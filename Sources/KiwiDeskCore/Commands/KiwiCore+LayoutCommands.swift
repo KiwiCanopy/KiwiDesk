@@ -131,10 +131,20 @@ extension KiwiCore {
             eventLoop.element(for: $0)
         }
         guard !ordered.isEmpty else { return }
+        let focused = space.focused
         nonisolated(unsafe) let elements = ordered
-        zOrderQueue.async {
+        zOrderQueue.async { [weak self] in
             for element in elements {
                 AXHelper.raiseQuietly(element)
+            }
+            // AXRaise on a window of the ACTIVE app makes it
+            // key (AppKit's handler does makeKeyAndOrderFront),
+            // so the cascade steals focus window by window.
+            // Re-assert the intended focus as the ordered
+            // final step of the same sequence.
+            guard let focused else { return }
+            Task { @MainActor [weak self] in
+                self?.focusWindow(focused)
             }
         }
     }
