@@ -110,6 +110,8 @@ struct DragDropTests {
             core.state.workspaces[SpaceID(1)]?.windows
                 == [WindowID(2), WindowID(1)]
         )
+        // The dropped window ends up focused.
+        #expect(core.activeSpace?.focused == WindowID(1))
     }
 
     @Test("Dropping into nowhere keeps the order (snap back)")

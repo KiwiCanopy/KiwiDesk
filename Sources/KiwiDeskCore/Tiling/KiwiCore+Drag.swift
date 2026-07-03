@@ -33,6 +33,9 @@ extension KiwiCore {
         // Applies the swap — or, without a target, animates
         // the dragged window back into its slot.
         retile()
+        // The dropped window has the user's attention: make
+        // it the focused one, in state and for real.
+        focusWindow(id)
         if crossedZones {
             scheduleStackZOrderRestore()
         }
