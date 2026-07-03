@@ -1,0 +1,52 @@
+# SwiftLint configuration for KiwiDesk.
+# Mirrors the rules in AGENTS.md; formatting itself is owned by
+# swift-format (.swift-format), so pure style rules that clash
+# with its output are disabled here.
+
+included:
+  - Sources
+  - Tests
+  - Package.swift
+
+# AGENTS.md: 79-char lines. swift-format already fails the build
+# on this via scripts/lint.sh; SwiftLint warns early in-editor.
+line_length:
+  warning: 79
+  error: 100
+
+# AGENTS.md: 100-250 lines sweet spot, 350 hard ceiling.
+file_length:
+  warning: 250
+  error: 350
+
+type_body_length:
+  warning: 220
+  error: 320
+
+function_body_length:
+  warning: 60
+  error: 100
+
+# Event handling switches over many AX notification names.
+cyclomatic_complexity:
+  warning: 15
+  error: 25
+
+# Geometry math legitimately uses short names (x, y, w, h).
+identifier_name:
+  min_length: 1
+
+disabled_rules:
+  # swift-format owns comma, whitespace, and brace style. Its
+  # house style puts the opening brace on its own line after
+  # multiline signatures, which opening_brace rejects.
+  - trailing_comma
+  - opening_brace
+  # TODOs are tracked in the roadmap, not treated as lint noise.
+  - todo
+
+opt_in_rules:
+  - closure_spacing
+  - contains_over_filter_is_empty
+  - redundant_nil_coalescing
+  - unneeded_parentheses_in_closure_argument

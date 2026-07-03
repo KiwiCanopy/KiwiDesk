@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-lint-test:
+    name: Build, Lint & Test
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: |
+          sudo xcode-select -s /Applications/Xcode_16.4.app \
+            || sudo xcode-select -s /Applications/Xcode.app
+          swift --version
+
+      - name: Build
+        run: swift build
+
+      - name: Lint
+        run: ./scripts/lint.sh
+
+      - name: Test
+        run: swift test

@@ -1,0 +1,19 @@
+#!/bin/bash
+# KiwiDesk pre-commit hook: lint staged Swift files.
+# Installed by scripts/install-hooks.sh
+set -euo pipefail
+
+ROOT="$(git rev-parse --show-toplevel)"
+
+STAGED=()
+while IFS= read -r f; do
+    STAGED+=("$ROOT/$f")
+done < <(git diff --cached --name-only --diff-filter=ACM \
+    | grep '\.swift$' || true)
+
+if [ "${#STAGED[@]}" -eq 0 ]; then
+    exit 0
+fi
+
+echo "pre-commit: linting ${#STAGED[@]} staged Swift file(s)..."
+"$ROOT/scripts/lint.sh" "${STAGED[@]}"

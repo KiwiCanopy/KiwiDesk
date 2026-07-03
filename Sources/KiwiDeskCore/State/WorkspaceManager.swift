@@ -1,0 +1,137 @@
+import Foundation
+
+/// Manages virtual workspaces and their display assignment.
+///
+/// Pure state container: window-to-space membership lives here as
+/// flat arrays inside each `Space`. A window belongs to at most one
+/// space at a time.
+public struct WorkspaceManager: Sendable {
+    private var spaces: [SpaceID: Space] = [:]
+    /// Creation order, used for deterministic iteration.
+    private var order: [SpaceID] = []
+    private var displays: [DisplayID: Display] = [:]
+    private var spaceDisplay: [SpaceID: DisplayID] = [:]
+    public private(set) var activeSpace: SpaceID?
+
+    public init() {}
+
+    // MARK: - Spaces
+
+    public var allSpaces: [Space] {
+        order.compactMap { spaces[$0] }
+    }
+
+    public subscript(id: SpaceID) -> Space? {
+        spaces[id]
+    }
+
+    /// Returns the space, creating it on first use.
+    @discardableResult
+    public mutating func ensureSpace(
+        _ id: SpaceID,
+        mode: LayoutMode = .bsp
+    ) -> Space {
+        if let existing = spaces[id] {
+            return existing
+        }
+        let space = Space(id: id, mode: mode)
+        spaces[id] = space
+        order.append(id)
+        if activeSpace == nil {
+            activeSpace = id
+        }
+        return space
+    }
+
+    public mutating func setMode(
+        _ id: SpaceID,
+        _ mode: LayoutMode
+    ) {
+        spaces[id]?.mode = mode
+    }
+
+    public mutating func activate(_ id: SpaceID) {
+        ensureSpace(id)
+        activeSpace = id
+    }
+
+    // MARK: - Window membership
+
+    /// The space currently containing the window, if any.
+    public func space(of window: WindowID) -> SpaceID? {
+        order.first { spaces[$0]?.windows.contains(window) == true }
+    }
+
+    /// Adds a window to a space, removing it from its old space.
+    public mutating func add(
+        _ window: WindowID,
+        to id: SpaceID
+    ) {
+        remove(window)
+        ensureSpace(id)
+        spaces[id]?.append(window)
+    }
+
+    /// Removes a window from whatever space contains it.
+    public mutating func remove(_ window: WindowID) {
+        guard let id = space(of: window) else { return }
+        spaces[id]?.remove(window)
+    }
+
+    public mutating func focus(
+        _ window: WindowID,
+        in id: SpaceID
+    ) {
+        guard spaces[id]?.windows.contains(window) == true else {
+            return
+        }
+        spaces[id]?.focused = window
+    }
+
+    /// Mutates one space in place (array reordering etc.).
+    public mutating func withSpace(
+        _ id: SpaceID,
+        _ body: (inout Space) -> Void
+    ) {
+        guard var space = spaces[id] else { return }
+        body(&space)
+        spaces[id] = space
+    }
+
+    // MARK: - Displays
+
+    public var allDisplays: [Display] {
+        Array(displays.values)
+    }
+
+    public mutating func upsertDisplay(_ display: Display) {
+        displays[display.id] = display
+    }
+
+    @discardableResult
+    public mutating func removeDisplay(
+        _ id: DisplayID
+    ) -> Display? {
+        for (space, display) in spaceDisplay where display == id {
+            spaceDisplay[space] = nil
+        }
+        return displays.removeValue(forKey: id)
+    }
+
+    public mutating func assign(
+        _ space: SpaceID,
+        to display: DisplayID
+    ) {
+        ensureSpace(space)
+        spaceDisplay[space] = display
+    }
+
+    public func display(of space: SpaceID) -> DisplayID? {
+        spaceDisplay[space]
+    }
+
+    /// Spaces assigned to one display, in creation order.
+    public func spaces(on display: DisplayID) -> [SpaceID] {
+        order.filter { spaceDisplay[$0] == display }
+    }
+}
