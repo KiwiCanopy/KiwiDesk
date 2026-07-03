@@ -52,6 +52,10 @@ stack.set_master_count(1)
 stack.set_master_ratio(0.6)
 stack.promote()                    -- focused window -> master
 stack.demote()                     -- focused window -> stack
+-- Overflow: "cascade_overflow" (default) keeps as many full
+-- windows as fit and cascades the rest at the bottom;
+-- "cascade_all" cascades the whole zone.
+stack.set_overflow_style("cascade_overflow")
 
 -- Scrolling (PaperWM style)
 scroll.set_width(800)              -- fixed column width
@@ -79,9 +83,12 @@ windows as still fit keep their full size, and only the
 remainder collapses into a cascade at the bottom of the
 column (last window fully visible, the ones above it showing
 their title bars). Only when not even one full window fits
-does the whole zone cascade. If the screen is too narrow to
-give both zones `min_window_size`, the split is abandoned
-entirely and all windows cascade over the whole usable area.
+does the whole zone cascade. Prefer the old all-or-nothing
+behavior? `stack.set_overflow_style("cascade_all")` cascades
+the entire zone as soon as it overflows. If the screen is
+too narrow to give both zones `min_window_size`, the split
+is abandoned entirely and all windows cascade over the whole
+usable area regardless of the style.
 
 For a cascade to read correctly, upper windows must sit
 *behind* lower ones. KiwiDesk restores this z-order whenever

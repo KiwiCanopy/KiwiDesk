@@ -138,12 +138,47 @@ public struct BspParams: Sendable, Equatable, Codable {
 }
 
 public struct StackParams: Sendable, Equatable, Codable {
+    /// What happens when a column can't give every window
+    /// `minWindowSize`.
+    public enum OverflowStyle: String, Sendable, Codable {
+        /// Only the windows that don't fit cascade at the
+        /// bottom; the rest stay fully tiled.
+        case cascadeOverflow = "cascade_overflow"
+        /// The whole zone cascades.
+        case cascadeAll = "cascade_all"
+    }
+
     /// Windows 0..<masterCount form the master zone.
     public var masterCount: Int = 1
     /// Width fraction of the master zone.
     public var masterRatio: Double = 0.6
+    /// Column overflow behavior (applies to both zones).
+    public var overflowStyle: OverflowStyle = .cascadeOverflow
 
     public init() {}
+
+    /// Manual decoding: profiles saved before a field existed
+    /// must keep loading (missing keys fall back to defaults).
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(
+            keyedBy: CodingKeys.self
+        )
+        masterCount =
+            try container.decodeIfPresent(
+                Int.self,
+                forKey: .masterCount
+            ) ?? 1
+        masterRatio =
+            try container.decodeIfPresent(
+                Double.self,
+                forKey: .masterRatio
+            ) ?? 0.6
+        overflowStyle =
+            try container.decodeIfPresent(
+                OverflowStyle.self,
+                forKey: .overflowStyle
+            ) ?? .cascadeOverflow
+    }
 }
 
 public struct ScrollingParams: Sendable, Equatable, Codable {

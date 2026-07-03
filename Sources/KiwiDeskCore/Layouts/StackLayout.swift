@@ -79,6 +79,13 @@ public struct StackLayout: LayoutSystem {
         let gap = context.gaps.inner.vertical
         let height = (region.height - gap * (count - 1)) / count
         if height < context.minWindowSize {
+            if context.stack.overflowStyle == .cascadeAll {
+                return OverlapStack.frames(
+                    for: windows,
+                    in: region,
+                    minSize: context.minWindowSize
+                )
+            }
             return overflowColumn(
                 windows,
                 in: region,

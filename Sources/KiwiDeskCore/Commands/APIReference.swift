@@ -61,6 +61,7 @@ public enum APIReference {
         "stack": [
             "promote", "demote",
             "set_master_count", "set_master_ratio",
+            "set_overflow_style",
         ],
         "bsp": ["set_strategy", "set_ratio"],
         "scroll": ["set_width", "set_anchor", "set_speed"],

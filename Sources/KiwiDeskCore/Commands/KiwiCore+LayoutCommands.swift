@@ -54,6 +54,17 @@ extension KiwiCore {
             }
             tiler.settings.stack.masterRatio =
                 min(max(ratio, 0.1), 0.9)
+        case "stack.set_overflow_style":
+            guard let raw = args.first?.stringValue,
+                let style = StackParams.OverflowStyle(
+                    rawValue: raw
+                )
+            else {
+                return .fail(
+                    "expected cascade_overflow | cascade_all"
+                )
+            }
+            tiler.settings.stack.overflowStyle = style
         default:
             return .fail("unknown command: \(command)")
         }

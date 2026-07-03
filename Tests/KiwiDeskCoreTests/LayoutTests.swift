@@ -1,4 +1,5 @@
 import CoreGraphics
+import Foundation
 import Testing
 
 @testable import KiwiDeskCore
@@ -235,6 +236,40 @@ struct StackLayoutTests {
         #expect(c1.height == 300)
         // The cascade ends exactly at the region bottom.
         #expect(abs(c3.maxY - 790) < 0.01)
+    }
+
+    @Test("cascade_all overflow style cascades the whole zone")
+    func cascadeAllStyle() throws {
+        // Same crowded column as partialOverflow, old-style.
+        var context = makeContext(
+            bounds: CGRect(x: 0, y: 0, width: 1920, height: 800)
+        )
+        context.stack.overflowStyle = .cascadeAll
+        let frames = layout.calculateGeometry(
+            for: [w1, w2, w3, w4, w5],
+            in: context
+        )
+        let s1 = try #require(frames[w2])
+        let s2 = try #require(frames[w3])
+        let s3 = try #require(frames[w4])
+        let s4 = try #require(frames[w5])
+        #expect(s2.minY - s1.minY == OverlapStack.offset)
+        #expect(s3.minY - s2.minY == OverlapStack.offset)
+        #expect(s4.minY - s3.minY == OverlapStack.offset)
+        #expect(s1.size == s4.size)
+    }
+
+    @Test("StackParams decodes profiles missing new fields")
+    func decodeOldProfile() throws {
+        // A profile saved before overflowStyle existed.
+        let old = #"{"masterCount":2,"masterRatio":0.7}"#
+        let params = try JSONDecoder().decode(
+            StackParams.self,
+            from: Data(old.utf8)
+        )
+        #expect(params.masterCount == 2)
+        #expect(params.masterRatio == 0.7)
+        #expect(params.overflowStyle == .cascadeOverflow)
     }
 
     @Test("Promote swaps with the last master window")
