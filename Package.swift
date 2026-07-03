@@ -32,8 +32,7 @@ let package = Package(
         .testTarget(
             name: "KiwiDeskCoreTests",
             dependencies: ["KiwiDeskCore"],
-            path: "Tests/KiwiDeskCoreTests",
-            plugins: [lintPlugin]
+            path: "Tests/KiwiDeskCoreTests"
         ),
     ]
 )

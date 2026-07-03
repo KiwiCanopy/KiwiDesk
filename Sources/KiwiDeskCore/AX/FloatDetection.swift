@@ -1,0 +1,91 @@
+import ApplicationServices
+import Foundation
+
+/// User-overridable float rules from the Lua config:
+/// `float_rules = { "Finder:Get Info", "Calculator" }`.
+/// `"App"` floats every window of the app; `"App:Title"`
+/// floats windows whose title contains the substring.
+public struct FloatRules: Sendable, Equatable {
+    private let rules: [(app: String, title: String?)]
+
+    public init(_ rules: [String] = []) {
+        self.rules = rules.map { rule in
+            let parts = rule.split(
+                separator: ":",
+                maxSplits: 1
+            )
+            guard parts.count == 2 else {
+                return (rule, nil)
+            }
+            return (String(parts[0]), String(parts[1]))
+        }
+    }
+
+    public func matches(app: String, title: String) -> Bool {
+        rules.contains { rule in
+            guard rule.app == app else { return false }
+            guard let fragment = rule.title else { return true }
+            return title.contains(fragment)
+        }
+    }
+
+    public static func == (a: FloatRules, b: FloatRules) -> Bool {
+        a.rules.map(\.app) == b.rules.map(\.app)
+            && a.rules.map(\.title) == b.rules.map(\.title)
+    }
+}
+
+/// Decides whether a window should float instead of tile.
+public enum FloatDetection {
+    /// Subroles that identify auxiliary windows (dialogs,
+    /// panels, PIP overlays). Everything that is not a
+    /// standard window floats by default.
+    public static func shouldFloat(
+        role: String,
+        subrole: String
+    ) -> Bool {
+        guard role == kAXWindowRole else { return true }
+        return subrole != kAXStandardWindowSubrole
+    }
+
+    /// Full decision for a live AX element, including user
+    /// rules. PIP windows (subrole AXFloatingWindow) float
+    /// automatically via the subrole check.
+    @MainActor
+    public static func shouldFloat(
+        element: AXUIElement,
+        appName: String,
+        rules: FloatRules
+    ) -> Bool {
+        let title = AXHelper.title(of: element)
+        if rules.matches(app: appName, title: title) {
+            return true
+        }
+        return shouldFloat(
+            role: AXHelper.role(of: element),
+            subrole: AXHelper.subrole(of: element)
+        )
+    }
+}
+
+extension AXHelper {
+    /// Detects macOS native tabs (Finder, Terminal, Safari).
+    /// A tab group is a single `NSWindow` and is treated as
+    /// ONE tiling unit — tabs are never split apart (see
+    /// 03_Layout_Engine §6.1).
+    @MainActor
+    public static func hasNativeTabs(
+        _ element: AXUIElement
+    ) -> Bool {
+        guard
+            let children = attribute(
+                element,
+                kAXChildrenAttribute,
+                as: [AXUIElement].self
+            )
+        else { return false }
+        return children.contains {
+            role(of: $0) == "AXTabGroup"
+        }
+    }
+}

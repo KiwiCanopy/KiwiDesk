@@ -10,6 +10,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var state = StateCoordinator()
     private let permissions = PermissionMonitor()
     private let sleepWake = SleepWakeManager()
+    private let tiler = TilingEngine()
     private var statusItem: StatusItemController?
     private var onboardingWindow: NSWindow?
     private let onboardingModel = OnboardingModel()
@@ -21,8 +22,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         self.statusItem = statusItem
 
+        tiler.elementProvider = { [weak self] id in
+            self?.eventLoop.element(for: id)
+        }
         eventLoop.onEvent = { [weak self] event in
-            self?.state.apply(event)
+            guard let self else { return }
+            self.state.apply(event)
+            if case .displaysChanged = event {
+                self.tiler.displaysChanged()
+            }
+            if TilingEngine.shouldRetile(after: event) {
+                self.tiler.retile(state: self.state)
+            }
         }
 
         sleepWake.captureState = { [weak self] in

@@ -3,9 +3,11 @@
 # swift-format (.swift-format), so pure style rules that clash
 # with its output are disabled here.
 
+# Tests are exempt: they are data-heavy (fixtures, expected
+# geometry) and idiomatically use force unwraps. swift-format
+# still enforces style there via scripts/lint.sh.
 included:
   - Sources
-  - Tests
   - Package.swift
 
 # AGENTS.md: 79-char lines. swift-format already fails the build

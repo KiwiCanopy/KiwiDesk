@@ -11,6 +11,9 @@ import ApplicationServices
 public final class EventLoop {
     public var onEvent: @MainActor (KiwiEvent) -> Void = { _ in }
 
+    /// User float rules from the Lua config (`float_rules`).
+    public var floatRules = FloatRules()
+
     private var observers: [pid_t: AXApplicationObserver] = [:]
     private var elements: [pid_t: [WindowID: AXUIElement]] = [:]
     private var workspaceTokens: [NSObjectProtocol] = []
@@ -159,13 +162,18 @@ public final class EventLoop {
         appName: String
     ) {
         guard AXHelper.role(of: element) == kAXWindowRole,
-            let window = AXHelper.snapshot(
+            var window = AXHelper.snapshot(
                 element: element,
                 pid: pid,
                 appName: appName
             )
         else { return }
         guard elements[pid]?[window.id] == nil else { return }
+        window.isFloating = FloatDetection.shouldFloat(
+            element: element,
+            appName: appName,
+            rules: floatRules
+        )
         elements[pid, default: [:]][window.id] = element
         observers[pid]?.observe(window: element)
         onEvent(.windowCreated(window))
