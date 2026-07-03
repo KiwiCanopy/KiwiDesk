@@ -120,6 +120,25 @@ public enum AXHelper {
         )
     }
 
+    /// Raises a window and gives it (and its app) focus.
+    @MainActor
+    public static func raise(
+        _ element: AXUIElement,
+        pid: pid_t
+    ) {
+        AXUIElementPerformAction(
+            element,
+            kAXRaiseAction as CFString
+        )
+        AXUIElementSetAttributeValue(
+            element,
+            kAXMainAttribute as CFString,
+            kCFBooleanTrue
+        )
+        NSRunningApplication(processIdentifier: pid)?
+            .activate()
+    }
+
     /// Builds a `ManagedWindow` snapshot from an AX element.
     public static func snapshot(
         element: AXUIElement,

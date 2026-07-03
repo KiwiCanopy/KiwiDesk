@@ -8,10 +8,22 @@ import Foundation
 /// so the full pipeline is unit-testable without AX access.
 public struct StateCoordinator: Sendable {
     public private(set) var windows = WindowManager()
-    public private(set) var workspaces = WorkspaceManager()
+    public internal(set) var workspaces = WorkspaceManager()
+
+    /// `app_rules` from init.lua: new windows of these apps go
+    /// to a fixed space instead of the active one.
+    public var appRules: [String: SpaceID] = [:]
 
     public init(defaultSpace: SpaceID = SpaceID(1)) {
         workspaces.ensureSpace(defaultSpace)
+    }
+
+    /// Marks a window floating/tiled (`make_floating`).
+    public mutating func setFloating(
+        _ id: WindowID,
+        _ floating: Bool
+    ) {
+        windows.setFloating(id, floating)
     }
 
     public mutating func apply(_ event: KiwiEvent) {
@@ -26,9 +38,12 @@ public struct StateCoordinator: Sendable {
 
         case .windowCreated(let window):
             windows.upsert(window)
-            if let space = workspaces.activeSpace {
-                workspaces.add(window.id, to: space)
-                workspaces.focus(window.id, in: space)
+            let target =
+                appRules[window.appName]
+                ?? workspaces.activeSpace
+            if let target {
+                workspaces.add(window.id, to: target)
+                workspaces.focus(window.id, in: target)
             }
 
         case .windowDestroyed(let id):

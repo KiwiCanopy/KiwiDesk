@@ -12,6 +12,9 @@ public struct TilingSettings: Sendable {
     public var stack = StackParams()
     public var scrolling = ScrollingParams()
     public var grid = GridParams()
+    /// Drag-and-drop visuals (consumed once D&D lands).
+    public var dragShowGhost = true
+    public var dragShowDropZone = true
 
     public init() {}
 

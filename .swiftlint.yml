@@ -46,6 +46,10 @@ disabled_rules:
   - opening_brace
   # TODOs are tracked in the roadmap, not treated as lint noise.
   - todo
+  # "master/stack" is the established tiling-WM terminology
+  # (dwm, xmonad, AeroSpace) and part of our public Lua API
+  # (master_count, master_ratio).
+  - inclusive_language
 
 opt_in_rules:
   - closure_spacing
