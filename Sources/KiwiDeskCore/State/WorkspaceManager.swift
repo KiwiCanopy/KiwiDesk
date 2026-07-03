@@ -62,14 +62,17 @@ public struct WorkspaceManager: Sendable {
         order.first { spaces[$0]?.windows.contains(window) == true }
     }
 
-    /// Adds a window to a space, removing it from its old space.
+    /// Adds a window to a space, removing it from its old
+    /// space. With an anchor, the window is inserted right
+    /// after it (new windows split the focused window).
     public mutating func add(
         _ window: WindowID,
-        to id: SpaceID
+        to id: SpaceID,
+        after anchor: WindowID? = nil
     ) {
         remove(window)
         ensureSpace(id)
-        spaces[id]?.append(window)
+        spaces[id]?.insert(window, after: anchor)
     }
 
     /// Removes a window from whatever space contains it.

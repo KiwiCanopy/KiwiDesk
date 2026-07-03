@@ -138,6 +138,24 @@ struct StateCoordinatorTests {
         )
     }
 
+    @Test("New windows split the focused window's region")
+    func insertAfterFocused() {
+        var state = StateCoordinator()
+        state.apply(.windowCreated(makeWindow(1)))
+        state.apply(.windowCreated(makeWindow(2)))
+        state.apply(.windowCreated(makeWindow(3)))
+        // Focus back to window 1, then open window 4: it
+        // must land right after window 1, not at the end.
+        state.apply(.windowFocused(WindowID(1)))
+        state.apply(.windowCreated(makeWindow(4)))
+        #expect(
+            state.workspaces[SpaceID(1)]?.windows == [
+                WindowID(1), WindowID(4),
+                WindowID(2), WindowID(3),
+            ]
+        )
+    }
+
     @Test("Focus event updates the containing space")
     func focusTracking() {
         var state = StateCoordinator()

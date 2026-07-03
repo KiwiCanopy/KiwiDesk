@@ -77,6 +77,7 @@ public final class EventLoop {
         appName: String
     ) {
         guard AXHelper.role(of: element) == kAXWindowRole,
+            !AXHelper.isMinimized(element),
             var window = AXHelper.snapshot(
                 element: element,
                 pid: pid,
@@ -94,20 +95,28 @@ public final class EventLoop {
         onEvent(.windowCreated(window))
     }
 
-    /// Removes tracked windows that no longer exist in the
-    /// app's live AX window list. Safety net for missed or
-    /// unmappable destroy notifications — without it, closed
-    /// windows would keep occupying layout slots.
-    func reconcile(pid: pid_t) {
-        guard let tracked = elements[pid],
-            !tracked.isEmpty
-        else { return }
-        let live = Set(
-            AXHelper.windows(pid: pid).compactMap {
-                AXHelper.windowID(of: $0)
+    /// Syncs tracked windows with the app's live AX window
+    /// list. Removes windows that closed or minimized, and
+    /// picks up windows we missed (e.g. deminiaturized).
+    /// Safety net for macOS's unreliable AX notifications —
+    /// without it, closed windows keep occupying layout slots.
+    func reconcile(pid: pid_t, appName: String) {
+        guard observers[pid] != nil else { return }
+        var live: Set<WindowID> = []
+        for element in AXHelper.windows(pid: pid) {
+            guard let id = AXHelper.windowID(of: element)
+            else { continue }
+            // Minimized windows count as gone.
+            guard !AXHelper.isMinimized(element) else {
+                continue
             }
-        )
-        for id in tracked.keys where !live.contains(id) {
+            live.insert(id)
+            if elements[pid]?[id] == nil {
+                track(element, pid: pid, appName: appName)
+            }
+        }
+        for id in elements[pid, default: [:]].keys
+        where !live.contains(id) {
             elements[pid]?[id] = nil
             onEvent(.windowDestroyed(id))
         }
@@ -146,13 +155,13 @@ public final class EventLoop {
             // Destroyed elements often cannot be mapped back
             // (and some apps skip the notification entirely),
             // so always diff against the live window list.
-            reconcile(pid: pid)
+            reconcile(pid: pid, appName: appName)
         case kAXWindowDeminiaturizedNotification:
             track(element, pid: pid, appName: appName)
         case kAXFocusedWindowChangedNotification:
             // Closing a window nearly always moves focus;
             // reconciling here catches missed destroy events.
-            reconcile(pid: pid)
+            reconcile(pid: pid, appName: appName)
             guard let id = AXHelper.windowID(of: element) else {
                 return
             }

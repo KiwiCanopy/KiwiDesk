@@ -42,7 +42,14 @@ public struct StateCoordinator: Sendable {
                 appRules[window.appName]
                 ?? workspaces.activeSpace
             if let target {
-                workspaces.add(window.id, to: target)
+                // New windows split the focused window's
+                // region, like classic BSP.
+                let anchor = workspaces[target]?.focused
+                workspaces.add(
+                    window.id,
+                    to: target,
+                    after: anchor
+                )
                 workspaces.focus(window.id, in: target)
             }
 

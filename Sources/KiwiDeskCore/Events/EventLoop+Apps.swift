@@ -86,7 +86,11 @@ extension EventLoop {
     private func appActivated(_ app: NSRunningApplication) {
         let pid = app.processIdentifier
         if let previous = lastActivePid, previous != pid {
-            reconcile(pid: previous)
+            let name =
+                NSRunningApplication(
+                    processIdentifier: previous
+                )?.localizedName ?? "?"
+            reconcile(pid: previous, appName: name)
         }
         lastActivePid = pid
     }

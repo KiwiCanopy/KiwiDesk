@@ -106,6 +106,19 @@ public enum AXHelper {
             ?? ""
     }
 
+    /// Whether a window is minimized to the Dock. Minimized
+    /// windows stay in the AX window list but must not occupy
+    /// layout slots.
+    public static func isMinimized(
+        _ element: AXUIElement
+    ) -> Bool {
+        attribute(
+            element,
+            kAXMinimizedAttribute,
+            as: Bool.self
+        ) ?? false
+    }
+
     /// Keeps Electron/WebKit AX trees warm to avoid 100-300 ms
     /// query latency. See AGENTS.md guardrails before changing.
     public static func setEnhancedUserInterface(

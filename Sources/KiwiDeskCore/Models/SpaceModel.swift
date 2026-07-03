@@ -74,6 +74,23 @@ public struct Space: Sendable, Equatable {
         windows.append(window)
     }
 
+    /// Inserts a window right after another one (BSP: a new
+    /// window splits the FOCUSED window's region). Falls back
+    /// to appending when the anchor is unknown.
+    public mutating func insert(
+        _ window: WindowID,
+        after anchor: WindowID?
+    ) {
+        guard !windows.contains(window) else { return }
+        if let anchor,
+            let index = windows.firstIndex(of: anchor)
+        {
+            windows.insert(window, at: index + 1)
+        } else {
+            windows.append(window)
+        }
+    }
+
     /// Removes a window; clears focus if it was focused.
     public mutating func remove(_ window: WindowID) {
         windows.removeAll { $0 == window }

@@ -40,9 +40,14 @@ public final class AXApplicationObserver {
 
     private var observer: AXObserver?
 
+    /// Registered on the app element: delivered app-wide for
+    /// all (including future) windows. Miniaturize events are
+    /// only reliable at this level.
     private static let appNotifications: [String] = [
         kAXWindowCreatedNotification,
         kAXFocusedWindowChangedNotification,
+        kAXWindowMiniaturizedNotification,
+        kAXWindowDeminiaturizedNotification,
     ]
 
     private static let windowNotifications: [String] = [
@@ -50,8 +55,6 @@ public final class AXApplicationObserver {
         kAXWindowMovedNotification,
         kAXWindowResizedNotification,
         kAXTitleChangedNotification,
-        kAXWindowMiniaturizedNotification,
-        kAXWindowDeminiaturizedNotification,
     ]
 
     public init?(pid: pid_t) {
