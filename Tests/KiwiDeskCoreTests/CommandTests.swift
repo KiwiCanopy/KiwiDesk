@@ -333,6 +333,40 @@ struct NavigationTests {
         CGRect(x: x, y: y, width: 100, height: 100)
     }
 
+    @Test("No cross-column jump without cross-axis overlap")
+    func requiresOverlap() {
+        // Full-height master, two stack windows to the right.
+        let master = CGRect(x: 0, y: 0, width: 500, height: 1000)
+        let candidates: [(id: WindowID, frame: CGRect)] = [
+            (WindowID(2), CGRect(x: 510, y: 0, width: 300, height: 490)),
+            (WindowID(3), CGRect(x: 510, y: 510, width: 300, height: 490)),
+        ]
+        // Up/down from the master must fail, not jump into
+        // the stack column diagonally.
+        #expect(
+            Navigation.neighbor(
+                from: master,
+                in: .up,
+                candidates: candidates
+            ) == nil
+        )
+        #expect(
+            Navigation.neighbor(
+                from: master,
+                in: .down,
+                candidates: candidates
+            ) == nil
+        )
+        // Right still finds the stack (rows overlap).
+        #expect(
+            Navigation.neighbor(
+                from: master,
+                in: .right,
+                candidates: candidates
+            ) != nil
+        )
+    }
+
     @Test("Finds the straight neighbor in each direction")
     func straightNeighbors() {
         let origin = frame(500, 500)

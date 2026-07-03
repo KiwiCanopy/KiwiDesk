@@ -11,8 +11,11 @@ public enum Direction: String, Sendable, Codable {
 /// Geometric window navigation (`focus left`, `swap right`).
 public enum Navigation {
     /// The nearest candidate whose center lies in `direction`
-    /// from the origin frame. Lateral offset is penalized so
-    /// straight neighbors beat diagonal ones.
+    /// from the origin frame. Candidates must overlap the
+    /// origin on the cross axis — "up" means a window above
+    /// within the same column, otherwise a full-height master
+    /// would jump diagonally into the stack. Lateral offset is
+    /// penalized so straight neighbors beat diagonal ones.
     public static func neighbor(
         from origin: CGRect,
         in direction: Direction,
@@ -24,6 +27,16 @@ public enum Navigation {
         )
         var best: (id: WindowID, score: CGFloat)?
         for candidate in candidates {
+            switch direction {
+            case .left, .right:
+                guard candidate.frame.maxY > origin.minY,
+                    candidate.frame.minY < origin.maxY
+                else { continue }
+            case .up, .down:
+                guard candidate.frame.maxX > origin.minX,
+                    candidate.frame.minX < origin.maxX
+                else { continue }
+            }
             let center = CGPoint(
                 x: candidate.frame.midX,
                 y: candidate.frame.midY
