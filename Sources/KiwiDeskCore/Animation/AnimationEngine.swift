@@ -5,15 +5,35 @@ import CoreGraphics
 ///
 /// Drives `FrameAnimation`s from one `DisplayLinkDriver` per
 /// monitor. Frames are delivered through the `apply` closure
-/// (wired to `WindowControl.setFrame` by the app). Starting an
+/// (wired to `FrameApplier` by the tiler). Starting an
 /// animation for a window that is already animating retargets
 /// it in place: position and velocity carry over, so an
 /// interrupt never causes a visual jump.
+///
+/// Frames are rounded to whole pixels and consecutive
+/// duplicates are skipped: sub-pixel deltas don't render but
+/// each one would still cost a blocking AX round-trip.
+///
+/// Sizes are applied stepwise (rift-style): a window keeps
+/// its size until the animation passes the halfway mark, then
+/// jumps to the target size. Every other frame is
+/// position-only — one AX call, and the target app never
+/// re-lays-out its content mid-flight.
 @MainActor
 public final class AnimationEngine {
     /// Applies one interpolated frame to a real window.
-    public var apply: @MainActor (WindowID, CGRect) -> Void =
-        { _, _ in }
+    /// `setSize` marks the rare frames that change size (the
+    /// halfway switch and the final frame); all others are
+    /// position-only.
+    public var apply: @MainActor (WindowID, CGRect, Bool) -> Void =
+        { _, _, _ in }
+
+    /// Fired when a window starts / stops animating. Wired to
+    /// the per-app `AXEnhancedUserInterface` toggling.
+    public var onAnimationStart: @MainActor (WindowID) -> Void =
+        { _ in }
+    public var onAnimationEnd: @MainActor (WindowID) -> Void =
+        { _ in }
 
     /// `enable_animations`: when false, frames apply instantly.
     public var isEnabled = true
@@ -28,6 +48,11 @@ public final class AnimationEngine {
     private var storedDurationMS = 250
     private var animations: [DisplayID: [WindowID: FrameAnimation]] = [:]
     private var drivers: [DisplayID: DisplayLinkDriver] = [:]
+    /// Last rounded frame sent per window, for no-op skipping.
+    private var lastApplied: [WindowID: CGRect] = [:]
+    /// The size a window actually has on screen right now;
+    /// held until the halfway switch to the target size.
+    private var heldSize: [WindowID: CGSize] = [:]
 
     public init() {}
 
@@ -59,17 +84,20 @@ public final class AnimationEngine {
     ) {
         guard isEnabled else {
             cancel(window: window)
-            apply(window, target)
+            apply(window, target, true)
             return
         }
         guard let display = screen.kiwiDisplay?.id else {
-            apply(window, target)
+            cancel(window: window)
+            apply(window, target, true)
             return
         }
         if var existing = removeAnimation(for: window) {
             existing.retarget(to: target)
             animations[display, default: [:]][window] = existing
         } else {
+            onAnimationStart(window)
+            heldSize[window] = current.size
             animations[display, default: [:]][window] =
                 FrameAnimation(
                     from: current,
@@ -82,19 +110,26 @@ public final class AnimationEngine {
 
     /// Stops animating a window, leaving it where it is.
     public func cancel(window: WindowID) {
-        removeAnimation(for: window)
+        if removeAnimation(for: window) != nil {
+            lastApplied[window] = nil
+            heldSize[window] = nil
+            onAnimationEnd(window)
+        }
     }
 
     /// Stops everything, snapping to targets when enabled.
     public func cancelAll(snapToTargets: Bool = false) {
-        if snapToTargets {
-            for perWindow in animations.values {
-                for (id, animation) in perWindow {
-                    apply(id, animation.targetFrame)
+        for perWindow in animations.values {
+            for (id, animation) in perWindow {
+                if snapToTargets {
+                    apply(id, animation.targetFrame, true)
                 }
+                onAnimationEnd(id)
             }
         }
         animations = [:]
+        lastApplied = [:]
+        heldSize = [:]
         for driver in drivers.values {
             driver.stop()
         }
@@ -111,7 +146,10 @@ public final class AnimationEngine {
             drivers[display]?.invalidate()
             drivers[display] = nil
             for (id, animation) in animations[display] ?? [:] {
-                apply(id, animation.targetFrame)
+                apply(id, animation.targetFrame, true)
+                lastApplied[id] = nil
+                heldSize[id] = nil
+                onAnimationEnd(id)
             }
             animations[display] = nil
         }
@@ -156,10 +194,36 @@ public final class AnimationEngine {
         }
         for (id, var animation) in perWindow {
             let settled = animation.step(dt: dt)
-            apply(id, animation.frame)
             if settled {
+                // Exact target, unrounded: layout output is
+                // the source of truth for the final frame.
+                apply(id, animation.frame, true)
                 perWindow[id] = nil
+                lastApplied[id] = nil
+                heldSize[id] = nil
+                onAnimationEnd(id)
             } else {
+                // Stepwise size: hold the on-screen size until
+                // halfway, then switch to the target size. For
+                // pure moves the sizes match and no resize is
+                // ever emitted.
+                let size =
+                    animation.pastHalfway
+                    ? animation.targetFrame.size
+                    : heldSize[id]
+                        ?? Self.rounded(animation.frame).size
+                let setSize = size != heldSize[id]
+                heldSize[id] = size
+                let frame = CGRect(
+                    x: animation.frame.origin.x.rounded(),
+                    y: animation.frame.origin.y.rounded(),
+                    width: size.width,
+                    height: size.height
+                )
+                if setSize || lastApplied[id] != frame {
+                    lastApplied[id] = frame
+                    apply(id, frame, setSize)
+                }
                 perWindow[id] = animation
             }
         }
@@ -167,5 +231,14 @@ public final class AnimationEngine {
         if perWindow.isEmpty {
             drivers[display]?.stop()
         }
+    }
+
+    private static func rounded(_ frame: CGRect) -> CGRect {
+        CGRect(
+            x: frame.origin.x.rounded(),
+            y: frame.origin.y.rounded(),
+            width: frame.width.rounded(),
+            height: frame.height.rounded()
+        )
     }
 }

@@ -49,6 +49,10 @@ public final class TilingEngine {
     public let animation = AnimationEngine()
     public var settings = TilingSettings()
 
+    /// Applies frames off the main thread with frame-dropping
+    /// and per-app EnhancedUserInterface toggling.
+    private let applier = FrameApplier()
+
     /// Resolves the AX element of a window (wired to the
     /// event loop's registry).
     public var elementProvider: @MainActor (WindowID) -> AXUIElement? = { _ in
@@ -56,10 +60,17 @@ public final class TilingEngine {
     }
 
     public init() {
-        animation.apply = { [weak self] id, frame in
-            guard let element = self?.elementProvider(id)
-            else { return }
-            WindowControl.setFrame(frame, of: element)
+        applier.elementProvider = { [weak self] id in
+            self?.elementProvider(id)
+        }
+        animation.apply = { [applier] id, frame, setSize in
+            applier.apply(id, frame, setSize: setSize)
+        }
+        animation.onAnimationStart = { [applier] id in
+            applier.beginAnimating(id)
+        }
+        animation.onAnimationEnd = { [applier] id in
+            applier.endAnimating(id)
         }
     }
 
@@ -132,5 +143,18 @@ public final class TilingEngine {
     /// Forwards display topology changes to the animator.
     public func displaysChanged() {
         animation.displaysChanged()
+    }
+
+    /// Whether we set this window's frame moments ago. Move
+    /// events arriving within the grace period are AX echoes
+    /// of our own frame-sets, not user drags.
+    public func didRecentlySetFrame(_ id: WindowID) -> Bool {
+        applier.didRecentlySetFrame(id)
+    }
+
+    /// Sets a frame directly (no animation) through the frame
+    /// pipeline, so it is echo-tracked like animated frames.
+    public func setFrame(_ id: WindowID, _ frame: CGRect) {
+        applier.apply(id, frame, setSize: true)
     }
 }

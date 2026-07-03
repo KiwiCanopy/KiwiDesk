@@ -7,16 +7,22 @@ import CoreGraphics
 /// API. A SkyLight fast path (window-server-side transactions)
 /// will be added on top later; the public surface stays the
 /// same so callers never care which path executed.
-@MainActor
+///
+/// Deliberately NOT MainActor: AX set calls are blocking IPC
+/// into the target app and are thread-safe, so the animation
+/// pipeline applies frames from a background queue.
 public enum WindowControl {
     /// Applies a frame to a window element.
     ///
-    /// Order matters: position first, then size — some apps
-    /// clamp their size to the screen edge at the old origin.
+    /// Size → position → size: apps clamp whichever attribute
+    /// is set first against the other's old value, so setting
+    /// size on both sides of the move converges regardless of
+    /// direction.
     public static func setFrame(
         _ frame: CGRect,
         of element: AXUIElement
     ) {
+        setSize(frame.size, of: element)
         setPosition(frame.origin, of: element)
         setSize(frame.size, of: element)
     }

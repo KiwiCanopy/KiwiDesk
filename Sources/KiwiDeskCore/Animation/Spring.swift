@@ -44,18 +44,38 @@ public struct FrameAnimation: Sendable {
     public let spring: Spring
 
     /// Settled when within this distance at negligible speed.
-    private static let epsilon = 0.1
+    /// Sub-pixel tails are invisible but cost real AX calls,
+    /// so half a point is close enough (the final frame snaps
+    /// to the exact target anyway).
+    private static let epsilon = 0.5
+
+    /// Total distance at start (or last retarget); yardstick
+    /// for `pastHalfway`.
+    private var initialDistance: Double
 
     public init(from: CGRect, to: CGRect, spring: Spring) {
         self.current = Self.vector(from)
         self.velocity = [0, 0, 0, 0]
         self.target = Self.vector(to)
         self.spring = spring
+        self.initialDistance = Self.distance(
+            self.current,
+            self.target
+        )
     }
 
     /// Redirects the animation to a new target mid-flight.
     public mutating func retarget(to frame: CGRect) {
         target = Self.vector(frame)
+        initialDistance = Self.distance(current, target)
+    }
+
+    /// True once at least half the distance is covered. Sizes
+    /// are applied stepwise (start size until here, target
+    /// size after): a resize forces the app to re-lay-out its
+    /// content, which is far too expensive per frame.
+    public var pastHalfway: Bool {
+        Self.distance(current, target) * 2 <= initialDistance
     }
 
     /// Advances by `dt`; returns true when settled.
@@ -97,6 +117,17 @@ public struct FrameAnimation: Sendable {
             width: target[2],
             height: target[3]
         )
+    }
+
+    private static func distance(
+        _ a: [Double],
+        _ b: [Double]
+    ) -> Double {
+        var sum = 0.0
+        for i in 0..<4 {
+            sum += (a[i] - b[i]) * (a[i] - b[i])
+        }
+        return sum.squareRoot()
     }
 
     private static func vector(_ rect: CGRect) -> [Double] {

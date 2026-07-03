@@ -77,8 +77,13 @@ public final class KiwiCore {
             self?.onLog(message)
         }
         drag.isAnimating = { [weak self] id in
-            self?.tiler.animation.isAnimating(window: id)
-                ?? false
+            guard let self else { return false }
+            // Covers in-flight animations AND the trailing AX
+            // echoes of frames we already applied: those
+            // arrive after the animation settles and must not
+            // read as user drags.
+            return self.tiler.animation.isAnimating(window: id)
+                || self.tiler.didRecentlySetFrame(id)
         }
         drag.onDragEnd = { [weak self] id, frame in
             self?.handleDragEnd(id, frame: frame)
@@ -155,15 +160,12 @@ public final class KiwiCore {
         }
     }
 
-    /// Re-applies window frames after wake/unlock.
+    /// Re-applies window frames after wake/unlock. Goes
+    /// through the tiler's frame pipeline so the resulting AX
+    /// echoes are not mistaken for user drags.
     private func restore(_ snapshot: StateSnapshot) {
         for record in snapshot.windows {
-            guard
-                let element = eventLoop.element(
-                    for: record.windowID
-                )
-            else { continue }
-            WindowControl.setFrame(record.frame, of: element)
+            tiler.setFrame(record.windowID, record.frame)
         }
     }
 
