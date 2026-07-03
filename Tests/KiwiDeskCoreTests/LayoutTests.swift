@@ -7,6 +7,7 @@ private let w1 = WindowID(1)
 private let w2 = WindowID(2)
 private let w3 = WindowID(3)
 private let w4 = WindowID(4)
+private let w5 = WindowID(5)
 
 private func makeContext(
     bounds: CGRect = CGRect(x: 0, y: 0, width: 1920, height: 1080),
@@ -205,6 +206,35 @@ struct StackLayoutTests {
         #expect(m1.minX == m2.minX)
         #expect(m2.minY > m1.minY)
         #expect(frames[w3]?.minX ?? 0 > m1.maxX)
+    }
+
+    @Test("Column overflow keeps full windows, cascades rest")
+    func partialOverflow() throws {
+        // Usable 780pt tall; four stack windows can't all get
+        // 300pt, but one can — the other three cascade below.
+        let frames = layout.calculateGeometry(
+            for: [w1, w2, w3, w4, w5],
+            in: makeContext(
+                bounds: CGRect(
+                    x: 0,
+                    y: 0,
+                    width: 1920,
+                    height: 800
+                )
+            )
+        )
+        let top = try #require(frames[w2])
+        let c1 = try #require(frames[w3])
+        let c2 = try #require(frames[w4])
+        let c3 = try #require(frames[w5])
+        // First stack window stays fully tiled...
+        #expect(top.height >= 300)
+        // ...the rest cascade with title-bar offsets.
+        #expect(c2.minY - c1.minY == OverlapStack.offset)
+        #expect(c3.minY - c2.minY == OverlapStack.offset)
+        #expect(c1.height == 300)
+        // The cascade ends exactly at the region bottom.
+        #expect(abs(c3.maxY - 790) < 0.01)
     }
 
     @Test("Promote swaps with the last master window")

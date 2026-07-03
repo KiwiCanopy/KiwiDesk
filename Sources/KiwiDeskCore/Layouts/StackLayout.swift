@@ -66,6 +66,9 @@ public struct StackLayout: LayoutSystem {
     }
 
     /// Distributes windows vertically and evenly in a region.
+    /// When they stop fitting, as many windows as possible
+    /// stay fully tiled and only the overflow collapses into
+    /// a title-bar cascade at the bottom.
     private func column(
         _ windows: ArraySlice<WindowID>,
         in region: CGRect,
@@ -76,10 +79,10 @@ public struct StackLayout: LayoutSystem {
         let gap = context.gaps.inner.vertical
         let height = (region.height - gap * (count - 1)) / count
         if height < context.minWindowSize {
-            return OverlapStack.frames(
-                for: windows,
+            return overflowColumn(
+                windows,
                 in: region,
-                minSize: context.minWindowSize
+                context: context
             )
         }
         var result: [WindowID: CGRect] = [:]
@@ -95,6 +98,62 @@ public struct StackLayout: LayoutSystem {
             )
         }
         return result
+    }
+
+    /// Column overflow: the first `tiled` windows keep at
+    /// least `minWindowSize`, the rest cascade at the bottom
+    /// with a fixed title-bar offset — the block's last
+    /// window fully visible, the buried ones showing their
+    /// title bars above it. Nothing extends past the region.
+    private func overflowColumn(
+        _ windows: ArraySlice<WindowID>,
+        in region: CGRect,
+        context: LayoutContext
+    ) -> [WindowID: CGRect] {
+        let minSize = context.minWindowSize
+        let gap = context.gaps.inner.vertical
+        let offset = OverlapStack.offset
+        let ids = Array(windows)
+        for tiled in stride(
+            from: ids.count - 1,
+            through: 1,
+            by: -1
+        ) {
+            let buried = CGFloat(ids.count - tiled - 1)
+            let cascadeHeight = minSize + offset * buried
+            let tileHeight =
+                (region.height - cascadeHeight
+                    - gap * CGFloat(tiled))
+                / CGFloat(tiled)
+            guard tileHeight >= minSize else { continue }
+            var result: [WindowID: CGRect] = [:]
+            var y = region.minY
+            for id in ids[..<tiled] {
+                result[id] = CGRect(
+                    x: region.minX,
+                    y: y,
+                    width: region.width,
+                    height: tileHeight
+                )
+                y += tileHeight + gap
+            }
+            for (index, id) in ids[tiled...].enumerated() {
+                result[id] = CGRect(
+                    x: region.minX,
+                    y: y + CGFloat(index) * offset,
+                    width: region.width,
+                    height: minSize
+                )
+            }
+            return result
+        }
+        // Not even one full window fits above the cascade:
+        // the whole region cascades (emergency fallback).
+        return OverlapStack.frames(
+            for: windows,
+            in: region,
+            minSize: minSize
+        )
     }
 }
 

@@ -69,17 +69,19 @@ grid.set_dimensions(3, 2)          -- rigid: columns, rows
 
 No layout ever shrinks a window below `min_window_size`.
 When a zone gets too crowded, downsizing stops and the
-windows in that zone **cascade vertically**: each keeps the
-zone's full size and is offset 40 pt downward from the one
-above it, so every title bar stays visible and clickable.
+overflow **cascades vertically**: offset 40 pt downward per
+window, so every title bar stays visible and clickable.
 There is no horizontal (side-reveal) stacking — overflow is
 always resolved top-to-bottom via title bars.
 
-In the stack layout this happens per zone: a crowded stack
-column cascades on its own while the master zone stays
-untouched. If the screen is too narrow to give both zones
-`min_window_size`, the split is abandoned entirely and all
-windows cascade over the whole usable area.
+The stack layout degrades gradually, per zone: as many
+windows as still fit keep their full size, and only the
+remainder collapses into a cascade at the bottom of the
+column (last window fully visible, the ones above it showing
+their title bars). Only when not even one full window fits
+does the whole zone cascade. If the screen is too narrow to
+give both zones `min_window_size`, the split is abandoned
+entirely and all windows cascade over the whole usable area.
 
 For a cascade to read correctly, upper windows must sit
 *behind* lower ones. KiwiDesk restores this z-order whenever
