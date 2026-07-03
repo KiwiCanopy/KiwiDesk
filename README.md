@@ -75,7 +75,8 @@ To start KiwiDesk automatically at login:
 The CLI is the same binary:
 
 ```sh
-KiwiDesk set_mode 1 bsp          # tile the current space
+KiwiDesk set_mode monocle        # current space -> monocle
+KiwiDesk set_mode 2 stack        # space "2" -> master/stack
 KiwiDesk focus left              # move focus
 KiwiDesk set_gap_global 12       # breathing room
 KiwiDesk get_state               # inspect everything as JSON
@@ -87,7 +88,10 @@ first launch):
 
 ```lua
 KiwiDesk.set_gap_global(10)
-KiwiDesk.set_mode(1, "bsp")
+
+-- Layouts are per SPACE (virtual workspace, number or name);
+-- every space defaults to "bsp".
+KiwiDesk.set_mode("music", "floating")
 
 float_rules = { "Calculator", "Finder:Get Info" }
 app_rules   = { ["Spotify"] = "music" }

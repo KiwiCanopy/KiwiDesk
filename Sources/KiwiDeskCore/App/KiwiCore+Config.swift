@@ -84,9 +84,13 @@ extension KiwiCore {
 
             KiwiDesk.set_gap_global(10)
 
-            -- Layout per space: bsp | stack | scrolling |
-            -- monocle | grid | floating
-            -- KiwiDesk.set_mode(1, "bsp")
+            -- Every virtual space (workspace) has its own
+            -- layout; the first argument is the SPACE id
+            -- (number or name), never a monitor. All spaces
+            -- default to "bsp". Modes: bsp | stack |
+            -- scrolling | monocle | grid | floating
+            -- KiwiDesk.set_mode(1, "stack")
+            -- KiwiDesk.set_mode("music", "floating")
 
             -- Windows that should never be tiled:
             -- float_rules = { "Calculator", "Finder:Get Info" }

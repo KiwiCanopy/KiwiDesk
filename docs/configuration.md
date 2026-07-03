@@ -21,9 +21,11 @@ Two safety rails apply to all Lua code:
 ## Layouts & Gaps
 
 ```lua
--- Layout per space:
--- bsp | stack | scrolling | monocle | grid | floating
-KiwiDesk.set_mode(1, "bsp")
+-- The first argument is a SPACE (virtual workspace)
+-- identifier — a number or a name, never a monitor. Every
+-- space defaults to "bsp".
+-- Modes: bsp | stack | scrolling | monocle | grid | floating
+KiwiDesk.set_mode(1, "stack")
 KiwiDesk.set_mode("music", "floating")
 
 -- One value for all gaps...
@@ -34,6 +36,9 @@ KiwiDesk.set_gap_override("browser", 0)
 
 Spaces are identified by **strings or numbers** — `1` and
 `"1"` are the same space, `"code"` and `"Code"` are not.
+Monitors never carry a layout themselves: windows live in
+spaces, and spaces are mapped to monitors (see
+`space_monitor_map` below).
 
 ### Per-layout tuning
 
