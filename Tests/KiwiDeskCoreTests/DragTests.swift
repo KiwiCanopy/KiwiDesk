@@ -28,7 +28,14 @@ struct DragCoordinatorTests {
                 )
             )
         }
-        try await Task.sleep(nanoseconds: 200_000_000)
+        // Poll instead of a fixed sleep: under full-suite
+        // load the settle task can get main-actor time late.
+        let deadline = ContinuousClock.now + .seconds(5)
+        while ended.isEmpty, ContinuousClock.now < deadline {
+            try await Task.sleep(nanoseconds: 20_000_000)
+        }
+        // Grace window so a wrong second fire would show up.
+        try await Task.sleep(nanoseconds: 100_000_000)
         #expect(ended.count == 1)
         #expect(ended.first?.1.minX == 300)
     }
