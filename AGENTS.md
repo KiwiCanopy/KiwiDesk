@@ -62,6 +62,22 @@ and (later) the Lua VM.
 4. **Verify:** `swift build && swift test && scripts/lint.sh` must
    pass before any commit.
 
+### Commit messages (Angular / Conventional Commits)
+
+Format: `type(scope): subject` — imperative, lower-case subject,
+no trailing period. Body (optional) explains the why, wrapped at
+72 columns.
+
+- Types: `feat`, `fix`, `perf`, `refactor`, `docs`, `test`,
+  `build`, `ci`, `chore`.
+- Scope is the touched area, e.g. `animation`, `tiling`, `layout`,
+  `commands`, `lua`, `ax`, `profiles`, `docs`. Omit when the
+  change is repo-wide.
+- Examples:
+  - `feat(layout): add stack.set_overflow_style`
+  - `fix(tiling): defer z-order restore until animations settle`
+  - `perf(animation): apply position-only frames per app`
+
 ## 4. Tooling
 
 - Shared automation lives in the visible `/scripts/` directory
