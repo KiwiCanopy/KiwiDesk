@@ -1,3 +1,4 @@
+import AppKit
 import CoreGraphics
 import Foundation
 import Testing
@@ -162,6 +163,36 @@ struct CommandTests {
             args: [.number(2500)]
         )
         #expect(core.sleepWake.restoreDelayMS == 2500)
+    }
+
+    @Test("Navigation uses layout slots, not live AX frames")
+    func navigateBySlots() throws {
+        // Needs a real screen for slot geometry.
+        guard NSScreen.main != nil else { return }
+        let core = makeCore()
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: WindowID(1), pid: 1, appName: "A")
+            )
+        )
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: WindowID(2), pid: 1, appName: "B")
+            )
+        )
+        if let space = core.state.workspaces.space(
+            of: WindowID(1)
+        ) {
+            core.state.workspaces.focus(WindowID(1), in: space)
+        }
+        // Both windows still report frame .zero (no AX events
+        // arrived): navigation must use the layout's slots.
+        let response = core.execute(
+            "focus",
+            args: [.string("right")]
+        )
+        #expect(response.isSuccess)
+        #expect(core.activeSpace?.focused == WindowID(2))
     }
 
     @Test("stack.set_overflow_style updates and validates")

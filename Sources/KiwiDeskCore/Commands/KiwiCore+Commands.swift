@@ -77,8 +77,19 @@ extension KiwiCore {
             return .fail("expected left|right|up|down")
         }
         guard let space = activeSpace,
-            let focused = space.focused,
-            let frame = state.windows[focused]?.frame
+            let focused = space.focused
+        else {
+            return .fail("no focused window")
+        }
+        // Navigate the layout's slots, not live AX frames:
+        // live frames are stale mid-animation or when an app
+        // misses a move notification, and cascaded windows
+        // overlap anyway. Floating windows (no slot) fall
+        // back to their last known frame.
+        let slots = tiler.calculatedFrames(state: state)
+        guard
+            let frame = slots[focused]
+                ?? state.windows[focused]?.frame
         else {
             return .fail("no focused window")
         }
@@ -87,8 +98,12 @@ extension KiwiCore {
                 $0 != focused
                     && state.windows[$0]?.isFloating == false
             }
-            .compactMap { id in
-                state.windows[id].map { (id, $0.frame) }
+            .compactMap { id -> (WindowID, CGRect)? in
+                guard
+                    let slot = slots[id]
+                        ?? state.windows[id]?.frame
+                else { return nil }
+                return (id, slot)
             }
         guard
             let target = Navigation.neighbor(
