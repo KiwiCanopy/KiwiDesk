@@ -60,6 +60,8 @@ extension KiwiCore {
         case "save_profile", "load_profile",
             "list_profiles", "get_profile_status":
             return profileCommand(command, args)
+        case "bind_profile_to_native_space":
+            return bindProfileToNativeSpace(args)
         default:
             return layoutCommand(command, args)
         }
@@ -150,41 +152,6 @@ extension KiwiCore {
         if activeSpace?.mode.isFocusDriven == true {
             retile()
         }
-    }
-
-    // MARK: - Spaces
-
-    private func focusSpace(
-        _ args: [JSONValue]
-    ) -> CommandResponse {
-        guard let raw = args.first?.stringValue else {
-            return .fail("expected space id")
-        }
-        state.workspaces.activate(SpaceID(raw))
-        retile()
-        emitSpaceChange()
-        return .ok()
-    }
-
-    private func moveToSpace(
-        _ args: [JSONValue],
-        follow: Bool
-    ) -> CommandResponse {
-        guard let raw = args.first?.stringValue else {
-            return .fail("expected space id")
-        }
-        guard let focused = activeSpace?.focused else {
-            return .fail("no focused window")
-        }
-        let target = SpaceID(raw)
-        state.workspaces.add(focused, to: target)
-        if follow {
-            state.workspaces.activate(target)
-            focusWindow(focused)
-            emitSpaceChange()
-        }
-        retile()
-        return .ok()
     }
 
     // MARK: - Window state

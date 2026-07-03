@@ -8,8 +8,9 @@ spring-based animations. It runs entirely in user-space and
 **never requires disabling System Integrity Protection**.
 
 > **Status: CLI beta.** The core (layouts, Lua config, CLI,
-> profiles) is functional; the SwiftUI settings GUI, per-native-
-> space profiles, and packaged releases are still in progress.
+> profiles, per-native-space profiles, virtual workspace
+> hiding) is functional; the SwiftUI settings GUI and packaged
+> releases are still in progress.
 
 ## Why KiwiDesk?
 

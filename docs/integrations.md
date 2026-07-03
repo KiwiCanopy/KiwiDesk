@@ -20,6 +20,13 @@ KiwiDesk.on("focus_change", function(window_id, app)
         "sketchybar --trigger kiwi_focus APP='"
         .. app .. "'")
 end)
+
+-- Native macOS desktop indicator (Mission Control number):
+KiwiDesk.on("native_space_change", function(desktop)
+    os.execute(
+        "sketchybar --trigger kiwi_desktop DESKTOP="
+        .. desktop)
+end)
 ```
 
 In your `sketchybarrc`:

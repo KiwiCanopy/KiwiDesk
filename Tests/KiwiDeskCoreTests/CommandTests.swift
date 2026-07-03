@@ -163,6 +163,12 @@ struct CommandTests {
             args: [.number(2500)]
         )
         #expect(core.sleepWake.restoreDelayMS == 2500)
+        #expect(!core.tiler.animateSpaceSwitch)
+        core.execute(
+            "set_space_animation",
+            args: [.bool(true)]
+        )
+        #expect(core.tiler.animateSpaceSwitch)
     }
 
     @Test("Navigation uses layout slots, not live AX frames")

@@ -52,6 +52,36 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
 }
 
 extension StateCoordinator {
+    /// Re-applies a snapshot's arrangement: window order per
+    /// space, focus, and the active space. The array order IS
+    /// the layout order, so without this a restart re-tiles
+    /// windows in AX discovery order (seemingly shuffled).
+    /// Snapshot windows that are not currently tracked (other
+    /// native desktops, minimized) are remembered so they
+    /// return to their space when they reappear.
+    public mutating func adopt(_ snapshot: StateSnapshot) {
+        for record in snapshot.spaces {
+            let space = SpaceID(record.id)
+            workspaces.ensureSpace(space)
+            for raw in record.windows {
+                let id = WindowID(raw)
+                if windows[id] != nil {
+                    workspaces.add(id, to: space)
+                } else {
+                    remember(id, in: space)
+                }
+            }
+            if let raw = record.focused,
+                windows[WindowID(raw)] != nil
+            {
+                workspaces.focus(WindowID(raw), in: space)
+            }
+        }
+        if let active = snapshot.activeSpace {
+            workspaces.activate(SpaceID(active))
+        }
+    }
+
     /// Captures the current state for later restoration.
     public func snapshot() -> StateSnapshot {
         StateSnapshot(

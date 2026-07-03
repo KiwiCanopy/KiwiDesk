@@ -9,6 +9,7 @@ public enum KiwiNotification: String, CaseIterable, Sendable,
     case layoutChange = "layout_change"
     case focusChange = "focus_change"
     case monitorChange = "monitor_change"
+    case nativeSpaceChange = "native_space_change"
 }
 
 /// Fans events out to Lua callbacks and generic sinks (the

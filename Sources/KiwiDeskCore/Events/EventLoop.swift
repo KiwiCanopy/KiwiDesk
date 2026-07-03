@@ -69,6 +69,20 @@ public final class EventLoop {
         return nil
     }
 
+    /// Whether the window's app still lists it via AX. False
+    /// for windows on another native macOS Space — raising
+    /// one of those would yank macOS back to that Space.
+    public func isListed(_ id: WindowID) -> Bool {
+        guard
+            let pid = elements.first(
+                where: { $1[id] != nil }
+            )?.key
+        else { return false }
+        return AXHelper.windows(pid: pid).contains {
+            AXHelper.windowID(of: $0) == id
+        }
+    }
+
     // MARK: - Window tracking
 
     func track(

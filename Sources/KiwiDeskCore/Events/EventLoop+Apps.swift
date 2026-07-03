@@ -44,7 +44,17 @@ extension EventLoop {
                 self?.appActivated(app)
             }
         }
-        workspaceTokens = [launch, terminate, activate]
+        let space = center.addObserver(
+            forName:
+                NSWorkspace.activeSpaceDidChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated {
+                self?.nativeSpaceChanged()
+            }
+        }
+        workspaceTokens = [launch, terminate, activate, space]
 
         screenToken = NotificationCenter.default.addObserver(
             forName:
@@ -101,6 +111,23 @@ extension EventLoop {
             let id = AXHelper.windowID(of: element)
         {
             onEvent(.windowFocused(id))
+        }
+    }
+
+    /// The user switched native macOS Spaces. AX only reports
+    /// windows on the current space, so reconcile every app:
+    /// windows of the previous space leave the layout, windows
+    /// of the new space are picked up. The event goes out
+    /// first so a bound profile is in place before the new
+    /// space's windows are tiled.
+    private func nativeSpaceChanged() {
+        onEvent(.nativeSpaceChanged)
+        for pid in observers.keys {
+            let name =
+                NSRunningApplication(
+                    processIdentifier: pid
+                )?.localizedName ?? "?"
+            reconcile(pid: pid, appName: name)
         }
     }
 

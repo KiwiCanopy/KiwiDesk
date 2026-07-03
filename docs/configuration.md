@@ -40,6 +40,29 @@ Monitors never carry a layout themselves: windows live in
 spaces, and spaces are mapped to monitors (see
 `space_monitor_map` below).
 
+### How inactive spaces hide their windows
+
+Switching virtual spaces hides the other spaces' tiled
+windows the same way
+[AeroSpace does](https://nikitabobko.github.io/AeroSpace/guide#emulation-of-virtual-workspaces):
+they are parked in the bottom-right corner of their screen
+with only a few pixels peeking in (macOS refuses fully
+offscreen windows). They return to their tiles when their
+space becomes active — instantly by default; see
+`set_space_animation` under Animations. Focusing a hidden
+window (cmd+tab) pulls its space forward automatically. Floating windows —
+including picture-in-picture — are never stashed and stay
+visible across all virtual spaces.
+
+With **multiple monitors**, arrange your displays so no
+monitor sits directly right of or below another one's
+bottom-right corner, or the parked windows peek onto the
+neighbor. This is the same constraint AeroSpace documents —
+see their
+[proper monitor arrangement guide](https://nikitabobko.github.io/AeroSpace/guide#proper-monitor-arrangement);
+KiwiDesk solves hiding in a similar fashion, so the same
+arrangements work.
+
 ### Per-layout tuning
 
 ```lua
@@ -170,6 +193,7 @@ end)
 | `layout_change` | `space_id`, `mode` |
 | `focus_change` | `window_id`, `app` |
 | `monitor_change` | `monitor_count` |
+| `native_space_change` | `native_space` (desktop number) |
 
 ## Profiles & Monitors
 
@@ -199,15 +223,108 @@ space_monitor_map = {
 }
 ```
 
+### Native macOS Spaces (Mission Control)
+
+KiwiDesk's spaces above are *virtual* workspaces, independent
+of Mission Control. On top of that, each native macOS Space
+(desktop) can carry its own profile:
+
+```lua
+KiwiDesk.bind_profile_to_native_space(1, "Developer Rig")
+KiwiDesk.bind_profile_to_native_space(2, "Creator Studio")
+```
+
+When you switch desktops (Ctrl+arrow, Mission Control, …),
+KiwiDesk loads the bound profile — its virtual workspaces,
+layouts, and settings. Desktops without a binding keep
+whatever profile is active. `native_space` is the desktop
+number as Mission Control counts them (1-based; fullscreen
+apps don't count). Unsure which number you're on? Check
+`KiwiDesk get_state` (field `native_space`), or subscribe to
+the `native_space_change` event.
+
+KiwiDesk never moves windows between native Spaces — windows
+stay on their desktop, and KiwiDesk manages the ones on the
+desktop you're looking at.
+
+Each desktop also remembers which *virtual* space it was
+showing: switch away and back, and you land on the same
+virtual space with the same windows hidden. A desktop you
+haven't visited yet starts on the first virtual space.
+
 ## Animations, Sleep & Wake
 
 ```lua
 KiwiDesk.enable_animations(true)
 KiwiDesk.set_animation_duration(250)  -- ms, clamped 50-1000
 
+-- Virtual space switches snap instantly by default: flying
+-- many windows in from the hiding corner at once needs one
+-- blocking AX call per window per frame, which stutters on
+-- slow apps. Opt in if you like the effect anyway:
+KiwiDesk.set_space_animation(true)
+
 KiwiDesk.enable_wake_restore(true)
 KiwiDesk.set_wake_restore_delay(1500) -- ms after wake
 ```
+
+### Quit & restart
+
+Quitting KiwiDesk saves the current arrangement — window
+order per virtual space, focus, and the active space — and
+restores it on the next launch, so tiles do not shuffle
+across restarts. This works within one login session (macOS
+window ids reset on logout/reboot; after that, windows are
+re-tiled fresh). Crashes restore from the last autosave (30 s
+interval) instead.
+
+## Extras
+
+### Per-desktop keybinds (profiles + modes)
+
+Profiles carry layouts and tiling settings, **not**
+keybindings — binds in `init.lua` are global and survive
+every profile swap. To get "global binds, overridden per
+native desktop" anyway, combine modal modes with the
+`native_space_change` event. Only the active mode's bindings
+fire, so build each desktop's mode by merging your shared
+binds with its overrides:
+
+```lua
+-- Shared binds, present in every mode:
+local common = {
+    ["cmd+alt+1"] = function()
+        KiwiDesk.focus_virtual_space(1)
+    end,
+    ["cmd+alt+left"] = function()
+        KiwiDesk.focus("left")
+    end,
+    -- ...
+}
+
+local function mode(overrides)
+    local merged = {}
+    for k, v in pairs(common) do merged[k] = v end
+    for k, v in pairs(overrides) do merged[k] = v end
+    return merged
+end
+
+-- Desktop 2 overrides cmd+alt+m, inherits the rest:
+KiwiDesk.define_mode("desk1", mode({}))
+KiwiDesk.define_mode("desk2", mode({
+    ["cmd+alt+m"] = function()
+        KiwiDesk.set_mode("monocle")
+    end,
+}))
+
+KiwiDesk.on("native_space_change", function(n)
+    KiwiDesk.switch_mode(n == 2 and "desk2" or "desk1")
+end)
+KiwiDesk.switch_mode("desk1")
+```
+
+Pair it with `bind_profile_to_native_space` (see above) and
+each desktop gets its own layouts *and* its own keybinds.
 
 ## Debugging
 

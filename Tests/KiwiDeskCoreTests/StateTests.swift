@@ -167,4 +167,33 @@ struct StateCoordinatorTests {
                 == WindowID(1)
         )
     }
+
+    @Test("Reappearing windows return to their old space")
+    func remembersSpace() {
+        var state = StateCoordinator()
+        state.apply(.windowCreated(makeWindow(1)))
+        state.workspaces.add(WindowID(1), to: SpaceID("mail"))
+        // Native desktop switch / minimize: window vanishes
+        // from AX and is destroyed, then comes back later.
+        state.apply(.windowDestroyed(WindowID(1)))
+        state.apply(.windowCreated(makeWindow(1)))
+        #expect(
+            state.workspaces.space(of: WindowID(1))
+                == SpaceID("mail")
+        )
+    }
+
+    @Test("Remembered space beats app rules")
+    func rememberedBeatsAppRules() {
+        var state = StateCoordinator()
+        state.appRules = ["TestApp": SpaceID("music")]
+        state.apply(.windowCreated(makeWindow(1)))
+        state.workspaces.add(WindowID(1), to: SpaceID("code"))
+        state.apply(.windowDestroyed(WindowID(1)))
+        state.apply(.windowCreated(makeWindow(1)))
+        #expect(
+            state.workspaces.space(of: WindowID(1))
+                == SpaceID("code")
+        )
+    }
 }

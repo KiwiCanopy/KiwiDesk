@@ -41,6 +41,7 @@ public enum APIReference {
                 "set_animation_duration",
                 "set_animation_duration"
             ),
+            ("set_space_animation", "set_space_animation"),
             ("enable_wake_restore", "enable_wake_restore"),
             (
                 "set_wake_restore_delay",
@@ -54,6 +55,10 @@ public enum APIReference {
             ("load_profile", "load_profile"),
             ("list_profiles", "list_profiles"),
             ("get_profile_status", "get_profile_status"),
+            (
+                "bind_profile_to_native_space",
+                "bind_profile_to_native_space"
+            ),
         ]
 
     /// Layout sub-APIs exposed as global Lua tables.

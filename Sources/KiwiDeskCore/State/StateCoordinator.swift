@@ -14,8 +14,21 @@ public struct StateCoordinator: Sendable {
     /// to a fixed space instead of the active one.
     public var appRules: [String: SpaceID] = [:]
 
+    /// Last known space per window. Window ids are stable OS
+    /// ids, so a "created" window with a remembered space is
+    /// one coming back — from another native macOS Space or
+    /// from the Dock (deminiaturize) — and returns there
+    /// instead of landing in the active space.
+    private var rememberedSpaces: [WindowID: SpaceID] = [:]
+
     public init(defaultSpace: SpaceID = SpaceID(1)) {
         workspaces.ensureSpace(defaultSpace)
+    }
+
+    /// Notes where a currently-untracked window belongs (see
+    /// rememberedSpaces; used by session restore).
+    mutating func remember(_ id: WindowID, in space: SpaceID) {
+        rememberedSpaces[id] = space
     }
 
     /// Marks a window floating/tiled (`make_floating`).
@@ -39,7 +52,8 @@ public struct StateCoordinator: Sendable {
         case .windowCreated(let window):
             windows.upsert(window)
             let target =
-                appRules[window.appName]
+                rememberedSpaces[window.id]
+                ?? appRules[window.appName]
                 ?? workspaces.activeSpace
             if let target {
                 // New windows split the focused window's
@@ -54,6 +68,9 @@ public struct StateCoordinator: Sendable {
             }
 
         case .windowDestroyed(let id):
+            if let space = workspaces.space(of: id) {
+                rememberedSpaces[id] = space
+            }
             windows.remove(id)
             workspaces.remove(id)
 
@@ -73,6 +90,12 @@ public struct StateCoordinator: Sendable {
 
         case .displaysChanged(let displays):
             reconcile(displays: displays)
+
+        case .nativeSpaceChanged:
+            // Handled by KiwiCore (profile binding); the
+            // internal state keys off the AX reconcile that
+            // follows the switch.
+            break
         }
     }
 

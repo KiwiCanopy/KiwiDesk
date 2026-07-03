@@ -15,4 +15,7 @@ public enum KiwiEvent: Sendable {
     case windowFocused(WindowID)
     case windowTitleChanged(WindowID, String)
     case displaysChanged([Display])
+    /// The user switched native macOS Spaces (Mission
+    /// Control). Consumers query `NativeSpaces` for details.
+    case nativeSpaceChanged
 }

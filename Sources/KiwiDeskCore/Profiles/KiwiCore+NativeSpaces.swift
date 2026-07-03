@@ -1,0 +1,130 @@
+import Foundation
+
+/// Per-native-space profile binding (04_API_Contract §6):
+/// each Mission Control desktop can carry its own profile,
+/// swapped in when the user switches native Spaces.
+extension KiwiCore {
+    // MARK: - Commands
+
+    /// `bind_profile_to_native_space(native_space, profile)`.
+    /// The binding applies immediately when the bound space is
+    /// the current one, and on every future switch to it.
+    func bindProfileToNativeSpace(
+        _ args: [JSONValue]
+    ) -> CommandResponse {
+        guard let number = args.first?.intValue, number >= 1
+        else {
+            return .fail(
+                "expected native space number (1-based)"
+            )
+        }
+        guard
+            let profile = args.dropFirst().first?.stringValue,
+            !profile.isEmpty
+        else {
+            return .fail("expected profile name")
+        }
+        nativeSpaceBindings[number] = profile
+        if !profiles.list().contains(profile) {
+            onLog(
+                "bind_profile_to_native_space: profile "
+                    + "'\(profile)' does not exist (yet)"
+            )
+        }
+        applyNativeSpaceBinding()
+        return .ok()
+    }
+
+    // MARK: - Space switch reaction
+
+    /// Native space switch: remember the virtual space the
+    /// desktop we left was showing, swap in the bound profile
+    /// (if any), restore the new desktop's virtual space, and
+    /// notify subscribers.
+    func handleNativeSpaceChange() {
+        let number = NativeSpaces.activeSpaceNumber()
+        lastNativeSwitch = Date()
+        if let last = lastNativeSpace, last != number,
+            let active = state.workspaces.activeSpace
+        {
+            virtualSpaceMemory[last] = active
+        }
+        lastNativeSpace = number
+        applyNativeSpaceBinding()
+        if let number,
+            let target = virtualSpaceTarget(for: number)
+        {
+            state.workspaces.activate(target)
+            // Never animate here: this desktop's windows just
+            // (re)appeared, there is nothing to fly around.
+            retile(animated: false, force: true)
+            emitSpaceChange()
+        }
+        emitNativeSpaceChange()
+        settleAfterNativeSwitch(number)
+    }
+
+    /// The virtual space a native desktop should show: the
+    /// one it showed last, or the first space as default.
+    func virtualSpaceTarget(for native: Int) -> SpaceID? {
+        virtualSpaceMemory[native]
+            ?? state.workspaces.allSpaces.first?.id
+    }
+
+    /// The post-switch AX reconcile re-tracks this desktop's
+    /// windows over the next few hundred ms; afterwards,
+    /// re-assert the layout (stashing included) and hand
+    /// focus to the restored space — the OS may have focused
+    /// a stashed window during the transition.
+    private func settleAfterNativeSwitch(_ number: Int?) {
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .milliseconds(600))
+            guard let self, self.lastNativeSpace == number
+            else { return }
+            self.retile(animated: false, force: true)
+            if let focused = self.activeSpace?.focused {
+                self.focusWindow(focused)
+            }
+        }
+    }
+
+    /// Loads the profile bound to the current native space.
+    /// No-ops without SkyLight (single-space fallback), when
+    /// the space has no binding, or when the bound profile is
+    /// already active. All native spaces without a binding
+    /// share whatever profile is current.
+    func applyNativeSpaceBinding() {
+        guard let number = NativeSpaces.activeSpaceNumber(),
+            let name = nativeSpaceBindings[number],
+            name != profiles.currentName
+        else { return }
+        do {
+            let profile = try profiles.load(name: name)
+            apply(profile: profile)
+            onLog(
+                "native space \(number): loaded profile "
+                    + "'\(name)'"
+            )
+        } catch {
+            onLog(
+                "native space \(number): cannot load "
+                    + "profile '\(name)': \(error)"
+            )
+        }
+    }
+
+    private func emitNativeSpaceChange() {
+        guard let number = NativeSpaces.activeSpaceNumber()
+        else { return }
+        bus.emit(
+            .nativeSpaceChange,
+            data: .object([
+                "native_space": .number(Double(number)),
+                "profile": profiles.currentName.map {
+                    .string($0)
+                } ?? .null,
+            ]),
+            luaArgs: [.number(Double(number))]
+        )
+    }
+}

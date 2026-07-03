@@ -6,6 +6,21 @@ public struct NativeSpace: Sendable, Equatable {
     public let id: SkyLight.SpaceID
     public let displayUUID: String
     public let isCurrent: Bool
+    /// False for fullscreen-app and system spaces, which
+    /// Mission Control does not count as desktops.
+    public let isUser: Bool
+
+    public init(
+        id: SkyLight.SpaceID,
+        displayUUID: String,
+        isCurrent: Bool,
+        isUser: Bool = true
+    ) {
+        self.id = id
+        self.displayUUID = displayUUID
+        self.isCurrent = isCurrent
+        self.isUser = isUser
+    }
 }
 
 /// Detection of native macOS Spaces via SkyLight.
@@ -58,16 +73,41 @@ public enum NativeSpaces {
                 guard let id = space["id64"] as? UInt64 else {
                     continue
                 }
+                let type = space["type"] as? Int ?? 0
                 result.append(
                     NativeSpace(
                         id: id,
                         displayUUID: uuid,
-                        isCurrent: id == current
+                        isCurrent: id == current,
+                        isUser: type == 0
                     )
                 )
             }
         }
         return result
+    }
+
+    // MARK: - Mission Control numbering
+
+    /// The 1-based Mission Control number of a space: its
+    /// position among the user spaces in `allSpaces()` order
+    /// (displays in SkyLight order, spaces left to right).
+    /// Nil for fullscreen/system spaces and unknown ids.
+    public static func number(
+        of id: SkyLight.SpaceID,
+        in spaces: [NativeSpace]
+    ) -> Int? {
+        spaces
+            .filter(\.isUser)
+            .firstIndex { $0.id == id }
+            .map { $0 + 1 }
+    }
+
+    /// Mission Control number of the active space, or nil
+    /// without SkyLight (callers treat that as single-space).
+    public static func activeSpaceNumber() -> Int? {
+        guard let id = activeSpaceID() else { return nil }
+        return number(of: id, in: allSpaces())
     }
 
     /// C signature of CGDisplayCreateUUIDFromDisplayID, which

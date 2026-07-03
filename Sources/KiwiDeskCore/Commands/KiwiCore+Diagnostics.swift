@@ -69,6 +69,11 @@ extension KiwiCore {
             "monitor_count": .number(
                 Double(state.workspaces.allDisplays.count)
             ),
+            // Mission Control desktop number, for setting up
+            // bind_profile_to_native_space. Null without
+            // SkyLight.
+            "native_space": NativeSpaces.activeSpaceNumber()
+                .map { .number(Double($0)) } ?? .null,
         ])
     }
 }

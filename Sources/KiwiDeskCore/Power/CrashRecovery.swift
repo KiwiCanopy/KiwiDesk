@@ -16,11 +16,17 @@ public final class CrashRecovery {
     public var onLog: @MainActor (String) -> Void = { _ in }
 
     private let fileURL: URL
+    /// Arrangement saved on CLEAN shutdown, restored on the
+    /// next launch (window order per space, active space).
+    private let sessionURL: URL
     private var timer: Timer?
 
     public init(directory: URL) {
         self.fileURL = directory.appendingPathComponent(
             ".state_snapshot"
+        )
+        self.sessionURL = directory.appendingPathComponent(
+            ".session_snapshot"
         )
     }
 
@@ -47,12 +53,33 @@ public final class CrashRecovery {
         self.timer = timer
     }
 
-    /// Clean shutdown: stop autosaving and drop the snapshot
-    /// so the next launch does not "restore".
+    /// Clean shutdown: stop autosaving, save the arrangement
+    /// for the next launch, and drop the crash marker so the
+    /// next launch does not treat this as a crash.
     public func shutdownCleanly() {
         timer?.invalidate()
         timer = nil
+        if let snapshot = captureState(),
+            let data = try? JSONEncoder().encode(snapshot)
+        {
+            try? data.write(to: sessionURL, options: .atomic)
+        }
         try? FileManager.default.removeItem(at: fileURL)
+    }
+
+    /// The previous session's arrangement, if any. One-shot:
+    /// reading deletes the file, so a stale session (reboot,
+    /// crash) is never applied twice.
+    public func consumeSession() -> StateSnapshot? {
+        defer {
+            try? FileManager.default.removeItem(at: sessionURL)
+        }
+        guard let data = try? Data(contentsOf: sessionURL)
+        else { return nil }
+        return try? JSONDecoder().decode(
+            StateSnapshot.self,
+            from: data
+        )
     }
 
     /// Writes one snapshot now (also called by the timer).

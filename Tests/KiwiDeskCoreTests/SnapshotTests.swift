@@ -73,4 +73,97 @@ struct SnapshotTests {
         )
         #expect(record.windowID == WindowID(7))
     }
+
+    @Test("Adopt restores order, membership, and focus")
+    func adoptArrangement() {
+        // Previous session: space 1 held [2, 1] (2 focused),
+        // space "mail" held window 3.
+        let snapshot = StateSnapshot(
+            windows: [],
+            spaces: [
+                .init(
+                    space: Space(
+                        id: SpaceID(1),
+                        mode: .bsp,
+                        windows: [WindowID(2), WindowID(1)],
+                        focused: WindowID(2)
+                    )
+                ),
+                .init(
+                    space: Space(
+                        id: SpaceID("mail"),
+                        mode: .stack,
+                        windows: [WindowID(3)],
+                        focused: WindowID(3)
+                    )
+                ),
+            ],
+            activeSpace: "mail"
+        )
+        // Fresh start discovers 1, 2, 3 in AX order: all land
+        // in space 1 as [1, 2, 3].
+        var state = StateCoordinator()
+        for id: UInt32 in [1, 2, 3] {
+            state.apply(
+                .windowCreated(
+                    ManagedWindow(
+                        id: WindowID(id),
+                        pid: 100,
+                        appName: "App"
+                    )
+                )
+            )
+        }
+        state.adopt(snapshot)
+        let one = state.workspaces[SpaceID(1)]
+        #expect(one?.windows == [WindowID(2), WindowID(1)])
+        #expect(one?.focused == WindowID(2))
+        #expect(
+            state.workspaces.space(of: WindowID(3))
+                == SpaceID("mail")
+        )
+        #expect(
+            state.workspaces.activeSpace == SpaceID("mail")
+        )
+    }
+
+    @Test("Adopt remembers windows that are not tracked yet")
+    func adoptRemembers() {
+        // Window 9 was on another native desktop at quit; it
+        // is in the snapshot but not discovered at startup.
+        let snapshot = StateSnapshot(
+            windows: [],
+            spaces: [
+                .init(
+                    space: Space(
+                        id: SpaceID("code"),
+                        mode: .bsp,
+                        windows: [WindowID(9)],
+                        focused: nil
+                    )
+                )
+            ],
+            activeSpace: nil
+        )
+        var state = StateCoordinator()
+        state.adopt(snapshot)
+        #expect(
+            state.workspaces[SpaceID("code")]?.windows.isEmpty
+                == true
+        )
+        // When it reappears, it returns to its space.
+        state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: WindowID(9),
+                    pid: 100,
+                    appName: "App"
+                )
+            )
+        )
+        #expect(
+            state.workspaces.space(of: WindowID(9))
+                == SpaceID("code")
+        )
+    }
 }

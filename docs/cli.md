@@ -45,11 +45,13 @@ KiwiDesk service restart
 | | `load_profile` | name |
 | | `list_profiles` | — |
 | | `get_profile_status` | — |
+| | `bind_profile_to_native_space` | desktop number, profile |
 | Diagnostics | `get_layout_info` | — |
 | | `list_monitors` | — |
 | | `debug_log` | message |
 | Animation | `enable_animations` | true\|false |
 | | `set_animation_duration` | ms (50–1000) |
+| | `set_space_animation` | true\|false (default false) |
 | Sleep/Wake | `enable_wake_restore` | true\|false |
 | | `set_wake_restore_delay` | ms |
 | Stack | `stack.promote` / `stack.demote` | — |
@@ -86,7 +88,16 @@ Each event is one JSON line:
 ```
 
 Events: `space_change`, `layout_change`, `focus_change`,
-`monitor_change`.
+`monitor_change`, `native_space_change`.
+
+`native_space_change` fires when the user switches native
+macOS Spaces (Mission Control desktops); its data carries the
+1-based desktop number and the active profile:
+
+```json
+{"event": "native_space_change",
+ "data": {"native_space": 2, "profile": "Creator Studio"}}
+```
 
 ## Raw IPC Protocol
 

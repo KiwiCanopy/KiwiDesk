@@ -21,11 +21,28 @@ public final class KiwiCore {
     /// animations to settle (see restoreStackZOrder).
     var pendingStackZOrderRestore = false
 
+    /// Deferred switch to a hidden window's virtual space
+    /// (see scheduleFocusFollow).
+    var pendingFocusFollow: Task<Void, Never>?
+
+    /// Native desktop we are currently on (Mission Control
+    /// number), and the virtual space each desktop showed
+    /// last, restored when the user returns to it.
+    var lastNativeSpace: Int?
+    var virtualSpaceMemory: [Int: SpaceID] = [:]
+    /// When the last native desktop switch happened; focus
+    /// events during the transition must not change spaces.
+    var lastNativeSwitch: Date = .distantPast
+
     /// `monitor_fallback` from init.lua (per-monitor chains).
     public var monitorFallback: [String: [String]] = [:]
     /// `space_monitor_map` from init.lua (per-space chains,
     /// beats per-monitor rules).
     public var spaceMonitorMap: [SpaceID: [String]] = [:]
+    /// Profile bound per native macOS Space, keyed by the
+    /// Mission Control number (1-based). Populated by
+    /// `bind_profile_to_native_space`.
+    public internal(set) var nativeSpaceBindings: [Int: String] = [:]
 
     /// Log line consumer (GUI console later; syslog now).
     public var onLog: @MainActor (String) -> Void = { message in
@@ -122,9 +139,17 @@ public final class KiwiCore {
 
     /// Loads the config and starts window management.
     public func start() {
+        lastNativeSpace = NativeSpaces.activeSpaceNumber()
         loadConfig()
         sleepWake.start()
         eventLoop.start()
+        // The event loop discovered windows in AX order; put
+        // back the arrangement of the previous session.
+        if let session = crash.consumeSession() {
+            restore(session)
+            retile()
+            onLog("restored previous session arrangement")
+        }
         crash.start()
         do {
             try socket.start()
@@ -134,14 +159,22 @@ public final class KiwiCore {
     }
 
     public func stop() {
+        pendingFocusFollow?.cancel()
         eventLoop.stop()
         sleepWake.stop()
         socket.stop()
         crash.shutdownCleanly()
     }
 
-    public func retile() {
-        tiler.retile(state: state)
+    public func retile(
+        animated: Bool = true,
+        force: Bool = false
+    ) {
+        tiler.retile(
+            state: state,
+            animated: animated,
+            force: force
+        )
     }
 
     // MARK: - Event flow
@@ -162,28 +195,52 @@ public final class KiwiCore {
             emitMonitorChange()
         case .windowFocused(let id):
             emitFocusChange(id)
-            if activeSpace?.mode.isFocusDriven == true {
+            // cmd+tab (or a click) can reach a window hidden
+            // in an inactive virtual space; pull that space
+            // forward instead of typing into a stashed window.
+            // Deferred: app activation transiently re-reports
+            // the app's OLD focused window right before a new
+            // window opens — only follow if focus settles.
+            if let space = state.workspaces.space(of: id),
+                space != state.workspaces.activeSpace
+            {
+                scheduleFocusFollow(id)
+            } else if activeSpace?.mode.isFocusDriven == true {
                 retile()
             }
+        case .windowCreated:
+            // A brand-new window supersedes a pending follow
+            // of a hidden window (see above).
+            pendingFocusFollow?.cancel()
         case .windowMoved(let id, let frame):
             drag.windowMoved(id, frame: frame)
         case .windowDestroyed(let id):
             drag.cancel(id)
+        case .nativeSpaceChanged:
+            handleNativeSpaceChange()
         default:
             break
         }
         if TilingEngine.shouldRetile(after: event) {
             retile()
         }
-        if focusLost, let next = activeSpace?.focused {
+        // Only raise windows the app still lists: after a
+        // native Space switch the fallback may live on the
+        // previous desktop, and raising it would switch back.
+        if focusLost, let next = activeSpace?.focused,
+            eventLoop.isListed(next)
+        {
             focusWindow(next)
         }
     }
 
-    /// Re-applies window frames after wake/unlock. Goes
-    /// through the tiler's frame pipeline so the resulting AX
-    /// echoes are not mistaken for user drags.
+    /// Re-applies a snapshot after wake/unlock, a crash, or a
+    /// restart: space membership and order first (the array
+    /// order is the layout order), then the raw frames. Frames
+    /// go through the tiler's frame pipeline so the resulting
+    /// AX echoes are not mistaken for user drags.
     private func restore(_ snapshot: StateSnapshot) {
+        state.adopt(snapshot)
         for record in snapshot.windows {
             tiler.setFrame(record.windowID, record.frame)
         }

@@ -6,6 +6,7 @@ extension KiwiCore {
     public func loadConfig() {
         bus.resetLuaCallbacks()
         keys.reset()
+        nativeSpaceBindings = [:]
         guard let fresh = LuaInterpreter() else {
             onLog("failed to create Lua VM")
             return
@@ -23,6 +24,9 @@ extension KiwiCore {
         }
         applyConfigGlobals(from: fresh)
         retile()
+        // The current native space may carry a binding that
+        // the config just (re)declared.
+        applyNativeSpaceBinding()
     }
 
     /// Applies declarative globals after the config ran.
@@ -97,6 +101,11 @@ extension KiwiCore {
 
             -- Send apps to fixed spaces:
             -- app_rules = { ["Spotify"] = "music" }
+
+            -- Load a saved profile per native macOS Space
+            -- (the Mission Control desktop number):
+            -- KiwiDesk.bind_profile_to_native_space(
+            --     2, "Creator Studio")
 
             -- Keybindings:
             -- KiwiDesk.bind("cmd+alt+left", function()

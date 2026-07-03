@@ -49,6 +49,13 @@ public final class TilingEngine {
     public let animation = AnimationEngine()
     public var settings = TilingSettings()
 
+    /// `set_space_animation`: animate windows flying in from
+    /// the stash corner on a virtual space switch. Off by
+    /// default — many simultaneous long-distance animations
+    /// mean one blocking AX call per window per tick, which
+    /// stutters on slow AX responders (Electron/WebKit).
+    public var animateSpaceSwitch = false
+
     /// Applies frames off the main thread with frame-dropping
     /// and per-app EnhancedUserInterface toggling.
     private let applier = FrameApplier()
@@ -87,7 +94,8 @@ public final class TilingEngine {
             .displaysChanged:
             return true
         case .appLaunched, .windowFocused, .windowMoved,
-            .windowResized, .windowTitleChanged:
+            .windowResized, .windowTitleChanged,
+            .nativeSpaceChanged:
             return false
         }
     }
@@ -119,7 +127,20 @@ public final class TilingEngine {
     }
 
     /// Recomputes and applies the active space's layout.
-    public func retile(state: StateCoordinator) {
+    /// `animated: false` snaps windows to their targets in
+    /// one frame-set each (virtual space switches).
+    ///
+    /// `force` skips the "already there" tolerance check and
+    /// (re)issues every frame. Space switches need it: the
+    /// check reads state frames, which are updated by the AX
+    /// echoes of our own frame-sets — during rapid
+    /// back-and-forth switching those echoes lag, and skipping
+    /// based on them leaves windows stranded mid-transition.
+    public func retile(
+        state: StateCoordinator,
+        animated: Bool = true,
+        force: Bool = false
+    ) {
         guard
             let screen = NSScreen.main
                 ?? NSScreen.screens.first
@@ -133,16 +154,87 @@ public final class TilingEngine {
             // grids, minimum sizes), so the reported frame is
             // often a hair off the target. Re-applying an
             // unchanged target just wobbles the window.
-            guard !Self.close(current, to: target) else {
+            if !force, Self.close(current, to: target) {
                 animation.cancel(window: id)
                 continue
             }
-            animation.animate(
-                window: id,
-                on: screen,
-                from: current,
-                to: target
-            )
+            if animated {
+                animation.animate(
+                    window: id,
+                    on: screen,
+                    from: current,
+                    to: target
+                )
+            } else {
+                animation.cancel(window: id)
+                setFrame(id, target)
+            }
+        }
+        stashInactive(
+            state: state,
+            fallback: screen,
+            force: force
+        )
+    }
+
+    // MARK: - Hiding inactive virtual spaces
+
+    /// Visible sliver of stashed windows: macOS rejects fully
+    /// offscreen frames, so this many points stay on screen.
+    nonisolated static let stashPeek: CGFloat = 8
+
+    /// Where a hidden window parks: the bottom-right corner
+    /// of its screen, AeroSpace style (only the top-left
+    /// `stashPeek` corner remains visible). Size unchanged.
+    nonisolated static func stashFrame(
+        _ frame: CGRect,
+        in bounds: CGRect
+    ) -> CGRect {
+        CGRect(
+            x: bounds.maxX - stashPeek,
+            y: bounds.maxY - stashPeek,
+            width: frame.width,
+            height: frame.height
+        )
+    }
+
+    /// Hides the tiled windows of every inactive virtual
+    /// space. Floating windows (incl. PIP) are left alone —
+    /// they behave as pinned across virtual spaces. Windows
+    /// come back through the normal retile when their space
+    /// is activated again.
+    private func stashInactive(
+        state: StateCoordinator,
+        fallback: NSScreen,
+        force: Bool
+    ) {
+        guard let active = state.workspaces.activeSpace
+        else { return }
+        for space in state.workspaces.allSpaces
+        where space.id != active {
+            for id in space.windows {
+                guard let window = state.windows[id],
+                    !window.isFloating
+                else { continue }
+                let screen =
+                    NSScreen.screens.first {
+                        GeometryUtils.axVisibleFrame(of: $0)
+                            .intersects(window.frame)
+                    } ?? fallback
+                let target = Self.stashFrame(
+                    window.frame,
+                    in: GeometryUtils.axVisibleFrame(
+                        of: screen
+                    )
+                )
+                if !force,
+                    Self.close(window.frame, to: target)
+                {
+                    continue
+                }
+                animation.cancel(window: id)
+                setFrame(id, target)
+            }
         }
     }
 

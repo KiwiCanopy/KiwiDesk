@@ -286,6 +286,11 @@ extension KiwiCore {
                 return .fail("expected milliseconds")
             }
             tiler.animation.durationMS = ms
+        case "set_space_animation":
+            guard let enabled = args.first?.boolValue else {
+                return .fail("expected boolean")
+            }
+            tiler.animateSpaceSwitch = enabled
         case "enable_wake_restore":
             guard let enabled = args.first?.boolValue else {
                 return .fail("expected boolean")
