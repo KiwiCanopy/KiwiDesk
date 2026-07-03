@@ -313,11 +313,17 @@ struct FloatRuleTests {
                 after: .windowDestroyed(w1)
             )
         )
+        // Focus retiles are gated by the layout mode instead
+        // (only Scrolling and Monocle are focus-driven).
         #expect(
-            TilingEngine.shouldRetile(
+            !TilingEngine.shouldRetile(
                 after: .windowFocused(w1)
             )
         )
+        #expect(LayoutMode.scrolling.isFocusDriven)
+        #expect(LayoutMode.monocle.isFocusDriven)
+        #expect(!LayoutMode.stack.isFocusDriven)
+        #expect(!LayoutMode.bsp.isFocusDriven)
         #expect(
             !TilingEngine.shouldRetile(
                 after: .windowMoved(w1, .zero)

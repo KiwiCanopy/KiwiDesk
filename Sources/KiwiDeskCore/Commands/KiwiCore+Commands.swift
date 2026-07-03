@@ -133,8 +133,11 @@ extension KiwiCore {
         return .ok()
     }
 
-    /// Focuses a window: state, AX raise, and retile (focus
-    /// drives Scrolling and Monocle).
+    /// Focuses a window: state, AX raise, and — only for
+    /// focus-driven layouts (Scrolling, Monocle) — a retile.
+    /// Static layouts skip it: their targets are unchanged,
+    /// and re-applying them just fights apps that clamp our
+    /// frames (grid-snapping terminals), wobbling everything.
     public func focusWindow(_ id: WindowID) {
         if let space = state.workspaces.space(of: id) {
             state.workspaces.focus(id, in: space)
@@ -144,7 +147,9 @@ extension KiwiCore {
         {
             AXHelper.raise(element, pid: window.pid)
         }
-        retile()
+        if activeSpace?.mode.isFocusDriven == true {
+            retile()
+        }
     }
 
     // MARK: - Spaces

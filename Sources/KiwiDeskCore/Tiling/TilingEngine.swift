@@ -76,16 +76,18 @@ public final class TilingEngine {
 
     /// Events that change window structure and require a
     /// retile. Move/resize events are deliberately excluded:
-    /// applying frames emits them, which would loop.
+    /// applying frames emits them, which would loop. Focus
+    /// changes are handled separately — only focus-driven
+    /// layouts (Scrolling, Monocle) re-layout on focus.
     public nonisolated static func shouldRetile(
         after event: KiwiEvent
     ) -> Bool {
         switch event {
         case .windowCreated, .windowDestroyed, .appTerminated,
-            .windowFocused, .displaysChanged:
+            .displaysChanged:
             return true
-        case .appLaunched, .windowMoved, .windowResized,
-            .windowTitleChanged:
+        case .appLaunched, .windowFocused, .windowMoved,
+            .windowResized, .windowTitleChanged:
             return false
         }
     }
@@ -127,7 +129,11 @@ public final class TilingEngine {
         for (id, target) in frames {
             guard let current = state.windows[id]?.frame
             else { continue }
-            guard current != target else {
+            // Tolerance: apps clamp what we set (character
+            // grids, minimum sizes), so the reported frame is
+            // often a hair off the target. Re-applying an
+            // unchanged target just wobbles the window.
+            guard !Self.close(current, to: target) else {
                 animation.cancel(window: id)
                 continue
             }
@@ -138,6 +144,20 @@ public final class TilingEngine {
                 to: target
             )
         }
+    }
+
+    /// Frames within this distance per edge count as "already
+    /// there". Covers rounding and small app-side clamping.
+    private static let retileTolerance: CGFloat = 2
+
+    private static func close(
+        _ a: CGRect,
+        to b: CGRect
+    ) -> Bool {
+        abs(a.minX - b.minX) <= retileTolerance
+            && abs(a.minY - b.minY) <= retileTolerance
+            && abs(a.width - b.width) <= retileTolerance
+            && abs(a.height - b.height) <= retileTolerance
     }
 
     /// Forwards display topology changes to the animator.

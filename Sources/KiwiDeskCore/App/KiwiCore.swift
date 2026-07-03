@@ -155,6 +155,9 @@ public final class KiwiCore {
             emitMonitorChange()
         case .windowFocused(let id):
             emitFocusChange(id)
+            if activeSpace?.mode.isFocusDriven == true {
+                retile()
+            }
         case .windowMoved(let id, let frame):
             drag.windowMoved(id, frame: frame)
         case .windowDestroyed(let id):

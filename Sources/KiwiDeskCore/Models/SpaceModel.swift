@@ -44,6 +44,12 @@ public enum LayoutMode: String, Sendable, Codable, CaseIterable {
     case monocle
     case grid
     case floating
+
+    /// Whether the layout's output depends on which window
+    /// is focused, requiring a retile on focus changes.
+    public var isFocusDriven: Bool {
+        self == .scrolling || self == .monocle
+    }
 }
 
 /// A virtual workspace holding its windows as a flat 1D array.
