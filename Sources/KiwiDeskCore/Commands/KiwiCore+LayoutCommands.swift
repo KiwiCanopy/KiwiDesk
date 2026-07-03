@@ -68,7 +68,45 @@ extension KiwiCore {
                 $0.demote(focused, masterCount: count)
             }
         }
+        if activeSpace?.windows != space.windows {
+            restoreStackZOrder()
+        }
         return .ok()
+    }
+
+    // MARK: - Stack z-order
+
+    /// Re-raises the stack zone top to bottom, so upper
+    /// windows sit behind lower ones and every title bar of
+    /// the cascade stays visible. Called after a window
+    /// crosses the master/stack boundary; a plain focus
+    /// change still brings the focused window to the front,
+    /// which is the expected override.
+    func restoreStackZOrder() {
+        guard let space = activeSpace, space.mode == .stack
+        else { return }
+        let boundary = max(1, tiler.settings.stack.masterCount)
+        guard space.windows.count > boundary else { return }
+        for id in space.windows[boundary...] {
+            guard let element = eventLoop.element(for: id)
+            else { continue }
+            AXHelper.raiseQuietly(element)
+        }
+    }
+
+    /// Whether swapping these two windows moves one across
+    /// the stack layout's master/stack boundary.
+    func crossesStackBoundary(
+        _ a: WindowID,
+        _ b: WindowID,
+        in space: Space
+    ) -> Bool {
+        guard space.mode == .stack else { return false }
+        let boundary = max(1, tiler.settings.stack.masterCount)
+        guard let indexA = space.windows.firstIndex(of: a),
+            let indexB = space.windows.firstIndex(of: b)
+        else { return false }
+        return (indexA < boundary) != (indexB < boundary)
     }
 
     // MARK: - bsp.*

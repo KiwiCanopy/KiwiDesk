@@ -100,10 +100,18 @@ extension KiwiCore {
             return .fail("no window \(raw) of focus")
         }
         if swapping {
+            let crossedZones = crossesStackBoundary(
+                focused,
+                target,
+                in: space
+            )
             state.workspaces.withSpace(space.id) {
                 $0.swap(focused, target)
             }
             retile()
+            if crossedZones {
+                restoreStackZOrder()
+            }
         } else {
             focusWindow(target)
         }

@@ -19,7 +19,13 @@ extension KiwiCore {
             entry.key != id && entry.value.contains(center)
         }?.key
 
+        var crossedZones = false
         if let target {
+            crossedZones = crossesStackBoundary(
+                id,
+                target,
+                in: space
+            )
             state.workspaces.withSpace(space.id) {
                 $0.swap(id, target)
             }
@@ -27,5 +33,8 @@ extension KiwiCore {
         // Applies the swap — or, without a target, animates
         // the dragged window back into its slot.
         retile()
+        if crossedZones {
+            restoreStackZOrder()
+        }
     }
 }

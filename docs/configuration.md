@@ -65,6 +65,30 @@ grid.set_split_direction("horizontal")
 grid.set_dimensions(3, 2)          -- rigid: columns, rows
 ```
 
+### When windows run out of space
+
+No layout ever shrinks a window below `min_window_size`.
+When a zone gets too crowded, downsizing stops and the
+windows in that zone **cascade vertically**: each keeps the
+zone's full size and is offset 40 pt downward from the one
+above it, so every title bar stays visible and clickable.
+There is no horizontal (side-reveal) stacking — overflow is
+always resolved top-to-bottom via title bars.
+
+In the stack layout this happens per zone: a crowded stack
+column cascades on its own while the master zone stays
+untouched. If the screen is too narrow to give both zones
+`min_window_size`, the split is abandoned entirely and all
+windows cascade over the whole usable area.
+
+For a cascade to read correctly, upper windows must sit
+*behind* lower ones. KiwiDesk restores this z-order whenever
+a window crosses the master/stack boundary (drag swap,
+directional `swap`, `stack.promote` / `stack.demote`).
+Focusing a window still raises it to the front — that
+override is deliberate and lasts until the next boundary
+crossing re-stacks the zone.
+
 ## Window Rules
 
 ```lua
