@@ -78,6 +78,10 @@ static inline int shim_luaL_dostring(lua_State *L,
     return luaL_dostring(L, s);
 }
 
+static inline void shim_luaL_openlibs(lua_State *L) {
+    luaL_openlibs(L);
+}
+
 /*
  * Timeout sandbox: a monotonic deadline is stored in the
  * state's extra space (LUA_EXTRASPACE == sizeof(void*), which

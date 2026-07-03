@@ -62,7 +62,7 @@ public final class LuaInterpreter {
 
     public init?() {
         guard let created = luaL_newstate() else { return nil }
-        luaL_openlibs(created)
+        shim_luaL_openlibs(created)
         // Check the deadline every 10k VM instructions.
         shim_enable_timeout_hook(created, 10_000)
         state = created

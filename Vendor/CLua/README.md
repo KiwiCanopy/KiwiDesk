@@ -1,7 +1,7 @@
-# CLua — vendored Lua 5.4.8
+# CLua — vendored Lua 5.5.0
 
-Unmodified upstream Lua 5.4.8 sources from
-https://www.lua.org/ftp/lua-5.4.8.tar.gz (MIT license, see
+Unmodified upstream Lua 5.5.0 sources from
+https://www.lua.org/ftp/lua-5.5.0.tar.gz (MIT license, see
 LICENSE).
 
 **Do not edit files in `src/`.** To upgrade, replace `src/` and
