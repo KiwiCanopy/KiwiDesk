@@ -214,7 +214,14 @@ extension KiwiCore {
             }
             tiler.settings.dragShowDropZone = enabled
         default:
-            return .fail("unknown command: \(command)")
+            var message = "unknown command: \(command)"
+            if let hint = APIReference.suggestion(
+                for: command
+            ) {
+                message += " — did you mean '\(hint)'?"
+            }
+            message += " (run 'help' for all commands)"
+            return .fail(message)
         }
         return .ok()
     }

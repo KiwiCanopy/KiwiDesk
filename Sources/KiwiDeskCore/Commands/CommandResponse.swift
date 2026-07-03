@@ -1,5 +1,29 @@
 import Foundation
 
+/// One request over the IPC socket:
+/// `{"command": "focus", "args": ["left"]}`.
+public struct CommandRequest: Codable, Sendable, Equatable {
+    public var command: String
+    public var args: [JSONValue]?
+
+    public init(command: String, args: [JSONValue]? = nil) {
+        self.command = command
+        self.args = args
+    }
+}
+
+/// One pushed event for stream subscribers:
+/// `{"event": "space_change", "data": {...}}`.
+public struct EventMessage: Codable, Sendable, Equatable {
+    public var event: String
+    public var data: JSONValue
+
+    public init(event: String, data: JSONValue) {
+        self.event = event
+        self.data = data
+    }
+}
+
 /// Uniform result of every KiwiDesk command, shared by the
 /// Lua API, the CLI, and the IPC socket.
 public struct CommandResponse: Codable, Sendable, Equatable {

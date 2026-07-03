@@ -90,12 +90,37 @@ struct CommandTests {
         #expect(core.tiler.settings.grid.rows == 2)
     }
 
-    @Test("Unknown commands return an error")
+    @Test("Unknown commands return an error with a hint")
     func unknownCommand() {
         let core = makeCore()
         let response = core.execute("frobnicate")
         #expect(!response.isSuccess)
         #expect(response.error?.contains("unknown") == true)
+        #expect(response.error?.contains("help") == true)
+    }
+
+    @Test("Typos get a did-you-mean suggestion")
+    func didYouMean() {
+        let core = makeCore()
+        let response = core.execute("set_mdoe")
+        #expect(
+            response.error?.contains("set_mode") == true
+        )
+    }
+
+    @Test("help lists every command")
+    func helpCommand() {
+        let core = makeCore()
+        let response = core.execute("help")
+        guard case .array(let names)? = response.data else {
+            Issue.record("expected command list")
+            return
+        }
+        #expect(names.contains(.string("focus")))
+        #expect(
+            names.contains(.string("stack.set_master_count"))
+        )
+        #expect(names.contains(.string("subscribe")))
     }
 
     @Test("get_state reports spaces and windows")
@@ -196,6 +221,54 @@ struct ConfigTests {
             )
         )
     }
+
+    @Test("Lua typos log a hint instead of erroring")
+    func typoGuard() throws {
+        let core = makeCore()
+        var logs: [String] = []
+        core.onLog = { logs.append($0) }
+        core.loadConfig()
+        let result = core.lua?.run(
+            "KiwiDesk.focsu('left')"
+        )
+        #expect(result?.succeeded == true)
+        #expect(
+            logs.contains {
+                $0.contains("focsu")
+                    && $0.contains("KiwiDesk.help()")
+            }
+        )
+    }
+}
+
+@Suite("API reference")
+struct APIReferenceTests {
+    @Test("Suggestions catch close typos only")
+    func suggestions() {
+        #expect(
+            APIReference.suggestion(for: "set_mdoe")
+                == "set_mode"
+        )
+        #expect(
+            APIReference.suggestion(for: "focsu") == "focus"
+        )
+        #expect(
+            APIReference.suggestion(
+                for: "completely_unrelated_xyz"
+            ) == nil
+        )
+    }
+
+    @Test("Edit distance is symmetric and exact")
+    func editDistance() {
+        #expect(APIReference.editDistance("", "abc") == 3)
+        #expect(
+            APIReference.editDistance("focus", "focus") == 0
+        )
+        #expect(
+            APIReference.editDistance("focus", "focsu") == 2
+        )
+    }
 }
 
 @Suite("Navigation")
@@ -275,5 +348,12 @@ struct NavigationTests {
                 candidates: candidates
             ) == nil
         )
+    }
+}
+
+extension Result {
+    fileprivate var succeeded: Bool {
+        if case .success = self { return true }
+        return false
     }
 }

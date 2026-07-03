@@ -24,14 +24,35 @@ public final class KiwiCore {
         configDirectory.appendingPathComponent("init.lua")
     }
 
+    public let socket: SocketServer
+
+    /// Where the CLI expects the running app's socket.
+    public nonisolated static var defaultSocketPath: String {
+        FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent(
+                ".config/KiwiDesk/KiwiDesk.sock"
+            ).path
+    }
+
     public init(
         configDirectory: URL? = nil
     ) {
-        self.configDirectory =
+        let directory =
             configDirectory
             ?? FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent(".config/KiwiDesk")
+        self.configDirectory = directory
+        self.socket = SocketServer(
+            path:
+                directory
+                .appendingPathComponent("KiwiDesk.sock").path
+        )
 
+        socket.handler = { [weak self] command, args in
+            self?.execute(command, args: args)
+                ?? .fail("core unavailable")
+        }
+        socket.bus = bus
         tiler.elementProvider = { [weak self] id in
             self?.eventLoop.element(for: id)
         }
@@ -56,11 +77,17 @@ public final class KiwiCore {
         loadConfig()
         sleepWake.start()
         eventLoop.start()
+        do {
+            try socket.start()
+        } catch {
+            onLog("socket server failed: \(error)")
+        }
     }
 
     public func stop() {
         eventLoop.stop()
         sleepWake.stop()
+        socket.stop()
     }
 
     public func retile() {

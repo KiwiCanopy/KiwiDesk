@@ -27,70 +27,15 @@ extension JSONValue {
 /// tables, matching the contract examples verbatim.
 extension KiwiCore {
     func registerLuaAPI(on lua: LuaInterpreter) {
-        // Lua name -> dispatcher command.
-        let commands: [(String, String)] = [
-            ("focus", "focus"),
-            ("swap", "swap"),
-            ("focus_space", "focus_virtual_space"),
-            ("focus_virtual_space", "focus_virtual_space"),
-            ("move_to_space", "move_to_virtual_space"),
-            (
-                "move_to_virtual_space",
-                "move_to_virtual_space"
-            ),
-            (
-                "move_to_space_and_follow",
-                "move_to_virtual_space_and_follow"
-            ),
-            (
-                "move_to_virtual_space_and_follow",
-                "move_to_virtual_space_and_follow"
-            ),
-            ("make_floating", "make_floating"),
-            ("make_tiled", "make_tiled"),
-            ("resize", "resize"),
-            ("pull_or_spawn", "pull_or_spawn"),
-            ("spawn_new", "spawn_new"),
-            ("set_mode", "set_mode"),
-            ("set_gap_global", "set_gap_global"),
-            ("set_gap_override", "set_gap_override"),
-            ("get_state", "get_state"),
-            ("get_layout_info", "get_layout_info"),
-            ("list_monitors", "list_monitors"),
-            ("debug_log", "debug_log"),
-            ("reload_config", "reload_config"),
-            ("enable_animations", "enable_animations"),
-            (
-                "set_animation_duration",
-                "set_animation_duration"
-            ),
-            ("enable_wake_restore", "enable_wake_restore"),
-            (
-                "set_wake_restore_delay",
-                "set_wake_restore_delay"
-            ),
-            ("set_drag_ghost", "set_drag_ghost"),
-            ("set_drag_drop_zone", "set_drag_drop_zone"),
-        ]
-        for (luaName, command) in commands {
-            register(command, as: luaName, in: "KiwiDesk", lua)
+        for entry in APIReference.commands {
+            register(
+                entry.command,
+                as: entry.lua,
+                in: "KiwiDesk",
+                lua
+            )
         }
-
-        let namespaces: [String: [String]] = [
-            "stack": [
-                "promote", "demote",
-                "set_master_count", "set_master_ratio",
-            ],
-            "bsp": ["set_strategy", "set_ratio"],
-            "scroll": [
-                "set_width", "set_anchor", "set_speed",
-            ],
-            "grid": [
-                "set_type", "set_fill_empty_space",
-                "set_split_direction", "set_dimensions",
-            ],
-        ]
-        for (table, functions) in namespaces {
+        for (table, functions) in APIReference.namespaces {
             for function in functions {
                 register(
                     "\(table).\(function)",
@@ -100,8 +45,28 @@ extension KiwiCore {
                 )
             }
         }
-
         registerEventAPI(on: lua)
+        installTypoGuard(on: lua)
+    }
+
+    /// A metatable on the KiwiDesk table turns typo'd calls
+    /// ("attempt to call a nil value") into a helpful log
+    /// line pointing at KiwiDesk.help().
+    private func installTypoGuard(on lua: LuaInterpreter) {
+        lua.run(
+            """
+            setmetatable(KiwiDesk, {
+                __index = function(_, key)
+                    return function()
+                        KiwiDesk.debug_log(
+                            "unknown KiwiDesk function '"
+                            .. tostring(key)
+                            .. "' — see KiwiDesk.help()")
+                    end
+                end,
+            })
+            """
+        )
     }
 
     private func register(

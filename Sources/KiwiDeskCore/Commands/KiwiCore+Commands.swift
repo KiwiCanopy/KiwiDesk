@@ -33,6 +33,14 @@ extension KiwiCore {
             return setMode(args)
         case "set_gap_global", "set_gap_override":
             return setGaps(command, args)
+        case "help", "list_commands":
+            return .ok(
+                .array(
+                    APIReference.allCommands.map {
+                        .string($0)
+                    }
+                )
+            )
         case "get_state":
             return .ok(stateJSON())
         case "get_layout_info":
