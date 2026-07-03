@@ -15,10 +15,21 @@ let package = Package(
         )
     ],
     targets: [
+        // Vendored Lua 5.4 (unmodified upstream C sources).
+        .target(
+            name: "CLua",
+            path: "Vendor/CLua",
+            sources: ["src"],
+            publicHeadersPath: "include",
+            cSettings: [
+                .define("LUA_USE_MACOSX")
+            ]
+        ),
         // Core: state tracking, event loop, OS bridging.
         // Strictly separated from the GUI (see AGENTS.md).
         .target(
             name: "KiwiDeskCore",
+            dependencies: ["CLua"],
             path: "Sources/KiwiDeskCore",
             plugins: [lintPlugin]
         ),
