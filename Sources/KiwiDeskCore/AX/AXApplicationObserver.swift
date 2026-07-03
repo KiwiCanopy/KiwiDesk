@@ -50,6 +50,8 @@ public final class AXApplicationObserver {
         kAXWindowMovedNotification,
         kAXWindowResizedNotification,
         kAXTitleChangedNotification,
+        kAXWindowMiniaturizedNotification,
+        kAXWindowDeminiaturizedNotification,
     ]
 
     public init?(pid: pid_t) {

@@ -12,6 +12,7 @@ public final class KiwiCore {
     public let sleepWake = SleepWakeManager()
     public let bus = EventBus()
     public let keys = KeybindingManager()
+    public let drag = DragCoordinator()
     public let profiles: ProfileManager
     public let crash: CrashRecovery
     public internal(set) var lua: LuaInterpreter?
@@ -75,6 +76,13 @@ public final class KiwiCore {
         keys.onLog = { [weak self] message in
             self?.onLog(message)
         }
+        drag.isAnimating = { [weak self] id in
+            self?.tiler.animation.isAnimating(window: id)
+                ?? false
+        }
+        drag.onDragEnd = { [weak self] id, frame in
+            self?.handleDragEnd(id, frame: frame)
+        }
 
         socket.handler = { [weak self] command, args in
             self?.execute(command, args: args)
@@ -135,6 +143,10 @@ public final class KiwiCore {
             emitMonitorChange()
         case .windowFocused(let id):
             emitFocusChange(id)
+        case .windowMoved(let id, let frame):
+            drag.windowMoved(id, frame: frame)
+        case .windowDestroyed(let id):
+            drag.cancel(id)
         default:
             break
         }

@@ -35,6 +35,12 @@ public final class AnimationEngine {
         animations.values.reduce(0) { $0 + $1.count }
     }
 
+    /// Whether a window is currently being animated. Used to
+    /// tell our own frame updates apart from user drags.
+    public func isAnimating(window: WindowID) -> Bool {
+        animations.values.contains { $0[window] != nil }
+    }
+
     private var spring: Spring {
         Spring(
             response: Double(storedDurationMS) / 1000 * 1.4,

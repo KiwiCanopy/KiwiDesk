@@ -79,20 +79,23 @@ public final class TilingEngine {
         }
     }
 
-    /// Recomputes and applies the active space's layout.
-    public func retile(state: StateCoordinator) {
+    /// The frames the active space's layout assigns right
+    /// now, without applying them. Used by retiling and by
+    /// drag-and-drop slot detection.
+    public func calculatedFrames(
+        state: StateCoordinator
+    ) -> [WindowID: CGRect] {
         guard
             let spaceID = state.workspaces.activeSpace,
             let space = state.workspaces[spaceID],
             let screen = NSScreen.main
                 ?? NSScreen.screens.first
-        else { return }
-
+        else { return [:] }
         let bounds = GeometryUtils.axVisibleFrame(of: screen)
         let tiled = space.windows.filter { id in
             state.windows[id]?.isFloating == false
         }
-        let frames = LayoutEngine.calculate(
+        return LayoutEngine.calculate(
             mode: space.mode,
             windows: tiled,
             context: settings.context(
@@ -100,6 +103,15 @@ public final class TilingEngine {
                 space: space
             )
         )
+    }
+
+    /// Recomputes and applies the active space's layout.
+    public func retile(state: StateCoordinator) {
+        guard
+            let screen = NSScreen.main
+                ?? NSScreen.screens.first
+        else { return }
+        let frames = calculatedFrames(state: state)
 
         for (id, target) in frames {
             guard let current = state.windows[id]?.frame

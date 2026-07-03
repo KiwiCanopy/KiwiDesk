@@ -3,10 +3,11 @@ import ApplicationServices
 
 /// Central listener for system events.
 ///
-/// Watches app launches/terminations via `NSWorkspace`, attaches
-/// an `AXApplicationObserver` per app, and translates raw AX
-/// notifications into typed `KiwiEvent`s. It keeps no layout
-/// state itself — consumers apply events to the state managers.
+/// Watches app launches/terminations via `NSWorkspace` (see
+/// EventLoop+Apps.swift), attaches an `AXApplicationObserver`
+/// per app, and translates raw AX notifications into typed
+/// `KiwiEvent`s. It keeps no layout state itself — consumers
+/// apply events to the state managers.
 @MainActor
 public final class EventLoop {
     public var onEvent: @MainActor (KiwiEvent) -> Void = { _ in }
@@ -14,10 +15,11 @@ public final class EventLoop {
     /// User float rules from the Lua config (`float_rules`).
     public var floatRules = FloatRules()
 
-    private var observers: [pid_t: AXApplicationObserver] = [:]
-    private var elements: [pid_t: [WindowID: AXUIElement]] = [:]
-    private var workspaceTokens: [NSObjectProtocol] = []
-    private var screenToken: NSObjectProtocol?
+    var observers: [pid_t: AXApplicationObserver] = [:]
+    var elements: [pid_t: [WindowID: AXUIElement]] = [:]
+    var workspaceTokens: [NSObjectProtocol] = []
+    var screenToken: NSObjectProtocol?
+    var lastActivePid: pid_t?
     public private(set) var isRunning = false
 
     public init() {}
@@ -67,96 +69,9 @@ public final class EventLoop {
         return nil
     }
 
-    // MARK: - App tracking
-
-    private func registerWorkspaceObservers() {
-        let center = NSWorkspace.shared.notificationCenter
-        let launch = center.addObserver(
-            forName: NSWorkspace.didLaunchApplicationNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] note in
-            // Queue .main delivers on the main thread, but the
-            // closure is nonisolated and Notification is not
-            // Sendable; bridge manually.
-            let app = note.runningApplication
-            MainActor.assumeIsolated {
-                guard let app else { return }
-                self?.appLaunched(app)
-            }
-        }
-        let term = center.addObserver(
-            forName:
-                NSWorkspace.didTerminateApplicationNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] note in
-            let app = note.runningApplication
-            MainActor.assumeIsolated {
-                guard let app else { return }
-                self?.appTerminated(app)
-            }
-        }
-        workspaceTokens = [launch, term]
-
-        screenToken = NotificationCenter.default.addObserver(
-            forName:
-                NSApplication
-                .didChangeScreenParametersNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            MainActor.assumeIsolated {
-                self?.publishDisplays()
-            }
-        }
-    }
-
-    private func appLaunched(_ app: NSRunningApplication) {
-        attach(app: app)
-        onEvent(
-            .appLaunched(
-                pid: app.processIdentifier,
-                name: app.localizedName ?? "?"
-            )
-        )
-    }
-
-    private func appTerminated(_ app: NSRunningApplication) {
-        let pid = app.processIdentifier
-        observers[pid]?.invalidate()
-        observers[pid] = nil
-        for id in elements[pid, default: [:]].keys {
-            onEvent(.windowDestroyed(id))
-        }
-        elements[pid] = nil
-        onEvent(.appTerminated(pid: pid))
-    }
-
-    /// Attaches AX observation to a regular (Dock-visible) app.
-    private func attach(app: NSRunningApplication) {
-        guard app.activationPolicy == .regular else { return }
-        let pid = app.processIdentifier
-        guard observers[pid] == nil else { return }
-        guard let observer = AXApplicationObserver(pid: pid)
-        else { return }
-
-        let name = app.localizedName ?? "?"
-        observer.onNotification = { [weak self] note, element in
-            self?.handle(note, element, pid: pid, appName: name)
-        }
-        observers[pid] = observer
-        // Keep Electron/WebKit AX trees warm (see AGENTS.md).
-        AXHelper.setEnhancedUserInterface(pid: pid, enabled: true)
-
-        for element in AXHelper.windows(pid: pid) {
-            track(element, pid: pid, appName: name)
-        }
-    }
-
     // MARK: - Window tracking
 
-    private func track(
+    func track(
         _ element: AXUIElement,
         pid: pid_t,
         appName: String
@@ -179,6 +94,25 @@ public final class EventLoop {
         onEvent(.windowCreated(window))
     }
 
+    /// Removes tracked windows that no longer exist in the
+    /// app's live AX window list. Safety net for missed or
+    /// unmappable destroy notifications — without it, closed
+    /// windows would keep occupying layout slots.
+    func reconcile(pid: pid_t) {
+        guard let tracked = elements[pid],
+            !tracked.isEmpty
+        else { return }
+        let live = Set(
+            AXHelper.windows(pid: pid).compactMap {
+                AXHelper.windowID(of: $0)
+            }
+        )
+        for id in tracked.keys where !live.contains(id) {
+            elements[pid]?[id] = nil
+            onEvent(.windowDestroyed(id))
+        }
+    }
+
     private func windowID(
         of element: AXUIElement,
         pid: pid_t
@@ -192,7 +126,7 @@ public final class EventLoop {
             .first { CFEqual($1, element) }?.key
     }
 
-    private func handle(
+    func handle(
         _ note: String,
         _ element: AXUIElement,
         pid: pid_t,
@@ -201,13 +135,24 @@ public final class EventLoop {
         switch note {
         case kAXWindowCreatedNotification:
             track(element, pid: pid, appName: appName)
-        case kAXUIElementDestroyedNotification:
-            guard let id = windowID(of: element, pid: pid),
+        case kAXUIElementDestroyedNotification,
+            kAXWindowMiniaturizedNotification:
+            if let id = windowID(of: element, pid: pid),
                 elements[pid]?[id] != nil
-            else { return }
-            elements[pid]?[id] = nil
-            onEvent(.windowDestroyed(id))
+            {
+                elements[pid]?[id] = nil
+                onEvent(.windowDestroyed(id))
+            }
+            // Destroyed elements often cannot be mapped back
+            // (and some apps skip the notification entirely),
+            // so always diff against the live window list.
+            reconcile(pid: pid)
+        case kAXWindowDeminiaturizedNotification:
+            track(element, pid: pid, appName: appName)
         case kAXFocusedWindowChangedNotification:
+            // Closing a window nearly always moves focus;
+            // reconciling here catches missed destroy events.
+            reconcile(pid: pid)
             guard let id = AXHelper.windowID(of: element) else {
                 return
             }
@@ -245,38 +190,5 @@ public final class EventLoop {
         default:
             break
         }
-    }
-
-    // MARK: - Displays
-
-    private func publishDisplays() {
-        let displays = NSScreen.screens.compactMap { screen in
-            screen.kiwiDisplay
-        }
-        onEvent(.displaysChanged(displays))
-    }
-}
-
-extension Notification {
-    /// The `NSRunningApplication` attached to an `NSWorkspace`
-    /// launch/termination notification.
-    fileprivate var runningApplication: NSRunningApplication? {
-        userInfo?[NSWorkspace.applicationUserInfoKey]
-            as? NSRunningApplication
-    }
-}
-
-extension NSScreen {
-    /// Converts an `NSScreen` into a KiwiDesk display snapshot.
-    var kiwiDisplay: Display? {
-        let key = NSDeviceDescriptionKey("NSScreenNumber")
-        guard let number = deviceDescription[key] as? NSNumber
-        else { return nil }
-        return Display(
-            id: DisplayID(number.uint32Value),
-            name: localizedName,
-            frame: frame,
-            visibleFrame: visibleFrame
-        )
     }
 }
