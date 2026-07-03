@@ -134,10 +134,9 @@ public enum AXHelper {
     }
 
     /// Raises a window without focusing it or activating its
-    /// app — z-order only. Cross-app ordering is best-effort:
-    /// without private window-server APIs, AX can only order
-    /// a window within its own app's layer.
-    @MainActor
+    /// app — z-order only. Blocking IPC (returns after the
+    /// target app processed the action), safe off the main
+    /// thread like all AX element calls.
     public static func raiseQuietly(_ element: AXUIElement) {
         AXUIElementPerformAction(
             element,

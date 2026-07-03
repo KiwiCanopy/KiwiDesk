@@ -34,7 +34,7 @@ extension KiwiCore {
         // the dragged window back into its slot.
         retile()
         if crossedZones {
-            restoreStackZOrder()
+            scheduleStackZOrderRestore()
         }
     }
 }

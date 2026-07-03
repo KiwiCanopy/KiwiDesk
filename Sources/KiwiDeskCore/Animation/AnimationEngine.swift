@@ -35,6 +35,12 @@ public final class AnimationEngine {
     public var onAnimationEnd: @MainActor (WindowID) -> Void =
         { _ in }
 
+    /// Fired when the last running animation ends (settled,
+    /// cancelled, or display removed). Used for work that
+    /// must wait until windows stop moving, like z-order
+    /// restoration.
+    public var onAllAnimationsEnded: @MainActor () -> Void = {}
+
     /// `enable_animations`: when false, frames apply instantly.
     public var isEnabled = true
 
@@ -114,6 +120,7 @@ public final class AnimationEngine {
             lastApplied[window] = nil
             heldSize[window] = nil
             onAnimationEnd(window)
+            notifyIfIdle()
         }
     }
 
@@ -127,11 +134,15 @@ public final class AnimationEngine {
                 onAnimationEnd(id)
             }
         }
+        let wasActive = activeCount > 0
         animations = [:]
         lastApplied = [:]
         heldSize = [:]
         for driver in drivers.values {
             driver.stop()
+        }
+        if wasActive {
+            onAllAnimationsEnded()
         }
     }
 
@@ -145,13 +156,18 @@ public final class AnimationEngine {
         where !connected.contains(display) {
             drivers[display]?.invalidate()
             drivers[display] = nil
+            var removedAny = false
             for (id, animation) in animations[display] ?? [:] {
                 apply(id, animation.targetFrame, true)
                 lastApplied[id] = nil
                 heldSize[id] = nil
                 onAnimationEnd(id)
+                removedAny = true
             }
             animations[display] = nil
+            if removedAny {
+                notifyIfIdle()
+            }
         }
     }
 
@@ -230,6 +246,15 @@ public final class AnimationEngine {
         animations[display] = perWindow
         if perWindow.isEmpty {
             drivers[display]?.stop()
+            notifyIfIdle()
+        }
+    }
+
+    /// Fires `onAllAnimationsEnded` when nothing animates
+    /// anymore, on any display.
+    private func notifyIfIdle() {
+        if activeCount == 0 {
+            onAllAnimationsEnded()
         }
     }
 

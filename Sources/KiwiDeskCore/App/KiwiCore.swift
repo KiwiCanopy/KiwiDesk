@@ -17,6 +17,10 @@ public final class KiwiCore {
     public let crash: CrashRecovery
     public internal(set) var lua: LuaInterpreter?
 
+    /// A stack z-order restore is waiting for the current
+    /// animations to settle (see restoreStackZOrder).
+    var pendingStackZOrderRestore = false
+
     /// `monitor_fallback` from init.lua (per-monitor chains).
     public var monitorFallback: [String: [String]] = [:]
     /// `space_monitor_map` from init.lua (per-space chains,
@@ -87,6 +91,9 @@ public final class KiwiCore {
         }
         drag.onDragEnd = { [weak self] id, frame in
             self?.handleDragEnd(id, frame: frame)
+        }
+        tiler.animation.onAllAnimationsEnded = { [weak self] in
+            self?.runPendingStackZOrderRestore()
         }
 
         socket.handler = { [weak self] command, args in
