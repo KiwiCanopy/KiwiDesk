@@ -28,14 +28,51 @@ public enum GeometryUtils {
         NSScreen.screens.first?.frame.height ?? 0
     }
 
-    /// A screen's usable area in AX coordinates.
+    /// A screen's usable area in AX coordinates. When the
+    /// menu bar auto-hides, its reserved strip is reclaimed —
+    /// only user-configured gaps remain at the top.
     @MainActor
     public static func axVisibleFrame(
         of screen: NSScreen
     ) -> CGRect {
-        flip(
-            screen.visibleFrame,
-            primaryHeight: primaryHeight
+        var visible = screen.visibleFrame
+        if menuBarAutoHides {
+            visible = reclaimingMenuBar(
+                visible,
+                screen: screen.frame,
+                safeTop: screen.safeAreaInsets.top
+            )
+        }
+        return flip(visible, primaryHeight: primaryHeight)
+    }
+
+    /// True when the macOS menu bar auto-hides on the desktop
+    /// (System Settings > Control Center). visibleFrame keeps
+    /// the menu bar strip reserved even then; windows may use
+    /// it.
+    public static var menuBarAutoHides: Bool {
+        let domain = UserDefaults.standard.persistentDomain(
+            forName: UserDefaults.globalDomain
         )
+        return (domain?["_HIHideMenuBar"] as? NSNumber)?
+            .boolValue ?? false
+    }
+
+    /// Extends a visibleFrame's top edge over the menu bar
+    /// strip (Cocoa coordinates). The notch housing (safeTop)
+    /// stays reserved: WindowServer clamps regular windows
+    /// below it, and fighting that clamp would wobble every
+    /// retile.
+    static func reclaimingMenuBar(
+        _ visible: CGRect,
+        screen frame: CGRect,
+        safeTop: CGFloat
+    ) -> CGRect {
+        var result = visible
+        let top = frame.maxY - safeTop
+        if top > result.maxY {
+            result.size.height += top - result.maxY
+        }
+        return result
     }
 }

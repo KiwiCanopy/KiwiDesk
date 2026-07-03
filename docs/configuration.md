@@ -34,6 +34,13 @@ KiwiDesk.set_gap_global(10)
 KiwiDesk.set_gap_override("browser", 0)
 ```
 
+Tiling respects the menu bar and the Dock. If the menu bar
+is set to auto-hide (System Settings > Control Center), its
+strip is reclaimed automatically and only your configured
+gaps remain at the top. On MacBooks with a notch, the camera
+housing row stays reserved — macOS does not allow regular
+windows there.
+
 Spaces are identified by **strings or numbers** — `1` and
 `"1"` are the same space, `"code"` and `"Code"` are not.
 Monitors never carry a layout themselves: windows live in
