@@ -57,6 +57,9 @@ extension KiwiCore {
                 self?.loadConfig()
             }
             return .ok(.string("reloading"))
+        case "save_profile", "load_profile",
+            "list_profiles", "get_profile_status":
+            return profileCommand(command, args)
         default:
             return layoutCommand(command, args)
         }

@@ -15,7 +15,7 @@ import Carbon.HIToolbox
 // prominently in release notes.
 
 /// Modifier mask for Carbon hotkeys.
-public struct HotkeyModifiers: OptionSet, Sendable {
+public struct HotkeyModifiers: OptionSet, Sendable, Hashable {
     public let rawValue: UInt32
 
     public init(rawValue: UInt32) {

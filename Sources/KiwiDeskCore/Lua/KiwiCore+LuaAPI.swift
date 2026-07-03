@@ -46,7 +46,67 @@ extension KiwiCore {
             }
         }
         registerEventAPI(on: lua)
+        registerKeybindingAPI(on: lua)
         installTypoGuard(on: lua)
+    }
+
+    /// `KiwiDesk.bind`, `define_mode`, and `switch_mode`
+    /// (04_API_Contract §8).
+    private func registerKeybindingAPI(
+        on lua: LuaInterpreter
+    ) {
+        lua.register("bind") { [weak self] args in
+            guard let self,
+                let text = args.first?.stringValue,
+                let combo = KeyCombo.parse(text),
+                case .functionRef(let ref) =
+                    args.dropFirst().first ?? .none
+            else {
+                self?.onLog(
+                    "bind(): expected combo and function"
+                )
+                return .none
+            }
+            self.keys.bind(combo, ref: ref)
+            return .none
+        }
+        lua.register("define_mode") { [weak self] args in
+            guard let self,
+                let name = args.first?.stringValue,
+                case .table(let table) =
+                    args.dropFirst().first ?? .none
+            else {
+                self?.onLog(
+                    "define_mode(): expected name and table"
+                )
+                return .none
+            }
+            var bindings: [KeyCombo: Int32] = [:]
+            for (key, value) in table {
+                guard let combo = KeyCombo.parse(key),
+                    case .functionRef(let ref) = value
+                else {
+                    self.onLog(
+                        "define_mode('\(name)'): bad key "
+                            + "'\(key)'"
+                    )
+                    continue
+                }
+                bindings[combo] = ref
+            }
+            self.keys.defineMode(name, bindings: bindings)
+            return .none
+        }
+        lua.register("switch_mode") { [weak self] args in
+            guard let name = args.first?.stringValue else {
+                self?.onLog(
+                    "switch_mode(): expected mode name"
+                )
+                return .none
+            }
+            self?.keys.switchMode(name)
+            return .none
+        }
     }
 
     /// A metatable on the KiwiDesk table turns typo'd calls

@@ -3,7 +3,7 @@ import ApplicationServices
 import CoreGraphics
 
 /// Tunable tiling parameters (later fed from init.lua).
-public struct TilingSettings: Sendable {
+public struct TilingSettings: Sendable, Equatable, Codable {
     public var gapsGlobal = Gaps()
     /// `gap_override[space_id]` beats the global gaps.
     public var gapsOverride: [SpaceID: Gaps] = [:]

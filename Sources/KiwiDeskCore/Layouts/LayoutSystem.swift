@@ -123,7 +123,7 @@ public struct LayoutContext: Sendable {
 
 // MARK: - Per-mode parameters
 
-public struct BspParams: Sendable, Equatable {
+public struct BspParams: Sendable, Equatable, Codable {
     public enum Strategy: String, Sendable, Codable {
         /// Split the longer side (keeps windows square-ish).
         case shortestSide = "shortest_side"
@@ -137,7 +137,7 @@ public struct BspParams: Sendable, Equatable {
     public init() {}
 }
 
-public struct StackParams: Sendable, Equatable {
+public struct StackParams: Sendable, Equatable, Codable {
     /// Windows 0..<masterCount form the master zone.
     public var masterCount: Int = 1
     /// Width fraction of the master zone.
@@ -146,7 +146,7 @@ public struct StackParams: Sendable, Equatable {
     public init() {}
 }
 
-public struct ScrollingParams: Sendable, Equatable {
+public struct ScrollingParams: Sendable, Equatable, Codable {
     public enum Anchor: String, Sendable, Codable {
         case center
         case left
@@ -161,7 +161,7 @@ public struct ScrollingParams: Sendable, Equatable {
     public init() {}
 }
 
-public struct GridParams: Sendable, Equatable {
+public struct GridParams: Sendable, Equatable, Codable {
     public enum GridType: String, Sendable, Codable {
         case dynamic
         case rigid

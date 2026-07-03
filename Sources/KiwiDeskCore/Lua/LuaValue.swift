@@ -105,14 +105,16 @@ enum LuaBridge {
         at index: Int32,
         depth: Int
     ) -> LuaValue {
-        var array: [LuaValue] = []
+        var numbered: [(key: Double, value: LuaValue)] = []
         var dict: [String: LuaValue] = [:]
         let table = lua_absindex(state, index)
         lua_pushnil(state)
         while lua_next(state, table) != 0 {
             let value = read(state, at: -1, depth: depth + 1)
             if lua_type(state, -2) == SHIM_LUA_TNUMBER {
-                array.append(value)
+                numbered.append(
+                    (shim_lua_tonumber(state, -2), value)
+                )
             } else if lua_type(state, -2) == SHIM_LUA_TSTRING,
                 let key = shim_lua_tostring(state, -2)
             {
@@ -120,8 +122,23 @@ enum LuaBridge {
             }
             shim_lua_pop(state, 1)
         }
-        if dict.isEmpty {
-            return .array(array)
+        numbered.sort { $0.key < $1.key }
+
+        // A pure 1..n sequence is an array; anything else
+        // (sparse like `{ [1]=a, [3]=b }`, or mixed keys)
+        // becomes a table with canonical string keys.
+        let sequential = numbered.enumerated().allSatisfy {
+            $0.element.key == Double($0.offset + 1)
+        }
+        if dict.isEmpty, sequential {
+            return .array(numbered.map(\.value))
+        }
+        for entry in numbered {
+            let key =
+                entry.key == entry.key.rounded()
+                ? String(Int(entry.key))
+                : String(entry.key)
+            dict[key] = entry.value
         }
         return .table(dict)
     }

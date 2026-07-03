@@ -11,7 +11,16 @@ public final class KiwiCore {
     public let tiler = TilingEngine()
     public let sleepWake = SleepWakeManager()
     public let bus = EventBus()
+    public let keys = KeybindingManager()
+    public let profiles: ProfileManager
+    public let crash: CrashRecovery
     public internal(set) var lua: LuaInterpreter?
+
+    /// `monitor_fallback` from init.lua (per-monitor chains).
+    public var monitorFallback: [String: [String]] = [:]
+    /// `space_monitor_map` from init.lua (per-space chains,
+    /// beats per-monitor rules).
+    public var spaceMonitorMap: [SpaceID: [String]] = [:]
 
     /// Log line consumer (GUI console later; syslog now).
     public var onLog: @MainActor (String) -> Void = { message in
@@ -47,6 +56,25 @@ public final class KiwiCore {
                 directory
                 .appendingPathComponent("KiwiDesk.sock").path
         )
+        self.profiles = ProfileManager(
+            directory: directory.appendingPathComponent(
+                "profiles"
+            )
+        )
+        self.crash = CrashRecovery(directory: directory)
+
+        crash.captureState = { [weak self] in
+            self?.state.snapshot()
+        }
+        crash.restoreState = { [weak self] snapshot in
+            self?.restore(snapshot)
+        }
+        crash.onLog = { [weak self] message in
+            self?.onLog(message)
+        }
+        keys.onLog = { [weak self] message in
+            self?.onLog(message)
+        }
 
         socket.handler = { [weak self] command, args in
             self?.execute(command, args: args)
@@ -77,6 +105,7 @@ public final class KiwiCore {
         loadConfig()
         sleepWake.start()
         eventLoop.start()
+        crash.start()
         do {
             try socket.start()
         } catch {
@@ -88,6 +117,7 @@ public final class KiwiCore {
         eventLoop.stop()
         sleepWake.stop()
         socket.stop()
+        crash.shutdownCleanly()
     }
 
     public func retile() {
@@ -101,6 +131,7 @@ public final class KiwiCore {
         switch event {
         case .displaysChanged:
             tiler.displaysChanged()
+            handleMonitorChange()
             emitMonitorChange()
         case .windowFocused(let id):
             emitFocusChange(id)
@@ -122,80 +153,6 @@ public final class KiwiCore {
             else { continue }
             WindowControl.setFrame(record.frame, of: element)
         }
-    }
-
-    // MARK: - Config
-
-    /// Loads (or reloads) init.lua into a fresh VM.
-    public func loadConfig() {
-        bus.resetLuaCallbacks()
-        guard let fresh = LuaInterpreter() else {
-            onLog("failed to create Lua VM")
-            return
-        }
-        lua = fresh
-        bus.lua = fresh
-        registerLuaAPI(on: fresh)
-
-        ensureDefaultConfig()
-        if case .failure(let error) = fresh.runFile(configURL) {
-            onLog("init.lua error: \(error)")
-        }
-        applyConfigGlobals(from: fresh)
-        retile()
-    }
-
-    /// Applies declarative globals after the config ran.
-    private func applyConfigGlobals(from lua: LuaInterpreter) {
-        if case .array(let rules) = lua.global("float_rules") {
-            eventLoop.floatRules = FloatRules(
-                rules.compactMap(\.stringValue)
-            )
-        }
-        if case .table(let rules) = lua.global("app_rules") {
-            var mapped: [String: SpaceID] = [:]
-            for (app, value) in rules {
-                if let space = value.stringValue {
-                    mapped[app] = SpaceID(space)
-                } else if let number = value.intValue {
-                    mapped[app] = SpaceID(number)
-                }
-            }
-            state.appRules = mapped
-        }
-    }
-
-    /// Writes a starter init.lua on first launch.
-    private func ensureDefaultConfig() {
-        let files = FileManager.default
-        guard !files.fileExists(atPath: configURL.path) else {
-            return
-        }
-        try? files.createDirectory(
-            at: configDirectory,
-            withIntermediateDirectories: true
-        )
-        let template = """
-            -- KiwiDesk configuration
-            -- Docs: https://github.com/hajiboy95/KiwiDesk
-
-            KiwiDesk.set_gap_global(10)
-
-            -- Layout per space: bsp | stack | scrolling |
-            -- monocle | grid | floating
-            -- KiwiDesk.set_mode(1, "bsp")
-
-            -- Windows that should never be tiled:
-            -- float_rules = { "Calculator", "Finder:Get Info" }
-
-            -- Send apps to fixed spaces:
-            -- app_rules = { ["Spotify"] = "music" }
-            """
-        try? template.write(
-            to: configURL,
-            atomically: true,
-            encoding: .utf8
-        )
     }
 
     // MARK: - Event emission helpers

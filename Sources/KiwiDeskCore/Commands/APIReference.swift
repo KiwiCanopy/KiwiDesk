@@ -50,6 +50,10 @@ public enum APIReference {
             ("set_drag_drop_zone", "set_drag_drop_zone"),
             ("help", "help"),
             ("list_commands", "help"),
+            ("save_profile", "save_profile"),
+            ("load_profile", "load_profile"),
+            ("list_profiles", "list_profiles"),
+            ("get_profile_status", "get_profile_status"),
         ]
 
     /// Layout sub-APIs exposed as global Lua tables.
