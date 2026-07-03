@@ -53,6 +53,17 @@ public final class EventLoop {
         elements = [:]
     }
 
+    /// AX element of a tracked window, if still known. Used to
+    /// apply geometry (animations, wake restore) to windows.
+    public func element(for id: WindowID) -> AXUIElement? {
+        for perApp in elements.values {
+            if let element = perApp[id] {
+                return element
+            }
+        }
+        return nil
+    }
+
     // MARK: - App tracking
 
     private func registerWorkspaceObservers() {
@@ -65,7 +76,7 @@ public final class EventLoop {
             // Queue .main delivers on the main thread, but the
             // closure is nonisolated and Notification is not
             // Sendable; bridge manually.
-            nonisolated(unsafe) let app = note.runningApplication
+            let app = note.runningApplication
             MainActor.assumeIsolated {
                 guard let app else { return }
                 self?.appLaunched(app)
@@ -77,7 +88,7 @@ public final class EventLoop {
             object: nil,
             queue: .main
         ) { [weak self] note in
-            nonisolated(unsafe) let app = note.runningApplication
+            let app = note.runningApplication
             MainActor.assumeIsolated {
                 guard let app else { return }
                 self?.appTerminated(app)

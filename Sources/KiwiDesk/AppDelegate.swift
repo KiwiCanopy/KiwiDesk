@@ -9,6 +9,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let eventLoop = EventLoop()
     private var state = StateCoordinator()
     private let permissions = PermissionMonitor()
+    private let sleepWake = SleepWakeManager()
     private var statusItem: StatusItemController?
     private var onboardingWindow: NSWindow?
     private let onboardingModel = OnboardingModel()
@@ -23,6 +24,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         eventLoop.onEvent = { [weak self] event in
             self?.state.apply(event)
         }
+
+        sleepWake.captureState = { [weak self] in
+            self?.state.snapshot()
+        }
+        sleepWake.restoreState = { [weak self] snapshot in
+            self?.restore(snapshot)
+        }
+        sleepWake.start()
 
         permissions.onChange = { [weak self] trusted in
             self?.permissionChanged(trusted)
@@ -40,6 +49,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ notification: Notification) {
         eventLoop.stop()
         permissions.stop()
+        sleepWake.stop()
+    }
+
+    /// Re-applies window frames after wake/unlock.
+    private func restore(_ snapshot: StateSnapshot) {
+        for record in snapshot.windows {
+            guard
+                let element = eventLoop.element(
+                    for: record.windowID
+                )
+            else { continue }
+            WindowControl.setFrame(record.frame, of: element)
+        }
     }
 
     // MARK: - Permission transitions

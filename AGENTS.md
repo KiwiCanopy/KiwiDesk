@@ -75,9 +75,13 @@ and (later) the Lua VM.
 
 Keep this list updated whenever a recurring mistake is found.
 
-- **Never disable SIP or ask users to.** Private SkyLight/CGS calls
-  are declared via `@_silgen_name` and must always have a public
-  Accessibility API (`AXUIElement`) fallback.
+- **Never disable SIP or ask users to.** Private SkyLight/CGS
+  symbols are resolved at runtime via `dlsym` (`SkyLight.swift`),
+  never linked with `@_silgen_name` — a linked symbol that
+  disappears in a macOS update would crash the app at launch,
+  while a failed lookup returns nil and the caller falls back to
+  the public Accessibility API (`AXUIElement`). Every private
+  fast path must have such a fallback.
 - **AX calls are slow and can block.** Never call AX APIs inside
   tight loops or layout math; snapshot state first.
 - **Electron/WebKit apps answer AX queries lazily** (100–300 ms).
