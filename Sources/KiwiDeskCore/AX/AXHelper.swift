@@ -70,6 +70,17 @@ public enum AXHelper {
         return list ?? []
     }
 
+    /// The window that currently has focus within an app.
+    public static func focusedWindow(
+        pid: pid_t
+    ) -> AXUIElement? {
+        attribute(
+            appElement(pid: pid),
+            kAXFocusedWindowAttribute,
+            as: AXUIElement.self
+        )
+    }
+
     public static func title(of element: AXUIElement) -> String {
         attribute(element, kAXTitleAttribute, as: String.self)
             ?? ""

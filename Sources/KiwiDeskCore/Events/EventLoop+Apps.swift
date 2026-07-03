@@ -93,6 +93,15 @@ extension EventLoop {
             reconcile(pid: previous, appName: name)
         }
         lastActivePid = pid
+        // Clicking a window of another app only activates the
+        // app: if that window was already its app's focused
+        // window, no kAXFocusedWindowChanged fires. Report the
+        // cross-app focus change ourselves.
+        if let element = AXHelper.focusedWindow(pid: pid),
+            let id = AXHelper.windowID(of: element)
+        {
+            onEvent(.windowFocused(id))
+        }
     }
 
     /// Attaches AX observation to a regular (Dock-visible) app.

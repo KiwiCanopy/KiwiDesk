@@ -147,6 +147,13 @@ public final class KiwiCore {
     // MARK: - Event flow
 
     private func handle(_ event: KiwiEvent) {
+        // Closing or minimizing the focused window must hand
+        // focus to the space's fallback window (state already
+        // picks one; the AX raise below makes it real).
+        var focusLost = false
+        if case .windowDestroyed(let id) = event {
+            focusLost = activeSpace?.focused == id
+        }
         state.apply(event)
         switch event {
         case .displaysChanged:
@@ -167,6 +174,9 @@ public final class KiwiCore {
         }
         if TilingEngine.shouldRetile(after: event) {
             retile()
+        }
+        if focusLost, let next = activeSpace?.focused {
+            focusWindow(next)
         }
     }
 
