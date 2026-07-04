@@ -303,7 +303,7 @@ becomes `layout.bsp.ratio`:
   "name": "Desk One",
   "saved_at": "2026-07-04T12:00:00Z",
   "settings": {
-    "drag": { "drop_zone": true, "ghost": true },
+    "drag": { "show_drop_zone": true, "show_ghost": true },
     "gap": {
       "global": {
         "inner": { "horizontal": 20, "vertical": 20 },

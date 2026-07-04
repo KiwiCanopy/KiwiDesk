@@ -52,8 +52,14 @@ public enum APIReference {
                 "set_wake_restore_delay",
                 "set_wake_restore_delay"
             ),
-            ("set_drag_ghost", "set_drag_ghost"),
-            ("set_drag_drop_zone", "set_drag_drop_zone"),
+            (
+                "set_drag_show_ghost",
+                "set_drag_show_ghost"
+            ),
+            (
+                "set_drag_show_drop_zone",
+                "set_drag_show_drop_zone"
+            ),
             ("help", "help"),
             ("list_commands", "help"),
             ("save_profile", "save_profile"),

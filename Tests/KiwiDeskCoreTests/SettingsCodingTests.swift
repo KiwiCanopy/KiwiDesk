@@ -54,7 +54,12 @@ struct SettingsCodingTests {
         let drag = try #require(
             root["drag"] as? [String: Bool]
         )
-        #expect(drag == ["ghost": true, "drop_zone": true])
+        #expect(
+            drag == [
+                "show_ghost": true,
+                "show_drop_zone": true,
+            ]
+        )
     }
 
     @Test("Round-trip preserves every setting")

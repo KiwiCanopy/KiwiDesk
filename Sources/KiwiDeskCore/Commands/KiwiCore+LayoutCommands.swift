@@ -268,12 +268,12 @@ extension KiwiCore {
                 return .fail("expected milliseconds")
             }
             sleepWake.restoreDelayMS = max(0, ms)
-        case "set_drag_ghost":
+        case "set_drag_show_ghost":
             guard let enabled = args.first?.boolValue else {
                 return .fail("expected boolean")
             }
             tiler.settings.dragShowGhost = enabled
-        case "set_drag_drop_zone":
+        case "set_drag_show_drop_zone":
             guard let enabled = args.first?.boolValue else {
                 return .fail("expected boolean")
             }

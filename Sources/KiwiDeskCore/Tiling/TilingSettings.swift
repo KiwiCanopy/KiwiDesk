@@ -39,8 +39,8 @@ public struct TilingSettings: Sendable, Equatable, Codable {
     }
 
     private enum DragKeys: String, CodingKey {
-        case dropZone = "drop_zone"
-        case ghost
+        case dropZone = "show_drop_zone"
+        case ghost = "show_ghost"
     }
 
     private enum GapKeys: String, CodingKey {
