@@ -61,6 +61,24 @@ public enum SkyLight {
         as: DisplayCurrentSpaceFn.self
     )
 
+    // MARK: - Display suppression
+
+    public typealias DisableUpdateFn =
+        @convention(c) (ConnectionID) -> Int32
+    public typealias ReenableUpdateFn =
+        @convention(c) (ConnectionID) -> Int32
+
+    public static let disableUpdate: DisableUpdateFn? =
+        symbol(
+            "SLSDisableUpdate",
+            as: DisableUpdateFn.self
+        )
+    public static let reenableUpdate: ReenableUpdateFn? =
+        symbol(
+            "SLSReenableUpdate",
+            as: ReenableUpdateFn.self
+        )
+
     /// True when the minimum set of space APIs resolved.
     public static var isAvailable: Bool {
         mainConnection != nil && getActiveSpace != nil
@@ -72,5 +90,23 @@ public enum SkyLight {
         guard let mainConnection else { return nil }
         let cid = mainConnection()
         return cid != 0 ? cid : nil
+    }
+
+    /// Freezes window-server compositing so multiple AX
+    /// frame-sets composite as one visual update. No-op
+    /// when SkyLight symbols didn't resolve.
+    public static func suppressDisplay() {
+        guard let cid = connection,
+            let fn = disableUpdate
+        else { return }
+        _ = fn(cid)
+    }
+
+    /// Resumes compositing after `suppressDisplay()`.
+    public static func resumeDisplay() {
+        guard let cid = connection,
+            let fn = reenableUpdate
+        else { return }
+        _ = fn(cid)
     }
 }

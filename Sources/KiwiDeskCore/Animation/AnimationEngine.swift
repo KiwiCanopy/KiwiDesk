@@ -103,15 +103,31 @@ public final class AnimationEngine {
             animations[display, default: [:]][window] = existing
         } else {
             onAnimationStart(window)
-            heldSize[window] = current.size
+            // Pre-set the target size at the current position
+            // so only position slides. The app resizes once
+            // at its spawn point, then moves smoothly — no
+            // visible halfway size snap.
+            heldSize[window] = target.size
+            apply(
+                window,
+                CGRect(
+                    origin: current.origin,
+                    size: target.size
+                ),
+                true
+            )
             animations[display, default: [:]][window] =
                 FrameAnimation(
-                    from: current,
+                    from: CGRect(
+                        origin: current.origin,
+                        size: target.size
+                    ),
                     to: target,
                     spring: spring
                 )
         }
         startDriver(for: display, screen: screen)
+
     }
 
     /// Stops animating a window, leaving it where it is.
