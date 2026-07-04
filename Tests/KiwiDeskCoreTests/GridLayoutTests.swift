@@ -330,7 +330,10 @@ struct FloatRuleTests {
     func retileFilter() throws {
         #expect(
             TilingEngine.shouldRetile(
-                after: .windowDestroyed(w1)
+                after: .windowDestroyed(
+                    w1,
+                    wasMinimized: false
+                )
             )
         )
         // A healed float verdict changes layout membership.

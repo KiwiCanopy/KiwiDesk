@@ -101,7 +101,9 @@ struct StateCoordinatorTests {
     func windowDestroyed() {
         var state = StateCoordinator()
         state.apply(.windowCreated(makeWindow(1)))
-        state.apply(.windowDestroyed(WindowID(1)))
+        state.apply(
+            .windowDestroyed(WindowID(1), wasMinimized: false)
+        )
         #expect(state.windows.count == 0)
         #expect(
             state.workspaces[SpaceID(1)]?.windows.isEmpty
@@ -194,9 +196,11 @@ struct StateCoordinatorTests {
         var state = StateCoordinator()
         state.apply(.windowCreated(makeWindow(1)))
         state.workspaces.add(WindowID(1), to: SpaceID("mail"))
-        // Native desktop switch / minimize: window vanishes
-        // from AX and is destroyed, then comes back later.
-        state.apply(.windowDestroyed(WindowID(1)))
+        // Native desktop switch: window vanishes from AX and
+        // is destroyed, then comes back later.
+        state.apply(
+            .windowDestroyed(WindowID(1), wasMinimized: false)
+        )
         state.apply(.windowCreated(makeWindow(1)))
         #expect(
             state.workspaces.space(of: WindowID(1))
@@ -210,7 +214,49 @@ struct StateCoordinatorTests {
         state.appRules = ["TestApp": SpaceID("music")]
         state.apply(.windowCreated(makeWindow(1)))
         state.workspaces.add(WindowID(1), to: SpaceID("code"))
-        state.apply(.windowDestroyed(WindowID(1)))
+        state.apply(
+            .windowDestroyed(WindowID(1), wasMinimized: false)
+        )
+        state.apply(.windowCreated(makeWindow(1)))
+        #expect(
+            state.workspaces.space(of: WindowID(1))
+                == SpaceID("code")
+        )
+    }
+
+    @Test("Deminiaturized windows open in the active space")
+    func minimizeForgetsSpace() {
+        var state = StateCoordinator()
+        state.apply(.windowCreated(makeWindow(1)))
+        state.workspaces.add(WindowID(1), to: SpaceID("mail"))
+        // Minimize forgets the space, so restoring from the
+        // Dock lands in whatever space is active by then.
+        state.apply(
+            .windowDestroyed(WindowID(1), wasMinimized: true)
+        )
+        state.workspaces.activate(SpaceID("code"))
+        state.apply(.windowCreated(makeWindow(1)))
+        #expect(
+            state.workspaces.space(of: WindowID(1))
+                == SpaceID("code")
+        )
+    }
+
+    @Test("Minimize clears a space remembered earlier")
+    func minimizeClearsStaleMemory() {
+        var state = StateCoordinator()
+        state.apply(.windowCreated(makeWindow(1)))
+        state.workspaces.add(WindowID(1), to: SpaceID("mail"))
+        // Native desktop round-trip stores a memory...
+        state.apply(
+            .windowDestroyed(WindowID(1), wasMinimized: false)
+        )
+        state.apply(.windowCreated(makeWindow(1)))
+        // ...which a later minimize must invalidate.
+        state.apply(
+            .windowDestroyed(WindowID(1), wasMinimized: true)
+        )
+        state.workspaces.activate(SpaceID("code"))
         state.apply(.windowCreated(makeWindow(1)))
         #expect(
             state.workspaces.space(of: WindowID(1))

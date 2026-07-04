@@ -123,11 +123,16 @@ public final class EventLoop {
     func reconcile(pid: pid_t, appName: String) {
         guard observers[pid] != nil else { return }
         var live: Set<WindowID> = []
+        var minimized: Set<WindowID> = []
         for element in AXHelper.windows(pid: pid) {
             guard let id = AXHelper.windowID(of: element)
             else { continue }
-            // Minimized windows count as gone.
+            // Minimized windows count as gone. Unlike windows
+            // missing from the list entirely (other native
+            // Space), they are flagged so state forgets their
+            // space (see KiwiEvent.windowDestroyed).
             guard !AXHelper.isMinimized(element) else {
+                minimized.insert(id)
                 continue
             }
             live.insert(id)
@@ -141,7 +146,12 @@ public final class EventLoop {
         where !live.contains(id) {
             elements[pid]?[id] = nil
             detectedFloating[id] = nil
-            onEvent(.windowDestroyed(id))
+            onEvent(
+                .windowDestroyed(
+                    id,
+                    wasMinimized: minimized.contains(id)
+                )
+            )
         }
     }
 
@@ -195,7 +205,13 @@ public final class EventLoop {
             {
                 elements[pid]?[id] = nil
                 detectedFloating[id] = nil
-                onEvent(.windowDestroyed(id))
+                onEvent(
+                    .windowDestroyed(
+                        id,
+                        wasMinimized: note
+                            == kAXWindowMiniaturizedNotification
+                    )
+                )
             }
             // Destroyed elements often cannot be mapped back
             // (and some apps skip the notification entirely),

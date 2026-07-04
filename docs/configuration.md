@@ -61,6 +61,12 @@ window (cmd+tab) pulls its space forward automatically. Floating windows —
 including picture-in-picture — are never stashed and stay
 visible across all virtual spaces.
 
+**Minimizing** a window removes it from its space entirely.
+Restoring it from the Dock opens it in the virtual space you
+are on at that moment (an `app_rules` entry for its app still
+wins), just like a new window — it does not pull you back to
+the space it was minimized from.
+
 With **multiple monitors**, arrange your displays so no
 monitor sits directly right of or below another one's
 bottom-right corner, or the parked windows peek onto the

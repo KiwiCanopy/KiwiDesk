@@ -16,9 +16,10 @@ public struct StateCoordinator: Sendable {
 
     /// Last known space per window. Window ids are stable OS
     /// ids, so a "created" window with a remembered space is
-    /// one coming back — from another native macOS Space or
-    /// from the Dock (deminiaturize) — and returns there
-    /// instead of landing in the active space.
+    /// one coming back from another native macOS Space (or a
+    /// session restore) and returns there instead of landing
+    /// in the active space. Minimized windows are deliberately
+    /// forgotten: deminiaturize opens in the active space.
     private var rememberedSpaces: [WindowID: SpaceID] = [:]
 
     public init(defaultSpace: SpaceID = SpaceID(1)) {
@@ -67,8 +68,10 @@ public struct StateCoordinator: Sendable {
                 workspaces.focus(window.id, in: target)
             }
 
-        case .windowDestroyed(let id):
-            if let space = workspaces.space(of: id) {
+        case .windowDestroyed(let id, let wasMinimized):
+            if wasMinimized {
+                rememberedSpaces[id] = nil
+            } else if let space = workspaces.space(of: id) {
                 rememberedSpaces[id] = space
             }
             windows.remove(id)

@@ -85,7 +85,7 @@ extension EventLoop {
         observers[pid] = nil
         for id in elements[pid, default: [:]].keys {
             detectedFloating[id] = nil
-            onEvent(.windowDestroyed(id))
+            onEvent(.windowDestroyed(id, wasMinimized: false))
         }
         elements[pid] = nil
         onEvent(.appTerminated(pid: pid))

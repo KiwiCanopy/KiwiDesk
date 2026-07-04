@@ -190,7 +190,7 @@ public final class KiwiCore {
         // focus to the space's fallback window (state already
         // picks one; the AX raise below makes it real).
         var focusLost = false
-        if case .windowDestroyed(let id) = event {
+        if case .windowDestroyed(let id, _) = event {
             focusLost = activeSpace?.focused == id
         }
         state.apply(event)
@@ -228,7 +228,7 @@ public final class KiwiCore {
             if isResizeGesture(id) {
                 drag.windowMoved(id, frame: frame)
             }
-        case .windowDestroyed(let id):
+        case .windowDestroyed(let id, _):
             drag.cancel(id)
         case .nativeSpaceChanged:
             handleNativeSpaceChange()

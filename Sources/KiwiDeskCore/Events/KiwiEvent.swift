@@ -9,7 +9,12 @@ public enum KiwiEvent: Sendable {
     case appLaunched(pid: pid_t, name: String)
     case appTerminated(pid: pid_t)
     case windowCreated(ManagedWindow)
-    case windowDestroyed(WindowID)
+    /// The window left the layout. `wasMinimized` separates a
+    /// user minimize (forget its space; deminiaturize lands in
+    /// the active space) from closing or vanishing from AX on
+    /// a native Space switch (remember it, so it returns to
+    /// its space when the desktop comes back).
+    case windowDestroyed(WindowID, wasMinimized: Bool)
     case windowMoved(WindowID, CGRect)
     case windowResized(WindowID, CGRect)
     case windowFocused(WindowID)
