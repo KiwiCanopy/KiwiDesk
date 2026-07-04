@@ -170,9 +170,13 @@ struct GridLayoutTests {
 
 @Suite("Monocle and Floating")
 struct SimpleLayoutTests {
-    @Test("Monocle maximizes every window")
+    @Test("Monocle maximizes every window (bar disabled)")
     func monocle() throws {
-        let context = makeContext()
+        // The default-on indicator bar carves its strip out
+        // of the usable area; without it, monocle fills the
+        // whole thing (see MonocleTests for the strip).
+        var context = makeContext()
+        context.monocle.bar.enabled = false
         let frames = MonocleLayout().calculateGeometry(
             for: ids(3),
             in: context

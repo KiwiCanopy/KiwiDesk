@@ -17,6 +17,8 @@ extension KiwiCore {
             response = scrollCommand(command, args)
         } else if command.hasPrefix("grid.") {
             response = gridCommand(command, args)
+        } else if command.hasPrefix("monocle.") {
+            response = monocleCommand(command, args)
         } else if command.hasPrefix("drag.") {
             response = dragCommand(command, args)
         } else {

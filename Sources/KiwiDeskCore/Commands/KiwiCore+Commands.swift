@@ -83,6 +83,20 @@ extension KiwiCore {
         else {
             return .fail("no focused window")
         }
+        // Monocle windows all share one frame, so geometric
+        // neighbor search finds nothing. Directions on the
+        // configured orientation axis cycle the window order
+        // instead; the cross axis falls through.
+        if space.mode == .monocle,
+            let response = monocleCycle(
+                direction,
+                space: space,
+                focused: focused,
+                swapping: swapping
+            )
+        {
+            return response
+        }
         // Navigate the layout's slots, not live AX frames:
         // live frames are stale mid-animation or when an app
         // misses a move notification, and cascaded windows

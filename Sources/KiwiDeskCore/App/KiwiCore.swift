@@ -14,6 +14,7 @@ public final class KiwiCore {
     public let keys = KeybindingManager()
     public let drag = DragCoordinator()
     public let dragOverlay = DragOverlay()
+    public let monocleBar = IndicatorBarOverlay()
     public let mouse = MouseTracker()
     public let profiles: ProfileManager
     public let crash: CrashRecovery
@@ -100,6 +101,9 @@ public final class KiwiCore {
             self?.onLog(message)
         }
         wireDrag()
+        monocleBar.onSelect = { [weak self] id in
+            self?.focusWindow(id)
+        }
         tiler.animation.onAllAnimationsEnded = { [weak self] in
             self?.runPendingStackZOrderRestore()
         }
@@ -168,6 +172,7 @@ public final class KiwiCore {
             animated: animated,
             force: force
         )
+        updateMonocleBar()
     }
 
     // MARK: - Event flow

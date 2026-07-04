@@ -105,6 +105,101 @@ grid.set_split_direction("horizontal")
 grid.set_dimensions(3, 2)          -- rigid: columns, rows
 ```
 
+### Monocle: orientation & indicator bar
+
+Monocle keeps its core promise — one window fills the whole
+usable area, the rest wait behind it — but no longer leaves
+you guessing what is back there: an **indicator bar** lists
+every window in the container, and an **orientation** decides
+which focus axis cycles through them.
+
+```lua
+-- horizontal (default): focus("left"/"right") steps through
+-- the windows, wrapping at the ends; the bar sits on
+-- top/bottom. vertical: focus("up"/"down") cycles; the bar
+-- sits on left/right and stacks the letters vertically
+-- (icon on top). The cross axis keeps its normal directional
+-- behavior (other monitors etc.). swap along the axis
+-- reorders the sequence — the bar is a live map, not a list.
+monocle.set_orientation("horizontal")
+
+-- The bar is on by default; opt out explicitly. A position
+-- that doesn't fit the orientation is logged and falls back
+-- to that orientation's default edge (top / left).
+monocle.set_bar_enabled(true)
+monocle.set_bar_position("top")  -- horizontal: top|bottom
+                                 -- vertical:   left|right
+monocle.set_bar_thickness(32)    -- carved out of the layout,
+                                 -- so bar and window never
+                                 -- overlap or leave the
+                                 -- monitor
+```
+
+Items appear in window order and are always **equal-sized**:
+`item_size` pt along the bar (width on horizontal bars,
+height on vertical ones). Left at `0` (the default), each
+`content` mode gets a sensible standard — a compact square
+for `icon`, wider once text is shown. Whatever the source,
+the size is clamped: at least the icon square (icons never
+clip), at most a quarter of the bar (single items never
+balloon).
+
+Items that don't fit the strip **scroll** instead of
+shrinking: the bar follows the focused window as you cycle,
+and clickable arrows appear over the ends that hide more
+items, each click shifting the bar by one slot. Names
+truncate (ellipsis) only when they genuinely don't fit their
+slot; with `icon_and_name`, only the name shrinks, the icon
+always survives. Clicking an item focuses its window (the
+panel never steals key focus); hovering swaps the item's
+background to the hover color — the already-active item
+ignores clicks and shows no hover.
+
+```lua
+monocle.set_bar_style("pills")     -- pills | segments | underline
+monocle.set_bar_active_style("highlight")  -- highlight | gap
+monocle.set_bar_item_size(0)  -- pt; 0 (default) = standard
+                              -- size per content mode
+monocle.set_bar_item_gap(6)        -- pt between items
+monocle.set_bar_content("icon_and_name")  -- icon | name |
+                                          -- icon_and_name
+monocle.set_bar_font_size(0)   -- 0 (default) = auto: text
+                               -- scales with bar_thickness;
+                               -- any positive value pins it
+monocle.set_bar_corner_radius(8)
+```
+
+- **pills** — rounded floating badges, `item_gap` apart.
+- **segments** — one continuous strip divided into slots
+  (an `item_gap` > 0 inserts separators).
+- **underline** — names on one shared translucent box, the
+  most minimal look.
+- `active_style = "gap"` doesn't highlight the focused
+  window's item — it leaves the slot **empty**, so the hole
+  marks the active window. Works with every style.
+
+Colors take `#RRGGBB` / `#RRGGBBAA` like the drag visuals.
+The defaults are kiwi-themed: cream text in translucent
+shell-brown boxes; the active item turns flesh-green while
+its box stays brown. The **highlight** is one color with a
+style-dependent shape: a ring around the active pill, an
+accent bar on the window-facing edge of the active segment,
+or the underline itself.
+
+```lua
+monocle.set_bar_text_color("#F2EBD9")
+monocle.set_bar_box_color("#8B5E3C66")
+monocle.set_bar_active_text_color("#4E9F3D")
+monocle.set_bar_active_box_color("#8B5E3C66")
+monocle.set_bar_highlight_color("#4E9F3D")
+-- Hover feedback on clickable items: a lighter translucent
+-- green by default, deliberately a shade off the highlight.
+monocle.set_bar_hover_color("#6DBF5B80")
+monocle.set_bar_hover_text_color("#F2EBD9")
+-- The strip behind everything (default fully transparent):
+monocle.set_bar_background_color("#00000000")
+```
+
 ### Where new windows land
 
 Every layout takes the same `new_window_placement` values —
@@ -363,6 +458,11 @@ becomes `layout.bsp.ratio`:
                 "fill_empty_space": true,
                 "split_direction": "horizontal",
                 "new_window_placement": "last" },
+      "monocle": { "orientation": "horizontal",
+                   "bar": { "enabled": true,
+                            "position": "top",
+                            "style": "pills",
+                            "item_size": 0 } },
       "scroll": { "anchor": "center", "width": 800,
                   "new_window_placement": "after_focused" },
       "stack": { "master_count": 1, "master_ratio": 0.6,

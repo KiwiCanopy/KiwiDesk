@@ -4,7 +4,9 @@ import CoreGraphics
 ///
 /// All windows share the same frame; whichever is focused sits
 /// on top, the rest are hidden behind it. No geometry splitting
-/// regardless of window count.
+/// regardless of window count. With the indicator bar enabled,
+/// its strip is carved out of the usable area first, so windows
+/// and bar never overlap and both stay on the monitor.
 public struct MonocleLayout: LayoutSystem {
     public init() {}
 
@@ -12,10 +14,13 @@ public struct MonocleLayout: LayoutSystem {
         for windows: [WindowID],
         in context: LayoutContext
     ) -> [WindowID: CGRect] {
-        let usable = context.usable
+        let frame = context.monocle.windowFrame(
+            in: context.usable,
+            inner: context.gaps.inner
+        )
         var result: [WindowID: CGRect] = [:]
         for window in windows {
-            result[window] = usable
+            result[window] = frame
         }
         return result
     }

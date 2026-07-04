@@ -17,6 +17,7 @@ public struct TilingSettings: Sendable, Equatable, Codable {
     public var stack = StackParams()
     public var scrolling = ScrollingParams()
     public var grid = GridParams()
+    public var monocle = MonocleParams()
     /// `new_window_placement_override[space_id]` beats the
     /// layout's own spawn placement (like the gap override).
     public var placementOverride: [SpaceID: SpawnPlacement] =
@@ -56,6 +57,7 @@ public struct TilingSettings: Sendable, Equatable, Codable {
     private enum LayoutKeys: String, CodingKey {
         case bsp
         case grid
+        case monocle
         case scroll
         case stack
     }
@@ -122,6 +124,11 @@ public struct TilingSettings: Sendable, Equatable, Codable {
                 GridParams.self,
                 forKey: .grid
             ) ?? GridParams()
+        monocle =
+            try layout.decodeIfPresent(
+                MonocleParams.self,
+                forKey: .monocle
+            ) ?? MonocleParams()
         scrolling =
             try layout.decodeIfPresent(
                 ScrollingParams.self,
@@ -185,6 +192,7 @@ public struct TilingSettings: Sendable, Equatable, Codable {
         )
         try layout.encode(bsp, forKey: .bsp)
         try layout.encode(grid, forKey: .grid)
+        try layout.encode(monocle, forKey: .monocle)
         try layout.encode(scrolling, forKey: .scroll)
         try layout.encode(stack, forKey: .stack)
         var drag = container.nestedContainer(
@@ -217,7 +225,8 @@ public struct TilingSettings: Sendable, Equatable, Codable {
             bsp: bsp,
             stack: stack,
             scrolling: scrolling,
-            grid: grid
+            grid: grid,
+            monocle: monocle
         )
     }
 }

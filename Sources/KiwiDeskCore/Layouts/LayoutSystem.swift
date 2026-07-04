@@ -88,6 +88,7 @@ public struct LayoutContext: Sendable {
     public var stack: StackParams
     public var scrolling: ScrollingParams
     public var grid: GridParams
+    public var monocle: MonocleParams
 
     public init(
         bounds: CGRect,
@@ -97,7 +98,8 @@ public struct LayoutContext: Sendable {
         bsp: BspParams = BspParams(),
         stack: StackParams = StackParams(),
         scrolling: ScrollingParams = ScrollingParams(),
-        grid: GridParams = GridParams()
+        grid: GridParams = GridParams(),
+        monocle: MonocleParams = MonocleParams()
     ) {
         self.bounds = bounds
         self.gaps = gaps
@@ -107,6 +109,7 @@ public struct LayoutContext: Sendable {
         self.stack = stack
         self.scrolling = scrolling
         self.grid = grid
+        self.monocle = monocle
     }
 
     /// Screen bounds inset by the per-edge outer gaps.

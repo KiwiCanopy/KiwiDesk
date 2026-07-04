@@ -33,7 +33,7 @@ struct SettingsCodingTests {
         let layout = try object(root["layout"])
         #expect(
             Set(layout.keys) == [
-                "bsp", "grid", "scroll", "stack",
+                "bsp", "grid", "monocle", "scroll", "stack",
             ]
         )
         // Lua `bsp.set_ratio` / `scroll.set_width`.
