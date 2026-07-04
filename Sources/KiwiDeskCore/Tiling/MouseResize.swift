@@ -34,6 +34,59 @@ public enum MouseResize {
             || abs(frame.height - slot.height) > threshold
     }
 
+    /// Drops size changes made by dragging an OUTER edge —
+    /// one with no neighbor slot on the far side. There is
+    /// nobody to trade space with there: the window would
+    /// snap back to its slot origin and the freed area would
+    /// reappear on the OPPOSITE side, growing neighbors the
+    /// user never dragged. Returns the frame with such axis
+    /// changes reverted to the slot's size.
+    public static func keepingInnerEdgeChanges(
+        slot: CGRect,
+        frame: CGRect,
+        neighbors: [CGRect]
+    ) -> CGRect {
+        var result = frame
+        let movedLeft =
+            abs(frame.minX - slot.minX) > threshold
+        let movedRight =
+            abs(frame.maxX - slot.maxX) > threshold
+        if movedLeft || movedRight {
+            let ok =
+                (movedLeft
+                    && neighbors.contains {
+                        $0.midX < slot.minX
+                    })
+                || (movedRight
+                    && neighbors.contains {
+                        $0.midX > slot.maxX
+                    })
+            if !ok {
+                result.size.width = slot.width
+            }
+        }
+        // AX coordinates: minY is the top edge.
+        let movedTop =
+            abs(frame.minY - slot.minY) > threshold
+        let movedBottom =
+            abs(frame.maxY - slot.maxY) > threshold
+        if movedTop || movedBottom {
+            let ok =
+                (movedTop
+                    && neighbors.contains {
+                        $0.midY < slot.minY
+                    })
+                || (movedBottom
+                    && neighbors.contains {
+                        $0.midY > slot.maxY
+                    })
+            if !ok {
+                result.size.height = slot.height
+            }
+        }
+        return result
+    }
+
     /// Whether a point sits in the band around a rect's
     /// border — where resize drags start (the resize cursor
     /// zone extends a few points to both sides of the edge).

@@ -30,12 +30,32 @@ extension KiwiCore {
         if let slot = slots[id],
             MouseResize.isResize(from: slot, to: frame)
         {
-            handleResizeEnd(
-                id,
-                slot: slot,
-                frame: frame,
-                in: space
-            )
+            // Only edges shared with a neighbor trade space;
+            // pulling an outer (screen-side) edge snaps back
+            // instead of growing windows on the far side.
+            let effective =
+                MouseResize.keepingInnerEdgeChanges(
+                    slot: slot,
+                    frame: frame,
+                    neighbors:
+                        slots
+                        .filter { $0.key != id }
+                        .map(\.value)
+                )
+            if MouseResize.isResize(
+                from: slot,
+                to: effective
+            ) {
+                handleResizeEnd(
+                    id,
+                    slot: slot,
+                    frame: effective,
+                    in: space
+                )
+            } else {
+                retile()
+                focusWindow(id)
+            }
             return
         }
         let center = CGPoint(x: frame.midX, y: frame.midY)

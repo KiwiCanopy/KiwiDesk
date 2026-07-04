@@ -121,6 +121,10 @@ you release. If you flick faster than a (slow) app resizes
 its window and release mid-motion, only the distance the
 window managed to follow is applied.
 
+Only edges **shared with a neighbor** trade space — pulling
+a window's outer, screen-side edge has nobody to trade with
+and snaps back.
+
 ### When windows run out of space
 
 No layout ever shrinks a window below `min_window_size`.
