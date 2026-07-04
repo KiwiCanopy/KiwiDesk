@@ -99,6 +99,23 @@ grid.set_split_direction("horizontal")
 grid.set_dimensions(3, 2)          -- rigid: columns, rows
 ```
 
+### Mouse resizing
+
+Resizing a tiled window with the mouse adjusts the layout the
+same way the `resize` command does, applied when you release:
+neighbors give or take the space. What changes depends on the
+layout — Master/Stack maps width changes to the master ratio
+(pull the stack wider and the master shrinks), BSP steers its
+split ratio toward the dragged side, Scrolling adjusts the
+column width. Axes a layout has no parameter for (stack
+heights, grid, monocle) animate back into place. Floating
+windows resize freely.
+
+```lua
+-- "layout" (default) or "snap_back" (always revert):
+KiwiDesk.set_mouse_resize("snap_back")
+```
+
 ### When windows run out of space
 
 No layout ever shrinks a window below `min_window_size`.

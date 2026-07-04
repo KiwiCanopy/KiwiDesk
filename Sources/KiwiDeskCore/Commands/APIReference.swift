@@ -42,6 +42,7 @@ public enum APIReference {
                 "set_animation_duration"
             ),
             ("set_space_animation", "set_space_animation"),
+            ("set_mouse_resize", "set_mouse_resize"),
             ("enable_wake_restore", "enable_wake_restore"),
             (
                 "set_wake_restore_delay",

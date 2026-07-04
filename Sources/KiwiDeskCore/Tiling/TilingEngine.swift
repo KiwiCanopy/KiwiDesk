@@ -56,6 +56,10 @@ public final class TilingEngine {
     /// stutters on slow AX responders (Electron/WebKit).
     public var animateSpaceSwitch = false
 
+    /// `set_mouse_resize`: what resizing a tiled window with
+    /// the mouse does (applied on release).
+    public var mouseResize: MouseResizeMode = .layout
+
     /// Applies frames off the main thread with frame-dropping
     /// and per-app EnhancedUserInterface toggling.
     private let applier = FrameApplier()

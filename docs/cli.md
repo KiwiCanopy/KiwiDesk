@@ -37,6 +37,7 @@ KiwiDesk service restart
 | Launch | `pull_or_spawn` | app name |
 | | `spawn_new` | app name |
 | System | `set_mode` | [space,] mode |
+| | `set_mouse_resize` | `layout\|snap_back` |
 | | `set_gap_global` | size |
 | | `set_gap_override` | space, size |
 | | `get_state` | — |

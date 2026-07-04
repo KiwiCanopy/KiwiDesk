@@ -169,6 +169,18 @@ struct CommandTests {
             args: [.bool(true)]
         )
         #expect(core.tiler.animateSpaceSwitch)
+        #expect(core.tiler.mouseResize == .layout)
+        core.execute(
+            "set_mouse_resize",
+            args: [.string("snap_back")]
+        )
+        #expect(core.tiler.mouseResize == .snapBack)
+        #expect(
+            !core.execute(
+                "set_mouse_resize",
+                args: [.string("bogus")]
+            ).isSuccess
+        )
     }
 
     @Test("Navigation uses layout slots, not live AX frames")

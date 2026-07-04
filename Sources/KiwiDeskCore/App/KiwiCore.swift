@@ -214,6 +214,14 @@ public final class KiwiCore {
             pendingFocusFollow?.cancel()
         case .windowMoved(let id, let frame):
             drag.windowMoved(id, frame: frame)
+        case .windowResized(let id, let frame):
+            // Resize gestures share the drag pipeline (same
+            // settle debounce). Only mouse-driven resizes
+            // count; apps resizing themselves are corrected
+            // by the next retile.
+            if NSEvent.pressedMouseButtons & 1 == 1 {
+                drag.windowMoved(id, frame: frame)
+            }
         case .windowDestroyed(let id):
             drag.cancel(id)
         case .nativeSpaceChanged:

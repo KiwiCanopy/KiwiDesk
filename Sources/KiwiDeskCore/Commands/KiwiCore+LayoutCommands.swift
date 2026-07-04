@@ -291,6 +291,13 @@ extension KiwiCore {
                 return .fail("expected boolean")
             }
             tiler.animateSpaceSwitch = enabled
+        case "set_mouse_resize":
+            guard let raw = args.first?.stringValue,
+                let mode = MouseResizeMode(rawValue: raw)
+            else {
+                return .fail("expected layout|snap_back")
+            }
+            tiler.mouseResize = mode
         case "enable_wake_restore":
             guard let enabled = args.first?.boolValue else {
                 return .fail("expected boolean")
