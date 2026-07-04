@@ -97,6 +97,16 @@ no trailing period. Body (optional) explains the why, wrapped at
 
 Keep this list updated whenever a recurring mistake is found.
 
+- **One vocabulary across Lua and profile JSON.** A profile
+  JSON key is the Lua command name with the `set_` verb
+  stripped, snake_case, grouped by namespace:
+  `set_gap_override` → `gap.override`, `bsp.set_ratio` →
+  `layout.bsp.ratio`, `stack.set_master_ratio` →
+  `layout.stack.master_ratio`. Groups are singular (`gap`,
+  `layout`, `drag`); never invent synonyms or plurals. When
+  adding a setting, pick the Lua name first and derive the
+  JSON key from it via `CodingKeys` (Swift property names may
+  differ internally). `SettingsCodingTests` pins this shape.
 - **Never disable SIP or ask users to.** Private SkyLight/CGS
   symbols are resolved at runtime via `dlsym` (`SkyLight.swift`),
   never linked with `@_silgen_name` — a linked symbol that

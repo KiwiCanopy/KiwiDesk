@@ -263,7 +263,7 @@ struct StackLayoutTests {
     @Test("StackParams decodes profiles missing new fields")
     func decodeOldProfile() throws {
         // A profile saved before overflowStyle existed.
-        let old = #"{"masterCount":2,"masterRatio":0.7}"#
+        let old = #"{"master_count":2,"master_ratio":0.7}"#
         let params = try JSONDecoder().decode(
             StackParams.self,
             from: Data(old.utf8)

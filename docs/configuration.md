@@ -289,6 +289,53 @@ the exact same monitors; failing that, one saved for the same
 *number* of monitors; failing that, it keeps a transient state
 and flags the profile as dirty.
 
+Profiles live as JSON files in `~/.config/kiwidesk/profiles/`
+and are meant to be readable (and hand-editable — reload with
+`load_profile`). Keys mirror the Lua API: the command name
+with the `set_` verb stripped, grouped by namespace —
+`set_gap_override` becomes `gap.override`, `bsp.set_ratio`
+becomes `layout.bsp.ratio`:
+
+```jsonc
+{
+  "fingerprints": ["Built-in Retina Display:1728x1117"],
+  "monitor_count": 1,
+  "name": "Desk One",
+  "saved_at": "2026-07-04T12:00:00Z",
+  "settings": {
+    "drag": { "drop_zone": true, "ghost": true },
+    "gap": {
+      "global": {
+        "inner": { "horizontal": 20, "vertical": 20 },
+        "outer": {
+          "top": 20, "bottom": 20, "left": 20, "right": 20
+        }
+      },
+      "override": {}              // per space id
+    },
+    "layout": {
+      "bsp": {
+        "new_window_placement": "after_focused",
+        "ratio": 0.5,
+        "strategy": "shortest_side"
+      },
+      "grid": { "columns": 3, "rows": 2, "type": "dynamic",
+                "fill_empty_space": true,
+                "split_direction": "horizontal",
+                "new_window_placement": "last" },
+      "scroll": { "anchor": "center", "width": 800,
+                  "new_window_placement": "after_focused" },
+      "stack": { "master_count": 1, "master_ratio": 0.6,
+                 "overflow_style": "cascade_overflow",
+                 "new_window_placement": "first" }
+    },
+    "min_window_size": 300,
+    "new_window_placement_override": {}  // per space id
+  },
+  "space_modes": { "1": "stack", "2": "bsp" }
+}
+```
+
 Fallback chains for disconnects (per-space beats per-monitor):
 
 ```lua

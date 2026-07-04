@@ -13,6 +13,15 @@ public struct Profile: Codable, Sendable, Equatable {
     public var settings: TilingSettings
     public var savedAt: Date
 
+    private enum CodingKeys: String, CodingKey {
+        case name
+        case fingerprints
+        case monitorCount = "monitor_count"
+        case spaceModes = "space_modes"
+        case settings
+        case savedAt = "saved_at"
+    }
+
     public init(
         name: String,
         fingerprints: [String],

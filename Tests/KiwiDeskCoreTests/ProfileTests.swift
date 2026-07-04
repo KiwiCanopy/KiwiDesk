@@ -24,7 +24,10 @@ private func makeProfile(
         fingerprints: fingerprints,
         monitorCount: fingerprints.count,
         spaceModes: modes,
-        settings: TilingSettings()
+        settings: TilingSettings(),
+        // Whole seconds: profile files store ISO-8601 dates,
+        // which drop sub-second precision.
+        savedAt: Date(timeIntervalSince1970: 1_780_000_000)
     )
 }
 

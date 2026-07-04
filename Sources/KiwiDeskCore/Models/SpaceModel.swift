@@ -34,6 +34,51 @@ public struct SpaceID: Hashable, Sendable, Codable,
     }
 
     public var description: String { raw }
+
+    // MARK: - Codable
+
+    /// Encodes as its bare string ("1", "mail") — never as a
+    /// keyed `{"raw": ...}` object — so ids read naturally in
+    /// profile JSON. Decoding accepts strings and integers
+    /// (hand-edited files may write `1` for `"1"`).
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let number = try? container.decode(Int.self) {
+            self.init(number)
+        } else {
+            self.init(try container.decode(String.self))
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(raw)
+    }
+}
+
+/// Dictionaries keyed by SpaceID serialize as JSON objects
+/// (`{"2": ...}`) instead of flattened key/value arrays.
+extension SpaceID: CodingKeyRepresentable {
+    struct RawKey: CodingKey {
+        let stringValue: String
+        var intValue: Int? { Int(stringValue) }
+
+        init?(stringValue: String) {
+            self.stringValue = stringValue
+        }
+
+        init?(intValue: Int) {
+            self.stringValue = String(intValue)
+        }
+    }
+
+    public var codingKey: CodingKey {
+        RawKey(stringValue: raw)!
+    }
+
+    public init?(codingKey: some CodingKey) {
+        self.init(codingKey.stringValue)
+    }
 }
 
 /// The layout algorithm applied to a space.

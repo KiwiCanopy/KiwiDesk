@@ -44,6 +44,8 @@ public final class ProfileManager {
         encoder.outputFormatting = [
             .prettyPrinted, .sortedKeys,
         ]
+        // Human-readable timestamps in the profile files.
+        encoder.dateEncodingStrategy = .iso8601
         try encoder.encode(profile).write(
             to: url(for: profile.name),
             options: .atomic
@@ -62,7 +64,9 @@ public final class ProfileManager {
     /// Reads a profile without touching current/dirty state.
     private func read(name: String) throws -> Profile {
         let data = try Data(contentsOf: url(for: name))
-        return try JSONDecoder().decode(
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode(
             Profile.self,
             from: data
         )
