@@ -92,6 +92,24 @@ no trailing period. Body (optional) explains the why, wrapped at
 - Install hooks once per clone: `./scripts/install-hooks.sh`.
 - Fetch and install workspace subagents and skills:
   `./scripts/install-subagents.sh`.
+
+### Subagent delegation (AI agents)
+
+When subagents are available, spin them off proactively — no
+need to wait for the user to ask — but only where the payoff is
+clear. A subagent starts with zero conversation context, so
+delegate work that does not depend on it:
+
+- **Broad fan-out searches** across many files or naming
+  conventions where only the conclusion matters (`Explore`).
+- **Independent review passes** on a finished, substantial
+  change (`code-reviewer`, `architect-reviewer`).
+- **Parallel, isolated implementation work** (e.g. in a separate
+  worktree) that would otherwise serialize.
+
+Stay inline for anything small, sequential, or dependent on
+conversation context: a cold agent re-deriving what the session
+already knows costs more than it saves.
 - CI (`.github/workflows/ci.yml`) builds, lints, and tests on every
   push and on PRs targeting `main`. A red build blocks merging.
 
