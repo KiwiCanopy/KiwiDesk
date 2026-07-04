@@ -5,6 +5,73 @@ import Testing
 
 @Suite("KeyCombo parsing")
 struct KeyComboTests {
+    @Test("comboString emits Mac words and round-trips")
+    func comboStringRoundTrip() throws {
+        let text = try #require(
+            KeyCombo.comboString(
+                keyCode: 15,
+                command: false,
+                option: true,
+                control: true,
+                shift: false
+            )
+        )
+        #expect(text == "control+option+r")
+        let parsed = try #require(KeyCombo.parse(text))
+        #expect(parsed.modifiers == [.control, .option])
+        #expect(parsed.keyCode == 15)
+    }
+
+    @Test("word aliases for punctuation keys parse")
+    func punctuationAliases() throws {
+        let combo = try #require(
+            KeyCombo.parse("ctrl+alt+cmd+semicolon")
+        )
+        #expect(combo.keyCode == 41)
+        #expect(
+            combo.modifiers == [.control, .option, .command]
+        )
+        #expect(KeyCombo.parse("cmd+comma")?.keyCode == 43)
+        #expect(KeyCombo.parse("alt+period")?.keyCode == 47)
+        // The symbol form still works and matches the word.
+        #expect(
+            KeyCombo.parse("cmd+;")?.keyCode
+                == KeyCombo.parse("cmd+semicolon")?.keyCode
+        )
+        // Display prefers the readable word form.
+        #expect(
+            KeyCombo.comboString(
+                keyCode: 41,
+                command: true,
+                option: false,
+                control: false,
+                shift: false
+            ) == "command+semicolon"
+        )
+    }
+
+    @Test("comboString names disambiguate aliased codes")
+    func comboStringNames() {
+        #expect(
+            KeyCombo.comboString(
+                keyCode: 53,
+                command: false,
+                option: false,
+                control: false,
+                shift: false
+            ) == "escape"
+        )
+        #expect(
+            KeyCombo.comboString(
+                keyCode: 36,
+                command: true,
+                option: false,
+                control: false,
+                shift: false
+            ) == "command+return"
+        )
+    }
+
     @Test("Parses modifiers and key names")
     func parsing() throws {
         let combo = try #require(

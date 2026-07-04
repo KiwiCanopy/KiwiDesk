@@ -44,6 +44,50 @@ public struct KeyCombo: Hashable, Sendable {
         )
     }
 
+    /// Formats a captured key event into a combo string using
+    /// the words printed on Apple keyboards
+    /// (`"control+option+r"`) so users can read exactly what a
+    /// binding is. `parse` round-trips it and also accepts the
+    /// short aliases (ctrl / alt / cmd) in hand-written configs.
+    /// Returns nil for key codes with no known name (so the
+    /// recorder can reject them). Modifier order follows ⌃⌥⇧⌘.
+    ///
+    /// Carbon hotkeys can't tell left from right modifiers
+    /// (that needs an event tap + Input Monitoring, which
+    /// KiwiDesk avoids), so the two sides are intentionally
+    /// unified here.
+    public static func comboString(
+        keyCode: UInt32,
+        command: Bool,
+        option: Bool,
+        control: Bool,
+        shift: Bool
+    ) -> String? {
+        guard let key = keyName(for: keyCode) else { return nil }
+        var parts: [String] = []
+        if control { parts.append("control") }
+        if option { parts.append("option") }
+        if shift { parts.append("shift") }
+        if command { parts.append("command") }
+        parts.append(key)
+        return parts.joined(separator: "+")
+    }
+
+    /// The canonical name for a key code (reverse of
+    /// `keyCodes`). Codes that carry both a symbol and a word
+    /// alias resolve to the readable word form for display.
+    static func keyName(for code: UInt32) -> String? {
+        let overrides: [UInt32: String] = [
+            36: "return", 51: "delete", 53: "escape",
+            41: "semicolon", 43: "comma", 47: "period",
+            44: "slash", 42: "backslash", 39: "quote",
+            50: "grave", 27: "minus", 24: "equal",
+            30: "rightbracket", 33: "leftbracket",
+        ]
+        if let name = overrides[code] { return name }
+        return keyCodes.first { $0.value == code }?.key
+    }
+
     /// US-layout virtual key codes (Carbon kVK_*).
     static let keyCodes: [String: UInt32] = [
         "a": 0, "s": 1, "d": 2, "f": 3, "h": 4, "g": 5,
@@ -55,6 +99,13 @@ public struct KeyCombo: Hashable, Sendable {
         "[": 33, "i": 34, "p": 35, "l": 37, "j": 38,
         "'": 39, "k": 40, ";": 41, "\\": 42, ",": 43,
         "/": 44, "n": 45, "m": 46, ".": 47, "`": 50,
+        // Word aliases for punctuation (skhd / AeroSpace
+        // convention); the symbol forms above still work.
+        "semicolon": 41, "comma": 43, "period": 47,
+        "slash": 44, "backslash": 42, "quote": 39,
+        "apostrophe": 39, "grave": 50, "backtick": 50,
+        "minus": 27, "equal": 24, "leftbracket": 33,
+        "rightbracket": 30,
         "return": 36, "enter": 36, "tab": 48, "space": 49,
         "delete": 51, "backspace": 51, "escape": 53,
         "esc": 53, "left": 123, "right": 124, "down": 125,

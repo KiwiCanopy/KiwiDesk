@@ -33,6 +33,8 @@ extension KiwiCore {
             return setMode(args)
         case "set_gap_global", "set_gap_override":
             return setGaps(command, args)
+        case "set_min_window_size":
+            return setMinWindowSize(args)
         case "help", "list_commands":
             return .ok(
                 .array(
@@ -294,27 +296,4 @@ extension KiwiCore {
         return .ok()
     }
 
-    private func setGaps(
-        _ command: String,
-        _ args: [JSONValue]
-    ) -> CommandResponse {
-        if command == "set_gap_global" {
-            guard let size = args.first?.numberValue else {
-                return .fail("expected gap size")
-            }
-            tiler.settings.gapsGlobal = .uniform(
-                CGFloat(size)
-            )
-        } else {
-            guard let space = args.first?.stringValue,
-                let size = args.dropFirst().first?.numberValue
-            else {
-                return .fail("expected space id and size")
-            }
-            tiler.settings.gapsOverride[SpaceID(space)] =
-                .uniform(CGFloat(size))
-        }
-        retile()
-        return .ok()
-    }
 }

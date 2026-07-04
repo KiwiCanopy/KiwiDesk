@@ -12,13 +12,29 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: StatusItemController?
     private var onboardingWindow: NSWindow?
     private let onboardingModel = OnboardingModel()
+    private lazy var dashboard = SettingsWindowController(
+        core: core
+    )
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let statusItem = StatusItemController()
         statusItem.onOpenSettings = {
             PermissionMonitor.openSystemSettings()
         }
+        statusItem.onOpenDashboard = { [weak self] in
+            self?.dashboard.show()
+        }
         self.statusItem = statusItem
+
+        // Reflect the active keybinding mode on the menu bar
+        // icon (custom modes carry their own indicator).
+        core.keys.onModeChange = { [weak self] mode in
+            let icon =
+                mode == KeybindingManager.defaultMode
+                ? nil
+                : self?.core.keys.icon(for: mode)
+            self?.statusItem?.setModeIcon(icon)
+        }
 
         permissions.onChange = { [weak self] trusted in
             self?.permissionChanged(trusted)

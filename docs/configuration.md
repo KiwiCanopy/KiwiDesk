@@ -18,6 +18,35 @@ Two safety rails apply to all Lua code:
   times out is **disabled** and logged; everything else keeps
   working until the next `reload_config`.
 
+## The Settings app and the managed block
+
+You can edit everything below from the menu bar **Settings…**
+window instead of by hand. When you save, the app rewrites a
+delimited region of `init.lua`:
+
+```lua
+-- >>> KiwiDesk managed block (edit in the app, not by hand) >>>
+KiwiDesk.set_gap_global(10)
+-- ...generated settings, modes, and keybindings...
+-- <<< KiwiDesk managed block <<<
+```
+
+Anything you write **outside** that region is preserved across
+saves. If the app finds custom Lua it can't represent with its
+visual controls, it opens the integrated Lua editor for the
+whole file instead of risking your code. From there you can keep
+editing raw Lua, or click **Adopt into the GUI** to import your
+current gaps, layouts, and rules into a fresh managed block —
+your previous file is kept verbatim as a commented backup, and
+keybindings (which can't be recovered from executed Lua) are
+re-added from the Keybindings tab. The editor's own
+state (keybinding actions, mode icons) is mirrored to
+`~/.config/KiwiDesk/gui.json`; delete that file to reset the
+GUI to what `init.lua` currently declares. Custom keybinding
+Lua is stored there and runs on reload, so treat `gui.json`
+with the same trust as `init.lua` — don't import one from an
+untrusted source.
+
 ## Layouts & Gaps
 
 ```lua
@@ -32,6 +61,17 @@ KiwiDesk.set_mode("music", "floating")
 KiwiDesk.set_gap_global(10)
 -- ...or per space (0 = fullscreen feel):
 KiwiDesk.set_gap_override("browser", 0)
+
+-- Per-edge control: pass a table instead of a number.
+-- Missing keys default to 10. Both setters accept it.
+KiwiDesk.set_gap_global({
+    top = 4, bottom = 8, left = 12, right = 12,
+    inner_horizontal = 6, inner_vertical = 6,
+})
+
+-- Windows below this width or height fall back to the
+-- Overlap Stack instead of shrinking further (pt).
+KiwiDesk.set_min_window_size(300)
 ```
 
 Tiling respects the menu bar and the Dock. If the menu bar
@@ -379,13 +419,22 @@ KiwiDesk.bind("cmd+alt+f", function()
 end)
 ```
 
-Modifiers: `cmd`, `alt`/`opt`, `ctrl`, `shift`. Keys: letters,
-digits, `left/right/up/down`, `space`, `return`, `tab`,
-`escape`, `f1`–`f12`, and common punctuation.
+Modifiers: `cmd`/`command`, `alt`/`opt`/`option`,
+`ctrl`/`control`, `shift`. Keys: letters, digits,
+`left/right/up/down`, `space`, `return`, `tab`, `escape`,
+`f1`–`f12`, and punctuation. Punctuation accepts both the
+symbol and a word name, so `";"` and `"semicolon"` are the
+same key — likewise `comma`/`,`, `period`/`.`, `slash`/`/`,
+`backslash`/`\`, `minus`/`-`, `equal`/`=`,
+`leftbracket`/`[`, `rightbracket`/`]`, `grave`/`` ` ``,
+`quote`/`'`. The Settings app's shortcut recorder writes the
+long forms (`command`, `option`, `semicolon`, …) for
+readability; every alias round-trips.
 
 Hotkeys use the Carbon API: macOS filters them before they
 reach any app, and KiwiDesk never needs the Input Monitoring
-permission.
+permission. Left and right modifiers are treated as the same
+key (Carbon can't distinguish them without Input Monitoring).
 
 ### Modal modes
 
@@ -403,6 +452,17 @@ KiwiDesk.define_mode("resize", {
 KiwiDesk.bind("ctrl+alt+r", function()
     KiwiDesk.switch_mode("resize")
 end)
+```
+
+An optional third argument sets a menu bar indicator for the
+mode — an SF Symbol name or a flat emoji. While the mode is
+active, the KiwiDesk status item swaps to it:
+
+```lua
+KiwiDesk.define_mode("resize", { --[[ bindings ]] },
+    { icon = "arrow.left.and.right" })
+KiwiDesk.define_mode("service", { --[[ bindings ]] },
+    { icon = "⚙️" })
 ```
 
 ## Events

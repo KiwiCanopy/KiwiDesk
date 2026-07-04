@@ -30,6 +30,9 @@ public final class KeybindingManager {
 
     public private(set) var currentMode = defaultMode
     private var modes: [String: [KeyCombo: Int32]] = [:]
+    /// Menu bar indicator per mode (SF Symbol name or emoji),
+    /// set via `define_mode(name, bindings, { icon = ... })`.
+    private var modeIcons: [String: String] = [:]
     private var activeIDs: [UInt32] = []
     private let registrar: HotkeyRegistrar
 
@@ -56,15 +59,26 @@ public final class KeybindingManager {
         }
     }
 
-    /// `KiwiDesk.define_mode(name, { key = fn, ... })`.
+    /// `KiwiDesk.define_mode(name, { key = fn, ... }, opts)`.
     public func defineMode(
         _ name: String,
-        bindings: [KeyCombo: Int32]
+        bindings: [KeyCombo: Int32],
+        icon: String? = nil
     ) {
         modes[name] = bindings
+        if let icon, !icon.isEmpty {
+            modeIcons[name] = icon
+        } else {
+            modeIcons[name] = nil
+        }
         if currentMode == name {
             activate(name)
         }
+    }
+
+    /// The menu bar indicator for a mode, if one was set.
+    public func icon(for mode: String) -> String? {
+        modeIcons[mode]
     }
 
     /// `KiwiDesk.switch_mode(name)`.
@@ -90,6 +104,7 @@ public final class KeybindingManager {
             }
         }
         modes = [:]
+        modeIcons = [:]
         currentMode = Self.defaultMode
     }
 

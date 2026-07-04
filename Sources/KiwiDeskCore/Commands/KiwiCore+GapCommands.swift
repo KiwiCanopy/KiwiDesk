@@ -1,0 +1,71 @@
+import CoreGraphics
+import Foundation
+
+/// Gap and minimum-size setters. Both accept the values the
+/// GUI's Layouts & Gaps tab produces (see 05_GUI_Concept §3).
+extension KiwiCore {
+    func setGaps(
+        _ command: String,
+        _ args: [JSONValue]
+    ) -> CommandResponse {
+        if command == "set_gap_global" {
+            guard let gaps = Self.parseGaps(args.first) else {
+                return .fail("expected gap size or table")
+            }
+            tiler.settings.gapsGlobal = gaps
+        } else {
+            guard let space = args.first?.stringValue,
+                let gaps = Self.parseGaps(
+                    args.dropFirst().first
+                )
+            else {
+                return .fail("expected space id and size")
+            }
+            tiler.settings.gapsOverride[SpaceID(space)] = gaps
+        }
+        retile()
+        return .ok()
+    }
+
+    /// A gap argument is either a single number (uniform) or a
+    /// table with any of `top`/`bottom`/`left`/`right` (outer)
+    /// and `inner_horizontal`/`inner_vertical`. Missing keys
+    /// keep the uniform default of 10 pt.
+    static func parseGaps(_ value: JSONValue?) -> Gaps? {
+        if let size = value?.numberValue {
+            return .uniform(CGFloat(size))
+        }
+        guard case .object(let table)? = value else {
+            return nil
+        }
+        func read(_ key: String, _ fallback: CGFloat) -> CGFloat {
+            guard let number = table[key]?.numberValue else {
+                return fallback
+            }
+            return CGFloat(number)
+        }
+        return Gaps(
+            outer: Gaps.Outer(
+                top: read("top", 10),
+                bottom: read("bottom", 10),
+                left: read("left", 10),
+                right: read("right", 10)
+            ),
+            inner: Gaps.Inner(
+                horizontal: read("inner_horizontal", 10),
+                vertical: read("inner_vertical", 10)
+            )
+        )
+    }
+
+    func setMinWindowSize(
+        _ args: [JSONValue]
+    ) -> CommandResponse {
+        guard let size = args.first?.numberValue else {
+            return .fail("expected size")
+        }
+        tiler.settings.minWindowSize = CGFloat(size)
+        retile()
+        return .ok()
+    }
+}
