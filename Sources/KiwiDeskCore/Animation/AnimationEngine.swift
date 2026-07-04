@@ -86,7 +86,8 @@ public final class AnimationEngine {
         window: WindowID,
         on screen: NSScreen,
         from current: CGRect,
-        to target: CGRect
+        to target: CGRect,
+        isNewWindow: Bool = false
     ) {
         guard isEnabled else {
             cancel(window: window)
@@ -103,31 +104,40 @@ public final class AnimationEngine {
             animations[display, default: [:]][window] = existing
         } else {
             onAnimationStart(window)
-            // Pre-set the target size at the current position
-            // so only position slides. The app resizes once
-            // at its spawn point, then moves smoothly — no
-            // visible halfway size snap.
-            heldSize[window] = target.size
-            apply(
-                window,
-                CGRect(
-                    origin: current.origin,
-                    size: target.size
-                ),
-                true
-            )
-            animations[display, default: [:]][window] =
-                FrameAnimation(
-                    from: CGRect(
+            if isNewWindow {
+                // Pre-set the target size at the current position
+                // so only position slides. The app resizes once
+                // at its spawn point, then moves smoothly — no
+                // visible halfway size snap.
+                heldSize[window] = target.size
+                apply(
+                    window,
+                    CGRect(
                         origin: current.origin,
                         size: target.size
                     ),
-                    to: target,
-                    spring: spring
+                    true
                 )
+                animations[display, default: [:]][window] =
+                    FrameAnimation(
+                        from: CGRect(
+                            origin: current.origin,
+                            size: target.size
+                        ),
+                        to: target,
+                        spring: spring
+                    )
+            } else {
+                heldSize[window] = current.size
+                animations[display, default: [:]][window] =
+                    FrameAnimation(
+                        from: current,
+                        to: target,
+                        spring: spring
+                    )
+            }
         }
         startDriver(for: display, screen: screen)
-
     }
 
     /// Stops animating a window, leaving it where it is.
@@ -239,18 +249,24 @@ public final class AnimationEngine {
                 // halfway, then switch to the target size. For
                 // pure moves the sizes match and no resize is
                 // ever emitted.
+                //
+                // For pure resizes (no movement), we animate the
+                // size smoothly on every tick to prevent the window
+                // from staying static and suddenly jumping.
                 let size =
-                    animation.pastHalfway
-                    ? animation.targetFrame.size
-                    : heldSize[id]
-                        ?? Self.rounded(animation.frame).size
+                    animation.isPureResize
+                    ? animation.frame.size
+                    : (animation.pastHalfway
+                        ? animation.targetFrame.size
+                        : heldSize[id]
+                            ?? Self.rounded(animation.frame).size)
                 let setSize = size != heldSize[id]
                 heldSize[id] = size
                 let frame = CGRect(
                     x: animation.frame.origin.x.rounded(),
                     y: animation.frame.origin.y.rounded(),
-                    width: size.width,
-                    height: size.height
+                    width: size.width.rounded(),
+                    height: size.height.rounded()
                 )
                 if setSize || lastApplied[id] != frame {
                     lastApplied[id] = frame

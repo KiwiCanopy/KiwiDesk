@@ -106,7 +106,8 @@ public final class TilingEngine {
     public func retile(
         state: StateCoordinator,
         animated: Bool = true,
-        force: Bool = false
+        force: Bool = false,
+        newlyCreatedWindow: WindowID? = nil
     ) {
         guard
             let screen = NSScreen.main
@@ -130,7 +131,8 @@ public final class TilingEngine {
                     window: id,
                     on: screen,
                     from: current,
-                    to: target
+                    to: target,
+                    isNewWindow: id == newlyCreatedWindow
                 )
             } else {
                 animation.cancel(window: id)

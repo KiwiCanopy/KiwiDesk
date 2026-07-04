@@ -168,12 +168,14 @@ public final class KiwiCore {
 
     public func retile(
         animated: Bool = true,
-        force: Bool = false
+        force: Bool = false,
+        newlyCreatedWindow: WindowID? = nil
     ) {
         tiler.retile(
             state: state,
             animated: animated,
-            force: force
+            force: force,
+            newlyCreatedWindow: newlyCreatedWindow
         )
         updateMonocleBar()
     }
@@ -197,6 +199,7 @@ public final class KiwiCore {
         ]
         state.spawnOverride = tiler.settings.placementOverride
         state.apply(event)
+        var newlyCreatedWindow: WindowID? = nil
         switch event {
         case .displaysChanged:
             tiler.displaysChanged()
@@ -217,10 +220,11 @@ public final class KiwiCore {
             } else if activeSpace?.mode.isFocusDriven == true {
                 retile()
             }
-        case .windowCreated:
+        case .windowCreated(let window):
             // A brand-new window supersedes a pending follow
             // of a hidden window (see above).
             pendingFocusFollow?.cancel()
+            newlyCreatedWindow = window.id
         case .windowMoved(let id, let frame):
             drag.windowMoved(id, frame: frame)
         case .windowResized(let id, let frame):
@@ -240,7 +244,7 @@ public final class KiwiCore {
             break
         }
         if TilingEngine.shouldRetile(after: event) {
-            retile()
+            retile(newlyCreatedWindow: newlyCreatedWindow)
         }
         // Only raise windows the app still lists: after a
         // native Space switch the fallback may live on the
