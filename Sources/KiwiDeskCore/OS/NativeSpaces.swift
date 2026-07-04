@@ -103,9 +103,18 @@ public enum NativeSpaces {
             .map { $0 + 1 }
     }
 
+    #if DEBUG
+        public static nonisolated(unsafe) var activeSpaceNumberOverride: Int?
+    #endif
+
     /// Mission Control number of the active space, or nil
     /// without SkyLight (callers treat that as single-space).
     public static func activeSpaceNumber() -> Int? {
+        #if DEBUG
+            if let override = activeSpaceNumberOverride {
+                return override
+            }
+        #endif
         guard let id = activeSpaceID() else { return nil }
         return number(of: id, in: allSpaces())
     }

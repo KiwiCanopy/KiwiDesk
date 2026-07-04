@@ -89,10 +89,28 @@ extension KiwiCore {
         let displays = state.workspaces.allDisplays
         guard !displays.isEmpty else { return }
         let fingerprints = displays.map(\.fingerprint)
-        if let matched = profiles.match(
-            fingerprints: fingerprints,
-            count: displays.count
-        ) {
+
+        let targetProfile: Profile?
+        if let number = NativeSpaces.activeSpaceNumber(),
+            let boundName = nativeSpaceBindings[number]
+        {
+            do {
+                targetProfile = try profiles.load(name: boundName)
+            } catch {
+                onLog(
+                    "monitor change: cannot load bound profile "
+                        + "'\(boundName)': \(error)"
+                )
+                targetProfile = nil
+            }
+        } else {
+            targetProfile = profiles.match(
+                fingerprints: fingerprints,
+                count: displays.count
+            )
+        }
+
+        if let matched = targetProfile {
             if matched.name != profiles.currentName {
                 apply(profile: matched)
                 profiles.adopt(matched)
@@ -100,6 +118,11 @@ extension KiwiCore {
                     "monitor change: loaded profile "
                         + "'\(matched.name)'"
                 )
+            }
+            if Set(matched.fingerprints) != Set(fingerprints)
+                || matched.monitorCount != displays.count
+            {
+                profiles.markDirty()
             }
         } else {
             profiles.markDirty()

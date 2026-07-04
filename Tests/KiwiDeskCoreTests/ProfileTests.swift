@@ -173,6 +173,49 @@ struct ProfileCommandTests {
                 ])
         )
     }
+
+    @Test("handleMonitorChange respects space bindings")
+    func monitorChangeRespectsBindings() {
+        let core = makeCore()
+
+        let p1 = Profile(
+            name: "Desk One",
+            fingerprints: ["A:1x1"],
+            monitorCount: 1,
+            spaceModes: ["1": .stack],
+            settings: TilingSettings()
+        )
+        let p2 = Profile(
+            name: "Desk Two",
+            fingerprints: ["A:1x1"],
+            monitorCount: 1,
+            spaceModes: ["1": .grid],
+            settings: TilingSettings()
+        )
+        try? core.profiles.save(p1)
+        try? core.profiles.save(p2)
+
+        core.execute(
+            "bind_profile_to_native_space",
+            args: [.number(2), .string("Desk Two")]
+        )
+
+        NativeSpaces.activeSpaceNumberOverride = 2
+        defer {
+            NativeSpaces.activeSpaceNumberOverride = nil
+        }
+
+        let display = Display(
+            id: DisplayID(1),
+            name: "Display A",
+            frame: CGRect(x: 0, y: 0, width: 1, height: 1)
+        )
+        core.state.workspaces.upsertDisplay(display)
+
+        core.handleMonitorChange()
+
+        #expect(core.profiles.currentName == "Desk Two")
+    }
 }
 
 @Suite("Monitor fallback resolution")
