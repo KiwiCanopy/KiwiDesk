@@ -10,17 +10,23 @@ import Foundation
 /// are filtered out via `isAnimating`.
 @MainActor
 public final class DragCoordinator {
-    /// Fired once per finished drag with the final frame.
-    public var onDragEnd: @MainActor (WindowID, CGRect) -> Void =
-        { _, _ in }
+    /// Fired once per finished drag with the frame at the
+    /// gesture's start and the final frame. The start frame
+    /// tells a move (same size) from a resize (size changed)
+    /// — the window's real size, not its slot, because apps
+    /// with size constraints never match their slot exactly.
+    public var onDragEnd:
+        @MainActor (WindowID, _ start: CGRect, _ end: CGRect)
+            -> Void = { _, _, _ in }
 
     /// Fired for every user-driven move while the button is
     /// down — live feedback (drag ghost / drop zone), not
     /// debounced. Trailing AX events after the release only
-    /// reach onDragEnd.
+    /// reach onDragEnd. Same (start, current) frame pair as
+    /// onDragEnd.
     public var onDragMove:
-        @MainActor (WindowID, CGRect) ->
-            Void = { _, _ in }
+        @MainActor (WindowID, _ start: CGRect, _ frame: CGRect)
+            -> Void = { _, _, _ in }
 
     /// Filters out our own animation-driven move events.
     public var isAnimating: @MainActor (WindowID) -> Bool = {
@@ -43,6 +49,8 @@ public final class DragCoordinator {
 
     private var pending: [WindowID: Task<Void, Never>] = [:]
     private var latestFrames: [WindowID: CGRect] = [:]
+    /// First frame of the gesture in flight, per window.
+    private var startFrames: [WindowID: CGRect] = [:]
 
     public init() {}
 
@@ -54,11 +62,14 @@ public final class DragCoordinator {
             pending[id]?.cancel()
             pending[id] = nil
             latestFrames[id] = nil
+            startFrames[id] = nil
             return
         }
         latestFrames[id] = frame
+        let start = startFrames[id] ?? frame
+        startFrames[id] = start
         if isMousePressed() {
-            onDragMove(id, frame)
+            onDragMove(id, start, frame)
         }
         schedule(id, after: settleDelay)
     }
@@ -81,6 +92,7 @@ public final class DragCoordinator {
         pending[id]?.cancel()
         pending[id] = nil
         latestFrames[id] = nil
+        startFrames[id] = nil
     }
 
     private func settle(_ id: WindowID) {
@@ -89,8 +101,13 @@ public final class DragCoordinator {
             schedule(id, after: releasePollDelay)
             return
         }
-        guard let frame = latestFrames[id] else { return }
+        guard let frame = latestFrames[id] else {
+            startFrames[id] = nil
+            return
+        }
+        let start = startFrames[id] ?? frame
         latestFrames[id] = nil
-        onDragEnd(id, frame)
+        startFrames[id] = nil
+        onDragEnd(id, start, frame)
     }
 }

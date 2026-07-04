@@ -12,9 +12,9 @@ struct DragCoordinatorTests {
     func debounce() async throws {
         let drag = DragCoordinator()
         drag.settleDelay = 0.05
-        var ended: [(WindowID, CGRect)] = []
-        drag.onDragEnd = { id, frame in
-            ended.append((id, frame))
+        var ended: [(WindowID, CGRect, CGRect)] = []
+        drag.onDragEnd = { id, start, frame in
+            ended.append((id, start, frame))
         }
         let id = WindowID(1)
         for x in 1...3 {
@@ -37,7 +37,10 @@ struct DragCoordinatorTests {
         // Grace window so a wrong second fire would show up.
         try await Task.sleep(nanoseconds: 100_000_000)
         #expect(ended.count == 1)
-        #expect(ended.first?.1.minX == 300)
+        // The end frame is the last move, the start frame the
+        // first one of the gesture.
+        #expect(ended.first?.2.minX == 300)
+        #expect(ended.first?.1.minX == 100)
     }
 
     @Test("Animation-driven moves never count as drags")
@@ -46,7 +49,7 @@ struct DragCoordinatorTests {
         drag.settleDelay = 0.05
         drag.isAnimating = { _ in true }
         var ended = 0
-        drag.onDragEnd = { _, _ in ended += 1 }
+        drag.onDragEnd = { _, _, _ in ended += 1 }
         drag.windowMoved(WindowID(1), frame: .zero)
         try await Task.sleep(nanoseconds: 150_000_000)
         #expect(ended == 0)
@@ -57,7 +60,7 @@ struct DragCoordinatorTests {
         let drag = DragCoordinator()
         drag.settleDelay = 0.05
         var ended = 0
-        drag.onDragEnd = { _, _ in ended += 1 }
+        drag.onDragEnd = { _, _, _ in ended += 1 }
         drag.windowMoved(WindowID(1), frame: .zero)
         drag.cancel(WindowID(1))
         try await Task.sleep(nanoseconds: 150_000_000)
@@ -70,7 +73,7 @@ struct DragCoordinatorTests {
         var pressed = true
         drag.isMousePressed = { pressed }
         var moves: [CGRect] = []
-        drag.onDragMove = { _, frame in
+        drag.onDragMove = { _, _, frame in
             moves.append(frame)
         }
         let frame = CGRect(x: 50, y: 0, width: 10, height: 10)
@@ -88,7 +91,7 @@ struct DragCoordinatorTests {
         drag.isAnimating = { _ in true }
         drag.isMousePressed = { true }
         var moves = 0
-        drag.onDragMove = { _, _ in moves += 1 }
+        drag.onDragMove = { _, _, _ in moves += 1 }
         drag.windowMoved(WindowID(1), frame: .zero)
         #expect(moves == 0)
     }
@@ -101,7 +104,7 @@ struct DragCoordinatorTests {
         var pressed = true
         drag.isMousePressed = { pressed }
         var ended: [CGRect] = []
-        drag.onDragEnd = { _, frame in
+        drag.onDragEnd = { _, _, frame in
             ended.append(frame)
         }
         let frame = CGRect(x: 500, y: 0, width: 10, height: 10)
@@ -156,9 +159,21 @@ struct DragDropTests {
         let slots = core.tiler.calculatedFrames(
             state: core.state
         )
+        let home = try #require(slots[WindowID(1)])
         let targetSlot = try #require(slots[WindowID(2)])
 
-        core.handleDragEnd(WindowID(1), frame: targetSlot)
+        // Same size as at gesture start (a move), centered
+        // over the other window's slot.
+        var frame = home
+        frame.origin = CGPoint(
+            x: targetSlot.midX - home.width / 2,
+            y: targetSlot.midY - home.height / 2
+        )
+        core.handleDragEnd(
+            WindowID(1),
+            start: home,
+            frame: frame
+        )
         #expect(
             core.state.workspaces[SpaceID(1)]?.windows
                 == [WindowID(2), WindowID(1)]
@@ -174,14 +189,16 @@ struct DragDropTests {
         addWindow(core, 1)
         addWindow(core, 2)
 
+        let nowhere = CGRect(
+            x: -9000,
+            y: -9000,
+            width: 100,
+            height: 100
+        )
         core.handleDragEnd(
             WindowID(1),
-            frame: CGRect(
-                x: -9000,
-                y: -9000,
-                width: 100,
-                height: 100
-            )
+            start: nowhere.offsetBy(dx: 500, dy: 500),
+            frame: nowhere
         )
         #expect(
             core.state.workspaces[SpaceID(1)]?.windows
@@ -208,7 +225,11 @@ struct DragDropTests {
             x: targetSlot.midX - home.width / 2,
             y: targetSlot.midY - home.height / 2
         )
-        core.handleDragMove(WindowID(1), frame: frame)
+        core.handleDragMove(
+            WindowID(1),
+            start: home,
+            frame: frame
+        )
         #expect(core.dragOverlay.isGhostVisible)
         #expect(core.dragOverlay.isDropZoneVisible)
 
@@ -216,13 +237,18 @@ struct DragDropTests {
         // (home slot) stays.
         core.handleDragMove(
             WindowID(1),
+            start: home,
             frame: frame.offsetBy(dx: -9000, dy: -9000)
         )
         #expect(core.dragOverlay.isGhostVisible)
         #expect(!core.dragOverlay.isDropZoneVisible)
 
         // The drop hides everything.
-        core.handleDragEnd(WindowID(1), frame: frame)
+        core.handleDragEnd(
+            WindowID(1),
+            start: home,
+            frame: frame
+        )
         #expect(!core.dragOverlay.isGhostVisible)
         #expect(!core.dragOverlay.isDropZoneVisible)
     }
@@ -240,7 +266,11 @@ struct DragDropTests {
         )
         let targetSlot = try #require(slots[WindowID(2)])
 
-        core.handleDragMove(WindowID(1), frame: targetSlot)
+        core.handleDragMove(
+            WindowID(1),
+            start: targetSlot,
+            frame: targetSlot
+        )
         #expect(!core.dragOverlay.isGhostVisible)
         #expect(!core.dragOverlay.isDropZoneVisible)
     }
@@ -254,12 +284,55 @@ struct DragDropTests {
         let slots = core.tiler.calculatedFrames(
             state: core.state
         )
-        var frame = try #require(slots[WindowID(1)])
+        let start = try #require(slots[WindowID(1)])
+        var frame = start
         frame.size.width += 120
 
-        core.handleDragMove(WindowID(1), frame: frame)
+        core.handleDragMove(
+            WindowID(1),
+            start: start,
+            frame: frame
+        )
         #expect(!core.dragOverlay.isGhostVisible)
         #expect(!core.dragOverlay.isDropZoneVisible)
+    }
+
+    @Test(
+        """
+        A moved window that never matched its slot's size \
+        still swaps (no false resize)
+        """
+    )
+    func constrainedWindowMoveIsNotAResize() throws {
+        guard NSScreen.main != nil else { return }
+        let core = makeCore()
+        addWindow(core, 1)
+        addWindow(core, 2)
+        let slots = core.tiler.calculatedFrames(
+            state: core.state
+        )
+        let home = try #require(slots[WindowID(1)])
+        let targetSlot = try #require(slots[WindowID(2)])
+
+        // The app refused the slot size (min size): the real
+        // frame is bigger than the slot for the whole
+        // gesture, but its size never CHANGES — a move.
+        var start = home
+        start.size.height += 80
+        var frame = start
+        frame.origin = CGPoint(
+            x: targetSlot.midX - frame.width / 2,
+            y: targetSlot.midY - frame.height / 2
+        )
+        core.handleDragEnd(
+            WindowID(1),
+            start: start,
+            frame: frame
+        )
+        #expect(
+            core.state.workspaces[SpaceID(1)]?.windows
+                == [WindowID(2), WindowID(1)]
+        )
     }
 }
 
@@ -405,5 +478,76 @@ struct DragTargetTests {
                 slots: slots
             ) == nil
         )
+    }
+
+    @Test(
+        """
+        Overlapping cascade slots resolve to the visible \
+        strip's owner, not dictionary order
+        """
+    )
+    func cascadeOverlap() {
+        // A stack overflow cascade: same column, each slot 40
+        // lower than the previous, all 100 tall — so slot n's
+        // visible part is the 40-point strip under its top.
+        let cascade: [WindowID: CGRect] = [
+            WindowID(2): CGRect(
+                x: 0,
+                y: 0,
+                width: 100,
+                height: 100
+            ),
+            WindowID(3): CGRect(
+                x: 0,
+                y: 40,
+                width: 100,
+                height: 100
+            ),
+            WindowID(4): CGRect(
+                x: 0,
+                y: 80,
+                width: 100,
+                height: 100
+            ),
+        ]
+        func target(centerY: CGFloat) -> WindowID? {
+            DragTarget.swapTarget(
+                of: WindowID(1),
+                frame: CGRect(
+                    x: 30,
+                    y: centerY - 20,
+                    width: 40,
+                    height: 40
+                ),
+                slots: cascade
+            )
+        }
+        // Inside the top window's exposed strip.
+        #expect(target(centerY: 20) == WindowID(2))
+        // Two slots contain this point; the middle window's
+        // strip is the visible one.
+        #expect(target(centerY: 60) == WindowID(3))
+        // All three contain this point; the last window is
+        // raised on top of the whole cascade.
+        #expect(target(centerY: 90) == WindowID(4))
+    }
+
+    @Test("Identical slots pick a deterministic target")
+    func identicalSlots() {
+        let rect = CGRect(x: 0, y: 0, width: 100, height: 100)
+        let same: [WindowID: CGRect] = [
+            WindowID(2): rect,
+            WindowID(3): rect,
+        ]
+        let frame = CGRect(x: 30, y: 30, width: 40, height: 40)
+        for _ in 0..<10 {
+            #expect(
+                DragTarget.swapTarget(
+                    of: WindowID(1),
+                    frame: frame,
+                    slots: same
+                ) == WindowID(3)
+            )
+        }
     }
 }

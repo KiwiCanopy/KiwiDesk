@@ -13,8 +13,19 @@ enum DragTarget {
         slots: [WindowID: CGRect]
     ) -> WindowID? {
         let center = CGPoint(x: frame.midX, y: frame.midY)
-        return slots.first { entry in
+        let hits = slots.filter { entry in
             entry.key != id && entry.value.contains(center)
+        }
+        // Slots can overlap (stack overflow cascade). The hit
+        // slot with the lowest top edge is the one visually
+        // under the point: cascade windows sit progressively
+        // lower and are raised on top of the previous ones,
+        // so each slot's visible part is the strip between
+        // its top edge and the next slot's. Ties (identical
+        // slots) break by id, never by dictionary order.
+        return hits.max { a, b in
+            (a.value.minY, a.key.raw)
+                < (b.value.minY, b.key.raw)
         }?.key
     }
 }
@@ -33,11 +44,11 @@ extension KiwiCore {
             return self.tiler.animation.isAnimating(window: id)
                 || self.tiler.didRecentlySetFrame(id)
         }
-        drag.onDragMove = { [weak self] id, frame in
-            self?.handleDragMove(id, frame: frame)
+        drag.onDragMove = { [weak self] id, start, frame in
+            self?.handleDragMove(id, start: start, frame: frame)
         }
-        drag.onDragEnd = { [weak self] id, frame in
-            self?.handleDragEnd(id, frame: frame)
+        drag.onDragEnd = { [weak self] id, start, frame in
+            self?.handleDragEnd(id, start: start, frame: frame)
         }
         drag.isMousePressed = {
             NSEvent.pressedMouseButtons & 1 == 1
@@ -48,7 +59,11 @@ extension KiwiCore {
     /// outline over the window's own slot and a highlight
     /// over the slot a drop would swap with (settings toggle
     /// each visual individually).
-    func handleDragMove(_ id: WindowID, frame: CGRect) {
+    func handleDragMove(
+        _ id: WindowID,
+        start: CGRect,
+        frame: CGRect
+    ) {
         let settings = tiler.settings
         guard
             settings.dragGhost.enabled
@@ -67,8 +82,12 @@ extension KiwiCore {
             return
         }
         // A resize gesture adjusts the layout in place; slot
-        // previews would only mislead.
-        if MouseResize.isResize(from: slot, to: frame) {
+        // previews would only mislead. Compared against the
+        // gesture's START frame, never the slot: a window
+        // that can't shrink to its slot (min sizes, character
+        // grids) differs from it permanently, which would
+        // turn every plain move into a "resize".
+        if MouseResize.isResize(from: start, to: frame) {
             dragOverlay.hideAll()
             return
         }
@@ -101,9 +120,19 @@ extension KiwiCore {
     /// Drop over another window's layout slot: the two windows
     /// swap positions and everything readjusts. Drop anywhere
     /// else: the window snaps back to its own slot. A drop
-    /// that changed the window's SIZE is a resize gesture and
-    /// adjusts the layout instead (see handleResizeEnd).
-    func handleDragEnd(_ id: WindowID, frame: CGRect) {
+    /// that changed the window's SIZE during the gesture is a
+    /// resize gesture and adjusts the layout instead (see
+    /// handleResizeEnd). Move vs resize is judged against the
+    /// gesture's start frame, never the slot: a window that
+    /// can't match its slot's size (min sizes, character
+    /// grids — every overflow-cascade window whose app can't
+    /// shrink that far) differs from it permanently, and slot
+    /// comparison would turn every plain move into a resize.
+    func handleDragEnd(
+        _ id: WindowID,
+        start: CGRect,
+        frame: CGRect
+    ) {
         dragOverlay.hideAll()
         guard let space = activeSpace,
             space.mode != .floating,
@@ -122,15 +151,17 @@ extension KiwiCore {
         }
 
         let slots = tiler.calculatedFrames(state: state)
-        if let slot = slots[id],
-            MouseResize.isResize(from: slot, to: frame)
+        if slots[id] != nil,
+            MouseResize.isResize(from: start, to: frame)
         {
             // Only edges shared with a neighbor trade space;
             // pulling an outer (screen-side) edge snaps back
             // instead of growing windows on the far side.
+            // All deltas are measured from the start frame
+            // (where the window really was), not the slot.
             let effective =
                 MouseResize.keepingInnerEdgeChanges(
-                    slot: slot,
+                    slot: start,
                     frame: frame,
                     neighbors:
                         slots
@@ -138,12 +169,12 @@ extension KiwiCore {
                         .map(\.value)
                 )
             if MouseResize.isResize(
-                from: slot,
+                from: start,
                 to: effective
             ) {
                 handleResizeEnd(
                     id,
-                    slot: slot,
+                    slot: start,
                     frame: effective,
                     in: space
                 )
