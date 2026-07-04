@@ -16,6 +16,16 @@ extension KiwiCore {
             state.windows[id]?.isFloating == false
         else { return }
 
+        // The last AX event of a fast drag lags the real
+        // drop; read the frame fresh instead of trusting it.
+        var frame = frame
+        if let element = eventLoop.element(for: id) {
+            let live = AXHelper.frame(of: element)
+            if live != .zero {
+                frame = live
+            }
+        }
+
         let slots = tiler.calculatedFrames(state: state)
         if let slot = slots[id],
             MouseResize.isResize(from: slot, to: frame)
@@ -53,6 +63,29 @@ extension KiwiCore {
         if crossedZones {
             scheduleStackZOrderRestore()
         }
+    }
+
+    /// Whether a resized event belongs to a mouse gesture:
+    /// the button is still down, or it is the trailing AX
+    /// event of a fast resize — released moments ago, with
+    /// the press having started near the window's slot edge
+    /// (where resize drags begin; app-initiated resizes like
+    /// a zoom button don't match).
+    func isResizeGesture(_ id: WindowID) -> Bool {
+        if NSEvent.pressedMouseButtons & 1 == 1 {
+            return true
+        }
+        guard let press = mouse.press,
+            let up = press.upAt,
+            Date().timeIntervalSince(up) < 1,
+            let slot = tiler.calculatedFrames(
+                state: state
+            )[id]
+        else { return false }
+        return MouseResize.nearEdge(
+            press.location,
+            of: slot
+        )
     }
 
     /// Mouse resize of a tiled window, applied on release:

@@ -116,6 +116,11 @@ windows resize freely.
 KiwiDesk.set_mouse_resize("snap_back")
 ```
 
+The layout follows the size the window actually reached when
+you release. If you flick faster than a (slow) app resizes
+its window and release mid-motion, only the distance the
+window managed to follow is applied.
+
 ### When windows run out of space
 
 No layout ever shrinks a window below `min_window_size`.

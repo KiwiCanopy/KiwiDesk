@@ -28,6 +28,12 @@ public enum GeometryUtils {
         NSScreen.screens.first?.frame.height ?? 0
     }
 
+    /// Flips a screen point between Cocoa and AX coordinates.
+    @MainActor
+    public static func axPoint(_ point: CGPoint) -> CGPoint {
+        CGPoint(x: point.x, y: primaryHeight - point.y)
+    }
+
     /// A screen's usable area in AX coordinates. When the
     /// menu bar auto-hides, its reserved strip is reclaimed —
     /// only user-configured gaps remain at the top.

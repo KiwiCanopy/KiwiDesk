@@ -34,6 +34,26 @@ public enum MouseResize {
             || abs(frame.height - slot.height) > threshold
     }
 
+    /// Whether a point sits in the band around a rect's
+    /// border — where resize drags start (the resize cursor
+    /// zone extends a few points to both sides of the edge).
+    public static func nearEdge(
+        _ point: CGPoint,
+        of rect: CGRect,
+        tolerance: CGFloat = 10
+    ) -> Bool {
+        let outer = rect.insetBy(
+            dx: -tolerance,
+            dy: -tolerance
+        )
+        let inner = rect.insetBy(
+            dx: tolerance,
+            dy: tolerance
+        )
+        return outer.contains(point)
+            && !inner.contains(point)
+    }
+
     /// The layout change a resize gesture asks for, or nil
     /// when the layout has no parameter for that axis (the
     /// window snaps back).

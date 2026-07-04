@@ -13,6 +13,7 @@ public final class KiwiCore {
     public let bus = EventBus()
     public let keys = KeybindingManager()
     public let drag = DragCoordinator()
+    public let mouse = MouseTracker()
     public let profiles: ProfileManager
     public let crash: CrashRecovery
     public internal(set) var lua: LuaInterpreter?
@@ -109,6 +110,9 @@ public final class KiwiCore {
         drag.onDragEnd = { [weak self] id, frame in
             self?.handleDragEnd(id, frame: frame)
         }
+        drag.isMousePressed = {
+            NSEvent.pressedMouseButtons & 1 == 1
+        }
         tiler.animation.onAllAnimationsEnded = { [weak self] in
             self?.runPendingStackZOrderRestore()
         }
@@ -143,6 +147,7 @@ public final class KiwiCore {
         loadConfig()
         sleepWake.start()
         eventLoop.start()
+        mouse.start()
         // The event loop discovered windows in AX order; put
         // back the arrangement of the previous session.
         if let session = crash.consumeSession() {
@@ -160,6 +165,7 @@ public final class KiwiCore {
 
     public func stop() {
         pendingFocusFollow?.cancel()
+        mouse.stop()
         eventLoop.stop()
         sleepWake.stop()
         socket.stop()
@@ -219,7 +225,7 @@ public final class KiwiCore {
             // settle debounce). Only mouse-driven resizes
             // count; apps resizing themselves are corrected
             // by the next retile.
-            if NSEvent.pressedMouseButtons & 1 == 1 {
+            if isResizeGesture(id) {
                 drag.windowMoved(id, frame: frame)
             }
         case .windowDestroyed(let id):

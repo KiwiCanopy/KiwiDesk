@@ -63,6 +63,30 @@ struct DragCoordinatorTests {
         try await Task.sleep(nanoseconds: 150_000_000)
         #expect(ended == 0)
     }
+
+    @Test("No settle while the mouse button is held")
+    func waitsForRelease() async throws {
+        let drag = DragCoordinator()
+        drag.settleDelay = 0.05
+        drag.releasePollDelay = 0.02
+        var pressed = true
+        drag.isMousePressed = { pressed }
+        var ended: [CGRect] = []
+        drag.onDragEnd = { _, frame in
+            ended.append(frame)
+        }
+        let frame = CGRect(x: 500, y: 0, width: 10, height: 10)
+        drag.windowMoved(WindowID(1), frame: frame)
+        // Standing still with the button down is not a drop.
+        try await Task.sleep(nanoseconds: 150_000_000)
+        #expect(ended.isEmpty)
+        pressed = false
+        let deadline = ContinuousClock.now + .seconds(5)
+        while ended.isEmpty, ContinuousClock.now < deadline {
+            try await Task.sleep(nanoseconds: 20_000_000)
+        }
+        #expect(ended == [frame])
+    }
 }
 
 @Suite("Drag drop resolution", .serialized)

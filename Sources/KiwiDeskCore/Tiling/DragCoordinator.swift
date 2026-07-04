@@ -19,8 +19,19 @@ public final class DragCoordinator {
         _ in false
     }
 
+    /// Whether the user still holds the mouse button. A
+    /// gesture can only end after the release: fast drags
+    /// stop emitting AX moves long before the drop, and
+    /// standing still mid-drag is not a drop either.
+    /// Injected to keep this type AppKit-free and testable.
+    public var isMousePressed: @MainActor () -> Bool = {
+        false
+    }
+
     /// Quiet time after the last move event (seconds).
     public var settleDelay: TimeInterval = 0.35
+    /// Recheck interval while waiting for the release.
+    public var releasePollDelay: TimeInterval = 0.1
 
     private var pending: [WindowID: Task<Void, Never>] = [:]
     private var latestFrames: [WindowID: CGRect] = [:]
@@ -38,8 +49,14 @@ public final class DragCoordinator {
             return
         }
         latestFrames[id] = frame
+        schedule(id, after: settleDelay)
+    }
+
+    private func schedule(
+        _ id: WindowID,
+        after delay: TimeInterval
+    ) {
         pending[id]?.cancel()
-        let delay = settleDelay
         pending[id] = Task { [weak self] in
             let ns = UInt64(delay * 1_000_000_000)
             try? await Task.sleep(nanoseconds: ns)
@@ -57,6 +74,10 @@ public final class DragCoordinator {
 
     private func settle(_ id: WindowID) {
         pending[id] = nil
+        guard !isMousePressed() else {
+            schedule(id, after: releasePollDelay)
+            return
+        }
         guard let frame = latestFrames[id] else { return }
         latestFrames[id] = nil
         onDragEnd(id, frame)

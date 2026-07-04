@@ -122,6 +122,37 @@ struct MouseResizeTests {
         #expect(adjustment == .scrollWidth(-150))
     }
 
+    @Test("Near-edge band detects resize start points")
+    func nearEdge() {
+        let rect = CGRect(x: 100, y: 100, width: 400, height: 300)
+        // On the right edge, slightly outside and inside.
+        #expect(
+            MouseResize.nearEdge(
+                CGPoint(x: 503, y: 250),
+                of: rect
+            )
+        )
+        #expect(
+            MouseResize.nearEdge(
+                CGPoint(x: 494, y: 250),
+                of: rect
+            )
+        )
+        // Window center and far outside are not edges.
+        #expect(
+            !MouseResize.nearEdge(
+                CGPoint(x: 300, y: 250),
+                of: rect
+            )
+        )
+        #expect(
+            !MouseResize.nearEdge(
+                CGPoint(x: 600, y: 250),
+                of: rect
+            )
+        )
+    }
+
     @Test("Grid and monocle have no resize parameter")
     func unsupportedModes() {
         let slot = slot(x: 0)
