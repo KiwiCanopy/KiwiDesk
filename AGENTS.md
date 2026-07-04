@@ -90,6 +90,8 @@ no trailing period. Body (optional) explains the why, wrapped at
   (never hidden in dot-folders): lint, git hooks, localization
   scripts.
 - Install hooks once per clone: `./scripts/install-hooks.sh`.
+- Fetch and install workspace subagents and skills:
+  `./scripts/install-subagents.sh`.
 - CI (`.github/workflows/ci.yml`) builds, lints, and tests on every
   push and on PRs targeting `main`. A red build blocks merging.
 
