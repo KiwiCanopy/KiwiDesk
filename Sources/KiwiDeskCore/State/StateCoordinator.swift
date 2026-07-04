@@ -88,6 +88,9 @@ public struct StateCoordinator: Sendable {
         case .windowTitleChanged(let id, let title):
             windows.updateTitle(id, title: title)
 
+        case .windowFloatChanged(let id, let floating):
+            windows.setFloating(id, floating)
+
         case .displaysChanged(let displays):
             reconcile(displays: displays)
 

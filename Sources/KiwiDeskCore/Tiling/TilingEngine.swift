@@ -95,7 +95,7 @@ public final class TilingEngine {
     ) -> Bool {
         switch event {
         case .windowCreated, .windowDestroyed, .appTerminated,
-            .displaysChanged:
+            .displaysChanged, .windowFloatChanged:
             return true
         case .appLaunched, .windowFocused, .windowMoved,
             .windowResized, .windowTitleChanged,

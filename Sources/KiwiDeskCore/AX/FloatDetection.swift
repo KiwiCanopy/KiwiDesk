@@ -48,6 +48,30 @@ public enum FloatDetection {
         return subrole != kAXStandardWindowSubrole
     }
 
+    /// Subrole check plus the window's CGWindow layer. Normal
+    /// windows live on layer 0; panels and overlays (Ghostty's
+    /// quick terminal: layer 3) sit higher and never tile, even
+    /// when their subrole momentarily reads AXStandardWindow
+    /// (apps mid-launch report unreliable subroles).
+    public static func shouldFloat(
+        role: String,
+        subrole: String,
+        layer: Int
+    ) -> Bool {
+        layer != 0 || shouldFloat(role: role, subrole: subrole)
+    }
+
+    /// CGWindow layer of a window, nil if the system does not
+    /// list it (e.g. another native Space).
+    public static func windowLayer(of id: WindowID) -> Int? {
+        let list =
+            CGWindowListCopyWindowInfo(
+                [.optionIncludingWindow],
+                CGWindowID(id.raw)
+            ) as? [[String: Any]]
+        return list?.first?[kCGWindowLayer as String] as? Int
+    }
+
     /// Full decision for a live AX element, including user
     /// rules. PIP windows (subrole AXFloatingWindow) float
     /// automatically via the subrole check.
@@ -61,9 +85,12 @@ public enum FloatDetection {
         if rules.matches(app: appName, title: title) {
             return true
         }
+        let layer = AXHelper.windowID(of: element)
+            .flatMap { windowLayer(of: $0) }
         return shouldFloat(
             role: AXHelper.role(of: element),
-            subrole: AXHelper.subrole(of: element)
+            subrole: AXHelper.subrole(of: element),
+            layer: layer ?? 0
         )
     }
 }

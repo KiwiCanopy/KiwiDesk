@@ -162,6 +162,17 @@ crossing re-stacks the zone.
 -- fragment. Dialogs, sheets, and picture-in-picture windows
 -- float automatically.
 float_rules = { "Calculator", "Finder:Get Info" }
+```
+
+Panels and overlays that live above the normal window layer
+(e.g. Ghostty's quick terminal) also float automatically, no
+rule needed. Detection is re-checked as windows come and go,
+so a window that reported wrong metadata while its app was
+still launching corrects itself instead of staying tiled. A
+manual `make_floating` override is never reverted by these
+re-checks.
+
+```lua
 
 -- New windows of these apps go to a fixed space:
 app_rules = {

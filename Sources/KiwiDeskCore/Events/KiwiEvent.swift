@@ -14,6 +14,10 @@ public enum KiwiEvent: Sendable {
     case windowResized(WindowID, CGRect)
     case windowFocused(WindowID)
     case windowTitleChanged(WindowID, String)
+    /// Float detection re-evaluated a tracked window and its
+    /// verdict changed (a window scanned mid-launch can report
+    /// a wrong subrole once; see EventLoop.reconcile).
+    case windowFloatChanged(WindowID, isFloating: Bool)
     case displaysChanged([Display])
     /// The user switched native macOS Spaces (Mission
     /// Control). Consumers query `NativeSpaces` for details.

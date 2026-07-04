@@ -17,6 +17,10 @@ public final class EventLoop {
 
     var observers: [pid_t: AXApplicationObserver] = [:]
     var elements: [pid_t: [WindowID: AXUIElement]] = [:]
+    /// Last float-detection verdict per tracked window, so
+    /// reconcile can re-check and emit only actual changes
+    /// (manual make_floating overrides stay untouched).
+    var detectedFloating: [WindowID: Bool] = [:]
     var workspaceTokens: [NSObjectProtocol] = []
     var screenToken: NSObjectProtocol?
     var lastActivePid: pid_t?
@@ -56,6 +60,7 @@ public final class EventLoop {
         }
         observers = [:]
         elements = [:]
+        detectedFloating = [:]
     }
 
     /// AX element of a tracked window, if still known. Used to
@@ -104,6 +109,7 @@ public final class EventLoop {
             appName: appName,
             rules: floatRules
         )
+        detectedFloating[window.id] = window.isFloating
         elements[pid, default: [:]][window.id] = element
         observers[pid]?.observe(window: element)
         onEvent(.windowCreated(window))
@@ -127,13 +133,37 @@ public final class EventLoop {
             live.insert(id)
             if elements[pid]?[id] == nil {
                 track(element, pid: pid, appName: appName)
+            } else {
+                recheckFloat(element, id: id, appName: appName)
             }
         }
         for id in elements[pid, default: [:]].keys
         where !live.contains(id) {
             elements[pid]?[id] = nil
+            detectedFloating[id] = nil
             onEvent(.windowDestroyed(id))
         }
+    }
+
+    /// Re-runs float detection on an already-tracked window.
+    /// A window scanned mid-launch or mid-animation can report
+    /// a wrong subrole once (Ghostty's quick terminal during
+    /// the startup scan) and would otherwise stay misclassified
+    /// until it closes. Only a changed detection verdict emits,
+    /// so manual make_floating overrides survive reconciles.
+    private func recheckFloat(
+        _ element: AXUIElement,
+        id: WindowID,
+        appName: String
+    ) {
+        let floating = FloatDetection.shouldFloat(
+            element: element,
+            appName: appName,
+            rules: floatRules
+        )
+        guard detectedFloating[id] != floating else { return }
+        detectedFloating[id] = floating
+        onEvent(.windowFloatChanged(id, isFloating: floating))
     }
 
     private func windowID(
@@ -164,6 +194,7 @@ public final class EventLoop {
                 elements[pid]?[id] != nil
             {
                 elements[pid]?[id] = nil
+                detectedFloating[id] = nil
                 onEvent(.windowDestroyed(id))
             }
             // Destroyed elements often cannot be mapped back

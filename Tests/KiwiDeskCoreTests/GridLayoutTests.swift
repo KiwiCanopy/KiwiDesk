@@ -306,11 +306,40 @@ struct FloatRuleTests {
         )
     }
 
+    @Test("Non-normal window layers float despite the subrole")
+    func layerDetection() throws {
+        // Ghostty's quick terminal: layer 3, but can read as
+        // AXStandardWindow during the startup scan.
+        #expect(
+            FloatDetection.shouldFloat(
+                role: "AXWindow",
+                subrole: "AXStandardWindow",
+                layer: 3
+            )
+        )
+        #expect(
+            !FloatDetection.shouldFloat(
+                role: "AXWindow",
+                subrole: "AXStandardWindow",
+                layer: 0
+            )
+        )
+    }
+
     @Test("Only structural events trigger a retile")
     func retileFilter() throws {
         #expect(
             TilingEngine.shouldRetile(
                 after: .windowDestroyed(w1)
+            )
+        )
+        // A healed float verdict changes layout membership.
+        #expect(
+            TilingEngine.shouldRetile(
+                after: .windowFloatChanged(
+                    w1,
+                    isFloating: true
+                )
             )
         )
         // Focus retiles are gated by the layout mode instead

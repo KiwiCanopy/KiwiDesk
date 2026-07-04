@@ -109,6 +109,27 @@ struct StateCoordinatorTests {
         )
     }
 
+    @Test("Float re-check heals a misclassified window")
+    func floatChanged() {
+        var state = StateCoordinator()
+        state.apply(.windowCreated(makeWindow(1)))
+        #expect(
+            state.windows[WindowID(1)]?.isFloating == false
+        )
+        state.apply(
+            .windowFloatChanged(WindowID(1), isFloating: true)
+        )
+        #expect(
+            state.windows[WindowID(1)]?.isFloating == true
+        )
+        // Space membership is untouched: floating windows
+        // stay in the space array, layouts filter them.
+        #expect(
+            state.workspaces[SpaceID(1)]?.windows
+                == [WindowID(1)]
+        )
+    }
+
     @Test("App termination removes all its windows")
     func appTerminated() {
         var state = StateCoordinator()
