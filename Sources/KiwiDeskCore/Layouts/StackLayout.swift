@@ -194,24 +194,4 @@ extension Space {
         else { return }
         windows.swapAt(index, boundary)
     }
-
-    /// Spawn placement for new windows in stack mode.
-    public mutating func insert(
-        _ window: WindowID,
-        placement: StackPlacement
-    ) {
-        guard !windows.contains(window) else { return }
-        switch placement {
-        case .master:
-            windows.insert(window, at: 0)
-        case .stack:
-            windows.append(window)
-        }
-    }
-}
-
-/// `new_window_placement` for stack mode.
-public enum StackPlacement: String, Sendable, Codable {
-    case master
-    case stack
 }

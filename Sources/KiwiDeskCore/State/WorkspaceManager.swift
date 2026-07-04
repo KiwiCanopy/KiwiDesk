@@ -75,6 +75,19 @@ public struct WorkspaceManager: Sendable {
         spaces[id]?.insert(window, after: anchor)
     }
 
+    /// Adds a window to a space per the layout's spawn
+    /// placement rule (`new_window_placement`), removing it
+    /// from its old space.
+    public mutating func add(
+        _ window: WindowID,
+        to id: SpaceID,
+        placement: SpawnPlacement
+    ) {
+        remove(window)
+        ensureSpace(id)
+        spaces[id]?.insert(window, placement: placement)
+    }
+
     /// Removes a window from whatever space contains it.
     public mutating func remove(_ window: WindowID) {
         guard let id = space(of: window) else { return }

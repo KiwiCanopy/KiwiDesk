@@ -9,6 +9,7 @@ private let w2 = WindowID(2)
 private let w3 = WindowID(3)
 private let w4 = WindowID(4)
 private let w5 = WindowID(5)
+private let w6 = WindowID(6)
 
 private func makeContext(
     bounds: CGRect = CGRect(x: 0, y: 0, width: 1920, height: 1080),
@@ -292,13 +293,20 @@ struct StackLayoutTests {
         #expect(space.windows == [w2, w1, w3])
     }
 
-    @Test("Spawn placement master inserts at index 0")
+    @Test("Spawn placements insert at the right position")
     func spawnPlacement() throws {
         var space = Space(id: "s", windows: [w1, w2])
-        space.insert(w3, placement: .master)
+        space.insert(w3, placement: .first)
         #expect(space.windows == [w3, w1, w2])
-        space.insert(w4, placement: .stack)
+        space.insert(w4, placement: .last)
         #expect(space.windows == [w3, w1, w2, w4])
+        // Relative placements anchor on the focused window
+        // and fall back to appending without one.
+        space.focused = w1
+        space.insert(w5, placement: .beforeFocused)
+        #expect(space.windows == [w3, w5, w1, w2, w4])
+        space.insert(w6, placement: .afterFocused)
+        #expect(space.windows == [w3, w5, w1, w6, w2, w4])
     }
 }
 

@@ -105,6 +105,36 @@ grid.set_split_direction("horizontal")
 grid.set_dimensions(3, 2)          -- rigid: columns, rows
 ```
 
+### Where new windows land
+
+Every layout takes the same `new_window_placement` values —
+`"first"`, `"last"`, `"before_focused"`, `"after_focused"` —
+describing where a new window enters the space's window
+order. Only the default differs per layout:
+
+- **BSP** `after_focused` — the new window splits the
+  focused window's region.
+- **Master/Stack** `first` — dwm-style: the new window
+  becomes master, the last master slides into the stack.
+  Prefer a calm master? `"last"` appends to the bottom of
+  the stack instead.
+- **Scrolling** `after_focused` — the new column opens next
+  to the one you are working in (PaperWM behavior).
+- **Grid** `last` — appending keeps every existing cell in
+  place.
+
+```lua
+stack.set_new_window_placement("last")
+bsp.set_new_window_placement("after_focused")
+scroll.set_new_window_placement("after_focused")
+grid.set_new_window_placement("last")
+
+-- Per-space override, beats the layout default (like
+-- set_gap_override): mail space collects new windows at
+-- the end no matter the layout.
+KiwiDesk.set_new_window_placement_override("mail", "last")
+```
+
 ### Mouse resizing
 
 Resizing a tiled window with the mouse adjusts the layout the

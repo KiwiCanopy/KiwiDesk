@@ -58,15 +58,23 @@ KiwiDesk service restart
 | Stack | `stack.promote` / `stack.demote` | — |
 | | `stack.set_master_count` | n |
 | | `stack.set_master_ratio` | 0.1–0.9 |
+| | `stack.set_overflow_style` | `cascade_overflow\|cascade_all` |
+| | `stack.set_new_window_placement` | placement¹ (default `first`) |
 | BSP | `bsp.set_strategy` | `shortest_side\|alternating` |
 | | `bsp.set_ratio` | 0.1–0.9 |
+| | `bsp.set_new_window_placement` | placement¹ (default `after_focused`) |
 | Scrolling | `scroll.set_width` | px |
 | | `scroll.set_anchor` | `center\|left\|right` |
 | | `scroll.set_speed` | ms |
+| | `scroll.set_new_window_placement` | placement¹ (default `after_focused`) |
 | Grid | `grid.set_type` | `dynamic\|rigid` |
 | | `grid.set_fill_empty_space` | true\|false |
 | | `grid.set_split_direction` | `horizontal\|vertical` |
 | | `grid.set_dimensions` | columns, rows |
+| | `grid.set_new_window_placement` | placement¹ (default `last`) |
+| Spawn | `set_new_window_placement_override` | space id, placement¹ |
+
+¹ placement: `first\|last\|before_focused\|after_focused`
 
 `resize` adapts to the active layout: BSP adjusts the split
 ratio, Stack the master ratio, Scrolling the column width.

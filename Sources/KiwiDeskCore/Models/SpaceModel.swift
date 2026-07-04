@@ -97,6 +97,33 @@ public struct Space: Sendable, Equatable {
         }
     }
 
+    /// Inserts a window per the layout's spawn placement rule
+    /// (`new_window_placement`); the focused window anchors
+    /// the relative placements, falling back to appending
+    /// when there is none.
+    public mutating func insert(
+        _ window: WindowID,
+        placement: SpawnPlacement
+    ) {
+        guard !windows.contains(window) else { return }
+        switch placement {
+        case .first:
+            windows.insert(window, at: 0)
+        case .last:
+            windows.append(window)
+        case .beforeFocused:
+            if let focused,
+                let index = windows.firstIndex(of: focused)
+            {
+                windows.insert(window, at: index)
+            } else {
+                windows.append(window)
+            }
+        case .afterFocused:
+            insert(window, after: focused)
+        }
+    }
+
     /// Removes a window; clears focus if it was focused.
     public mutating func remove(_ window: WindowID) {
         windows.removeAll { $0 == window }

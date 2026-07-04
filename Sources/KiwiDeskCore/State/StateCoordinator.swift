@@ -14,6 +14,23 @@ public struct StateCoordinator: Sendable {
     /// to a fixed space instead of the active one.
     public var appRules: [String: SpaceID] = [:]
 
+    /// `new_window_placement` per layout mode. Mirrored from
+    /// the tiler settings before each event (KiwiCore), so it
+    /// survives profile loads and live commands. Modes absent
+    /// here (monocle, floating) fall back to `.afterFocused`.
+    /// Defaults derive from the params structs so unit tests
+    /// see production behavior.
+    public var spawnPlacements: [LayoutMode: SpawnPlacement] = [
+        .bsp: BspParams().newWindowPlacement,
+        .stack: StackParams().newWindowPlacement,
+        .scrolling: ScrollingParams().newWindowPlacement,
+        .grid: GridParams().newWindowPlacement,
+    ]
+
+    /// Per-space `new_window_placement_override`: beats the
+    /// layout's spawn placement, like the gap override.
+    public var spawnOverride: [SpaceID: SpawnPlacement] = [:]
+
     /// Last known space per window. Window ids are stable OS
     /// ids, so a "created" window with a remembered space is
     /// one coming back from another native macOS Space (or a
@@ -57,13 +74,13 @@ public struct StateCoordinator: Sendable {
                 ?? appRules[window.appName]
                 ?? workspaces.activeSpace
             if let target {
-                // New windows split the focused window's
-                // region, like classic BSP.
-                let anchor = workspaces[target]?.focused
+                let mode = workspaces[target]?.mode ?? .bsp
                 workspaces.add(
                     window.id,
                     to: target,
-                    after: anchor
+                    placement: spawnOverride[target]
+                        ?? spawnPlacements[mode]
+                        ?? .afterFocused
                 )
                 workspaces.focus(window.id, in: target)
             }

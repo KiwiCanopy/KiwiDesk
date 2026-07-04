@@ -179,6 +179,72 @@ struct StateCoordinatorTests {
         )
     }
 
+    @Test("Stack mode spawns new windows as master (first)")
+    func stackSpawnsFirstByDefault() {
+        var state = StateCoordinator()
+        state.workspaces.setMode(SpaceID(1), .stack)
+        state.apply(.windowCreated(makeWindow(1)))
+        state.apply(.windowCreated(makeWindow(2)))
+        state.apply(.windowCreated(makeWindow(3)))
+        #expect(
+            state.workspaces[SpaceID(1)]?.windows == [
+                WindowID(3), WindowID(2), WindowID(1),
+            ]
+        )
+    }
+
+    @Test("Spawn placement 'last' appends to the end")
+    func spawnPlacementLast() {
+        var state = StateCoordinator()
+        state.workspaces.setMode(SpaceID(1), .stack)
+        state.spawnPlacements[.stack] = .last
+        state.apply(.windowCreated(makeWindow(1)))
+        state.apply(.windowCreated(makeWindow(2)))
+        state.apply(.windowCreated(makeWindow(3)))
+        // Focus back to window 1: the new window must not
+        // land next to it but at the very end.
+        state.apply(.windowFocused(WindowID(1)))
+        state.apply(.windowCreated(makeWindow(4)))
+        #expect(
+            state.workspaces[SpaceID(1)]?.windows == [
+                WindowID(1), WindowID(2),
+                WindowID(3), WindowID(4),
+            ]
+        )
+    }
+
+    @Test("Spawn placement 'before_focused' inserts left")
+    func spawnPlacementBeforeFocused() {
+        var state = StateCoordinator()
+        state.spawnPlacements[.bsp] = .beforeFocused
+        // Every new window takes focus, so window 2 lands
+        // before 1; window 3 before the re-focused 1.
+        state.apply(.windowCreated(makeWindow(1)))
+        state.apply(.windowCreated(makeWindow(2)))
+        state.apply(.windowFocused(WindowID(1)))
+        state.apply(.windowCreated(makeWindow(3)))
+        #expect(
+            state.workspaces[SpaceID(1)]?.windows == [
+                WindowID(2), WindowID(3), WindowID(1),
+            ]
+        )
+    }
+
+    @Test("Per-space override beats the layout placement")
+    func spawnOverrideWins() {
+        var state = StateCoordinator()
+        state.workspaces.setMode(SpaceID(1), .stack)
+        state.spawnOverride[SpaceID(1)] = .last
+        state.apply(.windowCreated(makeWindow(1)))
+        state.apply(.windowCreated(makeWindow(2)))
+        state.apply(.windowCreated(makeWindow(3)))
+        #expect(
+            state.workspaces[SpaceID(1)]?.windows == [
+                WindowID(1), WindowID(2), WindowID(3),
+            ]
+        )
+    }
+
     @Test("Focus event updates the containing space")
     func focusTracking() {
         var state = StateCoordinator()

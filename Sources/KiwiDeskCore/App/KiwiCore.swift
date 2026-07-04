@@ -193,6 +193,14 @@ public final class KiwiCore {
         if case .windowDestroyed(let id, _) = event {
             focusLost = activeSpace?.focused == id
         }
+        state.spawnPlacements = [
+            .bsp: tiler.settings.bsp.newWindowPlacement,
+            .stack: tiler.settings.stack.newWindowPlacement,
+            .scrolling:
+                tiler.settings.scrolling.newWindowPlacement,
+            .grid: tiler.settings.grid.newWindowPlacement,
+        ]
+        state.spawnOverride = tiler.settings.placementOverride
         state.apply(event)
         switch event {
         case .displaysChanged:

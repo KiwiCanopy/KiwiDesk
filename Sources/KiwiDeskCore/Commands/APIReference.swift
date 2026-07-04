@@ -31,6 +31,10 @@ public enum APIReference {
             ("set_mode", "set_mode"),
             ("set_gap_global", "set_gap_global"),
             ("set_gap_override", "set_gap_override"),
+            (
+                "set_new_window_placement_override",
+                "set_new_window_placement_override"
+            ),
             ("get_state", "get_state"),
             ("get_layout_info", "get_layout_info"),
             ("list_monitors", "list_monitors"),
@@ -68,12 +72,20 @@ public enum APIReference {
             "promote", "demote",
             "set_master_count", "set_master_ratio",
             "set_overflow_style",
+            "set_new_window_placement",
         ],
-        "bsp": ["set_strategy", "set_ratio"],
-        "scroll": ["set_width", "set_anchor", "set_speed"],
+        "bsp": [
+            "set_strategy", "set_ratio",
+            "set_new_window_placement",
+        ],
+        "scroll": [
+            "set_width", "set_anchor", "set_speed",
+            "set_new_window_placement",
+        ],
         "grid": [
             "set_type", "set_fill_empty_space",
             "set_split_direction", "set_dimensions",
+            "set_new_window_placement",
         ],
     ]
 

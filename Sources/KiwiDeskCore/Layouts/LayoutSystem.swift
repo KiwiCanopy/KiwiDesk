@@ -123,6 +123,21 @@ public struct LayoutContext: Sendable {
 
 // MARK: - Per-mode parameters
 
+/// `new_window_placement`: where a new window lands in a
+/// space's flat window array. Every layout shares the same
+/// vocabulary; only the default differs per layout.
+public enum SpawnPlacement: String, Sendable, Codable {
+    /// Index 0 (stack mode: the new window becomes master).
+    case first
+    /// End of the array.
+    case last
+    /// Directly before the focused window.
+    case beforeFocused = "before_focused"
+    /// Directly after the focused window (BSP: the new
+    /// window splits the focused window's region).
+    case afterFocused = "after_focused"
+}
+
 public struct BspParams: Sendable, Equatable, Codable {
     public enum Strategy: String, Sendable, Codable {
         /// Split the longer side (keeps windows square-ish).
@@ -133,8 +148,32 @@ public struct BspParams: Sendable, Equatable, Codable {
 
     public var strategy: Strategy = .shortestSide
     public var splitRatio: Double = 0.5
+    public var newWindowPlacement: SpawnPlacement = .afterFocused
 
     public init() {}
+
+    /// Manual decoding: profiles saved before a field existed
+    /// must keep loading (missing keys fall back to defaults).
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(
+            keyedBy: CodingKeys.self
+        )
+        strategy =
+            try container.decodeIfPresent(
+                Strategy.self,
+                forKey: .strategy
+            ) ?? .shortestSide
+        splitRatio =
+            try container.decodeIfPresent(
+                Double.self,
+                forKey: .splitRatio
+            ) ?? 0.5
+        newWindowPlacement =
+            try container.decodeIfPresent(
+                SpawnPlacement.self,
+                forKey: .newWindowPlacement
+            ) ?? .afterFocused
+    }
 }
 
 public struct StackParams: Sendable, Equatable, Codable {
@@ -154,6 +193,9 @@ public struct StackParams: Sendable, Equatable, Codable {
     public var masterRatio: Double = 0.6
     /// Column overflow behavior (applies to both zones).
     public var overflowStyle: OverflowStyle = .cascadeOverflow
+    /// dwm-style default: `.first` makes the new window the
+    /// master (the last master slides into the stack).
+    public var newWindowPlacement: SpawnPlacement = .first
 
     public init() {}
 
@@ -178,6 +220,11 @@ public struct StackParams: Sendable, Equatable, Codable {
                 OverflowStyle.self,
                 forKey: .overflowStyle
             ) ?? .cascadeOverflow
+        newWindowPlacement =
+            try container.decodeIfPresent(
+                SpawnPlacement.self,
+                forKey: .newWindowPlacement
+            ) ?? .first
     }
 }
 
@@ -192,8 +239,34 @@ public struct ScrollingParams: Sendable, Equatable, Codable {
     public var windowWidth: CGFloat = 800
     /// Where the focused column sits in the viewport.
     public var anchor: Anchor = .center
+    /// PaperWM-style default: new columns open next to the
+    /// one you are working in.
+    public var newWindowPlacement: SpawnPlacement = .afterFocused
 
     public init() {}
+
+    /// Manual decoding: profiles saved before a field existed
+    /// must keep loading (missing keys fall back to defaults).
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(
+            keyedBy: CodingKeys.self
+        )
+        windowWidth =
+            try container.decodeIfPresent(
+                CGFloat.self,
+                forKey: .windowWidth
+            ) ?? 800
+        anchor =
+            try container.decodeIfPresent(
+                Anchor.self,
+                forKey: .anchor
+            ) ?? .center
+        newWindowPlacement =
+            try container.decodeIfPresent(
+                SpawnPlacement.self,
+                forKey: .newWindowPlacement
+            ) ?? .afterFocused
+    }
 }
 
 public struct GridParams: Sendable, Equatable, Codable {
@@ -215,6 +288,47 @@ public struct GridParams: Sendable, Equatable, Codable {
     /// Rigid grid dimensions.
     public var columns: Int = 3
     public var rows: Int = 2
+    /// Grids read as ordered cells: appending keeps every
+    /// existing cell in place.
+    public var newWindowPlacement: SpawnPlacement = .last
 
     public init() {}
+
+    /// Manual decoding: profiles saved before a field existed
+    /// must keep loading (missing keys fall back to defaults).
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(
+            keyedBy: CodingKeys.self
+        )
+        type =
+            try container.decodeIfPresent(
+                GridType.self,
+                forKey: .type
+            ) ?? .dynamic
+        fillEmptySpace =
+            try container.decodeIfPresent(
+                Bool.self,
+                forKey: .fillEmptySpace
+            ) ?? true
+        splitDirection =
+            try container.decodeIfPresent(
+                SplitDirection.self,
+                forKey: .splitDirection
+            ) ?? .horizontal
+        columns =
+            try container.decodeIfPresent(
+                Int.self,
+                forKey: .columns
+            ) ?? 3
+        rows =
+            try container.decodeIfPresent(
+                Int.self,
+                forKey: .rows
+            ) ?? 2
+        newWindowPlacement =
+            try container.decodeIfPresent(
+                SpawnPlacement.self,
+                forKey: .newWindowPlacement
+            ) ?? .last
+    }
 }

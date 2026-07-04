@@ -12,11 +12,73 @@ public struct TilingSettings: Sendable, Equatable, Codable {
     public var stack = StackParams()
     public var scrolling = ScrollingParams()
     public var grid = GridParams()
+    /// `new_window_placement_override[space_id]` beats the
+    /// layout's own spawn placement (like the gap override).
+    public var placementOverride: [SpaceID: SpawnPlacement] =
+        [:]
     /// Drag-and-drop visuals (consumed once D&D lands).
     public var dragShowGhost = true
     public var dragShowDropZone = true
 
     public init() {}
+
+    /// Manual decoding: profiles saved before a field existed
+    /// must keep loading (missing keys fall back to defaults).
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(
+            keyedBy: CodingKeys.self
+        )
+        gapsGlobal =
+            try container.decodeIfPresent(
+                Gaps.self,
+                forKey: .gapsGlobal
+            ) ?? Gaps()
+        gapsOverride =
+            try container.decodeIfPresent(
+                [SpaceID: Gaps].self,
+                forKey: .gapsOverride
+            ) ?? [:]
+        minWindowSize =
+            try container.decodeIfPresent(
+                CGFloat.self,
+                forKey: .minWindowSize
+            ) ?? 300
+        bsp =
+            try container.decodeIfPresent(
+                BspParams.self,
+                forKey: .bsp
+            ) ?? BspParams()
+        stack =
+            try container.decodeIfPresent(
+                StackParams.self,
+                forKey: .stack
+            ) ?? StackParams()
+        scrolling =
+            try container.decodeIfPresent(
+                ScrollingParams.self,
+                forKey: .scrolling
+            ) ?? ScrollingParams()
+        grid =
+            try container.decodeIfPresent(
+                GridParams.self,
+                forKey: .grid
+            ) ?? GridParams()
+        placementOverride =
+            try container.decodeIfPresent(
+                [SpaceID: SpawnPlacement].self,
+                forKey: .placementOverride
+            ) ?? [:]
+        dragShowGhost =
+            try container.decodeIfPresent(
+                Bool.self,
+                forKey: .dragShowGhost
+            ) ?? true
+        dragShowDropZone =
+            try container.decodeIfPresent(
+                Bool.self,
+                forKey: .dragShowDropZone
+            ) ?? true
+    }
 
     public func gaps(for space: SpaceID) -> Gaps {
         gapsOverride[space] ?? gapsGlobal

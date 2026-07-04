@@ -234,6 +234,55 @@ struct CommandTests {
                 == .cascadeAll
         )
     }
+
+    @Test("set_new_window_placement updates and validates")
+    func newWindowPlacement() {
+        let core = makeCore()
+        core.execute(
+            "stack.set_new_window_placement",
+            args: [.string("last")]
+        )
+        #expect(
+            core.tiler.settings.stack.newWindowPlacement
+                == .last
+        )
+        core.execute(
+            "bsp.set_new_window_placement",
+            args: [.string("before_focused")]
+        )
+        #expect(
+            core.tiler.settings.bsp.newWindowPlacement
+                == .beforeFocused
+        )
+        let bad = core.execute(
+            "stack.set_new_window_placement",
+            args: [.string("middle")]
+        )
+        #expect(!bad.isSuccess)
+        #expect(
+            core.tiler.settings.stack.newWindowPlacement
+                == .last
+        )
+    }
+
+    @Test("set_new_window_placement_override targets a space")
+    func newWindowPlacementOverride() {
+        let core = makeCore()
+        core.execute(
+            "set_new_window_placement_override",
+            args: [.string("mail"), .string("first")]
+        )
+        #expect(
+            core.tiler.settings.placementOverride[
+                SpaceID("mail")
+            ] == .first
+        )
+        let bad = core.execute(
+            "set_new_window_placement_override",
+            args: [.string("mail"), .string("middle")]
+        )
+        #expect(!bad.isSuccess)
+    }
 }
 
 @Suite("Config loading", .serialized)
