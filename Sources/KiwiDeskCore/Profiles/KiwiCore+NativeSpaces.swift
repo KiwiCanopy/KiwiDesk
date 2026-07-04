@@ -82,6 +82,10 @@ extension KiwiCore {
             guard let self, self.lastNativeSpace == number
             else { return }
             self.retile(animated: false, force: true)
+            // The switch rebuilt this desktop's windows with
+            // arbitrary stacking; put the overlapping
+            // layouts' z-order back before handing focus over.
+            self.scheduleZOrderRestore()
             if let focused = self.activeSpace?.focused {
                 self.focusWindow(focused)
             }

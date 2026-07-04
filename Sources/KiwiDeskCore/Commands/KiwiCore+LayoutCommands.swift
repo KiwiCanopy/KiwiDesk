@@ -107,7 +107,7 @@ extension KiwiCore {
             }
         }
         if activeSpace?.windows != space.windows {
-            scheduleStackZOrderRestore()
+            scheduleZOrderRestore()
         }
         return .ok()
     }

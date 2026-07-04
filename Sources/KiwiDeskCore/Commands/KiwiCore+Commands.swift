@@ -141,7 +141,7 @@ extension KiwiCore {
             }
             retile()
             if crossedZones {
-                scheduleStackZOrderRestore()
+                scheduleZOrderRestore()
             }
         } else {
             focusWindow(target)

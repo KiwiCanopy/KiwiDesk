@@ -382,4 +382,35 @@ struct ScrollingLayoutTests {
         let first = try #require(frames[w1])
         #expect(first.minX == context.usable.minX)
     }
+
+    @Test("Scrolling raise order math")
+    func scrollingRaiseOrder() throws {
+        let windows = [w1, w2, w3, w4, w5]
+
+        // Focus is w1 (index 0)
+        #expect(
+            KiwiCore.scrollingRaiseOrder(windows, focusIndex: 0) == [
+                w5, w4, w3, w2,
+            ]
+        )
+
+        // Focus is w3 (index 2)
+        #expect(
+            KiwiCore.scrollingRaiseOrder(windows, focusIndex: 2) == [
+                w1, w2, w5, w4,
+            ]
+        )
+
+        // Focus is w5 (index 4)
+        #expect(
+            KiwiCore.scrollingRaiseOrder(windows, focusIndex: 4) == [
+                w1, w2, w3, w4,
+            ]
+        )
+
+        // Focus index out of bounds
+        #expect(
+            KiwiCore.scrollingRaiseOrder(windows, focusIndex: 10) == windows
+        )
+    }
 }

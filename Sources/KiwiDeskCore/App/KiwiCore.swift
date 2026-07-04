@@ -22,7 +22,7 @@ public final class KiwiCore {
 
     /// A stack z-order restore is waiting for the current
     /// animations to settle (see restoreStackZOrder).
-    var pendingStackZOrderRestore = false
+    var pendingZOrderRestore = false
 
     /// Deferred switch to a hidden window's virtual space
     /// (see scheduleFocusFollow).
@@ -108,7 +108,7 @@ public final class KiwiCore {
             self?.moveMonocleItem(from: from, to: to)
         }
         tiler.animation.onAllAnimationsEnded = { [weak self] in
-            self?.runPendingStackZOrderRestore()
+            self?.runPendingZOrderRestore()
         }
 
         socket.handler = { [weak self] command, args in

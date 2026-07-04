@@ -208,7 +208,7 @@ extension KiwiCore {
         // it the focused one, in state and for real.
         focusWindow(id)
         if crossedZones {
-            scheduleStackZOrderRestore()
+            scheduleZOrderRestore()
         }
     }
 }
