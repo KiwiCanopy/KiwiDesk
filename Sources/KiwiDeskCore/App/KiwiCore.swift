@@ -13,6 +13,7 @@ public final class KiwiCore {
     public let bus = EventBus()
     public let keys = KeybindingManager()
     public let drag = DragCoordinator()
+    public let dragOverlay = DragOverlay()
     public let mouse = MouseTracker()
     public let profiles: ProfileManager
     public let crash: CrashRecovery
@@ -98,21 +99,7 @@ public final class KiwiCore {
         keys.onLog = { [weak self] message in
             self?.onLog(message)
         }
-        drag.isAnimating = { [weak self] id in
-            guard let self else { return false }
-            // Covers in-flight animations AND the trailing AX
-            // echoes of frames we already applied: those
-            // arrive after the animation settles and must not
-            // read as user drags.
-            return self.tiler.animation.isAnimating(window: id)
-                || self.tiler.didRecentlySetFrame(id)
-        }
-        drag.onDragEnd = { [weak self] id, frame in
-            self?.handleDragEnd(id, frame: frame)
-        }
-        drag.isMousePressed = {
-            NSEvent.pressedMouseButtons & 1 == 1
-        }
+        wireDrag()
         tiler.animation.onAllAnimationsEnded = { [weak self] in
             self?.runPendingStackZOrderRestore()
         }
@@ -238,6 +225,7 @@ public final class KiwiCore {
             }
         case .windowDestroyed(let id, _):
             drag.cancel(id)
+            dragOverlay.hideAll()
         case .nativeSpaceChanged:
             handleNativeSpaceChange()
         default:

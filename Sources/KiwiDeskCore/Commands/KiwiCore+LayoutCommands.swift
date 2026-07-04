@@ -17,6 +17,8 @@ extension KiwiCore {
             response = scrollCommand(command, args)
         } else if command.hasPrefix("grid.") {
             response = gridCommand(command, args)
+        } else if command.hasPrefix("drag.") {
+            response = dragCommand(command, args)
         } else {
             response = settingsCommand(command, args)
         }
@@ -268,16 +270,6 @@ extension KiwiCore {
                 return .fail("expected milliseconds")
             }
             sleepWake.restoreDelayMS = max(0, ms)
-        case "set_drag_show_ghost":
-            guard let enabled = args.first?.boolValue else {
-                return .fail("expected boolean")
-            }
-            tiler.settings.dragShowGhost = enabled
-        case "set_drag_show_drop_zone":
-            guard let enabled = args.first?.boolValue else {
-                return .fail("expected boolean")
-            }
-            tiler.settings.dragShowDropZone = enabled
         case "set_new_window_placement_override":
             guard let space = args.first?.stringValue else {
                 return .fail("expected space id and placement")

@@ -2,14 +2,109 @@ import AppKit
 import CoreGraphics
 import Foundation
 
+/// The drop-target rule, shared by the live preview and the
+/// final drop so the highlight can never disagree with what
+/// the drop does: a drag targets the slot that contains the
+/// dragged frame's center.
+enum DragTarget {
+    static func swapTarget(
+        of id: WindowID,
+        frame: CGRect,
+        slots: [WindowID: CGRect]
+    ) -> WindowID? {
+        let center = CGPoint(x: frame.midX, y: frame.midY)
+        return slots.first { entry in
+            entry.key != id && entry.value.contains(center)
+        }?.key
+    }
+}
+
 /// Drop resolution for user window drags and resizes.
 extension KiwiCore {
+    /// Connects the drag coordinator's callbacks (once, from
+    /// init).
+    func wireDrag() {
+        drag.isAnimating = { [weak self] id in
+            guard let self else { return false }
+            // Covers in-flight animations AND the trailing AX
+            // echoes of frames we already applied: those
+            // arrive after the animation settles and must not
+            // read as user drags.
+            return self.tiler.animation.isAnimating(window: id)
+                || self.tiler.didRecentlySetFrame(id)
+        }
+        drag.onDragMove = { [weak self] id, frame in
+            self?.handleDragMove(id, frame: frame)
+        }
+        drag.onDragEnd = { [weak self] id, frame in
+            self?.handleDragEnd(id, frame: frame)
+        }
+        drag.isMousePressed = {
+            NSEvent.pressedMouseButtons & 1 == 1
+        }
+    }
+
+    /// Live feedback while a tiled window is dragged: a ghost
+    /// outline over the window's own slot and a highlight
+    /// over the slot a drop would swap with (settings toggle
+    /// each visual individually).
+    func handleDragMove(_ id: WindowID, frame: CGRect) {
+        let settings = tiler.settings
+        guard
+            settings.dragGhost.enabled
+                || settings.dragDropZone.enabled,
+            let space = activeSpace,
+            space.mode != .floating,
+            space.windows.contains(id),
+            state.windows[id]?.isFloating == false
+        else {
+            dragOverlay.hideAll()
+            return
+        }
+        let slots = tiler.calculatedFrames(state: state)
+        guard let slot = slots[id] else {
+            dragOverlay.hideAll()
+            return
+        }
+        // A resize gesture adjusts the layout in place; slot
+        // previews would only mislead.
+        if MouseResize.isResize(from: slot, to: frame) {
+            dragOverlay.hideAll()
+            return
+        }
+        if settings.dragGhost.enabled {
+            dragOverlay.showGhost(
+                at: slot,
+                style: settings.dragGhost,
+                cornerRadius: settings.dragCornerRadius
+            )
+        }
+        let target = DragTarget.swapTarget(
+            of: id,
+            frame: frame,
+            slots: slots
+        )
+        if settings.dragDropZone.enabled,
+            let target,
+            let targetSlot = slots[target]
+        {
+            dragOverlay.showDropZone(
+                at: targetSlot,
+                style: settings.dragDropZone,
+                cornerRadius: settings.dragCornerRadius
+            )
+        } else {
+            dragOverlay.hideDropZone()
+        }
+    }
+
     /// Drop over another window's layout slot: the two windows
     /// swap positions and everything readjusts. Drop anywhere
     /// else: the window snaps back to its own slot. A drop
     /// that changed the window's SIZE is a resize gesture and
     /// adjusts the layout instead (see handleResizeEnd).
     func handleDragEnd(_ id: WindowID, frame: CGRect) {
+        dragOverlay.hideAll()
         guard let space = activeSpace,
             space.mode != .floating,
             space.windows.contains(id),
@@ -58,10 +153,11 @@ extension KiwiCore {
             }
             return
         }
-        let center = CGPoint(x: frame.midX, y: frame.midY)
-        let target = slots.first { entry in
-            entry.key != id && entry.value.contains(center)
-        }?.key
+        let target = DragTarget.swapTarget(
+            of: id,
+            frame: frame,
+            slots: slots
+        )
 
         var crossedZones = false
         if let target {

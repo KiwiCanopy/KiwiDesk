@@ -55,6 +55,17 @@ KiwiDesk service restart
 | | `set_space_animation` | true\|false (default false) |
 | Sleep/Wake | `enable_wake_restore` | true\|false |
 | | `set_wake_restore_delay` | ms |
+| Drag | `drag.set_ghost_enabled` | true\|false |
+| | `drag.set_ghost_border` / `drag.set_ghost_fill` | true\|false |
+| | `drag.set_ghost_border_thickness` | pt (default 5) |
+| | `drag.set_ghost_border_alignment` | `inside\|outside` (default inside) |
+| | `drag.set_ghost_border_color` / `drag.set_ghost_fill_color` | #RRGGBB[AA] |
+| | `drag.set_drop_zone_enabled` | true\|false |
+| | `drag.set_drop_zone_border` / `drag.set_drop_zone_fill` | true\|false |
+| | `drag.set_drop_zone_border_thickness` | pt (default 5) |
+| | `drag.set_drop_zone_border_alignment` | `inside\|outside` (default inside) |
+| | `drag.set_drop_zone_border_color` / `drag.set_drop_zone_fill_color` | #RRGGBB[AA] |
+| | `drag.set_corner_radius` | pt (default 16) |
 | Stack | `stack.promote` / `stack.demote` | — |
 | | `stack.set_master_count` | n |
 | | `stack.set_master_ratio` | 0.1–0.9 |

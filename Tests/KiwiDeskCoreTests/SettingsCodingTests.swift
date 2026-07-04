@@ -51,15 +51,46 @@ struct SettingsCodingTests {
             root["new_window_placement_override"]
         )
         #expect(placement["3"] as? String == "first")
-        let drag = try #require(
-            root["drag"] as? [String: Bool]
-        )
+        let drag = try object(root["drag"])
         #expect(
-            drag == [
-                "show_ghost": true,
-                "show_drop_zone": true,
+            Set(drag.keys) == [
+                "corner_radius", "drop_zone", "ghost",
             ]
         )
+        let ghost = try object(drag["ghost"])
+        #expect(
+            Set(ghost.keys) == [
+                "border", "border_color", "border_thickness",
+                "border_alignment", "enabled", "fill", "fill_color",
+            ]
+        )
+        // Kiwi defaults: green fill / brown border (ghost),
+        // brown fill / green border (drop zone).
+        #expect(ghost["border_color"] as? String == "#8B5E3C")
+        #expect(ghost["fill_color"] as? String == "#4E9F3D40")
+        #expect(ghost["border_thickness"] as? Double == 5)
+        #expect(ghost["border_alignment"] as? String == "inside")
+        let zone = try object(drag["drop_zone"])
+        #expect(zone["border_color"] as? String == "#4E9F3D")
+        #expect(zone["fill_color"] as? String == "#8B5E3C40")
+        #expect(zone["border_thickness"] as? Double == 5)
+        #expect(zone["border_alignment"] as? String == "inside")
+    }
+
+    @Test("Partial drag visuals keep the default look")
+    func partialDragDecode() throws {
+        let json = #"{"drag":{"ghost":{"enabled":false}}}"#
+        let decoded = try JSONDecoder().decode(
+            TilingSettings.self,
+            from: Data(json.utf8)
+        )
+        #expect(!decoded.dragGhost.enabled)
+        #expect(
+            decoded.dragGhost.borderColor
+                == DragVisual.ghostDefault.borderColor
+        )
+        #expect(decoded.dragDropZone == .dropZoneDefault)
+        #expect(decoded.dragCornerRadius == 16)
     }
 
     @Test("Round-trip preserves every setting")
@@ -70,7 +101,9 @@ struct SettingsCodingTests {
         settings.stack.masterCount = 2
         settings.grid.rows = 4
         settings.minWindowSize = 200
-        settings.dragShowGhost = false
+        settings.dragGhost.enabled = false
+        settings.dragDropZone.fillColor = "#11223344"
+        settings.dragCornerRadius = 22
         settings.gapsOverride[SpaceID(2)] = .uniform(4)
         settings.placementOverride[SpaceID("mail")] = .last
         let data = try JSONEncoder().encode(settings)

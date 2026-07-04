@@ -135,6 +135,46 @@ grid.set_new_window_placement("last")
 KiwiDesk.set_new_window_placement_override("mail", "last")
 ```
 
+### Drag & drop rearranging
+
+Dragging a tiled window over another window's slot and
+releasing swaps the two; dropping anywhere else snaps the
+window back. While you drag, KiwiDesk shows two visuals:
+
+- **Ghost**: the dragged window's own slot — where it snaps
+  back, and where the displaced window would move.
+- **Drop zone**: the slot under the window's center, i.e.
+  the window a drop would swap with.
+
+Each visual has an on/off switch plus an independently
+toggle-able border and fill with configurable colors
+(`#RRGGBB`, or `#RRGGBBAA` for translucency), thickness,
+and alignment (`"inside"` or `"outside"` relative to the slot).
+The defaults are kiwi-themed: the ghost is flesh-green
+filled with a shell-brown border, the drop zone the inverse.
+
+```lua
+drag.set_ghost_enabled(true)
+drag.set_ghost_border(true)
+drag.set_ghost_border_thickness(5)
+drag.set_ghost_border_alignment("inside")
+drag.set_ghost_border_color("#8B5E3C")
+drag.set_ghost_fill(true)
+drag.set_ghost_fill_color("#4E9F3D40")  -- 25% alpha
+
+drag.set_drop_zone_enabled(true)
+drag.set_drop_zone_border(true)
+drag.set_drop_zone_border_thickness(5)
+drag.set_drop_zone_border_alignment("inside")
+drag.set_drop_zone_border_color("#4E9F3D")
+drag.set_drop_zone_fill(true)
+drag.set_drop_zone_fill_color("#8B5E3C40")
+
+-- Corner rounding of both visuals; tune it to match the
+-- window corners of your macOS release (default 16).
+drag.set_corner_radius(16)
+```
+
 ### Mouse resizing
 
 Resizing a tiled window with the mouse adjusts the layout the

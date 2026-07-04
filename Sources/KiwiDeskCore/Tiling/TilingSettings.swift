@@ -21,9 +21,13 @@ public struct TilingSettings: Sendable, Equatable, Codable {
     /// layout's own spawn placement (like the gap override).
     public var placementOverride: [SpaceID: SpawnPlacement] =
         [:]
-    /// Drag-and-drop visuals (consumed once D&D lands).
-    public var dragShowGhost = true
-    public var dragShowDropZone = true
+    /// Drag visuals (see DragOverlay): the dragged window's
+    /// own slot (ghost) and the swap target slot (drop zone).
+    public var dragGhost = DragVisual.ghostDefault
+    public var dragDropZone = DragVisual.dropZoneDefault
+    /// Corner rounding of both visuals — tune it to match
+    /// the window corners of the running macOS release.
+    public var dragCornerRadius: CGFloat = 16
 
     public init() {}
 
@@ -39,8 +43,9 @@ public struct TilingSettings: Sendable, Equatable, Codable {
     }
 
     private enum DragKeys: String, CodingKey {
-        case dropZone = "show_drop_zone"
-        case ghost = "show_ghost"
+        case cornerRadius = "corner_radius"
+        case dropZone = "drop_zone"
+        case ghost
     }
 
     private enum GapKeys: String, CodingKey {
@@ -137,16 +142,23 @@ public struct TilingSettings: Sendable, Equatable, Codable {
             keyedBy: DragKeys.self,
             forKey: .drag
         )
-        dragShowGhost =
+        dragCornerRadius =
             try drag.decodeIfPresent(
-                Bool.self,
-                forKey: .ghost
-            ) ?? true
-        dragShowDropZone =
-            try drag.decodeIfPresent(
-                Bool.self,
-                forKey: .dropZone
-            ) ?? true
+                CGFloat.self,
+                forKey: .cornerRadius
+            ) ?? 16
+        if drag.contains(.ghost) {
+            dragGhost = try DragVisual(
+                from: drag.superDecoder(forKey: .ghost),
+                defaults: .ghostDefault
+            )
+        }
+        if drag.contains(.dropZone) {
+            dragDropZone = try DragVisual(
+                from: drag.superDecoder(forKey: .dropZone),
+                defaults: .dropZoneDefault
+            )
+        }
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -179,8 +191,12 @@ public struct TilingSettings: Sendable, Equatable, Codable {
             keyedBy: DragKeys.self,
             forKey: .drag
         )
-        try drag.encode(dragShowGhost, forKey: .ghost)
-        try drag.encode(dragShowDropZone, forKey: .dropZone)
+        try drag.encode(
+            dragCornerRadius,
+            forKey: .cornerRadius
+        )
+        try drag.encode(dragGhost, forKey: .ghost)
+        try drag.encode(dragDropZone, forKey: .dropZone)
     }
 
     // MARK: - Resolution

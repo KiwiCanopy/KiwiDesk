@@ -14,6 +14,14 @@ public final class DragCoordinator {
     public var onDragEnd: @MainActor (WindowID, CGRect) -> Void =
         { _, _ in }
 
+    /// Fired for every user-driven move while the button is
+    /// down — live feedback (drag ghost / drop zone), not
+    /// debounced. Trailing AX events after the release only
+    /// reach onDragEnd.
+    public var onDragMove:
+        @MainActor (WindowID, CGRect) ->
+            Void = { _, _ in }
+
     /// Filters out our own animation-driven move events.
     public var isAnimating: @MainActor (WindowID) -> Bool = {
         _ in false
@@ -49,6 +57,9 @@ public final class DragCoordinator {
             return
         }
         latestFrames[id] = frame
+        if isMousePressed() {
+            onDragMove(id, frame)
+        }
         schedule(id, after: settleDelay)
     }
 

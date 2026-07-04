@@ -64,6 +64,35 @@ struct DragCoordinatorTests {
         #expect(ended == 0)
     }
 
+    @Test("Moves with the button down fire live drag moves")
+    func liveMoves() throws {
+        let drag = DragCoordinator()
+        var pressed = true
+        drag.isMousePressed = { pressed }
+        var moves: [CGRect] = []
+        drag.onDragMove = { _, frame in
+            moves.append(frame)
+        }
+        let frame = CGRect(x: 50, y: 0, width: 10, height: 10)
+        drag.windowMoved(WindowID(1), frame: frame)
+        #expect(moves == [frame])
+        // Trailing AX events after the release: no feedback.
+        pressed = false
+        drag.windowMoved(WindowID(1), frame: .zero)
+        #expect(moves == [frame])
+    }
+
+    @Test("Animation-driven moves fire no live drag moves")
+    func liveMovesFiltered() throws {
+        let drag = DragCoordinator()
+        drag.isAnimating = { _ in true }
+        drag.isMousePressed = { true }
+        var moves = 0
+        drag.onDragMove = { _, _ in moves += 1 }
+        drag.windowMoved(WindowID(1), frame: .zero)
+        #expect(moves == 0)
+    }
+
     @Test("No settle while the mouse button is held")
     func waitsForRelease() async throws {
         let drag = DragCoordinator()
@@ -157,6 +186,224 @@ struct DragDropTests {
         #expect(
             core.state.workspaces[SpaceID(1)]?.windows
                 == [WindowID(1), WindowID(2)]
+        )
+    }
+
+    @Test("Live preview shows ghost and drop zone over a slot")
+    func livePreview() throws {
+        guard NSScreen.main != nil else { return }
+        let core = makeCore()
+        addWindow(core, 1)
+        addWindow(core, 2)
+        let slots = core.tiler.calculatedFrames(
+            state: core.state
+        )
+        let home = try #require(slots[WindowID(1)])
+        let targetSlot = try #require(slots[WindowID(2)])
+
+        // Same size (a move, not a resize), centered over the
+        // other window's slot.
+        var frame = home
+        frame.origin = CGPoint(
+            x: targetSlot.midX - home.width / 2,
+            y: targetSlot.midY - home.height / 2
+        )
+        core.handleDragMove(WindowID(1), frame: frame)
+        #expect(core.dragOverlay.isGhostVisible)
+        #expect(core.dragOverlay.isDropZoneVisible)
+
+        // Over no slot: the drop zone goes away, the ghost
+        // (home slot) stays.
+        core.handleDragMove(
+            WindowID(1),
+            frame: frame.offsetBy(dx: -9000, dy: -9000)
+        )
+        #expect(core.dragOverlay.isGhostVisible)
+        #expect(!core.dragOverlay.isDropZoneVisible)
+
+        // The drop hides everything.
+        core.handleDragEnd(WindowID(1), frame: frame)
+        #expect(!core.dragOverlay.isGhostVisible)
+        #expect(!core.dragOverlay.isDropZoneVisible)
+    }
+
+    @Test("Disabled toggles suppress the drag visuals")
+    func previewDisabled() throws {
+        guard NSScreen.main != nil else { return }
+        let core = makeCore()
+        core.tiler.settings.dragGhost.enabled = false
+        core.tiler.settings.dragDropZone.enabled = false
+        addWindow(core, 1)
+        addWindow(core, 2)
+        let slots = core.tiler.calculatedFrames(
+            state: core.state
+        )
+        let targetSlot = try #require(slots[WindowID(2)])
+
+        core.handleDragMove(WindowID(1), frame: targetSlot)
+        #expect(!core.dragOverlay.isGhostVisible)
+        #expect(!core.dragOverlay.isDropZoneVisible)
+    }
+
+    @Test("A resize-shaped drag shows no swap preview")
+    func previewSkipsResize() throws {
+        guard NSScreen.main != nil else { return }
+        let core = makeCore()
+        addWindow(core, 1)
+        addWindow(core, 2)
+        let slots = core.tiler.calculatedFrames(
+            state: core.state
+        )
+        var frame = try #require(slots[WindowID(1)])
+        frame.size.width += 120
+
+        core.handleDragMove(WindowID(1), frame: frame)
+        #expect(!core.dragOverlay.isGhostVisible)
+        #expect(!core.dragOverlay.isDropZoneVisible)
+    }
+}
+
+@Suite("Drag visual configuration", .serialized)
+@MainActor
+struct DragVisualCommandTests {
+    private func makeCore() -> KiwiCore {
+        KiwiCore(
+            configDirectory: FileManager.default
+                .temporaryDirectory
+                .appendingPathComponent(
+                    "kiwi-dragviz-\(UUID().uuidString)"
+                )
+        )
+    }
+
+    @Test("drag.* commands update every visual setting")
+    func commands() {
+        let core = makeCore()
+        core.execute(
+            "drag.set_ghost_enabled",
+            args: [.bool(false)]
+        )
+        core.execute(
+            "drag.set_ghost_fill_color",
+            args: [.string("#112233")]
+        )
+        core.execute(
+            "drag.set_ghost_border_thickness",
+            args: [.number(4)]
+        )
+        core.execute(
+            "drag.set_ghost_border_alignment",
+            args: [.string("outside")]
+        )
+        core.execute(
+            "drag.set_drop_zone_border_thickness",
+            args: [.number(3)]
+        )
+        core.execute(
+            "drag.set_drop_zone_border",
+            args: [.bool(false)]
+        )
+        core.execute(
+            "drag.set_corner_radius",
+            args: [.number(26)]
+        )
+        let settings = core.tiler.settings
+        #expect(!settings.dragGhost.enabled)
+        #expect(settings.dragGhost.fillColor == "#112233")
+        #expect(settings.dragGhost.borderThickness == 4)
+        #expect(settings.dragGhost.borderAlignment == .outside)
+        #expect(settings.dragDropZone.borderThickness == 3)
+        #expect(settings.dragDropZone.borderAlignment == .inside)
+        #expect(!settings.dragDropZone.border)
+        #expect(settings.dragCornerRadius == 26)
+    }
+
+    @Test("Bad colors and unknown settings are rejected")
+    func rejectsBadInput() {
+        let core = makeCore()
+        #expect(
+            !core.execute(
+                "drag.set_ghost_border_color",
+                args: [.string("kiwi")]
+            ).isSuccess
+        )
+        #expect(
+            !core.execute(
+                "drag.set_ghost_opacity",
+                args: [.number(1)]
+            ).isSuccess
+        )
+        #expect(
+            core.tiler.settings.dragGhost
+                == .ghostDefault
+        )
+    }
+}
+
+@Suite("Hex color parsing")
+struct HexColorTests {
+    @Test("6- and 8-digit hex parse, junk does not")
+    func parse() throws {
+        let rgb = try #require(
+            DragVisual.parseHex("#4E9F3D")
+        )
+        #expect(rgb.alpha == 1)
+        #expect(abs(rgb.green - 0x9F / 255.0) < 0.001)
+        let rgba = try #require(
+            DragVisual.parseHex("8B5E3C40")
+        )
+        #expect(abs(rgba.alpha - 0x40 / 255.0) < 0.001)
+        #expect(DragVisual.parseHex("#12345") == nil)
+        #expect(DragVisual.parseHex("kiwi") == nil)
+        #expect(DragVisual.parseHex("#GG5E3C") == nil)
+    }
+}
+
+@Suite("Drag target rule")
+struct DragTargetTests {
+    private let slots: [WindowID: CGRect] = [
+        WindowID(1): CGRect(x: 0, y: 0, width: 100, height: 100),
+        WindowID(2): CGRect(
+            x: 100,
+            y: 0,
+            width: 100,
+            height: 100
+        ),
+    ]
+
+    @Test("The slot under the frame's center is the target")
+    func centerRule() {
+        let frame = CGRect(x: 90, y: 10, width: 80, height: 80)
+        #expect(
+            DragTarget.swapTarget(
+                of: WindowID(1),
+                frame: frame,
+                slots: slots
+            ) == WindowID(2)
+        )
+    }
+
+    @Test("A window's own slot is never its target")
+    func neverSelf() {
+        let frame = CGRect(x: 10, y: 10, width: 50, height: 50)
+        #expect(
+            DragTarget.swapTarget(
+                of: WindowID(1),
+                frame: frame,
+                slots: slots
+            ) == nil
+        )
+    }
+
+    @Test("A center over no slot yields no target")
+    func nowhere() {
+        let frame = CGRect(x: 500, y: 500, width: 50, height: 50)
+        #expect(
+            DragTarget.swapTarget(
+                of: WindowID(1),
+                frame: frame,
+                slots: slots
+            ) == nil
         )
     }
 }
