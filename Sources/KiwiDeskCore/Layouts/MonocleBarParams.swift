@@ -60,6 +60,13 @@ public struct MonocleBarParams: Sendable, Equatable {
     /// Spacing between items (pt); 0 = touching.
     public var itemGap: CGFloat = 6
     public var content: Content = .iconAndName
+    /// Adjacent windows of the same app collapse into one
+    /// item wearing a count badge. Clicking the group
+    /// focuses its first member, which expands the group
+    /// into individual items; focus leaving the group
+    /// collapses it again. Non-adjacent windows of the same
+    /// app stay separate items.
+    public var groupAdjacentWindows = true
     /// 0 (default) = auto: the text scales with the bar
     /// thickness. Any positive value pins the size.
     public var fontSize: CGFloat = 0
@@ -83,6 +90,9 @@ public struct MonocleBarParams: Sendable, Equatable {
     /// whose hover tint needs darker text.
     public var hoverTextColor = "#F2EBD9"
     public var backgroundColor = "#00000000"
+    /// The count badge on grouped items.
+    public var groupBadgeColor = "#FF3B30"
+    public var groupBadgeTextColor = "#FFFFFF"
 
     public init() {}
 }
@@ -101,6 +111,9 @@ extension MonocleBarParams: Codable {
         case itemSize = "item_size"
         case itemGap = "item_gap"
         case content
+        case groupAdjacentWindows = "group_adjacent_windows"
+        case groupBadgeColor = "group_badge_color"
+        case groupBadgeTextColor = "group_badge_text_color"
         case fontSize = "font_size"
         case cornerRadius = "corner_radius"
         case textColor = "text_color"
@@ -162,6 +175,11 @@ extension MonocleBarParams: Codable {
                 Content.self,
                 forKey: .content
             ) ?? defaults.content
+        groupAdjacentWindows =
+            try container.decodeIfPresent(
+                Bool.self,
+                forKey: .groupAdjacentWindows
+            ) ?? defaults.groupAdjacentWindows
     }
 
     private mutating func decodeAppearance(
@@ -223,5 +241,15 @@ extension MonocleBarParams: Codable {
                 String.self,
                 forKey: .backgroundColor
             ) ?? defaults.backgroundColor
+        groupBadgeColor =
+            try container.decodeIfPresent(
+                String.self,
+                forKey: .groupBadgeColor
+            ) ?? defaults.groupBadgeColor
+        groupBadgeTextColor =
+            try container.decodeIfPresent(
+                String.self,
+                forKey: .groupBadgeTextColor
+            ) ?? defaults.groupBadgeTextColor
     }
 }

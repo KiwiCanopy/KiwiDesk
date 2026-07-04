@@ -104,6 +104,9 @@ public final class KiwiCore {
         monocleBar.onSelect = { [weak self] id in
             self?.focusWindow(id)
         }
+        monocleBar.onMove = { [weak self] from, to in
+            self?.moveMonocleItem(from: from, to: to)
+        }
         tiler.animation.onAllAnimationsEnded = { [weak self] in
             self?.runPendingStackZOrderRestore()
         }

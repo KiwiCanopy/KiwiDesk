@@ -17,20 +17,32 @@ public final class IndicatorBarOverlay {
         public let id: WindowID
         public let name: String
         public let icon: NSImage?
+        /// Windows behind this item; > 1 for a group of
+        /// adjacent same-app windows (shown as a badge).
+        public let count: Int
 
         public init(
             id: WindowID,
             name: String,
-            icon: NSImage?
+            icon: NSImage?,
+            count: Int = 1
         ) {
             self.id = id
             self.name = name
             self.icon = icon
+            self.count = count
         }
     }
 
     /// Click-to-focus hook; wired to `KiwiCore.focusWindow`.
     public var onSelect: @MainActor (WindowID) -> Void = {
+        _ in
+    }
+
+    /// Drag-and-drop reorder hook (from slot, to slot);
+    /// wired to `KiwiCore.moveMonocleItem`.
+    public var onMove: @MainActor (Int, Int) -> Void = {
+        _,
         _ in
     }
 
@@ -50,11 +62,14 @@ public final class IndicatorBarOverlay {
     }
 
     private var panel: NSPanel?
-    private var itemViews: [IndicatorBarItemView] = []
-    private let itemContainer = FlippedView()
-    private let backArrow = IndicatorBarArrowView()
-    private let forwardArrow = IndicatorBarArrowView()
-    private var scrollOffset: CGFloat = 0
+    var itemViews: [IndicatorBarItemView] = []
+    let itemContainer = FlippedView()
+    let backArrow = IndicatorBarArrowView()
+    let forwardArrow = IndicatorBarArrowView()
+    var scrollOffset: CGFloat = 0
+    /// The last render's geometry, kept for the drag
+    /// handlers (IndicatorBarOverlay+Drag).
+    var lastMetrics: Metrics?
     private var lastShown: RenderState?
 
     public init() {}
@@ -95,7 +110,7 @@ public final class IndicatorBarOverlay {
     /// changes follow the active item into view; manual
     /// arrow scrolling re-renders without that adjustment so
     /// it isn't immediately snapped back.
-    private func render(followingFocus: Bool) {
+    func render(followingFocus: Bool) {
         guard let state = lastShown else { return }
         let items = state.items
         let activeIndex = state.activeIndex
@@ -111,6 +126,7 @@ public final class IndicatorBarOverlay {
             count: items.count,
             params: params
         )
+        lastMetrics = m
         scrollOffset = Self.scrollOffset(
             current: scrollOffset,
             activeIndex: followingFocus ? activeIndex : nil,
@@ -144,9 +160,24 @@ public final class IndicatorBarOverlay {
             horizontal: m.horizontal,
             scrolledBy: scrollOffset
         )
+        // Frame changes ease into place so group expansion
+        // (and scroll-follow) widens out instead of popping;
+        // freshly created views take their frame directly.
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.15
+            context.timingFunction = CAMediaTimingFunction(
+                name: .easeOut
+            )
+            for (index, view) in itemViews.enumerated() {
+                if view.frame == .zero {
+                    view.frame = frames[index]
+                } else {
+                    view.animator().frame = frames[index]
+                }
+            }
+        }
         for (index, item) in items.enumerated() {
             let view = itemViews[index]
-            view.frame = frames[index]
             let active = index == activeIndex
             // "gap" active style: the focused window's slot
             // stays empty instead of being highlighted.
@@ -156,12 +187,19 @@ public final class IndicatorBarOverlay {
                 id: item.id,
                 name: item.name,
                 icon: item.icon,
+                count: item.count,
                 active: active,
                 horizontal: m.horizontal,
                 params: params
             )
             view.onSelect = { [weak self] id in
                 self?.onSelect(id)
+            }
+            view.onDragMoved = { [weak self] view, point in
+                self?.dragMoved(view, to: point)
+            }
+            view.onDragEnded = { [weak self] view in
+                self?.dragEnded(view)
             }
         }
         layoutArrows(strip: strip, m: m, params: params)
@@ -242,80 +280,4 @@ public final class IndicatorBarOverlay {
         render(followingFocus: false)
     }
 
-    // MARK: - Panel plumbing
-
-    /// Underline style draws all names on one shared box; the
-    /// other styles put boxes on the items and keep the strip
-    /// itself in the (default transparent) background color.
-    private func styleContainer(
-        _ panel: NSPanel,
-        params: MonocleParams
-    ) {
-        guard let layer = panel.contentView?.layer else {
-            return
-        }
-        layer.masksToBounds = true
-        layer.cornerRadius =
-            params.bar.style == .pills
-            ? 0 : params.bar.cornerRadius
-        let background =
-            params.bar.style == .underline
-            ? params.bar.boxColor
-            : params.bar.backgroundColor
-        layer.backgroundColor =
-            NSColor(kiwiHex: background).cgColor
-    }
-
-    private func syncItemViewCount(_ count: Int) {
-        while itemViews.count > count {
-            itemViews.removeLast().removeFromSuperview()
-        }
-        while itemViews.count < count {
-            let view = IndicatorBarItemView()
-            itemViews.append(view)
-            itemContainer.addSubview(view)
-        }
-    }
-
-    /// Flipped so the first item sits at the visual top of
-    /// vertical bars.
-    private final class FlippedView: NSView {
-        override var isFlipped: Bool { true }
-    }
-
-    /// Like the drag visuals' panels, but clickable: items
-    /// focus their window on click. `.nonactivatingPanel`
-    /// keeps KiwiDesk out of the key window order anyway.
-    private func makePanel() -> NSPanel {
-        let panel = NSPanel(
-            contentRect: .zero,
-            styleMask: [.borderless, .nonactivatingPanel],
-            backing: .buffered,
-            defer: true
-        )
-        panel.isOpaque = false
-        panel.backgroundColor = .clear
-        panel.hasShadow = false
-        panel.ignoresMouseEvents = false
-        panel.level = .floating
-        panel.isReleasedWhenClosed = false
-        panel.animationBehavior = .none
-        panel.collectionBehavior = [
-            .canJoinAllSpaces,
-            .fullScreenAuxiliary,
-            .ignoresCycle,
-        ]
-        let view = FlippedView()
-        view.wantsLayer = true
-        panel.contentView = view
-        // Items render inside a clipping viewport so that,
-        // while scrolled, the cut-off item ends a gap short
-        // of the arrows instead of sliding under them.
-        itemContainer.wantsLayer = true
-        itemContainer.layer?.masksToBounds = true
-        view.addSubview(itemContainer)
-        view.addSubview(backArrow)
-        view.addSubview(forwardArrow)
-        return panel
-    }
 }

@@ -11,6 +11,38 @@ extension IndicatorBarItemView {
         } else {
             layoutVertical()
         }
+        layoutBadge()
+    }
+
+    /// The group-count badge hugs the slot's top-right
+    /// corner (flipped coordinates): a filled circle that
+    /// grows into a larger circle for multi-digit counts.
+    private func layoutBadge() {
+        guard !badge.isHidden else { return }
+        let baseHeight = min(
+            max(
+                min(bounds.width, bounds.height) * 0.38,
+                10
+            ),
+            14
+        )
+        badge.font = .systemFont(
+            ofSize: baseHeight * 0.9,
+            weight: .bold
+        )
+        // Ensure text fits centered; width must equal height
+        // to maintain a proper circle. We add minimal horizontal
+        // padding to keep the badge tight around the text.
+        let textWidth = ceil(badge.cell?.cellSize.width ?? 0)
+        let diameter = max(baseHeight, textWidth + 2)
+        let cornerPadding: CGFloat = 3
+        badge.frame = CGRect(
+            x: bounds.width - diameter - cornerPadding,
+            y: cornerPadding,
+            width: diameter,
+            height: diameter
+        )
+        badge.layer?.cornerRadius = diameter / 2
     }
 
     /// Shared with the overlay's natural-width measurement.

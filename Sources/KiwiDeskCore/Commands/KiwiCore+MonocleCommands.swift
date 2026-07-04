@@ -22,6 +22,11 @@ extension KiwiCore {
                 return .fail("expected boolean")
             }
             tiler.settings.monocle.bar.enabled = enabled
+        case "monocle.set_bar_group_adjacent_windows":
+            guard let enabled = args.first?.boolValue else {
+                return .fail("expected boolean")
+            }
+            tiler.settings.monocle.bar.groupAdjacentWindows = enabled
         case "monocle.set_bar_position":
             guard let raw = args.first?.stringValue,
                 let position =
@@ -117,6 +122,10 @@ extension KiwiCore {
                     \.bar.hoverTextColor,
                 "monocle.set_bar_background_color":
                     \.bar.backgroundColor,
+                "monocle.set_bar_group_badge_color":
+                    \.bar.groupBadgeColor,
+                "monocle.set_bar_group_badge_text_color":
+                    \.bar.groupBadgeTextColor,
             ]
         guard let keyPath = colors[command] else {
             return .fail("unknown command: \(command)")

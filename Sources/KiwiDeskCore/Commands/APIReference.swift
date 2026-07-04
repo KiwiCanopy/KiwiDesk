@@ -100,6 +100,9 @@ public enum APIReference {
             "set_bar_hover_color",
             "set_bar_hover_text_color",
             "set_bar_background_color",
+            "set_bar_group_adjacent_windows",
+            "set_bar_group_badge_color",
+            "set_bar_group_badge_text_color",
         ],
         "drag": [
             "set_ghost_enabled", "set_ghost_border",

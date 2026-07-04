@@ -155,6 +155,17 @@ panel never steals key focus); hovering swaps the item's
 background to the hover color — the already-active item
 ignores clicks and shows no hover.
 
+Adjacent windows of the same app collapse into **one item**
+wearing a count badge (`group_adjacent_windows`, on by
+default); same-app windows that are not adjacent stay
+separate. Clicking a grouped item focuses its first window
+and the group **expands** — its members widen out into
+individual items (overflow just scrolls as usual), so any
+member can be picked directly. Focus leaving the group
+collapses it again. Items can also be **dragged** along the
+bar to reorder the windows: a collapsed group moves as a
+whole, an expanded member moves alone.
+
 ```lua
 monocle.set_bar_style("pills")     -- pills | segments | underline
 monocle.set_bar_active_style("highlight")  -- highlight | gap
@@ -163,6 +174,8 @@ monocle.set_bar_item_size(0)  -- pt; 0 (default) = standard
 monocle.set_bar_item_gap(6)        -- pt between items
 monocle.set_bar_content("icon_and_name")  -- icon | name |
                                           -- icon_and_name
+monocle.set_bar_group_adjacent_windows(true)  -- collapse
+                                              -- same-app runs
 monocle.set_bar_font_size(0)   -- 0 (default) = auto: text
                                -- scales with bar_thickness;
                                -- any positive value pins it
@@ -198,6 +211,9 @@ monocle.set_bar_hover_color("#6DBF5B80")
 monocle.set_bar_hover_text_color("#F2EBD9")
 -- The strip behind everything (default fully transparent):
 monocle.set_bar_background_color("#00000000")
+-- The count badge on grouped items:
+monocle.set_bar_group_badge_color("#FF3B30")
+monocle.set_bar_group_badge_text_color("#FFFFFF")
 ```
 
 ### Where new windows land
