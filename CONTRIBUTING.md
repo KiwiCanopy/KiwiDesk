@@ -33,33 +33,46 @@ The binding style and workflow rules live in
 - Run `swift build && swift test && ./scripts/lint.sh` before
   pushing — CI enforces all three and blocks merging on red.
 
-## Pull Requests
+## Branching & Pull Requests
 
-1. Fork and branch from `main`.
-2. Keep PRs focused; separate refactors from features.
-3. Include tests for new behavior and update the docs
-   (`docs/`, README) when you change user-facing behavior.
-4. Make sure CI is green.
+**Branch naming:** follow Conventional Commit types with kebab-case
+descriptions. Examples:
+- `feat/scrolling-snap-mode` — new feature
+- `fix/z-order-on-monitor-change` — bug fix
+- `refactor/layout-math` — code restructure (no behavior change)
+- `docs/update-cli-guide` — documentation
+- `test/animation-timing` — new tests
+- `chore/upgrade-lua` — build/maintenance
 
-## Bug Reports
+Branch from `main` and keep one focused change per branch. Separate
+refactors from features (review them independently).
 
-Please include:
+**Pull request process:**
+1. Fill in the PR template (checklist of tests, docs,
+   linting).
+2. Commit messages follow Conventional Commits format
+   (see [AGENTS.md](AGENTS.md) §3).
+3. CI (build, lint, test) must pass before merging.
+4. Address feedback from code-reviewer and
+   architect-reviewer agents (see [AGENTS.md](AGENTS.md) §4)
+   before opening a PR.
 
-- macOS version and Mac model (Apple Silicon / Intel).
-- KiwiDesk version or commit hash.
-- Steps to reproduce, expected vs. actual behavior.
-- Relevant output: `KiwiDesk get_state`,
-  `KiwiDesk get_layout_info`, and log lines (KiwiDesk logs to
-  the system log; filter for "KiwiDesk").
-- Whether other window managers / AX tools were running —
-  they often interact.
+## Reporting Issues
 
-## Feature Requests
+Use the [issue templates](.github/ISSUE_TEMPLATE/) when opening
+an issue. GitHub will prompt you to choose a template.
 
-Open an issue describing the use case (not just the feature).
-Check the roadmap in the README status note first — the GUI,
-per-native-space profiles, and drag-and-drop are already
-planned.
+**Bug reports** capture macOS version, KiwiDesk version/commit,
+repro steps, expected vs. actual behavior, and relevant logs
+(`KiwiDesk get_state`, `get_layout_info`, and system log lines).
+The template walks you through the details.
+
+**Feature requests** should describe the **use case** and
+**problem it solves** (not just the feature itself). Check the
+**Status** note at the top of the
+[README](https://github.com/hajiboy95/KiwiDesk) first — the
+SwiftUI GUI, per-native-space profiles, and drag-and-drop are
+already planned.
 
 ## Vulnerability Reports
 

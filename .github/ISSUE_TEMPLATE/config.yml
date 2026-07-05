@@ -1,0 +1,7 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/hajiboy95/KiwiDesk/security/advisories/new
+    about: |
+      Report privately via GitHub's Security tab.
+      See SECURITY.md for details.

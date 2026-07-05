@@ -79,6 +79,20 @@ and (later) the Lua VM.
    their findings before opening a PR. (See §4 subagent
    delegation.)
 
+### Branching & Pull Requests
+
+Branch from `main` with a name that matches the Conventional
+Commit type: `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
+`chore/`, `ci/`, `perf/`, etc., followed by a short kebab-case
+description (e.g., `feat/scrolling-snap-mode`). One focused
+change per branch; separate refactors from features.
+
+When opening an issue or pull request, use the GitHub
+[issue templates](.github/ISSUE_TEMPLATE/) and
+[PR template](.github/pull_request_template.md). Reference
+related issues in commit messages or PR descriptions using
+`fixes #123` syntax.
+
 ### Commit messages (Angular / Conventional Commits)
 
 Format: `type(scope): subject` — imperative, lower-case subject,

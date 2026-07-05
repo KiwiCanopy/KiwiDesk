@@ -1,0 +1,109 @@
+name: Bug Report
+description: Something is not working as expected
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Please provide enough detail to
+        reproduce the issue. Fill in all fields below.
+
+  - type: input
+    id: kiwidesk_version
+    attributes:
+      label: KiwiDesk version or commit
+      description: |
+        For a source build, run `git rev-parse --short HEAD`
+        in the repo. For a release, the version you installed.
+      placeholder: "abc1234 or 1.0.0"
+    validations:
+      required: true
+
+  - type: input
+    id: macos_version
+    attributes:
+      label: macOS version
+      description: "Run `sw_vers` or check System Settings."
+      placeholder: "macOS 15.2"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: mac_model
+    attributes:
+      label: Mac model type
+      options:
+        - Apple Silicon (M1, M2, M3, etc.)
+        - Intel
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro_steps
+    attributes:
+      label: Steps to reproduce
+      description: |
+        Clear, numbered steps. Include key presses, commands,
+        or conditions needed to trigger the bug.
+      placeholder: |
+        1. Open Terminal
+        2. Run `KiwiDesk set_mode bsp`
+        3. (etc.)
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_vs_actual
+    attributes:
+      label: Expected vs. actual behavior
+      description: |
+        What should happen? What actually happened instead?
+      placeholder: |
+        Expected: windows tile in binary-space-partition
+        Actual: windows stack vertically
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs_and_state
+    attributes:
+      label: Relevant output and logs
+      description: |
+        Paste the output of these commands (one per block):
+        - `KiwiDesk get_state` (print as JSON)
+        - `KiwiDesk get_layout_info` (current layout details)
+        - `log show --predicate 'eventMessage contains[c] "KiwiDesk"'`
+        (copy lines mentioning KiwiDesk)
+      placeholder: |
+        ## KiwiDesk get_state
+        { "spaces": {...}, ... }
+
+        ## KiwiDesk get_layout_info
+        { "layout": "bsp", ... }
+
+        ## System log (KiwiDesk filter)
+        [timestamp] ...
+
+  - type: checkboxes
+    id: other_tools
+    attributes:
+      label: Other window managers or AX tools running?
+      description: |
+        Some tools interact. Is anything else managing windows,
+        tracking focus, or controlling accessibility?
+      options:
+        - label: Other window managers (e.g., Rectangle, yabai)
+        - label: Accessibility tools (e.g., Keyboard Maestro)
+        - label: None that I know of
+    validations:
+      required: true
+
+  - type: textarea
+    id: extra_context
+    attributes:
+      label: Extra context
+      description: "Any other relevant details?"
+      placeholder: |
+        Happens only with a specific app?
+        Only on external monitor?
