@@ -1,0 +1,53 @@
+name: Feature Request
+description: Suggest an enhancement or new behavior
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please describe the **use case** and the **problem it
+        solves**, not just the feature itself.
+
+        Check the **Status** note at the top of the
+        [README](https://github.com/hajiboy95/KiwiDesk) first to
+        see what already ships and what's still in progress.
+
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Use case
+      description: |
+        What are you trying to do? What workflow or problem
+        does this enable?
+      placeholder: |
+        I manage windows across many spaces and need to...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: Proposed solution
+      description: |
+        How would you like KiwiDesk to behave? Be as specific
+        or exploratory as you like.
+      placeholder: |
+        - A new command or setting like...
+        - A change to existing behavior (e.g., ...)
+        - Integration with (e.g., ...)
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: |
+        Any other approaches or workarounds you've tried?
+      placeholder: "I've tried using..., but it doesn't..."
+
+  - type: textarea
+    id: extra_context
+    attributes:
+      label: Extra context
+      placeholder: "Screenshots, examples, or related projects?"
