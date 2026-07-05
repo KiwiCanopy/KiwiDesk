@@ -16,6 +16,14 @@ if [ "$#" -ne 1 ]; then
 fi
 
 VERSION="$1"
+
+if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([+-][A-Za-z0-9.]+)?$ ]]
+then
+    echo "error: invalid version '$VERSION'" \
+        "(expected e.g. 1.2.3 or 1.2.3-rc1)" >&2
+    exit 1
+fi
+
 COMMIT="$(git -C "$ROOT" rev-parse --short HEAD)"
 
 sed -i '' \
