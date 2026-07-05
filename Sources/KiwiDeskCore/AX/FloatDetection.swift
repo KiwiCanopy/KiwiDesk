@@ -80,6 +80,35 @@ public enum FloatDetection {
         return list?.first?[kCGWindowLayer as String] as? Int
     }
 
+    /// Windows KiwiDesk must not manage at all — no tracking,
+    /// no state entry, no events. Ghostty's quick terminal is
+    /// a slide-down panel (non-zero CGWindow layer) that macOS
+    /// shows over every space; merely *floating* it still
+    /// assigns it a space, and focusing it then drags the user
+    /// to that space (issue #21). Hardcoded on purpose: no
+    /// general ignore-rule machinery until a second case
+    /// exists.
+    public static func shouldIgnore(
+        appName: String,
+        layer: Int
+    ) -> Bool {
+        appName == "Ghostty" && layer != 0
+    }
+
+    /// Live-element variant of `shouldIgnore(appName:layer:)`.
+    @MainActor
+    public static func shouldIgnore(
+        element: AXUIElement,
+        appName: String
+    ) -> Bool {
+        let layer = AXHelper.windowID(of: element)
+            .flatMap { windowLayer(of: $0) }
+        return shouldIgnore(
+            appName: appName,
+            layer: layer ?? 0
+        )
+    }
+
     /// Full decision for a live AX element, including user
     /// rules. PIP windows (subrole AXFloatingWindow) float
     /// automatically via the subrole check.

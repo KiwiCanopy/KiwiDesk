@@ -330,6 +330,32 @@ struct FloatRuleTests {
         )
     }
 
+    @Test("Ghostty's quick terminal panel is never managed")
+    func ignoreDetection() throws {
+        // The quick terminal: Ghostty + non-zero layer.
+        #expect(
+            FloatDetection.shouldIgnore(
+                appName: "Ghostty",
+                layer: 3
+            )
+        )
+        // Ghostty's normal windows tile as usual.
+        #expect(
+            !FloatDetection.shouldIgnore(
+                appName: "Ghostty",
+                layer: 0
+            )
+        )
+        // Other apps' panels merely float; only Ghostty's
+        // quick terminal is ignored outright (issue #21).
+        #expect(
+            !FloatDetection.shouldIgnore(
+                appName: "Finder",
+                layer: 3
+            )
+        )
+    }
+
     @Test("Only structural events trigger a retile")
     func retileFilter() throws {
         #expect(

@@ -104,6 +104,14 @@ public final class EventLoop {
             )
         else { return }
         guard elements[pid]?[window.id] == nil else { return }
+        // Some panels must never be managed at all — merely
+        // floating them still pins them to a space (issue #21).
+        guard
+            !FloatDetection.shouldIgnore(
+                element: element,
+                appName: appName
+            )
+        else { return }
         window.isFloating = FloatDetection.shouldFloat(
             element: element,
             appName: appName,
@@ -135,6 +143,15 @@ public final class EventLoop {
                 minimized.insert(id)
                 continue
             }
+            // An ignored panel stays out of `live`: if the
+            // startup scan mistracked it (its layer reads
+            // wrong mid-launch), the sweep below untracks it.
+            guard
+                !FloatDetection.shouldIgnore(
+                    element: element,
+                    appName: appName
+                )
+            else { continue }
             live.insert(id)
             if elements[pid]?[id] == nil {
                 track(element, pid: pid, appName: appName)

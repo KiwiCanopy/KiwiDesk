@@ -419,12 +419,19 @@ float_rules = { "Calculator", "Finder:Get Info" }
 ```
 
 Panels and overlays that live above the normal window layer
-(e.g. Ghostty's quick terminal) also float automatically, no
-rule needed. Detection is re-checked as windows come and go,
-so a window that reported wrong metadata while its app was
-still launching corrects itself instead of staying tiled. A
-manual `make_floating` override is never reverted by these
-re-checks.
+also float automatically, no rule needed. Detection is
+re-checked as windows come and go, so a window that reported
+wrong metadata while its app was still launching corrects
+itself instead of staying tiled. A manual `make_floating`
+override is never reverted by these re-checks.
+
+**Ghostty's quick terminal** goes one step further: it is
+not managed at all — no space assignment, no window events.
+Even a floating window belongs to a space, and since macOS
+shows the quick terminal over *every* space, focusing it
+would drag you to whichever space it was first seen on. It
+can take focus freely; KiwiDesk simply pretends it does not
+exist.
 
 ```lua
 
