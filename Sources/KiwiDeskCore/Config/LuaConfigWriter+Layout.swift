@@ -109,7 +109,7 @@ extension LuaConfigWriter {
                 !$0.combo.isEmpty
             }
             if mode.isDefault {
-                blocks.append(defaultBinds(rows))
+                blocks.append(defaultBinds(mode, rows: rows))
             } else {
                 blocks.append(defineMode(mode, rows: rows))
             }
@@ -120,10 +120,21 @@ extension LuaConfigWriter {
             .joined(separator: "\n\n")
     }
 
+    /// The default mode always shows the standard menu bar
+    /// glyph — the GUI never offers an icon picker for it (see
+    /// `KeybindingsTab.modeIconRow`), so `KiwiDesk.bind` has no
+    /// icon argument to emit. This assertion pins that
+    /// asymmetry: revisit both sides together if it ever
+    /// changes.
     private static func defaultBinds(
-        _ rows: [KeyBinding]
+        _ mode: KeyMode,
+        rows: [KeyBinding]
     ) -> String {
-        rows.map { row in
+        assert(
+            mode.icon == nil,
+            "default mode must never carry an icon"
+        )
+        return rows.map { row in
             "KiwiDesk.bind("
                 + LuaLiteral.string(row.combo)
                 + ", function()\n" + indent(row.lua)
