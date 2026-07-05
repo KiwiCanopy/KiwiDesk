@@ -554,6 +554,37 @@ end)
 | `focus_change` | `window_id`, `app` |
 | `monitor_change` | `monitor_count` |
 | `native_space_change` | `native_space` (desktop number) |
+| `window_created` | `window_id`, `app`, `space` |
+| `window_destroyed` | `window_id`, `app`, `space` |
+| `window_minimized` | `window_id`, `app`, `space` |
+| `window_moved_to_space` | `window_id`, `app`, `from`, `to` |
+
+The window lifecycle events fire even when focus does not
+change (a background window opening or closing), so status
+bars stay current without polling. `space` is always the
+space the window lives in — for the gone-events, the one it
+disappeared from, even when that space is not active. A
+minimize fires only `window_minimized`, never
+`window_destroyed`. In the CLI event stream the key is
+`space_id` (matching `space_change`) and an unknown space is
+JSON `null`; the Lua callback receives `""` instead, since a
+positional `nil` would truncate the argument list.
+
+`window_moved_to_space` fires on an explicit
+`move_to_virtual_space` (with or without follow) when the
+target differs from the window's current space. Bulk
+reassignments — profile loads, session restore — stay
+silent. JSON keys: `from_space_id` (null if unknown) and
+`to_space_id`.
+
+Two caveats: `window_created` / `window_destroyed` also fire
+when windows *appear to* come and go — deminiaturizing a
+window surfaces as `window_created`, and switching native
+macOS Spaces makes every managed window on the old desktop
+vanish from the accessibility tree (a burst of
+`window_destroyed`) and reappear on return (a burst of
+`window_created`). Treat the events as "the visible window
+set changed", not as app lifecycle.
 
 ## External Commands
 

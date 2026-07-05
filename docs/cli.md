@@ -122,7 +122,45 @@ Each event is one JSON line:
 ```
 
 Events: `space_change`, `layout_change`, `focus_change`,
-`monitor_change`, `native_space_change`.
+`monitor_change`, `native_space_change`, `window_created`,
+`window_destroyed`, `window_minimized`,
+`window_moved_to_space`.
+
+The window lifecycle events fire even when focus does not
+change, so bars can drop stale icons immediately:
+
+```json
+{"event": "window_created",
+ "data": {"window_id": 4711, "app": "Ghostty",
+          "space_id": "2"}}
+{"event": "window_destroyed",
+ "data": {"window_id": 4711, "app": "Ghostty",
+          "space_id": "2"}}
+```
+
+`window_created` carries the space the window was placed in
+(`app_rules` included); `window_destroyed` and
+`window_minimized` carry the space the window disappeared
+from — its own space, even when that space is not active. A
+minimize fires only `window_minimized`, never
+`window_destroyed`.
+
+Caveat: these events track the *visible window set*, not app
+lifecycle. Deminiaturize surfaces as `window_created`, and a
+native macOS Space switch fires a burst of `window_destroyed`
+for the old desktop's windows and `window_created` when they
+return.
+
+`window_moved_to_space` fires when a window is explicitly
+moved to another virtual space (`move_to_virtual_space`,
+with or without follow); bulk reassignments (profile load,
+session restore) stay silent:
+
+```json
+{"event": "window_moved_to_space",
+ "data": {"window_id": 4711, "app": "Spotify",
+          "from_space_id": "1", "to_space_id": "3"}}
+```
 
 `native_space_change` fires when the user switches native
 macOS Spaces (Mission Control desktops); its data carries the
