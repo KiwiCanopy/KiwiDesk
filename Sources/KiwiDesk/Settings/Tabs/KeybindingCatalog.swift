@@ -9,8 +9,8 @@ struct NavCommand: Identifiable, Hashable {
     var id: String { lua }
 }
 
-/// A collapsible group of navigation commands (Focus, Window
-/// Movement, Space Movement).
+/// A collapsible group of navigation commands (Focus — including
+/// go-to-space — and Window Movement).
 struct NavGroup: Identifiable {
     let title: String
     let commands: [NavCommand]
@@ -32,10 +32,21 @@ enum KeybindingCatalog {
     static func navigationGroups(
         spaces: [SpaceID]
     ) -> [NavGroup] {
-        let focus = directions.map { name, dir in
+        var focus = directions.map { name, dir in
             NavCommand(
                 label: "Focus \(name)",
                 lua: "KiwiDesk.focus(\"\(dir)\")"
+            )
+        }
+        // Going to a space is a focus action, so it shares the
+        // Focus group rather than its own accordion.
+        for space in spaces {
+            focus.append(
+                NavCommand(
+                    label: "Go to \(space.raw)",
+                    lua: "KiwiDesk.focus_virtual_space"
+                        + "(\(spaceArg(space)))"
+                )
             )
         }
         var movement = directions.map { name, dir in
@@ -61,20 +72,9 @@ enum KeybindingCatalog {
                 )
             )
         }
-        let spaceMovement = spaces.map { space in
-            NavCommand(
-                label: "Go to \(space.raw)",
-                lua: "KiwiDesk.focus_virtual_space"
-                    + "(\(spaceArg(space)))"
-            )
-        }
         return [
             NavGroup(title: "Focus", commands: focus),
             NavGroup(title: "Window Movement", commands: movement),
-            NavGroup(
-                title: "Space Movement",
-                commands: spaceMovement
-            ),
         ]
     }
 
