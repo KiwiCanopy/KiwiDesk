@@ -17,6 +17,7 @@ AGENTS=(
     "03-infrastructure/devops-engineer"
     "04-quality-security/code-reviewer"
     "04-quality-security/architect-reviewer"
+    "06-developer-experience/git-workflow-manager"
     "09-meta-orchestration/codebase-orchestrator"
 )
 
