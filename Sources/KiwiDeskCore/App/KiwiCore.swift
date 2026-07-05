@@ -229,6 +229,7 @@ public final class KiwiCore {
             // of a hidden window (see above).
             pendingFocusFollow?.cancel()
             newlyCreatedWindow = window.id
+            emitWindowCreated(window)
         case .windowMoved(let id, let frame):
             drag.windowMoved(id, frame: frame)
         case .windowResized(let id, let frame):
@@ -239,9 +240,14 @@ public final class KiwiCore {
             if isResizeGesture(id) {
                 drag.windowMoved(id, frame: frame)
             }
-        case .windowDestroyed(let id, _):
+        case .windowDestroyed(let id, let wasMinimized):
             drag.cancel(id)
             dragOverlay.hideAll()
+            if wasMinimized {
+                emitWindowMinimized(id)
+            } else {
+                emitWindowDestroyed(id)
+            }
         case .nativeSpaceChanged:
             handleNativeSpaceChange()
         default:
@@ -270,69 +276,6 @@ public final class KiwiCore {
         for record in snapshot.windows {
             tiler.setFrame(record.windowID, record.frame)
         }
-    }
-
-    // MARK: - Event emission helpers
-
-    func emitSpaceChange() {
-        guard let id = state.workspaces.activeSpace,
-            let space = state.workspaces[id]
-        else { return }
-        bus.emit(
-            .spaceChange,
-            data: .object([
-                "space_id": .string(id.raw),
-                "layout_mode": .string(space.mode.rawValue),
-                "window_count": .number(
-                    Double(space.windows.count)
-                ),
-            ]),
-            luaArgs: [
-                .string(id.raw),
-                .string(space.mode.rawValue),
-            ]
-        )
-    }
-
-    func emitLayoutChange(space: Space) {
-        bus.emit(
-            .layoutChange,
-            data: .object([
-                "space_id": .string(space.id.raw),
-                "layout_mode": .string(space.mode.rawValue),
-            ]),
-            luaArgs: [
-                .string(space.id.raw),
-                .string(space.mode.rawValue),
-            ]
-        )
-    }
-
-    private func emitFocusChange(_ id: WindowID) {
-        let window = state.windows[id]
-        bus.emit(
-            .focusChange,
-            data: .object([
-                "window_id": .number(Double(id.raw)),
-                "app": .string(window?.appName ?? ""),
-                "title": .string(window?.title ?? ""),
-            ]),
-            luaArgs: [
-                .number(Double(id.raw)),
-                .string(window?.appName ?? ""),
-            ]
-        )
-    }
-
-    private func emitMonitorChange() {
-        let displays = state.workspaces.allDisplays
-        bus.emit(
-            .monitorChange,
-            data: .object([
-                "count": .number(Double(displays.count))
-            ]),
-            luaArgs: [.number(Double(displays.count))]
-        )
     }
 
     // MARK: - Accessors
