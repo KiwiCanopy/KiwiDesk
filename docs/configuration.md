@@ -140,7 +140,9 @@ scroll.set_slot_size(0)            -- slot size along the scroll
                                    -- height vertical); a number =
                                    -- px; "NN%" = fraction of the
                                    -- available axis (minus bar/gaps)
-scroll.set_anchor("center")        -- center | left | right
+scroll.set_anchor("center")        -- center (any orientation), or
+                                   -- an edge: left|right horizontal,
+                                   -- top|bottom vertical
 scroll.set_speed(250)              -- animation ms
 scroll.set_orientation("horizontal")  -- horizontal: columns
                                    -- scroll left/right.

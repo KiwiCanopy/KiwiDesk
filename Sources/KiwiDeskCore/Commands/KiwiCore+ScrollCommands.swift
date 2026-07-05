@@ -32,12 +32,24 @@ extension KiwiCore {
                 )
             }
         case "scroll.set_anchor":
-            guard let raw = args.first?.stringValue,
+            guard let raw = args.first?.stringValue else {
+                return .fail(
+                    "expected center|left|right|top|bottom"
+                )
+            }
+            // top/bottom are the vertical spellings of the
+            // leading/trailing edge; the stored enum stays
+            // center/left/right (see ScrollGridEditor labels).
+            let normalized =
+                ["top": "left", "bottom": "right"][raw] ?? raw
+            guard
                 let anchor = ScrollingParams.Anchor(
-                    rawValue: raw
+                    rawValue: normalized
                 )
             else {
-                return .fail("expected center|left|right")
+                return .fail(
+                    "expected center|left|right|top|bottom"
+                )
             }
             tiler.settings.scrolling.anchor = anchor
         case "scroll.set_orientation":

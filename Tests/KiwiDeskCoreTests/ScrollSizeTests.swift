@@ -191,3 +191,34 @@ struct ScrollSlotSizeCommandTests {
         )
     }
 }
+
+@Suite("scroll.set_anchor", .serialized)
+@MainActor
+struct ScrollAnchorCommandTests {
+    @Test("top / bottom alias to left / right (vertical spelling)")
+    func verticalAnchorAliases() {
+        let core = makeCore()
+        #expect(
+            core.execute(
+                "scroll.set_anchor",
+                args: [.string("top")]
+            ).isSuccess
+        )
+        #expect(core.tiler.settings.scrolling.anchor == .left)
+        #expect(
+            core.execute(
+                "scroll.set_anchor",
+                args: [.string("bottom")]
+            ).isSuccess
+        )
+        #expect(core.tiler.settings.scrolling.anchor == .right)
+        // The canonical spellings still work.
+        #expect(
+            core.execute(
+                "scroll.set_anchor",
+                args: [.string("center")]
+            ).isSuccess
+        )
+        #expect(core.tiler.settings.scrolling.anchor == .center)
+    }
+}
