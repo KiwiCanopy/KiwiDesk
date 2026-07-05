@@ -807,10 +807,13 @@ KiwiDesk.set_wake_restore_delay(1500) -- ms after wake
 Quitting KiwiDesk saves the current arrangement — window
 order per virtual space, focus, and the active space — and
 restores it on the next launch, so tiles do not shuffle
-across restarts. This works within one login session (macOS
-window ids reset on logout/reboot; after that, windows are
-re-tiled fresh). Crashes restore from the last autosave (30 s
-interval) instead.
+across restarts. After the restore, KiwiDesk lands on the
+virtual space of the window that has focus *right now*,
+falling back to the space that was active at quit. This
+works within one login session (macOS window ids reset on
+logout/reboot; after that, windows are re-tiled fresh).
+Crashes restore from the last autosave (30 s interval)
+instead.
 
 ## Extras
 

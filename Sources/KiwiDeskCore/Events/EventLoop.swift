@@ -108,8 +108,8 @@ public final class EventLoop {
         // floating them still pins them to a space (issue #21).
         guard
             !FloatDetection.shouldIgnore(
-                element: element,
-                appName: appName
+                appName: appName,
+                id: window.id
             )
         else { return }
         window.isFloating = FloatDetection.shouldFloat(
@@ -148,8 +148,8 @@ public final class EventLoop {
             // wrong mid-launch), the sweep below untracks it.
             guard
                 !FloatDetection.shouldIgnore(
-                    element: element,
-                    appName: appName
+                    appName: appName,
+                    id: id
                 )
             else { continue }
             live.insert(id)
@@ -243,6 +243,12 @@ public final class EventLoop {
             guard let id = AXHelper.windowID(of: element) else {
                 return
             }
+            // Focus events carry only managed windows: the
+            // reconcile above just settled tracking, so an
+            // absent id is an ignored panel (issue #21) —
+            // reporting it would emit a focus_change with an
+            // empty app and retile focus-driven layouts.
+            guard elements[pid]?[id] != nil else { return }
             onEvent(.windowFocused(id))
         case kAXWindowMovedNotification:
             guard let id = AXHelper.windowID(of: element) else {

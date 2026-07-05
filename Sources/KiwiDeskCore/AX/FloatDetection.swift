@@ -43,7 +43,8 @@ public struct FloatRules: Sendable, Equatable {
     }
 }
 
-/// Decides whether a window should float instead of tile.
+/// Classifies windows from AX and CGWindow signals: float
+/// instead of tile, or ignore entirely (never managed).
 public enum FloatDetection {
     /// Subroles that identify auxiliary windows (dialogs,
     /// panels, PIP overlays). Everything that is not a
@@ -95,18 +96,50 @@ public enum FloatDetection {
         appName == "Ghostty" && layer != 0
     }
 
-    /// Live-element variant of `shouldIgnore(appName:layer:)`.
-    @MainActor
+    /// Window-id variant: skips the CGWindowList lookup for
+    /// apps that have no ignore rule at all (the common case
+    /// on every reconcile).
     public static func shouldIgnore(
-        element: AXUIElement,
-        appName: String
+        appName: String,
+        id: WindowID
     ) -> Bool {
-        let layer = AXHelper.windowID(of: element)
-            .flatMap { windowLayer(of: $0) }
+        guard shouldIgnore(appName: appName, layer: 1) else {
+            return false
+        }
         return shouldIgnore(
             appName: appName,
-            layer: layer ?? 0
+            layer: windowLayer(of: id) ?? 0
         )
+    }
+
+    /// True while the app currently shows an ignored panel on
+    /// screen. While Ghostty's quick terminal is open, AX
+    /// reports the app's *main* window as focused — trusting
+    /// that report would focus-follow to the main window's
+    /// space even though the user is typing into the panel
+    /// (issue #21).
+    public static func hasVisibleIgnoredPanel(
+        pid: pid_t,
+        appName: String
+    ) -> Bool {
+        // Cheap out before the window-list scan: only apps
+        // with an ignore rule can have ignored panels.
+        guard shouldIgnore(appName: appName, layer: 1) else {
+            return false
+        }
+        let list =
+            CGWindowListCopyWindowInfo(
+                [.optionOnScreenOnly],
+                kCGNullWindowID
+            ) as? [[String: Any]] ?? []
+        return list.contains { info in
+            info[kCGWindowOwnerPID as String] as? pid_t == pid
+                && shouldIgnore(
+                    appName: appName,
+                    layer: info[kCGWindowLayer as String]
+                        as? Int ?? 0
+                )
+        }
     }
 
     /// Full decision for a live AX element, including user

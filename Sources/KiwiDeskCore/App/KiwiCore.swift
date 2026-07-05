@@ -150,6 +150,7 @@ public final class KiwiCore {
         // back the arrangement of the previous session.
         if let session = crash.consumeSession() {
             restore(session)
+            activateSpaceOfFocusedWindow()
             retile()
             onLog("restored previous session arrangement")
         }
@@ -158,6 +159,17 @@ public final class KiwiCore {
             try socket.start()
         } catch {
             onLog("socket server failed: \(error)")
+        }
+        // The startup scan ran against cold AX trees; slow
+        // responders list windows late or mis-report subroles
+        // (see AGENTS.md). One delayed sweep re-tracks what
+        // the scan missed — session restore has remembered
+        // their spaces — before the first space switch.
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .seconds(1))
+            guard let self, self.eventLoop.isRunning
+            else { return }
+            self.eventLoop.reconcileAll()
         }
     }
 
@@ -289,6 +301,18 @@ public final class KiwiCore {
         state.adopt(snapshot)
         for record in snapshot.windows {
             tiler.setFrame(record.windowID, record.frame)
+        }
+        // Diagnostic: snapshot windows that are not tracked
+        // yet stay out of their space until a reconcile finds
+        // them (cold-AX startup scan, issue #21 follow-up).
+        let missing = snapshot.windows.filter {
+            state.windows[$0.windowID] == nil
+        }.count
+        if missing > 0 {
+            onLog(
+                "restore: \(missing) snapshot windows not "
+                    + "tracked yet"
+            )
         }
     }
 
