@@ -12,14 +12,17 @@ struct KeybindingsTab: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
+                KeybindingConflictBanner(model: model)
                 modeHeader
                 modeIconRow
                 NavigationSection(
+                    model: model,
                     bindings: bindingsBinding,
                     spaces: model.config.spaces
                 )
                 if model.config.modes.count > 1 {
                     ChangeModesSection(
+                        model: model,
                         bindings: bindingsBinding,
                         modeNames: model.config.modes.map(
                             \.name
@@ -27,8 +30,14 @@ struct KeybindingsTab: View {
                         current: selected
                     )
                 }
-                ApplicationsSection(bindings: bindingsBinding)
-                CustomSection(bindings: bindingsBinding)
+                ApplicationsSection(
+                    model: model,
+                    bindings: bindingsBinding
+                )
+                CustomSection(
+                    model: model,
+                    bindings: bindingsBinding
+                )
             }
             .padding(16)
         }

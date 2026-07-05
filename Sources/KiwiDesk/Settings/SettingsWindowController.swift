@@ -10,18 +10,8 @@ final class SettingsWindowController {
     private let model: SettingsModel
     private var window: NSWindow?
 
-    // `onKeybindingsLoaded` is forwarded to the model so it is
-    // in place before the constructor's own initial `reload()`
-    // runs (see `SettingsModel.init`).
-    init(
-        core: KiwiCore,
-        onKeybindingsLoaded:
-            @escaping @MainActor ([KeyMode]) -> Void = { _ in }
-    ) {
-        self.model = SettingsModel(
-            core: core,
-            onKeybindingsLoaded: onKeybindingsLoaded
-        )
+    init(core: KiwiCore) {
+        self.model = SettingsModel(core: core)
     }
 
     /// Shows the dashboard, refreshing from the backend so the

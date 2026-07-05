@@ -7,6 +7,7 @@ import SwiftUI
 /// combo. The Lua action pulls the app into the current space,
 /// launching it if needed.
 struct ApplicationsSection: View {
+    @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
 
     var body: some View {
@@ -39,7 +40,7 @@ struct ApplicationsSection: View {
                     for: binding.wrappedValue,
                     in: bindings
                 ),
-                onRecord: { binding.wrappedValue.combo = $0 },
+                onRecord: { record($0, into: binding) },
                 onClear: { binding.wrappedValue.combo = "" }
             )
             Button {
@@ -49,6 +50,17 @@ struct ApplicationsSection: View {
             }
             .buttonStyle(.borderless)
         }
+    }
+
+    private func record(
+        _ combo: String,
+        into binding: Binding<KeyBinding>
+    ) {
+        binding.wrappedValue.combo = combo
+        model.noteRecordedCombo(
+            binding.wrappedValue,
+            in: bindings
+        )
     }
 
     private func appMenu(

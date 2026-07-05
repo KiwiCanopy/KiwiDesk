@@ -32,23 +32,20 @@ final class SettingsModel: ObservableObject {
     @Published var profileDirty = false
     @Published var profiles: [String] = []
 
+    /// A dismissible in-app warning shown when a keybinding
+    /// conflict was just introduced — nil hides the banner. Set
+    /// by `noteRecordedCombo` (recording a conflicting shortcut)
+    /// and by `adoptIntoGui`/`save`'s raw-Lua path (a batch check
+    /// of the resulting config). The persistent per-row ⚠️ and
+    /// its tooltip are unaffected and always reflect live state.
+    @Published var keybindingWarning: String?
+
     let core: KiwiCore
     private var suppressDirty = false
-    /// Reports this load's modes so the caller can evaluate the
-    /// one-time keybinding-conflict notification. `AppDelegate`
-    /// owns the had-conflict baseline as the single source of
-    /// truth, shared with the launch-time check, so a conflict
-    /// already present at startup isn't double-counted here.
-    private let onKeybindingsLoaded: @MainActor ([KeyMode]) -> Void
 
-    init(
-        core: KiwiCore,
-        onKeybindingsLoaded:
-            @escaping @MainActor ([KeyMode]) -> Void = { _ in }
-    ) {
+    init(core: KiwiCore) {
         self.core = core
         self.config = GuiConfig()
-        self.onKeybindingsLoaded = onKeybindingsLoaded
         reload()
     }
 
@@ -74,7 +71,6 @@ final class SettingsModel: ObservableObject {
             )) ?? ""
         refreshProfiles()
         isDirty = false
-        onKeybindingsLoaded(config.modes)
     }
 
     func refreshProfiles() {
@@ -96,6 +92,10 @@ final class SettingsModel: ObservableObject {
                 )
                 core.loadConfig()
                 reload()
+                // Free-form Lua isn't checked at input time (no
+                // recorder was involved), so warn once here if
+                // the reloaded config carries a conflict.
+                warnIfAnyConflict()
             } else {
                 try core.saveGuiConfig(config)
                 isDirty = false
@@ -121,10 +121,45 @@ final class SettingsModel: ObservableObject {
             try core.adoptConfigIntoGui()
             showLuaEditor = false
             reload()
+            // Keybindings can't be recovered from adopted Lua
+            // (see adoptConfigIntoGui), but the check is cheap
+            // and keeps this path consistent with Lua-editor save.
+            warnIfAnyConflict()
         } catch {
             core.onLog("adopt failed: \(error)")
         }
     }
+
+    // MARK: - Keybinding conflicts (in-app warning)
+
+    /// Called after a `KeyRecorderField.onRecord` commits a new
+    /// combo: warns once if that specific row now conflicts. The
+    /// persistent per-row ⚠️ already reflects this independently;
+    /// this only drives the transient banner.
+    func noteRecordedCombo(
+        _ binding: KeyBinding,
+        in bindings: [KeyBinding]
+    ) {
+        guard
+            KeybindingConflicts.text(for: binding, in: bindings)
+                != nil
+        else { return }
+        keybindingWarning = Self.conflictMessage
+    }
+
+    /// Warns once if any mode in the current config has a
+    /// conflict — used by the two batch-load paths (Adopt, Lua
+    /// editor save) where no single recorder input triggered it.
+    private func warnIfAnyConflict() {
+        guard
+            KeybindingConflicts.hasAnyAcrossModes(config.modes)
+        else { return }
+        keybindingWarning = Self.conflictMessage
+    }
+
+    private static let conflictMessage =
+        "A keybinding conflict was found — check the ⚠️ marks "
+        + "in the Shortcuts tab."
 
     // MARK: - Profiles (Tab 1 / sync banner)
 
