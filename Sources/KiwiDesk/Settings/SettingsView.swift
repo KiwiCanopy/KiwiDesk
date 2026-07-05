@@ -116,12 +116,30 @@ struct ProfileSyncBanner: View {
     }
 }
 
-/// Save / revert footer with the unsaved-changes indicator.
+/// Save / revert footer with the unsaved-changes indicator. When
+/// the raw Lua editor is forced (init.lua holds custom code), it
+/// also hosts the "parse into the visual editor" action so it
+/// shares the row with Revert / Save.
 struct SettingsFooter: View {
     @ObservedObject var model: SettingsModel
+    @State private var confirmingAdopt = false
+    @State private var showAdoptHelp = false
+    @State private var helpHovering = false
+
+    /// A muted, darker green so the action reads as inviting
+    /// without shouting over the standard Save button.
+    private let adoptGreen = Color(
+        red: 0.16,
+        green: 0.45,
+        blue: 0.24
+    )
 
     var body: some View {
-        HStack {
+        HStack(spacing: 8) {
+            if model.forcedLuaEditor {
+                adoptButton
+                helpButton
+            }
             if model.isDirty {
                 Label(
                     "Unsaved changes",
@@ -139,6 +157,54 @@ struct SettingsFooter: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
+        .confirmationDialog(
+            "Adopt this config into the visual editor?",
+            isPresented: $confirmingAdopt,
+            titleVisibility: .visible
+        ) {
+            Button("Adopt") { model.adoptIntoGui() }
+            Button("Cancel", role: .cancel) {}
+        }
+    }
+
+    private var adoptButton: some View {
+        Button {
+            confirmingAdopt = true
+        } label: {
+            Label(
+                "Parse into Visual Editor…",
+                systemImage: "wand.and.stars"
+            )
+        }
+        .buttonStyle(.borderedProminent)
+        .tint(adoptGreen)
+    }
+
+    private var helpButton: some View {
+        Image(systemName: "questionmark.circle")
+            .imageScale(.large)
+            .foregroundStyle(
+                helpHovering ? Color.accentColor : .secondary
+            )
+            .animation(.easeInOut(duration: 0.15), value: helpHovering)
+            .onHover { hovering in
+                helpHovering = hovering
+                showAdoptHelp = hovering
+            }
+            .help("What happens to my current code?")
+            .popover(isPresented: $showAdoptHelp, arrowEdge: .top) {
+                Text(
+                    "Nothing is lost: your current code isn't "
+                        + "deleted, it's kept as a commented-out "
+                        + "backup in init.lua. Your gaps, layouts, "
+                        + "and rules are imported; keybindings "
+                        + "can't be imported automatically — re-add "
+                        + "them in the Shortcuts tab."
+                )
+                .font(.callout)
+                .frame(width: 300)
+                .padding()
+            }
     }
 }
 

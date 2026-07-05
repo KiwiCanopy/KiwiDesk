@@ -7,7 +7,6 @@ import SwiftUI
 /// (05_GUI_Concept §2). Edits here write the whole file verbatim.
 struct LuaEditorTab: View {
     @ObservedObject var model: SettingsModel
-    @State private var confirmingAdopt = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -18,43 +17,22 @@ struct LuaEditorTab: View {
                 }
         }
         .padding(16)
-        .confirmationDialog(
-            "Adopt this config into the visual editor?",
-            isPresented: $confirmingAdopt,
-            titleVisibility: .visible
-        ) {
-            Button("Adopt") { model.adoptIntoGui() }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text(
-                "Your current gaps, layouts, and rules are "
-                    + "imported. Your existing file is kept as a "
-                    + "commented backup. Keybindings can't be "
-                    + "imported automatically — re-add them in "
-                    + "the Keybindings tab."
-            )
-        }
     }
 
     @ViewBuilder private var header: some View {
         if model.forcedLuaEditor {
-            VStack(alignment: .leading, spacing: 8) {
-                Label {
-                    Text(
-                        "This init.lua contains custom code, so "
-                            + "the visual editor is disabled to "
-                            + "avoid overwriting it. Edit the Lua "
-                            + "directly below."
-                    )
-                } icon: {
-                    Image(systemName: "curlybraces")
-                }
-                .font(.callout)
-                .foregroundStyle(.secondary)
-                Button("Adopt into the GUI…") {
-                    confirmingAdopt = true
-                }
+            Label {
+                Text(
+                    "This init.lua contains custom code, so "
+                        + "the visual editor is disabled to "
+                        + "avoid overwriting it. Edit the Lua "
+                        + "directly below."
+                )
+            } icon: {
+                Image(systemName: "curlybraces")
             }
+            .font(.callout)
+            .foregroundStyle(.secondary)
         } else {
             HStack {
                 Text("Editing init.lua directly.")
