@@ -499,7 +499,7 @@ Subscribe to state changes (see also
 
 ```lua
 KiwiDesk.on("space_change", function(space_id, mode)
-    os.execute(
+    KiwiDesk.exec(
         "sketchybar --trigger space_change SPACE="
         .. space_id)
 end)
@@ -512,6 +512,86 @@ end)
 | `focus_change` | `window_id`, `app` |
 | `monitor_change` | `monitor_count` |
 | `native_space_change` | `native_space` (desktop number) |
+
+## External Commands
+
+Config callbacks run on KiwiDesk's main thread — a shell
+command that waits synchronously there would freeze window
+management, animations, and the menu bar. External commands
+therefore always run in the background.
+
+### `KiwiDesk.exec(command [, callback])`
+
+**Expects:** `command` — a string, run via `/bin/sh -c`, so
+pipes, quoting, `&&`, and `$PATH` lookups work exactly as in
+a terminal. `callback` — an optional Lua function; if given,
+it is called once the command has exited, with:
+
+| Callback argument | Type | Meaning |
+|---|---|---|
+| `code` | number | exit code (`0` = success) |
+| `stdout` | string | everything written to stdout |
+| `stderr` | string | everything written to stderr |
+
+**Does:** starts the command in the background and returns
+immediately — KiwiDesk never waits for it. Returns the
+child's pid (a number), or `nil` when the command could not
+be started. If the config reloads before the command
+finishes, the callback is dropped silently.
+
+**Example:**
+
+```lua
+-- Fire and forget:
+KiwiDesk.exec("sketchybar --reload")
+
+-- Read a command's output via the callback:
+KiwiDesk.exec("defaults read -g AppleInterfaceStyle",
+    function(code, out, err)
+        dark = (code == 0 and out:match("Dark") ~= nil)
+    end)
+```
+
+### `os.execute(command)` — asynchronous in KiwiDesk
+
+**Expects:** a command string, like standard Lua. Calling it
+with no argument keeps its stdlib meaning ("is a shell
+available?") and returns `true`.
+
+**Does:** forwards the command to `KiwiDesk.exec` and returns
+`true` **immediately** — it does *not* wait, and the return
+value says nothing about whether the command succeeded. When
+you need the exit code or output, use `KiwiDesk.exec` with a
+callback instead.
+
+**Example:**
+
+```lua
+-- Fine: fire-and-forget side effect.
+os.execute("open -a Spotify")
+
+-- Wrong: the file is NOT guaranteed to exist yet here.
+os.execute("touch /tmp/marker")
+-- do_something("/tmp/marker")
+```
+
+### `io.popen(command)` — disabled
+
+**Expects:** n/a — any call is rejected.
+
+**Does:** returns `nil` plus an explanatory message instead
+of a file handle. Reading a child's output synchronously
+cannot be done without blocking the app; `KiwiDesk.exec`
+with a callback delivers the same output asynchronously.
+
+**Example:**
+
+```lua
+-- Instead of: local h = io.popen("pmset -g batt")
+KiwiDesk.exec("pmset -g batt", function(code, out)
+    battery_info = out
+end)
+```
 
 ## Profiles & Monitors
 
