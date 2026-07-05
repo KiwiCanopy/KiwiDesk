@@ -151,6 +151,25 @@ struct ConfigWriteTests {
         #expect(!lua.contains("define_mode(\"default\""))
     }
 
+    @Test(
+        "a malformed default mode icon is dropped, not emitted"
+    )
+    func defaultModeIconIsDropped() {
+        let modes = [
+            KeyMode(
+                name: KeyMode.defaultName,
+                icon: "📐",
+                bindings: [
+                    KeyBinding(combo: "alt+h", lua: "-- noop")
+                ]
+            )
+        ]
+        let lua = LuaConfigWriter.keybindings(modes)
+        #expect(lua.contains("KiwiDesk.bind(\"alt+h\""))
+        #expect(!lua.contains("icon ="))
+        #expect(!lua.contains("define_mode"))
+    }
+
     @Test("round-trip: write, reload, live state matches")
     func roundTrip() throws {
         let core = makeCore()
