@@ -473,11 +473,24 @@ current bindings, live, with no action needed to see it.
 
 On top of that, KiwiDesk shows a dismissible in-app banner the
 moment a conflict is introduced: right after you record a
-clashing shortcut in the Shortcuts tab (naming the specific
-reason, e.g. which row or system shortcut it clashes with), or
-after adopting a hand-written config, or after saving from the
-raw Lua editor finds one or more conflicts in the result (a
-general message, since a batch check has no single row to name).
+clashing shortcut in the Shortcuts tab, or after adopting a
+hand-written config, or after saving from the raw Lua editor
+finds one or more conflicts in the result. The banner names
+every current conflict. With exactly one:
+
+```
+Shortcut for "Close" is conflicting with the macOS
+shortcut "Close Window".
+```
+
+With more than one, a bulleted summary:
+
+```
+Several shortcuts are conflicting:
+– "First" with "Second"
+– "Second" with "First"
+```
+
 The banner clears itself once the last conflict is fixed (or
 can be dismissed early with its own close button). It does not
 appear on app launch, when Settings is simply opened, on Load

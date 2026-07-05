@@ -135,43 +135,85 @@ final class SettingsModel: ObservableObject {
     // MARK: - Keybinding conflicts (in-app warning)
 
     /// Called after a `KeyRecorderField.onRecord` commits a new
-    /// combo. Warns with the specific reason if that row now
-    /// conflicts; else clears the banner once the whole config
-    /// has no conflict left, so it doesn't linger once the last
-    /// one is fixed. An edit that leaves some *other* row still
-    /// conflicting leaves the banner as-is (this row is fine,
-    /// but the warning is still accurate — it may just no longer
-    /// name the right row; the persistent per-row indicator
-    /// remains the precise source of truth either way).
+    /// combo. Warns (naming every current conflict) if that row
+    /// now conflicts; else clears the banner once the whole
+    /// config has no conflict left, so it doesn't linger once
+    /// the last one is fixed. An edit that leaves some *other*
+    /// row still conflicting only refreshes the banner if it was
+    /// already shown — an unrelated valid edit must not newly
+    /// pop it open. The persistent per-row indicator remains the
+    /// precise, always-live source of truth either way.
     func noteRecordedCombo(
         _ binding: KeyBinding,
         in bindings: [KeyBinding]
     ) {
-        if let reason = KeybindingConflicts.text(
-            for: binding,
-            in: bindings
-        ) {
-            keybindingWarning = "This shortcut — \(reason)"
-        } else if !KeybindingConflicts.hasAnyAcrossModes(
-            config.modes
-        ) {
+        let list = KeybindingConflicts.conflicts(
+            in: config.modes
+        )
+        if KeybindingConflicts.text(for: binding, in: bindings)
+            != nil
+        {
+            keybindingWarning = Self.formatConflicts(list)
+        } else if list.isEmpty {
             keybindingWarning = nil
+        } else if keybindingWarning != nil {
+            keybindingWarning = Self.formatConflicts(list)
         }
     }
 
     /// Sets or clears the banner from a whole-config check —
     /// used by the two batch paths (Adopt, Lua editor save)
-    /// where no single recorder input triggered the check, so
-    /// there's no one row's reason to name.
+    /// where no single recorder input triggered the check.
     private func warnIfAnyConflict() {
+        let list = KeybindingConflicts.conflicts(
+            in: config.modes
+        )
         keybindingWarning =
-            KeybindingConflicts.hasAnyAcrossModes(config.modes)
-            ? Self.batchConflictMessage : nil
+            list.isEmpty ? nil : Self.formatConflicts(list)
     }
 
-    private static let batchConflictMessage =
-        "One or more keybinding conflicts were found — see "
-        + "the highlighted rows below."
+    /// Renders a named, enumerated summary: a single sentence
+    /// for one conflict, or a bulleted list for several.
+    private static func formatConflicts(
+        _ conflicts: [Conflict]
+    ) -> String? {
+        guard let only = conflicts.first else { return nil }
+        guard conflicts.count > 1 else {
+            return "Shortcut for \"\(only.name)\" "
+                + sentenceTail(only)
+        }
+        let lines = conflicts.map { "– \(bulletTail($0))" }
+        return "Several shortcuts are conflicting:\n"
+            + lines.joined(separator: "\n")
+    }
+
+    /// The rest of the single-conflict sentence, after the name.
+    private static func sentenceTail(_ conflict: Conflict) -> String {
+        switch conflict.target {
+        case .unrecognized:
+            return "isn't a recognized shortcut."
+        case .otherBinding(let who):
+            return "is conflicting with \"\(who)\"."
+        case .systemShortcut(let name):
+            return
+                "is conflicting with the macOS shortcut "
+                + "\"\(name)\"."
+        }
+    }
+
+    /// One bullet line's text, after the leading "– ".
+    private static func bulletTail(_ conflict: Conflict) -> String {
+        switch conflict.target {
+        case .unrecognized:
+            return "\"\(conflict.name)\" isn't a recognized "
+                + "shortcut"
+        case .otherBinding(let who):
+            return "\"\(conflict.name)\" with \"\(who)\""
+        case .systemShortcut(let name):
+            return "\"\(conflict.name)\" with the macOS "
+                + "shortcut \"\(name)\""
+        }
+    }
 
     // MARK: - Profiles (Tab 1 / sync banner)
 
