@@ -27,6 +27,17 @@ KiwiDesk.on("native_space_change", function(desktop)
         "sketchybar --trigger kiwi_desktop DESKTOP="
         .. desktop)
 end)
+
+-- Window icons stay fresh even when focus doesn't change
+-- (background window opens, closes, or minimizes):
+for _, event in ipairs({
+    "window_created", "window_destroyed", "window_minimized",
+}) do
+    KiwiDesk.on(event, function()
+        KiwiDesk.exec(
+            "sketchybar --trigger kiwi_space_change")
+    end)
+end
 ```
 
 In your `sketchybarrc`:

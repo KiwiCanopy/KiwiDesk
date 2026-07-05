@@ -122,7 +122,25 @@ Each event is one JSON line:
 ```
 
 Events: `space_change`, `layout_change`, `focus_change`,
-`monitor_change`, `native_space_change`.
+`monitor_change`, `native_space_change`, `window_created`,
+`window_destroyed`, `window_minimized`.
+
+The window lifecycle events fire even when focus does not
+change, so bars can drop stale icons immediately:
+
+```json
+{"event": "window_created",
+ "data": {"window_id": 4711, "app": "Ghostty",
+          "space": "2"}}
+{"event": "window_destroyed",
+ "data": {"window_id": 4711, "space": "2"}}
+```
+
+`window_created` carries the space the window was placed in
+(`app_rules` included); `window_destroyed` and
+`window_minimized` carry the active space the window
+disappeared from. A minimize fires only `window_minimized`,
+never `window_destroyed`.
 
 `native_space_change` fires when the user switches native
 macOS Spaces (Mission Control desktops); its data carries the

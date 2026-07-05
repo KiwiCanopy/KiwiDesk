@@ -554,6 +554,14 @@ end)
 | `focus_change` | `window_id`, `app` |
 | `monitor_change` | `monitor_count` |
 | `native_space_change` | `native_space` (desktop number) |
+| `window_created` | `window_id`, `app`, `space` |
+| `window_destroyed` | `window_id`, `space` |
+| `window_minimized` | `window_id`, `space` |
+
+The window lifecycle events fire even when focus does not
+change (a background window opening or closing), so status
+bars stay current without polling. A minimize fires only
+`window_minimized`, never `window_destroyed`.
 
 ## External Commands
 
