@@ -6,36 +6,18 @@ import SwiftUI
 /// the raw Lua editor (05_GUI_Concept §2, Tab 1).
 struct GeneralTab: View {
     @ObservedObject var model: SettingsModel
+    /// Advanced is collapsed by default — only interested users
+    /// need the config-file path and the raw Lua editor.
+    @State private var advancedExpanded = false
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                configSection
                 presetSection
                 profileSection
                 advancedSection
             }
             .padding(16)
-        }
-    }
-
-    private var configSection: some View {
-        SettingsSection("Configuration file") {
-            HStack {
-                Image(systemName: "doc.text")
-                    .foregroundStyle(.secondary)
-                Text(model.configURL.path)
-                    .font(.system(.body, design: .monospaced))
-                    .textSelection(.enabled)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-                Spacer()
-                Button("Reveal") {
-                    NSWorkspace.shared.activateFileViewerSelecting(
-                        [model.configURL]
-                    )
-                }
-            }
         }
     }
 
@@ -96,22 +78,53 @@ struct GeneralTab: View {
     }
 
     private var advancedSection: some View {
-        SettingsSection("Advanced") {
-            Button {
-                model.showLuaEditor = true
-            } label: {
-                Label(
-                    "Edit init.lua directly",
-                    systemImage: "curlybraces"
+        DisclosureGroup(isExpanded: $advancedExpanded) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Configuration file")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                HStack {
+                    Image(systemName: "doc.text")
+                        .foregroundStyle(.secondary)
+                    Text(model.configURL.path)
+                        .font(.system(.body, design: .monospaced))
+                        .textSelection(.enabled)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                    Spacer()
+                    Button("Reveal") {
+                        NSWorkspace.shared
+                            .activateFileViewerSelecting(
+                                [model.configURL]
+                            )
+                    }
+                }
+                Divider()
+                Button {
+                    model.showLuaEditor = true
+                } label: {
+                    Label(
+                        "Edit init.lua directly",
+                        systemImage: "curlybraces"
+                    )
+                }
+                Text(
+                    "Opens the integrated Lua editor for custom "
+                        + "scripting beyond the visual controls."
                 )
+                .font(.caption)
+                .foregroundStyle(.secondary)
             }
-            Text(
-                "Opens the integrated Lua editor for custom "
-                    + "scripting beyond the visual controls."
-            )
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            .padding(.top, 8)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        } label: {
+            Text("Advanced").font(.headline)
         }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color(nsColor: .controlBackgroundColor))
+        )
     }
 }
 
