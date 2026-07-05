@@ -3,6 +3,21 @@ import Foundation
 /// Diagnostic commands: `get_state`, `get_layout_info`,
 /// `list_monitors`.
 extension KiwiCore {
+    /// One diagnostic line per space switch: how many windows
+    /// the space holds and how many actually tile. "0
+    /// windows" right after a restart means the startup scan
+    /// missed them; "0 tiled" means wrong float verdicts.
+    func logSpaceContents(_ id: SpaceID) {
+        let members = state.workspaces[id]?.windows ?? []
+        let tiled = members.filter {
+            state.windows[$0]?.isFloating == false
+        }
+        onLog(
+            "space \(id.raw): \(members.count) windows, "
+                + "\(tiled.count) tiled"
+        )
+    }
+
     func layoutInfo() -> CommandResponse {
         guard let space = activeSpace else {
             return .fail("no active space")

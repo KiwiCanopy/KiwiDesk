@@ -25,6 +25,15 @@ extension KiwiCore {
             guard let window = self.state.windows[id],
                 NSWorkspace.shared.frontmostApplication?
                     .processIdentifier == window.pid,
+                // An open quick-terminal-style panel makes AX
+                // report the app's main window as focused;
+                // following that report would enforce the main
+                // window's space under the panel the user is
+                // actually typing into (issue #21).
+                !FloatDetection.hasVisibleIgnoredPanel(
+                    pid: window.pid,
+                    appName: window.appName
+                ),
                 let element = AXHelper.focusedWindow(
                     pid: window.pid
                 ),
@@ -43,6 +52,33 @@ extension KiwiCore {
         }
     }
 
+    /// After a restart, land on the virtual space of the
+    /// window the user is focused on right now — the
+    /// snapshot's active space is where they were at
+    /// shutdown, not where they are. Apps currently showing
+    /// an ignored panel are distrusted: while Ghostty's quick
+    /// terminal has focus, AX reports the app's *main*
+    /// window, which may live on another space (issue #21).
+    func activateSpaceOfFocusedWindow() {
+        guard
+            let app = NSWorkspace.shared.frontmostApplication,
+            !FloatDetection.hasVisibleIgnoredPanel(
+                pid: app.processIdentifier,
+                appName: app.localizedName ?? "?"
+            ),
+            let element = AXHelper.focusedWindow(
+                pid: app.processIdentifier
+            ),
+            let id = AXHelper.windowID(of: element),
+            // The cold startup scan may not have tracked the
+            // focused window yet — the session snapshot still
+            // remembers where it belongs.
+            let space = state.workspaces.space(of: id)
+                ?? state.rememberedSpace(of: id)
+        else { return }
+        state.workspaces.activate(space)
+    }
+
     func focusSpace(
         _ args: [JSONValue]
     ) -> CommandResponse {
@@ -50,6 +86,7 @@ extension KiwiCore {
             return .fail("expected space id")
         }
         state.workspaces.activate(SpaceID(raw))
+        logSpaceContents(SpaceID(raw))
         retile(
             animated: tiler.animateSpaceSwitch,
             force: true

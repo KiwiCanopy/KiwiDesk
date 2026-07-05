@@ -43,7 +43,8 @@ public struct FloatRules: Sendable, Equatable {
     }
 }
 
-/// Decides whether a window should float instead of tile.
+/// Classifies windows from AX and CGWindow signals: float
+/// instead of tile, or ignore entirely (never managed).
 public enum FloatDetection {
     /// Subroles that identify auxiliary windows (dialogs,
     /// panels, PIP overlays). Everything that is not a
@@ -78,6 +79,106 @@ public enum FloatDetection {
                 CGWindowID(id.raw)
             ) as? [[String: Any]]
         return list?.first?[kCGWindowLayer as String] as? Int
+    }
+
+    /// Windows KiwiDesk must not manage at all — no tracking,
+    /// no state entry, no events. Ghostty's quick terminal is
+    /// a slide-down panel (non-zero CGWindow layer) that macOS
+    /// shows over every space; merely *floating* it still
+    /// assigns it a space, and focusing it then drags the user
+    /// to that space (issue #21). Hardcoded on purpose: no
+    /// general ignore-rule machinery until a second case
+    /// exists.
+    public static func shouldIgnore(
+        appName: String,
+        layer: Int
+    ) -> Bool {
+        appName == "Ghostty" && layer != 0
+    }
+
+    /// Whether any ignore rule exists for this app at all —
+    /// the cheap gate before every window-list lookup.
+    public static func hasIgnoreRule(
+        appName: String
+    ) -> Bool {
+        appName == "Ghostty"
+    }
+
+    /// Window-id variant: skips the CGWindowList lookup for
+    /// apps that have no ignore rule at all (the common case
+    /// on every reconcile).
+    public static func shouldIgnore(
+        appName: String,
+        id: WindowID
+    ) -> Bool {
+        guard hasIgnoreRule(appName: appName) else {
+            return false
+        }
+        return shouldIgnore(
+            appName: appName,
+            layer: windowLayer(of: id) ?? 0
+        )
+    }
+
+    /// CGWindow layers of all of an app's windows in ONE
+    /// window-server round trip. Reconcile uses this instead
+    /// of one lookup per window (AGENTS.md: never query the
+    /// window server in a loop).
+    public static func windowLayers(
+        pid: pid_t
+    ) -> [WindowID: Int] {
+        let list =
+            CGWindowListCopyWindowInfo(
+                [.optionAll],
+                kCGNullWindowID
+            ) as? [[String: Any]] ?? []
+        var layers: [WindowID: Int] = [:]
+        for info in list
+        where info[kCGWindowOwnerPID as String] as? pid_t
+            == pid
+        {
+            guard
+                let number = info[kCGWindowNumber as String]
+                    as? Int,
+                let raw = UInt32(exactly: number)
+            else { continue }
+            layers[WindowID(raw)] =
+                info[kCGWindowLayer as String] as? Int ?? 0
+        }
+        return layers
+    }
+
+    /// True while the app currently shows an ignored panel on
+    /// screen. While Ghostty's quick terminal is open, AX
+    /// reports the app's *main* window as focused — trusting
+    /// that report would focus-follow to the main window's
+    /// space even though the user is typing into the panel
+    /// (issue #21). Known limit: visibility is a proxy for
+    /// focus — with panel autohide disabled, a genuine main-
+    /// window focus is also distrusted while the panel shows.
+    /// Deliberate: suppressing a follow beats hijacking one.
+    public static func hasVisibleIgnoredPanel(
+        pid: pid_t,
+        appName: String
+    ) -> Bool {
+        // Cheap out before the window-list scan: only apps
+        // with an ignore rule can have ignored panels.
+        guard hasIgnoreRule(appName: appName) else {
+            return false
+        }
+        let list =
+            CGWindowListCopyWindowInfo(
+                [.optionOnScreenOnly],
+                kCGNullWindowID
+            ) as? [[String: Any]] ?? []
+        return list.contains { info in
+            info[kCGWindowOwnerPID as String] as? pid_t == pid
+                && shouldIgnore(
+                    appName: appName,
+                    layer: info[kCGWindowLayer as String]
+                        as? Int ?? 0
+                )
+        }
     }
 
     /// Full decision for a live AX element, including user

@@ -104,12 +104,24 @@ extension EventLoop {
             reconcile(pid: previous, appName: name)
         }
         lastActivePid = pid
+        // Mirror the focused-changed path: reconcile the
+        // activated app first, so a window tracked late (cold
+        // Electron tree, other native Space) is known before
+        // the managed-window guard below.
+        reconcile(
+            pid: pid,
+            appName: app.localizedName ?? "?"
+        )
         // Clicking a window of another app only activates the
         // app: if that window was already its app's focused
         // window, no kAXFocusedWindowChanged fires. Report the
         // cross-app focus change ourselves.
         if let element = AXHelper.focusedWindow(pid: pid),
-            let id = AXHelper.windowID(of: element)
+            let id = AXHelper.windowID(of: element),
+            // Only managed windows: an ignored panel (issue
+            // #21) or a not-yet-tracked window must not leak
+            // a focus event with no state behind it.
+            elements[pid]?[id] != nil
         {
             onEvent(.windowFocused(id))
         }
@@ -123,6 +135,15 @@ extension EventLoop {
     /// space's windows are tiled.
     private func nativeSpaceChanged() {
         onEvent(.nativeSpaceChanged)
+        reconcileAll()
+    }
+
+    /// Re-syncs every attached app against its live AX window
+    /// list. Used after native space switches and once shortly
+    /// after startup: the startup scan runs against cold AX
+    /// trees, and slow responders (Electron/WebKit, see
+    /// AGENTS.md) list windows late or mis-report subroles.
+    public func reconcileAll() {
         for pid in observers.keys {
             let name =
                 NSRunningApplication(

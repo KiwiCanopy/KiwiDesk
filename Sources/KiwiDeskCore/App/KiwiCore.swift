@@ -29,6 +29,10 @@ public final class KiwiCore {
     /// (see scheduleFocusFollow).
     var pendingFocusFollow: Task<Void, Never>?
 
+    /// One-shot startup sweep re-tracking windows the cold
+    /// AX scan missed (see start()).
+    var pendingStartupSweep: Task<Void, Never>?
+
     /// Native desktop we are currently on (Mission Control
     /// number), and the virtual space each desktop showed
     /// last, restored when the user returns to it.
@@ -135,39 +139,6 @@ public final class KiwiCore {
         bus.onLog = { [weak self] message in
             self?.onLog(message)
         }
-    }
-
-    // MARK: - Lifecycle
-
-    /// Loads the config and starts window management.
-    public func start() {
-        lastNativeSpace = NativeSpaces.activeSpaceNumber()
-        loadConfig()
-        sleepWake.start()
-        eventLoop.start()
-        mouse.start()
-        // The event loop discovered windows in AX order; put
-        // back the arrangement of the previous session.
-        if let session = crash.consumeSession() {
-            restore(session)
-            retile()
-            onLog("restored previous session arrangement")
-        }
-        crash.start()
-        do {
-            try socket.start()
-        } catch {
-            onLog("socket server failed: \(error)")
-        }
-    }
-
-    public func stop() {
-        pendingFocusFollow?.cancel()
-        mouse.stop()
-        eventLoop.stop()
-        sleepWake.stop()
-        socket.stop()
-        crash.shutdownCleanly()
     }
 
     public func retile(
@@ -285,10 +256,22 @@ public final class KiwiCore {
     /// order is the layout order), then the raw frames. Frames
     /// go through the tiler's frame pipeline so the resulting
     /// AX echoes are not mistaken for user drags.
-    private func restore(_ snapshot: StateSnapshot) {
+    func restore(_ snapshot: StateSnapshot) {
         state.adopt(snapshot)
         for record in snapshot.windows {
             tiler.setFrame(record.windowID, record.frame)
+        }
+        // Diagnostic: snapshot windows that are not tracked
+        // yet stay out of their space until a reconcile finds
+        // them (cold-AX startup scan, issue #21 follow-up).
+        let missing = snapshot.windows.filter {
+            state.windows[$0.windowID] == nil
+        }.count
+        if missing > 0 {
+            onLog(
+                "restore: \(missing) snapshot windows not "
+                    + "tracked yet"
+            )
         }
     }
 

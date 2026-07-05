@@ -21,6 +21,10 @@ public final class EventLoop {
     /// reconcile can re-check and emit only actual changes
     /// (manual make_floating overrides stay untouched).
     var detectedFloating: [WindowID: Bool] = [:]
+    /// Tracked windows whose CGWindow layer read as ignored
+    /// once; untracked only if the reading persists (layers
+    /// flicker during fullscreen transitions).
+    var ignorePending: Set<WindowID> = []
     var workspaceTokens: [NSObjectProtocol] = []
     var screenToken: NSObjectProtocol?
     var lastActivePid: pid_t?
@@ -61,6 +65,7 @@ public final class EventLoop {
         observers = [:]
         elements = [:]
         detectedFloating = [:]
+        ignorePending = []
     }
 
     /// AX element of a tracked window, if still known. Used to
@@ -104,6 +109,14 @@ public final class EventLoop {
             )
         else { return }
         guard elements[pid]?[window.id] == nil else { return }
+        // Some panels must never be managed at all — merely
+        // floating them still pins them to a space (issue #21).
+        guard
+            !FloatDetection.shouldIgnore(
+                appName: appName,
+                id: window.id
+            )
+        else { return }
         window.isFloating = FloatDetection.shouldFloat(
             element: element,
             appName: appName,
@@ -122,6 +135,11 @@ public final class EventLoop {
     /// without it, closed windows keep occupying layout slots.
     func reconcile(pid: pid_t, appName: String) {
         guard observers[pid] != nil else { return }
+        // One window-server snapshot for the whole pass; only
+        // apps with an ignore rule need layers at all.
+        let layers =
+            FloatDetection.hasIgnoreRule(appName: appName)
+            ? FloatDetection.windowLayers(pid: pid) : [:]
         var live: Set<WindowID> = []
         var minimized: Set<WindowID> = []
         for element in AXHelper.windows(pid: pid) {
@@ -135,6 +153,26 @@ public final class EventLoop {
                 minimized.insert(id)
                 continue
             }
+            // An ignored panel stays out of `live`: if the
+            // startup scan mistracked it (its layer reads
+            // wrong mid-launch), the sweep below untracks it.
+            // A tracked window gets one reading of grace —
+            // layers flicker during fullscreen transitions,
+            // and untracking on a glitch leaks a spurious
+            // destroy/create pair to subscribers.
+            if FloatDetection.shouldIgnore(
+                appName: appName,
+                layer: layers[id] ?? 0
+            ) {
+                if elements[pid]?[id] != nil,
+                    !ignorePending.contains(id)
+                {
+                    ignorePending.insert(id)
+                    live.insert(id)
+                }
+                continue
+            }
+            ignorePending.remove(id)
             live.insert(id)
             if elements[pid]?[id] == nil {
                 track(element, pid: pid, appName: appName)
@@ -146,6 +184,7 @@ public final class EventLoop {
         where !live.contains(id) {
             elements[pid]?[id] = nil
             detectedFloating[id] = nil
+            ignorePending.remove(id)
             onEvent(
                 .windowDestroyed(
                     id,
@@ -226,6 +265,12 @@ public final class EventLoop {
             guard let id = AXHelper.windowID(of: element) else {
                 return
             }
+            // Focus events carry only managed windows: the
+            // reconcile above just settled tracking, so an
+            // absent id is an ignored panel (issue #21) —
+            // reporting it would emit a focus_change with an
+            // empty app and retile focus-driven layouts.
+            guard elements[pid]?[id] != nil else { return }
             onEvent(.windowFocused(id))
         case kAXWindowMovedNotification:
             guard let id = AXHelper.windowID(of: element) else {
