@@ -29,7 +29,7 @@ private struct OverrideChrome<Content: View>: View {
 
 /// Bindings that map an optional override field + its global
 /// default onto the on/off checkbox and the concrete control.
-private func overrideToggle<T>(
+private func overrideToggle<T: Sendable>(
     _ value: Binding<T?>,
     global: T
 ) -> Binding<Bool> {
@@ -39,7 +39,7 @@ private func overrideToggle<T>(
     )
 }
 
-private func overrideValue<T>(
+private func overrideValue<T: Sendable>(
     _ value: Binding<T?>,
     global: T
 ) -> Binding<T> {
@@ -98,7 +98,7 @@ struct OverrideToggleRow: View {
 }
 
 /// An override picker over any labeled, hashable option set.
-struct OverridePickerRow<Value: Hashable>: View {
+struct OverridePickerRow<Value: Hashable & Sendable>: View {
     let label: String
     @Binding var value: Value?
     let global: Value

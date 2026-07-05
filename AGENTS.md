@@ -59,8 +59,12 @@ and (later) the Lua VM.
 2. **Plan:** for features and major fixes, write a short written
    plan (files to change, API surface, tests) before implementing.
 3. **Act:** implement step by step; keep commits focused.
-4. **Verify:** `swift build && swift test && scripts/lint.sh` must
-   pass before any commit.
+4. **Verify:** `swift build && swift test && scripts/lint.sh` for
+   the fast inner loop. A **release build** (`swift build -c
+   release`) must also pass before any commit or PR — it enables
+   the optimizer and stricter concurrency diagnostics (e.g.
+   non-Sendable captures in `@Sendable` closures) that the debug
+   build silently misses.
 5. **Document:** any user-visible behavior change updates the
    matching docs in the same change set — `docs/configuration.md`
    (Lua config & behavior), `docs/cli.md` (commands, events, IPC),
