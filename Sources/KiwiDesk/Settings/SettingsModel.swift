@@ -36,8 +36,9 @@ final class SettingsModel: ObservableObject {
     /// conflict was just introduced — nil hides the banner. Set
     /// by `noteRecordedCombo` (recording a conflicting shortcut)
     /// and by `adoptIntoGui`/`save`'s raw-Lua path (a batch check
-    /// of the resulting config). The persistent per-row ⚠️ and
-    /// its tooltip are unaffected and always reflect live state.
+    /// of the resulting config); both also clear it once no
+    /// conflict remains. The persistent per-row ⚠️ and its
+    /// tooltip are unaffected and always reflect live state.
     @Published var keybindingWarning: String?
 
     let core: KiwiCore
@@ -93,8 +94,8 @@ final class SettingsModel: ObservableObject {
                 core.loadConfig()
                 reload()
                 // Free-form Lua isn't checked at input time (no
-                // recorder was involved), so warn once here if
-                // the reloaded config carries a conflict.
+                // recorder was involved), so set or clear the
+                // banner here from the reloaded config.
                 warnIfAnyConflict()
             } else {
                 try core.saveGuiConfig(config)
@@ -123,7 +124,8 @@ final class SettingsModel: ObservableObject {
             reload()
             // Keybindings can't be recovered from adopted Lua
             // (see adoptConfigIntoGui), but the check is cheap
-            // and keeps this path consistent with Lua-editor save.
+            // and keeps this path consistent with Lua-editor
+            // save: set or clear the banner from the result.
             warnIfAnyConflict()
         } catch {
             core.onLog("adopt failed: \(error)")
@@ -133,33 +135,40 @@ final class SettingsModel: ObservableObject {
     // MARK: - Keybinding conflicts (in-app warning)
 
     /// Called after a `KeyRecorderField.onRecord` commits a new
-    /// combo: warns once if that specific row now conflicts. The
-    /// persistent per-row ⚠️ already reflects this independently;
-    /// this only drives the transient banner.
+    /// combo. Warns if that specific row now conflicts; else
+    /// clears the banner once the whole config has no conflict
+    /// left, so it doesn't linger once the last one is fixed.
+    /// An edit that leaves some *other* row still conflicting
+    /// leaves the banner as-is (this row is fine, but the
+    /// warning is still accurate). The persistent per-row ⚠️
+    /// already reflects live state independently either way.
     func noteRecordedCombo(
         _ binding: KeyBinding,
         in bindings: [KeyBinding]
     ) {
-        guard
-            KeybindingConflicts.text(for: binding, in: bindings)
-                != nil
-        else { return }
-        keybindingWarning = Self.conflictMessage
+        if KeybindingConflicts.text(for: binding, in: bindings)
+            != nil
+        {
+            keybindingWarning = Self.conflictMessage
+        } else if !KeybindingConflicts.hasAnyAcrossModes(
+            config.modes
+        ) {
+            keybindingWarning = nil
+        }
     }
 
-    /// Warns once if any mode in the current config has a
-    /// conflict — used by the two batch-load paths (Adopt, Lua
-    /// editor save) where no single recorder input triggered it.
+    /// Sets or clears the banner from a whole-config check —
+    /// used by the two batch paths (Adopt, Lua editor save)
+    /// where no single recorder input triggered the check.
     private func warnIfAnyConflict() {
-        guard
+        keybindingWarning =
             KeybindingConflicts.hasAnyAcrossModes(config.modes)
-        else { return }
-        keybindingWarning = Self.conflictMessage
+            ? Self.conflictMessage : nil
     }
 
     private static let conflictMessage =
-        "A keybinding conflict was found — check the ⚠️ marks "
-        + "in the Shortcuts tab."
+        "A keybinding conflict was found — see the ⚠️ mark "
+        + "below."
 
     // MARK: - Profiles (Tab 1 / sync banner)
 

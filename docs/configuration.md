@@ -465,7 +465,7 @@ key (Carbon can't distinguish them without Input Monitoring).
 
 ### Conflict detection
 
-The Settings app's Keybindings tab flags any row whose combo
+The Settings app's Shortcuts tab flags any row whose combo
 duplicates another row in the same mode, or a reserved macOS
 shortcut, with a persistent ⚠️ next to that row; hover it for a
 tooltip naming the clash. This indicator always reflects the
@@ -475,12 +475,13 @@ On top of that, KiwiDesk shows a dismissible in-app banner the
 moment a conflict is introduced: right after you record a
 clashing shortcut in the Shortcuts tab, or after adopting a
 hand-written config, or after saving from the raw Lua editor
-finds a conflict in the result. It does not appear on app
-launch, when Settings is simply opened, on Load Profile, or on
-a normal visual-editor Save — those already reflect any
-conflict through the persistent ⚠️, and re-showing the banner
-there would be redundant with the action that actually created
-it.
+finds a conflict in the result. The banner clears itself once
+the last conflict is fixed (or can be dismissed early with its
+✕). It does not appear on app launch, when Settings is simply
+opened, on Load Profile, or on a normal visual-editor Save —
+those already reflect any conflict through the persistent ⚠️,
+and showing the banner there would be redundant with the
+action that actually created it.
 
 ### Modal modes
 

@@ -3,8 +3,8 @@ import Foundation
 /// Conflict detection for the keybindings tab. Comparisons run
 /// on the parsed `KeyCombo` (key code + modifiers), so they are
 /// independent of how a combo was spelled (05_GUI_Concept §2,
-/// Tab 5). Lives in Core (not the GUI target) so it can be
-/// evaluated at app launch, before the Settings window exists.
+/// Tab 5). Lives in Core (not the GUI target) since it is pure
+/// logic over `KeyBinding`/`KeyMode`, with no GUI dependency.
 public enum KeybindingConflicts {
     /// A tooltip describing the conflict on this row, or nil if
     /// the combo is empty, invalid-but-empty, or unique.
@@ -33,7 +33,10 @@ public enum KeybindingConflicts {
         return nil
     }
 
-    /// Whether any row in the set carries a conflict.
+    /// Whether any row in the set carries a conflict. This is
+    /// the per-mode primitive `hasAnyAcrossModes` reduces over:
+    /// modes are independent keymaps, so each is checked
+    /// against its own rows only, never across modes.
     public static func hasAny(_ bindings: [KeyBinding]) -> Bool {
         bindings.contains { binding in
             text(for: binding, in: bindings) != nil
@@ -41,9 +44,9 @@ public enum KeybindingConflicts {
     }
 
     /// Whether any mode's bindings carry a conflict — drives
-    /// the one-time notification on config load. Modes are
-    /// independent keymaps (only one is active at a time), so
-    /// each is checked against its own rows only.
+    /// the in-app warning shown after recording a conflicting
+    /// shortcut, adopting a config, or saving from the raw Lua
+    /// editor (see `SettingsModel`).
     public static func hasAnyAcrossModes(
         _ modes: [KeyMode]
     ) -> Bool {
