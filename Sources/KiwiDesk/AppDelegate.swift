@@ -13,7 +13,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var onboardingWindow: NSWindow?
     private let onboardingModel = OnboardingModel()
     private lazy var dashboard = SettingsWindowController(
-        core: core
+        core: core,
+        onNewKeybindingConflict: { [weak self] in
+            self?.notifyKeybindingConflict()
+        }
     )
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -142,6 +145,37 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 + "& Security > Accessibility."
             let request = UNNotificationRequest(
                 identifier: "kiwidesk.permission-lost",
+                content: content,
+                trigger: nil
+            )
+            center.add(request)
+        }
+    }
+
+    /// Posts a one-time system notification the first time a
+    /// config load finds a keybinding conflict (see
+    /// `SettingsModel.onNewKeybindingConflict`). The persistent
+    /// per-row ⚠️ in the Keybindings tab is unaffected.
+    private func notifyKeybindingConflict() {
+        guard Bundle.main.bundleIdentifier != nil else {
+            NSLog(
+                "KiwiDesk: keybinding conflict detected; see "
+                    + "the Keybindings tab."
+            )
+            return
+        }
+        let center = UNUserNotificationCenter.current()
+        center.requestAuthorization(
+            options: [.alert]
+        ) { granted, _ in
+            guard granted else { return }
+            let content = UNMutableNotificationContent()
+            content.title = "Keybinding conflict detected"
+            content.body =
+                "Two or more shortcuts collide. Review them "
+                + "in Settings > Keybindings."
+            let request = UNNotificationRequest(
+                identifier: "kiwidesk.keybinding-conflict",
                 content: content,
                 trigger: nil
             )

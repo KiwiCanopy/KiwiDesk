@@ -463,6 +463,18 @@ reach any app, and KiwiDesk never needs the Input Monitoring
 permission. Left and right modifiers are treated as the same
 key (Carbon can't distinguish them without Input Monitoring).
 
+### Conflict detection
+
+The Settings app's Keybindings tab flags any row whose combo
+duplicates another row in the same mode, or a reserved macOS
+shortcut, with a persistent ⚠️ and a tooltip explaining the
+clash. The first time a config load finds such a conflict,
+KiwiDesk also raises a one-time system notification pointing
+you at the tab; reloading again with the same (or a different)
+conflict still present does not repeat the notification — it
+only fires again after the conflict clears and a later load
+finds a new one.
+
 ### Modal modes
 
 Define vim-style modes; only the active mode's bindings fire:

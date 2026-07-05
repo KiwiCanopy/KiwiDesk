@@ -39,4 +39,11 @@ enum KeybindingConflicts {
             text(for: binding, in: bindings) != nil
         }
     }
+
+    /// Whether any mode's bindings carry a conflict. Modes are
+    /// independent keymaps (only one is active at a time), so
+    /// each is checked against its own rows only.
+    static func hasAny(in modes: [KeyMode]) -> Bool {
+        modes.contains { hasAny($0.bindings) }
+    }
 }

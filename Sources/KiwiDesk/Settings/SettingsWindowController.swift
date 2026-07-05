@@ -10,8 +10,18 @@ final class SettingsWindowController {
     private let model: SettingsModel
     private var window: NSWindow?
 
-    init(core: KiwiCore) {
-        self.model = SettingsModel(core: core)
+    // `onNewKeybindingConflict` is forwarded to the model so
+    // it is in place before the constructor's own initial
+    // `reload()` runs (see `SettingsModel.init`).
+    init(
+        core: KiwiCore,
+        onNewKeybindingConflict:
+            @escaping @MainActor () -> Void = {}
+    ) {
+        self.model = SettingsModel(
+            core: core,
+            onNewKeybindingConflict: onNewKeybindingConflict
+        )
     }
 
     /// Shows the dashboard, refreshing from the backend so the
