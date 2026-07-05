@@ -10,20 +10,20 @@ Space indicator + layout mode display. In `init.lua`:
 
 ```lua
 KiwiDesk.on("space_change", function(space_id, mode)
-    os.execute(
+    KiwiDesk.exec(
         "sketchybar --trigger kiwi_space_change "
         .. "SPACE=" .. space_id .. " MODE=" .. mode)
 end)
 
 KiwiDesk.on("focus_change", function(window_id, app)
-    os.execute(
+    KiwiDesk.exec(
         "sketchybar --trigger kiwi_focus APP='"
         .. app .. "'")
 end)
 
 -- Native macOS desktop indicator (Mission Control number):
 KiwiDesk.on("native_space_change", function(desktop)
-    os.execute(
+    KiwiDesk.exec(
         "sketchybar --trigger kiwi_desktop DESKTOP="
         .. desktop)
 end)
@@ -56,7 +56,7 @@ KiwiDesk.on("layout_change", function(space_id, mode)
         floating  = "0x00000000",  -- transparent
     }
     local c = colors[mode] or "0xFFFFFFFF"
-    os.execute("borders active_color=" .. c)
+    KiwiDesk.exec("borders active_color=" .. c)
 end)
 ```
 

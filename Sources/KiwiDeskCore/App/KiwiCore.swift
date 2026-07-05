@@ -19,6 +19,7 @@ public final class KiwiCore {
     public let profiles: ProfileManager
     public let crash: CrashRecovery
     public internal(set) var lua: LuaInterpreter?
+    public let exec = ExecLauncher()
 
     /// A stack z-order restore is waiting for the current
     /// animations to settle (see restoreStackZOrder).
@@ -98,6 +99,9 @@ public final class KiwiCore {
             self?.onLog(message)
         }
         keys.onLog = { [weak self] message in
+            self?.onLog(message)
+        }
+        exec.onLog = { [weak self] message in
             self?.onLog(message)
         }
         wireDrag()

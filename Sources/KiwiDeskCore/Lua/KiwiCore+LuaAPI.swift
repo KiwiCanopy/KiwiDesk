@@ -47,6 +47,7 @@ extension KiwiCore {
         }
         registerEventAPI(on: lua)
         registerKeybindingAPI(on: lua)
+        registerExecAPI(on: lua)
         installTypoGuard(on: lua)
     }
 
