@@ -32,6 +32,15 @@ final class SettingsModel: ObservableObject {
     @Published var profileDirty = false
     @Published var profiles: [String] = []
 
+    /// A dismissible in-app warning shown when a keybinding
+    /// conflict was just introduced — nil hides the banner. Set
+    /// by `noteRecordedCombo` (recording a conflicting shortcut)
+    /// and by `adoptIntoGui`/`save`'s raw-Lua path (a batch check
+    /// of the resulting config); both also clear it once no
+    /// conflict remains. The persistent per-row ⚠️ and its
+    /// tooltip are unaffected and always reflect live state.
+    @Published var keybindingWarning: String?
+
     let core: KiwiCore
     private var suppressDirty = false
 
@@ -84,6 +93,10 @@ final class SettingsModel: ObservableObject {
                 )
                 core.loadConfig()
                 reload()
+                // Free-form Lua isn't checked at input time (no
+                // recorder was involved), so set or clear the
+                // banner here from the reloaded config.
+                warnIfAnyConflict()
             } else {
                 try core.saveGuiConfig(config)
                 isDirty = false
@@ -109,8 +122,96 @@ final class SettingsModel: ObservableObject {
             try core.adoptConfigIntoGui()
             showLuaEditor = false
             reload()
+            // Keybindings can't be recovered from adopted Lua
+            // (see adoptConfigIntoGui), but the check is cheap
+            // and keeps this path consistent with Lua-editor
+            // save: set or clear the banner from the result.
+            warnIfAnyConflict()
         } catch {
             core.onLog("adopt failed: \(error)")
+        }
+    }
+
+    // MARK: - Keybinding conflicts (in-app warning)
+
+    /// Called after a `KeyRecorderField.onRecord` commits a new
+    /// combo. Warns (naming every current conflict) if that row
+    /// now conflicts; else clears the banner once the whole
+    /// config has no conflict left, so it doesn't linger once
+    /// the last one is fixed. An edit that leaves some *other*
+    /// row still conflicting only refreshes the banner if it was
+    /// already shown — an unrelated valid edit must not newly
+    /// pop it open. The persistent per-row indicator remains the
+    /// precise, always-live source of truth either way.
+    func noteRecordedCombo(
+        _ binding: KeyBinding,
+        in bindings: [KeyBinding]
+    ) {
+        let list = KeybindingConflicts.conflicts(
+            in: config.modes
+        )
+        if KeybindingConflicts.text(for: binding, in: bindings)
+            != nil
+        {
+            keybindingWarning = Self.formatConflicts(list)
+        } else if list.isEmpty {
+            keybindingWarning = nil
+        } else if keybindingWarning != nil {
+            keybindingWarning = Self.formatConflicts(list)
+        }
+    }
+
+    /// Sets or clears the banner from a whole-config check —
+    /// used by the two batch paths (Adopt, Lua editor save)
+    /// where no single recorder input triggered the check.
+    private func warnIfAnyConflict() {
+        let list = KeybindingConflicts.conflicts(
+            in: config.modes
+        )
+        keybindingWarning =
+            list.isEmpty ? nil : Self.formatConflicts(list)
+    }
+
+    /// Renders a named, enumerated summary: a single sentence
+    /// for one conflict, or a bulleted list for several.
+    private static func formatConflicts(
+        _ conflicts: [Conflict]
+    ) -> String? {
+        guard let only = conflicts.first else { return nil }
+        guard conflicts.count > 1 else {
+            return "Shortcut for \"\(only.name)\" "
+                + sentenceTail(only)
+        }
+        let lines = conflicts.map { "– \(bulletTail($0))" }
+        return "Several shortcuts are conflicting:\n"
+            + lines.joined(separator: "\n")
+    }
+
+    /// The rest of the single-conflict sentence, after the name.
+    private static func sentenceTail(_ conflict: Conflict) -> String {
+        switch conflict.target {
+        case .unrecognized:
+            return "isn't a recognized shortcut."
+        case .otherBinding(let who):
+            return "is conflicting with \"\(who)\"."
+        case .systemShortcut(let name):
+            return
+                "is conflicting with the macOS shortcut "
+                + "\"\(name)\"."
+        }
+    }
+
+    /// One bullet line's text, after the leading "– ".
+    private static func bulletTail(_ conflict: Conflict) -> String {
+        switch conflict.target {
+        case .unrecognized:
+            return "\"\(conflict.name)\" isn't a recognized "
+                + "shortcut"
+        case .otherBinding(let who):
+            return "\"\(conflict.name)\" with \"\(who)\""
+        case .systemShortcut(let name):
+            return "\"\(conflict.name)\" with the macOS "
+                + "shortcut \"\(name)\""
         }
     }
 

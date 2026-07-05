@@ -17,9 +17,10 @@ struct NavGroup: Identifiable {
     var id: String { title }
 }
 
-/// The catalog backing the keybindings tab: navigation presets,
-/// installed applications, and known macOS shortcuts used for
-/// conflict detection (05_GUI_Concept §2, Tab 5).
+/// The catalog backing the keybindings tab: navigation presets
+/// and installed applications. Known macOS shortcuts used for
+/// conflict detection live in Core's `SystemShortcuts`
+/// (05_GUI_Concept §2, Tab 5).
 enum KeybindingCatalog {
     private static let directions = [
         ("Left", "left"), ("Down", "down"),
@@ -113,35 +114,4 @@ enum KeybindingCatalog {
         }
         return names.sorted()
     }()
-
-    /// macOS system shortcuts KiwiDesk shouldn't shadow, keyed
-    /// by the parsed combo, with a human description.
-    static let systemShortcuts: [KeyCombo: String] = build([
-        ("command+space", "Spotlight"),
-        ("command+tab", "App Switcher"),
-        ("command+q", "Quit App"),
-        ("command+w", "Close Window"),
-        ("command+m", "Minimize"),
-        ("command+h", "Hide App"),
-        ("command+option+esc", "Force Quit"),
-        ("control+left", "Mission Control: Space Left"),
-        ("control+right", "Mission Control: Space Right"),
-        ("control+up", "Mission Control"),
-        ("control+down", "App Windows"),
-        ("command+shift+3", "Screenshot"),
-        ("command+shift+4", "Screenshot Selection"),
-        ("command+shift+5", "Screenshot Tools"),
-    ])
-
-    private static func build(
-        _ entries: [(String, String)]
-    ) -> [KeyCombo: String] {
-        var map: [KeyCombo: String] = [:]
-        for (combo, description) in entries {
-            if let parsed = KeyCombo.parse(combo) {
-                map[parsed] = description
-            }
-        }
-        return map
-    }
 }

@@ -7,6 +7,7 @@ import SwiftUI
 /// commands here. Recording upserts a `.navigation` row keyed by
 /// its Lua; clearing removes it.
 struct NavigationSection: View {
+    @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
     let spaces: [SpaceID]
 
@@ -18,6 +19,7 @@ struct NavigationSection: View {
                 DisclosureGroup(group.title) {
                     ForEach(group.commands) { command in
                         NavRow(
+                            model: model,
                             bindings: $bindings,
                             command: command
                         )
@@ -32,6 +34,7 @@ struct NavigationSection: View {
 /// `switch_mode` shortcut. Shown only when more than one mode
 /// exists.
 struct ChangeModesSection: View {
+    @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
     let modeNames: [String]
     let current: String
@@ -40,6 +43,7 @@ struct ChangeModesSection: View {
         SettingsSection("Change Modes") {
             ForEach(others, id: \.self) { name in
                 NavRow(
+                    model: model,
                     bindings: $bindings,
                     command: NavCommand(
                         label: "Switch to \(name)",
@@ -59,6 +63,7 @@ struct ChangeModesSection: View {
 /// A single navigation/mode row: label plus a recorder that
 /// upserts a `.navigation` binding keyed by the command's Lua.
 struct NavRow: View {
+    @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
     let command: NavCommand
 
@@ -102,6 +107,11 @@ struct NavRow: View {
                 )
             )
         }
+        if let updated = bindings.first(
+            where: { $0.lua == command.lua }
+        ) {
+            model.noteRecordedCombo(updated, in: bindings)
+        }
     }
 
     private func clear() {
@@ -112,6 +122,7 @@ struct NavRow: View {
 /// Section 3 — Custom Bindings: inline Lua actions. Starts empty;
 /// "+" appends a row.
 struct CustomSection: View {
+    @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
 
     var body: some View {
@@ -146,7 +157,7 @@ struct CustomSection: View {
                     for: binding.wrappedValue,
                     in: bindings
                 ),
-                onRecord: { binding.wrappedValue.combo = $0 },
+                onRecord: { record($0, into: binding) },
                 onClear: { binding.wrappedValue.combo = "" }
             )
             Button {
@@ -156,6 +167,17 @@ struct CustomSection: View {
             }
             .buttonStyle(.borderless)
         }
+    }
+
+    private func record(
+        _ combo: String,
+        into binding: Binding<KeyBinding>
+    ) {
+        binding.wrappedValue.combo = combo
+        model.noteRecordedCombo(
+            binding.wrappedValue,
+            in: bindings
+        )
     }
 
     private func remove(_ id: UUID) {

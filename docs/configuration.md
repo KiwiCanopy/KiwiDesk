@@ -463,6 +463,42 @@ reach any app, and KiwiDesk never needs the Input Monitoring
 permission. Left and right modifiers are treated as the same
 key (Carbon can't distinguish them without Input Monitoring).
 
+### Conflict detection
+
+The Settings app's Shortcuts tab flags any row whose combo
+duplicates another row in the same mode, or a reserved macOS
+shortcut, with a persistent ⚠️ next to that row; hover it for a
+tooltip naming the clash. This indicator always reflects the
+current bindings, live, with no action needed to see it.
+
+On top of that, KiwiDesk shows a dismissible in-app banner the
+moment a conflict is introduced: right after you record a
+clashing shortcut in the Shortcuts tab, or after adopting a
+hand-written config, or after saving from the raw Lua editor
+finds one or more conflicts in the result. The banner names
+every current conflict. With exactly one:
+
+```
+Shortcut for "Close" is conflicting with the macOS
+shortcut "Close Window".
+```
+
+With more than one, a bulleted summary:
+
+```
+Several shortcuts are conflicting:
+– "First" with "Second"
+– "Second" with "First"
+```
+
+The banner clears itself once the last conflict is fixed (or
+can be dismissed early with its own close button). It does not
+appear on app launch, when Settings is simply opened, on Load
+Profile, or on a normal visual-editor Save — those already
+reflect any conflict through the persistent ⚠️, and showing the
+banner there would be redundant with the action that actually
+created it.
+
 ### Modal modes
 
 Define vim-style modes; only the active mode's bindings fire:

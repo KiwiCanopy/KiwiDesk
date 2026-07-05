@@ -1,0 +1,127 @@
+import Foundation
+
+/// Conflict detection for the keybindings tab. Comparisons run
+/// on the parsed `KeyCombo` (key code + modifiers), so they are
+/// independent of how a combo was spelled (05_GUI_Concept §2,
+/// Tab 5). Lives in Core (not the GUI target) since it is pure
+/// logic over `KeyBinding`/`KeyMode`, with no GUI dependency.
+public enum KeybindingConflicts {
+    /// A tooltip describing the conflict on this row, or nil if
+    /// the combo is empty, invalid-but-empty, or unique.
+    public static func text(
+        for binding: KeyBinding,
+        in bindings: [KeyBinding]
+    ) -> String? {
+        guard !binding.combo.isEmpty else { return nil }
+        guard let combo = KeyCombo.parse(binding.combo) else {
+            return "Not a recognized shortcut."
+        }
+        for other in bindings
+        where other.id != binding.id && !other.combo.isEmpty {
+            guard let otherCombo = KeyCombo.parse(other.combo)
+            else { continue }
+            if otherCombo == combo {
+                let who =
+                    other.label.isEmpty
+                    ? other.combo : other.label
+                return "Already bound in this mode: \(who)"
+            }
+        }
+        if let system = SystemShortcuts.map[combo] {
+            return "Conflicts with macOS: \(system)"
+        }
+        return nil
+    }
+
+    /// Whether any row in the set carries a conflict. This is
+    /// the per-mode primitive `hasAnyAcrossModes` reduces over:
+    /// modes are independent keymaps, so each is checked
+    /// against its own rows only, never across modes.
+    public static func hasAny(_ bindings: [KeyBinding]) -> Bool {
+        bindings.contains { binding in
+            text(for: binding, in: bindings) != nil
+        }
+    }
+
+    /// Whether any mode's bindings carry a conflict — drives
+    /// the in-app warning shown after recording a conflicting
+    /// shortcut, adopting a config, or saving from the raw Lua
+    /// editor (see `SettingsModel`).
+    public static func hasAnyAcrossModes(
+        _ modes: [KeyMode]
+    ) -> Bool {
+        modes.contains { hasAny($0.bindings) }
+    }
+
+    /// Structured conflicts across all modes, for building a
+    /// named, enumerated summary (see `SettingsModel`'s banner
+    /// formatter). One entry per conflicting row; a row that
+    /// duplicates another and *also* shadows a system shortcut
+    /// only reports the first match, same as `text(for:in:)`.
+    public static func conflicts(
+        in modes: [KeyMode]
+    ) -> [Conflict] {
+        modes.flatMap { mode in
+            mode.bindings.compactMap { binding in
+                conflict(for: binding, in: mode.bindings)
+            }
+        }
+    }
+
+    /// One row's conflict: its display name and what it clashes
+    /// with, or nil if the row is empty/unique/valid.
+    private static func conflict(
+        for binding: KeyBinding,
+        in bindings: [KeyBinding]
+    ) -> Conflict? {
+        guard !binding.combo.isEmpty else { return nil }
+        let name =
+            binding.label.isEmpty ? binding.combo : binding.label
+        guard let combo = KeyCombo.parse(binding.combo) else {
+            return Conflict(name: name, target: .unrecognized)
+        }
+        for other in bindings
+        where other.id != binding.id && !other.combo.isEmpty {
+            guard let otherCombo = KeyCombo.parse(other.combo)
+            else { continue }
+            if otherCombo == combo {
+                let who =
+                    other.label.isEmpty
+                    ? other.combo : other.label
+                return Conflict(
+                    name: name,
+                    target: .otherBinding(who)
+                )
+            }
+        }
+        if let system = SystemShortcuts.map[combo] {
+            return Conflict(
+                name: name,
+                target: .systemShortcut(system)
+            )
+        }
+        return nil
+    }
+}
+
+/// One row's conflict, as structured data (see
+/// `KeybindingConflicts.conflicts(in:)`).
+public struct Conflict: Equatable, Sendable {
+    /// What this row clashes with.
+    public enum Target: Equatable, Sendable {
+        /// A reserved macOS shortcut, by its display name
+        /// (e.g. "Close Window").
+        case systemShortcut(String)
+        /// Another row in the same mode, by its display name.
+        case otherBinding(String)
+        /// The combo itself couldn't be parsed — not a "conflicts
+        /// with X" case, just an invalid shortcut.
+        case unrecognized
+    }
+
+    /// The conflicting action's display label, or its combo
+    /// string when the row has no label (e.g. an unnamed
+    /// custom binding).
+    public let name: String
+    public let target: Target
+}
