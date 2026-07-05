@@ -75,8 +75,9 @@ extension KiwiCore {
     }
 
     /// Shared parsing for the per-layout
-    /// `*.set_new_window_placement` commands.
-    private func parsePlacement(
+    /// `*.set_new_window_placement` commands. Internal so the
+    /// split-out `scroll.*` / settings command files can reuse it.
+    func parsePlacement(
         _ args: [JSONValue]
     ) -> SpawnPlacement? {
         guard let raw = args.first?.stringValue else {
@@ -85,7 +86,7 @@ extension KiwiCore {
         return SpawnPlacement(rawValue: raw)
     }
 
-    private var placementError: CommandResponse {
+    var placementError: CommandResponse {
         .fail(
             "expected first | last | before_focused"
                 + " | after_focused"
@@ -149,93 +150,6 @@ extension KiwiCore {
         return .ok()
     }
 
-    // MARK: - scroll.*
-
-    private func scrollCommand(
-        _ command: String,
-        _ args: [JSONValue]
-    ) -> CommandResponse {
-        switch command {
-        case "scroll.set_slot_size":
-            guard let first = args.first else {
-                return .fail(
-                    "expected points, \"NN%\", or 0 for auto"
-                )
-            }
-            if let number = first.numberValue {
-                tiler.settings.scrolling.slotSize =
-                    number <= 0
-                    ? .auto : .points(clamping: CGFloat(number))
-            } else if let string = first.stringValue,
-                string.hasSuffix("%"),
-                let percent = Double(string.dropLast())
-            {
-                tiler.settings.scrolling.slotSize =
-                    .fraction(clamping: percent / 100)
-            } else {
-                return .fail(
-                    "expected points, \"NN%\", or 0 for auto"
-                )
-            }
-        case "scroll.set_anchor":
-            guard let raw = args.first?.stringValue,
-                let anchor = ScrollingParams.Anchor(
-                    rawValue: raw
-                )
-            else {
-                return .fail("expected center|left|right")
-            }
-            tiler.settings.scrolling.anchor = anchor
-        case "scroll.set_orientation":
-            guard let raw = args.first?.stringValue,
-                let orientation = ScrollingParams.Orientation(
-                    rawValue: raw
-                )
-            else {
-                return .fail("expected horizontal|vertical")
-            }
-            tiler.settings.scrolling.orientation = orientation
-            warnOnScrollBarMismatch()
-        case "scroll.set_speed":
-            guard let ms = args.first?.intValue else {
-                return .fail("expected milliseconds")
-            }
-            tiler.animation.durationMS = ms
-        case "scroll.set_new_window_placement":
-            guard let placement = parsePlacement(args) else {
-                return placementError
-            }
-            tiler.settings.scrolling.newWindowPlacement =
-                placement
-        default:
-            guard command.hasPrefix("scroll.set_app_bar_") else {
-                return .fail("unknown command: \(command)")
-            }
-            let field = String(
-                command.dropFirst("scroll.set_app_bar_".count)
-            )
-            let response = applyBarOverride(
-                field: field,
-                args,
-                into: &tiler.settings.scrolling.appBar
-            )
-            if response.isSuccess, field == "position" {
-                warnOnScrollBarMismatch()
-            }
-            return response
-        }
-        return .ok()
-    }
-
-    private func warnOnScrollBarMismatch() {
-        warnOnBarPositionMismatch(
-            host: tiler.settings.scrolling,
-            layout: "scroll",
-            orientation: tiler.settings.scrolling.orientation
-                .rawValue
-        )
-    }
-
     // MARK: - grid.*
 
     private func gridCommand(
@@ -283,68 +197,4 @@ extension KiwiCore {
         return .ok()
     }
 
-    // MARK: - Global toggles
-
-    private func settingsCommand(
-        _ command: String,
-        _ args: [JSONValue]
-    ) -> CommandResponse {
-        switch command {
-        case "enable_animations":
-            guard let enabled = args.first?.boolValue else {
-                return .fail("expected boolean")
-            }
-            tiler.animation.isEnabled = enabled
-        case "set_animation_duration":
-            guard let ms = args.first?.intValue else {
-                return .fail("expected milliseconds")
-            }
-            tiler.animation.durationMS = ms
-        case "set_space_animation":
-            guard let enabled = args.first?.boolValue else {
-                return .fail("expected boolean")
-            }
-            tiler.animateSpaceSwitch = enabled
-        case "set_mouse_resize":
-            guard let raw = args.first?.stringValue,
-                let mode = MouseResizeMode(rawValue: raw)
-            else {
-                return .fail("expected layout|snap_back")
-            }
-            tiler.mouseResize = mode
-        case "enable_wake_restore":
-            guard let enabled = args.first?.boolValue else {
-                return .fail("expected boolean")
-            }
-            sleepWake.isEnabled = enabled
-        case "set_wake_restore_delay":
-            guard let ms = args.first?.intValue else {
-                return .fail("expected milliseconds")
-            }
-            sleepWake.restoreDelayMS = max(0, ms)
-        case "set_new_window_placement_override":
-            guard let space = args.first?.stringValue else {
-                return .fail("expected space id and placement")
-            }
-            guard
-                let placement = parsePlacement(
-                    Array(args.dropFirst())
-                )
-            else {
-                return placementError
-            }
-            tiler.settings.placementOverride[SpaceID(space)] =
-                placement
-        default:
-            var message = "unknown command: \(command)"
-            if let hint = APIReference.suggestion(
-                for: command
-            ) {
-                message += " — did you mean '\(hint)'?"
-            }
-            message += " (run 'help' for all commands)"
-            return .fail(message)
-        }
-        return .ok()
-    }
 }
