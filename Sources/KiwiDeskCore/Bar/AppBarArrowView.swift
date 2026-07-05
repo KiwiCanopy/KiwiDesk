@@ -6,10 +6,10 @@ import AppKit
 /// the item scrolling away beneath it. Hover feedback
 /// mirrors the items': the box swaps to the hover color.
 @MainActor
-final class IndicatorBarArrowView: NSView {
+final class AppBarArrowView: NSView {
     var onClick: () -> Void = {}
     private let label = NSTextField(labelWithString: "")
-    private var params = MonocleParams()
+    private var style = AppBarStyle()
     private var isHovered = false
 
     init() {
@@ -22,7 +22,7 @@ final class IndicatorBarArrowView: NSView {
 
     @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("IndicatorBarArrowView is code-only")
+        fatalError("AppBarArrowView is code-only")
     }
 
     override func mouseDown(with event: NSEvent) {
@@ -53,23 +53,23 @@ final class IndicatorBarArrowView: NSView {
         applyColors()
     }
 
-    func style(glyph: String, params: MonocleParams) {
-        self.params = params
+    func style(glyph: String, style: AppBarStyle) {
+        self.style = style
         label.stringValue = glyph
         label.font = .systemFont(
-            ofSize: IndicatorBarOverlay.arrowZone * 0.7,
+            ofSize: AppBarOverlay.arrowZone * 0.7,
             weight: .bold
         )
         layer?.cornerRadius = min(
-            params.bar.cornerRadius,
-            IndicatorBarOverlay.arrowZone / 2
+            style.cornerRadius,
+            AppBarOverlay.arrowZone / 2
         )
         applyColors()
         needsLayout = true
     }
 
     private func applyColors() {
-        let bar = params.bar
+        let bar = style
         label.textColor = NSColor(
             kiwiHex: isHovered
                 ? bar.hoverTextColor : bar.textColor

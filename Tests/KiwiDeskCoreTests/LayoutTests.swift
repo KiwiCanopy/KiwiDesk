@@ -316,7 +316,10 @@ struct ScrollingLayoutTests {
 
     @Test("Single window scales to the full width")
     func singleWindow() throws {
-        let context = makeContext()
+        // Isolate the column mechanics from the now-default
+        // app bar (its strip carving is covered separately).
+        var context = makeContext()
+        context.scrolling.appBar.enabled = false
         let frames = layout.calculateGeometry(
             for: [w1],
             in: context
@@ -360,7 +363,8 @@ struct ScrollingLayoutTests {
 
     @Test("Columns keep fixed width and full height")
     func columnDimensions() throws {
-        let context = makeContext(focused: w2)
+        var context = makeContext(focused: w2)
+        context.scrolling.appBar.enabled = false
         let frames = layout.calculateGeometry(
             for: [w1, w2, w3],
             in: context

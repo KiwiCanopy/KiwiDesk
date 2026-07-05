@@ -89,6 +89,9 @@ public struct LayoutContext: Sendable {
     public var scrolling: ScrollingParams
     public var grid: GridParams
     public var monocle: MonocleParams
+    /// The indicator bar's global look; a layout resolves its
+    /// own bar against this to carve the strip.
+    public var appBarStyle: AppBarStyle
 
     public init(
         bounds: CGRect,
@@ -99,7 +102,8 @@ public struct LayoutContext: Sendable {
         stack: StackParams = StackParams(),
         scrolling: ScrollingParams = ScrollingParams(),
         grid: GridParams = GridParams(),
-        monocle: MonocleParams = MonocleParams()
+        monocle: MonocleParams = MonocleParams(),
+        appBarStyle: AppBarStyle = AppBarStyle()
     ) {
         self.bounds = bounds
         self.gaps = gaps
@@ -110,6 +114,7 @@ public struct LayoutContext: Sendable {
         self.scrolling = scrolling
         self.grid = grid
         self.monocle = monocle
+        self.appBarStyle = appBarStyle
     }
 
     /// Screen bounds inset by the per-edge outer gaps.

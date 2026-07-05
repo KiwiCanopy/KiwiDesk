@@ -29,8 +29,8 @@ private func richConfig() -> GuiConfig {
     config.settings.scrolling.windowWidth = 900
     config.settings.grid.columns = 4
     config.settings.grid.rows = 3
-    config.settings.monocle.bar.thickness = 40
-    config.settings.monocle.bar.textColor = "#112233"
+    config.settings.monocle.appBar.thickness = 40
+    config.settings.monocle.appBar.textColor = "#112233"
     config.settings.dragCornerRadius = 12
     config.settings.placementOverride[SpaceID("mail")] = .last
     config.spaceModes = [

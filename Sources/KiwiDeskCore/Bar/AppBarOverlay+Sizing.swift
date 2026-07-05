@@ -6,9 +6,9 @@ import AppKit
 /// icon square (icons never clip) and a quarter of the bar
 /// (single items never balloon). Items that overflow the
 /// strip anyway don't shrink — the bar scrolls instead,
-/// following the focused item (see IndicatorBarOverlay).
+/// following the focused item (see AppBarOverlay).
 /// Pure math, unit-tested.
-extension IndicatorBarOverlay {
+extension AppBarOverlay {
     /// One render pass's derived lengths along the bar axis.
     /// While the items overflow the strip, the viewport they
     /// render (and clip) in is inset by the arrow zone plus
@@ -26,15 +26,14 @@ extension IndicatorBarOverlay {
     func metrics(
         strip: CGRect,
         count: Int,
-        params: MonocleParams
+        style: AppBarStyle
     ) -> Metrics {
-        let horizontal =
-            params.resolvedBarPosition.isHorizontalEdge
+        let horizontal = style.position.isHorizontalEdge
         let axis = horizontal ? strip.width : strip.height
-        let gap = params.bar.itemGap
+        let gap = style.itemGap
         let slot = Self.slotLength(
-            itemSize: params.bar.itemSize,
-            content: params.bar.content,
+            itemSize: style.itemSize,
+            content: style.content,
             thickness:
                 horizontal ? strip.height : strip.width,
             axis: axis
@@ -62,7 +61,7 @@ extension IndicatorBarOverlay {
     /// The shared slot length for one bar layout pass.
     nonisolated static func slotLength(
         itemSize: CGFloat,
-        content: MonocleParams.Bar.Content,
+        content: AppBarStyle.Content,
         thickness: CGFloat,
         axis: CGFloat
     ) -> CGFloat {
@@ -91,10 +90,10 @@ extension IndicatorBarOverlay {
     /// text-only bars just keep a sliver of legibility.
     nonisolated static func minimumSlot(
         thickness: CGFloat,
-        content: MonocleParams.Bar.Content
+        content: AppBarStyle.Content
     ) -> CGFloat {
         content == .name
-            ? IndicatorBarItemView.contentPadding * 4
+            ? AppBarItemView.contentPadding * 4
             : thickness
     }
 

@@ -53,10 +53,14 @@ extension LuaConfigWriter {
                 + LuaLiteral.number(params.windowWidth) + ")",
             "scroll.set_anchor("
                 + LuaLiteral.string(params.anchor.rawValue) + ")",
+            "scroll.set_orientation("
+                + LuaLiteral.string(params.orientation.rawValue)
+                + ")",
             "scroll.set_new_window_placement("
                 + LuaLiteral.string(
                     params.newWindowPlacement.rawValue
                 ) + ")",
+            layoutBar("scroll", params.appBar),
         ].joined(separator: "\n")
     }
 

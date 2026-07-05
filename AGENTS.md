@@ -67,6 +67,13 @@ and (later) the Lua VM.
    `docs/integrations.md` (recipes) — and `plan/` when the design
    itself shifts. Code and docs must never describe different
    behavior.
+6. **Review:** once a substantial change is finished, verified,
+   and committed, spin up **both** `code-reviewer` and
+   `architect-reviewer` on the diff since the last review point —
+   the branch's merge base with `main`, or the last reviewed
+   commit / PR if there is one. Address or consciously dismiss
+   their findings before opening a PR. (See §4 subagent
+   delegation.)
 
 ### Commit messages (Angular / Conventional Commits)
 

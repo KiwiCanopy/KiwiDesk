@@ -5,11 +5,11 @@ import AppKit
 /// the other items reflow live around the slot it would land
 /// in; dropping reports (from, to) through `onMove`, and the
 /// core rewrites the window order.
-extension IndicatorBarOverlay {
+extension AppBarOverlay {
     /// The dragged item rides along the axis (cross-axis
     /// pinned), floating above its siblings.
     func dragMoved(
-        _ view: IndicatorBarItemView,
+        _ view: AppBarItemView,
         to point: CGPoint
     ) {
         guard let m = lastMetrics,
@@ -28,7 +28,7 @@ extension IndicatorBarOverlay {
         reflow(around: view, m: m)
     }
 
-    func dragEnded(_ view: IndicatorBarItemView) {
+    func dragEnded(_ view: AppBarItemView) {
         guard let m = lastMetrics,
             let from = itemViews.firstIndex(of: view)
         else { return }
@@ -51,7 +51,7 @@ extension IndicatorBarOverlay {
     /// The non-dragged items take the frames of the order
     /// the drop would produce, so the gap tracks the cursor.
     private func reflow(
-        around dragged: IndicatorBarItemView,
+        around dragged: AppBarItemView,
         m: Metrics
     ) {
         guard let container = dragged.superview,

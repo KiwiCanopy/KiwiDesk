@@ -123,28 +123,52 @@ public struct StackParams: Sendable, Equatable, Codable {
     }
 }
 
-public struct ScrollingParams: Sendable, Equatable, Codable {
+public struct ScrollingParams: Sendable, Equatable, Codable,
+    AppBarHosting
+{
     public enum Anchor: String, Sendable, Codable {
         case center
         case left
         case right
     }
 
-    /// Fixed column width for every window.
+    /// Which axis the columns scroll along — the scrolling
+    /// analogue of monocle's orientation, and what decides
+    /// which edges the indicator bar may sit on.
+    public enum Orientation: String, Sendable, Codable {
+        /// Columns side by side, scrolling left/right; bar on
+        /// top/bottom.
+        case horizontal
+        /// Rows stacked, scrolling up/down; bar on left/right.
+        case vertical
+    }
+
+    /// Fixed column width for every window (the extent across
+    /// the scroll axis: width when horizontal, height when
+    /// vertical).
     public var windowWidth: CGFloat = 800
     /// Where the focused column sits in the viewport.
     public var anchor: Anchor = .center
+    public var orientation: Orientation = .horizontal
     /// PaperWM-style default: new columns open next to the
     /// one you are working in.
     public var newWindowPlacement: SpawnPlacement = .afterFocused
+    public var appBar = LayoutAppBar()
 
     public init() {}
+
+    /// AppBarHosting: the bar axis follows the scroll axis.
+    public var barAxisIsHorizontal: Bool {
+        orientation == .horizontal
+    }
 
     /// JSON keys follow the Lua setters (`scroll.set_width`).
     private enum CodingKeys: String, CodingKey {
         case windowWidth = "width"
         case anchor
+        case orientation
         case newWindowPlacement = "new_window_placement"
+        case appBar = "app_bar"
     }
 
     /// Manual decoding: profiles saved before a field existed
@@ -163,11 +187,21 @@ public struct ScrollingParams: Sendable, Equatable, Codable {
                 Anchor.self,
                 forKey: .anchor
             ) ?? .center
+        orientation =
+            try container.decodeIfPresent(
+                Orientation.self,
+                forKey: .orientation
+            ) ?? .horizontal
         newWindowPlacement =
             try container.decodeIfPresent(
                 SpawnPlacement.self,
                 forKey: .newWindowPlacement
             ) ?? .afterFocused
+        appBar =
+            try container.decodeIfPresent(
+                LayoutAppBar.self,
+                forKey: .appBar
+            ) ?? LayoutAppBar()
     }
 }
 

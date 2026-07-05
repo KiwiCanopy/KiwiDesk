@@ -45,6 +45,17 @@ struct ScrollGridEditor: View {
                 Text("Right").tag(ScrollingParams.Anchor.right)
             }
             .pickerStyle(.segmented)
+            Picker(
+                "Scroll orientation",
+                selection: $model.config.settings.scrolling
+                    .orientation
+            ) {
+                Text("Horizontal")
+                    .tag(ScrollingParams.Orientation.horizontal)
+                Text("Vertical")
+                    .tag(ScrollingParams.Orientation.vertical)
+            }
+            .pickerStyle(.segmented)
             PlacementPicker(
                 placement: $model.config.settings.scrolling
                     .newWindowPlacement

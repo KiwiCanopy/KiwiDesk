@@ -23,6 +23,7 @@ public enum LuaConfigWriter {
                 ) + ")"
         )
         sections.append(spaceModes(config.spaceModes))
+        sections.append(appBarStyle(config.settings.appBarStyle))
         sections.append(layoutParams(config.settings))
         sections.append(dragVisuals(config.settings))
         sections.append(appRules(config.appRules))

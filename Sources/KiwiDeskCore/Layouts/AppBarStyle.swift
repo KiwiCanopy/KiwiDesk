@@ -1,10 +1,17 @@
 import CoreGraphics
 import Foundation
 
-/// The monocle indicator bar's settings, nested under
-/// `monocle.bar` in profile JSON (usually spelled
-/// `MonocleParams.Bar` at call sites).
-public struct MonocleBarParams: Sendable, Equatable {
+/// The indicator bar's global look, shared by every layout that
+/// shows a bar (monocle, scrolling). Stored top-level as `bar`
+/// in profile JSON, set from Lua via `app_bar.set_*`. A layout may
+/// override any of these fields for itself (see `LayoutAppBar`);
+/// what isn't overridden inherits from here.
+///
+/// Two things deliberately live *outside* this type because they
+/// are layout-specific, not looks: whether the bar is shown
+/// (`LayoutAppBar.enabled`) and the focus/scroll axis
+/// (`MonocleParams.orientation` / `ScrollingParams.orientation`).
+public struct AppBarStyle: Sendable, Equatable {
     public enum Position: String, Sendable, Codable {
         case top, bottom, left, right
 
@@ -42,9 +49,9 @@ public struct MonocleBarParams: Sendable, Equatable {
         case iconAndName = "icon_and_name"
     }
 
-    /// The bar is the point of the monocle overhaul: on by
-    /// default, users opt out explicitly.
-    public var enabled = true
+    /// Which edge the bar sits on. A layout resolves this
+    /// against its own orientation (see `resolvedPosition`);
+    /// a mismatch falls back to the orientation's default edge.
     public var position: Position = .top
     /// Depth of the reserved strip (pt).
     public var thickness: CGFloat = 32
@@ -95,15 +102,27 @@ public struct MonocleBarParams: Sendable, Equatable {
     public var groupBadgeTextColor = "#FFFFFF"
 
     public init() {}
+
+    /// The bar's edge resolved against a layout `orientation`:
+    /// a horizontal axis keeps top/bottom (default top), a
+    /// vertical axis keeps left/right (default left). Keeps a
+    /// mismatched setting rather than erroring.
+    public func resolvedPosition(
+        horizontalAxis: Bool
+    ) -> Position {
+        if horizontalAxis {
+            return position.isHorizontalEdge ? position : .top
+        }
+        return position.isHorizontalEdge ? .left : position
+    }
 }
 
 // MARK: - Codable
 
-extension MonocleBarParams: Codable {
-    /// JSON keys are the Lua setters (`monocle.set_bar_*`)
-    /// minus the `bar_` prefix — the nesting carries it.
-    private enum CodingKeys: String, CodingKey {
-        case enabled
+extension AppBarStyle: Codable {
+    /// JSON keys are the Lua setters (`app_bar.set_*`) minus the
+    /// `set_` verb — the `bar` nesting carries the namespace.
+    enum CodingKeys: String, CodingKey {
         case position
         case thickness
         case style
@@ -112,8 +131,6 @@ extension MonocleBarParams: Codable {
         case itemGap = "item_gap"
         case content
         case groupAdjacentWindows = "group_adjacent_windows"
-        case groupBadgeColor = "group_badge_color"
-        case groupBadgeTextColor = "group_badge_text_color"
         case fontSize = "font_size"
         case cornerRadius = "corner_radius"
         case textColor = "text_color"
@@ -124,6 +141,8 @@ extension MonocleBarParams: Codable {
         case hoverColor = "hover_color"
         case hoverTextColor = "hover_text_color"
         case backgroundColor = "background_color"
+        case groupBadgeColor = "group_badge_color"
+        case groupBadgeTextColor = "group_badge_text_color"
     }
 
     /// Manual decoding: profiles saved before a field existed
@@ -132,19 +151,7 @@ extension MonocleBarParams: Codable {
         let container = try decoder.container(
             keyedBy: CodingKeys.self
         )
-        try decodeBehavior(from: container)
-        try decodeAppearance(from: container)
-    }
-
-    private mutating func decodeBehavior(
-        from container: KeyedDecodingContainer<CodingKeys>
-    ) throws {
         let defaults = Self()
-        enabled =
-            try container.decodeIfPresent(
-                Bool.self,
-                forKey: .enabled
-            ) ?? defaults.enabled
         position =
             try container.decodeIfPresent(
                 Position.self,
@@ -170,6 +177,11 @@ extension MonocleBarParams: Codable {
                 CGFloat.self,
                 forKey: .itemSize
             ) ?? defaults.itemSize
+        itemGap =
+            try container.decodeIfPresent(
+                CGFloat.self,
+                forKey: .itemGap
+            ) ?? defaults.itemGap
         content =
             try container.decodeIfPresent(
                 Content.self,
@@ -180,17 +192,13 @@ extension MonocleBarParams: Codable {
                 Bool.self,
                 forKey: .groupAdjacentWindows
             ) ?? defaults.groupAdjacentWindows
+        try decodeAppearance(from: container)
     }
 
     private mutating func decodeAppearance(
         from container: KeyedDecodingContainer<CodingKeys>
     ) throws {
         let defaults = Self()
-        itemGap =
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .itemGap
-            ) ?? defaults.itemGap
         fontSize =
             try container.decodeIfPresent(
                 CGFloat.self,

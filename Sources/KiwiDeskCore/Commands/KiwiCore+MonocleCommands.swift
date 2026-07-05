@@ -1,14 +1,15 @@
 import Foundation
 
 /// monocle.* sub-API: orientation (which focus axis cycles
-/// through the windows) and the indicator bar listing them.
+/// through the windows) and its indicator-bar overrides. The
+/// bar's look is global (`app_bar.set_*`); `monocle.set_app_bar_*` only
+/// carries this layout's `enabled` and per-field overrides.
 extension KiwiCore {
     func monocleCommand(
         _ command: String,
         _ args: [JSONValue]
     ) -> CommandResponse {
-        switch command {
-        case "monocle.set_orientation":
+        if command == "monocle.set_orientation" {
             guard let raw = args.first?.stringValue,
                 let orientation =
                     MonocleParams.Orientation(rawValue: raw)
@@ -16,127 +17,33 @@ extension KiwiCore {
                 return .fail("expected horizontal|vertical")
             }
             tiler.settings.monocle.orientation = orientation
-            warnOnBarPositionMismatch()
-        case "monocle.set_bar_enabled":
-            guard let enabled = args.first?.boolValue else {
-                return .fail("expected boolean")
-            }
-            tiler.settings.monocle.bar.enabled = enabled
-        case "monocle.set_bar_group_adjacent_windows":
-            guard let enabled = args.first?.boolValue else {
-                return .fail("expected boolean")
-            }
-            tiler.settings.monocle.bar.groupAdjacentWindows = enabled
-        case "monocle.set_bar_position":
-            guard let raw = args.first?.stringValue,
-                let position =
-                    MonocleParams.Bar.Position(rawValue: raw)
-            else {
-                return .fail("expected top|bottom|left|right")
-            }
-            tiler.settings.monocle.bar.position = position
-            warnOnBarPositionMismatch()
-        case "monocle.set_bar_style":
-            guard let raw = args.first?.stringValue,
-                let style =
-                    MonocleParams.Bar.Style(rawValue: raw)
-            else {
-                return .fail(
-                    "expected pills|segments|underline"
-                )
-            }
-            tiler.settings.monocle.bar.style = style
-        case "monocle.set_bar_active_style":
-            guard let raw = args.first?.stringValue,
-                let style =
-                    MonocleParams.Bar.ActiveStyle(
-                        rawValue: raw
-                    )
-            else {
-                return .fail("expected highlight|gap")
-            }
-            tiler.settings.monocle.bar.activeStyle = style
-        case "monocle.set_bar_content":
-            guard let raw = args.first?.stringValue,
-                let content =
-                    MonocleParams.Bar.Content(rawValue: raw)
-            else {
-                return .fail(
-                    "expected icon|name|icon_and_name"
-                )
-            }
-            tiler.settings.monocle.bar.content = content
-        default:
-            return setMonocleNumber(command, args)
-                ?? setMonocleColor(command, args)
+            warnOnMonocleBarMismatch()
+            return .ok()
         }
-        return .ok()
-    }
-
-    /// The pt-valued setters, all clamped at 0. Nil when the
-    /// command isn't one of them (colors come next).
-    private func setMonocleNumber(
-        _ command: String,
-        _ args: [JSONValue]
-    ) -> CommandResponse? {
-        let numbers:
-            [String: WritableKeyPath<
-                MonocleParams, CGFloat
-            >] = [
-                "monocle.set_bar_thickness": \.bar.thickness,
-                "monocle.set_bar_item_size": \.bar.itemSize,
-                "monocle.set_bar_item_gap": \.bar.itemGap,
-                "monocle.set_bar_font_size": \.bar.fontSize,
-                "monocle.set_bar_corner_radius":
-                    \.bar.cornerRadius,
-            ]
-        guard let keyPath = numbers[command] else {
-            return nil
-        }
-        guard let value = args.first?.numberValue else {
-            return .fail("expected a length (pt)")
-        }
-        tiler.settings.monocle[keyPath: keyPath] =
-            max(0, value)
-        return .ok()
-    }
-
-    private func setMonocleColor(
-        _ command: String,
-        _ args: [JSONValue]
-    ) -> CommandResponse {
-        let colors:
-            [String: WritableKeyPath<
-                MonocleParams, String
-            >] = [
-                "monocle.set_bar_text_color": \.bar.textColor,
-                "monocle.set_bar_box_color": \.bar.boxColor,
-                "monocle.set_bar_active_text_color":
-                    \.bar.activeTextColor,
-                "monocle.set_bar_active_box_color":
-                    \.bar.activeBoxColor,
-                "monocle.set_bar_highlight_color":
-                    \.bar.highlightColor,
-                "monocle.set_bar_hover_color": \.bar.hoverColor,
-                "monocle.set_bar_hover_text_color":
-                    \.bar.hoverTextColor,
-                "monocle.set_bar_background_color":
-                    \.bar.backgroundColor,
-                "monocle.set_bar_group_badge_color":
-                    \.bar.groupBadgeColor,
-                "monocle.set_bar_group_badge_text_color":
-                    \.bar.groupBadgeTextColor,
-            ]
-        guard let keyPath = colors[command] else {
+        guard command.hasPrefix("monocle.set_app_bar_") else {
             return .fail("unknown command: \(command)")
         }
-        guard let hex = args.first?.stringValue,
-            DragVisual.parseHex(hex) != nil
-        else {
-            return .fail("expected #RRGGBB or #RRGGBBAA")
+        let field = String(
+            command.dropFirst("monocle.set_app_bar_".count)
+        )
+        let response = applyBarOverride(
+            field: field,
+            args,
+            into: &tiler.settings.monocle.appBar
+        )
+        if response.isSuccess, field == "position" {
+            warnOnMonocleBarMismatch()
         }
-        tiler.settings.monocle[keyPath: keyPath] = hex
-        return .ok()
+        return response
+    }
+
+    private func warnOnMonocleBarMismatch() {
+        warnOnBarPositionMismatch(
+            host: tiler.settings.monocle,
+            layout: "monocle",
+            orientation: tiler.settings.monocle.orientation
+                .rawValue
+        )
     }
 
     /// Cycles or reorders along the monocle orientation axis.
@@ -181,23 +88,5 @@ extension KiwiCore {
             focusWindow(target)
         }
         return .ok()
-    }
-
-    /// A bar position that doesn't fit the orientation is
-    /// kept in the settings but resolved to the orientation's
-    /// default edge — warn so the user isn't left guessing.
-    private func warnOnBarPositionMismatch() {
-        let monocle = tiler.settings.monocle
-        guard
-            monocle.bar.position
-                != monocle.resolvedBarPosition
-        else { return }
-        onLog(
-            "monocle: bar position '"
-                + monocle.bar.position.rawValue
-                + "' doesn't fit \(monocle.orientation.rawValue)"
-                + " orientation — using '"
-                + monocle.resolvedBarPosition.rawValue + "'"
-        )
     }
 }

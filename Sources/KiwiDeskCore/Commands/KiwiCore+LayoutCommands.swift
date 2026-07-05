@@ -19,6 +19,8 @@ extension KiwiCore {
             response = gridCommand(command, args)
         } else if command.hasPrefix("monocle.") {
             response = monocleCommand(command, args)
+        } else if command.hasPrefix("app_bar.") {
+            response = barCommand(command, args)
         } else if command.hasPrefix("drag.") {
             response = dragCommand(command, args)
         } else {
@@ -169,6 +171,16 @@ extension KiwiCore {
                 return .fail("expected center|left|right")
             }
             tiler.settings.scrolling.anchor = anchor
+        case "scroll.set_orientation":
+            guard let raw = args.first?.stringValue,
+                let orientation = ScrollingParams.Orientation(
+                    rawValue: raw
+                )
+            else {
+                return .fail("expected horizontal|vertical")
+            }
+            tiler.settings.scrolling.orientation = orientation
+            warnOnScrollBarMismatch()
         case "scroll.set_speed":
             guard let ms = args.first?.intValue else {
                 return .fail("expected milliseconds")
@@ -181,9 +193,32 @@ extension KiwiCore {
             tiler.settings.scrolling.newWindowPlacement =
                 placement
         default:
-            return .fail("unknown command: \(command)")
+            guard command.hasPrefix("scroll.set_app_bar_") else {
+                return .fail("unknown command: \(command)")
+            }
+            let field = String(
+                command.dropFirst("scroll.set_app_bar_".count)
+            )
+            let response = applyBarOverride(
+                field: field,
+                args,
+                into: &tiler.settings.scrolling.appBar
+            )
+            if response.isSuccess, field == "position" {
+                warnOnScrollBarMismatch()
+            }
+            return response
         }
         return .ok()
+    }
+
+    private func warnOnScrollBarMismatch() {
+        warnOnBarPositionMismatch(
+            host: tiler.settings.scrolling,
+            layout: "scroll",
+            orientation: tiler.settings.scrolling.orientation
+                .rawValue
+        )
     }
 
     // MARK: - grid.*

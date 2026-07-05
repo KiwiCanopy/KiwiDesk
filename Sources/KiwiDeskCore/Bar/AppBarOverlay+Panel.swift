@@ -2,7 +2,7 @@ import AppKit
 
 /// Panel plumbing: the non-activating panel, the clipping
 /// item viewport inside it, and per-render container styling.
-extension IndicatorBarOverlay {
+extension AppBarOverlay {
     /// Flipped so the first item sits at the visual top of
     /// vertical bars.
     final class FlippedView: NSView {
@@ -14,19 +14,19 @@ extension IndicatorBarOverlay {
     /// itself in the (default transparent) background color.
     func styleContainer(
         _ panel: NSPanel,
-        params: MonocleParams
+        style: AppBarStyle
     ) {
         guard let layer = panel.contentView?.layer else {
             return
         }
         layer.masksToBounds = true
         layer.cornerRadius =
-            params.bar.style == .pills
-            ? 0 : params.bar.cornerRadius
+            style.style == .pills
+            ? 0 : style.cornerRadius
         let background =
-            params.bar.style == .underline
-            ? params.bar.boxColor
-            : params.bar.backgroundColor
+            style.style == .underline
+            ? style.boxColor
+            : style.backgroundColor
         layer.backgroundColor =
             NSColor(kiwiHex: background).cgColor
     }
@@ -36,7 +36,7 @@ extension IndicatorBarOverlay {
             itemViews.removeLast().removeFromSuperview()
         }
         while itemViews.count < count {
-            let view = IndicatorBarItemView()
+            let view = AppBarItemView()
             itemViews.append(view)
             itemContainer.addSubview(view)
         }

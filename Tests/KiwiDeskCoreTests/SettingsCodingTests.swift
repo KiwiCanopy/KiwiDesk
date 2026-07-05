@@ -26,7 +26,8 @@ struct SettingsCodingTests {
         )
         #expect(
             Set(root.keys) == [
-                "drag", "gap", "layout", "min_window_size",
+                "app_bar", "drag", "gap", "layout",
+                "min_window_size",
                 "new_window_placement_override",
             ]
         )

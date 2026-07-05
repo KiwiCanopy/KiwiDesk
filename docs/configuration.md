@@ -134,9 +134,12 @@ stack.demote()                     -- focused window -> stack
 stack.set_overflow_style("cascade_overflow")
 
 -- Scrolling (PaperWM style)
-scroll.set_width(800)              -- fixed column width
+scroll.set_width(800)              -- fixed slot size along axis
 scroll.set_anchor("center")        -- center | left | right
 scroll.set_speed(250)              -- animation ms
+scroll.set_orientation("horizontal")  -- horizontal: columns
+                                   -- scroll left/right.
+                                   -- vertical: rows scroll up/down
 
 -- Grid
 grid.set_type("dynamic")           -- dynamic | rigid
@@ -145,35 +148,52 @@ grid.set_split_direction("horizontal")
 grid.set_dimensions(3, 2)          -- rigid: columns, rows
 ```
 
-### Monocle: orientation & indicator bar
+### App Bar
 
-Monocle keeps its core promise — one window fills the whole
-usable area, the rest wait behind it — but no longer leaves
-you guessing what is back there: an **indicator bar** lists
-every window in the container, and an **orientation** decides
-which focus axis cycles through them.
+The **app bar** lists every window in the current space — for
+layouts where windows can hide each other (**monocle**) or
+scroll off-screen (**scrolling**) — so you always see what's
+there. Click an item to focus its window; drag to reorder.
+
+Its look is **global**: set it once with `app_bar.set_*` and
+every layout's bar shares it. Each layout then decides only
+whether it shows a bar and, if it wants, **overrides** any
+individual field just for itself with `<layout>.set_app_bar_*`.
+
+```lua
+-- Global look — the shared baseline for every bar.
+app_bar.set_thickness(32)          -- strip depth (pt), carved
+                                   -- out of the layout so bar
+                                   -- and windows never overlap
+app_bar.set_style("pills")         -- pills | segments | underline
+app_bar.set_position("top")        -- default edge (see below)
+
+-- Per layout: turn the bar on (default) and, optionally,
+-- override a field. Unset overrides inherit the global value.
+monocle.set_app_bar_enabled(true)
+scroll.set_app_bar_enabled(true)
+scroll.set_app_bar_style("segments")  -- scrolling only; monocle
+                                      -- keeps the global pills
+```
+
+**Orientation** decides which focus axis cycles through the
+windows, and with it which edges the bar may sit on. Both
+monocle and scrolling have one:
 
 ```lua
 -- horizontal (default): focus("left"/"right") steps through
--- the windows, wrapping at the ends; the bar sits on
--- top/bottom. vertical: focus("up"/"down") cycles; the bar
--- sits on left/right and stacks the letters vertically
--- (icon on top). The cross axis keeps its normal directional
--- behavior (other monitors etc.). swap along the axis
--- reorders the sequence — the bar is a live map, not a list.
+-- the windows; the bar sits on top/bottom. vertical:
+-- focus("up"/"down") cycles; the bar sits on left/right and
+-- stacks the letters vertically (icon on top). A position that
+-- doesn't fit the orientation is logged and falls back to that
+-- orientation's default edge (top / left).
 monocle.set_orientation("horizontal")
-
--- The bar is on by default; opt out explicitly. A position
--- that doesn't fit the orientation is logged and falls back
--- to that orientation's default edge (top / left).
-monocle.set_bar_enabled(true)
-monocle.set_bar_position("top")  -- horizontal: top|bottom
-                                 -- vertical:   left|right
-monocle.set_bar_thickness(32)    -- carved out of the layout,
-                                 -- so bar and window never
-                                 -- overlap or leave the
-                                 -- monitor
+scroll.set_orientation("horizontal")
 ```
+
+Position is resolved per layout: `app_bar.set_position` (or a
+per-layout `set_app_bar_position` override) is clamped to the
+layout's own orientation.
 
 Items appear in window order and are always **equal-sized**:
 `item_size` pt along the bar (width on horizontal bars,
@@ -207,19 +227,19 @@ bar to reorder the windows: a collapsed group moves as a
 whole, an expanded member moves alone.
 
 ```lua
-monocle.set_bar_style("pills")     -- pills | segments | underline
-monocle.set_bar_active_style("highlight")  -- highlight | gap
-monocle.set_bar_item_size(0)  -- pt; 0 (default) = standard
+app_bar.set_style("pills")     -- pills | segments | underline
+app_bar.set_active_style("highlight")  -- highlight | gap
+app_bar.set_item_size(0)  -- pt; 0 (default) = standard
                               -- size per content mode
-monocle.set_bar_item_gap(6)        -- pt between items
-monocle.set_bar_content("icon_and_name")  -- icon | name |
+app_bar.set_item_gap(6)        -- pt between items
+app_bar.set_content("icon_and_name")  -- icon | name |
                                           -- icon_and_name
-monocle.set_bar_group_adjacent_windows(true)  -- collapse
+app_bar.set_group_adjacent_windows(true)  -- collapse
                                               -- same-app runs
-monocle.set_bar_font_size(0)   -- 0 (default) = auto: text
+app_bar.set_font_size(0)   -- 0 (default) = auto: text
                                -- scales with bar_thickness;
                                -- any positive value pins it
-monocle.set_bar_corner_radius(8)
+app_bar.set_corner_radius(8)
 ```
 
 - **pills** — rounded floating badges, `item_gap` apart.
@@ -240,20 +260,20 @@ accent bar on the window-facing edge of the active segment,
 or the underline itself.
 
 ```lua
-monocle.set_bar_text_color("#F2EBD9")
-monocle.set_bar_box_color("#8B5E3C66")
-monocle.set_bar_active_text_color("#4E9F3D")
-monocle.set_bar_active_box_color("#8B5E3C66")
-monocle.set_bar_highlight_color("#4E9F3D")
+app_bar.set_text_color("#F2EBD9")
+app_bar.set_box_color("#8B5E3C66")
+app_bar.set_active_text_color("#4E9F3D")
+app_bar.set_active_box_color("#8B5E3C66")
+app_bar.set_highlight_color("#4E9F3D")
 -- Hover feedback on clickable items: a lighter translucent
 -- green by default, deliberately a shade off the highlight.
-monocle.set_bar_hover_color("#6DBF5B80")
-monocle.set_bar_hover_text_color("#F2EBD9")
+app_bar.set_hover_color("#6DBF5B80")
+app_bar.set_hover_text_color("#F2EBD9")
 -- The strip behind everything (default fully transparent):
-monocle.set_bar_background_color("#00000000")
+app_bar.set_background_color("#00000000")
 -- The count badge on grouped items:
-monocle.set_bar_group_badge_color("#FF3B30")
-monocle.set_bar_group_badge_text_color("#FFFFFF")
+app_bar.set_group_badge_color("#FF3B30")
+app_bar.set_group_badge_text_color("#FFFFFF")
 ```
 
 ### Where new windows land

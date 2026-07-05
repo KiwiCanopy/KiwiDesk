@@ -44,6 +44,13 @@ struct SettingsView: View {
                             systemImage: "rectangle.split.3x1"
                         )
                     }
+                AppBarTab(model: model)
+                    .tabItem {
+                        Label(
+                            "App Bar",
+                            systemImage: "menubar.rectangle"
+                        )
+                    }
                 AppRulesTab(model: model)
                     .tabItem {
                         Label(
