@@ -10,6 +10,8 @@ mkdir -p "$CLAUDE_AGENTS_DIR"
 
 # KiwiDesk-relevant subagents (category/agent-name)
 AGENTS=(
+    "01-core-development/ui-designer" 
+    "01-core-development/websocket-engineer" 
     "02-language-specialists/swift-expert"
     "02-language-specialists/cpp-pro"
     "03-infrastructure/devops-engineer"
