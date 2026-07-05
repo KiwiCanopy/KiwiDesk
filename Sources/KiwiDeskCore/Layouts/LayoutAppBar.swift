@@ -1,8 +1,8 @@
 import CoreGraphics
 import Foundation
 
-/// A layout's own bar settings, nested as `bar` under the
-/// layout (`layout.monocle.appBar`, `layout.scroll.bar`).
+/// A layout's own bar settings, nested as `app_bar` under the
+/// layout (`layout.monocle.app_bar`, `layout.scroll.app_bar`).
 ///
 /// `enabled` is the only always-present, layout-specific value —
 /// whether this layout shows a bar at all. Every look field is

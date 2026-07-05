@@ -220,8 +220,8 @@ struct MonocleSettingsTests {
     }
 }
 
-@Suite("Indicator bar math")
-struct IndicatorBarMathTests {
+@Suite("App bar math")
+struct AppBarMathTests {
     @Test("item_size 0 falls back to a standard per content")
     func standardSlots() {
         // Icon-only items default to their square.

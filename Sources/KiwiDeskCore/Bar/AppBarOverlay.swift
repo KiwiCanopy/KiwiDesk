@@ -1,16 +1,15 @@
 import AppKit
 
-/// The indicator bar: a non-activating panel listing the
-/// windows of a container, one item per window, the active
-/// one highlighted (or left out as a gap). Items that don't
-/// fit the strip scroll instead of shrinking: the bar follows
-/// the focused item, and clickable arrows appear over the
-/// ends that hide more items.
+/// The app bar: a non-activating panel listing the windows of a
+/// container, one item per window, the active one highlighted
+/// (or left out as a gap). Items that don't fit the strip scroll
+/// instead of shrinking: the bar follows the focused item, and
+/// clickable arrows appear over the ends that hide more items.
 ///
-/// Deliberately generic — it renders items into a strip
-/// handed to it in AX coordinates and knows nothing about
-/// layouts. Monocle is its first client; Lua-registered
-/// custom layouts can adopt it later without a rewrite.
+/// Deliberately generic — it renders items into a strip handed
+/// to it in AX coordinates and knows nothing about layouts.
+/// Monocle and scrolling both drive it; Lua-registered custom
+/// layouts can adopt it later without a rewrite.
 @MainActor
 public final class AppBarOverlay {
     public struct Item {

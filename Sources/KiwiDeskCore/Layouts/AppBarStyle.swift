@@ -1,9 +1,10 @@
 import CoreGraphics
 import Foundation
 
-/// The indicator bar's global look, shared by every layout that
-/// shows a bar (monocle, scrolling). Stored top-level as `bar`
-/// in profile JSON, set from Lua via `app_bar.set_*`. A layout may
+/// The app bar's global look, shared by every layout that
+/// shows a bar (monocle, scrolling). Stored top-level as
+/// `app_bar` in profile JSON, set from Lua via `app_bar.set_*`.
+/// A layout may
 /// override any of these fields for itself (see `LayoutAppBar`);
 /// what isn't overridden inherits from here.
 ///
@@ -121,7 +122,7 @@ public struct AppBarStyle: Sendable, Equatable {
 
 extension AppBarStyle: Codable {
     /// JSON keys are the Lua setters (`app_bar.set_*`) minus the
-    /// `set_` verb — the `bar` nesting carries the namespace.
+    /// `set_` verb — the `app_bar` nesting carries the namespace.
     enum CodingKeys: String, CodingKey {
         case position
         case thickness

@@ -62,6 +62,78 @@ struct AppBarOverrideTests {
                 == .top
         )
     }
+
+    /// Drift guard: every look field must survive a JSON
+    /// round-trip on both the global style and a per-layout
+    /// override. If a field is ever added to `AppBarStyle` but
+    /// missed in `LayoutAppBar` / its Codable / `resolved`, one
+    /// of these equalities breaks.
+    @Test("Every field round-trips on global and override")
+    func fullRoundTrip() throws {
+        var settings = TilingSettings()
+        settings.appBarStyle = Self.everyGlobalField()
+        settings.scrolling.appBar = Self.everyOverrideField()
+        let data = try JSONEncoder().encode(settings)
+        let decoded = try JSONDecoder().decode(
+            TilingSettings.self,
+            from: data
+        )
+        #expect(decoded.appBarStyle == settings.appBarStyle)
+        #expect(
+            decoded.scrolling.appBar == settings.scrolling.appBar
+        )
+    }
+
+    private static func everyGlobalField() -> AppBarStyle {
+        var style = AppBarStyle()
+        style.position = .bottom
+        style.thickness = 44
+        style.style = .segments
+        style.activeStyle = .gap
+        style.itemSize = 120
+        style.itemGap = 3
+        style.content = .name
+        style.groupAdjacentWindows = false
+        style.fontSize = 15
+        style.cornerRadius = 5
+        style.textColor = "#010101"
+        style.boxColor = "#020202"
+        style.activeTextColor = "#030303"
+        style.activeBoxColor = "#040404"
+        style.highlightColor = "#050505"
+        style.hoverColor = "#060606"
+        style.hoverTextColor = "#070707"
+        style.backgroundColor = "#080808"
+        style.groupBadgeColor = "#090909"
+        style.groupBadgeTextColor = "#0A0A0A"
+        return style
+    }
+
+    private static func everyOverrideField() -> LayoutAppBar {
+        var bar = LayoutAppBar()
+        bar.enabled = false
+        bar.position = .right
+        bar.thickness = 50
+        bar.style = .underline
+        bar.activeStyle = .highlight
+        bar.itemSize = 88
+        bar.itemGap = 9
+        bar.content = .iconAndName
+        bar.groupAdjacentWindows = true
+        bar.fontSize = 20
+        bar.cornerRadius = 12
+        bar.textColor = "#111111"
+        bar.boxColor = "#222222"
+        bar.activeTextColor = "#333333"
+        bar.activeBoxColor = "#444444"
+        bar.highlightColor = "#555555"
+        bar.hoverColor = "#666666"
+        bar.hoverTextColor = "#777777"
+        bar.backgroundColor = "#888888"
+        bar.groupBadgeColor = "#999999"
+        bar.groupBadgeTextColor = "#AAAAAA"
+        return bar
+    }
 }
 
 @Suite("Scrolling app bar geometry")
@@ -114,6 +186,22 @@ struct ScrollingBarGeometryTests {
         #expect(first.height == 300)
         #expect(second.minY > first.minY)
         #expect(first.minX == context.usable.minX)
+    }
+
+    @Test("Vertical orientation carves a left strip")
+    func verticalStrip() throws {
+        // A vertical axis resolves the default top edge to the
+        // left, so the strip eats window *width*, not height.
+        let context = context(orientation: .vertical)
+        let frames = layout.calculateGeometry(
+            for: [w1],
+            in: context
+        )
+        let usable = context.usable
+        let window = try #require(frames[w1])
+        #expect(window.minX == usable.minX + 32 + 10)
+        #expect(window.width == usable.width - 32 - 10)
+        #expect(window.height == usable.height)
     }
 
     @Test("A disabled bar leaves the full usable area")
@@ -202,6 +290,51 @@ struct AppBarCommandTests {
         let space = try #require(core.activeSpace)
         #expect(
             core.barGroups(in: space, grouping: true).count == 3
+        )
+    }
+
+    @Test("Dragging a scrolling item reorders the windows")
+    func scrollingReorder() throws {
+        let core = makeCore()
+        core.execute(
+            "set_mode",
+            args: [.string("1"), .string("scrolling")]
+        )
+        for (index, name) in ["A", "B", "C"].enumerated() {
+            core.state.apply(
+                .windowCreated(
+                    ManagedWindow(
+                        id: WindowID(UInt32(index + 1)),
+                        pid: 1,
+                        appName: name
+                    )
+                )
+            )
+        }
+        core.moveBarItem(from: 0, to: 2)
+        #expect(core.activeSpace?.windows == [w2, w3, w1])
+    }
+
+    @Test("Invalid global bar values are rejected")
+    func globalValidation() {
+        let core = makeCore()
+        #expect(
+            !core.execute(
+                "app_bar.set_style",
+                args: [.string("triangles")]
+            ).isSuccess
+        )
+        #expect(
+            !core.execute(
+                "app_bar.set_thickness",
+                args: [.string("thick")]
+            ).isSuccess
+        )
+        #expect(
+            !core.execute(
+                "app_bar.set_nonsense",
+                args: [.number(1)]
+            ).isSuccess
         )
     }
 }

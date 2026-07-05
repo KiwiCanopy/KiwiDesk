@@ -5,7 +5,7 @@ import SwiftUI
 /// color swatch that reflects the parsed RGBA value.
 ///
 /// Reads and writes `#RRGGBB` / `#RRGGBBAA` strings as
-/// used by `MonocleBarParams` and `DragVisual`.
+/// used by `AppBarStyle` and `DragVisual`.
 struct HexColorField: View {
     let label: String
     @Binding var hex: String
