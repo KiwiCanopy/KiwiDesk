@@ -12,10 +12,8 @@ body:
     id: kiwidesk_version
     attributes:
       label: KiwiDesk version or commit
-      description: |
-        For a source build, run `git rev-parse --short HEAD`
-        in the repo. For a release, the version you installed.
-      placeholder: "abc1234 or 1.0.0"
+      description: "Run `KiwiDesk --version`."
+      placeholder: "0.1.0 (abc1234)"
     validations:
       required: true
 

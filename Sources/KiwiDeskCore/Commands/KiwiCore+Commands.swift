@@ -43,6 +43,15 @@ extension KiwiCore {
                     }
                 )
             )
+        case "version":
+            return .ok(
+                .object([
+                    "version": .string(
+                        KiwiDeskVersion.semantic
+                    ),
+                    "commit": .string(KiwiDeskVersion.commit),
+                ])
+            )
         case "get_state":
             return .ok(stateJSON())
         case "get_layout_info":
