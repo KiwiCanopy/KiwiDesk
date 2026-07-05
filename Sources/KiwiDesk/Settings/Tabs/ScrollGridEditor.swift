@@ -34,25 +34,28 @@ struct ScrollGridEditor: View {
         }
     }
 
-    /// Seed value for the Points unit: keep an explicit pt, else
-    /// fall back to the orientation standard `auto` would resolve.
+    /// Seed for the Points unit: keep an explicit pt, else a
+    /// sensible per-axis start. The editor has no screen to
+    /// resolve `.auto` against, so vertical (auto = a fraction)
+    /// uses a fixed pt hint rather than the fraction standard.
     private var currentPoints: CGFloat {
         if case .points(let points) =
             model.config.settings.scrolling.slotSize
         {
             return points
         }
-        return isVertical
-            ? ScrollSize.autoVertical : ScrollSize.autoHorizontal
+        return isVertical ? 700 : ScrollSize.autoHorizontalPoints
     }
 
+    /// Seed for the Percent unit: keep an explicit fraction, else
+    /// the orientation's auto standard (vertical) or a neutral half.
     private var currentFraction: Double {
         if case .fraction(let fraction) =
             model.config.settings.scrolling.slotSize
         {
             return fraction
         }
-        return 0.5
+        return isVertical ? ScrollSize.autoVerticalFraction : 0.5
     }
 
     private var sizeUnitBinding: Binding<SizeUnit> {

@@ -213,18 +213,24 @@ extension KiwiCore {
             tiler.settings.stack.masterRatio =
                 min(max(ratio, 0.1), 0.9)
         case .scrolling:
-            // Resolve the current slot size (auto/% → pt) against
-            // the scroll axis, add the pt delta, store as points.
+            // The scrolling slot resizes along its own scroll axis,
+            // not the requested x/y axis, so `span` above (keyed by
+            // axis) does not apply here. Take the current magnitude
+            // (stored pt as-is; auto/% seeded against the axis), add
+            // the delta, store as points. Screen basis matches the
+            // mouse-resize path (main screen — the pre-existing
+            // single-screen ceiling, see plan item 8).
             let horizontal =
                 tiler.settings.scrolling.barAxisIsHorizontal
-            let along =
-                horizontal
-                ? (NSScreen.main?.visibleFrame.width ?? 1920)
-                : (NSScreen.main?.visibleFrame.height ?? 1080)
+            let screen = NSScreen.main ?? NSScreen.screens.first
+            let bounds =
+                screen.map { GeometryUtils.axVisibleFrame(of: $0) }
+                ?? CGRect(x: 0, y: 0, width: 1920, height: 1080)
+            let along = horizontal ? bounds.width : bounds.height
             let current = tiler.settings.scrolling.slotSize
-                .resolved(along: along, horizontal: horizontal)
+                .editablePoints(along: along, horizontal: horizontal)
             tiler.settings.scrolling.slotSize =
-                .points(max(current + CGFloat(delta), 100))
+                .points(clamping: current + CGFloat(delta))
         default:
             return .fail(
                 "resize not supported in "

@@ -165,13 +165,13 @@ extension KiwiCore {
             if let number = first.numberValue {
                 tiler.settings.scrolling.slotSize =
                     number <= 0
-                    ? .auto : .points(max(CGFloat(number), 100))
+                    ? .auto : .points(clamping: CGFloat(number))
             } else if let string = first.stringValue,
                 string.hasSuffix("%"),
                 let percent = Double(string.dropLast())
             {
                 tiler.settings.scrolling.slotSize =
-                    .fraction(min(max(percent / 100, 0.05), 1))
+                    .fraction(clamping: percent / 100)
             } else {
                 return .fail(
                     "expected points, \"NN%\", or 0 for auto"

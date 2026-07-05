@@ -134,9 +134,12 @@ stack.demote()                     -- focused window -> stack
 stack.set_overflow_style("cascade_overflow")
 
 -- Scrolling (PaperWM style)
-scroll.set_slot_size(0)            -- slot size along axis:
-                                   -- 0 = auto (orientation standard),
-                                   -- a number = px, "NN%" = fraction
+scroll.set_slot_size(0)            -- slot size along the scroll
+                                   -- axis. 0 = auto (1100px column
+                                   -- horizontal, 80% of available
+                                   -- height vertical); a number =
+                                   -- px; "NN%" = fraction of the
+                                   -- available axis (minus bar/gaps)
 scroll.set_anchor("center")        -- center | left | right
 scroll.set_speed(250)              -- animation ms
 scroll.set_orientation("horizontal")  -- horizontal: columns

@@ -56,8 +56,9 @@ extension LuaConfigWriter {
         case .points(let points):
             return LuaLiteral.number(points)
         case .fraction(let fraction):
-            let percent = Int((fraction * 100).rounded())
-            return LuaLiteral.string("\(percent)%")
+            return LuaLiteral.string(
+                ScrollSize.percentString(fraction)
+            )
         }
     }
 

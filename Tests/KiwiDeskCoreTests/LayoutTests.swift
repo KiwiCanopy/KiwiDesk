@@ -452,8 +452,8 @@ struct ScrollingLayoutTests {
 
     @Test("Auto slot size resolves to the orientation standard")
     func autoSlotSize() throws {
-        // Horizontal auto → 1100 pt column; vertical auto → 800 pt
-        // row (both clamped to the along-axis).
+        // Horizontal auto → fixed 1100 pt column; vertical auto →
+        // 80% of the *available* along-axis (height here).
         var horizontal = makeContext(focused: w1)
         horizontal.scrolling.appBar.enabled = false
         horizontal.scrolling.slotSize = .auto
@@ -471,7 +471,10 @@ struct ScrollingLayoutTests {
             for: [w1, w2, w3],
             in: vertical
         )
-        #expect(try #require(vFrames[w1]).height == 800)
+        let expected = vertical.usable.height * 0.8
+        #expect(
+            abs(try #require(vFrames[w1]).height - expected) < 0.01
+        )
     }
 
     @Test("Scrolling raise order math")
