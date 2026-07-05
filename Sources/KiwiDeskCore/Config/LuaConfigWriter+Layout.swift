@@ -120,6 +120,13 @@ extension LuaConfigWriter {
             .joined(separator: "\n\n")
     }
 
+    /// The default mode always shows the standard menu bar
+    /// glyph — the GUI never offers an icon picker for it (see
+    /// `KeybindingsTab.modeIconRow`), so `KiwiDesk.bind` has no
+    /// icon argument to emit. Any icon on the default mode
+    /// (e.g. from hand-edited profile JSON) is silently dropped
+    /// here rather than surfaced: revisit both sides together
+    /// if the GUI ever allows a default-mode icon.
     private static func defaultBinds(
         _ rows: [KeyBinding]
     ) -> String {

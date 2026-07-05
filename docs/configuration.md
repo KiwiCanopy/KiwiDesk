@@ -492,6 +492,12 @@ KiwiDesk.define_mode("service", { --[[ bindings ]] },
     { icon = "⚙️" })
 ```
 
+The default mode (`KiwiDesk.bind`) never takes an icon — it
+always shows the standard KiwiDesk glyph. The Settings app
+reflects this by hiding the icon picker while the default mode
+is selected. An icon set on the default mode by hand (e.g. in
+directly-edited profile JSON) is simply ignored and never shown.
+
 ## Events
 
 Subscribe to state changes (see also

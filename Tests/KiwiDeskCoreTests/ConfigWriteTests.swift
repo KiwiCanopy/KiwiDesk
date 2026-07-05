@@ -124,6 +124,52 @@ struct ConfigWriteTests {
         #expect(!lua.contains("top ="))
     }
 
+    @Test(
+        "default mode never emits an icon; other modes do"
+    )
+    func defaultModeHasNoIcon() {
+        let modes = [
+            KeyMode(
+                name: "default",
+                bindings: [
+                    KeyBinding(combo: "alt+h", lua: "-- noop")
+                ]
+            ),
+            KeyMode(
+                name: "resize",
+                icon: "📐",
+                bindings: [
+                    KeyBinding(combo: "alt+l", lua: "-- noop")
+                ]
+            ),
+        ]
+        let lua = LuaConfigWriter.keybindings(modes)
+        #expect(lua.contains("KiwiDesk.bind(\"alt+h\""))
+        #expect(lua.contains("icon = \"📐\""))
+        // The default mode's block never carries an icon
+        // argument — only `KiwiDesk.bind`, no `define_mode`.
+        #expect(!lua.contains("define_mode(\"default\""))
+    }
+
+    @Test(
+        "a malformed default mode icon is dropped, not emitted"
+    )
+    func defaultModeIconIsDropped() {
+        let modes = [
+            KeyMode(
+                name: KeyMode.defaultName,
+                icon: "📐",
+                bindings: [
+                    KeyBinding(combo: "alt+h", lua: "-- noop")
+                ]
+            )
+        ]
+        let lua = LuaConfigWriter.keybindings(modes)
+        #expect(lua.contains("KiwiDesk.bind(\"alt+h\""))
+        #expect(!lua.contains("icon ="))
+        #expect(!lua.contains("define_mode"))
+    }
+
     @Test("round-trip: write, reload, live state matches")
     func roundTrip() throws {
         let core = makeCore()
