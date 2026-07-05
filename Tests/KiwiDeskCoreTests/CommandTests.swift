@@ -122,6 +122,24 @@ struct CommandTests {
             names.contains(.string("stack.set_master_count"))
         )
         #expect(names.contains(.string("subscribe")))
+        #expect(names.contains(.string("version")))
+    }
+
+    @Test("version reports the semantic version and commit")
+    func versionCommand() {
+        let core = makeCore()
+        let response = core.execute("version")
+        guard case .object(let data)? = response.data else {
+            Issue.record("expected object data")
+            return
+        }
+        #expect(
+            data["version"]
+                == .string(KiwiDeskVersion.semantic)
+        )
+        #expect(
+            data["commit"] == .string(KiwiDeskVersion.commit)
+        )
     }
 
     @Test("get_state reports spaces and windows")

@@ -10,6 +10,9 @@ func runCLI(_ arguments: [String]) -> Int32 {
     case "help", "--help", "-h":
         print(cliUsage)
         return 0
+    case "--version", "-v":
+        print(KiwiDeskVersion.displayString)
+        return 0
     case "service":
         return runService(arguments)
     default:
@@ -102,6 +105,7 @@ private let cliUsage = """
     usage:
       KiwiDesk                        run the app
       KiwiDesk <command> [args...]    send an IPC command
+      KiwiDesk --version              print version and exit
       KiwiDesk service start|stop|restart
       KiwiDesk subscribe [events...]  stream events (NDJSON)
 

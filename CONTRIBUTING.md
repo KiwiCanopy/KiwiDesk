@@ -62,10 +62,11 @@ refactors from features (review them independently).
 Use the [issue templates](.github/ISSUE_TEMPLATE/) when opening
 an issue. GitHub will prompt you to choose a template.
 
-**Bug reports** capture macOS version, KiwiDesk version/commit,
-repro steps, expected vs. actual behavior, and relevant logs
-(`KiwiDesk get_state`, `get_layout_info`, and system log lines).
-The template walks you through the details.
+**Bug reports** capture macOS version, KiwiDesk version/commit
+(`KiwiDesk --version`), repro steps, expected vs. actual
+behavior, and relevant logs (`KiwiDesk get_state`,
+`get_layout_info`, and system log lines). The template walks
+you through the details.
 
 **Feature requests** should describe the **use case** and
 **problem it solves** (not just the feature itself). Check the

@@ -6,12 +6,25 @@ The `KiwiDesk` binary is both the app and the CLI:
 KiwiDesk                      # run the window manager
 KiwiDesk <command> [args...]  # send a command to the app
 KiwiDesk help                 # local usage
+KiwiDesk --version            # local version (no app needed)
 KiwiDesk list_commands        # every command (app running)
 ```
 
 Commands are sent over a UNIX domain socket at
 `~/.config/KiwiDesk/KiwiDesk.sock`. Exit code is 0 on
 success, 1 on error (message on stderr, data on stdout).
+
+## Version
+
+```sh
+KiwiDesk --version   # or -v; works without the app running
+```
+
+Prints `<semantic version> (<short commit>)`, e.g. `0.1.0
+(abc1234)`, or just the semantic version when the commit is
+unknown (a build made without running
+`scripts/bump-version.sh`). The same information is available
+over IPC/Lua as the `version` command — see the table below.
 
 ## Service Control
 
@@ -42,6 +55,7 @@ KiwiDesk service restart
 | | `set_gap_override` | space, size |
 | | `get_state` | — |
 | | `reload_config` | — |
+| | `version` | — (returns `{version, commit}`) |
 | Profiles | `save_profile` | name |
 | | `load_profile` | name |
 | | `list_profiles` | — |

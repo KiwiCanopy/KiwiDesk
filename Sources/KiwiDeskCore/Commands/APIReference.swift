@@ -55,6 +55,7 @@ public enum APIReference {
             ),
             ("help", "help"),
             ("list_commands", "help"),
+            ("version", "version"),
             ("save_profile", "save_profile"),
             ("load_profile", "load_profile"),
             ("list_profiles", "list_profiles"),
