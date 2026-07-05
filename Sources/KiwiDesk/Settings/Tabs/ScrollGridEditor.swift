@@ -12,37 +12,106 @@ struct ScrollGridEditor: View {
         }
     }
 
-    private var widthLabel: String {
-        let width = Int(
-            model.config.settings.scrolling.windowWidth
+    /// The scroll axis runs top↔bottom when vertical, so the slot
+    /// size reads as a row *height*, and the anchor ends as
+    /// top/bottom — labels swap accordingly (frontend only; the
+    /// stored `slot_size` / anchor enum are orientation-neutral).
+    private var isVertical: Bool {
+        model.config.settings.scrolling.orientation == .vertical
+    }
+
+    private var sizeLabel: String {
+        isVertical ? "Row height" : "Column width"
+    }
+
+    private enum SizeUnit: Hashable { case auto, points, percent }
+
+    private var sizeUnit: SizeUnit {
+        switch model.config.settings.scrolling.slotSize {
+        case .auto: return .auto
+        case .points: return .points
+        case .fraction: return .percent
+        }
+    }
+
+    /// Seed value for the Points unit: keep an explicit pt, else
+    /// fall back to the orientation standard `auto` would resolve.
+    private var currentPoints: CGFloat {
+        if case .points(let points) =
+            model.config.settings.scrolling.slotSize
+        {
+            return points
+        }
+        return isVertical
+            ? ScrollSize.autoVertical : ScrollSize.autoHorizontal
+    }
+
+    private var currentFraction: Double {
+        if case .fraction(let fraction) =
+            model.config.settings.scrolling.slotSize
+        {
+            return fraction
+        }
+        return 0.5
+    }
+
+    private var sizeUnitBinding: Binding<SizeUnit> {
+        Binding(
+            get: { sizeUnit },
+            set: { unit in
+                switch unit {
+                case .auto:
+                    model.config.settings.scrolling.slotSize = .auto
+                case .points:
+                    model.config.settings.scrolling.slotSize =
+                        .points(currentPoints)
+                case .percent:
+                    model.config.settings.scrolling.slotSize =
+                        .fraction(currentFraction)
+                }
+            }
         )
-        return "\(width) pt"
+    }
+
+    private var pointsBinding: Binding<Double> {
+        Binding(
+            get: { Double(currentPoints) },
+            set: {
+                model.config.settings.scrolling.slotSize =
+                    .points(CGFloat($0))
+            }
+        )
+    }
+
+    private var percentBinding: Binding<Double> {
+        Binding(
+            get: { currentFraction * 100 },
+            set: {
+                model.config.settings.scrolling.slotSize =
+                    .fraction($0 / 100)
+            }
+        )
     }
 
     private var scrolling: some View {
         SettingsSection("Scrolling") {
-            HStack {
-                Text("Column width")
-                    .frame(width: 110, alignment: .leading)
-                Slider(
-                    value: $model.config.settings.scrolling
-                        .windowWidth,
-                    in: 100...2000,
-                    step: 10
-                )
-                Text(widthLabel)
-                    .frame(width: 64, alignment: .trailing)
-                    .foregroundStyle(.secondary)
-                    .font(.system(.body, design: .monospaced))
+            Picker("Size unit", selection: sizeUnitBinding) {
+                Text("Auto").tag(SizeUnit.auto)
+                Text("Points").tag(SizeUnit.points)
+                Text("Percent").tag(SizeUnit.percent)
             }
+            .pickerStyle(.segmented)
+            sizeControl
             Picker(
                 "Focused anchor",
                 selection: $model.config.settings.scrolling
                     .anchor
             ) {
                 Text("Center").tag(ScrollingParams.Anchor.center)
-                Text("Left").tag(ScrollingParams.Anchor.left)
-                Text("Right").tag(ScrollingParams.Anchor.right)
+                Text(isVertical ? "Top" : "Left")
+                    .tag(ScrollingParams.Anchor.left)
+                Text(isVertical ? "Bottom" : "Right")
+                    .tag(ScrollingParams.Anchor.right)
             }
             .pickerStyle(.segmented)
             Picker(
@@ -60,6 +129,40 @@ struct ScrollGridEditor: View {
                 placement: $model.config.settings.scrolling
                     .newWindowPlacement
             )
+        }
+    }
+
+    @ViewBuilder
+    private var sizeControl: some View {
+        switch sizeUnit {
+        case .auto:
+            HStack {
+                Text(sizeLabel)
+                    .frame(width: 110, alignment: .leading)
+                Text("Auto — orientation standard")
+                    .foregroundStyle(.secondary)
+                Spacer()
+            }
+        case .points:
+            HStack {
+                Text(sizeLabel)
+                    .frame(width: 110, alignment: .leading)
+                Slider(value: pointsBinding, in: 100...2000, step: 10)
+                Text("\(Int(currentPoints)) pt")
+                    .frame(width: 64, alignment: .trailing)
+                    .foregroundStyle(.secondary)
+                    .font(.system(.body, design: .monospaced))
+            }
+        case .percent:
+            HStack {
+                Text(sizeLabel)
+                    .frame(width: 110, alignment: .leading)
+                Slider(value: percentBinding, in: 5...100, step: 5)
+                Text("\(Int(currentFraction * 100)) %")
+                    .frame(width: 64, alignment: .trailing)
+                    .foregroundStyle(.secondary)
+                    .font(.system(.body, design: .monospaced))
+            }
         }
     }
 

@@ -35,7 +35,10 @@ public struct ScrollingLayout: LayoutSystem {
             ? context.gaps.inner.horizontal
             : context.gaps.inner.vertical
         let along = horizontal ? area.width : area.height
-        let size = min(context.scrolling.windowWidth, along)
+        let size = context.scrolling.slotSize.resolved(
+            along: along,
+            horizontal: horizontal
+        )
         let stride = size + gap
         let count = CGFloat(windows.count)
         let rowLength = count * size + (count - 1) * gap

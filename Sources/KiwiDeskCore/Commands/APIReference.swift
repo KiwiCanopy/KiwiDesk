@@ -78,7 +78,7 @@ public enum APIReference {
             "set_new_window_placement",
         ],
         "scroll": [
-            "set_width", "set_anchor", "set_speed",
+            "set_slot_size", "set_anchor", "set_speed",
             "set_orientation", "set_new_window_placement",
             "set_app_bar_enabled", "set_app_bar_position",
             "set_app_bar_thickness", "set_app_bar_style",

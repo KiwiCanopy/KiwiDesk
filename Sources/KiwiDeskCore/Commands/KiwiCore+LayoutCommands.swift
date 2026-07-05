@@ -156,12 +156,27 @@ extension KiwiCore {
         _ args: [JSONValue]
     ) -> CommandResponse {
         switch command {
-        case "scroll.set_width":
-            guard let width = args.first?.numberValue else {
-                return .fail("expected width")
+        case "scroll.set_slot_size":
+            guard let first = args.first else {
+                return .fail(
+                    "expected points, \"NN%\", or 0 for auto"
+                )
             }
-            tiler.settings.scrolling.windowWidth =
-                max(CGFloat(width), 100)
+            if let number = first.numberValue {
+                tiler.settings.scrolling.slotSize =
+                    number <= 0
+                    ? .auto : .points(max(CGFloat(number), 100))
+            } else if let string = first.stringValue,
+                string.hasSuffix("%"),
+                let percent = Double(string.dropLast())
+            {
+                tiler.settings.scrolling.slotSize =
+                    .fraction(min(max(percent / 100, 0.05), 1))
+            } else {
+                return .fail(
+                    "expected points, \"NN%\", or 0 for auto"
+                )
+            }
         case "scroll.set_anchor":
             guard let raw = args.first?.stringValue,
                 let anchor = ScrollingParams.Anchor(

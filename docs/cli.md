@@ -74,7 +74,7 @@ KiwiDesk service restart
 | BSP | `bsp.set_strategy` | `shortest_side\|alternating` |
 | | `bsp.set_ratio` | 0.1–0.9 |
 | | `bsp.set_new_window_placement` | placement¹ (default `after_focused`) |
-| Scrolling | `scroll.set_width` | px |
+| Scrolling | `scroll.set_slot_size` | px, `"NN%"`, or `0` (auto) |
 | | `scroll.set_anchor` | `center\|left\|right` |
 | | `scroll.set_speed` | ms |
 | | `scroll.set_new_window_placement` | placement¹ (default `after_focused`) |

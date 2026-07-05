@@ -26,7 +26,7 @@ private func richConfig() -> GuiConfig {
     config.settings.bsp.splitRatio = 0.62
     config.settings.bsp.strategy = .alternating
     config.settings.stack.masterCount = 2
-    config.settings.scrolling.windowWidth = 900
+    config.settings.scrolling.slotSize = .points(900)
     config.settings.grid.columns = 4
     config.settings.grid.rows = 3
     config.settings.monocle.appBar.thickness = 40

@@ -143,10 +143,10 @@ public struct ScrollingParams: Sendable, Equatable, Codable,
         case vertical
     }
 
-    /// Fixed column width for every window (the extent across
-    /// the scroll axis: width when horizontal, height when
-    /// vertical).
-    public var windowWidth: CGFloat = 800
+    /// Fixed slot size along the scroll axis (column width when
+    /// horizontal, row height when vertical). `auto` by default,
+    /// resolving to an orientation-aware standard at layout time.
+    public var slotSize: ScrollSize = .auto
     /// Where the focused column sits in the viewport.
     public var anchor: Anchor = .center
     public var orientation: Orientation = .horizontal
@@ -162,9 +162,9 @@ public struct ScrollingParams: Sendable, Equatable, Codable,
         orientation == .horizontal
     }
 
-    /// JSON keys follow the Lua setters (`scroll.set_width`).
+    /// JSON keys follow the Lua setters (`scroll.set_slot_size`).
     private enum CodingKeys: String, CodingKey {
-        case windowWidth = "width"
+        case slotSize = "slot_size"
         case anchor
         case orientation
         case newWindowPlacement = "new_window_placement"
@@ -177,11 +177,11 @@ public struct ScrollingParams: Sendable, Equatable, Codable,
         let container = try decoder.container(
             keyedBy: CodingKeys.self
         )
-        windowWidth =
+        slotSize =
             try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .windowWidth
-            ) ?? 800
+                ScrollSize.self,
+                forKey: .slotSize
+            ) ?? .auto
         anchor =
             try container.decodeIfPresent(
                 Anchor.self,

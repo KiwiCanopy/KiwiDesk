@@ -73,10 +73,17 @@ extension KiwiCore {
             tiler.settings.stack.masterRatio =
                 min(max(ratio, 0.1), 0.9)
         case .scrollWidth(let delta):
-            let width =
-                tiler.settings.scrolling.windowWidth + delta
-            tiler.settings.scrolling.windowWidth =
-                max(width, 100)
+            // Resize grows the slot by a pt delta: resolve the
+            // current size (auto/% → pt) against the scroll axis,
+            // then store the result as absolute points.
+            let horizontal =
+                tiler.settings.scrolling.barAxisIsHorizontal
+            let bounds = GeometryUtils.axVisibleFrame(of: screen)
+            let along = horizontal ? bounds.width : bounds.height
+            let current = tiler.settings.scrolling.slotSize
+                .resolved(along: along, horizontal: horizontal)
+            tiler.settings.scrolling.slotSize =
+                .points(max(current + delta, 100))
         case nil:
             break
         }

@@ -329,7 +329,8 @@ struct ScrollingLayoutTests {
 
     @Test("Focused column is centered")
     func centerAnchor() throws {
-        let context = makeContext(focused: w2)
+        var context = makeContext(focused: w2)
+        context.scrolling.slotSize = .points(800)
         let frames = layout.calculateGeometry(
             for: [w1, w2, w3],
             in: context
@@ -365,6 +366,7 @@ struct ScrollingLayoutTests {
     func columnDimensions() throws {
         var context = makeContext(focused: w2)
         context.scrolling.appBar.enabled = false
+        context.scrolling.slotSize = .points(800)
         let frames = layout.calculateGeometry(
             for: [w1, w2, w3],
             in: context
@@ -378,13 +380,98 @@ struct ScrollingLayoutTests {
     @Test("Short rows left-align without margins")
     func shortRow() throws {
         var context = makeContext(focused: w2)
-        context.scrolling.windowWidth = 400
+        context.scrolling.slotSize = .points(400)
         let frames = layout.calculateGeometry(
             for: [w1, w2],
             in: context
         )
         let first = try #require(frames[w1])
         #expect(first.minX == context.usable.minX)
+    }
+
+    // Vertical mirrors the horizontal mechanics onto the y axis;
+    // the bar (default on) resolves to the left edge, carving
+    // width, so top/bottom snapping is against the full usable
+    // height. (Row stacking + strip carving live in AppBarTests.)
+
+    @Test("Vertical: focused row is centered on the y axis")
+    func verticalCenterAnchor() throws {
+        // 400×3 + gaps overflows the ~1060pt usable height, so the
+        // viewport scrolls and centers the focus (a fitting row
+        // would top-align at offset 0 instead).
+        var context = makeContext(focused: w2)
+        context.scrolling.orientation = .vertical
+        context.scrolling.slotSize = .points(400)
+        let frames = layout.calculateGeometry(
+            for: [w1, w2, w3],
+            in: context
+        )
+        let focused = try #require(frames[w2])
+        #expect(abs(focused.midY - context.usable.midY) < 0.01)
+        #expect(focused.height == 400)
+    }
+
+    @Test("Vertical: first row snaps to the top edge")
+    func verticalTopBoundary() throws {
+        var context = makeContext(focused: w1)
+        context.scrolling.orientation = .vertical
+        context.scrolling.slotSize = .points(300)
+        let frames = layout.calculateGeometry(
+            for: [w1, w2, w3],
+            in: context
+        )
+        let first = try #require(frames[w1])
+        #expect(first.minY == context.usable.minY)
+    }
+
+    @Test("Vertical: last row snaps to the bottom edge")
+    func verticalBottomBoundary() throws {
+        var context = makeContext(focused: w3)
+        context.scrolling.orientation = .vertical
+        context.scrolling.slotSize = .points(400)
+        let frames = layout.calculateGeometry(
+            for: [w1, w2, w3],
+            in: context
+        )
+        let last = try #require(frames[w3])
+        #expect(abs(last.maxY - context.usable.maxY) < 0.01)
+    }
+
+    @Test("Vertical: short column top-aligns without margins")
+    func verticalShortColumn() throws {
+        var context = makeContext(focused: w2)
+        context.scrolling.orientation = .vertical
+        context.scrolling.slotSize = .points(200)
+        let frames = layout.calculateGeometry(
+            for: [w1, w2],
+            in: context
+        )
+        let first = try #require(frames[w1])
+        #expect(first.minY == context.usable.minY)
+    }
+
+    @Test("Auto slot size resolves to the orientation standard")
+    func autoSlotSize() throws {
+        // Horizontal auto → 1100 pt column; vertical auto → 800 pt
+        // row (both clamped to the along-axis).
+        var horizontal = makeContext(focused: w1)
+        horizontal.scrolling.appBar.enabled = false
+        horizontal.scrolling.slotSize = .auto
+        let hFrames = layout.calculateGeometry(
+            for: [w1, w2, w3],
+            in: horizontal
+        )
+        #expect(try #require(hFrames[w1]).width == 1100)
+
+        var vertical = makeContext(focused: w1)
+        vertical.scrolling.appBar.enabled = false
+        vertical.scrolling.orientation = .vertical
+        vertical.scrolling.slotSize = .auto
+        let vFrames = layout.calculateGeometry(
+            for: [w1, w2, w3],
+            in: vertical
+        )
+        #expect(try #require(vFrames[w1]).height == 800)
     }
 
     @Test("Scrolling raise order math")

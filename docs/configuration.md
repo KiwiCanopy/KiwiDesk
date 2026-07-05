@@ -134,7 +134,9 @@ stack.demote()                     -- focused window -> stack
 stack.set_overflow_style("cascade_overflow")
 
 -- Scrolling (PaperWM style)
-scroll.set_width(800)              -- fixed slot size along axis
+scroll.set_slot_size(0)            -- slot size along axis:
+                                   -- 0 = auto (orientation standard),
+                                   -- a number = px, "NN%" = fraction
 scroll.set_anchor("center")        -- center | left | right
 scroll.set_speed(250)              -- animation ms
 scroll.set_orientation("horizontal")  -- horizontal: columns
@@ -559,7 +561,7 @@ becomes `layout.bsp.ratio`:
                             "position": "top",
                             "style": "pills",
                             "item_size": 0 } },
-      "scroll": { "anchor": "center", "width": 800,
+      "scroll": { "anchor": "center", "slot_size": 0,
                   "new_window_placement": "after_focused" },
       "stack": { "master_count": 1, "master_ratio": 0.6,
                  "overflow_style": "cascade_overflow",

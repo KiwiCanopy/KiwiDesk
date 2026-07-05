@@ -174,7 +174,7 @@ struct ScrollingBarGeometryTests {
             orientation: .vertical,
             barEnabled: false
         )
-        context.scrolling.windowWidth = 300
+        context.scrolling.slotSize = .points(300)
         let frames = layout.calculateGeometry(
             for: [w1, w2],
             in: context

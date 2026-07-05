@@ -45,12 +45,28 @@ extension LuaConfigWriter {
         ].joined(separator: "\n")
     }
 
+    /// `slot_size` emits as the Lua setter accepts it: `0` for
+    /// auto, a number for points, a `"NN%"` string for a fraction.
+    private static func slotSizeLiteral(
+        _ size: ScrollSize
+    ) -> String {
+        switch size {
+        case .auto:
+            return "0"
+        case .points(let points):
+            return LuaLiteral.number(points)
+        case .fraction(let fraction):
+            let percent = Int((fraction * 100).rounded())
+            return LuaLiteral.string("\(percent)%")
+        }
+    }
+
     private static func scroll(
         _ params: ScrollingParams
     ) -> String {
         [
-            "scroll.set_width("
-                + LuaLiteral.number(params.windowWidth) + ")",
+            "scroll.set_slot_size("
+                + slotSizeLiteral(params.slotSize) + ")",
             "scroll.set_anchor("
                 + LuaLiteral.string(params.anchor.rawValue) + ")",
             "scroll.set_orientation("

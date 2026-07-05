@@ -213,11 +213,18 @@ extension KiwiCore {
             tiler.settings.stack.masterRatio =
                 min(max(ratio, 0.1), 0.9)
         case .scrolling:
-            let width =
-                tiler.settings.scrolling.windowWidth
-                + CGFloat(delta)
-            tiler.settings.scrolling.windowWidth =
-                max(width, 100)
+            // Resolve the current slot size (auto/% → pt) against
+            // the scroll axis, add the pt delta, store as points.
+            let horizontal =
+                tiler.settings.scrolling.barAxisIsHorizontal
+            let along =
+                horizontal
+                ? (NSScreen.main?.visibleFrame.width ?? 1920)
+                : (NSScreen.main?.visibleFrame.height ?? 1080)
+            let current = tiler.settings.scrolling.slotSize
+                .resolved(along: along, horizontal: horizontal)
+            tiler.settings.scrolling.slotSize =
+                .points(max(current + CGFloat(delta), 100))
         default:
             return .fail(
                 "resize not supported in "
