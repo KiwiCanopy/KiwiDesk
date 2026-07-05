@@ -1,7 +1,12 @@
 name: CI
 
+# push runs post-merge on main; pull_request runs pre-merge on
+# branches. Scoping push to main avoids a duplicate run on every
+# PR-branch push (which would otherwise fire both push and
+# pull_request for the same commit).
 on:
   push:
+    branches: [main]
   pull_request:
     branches: [main]
 
