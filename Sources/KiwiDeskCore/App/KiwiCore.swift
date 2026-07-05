@@ -14,7 +14,7 @@ public final class KiwiCore {
     public let keys = KeybindingManager()
     public let drag = DragCoordinator()
     public let dragOverlay = DragOverlay()
-    public let monocleBar = IndicatorBarOverlay()
+    public let appBar = AppBarOverlay()
     public let mouse = MouseTracker()
     public let profiles: ProfileManager
     public let crash: CrashRecovery
@@ -101,11 +101,11 @@ public final class KiwiCore {
             self?.onLog(message)
         }
         wireDrag()
-        monocleBar.onSelect = { [weak self] id in
+        appBar.onSelect = { [weak self] id in
             self?.focusWindow(id)
         }
-        monocleBar.onMove = { [weak self] from, to in
-            self?.moveMonocleItem(from: from, to: to)
+        appBar.onMove = { [weak self] from, to in
+            self?.moveBarItem(from: from, to: to)
         }
         tiler.animation.onAllAnimationsEnded = { [weak self] in
             self?.runPendingZOrderRestore()
@@ -177,7 +177,7 @@ public final class KiwiCore {
             force: force,
             newlyCreatedWindow: newlyCreatedWindow
         )
-        updateMonocleBar()
+        updateAppBar()
     }
 
     // MARK: - Event flow

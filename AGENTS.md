@@ -59,14 +59,25 @@ and (later) the Lua VM.
 2. **Plan:** for features and major fixes, write a short written
    plan (files to change, API surface, tests) before implementing.
 3. **Act:** implement step by step; keep commits focused.
-4. **Verify:** `swift build && swift test && scripts/lint.sh` must
-   pass before any commit.
+4. **Verify:** `swift build && swift test && scripts/lint.sh` for
+   the fast inner loop. A **release build** (`swift build -c
+   release`) must also pass before any commit or PR — it enables
+   the optimizer and stricter concurrency diagnostics (e.g.
+   non-Sendable captures in `@Sendable` closures) that the debug
+   build silently misses.
 5. **Document:** any user-visible behavior change updates the
    matching docs in the same change set — `docs/configuration.md`
    (Lua config & behavior), `docs/cli.md` (commands, events, IPC),
    `docs/integrations.md` (recipes) — and `plan/` when the design
    itself shifts. Code and docs must never describe different
    behavior.
+6. **Review:** once a substantial change is finished, verified,
+   and committed, spin up **both** `code-reviewer` and
+   `architect-reviewer` on the diff since the last review point —
+   the branch's merge base with `main`, or the last reviewed
+   commit / PR if there is one. Address or consciously dismiss
+   their findings before opening a PR. (See §4 subagent
+   delegation.)
 
 ### Commit messages (Angular / Conventional Commits)
 

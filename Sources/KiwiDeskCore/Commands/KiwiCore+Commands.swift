@@ -33,6 +33,8 @@ extension KiwiCore {
             return setMode(args)
         case "set_gap_global", "set_gap_override":
             return setGaps(command, args)
+        case "set_min_window_size":
+            return setMinWindowSize(args)
         case "help", "list_commands":
             return .ok(
                 .array(
@@ -65,88 +67,6 @@ extension KiwiCore {
         default:
             return layoutCommand(command, args)
         }
-    }
-
-    // MARK: - Navigation
-
-    private func navigate(
-        _ args: [JSONValue],
-        swapping: Bool
-    ) -> CommandResponse {
-        guard let raw = args.first?.stringValue,
-            let direction = Direction(rawValue: raw)
-        else {
-            return .fail("expected left|right|up|down")
-        }
-        guard let space = activeSpace,
-            let focused = space.focused
-        else {
-            return .fail("no focused window")
-        }
-        // Monocle windows all share one frame, so geometric
-        // neighbor search finds nothing. Directions on the
-        // configured orientation axis cycle the window order
-        // instead; the cross axis falls through.
-        if space.mode == .monocle,
-            let response = monocleCycle(
-                direction,
-                space: space,
-                focused: focused,
-                swapping: swapping
-            )
-        {
-            return response
-        }
-        // Navigate the layout's slots, not live AX frames:
-        // live frames are stale mid-animation or when an app
-        // misses a move notification, and cascaded windows
-        // overlap anyway. Floating windows (no slot) fall
-        // back to their last known frame.
-        let slots = tiler.calculatedFrames(state: state)
-        guard
-            let frame = slots[focused]
-                ?? state.windows[focused]?.frame
-        else {
-            return .fail("no focused window")
-        }
-        let candidates = space.windows
-            .filter {
-                $0 != focused
-                    && state.windows[$0]?.isFloating == false
-            }
-            .compactMap { id -> (WindowID, CGRect)? in
-                guard
-                    let slot = slots[id]
-                        ?? state.windows[id]?.frame
-                else { return nil }
-                return (id, slot)
-            }
-        guard
-            let target = Navigation.neighbor(
-                from: frame,
-                in: direction,
-                candidates: candidates
-            )
-        else {
-            return .fail("no window \(raw) of focus")
-        }
-        if swapping {
-            let crossedZones = crossesStackBoundary(
-                focused,
-                target,
-                in: space
-            )
-            state.workspaces.withSpace(space.id) {
-                $0.swap(focused, target)
-            }
-            retile()
-            if crossedZones {
-                scheduleZOrderRestore()
-            }
-        } else {
-            focusWindow(target)
-        }
-        return .ok()
     }
 
     /// Focuses a window: state, AX raise, and — only for
@@ -211,11 +131,24 @@ extension KiwiCore {
             tiler.settings.stack.masterRatio =
                 min(max(ratio, 0.1), 0.9)
         case .scrolling:
-            let width =
-                tiler.settings.scrolling.windowWidth
-                + CGFloat(delta)
-            tiler.settings.scrolling.windowWidth =
-                max(width, 100)
+            // The scrolling slot resizes along its own scroll axis,
+            // not the requested x/y axis, so `span` above (keyed by
+            // axis) does not apply here. Take the current magnitude
+            // (stored pt as-is; auto/% seeded against the axis), add
+            // the delta, store as points. Screen basis matches the
+            // mouse-resize path (main screen — the pre-existing
+            // single-screen ceiling, see plan item 8).
+            let horizontal =
+                tiler.settings.scrolling.barAxisIsHorizontal
+            let screen = NSScreen.main ?? NSScreen.screens.first
+            let bounds =
+                screen.map { GeometryUtils.axVisibleFrame(of: $0) }
+                ?? CGRect(x: 0, y: 0, width: 1920, height: 1080)
+            let along = horizontal ? bounds.width : bounds.height
+            let current = tiler.settings.scrolling.slotSize
+                .editablePoints(along: along, horizontal: horizontal)
+            tiler.settings.scrolling.slotSize =
+                .points(clamping: current + CGFloat(delta))
         default:
             return .fail(
                 "resize not supported in "
@@ -294,27 +227,4 @@ extension KiwiCore {
         return .ok()
     }
 
-    private func setGaps(
-        _ command: String,
-        _ args: [JSONValue]
-    ) -> CommandResponse {
-        if command == "set_gap_global" {
-            guard let size = args.first?.numberValue else {
-                return .fail("expected gap size")
-            }
-            tiler.settings.gapsGlobal = .uniform(
-                CGFloat(size)
-            )
-        } else {
-            guard let space = args.first?.stringValue,
-                let size = args.dropFirst().first?.numberValue
-            else {
-                return .fail("expected space id and size")
-            }
-            tiler.settings.gapsOverride[SpaceID(space)] =
-                .uniform(CGFloat(size))
-        }
-        retile()
-        return .ok()
-    }
 }

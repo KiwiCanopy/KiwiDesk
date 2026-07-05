@@ -1,59 +1,78 @@
 import AppKit
 
-/// Keeps the monocle indicator bar in sync with the active
-/// space. Driven from `retile()`, which already fires on
-/// every structural, focus, mode, and settings change.
+/// Keeps the indicator bar in sync with the active space. Driven
+/// from `retile()`, which already fires on every structural,
+/// focus, mode, and settings change. Any layout that hosts a bar
+/// (monocle, scrolling) drives the one shared overlay; the bar's
+/// look is the global `AppBarStyle` overlaid by that layout's own
+/// overrides.
 extension KiwiCore {
-    func updateMonocleBar() {
-        let params = tiler.settings.monocle
+    func updateAppBar() {
+        let settings = tiler.settings
         guard let space = activeSpace,
-            space.mode == .monocle,
-            params.bar.enabled,
-            let screen = NSScreen.main
-                ?? NSScreen.screens.first
+            let host = barHost(for: space.mode),
+            host.appBar.enabled,
+            let screen = NSScreen.main ?? NSScreen.screens.first
         else {
-            monocleBar.hide()
+            appBar.hide()
             return
         }
-        let groups = monocleGroups(in: space)
-        let context = tiler.settings.context(
+        let style = host.resolvedBar(global: settings.appBarStyle)
+        let context = settings.context(
             bounds: GeometryUtils.axVisibleFrame(of: screen),
             space: space
         )
+        let groups = barGroups(
+            in: space,
+            grouping: style.groupAdjacentWindows
+        )
         guard !groups.isEmpty,
-            let strip = params.barFrame(in: context.usable)
+            let strip = host.barFrame(
+                in: context.usable,
+                global: settings.appBarStyle
+            )
         else {
-            monocleBar.hide()
+            appBar.hide()
             return
         }
-        monocleBar.show(
-            items: groups.map {
-                barItem(for: $0, focused: space.focused)
-            },
+        appBar.show(
+            items: groups.map(barItem),
             activeIndex: groups.firstIndex { group in
                 space.focused.map(group.contains) ?? false
             },
             strip: strip,
-            params: params
+            style: style
         )
+    }
+
+    /// The bar-hosting layout for a space mode, or nil for modes
+    /// that don't show a bar.
+    func barHost(for mode: LayoutMode) -> AppBarHosting? {
+        switch mode {
+        case .monocle: return tiler.settings.monocle
+        case .scrolling: return tiler.settings.scrolling
+        default: return nil
+        }
     }
 
     /// The bar's items: the space's tiled windows in order,
     /// with adjacent same-app runs collapsed into one group
-    /// while `bar.group_adjacent_windows` is on. Same-app
-    /// windows that are not adjacent stay separate items.
+    /// while `grouping` is on. Same-app windows that are not
+    /// adjacent stay separate items.
     ///
-    /// The group holding the focused window renders
-    /// *expanded* — its members become individual items, so
-    /// after clicking a group (which focuses its first
-    /// member) any member can be picked or dragged directly.
-    /// Focus leaving the group collapses it again.
-    func monocleGroups(in space: Space) -> [[WindowID]] {
+    /// The group holding the focused window renders *expanded*
+    /// — its members become individual items, so after clicking
+    /// a group (which focuses its first member) any member can
+    /// be picked or dragged directly. Focus leaving the group
+    /// collapses it again.
+    func barGroups(
+        in space: Space,
+        grouping: Bool
+    ) -> [[WindowID]] {
         let tiled = space.windows.filter {
             state.windows[$0]?.isFloating == false
         }
-        let bar = tiler.settings.monocle.bar
-        guard bar.groupAdjacentWindows else {
+        guard grouping else {
             return tiled.map { [$0] }
         }
         let names = tiled.map {
@@ -90,16 +109,15 @@ extension KiwiCore {
     }
 
     private func barItem(
-        for group: [WindowID],
-        focused: WindowID?
-    ) -> IndicatorBarOverlay.Item {
+        for group: [WindowID]
+    ) -> AppBarOverlay.Item {
         let window = group.first.flatMap {
             state.windows[$0]
         }
         // Clicking a collapsed group focuses its first
         // member; the resulting re-render expands the group
-        // into individual items (see monocleGroups).
-        return IndicatorBarOverlay.Item(
+        // into individual items (see barGroups).
+        return AppBarOverlay.Item(
             id: group.first ?? WindowID(0),
             name: window?.appName ?? "?",
             icon: window.flatMap {
@@ -115,11 +133,17 @@ extension KiwiCore {
     /// slot `from` (a single window or a whole group) to slot
     /// `to`, rewriting the tiled order in place — floating
     /// windows keep their positions in the flat array.
-    func moveMonocleItem(from: Int, to: Int) {
+    func moveBarItem(from: Int, to: Int) {
         guard let space = activeSpace,
-            space.mode == .monocle
+            let host = barHost(for: space.mode)
         else { return }
-        var groups = monocleGroups(in: space)
+        let style = host.resolvedBar(
+            global: tiler.settings.appBarStyle
+        )
+        var groups = barGroups(
+            in: space,
+            grouping: style.groupAdjacentWindows
+        )
         guard from != to,
             groups.indices.contains(from),
             groups.indices.contains(to)

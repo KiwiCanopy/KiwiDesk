@@ -94,7 +94,14 @@ extension KiwiCore {
                 }
                 bindings[combo] = ref
             }
-            self.keys.defineMode(name, bindings: bindings)
+            let icon = Self.modeIcon(
+                from: args.dropFirst(2).first
+            )
+            self.keys.defineMode(
+                name,
+                bindings: bindings,
+                icon: icon
+            )
             return .none
         }
         lua.register("switch_mode") { [weak self] args in
@@ -107,6 +114,17 @@ extension KiwiCore {
             self?.keys.switchMode(name)
             return .none
         }
+    }
+
+    /// Reads `{ icon = "..." }` from `define_mode`'s optional
+    /// third argument.
+    private static func modeIcon(
+        from value: LuaValue?
+    ) -> String? {
+        guard case .table(let opts)? = value else {
+            return nil
+        }
+        return opts["icon"]?.stringValue
     }
 
     /// A metatable on the KiwiDesk table turns typo'd calls

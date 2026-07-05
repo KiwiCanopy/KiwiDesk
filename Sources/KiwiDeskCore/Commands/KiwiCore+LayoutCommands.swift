@@ -19,6 +19,8 @@ extension KiwiCore {
             response = gridCommand(command, args)
         } else if command.hasPrefix("monocle.") {
             response = monocleCommand(command, args)
+        } else if command.hasPrefix("app_bar.") {
+            response = barCommand(command, args)
         } else if command.hasPrefix("drag.") {
             response = dragCommand(command, args)
         } else {
@@ -73,8 +75,9 @@ extension KiwiCore {
     }
 
     /// Shared parsing for the per-layout
-    /// `*.set_new_window_placement` commands.
-    private func parsePlacement(
+    /// `*.set_new_window_placement` commands. Internal so the
+    /// split-out `scroll.*` / settings command files can reuse it.
+    func parsePlacement(
         _ args: [JSONValue]
     ) -> SpawnPlacement? {
         guard let raw = args.first?.stringValue else {
@@ -83,7 +86,7 @@ extension KiwiCore {
         return SpawnPlacement(rawValue: raw)
     }
 
-    private var placementError: CommandResponse {
+    var placementError: CommandResponse {
         .fail(
             "expected first | last | before_focused"
                 + " | after_focused"
@@ -147,45 +150,6 @@ extension KiwiCore {
         return .ok()
     }
 
-    // MARK: - scroll.*
-
-    private func scrollCommand(
-        _ command: String,
-        _ args: [JSONValue]
-    ) -> CommandResponse {
-        switch command {
-        case "scroll.set_width":
-            guard let width = args.first?.numberValue else {
-                return .fail("expected width")
-            }
-            tiler.settings.scrolling.windowWidth =
-                max(CGFloat(width), 100)
-        case "scroll.set_anchor":
-            guard let raw = args.first?.stringValue,
-                let anchor = ScrollingParams.Anchor(
-                    rawValue: raw
-                )
-            else {
-                return .fail("expected center|left|right")
-            }
-            tiler.settings.scrolling.anchor = anchor
-        case "scroll.set_speed":
-            guard let ms = args.first?.intValue else {
-                return .fail("expected milliseconds")
-            }
-            tiler.animation.durationMS = ms
-        case "scroll.set_new_window_placement":
-            guard let placement = parsePlacement(args) else {
-                return placementError
-            }
-            tiler.settings.scrolling.newWindowPlacement =
-                placement
-        default:
-            return .fail("unknown command: \(command)")
-        }
-        return .ok()
-    }
-
     // MARK: - grid.*
 
     private func gridCommand(
@@ -233,68 +197,4 @@ extension KiwiCore {
         return .ok()
     }
 
-    // MARK: - Global toggles
-
-    private func settingsCommand(
-        _ command: String,
-        _ args: [JSONValue]
-    ) -> CommandResponse {
-        switch command {
-        case "enable_animations":
-            guard let enabled = args.first?.boolValue else {
-                return .fail("expected boolean")
-            }
-            tiler.animation.isEnabled = enabled
-        case "set_animation_duration":
-            guard let ms = args.first?.intValue else {
-                return .fail("expected milliseconds")
-            }
-            tiler.animation.durationMS = ms
-        case "set_space_animation":
-            guard let enabled = args.first?.boolValue else {
-                return .fail("expected boolean")
-            }
-            tiler.animateSpaceSwitch = enabled
-        case "set_mouse_resize":
-            guard let raw = args.first?.stringValue,
-                let mode = MouseResizeMode(rawValue: raw)
-            else {
-                return .fail("expected layout|snap_back")
-            }
-            tiler.mouseResize = mode
-        case "enable_wake_restore":
-            guard let enabled = args.first?.boolValue else {
-                return .fail("expected boolean")
-            }
-            sleepWake.isEnabled = enabled
-        case "set_wake_restore_delay":
-            guard let ms = args.first?.intValue else {
-                return .fail("expected milliseconds")
-            }
-            sleepWake.restoreDelayMS = max(0, ms)
-        case "set_new_window_placement_override":
-            guard let space = args.first?.stringValue else {
-                return .fail("expected space id and placement")
-            }
-            guard
-                let placement = parsePlacement(
-                    Array(args.dropFirst())
-                )
-            else {
-                return placementError
-            }
-            tiler.settings.placementOverride[SpaceID(space)] =
-                placement
-        default:
-            var message = "unknown command: \(command)"
-            if let hint = APIReference.suggestion(
-                for: command
-            ) {
-                message += " — did you mean '\(hint)'?"
-            }
-            message += " (run 'help' for all commands)"
-            return .fail(message)
-        }
-        return .ok()
-    }
 }

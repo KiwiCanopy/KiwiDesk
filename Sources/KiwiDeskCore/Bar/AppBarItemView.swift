@@ -9,8 +9,8 @@ import AppKit
 /// instead of clicking.
 ///
 /// Slot layout & text measurement live in
-/// IndicatorBarItemView+Layout.swift.
-final class IndicatorBarItemView: NSView {
+/// AppBarItemView+Layout.swift.
+final class AppBarItemView: NSView {
     let iconView = NSImageView()
     let label = NSTextField(labelWithString: "")
     let accent = NSView()
@@ -33,10 +33,10 @@ final class IndicatorBarItemView: NSView {
     private(set) var isActive = false
     private(set) var count = 1
     private var isHovered = false
-    var params = MonocleParams()
+    var style = AppBarStyle()
     var onSelect: (WindowID) -> Void = { _ in }
-    var onDragMoved: (IndicatorBarItemView, CGPoint) -> Void = { _, _ in }
-    var onDragEnded: (IndicatorBarItemView) -> Void = { _ in }
+    var onDragMoved: (AppBarItemView, CGPoint) -> Void = { _, _ in }
+    var onDragEnded: (AppBarItemView) -> Void = { _ in }
 
     private var pressLocation: NSPoint?
     private var isDragging = false
@@ -65,7 +65,7 @@ final class IndicatorBarItemView: NSView {
 
     @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("IndicatorBarItemView is code-only")
+        fatalError("AppBarItemView is code-only")
     }
 
     // MARK: - Click, drag & hover
@@ -140,25 +140,25 @@ final class IndicatorBarItemView: NSView {
         count: Int,
         active: Bool,
         horizontal: Bool,
-        params: MonocleParams
+        style: AppBarStyle
     ) {
         windowID = id
         self.name = name
         self.count = count
         self.horizontal = horizontal
         self.isActive = active
-        self.params = params
+        self.style = style
         isHovered = false
         iconView.image = icon
         iconView.isHidden =
-            params.bar.content == .name || icon == nil
-        label.isHidden = params.bar.content == .icon
+            style.content == .name || icon == nil
+        label.isHidden = style.content == .icon
         badge.isHidden = count < 2
         badge.stringValue = "\(count)"
         badge.textColor =
-            NSColor(kiwiHex: params.bar.groupBadgeTextColor)
+            NSColor(kiwiHex: style.groupBadgeTextColor)
         badge.layer?.backgroundColor =
-            NSColor(kiwiHex: params.bar.groupBadgeColor).cgColor
+            NSColor(kiwiHex: style.groupBadgeColor).cgColor
         applyColors()
         applyAccent()
         needsLayout = true
@@ -173,26 +173,26 @@ final class IndicatorBarItemView: NSView {
         // Pills round always; underline items only show their
         // box while hovered, rounded like a pill.
         let rounded =
-            params.bar.style == .pills
-            || (params.bar.style == .underline && isHovered)
+            style.style == .pills
+            || (style.style == .underline && isHovered)
         layer?.cornerRadius =
-            rounded ? params.bar.cornerRadius : 0
+            rounded ? style.cornerRadius : 0
     }
 
     private var textColorHex: String {
-        if isHovered { return params.bar.hoverTextColor }
+        if isHovered { return style.hoverTextColor }
         return isActive
-            ? params.bar.activeTextColor
-            : params.bar.textColor
+            ? style.activeTextColor
+            : style.textColor
     }
 
     private var boxColorHex: String {
-        if isHovered { return params.bar.hoverColor }
-        switch params.bar.style {
+        if isHovered { return style.hoverColor }
+        switch style.style {
         case .pills, .segments:
             return isActive
-                ? params.bar.activeBoxColor
-                : params.bar.boxColor
+                ? style.activeBoxColor
+                : style.boxColor
         case .underline:
             return "#00000000"
         }
@@ -204,12 +204,12 @@ final class IndicatorBarItemView: NSView {
     /// name.
     private func applyAccent() {
         let highlighted =
-            isActive && params.bar.activeStyle == .highlight
-        if params.bar.style == .pills {
+            isActive && style.activeStyle == .highlight
+        if style.style == .pills {
             layer?.borderWidth = highlighted ? 2 : 0
             layer?.borderColor =
                 NSColor(
-                    kiwiHex: params.bar.highlightColor
+                    kiwiHex: style.highlightColor
                 ).cgColor
             accent.isHidden = true
             return
@@ -217,7 +217,7 @@ final class IndicatorBarItemView: NSView {
         layer?.borderWidth = 0
         accent.isHidden = !highlighted
         accent.layer?.backgroundColor =
-            NSColor(kiwiHex: params.bar.highlightColor).cgColor
+            NSColor(kiwiHex: style.highlightColor).cgColor
     }
 }
 

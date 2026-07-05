@@ -1,18 +1,17 @@
 import AppKit
 
-/// The indicator bar: a non-activating panel listing the
-/// windows of a container, one item per window, the active
-/// one highlighted (or left out as a gap). Items that don't
-/// fit the strip scroll instead of shrinking: the bar follows
-/// the focused item, and clickable arrows appear over the
-/// ends that hide more items.
+/// The app bar: a non-activating panel listing the windows of a
+/// container, one item per window, the active one highlighted
+/// (or left out as a gap). Items that don't fit the strip scroll
+/// instead of shrinking: the bar follows the focused item, and
+/// clickable arrows appear over the ends that hide more items.
 ///
-/// Deliberately generic — it renders items into a strip
-/// handed to it in AX coordinates and knows nothing about
-/// layouts. Monocle is its first client; Lua-registered
-/// custom layouts can adopt it later without a rewrite.
+/// Deliberately generic — it renders items into a strip handed
+/// to it in AX coordinates and knows nothing about layouts.
+/// Monocle and scrolling both drive it; Lua-registered custom
+/// layouts can adopt it later without a rewrite.
 @MainActor
-public final class IndicatorBarOverlay {
+public final class AppBarOverlay {
     public struct Item {
         public let id: WindowID
         public let name: String
@@ -40,7 +39,7 @@ public final class IndicatorBarOverlay {
     }
 
     /// Drag-and-drop reorder hook (from slot, to slot);
-    /// wired to `KiwiCore.moveMonocleItem`.
+    /// wired to `KiwiCore.moveBarItem`.
     public var onMove: @MainActor (Int, Int) -> Void = {
         _,
         _ in
@@ -58,17 +57,20 @@ public final class IndicatorBarOverlay {
         let items: [Item]
         let activeIndex: Int?
         let strip: CGRect
-        let params: MonocleParams
+        /// The already-resolved style (global overlaid by the
+        /// active layout's overrides, position clamped to its
+        /// axis) — the overlay is layout-agnostic.
+        let style: AppBarStyle
     }
 
     private var panel: NSPanel?
-    var itemViews: [IndicatorBarItemView] = []
+    var itemViews: [AppBarItemView] = []
     let itemContainer = FlippedView()
-    let backArrow = IndicatorBarArrowView()
-    let forwardArrow = IndicatorBarArrowView()
+    let backArrow = AppBarArrowView()
+    let forwardArrow = AppBarArrowView()
     var scrollOffset: CGFloat = 0
     /// The last render's geometry, kept for the drag
-    /// handlers (IndicatorBarOverlay+Drag).
+    /// handlers (AppBarOverlay+Drag).
     var lastMetrics: Metrics?
     private var lastShown: RenderState?
 
@@ -81,7 +83,7 @@ public final class IndicatorBarOverlay {
         items: [Item],
         activeIndex: Int?,
         strip: CGRect,
-        params: MonocleParams
+        style: AppBarStyle
     ) {
         guard !items.isEmpty,
             strip.width >= 1, strip.height >= 1
@@ -93,7 +95,7 @@ public final class IndicatorBarOverlay {
             items: items,
             activeIndex: activeIndex,
             strip: strip,
-            params: params
+            style: style
         )
         render(followingFocus: true)
     }
@@ -115,16 +117,15 @@ public final class IndicatorBarOverlay {
         let items = state.items
         let activeIndex = state.activeIndex
         let strip = state.strip
-        let params = state.params
+        let style = state.style
         let panel = self.panel ?? makePanel()
         self.panel = panel
-        let bar = params.bar
-        styleContainer(panel, params: params)
+        styleContainer(panel, style: style)
         syncItemViewCount(items.count)
         let m = metrics(
             strip: strip,
             count: items.count,
-            params: params
+            style: style
         )
         lastMetrics = m
         scrollOffset = Self.scrollOffset(
@@ -182,7 +183,7 @@ public final class IndicatorBarOverlay {
             // "gap" active style: the focused window's slot
             // stays empty instead of being highlighted.
             view.isHidden =
-                active && bar.activeStyle == .gap
+                active && style.activeStyle == .gap
             view.configure(
                 id: item.id,
                 name: item.name,
@@ -190,7 +191,7 @@ public final class IndicatorBarOverlay {
                 count: item.count,
                 active: active,
                 horizontal: m.horizontal,
-                params: params
+                style: style
             )
             view.onSelect = { [weak self] id in
                 self?.onSelect(id)
@@ -202,7 +203,7 @@ public final class IndicatorBarOverlay {
                 self?.dragEnded(view)
             }
         }
-        layoutArrows(strip: strip, m: m, params: params)
+        layoutArrows(strip: strip, m: m, style: style)
         panel.setFrame(
             GeometryUtils.flip(
                 strip,
@@ -222,7 +223,7 @@ public final class IndicatorBarOverlay {
     private func layoutArrows(
         strip: CGRect,
         m: Metrics,
-        params: MonocleParams
+        style: AppBarStyle
     ) {
         backArrow.isHidden =
             m.inset == 0 || scrollOffset <= 0.5
@@ -260,11 +261,11 @@ public final class IndicatorBarOverlay {
             )
         backArrow.style(
             glyph: m.horizontal ? "◂" : "▴",
-            params: params
+            style: style
         )
         forwardArrow.style(
             glyph: m.horizontal ? "▸" : "▾",
-            params: params
+            style: style
         )
         let step = m.slot + m.gap
         backArrow.onClick = { [weak self] in

@@ -18,6 +18,35 @@ Two safety rails apply to all Lua code:
   times out is **disabled** and logged; everything else keeps
   working until the next `reload_config`.
 
+## The Settings app and the managed block
+
+You can edit everything below from the menu bar **Settings…**
+window instead of by hand. When you save, the app rewrites a
+delimited region of `init.lua`:
+
+```lua
+-- >>> KiwiDesk managed block (edit in the app, not by hand) >>>
+KiwiDesk.set_gap_global(10)
+-- ...generated settings, modes, and keybindings...
+-- <<< KiwiDesk managed block <<<
+```
+
+Anything you write **outside** that region is preserved across
+saves. If the app finds custom Lua it can't represent with its
+visual controls, it opens the integrated Lua editor for the
+whole file instead of risking your code. From there you can keep
+editing raw Lua, or click **Adopt into the GUI** to import your
+current gaps, layouts, and rules into a fresh managed block —
+your previous file is kept verbatim as a commented backup, and
+keybindings (which can't be recovered from executed Lua) are
+re-added from the Keybindings tab. The editor's own
+state (keybinding actions, mode icons) is mirrored to
+`~/.config/KiwiDesk/gui.json`; delete that file to reset the
+GUI to what `init.lua` currently declares. Custom keybinding
+Lua is stored there and runs on reload, so treat `gui.json`
+with the same trust as `init.lua` — don't import one from an
+untrusted source.
+
 ## Layouts & Gaps
 
 ```lua
@@ -32,6 +61,17 @@ KiwiDesk.set_mode("music", "floating")
 KiwiDesk.set_gap_global(10)
 -- ...or per space (0 = fullscreen feel):
 KiwiDesk.set_gap_override("browser", 0)
+
+-- Per-edge control: pass a table instead of a number.
+-- Missing keys default to 10. Both setters accept it.
+KiwiDesk.set_gap_global({
+    top = 4, bottom = 8, left = 12, right = 12,
+    inner_horizontal = 6, inner_vertical = 6,
+})
+
+-- Windows below this width or height fall back to the
+-- Overlap Stack instead of shrinking further (pt).
+KiwiDesk.set_min_window_size(300)
 ```
 
 Tiling respects the menu bar and the Dock. If the menu bar
@@ -94,9 +134,19 @@ stack.demote()                     -- focused window -> stack
 stack.set_overflow_style("cascade_overflow")
 
 -- Scrolling (PaperWM style)
-scroll.set_width(800)              -- fixed column width
-scroll.set_anchor("center")        -- center | left | right
+scroll.set_slot_size(0)            -- slot size along the scroll
+                                   -- axis. 0 = auto (1100px column
+                                   -- horizontal, 80% of available
+                                   -- height vertical); a number =
+                                   -- px; "NN%" = fraction of the
+                                   -- available axis (minus bar/gaps)
+scroll.set_anchor("center")        -- center (any orientation), or
+                                   -- an edge: left|right horizontal,
+                                   -- top|bottom vertical
 scroll.set_speed(250)              -- animation ms
+scroll.set_orientation("horizontal")  -- horizontal: columns
+                                   -- scroll left/right.
+                                   -- vertical: rows scroll up/down
 
 -- Grid
 grid.set_type("dynamic")           -- dynamic | rigid
@@ -105,35 +155,52 @@ grid.set_split_direction("horizontal")
 grid.set_dimensions(3, 2)          -- rigid: columns, rows
 ```
 
-### Monocle: orientation & indicator bar
+### App Bar
 
-Monocle keeps its core promise — one window fills the whole
-usable area, the rest wait behind it — but no longer leaves
-you guessing what is back there: an **indicator bar** lists
-every window in the container, and an **orientation** decides
-which focus axis cycles through them.
+The **app bar** lists every window in the current space — for
+layouts where windows can hide each other (**monocle**) or
+scroll off-screen (**scrolling**) — so you always see what's
+there. Click an item to focus its window; drag to reorder.
+
+Its look is **global**: set it once with `app_bar.set_*` and
+every layout's bar shares it. Each layout then decides only
+whether it shows a bar and, if it wants, **overrides** any
+individual field just for itself with `<layout>.set_app_bar_*`.
+
+```lua
+-- Global look — the shared baseline for every bar.
+app_bar.set_thickness(32)          -- strip depth (pt), carved
+                                   -- out of the layout so bar
+                                   -- and windows never overlap
+app_bar.set_style("pills")         -- pills | segments | underline
+app_bar.set_position("top")        -- default edge (see below)
+
+-- Per layout: turn the bar on (default) and, optionally,
+-- override a field. Unset overrides inherit the global value.
+monocle.set_app_bar_enabled(true)
+scroll.set_app_bar_enabled(true)
+scroll.set_app_bar_style("segments")  -- scrolling only; monocle
+                                      -- keeps the global pills
+```
+
+**Orientation** decides which focus axis cycles through the
+windows, and with it which edges the bar may sit on. Both
+monocle and scrolling have one:
 
 ```lua
 -- horizontal (default): focus("left"/"right") steps through
--- the windows, wrapping at the ends; the bar sits on
--- top/bottom. vertical: focus("up"/"down") cycles; the bar
--- sits on left/right and stacks the letters vertically
--- (icon on top). The cross axis keeps its normal directional
--- behavior (other monitors etc.). swap along the axis
--- reorders the sequence — the bar is a live map, not a list.
+-- the windows; the bar sits on top/bottom. vertical:
+-- focus("up"/"down") cycles; the bar sits on left/right and
+-- stacks the letters vertically (icon on top). A position that
+-- doesn't fit the orientation is logged and falls back to that
+-- orientation's default edge (top / left).
 monocle.set_orientation("horizontal")
-
--- The bar is on by default; opt out explicitly. A position
--- that doesn't fit the orientation is logged and falls back
--- to that orientation's default edge (top / left).
-monocle.set_bar_enabled(true)
-monocle.set_bar_position("top")  -- horizontal: top|bottom
-                                 -- vertical:   left|right
-monocle.set_bar_thickness(32)    -- carved out of the layout,
-                                 -- so bar and window never
-                                 -- overlap or leave the
-                                 -- monitor
+scroll.set_orientation("horizontal")
 ```
+
+Position is resolved per layout: `app_bar.set_position` (or a
+per-layout `set_app_bar_position` override) is clamped to the
+layout's own orientation.
 
 Items appear in window order and are always **equal-sized**:
 `item_size` pt along the bar (width on horizontal bars,
@@ -167,19 +234,19 @@ bar to reorder the windows: a collapsed group moves as a
 whole, an expanded member moves alone.
 
 ```lua
-monocle.set_bar_style("pills")     -- pills | segments | underline
-monocle.set_bar_active_style("highlight")  -- highlight | gap
-monocle.set_bar_item_size(0)  -- pt; 0 (default) = standard
+app_bar.set_style("pills")     -- pills | segments | underline
+app_bar.set_active_style("highlight")  -- highlight | gap
+app_bar.set_item_size(0)  -- pt; 0 (default) = standard
                               -- size per content mode
-monocle.set_bar_item_gap(6)        -- pt between items
-monocle.set_bar_content("icon_and_name")  -- icon | name |
+app_bar.set_item_gap(6)        -- pt between items
+app_bar.set_content("icon_and_name")  -- icon | name |
                                           -- icon_and_name
-monocle.set_bar_group_adjacent_windows(true)  -- collapse
+app_bar.set_group_adjacent_windows(true)  -- collapse
                                               -- same-app runs
-monocle.set_bar_font_size(0)   -- 0 (default) = auto: text
+app_bar.set_font_size(0)   -- 0 (default) = auto: text
                                -- scales with bar_thickness;
                                -- any positive value pins it
-monocle.set_bar_corner_radius(8)
+app_bar.set_corner_radius(8)
 ```
 
 - **pills** — rounded floating badges, `item_gap` apart.
@@ -200,20 +267,20 @@ accent bar on the window-facing edge of the active segment,
 or the underline itself.
 
 ```lua
-monocle.set_bar_text_color("#F2EBD9")
-monocle.set_bar_box_color("#8B5E3C66")
-monocle.set_bar_active_text_color("#4E9F3D")
-monocle.set_bar_active_box_color("#8B5E3C66")
-monocle.set_bar_highlight_color("#4E9F3D")
+app_bar.set_text_color("#F2EBD9")
+app_bar.set_box_color("#8B5E3C66")
+app_bar.set_active_text_color("#4E9F3D")
+app_bar.set_active_box_color("#8B5E3C66")
+app_bar.set_highlight_color("#4E9F3D")
 -- Hover feedback on clickable items: a lighter translucent
 -- green by default, deliberately a shade off the highlight.
-monocle.set_bar_hover_color("#6DBF5B80")
-monocle.set_bar_hover_text_color("#F2EBD9")
+app_bar.set_hover_color("#6DBF5B80")
+app_bar.set_hover_text_color("#F2EBD9")
 -- The strip behind everything (default fully transparent):
-monocle.set_bar_background_color("#00000000")
+app_bar.set_background_color("#00000000")
 -- The count badge on grouped items:
-monocle.set_bar_group_badge_color("#FF3B30")
-monocle.set_bar_group_badge_text_color("#FFFFFF")
+app_bar.set_group_badge_color("#FF3B30")
+app_bar.set_group_badge_text_color("#FFFFFF")
 ```
 
 ### Where new windows land
@@ -379,13 +446,22 @@ KiwiDesk.bind("cmd+alt+f", function()
 end)
 ```
 
-Modifiers: `cmd`, `alt`/`opt`, `ctrl`, `shift`. Keys: letters,
-digits, `left/right/up/down`, `space`, `return`, `tab`,
-`escape`, `f1`–`f12`, and common punctuation.
+Modifiers: `cmd`/`command`, `alt`/`opt`/`option`,
+`ctrl`/`control`, `shift`. Keys: letters, digits,
+`left/right/up/down`, `space`, `return`, `tab`, `escape`,
+`f1`–`f12`, and punctuation. Punctuation accepts both the
+symbol and a word name, so `";"` and `"semicolon"` are the
+same key — likewise `comma`/`,`, `period`/`.`, `slash`/`/`,
+`backslash`/`\`, `minus`/`-`, `equal`/`=`,
+`leftbracket`/`[`, `rightbracket`/`]`, `grave`/`` ` ``,
+`quote`/`'`. The Settings app's shortcut recorder writes the
+long forms (`command`, `option`, `semicolon`, …) for
+readability; every alias round-trips.
 
 Hotkeys use the Carbon API: macOS filters them before they
 reach any app, and KiwiDesk never needs the Input Monitoring
-permission.
+permission. Left and right modifiers are treated as the same
+key (Carbon can't distinguish them without Input Monitoring).
 
 ### Modal modes
 
@@ -403,6 +479,17 @@ KiwiDesk.define_mode("resize", {
 KiwiDesk.bind("ctrl+alt+r", function()
     KiwiDesk.switch_mode("resize")
 end)
+```
+
+An optional third argument sets a menu bar indicator for the
+mode — an SF Symbol name or a flat emoji. While the mode is
+active, the KiwiDesk status item swaps to it:
+
+```lua
+KiwiDesk.define_mode("resize", { --[[ bindings ]] },
+    { icon = "arrow.left.and.right" })
+KiwiDesk.define_mode("service", { --[[ bindings ]] },
+    { icon = "⚙️" })
 ```
 
 ## Events
@@ -479,7 +566,7 @@ becomes `layout.bsp.ratio`:
                             "position": "top",
                             "style": "pills",
                             "item_size": 0 } },
-      "scroll": { "anchor": "center", "width": 800,
+      "scroll": { "anchor": "center", "slot_size": 0,
                   "new_window_placement": "after_focused" },
       "stack": { "master_count": 1, "master_ratio": 0.6,
                  "overflow_style": "cascade_overflow",

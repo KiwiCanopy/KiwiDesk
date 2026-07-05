@@ -2,7 +2,7 @@ import AppKit
 
 /// Slot layout: icon and name centered as one group, font
 /// scaled with the bar thickness, name-only truncation.
-extension IndicatorBarItemView {
+extension AppBarItemView {
     override func layout() {
         super.layout()
         layoutAccent()
@@ -52,8 +52,8 @@ extension IndicatorBarItemView {
     /// dimension (its thickness), so a fat bar gets readable
     /// text and a slim one stays inside its strip.
     private var effectiveFontSize: CGFloat {
-        if params.bar.fontSize > 0 {
-            return params.bar.fontSize
+        if style.fontSize > 0 {
+            return style.fontSize
         }
         return Self.autoFontSize(
             forThickness: horizontal
@@ -89,12 +89,12 @@ extension IndicatorBarItemView {
         // measuring the raw string undershoots the cell's own
         // padding and truncates names that would have fit.
         var textSize =
-            params.bar.content == .icon
+            style.content == .icon
             ? .zero
             : (label.cell?.cellSize ?? .zero)
         textSize.width = ceil(textSize.width)
         textSize.height = ceil(textSize.height)
-        let showText = params.bar.content != .icon
+        let showText = style.content != .icon
         var spacing: CGFloat =
             side > 0 && showText ? pad : 0
         textSize.width = min(
@@ -147,7 +147,7 @@ extension IndicatorBarItemView {
             bounds.height - side - spacing - pad * 2
         let maxLines = Int(available / max(lineHeight, 1))
         let showText =
-            params.bar.content != .icon && maxLines >= 1
+            style.content != .icon && maxLines >= 1
         label.isHidden = !showText
         let lines =
             showText ? min(name.count, maxLines) : 0
@@ -188,7 +188,7 @@ extension IndicatorBarItemView {
         let thickness: CGFloat = 3
         // The accent hugs the window-facing edge of the slot
         // (flipped coordinates: y grows downward).
-        switch params.resolvedBarPosition {
+        switch style.position {
         case .top:
             accent.frame = CGRect(
                 x: 0,

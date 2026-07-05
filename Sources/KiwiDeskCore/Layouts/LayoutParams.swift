@@ -123,28 +123,52 @@ public struct StackParams: Sendable, Equatable, Codable {
     }
 }
 
-public struct ScrollingParams: Sendable, Equatable, Codable {
+public struct ScrollingParams: Sendable, Equatable, Codable,
+    AppBarHosting
+{
     public enum Anchor: String, Sendable, Codable {
         case center
         case left
         case right
     }
 
-    /// Fixed column width for every window.
-    public var windowWidth: CGFloat = 800
+    /// Which axis the columns scroll along — the scrolling
+    /// analogue of monocle's orientation, and what decides
+    /// which edges the indicator bar may sit on.
+    public enum Orientation: String, Sendable, Codable {
+        /// Columns side by side, scrolling left/right; bar on
+        /// top/bottom.
+        case horizontal
+        /// Rows stacked, scrolling up/down; bar on left/right.
+        case vertical
+    }
+
+    /// Fixed slot size along the scroll axis (column width when
+    /// horizontal, row height when vertical). `auto` by default,
+    /// resolving to an orientation-aware standard at layout time.
+    public var slotSize: ScrollSize = .auto
     /// Where the focused column sits in the viewport.
     public var anchor: Anchor = .center
+    public var orientation: Orientation = .horizontal
     /// PaperWM-style default: new columns open next to the
     /// one you are working in.
     public var newWindowPlacement: SpawnPlacement = .afterFocused
+    public var appBar = LayoutAppBar()
 
     public init() {}
 
-    /// JSON keys follow the Lua setters (`scroll.set_width`).
+    /// AppBarHosting: the bar axis follows the scroll axis.
+    public var barAxisIsHorizontal: Bool {
+        orientation == .horizontal
+    }
+
+    /// JSON keys follow the Lua setters (`scroll.set_slot_size`).
     private enum CodingKeys: String, CodingKey {
-        case windowWidth = "width"
+        case slotSize = "slot_size"
         case anchor
+        case orientation
         case newWindowPlacement = "new_window_placement"
+        case appBar = "app_bar"
     }
 
     /// Manual decoding: profiles saved before a field existed
@@ -153,21 +177,31 @@ public struct ScrollingParams: Sendable, Equatable, Codable {
         let container = try decoder.container(
             keyedBy: CodingKeys.self
         )
-        windowWidth =
+        slotSize =
             try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .windowWidth
-            ) ?? 800
+                ScrollSize.self,
+                forKey: .slotSize
+            ) ?? .auto
         anchor =
             try container.decodeIfPresent(
                 Anchor.self,
                 forKey: .anchor
             ) ?? .center
+        orientation =
+            try container.decodeIfPresent(
+                Orientation.self,
+                forKey: .orientation
+            ) ?? .horizontal
         newWindowPlacement =
             try container.decodeIfPresent(
                 SpawnPlacement.self,
                 forKey: .newWindowPlacement
             ) ?? .afterFocused
+        appBar =
+            try container.decodeIfPresent(
+                LayoutAppBar.self,
+                forKey: .appBar
+            ) ?? LayoutAppBar()
     }
 }
 

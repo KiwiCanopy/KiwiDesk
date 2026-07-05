@@ -1,11 +1,13 @@
 import CoreGraphics
 
-/// Niri/PaperWM-style horizontal scrolling columns.
+/// Niri/PaperWM-style scrolling columns.
 ///
-/// Windows sit side by side in an infinite row of fixed-width
-/// columns; the viewport shifts so the focused column lands at
-/// the configured anchor. Columns at the row ends snap to the
-/// screen edge so no empty margin appears.
+/// Windows sit in an infinite row (horizontal orientation) or
+/// column (vertical) of fixed-size slots; the viewport shifts so
+/// the focused slot lands at the configured anchor. Slots at the
+/// ends snap to the screen edge so no empty margin appears. With
+/// the indicator bar enabled its strip is carved out of the
+/// usable area first, so windows and bar never overlap.
 public struct ScrollingLayout: LayoutSystem {
     public init() {}
 
@@ -13,60 +15,107 @@ public struct ScrollingLayout: LayoutSystem {
         for windows: [WindowID],
         in context: LayoutContext
     ) -> [WindowID: CGRect] {
-        let usable = context.usable
         guard !windows.isEmpty else { return [:] }
 
-        // A single window always fills the whole screen.
+        // The area left for windows after the bar strip.
+        let area = context.scrolling.windowFrame(
+            in: context.usable,
+            inner: context.gaps.inner,
+            global: context.appBarStyle
+        )
+        let horizontal = context.scrolling.barAxisIsHorizontal
+
+        // A single window always fills the whole window area.
         if windows.count == 1, let only = windows.first {
-            return [only: usable]
+            return [only: area]
         }
 
-        let gap = context.gaps.inner.horizontal
-        let width = min(
-            context.scrolling.windowWidth,
-            usable.width
+        let gap =
+            horizontal
+            ? context.gaps.inner.horizontal
+            : context.gaps.inner.vertical
+        let along = horizontal ? area.width : area.height
+        let size = context.scrolling.slotSize.resolved(
+            along: along,
+            horizontal: horizontal
         )
-        let stride = width + gap
+        let stride = size + gap
         let count = CGFloat(windows.count)
-        let rowWidth = count * width + (count - 1) * gap
+        let rowLength = count * size + (count - 1) * gap
 
         let focusedIndex =
             context.focused.flatMap {
                 windows.firstIndex(of: $0)
             } ?? 0
-        let focusedX = CGFloat(focusedIndex) * stride
-
-        // Offset of the row start relative to usable.minX.
-        var offset: CGFloat
-        switch context.scrolling.anchor {
-        case .center:
-            offset =
-                (usable.width - width) / 2 - focusedX
-        case .left:
-            offset = -focusedX
-        case .right:
-            offset = usable.width - width - focusedX
-        }
+        let focusedPos = CGFloat(focusedIndex) * stride
+        var offset = anchorOffset(
+            anchor: context.scrolling.anchor,
+            along: along,
+            size: size,
+            focusedPos: focusedPos
+        )
 
         // Boundary awareness: snap to the row ends.
-        if rowWidth <= usable.width {
+        if rowLength <= along {
             offset = 0
         } else {
             offset = min(offset, 0)
-            offset = max(offset, usable.width - rowWidth)
+            offset = max(offset, along - rowLength)
         }
 
+        return frames(
+            windows: windows,
+            area: area,
+            horizontal: horizontal,
+            offset: offset,
+            stride: stride,
+            size: size
+        )
+    }
+
+    /// Offset of the row start relative to the area's leading
+    /// edge, before boundary snapping.
+    private func anchorOffset(
+        anchor: ScrollingParams.Anchor,
+        along: CGFloat,
+        size: CGFloat,
+        focusedPos: CGFloat
+    ) -> CGFloat {
+        switch anchor {
+        case .center:
+            return (along - size) / 2 - focusedPos
+        case .left:
+            return -focusedPos
+        case .right:
+            return along - size - focusedPos
+        }
+    }
+
+    private func frames(
+        windows: [WindowID],
+        area: CGRect,
+        horizontal: Bool,
+        offset: CGFloat,
+        stride: CGFloat,
+        size: CGFloat
+    ) -> [WindowID: CGRect] {
         var result: [WindowID: CGRect] = [:]
         for (index, window) in windows.enumerated() {
-            let x =
-                usable.minX + offset
-                + CGFloat(index) * stride
-            result[window] = CGRect(
-                x: x,
-                y: usable.minY,
-                width: width,
-                height: usable.height
-            )
+            let lead = offset + CGFloat(index) * stride
+            result[window] =
+                horizontal
+                ? CGRect(
+                    x: area.minX + lead,
+                    y: area.minY,
+                    width: size,
+                    height: area.height
+                )
+                : CGRect(
+                    x: area.minX,
+                    y: area.minY + lead,
+                    width: area.width,
+                    height: size
+                )
         }
         return result
     }

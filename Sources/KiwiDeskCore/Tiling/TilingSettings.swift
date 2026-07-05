@@ -18,6 +18,10 @@ public struct TilingSettings: Sendable, Equatable, Codable {
     public var scrolling = ScrollingParams()
     public var grid = GridParams()
     public var monocle = MonocleParams()
+    /// The indicator bar's global look, shared by every layout
+    /// that shows a bar. Each layout's own `bar` (enabled +
+    /// overrides) resolves against this.
+    public var appBarStyle = AppBarStyle()
     /// `new_window_placement_override[space_id]` beats the
     /// layout's own spawn placement (like the gap override).
     public var placementOverride: [SpaceID: SpawnPlacement] =
@@ -35,6 +39,7 @@ public struct TilingSettings: Sendable, Equatable, Codable {
     // MARK: - Codable
 
     private enum CodingKeys: String, CodingKey {
+        case appBar = "app_bar"
         case drag
         case gap
         case layout
@@ -81,6 +86,11 @@ public struct TilingSettings: Sendable, Equatable, Codable {
                 [SpaceID: SpawnPlacement].self,
                 forKey: .placementOverride
             ) ?? [:]
+        appBarStyle =
+            try container.decodeIfPresent(
+                AppBarStyle.self,
+                forKey: .appBar
+            ) ?? AppBarStyle()
         try decodeGap(from: container)
         try decodeLayout(from: container)
         try decodeDrag(from: container)
@@ -180,6 +190,7 @@ public struct TilingSettings: Sendable, Equatable, Codable {
             placementOverride,
             forKey: .placementOverride
         )
+        try container.encode(appBarStyle, forKey: .appBar)
         var gap = container.nestedContainer(
             keyedBy: GapKeys.self,
             forKey: .gap
@@ -226,7 +237,8 @@ public struct TilingSettings: Sendable, Equatable, Codable {
             stack: stack,
             scrolling: scrolling,
             grid: grid,
-            monocle: monocle
+            monocle: monocle,
+            appBarStyle: appBarStyle
         )
     }
 }

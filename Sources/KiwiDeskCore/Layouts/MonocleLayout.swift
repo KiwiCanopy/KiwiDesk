@@ -16,7 +16,8 @@ public struct MonocleLayout: LayoutSystem {
     ) -> [WindowID: CGRect] {
         let frame = context.monocle.windowFrame(
             in: context.usable,
-            inner: context.gaps.inner
+            inner: context.gaps.inner,
+            global: context.appBarStyle
         )
         var result: [WindowID: CGRect] = [:]
         for window in windows {

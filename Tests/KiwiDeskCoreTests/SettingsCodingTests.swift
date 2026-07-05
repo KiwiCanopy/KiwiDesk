@@ -26,7 +26,8 @@ struct SettingsCodingTests {
         )
         #expect(
             Set(root.keys) == [
-                "drag", "gap", "layout", "min_window_size",
+                "app_bar", "drag", "gap", "layout",
+                "min_window_size",
                 "new_window_placement_override",
             ]
         )
@@ -36,11 +37,12 @@ struct SettingsCodingTests {
                 "bsp", "grid", "monocle", "scroll", "stack",
             ]
         )
-        // Lua `bsp.set_ratio` / `scroll.set_width`.
+        // Lua `bsp.set_ratio` / `scroll.set_slot_size`.
         let bsp = try object(layout["bsp"])
         #expect(bsp["ratio"] as? Double == 0.5)
         let scroll = try object(layout["scroll"])
-        #expect(scroll["width"] as? Double == 800)
+        // Default slot size is `auto`, encoded as 0.
+        #expect(scroll["slot_size"] as? Double == 0)
         let stack = try object(layout["stack"])
         #expect(stack["master_ratio"] as? Double == 0.6)
         // SpaceID-keyed maps encode as objects, not arrays.
@@ -97,7 +99,7 @@ struct SettingsCodingTests {
     func roundTrip() throws {
         var settings = TilingSettings()
         settings.bsp.splitRatio = 0.7
-        settings.scrolling.windowWidth = 400
+        settings.scrolling.slotSize = .points(400)
         settings.stack.masterCount = 2
         settings.grid.rows = 4
         settings.minWindowSize = 200

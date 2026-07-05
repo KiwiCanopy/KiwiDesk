@@ -176,7 +176,7 @@ struct SimpleLayoutTests {
         // of the usable area; without it, monocle fills the
         // whole thing (see MonocleTests for the strip).
         var context = makeContext()
-        context.monocle.bar.enabled = false
+        context.monocle.appBar.enabled = false
         let frames = MonocleLayout().calculateGeometry(
             for: ids(3),
             in: context

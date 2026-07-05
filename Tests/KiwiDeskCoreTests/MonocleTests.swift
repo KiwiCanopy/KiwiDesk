@@ -13,6 +13,22 @@ private func ids(_ n: Int) -> [WindowID] {
     (1...n).map { WindowID(UInt32($0)) }
 }
 
+/// The app bar's window groups for a space, resolving the
+/// grouping flag the way the live bar does (monocle override
+/// over the global style).
+@MainActor
+private func groups(
+    _ core: KiwiCore,
+    in space: Space
+) -> [[WindowID]] {
+    core.barGroups(
+        in: space,
+        grouping: core.tiler.settings.monocle
+            .resolvedBar(global: core.tiler.settings.appBarStyle)
+            .groupAdjacentWindows
+    )
+}
+
 private func makeContext(
     bounds: CGRect = CGRect(x: 0, y: 0, width: 1920, height: 1080),
     monocle: (inout MonocleParams) -> Void = { _ in }
@@ -31,7 +47,7 @@ struct MonocleGeometryTests {
 
     @Test("Bar disabled: every window fills the usable area")
     func barDisabled() throws {
-        let context = makeContext { $0.bar.enabled = false }
+        let context = makeContext { $0.appBar.enabled = false }
         let frames = layout.calculateGeometry(
             for: ids(3),
             in: context
@@ -44,22 +60,22 @@ struct MonocleGeometryTests {
     @Test(
         "Bar strip and window never overlap and stay usable",
         arguments: [
-            MonocleParams.Bar.Position.top, .bottom,
+            AppBarStyle.Position.top, .bottom,
             .left, .right,
         ]
     )
     func stripCarving(
-        position: MonocleParams.Bar.Position
+        position: AppBarStyle.Position
     ) throws {
         let context = makeContext {
             $0.orientation =
                 position.isHorizontalEdge
                 ? .horizontal : .vertical
-            $0.bar.position = position
+            $0.appBar.position = position
         }
         let usable = context.usable
         let bar = try #require(
-            context.monocle.barFrame(in: usable)
+            context.monocle.barFrame(in: usable, global: AppBarStyle())
         )
         let frames = layout.calculateGeometry(
             for: ids(2),
@@ -91,19 +107,19 @@ struct MonocleGeometryTests {
     func mismatchFallsBack() {
         var params = MonocleParams()
         params.orientation = .vertical
-        params.bar.position = .top
-        #expect(params.resolvedBarPosition == .left)
+        params.appBar.position = .top
+        #expect(params.resolvedBar(global: AppBarStyle()).position == .left)
         params.orientation = .horizontal
-        params.bar.position = .right
-        #expect(params.resolvedBarPosition == .top)
-        params.bar.position = .bottom
-        #expect(params.resolvedBarPosition == .bottom)
+        params.appBar.position = .right
+        #expect(params.resolvedBar(global: AppBarStyle()).position == .top)
+        params.appBar.position = .bottom
+        #expect(params.resolvedBar(global: AppBarStyle()).position == .bottom)
     }
 
     @Test("Oversized thickness never produces negative frames")
     func oversizedThickness() throws {
         let context = makeContext {
-            $0.bar.thickness = 5000
+            $0.appBar.thickness = 5000
         }
         let frames = layout.calculateGeometry(
             for: [w1],
@@ -113,7 +129,7 @@ struct MonocleGeometryTests {
         #expect(window.width >= 0)
         #expect(window.height >= 0)
         let bar = try #require(
-            context.monocle.barFrame(in: context.usable)
+            context.monocle.barFrame(in: context.usable, global: AppBarStyle())
         )
         #expect(context.usable.contains(bar))
     }
@@ -125,17 +141,17 @@ struct MonocleSettingsTests {
     func codableRoundTrip() throws {
         var settings = TilingSettings()
         settings.monocle.orientation = .vertical
-        settings.monocle.bar.enabled = false
-        settings.monocle.bar.position = .right
-        settings.monocle.bar.thickness = 48
-        settings.monocle.bar.style = .underline
-        settings.monocle.bar.activeStyle = .gap
-        settings.monocle.bar.itemSize = 90
-        settings.monocle.bar.itemGap = 0
-        settings.monocle.bar.content = .icon
-        settings.monocle.bar.highlightColor = "#FF0000"
-        settings.monocle.bar.groupAdjacentWindows = false
-        settings.monocle.bar.groupBadgeColor = "#112233"
+        settings.monocle.appBar.enabled = false
+        settings.monocle.appBar.position = .right
+        settings.monocle.appBar.thickness = 48
+        settings.monocle.appBar.style = .underline
+        settings.monocle.appBar.activeStyle = .gap
+        settings.monocle.appBar.itemSize = 90
+        settings.monocle.appBar.itemGap = 0
+        settings.monocle.appBar.content = .icon
+        settings.monocle.appBar.highlightColor = "#FF0000"
+        settings.monocle.appBar.groupAdjacentWindows = false
+        settings.monocle.appBar.groupBadgeColor = "#112233"
         let data = try JSONEncoder().encode(settings)
         let decoded = try JSONDecoder().decode(
             TilingSettings.self,
@@ -144,13 +160,21 @@ struct MonocleSettingsTests {
         #expect(decoded.monocle == settings.monocle)
     }
 
-    @Test("Bar settings nest under monocle.bar in the JSON")
+    @Test("Global style and per-layout overrides split in JSON")
     func nestedBarKey() throws {
         let data = try JSONEncoder().encode(TilingSettings())
         let json = try #require(
             try JSONSerialization.jsonObject(with: data)
                 as? [String: Any]
         )
+        // The global look sits top-level; item_size is a
+        // concrete field there.
+        let global = try #require(
+            json["app_bar"] as? [String: Any]
+        )
+        #expect(global["item_size"] as? Double == 0)
+        // The per-layout bar under monocle only carries its
+        // own enabled flag until a field is overridden.
         let layout = try #require(
             json["layout"] as? [String: Any]
         )
@@ -158,10 +182,10 @@ struct MonocleSettingsTests {
             layout["monocle"] as? [String: Any]
         )
         let bar = try #require(
-            monocle["bar"] as? [String: Any]
+            monocle["app_bar"] as? [String: Any]
         )
-        #expect(bar["item_size"] as? Double == 0)
-        #expect(monocle["bar_enabled"] == nil)
+        #expect(bar["enabled"] as? Bool == true)
+        #expect(bar["item_size"] == nil)
     }
 
     @Test("Profiles without a monocle key keep the defaults")
@@ -172,38 +196,37 @@ struct MonocleSettingsTests {
             from: Data(json.utf8)
         )
         #expect(decoded.monocle == MonocleParams())
-        #expect(decoded.monocle.bar.enabled)
-        #expect(decoded.monocle.bar.itemSize == 0)
+        #expect(decoded.monocle.appBar.enabled)
+        // Nothing is overridden, so every look field inherits.
+        #expect(decoded.monocle.appBar.itemSize == nil)
         #expect(decoded.monocle.orientation == .horizontal)
     }
 
-    @Test("Partial bar objects fill the gaps with defaults")
+    @Test("Partial bar objects override only the listed fields")
     func lenientBarDecoding() throws {
         let json = #"""
             {"layout": {"monocle": {
-                "bar": {"item_size": 90}
+                "app_bar": {"item_size": 90}
             }}}
             """#
         let decoded = try JSONDecoder().decode(
             TilingSettings.self,
             from: Data(json.utf8)
         )
-        #expect(decoded.monocle.bar.itemSize == 90)
-        #expect(
-            decoded.monocle.bar.thickness
-                == MonocleParams.Bar().thickness
-        )
-        #expect(decoded.monocle.bar.enabled)
+        #expect(decoded.monocle.appBar.itemSize == 90)
+        // Unlisted fields stay nil (inherit the global style).
+        #expect(decoded.monocle.appBar.thickness == nil)
+        #expect(decoded.monocle.appBar.enabled)
     }
 }
 
-@Suite("Indicator bar math")
-struct IndicatorBarMathTests {
+@Suite("App bar math")
+struct AppBarMathTests {
     @Test("item_size 0 falls back to a standard per content")
     func standardSlots() {
         // Icon-only items default to their square.
         #expect(
-            IndicatorBarOverlay.slotLength(
+            AppBarOverlay.slotLength(
                 itemSize: 0,
                 content: .icon,
                 thickness: 32,
@@ -212,13 +235,13 @@ struct IndicatorBarMathTests {
         )
         // Text content gets wider standards, name-only the
         // narrower of the two.
-        let name = IndicatorBarOverlay.slotLength(
+        let name = AppBarOverlay.slotLength(
             itemSize: 0,
             content: .name,
             thickness: 32,
             axis: 1000
         )
-        let both = IndicatorBarOverlay.slotLength(
+        let both = AppBarOverlay.slotLength(
             itemSize: 0,
             content: .iconAndName,
             thickness: 32,
@@ -232,7 +255,7 @@ struct IndicatorBarMathTests {
     func explicitSlot() {
         // The user's size as-is while it is sane.
         #expect(
-            IndicatorBarOverlay.slotLength(
+            AppBarOverlay.slotLength(
                 itemSize: 80,
                 content: .iconAndName,
                 thickness: 32,
@@ -242,7 +265,7 @@ struct IndicatorBarMathTests {
         // Too small: icons must survive — at least the
         // icon square.
         #expect(
-            IndicatorBarOverlay.slotLength(
+            AppBarOverlay.slotLength(
                 itemSize: 10,
                 content: .iconAndName,
                 thickness: 32,
@@ -251,7 +274,7 @@ struct IndicatorBarMathTests {
         )
         // Too big: capped at a quarter of the bar.
         #expect(
-            IndicatorBarOverlay.slotLength(
+            AppBarOverlay.slotLength(
                 itemSize: 900,
                 content: .iconAndName,
                 thickness: 32,
@@ -260,7 +283,7 @@ struct IndicatorBarMathTests {
         )
         // Tiny bar: the icon minimum beats the quarter cap.
         #expect(
-            IndicatorBarOverlay.slotLength(
+            AppBarOverlay.slotLength(
                 itemSize: 80,
                 content: .iconAndName,
                 thickness: 32,
@@ -277,7 +300,7 @@ struct IndicatorBarMathTests {
         // total - axis (680) wins; there is nothing beyond
         // the last item to keep clear of.
         #expect(
-            IndicatorBarOverlay.scrollOffset(
+            AppBarOverlay.scrollOffset(
                 current: 0,
                 activeIndex: 9,
                 slot: 100,
@@ -290,7 +313,7 @@ struct IndicatorBarMathTests {
         // A middle item does keep the margin: item 5 must end
         // 16pt clear of the right edge -> 600 - 320 + 16.
         #expect(
-            IndicatorBarOverlay.scrollOffset(
+            AppBarOverlay.scrollOffset(
                 current: 0,
                 activeIndex: 5,
                 slot: 100,
@@ -303,7 +326,7 @@ struct IndicatorBarMathTests {
         // Scrolling back to the first item pins at 0 — the
         // margin never pushes the offset negative.
         #expect(
-            IndicatorBarOverlay.scrollOffset(
+            AppBarOverlay.scrollOffset(
                 current: 696,
                 activeIndex: 0,
                 slot: 100,
@@ -315,7 +338,7 @@ struct IndicatorBarMathTests {
         )
         // An already-visible active item moves nothing.
         #expect(
-            IndicatorBarOverlay.scrollOffset(
+            AppBarOverlay.scrollOffset(
                 current: 100,
                 activeIndex: 2,
                 slot: 100,
@@ -331,7 +354,7 @@ struct IndicatorBarMathTests {
     func scrollClamps() {
         // Nil active index (manual arrow scroll): only clamp.
         #expect(
-            IndicatorBarOverlay.scrollOffset(
+            AppBarOverlay.scrollOffset(
                 current: 9999,
                 activeIndex: nil,
                 slot: 100,
@@ -342,7 +365,7 @@ struct IndicatorBarMathTests {
             ) == 680
         )
         #expect(
-            IndicatorBarOverlay.scrollOffset(
+            AppBarOverlay.scrollOffset(
                 current: -50,
                 activeIndex: nil,
                 slot: 100,
@@ -354,7 +377,7 @@ struct IndicatorBarMathTests {
         )
         // Everything fits: no scrolling, whatever the state.
         #expect(
-            IndicatorBarOverlay.scrollOffset(
+            AppBarOverlay.scrollOffset(
                 current: 300,
                 activeIndex: 1,
                 slot: 100,
@@ -370,7 +393,7 @@ struct IndicatorBarMathTests {
     func dropIndex() {
         // Slots of 100pt, 10pt apart, starting at 0.
         #expect(
-            IndicatorBarOverlay.dropIndex(
+            AppBarOverlay.dropIndex(
                 center: 50,
                 start: 0,
                 slot: 100,
@@ -379,7 +402,7 @@ struct IndicatorBarMathTests {
             ) == 0
         )
         #expect(
-            IndicatorBarOverlay.dropIndex(
+            AppBarOverlay.dropIndex(
                 center: 165,
                 start: 0,
                 slot: 100,
@@ -389,7 +412,7 @@ struct IndicatorBarMathTests {
         )
         // Past the ends: clamped into the item range.
         #expect(
-            IndicatorBarOverlay.dropIndex(
+            AppBarOverlay.dropIndex(
                 center: -40,
                 start: 0,
                 slot: 100,
@@ -398,7 +421,7 @@ struct IndicatorBarMathTests {
             ) == 0
         )
         #expect(
-            IndicatorBarOverlay.dropIndex(
+            AppBarOverlay.dropIndex(
                 center: 900,
                 start: 0,
                 slot: 100,
@@ -408,7 +431,7 @@ struct IndicatorBarMathTests {
         )
         // A centered / scrolled group shifts the mapping.
         #expect(
-            IndicatorBarOverlay.dropIndex(
+            AppBarOverlay.dropIndex(
                 center: 60,
                 start: 55,
                 slot: 100,
@@ -420,7 +443,7 @@ struct IndicatorBarMathTests {
 
     @Test("Overflowing frames start at the scroll offset")
     func scrolledFrames() {
-        let frames = IndicatorBarOverlay.frames(
+        let frames = AppBarOverlay.frames(
             lengths: Array(repeating: 100, count: 10),
             in: CGRect(x: 0, y: 0, width: 320, height: 32),
             gap: 0,
@@ -434,20 +457,20 @@ struct IndicatorBarMathTests {
     @Test("Icon bars refuse slots smaller than the icon square")
     func iconMinimum() {
         #expect(
-            IndicatorBarOverlay.minimumSlot(
+            AppBarOverlay.minimumSlot(
                 thickness: 32,
                 content: .iconAndName
             ) == 32
         )
         #expect(
-            IndicatorBarOverlay.minimumSlot(
+            AppBarOverlay.minimumSlot(
                 thickness: 32,
                 content: .icon
             ) == 32
         )
         // Text-only bars keep just a sliver of legibility.
         #expect(
-            IndicatorBarOverlay.minimumSlot(
+            AppBarOverlay.minimumSlot(
                 thickness: 32,
                 content: .name
             ) < 32
@@ -456,7 +479,7 @@ struct IndicatorBarMathTests {
 
     @Test("Frames line up along the axis, centered as a group")
     func framesCentered() {
-        let frames = IndicatorBarOverlay.frames(
+        let frames = AppBarOverlay.frames(
             lengths: [100, 100],
             in: CGRect(x: 0, y: 0, width: 320, height: 32),
             gap: 10,
@@ -467,7 +490,7 @@ struct IndicatorBarMathTests {
         #expect(frames[1].minX == 165)
         #expect(frames[0].height == 32)
         // Vertical bars stack top-down instead.
-        let vertical = IndicatorBarOverlay.frames(
+        let vertical = AppBarOverlay.frames(
             lengths: [40, 40],
             in: CGRect(x: 0, y: 0, width: 32, height: 100),
             gap: 0,
@@ -480,21 +503,21 @@ struct IndicatorBarMathTests {
 
     @Test("Auto font size scales with thickness, clamped")
     func autoFontSize() {
-        let slim = IndicatorBarItemView.autoFontSize(
+        let slim = AppBarItemView.autoFontSize(
             forThickness: 20
         )
-        let fat = IndicatorBarItemView.autoFontSize(
+        let fat = AppBarItemView.autoFontSize(
             forThickness: 48
         )
         #expect(slim < fat)
         // Extremes stay readable and inside the strip.
         #expect(
-            IndicatorBarItemView.autoFontSize(
+            AppBarItemView.autoFontSize(
                 forThickness: 4
             ) == 9
         )
         #expect(
-            IndicatorBarItemView.autoFontSize(
+            AppBarItemView.autoFontSize(
                 forThickness: 400
             ) == 28
         )
@@ -503,15 +526,15 @@ struct IndicatorBarMathTests {
     @Test("Stacked names truncate to the lines that fit")
     func stackedText() {
         #expect(
-            IndicatorBarItemView.stacked("Safari", limit: 10)
+            AppBarItemView.stacked("Safari", limit: 10)
                 == "S\na\nf\na\nr\ni"
         )
         #expect(
-            IndicatorBarItemView.stacked("Safari", limit: 4)
+            AppBarItemView.stacked("Safari", limit: 4)
                 == "S\na\nf\n…"
         )
         #expect(
-            IndicatorBarItemView.stacked("Safari", limit: 0)
+            AppBarItemView.stacked("Safari", limit: 0)
                 .isEmpty
         )
     }
@@ -544,70 +567,70 @@ struct MonocleCommandTests {
         )
         #expect(
             core.execute(
-                "monocle.set_bar_style",
+                "monocle.set_app_bar_style",
                 args: [.string("segments")]
             ).isSuccess
         )
         #expect(
-            core.tiler.settings.monocle.bar.style
+            core.tiler.settings.monocle.appBar.style
                 == .segments
         )
         #expect(
             core.execute(
-                "monocle.set_bar_active_style",
+                "monocle.set_app_bar_active_style",
                 args: [.string("gap")]
             ).isSuccess
         )
         #expect(
             core.execute(
-                "monocle.set_bar_content",
+                "monocle.set_app_bar_content",
                 args: [.string("icon_and_name")]
             ).isSuccess
         )
         #expect(
             core.execute(
-                "monocle.set_bar_item_size",
+                "monocle.set_app_bar_item_size",
                 args: [.number(150)]
             ).isSuccess
         )
         #expect(
-            core.tiler.settings.monocle.bar.itemSize == 150
+            core.tiler.settings.monocle.appBar.itemSize == 150
         )
         #expect(
             core.execute(
-                "monocle.set_bar_highlight_color",
+                "monocle.set_app_bar_highlight_color",
                 args: [.string("#123456")]
             ).isSuccess
         )
         #expect(
-            core.tiler.settings.monocle.bar.highlightColor
+            core.tiler.settings.monocle.appBar.highlightColor
                 == "#123456"
         )
         #expect(
             core.execute(
-                "monocle.set_bar_hover_color",
+                "monocle.set_app_bar_hover_color",
                 args: [.string("#4E9F3D40")]
             ).isSuccess
         )
         #expect(
-            core.tiler.settings.monocle.bar.hoverColor
+            core.tiler.settings.monocle.appBar.hoverColor
                 == "#4E9F3D40"
         )
         #expect(
             core.execute(
-                "monocle.set_bar_hover_text_color",
+                "monocle.set_app_bar_hover_text_color",
                 args: [.string("#101010")]
             ).isSuccess
         )
         #expect(
-            core.tiler.settings.monocle.bar.hoverTextColor
+            core.tiler.settings.monocle.appBar.hoverTextColor
                 == "#101010"
         )
     }
 
     @Test("Hover default is a shade off the highlight")
     func hoverDefault() {
-        let bar = MonocleParams.Bar()
+        let bar = AppBarStyle()
         #expect(bar.hoverColor != bar.highlightColor)
     }
 
@@ -622,19 +645,19 @@ struct MonocleCommandTests {
         )
         #expect(
             !core.execute(
-                "monocle.set_bar_position",
+                "monocle.set_app_bar_position",
                 args: [.string("middle")]
             ).isSuccess
         )
         #expect(
             !core.execute(
-                "monocle.set_bar_item_size",
+                "monocle.set_app_bar_item_size",
                 args: [.string("wide")]
             ).isSuccess
         )
         #expect(
             !core.execute(
-                "monocle.set_bar_text_color",
+                "monocle.set_app_bar_text_color",
                 args: [.string("red")]
             ).isSuccess
         )
@@ -650,14 +673,15 @@ struct MonocleCommandTests {
             args: [.string("vertical")]
         )
         core.execute(
-            "monocle.set_bar_position",
+            "monocle.set_app_bar_position",
             args: [.string("top")]
         )
         #expect(
             logs.contains { $0.contains("doesn't fit") }
         )
         #expect(
-            core.tiler.settings.monocle.resolvedBarPosition
+            core.tiler.settings.monocle.resolvedBar(global: AppBarStyle())
+                .position
                 == .left
         )
     }
@@ -702,7 +726,7 @@ struct MonocleGroupingTests {
         )
         let space = try #require(core.activeSpace)
         #expect(
-            core.monocleGroups(in: space) == [
+            groups(core, in: space) == [
                 [w1, w2], [w3], [WindowID(4)],
             ]
         )
@@ -714,7 +738,7 @@ struct MonocleGroupingTests {
         core.state.workspaces.focus(w1, in: SpaceID(1))
         let space = try #require(core.activeSpace)
         #expect(
-            core.monocleGroups(in: space) == [
+            groups(core, in: space) == [
                 [w1], [w2], [w3],
             ]
         )
@@ -722,7 +746,7 @@ struct MonocleGroupingTests {
         core.state.workspaces.focus(w3, in: SpaceID(1))
         let after = try #require(core.activeSpace)
         #expect(
-            core.monocleGroups(in: after) == [[w1, w2], [w3]]
+            groups(core, in: after) == [[w1, w2], [w3]]
         )
     }
 
@@ -731,23 +755,23 @@ struct MonocleGroupingTests {
         let core = makeNamedCore(["Zed", "Zed"])
         #expect(
             core.execute(
-                "monocle.set_bar_group_adjacent_windows",
+                "monocle.set_app_bar_group_adjacent_windows",
                 args: [.bool(false)]
             ).isSuccess
         )
         let space = try #require(core.activeSpace)
         #expect(
-            core.monocleGroups(in: space) == [[w1], [w2]]
+            groups(core, in: space) == [[w1], [w2]]
         )
     }
 
     @Test("Dragging an item reorders the window array")
     func moveSingle() {
         let core = makeNamedCore(["A", "B", "C"])
-        core.moveMonocleItem(from: 0, to: 2)
+        core.moveBarItem(from: 0, to: 2)
         #expect(core.activeSpace?.windows == [w2, w3, w1])
         // Out-of-range moves are ignored.
-        core.moveMonocleItem(from: 0, to: 9)
+        core.moveBarItem(from: 0, to: 9)
         #expect(core.activeSpace?.windows == [w2, w3, w1])
     }
 
@@ -755,7 +779,7 @@ struct MonocleGroupingTests {
     func moveGroup() {
         let core = makeNamedCore(["Zed", "Zed", "Finder"])
         // Items: [Zed ×2] [Finder] — swap their slots.
-        core.moveMonocleItem(from: 0, to: 1)
+        core.moveBarItem(from: 0, to: 1)
         #expect(core.activeSpace?.windows == [w3, w1, w2])
     }
 }

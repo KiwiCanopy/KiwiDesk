@@ -7,6 +7,7 @@ extension KiwiCore {
         bus.resetLuaCallbacks()
         keys.reset()
         nativeSpaceBindings = [:]
+        resetDeclarativeState()
         guard let fresh = LuaInterpreter() else {
             onLog("failed to create Lua VM")
             return
@@ -27,6 +28,26 @@ extension KiwiCore {
         // The current native space may carry a binding that
         // the config just (re)declared.
         applyNativeSpaceBinding()
+    }
+
+    /// Clears every setting the config declares *sparsely* so a
+    /// reload is authoritative, not additive: the writer omits
+    /// deleted entries (removed app/float rules, gap or
+    /// placement overrides, a space reverted to `bsp`), and
+    /// without this reset the stale live value would survive.
+    /// Fully-emitted settings (global gaps, min size, per-layout
+    /// params) are always overwritten, so they need no reset.
+    private func resetDeclarativeState() {
+        state.appRules = [:]
+        eventLoop.floatRules = FloatRules([])
+        monitorFallback = [:]
+        spaceMonitorMap = [:]
+        tiler.settings.gapsOverride = [:]
+        tiler.settings.placementOverride = [:]
+        for space in state.workspaces.allSpaces
+        where space.mode != .bsp {
+            state.workspaces.setMode(space.id, .bsp)
+        }
     }
 
     /// Applies declarative globals after the config ran.

@@ -21,6 +21,14 @@ public struct FloatRules: Sendable, Equatable {
         }
     }
 
+    /// The rules as originally written (`"App"` or
+    /// `"App:Title"`) — used to seed the GUI editor.
+    public var rawRules: [String] {
+        rules.map { rule in
+            rule.title.map { "\(rule.app):\($0)" } ?? rule.app
+        }
+    }
+
     public func matches(app: String, title: String) -> Bool {
         rules.contains { rule in
             guard rule.app == app else { return false }
