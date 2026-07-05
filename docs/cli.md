@@ -131,16 +131,24 @@ change, so bars can drop stale icons immediately:
 ```json
 {"event": "window_created",
  "data": {"window_id": 4711, "app": "Ghostty",
-          "space": "2"}}
+          "space_id": "2"}}
 {"event": "window_destroyed",
- "data": {"window_id": 4711, "space": "2"}}
+ "data": {"window_id": 4711, "app": "Ghostty",
+          "space_id": "2"}}
 ```
 
 `window_created` carries the space the window was placed in
 (`app_rules` included); `window_destroyed` and
-`window_minimized` carry the active space the window
-disappeared from. A minimize fires only `window_minimized`,
-never `window_destroyed`.
+`window_minimized` carry the space the window disappeared
+from — its own space, even when that space is not active. A
+minimize fires only `window_minimized`, never
+`window_destroyed`.
+
+Caveat: these events track the *visible window set*, not app
+lifecycle. Deminiaturize surfaces as `window_created`, and a
+native macOS Space switch fires a burst of `window_destroyed`
+for the old desktop's windows and `window_created` when they
+return.
 
 `native_space_change` fires when the user switches native
 macOS Spaces (Mission Control desktops); its data carries the

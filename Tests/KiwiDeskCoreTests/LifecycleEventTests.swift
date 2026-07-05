@@ -46,8 +46,8 @@ struct LifecycleEventTests {
         #expect(payload["window_id"] == .number(42))
         #expect(payload["app"] == .string("TestApp"))
         // The window was placed in the active space.
-        #expect(payload["space"] != nil)
-        #expect(payload["space"] != .null)
+        #expect(payload["space_id"] != nil)
+        #expect(payload["space_id"] != .null)
     }
 
     @Test("closing fires window_destroyed, not minimized")
@@ -89,6 +89,42 @@ struct LifecycleEventTests {
             return
         }
         #expect(payload["window_id"] == .number(9))
+    }
+
+    @Test("gone-events report the window's former space")
+    func formerSpace() {
+        let core = makeCore()
+        // Window lands in the active space "1"...
+        core.eventLoop.onEvent(
+            .windowCreated(window(21, app: "Zen"))
+        )
+        // ...then the user switches away.
+        _ = core.execute(
+            "focus_virtual_space",
+            args: [.string("2")]
+        )
+        var events: [(KiwiNotification, JSONValue)] = []
+        core.bus.addSink { event, data in
+            events.append((event, data))
+        }
+        core.eventLoop.onEvent(
+            .windowDestroyed(
+                WindowID(21),
+                wasMinimized: false
+            )
+        )
+        guard
+            let (_, data) = events.first(where: {
+                $0.0 == .windowDestroyed
+            }),
+            case .object(let payload) = data
+        else {
+            Issue.record("expected destroyed payload")
+            return
+        }
+        // The space it disappeared FROM, not the active one.
+        #expect(payload["space_id"] == .string("1"))
+        #expect(payload["app"] == .string("Zen"))
     }
 
     @Test("lifecycle events reach Lua callbacks")

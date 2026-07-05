@@ -75,7 +75,7 @@ extension KiwiCore {
             data: .object([
                 "window_id": .number(Double(window.id.raw)),
                 "app": .string(window.appName),
-                "space": space.map { .string($0.raw) }
+                "space_id": space.map { .string($0.raw) }
                     ?? .null,
             ]),
             luaArgs: [
@@ -86,30 +86,43 @@ extension KiwiCore {
         )
     }
 
-    func emitWindowDestroyed(_ id: WindowID) {
-        emitWindowGone(.windowDestroyed, id)
+    func emitWindowDestroyed(
+        _ id: WindowID,
+        app: String?,
+        space: SpaceID?
+    ) {
+        emitWindowGone(.windowDestroyed, id, app, space)
     }
 
-    func emitWindowMinimized(_ id: WindowID) {
-        emitWindowGone(.windowMinimized, id)
+    func emitWindowMinimized(
+        _ id: WindowID,
+        app: String?,
+        space: SpaceID?
+    ) {
+        emitWindowGone(.windowMinimized, id, app, space)
     }
 
-    /// The window already left the layout, so `space` is the
-    /// active space it disappeared from (05_GUI issue #20).
+    /// `app` and `space` are captured by handle() before
+    /// state.apply removes the window — the payload reports
+    /// the space the window actually disappeared from, not
+    /// whichever space happens to be active.
     private func emitWindowGone(
         _ event: KiwiNotification,
-        _ id: WindowID
+        _ id: WindowID,
+        _ app: String?,
+        _ space: SpaceID?
     ) {
-        let space = state.workspaces.activeSpace
         bus.emit(
             event,
             data: .object([
                 "window_id": .number(Double(id.raw)),
-                "space": space.map { .string($0.raw) }
+                "app": .string(app ?? ""),
+                "space_id": space.map { .string($0.raw) }
                     ?? .null,
             ]),
             luaArgs: [
                 .number(Double(id.raw)),
+                .string(app ?? ""),
                 .string(space?.raw ?? ""),
             ]
         )

@@ -189,10 +189,16 @@ public final class KiwiCore {
     private func handle(_ event: KiwiEvent) {
         // Closing or minimizing the focused window must hand
         // focus to the space's fallback window (state already
-        // picks one; the AX raise below makes it real).
+        // picks one; the AX raise below makes it real). The
+        // gone-event payload needs the window's app and space
+        // captured here too — state.apply removes both.
         var focusLost = false
+        var goneApp: String? = nil
+        var goneSpace: SpaceID? = nil
         if case .windowDestroyed(let id, _) = event {
             focusLost = activeSpace?.focused == id
+            goneApp = state.windows[id]?.appName
+            goneSpace = state.workspaces.space(of: id)
         }
         state.spawnPlacements = [
             .bsp: tiler.settings.bsp.newWindowPlacement,
@@ -244,9 +250,17 @@ public final class KiwiCore {
             drag.cancel(id)
             dragOverlay.hideAll()
             if wasMinimized {
-                emitWindowMinimized(id)
+                emitWindowMinimized(
+                    id,
+                    app: goneApp,
+                    space: goneSpace
+                )
             } else {
-                emitWindowDestroyed(id)
+                emitWindowDestroyed(
+                    id,
+                    app: goneApp,
+                    space: goneSpace
+                )
             }
         case .nativeSpaceChanged:
             handleNativeSpaceChange()
