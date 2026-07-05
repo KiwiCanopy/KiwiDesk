@@ -75,7 +75,16 @@ extension KiwiCore {
             return .fail("no focused window")
         }
         let target = SpaceID(raw)
+        let from = state.workspaces.space(of: focused)
         state.workspaces.add(focused, to: target)
+        if from != target {
+            emitWindowMovedToSpace(
+                focused,
+                app: state.windows[focused]?.appName ?? "",
+                from: from,
+                to: target
+            )
+        }
         if follow {
             state.workspaces.activate(target)
             focusWindow(focused)

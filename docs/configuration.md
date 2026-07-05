@@ -557,6 +557,7 @@ end)
 | `window_created` | `window_id`, `app`, `space` |
 | `window_destroyed` | `window_id`, `app`, `space` |
 | `window_minimized` | `window_id`, `app`, `space` |
+| `window_moved_to_space` | `window_id`, `app`, `from`, `to` |
 
 The window lifecycle events fire even when focus does not
 change (a background window opening or closing), so status
@@ -568,6 +569,13 @@ minimize fires only `window_minimized`, never
 `space_id` (matching `space_change`) and an unknown space is
 JSON `null`; the Lua callback receives `""` instead, since a
 positional `nil` would truncate the argument list.
+
+`window_moved_to_space` fires on an explicit
+`move_to_virtual_space` (with or without follow) when the
+target differs from the window's current space. Bulk
+reassignments — profile loads, session restore — stay
+silent. JSON keys: `from_space_id` (null if unknown) and
+`to_space_id`.
 
 Two caveats: `window_created` / `window_destroyed` also fire
 when windows *appear to* come and go — deminiaturizing a

@@ -32,6 +32,7 @@ end)
 -- (background window opens, closes, or minimizes):
 for _, event in ipairs({
     "window_created", "window_destroyed", "window_minimized",
+    "window_moved_to_space",
 }) do
     KiwiDesk.on(event, function()
         KiwiDesk.exec(

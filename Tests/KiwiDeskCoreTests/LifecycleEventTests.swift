@@ -127,6 +127,45 @@ struct LifecycleEventTests {
         #expect(payload["app"] == .string("Zen"))
     }
 
+    @Test("moving a window across spaces reports from and to")
+    func movedToSpace() {
+        let core = makeCore()
+        core.eventLoop.onEvent(
+            .windowCreated(window(31, app: "Spotify"))
+        )
+        var events: [(KiwiNotification, JSONValue)] = []
+        core.bus.addSink { event, data in
+            events.append((event, data))
+        }
+        let response = core.execute(
+            "move_to_virtual_space",
+            args: [.string("3")]
+        )
+        #expect(response.isSuccess)
+        guard
+            let (_, data) = events.first(where: {
+                $0.0 == .windowMovedToSpace
+            }),
+            case .object(let payload) = data
+        else {
+            Issue.record("expected moved-to-space payload")
+            return
+        }
+        #expect(payload["window_id"] == .number(31))
+        #expect(payload["app"] == .string("Spotify"))
+        #expect(payload["from_space_id"] == .string("1"))
+        #expect(payload["to_space_id"] == .string("3"))
+        // Moving to the space it is already on stays silent.
+        events.removeAll()
+        _ = core.execute(
+            "move_to_virtual_space",
+            args: [.string("3")]
+        )
+        #expect(
+            !events.contains { $0.0 == .windowMovedToSpace }
+        )
+    }
+
     @Test("lifecycle events reach Lua callbacks")
     func luaCallback() {
         let core = makeCore()

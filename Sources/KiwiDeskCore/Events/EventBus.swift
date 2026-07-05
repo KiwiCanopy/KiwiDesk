@@ -13,6 +13,7 @@ public enum KiwiNotification: String, CaseIterable, Sendable,
     case windowCreated = "window_created"
     case windowDestroyed = "window_destroyed"
     case windowMinimized = "window_minimized"
+    case windowMovedToSpace = "window_moved_to_space"
 }
 
 /// Fans events out to Lua callbacks and generic sinks (the

@@ -102,6 +102,34 @@ extension KiwiCore {
         emitWindowGone(.windowMinimized, id, app, space)
     }
 
+    /// Fires on an explicit single-window move
+    /// (`move_to_virtual_space`); bulk reassignments
+    /// (snapshot restore, profile load) stay silent.
+    func emitWindowMovedToSpace(
+        _ id: WindowID,
+        app: String,
+        from: SpaceID?,
+        to: SpaceID
+    ) {
+        bus.emit(
+            .windowMovedToSpace,
+            data: .object([
+                "window_id": .number(Double(id.raw)),
+                "app": .string(app),
+                "from_space_id": from.map {
+                    .string($0.raw)
+                } ?? .null,
+                "to_space_id": .string(to.raw),
+            ]),
+            luaArgs: [
+                .number(Double(id.raw)),
+                .string(app),
+                .string(from?.raw ?? ""),
+                .string(to.raw),
+            ]
+        )
+    }
+
     /// `app` and `space` are captured by handle() before
     /// state.apply removes the window — the payload reports
     /// the space the window actually disappeared from, not
