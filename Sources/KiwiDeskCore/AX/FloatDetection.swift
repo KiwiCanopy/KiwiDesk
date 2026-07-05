@@ -96,6 +96,14 @@ public enum FloatDetection {
         appName == "Ghostty" && layer != 0
     }
 
+    /// Whether any ignore rule exists for this app at all —
+    /// the cheap gate before every window-list lookup.
+    public static func hasIgnoreRule(
+        appName: String
+    ) -> Bool {
+        appName == "Ghostty"
+    }
+
     /// Window-id variant: skips the CGWindowList lookup for
     /// apps that have no ignore rule at all (the common case
     /// on every reconcile).
@@ -103,7 +111,7 @@ public enum FloatDetection {
         appName: String,
         id: WindowID
     ) -> Bool {
-        guard shouldIgnore(appName: appName, layer: 1) else {
+        guard hasIgnoreRule(appName: appName) else {
             return false
         }
         return shouldIgnore(
@@ -112,19 +120,50 @@ public enum FloatDetection {
         )
     }
 
+    /// CGWindow layers of all of an app's windows in ONE
+    /// window-server round trip. Reconcile uses this instead
+    /// of one lookup per window (AGENTS.md: never query the
+    /// window server in a loop).
+    public static func windowLayers(
+        pid: pid_t
+    ) -> [WindowID: Int] {
+        let list =
+            CGWindowListCopyWindowInfo(
+                [.optionAll],
+                kCGNullWindowID
+            ) as? [[String: Any]] ?? []
+        var layers: [WindowID: Int] = [:]
+        for info in list
+        where info[kCGWindowOwnerPID as String] as? pid_t
+            == pid
+        {
+            guard
+                let number = info[kCGWindowNumber as String]
+                    as? Int,
+                let raw = UInt32(exactly: number)
+            else { continue }
+            layers[WindowID(raw)] =
+                info[kCGWindowLayer as String] as? Int ?? 0
+        }
+        return layers
+    }
+
     /// True while the app currently shows an ignored panel on
     /// screen. While Ghostty's quick terminal is open, AX
     /// reports the app's *main* window as focused — trusting
     /// that report would focus-follow to the main window's
     /// space even though the user is typing into the panel
-    /// (issue #21).
+    /// (issue #21). Known limit: visibility is a proxy for
+    /// focus — with panel autohide disabled, a genuine main-
+    /// window focus is also distrusted while the panel shows.
+    /// Deliberate: suppressing a follow beats hijacking one.
     public static func hasVisibleIgnoredPanel(
         pid: pid_t,
         appName: String
     ) -> Bool {
         // Cheap out before the window-list scan: only apps
         // with an ignore rule can have ignored panels.
-        guard shouldIgnore(appName: appName, layer: 1) else {
+        guard hasIgnoreRule(appName: appName) else {
             return false
         }
         let list =

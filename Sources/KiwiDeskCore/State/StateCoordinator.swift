@@ -49,6 +49,14 @@ public struct StateCoordinator: Sendable {
         rememberedSpaces[id] = space
     }
 
+    /// Where an untracked window will be filed once tracked.
+    /// Session restore fills this before slow-AX apps list
+    /// their windows, so startup can land on the right space
+    /// even when the window itself is not tracked yet.
+    func rememberedSpace(of id: WindowID) -> SpaceID? {
+        rememberedSpaces[id]
+    }
+
     /// Marks a window floating/tiled (`make_floating`).
     public mutating func setFloating(
         _ id: WindowID,

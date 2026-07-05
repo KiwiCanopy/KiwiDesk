@@ -70,7 +70,11 @@ extension KiwiCore {
                 pid: app.processIdentifier
             ),
             let id = AXHelper.windowID(of: element),
+            // The cold startup scan may not have tracked the
+            // focused window yet — the session snapshot still
+            // remembers where it belongs.
             let space = state.workspaces.space(of: id)
+                ?? state.rememberedSpace(of: id)
         else { return }
         state.workspaces.activate(space)
     }
@@ -133,20 +137,5 @@ extension KiwiCore {
             force: follow
         )
         return .ok()
-    }
-
-    /// One diagnostic line per switch: how many windows the
-    /// space holds and how many actually tile. "0 windows"
-    /// right after a restart means the startup scan missed
-    /// them; "0 tiled" means wrong float verdicts.
-    private func logSpaceContents(_ id: SpaceID) {
-        let members = state.workspaces[id]?.windows ?? []
-        let tiled = members.filter {
-            state.windows[$0]?.isFloating == false
-        }
-        onLog(
-            "space \(id.raw): \(members.count) windows, "
-                + "\(tiled.count) tiled"
-        )
     }
 }

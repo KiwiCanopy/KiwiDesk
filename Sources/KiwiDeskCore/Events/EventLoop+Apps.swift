@@ -104,6 +104,14 @@ extension EventLoop {
             reconcile(pid: previous, appName: name)
         }
         lastActivePid = pid
+        // Mirror the focused-changed path: reconcile the
+        // activated app first, so a window tracked late (cold
+        // Electron tree, other native Space) is known before
+        // the managed-window guard below.
+        reconcile(
+            pid: pid,
+            appName: app.localizedName ?? "?"
+        )
         // Clicking a window of another app only activates the
         // app: if that window was already its app's focused
         // window, no kAXFocusedWindowChanged fires. Report the
