@@ -14,10 +14,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let onboardingModel = OnboardingModel()
     private lazy var dashboard = SettingsWindowController(
         core: core,
-        onNewKeybindingConflict: { [weak self] in
-            self?.notifyKeybindingConflict()
+        onKeybindingsLoaded: { [weak self] modes in
+            self?.checkKeybindingConflicts(modes)
         }
     )
+    /// True once a config load has found a keybinding conflict.
+    /// The single source of truth for the one-time notification
+    /// — shared by the launch-time check below and every later
+    /// `SettingsModel.reload()` — so the notification fires once
+    /// on the transition into conflict and never double-fires.
+    private var hadKeybindingConflict = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let statusItem = StatusItemController()
@@ -43,6 +49,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self?.permissionChanged(trusted)
         }
         permissions.start()
+
+        // Issue #10: notify once if the config already has a
+        // keybinding conflict at startup, not only once the
+        // user opens Settings (`dashboard` is built lazily).
+        checkKeybindingConflicts(core.loadGuiConfig().modes)
 
         if permissions.isTrusted {
             startManaging()
@@ -119,6 +130,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.setActivationPolicy(.accessory)
     }
 
+    // MARK: - Keybinding conflicts
+
+    /// Evaluates a freshly loaded set of modes and notifies once
+    /// on the no-conflict -> conflict transition. Called both at
+    /// launch (before `dashboard` exists) and from every later
+    /// `SettingsModel.reload()`, funneled through this single
+    /// `hadKeybindingConflict` baseline so the two call sites
+    /// never double-fire: reloads that stay conflict-free, or
+    /// stay conflicting, do not re-fire; it re-arms once a load
+    /// finds no conflict and a later one finds a new one.
+    private func checkKeybindingConflicts(_ modes: [KeyMode]) {
+        let hasConflict = KeybindingConflicts.hasAnyAcrossModes(
+            modes
+        )
+        if hasConflict && !hadKeybindingConflict {
+            notifyKeybindingConflict()
+        }
+        hadKeybindingConflict = hasConflict
+    }
+
     // MARK: - Notifications
 
     /// Posts a system notification about revoked permission.
@@ -152,10 +183,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    /// Posts a one-time system notification the first time a
-    /// config load finds a keybinding conflict (see
-    /// `SettingsModel.onNewKeybindingConflict`). The persistent
-    /// per-row ⚠️ in the Keybindings tab is unaffected.
+    /// Posts a system notification for a keybinding conflict.
+    /// Called at most once per transition into conflict (see
+    /// `checkKeybindingConflicts`). The persistent per-row ⚠️
+    /// in the Keybindings tab is unaffected.
     private func notifyKeybindingConflict() {
         guard Bundle.main.bundleIdentifier != nil else {
             NSLog(

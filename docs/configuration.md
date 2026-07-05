@@ -468,12 +468,13 @@ key (Carbon can't distinguish them without Input Monitoring).
 The Settings app's Keybindings tab flags any row whose combo
 duplicates another row in the same mode, or a reserved macOS
 shortcut, with a persistent ⚠️ and a tooltip explaining the
-clash. The first time a config load finds such a conflict,
-KiwiDesk also raises a one-time system notification pointing
-you at the tab; reloading again with the same (or a different)
-conflict still present does not repeat the notification — it
-only fires again after the conflict clears and a later load
-finds a new one.
+clash. KiwiDesk checks for conflicts on every config load,
+starting at app launch (whether or not Settings is ever
+opened), and raises a one-time system notification the first
+time it finds one. Reloading again with the same (or a
+different) conflict still present does not repeat the
+notification — it only fires again after the conflict clears
+and a later load finds a new one.
 
 ### Modal modes
 

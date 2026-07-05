@@ -34,23 +34,21 @@ final class SettingsModel: ObservableObject {
 
     let core: KiwiCore
     private var suppressDirty = false
-    /// True once a config load has found a keybinding conflict,
-    /// so the one-time system notification only fires on the
-    /// transition into conflict, not on every reload.
-    private var hadKeybindingConflict = false
-    /// Fired the first time a load transitions from no conflict
-    /// to at least one keybinding conflict (see `reload`). The
-    /// persistent per-row warning in the tab is unaffected.
-    var onNewKeybindingConflict: @MainActor () -> Void = {}
+    /// Reports this load's modes so the caller can evaluate the
+    /// one-time keybinding-conflict notification. `AppDelegate`
+    /// owns the had-conflict baseline as the single source of
+    /// truth, shared with the launch-time check, so a conflict
+    /// already present at startup isn't double-counted here.
+    private let onKeybindingsLoaded: @MainActor ([KeyMode]) -> Void
 
     init(
         core: KiwiCore,
-        onNewKeybindingConflict:
-            @escaping @MainActor () -> Void = {}
+        onKeybindingsLoaded:
+            @escaping @MainActor ([KeyMode]) -> Void = { _ in }
     ) {
         self.core = core
         self.config = GuiConfig()
-        self.onNewKeybindingConflict = onNewKeybindingConflict
+        self.onKeybindingsLoaded = onKeybindingsLoaded
         reload()
     }
 
@@ -76,20 +74,7 @@ final class SettingsModel: ObservableObject {
             )) ?? ""
         refreshProfiles()
         isDirty = false
-        checkKeybindingConflicts()
-    }
-
-    /// Notifies once when this load newly finds a keybinding
-    /// conflict (no conflict -> conflict). Reloads that stay
-    /// conflict-free or stay conflicting do not re-fire.
-    private func checkKeybindingConflicts() {
-        let hasConflict = KeybindingConflicts.hasAny(
-            in: config.modes
-        )
-        if hasConflict && !hadKeybindingConflict {
-            onNewKeybindingConflict()
-        }
-        hadKeybindingConflict = hasConflict
+        onKeybindingsLoaded(config.modes)
     }
 
     func refreshProfiles() {

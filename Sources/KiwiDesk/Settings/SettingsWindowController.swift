@@ -10,17 +10,17 @@ final class SettingsWindowController {
     private let model: SettingsModel
     private var window: NSWindow?
 
-    // `onNewKeybindingConflict` is forwarded to the model so
-    // it is in place before the constructor's own initial
-    // `reload()` runs (see `SettingsModel.init`).
+    // `onKeybindingsLoaded` is forwarded to the model so it is
+    // in place before the constructor's own initial `reload()`
+    // runs (see `SettingsModel.init`).
     init(
         core: KiwiCore,
-        onNewKeybindingConflict:
-            @escaping @MainActor () -> Void = {}
+        onKeybindingsLoaded:
+            @escaping @MainActor ([KeyMode]) -> Void = { _ in }
     ) {
         self.model = SettingsModel(
             core: core,
-            onNewKeybindingConflict: onNewKeybindingConflict
+            onKeybindingsLoaded: onKeybindingsLoaded
         )
     }
 
