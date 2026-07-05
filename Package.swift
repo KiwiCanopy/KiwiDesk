@@ -7,13 +7,11 @@ let package = Package(
     platforms: [
         .macOS(.v14)
     ],
-    dependencies: [
-        // Prebuilt SwiftLint binary plugin (no source build).
-        .package(
-            url: "https://github.com/SimplyDanny/SwiftLintPlugins",
-            from: "0.57.0"
-        )
-    ],
+    // Linting runs as its own step (scripts/lint.sh: swift-format
+    // + line/file-size checks), not a build-tool plugin. The
+    // SwiftLint prebuild plugin cannot run during build planning on
+    // the CI toolchain ("a prebuild command cannot use executables
+    // built from source"), and its rules were advisory only.
     targets: [
         // Vendored Lua 5.4 (unmodified upstream C sources).
         .target(
@@ -30,15 +28,13 @@ let package = Package(
         .target(
             name: "KiwiDeskCore",
             dependencies: ["CLua"],
-            path: "Sources/KiwiDeskCore",
-            plugins: [lintPlugin]
+            path: "Sources/KiwiDeskCore"
         ),
         // Executable: AppDelegate, menu bar, SwiftUI GUI.
         .executableTarget(
             name: "KiwiDesk",
             dependencies: ["KiwiDeskCore"],
-            path: "Sources/KiwiDesk",
-            plugins: [lintPlugin]
+            path: "Sources/KiwiDesk"
         ),
         .testTarget(
             name: "KiwiDeskCoreTests",
@@ -47,10 +43,3 @@ let package = Package(
         ),
     ]
 )
-
-var lintPlugin: Target.PluginUsage {
-    .plugin(
-        name: "SwiftLintBuildToolPlugin",
-        package: "SwiftLintPlugins"
-    )
-}
