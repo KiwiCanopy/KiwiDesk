@@ -135,21 +135,23 @@ final class SettingsModel: ObservableObject {
     // MARK: - Keybinding conflicts (in-app warning)
 
     /// Called after a `KeyRecorderField.onRecord` commits a new
-    /// combo. Warns if that specific row now conflicts; else
-    /// clears the banner once the whole config has no conflict
-    /// left, so it doesn't linger once the last one is fixed.
-    /// An edit that leaves some *other* row still conflicting
-    /// leaves the banner as-is (this row is fine, but the
-    /// warning is still accurate). The persistent per-row ⚠️
-    /// already reflects live state independently either way.
+    /// combo. Warns with the specific reason if that row now
+    /// conflicts; else clears the banner once the whole config
+    /// has no conflict left, so it doesn't linger once the last
+    /// one is fixed. An edit that leaves some *other* row still
+    /// conflicting leaves the banner as-is (this row is fine,
+    /// but the warning is still accurate — it may just no longer
+    /// name the right row; the persistent per-row indicator
+    /// remains the precise source of truth either way).
     func noteRecordedCombo(
         _ binding: KeyBinding,
         in bindings: [KeyBinding]
     ) {
-        if KeybindingConflicts.text(for: binding, in: bindings)
-            != nil
-        {
-            keybindingWarning = Self.conflictMessage
+        if let reason = KeybindingConflicts.text(
+            for: binding,
+            in: bindings
+        ) {
+            keybindingWarning = "This shortcut — \(reason)"
         } else if !KeybindingConflicts.hasAnyAcrossModes(
             config.modes
         ) {
@@ -159,16 +161,17 @@ final class SettingsModel: ObservableObject {
 
     /// Sets or clears the banner from a whole-config check —
     /// used by the two batch paths (Adopt, Lua editor save)
-    /// where no single recorder input triggered the check.
+    /// where no single recorder input triggered the check, so
+    /// there's no one row's reason to name.
     private func warnIfAnyConflict() {
         keybindingWarning =
             KeybindingConflicts.hasAnyAcrossModes(config.modes)
-            ? Self.conflictMessage : nil
+            ? Self.batchConflictMessage : nil
     }
 
-    private static let conflictMessage =
-        "A keybinding conflict was found — see the ⚠️ mark "
-        + "below."
+    private static let batchConflictMessage =
+        "One or more keybinding conflicts were found — see "
+        + "the highlighted rows below."
 
     // MARK: - Profiles (Tab 1 / sync banner)
 

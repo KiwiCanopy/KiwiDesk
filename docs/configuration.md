@@ -473,15 +473,18 @@ current bindings, live, with no action needed to see it.
 
 On top of that, KiwiDesk shows a dismissible in-app banner the
 moment a conflict is introduced: right after you record a
-clashing shortcut in the Shortcuts tab, or after adopting a
-hand-written config, or after saving from the raw Lua editor
-finds a conflict in the result. The banner clears itself once
-the last conflict is fixed (or can be dismissed early with its
-✕). It does not appear on app launch, when Settings is simply
-opened, on Load Profile, or on a normal visual-editor Save —
-those already reflect any conflict through the persistent ⚠️,
-and showing the banner there would be redundant with the
-action that actually created it.
+clashing shortcut in the Shortcuts tab (naming the specific
+reason, e.g. which row or system shortcut it clashes with), or
+after adopting a hand-written config, or after saving from the
+raw Lua editor finds one or more conflicts in the result (a
+general message, since a batch check has no single row to name).
+The banner clears itself once the last conflict is fixed (or
+can be dismissed early with its own close button). It does not
+appear on app launch, when Settings is simply opened, on Load
+Profile, or on a normal visual-editor Save — those already
+reflect any conflict through the persistent ⚠️, and showing the
+banner there would be redundant with the action that actually
+created it.
 
 ### Modal modes
 
