@@ -70,9 +70,8 @@ The template walks you through the details.
 **Feature requests** should describe the **use case** and
 **problem it solves** (not just the feature itself). Check the
 **Status** note at the top of the
-[README](https://github.com/hajiboy95/KiwiDesk) first — the
-SwiftUI GUI, per-native-space profiles, and drag-and-drop are
-already planned.
+[README](https://github.com/hajiboy95/KiwiDesk) first to see
+what already ships and what's still in progress.
 
 ## Vulnerability Reports
 
