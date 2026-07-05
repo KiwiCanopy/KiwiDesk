@@ -109,6 +109,36 @@ struct ExecTests {
         #expect(core.exec.runningCount == 0)
     }
 
+    @Test("config reload drops pending exec callbacks")
+    func reloadDropsPendingCallbacks() async throws {
+        let core = makeCore()
+        let lua1 = try #require(core.lua)
+        #expect(
+            lua1.run(
+                """
+                KiwiDesk.exec("sleep 0.2", function()
+                    hit = true
+                end)
+                """
+            ).succeeded
+        )
+        // Reload swaps in a fresh VM; the pending ref was
+        // minted in the old one and must never cross over.
+        core.loadConfig()
+        let lua2 = try #require(core.lua)
+        let deadline = Date().addingTimeInterval(5)
+        while core.exec.runningCount > 0, Date() < deadline {
+            try await Task.sleep(nanoseconds: 20_000_000)
+        }
+        // Child was reaped, but the callback went nowhere:
+        // neither VM saw it.
+        #expect(core.exec.runningCount == 0)
+        #expect(lua2.global("hit") == .none)
+        // The fresh VM is fully functional afterwards.
+        #expect(lua2.run("sane = 1").succeeded)
+        #expect(lua2.global("sane") == .number(1))
+    }
+
     @Test("io.popen is disabled with a pointer to exec")
     func popenDisabled() throws {
         let core = makeCore()

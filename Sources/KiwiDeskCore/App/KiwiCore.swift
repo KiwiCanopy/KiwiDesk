@@ -101,6 +101,9 @@ public final class KiwiCore {
         keys.onLog = { [weak self] message in
             self?.onLog(message)
         }
+        exec.onLog = { [weak self] message in
+            self?.onLog(message)
+        }
         wireDrag()
         appBar.onSelect = { [weak self] id in
             self?.focusWindow(id)

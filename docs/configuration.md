@@ -537,7 +537,11 @@ it is called once the command has exited, with:
 immediately — KiwiDesk never waits for it. Returns the
 child's pid (a number), or `nil` when the command could not
 be started. If the config reloads before the command
-finishes, the callback is dropped silently.
+finishes, the callback is dropped silently. The child's
+`PATH` gets `/opt/homebrew/bin` and `/usr/local/bin`
+appended, so Homebrew tools (`sketchybar`, `borders`, …)
+resolve even when KiwiDesk was launched from Finder — GUI
+apps inherit launchd's minimal `PATH`, not your shell's.
 
 **Example:**
 

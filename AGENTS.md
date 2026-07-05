@@ -162,6 +162,16 @@ Keep this list updated whenever a recurring mistake is found.
   while a failed lookup returns nil and the caller falls back to
   the public Accessibility API (`AXUIElement`). Every private
   fast path must have such a fallback.
+- **The Lua watchdog cannot interrupt blocking C calls.** The
+  runaway-script guard is an instruction-count hook; code that
+  blocks inside C (`system()`, pipe reads) executes zero VM
+  instructions and freezes the main thread forever. Never add
+  an API that blocks in C on the main thread — external
+  commands always go through `ExecLauncher`. Lua registry refs
+  (`luaL_ref`) are VM-specific and their slots are reused:
+  never deliver a ref into a different interpreter than the
+  one that minted it (capture the owning `LuaInterpreter`
+  weakly, as `KiwiCore+ExecAPI` does).
 - **AX calls are slow and can block.** Never call AX APIs inside
   tight loops or layout math; snapshot state first.
 - **Electron/WebKit apps answer AX queries lazily** (100–300 ms).

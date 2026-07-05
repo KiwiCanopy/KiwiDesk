@@ -9,34 +9,75 @@ import Foundation
 /// executes zero VM instructions, so the hook can never fire
 /// and the whole app freezes. External commands therefore must
 /// always go through `ExecLauncher`, which backgrounds them.
+///
+/// `exec` is deliberately Lua-only, like `bind` and `on`: its
+/// callback cannot cross the JSON socket, and exposing shell
+/// execution on the IPC socket would let any client with file
+/// access to it run commands under KiwiDesk's identity (and
+/// its Accessibility grant). Do not add it to the dispatcher.
 extension KiwiCore {
     func registerExecAPI(on lua: LuaInterpreter) {
-        exec.lua = lua
-        exec.onLog = { [weak self] message in
-            self?.onLog(message)
-        }
-        lua.register("exec") { [weak self] args in
+        lua.register("exec") { [weak self, weak lua] args in
+            let callbackRef: Int32?
+            if case .functionRef(let ref) =
+                args.dropFirst().first ?? .none
+            {
+                callbackRef = ref
+            } else {
+                callbackRef = nil
+            }
             guard let self,
                 let command = args.first?.stringValue,
                 !command.isEmpty
             else {
+                // The trampoline already took registry refs
+                // on any function arguments; don't leak them.
+                for case .functionRef(let ref) in args {
+                    lua?.release(ref: ref)
+                }
                 self?.onLog(
                     "exec(): expected a command string"
                 )
                 return .none
             }
-            var ref: Int32?
-            if case .functionRef(let found) =
-                args.dropFirst().first ?? .none
-            {
-                ref = found
+            var onExit: ExecLauncher.ExitHandler?
+            if let ref = callbackRef {
+                // Bind the ref to the VM that minted it: on a
+                // config reload the weak capture goes nil and
+                // the callback drops silently. A ref must
+                // never reach a different VM's registry —
+                // its slot may already belong to an unrelated
+                // function there.
+                onExit = {
+                    [weak self, weak lua] code, out, err in
+                    guard let lua else { return }
+                    defer { lua.release(ref: ref) }
+                    let result = lua.call(
+                        ref: ref,
+                        args: [
+                            .number(Double(code)),
+                            .string(out),
+                            .string(err),
+                        ]
+                    )
+                    if case .failure(let error) = result {
+                        self?.onLog(
+                            "exec callback error: \(error)"
+                        )
+                    }
+                }
             }
             guard
                 let pid = self.exec.launch(
                     command,
-                    callbackRef: ref
+                    onExit: onExit
                 )
-            else { return .none }
+            else {
+                if let ref = callbackRef {
+                    lua?.release(ref: ref)
+                }
+                return .none
+            }
             return .number(Double(pid))
         }
         neutralizeBlockingOSCalls(on: lua)

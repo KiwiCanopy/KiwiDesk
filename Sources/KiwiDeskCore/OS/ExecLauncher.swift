@@ -6,50 +6,53 @@ import os
 /// replacement both funnel through here.
 ///
 /// Each command runs as `/bin/sh -c <command>`. The launcher
-/// never waits for the child; an optional Lua callback is
+/// never waits for the child; the optional `onExit` closure is
 /// invoked back on the main actor once the child exits, with
 /// `(exit_code, stdout, stderr)`. Output pipes are only created
-/// when a callback exists, and they are drained on a background
+/// when a closure exists, and they are drained on a background
 /// queue — the main thread never touches a pipe, so even a
 /// child that leaves grandchildren holding the descriptors open
 /// can only delay its own callback, never stall the app.
+///
+/// The launcher knows nothing about Lua: callers bind their own
+/// callback lifetime into `onExit` (see `KiwiCore+ExecAPI`,
+/// which captures the owning interpreter weakly so a config
+/// reload drops pending callbacks).
 @MainActor
 public final class ExecLauncher {
-    /// Delivers callbacks into the VM. Weak on purpose: a
-    /// config reload replaces the interpreter, and pending
-    /// callbacks into the torn-down VM must silently drop.
-    public weak var lua: LuaInterpreter?
+    public typealias ExitHandler =
+        @MainActor @Sendable (Int32, String, String) -> Void
 
     public var onLog: @MainActor (String) -> Void = { message in
         NSLog("KiwiDesk: %@", message)
     }
 
-    /// Children we have launched and not yet reaped. Process
-    /// objects must stay alive until termination or their
-    /// handlers never fire.
-    private var running: [Int32: Process] = [:]
+    /// Children we have launched and not yet reaped, keyed by
+    /// object identity (pids can be recycled). Process objects
+    /// must stay alive until termination or their handlers
+    /// never fire.
+    private var running: [ObjectIdentifier: Process] = [:]
 
     public init() {}
 
     public var runningCount: Int { running.count }
 
     /// Starts `command` and returns its pid, or nil when the
-    /// child could not be spawned. `callbackRef` is a Lua
-    /// registry reference; ownership transfers to the launcher,
-    /// which releases it after delivery.
+    /// child could not be spawned.
     @discardableResult
     public func launch(
         _ command: String,
-        callbackRef: Int32? = nil
+        onExit: ExitHandler? = nil
     ) -> Int32? {
         let process = Process()
         process.executableURL = URL(
             fileURLWithPath: "/bin/sh"
         )
         process.arguments = ["-c", command]
+        process.environment = Self.childEnvironment()
 
         let capture: OutputCapture?
-        if callbackRef != nil {
+        if onExit != nil {
             let pipes = (out: Pipe(), err: Pipe())
             process.standardOutput = pipes.out
             process.standardError = pipes.err
@@ -64,16 +67,16 @@ public final class ExecLauncher {
         // the bookkeeping below — it only runs once launch()
         // has returned control to the main actor.
         process.terminationHandler = { [weak self] child in
-            let pid = child.processIdentifier
+            let key = ObjectIdentifier(child)
             let code = child.terminationStatus
             let deliver: @Sendable (String, String) -> Void = {
                 out,
                 err in
                 Task { @MainActor in
                     self?.reap(
-                        pid: pid,
+                        key: key,
                         code: code,
-                        callbackRef: callbackRef,
+                        onExit: onExit,
                         stdout: out,
                         stderr: err
                     )
@@ -92,39 +95,40 @@ public final class ExecLauncher {
             onLog(
                 "exec: failed to start '\(command)': \(error)"
             )
-            if let ref = callbackRef {
-                lua?.release(ref: ref)
-            }
             return nil
         }
 
-        running[process.processIdentifier] = process
+        running[ObjectIdentifier(process)] = process
         capture?.drain()
         return process.processIdentifier
     }
 
     private func reap(
-        pid: Int32,
+        key: ObjectIdentifier,
         code: Int32,
-        callbackRef: Int32?,
+        onExit: ExitHandler?,
         stdout: String,
         stderr: String
     ) {
-        running[pid] = nil
-        guard let ref = callbackRef else { return }
-        guard let lua else { return }
-        defer { lua.release(ref: ref) }
-        let result = lua.call(
-            ref: ref,
-            args: [
-                .number(Double(code)),
-                .string(stdout),
-                .string(stderr),
-            ]
-        )
-        if case .failure(let error) = result {
-            onLog("exec callback error: \(error)")
+        running[key] = nil
+        onExit?(code, stdout, stderr)
+    }
+
+    /// GUI apps inherit launchd's minimal PATH, not the user's
+    /// shell PATH — `sketchybar`, `borders`, etc. live in the
+    /// Homebrew prefix and would be "command not found" in
+    /// production while working in terminal-launched dev runs.
+    private static func childEnvironment() -> [String: String] {
+        var env = ProcessInfo.processInfo.environment
+        var parts = (env["PATH"] ?? "")
+            .split(separator: ":")
+            .map(String.init)
+        for extra in ["/opt/homebrew/bin", "/usr/local/bin"]
+        where !parts.contains(extra) {
+            parts.append(extra)
         }
+        env["PATH"] = parts.joined(separator: ":")
+        return env
     }
 }
 
@@ -142,6 +146,12 @@ private final class OutputCapture: Sendable {
     init(_ out: Pipe, _ err: Pipe) {
         self.out = out
         self.err = err
+        // Enter for both streams up front: the termination
+        // handler can fire before drain() runs on the main
+        // actor, and an empty group would notify immediately
+        // with empty output.
+        group.enter()
+        group.enter()
     }
 
     /// Starts both reads; must be called exactly once.
@@ -158,11 +168,12 @@ private final class OutputCapture: Sendable {
         _ handle: FileHandle,
         _ store: @escaping @Sendable (Data) -> Void
     ) {
-        group.enter()
         DispatchQueue.global(qos: .utility).async {
             [group] in
-            let data = handle.readDataToEndOfFile()
-            store(data)
+            // readToEnd throws on I/O errors; the legacy
+            // readDataToEndOfFile raises an ObjC exception
+            // Swift cannot catch.
+            store((try? handle.readToEnd()) ?? Data())
             group.leave()
         }
     }
