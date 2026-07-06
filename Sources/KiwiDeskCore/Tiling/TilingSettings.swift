@@ -35,6 +35,8 @@ public struct TilingSettings: Sendable, Equatable, Codable {
     public var dragCornerRadius: CGFloat = 16
     /// Per-trigger animation toggles (`animations.*`).
     public var animations = AnimationSettings()
+    /// What resizing a tiled window with the mouse does.
+    public var mouseResize: MouseResizeMode = .layout
 
     public init() {}
 
@@ -49,6 +51,7 @@ public struct TilingSettings: Sendable, Equatable, Codable {
         case minWindowSize = "min_window_size"
         case placementOverride =
             "new_window_placement_override"
+        case mouseResize = "mouse_resize"
     }
 
     private enum DragKeys: String, CodingKey {
@@ -99,6 +102,11 @@ public struct TilingSettings: Sendable, Equatable, Codable {
                 AnimationSettings.self,
                 forKey: .animations
             ) ?? AnimationSettings()
+        mouseResize =
+            try container.decodeIfPresent(
+                MouseResizeMode.self,
+                forKey: .mouseResize
+            ) ?? .layout
         try decodeGap(from: container)
         try decodeLayout(from: container)
         try decodeDrag(from: container)
@@ -200,6 +208,7 @@ public struct TilingSettings: Sendable, Equatable, Codable {
         )
         try container.encode(appBarStyle, forKey: .appBar)
         try container.encode(animations, forKey: .animations)
+        try container.encode(mouseResize, forKey: .mouseResize)
         var gap = container.nestedContainer(
             keyedBy: GapKeys.self,
             forKey: .gap

@@ -27,10 +27,11 @@ struct SettingsCodingTests {
         #expect(
             Set(root.keys) == [
                 "animations", "app_bar", "drag", "gap", "layout",
-                "min_window_size",
+                "min_window_size", "mouse_resize",
                 "new_window_placement_override",
             ]
         )
+        #expect(root["mouse_resize"] as? String == "layout")
         // Lua `animations.set_on_space_change` /
         // `animations.set_on_scrolling` (issue #11).
         let animations = try object(root["animations"])
