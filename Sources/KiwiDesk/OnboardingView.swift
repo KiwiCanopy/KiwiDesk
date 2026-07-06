@@ -1,3 +1,4 @@
+import KiwiDeskCore
 import SwiftUI
 
 /// View state for the first-launch permission wizard.
@@ -7,11 +8,14 @@ final class OnboardingModel {
     enum Step {
         case welcome
         case grant
+        case separateSpaces
     }
 
     var step: Step = .welcome
     var isTrusted = false
     var onOpenSettings: () -> Void = {}
+    /// Opens System Settings › Desktop & Dock (#8).
+    var onOpenSpaceSettings: () -> Void = {}
     var onFinish: () -> Void = {}
 }
 
@@ -27,6 +31,8 @@ struct OnboardingView: View {
                 welcome
             case .grant:
                 grant
+            case .separateSpaces:
+                separateSpaces
             }
         }
         .padding(32)
@@ -77,10 +83,10 @@ struct OnboardingView: View {
             .foregroundStyle(.secondary)
             Spacer()
             if model.isTrusted {
-                Text("Permission granted — you're all set!")
+                Text("Permission granted!")
                     .foregroundStyle(.green)
-                Button("Start KiwiDesk") {
-                    model.onFinish()
+                Button("Continue") {
+                    advancePastAccessibility()
                 }
                 .keyboardShortcut(.defaultAction)
                 .controlSize(.large)
@@ -106,5 +112,48 @@ struct OnboardingView: View {
         .font(.system(size: 56))
         .foregroundStyle(model.isTrusted ? .green : .orange)
         .animation(.spring, value: model.isTrusted)
+    }
+
+    /// After Accessibility, guide the display/Space model — but
+    /// skip straight to finish when it's already enabled.
+    private func advancePastAccessibility() {
+        if DisplaySpacesSetting.hasSeparateSpaces() {
+            model.onFinish()
+        } else {
+            model.step = .separateSpaces
+        }
+    }
+
+    private var separateSpaces: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "rectangle.split.2x1")
+                .font(.system(size: 56))
+                .foregroundStyle(.green)
+            Text("Displays have separate Spaces")
+                .font(.title.bold())
+                .multilineTextAlignment(.center)
+            Text(
+                """
+                KiwiDesk maps virtual spaces to specific \
+                monitors. For that, macOS needs “Displays have \
+                separate Spaces” turned on.
+
+                Enable it in System Settings › Desktop & Dock, \
+                then log out and back in. You can also skip this \
+                and set it up later.
+                """
+            )
+            .multilineTextAlignment(.center)
+            .foregroundStyle(.secondary)
+            Spacer()
+            Button("Open Desktop & Dock Settings") {
+                model.onOpenSpaceSettings()
+            }
+            .controlSize(.large)
+            Button("Continue") {
+                model.onFinish()
+            }
+            .keyboardShortcut(.defaultAction)
+        }
     }
 }
