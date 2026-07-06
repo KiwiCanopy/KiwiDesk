@@ -213,9 +213,16 @@ public final class KiwiCore {
             // Resize gestures share the drag pipeline (same
             // settle debounce). Only mouse-driven resizes
             // count; apps resizing themselves are corrected
-            // by the next retile.
+            // by the next retile. `validated` lets the
+            // trailing events of a fast resize (classified
+            // via the recent press near a slot edge) start
+            // the gesture even after the release.
             if isResizeGesture(id) {
-                drag.windowMoved(id, frame: frame)
+                drag.windowMoved(
+                    id,
+                    frame: frame,
+                    validated: true
+                )
             }
         case .windowDestroyed(let id, let wasMinimized):
             drag.cancel(id)

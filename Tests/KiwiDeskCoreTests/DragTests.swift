@@ -12,6 +12,8 @@ struct DragCoordinatorTests {
     func debounce() async throws {
         let drag = DragCoordinator()
         drag.settleDelay = 0.05
+        var pressed = true
+        drag.isMousePressed = { pressed }
         var ended: [(WindowID, CGRect, CGRect)] = []
         drag.onDragEnd = { id, start, frame in
             ended.append((id, start, frame))
@@ -28,6 +30,7 @@ struct DragCoordinatorTests {
                 )
             )
         }
+        pressed = false
         // Poll instead of a fixed sleep: under full-suite
         // load the settle task can get main-actor time late.
         let deadline = ContinuousClock.now + .seconds(5)
@@ -41,6 +44,44 @@ struct DragCoordinatorTests {
         // first one of the gesture.
         #expect(ended.first?.2.minX == 300)
         #expect(ended.first?.1.minX == 100)
+    }
+
+    @Test("Mouse-up moves never start a gesture")
+    func programmaticMovesIgnored() async throws {
+        let drag = DragCoordinator()
+        drag.settleDelay = 0.05
+        var ended = 0
+        drag.onDragEnd = { _, _, _ in ended += 1 }
+        // An app repositioning its own window: the mouse
+        // button is up (isMousePressed defaults to false)
+        // and no gesture is in flight — not a drag.
+        drag.windowMoved(
+            WindowID(1),
+            frame: CGRect(x: 100, y: 0, width: 10, height: 10)
+        )
+        try await Task.sleep(nanoseconds: 150_000_000)
+        #expect(ended == 0)
+    }
+
+    @Test("A validated trail starts a gesture after release")
+    func validatedTrailStartsGesture() async throws {
+        let drag = DragCoordinator()
+        drag.settleDelay = 0.05
+        var ended = 0
+        drag.onDragEnd = { _, _, _ in ended += 1 }
+        // A fast mouse resize on a slow AX responder: every
+        // event arrives after the release, pre-classified by
+        // the caller (KiwiCore.isResizeGesture).
+        drag.windowMoved(
+            WindowID(1),
+            frame: CGRect(x: 0, y: 0, width: 500, height: 500),
+            validated: true
+        )
+        let deadline = ContinuousClock.now + .seconds(5)
+        while ended == 0, ContinuousClock.now < deadline {
+            try await Task.sleep(nanoseconds: 20_000_000)
+        }
+        #expect(ended == 1)
     }
 
     @Test("Animation-driven moves never count as drags")
@@ -59,9 +100,12 @@ struct DragCoordinatorTests {
     func cancelPending() async throws {
         let drag = DragCoordinator()
         drag.settleDelay = 0.05
+        var pressed = true
+        drag.isMousePressed = { pressed }
         var ended = 0
         drag.onDragEnd = { _, _, _ in ended += 1 }
         drag.windowMoved(WindowID(1), frame: .zero)
+        pressed = false
         drag.cancel(WindowID(1))
         try await Task.sleep(nanoseconds: 150_000_000)
         #expect(ended == 0)

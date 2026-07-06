@@ -7,7 +7,10 @@ import Foundation
 /// event — so a drag end is inferred by debouncing: when a
 /// window stops emitting move events for `settleDelay`, the
 /// drop happened. Frame updates caused by our own animations
-/// are filtered out via `isAnimating`.
+/// are filtered out via `isAnimating`, and a gesture can only
+/// start while the mouse button is down — programmatic moves
+/// (apps repositioning their own windows, late AX echoes)
+/// never count as drags (issue #45).
 @MainActor
 public final class DragCoordinator {
     /// Fired once per finished drag with the frame at the
@@ -55,7 +58,21 @@ public final class DragCoordinator {
     public init() {}
 
     /// Feed every `windowMoved` event here.
-    public func windowMoved(_ id: WindowID, frame: CGRect) {
+    ///
+    /// `validated` marks events the caller already classified
+    /// as part of a user gesture (the mouse-resize path, see
+    /// KiwiCore.isResizeGesture). Unvalidated moves can only
+    /// START a gesture while the mouse button is down: apps
+    /// repositioning their own windows (a brand-new window
+    /// right after the open) and AX echoes outliving the echo
+    /// grace arrive with the button up, and reading them as
+    /// drags swaps windows in the array and re-tiles them into
+    /// the wrong slots (issue #45).
+    public func windowMoved(
+        _ id: WindowID,
+        frame: CGRect,
+        validated: Bool = false
+    ) {
         guard !isAnimating(id) else {
             // Our own animation: forget any pending drag so
             // a retile never counts as a user drop.
@@ -63,6 +80,14 @@ public final class DragCoordinator {
             pending[id] = nil
             latestFrames[id] = nil
             startFrames[id] = nil
+            return
+        }
+        // A real drag always emits its first move while the
+        // button is still down; trailing events after the
+        // release join the gesture already in flight.
+        if startFrames[id] == nil, !validated,
+            !isMousePressed()
+        {
             return
         }
         latestFrames[id] = frame
