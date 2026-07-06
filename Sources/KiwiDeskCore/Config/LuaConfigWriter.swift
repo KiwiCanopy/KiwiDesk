@@ -119,7 +119,7 @@ public enum LuaConfigWriter {
             guard let space = rules[app] else { continue }
             lines.append(
                 "    [" + LuaLiteral.string(app) + "] = "
-                    + LuaLiteral.string(space.raw) + ","
+                    + SpaceLuaArg.quote(space.raw) + ","
             )
         }
         lines.append("}")
@@ -140,7 +140,7 @@ public enum LuaConfigWriter {
                     chain
                     .map { LuaLiteral.string($0) }
                     .joined(separator: ", ")
-                return "    [" + LuaLiteral.string(space.raw)
+                return "    [" + SpaceLuaArg.quote(space.raw)
                     + "] = { " + items + " },"
             }
         guard !entries.isEmpty else { return "" }

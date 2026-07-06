@@ -6,13 +6,15 @@ import Foundation
 /// writer, and space rename (#13) — so the three never drift on
 /// escaping and a rename can rewrite what the catalog produced.
 public enum SpaceLuaArg {
-    /// A quoted, backslash/quote-escaped Lua string literal.
+    /// A quoted Lua string literal for a SpaceID. Delegates to
+    /// `LuaLiteral.string` so keybinding args, the writer's
+    /// `space_monitor_map`/`app_rules` keys, and rename all escape
+    /// identically (including control characters, which a raw
+    /// newline in a short string literal would otherwise make
+    /// invalid Lua) — the single source of truth this type exists
+    /// to guarantee.
     public static func quote(_ raw: String) -> String {
-        let escaped =
-            raw
-            .replacingOccurrences(of: "\\", with: "\\\\")
-            .replacingOccurrences(of: "\"", with: "\\\"")
-        return "\"\(escaped)\""
+        LuaLiteral.string(raw)
     }
 
     /// The space-targeting Lua calls whose sole argument is a
@@ -27,7 +29,10 @@ public enum SpaceLuaArg {
 
     /// Rewrites every `<call>("from")` to `<call>("to")` within a
     /// single Lua binding body, matching the exact quoted form the
-    /// catalog emitted.
+    /// catalog emitted. Only that quoted form is rewritten — a
+    /// hand-written bare-number arg (`focus_virtual_space(2)`) is
+    /// left untouched, consistent with such bindings being outside
+    /// GUI management.
     public static func rename(
         in lua: String,
         from: String,
