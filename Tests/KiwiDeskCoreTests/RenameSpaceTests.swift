@@ -13,6 +13,8 @@ struct RenameSpaceTests {
         config.spaceModes = [SpaceID("2"): .stack]
         config.appRules = ["Spotify": SpaceID("2")]
         config.spaceMonitorMap = [SpaceID("2"): ["LG:2560x1440"]]
+        config.settings.gapsOverride[SpaceID("2")] = .uniform(12)
+        config.settings.placementOverride[SpaceID("2")] = .last
         config.modes = [
             KeyMode(
                 name: "default",
@@ -75,6 +77,29 @@ struct RenameSpaceTests {
                 "KiwiDesk.move_to_virtual_space_and_follow"
                     + "(\"main\")"
             )
+        )
+    }
+
+    @Test("rename migrates per-space gap and placement overrides")
+    func migratesOverrides() {
+        var config = richConfig()
+        _ = config.renameSpace(
+            from: SpaceID("2"),
+            to: SpaceID("main")
+        )
+        #expect(
+            config.settings.gapsOverride[SpaceID("main")]
+                == .uniform(12)
+        )
+        #expect(
+            config.settings.gapsOverride[SpaceID("2")] == nil
+        )
+        #expect(
+            config.settings.placementOverride[SpaceID("main")]
+                == .last
+        )
+        #expect(
+            config.settings.placementOverride[SpaceID("2")] == nil
         )
     }
 

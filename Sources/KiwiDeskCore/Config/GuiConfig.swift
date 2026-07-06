@@ -37,16 +37,22 @@ public struct GuiConfig: Codable, Equatable, Sendable {
 
     /// Renames a space everywhere it is referenced (#13): the
     /// `spaces` list, `spaceModes`, `appRules`, `spaceMonitorMap`,
-    /// and the space-targeting Lua inside every keybinding. A
-    /// no-op returning `false` when `from` is unknown or `to`
-    /// already exists (the caller keeps the old name); renaming to
-    /// the same id succeeds trivially.
+    /// the per-space `settings.gapsOverride` /
+    /// `settings.placementOverride` maps, and the space-targeting
+    /// Lua inside every keybinding. A no-op returning `false` when
+    /// `from` is unknown or `to` already exists (the caller keeps
+    /// the old name); renaming to the same id succeeds trivially.
     @discardableResult
     public mutating func renameSpace(
         from: SpaceID,
         to: SpaceID
     ) -> Bool {
         guard from != to else { return true }
+        // `spaces` is the authoritative membership set; the caller's
+        // collision check mirrors this guard. A `to` that lingers as
+        // a key in another surface (hand-edited sidecar) is rare and
+        // gets overwritten below — acceptable given `spaces` gates
+        // what the GUI ever offers.
         guard spaces.contains(from), !spaces.contains(to) else {
             return false
         }
@@ -56,6 +62,16 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         }
         if let chain = spaceMonitorMap.removeValue(forKey: from) {
             spaceMonitorMap[to] = chain
+        }
+        if let gaps = settings.gapsOverride.removeValue(
+            forKey: from
+        ) {
+            settings.gapsOverride[to] = gaps
+        }
+        if let placement = settings.placementOverride
+            .removeValue(forKey: from)
+        {
+            settings.placementOverride[to] = placement
         }
         for (app, space) in appRules where space == from {
             appRules[app] = to
