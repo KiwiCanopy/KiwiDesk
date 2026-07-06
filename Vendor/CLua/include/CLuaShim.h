@@ -116,4 +116,34 @@ static inline void shim_enable_timeout_hook(lua_State *L,
     lua_sethook(L, shim_timeout_hook, LUA_MASKCOUNT, count);
 }
 
+/*
+ * Source range of a Lua function stored as a registry ref
+ * (`luaL_ref`), via `lua_getinfo(L, ">S", ...)`. Used to recover
+ * a keybinding's action text from init.lua (#4): the returned
+ * pointer is the interned source name (`"@/path"` for a file
+ * chunk), valid while the ref keeps the function alive, so the
+ * caller must copy it before releasing the ref. Returns NULL for
+ * a stale ref, a non-function, or a C function (linedefined -1).
+ */
+static inline const char *shim_func_source(lua_State *L, int ref,
+                                           int *first,
+                                           int *last) {
+    lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+    if (!lua_isfunction(L, -1)) {
+        lua_pop(L, 1);
+        return NULL;
+    }
+    lua_Debug ar;
+    /* ">S" pops the function and fills the source fields. */
+    if (lua_getinfo(L, ">S", &ar) == 0) {
+        return NULL;
+    }
+    if (ar.linedefined < 1) {
+        return NULL;
+    }
+    *first = ar.linedefined;
+    *last = ar.lastlinedefined;
+    return ar.source;
+}
+
 #endif /* CLUA_SHIM_H */

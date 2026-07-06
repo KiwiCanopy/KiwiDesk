@@ -49,6 +49,17 @@ public final class KeybindingManager {
         modes[mode] ?? [:]
     }
 
+    /// Every defined mode name, the default first and the rest
+    /// sorted, so the GUI import (#4) can enumerate them in a
+    /// stable order. The default is always present even with no
+    /// bindings, matching the always-present GUI default mode.
+    public var definedModes: [String] {
+        let others = modes.keys
+            .filter { $0 != Self.defaultMode }
+            .sorted()
+        return [Self.defaultMode] + others
+    }
+
     // MARK: - Registration (from Lua)
 
     /// `KiwiDesk.bind(combo, fn)` — default mode.

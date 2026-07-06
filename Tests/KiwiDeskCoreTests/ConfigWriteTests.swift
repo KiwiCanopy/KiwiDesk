@@ -351,9 +351,13 @@ struct ConfigWriteTests {
             encoding: .utf8
         )
         #expect(file.contains("-- KiwiDesk.bind(\"cmd+h\""))
-        // Keybindings can't be imported — dropped from live
-        // state until the user re-adds them.
+        // Keybindings are recovered from the original file and
+        // re-emitted into the managed block, so the combo is live
+        // again after adopt — normalized to its canonical form
+        // (#4). The commented backup above still uses the
+        // hand-written "cmd+h".
+        #expect(file.contains("KiwiDesk.bind(\"command+h\""))
         let combo = try #require(KeyCombo.parse("cmd+h"))
-        #expect(core.keys.bindings(for: "default")[combo] == nil)
+        #expect(core.keys.bindings(for: "default")[combo] != nil)
     }
 }

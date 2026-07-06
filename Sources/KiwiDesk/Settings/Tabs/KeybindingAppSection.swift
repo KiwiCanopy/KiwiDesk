@@ -89,8 +89,9 @@ struct ApplicationsSection: View {
         name: String
     ) {
         binding.wrappedValue.label = name
-        binding.wrappedValue.lua =
-            "KiwiDesk.pull_or_spawn(\"\(name)\")"
+        binding.wrappedValue.lua = KeybindingCatalog.appCommand(
+            name
+        )
     }
 
     private func chooseBundle(_ binding: Binding<KeyBinding>) {

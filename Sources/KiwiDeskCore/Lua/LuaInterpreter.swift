@@ -134,6 +134,30 @@ public final class LuaInterpreter {
         luaL_unref(state, SHIM_LUA_REGISTRYINDEX, ref)
     }
 
+    /// The source location of a Lua function captured as a
+    /// registry `ref` — the chunk name plus the 1-based line
+    /// range it spans. Used to recover a keybinding's action
+    /// text from init.lua (#4). `source` is the raw
+    /// `lua_getinfo` name (`"@/path/to/init.lua"` for a file
+    /// chunk); callers strip the `@`. Returns nil for a stale
+    /// ref, a non-function, or a C function.
+    public func functionSource(
+        ref: Int32
+    ) -> (source: String, firstLine: Int, lastLine: Int)? {
+        guard let state else { return nil }
+        var first: Int32 = 0
+        var last: Int32 = 0
+        guard
+            let cString = shim_func_source(
+                state,
+                ref,
+                &first,
+                &last
+            )
+        else { return nil }
+        return (String(cString: cString), Int(first), Int(last))
+    }
+
     // MARK: - Registration
 
     /// Exposes a Swift closure as `tableName.name(...)`. The

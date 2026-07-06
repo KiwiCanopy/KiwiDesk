@@ -36,10 +36,20 @@ saves. If the app finds custom Lua it can't represent with its
 visual controls, it opens the integrated Lua editor for the
 whole file instead of risking your code. From there you can keep
 editing raw Lua, or click **Adopt into the GUI** to import your
-current gaps, layouts, and rules into a fresh managed block —
-your previous file is kept verbatim as a commented backup, and
-keybindings (which can't be recovered from executed Lua) are
-re-added from the Keybindings tab. The editor's own
+current gaps, layouts, rules, and keybindings into a fresh
+managed block — your previous file is kept verbatim as a
+commented backup. Keybindings are recovered from the file: each
+bound combo and its action text are read back and sorted into
+the Keybindings tab (known Focus, Window Movement, and app-launch
+actions land in their sections; anything else becomes a Custom
+binding). You can also pull them in without adopting the whole
+file — **Import current shortcuts** at the bottom of the
+Keybindings tab reads the shortcuts active in `init.lua` and adds
+them for review before you Save. Recovery expects each shortcut to be an inline
+`function() … end` on its own line (the form the app writes). A
+binding whose action can't be read back — one bound to a named
+handler or a C function, rather than an inline function — is left
+only in the backup and can be re-added from the tab. The editor's own
 state (keybinding actions, mode icons) is mirrored to
 `~/.config/KiwiDesk/gui.json`; delete that file to reset the
 GUI to what `init.lua` currently declares. Custom keybinding
