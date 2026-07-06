@@ -1,6 +1,20 @@
 import Foundation
 
-/// Profile commands and monitor-change handling.
+/// Thrown when a profile save cannot honor the live monitors.
+enum ProfileSaveError: Error, CustomStringConvertible {
+    case screenCountMismatch(expected: Int, live: Int)
+
+    var description: String {
+        switch self {
+        case .screenCountMismatch(let expected, let live):
+            return
+                "profile is for \(expected) screen(s), "
+                + "\(live) connected"
+        }
+    }
+}
+
+/// Profile commands and monitor-change handling (#36/#53).
 extension KiwiCore {
     // MARK: - Commands
 
@@ -10,25 +24,24 @@ extension KiwiCore {
     ) -> CommandResponse {
         switch command {
         case "save_profile":
-            guard let name = args.first?.stringValue else {
-                return .fail("expected profile name")
-            }
-            do {
-                try profiles.save(buildProfile(name: name))
-                return .ok()
-            } catch {
-                return .fail("save failed: \(error)")
+            return namedProfileCommand(args) { name in
+                try self.persistProfile(named: name)
             }
         case "load_profile":
-            guard let name = args.first?.stringValue else {
-                return .fail("expected profile name")
+            return namedProfileCommand(args) { name in
+                let profile = try self.profiles.load(
+                    name: name
+                )
+                self.apply(profile: profile)
             }
-            do {
-                let profile = try profiles.load(name: name)
-                apply(profile: profile)
-                return .ok()
-            } catch {
-                return .fail("load failed: \(error)")
+        case "delete_profile":
+            return namedProfileCommand(args) { name in
+                try self.profiles.delete(name: name)
+                self.handleMonitorChange()
+            }
+        case "set_default_profile":
+            return namedProfileCommand(args) { name in
+                try self.profiles.setDefault(name: name)
             }
         case "list_profiles":
             return .ok(
@@ -42,6 +55,9 @@ extension KiwiCore {
                     "name": profiles.currentName.map {
                         .string($0)
                     } ?? .null,
+                    "standard": profiles.currentStandard.map {
+                        .string($0)
+                    } ?? .null,
                     "isDirty": .bool(profiles.isDirty),
                 ])
             )
@@ -50,86 +66,91 @@ extension KiwiCore {
         }
     }
 
-    // MARK: - Building / applying
+    private func namedProfileCommand(
+        _ args: [JSONValue],
+        _ body: (String) throws -> Void
+    ) -> CommandResponse {
+        guard let name = args.first?.stringValue,
+            !name.isEmpty
+        else {
+            return .fail("expected profile name")
+        }
+        do {
+            try body(name)
+            return .ok()
+        } catch {
+            return .fail("\(error)")
+        }
+    }
 
-    /// Snapshot of the current configuration as a profile.
+    // MARK: - Building / persisting
+
+    /// The connected monitors as a stored set, carrying the
+    /// live space pins (pins to disconnected monitors drop).
+    func liveMonitorSet() -> MonitorSet {
+        MonitorSet(
+            monitors: state.workspaces.allDisplays
+                .map(\.fingerprint),
+            spaceMonitorMap: spacePins
+        )
+    }
+
+    /// Snapshot of the current configuration as a new profile
+    /// carrying only the live monitor set.
     func buildProfile(name: String) -> Profile {
         var modes: [String: LayoutMode] = [:]
         for space in state.workspaces.allSpaces {
             modes[space.id.raw] = space.mode
         }
-        let displays = state.workspaces.allDisplays
         return Profile(
             name: name,
-            fingerprints: displays.map(\.fingerprint),
-            monitorCount: displays.count,
+            monitorSets: [liveMonitorSet()],
+            mainSpaces: mainSpaces.sorted { $0.raw < $1.raw },
             spaceModes: modes,
             settings: tiler.settings
         )
     }
 
-    /// Applies a profile to live state and retiles.
-    func apply(profile: Profile) {
-        tiler.settings = profile.settings
-        for (raw, mode) in profile.spaceModes {
-            let id = SpaceID(raw)
-            state.workspaces.ensureSpace(id)
-            state.workspaces.setMode(id, mode)
+    /// Persists the live configuration under `name`: an
+    /// existing profile is updated (settings overwritten, the
+    /// live monitor set added or refreshed), a new name creates
+    /// a profile with only the live set. Updating a profile of
+    /// a different screen count is refused — that state needs
+    /// "save as new" (#36).
+    public func persistProfile(named name: String) throws {
+        guard var existing = try? profiles.read(name: name)
+        else {
+            try profiles.save(buildProfile(name: name))
+            return
         }
-        retile()
-        emitSpaceChange()
+        let live = liveMonitorSet()
+        guard existing.upsert(live) else {
+            throw ProfileSaveError.screenCountMismatch(
+                expected: existing.monitorCount,
+                live: live.monitors.count
+            )
+        }
+        let fresh = buildProfile(name: name)
+        existing.spaceModes = fresh.spaceModes
+        existing.mainSpaces = fresh.mainSpaces
+        existing.settings = fresh.settings
+        existing.savedAt = .now
+        try profiles.save(existing)
     }
 
-    // MARK: - Monitor changes
-
-    /// Profile selection on monitor reconfiguration:
-    /// direct fingerprint match -> monitor count match ->
-    /// transient state (dirty flag for the GUI).
-    func handleMonitorChange() {
-        let displays = state.workspaces.allDisplays
-        guard !displays.isEmpty else { return }
-        let fingerprints = displays.map(\.fingerprint)
-
-        let targetProfile: Profile?
-        if let number = NativeSpaces.activeSpaceNumber(),
-            let boundName = nativeSpaceBindings[number]
-        {
-            do {
-                targetProfile = try profiles.load(name: boundName)
-            } catch {
-                onLog(
-                    "monitor change: cannot load bound profile "
-                        + "'\(boundName)': \(error)"
-                )
-                targetProfile = nil
+    /// Names of profiles (other than `name`) already claiming
+    /// the live monitor set — the GUI warns before Update
+    /// makes the set ambiguous (#36 overlap policy).
+    public func profilesClaimingLiveSet(
+        excluding name: String
+    ) -> [String] {
+        let live = state.workspaces.allDisplays
+            .map(\.fingerprint)
+        return profiles.allProfiles()
+            .filter {
+                $0.name != name
+                    && $0.set(matching: live) != nil
             }
-        } else {
-            targetProfile = profiles.match(
-                fingerprints: fingerprints,
-                count: displays.count
-            )
-        }
-
-        if let matched = targetProfile {
-            if matched.name != profiles.currentName {
-                apply(profile: matched)
-                profiles.adopt(matched)
-                onLog(
-                    "monitor change: loaded profile "
-                        + "'\(matched.name)'"
-                )
-            }
-            if Set(matched.fingerprints) != Set(fingerprints)
-                || matched.monitorCount != displays.count
-            {
-                profiles.markDirty()
-            }
-        } else {
-            profiles.markDirty()
-            onLog(
-                "monitor change: no matching profile, "
-                    + "using transient state"
-            )
-        }
+            .map(\.name)
     }
 }

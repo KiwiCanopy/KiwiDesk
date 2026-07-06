@@ -57,6 +57,11 @@ public enum APIReference {
             ("version", "version"),
             ("save_profile", "save_profile"),
             ("load_profile", "load_profile"),
+            ("delete_profile", "delete_profile"),
+            (
+                "set_default_profile",
+                "set_default_profile"
+            ),
             ("list_profiles", "list_profiles"),
             ("get_profile_status", "get_profile_status"),
             (

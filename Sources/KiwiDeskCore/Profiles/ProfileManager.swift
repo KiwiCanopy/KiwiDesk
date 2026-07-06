@@ -1,21 +1,32 @@
 import Foundation
 
+/// The outcome of matching the live monitors against the saved
+/// profiles (#36). Either an exact set matches (adopt clean),
+/// the count's default user profile applies (load dirty), or
+/// nothing does and the caller composes the built-in Standard
+/// (#53). No near-match adaptation.
+public enum ProfileMatch: Equatable {
+    case exact(Profile)
+    case countDefault(Profile)
+    case none
+}
+
 /// Persists profiles and picks the right one when the monitor
 /// setup changes.
-///
-/// Selection algorithm (05_GUI_Concept §1):
-/// 1. Direct match: same monitor fingerprints.
-/// 2. Count fallback: same number of monitors.
-/// 3. Default: none — the caller keeps a transient state and
-///    marks the profile dirty.
 @MainActor
 public final class ProfileManager {
     public private(set) var currentName: String?
+    /// The built-in Standard currently resolving (no saved
+    /// profile covers the live screen count), if any.
+    public private(set) var currentStandard: String?
     /// True when the live state diverged from the saved
     /// profile (e.g. after a monitor change).
     public private(set) var isDirty = false
 
     private let directory: URL
+
+    /// Invalid profile files reported while listing (#31).
+    public var onLog: @MainActor (String) -> Void = { _ in }
 
     public init(directory: URL) {
         self.directory = directory
@@ -35,7 +46,163 @@ public final class ProfileManager {
             .sorted()
     }
 
+    /// Every readable profile, sorted by name. Unreadable files
+    /// are skipped (and logged), never fatal.
+    public func allProfiles() -> [Profile] {
+        list().compactMap { name in
+            do {
+                return try read(name: name)
+            } catch {
+                onLog(
+                    "profile '\(name)' is invalid: \(error)"
+                )
+                return nil
+            }
+        }
+    }
+
+    /// Saves the profile; the first profile of its screen count
+    /// is auto-flagged as that count's default.
     public func save(_ profile: Profile) throws {
+        var profile = profile
+        if !profile.isDefault,
+            defaultProfile(count: profile.monitorCount) == nil
+        {
+            profile.isDefault = true
+        }
+        try write(profile)
+        currentName = profile.name
+        currentStandard = nil
+        isDirty = false
+    }
+
+    public func load(name: String) throws -> Profile {
+        let profile = try read(name: name)
+        currentName = profile.name
+        currentStandard = nil
+        isDirty = false
+        return profile
+    }
+
+    /// Deletes a profile. When it was its count's default, the
+    /// alphabetically-first remaining profile of that count
+    /// inherits the flag; the last profile of a count simply
+    /// reverts the count to the built-in Standard.
+    public func delete(name: String) throws {
+        let deleted = try? read(name: name)
+        try FileManager.default.removeItem(at: url(for: name))
+        if currentName == name {
+            currentName = nil
+            isDirty = true
+        }
+        guard let deleted, deleted.isDefault else { return }
+        if var heir = allProfiles().first(where: {
+            $0.monitorCount == deleted.monitorCount
+        }) {
+            heir.isDefault = true
+            try write(heir)
+        }
+    }
+
+    /// Re-designates a count's default: flags `name`, clears
+    /// the flag on every other profile of the same count.
+    public func setDefault(name: String) throws {
+        var chosen = try read(name: name)
+        chosen.isDefault = true
+        try write(chosen)
+        for var other in allProfiles()
+        where other.name != name
+            && other.monitorCount == chosen.monitorCount
+            && other.isDefault
+        {
+            other.isDefault = false
+            try write(other)
+        }
+    }
+
+    /// `base`, or `base_1`, `base_2`, … up to the next free
+    /// name — repeated preset Applies accumulate copies (#53).
+    public func freeName(base: String) -> String {
+        let taken = Set(list())
+        guard taken.contains(base) else { return base }
+        var suffix = 1
+        while taken.contains("\(base)_\(suffix)") {
+            suffix += 1
+        }
+        return "\(base)_\(suffix)"
+    }
+
+    /// Reads a profile without touching current/dirty state.
+    public func read(name: String) throws -> Profile {
+        let data = try Data(contentsOf: url(for: name))
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return try decoder.decode(Profile.self, from: data)
+    }
+
+    // MARK: - Monitor matching
+
+    /// Finds the profile for a live monitor set: exact stored
+    /// set (sorted-array comparison) → the count's default user
+    /// profile → none (caller composes the Standard). Ties
+    /// resolve alphabetically (profiles come pre-sorted).
+    public func match(fingerprints: [String]) -> ProfileMatch {
+        let profiles = allProfiles()
+        if let exact = profiles.first(where: {
+            $0.set(matching: fingerprints) != nil
+        }) {
+            return .exact(exact)
+        }
+        if let fallback = profiles.first(where: {
+            $0.isDefault
+                && $0.monitorCount == fingerprints.count
+        }) {
+            return .countDefault(fallback)
+        }
+        return .none
+    }
+
+    /// The count's default profile (alphabetically first when
+    /// hand-edited duplicates exist).
+    public func defaultProfile(count: Int) -> Profile? {
+        allProfiles().first {
+            $0.isDefault && $0.monitorCount == count
+        }
+    }
+
+    /// Screen counts where several profiles claim the default
+    /// flag (hand-edited) — surfaces a GUI warning badge.
+    public func duplicateDefaultCounts() -> [Int] {
+        var counts: [Int: Int] = [:]
+        for profile in allProfiles() where profile.isDefault {
+            counts[profile.monitorCount, default: 0] += 1
+        }
+        return counts.filter { $0.value > 1 }.keys.sorted()
+    }
+
+    // MARK: - State
+
+    /// Marks the live state as diverged (transient state).
+    public func markDirty() {
+        isDirty = true
+    }
+
+    /// Records that a matched profile is now active.
+    public func adopt(_ profile: Profile) {
+        currentName = profile.name
+        currentStandard = nil
+        isDirty = false
+    }
+
+    /// Records that a built-in Standard is resolving; always a
+    /// dirty (transient) state until the user saves.
+    public func adoptStandard(named name: String) {
+        currentName = nil
+        currentStandard = name
+        isDirty = true
+    }
+
+    private func write(_ profile: Profile) throws {
         try FileManager.default.createDirectory(
             at: directory,
             withIntermediateDirectories: true
@@ -50,60 +217,6 @@ public final class ProfileManager {
             to: url(for: profile.name),
             options: .atomic
         )
-        currentName = profile.name
-        isDirty = false
-    }
-
-    public func load(name: String) throws -> Profile {
-        let profile = try read(name: name)
-        currentName = profile.name
-        isDirty = false
-        return profile
-    }
-
-    /// Reads a profile without touching current/dirty state.
-    private func read(name: String) throws -> Profile {
-        let data = try Data(contentsOf: url(for: name))
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        return try decoder.decode(
-            Profile.self,
-            from: data
-        )
-    }
-
-    // MARK: - Monitor matching
-
-    /// Finds the best profile for a monitor setup. Does not
-    /// change the current profile — callers decide whether to
-    /// apply the match.
-    public func match(
-        fingerprints: [String],
-        count: Int
-    ) -> Profile? {
-        let profiles = list().compactMap { name in
-            try? read(name: name)
-        }
-        let wanted = Set(fingerprints)
-        if let direct = profiles.first(where: {
-            Set($0.fingerprints) == wanted
-        }) {
-            return direct
-        }
-        return profiles.first {
-            $0.monitorCount == count
-        }
-    }
-
-    /// Marks the live state as diverged (transient state).
-    public func markDirty() {
-        isDirty = true
-    }
-
-    /// Records that a matched profile is now active.
-    public func adopt(_ profile: Profile) {
-        currentName = profile.name
-        isDirty = false
     }
 
     private func url(for name: String) -> URL {
