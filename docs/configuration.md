@@ -96,7 +96,7 @@ they are parked in the bottom-right corner of their screen
 with only a few pixels peeking in (macOS refuses fully
 offscreen windows). They return to their tiles when their
 space becomes active — instantly by default; see
-`set_space_animation` under Animations. Focusing a hidden
+`animations.set_on_space_change` under Animations. Focusing a hidden
 window (cmd+tab) pulls its space forward automatically. Floating windows —
 including picture-in-picture — are never stashed and stay
 visible across all virtual spaces.
@@ -793,19 +793,58 @@ haven't visited yet starts on the first virtual space.
 ## Animations, Sleep & Wake
 
 ```lua
--- Window moves and resizes always animate: a spring settle is
--- the only way to place windows reliably on slow-AX apps.
-KiwiDesk.set_animation_duration(250)  -- ms, clamped 50-1000
+-- Animation duration for every spring-animated move (runtime
+-- only, not saved in a profile). scroll.set_speed shares it.
+animations.set_duration(250)          -- ms, clamped 50-1000
 
--- Virtual space switches snap instantly by default: flying
--- many windows in from the hiding corner at once needs one
--- blocking AX call per window per frame, which stutters on
--- slow apps. Opt in if you like the effect anyway:
-KiwiDesk.set_space_animation(true)
+-- Per-trigger animation toggles. An "off" trigger snaps
+-- instantly: the un-animated path drops the app's
+-- EnhancedUserInterface around a size→position→size AX set, so
+-- the frame lands in one pass instead of the app running its
+-- own move animation. This is reliable on most apps; a few
+-- grid-snapping apps still clamp an instant *resize*.
+
+-- Virtual space switches: flying many windows in from the
+-- hiding corner at once stutters on slow apps, so off by
+-- default. Opt in if you like the effect anyway:
+animations.set_on_space_change(false)  -- default false
+
+-- The layout slide as focus moves within a Scrolling space:
+animations.set_on_scrolling(true)      -- default true
+
+-- Window resizes (split-ratio changes, mouse-resize settle):
+animations.set_on_window_resize(true)  -- default true
+
+-- Swapping two tiles:
+animations.set_on_window_swap(true)    -- default true
+
+-- The layout reflow when a window opens or closes, the mode
+-- switches, or a gap / layout parameter changes:
+animations.set_on_relayout(true)       -- default true
 
 KiwiDesk.enable_wake_restore(true)
 KiwiDesk.set_wake_restore_delay(1500) -- ms after wake
 ```
+
+`on_space_change` governs KiwiDesk's own **virtual-space**
+transitions only. The native macOS desktop slide (three-finger
+swipe, Ctrl+←/→) is the OS's own animation — KiwiDesk cannot
+turn it off; use System Settings › Accessibility › Display ›
+Reduce Motion for that.
+
+> **Profiles own these toggles.** Like every other tiling
+> setting, `animations.*` is saved in a profile. When a profile
+> is bound to a native macOS Space
+> (`bind_profile_to_native_space`), switching to that Space
+> loads the profile and **replaces** the live settings — so the
+> `animations.*` calls in `init.lua` apply only until a bound
+> profile activates. To make a toggle stick on a bound Space,
+> set it and re-save that profile (or edit the profile JSON).
+
+> The old `KiwiDesk.set_space_animation(bool)` and
+> `KiwiDesk.set_animation_duration(ms)` still work as deprecated
+> aliases for `animations.set_on_space_change` and
+> `animations.set_duration`.
 
 ### Quit & restart
 

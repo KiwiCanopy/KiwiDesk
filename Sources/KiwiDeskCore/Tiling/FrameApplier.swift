@@ -116,6 +116,55 @@ final class FrameApplier {
         }
     }
 
+    /// Applies a frame instantly (no spring), AeroSpace-style:
+    /// on the app's serial queue, drop `AXEnhancedUserInterface`
+    /// around the set so an EUI-on app does not animate the move
+    /// itself — which stutters and can clamp or swallow the
+    /// frame — then restore whatever it was. `WindowControl`'s
+    /// size→position→size order lands the window in one pass, so
+    /// no settle frame is needed. Reading the live EUI state
+    /// (rather than a cached flag) means that if a sibling
+    /// window of the same app is still spring-animating — and so
+    /// already holds EUI off — this leaves it off for that
+    /// animation to restore.
+    ///
+    /// This deliberately does NOT participate in the `pidCounts`
+    /// ref-counting that `begin/endAnimating` use: every EUI
+    /// toggle and frame-set for a pid is enqueued from the main
+    /// actor onto the one serial `queue(for: pid)`, so the live
+    /// read observes the correct interleaved state without a
+    /// lock. Callers must `animation.cancel(window:)` before an
+    /// instant set (as `retile` and `stashInactive` do) so a
+    /// window is never spring-animated and instant-set at once.
+    func applyInstant(_ id: WindowID, _ frame: CGRect) {
+        guard let element = elementProvider(id) else { return }
+        guard
+            let pid = animatingPid[id] ?? Self.pid(of: element)
+        else { return }
+        nonisolated(unsafe) let target = element
+        let recent = recent
+        queue(for: pid).async {
+            let wasEnabled =
+                AXHelper.getEnhancedUserInterface(pid: pid)
+                == true
+            if wasEnabled {
+                AXHelper.setEnhancedUserInterface(
+                    pid: pid,
+                    enabled: false
+                )
+            }
+            WindowControl.setFrame(frame, of: target)
+            if wasEnabled {
+                AXHelper.setEnhancedUserInterface(
+                    pid: pid,
+                    enabled: true
+                )
+            }
+            // Stamped after the AX calls: echoes trail them.
+            recent.record(id)
+        }
+    }
+
     // MARK: - Internals
 
     private func queue(for pid: pid_t) -> DispatchQueue {

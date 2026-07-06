@@ -45,7 +45,7 @@ extension KiwiCore {
             else { return }
             self.state.workspaces.activate(space)
             self.retile(
-                animated: self.tiler.animateSpaceSwitch,
+                animated: self.tiler.settings.animations.onSpaceChange,
                 force: true
             )
             self.emitSpaceChange()
@@ -88,14 +88,14 @@ extension KiwiCore {
         state.workspaces.activate(SpaceID(raw))
         logSpaceContents(SpaceID(raw))
         retile(
-            animated: tiler.animateSpaceSwitch,
+            animated: tiler.settings.animations.onSpaceChange,
             force: true
         )
         // Hand real (AX) focus to the space's last focused
         // window — otherwise keystrokes keep going to a
         // window that is now stashed offscreen.
         if let next = activeSpace?.focused {
-            focusWindow(next)
+            focusWindow(next, refocusRetile: false)
         }
         emitSpaceChange()
         scheduleSpaceSettle(SpaceID(raw))
@@ -130,7 +130,7 @@ extension KiwiCore {
                 Date().timeIntervalSince(self.lastNativeSwitch) > 1
             else { return }
             self.retile(
-                animated: self.tiler.animateSpaceSwitch,
+                animated: self.tiler.settings.animations.onSpaceChange,
                 force: true
             )
         }
@@ -166,7 +166,8 @@ extension KiwiCore {
         }
         if follow {
             state.workspaces.activate(target)
-            focusWindow(focused)
+            // The retile below owns placement (see focusWindow).
+            focusWindow(focused, refocusRetile: false)
             emitSpaceChange()
             // Following is a space switch too: re-assert so the
             // target's other windows survive a dropped frame.
@@ -174,11 +175,11 @@ extension KiwiCore {
         } else if let next = activeSpace?.focused {
             // The moved window would keep macOS focus while
             // stashed offscreen; refocus the current space.
-            focusWindow(next)
+            focusWindow(next, refocusRetile: false)
         }
         retile(
             animated: follow
-                ? tiler.animateSpaceSwitch : true,
+                ? tiler.settings.animations.onSpaceChange : true,
             force: follow
         )
         return .ok()

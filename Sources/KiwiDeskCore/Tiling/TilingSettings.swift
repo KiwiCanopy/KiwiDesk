@@ -33,12 +33,15 @@ public struct TilingSettings: Sendable, Equatable, Codable {
     /// Corner rounding of both visuals — tune it to match
     /// the window corners of the running macOS release.
     public var dragCornerRadius: CGFloat = 16
+    /// Per-trigger animation toggles (`animations.*`).
+    public var animations = AnimationSettings()
 
     public init() {}
 
     // MARK: - Codable
 
     private enum CodingKeys: String, CodingKey {
+        case animations
         case appBar = "app_bar"
         case drag
         case gap
@@ -91,6 +94,11 @@ public struct TilingSettings: Sendable, Equatable, Codable {
                 AppBarStyle.self,
                 forKey: .appBar
             ) ?? AppBarStyle()
+        animations =
+            try container.decodeIfPresent(
+                AnimationSettings.self,
+                forKey: .animations
+            ) ?? AnimationSettings()
         try decodeGap(from: container)
         try decodeLayout(from: container)
         try decodeDrag(from: container)
@@ -191,6 +199,7 @@ public struct TilingSettings: Sendable, Equatable, Codable {
             forKey: .placementOverride
         )
         try container.encode(appBarStyle, forKey: .appBar)
+        try container.encode(animations, forKey: .animations)
         var gap = container.nestedContainer(
             keyedBy: GapKeys.self,
             forKey: .gap

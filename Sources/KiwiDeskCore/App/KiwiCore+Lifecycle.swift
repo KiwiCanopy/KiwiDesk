@@ -21,7 +21,7 @@ extension KiwiCore {
             // space-switch animation setting, and tell bus
             // subscribers (the bar) where we landed.
             retile(
-                animated: tiler.animateSpaceSwitch,
+                animated: tiler.settings.animations.onSpaceChange,
                 force: true
             )
             emitSpaceChange()
@@ -58,7 +58,7 @@ extension KiwiCore {
             self.activateSpaceOfFocusedWindow()
             if self.state.workspaces.activeSpace != landed {
                 self.retile(
-                    animated: self.tiler.animateSpaceSwitch,
+                    animated: self.tiler.settings.animations.onSpaceChange,
                     force: true
                 )
                 self.emitSpaceChange()

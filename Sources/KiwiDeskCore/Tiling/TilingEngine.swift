@@ -12,13 +12,6 @@ public final class TilingEngine {
     public let animation = AnimationEngine()
     public var settings = TilingSettings()
 
-    /// `set_space_animation`: animate windows flying in from
-    /// the stash corner on a virtual space switch. Off by
-    /// default — many simultaneous long-distance animations
-    /// mean one blocking AX call per window per tick, which
-    /// stutters on slow AX responders (Electron/WebKit).
-    public var animateSpaceSwitch = false
-
     /// `set_mouse_resize`: what resizing a tiled window with
     /// the mouse does (applied on release).
     public var mouseResize: MouseResizeMode = .layout
@@ -235,7 +228,11 @@ public final class TilingEngine {
 
     /// Sets a frame directly (no animation) through the frame
     /// pipeline, so it is echo-tracked like animated frames.
+    /// Uses the EUI-bracketed instant path so an un-animated
+    /// placement (space switch / stash with animation off) snaps
+    /// cleanly instead of triggering the app's own move
+    /// animation (which stutters on slow-AX apps).
     public func setFrame(_ id: WindowID, _ frame: CGRect) {
-        applier.apply(id, frame, setSize: true)
+        applier.applyInstant(id, frame)
     }
 }

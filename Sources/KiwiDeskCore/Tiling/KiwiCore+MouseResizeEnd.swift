@@ -45,7 +45,9 @@ extension KiwiCore {
             let screen = NSScreen.main
                 ?? NSScreen.screens.first
         else {
-            retile()
+            retile(
+                animated: tiler.settings.animations.onWindowResize
+            )
             focusWindow(id)
             return
         }
@@ -87,7 +89,9 @@ extension KiwiCore {
         case nil:
             break
         }
-        retile()
+        retile(
+            animated: tiler.settings.animations.onWindowResize
+        )
         focusWindow(id)
     }
 }
