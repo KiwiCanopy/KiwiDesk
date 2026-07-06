@@ -531,8 +531,6 @@ Define vim-style modes; only the active mode's bindings fire:
 KiwiDesk.define_mode("resize", {
     ["h"]      = function() KiwiDesk.resize("x", -50) end,
     ["l"]      = function() KiwiDesk.resize("x", 50) end,
-    ["j"]      = function() KiwiDesk.resize("y", 50) end,
-    ["k"]      = function() KiwiDesk.resize("y", -50) end,
     ["escape"] = function() KiwiDesk.switch_mode("default") end,
 })
 
@@ -540,6 +538,20 @@ KiwiDesk.bind("ctrl+alt+r", function()
     KiwiDesk.switch_mode("resize")
 end)
 ```
+
+`KiwiDesk.resize(axis, delta)` grows (`delta > 0`) or shrinks the
+focused window by `delta` points. It **only applies in the bsp,
+stack, and scrolling layouts and is a no-op in monocle, grid, and
+floating**. In bsp and stack it nudges the single split / master
+ratio, so there is no independent width and height today: the
+`axis` argument (`"x"` / `"y"`) only scales the step by the
+screen's width or height — both axes move the same ratio. Prefer a
+single shrink/enlarge pair, as above; true 2-axis resize is
+planned (#56). The Settings app exposes this pair as **Shrink** and
+**Enlarge** in the *Space/Window Management* section's Window
+Management group, using the fixed `±50` step; a hand-written
+binding with a different magnitude still works but imports into
+Custom Bindings rather than matching the preset.
 
 An optional third argument sets a menu bar indicator for the
 mode — an SF Symbol name or a flat emoji. While the mode is
