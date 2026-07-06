@@ -26,7 +26,7 @@ public enum LuaConfigWriter {
         sections.append(appBarStyle(config.settings.appBarStyle))
         sections.append(layoutParams(config.settings))
         sections.append(dragVisuals(config.settings))
-        sections.append(generalBehaviour(config.settings))
+        sections.append(generalBehavior(config.settings))
         sections.append(appRules(config.appRules))
         sections.append(floatRules(config.floatRules))
         sections.append(
@@ -164,7 +164,11 @@ public enum LuaConfigWriter {
             .joined(separator: "\n")
     }
 
-    static func generalBehaviour(
+    /// Mouse-resize mode and the per-trigger animation toggles
+    /// (issue #12). Sleep/wake restore (`enable_wake_restore`,
+    /// `set_wake_restore_delay`) is deliberately not emitted —
+    /// it's an advanced knob left to hand-written `init.lua`.
+    static func generalBehavior(
         _ settings: TilingSettings
     ) -> String {
         var lines: [String] = []

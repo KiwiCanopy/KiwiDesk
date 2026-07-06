@@ -12,14 +12,14 @@ struct GeneralTab: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                behaviourSection
+                behaviorSection
                 advancedSection
             }
             .padding(16)
         }
     }
 
-    private var behaviourSection: some View {
+    private var behaviorSection: some View {
         SettingsSection("General behavior") {
             Picker(
                 "Mouse resize action",
