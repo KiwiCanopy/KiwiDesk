@@ -21,6 +21,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     public var spaceModes: [SpaceID: LayoutMode] = [:]
     /// App -> space assignment (`app_rules`).
     public var appRules: [String: SpaceID] = [:]
+    /// Space -> monitor fingerprint priority chain
+    /// (`space_monitor_map`). The GUI authors a single-element
+    /// chain per space; hand-written configs may list several.
+    public var spaceMonitorMap: [SpaceID: [String]] = [:]
     /// Windows that never tile (`float_rules`).
     public var floatRules: [String] = []
     /// Profile bound per native macOS Space (Mission Control
@@ -56,6 +60,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case spaces
         case spaceModes = "space_modes"
         case appRules = "app_rules"
+        case spaceMonitorMap = "space_monitor_map"
         case floatRules = "float_rules"
         case profileBindings = "profile_bindings"
         case modes
@@ -87,6 +92,11 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             try container.decodeIfPresent(
                 [String: SpaceID].self,
                 forKey: .appRules
+            ) ?? [:]
+        spaceMonitorMap =
+            try container.decodeIfPresent(
+                [SpaceID: [String]].self,
+                forKey: .spaceMonitorMap
             ) ?? [:]
         floatRules =
             try container.decodeIfPresent(
@@ -128,6 +138,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         try container.encode(spaces, forKey: .spaces)
         try container.encode(spaceModes, forKey: .spaceModes)
         try container.encode(appRules, forKey: .appRules)
+        try container.encode(
+            spaceMonitorMap,
+            forKey: .spaceMonitorMap
+        )
         try container.encode(floatRules, forKey: .floatRules)
         var bindings: [String: String] = [:]
         for (number, name) in profileBindings {
