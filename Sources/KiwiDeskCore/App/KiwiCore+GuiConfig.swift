@@ -67,13 +67,34 @@ extension KiwiCore {
         )
     }
 
+    /// Recovers the live keybindings as editable modes (#4): each
+    /// bound combo plus its action text, sliced from the source
+    /// file via `debug.getinfo`. Rows come back as `.custom`; the
+    /// GUI classifies known catalog actions afterwards. Returns at
+    /// least the default mode (empty when nothing is bound or the
+    /// interpreter is unavailable).
+    public func recoverKeybindings() -> [KeyMode] {
+        guard let lua else { return [KeyMode.defaultMode] }
+        return KeybindingImporter.modes(
+            from: keys,
+            interpreter: lua,
+            readFile: { path in
+                try? String(
+                    contentsOfFile: path,
+                    encoding: .utf8
+                )
+            }
+        )
+    }
+
     /// Migrates a hand-written config into GUI management: the
     /// current file is preserved verbatim as a commented backup,
     /// and a fresh managed block is generated from the live
-    /// (executed) state — gaps, layouts, and rules carry over.
-    /// Keybindings can't be recovered from executed Lua, so they
-    /// remain only in the backup for the user to re-enter.
-    /// Returns the seeded model now under GUI ownership.
+    /// (executed) state — gaps, layouts, rules, and keybindings
+    /// carry over (bindings are recovered from the file via
+    /// `recoverKeybindings`; any that can't be read back stay
+    /// only in the backup). Returns the seeded model now under
+    /// GUI ownership.
     @discardableResult
     public func adoptConfigIntoGui() throws -> GuiConfig {
         let original =
@@ -104,14 +125,15 @@ extension KiwiCore {
     }
 
     /// Builds an editable model from the running configuration.
-    /// Keybinding actions and mode icons can't be recovered
-    /// from live Lua state, so modes start with just an empty
-    /// default (the sidecar owns them once saved).
+    /// Keybindings and mode icons are recovered from the source
+    /// file via `recoverKeybindings` (#4); the sidecar owns them
+    /// once saved.
     func guiConfigSeed() -> GuiConfig {
         var config = GuiConfig()
         config.settings = tiler.settings
         config.appRules = state.appRules
         config.spaceMonitorMap = spaceMonitorMap
+        config.modes = recoverKeybindings()
         config.floatRules = eventLoop.floatRules.rawRules
         var modes: [SpaceID: LayoutMode] = [:]
         var defined: [SpaceID] = []

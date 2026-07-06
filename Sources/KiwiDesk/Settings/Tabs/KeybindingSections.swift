@@ -45,10 +45,8 @@ struct ChangeModesSection: View {
                 NavRow(
                     model: model,
                     bindings: $bindings,
-                    command: NavCommand(
-                        label: "Switch to \(name)",
-                        lua: "KiwiDesk.switch_mode"
-                            + "(\(KeybindingCatalog.quote(name)))"
+                    command: KeybindingCatalog.switchModeCommand(
+                        name
                     )
                 )
             }

@@ -73,6 +73,20 @@ public struct KeyCombo: Hashable, Sendable {
         return parts.joined(separator: "+")
     }
 
+    /// This combo formatted as a canonical string
+    /// (`"control+option+r"`), reversing `parse`. Returns nil
+    /// when the key code has no known name. Used when importing
+    /// live bindings back into the GUI (#4).
+    public func comboString() -> String? {
+        Self.comboString(
+            keyCode: keyCode,
+            command: modifiers.contains(.command),
+            option: modifiers.contains(.option),
+            control: modifiers.contains(.control),
+            shift: modifiers.contains(.shift)
+        )
+    }
+
     /// The canonical name for a key code (reverse of
     /// `keyCodes`). Codes that carry both a symbol and a word
     /// alias resolve to the readable word form for display.

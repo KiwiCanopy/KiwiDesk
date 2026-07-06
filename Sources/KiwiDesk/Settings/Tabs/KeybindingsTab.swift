@@ -38,10 +38,34 @@ struct KeybindingsTab: View {
                     model: model,
                     bindings: bindingsBinding
                 )
+                importSection
             }
             .padding(16)
         }
         .onAppear(perform: ensureSelection)
+    }
+
+    // MARK: - Import current shortcuts (#4)
+
+    private var importSection: some View {
+        SettingsSection("Import current shortcuts") {
+            HStack {
+                Button("Import current shortcuts") {
+                    model.importCurrentShortcuts()
+                    ensureSelection()
+                }
+                Spacer()
+            }
+            Text(
+                "Reads the shortcuts active in init.lua and adds "
+                    + "them here, matching each combo. Known "
+                    + "actions are sorted into the sections above; "
+                    + "anything else lands in Custom Bindings. "
+                    + "Review, then Save."
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
+        }
     }
 
     // MARK: - Mode header

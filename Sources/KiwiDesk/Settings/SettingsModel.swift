@@ -70,7 +70,12 @@ final class SettingsModel: ObservableObject {
     /// the core into the view model (discards unsaved edits).
     func reload() {
         suppressDirty = true
-        config = core.loadGuiConfig()
+        var loaded = core.loadGuiConfig()
+        // Recovered rows arrive as `.custom`; sort the ones that
+        // match a catalog action into their sections before the
+        // tabs render them (#4).
+        KeybindingImportClassifier.classify(&loaded)
+        config = loaded
         suppressDirty = false
         forcedLuaEditor = core.configHasForeignCode
         luaSource =
@@ -89,6 +94,24 @@ final class SettingsModel: ObservableObject {
         nativeSpaceCount =
             NativeSpaces.allSpaces().filter(\.isUser).count
         currentNativeSpace = NativeSpaces.activeSpaceNumber()
+    }
+
+    // MARK: - Import live keybindings (#4)
+
+    /// Merges the shortcuts currently active in `init.lua` into
+    /// the edited config: each recovered mode is matched by name
+    /// (created if new), every recovered row upserted by combo,
+    /// and the result reclassified so known actions land in their
+    /// sections. Marks the config dirty so the user reviews the
+    /// import before Save writes it.
+    func importCurrentShortcuts() {
+        var updated = config
+        KeybindingMerge.merge(
+            recovered: core.recoverKeybindings(),
+            into: &updated
+        )
+        KeybindingImportClassifier.classify(&updated)
+        config = updated
     }
 
     // MARK: - Persistence
@@ -133,10 +156,11 @@ final class SettingsModel: ObservableObject {
             try core.adoptConfigIntoGui()
             showLuaEditor = false
             reload()
-            // Keybindings can't be recovered from adopted Lua
-            // (see adoptConfigIntoGui), but the check is cheap
-            // and keeps this path consistent with Lua-editor
-            // save: set or clear the banner from the result.
+            // Adopt recovers the file's keybindings (see
+            // adoptConfigIntoGui / recoverKeybindings), so a
+            // conflict can arrive with the seeded config: set or
+            // clear the banner from the result, matching the
+            // Lua-editor save path.
             warnIfAnyConflict()
         } catch {
             core.onLog("adopt failed: \(error)")
