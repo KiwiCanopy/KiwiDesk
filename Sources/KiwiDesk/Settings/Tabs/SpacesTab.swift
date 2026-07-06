@@ -63,8 +63,11 @@ struct SpacesTab: View {
 
     private func spaceRow(_ space: SpaceID) -> some View {
         HStack {
-            Text(space.raw)
-                .fontWeight(.medium)
+            SpaceNameField(
+                space: space,
+                isAvailable: { !model.config.spaces.contains($0) },
+                onRename: { renameSpace(space, to: $0) }
+            )
             Spacer()
             Picker("", selection: modeBinding(space)) {
                 ForEach(LayoutMode.allCases, id: \.self) { mode in
@@ -121,6 +124,12 @@ struct SpacesTab: View {
         model.config.spaceModes[space] = nil
     }
 
+    /// Renames a space, migrating its mode, app rules, monitor
+    /// map, and keybinding references (`GuiConfig.renameSpace`).
+    private func renameSpace(_ space: SpaceID, to target: SpaceID) {
+        model.config.renameSpace(from: space, to: target)
+    }
+
     /// Setting a space to the default `bsp` removes its entry
     /// (the writer treats absent as `bsp`).
     private func modeBinding(
@@ -133,5 +142,53 @@ struct SpacesTab: View {
                     mode == .bsp ? nil : mode
             }
         )
+    }
+}
+
+/// An editable space name. Commits the rename on Return or when
+/// focus leaves; reverts to the current name if the new one is
+/// empty or already taken, so a bad edit never renames.
+private struct SpaceNameField: View {
+    let space: SpaceID
+    let isAvailable: (SpaceID) -> Bool
+    let onRename: (SpaceID) -> Void
+
+    @State private var draft: String
+    @FocusState private var focused: Bool
+
+    init(
+        space: SpaceID,
+        isAvailable: @escaping (SpaceID) -> Bool,
+        onRename: @escaping (SpaceID) -> Void
+    ) {
+        self.space = space
+        self.isAvailable = isAvailable
+        self.onRename = onRename
+        _draft = State(initialValue: space.raw)
+    }
+
+    var body: some View {
+        TextField("", text: $draft)
+            .textFieldStyle(.plain)
+            .fontWeight(.medium)
+            .focused($focused)
+            .frame(maxWidth: 200, alignment: .leading)
+            .onSubmit(commit)
+            .onChange(of: focused) { _, isFocused in
+                if !isFocused { commit() }
+            }
+    }
+
+    private func commit() {
+        let target = SpaceID(draft.trimmed)
+        guard target != space else {
+            draft = space.raw
+            return
+        }
+        guard !target.raw.isEmpty, isAvailable(target) else {
+            draft = space.raw
+            return
+        }
+        onRename(target)
     }
 }

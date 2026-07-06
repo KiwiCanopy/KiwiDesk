@@ -35,6 +35,47 @@ public struct GuiConfig: Codable, Equatable, Sendable {
 
     public init() {}
 
+    /// Renames a space everywhere it is referenced (#13): the
+    /// `spaces` list, `spaceModes`, `appRules`, `spaceMonitorMap`,
+    /// and the space-targeting Lua inside every keybinding. A
+    /// no-op returning `false` when `from` is unknown or `to`
+    /// already exists (the caller keeps the old name); renaming to
+    /// the same id succeeds trivially.
+    @discardableResult
+    public mutating func renameSpace(
+        from: SpaceID,
+        to: SpaceID
+    ) -> Bool {
+        guard from != to else { return true }
+        guard spaces.contains(from), !spaces.contains(to) else {
+            return false
+        }
+        spaces = spaces.map { $0 == from ? to : $0 }
+        if let mode = spaceModes.removeValue(forKey: from) {
+            spaceModes[to] = mode
+        }
+        if let chain = spaceMonitorMap.removeValue(forKey: from) {
+            spaceMonitorMap[to] = chain
+        }
+        for (app, space) in appRules where space == from {
+            appRules[app] = to
+        }
+        modes = modes.map { mode in
+            var mode = mode
+            mode.bindings = mode.bindings.map { binding in
+                var binding = binding
+                binding.lua = SpaceLuaArg.rename(
+                    in: binding.lua,
+                    from: from.raw,
+                    to: to.raw
+                )
+                return binding
+            }
+            return mode
+        }
+        return true
+    }
+
     /// De-duplicates and orders space ids for display: numeric
     /// ids ascending, then named ids alphabetically.
     public static func orderedSpaces(
