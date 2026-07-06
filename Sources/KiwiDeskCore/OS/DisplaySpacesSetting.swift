@@ -19,6 +19,10 @@ public enum DisplaySpacesSetting {
             "spans-displays" as CFString,
             "com.apple.spaces" as CFString
         )
+        // Absent/unreadable (nil, or stored under a host this API
+        // doesn't resolve): assume the default, separate Spaces.
+        // The only consequence is the onboarding step not
+        // self-skipping, so the conservative default is benign.
         guard let number = value as? NSNumber else { return true }
         return number.intValue != 1
     }
