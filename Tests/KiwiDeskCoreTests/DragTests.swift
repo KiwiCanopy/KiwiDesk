@@ -67,21 +67,52 @@ struct DragCoordinatorTests {
     func validatedTrailStartsGesture() async throws {
         let drag = DragCoordinator()
         drag.settleDelay = 0.05
-        var ended = 0
-        drag.onDragEnd = { _, _, _ in ended += 1 }
+        var ended: [CGRect] = []
+        drag.onDragEnd = { _, _, frame in
+            ended.append(frame)
+        }
         // A fast mouse resize on a slow AX responder: every
         // event arrives after the release, pre-classified by
         // the caller (KiwiCore.isResizeGesture).
+        let frame = CGRect(x: 0, y: 0, width: 500, height: 500)
         drag.windowMoved(
             WindowID(1),
-            frame: CGRect(x: 0, y: 0, width: 500, height: 500),
+            frame: frame,
             validated: true
         )
         let deadline = ContinuousClock.now + .seconds(5)
-        while ended == 0, ContinuousClock.now < deadline {
+        while ended.isEmpty, ContinuousClock.now < deadline {
             try await Task.sleep(nanoseconds: 20_000_000)
         }
-        #expect(ended == 1)
+        // Grace window so a wrong second fire would show up.
+        try await Task.sleep(nanoseconds: 100_000_000)
+        #expect(ended == [frame])
+    }
+
+    @Test("Trailing moves after release join the gesture")
+    func trailingMovesJoinGesture() async throws {
+        let drag = DragCoordinator()
+        drag.settleDelay = 0.05
+        var pressed = true
+        drag.isMousePressed = { pressed }
+        var ended: [(start: CGRect, end: CGRect)] = []
+        drag.onDragEnd = { _, start, end in
+            ended.append((start, end))
+        }
+        let first = CGRect(x: 100, y: 0, width: 10, height: 10)
+        drag.windowMoved(WindowID(1), frame: first)
+        // The last AX event of a fast drag lags the release;
+        // it must still update the gesture's end frame.
+        pressed = false
+        let trailing = CGRect(x: 400, y: 0, width: 10, height: 10)
+        drag.windowMoved(WindowID(1), frame: trailing)
+        let deadline = ContinuousClock.now + .seconds(5)
+        while ended.isEmpty, ContinuousClock.now < deadline {
+            try await Task.sleep(nanoseconds: 20_000_000)
+        }
+        #expect(ended.count == 1)
+        #expect(ended.first?.start == first)
+        #expect(ended.first?.end == trailing)
     }
 
     @Test("Animation-driven moves never count as drags")
