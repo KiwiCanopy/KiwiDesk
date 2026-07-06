@@ -1,3 +1,4 @@
+import AppKit
 import CoreGraphics
 import Testing
 
@@ -101,5 +102,46 @@ struct AnimationEngineTests {
         #expect(engine.durationMS == 1000)
         engine.durationMS = 300
         #expect(engine.durationMS == 300)
+    }
+}
+
+@Suite("AnimationEngine stepwise sizing")
+@MainActor
+struct AnimationEngineSizingTests {
+    /// Issue #45: a pure resize (same origin, new size) must
+    /// apply its size stepwise — once at the halfway switch,
+    /// once at settle — never interpolated per tick. A resize
+    /// per frame makes slow AX responders re-lay-out
+    /// continuously; their echoes fall seconds behind and the
+    /// window can end up stranded at a mid-animation size.
+    @Test("A pure resize emits at most two size-sets")
+    func pureResizeIsStepwise() throws {
+        guard let screen = NSScreen.main,
+            let display = screen.kiwiDisplay?.id
+        else { return }
+        let engine = AnimationEngine()
+        var applies: [(frame: CGRect, setSize: Bool)] = []
+        engine.apply = { _, frame, setSize in
+            applies.append((frame, setSize))
+        }
+        let from = CGRect(x: 10, y: 20, width: 400, height: 300)
+        let to = CGRect(x: 10, y: 20, width: 900, height: 800)
+        engine.animate(
+            window: WindowID(1),
+            on: screen,
+            from: from,
+            to: to
+        )
+        // Drive the clock manually; the real display link
+        // never fires while this loop holds the main actor.
+        var steps = 0
+        while engine.activeCount > 0, steps < 2000 {
+            engine.tick(display: display, dt: 1.0 / 120.0)
+            steps += 1
+        }
+        #expect(engine.activeCount == 0)
+        #expect(applies.last?.frame == to)
+        #expect(applies.last?.setSize == true)
+        #expect(applies.filter(\.setSize).count <= 2)
     }
 }

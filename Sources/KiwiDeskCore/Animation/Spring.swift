@@ -42,7 +42,6 @@ public struct FrameAnimation: Sendable {
     public private(set) var velocity: [Double]
     public private(set) var target: [Double]
     public let spring: Spring
-    public private(set) var isPureResize: Bool
 
     /// Settled when within this distance at negligible speed.
     /// Sub-pixel tails are invisible but cost real AX calls,
@@ -63,18 +62,12 @@ public struct FrameAnimation: Sendable {
             self.current,
             self.target
         )
-        self.isPureResize =
-            abs(from.origin.x - to.origin.x) < 0.5
-            && abs(from.origin.y - to.origin.y) < 0.5
     }
 
     /// Redirects the animation to a new target mid-flight.
     public mutating func retarget(to frame: CGRect) {
         target = Self.vector(frame)
         initialDistance = Self.distance(current, target)
-        isPureResize =
-            abs(current[0] - target[0]) < 0.5
-            && abs(current[1] - target[1]) < 0.5
     }
 
     /// True once at least half the distance is covered. Sizes

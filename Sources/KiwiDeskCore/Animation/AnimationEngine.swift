@@ -227,7 +227,7 @@ public final class AnimationEngine {
         drivers[display]?.start()
     }
 
-    private func tick(display: DisplayID, dt: TimeInterval) {
+    func tick(display: DisplayID, dt: TimeInterval) {
         guard var perWindow = animations[display],
             !perWindow.isEmpty
         else {
@@ -250,16 +250,18 @@ public final class AnimationEngine {
                 // pure moves the sizes match and no resize is
                 // ever emitted.
                 //
-                // For pure resizes (no movement), we animate the
-                // size smoothly on every tick to prevent the window
-                // from staying static and suddenly jumping.
+                // Pure resizes are stepwise too. Interpolating
+                // the size per tick emits a resize per frame,
+                // and slow AX responders (Electron/WebKit)
+                // re-lay-out on each one: their echoes fall
+                // seconds behind, which strands the window
+                // mid-size when a later retile trusts the
+                // stale state frames (issue #45).
                 let size =
-                    animation.isPureResize
-                    ? animation.frame.size
-                    : (animation.pastHalfway
-                        ? animation.targetFrame.size
-                        : heldSize[id]
-                            ?? Self.rounded(animation.frame).size)
+                    animation.pastHalfway
+                    ? animation.targetFrame.size
+                    : heldSize[id]
+                        ?? Self.rounded(animation.frame).size
                 let setSize = size != heldSize[id]
                 heldSize[id] = size
                 let frame = CGRect(
