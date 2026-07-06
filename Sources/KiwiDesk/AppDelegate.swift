@@ -87,6 +87,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         onboardingModel.onOpenSettings = {
             PermissionMonitor.openSystemSettings()
         }
+        onboardingModel.onOpenSpaceSettings = {
+            Self.openDesktopAndDockSettings()
+        }
         onboardingModel.onFinish = { [weak self] in
             self?.closeOnboarding()
         }
@@ -114,6 +117,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         onboardingWindow?.close()
         onboardingWindow = nil
         NSApp.setActivationPolicy(.accessory)
+    }
+
+    /// Opens System Settings › Desktop & Dock, where "Displays
+    /// have separate Spaces" lives (#8). Falls back to the
+    /// Settings root if the pane identifier is ever renamed.
+    private static func openDesktopAndDockSettings() {
+        let pane =
+            "x-apple.systempreferences:"
+            + "com.apple.Desktop-Settings.extension"
+        let target =
+            URL(string: pane)
+            ?? URL(string: "x-apple.systempreferences:")
+        guard let target else { return }
+        NSWorkspace.shared.open(target)
     }
 
     // MARK: - Notifications

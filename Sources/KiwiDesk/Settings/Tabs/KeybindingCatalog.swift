@@ -84,13 +84,11 @@ enum KeybindingCatalog {
         quote(space.raw)
     }
 
-    /// A quoted, escaped Lua string literal.
+    /// A quoted, escaped Lua string literal. Delegates to the
+    /// canonical `SpaceLuaArg.quote` so the form a space rename
+    /// rewrites always matches what the catalog authored (#13).
     static func quote(_ raw: String) -> String {
-        let escaped =
-            raw
-            .replacingOccurrences(of: "\\", with: "\\\\")
-            .replacingOccurrences(of: "\"", with: "\\\"")
-        return "\"\(escaped)\""
+        SpaceLuaArg.quote(raw)
     }
 
     /// Installed application names, scanned once per launch.

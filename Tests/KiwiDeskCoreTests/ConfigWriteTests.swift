@@ -40,6 +40,10 @@ private func richConfig() -> GuiConfig {
         SpaceID(1): .stack, SpaceID("music"): .floating,
     ]
     config.appRules = ["Spotify": SpaceID("music")]
+    config.spaceMonitorMap = [
+        SpaceID(1): ["LG:2560x1440"],
+        SpaceID("music"): ["Dell:1920x1080"],
+    ]
     config.floatRules = ["Calculator", "Finder:Get Info"]
     config.profileBindings = [2: "Studio"]
     config.modes = [
@@ -173,6 +177,29 @@ struct ConfigWriteTests {
         #expect(!lua.contains("define_mode"))
     }
 
+    @Test("space_monitor_map emits a table; empty is omitted")
+    func spaceMonitorMapWriter() {
+        let map: [SpaceID: [String]] = [
+            SpaceID(1): ["LG:2560x1440"],
+            SpaceID("music"): ["Dell:1920x1080"],
+        ]
+        let lua = LuaConfigWriter.spaceMonitorMap(map)
+        #expect(lua.contains("space_monitor_map = {"))
+        #expect(lua.contains("[\"1\"] = { \"LG:2560x1440\" },"))
+        #expect(
+            lua.contains(
+                "[\"music\"] = { \"Dell:1920x1080\" },"
+            )
+        )
+        #expect(LuaConfigWriter.spaceMonitorMap([:]).isEmpty)
+        // A space with an empty chain contributes nothing.
+        #expect(
+            LuaConfigWriter.spaceMonitorMap(
+                [SpaceID(1): []]
+            ).isEmpty
+        )
+    }
+
     @Test("round-trip: write, reload, live state matches")
     func roundTrip() throws {
         let core = makeCore()
@@ -188,6 +215,9 @@ struct ConfigWriteTests {
                 == .floating
         )
         #expect(core.state.appRules["Spotify"] == SpaceID("music"))
+        #expect(
+            core.spaceMonitorMap[SpaceID(1)] == ["LG:2560x1440"]
+        )
         #expect(core.nativeSpaceBindings[2] == "Studio")
         #expect(core.keys.icon(for: "resize") == "📐")
         let combo = KeyCombo.parse("alt+h")
@@ -221,6 +251,7 @@ struct ConfigWriteTests {
         try core.saveGuiConfig(GuiConfig())
 
         #expect(core.state.appRules.isEmpty)
+        #expect(core.spaceMonitorMap.isEmpty)
         #expect(core.eventLoop.floatRules.rawRules.isEmpty)
         #expect(core.tiler.settings.gapsOverride.isEmpty)
         #expect(core.tiler.settings.placementOverride.isEmpty)

@@ -21,6 +21,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     public var spaceModes: [SpaceID: LayoutMode] = [:]
     /// App -> space assignment (`app_rules`).
     public var appRules: [String: SpaceID] = [:]
+    /// Space -> monitor fingerprint priority chain
+    /// (`space_monitor_map`). The GUI authors a single-element
+    /// chain per space; hand-written configs may list several.
+    public var spaceMonitorMap: [SpaceID: [String]] = [:]
     /// Windows that never tile (`float_rules`).
     public var floatRules: [String] = []
     /// Profile bound per native macOS Space (Mission Control
@@ -30,6 +34,66 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     public var modes: [KeyMode] = [KeyMode.defaultMode]
 
     public init() {}
+
+    /// Renames a space everywhere it is referenced (#13): the
+    /// `spaces` list, `spaceModes`, `appRules`, `spaceMonitorMap`,
+    /// the per-space `settings.gapsOverride` /
+    /// `settings.placementOverride` maps, and the space-targeting
+    /// Lua inside every keybinding. A no-op returning `false` when
+    /// `from` is unknown or `to` already exists (the caller keeps
+    /// the old name); renaming to the same id succeeds trivially.
+    @discardableResult
+    public mutating func renameSpace(
+        from: SpaceID,
+        to: SpaceID
+    ) -> Bool {
+        guard from != to else { return true }
+        // An empty name is never a valid space (it would emit a
+        // `[""]` key); reject it as a rename target.
+        guard !to.raw.isEmpty else { return false }
+        // `spaces` is the authoritative membership set; the caller's
+        // collision check mirrors this guard. A `to` that lingers as
+        // a key in another surface (hand-edited sidecar) is rare and
+        // gets overwritten below — acceptable given `spaces` gates
+        // what the GUI ever offers.
+        guard spaces.contains(from), !spaces.contains(to) else {
+            return false
+        }
+        spaces = spaces.map { $0 == from ? to : $0 }
+        if let mode = spaceModes.removeValue(forKey: from) {
+            spaceModes[to] = mode
+        }
+        if let chain = spaceMonitorMap.removeValue(forKey: from) {
+            spaceMonitorMap[to] = chain
+        }
+        if let gaps = settings.gapsOverride.removeValue(
+            forKey: from
+        ) {
+            settings.gapsOverride[to] = gaps
+        }
+        if let placement = settings.placementOverride
+            .removeValue(forKey: from)
+        {
+            settings.placementOverride[to] = placement
+        }
+        for (app, space) in appRules where space == from {
+            appRules[app] = to
+        }
+        modes = modes.map { mode in
+            var mode = mode
+            mode.bindings = mode.bindings.map { binding in
+                var binding = binding
+                binding.lua = SpaceLuaArg.rename(
+                    in: binding.lua,
+                    from: from.raw,
+                    to: to.raw
+                )
+                return binding
+            }
+            return mode
+        }
+        return true
+    }
 
     /// De-duplicates and orders space ids for display: numeric
     /// ids ascending, then named ids alphabetically.
@@ -56,6 +120,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case spaces
         case spaceModes = "space_modes"
         case appRules = "app_rules"
+        case spaceMonitorMap = "space_monitor_map"
         case floatRules = "float_rules"
         case profileBindings = "profile_bindings"
         case modes
@@ -88,6 +153,11 @@ public struct GuiConfig: Codable, Equatable, Sendable {
                 [String: SpaceID].self,
                 forKey: .appRules
             ) ?? [:]
+        spaceMonitorMap =
+            try container.decodeIfPresent(
+                [SpaceID: [String]].self,
+                forKey: .spaceMonitorMap
+            ) ?? [:]
         floatRules =
             try container.decodeIfPresent(
                 [String].self,
@@ -101,6 +171,27 @@ public struct GuiConfig: Codable, Equatable, Sendable {
                 forKey: .modes
             ) ?? [KeyMode.defaultMode]
         if modes.isEmpty { modes = [KeyMode.defaultMode] }
+        dropEmptyNamedSpaces()
+    }
+
+    /// Empty space names are blocked at every GUI entry point
+    /// (`SpacesTab` add/rename); this drops any that slipped in
+    /// through a hand-edited sidecar so a `[""]` key never reaches
+    /// the writer. Glyph/symbol names are unaffected.
+    private mutating func dropEmptyNamedSpaces() {
+        spaces.removeAll { $0.raw.isEmpty }
+        spaceModes = spaceModes.filter { !$0.key.raw.isEmpty }
+        spaceMonitorMap = spaceMonitorMap.filter {
+            !$0.key.raw.isEmpty
+        }
+        appRules = appRules.filter { !$0.value.raw.isEmpty }
+        settings.gapsOverride = settings.gapsOverride.filter {
+            !$0.key.raw.isEmpty
+        }
+        settings.placementOverride =
+            settings.placementOverride.filter {
+                !$0.key.raw.isEmpty
+            }
     }
 
     /// JSON object keys are strings; native-space numbers are
@@ -128,6 +219,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         try container.encode(spaces, forKey: .spaces)
         try container.encode(spaceModes, forKey: .spaceModes)
         try container.encode(appRules, forKey: .appRules)
+        try container.encode(
+            spaceMonitorMap,
+            forKey: .spaceMonitorMap
+        )
         try container.encode(floatRules, forKey: .floatRules)
         var bindings: [String: String] = [:]
         for (number, name) in profileBindings {

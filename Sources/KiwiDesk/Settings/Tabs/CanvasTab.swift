@@ -3,9 +3,10 @@ import SwiftUI
 
 /// Tab 2 — Workspace & Monitor Mapping: a scaled canvas of the
 /// connected monitors, each labeled with its fingerprint and the
-/// virtual spaces currently living on it (05_GUI_Concept §2,
-/// Tab 2). Assignment editing (`space_monitor_map`) is surfaced
-/// read-only here; the Lua editor owns the mapping for now.
+/// virtual spaces assigned to it (05_GUI_Concept §2, Tab 2).
+/// Spaces are dragged from the palette below onto a monitor to
+/// author `space_monitor_map` (#6); `SpaceMonitorAssignments`
+/// hosts the palette and the unassign list.
 struct CanvasTab: View {
     @ObservedObject var model: SettingsModel
 
@@ -21,6 +22,10 @@ struct CanvasTab: View {
                             .frame(height: 260)
                     }
                 }
+                if !model.displays.isEmpty {
+                    SpaceMonitorAssignments(model: model)
+                }
+                NativeSpacesSection(model: model)
                 fingerprintSection
             }
             .padding(16)
@@ -53,9 +58,11 @@ struct CanvasTab: View {
     }
 }
 
-/// Draws each display as a proportionally placed rectangle.
+/// Draws each display as a proportionally placed rectangle that
+/// accepts dropped spaces (#6).
 private struct MonitorCanvas: View {
     @ObservedObject var model: SettingsModel
+    @State private var targeted: DisplayID?
 
     var body: some View {
         GeometryReader { geo in
@@ -82,7 +89,12 @@ private struct MonitorCanvas: View {
             .fill(Color(nsColor: .controlBackgroundColor))
             .overlay(
                 RoundedRectangle(cornerRadius: 6)
-                    .strokeBorder(.tint.opacity(0.6))
+                    .strokeBorder(
+                        .tint.opacity(
+                            targeted == display.id ? 1 : 0.6
+                        ),
+                        lineWidth: targeted == display.id ? 2 : 1
+                    )
             )
             .overlay(
                 VStack(spacing: 2) {
@@ -95,14 +107,48 @@ private struct MonitorCanvas: View {
                 }
                 .padding(4)
             )
+            .dropDestination(for: DraggableSpace.self) {
+                items,
+                _ in
+                assign(items, to: display)
+            } isTargeted: { hovering in
+                targeted = hovering ? display.id : nil
+            }
     }
 
+    /// Pins each dropped space to this monitor's fingerprint as a
+    /// single-element chain; the footer Save persists it.
+    private func assign(
+        _ items: [DraggableSpace],
+        to display: Display
+    ) -> Bool {
+        guard !items.isEmpty else { return false }
+        var assigned = false
+        for item in items {
+            let space = SpaceID(item.raw)
+            // The palette only vends defined spaces; reject any
+            // stray payload so the map never gains an orphan key.
+            guard model.config.spaces.contains(space) else {
+                continue
+            }
+            model.config.spaceMonitorMap[space] =
+                [display.fingerprint]
+            assigned = true
+        }
+        return assigned
+    }
+
+    /// The spaces authored onto this monitor (its fingerprint is
+    /// first in their chain), not merely where they live now.
     private func spacesLabel(_ display: Display) -> String {
-        let spaces = model.core.state.workspaces
-            .spaces(on: display.id)
+        let spaces = model.config.spaceMonitorMap.keys
+            .filter {
+                model.config.spaceMonitorMap[$0]?.first
+                    == display.fingerprint
+            }
             .map(\.raw)
             .sorted()
-        guard !spaces.isEmpty else { return "no spaces" }
+        guard !spaces.isEmpty else { return "drop a space" }
         return "spaces " + spaces.joined(separator: ", ")
     }
 

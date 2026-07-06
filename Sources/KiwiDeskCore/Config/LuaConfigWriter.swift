@@ -29,6 +29,9 @@ public enum LuaConfigWriter {
         sections.append(mouseResize(config.settings))
         sections.append(animations(config.settings))
         sections.append(appRules(config.appRules))
+        sections.append(
+            spaceMonitorMap(config.spaceMonitorMap)
+        )
         sections.append(floatRules(config.floatRules))
         sections.append(
             profileBindings(config.profileBindings)
@@ -116,11 +119,33 @@ public enum LuaConfigWriter {
             guard let space = rules[app] else { continue }
             lines.append(
                 "    [" + LuaLiteral.string(app) + "] = "
-                    + LuaLiteral.string(space.raw) + ","
+                    + SpaceLuaArg.quote(space.raw) + ","
             )
         }
         lines.append("}")
         return lines.joined(separator: "\n")
+    }
+
+    /// `space_monitor_map = { ["1"] = { "fp" }, … }`. String
+    /// keys (read back as `SpaceID`); each value a fingerprint
+    /// chain. Empty chains and an empty map are omitted.
+    static func spaceMonitorMap(
+        _ map: [SpaceID: [String]]
+    ) -> String {
+        let entries = map.keys.sorted { $0.raw < $1.raw }
+            .compactMap { space -> String? in
+                guard let chain = map[space], !chain.isEmpty
+                else { return nil }
+                let items =
+                    chain
+                    .map { LuaLiteral.string($0) }
+                    .joined(separator: ", ")
+                return "    [" + SpaceLuaArg.quote(space.raw)
+                    + "] = { " + items + " },"
+            }
+        guard !entries.isEmpty else { return "" }
+        return (["space_monitor_map = {"] + entries + ["}"])
+            .joined(separator: "\n")
     }
 
     static func floatRules(_ rules: [String]) -> String {

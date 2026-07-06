@@ -85,7 +85,10 @@ Spaces are identified by **strings or numbers** — `1` and
 `"1"` are the same space, `"code"` and `"Code"` are not.
 Monitors never carry a layout themselves: windows live in
 spaces, and spaces are mapped to monitors (see
-`space_monitor_map` below).
+`space_monitor_map` below). You can rename a space in place from
+the Settings app's **Spaces** tab; the rename follows the id
+everywhere it is used — its layout mode, app rules, monitor
+map, and any keybindings that target it.
 
 ### How inactive spaces hide their windows
 
@@ -761,6 +764,12 @@ space_monitor_map = {
 }
 ```
 
+You can also author `space_monitor_map` visually: in the
+Settings app's **Canvas** tab, drag a space from the palette
+onto a monitor to pin it there. Drops are saved to `init.lua`
+on the next Save and survive a reload. (`monitor_fallback`
+stays Lua-only for now.)
+
 ### Native macOS Spaces (Mission Control)
 
 KiwiDesk's spaces above are *virtual* workspaces, independent
@@ -771,6 +780,11 @@ of Mission Control. On top of that, each native macOS Space
 KiwiDesk.bind_profile_to_native_space(1, "Developer Rig")
 KiwiDesk.bind_profile_to_native_space(2, "Creator Studio")
 ```
+
+The **Canvas** tab lists each native Space with a profile
+dropdown, and you can also drag a profile chip onto a Space to
+bind it. Bindings save to `init.lua` and take effect when that
+Space next activates.
 
 When you switch desktops (Ctrl+arrow, Mission Control, …),
 KiwiDesk loads the bound profile — its virtual workspaces,

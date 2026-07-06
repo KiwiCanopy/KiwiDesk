@@ -111,6 +111,7 @@ extension KiwiCore {
         var config = GuiConfig()
         config.settings = tiler.settings
         config.appRules = state.appRules
+        config.spaceMonitorMap = spaceMonitorMap
         config.floatRules = eventLoop.floatRules.rawRules
         var modes: [SpaceID: LayoutMode] = [:]
         var defined: [SpaceID] = []
