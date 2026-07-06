@@ -123,11 +123,19 @@ private struct MonitorCanvas: View {
         to display: Display
     ) -> Bool {
         guard !items.isEmpty else { return false }
+        var assigned = false
         for item in items {
-            model.config.spaceMonitorMap[SpaceID(item.raw)] =
+            let space = SpaceID(item.raw)
+            // The palette only vends defined spaces; reject any
+            // stray payload so the map never gains an orphan key.
+            guard model.config.spaces.contains(space) else {
+                continue
+            }
+            model.config.spaceMonitorMap[space] =
                 [display.fingerprint]
+            assigned = true
         }
-        return true
+        return assigned
     }
 
     /// The spaces authored onto this monitor (its fingerprint is
