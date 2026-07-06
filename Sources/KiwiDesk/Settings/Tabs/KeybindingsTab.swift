@@ -2,8 +2,9 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Tab 5 — Keybindings: a mode selector with an optional menu
-/// bar icon, plus the Navigation, Open Applications, and Custom
-/// sections for the active mode (05_GUI_Concept §2, Tab 5).
+/// bar icon, plus the Space/Window Management, Open Applications,
+/// and Custom sections for the active mode (05_GUI_Concept §2,
+/// Tab 5).
 struct KeybindingsTab: View {
     @ObservedObject var model: SettingsModel
     @State private var selected = KeyMode.defaultName

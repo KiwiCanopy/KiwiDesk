@@ -1,18 +1,18 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Section 1 — Navigation: Focus, Window Movement, and Space
-/// Movement commands grouped into dropdowns. Space rows are
-/// generated from the defined spaces, so adding a space adds its
-/// commands here. Recording upserts a `.navigation` row keyed by
-/// its Lua; clearing removes it.
+/// Section 1 — Space/Window Management: Focus and Window
+/// Management (move, resize, float) commands grouped into
+/// dropdowns. Space rows are generated from the defined spaces, so
+/// adding a space adds its commands here. Recording upserts a
+/// `.navigation` row keyed by its Lua; clearing removes it.
 struct NavigationSection: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
     let spaces: [SpaceID]
 
     var body: some View {
-        SettingsSection("Navigation") {
+        SettingsSection("Space/Window Management") {
             ForEach(
                 KeybindingCatalog.navigationGroups(spaces: spaces)
             ) { group in
@@ -26,6 +26,15 @@ struct NavigationSection: View {
                     }
                 }
             }
+            Text(
+                "Shrink/Enlarge only applies in the bsp, stack, "
+                    + "and scrolling layouts; it is a no-op in "
+                    + "monocle, grid, and floating. It nudges the "
+                    + "one split/master ratio, so it has no "
+                    + "separate width and height."
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
         }
     }
 }

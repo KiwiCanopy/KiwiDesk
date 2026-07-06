@@ -10,7 +10,7 @@ struct NavCommand: Identifiable, Hashable {
 }
 
 /// A collapsible group of navigation commands (Focus — including
-/// go-to-space — and Window Movement).
+/// go-to-space — and Window Management: move, resize, float).
 struct NavGroup: Identifiable {
     let title: String
     let commands: [NavCommand]
@@ -26,6 +26,13 @@ enum KeybindingCatalog {
         ("Left", "left"), ("Down", "down"),
         ("Up", "up"), ("Right", "right"),
     ]
+
+    /// The fixed step a Grow/Shrink preset nudges the layout by, in
+    /// points. The catalog authors one magnitude, so import
+    /// classification only upgrades a recovered `resize` that used
+    /// this exact delta (like every preset, the Lua must match
+    /// byte-for-byte); other magnitudes stay Custom.
+    static let resizeStep = 50
 
     /// Navigation grouped into dropdowns. Space-specific rows
     /// are generated from the user's defined spaces, so adding
@@ -50,9 +57,9 @@ enum KeybindingCatalog {
                 )
             )
         }
-        var movement = directions.map { name, dir in
+        var movement = directions.map { _, dir in
             NavCommand(
-                label: "Swap \(name)",
+                label: "Swap with window on the \(dir)",
                 lua: "KiwiDesk.swap(\"\(dir)\")"
             )
         }
@@ -60,13 +67,13 @@ enum KeybindingCatalog {
             let arg = spaceArg(space)
             movement.append(
                 NavCommand(
-                    label: "Move window to \(space.raw)",
+                    label: "Move to Space \(space.raw)",
                     lua: "KiwiDesk.move_to_virtual_space(\(arg))"
                 )
             )
             movement.append(
                 NavCommand(
-                    label: "Move window to \(space.raw) & follow",
+                    label: "Move to Space \(space.raw) & follow",
                     lua:
                         "KiwiDesk.move_to_virtual_space_and_follow"
                         + "(\(arg))"
@@ -75,9 +82,34 @@ enum KeybindingCatalog {
         }
         return [
             NavGroup(title: "Focus", commands: focus),
-            NavGroup(title: "Window Movement", commands: movement),
+            NavGroup(
+                title: "Window Management",
+                commands: resizeAndFloat + movement
+            ),
         ]
     }
+
+    /// Window-size and float presets, shown alongside movement in
+    /// the Window Management group. Enlarge/Shrink nudge the single
+    /// bsp split / stack master ratio by `resizeStep` — there is no
+    /// independent width/height today, so this is one pair on the
+    /// `"x"` axis, not four (true 2-axis resize is deferred, #56).
+    /// Resize is a no-op in monocle/grid/floating; the section
+    /// caption states this and the docs echo it.
+    private static let resizeAndFloat: [NavCommand] = [
+        NavCommand(
+            label: "Shrink",
+            lua: "KiwiDesk.resize(\"x\", -\(resizeStep))"
+        ),
+        NavCommand(
+            label: "Enlarge",
+            lua: "KiwiDesk.resize(\"x\", \(resizeStep))"
+        ),
+        NavCommand(
+            label: "Make floating",
+            lua: "KiwiDesk.make_floating()"
+        ),
+    ]
 
     /// A space id as a quoted, escaped Lua string argument.
     static func spaceArg(_ space: SpaceID) -> String {
