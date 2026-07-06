@@ -43,7 +43,16 @@ struct KeyRecorderField: View {
 
     private var label: String {
         if recording { return "Press keys…" }
-        return combo.isEmpty ? "Record" : combo
+        guard !combo.isEmpty else { return "Record" }
+        // Show the shortcut as native macOS glyphs, mapped through
+        // the active keyboard layout (#23). The stored combo stays
+        // the canonical word form; only the display changes, so a
+        // parse failure just shows the raw string.
+        guard let parsed = KeyCombo.parse(combo) else { return combo }
+        return ComboSymbols.render(
+            parsed,
+            layoutChar: LayoutKeyGlyph.char
+        )
     }
 
     private func toggle() {

@@ -482,6 +482,15 @@ same key — likewise `comma`/`,`, `period`/`.`, `slash`/`/`,
 long forms (`command`, `option`, `semicolon`, …) for
 readability; every alias round-trips.
 
+In the editor each recorded shortcut *displays* as the compact
+macOS-native glyph string menus use — modifier symbols `⌃⌥⇧⌘`
+(Command last) followed by the key glyph, with no `+` separator,
+e.g. `⇧⌘,`. The key glyph is mapped through your **active
+keyboard layout**, so a German layout shows `+` where a US layout
+shows `]`. Because there is no `+` combinator, a literal `+` key
+is unambiguous (`⌘+`). Only the display changes; the stored config
+keeps the long word forms above.
+
 Hotkeys use the Carbon API: macOS filters them before they
 reach any app, and KiwiDesk never needs the Input Monitoring
 permission. Left and right modifiers are treated as the same

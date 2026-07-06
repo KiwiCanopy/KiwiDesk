@@ -22,9 +22,11 @@ struct NavGroup: Identifiable {
 /// conflict detection live in Core's `SystemShortcuts`
 /// (05_GUI_Concept §2, Tab 5).
 enum KeybindingCatalog {
+    // dir is the Lua argument; phrase is the positional wording
+    // used in labels ("above"/"below" read better than "up"/"down").
     private static let directions = [
-        ("Left", "left"), ("Down", "down"),
-        ("Up", "up"), ("Right", "right"),
+        ("left", "to the left"), ("down", "below"),
+        ("up", "above"), ("right", "to the right"),
     ]
 
     /// The fixed step a Grow/Shrink preset nudges the layout by, in
@@ -40,9 +42,9 @@ enum KeybindingCatalog {
     static func navigationGroups(
         spaces: [SpaceID]
     ) -> [NavGroup] {
-        var focus = directions.map { name, dir in
+        var focus = directions.map { dir, phrase in
             NavCommand(
-                label: "Focus \(name)",
+                label: "Focus window \(phrase)",
                 lua: "KiwiDesk.focus(\"\(dir)\")"
             )
         }
@@ -51,15 +53,15 @@ enum KeybindingCatalog {
         for space in spaces {
             focus.append(
                 NavCommand(
-                    label: "Go to \(space.raw)",
+                    label: "Go to Space \(space.raw)",
                     lua: "KiwiDesk.focus_virtual_space"
                         + "(\(spaceArg(space)))"
                 )
             )
         }
-        var movement = directions.map { _, dir in
+        var movement = directions.map { dir, phrase in
             NavCommand(
-                label: "Swap with window on the \(dir)",
+                label: "Swap with window \(phrase)",
                 lua: "KiwiDesk.swap(\"\(dir)\")"
             )
         }
