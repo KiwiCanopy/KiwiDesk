@@ -101,6 +101,10 @@ window (cmd+tab) pulls its space forward automatically. Floating windows —
 including picture-in-picture — are never stashed and stay
 visible across all virtual spaces.
 
+Sending a window elsewhere with `move_to_virtual_space` makes
+it that space's focused window, so the first time you switch
+there it is the window you land on — even without `_and_follow`.
+
 **Minimizing** a window removes it from its space entirely.
 Restoring it from the Dock opens it in the virtual space you
 are on at that moment (an `app_rules` entry for its app still
