@@ -146,14 +146,21 @@ public final class KiwiCore {
         }
     }
 
+    /// `animated: nil` (the default for a bare `retile()`) means
+    /// "a structural reflow" — window open/close, mode / gap /
+    /// param change — and obeys `animations.on_relayout`. Callers
+    /// that own a more specific trigger (space switch, swap,
+    /// resize, focus slide) pass an explicit `animated:` and are
+    /// gated by their own toggle instead.
     public func retile(
-        animated: Bool = true,
+        animated: Bool? = nil,
         force: Bool = false,
         newlyCreatedWindow: WindowID? = nil
     ) {
         tiler.retile(
             state: state,
-            animated: animated,
+            animated: animated
+                ?? tiler.settings.animations.onRelayout,
             force: force,
             newlyCreatedWindow: newlyCreatedWindow
         )
@@ -204,7 +211,7 @@ public final class KiwiCore {
             {
                 scheduleFocusFollow(id)
             } else if activeSpace?.mode.isFocusDriven == true {
-                retile()
+                retile(animated: focusRetileAnimated)
             }
         case .windowCreated(let window):
             // A brand-new window supersedes a pending follow

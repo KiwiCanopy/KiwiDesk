@@ -201,9 +201,13 @@ extension KiwiCore {
                 $0.swap(id, target)
             }
         }
-        // Applies the swap — or, without a target, animates
-        // the dragged window back into its slot.
-        retile()
+        // Applies the swap — honoring `on_window_swap`, like the
+        // keyboard swap — or, without a target, snaps/animates the
+        // dragged window back into its slot (a relayout).
+        retile(
+            animated: target != nil
+                ? tiler.settings.animations.onWindowSwap : nil
+        )
         // The dropped window has the user's attention: make
         // it the focused one, in state and for real.
         focusWindow(id)

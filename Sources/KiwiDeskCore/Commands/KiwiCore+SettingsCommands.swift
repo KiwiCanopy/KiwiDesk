@@ -11,15 +11,26 @@ extension KiwiCore {
     ) -> CommandResponse {
         switch command {
         case "set_animation_duration":
+            // Deprecated alias for `animations.set_duration`.
             guard let ms = args.first?.intValue else {
                 return .fail("expected milliseconds")
             }
+            onLog(
+                "set_animation_duration is deprecated — use "
+                    + "animations.set_duration(ms)"
+            )
             tiler.animation.durationMS = ms
         case "set_space_animation":
+            // Deprecated alias for `animations.set_on_space_change`
+            // (issue #11). Still works so existing configs load.
             guard let enabled = args.first?.boolValue else {
                 return .fail("expected boolean")
             }
-            tiler.animateSpaceSwitch = enabled
+            onLog(
+                "set_space_animation is deprecated — use "
+                    + "animations.set_on_space_change(bool)"
+            )
+            tiler.settings.animations.onSpaceChange = enabled
         case "set_mouse_resize":
             guard let raw = args.first?.stringValue,
                 let mode = MouseResizeMode(rawValue: raw)
@@ -59,6 +70,42 @@ extension KiwiCore {
             }
             message += " (run 'help' for all commands)"
             return .fail(message)
+        }
+        return .ok()
+    }
+
+    /// `animations.*` toggles (issue #11): per-trigger animation
+    /// control. Persisted in `settings.animations`.
+    func animationsCommand(
+        _ command: String,
+        _ args: [JSONValue]
+    ) -> CommandResponse {
+        // Duration takes an Int, not a Bool. Runtime-only (like
+        // scroll.set_speed, which shares this knob) — not
+        // persisted, so set it in init.lua.
+        if command == "animations.set_duration" {
+            guard let ms = args.first?.intValue else {
+                return .fail("expected milliseconds")
+            }
+            tiler.animation.durationMS = ms
+            return .ok()
+        }
+        guard let enabled = args.first?.boolValue else {
+            return .fail("expected boolean")
+        }
+        switch command {
+        case "animations.set_on_space_change":
+            tiler.settings.animations.onSpaceChange = enabled
+        case "animations.set_on_scrolling":
+            tiler.settings.animations.onScrolling = enabled
+        case "animations.set_on_window_resize":
+            tiler.settings.animations.onWindowResize = enabled
+        case "animations.set_on_window_swap":
+            tiler.settings.animations.onWindowSwap = enabled
+        case "animations.set_on_relayout":
+            tiler.settings.animations.onRelayout = enabled
+        default:
+            return .fail("unknown command: \(command)")
         }
         return .ok()
     }

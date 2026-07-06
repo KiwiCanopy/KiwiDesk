@@ -9,7 +9,9 @@ extension KiwiCore {
         _ args: [JSONValue]
     ) -> CommandResponse {
         let response: CommandResponse
-        if command.hasPrefix("stack.") {
+        if command.hasPrefix("animations.") {
+            response = animationsCommand(command, args)
+        } else if command.hasPrefix("stack.") {
             response = stackCommand(command, args)
         } else if command.hasPrefix("bsp.") {
             response = bspCommand(command, args)

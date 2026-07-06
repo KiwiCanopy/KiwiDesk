@@ -130,6 +130,21 @@ public enum AXHelper {
         ) ?? false
     }
 
+    /// Current `AXEnhancedUserInterface` state of an app, read
+    /// live (nil if the app does not answer). Used to bracket an
+    /// instant frame-set: EUI-on apps animate programmatic frame
+    /// changes themselves, so an un-animated placement must drop
+    /// it for the set and restore whatever it was.
+    public static func getEnhancedUserInterface(
+        pid: pid_t
+    ) -> Bool? {
+        attribute(
+            appElement(pid: pid),
+            "AXEnhancedUserInterface",
+            as: Bool.self
+        )
+    }
+
     /// Keeps Electron/WebKit AX trees warm to avoid 100-300 ms
     /// query latency. See AGENTS.md guardrails before changing.
     public static func setEnhancedUserInterface(

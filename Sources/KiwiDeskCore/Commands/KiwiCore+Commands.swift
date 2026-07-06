@@ -83,7 +83,17 @@ extension KiwiCore {
     /// Static layouts skip it: their targets are unchanged,
     /// and re-applying them just fights apps that clamp our
     /// frames (grid-snapping terminals), wobbling everything.
-    public func focusWindow(_ id: WindowID) {
+    ///
+    /// `refocusRetile: false` suppresses that retile for callers
+    /// that just retiled themselves — a space switch already
+    /// placed windows with the correct focus, and re-tiling here
+    /// would spring them from their stale stash-corner frames
+    /// (the AX echo of the instant switch has not landed yet),
+    /// which is the "fly out of the corner" bug (issue #11).
+    public func focusWindow(
+        _ id: WindowID,
+        refocusRetile: Bool = true
+    ) {
         if let space = state.workspaces.space(of: id) {
             state.workspaces.focus(id, in: space)
         }
@@ -92,9 +102,21 @@ extension KiwiCore {
         {
             AXHelper.raise(element, pid: window.pid)
         }
-        if activeSpace?.mode.isFocusDriven == true {
-            retile()
-        }
+        guard refocusRetile,
+            activeSpace?.mode.isFocusDriven == true
+        else { return }
+        retile(animated: focusRetileAnimated)
+    }
+
+    /// Whether a focus-driven re-layout animates. Scrolling's
+    /// focus slide is toggleable (`on_scrolling`); other
+    /// focus-driven modes (Monocle) always animate. Shared by
+    /// the `focusWindow` hand-off and the `windowFocused` event
+    /// handler so an external focus change (click / cmd+tab
+    /// within the space) obeys the same toggle.
+    var focusRetileAnimated: Bool {
+        activeSpace?.mode == .scrolling
+            ? tiler.settings.animations.onScrolling : true
     }
 
     // MARK: - Window state
@@ -164,7 +186,9 @@ extension KiwiCore {
                     + space.mode.rawValue
             )
         }
-        retile()
+        retile(
+            animated: tiler.settings.animations.onWindowResize
+        )
         return .ok()
     }
 

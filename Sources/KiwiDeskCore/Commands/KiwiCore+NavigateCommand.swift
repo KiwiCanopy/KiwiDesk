@@ -74,7 +74,9 @@ extension KiwiCore {
             state.workspaces.withSpace(space.id) {
                 $0.swap(focused, target)
             }
-            retile()
+            retile(
+                animated: tiler.settings.animations.onWindowSwap
+            )
             if crossedZones {
                 scheduleZOrderRestore()
             }

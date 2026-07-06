@@ -26,11 +26,19 @@ struct SettingsCodingTests {
         )
         #expect(
             Set(root.keys) == [
-                "app_bar", "drag", "gap", "layout",
+                "animations", "app_bar", "drag", "gap", "layout",
                 "min_window_size",
                 "new_window_placement_override",
             ]
         )
+        // Lua `animations.set_on_space_change` /
+        // `animations.set_on_scrolling` (issue #11).
+        let animations = try object(root["animations"])
+        #expect(animations["on_space_change"] as? Bool == false)
+        #expect(animations["on_scrolling"] as? Bool == true)
+        #expect(animations["on_window_resize"] as? Bool == true)
+        #expect(animations["on_window_swap"] as? Bool == true)
+        #expect(animations["on_relayout"] as? Bool == true)
         let layout = try object(root["layout"])
         #expect(
             Set(layout.keys) == [
@@ -108,12 +116,29 @@ struct SettingsCodingTests {
         settings.dragCornerRadius = 22
         settings.gapsOverride[SpaceID(2)] = .uniform(4)
         settings.placementOverride[SpaceID("mail")] = .last
+        settings.animations.onSpaceChange = true
+        settings.animations.onScrolling = false
+        settings.animations.onWindowResize = false
+        settings.animations.onWindowSwap = false
+        settings.animations.onRelayout = false
         let data = try JSONEncoder().encode(settings)
         let decoded = try JSONDecoder().decode(
             TilingSettings.self,
             from: data
         )
         #expect(decoded == settings)
+    }
+
+    @Test("A partial animations object keeps the other default")
+    func partialAnimationsDecode() throws {
+        let json = #"{"animations":{"on_space_change":true}}"#
+        let decoded = try JSONDecoder().decode(
+            TilingSettings.self,
+            from: Data(json.utf8)
+        )
+        #expect(decoded.animations.onSpaceChange)
+        // on_scrolling absent — keeps its `true` default.
+        #expect(decoded.animations.onScrolling)
     }
 
     @Test("Missing keys fall back to defaults")
