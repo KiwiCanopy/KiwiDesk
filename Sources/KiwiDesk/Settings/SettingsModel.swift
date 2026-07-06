@@ -32,6 +32,14 @@ final class SettingsModel: ObservableObject {
     @Published var profileDirty = false
     @Published var profiles: [String] = []
 
+    /// Number of native macOS user Spaces (Mission Control
+    /// desktops) currently detected — 0 without SkyLight. Drives
+    /// the profile-binding rows (#7).
+    @Published var nativeSpaceCount = 0
+    /// Mission Control number of the active native Space, for the
+    /// "current" badge; nil without SkyLight.
+    @Published var currentNativeSpace: Int?
+
     /// A dismissible in-app warning shown when a keybinding
     /// conflict was just introduced — nil hides the banner. Set
     /// by `noteRecordedCombo` (recording a conflicting shortcut)
@@ -78,6 +86,9 @@ final class SettingsModel: ObservableObject {
         profiles = core.profiles.list()
         activeProfile = core.profiles.currentName
         profileDirty = core.profiles.isDirty
+        nativeSpaceCount =
+            NativeSpaces.allSpaces().filter(\.isUser).count
+        currentNativeSpace = NativeSpaces.activeSpaceNumber()
     }
 
     // MARK: - Persistence

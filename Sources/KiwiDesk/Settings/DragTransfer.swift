@@ -11,6 +11,10 @@ extension UTType {
     static let kiwiSpaceID = UTType(
         exportedAs: "com.kiwidesk.space-id"
     )
+    /// A profile name dragged onto a native Space (#7).
+    static let kiwiProfileName = UTType(
+        exportedAs: "com.kiwidesk.profile-name"
+    )
 }
 
 /// A virtual space being dragged onto a monitor (#6).
@@ -19,5 +23,14 @@ struct DraggableSpace: Codable, Transferable {
 
     static var transferRepresentation: some TransferRepresentation {
         CodableRepresentation(contentType: .kiwiSpaceID)
+    }
+}
+
+/// A saved profile being dragged onto a native macOS Space (#7).
+struct DraggableProfile: Codable, Transferable {
+    let name: String
+
+    static var transferRepresentation: some TransferRepresentation {
+        CodableRepresentation(contentType: .kiwiProfileName)
     }
 }

@@ -25,6 +25,7 @@ struct CanvasTab: View {
                 if !model.displays.isEmpty {
                     SpaceMonitorAssignments(model: model)
                 }
+                NativeSpacesSection(model: model)
                 fingerprintSection
             }
             .padding(16)
