@@ -48,6 +48,9 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         to: SpaceID
     ) -> Bool {
         guard from != to else { return true }
+        // An empty name is never a valid space (it would emit a
+        // `[""]` key); reject it as a rename target.
+        guard !to.raw.isEmpty else { return false }
         // `spaces` is the authoritative membership set; the caller's
         // collision check mirrors this guard. A `to` that lingers as
         // a key in another surface (hand-edited sidecar) is rare and
@@ -168,6 +171,27 @@ public struct GuiConfig: Codable, Equatable, Sendable {
                 forKey: .modes
             ) ?? [KeyMode.defaultMode]
         if modes.isEmpty { modes = [KeyMode.defaultMode] }
+        dropEmptyNamedSpaces()
+    }
+
+    /// Empty space names are blocked at every GUI entry point
+    /// (`SpacesTab` add/rename); this drops any that slipped in
+    /// through a hand-edited sidecar so a `[""]` key never reaches
+    /// the writer. Glyph/symbol names are unaffected.
+    private mutating func dropEmptyNamedSpaces() {
+        spaces.removeAll { $0.raw.isEmpty }
+        spaceModes = spaceModes.filter { !$0.key.raw.isEmpty }
+        spaceMonitorMap = spaceMonitorMap.filter {
+            !$0.key.raw.isEmpty
+        }
+        appRules = appRules.filter { !$0.value.raw.isEmpty }
+        settings.gapsOverride = settings.gapsOverride.filter {
+            !$0.key.raw.isEmpty
+        }
+        settings.placementOverride =
+            settings.placementOverride.filter {
+                !$0.key.raw.isEmpty
+            }
     }
 
     /// JSON object keys are strings; native-space numbers are

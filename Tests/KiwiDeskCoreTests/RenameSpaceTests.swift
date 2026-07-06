@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 
 @testable import KiwiDeskCore
@@ -138,6 +139,37 @@ struct RenameSpaceTests {
         )
         #expect(!ok)
         #expect(config.spaces == [SpaceID("2"), SpaceID("mail")])
+    }
+
+    @Test("rename to an empty name is rejected")
+    func rejectsEmpty() {
+        var config = richConfig()
+        let ok = config.renameSpace(
+            from: SpaceID("2"),
+            to: SpaceID("")
+        )
+        #expect(!ok)
+        #expect(config.spaces == [SpaceID("2"), SpaceID("mail")])
+    }
+
+    @Test("decode drops empty-named spaces and their entries")
+    func decodeDropsEmptyNames() throws {
+        var config = GuiConfig()
+        config.spaces = [SpaceID(""), SpaceID("1")]
+        config.spaceModes = [SpaceID(""): .stack]
+        config.spaceMonitorMap = [SpaceID(""): ["fp"]]
+        config.appRules = ["Mail": SpaceID("")]
+        config.settings.gapsOverride[SpaceID("")] = .uniform(4)
+        let data = try JSONEncoder().encode(config)
+        let decoded = try JSONDecoder().decode(
+            GuiConfig.self,
+            from: data
+        )
+        #expect(decoded.spaces == [SpaceID("1")])
+        #expect(decoded.spaceModes.isEmpty)
+        #expect(decoded.spaceMonitorMap.isEmpty)
+        #expect(decoded.appRules.isEmpty)
+        #expect(decoded.settings.gapsOverride.isEmpty)
     }
 
     @Test("renaming to the same id succeeds trivially")
