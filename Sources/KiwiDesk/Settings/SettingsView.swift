@@ -23,11 +23,18 @@ struct SettingsView: View {
             LuaEditorTab(model: model)
         } else {
             TabView {
-                GeneralTab(model: model)
+                PresetsTab(model: model)
                     .tabItem {
                         Label(
                             "Presets",
                             systemImage: "square.grid.2x2"
+                        )
+                    }
+                GeneralTab(model: model)
+                    .tabItem {
+                        Label(
+                            "General",
+                            systemImage: "gearshape"
                         )
                     }
                 CanvasTab(model: model)

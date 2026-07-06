@@ -32,6 +32,9 @@ private func richConfig() -> GuiConfig {
     config.settings.monocle.appBar.thickness = 40
     config.settings.monocle.appBar.textColor = "#112233"
     config.settings.dragCornerRadius = 12
+    config.settings.mouseResize = .snapBack
+    config.settings.animations.onSpaceChange = true
+    config.settings.animations.onScrolling = false
     config.settings.placementOverride[SpaceID("mail")] = .last
     config.spaceModes = [
         SpaceID(1): .stack, SpaceID("music"): .floating,

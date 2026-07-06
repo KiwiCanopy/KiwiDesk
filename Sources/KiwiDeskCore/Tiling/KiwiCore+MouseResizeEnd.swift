@@ -41,7 +41,7 @@ extension KiwiCore {
         frame: CGRect,
         in space: Space
     ) {
-        guard tiler.mouseResize == .layout,
+        guard tiler.settings.mouseResize == .layout,
             let screen = NSScreen.main
                 ?? NSScreen.screens.first
         else {

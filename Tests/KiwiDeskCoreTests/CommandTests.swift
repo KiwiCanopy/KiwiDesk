@@ -243,12 +243,12 @@ struct CommandTests {
             args: [.bool(false)]
         )
         #expect(!core.tiler.settings.animations.onSpaceChange)
-        #expect(core.tiler.mouseResize == .layout)
+        #expect(core.tiler.settings.mouseResize == .layout)
         core.execute(
             "set_mouse_resize",
             args: [.string("snap_back")]
         )
-        #expect(core.tiler.mouseResize == .snapBack)
+        #expect(core.tiler.settings.mouseResize == .snapBack)
         #expect(
             !core.execute(
                 "set_mouse_resize",

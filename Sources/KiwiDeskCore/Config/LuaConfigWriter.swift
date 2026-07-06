@@ -26,6 +26,7 @@ public enum LuaConfigWriter {
         sections.append(appBarStyle(config.settings.appBarStyle))
         sections.append(layoutParams(config.settings))
         sections.append(dragVisuals(config.settings))
+        sections.append(generalBehaviour(config.settings))
         sections.append(appRules(config.appRules))
         sections.append(floatRules(config.floatRules))
         sections.append(
@@ -161,5 +162,38 @@ public enum LuaConfigWriter {
                 }
             }
             .joined(separator: "\n")
+    }
+
+    static func generalBehaviour(
+        _ settings: TilingSettings
+    ) -> String {
+        var lines: [String] = []
+        lines.append(
+            "KiwiDesk.set_mouse_resize("
+                + LuaLiteral.string(settings.mouseResize.rawValue)
+                + ")"
+        )
+        let anims = settings.animations
+        lines.append(
+            "animations.set_on_space_change("
+                + LuaLiteral.bool(anims.onSpaceChange) + ")"
+        )
+        lines.append(
+            "animations.set_on_scrolling("
+                + LuaLiteral.bool(anims.onScrolling) + ")"
+        )
+        lines.append(
+            "animations.set_on_window_resize("
+                + LuaLiteral.bool(anims.onWindowResize) + ")"
+        )
+        lines.append(
+            "animations.set_on_window_swap("
+                + LuaLiteral.bool(anims.onWindowSwap) + ")"
+        )
+        lines.append(
+            "animations.set_on_relayout("
+                + LuaLiteral.bool(anims.onRelayout) + ")"
+        )
+        return lines.joined(separator: "\n")
     }
 }

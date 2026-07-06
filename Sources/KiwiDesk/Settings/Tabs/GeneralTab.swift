@@ -1,9 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Tab 1 — General & Presets: the active config file, best-
-/// practice presets, saved-profile management, and the door to
-/// the raw Lua editor (05_GUI_Concept §2, Tab 1).
+/// Tab 2 — General: behavior tuning (mouse resize, animations) and
+/// advanced settings (05_GUI_Concept §2, Tab 2).
 struct GeneralTab: View {
     @ObservedObject var model: SettingsModel
     /// Advanced is collapsed by default — only interested users
@@ -13,66 +12,58 @@ struct GeneralTab: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                presetSection
-                profileSection
+                behaviourSection
                 advancedSection
             }
             .padding(16)
         }
     }
 
-    private var presetSection: some View {
-        SettingsSection("Presets") {
-            Text(
-                "Applying a preset rewrites the visual tuning. "
-                    + "Your keybindings and app rules are kept. "
-                    + "Nothing is written until you press Save."
-            )
-            .font(.caption)
-            .foregroundStyle(.secondary)
-            ForEach(ConfigPreset.allCases) { preset in
-                HStack {
-                    VStack(alignment: .leading) {
-                        Text(preset.title).font(.headline)
-                        Text(preset.summary)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    Button("Apply") {
-                        model.applyPreset(preset)
-                    }
-                }
-                .padding(.vertical, 2)
+    private var behaviourSection: some View {
+        SettingsSection("General behavior") {
+            Picker(
+                "Mouse resize action",
+                selection: $model.config.settings.mouseResize
+            ) {
+                Text("Resize adjacent windows")
+                    .tag(MouseResizeMode.layout)
+                Text("Snap back to slot")
+                    .tag(MouseResizeMode.snapBack)
             }
-        }
-    }
+            .pickerStyle(.segmented)
+            .padding(.bottom, 4)
 
-    private var profileSection: some View {
-        SettingsSection("Saved profiles") {
-            if model.profiles.isEmpty {
-                Text("No profiles saved yet.")
-                    .font(.caption)
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Animations")
+                    .font(.subheadline)
+                    .bold()
                     .foregroundStyle(.secondary)
-            }
-            ForEach(model.profiles, id: \.self) { name in
-                HStack {
-                    Image(systemName: "square.stack.3d.up")
-                        .foregroundStyle(.secondary)
-                    Text(name)
-                    if name == model.activeProfile {
-                        Text("active")
-                            .font(.caption2)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 1)
-                            .background(.tint.opacity(0.2))
-                            .clipShape(Capsule())
-                    }
-                    Spacer()
-                    Button("Load") {
-                        model.loadProfile(named: name)
-                    }
-                }
+
+                Toggle(
+                    "Virtual space switches",
+                    isOn: $model.config.settings.animations
+                        .onSpaceChange
+                )
+                Toggle(
+                    "Scrolling space focus shifts",
+                    isOn: $model.config.settings.animations
+                        .onScrolling
+                )
+                Toggle(
+                    "Window resizes",
+                    isOn: $model.config.settings.animations
+                        .onWindowResize
+                )
+                Toggle(
+                    "Window swaps",
+                    isOn: $model.config.settings.animations
+                        .onWindowSwap
+                )
+                Toggle(
+                    "Layout reflows",
+                    isOn: $model.config.settings.animations
+                        .onRelayout
+                )
             }
         }
     }

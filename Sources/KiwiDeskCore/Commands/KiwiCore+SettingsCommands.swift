@@ -37,7 +37,7 @@ extension KiwiCore {
             else {
                 return .fail("expected layout|snap_back")
             }
-            tiler.mouseResize = mode
+            tiler.settings.mouseResize = mode
         case "enable_wake_restore":
             guard let enabled = args.first?.boolValue else {
                 return .fail("expected boolean")
