@@ -70,10 +70,10 @@ public struct FrameAnimation: Sendable {
         initialDistance = Self.distance(current, target)
     }
 
-    /// True once at least half the distance is covered. Sizes
-    /// are applied stepwise (start size until here, target
-    /// size after): a resize forces the app to re-lay-out its
-    /// content, which is far too expensive per frame.
+    /// True once at least half the distance is covered. A
+    /// growing window switches to its target size here, where
+    /// the ongoing slide masks the single-frame size jump and
+    /// the window already sits near its final origin.
     public var pastHalfway: Bool {
         Self.distance(current, target) * 2 <= initialDistance
     }

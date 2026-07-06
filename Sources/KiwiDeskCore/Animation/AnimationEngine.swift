@@ -14,16 +14,17 @@ import CoreGraphics
 /// duplicates are skipped: sub-pixel deltas don't render but
 /// each one would still cost a blocking AX round-trip.
 ///
-/// Sizes are applied stepwise (rift-style): a window keeps
-/// its size until the animation passes the halfway mark, then
-/// jumps to the target size. Every other frame is
-/// position-only — one AX call, and the target app never
-/// re-lays-out its content mid-flight.
+/// Sizes are applied stepwise, split by direction: a
+/// shrinking window takes its target size on the first frame,
+/// a growing one holds its start size until halfway and then
+/// grows in one frame, where the ongoing slide masks the jump.
+/// Every other frame is position-only — one AX call, and the
+/// target app never re-lays-out its content mid-flight.
 @MainActor
 public final class AnimationEngine {
     /// Applies one interpolated frame to a real window.
-    /// `setSize` marks the rare frames that change size (the
-    /// halfway switch and the final frame); all others are
+    /// `setSize` marks the rare frames that change size (a
+    /// size step and the final frame); all others are
     /// position-only.
     public var apply: @MainActor (WindowID, CGRect, Bool) -> Void =
         { _, _, _ in }
@@ -41,8 +42,13 @@ public final class AnimationEngine {
     /// restoration.
     public var onAllAnimationsEnded: @MainActor () -> Void = {}
 
-    /// `enable_animations`: when false, frames apply instantly.
-    public var isEnabled = true
+    /// Test seam: when false, `animate` applies the target
+    /// frame synchronously instead of spring-animating it, so
+    /// unit tests get deterministic placement without driving
+    /// the display-link clock. Not reachable from config — the
+    /// instant path can't reliably place windows on slow-AX
+    /// apps, so animation is always on in production.
+    var isEnabled = true
 
     /// Animation duration in ms, clamped to 50–1000.
     /// Maps onto the spring's response time (250 ms = 0.35 s).
@@ -56,8 +62,9 @@ public final class AnimationEngine {
     private var drivers: [DisplayID: DisplayLinkDriver] = [:]
     /// Last rounded frame sent per window, for no-op skipping.
     private var lastApplied: [WindowID: CGRect] = [:]
-    /// The size a window actually has on screen right now;
-    /// held until the halfway switch to the target size.
+    /// The size a window actually has on screen right now:
+    /// per axis, the target size once shrinking or past
+    /// halfway, otherwise the start size held until then.
     private var heldSize: [WindowID: CGSize] = [:]
 
     public init() {}
@@ -108,7 +115,7 @@ public final class AnimationEngine {
                 // Pre-set the target size at the current position
                 // so only position slides. The app resizes once
                 // at its spawn point, then moves smoothly — no
-                // visible halfway size snap.
+                // visible mid-flight size snap.
                 heldSize[window] = target.size
                 apply(
                     window,
@@ -245,23 +252,33 @@ public final class AnimationEngine {
                 heldSize[id] = nil
                 onAnimationEnd(id)
             } else {
-                // Stepwise size: hold the on-screen size until
-                // halfway, then switch to the target size. For
-                // pure moves the sizes match and no resize is
-                // ever emitted.
-                //
-                // Pure resizes are stepwise too. Interpolating
-                // the size per tick emits a resize per frame,
-                // and slow AX responders (Electron/WebKit)
-                // re-lay-out on each one: their echoes fall
-                // seconds behind, which strands the window
-                // mid-size when a later retile trusts the
-                // stale state frames (issue #45).
-                let size =
-                    animation.pastHalfway
-                    ? animation.targetFrame.size
-                    : heldSize[id]
-                        ?? Self.rounded(animation.frame).size
+                // Stepwise size, split per axis (issue #45).
+                // A shrinking axis takes its target size on the
+                // first frame — mid-flight overlap clears at
+                // once (siblings yielding room to a newly
+                // opened window). A growing axis holds its start
+                // size until halfway, then grows in one frame,
+                // where the ongoing slide masks the jump and the
+                // window sits near its final origin (any clamp
+                // there self-heals on the exact settle frame).
+                // Either way a single size-set lands mid-flight;
+                // interpolating per tick would instead make slow
+                // AX responders (Electron/WebKit) re-lay-out
+                // continuously and fall seconds behind,
+                // stranding the window mid-size. Pure moves keep
+                // the sizes equal, so no resize is emitted.
+                let held =
+                    heldSize[id]
+                    ?? Self.rounded(animation.frame).size
+                let target = animation.targetFrame.size
+                let grown = animation.pastHalfway
+                let width =
+                    target.width <= held.width || grown
+                    ? target.width : held.width
+                let height =
+                    target.height <= held.height || grown
+                    ? target.height : held.height
+                let size = CGSize(width: width, height: height)
                 let setSize = size != heldSize[id]
                 heldSize[id] = size
                 let frame = CGRect(

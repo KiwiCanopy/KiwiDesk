@@ -77,8 +77,8 @@ final class FrameApplier {
     // MARK: - Frame application
 
     /// Hands one frame to the target app's queue. `setSize`
-    /// marks the rare frames that change size (the halfway
-    /// switch and the final frame); all others apply position
+    /// marks the rare frames that change size (a size step and
+    /// the final frame); all others apply position
     /// only — a single AX call that never forces the app to
     /// re-lay-out its content.
     func apply(_ id: WindowID, _ frame: CGRect, setSize: Bool) {
