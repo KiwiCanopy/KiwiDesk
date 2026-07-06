@@ -114,6 +114,13 @@ extension KiwiCore {
         let target = SpaceID(raw)
         let from = state.workspaces.space(of: focused)
         state.workspaces.add(focused, to: target)
+        // The moved window becomes the target space's focus, so
+        // the FIRST focus of that space raises it. Without this,
+        // `focusSpace` finds no focus to hand over and the window
+        // is un-stashed frame-wise but never brought forward —
+        // the space renders empty until a later focus event
+        // stamps the focus and a second switch surfaces it (#22).
+        state.workspaces.focus(focused, in: target)
         if from != target {
             emitWindowMovedToSpace(
                 focused,
