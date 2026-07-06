@@ -29,6 +29,11 @@ public final class KiwiCore {
     /// (see scheduleFocusFollow).
     var pendingFocusFollow: Task<Void, Never>?
 
+    /// One-shot re-assertion of a virtual space's layout shortly
+    /// after a switch, catching windows whose single frame-set a
+    /// slow/background app dropped (see scheduleSpaceSettle).
+    var pendingSpaceSettle: Task<Void, Never>?
+
     /// One-shot startup sweep re-tracking windows the cold
     /// AX scan missed (see start()).
     var pendingStartupSweep: Task<Void, Never>?

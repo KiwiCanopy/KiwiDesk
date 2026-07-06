@@ -69,6 +69,7 @@ extension KiwiCore {
     public func stop() {
         pendingFocusFollow?.cancel()
         pendingStartupSweep?.cancel()
+        pendingSpaceSettle?.cancel()
         mouse.stop()
         eventLoop.stop()
         sleepWake.stop()

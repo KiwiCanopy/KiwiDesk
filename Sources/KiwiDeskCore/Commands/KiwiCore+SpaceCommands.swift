@@ -98,7 +98,42 @@ extension KiwiCore {
             focusWindow(next)
         }
         emitSpaceChange()
+        scheduleSpaceSettle(SpaceID(raw))
         return .ok()
+    }
+
+    /// A virtual-space switch applies each window's target frame
+    /// exactly once. Slow-AX apps (Electron/WebKit answer lazily)
+    /// and deprioritized background windows occasionally drop
+    /// that single position update and stay parked offscreen, so
+    /// the space comes up missing windows until another switch
+    /// re-issues the frames. Re-assert the layout once, shortly
+    /// after the switch, so the stragglers land without a manual
+    /// second focus. Mirrors `settleAfterNativeSwitch` (#22).
+    ///
+    /// Layout only — no focus re-assert (unlike the native
+    /// settle): a virtual switch already handed real focus to the
+    /// space's window, so only dropped *frames* need recovery,
+    /// not focus. Single-shot: an app that drops the frame again
+    /// on the retry still needs another switch — if that recurs,
+    /// re-issue only the windows still at the stash corner rather
+    /// than lengthening or repeating this timer.
+    func scheduleSpaceSettle(_ target: SpaceID) {
+        pendingSpaceSettle?.cancel()
+        pendingSpaceSettle = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: .milliseconds(300))
+            guard !Task.isCancelled, let self,
+                self.state.workspaces.activeSpace == target,
+                // A native desktop switch in this window runs its
+                // own retile + settle and is still re-tracking
+                // windows; don't collide (cf. scheduleFocusFollow).
+                Date().timeIntervalSince(self.lastNativeSwitch) > 1
+            else { return }
+            self.retile(
+                animated: self.tiler.animateSpaceSwitch,
+                force: true
+            )
+        }
     }
 
     func moveToSpace(
@@ -133,6 +168,9 @@ extension KiwiCore {
             state.workspaces.activate(target)
             focusWindow(focused)
             emitSpaceChange()
+            // Following is a space switch too: re-assert so the
+            // target's other windows survive a dropped frame.
+            scheduleSpaceSettle(target)
         } else if let next = activeSpace?.focused {
             // The moved window would keep macOS focus while
             // stashed offscreen; refocus the current space.
