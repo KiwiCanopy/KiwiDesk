@@ -26,7 +26,8 @@ public enum LuaConfigWriter {
         sections.append(appBarStyle(config.settings.appBarStyle))
         sections.append(layoutParams(config.settings))
         sections.append(dragVisuals(config.settings))
-        sections.append(generalBehavior(config.settings))
+        sections.append(mouseResize(config.settings))
+        sections.append(animations(config.settings))
         sections.append(appRules(config.appRules))
         sections.append(floatRules(config.floatRules))
         sections.append(
@@ -164,40 +165,30 @@ public enum LuaConfigWriter {
             .joined(separator: "\n")
     }
 
-    /// Mouse-resize mode and the per-trigger animation toggles
-    /// (issue #12). Sleep/wake restore (`enable_wake_restore`,
-    /// `set_wake_restore_delay`) is deliberately not emitted —
-    /// it's an advanced knob left to hand-written `init.lua`.
-    static func generalBehavior(
-        _ settings: TilingSettings
-    ) -> String {
-        var lines: [String] = []
-        lines.append(
-            "KiwiDesk.set_mouse_resize("
-                + LuaLiteral.string(settings.mouseResize.rawValue)
-                + ")"
-        )
+    /// `set_mouse_resize` (issue #12). Sleep/wake restore
+    /// (`enable_wake_restore`, `set_wake_restore_delay`) is
+    /// deliberately not emitted — it's an advanced knob left to
+    /// hand-written `init.lua`.
+    static func mouseResize(_ settings: TilingSettings) -> String {
+        "KiwiDesk.set_mouse_resize("
+            + LuaLiteral.string(settings.mouseResize.rawValue)
+            + ")"
+    }
+
+    /// The per-trigger `animations.*` toggles (issue #11/#12).
+    static func animations(_ settings: TilingSettings) -> String {
         let anims = settings.animations
-        lines.append(
+        return [
             "animations.set_on_space_change("
-                + LuaLiteral.bool(anims.onSpaceChange) + ")"
-        )
-        lines.append(
+                + LuaLiteral.bool(anims.onSpaceChange) + ")",
             "animations.set_on_scrolling("
-                + LuaLiteral.bool(anims.onScrolling) + ")"
-        )
-        lines.append(
+                + LuaLiteral.bool(anims.onScrolling) + ")",
             "animations.set_on_window_resize("
-                + LuaLiteral.bool(anims.onWindowResize) + ")"
-        )
-        lines.append(
+                + LuaLiteral.bool(anims.onWindowResize) + ")",
             "animations.set_on_window_swap("
-                + LuaLiteral.bool(anims.onWindowSwap) + ")"
-        )
-        lines.append(
+                + LuaLiteral.bool(anims.onWindowSwap) + ")",
             "animations.set_on_relayout("
-                + LuaLiteral.bool(anims.onRelayout) + ")"
-        )
-        return lines.joined(separator: "\n")
+                + LuaLiteral.bool(anims.onRelayout) + ")",
+        ].joined(separator: "\n")
     }
 }
