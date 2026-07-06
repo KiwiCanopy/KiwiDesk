@@ -45,6 +45,60 @@ extension KiwiCore {
         emitSpaceChange()
     }
 
+    /// Applies a built-in Preset and materializes it as a real,
+    /// editable profile named after the preset (`_N`-suffixed
+    /// when taken; repeated Applies accumulate copies — #53).
+    /// Spaces planned for the main display take the Main role;
+    /// secondary-screen spaces pin to the live fingerprints.
+    /// Returns the saved profile's name.
+    @discardableResult
+    public func applyStandard(
+        _ layout: StandardLayout
+    ) throws -> String {
+        let displays = state.workspaces.allDisplays
+        guard displays.count == layout.screenCount else {
+            throw ProfileSaveError.screenCountMismatch(
+                expected: layout.screenCount,
+                live: displays.count
+            )
+        }
+        let mainID = PositionalDisplays.liveMainID
+        guard
+            let composed = ProfileComposition.compose(
+                layout: layout,
+                displays: displays,
+                mainID: mainID
+            )
+        else {
+            throw ProfileSaveError.screenCountMismatch(
+                expected: layout.screenCount,
+                live: 0
+            )
+        }
+        apply(composed: composed)
+        let ordered = PositionalDisplays.ordered(
+            displays,
+            mainID: mainID
+        )
+        var pins: [SpaceID: String] = [:]
+        var mains: Set<SpaceID> = []
+        for space in composed.spaces {
+            let assigned = composed.assignment[space]
+            if assigned == ordered.first?.id || assigned == nil {
+                mains.insert(space)
+            } else if let display = ordered.first(where: {
+                $0.id == assigned
+            }) {
+                pins[space] = display.fingerprint
+            }
+        }
+        spacePins = pins
+        mainSpaces = mains
+        let name = profiles.freeName(base: layout.name)
+        try profiles.save(buildProfile(name: name))
+        return name
+    }
+
     /// Total space→display resolution (#36): explicit pin →
     /// Main role → the positional default (#53). Writes the
     /// result into workspace state so every space has a screen
@@ -80,6 +134,25 @@ extension KiwiCore {
                     composed?.assignment[id] ?? main.id
             }
             state.workspaces.assign(id, to: resolved)
+        }
+    }
+
+    /// Re-applies the active profile (or recomposes the active
+    /// Standard) after a config reload, so the Lua base state
+    /// never clobbers profile-owned tiling. No-op in the plain
+    /// transient state.
+    func reapplyActiveProfileState() {
+        if let name = profiles.currentName,
+            let profile = try? profiles.read(name: name)
+        {
+            apply(profile: profile)
+        } else if profiles.currentStandard != nil,
+            let composed = ProfileComposition.compose(
+                displays: state.workspaces.allDisplays,
+                mainID: PositionalDisplays.liveMainID
+            )
+        {
+            apply(composed: composed)
         }
     }
 

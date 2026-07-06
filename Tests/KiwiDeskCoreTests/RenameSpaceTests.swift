@@ -4,8 +4,9 @@ import Testing
 @testable import KiwiDeskCore
 
 /// `GuiConfig.renameSpace` must migrate every place a SpaceID is
-/// referenced (#13): the list, modes, app rules, the monitor map,
-/// and the space-targeting Lua inside keybindings.
+/// referenced (#13): the list, modes, app rules, the monitor
+/// pins and Main role, and the space-targeting Lua inside
+/// keybindings.
 @Suite("Space rename migration")
 struct RenameSpaceTests {
     private func richConfig() -> GuiConfig {
@@ -13,7 +14,8 @@ struct RenameSpaceTests {
         config.spaces = [SpaceID("2"), SpaceID("mail")]
         config.spaceModes = [SpaceID("2"): .stack]
         config.appRules = ["Spotify": SpaceID("2")]
-        config.spaceMonitorMap = [SpaceID("2"): ["LG:2560x1440"]]
+        config.spacePins = [SpaceID("2"): "LG:2560x1440"]
+        config.mainSpaces = [SpaceID("mail")]
         config.settings.gapsOverride[SpaceID("2")] = .uniform(12)
         config.settings.placementOverride[SpaceID("2")] = .last
         config.modes = [
@@ -58,10 +60,10 @@ struct RenameSpaceTests {
         #expect(config.spaceModes[SpaceID("2")] == nil)
         #expect(config.appRules["Spotify"] == SpaceID("main"))
         #expect(
-            config.spaceMonitorMap[SpaceID("main")]
-                == ["LG:2560x1440"]
+            config.spacePins[SpaceID("main")]
+                == "LG:2560x1440"
         )
-        #expect(config.spaceMonitorMap[SpaceID("2")] == nil)
+        #expect(config.spacePins[SpaceID("2")] == nil)
         let lua = config.modes[0].bindings.map(\.lua)
         #expect(
             lua.contains(
@@ -156,20 +158,25 @@ struct RenameSpaceTests {
     func decodeDropsEmptyNames() throws {
         var config = GuiConfig()
         config.spaces = [SpaceID(""), SpaceID("1")]
-        config.spaceModes = [SpaceID(""): .stack]
-        config.spaceMonitorMap = [SpaceID(""): ["fp"]]
         config.appRules = ["Mail": SpaceID("")]
-        config.settings.gapsOverride[SpaceID("")] = .uniform(4)
         let data = try JSONEncoder().encode(config)
         let decoded = try JSONDecoder().decode(
             GuiConfig.self,
             from: data
         )
         #expect(decoded.spaces == [SpaceID("1")])
-        #expect(decoded.spaceModes.isEmpty)
-        #expect(decoded.spaceMonitorMap.isEmpty)
         #expect(decoded.appRules.isEmpty)
-        #expect(decoded.settings.gapsOverride.isEmpty)
+    }
+
+    @Test("rename moves the Main role with the space")
+    func migratesMainRole() {
+        var config = richConfig()
+        _ = config.renameSpace(
+            from: SpaceID("mail"),
+            to: SpaceID("inbox")
+        )
+        #expect(!config.mainSpaces.contains(SpaceID("mail")))
+        #expect(config.mainSpaces.contains(SpaceID("inbox")))
     }
 
     @Test("renaming to the same id succeeds trivially")

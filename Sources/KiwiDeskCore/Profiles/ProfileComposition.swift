@@ -30,15 +30,31 @@ public enum ProfileComposition {
         displays: [Display],
         mainID: DisplayID?
     ) -> Composed? {
+        guard
+            let layout = StandardProfiles.standard(
+                for: displays.count
+            )
+        else { return nil }
+        return compose(
+            layout: layout,
+            displays: displays,
+            mainID: mainID
+        )
+    }
+
+    /// Composes a specific built-in layout (a GUI Preset being
+    /// applied, or the count's Standard) onto the connected
+    /// displays, monocle-filling any screens beyond its plan.
+    public static func compose(
+        layout: StandardLayout,
+        displays: [Display],
+        mainID: DisplayID?
+    ) -> Composed? {
         let ordered = PositionalDisplays.ordered(
             displays,
             mainID: mainID
         )
-        guard !ordered.isEmpty,
-            let layout = StandardProfiles.standard(
-                for: ordered.count
-            )
-        else { return nil }
+        guard !ordered.isEmpty else { return nil }
 
         var spaces: [SpaceID] = []
         var modes: [SpaceID: LayoutMode] = [:]

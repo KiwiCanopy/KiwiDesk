@@ -47,11 +47,6 @@ public final class KiwiCore {
     /// events during the transition must not change spaces.
     var lastNativeSwitch: Date = .distantPast
 
-    /// `monitor_fallback` from init.lua (per-monitor chains).
-    public var monitorFallback: [String: [String]] = [:]
-    /// `space_monitor_map` from init.lua (per-space chains,
-    /// beats per-monitor rules).
-    public var spaceMonitorMap: [SpaceID: [String]] = [:]
     /// The live arrangement's space→monitor fingerprint pins,
     /// adopted from the active profile's matching monitor set
     /// and edited by the GUI Canvas (#36).

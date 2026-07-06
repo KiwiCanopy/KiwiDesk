@@ -16,9 +16,68 @@ extension KiwiCore {
     }
 
     /// The editable model for the dashboard: the saved sidecar
-    /// if present, otherwise a snapshot of live state.
+    /// if present, otherwise a snapshot of live state. The
+    /// sidecar only persists the global fields; the
+    /// profile-scoped ones (tiling, modes, pins) are overlaid
+    /// from live state, whose source of truth is the active
+    /// profile (#36).
     public func loadGuiConfig() -> GuiConfig {
-        guiConfigStore.load() ?? guiConfigSeed()
+        guard var config = guiConfigStore.load() else {
+            return guiConfigSeed()
+        }
+        overlayLiveProfileState(&config)
+        return config
+    }
+
+    /// Copies the live profile-scoped state into the model:
+    /// tiling settings, per-space modes, monitor pins, and the
+    /// Main role.
+    private func overlayLiveProfileState(
+        _ config: inout GuiConfig
+    ) {
+        config.settings = tiler.settings
+        var modes: [SpaceID: LayoutMode] = [:]
+        var live: [SpaceID] = []
+        for space in state.workspaces.allSpaces {
+            live.append(space.id)
+            if space.mode != .bsp {
+                modes[space.id] = space.mode
+            }
+        }
+        config.spaceModes = modes
+        config.spaces = GuiConfig.orderedSpaces(
+            config.spaces + live
+        )
+        config.spacePins = spacePins
+        config.mainSpaces = mainSpaces
+    }
+
+    /// Applies the model's profile-scoped state to the running
+    /// core (settings, modes, pins, Main role) and re-resolves
+    /// placement — the in-memory half of a profile save; the
+    /// caller persists via `persistProfile(named:)`.
+    public func applyProfileScopedState(
+        from config: GuiConfig
+    ) {
+        tiler.settings = config.settings
+        var known = Set(config.spaces)
+        known.formUnion(config.spaceModes.keys)
+        known.formUnion(config.spacePins.keys)
+        known.formUnion(config.mainSpaces)
+        for space in known {
+            state.workspaces.ensureSpace(space)
+        }
+        for space in state.workspaces.allSpaces {
+            state.workspaces.setMode(
+                space.id,
+                config.spaceModes[space.id] ?? .bsp
+            )
+        }
+        spacePins = config.spacePins
+        mainSpaces = config.mainSpaces
+        resolveSpaceDisplays()
+        retile()
+        emitSpaceChange()
     }
 
     /// Whether `init.lua` holds code outside the managed block
@@ -121,6 +180,11 @@ extension KiwiCore {
             encoding: .utf8
         )
         loadConfig()
+        // The reload reset the sparse tiling state and the
+        // managed block no longer re-declares it (#36); put the
+        // executed original's tiling back so adopt preserves
+        // the live arrangement until it is saved as a profile.
+        applyProfileScopedState(from: config)
         return config
     }
 
@@ -132,7 +196,8 @@ extension KiwiCore {
         var config = GuiConfig()
         config.settings = tiler.settings
         config.appRules = state.appRules
-        config.spaceMonitorMap = spaceMonitorMap
+        config.spacePins = spacePins
+        config.mainSpaces = mainSpaces
         config.modes = recoverKeybindings()
         config.floatRules = eventLoop.floatRules.rawRules
         var modes: [SpaceID: LayoutMode] = [:]

@@ -25,6 +25,10 @@ extension KiwiCore {
         }
         applyConfigGlobals(from: fresh)
         retile()
+        // Lua-declared tiling is only the base state: the
+        // active profile (or transient Standard) owns tiling
+        // and goes back on top after a reload (#36).
+        reapplyActiveProfileState()
         // The current native space may carry a binding that
         // the config just (re)declared.
         applyNativeSpaceBinding()
@@ -40,8 +44,6 @@ extension KiwiCore {
     private func resetDeclarativeState() {
         state.appRules = [:]
         eventLoop.floatRules = FloatRules([])
-        monitorFallback = [:]
-        spaceMonitorMap = [:]
         tiler.settings.gapsOverride = [:]
         tiler.settings.placementOverride = [:]
         for space in state.workspaces.allSpaces
@@ -65,31 +67,6 @@ extension KiwiCore {
                 }
             }
             state.appRules = mapped
-        }
-        if case .table(let fallback) = lua.global(
-            "monitor_fallback"
-        ) {
-            var mapped: [String: [String]] = [:]
-            for (monitor, value) in fallback {
-                if case .array(let chain) = value {
-                    mapped[monitor] = chain.compactMap(
-                        \.stringValue
-                    )
-                }
-            }
-            monitorFallback = mapped
-        }
-        if case .table(let map) = lua.global(
-            "space_monitor_map"
-        ) {
-            var mapped: [SpaceID: [String]] = [:]
-            for (space, value) in map {
-                if case .array(let chain) = value {
-                    mapped[SpaceID(space)] =
-                        chain.compactMap(\.stringValue)
-                }
-            }
-            spaceMonitorMap = mapped
         }
     }
 
