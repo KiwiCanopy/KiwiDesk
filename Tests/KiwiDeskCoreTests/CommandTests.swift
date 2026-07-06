@@ -168,14 +168,9 @@ struct CommandTests {
         #expect(windows.count == 1)
     }
 
-    @Test("Toggles reach animation and wake-restore")
+    @Test("Toggles reach space animation and wake-restore")
     func toggles() {
         let core = makeCore()
-        core.execute(
-            "enable_animations",
-            args: [.bool(false)]
-        )
-        #expect(!core.tiler.animation.isEnabled)
         core.execute(
             "set_wake_restore_delay",
             args: [.number(2500)]

@@ -10,11 +10,6 @@ extension KiwiCore {
         _ args: [JSONValue]
     ) -> CommandResponse {
         switch command {
-        case "enable_animations":
-            guard let enabled = args.first?.boolValue else {
-                return .fail("expected boolean")
-            }
-            tiler.animation.isEnabled = enabled
         case "set_animation_duration":
             guard let ms = args.first?.intValue else {
                 return .fail("expected milliseconds")

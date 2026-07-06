@@ -64,8 +64,7 @@ KiwiDesk service restart
 | Diagnostics | `get_layout_info` | — |
 | | `list_monitors` | — |
 | | `debug_log` | message |
-| Animation | `enable_animations` | true\|false |
-| | `set_animation_duration` | ms (50–1000) |
+| Animation | `set_animation_duration` | ms (50–1000) |
 | | `set_space_animation` | true\|false (default false) |
 | Sleep/Wake | `enable_wake_restore` | true\|false |
 | | `set_wake_restore_delay` | ms |

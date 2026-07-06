@@ -41,7 +41,6 @@ public enum APIReference {
             ("list_monitors", "list_monitors"),
             ("debug_log", "debug_log"),
             ("reload_config", "reload_config"),
-            ("enable_animations", "enable_animations"),
             (
                 "set_animation_duration",
                 "set_animation_duration"

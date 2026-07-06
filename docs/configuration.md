@@ -789,7 +789,8 @@ haven't visited yet starts on the first virtual space.
 ## Animations, Sleep & Wake
 
 ```lua
-KiwiDesk.enable_animations(true)
+-- Window moves and resizes always animate: a spring settle is
+-- the only way to place windows reliably on slow-AX apps.
 KiwiDesk.set_animation_duration(250)  -- ms, clamped 50-1000
 
 -- Virtual space switches snap instantly by default: flying
