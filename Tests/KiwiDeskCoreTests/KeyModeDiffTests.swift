@@ -103,6 +103,39 @@ struct KeyModeDiffTests {
         #expect(over.modes[0].bindings.isEmpty)
     }
 
+    @Test("kind/label-only differences are inherited (no diff)")
+    func classifierUpgradeIsNotDivergence() {
+        // The GUI import classifier upgrades display metadata
+        // (.custom → .navigation, label filled) on the edited
+        // copy while the stored base keeps the raw rows. Same
+        // combo + lua = same action — an unchanged edit
+        // session must never mint an override.
+        var edited = base
+        edited[0].bindings[1] = KeyBinding(
+            combo: "alt+h",
+            lua: "focus_left",
+            kind: .navigation,
+            label: "Focus left"
+        )
+        #expect(
+            KeyModeOverride.diff(base: base, edited: edited)
+                == nil
+        )
+    }
+
+    @Test("Clearing a base icon is NOT expressible (reverts)")
+    func iconClearNotExpressed() {
+        // nil icon means inherit (`over.icon ?? base.icon`),
+        // so an icon-only clear drops out of the diff entirely
+        // — same delete-is-revert semantics as rows.
+        var edited = base
+        edited[1].icon = nil
+        #expect(
+            KeyModeOverride.diff(base: base, edited: edited)
+                == nil
+        )
+    }
+
     @Test("Deleted base row is NOT expressed (O4 revert)")
     func deletionNotExpressed() {
         var edited = base

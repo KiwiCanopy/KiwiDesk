@@ -73,8 +73,9 @@ extension KiwiCore {
             return config
         }
         onLog(
-            "structured: gui.json exists but could not "
-                + "be decoded — structured settings unchanged"
+            "structured: gui.json unreadable — rules and "
+                + "keybindings unavailable until it is "
+                + "fixed or deleted"
         )
         return nil
     }

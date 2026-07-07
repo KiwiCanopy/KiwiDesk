@@ -102,15 +102,18 @@ public struct KeyModeOverride: Sendable, Equatable {
 
 extension KeyModeOverride {
     /// Inverse of `resolved(onto:)`: the sparse override that,
-    /// resolved onto `base`, yields `edited`. Rows equal to
-    /// their base row (`KeyBinding ==`, id excluded) are
-    /// inherited and omitted; a row whose combo is absent from
-    /// base or whose action diverges is included. A mode
-    /// absent from base is included whole. An edited icon
-    /// differing from the base icon is carried (nil inherits).
-    /// Returns nil when nothing diverges — a fully-inherited
-    /// profile stores no override (O3 sparse; an empty
-    /// override is never persisted).
+    /// resolved onto `base`, yields `edited`. Rows matching a
+    /// base row SEMANTICALLY (`sameAction`: combo + lua —
+    /// display-only kind/label differences from the GUI
+    /// classifier never read as divergence) are inherited and
+    /// omitted; a row whose combo is absent from base or whose
+    /// action diverges is included. A mode absent from base is
+    /// included whole. An edited icon differing from the base
+    /// icon is carried (nil inherits — CLEARING a base icon
+    /// per profile is therefore not expressible; it reverts,
+    /// like row deletion). Returns nil when nothing diverges —
+    /// a fully-inherited profile stores no override (O3
+    /// sparse; an empty override is never persisted).
     ///
     /// DELETIONS are not expressible (O4 soft: base rows the
     /// override does not mention always survive) — a base row
@@ -136,7 +139,7 @@ extension KeyModeOverride {
             var rows: [KeyBinding] = []
             for row in mode.bindings {
                 let inherited = baseMode.bindings.contains {
-                    $0 == row
+                    $0.sameAction(as: row)
                 }
                 if !inherited {
                     rows.append(row)

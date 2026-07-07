@@ -111,4 +111,15 @@ public struct KeyBinding: Codable, Equatable, Sendable,
         lhs.combo == rhs.combo && lhs.lua == rhs.lua
             && lhs.kind == rhs.kind && lhs.label == rhs.label
     }
+
+    /// Semantic identity for the override cascade (#55):
+    /// combo + lua only. `kind` and `label` are display-only
+    /// metadata — the GUI import classifier may upgrade them
+    /// (`.custom` → `.navigation`, label filled), and that
+    /// must never read as divergence from the base, or an
+    /// unchanged edit session would persist spurious profile
+    /// overrides.
+    public func sameAction(as other: KeyBinding) -> Bool {
+        combo == other.combo && lua == other.lua
+    }
 }

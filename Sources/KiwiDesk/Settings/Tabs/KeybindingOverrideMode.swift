@@ -23,12 +23,13 @@ extension EnvironmentValues {
 }
 
 extension KeyBinding {
-    /// Whether this row is inherited unchanged from `base`
-    /// (id is excluded from equality, so a save/load cycle
-    /// does not break the match). Always false outside
-    /// override mode (`base == nil`).
+    /// Whether this row is inherited unchanged from `base` —
+    /// SEMANTIC match (`sameAction`: combo + lua), so the GUI
+    /// import classifier's display-only kind/label upgrades
+    /// never render an untouched row as overridden. Always
+    /// false outside override mode (`base == nil`).
     func isInherited(from base: [KeyBinding]?) -> Bool {
-        base?.contains(self) == true
+        base?.contains { $0.sameAction(as: self) } == true
     }
 }
 

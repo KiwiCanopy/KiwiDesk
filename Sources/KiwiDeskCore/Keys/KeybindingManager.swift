@@ -62,20 +62,35 @@ public final class KeybindingManager {
 
     // MARK: - Registration (from Lua)
 
-    /// `KiwiDesk.bind(combo, fn)` — default mode.
+    /// `KiwiDesk.bind(combo, fn)` — default mode. A rebound
+    /// combo's displaced ref is released (registry slots must
+    /// not leak between resets).
     public func bind(_ combo: KeyCombo, ref: Int32) {
-        modes[Self.defaultMode, default: [:]][combo] = ref
+        let old = modes[Self.defaultMode, default: [:]]
+            .updateValue(ref, forKey: combo)
+        if let old, old != ref {
+            lua?.release(ref: old)
+        }
         if currentMode == Self.defaultMode {
             activate(Self.defaultMode)
         }
     }
 
     /// `KiwiDesk.define_mode(name, { key = fn, ... }, opts)`.
+    /// Redefining an existing mode releases the displaced
+    /// refs — a duplicate mode name in hand-edited config must
+    /// not leak registry slots until the next reload.
     public func defineMode(
         _ name: String,
         bindings: [KeyCombo: Int32],
         icon: String? = nil
     ) {
+        if let lua, let old = modes[name] {
+            for ref in old.values
+            where bindings.values.contains(ref) == false {
+                lua.release(ref: ref)
+            }
+        }
         modes[name] = bindings
         if let icon, !icon.isEmpty {
             modeIcons[name] = icon
@@ -104,7 +119,10 @@ public final class KeybindingManager {
         onModeChange(name)
     }
 
-    /// Clears everything (config reload).
+    /// Clears everything (config reload / profile apply).
+    /// Falling back to the default mode notifies
+    /// `onModeChange` — the menu-bar indicator must not keep
+    /// showing a mode whose bindings just went away.
     public func reset() {
         deactivate()
         if let lua {
@@ -116,7 +134,11 @@ public final class KeybindingManager {
         }
         modes = [:]
         modeIcons = [:]
+        let changed = currentMode != Self.defaultMode
         currentMode = Self.defaultMode
+        if changed {
+            onModeChange(Self.defaultMode)
+        }
     }
 
     // MARK: - Hotkey activation

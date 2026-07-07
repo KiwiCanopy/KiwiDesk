@@ -179,6 +179,43 @@ struct ProfileSpaceOrderTests {
         )
     }
 
+    // MARK: live order beats a stale sidecar list
+
+    /// The live order (reconciled on every apply/save) beats
+    /// a stale sidecar list: after loading a profile whose
+    /// order differs from gui.json, live editing must show —
+    /// and a live Update must capture — the profile's order,
+    /// not the sidecar's (#55 final review M2).
+    @Test("loadGuiConfig prefers live order over stale sidecar")
+    func liveOrderBeatsStaleSidecar() throws {
+        let core = makeCore()
+        connect(core, [display(1, "A")])
+        // Sidecar remembers an old display order.
+        var sidecar = GuiConfig()
+        sidecar.spaces = [
+            SpaceID("a"), SpaceID("m"), SpaceID("z"),
+        ]
+        try core.guiConfigStore.save(sidecar)
+        // Live state reconciled to a profile order z,m.
+        core.state.workspaces.ensureSpace(SpaceID("a"))
+        core.state.workspaces.ensureSpace(SpaceID("m"))
+        core.state.workspaces.ensureSpace(SpaceID("z"))
+        core.state.workspaces.reorder(matching: [
+            SpaceID("z"), SpaceID("m"),
+        ])
+
+        let cfg = core.loadGuiConfig()
+
+        let interesting = cfg.spaces.filter {
+            ["z", "m", "a"].contains($0.raw)
+        }
+        #expect(
+            interesting == [
+                SpaceID("z"), SpaceID("m"), SpaceID("a"),
+            ]
+        )
+    }
+
     // MARK: sidecar and profile agree after load
 
     /// After loading a profile with stored order ["z","m","a"],

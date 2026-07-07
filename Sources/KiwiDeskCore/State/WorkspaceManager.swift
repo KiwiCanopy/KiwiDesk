@@ -59,9 +59,13 @@ public struct WorkspaceManager: Sendable {
     /// ONE order representation.
     public mutating func reorder(matching desired: [SpaceID]) {
         let current = Set(order)
-        let front = desired.filter { current.contains($0) }
-        let frontSet = Set(front)
-        let rest = order.filter { !frontSet.contains($0) }
+        var seen: Set<SpaceID> = []
+        // First occurrence wins — a duplicate id in `desired`
+        // must not duplicate a space in the iteration order.
+        let front = desired.filter {
+            current.contains($0) && seen.insert($0).inserted
+        }
+        let rest = order.filter { !seen.contains($0) }
         order = front + rest
     }
 

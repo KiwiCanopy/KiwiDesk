@@ -78,7 +78,10 @@ final class SettingsModel: ObservableObject {
     @Published var keybindingWarning: String?
 
     let core: KiwiCore
-    private var suppressDirty = false
+    /// Guards the `config.didSet` dirty flag during reload
+    /// cycles (also used by the profile-editing reload in
+    /// `SettingsModel+ProfileOverrides.swift`).
+    var suppressDirty = false
     /// The sidecar as last loaded — the baseline that decides
     /// whether a save must also regenerate the global files
     /// (see `SettingsModel+Profiles`).
@@ -105,31 +108,9 @@ final class SettingsModel: ObservableObject {
     /// Whether the dashboard is editing a stored profile rather
     /// than the live config (#18) — hides App Rules, renders
     /// the Shortcuts tab in override mode (#55 phase 7), and
-    /// swaps the footer's save action.
+    /// swaps the footer's save action. The editing surface
+    /// lives in `SettingsModel+ProfileOverrides.swift`.
     var editingStoredProfile: Bool { editingProfile != nil }
-
-    /// The selected mode's base rows for the Shortcuts tab's
-    /// override affordance; nil during live editing, empty
-    /// when the mode only exists in the profile.
-    func overrideBaseRows(mode name: String) -> [KeyBinding]? {
-        guard let base = profileEditingBaseModes else {
-            return nil
-        }
-        return base.first { $0.name == name }?.bindings ?? []
-    }
-
-    /// True while the edited profile's shortcuts diverge from
-    /// the base — drives the "overrides base keybindings"
-    /// indicator (#55 phase 7).
-    var editedProfileOverridesKeys: Bool {
-        guard let base = profileEditingBaseModes else {
-            return false
-        }
-        return KeyModeOverride.diff(
-            base: base,
-            edited: config.modes
-        ) != nil
-    }
 
     // MARK: - Sync with the backend
 
@@ -170,43 +151,6 @@ final class SettingsModel: ObservableObject {
         // the overlaid spaces union, and deleting + re-adding
         // a transient space alone doesn't read as an edit.
         savedSidecar = core.isGuiManaged ? config : nil
-        refreshProfiles()
-        isDirty = false
-    }
-
-    /// Reload path for the profile-dropdown edit mode (#18): seed
-    /// the tabs from a stored profile's JSON instead of live
-    /// state. A profile that has vanished falls back to live
-    /// editing. Stored-profile edits never touch the raw Lua
-    /// editor or the global sidecar — only the profile JSON is
-    /// written — so `savedSidecar` is cleared.
-    private func reloadEditingProfile(_ name: String) {
-        guard var loaded = try? core.loadGuiConfig(editing: name)
-        else {
-            editingProfile = nil
-            reload()
-            return
-        }
-        suppressDirty = true
-        KeybindingImportClassifier.classify(&loaded)
-        config = loaded
-        suppressDirty = false
-        // Diff baseline for the override-mode Shortcuts tab
-        // (#55 phase 7): the raw base modes, NOT the resolved
-        // set the tabs edit.
-        profileEditingBaseModes =
-            core.guiConfigStore.load()?.modes ?? []
-        // Stored-profile editing is mutually exclusive with the
-        // raw Lua editor — leaving it on would let a global
-        // init.lua write escape edit mode.
-        forcedLuaEditor = false
-        hasCustomLua = false
-        showLuaEditor = false
-        savedSidecar = nil
-        let live = displays.map(\.fingerprint)
-        placementEditable =
-            (try? core.profiles.read(name: name))?
-            .set(matching: live) != nil
         refreshProfiles()
         isDirty = false
     }

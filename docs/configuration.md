@@ -37,11 +37,13 @@ Earlier versions generated a delimited "managed block" inside
 -- <<< KiwiDesk managed block <<<
 ```
 
-A leftover block is harmless but stale: it still runs, and the
-app's own settings are applied after it and win. It is never
-regenerated — delete it by hand whenever convenient (the
-markers are recognized, so a stale block does not force the
-raw editor described below).
+A leftover block is harmless but stale: it still runs, and
+the app's own rules and keybindings are applied after it and
+win. (Tiling calls inside a stale block remain live base
+state until a profile loads, like any hand-written tiling —
+see below.) The block is never regenerated — delete it by
+hand whenever convenient; the markers are recognized, so a
+stale block does not force the raw editor described below.
 
 **Harmless custom Lua coexists** with the visual editor. A
 `print`, a debug call, a sketchybar hook — any Lua that doesn't
@@ -713,6 +715,9 @@ The override is **sparse and soft by design**:
 - Removing a base binding per profile is not expressible:
   deleting an inherited row in the editor just resets it. To
   disable a combo in one profile, rebind it to a no-op action.
+  The same applies to a base mode's menu bar icon — a profile
+  can *change* it, but clearing it just reverts to the base
+  icon.
 - Keybindings live in ONE home: the structured config
   (gui.json + profiles) when GUI-managed, or your `init.lua`
   otherwise — never merged. Hand-written binds that evade the
@@ -1059,6 +1064,12 @@ Both also rewrite `gui.json` when a global setting
 (keybindings, app/float rules, Space bindings) changed — a
 tiling-only edit touches only the profile JSON, and
 `init.lua` is never written either way.
+
+Neither live save carries a keybinding override: the live
+Shortcuts tab edits the *base* shortcuts, so **Update** and
+**Save as new…** capture tiling only. To give a profile its
+own shortcuts, pick it in the banner dropdown and edit its
+Shortcuts tab in override mode (below).
 
 ### Editing a saved profile (not just the active one)
 

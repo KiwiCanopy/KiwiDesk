@@ -16,6 +16,18 @@ extension KiwiCore {
         GuiConfigStore(directory: configDirectory)
     }
 
+    /// The base keybinding modes every profile override
+    /// resolves onto AND diffs against — the ONE definition
+    /// shared by the resolve side (`loadGuiConfig(editing:)`),
+    /// the diff side (`overwriteProfile`), and the GUI's
+    /// override-mode baseline (#55). Sidecar modes when the
+    /// sidecar decodes; the live seed otherwise. Asymmetric
+    /// bases would mint spurious overrides (e.g. the whole
+    /// recovered set diffed against []).
+    public func baseKeyModes() -> [KeyMode] {
+        (guiConfigStore.load() ?? guiConfigSeed()).modes
+    }
+
     /// The editable model for the dashboard: the saved sidecar
     /// if present, otherwise a snapshot of live state. The
     /// sidecar only persists the global fields; the
@@ -95,18 +107,15 @@ extension KiwiCore {
             }
         }
         config.spaceModes = modes
-        // Live state is authoritative for which spaces EXIST (#75).
-        // Order: use the sidecar's stored list as the base (keeps
-        // the user's chosen display order across reloads), filter
-        // to live members, then append any live space absent from
-        // the sidecar. Stale sidecar spaces (no longer live after a
-        // profile-load prune) drop via the filter. A bare space
-        // only in `gui.json` drops too — it wasn't seeded at boot.
-        let liveSet = Set(live)
-        let ordered = config.spaces.filter { liveSet.contains($0) }
-        let inOrdered = Set(config.spaces)
-        let extra = live.filter { !inOrdered.contains($0) }
-        config.spaces = SpaceID.deduplicated(ordered + extra)
+        // Live state is authoritative for which spaces EXIST
+        // and for their ORDER (#75/#55): every profile apply
+        // and every GUI save reconciles the live order via
+        // `WorkspaceManager.reorder`, so the live list already
+        // carries the chosen display order — while the
+        // sidecar's list can be stale (e.g. right after
+        // loading a profile whose order differs). A bare space
+        // only in `gui.json` drops — it wasn't seeded at boot.
+        config.spaces = SpaceID.deduplicated(live)
         config.spacePins = spacePins
         config.mainSpaces = mainSpaces
     }
