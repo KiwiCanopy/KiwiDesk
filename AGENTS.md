@@ -264,7 +264,10 @@ Keep this list updated whenever a recurring mistake is found.
   ships, it **must** carry a parity test — and prefer one that
   discovers fields by reflection / shared `CodingKeys` over a
   hand-enumerated list, so the guard itself cannot silently rot
-  (a hand-listed parity test is one more place to forget). Reach
+  (a hand-listed parity test is one more place to forget). A
+  reflection net catches a missing *property*, not a forgotten
+  `resolved()` / `encode` line — back it with a round-trip +
+  resolve-every-field test for those. Reach
   for a generic/keypath merge only when it removes the drift, not
   just the `resolved()` lines — sparse `Codable` stays per-field
   either way, so generics rarely buy down the real risk and fight

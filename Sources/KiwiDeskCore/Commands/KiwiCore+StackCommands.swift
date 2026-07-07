@@ -127,7 +127,9 @@ extension KiwiCore {
         else {
             return .fail("no focused window")
         }
-        let count = tiler.settings.stack.masterCount
+        // Per-space master boundary (#17), matching layout math.
+        let count =
+            tiler.settings.resolvedStack(for: space.id).masterCount
         state.workspaces.withSpace(space.id) {
             if promote {
                 $0.promote(focused, masterCount: count)

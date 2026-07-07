@@ -54,9 +54,13 @@ extension KiwiCore {
         let tiled = space.windows.filter {
             state.windows[$0]?.isFloating == false
         }
+        // Everything below resolves against the active space's
+        // params (#17): base value, master classification, and
+        // the write target all follow the space's own override,
+        // never the global — so a resize can't shift other spaces.
+        let stack = tiler.settings.resolvedStack(for: space.id)
         let isMaster =
-            (tiled.firstIndex(of: id) ?? .max)
-            < tiler.settings.stack.masterCount
+            (tiled.firstIndex(of: id) ?? .max) < stack.masterCount
         let adjustment = MouseResize.translate(
             mode: space.mode,
             isMaster: isMaster,
@@ -66,26 +70,32 @@ extension KiwiCore {
         )
         switch adjustment {
         case .bspRatio(let delta):
-            let ratio = tiler.settings.bsp.splitRatio + delta
-            tiler.settings.bsp.splitRatio =
-                min(max(ratio, 0.1), 0.9)
+            let base =
+                tiler.settings.resolvedBsp(for: space.id).splitRatio
+            tiler.settings.setSplitRatio(
+                min(max(base + delta, 0.1), 0.9),
+                for: space.id
+            )
         case .masterRatio(let delta):
-            let ratio =
-                tiler.settings.stack.masterRatio + delta
-            tiler.settings.stack.masterRatio =
-                min(max(ratio, 0.1), 0.9)
+            tiler.settings.setMasterRatio(
+                min(max(stack.masterRatio + delta, 0.1), 0.9),
+                for: space.id
+            )
         case .scrollWidth(let delta):
             // Resize grows the slot by a pt delta: take the current
             // magnitude (a stored pt as-is; auto/% seeded against
             // the scroll axis), add the delta, store as points.
-            let horizontal =
-                tiler.settings.scrolling.barAxisIsHorizontal
+            let scrolling =
+                tiler.settings.resolvedScrolling(for: space.id)
+            let horizontal = scrolling.barAxisIsHorizontal
             let bounds = GeometryUtils.axVisibleFrame(of: screen)
             let along = horizontal ? bounds.width : bounds.height
-            let current = tiler.settings.scrolling.slotSize
+            let current = scrolling.slotSize
                 .editablePoints(along: along, horizontal: horizontal)
-            tiler.settings.scrolling.slotSize =
-                .points(clamping: current + delta)
+            tiler.settings.setSlotSize(
+                .points(clamping: current + delta),
+                for: space.id
+            )
         case nil:
             break
         }

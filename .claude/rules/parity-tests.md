@@ -14,6 +14,12 @@ The checklist for any code that repeats a struct's field list:
   discovers fields by **reflection / shared `CodingKeys`** over a
   hand-enumerated list — a hand-listed parity test is itself one
   more place to forget.
+- Know the net's reach: a reflection parity test catches a missing
+  field *property*, not a missing line in `resolved()` / `encode` /
+  `decode` (Swift can't drive those from reflection without
+  keypaths). Back it with a round-trip + resolve-every-field test
+  so a forgotten merge/encode line also fails — those stay
+  hand-listed, so treat them as part of the same mirror.
 - A keypath/generic merge is justified only when it removes the
   drift, not just the `resolved()` lines. Sparse `Codable` stays
   per-field either way, so generics rarely buy down the real risk

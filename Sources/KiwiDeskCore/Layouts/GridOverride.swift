@@ -35,6 +35,8 @@ public struct GridOverride: Sendable, Equatable {
         }
         if let columns { out.columns = columns }
         if let rows { out.rows = rows }
+        // Merged params hold no override map (see ScrollingOverride).
+        out.override = [:]
         return out
     }
 

@@ -25,6 +25,8 @@ public struct BspOverride: Sendable, Equatable {
         var out = global
         if let strategy { out.strategy = strategy }
         if let splitRatio { out.splitRatio = splitRatio }
+        // Merged params hold no override map (see ScrollingOverride).
+        out.override = [:]
         return out
     }
 

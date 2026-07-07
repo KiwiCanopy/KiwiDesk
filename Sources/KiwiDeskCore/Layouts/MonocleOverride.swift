@@ -27,6 +27,8 @@ public struct MonocleOverride: Sendable, Equatable {
     ) -> MonocleParams {
         var out = global
         if let orientation { out.orientation = orientation }
+        // Merged params hold no override map (see ScrollingOverride).
+        out.override = [:]
         return out
     }
 

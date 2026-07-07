@@ -278,6 +278,47 @@ public struct TilingSettings: Sendable, Equatable, Codable {
         monocle.override[space]?.resolved(onto: monocle) ?? monocle
     }
 
+    // MARK: - Per-space writes (interactive resize)
+
+    /// Writes a resize-adjusted value for `space`: into the
+    /// space's override when it already overrides that field,
+    /// else into the global params. So resizing a window edits
+    /// exactly the value the space currently displays — its
+    /// override when it has one, the global otherwise (the
+    /// pre-#17 behavior) — never silently shifting other spaces.
+    public mutating func setSplitRatio(
+        _ value: Double,
+        for space: SpaceID
+    ) {
+        if bsp.override[space]?.splitRatio != nil {
+            bsp.override[space]?.splitRatio = value
+        } else {
+            bsp.splitRatio = value
+        }
+    }
+
+    public mutating func setMasterRatio(
+        _ value: Double,
+        for space: SpaceID
+    ) {
+        if stack.override[space]?.masterRatio != nil {
+            stack.override[space]?.masterRatio = value
+        } else {
+            stack.masterRatio = value
+        }
+    }
+
+    public mutating func setSlotSize(
+        _ value: ScrollSize,
+        for space: SpaceID
+    ) {
+        if scrolling.override[space]?.slotSize != nil {
+            scrolling.override[space]?.slotSize = value
+        } else {
+            scrolling.slotSize = value
+        }
+    }
+
     public func context(
         bounds: CGRect,
         space: Space

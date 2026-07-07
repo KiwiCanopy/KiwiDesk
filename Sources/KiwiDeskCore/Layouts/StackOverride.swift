@@ -27,6 +27,8 @@ public struct StackOverride: Sendable, Equatable {
         if let masterCount { out.masterCount = masterCount }
         if let masterRatio { out.masterRatio = masterRatio }
         if let overflowStyle { out.overflowStyle = overflowStyle }
+        // Merged params hold no override map (see ScrollingOverride).
+        out.override = [:]
         return out
     }
 

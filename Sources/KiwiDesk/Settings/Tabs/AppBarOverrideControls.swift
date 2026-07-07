@@ -117,8 +117,10 @@ struct OverrideStepperRow: View {
     }
 }
 
-/// An override ratio field, shown as a 5–95% slider that stores
-/// the underlying 0...1 fraction.
+/// An override ratio field, shown as a 10–90% slider that stores
+/// the underlying 0...1 fraction. The range matches the Lua ratio
+/// clamp (`parseSplitRatio` / `parseMasterRatio`) so the GUI can't
+/// store a value the setters would reject.
 struct OverrideFractionRow: View {
     let label: String
     @Binding var value: Double?
@@ -135,7 +137,7 @@ struct OverrideFractionRow: View {
                         get: { bound.wrappedValue * 100 },
                         set: { bound.wrappedValue = $0 / 100 }
                     ),
-                    in: 5...95,
+                    in: 10...90,
                     step: 1
                 )
                 Text("\(Int(bound.wrappedValue * 100))%")

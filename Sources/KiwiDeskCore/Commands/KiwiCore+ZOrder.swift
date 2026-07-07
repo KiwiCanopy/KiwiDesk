@@ -47,7 +47,11 @@ extension KiwiCore {
     /// brings the focused window to the front, which is the
     /// expected override.
     private func restoreStackZOrder(_ space: Space) {
-        let boundary = max(1, tiler.settings.stack.masterCount)
+        // Per-space master boundary (#17), matching layout math.
+        let boundary = max(
+            1,
+            tiler.settings.resolvedStack(for: space.id).masterCount
+        )
         guard space.windows.count > boundary else { return }
         raiseSequentially(
             Array(space.windows[boundary...]),
@@ -133,7 +137,11 @@ extension KiwiCore {
         in space: Space
     ) -> Bool {
         guard space.mode == .stack else { return false }
-        let boundary = max(1, tiler.settings.stack.masterCount)
+        // Per-space master boundary (#17), matching layout math.
+        let boundary = max(
+            1,
+            tiler.settings.resolvedStack(for: space.id).masterCount
+        )
         guard let indexA = space.windows.firstIndex(of: a),
             let indexB = space.windows.firstIndex(of: b)
         else { return false }
