@@ -36,14 +36,14 @@ private func richConfig() -> GuiConfig {
     config.settings.animations.onSpaceChange = true
     config.settings.animations.onScrolling = false
     config.settings.placementOverride[SpaceID("mail")] = .last
+    config.spaces = [
+        SpaceID(1), SpaceID("browser"), SpaceID("mail"),
+        SpaceID("music"),
+    ]
     config.spaceModes = [
         SpaceID(1): .stack, SpaceID("music"): .floating,
     ]
     config.appRules = ["Spotify": SpaceID("music")]
-    config.spaceMonitorMap = [
-        SpaceID(1): ["LG:2560x1440"],
-        SpaceID("music"): ["Dell:1920x1080"],
-    ]
     config.floatRules = ["Calculator", "Finder:Get Info"]
     config.profileBindings = [2: "Studio"]
     config.modes = [
@@ -122,15 +122,6 @@ struct ConfigWriteTests {
         #expect(updated.contains("-- header"))
     }
 
-    @Test("gap writer collapses uniform values to a number")
-    func uniformGaps() {
-        var settings = TilingSettings()
-        settings.gapsGlobal = .uniform(10)
-        let lua = LuaConfigWriter.gaps(settings)
-        #expect(lua.contains("set_gap_global(10)"))
-        #expect(!lua.contains("top ="))
-    }
-
     @Test(
         "default mode never emits an icon; other modes do"
     )
@@ -177,27 +168,23 @@ struct ConfigWriteTests {
         #expect(!lua.contains("define_mode"))
     }
 
-    @Test("space_monitor_map emits a table; empty is omitted")
-    func spaceMonitorMapWriter() {
-        let map: [SpaceID: [String]] = [
-            SpaceID(1): ["LG:2560x1440"],
-            SpaceID("music"): ["Dell:1920x1080"],
-        ]
-        let lua = LuaConfigWriter.spaceMonitorMap(map)
-        #expect(lua.contains("space_monitor_map = {"))
-        #expect(lua.contains("[\"1\"] = { \"LG:2560x1440\" },"))
+    @Test("the managed block only carries global sections")
+    func blockIsGlobalOnly() {
+        let lua = LuaConfigWriter.block(for: richConfig())
+        // Globals present.
+        #expect(lua.contains("app_rules = {"))
+        #expect(lua.contains("float_rules = {"))
         #expect(
-            lua.contains(
-                "[\"music\"] = { \"Dell:1920x1080\" },"
-            )
+            lua.contains("bind_profile_to_native_space(2")
         )
-        #expect(LuaConfigWriter.spaceMonitorMap([:]).isEmpty)
-        // A space with an empty chain contributes nothing.
-        #expect(
-            LuaConfigWriter.spaceMonitorMap(
-                [SpaceID(1): []]
-            ).isEmpty
-        )
+        #expect(lua.contains("KiwiDesk.bind(\"alt+h\""))
+        // Tiling lives in the profile JSON, not init.lua (#36).
+        #expect(!lua.contains("set_gap_global"))
+        #expect(!lua.contains("set_mode"))
+        #expect(!lua.contains("set_min_window_size"))
+        #expect(!lua.contains("set_mouse_resize"))
+        #expect(!lua.contains("animations."))
+        #expect(!lua.contains("space_monitor_map"))
     }
 
     @Test("round-trip: write, reload, live state matches")
@@ -205,6 +192,7 @@ struct ConfigWriteTests {
         let core = makeCore()
         let config = richConfig()
         try core.saveGuiConfig(config)
+        core.applyProfileScopedState(from: config)
 
         #expect(core.tiler.settings == config.settings)
         #expect(
@@ -215,9 +203,6 @@ struct ConfigWriteTests {
                 == .floating
         )
         #expect(core.state.appRules["Spotify"] == SpaceID("music"))
-        #expect(
-            core.spaceMonitorMap[SpaceID(1)] == ["LG:2560x1440"]
-        )
         #expect(core.nativeSpaceBindings[2] == "Studio")
         #expect(core.keys.icon(for: "resize") == "📐")
         let combo = KeyCombo.parse("alt+h")
@@ -229,11 +214,15 @@ struct ConfigWriteTests {
         }
     }
 
-    @Test("reopening reads back the saved sidecar verbatim")
+    @Test("reopening reads back the saved model")
     func sidecarRoundTrip() throws {
         let core = makeCore()
         let config = richConfig()
         try core.saveGuiConfig(config)
+        // The sidecar holds the globals; the profile-scoped
+        // fields overlay from live state, so applying them
+        // first makes the round-trip lossless.
+        core.applyProfileScopedState(from: config)
         let reloaded = core.loadGuiConfig()
         #expect(reloaded == config)
     }
@@ -241,7 +230,9 @@ struct ConfigWriteTests {
     @Test("deleting entries clears them on reload")
     func deletionRoundTrip() throws {
         let core = makeCore()
-        try core.saveGuiConfig(richConfig())
+        let config = richConfig()
+        try core.saveGuiConfig(config)
+        core.applyProfileScopedState(from: config)
         #expect(core.state.appRules["Spotify"] != nil)
         #expect(
             core.state.workspaces[SpaceID(1)]?.mode == .stack
@@ -249,9 +240,9 @@ struct ConfigWriteTests {
 
         // Save a config with all sparse entries removed.
         try core.saveGuiConfig(GuiConfig())
+        core.applyProfileScopedState(from: GuiConfig())
 
         #expect(core.state.appRules.isEmpty)
-        #expect(core.spaceMonitorMap.isEmpty)
         #expect(core.eventLoop.floatRules.rawRules.isEmpty)
         #expect(core.tiler.settings.gapsOverride.isEmpty)
         #expect(core.tiler.settings.placementOverride.isEmpty)
@@ -261,18 +252,18 @@ struct ConfigWriteTests {
         )
     }
 
-    @Test("fractional ratios survive write and reload exactly")
+    @Test("fractional ratios survive a profile round-trip")
     func fractionalRoundTrip() throws {
         let core = makeCore()
         var config = GuiConfig()
         config.settings.bsp.splitRatio = 1.0 / 3.0
         config.settings.stack.masterRatio = 2.0 / 7.0
-        try core.saveGuiConfig(config)
+        core.applyProfileScopedState(from: config)
+        try core.persistProfile(named: "ratios")
+        let saved = try core.profiles.read(name: "ratios")
+        #expect(saved.settings.bsp.splitRatio == 1.0 / 3.0)
         #expect(
-            core.tiler.settings.bsp.splitRatio == 1.0 / 3.0
-        )
-        #expect(
-            core.tiler.settings.stack.masterRatio == 2.0 / 7.0
+            saved.settings.stack.masterRatio == 2.0 / 7.0
         )
     }
 

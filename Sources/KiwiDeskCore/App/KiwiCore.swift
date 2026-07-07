@@ -47,11 +47,15 @@ public final class KiwiCore {
     /// events during the transition must not change spaces.
     var lastNativeSwitch: Date = .distantPast
 
-    /// `monitor_fallback` from init.lua (per-monitor chains).
-    public var monitorFallback: [String: [String]] = [:]
-    /// `space_monitor_map` from init.lua (per-space chains,
-    /// beats per-monitor rules).
-    public var spaceMonitorMap: [SpaceID: [String]] = [:]
+    /// The live arrangement's space→monitor fingerprint pins,
+    /// adopted from the active profile's matching monitor set
+    /// and edited by the GUI Canvas (#36). Internal: the GUI
+    /// reads placement via `loadGuiConfig` and writes it via
+    /// `applyProfileScopedState`, never directly.
+    var spacePins: [SpaceID: String] = [:]
+    /// Spaces assigned the *Main* role — they follow whatever
+    /// display is currently main (#36).
+    var mainSpaces: Set<SpaceID> = []
     /// Profile bound per native macOS Space, keyed by the
     /// Mission Control number (1-based). Populated by
     /// `bind_profile_to_native_space`.
@@ -111,6 +115,9 @@ public final class KiwiCore {
             self?.onLog(message)
         }
         exec.onLog = { [weak self] message in
+            self?.onLog(message)
+        }
+        profiles.onLog = { [weak self] message in
             self?.onLog(message)
         }
         wireDrag()

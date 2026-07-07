@@ -5,7 +5,8 @@ import SwiftUI
 /// macOS Space. Drag a profile chip onto a Space or pick from the
 /// dropdown; the binding emits `bind_profile_to_native_space` and
 /// loads that profile when the Space activates. Bindings mutate
-/// `model.config.profileBindings`; the footer Save persists them.
+/// `model.config.profileBindings`; the footer's profile
+/// actions persist them.
 struct NativeSpacesSection: View {
     @ObservedObject var model: SettingsModel
 

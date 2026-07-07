@@ -2,29 +2,40 @@ import Foundation
 
 /// The GUI's complete editable configuration.
 ///
-/// This is the single source of truth the SwiftUI dashboard
-/// edits and persists (to `gui.json`). `init.lua`'s managed
-/// block is regenerated from it (see `LuaConfigWriter`), so the
-/// visual editor never round-trips through parsed Lua. Anything
-/// the user hand-writes outside the managed block is preserved
-/// (see `ManagedConfig`).
+/// The model splits along the profile boundary (#36):
+///
+/// - **Global fields** (spaces list, app rules, float rules,
+///   profile bindings, keybindings) persist in the `gui.json`
+///   sidecar and regenerate `init.lua`'s managed block (see
+///   `LuaConfigWriter`).
+/// - **Profile-scoped fields** (tiling settings, space modes,
+///   monitor pins, Main role) are held in memory for editing
+///   and persist into the active profile's JSON — never into
+///   the sidecar or `init.lua`, so the two files can't drift.
+///
+/// Anything the user hand-writes outside the managed block is
+/// preserved (see `ManagedConfig`).
 public struct GuiConfig: Codable, Equatable, Sendable {
     /// Tunable tiling parameters (gaps, per-layout params,
-    /// drag visuals). Mirrors the running `tiler.settings`.
+    /// drag visuals). Mirrors the running `tiler.settings`;
+    /// profile-scoped.
     public var settings = TilingSettings()
     /// The virtual spaces the user has defined, in display
     /// order. Drives the space lists across the GUI (layouts,
     /// navigation shortcuts, app assignment). A space can be
     /// listed with the default `bsp` mode and no other config.
     public var spaces: [SpaceID] = []
-    /// Layout mode per virtual space (`set_mode`).
+    /// Layout mode per virtual space (`set_mode`);
+    /// profile-scoped.
     public var spaceModes: [SpaceID: LayoutMode] = [:]
     /// App -> space assignment (`app_rules`).
     public var appRules: [String: SpaceID] = [:]
-    /// Space -> monitor fingerprint priority chain
-    /// (`space_monitor_map`). The GUI authors a single-element
-    /// chain per space; hand-written configs may list several.
-    public var spaceMonitorMap: [SpaceID: [String]] = [:]
+    /// Space -> monitor fingerprint pin for the *live*
+    /// arrangement; profile-scoped (stored per monitor set).
+    public var spacePins: [SpaceID: String] = [:]
+    /// Spaces assigned the Main role (they follow the current
+    /// main display); profile-scoped, stored once per profile.
+    public var mainSpaces: Set<SpaceID> = []
     /// Windows that never tile (`float_rules`).
     public var floatRules: [String] = []
     /// Profile bound per native macOS Space (Mission Control
@@ -36,12 +47,13 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     public init() {}
 
     /// Renames a space everywhere it is referenced (#13): the
-    /// `spaces` list, `spaceModes`, `appRules`, `spaceMonitorMap`,
-    /// the per-space `settings.gapsOverride` /
-    /// `settings.placementOverride` maps, and the space-targeting
-    /// Lua inside every keybinding. A no-op returning `false` when
-    /// `from` is unknown or `to` already exists (the caller keeps
-    /// the old name); renaming to the same id succeeds trivially.
+    /// `spaces` list, `spaceModes`, `appRules`, the monitor pin
+    /// and Main-role maps, the per-space
+    /// `settings.gapsOverride` / `settings.placementOverride`
+    /// maps, and the space-targeting Lua inside every
+    /// keybinding. A no-op returning `false` when `from` is
+    /// unknown or `to` already exists (the caller keeps the old
+    /// name); renaming to the same id succeeds trivially.
     @discardableResult
     public mutating func renameSpace(
         from: SpaceID,
@@ -63,8 +75,11 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         if let mode = spaceModes.removeValue(forKey: from) {
             spaceModes[to] = mode
         }
-        if let chain = spaceMonitorMap.removeValue(forKey: from) {
-            spaceMonitorMap[to] = chain
+        if let pin = spacePins.removeValue(forKey: from) {
+            spacePins[to] = pin
+        }
+        if mainSpaces.remove(from) != nil {
+            mainSpaces.insert(to)
         }
         if let gaps = settings.gapsOverride.removeValue(
             forKey: from
@@ -115,12 +130,12 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         }
     }
 
+    /// Only the global fields persist in the sidecar — the
+    /// profile-scoped ones (settings, modes, pins) round-trip
+    /// through the profile JSON instead (#36).
     private enum CodingKeys: String, CodingKey {
-        case settings
         case spaces
-        case spaceModes = "space_modes"
         case appRules = "app_rules"
-        case spaceMonitorMap = "space_monitor_map"
         case floatRules = "float_rules"
         case profileBindings = "profile_bindings"
         case modes
@@ -128,35 +143,20 @@ public struct GuiConfig: Codable, Equatable, Sendable {
 
     /// Lenient decoding: a field missing from an older sidecar
     /// falls back to its default (same policy as profiles).
+    /// Legacy tiling keys in an old sidecar are simply ignored.
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(
             keyedBy: CodingKeys.self
         )
-        let defaults = GuiConfig()
-        settings =
-            try container.decodeIfPresent(
-                TilingSettings.self,
-                forKey: .settings
-            ) ?? defaults.settings
         spaces =
             try container.decodeIfPresent(
                 [SpaceID].self,
                 forKey: .spaces
             ) ?? []
-        spaceModes =
-            try container.decodeIfPresent(
-                [SpaceID: LayoutMode].self,
-                forKey: .spaceModes
-            ) ?? [:]
         appRules =
             try container.decodeIfPresent(
                 [String: SpaceID].self,
                 forKey: .appRules
-            ) ?? [:]
-        spaceMonitorMap =
-            try container.decodeIfPresent(
-                [SpaceID: [String]].self,
-                forKey: .spaceMonitorMap
             ) ?? [:]
         floatRules =
             try container.decodeIfPresent(
@@ -181,9 +181,8 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     private mutating func dropEmptyNamedSpaces() {
         spaces.removeAll { $0.raw.isEmpty }
         spaceModes = spaceModes.filter { !$0.key.raw.isEmpty }
-        spaceMonitorMap = spaceMonitorMap.filter {
-            !$0.key.raw.isEmpty
-        }
+        spacePins = spacePins.filter { !$0.key.raw.isEmpty }
+        mainSpaces = mainSpaces.filter { !$0.raw.isEmpty }
         appRules = appRules.filter { !$0.value.raw.isEmpty }
         settings.gapsOverride = settings.gapsOverride.filter {
             !$0.key.raw.isEmpty
@@ -215,14 +214,8 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         var container = encoder.container(
             keyedBy: CodingKeys.self
         )
-        try container.encode(settings, forKey: .settings)
         try container.encode(spaces, forKey: .spaces)
-        try container.encode(spaceModes, forKey: .spaceModes)
         try container.encode(appRules, forKey: .appRules)
-        try container.encode(
-            spaceMonitorMap,
-            forKey: .spaceMonitorMap
-        )
         try container.encode(floatRules, forKey: .floatRules)
         var bindings: [String: String] = [:]
         for (number, name) in profileBindings {

@@ -94,11 +94,11 @@ windows there.
 Spaces are identified by **strings or numbers** — `1` and
 `"1"` are the same space, `"code"` and `"Code"` are not.
 Monitors never carry a layout themselves: windows live in
-spaces, and spaces are mapped to monitors (see
-`space_monitor_map` below). You can rename a space in place from
+spaces, and spaces are mapped to monitors (see *Profiles &
+Monitors* below). You can rename a space in place from
 the Settings app's **Spaces** tab; the rename follows the id
 everywhere it is used — its layout mode, app rules, monitor
-map, and any keybindings that target it.
+pins, and any keybindings that target it.
 
 ### How inactive spaces hide their windows
 
@@ -719,15 +719,60 @@ end)
 
 ```lua
 -- Save/load named profiles (layout modes + all settings):
-KiwiDesk.save_profile("Developer Rig")
+KiwiDesk.save_profile("Developer Rig")   -- updates if it exists
 KiwiDesk.load_profile("Developer Rig")
+KiwiDesk.delete_profile("Developer Rig")
+KiwiDesk.set_default_profile("Developer Rig")
 ```
 
-Profiles remember the monitor fingerprints they were saved
-with. When displays change, KiwiDesk loads the profile with
-the exact same monitors; failing that, one saved for the same
-*number* of monitors; failing that, it keeps a transient state
-and flags the profile as dirty.
+**Profiles are the single source of truth for tiling.** A
+profile owns the gaps, per-space layout modes, layout
+parameters, animations, mouse-resize behavior, and the
+space→monitor assignments. `init.lua` keeps only the global,
+non-profile declarations: keybindings, `app_rules`,
+`float_rules`, and `bind_profile_to_native_space`. (The Lua
+tiling API — `set_gap_global`, `bsp.set_ratio`, … — remains
+valid in hand-written configs and acts as base state *before*
+a profile loads; the GUI no longer writes those calls.)
+
+A profile covers one or more concrete **monitor sets** — each
+a list of monitor fingerprints plus the space→monitor pins
+valid for that arrangement. Updating a profile while a new
+combination is connected teaches it that combination. When
+displays change, KiwiDesk resolves in this order:
+
+1. **Exact match** — a profile stores exactly the connected
+   monitors → loaded clean.
+2. **Count default** — the profile marked `default` for that
+   screen count → loaded with the dirty flag.
+3. **Built-in Standard** — no saved profile for that count →
+   a built-in positional layout composes silently (see
+   *Standards & Presets* below); screens beyond its plan each
+   get one monocle space, so no screen is ever blank.
+
+   The Standard only *owns tiling* (gaps, modes, parameters)
+   when the config is GUI-managed: a `gui.json` sidecar
+   exists *and* `init.lua` holds no code outside the managed
+   block. With a hand-written — or hybrid — config, your
+   Lua-declared tiling stays authoritative and the Standard
+   merely steers the space→screen placement; no transient
+   `Standard: <name>` state is entered. If a profile was
+   active when the monitors changed, it keeps owning tiling
+   but the state goes *dirty* (no stored set covers the live
+   monitors), same as loading it explicitly would.
+
+Every space always resolves to a screen: an explicit
+fingerprint pin wins, then the **Main** role (the space
+follows whatever display is currently main — dock and undock
+without stale fingerprints), then the built-in positional
+default. In the **Canvas** tab, drag a space onto a monitor
+tile to pin it, or onto the **Main** target to give it the
+Main role; everything else shows as *Auto*.
+
+Explicitly loading a profile whose stored sets don't cover the
+connected monitors works, but the state loads *dirty*
+(`get_profile_status` reports `isDirty`) until you update the
+profile on this hardware or return to a covered set.
 
 Profiles live as JSON files in `~/.config/kiwidesk/profiles/`
 and are meant to be readable (and hand-editable — reload with
@@ -738,9 +783,17 @@ becomes `layout.bsp.ratio`:
 
 ```jsonc
 {
-  "fingerprints": ["Built-in Retina Display:1728x1117"],
-  "monitor_count": 1,
   "name": "Desk One",
+  "default": true,            // this count's fallback profile
+  "monitor_sets": [
+    {
+      "monitors": ["Built-in Retina Display:1728x1117"],
+      "space_monitor_map": {  // explicit pins only (sparse)
+        "2": "Built-in Retina Display:1728x1117"
+      }
+    }
+  ],
+  "main_spaces": ["1"],       // follow the main display
   "saved_at": "2026-07-04T12:00:00Z",
   "settings": {
     "drag": { "show_drop_zone": true, "show_ghost": true },
@@ -781,25 +834,51 @@ becomes `layout.bsp.ratio`:
 }
 ```
 
-Fallback chains for disconnects (per-space beats per-monitor):
+> The pre-release `fingerprints`/`monitor_count` profile shape
+> and the `monitor_fallback`/`space_monitor_map` Lua globals
+> are gone — re-save affected profiles and move any pins into
+> the profile JSON (or re-drag them in the Canvas tab).
 
-```lua
-monitor_fallback = {
-    ["LG 27"]   = { "Built-in", "Dell 24" },
-    ["Dell 24"] = { "Built-in" },
-}
+### Standards & Presets
 
-space_monitor_map = {
-    ["1"] = { "LG 27", "Built-in" },
-    ["3"] = { "Dell 24", "LG 27", "Built-in" },
-}
-```
+KiwiDesk ships built-in layouts for 1, 2, and 3 screens.
+They are hardware-agnostic and address monitors
+*positionally* — spaces map to "the main display", "the
+second display" (left to right), never to a fingerprint.
+They serve in two modes:
 
-You can also author `space_monitor_map` visually: in the
-Settings app's **Canvas** tab, drag a space from the palette
-onto a monitor to pin it there. Drops are saved to `init.lua`
-on the next Save and survive a reload. (`monitor_fallback`
-stays Lua-only for now.)
+- **Standard (silent fallback).** When a screen count has no
+  saved profile, its built-in layout resolves automatically.
+  It is never listed as a profile; the banner shows
+  `Standard: <name>` while one is active. It steps back the
+  moment that count has a saved profile.
+- **Preset (applyable template).** The same layouts appear in
+  the **Presets** section of the settings app. **Apply** —
+  enabled only when the connected screen count matches —
+  loads the layout *and* saves it as a real, editable profile
+  under the preset's name (suffixed `_1`, `_2`, … when
+  taken). The first profile saved for a count becomes that
+  count's `default`.
+
+The built-ins can never be deleted; deleting the last saved
+profile of a count simply reverts that count to its Standard.
+
+### Saving from the GUI
+
+The settings footer offers two profile actions (replacing the
+old generic Save):
+
+- **Update "\<profile\>"** — persists the edited tiling into
+  the active profile and adds/refreshes the connected monitor
+  set. Greyed out when the connected screen count differs
+  from the profile's ("this profile is for N screens").
+- **Save as new…** — creates a profile carrying only the
+  connected monitor set. Always available; names are
+  auto-suffixed `_1`, `_2`, … when taken.
+
+Both also regenerate `init.lua`/`gui.json` when a global
+setting (keybindings, app/float rules, Space bindings)
+changed — a tiling-only edit touches only the profile JSON.
 
 ### Native macOS Spaces (Mission Control)
 

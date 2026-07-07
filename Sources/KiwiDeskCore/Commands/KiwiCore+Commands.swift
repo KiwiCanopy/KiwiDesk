@@ -69,6 +69,7 @@ extension KiwiCore {
             }
             return .ok(.string("reloading"))
         case "save_profile", "load_profile",
+            "delete_profile", "set_default_profile",
             "list_profiles", "get_profile_status":
             return profileCommand(command, args)
         case "bind_profile_to_native_space":

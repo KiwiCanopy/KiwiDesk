@@ -4,25 +4,24 @@ import Testing
 
 @testable import KiwiDeskCore
 
-@MainActor
-private func makeManager() -> ProfileManager {
-    ProfileManager(
-        directory: FileManager.default.temporaryDirectory
-            .appendingPathComponent(
-                "kiwi-profiles-\(UUID().uuidString)"
-            )
-    )
-}
-
 private func makeProfile(
     name: String,
-    fingerprints: [String],
-    modes: [String: LayoutMode] = ["1": .bsp]
+    monitors: [String],
+    pins: [SpaceID: String] = [:],
+    mains: [SpaceID] = [],
+    isDefault: Bool = false,
+    modes: [SpaceID: LayoutMode] = ["1": .bsp]
 ) -> Profile {
     Profile(
         name: name,
-        fingerprints: fingerprints,
-        monitorCount: fingerprints.count,
+        monitorSets: [
+            MonitorSet(
+                monitors: monitors,
+                spaceMonitorMap: pins
+            )
+        ],
+        mainSpaces: mains,
+        isDefault: isDefault,
         spaceModes: modes,
         settings: TilingSettings(),
         // Whole seconds: profile files store ISO-8601 dates,
@@ -31,237 +30,171 @@ private func makeProfile(
     )
 }
 
-@Suite("ProfileManager", .serialized)
-@MainActor
-struct ProfileManagerTests {
-    @Test("Save, list, and load round-trip")
-    func roundTrip() throws {
-        let manager = makeManager()
-        let profile = makeProfile(
-            name: "Developer Rig",
-            fingerprints: ["LG 27:2560x1440"],
-            modes: ["code": .bsp, "music": .floating]
-        )
-        try manager.save(profile)
-        #expect(manager.list() == ["Developer Rig"])
-        let loaded = try manager.load(name: "Developer Rig")
-        #expect(loaded == profile)
-        #expect(manager.currentName == "Developer Rig")
-        #expect(!manager.isDirty)
+@Suite("Profile data model")
+struct ProfileModelTests {
+    @Test("Monitor sets store canonically sorted")
+    func sortedMonitors() {
+        let set = MonitorSet(monitors: ["B:2x2", "A:1x1"])
+        #expect(set.monitors == ["A:1x1", "B:2x2"])
     }
 
-    @Test("Direct fingerprint match wins over count match")
-    func matchPriority() throws {
-        let manager = makeManager()
-        try manager.save(
-            makeProfile(
-                name: "docked",
-                fingerprints: ["LG 27:2560x1440"]
-            )
+    @Test("Pins to monitors outside the set are dropped")
+    func orphanPinsDropped() {
+        let set = MonitorSet(
+            monitors: ["A:1x1"],
+            spaceMonitorMap: [
+                SpaceID(1): "A:1x1",
+                SpaceID(2): "GONE:9x9",
+            ]
         )
-        try manager.save(
-            makeProfile(
-                name: "other-single",
-                fingerprints: ["Dell 24:1920x1080"]
-            )
-        )
-        let match = manager.match(
-            fingerprints: ["LG 27:2560x1440"],
-            count: 1
-        )
-        #expect(match?.name == "docked")
-    }
-
-    @Test("Count fallback when fingerprints are unknown")
-    func countFallback() throws {
-        let manager = makeManager()
-        try manager.save(
-            makeProfile(
-                name: "dual",
-                fingerprints: ["A:1x1", "B:2x2"]
-            )
-        )
-        let match = manager.match(
-            fingerprints: ["C:3x3", "D:4x4"],
-            count: 2
-        )
-        #expect(match?.name == "dual")
         #expect(
-            manager.match(
-                fingerprints: ["C:3x3"],
-                count: 1
+            set.spaceMonitorMap == [SpaceID(1): "A:1x1"]
+        )
+    }
+
+    @Test("Mismatched set lengths drop; first is canonical")
+    func setLengthSanitization() {
+        let profile = Profile(
+            name: "p",
+            monitorSets: [
+                MonitorSet(monitors: ["A:1x1", "B:2x2"]),
+                MonitorSet(monitors: ["C:3x3"]),
+                MonitorSet(monitors: ["D:4x4", "E:5x5"]),
+            ],
+            spaceModes: [:],
+            settings: TilingSettings()
+        )
+        #expect(profile.monitorSets.count == 2)
+        #expect(profile.monitorCount == 2)
+    }
+
+    @Test("A profile with zero valid sets fails to decode")
+    func zeroSetsInvalid() throws {
+        let json = """
+            {"name": "broken", "monitor_sets": [],
+             "space_modes": {}, "settings": {},
+             "saved_at": "2026-06-01T00:00:00Z"}
+            """
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        #expect(throws: DecodingError.self) {
+            try decoder.decode(
+                Profile.self,
+                from: Data(json.utf8)
+            )
+        }
+    }
+
+    @Test("Identical monitors do not collapse (multiset)")
+    func duplicateMonitors() {
+        let dual = makeProfile(
+            name: "dual",
+            monitors: ["LG:2560x1440", "LG:2560x1440"]
+        )
+        // The old Set comparison collapsed the twins, so a
+        // single LG wrongly matched the dual profile.
+        #expect(dual.set(matching: ["LG:2560x1440"]) == nil)
+        #expect(
+            dual.set(
+                matching: ["LG:2560x1440", "LG:2560x1440"]
+            ) != nil
+        )
+    }
+
+    @Test("SpacePlacement: pin → Main → plan → main")
+    func placementPrecedence() {
+        let a = Display(
+            id: DisplayID(1),
+            name: "A",
+            frame: CGRect(x: 0, y: 0, width: 1, height: 1)
+        )
+        let b = Display(
+            id: DisplayID(2),
+            name: "B",
+            frame: CGRect(x: 1, y: 0, width: 2, height: 2)
+        )
+        func resolve(
+            _ space: SpaceID
+        ) -> SpacePlacement.Resolution? {
+            SpacePlacement.resolve(
+                space: space,
+                pins: [
+                    SpaceID(2): "B:2x2",
+                    SpaceID(4): "GONE:9x9",
+                ],
+                mainSpaces: [SpaceID(1)],
+                displays: [a, b],
+                mainID: DisplayID(1),
+                assignment: [SpaceID(3): DisplayID(2)]
+            )
+        }
+        #expect(resolve(SpaceID(2)) == .pinned(b))
+        #expect(resolve(SpaceID(1)) == .main(a))
+        #expect(resolve(SpaceID(3)) == .auto(b))
+        // Off-plan spaces land on main.
+        #expect(resolve(SpaceID(9)) == .auto(a))
+        // A pin to a disconnected monitor keeps the intent
+        // and falls back like an unpinned space would.
+        #expect(
+            resolve(SpaceID(4))
+                == .pinnedAbsent(intent: "GONE:9x9", fallback: a)
+        )
+        // No displays: the only unresolvable state.
+        #expect(
+            SpacePlacement.resolve(
+                space: SpaceID(1),
+                pins: [:],
+                mainSpaces: [],
+                displays: [],
+                mainID: nil,
+                assignment: [:]
             ) == nil
         )
     }
 
-    @Test("Dirty flag lifecycle")
-    func dirtyFlag() throws {
-        let manager = makeManager()
-        manager.markDirty()
-        #expect(manager.isDirty)
-        try manager.save(
-            makeProfile(name: "x", fingerprints: [])
+    @Test("space_modes encodes as a JSON object")
+    func spaceModesEncodesAsObject() throws {
+        // Pins the CodingKeyRepresentable shape: [SpaceID:
+        // LayoutMode] must serialize as {"1": "stack"}, not
+        // as a flattened key/value array.
+        let profile = makeProfile(
+            name: "p",
+            monitors: ["A:1x1"],
+            modes: ["1": .stack]
         )
-        #expect(!manager.isDirty)
-    }
-}
-
-@Suite("Profile commands", .serialized)
-@MainActor
-struct ProfileCommandTests {
-    private func makeCore() -> KiwiCore {
-        KiwiCore(
-            configDirectory: FileManager.default
-                .temporaryDirectory
-                .appendingPathComponent(
-                    "kiwi-core-\(UUID().uuidString)"
-                )
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let json = String(
+            decoding: try encoder.encode(profile),
+            as: UTF8.self
         )
+        #expect(json.contains("\"space_modes\":{\"1\""))
     }
 
-    @Test("save_profile / load_profile apply settings")
-    func saveLoad() {
-        let core = makeCore()
-        core.execute(
-            "set_gap_global",
-            args: [.number(30)]
+    @Test("Upsert replaces the same set, refuses new lengths")
+    func upsert() {
+        var profile = makeProfile(
+            name: "p",
+            monitors: ["A:1x1"]
         )
-        core.execute(
-            "set_mode",
-            args: [.string("1"), .string("grid")]
+        let replaced = MonitorSet(
+            monitors: ["A:1x1"],
+            spaceMonitorMap: [SpaceID(1): "A:1x1"]
         )
+        let sameSet = profile.upsert(replaced)
+        #expect(sameSet)
+        #expect(profile.monitorSets.count == 1)
         #expect(
-            core.execute(
-                "save_profile",
-                args: [.string("test")]
-            ).isSuccess
+            profile.monitorSets[0].spaceMonitorMap.count == 1
         )
-
-        // Diverge, then load back.
-        core.execute("set_gap_global", args: [.number(2)])
-        core.execute(
-            "set_mode",
-            args: [.string("1"), .string("stack")]
+        let newSet = profile.upsert(
+            MonitorSet(monitors: ["B:2x2"])
         )
-        #expect(
-            core.execute(
-                "load_profile",
-                args: [.string("test")]
-            ).isSuccess
+        #expect(newSet)
+        #expect(profile.monitorSets.count == 2)
+        let wrongLength = profile.upsert(
+            MonitorSet(monitors: ["C:3x3", "D:4x4"])
         )
-        #expect(
-            core.tiler.settings.gapsGlobal == .uniform(30)
-        )
-        #expect(
-            core.state.workspaces[SpaceID(1)]?.mode == .grid
-        )
-    }
-
-    @Test("get_profile_status reports name and dirty flag")
-    func status() {
-        let core = makeCore()
-        core.execute(
-            "save_profile",
-            args: [.string("current")]
-        )
-        let response = core.execute("get_profile_status")
-        #expect(
-            response.data
-                == .object([
-                    "name": .string("current"),
-                    "isDirty": .bool(false),
-                ])
-        )
-    }
-
-    @Test("handleMonitorChange respects space bindings")
-    func monitorChangeRespectsBindings() {
-        let core = makeCore()
-
-        let p1 = Profile(
-            name: "Desk One",
-            fingerprints: ["A:1x1"],
-            monitorCount: 1,
-            spaceModes: ["1": .stack],
-            settings: TilingSettings()
-        )
-        let p2 = Profile(
-            name: "Desk Two",
-            fingerprints: ["A:1x1"],
-            monitorCount: 1,
-            spaceModes: ["1": .grid],
-            settings: TilingSettings()
-        )
-        try? core.profiles.save(p1)
-        try? core.profiles.save(p2)
-
-        core.execute(
-            "bind_profile_to_native_space",
-            args: [.number(2), .string("Desk Two")]
-        )
-
-        NativeSpaces.activeSpaceNumberOverride = 2
-        defer {
-            NativeSpaces.activeSpaceNumberOverride = nil
-        }
-
-        let display = Display(
-            id: DisplayID(1),
-            name: "Display A",
-            frame: CGRect(x: 0, y: 0, width: 1, height: 1)
-        )
-        core.state.workspaces.upsertDisplay(display)
-
-        core.handleMonitorChange()
-
-        #expect(core.profiles.currentName == "Desk Two")
-    }
-}
-
-@Suite("Monitor fallback resolution")
-struct MonitorFallbackTests {
-    private let displays = [
-        Display(
-            id: DisplayID(1),
-            name: "Built-in",
-            frame: .zero
-        ),
-        Display(id: DisplayID(2), name: "LG 27", frame: .zero),
-    ]
-
-    @Test("Per-space rule beats per-monitor rule")
-    func perSpaceWins() {
-        let resolved = MonitorFallback.resolve(
-            space: SpaceID(1),
-            preferredMonitor: "Dell 24",
-            displays: displays,
-            perSpace: [SpaceID(1): ["LG 27", "Built-in"]],
-            perMonitor: ["Dell 24": ["Built-in"]]
-        )
-        #expect(resolved == DisplayID(2))
-    }
-
-    @Test("Per-monitor chain applies without space rule")
-    func perMonitorChain() {
-        let resolved = MonitorFallback.resolve(
-            space: SpaceID(2),
-            preferredMonitor: "Dell 24",
-            displays: displays,
-            perSpace: [:],
-            perMonitor: ["Dell 24": ["Built-in"]]
-        )
-        #expect(resolved == DisplayID(1))
-    }
-
-    @Test("Primary display is the final fallback")
-    func primaryFallback() {
-        let resolved = MonitorFallback.resolve(
-            space: SpaceID(3),
-            preferredMonitor: nil,
-            displays: displays,
-            perSpace: [:],
-            perMonitor: [:]
-        )
-        #expect(resolved == DisplayID(1))
+        #expect(!wrongLength)
     }
 }

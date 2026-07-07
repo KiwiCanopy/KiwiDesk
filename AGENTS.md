@@ -79,6 +79,19 @@ and (later) the Lua VM.
    their findings before opening a PR. (See §4 subagent
    delegation.)
 
+   Sequencing: the first round runs both agents **in
+   parallel** — the diff is finished, the perspectives are
+   independent, and serializing only costs time. When the
+   resulting fix batch is itself substantial (new
+   abstractions, behavioral gates — not just comment or guard
+   tweaks), run a focused re-review of **only the fix range**,
+   this time **sequentially**: `code-reviewer` first (are the
+   fixes correct?), then `architect-reviewer` (do the seams
+   the fixes introduced hold up?). Alternate rounds until one
+   returns no major findings. Brief each re-review with what
+   the fixes claim to do, so it verifies claims instead of
+   re-reviewing the feature.
+
 ### Branching & Pull Requests
 
 Branch from `main` with a name that matches the Conventional

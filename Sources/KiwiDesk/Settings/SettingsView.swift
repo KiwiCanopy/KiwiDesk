@@ -79,54 +79,87 @@ struct SettingsView: View {
     }
 }
 
-/// Top banner: active profile, the transient/dirty warning, and
-/// a "Save Profile" action (05_GUI_Concept §1).
+/// Top banner: the active profile (or resolving Standard), the
+/// transient/dirty state, and profile-action warnings (#36).
+/// Saving lives in the footer's two profile buttons.
 struct ProfileSyncBanner: View {
     @ObservedObject var model: SettingsModel
-    @State private var profileName = ""
 
     var body: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "rectangle.3.group")
-                .foregroundStyle(.secondary)
-            VStack(alignment: .leading, spacing: 1) {
-                Text(model.activeProfile ?? "Transient layout")
-                    .font(.headline)
-                Text(statusText)
-                    .font(.caption)
-                    .foregroundStyle(
-                        model.profileDirty ? .orange : .secondary
+        VStack(spacing: 0) {
+            HStack(spacing: 10) {
+                Image(systemName: "rectangle.3.group")
+                    .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(title).font(.headline)
+                    Text(statusText)
+                        .font(.caption)
+                        .foregroundStyle(
+                            model.profileDirty
+                                ? .orange : .secondary
+                        )
+                }
+                Spacer()
+                if model.profileDirty {
+                    Image(
+                        systemName:
+                            "exclamationmark.triangle.fill"
                     )
-            }
-            Spacer()
-            if model.profileDirty {
-                Image(systemName: "exclamationmark.triangle.fill")
                     .foregroundStyle(.orange)
                     .help(
                         "The live layout diverged from the "
                             + "saved profile."
                     )
+                }
             }
-            TextField("Profile name", text: $profileName)
-                .frame(width: 140)
-                .textFieldStyle(.roundedBorder)
-            Button("Save Profile") {
-                model.saveProfile(named: profileName)
-                profileName = ""
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+            if let warning = model.profileWarning {
+                warningRow(warning)
             }
-            .disabled(profileName.trimmed.isEmpty)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
+    }
+
+    private var title: String {
+        if let profile = model.activeProfile { return profile }
+        if let standard = model.activeStandard {
+            return "Standard: \(standard)"
+        }
+        return "Transient layout"
     }
 
     private var statusText: String {
+        if model.activeStandard != nil {
+            return "Built-in layout — save as a profile to "
+                + "make it yours."
+        }
         if model.profileDirty {
-            return "Unsaved monitor changes — save to keep them."
+            return "Unsaved monitor changes — update the "
+                + "profile to keep them."
         }
         return model.activeProfile == nil
             ? "No profile matches this monitor setup."
             : "Profile is up to date."
+    }
+
+    private func warningRow(_ warning: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: "exclamationmark.bubble")
+                .foregroundStyle(.orange)
+            Text(warning)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Spacer()
+            Button {
+                model.profileWarning = nil
+            } label: {
+                Image(systemName: "xmark.circle")
+            }
+            .buttonStyle(.borderless)
+            .help("Dismiss")
+        }
+        .padding(.horizontal, 16)
+        .padding(.bottom, 8)
     }
 }
 
@@ -139,6 +172,8 @@ struct SettingsFooter: View {
     @State private var confirmingAdopt = false
     @State private var showAdoptHelp = false
     @State private var helpHovering = false
+    @State private var namingNewProfile = false
+    @State private var newProfileName = ""
 
     /// A muted, darker green so the action reads as inviting
     /// without shouting over the standard Save button.
@@ -165,9 +200,14 @@ struct SettingsFooter: View {
             Spacer()
             Button("Revert") { model.revert() }
                 .disabled(!model.isDirty)
-            Button("Save") { model.save() }
-                .keyboardShortcut("s")
-                .disabled(!model.isDirty)
+            if model.editingLua {
+                Button("Save") { model.saveLuaSource() }
+                    .keyboardShortcut("s")
+                    .disabled(!model.isDirty)
+            } else {
+                updateButton
+                saveAsNewButton
+            }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
@@ -179,6 +219,46 @@ struct SettingsFooter: View {
             Button("Adopt") { model.adoptIntoGui() }
             Button("Cancel", role: .cancel) {}
         }
+        .alert(
+            "Save as new profile",
+            isPresented: $namingNewProfile
+        ) {
+            TextField("Profile name", text: $newProfileName)
+            Button("Save") {
+                model.saveAsNewProfile(named: newProfileName)
+                newProfileName = ""
+            }
+            .disabled(newProfileName.trimmed.isEmpty)
+            Button("Cancel", role: .cancel) {
+                newProfileName = ""
+            }
+        } message: {
+            Text(
+                "The new profile carries the current tiling "
+                    + "and the connected monitor set."
+            )
+        }
+    }
+
+    /// Update "<profile>": enabled only when a profile is
+    /// active, its screen count matches, and something changed.
+    @ViewBuilder private var updateButton: some View {
+        if let name = model.activeProfile {
+            Button("Update \u{201C}\(name)\u{201D}") {
+                model.updateActiveProfile()
+            }
+            .keyboardShortcut("s")
+            .disabled(
+                !model.updateEnabled
+                    || !(model.isDirty || model.profileDirty)
+            )
+            .help(model.updateHint ?? "")
+        }
+    }
+
+    private var saveAsNewButton: some View {
+        Button("Save as new…") { namingNewProfile = true }
+            .buttonStyle(.borderedProminent)
     }
 
     private var adoptButton: some View {

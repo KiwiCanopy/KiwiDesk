@@ -1,20 +1,21 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The editing half of the Canvas tab (#6): a palette of spaces
-/// to drag onto the monitors above, and the resulting
-/// `space_monitor_map` assignments with an unassign control.
-/// Drops mutate `model.config.spaceMonitorMap`; the footer Save
-/// persists them to `init.lua`.
+/// The editing half of the Canvas tab (#6/#36): a palette of
+/// spaces to drag onto the monitors (or Main target) above, and
+/// the resolved placement per space. Drops mutate
+/// `model.config.spacePins` / `mainSpaces`; the footer's profile
+/// actions persist them into the profile JSON.
 struct SpaceMonitorAssignments: View {
     @ObservedObject var model: SettingsModel
 
     var body: some View {
         SettingsSection("Assign spaces to monitors") {
             Text(
-                "Drag a space onto a monitor above to pin it "
-                    + "there. Assignments are saved to "
-                    + "space_monitor_map."
+                "Drag a space onto a monitor to pin it to that "
+                    + "hardware, or onto Main to follow the "
+                    + "main display. Everything else is placed "
+                    + "by the built-in default."
             )
             .font(.caption)
             .foregroundStyle(.secondary)
@@ -33,67 +34,88 @@ struct SpaceMonitorAssignments: View {
         }
     }
 
-    // MARK: - Assignments
+    // MARK: - Resolved placement
 
     @ViewBuilder
     private var assignments: some View {
-        let rows = assignedRows
-        if rows.isEmpty {
-            Text("No assignments yet.")
+        if model.config.spaces.isEmpty {
+            Text("No spaces defined yet.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         } else {
-            ForEach(rows, id: \.space.raw) { row in
-                assignmentRow(row)
+            ForEach(model.config.spaces, id: \.raw) { space in
+                assignmentRow(space)
             }
         }
     }
 
     private func assignmentRow(
-        _ row: AssignedRow
+        _ space: SpaceID
     ) -> some View {
-        HStack {
-            SpaceChip(label: row.space.raw)
+        let resolution = model.resolution(for: space)
+        return HStack {
+            SpaceChip(label: space.raw)
             Image(systemName: "arrow.right")
                 .foregroundStyle(.secondary)
                 .font(.caption)
-            Image(systemName: "display")
-                .foregroundStyle(.secondary)
-            Text(row.monitor)
-                .font(.system(.caption, design: .monospaced))
+            targetLabel(resolution)
             Spacer()
-            Button {
-                model.config.spaceMonitorMap[row.space] = nil
-            } label: {
-                Image(systemName: "xmark.circle")
+            if resolution != .auto(nil), isExplicit(resolution) {
+                Button {
+                    model.config.spacePins[space] = nil
+                    model.config.mainSpaces.remove(space)
+                } label: {
+                    Image(systemName: "xmark.circle")
+                }
+                .buttonStyle(.borderless)
+                .help("Back to automatic placement")
             }
-            .buttonStyle(.borderless)
-            .help("Unassign")
         }
     }
 
-    /// Resolves each assigned space to a human-readable monitor
-    /// name, falling back to the raw fingerprint when the mapped
-    /// display isn't currently connected.
-    private var assignedRows: [AssignedRow] {
-        model.config.spaceMonitorMap.keys
-            .sorted { $0.raw < $1.raw }
-            .compactMap { space in
-                guard
-                    let chain = model.config.spaceMonitorMap[
-                        space
-                    ], let fingerprint = chain.first
-                else { return nil }
-                let name =
-                    model.displays.first {
-                        $0.fingerprint == fingerprint
-                    }?.name ?? fingerprint
-                return AssignedRow(space: space, monitor: name)
-            }
+    private func isExplicit(
+        _ resolution: SpaceResolution
+    ) -> Bool {
+        switch resolution {
+        case .pinned, .main: return true
+        case .auto: return false
+        }
     }
 
-    private struct AssignedRow {
-        let space: SpaceID
-        let monitor: String
+    @ViewBuilder
+    private func targetLabel(
+        _ resolution: SpaceResolution
+    ) -> some View {
+        switch resolution {
+        case .pinned(let fingerprint):
+            Image(systemName: "display")
+                .foregroundStyle(.secondary)
+            Text(monitorName(fingerprint))
+                .font(.system(.caption, design: .monospaced))
+        case .main:
+            Image(systemName: "macwindow.on.rectangle")
+                .foregroundStyle(.secondary)
+            Text("Main")
+                .font(.caption)
+                .fontWeight(.medium)
+        case .auto(let fingerprint):
+            Image(systemName: "wand.and.rays")
+                .foregroundStyle(.tertiary)
+            Text(
+                "Auto → "
+                    + (fingerprint.map(monitorName)
+                        ?? "no display")
+            )
+            .font(.system(.caption, design: .monospaced))
+            .foregroundStyle(.secondary)
+        }
+    }
+
+    /// Human-readable monitor name, falling back to the raw
+    /// fingerprint when that display isn't connected.
+    private func monitorName(_ fingerprint: String) -> String {
+        model.displays.first {
+            $0.fingerprint == fingerprint
+        }?.name ?? fingerprint
     }
 }

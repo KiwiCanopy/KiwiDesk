@@ -56,10 +56,12 @@ KiwiDesk service restart
 | | `get_state` | — |
 | | `reload_config` | — |
 | | `version` | — (returns `{version, commit}`) |
-| Profiles | `save_profile` | name |
+| Profiles | `save_profile` | name (updates in place when it exists) |
 | | `load_profile` | name |
+| | `delete_profile` | name |
+| | `set_default_profile` | name (its screen count's fallback) |
 | | `list_profiles` | — |
-| | `get_profile_status` | — |
+| | `get_profile_status` | — (returns `{name, standard, isDirty}`) |
 | | `bind_profile_to_native_space` | desktop number, profile |
 | Diagnostics | `get_layout_info` | — |
 | | `list_monitors` | — |

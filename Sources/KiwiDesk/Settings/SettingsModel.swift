@@ -6,7 +6,8 @@ import SwiftUI
 /// The dashboard's view model: the editable `GuiConfig` plus the
 /// live backend state the tabs display (active profile, dirty
 /// flag, monitors). Tabs mutate `config` and the change is held
-/// until "Save" writes it through `KiwiCore` (05_GUI_Concept §1).
+/// until one of the footer's profile actions (Update / Save as
+/// new) writes it through `KiwiCore` (#36).
 @MainActor
 final class SettingsModel: ObservableObject {
     /// The visually edited configuration.
@@ -27,10 +28,22 @@ final class SettingsModel: ObservableObject {
 
     /// Active saved profile, or nil for a transient state.
     @Published var activeProfile: String?
+    /// The built-in Standard currently resolving (no saved
+    /// profile covers the live screen count), if any (#53).
+    @Published var activeStandard: String?
     /// The live state diverged from the saved profile (e.g.
-    /// after a monitor change) — the "Save Profile" prompt.
+    /// after a monitor change) — the update prompt.
     @Published var profileDirty = false
     @Published var profiles: [String] = []
+    /// Rich rows for the saved-profiles list (#36): monitor
+    /// sets, screen count, default flag, live match.
+    @Published var profileSummaries: [ProfileSummary] = []
+    /// Screen counts where several profiles claim the default
+    /// flag (hand-edited files) — warning badge.
+    @Published var duplicateDefaultCounts: [Int] = []
+    /// A dismissible warning from the last profile action
+    /// (overlapping monitor sets, save failures).
+    @Published var profileWarning: String?
 
     /// Number of native macOS user Spaces (Mission Control
     /// desktops) currently detected — 0 without SkyLight. Drives
@@ -51,6 +64,10 @@ final class SettingsModel: ObservableObject {
 
     let core: KiwiCore
     private var suppressDirty = false
+    /// The sidecar as last loaded — the baseline that decides
+    /// whether a save must also regenerate the global files
+    /// (see `SettingsModel+Profiles`).
+    var savedSidecar: GuiConfig?
 
     init(core: KiwiCore) {
         self.core = core
@@ -83,6 +100,16 @@ final class SettingsModel: ObservableObject {
                 contentsOf: configURL,
                 encoding: .utf8
             )) ?? ""
+        // Baseline for `globalsChanged`: the *overlaid* model,
+        // not the raw sidecar — live profile state merged in
+        // (e.g. composed monocle-fill spaces in the spaces
+        // union) must not read as a global edit, or a
+        // tiling-only save would regenerate gui.json and
+        // init.lua and leak transient spaces into them.
+        // Accepted edges: a genuine global edit still saves
+        // the overlaid spaces union, and deleting + re-adding
+        // a transient space alone doesn't read as an edit.
+        savedSidecar = core.isGuiManaged ? config : nil
         refreshProfiles()
         isDirty = false
     }
@@ -90,7 +117,21 @@ final class SettingsModel: ObservableObject {
     func refreshProfiles() {
         profiles = core.profiles.list()
         activeProfile = core.profiles.currentName
+        activeStandard = core.profiles.currentStandard
         profileDirty = core.profiles.isDirty
+        duplicateDefaultCounts =
+            core.profiles.duplicateDefaultCounts()
+        let live = displays.map(\.fingerprint)
+        profileSummaries = core.profiles.allProfiles().map {
+            profile in
+            ProfileSummary(
+                name: profile.name,
+                count: profile.monitorCount,
+                sets: profile.monitorSets.map(\.monitors),
+                isDefault: profile.isDefault,
+                matchesLive: profile.set(matching: live) != nil
+            )
+        }
         nativeSpaceCount =
             NativeSpaces.allSpaces().filter(\.isUser).count
         currentNativeSpace = NativeSpaces.activeSpaceNumber()
@@ -116,31 +157,20 @@ final class SettingsModel: ObservableObject {
 
     // MARK: - Persistence
 
-    /// Writes the current state to disk and applies it live.
-    func save() {
+    /// Writes the raw Lua editor's buffer to disk and reloads.
+    func saveLuaSource() {
         do {
-            if editingLua {
-                try luaSource.write(
-                    to: configURL,
-                    atomically: true,
-                    encoding: .utf8
-                )
-                core.loadConfig()
-                reload()
-                // Free-form Lua isn't checked at input time (no
-                // recorder was involved), so set or clear the
-                // banner here from the reloaded config.
-                warnIfAnyConflict()
-            } else {
-                try core.saveGuiConfig(config)
-                isDirty = false
-                forcedLuaEditor = core.configHasForeignCode
-                luaSource =
-                    (try? String(
-                        contentsOf: configURL,
-                        encoding: .utf8
-                    )) ?? ""
-            }
+            try luaSource.write(
+                to: configURL,
+                atomically: true,
+                encoding: .utf8
+            )
+            core.loadConfig()
+            reload()
+            // Free-form Lua isn't checked at input time (no
+            // recorder was involved), so set or clear the
+            // banner here from the reloaded config.
+            warnIfAnyConflict()
         } catch {
             core.onLog("settings save failed: \(error)")
         }
@@ -248,36 +278,5 @@ final class SettingsModel: ObservableObject {
             return "\"\(conflict.name)\" with the macOS "
                 + "shortcut \"\(name)\""
         }
-    }
-
-    // MARK: - Profiles (Tab 1 / sync banner)
-
-    func saveProfile(named name: String) {
-        let trimmed = name.trimmingCharacters(
-            in: .whitespaces
-        )
-        guard !trimmed.isEmpty else { return }
-        _ = core.execute(
-            "save_profile",
-            args: [.string(trimmed)]
-        )
-        refreshProfiles()
-    }
-
-    func loadProfile(named name: String) {
-        _ = core.execute(
-            "load_profile",
-            args: [.string(name)]
-        )
-        reload()
-    }
-
-    // MARK: - Presets (Tab 1)
-
-    func applyPreset(_ preset: ConfigPreset) {
-        suppressDirty = true
-        config = preset.config(basedOn: config)
-        suppressDirty = false
-        isDirty = true
     }
 }
