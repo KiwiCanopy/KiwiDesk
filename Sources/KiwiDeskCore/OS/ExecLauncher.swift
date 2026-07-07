@@ -205,7 +205,8 @@ public final class ExecLauncher {
     /// SIGTERM or force-reap a child after teardown. Children
     /// stay fire-and-forget.
     func cancelWatchdogs() {
-        for key in running.keys {
+        // Snapshot the keys: the loop mutates `running`.
+        for key in Array(running.keys) {
             running[key]?.watchdog?.cancel()
             running[key]?.watchdog = nil
         }

@@ -172,8 +172,10 @@ public enum APIReference {
     /// Lua-only entry points on the `KiwiDesk` table that
     /// are not routed through the dispatcher and therefore
     /// absent from the CLI/IPC socket. Listed here so
-    /// `help()` and did-you-mean suggestions cover the full
-    /// Lua API surface (issue #37).
+    /// `help()` / `list_commands` cover the full Lua API
+    /// surface. Deliberately excluded from did-you-mean
+    /// (`suggestion`), which must only hint at commands the
+    /// caller's channel can invoke (issue #37).
     public static let luaOnly: [String] = [
         "exec", "bind", "on", "define_mode", "switch_mode",
     ]
