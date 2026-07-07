@@ -88,6 +88,10 @@ public struct Profile: Codable, Sendable, Equatable {
     public var spaceModes: [SpaceID: LayoutMode]
     public var settings: TilingSettings
     public var savedAt: Date
+    /// Per-profile sparse keybinding override (#55). nil
+    /// inherits the base modes (gui.json) entirely; present,
+    /// it shadows by mode name then combo (O4 soft).
+    public var modes: KeyModeOverride?
 
     /// Derived from the sets — never stored separately.
     public var monitorCount: Int {
@@ -136,6 +140,7 @@ public struct Profile: Codable, Sendable, Equatable {
         case spaceModes = "space_modes"
         case settings
         case savedAt = "saved_at"
+        case modes
     }
 
     public init(
@@ -146,7 +151,8 @@ public struct Profile: Codable, Sendable, Equatable {
         spaces: [SpaceID] = [],
         spaceModes: [SpaceID: LayoutMode],
         settings: TilingSettings,
-        savedAt: Date = .now
+        savedAt: Date = .now,
+        modes: KeyModeOverride? = nil
     ) {
         self.name = name
         self.monitorSets = Self.sanitized(monitorSets)
@@ -156,6 +162,7 @@ public struct Profile: Codable, Sendable, Equatable {
         self.spaceModes = spaceModes
         self.settings = settings
         self.savedAt = savedAt
+        self.modes = modes
     }
 
     /// Lenient where safe (missing flags default), strict where
@@ -209,6 +216,10 @@ public struct Profile: Codable, Sendable, Equatable {
         savedAt = try container.decode(
             Date.self,
             forKey: .savedAt
+        )
+        modes = try container.decodeIfPresent(
+            KeyModeOverride.self,
+            forKey: .modes
         )
     }
 
