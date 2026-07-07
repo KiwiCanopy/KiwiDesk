@@ -236,6 +236,47 @@ struct ProfileCommandTests {
         #expect(try !core.profiles.read(name: "alpha").isDefault)
     }
 
+    @Test("Overlapping profiles claiming the live set listed")
+    func overlapWarning() {
+        let core = makeCore()
+        connect(core, [display(1, "A")])
+        core.execute(
+            "save_profile",
+            args: [.string("desk")]
+        )
+        core.execute(
+            "save_profile",
+            args: [.string("other")]
+        )
+        #expect(
+            core.profilesClaimingLiveSet(excluding: "desk")
+                == ["other"]
+        )
+        #expect(
+            core.profilesClaimingLiveSet(excluding: "other")
+                == ["desk"]
+        )
+    }
+
+    @Test("Profile tiling survives a Lua config reload")
+    func profileSurvivesReload() {
+        let core = makeCore()
+        connect(core, [display(1, "A")])
+        core.execute("set_gap_global", args: [.number(30)])
+        core.execute(
+            "save_profile",
+            args: [.string("desk")]
+        )
+        // Reload runs init.lua (the starter template declares
+        // set_gap_global(10)) — the active profile must go
+        // back on top of that base state.
+        core.loadConfig()
+        #expect(
+            core.tiler.settings.gapsGlobal == .uniform(30)
+        )
+        #expect(core.profiles.currentName == "desk")
+    }
+
     @Test("get_profile_status reports name, standard, dirty")
     func status() {
         let core = makeCore()
