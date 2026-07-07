@@ -228,6 +228,34 @@ struct SpacePlacementTests {
         )
     }
 
+    @Test("A sparse profile resets undeclared modes to bsp")
+    func sparseProfileResetsModes() throws {
+        let core = makeCore()
+        connect(core, [display(1, "A")])
+        core.state.workspaces.ensureSpace(SpaceID(1))
+        core.state.workspaces.ensureSpace(SpaceID(2))
+        core.state.workspaces.setMode(SpaceID(2), .grid)
+        try core.profiles.save(
+            Profile(
+                name: "sparse",
+                monitorSets: [
+                    MonitorSet(monitors: ["A:100x100"])
+                ],
+                spaceModes: ["1": .stack],
+                settings: TilingSettings()
+            )
+        )
+        core.execute(
+            "load_profile",
+            args: [.string("sparse")]
+        )
+        let workspaces = core.state.workspaces
+        #expect(workspaces[SpaceID(1)]?.mode == .stack)
+        // Undeclared by the (hand-edited, sparse) profile:
+        // back to bsp, not the previous grid.
+        #expect(workspaces[SpaceID(2)]?.mode == .bsp)
+    }
+
     @Test("Loading a profile adopts its live set's pins")
     func applyAdoptsPins() throws {
         let core = makeCore()

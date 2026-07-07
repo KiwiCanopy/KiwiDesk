@@ -38,7 +38,9 @@ extension SettingsModel {
         let overlap = core.profilesClaimingLiveSet(
             excluding: name
         )
-        persist(named: name)
+        // A save failure must stay visible; only a successful
+        // update may show the overlap warning.
+        guard persist(named: name) else { return }
         if !overlap.isEmpty {
             profileWarning =
                 "This monitor set is also covered by "
@@ -59,16 +61,20 @@ extension SettingsModel {
         persist(named: core.profiles.freeName(base: trimmed))
     }
 
-    private func persist(named name: String) {
+    @discardableResult
+    private func persist(named name: String) -> Bool {
         core.applyProfileScopedState(from: config)
+        var saved = true
         do {
             try core.persistProfile(named: name)
         } catch {
             profileWarning = "Saving failed: \(error)"
             core.onLog("profile save failed: \(error)")
+            saved = false
         }
         persistGlobalsIfNeeded()
         reload()
+        return saved
     }
 
     /// The sidecar and `init.lua` only regenerate when a global

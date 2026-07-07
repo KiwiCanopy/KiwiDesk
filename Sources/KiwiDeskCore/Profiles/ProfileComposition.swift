@@ -54,7 +54,11 @@ public enum ProfileComposition {
             displays,
             mainID: mainID
         )
-        guard !ordered.isEmpty else { return nil }
+        // spaceCount > 0 keeps the composer total even for a
+        // (hypothetical) degenerate catalog entry.
+        guard !ordered.isEmpty, layout.spaceCount > 0 else {
+            return nil
+        }
 
         var spaces: [SpaceID] = []
         var modes: [SpaceID: LayoutMode] = [:]
@@ -66,7 +70,7 @@ public enum ProfileComposition {
             // Positions are clamped defensively; a Standard
             // never plans beyond its own screen count.
             let position = min(
-                layout.spaceScreens[space] ?? 0,
+                max(layout.spaceScreens[space] ?? 0, 0),
                 ordered.count - 1
             )
             assignment[space] = ordered[position].id

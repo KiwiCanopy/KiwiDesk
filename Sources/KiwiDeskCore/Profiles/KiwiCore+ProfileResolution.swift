@@ -9,9 +9,17 @@ extension KiwiCore {
     /// Applies a profile to live state and retiles.
     func apply(profile: Profile) {
         tiler.settings = profile.settings
-        for (id, mode) in profile.spaceModes {
+        for id in profile.spaceModes.keys {
             state.workspaces.ensureSpace(id)
-            state.workspaces.setMode(id, mode)
+        }
+        // Dense over all live spaces: a space a (hand-edited,
+        // sparse) profile doesn't declare reverts to bsp
+        // instead of keeping the previous state's mode.
+        for space in state.workspaces.allSpaces {
+            state.workspaces.setMode(
+                space.id,
+                profile.spaceModes[space.id] ?? .bsp
+            )
         }
         // Adopt the pins of the set covering the live monitors
         // (none when the profile loads dirty on other hardware)
@@ -71,10 +79,13 @@ extension KiwiCore {
         else {
             throw ProfileSaveError.screenCountMismatch(
                 expected: layout.screenCount,
-                live: 0
+                live: displays.count
             )
         }
         apply(composed: composed)
+        // If the save below fails, state honestly reflects a
+        // transient Standard instead of a stale profile.
+        profiles.adoptStandard(named: composed.sourceName)
         let ordered = PositionalDisplays.ordered(
             displays,
             mainID: mainID

@@ -100,7 +100,14 @@ final class SettingsModel: ObservableObject {
                 contentsOf: configURL,
                 encoding: .utf8
             )) ?? ""
-        savedSidecar = core.guiConfigStore.load()
+        // Baseline for `globalsChanged`: the *overlaid* model,
+        // not the raw sidecar — live profile state merged in
+        // (e.g. composed monocle-fill spaces in the spaces
+        // union) must not read as a global edit, or a
+        // tiling-only save would regenerate gui.json and
+        // init.lua and leak transient spaces into them.
+        savedSidecar =
+            core.guiConfigStore.exists ? config : nil
         refreshProfiles()
         isDirty = false
     }

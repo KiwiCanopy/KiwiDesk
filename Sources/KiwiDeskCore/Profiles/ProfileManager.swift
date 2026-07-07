@@ -96,10 +96,13 @@ public final class ProfileManager {
         return profile
     }
 
-    /// Deletes a profile. When it was its count's default, the
-    /// alphabetically-first remaining profile of that count
-    /// inherits the flag; the last profile of a count simply
-    /// reverts the count to the built-in Standard.
+    /// Deletes a profile. A count left without a default gets
+    /// the alphabetically-first remaining profile flagged; the
+    /// last profile of a count simply reverts the count to the
+    /// built-in Standard. A count that still has a default
+    /// (hand-edited duplicates) is left alone. When the deleted
+    /// file was unreadable its count is unknown, so every
+    /// orphaned count is repaired.
     func delete(name: String) throws {
         let deleted = try? read(name: name)
         try FileManager.default.removeItem(
@@ -109,12 +112,17 @@ public final class ProfileManager {
             currentName = nil
             isDirty = true
         }
-        guard let deleted, deleted.isDefault else { return }
-        if var heir = allProfiles().first(where: {
-            $0.monitorCount == deleted.monitorCount
-        }) {
-            heir.isDefault = true
-            try write(heir)
+        let counts =
+            deleted.map { [$0.monitorCount] }
+            ?? Array(Set(allProfiles().map(\.monitorCount)))
+        for count in counts
+        where defaultProfile(count: count) == nil {
+            if var heir = allProfiles().first(where: {
+                $0.monitorCount == count
+            }) {
+                heir.isDefault = true
+                try write(heir)
+            }
         }
     }
 
