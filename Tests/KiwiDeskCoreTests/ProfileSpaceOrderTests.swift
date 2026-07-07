@@ -177,6 +177,18 @@ struct ProfileSpaceOrderTests {
                 SpaceID("b"), SpaceID("d"),
             ]
         )
+
+        // A duplicated id in `desired` must not duplicate the
+        // space — first occurrence wins.
+        manager.reorder(matching: [
+            SpaceID("d"), SpaceID("d"), SpaceID("b"),
+        ])
+        #expect(
+            manager.allSpaces.map(\.id) == [
+                SpaceID("d"), SpaceID("b"),
+                SpaceID("c"), SpaceID("a"),
+            ]
+        )
     }
 
     // MARK: live order beats a stale sidecar list

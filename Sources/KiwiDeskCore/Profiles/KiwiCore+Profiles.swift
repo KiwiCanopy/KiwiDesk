@@ -200,14 +200,15 @@ extension KiwiCore {
         // exists but fails to decode gives no trustworthy
         // base — keep the stored override untouched rather
         // than capturing the whole resolved set.
-        if guiConfigStore.exists, guiConfigStore.load() == nil {
+        let sidecar = guiConfigStore.load()
+        if guiConfigStore.exists, sidecar == nil {
             onLog(
                 "profiles: gui.json unreadable — keeping "
                     + "'\(name)' keybinding override unchanged"
             )
         } else {
             existing.modes = KeyModeOverride.diff(
-                base: baseKeyModes(),
+                base: (sidecar ?? guiConfigSeed()).modes,
                 edited: config.modes
             )
         }

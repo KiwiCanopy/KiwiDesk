@@ -19,11 +19,15 @@ extension KiwiCore {
     /// The base keybinding modes every profile override
     /// resolves onto AND diffs against — the ONE definition
     /// shared by the resolve side (`loadGuiConfig(editing:)`),
-    /// the diff side (`overwriteProfile`), and the GUI's
+    /// the diff side (`overwriteProfile`, which inlines it to
+    /// reuse a single sidecar decode), and the GUI's
     /// override-mode baseline (#55). Sidecar modes when the
     /// sidecar decodes; the live seed otherwise. Asymmetric
     /// bases would mint spurious overrides (e.g. the whole
-    /// recovered set diffed against []).
+    /// recovered set diffed against []). The seed branch is
+    /// time-dependent (recovers from the live VM) — callers
+    /// should read it once per edit/save cycle, not cache it
+    /// across reloads.
     public func baseKeyModes() -> [KeyMode] {
         (guiConfigStore.load() ?? guiConfigSeed()).modes
     }
