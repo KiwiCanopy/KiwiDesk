@@ -69,17 +69,22 @@ struct PerSpaceResizeTests {
     func resizeBaseIsResolved() {
         let core = makeCore()
         stackSpace(core)
-        // Global 0.6, override 0.9: a downward resize off 0.9
-        // lands below 0.9 (resolved base) — never off 0.6.
+        // Override sits at the 0.9 clamp ceiling; the global stays
+        // at 0.6. Resizing UP reads the resolved base (0.9) and
+        // saturates at the ceiling → exactly 0.9, whatever the
+        // screen width (the `resize` delta is scaled by it). Had
+        // the base been the global 0.6, a step would land short of
+        // 0.9. Asserting the saturated value keeps the test
+        // deterministic in a headless CI.
         core.execute(
             "stack.set_master_ratio_override",
             args: [.string("1"), .number(0.9)]
         )
-        core.execute("resize", args: [.string("x"), .number(-500)])
+        core.execute("resize", args: [.string("x"), .number(10)])
         let value =
             core.tiler.settings.stack
             .override[SpaceID("1")]?.masterRatio ?? 0
-        #expect(value > 0.6 && value < 0.9)
+        #expect(value == 0.9)
     }
 
     @Test("bsp resize also targets the space's own override")
