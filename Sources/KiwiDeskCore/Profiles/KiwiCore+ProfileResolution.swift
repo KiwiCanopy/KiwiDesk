@@ -9,8 +9,7 @@ extension KiwiCore {
     /// Applies a profile to live state and retiles.
     func apply(profile: Profile) {
         tiler.settings = profile.settings
-        for (raw, mode) in profile.spaceModes {
-            let id = SpaceID(raw)
+        for (id, mode) in profile.spaceModes {
             state.workspaces.ensureSpace(id)
             state.workspaces.setMode(id, mode)
         }

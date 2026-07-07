@@ -20,7 +20,7 @@ private func makeProfile(
     pins: [SpaceID: String] = [:],
     mains: [SpaceID] = [],
     isDefault: Bool = false,
-    modes: [String: LayoutMode] = ["1": .bsp]
+    modes: [SpaceID: LayoutMode] = ["1": .bsp]
 ) -> Profile {
     Profile(
         name: name,

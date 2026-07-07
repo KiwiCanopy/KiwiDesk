@@ -75,7 +75,7 @@ public final class ProfileManager {
 
     /// Saves the profile; the first profile of its screen count
     /// is auto-flagged as that count's default.
-    public func save(_ profile: Profile) throws {
+    func save(_ profile: Profile) throws {
         var profile = profile
         if !profile.isDefault,
             defaultProfile(count: profile.monitorCount) == nil
@@ -88,7 +88,7 @@ public final class ProfileManager {
         isDirty = false
     }
 
-    public func load(name: String) throws -> Profile {
+    func load(name: String) throws -> Profile {
         let profile = try read(name: name)
         currentName = profile.name
         currentStandard = nil
@@ -100,7 +100,7 @@ public final class ProfileManager {
     /// alphabetically-first remaining profile of that count
     /// inherits the flag; the last profile of a count simply
     /// reverts the count to the built-in Standard.
-    public func delete(name: String) throws {
+    func delete(name: String) throws {
         let deleted = try? read(name: name)
         try FileManager.default.removeItem(
             at: url(for: validated(name))
@@ -120,7 +120,7 @@ public final class ProfileManager {
 
     /// Re-designates a count's default: flags `name`, clears
     /// the flag on every other profile of the same count.
-    public func setDefault(name: String) throws {
+    func setDefault(name: String) throws {
         var chosen = try read(name: name)
         chosen.isDefault = true
         try write(chosen)
@@ -223,12 +223,12 @@ public final class ProfileManager {
     // MARK: - State
 
     /// Marks the live state as diverged (transient state).
-    public func markDirty() {
+    func markDirty() {
         isDirty = true
     }
 
     /// Records that a matched profile is now active.
-    public func adopt(_ profile: Profile) {
+    func adopt(_ profile: Profile) {
         currentName = profile.name
         currentStandard = nil
         isDirty = false
@@ -236,7 +236,7 @@ public final class ProfileManager {
 
     /// Records that a built-in Standard is resolving; always a
     /// dirty (transient) state until the user saves.
-    public func adoptStandard(named name: String) {
+    func adoptStandard(named name: String) {
         currentName = nil
         currentStandard = name
         isDirty = true

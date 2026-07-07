@@ -14,7 +14,9 @@ public struct MonitorSet: Codable, Sendable, Equatable {
     public private(set) var monitors: [String]
     /// Explicit fingerprint pin per space (sparse; unpinned
     /// spaces resolve via Main and the positional default).
-    public var spaceMonitorMap: [SpaceID: String]
+    /// Read-only so the init-time invariant (pins reference
+    /// only monitors inside the set) cannot be bypassed.
+    public private(set) var spaceMonitorMap: [SpaceID: String]
 
     private enum CodingKeys: String, CodingKey {
         case monitors
@@ -68,8 +70,8 @@ public struct Profile: Codable, Sendable, Equatable {
     /// Marks this profile as its screen count's default (the
     /// dirty-load fallback when no set matches exactly).
     public var isDefault: Bool
-    /// Space id (raw) -> layout mode.
-    public var spaceModes: [String: LayoutMode]
+    /// Layout mode per space.
+    public var spaceModes: [SpaceID: LayoutMode]
     public var settings: TilingSettings
     public var savedAt: Date
 
@@ -93,7 +95,7 @@ public struct Profile: Codable, Sendable, Equatable {
         monitorSets: [MonitorSet],
         mainSpaces: [SpaceID] = [],
         isDefault: Bool = false,
-        spaceModes: [String: LayoutMode],
+        spaceModes: [SpaceID: LayoutMode],
         settings: TilingSettings,
         savedAt: Date = .now
     ) {
@@ -139,7 +141,7 @@ public struct Profile: Codable, Sendable, Equatable {
                 forKey: .isDefault
             ) ?? false
         spaceModes = try container.decode(
-            [String: LayoutMode].self,
+            [SpaceID: LayoutMode].self,
             forKey: .spaceModes
         )
         settings = try container.decode(

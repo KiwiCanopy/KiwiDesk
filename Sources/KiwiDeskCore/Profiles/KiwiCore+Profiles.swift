@@ -105,9 +105,9 @@ extension KiwiCore {
     /// Snapshot of the current configuration as a new profile
     /// carrying only the live monitor set.
     func buildProfile(name: String) -> Profile {
-        var modes: [String: LayoutMode] = [:]
+        var modes: [SpaceID: LayoutMode] = [:]
         for space in state.workspaces.allSpaces {
-            modes[space.id.raw] = space.mode
+            modes[space.id] = space.mode
         }
         return Profile(
             name: name,

@@ -49,11 +49,13 @@ public final class KiwiCore {
 
     /// The live arrangement's space→monitor fingerprint pins,
     /// adopted from the active profile's matching monitor set
-    /// and edited by the GUI Canvas (#36).
-    public var spacePins: [SpaceID: String] = [:]
+    /// and edited by the GUI Canvas (#36). Internal: the GUI
+    /// reads placement via `loadGuiConfig` and writes it via
+    /// `applyProfileScopedState`, never directly.
+    var spacePins: [SpaceID: String] = [:]
     /// Spaces assigned the *Main* role — they follow whatever
     /// display is currently main (#36).
-    public var mainSpaces: Set<SpaceID> = []
+    var mainSpaces: Set<SpaceID> = []
     /// Profile bound per native macOS Space, keyed by the
     /// Mission Control number (1-based). Populated by
     /// `bind_profile_to_native_space`.
