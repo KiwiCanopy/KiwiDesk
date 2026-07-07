@@ -21,11 +21,10 @@ final class SettingsModel: ObservableObject {
     @Published var luaSource = ""
     /// True while foreign Lua forces the raw editor.
     @Published var forcedLuaEditor = false
-    /// True when init.lua has harmless custom Lua outside the
-    /// managed block (code that doesn't touch managed
-    /// vocabulary). Shows the informational coexistence banner
-    /// in the visual editor. Always false when
-    /// `forcedLuaEditor` is true.
+    /// True when init.lua has harmless custom Lua (code that
+    /// doesn't touch managed vocabulary). Shows the
+    /// informational coexistence banner in the visual editor.
+    /// Always false when `forcedLuaEditor` is true.
     @Published var hasCustomLua = false
     /// User toggle to edit init.lua directly.
     @Published var showLuaEditor = false

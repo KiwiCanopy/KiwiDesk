@@ -120,6 +120,65 @@ struct ProfileSpaceOrderTests {
         )
     }
 
+    // MARK: reorder of EXISTING spaces reconciles live order
+
+    /// The #55 fix for the inherited #75 seam: `ensureSpace`
+    /// early-returns for existing spaces, so a live save used
+    /// to capture the OLD creation order even when the GUI
+    /// showed a reordered list (masked only by prose guards).
+    /// `applyProfileScopedState` now reconciles the live order
+    /// to the GUI display order via `WorkspaceManager.reorder`,
+    /// so the live save and `overwriteProfile` capture ONE
+    /// order representation.
+    @Test("live save after GUI reorder of existing spaces")
+    func liveSaveAfterReorder() throws {
+        let core = makeCore()
+        connect(core, [display(1, "A")])
+
+        // Existing live spaces, creation order one,two,three.
+        core.state.workspaces.ensureSpace(SpaceID("one"))
+        core.state.workspaces.ensureSpace(SpaceID("two"))
+        core.state.workspaces.ensureSpace(SpaceID("three"))
+
+        // The GUI shows (and applies) the reversed order.
+        var config = GuiConfig()
+        config.spaces = [
+            SpaceID("three"), SpaceID("two"),
+            SpaceID("one"), SpaceID(1),
+        ]
+        core.applyProfileScopedState(from: config)
+
+        // The LIVE save path must capture the display order.
+        try core.persistProfile(named: "reordered")
+        let saved = try core.profiles.read(name: "reordered")
+        #expect(saved.spaces == config.spaces)
+    }
+
+    /// `WorkspaceManager.reorder` semantics: spaces in
+    /// `desired` lead in that order; unmentioned spaces keep
+    /// their relative order after them; unknown ids in
+    /// `desired` are ignored (no phantom spaces).
+    @Test("reorder primitive: partial list, unknown ids")
+    func reorderPrimitive() {
+        var manager = WorkspaceManager()
+        manager.ensureSpace(SpaceID("a"))
+        manager.ensureSpace(SpaceID("b"))
+        manager.ensureSpace(SpaceID("c"))
+        manager.ensureSpace(SpaceID("d"))
+
+        manager.reorder(matching: [
+            SpaceID("c"), SpaceID("ghost"), SpaceID("a"),
+        ])
+
+        let order = manager.allSpaces.map(\.id)
+        #expect(
+            order == [
+                SpaceID("c"), SpaceID("a"),
+                SpaceID("b"), SpaceID("d"),
+            ]
+        )
+    }
+
     // MARK: sidecar and profile agree after load
 
     /// After loading a profile with stored order ["z","m","a"],

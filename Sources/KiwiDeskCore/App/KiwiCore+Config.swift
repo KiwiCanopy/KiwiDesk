@@ -23,15 +23,21 @@ extension KiwiCore {
         ) {
             onLog("init.lua error: \(error)")
         }
-        applyConfigGlobals(from: fresh)
-        // When GUI-managed: re-apply rules + keybindings
-        // directly from gui.json so the structured path wins
-        // over the managed block (#55 phase 4). No-op when not
-        // GUI-managed — applyConfigGlobals stays authoritative.
+        // Two mutually exclusive config owners (#55, O7):
+        // GUI-managed configs load rules + keybindings directly
+        // from gui.json via the structured loader; hand-written
+        // (or foreign-Lua) configs keep their Lua-declared
+        // globals via applyConfigGlobals. A stale managed block
+        // from an earlier version still executes its binds —
+        // the structured reset makes them inert (O6).
         // Keybindings resolve against the profile active NOW;
         // a profile applied later (e.g. applyNativeSpaceBinding
         // below) re-registers in phase 6 (#55).
-        applyStructuredConfig()
+        if isGuiManaged {
+            applyStructuredConfig()
+        } else {
+            applyConfigGlobals(from: fresh)
+        }
         retile()
         // Lua-declared tiling is only the base state: the
         // active profile (or transient Standard) owns tiling

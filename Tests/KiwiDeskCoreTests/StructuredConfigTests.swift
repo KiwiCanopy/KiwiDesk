@@ -64,7 +64,7 @@ struct StructuredConfigTests {
         var config = GuiConfig()
         config.appRules = ["Spotify": SpaceID("music")]
         config.floatRules = ["Calculator"]
-        // Write gui.json + managed block, then clear init.lua.
+        // Write gui.json; init.lua stays empty (hooks-only).
         try core.saveGuiConfig(config)
         try writeInitLua("", core: core)
 
@@ -164,10 +164,25 @@ struct StructuredConfigTests {
         #expect(core.state.appRules["Xcode"] == nil)
     }
 
-    // MARK: - Double-registration guard
+    // MARK: - Stale managed block (O6)
+
+    /// A stale pre-#55 managed block binding `combo` — earlier
+    /// versions generated this into init.lua. It still
+    /// executes on load, but must stay inert in effect: the
+    /// structured loader resets its refs and re-registers from
+    /// gui.json.
+    private func staleBlock(binding combo: String) -> String {
+        """
+        \(ManagedConfig.beginMarker)
+        KiwiDesk.bind("\(combo)", function()
+            -- noop
+        end)
+        \(ManagedConfig.endMarker)
+        """
+    }
 
     /// Verifies exactly one ref per combo exists after
-    /// loadConfig — structured loader resets managed-block refs.
+    /// loadConfig — structured loader resets stale-block refs.
     @Test("Only one ref per combo after loadConfig (no double)")
     func noDoubleRegistration() throws {
         let core = makeGuiCore()
@@ -186,7 +201,11 @@ struct StructuredConfigTests {
             )
         ]
         try core.saveGuiConfig(config)
-        // init.lua has a managed block that also binds alt+h.
+        // A stale block (pre-#55) also binds alt+h on load.
+        try writeInitLua(
+            staleBlock(binding: "alt+h"),
+            core: core
+        )
         core.loadConfig()
 
         let combo = try #require(KeyCombo.parse("alt+h"))
@@ -199,15 +218,15 @@ struct StructuredConfigTests {
         #expect(bindings.count == 1)
     }
 
-    /// Leak canary for the managed-block refs: `luaL_ref`
-    /// reuses released slots, so after `loadConfig()` a probe
+    /// Leak canary for stale-block refs: `luaL_ref` reuses
+    /// released slots, so after `loadConfig()` a probe
     /// `makeFunction` must land on the same slot number in a
-    /// core whose init.lua holds the managed block as in one
-    /// whose init.lua is empty. If `applyStructuredConfig`
+    /// core whose init.lua holds a stale managed block as in
+    /// one whose init.lua is empty. If `applyStructuredConfig`
     /// stopped calling `keys.reset()`, the block's ref would
     /// stay live, the freelist would be empty, and the probe
     /// slot in the block core would shift up — red test.
-    @Test("Managed-block refs are released (slot-reuse canary)")
+    @Test("Stale-block refs are released (slot-reuse canary)")
     func noLeakedRefsAfterLoad() throws {
         var config = GuiConfig()
         config.modes = [
@@ -224,7 +243,7 @@ struct StructuredConfigTests {
             )
         ]
 
-        // Baseline: same gui.json, init.lua emptied (no block).
+        // Baseline: same gui.json, init.lua empty (no block).
         let bare = makeGuiCore()
         try bare.saveGuiConfig(config)
         try writeInitLua("", core: bare)
@@ -234,10 +253,14 @@ struct StructuredConfigTests {
             try bareLua
             .makeFunction(body: "-- probe").get()
 
-        // Block core: saveGuiConfig leaves the managed block
-        // in init.lua, which also binds alt+h on load.
+        // Block core: a stale pre-#55 block also binds alt+h
+        // on load; its ref must be released by the reset.
         let block = makeGuiCore()
         try block.saveGuiConfig(config)
+        try writeInitLua(
+            staleBlock(binding: "alt+h"),
+            core: block
+        )
         block.loadConfig()
         let blockLua = try #require(block.lua)
         let blockProbe =

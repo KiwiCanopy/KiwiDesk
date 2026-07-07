@@ -235,10 +235,11 @@ struct SettingsFooter: View {
                 Text(
                     "Nothing is lost: your current code isn't "
                         + "deleted, it's kept as a commented-out "
-                        + "backup in init.lua. Your gaps, layouts, "
-                        + "and rules are imported; keybindings "
-                        + "can't be imported automatically — re-add "
-                        + "them in the Shortcuts tab."
+                        + "backup in init.lua. Gaps, layouts, "
+                        + "rules, and keybindings are imported; "
+                        + "a shortcut that can't be read back "
+                        + "stays in the backup — re-add it in "
+                        + "the Shortcuts tab."
                 )
                 .font(.callout)
                 .frame(width: 300)

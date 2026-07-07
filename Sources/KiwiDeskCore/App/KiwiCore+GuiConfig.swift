@@ -4,12 +4,13 @@ import Foundation
 ///
 /// Reading: the dashboard opens the `gui.json` sidecar when it
 /// exists, else seeds an editable model from live state. Any
-/// hand-written Lua outside the managed block flips the editor
-/// into raw-Lua fallback (`configHasForeignCode`).
+/// hand-written Lua touching managed vocabulary flips the
+/// editor into raw-Lua fallback (`configHasForeignCode`).
 ///
-/// Writing: the model is persisted to the sidecar and its
-/// managed block spliced into `init.lua`, then the config is
-/// reloaded so the change takes effect immediately.
+/// Writing: the model is persisted to the sidecar and the
+/// config reloaded — the structured loader applies it directly
+/// (#55). `init.lua` is never touched by a save: it is
+/// hooks-only, owned by the user.
 extension KiwiCore {
     public var guiConfigStore: GuiConfigStore {
         GuiConfigStore(directory: configDirectory)
@@ -125,6 +126,12 @@ extension KiwiCore {
         for space in extra.subtracting(inList) {
             state.workspaces.ensureSpace(space)
         }
+        // `ensureSpace` early-returns for existing spaces, so
+        // reconcile the live order to the GUI's display order:
+        // a later live save (`buildProfile`) then captures the
+        // same order `overwriteProfile` would — one order
+        // representation across both save paths (#75/#55).
+        state.workspaces.reorder(matching: config.spaces)
         for space in state.workspaces.allSpaces {
             state.workspaces.setMode(
                 space.id,
@@ -184,37 +191,12 @@ extension KiwiCore {
     }
 
     /// Persists the model and applies it: writes `gui.json`,
-    /// regenerates `init.lua`'s managed block, then reloads.
+    /// then reloads — the structured loader registers rules and
+    /// keybindings directly from the sidecar (#55). `init.lua`
+    /// is not touched.
     public func saveGuiConfig(_ config: GuiConfig) throws {
         try guiConfigStore.save(config)
-        try writeManagedBlock(for: config)
         loadConfig()
-    }
-
-    /// Splices a freshly generated managed block into the
-    /// existing `init.lua`, preserving surrounding user code.
-    private func writeManagedBlock(
-        for config: GuiConfig
-    ) throws {
-        let existing =
-            (try? String(
-                contentsOf: configURL,
-                encoding: .utf8
-            )) ?? ""
-        let block = LuaConfigWriter.block(for: config)
-        let merged = ManagedConfig.merge(
-            block: block,
-            into: existing
-        )
-        try FileManager.default.createDirectory(
-            at: configDirectory,
-            withIntermediateDirectories: true
-        )
-        try merged.write(
-            to: configURL,
-            atomically: true,
-            encoding: .utf8
-        )
     }
 
     /// Recovers the live keybindings as editable modes (#4): each
@@ -238,13 +220,14 @@ extension KiwiCore {
     }
 
     /// Migrates a hand-written config into GUI management: the
-    /// current file is preserved verbatim as a commented backup,
-    /// and a fresh managed block is generated from the live
-    /// (executed) state — gaps, layouts, rules, and keybindings
-    /// carry over (bindings are recovered from the file via
-    /// `recoverKeybindings`; any that can't be read back stay
-    /// only in the backup). Returns the seeded model now under
-    /// GUI ownership.
+    /// current file is preserved verbatim as a commented backup
+    /// (no managed block is generated — the seeded `gui.json`
+    /// now owns rules and keybindings, #55). Gaps, layouts,
+    /// rules, and keybindings carry over from the live
+    /// (executed) state — bindings are recovered from the file
+    /// via `recoverKeybindings`; any that can't be read back
+    /// stay only in the backup. Returns the seeded model now
+    /// under GUI ownership.
     @discardableResult
     public func adoptConfigIntoGui() throws -> GuiConfig {
         let original =
@@ -258,7 +241,6 @@ extension KiwiCore {
         formatter.dateFormat = "yyyy-MM-dd"
         let file = ManagedConfig.adopt(
             original: original,
-            block: LuaConfigWriter.block(for: config),
             date: formatter.string(from: .now)
         )
         try FileManager.default.createDirectory(

@@ -18,30 +18,38 @@ Two safety rails apply to all Lua code:
   times out is **disabled** and logged; everything else keeps
   working until the next `reload_config`.
 
-## The Settings app and the managed block
+## The Settings app and `init.lua`
 
 You can edit everything below from the menu bar **Settings…**
-window instead of by hand. When you save, the app rewrites a
-delimited region of `init.lua`:
+window instead of by hand. The app stores its own settings —
+app rules, float rules, keybindings, modes, and native-Space
+profile bindings — in `~/.config/KiwiDesk/gui.json` (plus the
+profile JSON files) and applies them directly on every reload.
+**Saving never rewrites `init.lua`**: the file is yours alone,
+for event hooks and custom Lua.
+
+Earlier versions generated a delimited "managed block" inside
+`init.lua`:
 
 ```lua
 -- >>> KiwiDesk managed block (edit in the app, not by hand) >>>
-KiwiDesk.set_gap_global(10)
--- ...generated settings, modes, and keybindings...
+-- ...generated rules and keybindings...
 -- <<< KiwiDesk managed block <<<
 ```
 
-Anything you write **outside** that region is preserved across
-saves.
+A leftover block is harmless but stale: it still runs, and the
+app's own settings are applied after it and win. It is never
+regenerated — delete it by hand whenever convenient (the
+markers are recognized, so a stale block does not force the
+raw editor described below).
 
 **Harmless custom Lua coexists** with the visual editor. A
 `print`, a debug call, a sketchybar hook — any Lua that doesn't
 declare `app_rules`, `float_rules`, keybindings
 (`KiwiDesk.bind`, `KiwiDesk.define_mode`), or profile bindings
-(`KiwiDesk.bind_profile_to_native_space`) alongside the managed
-block — is left completely untouched on every save and a small
-informational banner is shown to confirm it. The visual editor
-stays active.
+(`KiwiDesk.bind_profile_to_native_space`) — is never touched
+and a small informational banner is shown to confirm it. The
+visual editor stays active.
 
 Tiling commands (`set_gap_global`, `set_mode`, and similar
 calls) also fall into this harmless category and do not force
@@ -49,38 +57,40 @@ the raw Lua editor. However, **once `gui.json` exists the
 visual editor owns tiling**: on a monitor change when no saved
 profile matches the connected displays, KiwiDesk applies the
 closest built-in Standard profile, resetting gaps, modes, and
-layout parameters. Hand-written tiling calls written outside
-the managed block do not survive that reset. To persist custom
-tiling across monitor changes, configure it in the Layouts &
-Gaps controls and save it as a profile.
+layout parameters. Hand-written tiling calls do not survive
+that reset. To persist custom tiling across monitor changes,
+configure it in the Layouts & Gaps controls and save it as a
+profile.
 
 **The raw Lua editor replaces the visual controls** only when
-custom code outside the block touches the same vocabulary the
-GUI writes — declaring `app_rules`, `float_rules`, a keybinding,
-or a profile binding in two places at once would create a
-conflict. In that case the app opens the integrated Lua editor
-for the whole file so you can edit it directly. From there you
-can keep editing raw Lua, or click **Adopt into the GUI** to
-import your current settings into a fresh managed block — your
-previous file is kept verbatim as a commented backup.
-Keybindings are recovered from the file: each bound combo and
-its action text are read back and sorted into the Keybindings
-tab (known Focus, Window Movement, and app-launch actions land
-in their sections; anything else becomes a Custom binding). You
-can also pull them in without adopting the whole file —
-**Import current shortcuts** at the bottom of the Keybindings
-tab reads the shortcuts active in `init.lua` and adds them for
-review before you Save. Recovery expects each shortcut to be an
-inline `function() … end` on its own line (the form the app
-writes). A binding whose action can't be read back — one bound
-to a named handler or a C function, rather than an inline
-function — is left only in the backup and can be re-added from
-the tab. The editor's own state (keybinding actions, mode icons)
-is mirrored to `~/.config/KiwiDesk/gui.json`; delete that file
-to reset the GUI to what `init.lua` currently declares. Custom
-keybinding Lua is stored there and runs on reload, so treat
-`gui.json` with the same trust as `init.lua` — don't import one
-from an untrusted source.
+custom code touches the same vocabulary the app owns in
+`gui.json` — declaring `app_rules`, `float_rules`, a
+keybinding, or a profile binding in two places at once would
+create a conflict, so keybindings and rules are owned by
+either `init.lua` *or* the app, never merged. In that case the
+app opens the integrated Lua editor for the whole file so you
+can edit it directly. From there you can keep editing raw Lua,
+or click **Adopt into the GUI** to import your current
+settings into the app — your previous file is kept verbatim as
+a commented backup and `init.lua` carries no active code
+afterwards. Keybindings are recovered from the file: each
+bound combo and its action text are read back and sorted into
+the Keybindings tab (known Focus, Window Movement, and
+app-launch actions land in their sections; anything else
+becomes a Custom binding). You can also pull them in without
+adopting the whole file — **Import current shortcuts** at the
+bottom of the Keybindings tab reads the shortcuts active in
+`init.lua` and adds them for review before you Save. Recovery
+expects each shortcut to be an inline `function() … end` on
+its own line. A binding whose action can't be read back — one
+bound to a named handler or a C function, rather than an
+inline function — is left only in the backup and can be
+re-added from the tab. The app's own state (keybinding
+actions, mode icons) lives in `~/.config/KiwiDesk/gui.json`;
+delete that file to reset the GUI to what `init.lua` currently
+declares. Custom keybinding Lua is stored there and runs on
+reload, so treat `gui.json` with the same trust as `init.lua`
+— don't import one from an untrusted source.
 
 ## Layouts & Gaps
 

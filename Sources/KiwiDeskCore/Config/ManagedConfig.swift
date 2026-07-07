@@ -1,14 +1,17 @@
 import Foundation
 
-/// Splits `init.lua` into the app-managed block and the user's
-/// own code around it, and merges a freshly generated block
-/// back in without touching anything else.
+/// Recognizes the legacy app-managed block in `init.lua` and
+/// classifies the code around it (#55: the app no longer
+/// GENERATES a block — `gui.json` and profiles are loaded
+/// directly, and `init.lua` is hooks-only). The split stays so
+/// a stale block from an earlier version keeps being treated
+/// as app-owned (inert, never "foreign") until the user
+/// deletes it by hand — re-saving is the migration.
 ///
-/// The GUI owns exactly one delimited region; everything a user
-/// hand-writes outside it survives a "Save". The GUI only falls
-/// back to the raw Lua editor when the surrounding code touches
-/// the managed vocabulary — verbs the GUI itself emits. Harmless
-/// custom Lua (print calls, debug hooks, sketchybar integrations)
+/// The GUI only falls back to the raw Lua editor when code
+/// outside a (stale) block touches the managed vocabulary —
+/// verbs the GUI owns in `gui.json`. Harmless custom Lua
+/// (print calls, debug hooks, sketchybar integrations)
 /// coexists with the visual editor; it shows an informational
 /// banner instead of locking the user out.
 public enum ManagedConfig {
@@ -21,10 +24,12 @@ public enum ManagedConfig {
     // MARK: - Managed vocabulary
 
     /// Tokens matched against non-comment lines outside the
-    /// managed block (see `touchesManagedVocabulary`). A
-    /// match forces the raw editor because the GUI cannot
-    /// safely co-own that vocabulary. Harmless custom Lua
-    /// (no matching token) coexists with the visual editor.
+    /// (stale) managed block (see `touchesManagedVocabulary`).
+    /// A match forces the raw editor because the GUI cannot
+    /// safely co-own that vocabulary — it owns app rules,
+    /// float rules, keybindings, and profile bindings in
+    /// `gui.json` (#55). Harmless custom Lua (no matching
+    /// token) coexists with the visual editor.
     ///
     /// Matching rules (see `lineMatchesToken`):
     /// - Tokens ending with `(` (method calls): optional
@@ -39,11 +44,10 @@ public enum ManagedConfig {
     /// Known limitation: receiver aliasing
     /// (`local K = KiwiDesk; K.bind(…)`) escapes detection.
     /// Token-based scanning (not full Lua parsing) is a
-    /// deliberate pre-release tradeoff.
-    ///
-    /// Drift guard: `ManagedVocabularyTests` verifies that
-    /// every line `LuaConfigWriter` emits is covered by at
-    /// least one token here.
+    /// deliberate pre-release tradeoff. Post-#55 the stakes:
+    /// an evading bind is registered by `init.lua`, then
+    /// silently unregistered when the structured loader
+    /// resets — keep bindings in ONE home (O7).
     public static let managedTokens: [String] = [
         "app_rules",
         "float_rules",
@@ -91,43 +95,18 @@ public enum ManagedConfig {
         )
     }
 
-    /// Rebuilds a full config file: the user's surrounding code
-    /// with a freshly wrapped managed block spliced in. If the
-    /// source had no block, the new one is appended.
-    public static func merge(
-        block: String,
-        into source: String
-    ) -> String {
-        let split = split(source)
-        let wrapped =
-            beginMarker + "\n" + block + "\n" + endMarker
-        var parts: [String] = []
-        // Strip any stray marker lines the surrounding regions
-        // may carry (an orphaned begin without an end, a
-        // duplicate marker from a partial write) so exactly one
-        // canonical block survives.
-        let before = stripMarkers(split.before).trimmedTrailing
-        if !before.isEmpty { parts.append(before) }
-        parts.append(wrapped)
-        let after = stripMarkers(split.after)
-            .trimmedLeadingWhitespaceLines
-        if !after.isEmpty { parts.append(after) }
-        return parts.joined(separator: "\n\n") + "\n"
-    }
-
-    /// Builds an "adopted" file: a fresh managed block followed
-    /// by the user's entire previous config, preserved verbatim
-    /// but commented out (so it is inert). Used when migrating a
-    /// hand-written config into GUI management — nothing is
-    /// dropped or reordered, and even old marker lines are safe
-    /// because every original line is prefixed with `-- `.
+    /// Builds an "adopted" file: the user's entire previous
+    /// config, preserved verbatim but commented out (so it is
+    /// inert). Used when migrating a hand-written config into
+    /// GUI management — nothing is dropped or reordered, and
+    /// even old marker lines are safe because every original
+    /// line is prefixed with `-- `. No managed block is
+    /// generated (#55): the app owns the settings in
+    /// `gui.json`, and `init.lua` stays hooks-only.
     public static func adopt(
         original: String,
-        block: String,
         date: String
     ) -> String {
-        let wrapped =
-            beginMarker + "\n" + block + "\n" + endMarker
         let commented =
             original
             .components(separatedBy: "\n")
@@ -136,16 +115,15 @@ public enum ManagedConfig {
         let header = [
             "-- Previous configuration, adopted by KiwiDesk on "
                 + date + ".",
-            "-- The app now manages the settings in the block "
-                + "above.",
-            "-- Keybindings could not be imported automatically "
-                + "— add",
-            "-- them again in the Keybindings tab, then delete "
-                + "this",
-            "-- backup once you no longer need it.",
+            "-- The app now manages these settings itself "
+                + "(gui.json);",
+            "-- recovered keybindings appear in the "
+                + "Keybindings tab.",
+            "-- Anything below stays inert — delete this "
+                + "backup once",
+            "-- you no longer need it.",
         ].joined(separator: "\n")
-        return wrapped + "\n\n" + header + "\n" + commented
-            + "\n"
+        return header + "\n" + commented + "\n"
     }
 
     // MARK: - Foreign-code detection
@@ -202,16 +180,6 @@ public enum ManagedConfig {
     }
 
     // MARK: - Internals
-
-    /// Drops any line that is itself a block marker.
-    private static func stripMarkers(_ text: String) -> String {
-        text.components(separatedBy: "\n")
-            .filter {
-                let line = $0.trimmed
-                return line != beginMarker && line != endMarker
-            }
-            .joined(separator: "\n")
-    }
 
     /// True if `text` holds a line that is not blank and not a
     /// full-line Lua comment (lines starting with `--`).
@@ -292,29 +260,5 @@ extension StringProtocol {
     /// matching and the foreign-code scan survive CRLF files.
     fileprivate var trimmed: String {
         trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-}
-
-extension String {
-    /// Drops trailing blank lines (keeps interior spacing).
-    fileprivate var trimmedTrailing: String {
-        var lines = components(separatedBy: "\n")
-        while let last = lines.last,
-            last.trimmingCharacters(in: .whitespaces).isEmpty
-        {
-            lines.removeLast()
-        }
-        return lines.joined(separator: "\n")
-    }
-
-    /// Drops leading blank lines.
-    fileprivate var trimmedLeadingWhitespaceLines: String {
-        var lines = components(separatedBy: "\n")
-        while let first = lines.first,
-            first.trimmingCharacters(in: .whitespaces).isEmpty
-        {
-            lines.removeFirst()
-        }
-        return lines.joined(separator: "\n")
     }
 }

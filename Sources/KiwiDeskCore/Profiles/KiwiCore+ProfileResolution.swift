@@ -24,9 +24,15 @@ extension KiwiCore {
         // WorkspaceManager.order follows the profile's list,
         // not Set-hash order — making the subsequent
         // buildProfile capture deterministic and faithful.
+        // `ensureSpace` early-returns for spaces that already
+        // exist (profile switch with shared names), so
+        // reconcile the order explicitly (#75/#55).
         for id in profile.orderedSpaces {
             state.workspaces.ensureSpace(id)
         }
+        state.workspaces.reorder(
+            matching: profile.orderedSpaces
+        )
         if pruneStaleSpaces {
             pruneSpaces(
                 keeping: declared,
