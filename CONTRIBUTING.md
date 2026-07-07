@@ -33,6 +33,27 @@ The binding style and workflow rules live in
 - Run `swift build && swift test && ./scripts/lint.sh` before
   pushing — CI enforces all three and blocks merging on red.
 
+## Using AI Assistants
+
+AI coding assistants are **welcome and encouraged** here. Much of
+the repo is set up specifically to make them productive: the
+committed `.claude/` config (`AGENTS.md`, path-scoped `rules/`,
+`skills/`, and project-tailored review agents) teaches an assistant
+KiwiDesk's conventions so its output lands on-style instead of
+generic. If you use Claude Code or a similar tool, run
+`./scripts/install-subagents.sh` once to pull the review agents.
+
+One rule, though: **understand what you submit.** A pull request is
+yours regardless of how it was written — know what your change does
+and why, and be able to talk through it in review. Please don't
+"vibecode" a PR full of generated code you couldn't explain. Treat
+the assistant as a fast pair-programmer, not an author you
+rubber-stamp.
+
+And before you push, actually run it — build and launch KiwiDesk,
+exercise the change, and confirm it behaves the way you intend.
+Green tests aren't proof for anything user-facing.
+
 ## Branching & Pull Requests
 
 **Branch naming:** follow Conventional Commit types with kebab-case
