@@ -58,15 +58,28 @@ public final class AppBarManager {
         Set(spaceOfDisplay.keys)
     }
 
-    /// Shows exactly `bars` — one per display — and hides the
-    /// overlays of any display no longer in the set.
+    /// Shows exactly `bars` — one per display — and retires the
+    /// overlays of any display no longer in the set (passing an
+    /// empty array retires them all). Retiring releases the
+    /// panel, so a display that never returns leaves nothing
+    /// behind.
     public func sync(_ bars: [Bar]) {
-        let wanted = Set(bars.map(\.display))
+        // A bar whose strip/items can't render is treated as
+        // absent — AppBarOverlay.show would hide it anyway — so
+        // its display retires instead of keeping a stale panel,
+        // and the "shown" bookkeeping (and thus onMove routing)
+        // never claims a display whose panel is hidden.
+        let valid = bars.filter {
+            !$0.items.isEmpty
+                && $0.strip.width >= 1 && $0.strip.height >= 1
+        }
+        let wanted = Set(valid.map(\.display))
         for (id, overlay) in overlays where !wanted.contains(id) {
             overlay.hide()
+            overlays[id] = nil
             spaceOfDisplay[id] = nil
         }
-        for bar in bars {
+        for bar in valid {
             let overlay = overlay(for: bar.display)
             spaceOfDisplay[bar.display] = bar.space
             overlay.show(
@@ -76,12 +89,6 @@ public final class AppBarManager {
                 style: bar.style
             )
         }
-    }
-
-    /// Hides every bar (no display hosts one right now).
-    public func hideAll() {
-        for overlay in overlays.values { overlay.hide() }
-        spaceOfDisplay.removeAll()
     }
 
     #if DEBUG

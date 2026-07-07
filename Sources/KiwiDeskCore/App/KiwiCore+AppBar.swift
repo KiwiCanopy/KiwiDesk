@@ -13,9 +13,16 @@ extension KiwiCore {
     func updateAppBar() {
         let settings = tiler.settings
         let displays = state.workspaces.allDisplays
-        // Before displays are tracked (cold start) fall back to
-        // the active space on the main screen — the pre-#16
-        // single-bar behavior.
+        // Cold start: `loadConfig()` can apply a profile and
+        // retile before `eventLoop.start()` publishes the
+        // displays, so `allDisplays` is briefly empty while a
+        // bar-hosting space is already active. Fall back to the
+        // active space on the main screen — the pre-#16
+        // single-bar behavior — until the display list seeds.
+        // Once seeded, an active space that resolves to no
+        // display (so `resolveSpaceDisplays` never assigned it)
+        // shows no bar; in the normal flow resolution always
+        // assigns it first.
         guard !displays.isEmpty else {
             appBars.sync(mainScreenFallback(settings: settings))
             return

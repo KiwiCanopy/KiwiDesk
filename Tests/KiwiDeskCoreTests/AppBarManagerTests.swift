@@ -50,11 +50,26 @@ struct AppBarManagerTests {
         #expect(manager.shownDisplays == [DisplayID(1)])
     }
 
-    @Test("hideAll retires every bar")
-    func hideAllClears() {
+    @Test("syncing an empty set retires every bar")
+    func emptySyncClears() {
         let manager = AppBarManager()
         manager.sync([bar(display: 1, space: "1")])
-        manager.hideAll()
+        manager.sync([])
+        #expect(manager.shownDisplays.isEmpty)
+    }
+
+    @Test("a degenerate strip retires rather than claims a bar")
+    func degenerateStripNotShown() {
+        let manager = AppBarManager()
+        let empty = AppBarManager.Bar(
+            display: DisplayID(1),
+            space: SpaceID("1"),
+            items: [],
+            activeIndex: nil,
+            strip: .zero,
+            style: AppBarStyle()
+        )
+        manager.sync([empty])
         #expect(manager.shownDisplays.isEmpty)
     }
 
