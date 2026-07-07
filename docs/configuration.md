@@ -324,7 +324,12 @@ scroll.set_anchor_override("3", "center")
 
 Overrides **merge per field**: an unset field inherits the
 global value (so overriding only `orientation` leaves
-`slot_size` and `anchor` following the global). Derived
+`slot_size` and `anchor` following the global). Because the
+merge is per field, **resizing** a window adjusts whatever the
+space currently shows for that field — its override if it has
+one, otherwise the shared global (which moves every space still
+inheriting it). Override the field first to keep a resize local
+to one space. Derived
 attributes re-resolve against the merged result — a space
 that flips to `vertical` moves its app bar to the left/right
 edge even though the global bar sits on top. In profile JSON

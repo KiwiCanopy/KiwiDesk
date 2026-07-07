@@ -109,6 +109,37 @@ struct ScrollingOverrideTests {
         )
     }
 
+    @Test("resolved params never carry the per-space override map")
+    func resolvedDropsOverrideMap() {
+        var s = TilingSettings()
+        var scroll = ScrollingOverride()
+        scroll.orientation = .vertical
+        s.scrolling.override[SpaceID("1")] = scroll
+        var bsp = BspOverride()
+        bsp.splitRatio = 0.7
+        s.bsp.override[SpaceID("1")] = bsp
+        var stack = StackOverride()
+        stack.masterCount = 3
+        s.stack.override[SpaceID("1")] = stack
+        var grid = GridOverride()
+        grid.columns = 4
+        s.grid.override[SpaceID("1")] = grid
+        var mono = MonocleOverride()
+        mono.orientation = .vertical
+        s.monocle.override[SpaceID("1")] = mono
+        // Both the overridden space and an unoverridden one must
+        // resolve to params with an empty override map — a
+        // forgotten `out.override = [:]` in any family (either
+        // resolve branch) fails here (guards the m3b invariant).
+        for space in [SpaceID("1"), SpaceID("2")] {
+            #expect(s.resolvedScrolling(for: space).override.isEmpty)
+            #expect(s.resolvedBsp(for: space).override.isEmpty)
+            #expect(s.resolvedStack(for: space).override.isEmpty)
+            #expect(s.resolvedGrid(for: space).override.isEmpty)
+            #expect(s.resolvedMonocle(for: space).override.isEmpty)
+        }
+    }
+
     @Test("override map nests under layout.scroll and round-trips")
     func settingsJSONNesting() throws {
         var settings = TilingSettings()

@@ -284,6 +284,12 @@ public struct TilingSettings: Sendable, Equatable, Codable {
     }
 
     // MARK: - Per-space writes (interactive resize)
+    //
+    // Only the interactive-resize path routes here — Lua `set_*`
+    // and the GUI per-space bindings write the global params or
+    // the override map directly. These helpers exist so a resize
+    // edits the value the space displays without knowing whether
+    // that value is overridden.
 
     /// Writes a resize-adjusted value for `space`: into the
     /// space's override when it already overrides that field,
