@@ -67,12 +67,15 @@ struct AppBarOverrideTests {
     /// round-trip on both the global style and a per-layout
     /// override. If a field is ever added to `AppBarStyle` but
     /// missed in `LayoutAppBar` / its Codable / `resolved`, one
-    /// of these equalities breaks.
+    /// of these equalities breaks. The fixtures (shared with
+    /// `AppBarParityTests`) are pinned exhaustive there, so a new
+    /// field can't slip past this round-trip unset.
     @Test("Every field round-trips on global and override")
     func fullRoundTrip() throws {
         var settings = TilingSettings()
-        settings.appBarStyle = Self.everyGlobalField()
-        settings.scrolling.appBar = Self.everyOverrideField()
+        settings.appBarStyle = AppBarFixtures.everyGlobalField()
+        settings.scrolling.appBar =
+            AppBarFixtures.everyOverrideField()
         let data = try JSONEncoder().encode(settings)
         let decoded = try JSONDecoder().decode(
             TilingSettings.self,
@@ -82,57 +85,6 @@ struct AppBarOverrideTests {
         #expect(
             decoded.scrolling.appBar == settings.scrolling.appBar
         )
-    }
-
-    private static func everyGlobalField() -> AppBarStyle {
-        var style = AppBarStyle()
-        style.position = .bottom
-        style.thickness = 44
-        style.style = .segments
-        style.activeStyle = .gap
-        style.itemSize = 120
-        style.itemGap = 3
-        style.content = .name
-        style.groupAdjacentWindows = false
-        style.fontSize = 15
-        style.cornerRadius = 5
-        style.textColor = "#010101"
-        style.boxColor = "#020202"
-        style.activeTextColor = "#030303"
-        style.activeBoxColor = "#040404"
-        style.highlightColor = "#050505"
-        style.hoverColor = "#060606"
-        style.hoverTextColor = "#070707"
-        style.backgroundColor = "#080808"
-        style.groupBadgeColor = "#090909"
-        style.groupBadgeTextColor = "#0A0A0A"
-        return style
-    }
-
-    private static func everyOverrideField() -> LayoutAppBar {
-        var bar = LayoutAppBar()
-        bar.enabled = false
-        bar.position = .right
-        bar.thickness = 50
-        bar.style = .underline
-        bar.activeStyle = .highlight
-        bar.itemSize = 88
-        bar.itemGap = 9
-        bar.content = .iconAndName
-        bar.groupAdjacentWindows = true
-        bar.fontSize = 20
-        bar.cornerRadius = 12
-        bar.textColor = "#111111"
-        bar.boxColor = "#222222"
-        bar.activeTextColor = "#333333"
-        bar.activeBoxColor = "#444444"
-        bar.highlightColor = "#555555"
-        bar.hoverColor = "#666666"
-        bar.hoverTextColor = "#777777"
-        bar.backgroundColor = "#888888"
-        bar.groupBadgeColor = "#999999"
-        bar.groupBadgeTextColor = "#AAAAAA"
-        return bar
     }
 }
 

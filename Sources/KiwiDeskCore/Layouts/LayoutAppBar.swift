@@ -97,7 +97,10 @@ extension LayoutAppBar: Codable {
     /// written; inherited fields stay absent.
     typealias CodingKeys = Key
 
-    enum Key: String, CodingKey {
+    /// `CaseIterable` is load-bearing: the parity test
+    /// (`AppBarParityTests`) reflects over `allCases` to prove
+    /// every field has a key — do not drop it as "unused".
+    enum Key: String, CodingKey, CaseIterable {
         case enabled
         case position
         case thickness
