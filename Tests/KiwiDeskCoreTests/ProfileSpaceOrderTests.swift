@@ -120,6 +120,114 @@ struct ProfileSpaceOrderTests {
         )
     }
 
+    // MARK: reorder of EXISTING spaces reconciles live order
+
+    /// The #55 fix for the inherited #75 seam: `ensureSpace`
+    /// early-returns for existing spaces, so a live save used
+    /// to capture the OLD creation order even when the GUI
+    /// showed a reordered list (masked only by prose guards).
+    /// `applyProfileScopedState` now reconciles the live order
+    /// to the GUI display order via `WorkspaceManager.reorder`,
+    /// so the live save and `overwriteProfile` capture ONE
+    /// order representation.
+    @Test("live save after GUI reorder of existing spaces")
+    func liveSaveAfterReorder() throws {
+        let core = makeCore()
+        connect(core, [display(1, "A")])
+
+        // Existing live spaces, creation order one,two,three.
+        core.state.workspaces.ensureSpace(SpaceID("one"))
+        core.state.workspaces.ensureSpace(SpaceID("two"))
+        core.state.workspaces.ensureSpace(SpaceID("three"))
+
+        // The GUI shows (and applies) the reversed order.
+        var config = GuiConfig()
+        config.spaces = [
+            SpaceID("three"), SpaceID("two"),
+            SpaceID("one"), SpaceID(1),
+        ]
+        core.applyProfileScopedState(from: config)
+
+        // The LIVE save path must capture the display order.
+        try core.persistProfile(named: "reordered")
+        let saved = try core.profiles.read(name: "reordered")
+        #expect(saved.spaces == config.spaces)
+    }
+
+    /// `WorkspaceManager.reorder` semantics: spaces in
+    /// `desired` lead in that order; unmentioned spaces keep
+    /// their relative order after them; unknown ids in
+    /// `desired` are ignored (no phantom spaces).
+    @Test("reorder primitive: partial list, unknown ids")
+    func reorderPrimitive() {
+        var manager = WorkspaceManager()
+        manager.ensureSpace(SpaceID("a"))
+        manager.ensureSpace(SpaceID("b"))
+        manager.ensureSpace(SpaceID("c"))
+        manager.ensureSpace(SpaceID("d"))
+
+        manager.reorder(matching: [
+            SpaceID("c"), SpaceID("ghost"), SpaceID("a"),
+        ])
+
+        let order = manager.allSpaces.map(\.id)
+        #expect(
+            order == [
+                SpaceID("c"), SpaceID("a"),
+                SpaceID("b"), SpaceID("d"),
+            ]
+        )
+
+        // A duplicated id in `desired` must not duplicate the
+        // space — first occurrence wins.
+        manager.reorder(matching: [
+            SpaceID("d"), SpaceID("d"), SpaceID("b"),
+        ])
+        #expect(
+            manager.allSpaces.map(\.id) == [
+                SpaceID("d"), SpaceID("b"),
+                SpaceID("c"), SpaceID("a"),
+            ]
+        )
+    }
+
+    // MARK: live order beats a stale sidecar list
+
+    /// The live order (reconciled on every apply/save) beats
+    /// a stale sidecar list: after loading a profile whose
+    /// order differs from gui.json, live editing must show —
+    /// and a live Update must capture — the profile's order,
+    /// not the sidecar's (#55 final review M2).
+    @Test("loadGuiConfig prefers live order over stale sidecar")
+    func liveOrderBeatsStaleSidecar() throws {
+        let core = makeCore()
+        connect(core, [display(1, "A")])
+        // Sidecar remembers an old display order.
+        var sidecar = GuiConfig()
+        sidecar.spaces = [
+            SpaceID("a"), SpaceID("m"), SpaceID("z"),
+        ]
+        try core.guiConfigStore.save(sidecar)
+        // Live state reconciled to a profile order z,m.
+        core.state.workspaces.ensureSpace(SpaceID("a"))
+        core.state.workspaces.ensureSpace(SpaceID("m"))
+        core.state.workspaces.ensureSpace(SpaceID("z"))
+        core.state.workspaces.reorder(matching: [
+            SpaceID("z"), SpaceID("m"),
+        ])
+
+        let cfg = core.loadGuiConfig()
+
+        let interesting = cfg.spaces.filter {
+            ["z", "m", "a"].contains($0.raw)
+        }
+        #expect(
+            interesting == [
+                SpaceID("z"), SpaceID("m"), SpaceID("a"),
+            ]
+        )
+    }
+
     // MARK: sidecar and profile agree after load
 
     /// After loading a profile with stored order ["z","m","a"],

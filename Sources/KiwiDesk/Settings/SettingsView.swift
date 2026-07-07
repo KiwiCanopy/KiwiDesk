@@ -67,9 +67,12 @@ struct SettingsView: View {
                                 systemImage: "menubar.rectangle"
                             )
                         }
-                    // Shortcuts and App Rules are global, not
-                    // part of any profile (Model A) — hidden
-                    // while editing a stored profile (#18).
+                    // App Rules are global, not part of any
+                    // profile (Model A) — hidden while editing
+                    // a stored profile (#18). Shortcuts stay
+                    // visible there in OVERRIDE mode: the
+                    // profile's sparse keybinding tier (#55
+                    // phase 7).
                     if !model.editingStoredProfile {
                         AppRulesTab(model: model)
                             .tabItem {
@@ -78,14 +81,14 @@ struct SettingsView: View {
                                     systemImage: "app.badge"
                                 )
                             }
-                        KeybindingsTab(model: model)
-                            .tabItem {
-                                Label(
-                                    "Shortcuts",
-                                    systemImage: "keyboard"
-                                )
-                            }
                     }
+                    KeybindingsTab(model: model)
+                        .tabItem {
+                            Label(
+                                "Shortcuts",
+                                systemImage: "keyboard"
+                            )
+                        }
                 }
                 .padding(.horizontal, 12)
                 .padding(.top, 10)
@@ -235,10 +238,11 @@ struct SettingsFooter: View {
                 Text(
                     "Nothing is lost: your current code isn't "
                         + "deleted, it's kept as a commented-out "
-                        + "backup in init.lua. Your gaps, layouts, "
-                        + "and rules are imported; keybindings "
-                        + "can't be imported automatically — re-add "
-                        + "them in the Shortcuts tab."
+                        + "backup in init.lua. Gaps, layouts, "
+                        + "rules, and keybindings are imported; "
+                        + "a shortcut that can't be read back "
+                        + "stays in the backup — re-add it in "
+                        + "the Shortcuts tab."
                 )
                 .font(.callout)
                 .frame(width: 300)

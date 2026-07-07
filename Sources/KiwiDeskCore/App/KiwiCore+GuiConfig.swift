@@ -4,15 +4,32 @@ import Foundation
 ///
 /// Reading: the dashboard opens the `gui.json` sidecar when it
 /// exists, else seeds an editable model from live state. Any
-/// hand-written Lua outside the managed block flips the editor
-/// into raw-Lua fallback (`configHasForeignCode`).
+/// hand-written Lua touching managed vocabulary flips the
+/// editor into raw-Lua fallback (`configHasForeignCode`).
 ///
-/// Writing: the model is persisted to the sidecar and its
-/// managed block spliced into `init.lua`, then the config is
-/// reloaded so the change takes effect immediately.
+/// Writing: the model is persisted to the sidecar and the
+/// config reloaded — the structured loader applies it directly
+/// (#55). `init.lua` is never touched by a save: it is
+/// hooks-only, owned by the user.
 extension KiwiCore {
     public var guiConfigStore: GuiConfigStore {
         GuiConfigStore(directory: configDirectory)
+    }
+
+    /// The base keybinding modes every profile override
+    /// resolves onto AND diffs against — the ONE definition
+    /// shared by the resolve side (`loadGuiConfig(editing:)`),
+    /// the diff side (`overwriteProfile`, which inlines it to
+    /// reuse a single sidecar decode), and the GUI's
+    /// override-mode baseline (#55). Sidecar modes when the
+    /// sidecar decodes; the live seed otherwise. Asymmetric
+    /// bases would mint spurious overrides (e.g. the whole
+    /// recovered set diffed against []). The seed branch is
+    /// time-dependent (recovers from the live VM) — callers
+    /// should read it once per edit/save cycle, not cache it
+    /// across reloads.
+    public func baseKeyModes() -> [KeyMode] {
+        (guiConfigStore.load() ?? guiConfigSeed()).modes
     }
 
     /// The editable model for the dashboard: the saved sidecar
@@ -68,6 +85,14 @@ extension KiwiCore {
         // Stored order is authoritative (#75); `orderedSpaces`
         // appends any declared space absent from the list.
         config.spaces = profile.orderedSpaces
+        // Shortcuts tab in override mode (#55 phase 7): the
+        // tabs edit the RESOLVED modes (base + this profile's
+        // sparse override); `overwriteProfile` diffs them back
+        // against the base on save.
+        config.modes = ConfigResolver.resolvedModes(
+            base: config.modes,
+            profile: profile.modes
+        )
     }
 
     /// Copies the live profile-scoped state into the model:
@@ -86,18 +111,15 @@ extension KiwiCore {
             }
         }
         config.spaceModes = modes
-        // Live state is authoritative for which spaces EXIST (#75).
-        // Order: use the sidecar's stored list as the base (keeps
-        // the user's chosen display order across reloads), filter
-        // to live members, then append any live space absent from
-        // the sidecar. Stale sidecar spaces (no longer live after a
-        // profile-load prune) drop via the filter. A bare space
-        // only in `gui.json` drops too — it wasn't seeded at boot.
-        let liveSet = Set(live)
-        let ordered = config.spaces.filter { liveSet.contains($0) }
-        let inOrdered = Set(config.spaces)
-        let extra = live.filter { !inOrdered.contains($0) }
-        config.spaces = SpaceID.deduplicated(ordered + extra)
+        // Live state is authoritative for which spaces EXIST
+        // and for their ORDER (#75/#55): every profile apply
+        // and every GUI save reconciles the live order via
+        // `WorkspaceManager.reorder`, so the live list already
+        // carries the chosen display order — while the
+        // sidecar's list can be stale (e.g. right after
+        // loading a profile whose order differs). A bare space
+        // only in `gui.json` drops — it wasn't seeded at boot.
+        config.spaces = SpaceID.deduplicated(live)
         config.spacePins = spacePins
         config.mainSpaces = mainSpaces
     }
@@ -125,6 +147,12 @@ extension KiwiCore {
         for space in extra.subtracting(inList) {
             state.workspaces.ensureSpace(space)
         }
+        // `ensureSpace` early-returns for existing spaces, so
+        // reconcile the live order to the GUI's display order:
+        // a later live save (`buildProfile`) then captures the
+        // same order `overwriteProfile` would — one order
+        // representation across both save paths (#75/#55).
+        state.workspaces.reorder(matching: config.spaces)
         for space in state.workspaces.allSpaces {
             state.workspaces.setMode(
                 space.id,
@@ -184,37 +212,12 @@ extension KiwiCore {
     }
 
     /// Persists the model and applies it: writes `gui.json`,
-    /// regenerates `init.lua`'s managed block, then reloads.
+    /// then reloads — the structured loader registers rules and
+    /// keybindings directly from the sidecar (#55). `init.lua`
+    /// is not touched.
     public func saveGuiConfig(_ config: GuiConfig) throws {
         try guiConfigStore.save(config)
-        try writeManagedBlock(for: config)
         loadConfig()
-    }
-
-    /// Splices a freshly generated managed block into the
-    /// existing `init.lua`, preserving surrounding user code.
-    private func writeManagedBlock(
-        for config: GuiConfig
-    ) throws {
-        let existing =
-            (try? String(
-                contentsOf: configURL,
-                encoding: .utf8
-            )) ?? ""
-        let block = LuaConfigWriter.block(for: config)
-        let merged = ManagedConfig.merge(
-            block: block,
-            into: existing
-        )
-        try FileManager.default.createDirectory(
-            at: configDirectory,
-            withIntermediateDirectories: true
-        )
-        try merged.write(
-            to: configURL,
-            atomically: true,
-            encoding: .utf8
-        )
     }
 
     /// Recovers the live keybindings as editable modes (#4): each
@@ -238,13 +241,14 @@ extension KiwiCore {
     }
 
     /// Migrates a hand-written config into GUI management: the
-    /// current file is preserved verbatim as a commented backup,
-    /// and a fresh managed block is generated from the live
-    /// (executed) state — gaps, layouts, rules, and keybindings
-    /// carry over (bindings are recovered from the file via
-    /// `recoverKeybindings`; any that can't be read back stay
-    /// only in the backup). Returns the seeded model now under
-    /// GUI ownership.
+    /// current file is preserved verbatim as a commented backup
+    /// (no managed block is generated — the seeded `gui.json`
+    /// now owns rules and keybindings, #55). Gaps, layouts,
+    /// rules, and keybindings carry over from the live
+    /// (executed) state — bindings are recovered from the file
+    /// via `recoverKeybindings`; any that can't be read back
+    /// stay only in the backup. Returns the seeded model now
+    /// under GUI ownership.
     @discardableResult
     public func adoptConfigIntoGui() throws -> GuiConfig {
         let original =
@@ -258,7 +262,6 @@ extension KiwiCore {
         formatter.dateFormat = "yyyy-MM-dd"
         let file = ManagedConfig.adopt(
             original: original,
-            block: LuaConfigWriter.block(for: config),
             date: formatter.string(from: .now)
         )
         try FileManager.default.createDirectory(

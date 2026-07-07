@@ -1,9 +1,9 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The integrated Lua editor. Shown when init.lua holds code the
-/// visual editor can't represent (foreign code outside the
-/// managed block), or when the user opts to edit raw Lua
+/// The integrated Lua editor. Shown when init.lua holds code
+/// the visual editor can't represent (foreign code touching
+/// managed vocabulary), or when the user opts to edit raw Lua
 /// (05_GUI_Concept §2). Edits here write the whole file verbatim.
 struct LuaEditorTab: View {
     @ObservedObject var model: SettingsModel

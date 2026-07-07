@@ -18,30 +18,40 @@ Two safety rails apply to all Lua code:
   times out is **disabled** and logged; everything else keeps
   working until the next `reload_config`.
 
-## The Settings app and the managed block
+## The Settings app and `init.lua`
 
 You can edit everything below from the menu bar **Settings…**
-window instead of by hand. When you save, the app rewrites a
-delimited region of `init.lua`:
+window instead of by hand. The app stores its own settings —
+app rules, float rules, keybindings, modes, and native-Space
+profile bindings — in `~/.config/KiwiDesk/gui.json` (plus the
+profile JSON files) and applies them directly on every reload.
+**Saving never rewrites `init.lua`**: the file is yours alone,
+for event hooks and custom Lua.
+
+Earlier versions generated a delimited "managed block" inside
+`init.lua`:
 
 ```lua
 -- >>> KiwiDesk managed block (edit in the app, not by hand) >>>
-KiwiDesk.set_gap_global(10)
--- ...generated settings, modes, and keybindings...
+-- ...generated rules and keybindings...
 -- <<< KiwiDesk managed block <<<
 ```
 
-Anything you write **outside** that region is preserved across
-saves.
+A leftover block is harmless but stale: it still runs, and
+the app's own rules and keybindings are applied after it and
+win. (Tiling calls inside a stale block remain live base
+state until a profile loads, like any hand-written tiling —
+see below.) The block is never regenerated — delete it by
+hand whenever convenient; the markers are recognized, so a
+stale block does not force the raw editor described below.
 
 **Harmless custom Lua coexists** with the visual editor. A
 `print`, a debug call, a sketchybar hook — any Lua that doesn't
 declare `app_rules`, `float_rules`, keybindings
 (`KiwiDesk.bind`, `KiwiDesk.define_mode`), or profile bindings
-(`KiwiDesk.bind_profile_to_native_space`) alongside the managed
-block — is left completely untouched on every save and a small
-informational banner is shown to confirm it. The visual editor
-stays active.
+(`KiwiDesk.bind_profile_to_native_space`) — is never touched
+and a small informational banner is shown to confirm it. The
+visual editor stays active.
 
 Tiling commands (`set_gap_global`, `set_mode`, and similar
 calls) also fall into this harmless category and do not force
@@ -49,38 +59,40 @@ the raw Lua editor. However, **once `gui.json` exists the
 visual editor owns tiling**: on a monitor change when no saved
 profile matches the connected displays, KiwiDesk applies the
 closest built-in Standard profile, resetting gaps, modes, and
-layout parameters. Hand-written tiling calls written outside
-the managed block do not survive that reset. To persist custom
-tiling across monitor changes, configure it in the Layouts &
-Gaps controls and save it as a profile.
+layout parameters. Hand-written tiling calls do not survive
+that reset. To persist custom tiling across monitor changes,
+configure it in the Layouts & Gaps controls and save it as a
+profile.
 
 **The raw Lua editor replaces the visual controls** only when
-custom code outside the block touches the same vocabulary the
-GUI writes — declaring `app_rules`, `float_rules`, a keybinding,
-or a profile binding in two places at once would create a
-conflict. In that case the app opens the integrated Lua editor
-for the whole file so you can edit it directly. From there you
-can keep editing raw Lua, or click **Adopt into the GUI** to
-import your current settings into a fresh managed block — your
-previous file is kept verbatim as a commented backup.
-Keybindings are recovered from the file: each bound combo and
-its action text are read back and sorted into the Keybindings
-tab (known Focus, Window Movement, and app-launch actions land
-in their sections; anything else becomes a Custom binding). You
-can also pull them in without adopting the whole file —
-**Import current shortcuts** at the bottom of the Keybindings
-tab reads the shortcuts active in `init.lua` and adds them for
-review before you Save. Recovery expects each shortcut to be an
-inline `function() … end` on its own line (the form the app
-writes). A binding whose action can't be read back — one bound
-to a named handler or a C function, rather than an inline
-function — is left only in the backup and can be re-added from
-the tab. The editor's own state (keybinding actions, mode icons)
-is mirrored to `~/.config/KiwiDesk/gui.json`; delete that file
-to reset the GUI to what `init.lua` currently declares. Custom
-keybinding Lua is stored there and runs on reload, so treat
-`gui.json` with the same trust as `init.lua` — don't import one
-from an untrusted source.
+custom code touches the same vocabulary the app owns in
+`gui.json` — declaring `app_rules`, `float_rules`, a
+keybinding, or a profile binding in two places at once would
+create a conflict, so keybindings and rules are owned by
+either `init.lua` *or* the app, never merged. In that case the
+app opens the integrated Lua editor for the whole file so you
+can edit it directly. From there you can keep editing raw Lua,
+or click **Adopt into the GUI** to import your current
+settings into the app — your previous file is kept verbatim as
+a commented backup and `init.lua` carries no active code
+afterwards. Keybindings are recovered from the file: each
+bound combo and its action text are read back and sorted into
+the Keybindings tab (known Focus, Window Movement, and
+app-launch actions land in their sections; anything else
+becomes a Custom binding). You can also pull them in without
+adopting the whole file — **Import current shortcuts** at the
+bottom of the Keybindings tab reads the shortcuts active in
+`init.lua` and adds them for review before you Save. Recovery
+expects each shortcut to be an inline `function() … end` on
+its own line. A binding whose action can't be read back — one
+bound to a named handler or a C function, rather than an
+inline function — is left only in the backup and can be
+re-added from the tab. The app's own state (keybinding
+actions, mode icons) lives in `~/.config/KiwiDesk/gui.json`;
+delete that file to reset the GUI to what `init.lua` currently
+declares. Custom keybinding Lua is stored there and runs on
+reload, so treat `gui.json` with the same trust as `init.lua`
+— don't import one from an untrusted source.
 
 ## Layouts & Gaps
 
@@ -672,6 +684,53 @@ reflects this by hiding the icon picker while the default mode
 is selected. An icon set on the default mode by hand (e.g. in
 directly-edited profile JSON) is simply ignored and never shown.
 
+### Config cascade (per-profile keybindings)
+
+Keybindings resolve through a two-tier cascade, mirroring how
+tiling already layers (global settings ← profile ← per-space
+overrides):
+
+> **The base config is the seed; the profile wins.** The base
+> shortcuts (the app's `gui.json`, or your Lua-declared binds
+> in a hand-written config) apply first. When the loaded
+> profile carries a `"modes"` override, each of its rows
+> shadows the base row with the same combo in the same mode;
+> everything the profile does not mention stays active.
+> Event hooks fire on their event — they are never a cascade
+> layer.
+
+The override is **sparse and soft by design**:
+
+- A profile stores only the modes and rows that diverge; a
+  profile without a `"modes"` key inherits the base shortcuts
+  completely.
+- Every base binding the profile doesn't rebind survives — in
+  particular your profile-switch shortcut, so a profile can
+  never trap you by *omission*. This is intentional: rebinding
+  the same combo differently per profile (in *Business*,
+  `⌘1 → Personal`; in *Personal*, `⌘1 → Business`) stays
+  possible, and only a *deliberate* rebind of your own escape
+  combo can dead-end a profile — the override editor's
+  dimmed-inherited affordance makes such a rebind visible.
+- Removing a base binding per profile is not expressible:
+  deleting an inherited row in the editor just resets it. To
+  disable a combo in one profile, rebind it to a no-op action.
+  The same applies to a base mode's menu bar icon — a profile
+  can *change* it, but clearing it just reverts to the base
+  icon.
+- Keybindings live in ONE home: the structured config
+  (gui.json + profiles) when GUI-managed, or your `init.lua`
+  otherwise — never merged. Hand-written binds that evade the
+  managed-vocabulary detection (e.g. aliasing `KiwiDesk` to a
+  local first) are silently unregistered on every reload while
+  GUI-managed; keep hand-written binds out of a GUI-managed
+  config.
+
+Profiles re-resolve their bindings whenever they apply: on
+`load_profile`, on a monitor change, and on a native-Space
+binding switch. Switching profiles also returns you to the
+default key mode.
+
 ## Events
 
 Subscribe to state changes (see also
@@ -821,12 +880,15 @@ KiwiDesk.set_default_profile("Developer Rig")
 **Profiles are the single source of truth for tiling.** A
 profile owns the gaps, per-space layout modes, layout
 parameters, animations, mouse-resize behavior, and the
-space→monitor assignments. `init.lua` keeps only the global,
-non-profile declarations: keybindings, `app_rules`,
-`float_rules`, and `bind_profile_to_native_space`. (The Lua
-tiling API — `set_gap_global`, `bsp.set_ratio`, … — remains
-valid in hand-written configs and acts as base state *before*
-a profile loads; the GUI no longer writes those calls.)
+space→monitor assignments — plus, optionally, a **sparse
+keybinding override** (see *Config cascade* under
+Keybindings). The global, shared declarations — keybindings,
+`app_rules`, `float_rules`, and profile bindings — live in
+the app's own `gui.json` when GUI-managed, or in your
+hand-written `init.lua` otherwise. (The Lua tiling API —
+`set_gap_global`, `bsp.set_ratio`, … — remains valid in
+hand-written configs and acts as base state *before* a
+profile loads; the GUI never writes Lua.)
 
 **Switching profiles reconciles your spaces.** Explicitly
 loading a profile makes its space set authoritative: a space
@@ -860,10 +922,12 @@ displays change, KiwiDesk resolves in this order:
 
    The Standard only *owns tiling* (gaps, modes, parameters)
    when the config is GUI-managed: a `gui.json` sidecar
-   exists *and* `init.lua` holds no code outside the managed
-   block. With a hand-written — or hybrid — config, your
-   Lua-declared tiling stays authoritative and the Standard
-   merely steers the space→screen placement; no transient
+   exists *and* `init.lua` holds no code touching the managed
+   vocabulary (`app_rules`, `float_rules`, `KiwiDesk.bind`,
+   `define_mode`, `bind_profile_to_native_space`). With a
+   hand-written — or hybrid — config, your Lua-declared
+   tiling stays authoritative and the Standard merely steers
+   the space→screen placement; no transient
    `Standard: <name>` state is entered. If a profile was
    active when the monitors changed, it keeps owning tiling
    but the state goes *dirty* (no stored set covers the live
@@ -938,7 +1002,19 @@ becomes `layout.bsp.ratio`:
     "min_window_size": 300,
     "new_window_placement_override": {}  // per space id
   },
-  "space_modes": { "1": "stack", "2": "bsp" }
+  "space_modes": { "1": "stack", "2": "bsp" },
+  // Optional sparse keybinding override (see Config
+  // cascade): only the modes/rows this profile changes.
+  // Omit the key entirely to inherit the base shortcuts.
+  "modes": [
+    {
+      "name": "default",
+      "bindings": [
+        { "combo": "alt+h", "lua": "KiwiDesk.focus(\"left\")",
+          "kind": "custom", "label": "" }
+      ]
+    }
+  ]
 }
 ```
 
@@ -984,9 +1060,16 @@ old generic Save):
   connected monitor set. Always available; names are
   auto-suffixed `_1`, `_2`, … when taken.
 
-Both also regenerate `init.lua`/`gui.json` when a global
-setting (keybindings, app/float rules, Space bindings)
-changed — a tiling-only edit touches only the profile JSON.
+Both also rewrite `gui.json` when a global setting
+(keybindings, app/float rules, Space bindings) changed — a
+tiling-only edit touches only the profile JSON, and
+`init.lua` is never written either way.
+
+Neither live save carries a keybinding override: the live
+Shortcuts tab edits the *base* shortcuts, so **Update** and
+**Save as new…** capture tiling only. To give a profile its
+own shortcuts, pick it in the banner dropdown and edit its
+Shortcuts tab in override mode (below).
 
 ### Editing a saved profile (not just the active one)
 
@@ -996,13 +1079,23 @@ pick any saved profile and edit it **in place** — without
 switching the running layout. Selecting the loaded profile
 returns to normal live editing.
 
-Because a profile stores tiling only, editing a *non-loaded*
-one is scoped to what a profile actually holds: the
-**General**, **Spaces**, **App Bar**, and **Canvas** tabs.
-The **Shortcuts** and **App Rules** tabs are hidden — those
-are global, shared across every profile, not per-profile
-settings. The footer collapses to a single **Save to
-"\<profile\>"**.
+Editing a *non-loaded* profile is scoped to what a profile
+actually holds: the **General**, **Spaces**, **App Bar**, and
+**Canvas** tabs, plus **Shortcuts** in *override mode* — a
+profile can override individual keybindings while inheriting
+everything else from the base shortcuts (see the Keybindings
+section). The **App Rules** tab is hidden — app rules are
+global, shared across every profile. The footer collapses to
+a single **Save to "\<profile\>"**.
+
+In the override-mode Shortcuts tab, dimmed rows are inherited
+from the base config and stay in sync with it; edit a row to
+override it for this profile only. Only the overriding rows
+are stored in the profile (sparse), and every base shortcut
+the profile doesn't rebind stays active when the profile
+loads — a profile-switch shortcut can never be lost by
+omission. Removing an inherited row just resets it; to
+disable a combo in one profile, rebind it to a no-op action.
 
 Saving writes only that profile's JSON. It hot-reloads the
 live layout **only if the profile you edited is the one on
@@ -1140,10 +1233,15 @@ Accessibility in System Settings resumes management.
 
 ### Per-desktop keybinds (profiles + modes)
 
-Profiles carry layouts and tiling settings, **not**
-keybindings — binds in `init.lua` are global and survive
-every profile swap. To get "global binds, overridden per
-native desktop" anyway, combine modal modes with the
+> Per-profile keybindings are **native** now: a profile can
+> carry a sparse `"modes"` override that shadows individual
+> base shortcuts (see *Config cascade* under Keybindings).
+> Combined with `bind_profile_to_native_space`, each desktop
+> gets its own layouts and its own keybinds with no Lua. The
+> recipe below remains for hand-written (non-GUI-managed)
+> configs, where Lua owns the keybindings.
+
+For a hand-written config, combine modal modes with the
 `native_space_change` event. Only the active mode's bindings
 fire, so build each desktop's mode by merging your shared
 binds with its overrides:

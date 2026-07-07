@@ -235,7 +235,11 @@ Keep this list updated whenever a recurring mistake is found.
 - **Profiles own tiling only.** A profile serializes tiling state,
   not keybindings or app rules. Profile-serialized settings belong
   *inside* `TilingSettings` so they ride the config split for free
-  (see `gap.override`). `ProfileManager` mutators are `internal` by
+  (see `gap.override`). One designed exception (#55): the sparse
+  per-profile keybinding tier lives in `Profile.modes`
+  (`KeyModeOverride`) — it is an override onto the base `gui.json`
+  modes, not a second home for keybindings, and it must stay the
+  only non-tiling field. `ProfileManager` mutators are `internal` by
   design — mutate through a `KiwiCore` facade, never re-publicize
   them. `read(name:)` is the public load-for-edit primitive
   (path-traversal guarded, touches no state); `save()` **adopts**

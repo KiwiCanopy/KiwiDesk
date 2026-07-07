@@ -6,15 +6,15 @@ import Foundation
 ///
 /// - **Global fields** (spaces list, app rules, float rules,
 ///   profile bindings, keybindings) persist in the `gui.json`
-///   sidecar and regenerate `init.lua`'s managed block (see
-///   `LuaConfigWriter`).
+///   sidecar and are applied directly by the structured
+///   loader on reload (#55) — `init.lua` is never generated.
 /// - **Profile-scoped fields** (tiling settings, space modes,
 ///   monitor pins, Main role) are held in memory for editing
 ///   and persist into the active profile's JSON — never into
 ///   the sidecar or `init.lua`, so the two files can't drift.
 ///
-/// Anything the user hand-writes outside the managed block is
-/// preserved (see `ManagedConfig`).
+/// `init.lua` is the user's own hooks-only Lua; code touching
+/// managed vocabulary flips the raw editor (`ManagedConfig`).
 public struct GuiConfig: Codable, Equatable, Sendable {
     /// Tunable tiling parameters (gaps, per-layout params,
     /// drag visuals). Mirrors the running `tiler.settings`;
@@ -113,9 +113,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// Moves `space` to the front of the ordered list. A no-op
     /// when `space` is absent or is already the first element.
     /// This is the primitive a future fallback-space chooser
-    /// (#68) will call; wire it through the edit-stored-profile
-    /// path (`overwriteProfile`), not a live save, so the
-    /// reorder reaches `Profile.spaces` faithfully.
+    /// (#68) will call. Both save paths capture the same order
+    /// since `applyProfileScopedState` reconciles the live
+    /// order via `WorkspaceManager.reorder` (#75/#55), so the
+    /// reorder reaches `Profile.spaces` from either one.
     public mutating func moveToFirst(_ space: SpaceID) {
         guard let index = spaces.firstIndex(of: space),
             index != 0

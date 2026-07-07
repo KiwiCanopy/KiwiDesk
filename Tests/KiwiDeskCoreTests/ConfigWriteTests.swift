@@ -13,7 +13,7 @@ private func makeCore() -> KiwiCore {
     return KiwiCore(configDirectory: directory)
 }
 
-/// A model exercising every section the writer emits.
+/// A model exercising every global + profile-scoped section.
 private func richConfig() -> GuiConfig {
     var config = GuiConfig()
     config.settings.gapsGlobal = Gaps(
@@ -74,74 +74,34 @@ private func richConfig() -> GuiConfig {
     return config
 }
 
-/// Writer, round-trip, and KiwiCore-level config tests.
-/// Split/detection and parity tests live in `ManagedConfigTests`.
+/// Round-trip and KiwiCore-level config tests (#55: saves go
+/// to `gui.json` only; `init.lua` is hooks-only, never
+/// generated). Split/detection tests live in
+/// `ManagedConfigTests`.
 @Suite("Config write-back", .serialized)
 @MainActor
 struct ConfigWriteTests {
-    @Test(
-        "default mode never emits an icon; other modes do"
-    )
-    func defaultModeHasNoIcon() {
-        let modes = [
-            KeyMode(
-                name: "default",
-                bindings: [
-                    KeyBinding(combo: "alt+h", lua: "-- noop")
-                ]
-            ),
-            KeyMode(
-                name: "resize",
-                icon: "📐",
-                bindings: [
-                    KeyBinding(combo: "alt+l", lua: "-- noop")
-                ]
-            ),
-        ]
-        let lua = LuaConfigWriter.keybindings(modes)
-        #expect(lua.contains("KiwiDesk.bind(\"alt+h\""))
-        #expect(lua.contains("icon = \"📐\""))
-        // The default mode's block never carries an icon
-        // argument — only `KiwiDesk.bind`, no `define_mode`.
-        #expect(!lua.contains("define_mode(\"default\""))
-    }
-
-    @Test(
-        "a malformed default mode icon is dropped, not emitted"
-    )
-    func defaultModeIconIsDropped() {
-        let modes = [
-            KeyMode(
-                name: KeyMode.defaultName,
-                icon: "📐",
-                bindings: [
-                    KeyBinding(combo: "alt+h", lua: "-- noop")
-                ]
-            )
-        ]
-        let lua = LuaConfigWriter.keybindings(modes)
-        #expect(lua.contains("KiwiDesk.bind(\"alt+h\""))
-        #expect(!lua.contains("icon ="))
-        #expect(!lua.contains("define_mode"))
-    }
-
-    @Test("the managed block only carries global sections")
-    func blockIsGlobalOnly() {
-        let lua = LuaConfigWriter.block(for: richConfig())
-        // Globals present.
-        #expect(lua.contains("app_rules = {"))
-        #expect(lua.contains("float_rules = {"))
-        #expect(
-            lua.contains("bind_profile_to_native_space(2")
+    @Test("saveGuiConfig never touches init.lua (hooks-only)")
+    func saveLeavesInitLua() throws {
+        let core = makeCore()
+        try FileManager.default.createDirectory(
+            at: core.configDirectory,
+            withIntermediateDirectories: true
         )
-        #expect(lua.contains("KiwiDesk.bind(\"alt+h\""))
-        // Tiling lives in the profile JSON, not init.lua (#36).
-        #expect(!lua.contains("set_gap_global"))
-        #expect(!lua.contains("set_mode"))
-        #expect(!lua.contains("set_min_window_size"))
-        #expect(!lua.contains("set_mouse_resize"))
-        #expect(!lua.contains("animations."))
-        #expect(!lua.contains("space_monitor_map"))
+        let hooks = "-- my hooks file\n"
+        try hooks.write(
+            to: core.configURL,
+            atomically: true,
+            encoding: .utf8
+        )
+
+        try core.saveGuiConfig(richConfig())
+
+        let after = try String(
+            contentsOf: core.configURL,
+            encoding: .utf8
+        )
+        #expect(after == hooks)
     }
 
     @Test("round-trip: write, reload, live state matches")
@@ -251,23 +211,29 @@ struct ConfigWriteTests {
         // Now GUI-managed: no foreign code, sidecar written.
         #expect(!core.configHasForeignCode)
         #expect(core.guiConfigStore.exists)
-        // Executed settings carried into the managed block.
+        // Executed settings carried into the adopted state.
         #expect(core.tiler.settings.gapsGlobal.outer.top == 7)
         #expect(
             core.state.workspaces[SpaceID(1)]?.mode == .stack
         )
-        // Original preserved verbatim as a comment.
+        // Original preserved verbatim as a comment; NO managed
+        // block is generated — init.lua is hooks-only (#55),
+        // so no active Lua remains in the file.
         let file = try String(
             contentsOf: core.configURL,
             encoding: .utf8
         )
         #expect(file.contains("-- KiwiDesk.bind(\"cmd+h\""))
-        // Keybindings are recovered from the original file and
-        // re-emitted into the managed block, so the combo is live
-        // again after adopt — normalized to its canonical form
-        // (#4). The commented backup above still uses the
-        // hand-written "cmd+h".
-        #expect(file.contains("KiwiDesk.bind(\"command+h\""))
+        #expect(!file.contains(ManagedConfig.beginMarker))
+        for line in file.components(separatedBy: "\n") {
+            let t = line.trimmingCharacters(
+                in: .whitespaces
+            )
+            #expect(t.isEmpty || t.hasPrefix("--"))
+        }
+        // Keybindings are recovered from the original file into
+        // gui.json (#4) and registered by the structured loader
+        // — the combo is live again after adopt.
         let combo = try #require(KeyCombo.parse("cmd+h"))
         #expect(core.keys.bindings(for: "default")[combo] != nil)
     }

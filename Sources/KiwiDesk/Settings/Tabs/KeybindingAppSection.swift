@@ -9,6 +9,8 @@ import SwiftUI
 struct ApplicationsSection: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
+    @Environment(\.keybindingOverrideBase)
+    private var overrideBase
 
     var body: some View {
         SettingsSection("Open Applications") {
@@ -50,6 +52,11 @@ struct ApplicationsSection: View {
             }
             .buttonStyle(.borderless)
         }
+        .keybindingRowStyle(
+            inherited: binding.wrappedValue.isInherited(
+                from: overrideBase
+            )
+        )
     }
 
     private func record(

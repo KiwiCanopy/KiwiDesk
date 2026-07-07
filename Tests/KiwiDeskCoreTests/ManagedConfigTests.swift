@@ -3,12 +3,14 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// Tests for `ManagedConfig`'s split/merge logic and the
+/// Tests for `ManagedConfig`'s split logic and the
 /// token-scoped foreign-code detection introduced in #14.
+/// #55: the app no longer generates a block — split stays so
+/// a STALE block keeps classifying as app-owned, not foreign.
 /// Round-trip and KiwiCore tests live in `ConfigWriteTests`.
 @Suite("ManagedConfig split / detection")
 struct ManagedConfigTests {
-    // MARK: - Split & merge
+    // MARK: - Split
 
     @Test("managed block splits and preserves user code")
     func managedSplit() {
@@ -45,56 +47,33 @@ struct ManagedConfigTests {
         #expect(!ManagedConfig.hasCustomCode(source))
     }
 
-    @Test("merge replaces the block, keeps the surroundings")
-    func mergeReplaces() {
-        let original = ManagedConfig.merge(
-            block: "KiwiDesk.set_gap_global(10)",
-            into: "-- header\n"
-        )
-        let updated = ManagedConfig.merge(
-            block: "KiwiDesk.set_gap_global(20)",
-            into: original
-        )
-        #expect(updated.contains("set_gap_global(20)"))
-        #expect(!updated.contains("set_gap_global(10)"))
-        #expect(updated.contains("-- header"))
-    }
-
-    @Test("merge tolerates CRLF and keeps one block")
-    func crlfMerge() {
+    @Test("split tolerates CRLF line endings")
+    func crlfSplit() {
         let source =
             "-- header\r\n" + ManagedConfig.beginMarker
             + "\r\nKiwiDesk.set_gap_global(10)\r\n"
             + ManagedConfig.endMarker + "\r\n"
-        #expect(ManagedConfig.split(source).managed != nil)
-        let merged = ManagedConfig.merge(
-            block: "KiwiDesk.set_gap_global(20)",
-            into: source
+        let split = ManagedConfig.split(source)
+        #expect(
+            split.managed?.contains("set_gap_global") == true
         )
-        let begins =
-            merged.components(
-                separatedBy: ManagedConfig.beginMarker
-            ).count - 1
-        #expect(begins == 1)
-        #expect(merged.contains("set_gap_global(20)"))
-        #expect(!merged.contains("set_gap_global(10)"))
+        #expect(split.before.contains("-- header"))
     }
 
-    @Test("merge strips an orphaned begin marker")
-    func orphanMarker() {
-        let source =
-            "-- header\n" + ManagedConfig.beginMarker
-            + "\nKiwiDesk.set_gap_global(10)\n"
-        let merged = ManagedConfig.merge(
-            block: "KiwiDesk.set_gap_global(20)",
-            into: source
+    @Test("adopt comments out every original line, no block")
+    func adoptCommentsOriginal() {
+        let adopted = ManagedConfig.adopt(
+            original: "KiwiDesk.bind(\"alt+h\", fn)\n\nx = 1",
+            date: "2026-07-07"
         )
-        let begins =
-            merged.components(
-                separatedBy: ManagedConfig.beginMarker
-            ).count - 1
-        #expect(begins == 1)
-        #expect(merged.contains("-- header"))
+        #expect(!adopted.contains(ManagedConfig.beginMarker))
+        for line in adopted.components(separatedBy: "\n") {
+            let t = line.trimmingCharacters(in: .whitespaces)
+            #expect(t.isEmpty || t.hasPrefix("--"))
+        }
+        // Nothing foreign remains — the adopted file is inert.
+        #expect(!ManagedConfig.hasForeignCode(adopted))
+        #expect(!ManagedConfig.hasCustomCode(adopted))
     }
 
     // MARK: - Token-scoped detection (#14)

@@ -21,11 +21,10 @@ final class SettingsModel: ObservableObject {
     @Published var luaSource = ""
     /// True while foreign Lua forces the raw editor.
     @Published var forcedLuaEditor = false
-    /// True when init.lua has harmless custom Lua outside the
-    /// managed block (code that doesn't touch managed
-    /// vocabulary). Shows the informational coexistence banner
-    /// in the visual editor. Always false when
-    /// `forcedLuaEditor` is true.
+    /// True when init.lua has harmless custom Lua (code that
+    /// doesn't touch managed vocabulary). Shows the
+    /// informational coexistence banner in the visual editor.
+    /// Always false when `forcedLuaEditor` is true.
     @Published var hasCustomLua = false
     /// User toggle to edit init.lua directly.
     @Published var showLuaEditor = false
@@ -79,11 +78,20 @@ final class SettingsModel: ObservableObject {
     @Published var keybindingWarning: String?
 
     let core: KiwiCore
-    private var suppressDirty = false
+    /// Guards the `config.didSet` dirty flag during reload
+    /// cycles (also used by the profile-editing reload in
+    /// `SettingsModel+ProfileOverrides.swift`).
+    var suppressDirty = false
     /// The sidecar as last loaded — the baseline that decides
     /// whether a save must also regenerate the global files
     /// (see `SettingsModel+Profiles`).
     var savedSidecar: GuiConfig?
+    /// The base gui.json modes while editing a stored profile
+    /// — the diff baseline for the Shortcuts tab's override
+    /// mode (#55 phase 7). nil during live editing. Updated
+    /// only inside the reload cycle, which republishes
+    /// `config`, so views recompute together.
+    var profileEditingBaseModes: [KeyMode]?
 
     init(core: KiwiCore) {
         self.core = core
@@ -98,8 +106,10 @@ final class SettingsModel: ObservableObject {
     var editingLua: Bool { forcedLuaEditor || showLuaEditor }
 
     /// Whether the dashboard is editing a stored profile rather
-    /// than the live config (#18) — hides the global-only tabs
-    /// (Shortcuts, App Rules) and swaps the footer's save action.
+    /// than the live config (#18) — hides App Rules, renders
+    /// the Shortcuts tab in override mode (#55 phase 7), and
+    /// swaps the footer's save action. The editing surface
+    /// lives in `SettingsModel+ProfileOverrides.swift`.
     var editingStoredProfile: Bool { editingProfile != nil }
 
     // MARK: - Sync with the backend
@@ -115,6 +125,7 @@ final class SettingsModel: ObservableObject {
         // Only meaningful while editing a stored profile; reset it
         // so a stale `false` never lingers into live editing.
         placementEditable = true
+        profileEditingBaseModes = nil
         var loaded = core.loadGuiConfig()
         // Recovered rows arrive as `.custom`; sort the ones that
         // match a catalog action into their sections before the
@@ -140,38 +151,6 @@ final class SettingsModel: ObservableObject {
         // the overlaid spaces union, and deleting + re-adding
         // a transient space alone doesn't read as an edit.
         savedSidecar = core.isGuiManaged ? config : nil
-        refreshProfiles()
-        isDirty = false
-    }
-
-    /// Reload path for the profile-dropdown edit mode (#18): seed
-    /// the tabs from a stored profile's JSON instead of live
-    /// state. A profile that has vanished falls back to live
-    /// editing. Stored-profile edits never touch the raw Lua
-    /// editor or the global sidecar — only the profile JSON is
-    /// written — so `savedSidecar` is cleared.
-    private func reloadEditingProfile(_ name: String) {
-        guard var loaded = try? core.loadGuiConfig(editing: name)
-        else {
-            editingProfile = nil
-            reload()
-            return
-        }
-        suppressDirty = true
-        KeybindingImportClassifier.classify(&loaded)
-        config = loaded
-        suppressDirty = false
-        // Stored-profile editing is mutually exclusive with the
-        // raw Lua editor — leaving it on would let a global
-        // init.lua write escape edit mode.
-        forcedLuaEditor = false
-        hasCustomLua = false
-        showLuaEditor = false
-        savedSidecar = nil
-        let live = displays.map(\.fingerprint)
-        placementEditable =
-            (try? core.profiles.read(name: name))?
-            .set(matching: live) != nil
         refreshProfiles()
         isDirty = false
     }

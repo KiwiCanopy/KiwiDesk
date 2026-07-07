@@ -24,9 +24,15 @@ extension KiwiCore {
         // WorkspaceManager.order follows the profile's list,
         // not Set-hash order — making the subsequent
         // buildProfile capture deterministic and faithful.
+        // `ensureSpace` early-returns for spaces that already
+        // exist (profile switch with shared names), so
+        // reconcile the order explicitly (#75/#55).
         for id in profile.orderedSpaces {
             state.workspaces.ensureSpace(id)
         }
+        state.workspaces.reorder(
+            matching: profile.orderedSpaces
+        )
         if pruneStaleSpaces {
             pruneSpaces(
                 keeping: declared,
@@ -50,6 +56,13 @@ extension KiwiCore {
         spacePins =
             profile.set(matching: live)?.spaceMonitorMap ?? [:]
         mainSpaces = Set(profile.mainSpaces)
+        // Per-profile keybinding tier (#55 phase 6): register
+        // THIS profile's override (base survives unmentioned,
+        // O4 soft). Passed explicitly — callers adopt after
+        // apply, so `currentName` may still be the old profile.
+        reapplyStructuredKeybindings(
+            profileModes: profile.modes
+        )
         resolveSpaceDisplays()
         retile()
         emitSpaceChange()
@@ -99,6 +112,9 @@ extension KiwiCore {
         }
         spacePins = [:]
         mainSpaces = []
+        // A transient Standard has no keybinding override —
+        // revert to the base gui.json modes (#55 phase 6).
+        reapplyStructuredKeybindings(profileModes: nil)
         resolveSpaceDisplays()
         retile()
         emitSpaceChange()

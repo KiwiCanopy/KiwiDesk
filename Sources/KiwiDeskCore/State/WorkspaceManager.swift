@@ -50,6 +50,25 @@ public struct WorkspaceManager: Sendable {
         spaces[id]?.mode = mode
     }
 
+    /// Reorders the iteration order to follow `desired` for
+    /// spaces present in both; spaces not mentioned keep their
+    /// relative order, appended after. `ensureSpace` never
+    /// reorders an existing space, so profile application calls
+    /// this to reconcile creation order with the stored display
+    /// order (#75/#55) — both profile-save paths then capture
+    /// ONE order representation.
+    public mutating func reorder(matching desired: [SpaceID]) {
+        let current = Set(order)
+        var seen: Set<SpaceID> = []
+        // First occurrence wins — a duplicate id in `desired`
+        // must not duplicate a space in the iteration order.
+        let front = desired.filter {
+            current.contains($0) && seen.insert($0).inserted
+        }
+        let rest = order.filter { !seen.contains($0) }
+        order = front + rest
+    }
+
     public mutating func activate(_ id: SpaceID) {
         ensureSpace(id)
         activeSpace = id
