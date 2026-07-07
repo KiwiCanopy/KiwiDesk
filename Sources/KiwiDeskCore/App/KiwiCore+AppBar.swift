@@ -126,7 +126,8 @@ extension KiwiCore {
     /// which needs no per-space geometry.
     func barHost(for space: Space) -> AppBarHosting? {
         switch space.mode {
-        case .monocle: return tiler.settings.monocle
+        case .monocle:
+            return tiler.settings.resolvedMonocle(for: space.id)
         case .scrolling:
             return tiler.settings.resolvedScrolling(for: space.id)
         default: return nil

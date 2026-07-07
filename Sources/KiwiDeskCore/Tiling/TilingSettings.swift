@@ -252,6 +252,32 @@ public struct TilingSettings: Sendable, Equatable, Codable {
             ?? scrolling
     }
 
+    /// The bsp params effective for `space` (#17): the global
+    /// params with that space's optional overrides merged on top.
+    public func resolvedBsp(for space: SpaceID) -> BspParams {
+        bsp.override[space]?.resolved(onto: bsp) ?? bsp
+    }
+
+    /// The stack params effective for `space` (#17): the global
+    /// params with that space's optional overrides merged on top.
+    public func resolvedStack(for space: SpaceID) -> StackParams {
+        stack.override[space]?.resolved(onto: stack) ?? stack
+    }
+
+    /// The grid params effective for `space` (#17): the global
+    /// params with that space's optional overrides merged on top.
+    public func resolvedGrid(for space: SpaceID) -> GridParams {
+        grid.override[space]?.resolved(onto: grid) ?? grid
+    }
+
+    /// The monocle params effective for `space` (#17): the global
+    /// params with that space's optional overrides merged on top.
+    public func resolvedMonocle(
+        for space: SpaceID
+    ) -> MonocleParams {
+        monocle.override[space]?.resolved(onto: monocle) ?? monocle
+    }
+
     public func context(
         bounds: CGRect,
         space: Space
@@ -261,11 +287,11 @@ public struct TilingSettings: Sendable, Equatable, Codable {
             gaps: gaps(for: space.id),
             focused: space.focused,
             minWindowSize: minWindowSize,
-            bsp: bsp,
-            stack: stack,
+            bsp: resolvedBsp(for: space.id),
+            stack: resolvedStack(for: space.id),
             scrolling: resolvedScrolling(for: space.id),
-            grid: grid,
-            monocle: monocle,
+            grid: resolvedGrid(for: space.id),
+            monocle: resolvedMonocle(for: space.id),
             appBarStyle: appBarStyle
         )
     }

@@ -17,6 +17,9 @@ public struct MonocleParams: Sendable, Equatable, AppBarHosting {
 
     public var orientation: Orientation = .horizontal
     public var appBar = LayoutAppBar()
+    /// Per-space overrides (`layout.monocle.override[space_id]`),
+    /// resolved via `TilingSettings.resolvedMonocle(for:)`.
+    public var override: [SpaceID: MonocleOverride] = [:]
 
     public init() {}
 
@@ -32,6 +35,7 @@ extension MonocleParams: Codable {
     private enum CodingKeys: String, CodingKey {
         case orientation
         case appBar = "app_bar"
+        case override
     }
 
     /// Manual decoding: profiles saved before a field existed
@@ -51,5 +55,21 @@ extension MonocleParams: Codable {
                 LayoutAppBar.self,
                 forKey: .appBar
             ) ?? defaults.appBar
+        override =
+            try container.decodeIfPresent(
+                [SpaceID: MonocleOverride].self,
+                forKey: .override
+            ) ?? [:]
+    }
+
+    /// Manual encode so the per-space override map stays sparse
+    /// (absent when empty), unlike the synthesized encode.
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(orientation, forKey: .orientation)
+        try container.encode(appBar, forKey: .appBar)
+        if !override.isEmpty {
+            try container.encode(override, forKey: .override)
+        }
     }
 }

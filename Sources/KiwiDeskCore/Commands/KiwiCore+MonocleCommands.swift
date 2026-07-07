@@ -10,15 +10,17 @@ extension KiwiCore {
         _ args: [JSONValue]
     ) -> CommandResponse {
         if command == "monocle.set_orientation" {
-            guard let raw = args.first?.stringValue,
-                let orientation =
-                    MonocleParams.Orientation(rawValue: raw)
-            else {
-                return .fail("expected horizontal|vertical")
-            }
+            guard
+                let orientation = Self.parseMonocleOrientation(
+                    args.first?.stringValue
+                )
+            else { return Self.orientationError }
             tiler.settings.monocle.orientation = orientation
             warnOnMonocleBarMismatch()
             return .ok()
+        }
+        if command == "monocle.set_orientation_override" {
+            return applyMonocleOverride(args)
         }
         guard command.hasPrefix("monocle.set_app_bar_") else {
             return .fail("unknown command: \(command)")
@@ -36,6 +38,42 @@ extension KiwiCore {
         }
         return response
     }
+
+    /// `monocle.set_orientation_override(space, value)` — the
+    /// per-space sibling of the global orientation setter (#17).
+    /// Parses the same value, writes it into that space's
+    /// override, and clears the entry when it becomes empty. The
+    /// bar edge re-resolves against the merged orientation via
+    /// `resolvedMonocle(for:)`.
+    private func applyMonocleOverride(
+        _ args: [JSONValue]
+    ) -> CommandResponse {
+        guard let space = args.first?.stringValue, !space.isEmpty
+        else { return .fail("expected space id and value") }
+        guard
+            let orientation = Self.parseMonocleOrientation(
+                args.dropFirst().first?.stringValue
+            )
+        else { return Self.orientationError }
+        var over =
+            tiler.settings.monocle.override[SpaceID(space)]
+            ?? MonocleOverride()
+        over.orientation = orientation
+        tiler.settings.monocle.override[SpaceID(space)] =
+            over.isEmpty ? nil : over
+        return .ok()
+    }
+
+    /// Shared by the global setter and its per-space override.
+    static func parseMonocleOrientation(
+        _ raw: String?
+    ) -> MonocleParams.Orientation? {
+        raw.flatMap(MonocleParams.Orientation.init(rawValue:))
+    }
+
+    private static let orientationError = CommandResponse.fail(
+        "expected horizontal|vertical"
+    )
 
     private func warnOnMonocleBarMismatch() {
         warnOnBarPositionMismatch(

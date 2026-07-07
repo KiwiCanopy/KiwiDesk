@@ -343,6 +343,26 @@ written):
 }
 ```
 
+Every layout has the same per-space siblings for its own
+tunables (all keyed by space id, all merging per field):
+
+```lua
+bsp.set_strategy_override("3", "alternating")
+bsp.set_ratio_override("3", 0.6)
+
+stack.set_master_count_override("3", 2)
+stack.set_master_ratio_override("3", 0.7)
+stack.set_overflow_style_override("3", "cascade_all")
+
+grid.set_type_override("3", "rigid")
+grid.set_fill_empty_space_override("3", false)
+grid.set_split_direction_override("3", "vertical")
+grid.set_dimensions_override("3", 4, 3)  -- columns, rows
+
+-- Monocle's orientation drives its bar edge, like scrolling.
+monocle.set_orientation_override("3", "vertical")
+```
+
 ### Where new windows land
 
 Every layout takes the same `new_window_placement` values —
