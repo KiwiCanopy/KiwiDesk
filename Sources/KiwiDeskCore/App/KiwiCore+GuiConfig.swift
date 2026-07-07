@@ -56,14 +56,20 @@ extension KiwiCore {
     ) {
         config.settings = profile.settings
         config.spaceModes = profile.spaceModes
-        config.spaces = GuiConfig.orderedSpaces(
-            config.spaces + Array(profile.spaceModes.keys)
-        )
         config.mainSpaces = Set(profile.mainSpaces)
         let live = state.workspaces.allDisplays
             .map(\.fingerprint)
         config.spacePins =
             profile.set(matching: live)?.spaceMonitorMap ?? [:]
+        // The space set is the profile's own — NOT unioned with
+        // the live sidecar's spaces, or editing a profile for
+        // other hardware would graft this machine's spaces into
+        // it on save (mirrors `applyProfileScopedState`, #18).
+        config.spaces = GuiConfig.orderedSpaces(
+            Array(profile.spaceModes.keys)
+                + profile.mainSpaces
+                + Array(config.spacePins.keys)
+        )
     }
 
     /// Copies the live profile-scoped state into the model:

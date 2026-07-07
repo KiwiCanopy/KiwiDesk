@@ -162,9 +162,15 @@ extension KiwiCore {
         var existing = try profiles.read(name: name)
         existing.settings = config.settings
         // Dense over the profile's own spaces (mirrors
-        // `buildProfile`): an undeclared space reads as bsp.
+        // `buildProfile`): an undeclared space reads as bsp. The
+        // union with `spaceModes.keys` keeps a just-set mode even
+        // if its space hasn't landed in the list yet; `spaces` is
+        // profile-derived (see `overlayProfileState`), so no
+        // live-only space can leak in here.
         var modes: [SpaceID: LayoutMode] = [:]
-        for space in config.spaces {
+        let declared = Set(config.spaces)
+            .union(config.spaceModes.keys)
+        for space in declared {
             modes[space] = config.spaceModes[space] ?? .bsp
         }
         existing.spaceModes = modes
@@ -200,7 +206,10 @@ extension KiwiCore {
     /// edit. The active profile re-applies in place (no adopt);
     /// a profile merely bound to the active native Space
     /// re-resolves through the shared monitor-change path so the
-    /// binding picks up the freshly-written JSON (#18).
+    /// binding picks up the freshly-written JSON (#18). That
+    /// bound path runs the normal resolver, which *adopts* the
+    /// bound profile (it is now the on-screen layout) — an
+    /// intended live-state change, unlike the in-place branch.
     public func reapplyIfInEffect(_ name: String) {
         guard isProfileInEffect(name) else { return }
         if profiles.currentName == name,

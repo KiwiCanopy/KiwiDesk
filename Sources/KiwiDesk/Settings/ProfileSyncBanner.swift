@@ -100,6 +100,11 @@ struct ProfileSyncBanner: View {
     }
 
     private func requestSelect(_ name: String?) {
+        // Resolve to the same target `selectEditTarget` will use,
+        // so re-picking the profile already open is a no-op that
+        // never pops a pointless discard dialog.
+        let target = (name == model.activeProfile) ? nil : name
+        guard target != model.editingProfile else { return }
         if model.isDirty {
             switchTarget = name
             confirmingSwitch = true

@@ -106,6 +106,9 @@ final class SettingsModel: ObservableObject {
             return
         }
         suppressDirty = true
+        // Only meaningful while editing a stored profile; reset it
+        // so a stale `false` never lingers into live editing.
+        placementEditable = true
         var loaded = core.loadGuiConfig()
         // Recovered rows arrive as `.custom`; sort the ones that
         // match a catalog action into their sections before the
@@ -150,7 +153,11 @@ final class SettingsModel: ObservableObject {
         KeybindingImportClassifier.classify(&loaded)
         config = loaded
         suppressDirty = false
+        // Stored-profile editing is mutually exclusive with the
+        // raw Lua editor — leaving it on would let a global
+        // init.lua write escape edit mode.
         forcedLuaEditor = false
+        showLuaEditor = false
         savedSidecar = nil
         let live = displays.map(\.fingerprint)
         placementEditable =

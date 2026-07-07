@@ -151,6 +151,77 @@ struct ProfileEditTests {
         #expect(!core.isProfileInEffect("other"))
     }
 
+    @Test("reapplyIfInEffect leaves an idle profile's live state")
+    func reapplyIdleIsNoop() throws {
+        let core = makeCore()
+        connect(core, [display(1, "A")])
+        core.execute("set_gap_global", args: [.number(30)])
+        core.execute("save_profile", args: [.string("stored")])
+        core.execute("save_profile", args: [.string("active")])
+        // "active" is current; live gap is 30.
+        var cfg = try core.loadGuiConfig(editing: "stored")
+        cfg.settings.gapsGlobal = .uniform(77)
+        try core.overwriteProfile(named: "stored", with: cfg)
+
+        // "stored" is not on screen — no live reapply.
+        core.reapplyIfInEffect("stored")
+        #expect(core.tiler.settings.gapsGlobal == .uniform(30))
+    }
+
+    @Test("Editing a profile never grafts live-only spaces")
+    func editKeepsOwnSpaceSet() throws {
+        let core = makeCore()
+        connect(core, [display(1, "A")])
+        core.execute(
+            "set_mode",
+            args: [.string("1"), .string("grid")]
+        )
+        core.execute("save_profile", args: [.string("small")])
+        #expect(
+            try core.profiles.read(name: "small")
+                .spaceModes[SpaceID(9)] == nil
+        )
+        // A live-only space 9 appears; another profile is active.
+        core.execute(
+            "set_mode",
+            args: [.string("9"), .string("stack")]
+        )
+        core.execute("save_profile", args: [.string("live")])
+
+        var cfg = try core.loadGuiConfig(editing: "small")
+        cfg.settings.gapsGlobal = .uniform(5)
+        try core.overwriteProfile(named: "small", with: cfg)
+
+        let after = try core.profiles.read(name: "small")
+        #expect(after.spaceModes[SpaceID(9)] == nil)
+        #expect(after.settings.gapsGlobal == .uniform(5))
+    }
+
+    @Test("Editing an absent-monitor profile drops stray pins")
+    func absentMonitorDropsPins() throws {
+        let core = makeCore()
+        connect(core, [display(1, "A")])
+        core.execute("save_profile", args: [.string("deskA")])
+        // Live monitors change to B: deskA's {A} set won't match.
+        core.state.workspaces.removeDisplay(DisplayID(1))
+        connect(core, [display(2, "B")])
+
+        var cfg = try core.loadGuiConfig(editing: "deskA")
+        // No matching set → no pins come back for editing.
+        #expect(cfg.spacePins.isEmpty)
+        // Even a stray pin is dropped: {A} untouched, no {B} set.
+        cfg.spacePins[SpaceID(1)] = "B:100x100"
+        try core.overwriteProfile(named: "deskA", with: cfg)
+
+        let after = try core.profiles.read(name: "deskA")
+        #expect(after.monitorSets.count == 1)
+        #expect(after.set(matching: ["B:100x100"]) == nil)
+        #expect(
+            after.set(matching: ["A:100x100"])?
+                .spaceMonitorMap[SpaceID(1)] == nil
+        )
+    }
+
     @Test("reapplyIfInEffect hot-reloads the active profile")
     func reapplyActive() throws {
         let core = makeCore()
