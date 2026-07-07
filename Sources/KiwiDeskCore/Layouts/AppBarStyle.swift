@@ -123,6 +123,9 @@ public struct AppBarStyle: Sendable, Equatable {
 extension AppBarStyle: Codable {
     /// JSON keys are the Lua setters (`app_bar.set_*`) minus the
     /// `set_` verb — the `app_bar` nesting carries the namespace.
+    /// `CaseIterable` is load-bearing: the parity test
+    /// (`AppBarParityTests`) reflects over `allCases` to prove
+    /// every field has a key — do not drop it as "unused".
     enum CodingKeys: String, CodingKey, CaseIterable {
         case position
         case thickness

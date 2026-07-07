@@ -109,16 +109,3 @@ struct LayoutParamsCodingParityTests {
         return params
     }
 }
-
-/// Asserts `fixture` touches every field, then that it survives a
-/// JSON round-trip. The exhaustiveness check is what keeps the
-/// round-trip forget-proof (see suite doc).
-private func expectRoundTrips<T: Codable & Equatable>(
-    _ fixture: T,
-    from base: T
-) throws {
-    expectAllChanged(fixture, from: base)
-    let data = try JSONEncoder().encode(fixture)
-    let back = try JSONDecoder().decode(T.self, from: data)
-    #expect(back == fixture)
-}
