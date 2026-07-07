@@ -190,6 +190,16 @@ extension KiwiCore {
         existing.mainSpaces = config.mainSpaces.sorted {
             $0.raw < $1.raw
         }
+        // Per-profile keybinding override (#55 phase 7): the
+        // edited modes are the RESOLVED set (seeded by
+        // `overlayProfileState`); store only the sparse diff
+        // against the base gui.json modes. nil when nothing
+        // diverges — an empty override is never persisted
+        // (O3/o4), and gui.json itself is NOT written here.
+        existing.modes = KeyModeOverride.diff(
+            base: guiConfigStore.load()?.modes ?? [],
+            edited: config.modes
+        )
         let live = state.workspaces.allDisplays
             .map(\.fingerprint)
         if existing.set(matching: live) != nil {

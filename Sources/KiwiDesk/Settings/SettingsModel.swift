@@ -83,6 +83,12 @@ final class SettingsModel: ObservableObject {
     /// whether a save must also regenerate the global files
     /// (see `SettingsModel+Profiles`).
     var savedSidecar: GuiConfig?
+    /// The base gui.json modes while editing a stored profile
+    /// — the diff baseline for the Shortcuts tab's override
+    /// mode (#55 phase 7). nil during live editing. Updated
+    /// only inside the reload cycle, which republishes
+    /// `config`, so views recompute together.
+    var profileEditingBaseModes: [KeyMode]?
 
     init(core: KiwiCore) {
         self.core = core
@@ -97,9 +103,33 @@ final class SettingsModel: ObservableObject {
     var editingLua: Bool { forcedLuaEditor || showLuaEditor }
 
     /// Whether the dashboard is editing a stored profile rather
-    /// than the live config (#18) — hides the global-only tabs
-    /// (Shortcuts, App Rules) and swaps the footer's save action.
+    /// than the live config (#18) — hides App Rules, renders
+    /// the Shortcuts tab in override mode (#55 phase 7), and
+    /// swaps the footer's save action.
     var editingStoredProfile: Bool { editingProfile != nil }
+
+    /// The selected mode's base rows for the Shortcuts tab's
+    /// override affordance; nil during live editing, empty
+    /// when the mode only exists in the profile.
+    func overrideBaseRows(mode name: String) -> [KeyBinding]? {
+        guard let base = profileEditingBaseModes else {
+            return nil
+        }
+        return base.first { $0.name == name }?.bindings ?? []
+    }
+
+    /// True while the edited profile's shortcuts diverge from
+    /// the base — drives the "overrides base keybindings"
+    /// indicator (#55 phase 7).
+    var editedProfileOverridesKeys: Bool {
+        guard let base = profileEditingBaseModes else {
+            return false
+        }
+        return KeyModeOverride.diff(
+            base: base,
+            edited: config.modes
+        ) != nil
+    }
 
     // MARK: - Sync with the backend
 
@@ -114,6 +144,7 @@ final class SettingsModel: ObservableObject {
         // Only meaningful while editing a stored profile; reset it
         // so a stale `false` never lingers into live editing.
         placementEditable = true
+        profileEditingBaseModes = nil
         var loaded = core.loadGuiConfig()
         // Recovered rows arrive as `.custom`; sort the ones that
         // match a catalog action into their sections before the
@@ -160,6 +191,11 @@ final class SettingsModel: ObservableObject {
         KeybindingImportClassifier.classify(&loaded)
         config = loaded
         suppressDirty = false
+        // Diff baseline for the override-mode Shortcuts tab
+        // (#55 phase 7): the raw base modes, NOT the resolved
+        // set the tabs edit.
+        profileEditingBaseModes =
+            core.guiConfigStore.load()?.modes ?? []
         // Stored-profile editing is mutually exclusive with the
         // raw Lua editor — leaving it on would let a global
         // init.lua write escape edit mode.

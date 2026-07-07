@@ -73,6 +73,8 @@ struct NavRow: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
     let command: NavCommand
+    @Environment(\.keybindingOverrideBase)
+    private var overrideBase
 
     var body: some View {
         HStack {
@@ -85,10 +87,23 @@ struct NavRow: View {
                 onClear: clear
             )
         }
+        .keybindingRowStyle(inherited: isInherited)
     }
 
     private var index: Int? {
         bindings.firstIndex {
+            $0.kind == .navigation && $0.lua == command.lua
+        }
+    }
+
+    /// Override mode: bound-and-equal to the base row, or
+    /// unbound on both sides. Always false while editing live.
+    private var isInherited: Bool {
+        guard let base = overrideBase else { return false }
+        if let index {
+            return bindings[index].isInherited(from: base)
+        }
+        return !base.contains {
             $0.kind == .navigation && $0.lua == command.lua
         }
     }
@@ -131,6 +146,8 @@ struct NavRow: View {
 struct CustomSection: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
+    @Environment(\.keybindingOverrideBase)
+    private var overrideBase
 
     var body: some View {
         SettingsSection("Custom Bindings") {
@@ -174,6 +191,11 @@ struct CustomSection: View {
             }
             .buttonStyle(.borderless)
         }
+        .keybindingRowStyle(
+            inherited: binding.wrappedValue.isInherited(
+                from: overrideBase
+            )
+        )
     }
 
     private func record(

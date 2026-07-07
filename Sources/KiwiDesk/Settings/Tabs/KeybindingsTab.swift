@@ -14,6 +14,7 @@ struct KeybindingsTab: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 KeybindingConflictBanner(model: model)
+                overrideBanner
                 modeHeader
                 modeIconRow
                 NavigationSection(
@@ -39,11 +40,53 @@ struct KeybindingsTab: View {
                     model: model,
                     bindings: bindingsBinding
                 )
-                importSection
+                // Importing init.lua shortcuts targets the
+                // BASE config — not available while editing a
+                // profile override (#55 phase 7).
+                if !model.editingStoredProfile {
+                    importSection
+                }
             }
             .padding(16)
+            .environment(
+                \.keybindingOverrideBase,
+                model.overrideBaseRows(mode: selected)
+            )
         }
         .onAppear(perform: ensureSelection)
+    }
+
+    // MARK: - Override mode (#55 phase 7)
+
+    /// Shown while editing a stored profile: the tab renders
+    /// the RESOLVED modes; only rows diverging from the base
+    /// are saved into the profile's sparse override.
+    @ViewBuilder private var overrideBanner: some View {
+        if model.editingStoredProfile {
+            SettingsSection("Profile shortcuts") {
+                if model.editedProfileOverridesKeys {
+                    Label(
+                        "This profile overrides base "
+                            + "keybindings.",
+                        systemImage: "keyboard.badge.ellipsis"
+                    )
+                    .font(.callout)
+                }
+                Text(
+                    "Dimmed rows are inherited from the base "
+                        + "shortcuts and stay in sync with "
+                        + "them. Edit a row to override it "
+                        + "for this profile only; matching "
+                        + "the base again makes it inherited "
+                        + "again. Removing an inherited row "
+                        + "only resets it — to disable a "
+                        + "combo in this profile, rebind it "
+                        + "to a no-op action instead."
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+        }
     }
 
     // MARK: - Import current shortcuts (#4)
@@ -112,11 +155,21 @@ struct KeybindingsTab: View {
                     Text("Icon")
                     ModeIconPicker(icon: iconBinding)
                     Spacer()
-                    Button(
-                        "Delete mode",
-                        role: .destructive,
-                        action: deleteMode
-                    )
+                    if canDeleteSelected {
+                        Button(
+                            "Delete mode",
+                            role: .destructive,
+                            action: deleteMode
+                        )
+                    } else {
+                        // O4 soft: a base mode the profile
+                        // doesn't mention always survives —
+                        // removal is not expressible per
+                        // profile (#55 phase 7).
+                        Text("Base modes can't be removed here")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
                 Text(
                     "Shown on the menu bar while this mode is "
@@ -154,6 +207,19 @@ struct KeybindingsTab: View {
     }
 
     // MARK: - Mode mutations
+
+    /// Live editing: any non-default mode. Override mode:
+    /// only modes the PROFILE added — base modes always pass
+    /// through (O4 soft), so deleting one is inexpressible.
+    private var canDeleteSelected: Bool {
+        guard selected != KeyMode.defaultName else {
+            return false
+        }
+        guard let base = model.profileEditingBaseModes else {
+            return true
+        }
+        return !base.contains { $0.name == selected }
+    }
 
     private var canAddMode: Bool {
         let name = newMode.trimmed

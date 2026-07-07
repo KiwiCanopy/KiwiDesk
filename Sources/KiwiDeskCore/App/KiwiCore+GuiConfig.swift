@@ -69,6 +69,14 @@ extension KiwiCore {
         // Stored order is authoritative (#75); `orderedSpaces`
         // appends any declared space absent from the list.
         config.spaces = profile.orderedSpaces
+        // Shortcuts tab in override mode (#55 phase 7): the
+        // tabs edit the RESOLVED modes (base + this profile's
+        // sparse override); `overwriteProfile` diffs them back
+        // against the base on save.
+        config.modes = ConfigResolver.resolvedModes(
+            base: config.modes,
+            profile: profile.modes
+        )
     }
 
     /// Copies the live profile-scoped state into the model:

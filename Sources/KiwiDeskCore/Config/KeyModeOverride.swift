@@ -98,6 +98,67 @@ public struct KeyModeOverride: Sendable, Equatable {
     }
 }
 
+// MARK: - Diff (inverse of resolved)
+
+extension KeyModeOverride {
+    /// Inverse of `resolved(onto:)`: the sparse override that,
+    /// resolved onto `base`, yields `edited`. Rows equal to
+    /// their base row (`KeyBinding ==`, id excluded) are
+    /// inherited and omitted; a row whose combo is absent from
+    /// base or whose action diverges is included. A mode
+    /// absent from base is included whole. An edited icon
+    /// differing from the base icon is carried (nil inherits).
+    /// Returns nil when nothing diverges — a fully-inherited
+    /// profile stores no override (O3 sparse; an empty
+    /// override is never persisted).
+    ///
+    /// DELETIONS are not expressible (O4 soft: base rows the
+    /// override does not mention always survive) — a base row
+    /// missing from `edited` is simply absent from the diff
+    /// and reappears on resolve. The editor treats deleting an
+    /// inherited row as revert, never removal; rebind to a
+    /// no-op to disable a combo in one profile. No tombstones.
+    public static func diff(
+        base: [KeyMode],
+        edited: [KeyMode]
+    ) -> KeyModeOverride? {
+        var baseByName: [String: KeyMode] = [:]
+        for mode in base {
+            baseByName[mode.name] = mode
+        }
+        var modes: [KeyMode] = []
+        for mode in edited {
+            guard let baseMode = baseByName[mode.name] else {
+                // New mode: carried whole.
+                modes.append(mode)
+                continue
+            }
+            var rows: [KeyBinding] = []
+            for row in mode.bindings {
+                let inherited = baseMode.bindings.contains {
+                    $0 == row
+                }
+                if !inherited {
+                    rows.append(row)
+                }
+            }
+            let icon =
+                mode.icon != baseMode.icon ? mode.icon : nil
+            if !rows.isEmpty || icon != nil {
+                modes.append(
+                    KeyMode(
+                        name: mode.name,
+                        icon: icon,
+                        bindings: rows
+                    )
+                )
+            }
+        }
+        let over = KeyModeOverride(modes: modes)
+        return over.isEmpty ? nil : over
+    }
+}
+
 // MARK: - Codable
 
 extension KeyModeOverride: Codable {

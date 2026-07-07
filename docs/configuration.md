@@ -1006,13 +1006,23 @@ pick any saved profile and edit it **in place** — without
 switching the running layout. Selecting the loaded profile
 returns to normal live editing.
 
-Because a profile stores tiling only, editing a *non-loaded*
-one is scoped to what a profile actually holds: the
-**General**, **Spaces**, **App Bar**, and **Canvas** tabs.
-The **Shortcuts** and **App Rules** tabs are hidden — those
-are global, shared across every profile, not per-profile
-settings. The footer collapses to a single **Save to
-"\<profile\>"**.
+Editing a *non-loaded* profile is scoped to what a profile
+actually holds: the **General**, **Spaces**, **App Bar**, and
+**Canvas** tabs, plus **Shortcuts** in *override mode* — a
+profile can override individual keybindings while inheriting
+everything else from the base shortcuts (see the Keybindings
+section). The **App Rules** tab is hidden — app rules are
+global, shared across every profile. The footer collapses to
+a single **Save to "\<profile\>"**.
+
+In the override-mode Shortcuts tab, dimmed rows are inherited
+from the base config and stay in sync with it; edit a row to
+override it for this profile only. Only the overriding rows
+are stored in the profile (sparse), and every base shortcut
+the profile doesn't rebind stays active when the profile
+loads — a profile-switch shortcut can never be lost by
+omission. Removing an inherited row just resets it; to
+disable a combo in one profile, rebind it to a no-op action.
 
 Saving writes only that profile's JSON. It hot-reloads the
 live layout **only if the profile you edited is the one on
