@@ -17,6 +17,7 @@ extension KiwiCore {
         pruneStaleSpaces: Bool = false
     ) {
         tiler.settings = profile.settings
+        syncAnimationDurations(from: profile.settings)
         let declared = profile.declaredSpaces
         // Seed live order from the profile's stored list so
         // creation order matches display order. Using
@@ -99,10 +100,23 @@ extension KiwiCore {
         }
     }
 
+    /// Syncs animation durations from `settings` to the engine.
+    /// Called by both `apply(profile:)` and `apply(composed:)`
+    /// so the engine is always consistent with the live settings.
+    private func syncAnimationDurations(
+        from settings: TilingSettings
+    ) {
+        tiler.animation.durationMS =
+            settings.animations.durationMS
+        tiler.animation.scrollDurationMS =
+            settings.animations.scrollSpeedMS
+    }
+
     /// Applies a composed Standard fallback (#53): transient,
     /// nothing is written until the user saves.
     func apply(composed: ProfileComposition.Composed) {
         tiler.settings = composed.settings
+        syncAnimationDurations(from: composed.settings)
         for space in composed.spaces {
             state.workspaces.ensureSpace(space)
             state.workspaces.setMode(

@@ -20,6 +20,7 @@ extension KiwiCore {
                     + "animations.set_duration(ms)"
             )
             tiler.animation.durationMS = ms
+            tiler.settings.animations.durationMS = ms
         case "set_space_animation":
             // Deprecated alias for `animations.set_on_space_change`
             // (issue #11). Still works so existing configs load.
@@ -74,21 +75,38 @@ extension KiwiCore {
         return .ok()
     }
 
-    /// `animations.*` toggles (issue #11): per-trigger animation
-    /// control. Persisted in `settings.animations`.
+    /// `animations.*` toggles and duration knobs (issues #11,
+    /// #51). Toggles and duration values persist in
+    /// `settings.animations`; the engine is updated in place.
     func animationsCommand(
         _ command: String,
         _ args: [JSONValue]
     ) -> CommandResponse {
-        // Duration takes an Int, not a Bool. Runtime-only (like
-        // scroll.set_speed, which shares this knob) — not
-        // persisted, so set it in init.lua.
-        if command == "animations.set_duration" {
+        // Duration knobs take Int, not Bool; handle before the
+        // Bool guard below.
+        switch command {
+        case "animations.set_duration":
+            // Persisted per-profile (issue #51). Writes both
+            // the settings struct and the engine so the value
+            // is live immediately AND captured on next save.
             guard let ms = args.first?.intValue else {
                 return .fail("expected milliseconds")
             }
             tiler.animation.durationMS = ms
+            tiler.settings.animations.durationMS = ms
             return .ok()
+        case "animations.set_scroll_speed":
+            // The scroll-specific duration knob, split from
+            // `animations.set_duration` (issue #51).
+            // `scroll.set_speed` is the deprecated alias.
+            guard let ms = args.first?.intValue else {
+                return .fail("expected milliseconds")
+            }
+            tiler.animation.scrollDurationMS = ms
+            tiler.settings.animations.scrollSpeedMS = ms
+            return .ok()
+        default:
+            break
         }
         guard let enabled = args.first?.boolValue else {
             return .fail("expected boolean")

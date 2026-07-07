@@ -32,14 +32,18 @@ struct SettingsCodingTests {
             ]
         )
         #expect(root["mouse_resize"] as? String == "layout")
-        // Lua `animations.set_on_space_change` /
-        // `animations.set_on_scrolling` (issue #11).
+        // Toggles (issue #11) and duration knobs (issue #51).
+        // Keys mirror the Lua names per the one-vocabulary rule.
         let animations = try object(root["animations"])
         #expect(animations["on_space_change"] as? Bool == false)
         #expect(animations["on_scrolling"] as? Bool == true)
         #expect(animations["on_window_resize"] as? Bool == true)
         #expect(animations["on_window_swap"] as? Bool == true)
         #expect(animations["on_relayout"] as? Bool == true)
+        // `animations.set_duration` → JSON `animations.duration`
+        #expect(animations["duration"] as? Int == 250)
+        // `animations.set_scroll_speed` → `animations.scroll_speed`
+        #expect(animations["scroll_speed"] as? Int == 250)
         let layout = try object(root["layout"])
         #expect(
             Set(layout.keys) == [
@@ -122,6 +126,8 @@ struct SettingsCodingTests {
         settings.animations.onWindowResize = false
         settings.animations.onWindowSwap = false
         settings.animations.onRelayout = false
+        settings.animations.durationMS = 400
+        settings.animations.scrollSpeedMS = 180
         let data = try JSONEncoder().encode(settings)
         let decoded = try JSONDecoder().decode(
             TilingSettings.self,
@@ -140,6 +146,9 @@ struct SettingsCodingTests {
         #expect(decoded.animations.onSpaceChange)
         // on_scrolling absent — keeps its `true` default.
         #expect(decoded.animations.onScrolling)
+        // Duration knobs absent — keep their 250 ms defaults.
+        #expect(decoded.animations.durationMS == 250)
+        #expect(decoded.animations.scrollSpeedMS == 250)
     }
 
     @Test("Missing keys fall back to defaults")

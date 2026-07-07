@@ -73,7 +73,7 @@ public enum APIReference {
     /// Layout sub-APIs exposed as global Lua tables.
     public static let namespaces: [String: [String]] = [
         "animations": [
-            "set_duration",
+            "set_duration", "set_scroll_speed",
             "set_on_space_change", "set_on_scrolling",
             "set_on_window_resize", "set_on_window_swap",
             "set_on_relayout",

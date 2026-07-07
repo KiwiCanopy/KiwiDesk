@@ -50,14 +50,29 @@ public final class AnimationEngine {
     /// apps, so animation is always on in production.
     var isEnabled = true
 
-    /// Animation duration in ms, clamped to 50–1000.
+    /// General animation duration in ms, clamped to 50–1000.
     /// Maps onto the spring's response time (250 ms = 0.35 s).
+    /// Synced from `AnimationSettings.durationMS` on profile
+    /// apply; also set directly by `animations.set_duration`.
     public var durationMS: Int {
         get { storedDurationMS }
         set { storedDurationMS = min(max(newValue, 50), 1000) }
     }
 
+    /// Scrolling-layout focus-shift speed in ms, clamped
+    /// 50–1000. Independent knob so scroll speed and general
+    /// animation speed can be tuned separately. Synced from
+    /// `AnimationSettings.scrollSpeedMS` on profile apply.
+    public var scrollDurationMS: Int {
+        get { storedScrollDurationMS }
+        set {
+            storedScrollDurationMS =
+                min(max(newValue, 50), 1000)
+        }
+    }
+
     private var storedDurationMS = 250
+    private var storedScrollDurationMS = 250
     private var animations: [DisplayID: [WindowID: FrameAnimation]] = [:]
     private var drivers: [DisplayID: DisplayLinkDriver] = [:]
     /// Last rounded frame sent per window, for no-op skipping.

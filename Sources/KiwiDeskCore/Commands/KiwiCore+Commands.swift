@@ -106,18 +106,39 @@ extension KiwiCore {
         guard refocusRetile,
             activeSpace?.mode.isFocusDriven == true
         else { return }
-        retile(animated: focusRetileAnimated)
+        retileWithScrollDuration()
     }
 
     /// Whether a focus-driven re-layout animates. Scrolling's
     /// focus slide is toggleable (`on_scrolling`); other
     /// focus-driven modes (Monocle) always animate. Shared by
-    /// the `focusWindow` hand-off and the `windowFocused` event
-    /// handler so an external focus change (click / cmd+tab
-    /// within the space) obeys the same toggle.
+    /// `retileWithScrollDuration` and the `windowFocused` event
+    /// handler so an external focus change obeys the same toggle.
     var focusRetileAnimated: Bool {
         activeSpace?.mode == .scrolling
             ? tiler.settings.animations.onScrolling : true
+    }
+
+    /// Retiles for a focus-driven layout, honouring
+    /// `scrollDurationMS` when the active mode is scrolling and
+    /// `onScrolling` is true — so scroll focus shifts animate at
+    /// their own speed without touching the general duration.
+    ///
+    /// Safe to call on MainActor: `retile()` is synchronous and
+    /// reads `durationMS` at call time, so the transient swap
+    /// cannot race anything.
+    func retileWithScrollDuration() {
+        if activeSpace?.mode == .scrolling,
+            tiler.settings.animations.onScrolling
+        {
+            let saved = tiler.animation.durationMS
+            tiler.animation.durationMS =
+                tiler.animation.scrollDurationMS
+            retile(animated: true)
+            tiler.animation.durationMS = saved
+        } else {
+            retile(animated: focusRetileAnimated)
+        }
     }
 
     // MARK: - Window state

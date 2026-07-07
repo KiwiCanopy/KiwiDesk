@@ -66,7 +66,8 @@ KiwiDesk service restart
 | Diagnostics | `get_layout_info` | — |
 | | `list_monitors` | — |
 | | `debug_log` | message |
-| Animation | `animations.set_duration` | ms (50–1000); runtime only |
+| Animation | `animations.set_duration` | ms (50–1000); persisted per-profile |
+| | `animations.set_scroll_speed` | ms (50–1000); scroll-layout focus speed, persisted per-profile |
 | | `animations.set_on_space_change` | true\|false (default false) |
 | | `animations.set_on_scrolling` | true\|false (default true) |
 | | `animations.set_on_window_resize` | true\|false (default true) |
@@ -74,6 +75,7 @@ KiwiDesk service restart
 | | `animations.set_on_relayout` | true\|false (default true) |
 | | `set_space_animation` | deprecated alias for `animations.set_on_space_change` |
 | | `set_animation_duration` | deprecated alias for `animations.set_duration` |
+| | `scroll.set_speed` | deprecated alias for `animations.set_scroll_speed` |
 | Sleep/Wake | `enable_wake_restore` | true\|false |
 | | `set_wake_restore_delay` | ms |
 | Drag | `drag.set_ghost_enabled` | true\|false |

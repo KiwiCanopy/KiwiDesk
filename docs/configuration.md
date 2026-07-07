@@ -197,7 +197,7 @@ scroll.set_slot_size(0)            -- slot size along the scroll
 scroll.set_anchor("center")        -- center (any orientation), or
                                    -- an edge: left|right horizontal,
                                    -- top|bottom vertical
-scroll.set_speed(250)              -- animation ms
+-- scroll.set_speed is deprecated; use animations.set_scroll_speed
 scroll.set_orientation("horizontal")  -- horizontal: columns
                                    -- scroll left/right.
                                    -- vertical: rows scroll up/down
@@ -1156,9 +1156,14 @@ haven't visited yet starts on the first virtual space.
 ## Animations, Sleep & Wake
 
 ```lua
--- Animation duration for every spring-animated move (runtime
--- only, not saved in a profile). scroll.set_speed shares it.
-animations.set_duration(250)          -- ms, clamped 50-1000
+-- General animation duration (ms, clamped 50–1000).
+-- Persisted per-profile since issue #51.
+animations.set_duration(250)
+
+-- Scrolling-layout focus-shift speed (ms, clamped 50–1000).
+-- Independent knob, also persisted per-profile (#51).
+-- `scroll.set_speed` is a deprecated alias for this.
+animations.set_scroll_speed(250)
 
 -- Per-trigger animation toggles. An "off" trigger snaps
 -- instantly: the un-animated path drops the app's
@@ -1195,19 +1200,23 @@ swipe, Ctrl+←/→) is the OS's own animation — KiwiDesk cannot
 turn it off; use System Settings › Accessibility › Display ›
 Reduce Motion for that.
 
-> **Profiles own these toggles.** Like every other tiling
-> setting, `animations.*` is saved in a profile. When a profile
-> is bound to a native macOS Space
-> (`bind_profile_to_native_space`), switching to that Space
-> loads the profile and **replaces** the live settings — so the
-> `animations.*` calls in `init.lua` apply only until a bound
-> profile activates. To make a toggle stick on a bound Space,
-> set it and re-save that profile (or edit the profile JSON).
+> **Profiles own all animation settings.** Like every other
+> tiling setting, `animations.*` — including the duration knobs
+> — is saved in a profile. When a profile is bound to a native
+> macOS Space (`bind_profile_to_native_space`), switching to
+> that Space loads the profile and **replaces** the live
+> settings — so `animations.*` calls in `init.lua` apply only
+> until a bound profile activates. To make a value stick on a
+> bound Space, set it and re-save that profile (or edit the
+> profile JSON).
 
 > The old `KiwiDesk.set_space_animation(bool)` and
 > `KiwiDesk.set_animation_duration(ms)` still work as deprecated
 > aliases for `animations.set_on_space_change` and
-> `animations.set_duration`.
+> `animations.set_duration`. `scroll.set_speed(ms)` is a deprecated
+> alias for `animations.set_scroll_speed(ms)` — it previously
+> shared the general duration knob; after #51 it writes the
+> separate scroll-speed knob.
 
 ### Quit & restart
 

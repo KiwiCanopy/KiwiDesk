@@ -218,7 +218,7 @@ public final class KiwiCore {
             {
                 scheduleFocusFollow(id)
             } else if activeSpace?.mode.isFocusDriven == true {
-                retile(animated: focusRetileAnimated)
+                retileWithScrollDuration()
             }
         case .windowCreated(let window):
             // A brand-new window supersedes a pending follow
