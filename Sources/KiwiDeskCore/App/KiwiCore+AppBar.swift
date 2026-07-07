@@ -1,25 +1,86 @@
 import AppKit
 
-/// Keeps the indicator bar in sync with the active space. Driven
-/// from `retile()`, which already fires on every structural,
-/// focus, mode, and settings change. Any layout that hosts a bar
-/// (monocle, scrolling) drives the one shared overlay; the bar's
-/// look is the global `AppBarStyle` overlaid by that layout's own
-/// overrides.
+/// Keeps the indicator bars in sync with the spaces on screen.
+/// Driven from `retile()`, which already fires on every
+/// structural, focus, mode, and settings change. One bar per
+/// display (#16): each display shows the bar of the space
+/// currently visible on it, resolved through the total
+/// space→display assignment (`resolveSpaceDisplays`). Any layout
+/// that hosts a bar (monocle, scrolling) drives its display's
+/// overlay; the bar's look is the global `AppBarStyle` overlaid
+/// by that layout's own overrides.
 extension KiwiCore {
     func updateAppBar() {
         let settings = tiler.settings
+        let displays = state.workspaces.allDisplays
+        // Before displays are tracked (cold start) fall back to
+        // the active space on the main screen — the pre-#16
+        // single-bar behavior.
+        guard !displays.isEmpty else {
+            appBars.sync(mainScreenFallback(settings: settings))
+            return
+        }
+        let bars = displays.compactMap {
+            bar(for: $0, settings: settings)
+        }
+        appBars.sync(bars)
+    }
+
+    /// The bar for the space currently shown on `display`, or nil
+    /// when that space hosts no enabled, non-empty bar.
+    private func bar(
+        for display: Display,
+        settings: TilingSettings
+    ) -> AppBarManager.Bar? {
+        guard
+            let id = state.workspaces.currentSpace(on: display.id),
+            let space = state.workspaces[id],
+            let host = barHost(for: space.mode),
+            host.appBar.enabled,
+            let screen = screen(for: display.id)
+        else { return nil }
+        return buildBar(
+            space: space,
+            display: display.id,
+            bounds: GeometryUtils.axVisibleFrame(of: screen),
+            host: host,
+            settings: settings
+        )
+    }
+
+    /// Single bar for the active space on the main screen, used
+    /// only until the display list is populated.
+    private func mainScreenFallback(
+        settings: TilingSettings
+    ) -> [AppBarManager.Bar] {
         guard let space = activeSpace,
             let host = barHost(for: space.mode),
             host.appBar.enabled,
-            let screen = NSScreen.main ?? NSScreen.screens.first
-        else {
-            appBar.hide()
-            return
-        }
+            let screen = NSScreen.main ?? NSScreen.screens.first,
+            let bar = buildBar(
+                space: space,
+                display: screen.kiwiDisplay?.id
+                    ?? DisplayID(CGMainDisplayID()),
+                bounds: GeometryUtils.axVisibleFrame(of: screen),
+                host: host,
+                settings: settings
+            )
+        else { return [] }
+        return [bar]
+    }
+
+    /// Assembles one display's bar from its space and usable
+    /// bounds; nil when the space has no items or the bar is off.
+    private func buildBar(
+        space: Space,
+        display: DisplayID,
+        bounds: CGRect,
+        host: AppBarHosting,
+        settings: TilingSettings
+    ) -> AppBarManager.Bar? {
         let style = host.resolvedBar(global: settings.appBarStyle)
         let context = settings.context(
-            bounds: GeometryUtils.axVisibleFrame(of: screen),
+            bounds: bounds,
             space: space
         )
         let groups = barGroups(
@@ -31,11 +92,10 @@ extension KiwiCore {
                 in: context.usable,
                 global: settings.appBarStyle
             )
-        else {
-            appBar.hide()
-            return
-        }
-        appBar.show(
+        else { return nil }
+        return AppBarManager.Bar(
+            display: display,
+            space: space.id,
             items: groups.map(barItem),
             activeIndex: groups.firstIndex { group in
                 space.focused.map(group.contains) ?? false
@@ -43,6 +103,13 @@ extension KiwiCore {
             strip: strip,
             style: style
         )
+    }
+
+    /// The `NSScreen` backing a tracked display, matched by its
+    /// `CGDirectDisplayID`. Nil when the display is not currently
+    /// connected to a screen.
+    private func screen(for display: DisplayID) -> NSScreen? {
+        NSScreen.screens.first { $0.kiwiDisplay?.id == display }
     }
 
     /// The bar-hosting layout for a space mode, or nil for modes
@@ -55,86 +122,12 @@ extension KiwiCore {
         }
     }
 
-    /// The bar's items: the space's tiled windows in order,
-    /// with adjacent same-app runs collapsed into one group
-    /// while `grouping` is on. Same-app windows that are not
-    /// adjacent stay separate items.
-    ///
-    /// The group holding the focused window renders *expanded*
-    /// — its members become individual items, so after clicking
-    /// a group (which focuses its first member) any member can
-    /// be picked or dragged directly. Focus leaving the group
-    /// collapses it again.
-    func barGroups(
-        in space: Space,
-        grouping: Bool
-    ) -> [[WindowID]] {
-        let tiled = space.windows.filter {
-            state.windows[$0]?.isFloating == false
-        }
-        guard grouping else {
-            return tiled.map { [$0] }
-        }
-        let names = tiled.map {
-            state.windows[$0]?.appName ?? "?"
-        }
-        let runs = Self.adjacentRuns(of: names).map {
-            Array(tiled[$0])
-        }
-        return runs.flatMap { group -> [[WindowID]] in
-            let focusedInside =
-                space.focused.map(group.contains) ?? false
-            return focusedInside && group.count > 1
-                ? group.map { [$0] } : [group]
-        }
-    }
-
-    /// Runs of equal adjacent values:
-    /// ["Zed", "Zed", "Finder", "Zed"] ->
-    /// [0..<2, 2..<3, 3..<4] — the trailing Zed is not next
-    /// to the first two, so it stays its own run.
-    nonisolated static func adjacentRuns(
-        of names: [String]
-    ) -> [Range<Int>] {
-        var runs: [Range<Int>] = []
-        var start = 0
-        for index in names.indices
-        where index + 1 == names.count
-            || names[index + 1] != names[index]
-        {
-            runs.append(start..<(index + 1))
-            start = index + 1
-        }
-        return runs
-    }
-
-    private func barItem(
-        for group: [WindowID]
-    ) -> AppBarOverlay.Item {
-        let window = group.first.flatMap {
-            state.windows[$0]
-        }
-        // Clicking a collapsed group focuses its first
-        // member; the resulting re-render expands the group
-        // into individual items (see barGroups).
-        return AppBarOverlay.Item(
-            id: group.first ?? WindowID(0),
-            name: window?.appName ?? "?",
-            icon: window.flatMap {
-                NSRunningApplication(
-                    processIdentifier: $0.pid
-                )?.icon
-            },
-            count: group.count
-        )
-    }
-
     /// Drag-and-drop reorder from the bar: moves the item at
     /// slot `from` (a single window or a whole group) to slot
-    /// `to`, rewriting the tiled order in place — floating
-    /// windows keep their positions in the flat array.
-    func moveBarItem(from: Int, to: Int) {
-        guard let space = activeSpace,
+    /// `to` within `space`, rewriting the tiled order in place —
+    /// floating windows keep their positions in the flat array.
+    func moveBarItem(space id: SpaceID, from: Int, to: Int) {
+        guard let space = state.workspaces[id],
             let host = barHost(for: space.mode)
         else { return }
         let style = host.resolvedBar(

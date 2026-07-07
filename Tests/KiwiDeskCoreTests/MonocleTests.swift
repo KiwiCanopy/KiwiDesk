@@ -768,10 +768,10 @@ struct MonocleGroupingTests {
     @Test("Dragging an item reorders the window array")
     func moveSingle() {
         let core = makeNamedCore(["A", "B", "C"])
-        core.moveBarItem(from: 0, to: 2)
+        core.moveBarItem(space: SpaceID(1), from: 0, to: 2)
         #expect(core.activeSpace?.windows == [w2, w3, w1])
         // Out-of-range moves are ignored.
-        core.moveBarItem(from: 0, to: 9)
+        core.moveBarItem(space: SpaceID(1), from: 0, to: 9)
         #expect(core.activeSpace?.windows == [w2, w3, w1])
     }
 
@@ -779,7 +779,7 @@ struct MonocleGroupingTests {
     func moveGroup() {
         let core = makeNamedCore(["Zed", "Zed", "Finder"])
         // Items: [Zed ×2] [Finder] — swap their slots.
-        core.moveBarItem(from: 0, to: 1)
+        core.moveBarItem(space: SpaceID(1), from: 0, to: 1)
         #expect(core.activeSpace?.windows == [w3, w1, w2])
     }
 }
