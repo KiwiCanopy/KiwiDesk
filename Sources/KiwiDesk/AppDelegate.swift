@@ -15,6 +15,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private lazy var dashboard = SettingsWindowController(
         core: core
     )
+    /// Held strongly so the source stays active for the
+    /// lifetime of the process.
+    private var sigtermSource: DispatchSourceSignal?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         let statusItem = StatusItemController()
@@ -35,6 +38,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 : self?.core.keys.icon(for: mode)
             self?.statusItem?.setModeIcon(icon)
         }
+
+        // launchctl bootout (restart) delivers SIGTERM. AppKit
+        // isn't guaranteed to translate it into
+        // applicationWillTerminate for a LaunchAgent process, so
+        // redirect it explicitly into AppKit's termination flow.
+        // SIG_IGN prevents the default handler from killing the
+        // process before the DispatchSource fires.
+        signal(SIGTERM, SIG_IGN)
+        let src = DispatchSource.makeSignalSource(
+            signal: SIGTERM,
+            queue: .main
+        )
+        src.setEventHandler { NSApp.terminate(nil) }
+        src.resume()
+        sigtermSource = src
 
         permissions.onChange = { [weak self] trusted in
             self?.permissionChanged(trusted)
