@@ -1,8 +1,8 @@
 import Foundation
 
 /// Applying profiles and the total space→display resolution
-/// (#36), including the monitor-change matching that decides
-/// what to apply (#53 fallback composition).
+/// (#36). The monitor-change matching that decides what to apply
+/// lives in `KiwiCore+MonitorChange`.
 extension KiwiCore {
     // MARK: - Applying
 
@@ -16,8 +16,7 @@ extension KiwiCore {
         profile: Profile,
         pruneStaleSpaces: Bool = false
     ) {
-        tiler.settings = profile.settings
-        syncAnimationDurations(from: profile.settings)
+        applyTilingSettings(profile.settings)
         let declared = profile.declaredSpaces
         // Seed live order from the profile's stored list so
         // creation order matches display order. Using
@@ -100,23 +99,10 @@ extension KiwiCore {
         }
     }
 
-    /// Syncs animation durations from `settings` to the engine.
-    /// Called by both `apply(profile:)` and `apply(composed:)`
-    /// so the engine is always consistent with the live settings.
-    private func syncAnimationDurations(
-        from settings: TilingSettings
-    ) {
-        tiler.animation.durationMS =
-            settings.animations.durationMS
-        tiler.animation.scrollDurationMS =
-            settings.animations.scrollSpeedMS
-    }
-
     /// Applies a composed Standard fallback (#53): transient,
     /// nothing is written until the user saves.
     func apply(composed: ProfileComposition.Composed) {
-        tiler.settings = composed.settings
-        syncAnimationDurations(from: composed.settings)
+        applyTilingSettings(composed.settings)
         for space in composed.spaces {
             state.workspaces.ensureSpace(space)
             state.workspaces.setMode(
@@ -241,110 +227,6 @@ extension KiwiCore {
             )
         {
             apply(composed: composed)
-        }
-    }
-
-    // MARK: - Monitor changes
-
-    /// Profile selection on monitor reconfiguration (#36):
-    /// exact stored set → adopt clean; the count's default
-    /// user profile → load dirty; else compose the built-in
-    /// Standard (#53) → transient dirty state.
-    func handleMonitorChange() {
-        let displays = state.workspaces.allDisplays
-        guard !displays.isEmpty else { return }
-        let fingerprints = displays.map(\.fingerprint)
-
-        // A native-Space binding wins over matching (#7); a
-        // binding that fails to load falls through to matching.
-        if let number = NativeSpaces.activeSpaceNumber(),
-            let boundName = nativeSpaceBindings[number]
-        {
-            do {
-                let bound = try profiles.load(name: boundName)
-                apply(profile: bound)
-                if bound.set(matching: fingerprints) == nil {
-                    profiles.markDirty()
-                }
-                onLog(
-                    "monitor change: loaded bound profile "
-                        + "'\(boundName)'"
-                )
-                return
-            } catch {
-                onLog(
-                    "cannot load bound profile "
-                        + "'\(boundName)': \(error)"
-                )
-            }
-        }
-
-        switch profiles.match(fingerprints: fingerprints) {
-        case .exact(let profile):
-            if profile.name != profiles.currentName {
-                apply(profile: profile)
-                profiles.adopt(profile)
-                onLog(
-                    "monitor change: loaded profile "
-                        + "'\(profile.name)'"
-                )
-            } else {
-                // Same profile back on one of its exact sets
-                // (e.g. re-docked after an interim mismatch):
-                // re-adopt so a lingering dirty flag clears,
-                // and re-resolve with that set's pins.
-                profiles.adopt(profile)
-                spacePins =
-                    profile.set(matching: fingerprints)?
-                    .spaceMonitorMap ?? [:]
-                resolveSpaceDisplays()
-            }
-        case .countDefault(let profile):
-            if profile.name != profiles.currentName {
-                apply(profile: profile)
-                profiles.adopt(profile)
-                onLog(
-                    "monitor change: loaded default profile "
-                        + "'\(profile.name)' (dirty)"
-                )
-            }
-            profiles.markDirty()
-        case .none:
-            guard
-                let composed = ProfileComposition.compose(
-                    displays: displays,
-                    mainID: PositionalDisplays.liveMainID
-                )
-            else { return }
-            // A hand-written or hybrid Lua config keeps
-            // owning tiling: the Standard only steers
-            // placement and no transient-standard state is
-            // adopted, so with no active profile the Lua base
-            // survives reloads untouched (#36 promise). A
-            // still-active profile keeps its tiling and its
-            // still-valid pins, but goes dirty — the same
-            // rule as load_profile onto other hardware.
-            guard isGuiManaged else {
-                if profiles.currentName != nil {
-                    profiles.markDirty()
-                }
-                resolveSpaceDisplays()
-                retile()
-                emitSpaceChange()
-                onLog(
-                    "monitor change: no matching profile, "
-                        + "placement follows standard "
-                        + "'\(composed.sourceName)' (tiling "
-                        + "stays Lua/profile-owned)"
-                )
-                return
-            }
-            apply(composed: composed)
-            profiles.adoptStandard(named: composed.sourceName)
-            onLog(
-                "monitor change: no matching profile, "
-                    + "composed standard '\(composed.sourceName)'"
-            )
         }
     }
 }

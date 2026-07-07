@@ -19,8 +19,7 @@ extension KiwiCore {
                 "set_animation_duration is deprecated — use "
                     + "animations.set_duration(ms)"
             )
-            tiler.animation.durationMS = ms
-            tiler.settings.animations.durationMS = ms
+            setAnimationDuration(ms)
         case "set_space_animation":
             // Deprecated alias for `animations.set_on_space_change`
             // (issue #11). Still works so existing configs load.
@@ -92,8 +91,7 @@ extension KiwiCore {
             guard let ms = args.first?.intValue else {
                 return .fail("expected milliseconds")
             }
-            tiler.animation.durationMS = ms
-            tiler.settings.animations.durationMS = ms
+            setAnimationDuration(ms)
             return .ok()
         case "animations.set_scroll_speed":
             // The scroll-specific duration knob, split from
@@ -102,8 +100,7 @@ extension KiwiCore {
             guard let ms = args.first?.intValue else {
                 return .fail("expected milliseconds")
             }
-            tiler.animation.scrollDurationMS = ms
-            tiler.settings.animations.scrollSpeedMS = ms
+            setScrollSpeed(ms)
             return .ok()
         default:
             break

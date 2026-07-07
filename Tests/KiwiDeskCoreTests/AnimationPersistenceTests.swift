@@ -134,7 +134,7 @@ struct AnimationPersistenceTests {
         #expect(logs.contains { $0.contains("deprecated") })
     }
 
-    @Test("duration clamped to 50–1000")
+    @Test("duration clamped to 50–1000 on engine AND settings")
     func durationClamping() {
         let core = makeCore()
         core.execute(
@@ -142,11 +142,47 @@ struct AnimationPersistenceTests {
             args: [.number(10)]
         )
         #expect(core.tiler.animation.durationMS == 50)
+        // The persisted copy must clamp too, else the profile
+        // JSON and the GUI stepper show an out-of-range value.
+        #expect(
+            core.tiler.settings.animations.durationMS == 50
+        )
         core.execute(
             "animations.set_duration",
             args: [.number(5000)]
         )
         #expect(core.tiler.animation.durationMS == 1000)
+        #expect(
+            core.tiler.settings.animations.durationMS == 1000
+        )
+    }
+
+    @Test("scroll_speed clamps on the settings copy too")
+    func scrollSpeedClampingPersists() {
+        let core = makeCore()
+        core.execute(
+            "animations.set_scroll_speed",
+            args: [.number(9000)]
+        )
+        #expect(
+            core.tiler.settings.animations.scrollSpeedMS == 1000
+        )
+        #expect(
+            core.tiler.animation.scrollDurationMS == 1000
+        )
+    }
+
+    @Test("hand-edited out-of-range JSON decodes clamped")
+    func decodeClampsOutOfRange() throws {
+        let json = #"""
+            {"animations":{"duration":5000,"scroll_speed":5}}
+            """#
+        let decoded = try JSONDecoder().decode(
+            TilingSettings.self,
+            from: Data(json.utf8)
+        )
+        #expect(decoded.animations.durationMS == 1000)
+        #expect(decoded.animations.scrollSpeedMS == 50)
     }
 
     // MARK: - Profile apply sync
@@ -174,6 +210,24 @@ struct AnimationPersistenceTests {
         #expect(core.tiler.animation.durationMS == 450)
         #expect(
             core.tiler.animation.scrollDurationMS == 120
+        )
+    }
+
+    @Test("applyProfileScopedState syncs the engine (GUI apply)")
+    func guiApplySyncsEngine() {
+        let core = makeCore()
+        core.state.workspaces.upsertDisplay(display(1, "A"))
+        // Engine starts at defaults; a GUI live-apply must push
+        // the incoming settings onto the engine so the retile it
+        // triggers doesn't animate at the stale duration.
+        var config = GuiConfig()
+        config.settings.animations.durationMS = 470
+        config.settings.animations.scrollSpeedMS = 130
+        config.spaces = [SpaceID(1)]
+        core.applyProfileScopedState(from: config)
+        #expect(core.tiler.animation.durationMS == 470)
+        #expect(
+            core.tiler.animation.scrollDurationMS == 130
         )
     }
 

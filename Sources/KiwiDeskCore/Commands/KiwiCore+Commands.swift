@@ -111,9 +111,10 @@ extension KiwiCore {
 
     /// Whether a focus-driven re-layout animates. Scrolling's
     /// focus slide is toggleable (`on_scrolling`); other
-    /// focus-driven modes (Monocle) always animate. Shared by
-    /// `retileWithScrollDuration` and the `windowFocused` event
-    /// handler so an external focus change obeys the same toggle.
+    /// focus-driven modes (Monocle) always animate. Used by
+    /// `retileWithScrollDuration`'s non-scrolling branch — the
+    /// scrolling branch swaps in `scrollDurationMS` and always
+    /// animates when `on_scrolling` is set.
     var focusRetileAnimated: Bool {
         activeSpace?.mode == .scrolling
             ? tiler.settings.animations.onScrolling : true
