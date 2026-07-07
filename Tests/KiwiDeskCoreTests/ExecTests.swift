@@ -157,4 +157,162 @@ struct ExecTests {
         }
         #expect(message.contains("KiwiDesk.exec"))
     }
+
+    @Test("os.exit is neutralized — does not kill the app")
+    func osExitNeutralized() throws {
+        let core = makeCore()
+        let lua = try #require(core.lua)
+        // If os.exit were real, this would kill the test
+        // process. Reaching the next line proves it is safe.
+        #expect(lua.run("os.exit(0)").succeeded)
+        #expect(lua.run("still_alive = true").succeeded)
+        #expect(
+            lua.global("still_alive") == .bool(true)
+        )
+    }
+
+    @Test("Large output is truncated at 1 MB with a marker")
+    func outputCapTruncation() async throws {
+        let core = makeCore()
+        let lua = try #require(core.lua)
+        // 'yes x' writes "x\n" until head closes the pipe
+        // at 2 MB; the cap stops capture at 1 MB.
+        let script = """
+            KiwiDesk.exec(
+                "yes x | head -c 2097152",
+                function(code, out, err)
+                    cap_out = out
+                end)
+            """
+        #expect(lua.run(script).succeeded)
+        let out = try await awaitGlobal(
+            lua,
+            "cap_out",
+            timeout: 10
+        )
+        guard case .string(let text) = out else {
+            Issue.record("expected string output")
+            return
+        }
+        #expect(text.contains("[output truncated at 1 MB]"))
+        // 1 MB content + short marker — not more.
+        #expect(text.utf8.count <= 1_048_576 + 64)
+    }
+
+    @Test("Timed-out child is terminated and reaped")
+    func execTimeout() async throws {
+        let core = makeCore()
+        let lua = try #require(core.lua)
+        let started = Date()
+        // Third arg is timeout in seconds.
+        let script = """
+            KiwiDesk.exec("sleep 30",
+                function(code, out, err)
+                    timeout_code = code
+                end, 0.4)
+            """
+        #expect(lua.run(script).succeeded)
+        // Watchdog fires after ~0.4s; wait up to 10s.
+        let code = try await awaitGlobal(
+            lua,
+            "timeout_code",
+            timeout: 10
+        )
+        let elapsed = Date().timeIntervalSince(started)
+        #expect(code != .none)
+        // Definitely did not run for 30s.
+        #expect(elapsed < 10)
+        // Process was reaped after termination.
+        let deadline = Date().addingTimeInterval(5)
+        while core.exec.runningCount > 0,
+            Date() < deadline
+        {
+            try await Task.sleep(nanoseconds: 20_000_000)
+        }
+        #expect(core.exec.runningCount == 0)
+    }
+
+    @Test("Timeout with an early-exiting child reaps once")
+    func timeoutChildExitsFirst() async throws {
+        let core = makeCore()
+        let lua = try #require(core.lua)
+        // The child exits immediately; the 5s watchdog must
+        // not fire (the normal reap cancels it) and the
+        // callback must run exactly once with the real code.
+        let script = """
+            _calls = 0
+            KiwiDesk.exec("true",
+                function(code, out, err)
+                    _calls = _calls + 1
+                    _code = code
+                end, 5)
+            """
+        #expect(lua.run(script).succeeded)
+        let code = try await awaitGlobal(lua, "_code", timeout: 5)
+        #expect(code == .number(0))
+        // Reaped promptly; the pending watchdog was cancelled.
+        let deadline = Date().addingTimeInterval(2)
+        while core.exec.runningCount > 0, Date() < deadline {
+            try await Task.sleep(nanoseconds: 20_000_000)
+        }
+        #expect(core.exec.runningCount == 0)
+        #expect(lua.global("_calls") == .number(1))
+    }
+
+    @Test("get_state includes exec_running count")
+    func getStateExecRunning() async throws {
+        let core = makeCore()
+        // Before any launch: exec_running must be 0.
+        let before = core.execute("get_state")
+        guard case .object(let b)? = before.data else {
+            Issue.record("expected state object")
+            return
+        }
+        #expect(b["exec_running"] == .number(0))
+        // While a child runs, count is 1.
+        core.exec.launch("sleep 5")
+        let during = core.execute("get_state")
+        guard case .object(let d)? = during.data else {
+            Issue.record("expected state object")
+            return
+        }
+        #expect(d["exec_running"] == .number(1))
+    }
+
+    @Test("Lua-only functions appear in help() output")
+    func luaOnlyInHelp() throws {
+        let core = makeCore()
+        let response = core.execute("help")
+        guard case .array(let names)? = response.data else {
+            Issue.record("expected command list")
+            return
+        }
+        for name in APIReference.luaOnly {
+            #expect(names.contains(.string(name)))
+        }
+    }
+
+    @Test("Every luaOnly name is a real KiwiDesk function")
+    func luaOnlyNamesAreRegistered() throws {
+        let core = makeCore()
+        let lua = try #require(core.lua)
+        // Drives off APIReference.luaOnly so the list can't
+        // name a function that was never registered (or drift
+        // out of sync with the real Lua surface) — the parity
+        // guard the reflection net can't provide here.
+        let checks = APIReference.luaOnly
+            .map { "type(KiwiDesk.\($0)) == 'function'" }
+            .joined(separator: "\n    and ")
+        #expect(lua.run("_ok = (\(checks))").succeeded)
+        #expect(lua.global("_ok") == .bool(true))
+    }
+
+    @Test("did-you-mean never suggests a Lua-only command")
+    func suggestionExcludesLuaOnly() {
+        // The unknown-command path is reached over the socket
+        // too, where a Lua-only name is a dead-end hint (#37).
+        for name in APIReference.luaOnly {
+            #expect(APIReference.suggestion(for: name + "x") != name)
+        }
+    }
 }

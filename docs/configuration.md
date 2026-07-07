@@ -790,18 +790,27 @@ command that waits synchronously there would freeze window
 management, animations, and the menu bar. External commands
 therefore always run in the background.
 
-### `KiwiDesk.exec(command [, callback])`
+### `KiwiDesk.exec(command [, callback [, timeout]])`
 
-**Expects:** `command` — a string, run via `/bin/sh -c`, so
-pipes, quoting, `&&`, and `$PATH` lookups work exactly as in
-a terminal. `callback` — an optional Lua function; if given,
-it is called once the command has exited, with:
+**Expects:**
+
+- `command` — a string, run via `/bin/sh -c`, so pipes,
+  quoting, `&&`, and `$PATH` lookups work exactly as in a
+  terminal.
+- `callback` — an optional Lua function called once the
+  command has exited, with:
 
 | Callback argument | Type | Meaning |
 |---|---|---|
 | `code` | number | exit code (`0` = success) |
 | `stdout` | string | everything written to stdout |
 | `stderr` | string | everything written to stderr |
+
+- `timeout` — an optional number of seconds. If given and the
+  command has not exited by then, it receives SIGTERM and the
+  callback is still invoked with the termination code — even if
+  the child left a grandchild holding its output pipe open, in
+  which case the callback fires with whatever was captured.
 
 **Does:** starts the command in the background and returns
 immediately — KiwiDesk never waits for it. Returns the
@@ -812,6 +821,17 @@ finishes, the callback is dropped silently. The child's
 appended, so Homebrew tools (`sketchybar`, `borders`, …)
 resolve even when KiwiDesk was launched from Finder — GUI
 apps inherit launchd's minimal `PATH`, not your shell's.
+
+**Output cap:** stdout and stderr are each capped at ~1 MB.
+Output beyond the cap is still read (so the child never
+blocks writing), but the string delivered to the callback is
+truncated and ends with `[output truncated at 1 MB]`.
+
+**Quit policy:** exec children are fire-and-forget. When
+KiwiDesk exits, running children are re-parented to launchd
+and finish naturally — a `sketchybar --notify` hook will
+complete even if KiwiDesk quits first. Use `timeout` for
+commands that must not outlive a reasonable interval.
 
 **Example:**
 
@@ -824,6 +844,11 @@ KiwiDesk.exec("defaults read -g AppleInterfaceStyle",
     function(code, out, err)
         dark = (code == 0 and out:match("Dark") ~= nil)
     end)
+
+-- With a 5-second timeout:
+KiwiDesk.exec("some-slow-tool", function(code, out, err)
+    -- code is non-zero if killed by the watchdog
+end, 5)
 ```
 
 ### `os.execute(command)` — asynchronous in KiwiDesk
@@ -866,6 +891,21 @@ KiwiDesk.exec("pmset -g batt", function(code, out)
     battery_info = out
 end)
 ```
+
+### `os.exit(code)` — disabled
+
+**Expects:** n/a — any call is a no-op with a log message.
+
+**Does:** calling `os.exit()` from a config file would kill
+the KiwiDesk process immediately, including your window
+layout. It is stubbed out to prevent accidental or malicious
+instant app termination. If you want to restart KiwiDesk use
+`KiwiDesk service restart` from a terminal or a keybinding
+via `KiwiDesk.exec`.
+
+Note that, unlike real `os.exit`, the stub **returns** — code
+after the call keeps running. Don't rely on `os.exit()` to
+halt a script; use an explicit `return` or `if/else`.
 
 ## Profiles & Monitors
 

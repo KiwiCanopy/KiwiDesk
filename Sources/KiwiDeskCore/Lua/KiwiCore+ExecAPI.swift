@@ -26,6 +26,15 @@ extension KiwiCore {
             } else {
                 callbackRef = nil
             }
+            // Optional third argument: timeout in seconds.
+            let timeout: TimeInterval?
+            if case .number(let t) =
+                args.dropFirst(2).first ?? .none, t > 0
+            {
+                timeout = t
+            } else {
+                timeout = nil
+            }
             guard let self,
                 let command = args.first?.stringValue,
                 !command.isEmpty
@@ -42,9 +51,9 @@ extension KiwiCore {
             }
             var onExit: ExecLauncher.ExitHandler?
             if let ref = callbackRef {
-                // Bind the ref to the VM that minted it: on a
-                // config reload the weak capture goes nil and
-                // the callback drops silently. A ref must
+                // Bind the ref to the VM that minted it: on
+                // a config reload the weak capture goes nil
+                // and the callback drops silently. A ref must
                 // never reach a different VM's registry —
                 // its slot may already belong to an unrelated
                 // function there.
@@ -70,6 +79,7 @@ extension KiwiCore {
             guard
                 let pid = self.exec.launch(
                     command,
+                    timeout: timeout,
                     onExit: onExit
                 )
             else {
@@ -83,12 +93,16 @@ extension KiwiCore {
         neutralizeBlockingOSCalls(on: lua)
     }
 
-    /// Rewrites the stdlib entry points that block in C where
-    /// the instruction-count watchdog cannot interrupt them:
-    /// `os.execute` becomes fire-and-forget via `exec`, and
-    /// `io.popen` is disabled outright (its synchronous
-    /// read-the-output contract cannot be honored without
-    /// blocking).
+    /// Rewrites stdlib entry points that either block in C
+    /// (where the instruction-count watchdog cannot interrupt
+    /// them) or could instantly kill the app:
+    ///
+    /// - `os.execute` becomes fire-and-forget via `exec`.
+    /// - `io.popen` is disabled (its synchronous
+    ///   read-the-output contract cannot be honored without
+    ///   blocking).
+    /// - `os.exit` is stubbed out; calling it from config
+    ///   would otherwise terminate the app immediately.
     private func neutralizeBlockingOSCalls(
         on lua: LuaInterpreter
     ) {
@@ -112,6 +126,11 @@ extension KiwiCore {
                 return nil, "io.popen is disabled (it "
                     .. "blocks the app); use KiwiDesk.exec("
                     .. "cmd, callback) instead"
+            end
+            os.exit = function(code)
+                KiwiDesk.debug_log(
+                    "os.exit(" .. tostring(code)
+                    .. ") is disabled in KiwiDesk config")
             end
             """
         )

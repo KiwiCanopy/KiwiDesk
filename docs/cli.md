@@ -53,7 +53,7 @@ KiwiDesk service restart
 | | `set_mouse_resize` | `layout\|snap_back` |
 | | `set_gap_global` | size |
 | | `set_gap_override` | space, size |
-| | `get_state` | — |
+| | `get_state` | — (returns `{active_space, spaces, windows, monitor_count, native_space, exec_running}`) |
 | | `reload_config` | — |
 | | `version` | — (returns `{version, commit}`) |
 | Profiles | `save_profile` | name (updates in place when it exists) |
