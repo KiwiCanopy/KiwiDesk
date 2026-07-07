@@ -29,6 +29,43 @@ extension KiwiCore {
         return config
     }
 
+    /// The editable model for **a stored profile**, not the live
+    /// one (#18): global fields come from the sidecar/live seed
+    /// exactly as `loadGuiConfig()`, but the profile-scoped
+    /// fields are overlaid from `name`'s JSON instead of live
+    /// state — so the dashboard can edit a saved profile without
+    /// switching the running layout. Throws if the profile is
+    /// unreadable (the caller falls back to live editing).
+    public func loadGuiConfig(
+        editing name: String
+    ) throws -> GuiConfig {
+        let profile = try profiles.read(name: name)
+        var config = guiConfigStore.load() ?? guiConfigSeed()
+        overlayProfileState(&config, from: profile)
+        return config
+    }
+
+    /// Copies a *stored* profile's tiling into the model —
+    /// sibling of `overlayLiveProfileState`, reading the profile
+    /// instead of live state. Pins come from the set covering the
+    /// connected monitors (empty when none matches, i.e. the
+    /// Canvas can't be edited for this profile right now).
+    private func overlayProfileState(
+        _ config: inout GuiConfig,
+        from profile: Profile
+    ) {
+        config.settings = profile.settings
+        config.spaceModes = profile.spaceModes
+        config.spaces = GuiConfig.orderedSpaces(
+            config.spaces + Array(profile.spaceModes.keys)
+        )
+        config.mainSpaces = Set(profile.mainSpaces)
+        let live = state.workspaces.allDisplays
+            .map(\.fingerprint)
+        config.spacePins =
+            profile.set(matching: live)?.spaceMonitorMap ?? [:]
+    }
+
     /// Copies the live profile-scoped state into the model:
     /// tiling settings, per-space modes, monitor pins, and the
     /// Main role.
