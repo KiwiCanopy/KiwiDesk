@@ -160,9 +160,7 @@ public enum ManagedConfig {
     /// returns `false` here (the visual editor stays active) and
     /// `true` from `hasCustomCode(_:)` (a banner is shown).
     public static func hasForeignCode(_ source: String) -> Bool {
-        let split = split(source)
-        return touchesManagedVocabulary(split.before)
-            || touchesManagedVocabulary(split.after)
+        classify(source).foreign
     }
 
     /// Whether any non-blank, non-comment Lua exists outside the
@@ -175,18 +173,20 @@ public enum ManagedConfig {
     /// — every file that forces the raw editor also has custom
     /// code — but the converse does not hold.
     public static func hasCustomCode(_ source: String) -> Bool {
-        let split = split(source)
-        return isCode(split.before) || isCode(split.after)
+        classify(source).custom
     }
 
     /// Classifies a config source in a single scan: returns
     /// both `foreign` and `custom` flags without reading the
     /// file twice. `foreign` implies `custom` by construction.
     ///
-    /// Prefer this over the two separate predicates when the
-    /// source is already in memory (e.g. `SettingsModel
-    /// .reload()`), avoiding triple file reads for one
-    /// logical check.
+    /// This is the **single definition** of the foreign/custom
+    /// signal; `hasForeignCode`/`hasCustomCode` are thin
+    /// wrappers over it, so the "one ownership predicate"
+    /// invariant (AGENTS.md §5) holds structurally — there is
+    /// no second composition to keep in lockstep. Prefer
+    /// calling this directly when the source is already in
+    /// memory (e.g. `SettingsModel.reload()`).
     public static func classify(
         _ source: String
     ) -> (foreign: Bool, custom: Bool) {
