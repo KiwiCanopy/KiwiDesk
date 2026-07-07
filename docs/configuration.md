@@ -1097,6 +1097,16 @@ loads — a profile-switch shortcut can never be lost by
 omission. Removing an inherited row just resets it; to
 disable a combo in one profile, rebind it to a no-op action.
 
+**Save copy as…** duplicates the profile you are editing —
+including your pending edits — under a new name (`_1`, `_2`,
+… when taken) and switches the editor to the copy. Unlike the
+live **Save as new…**, which snapshots the running desktop,
+the copy's source is the stored profile: its monitor sets
+(even for hardware that isn't connected) and its shortcut
+overrides carry over, the count-`default` flag does not, and
+the running layout is never touched. This is how you create a
+variant of a profile without loading it first.
+
 Saving writes only that profile's JSON. It hot-reloads the
 live layout **only if the profile you edited is the one on
 screen** (the loaded profile, or the profile bound to the

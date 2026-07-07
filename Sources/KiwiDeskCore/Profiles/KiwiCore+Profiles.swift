@@ -169,11 +169,56 @@ extension KiwiCore {
         with config: GuiConfig
     ) throws {
         var existing = try profiles.read(name: name)
-        existing.settings = config.settings
+        applyProfileEdits(from: config, onto: &existing)
+        try profiles.write(existing)
+    }
+
+    /// Duplicates the stored profile `name` under a NEW free
+    /// name derived from `requested`, carrying the pending
+    /// edit-session changes — "Save copy as…" (#82). Same
+    /// transform and non-adopting write as `overwriteProfile`,
+    /// so live state, `current`/`dirty`, `gui.json`, and
+    /// `init.lua` stay untouched. The copy inherits the
+    /// source's monitor sets (including other-hardware ones)
+    /// and its sparse keybinding override re-diffed with the
+    /// edits; the count-default flag is NOT copied (two
+    /// defaults per count would be ambiguous). Built on
+    /// `profiles.read` — deliberately NOT `buildProfile`,
+    /// which snapshots live tiling and would drop `modes`.
+    /// Returns the name actually used (`_1`, `_2`, … when
+    /// `requested` is taken).
+    @discardableResult
+    public func copyProfile(
+        named name: String,
+        to requested: String,
+        with config: GuiConfig
+    ) throws -> String {
+        var copy = try profiles.read(name: name)
+        applyProfileEdits(from: config, onto: &copy)
+        copy.name = profiles.freeName(
+            base: requested.trimmingCharacters(
+                in: .whitespacesAndNewlines
+            )
+        )
+        copy.isDefault = false
+        try profiles.write(copy)
+        return copy.name
+    }
+
+    /// The shared edit-session transform: writes the GUI
+    /// model's profile-scoped fields onto `profile`. ONE
+    /// definition, used by `overwriteProfile` and
+    /// `copyProfile` — a second hand-mirror of this field
+    /// list would drift (AGENTS.md §5).
+    private func applyProfileEdits(
+        from config: GuiConfig,
+        onto profile: inout Profile
+    ) {
+        profile.settings = config.settings
         // Capture the display order from the GUI model (#75):
         // the config's `spaces` list is the profile's new
         // authoritative order.
-        existing.spaces = config.spaces
+        profile.spaces = config.spaces
         // Dense over the profile's own spaces (mirrors
         // `buildProfile`): an undeclared space reads as bsp. The
         // union with `spaceModes.keys` keeps a just-set mode even
@@ -186,8 +231,8 @@ extension KiwiCore {
         for space in declared {
             modes[space] = config.spaceModes[space] ?? .bsp
         }
-        existing.spaceModes = modes
-        existing.mainSpaces = config.mainSpaces.sorted {
+        profile.spaceModes = modes
+        profile.mainSpaces = config.mainSpaces.sorted {
             $0.raw < $1.raw
         }
         // Per-profile keybinding override (#55 phase 7): the
@@ -202,28 +247,30 @@ extension KiwiCore {
         // than capturing the whole resolved set.
         let sidecar = guiConfigStore.load()
         if guiConfigStore.exists, sidecar == nil {
+            // `profile.name` is the SOURCE here even on the
+            // copy path (rename happens after the transform).
             onLog(
-                "profiles: gui.json unreadable — keeping "
-                    + "'\(name)' keybinding override unchanged"
+                "profiles: gui.json unreadable — keeping the "
+                    + "stored keybinding override of "
+                    + "'\(profile.name)' unchanged"
             )
         } else {
-            existing.modes = KeyModeOverride.diff(
+            profile.modes = KeyModeOverride.diff(
                 base: (sidecar ?? guiConfigSeed()).modes,
                 edited: config.modes
             )
         }
         let live = state.workspaces.allDisplays
             .map(\.fingerprint)
-        if existing.set(matching: live) != nil {
-            existing.upsert(
+        if profile.set(matching: live) != nil {
+            profile.upsert(
                 MonitorSet(
                     monitors: live,
                     spaceMonitorMap: config.spacePins
                 )
             )
         }
-        existing.savedAt = .now
-        try profiles.write(existing)
+        profile.savedAt = .now
     }
 
     /// Whether `name` is the layout currently on screen — it is

@@ -256,9 +256,10 @@ public final class ProfileManager {
 
     /// The non-adopting write: persists the JSON only, touching
     /// no `current`/`dirty` state. `save()` layers adoption on
-    /// top; an edit-without-activating path (`overwriteProfile`)
-    /// writes through here directly so editing a stored profile
-    /// never switches the live layout (#18).
+    /// top; the edit-without-activating paths
+    /// (`overwriteProfile`, `copyProfile` #82) write through
+    /// here directly so editing a stored profile never
+    /// switches the live layout (#18).
     func write(_ profile: Profile) throws {
         let name = try validated(profile.name)
         try FileManager.default.createDirectory(
