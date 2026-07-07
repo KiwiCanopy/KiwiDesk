@@ -1119,14 +1119,22 @@ logout/reboot; after that, windows are re-tiled fresh).
 Crashes restore from the last autosave (30 s interval)
 instead.
 
-Before exiting (quit, disable, or restart), KiwiDesk moves
-each managed tiled window back onto the monitor its virtual
-space is assigned to, centered in the display's visible
-area. This prevents windows from being stranded in tiled
-frames after the window manager stops. Floating windows are
-left wherever they are. Only windows on the currently
-visible native Space can be reached (windows on background
-native Spaces are out of scope — see issue #70).
+On quit or restart, KiwiDesk moves each managed tiled window
+back onto the monitor its virtual space is assigned to and
+staggers them diagonally within the display's visible area,
+so every window is individually findable. Floating windows
+are left wherever they are. Because KiwiDesk keeps all
+managed windows on the single visible native Space (inactive
+virtual spaces are parked off-screen at the peek corner —
+not on a different native macOS Space), every reachable
+window lands there staggered together. Windows on background
+native macOS Spaces are out of scope — see issue #70.
+
+When AX permission is revoked mid-session, KiwiDesk pauses
+window management but cannot gather windows — `setFrame`
+calls return `kAXErrorAPIDisabled` and are silent no-ops.
+Windows stay wherever the WM left them; re-enabling
+Accessibility in System Settings resumes management.
 
 ## Extras
 
