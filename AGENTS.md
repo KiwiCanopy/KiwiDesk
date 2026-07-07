@@ -30,6 +30,33 @@ Module layout (SwiftPM targets):
 The Swift core must stay strictly separated from the SwiftUI GUI
 and (later) the Lua VM.
 
+Subsystem map (`Sources/KiwiDeskCore/*`) — directory-level, not a
+file list; grep within a subsystem for specifics:
+
+| Dir | Responsibility |
+|---|---|
+| `State` | Flat `[WindowID]`-per-space window state |
+| `Tiling` | Placing windows from state into layouts |
+| `Layouts` | Pure layout algorithms over the flat array |
+| `Commands` | Command dispatch (the `set_*` verbs) |
+| `Config` | Decoding the Lua/profile config into settings |
+| `Profiles` | Profile JSON load/save & defaults |
+| `Lua` | Lua VM bridge, watchdog, registry refs |
+| `AX` | Accessibility bridge & `AXObserver` callbacks |
+| `OS` | Private SkyLight/CGS symbols via `dlsym`, AX fallback |
+| `Keys` | Carbon hotkey registration |
+| `Events` | Event listening / mouse drag taps |
+| `Animation` | Per-monitor `DisplayLink` animation |
+| `IPC` | CLI / external command IPC |
+| `Bar` | sketchybar integration |
+| `Power` | Power / display-state handling |
+| `Permissions` | AX / permission prompts |
+| `App` | Core bootstrap & wiring |
+| `Models` | Shared value types |
+| `Service` | Long-running service glue |
+
+GUI lives in `Sources/KiwiDesk` (`Settings/`, `Settings/Tabs/`).
+
 ## 2. Code Rules
 
 1. **File size:** target **100–250 lines** per Swift file. Hard
@@ -201,3 +228,15 @@ Keep this list updated whenever a recurring mistake is found.
   drive animations from a single global timer.
 - **`AXObserver` callbacks arrive on the thread's run loop** that
   registered them; keep observer registration on the main thread.
+- **Split test suites early.** The 79-char limit and 350-line
+  ceiling repeatedly bit large test files. Break suites into
+  focused files before they grow; per-file private helpers are the
+  convention and small duplication across suites is fine.
+- **Profiles own tiling only.** A profile serializes tiling state,
+  not keybindings or app rules. Profile-serialized settings belong
+  *inside* `TilingSettings` so they ride the config split for free
+  (see `gap.override`). `ProfileManager` mutators are `internal` by
+  design — mutate through a `KiwiCore` facade, never re-publicize
+  them. The GUI-vs-Lua ownership predicate is centralized in
+  `KiwiCore.isGuiManaged` (`KiwiCore+GuiConfig.swift`); refine that
+  one predicate, never add a second.

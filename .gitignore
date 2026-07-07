@@ -63,5 +63,10 @@ fastlane/test_output
 plan/
 
 # Claude Code and Agent customizations
-.claude/
+# Third-party agents are regenerated per-clone via
+# scripts/install-subagents.sh, so they stay ignored. Team-shared
+# workflow config (skills, rules) is committed via the negations.
+.claude/*
+!.claude/skills/
+!.claude/rules/
 .agents/skills/
