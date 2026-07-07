@@ -153,6 +153,26 @@ struct MonitorChangeTests {
         )
     }
 
+    @Test("CLI-only: active profile goes dirty on no match")
+    func luaOwnedActiveProfileGoesDirty() throws {
+        let core = makeCore()
+        connect(core, [display(1, "A")])
+        core.execute(
+            "save_profile",
+            args: [.string("desk")]
+        )
+        // A second screen appears; no 2-screen profile exists
+        // and there is no gui.json (CLI-only user): placement
+        // recomposes, the profile keeps owning tiling, but the
+        // state must report dirty — no stored set covers the
+        // live monitors.
+        connect(core, [display(2, "B", x: 100)])
+        core.handleMonitorChange()
+        #expect(core.profiles.currentName == "desk")
+        #expect(core.profiles.currentStandard == nil)
+        #expect(core.profiles.isDirty)
+    }
+
     @Test("A native-space binding beats matching")
     func bindingWins() throws {
         let core = makeCore()

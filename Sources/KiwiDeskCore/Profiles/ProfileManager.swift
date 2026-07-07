@@ -55,6 +55,10 @@ public final class ProfileManager {
             contents
             .filter { $0.hasSuffix(".json") }
             .map { String($0.dropLast(5)) }
+            // read() rejects invalid names, so listing them
+            // (e.g. a hand-placed dot-file) would only log
+            // "invalid" on every allProfiles() pass.
+            .filter(Self.isValidName)
             .sorted()
     }
 

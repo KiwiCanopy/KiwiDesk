@@ -117,6 +117,9 @@ extension KiwiCore {
         mainID: DisplayID = PositionalDisplays.liveMainID
     ) {
         let displays = state.workspaces.allDisplays
+        // The one unresolvable state; resolve() below can then
+        // never return nil.
+        guard !displays.isEmpty else { return }
         let assignment =
             ProfileComposition.compose(
                 displays: displays,
@@ -132,7 +135,7 @@ extension KiwiCore {
                     mainID: mainID,
                     assignment: assignment
                 )
-            else { return }
+            else { continue }
             state.workspaces.assign(
                 space.id,
                 to: resolved.display.id
@@ -231,19 +234,26 @@ extension KiwiCore {
                     mainID: PositionalDisplays.liveMainID
                 )
             else { return }
-            // A hand-written Lua config (no gui.json) owns its
-            // tiling: the Standard only steers placement, and
-            // no transient-standard state is adopted — the Lua
-            // base survives reloads untouched (#36 promise).
+            // A hand-written Lua config (no gui.json) keeps
+            // owning tiling: the Standard only steers
+            // placement and no transient-standard state is
+            // adopted, so with no active profile the Lua base
+            // survives reloads untouched (#36 promise). A
+            // still-active profile keeps its tiling and its
+            // still-valid pins, but goes dirty — the same
+            // rule as load_profile onto other hardware.
             guard guiConfigStore.exists else {
+                if profiles.currentName != nil {
+                    profiles.markDirty()
+                }
                 resolveSpaceDisplays()
                 retile()
                 emitSpaceChange()
                 onLog(
                     "monitor change: no matching profile, "
                         + "placement follows standard "
-                        + "'\(composed.sourceName)' "
-                        + "(Lua-owned tiling untouched)"
+                        + "'\(composed.sourceName)' (tiling "
+                        + "stays Lua/profile-owned)"
                 )
                 return
             }

@@ -152,6 +152,25 @@ struct ProfileModelTests {
         )
     }
 
+    @Test("space_modes encodes as a JSON object")
+    func spaceModesEncodesAsObject() throws {
+        // Pins the CodingKeyRepresentable shape: [SpaceID:
+        // LayoutMode] must serialize as {"1": "stack"}, not
+        // as a flattened key/value array.
+        let profile = makeProfile(
+            name: "p",
+            monitors: ["A:1x1"],
+            modes: ["1": .stack]
+        )
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let json = String(
+            decoding: try encoder.encode(profile),
+            as: UTF8.self
+        )
+        #expect(json.contains("\"space_modes\":{\"1\""))
+    }
+
     @Test("Upsert replaces the same set, refuses new lengths")
     func upsert() {
         var profile = makeProfile(

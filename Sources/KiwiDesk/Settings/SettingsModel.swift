@@ -106,6 +106,9 @@ final class SettingsModel: ObservableObject {
         // union) must not read as a global edit, or a
         // tiling-only save would regenerate gui.json and
         // init.lua and leak transient spaces into them.
+        // Accepted edges: a genuine global edit still saves
+        // the overlaid spaces union, and deleting + re-adding
+        // a transient space alone doesn't read as an edit.
         savedSidecar =
             core.guiConfigStore.exists ? config : nil
         refreshProfiles()

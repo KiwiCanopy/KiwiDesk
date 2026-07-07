@@ -765,6 +765,11 @@ default. In the **Canvas** tab, drag a space onto a monitor
 tile to pin it, or onto the **Main** target to give it the
 Main role; everything else shows as *Auto*.
 
+Explicitly loading a profile whose stored sets don't cover the
+connected monitors works, but the state loads *dirty*
+(`get_profile_status` reports `isDirty`) until you update the
+profile on this hardware or return to a covered set.
+
 Profiles live as JSON files in `~/.config/kiwidesk/profiles/`
 and are meant to be readable (and hand-editable — reload with
 `load_profile`). Keys mirror the Lua API: the command name
