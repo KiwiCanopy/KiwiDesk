@@ -142,6 +142,36 @@ struct KeyModeOverrideTests {
         #expect(bindings.map(\.combo) == ["alt+h", "alt+j"])
     }
 
+    @Test("Duplicate base combo: override wins over every copy")
+    func duplicateBaseComboOverridden() {
+        // Hand-edited gui.json can carry a duplicate combo;
+        // decode does not validate. Every copy must take the
+        // override — registration is last-wins, so a stale
+        // trailing base row would silently displace it.
+        let base = [
+            mode(
+                "default",
+                combos: [
+                    ("alt+h", "first"),
+                    ("alt+j", "keep"),
+                    ("alt+h", "second"),
+                ]
+            )
+        ]
+        let over = KeyModeOverride(
+            modes: [mode("default", combos: [("alt+h", "WIN")])]
+        )
+        let result = over.resolved(onto: base)
+        let hRows = result[0].bindings.filter {
+            $0.combo == "alt+h"
+        }
+        #expect(!hRows.isEmpty)
+        #expect(hRows.allSatisfy { $0.lua == "WIN" })
+        // The unrelated row is untouched.
+        let j = result[0].bindings.first { $0.combo == "alt+j" }
+        #expect(j?.lua == "keep")
+    }
+
     @Test("Override icon replaces base icon when non-nil")
     func iconOverride() {
         let base = [

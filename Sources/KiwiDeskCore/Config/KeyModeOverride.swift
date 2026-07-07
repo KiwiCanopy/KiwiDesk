@@ -64,14 +64,19 @@ public struct KeyModeOverride: Sendable, Equatable {
             // Merge bindings in base order: an overridden
             // combo replaces its base row in place (the GUI
             // renders resolved modes — rows must not jump);
-            // combos new to the mode append at the end.
+            // combos new to the mode append at the end. EVERY
+            // matching base row is replaced — a hand-edited
+            // duplicate base combo must not let a stale copy
+            // outlive the override (registration is last-wins).
             var merged = baseMode.bindings
             for row in over.bindings {
-                if let at = merged.firstIndex(where: {
-                    $0.combo == row.combo
-                }) {
+                var replaced = false
+                for at in merged.indices
+                where merged[at].combo == row.combo {
                     merged[at] = row
-                } else {
+                    replaced = true
+                }
+                if !replaced {
                     merged.append(row)
                 }
             }
