@@ -45,11 +45,9 @@ extension KiwiCore {
     /// only now be resolvable to its space.
     private func scheduleStartupSweep() {
         let landed = state.workspaces.activeSpace
-        pendingStartupSweep?.cancel()
-        pendingStartupSweep = Task { @MainActor [weak self] in
-            try? await Task.sleep(for: .seconds(1))
-            guard !Task.isCancelled, let self,
-                self.eventLoop.isRunning
+        deferred.schedule(.startupSweep, after: .seconds(1)) {
+            [weak self] in
+            guard let self, self.eventLoop.isRunning
             else { return }
             self.eventLoop.reconcileAll()
             guard
@@ -79,9 +77,7 @@ extension KiwiCore {
         // armed timeout watchdogs — they must not SIGTERM a
         // child after teardown (a start() may reuse the launcher).
         exec.cancelWatchdogs()
-        pendingFocusFollow?.cancel()
-        pendingStartupSweep?.cancel()
-        pendingSpaceSettle?.cancel()
+        deferred.cancelAll()
         mouse.stop()
         eventLoop.stop()
         sleepWake.stop()

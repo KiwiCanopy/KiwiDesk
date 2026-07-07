@@ -302,7 +302,7 @@ struct MoveToSpaceTests {
             "focus_virtual_space",
             args: [.string("2")]
         )
-        let first = core.pendingSpaceSettle
+        let first = core.deferred.task(for: .spaceSettle)
         #expect(first != nil)
         core.execute(
             "focus_virtual_space",
@@ -310,9 +310,10 @@ struct MoveToSpaceTests {
         )
         // The prior settle is cancelled AND a fresh one scheduled
         // for the new target — not merely cancelled.
+        let second = core.deferred.task(for: .spaceSettle)
         #expect(first?.isCancelled == true)
-        #expect(core.pendingSpaceSettle != nil)
-        #expect(core.pendingSpaceSettle != first)
+        #expect(second != nil)
+        #expect(second != first)
     }
 
     @Test("Moving to the current space re-stamps focus safely")

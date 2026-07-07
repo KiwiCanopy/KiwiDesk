@@ -18,10 +18,11 @@ extension KiwiCore {
         guard
             Date().timeIntervalSince(lastNativeSwitch) > 1
         else { return }
-        pendingFocusFollow?.cancel()
-        pendingFocusFollow = Task { @MainActor [weak self] in
-            try? await Task.sleep(for: .milliseconds(250))
-            guard !Task.isCancelled, let self else { return }
+        deferred.schedule(
+            .focusFollow,
+            after: .milliseconds(250)
+        ) { [weak self] in
+            guard let self else { return }
             guard let window = self.state.windows[id],
                 NSWorkspace.shared.frontmostApplication?
                     .processIdentifier == window.pid,
@@ -119,10 +120,11 @@ extension KiwiCore {
     /// re-issue only the windows still at the stash corner rather
     /// than lengthening or repeating this timer.
     func scheduleSpaceSettle(_ target: SpaceID) {
-        pendingSpaceSettle?.cancel()
-        pendingSpaceSettle = Task { @MainActor [weak self] in
-            try? await Task.sleep(for: .milliseconds(300))
-            guard !Task.isCancelled, let self,
+        deferred.schedule(
+            .spaceSettle,
+            after: .milliseconds(300)
+        ) { [weak self] in
+            guard let self,
                 self.state.workspaces.activeSpace == target,
                 // A native desktop switch in this window runs its
                 // own retile + settle and is still re-tracking
