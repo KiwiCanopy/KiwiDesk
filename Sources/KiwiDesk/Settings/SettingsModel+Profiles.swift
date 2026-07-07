@@ -132,41 +132,54 @@ extension SettingsModel {
 
     // MARK: - Space placement (Canvas)
 
-    /// Where a space renders in the Canvas, mirroring the
-    /// runtime precedence: pin → Main → positional default.
-    /// There is no "unassigned" state — defaults compose a
-    /// concrete layout (#53).
+    /// Where a space renders in the Canvas, via the same
+    /// `SpacePlacement` precedence the runtime resolves with
+    /// (pin → Main → positional default). There is no
+    /// "unassigned" state — defaults compose a concrete
+    /// layout (#53). One conscious divergence: a pin to a
+    /// disconnected monitor renders as pinned (the user's
+    /// intent), while the runtime places the space on the
+    /// fallback display until that monitor returns.
     func resolution(for space: SpaceID) -> SpaceResolution {
-        if let pin = config.spacePins[space] {
-            return .pinned(pin)
-        }
-        if config.mainSpaces.contains(space) {
-            return .main
-        }
         let mainID = PositionalDisplays.liveMainID
-        if let composed = ProfileComposition.compose(
+        let assignment =
+            ProfileComposition.compose(
+                displays: displays,
+                mainID: mainID
+            )?.assignment ?? [:]
+        let resolved = SpacePlacement.resolve(
+            space: space,
+            pins: config.spacePins,
+            mainSpaces: config.mainSpaces,
             displays: displays,
-            mainID: mainID
-        ), let assigned = composed.assignment[space],
-            let display = displays.first(where: {
-                $0.id == assigned
-            })
-        {
+            mainID: mainID,
+            assignment: assignment
+        )
+        switch resolved {
+        case .pinned(let display):
+            return .pinned(display.fingerprint)
+        case .pinnedAbsent(let pin, fallback: _):
+            return .pinned(pin)
+        case .main:
+            return .main
+        case .auto(let display):
             return .auto(display.fingerprint)
+        case nil:
+            return .auto(nil)
         }
-        let main =
-            displays.first { $0.id == mainID }
-            ?? displays.first
-        return .auto(main?.fingerprint)
     }
 
     /// The current main display's fingerprint, for the Main
-    /// drop target's live annotation.
+    /// drop target's live annotation. Falls back positionally
+    /// (leftmost), matching the runtime.
     var mainFingerprint: String? {
         let mainID = PositionalDisplays.liveMainID
         return
             (displays.first { $0.id == mainID }
-            ?? displays.first)?.fingerprint
+            ?? PositionalDisplays.ordered(
+                displays,
+                mainID: mainID
+            ).first)?.fingerprint
     }
 }
 

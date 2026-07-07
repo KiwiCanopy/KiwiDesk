@@ -53,13 +53,6 @@ public struct MonitorSet: Codable, Sendable, Equatable {
     }
 }
 
-/// Where a space is placed: pinned to specific hardware, or on
-/// whatever display is currently main (resolved live).
-public enum MonitorTarget: Sendable, Equatable {
-    case fingerprint(String)
-    case main
-}
-
 /// A saved KiwiDesk configuration: layout modes per space plus
 /// all tiling settings, valid for one or more concrete monitor
 /// combinations (#36).
@@ -179,19 +172,6 @@ public struct Profile: Codable, Sendable, Equatable {
     ) -> MonitorSet? {
         let wanted = fingerprints.sorted()
         return monitorSets.first { $0.monitors == wanted }
-    }
-
-    /// Where a space is placed within one arrangement: explicit
-    /// pin first, then the profile-wide Main role.
-    public func target(
-        for space: SpaceID,
-        in set: MonitorSet?
-    ) -> MonitorTarget? {
-        if let pin = set?.spaceMonitorMap[space] {
-            return .fingerprint(pin)
-        }
-        if mainSpaces.contains(space) { return .main }
-        return nil
     }
 
     /// Adds or replaces the set covering the same monitors.

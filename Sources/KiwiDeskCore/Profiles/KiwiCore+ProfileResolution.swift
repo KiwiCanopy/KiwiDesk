@@ -99,41 +99,34 @@ extension KiwiCore {
         return name
     }
 
-    /// Total space→display resolution (#36): explicit pin →
-    /// Main role → the positional default (#53). Writes the
-    /// result into workspace state so every space has a screen
-    /// and the GUI renders the resolved mapping.
+    /// Total space→display resolution (#36): every space gets
+    /// a screen via the shared `SpacePlacement` precedence,
+    /// written into workspace state so the GUI renders the
+    /// resolved mapping.
     func resolveSpaceDisplays(
         mainID: DisplayID = PositionalDisplays.liveMainID
     ) {
         let displays = state.workspaces.allDisplays
-        guard !displays.isEmpty else { return }
-        let composed = ProfileComposition.compose(
-            displays: displays,
-            mainID: mainID
-        )
-        let main =
-            displays.first { $0.id == mainID }
-            ?? PositionalDisplays.ordered(
-                displays,
+        let assignment =
+            ProfileComposition.compose(
+                displays: displays,
                 mainID: mainID
-            )[0]
+            )?.assignment ?? [:]
         for space in state.workspaces.allSpaces {
-            let id = space.id
-            let resolved: DisplayID
-            if let pin = spacePins[id],
-                let pinned = displays.first(where: {
-                    $0.fingerprint == pin
-                })
-            {
-                resolved = pinned.id
-            } else if mainSpaces.contains(id) {
-                resolved = main.id
-            } else {
-                resolved =
-                    composed?.assignment[id] ?? main.id
-            }
-            state.workspaces.assign(id, to: resolved)
+            guard
+                let resolved = SpacePlacement.resolve(
+                    space: space.id,
+                    pins: spacePins,
+                    mainSpaces: mainSpaces,
+                    displays: displays,
+                    mainID: mainID,
+                    assignment: assignment
+                )
+            else { return }
+            state.workspaces.assign(
+                space.id,
+                to: resolved.display.id
+            )
         }
     }
 

@@ -111,24 +111,54 @@ struct ProfileModelTests {
         )
     }
 
-    @Test("Target resolution: pin first, then Main role")
-    func targetResolution() {
-        let profile = makeProfile(
-            name: "p",
-            monitors: ["A:1x1", "B:2x2"],
-            pins: [SpaceID(2): "B:2x2"],
-            mains: [SpaceID(1)]
+    @Test("SpacePlacement: pin → Main → plan → main")
+    func placementPrecedence() {
+        let a = Display(
+            id: DisplayID(1),
+            name: "A",
+            frame: CGRect(x: 0, y: 0, width: 1, height: 1)
         )
-        let set = profile.monitorSets.first
-        #expect(
-            profile.target(for: SpaceID(2), in: set)
-                == .fingerprint("B:2x2")
+        let b = Display(
+            id: DisplayID(2),
+            name: "B",
+            frame: CGRect(x: 1, y: 0, width: 2, height: 2)
         )
+        func resolve(
+            _ space: SpaceID
+        ) -> SpacePlacement.Resolution? {
+            SpacePlacement.resolve(
+                space: space,
+                pins: [
+                    SpaceID(2): "B:2x2",
+                    SpaceID(4): "GONE:9x9",
+                ],
+                mainSpaces: [SpaceID(1)],
+                displays: [a, b],
+                mainID: DisplayID(1),
+                assignment: [SpaceID(3): DisplayID(2)]
+            )
+        }
+        #expect(resolve(SpaceID(2)) == .pinned(b))
+        #expect(resolve(SpaceID(1)) == .main(a))
+        #expect(resolve(SpaceID(3)) == .auto(b))
+        // Off-plan spaces land on main.
+        #expect(resolve(SpaceID(9)) == .auto(a))
+        // A pin to a disconnected monitor keeps the intent
+        // and falls back like an unpinned space would.
         #expect(
-            profile.target(for: SpaceID(1), in: set) == .main
+            resolve(SpaceID(4))
+                == .pinnedAbsent("GONE:9x9", fallback: a)
         )
+        // No displays: the only unresolvable state.
         #expect(
-            profile.target(for: SpaceID(3), in: set) == nil
+            SpacePlacement.resolve(
+                space: SpaceID(1),
+                pins: [:],
+                mainSpaces: [],
+                displays: [],
+                mainID: nil,
+                assignment: [:]
+            ) == nil
         )
     }
 
