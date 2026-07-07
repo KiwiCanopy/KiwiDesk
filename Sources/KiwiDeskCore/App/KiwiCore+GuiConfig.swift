@@ -97,7 +97,7 @@ extension KiwiCore {
         let ordered = config.spaces.filter { liveSet.contains($0) }
         let inOrdered = Set(config.spaces)
         let extra = live.filter { !inOrdered.contains($0) }
-        config.spaces = GuiConfig.deduplicated(ordered + extra)
+        config.spaces = SpaceID.deduplicated(ordered + extra)
         config.spacePins = spacePins
         config.mainSpaces = mainSpaces
     }
@@ -110,11 +110,19 @@ extension KiwiCore {
         from config: GuiConfig
     ) {
         tiler.settings = config.settings
-        var known = Set(config.spaces)
-        known.formUnion(config.spaceModes.keys)
-        known.formUnion(config.spacePins.keys)
-        known.formUnion(config.mainSpaces)
-        for space in known {
+        // Ensure spaces in display order first (config.spaces
+        // is the authoritative list, so insertion order matches
+        // the user's chosen Spaces ordering). Any extras that
+        // appear only in modes/pins/main get appended after.
+        let inList = Set(config.spaces)
+        var extra: Set<SpaceID> = []
+        extra.formUnion(config.spaceModes.keys)
+        extra.formUnion(config.spacePins.keys)
+        extra.formUnion(config.mainSpaces)
+        for space in config.spaces {
+            state.workspaces.ensureSpace(space)
+        }
+        for space in extra.subtracting(inList) {
             state.workspaces.ensureSpace(space)
         }
         for space in state.workspaces.allSpaces {
@@ -291,7 +299,7 @@ extension KiwiCore {
         }
         config.spaceModes = modes
         // De-dup only — live order is authoritative (#75).
-        config.spaces = GuiConfig.deduplicated(
+        config.spaces = SpaceID.deduplicated(
             defined + Array(modes.keys)
         )
         if config.spaces.isEmpty {

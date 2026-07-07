@@ -18,7 +18,13 @@ extension KiwiCore {
     ) {
         tiler.settings = profile.settings
         let declared = profile.declaredSpaces
-        for id in declared {
+        // Seed live order from the profile's stored list so
+        // creation order matches display order. Using
+        // orderedSpaces (never the declaredSpaces Set) means
+        // WorkspaceManager.order follows the profile's list,
+        // not Set-hash order — making the subsequent
+        // buildProfile capture deterministic and faithful.
+        for id in profile.orderedSpaces {
             state.workspaces.ensureSpace(id)
         }
         if pruneStaleSpaces {
@@ -50,25 +56,26 @@ extension KiwiCore {
     }
 
     /// Explicit-load reconcile: drop live spaces whose name isn't
-    /// in the new profile, forwarding any windows they hold to the
-    /// rehome target so none are orphaned. A space whose name also
-    /// exists in the new profile is kept untouched — its windows
-    /// stay put regardless of the layout difference.
+    /// in the new profile, forwarding any windows they hold to
+    /// the rehome target so none are orphaned. A space whose
+    /// name also exists in the new profile is kept untouched —
+    /// its windows stay put regardless of the layout difference.
     ///
     /// `orderedBy` is the profile's `orderedSpaces` list (#75):
     /// the rehome target is the first element that is also a
     /// survivor, so windows land in the first space of the new
-    /// profile's displayed list. Falls back to a sorted-survivor
-    /// if none of the ordered spaces survived (degenerate).
+    /// profile's displayed list. When both lists are empty
+    /// (degenerate call) the guard skips pruning entirely.
     private func pruneSpaces(
         keeping survivors: Set<SpaceID>,
         orderedBy storedOrder: [SpaceID]
     ) {
-        let fallback =
-            storedOrder.first { survivors.contains($0) }
-            ?? GuiConfig.orderedSpaces(
-                Array(survivors)
-            ).first
+        // `orderedSpaces ⊆ declaredSpaces == survivors` so a
+        // non-empty storedOrder always has a match — nil only
+        // when storedOrder itself is empty (empty profile).
+        let fallback = storedOrder.first {
+            survivors.contains($0)
+        }
         guard let fallback else { return }
         for space in state.workspaces.allSpaces
         where !survivors.contains(space.id) {

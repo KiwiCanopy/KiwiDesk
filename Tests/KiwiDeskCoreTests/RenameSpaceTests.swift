@@ -191,7 +191,9 @@ struct RenameSpaceTests {
     }
 }
 
-/// `GuiConfig.moveToFirst` and `GuiConfig.deduplicated` (#75).
+/// `GuiConfig.moveToFirst` and `SpaceID.deduplicated` (#75).
+/// `deduplicated` was hoisted from `GuiConfig` to `SpaceID`
+/// (Models) so `Profile` and `GuiConfig` share one helper.
 @Suite("GuiConfig space-order helpers")
 struct GuiConfigSpaceOrderTests {
     @Test("moveToFirst moves a middle space to index 0")
@@ -227,7 +229,7 @@ struct GuiConfigSpaceOrderTests {
 
     @Test("deduplicated preserves insertion order, no sort")
     func deduplicatedOrder() {
-        let result = GuiConfig.deduplicated([
+        let result = SpaceID.deduplicated([
             SpaceID("z"), SpaceID("a"), SpaceID("m"),
             SpaceID("z"),  // duplicate — dropped
         ])

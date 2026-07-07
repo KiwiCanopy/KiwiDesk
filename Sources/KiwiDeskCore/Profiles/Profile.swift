@@ -75,6 +75,14 @@ public struct Profile: Codable, Sendable, Equatable {
     /// for the reconcile rehome fallback on profile switch.
     /// New spaces append; existing profiles without this key
     /// decode to `[]` and fall back to the derived order.
+    ///
+    /// Authority: `gui.json` owns live display order across the
+    /// session; `Profile.spaces` owns per-profile order,
+    /// consulted when that profile is loaded. The two stay in
+    /// sync because `apply(profile:)` seeds live order from
+    /// this list and both save paths (`persistProfile`,
+    /// `overwriteProfile`) capture the resulting live order
+    /// back here.
     public var spaces: [SpaceID]
     /// Layout mode per space.
     public var spaceModes: [SpaceID: LayoutMode]
@@ -109,28 +117,14 @@ public struct Profile: Codable, Sendable, Equatable {
     /// that predate the `spaces` key.
     public var orderedSpaces: [SpaceID] {
         if spaces.isEmpty {
-            return Self.numericLexicalSort(
+            return SpaceID.numericLexicalSorted(
                 Array(declaredSpaces)
             )
         }
         let stored = Set(spaces)
         let extra = declaredSpaces.subtracting(stored)
-        return spaces + Self.numericLexicalSort(Array(extra))
-    }
-
-    /// Sorts space IDs: numeric ids ascending, then named
-    /// ids alphabetically.
-    static func numericLexicalSort(
-        _ ids: [SpaceID]
-    ) -> [SpaceID] {
-        ids.sorted { a, b in
-            switch (Int(a.raw), Int(b.raw)) {
-            case (let l?, let r?): return l < r
-            case (_?, nil): return true
-            case (nil, _?): return false
-            default: return a.raw < b.raw
-            }
-        }
+        return spaces
+            + SpaceID.numericLexicalSorted(Array(extra))
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -158,18 +152,10 @@ public struct Profile: Codable, Sendable, Equatable {
         self.monitorSets = Self.sanitized(monitorSets)
         self.mainSpaces = mainSpaces.sorted { $0.raw < $1.raw }
         self.isDefault = isDefault
-        self.spaces = Self.deduplicated(spaces)
+        self.spaces = SpaceID.deduplicated(spaces)
         self.spaceModes = spaceModes
         self.settings = settings
         self.savedAt = savedAt
-    }
-
-    /// Order-preserving de-duplication: first occurrence wins.
-    private static func deduplicated(
-        _ spaces: [SpaceID]
-    ) -> [SpaceID] {
-        var seen: Set<SpaceID> = []
-        return spaces.filter { seen.insert($0).inserted }
     }
 
     /// Lenient where safe (missing flags default), strict where
@@ -206,7 +192,7 @@ public struct Profile: Codable, Sendable, Equatable {
             ) ?? false
         // Lenient: missing key on legacy profiles → empty,
         // which `orderedSpaces` converts to the derived order.
-        spaces = Self.deduplicated(
+        spaces = SpaceID.deduplicated(
             try container.decodeIfPresent(
                 [SpaceID].self,
                 forKey: .spaces

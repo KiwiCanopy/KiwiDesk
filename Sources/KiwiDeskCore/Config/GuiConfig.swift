@@ -110,40 +110,12 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         return true
     }
 
-    /// De-duplicates space ids preserving insertion order (first
-    /// occurrence wins). Does NOT sort — use `orderedSpaces` for
-    /// numeric-then-lexical ordering.
-    public static func deduplicated(
-        _ ids: [SpaceID]
-    ) -> [SpaceID] {
-        var seen: Set<String> = []
-        return ids.filter { seen.insert($0.raw).inserted }
-    }
-
-    /// De-duplicates and sorts space ids for display: numeric
-    /// ids ascending, then named ids alphabetically.
-    public static func orderedSpaces(
-        _ ids: [SpaceID]
-    ) -> [SpaceID] {
-        var seen: Set<String> = []
-        var unique: [SpaceID] = []
-        for id in ids where seen.insert(id.raw).inserted {
-            unique.append(id)
-        }
-        return unique.sorted { first, second in
-            switch (Int(first.raw), Int(second.raw)) {
-            case (let left?, let right?): return left < right
-            case (_?, nil): return true
-            case (nil, _?): return false
-            default: return first.raw < second.raw
-            }
-        }
-    }
-
     /// Moves `space` to the front of the ordered list. A no-op
     /// when `space` is absent or is already the first element.
     /// This is the primitive a future fallback-space chooser
-    /// (#68) will call.
+    /// (#68) will call; wire it through the edit-stored-profile
+    /// path (`overwriteProfile`), not a live save, so the
+    /// reorder reaches `Profile.spaces` faithfully.
     public mutating func moveToFirst(_ space: SpaceID) {
         guard let index = spaces.firstIndex(of: space),
             index != 0

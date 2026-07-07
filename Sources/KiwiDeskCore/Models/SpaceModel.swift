@@ -56,6 +56,40 @@ public struct SpaceID: Hashable, Sendable, Codable,
     }
 }
 
+// MARK: - Ordering helpers
+
+extension SpaceID {
+    /// Sorts space IDs: numeric ids ascending, then named ids
+    /// alphabetically. Stable within equal-valued elements.
+    ///
+    /// Shared by `Profile.orderedSpaces` and
+    /// `GuiConfig` sort helpers — the single canonical
+    /// numeric-then-lexical comparator for space lists.
+    public static func numericLexicalSorted(
+        _ ids: [SpaceID]
+    ) -> [SpaceID] {
+        ids.sorted { a, b in
+            switch (Int(a.raw), Int(b.raw)) {
+            case (let l?, let r?): return l < r
+            case (_?, nil): return true
+            case (nil, _?): return false
+            default: return a.raw < b.raw
+            }
+        }
+    }
+
+    /// Order-preserving de-duplication: first occurrence wins.
+    ///
+    /// Shared by `Profile` and `GuiConfig` — the single
+    /// canonical dedup helper for space ID arrays.
+    public static func deduplicated(
+        _ ids: [SpaceID]
+    ) -> [SpaceID] {
+        var seen: Set<SpaceID> = []
+        return ids.filter { seen.insert($0).inserted }
+    }
+}
+
 /// Dictionaries keyed by SpaceID serialize as JSON objects
 /// (`{"2": ...}`) instead of flattened key/value arrays.
 extension SpaceID: CodingKeyRepresentable {
