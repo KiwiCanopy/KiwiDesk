@@ -109,7 +109,7 @@ struct DeferredTasksTests {
         let owner = DeferredTasks()
         var fired = false
         owner.schedule(.spaceSettle, after: .milliseconds(5)) {}
-        owner.cancelAll()
+        owner.cancel(.spaceSettle)
         owner.schedule(.spaceSettle, after: .milliseconds(5)) {
             fired = true
         }

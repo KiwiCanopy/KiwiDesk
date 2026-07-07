@@ -36,6 +36,9 @@ final class DeferredTasks {
     /// or cancelled first. Cancellation is checked once, after
     /// the sleep: `body` is synchronous main-actor code, so a
     /// cancel cannot interleave with it once it has started.
+    /// `body` is retained until it fires or is cancelled, so
+    /// capture the core weakly (see the type doc) — a strong
+    /// capture would pin it for the pending delay.
     func schedule(
         _ key: Key,
         after delay: Duration,
@@ -56,6 +59,10 @@ final class DeferredTasks {
 
     /// The task currently stored for a key — lets tests pin the
     /// cancel-and-replace claims (identity + `isCancelled`).
+    /// Not a pending-check: a fired body leaves its *finished*
+    /// task in the slot (bounded — one per key — and inert), so
+    /// this stays non-nil after firing; only `cancel`/`cancelAll`
+    /// clear the slot.
     func task(for key: Key) -> Task<Void, Never>? {
         tasks[key]
     }
