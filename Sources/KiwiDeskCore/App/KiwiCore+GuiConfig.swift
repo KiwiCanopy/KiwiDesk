@@ -97,7 +97,7 @@ extension KiwiCore {
         // pin, window, or active profile — isn't seeded into live
         // at cold boot (`loadConfig` doesn't), so it drops on the
         // next reload. Closing that means reconciling the sidecar
-        // space list against live (config-cascade, #55/#75).
+        // space list against live (#77; config-cascade #55/#75).
         config.spaces = GuiConfig.orderedSpaces(live)
         config.spacePins = spacePins
         config.mainSpaces = mainSpaces
