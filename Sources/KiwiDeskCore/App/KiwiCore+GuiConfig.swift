@@ -144,7 +144,12 @@ extension KiwiCore {
     }
 
     /// Whether `init.lua` holds code outside the managed block
-    /// (so the visual editor can't safely own the file).
+    /// that touches the managed vocabulary — verbs the GUI
+    /// itself generates. When true the visual editor cannot
+    /// safely co-own the file and falls back to raw Lua mode.
+    /// Harmless custom Lua (e.g. `print`, sketchybar hooks)
+    /// does NOT set this; use `configHasCustomCode` for the
+    /// informational banner.
     public var configHasForeignCode: Bool {
         guard
             let source = try? String(
@@ -153,6 +158,22 @@ extension KiwiCore {
             )
         else { return false }
         return ManagedConfig.hasForeignCode(source)
+    }
+
+    /// Whether `init.lua` holds any non-blank, non-comment Lua
+    /// outside the managed block (including harmless code that
+    /// does not touch managed vocabulary). Used to show the
+    /// "you also have custom Lua" banner in the visual editor.
+    /// Always `false` when `configHasForeignCode` is `true`
+    /// (the raw editor is shown instead of the banner).
+    public var configHasCustomCode: Bool {
+        guard
+            let source = try? String(
+                contentsOf: configURL,
+                encoding: .utf8
+            )
+        else { return false }
+        return ManagedConfig.hasCustomCode(source)
     }
 
     /// Persists the model and applies it: writes `gui.json`,
