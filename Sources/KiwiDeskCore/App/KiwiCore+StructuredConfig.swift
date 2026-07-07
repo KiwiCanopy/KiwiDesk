@@ -22,9 +22,24 @@ extension KiwiCore {
     /// A no-op otherwise.
     func applyStructuredConfig() {
         guard isGuiManaged else { return }
-        guard let config = guiConfigStore.load() else { return }
-        guard let lua else { return }
+        guard let config = guiConfigStore.load() else {
+            // `isGuiManaged` implies the sidecar exists, so a
+            // nil load means unreadable/corrupt JSON. Post
+            // phase 5 no managed block stands behind it, so
+            // this must stay loud, never a silent no-op.
+            onLog(
+                "structured: gui.json exists but could not "
+                    + "be decoded — rules and keybindings "
+                    + "unchanged"
+            )
+            return
+        }
+        // Rules need no VM — apply them before the Lua guard.
         applyStructuredRules(from: config)
+        // Mint refs from the SAME interpreter that releases
+        // them (`keys.lua`, see `KeybindingManager.reset`),
+        // so mint and release cannot diverge.
+        guard let lua = keys.lua else { return }
         applyStructuredKeybindings(
             modes: config.modes,
             lua: lua
@@ -73,10 +88,11 @@ extension KiwiCore {
     }
 
     /// Compiles and registers one mode's bindings via
-    /// `makeFunction`. Bindings with empty combos or invalid
-    /// combo strings are skipped (logged). Compile errors skip
-    /// the binding (not the whole mode) — parity with
-    /// `KeybindingManager.fire` per-binding failure handling.
+    /// `makeFunction`. Empty combos are skipped silently (an
+    /// empty combo is an unassigned GUI row, not an error);
+    /// unparseable combos are logged and skipped. Compile
+    /// errors skip the binding (not the whole mode) — parity
+    /// with `KeybindingManager.fire` per-binding handling.
     private func registerStructuredMode(
         _ mode: KeyMode,
         lua: LuaInterpreter

@@ -191,10 +191,59 @@ struct StructuredConfigTests {
 
         let combo = try #require(KeyCombo.parse("alt+h"))
         let bindings = core.keys.bindings(for: "default")
-        // Exactly one ref — not two (block + structured).
+        // Pins re-registration: the structured entry is the
+        // only one. The keyed dict cannot hold duplicates, so
+        // the ref-leak half of the guard lives in
+        // `noLeakedRefsAfterLoad` below.
         #expect(bindings[combo] != nil)
-        // The dict is keyed, so duplicates are structurally
-        // impossible; the test confirms only one key exists.
         #expect(bindings.count == 1)
+    }
+
+    /// Leak canary for the managed-block refs: `luaL_ref`
+    /// reuses released slots, so after `loadConfig()` a probe
+    /// `makeFunction` must land on the same slot number in a
+    /// core whose init.lua holds the managed block as in one
+    /// whose init.lua is empty. If `applyStructuredConfig`
+    /// stopped calling `keys.reset()`, the block's ref would
+    /// stay live, the freelist would be empty, and the probe
+    /// slot in the block core would shift up — red test.
+    @Test("Managed-block refs are released (slot-reuse canary)")
+    func noLeakedRefsAfterLoad() throws {
+        var config = GuiConfig()
+        config.modes = [
+            KeyMode(
+                name: "default",
+                bindings: [
+                    KeyBinding(
+                        combo: "alt+h",
+                        lua: "-- noop",
+                        kind: .custom,
+                        label: ""
+                    )
+                ]
+            )
+        ]
+
+        // Baseline: same gui.json, init.lua emptied (no block).
+        let bare = makeGuiCore()
+        try bare.saveGuiConfig(config)
+        try writeInitLua("", core: bare)
+        bare.loadConfig()
+        let bareLua = try #require(bare.lua)
+        let bareProbe =
+            try bareLua
+            .makeFunction(body: "-- probe").get()
+
+        // Block core: saveGuiConfig leaves the managed block
+        // in init.lua, which also binds alt+h on load.
+        let block = makeGuiCore()
+        try block.saveGuiConfig(config)
+        block.loadConfig()
+        let blockLua = try #require(block.lua)
+        let blockProbe =
+            try blockLua
+            .makeFunction(body: "-- probe").get()
+
+        #expect(blockProbe == bareProbe)
     }
 }
