@@ -25,18 +25,11 @@ public final class KiwiCore {
     /// animations to settle (see restoreStackZOrder).
     var pendingZOrderRestore = false
 
-    /// Deferred switch to a hidden window's virtual space
-    /// (see scheduleFocusFollow).
-    var pendingFocusFollow: Task<Void, Never>?
-
-    /// One-shot re-assertion of a virtual space's layout shortly
-    /// after a switch, catching windows whose single frame-set a
-    /// slow/background app dropped (see scheduleSpaceSettle).
-    var pendingSpaceSettle: Task<Void, Never>?
-
-    /// One-shot startup sweep re-tracking windows the cold
-    /// AX scan missed (see start()).
-    var pendingStartupSweep: Task<Void, Never>?
+    /// The deferred one-shot settle tasks (focus follow, startup
+    /// sweep, space settles), keyed so `stop()` cancels them all
+    /// without a hand-kept list (#49). Bodies live at the
+    /// `schedule*` call sites.
+    let deferred = DeferredTasks()
 
     /// Native desktop we are currently on (Mission Control
     /// number), and the virtual space each desktop showed
@@ -223,7 +216,7 @@ public final class KiwiCore {
         case .windowCreated(let window):
             // A brand-new window supersedes a pending follow
             // of a hidden window (see above).
-            pendingFocusFollow?.cancel()
+            deferred.cancel(.focusFollow)
             newlyCreatedWindow = window.id
             emitWindowCreated(window)
         case .windowMoved(let id, let frame):

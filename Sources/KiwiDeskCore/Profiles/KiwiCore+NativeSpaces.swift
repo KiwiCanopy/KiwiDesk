@@ -75,10 +75,16 @@ extension KiwiCore {
     /// windows over the next few hundred ms; afterwards,
     /// re-assert the layout (stashing included) and hand
     /// focus to the restored space — the OS may have focused
-    /// a stashed window during the transition.
+    /// a stashed window during the transition. Keyed (#49):
+    /// rapid switches keep only the latest settle — a stale
+    /// task either no-op'd on the `lastNativeSpace` guard or
+    /// (switch away and back inside the delay) fired an early
+    /// settle mid-reconcile — and `stop()` can now cancel it.
     private func settleAfterNativeSwitch(_ number: Int?) {
-        Task { @MainActor [weak self] in
-            try? await Task.sleep(for: .milliseconds(600))
+        deferred.schedule(
+            .nativeSpaceSettle,
+            after: .milliseconds(600)
+        ) { [weak self] in
             guard let self, self.lastNativeSpace == number
             else { return }
             self.retile(animated: false, force: true)
