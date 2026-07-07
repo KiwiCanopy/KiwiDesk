@@ -5,15 +5,16 @@ paths:
 
 # Tests
 
-See AGENTS.md §2 & §5. Lesson learned the hard way on large PRs:
+The binding rules live in **AGENTS.md §2 & §5** (canonical). The
+ones that bite large test PRs, as a checklist (rationale is in §5):
 
-- **Split suites early.** The 79-char limit and the 350-line
-  ceiling repeatedly bit large test files. Break a suite into
-  focused files *before* it approaches the ceiling, not after.
+- **Split suites early** — the 79-char limit and 350-line ceiling
+  bite large test files. Break a suite into focused files *before*
+  it approaches the ceiling.
 - **Per-file private helpers are the convention** — small
-  duplication across suites is fine; do not build a shared test
-  harness or deep helper hierarchy to avoid it.
-- Config/profile shape is pinned by `SettingsCodingTests`; extend
-  it when adding a setting (Lua name → JSON key via `CodingKeys`).
-- Pre-release, single-user: profile JSON needs no migration
-  scripts — re-saving is the migration.
+  duplication across suites is fine; no shared test harness.
+- Config/profile shape is pinned by `SettingsCodingTests` — extend
+  it when adding a setting (Lua name → JSON key via `CodingKeys`;
+  see [config-vocabulary.md](config-vocabulary.md)).
+- Pre-release, single-user: profile JSON needs no migration — see
+  [profiles.md](profiles.md) and §5.

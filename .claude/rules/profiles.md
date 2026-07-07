@@ -6,23 +6,18 @@ paths:
 
 # Profiles & config ownership
 
-See AGENTS.md §5. Architecture invariants (from the #53/#36 work):
+The binding rules live in **AGENTS.md §5** (canonical) — read them
+before editing this subsystem. The ones this code trips over most,
+as a checklist (rationale is in §5, not restated here):
 
-- **Profiles own tiling only** — they serialize tiling state, not
-  keybindings or app rules. A new profile-serialized setting
-  belongs *inside* `TilingSettings`, so it rides the config split
-  automatically (follow the `gap.override` precedent).
-- **`ProfileManager` mutators are `internal` by design.** Mutate
-  through a `KiwiCore` facade (e.g. a `persistProfile`-style
-  method); never re-publicize the mutators. `read(name:)` is the
-  public load-for-edit primitive (path-traversal guarded).
-- **`ProfileManager.save()` adopts** (sets `currentName`, clears
-  dirty). An edit-without-activating path must be a separate,
-  non-adopting write — don't overload `save()`.
-- **One ownership predicate.** GUI-vs-Lua ownership is centralized
-  in `KiwiCore.isGuiManaged` (`KiwiCore+GuiConfig.swift`). Refine
-  that single predicate (e.g. token-scoped `configHasForeignCode`);
-  never introduce a second ownership check.
-- **Merge order:** per-field merge first, cross-field clamps last,
-  on the *merged* values (`AppBarStyle.resolved…` pattern).
-  Resolution happens before layout math — layout stays pure.
+- Profiles own **tiling only** — a new profile-serialized setting
+  goes *inside* `TilingSettings` (the `gap.override` precedent).
+- `ProfileManager` mutators are `internal`; go through a `KiwiCore`
+  facade. `read(name:)` loads for edit; `save()` **adopts** — an
+  edit-without-activating path is a separate, non-adopting write.
+- One ownership predicate: `KiwiCore.isGuiManaged`. Never add a
+  second.
+- Resolve before layout; merge per-field first, cross-field clamps
+  last (`AppBarStyle.resolved…`).
+- One vocabulary across Lua and profile JSON — see
+  [config-vocabulary.md](config-vocabulary.md).

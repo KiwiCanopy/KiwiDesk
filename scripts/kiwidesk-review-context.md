@@ -23,7 +23,10 @@ raise findings against thresholds the project has not adopted.
   Flag any tree/container structure creeping into state or layout.
 - **Private APIs:** SkyLight/CGS symbols resolve via `dlsym`, never
   `@_silgen_name`. Every private fast path MUST have a public-AX
-  fallback. Flag a linked private symbol or a missing fallback.
+  fallback. Flag a linked **SkyLight/CGS** symbol or a missing
+  fallback. (The one sanctioned `@_silgen_name` is
+  `_AXUIElementGetWindow` in `AX/AXHelper.swift` — a stable AX
+  symbol, not SkyLight/CGS; do not flag it.)
 - **Never disable SIP** or suggest the user do so.
 - **Lua watchdog can't interrupt blocking C.** Flag any new API
   that blocks in C on the main thread (`system()`, pipe reads) —

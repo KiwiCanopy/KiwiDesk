@@ -1,11 +1,12 @@
 ---
-description: Run KiwiDesk's full verification gate — debug build, tests, lint, and the mandatory release build (AGENTS.md §3.4). Use before any commit or PR.
+description: Run KiwiDesk's full verification gate — debug build, tests, lint, and the mandatory release build (AGENTS.md §3, the Verify step). Use before any commit or PR.
 argument-hint: "[optional: file/dir to scope the lint]"
 ---
 
-Run KiwiDesk's verification gate from AGENTS.md §3.4, in order, and
-report the result of each step. Stop and surface the failure the
-moment a step fails — do not continue to later steps.
+Run KiwiDesk's verification gate from AGENTS.md §3 (the Verify
+step), in order, and report the result of each step. Stop and
+surface the failure the moment a step fails — do not continue to
+later steps.
 
 ## Fast inner loop
 

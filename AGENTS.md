@@ -237,6 +237,18 @@ Keep this list updated whenever a recurring mistake is found.
   *inside* `TilingSettings` so they ride the config split for free
   (see `gap.override`). `ProfileManager` mutators are `internal` by
   design — mutate through a `KiwiCore` facade, never re-publicize
-  them. The GUI-vs-Lua ownership predicate is centralized in
+  them. `read(name:)` is the public load-for-edit primitive
+  (path-traversal guarded, touches no state); `save()` **adopts**
+  (sets `currentName`, clears dirty), so an edit-without-activating
+  path must be a separate, non-adopting write — never overload
+  `save()`. The GUI-vs-Lua ownership predicate is centralized in
   `KiwiCore.isGuiManaged` (`KiwiCore+GuiConfig.swift`); refine that
-  one predicate, never add a second.
+  one predicate, never add a second. Pre-release (single user):
+  profile JSON needs no migration scripts — re-saving is the
+  migration.
+- **Resolve before layout, and merge per-field first.** Settings
+  that layer (global → layout → space) merge field-by-field, with
+  cross-field clamps applied *last* on the already-merged values
+  (the `AppBarStyle.resolved…` pattern). Resolution runs before
+  layout math so the layout functions stay pure over the flat
+  array.
