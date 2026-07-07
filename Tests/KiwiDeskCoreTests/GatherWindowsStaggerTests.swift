@@ -197,14 +197,18 @@ struct GatherMultiDisplayTests {
             state: state,
             primaryHeight: pH
         )
-        if let f1 = frames[WindowID(1)] {
-            #expect(abs(f1.midX - axVisible1.midX) < 1)
-            #expect(abs(f1.midY - axVisible1.midY) < 1)
+        guard let f1 = frames[WindowID(1)] else {
+            Issue.record("no frame for window 1")
+            return
         }
-        if let f2 = frames[WindowID(2)] {
-            #expect(abs(f2.midX - axVisible2.midX) < 1)
-            #expect(abs(f2.midY - axVisible2.midY) < 1)
+        guard let f2 = frames[WindowID(2)] else {
+            Issue.record("no frame for window 2")
+            return
         }
+        #expect(abs(f1.midX - axVisible1.midX) < 1)
+        #expect(abs(f1.midY - axVisible1.midY) < 1)
+        #expect(abs(f2.midX - axVisible2.midX) < 1)
+        #expect(abs(f2.midY - axVisible2.midY) < 1)
     }
 
     @Test("two windows on same display are staggered apart")

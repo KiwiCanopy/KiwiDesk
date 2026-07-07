@@ -135,10 +135,13 @@ extension KiwiCore {
     ///
     /// Applies frames synchronously (direct AX IPC) inside a
     /// SkyLight display-suppression bracket so all moves
-    /// composite as one visual update. A per-element AX
-    /// messaging timeout (0.25 s) prevents one unresponsive app
-    /// from blocking the quit path; a total wall-clock budget
-    /// of ~1 s caps the worst case across all windows.
+    /// composite as one visual update. A system-wide AX
+    /// messaging timeout (0.25 s) is set once before the loop
+    /// and bounds every AX call in the iteration — EUI reads,
+    /// EUI disable/restore, and setFrame — so Electron/WebKit
+    /// apps (up to ~6 s with the default timeout) cannot stall
+    /// the quit path; a total wall-clock budget of ~1 s caps
+    /// the worst case across all windows.
     ///
     /// Called on quit and restart, at the top of `stop()` while
     /// the event loop and AX subsystem are still live. When
@@ -158,6 +161,14 @@ extension KiwiCore {
         // budget fires a break below.
         defer { SkyLight.resumeDisplay() }
         let deadline = Date().addingTimeInterval(1.0)
+        // Bound every AX call — EUI reads, EUI disable/
+        // restore, setFrame — including on fresh app elements
+        // created inside AXHelper. The system-wide default
+        // covers all elements created after this point.
+        AXUIElementSetMessagingTimeout(
+            AXUIElementCreateSystemWide(),
+            0.25
+        )
         for (id, frame) in frames {
             // Wall-clock budget: one unresponsive cluster of
             // apps cannot freeze the entire quit path.
@@ -171,10 +182,6 @@ extension KiwiCore {
             guard
                 let element = eventLoop.element(for: id)
             else { continue }
-            // Per-element timeout: default AX timeout is ~6 s;
-            // 0.25 s caps each call and keeps the total
-            // wall-clock cost bounded per window.
-            AXUIElementSetMessagingTimeout(element, 0.25)
             // Mirror applyInstant's EUI bracket: EUI-on apps
             // self-animate frame changes (Electron/WebKit) and
             // can clamp or swallow the set — drop it for the
