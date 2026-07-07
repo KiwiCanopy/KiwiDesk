@@ -14,6 +14,7 @@ struct SpacesTab: View {
                 minSizeSection
                 GapsEditor(model: model)
                 spacesSection
+                SpaceOverridesEditor(model: model)
                 layoutHeader
                 LayoutParamsEditor(model: model)
                 ScrollGridEditor(model: model)
