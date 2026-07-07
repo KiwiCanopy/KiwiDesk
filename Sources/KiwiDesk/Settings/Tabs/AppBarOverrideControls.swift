@@ -97,6 +97,58 @@ struct OverrideToggleRow: View {
     }
 }
 
+/// An override stepper over an integer field, clamped to `range`.
+struct OverrideStepperRow: View {
+    let label: String
+    @Binding var value: Int?
+    let global: Int
+    let range: ClosedRange<Int>
+
+    var body: some View {
+        let bound = overrideValue($value, global: global)
+        OverrideChrome(isOn: overrideToggle($value, global: global)) {
+            Stepper(
+                "\(label): \(bound.wrappedValue)",
+                value: bound,
+                in: range
+            )
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+}
+
+/// An override ratio field, shown as a 10–90% slider that stores
+/// the underlying 0...1 fraction. The range matches the Lua ratio
+/// clamp (`parseSplitRatio` / `parseMasterRatio`) so the GUI can't
+/// store a value the setters would reject.
+struct OverrideFractionRow: View {
+    let label: String
+    @Binding var value: Double?
+    let global: Double
+
+    var body: some View {
+        let bound = overrideValue($value, global: global)
+        OverrideChrome(isOn: overrideToggle($value, global: global)) {
+            HStack {
+                Text(label)
+                    .frame(width: 110, alignment: .leading)
+                Slider(
+                    value: Binding(
+                        get: { bound.wrappedValue * 100 },
+                        set: { bound.wrappedValue = $0 / 100 }
+                    ),
+                    in: 10...90,
+                    step: 1
+                )
+                Text("\(Int(bound.wrappedValue * 100))%")
+                    .frame(width: 48, alignment: .trailing)
+                    .foregroundStyle(.secondary)
+                    .font(.system(.body, design: .monospaced))
+            }
+        }
+    }
+}
+
 /// An override picker over any labeled, hashable option set.
 struct OverridePickerRow<Value: Hashable & Sendable>: View {
     let label: String

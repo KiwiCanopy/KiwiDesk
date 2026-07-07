@@ -222,3 +222,78 @@ struct ScrollAnchorCommandTests {
         #expect(core.tiler.settings.scrolling.anchor == .center)
     }
 }
+
+@Suite("scroll.set_*_override (per-space, #17)", .serialized)
+@MainActor
+struct ScrollOverrideCommandTests {
+    @Test("orientation override writes only that space")
+    func orientationOverride() {
+        let core = makeCore()
+        #expect(
+            core.execute(
+                "scroll.set_orientation_override",
+                args: [.string("2"), .string("vertical")]
+            ).isSuccess
+        )
+        let over =
+            core.tiler.settings.scrolling.override[SpaceID("2")]
+        #expect(over?.orientation == .vertical)
+        // The global params are untouched.
+        #expect(
+            core.tiler.settings.scrolling.orientation
+                == .horizontal
+        )
+        // Resolution reflects it for that space only.
+        #expect(
+            core.tiler.settings.resolvedScrolling(for: "2")
+                .orientation == .vertical
+        )
+        #expect(
+            core.tiler.settings.resolvedScrolling(for: "1")
+                .orientation == .horizontal
+        )
+    }
+
+    @Test("slot_size + anchor overrides share the global parsers")
+    func slotAndAnchorOverride() {
+        let core = makeCore()
+        #expect(
+            core.execute(
+                "scroll.set_slot_size_override",
+                args: [.string("7"), .number(50)]
+            ).isSuccess
+        )
+        #expect(
+            core.execute(
+                "scroll.set_anchor_override",
+                args: [.string("7"), .string("top")]
+            ).isSuccess
+        )
+        let over =
+            core.tiler.settings.scrolling.override[SpaceID("7")]
+        // Same clamp/normalization as the global setters.
+        #expect(over?.slotSize == .points(100))  // clamped floor
+        #expect(over?.anchor == .left)  // "top" -> left
+    }
+
+    @Test("Invalid value is rejected and writes nothing")
+    func invalidRejected() {
+        let core = makeCore()
+        #expect(
+            !core.execute(
+                "scroll.set_orientation_override",
+                args: [.string("2"), .string("sideways")]
+            ).isSuccess
+        )
+        #expect(
+            core.tiler.settings.scrolling.override.isEmpty
+        )
+        // Missing space id is rejected too.
+        #expect(
+            !core.execute(
+                "scroll.set_orientation_override",
+                args: [.string("vertical")]
+            ).isSuccess
+        )
+    }
+}

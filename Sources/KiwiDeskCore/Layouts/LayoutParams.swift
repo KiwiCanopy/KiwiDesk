@@ -29,6 +29,9 @@ public struct BspParams: Sendable, Equatable, Codable {
     public var strategy: Strategy = .shortestSide
     public var splitRatio: Double = 0.5
     public var newWindowPlacement: SpawnPlacement = .afterFocused
+    /// Per-space overrides (`layout.bsp.override[space_id]`),
+    /// resolved via `TilingSettings.resolvedBsp(for:)`.
+    public var override: [SpaceID: BspOverride] = [:]
 
     public init() {}
 
@@ -37,6 +40,7 @@ public struct BspParams: Sendable, Equatable, Codable {
         case strategy
         case splitRatio = "ratio"
         case newWindowPlacement = "new_window_placement"
+        case override
     }
 
     /// Manual decoding: profiles saved before a field existed
@@ -60,6 +64,26 @@ public struct BspParams: Sendable, Equatable, Codable {
                 SpawnPlacement.self,
                 forKey: .newWindowPlacement
             ) ?? .afterFocused
+        override =
+            try container.decodeIfPresent(
+                [SpaceID: BspOverride].self,
+                forKey: .override
+            ) ?? [:]
+    }
+
+    /// Manual encode so the per-space override map stays sparse
+    /// (absent when empty), unlike the synthesized encode.
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(strategy, forKey: .strategy)
+        try container.encode(splitRatio, forKey: .splitRatio)
+        try container.encode(
+            newWindowPlacement,
+            forKey: .newWindowPlacement
+        )
+        if !override.isEmpty {
+            try container.encode(override, forKey: .override)
+        }
     }
 }
 
@@ -83,6 +107,9 @@ public struct StackParams: Sendable, Equatable, Codable {
     /// dwm-style default: `.first` makes the new window the
     /// master (the last master slides into the stack).
     public var newWindowPlacement: SpawnPlacement = .first
+    /// Per-space overrides (`layout.stack.override[space_id]`),
+    /// resolved via `TilingSettings.resolvedStack(for:)`.
+    public var override: [SpaceID: StackOverride] = [:]
 
     public init() {}
 
@@ -92,6 +119,7 @@ public struct StackParams: Sendable, Equatable, Codable {
         case masterRatio = "master_ratio"
         case overflowStyle = "overflow_style"
         case newWindowPlacement = "new_window_placement"
+        case override
     }
 
     /// Manual decoding: profiles saved before a field existed
@@ -120,6 +148,30 @@ public struct StackParams: Sendable, Equatable, Codable {
                 SpawnPlacement.self,
                 forKey: .newWindowPlacement
             ) ?? .first
+        override =
+            try container.decodeIfPresent(
+                [SpaceID: StackOverride].self,
+                forKey: .override
+            ) ?? [:]
+    }
+
+    /// Manual encode so the per-space override map stays sparse
+    /// (absent when empty), unlike the synthesized encode.
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(masterCount, forKey: .masterCount)
+        try container.encode(masterRatio, forKey: .masterRatio)
+        try container.encode(
+            overflowStyle,
+            forKey: .overflowStyle
+        )
+        try container.encode(
+            newWindowPlacement,
+            forKey: .newWindowPlacement
+        )
+        if !override.isEmpty {
+            try container.encode(override, forKey: .override)
+        }
     }
 }
 
@@ -154,6 +206,9 @@ public struct ScrollingParams: Sendable, Equatable, Codable,
     /// one you are working in.
     public var newWindowPlacement: SpawnPlacement = .afterFocused
     public var appBar = LayoutAppBar()
+    /// Per-space overrides (`layout.scroll.override[space_id]`),
+    /// resolved via `TilingSettings.resolvedScrolling(for:)`.
+    public var override: [SpaceID: ScrollingOverride] = [:]
 
     public init() {}
 
@@ -169,6 +224,7 @@ public struct ScrollingParams: Sendable, Equatable, Codable,
         case orientation
         case newWindowPlacement = "new_window_placement"
         case appBar = "app_bar"
+        case override
     }
 
     /// Manual decoding: profiles saved before a field existed
@@ -202,79 +258,27 @@ public struct ScrollingParams: Sendable, Equatable, Codable,
                 LayoutAppBar.self,
                 forKey: .appBar
             ) ?? LayoutAppBar()
-    }
-}
-
-public struct GridParams: Sendable, Equatable, Codable {
-    public enum GridType: String, Sendable, Codable {
-        case dynamic
-        case rigid
+        override =
+            try container.decodeIfPresent(
+                [SpaceID: ScrollingOverride].self,
+                forKey: .override
+            ) ?? [:]
     }
 
-    public enum SplitDirection: String, Sendable, Codable {
-        /// Column-first progression / horizontal filling.
-        case horizontal
-        /// Row-first progression / vertical filling.
-        case vertical
-    }
-
-    public var type: GridType = .dynamic
-    public var fillEmptySpace = true
-    public var splitDirection: SplitDirection = .horizontal
-    /// Rigid grid dimensions.
-    public var columns: Int = 3
-    public var rows: Int = 2
-    /// Grids read as ordered cells: appending keeps every
-    /// existing cell in place.
-    public var newWindowPlacement: SpawnPlacement = .last
-
-    public init() {}
-
-    /// JSON keys follow the Lua setters (`grid.set_*`).
-    private enum CodingKeys: String, CodingKey {
-        case type
-        case fillEmptySpace = "fill_empty_space"
-        case splitDirection = "split_direction"
-        case columns
-        case rows
-        case newWindowPlacement = "new_window_placement"
-    }
-
-    /// Manual decoding: profiles saved before a field existed
-    /// must keep loading (missing keys fall back to defaults).
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(
-            keyedBy: CodingKeys.self
+    /// Manual encode so the per-space override map stays sparse
+    /// (absent when empty), unlike the synthesized encode.
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(slotSize, forKey: .slotSize)
+        try container.encode(anchor, forKey: .anchor)
+        try container.encode(orientation, forKey: .orientation)
+        try container.encode(
+            newWindowPlacement,
+            forKey: .newWindowPlacement
         )
-        type =
-            try container.decodeIfPresent(
-                GridType.self,
-                forKey: .type
-            ) ?? .dynamic
-        fillEmptySpace =
-            try container.decodeIfPresent(
-                Bool.self,
-                forKey: .fillEmptySpace
-            ) ?? true
-        splitDirection =
-            try container.decodeIfPresent(
-                SplitDirection.self,
-                forKey: .splitDirection
-            ) ?? .horizontal
-        columns =
-            try container.decodeIfPresent(
-                Int.self,
-                forKey: .columns
-            ) ?? 3
-        rows =
-            try container.decodeIfPresent(
-                Int.self,
-                forKey: .rows
-            ) ?? 2
-        newWindowPlacement =
-            try container.decodeIfPresent(
-                SpawnPlacement.self,
-                forKey: .newWindowPlacement
-            ) ?? .last
+        try container.encode(appBar, forKey: .appBar)
+        if !override.isEmpty {
+            try container.encode(override, forKey: .override)
+        }
     }
 }
