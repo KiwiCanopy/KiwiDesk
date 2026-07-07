@@ -69,6 +69,50 @@ struct GeneralTab: View {
                     isOn: $model.config.settings.animations
                         .onRelayout
                 )
+                Divider()
+                animationDurationRow
+                scrollSpeedRow
+            }
+        }
+    }
+
+    /// Stepper for the general animation duration
+    /// (`animations.duration` JSON; `animations.set_duration` Lua).
+    private var animationDurationRow: some View {
+        let ms = model.config.settings.animations.durationMS
+        return HStack {
+            Text("Duration")
+            Spacer()
+            Stepper(
+                value: $model.config.settings.animations
+                    .durationMS,
+                in: 50...1000,
+                step: 10
+            ) {
+                Text("\(ms) ms")
+                    .frame(minWidth: 52, alignment: .trailing)
+                    .monospacedDigit()
+            }
+        }
+    }
+
+    /// Stepper for the scrolling-layout focus-shift speed
+    /// (`animations.scroll_speed` JSON;
+    /// `animations.set_scroll_speed` Lua — issue #51).
+    private var scrollSpeedRow: some View {
+        let ms = model.config.settings.animations.scrollSpeedMS
+        return HStack {
+            Text("Scroll speed")
+            Spacer()
+            Stepper(
+                value: $model.config.settings.animations
+                    .scrollSpeedMS,
+                in: 50...1000,
+                step: 10
+            ) {
+                Text("\(ms) ms")
+                    .frame(minWidth: 52, alignment: .trailing)
+                    .monospacedDigit()
             }
         }
     }
