@@ -204,6 +204,14 @@ public final class ExecLauncher {
     /// which may `start()` again on this same launcher) must not
     /// SIGTERM or force-reap a child after teardown. Children
     /// stay fire-and-forget.
+    ///
+    /// Trade-off: this also voids the force-reap for a child that
+    /// is *already stuck* (grandchild holding the pipe, so EOF
+    /// never arrives) when the stop fires — its `running` entry
+    /// then leaks for the life of the process (`exec` outlives a
+    /// stop/start), inflating `runningCount`. Accepted: avoiding
+    /// a post-teardown SIGTERM outweighs reclaiming one entry in
+    /// that triple-conditional corner.
     func cancelWatchdogs() {
         // Snapshot the keys: the loop mutates `running`.
         for key in Array(running.keys) {
