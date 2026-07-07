@@ -70,6 +70,11 @@ extension KiwiCore {
         // Gather windows onto their owning monitors before
         // any subsystem teardown; AX must still be live here.
         gatherWindows()
+        // exec children are fire-and-forget: we do not
+        // terminate or wait for them. They are re-parented to
+        // launchd and finish naturally after the app exits.
+        // Per-command control is available via the optional
+        // timeout argument to KiwiDesk.exec().
         pendingFocusFollow?.cancel()
         pendingStartupSweep?.cancel()
         pendingSpaceSettle?.cancel()

@@ -157,4 +157,111 @@ struct ExecTests {
         }
         #expect(message.contains("KiwiDesk.exec"))
     }
+
+    @Test("os.exit is neutralized — does not kill the app")
+    func osExitNeutralized() throws {
+        let core = makeCore()
+        let lua = try #require(core.lua)
+        // If os.exit were real, this would kill the test
+        // process. Reaching the next line proves it is safe.
+        #expect(lua.run("os.exit(0)").succeeded)
+        #expect(lua.run("still_alive = true").succeeded)
+        #expect(
+            lua.global("still_alive") == .bool(true)
+        )
+    }
+
+    @Test("Large output is truncated at 1 MB with a marker")
+    func outputCapTruncation() async throws {
+        let core = makeCore()
+        let lua = try #require(core.lua)
+        // 'yes x' writes "x\n" until head closes the pipe
+        // at 2 MB; the cap stops capture at 1 MB.
+        let script = """
+            KiwiDesk.exec(
+                "yes x | head -c 2097152",
+                function(code, out, err)
+                    cap_out = out
+                end)
+            """
+        #expect(lua.run(script).succeeded)
+        let out = try await awaitGlobal(
+            lua,
+            "cap_out",
+            timeout: 10
+        )
+        guard case .string(let text) = out else {
+            Issue.record("expected string output")
+            return
+        }
+        #expect(text.contains("[output truncated at 1 MB]"))
+        // 1 MB content + short marker — not more.
+        #expect(text.utf8.count <= 1_048_576 + 64)
+    }
+
+    @Test("Timed-out child is terminated and reaped")
+    func execTimeout() async throws {
+        let core = makeCore()
+        let lua = try #require(core.lua)
+        let started = Date()
+        // Third arg is timeout in seconds.
+        let script = """
+            KiwiDesk.exec("sleep 30",
+                function(code, out, err)
+                    timeout_code = code
+                end, 0.4)
+            """
+        #expect(lua.run(script).succeeded)
+        // Watchdog fires after ~0.4s; wait up to 10s.
+        let code = try await awaitGlobal(
+            lua,
+            "timeout_code",
+            timeout: 10
+        )
+        let elapsed = Date().timeIntervalSince(started)
+        #expect(code != .none)
+        // Definitely did not run for 30s.
+        #expect(elapsed < 10)
+        // Process was reaped after termination.
+        let deadline = Date().addingTimeInterval(5)
+        while core.exec.runningCount > 0,
+            Date() < deadline
+        {
+            try await Task.sleep(nanoseconds: 20_000_000)
+        }
+        #expect(core.exec.runningCount == 0)
+    }
+
+    @Test("get_state includes exec_running count")
+    func getStateExecRunning() async throws {
+        let core = makeCore()
+        // Before any launch: exec_running must be 0.
+        let before = core.execute("get_state")
+        guard case .object(let b)? = before.data else {
+            Issue.record("expected state object")
+            return
+        }
+        #expect(b["exec_running"] == .number(0))
+        // While a child runs, count is 1.
+        core.exec.launch("sleep 5")
+        let during = core.execute("get_state")
+        guard case .object(let d)? = during.data else {
+            Issue.record("expected state object")
+            return
+        }
+        #expect(d["exec_running"] == .number(1))
+    }
+
+    @Test("Lua-only functions appear in help() output")
+    func luaOnlyInHelp() throws {
+        let core = makeCore()
+        let response = core.execute("help")
+        guard case .array(let names)? = response.data else {
+            Issue.record("expected command list")
+            return
+        }
+        for name in APIReference.luaOnly {
+            #expect(names.contains(.string(name)))
+        }
+    }
 }

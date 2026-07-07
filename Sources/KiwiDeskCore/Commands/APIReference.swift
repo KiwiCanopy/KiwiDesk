@@ -169,7 +169,19 @@ public enum APIReference {
         ],
     ]
 
-    /// Every dispatcher-level command name, sorted.
+    /// Lua-only entry points on the `KiwiDesk` table that
+    /// are not routed through the dispatcher and therefore
+    /// absent from the CLI/IPC socket. Listed here so
+    /// `help()` and did-you-mean suggestions cover the full
+    /// Lua API surface (issue #37).
+    public static let luaOnly: [String] = [
+        "exec", "bind", "on", "define_mode", "switch_mode",
+    ]
+
+    /// Every command name visible in `help()` and
+    /// did-you-mean, sorted. Includes dispatcher commands,
+    /// namespace sub-commands, `subscribe`, and Lua-only
+    /// entry points.
     public static var allCommands: [String] {
         var names = Set(commands.map(\.command))
         for (table, functions) in namespaces {
@@ -178,6 +190,7 @@ public enum APIReference {
             }
         }
         names.insert("subscribe")
+        names.formUnion(luaOnly)
         return names.sorted()
     }
 

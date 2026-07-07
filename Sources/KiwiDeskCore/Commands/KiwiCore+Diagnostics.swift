@@ -89,6 +89,11 @@ extension KiwiCore {
             // SkyLight.
             "native_space": NativeSpaces.activeSpaceNumber()
                 .map { .number(Double($0)) } ?? .null,
+            // Exec children still running; useful for
+            // debugging config hooks (issue #37).
+            "exec_running": .number(
+                Double(exec.runningCount)
+            ),
         ])
     }
 }
