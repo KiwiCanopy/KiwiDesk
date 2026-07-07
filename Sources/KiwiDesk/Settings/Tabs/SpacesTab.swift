@@ -55,6 +55,15 @@ struct SpacesTab: View {
             )
             .font(.caption)
             .foregroundStyle(.secondary)
+            Text(
+                "If you switch profiles, only windows in spaces "
+                    + "with the same name are kept (regardless of "
+                    + "layout differences). Windows in spaces whose "
+                    + "name isn't in the new profile move to the "
+                    + "first space in this list."
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
             ForEach(model.config.spaces, id: \.raw) { space in
                 spaceRow(space)
             }

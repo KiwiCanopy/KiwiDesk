@@ -271,8 +271,8 @@ struct SpacePlacementTests {
         )
     }
 
-    @Test("A sparse profile resets undeclared modes to bsp")
-    func sparseProfileResetsModes() throws {
+    @Test("Explicit load prunes spaces the profile omits")
+    func sparseProfilePrunesUndeclared() throws {
         let core = makeCore()
         connect(core, [display(1, "A")])
         core.state.workspaces.ensureSpace(SpaceID(1))
@@ -294,9 +294,9 @@ struct SpacePlacementTests {
         )
         let workspaces = core.state.workspaces
         #expect(workspaces[SpaceID(1)]?.mode == .stack)
-        // Undeclared by the (hand-edited, sparse) profile:
-        // back to bsp, not the previous grid.
-        #expect(workspaces[SpaceID(2)]?.mode == .bsp)
+        // Undeclared by the (hand-edited, sparse) profile, so the
+        // explicit load drops it — no stale grid mode lingers.
+        #expect(workspaces[SpaceID(2)] == nil)
     }
 
     @Test("Loading a profile adopts its live set's pins")
