@@ -31,8 +31,9 @@ extension KiwiCore {
         // from an earlier version still executes its binds —
         // the structured reset makes them inert (O6).
         // Keybindings resolve against the profile active NOW;
-        // a profile applied later (e.g. applyNativeSpaceBinding
-        // below) re-registers in phase 6 (#55).
+        // a profile applied later (reapplyActiveProfileState /
+        // applyNativeSpaceBinding below) re-registers with its
+        // own override via apply(profile:) (#55 phase 6).
         if isGuiManaged {
             applyStructuredConfig()
         } else {

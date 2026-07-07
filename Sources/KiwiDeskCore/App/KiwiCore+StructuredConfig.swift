@@ -22,16 +22,7 @@ extension KiwiCore {
     /// A no-op otherwise.
     func applyStructuredConfig() {
         guard isGuiManaged else { return }
-        guard let config = guiConfigStore.load() else {
-            // `isGuiManaged` implies the sidecar exists, so a
-            // nil load means unreadable/corrupt JSON. Post
-            // phase 5 no managed block stands behind it, so
-            // this must stay loud, never a silent no-op.
-            onLog(
-                "structured: gui.json exists but could not "
-                    + "be decoded — rules and keybindings "
-                    + "unchanged"
-            )
+        guard let config = loadStructuredConfig() else {
             return
         }
         // Rules need no VM — apply them before the Lua guard.
@@ -42,8 +33,50 @@ extension KiwiCore {
         guard let lua = keys.lua else { return }
         applyStructuredKeybindings(
             modes: config.modes,
+            profile: activeProfileModes(),
             lua: lua
         )
+    }
+
+    /// Re-registers keybindings for the profile being applied
+    /// (#55 phase 6) WITHOUT re-applying rules — rules are
+    /// global, not profile-scoped. Called from
+    /// `apply(profile:)` / `apply(composed:)` so load_profile,
+    /// dock/undock, and native-Space switches update binds.
+    /// Takes the override explicitly: callers adopt AFTER
+    /// applying, so `profiles.currentName` may still point at
+    /// the previous profile here. Resets the active key mode
+    /// to default (the mode set may change with the profile).
+    /// No-op when not GUI-managed (Lua owns bindings, O7) or
+    /// before the first `loadConfig` (no VM yet).
+    func reapplyStructuredKeybindings(
+        profileModes: KeyModeOverride?
+    ) {
+        guard isGuiManaged else { return }
+        guard let config = loadStructuredConfig() else {
+            return
+        }
+        guard let lua = keys.lua else { return }
+        applyStructuredKeybindings(
+            modes: config.modes,
+            profile: profileModes,
+            lua: lua
+        )
+    }
+
+    /// Loads the sidecar, logging loudly when it exists but
+    /// cannot be decoded (`isGuiManaged` implies existence, so
+    /// nil here means unreadable/corrupt JSON — post phase 5
+    /// nothing stands behind it; never a silent no-op).
+    private func loadStructuredConfig() -> GuiConfig? {
+        if let config = guiConfigStore.load() {
+            return config
+        }
+        onLog(
+            "structured: gui.json exists but could not "
+                + "be decoded — structured settings unchanged"
+        )
+        return nil
     }
 
     // MARK: - Rules
@@ -59,16 +92,18 @@ extension KiwiCore {
 
     // MARK: - Keybindings
 
-    /// Resolves modes (base + active profile override), resets
-    /// the `keys` table (releasing managed-block refs), then
-    /// registers the resolved bindings via `makeFunction`.
+    /// Resolves modes (base + profile override), resets the
+    /// `keys` table (releasing the previous registration's
+    /// refs), then registers the resolved bindings via
+    /// `makeFunction`.
     private func applyStructuredKeybindings(
         modes base: [KeyMode],
+        profile: KeyModeOverride?,
         lua: LuaInterpreter
     ) {
         let resolved = ConfigResolver.resolvedModes(
             base: base,
-            profile: activeProfileModes()
+            profile: profile
         )
         // Reset releases managed-block refs (those refs belong
         // to `lua` too — VM-consistent). `keys.lua` is NOT
