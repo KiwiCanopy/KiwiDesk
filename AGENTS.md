@@ -252,3 +252,20 @@ Keep this list updated whenever a recurring mistake is found.
   (the `AppBarStyle.resolved…` pattern). Resolution runs before
   layout math so the layout functions stay pure over the flat
   array.
+- **Guard hand-mirrored field lists with a forget-proof parity
+  test.** Some patterns repeat a struct's field list across
+  sites — a global ↔ optional-override mirror
+  (`AppBarStyle` ↔ `LayoutAppBar`), a dual apply switch
+  (`AppBarCommandSetting`), a manual sparse `Codable`. Small
+  readable duplication is fine (§2.4), but past **two** mirrors
+  of the same field list the drift risk (add a field, forget one
+  site → silent data loss) outweighs the clarity. Before adding
+  the third, weigh whether the duplication still pays off; if it
+  ships, it **must** carry a parity test — and prefer one that
+  discovers fields by reflection / shared `CodingKeys` over a
+  hand-enumerated list, so the guard itself cannot silently rot
+  (a hand-listed parity test is one more place to forget). Reach
+  for a generic/keypath merge only when it removes the drift, not
+  just the `resolved()` lines — sparse `Codable` stays per-field
+  either way, so generics rarely buy down the real risk and fight
+  §2.4.
