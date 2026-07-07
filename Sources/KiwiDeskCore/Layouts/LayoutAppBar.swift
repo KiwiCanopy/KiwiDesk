@@ -97,7 +97,7 @@ extension LayoutAppBar: Codable {
     /// written; inherited fields stay absent.
     typealias CodingKeys = Key
 
-    enum Key: String, CodingKey {
+    enum Key: String, CodingKey, CaseIterable {
         case enabled
         case position
         case thickness

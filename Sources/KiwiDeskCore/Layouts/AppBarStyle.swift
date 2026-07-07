@@ -123,7 +123,7 @@ public struct AppBarStyle: Sendable, Equatable {
 extension AppBarStyle: Codable {
     /// JSON keys are the Lua setters (`app_bar.set_*`) minus the
     /// `set_` verb — the `app_bar` nesting carries the namespace.
-    enum CodingKeys: String, CodingKey {
+    enum CodingKeys: String, CodingKey, CaseIterable {
         case position
         case thickness
         case style
