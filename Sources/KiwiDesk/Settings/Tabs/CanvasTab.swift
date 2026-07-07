@@ -14,23 +14,60 @@ struct CanvasTab: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                SettingsSection("Monitor layout") {
-                    if model.displays.isEmpty {
-                        Text("No monitors detected.")
-                            .foregroundStyle(.secondary)
-                    } else {
-                        MonitorCanvas(model: model)
-                            .frame(height: 260)
-                        MainDropTarget(model: model)
+                if model.editingStoredProfile
+                    && !model.placementEditable
+                {
+                    // Editing a stored profile whose monitors
+                    // aren't attached: there is no live geometry
+                    // to render, so placement is read-only here
+                    // (#18). The other tabs still edit it.
+                    placementUnavailable
+                } else {
+                    SettingsSection("Monitor layout") {
+                        if model.displays.isEmpty {
+                            Text("No monitors detected.")
+                                .foregroundStyle(.secondary)
+                        } else {
+                            MonitorCanvas(model: model)
+                                .frame(height: 260)
+                            MainDropTarget(model: model)
+                        }
                     }
+                    if !model.displays.isEmpty {
+                        SpaceMonitorAssignments(model: model)
+                    }
+                    // Native-Space bindings are global, not part
+                    // of a profile — only offered in live editing.
+                    if !model.editingStoredProfile {
+                        NativeSpacesSection(model: model)
+                    }
+                    fingerprintSection
                 }
-                if !model.displays.isEmpty {
-                    SpaceMonitorAssignments(model: model)
-                }
-                NativeSpacesSection(model: model)
-                fingerprintSection
             }
             .padding(16)
+        }
+    }
+
+    private var placementUnavailable: some View {
+        SettingsSection("Monitor layout") {
+            VStack(alignment: .leading, spacing: 8) {
+                Label(
+                    "Monitors not connected",
+                    systemImage:
+                        "display.trianglebadge.exclamationmark"
+                )
+                .font(.headline)
+                Text(
+                    "This profile's monitors aren't attached "
+                        + "right now, so its space placement "
+                        + "can't be edited here. Connect its "
+                        + "monitor setup to arrange spaces — the "
+                        + "other tabs still edit this profile."
+                )
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            }
         }
     }
 
