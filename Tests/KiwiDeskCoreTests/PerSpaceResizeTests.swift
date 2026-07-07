@@ -81,4 +81,22 @@ struct PerSpaceResizeTests {
             .override[SpaceID("1")]?.masterRatio ?? 0
         #expect(value > 0.6 && value < 0.9)
     }
+
+    @Test("bsp resize also targets the space's own override")
+    func bspResizeHitsOverride() {
+        let core = makeCore()
+        core.execute(
+            "set_mode",
+            args: [.string("1"), .string("bsp")]
+        )
+        core.execute(
+            "bsp.set_ratio_override",
+            args: [.string("1"), .number(0.7)]
+        )
+        let globalBefore = core.tiler.settings.bsp.splitRatio
+        core.execute("resize", args: [.string("x"), .number(500)])
+        let over = core.tiler.settings.bsp.override[SpaceID("1")]
+        #expect((over?.splitRatio ?? 0) > 0.7)
+        #expect(core.tiler.settings.bsp.splitRatio == globalBefore)
+    }
 }

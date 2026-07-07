@@ -242,40 +242,45 @@ public struct TilingSettings: Sendable, Equatable, Codable {
         gapsOverride[space] ?? gapsGlobal
     }
 
-    /// The scrolling params effective for `space`: the global
-    /// params with that space's optional overrides merged on top
-    /// (#17). Falls back to the global params when unoverridden.
+    /// The scrolling params effective for `space` (#17): the
+    /// global params with that space's optional overrides merged
+    /// on top. An unoverridden space resolves an empty override,
+    /// so the result always drops the per-space map (never carried
+    /// into layout math) on both branches.
     public func resolvedScrolling(
         for space: SpaceID
     ) -> ScrollingParams {
-        scrolling.override[space]?.resolved(onto: scrolling)
-            ?? scrolling
+        (scrolling.override[space] ?? ScrollingOverride())
+            .resolved(onto: scrolling)
     }
 
-    /// The bsp params effective for `space` (#17): the global
-    /// params with that space's optional overrides merged on top.
+    /// The bsp params effective for `space` (#17); see
+    /// `resolvedScrolling`.
     public func resolvedBsp(for space: SpaceID) -> BspParams {
-        bsp.override[space]?.resolved(onto: bsp) ?? bsp
+        (bsp.override[space] ?? BspOverride()).resolved(onto: bsp)
     }
 
-    /// The stack params effective for `space` (#17): the global
-    /// params with that space's optional overrides merged on top.
+    /// The stack params effective for `space` (#17); see
+    /// `resolvedScrolling`.
     public func resolvedStack(for space: SpaceID) -> StackParams {
-        stack.override[space]?.resolved(onto: stack) ?? stack
+        (stack.override[space] ?? StackOverride())
+            .resolved(onto: stack)
     }
 
-    /// The grid params effective for `space` (#17): the global
-    /// params with that space's optional overrides merged on top.
+    /// The grid params effective for `space` (#17); see
+    /// `resolvedScrolling`.
     public func resolvedGrid(for space: SpaceID) -> GridParams {
-        grid.override[space]?.resolved(onto: grid) ?? grid
+        (grid.override[space] ?? GridOverride())
+            .resolved(onto: grid)
     }
 
-    /// The monocle params effective for `space` (#17): the global
-    /// params with that space's optional overrides merged on top.
+    /// The monocle params effective for `space` (#17); see
+    /// `resolvedScrolling`.
     public func resolvedMonocle(
         for space: SpaceID
     ) -> MonocleParams {
-        monocle.override[space]?.resolved(onto: monocle) ?? monocle
+        (monocle.override[space] ?? MonocleOverride())
+            .resolved(onto: monocle)
     }
 
     // MARK: - Per-space writes (interactive resize)
