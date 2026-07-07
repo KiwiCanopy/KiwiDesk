@@ -121,7 +121,15 @@ extension KiwiCore {
             }
             switch lua.makeFunction(body: binding.lua) {
             case .success(let ref):
-                comboRefs[combo] = ref
+                // Duplicate combo within one mode: last wins;
+                // release the displaced ref or it would orphan
+                // a registry slot until the next reload.
+                if let old = comboRefs.updateValue(
+                    ref,
+                    forKey: combo
+                ) {
+                    lua.release(ref: old)
+                }
             case .failure(let err):
                 onLog(
                     "structured: bind skipped "
