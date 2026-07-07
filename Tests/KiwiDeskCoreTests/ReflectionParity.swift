@@ -116,12 +116,24 @@ func expectRoundTrips<T: Codable & Equatable>(
 /// (which leaves that field at the base value) goes red. `covered`
 /// is the override's own field-name set; the caller resolves an
 /// all-set override onto a `base` whose covered fields all differ.
+///
+/// A covered field absent from `resolved` would be silently
+/// skipped by the loop, so we first assert `covered` is a subset
+/// of the resolved fields — that keeps this net self-contained
+/// (a rename on the override side goes red here, not only in the
+/// sibling `fieldParity` test).
 func expectResolvesEveryField<P>(
     resolved: P,
     base: P,
     covered: Set<String>,
     sourceLocation: SourceLocation = #_sourceLocation
 ) {
+    let missing = covered.subtracting(fieldNames(resolved))
+    #expect(
+        missing.isEmpty,
+        "covered fields missing from resolved: \(missing)",
+        sourceLocation: sourceLocation
+    )
     let baseValues = fieldValues(base)
     for (field, value) in fieldValues(resolved)
     where covered.contains(field) {
