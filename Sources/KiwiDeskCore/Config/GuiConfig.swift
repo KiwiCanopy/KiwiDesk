@@ -53,10 +53,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
 
     /// Renames a space everywhere it is referenced (#13): the
     /// `spaces` list, `spaceModes`, `appRules`, the monitor pin
-    /// and Main-role maps, the fallback-space reference, the
-    /// per-space `settings.gapsOverride` /
-    /// `settings.placementOverride` / `settings.spaceIcons`
-    /// maps, and the space-targeting Lua inside every
+    /// and Main-role maps, the fallback-space reference, every
+    /// per-space settings map (`TilingSettings.renameSpace` —
+    /// gaps, placement, icons, layout overrides), and the
+    /// space-targeting Lua inside every
     /// keybinding. A no-op returning `false` when `from` is
     /// unknown or `to` already exists (the caller keeps the old
     /// name); renaming to the same id succeeds trivially.
@@ -88,21 +88,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             mainSpaces.insert(to)
         }
         if fallbackSpace == from { fallbackSpace = to }
-        if let gaps = settings.gapsOverride.removeValue(
-            forKey: from
-        ) {
-            settings.gapsOverride[to] = gaps
-        }
-        if let placement = settings.placementOverride
-            .removeValue(forKey: from)
-        {
-            settings.placementOverride[to] = placement
-        }
-        if let icon = settings.spaceIcons.removeValue(
-            forKey: from
-        ) {
-            settings.spaceIcons[to] = icon
-        }
+        settings.renameSpace(from: from, to: to)
         for (app, space) in appRules where space == from {
             appRules[app] = to
         }

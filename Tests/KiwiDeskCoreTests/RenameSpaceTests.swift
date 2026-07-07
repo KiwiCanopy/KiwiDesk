@@ -83,6 +83,34 @@ struct RenameSpaceTests {
         )
     }
 
+    @Test("rename migrates per-layout overrides (#17)")
+    func migratesLayoutOverrides() {
+        var config = GuiConfig()
+        config.spaces = [SpaceID("a"), SpaceID("b")]
+        var bsp = BspOverride()
+        bsp.splitRatio = 0.3
+        config.settings.bsp.override[SpaceID("a")] = bsp
+        var grid = GridOverride()
+        grid.columns = 4
+        config.settings.grid.override[SpaceID("a")] = grid
+        let ok = config.renameSpace(
+            from: SpaceID("a"),
+            to: SpaceID("c")
+        )
+        #expect(ok)
+        #expect(
+            config.settings.bsp.override[SpaceID("c")]?
+                .splitRatio == 0.3
+        )
+        #expect(
+            config.settings.grid.override[SpaceID("c")]?
+                .columns == 4
+        )
+        #expect(
+            config.settings.bsp.override[SpaceID("a")] == nil
+        )
+    }
+
     @Test("rename migrates per-space gap and placement overrides")
     func migratesOverrides() {
         var config = richConfig()
