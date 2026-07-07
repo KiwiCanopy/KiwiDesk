@@ -41,5 +41,14 @@ let package = Package(
             dependencies: ["KiwiDeskCore"],
             path: "Tests/KiwiDeskCoreTests"
         ),
+        // GUI model tests (#64): SwiftPM ≥5.5 lets a test
+        // target depend on an executable target, so the
+        // dashboard's view-model state machine is testable
+        // without splitting the GUI into a library.
+        .testTarget(
+            name: "KiwiDeskGuiTests",
+            dependencies: ["KiwiDesk", "KiwiDeskCore"],
+            path: "Tests/KiwiDeskGuiTests"
+        ),
     ]
 )

@@ -100,22 +100,10 @@ extension SettingsModel {
 
     // MARK: - Editing a stored profile (#18)
 
-    /// Switches the dashboard's edit target. Passing `nil` (or the
-    /// active profile's own name) returns to live editing; any
-    /// other saved profile enters edit-without-activating mode.
-    /// Pending edits are discarded on switch — the caller confirms
-    /// first.
-    func selectEditTarget(_ name: String?) {
-        // Selecting the currently-loaded profile is just editing
-        // live: it is the same data, on the live save path.
-        let target = (name == activeProfile) ? nil : name
-        guard target != editingProfile else { return }
-        editingProfile = target
-        reload()
-    }
-
-    // `saveEditedProfile` / `saveEditedProfileCopy` live with
-    // the rest of the stored-profile editing surface in
+    // `selectEditTarget` lives with the edit-mode state machine
+    // in `SettingsModel+EditTarget.swift` (#64);
+    // `saveEditedProfile` / `saveEditedProfileCopy` with the
+    // rest of the stored-profile editing surface in
     // `SettingsModel+ProfileOverrides.swift`.
 
     func loadProfile(named name: String) {

@@ -2,46 +2,11 @@ import Foundation
 import KiwiDeskCore
 
 /// The stored-profile editing surface of the dashboard model
-/// (#18, #55 phase 7): the edit-mode reload path and the
+/// (#18, #55 phase 7): the non-adopting save actions and the
 /// Shortcuts tab's override-mode baseline/affordance helpers.
+/// The edit-mode reload path lives in
+/// `SettingsModel+EditTarget.swift` (#64).
 extension SettingsModel {
-    /// Reload path for the profile-dropdown edit mode (#18):
-    /// seed the tabs from a stored profile's JSON instead of
-    /// live state. A profile that has vanished falls back to
-    /// live editing. Stored-profile edits never touch the raw
-    /// Lua editor or the global sidecar — only the profile
-    /// JSON is written — so `savedSidecar` is cleared.
-    func reloadEditingProfile(_ name: String) {
-        guard var loaded = try? core.loadGuiConfig(editing: name)
-        else {
-            editingProfile = nil
-            reload()
-            return
-        }
-        suppressDirty = true
-        KeybindingImportClassifier.classify(&loaded)
-        config = loaded
-        suppressDirty = false
-        // Diff baseline for the override-mode Shortcuts tab
-        // (#55 phase 7): the same base the seed resolved onto
-        // (ONE definition, `KiwiCore.baseKeyModes`) — never
-        // the resolved set the tabs edit.
-        profileEditingBaseModes = core.baseKeyModes()
-        // Stored-profile editing is mutually exclusive with the
-        // raw Lua editor — leaving it on would let a global
-        // init.lua write escape edit mode.
-        forcedLuaEditor = false
-        hasCustomLua = false
-        showLuaEditor = false
-        savedSidecar = nil
-        let live = displays.map(\.fingerprint)
-        placementEditable =
-            (try? core.profiles.read(name: name))?
-            .set(matching: live) != nil
-        refreshProfiles()
-        isDirty = false
-    }
-
     /// Save copy as… (#82): duplicates the edited stored
     /// profile under `requested` — including the pending
     /// edit-session changes — and makes the copy the new edit
@@ -65,7 +30,7 @@ extension SettingsModel {
             // never equal `activeProfile`, and the direct
             // assignment safely skips `selectEditTarget`'s
             // this-is-live-editing normalization.
-            editingProfile = created
+            target = .storedProfile(created)
             reload()
         } catch {
             profileWarning = "Copying failed: \(error)"
