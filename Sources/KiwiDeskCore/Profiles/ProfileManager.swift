@@ -11,6 +11,18 @@ public enum ProfileMatch: Equatable {
     case none
 }
 
+/// Thrown for profile names that cannot become file names.
+public enum ProfileError: Error, CustomStringConvertible {
+    case invalidName(String)
+
+    public var description: String {
+        switch self {
+        case .invalidName(let name):
+            return "invalid profile name: '\(name)'"
+        }
+    }
+}
+
 /// Persists profiles and picks the right one when the monitor
 /// setup changes.
 @MainActor
@@ -90,7 +102,9 @@ public final class ProfileManager {
     /// reverts the count to the built-in Standard.
     public func delete(name: String) throws {
         let deleted = try? read(name: name)
-        try FileManager.default.removeItem(at: url(for: name))
+        try FileManager.default.removeItem(
+            at: url(for: validated(name))
+        )
         if currentName == name {
             currentName = nil
             isDirty = true
@@ -134,10 +148,36 @@ public final class ProfileManager {
 
     /// Reads a profile without touching current/dirty state.
     public func read(name: String) throws -> Profile {
-        let data = try Data(contentsOf: url(for: name))
+        let data = try Data(
+            contentsOf: url(for: validated(name))
+        )
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         return try decoder.decode(Profile.self, from: data)
+    }
+
+    /// Names become file names inside the profiles directory:
+    /// path separators, traversal, hidden-file prefixes, and
+    /// blank names are rejected at this boundary — every caller
+    /// (CLI, Lua, IPC, GUI) funnels through here.
+    public static func isValidName(_ name: String) -> Bool {
+        let trimmed = name.trimmingCharacters(
+            in: .whitespacesAndNewlines
+        )
+        return !trimmed.isEmpty
+            && !name.contains("/")
+            && !name.contains("\0")
+            && !name.hasPrefix(".")
+    }
+
+    /// The name, or `ProfileError.invalidName`.
+    private func validated(
+        _ name: String
+    ) throws -> String {
+        guard Self.isValidName(name) else {
+            throw ProfileError.invalidName(name)
+        }
+        return name
     }
 
     // MARK: - Monitor matching
@@ -203,6 +243,7 @@ public final class ProfileManager {
     }
 
     private func write(_ profile: Profile) throws {
+        let name = try validated(profile.name)
         try FileManager.default.createDirectory(
             at: directory,
             withIntermediateDirectories: true
@@ -214,7 +255,7 @@ public final class ProfileManager {
         // Human-readable timestamps in the profile files.
         encoder.dateEncodingStrategy = .iso8601
         try encoder.encode(profile).write(
-            to: url(for: profile.name),
+            to: url(for: name),
             options: .atomic
         )
     }
