@@ -232,6 +232,33 @@ struct ExecTests {
         #expect(core.exec.runningCount == 0)
     }
 
+    @Test("Timeout with an early-exiting child reaps once")
+    func timeoutChildExitsFirst() async throws {
+        let core = makeCore()
+        let lua = try #require(core.lua)
+        // The child exits immediately; the 5s watchdog must
+        // not fire (the normal reap cancels it) and the
+        // callback must run exactly once with the real code.
+        let script = """
+            _calls = 0
+            KiwiDesk.exec("true",
+                function(code, out, err)
+                    _calls = _calls + 1
+                    _code = code
+                end, 5)
+            """
+        #expect(lua.run(script).succeeded)
+        let code = try await awaitGlobal(lua, "_code", timeout: 5)
+        #expect(code == .number(0))
+        // Reaped promptly; the pending watchdog was cancelled.
+        let deadline = Date().addingTimeInterval(2)
+        while core.exec.runningCount > 0, Date() < deadline {
+            try await Task.sleep(nanoseconds: 20_000_000)
+        }
+        #expect(core.exec.runningCount == 0)
+        #expect(lua.global("_calls") == .number(1))
+    }
+
     @Test("get_state includes exec_running count")
     func getStateExecRunning() async throws {
         let core = makeCore()
@@ -262,6 +289,30 @@ struct ExecTests {
         }
         for name in APIReference.luaOnly {
             #expect(names.contains(.string(name)))
+        }
+    }
+
+    @Test("Every luaOnly name is a real KiwiDesk function")
+    func luaOnlyNamesAreRegistered() throws {
+        let core = makeCore()
+        let lua = try #require(core.lua)
+        // Drives off APIReference.luaOnly so the list can't
+        // name a function that was never registered (or drift
+        // out of sync with the real Lua surface) — the parity
+        // guard the reflection net can't provide here.
+        let checks = APIReference.luaOnly
+            .map { "type(KiwiDesk.\($0)) == 'function'" }
+            .joined(separator: "\n    and ")
+        #expect(lua.run("_ok = (\(checks))").succeeded)
+        #expect(lua.global("_ok") == .bool(true))
+    }
+
+    @Test("did-you-mean never suggests a Lua-only command")
+    func suggestionExcludesLuaOnly() {
+        // The unknown-command path is reached over the socket
+        // too, where a Lua-only name is a dead-end hint (#37).
+        for name in APIReference.luaOnly {
+            #expect(APIReference.suggestion(for: name + "x") != name)
         }
     }
 }

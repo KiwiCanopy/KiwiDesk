@@ -178,11 +178,13 @@ public enum APIReference {
         "exec", "bind", "on", "define_mode", "switch_mode",
     ]
 
-    /// Every command name visible in `help()` and
-    /// did-you-mean, sorted. Includes dispatcher commands,
-    /// namespace sub-commands, `subscribe`, and Lua-only
-    /// entry points.
-    public static var allCommands: [String] {
+    /// Command names reachable through the dispatcher (and thus
+    /// the CLI/IPC socket): dispatcher verbs, namespace
+    /// sub-commands, and `subscribe`. This is the did-you-mean
+    /// set — a typo hint must never point at a command the
+    /// caller's channel cannot invoke, so the Lua-only entry
+    /// points are deliberately excluded here (issue #37).
+    public static var dispatchable: [String] {
         var names = Set(commands.map(\.command))
         for (table, functions) in namespaces {
             for function in functions {
@@ -190,16 +192,26 @@ public enum APIReference {
             }
         }
         names.insert("subscribe")
-        names.formUnion(luaOnly)
         return names.sorted()
     }
 
-    /// A close known command for a typo, if any.
+    /// Every command name shown by `help()` / `list_commands`,
+    /// sorted — the full Lua-visible surface: everything
+    /// dispatchable plus the Lua-only entry points that bypass
+    /// the dispatcher (`exec`, `bind`, …).
+    public static var allCommands: [String] {
+        Set(dispatchable).union(luaOnly).sorted()
+    }
+
+    /// A close known command for a typo, if any. Suggests only
+    /// dispatchable names — the unknown-command path is reached
+    /// from the CLI/IPC socket too, where a Lua-only name would
+    /// be a dead-end hint.
     public static func suggestion(
         for unknown: String
     ) -> String? {
         var best: (name: String, distance: Int)?
-        for name in allCommands {
+        for name in dispatchable {
             let distance = editDistance(unknown, name)
             let limit = max(2, unknown.count / 3)
             guard distance <= limit else { continue }

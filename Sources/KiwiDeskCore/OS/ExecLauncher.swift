@@ -16,11 +16,15 @@ import os
 /// open can only delay its own callback, never stall the app.
 ///
 /// **Child quit policy:** children are fire-and-forget.
-/// `KiwiCore.stop()` does not terminate or wait for them;
-/// they are re-parented to launchd and finish naturally.
-/// This is intentional — hooks like `sketchybar --notify`
-/// should complete even after KiwiDesk exits. Use the optional
-/// `timeout` parameter for per-command control.
+/// `KiwiCore.stop()` neither terminates nor waits for them —
+/// they re-parent to launchd and finish on their own. This is
+/// intentional: hooks like `sketchybar --notify` should
+/// complete even as KiwiDesk quits. Note `stop()` also runs
+/// mid-session on an AX-permission revoke (after which
+/// `start()` may reuse this same launcher), so it calls
+/// `cancelWatchdogs()` — a `timeout` armed before the stop must
+/// not SIGTERM a child once management has torn down. Use the
+/// optional `timeout` parameter for per-command control.
 ///
 /// The launcher knows nothing about Lua: callers bind their
 /// own callback lifetime into `onExit` (see
@@ -36,15 +40,18 @@ public final class ExecLauncher {
         NSLog("KiwiDesk: %@", message)
     }
 
-    /// Children we have launched and not yet reaped, keyed
-    /// by object identity (pids can be recycled). Process
-    /// objects must stay alive until termination or their
-    /// handlers never fire.
-    private var running: [ObjectIdentifier: Process] = [:]
+    /// A launched child and its optional timeout watchdog, kept
+    /// together so the two can never desync — one table, one
+    /// count. The `Process` must stay alive until termination or
+    /// its handlers never fire.
+    private struct Child {
+        let process: Process
+        var watchdog: Task<Void, Never>?
+    }
 
-    /// Per-child watchdog tasks, one per `timeout`-carrying
-    /// call. Cancelled when the child exits normally.
-    private var watchdogs: [ObjectIdentifier: Task<Void, Never>] = [:]
+    /// Children we have launched and not yet reaped, keyed by
+    /// object identity (pids can be recycled).
+    private var running: [ObjectIdentifier: Child] = [:]
 
     public init() {}
 
@@ -123,28 +130,85 @@ public final class ExecLauncher {
             return nil
         }
 
-        running[key] = process
+        running[key] = Child(process: process)
         capture?.drain()
 
         if let timeout {
-            watchdogs[key] = Task {
-                @MainActor [weak self] in
-                let ns = UInt64(
-                    max(0, timeout) * 1_000_000_000
-                )
-                try? await Task.sleep(nanoseconds: ns)
-                guard !Task.isCancelled else { return }
-                guard let self,
-                    self.running[key] != nil
-                else { return }
-                self.running[key]?.terminate()
-                self.onLog(
-                    "exec: '\(command)' timed out "
-                        + "after \(timeout)s"
-                )
-            }
+            running[key]?.watchdog = makeWatchdog(
+                key: key,
+                command: command,
+                timeout: timeout,
+                capture: capture,
+                onExit: onExit
+            )
         }
         return process.processIdentifier
+    }
+
+    /// Grace after SIGTERM for the normal EOF-driven reap to
+    /// land before the watchdog force-reaps (seconds).
+    private static let reapGrace: TimeInterval = 2
+
+    /// Builds a timeout watchdog: SIGTERM at `timeout`, then a
+    /// short grace for the normal EOF-driven reap to land. If the
+    /// child is still un-reaped after that — e.g. it left a
+    /// grandchild holding the output pipe open, so EOF never
+    /// arrives — force-reap with whatever was captured, so the
+    /// bookkeeping entry and any Lua callback ref are released
+    /// instead of leaking (#37 review).
+    private func makeWatchdog(
+        key: ObjectIdentifier,
+        command: String,
+        timeout: TimeInterval,
+        capture: OutputCapture?,
+        onExit: ExitHandler?
+    ) -> Task<Void, Never> {
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(
+                nanoseconds: Self.nanos(timeout)
+            )
+            guard !Task.isCancelled, let self,
+                self.running[key] != nil
+            else { return }
+            self.running[key]?.process.terminate()
+            self.onLog(
+                "exec: '\(command)' timed out after "
+                    + "\(timeout)s"
+            )
+            try? await Task.sleep(
+                nanoseconds: Self.nanos(Self.reapGrace)
+            )
+            guard !Task.isCancelled,
+                self.running[key] != nil
+            else { return }
+            let (out, err) = capture?.snapshot() ?? ("", "")
+            self.reap(
+                key: key,
+                code: 128 + SIGTERM,
+                onExit: onExit,
+                stdout: out,
+                stderr: err
+            )
+        }
+    }
+
+    private static func nanos(
+        _ seconds: TimeInterval
+    ) -> UInt64 {
+        UInt64(max(0, seconds) * 1_000_000_000)
+    }
+
+    /// Cancels outstanding timeout watchdogs without disturbing
+    /// the children. Called from `KiwiCore.stop()`: a `timeout`
+    /// armed before a mid-session stop (AX-permission revoke,
+    /// which may `start()` again on this same launcher) must not
+    /// SIGTERM or force-reap a child after teardown. Children
+    /// stay fire-and-forget.
+    func cancelWatchdogs() {
+        for key in running.keys {
+            running[key]?.watchdog?.cancel()
+            running[key]?.watchdog = nil
+        }
     }
 
     private func reap(
@@ -154,8 +218,14 @@ public final class ExecLauncher {
         stdout: String,
         stderr: String
     ) {
-        watchdogs[key]?.cancel()
-        watchdogs[key] = nil
+        // Idempotent: the normal EOF path and the timeout
+        // force-reap can both target the same child. Whichever
+        // runs first wins; the other finds no entry and is a
+        // no-op — so `onExit` (which releases the Lua ref) fires
+        // exactly once. Both run on the main actor, so the
+        // check-and-clear can't interleave.
+        guard let child = running[key] else { return }
+        child.watchdog?.cancel()
         running[key] = nil
         onExit?(code, stdout, stderr)
     }
@@ -176,107 +246,5 @@ public final class ExecLauncher {
         }
         env["PATH"] = parts.joined(separator: ":")
         return env
-    }
-}
-
-/// Drains a child's stdout and stderr via `readabilityHandler`
-/// and reports both, off the main thread, once both streams hit
-/// EOF. No thread is ever blocked waiting for a pipe; GCD calls
-/// the handler as data arrives.
-///
-/// Each stream is capped at `streamCap` bytes: data beyond the
-/// cap is still read (keeping the pipe drained so the child can
-/// keep writing without blocking) but discarded after the
-/// truncation marker is appended.
-private final class OutputCapture: Sendable {
-    /// Maximum bytes captured per stream (~1 MB).
-    static let streamCap = 1_048_576
-    /// Appended once when a stream's cap is reached.
-    static let truncMark = Data(
-        "\n[output truncated at 1 MB]\n".utf8
-    )
-
-    private let out: Pipe
-    private let err: Pipe
-    private let group = DispatchGroup()
-    private let outBuf = OSAllocatedUnfairLock(
-        initialState: (data: Data(), capped: false)
-    )
-    private let errBuf = OSAllocatedUnfairLock(
-        initialState: (data: Data(), capped: false)
-    )
-
-    init(_ out: Pipe, _ err: Pipe) {
-        self.out = out
-        self.err = err
-        // Enter for both streams up front: the termination
-        // handler can fire before drain() runs on the main
-        // actor, and an empty group would notify immediately
-        // with empty output.
-        group.enter()
-        group.enter()
-    }
-
-    /// Starts both reads; must be called exactly once.
-    func drain() {
-        attach(out.fileHandleForReading, to: outBuf)
-        attach(err.fileHandleForReading, to: errBuf)
-    }
-
-    private func attach(
-        _ handle: FileHandle,
-        to buf: OSAllocatedUnfairLock<
-            (
-                data: Data, capped: Bool
-            )
-        >
-    ) {
-        handle.readabilityHandler = { [group, buf] fh in
-            let chunk = fh.availableData
-            if chunk.isEmpty {
-                // EOF: all write ends of the pipe are closed.
-                fh.readabilityHandler = nil
-                group.leave()
-                return
-            }
-            buf.withLock { state in
-                guard !state.capped else { return }
-                let cap = OutputCapture.streamCap
-                let space = cap - state.data.count
-                if chunk.count <= space {
-                    state.data.append(chunk)
-                } else {
-                    if space > 0 {
-                        state.data.append(
-                            chunk.prefix(space)
-                        )
-                    }
-                    state.data.append(
-                        OutputCapture.truncMark
-                    )
-                    state.capped = true
-                }
-            }
-        }
-    }
-
-    /// Calls `handler` (on a background queue) once both
-    /// streams have hit EOF.
-    func onComplete(
-        _ handler:
-            @escaping @Sendable (
-                String, String
-            ) -> Void
-    ) {
-        group.notify(
-            queue: .global(qos: .utility)
-        ) { [outBuf, errBuf] in
-            let outData = outBuf.withLock { $0.data }
-            let errData = errBuf.withLock { $0.data }
-            handler(
-                String(decoding: outData, as: UTF8.self),
-                String(decoding: errData, as: UTF8.self)
-            )
-        }
     }
 }

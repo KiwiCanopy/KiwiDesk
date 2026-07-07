@@ -808,7 +808,9 @@ therefore always run in the background.
 
 - `timeout` — an optional number of seconds. If given and the
   command has not exited by then, it receives SIGTERM and the
-  callback is still invoked with the termination code.
+  callback is still invoked with the termination code — even if
+  the child left a grandchild holding its output pipe open, in
+  which case the callback fires with whatever was captured.
 
 **Does:** starts the command in the background and returns
 immediately — KiwiDesk never waits for it. Returns the
@@ -900,6 +902,10 @@ layout. It is stubbed out to prevent accidental or malicious
 instant app termination. If you want to restart KiwiDesk use
 `KiwiDesk service restart` from a terminal or a keybinding
 via `KiwiDesk.exec`.
+
+Note that, unlike real `os.exit`, the stub **returns** — code
+after the call keeps running. Don't rely on `os.exit()` to
+halt a script; use an explicit `return` or `if/else`.
 
 ## Profiles & Monitors
 

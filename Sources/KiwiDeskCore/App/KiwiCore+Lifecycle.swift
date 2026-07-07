@@ -74,7 +74,11 @@ extension KiwiCore {
         // terminate or wait for them. They are re-parented to
         // launchd and finish naturally after the app exits.
         // Per-command control is available via the optional
-        // timeout argument to KiwiDesk.exec().
+        // timeout argument to KiwiDesk.exec(). stop() also runs
+        // mid-session on an AX-permission revoke, so cancel any
+        // armed timeout watchdogs — they must not SIGTERM a
+        // child after teardown (a start() may reuse the launcher).
+        exec.cancelWatchdogs()
         pendingFocusFollow?.cancel()
         pendingStartupSweep?.cancel()
         pendingSpaceSettle?.cancel()
