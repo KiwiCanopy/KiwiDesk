@@ -103,6 +103,39 @@ public final class LuaInterpreter {
         return protectedCall(state, argc: 0)
     }
 
+    /// Compiles `body` as a Lua function body and captures the
+    /// result as a registry reference callable via `call(ref:)`.
+    ///
+    /// The body is wrapped as `return function()\n<body>\nend`
+    /// before loading. The returned ref is VM-specific: deliver
+    /// only to `call(ref:)` on this interpreter (AGENTS.md §5).
+    /// Release with `release(ref:)` when done (e.g. in
+    /// `KeybindingManager.reset()`). Returns an error when
+    /// compilation fails — caller logs and skips, matching the
+    /// per-binding failure policy in `KeybindingManager.fire`.
+    @discardableResult
+    public func makeFunction(
+        body: String
+    ) -> Result<Int32, LuaError> {
+        guard let state else {
+            return .failure(.initializationFailed)
+        }
+        let src = "return function()\n\(body)\nend"
+        guard luaL_loadstring(state, src) == SHIM_LUA_OK else {
+            return .failure(.runtime(popError(state)))
+        }
+        // Execute the load chunk: the chunk body is
+        // `return function()…end`, so no user code runs
+        // here. 1 result (the compiled function).
+        guard shim_lua_pcall(state, 0, 1, 0) == SHIM_LUA_OK
+        else {
+            return .failure(.runtime(popError(state)))
+        }
+        // The function sits on the stack top; pop + intern.
+        let ref = luaL_ref(state, SHIM_LUA_REGISTRYINDEX)
+        return .success(ref)
+    }
+
     /// Calls a Lua function previously captured as a registry
     /// reference (`LuaValue.functionRef`).
     @discardableResult
