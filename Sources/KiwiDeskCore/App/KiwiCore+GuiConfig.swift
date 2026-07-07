@@ -88,9 +88,17 @@ extension KiwiCore {
             }
         }
         config.spaceModes = modes
-        config.spaces = GuiConfig.orderedSpaces(
-            config.spaces + live
-        )
+        // Live state is authoritative for which spaces exist: a
+        // profile load prunes stale spaces from it, and every
+        // `persist` re-ensures the edited spaces into live, so the
+        // tab must not resurrect pruned spaces from the (still-
+        // stale) sidecar `spaces`. Edge (accepted, pre-release):
+        // a bare space that lives *only* in `gui.json` — no mode,
+        // pin, window, or active profile — isn't seeded into live
+        // at cold boot (`loadConfig` doesn't), so it drops on the
+        // next reload. Closing that means reconciling the sidecar
+        // space list against live (#77; config-cascade #55/#75).
+        config.spaces = GuiConfig.orderedSpaces(live)
         config.spacePins = spacePins
         config.mainSpaces = mainSpaces
     }

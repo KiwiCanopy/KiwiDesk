@@ -803,6 +803,18 @@ tiling API — `set_gap_global`, `bsp.set_ratio`, … — remains
 valid in hand-written configs and acts as base state *before*
 a profile loads; the GUI no longer writes those calls.)
 
+**Switching profiles reconciles your spaces.** Explicitly
+loading a profile makes its space set authoritative: a space
+is matched to the new profile **by name** (not position), so a
+window in a space whose name also exists in the new profile
+stays put — regardless of any layout difference. A space whose
+name the new profile doesn't define is dropped, and any windows
+it held are forwarded to the **first space** of the new profile
+(the first in the Spaces-tab list) so nothing is lost. This
+reconcile happens only on an explicit `load_profile`; automatic
+applies on a monitor change or a native-Space binding leave
+your spaces untouched.
+
 A profile covers one or more concrete **monitor sets** — each
 a list of monitor fingerprints plus the space→monitor pins
 valid for that arrangement. Updating a profile while a new
