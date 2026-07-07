@@ -79,6 +79,29 @@ struct LuaMakeFunctionTests {
         lua.release(ref: ref)
     }
 
+    // MARK: - Wrapper escape (watchdog)
+
+    /// A crafted body can escape the `return function()…end`
+    /// wrapper and execute code during the compile pcall. That
+    /// pcall runs under the watchdog deadline, so an escaped
+    /// infinite loop must come back as a bounded failure —
+    /// never a main-thread freeze.
+    @Test("Wrapper-escaping body is watchdog-bounded")
+    func escapedBodyIsBounded() throws {
+        let lua = try #require(LuaInterpreter())
+        lua.timeout = 0.05
+        let body =
+            "end, (function() while true do end end)(), "
+            + "function()"
+        let result = lua.makeFunction(body: body)
+        guard case .failure = result else {
+            Issue.record("escape must be stopped, not succeed")
+            return
+        }
+        // VM survives the timeout.
+        #expect(lua.run("ok = 1").succeeded)
+    }
+
     // MARK: - Ref lifecycle (VM-safety, AGENTS.md §5)
 
     @Test("Ref from makeFunction is released without leak")

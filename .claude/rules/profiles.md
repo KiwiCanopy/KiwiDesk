@@ -12,6 +12,8 @@ as a checklist (rationale is in §5, not restated here):
 
 - Profiles own **tiling only** — a new profile-serialized setting
   goes *inside* `TilingSettings` (the `gap.override` precedent).
+  One designed exception (#55): the sparse keybinding override in
+  `Profile.modes` — the only non-tiling field; never add another.
 - `ProfileManager` mutators are `internal`; go through a `KiwiCore`
   facade. `read(name:)` loads for edit; `save()` **adopts** — an
   edit-without-activating path is a separate, non-adopting write.

@@ -110,10 +110,11 @@ public final class LuaInterpreter {
     /// before loading. The returned ref is VM-specific: deliver
     /// only to `call(ref:)` on this interpreter (AGENTS.md §5).
     /// Release with `release(ref:)` when done (e.g. in
-    /// `KeybindingManager.reset()`). Returns an error when
-    /// compilation fails — caller logs and skips, matching the
-    /// per-binding failure policy in `KeybindingManager.fire`.
-    @discardableResult
+    /// `KeybindingManager.reset()`) — a discarded `.success`
+    /// would orphan a registry slot, so the result is not
+    /// discardable. Returns an error when compilation fails —
+    /// caller logs and skips, matching the per-binding failure
+    /// policy in `KeybindingManager.fire`.
     public func makeFunction(
         body: String
     ) -> Result<Int32, LuaError> {
@@ -124,9 +125,16 @@ public final class LuaInterpreter {
         guard luaL_loadstring(state, src) == SHIM_LUA_OK else {
             return .failure(.runtime(popError(state)))
         }
-        // Execute the load chunk: the chunk body is
-        // `return function()…end`, so no user code runs
-        // here. 1 result (the compiled function).
+        // Run the load chunk to produce the function value
+        // (1 result). A crafted body can ESCAPE the wrapper
+        // (`end, (…)(), function()`) and execute code during
+        // this pcall, so it runs under the same watchdog
+        // deadline as every other VM entry.
+        shim_set_deadline(
+            state,
+            shim_monotonic_now() + timeout
+        )
+        defer { shim_set_deadline(state, 0) }
         guard shim_lua_pcall(state, 0, 1, 0) == SHIM_LUA_OK
         else {
             return .failure(.runtime(popError(state)))

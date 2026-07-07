@@ -28,6 +28,9 @@ extension KiwiCore {
         // directly from gui.json so the structured path wins
         // over the managed block (#55 phase 4). No-op when not
         // GUI-managed — applyConfigGlobals stays authoritative.
+        // Keybindings resolve against the profile active NOW;
+        // a profile applied later (e.g. applyNativeSpaceBinding
+        // below) re-registers in phase 6 (#55).
         applyStructuredConfig()
         retile()
         // Lua-declared tiling is only the base state: the

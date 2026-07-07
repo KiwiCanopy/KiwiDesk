@@ -137,6 +137,9 @@ struct KeyModeOverrideTests {
         // Unmentioned alt+j survives from base.
         let j = bindings.first { $0.combo == "alt+j" }
         #expect(j?.lua == "focus_down")
+        // In-place merge: base row order survives (the GUI
+        // renders resolved modes — rows must not jump).
+        #expect(bindings.map(\.combo) == ["alt+h", "alt+j"])
     }
 
     @Test("Override icon replaces base icon when non-nil")

@@ -32,12 +32,18 @@ public struct KeyModeOverride: Sendable, Equatable {
     ///
     /// Merge rule (O4 soft base layer):
     /// - For each override mode matching a base mode by `name`:
-    ///   per-combo merge (override wins; base combos not in
-    ///   override survive). Override `icon` wins when non-nil;
-    ///   otherwise the base icon is kept.
+    ///   per-combo merge (override wins IN PLACE, so the base
+    ///   row order survives for GUI rendering; base combos not
+    ///   in the override survive). Override `icon` wins when
+    ///   non-nil; otherwise the base icon is kept.
     /// - An override mode absent from `base` is appended.
     /// - Base modes not in the override pass through unchanged
     ///   (default mode and switch-key bindings always survive).
+    ///
+    /// Sibling keyed merge: `KeybindingMerge` (GUI shortcut
+    /// import) folds by the same name×combo key but with the
+    /// OPPOSITE icon precedence (existing-wins). Both are
+    /// correct for their direction — do not unify them.
     public func resolved(
         onto base: [KeyMode]
     ) -> [KeyMode] {
@@ -55,15 +61,20 @@ public struct KeyModeOverride: Sendable, Equatable {
                 result.append(baseMode)
                 continue
             }
-            // Merge bindings: drop base combos the override
-            // redefines, then append the override's bindings.
-            let overrideCombos = Set(
-                over.bindings.map(\.combo)
-            )
-            var merged = baseMode.bindings.filter {
-                !overrideCombos.contains($0.combo)
+            // Merge bindings in base order: an overridden
+            // combo replaces its base row in place (the GUI
+            // renders resolved modes — rows must not jump);
+            // combos new to the mode append at the end.
+            var merged = baseMode.bindings
+            for row in over.bindings {
+                if let at = merged.firstIndex(where: {
+                    $0.combo == row.combo
+                }) {
+                    merged[at] = row
+                } else {
+                    merged.append(row)
+                }
             }
-            merged.append(contentsOf: over.bindings)
             result.append(
                 KeyMode(
                     name: baseMode.name,

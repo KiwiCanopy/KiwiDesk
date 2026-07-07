@@ -6,6 +6,11 @@ import Foundation
 /// combo, so re-importing refreshes an existing shortcut instead
 /// of duplicating it. Pure and Core-typed, so the dedup logic the
 /// import depends on is unit-tested without the SwiftUI layer.
+///
+/// Sibling keyed merge: `KeyModeOverride.resolved(onto:)` (#55
+/// profile override) merges by the same name×combo key but with
+/// the OPPOSITE icon precedence (override-wins). Both are
+/// correct for their direction — do not unify them.
 public enum KeybindingMerge {
     /// Merges every recovered mode into `config` in place.
     public static func merge(

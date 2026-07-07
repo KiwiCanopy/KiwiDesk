@@ -79,11 +79,22 @@ extension KiwiCore {
         }
     }
 
-    /// The active profile's `KeyModeOverride`, if any.
+    /// The active profile's `KeyModeOverride`, if any. A
+    /// profile that exists but cannot be read degrades to the
+    /// base bindings — loudly, matching the corrupt-gui.json
+    /// policy above.
     private func activeProfileModes() -> KeyModeOverride? {
-        guard let name = profiles.currentName,
-            let profile = try? profiles.read(name: name)
-        else { return nil }
+        guard let name = profiles.currentName else {
+            return nil
+        }
+        guard let profile = try? profiles.read(name: name)
+        else {
+            onLog(
+                "structured: active profile '\(name)' "
+                    + "unreadable — base keybindings apply"
+            )
+            return nil
+        }
         return profile.modes
     }
 
