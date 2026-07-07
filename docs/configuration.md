@@ -179,6 +179,11 @@ layouts where windows can hide each other (**monocle**) or
 scroll off-screen (**scrolling**) — so you always see what's
 there. Click an item to focus its window; drag to reorder.
 
+With **multiple monitors** each display shows its own bar for
+the space currently on it, all at once — a bar-hosting space on
+a secondary display draws its bar there, not on the main
+screen. Dragging an item reorders that display's own space.
+
 Its look is **global**: set it once with `app_bar.set_*` and
 every layout's bar shares it. Each layout then decides only
 whether it shows a bar and, if it wants, **overrides** any

@@ -83,6 +83,37 @@ struct WorkspaceManagerTests {
         manager.removeDisplay(display.id)
         #expect(manager.display(of: "code") == nil)
     }
+
+    @Test("currentSpace prefers the active space on a display")
+    func currentSpaceActive() {
+        var manager = WorkspaceManager()
+        let main = DisplayID(1)
+        let side = DisplayID(2)
+        // "web" first on side, then two on main; "main2" active.
+        manager.assign("web", to: side)
+        manager.assign("main1", to: main)
+        manager.assign("main2", to: main)
+        manager.activate("main2")
+        // The active space wins on its own display; the other
+        // display shows its first-assigned space.
+        #expect(manager.currentSpace(on: main) == "main2")
+        #expect(manager.currentSpace(on: side) == "web")
+    }
+
+    @Test("currentSpace falls back to the first assigned space")
+    func currentSpaceFallback() {
+        var manager = WorkspaceManager()
+        let side = DisplayID(2)
+        manager.assign("a", to: side)
+        manager.assign("b", to: side)
+        // Active space lives on another (untracked) display, so
+        // the side display shows its first-assigned space.
+        manager.assign("elsewhere", to: DisplayID(9))
+        manager.activate("elsewhere")
+        #expect(manager.currentSpace(on: side) == "a")
+        // No space assigned → nil.
+        #expect(manager.currentSpace(on: DisplayID(3)) == nil)
+    }
 }
 
 @Suite("StateCoordinator")

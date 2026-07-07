@@ -150,4 +150,18 @@ public struct WorkspaceManager: Sendable {
     public func spaces(on display: DisplayID) -> [SpaceID] {
         order.filter { spaceDisplay[$0] == display }
     }
+
+    /// The space a display currently shows: the globally active
+    /// space when it is assigned to this display, otherwise the
+    /// first space assigned to it (creation order). Nil when no
+    /// space is assigned. Drives the per-display app bar (#16);
+    /// the composed layouts give each secondary display exactly
+    /// one space, so the first-assigned fallback is the visible
+    /// one there and the active space covers the main display.
+    public func currentSpace(on display: DisplayID) -> SpaceID? {
+        if let active = activeSpace, spaceDisplay[active] == display {
+            return active
+        }
+        return spaces(on: display).first
+    }
 }

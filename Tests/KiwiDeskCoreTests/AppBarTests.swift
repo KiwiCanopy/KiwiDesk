@@ -311,7 +311,7 @@ struct AppBarCommandTests {
                 )
             )
         }
-        core.moveBarItem(from: 0, to: 2)
+        core.moveBarItem(space: SpaceID(1), from: 0, to: 2)
         #expect(core.activeSpace?.windows == [w2, w3, w1])
     }
 
