@@ -144,8 +144,8 @@ struct SettingsFooter: View {
                 saveCopyButton
                 editProfileSaveButton
             } else {
-                updateButton
                 saveAsNewButton
+                updateButton
             }
         }
         .padding(.horizontal, 16)
@@ -213,6 +213,7 @@ struct SettingsFooter: View {
                 model.updateActiveProfile()
             }
             .keyboardShortcut("s")
+            .buttonStyle(.borderedProminent)
             .disabled(
                 !model.updateEnabled
                     || !(model.isDirty || model.profileDirty)
@@ -223,7 +224,6 @@ struct SettingsFooter: View {
 
     private var saveAsNewButton: some View {
         Button("Save as new…") { namingNewProfile = true }
-            .buttonStyle(.borderedProminent)
     }
 
     /// Stored-profile edit mode (#82): duplicate the edited
