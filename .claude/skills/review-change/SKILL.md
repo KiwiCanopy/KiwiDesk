@@ -1,20 +1,20 @@
 ---
-description: Run KiwiDesk's two-agent review workflow (code-reviewer + architect-reviewer) with the AGENTS.md §3.6 sequencing. Use on a finished, verified, committed change before opening a PR.
+description: Run KiwiDesk's two-agent review workflow (code-reviewer + architect-reviewer) with the AGENTS.md §3 (Review step) sequencing. Use on a finished, verified, committed change before opening a PR.
 argument-hint: "[optional: base ref, e.g. main or a commit/PR]"
 ---
 
-Run the review workflow from AGENTS.md §3.6 on the current change.
-Precondition: the change should already be finished, verified
-(`/verify-gate`), and committed. If it clearly is not, say so and
-stop.
+Run the review workflow from AGENTS.md §3 (the Review step) on the
+current change. Precondition: the change should already be
+finished, verified (`/verify-gate`), and committed. If it clearly
+is not, say so and stop.
 
 ## 1. Establish the diff
 
-Determine the review range from `$ARGUMENTS` if given, else the
-last review point: the branch's merge base with `main`, or the
-last reviewed commit / PR if there is one.
+Determine the review range from `$ARGUMENTS` if given (a base ref —
+the last reviewed commit or PR merge point), else the branch's
+merge base with `main`.
 
-!`git merge-base HEAD main 2>/dev/null && echo "--- diff stat vs merge-base ---" && git diff --stat $(git merge-base HEAD main)...HEAD 2>/dev/null`
+!`BASE="$ARGUMENTS"; BASE="${BASE:-$(git merge-base HEAD main)}"; echo "--- diff stat vs $BASE ---" && git diff --stat "$BASE"...HEAD 2>/dev/null`
 
 ## 2. First round — parallel
 

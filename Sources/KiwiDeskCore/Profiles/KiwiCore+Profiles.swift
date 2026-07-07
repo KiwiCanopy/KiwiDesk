@@ -145,6 +145,82 @@ extension KiwiCore {
         try profiles.save(existing)
     }
 
+    /// Writes the edited tiling from `config` into the stored
+    /// profile `name` **without adopting it** — no change to
+    /// `current`/`dirty`, no touch to live state. Edit-without-
+    /// activating for the dashboard's profile dropdown (#18).
+    ///
+    /// The live monitor set's pins are refreshed only when the
+    /// profile already covers the connected monitors; a profile
+    /// whose monitors aren't attached never gets them injected
+    /// (its Canvas is read-only in that case, so `spacePins` is
+    /// empty here anyway).
+    public func overwriteProfile(
+        named name: String,
+        with config: GuiConfig
+    ) throws {
+        var existing = try profiles.read(name: name)
+        existing.settings = config.settings
+        // Dense over the profile's own spaces (mirrors
+        // `buildProfile`): an undeclared space reads as bsp. The
+        // union with `spaceModes.keys` keeps a just-set mode even
+        // if its space hasn't landed in the list yet; `spaces` is
+        // profile-derived (see `overlayProfileState`), so no
+        // live-only space can leak in here.
+        var modes: [SpaceID: LayoutMode] = [:]
+        let declared = Set(config.spaces)
+            .union(config.spaceModes.keys)
+        for space in declared {
+            modes[space] = config.spaceModes[space] ?? .bsp
+        }
+        existing.spaceModes = modes
+        existing.mainSpaces = config.mainSpaces.sorted {
+            $0.raw < $1.raw
+        }
+        let live = state.workspaces.allDisplays
+            .map(\.fingerprint)
+        if existing.set(matching: live) != nil {
+            existing.upsert(
+                MonitorSet(
+                    monitors: live,
+                    spaceMonitorMap: config.spacePins
+                )
+            )
+        }
+        existing.savedAt = .now
+        try profiles.write(existing)
+    }
+
+    /// Whether `name` is the layout currently on screen — it is
+    /// the active profile, or a native Space bound to it is the
+    /// active one — so a non-adopting edit should hot-reload it
+    /// (#18).
+    public func isProfileInEffect(_ name: String) -> Bool {
+        if profiles.currentName == name { return true }
+        guard let active = NativeSpaces.activeSpaceNumber()
+        else { return false }
+        return nativeSpaceBindings[active] == name
+    }
+
+    /// Re-applies `name` to the live layout after an in-effect
+    /// edit. The active profile re-applies in place (no adopt);
+    /// a profile merely bound to the active native Space
+    /// re-resolves through the shared monitor-change path so the
+    /// binding picks up the freshly-written JSON (#18). That
+    /// bound path runs the normal resolver, which *adopts* the
+    /// bound profile (it is now the on-screen layout) — an
+    /// intended live-state change, unlike the in-place branch.
+    public func reapplyIfInEffect(_ name: String) {
+        guard isProfileInEffect(name) else { return }
+        if profiles.currentName == name,
+            let fresh = try? profiles.read(name: name)
+        {
+            apply(profile: fresh)
+        } else {
+            handleMonitorChange()
+        }
+    }
+
     /// Names of profiles (other than `name`) already claiming
     /// the live monitor set — the GUI warns before Update
     /// makes the set ambiguous (#36 overlap policy).

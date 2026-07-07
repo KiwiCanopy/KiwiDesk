@@ -29,6 +29,49 @@ extension KiwiCore {
         return config
     }
 
+    /// The editable model for **a stored profile**, not the live
+    /// one (#18): global fields come from the sidecar/live seed
+    /// exactly as `loadGuiConfig()`, but the profile-scoped
+    /// fields are overlaid from `name`'s JSON instead of live
+    /// state — so the dashboard can edit a saved profile without
+    /// switching the running layout. Throws if the profile is
+    /// unreadable (the caller falls back to live editing).
+    public func loadGuiConfig(
+        editing name: String
+    ) throws -> GuiConfig {
+        let profile = try profiles.read(name: name)
+        var config = guiConfigStore.load() ?? guiConfigSeed()
+        overlayProfileState(&config, from: profile)
+        return config
+    }
+
+    /// Copies a *stored* profile's tiling into the model —
+    /// sibling of `overlayLiveProfileState`, reading the profile
+    /// instead of live state. Pins come from the set covering the
+    /// connected monitors (empty when none matches, i.e. the
+    /// Canvas can't be edited for this profile right now).
+    private func overlayProfileState(
+        _ config: inout GuiConfig,
+        from profile: Profile
+    ) {
+        config.settings = profile.settings
+        config.spaceModes = profile.spaceModes
+        config.mainSpaces = Set(profile.mainSpaces)
+        let live = state.workspaces.allDisplays
+            .map(\.fingerprint)
+        config.spacePins =
+            profile.set(matching: live)?.spaceMonitorMap ?? [:]
+        // The space set is the profile's own — NOT unioned with
+        // the live sidecar's spaces, or editing a profile for
+        // other hardware would graft this machine's spaces into
+        // it on save (mirrors `applyProfileScopedState`, #18).
+        config.spaces = GuiConfig.orderedSpaces(
+            Array(profile.spaceModes.keys)
+                + profile.mainSpaces
+                + Array(config.spacePins.keys)
+        )
+    }
+
     /// Copies the live profile-scoped state into the model:
     /// tiling settings, per-space modes, monitor pins, and the
     /// Main role.

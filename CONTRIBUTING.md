@@ -36,12 +36,15 @@ The binding style and workflow rules live in
 ## Using AI Assistants
 
 AI coding assistants are **welcome and encouraged** here. Much of
-the repo is set up specifically to make them productive: the
-committed `.claude/` config (`AGENTS.md`, path-scoped `rules/`,
-`skills/`, and project-tailored review agents) teaches an assistant
-KiwiDesk's conventions so its output lands on-style instead of
-generic. If you use Claude Code or a similar tool, run
-`./scripts/install-subagents.sh` once to pull the review agents.
+the repo is set up specifically to make them productive:
+[AGENTS.md](AGENTS.md) at the repo root, plus the committed
+`.claude/rules/` (path-scoped conventions) and `.claude/skills/`
+(verify/review workflows), teach an assistant KiwiDesk's
+conventions so its output lands on-style instead of generic. The
+project-tailored review agents themselves are *not* committed —
+they are regenerated per-clone: run `./scripts/install-subagents.sh`
+once and it pulls the review agents, appending the committed
+`scripts/kiwidesk-review-context.md` tailoring to each.
 
 One rule, though: **understand what you submit.** A pull request is
 yours regardless of how it was written — know what your change does

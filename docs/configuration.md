@@ -880,6 +880,34 @@ Both also regenerate `init.lua`/`gui.json` when a global
 setting (keybindings, app/float rules, Space bindings)
 changed — a tiling-only edit touches only the profile JSON.
 
+### Editing a saved profile (not just the active one)
+
+The banner title is a **dropdown**. It defaults to the
+live/loaded config (marked *(currently loaded)*), but you can
+pick any saved profile and edit it **in place** — without
+switching the running layout. Selecting the loaded profile
+returns to normal live editing.
+
+Because a profile stores tiling only, editing a *non-loaded*
+one is scoped to what a profile actually holds: the
+**General**, **Spaces**, **App Bar**, and **Canvas** tabs.
+The **Shortcuts** and **App Rules** tabs are hidden — those
+are global, shared across every profile, not per-profile
+settings. The footer collapses to a single **Save to
+"\<profile\>"**.
+
+Saving writes only that profile's JSON. It hot-reloads the
+live layout **only if the profile you edited is the one on
+screen** (the loaded profile, or the profile bound to the
+active native Space); otherwise the change simply waits until
+the profile is next loaded. No global files are regenerated.
+
+The **Canvas** tab needs the profile's monitors attached to
+draw them, so when you edit a profile whose monitor setup
+isn't connected, Canvas shows a read-only note instead of the
+placement grid — the other tabs still edit that profile.
+Connect its monitors to arrange space placement.
+
 ### Native macOS Spaces (Mission Control)
 
 KiwiDesk's spaces above are *virtual* workspaces, independent

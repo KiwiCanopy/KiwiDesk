@@ -98,6 +98,38 @@ extension SettingsModel {
             || saved.spaces != config.spaces
     }
 
+    // MARK: - Editing a stored profile (#18)
+
+    /// Switches the dashboard's edit target. Passing `nil` (or the
+    /// active profile's own name) returns to live editing; any
+    /// other saved profile enters edit-without-activating mode.
+    /// Pending edits are discarded on switch — the caller confirms
+    /// first.
+    func selectEditTarget(_ name: String?) {
+        // Selecting the currently-loaded profile is just editing
+        // live: it is the same data, on the live save path.
+        let target = (name == activeProfile) ? nil : name
+        guard target != editingProfile else { return }
+        editingProfile = target
+        reload()
+    }
+
+    /// Writes the edited tiling into the stored profile without
+    /// switching the live layout, then hot-reloads it only if it
+    /// is the layout currently on screen (#18).
+    func saveEditedProfile() {
+        guard let name = editingProfile else { return }
+        do {
+            try core.overwriteProfile(named: name, with: config)
+        } catch {
+            profileWarning = "Saving failed: \(error)"
+            core.onLog("profile edit save failed: \(error)")
+            return
+        }
+        core.reapplyIfInEffect(name)
+        reload()
+    }
+
     func loadProfile(named name: String) {
         _ = core.execute(
             "load_profile",

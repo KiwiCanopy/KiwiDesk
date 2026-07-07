@@ -34,6 +34,16 @@ final class SettingsModel: ObservableObject {
     /// The live state diverged from the saved profile (e.g.
     /// after a monitor change) — the update prompt.
     @Published var profileDirty = false
+    /// A *stored* profile being edited via the banner dropdown,
+    /// or nil for the live/active config (#18). Editing a stored
+    /// profile seeds the tabs from its JSON and never switches
+    /// the running layout.
+    @Published var editingProfile: String?
+    /// Whether the Canvas (monitor placement) is editable for the
+    /// current target: always true live; for a stored profile
+    /// only when its monitor set is the one connected now (else
+    /// there is no live geometry to render — #18).
+    @Published var placementEditable = true
     @Published var profiles: [String] = []
     /// Rich rows for the saved-profiles list (#36): monitor
     /// sets, screen count, default flag, live match.
@@ -81,12 +91,24 @@ final class SettingsModel: ObservableObject {
     /// Whether the raw Lua editor is currently shown.
     var editingLua: Bool { forcedLuaEditor || showLuaEditor }
 
+    /// Whether the dashboard is editing a stored profile rather
+    /// than the live config (#18) — hides the global-only tabs
+    /// (Shortcuts, App Rules) and swaps the footer's save action.
+    var editingStoredProfile: Bool { editingProfile != nil }
+
     // MARK: - Sync with the backend
 
     /// Pulls the current configuration and profile state from
     /// the core into the view model (discards unsaved edits).
     func reload() {
+        if let name = editingProfile {
+            reloadEditingProfile(name)
+            return
+        }
         suppressDirty = true
+        // Only meaningful while editing a stored profile; reset it
+        // so a stale `false` never lingers into live editing.
+        placementEditable = true
         var loaded = core.loadGuiConfig()
         // Recovered rows arrive as `.custom`; sort the ones that
         // match a catalog action into their sections before the
@@ -110,6 +132,37 @@ final class SettingsModel: ObservableObject {
         // the overlaid spaces union, and deleting + re-adding
         // a transient space alone doesn't read as an edit.
         savedSidecar = core.isGuiManaged ? config : nil
+        refreshProfiles()
+        isDirty = false
+    }
+
+    /// Reload path for the profile-dropdown edit mode (#18): seed
+    /// the tabs from a stored profile's JSON instead of live
+    /// state. A profile that has vanished falls back to live
+    /// editing. Stored-profile edits never touch the raw Lua
+    /// editor or the global sidecar — only the profile JSON is
+    /// written — so `savedSidecar` is cleared.
+    private func reloadEditingProfile(_ name: String) {
+        guard var loaded = try? core.loadGuiConfig(editing: name)
+        else {
+            editingProfile = nil
+            reload()
+            return
+        }
+        suppressDirty = true
+        KeybindingImportClassifier.classify(&loaded)
+        config = loaded
+        suppressDirty = false
+        // Stored-profile editing is mutually exclusive with the
+        // raw Lua editor — leaving it on would let a global
+        // init.lua write escape edit mode.
+        forcedLuaEditor = false
+        showLuaEditor = false
+        savedSidecar = nil
+        let live = displays.map(\.fingerprint)
+        placementEditable =
+            (try? core.profiles.read(name: name))?
+            .set(matching: live) != nil
         refreshProfiles()
         isDirty = false
     }

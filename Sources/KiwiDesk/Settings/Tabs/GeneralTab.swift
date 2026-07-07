@@ -13,7 +13,12 @@ struct GeneralTab: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 behaviorSection
-                advancedSection
+                // The advanced block reveals and edits the global
+                // init.lua — hidden while editing a stored profile
+                // (that mode writes only the profile JSON, #18).
+                if !model.editingStoredProfile {
+                    advancedSection
+                }
             }
             .padding(16)
         }

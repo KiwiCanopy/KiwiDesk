@@ -58,108 +58,29 @@ struct SettingsView: View {
                             systemImage: "menubar.rectangle"
                         )
                     }
-                AppRulesTab(model: model)
-                    .tabItem {
-                        Label(
-                            "App Rules",
-                            systemImage: "app.badge"
-                        )
-                    }
-                KeybindingsTab(model: model)
-                    .tabItem {
-                        Label(
-                            "Shortcuts",
-                            systemImage: "keyboard"
-                        )
-                    }
+                // Shortcuts and App Rules are global, not part of
+                // any profile (Model A) — hidden while editing a
+                // stored profile (#18).
+                if !model.editingStoredProfile {
+                    AppRulesTab(model: model)
+                        .tabItem {
+                            Label(
+                                "App Rules",
+                                systemImage: "app.badge"
+                            )
+                        }
+                    KeybindingsTab(model: model)
+                        .tabItem {
+                            Label(
+                                "Shortcuts",
+                                systemImage: "keyboard"
+                            )
+                        }
+                }
             }
             .padding(.horizontal, 12)
             .padding(.top, 10)
         }
-    }
-}
-
-/// Top banner: the active profile (or resolving Standard), the
-/// transient/dirty state, and profile-action warnings (#36).
-/// Saving lives in the footer's two profile buttons.
-struct ProfileSyncBanner: View {
-    @ObservedObject var model: SettingsModel
-
-    var body: some View {
-        VStack(spacing: 0) {
-            HStack(spacing: 10) {
-                Image(systemName: "rectangle.3.group")
-                    .foregroundStyle(.secondary)
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(title).font(.headline)
-                    Text(statusText)
-                        .font(.caption)
-                        .foregroundStyle(
-                            model.profileDirty
-                                ? .orange : .secondary
-                        )
-                }
-                Spacer()
-                if model.profileDirty {
-                    Image(
-                        systemName:
-                            "exclamationmark.triangle.fill"
-                    )
-                    .foregroundStyle(.orange)
-                    .help(
-                        "The live layout diverged from the "
-                            + "saved profile."
-                    )
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-            if let warning = model.profileWarning {
-                warningRow(warning)
-            }
-        }
-    }
-
-    private var title: String {
-        if let profile = model.activeProfile { return profile }
-        if let standard = model.activeStandard {
-            return "Standard: \(standard)"
-        }
-        return "Transient layout"
-    }
-
-    private var statusText: String {
-        if model.activeStandard != nil {
-            return "Built-in layout — save as a profile to "
-                + "make it yours."
-        }
-        if model.profileDirty {
-            return "Unsaved monitor changes — update the "
-                + "profile to keep them."
-        }
-        return model.activeProfile == nil
-            ? "No profile matches this monitor setup."
-            : "Profile is up to date."
-    }
-
-    private func warningRow(_ warning: String) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: "exclamationmark.bubble")
-                .foregroundStyle(.orange)
-            Text(warning)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            Spacer()
-            Button {
-                model.profileWarning = nil
-            } label: {
-                Image(systemName: "xmark.circle")
-            }
-            .buttonStyle(.borderless)
-            .help("Dismiss")
-        }
-        .padding(.horizontal, 16)
-        .padding(.bottom, 8)
     }
 }
 
@@ -204,6 +125,8 @@ struct SettingsFooter: View {
                 Button("Save") { model.saveLuaSource() }
                     .keyboardShortcut("s")
                     .disabled(!model.isDirty)
+            } else if model.editingStoredProfile {
+                editProfileSaveButton
             } else {
                 updateButton
                 saveAsNewButton
@@ -259,6 +182,18 @@ struct SettingsFooter: View {
     private var saveAsNewButton: some View {
         Button("Save as new…") { namingNewProfile = true }
             .buttonStyle(.borderedProminent)
+    }
+
+    /// Stored-profile edit mode (#18): write the edits into that
+    /// profile's JSON without switching the live layout.
+    @ViewBuilder private var editProfileSaveButton: some View {
+        let name = model.editingProfile ?? ""
+        Button("Save to \u{201C}\(name)\u{201D}") {
+            model.saveEditedProfile()
+        }
+        .keyboardShortcut("s")
+        .buttonStyle(.borderedProminent)
+        .disabled(!model.isDirty)
     }
 
     private var adoptButton: some View {
