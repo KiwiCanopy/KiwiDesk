@@ -49,6 +49,11 @@ public final class KiwiCore {
     /// Spaces assigned the *Main* role — they follow whatever
     /// display is currently main (#36).
     var mainSpaces: Set<SpaceID> = []
+    /// The live arrangement's explicit rehome target (#68) —
+    /// adopted from the active profile, edited by the GUI, and
+    /// captured back on save. nil falls back to the space
+    /// order's first survivor on a profile-switch reconcile.
+    var fallbackSpace: SpaceID?
     /// Profile bound per native macOS Space, keyed by the
     /// Mission Control number (1-based). Populated by
     /// `bind_profile_to_native_space`.

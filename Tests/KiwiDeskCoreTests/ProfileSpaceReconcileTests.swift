@@ -144,6 +144,63 @@ struct ProfileSpaceReconcileTests {
         )
     }
 
+    @Test("Explicit fallback space wins over stored order")
+    func explicitFallbackBeatsOrder() {
+        let core = makeCore()
+        core.state.workspaces.add(
+            WindowID(42),
+            to: SpaceID("old")
+        )
+        let p = Profile(
+            name: "p",
+            monitorSets: [],
+            spaces: [SpaceID("1"), SpaceID("2")],
+            fallbackSpace: SpaceID("2"),
+            spaceModes: [
+                SpaceID("1"): .bsp,
+                SpaceID("2"): .bsp,
+            ],
+            settings: TilingSettings()
+        )
+        core.apply(profile: p, pruneStaleSpaces: true)
+        // "old" pruned; its window rehomes to the designated
+        // fallback "2", not the order's first entry "1" (#68).
+        #expect(
+            core.state.workspaces.space(of: WindowID(42))
+                == SpaceID("2")
+        )
+        #expect(core.fallbackSpace == SpaceID("2"))
+    }
+
+    @Test("Dangling fallback falls back to the stored order")
+    func danglingFallbackUsesOrder() {
+        let core = makeCore()
+        core.state.workspaces.add(
+            WindowID(42),
+            to: SpaceID("old")
+        )
+        let p = Profile(
+            name: "p",
+            monitorSets: [],
+            spaces: [SpaceID("2"), SpaceID("1")],
+            fallbackSpace: SpaceID("gone"),
+            spaceModes: [
+                SpaceID("1"): .bsp,
+                SpaceID("2"): .bsp,
+            ],
+            settings: TilingSettings()
+        )
+        core.apply(profile: p, pruneStaleSpaces: true)
+        // The explicit target isn't a survivor — the stored
+        // order's first entry decides, as before #68.
+        #expect(
+            core.state.workspaces.space(of: WindowID(42))
+                == SpaceID("2")
+        )
+        // The dangling reference must not be adopted live.
+        #expect(core.fallbackSpace == nil)
+    }
+
     @Test("Hardware-driven applies keep spaces, reset stale modes")
     func noPruneByDefault() {
         let core = makeCore()

@@ -38,7 +38,8 @@ extension KiwiCore {
         if pruneStaleSpaces {
             pruneSpaces(
                 keeping: declared,
-                orderedBy: profile.orderedSpaces
+                orderedBy: profile.orderedSpaces,
+                preferring: profile.fallbackSpace
             )
         }
         // Dense over all live spaces: a space a (hand-edited,
@@ -58,6 +59,11 @@ extension KiwiCore {
         spacePins =
             profile.set(matching: live)?.spaceMonitorMap ?? [:]
         mainSpaces = Set(profile.mainSpaces)
+        // Adopt the profile's explicit rehome target (#68);
+        // a dangling reference reads as unset.
+        fallbackSpace = profile.fallbackSpace.flatMap {
+            declared.contains($0) ? $0 : nil
+        }
         // Per-profile keybinding tier (#55 phase 6): register
         // THIS profile's override (base survives unmentioned,
         // O4 soft). Passed explicitly — callers adopt after
@@ -76,21 +82,29 @@ extension KiwiCore {
     /// name also exists in the new profile is kept untouched —
     /// its windows stay put regardless of the layout difference.
     ///
-    /// `orderedBy` is the profile's `orderedSpaces` list (#75):
-    /// the rehome target is the first element that is also a
-    /// survivor, so windows land in the first space of the new
-    /// profile's displayed list. When both lists are empty
-    /// (degenerate call) the guard skips pruning entirely.
+    /// `preferring` is the profile's explicit fallback space
+    /// (#68): when it names a survivor, windows rehome there.
+    /// Otherwise `orderedBy` — the profile's `orderedSpaces`
+    /// list (#75) — decides: the rehome target is the first
+    /// element that is also a survivor, so windows land in the
+    /// first space of the new profile's displayed list. When
+    /// both lists are empty (degenerate call) the guard skips
+    /// pruning entirely.
     private func pruneSpaces(
         keeping survivors: Set<SpaceID>,
-        orderedBy storedOrder: [SpaceID]
+        orderedBy storedOrder: [SpaceID],
+        preferring explicit: SpaceID? = nil
     ) {
         // `orderedSpaces ⊆ declaredSpaces == survivors` so a
         // non-empty storedOrder always has a match — nil only
         // when storedOrder itself is empty (empty profile).
-        let fallback = storedOrder.first {
-            survivors.contains($0)
-        }
+        let fallback =
+            explicit.flatMap {
+                survivors.contains($0) ? $0 : nil
+            }
+            ?? storedOrder.first {
+                survivors.contains($0)
+            }
         guard let fallback else { return }
         for space in state.workspaces.allSpaces
         where !survivors.contains(space.id) {
@@ -114,6 +128,7 @@ extension KiwiCore {
         }
         spacePins = [:]
         mainSpaces = []
+        fallbackSpace = nil
         // A transient Standard has no keybinding override —
         // revert to the base gui.json modes (#55 phase 6).
         reapplyStructuredKeybindings(profileModes: nil)

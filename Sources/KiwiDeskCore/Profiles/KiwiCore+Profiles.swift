@@ -121,6 +121,9 @@ extension KiwiCore {
             monitorSets: [liveMonitorSet()],
             mainSpaces: mainSpaces.sorted { $0.raw < $1.raw },
             spaces: liveSpaces,
+            fallbackSpace: fallbackSpace.flatMap {
+                liveSpaces.contains($0) ? $0 : nil
+            },
             spaceModes: modes,
             settings: tiler.settings
         )
@@ -147,6 +150,7 @@ extension KiwiCore {
         }
         let fresh = buildProfile(name: name)
         existing.spaces = fresh.spaces
+        existing.fallbackSpace = fresh.fallbackSpace
         existing.spaceModes = fresh.spaceModes
         existing.mainSpaces = fresh.mainSpaces
         existing.settings = fresh.settings
@@ -219,6 +223,11 @@ extension KiwiCore {
         // the config's `spaces` list is the profile's new
         // authoritative order.
         profile.spaces = config.spaces
+        // Same dangling-reference guard as
+        // `applyProfileScopedState` (#68).
+        profile.fallbackSpace = config.fallbackSpace.flatMap {
+            config.spaces.contains($0) ? $0 : nil
+        }
         // Dense over the profile's own spaces (mirrors
         // `buildProfile`): an undeclared space reads as bsp. The
         // union with `spaceModes.keys` keeps a just-set mode even

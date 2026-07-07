@@ -36,6 +36,11 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// Spaces assigned the Main role (they follow the current
     /// main display); profile-scoped, stored once per profile.
     public var mainSpaces: Set<SpaceID> = []
+    /// The explicitly designated rehome target (#68): where
+    /// windows land when a profile switch drops their space.
+    /// Profile-scoped (rides the profile JSON, like the pins);
+    /// nil falls back to the order's first surviving space.
+    public var fallbackSpace: SpaceID?
     /// Windows that never tile (`float_rules`).
     public var floatRules: [String] = []
     /// Profile bound per native macOS Space (Mission Control
@@ -81,6 +86,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         if mainSpaces.remove(from) != nil {
             mainSpaces.insert(to)
         }
+        if fallbackSpace == from { fallbackSpace = to }
         if let gaps = settings.gapsOverride.removeValue(
             forKey: from
         ) {
@@ -108,21 +114,6 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             return mode
         }
         return true
-    }
-
-    /// Moves `space` to the front of the ordered list. A no-op
-    /// when `space` is absent or is already the first element.
-    /// This is the primitive a future fallback-space chooser
-    /// (#68) will call. Both save paths capture the same order
-    /// since `applyProfileScopedState` reconciles the live
-    /// order via `WorkspaceManager.reorder` (#75/#55), so the
-    /// reorder reaches `Profile.spaces` from either one.
-    public mutating func moveToFirst(_ space: SpaceID) {
-        guard let index = spaces.firstIndex(of: space),
-            index != 0
-        else { return }
-        spaces.remove(at: index)
-        spaces.insert(space, at: 0)
     }
 
     /// Only the global fields persist in the sidecar — the
@@ -178,6 +169,9 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         spaceModes = spaceModes.filter { !$0.key.raw.isEmpty }
         spacePins = spacePins.filter { !$0.key.raw.isEmpty }
         mainSpaces = mainSpaces.filter { !$0.raw.isEmpty }
+        if fallbackSpace?.raw.isEmpty == true {
+            fallbackSpace = nil
+        }
         appRules = appRules.filter { !$0.value.raw.isEmpty }
         settings.gapsOverride = settings.gapsOverride.filter {
             !$0.key.raw.isEmpty
