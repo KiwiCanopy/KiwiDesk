@@ -108,6 +108,8 @@ struct SettingsFooter: View {
     @State private var helpHovering = false
     @State private var namingNewProfile = false
     @State private var newProfileName = ""
+    @State private var namingProfileCopy = false
+    @State private var profileCopyName = ""
 
     /// A muted, darker green so the action reads as inviting
     /// without shouting over the standard Save button.
@@ -139,6 +141,7 @@ struct SettingsFooter: View {
                     .keyboardShortcut("s")
                     .disabled(!model.isDirty)
             } else if model.editingStoredProfile {
+                saveCopyButton
                 editProfileSaveButton
             } else {
                 updateButton
@@ -174,6 +177,32 @@ struct SettingsFooter: View {
                     + "and the connected monitor set."
             )
         }
+        .alert(
+            "Save copy as",
+            isPresented: $namingProfileCopy
+        ) {
+            TextField("Profile name", text: $profileCopyName)
+            Button("Save copy") {
+                model.saveEditedProfileCopy(
+                    named: profileCopyName
+                )
+                profileCopyName = ""
+            }
+            .disabled(profileCopyName.trimmed.isEmpty)
+            Button("Cancel", role: .cancel) {
+                profileCopyName = ""
+            }
+        } message: {
+            Text(
+                "Duplicates \u{201C}"
+                    + (model.editingProfile ?? "")
+                    + "\u{201D} with your pending edits — "
+                    + "monitor sets and shortcut overrides "
+                    + "included. The copy becomes the edit "
+                    + "target; the running layout is not "
+                    + "changed."
+            )
+        }
     }
 
     /// Update "<profile>": enabled only when a profile is
@@ -195,6 +224,16 @@ struct SettingsFooter: View {
     private var saveAsNewButton: some View {
         Button("Save as new…") { namingNewProfile = true }
             .buttonStyle(.borderedProminent)
+    }
+
+    /// Stored-profile edit mode (#82): duplicate the edited
+    /// profile (with pending edits) under a new name. Unlike
+    /// the live "Save as new…" (which snapshots the running
+    /// desktop), the source here is the stored profile —
+    /// enabled even with no pending edits (a plain duplicate
+    /// is legitimate).
+    private var saveCopyButton: some View {
+        Button("Save copy as…") { namingProfileCopy = true }
     }
 
     /// Stored-profile edit mode (#18): write the edits into that

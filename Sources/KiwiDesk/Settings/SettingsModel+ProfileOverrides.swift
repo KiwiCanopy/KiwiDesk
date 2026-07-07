@@ -42,6 +42,31 @@ extension SettingsModel {
         isDirty = false
     }
 
+    /// Save copy as… (#82): duplicates the edited stored
+    /// profile under `requested` — including the pending
+    /// edit-session changes — and makes the copy the new edit
+    /// target. Non-adopting: the live layout, `gui.json`, and
+    /// `init.lua` stay untouched.
+    func saveEditedProfileCopy(named requested: String) {
+        guard let source = editingProfile else { return }
+        let trimmed = requested.trimmingCharacters(
+            in: .whitespaces
+        )
+        guard !trimmed.isEmpty else { return }
+        do {
+            let created = try core.copyProfile(
+                named: source,
+                to: trimmed,
+                with: config
+            )
+            editingProfile = created
+            reload()
+        } catch {
+            profileWarning = "Copying failed: \(error)"
+            core.onLog("profile copy failed: \(error)")
+        }
+    }
+
     // MARK: - Override-mode Shortcuts affordance (#55)
 
     /// The selected mode's base rows for the Shortcuts tab's
