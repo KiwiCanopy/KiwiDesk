@@ -1119,6 +1119,15 @@ logout/reboot; after that, windows are re-tiled fresh).
 Crashes restore from the last autosave (30 s interval)
 instead.
 
+Before exiting (quit, disable, or restart), KiwiDesk moves
+each managed tiled window back onto the monitor its virtual
+space is assigned to, centered in the display's visible
+area. This prevents windows from being stranded in tiled
+frames after the window manager stops. Floating windows are
+left wherever they are. Only windows on the currently
+visible native Space can be reached (windows on background
+native Spaces are out of scope — see issue #70).
+
 ## Extras
 
 ### Per-desktop keybinds (profiles + modes)
