@@ -17,11 +17,12 @@ extension KiwiCore {
         pruneStaleSpaces: Bool = false
     ) {
         tiler.settings = profile.settings
-        for id in profile.spaceModes.keys {
+        let declared = profile.declaredSpaces
+        for id in declared {
             state.workspaces.ensureSpace(id)
         }
         if pruneStaleSpaces {
-            pruneSpaces(keeping: Set(profile.spaceModes.keys))
+            pruneSpaces(keeping: declared)
         }
         // Dense over all live spaces: a space a (hand-edited,
         // sparse) profile doesn't declare reverts to bsp

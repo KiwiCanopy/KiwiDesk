@@ -80,6 +80,19 @@ public struct Profile: Codable, Sendable, Equatable {
         monitorSets.first?.monitors.count ?? 0
     }
 
+    /// Every space the profile declares — by mode, Main role, or a
+    /// monitor pin. The one definition of "this profile's spaces",
+    /// so an authoritative load prunes to exactly what the editor
+    /// shows (a hand-edited pin/main on a mode-less space counts).
+    public var declaredSpaces: Set<SpaceID> {
+        var all = Set(spaceModes.keys)
+        all.formUnion(mainSpaces)
+        for set in monitorSets {
+            all.formUnion(set.spaceMonitorMap.keys)
+        }
+        return all
+    }
+
     private enum CodingKeys: String, CodingKey {
         case name
         case monitorSets = "monitor_sets"

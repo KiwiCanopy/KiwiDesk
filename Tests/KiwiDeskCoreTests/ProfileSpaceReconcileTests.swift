@@ -82,6 +82,37 @@ struct ProfileSpaceReconcileTests {
         )
     }
 
+    @Test("A profile declaring no spaces prunes nothing")
+    func emptyProfileKeepsSpaces() {
+        let core = makeCore()
+        core.state.workspaces.ensureSpace(SpaceID("1"))
+        core.state.workspaces.ensureSpace(SpaceID("2"))
+        // Degenerate: no declared spaces -> no fallback -> the
+        // guard skips pruning rather than wiping every space.
+        core.apply(
+            profile: profile("empty", spaces: []),
+            pruneStaleSpaces: true
+        )
+        #expect(core.state.workspaces[SpaceID("1")] != nil)
+        #expect(core.state.workspaces[SpaceID("2")] != nil)
+    }
+
+    @Test("Pruning the active space moves active to a survivor")
+    func activeSpaceReassignedOnPrune() {
+        let core = makeCore()
+        core.state.workspaces.ensureSpace(SpaceID("1"))
+        core.state.workspaces.activate(SpaceID("stale"))
+        // The active space isn't in the profile -> pruned; active
+        // must land on a surviving space, never nil or the removed
+        // one.
+        core.apply(
+            profile: profile("p", spaces: [SpaceID("1")]),
+            pruneStaleSpaces: true
+        )
+        #expect(core.state.workspaces[SpaceID("stale")] == nil)
+        #expect(core.state.workspaces.activeSpace == SpaceID("1"))
+    }
+
     @Test("Hardware-driven applies keep spaces, reset stale modes")
     func noPruneByDefault() {
         let core = makeCore()
