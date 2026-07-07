@@ -154,6 +154,9 @@ public struct ScrollingParams: Sendable, Equatable, Codable,
     /// one you are working in.
     public var newWindowPlacement: SpawnPlacement = .afterFocused
     public var appBar = LayoutAppBar()
+    /// Per-space overrides (`layout.scroll.override[space_id]`),
+    /// resolved via `TilingSettings.resolvedScrolling(for:)`.
+    public var override: [SpaceID: ScrollingOverride] = [:]
 
     public init() {}
 
@@ -169,6 +172,7 @@ public struct ScrollingParams: Sendable, Equatable, Codable,
         case orientation
         case newWindowPlacement = "new_window_placement"
         case appBar = "app_bar"
+        case override
     }
 
     /// Manual decoding: profiles saved before a field existed
@@ -202,6 +206,28 @@ public struct ScrollingParams: Sendable, Equatable, Codable,
                 LayoutAppBar.self,
                 forKey: .appBar
             ) ?? LayoutAppBar()
+        override =
+            try container.decodeIfPresent(
+                [SpaceID: ScrollingOverride].self,
+                forKey: .override
+            ) ?? [:]
+    }
+
+    /// Manual encode so the per-space override map stays sparse
+    /// (absent when empty), unlike the synthesized encode.
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(slotSize, forKey: .slotSize)
+        try container.encode(anchor, forKey: .anchor)
+        try container.encode(orientation, forKey: .orientation)
+        try container.encode(
+            newWindowPlacement,
+            forKey: .newWindowPlacement
+        )
+        try container.encode(appBar, forKey: .appBar)
+        if !override.isEmpty {
+            try container.encode(override, forKey: .override)
+        }
     }
 }
 

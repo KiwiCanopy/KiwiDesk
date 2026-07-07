@@ -242,6 +242,16 @@ public struct TilingSettings: Sendable, Equatable, Codable {
         gapsOverride[space] ?? gapsGlobal
     }
 
+    /// The scrolling params effective for `space`: the global
+    /// params with that space's optional overrides merged on top
+    /// (#17). Falls back to the global params when unoverridden.
+    public func resolvedScrolling(
+        for space: SpaceID
+    ) -> ScrollingParams {
+        scrolling.override[space]?.resolved(onto: scrolling)
+            ?? scrolling
+    }
+
     public func context(
         bounds: CGRect,
         space: Space
@@ -253,7 +263,7 @@ public struct TilingSettings: Sendable, Equatable, Codable {
             minWindowSize: minWindowSize,
             bsp: bsp,
             stack: stack,
-            scrolling: scrolling,
+            scrolling: resolvedScrolling(for: space.id),
             grid: grid,
             monocle: monocle,
             appBarStyle: appBarStyle

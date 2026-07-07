@@ -305,6 +305,44 @@ app_bar.set_group_badge_color("#FF3B30")
 app_bar.set_group_badge_text_color("#FFFFFF")
 ```
 
+### Per-space layout overrides
+
+Layout tuning is **global per layout type** — every scrolling
+space shares one orientation, every stack one master ratio.
+To configure the *same mode differently in different spaces*
+(e.g. one scrolling space horizontal, another vertical), each
+global setter has a per-space `_override` sibling, keyed by
+space id — the same shape as `set_gap_override`:
+
+```lua
+-- Space "3" scrolls vertically; every other scrolling space
+-- keeps the global orientation.
+scroll.set_orientation_override("3", "vertical")
+scroll.set_slot_size_override("3", 400)   -- pt / "NN%" / 0
+scroll.set_anchor_override("3", "center")
+```
+
+Overrides **merge per field**: an unset field inherits the
+global value (so overriding only `orientation` leaves
+`slot_size` and `anchor` following the global). Derived
+attributes re-resolve against the merged result — a space
+that flips to `vertical` moves its app bar to the left/right
+edge even though the global bar sits on top. In profile JSON
+the overrides nest under the layout, sparse (only set fields
+written):
+
+```jsonc
+"layout": {
+  "scroll": {
+    "orientation": "horizontal", "anchor": "center",
+    "slot_size": 0,
+    "override": {                 // per space id
+      "3": { "orientation": "vertical", "slot_size": 400 }
+    }
+  }
+}
+```
+
 ### Where new windows land
 
 Every layout takes the same `new_window_placement` values —

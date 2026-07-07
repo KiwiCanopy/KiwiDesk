@@ -42,7 +42,7 @@ extension KiwiCore {
         guard
             let id = state.workspaces.currentSpace(on: display.id),
             let space = state.workspaces[id],
-            let host = barHost(for: space.mode),
+            let host = barHost(for: space),
             host.appBar.enabled,
             let screen = screen(for: display.id)
         else { return nil }
@@ -61,7 +61,7 @@ extension KiwiCore {
         settings: TilingSettings
     ) -> [AppBarManager.Bar] {
         guard let space = activeSpace,
-            let host = barHost(for: space.mode),
+            let host = barHost(for: space),
             host.appBar.enabled,
             let screen = NSScreen.main ?? NSScreen.screens.first,
             let bar = buildBar(
@@ -117,6 +117,20 @@ extension KiwiCore {
     /// connected to a screen.
     private func screen(for display: DisplayID) -> NSScreen? {
         NSScreen.screens.first { $0.kiwiDisplay?.id == display }
+    }
+
+    /// The bar-hosting layout for a space, resolving per-space
+    /// layout overrides (#17) so the bar edge follows that
+    /// space's own orientation. Used when building a display's
+    /// bar; `barHost(for mode:)` stays for the reorder path,
+    /// which needs no per-space geometry.
+    func barHost(for space: Space) -> AppBarHosting? {
+        switch space.mode {
+        case .monocle: return tiler.settings.monocle
+        case .scrolling:
+            return tiler.settings.resolvedScrolling(for: space.id)
+        default: return nil
+        }
     }
 
     /// The bar-hosting layout for a space mode, or nil for modes
