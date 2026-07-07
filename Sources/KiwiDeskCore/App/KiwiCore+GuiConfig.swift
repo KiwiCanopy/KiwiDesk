@@ -80,6 +80,18 @@ extension KiwiCore {
         emitSpaceChange()
     }
 
+    /// Whether the GUI owns the configuration — the ownership
+    /// discriminator for the three tiling tiers (#36): only a
+    /// GUI-managed config lets the composed Standard own
+    /// tiling on an unmatched monitor change; hand-written or
+    /// hybrid configs (foreign Lua beside the managed block)
+    /// keep their Lua-declared tiling and get placement-only
+    /// resolution. Mirrors the editor, which demotes itself to
+    /// the raw-Lua fallback on foreign code.
+    public var isGuiManaged: Bool {
+        guiConfigStore.exists && !configHasForeignCode
+    }
+
     /// Whether `init.lua` holds code outside the managed block
     /// (so the visual editor can't safely own the file).
     public var configHasForeignCode: Bool {

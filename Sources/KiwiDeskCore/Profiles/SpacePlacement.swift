@@ -12,7 +12,7 @@ public enum SpacePlacement {
         /// Pinned to a disconnected display: placement falls
         /// back to `fallback`, while the fingerprint (the
         /// user's intent) is preserved for editing UIs.
-        case pinnedAbsent(String, fallback: Display)
+        case pinnedAbsent(intent: String, fallback: Display)
         /// Main role — follows the current main display.
         case main(Display)
         /// The positional default's plan, or main when the
@@ -23,7 +23,7 @@ public enum SpacePlacement {
         public var display: Display {
             switch self {
             case .pinned(let display),
-                .pinnedAbsent(_, fallback: let display),
+                .pinnedAbsent(intent: _, fallback: let display),
                 .main(let display),
                 .auto(let display):
                 return display
@@ -65,7 +65,7 @@ public enum SpacePlacement {
             return .pinned(pinned)
         }
         return .pinnedAbsent(
-            pin,
+            intent: pin,
             fallback: unpinned.display
         )
     }

@@ -164,7 +164,7 @@ extension SettingsModel {
         switch resolved {
         case .pinned(let display):
             return .pinned(display.fingerprint)
-        case .pinnedAbsent(let pin, fallback: _):
+        case .pinnedAbsent(intent: let pin, fallback: _):
             return .pinned(pin)
         case .main:
             return .main

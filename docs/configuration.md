@@ -751,11 +751,15 @@ displays change, KiwiDesk resolves in this order:
    get one monocle space, so no screen is ever blank.
 
    The Standard only *owns tiling* (gaps, modes, parameters)
-   when the config is GUI-managed (a `gui.json` sidecar
-   exists). With a purely hand-written `init.lua`, your
+   when the config is GUI-managed: a `gui.json` sidecar
+   exists *and* `init.lua` holds no code outside the managed
+   block. With a hand-written — or hybrid — config, your
    Lua-declared tiling stays authoritative and the Standard
-   merely steers the space→screen placement — no transient
-   `Standard: <name>` state is entered.
+   merely steers the space→screen placement; no transient
+   `Standard: <name>` state is entered. If a profile was
+   active when the monitors changed, it keeps owning tiling
+   but the state goes *dirty* (no stored set covers the live
+   monitors), same as loading it explicitly would.
 
 Every space always resolves to a screen: an explicit
 fingerprint pin wins, then the **Main** role (the space

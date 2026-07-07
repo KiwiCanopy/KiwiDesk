@@ -137,7 +137,7 @@ struct ProfileModelTests {
         // and falls back like an unpinned space would.
         #expect(
             resolve(SpaceID(4))
-                == .pinnedAbsent("GONE:9x9", fallback: a)
+                == .pinnedAbsent(intent: "GONE:9x9", fallback: a)
         )
         // No displays: the only unresolvable state.
         #expect(

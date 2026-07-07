@@ -234,7 +234,7 @@ extension KiwiCore {
                     mainID: PositionalDisplays.liveMainID
                 )
             else { return }
-            // A hand-written Lua config (no gui.json) keeps
+            // A hand-written or hybrid Lua config keeps
             // owning tiling: the Standard only steers
             // placement and no transient-standard state is
             // adopted, so with no active profile the Lua base
@@ -242,7 +242,7 @@ extension KiwiCore {
             // still-active profile keeps its tiling and its
             // still-valid pins, but goes dirty — the same
             // rule as load_profile onto other hardware.
-            guard guiConfigStore.exists else {
+            guard isGuiManaged else {
                 if profiles.currentName != nil {
                     profiles.markDirty()
                 }

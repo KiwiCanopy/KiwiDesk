@@ -109,8 +109,7 @@ final class SettingsModel: ObservableObject {
         // Accepted edges: a genuine global edit still saves
         // the overlaid spaces union, and deleting + re-adding
         // a transient space alone doesn't read as an edit.
-        savedSidecar =
-            core.guiConfigStore.exists ? config : nil
+        savedSidecar = core.isGuiManaged ? config : nil
         refreshProfiles()
         isDirty = false
     }

@@ -153,6 +153,29 @@ struct MonitorChangeTests {
         )
     }
 
+    @Test("Foreign Lua beside gui.json keeps tiling Lua-owned")
+    func hybridConfigStaysLuaOwned() throws {
+        let core = makeGuiManagedCore()
+        connect(core, [display(1, "A")])
+        core.state.workspaces.ensureSpace(SpaceID(1))
+        // Hand-written code outside the managed block demotes
+        // GUI ownership — the editor already falls back to
+        // raw Lua; the monitor-change gate must agree.
+        try "KiwiDesk.set_gap_global(30)".write(
+            to: core.configURL,
+            atomically: true,
+            encoding: .utf8
+        )
+        core.tiler.settings.gapsGlobal = .uniform(30)
+
+        core.handleMonitorChange()
+        #expect(core.profiles.currentStandard == nil)
+        #expect(!core.profiles.isDirty)
+        #expect(
+            core.tiler.settings.gapsGlobal == .uniform(30)
+        )
+    }
+
     @Test("CLI-only: active profile goes dirty on no match")
     func luaOwnedActiveProfileGoesDirty() throws {
         let core = makeCore()
