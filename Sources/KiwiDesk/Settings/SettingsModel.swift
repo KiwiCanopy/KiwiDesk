@@ -21,6 +21,12 @@ final class SettingsModel: ObservableObject {
     @Published var luaSource = ""
     /// True while foreign Lua forces the raw editor.
     @Published var forcedLuaEditor = false
+    /// True when init.lua has harmless custom Lua outside the
+    /// managed block (code that doesn't touch managed
+    /// vocabulary). Shows the informational coexistence banner
+    /// in the visual editor. Always false when
+    /// `forcedLuaEditor` is true.
+    @Published var hasCustomLua = false
     /// User toggle to edit init.lua directly.
     @Published var showLuaEditor = false
     /// Unsaved GUI edits are pending.
@@ -117,6 +123,8 @@ final class SettingsModel: ObservableObject {
         config = loaded
         suppressDirty = false
         forcedLuaEditor = core.configHasForeignCode
+        hasCustomLua =
+            !forcedLuaEditor && core.configHasCustomCode
         luaSource =
             (try? String(
                 contentsOf: configURL,
@@ -157,6 +165,7 @@ final class SettingsModel: ObservableObject {
         // raw Lua editor — leaving it on would let a global
         // init.lua write escape edit mode.
         forcedLuaEditor = false
+        hasCustomLua = false
         showLuaEditor = false
         savedSidecar = nil
         let live = displays.map(\.fingerprint)

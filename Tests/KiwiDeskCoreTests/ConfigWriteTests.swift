@@ -74,54 +74,11 @@ private func richConfig() -> GuiConfig {
     return config
 }
 
+/// Writer, round-trip, and KiwiCore-level config tests.
+/// Split/detection and parity tests live in `ManagedConfigTests`.
 @Suite("Config write-back", .serialized)
 @MainActor
 struct ConfigWriteTests {
-    @Test("managed block splits and preserves user code")
-    func managedSplit() {
-        let source = """
-            -- my own comment
-            KiwiDesk.debug_log("hi")
-
-            \(ManagedConfig.beginMarker)
-            KiwiDesk.set_gap_global(10)
-            \(ManagedConfig.endMarker)
-
-            KiwiDesk.debug_log("after")
-            """
-        let split = ManagedConfig.split(source)
-        #expect(split.managed?.contains("set_gap_global") == true)
-        #expect(split.before.contains("my own comment"))
-        #expect(split.after.contains("after"))
-        #expect(ManagedConfig.hasForeignCode(source))
-    }
-
-    @Test("comment-only files carry no foreign code")
-    func noForeignCode() {
-        let source = """
-            -- just a comment
-            \(ManagedConfig.beginMarker)
-            KiwiDesk.set_gap_global(10)
-            \(ManagedConfig.endMarker)
-            """
-        #expect(!ManagedConfig.hasForeignCode(source))
-    }
-
-    @Test("merge replaces the block, keeps the surroundings")
-    func mergeReplaces() {
-        let original = ManagedConfig.merge(
-            block: "KiwiDesk.set_gap_global(10)",
-            into: "-- header\n"
-        )
-        let updated = ManagedConfig.merge(
-            block: "KiwiDesk.set_gap_global(20)",
-            into: original
-        )
-        #expect(updated.contains("set_gap_global(20)"))
-        #expect(!updated.contains("set_gap_global(10)"))
-        #expect(updated.contains("-- header"))
-    }
-
     @Test(
         "default mode never emits an icon; other modes do"
     )
@@ -265,43 +222,6 @@ struct ConfigWriteTests {
         #expect(
             saved.settings.stack.masterRatio == 2.0 / 7.0
         )
-    }
-
-    @Test("merge tolerates CRLF and keeps one block")
-    func crlfMerge() {
-        let source =
-            "-- header\r\n" + ManagedConfig.beginMarker
-            + "\r\nKiwiDesk.set_gap_global(10)\r\n"
-            + ManagedConfig.endMarker + "\r\n"
-        #expect(ManagedConfig.split(source).managed != nil)
-        let merged = ManagedConfig.merge(
-            block: "KiwiDesk.set_gap_global(20)",
-            into: source
-        )
-        let begins =
-            merged.components(
-                separatedBy: ManagedConfig.beginMarker
-            ).count - 1
-        #expect(begins == 1)
-        #expect(merged.contains("set_gap_global(20)"))
-        #expect(!merged.contains("set_gap_global(10)"))
-    }
-
-    @Test("merge strips an orphaned begin marker")
-    func orphanMarker() {
-        let source =
-            "-- header\n" + ManagedConfig.beginMarker
-            + "\nKiwiDesk.set_gap_global(10)\n"
-        let merged = ManagedConfig.merge(
-            block: "KiwiDesk.set_gap_global(20)",
-            into: source
-        )
-        let begins =
-            merged.components(
-                separatedBy: ManagedConfig.beginMarker
-            ).count - 1
-        #expect(begins == 1)
-        #expect(merged.contains("-- header"))
     }
 
     @Test("adopt migrates a hand-written config into the GUI")

@@ -5,15 +5,42 @@ import Foundation
 /// back in without touching anything else.
 ///
 /// The GUI owns exactly one delimited region; everything a user
-/// hand-writes outside it survives a "Save". When meaningful
-/// Lua exists outside the region, the GUI shows the raw code
-/// editor instead of the visual controls (05_GUI_Concept §2).
+/// hand-writes outside it survives a "Save". The GUI only falls
+/// back to the raw Lua editor when the surrounding code touches
+/// the managed vocabulary — verbs the GUI itself emits. Harmless
+/// custom Lua (print calls, debug hooks, sketchybar integrations)
+/// coexists with the visual editor; it shows an informational
+/// banner instead of locking the user out.
 public enum ManagedConfig {
     public static let beginMarker =
         "-- >>> KiwiDesk managed block "
         + "(edit in the app, not by hand) >>>"
     public static let endMarker =
         "-- <<< KiwiDesk managed block <<<"
+
+    // MARK: - Managed vocabulary
+
+    /// Token substrings that appear in the GUI's generated
+    /// managed block (derived from `LuaConfigWriter`). Code
+    /// outside the block that contains one of these tokens
+    /// forces the raw editor — the GUI cannot safely own
+    /// the file when the same vocabulary appears in both
+    /// regions. Harmless custom Lua (none of these tokens)
+    /// coexists with the visual editor instead.
+    ///
+    /// Drift guard: `ManagedVocabularyTests` verifies that
+    /// every line `LuaConfigWriter` emits is covered by at
+    /// least one token here — add to this list whenever the
+    /// writer gains a new top-level construct.
+    public static let managedTokens: [String] = [
+        "app_rules",
+        "float_rules",
+        "KiwiDesk.bind(",
+        "KiwiDesk.define_mode(",
+        "KiwiDesk.bind_profile_to_native_space(",
+    ]
+
+    // MARK: - Split / merge
 
     /// The three regions of a config file. `managed` excludes
     /// the marker lines; it is nil when no block is present.
@@ -109,6 +136,39 @@ public enum ManagedConfig {
             + "\n"
     }
 
+    // MARK: - Foreign-code detection
+
+    /// Whether code outside the managed block touches the GUI's
+    /// managed vocabulary — verbs the GUI itself writes into the
+    /// block (`app_rules`, `float_rules`, `KiwiDesk.bind(`,
+    /// etc.). When `true` the visual editor cannot safely co-own
+    /// those constructs, so it yields to the raw Lua editor.
+    ///
+    /// Harmless custom Lua that does NOT touch any managed token
+    /// returns `false` here (the visual editor stays active) and
+    /// `true` from `hasCustomCode(_:)` (a banner is shown).
+    public static func hasForeignCode(_ source: String) -> Bool {
+        let split = split(source)
+        return touchesManagedVocabulary(split.before)
+            || touchesManagedVocabulary(split.after)
+    }
+
+    /// Whether any non-blank, non-comment Lua exists outside the
+    /// managed block. This includes harmless code that does NOT
+    /// touch the managed vocabulary. Used by the GUI to show an
+    /// informational banner while keeping the visual editor
+    /// active.
+    ///
+    /// When `hasForeignCode(_:)` is `true`, this is also `true`
+    /// — every file that forces the raw editor also has custom
+    /// code — but the converse does not hold.
+    public static func hasCustomCode(_ source: String) -> Bool {
+        let split = split(source)
+        return isCode(split.before) || isCode(split.after)
+    }
+
+    // MARK: - Internals
+
     /// Drops any line that is itself a block marker.
     private static func stripMarkers(_ text: String) -> String {
         text.components(separatedBy: "\n")
@@ -119,22 +179,29 @@ public enum ManagedConfig {
             .joined(separator: "\n")
     }
 
-    /// Whether the code outside the managed block contains
-    /// anything other than blank lines and comments. Such a
-    /// file cannot be fully represented by the visual editor,
-    /// so the GUI falls back to the Lua editor.
-    public static func hasForeignCode(_ source: String) -> Bool {
-        let split = split(source)
-        return isCode(split.before) || isCode(split.after)
-    }
-
-    /// True if the text holds a line that is not blank and not
-    /// a full-line comment (`-- ...`).
+    /// True if `text` holds a line that is not blank and not a
+    /// full-line comment (`-- ...`).
     private static func isCode(_ text: String) -> Bool {
         for line in text.components(separatedBy: "\n") {
-            let trimmed = line.trimmed
-            guard !trimmed.isEmpty else { continue }
-            if !trimmed.hasPrefix("--") { return true }
+            let t = line.trimmed
+            guard !t.isEmpty else { continue }
+            if !t.hasPrefix("--") { return true }
+        }
+        return false
+    }
+
+    /// True if any non-blank, non-comment line in `text`
+    /// contains a managed-vocabulary token.
+    private static func touchesManagedVocabulary(
+        _ text: String
+    ) -> Bool {
+        for line in text.components(separatedBy: "\n") {
+            let t = line.trimmed
+            guard !t.isEmpty else { continue }
+            if t.hasPrefix("--") { continue }
+            for token in managedTokens {
+                if t.contains(token) { return true }
+            }
         }
         return false
     }

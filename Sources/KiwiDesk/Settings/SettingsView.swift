@@ -22,64 +22,74 @@ struct SettingsView: View {
         if model.editingLua {
             LuaEditorTab(model: model)
         } else {
-            TabView {
-                PresetsTab(model: model)
-                    .tabItem {
-                        Label(
-                            "Presets",
-                            systemImage: "square.grid.2x2"
-                        )
-                    }
-                GeneralTab(model: model)
-                    .tabItem {
-                        Label(
-                            "General",
-                            systemImage: "gearshape"
-                        )
-                    }
-                CanvasTab(model: model)
-                    .tabItem {
-                        Label(
-                            "Canvas",
-                            systemImage: "rectangle.on.rectangle"
-                        )
-                    }
-                SpacesTab(model: model)
-                    .tabItem {
-                        Label(
-                            "Spaces",
-                            systemImage: "rectangle.split.3x1"
-                        )
-                    }
-                AppBarTab(model: model)
-                    .tabItem {
-                        Label(
-                            "App Bar",
-                            systemImage: "menubar.rectangle"
-                        )
-                    }
-                // Shortcuts and App Rules are global, not part of
-                // any profile (Model A) — hidden while editing a
-                // stored profile (#18).
-                if !model.editingStoredProfile {
-                    AppRulesTab(model: model)
-                        .tabItem {
-                            Label(
-                                "App Rules",
-                                systemImage: "app.badge"
-                            )
-                        }
-                    KeybindingsTab(model: model)
-                        .tabItem {
-                            Label(
-                                "Shortcuts",
-                                systemImage: "keyboard"
-                            )
-                        }
+            VStack(spacing: 0) {
+                if model.hasCustomLua {
+                    CustomLuaBanner()
+                        .padding(.horizontal, 12)
+                        .padding(.top, 10)
+                    Divider()
                 }
+                TabView {
+                    PresetsTab(model: model)
+                        .tabItem {
+                            Label(
+                                "Presets",
+                                systemImage: "square.grid.2x2"
+                            )
+                        }
+                    GeneralTab(model: model)
+                        .tabItem {
+                            Label(
+                                "General",
+                                systemImage: "gearshape"
+                            )
+                        }
+                    CanvasTab(model: model)
+                        .tabItem {
+                            Label(
+                                "Canvas",
+                                systemImage:
+                                    "rectangle.on.rectangle"
+                            )
+                        }
+                    SpacesTab(model: model)
+                        .tabItem {
+                            Label(
+                                "Spaces",
+                                systemImage:
+                                    "rectangle.split.3x1"
+                            )
+                        }
+                    AppBarTab(model: model)
+                        .tabItem {
+                            Label(
+                                "App Bar",
+                                systemImage: "menubar.rectangle"
+                            )
+                        }
+                    // Shortcuts and App Rules are global, not
+                    // part of any profile (Model A) — hidden
+                    // while editing a stored profile (#18).
+                    if !model.editingStoredProfile {
+                        AppRulesTab(model: model)
+                            .tabItem {
+                                Label(
+                                    "App Rules",
+                                    systemImage: "app.badge"
+                                )
+                            }
+                        KeybindingsTab(model: model)
+                            .tabItem {
+                                Label(
+                                    "Shortcuts",
+                                    systemImage: "keyboard"
+                                )
+                            }
+                    }
+                }
+                .padding(.horizontal, 12)
+                .padding(.top, 10)
             }
-            .padding(.horizontal, 12)
-            .padding(.top, 10)
         }
     }
 }
