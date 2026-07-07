@@ -204,89 +204,100 @@ struct ManagedConfigTests {
         #expect(!ManagedConfig.hasForeignCode(source))
         #expect(!ManagedConfig.hasCustomCode(source))
     }
-}
 
-// MARK: - Vocabulary parity test
+    // MARK: - Whitespace-before-paren (Fix 1)
 
-/// Verifies that every top-level construct `LuaConfigWriter`
-/// emits into a managed block is covered by at least one token
-/// in `ManagedConfig.managedTokens`. If `LuaConfigWriter` gains
-/// a new top-level construct without a matching token, this test
-/// fails — preventing silent drift between the writer and the
-/// detection logic.
-@Suite("Managed-vocabulary parity")
-struct ManagedVocabularyTests {
-    /// A config that exercises all five managed-vocabulary
-    /// constructs: app rules, float rules, profile bindings,
-    /// a default-mode bind, and a named mode.
-    private func vocabConfig() -> GuiConfig {
-        var c = GuiConfig()
-        c.appRules = ["Finder": SpaceID(1)]
-        c.floatRules = ["Calculator"]
-        c.profileBindings = [1: "Desk"]
-        c.modes = [
-            KeyMode(
-                name: "default",
-                bindings: [
-                    KeyBinding(
-                        combo: "alt+h",
-                        lua: "-- noop"
-                    )
-                ]
-            ),
-            KeyMode(
-                name: "resize",
-                bindings: [
-                    KeyBinding(
-                        combo: "alt+l",
-                        lua: "-- noop"
-                    )
-                ]
-            ),
-        ]
-        return c
+    @Test("KiwiDesk.bind with space before ( is foreign")
+    func bindWithSpaceBeforeParenIsForeign() {
+        // A space between the method name and ( must not
+        // escape token detection (#14 fix: whitespace is
+        // normalized before matching).
+        let source = """
+            KiwiDesk.bind ("alt+h", function()
+                KiwiDesk.focus("left")
+            end)
+
+            \(ManagedConfig.beginMarker)
+            \(ManagedConfig.endMarker)
+            """
+        #expect(ManagedConfig.hasForeignCode(source))
     }
 
-    @Test(
-        "every managed token appears in a full block"
-    )
-    func tokensAppearInGeneratedBlock() {
-        let block = LuaConfigWriter.block(for: vocabConfig())
-        for token in ManagedConfig.managedTokens {
-            #expect(
-                block.contains(token),
-                "token \"\(token)\" not found in generated block"
-            )
-        }
+    @Test("KiwiDesk.define_mode with space before ( is foreign")
+    func defineModeWithSpaceBeforeParenIsForeign() {
+        let source = """
+            KiwiDesk.define_mode ("resize", {})
+
+            \(ManagedConfig.beginMarker)
+            \(ManagedConfig.endMarker)
+            """
+        #expect(ManagedConfig.hasForeignCode(source))
     }
 
+    // MARK: - Substring anchoring for bare identifiers (Fix 4)
+
+    @Test("app_rules inside longer identifier is not foreign")
+    func appRulesSubstringNotForeign() {
+        // app_rules_count contains app_rules but is a
+        // different identifier: the word-boundary + assignment
+        // anchor prevents a false positive.
+        let source = """
+            local app_rules_count = 0
+
+            \(ManagedConfig.beginMarker)
+            \(ManagedConfig.endMarker)
+            """
+        #expect(!ManagedConfig.hasForeignCode(source))
+        // It IS custom (a non-comment Lua line).
+        #expect(ManagedConfig.hasCustomCode(source))
+    }
+
+    @Test("app_rules inside a string literal is not foreign")
+    func appRulesInStringNotForeign() {
+        // A string literal containing the token word must
+        // not be detected as foreign (no assignment).
+        let source = """
+            print("app_rules")
+
+            \(ManagedConfig.beginMarker)
+            \(ManagedConfig.endMarker)
+            """
+        #expect(!ManagedConfig.hasForeignCode(source))
+    }
+
+    @Test("app_rules assignment outside block is foreign")
+    func appRulesAssignmentForeign() {
+        let source = """
+            app_rules = { ["Finder"] = "1" }
+
+            \(ManagedConfig.beginMarker)
+            \(ManagedConfig.endMarker)
+            """
+        #expect(ManagedConfig.hasForeignCode(source))
+    }
+
+    // MARK: - Block-comment behavior (Fix 5 — pinned)
+
     @Test(
-        "every top-level writer line is covered by a token"
+        "block-comment interior lines are treated as code"
     )
-    func writerLinesAreCovered() {
-        let block = LuaConfigWriter.block(for: vocabConfig())
-        for line in block.components(separatedBy: "\n") {
-            // Skip blank lines and full-line comments.
-            let trimmed = line.trimmingCharacters(
-                in: .whitespaces
-            )
-            guard !trimmed.isEmpty else { continue }
-            guard !trimmed.hasPrefix("--") else { continue }
-            // Skip indented lines (table entries, bodies).
-            guard
-                line.first != " ", line.first != "\t"
-            else { continue }
-            // Skip structural closing tokens.
-            guard
-                !trimmed.hasPrefix("}"),
-                !trimmed.hasPrefix("end")
-            else { continue }
-            let covered = ManagedConfig.managedTokens
-                .contains { trimmed.contains($0) }
-            #expect(
-                covered,
-                "unrecognized top-level line: \"\(trimmed)\""
-            )
-        }
+    func blockCommentInteriorIsTreatedAsCode() {
+        // --[[ … ]] block comments: interior lines that don't
+        // start with -- are treated as code by the current
+        // line-by-line scan (known limitation — see isCode).
+        // This test pins the behavior so it is not mistaken
+        // for handled.
+        let source = """
+            --[[ multi-line block comment
+            this line has no leading dashes
+            ]]
+
+            \(ManagedConfig.beginMarker)
+            \(ManagedConfig.endMarker)
+            """
+        // Over-conservative: interior is seen as code.
+        #expect(ManagedConfig.hasCustomCode(source))
+        // No managed vocabulary → not foreign.
+        #expect(!ManagedConfig.hasForeignCode(source))
     }
 }

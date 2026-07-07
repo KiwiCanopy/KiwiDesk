@@ -85,6 +85,41 @@ struct GuiOwnershipTests {
     }
 
     @Test(
+        "tiling Lua beside gui.json yields to Standard"
+    )
+    func tilingLuaYieldsToStandardOnMonitorChange() throws {
+        let core = makeGuiManagedCore()
+        connect(core, [display(1, "A")])
+        core.state.workspaces.ensureSpace(SpaceID(1))
+        // set_gap_global is NOT managed vocabulary: no raw
+        // editor forced, isGuiManaged stays true (#14).
+        // But once gui.json exists the Standard owns tiling
+        // on a monitor change and overrides this Lua call.
+        // This is INTENDED: harmless tiling Lua flips back
+        // to GUI ownership; set_gap_global is not in the
+        // managed block (tiling lives in profiles, #36).
+        let lua = "KiwiDesk.set_gap_global(30)"
+        try lua.write(
+            to: core.configURL,
+            atomically: true,
+            encoding: .utf8
+        )
+        #expect(!core.configHasForeignCode)
+        #expect(core.configHasCustomCode)
+        #expect(core.isGuiManaged)
+        // Simulate the Lua tiling call having been applied.
+        core.tiler.settings.gapsGlobal = .uniform(30)
+
+        core.handleMonitorChange()
+        // The composed Standard is applied (Developer: 8 pt
+        // uniform gaps), overriding the hand-set 30 pt gap.
+        #expect(core.profiles.currentStandard != nil)
+        #expect(
+            core.tiler.settings.gapsGlobal == .uniform(8)
+        )
+    }
+
+    @Test(
         "harmless custom Lua beside gui.json stays GUI-managed"
     )
     func harmlessCustomLuaIsGuiManaged() throws {

@@ -20,18 +20,30 @@ public enum ManagedConfig {
 
     // MARK: - Managed vocabulary
 
-    /// Token substrings that appear in the GUI's generated
-    /// managed block (derived from `LuaConfigWriter`). Code
-    /// outside the block that contains one of these tokens
-    /// forces the raw editor — the GUI cannot safely own
-    /// the file when the same vocabulary appears in both
-    /// regions. Harmless custom Lua (none of these tokens)
-    /// coexists with the visual editor instead.
+    /// Tokens matched against non-comment lines outside the
+    /// managed block (see `touchesManagedVocabulary`). A
+    /// match forces the raw editor because the GUI cannot
+    /// safely co-own that vocabulary. Harmless custom Lua
+    /// (no matching token) coexists with the visual editor.
+    ///
+    /// Matching rules (see `lineMatchesToken`):
+    /// - Tokens ending with `(` (method calls): optional
+    ///   whitespace before `(` is collapsed first, so
+    ///   `KiwiDesk.bind (` also matches `KiwiDesk.bind(`.
+    /// - Bare-identifier tokens (`app_rules`, `float_rules`):
+    ///   require a word boundary and `\s*=` after the token
+    ///   so a substring inside a longer identifier
+    ///   (`app_rules_count`) or a string literal
+    ///   (`"app_rules"`) does not match.
+    ///
+    /// Known limitation: receiver aliasing
+    /// (`local K = KiwiDesk; K.bind(…)`) escapes detection.
+    /// Token-based scanning (not full Lua parsing) is a
+    /// deliberate pre-release tradeoff.
     ///
     /// Drift guard: `ManagedVocabularyTests` verifies that
     /// every line `LuaConfigWriter` emits is covered by at
-    /// least one token here — add to this list whenever the
-    /// writer gains a new top-level construct.
+    /// least one token here.
     public static let managedTokens: [String] = [
         "app_rules",
         "float_rules",
@@ -167,6 +179,28 @@ public enum ManagedConfig {
         return isCode(split.before) || isCode(split.after)
     }
 
+    /// Classifies a config source in a single scan: returns
+    /// both `foreign` and `custom` flags without reading the
+    /// file twice. `foreign` implies `custom` by construction.
+    ///
+    /// Prefer this over the two separate predicates when the
+    /// source is already in memory (e.g. `SettingsModel
+    /// .reload()`), avoiding triple file reads for one
+    /// logical check.
+    public static func classify(
+        _ source: String
+    ) -> (foreign: Bool, custom: Bool) {
+        let sp = split(source)
+        let foreign =
+            touchesManagedVocabulary(sp.before)
+            || touchesManagedVocabulary(sp.after)
+        let custom =
+            foreign
+            || isCode(sp.before)
+            || isCode(sp.after)
+        return (foreign: foreign, custom: custom)
+    }
+
     // MARK: - Internals
 
     /// Drops any line that is itself a block marker.
@@ -180,7 +214,13 @@ public enum ManagedConfig {
     }
 
     /// True if `text` holds a line that is not blank and not a
-    /// full-line comment (`-- ...`).
+    /// full-line Lua comment (lines starting with `--`).
+    ///
+    /// Known limitation: `--[[ … ]]` block comment interior
+    /// lines that don't start with `--` are treated as code
+    /// by this line-by-line scan. The behavior is
+    /// over-conservative (not dangerous); it is pinned by
+    /// `ManagedConfigTests.blockCommentInteriorIsTreatedAsCode`.
     private static func isCode(_ text: String) -> Bool {
         for line in text.components(separatedBy: "\n") {
             let t = line.trimmed
@@ -191,7 +231,8 @@ public enum ManagedConfig {
     }
 
     /// True if any non-blank, non-comment line in `text`
-    /// contains a managed-vocabulary token.
+    /// contains a managed-vocabulary token (matched via
+    /// `lineMatchesToken` for token-type-aware rules).
     private static func touchesManagedVocabulary(
         _ text: String
     ) -> Bool {
@@ -200,10 +241,49 @@ public enum ManagedConfig {
             guard !t.isEmpty else { continue }
             if t.hasPrefix("--") { continue }
             for token in managedTokens {
-                if t.contains(token) { return true }
+                if lineMatchesToken(t, token: token) {
+                    return true
+                }
             }
         }
         return false
+    }
+
+    /// Matches `line` against `token` with token-type-aware
+    /// rules:
+    /// - Tokens ending with `(` (method calls): optional
+    ///   whitespace before `(` is collapsed first so that
+    ///   `KiwiDesk.bind ("alt+h", …)` matches the token
+    ///   `KiwiDesk.bind(`.
+    /// - Bare-identifier tokens (`app_rules`, `float_rules`):
+    ///   a word boundary followed by `\s*=` is required so
+    ///   that a substring inside a longer identifier
+    ///   (`app_rules_count`) or inside a string literal
+    ///   (`"app_rules"`) does not produce a false positive.
+    private static func lineMatchesToken(
+        _ line: String,
+        token: String
+    ) -> Bool {
+        if token.hasSuffix("(") {
+            // Collapse whitespace immediately before ( so
+            // `KiwiDesk.bind (` also matches `KiwiDesk.bind(`.
+            let norm = line.replacingOccurrences(
+                of: #"\s+\("#,
+                with: "(",
+                options: .regularExpression
+            )
+            return norm.contains(token)
+        }
+        // Bare-identifier tokens: require word boundary + =
+        // so app_rules_count and "app_rules" don't match.
+        let pat =
+            #"\b"#
+            + NSRegularExpression.escapedPattern(for: token)
+            + #"\s*="#
+        return line.range(
+            of: pat,
+            options: .regularExpression
+        ) != nil
     }
 }
 

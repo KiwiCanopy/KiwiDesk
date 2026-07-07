@@ -122,14 +122,14 @@ final class SettingsModel: ObservableObject {
         KeybindingImportClassifier.classify(&loaded)
         config = loaded
         suppressDirty = false
-        forcedLuaEditor = core.configHasForeignCode
-        hasCustomLua =
-            !forcedLuaEditor && core.configHasCustomCode
         luaSource =
             (try? String(
                 contentsOf: configURL,
                 encoding: .utf8
             )) ?? ""
+        let flags = ManagedConfig.classify(luaSource)
+        forcedLuaEditor = flags.foreign
+        hasCustomLua = !flags.foreign && flags.custom
         // Baseline for `globalsChanged`: the *overlaid* model,
         // not the raw sidecar — live profile state merged in
         // (e.g. composed monocle-fill spaces in the spaces

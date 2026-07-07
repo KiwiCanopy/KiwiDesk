@@ -43,6 +43,17 @@ block — is left completely untouched on every save and a small
 informational banner is shown to confirm it. The visual editor
 stays active.
 
+Tiling commands (`set_gap_global`, `set_mode`, and similar
+calls) also fall into this harmless category and do not force
+the raw Lua editor. However, **once `gui.json` exists the
+visual editor owns tiling**: on a monitor change when no saved
+profile matches the connected displays, KiwiDesk applies the
+closest built-in Standard profile, resetting gaps, modes, and
+layout parameters. Hand-written tiling calls written outside
+the managed block do not survive that reset. To persist custom
+tiling across monitor changes, configure it in the Layouts &
+Gaps controls and save it as a profile.
+
 **The raw Lua editor replaces the visual controls** only when
 custom code outside the block touches the same vocabulary the
 GUI writes — declaring `app_rules`, `float_rules`, a keybinding,
