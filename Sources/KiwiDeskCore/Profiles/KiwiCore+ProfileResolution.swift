@@ -167,20 +167,28 @@ extension KiwiCore {
         guard !displays.isEmpty else { return }
         let fingerprints = displays.map(\.fingerprint)
 
-        // A native-Space binding wins over matching (#7).
+        // A native-Space binding wins over matching (#7); a
+        // binding that fails to load falls through to matching.
         if let number = NativeSpaces.activeSpaceNumber(),
-            let boundName = nativeSpaceBindings[number],
-            let bound = try? profiles.load(name: boundName)
+            let boundName = nativeSpaceBindings[number]
         {
-            apply(profile: bound)
-            if bound.set(matching: fingerprints) == nil {
-                profiles.markDirty()
+            do {
+                let bound = try profiles.load(name: boundName)
+                apply(profile: bound)
+                if bound.set(matching: fingerprints) == nil {
+                    profiles.markDirty()
+                }
+                onLog(
+                    "monitor change: loaded bound profile "
+                        + "'\(boundName)'"
+                )
+                return
+            } catch {
+                onLog(
+                    "cannot load bound profile "
+                        + "'\(boundName)': \(error)"
+                )
             }
-            onLog(
-                "monitor change: loaded bound profile "
-                    + "'\(boundName)'"
-            )
-            return
         }
 
         switch profiles.match(fingerprints: fingerprints) {
@@ -193,8 +201,11 @@ extension KiwiCore {
                         + "'\(profile.name)'"
                 )
             } else {
-                // Same profile, possibly a different set of
-                // its — re-resolve placement, stay clean.
+                // Same profile back on one of its exact sets
+                // (e.g. re-docked after an interim mismatch):
+                // re-adopt so a lingering dirty flag clears,
+                // and re-resolve with that set's pins.
+                profiles.adopt(profile)
                 spacePins =
                     profile.set(matching: fingerprints)?
                     .spaceMonitorMap ?? [:]
@@ -217,6 +228,22 @@ extension KiwiCore {
                     mainID: PositionalDisplays.liveMainID
                 )
             else { return }
+            // A hand-written Lua config (no gui.json) owns its
+            // tiling: the Standard only steers placement, and
+            // no transient-standard state is adopted — the Lua
+            // base survives reloads untouched (#36 promise).
+            guard guiConfigStore.exists else {
+                resolveSpaceDisplays()
+                retile()
+                emitSpaceChange()
+                onLog(
+                    "monitor change: no matching profile, "
+                        + "placement follows standard "
+                        + "'\(composed.sourceName)' "
+                        + "(Lua-owned tiling untouched)"
+                )
+                return
+            }
             apply(composed: composed)
             profiles.adoptStandard(named: composed.sourceName)
             onLog(

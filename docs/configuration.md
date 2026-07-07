@@ -750,6 +750,13 @@ displays change, KiwiDesk resolves in this order:
    *Standards & Presets* below); screens beyond its plan each
    get one monocle space, so no screen is ever blank.
 
+   The Standard only *owns tiling* (gaps, modes, parameters)
+   when the config is GUI-managed (a `gui.json` sidecar
+   exists). With a purely hand-written `init.lua`, your
+   Lua-declared tiling stays authoritative and the Standard
+   merely steers the space→screen placement — no transient
+   `Standard: <name>` state is entered.
+
 Every space always resolves to a screen: an explicit
 fingerprint pin wins, then the **Main** role (the space
 follows whatever display is currently main — dock and undock

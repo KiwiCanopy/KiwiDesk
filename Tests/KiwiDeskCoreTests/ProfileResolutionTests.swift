@@ -15,6 +15,16 @@ private func makeCore() -> KiwiCore {
     )
 }
 
+/// A core whose config is GUI-managed (a `gui.json` sidecar
+/// exists) — the mode in which the built-in Standard may own
+/// tiling when nothing matches (#53).
+@MainActor
+private func makeGuiManagedCore() -> KiwiCore {
+    let core = makeCore()
+    try? core.guiConfigStore.save(GuiConfig())
+    return core
+}
+
 @MainActor
 private func connect(
     _ core: KiwiCore,
@@ -137,9 +147,54 @@ struct ProfileCommandTests {
         #expect(!response.isSuccess)
     }
 
+    @Test("Path-escaping profile names are rejected")
+    func unsafeNames() {
+        let core = makeCore()
+        connect(core, [display(1, "A")])
+        for bad in ["../escape", "a/b", ".hidden", "   "] {
+            #expect(
+                !core.execute(
+                    "save_profile",
+                    args: [.string(bad)]
+                ).isSuccess
+            )
+            #expect(
+                !core.execute(
+                    "delete_profile",
+                    args: [.string(bad)]
+                ).isSuccess
+            )
+            #expect(
+                !core.execute(
+                    "load_profile",
+                    args: [.string(bad)]
+                ).isSuccess
+            )
+        }
+        #expect(core.profiles.list().isEmpty)
+    }
+
+    @Test("A profile saved for other monitors loads dirty")
+    func loadMismatchedDirty() {
+        let core = makeCore()
+        connect(core, [display(1, "A")])
+        core.execute(
+            "save_profile",
+            args: [.string("desk")]
+        )
+        core.state.workspaces.removeDisplay(DisplayID(1))
+        connect(core, [display(2, "B")])
+        core.execute(
+            "load_profile",
+            args: [.string("desk")]
+        )
+        #expect(core.profiles.currentName == "desk")
+        #expect(core.profiles.isDirty)
+    }
+
     @Test("delete_profile removes and reverts to fallback")
     func deleteProfile() {
-        let core = makeCore()
+        let core = makeGuiManagedCore()
         connect(core, [display(1, "A")])
         core.execute(
             "save_profile",
@@ -236,9 +291,33 @@ struct MonitorChangeTests {
         #expect(core.profiles.isDirty)
     }
 
+    @Test("Exact re-dock of the active profile clears dirty")
+    func redockClearsDirty() throws {
+        let core = makeCore()
+        connect(core, [display(1, "A")])
+        core.execute(
+            "save_profile",
+            args: [.string("desk")]
+        )
+        // Undock onto unknown hardware of the same count: the
+        // count's default profile loads dirty.
+        core.state.workspaces.removeDisplay(DisplayID(1))
+        connect(core, [display(2, "OTHER")])
+        core.handleMonitorChange()
+        #expect(core.profiles.isDirty)
+
+        // Re-dock the original monitor: same profile, exact
+        // set — the dirty flag must clear.
+        core.state.workspaces.removeDisplay(DisplayID(2))
+        connect(core, [display(1, "A")])
+        core.handleMonitorChange()
+        #expect(core.profiles.currentName == "desk")
+        #expect(!core.profiles.isDirty)
+    }
+
     @Test("No profile composes the built-in Standard")
     func standardFallback() throws {
-        let core = makeCore()
+        let core = makeGuiManagedCore()
         connect(core, [display(1, "A")])
 
         core.handleMonitorChange()
@@ -252,6 +331,28 @@ struct MonitorChangeTests {
         #expect(
             core.tiler.settings.gapsGlobal == .uniform(8)
         )
+        #expect(
+            core.state.workspaces.display(of: SpaceID(1))
+                == DisplayID(1)
+        )
+    }
+
+    @Test("Without gui.json the Standard only steers placement")
+    func luaOwnedTilingSurvives() throws {
+        let core = makeCore()
+        connect(core, [display(1, "A")])
+        core.execute("set_gap_global", args: [.number(30)])
+        core.state.workspaces.ensureSpace(SpaceID(1))
+
+        core.handleMonitorChange()
+        // No transient-standard state, no dirty banner, and
+        // the Lua-declared tiling is untouched (#36 promise).
+        #expect(core.profiles.currentStandard == nil)
+        #expect(!core.profiles.isDirty)
+        #expect(
+            core.tiler.settings.gapsGlobal == .uniform(30)
+        )
+        // Placement still resolves totally.
         #expect(
             core.state.workspaces.display(of: SpaceID(1))
                 == DisplayID(1)

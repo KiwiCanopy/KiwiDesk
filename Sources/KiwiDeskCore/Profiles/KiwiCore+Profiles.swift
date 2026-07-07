@@ -33,6 +33,13 @@ extension KiwiCore {
                     name: name
                 )
                 self.apply(profile: profile)
+                // A profile saved for other monitors stays
+                // loadable but loads dirty (#36).
+                let live = self.state.workspaces.allDisplays
+                    .map(\.fingerprint)
+                if profile.set(matching: live) == nil {
+                    self.profiles.markDirty()
+                }
             }
         case "delete_profile":
             return namedProfileCommand(args) { name in
