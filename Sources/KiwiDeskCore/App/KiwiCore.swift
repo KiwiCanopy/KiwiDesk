@@ -64,6 +64,17 @@ public final class KiwiCore {
         NSLog("KiwiDesk: %@", message)
     }
 
+    /// Problems from the last config load (#68): a broken
+    /// init.lua, an unreadable gui.json, invalid profile JSONs.
+    /// Empty when the config loaded cleanly. Drives the
+    /// menu-bar error badge and the Config Issues panel.
+    public internal(set) var configIssues: [ConfigIssue] = []
+    /// Fired whenever `configIssues` changes (including back
+    /// to empty, so the badge clears itself).
+    public var onConfigIssuesChange:
+        @MainActor ([ConfigIssue])
+            -> Void = { _ in }
+
     /// `~/.config/KiwiDesk/` (created on demand).
     public let configDirectory: URL
     public var configURL: URL {

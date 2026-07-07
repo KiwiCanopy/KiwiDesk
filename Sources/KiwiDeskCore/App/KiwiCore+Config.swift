@@ -8,8 +8,15 @@ extension KiwiCore {
         keys.reset()
         nativeSpaceBindings = [:]
         resetDeclarativeState()
+        var issues: [ConfigIssue] = []
         guard let fresh = LuaInterpreter() else {
             onLog("failed to create Lua VM")
+            setConfigIssues([
+                ConfigIssue(
+                    source: "init.lua",
+                    message: "failed to create the Lua VM"
+                )
+            ])
             return
         }
         lua = fresh
@@ -22,6 +29,24 @@ extension KiwiCore {
             configURL
         ) {
             onLog("init.lua error: \(error)")
+            issues.append(
+                ConfigIssue(
+                    source: "init.lua",
+                    message: "\(error)"
+                )
+            )
+        }
+        // A sidecar that exists but no longer decodes means
+        // the visual editor (and the structured loader) can't
+        // see the user's rules — half-loaded, must be visible.
+        if guiConfigStore.exists, guiConfigStore.load() == nil {
+            issues.append(
+                ConfigIssue(
+                    source: "gui.json",
+                    message: "unreadable — rules and "
+                        + "shortcuts were not applied"
+                )
+            )
         }
         // Two mutually exclusive config owners (#55, O7):
         // GUI-managed configs load rules + keybindings directly
@@ -47,6 +72,10 @@ extension KiwiCore {
         // The current native space may carry a binding that
         // the config just (re)declared.
         applyNativeSpaceBinding()
+        // Publish what this load could not apply (#68): the
+        // Lua/sidecar problems above plus any profile JSON
+        // that no longer decodes.
+        setConfigIssues(issues + profileConfigIssues())
     }
 
     /// Clears every setting the config declares *sparsely* so a
