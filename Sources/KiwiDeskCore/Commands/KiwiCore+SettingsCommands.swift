@@ -49,6 +49,18 @@ extension KiwiCore {
                 return .fail("expected milliseconds")
             }
             sleepWake.restoreDelayMS = max(0, ms)
+        case "set_space_icon":
+            // Optional recognition icon per space (#68) — an
+            // SF Symbol name, emoji, or single character (the
+            // mode-icon grammar). An empty icon clears.
+            guard let space = args.first?.stringValue,
+                !space.isEmpty,
+                let icon = args.dropFirst().first?.stringValue
+            else {
+                return .fail("expected space id and icon")
+            }
+            tiler.settings.spaceIcons[SpaceID(space)] =
+                icon.isEmpty ? nil : icon
         case "set_fallback_space":
             // The explicit rehome target (#68): where windows
             // land when a profile switch drops their space. An

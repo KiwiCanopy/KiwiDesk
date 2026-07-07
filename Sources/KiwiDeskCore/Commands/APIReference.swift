@@ -33,6 +33,7 @@ public enum APIReference {
             ("set_gap_override", "set_gap_override"),
             ("set_min_window_size", "set_min_window_size"),
             ("set_fallback_space", "set_fallback_space"),
+            ("set_space_icon", "set_space_icon"),
             (
                 "set_new_window_placement_override",
                 "set_new_window_placement_override"

@@ -37,6 +37,11 @@ public struct TilingSettings: Sendable, Equatable, Codable {
     public var animations = AnimationSettings()
     /// What resizing a tiled window with the mouse does.
     public var mouseResize: MouseResizeMode = .layout
+    /// Optional recognition icon per space (#68): an SF Symbol
+    /// name, an emoji, or a single character — the same grammar
+    /// as mode icons. Sparse; the name stays primary everywhere.
+    /// `space.icon[space_id]`.
+    public var spaceIcons: [SpaceID: String] = [:]
 
     public init() {}
 
@@ -52,6 +57,11 @@ public struct TilingSettings: Sendable, Equatable, Codable {
         case placementOverride =
             "new_window_placement_override"
         case mouseResize = "mouse_resize"
+        case space
+    }
+
+    private enum SpaceKeys: String, CodingKey {
+        case icon
     }
 
     private enum DragKeys: String, CodingKey {
@@ -110,6 +120,22 @@ public struct TilingSettings: Sendable, Equatable, Codable {
         try decodeGap(from: container)
         try decodeLayout(from: container)
         try decodeDrag(from: container)
+        try decodeSpace(from: container)
+    }
+
+    private mutating func decodeSpace(
+        from container: Container
+    ) throws {
+        guard container.contains(.space) else { return }
+        let space = try container.nestedContainer(
+            keyedBy: SpaceKeys.self,
+            forKey: .space
+        )
+        spaceIcons =
+            try space.decodeIfPresent(
+                [SpaceID: String].self,
+                forKey: .icon
+            ) ?? [:]
     }
 
     private mutating func decodeGap(
@@ -234,6 +260,11 @@ public struct TilingSettings: Sendable, Equatable, Codable {
         )
         try drag.encode(dragGhost, forKey: .ghost)
         try drag.encode(dragDropZone, forKey: .dropZone)
+        var space = container.nestedContainer(
+            keyedBy: SpaceKeys.self,
+            forKey: .space
+        )
+        try space.encode(spaceIcons, forKey: .icon)
     }
 
     // MARK: - Resolution

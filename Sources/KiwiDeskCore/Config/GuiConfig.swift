@@ -53,8 +53,9 @@ public struct GuiConfig: Codable, Equatable, Sendable {
 
     /// Renames a space everywhere it is referenced (#13): the
     /// `spaces` list, `spaceModes`, `appRules`, the monitor pin
-    /// and Main-role maps, the per-space
-    /// `settings.gapsOverride` / `settings.placementOverride`
+    /// and Main-role maps, the fallback-space reference, the
+    /// per-space `settings.gapsOverride` /
+    /// `settings.placementOverride` / `settings.spaceIcons`
     /// maps, and the space-targeting Lua inside every
     /// keybinding. A no-op returning `false` when `from` is
     /// unknown or `to` already exists (the caller keeps the old
@@ -96,6 +97,11 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             .removeValue(forKey: from)
         {
             settings.placementOverride[to] = placement
+        }
+        if let icon = settings.spaceIcons.removeValue(
+            forKey: from
+        ) {
+            settings.spaceIcons[to] = icon
         }
         for (app, space) in appRules where space == from {
             appRules[app] = to
@@ -180,6 +186,9 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             settings.placementOverride.filter {
                 !$0.key.raw.isEmpty
             }
+        settings.spaceIcons = settings.spaceIcons.filter {
+            !$0.key.raw.isEmpty
+        }
     }
 
     /// JSON object keys are strings; native-space numbers are
