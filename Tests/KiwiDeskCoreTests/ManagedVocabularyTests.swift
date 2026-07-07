@@ -132,6 +132,11 @@ struct ManagedVocabularyTests {
     /// entry to `managedTokens` so `tokensAppearInGeneratedBlock`
     /// also catches the drift.
     ///
+    /// A non-collection field (`Bool`/enum/`Int`) is neither
+    /// `EmptyCheckable` nor `settings`, so it trips the `else`
+    /// branch and fails until the guard is extended — the net
+    /// cannot silently rot on the next scalar field.
+    ///
     /// Limitation: the Mirror net catches a missing *property*,
     /// not a forgotten line in `encode`/`resolved()`. The
     /// struct `settings` cannot be compared through `Any`, so
@@ -148,6 +153,14 @@ struct ManagedVocabularyTests {
                     !c.anyIsEmpty,
                     "GuiConfig.\(label) empty — populate vocabConfig()"
                 )
+            } else if label != "settings" {
+                // A new non-collection field slipped the net —
+                // it is neither EmptyCheckable nor the struct
+                // checked below. Fail so the guard is extended.
+                let msg =
+                    "GuiConfig.\(label): unhandled field type "
+                    + "— extend allFieldsNonDefault to cover it"
+                Issue.record("\(msg)")
             }
         }
         // Non-collection struct: compared directly because
