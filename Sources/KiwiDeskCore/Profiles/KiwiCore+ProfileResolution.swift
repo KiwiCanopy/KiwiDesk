@@ -22,7 +22,10 @@ extension KiwiCore {
             state.workspaces.ensureSpace(id)
         }
         if pruneStaleSpaces {
-            pruneSpaces(keeping: declared)
+            pruneSpaces(
+                keeping: declared,
+                orderedBy: profile.orderedSpaces
+            )
         }
         // Dense over all live spaces: a space a (hand-edited,
         // sparse) profile doesn't declare reverts to bsp
@@ -48,16 +51,25 @@ extension KiwiCore {
 
     /// Explicit-load reconcile: drop live spaces whose name isn't
     /// in the new profile, forwarding any windows they hold to the
-    /// profile's first space so none are orphaned. A space whose
-    /// name also exists in the new profile is kept untouched — its
-    /// windows stay put regardless of the layout difference. The
-    /// fallback follows the same order the Spaces list shows; a
-    /// user-chosen order is a follow-up (roadmap #27).
-    private func pruneSpaces(keeping survivors: Set<SpaceID>) {
-        guard
-            let fallback =
-                GuiConfig.orderedSpaces(Array(survivors)).first
-        else { return }
+    /// rehome target so none are orphaned. A space whose name also
+    /// exists in the new profile is kept untouched — its windows
+    /// stay put regardless of the layout difference.
+    ///
+    /// `orderedBy` is the profile's `orderedSpaces` list (#75):
+    /// the rehome target is the first element that is also a
+    /// survivor, so windows land in the first space of the new
+    /// profile's displayed list. Falls back to a sorted-survivor
+    /// if none of the ordered spaces survived (degenerate).
+    private func pruneSpaces(
+        keeping survivors: Set<SpaceID>,
+        orderedBy storedOrder: [SpaceID]
+    ) {
+        let fallback =
+            storedOrder.first { survivors.contains($0) }
+            ?? GuiConfig.orderedSpaces(
+                Array(survivors)
+            ).first
+        guard let fallback else { return }
         for space in state.workspaces.allSpaces
         where !survivors.contains(space.id) {
             for window in space.windows {

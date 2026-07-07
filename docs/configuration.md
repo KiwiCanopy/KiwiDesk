@@ -835,10 +835,13 @@ window in a space whose name also exists in the new profile
 stays put — regardless of any layout difference. A space whose
 name the new profile doesn't define is dropped, and any windows
 it held are forwarded to the **first space** of the new profile
-(the first in the Spaces-tab list) so nothing is lost. This
-reconcile happens only on an explicit `load_profile`; automatic
-applies on a monitor change or a native-Space binding leave
-your spaces untouched.
+— the first in its Spaces-tab list, which is the order the
+profile stores. The Settings app preserves that order; if you
+reorder the list and save the profile, the new first space
+becomes the rehome target for future profile switches.
+This reconcile happens only on an explicit `load_profile`;
+automatic applies on a monitor change or a native-Space binding
+leave your spaces untouched.
 
 A profile covers one or more concrete **monitor sets** — each
 a list of monitor fingerprints plus the space→monitor pins

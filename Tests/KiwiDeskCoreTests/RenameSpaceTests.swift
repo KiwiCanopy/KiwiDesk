@@ -190,3 +190,50 @@ struct RenameSpaceTests {
         #expect(config.spaceModes[SpaceID("2")] == .stack)
     }
 }
+
+/// `GuiConfig.moveToFirst` and `GuiConfig.deduplicated` (#75).
+@Suite("GuiConfig space-order helpers")
+struct GuiConfigSpaceOrderTests {
+    @Test("moveToFirst moves a middle space to index 0")
+    func moveToFirstMid() {
+        var config = GuiConfig()
+        config.spaces = [SpaceID("a"), SpaceID("b"), SpaceID("c")]
+        config.moveToFirst(SpaceID("b"))
+        #expect(
+            config.spaces
+                == [SpaceID("b"), SpaceID("a"), SpaceID("c")]
+        )
+    }
+
+    @Test("moveToFirst is a no-op when already first")
+    func moveToFirstAlreadyFirst() {
+        var config = GuiConfig()
+        config.spaces = [SpaceID("a"), SpaceID("b")]
+        config.moveToFirst(SpaceID("a"))
+        #expect(
+            config.spaces == [SpaceID("a"), SpaceID("b")]
+        )
+    }
+
+    @Test("moveToFirst is a no-op for absent spaces")
+    func moveToFirstAbsent() {
+        var config = GuiConfig()
+        config.spaces = [SpaceID("a"), SpaceID("b")]
+        config.moveToFirst(SpaceID("z"))
+        #expect(
+            config.spaces == [SpaceID("a"), SpaceID("b")]
+        )
+    }
+
+    @Test("deduplicated preserves insertion order, no sort")
+    func deduplicatedOrder() {
+        let result = GuiConfig.deduplicated([
+            SpaceID("z"), SpaceID("a"), SpaceID("m"),
+            SpaceID("z"),  // duplicate — dropped
+        ])
+        // Order is z, a, m — NOT sorted alphabetically.
+        #expect(
+            result == [SpaceID("z"), SpaceID("a"), SpaceID("m")]
+        )
+    }
+}
