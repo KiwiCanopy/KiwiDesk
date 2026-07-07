@@ -131,11 +131,11 @@ extension KiwiCore {
     public func applyProfileScopedState(
         from config: GuiConfig
     ) {
-        // Route through the facade so the engine's cached
-        // durations track the incoming settings — a bare
-        // `tiler.settings =` here would retile below at the
-        // stale duration (#51 review).
-        applyTilingSettings(config.settings)
+        // The engine's cached durations sync via
+        // `TilingEngine.settings.didSet`, so the retile below
+        // animates at the incoming duration, not a stale one
+        // (#51 review).
+        tiler.settings = config.settings
         // Ensure spaces in display order first (config.spaces
         // is the authoritative list, so insertion order matches
         // the user's chosen Spaces ordering). Any extras that

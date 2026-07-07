@@ -16,7 +16,9 @@ extension KiwiCore {
         profile: Profile,
         pruneStaleSpaces: Bool = false
     ) {
-        applyTilingSettings(profile.settings)
+        // The engine's cached durations sync via
+        // `TilingEngine.settings.didSet` (#51).
+        tiler.settings = profile.settings
         let declared = profile.declaredSpaces
         // Seed live order from the profile's stored list so
         // creation order matches display order. Using
@@ -102,7 +104,7 @@ extension KiwiCore {
     /// Applies a composed Standard fallback (#53): transient,
     /// nothing is written until the user saves.
     func apply(composed: ProfileComposition.Composed) {
-        applyTilingSettings(composed.settings)
+        tiler.settings = composed.settings
         for space in composed.spaces {
             state.workspaces.ensureSpace(space)
             state.workspaces.setMode(

@@ -40,7 +40,8 @@ extension KiwiCore {
                 "scroll.set_speed is deprecated — use "
                     + "animations.set_scroll_speed(ms)"
             )
-            setScrollSpeed(ms)
+            // Engine syncs via TilingEngine.settings.didSet.
+            tiler.settings.animations.scrollSpeedMS = ms
         case "scroll.set_new_window_placement":
             guard let placement = parsePlacement(args) else {
                 return placementError
