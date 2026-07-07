@@ -6,11 +6,22 @@ import Foundation
 extension KiwiCore {
     // MARK: - Applying
 
-    /// Applies a profile to live state and retiles.
-    func apply(profile: Profile) {
+    /// Applies a profile to live state and retiles. An explicit
+    /// user load passes `pruneStaleSpaces: true` so the profile's
+    /// space set becomes authoritative (see `pruneSpaces`);
+    /// hardware-driven applies (monitor change, native-space
+    /// binding) leave it false to avoid shuffling windows on a
+    /// reconnect.
+    func apply(
+        profile: Profile,
+        pruneStaleSpaces: Bool = false
+    ) {
         tiler.settings = profile.settings
         for id in profile.spaceModes.keys {
             state.workspaces.ensureSpace(id)
+        }
+        if pruneStaleSpaces {
+            pruneSpaces(keeping: Set(profile.spaceModes.keys))
         }
         // Dense over all live spaces: a space a (hand-edited,
         // sparse) profile doesn't declare reverts to bsp
@@ -32,6 +43,27 @@ extension KiwiCore {
         resolveSpaceDisplays()
         retile()
         emitSpaceChange()
+    }
+
+    /// Explicit-load reconcile: drop live spaces whose name isn't
+    /// in the new profile, forwarding any windows they hold to the
+    /// profile's first space so none are orphaned. A space whose
+    /// name also exists in the new profile is kept untouched — its
+    /// windows stay put regardless of the layout difference. The
+    /// fallback follows the same order the Spaces list shows; a
+    /// user-chosen order is a follow-up (roadmap #27).
+    private func pruneSpaces(keeping survivors: Set<SpaceID>) {
+        guard
+            let fallback =
+                GuiConfig.orderedSpaces(Array(survivors)).first
+        else { return }
+        for space in state.workspaces.allSpaces
+        where !survivors.contains(space.id) {
+            for window in space.windows {
+                state.workspaces.add(window, to: fallback)
+            }
+            state.workspaces.removeSpace(space.id)
+        }
     }
 
     /// Applies a composed Standard fallback (#53): transient,

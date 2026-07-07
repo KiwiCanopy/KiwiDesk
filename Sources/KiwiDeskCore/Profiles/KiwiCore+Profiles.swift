@@ -32,7 +32,10 @@ extension KiwiCore {
                 let profile = try self.profiles.load(
                     name: name
                 )
-                self.apply(profile: profile)
+                // Explicit user load: the profile's spaces become
+                // authoritative — stale spaces are pruned and
+                // their windows forwarded (see `pruneSpaces`).
+                self.apply(profile: profile, pruneStaleSpaces: true)
                 // A profile saved for other monitors stays
                 // loadable but loads dirty (#36).
                 let live = self.state.workspaces.allDisplays

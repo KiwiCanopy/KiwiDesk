@@ -55,6 +55,19 @@ public struct WorkspaceManager: Sendable {
         activeSpace = id
     }
 
+    /// Removes a space and forgets its display assignment. Any
+    /// windows still in it are dropped, so callers that must keep
+    /// them move them out first (`add(_:to:)`). The active space
+    /// falls back to the first remaining space when removed.
+    public mutating func removeSpace(_ id: SpaceID) {
+        spaces[id] = nil
+        order.removeAll { $0 == id }
+        spaceDisplay[id] = nil
+        if activeSpace == id {
+            activeSpace = order.first
+        }
+    }
+
     // MARK: - Window membership
 
     /// The space currently containing the window, if any.

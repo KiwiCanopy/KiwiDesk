@@ -88,9 +88,12 @@ extension KiwiCore {
             }
         }
         config.spaceModes = modes
-        config.spaces = GuiConfig.orderedSpaces(
-            config.spaces + live
-        )
+        // Live state is authoritative for which spaces exist — a
+        // profile load prunes stale spaces from it, so the tab
+        // must not resurrect them from the (still-stale) sidecar
+        // `spaces`. Every saved space is re-ensured into live on
+        // save, so live is already a superset of the sidecar's.
+        config.spaces = GuiConfig.orderedSpaces(live)
         config.spacePins = spacePins
         config.mainSpaces = mainSpaces
     }
