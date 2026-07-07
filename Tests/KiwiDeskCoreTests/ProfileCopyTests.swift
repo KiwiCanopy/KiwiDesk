@@ -14,7 +14,7 @@ struct ProfileCopyTests {
 
     // MARK: - Helpers
 
-    private func makeGuiCore() -> KiwiCore {
+    private func makeGuiCore() throws -> KiwiCore {
         let core = KiwiCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
@@ -36,7 +36,9 @@ struct ProfileCopyTests {
                 ]
             )
         ]
-        try? core.guiConfigStore.save(config)
+        // A failed sidecar write would silently flip the diff
+        // base to the live seed — fail the test instead.
+        try core.guiConfigStore.save(config)
         return core
     }
 
@@ -77,7 +79,7 @@ struct ProfileCopyTests {
 
     @Test("Copy carries monitor sets, override, spaces; not default")
     func copyCarriesStoredState() throws {
-        let core = makeGuiCore()
+        let core = try makeGuiCore()
         try core.profiles.save(sourceProfile())
         let edited = try core.loadGuiConfig(editing: "Dock")
 
@@ -107,7 +109,7 @@ struct ProfileCopyTests {
 
     @Test("Pending edits land in the copy, not the source")
     func pendingEditsLandInCopy() throws {
-        let core = makeGuiCore()
+        let core = try makeGuiCore()
         try core.profiles.save(sourceProfile())
         var edited = try core.loadGuiConfig(editing: "Dock")
         // Rebind alt+h differently in the edit session.
@@ -136,11 +138,36 @@ struct ProfileCopyTests {
         )
     }
 
+    // MARK: - Invalid names fail closed
+
+    @Test("Blank or traversal names throw; nothing written")
+    func invalidNamesThrow() throws {
+        let core = try makeGuiCore()
+        try core.profiles.save(sourceProfile())
+        let edited = try core.loadGuiConfig(editing: "Dock")
+        let before = core.profiles.list()
+
+        for bad in ["   ", "\n", "../evil", ".hidden"] {
+            #expect(throws: (any Error).self) {
+                try core.copyProfile(
+                    named: "Dock",
+                    to: bad,
+                    with: edited
+                )
+            }
+        }
+        #expect(core.profiles.list() == before)
+    }
+
     // MARK: - Non-adopting
 
+    /// NOTE: `profiles.save` in the setup ADOPTS "Dock", so
+    /// this test also covers copying while the source is the
+    /// ACTIVE profile — keep the adopting save if the helper
+    /// changes.
     @Test("Copy adopts nothing and touches no global file")
     func copyIsNonAdopting() throws {
-        let core = makeGuiCore()
+        let core = try makeGuiCore()
         try core.profiles.save(sourceProfile())
         let sidecarURL = core.configDirectory
             .appendingPathComponent("gui.json")
@@ -163,7 +190,7 @@ struct ProfileCopyTests {
 
     @Test("Taken name gets the _1 suffix; result is returned")
     func collisionSuffixed() throws {
-        let core = makeGuiCore()
+        let core = try makeGuiCore()
         try core.profiles.save(sourceProfile())
         let edited = try core.loadGuiConfig(editing: "Dock")
 

@@ -114,21 +114,9 @@ extension SettingsModel {
         reload()
     }
 
-    /// Writes the edited tiling into the stored profile without
-    /// switching the live layout, then hot-reloads it only if it
-    /// is the layout currently on screen (#18).
-    func saveEditedProfile() {
-        guard let name = editingProfile else { return }
-        do {
-            try core.overwriteProfile(named: name, with: config)
-        } catch {
-            profileWarning = "Saving failed: \(error)"
-            core.onLog("profile edit save failed: \(error)")
-            return
-        }
-        core.reapplyIfInEffect(name)
-        reload()
-    }
+    // `saveEditedProfile` / `saveEditedProfileCopy` live with
+    // the rest of the stored-profile editing surface in
+    // `SettingsModel+ProfileOverrides.swift`.
 
     func loadProfile(named name: String) {
         _ = core.execute(

@@ -197,7 +197,7 @@ extension KiwiCore {
         applyProfileEdits(from: config, onto: &copy)
         copy.name = profiles.freeName(
             base: requested.trimmingCharacters(
-                in: .whitespaces
+                in: .whitespacesAndNewlines
             )
         )
         copy.isDefault = false
@@ -247,10 +247,12 @@ extension KiwiCore {
         // than capturing the whole resolved set.
         let sidecar = guiConfigStore.load()
         if guiConfigStore.exists, sidecar == nil {
+            // `profile.name` is the SOURCE here even on the
+            // copy path (rename happens after the transform).
             onLog(
-                "profiles: gui.json unreadable — keeping "
-                    + "'\(profile.name)' keybinding override "
-                    + "unchanged"
+                "profiles: gui.json unreadable — keeping the "
+                    + "stored keybinding override of "
+                    + "'\(profile.name)' unchanged"
             )
         } else {
             profile.modes = KeyModeOverride.diff(

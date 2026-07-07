@@ -50,7 +50,7 @@ extension SettingsModel {
     func saveEditedProfileCopy(named requested: String) {
         guard let source = editingProfile else { return }
         let trimmed = requested.trimmingCharacters(
-            in: .whitespaces
+            in: .whitespacesAndNewlines
         )
         guard !trimmed.isEmpty else { return }
         do {
@@ -59,12 +59,34 @@ extension SettingsModel {
                 to: trimmed,
                 with: config
             )
+            // `freeName` only returns names absent from
+            // `profiles.list()`, and `activeProfile` is always
+            // a listed name while it exists — so `created` can
+            // never equal `activeProfile`, and the direct
+            // assignment safely skips `selectEditTarget`'s
+            // this-is-live-editing normalization.
             editingProfile = created
             reload()
         } catch {
             profileWarning = "Copying failed: \(error)"
             core.onLog("profile copy failed: \(error)")
         }
+    }
+
+    /// Writes the edited tiling into the stored profile without
+    /// switching the live layout, then hot-reloads it only if it
+    /// is the layout currently on screen (#18).
+    func saveEditedProfile() {
+        guard let name = editingProfile else { return }
+        do {
+            try core.overwriteProfile(named: name, with: config)
+        } catch {
+            profileWarning = "Saving failed: \(error)"
+            core.onLog("profile edit save failed: \(error)")
+            return
+        }
+        core.reapplyIfInEffect(name)
+        reload()
     }
 
     // MARK: - Override-mode Shortcuts affordance (#55)
