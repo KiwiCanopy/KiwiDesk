@@ -113,6 +113,37 @@ struct ProfileSpaceReconcileTests {
         #expect(core.state.workspaces.activeSpace == SpaceID("1"))
     }
 
+    // MARK: - Stored-order rehome (#75)
+
+    @Test("Rehome uses profile's stored space order")
+    func rehomeUsesStoredOrder() {
+        // Verify that the reconcile fallback is the first space
+        // in the profile's *stored* order, not the sorted order.
+        // With stored order ["2", "1"], the sorted order would
+        // give "1" first — ensure "2" is used instead.
+        let core = makeCore()
+        core.state.workspaces.ensureSpace(SpaceID("1"))
+        core.state.workspaces.ensureSpace(SpaceID("2"))
+        core.state.workspaces.add(WindowID(42), to: SpaceID("old"))
+        let p = Profile(
+            name: "p",
+            monitorSets: [],
+            spaces: [SpaceID("2"), SpaceID("1")],
+            spaceModes: [
+                SpaceID("1"): .bsp,
+                SpaceID("2"): .bsp,
+            ],
+            settings: TilingSettings()
+        )
+        core.apply(profile: p, pruneStaleSpaces: true)
+        // "old" pruned; its window rehomes to "2" (first in
+        // stored order), not "1" (first in numeric order).
+        #expect(
+            core.state.workspaces.space(of: WindowID(42))
+                == SpaceID("2")
+        )
+    }
+
     @Test("Hardware-driven applies keep spaces, reset stale modes")
     func noPruneByDefault() {
         let core = makeCore()

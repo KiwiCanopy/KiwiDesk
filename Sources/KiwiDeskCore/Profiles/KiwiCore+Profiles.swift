@@ -106,16 +106,21 @@ extension KiwiCore {
     }
 
     /// Snapshot of the current configuration as a new profile
-    /// carrying only the live monitor set.
+    /// carrying only the live monitor set. The live space order
+    /// from `allSpaces` is captured as the profile's stored
+    /// order (#75) so the Spaces list round-trips unchanged.
     func buildProfile(name: String) -> Profile {
         var modes: [SpaceID: LayoutMode] = [:]
+        var liveSpaces: [SpaceID] = []
         for space in state.workspaces.allSpaces {
             modes[space.id] = space.mode
+            liveSpaces.append(space.id)
         }
         return Profile(
             name: name,
             monitorSets: [liveMonitorSet()],
             mainSpaces: mainSpaces.sorted { $0.raw < $1.raw },
+            spaces: liveSpaces,
             spaceModes: modes,
             settings: tiler.settings
         )
@@ -141,6 +146,7 @@ extension KiwiCore {
             )
         }
         let fresh = buildProfile(name: name)
+        existing.spaces = fresh.spaces
         existing.spaceModes = fresh.spaceModes
         existing.mainSpaces = fresh.mainSpaces
         existing.settings = fresh.settings
@@ -164,6 +170,10 @@ extension KiwiCore {
     ) throws {
         var existing = try profiles.read(name: name)
         existing.settings = config.settings
+        // Capture the display order from the GUI model (#75):
+        // the config's `spaces` list is the profile's new
+        // authoritative order.
+        existing.spaces = config.spaces
         // Dense over the profile's own spaces (mirrors
         // `buildProfile`): an undeclared space reads as bsp. The
         // union with `spaceModes.keys` keeps a just-set mode even

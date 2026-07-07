@@ -65,11 +65,9 @@ extension KiwiCore {
         // the live sidecar's spaces, or editing a profile for
         // other hardware would graft this machine's spaces into
         // it on save (mirrors `applyProfileScopedState`, #18).
-        config.spaces = GuiConfig.orderedSpaces(
-            Array(profile.spaceModes.keys)
-                + profile.mainSpaces
-                + Array(config.spacePins.keys)
-        )
+        // Stored order is authoritative (#75); `orderedSpaces`
+        // appends any declared space absent from the list.
+        config.spaces = profile.orderedSpaces
     }
 
     /// Copies the live profile-scoped state into the model:
@@ -88,17 +86,18 @@ extension KiwiCore {
             }
         }
         config.spaceModes = modes
-        // Live state is authoritative for which spaces exist: a
-        // profile load prunes stale spaces from it, and every
-        // `persist` re-ensures the edited spaces into live, so the
-        // tab must not resurrect pruned spaces from the (still-
-        // stale) sidecar `spaces`. Edge (accepted, pre-release):
-        // a bare space that lives *only* in `gui.json` — no mode,
-        // pin, window, or active profile — isn't seeded into live
-        // at cold boot (`loadConfig` doesn't), so it drops on the
-        // next reload. Closing that means reconciling the sidecar
-        // space list against live (#77; config-cascade #55/#75).
-        config.spaces = GuiConfig.orderedSpaces(live)
+        // Live state is authoritative for which spaces EXIST (#75).
+        // Order: use the sidecar's stored list as the base (keeps
+        // the user's chosen display order across reloads), filter
+        // to live members, then append any live space absent from
+        // the sidecar. Stale sidecar spaces (no longer live after a
+        // profile-load prune) drop via the filter. A bare space
+        // only in `gui.json` drops too — it wasn't seeded at boot.
+        let liveSet = Set(live)
+        let ordered = config.spaces.filter { liveSet.contains($0) }
+        let inOrdered = Set(config.spaces)
+        let extra = live.filter { !inOrdered.contains($0) }
+        config.spaces = SpaceID.deduplicated(ordered + extra)
         config.spacePins = spacePins
         config.mainSpaces = mainSpaces
     }
@@ -111,11 +110,19 @@ extension KiwiCore {
         from config: GuiConfig
     ) {
         tiler.settings = config.settings
-        var known = Set(config.spaces)
-        known.formUnion(config.spaceModes.keys)
-        known.formUnion(config.spacePins.keys)
-        known.formUnion(config.mainSpaces)
-        for space in known {
+        // Ensure spaces in display order first (config.spaces
+        // is the authoritative list, so insertion order matches
+        // the user's chosen Spaces ordering). Any extras that
+        // appear only in modes/pins/main get appended after.
+        let inList = Set(config.spaces)
+        var extra: Set<SpaceID> = []
+        extra.formUnion(config.spaceModes.keys)
+        extra.formUnion(config.spacePins.keys)
+        extra.formUnion(config.mainSpaces)
+        for space in config.spaces {
+            state.workspaces.ensureSpace(space)
+        }
+        for space in extra.subtracting(inList) {
             state.workspaces.ensureSpace(space)
         }
         for space in state.workspaces.allSpaces {
@@ -291,7 +298,8 @@ extension KiwiCore {
             if space.mode != .bsp { modes[space.id] = space.mode }
         }
         config.spaceModes = modes
-        config.spaces = GuiConfig.orderedSpaces(
+        // De-dup only — live order is authoritative (#75).
+        config.spaces = SpaceID.deduplicated(
             defined + Array(modes.keys)
         )
         if config.spaces.isEmpty {

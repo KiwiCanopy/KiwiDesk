@@ -18,11 +18,20 @@ extension KiwiCore {
     ) {
         tiler.settings = profile.settings
         let declared = profile.declaredSpaces
-        for id in declared {
+        // Seed live order from the profile's stored list so
+        // creation order matches display order. Using
+        // orderedSpaces (never the declaredSpaces Set) means
+        // WorkspaceManager.order follows the profile's list,
+        // not Set-hash order — making the subsequent
+        // buildProfile capture deterministic and faithful.
+        for id in profile.orderedSpaces {
             state.workspaces.ensureSpace(id)
         }
         if pruneStaleSpaces {
-            pruneSpaces(keeping: declared)
+            pruneSpaces(
+                keeping: declared,
+                orderedBy: profile.orderedSpaces
+            )
         }
         // Dense over all live spaces: a space a (hand-edited,
         // sparse) profile doesn't declare reverts to bsp
@@ -47,17 +56,27 @@ extension KiwiCore {
     }
 
     /// Explicit-load reconcile: drop live spaces whose name isn't
-    /// in the new profile, forwarding any windows they hold to the
-    /// profile's first space so none are orphaned. A space whose
-    /// name also exists in the new profile is kept untouched — its
-    /// windows stay put regardless of the layout difference. The
-    /// fallback follows the same order the Spaces list shows; a
-    /// user-chosen order is a follow-up (roadmap #27).
-    private func pruneSpaces(keeping survivors: Set<SpaceID>) {
-        guard
-            let fallback =
-                GuiConfig.orderedSpaces(Array(survivors)).first
-        else { return }
+    /// in the new profile, forwarding any windows they hold to
+    /// the rehome target so none are orphaned. A space whose
+    /// name also exists in the new profile is kept untouched —
+    /// its windows stay put regardless of the layout difference.
+    ///
+    /// `orderedBy` is the profile's `orderedSpaces` list (#75):
+    /// the rehome target is the first element that is also a
+    /// survivor, so windows land in the first space of the new
+    /// profile's displayed list. When both lists are empty
+    /// (degenerate call) the guard skips pruning entirely.
+    private func pruneSpaces(
+        keeping survivors: Set<SpaceID>,
+        orderedBy storedOrder: [SpaceID]
+    ) {
+        // `orderedSpaces ⊆ declaredSpaces == survivors` so a
+        // non-empty storedOrder always has a match — nil only
+        // when storedOrder itself is empty (empty profile).
+        let fallback = storedOrder.first {
+            survivors.contains($0)
+        }
+        guard let fallback else { return }
         for space in state.workspaces.allSpaces
         where !survivors.contains(space.id) {
             for window in space.windows {

@@ -70,6 +70,20 @@ public struct Profile: Codable, Sendable, Equatable {
     /// Marks this profile as its screen count's default (the
     /// dirty-load fallback when no set matches exactly).
     public var isDefault: Bool
+    /// Persisted display order of the profile's spaces (#75).
+    /// This is the authoritative order for the Spaces list and
+    /// for the reconcile rehome fallback on profile switch.
+    /// New spaces append; existing profiles without this key
+    /// decode to `[]` and fall back to the derived order.
+    ///
+    /// Authority: `gui.json` owns live display order across the
+    /// session; `Profile.spaces` owns per-profile order,
+    /// consulted when that profile is loaded. The two stay in
+    /// sync because `apply(profile:)` seeds live order from
+    /// this list and both save paths (`persistProfile`,
+    /// `overwriteProfile`) capture the resulting live order
+    /// back here.
+    public var spaces: [SpaceID]
     /// Layout mode per space.
     public var spaceModes: [SpaceID: LayoutMode]
     public var settings: TilingSettings
@@ -80,12 +94,13 @@ public struct Profile: Codable, Sendable, Equatable {
         monitorSets.first?.monitors.count ?? 0
     }
 
-    /// Every space the profile declares — by mode, Main role, or a
-    /// monitor pin. The one definition of "this profile's spaces",
-    /// so an authoritative load prunes to exactly what the editor
-    /// shows (a hand-edited pin/main on a mode-less space counts).
+    /// Every space the profile declares — by ordered list, mode,
+    /// Main role, or a monitor pin. The one definition of "this
+    /// profile's spaces", so an authoritative load prunes to
+    /// exactly what the editor shows.
     public var declaredSpaces: Set<SpaceID> {
-        var all = Set(spaceModes.keys)
+        var all = Set(spaces)
+        all.formUnion(spaceModes.keys)
         all.formUnion(mainSpaces)
         for set in monitorSets {
             all.formUnion(set.spaceMonitorMap.keys)
@@ -93,11 +108,31 @@ public struct Profile: Codable, Sendable, Equatable {
         return all
     }
 
+    /// Authoritative display order for this profile's spaces.
+    ///
+    /// Returns `spaces` when non-empty, with any declared space
+    /// absent from the list appended (sorted numerically then
+    /// lexically) — guards against hand-edited JSON gaps.
+    /// Falls back to sorted `declaredSpaces` for legacy profiles
+    /// that predate the `spaces` key.
+    public var orderedSpaces: [SpaceID] {
+        if spaces.isEmpty {
+            return SpaceID.numericLexicalSorted(
+                Array(declaredSpaces)
+            )
+        }
+        let stored = Set(spaces)
+        let extra = declaredSpaces.subtracting(stored)
+        return spaces
+            + SpaceID.numericLexicalSorted(Array(extra))
+    }
+
     private enum CodingKeys: String, CodingKey {
         case name
         case monitorSets = "monitor_sets"
         case mainSpaces = "main_spaces"
         case isDefault = "default"
+        case spaces
         case spaceModes = "space_modes"
         case settings
         case savedAt = "saved_at"
@@ -108,6 +143,7 @@ public struct Profile: Codable, Sendable, Equatable {
         monitorSets: [MonitorSet],
         mainSpaces: [SpaceID] = [],
         isDefault: Bool = false,
+        spaces: [SpaceID] = [],
         spaceModes: [SpaceID: LayoutMode],
         settings: TilingSettings,
         savedAt: Date = .now
@@ -116,6 +152,7 @@ public struct Profile: Codable, Sendable, Equatable {
         self.monitorSets = Self.sanitized(monitorSets)
         self.mainSpaces = mainSpaces.sorted { $0.raw < $1.raw }
         self.isDefault = isDefault
+        self.spaces = SpaceID.deduplicated(spaces)
         self.spaceModes = spaceModes
         self.settings = settings
         self.savedAt = savedAt
@@ -153,6 +190,14 @@ public struct Profile: Codable, Sendable, Equatable {
                 Bool.self,
                 forKey: .isDefault
             ) ?? false
+        // Lenient: missing key on legacy profiles → empty,
+        // which `orderedSpaces` converts to the derived order.
+        spaces = SpaceID.deduplicated(
+            try container.decodeIfPresent(
+                [SpaceID].self,
+                forKey: .spaces
+            ) ?? []
+        )
         spaceModes = try container.decode(
             [SpaceID: LayoutMode].self,
             forKey: .spaceModes
