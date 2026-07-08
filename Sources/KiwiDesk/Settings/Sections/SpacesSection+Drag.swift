@@ -16,8 +16,10 @@ extension SpacesSection {
     /// a stack cannot balance (a mid-drag exit would pop the
     /// closed hand; a re-enter would push an extra open hand
     /// that outlives the drag). While a drag is live, hover
-    /// keeps tracking `hoveredHandle` but stops driving the
-    /// cursor — drag end reads the tracked state instead.
+    /// stops driving the cursor; `hoveredHandle` keeps the
+    /// drag-start handle (mid-drag hover events rarely arrive
+    /// at all), which stays truthful because retargeting
+    /// keeps the row under the pointer — drag end reads it.
     func dragHandle(_ space: SpaceID) -> some View {
         Image(systemName: "line.3.horizontal")
             .foregroundStyle(.secondary)
@@ -37,8 +39,9 @@ extension SpacesSection {
                 // A row removed under the pointer (context-
                 // menu delete) never delivers the balancing
                 // onHover(false), and a cancelled drag (the
-                // window resigning key) skips onEnded —
-                // restore the arrow and drop the stale state.
+                // window resigning key) skips onEnded — drop
+                // the stale state and restore whichever
+                // cursor the remaining hover state earns.
                 guard
                     hoveredHandle == space || dragged == space
                 else { return }
@@ -46,7 +49,9 @@ extension SpacesSection {
                     hoveredHandle = nil
                 }
                 if dragged == space { dragged = nil }
-                NSCursor.arrow.set()
+                (hoveredHandle != nil
+                    ? NSCursor.openHand : .arrow)
+                    .set()
             }
             .gesture(dragGesture(space))
     }

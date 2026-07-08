@@ -20,9 +20,10 @@ import KiwiDeskCore
 /// - A second base key WHILE the first is held is a chord
 ///   attempt: the first key wins, a one-key hint teaches (a
 ///   shortcut is modifiers + one key).
-/// - Full release locks the freshest burst candidate; a
-///   pressed key or added modifier discards it (a new chord
-///   is being built).
+/// - Full release locks the freshest burst candidate; a key
+///   that starts a new chord, or an added modifier, discards
+///   it. (A chord-attempt overlap does NOT — the first key
+///   wins, so its stashed chord stays lockable.)
 /// - Bare Escape cancels. Any mouse click cancels
 ///   (`.clickAway`, so the field can absorb the click on its
 ///   own button). App deactivation cancels too — a system

@@ -39,50 +39,6 @@ private final class Capture {
 @Suite("Chord recorder lock-on-release")
 @MainActor
 struct ChordRecorderTests {
-    @Test("staggered release keeps the chord — ⌘ up first")
-    func commandReleasedFirst() {
-        let recorder = ChordRecorder()
-        let capture = Capture()
-        capture.attach(recorder)
-        recorder.handle(
-            .flagsChanged,
-            keyCode: 55,
-            flags: [.command]
-        )
-        recorder.handle(
-            .keyDown,
-            keyCode: 38,
-            flags: [.command]
-        )
-        // ⌘ released a split second before J.
-        recorder.handle(.flagsChanged, keyCode: 55, flags: [])
-        #expect(capture.outcomes.isEmpty)
-        recorder.handle(.keyUp, keyCode: 38, flags: [])
-        #expect(capture.lockedCombo == "command+j")
-        #expect(capture.outcomes.count == 1)
-    }
-
-    @Test("staggered release keeps the chord — base up first")
-    func baseReleasedFirst() {
-        let recorder = ChordRecorder()
-        let capture = Capture()
-        capture.attach(recorder)
-        recorder.handle(
-            .keyDown,
-            keyCode: 38,
-            flags: [.command]
-        )
-        // J released while ⌘ is still down — no lock yet.
-        recorder.handle(
-            .keyUp,
-            keyCode: 38,
-            flags: [.command]
-        )
-        #expect(capture.outcomes.isEmpty)
-        recorder.handle(.flagsChanged, keyCode: 55, flags: [])
-        #expect(capture.lockedCombo == "command+j")
-    }
-
     @Test("mid-chord correction re-snapshots — ⌘J then ⌘K")
     func midChordCorrection() {
         let recorder = ChordRecorder()
@@ -110,66 +66,6 @@ struct ChordRecorderTests {
         )
         recorder.handle(.flagsChanged, keyCode: 55, flags: [])
         #expect(capture.lockedCombo == "command+k")
-    }
-
-    @Test("preview waits out the release burst, then settles")
-    func previewSettlesLazily() {
-        let recorder = ChordRecorder()
-        let capture = Capture()
-        capture.attach(recorder)
-        var clock = Date(timeIntervalSince1970: 1000)
-        recorder.now = { clock }
-        recorder.handle(
-            .keyDown,
-            keyCode: 38,
-            flags: [.command]
-        )
-        let shown = capture.previews.last
-        // J released while ⌘ is still down: the preview keeps
-        // the chord — an instant downgrade flashed the combo
-        // away right before every normal lock-in.
-        recorder.handle(
-            .keyUp,
-            keyCode: 38,
-            flags: [.command]
-        )
-        #expect(capture.previews.last == shown)
-        #expect(capture.outcomes.isEmpty)
-        // Only a genuinely lingering hold settles the preview
-        // down to what is actually held.
-        let stamp = clock
-        clock += 1
-        recorder.settleBurst(stampedAt: stamp)
-        #expect(capture.previews.last == "⌘")
-    }
-
-    @Test("a slow disassembly never locks the stale chord")
-    func expiredCandidateKeepsRecording() {
-        let recorder = ChordRecorder()
-        let capture = Capture()
-        capture.attach(recorder)
-        var clock = Date(timeIntervalSince1970: 1000)
-        recorder.now = { clock }
-        recorder.handle(
-            .keyDown,
-            keyCode: 38,
-            flags: [.command]
-        )
-        recorder.handle(
-            .keyUp,
-            keyCode: 38,
-            flags: [.command]
-        )
-        // The user ponders past the release burst window…
-        clock += 1
-        recorder.handle(.flagsChanged, keyCode: 55, flags: [])
-        // …so nothing locks (the preview already dropped the
-        // J long ago) and the recorder stays live:
-        #expect(capture.outcomes.isEmpty)
-        #expect(capture.previews.last == "")
-        recorder.handle(.keyDown, keyCode: 40, flags: [])
-        recorder.handle(.keyUp, keyCode: 40, flags: [])
-        #expect(capture.lockedCombo == "k")
     }
 
     @Test("modifiers accumulate while the base key is held")

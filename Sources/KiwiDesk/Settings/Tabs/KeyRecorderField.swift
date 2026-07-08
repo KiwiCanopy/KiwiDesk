@@ -117,6 +117,12 @@ struct KeyRecorderField: View {
             hint = nil
             takenBy = nil
         }
+        .onChange(of: liveRejection == nil) { _, clear in
+            // The latch follows the live check out: once the
+            // conflict is fixed anywhere, a later collision on
+            // the same combo must not resurrect this row.
+            if clear { rejection = nil }
+        }
         .onDisappear(perform: stop)
     }
 
