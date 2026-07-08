@@ -53,6 +53,10 @@ struct SpacesSection: View {
                 Image(systemName: "line.3.horizontal")
                     .foregroundStyle(.tertiary)
                     .help("Drag to reorder")
+                IconPicker(
+                    icon: iconBinding(space),
+                    preview: .chip
+                )
                 SpaceNameField(
                     space: space,
                     isAvailable: {
@@ -220,6 +224,22 @@ struct SpacesSection: View {
         let insertion = spaces.firstIndex(of: anchor) ?? to
         spaces.insert(moved, at: insertion)
         model.config.spaces = spaces
+    }
+
+    /// The space's optional recognition icon (#68 §6.5):
+    /// empty clears the sparse `space.icon` entry.
+    private func iconBinding(
+        _ space: SpaceID
+    ) -> Binding<String> {
+        Binding(
+            get: {
+                model.config.settings.spaceIcons[space] ?? ""
+            },
+            set: {
+                model.config.settings.spaceIcons[space] =
+                    $0.isEmpty ? nil : $0
+            }
+        )
     }
 
     /// Setting a space to the default `bsp` removes its entry

@@ -6,6 +6,10 @@ import KiwiDeskCore
 struct NavCommand: Identifiable, Hashable {
     let label: String
     let lua: String
+    /// Optional space icon (#68 §6.5) shown before the label
+    /// — recognition sugar only; labels stay authoritative
+    /// (the import classifier matches on label + Lua).
+    var icon: String? = nil
     var id: String { lua }
 }
 
@@ -47,12 +51,16 @@ enum KeybindingCatalog {
     }
 
     /// One "Go to Space …" row per defined space.
-    static func goToSpace(_ spaces: [SpaceID]) -> [NavCommand] {
+    static func goToSpace(
+        _ spaces: [SpaceID],
+        icons: [SpaceID: String] = [:]
+    ) -> [NavCommand] {
         spaces.map { space in
             NavCommand(
                 label: "Go to Space \(space.raw)",
                 lua: "KiwiDesk.focus_virtual_space"
-                    + "(\(spaceArg(space)))"
+                    + "(\(spaceArg(space)))",
+                icon: icons[space]
             )
         }
     }
@@ -69,7 +77,8 @@ enum KeybindingCatalog {
 
     /// The per-space "Move to …" / "… & follow" row pairs.
     static func moveToSpace(
-        _ spaces: [SpaceID]
+        _ spaces: [SpaceID],
+        icons: [SpaceID: String] = [:]
     ) -> [NavCommand] {
         spaces.flatMap { space -> [NavCommand] in
             let arg = spaceArg(space)
@@ -77,14 +86,16 @@ enum KeybindingCatalog {
                 NavCommand(
                     label: "Move to Space \(space.raw)",
                     lua:
-                        "KiwiDesk.move_to_virtual_space(\(arg))"
+                        "KiwiDesk.move_to_virtual_space(\(arg))",
+                    icon: icons[space]
                 ),
                 NavCommand(
                     label:
                         "Move to Space \(space.raw) & follow",
                     lua: "KiwiDesk."
                         + "move_to_virtual_space_and_follow"
-                        + "(\(arg))"
+                        + "(\(arg))",
+                    icon: icons[space]
                 ),
             ]
         }

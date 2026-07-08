@@ -72,12 +72,13 @@ struct PresetsTab: View {
                 HStack(spacing: 6) {
                     Text(layout.name).font(.headline)
                     if layout.isStandard {
-                        badge("standard")
+                        BadgeChip(label: "standard")
                     }
                 }
                 Text(layout.summary)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                PresetThumbnail(layout: layout)
             }
             Spacer()
             Button("Apply") {
@@ -142,7 +143,7 @@ struct PresetsTab: View {
                 .fontWeight(.semibold)
                 .foregroundStyle(.secondary)
             if count == model.displays.count {
-                badge("connected")
+                BadgeChip(label: "connected")
             }
             if model.duplicateDefaultCounts.contains(count) {
                 Image(systemName: "exclamationmark.triangle")
@@ -168,10 +169,10 @@ struct PresetsTab: View {
                 HStack(spacing: 6) {
                     Text(summary.name)
                     if summary.name == model.activeProfile {
-                        badge("active")
+                        BadgeChip(label: "active")
                     }
                     if summary.isDefault {
-                        badge("default")
+                        BadgeChip(label: "default")
                     }
                 }
                 monitorChips(summary)
@@ -214,30 +215,48 @@ struct PresetsTab: View {
                 id: \.offset
             ) { _, set in
                 WrapChips(set) { monitor in
-                    Text(monitor)
-                        .font(
-                            .system(
-                                size: 10,
-                                design: .monospaced
-                            )
-                        )
+                    // Display names, not raw fingerprints
+                    // (#68 §3.15) — the diagnostic ID demotes
+                    // to a tooltip and stays copyable under
+                    // Monitors ▸ Advanced. Unknown hardware
+                    // falls back to the raw string.
+                    Text(model.monitorName(monitor))
+                        .font(.system(size: 10))
                         .padding(.horizontal, 6)
                         .padding(.vertical, 1)
                         .background(
                             Capsule()
                                 .fill(.quaternary.opacity(0.6))
                         )
+                        .help(monitor)
                 }
             }
         }
     }
+}
 
-    private func badge(_ label: String) -> some View {
-        Text(label)
-            .font(.caption2)
-            .padding(.horizontal, 6)
-            .padding(.vertical, 1)
-            .background(.tint.opacity(0.2))
-            .clipShape(Capsule())
+/// A mini layout diagram (#68 §3.15): one tile per space, each
+/// carrying its mode's glyph (§6.3), so choosing a preset stops
+/// requiring prose alone.
+struct PresetThumbnail: View {
+    let layout: StandardLayout
+
+    var body: some View {
+        HStack(spacing: 3) {
+            ForEach(1...layout.spaceCount, id: \.self) { n in
+                let mode =
+                    layout.spaceModes[SpaceID(n)] ?? .bsp
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(Color.accentColor.opacity(0.12))
+                    .frame(width: 24, height: 18)
+                    .overlay {
+                        Image(systemName: mode.glyph)
+                            .font(.system(size: 9))
+                            .foregroundStyle(.secondary)
+                    }
+                    .help("Space \(n): \(mode.displayName)")
+            }
+        }
+        .padding(.top, 1)
     }
 }

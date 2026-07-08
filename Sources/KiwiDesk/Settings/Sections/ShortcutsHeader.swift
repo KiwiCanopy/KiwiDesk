@@ -136,7 +136,7 @@ struct ShortcutsHeader: View {
             HStack(spacing: 10) {
                 Text("Menu bar icon")
                     .foregroundStyle(.secondary)
-                ModeIconPicker(icon: iconBinding)
+                IconPicker(icon: iconBinding, preview: .menuBar)
                 Spacer()
                 if canDeleteSelected {
                     Button(

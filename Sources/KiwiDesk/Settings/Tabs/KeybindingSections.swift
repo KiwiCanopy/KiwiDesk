@@ -13,6 +13,10 @@ struct FocusSection: View {
     @Binding var bindings: [KeyBinding]
     let spaces: [SpaceID]
 
+    private var icons: [SpaceID: String] {
+        model.config.settings.spaceIcons
+    }
+
     var body: some View {
         SettingsSection("Focus") {
             ForEach(KeybindingCatalog.focusDirections) {
@@ -29,7 +33,10 @@ struct FocusSection: View {
                     .foregroundStyle(.secondary)
                     .padding(.top, 4)
                 ForEach(
-                    KeybindingCatalog.goToSpace(spaces)
+                    KeybindingCatalog.goToSpace(
+                        spaces,
+                        icons: icons
+                    )
                 ) { command in
                     NavRow(
                         model: model,
@@ -47,6 +54,10 @@ struct MoveWindowsSection: View {
     @Binding var bindings: [KeyBinding]
     let spaces: [SpaceID]
 
+    private var icons: [SpaceID: String] {
+        model.config.settings.spaceIcons
+    }
+
     var body: some View {
         SettingsSection("Move Windows") {
             ForEach(KeybindingCatalog.swapDirections) {
@@ -63,7 +74,10 @@ struct MoveWindowsSection: View {
                     .foregroundStyle(.secondary)
                     .padding(.top, 4)
                 ForEach(
-                    KeybindingCatalog.moveToSpace(spaces)
+                    KeybindingCatalog.moveToSpace(
+                        spaces,
+                        icons: icons
+                    )
                 ) { command in
                     NavRow(
                         model: model,
@@ -150,6 +164,10 @@ struct NavRow: View {
 
     var body: some View {
         HStack {
+            if let glyph = command.icon, !glyph.isEmpty {
+                IconGlyphLabel(icon: glyph)
+                    .frame(width: 18)
+            }
             Text(command.label)
             Spacer()
             KeyRecorderField(

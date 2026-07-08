@@ -234,6 +234,12 @@ struct SpaceAssignmentChip: View {
                 Image(systemName: icon)
                     .font(.system(size: 8))
             }
+            if let spaceIcon = model.config.settings
+                .spaceIcons[space]
+            {
+                IconGlyphLabel(icon: spaceIcon)
+                    .font(.system(size: 10))
+            }
             Text(space.raw)
                 .font(.caption)
                 .fontWeight(.medium)
