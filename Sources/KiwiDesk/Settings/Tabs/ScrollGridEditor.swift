@@ -101,7 +101,7 @@ struct ScrollGridEditor: View {
             "Scrolling",
             symbol: LayoutMode.scrolling.glyph
         ) {
-            GlassSegmentedPicker(
+            SegmentedPicker(
                 "Size unit",
                 selection: sizeUnitBinding,
                 options: [
@@ -111,7 +111,7 @@ struct ScrollGridEditor: View {
                 ]
             )
             sizeControl
-            GlassSegmentedPicker(
+            SegmentedPicker(
                 "Focused anchor",
                 selection: $model.config.settings.scrolling
                     .anchor,
@@ -121,7 +121,7 @@ struct ScrollGridEditor: View {
                     (isVertical ? "Bottom" : "Right", .right),
                 ]
             )
-            GlassSegmentedPicker(
+            SegmentedPicker(
                 "Scroll orientation",
                 selection: $model.config.settings.scrolling
                     .orientation,
@@ -190,7 +190,7 @@ struct ScrollGridEditor: View {
             HStack {
                 Text(sizeLabel)
                     .frame(width: 110, alignment: .leading)
-                GlassSlider(
+                SettingsSlider(
                     value: pointsBinding,
                     range: 100...2000,
                     step: 10
@@ -204,7 +204,7 @@ struct ScrollGridEditor: View {
             HStack {
                 Text(sizeLabel)
                     .frame(width: 110, alignment: .leading)
-                GlassSlider(
+                SettingsSlider(
                     value: percentBinding,
                     range: 5...100,
                     step: 5
@@ -222,7 +222,7 @@ struct ScrollGridEditor: View {
             "Grid",
             symbol: LayoutMode.grid.glyph
         ) {
-            GlassSegmentedPicker(
+            SegmentedPicker(
                 "Grid type",
                 selection: $model.config.settings.grid.type,
                 options: [
@@ -234,7 +234,7 @@ struct ScrollGridEditor: View {
                 "Fill empty space",
                 isOn: $model.config.settings.grid.fillEmptySpace
             )
-            GlassSegmentedPicker(
+            SegmentedPicker(
                 "Split direction",
                 selection: $model.config.settings.grid
                     .splitDirection,

@@ -12,7 +12,7 @@ struct MonocleEditor: View {
             "Monocle",
             symbol: LayoutMode.monocle.glyph
         ) {
-            GlassSegmentedPicker(
+            SegmentedPicker(
                 "Focus orientation",
                 selection: $model.config.settings.monocle
                     .orientation,

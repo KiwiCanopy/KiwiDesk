@@ -150,7 +150,7 @@ struct OverrideFractionRow: View {
             HStack {
                 Text(label)
                     .frame(width: 110, alignment: .leading)
-                GlassSlider(
+                SettingsSlider(
                     value: Binding(
                         get: { bound.wrappedValue * 100 },
                         set: { bound.wrappedValue = $0 / 100 }

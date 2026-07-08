@@ -15,7 +15,7 @@ struct LayoutParamsEditor: View {
 
     private var bsp: some View {
         SettingsSection("BSP", symbol: LayoutMode.bsp.glyph) {
-            GlassSegmentedPicker(
+            SegmentedPicker(
                 "Split strategy",
                 selection: $model.config.settings.bsp
                     .strategy,
@@ -98,7 +98,7 @@ struct PtSlider: View {
         HStack {
             Text(label)
                 .frame(width: 110, alignment: .leading)
-            GlassSlider(
+            SettingsSlider(
                 value: Binding(
                     get: { Double(value) },
                     set: { value = CGFloat($0) }
@@ -123,7 +123,7 @@ struct RatioRow: View {
         HStack {
             Text(label)
                 .frame(width: 110, alignment: .leading)
-            GlassSlider(
+            SettingsSlider(
                 value: $value,
                 range: 0.1...0.9,
                 step: 0.01

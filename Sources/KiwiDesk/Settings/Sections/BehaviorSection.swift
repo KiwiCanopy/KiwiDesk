@@ -22,7 +22,7 @@ struct BehaviorSection: View {
 
     private var mouseSection: some View {
         SettingsSection("Mouse") {
-            GlassSegmentedPicker(
+            SegmentedPicker(
                 "Mouse resize action",
                 selection: $model.config.settings
                     .mouseResize,

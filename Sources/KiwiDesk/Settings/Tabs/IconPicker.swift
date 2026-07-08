@@ -79,7 +79,7 @@ struct IconPicker: View {
             .textFieldStyle(.roundedBorder)
             if search.trimmed.isEmpty {
                 HStack(spacing: 8) {
-                    GlassSegmentedPicker(
+                    SegmentedPicker(
                         selection: $tab,
                         options: IconTab.allCases.map {
                             ($0.rawValue, $0)

@@ -87,7 +87,7 @@ struct GapsEditor: View {
         HStack {
             Text(label)
                 .frame(width: 80, alignment: .leading)
-            GlassSlider(
+            SettingsSlider(
                 value: Binding(
                     get: { Double(unified.wrappedValue) },
                     set: { unified.wrappedValue = CGFloat($0) }
@@ -191,7 +191,7 @@ private struct GapRow: View {
         HStack {
             Text(label)
                 .frame(width: 80, alignment: .leading)
-            GlassSlider(
+            SettingsSlider(
                 value: Binding(
                     get: { Double(value) },
                     set: { value = CGFloat($0) }

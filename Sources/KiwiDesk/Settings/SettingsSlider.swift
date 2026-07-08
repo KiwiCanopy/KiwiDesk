@@ -1,13 +1,13 @@
 import SwiftUI
 
-/// The slider counterpart to `GlassSegmentedPicker` (#68): the
-/// same capsule track, a Liquid Glass pill as the knob (the
-/// bordered material capsule before macOS 26), and an accent
-/// fill up to the knob so the value reads at a glance. Values
+/// The slider counterpart to `SegmentedPicker` (#68): the
+/// same capsule track, a native-style white thumb overhanging
+/// the track slightly, and an accent fill up to the knob so
+/// the value reads at a glance. Values
 /// snap to `step`. Accessibility is delegated to a native
 /// `Slider` representation, so VoiceOver and keyboard
 /// adjustment behave exactly like the control it replaces.
-struct GlassSlider: View {
+struct SettingsSlider: View {
     @Binding var value: Double
     let range: ClosedRange<Double>
     var step: Double = 1
@@ -28,21 +28,40 @@ struct GlassSlider: View {
         }
     }
 
+    /// Disabled sliders gray the fill itself — the dimming
+    /// `.opacity` alone left the accent showing through the
+    /// translucent white knob, which read as a blue knob.
+    private var fill: AnyShapeStyle {
+        isEnabled
+            ? AnyShapeStyle(Color.accentColor.gradient)
+            : AnyShapeStyle(Color.primary.opacity(0.18))
+    }
+
     private func track(width: CGFloat) -> some View {
         let center = knobCenter(in: width)
         return ZStack(alignment: .leading) {
             Capsule()
-                .fill(Color.primary.opacity(0.06))
+                .fill(Color.primary.opacity(0.08))
             Capsule()
-                .fill(Color.accentColor.opacity(0.22))
+                .fill(fill)
                 .frame(width: center + Self.knobWidth / 2)
+            // The knob overhangs the track by 2 pt per edge
+            // (native sliders oversize the thumb); nothing
+            // clips it — the row's padding absorbs the
+            // overflow.
             knob
                 .frame(
                     width: Self.knobWidth,
-                    height: Self.height - 4
+                    height: Self.height + 4
                 )
                 .offset(x: center - Self.knobWidth / 2)
         }
+        .overlay(
+            Capsule().strokeBorder(
+                Color.primary.opacity(0.08),
+                lineWidth: 0.5
+            )
+        )
         .contentShape(Capsule())
         .gesture(
             DragGesture(minimumDistance: 0)
@@ -91,29 +110,22 @@ struct GlassSlider: View {
         )
     }
 
-    /// A lone glass element with no text on it, so it needs no
-    /// container and nothing can blur behind it.
-    @ViewBuilder private var knob: some View {
-        if #available(macOS 26.0, *) {
-            Color.clear
-                .glassEffect(
-                    .regular.interactive(),
-                    in: Capsule()
+    /// The native white thumb, on every macOS. A clear Liquid
+    /// Glass knob was tried and dropped: it refracted the
+    /// accent fill sliding beneath it, tinting the knob blue.
+    private var knob: some View {
+        Capsule()
+            .fill(.white)
+            .overlay(
+                Capsule().strokeBorder(
+                    Color.black.opacity(0.1),
+                    lineWidth: 0.5
                 )
-        } else {
-            Capsule()
-                .fill(.regularMaterial)
-                .overlay(
-                    Capsule().strokeBorder(
-                        Color.primary.opacity(0.12),
-                        lineWidth: 0.5
-                    )
-                )
-                .shadow(
-                    color: .black.opacity(0.12),
-                    radius: 2,
-                    y: 1
-                )
-        }
+            )
+            .shadow(
+                color: .black.opacity(0.25),
+                radius: 2,
+                y: 1
+            )
     }
 }
