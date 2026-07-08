@@ -69,49 +69,7 @@ struct KeyRecorderField: View {
                     .foregroundStyle(.orange)
                     .help(conflict)
                 }
-                Button(action: toggle) {
-                    Text(label)
-                        .frame(minWidth: 110)
-                        .monospaced()
-                }
-                .buttonStyle(.bordered)
-                .tint(buttonTint)
-                // The engagement halo: while recording, an
-                // accent fill + ring extend slightly past the
-                // button so the one armed field among dozens
-                // of recorder rows reads at a glance — the
-                // tint alone only recolors the border. Same
-                // accent-layer vocabulary as OverrideChrome's
-                // active rows. Negative padding keeps the
-                // layout footprint unchanged.
-                .background {
-                    if recording {
-                        RoundedRectangle(cornerRadius: 6)
-                            .fill(
-                                Color.accentColor.opacity(0.08)
-                            )
-                            .padding(-4)
-                            .allowsHitTesting(false)
-                    }
-                }
-                .overlay {
-                    if recording {
-                        RoundedRectangle(cornerRadius: 6)
-                            .strokeBorder(
-                                Color.accentColor.opacity(0.4),
-                                lineWidth: 1.5
-                            )
-                            .padding(-4)
-                            .allowsHitTesting(false)
-                    }
-                }
-                .help(
-                    "A shortcut is one key plus any of "
-                        + "⌃ Control, ⌥ Option, ⇧ Shift, "
-                        + "and ⌘ Command — it locks in when "
-                        + "you release the keys. For more "
-                        + "shortcut layers, add Modes."
-                )
+                recordButton
                 if !combo.isEmpty && !recording {
                     Button(action: onClear) {
                         Image(systemName: "xmark.circle.fill")
@@ -154,6 +112,52 @@ struct KeyRecorderField: View {
         }
         .onDisappear(perform: stop)
     }
+
+    /// Extracted from `body` — the full modifier chain in one
+    /// expression blew the type-checker's budget on CI.
+    ///
+    /// The engagement halo: while recording, an accent fill +
+    /// ring extend slightly past the button so the one armed
+    /// field among dozens of recorder rows reads at a glance —
+    /// the tint alone only recolors the border. Same
+    /// accent-layer vocabulary as OverrideChrome's active rows.
+    /// Negative padding keeps the layout footprint unchanged.
+    private var recordButton: some View {
+        Button(action: toggle) {
+            Text(label)
+                .frame(minWidth: 110)
+                .monospaced()
+        }
+        .buttonStyle(.bordered)
+        .tint(buttonTint)
+        .background {
+            if recording {
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(Color.accentColor.opacity(0.08))
+                    .padding(-4)
+                    .allowsHitTesting(false)
+            }
+        }
+        .overlay {
+            if recording {
+                RoundedRectangle(cornerRadius: 6)
+                    .strokeBorder(
+                        Color.accentColor.opacity(0.4),
+                        lineWidth: 1.5
+                    )
+                    .padding(-4)
+                    .allowsHitTesting(false)
+            }
+        }
+        .help(Self.recordHelp)
+    }
+
+    private static let recordHelp =
+        "A shortcut is one key plus any of "
+        + "⌃ Control, ⌥ Option, ⇧ Shift, "
+        + "and ⌘ Command — it locks in when "
+        + "you release the keys. For more "
+        + "shortcut layers, add Modes."
 
     // MARK: - Rejection UI (#34)
 
