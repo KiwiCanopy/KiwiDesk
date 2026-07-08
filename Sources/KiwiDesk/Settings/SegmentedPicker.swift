@@ -21,6 +21,8 @@ struct SegmentedPicker<Value: Hashable>: View {
     private let options: [(title: String, value: Value)]
     @Namespace private var pillSpace
     @Environment(\.colorScheme) private var scheme
+    @Environment(\.settingsLabelColumn)
+    private var labelColumn
 
     init(
         _ label: String? = nil,
@@ -37,9 +39,10 @@ struct SegmentedPicker<Value: Hashable>: View {
             HStack {
                 Text(label)
                     .frame(
-                        width: SettingsMetrics.labelColumn,
+                        width: labelColumn,
                         alignment: .leading
                     )
+                    .lineLimit(1)
                 labeledTrack
             }
         } else {

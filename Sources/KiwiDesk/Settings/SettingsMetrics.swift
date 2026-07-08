@@ -13,16 +13,28 @@ enum SettingsMetrics {
     /// wrap it.
     static let labelColumn: CGFloat = 128
 
-    /// The label column inside `OverrideChrome`, whose leading
-    /// checkbox prefixes every row with 8 pt padding + ~18 pt
-    /// checkbox + 8 pt spacing (34 pt): shrinking the label by
-    /// that prefix lands the override row's control on the
-    /// same axis as the plain rows. The discount means a label
+    /// `OverrideChrome`'s leading padding and checkbox
+    /// spacing — consumed by the chrome itself, so retuning
+    /// the chrome moves `overrideLabelColumn` in lockstep.
+    static let overrideRowInset: CGFloat = 8
+
+    /// The native checkbox's width — an AppKit metric no
+    /// constant can truly pin; best estimate.
+    static let checkboxWidth: CGFloat = 18
+
+    /// The label column inside `OverrideChrome`, whose
+    /// checkbox prefixes every row (inset + checkbox + inset):
+    /// shrinking the label by that prefix lands the override
+    /// row's control on the same axis as the plain rows. The
+    /// chrome re-scopes the shared rows onto this via
+    /// `\.settingsLabelColumn`. The discount means a label
     /// that fits `labelColumn` can still wrap here — override
     /// labels must measure under ~84 pt at body size (it bit
     /// "Focused anchor" at 97 pt, shortened to "Focus
-    /// anchor").
-    static let overrideLabelColumn: CGFloat = labelColumn - 34
+    /// anchor"); the shared rows' `lineLimit(1)` makes an
+    /// overflow truncate visibly instead of wrapping quietly.
+    static let overrideLabelColumn: CGFloat =
+        labelColumn - (2 * overrideRowInset + checkboxWidth)
 
     /// The trailing numeric readout of a slider row. Sized for
     /// the widest value in use ("2000 pt").
@@ -33,4 +45,20 @@ enum SettingsMetrics {
     /// shared row axis (120-ish would misalign the grid's
     /// second column) — don't "fix" them onto `labelColumn`.
     static let colorLabelColumn: CGFloat = 140
+}
+
+private struct SettingsLabelColumnKey: EnvironmentKey {
+    static let defaultValue: CGFloat =
+        SettingsMetrics.labelColumn
+}
+
+extension EnvironmentValues {
+    /// The label-column width the shared rows read.
+    /// `OverrideChrome` narrows it once for everything it
+    /// wraps, so a row is on the override axis by construction
+    /// instead of every row type plumbing a width parameter.
+    var settingsLabelColumn: CGFloat {
+        get { self[SettingsLabelColumnKey.self] }
+        set { self[SettingsLabelColumnKey.self] = newValue }
+    }
 }

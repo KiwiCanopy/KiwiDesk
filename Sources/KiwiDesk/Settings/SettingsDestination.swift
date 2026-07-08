@@ -89,4 +89,12 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         default: return true
         }
     }
+
+    /// The one reachability predicate all #18 enforcement
+    /// points share (sidebar offer, selection repair, navigate
+    /// guard) — one polarity, no hand-negated copies.
+    func isReachable(editingStoredProfile: Bool) -> Bool {
+        !editingStoredProfile
+            || visibleWhileEditingStoredProfile
+    }
 }

@@ -30,8 +30,9 @@ struct SettingsSidebar: View {
 
     private var visibleWholeApp: [SettingsDestination] {
         SettingsDestination.wholeApp.filter {
-            !editingStoredProfile
-                || $0.visibleWhileEditingStoredProfile
+            $0.isReachable(
+                editingStoredProfile: editingStoredProfile
+            )
         }
     }
 

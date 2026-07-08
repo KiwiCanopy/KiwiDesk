@@ -14,7 +14,7 @@ private struct OverrideChrome<Content: View>: View {
     @ViewBuilder let content: Content
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: SettingsMetrics.overrideRowInset) {
             Toggle("", isOn: isOn)
                 .labelsHidden()
                 .toggleStyle(.checkbox)
@@ -26,11 +26,19 @@ private struct OverrideChrome<Content: View>: View {
             content
                 .disabled(!isOn.wrappedValue)
                 .opacity(isOn.wrappedValue ? 1 : 0.5)
+                // The narrowed column pays for the checkbox
+                // prefix, so the shared rows inside land on
+                // the same control axis as plain rows.
+                .environment(
+                    \.settingsLabelColumn,
+                    SettingsMetrics.overrideLabelColumn
+                )
         }
-        // 8 pt leading keeps daylight between the 2 pt accent
+        // The inset keeps daylight between the 2 pt accent
         // bar and the checkbox, so the bar reads as a boundary
-        // rather than part of the control.
-        .padding(.leading, 8)
+        // rather than part of the control. It is a shared
+        // token: `overrideLabelColumn` derives from it.
+        .padding(.leading, SettingsMetrics.overrideRowInset)
         .padding(.vertical, 2)
         .background {
             if isOn.wrappedValue {
@@ -81,8 +89,7 @@ struct OverrideSliderRow: View {
             PtSlider(
                 label: label,
                 value: overrideValue($value, global: global),
-                range: range,
-                labelWidth: SettingsMetrics.overrideLabelColumn
+                range: range
             )
         }
     }
@@ -137,41 +144,21 @@ struct OverrideStepperRow: View {
     }
 }
 
-/// An override ratio field, shown as a 10–90% slider that stores
-/// the underlying 0...1 fraction. The range matches the Lua ratio
-/// clamp (`parseSplitRatio` / `parseMasterRatio`) so the GUI can't
-/// store a value the setters would reject.
+/// An override ratio field riding `RatioRow`, whose 0.1–0.9
+/// range matches the Lua ratio clamp (`parseSplitRatio` /
+/// `parseMasterRatio`) so the GUI can't store a value the
+/// setters would reject.
 struct OverrideFractionRow: View {
     let label: String
     @Binding var value: Double?
     let global: Double
 
     var body: some View {
-        let bound = overrideValue($value, global: global)
         OverrideChrome(isOn: overrideToggle($value, global: global)) {
-            HStack {
-                Text(label)
-                    .frame(
-                        width: SettingsMetrics
-                            .overrideLabelColumn,
-                        alignment: .leading
-                    )
-                SettingsSlider(
-                    value: Binding(
-                        get: { bound.wrappedValue * 100 },
-                        set: { bound.wrappedValue = $0 / 100 }
-                    ),
-                    range: 10...90,
-                    step: 1
-                )
-                Text("\(Int(bound.wrappedValue * 100))%")
-                    .frame(
-                        width: SettingsMetrics.readoutColumn,
-                        alignment: .trailing
-                    )
-                    .foregroundStyle(.secondary)
-                    .font(.system(.body, design: .monospaced))
-            }
+            RatioRow(
+                label: label,
+                value: overrideValue($value, global: global)
+            )
         }
     }
 }
@@ -185,13 +172,7 @@ struct OverridePickerRow<Value: Hashable & Sendable>: View {
 
     var body: some View {
         OverrideChrome(isOn: overrideToggle($value, global: global)) {
-            HStack {
-                Text(label)
-                    .frame(
-                        width: SettingsMetrics
-                            .overrideLabelColumn,
-                        alignment: .leading
-                    )
+            DropdownRow(label: label) {
                 Picker(
                     label,
                     selection: overrideValue(
@@ -203,10 +184,6 @@ struct OverridePickerRow<Value: Hashable & Sendable>: View {
                         Text(option.1).tag(option.0)
                     }
                 }
-                .labelsHidden()
-                .pickerStyle(.menu)
-                .controlSize(.large)
-                Spacer()
             }
         }
     }

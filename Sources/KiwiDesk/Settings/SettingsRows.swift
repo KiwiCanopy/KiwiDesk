@@ -8,19 +8,21 @@ import SwiftUI
 /// up across sections.
 
 /// A pt-valued slider row with a numeric readout, shared by the
-/// monocle and drag-visual editors. `labelWidth` narrows the
-/// label inside `OverrideChrome`, whose checkbox prefix would
-/// otherwise push the slider off the shared axis.
+/// monocle and drag-visual editors. The label column comes from
+/// the environment, so `OverrideChrome` narrows it once for
+/// every row inside.
 struct PtSlider: View {
     let label: String
     @Binding var value: CGFloat
     var range: ClosedRange<Double> = 0...100
-    var labelWidth: CGFloat = SettingsMetrics.labelColumn
+    @Environment(\.settingsLabelColumn)
+    private var labelColumn
 
     var body: some View {
         HStack {
             Text(label)
-                .frame(width: labelWidth, alignment: .leading)
+                .frame(width: labelColumn, alignment: .leading)
+                .lineLimit(1)
             SettingsSlider(
                 value: Binding(
                     get: { Double(value) },
@@ -44,14 +46,14 @@ struct PtSlider: View {
 struct RatioRow: View {
     let label: String
     @Binding var value: Double
+    @Environment(\.settingsLabelColumn)
+    private var labelColumn
 
     var body: some View {
         HStack {
             Text(label)
-                .frame(
-                    width: SettingsMetrics.labelColumn,
-                    alignment: .leading
-                )
+                .frame(width: labelColumn, alignment: .leading)
+                .lineLimit(1)
             SettingsSlider(
                 value: $value,
                 range: 0.1...0.9,
@@ -76,14 +78,14 @@ struct RatioRow: View {
 struct DropdownRow<P: View>: View {
     let label: String
     @ViewBuilder let picker: P
+    @Environment(\.settingsLabelColumn)
+    private var labelColumn
 
     var body: some View {
         HStack {
             Text(label)
-                .frame(
-                    width: SettingsMetrics.labelColumn,
-                    alignment: .leading
-                )
+                .frame(width: labelColumn, alignment: .leading)
+                .lineLimit(1)
             picker
                 .labelsHidden()
                 .pickerStyle(.menu)

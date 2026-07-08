@@ -26,9 +26,9 @@ struct SettingsView: View {
         .onChange(of: model.editingStoredProfile) { _, editing in
             // The selection must never point at a destination
             // the sidebar just hid (#18).
-            if editing,
-                !selection.visibleWhileEditingStoredProfile
-            {
+            if !selection.isReachable(
+                editingStoredProfile: editing
+            ) {
                 selection = .spaces
             }
         }
@@ -48,15 +48,16 @@ struct SettingsView: View {
                 detailPane
             }
             .environment(\.settingsNavigate) { destination in
-                // The #18 invariant has two writers: the
-                // sidebar can only offer visible rows, and
-                // this closure must refuse what the sidebar
-                // hides — the onChange above only fires on
-                // editing-flag transitions, not on selection.
+                // Third #18 enforcement point beside the
+                // sidebar's offer filter and the onChange
+                // repair above: links must refuse what the
+                // sidebar hides (the repair only fires on
+                // editing-flag transitions, not selection).
                 guard
-                    !model.editingStoredProfile
-                        || destination
-                            .visibleWhileEditingStoredProfile
+                    destination.isReachable(
+                        editingStoredProfile:
+                            model.editingStoredProfile
+                    )
                 else { return }
                 selection = destination
             }

@@ -289,10 +289,12 @@ puts its label in the same fixed-width column
 (`SettingsMetrics.labelColumn`), so controls start on one
 imaginary line across sections instead of each row picking
 its own label width; slider readouts share one trailing
-column the same way. Override rows join the axis with a
-narrower label (`overrideLabelColumn`) that pays for
-`OverrideChrome`'s checkbox prefix, so their controls land
-on the same line as plain rows. Numeric steppers are the
+column the same way. The rows read the column from the
+environment (`\.settingsLabelColumn`), and `OverrideChrome`
+narrows it once (`overrideLabelColumn`, paying for its
+checkbox prefix) — so a shared row dropped into override
+chrome lands on the plain rows' control axis by
+construction, not by remembering a width parameter. Numeric steppers are the
 deliberate exception: label leading, monospaced value plus
 arrows trailing (the native System-Settings numeric layout)
 — a value embedded in the label string ("Columns: 3") read
@@ -317,9 +319,12 @@ Class is expressed through the system styles: one
 sit level with the large dropdowns, `.bordered` for list-add
 actions (a `.borderless` "Add …" read as caption text), and
 `.plain` + underline + hover lift only for inline prose
-links. The one smaller control is the Shortcuts import
-button (`.controlSize(.small)`): it sits inline beside the
-mode chips and must not read as a peer tab.
+links. Icon-only inline row actions (trash, ×-clear, the
+rename pencil) stay `.borderless` — the native list-row
+convention; only text "Add …" actions warrant a border. The
+one smaller control is the Shortcuts import button
+(`.controlSize(.small)`): it sits inline beside the mode
+chips and must not read as a peer tab.
 
 **A recording shortcut field wears an accent halo.** The
 armed recorder among dozens of identical rows gets an accent
