@@ -130,6 +130,39 @@ extension SettingsModel {
         refreshProfiles()
     }
 
+    /// Renames a saved profile. Immediate, like Delete / Make
+    /// default (pending edits are discarded by the reload).
+    /// The core renames the file, adopted name, and runtime
+    /// native-Space bindings; the reload then re-composes the
+    /// GUI config from that runtime state, and a follow-up
+    /// global save makes the sidecar/init.lua binding lines
+    /// follow the new name.
+    func renameProfile(from old: String, to new: String) {
+        let name = new.trimmed
+        guard name != old, !name.isEmpty,
+            !profiles.contains(name)
+        else { return }
+        do {
+            try core.renameProfile(from: old, to: name)
+        } catch {
+            profileWarning = "Renaming failed: \(error)"
+            return
+        }
+        if target == .storedProfile(old) {
+            target = .storedProfile(name)
+        }
+        reload()
+        if config.profileBindings.values.contains(name) {
+            do {
+                try core.saveGuiConfig(config)
+            } catch {
+                core.onLog(
+                    "binding rename save failed: \(error)"
+                )
+            }
+        }
+    }
+
     // MARK: - Presets (#53)
 
     /// Applies a built-in layout and materializes it as a saved

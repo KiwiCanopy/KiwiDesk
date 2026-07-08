@@ -12,6 +12,9 @@ import SwiftUI
 /// the tab.
 struct ProfilesSection: View {
     @ObservedObject var model: SettingsModel
+    /// The profile whose rename popover is open, if any.
+    @State private var renaming: String?
+    @State private var renameDraft = ""
 
     var body: some View {
         ScrollView {
@@ -131,6 +134,7 @@ struct ProfilesSection: View {
                 .buttonStyle(.borderless)
                 .font(.caption)
             }
+            renameButton(summary.name)
             Button("Load") {
                 model.loadProfile(named: summary.name)
             }
@@ -148,6 +152,51 @@ struct ProfilesSection: View {
             .buttonStyle(.borderless)
             .help("Delete profile")
         }
+    }
+
+    /// Rename lives beside Load: a pencil opening a popover.
+    /// The rename is immediate (file + native-Space bindings
+    /// follow), like Delete and Make default.
+    private func renameButton(_ name: String) -> some View {
+        Button {
+            renameDraft = name
+            renaming = name
+        } label: {
+            Image(systemName: "pencil")
+        }
+        .buttonStyle(.borderless)
+        .help("Rename profile")
+        .popover(
+            isPresented: Binding(
+                get: { renaming == name },
+                set: { if !$0 { renaming = nil } }
+            )
+        ) {
+            HStack {
+                TextField(
+                    "Profile name",
+                    text: $renameDraft
+                )
+                .textFieldStyle(.roundedBorder)
+                .frame(width: 160)
+                .onSubmit { commitRename(of: name) }
+                Button("Rename") { commitRename(of: name) }
+                    .disabled(!canRename(name))
+            }
+            .padding(10)
+        }
+    }
+
+    private func canRename(_ old: String) -> Bool {
+        let new = renameDraft.trimmed
+        return !new.isEmpty && new != old
+            && !model.profiles.contains(new)
+    }
+
+    private func commitRename(of old: String) {
+        guard canRename(old) else { return }
+        model.renameProfile(from: old, to: renameDraft)
+        renaming = nil
     }
 
     /// Each covered monitor combination as one chip row, so

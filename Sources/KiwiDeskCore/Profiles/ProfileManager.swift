@@ -130,6 +130,21 @@ public final class ProfileManager {
         }
     }
 
+    /// Renames a stored profile: writes the file under the new
+    /// name first, then removes the old one (a validation or
+    /// write failure leaves the original untouched). Carries
+    /// the adopted `currentName` along. The `KiwiCore` facade
+    /// chases external references (native-Space bindings).
+    func rename(from old: String, to new: String) throws {
+        var profile = try read(name: old)
+        profile.name = new
+        try write(profile)
+        try FileManager.default.removeItem(
+            at: url(for: validated(old))
+        )
+        if currentName == old { currentName = new }
+    }
+
     /// Re-designates a count's default: flags `name`, clears
     /// the flag on every other profile of the same count.
     func setDefault(name: String) throws {
