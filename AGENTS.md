@@ -236,6 +236,16 @@ Keep this list updated whenever a recurring mistake is found.
   balancing `onHover(false)`, and hover interleaved with a drag
   gesture pops the wrong entry — a cursor stack cannot balance.
   Bit the spaces drag handle and the link-hover modifier.
+- **Keep SwiftUI `body` a shallow container.** A long modifier
+  chain with conditional `background`/`overlay` closures or
+  `+`-concatenated string literals inside one `body` expression
+  can exceed the type-checker's budget — and the failure is
+  machine-dependent: it compiles locally but dies on the slower
+  CI runner ("unable to type-check this expression in
+  reasonable time"), so the local verify gate does not catch
+  it. Extract chained subviews into private computed
+  properties / funcs and hoist concatenated strings into
+  constants. Bit `KeyRecorderField`.
 - **Split test suites early.** The 79-char limit and 350-line
   ceiling repeatedly bit large test files. Break suites into
   focused files before they grow; per-file private helpers are the
