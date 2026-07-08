@@ -108,13 +108,16 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         return true
     }
 
-    /// Deletes a space and every reference it holds (#68): the
-    /// list entry, its mode, monitor pin, Main role, fallback
-    /// designation, and all per-space settings maps
-    /// (`TilingSettings.removeSpace`). Without this, a pin or
-    /// override left behind keeps the space in
+    /// Deletes a space and every profile-scoped reference it
+    /// holds (#68): the list entry, its mode, monitor pin,
+    /// Main role, fallback designation, and all per-space
+    /// settings maps (`TilingSettings.removeSpace`). Without
+    /// this, a pin or override left behind keeps the space in
     /// `Profile.declaredSpaces` and the next authoritative
-    /// profile load resurrects it.
+    /// profile load resurrects it. Deliberately does NOT touch
+    /// `appRules` (unlike `renameSpace`): app rules are
+    /// global, and another profile may still declare a space
+    /// of this name — a per-profile delete must not drop them.
     public mutating func removeSpace(_ space: SpaceID) {
         spaces.removeAll { $0 == space }
         spaceModes[space] = nil
@@ -173,18 +176,12 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// through a hand-edited sidecar so a `[""]` key never reaches
     /// the writer. Glyph/symbol names are unaffected.
     private mutating func dropEmptyNamedSpaces() {
-        spaces.removeAll { $0.raw.isEmpty }
-        spaceModes = spaceModes.filter { !$0.key.raw.isEmpty }
-        spacePins = spacePins.filter { !$0.key.raw.isEmpty }
-        mainSpaces = mainSpaces.filter { !$0.raw.isEmpty }
-        if fallbackSpace?.raw.isEmpty == true {
-            fallbackSpace = nil
-        }
+        // ONE definition of the reference sites (removeSpace)
+        // instead of a third hand-mirror of the list; only the
+        // appRules *value* filter stays separate — decode-time
+        // sanitization removeSpace rightly skips.
+        removeSpace(SpaceID(""))
         appRules = appRules.filter { !$0.value.raw.isEmpty }
-        // One definition covers every per-space settings map
-        // (incl. the per-layout overrides a hand-edited file
-        // could carry under an empty key).
-        settings.removeSpace(SpaceID(""))
     }
 
     /// JSON object keys are strings; native-space numbers are

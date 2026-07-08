@@ -34,11 +34,13 @@ private func populated() -> TilingSettings {
 }
 
 /// String descriptions of every dictionary-typed stored
-/// property, looking one level into nested structs (the
-/// per-layout params hold their `override` maps).
+/// property, recursing into nested structs (the per-layout
+/// params hold their `override` maps at depth 2; the extra
+/// levels are headroom so a map inside a future sub-struct
+/// can't silently escape the net).
 private func dictionaryDescriptions(
     _ value: Any,
-    depth: Int = 2
+    depth: Int = 4
 ) -> [String] {
     var found: [String] = []
     for child in Mirror(reflecting: value).children {
