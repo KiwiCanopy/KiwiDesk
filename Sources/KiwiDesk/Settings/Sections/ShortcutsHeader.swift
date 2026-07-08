@@ -20,7 +20,15 @@ struct ShortcutsHeader: View {
             HStack(spacing: 8) {
                 modeStrip
                 Spacer()
-                if !model.editingStoredProfile {
+                // Import only offers itself when init.lua has
+                // custom Lua (the same condition as the
+                // banner): with nothing custom in the file
+                // there is nothing it could find, and inside
+                // the visual editor active foreign binds have
+                // already forced the raw-Lua fallback anyway.
+                if model.hasCustomLua,
+                    !model.editingStoredProfile
+                {
                     importButton
                 }
             }
