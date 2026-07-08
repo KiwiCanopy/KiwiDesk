@@ -12,6 +12,8 @@ struct ShortcutsHeader: View {
     @State private var addingMode = false
     @State private var newMode = ""
     @State private var importedNote = false
+    @State private var renamingMode = false
+    @State private var renameDraft = ""
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -25,7 +27,10 @@ struct ShortcutsHeader: View {
             Text(
                 "Modes are alternate shortcut sets — only the "
                     + "active mode's shortcuts fire. Bind a "
-                    + "key below to switch between them."
+                    + "key below to switch between them. "
+                    + "\u{201C}default\u{201D} is the standard "
+                    + "mode and is always the active one after "
+                    + "the app starts."
             )
             .font(.caption)
             .foregroundStyle(.secondary)
@@ -139,6 +144,7 @@ struct ShortcutsHeader: View {
                 IconPicker(icon: iconBinding, preview: .menuBar)
                 Spacer()
                 if canDeleteSelected {
+                    renameModeButton
                     Button(
                         "Delete mode",
                         role: .destructive,
@@ -174,6 +180,60 @@ struct ShortcutsHeader: View {
                     $0.isEmpty ? nil : $0
             }
         )
+    }
+
+    /// Rename shares Delete's gate (base modes are protected
+    /// in profile-override editing, #55): the switch-mode rows
+    /// referencing the mode rewrite through the catalog's
+    /// single authority, so writer and import classifier keep
+    /// matching byte-for-byte (#4).
+    private var renameModeButton: some View {
+        Button("Rename…") {
+            renameDraft = selected
+            renamingMode = true
+        }
+        .popover(isPresented: $renamingMode) {
+            HStack {
+                TextField("Mode name", text: $renameDraft)
+                    .textFieldStyle(.roundedBorder)
+                    .frame(width: 140)
+                    .onSubmit(renameMode)
+                Button("Rename", action: renameMode)
+                    .disabled(!canRenameMode)
+            }
+            .padding(10)
+        }
+    }
+
+    private var canRenameMode: Bool {
+        let name = renameDraft.trimmed
+        return !name.isEmpty && name != selected
+            && !model.config.modes.contains {
+                $0.name == name
+            }
+    }
+
+    private func renameMode() {
+        guard canRenameMode else { return }
+        let old = selected
+        let new = renameDraft.trimmed
+        let oldCmd = KeybindingCatalog.switchModeCommand(old)
+        let newCmd = KeybindingCatalog.switchModeCommand(new)
+        model.config.modes = model.config.modes.map { mode in
+            var mode = mode
+            if mode.name == old { mode.name = new }
+            mode.bindings = mode.bindings.map { binding in
+                var binding = binding
+                if binding.lua == oldCmd.lua {
+                    binding.lua = newCmd.lua
+                    binding.label = newCmd.label
+                }
+                return binding
+            }
+            return mode
+        }
+        selected = new
+        renamingMode = false
     }
 
     // MARK: - Mode mutations

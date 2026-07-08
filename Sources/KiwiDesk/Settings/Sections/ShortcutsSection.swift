@@ -26,6 +26,20 @@ struct ShortcutsSection: View {
                         model: model,
                         selected: $selected
                     )
+                    // Right under the strip that defines the
+                    // modes — the switch shortcuts belong
+                    // beside their definition, not buried
+                    // below the action groups.
+                    if model.config.modes.count > 1 {
+                        ChangeModesSection(
+                            model: model,
+                            bindings: bindingsBinding,
+                            modeNames: model.config.modes.map(
+                                \.name
+                            ),
+                            current: selected
+                        )
+                    }
                     FocusSection(
                         model: model,
                         bindings: bindingsBinding,
@@ -40,16 +54,6 @@ struct ShortcutsSection: View {
                         model: model,
                         bindings: bindingsBinding
                     )
-                    if model.config.modes.count > 1 {
-                        ChangeModesSection(
-                            model: model,
-                            bindings: bindingsBinding,
-                            modeNames: model.config.modes.map(
-                                \.name
-                            ),
-                            current: selected
-                        )
-                    }
                     ApplicationsSection(
                         model: model,
                         bindings: bindingsBinding
