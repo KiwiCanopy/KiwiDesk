@@ -117,6 +117,7 @@ struct ProfilesSection: View {
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {
                     Text(summary.name)
+                    renameButton(summary.name)
                     if summary.name == model.activeProfile {
                         BadgeChip(label: "active")
                     }
@@ -128,13 +129,8 @@ struct ProfilesSection: View {
             }
             Spacer()
             if !summary.isDefault {
-                Button("Make default") {
-                    model.makeDefault(named: summary.name)
-                }
-                .buttonStyle(.borderless)
-                .font(.caption)
+                makeDefaultLink(summary.name)
             }
-            renameButton(summary.name)
             Button("Load") {
                 model.loadProfile(named: summary.name)
             }
@@ -154,18 +150,37 @@ struct ProfilesSection: View {
         }
     }
 
-    /// Rename lives beside Load: a pencil opening a popover.
-    /// The rename is immediate (file + native-Space bindings
-    /// follow), like Delete and Make default.
+    /// "make default" is a quiet inline link — underlined
+    /// lowercase text rather than a button; hover lifts the
+    /// color and shows the pointing-hand cursor.
+    private func makeDefaultLink(
+        _ name: String
+    ) -> some View {
+        Button {
+            model.makeDefault(named: name)
+        } label: {
+            Text("make default").underline()
+        }
+        .buttonStyle(.plain)
+        .font(.caption)
+        .linkHover()
+    }
+
+    /// Rename is a pencil right beside the profile name (in
+    /// front of the badges), opening a popover. The rename is
+    /// immediate (file + native-Space bindings follow), like
+    /// Delete and make default.
     private func renameButton(_ name: String) -> some View {
         Button {
             renameDraft = name
             renaming = name
         } label: {
             Image(systemName: "pencil")
+                .imageScale(.small)
         }
         .buttonStyle(.borderless)
         .help("Rename profile")
+        .linkHover()
         .popover(
             isPresented: Binding(
                 get: { renaming == name },
