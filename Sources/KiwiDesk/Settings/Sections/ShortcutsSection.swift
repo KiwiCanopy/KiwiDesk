@@ -1,0 +1,168 @@
+import KiwiDeskCore
+import SwiftUI
+
+/// Whole App ▸ Shortcuts (#68 §3.6): a mode strip (chips, "+"
+/// popover), flat intent groups (Focus / Move Windows / Size &
+/// Float / Switch modes / Open applications), the raw-Lua rows
+/// demoted to a collapsed Advanced drawer, and Import moved to
+/// the header where a new user can see it. One recorder can be
+/// active at a time (#33), duplicates hard-block with Steal /
+/// Go to (#34), and conflict state derives live from the
+/// bindings on every render (#35).
+struct ShortcutsSection: View {
+    @ObservedObject var model: SettingsModel
+    @State private var selected = KeyMode.defaultName
+    @State private var advancedExpanded = false
+    @StateObject private var coordinator =
+        RecorderCoordinator()
+
+    var body: some View {
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    KeybindingConflictBanner(model: model)
+                    overrideBanner
+                    ShortcutsHeader(
+                        model: model,
+                        selected: $selected
+                    )
+                    FocusSection(
+                        model: model,
+                        bindings: bindingsBinding,
+                        spaces: model.config.spaces
+                    )
+                    MoveWindowsSection(
+                        model: model,
+                        bindings: bindingsBinding,
+                        spaces: model.config.spaces
+                    )
+                    SizeFloatSection(
+                        model: model,
+                        bindings: bindingsBinding
+                    )
+                    if model.config.modes.count > 1 {
+                        ChangeModesSection(
+                            model: model,
+                            bindings: bindingsBinding,
+                            modeNames: model.config.modes.map(
+                                \.name
+                            ),
+                            current: selected
+                        )
+                    }
+                    ApplicationsSection(
+                        model: model,
+                        bindings: bindingsBinding
+                    )
+                    advancedDrawer
+                }
+                .padding(16)
+                .environment(
+                    \.keybindingOverrideBase,
+                    model.overrideBaseRows(mode: selected)
+                )
+                .environmentObject(coordinator)
+            }
+            .onChange(of: coordinator.scrollTarget) {
+                _,
+                target in
+                guard let target else { return }
+                withAnimation {
+                    proxy.scrollTo(target, anchor: .center)
+                }
+                coordinator.scrollTarget = nil
+            }
+        }
+        .onAppear(perform: ensureSelection)
+    }
+
+    // MARK: - Override mode (#55 phase 7)
+
+    /// Shown while editing a stored profile: the section
+    /// renders the RESOLVED modes; only rows diverging from
+    /// the base are saved into the profile's sparse override.
+    @ViewBuilder private var overrideBanner: some View {
+        if model.editingStoredProfile {
+            SettingsSection("Profile shortcuts") {
+                if model.editedProfileOverridesKeys {
+                    Label(
+                        "This profile overrides base "
+                            + "keybindings.",
+                        systemImage:
+                            "keyboard.badge.ellipsis"
+                    )
+                    .font(.callout)
+                }
+                Text(
+                    "Dimmed rows are inherited from the base "
+                        + "shortcuts and stay in sync with "
+                        + "them. Edit a row to override it "
+                        + "for this profile only; matching "
+                        + "the base again makes it inherited "
+                        + "again. Removing an inherited row "
+                        + "only resets it — to disable a "
+                        + "combo in this profile, rebind it "
+                        + "to a no-op action instead."
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    // MARK: - Advanced drawer (§3.6.1)
+
+    private var advancedDrawer: some View {
+        DisclosureGroup(isExpanded: $advancedExpanded) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(
+                    "Bind any Lua to a hotkey. This is the "
+                        + "power-user escape hatch — the "
+                        + "groups above cover the built-in "
+                        + "actions."
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                AdvancedLuaSection(
+                    model: model,
+                    bindings: bindingsBinding
+                )
+            }
+            .padding(.top, 8)
+        } label: {
+            Text("Advanced: Lua bindings").font(.headline)
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color(nsColor: .controlBackgroundColor))
+        )
+    }
+
+    // MARK: - Bindings into the selected mode
+
+    private var modeIndex: Int {
+        model.config.modes.firstIndex {
+            $0.name == selected
+        } ?? 0
+    }
+
+    private var bindingsBinding: Binding<[KeyBinding]> {
+        Binding(
+            get: { model.config.modes[modeIndex].bindings },
+            set: {
+                model.config.modes[modeIndex].bindings = $0
+            }
+        )
+    }
+
+    /// Falls back to the default mode if the remembered
+    /// selection no longer exists (e.g. after a reload).
+    private func ensureSelection() {
+        if !model.config.modes.contains(
+            where: { $0.name == selected }
+        ) {
+            selected = KeyMode.defaultName
+        }
+    }
+}

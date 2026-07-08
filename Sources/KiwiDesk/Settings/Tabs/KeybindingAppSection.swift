@@ -42,6 +42,17 @@ struct ApplicationsSection: View {
                     for: binding.wrappedValue,
                     in: bindings
                 ),
+                preflight: { combo in
+                    RecorderPreflight.rejection(
+                        combo: combo,
+                        excluding: {
+                            [id = binding.wrappedValue.id] in
+                            $0.id == id
+                        },
+                        bindings: $bindings,
+                        commit: { record($0, into: binding) }
+                    )
+                },
                 onRecord: { record($0, into: binding) },
                 onClear: { binding.wrappedValue.combo = "" }
             )
@@ -57,6 +68,7 @@ struct ApplicationsSection: View {
                 from: overrideBase
             )
         )
+        .id(binding.wrappedValue.id.uuidString)
     }
 
     private func record(

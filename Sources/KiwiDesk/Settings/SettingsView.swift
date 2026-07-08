@@ -78,7 +78,7 @@ struct SettingsView: View {
         case .profiles:
             PresetsTab(model: model)
         case .shortcuts:
-            KeybindingsTab(model: model)
+            ShortcutsSection(model: model)
         case .appRules:
             AppRulesSection(model: model)
         case .general:
