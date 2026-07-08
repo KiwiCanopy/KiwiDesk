@@ -9,7 +9,14 @@ import SwiftUI
 /// and never leaves the column.
 extension SpacesSection {
     /// The open-hand cursor on hover is the drag affordance
-    /// the handle glyph alone doesn't deliver.
+    /// the handle glyph alone doesn't deliver. Cursor changes
+    /// use `set()` rather than push/pop: the pointer leaves
+    /// the 20×24 handle almost immediately during a drag, so
+    /// hover enter/exit and drag start/end interleave in ways
+    /// a stack cannot balance (a mid-drag exit would pop the
+    /// closed hand; a re-enter would push an extra open hand
+    /// that outlives the drag). Hover is ignored entirely
+    /// while a drag is live.
     func dragHandle(_ space: SpaceID) -> some View {
         Image(systemName: "line.3.horizontal")
             .foregroundStyle(.secondary)
@@ -17,11 +24,8 @@ extension SpacesSection {
             .contentShape(Rectangle())
             .help("Drag to reorder")
             .onHover { inside in
-                if inside {
-                    NSCursor.openHand.push()
-                } else {
-                    NSCursor.pop()
-                }
+                guard dragged == nil else { return }
+                (inside ? NSCursor.openHand : .arrow).set()
             }
             .gesture(dragGesture(space))
     }
@@ -35,12 +39,12 @@ extension SpacesSection {
         .onChanged { value in
             if dragged == nil {
                 dragged = space
-                NSCursor.closedHand.push()
+                NSCursor.closedHand.set()
             }
             retarget(space, at: value.location.y)
         }
         .onEnded { _ in
-            NSCursor.pop()
+            NSCursor.arrow.set()
             withAnimation(
                 .spring(response: 0.35, dampingFraction: 0.7)
             ) {
@@ -49,24 +53,30 @@ extension SpacesSection {
         }
     }
 
-    /// Only the pointer's *vertical* position matters: when it
-    /// crosses into another row's band, the dragged space
-    /// moves to that slot (the same before/after rule the
-    /// context menu's Move Up/Down applies).
+    /// Only the pointer's *vertical* position matters, and a
+    /// swap fires only once the pointer crosses the candidate
+    /// row's MIDPOINT — plain band containment oscillates
+    /// with variable-height rows (after a short row moves
+    /// past a tall one, the pointer can still sit inside the
+    /// tall row's new band and the next movement swaps them
+    /// straight back).
     private func retarget(_ space: SpaceID, at y: CGFloat) {
         guard
-            let target = rowFrames.first(where: {
+            let candidate = rowFrames.first(where: {
                 $0.key != space
                     && $0.value.minY <= y
                     && y <= $0.value.maxY
-            })?.key,
+            }),
             let from = model.config.spaces.firstIndex(
                 of: space
             ),
             let to = model.config.spaces.firstIndex(
-                of: target
+                of: candidate.key
             ),
-            from != to
+            from != to,
+            to > from
+                ? y >= candidate.value.midY
+                : y <= candidate.value.midY
         else { return }
         withAnimation(.easeInOut(duration: 0.15)) {
             model.config.spaces.move(
