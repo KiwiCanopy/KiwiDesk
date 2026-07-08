@@ -26,7 +26,7 @@ struct ApplicationsSection: View {
             } label: {
                 Label("Add application", systemImage: "plus")
             }
-            .buttonStyle(.borderless)
+            .buttonStyle(.bordered)
         }
     }
 

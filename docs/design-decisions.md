@@ -289,16 +289,44 @@ puts its label in the same fixed-width column
 (`SettingsMetrics.labelColumn`), so controls start on one
 imaginary line across sections instead of each row picking
 its own label width; slider readouts share one trailing
-column the same way. Numeric steppers are the deliberate
-exception: label leading, monospaced value plus arrows
-trailing (the native System-Settings numeric layout) — a
-value embedded in the label string ("Columns: 3") read as
-static text. Dropdowns ride the axis via `DropdownRow` and
-take `.controlSize(.large)` so a menu button's height sits
-with the capsule tracks around it. Within a section, a
-`Divider` separates geometry controls from the behavior
-dropdowns (overflow, new-window placement) — eight-point
-uniform spacing alone let unrelated rows read as one group.
+column the same way. Override rows join the axis with a
+narrower label (`overrideLabelColumn`) that pays for
+`OverrideChrome`'s checkbox prefix, so their controls land
+on the same line as plain rows. Numeric steppers are the
+deliberate exception: label leading, monospaced value plus
+arrows trailing (the native System-Settings numeric layout)
+— a value embedded in the label string ("Columns: 3") read
+as static text. The color grid is the other exception: its
+two-column `HexColorField` layout keeps its own label width
+(`colorLabelColumn`), because the shared axis would misalign
+the grid's second column. Dropdowns ride the axis via
+`DropdownRow` and take `.controlSize(.large)` so a menu
+button's height sits with the capsule tracks around it.
+Within a section, a `Divider` separates geometry controls
+from the behavior dropdowns (overflow, new-window placement)
+— eight-point uniform spacing alone let unrelated rows read
+as one group.
+
+**Buttons stay native; only size marks their class.** No
+gradients, borders, or shadows on buttons — the crisp shadow
+is reserved for controls that slide (pill, slider thumb).
+Class is expressed through the system styles: one
+`.borderedProminent` per surface for the commit action
+(footer Save, popover confirms), `.bordered` at
+`.controlSize(.large)` for row actions (Load, Apply) so they
+sit level with the large dropdowns, `.bordered` for list-add
+actions (a `.borderless` "Add …" read as caption text), and
+`.plain` + underline + hover lift only for inline prose
+links. The one smaller control is the Shortcuts import
+button (`.controlSize(.small)`): it sits inline beside the
+mode chips and must not read as a peer tab.
+
+**A recording shortcut field wears an accent halo.** The
+armed recorder among dozens of identical rows gets an accent
+fill + ring extending slightly past the button — the same
+accent-layer vocabulary as `OverrideChrome`'s active rows —
+because a tinted border plus a label swap alone was too
+quiet to spot at list speed.
 
 **Status badges stay flat.** The thumb/pill shadow is the
 settings' vocabulary for "interactive, movable"; putting it

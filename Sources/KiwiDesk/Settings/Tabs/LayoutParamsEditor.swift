@@ -77,21 +77,3 @@ struct LayoutParamsEditor: View {
         }
     }
 }
-
-/// New-window placement picker shared by every layout.
-struct PlacementPicker: View {
-    @Binding var placement: SpawnPlacement
-
-    var body: some View {
-        DropdownRow(label: "New window") {
-            Picker("New window", selection: $placement) {
-                Text("First").tag(SpawnPlacement.first)
-                Text("Last").tag(SpawnPlacement.last)
-                Text("Before focused")
-                    .tag(SpawnPlacement.beforeFocused)
-                Text("After focused")
-                    .tag(SpawnPlacement.afterFocused)
-            }
-        }
-    }
-}

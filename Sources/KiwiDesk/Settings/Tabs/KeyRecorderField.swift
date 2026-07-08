@@ -76,6 +76,33 @@ struct KeyRecorderField: View {
                 }
                 .buttonStyle(.bordered)
                 .tint(buttonTint)
+                // The engagement halo: while recording, an
+                // accent fill + ring extend slightly past the
+                // button so the one armed field among dozens
+                // of recorder rows reads at a glance — the
+                // tint alone only recolors the border. Same
+                // accent-layer vocabulary as OverrideChrome's
+                // active rows. Negative padding keeps the
+                // layout footprint unchanged.
+                .background {
+                    if recording {
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(
+                                Color.accentColor.opacity(0.08)
+                            )
+                            .padding(-4)
+                    }
+                }
+                .overlay {
+                    if recording {
+                        RoundedRectangle(cornerRadius: 6)
+                            .strokeBorder(
+                                Color.accentColor.opacity(0.4),
+                                lineWidth: 1.5
+                            )
+                            .padding(-4)
+                    }
+                }
                 .help(
                     "A shortcut is one key plus any of "
                         + "⌃ Control, ⌥ Option, ⇧ Shift, "

@@ -157,6 +157,7 @@ struct SpacesSection: View {
             }
         }
         .labelsHidden()
+        .controlSize(.large)
         .frame(width: 150)
     }
 

@@ -16,7 +16,10 @@ struct HexColorField: View {
     var body: some View {
         HStack(spacing: 8) {
             Text(label)
-                .frame(width: 140, alignment: .leading)
+                .frame(
+                    width: SettingsMetrics.colorLabelColumn,
+                    alignment: .leading
+                )
             ColorPicker(
                 "",
                 selection: colorBinding,

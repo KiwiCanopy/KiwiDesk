@@ -81,7 +81,8 @@ struct OverrideSliderRow: View {
             PtSlider(
                 label: label,
                 value: overrideValue($value, global: global),
-                range: range
+                range: range,
+                labelWidth: SettingsMetrics.overrideLabelColumn
             )
         }
     }
@@ -126,21 +127,12 @@ struct OverrideStepperRow: View {
     let range: ClosedRange<Int>
 
     var body: some View {
-        let bound = overrideValue($value, global: global)
         OverrideChrome(isOn: overrideToggle($value, global: global)) {
-            HStack {
-                Text(label)
-                Spacer()
-                Stepper(value: bound, in: range) {
-                    Text("\(bound.wrappedValue)")
-                        .frame(
-                            minWidth: 32,
-                            alignment: .trailing
-                        )
-                        .monospacedDigit()
-                }
-                .accessibilityLabel(label)
-            }
+            StepperRow(
+                label: label,
+                value: overrideValue($value, global: global),
+                in: range
+            )
         }
     }
 }
@@ -160,7 +152,8 @@ struct OverrideFractionRow: View {
             HStack {
                 Text(label)
                     .frame(
-                        width: SettingsMetrics.labelColumn,
+                        width: SettingsMetrics
+                            .overrideLabelColumn,
                         alignment: .leading
                     )
                 SettingsSlider(
@@ -192,13 +185,28 @@ struct OverridePickerRow<Value: Hashable & Sendable>: View {
 
     var body: some View {
         OverrideChrome(isOn: overrideToggle($value, global: global)) {
-            Picker(
-                label,
-                selection: overrideValue($value, global: global)
-            ) {
-                ForEach(options, id: \.0) { option in
-                    Text(option.1).tag(option.0)
+            HStack {
+                Text(label)
+                    .frame(
+                        width: SettingsMetrics
+                            .overrideLabelColumn,
+                        alignment: .leading
+                    )
+                Picker(
+                    label,
+                    selection: overrideValue(
+                        $value,
+                        global: global
+                    )
+                ) {
+                    ForEach(options, id: \.0) { option in
+                        Text(option.1).tag(option.0)
+                    }
                 }
+                .labelsHidden()
+                .pickerStyle(.menu)
+                .controlSize(.large)
+                Spacer()
             }
         }
     }

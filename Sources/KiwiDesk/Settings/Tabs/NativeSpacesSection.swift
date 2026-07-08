@@ -69,6 +69,7 @@ struct NativeSpacesSection: View {
             }
         }
         .labelsHidden()
+        .controlSize(.large)
         .frame(width: 180)
     }
 

@@ -47,8 +47,18 @@ struct SettingsView: View {
             } detail: {
                 detailPane
             }
-            .environment(\.settingsNavigate) {
-                selection = $0
+            .environment(\.settingsNavigate) { destination in
+                // The #18 invariant has two writers: the
+                // sidebar can only offer visible rows, and
+                // this closure must refuse what the sidebar
+                // hides — the onChange above only fires on
+                // editing-flag transitions, not on selection.
+                guard
+                    !model.editingStoredProfile
+                        || destination
+                            .visibleWhileEditingStoredProfile
+                else { return }
+                selection = destination
             }
         }
     }

@@ -72,6 +72,7 @@ struct PresetsSection: View {
             Button("Apply") {
                 model.applyStandardPreset(layout)
             }
+            .controlSize(.large)
             .disabled(
                 model.displays.count != layout.screenCount
             )

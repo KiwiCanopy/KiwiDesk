@@ -108,6 +108,7 @@ struct ShortcutsHeader: View {
                     .frame(width: 140)
                     .onSubmit(addMode)
                 Button("Add", action: addMode)
+                    .buttonStyle(.borderedProminent)
                     .disabled(!canAddMode)
             }
             .padding(10)
@@ -131,6 +132,9 @@ struct ShortcutsHeader: View {
                 systemImage: "square.and.arrow.down"
             )
         }
+        // Small: it sits inline beside the mode chips and
+        // must not read as a peer tab.
+        .controlSize(.small)
         .help(
             "Reads the shortcuts active in init.lua and adds "
                 + "them here, matching each combo. Known "
@@ -211,6 +215,7 @@ struct ShortcutsHeader: View {
                     .frame(width: 140)
                     .onSubmit(renameMode)
                 Button("Rename", action: renameMode)
+                    .buttonStyle(.borderedProminent)
                     .disabled(!canRenameMode)
             }
             .padding(10)

@@ -1,3 +1,4 @@
+import KiwiDeskCore
 import SwiftUI
 
 /// The shared row vocabulary of the settings tabs. Every row
@@ -7,19 +8,19 @@ import SwiftUI
 /// up across sections.
 
 /// A pt-valued slider row with a numeric readout, shared by the
-/// monocle and drag-visual editors.
+/// monocle and drag-visual editors. `labelWidth` narrows the
+/// label inside `OverrideChrome`, whose checkbox prefix would
+/// otherwise push the slider off the shared axis.
 struct PtSlider: View {
     let label: String
     @Binding var value: CGFloat
     var range: ClosedRange<Double> = 0...100
+    var labelWidth: CGFloat = SettingsMetrics.labelColumn
 
     var body: some View {
         HStack {
             Text(label)
-                .frame(
-                    width: SettingsMetrics.labelColumn,
-                    alignment: .leading
-                )
+                .frame(width: labelWidth, alignment: .leading)
             SettingsSlider(
                 value: Binding(
                     get: { Double(value) },
@@ -123,6 +124,30 @@ struct StepperRow: View {
             }
             .controlSize(.large)
             .accessibilityLabel(label)
+            // The custom label view replaces the stepper's
+            // announced text, so the current value must ride
+            // along explicitly or VoiceOver hears only the
+            // name.
+            .accessibilityValue("\(value)")
+        }
+    }
+}
+
+/// New-window placement picker shared by every layout (BSP,
+/// Stack, Scrolling, Grid).
+struct PlacementPicker: View {
+    @Binding var placement: SpawnPlacement
+
+    var body: some View {
+        DropdownRow(label: "New window") {
+            Picker("New window", selection: $placement) {
+                Text("First").tag(SpawnPlacement.first)
+                Text("Last").tag(SpawnPlacement.last)
+                Text("Before focused")
+                    .tag(SpawnPlacement.beforeFocused)
+                Text("After focused")
+                    .tag(SpawnPlacement.afterFocused)
+            }
         }
     }
 }

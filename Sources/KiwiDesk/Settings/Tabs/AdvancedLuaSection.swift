@@ -23,7 +23,7 @@ struct AdvancedLuaSection: View {
             } label: {
                 Label("Add binding", systemImage: "plus")
             }
-            .buttonStyle(.borderless)
+            .buttonStyle(.bordered)
         }
     }
 

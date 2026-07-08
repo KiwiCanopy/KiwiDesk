@@ -90,6 +90,7 @@ struct BehaviorSection: View {
             }
             .controlSize(.large)
             .accessibilityLabel("Duration")
+            .accessibilityValue("\(ms) ms")
         }
     }
 }

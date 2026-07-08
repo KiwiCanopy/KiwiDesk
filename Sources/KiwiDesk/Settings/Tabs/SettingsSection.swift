@@ -1,12 +1,5 @@
 import SwiftUI
 
-/// A titled group used across the dashboard sections. The
-/// optional symbol puts a glyph before the title — used by the
-/// per-mode sections so a layout's glyph (§6.3) travels with
-/// its name. The optional caption is a one-sentence plain-words
-/// explanation under the title; `subsection` shrinks the title
-/// for groups that belong to a bigger one (Ghost / Drop zone
-/// under Drag & Drop).
 /// The heading over a run of related sections (the App Bar
 /// block in Appearance): the one registered level above a
 /// section's `.headline`, so multi-section groups don't each
@@ -23,6 +16,13 @@ struct SettingsGroupHeader: View {
     }
 }
 
+/// A titled group used across the dashboard sections. The
+/// optional symbol puts a glyph before the title — used by the
+/// per-mode sections so a layout's glyph (§6.3) travels with
+/// its name. The optional caption is a one-sentence plain-words
+/// explanation under the title; `subsection` shrinks the title
+/// for groups that belong to a bigger one (Ghost / Drop zone
+/// under Drag & Drop).
 struct SettingsSection<Content: View>: View {
     let title: String
     let symbol: String?

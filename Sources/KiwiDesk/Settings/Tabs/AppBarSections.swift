@@ -38,24 +38,35 @@ struct GlobalAppBarSection: View {
     }
 
     @ViewBuilder private var behavior: some View {
-        Picker("Position", selection: $style.position) {
-            ForEach(AppBarOptions.position, id: \.0) {
-                Text($0.1).tag($0.0)
+        DropdownRow(label: "Position") {
+            Picker("Position", selection: $style.position) {
+                ForEach(AppBarOptions.position, id: \.0) {
+                    Text($0.1).tag($0.0)
+                }
             }
         }
-        Picker("Style", selection: $style.style) {
-            ForEach(AppBarOptions.style, id: \.0) {
-                Text($0.1).tag($0.0)
+        DropdownRow(label: "Style") {
+            Picker("Style", selection: $style.style) {
+                ForEach(AppBarOptions.style, id: \.0) {
+                    Text($0.1).tag($0.0)
+                }
             }
         }
-        Picker("Active item", selection: $style.activeStyle) {
-            ForEach(AppBarOptions.activeStyle, id: \.0) {
-                Text($0.1).tag($0.0)
+        DropdownRow(label: "Active item") {
+            Picker(
+                "Active item",
+                selection: $style.activeStyle
+            ) {
+                ForEach(AppBarOptions.activeStyle, id: \.0) {
+                    Text($0.1).tag($0.0)
+                }
             }
         }
-        Picker("Content", selection: $style.content) {
-            ForEach(AppBarOptions.content, id: \.0) {
-                Text($0.1).tag($0.0)
+        DropdownRow(label: "Content") {
+            Picker("Content", selection: $style.content) {
+                ForEach(AppBarOptions.content, id: \.0) {
+                    Text($0.1).tag($0.0)
+                }
             }
         }
         Toggle(

@@ -39,6 +39,7 @@ struct AppSelector: View {
                 Text(name.isEmpty ? "Choose app…" : name)
                     .frame(minWidth: 150, alignment: .leading)
             }
+            .controlSize(.large)
         }
     }
 }
@@ -59,6 +60,7 @@ struct SpaceMenu: View {
             Text(selected?.raw ?? "Space…")
                 .frame(minWidth: 70, alignment: .leading)
         }
+        .controlSize(.large)
         .frame(width: 110)
     }
 }

@@ -93,6 +93,7 @@ struct ScrollGridEditor: View {
             }
             .controlSize(.large)
             .accessibilityLabel("Scroll speed")
+            .accessibilityValue("\(ms) ms")
         }
         .disabled(
             !model.config.settings.animations.onScrolling

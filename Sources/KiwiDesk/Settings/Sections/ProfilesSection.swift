@@ -134,6 +134,7 @@ struct ProfilesSection: View {
             Button("Load") {
                 model.loadProfile(named: summary.name)
             }
+            .controlSize(.large)
             .help(
                 summary.matchesLive
                     ? ""
@@ -247,7 +248,7 @@ struct ProfilesSection: View {
                         .padding(.vertical, 1)
                         .background(
                             Capsule()
-                                .fill(.quaternary.opacity(0.6))
+                                .fill(.quaternary.opacity(0.4))
                         )
                         .help(monitor)
                 }
