@@ -32,7 +32,12 @@ extension KiwiCore {
             response = settingsCommand(command, args)
         }
         if response.isSuccess {
-            retile()
+            // Forced: these are explicit config applies from
+            // Lua/CLI (AGENTS.md §5) — un-forced, the engine's
+            // ±2 pt tolerance would swallow a small ratio
+            // nudge exactly like the 1 pt gap edit that
+            // motivated the guardrail.
+            retile(force: true)
         }
         return response
     }
