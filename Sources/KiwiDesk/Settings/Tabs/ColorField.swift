@@ -5,9 +5,10 @@ import SwiftUI
 /// well — the system color panel it opens carries hex entry
 /// natively (Color Sliders pane), so the inline `#RRGGBBAA`
 /// text field it used to pair with was redundant chrome and
-/// was dropped. The stored value stays a hex string. One
-/// component everywhere a color appears (App Bar, overrides,
-/// drag visuals).
+/// was dropped. "Hex" in the name is the STORAGE contract,
+/// not the UI: the binding is the `#RRGGBBAA` string the
+/// config persists. One component everywhere a color appears
+/// (App Bar, overrides, drag visuals).
 struct HexColorField: View {
     let label: String
     @Binding var hex: String

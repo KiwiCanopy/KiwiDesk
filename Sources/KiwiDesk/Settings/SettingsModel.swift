@@ -98,8 +98,8 @@ final class SettingsModel: ObservableObject {
 
     let core: KiwiCore
     /// Guards the `config.didSet` dirty flag during reload
-    /// cycles (also used by the profile-editing reload in
-    /// `SettingsModel+ProfileOverrides.swift`).
+    /// cycles; its only writer is `apply(_:)` in
+    /// `SettingsModel+EditTarget.swift`.
     var suppressDirty = false
     /// The sidecar as last loaded — the baseline that decides
     /// whether a save must also regenerate the global files

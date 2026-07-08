@@ -5,8 +5,11 @@ import SwiftUI
 /// values onto the miniature's 1–14 pt span. The square root
 /// exaggerates the 0–20 pt range users actually live in and
 /// compresses 60–100 pt, so slider drags stay perceptible
-/// without the miniature blowing out. No AppKit/SwiftUI
-/// dependency — unit-testable on its own.
+/// without the miniature blowing out. The 1 pt floor is
+/// deliberate: even a real gap of 0 keeps a hairline seam so
+/// the miniature's windows stay countable. The enum itself
+/// touches no AppKit/SwiftUI API (`GapPreviewScaleTests`);
+/// it lives here only until it grows more math.
 enum GapPreviewScale {
     static let realMax: CGFloat = 100
     static let miniMin: CGFloat = 1
