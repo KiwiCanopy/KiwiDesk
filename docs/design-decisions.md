@@ -253,8 +253,9 @@ Every pick-one-of-few chooser (layout parameters, mouse
 resize, icon picker tabs) uses `SegmentedPicker`
 instead of the native segmented picker: a capsule track
 where the selection is a solid white pill (light gray in
-dark mode, no shadow — a drop shadow read as the pill
-"fading out") and the selected label is larger and semibold
+dark mode) wearing the slider thumb's exact crisp shadow —
+the earlier soft glass-era shadow read as the pill "fading
+out" — and the selected label is larger and semibold
 — a real font-size step, because `scaleEffect` rasterizes
 the text and reads as blur. Liquid Glass was tried in three
 variants (bare, accent-tinted, clear + specular rim) and

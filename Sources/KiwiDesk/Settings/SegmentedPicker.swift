@@ -139,8 +139,10 @@ struct SegmentedPicker<Value: Hashable>: View {
     }
 
     /// The solid pill: white in light mode, a light gray in
-    /// dark — no shadow (a drop shadow read as the pill
-    /// "fading out" against the flat track).
+    /// dark, carrying the slider thumb's exact shadow so the
+    /// two controls read as one family. (The earlier soft
+    /// glass-era shadow read as the pill "fading out"; this
+    /// crisp one doesn't.)
     private var pill: some View {
         Capsule()
             .fill(
@@ -153,6 +155,11 @@ struct SegmentedPicker<Value: Hashable>: View {
                     Color.primary.opacity(0.06),
                     lineWidth: 0.5
                 )
+            )
+            .shadow(
+                color: .black.opacity(0.25),
+                radius: 2,
+                y: 1
             )
     }
 }
