@@ -107,7 +107,8 @@ extension ChordRecorder {
 
     private func scheduleSettle(_ stamp: Date) {
         Task { [weak self] in
-            let margin = Self.releaseWindow + 0.03
+            let margin =
+                Self.releaseWindow + Self.settleSlack
             try? await Task.sleep(
                 nanoseconds: UInt64(
                     margin * 1_000_000_000

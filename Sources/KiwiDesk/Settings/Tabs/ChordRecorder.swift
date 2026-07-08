@@ -57,8 +57,16 @@ final class ChordRecorder {
 
     /// Releasing a whole chord is a burst of events well
     /// under this; anything slower is a deliberate
-    /// disassembly the preview has already shown.
+    /// disassembly. Display freeze and lockability are
+    /// deliberately the SAME window — split the knob and the
+    /// preview either shows a chord that can no longer lock
+    /// or hides one that still can.
     static let releaseWindow: TimeInterval = 0.35
+
+    /// Scheduling slack on top of `releaseWindow`, so the
+    /// settle Task always wakes on the expired side of the
+    /// window it re-checks.
+    static let settleSlack: TimeInterval = 0.03
 
     /// Injectable clock — tests drive expiry without
     /// sleeping.
