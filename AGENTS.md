@@ -230,6 +230,12 @@ Keep this list updated whenever a recurring mistake is found.
   drive animations from a single global timer.
 - **`AXObserver` callbacks arrive on the thread's run loop** that
   registered them; keep observer registration on the main thread.
+- **SwiftUI cursor changes use `NSCursor.set()`, never
+  push/pop.** A view removed under the pointer (a link that
+  deletes itself, a row rebuilt by rename) never delivers the
+  balancing `onHover(false)`, and hover interleaved with a drag
+  gesture pops the wrong entry — a cursor stack cannot balance.
+  Bit the spaces drag handle and the link-hover modifier.
 - **Split test suites early.** The 79-char limit and 350-line
   ceiling repeatedly bit large test files. Break suites into
   focused files before they grow; per-file private helpers are the
@@ -258,9 +264,10 @@ Keep this list updated whenever a recurring mistake is found.
   after a config edit lets it swallow small changes entirely (a
   1 pt gap edit visibly did nothing). Config-apply entry points
   (`applyProfileScopedState`, `set_gap_*`,
-  `set_min_window_size`, and the whole `layoutCommand`
-  dispatch — every `set_*` from Lua/CLI) force; event-driven
-  retiles stay un-forced so echo lag can't wobble windows.
+  `set_min_window_size`, `set_mode`, and the whole
+  `layoutCommand` dispatch — every retile triggered by an
+  explicit `set_*` from Lua/CLI) force; event-driven retiles
+  stay un-forced so echo lag can't wobble windows.
 - **Resolve before layout, and merge per-field first.** Settings
   that layer (global → layout → space) merge field-by-field, with
   cross-field clamps applied *last* on the already-merged values

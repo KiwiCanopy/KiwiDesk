@@ -87,4 +87,28 @@ struct ProfileRenameTests {
                 == [2: "studio", 3: "other"]
         )
     }
+
+    @Test("rename follows the sidecar's binding lines")
+    func sidecarFollow() throws {
+        let core = makeCore()
+        save(core, "desk")
+        var config = GuiConfig()
+        config.profileBindings = [2: "desk"]
+        try core.guiConfigStore.save(config)
+        core.nativeSpaceBindings = [2: "desk"]
+        try core.renameProfile(from: "desk", to: "studio")
+        #expect(
+            core.guiConfigStore.load()?.profileBindings
+                == [2: "studio"]
+        )
+    }
+
+    @Test("rename never creates a sidecar")
+    func noSidecarCreated() throws {
+        let core = makeCore()
+        save(core, "desk")
+        core.nativeSpaceBindings = [2: "desk"]
+        try core.renameProfile(from: "desk", to: "studio")
+        #expect(!core.guiConfigStore.exists)
+    }
 }
