@@ -1,6 +1,6 @@
+import AppKit
 import KiwiDeskCore
 import SwiftUI
-import UniformTypeIdentifiers
 
 /// This Profile ▸ Spaces (#68 §3.2/§3.3): the profile's space
 /// list — rename, reorder (drag or context menu), pick a layout
@@ -11,9 +11,15 @@ struct SpacesSection: View {
     @State private var newSpace = ""
     /// Rows with an open "Customize" expander.
     @State private var expanded: Set<SpaceID> = []
-    /// The space being row-dragged, if any — the reorder
-    /// delegates key off this, not the drag payload.
-    @State private var dragged: SpaceID?
+    // Drag-reorder state, shared with the handle/gesture
+    // extension (`SpacesSection+Drag.swift`), hence not
+    // `private` (which is file-scoped).
+    /// The space being handle-dragged, if any.
+    @State var dragged: SpaceID?
+    /// Each row's frame in list space, for retargeting the
+    /// drag — measured via preference, so variable-height
+    /// rows (open expanders) stay accurate.
+    @State var rowFrames: [SpaceID: CGRect] = [:]
 
     var body: some View {
         ScrollView {
@@ -21,8 +27,14 @@ struct SpacesSection: View {
                 spacesSection
             }
             .padding(16)
+            .coordinateSpace(name: Self.listSpace)
+            .onPreferenceChange(SpaceRowFrames.self) {
+                rowFrames = $0
+            }
         }
     }
+
+    static let listSpace = "spacesList"
 
     private var spacesSection: some View {
         SettingsSection("Spaces") {
@@ -54,9 +66,7 @@ struct SpacesSection: View {
     private func spaceRow(_ space: SpaceID) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
-                Image(systemName: "line.3.horizontal")
-                    .foregroundStyle(.tertiary)
-                    .help("Drag to reorder")
+                dragHandle(space)
                 IconPicker(
                     icon: iconBinding(space),
                     preview: .chip
@@ -96,22 +106,42 @@ struct SpacesSection: View {
                     .padding(.leading, 24)
                     .padding(.bottom, 4)
             }
-            Divider()
         }
+        .padding(8)
+        // Each space is a bordered card: the rows read as
+        // grabbable tiles, not table lines.
+        .background(
+            RoundedRectangle(cornerRadius: 6)
+                .fill(.quaternary.opacity(0.35))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 6)
+                .strokeBorder(
+                    Color(nsColor: .separatorColor)
+                )
+        )
         .contextMenu { contextActions(space) }
-        .opacity(dragged == space ? 0.5 : 1)
-        .onDrag {
-            dragged = space
-            return DraggableSpace(raw: space.raw)
-                .itemProvider
-        }
-        .onDrop(
-            of: [.json],
-            delegate: SpaceReorderDelegate(
-                item: space,
-                spaces: $model.config.spaces,
-                dragged: $dragged
-            )
+        // Lifted while dragged: the row itself is what moves
+        // (no system ghost), stepping slot to slot — it never
+        // leaves the column.
+        .scaleEffect(dragged == space ? 1.02 : 1)
+        .shadow(
+            color: .black.opacity(dragged == space ? 0.2 : 0),
+            radius: 6,
+            y: 2
+        )
+        .zIndex(dragged == space ? 1 : 0)
+        .background(
+            GeometryReader { proxy in
+                Color.clear.preference(
+                    key: SpaceRowFrames.self,
+                    value: [
+                        space: proxy.frame(
+                            in: .named(Self.listSpace)
+                        )
+                    ]
+                )
+            }
         )
     }
 
@@ -247,53 +277,5 @@ struct SpacesSection: View {
                     mode == .bsp ? nil : mode
             }
         )
-    }
-}
-
-/// An editable space name. Commits the rename on Return or when
-/// focus leaves; reverts to the current name if the new one is
-/// empty or already taken, so a bad edit never renames.
-struct SpaceNameField: View {
-    let space: SpaceID
-    let isAvailable: (SpaceID) -> Bool
-    let onRename: (SpaceID) -> Void
-
-    @State private var draft: String
-    @FocusState private var focused: Bool
-
-    init(
-        space: SpaceID,
-        isAvailable: @escaping (SpaceID) -> Bool,
-        onRename: @escaping (SpaceID) -> Void
-    ) {
-        self.space = space
-        self.isAvailable = isAvailable
-        self.onRename = onRename
-        _draft = State(initialValue: space.raw)
-    }
-
-    var body: some View {
-        TextField("", text: $draft)
-            .textFieldStyle(.plain)
-            .fontWeight(.medium)
-            .focused($focused)
-            .frame(maxWidth: 200, alignment: .leading)
-            .onSubmit(commit)
-            .onChange(of: focused) { _, isFocused in
-                if !isFocused { commit() }
-            }
-    }
-
-    private func commit() {
-        let target = SpaceID(draft.trimmed)
-        guard target != space else {
-            draft = space.raw
-            return
-        }
-        guard !target.raw.isEmpty, isAvailable(target) else {
-            draft = space.raw
-            return
-        }
-        onRename(target)
     }
 }
