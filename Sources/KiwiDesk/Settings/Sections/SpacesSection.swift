@@ -1,5 +1,6 @@
 import KiwiDeskCore
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// This Profile ▸ Spaces (#68 §3.2/§3.3): the profile's space
 /// list — rename, reorder (drag or context menu), pick a layout
@@ -10,6 +11,9 @@ struct SpacesSection: View {
     @State private var newSpace = ""
     /// Rows with an open "Customize" expander.
     @State private var expanded: Set<SpaceID> = []
+    /// The space being row-dragged, if any — the reorder
+    /// delegates key off this, not the drag payload.
+    @State private var dragged: SpaceID?
 
     var body: some View {
         ScrollView {
@@ -95,16 +99,20 @@ struct SpacesSection: View {
             Divider()
         }
         .contextMenu { contextActions(space) }
-        .draggable(DraggableSpace(raw: space.raw))
-        .dropDestination(for: DraggableSpace.self) {
-            dropped,
-            _ in
-            guard let first = dropped.first else {
-                return false
-            }
-            move(SpaceID(first.raw), before: space)
-            return true
+        .opacity(dragged == space ? 0.5 : 1)
+        .onDrag {
+            dragged = space
+            return DraggableSpace(raw: space.raw)
+                .itemProvider
         }
+        .onDrop(
+            of: [.json],
+            delegate: SpaceReorderDelegate(
+                item: space,
+                spaces: $model.config.spaces,
+                dragged: $dragged
+            )
+        )
     }
 
     private func modePicker(_ space: SpaceID) -> some View {
@@ -209,21 +217,6 @@ struct SpacesSection: View {
             return
         }
         model.config.spaces.swapAt(from, to)
-    }
-
-    /// Reorder-by-drop: inserts `moved` in front of `anchor`.
-    private func move(_ moved: SpaceID, before anchor: SpaceID) {
-        guard moved != anchor,
-            let from = model.config.spaces.firstIndex(
-                of: moved
-            ),
-            let to = model.config.spaces.firstIndex(of: anchor)
-        else { return }
-        var spaces = model.config.spaces
-        spaces.remove(at: from)
-        let insertion = spaces.firstIndex(of: anchor) ?? to
-        spaces.insert(moved, at: insertion)
-        model.config.spaces = spaces
     }
 
     /// The space's optional recognition icon (#68 §6.5):

@@ -20,6 +20,22 @@ struct DraggableSpace: Codable, Transferable {
     static var transferRepresentation: some TransferRepresentation {
         CodableRepresentation(contentType: .json)
     }
+
+    /// Provider for the `DropDelegate`-based live reorder in
+    /// the Spaces list, which needs `.onDrag`'s drag-start
+    /// hook (`.draggable` has none). Same `.json` payload as
+    /// the Transferable path, for the reasons above.
+    var itemProvider: NSItemProvider {
+        let provider = NSItemProvider()
+        provider.registerDataRepresentation(
+            forTypeIdentifier: UTType.json.identifier,
+            visibility: .all
+        ) { completion in
+            completion(try? JSONEncoder().encode(self), nil)
+            return nil
+        }
+        return provider
+    }
 }
 
 /// A saved profile being dragged onto a native macOS Space (#7).
