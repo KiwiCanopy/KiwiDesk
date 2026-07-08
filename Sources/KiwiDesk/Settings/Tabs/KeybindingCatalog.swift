@@ -178,6 +178,10 @@ enum KeybindingCatalog {
         from old: String,
         to new: String
     ) -> [KeyMode] {
+        // `default` is the config's anchor mode ("always the
+        // active one after the app starts") — no entry point
+        // may rename it, today's UI gate or a future CLI's.
+        guard old != KeyMode.defaultName else { return modes }
         let oldCmd = switchModeCommand(old)
         let newCmd = switchModeCommand(new)
         return modes.map { mode in

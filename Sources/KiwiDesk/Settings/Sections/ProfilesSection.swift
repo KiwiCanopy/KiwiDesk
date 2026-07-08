@@ -202,10 +202,17 @@ struct ProfilesSection: View {
         }
     }
 
+    /// Mirrors the core's case-insensitive collision check
+    /// (APFS: "a" → "B" collides with "b"), still allowing
+    /// the case-only self-rename ("work" → "Work").
     private func canRename(_ old: String) -> Bool {
         let new = renameDraft.trimmed
-        return !new.isEmpty && new != old
-            && !model.profiles.contains(new)
+        guard !new.isEmpty, new != old else { return false }
+        return !model.profiles.contains {
+            $0.caseInsensitiveCompare(new) == .orderedSame
+                && $0.caseInsensitiveCompare(old)
+                    != .orderedSame
+        }
     }
 
     private func commitRename(of old: String) {

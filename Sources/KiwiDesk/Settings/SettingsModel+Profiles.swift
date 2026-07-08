@@ -136,11 +136,12 @@ extension SettingsModel {
     /// name, runtime native-Space bindings, and the sidecar's
     /// binding lines — so the model only retargets its edit
     /// session and reloads.
+    /// Collisions are the core's call (the only
+    /// case-insensitive tier) — a rejection surfaces as
+    /// `profileWarning`, never a silent dead click.
     func renameProfile(from old: String, to new: String) {
         let name = new.trimmed
-        guard name != old, !name.isEmpty,
-            !profiles.contains(name)
-        else { return }
+        guard name != old, !name.isEmpty else { return }
         do {
             try core.renameProfile(from: old, to: name)
         } catch {

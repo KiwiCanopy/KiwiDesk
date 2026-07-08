@@ -56,6 +56,18 @@ struct ModeRenameTests {
         #expect(renamed[1].bindings[0].lua == unchanged.lua)
     }
 
+    @Test("the default mode can never be renamed")
+    func defaultModeIsAnchored() {
+        var base = KeyMode(name: KeyMode.defaultName)
+        base.bindings = [switchRow(KeyMode.defaultName)]
+        let out = KeybindingCatalog.renameMode(
+            in: [base],
+            from: KeyMode.defaultName,
+            to: "base"
+        )
+        #expect(out == [base])
+    }
+
     @Test("renaming an absent mode changes nothing")
     func absentModeIsNoOp() {
         var base = KeyMode(name: KeyMode.defaultName)
