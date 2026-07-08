@@ -3,17 +3,21 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The right-hand column of every keybinding row: a recorder
-/// that captures the next key press into a canonical combo
-/// string, with a conflict indicator and a clear button.
+/// that captures a chord into a canonical combo string, with a
+/// conflict indicator and a clear button.
 ///
+/// Recording is lock-on-full-release (`ChordRecorder`): the
+/// field live-previews the chord as it is formed (modifiers,
+/// then the full combo) and locks in when every key is
+/// released — press order and release timing can never corrupt
+/// the chord, and the base key can be corrected mid-chord.
 /// Coordination (#33): at most one recorder is active — the
 /// shared `RecorderCoordinator` tears the previous field down
-/// synchronously when a new one starts. Duplicates (#34): when
-/// `preflight` reports the combo is taken by another KiwiDesk
-/// row, the recording is rejected with a red flash and inline
-/// Steal / Go to actions instead of committing a silent
-/// duplicate. While recording, held modifiers preview live in
-/// the field, and a click anywhere else cancels the recording.
+/// synchronously when a new one starts. Duplicates (#34):
+/// when `preflight` reports the combo is taken by another
+/// KiwiDesk row, the lock-in is rejected with a red flash and
+/// inline Steal / Go to actions instead of committing a
+/// silent duplicate.
 ///
 /// ShortcutsSection-private: requires a `RecorderCoordinator`
 /// in the environment (`.environmentObject`) — rendering it
@@ -31,11 +35,10 @@ struct KeyRecorderField: View {
 
     @EnvironmentObject private var coordinator: RecorderCoordinator
     @State private var fieldID = UUID()
-    @State private var keyMonitor: Any?
-    @State private var mouseMonitor: Any?
-    /// Live preview of the modifiers currently held (#68
-    /// recorder UX): "⌃⌥⌘" while the chord is being formed.
-    @State private var heldModifiers = ""
+    @State private var recorder = ChordRecorder()
+    /// Live preview of the chord being formed ("⌃⌥", then
+    /// "⌃⌥⌘K") while recording.
+    @State private var preview = ""
     /// Set when a click-away cancelled the recording — the
     /// button's own click lands right after the mouse monitor,
     /// and must not immediately restart it.
@@ -81,7 +84,8 @@ struct KeyRecorderField: View {
             // The edited mode/target changed — any pending
             // rejection captured stale bindings (#68 review).
             rejection = nil
-            removeMonitors()
+            recorder.stop()
+            preview = ""
         }
         .onDisappear(perform: stop)
     }
@@ -124,8 +128,7 @@ struct KeyRecorderField: View {
 
     private var label: String {
         if recording {
-            return heldModifiers.isEmpty
-                ? "Press keys…" : heldModifiers + "…"
+            return preview.isEmpty ? "Press keys…" : preview
         }
         guard !combo.isEmpty else { return "Record" }
         // Show the shortcut as native macOS glyphs, mapped
@@ -160,107 +163,43 @@ struct KeyRecorderField: View {
 
     private func start() {
         rejection = nil
-        heldModifiers = ""
+        preview = ""
         // Claiming tears down whichever field was recording
         // before — synchronously, so two keyDown monitors
-        // never coexist (#33). The teardown closure writes
-        // through the State bindings, not `self` (structs
-        // captured by value would mutate a stale copy).
-        let key = $keyMonitor
-        let mouse = $mouseMonitor
-        let held = $heldModifiers
-        coordinator.claim(fieldID) {
-            if let monitor = key.wrappedValue {
-                NSEvent.removeMonitor(monitor)
-            }
-            key.wrappedValue = nil
-            if let monitor = mouse.wrappedValue {
-                NSEvent.removeMonitor(monitor)
-            }
-            mouse.wrappedValue = nil
-            held.wrappedValue = ""
+        // never coexist (#33). The teardown closure captures
+        // the recorder object and the preview Binding, not
+        // the view struct (a struct captured by value would
+        // mutate a stale copy).
+        let previewBinding = $preview
+        coordinator.claim(fieldID) { [recorder] in
+            recorder.stop()
+            previewBinding.wrappedValue = ""
         }
-        keyMonitor = NSEvent.addLocalMonitorForEvents(
-            matching: [.keyDown, .flagsChanged]
-        ) { event in
-            if event.type == .flagsChanged {
-                heldModifiers = Self.modifierSymbols(
-                    event.modifierFlags
-                )
-                return event
+        recorder.start(
+            preview: { preview = $0 },
+            finish: { outcome in
+                finish(outcome)
             }
-            handle(event)
-            return nil
-        }
-        // Clicking anywhere else cancels the recording (the
-        // native recorder idiom); the event passes through so
-        // the click still lands.
-        mouseMonitor = NSEvent.addLocalMonitorForEvents(
-            matching: [.leftMouseDown, .rightMouseDown]
-        ) { event in
+        )
+    }
+
+    private func finish(_ outcome: ChordRecorder.Outcome) {
+        preview = ""
+        coordinator.release(fieldID)
+        switch outcome {
+        case .chord(let combo):
+            commit(combo)
+        case .clickAway:
             cancelledByClick = Date()
-            stop()
-            return event
+        case .cancelled:
+            break
         }
     }
 
     private func stop() {
-        removeMonitors()
+        recorder.stop()
+        preview = ""
         coordinator.release(fieldID)
-    }
-
-    private func removeMonitors() {
-        if let keyMonitor {
-            NSEvent.removeMonitor(keyMonitor)
-        }
-        keyMonitor = nil
-        if let mouseMonitor {
-            NSEvent.removeMonitor(mouseMonitor)
-        }
-        mouseMonitor = nil
-        heldModifiers = ""
-    }
-
-    /// The held modifiers in display order (⌃⌥⇧⌘) for the
-    /// live preview. Modifier-only combos are not recordable
-    /// (Carbon hotkeys need a base key); the preview makes
-    /// that visible instead of confusing.
-    private static func modifierSymbols(
-        _ flags: NSEvent.ModifierFlags
-    ) -> String {
-        var symbols = ""
-        if flags.contains(.control) { symbols += "⌃" }
-        if flags.contains(.option) { symbols += "⌥" }
-        if flags.contains(.shift) { symbols += "⇧" }
-        if flags.contains(.command) { symbols += "⌘" }
-        return symbols
-    }
-
-    /// Escape with no modifiers cancels; any other key becomes
-    /// the combo (bare keys are allowed for modal bindings).
-    private func handle(_ event: NSEvent) {
-        let flags = event.modifierFlags
-        let command = flags.contains(.command)
-        let option = flags.contains(.option)
-        let control = flags.contains(.control)
-        let shift = flags.contains(.shift)
-        let bareEscape =
-            event.keyCode == 53
-            && !command && !option && !control && !shift
-        if bareEscape {
-            stop()
-            return
-        }
-        if let string = KeyCombo.comboString(
-            keyCode: UInt32(event.keyCode),
-            command: command,
-            option: option,
-            control: control,
-            shift: shift
-        ) {
-            commit(string)
-        }
-        stop()
     }
 
     /// Hard-blocks a KiwiDesk duplicate (#34); anything else
