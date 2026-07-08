@@ -22,11 +22,20 @@ are always live. (#68 §3.1)
 The old footer showed up to seven differently-labeled verbs
 depending on invisible mode state, but they expressed only
 two intents: "persist to what I'm editing" and "duplicate
-under a new name". Three stable slots, with the save target
-named in a caption beside the primary button (the banner
-above already names the edit target authoritatively). Adopt
-is not a save verb — it lives with the raw-Lua content it
-migrates. (#68 §3.12)
+under a new name". Three stable slots, clustered at the
+trailing edge. The banner above names the edit target
+authoritatively — a destination caption beside Save
+duplicated it, read as confusing, and its fixed width split
+the button cluster apart, so it was dropped. Adopt is not a
+save verb — it lives with the raw-Lua content it migrates.
+(#68 §3.12)
+
+**"Unsaved changes" is a live comparison, not a latched
+flag.** `isDirty` compares the edited config and Lua source
+against the as-loaded baselines on every change, so manually
+undoing an edit clears the footer again — a latched flag
+kept claiming unsaved changes after the user had already
+put everything back.
 
 ## Spaces & profiles
 
@@ -43,6 +52,23 @@ profiles behave unchanged. Pull-to-first was considered and
 rejected: it would have made reordering silently change the
 fallback. (#68 §3.3, #75)
 
+**Space rows are bordered cards; reorder is an axis-locked
+handle drag, not a drag session.** A system drag session's
+ghost follows the pointer on both axes and cannot be
+constrained, and its drop choreography (snap-back flights,
+ghost-over-row double vision) kept reading as broken. The
+reorder is therefore a plain vertical `DragGesture` on the
+grab handle: the row itself lifts (shadow + slight scale)
+and steps slot to slot — it never leaves the column, only
+the pointer's vertical position matters, and there is no
+ghost at all. (`List.onMove` was rejected too: it brings
+list chrome that fights the card sections and shows no
+better affordance.) Each row is a bordered card, the handle
+flips the cursor to an open hand on hover, and the name is
+a visible rounded-border field of fixed width — renaming is
+discoverable without clicking first, and the fields align
+in a column.
+
 **Space icons are recognition sugar; the name stays primary.**
 Optional per-space icon (`space.icon`) shown where scanning
 many small items pays off — space rows, monitor chips,
@@ -55,6 +81,27 @@ reference would silently resurrect the space on the next
 profile load. App rules survive by design: they're global,
 and another profile may declare a space of the same name.
 
+**Saved profiles lead; Presets demote once one exists.** On
+the Profiles tab, the built-in Presets top the list only
+while no profile is saved yet — they're a bootstrap tool,
+and leading with an empty saved-profiles list would leave
+first launch barren. From the first saved profile on, the
+order flips: the user's own content takes the top — saved
+profiles with the Desktop bindings that reference them
+directly beneath — and the full preset list closes the tab.
+No disclosure folding on any section — collapsed content
+was tried and rejected as visual clutter; a plain order
+swap carries the same priority signal.
+
+**Native macOS Spaces read as "Desktop n", never "Space n".**
+"Space n" is how KiwiDesk's own virtual spaces read, so
+reusing it for Mission Control desktops made the two systems
+blur; "Desktop n" is the name Mission Control itself shows.
+Binding a profile to a Desktop is dropdown-only: the earlier
+draggable profile chips duplicated the dropdown while adding
+a chip palette row and drop-target styling — a second
+interaction model with zero extra capability. (#7)
+
 ## Icons
 
 **A curated, keyword-tagged icon catalog — because macOS has
@@ -66,6 +113,18 @@ names ever could. The full catalog stays reachable: any valid
 SF Symbol name typed into the search appears as a result, and
 any single character (incl. emoji) works via "Use as text".
 One `IconPicker` serves mode icons and space icons. (#68 §6.4)
+
+**Browsing is tabbed (Emoji first); search is global.** The
+picker's popover splits Emoji and Symbols into segmented
+tabs — emoji lead because space icons are the picker's most
+frequent use — but a typed query searches both vocabularies
+at once (the tabs stand back, like Character Viewer). The
+button shows a glyph-sized smiley when no icon is set,
+never a "Choose…" label: the text made unset pickers wider
+than set ones, so rows wouldn't line up. Clearing is a
+control, not a choice: the remove button sits beside the
+tabs (disabled when nothing is set) instead of posing as a
+grid cell under Recents.
 
 ## Shortcuts
 
@@ -115,6 +174,17 @@ for the everyday "more breathing room" action, per-edge
 sliders behind a disclosure. When stored edges differ, the
 disclosure pre-expands and the master slider disables itself
 — asymmetric setups can't be blindly flattened. (#68 §3.14)
+
+**The gap preview is a live 2×2 grid, not a layout
+preview.** It teaches the outer/inner vocabulary: a uniform
+2×2 shows both gap kinds on both axes, where a skewed
+BSP-style split would only add noise at miniature size. It
+tracks the sliders live — each of the six stored values maps
+through a square-root curve (`GapPreviewScale`, 0–100 pt →
+1–14 pt) so everyday 8–20 pt changes move visibly while the
+top of the range compresses, and per-edge asymmetry renders
+honestly as uneven margins. Deliberately not a "what will my
+layout look like" preview — that would be its own component.
 
 **Hex stays a first-class color affordance.** The native
 color well is primary, but the `#RRGGBBAA` field remains
