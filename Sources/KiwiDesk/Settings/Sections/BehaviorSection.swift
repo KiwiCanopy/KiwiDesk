@@ -38,22 +38,22 @@ struct BehaviorSection: View {
     private var animationsSection: some View {
         SettingsSection("Animations") {
             Toggle(
-                "Virtual space switches",
+                "Animate virtual space switches",
                 isOn: $model.config.settings.animations
                     .onSpaceChange
             )
             Toggle(
-                "Window resizes",
+                "Animate window resizes",
                 isOn: $model.config.settings.animations
                     .onWindowResize
             )
             Toggle(
-                "Window swaps",
+                "Animate window swaps",
                 isOn: $model.config.settings.animations
                     .onWindowSwap
             )
             Toggle(
-                "Layout reflows",
+                "Animate layout reflows",
                 isOn: $model.config.settings.animations
                     .onRelayout
             )
