@@ -1,11 +1,13 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// A labeled row: a monospaced hex text field and a live
-/// color swatch that reflects the parsed RGBA value.
-///
-/// Reads and writes `#RRGGBB` / `#RRGGBBAA` strings as
-/// used by `AppBarStyle` and `DragVisual`.
+/// A labeled color control (#68 §3.14): a native color well
+/// (opens the system color panel) as the primary affordance,
+/// with the `#RRGGBB` / `#RRGGBBAA` hex string kept beside it
+/// as the copy/paste-friendly secondary — theme sharing via
+/// hex strings is a real workflow and stays first-class. One
+/// component everywhere a color appears (App Bar, overrides,
+/// drag visuals).
 struct HexColorField: View {
     let label: String
     @Binding var hex: String
@@ -14,25 +16,27 @@ struct HexColorField: View {
         HStack(spacing: 8) {
             Text(label)
                 .frame(width: 140, alignment: .leading)
+            ColorPicker(
+                "",
+                selection: colorBinding,
+                supportsOpacity: true
+            )
+            .labelsHidden()
             TextField("#RRGGBBAA", text: $hex)
                 .textFieldStyle(.roundedBorder)
-                .font(.system(.body, design: .monospaced))
-                .frame(maxWidth: 120)
-            swatch
+                .font(.system(.callout, design: .monospaced))
+                .frame(maxWidth: 110)
         }
     }
 
-    private var swatch: some View {
-        RoundedRectangle(cornerRadius: 3)
-            .fill(parsedColor)
-            .frame(width: 22, height: 22)
-            .overlay(
-                RoundedRectangle(cornerRadius: 3)
-                    .stroke(
-                        Color.secondary.opacity(0.4),
-                        lineWidth: 1
-                    )
-            )
+    /// The well edits the same stored hex string: reads via
+    /// `DragVisual.parseHex`, writes back `#RRGGBB` (or
+    /// `#RRGGBBAA` when translucent).
+    private var colorBinding: Binding<Color> {
+        Binding(
+            get: { parsedColor },
+            set: { hex = Self.hexString(from: $0) }
+        )
     }
 
     /// Parses `hex` via `DragVisual.parseHex` (handles
@@ -46,6 +50,26 @@ struct HexColorField: View {
             green: rgba.green,
             blue: rgba.blue,
             opacity: rgba.alpha
+        )
+    }
+
+    static func hexString(from color: Color) -> String {
+        let ns =
+            NSColor(color).usingColorSpace(.sRGB)
+            ?? .black
+        let r = Int(round(ns.redComponent * 255))
+        let g = Int(round(ns.greenComponent * 255))
+        let b = Int(round(ns.blueComponent * 255))
+        let a = Int(round(ns.alphaComponent * 255))
+        if a >= 255 {
+            return String(format: "#%02X%02X%02X", r, g, b)
+        }
+        return String(
+            format: "#%02X%02X%02X%02X",
+            r,
+            g,
+            b,
+            a
         )
     }
 }

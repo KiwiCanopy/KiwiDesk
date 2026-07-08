@@ -17,12 +17,14 @@ struct AppearanceSection: View {
                 )
                 LayoutAppBarSection(
                     title: "Monocle",
+                    mode: .monocle,
                     bar: $model.config.settings.monocle
                         .appBar,
                     global: model.config.settings.appBarStyle
                 )
                 LayoutAppBarSection(
                     title: "Scrolling",
+                    mode: .scrolling,
                     bar: $model.config.settings.scrolling
                         .appBar,
                     global: model.config.settings.appBarStyle

@@ -1,11 +1,14 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// A per-layout override row. The leading checkbox is on when
-/// this layout overrides the field; off inherits the global
-/// value. The control is disabled and dimmed (gray) while
-/// inheriting, editable (black) once overridden — checking the
-/// box seeds the override with the current global value.
+/// An override row, "visible but inherited" (#68 §3.4): the
+/// leading checkbox is on when this scope overrides the field;
+/// off inherits the global value, with the control disabled
+/// and dimmed but still readable. Checking the box seeds the
+/// override with the current global value. Explicitly
+/// overridden rows carry a left accent bar and a subtle tint
+/// so active overrides form a scannable boundary instead of a
+/// checkerboard of enabled inputs.
 private struct OverrideChrome<Content: View>: View {
     let isOn: Binding<Bool>
     @ViewBuilder let content: Content
@@ -23,6 +26,21 @@ private struct OverrideChrome<Content: View>: View {
             content
                 .disabled(!isOn.wrappedValue)
                 .opacity(isOn.wrappedValue ? 1 : 0.5)
+        }
+        .padding(.leading, 6)
+        .padding(.vertical, 2)
+        .background {
+            if isOn.wrappedValue {
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.accentColor.opacity(0.07))
+            }
+        }
+        .overlay(alignment: .leading) {
+            if isOn.wrappedValue {
+                RoundedRectangle(cornerRadius: 1)
+                    .fill(Color.accentColor.opacity(0.7))
+                    .frame(width: 2)
+            }
         }
     }
 }

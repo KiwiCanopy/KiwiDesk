@@ -24,7 +24,16 @@ struct GlobalAppBarSection: View {
             appearance
         }
         SettingsSection("Global colors") {
-            colors
+            LazyVGrid(
+                columns: [
+                    GridItem(.flexible(), alignment: .leading),
+                    GridItem(.flexible(), alignment: .leading),
+                ],
+                alignment: .leading,
+                spacing: 8
+            ) {
+                colors
+            }
         }
     }
 
@@ -122,33 +131,34 @@ struct GlobalAppBarSection: View {
     }
 }
 
-/// One layout's bar: the enable checkbox and, while enabled, the
-/// override accordion.
+/// One layout's bar: the enable checkbox and, while enabled,
+/// the override rows — visible but inherited (#68 §3.4), no
+/// accordion: dimmed rows show the global value they inherit,
+/// the checkbox unlocks a row, and unlocked rows carry the
+/// accent styling from `OverrideChrome`.
 struct LayoutAppBarSection: View {
     let title: String
+    let mode: LayoutMode
     @Binding var bar: LayoutAppBar
     let global: AppBarStyle
-    @State private var expanded = true
 
     var body: some View {
-        SettingsSection(title) {
+        SettingsSection(title + " bar", symbol: mode.glyph) {
             Toggle("Show app bar", isOn: $bar.enabled)
             if bar.enabled {
-                DisclosureGroup(
-                    "Overrides — unchecked rows inherit the "
-                        + "global value",
-                    isExpanded: $expanded
-                ) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        behaviorOverrides
-                        appearanceOverrides
-                        LayoutAppBarColorOverrides(
-                            bar: $bar,
-                            global: global
-                        )
-                    }
-                    .padding(.top, 4)
-                }
+                Text(
+                    "Dimmed rows inherit the global value — "
+                        + "tick a box to override just that "
+                        + "field for this layout."
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                behaviorOverrides
+                appearanceOverrides
+                LayoutAppBarColorOverrides(
+                    bar: $bar,
+                    global: global
+                )
             }
         }
     }
