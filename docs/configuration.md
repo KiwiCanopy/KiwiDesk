@@ -599,8 +599,10 @@ The recorder **locks on full release**: the chord is
 captured as keys go *down* (with a live preview as it
 forms), modifiers accumulate while a key is held, and the
 combo commits once everything is released — release order
-and timing can never change it, and pressing a different
-key mid-chord corrects it (⌘J → ⌘K). Bare Escape, clicking
+and timing can never change it. To correct mid-chord,
+release the key and press another (⌘J, J up, K down → ⌘K);
+pressing a second key while the first is still held keeps
+the first and shows a one-key hint. Bare Escape, clicking
 anywhere else, or switching apps cancels the recording.
 
 In the editor each recorded shortcut *displays* as the compact

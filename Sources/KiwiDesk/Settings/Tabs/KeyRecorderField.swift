@@ -44,6 +44,9 @@ struct KeyRecorderField: View {
     /// and must not immediately restart it.
     @State private var cancelledByClick: Date?
     @State private var rejection: RecorderRejection?
+    /// Transient one-key notice (a second key pressed while
+    /// the first was still held).
+    @State private var hint: String?
     @State private var flashing = false
 
     private var recording: Bool {
@@ -86,6 +89,11 @@ struct KeyRecorderField: View {
             if let rejection {
                 rejectionRow(rejection)
             }
+            if let hint {
+                Text(hint)
+                    .font(.caption)
+                    .foregroundStyle(.orange)
+            }
         }
         .onChange(of: coordinator.generation) { _, _ in
             // The edited mode/target changed — any pending
@@ -93,6 +101,7 @@ struct KeyRecorderField: View {
             rejection = nil
             recorder.stop()
             preview = ""
+            hint = nil
         }
         .onDisappear(perform: stop)
     }
@@ -171,6 +180,7 @@ struct KeyRecorderField: View {
     private func start() {
         rejection = nil
         preview = ""
+        hint = nil
         // Claiming tears down whichever field was recording
         // before — synchronously, so two keyDown monitors
         // never coexist (#33). Captures reach the heap-backed
@@ -185,6 +195,7 @@ struct KeyRecorderField: View {
         }
         recorder.start(
             preview: { preview = $0 },
+            hint: { hint = $0 },
             finish: { outcome in
                 finish(outcome)
             }
@@ -193,6 +204,7 @@ struct KeyRecorderField: View {
 
     private func finish(_ outcome: ChordRecorder.Outcome) {
         preview = ""
+        hint = nil
         coordinator.release(fieldID)
         switch outcome {
         case .chord(let combo):
@@ -207,6 +219,7 @@ struct KeyRecorderField: View {
     private func stop() {
         recorder.stop()
         preview = ""
+        hint = nil
         coordinator.release(fieldID)
     }
 

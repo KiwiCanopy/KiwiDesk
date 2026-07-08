@@ -11,7 +11,12 @@ import KiwiDeskCore
 /// Rules:
 /// - A base keyDown snapshots the pending combo (key + the
 ///   modifiers held at that moment). Pressing another base
-///   key re-snapshots — you can correct mid-chord (⌘J → ⌘K).
+///   key AFTER releasing the first re-snapshots — you can
+///   correct mid-chord (⌘J, J up, K down → ⌘K).
+/// - A second base key pressed WHILE the first is still held
+///   is a chord attempt: the pending combo keeps the first
+///   key and the field shows a one-key hint instead of
+///   silently switching (a shortcut is modifiers + one key).
 /// - While a base key is held, added modifiers ACCUMULATE
 ///   into the pending combo; dropped ones are ignored — an
 ///   early modifier release can't strip the chord.
@@ -76,17 +81,22 @@ final class ChordRecorder {
     private var heldKeys: Set<UInt16> = []
     private var pending: Pending?
     private var onPreview: (String) -> Void = { _ in }
+    private var onHint: (String?) -> Void = { _ in }
     private var onFinish: (Outcome) -> Void = { _ in }
 
     /// Installs the event monitors. `preview` receives the
-    /// live label text on every change; `finish` fires exactly
-    /// once (teardown resets it to a no-op first).
+    /// live label text on every change; `hint` carries the
+    /// transient one-key notice (nil clears it); `finish`
+    /// fires exactly once (teardown resets it to a no-op
+    /// first).
     func start(
         preview: @escaping (String) -> Void,
+        hint: @escaping (String?) -> Void = { _ in },
         finish: @escaping (Outcome) -> Void
     ) {
         stop()
         onPreview = preview
+        onHint = hint
         onFinish = finish
         keyMonitor = NSEvent.addLocalMonitorForEvents(
             matching: [.keyDown, .keyUp, .flagsChanged]
@@ -150,6 +160,7 @@ final class ChordRecorder {
         heldKeys = []
         pending = nil
         onPreview = { _ in }
+        onHint = { _ in }
         onFinish = { _ in }
     }
 
@@ -208,6 +219,22 @@ final class ChordRecorder {
             finish(.cancelled)
             return true
         }
+        // A second base key while the first is still held is
+        // a chord attempt — a shortcut is modifiers + ONE key
+        // (Carbon can't register more). Keep the first key,
+        // teach instead of silently switching; the new key
+        // still counts as held so the lock-in waits for its
+        // release too.
+        if pending != nil, !heldKeys.isEmpty,
+            !heldKeys.contains(keyCode)
+        {
+            heldKeys.insert(keyCode)
+            onHint(
+                "Only one key besides modifiers — release "
+                    + "it first to switch."
+            )
+            return true
+        }
         heldKeys.insert(keyCode)
         // The snapshot: key + the modifiers held right now.
         pending = Pending(
@@ -217,6 +244,7 @@ final class ChordRecorder {
             control: flags.contains(.control),
             shift: flags.contains(.shift)
         )
+        onHint(nil)
         publishPreview(flags: flags)
         return true
     }

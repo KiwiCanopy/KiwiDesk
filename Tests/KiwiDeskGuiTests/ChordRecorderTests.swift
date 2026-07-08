@@ -12,11 +12,15 @@ import Testing
 private final class Capture {
     var outcomes: [ChordRecorder.Outcome] = []
     var previews: [String] = []
+    var hints: [String?] = []
 
     func attach(_ recorder: ChordRecorder) {
         recorder.start(
             preview: { [weak self] in
                 self?.previews.append($0)
+            },
+            hint: { [weak self] in
+                self?.hints.append($0)
             },
             finish: { [weak self] in
                 self?.outcomes.append($0)
@@ -127,11 +131,14 @@ struct ChordRecorderTests {
         #expect(capture.lockedCombo == "command+j")
     }
 
-    @Test("two base keys held at once: last one wins")
-    func multiBaseKeysNotCombined() {
+    @Test("second key while first is held: first wins + hint")
+    func overlappedSecondKeyKeepsFirst() {
         // A combo is modifiers + ONE key (Carbon
-        // RegisterEventHotKey can't express ⌘J+K), so holding
-        // a second base key re-snapshots instead of chording.
+        // RegisterEventHotKey can't express ⌘J+K). A chord
+        // attempt keeps the first key and teaches via the
+        // hint instead of silently switching; correction
+        // requires releasing the key first (see
+        // midChordCorrection).
         let recorder = ChordRecorder()
         let capture = Capture()
         capture.attach(recorder)
@@ -145,6 +152,7 @@ struct ChordRecorderTests {
             keyCode: 40,
             flags: [.command]
         )
+        #expect(capture.hints.last??.isEmpty == false)
         // Nothing locks while either key is down.
         recorder.handle(
             .keyUp,
@@ -158,7 +166,7 @@ struct ChordRecorderTests {
         )
         #expect(capture.outcomes.isEmpty)
         recorder.handle(.flagsChanged, keyCode: 55, flags: [])
-        #expect(capture.lockedCombo == "command+k")
+        #expect(capture.lockedCombo == "command+j")
     }
 
     @Test("bare key locks without modifiers")

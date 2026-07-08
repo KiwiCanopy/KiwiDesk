@@ -73,8 +73,9 @@ One `IconPicker` serves mode icons and space icons. (#68 §6.4)
 `RegisterEventHotKey` (one key code + modifier mask) is the
 mechanism, chosen because it needs no Input Monitoring
 permission. Multi-key chords (⌘J+K) are therefore not
-recordable — the recorder re-snapshots to the last key — and
-a hand-written `cmd+j+k` is inert and flagged ⚠ unrecognized.
+recordable — pressing a second key while the first is held
+keeps the first and shows a one-key hint — and a
+hand-written `cmd+j+k` is inert and flagged ⚠ unrecognized.
 **Modal modes are the layering mechanism**: a mode switch
 gives a whole second set of single-key bindings, ergonomically
 better than finger-twister chords.
@@ -83,9 +84,10 @@ better than finger-twister chords.
 snapshotted as keys go down (live preview), modifiers only
 accumulate while a base key is held, and the combo commits
 when everything is released — so staggered release order or
-timing can never corrupt it, and the base key can be
-corrected mid-chord. Bare Escape, click-away, and app
-deactivation cancel. (#68 recorder UX)
+timing can never corrupt it. Correction is
+release-then-press (⌘J, J up, K down → ⌘K); an overlapped
+second key keeps the first with a hint. Bare Escape,
+click-away, and app deactivation cancel. (#68 recorder UX)
 
 **Duplicates hard-block; system shortcuts soft-warn.**
 Recording a combo another KiwiDesk row already holds is
