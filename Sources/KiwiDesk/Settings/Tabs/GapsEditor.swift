@@ -16,7 +16,7 @@ struct GapsEditor: View {
 
     var body: some View {
         SettingsSection("Gaps") {
-            GapsDiagram()
+            GapsDiagram(outer: outer, inner: inner)
             masterRow(
                 label: "Outer gap",
                 unified: outerUnified,
@@ -170,59 +170,6 @@ struct GapsEditor: View {
             get: { innerExpanded || innerMixed },
             set: { innerExpanded = $0 }
         )
-    }
-}
-
-/// A static legend teaching the outer/inner vocabulary: a
-/// screen outline holding two window rects — the spacing to
-/// the screen edge is "outer", between windows is "inner".
-private struct GapsDiagram: View {
-    var body: some View {
-        HStack(spacing: 12) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 4)
-                    .strokeBorder(
-                        Color.secondary.opacity(0.6)
-                    )
-                HStack(spacing: 10) {
-                    windowRect
-                    windowRect
-                }
-                .padding(10)
-            }
-            .frame(width: 132, height: 76)
-            VStack(alignment: .leading, spacing: 4) {
-                legend(
-                    "Outer",
-                    "between windows and the screen edge"
-                )
-                legend("Inner", "between neighboring windows")
-            }
-            Spacer()
-        }
-    }
-
-    private var windowRect: some View {
-        RoundedRectangle(cornerRadius: 3)
-            .fill(Color.accentColor.opacity(0.25))
-            .overlay(
-                RoundedRectangle(cornerRadius: 3)
-                    .strokeBorder(
-                        Color.accentColor.opacity(0.6)
-                    )
-            )
-    }
-
-    private func legend(
-        _ term: String,
-        _ meaning: String
-    ) -> some View {
-        HStack(spacing: 4) {
-            Text(term).bold()
-            Text("— " + meaning)
-                .foregroundStyle(.secondary)
-        }
-        .font(.caption)
     }
 }
 
