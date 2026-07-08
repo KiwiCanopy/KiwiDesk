@@ -219,6 +219,9 @@ struct ChordRecorderTests {
             keyCode: 38,
             flags: [.command]
         )
+        // Back to one held key: the overlap hint leaves with
+        // the overlap, not on the next press.
+        #expect(capture.hints.last! == nil)
         recorder.handle(
             .keyUp,
             keyCode: 40,

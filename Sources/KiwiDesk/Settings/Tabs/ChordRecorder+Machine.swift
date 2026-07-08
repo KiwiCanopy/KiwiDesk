@@ -26,6 +26,12 @@ extension ChordRecorder {
             // responder.
             let tracked =
                 heldKeys.remove(keyCode) != nil
+            // Back to at most one held key: the one-key
+            // overlap hint no longer applies — it must leave
+            // with the overlap, not wait for the next press.
+            if tracked, heldKeys.count <= 1 {
+                onHint(nil)
+            }
             if let held = pending,
                 held.keyCode == UInt32(keyCode)
             {
