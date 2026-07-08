@@ -59,7 +59,9 @@ struct RatioRow: View {
                 range: 0.1...0.9,
                 step: 0.01
             )
-            Text("\(Int(value * 100))%")
+            // Rounded, not truncated: a stored exact 0.29
+            // (Lua/profile) must read "29%", not "28%".
+            Text("\(Int((value * 100).rounded()))%")
                 .frame(
                     width: SettingsMetrics.readoutColumn,
                     alignment: .trailing
