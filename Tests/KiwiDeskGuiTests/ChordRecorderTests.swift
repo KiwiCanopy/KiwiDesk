@@ -112,25 +112,35 @@ struct ChordRecorderTests {
         #expect(capture.lockedCombo == "command+k")
     }
 
-    @Test("preview downgrades live as keys release")
-    func previewTracksReleases() {
+    @Test("preview waits out the release burst, then settles")
+    func previewSettlesLazily() {
         let recorder = ChordRecorder()
         let capture = Capture()
         capture.attach(recorder)
+        var clock = Date(timeIntervalSince1970: 1000)
+        recorder.now = { clock }
         recorder.handle(
             .keyDown,
             keyCode: 38,
             flags: [.command]
         )
-        // J released while ⌘ is still down: the J leaves the
-        // preview immediately — the field shows what is held.
+        let shown = capture.previews.last
+        // J released while ⌘ is still down: the preview keeps
+        // the chord — an instant downgrade flashed the combo
+        // away right before every normal lock-in.
         recorder.handle(
             .keyUp,
             keyCode: 38,
             flags: [.command]
         )
-        #expect(capture.previews.last == "⌘")
+        #expect(capture.previews.last == shown)
         #expect(capture.outcomes.isEmpty)
+        // Only a genuinely lingering hold settles the preview
+        // down to what is actually held.
+        let stamp = clock
+        clock += 1
+        recorder.settleBurst(stampedAt: stamp)
+        #expect(capture.previews.last == "⌘")
     }
 
     @Test("a slow disassembly never locks the stale chord")

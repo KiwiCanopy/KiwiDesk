@@ -158,19 +158,22 @@ native-Space bindings follow, like Delete and make default.
 gives a whole second set of single-key bindings, ergonomically
 better than finger-twister chords.
 
-**The recorder locks on full release, previews live.** The
-preview mirrors exactly what is held — a released key or
-modifier leaves it immediately (a preview that kept showing
-released keys read as stuck). Staggered releases stay safe
-via a release-burst window: the first release that
-downgrades a chord stashes it, and if everything is up
-within ~a third of a second the stashed chord locks (⌘ let
-go a split second before J still locks ⌘J). Disassembling
-slowly instead expires the stash — nothing locks, the field
-stays recording, and re-entry just works. Correction is
-release-then-press (⌘J, J up, K down → ⌘K); an overlapped
-second key keeps the first with a hint. Bare Escape,
-click-away, and app deactivation cancel. (#68 recorder UX)
+**The recorder locks on full release; the preview downgrades
+lazily.** Releases work through a burst window (~a third of
+a second): the first release that downgrades a chord stashes
+it, and a full release within the window locks the stash —
+so staggered release order can't corrupt the combo (⌘ let go
+a split second before J still locks ⌘J). The DISPLAY keeps
+showing the stashed chord for that same window: an instant
+downgrade made the combo visibly vanish right before every
+normal lock-in. Only a genuinely lingering hold settles the
+preview to what is actually held — then nothing stale can
+lock, the field stays recording, and re-entry just works
+(a preview that kept showing released keys read as stuck).
+Correction is release-then-press (⌘J, J up, K down → ⌘K); an
+overlapped second key keeps the first with a hint. Bare
+Escape, click-away, and app deactivation cancel. (#68
+recorder UX)
 
 **Duplicates hard-block; system shortcuts soft-warn.**
 Recording a combo another KiwiDesk row already holds is
