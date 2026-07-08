@@ -168,6 +168,33 @@ enum KeybindingCatalog {
         )
     }
 
+    /// Renames a mode across `modes`: the mode itself plus
+    /// every switch-mode row targeting it, rewritten through
+    /// `switchModeCommand` so writer and import classifier
+    /// keep matching byte-for-byte (#4). Pure — the tested
+    /// core of the Shortcuts header's rename.
+    static func renameMode(
+        in modes: [KeyMode],
+        from old: String,
+        to new: String
+    ) -> [KeyMode] {
+        let oldCmd = switchModeCommand(old)
+        let newCmd = switchModeCommand(new)
+        return modes.map { mode in
+            var mode = mode
+            if mode.name == old { mode.name = new }
+            mode.bindings = mode.bindings.map { binding in
+                var binding = binding
+                if binding.lua == oldCmd.lua {
+                    binding.lua = newCmd.lua
+                    binding.label = newCmd.label
+                }
+                return binding
+            }
+            return mode
+        }
+    }
+
     /// The Open-Applications action that pulls or launches `name`.
     /// Paired with `appName(from:)`, its exact inverse.
     static func appCommand(_ name: String) -> String {

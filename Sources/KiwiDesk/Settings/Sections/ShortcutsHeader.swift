@@ -191,10 +191,14 @@ struct ShortcutsHeader: View {
     }
 
     /// Rename shares Delete's gate (base modes are protected
-    /// in profile-override editing, #55): the switch-mode rows
-    /// referencing the mode rewrite through the catalog's
-    /// single authority, so writer and import classifier keep
-    /// matching byte-for-byte (#4).
+    /// in profile-override editing, #55). Scope: the rewrite
+    /// covers THIS config's modes and switch-mode rows; a
+    /// stored profile whose sparse override (`Profile.modes`)
+    /// targets the old name keeps it and resurfaces it as a
+    /// standalone mode — the same accepted gap Delete has
+    /// (pre-release, single user; the edit here is a draft
+    /// until Save, so chasing stored files at click time
+    /// would desync them from an unsaved base).
     private var renameModeButton: some View {
         Button("Rename…") {
             renameDraft = selected
@@ -223,23 +227,12 @@ struct ShortcutsHeader: View {
 
     private func renameMode() {
         guard canRenameMode else { return }
-        let old = selected
         let new = renameDraft.trimmed
-        let oldCmd = KeybindingCatalog.switchModeCommand(old)
-        let newCmd = KeybindingCatalog.switchModeCommand(new)
-        model.config.modes = model.config.modes.map { mode in
-            var mode = mode
-            if mode.name == old { mode.name = new }
-            mode.bindings = mode.bindings.map { binding in
-                var binding = binding
-                if binding.lua == oldCmd.lua {
-                    binding.lua = newCmd.lua
-                    binding.label = newCmd.label
-                }
-                return binding
-            }
-            return mode
-        }
+        model.config.modes = KeybindingCatalog.renameMode(
+            in: model.config.modes,
+            from: selected,
+            to: new
+        )
         selected = new
         renamingMode = false
     }

@@ -143,11 +143,16 @@ caption also states that "default" is the standard mode and
 always the active one after an app start. Renaming a mode
 shares Delete's gate (base modes are protected in
 profile-override editing, #55) and rewrites the switch-mode
-rows through the catalog's single authority, so writer and
-import classifier keep matching byte-for-byte (#4). Saved
-profiles get the same affordance: a pencil beside Load
-renames immediately — file, adopted name, and native-Space
-bindings follow, like Delete and Make default.
+rows of the config being edited through the catalog's
+single authority, so writer and import classifier keep
+matching byte-for-byte (#4). Scope: a stored profile whose
+sparse override targets the old name keeps it and
+resurfaces it as a standalone mode — the same accepted
+pre-release gap Delete has (the edit is a draft until Save,
+so stored files can't be chased at click time). Saved
+profiles get the same affordance: a pencil beside the
+profile name renames immediately — file, adopted name, and
+native-Space bindings follow, like Delete and make default.
 
 **Modal modes are the layering mechanism**: a mode switch
 gives a whole second set of single-key bindings, ergonomically
