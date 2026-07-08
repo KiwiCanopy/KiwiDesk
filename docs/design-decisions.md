@@ -135,6 +135,20 @@ permission. Multi-key chords (⌘J+K) are therefore not
 recordable — pressing a second key while the first is held
 keeps the first and shows a one-key hint — and a
 hand-written `cmd+j+k` is inert and flagged ⚠ unrecognized.
+**Switch-mode shortcuts sit right under the mode strip.**
+The rows that switch modes render directly beneath the strip
+that defines the modes, ahead of the action groups — the
+definition and its bindings read as one unit. The strip's
+caption also states that "default" is the standard mode and
+always the active one after an app start. Renaming a mode
+shares Delete's gate (base modes are protected in
+profile-override editing, #55) and rewrites the switch-mode
+rows through the catalog's single authority, so writer and
+import classifier keep matching byte-for-byte (#4). Saved
+profiles get the same affordance: a pencil beside Load
+renames immediately — file, adopted name, and native-Space
+bindings follow, like Delete and Make default.
+
 **Modal modes are the layering mechanism**: a mode switch
 gives a whole second set of single-key bindings, ergonomically
 better than finger-twister chords.
@@ -186,10 +200,22 @@ top of the range compresses, and per-edge asymmetry renders
 honestly as uneven margins. Deliberately not a "what will my
 layout look like" preview — that would be its own component.
 
-**Hex stays a first-class color affordance.** The native
-color well is primary, but the `#RRGGBBAA` field remains
-beside it — theme sharing via hex strings is a real workflow.
-(#68 §3.14)
+**Colors are just the native well; hex entry rides the
+system panel.** The inline `#RRGGBBAA` field originally kept
+beside every well (the "hex stays first-class" round-1 call)
+turned ten color rows into a wall of text boxes. The system
+color panel the well opens has native hex entry in its
+sliders pane, so the inline field was redundant chrome and
+was dropped — the stored value stays a hex string, and
+copy/paste theme sharing works through the panel. (#68
+§3.14, revised)
+
+**Appearance ends with the App Bar block.** Gaps and drag
+visuals — the everyday controls — come first; the App Bar
+(global style + colors + per-layout overrides) is the
+deepest rabbit hole in the tab, so it sits last under one
+"App Bar" group title instead of pushing everything else
+below the fold.
 
 ## Monitors
 

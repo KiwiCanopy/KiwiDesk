@@ -1,11 +1,11 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// A labeled color control (#68 §3.14): a native color well
-/// (opens the system color panel) as the primary affordance,
-/// with the `#RRGGBB` / `#RRGGBBAA` hex string kept beside it
-/// as the copy/paste-friendly secondary — theme sharing via
-/// hex strings is a real workflow and stays first-class. One
+/// A labeled color control (#68 §3.14): just the native color
+/// well — the system color panel it opens carries hex entry
+/// natively (Color Sliders pane), so the inline `#RRGGBBAA`
+/// text field it used to pair with was redundant chrome and
+/// was dropped. The stored value stays a hex string. One
 /// component everywhere a color appears (App Bar, overrides,
 /// drag visuals).
 struct HexColorField: View {
@@ -22,10 +22,6 @@ struct HexColorField: View {
                 supportsOpacity: true
             )
             .labelsHidden()
-            TextField("#RRGGBBAA", text: $hex)
-                .textFieldStyle(.roundedBorder)
-                .font(.system(.callout, design: .monospaced))
-                .frame(maxWidth: 110)
         }
     }
 
