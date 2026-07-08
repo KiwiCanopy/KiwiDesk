@@ -15,8 +15,9 @@ extension SpacesSection {
     /// hover enter/exit and drag start/end interleave in ways
     /// a stack cannot balance (a mid-drag exit would pop the
     /// closed hand; a re-enter would push an extra open hand
-    /// that outlives the drag). Hover is ignored entirely
-    /// while a drag is live.
+    /// that outlives the drag). While a drag is live, hover
+    /// keeps tracking `hoveredHandle` but stops driving the
+    /// cursor — drag end reads the tracked state instead.
     func dragHandle(_ space: SpaceID) -> some View {
         Image(systemName: "line.3.horizontal")
             .foregroundStyle(.secondary)
@@ -24,8 +25,28 @@ extension SpacesSection {
             .contentShape(Rectangle())
             .help("Drag to reorder")
             .onHover { inside in
+                hoveredHandle =
+                    inside
+                    ? space
+                    : (hoveredHandle == space
+                        ? nil : hoveredHandle)
                 guard dragged == nil else { return }
                 (inside ? NSCursor.openHand : .arrow).set()
+            }
+            .onDisappear {
+                // A row removed under the pointer (context-
+                // menu delete) never delivers the balancing
+                // onHover(false), and a cancelled drag (the
+                // window resigning key) skips onEnded —
+                // restore the arrow and drop the stale state.
+                guard
+                    hoveredHandle == space || dragged == space
+                else { return }
+                if hoveredHandle == space {
+                    hoveredHandle = nil
+                }
+                if dragged == space { dragged = nil }
+                NSCursor.arrow.set()
             }
             .gesture(dragGesture(space))
     }
@@ -44,7 +65,13 @@ extension SpacesSection {
             retarget(space, at: value.location.y)
         }
         .onEnded { _ in
-            NSCursor.arrow.set()
+            // The pointer usually still sits on a handle
+            // after the drop, and hover won't refire without
+            // an exit/enter — restore the affordance the
+            // tracked hover state says is truthful.
+            (hoveredHandle != nil
+                ? NSCursor.openHand : .arrow)
+                .set()
             withAnimation(
                 .spring(response: 0.35, dampingFraction: 0.7)
             ) {

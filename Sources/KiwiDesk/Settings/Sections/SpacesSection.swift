@@ -16,6 +16,10 @@ struct SpacesSection: View {
     // `private` (which is file-scoped).
     /// The space being handle-dragged, if any.
     @State var dragged: SpaceID?
+    /// The handle currently under the pointer — tracked even
+    /// mid-drag (when hover no longer drives the cursor), so
+    /// drag end and row teardown can restore the right cursor.
+    @State var hoveredHandle: SpaceID?
     /// Each row's frame in list space, for retargeting the
     /// drag — measured via preference, so variable-height
     /// rows (open expanders) stay accurate.
