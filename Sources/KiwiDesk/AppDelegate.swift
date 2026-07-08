@@ -6,7 +6,9 @@ import SwiftUI
 /// Entry point: permissions, menu bar, and windows. All window
 /// management logic lives in `KiwiCore`.
 @MainActor
-final class AppDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate,
+    NSWindowDelegate
+{
     private let core = KiwiCore()
     private let permissions = PermissionMonitor()
     private var statusItem: StatusItemController?
@@ -150,6 +152,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         window.title = "KiwiDesk Setup"
         window.contentView = NSHostingView(rootView: view)
         window.isReleasedWhenClosed = false
+        window.delegate = self
         window.center()
         onboardingWindow = window
 
@@ -159,9 +162,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func closeOnboarding() {
+        // Closing routes through `windowWillClose`, which does
+        // the demote + teardown (also covers the red-button
+        // close, which the "finish" button used to bypass).
         onboardingWindow?.close()
+    }
+
+    func windowWillClose(_ notification: Notification) {
+        guard
+            let closing = notification.object as? NSWindow,
+            closing === onboardingWindow
+        else { return }
         onboardingWindow = nil
-        NSApp.setActivationPolicy(.accessory)
+        // Demote only if no other content window remains (the
+        // still-visible closing window is excluded).
+        NSApp.deactivateIfNoWindows(excluding: closing)
     }
 
     /// Opens System Settings › Desktop & Dock, where "Displays

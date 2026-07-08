@@ -55,6 +55,11 @@ struct HexColorField: View {
 struct ColorSwatch: View {
     @Binding var hex: String
     @State private var hovering = false
+    /// The panel-ownership token from the last `present`, so
+    /// this swatch can resign the shared panel when it goes
+    /// away (tab switch, App Bar disclosure collapse) without
+    /// clobbering a later swatch that took the panel.
+    @State private var token = 0
 
     var body: some View {
         Button(action: present) {
@@ -99,6 +104,10 @@ struct ColorSwatch: View {
         .pointingHandCursor()
         .onHover { hovering = $0 }
         .help("Edit the \(hex) color")
+        // Resign the shared panel when this swatch leaves the
+        // hierarchy, so a lingering panel can't write into a
+        // torn-down binding.
+        .onDisappear { ColorPanelController.shared.resign(token) }
     }
 
     /// Falls back to `.clear` (a bordered empty swatch) when the
@@ -116,7 +125,7 @@ struct ColorSwatch: View {
     }
 
     private func present() {
-        ColorPanelController.shared.present(
+        token = ColorPanelController.shared.present(
             current: NSColor(color)
         ) { hex = HexColorField.hexString(from: $0) }
     }
@@ -132,11 +141,16 @@ final class ColorPanelController: NSObject {
     static let shared = ColorPanelController()
 
     private var onChange: ((NSColor) -> Void)?
+    /// Bumped per `present`; identifies the current owner so a
+    /// swatch only resigns the panel while it still owns it.
+    private var activeToken = 0
 
+    @discardableResult
     func present(
         current: NSColor,
         onChange: @escaping (NSColor) -> Void
-    ) {
+    ) -> Int {
+        activeToken += 1
         self.onChange = onChange
         let panel = NSColorPanel.shared
         panel.showsAlpha = true
@@ -144,6 +158,22 @@ final class ColorPanelController: NSObject {
         panel.setTarget(self)
         panel.setAction(#selector(panelColorChanged(_:)))
         panel.makeKeyAndOrderFront(nil)
+        return activeToken
+    }
+
+    /// Detach when the owning swatch disappears — only if it is
+    /// still the owner (a later swatch may have taken over).
+    func resign(_ token: Int) {
+        guard token == activeToken else { return }
+        dismiss()
+    }
+
+    /// Unconditional teardown, e.g. on window close: stop
+    /// routing and put the panel away so it can't write into a
+    /// reloaded config after the window is gone.
+    func dismiss() {
+        onChange = nil
+        NSColorPanel.shared.orderOut(nil)
     }
 
     @objc private func panelColorChanged(

@@ -29,8 +29,12 @@ struct ProfileHeaderBar: View {
             }
         }
         .padding(.horizontal, 16)
-        // Extra top room so the title clears the traffic-light
-        // row instead of crowding the window's top edge.
+        // Clears the traffic-light row — `SettingsView`'s
+        // `ignoresSafeArea(.top)` discards the titlebar inset
+        // that would otherwise size this, so it's a fixed
+        // constant matched to the unified-titlebar height. This
+        // is the known-fragile point if Apple changes that
+        // metric (a visual break the verify gate can't catch).
         .padding(.top, 32)
         .padding(.bottom, 10)
         .frame(maxWidth: .infinity, alignment: .leading)

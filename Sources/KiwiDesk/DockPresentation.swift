@@ -17,4 +17,20 @@ extension NSApplication {
             applicationIconImage = icon
         }
     }
+
+    /// Return to menu-bar-only (`.accessory`) — but only if no
+    /// other content window is still on screen. Closing one of
+    /// {Settings, onboarding, Config Issues} must not drop the
+    /// Dock tile while another is visible. Panels (the shared
+    /// color panel) can't become main, so they don't count.
+    @MainActor func deactivateIfNoWindows(
+        excluding closing: NSWindow?
+    ) {
+        let othersVisible = windows.contains { win in
+            win !== closing && win.isVisible && win.canBecomeMain
+        }
+        if !othersVisible {
+            setActivationPolicy(.accessory)
+        }
+    }
 }

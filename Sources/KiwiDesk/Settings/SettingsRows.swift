@@ -156,8 +156,11 @@ struct StepperRow: View {
                 .accessibilityValue("\(value)")
         }
         // Keep the field in step with arrow taps / external
-        // changes.
-        .onChange(of: value) { _, now in text = "\(now)" }
+        // changes — but never while the user is mid-edit, or a
+        // background write would discard their partial entry.
+        .onChange(of: value) { _, now in
+            if !focused { text = "\(now)" }
+        }
     }
 
     private func commit() {

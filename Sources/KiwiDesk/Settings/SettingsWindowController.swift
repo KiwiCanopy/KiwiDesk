@@ -76,6 +76,11 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     /// after the window is gone. The window itself survives
     /// (`isReleasedWhenClosed = false`) for the next `show()`.
     func windowWillClose(_ notification: Notification) {
-        NSApp.setActivationPolicy(.accessory)
+        // Put the shared color panel away so it can't write
+        // into the config after the window is gone.
+        ColorPanelController.shared.dismiss()
+        // Demote only if no other content window remains (Config
+        // Issues / onboarding may still be up).
+        NSApp.deactivateIfNoWindows(excluding: window)
     }
 }
