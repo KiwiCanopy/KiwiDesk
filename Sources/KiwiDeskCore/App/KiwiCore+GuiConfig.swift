@@ -174,7 +174,12 @@ extension KiwiCore {
             config.spaces.contains($0) ? $0 : nil
         }
         resolveSpaceDisplays()
-        retile()
+        // Forced: this is an explicit settings apply, not an
+        // AX-echo-driven refresh. Un-forced, the engine's
+        // "already there" tolerance (±2 pt/edge) swallows
+        // small edits — a 1 pt gap change moved every window
+        // by ≤2 pt and visibly did nothing (#68).
+        retile(force: true)
         emitSpaceChange()
     }
 

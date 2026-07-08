@@ -23,7 +23,9 @@ extension KiwiCore {
             }
             tiler.settings.gapsOverride[SpaceID(space)] = gaps
         }
-        retile()
+        // Forced: an explicit gap command must apply even when
+        // the delta is within the retile tolerance (±2 pt).
+        retile(force: true)
         return .ok()
     }
 
@@ -65,7 +67,7 @@ extension KiwiCore {
             return .fail("expected size")
         }
         tiler.settings.minWindowSize = CGFloat(size)
-        retile()
+        retile(force: true)
         return .ok()
     }
 }

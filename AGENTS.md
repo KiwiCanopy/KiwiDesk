@@ -252,6 +252,14 @@ Keep this list updated whenever a recurring mistake is found.
   one predicate, never add a second. Pre-release (single user):
   profile JSON needs no migration scripts — re-saving is the
   migration.
+- **Explicit settings applies must `retile(force: true)`.** The
+  engine's "already there" tolerance (±2 pt per edge) exists to
+  absorb AX-echo lag and app-side clamping; an un-forced retile
+  after a config edit lets it swallow small changes entirely (a
+  1 pt gap edit visibly did nothing). Config-apply entry points
+  (`applyProfileScopedState`, `set_gap_*`,
+  `set_min_window_size`) force; event-driven retiles stay
+  un-forced so echo lag can't wobble windows.
 - **Resolve before layout, and merge per-field first.** Settings
   that layer (global → layout → space) merge field-by-field, with
   cross-field clamps applied *last* on the already-merged values
