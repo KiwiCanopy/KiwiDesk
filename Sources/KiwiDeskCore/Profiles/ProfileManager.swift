@@ -145,7 +145,11 @@ public final class ProfileManager {
     /// insensitively there, so "a" → "b" beside "B.json" is
     /// caught too). Same-name is a no-op. Carries the adopted
     /// `currentName` along. The `KiwiCore` facade chases
-    /// external references (native-Space bindings).
+    /// external references (native-Space bindings). Accepted
+    /// non-atomicity: if the name-field rewrite after the
+    /// move fails, the file is at the new name with the old
+    /// name inside — a tiny window (same directory, just
+    /// proven writable), traded for the case-safety above.
     func rename(from old: String, to new: String) throws {
         guard old != new else { return }
         var profile = try read(name: old)

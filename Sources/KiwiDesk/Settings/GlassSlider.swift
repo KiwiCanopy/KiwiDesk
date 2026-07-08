@@ -24,7 +24,7 @@ struct GlassSlider: View {
         .frame(height: Self.height)
         .opacity(isEnabled ? 1 : 0.4)
         .accessibilityRepresentation {
-            Slider(value: $value, in: range)
+            Slider(value: $value, in: range, step: step)
         }
     }
 
@@ -54,10 +54,13 @@ struct GlassSlider: View {
     }
 
     /// The knob's center, from half a knob in on both ends so
-    /// the pill never leaves the track.
+    /// the pill never leaves the track — the fraction clamps
+    /// so an out-of-range stored value (hand-edited config)
+    /// renders at the nearest end like a native slider.
     private func knobCenter(in width: CGFloat) -> CGFloat {
         let usable = max(width - Self.knobWidth, 1)
-        return Self.knobWidth / 2 + usable * fraction
+        let t = min(max(fraction, 0), 1)
+        return Self.knobWidth / 2 + usable * t
     }
 
     private var fraction: CGFloat {
@@ -68,12 +71,20 @@ struct GlassSlider: View {
         )
     }
 
+    /// Snapping anchors at `lowerBound` (not zero) so ranges
+    /// like `0.1...0.9` land on their own grid; a non-positive
+    /// step means no snapping.
     private func set(at x: CGFloat, in width: CGFloat) {
         let usable = max(width - Self.knobWidth, 1)
         let t = min(max((x - Self.knobWidth / 2) / usable, 0), 1)
         let span = range.upperBound - range.lowerBound
         let raw = range.lowerBound + Double(t) * span
-        let snapped = (raw / step).rounded() * step
+        let snapped =
+            step > 0
+            ? range.lowerBound
+                + ((raw - range.lowerBound) / step).rounded()
+                * step
+            : raw
         value = min(
             max(snapped, range.lowerBound),
             range.upperBound

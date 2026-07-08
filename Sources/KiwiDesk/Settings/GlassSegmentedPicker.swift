@@ -48,7 +48,18 @@ struct GlassSegmentedPicker<Value: Hashable>: View {
     /// with the material pill.
     @ViewBuilder private var glassTrack: some View {
         if #available(macOS 26.0, *) {
-            GlassEffectContainer { track }
+            GlassEffectContainer { labeledTrack }
+        } else {
+            labeledTrack
+        }
+    }
+
+    /// The label attaches only when one exists — an empty
+    /// accessibility label on the unlabeled instances (icon
+    /// picker tabs) would override the group's inferred name.
+    @ViewBuilder private var labeledTrack: some View {
+        if let label {
+            track.accessibilityLabel(label)
         } else {
             track
         }
@@ -65,7 +76,6 @@ struct GlassSegmentedPicker<Value: Hashable>: View {
             Capsule().fill(Color.primary.opacity(0.06))
         )
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(label ?? "")
     }
 
     private func segment(

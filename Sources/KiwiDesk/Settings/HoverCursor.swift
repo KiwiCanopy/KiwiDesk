@@ -3,7 +3,14 @@ import SwiftUI
 /// Link-like hover affordance for controls that don't look
 /// like buttons (the make-default link, the rename pencil):
 /// the pointing-hand cursor plus a secondary→primary color
-/// lift while the mouse is over the view.
+/// lift while the mouse is over the view. Cursor changes use
+/// `set()`, never push/pop: both call sites can remove
+/// themselves from the hierarchy mid-hover (make-default
+/// drops its own link, rename rebuilds the row identity) and
+/// a removed view never delivers the balancing
+/// `onHover(false)` — the imbalance the spaces drag handle
+/// fixed the same way. `onDisappear` restores the arrow when
+/// the view vanishes under the pointer.
 private struct LinkHover: ViewModifier {
     @State private var hovering = false
 
@@ -20,11 +27,11 @@ private struct LinkHover: ViewModifier {
             )
             .onHover { inside in
                 hovering = inside
-                if inside {
-                    NSCursor.pointingHand.push()
-                } else {
-                    NSCursor.pop()
-                }
+                (inside ? NSCursor.pointingHand : .arrow)
+                    .set()
+            }
+            .onDisappear {
+                if hovering { NSCursor.arrow.set() }
             }
     }
 }
