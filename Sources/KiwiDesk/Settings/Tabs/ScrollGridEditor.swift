@@ -64,6 +64,12 @@ struct ScrollGridEditor: View {
                     .onScrolling
             )
             scrollSpeedRow
+            CrossReferenceRow(
+                prose: "The app bar shown in scrolling is "
+                    + "configured in",
+                linkTitle: "Appearance ▸ App Bar",
+                destination: .appearance
+            )
         }
     }
 

@@ -61,18 +61,12 @@ struct BehaviorSection: View {
             )
             Divider()
             durationRow
-            HStack(spacing: 4) {
-                Text(
-                    "Scrolling-layout focus shifts have their "
-                        + "own toggle and speed in"
-                )
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                CrossReferenceLink(
-                    "Layout Defaults ▸ Scrolling",
-                    to: .layoutDefaults
-                )
-            }
+            CrossReferenceRow(
+                prose: "Scrolling-layout focus shifts have "
+                    + "their own toggle and speed in",
+                linkTitle: "Layout Defaults ▸ Scrolling",
+                destination: .layoutDefaults
+            )
         }
     }
 

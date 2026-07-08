@@ -24,18 +24,12 @@ struct MonocleEditor: View {
                     ("Vertical", .vertical),
                 ]
             )
-            HStack(spacing: 4) {
-                Text(
-                    "The app bar shown in monocle is "
-                        + "configured in"
-                )
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                CrossReferenceLink(
-                    "Appearance ▸ App Bar",
-                    to: .appearance
-                )
-            }
+            CrossReferenceRow(
+                prose: "The app bar shown in monocle is "
+                    + "configured in",
+                linkTitle: "Appearance ▸ App Bar",
+                destination: .appearance
+            )
         }
     }
 }

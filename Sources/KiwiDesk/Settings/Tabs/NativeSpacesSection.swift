@@ -54,12 +54,7 @@ struct NativeSpacesSection: View {
             Text("Desktop \(number)")
                 .fontWeight(.medium)
             if number == model.currentNativeSpace {
-                Text("current")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(Capsule().fill(.tint.opacity(0.15)))
+                BadgeChip(label: "current")
             }
             Spacer()
             profileMenu(number)
