@@ -15,8 +15,39 @@ struct GeneralSection: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 advancedSection
+                aboutSection
             }
             .padding(16)
+        }
+    }
+
+    /// About (#68 §3.9): the canonical logo + name + version
+    /// placement (the glyph is the reserved branding slot,
+    /// §3.8 — swapped for the real logo once it exists) and
+    /// the discreet support link.
+    private var aboutSection: some View {
+        SettingsSection("About") {
+            HStack(spacing: 12) {
+                Image(systemName: "rectangle.3.group")
+                    .font(.system(size: 30))
+                    .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("KiwiDesk")
+                        .font(.headline)
+                    Text(KiwiDeskVersion.displayString)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+                }
+                Spacer()
+                Link(destination: SupportLinks.koFi) {
+                    Label(
+                        "Support KiwiDesk",
+                        systemImage: "heart"
+                    )
+                }
+                .font(.callout)
+            }
         }
     }
 

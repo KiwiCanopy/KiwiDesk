@@ -15,6 +15,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private lazy var dashboard = SettingsWindowController(
         core: core
     )
+    private let configIssues = ConfigIssuesWindowController()
     /// Held strongly so the source stays active for the
     /// lifetime of the process.
     private var sigtermSource: DispatchSourceSignal?
@@ -27,7 +28,33 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem.onOpenDashboard = { [weak self] in
             self?.dashboard.show()
         }
+        // The quick menu's dynamic entries (#68 §3.10).
+        statusItem.profilesProvider = { [weak self] in
+            (
+                active: self?.core.profiles.currentName,
+                all: self?.core.profiles.list() ?? []
+            )
+        }
+        statusItem.onLoadProfile = { [weak self] name in
+            _ = self?.core.execute(
+                "load_profile",
+                args: [.string(name)]
+            )
+        }
+        statusItem.onShowConfigIssues = { [weak self] in
+            self?.configIssues.show()
+        }
         self.statusItem = statusItem
+
+        // The error surface (#68 §3.7): the badge and the
+        // standalone panel track the last config load.
+        configIssues.model.onReload = { [weak self] in
+            self?.core.loadConfig()
+        }
+        core.onConfigIssuesChange = { [weak self] issues in
+            self?.statusItem?.setConfigError(!issues.isEmpty)
+            self?.configIssues.model.issues = issues
+        }
 
         // Reflect the active keybinding mode on the menu bar
         // icon (custom modes carry their own indicator).
