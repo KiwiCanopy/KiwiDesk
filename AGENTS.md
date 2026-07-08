@@ -267,7 +267,13 @@ Keep this list updated whenever a recurring mistake is found.
   `set_min_window_size`, `set_mode`, and the whole
   `layoutCommand` dispatch — every retile triggered by an
   explicit `set_*` from Lua/CLI) force; event-driven retiles
-  stay un-forced so echo lag can't wobble windows.
+  stay un-forced so echo lag can't wobble windows. Profile
+  applies classify themselves: `apply(profile:)` /
+  `apply(composed:)` take a **required** `forceRetile`, so
+  every new caller must choose — explicit paths
+  (`load_profile`, an in-effect edit re-apply, the
+  post-reload re-apply, preset apply) force; monitor-change
+  and native-space-binding applies stay un-forced.
 - **Resolve before layout, and merge per-field first.** Settings
   that layer (global → layout → space) merge field-by-field, with
   cross-field clamps applied *last* on the already-merged values

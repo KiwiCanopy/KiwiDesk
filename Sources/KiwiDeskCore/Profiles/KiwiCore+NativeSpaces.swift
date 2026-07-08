@@ -113,7 +113,7 @@ extension KiwiCore {
         else { return }
         do {
             let profile = try profiles.load(name: name)
-            apply(profile: profile)
+            apply(profile: profile, forceRetile: false)
             onLog(
                 "native space \(number): loaded profile "
                     + "'\(name)'"

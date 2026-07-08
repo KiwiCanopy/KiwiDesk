@@ -20,7 +20,7 @@ extension KiwiCore {
         {
             do {
                 let bound = try profiles.load(name: boundName)
-                apply(profile: bound)
+                apply(profile: bound, forceRetile: false)
                 if bound.set(matching: fingerprints) == nil {
                     profiles.markDirty()
                 }
@@ -40,7 +40,7 @@ extension KiwiCore {
         switch profiles.match(fingerprints: fingerprints) {
         case .exact(let profile):
             if profile.name != profiles.currentName {
-                apply(profile: profile)
+                apply(profile: profile, forceRetile: false)
                 profiles.adopt(profile)
                 onLog(
                     "monitor change: loaded profile "
@@ -59,7 +59,7 @@ extension KiwiCore {
             }
         case .countDefault(let profile):
             if profile.name != profiles.currentName {
-                apply(profile: profile)
+                apply(profile: profile, forceRetile: false)
                 profiles.adopt(profile)
                 onLog(
                     "monitor change: loaded default profile "
@@ -97,7 +97,7 @@ extension KiwiCore {
                 )
                 return
             }
-            apply(composed: composed)
+            apply(composed: composed, forceRetile: false)
             profiles.adoptStandard(named: composed.sourceName)
             onLog(
                 "monitor change: no matching profile, "

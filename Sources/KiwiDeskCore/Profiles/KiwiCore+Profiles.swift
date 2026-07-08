@@ -35,7 +35,11 @@ extension KiwiCore {
                 // Explicit user load: the profile's spaces become
                 // authoritative — stale spaces are pruned and
                 // their windows forwarded (see `pruneSpaces`).
-                self.apply(profile: profile, pruneStaleSpaces: true)
+                self.apply(
+                    profile: profile,
+                    pruneStaleSpaces: true,
+                    forceRetile: true
+                )
                 // A profile saved for other monitors stays
                 // loadable but loads dirty (#36).
                 let live = self.state.workspaces.allDisplays
@@ -313,7 +317,9 @@ extension KiwiCore {
         if profiles.currentName == name,
             let fresh = try? profiles.read(name: name)
         {
-            apply(profile: fresh)
+            // Explicit: an in-effect edit re-apply whose
+            // delta may sit inside the tolerance.
+            apply(profile: fresh, forceRetile: true)
         } else {
             handleMonitorChange()
         }

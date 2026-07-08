@@ -12,9 +12,18 @@ extension KiwiCore {
     /// hardware-driven applies (monitor change, native-space
     /// binding) leave it false to avoid shuffling windows on a
     /// reconnect.
+    ///
+    /// `forceRetile` has no default so every caller classifies
+    /// itself (AGENTS.md §5): explicit applies — load_profile,
+    /// an in-effect edit re-apply, the post-reload re-apply —
+    /// force past the engine's ±2 pt tolerance so a small
+    /// settings change can't be swallowed; event-driven applies
+    /// (monitor change, native-space binding) stay un-forced so
+    /// AX-echo lag can't wobble windows.
     func apply(
         profile: Profile,
-        pruneStaleSpaces: Bool = false
+        pruneStaleSpaces: Bool = false,
+        forceRetile: Bool
     ) {
         // The engine's cached durations sync via
         // `TilingEngine.settings.didSet` (#51).
@@ -72,7 +81,7 @@ extension KiwiCore {
             profileModes: profile.modes
         )
         resolveSpaceDisplays()
-        retile()
+        retile(force: forceRetile)
         emitSpaceChange()
     }
 
@@ -116,8 +125,12 @@ extension KiwiCore {
     }
 
     /// Applies a composed Standard fallback (#53): transient,
-    /// nothing is written until the user saves.
-    func apply(composed: ProfileComposition.Composed) {
+    /// nothing is written until the user saves. `forceRetile`
+    /// classifies the caller like `apply(profile:)`.
+    func apply(
+        composed: ProfileComposition.Composed,
+        forceRetile: Bool
+    ) {
         tiler.settings = composed.settings
         for space in composed.spaces {
             state.workspaces.ensureSpace(space)
@@ -133,7 +146,7 @@ extension KiwiCore {
         // revert to the base gui.json modes (#55 phase 6).
         reapplyStructuredKeybindings(profileModes: nil)
         resolveSpaceDisplays()
-        retile()
+        retile(force: forceRetile)
         emitSpaceChange()
     }
 
@@ -167,7 +180,7 @@ extension KiwiCore {
                 live: displays.count
             )
         }
-        apply(composed: composed)
+        apply(composed: composed, forceRetile: true)
         // If the save below fails, state honestly reflects a
         // transient Standard instead of a stale profile.
         profiles.adoptStandard(named: composed.sourceName)
@@ -236,14 +249,16 @@ extension KiwiCore {
         if let name = profiles.currentName,
             let profile = try? profiles.read(name: name)
         {
-            apply(profile: profile)
+            // Explicit: reloads follow a config/profile edit
+            // whose deltas may sit inside the tolerance.
+            apply(profile: profile, forceRetile: true)
         } else if profiles.currentStandard != nil,
             let composed = ProfileComposition.compose(
                 displays: state.workspaces.allDisplays,
                 mainID: PositionalDisplays.liveMainID
             )
         {
-            apply(composed: composed)
+            apply(composed: composed, forceRetile: true)
         }
     }
 }
