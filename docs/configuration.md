@@ -587,6 +587,22 @@ same key — likewise `comma`/`,`, `period`/`.`, `slash`/`/`,
 long forms (`command`, `option`, `semicolon`, …) for
 readability; every alias round-trips.
 
+A combo is any set of modifiers plus **exactly one key**.
+Multi-key chords (`cmd+j+k`) are not expressible — Carbon
+registers modifiers plus a single key code — so a
+hand-written combo that doesn't parse is never registered
+and the Shortcuts section flags the row with ⚠ *"isn't a
+recognized shortcut"*. For more shortcut layers, use modal
+modes (below) instead of longer chords.
+
+The recorder **locks on full release**: the chord is
+captured as keys go *down* (with a live preview as it
+forms), modifiers accumulate while a key is held, and the
+combo commits once everything is released — release order
+and timing can never change it, and pressing a different
+key mid-chord corrects it (⌘J → ⌘K). Bare Escape, clicking
+anywhere else, or switching apps cancels the recording.
+
 In the editor each recorded shortcut *displays* as the compact
 macOS-native glyph string menus use — modifier symbols `⌃⌥⇧⌘`
 (Command last) followed by the key glyph, with no `+` separator,

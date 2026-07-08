@@ -95,7 +95,9 @@ GUI lives in `Sources/KiwiDesk` (`Settings/`, `Settings/Tabs/`).
 5. **Document:** any user-visible behavior change updates the
    matching docs in the same change set — `docs/configuration.md`
    (Lua config & behavior), `docs/cli.md` (commands, events, IPC),
-   `docs/integrations.md` (recipes) — and `plan/` when the design
+   `docs/integrations.md` (recipes),
+   `docs/design-decisions.md` (when a settled product/UX
+   decision is made or changed) — and `plan/` when the design
    itself shifts. Code and docs must never describe different
    behavior.
 6. **Review:** once a substantial change is finished, verified,

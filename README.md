@@ -110,6 +110,8 @@ end)
   event stream
 - [Integrations](docs/integrations.md) — SketchyBar and
   JankyBorders recipes
+- [Design decisions](docs/design-decisions.md) — why the
+  Settings app behaves the way it does
 
 ## Contributing
 
