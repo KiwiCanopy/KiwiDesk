@@ -176,6 +176,7 @@ enum IconCatalog {
     ]
 
     static let emoji: [IconChoice] = [
+        .init("🥝", "kiwi kiwidesk fruit green brand"),
         .init("🌐", "web internet globe browser"),
         .init("📧", "mail email message"),
         .init("💬", "chat message talk"),
