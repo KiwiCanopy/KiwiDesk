@@ -40,8 +40,16 @@ extension KiwiCore {
         guard chased, guiConfigStore.load() != nil else {
             return
         }
+        // Rewrite matching values in the sidecar's own map —
+        // never adopt the runtime map wholesale: in a hybrid
+        // config it also holds init.lua-registered bindings,
+        // which must not materialize into gui.json (deleting
+        // the Lua line would then resurrect the binding).
         var live = loadGuiConfig()
-        live.profileBindings = nativeSpaceBindings
+        for (number, name) in live.profileBindings
+        where name == old {
+            live.profileBindings[number] = new
+        }
         do {
             try saveGuiConfig(live)
         } catch {

@@ -112,6 +112,50 @@ struct ProfileRenameTests {
         #expect(!core.guiConfigStore.exists)
     }
 
+    @Test("hybrid: Lua-only bindings never enter the sidecar")
+    func hybridSidecarStaysSparse() throws {
+        let core = makeCore()
+        save(core, "desk")
+        var config = GuiConfig()
+        config.profileBindings = [2: "desk"]
+        try core.guiConfigStore.save(config)
+        // Space 3 exists only in the runtime map, as if
+        // init.lua registered it — the follow must not
+        // materialize it into gui.json.
+        core.nativeSpaceBindings = [2: "desk", 3: "luaOnly"]
+        try core.renameProfile(from: "desk", to: "studio")
+        #expect(
+            core.guiConfigStore.load()?.profileBindings
+                == [2: "studio"]
+        )
+    }
+
+    @Test("rename to an invalid name throws before the move")
+    func invalidTargetName() throws {
+        let core = makeCore()
+        save(core, "desk")
+        #expect(throws: ProfileError.self) {
+            try core.renameProfile(from: "desk", to: "a/b")
+        }
+        #expect(core.profiles.list() == ["desk"])
+        #expect(core.profiles.currentName == "desk")
+    }
+
+    @Test("rename of a missing profile throws")
+    func missingSource() throws {
+        let core = makeCore()
+        // The exact error is the read layer's (file missing);
+        // what this pins is throw-not-crash and no side
+        // effects.
+        #expect(throws: (any Error).self) {
+            try core.renameProfile(
+                from: "ghost",
+                to: "studio"
+            )
+        }
+        #expect(core.profiles.list().isEmpty)
+    }
+
     @Test("an unrelated sidecar is not rewritten")
     func unrelatedSidecarUntouched() throws {
         let core = makeCore()
