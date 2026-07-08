@@ -1,0 +1,48 @@
+import Foundation
+
+/// Discovers and decodes the bundled locale JSON files (issue
+/// #9). Kept separate from `LocalizationManager` so the manager
+/// stays focused on lookup + current-locale state (§1 of the
+/// design brief).
+enum LocaleCatalog {
+    /// Locale codes shipped as `Resources/Locales/<code>.json`,
+    /// excluding `en` (English lives inline in call sites, not
+    /// as a bundled file the manager reads).
+    static func availableLocales() -> [String] {
+        guard
+            let directory = Bundle.module.url(
+                forResource: "Locales",
+                withExtension: nil
+            )
+        else { return [] }
+        let files =
+            (try? FileManager.default.contentsOfDirectory(
+                at: directory,
+                includingPropertiesForKeys: nil
+            )) ?? []
+        return
+            files
+            .filter { $0.pathExtension == "json" }
+            .map { $0.deletingPathExtension().lastPathComponent }
+            .filter { $0 != "en" }
+            .sorted()
+    }
+
+    /// Loads and decodes `<locale>.json`, or an empty dictionary
+    /// if the file is missing or malformed.
+    static func load(_ locale: String) -> [String: String] {
+        guard
+            let url = Bundle.module.url(
+                forResource: locale,
+                withExtension: "json",
+                subdirectory: "Locales"
+            ),
+            let data = try? Data(contentsOf: url)
+        else { return [:] }
+        let decoded = try? JSONDecoder().decode(
+            [String: String].self,
+            from: data
+        )
+        return decoded ?? [:]
+    }
+}

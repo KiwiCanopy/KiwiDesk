@@ -48,6 +48,13 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     public var profileBindings: [Int: String] = [:]
     /// Keybinding modes; the first is always the default mode.
     public var modes: [KeyMode] = [KeyMode.defaultMode]
+    /// The GUI's chosen display language (issue #9): a shipped
+    /// locale code (e.g. `"de"`), or `nil` for "System default"
+    /// — absent from the encoded sidecar so a system-default
+    /// pick leaves no key in the file. Global, not
+    /// profile-scoped: language is a whole-app preference, like
+    /// the other fields this struct carries.
+    public var language: String?
 
     public init() {}
 
@@ -136,6 +143,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case floatRules = "float_rules"
         case profileBindings = "profile_bindings"
         case modes
+        case language
     }
 
     /// Lenient decoding: a field missing from an older sidecar
@@ -168,6 +176,11 @@ public struct GuiConfig: Codable, Equatable, Sendable {
                 forKey: .modes
             ) ?? [KeyMode.defaultMode]
         if modes.isEmpty { modes = [KeyMode.defaultMode] }
+        language =
+            try container.decodeIfPresent(
+                String.self,
+                forKey: .language
+            )
         dropEmptyNamedSpaces()
     }
 
@@ -217,5 +230,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             forKey: .profileBindings
         )
         try container.encode(modes, forKey: .modes)
+        // Encoded only when set: "System default" leaves no
+        // `language` key in the sidecar at all.
+        if let language {
+            try container.encode(language, forKey: .language)
+        }
     }
 }

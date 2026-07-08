@@ -25,10 +25,17 @@ let package = Package(
         ),
         // Core: state tracking, event loop, OS bridging.
         // Strictly separated from the GUI (see AGENTS.md).
+        // `LocalizationManager` lives here (issue #9) so both
+        // the SwiftUI GUI and the AppKit quick menu can call
+        // it; the locale JSON files bundle with this target so
+        // its own `Bundle.module` can find them at runtime.
         .target(
             name: "KiwiDeskCore",
             dependencies: ["CLua"],
-            path: "Sources/KiwiDeskCore"
+            path: "Sources/KiwiDeskCore",
+            resources: [
+                .copy("Resources/Locales")
+            ]
         ),
         // Executable: AppDelegate, menu bar, SwiftUI GUI.
         .executableTarget(

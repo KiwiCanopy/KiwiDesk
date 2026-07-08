@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+"""Fold a translated missing_<locale>.json back into
+<locale>.json (issue #9) and delete the temp file.
+
+Usage:
+    scripts/merge-keys <locale>
+
+Run after `scripts/extract-keys <locale>` produced
+`missing_<locale>.json` and a translator has replaced its
+English values with the target-language text in place (do not
+change the keys).
+"""
+
+import json
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+LOCALES_DIR = (
+    ROOT / "Sources" / "KiwiDeskCore" / "Resources" / "Locales"
+)
+
+
+def main(argv: list[str]) -> int:
+    if len(argv) != 2:
+        print(__doc__)
+        return 1
+    locale = argv[1]
+    missing_file = LOCALES_DIR / f"missing_{locale}.json"
+    locale_file = LOCALES_DIR / f"{locale}.json"
+
+    if not missing_file.exists():
+        print(
+            f"merge-keys: {missing_file} does not exist — run "
+            f"scripts/extract-keys {locale} first.",
+            file=sys.stderr,
+        )
+        return 1
+
+    translated = json.loads(
+        missing_file.read_text(encoding="utf-8")
+    )
+    existing: dict[str, str] = {}
+    if locale_file.exists():
+        existing = json.loads(
+            locale_file.read_text(encoding="utf-8")
+        )
+
+    existing.update(translated)
+    LOCALES_DIR.mkdir(parents=True, exist_ok=True)
+    locale_file.write_text(
+        json.dumps(
+            existing, indent=2, sort_keys=True, ensure_ascii=False
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    missing_file.unlink()
+    print(
+        f"merge-keys: merged {len(translated)} key(s) into "
+        f"{locale_file} ({len(existing)} total); removed "
+        f"{missing_file.name}."
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

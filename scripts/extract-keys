@@ -1,0 +1,238 @@
+#!/usr/bin/env python3
+"""Extract L("key", "English") call sites from Sources/KiwiDesk
+into the canonical locale manifest (issue #9).
+
+Usage:
+    scripts/extract-keys              Rebuild en.json only.
+    scripts/extract-keys <locale>     Rebuild en.json, then write
+                                       Resources/Locales/missing_
+                                       <locale>.json with every
+                                       key that locale's file is
+                                       missing (or has empty),
+                                       sourced with the English
+                                       text for a translator to
+                                       fill in place.
+
+Drift guard: if the same key is called with two DIFFERENT English
+strings across call sites, this is a bug (the two occurrences
+would silently disagree until whichever one this script scanned
+last overwrote en.json) — the script fails loudly instead,
+naming the key and every conflicting string it found.
+
+Limitation: the extractor is a regex-based scan tuned to this
+repo's `.swift-format` house style (each `L(` call's two string
+arguments, across any number of lines, joined only by string-
+literal concatenation with `+` — plain `"..."` literals and
+triple-quoted `\"\"\"...\"\"\"` blocks are both supported). It
+does not evaluate arbitrary Swift expressions — a key or English
+string built from anything other than adjacent string literals
+will not be picked up, and call sites should stay written that
+way for the tool to keep working.
+"""
+
+import json
+import os
+import re
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+# Overridable so `LocalizationDriftGuardTests` (Swift, run via
+# `swift test`) can point the scanner at a small fixture tree
+# instead of the real `Sources/KiwiDesk` — the CLI surface for a
+# human running this script is unaffected (never set these).
+SOURCES = Path(
+    os.environ.get(
+        "KIWIDESK_EXTRACT_SOURCES", str(ROOT / "Sources" / "KiwiDesk")
+    )
+)
+LOCALES_DIR = Path(
+    os.environ.get(
+        "KIWIDESK_EXTRACT_LOCALES",
+        str(
+            ROOT
+            / "Sources"
+            / "KiwiDeskCore"
+            / "Resources"
+            / "Locales"
+        ),
+    )
+)
+EN_JSON = LOCALES_DIR / "en.json"
+
+# One string piece: a plain "..." literal or a triple-quoted
+# """...""" block (Swift multi-line string, used for the
+# onboarding copy).
+_PIECE = r'(?:"""(?:[^\\]|\\.)*?"""|"(?:[^"\\]|\\.)*")'
+
+# A run of pieces joined by `+`, allowing line breaks and
+# comments between pieces (swift-format wraps long `L(...)`
+# calls across several lines).
+_STRING_LITERAL = re.compile(
+    _PIECE
+    + r"(?:\s*(?://[^\n]*)?\s*\+\s*(?://[^\n]*)?\s*"
+    + _PIECE
+    + r")*",
+    re.DOTALL,
+)
+
+# `L(` then a string literal, a comma, then a string literal.
+_CALL = re.compile(
+    r"\bL\(\s*(?P<key>"
+    + _STRING_LITERAL.pattern
+    + r")\s*,\s*(?P<english>"
+    + _STRING_LITERAL.pattern
+    + r")\s*[,)]",
+    re.DOTALL,
+)
+
+_PIECE_RE = re.compile(_PIECE, re.DOTALL)
+
+
+def _dedent_triple_quoted(body: str) -> str:
+    """Swift trims a `\"\"\"` block's leading whitespace to the
+    closing `\"\"\"`'s indent, and drops the literal's own
+    leading/trailing newline. Mirrors that so extracted
+    multi-line English matches the runtime value."""
+    lines = body.split("\n")
+    if lines and lines[0] == "":
+        lines = lines[1:]
+    if lines and lines[-1].strip() == "":
+        indent = len(lines[-1]) - len(lines[-1].lstrip(" "))
+        lines = lines[:-1]
+        lines = [line[indent:] for line in lines]
+    return "\n".join(lines)
+
+
+def _join_literal(raw: str) -> str:
+    """Concatenates a run of string pieces into the Swift string
+    value (decodes escapes; strips inter-piece comments)."""
+    parts: list[str] = []
+    for piece in _PIECE_RE.findall(raw):
+        if piece.startswith('"""'):
+            parts.append(_dedent_triple_quoted(piece[3:-3]))
+        else:
+            parts.append(piece[1:-1])
+    joined = "".join(parts)
+    return (
+        joined.replace(r"\u{201C}", "“")
+        .replace(r"\u{201D}", "”")
+        .replace(r"\u{2019}", "’")
+        .replace("\\\n", "")
+        .replace(r"\n", "\n")
+        .replace(r"\"", '"')
+        .replace(r"\\", "\\")
+    )
+
+
+def extract() -> dict[str, str]:
+    """Scans every .swift file for `L(key, english)` call sites
+    and returns the canonical {key: english} map. Fails loudly
+    on a drifted key (same key, different English across sites).
+    """
+    found: dict[str, tuple[str, str]] = {}
+    conflicts: dict[str, set[str]] = {}
+    for path in sorted(SOURCES.rglob("*.swift")):
+        text = path.read_text(encoding="utf-8")
+        for match in _CALL.finditer(text):
+            key = _join_literal(match.group("key"))
+            english = _join_literal(match.group("english"))
+            if key in found and found[key][0] != english:
+                conflicts.setdefault(key, {found[key][0]})
+                conflicts[key].add(english)
+            try:
+                display_path = str(path.relative_to(ROOT))
+            except ValueError:
+                display_path = str(path)
+            found[key] = (english, display_path)
+    if conflicts:
+        print(
+            "extract-keys: FAILED — the same key maps to "
+            "different English strings:",
+            file=sys.stderr,
+        )
+        for key, strings in sorted(conflicts.items()):
+            print(f"\n  key: {key}", file=sys.stderr)
+            for s in sorted(strings):
+                print(f"    - {s!r}", file=sys.stderr)
+        print(
+            "\nFix: make every call site for a key pass the "
+            "exact same English string.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    return {key: english for key, (english, _) in found.items()}
+
+
+def write_en_json(mapping: dict[str, str]) -> None:
+    LOCALES_DIR.mkdir(parents=True, exist_ok=True)
+    EN_JSON.write_text(
+        json.dumps(
+            mapping, indent=2, sort_keys=True, ensure_ascii=False
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    print(f"extract-keys: wrote {len(mapping)} keys to {EN_JSON}")
+
+
+def write_missing(locale: str, mapping: dict[str, str]) -> None:
+    locale_file = LOCALES_DIR / f"{locale}.json"
+    existing: dict[str, str] = {}
+    if locale_file.exists():
+        try:
+            existing = json.loads(
+                locale_file.read_text(encoding="utf-8")
+            )
+        except json.JSONDecodeError:
+            existing = {}
+    missing = {
+        key: english
+        for key, english in mapping.items()
+        if not existing.get(key)
+    }
+    out = LOCALES_DIR / f"missing_{locale}.json"
+    if not missing:
+        if out.exists():
+            out.unlink()
+        print(
+            f"extract-keys: {locale} has no missing keys "
+            f"(nothing written)."
+        )
+        return
+    out.write_text(
+        json.dumps(
+            missing, indent=2, sort_keys=True, ensure_ascii=False
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    print(
+        f"extract-keys: {len(missing)} missing key(s) for "
+        f"'{locale}' written to {out}"
+    )
+    print(
+        "Translate the English values in place, then run: "
+        f"scripts/merge-keys {locale}"
+    )
+
+
+def main(argv: list[str]) -> int:
+    if len(argv) > 2:
+        print(__doc__)
+        return 1
+    mapping = extract()
+    write_en_json(mapping)
+    if len(argv) == 2:
+        write_missing(argv[1], mapping)
+    elif len(argv) == 1:
+        print(
+            "extract-keys: no locale given — only en.json was "
+            "rebuilt. Run `scripts/extract-keys <locale>` to "
+            "also compute missing keys for a locale."
+        )
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))
