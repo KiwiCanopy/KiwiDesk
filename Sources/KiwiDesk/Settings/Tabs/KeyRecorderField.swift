@@ -68,6 +68,13 @@ struct KeyRecorderField: View {
                 }
                 .buttonStyle(.bordered)
                 .tint(buttonTint)
+                .help(
+                    "A shortcut is one key plus any of "
+                        + "⌃ Control, ⌥ Option, ⇧ Shift, "
+                        + "and ⌘ Command — it locks in when "
+                        + "you release the keys. For more "
+                        + "shortcut layers, add a Mode."
+                )
                 if !combo.isEmpty && !recording {
                     Button(action: onClear) {
                         Image(systemName: "xmark.circle.fill")
