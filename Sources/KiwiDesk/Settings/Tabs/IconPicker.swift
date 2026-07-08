@@ -16,6 +16,23 @@ struct IconPicker: View {
 
     @State private var showing = false
     @State private var search = ""
+    @State private var tab: IconTab = .emoji
+
+    /// Browse tabs (#68 §6.4): emoji first — space icons are
+    /// the picker's most frequent use and lean emoji. Search
+    /// stays global across both vocabularies.
+    enum IconTab: String, CaseIterable, Identifiable {
+        case emoji = "Emoji"
+        case symbols = "Symbols"
+        var id: String { rawValue }
+
+        var choices: [IconChoice] {
+            switch self {
+            case .emoji: IconCatalog.emoji
+            case .symbols: IconCatalog.symbols
+            }
+        }
+    }
 
     enum IconPreview {
         /// An 18 pt menu-bar mock, light and dark side by
@@ -35,13 +52,18 @@ struct IconPicker: View {
             showing = true
         } label: {
             HStack(spacing: 6) {
+                // Fixed glyph slot: every picker button is
+                // the same size whether it holds an emoji, a
+                // symbol, or nothing yet.
                 IconGlyphLabel(icon: icon)
+                    .frame(width: 20)
                 Image(systemName: "chevron.down")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
         }
         .buttonStyle(.bordered)
+        .help("Choose an icon")
         .popover(isPresented: $showing) { popover }
     }
 
@@ -55,24 +77,47 @@ struct IconPicker: View {
                 text: $search
             )
             .textFieldStyle(.roundedBorder)
+            if search.trimmed.isEmpty {
+                HStack(spacing: 8) {
+                    Picker("", selection: $tab) {
+                        ForEach(IconTab.allCases) { tab in
+                            Text(tab.rawValue).tag(tab)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    clearButton
+                }
+            }
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
-                    specialResults
                     if search.trimmed.isEmpty {
                         gridSection(
                             "Recents",
-                            defaultCell: true,
                             choices: recentChoices
                         )
+                        gridSection(
+                            nil,
+                            choices: tab.choices
+                        )
+                    } else {
+                        // Search is global: both
+                        // vocabularies, emoji first, the
+                        // tabs stand back.
+                        specialResults
+                        gridSection(
+                            "Emoji",
+                            choices: filtered(
+                                IconCatalog.emoji
+                            )
+                        )
+                        gridSection(
+                            "Symbols",
+                            choices: filtered(
+                                IconCatalog.symbols
+                            )
+                        )
                     }
-                    gridSection(
-                        "Symbols",
-                        choices: filtered(IconCatalog.symbols)
-                    )
-                    gridSection(
-                        "Emoji",
-                        choices: filtered(IconCatalog.emoji)
-                    )
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -171,20 +216,20 @@ struct IconPicker: View {
         }
     }
 
+    /// `title` nil renders the bare grid — used for the tab
+    /// grids, where the segmented control already names it.
     @ViewBuilder private func gridSection(
-        _ title: String,
-        defaultCell: Bool = false,
+        _ title: String?,
         choices: [IconChoice]
     ) -> some View {
-        if !choices.isEmpty || defaultCell {
+        if !choices.isEmpty {
             VStack(alignment: .leading, spacing: 4) {
-                Text(title)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                if let title {
+                    Text(title)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
                 LazyVGrid(columns: columns, spacing: 6) {
-                    if defaultCell {
-                        noneCell
-                    }
                     ForEach(choices) { choice in
                         cell(choice.glyph)
                     }
@@ -193,20 +238,20 @@ struct IconPicker: View {
         }
     }
 
-    /// Clearing is as discoverable as choosing (§6.4): the
-    /// "None (default)" cell leads the Recents row.
-    private var noneCell: some View {
+    /// Clearing is a control, not a choice (§6.4): it acts on
+    /// the current selection, so it sits beside the tabs
+    /// instead of posing as a grid cell under Recents.
+    private var clearButton: some View {
         Button {
             icon = ""
             showing = false
         } label: {
             Image(systemName: "circle.slash")
                 .foregroundStyle(.secondary)
-                .frame(width: 32, height: 28)
-                .contentShape(Rectangle())
         }
         .buttonStyle(.bordered)
-        .help("None (default)")
+        .help("Remove icon (use the default)")
+        .disabled(icon.isEmpty)
     }
 
     private func cell(_ glyph: String) -> some View {
@@ -246,36 +291,5 @@ struct IconPicker: View {
         icon = value
         IconCatalog.noteRecent(value)
         showing = false
-    }
-}
-
-/// Renders an icon string: an SF Symbol if the string names
-/// one, otherwise the literal character(s); a placeholder
-/// symbol when empty.
-struct IconGlyphLabel: View {
-    let icon: String
-    var placeholder: String?
-
-    var body: some View {
-        if icon.isEmpty {
-            if let placeholder {
-                Image(systemName: placeholder)
-            } else {
-                Label("Choose…", systemImage: "face.smiling")
-                    .frame(minWidth: 60)
-            }
-        } else if isSymbol {
-            Image(systemName: icon)
-        } else {
-            Text(icon)
-        }
-    }
-
-    private var isSymbol: Bool {
-        !icon.isEmpty
-            && NSImage(
-                systemSymbolName: icon,
-                accessibilityDescription: nil
-            ) != nil
     }
 }
