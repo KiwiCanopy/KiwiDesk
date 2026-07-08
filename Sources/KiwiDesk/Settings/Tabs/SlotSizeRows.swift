@@ -12,6 +12,12 @@ struct SlotSizeRows: View {
     /// vertical default (frontend only; the stored `slot_size`
     /// is orientation-neutral).
     let isVertical: Bool
+    /// Which half to render: the unit picker groups with the
+    /// other segmented pickers, the value control re-homes
+    /// below them (#68) — `.both` keeps the paired default.
+    var part: Part = .both
+
+    enum Part { case unit, control, both }
 
     private var sizeLabel: String {
         isVertical ? "Row height" : "Column width"
@@ -91,7 +97,20 @@ struct SlotSizeRows: View {
         )
     }
 
+    @ViewBuilder
     var body: some View {
+        switch part {
+        case .unit:
+            unitPicker
+        case .control:
+            sizeControl
+        case .both:
+            unitPicker
+            sizeControl
+        }
+    }
+
+    private var unitPicker: some View {
         SegmentedPicker(
             "Size unit",
             selection: sizeUnitBinding,
@@ -101,7 +120,6 @@ struct SlotSizeRows: View {
                 ("Percent", .percent),
             ]
         )
-        sizeControl
     }
 
     @ViewBuilder

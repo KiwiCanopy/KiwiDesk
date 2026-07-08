@@ -147,12 +147,14 @@ struct DragVisualControls: View {
             value: $visual.borderThickness,
             range: 0...20
         )
-        Picker(
-            "Border alignment",
-            selection: $visual.borderAlignment
-        ) {
-            Text("Inside").tag(BorderAlignment.inside)
-            Text("Outside").tag(BorderAlignment.outside)
+        DropdownRow(label: "Border alignment") {
+            Picker(
+                "Border alignment",
+                selection: $visual.borderAlignment
+            ) {
+                Text("Inside").tag(BorderAlignment.inside)
+                Text("Outside").tag(BorderAlignment.outside)
+            }
         }
         Divider()
         Toggle("Fill", isOn: $visual.fill)

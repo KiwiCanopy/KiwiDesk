@@ -25,7 +25,11 @@ struct ScrollGridEditor: View {
             "Scrolling",
             symbol: LayoutMode.scrolling.glyph
         ) {
-            SlotSizeRows(model: model, isVertical: isVertical)
+            SlotSizeRows(
+                model: model,
+                isVertical: isVertical,
+                part: .unit
+            )
             SegmentedPicker(
                 "Focus anchor",
                 selection: $model.config.settings.scrolling
@@ -47,6 +51,15 @@ struct ScrollGridEditor: View {
                     ),
                     ("Vertical", .vertical),
                 ]
+            )
+            Divider()
+            // The size value re-homed below the picker trio so
+            // the three segmented pickers read as one group and
+            // the size control gets its own breathing room.
+            SlotSizeRows(
+                model: model,
+                isVertical: isVertical,
+                part: .control
             )
             Divider()
             PlacementPicker(
@@ -75,26 +88,18 @@ struct ScrollGridEditor: View {
 
     /// Stepper for the scrolling focus-shift speed
     /// (`animations.scroll_speed`;
-    /// `animations.set_scroll_speed` Lua — #51).
+    /// `animations.set_scroll_speed` Lua — #51). Reuses the
+    /// shared editable `StepperRow` (with a "ms" suffix) rather
+    /// than hand-rolling the same shape.
     private var scrollSpeedRow: some View {
-        let ms = model.config.settings.animations.scrollSpeedMS
-        return HStack {
-            Text("Scroll speed")
-            Spacer()
-            Stepper(
-                value: $model.config.settings.animations
-                    .scrollSpeedMS,
-                in: 50...1000,
-                step: 10
-            ) {
-                Text("\(ms) ms")
-                    .frame(minWidth: 52, alignment: .trailing)
-                    .monospacedDigit()
-            }
-            .controlSize(.large)
-            .accessibilityLabel("Scroll speed")
-            .accessibilityValue("\(ms) ms")
-        }
+        StepperRow(
+            label: "Scroll speed",
+            value: $model.config.settings.animations
+                .scrollSpeedMS,
+            in: 50...1000,
+            step: 10,
+            suffix: "ms"
+        )
         .disabled(
             !model.config.settings.animations.onScrolling
         )
@@ -113,10 +118,6 @@ struct ScrollGridEditor: View {
                     ("Rigid", .rigid),
                 ]
             )
-            Toggle(
-                "Fill empty space",
-                isOn: $model.config.settings.grid.fillEmptySpace
-            )
             SegmentedPicker(
                 "Split direction",
                 selection: $model.config.settings.grid
@@ -128,6 +129,11 @@ struct ScrollGridEditor: View {
                     ),
                     ("Vertical", .vertical),
                 ]
+            )
+            Divider()
+            Toggle(
+                "Fill empty space",
+                isOn: $model.config.settings.grid.fillEmptySpace
             )
             StepperRow(
                 label: "Columns",

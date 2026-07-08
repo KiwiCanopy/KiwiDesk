@@ -152,26 +152,41 @@ struct LayoutAppBarSection: View {
     let mode: LayoutMode
     @Binding var bar: LayoutAppBar
     let global: AppBarStyle
+    /// Collapsed by default: the override rows (menu pickers
+    /// especially) are the Appearance tab's dominant mount
+    /// cost, so a `DisclosureGroup` keeps them unbuilt until
+    /// the user opens them — the enable toggle stays outside.
+    @State private var overridesExpanded = false
 
     var body: some View {
         SettingsSection(title + " bar", symbol: mode.glyph) {
             Toggle("Show app bar", isOn: $bar.enabled)
             if bar.enabled {
-                Text(
-                    "Dimmed rows inherit the global value — "
-                        + "tick a box to override just that "
-                        + "field for this layout."
-                )
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                behaviorOverrides
-                appearanceOverrides
-                LayoutAppBarColorOverrides(
-                    bar: $bar,
-                    global: global
-                )
+                DisclosureGroup(
+                    "Overrides",
+                    isExpanded: $overridesExpanded
+                ) {
+                    overrides
+                }
             }
         }
+    }
+
+    /// Split out so `DisclosureGroup` builds it lazily.
+    @ViewBuilder private var overrides: some View {
+        Text(
+            "Dimmed rows inherit the global value — "
+                + "tick a box to override just that "
+                + "field for this layout."
+        )
+        .font(.caption)
+        .foregroundStyle(.secondary)
+        behaviorOverrides
+        appearanceOverrides
+        LayoutAppBarColorOverrides(
+            bar: $bar,
+            global: global
+        )
     }
 
     @ViewBuilder private var behaviorOverrides: some View {

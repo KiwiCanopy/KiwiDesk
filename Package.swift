@@ -42,6 +42,8 @@ let package = Package(
             resources: [
                 .copy("Resources/MenuBarIcon.tiff"),
                 .copy("Resources/Wordmark.png"),
+                .copy("Resources/WordmarkDark.png"),
+                .copy("Resources/AppMark.png"),
             ]
         ),
         .testTarget(

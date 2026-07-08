@@ -11,21 +11,45 @@ struct SettingsSidebar: View {
 
     var body: some View {
         List(selection: $selection) {
-            Section("This Profile") {
+            Section("Design") {
                 ForEach(SettingsDestination.thisProfile) {
                     row($0)
                 }
             }
-            Section("Whole App") {
+            Section("System") {
                 ForEach(visibleWholeApp) { row($0) }
             }
         }
         .listStyle(.sidebar)
+        .safeAreaInset(edge: .top, spacing: 0) {
+            appIdentity
+        }
         .navigationSplitViewColumnWidth(
             min: 176,
             ideal: 190,
             max: 240
         )
+    }
+
+    /// App identity centered at the top of the sidebar (#68):
+    /// colour mark + name, sitting under the traffic lights
+    /// where `NavigationSplitView` insets the sidebar top. The
+    /// selected section's name rides the titlebar separately,
+    /// the System Settings split.
+    private var appIdentity: some View {
+        HStack(spacing: 8) {
+            if let mark = BrandAssets.appMark {
+                Image(nsImage: mark)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 28, height: 28)
+            }
+            Text("KiwiDesk")
+                .font(.title3.weight(.semibold))
+        }
+        .frame(maxWidth: .infinity, alignment: .center)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
     }
 
     private var visibleWholeApp: [SettingsDestination] {

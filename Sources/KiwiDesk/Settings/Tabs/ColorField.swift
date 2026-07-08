@@ -1,14 +1,18 @@
+import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// A labeled color control (#68 §3.14): just the native color
-/// well — the system color panel it opens carries hex entry
-/// natively (Color Sliders pane), so the inline `#RRGGBBAA`
-/// text field it used to pair with was redundant chrome and
-/// was dropped. "Hex" in the name is the STORAGE contract,
-/// not the UI: the binding is the `#RRGGBBAA` string the
-/// config persists. One component everywhere a color appears
-/// (App Bar, overrides, drag visuals).
+/// A labeled color control (#68 §3.14): a lightweight swatch
+/// that opens the shared system color panel on click, instead
+/// of a per-row `NSColorWell`. The Appearance tab mounts ~14 of
+/// these; a color well each is expensive to instantiate in
+/// bulk (a visible open lag), while a swatch is a cheap filled
+/// shape and there is only ever one system panel. The panel's
+/// "RGB Sliders" mode carries the hex field, so no custom hex
+/// UI is needed. "Hex" in the name is the STORAGE contract, not
+/// the UI: the binding is the `#RRGGBBAA` string the config
+/// persists. One component everywhere a color appears (App Bar,
+/// overrides, drag visuals).
 struct HexColorField: View {
     let label: String
     @Binding var hex: String
@@ -20,43 +24,14 @@ struct HexColorField: View {
                     width: SettingsMetrics.colorLabelColumn,
                     alignment: .leading
                 )
-            ColorPicker(
-                "",
-                selection: colorBinding,
-                supportsOpacity: true
-            )
-            .labelsHidden()
+            ColorSwatch(hex: $hex)
         }
     }
 
-    /// The well edits the same stored hex string: reads via
-    /// `DragVisual.parseHex`, writes back `#RRGGBB` (or
-    /// `#RRGGBBAA` when translucent).
-    private var colorBinding: Binding<Color> {
-        Binding(
-            get: { parsedColor },
-            set: { hex = Self.hexString(from: $0) }
-        )
-    }
-
-    /// Parses `hex` via `DragVisual.parseHex` (handles
-    /// `#RRGGBB` and `#RRGGBBAA`). Falls back to `.clear`.
-    private var parsedColor: Color {
-        guard let rgba = DragVisual.parseHex(hex) else {
-            return .clear
-        }
-        return Color(
-            red: rgba.red,
-            green: rgba.green,
-            blue: rgba.blue,
-            opacity: rgba.alpha
-        )
-    }
-
-    static func hexString(from color: Color) -> String {
-        let ns =
-            NSColor(color).usingColorSpace(.sRGB)
-            ?? .black
+    /// Formats an `NSColor` back into the stored hex string:
+    /// `#RRGGBB`, or `#RRGGBBAA` when translucent.
+    static func hexString(from color: NSColor) -> String {
+        let ns = color.usingColorSpace(.sRGB) ?? .black
         let r = Int(round(ns.redComponent * 255))
         let g = Int(round(ns.greenComponent * 255))
         let b = Int(round(ns.blueComponent * 255))
@@ -71,5 +46,109 @@ struct HexColorField: View {
             b,
             a
         )
+    }
+}
+
+/// The clickable color preview. Reads `hex` via
+/// `DragVisual.parseHex` (handles `#RRGGBB` and `#RRGGBBAA`)
+/// and writes back whatever the shared panel reports.
+struct ColorSwatch: View {
+    @Binding var hex: String
+    @State private var hovering = false
+
+    var body: some View {
+        Button(action: present) {
+            Capsule()
+                .fill(color)
+                .frame(width: 44, height: 22)
+                .overlay(
+                    // Top bevel highlight — the raised-well
+                    // look, so the swatch isn't a flat chip.
+                    Capsule()
+                        .inset(by: 1)
+                        .strokeBorder(
+                            .white.opacity(0.4),
+                            lineWidth: 0.75
+                        )
+                )
+                .overlay(
+                    // Appearance-adaptive ring: white-ish in
+                    // dark mode, dark in light — a defined
+                    // border in both, unlike the faint
+                    // separator that vanished on dark fills.
+                    Capsule()
+                        .strokeBorder(
+                            Color.primary.opacity(0.35),
+                            lineWidth: 1
+                        )
+                )
+                // Persistent raised shadow (the "3D",
+                // interactive vocabulary), amplified on hover.
+                .scaleEffect(hovering ? 1.06 : 1)
+                .shadow(
+                    color: .black.opacity(0.35),
+                    radius: hovering ? 4 : 2,
+                    y: hovering ? 2 : 1
+                )
+                .animation(
+                    .easeOut(duration: 0.12),
+                    value: hovering
+                )
+        }
+        .buttonStyle(.plain)
+        .pointingHandCursor()
+        .onHover { hovering = $0 }
+        .help("Edit the \(hex) color")
+    }
+
+    /// Falls back to `.clear` (a bordered empty swatch) when the
+    /// stored string is not parseable.
+    private var color: Color {
+        guard let rgba = DragVisual.parseHex(hex) else {
+            return .clear
+        }
+        return Color(
+            red: rgba.red,
+            green: rgba.green,
+            blue: rgba.blue,
+            opacity: rgba.alpha
+        )
+    }
+
+    private func present() {
+        ColorPanelController.shared.present(
+            current: NSColor(color)
+        ) { hex = HexColorField.hexString(from: $0) }
+    }
+}
+
+/// Drives the one shared `NSColorPanel` for every `ColorSwatch`.
+/// The last swatch to open the panel owns it: `present`
+/// retargets the panel and re-points the change callback,
+/// mirroring how a native color well hands the panel between
+/// wells.
+@MainActor
+final class ColorPanelController: NSObject {
+    static let shared = ColorPanelController()
+
+    private var onChange: ((NSColor) -> Void)?
+
+    func present(
+        current: NSColor,
+        onChange: @escaping (NSColor) -> Void
+    ) {
+        self.onChange = onChange
+        let panel = NSColorPanel.shared
+        panel.showsAlpha = true
+        panel.color = current
+        panel.setTarget(self)
+        panel.setAction(#selector(panelColorChanged(_:)))
+        panel.makeKeyAndOrderFront(nil)
+    }
+
+    @objc private func panelColorChanged(
+        _ sender: NSColorPanel
+    ) {
+        onChange?(sender.color)
     }
 }

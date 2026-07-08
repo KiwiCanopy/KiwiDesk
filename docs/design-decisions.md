@@ -10,25 +10,50 @@ live in `AGENTS.md`, not here.
 
 ## Navigation & saving
 
-**Two-group sidebar: "This Profile" vs "Whole App".** Every
-control either travels with the profile being edited or is
-app-wide, and the old flat tabs hid which was which — the
+**Two-group sidebar, topic-named: "Design" vs "System".**
+Every control either travels with the profile being edited or
+is app-wide, and the old flat tabs hid which was which — the
 single biggest source of confusion. The sidebar makes the
-scope split part of the navigation itself; profile-scoped
-sections follow the banner's edit target, Whole-App sections
-are always live. (#68 §3.1)
+split part of the navigation, but names the groups by *topic*,
+not scope (System Settings groups by subject, never by
+per-machine/per-user scope): **Design** holds the
+profile-scoped content (Spaces, Layout, Monitors, Appearance,
+Behavior); **System** holds the app-level surfaces (Profiles,
+Shortcuts, App Rules, General). Scope stays the underlying
+model — the header's profile picker shows which profile
+"Design" edits — it's just no longer the group label, since a
+new user can't predict placement from "is this a Profile
+thing?". The membership is unchanged from the earlier "This
+Profile" / "Whole App" split; only the labels are topical.
+(#68 §3.1)
 
 **One stable save footer: Revert / Save a Copy As… / Save.**
 The old footer showed up to seven differently-labeled verbs
 depending on invisible mode state, but they expressed only
 two intents: "persist to what I'm editing" and "duplicate
 under a new name". Three stable slots, clustered at the
-trailing edge. The banner above names the edit target
-authoritatively — a destination caption beside Save
+trailing edge. The header's profile picker names the edit
+target authoritatively — a destination caption beside Save
 duplicated it, read as confusing, and its fixed width split
 the button cluster apart, so it was dropped. Adopt is not a
 save verb — it lives with the raw-Lua content it migrates.
 (#68 §3.12)
+
+**One header bar: section title leading, profile picker
+trailing; status only when non-nominal.** The section name and
+the profile edit-target picker are related facts (what am I
+looking at / in which profile), so they share one titlebar row
+instead of a title stacked over a separate profile banner. The
+picker moves into a trailing toolbar item, shown everywhere
+except General (`showsProfileContext`) — App Rules keeps it
+because its rules target profile-scoped spaces, so it is *not*
+the same exclusion as `visibleWhileEditingStoredProfile`.
+The status sentence is demoted to a conditional strip that
+mounts only when there's something non-nominal to say
+(divergence, unsaved, built-in, no-match, or a warning) — a
+synced profile says nothing, so the common case is a single
+bar and content scrolls straight under the blurred titlebar.
+(#68 §3.1)
 
 **"Unsaved changes" is a live comparison, not a latched
 flag.** `isDirty` compares the edited config and Lua source
@@ -295,10 +320,14 @@ narrows it once (`overrideLabelColumn`, paying for its
 checkbox prefix) — so a shared row dropped into override
 chrome lands on the plain rows' control axis by
 construction, not by remembering a width parameter. Numeric steppers are the
-deliberate exception: label leading, monospaced value plus
-arrows trailing (the native System-Settings numeric layout)
-— a value embedded in the label string ("Columns: 3") read
-as static text. The color grid is the other exception: its
+deliberate exception: label leading, then an **editable
+monospaced field** plus arrows trailing (the native
+System-Settings numeric layout) — a value embedded in the
+label string ("Columns: 3") read as static text, and even a
+plain readout beside arrows read as passive, so the value is
+a real `TextField` (type a number, or use the arrows) that
+commits and clamps on Return / focus loss. An optional unit
+`suffix` ("ms") sits between the field and the arrows. The color grid is the other exception: its
 two-column `HexColorField` layout keeps its own label width
 (`colorLabelColumn`), because the shared axis would misalign
 the grid's second column. Dropdowns ride the axis via

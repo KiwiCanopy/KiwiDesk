@@ -30,7 +30,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .spaces: return "Spaces"
-        case .layoutDefaults: return "Layout Defaults"
+        case .layoutDefaults: return "Layout"
         case .monitors: return "Monitors"
         case .appearance: return "Appearance"
         case .behavior: return "Behavior"
@@ -63,11 +63,15 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
     var tint: Color {
         switch self {
         case .spaces: return .indigo
-        case .layoutDefaults: return .teal
+        // Deeper teal/green than the system defaults: the
+        // bright `.teal`/`.green` washed the white glyph out.
+        case .layoutDefaults:
+            return Color(red: 0.09, green: 0.47, blue: 0.53)
         case .monitors: return .blue
         case .appearance: return .purple
         case .behavior: return .orange
-        case .profiles: return .green
+        case .profiles:
+            return Color(red: 0.16, green: 0.53, blue: 0.28)
         case .shortcuts:
             return Color(
                 red: 0.35,
@@ -88,6 +92,18 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .appRules, .general: return false
         default: return true
         }
+    }
+
+    /// Whether the profile edit-target header (the toolbar
+    /// picker + the status strip) is shown for this
+    /// destination. Only General is truly profile-agnostic
+    /// (About + the config-file tools). App Rules is shown
+    /// too — its rules assign apps to spaces, and spaces are
+    /// profile-scoped, so the picker names which profile's
+    /// spaces a rule targets — so this is NOT the same set as
+    /// `visibleWhileEditingStoredProfile`.
+    var showsProfileContext: Bool {
+        self != .general
     }
 
     /// The one reachability predicate all #18 enforcement

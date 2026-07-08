@@ -10,12 +10,14 @@ struct GeneralSection: View {
     /// Advanced is collapsed by default — only interested
     /// users need the config-file path and the raw editor.
     @State private var advancedExpanded = false
+    /// Drives the light/dark wordmark swap (see `aboutBrand`).
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                advancedSection
                 aboutSection
+                advancedSection
             }
             .padding(16)
         }
@@ -45,22 +47,17 @@ struct GeneralSection: View {
         }
     }
 
-    /// The wordmark rides a fixed light badge: its navy text
-    /// is fused into the artwork's compound path, so it
-    /// cannot follow the appearance — the badge keeps it
-    /// readable in dark mode and melts into a light pane.
+    /// The wordmark's name text is fused into the artwork's
+    /// compound path, so it can't recolour per appearance.
+    /// Instead of a backing card we ship two masters — navy
+    /// text for light, off-white for dark — and swap by
+    /// `colorScheme`, so the mark melts into the pane in both.
     @ViewBuilder private var aboutBrand: some View {
-        if let wordmark = BrandAssets.wordmark {
+        if let wordmark {
             Image(nsImage: wordmark)
                 .resizable()
                 .scaledToFit()
                 .frame(height: 130)
-                .padding(.horizontal, 24)
-                .padding(.vertical, 14)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(Self.badge)
-                )
         } else {
             HStack(spacing: 12) {
                 Image(systemName: "rectangle.3.group")
@@ -72,12 +69,14 @@ struct GeneralSection: View {
         }
     }
 
-    /// Off-white with a whisper of the logo's cream green.
-    private static let badge = Color(
-        red: 0.965,
-        green: 0.976,
-        blue: 0.945
-    )
+    /// The dark master falls back to the light one if it is
+    /// ever missing — a readable-but-imperfect degrade beats
+    /// showing nothing.
+    private var wordmark: NSImage? {
+        colorScheme == .dark
+            ? BrandAssets.wordmarkDark ?? BrandAssets.wordmark
+            : BrandAssets.wordmark
+    }
 
     private var advancedSection: some View {
         DisclosureGroup(isExpanded: $advancedExpanded) {

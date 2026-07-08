@@ -98,42 +98,73 @@ struct DropdownRow<P: View>: View {
 }
 
 /// A stepper row in the duration rows' shape: label leading,
-/// the monospaced value plus arrows trailing — the native
-/// System-Settings numeric-stepper layout, and a value that
-/// reads as editable instead of a sentence with a number in
-/// it.
+/// the value trailing as an **editable field** (type a number
+/// or use the arrows) plus the stepper arrows — the native
+/// System-Settings numeric layout, with the value reading as
+/// changeable, not a static readout. An optional `suffix` (e.g.
+/// "ms") sits between the field and the arrows.
 struct StepperRow: View {
     let label: String
     @Binding var value: Int
     let range: ClosedRange<Int>
+    let step: Int
+    let suffix: String?
+    /// The field edits a string proxy so intermediate/empty
+    /// typing never clobbers `value`; it commits (parse +
+    /// clamp) on Return or focus loss, matching the rename
+    /// field's commit discipline.
+    @State private var text: String
+    @FocusState private var focused: Bool
 
     init(
         label: String,
         value: Binding<Int>,
-        in range: ClosedRange<Int>
+        in range: ClosedRange<Int>,
+        step: Int = 1,
+        suffix: String? = nil
     ) {
         self.label = label
         self._value = value
         self.range = range
+        self.step = step
+        self.suffix = suffix
+        self._text = State(initialValue: "\(value.wrappedValue)")
     }
 
     var body: some View {
         HStack {
             Text(label)
             Spacer()
-            Stepper(value: $value, in: range) {
-                Text("\(value)")
-                    .frame(minWidth: 32, alignment: .trailing)
-                    .monospacedDigit()
+            TextField("", text: $text)
+                .labelsHidden()
+                .frame(width: 48)
+                .multilineTextAlignment(.trailing)
+                .monospacedDigit()
+                .textFieldStyle(.roundedBorder)
+                .focused($focused)
+                .onSubmit(commit)
+                .onChange(of: focused) { _, now in
+                    if !now { commit() }
+                }
+            if let suffix {
+                Text(suffix).foregroundStyle(.secondary)
             }
-            .controlSize(.large)
-            .accessibilityLabel(label)
-            // The custom label view replaces the stepper's
-            // announced text, so the current value must ride
-            // along explicitly or VoiceOver hears only the
-            // name.
-            .accessibilityValue("\(value)")
+            Stepper(value: $value, in: range, step: step) {}
+                .labelsHidden()
+                .controlSize(.large)
+                .accessibilityLabel(label)
+                .accessibilityValue("\(value)")
         }
+        // Keep the field in step with arrow taps / external
+        // changes.
+        .onChange(of: value) { _, now in text = "\(now)" }
+    }
+
+    private func commit() {
+        if let parsed = Int(text) {
+            value = min(max(parsed, range.lowerBound), range.upperBound)
+        }
+        text = "\(value)"
     }
 }
 

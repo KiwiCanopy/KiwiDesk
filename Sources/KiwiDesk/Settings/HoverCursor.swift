@@ -36,10 +36,35 @@ private struct LinkHover: ViewModifier {
     }
 }
 
+/// Pointing-hand cursor on hover *without* the link color
+/// lift — for clickable controls that aren't text (the color
+/// swatch). Same `set()` + `onDisappear` discipline as
+/// `LinkHover`, so a view removed mid-hover restores the arrow.
+private struct PointingHandCursor: ViewModifier {
+    @State private var hovering = false
+
+    func body(content: Content) -> some View {
+        content
+            .onHover { inside in
+                hovering = inside
+                (inside ? NSCursor.pointingHand : .arrow).set()
+            }
+            .onDisappear {
+                if hovering { NSCursor.arrow.set() }
+            }
+    }
+}
+
 extension View {
     /// Marks a link-like control: pointing-hand cursor and a
     /// color lift on hover say "this is clickable".
     func linkHover() -> some View {
         modifier(LinkHover())
+    }
+
+    /// Pointing-hand cursor only (no color lift), for clickable
+    /// non-text controls like the color swatch.
+    func pointingHandCursor() -> some View {
+        modifier(PointingHandCursor())
     }
 }

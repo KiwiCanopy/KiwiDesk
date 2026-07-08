@@ -87,10 +87,12 @@ struct ProfilesSection: View {
         _ count: Int
     ) -> some View {
         HStack(spacing: 6) {
-            Text(count == 1 ? "1 screen" : "\(count) screens")
-                .font(.caption)
-                .fontWeight(.semibold)
-                .foregroundStyle(.secondary)
+            // A navigational grouping header, not a hint —
+            // uses the shared group-header style, one step above
+            // a section's headline, instead of caption text.
+            SettingsGroupHeader(
+                count == 1 ? "1 screen" : "\(count) screens"
+            )
             if count == model.displays.count {
                 BadgeChip(label: "connected")
             }

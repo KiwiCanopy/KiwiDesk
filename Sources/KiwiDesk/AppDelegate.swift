@@ -153,7 +153,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         window.center()
         onboardingWindow = window
 
-        NSApp.setActivationPolicy(.regular)
+        NSApp.activateAsRegular()
         window.makeKeyAndOrderFront(nil)
         NSApp.activate()
     }
