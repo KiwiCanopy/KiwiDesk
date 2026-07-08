@@ -63,6 +63,12 @@ struct IconPicker: View {
             }
         }
         .buttonStyle(.bordered)
+        // Large like the menu pickers beside it (the space
+        // row's mode dropdown): the trigger is a chooser
+        // button and must sit level with that family, even
+        // though what it opens is a popover browser, not a
+        // menu.
+        .controlSize(.large)
         .help("Choose an icon")
         .popover(isPresented: $showing) { popover }
     }
