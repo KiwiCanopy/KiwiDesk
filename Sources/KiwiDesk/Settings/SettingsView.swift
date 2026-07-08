@@ -80,7 +80,7 @@ struct SettingsView: View {
         case .shortcuts:
             KeybindingsTab(model: model)
         case .appRules:
-            AppRulesTab(model: model)
+            AppRulesSection(model: model)
         case .general:
             GeneralSection(model: model)
         }
