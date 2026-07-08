@@ -53,7 +53,7 @@ struct SidebarTile: View {
     let destination: SettingsDestination
 
     var body: some View {
-        RoundedRectangle(cornerRadius: 5)
+        RoundedRectangle(cornerRadius: 6)
             .fill(destination.tint)
             .frame(width: 22, height: 22)
             .overlay {

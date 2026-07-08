@@ -25,9 +25,7 @@ struct AppearanceSection: View {
     }
 
     @ViewBuilder private var appBarGroup: some View {
-        Text("App Bar")
-            .font(.title3)
-            .fontWeight(.semibold)
+        SettingsGroupHeader("App Bar")
             .padding(.top, 4)
         GlobalAppBarSection(
             style: $model.config.settings.appBarStyle

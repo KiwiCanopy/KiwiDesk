@@ -20,97 +20,12 @@ struct ScrollGridEditor: View {
         model.config.settings.scrolling.orientation == .vertical
     }
 
-    private var sizeLabel: String {
-        isVertical ? "Row height" : "Column width"
-    }
-
-    private enum SizeUnit: Hashable { case auto, points, percent }
-
-    private var sizeUnit: SizeUnit {
-        switch model.config.settings.scrolling.slotSize {
-        case .auto: return .auto
-        case .points: return .points
-        case .fraction: return .percent
-        }
-    }
-
-    /// Seed for the Points unit: keep an explicit pt, else a
-    /// sensible per-axis start. The editor has no screen to
-    /// resolve `.auto` against, so vertical (auto = a fraction)
-    /// uses a fixed pt hint rather than the fraction standard.
-    private var currentPoints: CGFloat {
-        if case .points(let points) =
-            model.config.settings.scrolling.slotSize
-        {
-            return points
-        }
-        return isVertical ? 700 : ScrollSize.autoHorizontalPoints
-    }
-
-    /// Seed for the Percent unit: keep an explicit fraction, else
-    /// the orientation's auto standard (vertical) or a neutral half.
-    private var currentFraction: Double {
-        if case .fraction(let fraction) =
-            model.config.settings.scrolling.slotSize
-        {
-            return fraction
-        }
-        return isVertical ? ScrollSize.autoVerticalFraction : 0.5
-    }
-
-    private var sizeUnitBinding: Binding<SizeUnit> {
-        Binding(
-            get: { sizeUnit },
-            set: { unit in
-                switch unit {
-                case .auto:
-                    model.config.settings.scrolling.slotSize = .auto
-                case .points:
-                    model.config.settings.scrolling.slotSize =
-                        .points(currentPoints)
-                case .percent:
-                    model.config.settings.scrolling.slotSize =
-                        .fraction(currentFraction)
-                }
-            }
-        )
-    }
-
-    private var pointsBinding: Binding<Double> {
-        Binding(
-            get: { Double(currentPoints) },
-            set: {
-                model.config.settings.scrolling.slotSize =
-                    .points(CGFloat($0))
-            }
-        )
-    }
-
-    private var percentBinding: Binding<Double> {
-        Binding(
-            get: { currentFraction * 100 },
-            set: {
-                model.config.settings.scrolling.slotSize =
-                    .fraction($0 / 100)
-            }
-        )
-    }
-
     private var scrolling: some View {
         SettingsSection(
             "Scrolling",
             symbol: LayoutMode.scrolling.glyph
         ) {
-            SegmentedPicker(
-                "Size unit",
-                selection: sizeUnitBinding,
-                options: [
-                    ("Auto", SizeUnit.auto),
-                    ("Points", .points),
-                    ("Percent", .percent),
-                ]
-            )
-            sizeControl
+            SlotSizeRows(model: model, isVertical: isVertical)
             SegmentedPicker(
                 "Focused anchor",
                 selection: $model.config.settings.scrolling
@@ -133,6 +48,7 @@ struct ScrollGridEditor: View {
                     ("Vertical", .vertical),
                 ]
             )
+            Divider()
             PlacementPicker(
                 placement: $model.config.settings.scrolling
                     .newWindowPlacement
@@ -169,52 +85,12 @@ struct ScrollGridEditor: View {
                     .frame(minWidth: 52, alignment: .trailing)
                     .monospacedDigit()
             }
+            .controlSize(.large)
+            .accessibilityLabel("Scroll speed")
         }
         .disabled(
             !model.config.settings.animations.onScrolling
         )
-    }
-
-    @ViewBuilder
-    private var sizeControl: some View {
-        switch sizeUnit {
-        case .auto:
-            HStack {
-                Text(sizeLabel)
-                    .frame(width: 110, alignment: .leading)
-                Text("Auto — orientation standard")
-                    .foregroundStyle(.secondary)
-                Spacer()
-            }
-        case .points:
-            HStack {
-                Text(sizeLabel)
-                    .frame(width: 110, alignment: .leading)
-                SettingsSlider(
-                    value: pointsBinding,
-                    range: 100...2000,
-                    step: 10
-                )
-                Text("\(Int(currentPoints)) pt")
-                    .frame(width: 64, alignment: .trailing)
-                    .foregroundStyle(.secondary)
-                    .font(.system(.body, design: .monospaced))
-            }
-        case .percent:
-            HStack {
-                Text(sizeLabel)
-                    .frame(width: 110, alignment: .leading)
-                SettingsSlider(
-                    value: percentBinding,
-                    range: 5...100,
-                    step: 5
-                )
-                Text("\(Int(currentFraction * 100)) %")
-                    .frame(width: 64, alignment: .trailing)
-                    .foregroundStyle(.secondary)
-                    .font(.system(.body, design: .monospaced))
-            }
-        }
     }
 
     private var grid: some View {
@@ -246,17 +122,17 @@ struct ScrollGridEditor: View {
                     ("Vertical", .vertical),
                 ]
             )
-            Stepper(
-                "Columns: "
-                    + "\(model.config.settings.grid.columns)",
+            StepperRow(
+                label: "Columns",
                 value: $model.config.settings.grid.columns,
                 in: 1...10
             )
-            Stepper(
-                "Rows: \(model.config.settings.grid.rows)",
+            StepperRow(
+                label: "Rows",
                 value: $model.config.settings.grid.rows,
                 in: 1...10
             )
+            Divider()
             PlacementPicker(
                 placement: $model.config.settings.grid
                     .newWindowPlacement

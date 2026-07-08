@@ -46,7 +46,10 @@ struct LayoutDefaultsSection: View {
                     "\(Int(model.config.settings.minWindowSize))"
                         + " pt"
                 )
-                .frame(width: 56, alignment: .trailing)
+                .frame(
+                    width: SettingsMetrics.readoutColumn,
+                    alignment: .trailing
+                )
                 .foregroundStyle(.secondary)
                 .font(.system(.body, design: .monospaced))
             }

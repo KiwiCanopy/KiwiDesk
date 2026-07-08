@@ -7,6 +7,22 @@ import SwiftUI
 /// explanation under the title; `subsection` shrinks the title
 /// for groups that belong to a bigger one (Ghost / Drop zone
 /// under Drag & Drop).
+/// The heading over a run of related sections (the App Bar
+/// block in Appearance): the one registered level above a
+/// section's `.headline`, so multi-section groups don't each
+/// invent their own title style.
+struct SettingsGroupHeader: View {
+    let title: String
+
+    init(_ title: String) { self.title = title }
+
+    var body: some View {
+        Text(title)
+            .font(.title3)
+            .fontWeight(.semibold)
+    }
+}
+
 struct SettingsSection<Content: View>: View {
     let title: String
     let symbol: String?

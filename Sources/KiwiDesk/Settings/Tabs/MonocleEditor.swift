@@ -24,12 +24,18 @@ struct MonocleEditor: View {
                     ("Vertical", .vertical),
                 ]
             )
-            Text(
-                "The app bar shown in monocle is configured in "
-                    + "the App Bar tab."
-            )
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            HStack(spacing: 4) {
+                Text(
+                    "The app bar shown in monocle is "
+                        + "configured in"
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                CrossReferenceLink(
+                    "Appearance ▸ App Bar",
+                    to: .appearance
+                )
+            }
         }
     }
 }

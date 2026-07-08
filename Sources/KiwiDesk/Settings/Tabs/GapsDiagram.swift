@@ -94,7 +94,7 @@ struct GapsDiagram: View {
         _ meaning: String
     ) -> some View {
         HStack(spacing: 4) {
-            Text(term).bold()
+            Text(term).fontWeight(.semibold)
             Text("— " + meaning)
                 .foregroundStyle(.secondary)
         }

@@ -27,7 +27,10 @@ private struct OverrideChrome<Content: View>: View {
                 .disabled(!isOn.wrappedValue)
                 .opacity(isOn.wrappedValue ? 1 : 0.5)
         }
-        .padding(.leading, 6)
+        // 8 pt leading keeps daylight between the 2 pt accent
+        // bar and the checkbox, so the bar reads as a boundary
+        // rather than part of the control.
+        .padding(.leading, 8)
         .padding(.vertical, 2)
         .background {
             if isOn.wrappedValue {
@@ -125,12 +128,19 @@ struct OverrideStepperRow: View {
     var body: some View {
         let bound = overrideValue($value, global: global)
         OverrideChrome(isOn: overrideToggle($value, global: global)) {
-            Stepper(
-                "\(label): \(bound.wrappedValue)",
-                value: bound,
-                in: range
-            )
-            .frame(maxWidth: .infinity, alignment: .leading)
+            HStack {
+                Text(label)
+                Spacer()
+                Stepper(value: bound, in: range) {
+                    Text("\(bound.wrappedValue)")
+                        .frame(
+                            minWidth: 32,
+                            alignment: .trailing
+                        )
+                        .monospacedDigit()
+                }
+                .accessibilityLabel(label)
+            }
         }
     }
 }
@@ -149,7 +159,10 @@ struct OverrideFractionRow: View {
         OverrideChrome(isOn: overrideToggle($value, global: global)) {
             HStack {
                 Text(label)
-                    .frame(width: 110, alignment: .leading)
+                    .frame(
+                        width: SettingsMetrics.labelColumn,
+                        alignment: .leading
+                    )
                 SettingsSlider(
                     value: Binding(
                         get: { bound.wrappedValue * 100 },
@@ -159,7 +172,10 @@ struct OverrideFractionRow: View {
                     step: 1
                 )
                 Text("\(Int(bound.wrappedValue * 100))%")
-                    .frame(width: 48, alignment: .trailing)
+                    .frame(
+                        width: SettingsMetrics.readoutColumn,
+                        alignment: .trailing
+                    )
                     .foregroundStyle(.secondary)
                     .font(.system(.body, design: .monospaced))
             }

@@ -34,8 +34,12 @@ struct SegmentedPicker<Value: Hashable>: View {
 
     var body: some View {
         if let label {
-            HStack(spacing: 12) {
+            HStack {
                 Text(label)
+                    .frame(
+                        width: SettingsMetrics.labelColumn,
+                        alignment: .leading
+                    )
                 labeledTrack
             }
         } else {

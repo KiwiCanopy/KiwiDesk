@@ -37,6 +37,12 @@ struct BadgeChip: View {
             .padding(.vertical, 1)
             .background(.tint.opacity(0.2))
             .clipShape(Capsule())
+            .overlay(
+                Capsule().strokeBorder(
+                    .tint.opacity(0.3),
+                    lineWidth: 0.5
+                )
+            )
     }
 }
 

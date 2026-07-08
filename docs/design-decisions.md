@@ -283,6 +283,40 @@ beneath it and turned blue. Accessibility is delegated to a
 native `Slider` representation, so assistive tech sees
 exactly the control it replaces.
 
+**Rows share one label axis and one readout column.** Every
+labeled control row (slider, segmented picker, dropdown)
+puts its label in the same fixed-width column
+(`SettingsMetrics.labelColumn`), so controls start on one
+imaginary line across sections instead of each row picking
+its own label width; slider readouts share one trailing
+column the same way. Numeric steppers are the deliberate
+exception: label leading, monospaced value plus arrows
+trailing (the native System-Settings numeric layout) — a
+value embedded in the label string ("Columns: 3") read as
+static text. Dropdowns ride the axis via `DropdownRow` and
+take `.controlSize(.large)` so a menu button's height sits
+with the capsule tracks around it. Within a section, a
+`Divider` separates geometry controls from the behavior
+dropdowns (overflow, new-window placement) — eight-point
+uniform spacing alone let unrelated rows read as one group.
+
+**Status badges stay flat.** The thumb/pill shadow is the
+settings' vocabulary for "interactive, movable"; putting it
+on a passive `BadgeChip` would promise interaction the chip
+doesn't have. Depth comes from the hairline stroke both chip
+types now share, matching the flat capsule language of
+native tags. A non-interactive value state in a control row
+(the slot size's "Auto — orientation standard") renders in
+the same capsule language rather than as bare gray prose,
+which read as skippable filler.
+
+**"Lives elsewhere" pointers are links.** Prose that names
+another tab ("configured in the App Bar tab") is a dead end;
+those pointers are `CrossReferenceLink`s in the
+make-default link's quiet style, jumping the sidebar
+selection through an injected `settingsNavigate` environment
+action.
+
 ## Monitors
 
 **One representation: monitor cards.** The old tab rendered

@@ -61,13 +61,18 @@ struct BehaviorSection: View {
             )
             Divider()
             durationRow
-            Text(
-                "Scrolling-layout focus shifts have their own "
-                    + "toggle and speed under Spaces ▸ "
-                    + "Scrolling."
-            )
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            HStack(spacing: 4) {
+                Text(
+                    "Scrolling-layout focus shifts have their "
+                        + "own toggle and speed in"
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                CrossReferenceLink(
+                    "Layout Defaults ▸ Scrolling",
+                    to: .layoutDefaults
+                )
+            }
         }
     }
 
@@ -89,6 +94,8 @@ struct BehaviorSection: View {
                     .frame(minWidth: 52, alignment: .trailing)
                     .monospacedDigit()
             }
+            .controlSize(.large)
+            .accessibilityLabel("Duration")
         }
     }
 }

@@ -47,6 +47,9 @@ struct SettingsView: View {
             } detail: {
                 detailPane
             }
+            .environment(\.settingsNavigate) {
+                selection = $0
+            }
         }
     }
 

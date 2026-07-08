@@ -86,7 +86,10 @@ struct GapsEditor: View {
     ) -> some View {
         HStack {
             Text(label)
-                .frame(width: 80, alignment: .leading)
+                .frame(
+                    width: SettingsMetrics.labelColumn,
+                    alignment: .leading
+                )
             SettingsSlider(
                 value: Binding(
                     get: { Double(unified.wrappedValue) },
@@ -101,7 +104,10 @@ struct GapsEditor: View {
                     ? "mixed"
                     : "\(Int(unified.wrappedValue)) pt"
             )
-            .frame(width: 52, alignment: .trailing)
+            .frame(
+                width: SettingsMetrics.readoutColumn,
+                alignment: .trailing
+            )
             .foregroundStyle(.secondary)
             .font(.system(.body, design: .monospaced))
             .help(
@@ -190,7 +196,10 @@ private struct GapRow: View {
     var body: some View {
         HStack {
             Text(label)
-                .frame(width: 80, alignment: .leading)
+                .frame(
+                    width: SettingsMetrics.labelColumn,
+                    alignment: .leading
+                )
             SettingsSlider(
                 value: Binding(
                     get: { Double(value) },
@@ -200,7 +209,10 @@ private struct GapRow: View {
                 step: 1
             )
             Text("\(Int(value)) pt")
-                .frame(width: 52, alignment: .trailing)
+                .frame(
+                    width: SettingsMetrics.readoutColumn,
+                    alignment: .trailing
+                )
                 .foregroundStyle(.secondary)
                 .font(.system(.body, design: .monospaced))
         }
