@@ -26,8 +26,21 @@ struct GlassSegmentedPicker<Value: Hashable>: View {
         if let label {
             HStack(spacing: 12) {
                 Text(label)
-                track
+                glassTrack
             }
+        } else {
+            glassTrack
+        }
+    }
+
+    /// On macOS 26 the track lives in a
+    /// `GlassEffectContainer` so the pill renders as one
+    /// coherent Liquid Glass element and morphs fluidly when
+    /// the selection moves; older systems get the bare track
+    /// with the material pill.
+    @ViewBuilder private var glassTrack: some View {
+        if #available(macOS 26.0, *) {
+            GlassEffectContainer { track }
         } else {
             track
         }
@@ -84,10 +97,17 @@ struct GlassSegmentedPicker<Value: Hashable>: View {
 
     /// The pill under the selected segment: Liquid Glass where
     /// the OS has it, a bordered material capsule otherwise.
+    /// `.interactive()` makes the glass respond to clicks; the
+    /// `glassEffectID` ties the pill's glass to one identity
+    /// so selection changes morph instead of re-materializing.
     @ViewBuilder private var pill: some View {
         if #available(macOS 26.0, *) {
             Color.clear
-                .glassEffect(.regular, in: Capsule())
+                .glassEffect(
+                    .regular.interactive(),
+                    in: Capsule()
+                )
+                .glassEffectID("pill", in: pillSpace)
         } else {
             Capsule()
                 .fill(.regularMaterial)
