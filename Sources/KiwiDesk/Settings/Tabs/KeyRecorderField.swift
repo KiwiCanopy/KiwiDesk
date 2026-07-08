@@ -73,7 +73,7 @@ struct KeyRecorderField: View {
                         + "⌃ Control, ⌥ Option, ⇧ Shift, "
                         + "and ⌘ Command — it locks in when "
                         + "you release the keys. For more "
-                        + "shortcut layers, add a Mode."
+                        + "shortcut layers, add Modes."
                 )
                 if !combo.isEmpty && !recording {
                     Button(action: onClear) {
