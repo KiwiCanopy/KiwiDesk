@@ -45,6 +45,12 @@ enum SettingsMetrics {
     /// shared row axis (120-ish would misalign the grid's
     /// second column) — don't "fix" them onto `labelColumn`.
     static let colorLabelColumn: CGFloat = 140
+
+    /// The inline hex `TextField` beside each color swatch.
+    /// Fixed (not auto-sizing) so the two-column color grid in
+    /// `AppBarSections` keeps stable cell widths as values
+    /// change; sized for the widest stored form, "#RRGGBBAA".
+    static let colorHexColumn: CGFloat = 84
 }
 
 private struct SettingsLabelColumnKey: EnvironmentKey {
