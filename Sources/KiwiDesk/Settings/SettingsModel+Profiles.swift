@@ -133,10 +133,15 @@ extension SettingsModel {
     /// Renames a saved profile. Immediate, like Delete / Make
     /// default (pending edits are discarded by the reload).
     /// The core renames the file, adopted name, and runtime
-    /// native-Space bindings; the reload then re-composes the
-    /// GUI config from that runtime state, and a follow-up
-    /// global save makes the sidecar/init.lua binding lines
-    /// follow the new name.
+    /// native-Space bindings; a follow-up global save then
+    /// makes the sidecar's binding lines follow the new name.
+    /// That save must gate on and write the LIVE config, not
+    /// the model's: after a reload `config.profileBindings`
+    /// still holds the sidecar's stale names (only the seed
+    /// path composes bindings from runtime), and while a
+    /// stored profile is being edited `config` carries that
+    /// profile's overlaid state, which must never leak into
+    /// the global sidecar (#18).
     func renameProfile(from old: String, to new: String) {
         let name = new.trimmed
         guard name != old, !name.isEmpty,
@@ -151,16 +156,18 @@ extension SettingsModel {
         if target == .storedProfile(old) {
             target = .storedProfile(name)
         }
-        reload()
-        if config.profileBindings.values.contains(name) {
+        if core.nativeSpaceBindings.values.contains(name) {
+            var live = core.loadGuiConfig()
+            live.profileBindings = core.nativeSpaceBindings
             do {
-                try core.saveGuiConfig(config)
+                try core.saveGuiConfig(live)
             } catch {
                 core.onLog(
                     "binding rename save failed: \(error)"
                 )
             }
         }
+        reload()
     }
 
     // MARK: - Presets (#53)
