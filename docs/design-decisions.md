@@ -391,6 +391,18 @@ something is wrong, Support near Quit. Menu entries stay
 monochrome template symbols; the colored tiles are a
 Settings-window device. (#68 §3.10, §6.2)
 
+**The real logo ships pre-rasterized, no asset catalog.**
+Vector masters live in `/assets`; the app bundles plain
+PNG/TIFF copies regenerated with macOS built-ins
+(`assets/README.md`) because `swift build` on CI runs no
+actool. The menu bar and quick-menu header render the mono
+mark as an 18 pt template TIFF (macOS tints it; the old SF
+Symbol stays as missing-resource fallback). About shows the
+wordmark on a fixed light badge — its navy text is fused into
+the artwork's compound path, so it cannot follow dark mode.
+The color mark is reserved as the `.icns` master for when an
+`.app` bundle exists. (#68 §3.8/§3.9)
+
 ## Out of scope, on purpose
 
 - **Onboarding** is a separate follow-up pass (shares only

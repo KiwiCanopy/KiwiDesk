@@ -95,10 +95,12 @@ final class StatusItemController: NSObject, NSMenuDelegate {
             applyModeIcon(modeIcon, to: button)
         } else {
             button.title = ""
-            button.image = NSImage(
-                systemSymbolName: "rectangle.3.group",
-                accessibilityDescription: "KiwiDesk"
-            )
+            button.image =
+                BrandAssets.menuBarIcon
+                ?? NSImage(
+                    systemSymbolName: "rectangle.3.group",
+                    accessibilityDescription: "KiwiDesk"
+                )
         }
     }
 
@@ -194,7 +196,9 @@ final class StatusItemController: NSObject, NSMenuDelegate {
             keyEquivalent: ""
         )
         header.isEnabled = false
-        header.image = symbol("rectangle.3.group")
+        header.image =
+            BrandAssets.menuBarIcon
+            ?? symbol("rectangle.3.group")
         return header
     }
 

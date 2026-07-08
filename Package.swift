@@ -34,7 +34,15 @@ let package = Package(
         .executableTarget(
             name: "KiwiDesk",
             dependencies: ["KiwiDeskCore"],
-            path: "Sources/KiwiDesk"
+            path: "Sources/KiwiDesk",
+            // Pre-rasterized from the vector masters in
+            // /assets (see assets/README.md) — plain files,
+            // not an asset catalog: `swift build` (CI) does
+            // not run actool.
+            resources: [
+                .copy("Resources/MenuBarIcon.tiff"),
+                .copy("Resources/Wordmark.png"),
+            ]
         ),
         .testTarget(
             name: "KiwiDeskCoreTests",

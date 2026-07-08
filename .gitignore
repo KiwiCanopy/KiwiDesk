@@ -69,4 +69,4 @@ plan/
 .claude/*
 !.claude/skills/
 !.claude/rules/
-.agents/skills/
+.agents/skills/.DS_Store

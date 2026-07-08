@@ -21,25 +21,18 @@ struct GeneralSection: View {
         }
     }
 
-    /// About (#68 §3.9): the canonical logo + name + version
-    /// placement (the glyph is the reserved branding slot,
-    /// §3.8 — swapped for the real logo once it exists) and
-    /// the discreet support link.
+    /// About (#68 §3.9): the wordmark as the canonical logo +
+    /// name placement, version and the discreet support link
+    /// beneath. Falls back to the pre-logo glyph row when the
+    /// bundled resource is missing.
     private var aboutSection: some View {
         SettingsSection("About") {
-            HStack(spacing: 12) {
-                Image(systemName: "rectangle.3.group")
-                    .font(.system(size: 30))
+            VStack(spacing: 10) {
+                aboutBrand
+                Text(KiwiDeskVersion.displayString)
+                    .font(.caption)
                     .foregroundStyle(.secondary)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("KiwiDesk")
-                        .font(.headline)
-                    Text(KiwiDeskVersion.displayString)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .textSelection(.enabled)
-                }
-                Spacer()
+                    .textSelection(.enabled)
                 Link(destination: SupportLinks.koFi) {
                     Label(
                         "Support KiwiDesk",
@@ -48,8 +41,43 @@ struct GeneralSection: View {
                 }
                 .font(.callout)
             }
+            .frame(maxWidth: .infinity)
         }
     }
+
+    /// The wordmark rides a fixed light badge: its navy text
+    /// is fused into the artwork's compound path, so it
+    /// cannot follow the appearance — the badge keeps it
+    /// readable in dark mode and melts into a light pane.
+    @ViewBuilder private var aboutBrand: some View {
+        if let wordmark = BrandAssets.wordmark {
+            Image(nsImage: wordmark)
+                .resizable()
+                .scaledToFit()
+                .frame(height: 130)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 14)
+                .background(
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Self.badge)
+                )
+        } else {
+            HStack(spacing: 12) {
+                Image(systemName: "rectangle.3.group")
+                    .font(.system(size: 30))
+                    .foregroundStyle(.secondary)
+                Text("KiwiDesk")
+                    .font(.headline)
+            }
+        }
+    }
+
+    /// Off-white with a whisper of the logo's cream green.
+    private static let badge = Color(
+        red: 0.965,
+        green: 0.976,
+        blue: 0.945
+    )
 
     private var advancedSection: some View {
         DisclosureGroup(isExpanded: $advancedExpanded) {
