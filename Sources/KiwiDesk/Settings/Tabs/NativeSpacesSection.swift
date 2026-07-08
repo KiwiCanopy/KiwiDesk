@@ -2,11 +2,13 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Canvas tab section (#7): bind a saved profile to each native
-/// macOS Space. Drag a profile chip onto a Space or pick from the
-/// dropdown; the binding emits `bind_profile_to_native_space` and
-/// loads that profile when the Space activates. Bindings mutate
-/// `model.config.profileBindings`; the footer's profile
-/// actions persist them.
+/// macOS Space, picked from the row's dropdown; the binding
+/// emits `bind_profile_to_native_space` and loads that profile
+/// when the Space activates. Rows are named "Desktop n" — the
+/// name Mission Control shows — never "Space n", which is how
+/// KiwiDesk's own virtual spaces read elsewhere in the app.
+/// Bindings mutate `model.config.profileBindings`; the footer's
+/// profile actions persist them.
 struct NativeSpacesSection: View {
     @ObservedObject var model: SettingsModel
 
@@ -16,7 +18,6 @@ struct NativeSpacesSection: View {
                 emptyHint
             } else {
                 intro
-                if !model.profiles.isEmpty { palette }
                 ForEach(spaceNumbers, id: \.self) { number in
                     spaceRow(number)
                 }
@@ -26,8 +27,9 @@ struct NativeSpacesSection: View {
 
     private var intro: some View {
         Text(
-            "Drag a profile onto a Space (or pick one) to load "
-                + "it automatically when that Space activates."
+            "Each Desktop is a native macOS Space from "
+                + "Mission Control. Pick a profile to load it "
+                + "automatically when that Desktop activates."
         )
         .font(.caption)
         .foregroundStyle(.secondary)
@@ -43,20 +45,13 @@ struct NativeSpacesSection: View {
         .foregroundStyle(.secondary)
     }
 
-    private var palette: some View {
-        WrapChips(model.profiles) { name in
-            ProfileChip(name: name)
-                .draggable(DraggableProfile(name: name))
-        }
-    }
-
     // MARK: - Rows
 
     private func spaceRow(_ number: Int) -> some View {
         HStack {
             Image(systemName: "square.on.square")
                 .foregroundStyle(.secondary)
-            Text("Space \(number)")
+            Text("Desktop \(number)")
                 .fontWeight(.medium)
             if number == model.currentNativeSpace {
                 Text("current")
@@ -68,15 +63,6 @@ struct NativeSpacesSection: View {
             }
             Spacer()
             profileMenu(number)
-        }
-        .dropDestination(for: DraggableProfile.self) {
-            items,
-            _ in
-            guard let name = items.first?.name else {
-                return false
-            }
-            model.config.profileBindings[number] = name
-            return true
         }
     }
 
@@ -122,24 +108,5 @@ struct NativeSpacesSection: View {
             get: { model.config.profileBindings[number] },
             set: { model.config.profileBindings[number] = $0 }
         )
-    }
-}
-
-/// A pill rendering a profile name, draggable onto a Space row.
-struct ProfileChip: View {
-    let name: String
-
-    var body: some View {
-        HStack(spacing: 4) {
-            Image(systemName: "rectangle.stack")
-                .font(.caption2)
-            Text(name)
-                .font(.caption)
-                .fontWeight(.medium)
-        }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 3)
-        .background(Capsule().fill(.tint.opacity(0.15)))
-        .overlay(Capsule().strokeBorder(.tint.opacity(0.4)))
     }
 }

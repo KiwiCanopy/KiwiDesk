@@ -1224,10 +1224,10 @@ KiwiDesk.bind_profile_to_native_space(1, "Developer Rig")
 KiwiDesk.bind_profile_to_native_space(2, "Creator Studio")
 ```
 
-The **Profiles** section lists each native Space with a profile
-dropdown, and you can also drag a profile chip onto a Space to
-bind it. Bindings save to `init.lua` and take effect when that
-Space next activates.
+The **Profiles** section lists each native Space as "Desktop
+n" — the name Mission Control shows — with a profile dropdown.
+Bindings save to `init.lua` and take effect when that Space
+next activates.
 
 When you switch desktops (Ctrl+arrow, Mission Control, …),
 KiwiDesk loads the bound profile — its virtual workspaces,
