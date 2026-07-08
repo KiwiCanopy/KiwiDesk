@@ -56,6 +56,10 @@ final class RecorderCoordinator: ObservableObject {
 /// stay a soft warning (the per-row ⚠) — shadowing one can be
 /// intentional.
 struct RecorderRejection {
+    /// The combo that was rejected — kept so the field can
+    /// re-validate against live bindings (the holder may have
+    /// been cleared since).
+    let combo: String
     /// The holder's display label ("Focus window above").
     let holder: String
     /// The holder's row id, for "Go to".
@@ -94,6 +98,7 @@ enum RecorderPreflight {
         let label =
             holder.label.isEmpty ? holder.lua : holder.label
         return RecorderRejection(
+            combo: combo,
             holder: label,
             holderRowID: rowID(holder),
             steal: {

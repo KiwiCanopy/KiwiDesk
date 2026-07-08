@@ -47,6 +47,11 @@ struct KeyRecorderField: View {
     /// Transient one-key notice (a second key pressed while
     /// the first was still held).
     @State private var hint: String?
+    /// The holder of the combo currently being formed, shown
+    /// live while recording (in-app rows only — the macOS
+    /// system-shortcut check would go stale, so it stays the
+    /// per-row warning after commit).
+    @State private var takenBy: String?
     @State private var flashing = false
 
     private var recording: Bool {
@@ -86,8 +91,16 @@ struct KeyRecorderField: View {
                     .foregroundStyle(.secondary)
                 }
             }
-            if let rejection {
+            if let rejection = liveRejection {
                 rejectionRow(rejection)
+            }
+            if recording, let takenBy {
+                Text(
+                    "Already used by \u{201C}\(takenBy)\u{201D}"
+                        + " — locking in will ask to replace."
+                )
+                .font(.caption)
+                .foregroundStyle(.orange)
             }
             if let hint {
                 Text(hint)
@@ -102,11 +115,21 @@ struct KeyRecorderField: View {
             recorder.stop()
             preview = ""
             hint = nil
+            takenBy = nil
         }
         .onDisappear(perform: stop)
     }
 
     // MARK: - Rejection UI (#34)
+
+    /// The stored rejection re-validated against live
+    /// bindings on every render — the holder may have been
+    /// cleared or deleted since it was raised, and a stale
+    /// "Assigned to…" row must follow it out.
+    private var liveRejection: RecorderRejection? {
+        guard let rejection, let preflight else { return nil }
+        return preflight(rejection.combo)
+    }
 
     private func rejectionRow(
         _ rejection: RecorderRejection
@@ -181,6 +204,7 @@ struct KeyRecorderField: View {
         rejection = nil
         preview = ""
         hint = nil
+        takenBy = nil
         // Claiming tears down whichever field was recording
         // before — synchronously, so two keyDown monitors
         // never coexist (#33). Captures reach the heap-backed
@@ -190,13 +214,20 @@ struct KeyRecorderField: View {
         // stop() even if the view's state died first.
         let previewBinding = $preview
         let hintBinding = $hint
+        let takenBinding = $takenBy
         coordinator.claim(fieldID) { [recorder] in
             recorder.stop()
             previewBinding.wrappedValue = ""
             hintBinding.wrappedValue = nil
+            takenBinding.wrappedValue = nil
         }
         recorder.start(
-            preview: { preview = $0 },
+            preview: { display, combo in
+                preview = display
+                takenBy = combo.flatMap {
+                    preflight?($0)?.holder
+                }
+            },
             hint: { hint = $0 },
             finish: { outcome in
                 finish(outcome)
@@ -207,6 +238,7 @@ struct KeyRecorderField: View {
     private func finish(_ outcome: ChordRecorder.Outcome) {
         preview = ""
         hint = nil
+        takenBy = nil
         coordinator.release(fieldID)
         switch outcome {
         case .chord(let combo):
@@ -222,6 +254,7 @@ struct KeyRecorderField: View {
         recorder.stop()
         preview = ""
         hint = nil
+        takenBy = nil
         coordinator.release(fieldID)
     }
 

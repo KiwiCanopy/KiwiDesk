@@ -231,6 +231,18 @@ final class SettingsModel: ObservableObject {
 
     // MARK: - Keybinding conflicts (in-app warning)
 
+    /// The banner text, derived live: nil once dismissed —
+    /// and nil once every conflict it named is fixed, however
+    /// it was fixed (clearing a combo or deleting a row never
+    /// passes through the recorder writers below, so the
+    /// banner re-derives instead of latching stale text).
+    var liveKeybindingBanner: String? {
+        guard keybindingWarning != nil else { return nil }
+        return Self.formatConflicts(
+            KeybindingConflicts.conflicts(in: config.modes)
+        )
+    }
+
     /// Called after a `KeyRecorderField.onRecord` commits a new
     /// combo. Warns (naming every current conflict) if that row
     /// now conflicts; else clears the banner once the whole

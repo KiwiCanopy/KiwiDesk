@@ -2,24 +2,33 @@ import AppKit
 import KiwiDeskCore
 
 /// The chord-capture engine behind `KeyRecorderField` (#68
-/// recorder UX): lock-on-full-release. The pending combo is
-/// snapshotted when keys go DOWN and commits only once every
-/// key and modifier is released — so releases can trigger the
-/// commit but never change the chord, and a staggered release
-/// (⌘ let go a split second before J) still locks ⌘J.
+/// recorder UX): lock-on-full-release with a live preview.
+/// The pending combo MIRRORS what is held right now — a
+/// released key or modifier leaves the preview immediately —
+/// while a release-burst candidate keeps staggered releases
+/// honest: the first release that downgrades a chord stashes
+/// it, and if everything is up within `releaseWindow` the
+/// stashed chord locks (⌘ let go a split second before J
+/// still locks ⌘J). A slower disassembly expires the stash:
+/// the preview has long shown the smaller truth, so nothing
+/// locks and the field keeps recording, ready for re-entry.
 ///
 /// Rules:
-/// - A base keyDown snapshots the pending combo (key + the
-///   modifiers held at that moment). Pressing another base
-///   key AFTER releasing the first re-snapshots — you can
-///   correct mid-chord (⌘J, J up, K down → ⌘K).
+/// - A base keyDown starts the pending combo (key + the
+///   modifiers held at that moment); modifier changes while
+///   it is held mirror into it, both directions.
+/// - Releasing the base key clears the pending combo (the
+///   preview drops to the held modifiers) and stashes the
+///   chord as the burst candidate. Pressing another key
+///   re-enters — you can correct mid-chord (⌘J, J up,
+///   K down → ⌘K).
 /// - A second base key pressed WHILE the first is still held
 ///   is a chord attempt: the pending combo keeps the first
 ///   key and the field shows a one-key hint instead of
 ///   silently switching (a shortcut is modifiers + one key).
-/// - While a base key is held, added modifiers ACCUMULATE
-///   into the pending combo; dropped ones are ignored — an
-///   early modifier release can't strip the chord.
+/// - Full release locks the freshest burst candidate; a
+///   pressed key or added modifier discards it (a new chord
+///   is being built).
 /// - Bare Escape cancels. Any mouse click cancels
 ///   (`.clickAway`, so the field can absorb the click on its
 ///   own button). App deactivation cancels too — a system
@@ -48,39 +57,26 @@ final class ChordRecorder {
         case flagsChanged
     }
 
-    private struct Pending {
-        var keyCode: UInt32
-        var command: Bool
-        var option: Bool
-        var control: Bool
-        var shift: Bool
+    /// Releasing a whole chord is a burst of events well
+    /// under this; anything slower is a deliberate
+    /// disassembly the preview has already shown.
+    static let releaseWindow: TimeInterval = 0.35
 
-        mutating func accumulate(
-            _ flags: NSEvent.ModifierFlags
-        ) {
-            command = command || flags.contains(.command)
-            option = option || flags.contains(.option)
-            control = control || flags.contains(.control)
-            shift = shift || flags.contains(.shift)
-        }
-
-        var combo: String? {
-            KeyCombo.comboString(
-                keyCode: keyCode,
-                command: command,
-                option: option,
-                control: control,
-                shift: shift
-            )
-        }
-    }
+    /// Injectable clock — tests drive expiry without
+    /// sleeping.
+    var now: () -> Date = Date.init
 
     private var keyMonitor: Any?
     private var mouseMonitor: Any?
     private var deactivation: (any NSObjectProtocol)?
     private var heldKeys: Set<UInt16> = []
-    private var pending: Pending?
-    private var onPreview: (String) -> Void = { _ in }
+    private var pending: PendingChord?
+    private var candidate: BurstCandidate?
+    private var lastFlags: NSEvent.ModifierFlags = []
+    private var onPreview: (String, String?) -> Void = {
+        _,
+        _ in
+    }
     private var onHint: (String?) -> Void = { _ in }
     private var onFinish: (Outcome) -> Void = { _ in }
 
@@ -90,7 +86,7 @@ final class ChordRecorder {
     /// fires exactly once (teardown resets it to a no-op
     /// first).
     func start(
-        preview: @escaping (String) -> Void,
+        preview: @escaping (String, String?) -> Void,
         hint: @escaping (String?) -> Void = { _ in },
         finish: @escaping (Outcome) -> Void
     ) {
@@ -159,7 +155,9 @@ final class ChordRecorder {
         deactivation = nil
         heldKeys = []
         pending = nil
-        onPreview = { _ in }
+        candidate = nil
+        lastFlags = []
+        onPreview = { _, _ in }
         onHint = { _ in }
         onFinish = { _ in }
     }
@@ -191,18 +189,60 @@ final class ChordRecorder {
             // responder.
             let tracked =
                 heldKeys.remove(keyCode) != nil
+            if let held = pending,
+                held.keyCode == UInt32(keyCode)
+            {
+                // The base key left: stash the chord for the
+                // burst window, mirror the release into the
+                // preview.
+                stashCandidate(held)
+                pending = nil
+            }
+            publishPreview(flags: flags)
             tryLockIn(flags: flags)
             return tracked
         case .flagsChanged:
-            // Modifiers only accumulate while a base key is
-            // held — releases never downgrade the chord.
-            if pending != nil, !heldKeys.isEmpty {
-                pending?.accumulate(flags)
+            defer { lastFlags = flags }
+            if var held = pending {
+                let before = held
+                held.mirror(flags)
+                if held.lostModifier(since: before) {
+                    // A modifier left mid-chord: preview
+                    // downgrades, the burst stash keeps the
+                    // fuller chord lockable.
+                    stashCandidate(before)
+                } else if before.lostModifier(since: held) {
+                    // A modifier JOINED — a new chord is
+                    // being built over any stashed one.
+                    candidate = nil
+                }
+                pending = held
+            } else if flags.subtracting(lastFlags)
+                .intersection([
+                    .command, .option, .control, .shift,
+                ]) != []
+            {
+                candidate = nil
             }
             publishPreview(flags: flags)
             tryLockIn(flags: flags)
             return false
         }
+    }
+
+    /// Keeps the chord a release just downgraded — only the
+    /// burst's FIRST downgrade: a fresh candidate is never
+    /// overwritten (the fullest chord wins), an expired one
+    /// is replaced by the live truth.
+    private func stashCandidate(_ pending: PendingChord) {
+        if let candidate,
+            now().timeIntervalSince(candidate.at)
+                < Self.releaseWindow
+        {
+            return
+        }
+        guard let combo = pending.combo else { return }
+        candidate = BurstCandidate(combo: combo, at: now())
     }
 
     private func keyDown(
@@ -245,8 +285,11 @@ final class ChordRecorder {
             return true
         }
         heldKeys.insert(keyCode)
+        // A fresh key discards any stashed burst chord — the
+        // user is building a new one.
+        candidate = nil
         // The snapshot: key + the modifiers held right now.
-        pending = Pending(
+        pending = PendingChord(
             keyCode: UInt32(keyCode),
             command: flags.contains(.command),
             option: flags.contains(.option),
@@ -258,19 +301,26 @@ final class ChordRecorder {
         return true
     }
 
-    /// The lock-in: everything released, a chord pending.
+    /// The lock-in: everything released. A fresh burst
+    /// candidate locks; an expired one is discarded and the
+    /// recording continues with an honest, empty preview —
+    /// the user disassembled the chord slowly and can simply
+    /// re-enter.
     private func tryLockIn(flags: NSEvent.ModifierFlags) {
         guard heldKeys.isEmpty,
             !flags.contains(.command),
             !flags.contains(.option),
             !flags.contains(.control),
             !flags.contains(.shift),
-            let pending
+            let candidate
         else { return }
-        if let combo = pending.combo {
-            finish(.chord(combo))
+        self.candidate = nil
+        if now().timeIntervalSince(candidate.at)
+            < Self.releaseWindow
+        {
+            finish(.chord(candidate.combo))
         } else {
-            finish(.cancelled)
+            onPreview("", nil)
         }
     }
 
@@ -286,24 +336,11 @@ final class ChordRecorder {
                 ComboSymbols.render(
                     parsed,
                     layoutChar: LayoutKeyGlyph.char
-                )
+                ),
+                combo
             )
         } else {
-            onPreview(Self.modifierSymbols(flags))
+            onPreview(Self.modifierSymbols(flags), nil)
         }
-    }
-
-    /// The held modifiers in display order (⌃⌥⇧⌘). A
-    /// modifier-only chord is not recordable (Carbon hotkeys
-    /// need a base key) — the preview makes that visible.
-    static func modifierSymbols(
-        _ flags: NSEvent.ModifierFlags
-    ) -> String {
-        var symbols = ""
-        if flags.contains(.control) { symbols += "⌃" }
-        if flags.contains(.option) { symbols += "⌥" }
-        if flags.contains(.shift) { symbols += "⇧" }
-        if flags.contains(.command) { symbols += "⌘" }
-        return symbols
     }
 }
