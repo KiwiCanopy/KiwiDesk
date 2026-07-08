@@ -17,7 +17,11 @@ enum SettingsMetrics {
     /// checkbox prefixes every row with 8 pt padding + ~18 pt
     /// checkbox + 8 pt spacing (34 pt): shrinking the label by
     /// that prefix lands the override row's control on the
-    /// same axis as the plain rows.
+    /// same axis as the plain rows. The discount means a label
+    /// that fits `labelColumn` can still wrap here — override
+    /// labels must measure under ~84 pt at body size (it bit
+    /// "Focused anchor" at 97 pt, shortened to "Focus
+    /// anchor").
     static let overrideLabelColumn: CGFloat = labelColumn - 34
 
     /// The trailing numeric readout of a slider row. Sized for

@@ -69,7 +69,7 @@ struct SpaceOverrideRows: View {
             ]
         )
         OverridePickerRow(
-            label: "Focused anchor",
+            label: "Focus anchor",
             value: binding(\.scrolling.override, space, \.anchor),
             global: g.scrolling.anchor,
             options: [

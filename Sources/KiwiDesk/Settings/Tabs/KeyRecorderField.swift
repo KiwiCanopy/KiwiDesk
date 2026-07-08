@@ -91,6 +91,7 @@ struct KeyRecorderField: View {
                                 Color.accentColor.opacity(0.08)
                             )
                             .padding(-4)
+                            .allowsHitTesting(false)
                     }
                 }
                 .overlay {
@@ -101,6 +102,7 @@ struct KeyRecorderField: View {
                                 lineWidth: 1.5
                             )
                             .padding(-4)
+                            .allowsHitTesting(false)
                     }
                 }
                 .help(

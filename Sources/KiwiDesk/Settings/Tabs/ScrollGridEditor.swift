@@ -27,7 +27,7 @@ struct ScrollGridEditor: View {
         ) {
             SlotSizeRows(model: model, isVertical: isVertical)
             SegmentedPicker(
-                "Focused anchor",
+                "Focus anchor",
                 selection: $model.config.settings.scrolling
                     .anchor,
                 options: [
