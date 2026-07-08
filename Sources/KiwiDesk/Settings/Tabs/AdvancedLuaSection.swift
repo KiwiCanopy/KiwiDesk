@@ -1,30 +1,27 @@
-import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// Section 2 — Open Applications: launch hotkeys. Each row picks
-/// an installed app (or any bundle via "Other…") and records a
-/// combo. The Lua action pulls the app into the current space,
-/// launching it if needed.
-struct ApplicationsSection: View {
+/// Advanced: Lua bindings (#68 §3.6.1) — the old "Custom
+/// Bindings", renamed and collapsed by its host. Raw Lua stays
+/// monospaced on purpose: arbitrary Lua *is* the capability
+/// here, not a serialization leak.
+struct AdvancedLuaSection: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
     @Environment(\.keybindingOverrideBase)
     private var overrideBase
 
     var body: some View {
-        SettingsSection("Open Applications") {
+        VStack(alignment: .leading, spacing: 8) {
             ForEach($bindings) { $binding in
-                if binding.kind == .application {
+                if binding.kind == .custom {
                     row($binding)
                 }
             }
             Button {
-                bindings.append(
-                    KeyBinding(kind: .application)
-                )
+                bindings.append(KeyBinding(kind: .custom))
             } label: {
-                Label("Add application", systemImage: "plus")
+                Label("Add binding", systemImage: "plus")
             }
             .buttonStyle(.borderless)
         }
@@ -34,8 +31,12 @@ struct ApplicationsSection: View {
         _ binding: Binding<KeyBinding>
     ) -> some View {
         HStack {
-            appMenu(binding)
-            Spacer()
+            TextField(
+                "Lua, e.g. KiwiDesk.reload_config()",
+                text: binding.lua
+            )
+            .textFieldStyle(.roundedBorder)
+            .font(.system(.body, design: .monospaced))
             KeyRecorderField(
                 combo: binding.wrappedValue.combo,
                 conflict: KeybindingConflicts.text(
@@ -50,8 +51,12 @@ struct ApplicationsSection: View {
                             $0.id == id
                         },
                         bindings: $bindings,
-                        // Id-based (#68 review M2): Steal
-                        // mutates the array before this runs.
+                        // Id-based: Steal mutates the array
+                        // (removing a navigation holder
+                        // shifts indices) before committing —
+                        // an element binding captured by the
+                        // ForEach would write the wrong row
+                        // (#68 review M2).
                         commit: {
                             record(
                                 $0,
@@ -102,51 +107,6 @@ struct ApplicationsSection: View {
             bindings[index],
             in: bindings
         )
-    }
-
-    private func appMenu(
-        _ binding: Binding<KeyBinding>
-    ) -> some View {
-        Menu {
-            ForEach(KeybindingCatalog.installedApps, id: \.self) {
-                name in
-                Button(name) { assign(binding, name: name) }
-            }
-            Divider()
-            Button("Other…") { chooseBundle(binding) }
-        } label: {
-            Text(
-                binding.wrappedValue.label.isEmpty
-                    ? "Choose app…"
-                    : binding.wrappedValue.label
-            )
-            .frame(minWidth: 160, alignment: .leading)
-        }
-        .frame(width: 200)
-    }
-
-    private func assign(
-        _ binding: Binding<KeyBinding>,
-        name: String
-    ) {
-        binding.wrappedValue.label = name
-        binding.wrappedValue.lua = KeybindingCatalog.appCommand(
-            name
-        )
-    }
-
-    private func chooseBundle(_ binding: Binding<KeyBinding>) {
-        let panel = NSOpenPanel()
-        panel.allowedContentTypes = [.application]
-        panel.canChooseDirectories = false
-        panel.directoryURL = URL(
-            fileURLWithPath: "/Applications"
-        )
-        guard panel.runModal() == .OK, let url = panel.url
-        else { return }
-        let name = url.deletingPathExtension()
-            .lastPathComponent
-        assign(binding, name: name)
     }
 
     private func remove(_ id: UUID) {

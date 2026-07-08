@@ -27,6 +27,7 @@ extension SettingsModel {
         var placementEditable: Bool
         var savedSidecar: GuiConfig?
         var profileEditingBaseModes: [KeyMode]?
+        var keybindingWarning: String?
     }
 
     /// Switches the dashboard's edit target. Passing `nil` (or
@@ -82,6 +83,7 @@ extension SettingsModel {
         placementEditable = state.placementEditable
         savedSidecar = state.savedSidecar
         profileEditingBaseModes = state.profileEditingBaseModes
+        keybindingWarning = state.keybindingWarning
     }
 
     private func liveState() -> TargetState {
@@ -116,7 +118,11 @@ extension SettingsModel {
             // deleting + re-adding a transient space alone
             // doesn't read as an edit.
             savedSidecar: core.isGuiManaged ? loaded : nil,
-            profileEditingBaseModes: nil
+            profileEditingBaseModes: nil,
+            // A reload discards the edits the banner was
+            // about; batch paths (Lua save, Adopt) re-derive
+            // it right after via `warnIfAnyConflict`.
+            keybindingWarning: nil
         )
     }
 
@@ -151,7 +157,8 @@ extension SettingsModel {
             // resolved onto (ONE definition,
             // `KiwiCore.baseKeyModes`) — never the resolved
             // set the tabs edit.
-            profileEditingBaseModes: core.baseKeyModes()
+            profileEditingBaseModes: core.baseKeyModes(),
+            keybindingWarning: nil
         )
     }
 }

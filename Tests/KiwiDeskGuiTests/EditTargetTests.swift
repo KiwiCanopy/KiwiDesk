@@ -152,6 +152,19 @@ struct EditTargetTests {
         #expect(!model.luaSource.isEmpty)
     }
 
+    @Test("a reload clears the conflict banner")
+    func reloadClearsKeybindingWarning() {
+        let model = makeModel()
+        storeProfile(model, named: "p")
+        model.keybindingWarning = "conflict!"
+
+        model.selectEditTarget("p")
+
+        // The banner described the previous target's edits —
+        // it must not survive the switch (#68 review).
+        #expect(model.keybindingWarning == nil)
+    }
+
     @Test("placement is editable when the monitors match")
     func placementEditableOnMatch() {
         let model = makeModel()

@@ -121,7 +121,11 @@ struct AppRuleRow: View {
             Button("Never") { setNever() }
             Button("All windows") { setAll() }
             Button("Windows titled…") {
-                setNever()
+                // Re-selecting the active choice must not
+                // wipe the pattern list (#68 review m3).
+                if floatFacet != .titled {
+                    setNever()
+                }
                 editingTitles = true
             }
         } label: {

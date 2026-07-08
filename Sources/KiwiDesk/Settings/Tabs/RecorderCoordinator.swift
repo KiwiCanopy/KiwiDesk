@@ -3,17 +3,50 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The one-active-recorder rule (#33): every `KeyRecorderField`
-/// registers its recording state here, so starting a new
-/// recording snaps the previous field back instantly — at most
-/// one field is ever in "Press keys…" state. Also carries the
-/// "Go to" scroll target for conflict resolution (#34).
+/// claims this coordinator when it starts recording, and the
+/// claim *synchronously* tears the previous recorder down — no
+/// window where two keyDown monitors coexist. Also carries the
+/// "Go to" scroll target (#34) and a generation counter the
+/// host bumps when the edited mode or target changes, so
+/// pending rejections can't act on stale bindings.
 @MainActor
 final class RecorderCoordinator: ObservableObject {
     /// The field currently recording, if any.
-    @Published var active: UUID?
+    @Published private(set) var active: UUID?
+    /// Bumped by `invalidate()` — fields clear their pending
+    /// rejection state when it changes.
+    @Published private(set) var generation = 0
     /// A row id the Shortcuts section should scroll to (the
     /// "Go to" action of a rejected recording).
     @Published var scrollTarget: String?
+
+    /// Tears down the active field's event monitor — installed
+    /// by `claim`, run synchronously before the next claim.
+    private var stopActive: (() -> Void)?
+
+    /// Starts a recording claim: the previous recorder (if
+    /// any) is stopped before this one becomes active.
+    func claim(_ id: UUID, teardown: @escaping () -> Void) {
+        stopActive?()
+        active = id
+        stopActive = teardown
+    }
+
+    func release(_ id: UUID) {
+        guard active == id else { return }
+        active = nil
+        stopActive = nil
+    }
+
+    /// The edited mode/target changed: stop any recording and
+    /// invalidate pending rejection UI (its Steal closure
+    /// captured pre-change bindings).
+    func invalidate() {
+        stopActive?()
+        stopActive = nil
+        active = nil
+        generation += 1
+    }
 }
 
 /// A rejected recording (#34): the combo is already assigned
@@ -43,7 +76,9 @@ enum RecorderPreflight {
     /// Checks `combo` against every *other* row of the mode.
     /// Returns the rejection for a KiwiDesk collision, nil
     /// when the combo is free (or only shadows a system
-    /// shortcut — soft, committed anyway).
+    /// shortcut — soft, committed anyway). `commit` must look
+    /// its row up at write time (id- or Lua-keyed), because
+    /// Steal mutates the array first.
     static func rejection(
         combo: String,
         excluding isOwn: @escaping (KeyBinding) -> Bool,

@@ -76,7 +76,7 @@ struct SettingsView: View {
         case .behavior:
             BehaviorSection(model: model)
         case .profiles:
-            PresetsTab(model: model)
+            ProfilesSection(model: model)
         case .shortcuts:
             ShortcutsSection(model: model)
         case .appRules:

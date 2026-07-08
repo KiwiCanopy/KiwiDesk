@@ -74,6 +74,22 @@ struct ShortcutsSection: View {
             }
         }
         .onAppear(perform: ensureSelection)
+        // The section stays mounted across reloads and edit-
+        // target switches; a vanished mode must never leave
+        // `selected` pointing at modes[0] under a phantom
+        // header (#68 review M1).
+        .onChange(of: model.config.modes.map(\.name)) {
+            _,
+            _ in
+            ensureSelection()
+        }
+        .onChange(of: model.target) { _, _ in
+            ensureSelection()
+            coordinator.invalidate()
+        }
+        .onChange(of: selected) { _, _ in
+            coordinator.invalidate()
+        }
     }
 
     // MARK: - Override mode (#55 phase 7)

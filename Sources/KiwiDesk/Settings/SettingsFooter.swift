@@ -156,9 +156,3 @@ struct SettingsFooter: View {
             .frame(maxWidth: 180)
     }
 }
-
-extension String {
-    var trimmed: String {
-        trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-}

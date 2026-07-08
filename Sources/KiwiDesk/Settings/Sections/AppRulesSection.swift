@@ -92,11 +92,13 @@ enum FloatFacet: Equatable {
     case all
     case titled
 
+    /// Mirrors `FloatRules`' parse exactly: only a rule that
+    /// splits into two non-empty-side parts has a title; a
+    /// degenerate `"App:"` / `":Title"` is a literal app name
+    /// to the engine and must group the same way here.
     static func appSegment(of rule: String) -> String {
-        String(
-            rule.split(separator: ":", maxSplits: 1).first
-                .map(String.init) ?? rule
-        )
+        let parts = rule.split(separator: ":", maxSplits: 1)
+        return parts.count == 2 ? String(parts[0]) : rule
     }
 
     static func current(

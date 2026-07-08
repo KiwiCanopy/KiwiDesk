@@ -1,10 +1,11 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Tab 1 — Presets & Profiles (#36/#53): the built-in per-count
-/// layouts (applyable Presets) and the saved-profiles list,
-/// grouped by screen count with the monitor sets visible.
-struct PresetsTab: View {
+/// Whole App ▸ Profiles (#36/#53/#68 §3.2): the built-in
+/// per-count layouts (applyable Presets), the saved-profiles
+/// list grouped by screen count, and the native-Space bindings
+/// — "which profile applies where/when" in one place.
+struct ProfilesSection: View {
     @ObservedObject var model: SettingsModel
 
     var body: some View {

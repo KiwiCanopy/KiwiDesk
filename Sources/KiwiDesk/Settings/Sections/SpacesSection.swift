@@ -190,12 +190,12 @@ struct SpacesSection: View {
     }
 
     private func removeSpace(_ space: SpaceID) {
-        model.config.spaces.removeAll { $0 == space }
-        model.config.spaceModes[space] = nil
+        // Clears the list entry AND every reference (pin,
+        // Main role, fallback, per-space settings maps) — a
+        // leftover reference would resurrect the space on the
+        // next profile load (#68 review).
+        model.config.removeSpace(space)
         expanded.remove(space)
-        if model.config.fallbackSpace == space {
-            model.config.fallbackSpace = nil
-        }
     }
 
     private func index(of space: SpaceID) -> Int {
