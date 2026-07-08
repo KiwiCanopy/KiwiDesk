@@ -3,8 +3,10 @@ import SwiftUI
 
 /// The stable three-verb footer (#68 §3.12): the same slots in
 /// every mode — Revert, "Save a Copy As…", and a primary Save
-/// (⌘S) whose destination is named in a caption beside it
-/// instead of inside the label. What each verb does per mode:
+/// (⌘S), clustered at the trailing edge. The banner above
+/// names the edit target authoritatively; a destination
+/// caption beside Save duplicated it and was dropped as
+/// confusing. What each verb does per mode:
 ///
 /// - Live w/ active profile: Save = update the profile (+
 ///   monitor-set refresh); Copy = snapshot into a new profile.
@@ -117,13 +119,11 @@ struct SettingsFooter: View {
                 .buttonStyle(.borderedProminent)
                 .disabled(!model.isDirty)
         } else if model.editingStoredProfile {
-            saveTarget(model.editingProfile ?? "")
             Button("Save") { model.saveEditedProfile() }
                 .keyboardShortcut("s")
                 .buttonStyle(.borderedProminent)
                 .disabled(!model.isDirty)
-        } else if let name = model.activeProfile {
-            saveTarget(name)
+        } else if model.activeProfile != nil {
             Button("Save") { model.updateActiveProfile() }
                 .keyboardShortcut("s")
                 .buttonStyle(.borderedProminent)
@@ -142,17 +142,5 @@ struct SettingsFooter: View {
             .keyboardShortcut("s")
             .buttonStyle(.borderedProminent)
         }
-    }
-
-    /// The destination caption beside the primary Save: the
-    /// banner names the edit target authoritatively; this
-    /// keeps the button label stable across modes (§3.12).
-    private func saveTarget(_ name: String) -> some View {
-        Text("→ \u{201C}\(name)\u{201D}")
-            .font(.caption)
-            .foregroundStyle(.secondary)
-            .lineLimit(1)
-            .truncationMode(.middle)
-            .frame(maxWidth: 180)
     }
 }

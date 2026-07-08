@@ -22,10 +22,10 @@ struct LuaEditorTab: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             header
+            // Dirty tracking rides `luaSource`'s own didSet
+            // in the model — a live baseline comparison, not
+            // a latched flag.
             LuaSourceEditor(text: $model.luaSource)
-                .onChange(of: model.luaSource) { _, _ in
-                    model.isDirty = true
-                }
         }
         .padding(16)
         .confirmationDialog(

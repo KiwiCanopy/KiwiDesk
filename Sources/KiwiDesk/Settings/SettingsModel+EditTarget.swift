@@ -75,8 +75,13 @@ extension SettingsModel {
     private func apply(_ state: TargetState) {
         suppressDirty = true
         config = state.config
-        suppressDirty = false
         luaSource = state.luaSource
+        suppressDirty = false
+        // The dirty baselines: `isDirty` is a live comparison
+        // against the as-applied state, so manually undoing
+        // an edit reads as clean again.
+        cleanConfig = state.config
+        cleanLuaSource = state.luaSource
         forcedLuaEditor = state.forcedLuaEditor
         hasCustomLua = state.hasCustomLua
         showLuaEditor = state.showLuaEditor

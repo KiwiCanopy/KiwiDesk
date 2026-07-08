@@ -13,12 +13,16 @@ final class SettingsModel: ObservableObject {
     /// The visually edited configuration.
     @Published var config: GuiConfig {
         didSet {
-            if !suppressDirty { isDirty = true }
+            if !suppressDirty { recomputeDirty() }
         }
     }
     /// Raw init.lua shown when the file holds code the visual
     /// editor can't represent, or when the user opts in.
-    @Published var luaSource = ""
+    @Published var luaSource = "" {
+        didSet {
+            if !suppressDirty { recomputeDirty() }
+        }
+    }
     /// True while foreign Lua forces the raw editor.
     @Published var forcedLuaEditor = false
     /// True when init.lua has harmless custom Lua (code that
@@ -28,8 +32,21 @@ final class SettingsModel: ObservableObject {
     @Published var hasCustomLua = false
     /// User toggle to edit init.lua directly.
     @Published var showLuaEditor = false
-    /// Unsaved GUI edits are pending.
+    /// Unsaved GUI edits are pending. A live comparison
+    /// against the as-loaded baselines, not a latched flag —
+    /// manually undoing an edit clears the footer again.
     @Published var isDirty = false
+    /// The state as last loaded/saved — what `isDirty`
+    /// compares against. Set only by `apply(_:)` (every clean
+    /// transition funnels through `reload()`).
+    var cleanConfig = GuiConfig()
+    var cleanLuaSource = ""
+
+    func recomputeDirty() {
+        isDirty =
+            config != cleanConfig
+            || luaSource != cleanLuaSource
+    }
 
     /// Active saved profile, or nil for a transient state.
     @Published var activeProfile: String?
