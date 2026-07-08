@@ -70,7 +70,7 @@ struct SettingsView: View {
         case .layoutDefaults:
             LayoutDefaultsSection(model: model)
         case .monitors:
-            CanvasTab(model: model)
+            MonitorsSection(model: model)
         case .appearance:
             AppearanceSection(model: model)
         case .behavior:

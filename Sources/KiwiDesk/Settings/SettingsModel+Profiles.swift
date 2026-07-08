@@ -183,6 +183,15 @@ extension SettingsModel {
         }
     }
 
+    /// Human-readable monitor name, falling back to the raw
+    /// fingerprint when that display isn't connected — used by
+    /// the Monitors cards and the profile rows (§3.15).
+    func monitorName(_ fingerprint: String) -> String {
+        displays.first {
+            $0.fingerprint == fingerprint
+        }?.name ?? fingerprint
+    }
+
     /// The current main display's fingerprint, for the Main
     /// drop target's live annotation. Falls back positionally
     /// (leftmost), matching the runtime.
