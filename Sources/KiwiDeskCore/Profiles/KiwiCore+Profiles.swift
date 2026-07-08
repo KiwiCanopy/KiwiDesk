@@ -48,6 +48,8 @@ extension KiwiCore {
             return namedProfileCommand(args) { name in
                 try self.profiles.delete(name: name)
                 self.handleMonitorChange()
+                // A broken profile's issue clears with it.
+                self.refreshConfigIssues()
             }
         case "set_default_profile":
             return namedProfileCommand(args) { name in
@@ -139,6 +141,7 @@ extension KiwiCore {
         guard var existing = try? profiles.read(name: name)
         else {
             try profiles.save(buildProfile(name: name))
+            refreshConfigIssues()
             return
         }
         let live = liveMonitorSet()
@@ -156,6 +159,9 @@ extension KiwiCore {
         existing.settings = fresh.settings
         existing.savedAt = .now
         try profiles.save(existing)
+        // Re-saving repairs an unreadable profile — clear its
+        // issue without waiting for a config reload (#68).
+        refreshConfigIssues()
     }
 
     /// Writes the edited tiling from `config` into the stored
@@ -175,6 +181,7 @@ extension KiwiCore {
         var existing = try profiles.read(name: name)
         applyProfileEdits(from: config, onto: &existing)
         try profiles.write(existing)
+        refreshConfigIssues()
     }
 
     /// Duplicates the stored profile `name` under a NEW free

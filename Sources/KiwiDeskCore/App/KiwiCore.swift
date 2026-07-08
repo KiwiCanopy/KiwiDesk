@@ -69,6 +69,10 @@ public final class KiwiCore {
     /// Empty when the config loaded cleanly. Drives the
     /// menu-bar error badge and the Config Issues panel.
     public internal(set) var configIssues: [ConfigIssue] = []
+    /// The load-scoped half of `configIssues` (init.lua /
+    /// gui.json) — kept so profile mutations can refresh the
+    /// profile half without losing these.
+    var configLoadIssues: [ConfigIssue] = []
     /// Fired whenever `configIssues` changes (including back
     /// to empty, so the badge clears itself).
     public var onConfigIssuesChange:

@@ -21,12 +21,22 @@ public struct ConfigIssue: Sendable, Equatable, Identifiable {
 
 extension KiwiCore {
     /// Publishes a fresh issue list when it differs from the
-    /// current one. Issues describe the *last config load*;
-    /// a recheck is a `loadConfig()` away (`reload_config`).
+    /// current one.
     func setConfigIssues(_ issues: [ConfigIssue]) {
         guard issues != configIssues else { return }
         configIssues = issues
         onConfigIssuesChange(issues)
+    }
+
+    /// Recombines the load-scoped issues (init.lua/gui.json —
+    /// fixed only by a reload) with a fresh profile scan.
+    /// Called after every config load AND after every profile
+    /// mutation, so deleting or re-saving a broken profile in
+    /// the GUI clears its badge without an unrelated reload.
+    func refreshConfigIssues() {
+        setConfigIssues(
+            configLoadIssues + profileConfigIssues()
+        )
     }
 
     /// Unreadable profile JSONs, as issues — the same files

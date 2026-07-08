@@ -84,6 +84,67 @@ struct ConfigIssuesTests {
         )
     }
 
+    @Test("deleting a broken profile clears its issue")
+    func deleteClearsProfileIssue() throws {
+        let core = makeCore()
+        try write(
+            "{\"name\": \"broken\"}",
+            to: core.configDirectory
+                .appendingPathComponent(
+                    "profiles/broken.json"
+                )
+        )
+        core.loadConfig()
+        #expect(!core.configIssues.isEmpty)
+        // The natural GUI repair path must clear the badge
+        // without an unrelated config reload (#68 review).
+        let response = core.execute(
+            "delete_profile",
+            args: [.string("broken")]
+        )
+        #expect(response.isSuccess)
+        #expect(core.configIssues.isEmpty)
+    }
+
+    @Test("re-saving over a broken profile clears its issue")
+    func saveClearsProfileIssue() throws {
+        let core = makeCore()
+        try write(
+            "not json at all",
+            to: core.configDirectory
+                .appendingPathComponent(
+                    "profiles/broken.json"
+                )
+        )
+        core.loadConfig()
+        #expect(
+            core.configIssues.map(\.source)
+                == ["broken.json"]
+        )
+        try core.persistProfile(named: "broken")
+        #expect(core.configIssues.isEmpty)
+    }
+
+    @Test("reload resets sparse icon and fallback state")
+    func reloadResetsSparseState() {
+        let core = makeCore()
+        core.state.workspaces.ensureSpace(SpaceID("a"))
+        _ = core.execute(
+            "set_space_icon",
+            args: [.string("a"), .string("globe")]
+        )
+        _ = core.execute(
+            "set_fallback_space",
+            args: [.string("a")]
+        )
+        // No profile is active and the (default) init.lua
+        // declares neither — an authoritative reload must
+        // clear both, like every other sparse declarative.
+        core.loadConfig()
+        #expect(core.tiler.settings.spaceIcons.isEmpty)
+        #expect(core.fallbackSpace == nil)
+    }
+
     @Test("unreadable gui.json becomes an issue")
     func unreadableSidecar() throws {
         let core = makeCore()

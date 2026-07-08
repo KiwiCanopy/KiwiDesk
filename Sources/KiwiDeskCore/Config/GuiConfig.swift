@@ -108,6 +108,22 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         return true
     }
 
+    /// Deletes a space and every reference it holds (#68): the
+    /// list entry, its mode, monitor pin, Main role, fallback
+    /// designation, and all per-space settings maps
+    /// (`TilingSettings.removeSpace`). Without this, a pin or
+    /// override left behind keeps the space in
+    /// `Profile.declaredSpaces` and the next authoritative
+    /// profile load resurrects it.
+    public mutating func removeSpace(_ space: SpaceID) {
+        spaces.removeAll { $0 == space }
+        spaceModes[space] = nil
+        spacePins[space] = nil
+        mainSpaces.remove(space)
+        if fallbackSpace == space { fallbackSpace = nil }
+        settings.removeSpace(space)
+    }
+
     /// Only the global fields persist in the sidecar — the
     /// profile-scoped ones (settings, modes, pins) round-trip
     /// through the profile JSON instead (#36).
@@ -165,16 +181,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             fallbackSpace = nil
         }
         appRules = appRules.filter { !$0.value.raw.isEmpty }
-        settings.gapsOverride = settings.gapsOverride.filter {
-            !$0.key.raw.isEmpty
-        }
-        settings.placementOverride =
-            settings.placementOverride.filter {
-                !$0.key.raw.isEmpty
-            }
-        settings.spaceIcons = settings.spaceIcons.filter {
-            !$0.key.raw.isEmpty
-        }
+        // One definition covers every per-space settings map
+        // (incl. the per-layout overrides a hand-edited file
+        // could carry under an empty key).
+        settings.removeSpace(SpaceID(""))
     }
 
     /// JSON object keys are strings; native-space numbers are
