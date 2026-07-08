@@ -12,7 +12,11 @@ struct DragVisualsEditor: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            SettingsSection("Drag & drop") {
+            SettingsSection(
+                "Drag & Drop",
+                caption: "Drag a window onto another to swap "
+                    + "their positions in the layout."
+            ) {
                 previewStrip
                 PtSlider(
                     label: "Corner radius",
@@ -21,12 +25,22 @@ struct DragVisualsEditor: View {
                     range: 0...40
                 )
             }
-            SettingsSection("Ghost (dragged window)") {
+            SettingsSection(
+                "Ghost",
+                caption: "Marks the position your window is "
+                    + "dragged from.",
+                subsection: true
+            ) {
                 DragVisualControls(
                     visual: $model.config.settings.dragGhost
                 )
             }
-            SettingsSection("Drop zone (swap target)") {
+            SettingsSection(
+                "Drop zone",
+                caption: "Marks the position your window will "
+                    + "snap into when dropped.",
+                subsection: true
+            ) {
                 DragVisualControls(
                     visual: $model.config.settings
                         .dragDropZone

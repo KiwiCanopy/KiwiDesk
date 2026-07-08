@@ -217,6 +217,16 @@ deepest rabbit hole in the tab, so it sits last under one
 "App Bar" group title instead of pushing everything else
 below the fold.
 
+**Drag & Drop explains itself in plain words.** The group
+opens with one sentence on what dragging does (swap a
+window's position with another), and Ghost / Drop zone are
+smaller subsections — each with a one-sentence caption
+("the position your window is dragged from" / "will snap
+into when dropped") instead of the parenthetical jargon
+titles ("dragged window", "swap target"). Section captions
+are a `SettingsSection` affordance, so other groups can
+adopt the same pattern.
+
 ## Monitors
 
 **One representation: monitor cards.** The old tab rendered
