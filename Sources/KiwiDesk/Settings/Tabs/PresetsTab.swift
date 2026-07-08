@@ -12,6 +12,12 @@ struct PresetsTab: View {
             VStack(alignment: .leading, spacing: 20) {
                 presetSection
                 profileSection
+                // "Which profile applies where/when" lives
+                // together (#68 §3.2): native-Space bindings
+                // are global — only offered in live editing.
+                if !model.editingStoredProfile {
+                    NativeSpacesSection(model: model)
+                }
             }
             .padding(16)
         }

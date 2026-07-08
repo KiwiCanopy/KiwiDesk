@@ -132,7 +132,42 @@ struct ScrollGridEditor: View {
                 placement: $model.config.settings.scrolling
                     .newWindowPlacement
             )
+            Divider()
+            // The scrolling-specific animation pair (#68
+            // §3.5): the on/off switch and its magnitude sit
+            // together, like a layout's App Bar enable sits
+            // above its overrides.
+            Toggle(
+                "Animate focus shifts",
+                isOn: $model.config.settings.animations
+                    .onScrolling
+            )
+            scrollSpeedRow
         }
+    }
+
+    /// Stepper for the scrolling focus-shift speed
+    /// (`animations.scroll_speed`;
+    /// `animations.set_scroll_speed` Lua — #51).
+    private var scrollSpeedRow: some View {
+        let ms = model.config.settings.animations.scrollSpeedMS
+        return HStack {
+            Text("Scroll speed")
+            Spacer()
+            Stepper(
+                value: $model.config.settings.animations
+                    .scrollSpeedMS,
+                in: 50...1000,
+                step: 10
+            ) {
+                Text("\(ms) ms")
+                    .frame(minWidth: 52, alignment: .trailing)
+                    .monospacedDigit()
+            }
+        }
+        .disabled(
+            !model.config.settings.animations.onScrolling
+        )
     }
 
     @ViewBuilder

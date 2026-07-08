@@ -36,11 +36,10 @@ struct CanvasTab: View {
                     if !model.displays.isEmpty {
                         SpaceMonitorAssignments(model: model)
                     }
-                    // Native-Space bindings are global, not part
-                    // of a profile — only offered in live editing.
-                    if !model.editingStoredProfile {
-                        NativeSpacesSection(model: model)
-                    }
+                    // Native-Space bindings moved to the
+                    // Profiles section (#68 §3.2): they are
+                    // "which profile applies where", not
+                    // monitor placement.
                     fingerprintSection
                 }
             }

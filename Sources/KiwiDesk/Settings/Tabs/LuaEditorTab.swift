@@ -7,6 +7,17 @@ import SwiftUI
 /// (05_GUI_Concept §2). Edits here write the whole file verbatim.
 struct LuaEditorTab: View {
     @ObservedObject var model: SettingsModel
+    @State private var confirmingAdopt = false
+    @State private var showAdoptHelp = false
+    @State private var helpHovering = false
+
+    /// A muted, darker green so the action reads as inviting
+    /// without shouting over the footer's Save button.
+    private let adoptGreen = Color(
+        red: 0.16,
+        green: 0.45,
+        blue: 0.24
+    )
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -17,22 +28,38 @@ struct LuaEditorTab: View {
                 }
         }
         .padding(16)
+        .confirmationDialog(
+            "Adopt this config into the visual editor?",
+            isPresented: $confirmingAdopt,
+            titleVisibility: .visible
+        ) {
+            Button("Adopt") { model.adoptIntoGui() }
+            Button("Cancel", role: .cancel) {}
+        }
     }
 
     @ViewBuilder private var header: some View {
         if model.forcedLuaEditor {
-            Label {
-                Text(
-                    "This init.lua contains custom code, so "
-                        + "the visual editor is disabled to "
-                        + "avoid overwriting it. Edit the Lua "
-                        + "directly below."
-                )
-            } icon: {
-                Image(systemName: "curlybraces")
+            // The Adopt action lives with the content it
+            // migrates (#68 §3.12) — it is not a save verb,
+            // so it left the footer.
+            HStack(spacing: 8) {
+                Label {
+                    Text(
+                        "This init.lua contains hand-written "
+                            + "Lua, so the visual editor is "
+                            + "disabled to avoid overwriting "
+                            + "it."
+                    )
+                } icon: {
+                    Image(systemName: "curlybraces")
+                }
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                Spacer()
+                adoptButton
+                helpButton
             }
-            .font(.callout)
-            .foregroundStyle(.secondary)
         } else {
             HStack {
                 Text("Editing init.lua directly.")
@@ -45,6 +72,54 @@ struct LuaEditorTab: View {
             }
             .font(.callout)
         }
+    }
+
+    private var adoptButton: some View {
+        Button {
+            confirmingAdopt = true
+        } label: {
+            Label(
+                "Adopt into Visual Editor…",
+                systemImage: "wand.and.stars"
+            )
+        }
+        .buttonStyle(.borderedProminent)
+        .tint(adoptGreen)
+    }
+
+    private var helpButton: some View {
+        Image(systemName: "questionmark.circle")
+            .imageScale(.large)
+            .foregroundStyle(
+                helpHovering ? Color.accentColor : .secondary
+            )
+            .animation(
+                .easeInOut(duration: 0.15),
+                value: helpHovering
+            )
+            .onHover { hovering in
+                helpHovering = hovering
+                showAdoptHelp = hovering
+            }
+            .help("What happens to my current code?")
+            .popover(
+                isPresented: $showAdoptHelp,
+                arrowEdge: .top
+            ) {
+                Text(
+                    "Nothing is lost: your current code isn't "
+                        + "deleted, it's kept as a "
+                        + "commented-out backup in init.lua. "
+                        + "Gaps, layouts, rules, and "
+                        + "keybindings are imported; a "
+                        + "shortcut that can't be read back "
+                        + "stays in the backup — re-add it in "
+                        + "the Shortcuts section."
+                )
+                .font(.callout)
+                .frame(width: 300)
+                .padding()
+            }
     }
 }
 
