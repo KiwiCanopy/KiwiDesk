@@ -98,12 +98,12 @@ struct PtSlider: View {
         HStack {
             Text(label)
                 .frame(width: 110, alignment: .leading)
-            Slider(
+            GlassSlider(
                 value: Binding(
                     get: { Double(value) },
                     set: { value = CGFloat($0) }
                 ),
-                in: range,
+                range: range,
                 step: 1
             )
             Text("\(Int(value)) pt")
@@ -123,7 +123,11 @@ struct RatioRow: View {
         HStack {
             Text(label)
                 .frame(width: 110, alignment: .leading)
-            Slider(value: $value, in: 0.1...0.9, step: 0.01)
+            GlassSlider(
+                value: $value,
+                range: 0.1...0.9,
+                step: 0.01
+            )
             Text("\(Int(value * 100))%")
                 .frame(width: 48, alignment: .trailing)
                 .foregroundStyle(.secondary)

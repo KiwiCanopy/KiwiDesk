@@ -26,10 +26,20 @@ struct LayoutDefaultsSection: View {
     private var minSizeSection: some View {
         SettingsSection("Minimum window size") {
             HStack {
-                Slider(
-                    value: $model.config.settings
-                        .minWindowSize,
-                    in: 100...800,
+                GlassSlider(
+                    value: Binding(
+                        get: {
+                            Double(
+                                model.config.settings
+                                    .minWindowSize
+                            )
+                        },
+                        set: {
+                            model.config.settings
+                                .minWindowSize = CGFloat($0)
+                        }
+                    ),
+                    range: 100...800,
                     step: 10
                 )
                 Text(

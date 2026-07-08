@@ -240,8 +240,20 @@ icon picker tabs) uses `GlassSegmentedPicker` instead of the
 native segmented picker: a capsule track where the selection
 is a sliding Liquid Glass pill (`glassEffect` on macOS 26, a
 material capsule earlier) and the selected label zooms
-slightly under the glass. One control, one look — a chooser
-reads as "pick a tab" everywhere in the settings.
+slightly. The glass is applied to the label itself — glass
+composites above sibling content, so a pill layered behind
+the text would blur it. Segments are equal-width across the
+track (full-bleed, like a native window-toolbar switcher),
+a deliberate trade against content-sized segments. One
+control, one look — a chooser reads as "pick a tab"
+everywhere in the settings.
+
+**Sliders share the pill design.** Every value adjuster
+(ratios, gaps, sizes) is a `GlassSlider`: the same capsule
+track as the segmented picker, a Liquid Glass pill as the
+knob, and an accent fill up to the knob. Accessibility is
+delegated to a native `Slider` representation, so assistive
+tech sees exactly the control it replaces.
 
 ## Monitors
 

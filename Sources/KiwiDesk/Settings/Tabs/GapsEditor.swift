@@ -87,8 +87,15 @@ struct GapsEditor: View {
         HStack {
             Text(label)
                 .frame(width: 80, alignment: .leading)
-            Slider(value: unified, in: 0...100, step: 1)
-                .disabled(mixed)
+            GlassSlider(
+                value: Binding(
+                    get: { Double(unified.wrappedValue) },
+                    set: { unified.wrappedValue = CGFloat($0) }
+                ),
+                range: 0...100,
+                step: 1
+            )
+            .disabled(mixed)
             Text(
                 mixed
                     ? "mixed"
@@ -184,7 +191,14 @@ private struct GapRow: View {
         HStack {
             Text(label)
                 .frame(width: 80, alignment: .leading)
-            Slider(value: $value, in: 0...100, step: 1)
+            GlassSlider(
+                value: Binding(
+                    get: { Double(value) },
+                    set: { value = CGFloat($0) }
+                ),
+                range: 0...100,
+                step: 1
+            )
             Text("\(Int(value)) pt")
                 .frame(width: 52, alignment: .trailing)
                 .foregroundStyle(.secondary)

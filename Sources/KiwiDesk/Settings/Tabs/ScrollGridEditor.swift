@@ -190,7 +190,11 @@ struct ScrollGridEditor: View {
             HStack {
                 Text(sizeLabel)
                     .frame(width: 110, alignment: .leading)
-                Slider(value: pointsBinding, in: 100...2000, step: 10)
+                GlassSlider(
+                    value: pointsBinding,
+                    range: 100...2000,
+                    step: 10
+                )
                 Text("\(Int(currentPoints)) pt")
                     .frame(width: 64, alignment: .trailing)
                     .foregroundStyle(.secondary)
@@ -200,7 +204,11 @@ struct ScrollGridEditor: View {
             HStack {
                 Text(sizeLabel)
                     .frame(width: 110, alignment: .leading)
-                Slider(value: percentBinding, in: 5...100, step: 5)
+                GlassSlider(
+                    value: percentBinding,
+                    range: 5...100,
+                    step: 5
+                )
                 Text("\(Int(currentFraction * 100)) %")
                     .frame(width: 64, alignment: .trailing)
                     .foregroundStyle(.secondary)

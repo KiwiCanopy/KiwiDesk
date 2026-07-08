@@ -4,8 +4,16 @@ import SwiftUI
 /// (#68): a capsule track where the selected segment carries a
 /// Liquid Glass pill — the real `glassEffect` on macOS 26, a
 /// material stand-in on earlier systems — and its label zooms
-/// slightly, as if magnified by the glass. Changing the
-/// selection slides the pill between segments.
+/// slightly. On macOS 26 the glass is applied to the LABEL
+/// itself, never layered above it: glass composites over
+/// sibling content in a `GlassEffectContainer`, so a pill
+/// behind the text would blur it; a view's own content renders
+/// crisply on its glass. Changing the selection morphs/slides
+/// the pill between segments.
+///
+/// Precondition: option `value`s must be unique — duplicates
+/// would render two selected pills fighting over one
+/// glass/geometry identity.
 struct GlassSegmentedPicker<Value: Hashable>: View {
     private let label: String?
     @Binding private var selection: Value
@@ -56,6 +64,8 @@ struct GlassSegmentedPicker<Value: Hashable>: View {
         .background(
             Capsule().fill(Color.primary.opacity(0.06))
         )
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(label ?? "")
     }
 
     private func segment(
@@ -69,59 +79,72 @@ struct GlassSegmentedPicker<Value: Hashable>: View {
                 selection = option.value
             }
         } label: {
-            Text(option.title)
-                .font(
-                    .callout
-                        .weight(selected ? .medium : .regular)
-                )
-                .scaleEffect(selected ? 1.08 : 1)
-                .lineLimit(1)
-                .padding(.vertical, 4)
-                .padding(.horizontal, 10)
-                .frame(maxWidth: .infinity)
-                .contentShape(Capsule())
+            segmentLabel(option.title, selected: selected)
         }
         .buttonStyle(.plain)
-        .background {
-            if selected {
-                pill.matchedGeometryEffect(
-                    id: "pill",
-                    in: pillSpace
-                )
-            }
-        }
         .accessibilityAddTraits(
             selected ? [.isSelected] : []
         )
     }
 
-    /// The pill under the selected segment: Liquid Glass where
-    /// the OS has it, a bordered material capsule otherwise.
-    /// `.interactive()` makes the glass respond to clicks; the
-    /// `glassEffectID` ties the pill's glass to one identity
-    /// so selection changes morph instead of re-materializing.
-    @ViewBuilder private var pill: some View {
+    /// The label carries the glass itself when selected (its
+    /// content then draws ON the glass, not blurred under
+    /// it); the pre-26 fallback keeps the material pill as a
+    /// background, where ordinary z-ordering already keeps
+    /// the text on top.
+    @ViewBuilder private func segmentLabel(
+        _ title: String,
+        selected: Bool
+    ) -> some View {
+        let base = Text(title)
+            .font(
+                .callout
+                    .weight(selected ? .medium : .regular)
+            )
+            .scaleEffect(selected ? 1.08 : 1)
+            .lineLimit(1)
+            .padding(.vertical, 4)
+            .padding(.horizontal, 10)
+            .frame(maxWidth: .infinity)
+            .contentShape(Capsule())
         if #available(macOS 26.0, *) {
-            Color.clear
-                .glassEffect(
-                    .regular.interactive(),
-                    in: Capsule()
-                )
-                .glassEffectID("pill", in: pillSpace)
-        } else {
-            Capsule()
-                .fill(.regularMaterial)
-                .overlay(
-                    Capsule().strokeBorder(
-                        Color.primary.opacity(0.12),
-                        lineWidth: 0.5
+            if selected {
+                base
+                    .glassEffect(
+                        .regular.interactive(),
+                        in: Capsule()
                     )
-                )
-                .shadow(
-                    color: .black.opacity(0.12),
-                    radius: 2,
-                    y: 1
-                )
+                    .glassEffectID("pill", in: pillSpace)
+            } else {
+                base
+            }
+        } else {
+            base.background {
+                if selected {
+                    fallbackPill.matchedGeometryEffect(
+                        id: "pill",
+                        in: pillSpace
+                    )
+                }
+            }
         }
+    }
+
+    /// The bordered material capsule standing in for Liquid
+    /// Glass on macOS 14/15.
+    private var fallbackPill: some View {
+        Capsule()
+            .fill(.regularMaterial)
+            .overlay(
+                Capsule().strokeBorder(
+                    Color.primary.opacity(0.12),
+                    lineWidth: 0.5
+                )
+            )
+            .shadow(
+                color: .black.opacity(0.12),
+                radius: 2,
+                y: 1
+            )
     }
 }
