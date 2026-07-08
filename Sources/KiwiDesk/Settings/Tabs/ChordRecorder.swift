@@ -17,16 +17,30 @@ import KiwiDeskCore
 ///   early modifier release can't strip the chord.
 /// - Bare Escape cancels. Any mouse click cancels
 ///   (`.clickAway`, so the field can absorb the click on its
-///   own button).
+///   own button). App deactivation cancels too — a system
+///   chord (⌘Tab, ⌘⇧4) steals its keyUps, which would
+///   otherwise leave `heldKeys` stuck and the recorder
+///   un-lockable.
+///
+/// The pure state machine lives in `handle(_:keyCode:flags:)`
+/// so `ChordRecorderTests` can drive every sequence without
+/// constructing `NSEvent`s; the monitors are a thin shell.
 @MainActor
 final class ChordRecorder {
     enum Outcome {
         /// Every key released — the chord locks in.
         case chord(String)
-        /// Bare Escape (or an unrepresentable key).
+        /// Bare Escape, deactivation, or an unrepresentable
+        /// key.
         case cancelled
         /// A mouse click ended the recording.
         case clickAway
+    }
+
+    enum EventKind {
+        case keyDown
+        case keyUp
+        case flagsChanged
     }
 
     private struct Pending {
@@ -58,6 +72,7 @@ final class ChordRecorder {
 
     private var keyMonitor: Any?
     private var mouseMonitor: Any?
+    private var deactivation: (any NSObjectProtocol)?
     private var heldKeys: Set<UInt16> = []
     private var pending: Pending?
     private var onPreview: (String) -> Void = { _ in }
@@ -65,20 +80,32 @@ final class ChordRecorder {
 
     /// Installs the event monitors. `preview` receives the
     /// live label text on every change; `finish` fires exactly
-    /// once (the monitors are torn down first).
+    /// once (teardown resets it to a no-op first).
     func start(
         preview: @escaping (String) -> Void,
         finish: @escaping (Outcome) -> Void
     ) {
         stop()
-        heldKeys = []
-        pending = nil
         onPreview = preview
         onFinish = finish
         keyMonitor = NSEvent.addLocalMonitorForEvents(
             matching: [.keyDown, .keyUp, .flagsChanged]
         ) { [weak self] event in
-            self?.handle(event)
+            // A nil self must never swallow the app's keys —
+            // the leaked monitor would eat every keystroke.
+            guard let self else { return event }
+            let kind: EventKind =
+                switch event.type {
+                case .keyDown: .keyDown
+                case .keyUp: .keyUp
+                default: .flagsChanged
+                }
+            let swallow = self.handle(
+                kind,
+                keyCode: event.keyCode,
+                flags: event.modifierFlags
+            )
+            return swallow ? nil : event
         }
         // Clicking anywhere cancels (the native recorder
         // idiom); the event passes through so the click still
@@ -89,11 +116,22 @@ final class ChordRecorder {
             self?.finish(.clickAway)
             return event
         }
+        deactivation = NotificationCenter.default.addObserver(
+            forName: NSApplication
+                .didResignActiveNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated {
+                self?.finish(.cancelled)
+            }
+        }
     }
 
-    /// Silent teardown — no `finish` callback. Used when the
-    /// coordinator hands the recording to another field or
-    /// the row disappears.
+    /// Silent teardown — no `finish` callback (the closures
+    /// reset to no-ops, making the exactly-once contract
+    /// structural). Used when the coordinator hands the
+    /// recording to another field or the row disappears.
     func stop() {
         if let keyMonitor {
             NSEvent.removeMonitor(keyMonitor)
@@ -103,8 +141,16 @@ final class ChordRecorder {
             NSEvent.removeMonitor(mouseMonitor)
         }
         mouseMonitor = nil
+        if let deactivation {
+            NotificationCenter.default.removeObserver(
+                deactivation
+            )
+        }
+        deactivation = nil
         heldKeys = []
         pending = nil
+        onPreview = { _ in }
+        onFinish = { _ in }
     }
 
     private func finish(_ outcome: Outcome) {
@@ -113,58 +159,66 @@ final class ChordRecorder {
         callback(outcome)
     }
 
-    // MARK: - Event handling
+    // MARK: - The state machine (testable seam)
 
-    private func handle(_ event: NSEvent) -> NSEvent? {
-        switch event.type {
+    /// Feeds one key event through the chord logic. Returns
+    /// whether the event should be swallowed. Internal so
+    /// tests can drive sequences without `NSEvent`.
+    @discardableResult
+    func handle(
+        _ kind: EventKind,
+        keyCode: UInt16,
+        flags: NSEvent.ModifierFlags
+    ) -> Bool {
+        switch kind {
         case .keyDown:
-            return keyDown(event)
+            return keyDown(keyCode: keyCode, flags: flags)
         case .keyUp:
-            heldKeys.remove(event.keyCode)
-            tryLockIn(flags: event.modifierFlags)
-            // Swallow the keyUp of a swallowed keyDown.
-            return nil
+            // Swallow only the keyUp of a keyDown we
+            // swallowed — a key held from before the
+            // recording started belongs to its original
+            // responder.
+            let tracked =
+                heldKeys.remove(keyCode) != nil
+            tryLockIn(flags: flags)
+            return tracked
         case .flagsChanged:
-            flagsChanged(event)
-            return event
-        default:
-            return event
+            // Modifiers only accumulate while a base key is
+            // held — releases never downgrade the chord.
+            if pending != nil, !heldKeys.isEmpty {
+                pending?.accumulate(flags)
+            }
+            publishPreview(flags: flags)
+            tryLockIn(flags: flags)
+            return false
         }
     }
 
-    private func keyDown(_ event: NSEvent) -> NSEvent? {
-        let flags = event.modifierFlags
+    private func keyDown(
+        keyCode: UInt16,
+        flags: NSEvent.ModifierFlags
+    ) -> Bool {
         let bareEscape =
-            event.keyCode == 53
+            keyCode == 53
             && !flags.contains(.command)
             && !flags.contains(.option)
             && !flags.contains(.control)
             && !flags.contains(.shift)
         if bareEscape {
             finish(.cancelled)
-            return nil
+            return true
         }
-        heldKeys.insert(event.keyCode)
+        heldKeys.insert(keyCode)
         // The snapshot: key + the modifiers held right now.
         pending = Pending(
-            keyCode: UInt32(event.keyCode),
+            keyCode: UInt32(keyCode),
             command: flags.contains(.command),
             option: flags.contains(.option),
             control: flags.contains(.control),
             shift: flags.contains(.shift)
         )
         publishPreview(flags: flags)
-        return nil
-    }
-
-    private func flagsChanged(_ event: NSEvent) {
-        // Modifiers only accumulate while a base key is held
-        // — releases never downgrade the pending chord.
-        if pending != nil, !heldKeys.isEmpty {
-            pending?.accumulate(event.modifierFlags)
-        }
-        publishPreview(flags: event.modifierFlags)
-        tryLockIn(flags: event.modifierFlags)
+        return true
     }
 
     /// The lock-in: everything released, a chord pending.

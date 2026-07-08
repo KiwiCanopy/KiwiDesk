@@ -166,10 +166,11 @@ struct KeyRecorderField: View {
         preview = ""
         // Claiming tears down whichever field was recording
         // before — synchronously, so two keyDown monitors
-        // never coexist (#33). The teardown closure captures
-        // the recorder object and the preview Binding, not
-        // the view struct (a struct captured by value would
-        // mutate a stale copy).
+        // never coexist (#33). Captures reach the heap-backed
+        // State storage either way (via the class reference
+        // and the Binding); the strong recorder capture is
+        // load-bearing — it keeps the recorder alive to run
+        // stop() even if the view's state died first.
         let previewBinding = $preview
         coordinator.claim(fieldID) { [recorder] in
             recorder.stop()
