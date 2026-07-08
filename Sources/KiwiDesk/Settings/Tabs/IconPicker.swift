@@ -79,13 +79,12 @@ struct IconPicker: View {
             .textFieldStyle(.roundedBorder)
             if search.trimmed.isEmpty {
                 HStack(spacing: 8) {
-                    Picker("", selection: $tab) {
-                        ForEach(IconTab.allCases) { tab in
-                            Text(tab.rawValue).tag(tab)
+                    GlassSegmentedPicker(
+                        selection: $tab,
+                        options: IconTab.allCases.map {
+                            ($0.rawValue, $0)
                         }
-                    }
-                    .pickerStyle(.segmented)
-                    .labelsHidden()
+                    )
                     clearButton
                 }
             }

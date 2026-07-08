@@ -101,36 +101,38 @@ struct ScrollGridEditor: View {
             "Scrolling",
             symbol: LayoutMode.scrolling.glyph
         ) {
-            Picker("Size unit", selection: sizeUnitBinding) {
-                Text("Auto").tag(SizeUnit.auto)
-                Text("Points").tag(SizeUnit.points)
-                Text("Percent").tag(SizeUnit.percent)
-            }
-            .pickerStyle(.segmented)
+            GlassSegmentedPicker(
+                "Size unit",
+                selection: sizeUnitBinding,
+                options: [
+                    ("Auto", SizeUnit.auto),
+                    ("Points", .points),
+                    ("Percent", .percent),
+                ]
+            )
             sizeControl
-            Picker(
+            GlassSegmentedPicker(
                 "Focused anchor",
                 selection: $model.config.settings.scrolling
-                    .anchor
-            ) {
-                Text("Center").tag(ScrollingParams.Anchor.center)
-                Text(isVertical ? "Top" : "Left")
-                    .tag(ScrollingParams.Anchor.left)
-                Text(isVertical ? "Bottom" : "Right")
-                    .tag(ScrollingParams.Anchor.right)
-            }
-            .pickerStyle(.segmented)
-            Picker(
+                    .anchor,
+                options: [
+                    ("Center", ScrollingParams.Anchor.center),
+                    (isVertical ? "Top" : "Left", .left),
+                    (isVertical ? "Bottom" : "Right", .right),
+                ]
+            )
+            GlassSegmentedPicker(
                 "Scroll orientation",
                 selection: $model.config.settings.scrolling
-                    .orientation
-            ) {
-                Text("Horizontal")
-                    .tag(ScrollingParams.Orientation.horizontal)
-                Text("Vertical")
-                    .tag(ScrollingParams.Orientation.vertical)
-            }
-            .pickerStyle(.segmented)
+                    .orientation,
+                options: [
+                    (
+                        "Horizontal",
+                        ScrollingParams.Orientation.horizontal
+                    ),
+                    ("Vertical", .vertical),
+                ]
+            )
             PlacementPicker(
                 placement: $model.config.settings.scrolling
                     .newWindowPlacement
@@ -212,29 +214,30 @@ struct ScrollGridEditor: View {
             "Grid",
             symbol: LayoutMode.grid.glyph
         ) {
-            Picker(
+            GlassSegmentedPicker(
                 "Grid type",
-                selection: $model.config.settings.grid.type
-            ) {
-                Text("Dynamic").tag(GridParams.GridType.dynamic)
-                Text("Rigid").tag(GridParams.GridType.rigid)
-            }
-            .pickerStyle(.segmented)
+                selection: $model.config.settings.grid.type,
+                options: [
+                    ("Dynamic", GridParams.GridType.dynamic),
+                    ("Rigid", .rigid),
+                ]
+            )
             Toggle(
                 "Fill empty space",
                 isOn: $model.config.settings.grid.fillEmptySpace
             )
-            Picker(
+            GlassSegmentedPicker(
                 "Split direction",
                 selection: $model.config.settings.grid
-                    .splitDirection
-            ) {
-                Text("Horizontal")
-                    .tag(GridParams.SplitDirection.horizontal)
-                Text("Vertical")
-                    .tag(GridParams.SplitDirection.vertical)
-            }
-            .pickerStyle(.segmented)
+                    .splitDirection,
+                options: [
+                    (
+                        "Horizontal",
+                        GridParams.SplitDirection.horizontal
+                    ),
+                    ("Vertical", .vertical),
+                ]
+            )
             Stepper(
                 "Columns: "
                     + "\(model.config.settings.grid.columns)",

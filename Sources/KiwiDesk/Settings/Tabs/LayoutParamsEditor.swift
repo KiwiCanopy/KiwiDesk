@@ -15,16 +15,18 @@ struct LayoutParamsEditor: View {
 
     private var bsp: some View {
         SettingsSection("BSP", symbol: LayoutMode.bsp.glyph) {
-            Picker(
+            GlassSegmentedPicker(
                 "Split strategy",
-                selection: $model.config.settings.bsp.strategy
-            ) {
-                Text("Shortest side")
-                    .tag(BspParams.Strategy.shortestSide)
-                Text("Alternating")
-                    .tag(BspParams.Strategy.alternating)
-            }
-            .pickerStyle(.segmented)
+                selection: $model.config.settings.bsp
+                    .strategy,
+                options: [
+                    (
+                        "Shortest side",
+                        BspParams.Strategy.shortestSide
+                    ),
+                    ("Alternating", .alternating),
+                ]
+            )
             RatioRow(
                 label: "Split ratio",
                 value: $model.config.settings.bsp.splitRatio

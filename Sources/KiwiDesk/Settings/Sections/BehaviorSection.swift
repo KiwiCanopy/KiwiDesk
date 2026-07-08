@@ -22,16 +22,18 @@ struct BehaviorSection: View {
 
     private var mouseSection: some View {
         SettingsSection("Mouse") {
-            Picker(
+            GlassSegmentedPicker(
                 "Mouse resize action",
-                selection: $model.config.settings.mouseResize
-            ) {
-                Text("Resize adjacent windows")
-                    .tag(MouseResizeMode.layout)
-                Text("Snap back to slot")
-                    .tag(MouseResizeMode.snapBack)
-            }
-            .pickerStyle(.segmented)
+                selection: $model.config.settings
+                    .mouseResize,
+                options: [
+                    (
+                        "Resize adjacent windows",
+                        MouseResizeMode.layout
+                    ),
+                    ("Snap back to slot", .snapBack),
+                ]
+            )
         }
     }
 

@@ -12,17 +12,18 @@ struct MonocleEditor: View {
             "Monocle",
             symbol: LayoutMode.monocle.glyph
         ) {
-            Picker(
+            GlassSegmentedPicker(
                 "Focus orientation",
                 selection: $model.config.settings.monocle
-                    .orientation
-            ) {
-                Text("Horizontal")
-                    .tag(MonocleParams.Orientation.horizontal)
-                Text("Vertical")
-                    .tag(MonocleParams.Orientation.vertical)
-            }
-            .pickerStyle(.segmented)
+                    .orientation,
+                options: [
+                    (
+                        "Horizontal",
+                        MonocleParams.Orientation.horizontal
+                    ),
+                    ("Vertical", .vertical),
+                ]
+            )
             Text(
                 "The app bar shown in monocle is configured in "
                     + "the App Bar tab."

@@ -227,6 +227,17 @@ titles ("dragged window", "swap target"). Section captions
 are a `SettingsSection` affordance, so other groups can
 adopt the same pattern.
 
+## Shared controls
+
+**Option tabs are a Liquid Glass segmented pill.** Every
+pick-one-of-few chooser (layout parameters, mouse resize,
+icon picker tabs) uses `GlassSegmentedPicker` instead of the
+native segmented picker: a capsule track where the selection
+is a sliding Liquid Glass pill (`glassEffect` on macOS 26, a
+material capsule earlier) and the selected label zooms
+slightly under the glass. One control, one look — a chooser
+reads as "pick a tab" everywhere in the settings.
+
 ## Monitors
 
 **One representation: monitor cards.** The old tab rendered
