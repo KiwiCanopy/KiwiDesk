@@ -66,11 +66,13 @@ struct SettingsView: View {
     @ViewBuilder private var detail: some View {
         switch selection {
         case .spaces:
-            SpacesTab(model: model)
+            SpacesSection(model: model)
+        case .layoutDefaults:
+            LayoutDefaultsSection(model: model)
         case .monitors:
             CanvasTab(model: model)
         case .appearance:
-            AppBarTab(model: model)
+            AppearanceSection(model: model)
         case .behavior:
             BehaviorSection(model: model)
         case .profiles:

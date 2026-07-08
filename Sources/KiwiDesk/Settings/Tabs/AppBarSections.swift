@@ -1,35 +1,12 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The App Bar tab: the global look shared by every layout's bar
-/// at the top, then a per-layout section for each layout that
-/// can show one (monocle, scrolling). A layout's checkbox toggles
-/// its bar on; while on, an accordion exposes per-field overrides
-/// (unchecked rows inherit the global value shown grayed out).
-struct AppBarTab: View {
-    @ObservedObject var model: SettingsModel
-
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                GlobalAppBarSection(
-                    style: $model.config.settings.appBarStyle
-                )
-                LayoutAppBarSection(
-                    title: "Monocle",
-                    bar: $model.config.settings.monocle.appBar,
-                    global: model.config.settings.appBarStyle
-                )
-                LayoutAppBarSection(
-                    title: "Scrolling",
-                    bar: $model.config.settings.scrolling.appBar,
-                    global: model.config.settings.appBarStyle
-                )
-            }
-            .padding(16)
-        }
-    }
-}
+// The App Bar sections are hosted by AppearanceSection (#68
+// §3.2): the global look shared by every layout's bar, then a
+// per-layout section for each layout that can show one
+// (monocle, scrolling). A layout's checkbox toggles its bar
+// on; while on, an accordion exposes per-field overrides
+// (unchecked rows inherit the global value shown grayed out).
 
 /// The global `app_bar.*` look every layout inherits.
 struct GlobalAppBarSection: View {

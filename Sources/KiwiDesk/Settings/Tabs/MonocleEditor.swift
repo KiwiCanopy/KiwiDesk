@@ -8,7 +8,10 @@ struct MonocleEditor: View {
     @ObservedObject var model: SettingsModel
 
     var body: some View {
-        SettingsSection("Monocle") {
+        SettingsSection(
+            "Monocle",
+            symbol: LayoutMode.monocle.glyph
+        ) {
             Picker(
                 "Focus orientation",
                 selection: $model.config.settings.monocle

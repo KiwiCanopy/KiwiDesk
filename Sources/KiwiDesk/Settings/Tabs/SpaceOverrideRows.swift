@@ -1,74 +1,27 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Per-space layout overrides (issue #17). Pick a space, then tune
-/// only the fields its current mode overrides — each row inherits
-/// the global value (gray) until its checkbox is ticked. Mirrors
-/// the app-bar override controls, keyed by space instead of layout.
-struct SpaceOverridesEditor: View {
+/// The per-space layout override rows (issue #17): the fields
+/// the space's current mode can override, each inheriting the
+/// global value (gray) until its checkbox is ticked. Rendered
+/// inline inside a space row's "Customize" expander (#68 §3.2)
+/// — the row set mirrors the app-bar override controls, keyed
+/// by space instead of layout.
+struct SpaceOverrideRows: View {
     @ObservedObject var model: SettingsModel
-    @State private var selected: SpaceID?
+    let space: SpaceID
 
     var body: some View {
-        SettingsSection("Per-space overrides") {
-            if model.config.spaces.isEmpty {
-                placeholder(
-                    "Add a space above to set per-space overrides."
-                )
-            } else {
-                caption
-                spacePicker
-                Divider()
-                modeHeader
-                modeRows
-            }
-        }
-    }
-
-    // MARK: - Chrome
-
-    private var caption: some View {
-        Text(
-            "Gray = inherit the global value. Check a box to "
-                + "override just that field for the chosen space."
-        )
-        .font(.caption)
-        .foregroundStyle(.secondary)
-    }
-
-    private var spacePicker: some View {
-        Picker("Space", selection: spaceBinding) {
-            ForEach(model.config.spaces, id: \.raw) { space in
-                Text(space.raw).tag(space)
-            }
-        }
-    }
-
-    private var modeHeader: some View {
-        Text("Mode: \(mode.rawValue.capitalized)")
-            .font(.subheadline)
-            .fontWeight(.medium)
-    }
-
-    private func placeholder(_ text: String) -> some View {
-        Text(text)
+        VStack(alignment: .leading, spacing: 8) {
+            Text(
+                "Gray = inherit the global value (Layout "
+                    + "Defaults). Check a box to override "
+                    + "just that field for this space."
+            )
             .font(.caption)
             .foregroundStyle(.secondary)
-    }
-
-    // MARK: - Selection
-
-    /// The chosen space, falling back to the first when the
-    /// selection was removed or never set.
-    private var space: SpaceID {
-        if let selected, model.config.spaces.contains(selected) {
-            return selected
+            modeRows
         }
-        return model.config.spaces.first ?? SpaceID("")
-    }
-
-    private var spaceBinding: Binding<SpaceID> {
-        Binding(get: { space }, set: { selected = $0 })
     }
 
     private var mode: LayoutMode {
@@ -76,6 +29,12 @@ struct SpaceOverridesEditor: View {
     }
 
     private var g: TilingSettings { model.config.settings }
+
+    private func placeholder(_ text: String) -> some View {
+        Text(text)
+            .font(.caption)
+            .foregroundStyle(.secondary)
+    }
 
     // MARK: - Per-mode rows
 
@@ -88,7 +47,9 @@ struct SpaceOverridesEditor: View {
         case .grid: gridRows
         case .monocle: monocleRows
         case .floating:
-            placeholder("Floating has no per-space overrides.")
+            placeholder(
+                "Floating has no per-space overrides."
+            )
         }
     }
 
@@ -96,10 +57,15 @@ struct SpaceOverridesEditor: View {
     private var scrollingRows: some View {
         OverridePickerRow(
             label: "Orientation",
-            value: binding(\.scrolling.override, space, \.orientation),
+            value: binding(
+                \.scrolling.override,
+                space,
+                \.orientation
+            ),
             global: g.scrolling.orientation,
             options: [
-                (.horizontal, "Horizontal"), (.vertical, "Vertical"),
+                (.horizontal, "Horizontal"),
+                (.vertical, "Vertical"),
             ]
         )
         OverridePickerRow(
@@ -139,13 +105,21 @@ struct SpaceOverridesEditor: View {
     private var stackRows: some View {
         OverrideStepperRow(
             label: "Master count",
-            value: binding(\.stack.override, space, \.masterCount),
+            value: binding(
+                \.stack.override,
+                space,
+                \.masterCount
+            ),
             global: g.stack.masterCount,
             range: 1...5
         )
         OverrideFractionRow(
             label: "Master ratio",
-            value: binding(\.stack.override, space, \.masterRatio),
+            value: binding(
+                \.stack.override,
+                space,
+                \.masterRatio
+            ),
             global: g.stack.masterRatio
         )
         OverridePickerRow(
@@ -211,19 +185,25 @@ struct SpaceOverridesEditor: View {
     private var monocleRows: some View {
         OverridePickerRow(
             label: "Orientation",
-            value: binding(\.monocle.override, space, \.orientation),
+            value: binding(
+                \.monocle.override,
+                space,
+                \.orientation
+            ),
             global: g.monocle.orientation,
             options: [
-                (.horizontal, "Horizontal"), (.vertical, "Vertical"),
+                (.horizontal, "Horizontal"),
+                (.vertical, "Vertical"),
             ]
         )
     }
 
     // MARK: - Binding helper
 
-    /// One generic bridge from an override map's optional field to a
-    /// `Binding<T?>`. Setting a field to nil that empties the
-    /// override drops the map entry, mirroring the Lua command.
+    /// One generic bridge from an override map's optional field
+    /// to a `Binding<T?>`. Setting a field to nil that empties
+    /// the override drops the map entry, mirroring the Lua
+    /// command.
     private func binding<O: SpaceLayoutOverride, T>(
         _ map: WritableKeyPath<TilingSettings, [SpaceID: O]>,
         _ space: SpaceID,
@@ -237,7 +217,8 @@ struct SpaceOverridesEditor: View {
             },
             set: { v in
                 var o =
-                    model.config.settings[keyPath: map][space] ?? O()
+                    model.config.settings[keyPath: map][space]
+                    ?? O()
                 o[keyPath: field] = v
                 model.config.settings[keyPath: map][space] =
                     o.isEmpty ? nil : o

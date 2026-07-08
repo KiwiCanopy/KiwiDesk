@@ -7,6 +7,7 @@ import SwiftUI
 enum SettingsDestination: String, CaseIterable, Identifiable {
     // This Profile
     case spaces
+    case layoutDefaults
     case monitors
     case appearance
     case behavior
@@ -19,7 +20,8 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 
     static let thisProfile: [SettingsDestination] = [
-        .spaces, .monitors, .appearance, .behavior,
+        .spaces, .layoutDefaults, .monitors, .appearance,
+        .behavior,
     ]
     static let wholeApp: [SettingsDestination] = [
         .profiles, .shortcuts, .appRules, .general,
@@ -28,6 +30,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .spaces: return "Spaces"
+        case .layoutDefaults: return "Layout Defaults"
         case .monitors: return "Monitors"
         case .appearance: return "Appearance"
         case .behavior: return "Behavior"
@@ -44,6 +47,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
     var symbol: String {
         switch self {
         case .spaces: return "rectangle.split.3x1"
+        case .layoutDefaults: return "slider.horizontal.3"
         case .monitors: return "display.2"
         case .appearance: return "paintbrush.fill"
         case .behavior: return "cursorarrow.motionlines"
@@ -59,6 +63,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
     var tint: Color {
         switch self {
         case .spaces: return .indigo
+        case .layoutDefaults: return .teal
         case .monitors: return .blue
         case .appearance: return .purple
         case .behavior: return .orange

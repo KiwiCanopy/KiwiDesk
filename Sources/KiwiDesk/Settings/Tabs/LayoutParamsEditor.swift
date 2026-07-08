@@ -14,7 +14,7 @@ struct LayoutParamsEditor: View {
     }
 
     private var bsp: some View {
-        SettingsSection("BSP") {
+        SettingsSection("BSP", symbol: LayoutMode.bsp.glyph) {
             Picker(
                 "Split strategy",
                 selection: $model.config.settings.bsp.strategy
@@ -37,7 +37,10 @@ struct LayoutParamsEditor: View {
     }
 
     private var stack: some View {
-        SettingsSection("Stack") {
+        SettingsSection(
+            "Stack",
+            symbol: LayoutMode.stack.glyph
+        ) {
             Stepper(
                 "Master count: "
                     + "\(model.config.settings.stack.masterCount)",

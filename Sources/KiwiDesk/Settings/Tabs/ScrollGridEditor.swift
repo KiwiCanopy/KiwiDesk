@@ -97,7 +97,10 @@ struct ScrollGridEditor: View {
     }
 
     private var scrolling: some View {
-        SettingsSection("Scrolling") {
+        SettingsSection(
+            "Scrolling",
+            symbol: LayoutMode.scrolling.glyph
+        ) {
             Picker("Size unit", selection: sizeUnitBinding) {
                 Text("Auto").tag(SizeUnit.auto)
                 Text("Points").tag(SizeUnit.points)
@@ -205,7 +208,10 @@ struct ScrollGridEditor: View {
     }
 
     private var grid: some View {
-        SettingsSection("Grid") {
+        SettingsSection(
+            "Grid",
+            symbol: LayoutMode.grid.glyph
+        ) {
             Picker(
                 "Grid type",
                 selection: $model.config.settings.grid.type
