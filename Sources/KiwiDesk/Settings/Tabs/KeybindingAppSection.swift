@@ -26,7 +26,7 @@ struct ApplicationsSection: View {
             } label: {
                 Label("Add application", systemImage: "plus")
             }
-            .buttonStyle(.borderless)
+            .buttonStyle(.bordered)
         }
     }
 
@@ -42,6 +42,24 @@ struct ApplicationsSection: View {
                     for: binding.wrappedValue,
                     in: bindings
                 ),
+                preflight: { combo in
+                    RecorderPreflight.rejection(
+                        combo: combo,
+                        excluding: {
+                            [id = binding.wrappedValue.id] in
+                            $0.id == id
+                        },
+                        bindings: $bindings,
+                        // Id-based (#68 review M2): Steal
+                        // mutates the array before this runs.
+                        commit: {
+                            record(
+                                $0,
+                                id: binding.wrappedValue.id
+                            )
+                        }
+                    )
+                },
                 onRecord: { record($0, into: binding) },
                 onClear: { binding.wrappedValue.combo = "" }
             )
@@ -57,6 +75,7 @@ struct ApplicationsSection: View {
                 from: overrideBase
             )
         )
+        .id(binding.wrappedValue.id.uuidString)
     }
 
     private func record(
@@ -66,6 +85,21 @@ struct ApplicationsSection: View {
         binding.wrappedValue.combo = combo
         model.noteRecordedCombo(
             binding.wrappedValue,
+            in: bindings
+        )
+    }
+
+    /// Looks the row up by id at write time — safe after any
+    /// structural mutation of the bindings array.
+    private func record(_ combo: String, id: UUID) {
+        guard
+            let index = bindings.firstIndex(where: {
+                $0.id == id
+            })
+        else { return }
+        bindings[index].combo = combo
+        model.noteRecordedCombo(
+            bindings[index],
             in: bindings
         )
     }

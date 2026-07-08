@@ -36,6 +36,11 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// Spaces assigned the Main role (they follow the current
     /// main display); profile-scoped, stored once per profile.
     public var mainSpaces: Set<SpaceID> = []
+    /// The explicitly designated rehome target (#68): where
+    /// windows land when a profile switch drops their space.
+    /// Profile-scoped (rides the profile JSON, like the pins);
+    /// nil falls back to the order's first surviving space.
+    public var fallbackSpace: SpaceID?
     /// Windows that never tile (`float_rules`).
     public var floatRules: [String] = []
     /// Profile bound per native macOS Space (Mission Control
@@ -48,9 +53,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
 
     /// Renames a space everywhere it is referenced (#13): the
     /// `spaces` list, `spaceModes`, `appRules`, the monitor pin
-    /// and Main-role maps, the per-space
-    /// `settings.gapsOverride` / `settings.placementOverride`
-    /// maps, and the space-targeting Lua inside every
+    /// and Main-role maps, the fallback-space reference, every
+    /// per-space settings map (`TilingSettings.renameSpace` —
+    /// gaps, placement, icons, layout overrides), and the
+    /// space-targeting Lua inside every
     /// keybinding. A no-op returning `false` when `from` is
     /// unknown or `to` already exists (the caller keeps the old
     /// name); renaming to the same id succeeds trivially.
@@ -81,16 +87,8 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         if mainSpaces.remove(from) != nil {
             mainSpaces.insert(to)
         }
-        if let gaps = settings.gapsOverride.removeValue(
-            forKey: from
-        ) {
-            settings.gapsOverride[to] = gaps
-        }
-        if let placement = settings.placementOverride
-            .removeValue(forKey: from)
-        {
-            settings.placementOverride[to] = placement
-        }
+        if fallbackSpace == from { fallbackSpace = to }
+        settings.renameSpace(from: from, to: to)
         for (app, space) in appRules where space == from {
             appRules[app] = to
         }
@@ -110,19 +108,23 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         return true
     }
 
-    /// Moves `space` to the front of the ordered list. A no-op
-    /// when `space` is absent or is already the first element.
-    /// This is the primitive a future fallback-space chooser
-    /// (#68) will call. Both save paths capture the same order
-    /// since `applyProfileScopedState` reconciles the live
-    /// order via `WorkspaceManager.reorder` (#75/#55), so the
-    /// reorder reaches `Profile.spaces` from either one.
-    public mutating func moveToFirst(_ space: SpaceID) {
-        guard let index = spaces.firstIndex(of: space),
-            index != 0
-        else { return }
-        spaces.remove(at: index)
-        spaces.insert(space, at: 0)
+    /// Deletes a space and every profile-scoped reference it
+    /// holds (#68): the list entry, its mode, monitor pin,
+    /// Main role, fallback designation, and all per-space
+    /// settings maps (`TilingSettings.removeSpace`). Without
+    /// this, a pin or override left behind keeps the space in
+    /// `Profile.declaredSpaces` and the next authoritative
+    /// profile load resurrects it. Deliberately does NOT touch
+    /// `appRules` (unlike `renameSpace`): app rules are
+    /// global, and another profile may still declare a space
+    /// of this name — a per-profile delete must not drop them.
+    public mutating func removeSpace(_ space: SpaceID) {
+        spaces.removeAll { $0 == space }
+        spaceModes[space] = nil
+        spacePins[space] = nil
+        mainSpaces.remove(space)
+        if fallbackSpace == space { fallbackSpace = nil }
+        settings.removeSpace(space)
     }
 
     /// Only the global fields persist in the sidecar — the
@@ -174,18 +176,12 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// through a hand-edited sidecar so a `[""]` key never reaches
     /// the writer. Glyph/symbol names are unaffected.
     private mutating func dropEmptyNamedSpaces() {
-        spaces.removeAll { $0.raw.isEmpty }
-        spaceModes = spaceModes.filter { !$0.key.raw.isEmpty }
-        spacePins = spacePins.filter { !$0.key.raw.isEmpty }
-        mainSpaces = mainSpaces.filter { !$0.raw.isEmpty }
+        // ONE definition of the reference sites (removeSpace)
+        // instead of a third hand-mirror of the list; only the
+        // appRules *value* filter stays separate — decode-time
+        // sanitization removeSpace rightly skips.
+        removeSpace(SpaceID(""))
         appRules = appRules.filter { !$0.value.raw.isEmpty }
-        settings.gapsOverride = settings.gapsOverride.filter {
-            !$0.key.raw.isEmpty
-        }
-        settings.placementOverride =
-            settings.placementOverride.filter {
-                !$0.key.raw.isEmpty
-            }
     }
 
     /// JSON object keys are strings; native-space numbers are

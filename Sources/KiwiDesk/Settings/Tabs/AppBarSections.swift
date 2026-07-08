@@ -1,35 +1,12 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The App Bar tab: the global look shared by every layout's bar
-/// at the top, then a per-layout section for each layout that
-/// can show one (monocle, scrolling). A layout's checkbox toggles
-/// its bar on; while on, an accordion exposes per-field overrides
-/// (unchecked rows inherit the global value shown grayed out).
-struct AppBarTab: View {
-    @ObservedObject var model: SettingsModel
-
-    var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                GlobalAppBarSection(
-                    style: $model.config.settings.appBarStyle
-                )
-                LayoutAppBarSection(
-                    title: "Monocle",
-                    bar: $model.config.settings.monocle.appBar,
-                    global: model.config.settings.appBarStyle
-                )
-                LayoutAppBarSection(
-                    title: "Scrolling",
-                    bar: $model.config.settings.scrolling.appBar,
-                    global: model.config.settings.appBarStyle
-                )
-            }
-            .padding(16)
-        }
-    }
-}
+// The App Bar sections are hosted by AppearanceSection (#68
+// §3.2): the global look shared by every layout's bar, then a
+// per-layout section for each layout that can show one
+// (monocle, scrolling). A layout's checkbox toggles its bar
+// on; while on, an accordion exposes per-field overrides
+// (unchecked rows inherit the global value shown grayed out).
 
 /// The global `app_bar.*` look every layout inherits.
 struct GlobalAppBarSection: View {
@@ -47,29 +24,49 @@ struct GlobalAppBarSection: View {
             appearance
         }
         SettingsSection("Global colors") {
-            colors
+            LazyVGrid(
+                columns: [
+                    GridItem(.flexible(), alignment: .leading),
+                    GridItem(.flexible(), alignment: .leading),
+                ],
+                alignment: .leading,
+                spacing: 8
+            ) {
+                colors
+            }
         }
     }
 
     @ViewBuilder private var behavior: some View {
-        Picker("Position", selection: $style.position) {
-            ForEach(AppBarOptions.position, id: \.0) {
-                Text($0.1).tag($0.0)
+        DropdownRow(label: "Position") {
+            Picker("Position", selection: $style.position) {
+                ForEach(AppBarOptions.position, id: \.0) {
+                    Text($0.1).tag($0.0)
+                }
             }
         }
-        Picker("Style", selection: $style.style) {
-            ForEach(AppBarOptions.style, id: \.0) {
-                Text($0.1).tag($0.0)
+        DropdownRow(label: "Style") {
+            Picker("Style", selection: $style.style) {
+                ForEach(AppBarOptions.style, id: \.0) {
+                    Text($0.1).tag($0.0)
+                }
             }
         }
-        Picker("Active item", selection: $style.activeStyle) {
-            ForEach(AppBarOptions.activeStyle, id: \.0) {
-                Text($0.1).tag($0.0)
+        DropdownRow(label: "Active item") {
+            Picker(
+                "Active item",
+                selection: $style.activeStyle
+            ) {
+                ForEach(AppBarOptions.activeStyle, id: \.0) {
+                    Text($0.1).tag($0.0)
+                }
             }
         }
-        Picker("Content", selection: $style.content) {
-            ForEach(AppBarOptions.content, id: \.0) {
-                Text($0.1).tag($0.0)
+        DropdownRow(label: "Content") {
+            Picker("Content", selection: $style.content) {
+                ForEach(AppBarOptions.content, id: \.0) {
+                    Text($0.1).tag($0.0)
+                }
             }
         }
         Toggle(
@@ -145,35 +142,51 @@ struct GlobalAppBarSection: View {
     }
 }
 
-/// One layout's bar: the enable checkbox and, while enabled, the
-/// override accordion.
+/// One layout's bar: the enable checkbox and, while enabled,
+/// the override rows — visible but inherited (#68 §3.4), no
+/// accordion: dimmed rows show the global value they inherit,
+/// the checkbox unlocks a row, and unlocked rows carry the
+/// accent styling from `OverrideChrome`.
 struct LayoutAppBarSection: View {
     let title: String
+    let mode: LayoutMode
     @Binding var bar: LayoutAppBar
     let global: AppBarStyle
-    @State private var expanded = true
+    /// Collapsed by default: the override rows (menu pickers
+    /// especially) are the Appearance tab's dominant mount
+    /// cost, so a `DisclosureGroup` keeps them unbuilt until
+    /// the user opens them — the enable toggle stays outside.
+    @State private var overridesExpanded = false
 
     var body: some View {
-        SettingsSection(title) {
+        SettingsSection(title + " bar", symbol: mode.glyph) {
             Toggle("Show app bar", isOn: $bar.enabled)
             if bar.enabled {
                 DisclosureGroup(
-                    "Overrides — unchecked rows inherit the "
-                        + "global value",
-                    isExpanded: $expanded
+                    "Overrides",
+                    isExpanded: $overridesExpanded
                 ) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        behaviorOverrides
-                        appearanceOverrides
-                        LayoutAppBarColorOverrides(
-                            bar: $bar,
-                            global: global
-                        )
-                    }
-                    .padding(.top, 4)
+                    overrides
                 }
             }
         }
+    }
+
+    /// Split out so `DisclosureGroup` builds it lazily.
+    @ViewBuilder private var overrides: some View {
+        Text(
+            "Dimmed rows inherit the global value — "
+                + "tick a box to override just that "
+                + "field for this layout."
+        )
+        .font(.caption)
+        .foregroundStyle(.secondary)
+        behaviorOverrides
+        appearanceOverrides
+        LayoutAppBarColorOverrides(
+            bar: $bar,
+            global: global
+        )
     }
 
     @ViewBuilder private var behaviorOverrides: some View {

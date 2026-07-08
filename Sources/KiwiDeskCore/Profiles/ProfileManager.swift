@@ -11,14 +11,18 @@ public enum ProfileMatch: Equatable {
     case none
 }
 
-/// Thrown for profile names that cannot become file names.
+/// Thrown for profile names that cannot become file names, and
+/// for renames that would clobber an existing profile.
 public enum ProfileError: Error, CustomStringConvertible {
     case invalidName(String)
+    case nameTaken(String)
 
     public var description: String {
         switch self {
         case .invalidName(let name):
             return "invalid profile name: '\(name)'"
+        case .nameTaken(let name):
+            return "a profile named '\(name)' already exists"
         }
     }
 }
@@ -128,6 +132,41 @@ public final class ProfileManager {
                 try write(heir)
             }
         }
+    }
+
+    /// Renames a stored profile via an atomic file move, then
+    /// rewrites the JSON's own name field. NOT write-new-then-
+    /// remove-old: on a case-insensitive volume (default APFS)
+    /// a case-only rename ("work" → "Work") resolves both
+    /// names to ONE file, and the remove leg would delete the
+    /// just-renamed profile. `moveItem` handles the case
+    /// change in place; any other existing destination is
+    /// rejected, never clobbered (`fileExists` matches case-
+    /// insensitively there, so "a" → "b" beside "B.json" is
+    /// caught too). Same-name is a no-op. Carries the adopted
+    /// `currentName` along. The `KiwiCore` facade chases
+    /// external references (native-Space bindings). Accepted
+    /// non-atomicity: if the name-field rewrite after the
+    /// move fails, the file is at the new name with the old
+    /// name inside — a tiny window (same directory, just
+    /// proven writable), traded for the case-safety above.
+    func rename(from old: String, to new: String) throws {
+        guard old != new else { return }
+        var profile = try read(name: old)
+        let source = url(for: try validated(old))
+        let destination = url(for: try validated(new))
+        let files = FileManager.default
+        let caseOnly =
+            old.caseInsensitiveCompare(new) == .orderedSame
+        if !caseOnly,
+            files.fileExists(atPath: destination.path)
+        {
+            throw ProfileError.nameTaken(new)
+        }
+        try files.moveItem(at: source, to: destination)
+        profile.name = new
+        try write(profile)
+        if currentName == old { currentName = new }
     }
 
     /// Re-designates a count's default: flags `name`, clears

@@ -6,6 +6,10 @@ import KiwiDeskCore
 struct NavCommand: Identifiable, Hashable {
     let label: String
     let lua: String
+    /// Optional space icon (#68 §6.5) shown before the label
+    /// — recognition sugar only; labels stay authoritative
+    /// (the import classifier matches on label + Lua).
+    var icon: String? = nil
     var id: String { lua }
 }
 
@@ -36,69 +40,95 @@ enum KeybindingCatalog {
     /// byte-for-byte); other magnitudes stay Custom.
     static let resizeStep = 50
 
-    /// Navigation grouped into dropdowns. Space-specific rows
-    /// are generated from the user's defined spaces, so adding
-    /// a space adds its move/focus commands here automatically.
+    /// The four directional focus rows (#68 §3.6.1 Focus).
+    static let focusDirections: [NavCommand] = directions.map {
+        dir,
+        phrase in
+        NavCommand(
+            label: "Focus window \(phrase)",
+            lua: "KiwiDesk.focus(\"\(dir)\")"
+        )
+    }
+
+    /// One "Go to Space …" row per defined space.
+    static func goToSpace(
+        _ spaces: [SpaceID],
+        icons: [SpaceID: String] = [:]
+    ) -> [NavCommand] {
+        spaces.map { space in
+            NavCommand(
+                label: "Go to Space \(space.raw)",
+                lua: "KiwiDesk.focus_virtual_space"
+                    + "(\(spaceArg(space)))",
+                icon: icons[space]
+            )
+        }
+    }
+
+    /// The four directional swap rows (Move Windows).
+    static let swapDirections: [NavCommand] = directions.map {
+        dir,
+        phrase in
+        NavCommand(
+            label: "Swap with window \(phrase)",
+            lua: "KiwiDesk.swap(\"\(dir)\")"
+        )
+    }
+
+    /// The per-space "Move to …" / "… & follow" row pairs.
+    static func moveToSpace(
+        _ spaces: [SpaceID],
+        icons: [SpaceID: String] = [:]
+    ) -> [NavCommand] {
+        spaces.flatMap { space -> [NavCommand] in
+            let arg = spaceArg(space)
+            return [
+                NavCommand(
+                    label: "Move to Space \(space.raw)",
+                    lua:
+                        "KiwiDesk.move_to_virtual_space(\(arg))",
+                    icon: icons[space]
+                ),
+                NavCommand(
+                    label:
+                        "Move to Space \(space.raw) & follow",
+                    lua: "KiwiDesk."
+                        + "move_to_virtual_space_and_follow"
+                        + "(\(arg))",
+                    icon: icons[space]
+                ),
+            ]
+        }
+    }
+
+    /// Navigation grouped for the import classifier (#4): the
+    /// same commands the sections render, so a recovered row
+    /// matches byte-for-byte.
     static func navigationGroups(
         spaces: [SpaceID]
     ) -> [NavGroup] {
-        var focus = directions.map { dir, phrase in
-            NavCommand(
-                label: "Focus window \(phrase)",
-                lua: "KiwiDesk.focus(\"\(dir)\")"
-            )
-        }
-        // Going to a space is a focus action, so it shares the
-        // Focus group rather than its own accordion.
-        for space in spaces {
-            focus.append(
-                NavCommand(
-                    label: "Go to Space \(space.raw)",
-                    lua: "KiwiDesk.focus_virtual_space"
-                        + "(\(spaceArg(space)))"
-                )
-            )
-        }
-        var movement = directions.map { dir, phrase in
-            NavCommand(
-                label: "Swap with window \(phrase)",
-                lua: "KiwiDesk.swap(\"\(dir)\")"
-            )
-        }
-        for space in spaces {
-            let arg = spaceArg(space)
-            movement.append(
-                NavCommand(
-                    label: "Move to Space \(space.raw)",
-                    lua: "KiwiDesk.move_to_virtual_space(\(arg))"
-                )
-            )
-            movement.append(
-                NavCommand(
-                    label: "Move to Space \(space.raw) & follow",
-                    lua:
-                        "KiwiDesk.move_to_virtual_space_and_follow"
-                        + "(\(arg))"
-                )
-            )
-        }
-        return [
-            NavGroup(title: "Focus", commands: focus),
+        [
+            NavGroup(
+                title: "Focus",
+                commands: focusDirections + goToSpace(spaces)
+            ),
             NavGroup(
                 title: "Window Management",
-                commands: resizeAndFloat + movement
+                commands: resizeAndFloat + swapDirections
+                    + moveToSpace(spaces)
             ),
         ]
     }
 
-    /// Window-size and float presets, shown alongside movement in
-    /// the Window Management group. Enlarge/Shrink nudge the single
-    /// bsp split / stack master ratio by `resizeStep` — there is no
-    /// independent width/height today, so this is one pair on the
-    /// `"x"` axis, not four (true 2-axis resize is deferred, #56).
+    /// Window-size and float presets (Size & Float, §3.6.1).
+    /// Enlarge/Shrink nudge the single bsp split / stack master
+    /// ratio by `resizeStep` — there is no independent
+    /// width/height today, so this is one pair on the `"x"`
+    /// axis, not four (true 2-axis resize is deferred, #56; a
+    /// configurable step is #58 — both land in this group).
     /// Resize is a no-op in monocle/grid/floating; the section
     /// caption states this and the docs echo it.
-    private static let resizeAndFloat: [NavCommand] = [
+    static let resizeAndFloat: [NavCommand] = [
         NavCommand(
             label: "Shrink",
             lua: "KiwiDesk.resize(\"x\", -\(resizeStep))"
@@ -136,6 +166,37 @@ enum KeybindingCatalog {
             label: "Switch to \(name)",
             lua: "KiwiDesk.switch_mode(\(quote(name)))"
         )
+    }
+
+    /// Renames a mode across `modes`: the mode itself plus
+    /// every switch-mode row targeting it, rewritten through
+    /// `switchModeCommand` so writer and import classifier
+    /// keep matching byte-for-byte (#4). Pure — the tested
+    /// core of the Shortcuts header's rename.
+    static func renameMode(
+        in modes: [KeyMode],
+        from old: String,
+        to new: String
+    ) -> [KeyMode] {
+        // `default` is the config's anchor mode ("always the
+        // active one after the app starts") — no entry point
+        // may rename it, today's UI gate or a future CLI's.
+        guard old != KeyMode.defaultName else { return modes }
+        let oldCmd = switchModeCommand(old)
+        let newCmd = switchModeCommand(new)
+        return modes.map { mode in
+            var mode = mode
+            if mode.name == old { mode.name = new }
+            mode.bindings = mode.bindings.map { binding in
+                var binding = binding
+                if binding.lua == oldCmd.lua {
+                    binding.lua = newCmd.lua
+                    binding.label = newCmd.label
+                }
+                return binding
+            }
+            return mode
+        }
     }
 
     /// The Open-Applications action that pulls or launches `name`.

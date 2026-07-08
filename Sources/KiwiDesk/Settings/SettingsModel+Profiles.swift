@@ -100,22 +100,10 @@ extension SettingsModel {
 
     // MARK: - Editing a stored profile (#18)
 
-    /// Switches the dashboard's edit target. Passing `nil` (or the
-    /// active profile's own name) returns to live editing; any
-    /// other saved profile enters edit-without-activating mode.
-    /// Pending edits are discarded on switch — the caller confirms
-    /// first.
-    func selectEditTarget(_ name: String?) {
-        // Selecting the currently-loaded profile is just editing
-        // live: it is the same data, on the live save path.
-        let target = (name == activeProfile) ? nil : name
-        guard target != editingProfile else { return }
-        editingProfile = target
-        reload()
-    }
-
-    // `saveEditedProfile` / `saveEditedProfileCopy` live with
-    // the rest of the stored-profile editing surface in
+    // `selectEditTarget` lives with the edit-mode state machine
+    // in `SettingsModel+EditTarget.swift` (#64);
+    // `saveEditedProfile` / `saveEditedProfileCopy` with the
+    // rest of the stored-profile editing surface in
     // `SettingsModel+ProfileOverrides.swift`.
 
     func loadProfile(named name: String) {
@@ -140,6 +128,30 @@ extension SettingsModel {
             args: [.string(name)]
         )
         refreshProfiles()
+    }
+
+    /// Renames a saved profile. Immediate, like Delete / make
+    /// default (pending edits are discarded by the reload).
+    /// The core facade owns the whole chase — file, adopted
+    /// name, runtime native-Space bindings, and the sidecar's
+    /// binding lines — so the model only retargets its edit
+    /// session and reloads.
+    /// Collisions are the core's call (the only
+    /// case-insensitive tier) — a rejection surfaces as
+    /// `profileWarning`, never a silent dead click.
+    func renameProfile(from old: String, to new: String) {
+        let name = new.trimmed
+        guard name != old, !name.isEmpty else { return }
+        do {
+            try core.renameProfile(from: old, to: name)
+        } catch {
+            profileWarning = "Renaming failed: \(error)"
+            return
+        }
+        if target == .storedProfile(old) {
+            target = .storedProfile(name)
+        }
+        reload()
     }
 
     // MARK: - Presets (#53)
@@ -193,6 +205,15 @@ extension SettingsModel {
         case nil:
             return .auto(nil)
         }
+    }
+
+    /// Human-readable monitor name, falling back to the raw
+    /// fingerprint when that display isn't connected — used by
+    /// the Monitors cards and the profile rows (§3.15).
+    func monitorName(_ fingerprint: String) -> String {
+        displays.first {
+            $0.fingerprint == fingerprint
+        }?.name ?? fingerprint
     }
 
     /// The current main display's fingerprint, for the Main

@@ -6,7 +6,9 @@ import SwiftUI
 /// Entry point: permissions, menu bar, and windows. All window
 /// management logic lives in `KiwiCore`.
 @MainActor
-final class AppDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate,
+    NSWindowDelegate
+{
     private let core = KiwiCore()
     private let permissions = PermissionMonitor()
     private var statusItem: StatusItemController?
@@ -15,6 +17,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private lazy var dashboard = SettingsWindowController(
         core: core
     )
+    private let configIssues = ConfigIssuesWindowController()
     /// Held strongly so the source stays active for the
     /// lifetime of the process.
     private var sigtermSource: DispatchSourceSignal?
@@ -27,7 +30,33 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem.onOpenDashboard = { [weak self] in
             self?.dashboard.show()
         }
+        // The quick menu's dynamic entries (#68 §3.10).
+        statusItem.profilesProvider = { [weak self] in
+            (
+                active: self?.core.profiles.currentName,
+                all: self?.core.profiles.list() ?? []
+            )
+        }
+        statusItem.onLoadProfile = { [weak self] name in
+            _ = self?.core.execute(
+                "load_profile",
+                args: [.string(name)]
+            )
+        }
+        statusItem.onShowConfigIssues = { [weak self] in
+            self?.configIssues.show()
+        }
         self.statusItem = statusItem
+
+        // The error surface (#68 §3.7): the badge and the
+        // standalone panel track the last config load.
+        configIssues.model.onReload = { [weak self] in
+            self?.core.loadConfig()
+        }
+        core.onConfigIssuesChange = { [weak self] issues in
+            self?.statusItem?.setConfigError(!issues.isEmpty)
+            self?.configIssues.model.issues = issues
+        }
 
         // Reflect the active keybinding mode on the menu bar
         // icon (custom modes carry their own indicator).
@@ -123,18 +152,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         window.title = "KiwiDesk Setup"
         window.contentView = NSHostingView(rootView: view)
         window.isReleasedWhenClosed = false
+        window.delegate = self
         window.center()
         onboardingWindow = window
 
-        NSApp.setActivationPolicy(.regular)
+        NSApp.activateAsRegular()
         window.makeKeyAndOrderFront(nil)
         NSApp.activate()
     }
 
     private func closeOnboarding() {
+        // Closing routes through `windowWillClose`, which does
+        // the demote + teardown (also covers the red-button
+        // close, which the "finish" button used to bypass).
         onboardingWindow?.close()
+    }
+
+    func windowWillClose(_ notification: Notification) {
+        guard
+            let closing = notification.object as? NSWindow,
+            closing === onboardingWindow
+        else { return }
         onboardingWindow = nil
-        NSApp.setActivationPolicy(.accessory)
+        // Demote only if no other content window remains (the
+        // still-visible closing window is excluded).
+        NSApp.deactivateIfNoWindows(excluding: closing)
     }
 
     /// Opens System Settings › Desktop & Dock, where "Displays

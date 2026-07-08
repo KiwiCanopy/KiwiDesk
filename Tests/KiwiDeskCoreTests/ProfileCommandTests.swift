@@ -267,9 +267,10 @@ struct ProfileCommandTests {
             "save_profile",
             args: [.string("desk")]
         )
-        // Reload runs init.lua (the starter template declares
-        // set_gap_global(10)) — the active profile must go
-        // back on top of that base state.
+        // Reload runs init.lua and resets to the built-in
+        // defaults (the starter template is comments-only) —
+        // the active profile must go back on top of that
+        // base state.
         core.loadConfig()
         #expect(
             core.tiler.settings.gapsGlobal == .uniform(30)

@@ -95,7 +95,9 @@ GUI lives in `Sources/KiwiDesk` (`Settings/`, `Settings/Tabs/`).
 5. **Document:** any user-visible behavior change updates the
    matching docs in the same change set — `docs/configuration.md`
    (Lua config & behavior), `docs/cli.md` (commands, events, IPC),
-   `docs/integrations.md` (recipes) — and `plan/` when the design
+   `docs/integrations.md` (recipes),
+   `docs/design-decisions.md` (when a settled product/UX
+   decision is made or changed) — and `plan/` when the design
    itself shifts. Code and docs must never describe different
    behavior.
 6. **Review:** once a substantial change is finished, verified,
@@ -228,6 +230,22 @@ Keep this list updated whenever a recurring mistake is found.
   drive animations from a single global timer.
 - **`AXObserver` callbacks arrive on the thread's run loop** that
   registered them; keep observer registration on the main thread.
+- **SwiftUI cursor changes use `NSCursor.set()`, never
+  push/pop.** A view removed under the pointer (a link that
+  deletes itself, a row rebuilt by rename) never delivers the
+  balancing `onHover(false)`, and hover interleaved with a drag
+  gesture pops the wrong entry — a cursor stack cannot balance.
+  Bit the spaces drag handle and the link-hover modifier.
+- **Keep SwiftUI `body` a shallow container.** A long modifier
+  chain with conditional `background`/`overlay` closures or
+  `+`-concatenated string literals inside one `body` expression
+  can exceed the type-checker's budget — and the failure is
+  machine-dependent: it compiles locally but dies on the slower
+  CI runner ("unable to type-check this expression in
+  reasonable time"), so the local verify gate does not catch
+  it. Extract chained subviews into private computed
+  properties / funcs and hoist concatenated strings into
+  constants. Bit `KeyRecorderField`.
 - **Split test suites early.** The 79-char limit and 350-line
   ceiling repeatedly bit large test files. Break suites into
   focused files before they grow; per-file private helpers are the
@@ -250,6 +268,22 @@ Keep this list updated whenever a recurring mistake is found.
   one predicate, never add a second. Pre-release (single user):
   profile JSON needs no migration scripts — re-saving is the
   migration.
+- **Explicit settings applies must `retile(force: true)`.** The
+  engine's "already there" tolerance (±2 pt per edge) exists to
+  absorb AX-echo lag and app-side clamping; an un-forced retile
+  after a config edit lets it swallow small changes entirely (a
+  1 pt gap edit visibly did nothing). Config-apply entry points
+  (`applyProfileScopedState`, `set_gap_*`,
+  `set_min_window_size`, `set_mode`, and the whole
+  `layoutCommand` dispatch — every retile triggered by an
+  explicit `set_*` from Lua/CLI) force; event-driven retiles
+  stay un-forced so echo lag can't wobble windows. Profile
+  applies classify themselves: `apply(profile:)` /
+  `apply(composed:)` take a **required** `forceRetile`, so
+  every new caller must choose — explicit paths
+  (`load_profile`, an in-effect edit re-apply, the
+  post-reload re-apply, preset apply) force; monitor-change
+  and native-space-binding applies stay un-forced.
 - **Resolve before layout, and merge per-field first.** Settings
   that layer (global → layout → space) merge field-by-field, with
   cross-field clamps applied *last* on the already-merged values

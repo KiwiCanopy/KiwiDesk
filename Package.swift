@@ -34,12 +34,32 @@ let package = Package(
         .executableTarget(
             name: "KiwiDesk",
             dependencies: ["KiwiDeskCore"],
-            path: "Sources/KiwiDesk"
+            path: "Sources/KiwiDesk",
+            // Pre-rasterized from the vector masters in
+            // /assets (see assets/README.md) — plain files,
+            // not an asset catalog: `swift build` (CI) does
+            // not run actool.
+            resources: [
+                .copy("Resources/MenuBarIcon.tiff"),
+                .copy("Resources/Wordmark.png"),
+                .copy("Resources/WordmarkDark.png"),
+                .copy("Resources/AppMark.png"),
+                .copy("Resources/AppMarkDark.png"),
+            ]
         ),
         .testTarget(
             name: "KiwiDeskCoreTests",
             dependencies: ["KiwiDeskCore"],
             path: "Tests/KiwiDeskCoreTests"
+        ),
+        // GUI model tests (#64): SwiftPM ≥5.5 lets a test
+        // target depend on an executable target, so the
+        // dashboard's view-model state machine is testable
+        // without splitting the GUI into a library.
+        .testTarget(
+            name: "KiwiDeskGuiTests",
+            dependencies: ["KiwiDesk", "KiwiDeskCore"],
+            path: "Tests/KiwiDeskGuiTests"
         ),
     ]
 )

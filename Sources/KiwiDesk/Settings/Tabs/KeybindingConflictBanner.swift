@@ -4,13 +4,15 @@ import SwiftUI
 /// conflict was just introduced (recording a clashing combo, or
 /// a batch check after Adopt / a raw-Lua save). The persistent
 /// per-row ⚠️ + tooltip always reflects live state on its own;
-/// this banner is only a transient nudge toward it, so it
-/// disappears once dismissed or once the model clears it.
+/// this banner is only a transient nudge toward it. Its text
+/// derives live (`liveKeybindingBanner`), so it disappears
+/// once dismissed — or once the conflicts it names are gone,
+/// however they were fixed.
 struct KeybindingConflictBanner: View {
     @ObservedObject var model: SettingsModel
 
     var body: some View {
-        if let message = model.keybindingWarning {
+        if let message = model.liveKeybindingBanner {
             HStack(alignment: .top, spacing: 10) {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .foregroundStyle(.orange)

@@ -49,6 +49,11 @@ public final class KiwiCore {
     /// Spaces assigned the *Main* role — they follow whatever
     /// display is currently main (#36).
     var mainSpaces: Set<SpaceID> = []
+    /// The live arrangement's explicit rehome target (#68) —
+    /// adopted from the active profile, edited by the GUI, and
+    /// captured back on save. nil falls back to the space
+    /// order's first survivor on a profile-switch reconcile.
+    var fallbackSpace: SpaceID?
     /// Profile bound per native macOS Space, keyed by the
     /// Mission Control number (1-based). Populated by
     /// `bind_profile_to_native_space`.
@@ -58,6 +63,21 @@ public final class KiwiCore {
     public var onLog: @MainActor (String) -> Void = { message in
         NSLog("KiwiDesk: %@", message)
     }
+
+    /// Problems from the last config load (#68): a broken
+    /// init.lua, an unreadable gui.json, invalid profile JSONs.
+    /// Empty when the config loaded cleanly. Drives the
+    /// menu-bar error badge and the Config Issues panel.
+    public internal(set) var configIssues: [ConfigIssue] = []
+    /// The load-scoped half of `configIssues` (init.lua /
+    /// gui.json) — kept so profile mutations can refresh the
+    /// profile half without losing these.
+    var configLoadIssues: [ConfigIssue] = []
+    /// Fired whenever `configIssues` changes (including back
+    /// to empty, so the badge clears itself).
+    public var onConfigIssuesChange:
+        @MainActor ([ConfigIssue])
+            -> Void = { _ in }
 
     /// `~/.config/KiwiDesk/` (created on demand).
     public let configDirectory: URL

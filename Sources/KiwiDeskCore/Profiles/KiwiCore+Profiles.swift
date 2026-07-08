@@ -35,7 +35,11 @@ extension KiwiCore {
                 // Explicit user load: the profile's spaces become
                 // authoritative — stale spaces are pruned and
                 // their windows forwarded (see `pruneSpaces`).
-                self.apply(profile: profile, pruneStaleSpaces: true)
+                self.apply(
+                    profile: profile,
+                    pruneStaleSpaces: true,
+                    forceRetile: true
+                )
                 // A profile saved for other monitors stays
                 // loadable but loads dirty (#36).
                 let live = self.state.workspaces.allDisplays
@@ -48,6 +52,8 @@ extension KiwiCore {
             return namedProfileCommand(args) { name in
                 try self.profiles.delete(name: name)
                 self.handleMonitorChange()
+                // A broken profile's issue clears with it.
+                self.refreshConfigIssues()
             }
         case "set_default_profile":
             return namedProfileCommand(args) { name in
@@ -121,6 +127,9 @@ extension KiwiCore {
             monitorSets: [liveMonitorSet()],
             mainSpaces: mainSpaces.sorted { $0.raw < $1.raw },
             spaces: liveSpaces,
+            fallbackSpace: fallbackSpace.flatMap {
+                liveSpaces.contains($0) ? $0 : nil
+            },
             spaceModes: modes,
             settings: tiler.settings
         )
@@ -136,6 +145,7 @@ extension KiwiCore {
         guard var existing = try? profiles.read(name: name)
         else {
             try profiles.save(buildProfile(name: name))
+            refreshConfigIssues()
             return
         }
         let live = liveMonitorSet()
@@ -147,11 +157,15 @@ extension KiwiCore {
         }
         let fresh = buildProfile(name: name)
         existing.spaces = fresh.spaces
+        existing.fallbackSpace = fresh.fallbackSpace
         existing.spaceModes = fresh.spaceModes
         existing.mainSpaces = fresh.mainSpaces
         existing.settings = fresh.settings
         existing.savedAt = .now
         try profiles.save(existing)
+        // Re-saving repairs an unreadable profile — clear its
+        // issue without waiting for a config reload (#68).
+        refreshConfigIssues()
     }
 
     /// Writes the edited tiling from `config` into the stored
@@ -171,6 +185,7 @@ extension KiwiCore {
         var existing = try profiles.read(name: name)
         applyProfileEdits(from: config, onto: &existing)
         try profiles.write(existing)
+        refreshConfigIssues()
     }
 
     /// Duplicates the stored profile `name` under a NEW free
@@ -219,6 +234,11 @@ extension KiwiCore {
         // the config's `spaces` list is the profile's new
         // authoritative order.
         profile.spaces = config.spaces
+        // Same dangling-reference guard as
+        // `applyProfileScopedState` (#68).
+        profile.fallbackSpace = config.fallbackSpace.flatMap {
+            config.spaces.contains($0) ? $0 : nil
+        }
         // Dense over the profile's own spaces (mirrors
         // `buildProfile`): an undeclared space reads as bsp. The
         // union with `spaceModes.keys` keeps a just-set mode even
@@ -297,7 +317,9 @@ extension KiwiCore {
         if profiles.currentName == name,
             let fresh = try? profiles.read(name: name)
         {
-            apply(profile: fresh)
+            // Explicit: an in-effect edit re-apply whose
+            // delta may sit inside the tolerance.
+            apply(profile: fresh, forceRetile: true)
         } else {
             handleMonitorChange()
         }

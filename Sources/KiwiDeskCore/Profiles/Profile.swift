@@ -84,6 +84,12 @@ public struct Profile: Codable, Sendable, Equatable {
     /// `overwriteProfile`) capture the resulting live order
     /// back here.
     public var spaces: [SpaceID]
+    /// The explicitly designated rehome target (#68): windows
+    /// from spaces this profile doesn't declare land here when
+    /// the profile is loaded. nil (or a dangling reference)
+    /// falls back to the stored order's first surviving space
+    /// — the pre-#68 rule, so legacy profiles keep behaving.
+    public var fallbackSpace: SpaceID?
     /// Layout mode per space.
     public var spaceModes: [SpaceID: LayoutMode]
     public var settings: TilingSettings
@@ -137,6 +143,7 @@ public struct Profile: Codable, Sendable, Equatable {
         case mainSpaces = "main_spaces"
         case isDefault = "default"
         case spaces
+        case fallbackSpace = "fallback_space"
         case spaceModes = "space_modes"
         case settings
         case savedAt = "saved_at"
@@ -149,6 +156,7 @@ public struct Profile: Codable, Sendable, Equatable {
         mainSpaces: [SpaceID] = [],
         isDefault: Bool = false,
         spaces: [SpaceID] = [],
+        fallbackSpace: SpaceID? = nil,
         spaceModes: [SpaceID: LayoutMode],
         settings: TilingSettings,
         savedAt: Date = .now,
@@ -159,6 +167,7 @@ public struct Profile: Codable, Sendable, Equatable {
         self.mainSpaces = mainSpaces.sorted { $0.raw < $1.raw }
         self.isDefault = isDefault
         self.spaces = SpaceID.deduplicated(spaces)
+        self.fallbackSpace = fallbackSpace
         self.spaceModes = spaceModes
         self.settings = settings
         self.savedAt = savedAt
@@ -204,6 +213,12 @@ public struct Profile: Codable, Sendable, Equatable {
                 [SpaceID].self,
                 forKey: .spaces
             ) ?? []
+        )
+        // Lenient: absent on pre-#68 profiles; a dangling
+        // reference is tolerated here and ignored at use.
+        fallbackSpace = try container.decodeIfPresent(
+            SpaceID.self,
+            forKey: .fallbackSpace
         )
         spaceModes = try container.decode(
             [SpaceID: LayoutMode].self,

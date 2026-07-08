@@ -1,37 +1,120 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Section 1 — Space/Window Management: Focus and Window
-/// Management (move, resize, float) commands grouped into
-/// dropdowns. Space rows are generated from the defined spaces, so
-/// adding a space adds its commands here. Recording upserts a
-/// `.navigation` row keyed by its Lua; clearing removes it.
-struct NavigationSection: View {
+/// The Shortcuts intent groups (#68 §3.6.1): flat sections,
+/// one level of hierarchy — Focus, Move Windows, Size & Float,
+/// Switch modes — rendered as plain titled sections (the old
+/// double-nested disclosures are gone). Space rows generate
+/// from the defined spaces, so adding a space adds its
+/// commands. Recording upserts a `.navigation` row keyed by
+/// its Lua; clearing removes it.
+struct FocusSection: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
     let spaces: [SpaceID]
 
+    private var icons: [SpaceID: String] {
+        model.config.settings.spaceIcons
+    }
+
     var body: some View {
-        SettingsSection("Space/Window Management") {
-            ForEach(
-                KeybindingCatalog.navigationGroups(spaces: spaces)
-            ) { group in
-                DisclosureGroup(group.title) {
-                    ForEach(group.commands) { command in
-                        NavRow(
-                            model: model,
-                            bindings: $bindings,
-                            command: command
-                        )
-                    }
+        SettingsSection("Focus") {
+            ForEach(KeybindingCatalog.focusDirections) {
+                command in
+                NavRow(
+                    model: model,
+                    bindings: $bindings,
+                    command: command
+                )
+            }
+            if !spaces.isEmpty {
+                Text("Go to space")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .padding(.top, 4)
+                ForEach(
+                    KeybindingCatalog.goToSpace(
+                        spaces,
+                        icons: icons
+                    )
+                ) { command in
+                    NavRow(
+                        model: model,
+                        bindings: $bindings,
+                        command: command
+                    )
                 }
             }
+        }
+    }
+}
+
+struct MoveWindowsSection: View {
+    @ObservedObject var model: SettingsModel
+    @Binding var bindings: [KeyBinding]
+    let spaces: [SpaceID]
+
+    private var icons: [SpaceID: String] {
+        model.config.settings.spaceIcons
+    }
+
+    var body: some View {
+        SettingsSection("Move Windows") {
+            ForEach(KeybindingCatalog.swapDirections) {
+                command in
+                NavRow(
+                    model: model,
+                    bindings: $bindings,
+                    command: command
+                )
+            }
+            if !spaces.isEmpty {
+                Text("Move to space")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .padding(.top, 4)
+                ForEach(
+                    KeybindingCatalog.moveToSpace(
+                        spaces,
+                        icons: icons
+                    )
+                ) { command in
+                    NavRow(
+                        model: model,
+                        bindings: $bindings,
+                        command: command
+                    )
+                }
+            }
+        }
+    }
+}
+
+/// Size & Float (#68 §3.5): the resize pair, Make floating —
+/// and the reserved slot for the configurable resize step
+/// (#58; grows to a per-axis pair when #56 splits resize into
+/// horizontal/vertical). The step control lands directly
+/// above the rows it parameterizes.
+struct SizeFloatSection: View {
+    @ObservedObject var model: SettingsModel
+    @Binding var bindings: [KeyBinding]
+
+    var body: some View {
+        SettingsSection("Size & Float") {
+            ForEach(KeybindingCatalog.resizeAndFloat) {
+                command in
+                NavRow(
+                    model: model,
+                    bindings: $bindings,
+                    command: command
+                )
+            }
             Text(
-                "Shrink/Enlarge only applies in the bsp, stack, "
-                    + "and scrolling layouts; it is a no-op in "
-                    + "monocle, grid, and floating. It nudges the "
-                    + "one split/master ratio, so it has no "
-                    + "separate width and height."
+                "Shrink/Enlarge only applies in the bsp, "
+                    + "stack, and scrolling layouts; it is a "
+                    + "no-op in monocle, grid, and floating. "
+                    + "It nudges the one split/master ratio, "
+                    + "so it has no separate width and height."
             )
             .font(.caption)
             .foregroundStyle(.secondary)
@@ -39,7 +122,7 @@ struct NavigationSection: View {
     }
 }
 
-/// Section — Change Modes: one row per other mode, binding a
+/// Switch modes: one row per other mode, binding a
 /// `switch_mode` shortcut. Shown only when more than one mode
 /// exists.
 struct ChangeModesSection: View {
@@ -49,14 +132,15 @@ struct ChangeModesSection: View {
     let current: String
 
     var body: some View {
-        SettingsSection("Change Modes") {
+        SettingsSection("Switch modes") {
             ForEach(others, id: \.self) { name in
                 NavRow(
                     model: model,
                     bindings: $bindings,
-                    command: KeybindingCatalog.switchModeCommand(
-                        name
-                    )
+                    command:
+                        KeybindingCatalog.switchModeCommand(
+                            name
+                        )
                 )
             }
         }
@@ -67,8 +151,10 @@ struct ChangeModesSection: View {
     }
 }
 
-/// A single navigation/mode row: label plus a recorder that
-/// upserts a `.navigation` binding keyed by the command's Lua.
+/// A single catalog row: label plus a recorder that upserts a
+/// `.navigation` binding keyed by the command's Lua. The
+/// preflight hard-blocks combos already held by another row
+/// (#34); the row id feeds "Go to" (#68 §3.6.2).
 struct NavRow: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
@@ -78,16 +164,22 @@ struct NavRow: View {
 
     var body: some View {
         HStack {
+            if let glyph = command.icon, !glyph.isEmpty {
+                IconGlyphLabel(icon: glyph)
+                    .frame(width: 18)
+            }
             Text(command.label)
             Spacer()
             KeyRecorderField(
                 combo: index.map { bindings[$0].combo } ?? "",
                 conflict: conflict,
+                preflight: preflight,
                 onRecord: record,
                 onClear: clear
             )
         }
         .keybindingRowStyle(inherited: isInherited)
+        .id(command.lua)
     }
 
     private var index: Int? {
@@ -116,6 +208,19 @@ struct NavRow: View {
         )
     }
 
+    private func preflight(
+        _ combo: String
+    ) -> RecorderRejection? {
+        RecorderPreflight.rejection(
+            combo: combo,
+            excluding: { [lua = command.lua] in
+                $0.kind == .navigation && $0.lua == lua
+            },
+            bindings: $bindings,
+            commit: record
+        )
+    }
+
     private func record(_ combo: String) {
         if let index {
             bindings[index].combo = combo
@@ -129,87 +234,14 @@ struct NavRow: View {
                 )
             )
         }
-        if let updated = bindings.first(
-            where: { $0.lua == command.lua }
-        ) {
+        if let updated = bindings.first(where: {
+            $0.kind == .navigation && $0.lua == command.lua
+        }) {
             model.noteRecordedCombo(updated, in: bindings)
         }
     }
 
     private func clear() {
         if let index { bindings.remove(at: index) }
-    }
-}
-
-/// Section 3 — Custom Bindings: inline Lua actions. Starts empty;
-/// "+" appends a row.
-struct CustomSection: View {
-    @ObservedObject var model: SettingsModel
-    @Binding var bindings: [KeyBinding]
-    @Environment(\.keybindingOverrideBase)
-    private var overrideBase
-
-    var body: some View {
-        SettingsSection("Custom Bindings") {
-            ForEach($bindings) { $binding in
-                if binding.kind == .custom {
-                    row($binding)
-                }
-            }
-            Button {
-                bindings.append(KeyBinding(kind: .custom))
-            } label: {
-                Label("Add binding", systemImage: "plus")
-            }
-            .buttonStyle(.borderless)
-        }
-    }
-
-    private func row(
-        _ binding: Binding<KeyBinding>
-    ) -> some View {
-        HStack {
-            TextField(
-                "Lua, e.g. KiwiDesk.reload_config()",
-                text: binding.lua
-            )
-            .textFieldStyle(.roundedBorder)
-            .font(.system(.body, design: .monospaced))
-            KeyRecorderField(
-                combo: binding.wrappedValue.combo,
-                conflict: KeybindingConflicts.text(
-                    for: binding.wrappedValue,
-                    in: bindings
-                ),
-                onRecord: { record($0, into: binding) },
-                onClear: { binding.wrappedValue.combo = "" }
-            )
-            Button {
-                remove(binding.wrappedValue.id)
-            } label: {
-                Image(systemName: "trash")
-            }
-            .buttonStyle(.borderless)
-        }
-        .keybindingRowStyle(
-            inherited: binding.wrappedValue.isInherited(
-                from: overrideBase
-            )
-        )
-    }
-
-    private func record(
-        _ combo: String,
-        into binding: Binding<KeyBinding>
-    ) {
-        binding.wrappedValue.combo = combo
-        model.noteRecordedCombo(
-            binding.wrappedValue,
-            in: bindings
-        )
-    }
-
-    private func remove(_ id: UUID) {
-        bindings.removeAll { $0.id == id }
     }
 }

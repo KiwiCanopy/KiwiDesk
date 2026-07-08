@@ -284,7 +284,9 @@ extension KiwiCore {
         }
         state.workspaces.ensureSpace(spaceID)
         state.workspaces.setMode(spaceID, mode)
-        retile()
+        // Forced: an explicit config apply (AGENTS.md §5),
+        // like the layoutCommand dispatch.
+        retile(force: true)
         if let space = state.workspaces[spaceID] {
             emitLayoutChange(space: space)
         }

@@ -24,6 +24,28 @@ struct SpaceChip: View {
     }
 }
 
+/// The small status capsule used across the settings sections
+/// ("active", "default", "Fallback", …) — one chip language
+/// everywhere a row carries a state marker.
+struct BadgeChip: View {
+    let label: String
+
+    var body: some View {
+        Text(label)
+            .font(.caption2)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 1)
+            .background(.tint.opacity(0.2))
+            .clipShape(Capsule())
+            .overlay(
+                Capsule().strokeBorder(
+                    .tint.opacity(0.3),
+                    lineWidth: 0.5
+                )
+            )
+    }
+}
+
 /// A simple left-to-right flowing row of chips that wraps to the
 /// next line when it runs out of width.
 struct WrapChips<Item, Chip: View>: View {

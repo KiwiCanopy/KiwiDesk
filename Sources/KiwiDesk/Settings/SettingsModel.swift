@@ -13,12 +13,16 @@ final class SettingsModel: ObservableObject {
     /// The visually edited configuration.
     @Published var config: GuiConfig {
         didSet {
-            if !suppressDirty { isDirty = true }
+            if !suppressDirty { recomputeDirty() }
         }
     }
     /// Raw init.lua shown when the file holds code the visual
     /// editor can't represent, or when the user opts in.
-    @Published var luaSource = ""
+    @Published var luaSource = "" {
+        didSet {
+            if !suppressDirty { recomputeDirty() }
+        }
+    }
     /// True while foreign Lua forces the raw editor.
     @Published var forcedLuaEditor = false
     /// True when init.lua has harmless custom Lua (code that
@@ -28,8 +32,21 @@ final class SettingsModel: ObservableObject {
     @Published var hasCustomLua = false
     /// User toggle to edit init.lua directly.
     @Published var showLuaEditor = false
-    /// Unsaved GUI edits are pending.
+    /// Unsaved GUI edits are pending. A live comparison
+    /// against the as-loaded baselines, not a latched flag —
+    /// manually undoing an edit clears the footer again.
     @Published var isDirty = false
+    /// The state as last loaded/saved — what `isDirty`
+    /// compares against. Set only by `apply(_:)` (every clean
+    /// transition funnels through `reload()`).
+    var cleanConfig = GuiConfig()
+    var cleanLuaSource = ""
+
+    func recomputeDirty() {
+        isDirty =
+            config != cleanConfig
+            || luaSource != cleanLuaSource
+    }
 
     /// Active saved profile, or nil for a transient state.
     @Published var activeProfile: String?
@@ -39,11 +56,13 @@ final class SettingsModel: ObservableObject {
     /// The live state diverged from the saved profile (e.g.
     /// after a monitor change) — the update prompt.
     @Published var profileDirty = false
-    /// A *stored* profile being edited via the banner dropdown,
-    /// or nil for the live/active config (#18). Editing a stored
-    /// profile seeds the tabs from its JSON and never switches
-    /// the running layout.
-    @Published var editingProfile: String?
+    /// The dashboard's edit target (#64/#18): the live config,
+    /// or a stored profile edited via the banner dropdown —
+    /// seeded from its JSON, never switching the running
+    /// layout. Written only by `selectEditTarget` and the
+    /// reload fallback; every mode-dependent field derives
+    /// from it through the single `reload()`.
+    @Published var target: EditTarget = .live
     /// Whether the Canvas (monitor placement) is editable for the
     /// current target: always true live; for a stored profile
     /// only when its monitor set is the one connected now (else
@@ -79,8 +98,8 @@ final class SettingsModel: ObservableObject {
 
     let core: KiwiCore
     /// Guards the `config.didSet` dirty flag during reload
-    /// cycles (also used by the profile-editing reload in
-    /// `SettingsModel+ProfileOverrides.swift`).
+    /// cycles; its only writer is `apply(_:)` in
+    /// `SettingsModel+EditTarget.swift`.
     var suppressDirty = false
     /// The sidecar as last loaded — the baseline that decides
     /// whether a save must also regenerate the global files
@@ -105,55 +124,27 @@ final class SettingsModel: ObservableObject {
     /// Whether the raw Lua editor is currently shown.
     var editingLua: Bool { forcedLuaEditor || showLuaEditor }
 
+    /// The stored profile being edited, or nil while live —
+    /// derived from `target` (#64).
+    var editingProfile: String? {
+        if case .storedProfile(let name) = target {
+            return name
+        }
+        return nil
+    }
+
     /// Whether the dashboard is editing a stored profile rather
     /// than the live config (#18) — hides App Rules, renders
     /// the Shortcuts tab in override mode (#55 phase 7), and
     /// swaps the footer's save action. The editing surface
     /// lives in `SettingsModel+ProfileOverrides.swift`.
-    var editingStoredProfile: Bool { editingProfile != nil }
+    var editingStoredProfile: Bool { target != .live }
 
     // MARK: - Sync with the backend
 
-    /// Pulls the current configuration and profile state from
-    /// the core into the view model (discards unsaved edits).
-    func reload() {
-        if let name = editingProfile {
-            reloadEditingProfile(name)
-            return
-        }
-        suppressDirty = true
-        // Only meaningful while editing a stored profile; reset it
-        // so a stale `false` never lingers into live editing.
-        placementEditable = true
-        profileEditingBaseModes = nil
-        var loaded = core.loadGuiConfig()
-        // Recovered rows arrive as `.custom`; sort the ones that
-        // match a catalog action into their sections before the
-        // tabs render them (#4).
-        KeybindingImportClassifier.classify(&loaded)
-        config = loaded
-        suppressDirty = false
-        luaSource =
-            (try? String(
-                contentsOf: configURL,
-                encoding: .utf8
-            )) ?? ""
-        let flags = ManagedConfig.classify(luaSource)
-        forcedLuaEditor = flags.foreign
-        hasCustomLua = !flags.foreign && flags.custom
-        // Baseline for `globalsChanged`: the *overlaid* model,
-        // not the raw sidecar — live profile state merged in
-        // (e.g. composed monocle-fill spaces in the spaces
-        // union) must not read as a global edit, or a
-        // tiling-only save would regenerate gui.json and
-        // init.lua and leak transient spaces into them.
-        // Accepted edges: a genuine global edit still saves
-        // the overlaid spaces union, and deleting + re-adding
-        // a transient space alone doesn't read as an edit.
-        savedSidecar = core.isGuiManaged ? config : nil
-        refreshProfiles()
-        isDirty = false
-    }
+    // `reload()` and `selectEditTarget` — the single edit-mode
+    // state machine — live in `SettingsModel+EditTarget.swift`
+    // (#64).
 
     func refreshProfiles() {
         profiles = core.profiles.list()
@@ -239,6 +230,18 @@ final class SettingsModel: ObservableObject {
     }
 
     // MARK: - Keybinding conflicts (in-app warning)
+
+    /// The banner text, derived live: nil once dismissed —
+    /// and nil once every conflict it named is fixed, however
+    /// it was fixed (clearing a combo or deleting a row never
+    /// passes through the recorder writers below, so the
+    /// banner re-derives instead of latching stale text).
+    var liveKeybindingBanner: String? {
+        guard keybindingWarning != nil else { return nil }
+        return Self.formatConflicts(
+            KeybindingConflicts.conflicts(in: config.modes)
+        )
+    }
 
     /// Called after a `KeyRecorderField.onRecord` commits a new
     /// combo. Warns (naming every current conflict) if that row

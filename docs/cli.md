@@ -53,6 +53,8 @@ KiwiDesk service restart
 | | `set_mouse_resize` | `layout\|snap_back` |
 | | `set_gap_global` | size |
 | | `set_gap_override` | space, size |
+| | `set_fallback_space` | space id ("" clears) — rehome target on profile switch |
+| | `set_space_icon` | space id, icon (SF Symbol\|emoji\|char; "" clears) |
 | | `get_state` | — (returns `{active_space, spaces, windows, monitor_count, native_space, exec_running}`) |
 | | `reload_config` | — |
 | | `version` | — (returns `{version, commit}`) |

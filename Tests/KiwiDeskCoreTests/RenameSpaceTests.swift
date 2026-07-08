@@ -83,6 +83,34 @@ struct RenameSpaceTests {
         )
     }
 
+    @Test("rename migrates per-layout overrides (#17)")
+    func migratesLayoutOverrides() {
+        var config = GuiConfig()
+        config.spaces = [SpaceID("a"), SpaceID("b")]
+        var bsp = BspOverride()
+        bsp.splitRatio = 0.3
+        config.settings.bsp.override[SpaceID("a")] = bsp
+        var grid = GridOverride()
+        grid.columns = 4
+        config.settings.grid.override[SpaceID("a")] = grid
+        let ok = config.renameSpace(
+            from: SpaceID("a"),
+            to: SpaceID("c")
+        )
+        #expect(ok)
+        #expect(
+            config.settings.bsp.override[SpaceID("c")]?
+                .splitRatio == 0.3
+        )
+        #expect(
+            config.settings.grid.override[SpaceID("c")]?
+                .columns == 4
+        )
+        #expect(
+            config.settings.bsp.override[SpaceID("a")] == nil
+        )
+    }
+
     @Test("rename migrates per-space gap and placement overrides")
     func migratesOverrides() {
         var config = richConfig()
@@ -191,40 +219,36 @@ struct RenameSpaceTests {
     }
 }
 
-/// `GuiConfig.moveToFirst` and `SpaceID.deduplicated` (#75).
-/// `deduplicated` was hoisted from `GuiConfig` to `SpaceID`
-/// (Models) so `Profile` and `GuiConfig` share one helper.
+/// `GuiConfig.fallbackSpace` (#68) and `SpaceID.deduplicated`
+/// (#75). `deduplicated` was hoisted from `GuiConfig` to
+/// `SpaceID` (Models) so `Profile` and `GuiConfig` share one
+/// helper.
 @Suite("GuiConfig space-order helpers")
 struct GuiConfigSpaceOrderTests {
-    @Test("moveToFirst moves a middle space to index 0")
-    func moveToFirstMid() {
-        var config = GuiConfig()
-        config.spaces = [SpaceID("a"), SpaceID("b"), SpaceID("c")]
-        config.moveToFirst(SpaceID("b"))
-        #expect(
-            config.spaces
-                == [SpaceID("b"), SpaceID("a"), SpaceID("c")]
-        )
-    }
-
-    @Test("moveToFirst is a no-op when already first")
-    func moveToFirstAlreadyFirst() {
+    @Test("rename migrates the fallback-space reference")
+    func renameMigratesFallback() {
         var config = GuiConfig()
         config.spaces = [SpaceID("a"), SpaceID("b")]
-        config.moveToFirst(SpaceID("a"))
-        #expect(
-            config.spaces == [SpaceID("a"), SpaceID("b")]
+        config.fallbackSpace = SpaceID("b")
+        let ok = config.renameSpace(
+            from: SpaceID("b"),
+            to: SpaceID("c")
         )
+        #expect(ok)
+        #expect(config.fallbackSpace == SpaceID("c"))
     }
 
-    @Test("moveToFirst is a no-op for absent spaces")
-    func moveToFirstAbsent() {
+    @Test("rename of another space keeps the fallback")
+    func renameKeepsUnrelatedFallback() {
         var config = GuiConfig()
         config.spaces = [SpaceID("a"), SpaceID("b")]
-        config.moveToFirst(SpaceID("z"))
-        #expect(
-            config.spaces == [SpaceID("a"), SpaceID("b")]
+        config.fallbackSpace = SpaceID("b")
+        let ok = config.renameSpace(
+            from: SpaceID("a"),
+            to: SpaceID("c")
         )
+        #expect(ok)
+        #expect(config.fallbackSpace == SpaceID("b"))
     }
 
     @Test("deduplicated preserves insertion order, no sort")

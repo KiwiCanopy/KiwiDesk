@@ -85,6 +85,7 @@ extension KiwiCore {
         // Stored order is authoritative (#75); `orderedSpaces`
         // appends any declared space absent from the list.
         config.spaces = profile.orderedSpaces
+        config.fallbackSpace = profile.fallbackSpace
         // Shortcuts tab in override mode (#55 phase 7): the
         // tabs edit the RESOLVED modes (base + this profile's
         // sparse override); `overwriteProfile` diffs them back
@@ -122,6 +123,7 @@ extension KiwiCore {
         config.spaces = SpaceID.deduplicated(live)
         config.spacePins = spacePins
         config.mainSpaces = mainSpaces
+        config.fallbackSpace = fallbackSpace
     }
 
     /// Applies the model's profile-scoped state to the running
@@ -165,8 +167,19 @@ extension KiwiCore {
         }
         spacePins = config.spacePins
         mainSpaces = config.mainSpaces
+        // A fallback pointing outside the edited space list is
+        // meaningless — drop it rather than persist a dangling
+        // reference (#68).
+        fallbackSpace = config.fallbackSpace.flatMap {
+            config.spaces.contains($0) ? $0 : nil
+        }
         resolveSpaceDisplays()
-        retile()
+        // Forced: this is an explicit settings apply, not an
+        // AX-echo-driven refresh. Un-forced, the engine's
+        // "already there" tolerance (±2 pt/edge) swallows
+        // small edits — a 1 pt gap change moved every window
+        // by ≤2 pt and visibly did nothing (#68).
+        retile(force: true)
         emitSpaceChange()
     }
 
@@ -296,6 +309,7 @@ extension KiwiCore {
         config.appRules = state.appRules
         config.spacePins = spacePins
         config.mainSpaces = mainSpaces
+        config.fallbackSpace = fallbackSpace
         config.modes = recoverKeybindings()
         config.floatRules = eventLoop.floatRules.rawRules
         var modes: [SpaceID: LayoutMode] = [:]

@@ -20,6 +20,7 @@ struct SettingsCodingTests {
         var settings = TilingSettings()
         settings.gapsOverride[SpaceID(2)] = .uniform(4)
         settings.placementOverride[SpaceID(3)] = .first
+        settings.spaceIcons[SpaceID(2)] = "globe"
         let data = try JSONEncoder().encode(settings)
         let root = try object(
             JSONSerialization.jsonObject(with: data)
@@ -28,9 +29,13 @@ struct SettingsCodingTests {
             Set(root.keys) == [
                 "animations", "app_bar", "drag", "gap", "layout",
                 "min_window_size", "mouse_resize",
-                "new_window_placement_override",
+                "new_window_placement_override", "space",
             ]
         )
+        // `set_space_icon` → `space.icon[space_id]` (#68).
+        let space = try object(root["space"])
+        let icons = try object(space["icon"])
+        #expect(icons["2"] as? String == "globe")
         #expect(root["mouse_resize"] as? String == "layout")
         // Toggles (issue #11) and duration knobs (issue #51).
         // Keys mirror the Lua names per the one-vocabulary rule.

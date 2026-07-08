@@ -1,17 +1,20 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// A per-layout override row. The leading checkbox is on when
-/// this layout overrides the field; off inherits the global
-/// value. The control is disabled and dimmed (gray) while
-/// inheriting, editable (black) once overridden — checking the
-/// box seeds the override with the current global value.
+/// An override row, "visible but inherited" (#68 §3.4): the
+/// leading checkbox is on when this scope overrides the field;
+/// off inherits the global value, with the control disabled
+/// and dimmed but still readable. Checking the box seeds the
+/// override with the current global value. Explicitly
+/// overridden rows carry a left accent bar and a subtle tint
+/// so active overrides form a scannable boundary instead of a
+/// checkerboard of enabled inputs.
 private struct OverrideChrome<Content: View>: View {
     let isOn: Binding<Bool>
     @ViewBuilder let content: Content
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: SettingsMetrics.overrideRowInset) {
             Toggle("", isOn: isOn)
                 .labelsHidden()
                 .toggleStyle(.checkbox)
@@ -23,6 +26,32 @@ private struct OverrideChrome<Content: View>: View {
             content
                 .disabled(!isOn.wrappedValue)
                 .opacity(isOn.wrappedValue ? 1 : 0.5)
+                // The narrowed column pays for the checkbox
+                // prefix, so the shared rows inside land on
+                // the same control axis as plain rows.
+                .environment(
+                    \.settingsLabelColumn,
+                    SettingsMetrics.overrideLabelColumn
+                )
+        }
+        // The inset keeps daylight between the 2 pt accent
+        // bar and the checkbox, so the bar reads as a boundary
+        // rather than part of the control. It is a shared
+        // token: `overrideLabelColumn` derives from it.
+        .padding(.leading, SettingsMetrics.overrideRowInset)
+        .padding(.vertical, 2)
+        .background {
+            if isOn.wrappedValue {
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.accentColor.opacity(0.07))
+            }
+        }
+        .overlay(alignment: .leading) {
+            if isOn.wrappedValue {
+                RoundedRectangle(cornerRadius: 1)
+                    .fill(Color.accentColor.opacity(0.7))
+                    .frame(width: 2)
+            }
         }
     }
 }
@@ -105,46 +134,31 @@ struct OverrideStepperRow: View {
     let range: ClosedRange<Int>
 
     var body: some View {
-        let bound = overrideValue($value, global: global)
         OverrideChrome(isOn: overrideToggle($value, global: global)) {
-            Stepper(
-                "\(label): \(bound.wrappedValue)",
-                value: bound,
+            StepperRow(
+                label: label,
+                value: overrideValue($value, global: global),
                 in: range
             )
-            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }
 
-/// An override ratio field, shown as a 10–90% slider that stores
-/// the underlying 0...1 fraction. The range matches the Lua ratio
-/// clamp (`parseSplitRatio` / `parseMasterRatio`) so the GUI can't
-/// store a value the setters would reject.
+/// An override ratio field riding `RatioRow`, whose 0.1–0.9
+/// range matches the Lua ratio clamp (`parseSplitRatio` /
+/// `parseMasterRatio`) so the GUI can't store a value the
+/// setters would reject.
 struct OverrideFractionRow: View {
     let label: String
     @Binding var value: Double?
     let global: Double
 
     var body: some View {
-        let bound = overrideValue($value, global: global)
         OverrideChrome(isOn: overrideToggle($value, global: global)) {
-            HStack {
-                Text(label)
-                    .frame(width: 110, alignment: .leading)
-                Slider(
-                    value: Binding(
-                        get: { bound.wrappedValue * 100 },
-                        set: { bound.wrappedValue = $0 / 100 }
-                    ),
-                    in: 10...90,
-                    step: 1
-                )
-                Text("\(Int(bound.wrappedValue * 100))%")
-                    .frame(width: 48, alignment: .trailing)
-                    .foregroundStyle(.secondary)
-                    .font(.system(.body, design: .monospaced))
-            }
+            RatioRow(
+                label: label,
+                value: overrideValue($value, global: global)
+            )
         }
     }
 }
@@ -158,12 +172,17 @@ struct OverridePickerRow<Value: Hashable & Sendable>: View {
 
     var body: some View {
         OverrideChrome(isOn: overrideToggle($value, global: global)) {
-            Picker(
-                label,
-                selection: overrideValue($value, global: global)
-            ) {
-                ForEach(options, id: \.0) { option in
-                    Text(option.1).tag(option.0)
+            DropdownRow(label: label) {
+                Picker(
+                    label,
+                    selection: overrideValue(
+                        $value,
+                        global: global
+                    )
+                ) {
+                    ForEach(options, id: \.0) { option in
+                        Text(option.1).tag(option.0)
+                    }
                 }
             }
         }

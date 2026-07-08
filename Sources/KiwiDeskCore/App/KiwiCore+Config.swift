@@ -8,8 +8,26 @@ extension KiwiCore {
         keys.reset()
         nativeSpaceBindings = [:]
         resetDeclarativeState()
+        var issues: [ConfigIssue] = []
         guard let fresh = LuaInterpreter() else {
             onLog("failed to create Lua VM")
+            // The panel must stay complete even when the
+            // config system is at its most broken: report the
+            // sidecar and profile problems alongside the VM
+            // failure.
+            issues.append(
+                ConfigIssue(
+                    source: "init.lua",
+                    message: "failed to create the Lua VM"
+                )
+            )
+            if guiConfigStore.exists,
+                guiConfigStore.load() == nil
+            {
+                issues.append(unreadableSidecarIssue)
+            }
+            configLoadIssues = issues
+            refreshConfigIssues()
             return
         }
         lua = fresh
@@ -22,6 +40,18 @@ extension KiwiCore {
             configURL
         ) {
             onLog("init.lua error: \(error)")
+            issues.append(
+                ConfigIssue(
+                    source: "init.lua",
+                    message: "\(error)"
+                )
+            )
+        }
+        // A sidecar that exists but no longer decodes means
+        // the visual editor (and the structured loader) can't
+        // see the user's rules — half-loaded, must be visible.
+        if guiConfigStore.exists, guiConfigStore.load() == nil {
+            issues.append(unreadableSidecarIssue)
         }
         // Two mutually exclusive config owners (#55, O7):
         // GUI-managed configs load rules + keybindings directly
@@ -47,13 +77,27 @@ extension KiwiCore {
         // The current native space may carry a binding that
         // the config just (re)declared.
         applyNativeSpaceBinding()
+        // Publish what this load could not apply (#68): the
+        // Lua/sidecar problems above plus any profile JSON
+        // that no longer decodes.
+        configLoadIssues = issues
+        refreshConfigIssues()
+    }
+
+    private var unreadableSidecarIssue: ConfigIssue {
+        ConfigIssue(
+            source: "gui.json",
+            message: "unreadable — rules and "
+                + "shortcuts were not applied"
+        )
     }
 
     /// Clears every setting the config declares *sparsely* so a
     /// reload is authoritative, not additive: the writer omits
     /// deleted entries (removed app/float rules, gap or
-    /// placement overrides, a space reverted to `bsp`), and
-    /// without this reset the stale live value would survive.
+    /// placement overrides, a space reverted to `bsp`, a
+    /// cleared space icon or fallback space), and without this
+    /// reset the stale live value would survive.
     /// Fully-emitted settings (global gaps, min size, per-layout
     /// params) are always overwritten, so they need no reset.
     private func resetDeclarativeState() {
@@ -61,6 +105,8 @@ extension KiwiCore {
         eventLoop.floatRules = FloatRules([])
         tiler.settings.gapsOverride = [:]
         tiler.settings.placementOverride = [:]
+        tiler.settings.spaceIcons = [:]
+        fallbackSpace = nil
         for space in state.workspaces.allSpaces
         where space.mode != .bsp {
             state.workspaces.setMode(space.id, .bsp)
@@ -98,8 +144,14 @@ extension KiwiCore {
         let template = """
             -- KiwiDesk configuration
             -- Docs: https://github.com/hajiboy95/KiwiDesk
+            --
+            -- Everyday settings live in the Settings window;
+            -- this file is for optional custom Lua. Comments
+            -- only by default — the built-in defaults apply
+            -- until a line below is uncommented.
 
-            KiwiDesk.set_gap_global(10)
+            -- One value for all gaps (the built-in default):
+            -- KiwiDesk.set_gap_global(10)
 
             -- Every virtual space (workspace) has its own
             -- layout; the first argument is the SPACE id

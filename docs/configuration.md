@@ -77,17 +77,19 @@ settings into the app — your previous file is kept verbatim as
 a commented backup and `init.lua` carries no active code
 afterwards. Keybindings are recovered from the file: each
 bound combo and its action text are read back and sorted into
-the Keybindings tab (known Focus, Window Movement, and
+the Shortcuts section (known Focus, Move Windows, and
 app-launch actions land in their sections; anything else
-becomes a Custom binding). You can also pull them in without
-adopting the whole file — **Import current shortcuts** at the
-bottom of the Keybindings tab reads the shortcuts active in
-`init.lua` and adds them for review before you Save. Recovery
+lands under *Advanced: Lua bindings*). You can also pull them in without
+adopting the whole file — **Import from init.lua…** in the
+header of the Shortcuts section (shown while `init.lua`
+carries custom Lua and you are editing the live config, not
+a stored profile) reads the shortcuts active in `init.lua`
+and adds them for review before you Save. Recovery
 expects each shortcut to be an inline `function() … end` on
 its own line. A binding whose action can't be read back — one
 bound to a named handler or a C function, rather than an
 inline function — is left only in the backup and can be
-re-added from the tab. The app's own state (keybinding
+re-added from the section. The app's own state (keybinding
 actions, mode icons) lives in `~/.config/KiwiDesk/gui.json`;
 delete that file to reset the GUI to what `init.lua` currently
 declares. Custom keybinding Lua is stored there and runs on
@@ -133,7 +135,7 @@ Spaces are identified by **strings or numbers** — `1` and
 Monitors never carry a layout themselves: windows live in
 spaces, and spaces are mapped to monitors (see *Profiles &
 Monitors* below). You can rename a space in place from
-the Settings app's **Spaces** tab; the rename follows the id
+the Settings app's **Spaces** section; the rename follows the id
 everywhere it is used — its layout mode, app rules, monitor
 pins, and any keybindings that target it.
 
@@ -587,6 +589,24 @@ same key — likewise `comma`/`,`, `period`/`.`, `slash`/`/`,
 long forms (`command`, `option`, `semicolon`, …) for
 readability; every alias round-trips.
 
+A combo is any set of modifiers plus **exactly one key**.
+Multi-key chords (`cmd+j+k`) are not expressible — Carbon
+registers modifiers plus a single key code — so a
+hand-written combo that doesn't parse is never registered
+and the Shortcuts section flags the row with ⚠ *"isn't a
+recognized shortcut"*. For more shortcut layers, use modal
+modes (below) instead of longer chords.
+
+The recorder **locks on full release**: the chord is
+captured as keys go *down* (with a live preview as it
+forms), modifiers accumulate while a key is held, and the
+combo commits once everything is released — release order
+and timing can never change it. To correct mid-chord,
+release the key and press another (⌘J, J up, K down → ⌘K);
+pressing a second key while the first is still held keeps
+the first and shows a one-key hint. Bare Escape, clicking
+anywhere else, or switching apps cancels the recording.
+
 In the editor each recorded shortcut *displays* as the compact
 macOS-native glyph string menus use — modifier symbols `⌃⌥⇧⌘`
 (Command last) followed by the key glyph, with no `+` separator,
@@ -603,7 +623,7 @@ key (Carbon can't distinguish them without Input Monitoring).
 
 ### Conflict detection
 
-The Settings app's Shortcuts tab flags any row whose combo
+The Settings app's Shortcuts section flags any row whose combo
 duplicates another row in the same mode, or a reserved macOS
 shortcut, with a persistent ⚠️ next to that row; hover it for a
 tooltip naming the clash. This indicator always reflects the
@@ -611,7 +631,7 @@ current bindings, live, with no action needed to see it.
 
 On top of that, KiwiDesk shows a dismissible in-app banner the
 moment a conflict is introduced: right after you record a
-clashing shortcut in the Shortcuts tab, or after adopting a
+clashing shortcut in the Shortcuts section, or after adopting a
 hand-written config, or after saving from the raw Lua editor
 finds one or more conflicts in the result. The banner names
 every current conflict. With exactly one:
@@ -936,14 +956,38 @@ is matched to the new profile **by name** (not position), so a
 window in a space whose name also exists in the new profile
 stays put — regardless of any layout difference. A space whose
 name the new profile doesn't define is dropped, and any windows
-it held are forwarded to the **first space** of the new profile
-— the first in its Spaces-tab list, which is the order the
-profile stores. The Settings app preserves that order; if you
-reorder the list and save the profile, the new first space
-becomes the rehome target for future profile switches.
-This reconcile happens only on an explicit `load_profile`;
-automatic applies on a monitor change or a native-Space binding
-leave your spaces untouched.
+it held are forwarded to the profile's **fallback space**:
+
+```lua
+-- Where windows land when a profile switch drops their
+-- space ("" clears back to the first-of-list rule):
+KiwiDesk.set_fallback_space("mail")
+```
+
+In the Settings app, right-click a row in the Spaces section
+and pick **Make Fallback** — the chosen row carries a
+*Fallback* badge. Without an explicit choice (or when the
+chosen space doesn't exist in the profile) windows land in
+the **first space** of the profile's ordered list, as before.
+The value is captured into the profile on save
+(`fallback_space` in the JSON). This reconcile happens only
+on an explicit `load_profile`; automatic applies on a monitor
+change or a native-Space binding leave your spaces untouched.
+
+Each space can also carry an optional **recognition icon** —
+an SF Symbol name, an emoji, or a single character — shown
+next to the name in the Spaces list, on the Monitors cards,
+and in the per-space shortcut rows. The name stays primary;
+the icon is recognition sugar:
+
+```lua
+-- "" clears the icon:
+KiwiDesk.set_space_icon("mail", "envelope")
+KiwiDesk.set_space_icon("web", "🌐")
+```
+
+Icons ride the profile like every other tiling setting
+(`settings.space.icon`, a map keyed by space id).
 
 A profile covers one or more concrete **monitor sets** — each
 a list of monitor fingerprints plus the space→monitor pins
@@ -977,9 +1021,10 @@ Every space always resolves to a screen: an explicit
 fingerprint pin wins, then the **Main** role (the space
 follows whatever display is currently main — dock and undock
 without stale fingerprints), then the built-in positional
-default. In the **Canvas** tab, drag a space onto a monitor
-tile to pin it, or onto the **Main** target to give it the
-Main role; everything else shows as *Auto*.
+default. In the **Monitors** section, drag a space chip onto a
+monitor card to pin it, or onto the **Follows main display**
+card to give it the Main role; dimmed chips are placed
+automatically.
 
 Explicitly loading a profile whose stored sets don't cover the
 connected monitors works, but the state loads *dirty*
@@ -1006,6 +1051,7 @@ becomes `layout.bsp.ratio`:
     }
   ],
   "main_spaces": ["1"],       // follow the main display
+  "fallback_space": "1",      // rehome target on switch
   "saved_at": "2026-07-04T12:00:00Z",
   "settings": {
     "drag": { "show_drop_zone": true, "show_ghost": true },
@@ -1040,7 +1086,8 @@ becomes `layout.bsp.ratio`:
                  "new_window_placement": "first" }
     },
     "min_window_size": 300,
-    "new_window_placement_override": {}  // per space id
+    "new_window_placement_override": {},  // per space id
+    "space": { "icon": { "2": "envelope" } }  // per space id
   },
   "space_modes": { "1": "stack", "2": "bsp" },
   // Optional sparse keybinding override (see Config
@@ -1061,7 +1108,8 @@ becomes `layout.bsp.ratio`:
 > The pre-release `fingerprints`/`monitor_count` profile shape
 > and the `monitor_fallback`/`space_monitor_map` Lua globals
 > are gone — re-save affected profiles and move any pins into
-> the profile JSON (or re-drag them in the Canvas tab).
+> the profile JSON (or re-drag them in the Monitors
+> section).
 
 ### Standards & Presets
 
@@ -1089,16 +1137,21 @@ profile of a count simply reverts that count to its Standard.
 
 ### Saving from the GUI
 
-The settings footer offers two profile actions (replacing the
-old generic Save):
+The settings footer holds the same three slots in every mode
+— **Revert**, **Save a Copy As…**, and a primary **Save**
+(⌘S) whose destination is named in the caption beside it:
 
-- **Update "\<profile\>"** — persists the edited tiling into
-  the active profile and adds/refreshes the connected monitor
-  set. Greyed out when the connected screen count differs
-  from the profile's ("this profile is for N screens").
-- **Save as new…** — creates a profile carrying only the
-  connected monitor set. Always available; names are
-  auto-suffixed `_1`, `_2`, … when taken.
+- **Save** (live, with an active profile) — persists the
+  edited tiling into the active profile and adds/refreshes
+  the connected monitor set. Greyed out when the connected
+  screen count differs from the profile's ("this profile is
+  for N screens").
+- **Save a Copy As…** (live) — creates a profile carrying
+  only the connected monitor set. Names are auto-suffixed
+  `_1`, `_2`, … when taken.
+- With **no** active profile (a transient layout or a
+  built-in Standard), the primary becomes **Save as New
+  Profile…** — there is no target to update yet.
 
 Both also rewrite `gui.json` when a global setting
 (keybindings, app/float rules, Space bindings) changed — a
@@ -1106,10 +1159,10 @@ tiling-only edit touches only the profile JSON, and
 `init.lua` is never written either way.
 
 Neither live save carries a keybinding override: the live
-Shortcuts tab edits the *base* shortcuts, so **Update** and
-**Save as new…** capture tiling only. To give a profile its
+Shortcuts section edits the *base* shortcuts, so both live
+saves capture tiling only. To give a profile its
 own shortcuts, pick it in the banner dropdown and edit its
-Shortcuts tab in override mode (below).
+Shortcuts section in override mode (below).
 
 ### Editing a saved profile (not just the active one)
 
@@ -1120,15 +1173,17 @@ switching the running layout. Selecting the loaded profile
 returns to normal live editing.
 
 Editing a *non-loaded* profile is scoped to what a profile
-actually holds: the **General**, **Spaces**, **App Bar**, and
-**Canvas** tabs, plus **Shortcuts** in *override mode* — a
-profile can override individual keybindings while inheriting
-everything else from the base shortcuts (see the Keybindings
-section). The **App Rules** tab is hidden — app rules are
-global, shared across every profile. The footer collapses to
-a single **Save to "\<profile\>"**.
+actually holds: the **This Profile** sidebar group (Spaces,
+Layout Defaults, Monitors, Appearance, Behavior), plus
+**Shortcuts** in *override mode* — a profile can override
+individual keybindings while inheriting everything else from
+the base shortcuts (see the Keybindings section). **App
+Rules** and **General** are hidden — they hold global state,
+shared across every profile. The footer's primary **Save**
+writes into that profile's JSON (the caption beside it names
+the target).
 
-In the override-mode Shortcuts tab, dimmed rows are inherited
+In the override-mode Shortcuts section, dimmed rows are inherited
 from the base config and stay in sync with it; edit a row to
 override it for this profile only. Only the overriding rows
 are stored in the profile (sparse), and every base shortcut
@@ -1137,10 +1192,11 @@ loads — a profile-switch shortcut can never be lost by
 omission. Removing an inherited row just resets it; to
 disable a combo in one profile, rebind it to a no-op action.
 
-**Save copy as…** duplicates the profile you are editing —
-including your pending edits — under a new name (`_1`, `_2`,
-… when taken) and switches the editor to the copy. Unlike the
-live **Save as new…**, which snapshots the running desktop,
+**Save a Copy As…** (while editing a stored profile)
+duplicates the profile you are editing — including your
+pending edits — under a new name (`_1`, `_2`, … when taken)
+and switches the editor to the copy. Unlike the live copy,
+which snapshots the running desktop,
 the copy's source is the stored profile: its monitor sets
 (even for hardware that isn't connected) and its shortcut
 overrides carry over, the count-`default` flag does not, and
@@ -1153,10 +1209,10 @@ screen** (the loaded profile, or the profile bound to the
 active native Space); otherwise the change simply waits until
 the profile is next loaded. No global files are regenerated.
 
-The **Canvas** tab needs the profile's monitors attached to
+The **Monitors** section needs the profile's monitors attached to
 draw them, so when you edit a profile whose monitor setup
-isn't connected, Canvas shows a read-only note instead of the
-placement grid — the other tabs still edit that profile.
+isn't connected, Monitors shows a read-only note instead of the
+placement cards — the other sections still edit that profile.
 Connect its monitors to arrange space placement.
 
 ### Native macOS Spaces (Mission Control)
@@ -1170,10 +1226,10 @@ KiwiDesk.bind_profile_to_native_space(1, "Developer Rig")
 KiwiDesk.bind_profile_to_native_space(2, "Creator Studio")
 ```
 
-The **Canvas** tab lists each native Space with a profile
-dropdown, and you can also drag a profile chip onto a Space to
-bind it. Bindings save to `init.lua` and take effect when that
-Space next activates.
+The **Profiles** section lists each native Space as "Desktop
+n" — the name Mission Control shows — with a profile dropdown.
+Bindings save to `init.lua` and take effect when that Space
+next activates.
 
 When you switch desktops (Ctrl+arrow, Mission Control, …),
 KiwiDesk loads the bound profile — its virtual workspaces,

@@ -1,30 +1,20 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// In-app drag payloads for the settings dashboard. These are
-/// same-process, model-level drags (a space chip onto a monitor
-/// tile, a profile chip onto a native Space).
+/// In-app drag payload for the settings dashboard: a
+/// same-process, model-level drag of a space chip onto a
+/// monitor tile. (The Spaces-list reorder is a plain drag
+/// *gesture*, not a drag session — no payload involved.)
 ///
-/// They ride the system `.json` content type rather than a bespoke
+/// It rides the system `.json` content type rather than a bespoke
 /// `UTType(exportedAs:)`: KiwiDesk ships as a bare SwiftPM
 /// executable with no bundle, so a custom exported type is never
 /// registered with LaunchServices and its drops are silently
 /// rejected (the chip snaps back). `.json` is always registered, so
-/// the drop round-trips. Unrelated text drags still don't match
-/// (`.json` ≠ `.plainText`), and a space dropped where a profile is
-/// expected (or vice versa) fails the `Codable` shape check — the
-/// two structs have disjoint keys — so the drop is rejected.
+/// the drop round-trips, while unrelated text drags still don't
+/// match (`.json` ≠ `.plainText`).
 struct DraggableSpace: Codable, Transferable {
     let raw: String
-
-    static var transferRepresentation: some TransferRepresentation {
-        CodableRepresentation(contentType: .json)
-    }
-}
-
-/// A saved profile being dragged onto a native macOS Space (#7).
-struct DraggableProfile: Codable, Transferable {
-    let name: String
 
     static var transferRepresentation: some TransferRepresentation {
         CodableRepresentation(contentType: .json)
