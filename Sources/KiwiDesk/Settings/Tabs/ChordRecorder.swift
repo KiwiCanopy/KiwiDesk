@@ -36,7 +36,10 @@ import KiwiDeskCore
 /// `ChordRecorderTests` without `NSEvent`s; this file is the
 /// monitor shell and lifecycle. Stored state is internal (not
 /// `private`, which is file-scoped) for that split — nothing
-/// outside the two files and the tests may touch it.
+/// outside the two files and the tests may touch it. Growth
+/// threshold (review 2026-07): if the machine grows again,
+/// the next split is a value-type machine returning effects —
+/// never a third extension file over shared internal state.
 @MainActor
 final class ChordRecorder {
     enum Outcome {

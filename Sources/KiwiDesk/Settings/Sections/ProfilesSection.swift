@@ -204,7 +204,11 @@ struct ProfilesSection: View {
 
     /// Mirrors the core's case-insensitive collision check
     /// (APFS: "a" → "B" collides with "b"), still allowing
-    /// the case-only self-rename ("work" → "Work").
+    /// the case-only self-rename ("work" → "Work"). One
+    /// optimistic mirror is the limit (review 2026-07): a
+    /// second GUI consumer of this rule gets a read-only
+    /// availability query on the KiwiCore facade instead of
+    /// a copy — core stays the only authority either way.
     private func canRename(_ old: String) -> Bool {
         let new = renameDraft.trimmed
         guard !new.isEmpty, new != old else { return false }

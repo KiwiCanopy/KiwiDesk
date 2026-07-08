@@ -20,6 +20,11 @@ extension KiwiCore {
     /// settings change can't be swallowed; event-driven applies
     /// (monitor change, native-space binding) stay un-forced so
     /// AX-echo lag can't wobble windows.
+    ///
+    /// Growth threshold (review 2026-07): two classification
+    /// Bools is the ceiling. A THIRD would be the point to
+    /// fold them into one apply-intent value (.userExplicit /
+    /// .hardwareEvent) — do not add Bool #3.
     func apply(
         profile: Profile,
         pruneStaleSpaces: Bool = false,
