@@ -144,8 +144,14 @@ extension KiwiCore {
         let template = """
             -- KiwiDesk configuration
             -- Docs: https://github.com/hajiboy95/KiwiDesk
+            --
+            -- Everyday settings live in the Settings window;
+            -- this file is for optional custom Lua. Comments
+            -- only by default — the built-in defaults apply
+            -- until a line below is uncommented.
 
-            KiwiDesk.set_gap_global(10)
+            -- One value for all gaps (the built-in default):
+            -- KiwiDesk.set_gap_global(10)
 
             -- Every virtual space (workspace) has its own
             -- layout; the first argument is the SPACE id
