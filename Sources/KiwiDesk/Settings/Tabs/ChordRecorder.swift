@@ -219,6 +219,15 @@ final class ChordRecorder {
             finish(.cancelled)
             return true
         }
+        // A keyDown for a key already held is the OS
+        // auto-repeat: swallow it without touching the
+        // pending chord or the hint — a repeat must neither
+        // re-snapshot to the overlapped key (defeating
+        // first-wins) nor rebuild the chord from the current
+        // flags (stripping accumulated modifiers).
+        if heldKeys.contains(keyCode) {
+            return true
+        }
         // A second base key while the first is still held is
         // a chord attempt — a shortcut is modifiers + ONE key
         // (Carbon can't register more). Keep the first key,

@@ -189,9 +189,11 @@ struct KeyRecorderField: View {
         // load-bearing — it keeps the recorder alive to run
         // stop() even if the view's state died first.
         let previewBinding = $preview
+        let hintBinding = $hint
         coordinator.claim(fieldID) { [recorder] in
             recorder.stop()
             previewBinding.wrappedValue = ""
+            hintBinding.wrappedValue = nil
         }
         recorder.start(
             preview: { preview = $0 },
