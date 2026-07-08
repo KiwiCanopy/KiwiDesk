@@ -111,4 +111,21 @@ struct ProfileRenameTests {
         try core.renameProfile(from: "desk", to: "studio")
         #expect(!core.guiConfigStore.exists)
     }
+
+    @Test("an unrelated sidecar is not rewritten")
+    func unrelatedSidecarUntouched() throws {
+        let core = makeCore()
+        save(core, "desk")
+        var config = GuiConfig()
+        config.profileBindings = [2: "other"]
+        // Marker: a follow-up save would overwrite the
+        // stored spaces with the live list.
+        config.spaces = [SpaceID("zed")]
+        try core.guiConfigStore.save(config)
+        core.nativeSpaceBindings = [2: "other"]
+        try core.renameProfile(from: "desk", to: "studio")
+        let sidecar = core.guiConfigStore.load()
+        #expect(sidecar?.profileBindings == [2: "other"])
+        #expect(sidecar?.spaces == [SpaceID("zed")])
+    }
 }

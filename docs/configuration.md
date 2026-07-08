@@ -82,7 +82,8 @@ app-launch actions land in their sections; anything else
 lands under *Advanced: Lua bindings*). You can also pull them in without
 adopting the whole file — **Import from init.lua…** in the
 header of the Shortcuts section (shown while `init.lua`
-carries custom Lua) reads the shortcuts active in `init.lua`
+carries custom Lua and you are editing the live config, not
+a stored profile) reads the shortcuts active in `init.lua`
 and adds them for review before you Save. Recovery
 expects each shortcut to be an inline `function() … end` on
 its own line. A binding whose action can't be read back — one
