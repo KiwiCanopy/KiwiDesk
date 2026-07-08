@@ -8,6 +8,8 @@ struct SettingsSidebar: View {
     /// Hides the global-only destinations while a stored
     /// profile is being edited (#18).
     let editingStoredProfile: Bool
+    /// Swaps the identity mark to the golden variant on dark.
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         List(selection: $selection) {
@@ -32,13 +34,12 @@ struct SettingsSidebar: View {
     }
 
     /// App identity centered at the top of the sidebar (#68):
-    /// colour mark + name, sitting under the traffic lights
-    /// where `NavigationSplitView` insets the sidebar top. The
+    /// colour mark + name, just under the traffic lights. The
     /// selected section's name rides the titlebar separately,
     /// the System Settings split.
     private var appIdentity: some View {
         HStack(spacing: 8) {
-            if let mark = BrandAssets.appMark {
+            if let mark {
                 Image(nsImage: mark)
                     .resizable()
                     .scaledToFit()
@@ -49,7 +50,19 @@ struct SettingsSidebar: View {
         }
         .frame(maxWidth: .infinity, alignment: .center)
         .padding(.horizontal, 12)
-        .padding(.vertical, 10)
+        // Tight top gap — the toolbar safe-area inset already
+        // clears the traffic lights, so this just seats the
+        // mark below them without a legacy void.
+        .padding(.top, 2)
+        .padding(.bottom, 8)
+    }
+
+    /// The golden dark mark on dark, colour mark on light;
+    /// falls back across variants if one resource is missing.
+    private var mark: NSImage? {
+        colorScheme == .dark
+            ? BrandAssets.appMarkDark ?? BrandAssets.appMark
+            : BrandAssets.appMark
     }
 
     private var visibleWholeApp: [SettingsDestination] {

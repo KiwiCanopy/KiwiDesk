@@ -50,4 +50,11 @@ enum BrandAssets {
     /// bundle provides one.
     static let appMark: NSImage? =
         Bundle.module.image(forResource: "AppMark")
+
+    /// The golden dark-mode app mark (from `logo_dark.svg`), for
+    /// the sidebar identity on a dark pane. The Dock icon keeps
+    /// the colour `appMark` — the Dock tile is a neutral surface
+    /// where the light mark reads in either appearance.
+    static let appMarkDark: NSImage? =
+        Bundle.module.image(forResource: "AppMarkDark")
 }

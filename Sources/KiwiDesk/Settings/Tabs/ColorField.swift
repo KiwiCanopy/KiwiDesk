@@ -154,6 +154,9 @@ final class ColorPanelController: NSObject {
         self.onChange = onChange
         let panel = NSColorPanel.shared
         panel.showsAlpha = true
+        // Open on the colour wheel (preferred over the sliders
+        // pane, even though hex entry lives there).
+        panel.mode = .wheel
         panel.color = current
         panel.setTarget(self)
         panel.setAction(#selector(panelColorChanged(_:)))

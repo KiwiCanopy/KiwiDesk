@@ -10,7 +10,8 @@ an asset catalog — `swift build` on CI does not run actool).
 | `logo_mono.svg` | `MenuBarIcon.tiff` (18/36 px) | Menu-bar template icon + quick-menu header |
 | `logo_wordmark.svg` | `Wordmark.png` (512 px) | Settings ▸ General ▸ About (light mode) |
 | `logo_wordmark_dark.svg` | `WordmarkDark.png` (512 px) | Settings ▸ General ▸ About (dark mode) |
-| `logo.svg` | `AppMark.png` (512 px) | Settings sidebar identity header + runtime Dock icon (`NSApp.applicationIconImage`) while `.regular` |
+| `logo.svg` | `AppMark.png` (512 px) | Sidebar identity (light mode) + runtime Dock icon (`NSApp.applicationIconImage`) while `.regular` |
+| `logo_dark.svg` | `AppMarkDark.png` (512 px) | Sidebar identity (dark mode) — golden variant |
 | `logo.svg` | — (reserved) | App-icon (`.icns`) master, once an `.app` bundle exists (#89) |
 
 ## Regenerating after editing a master
