@@ -9,25 +9,40 @@ struct MonocleEditor: View {
 
     var body: some View {
         SettingsSection(
-            "Monocle",
+            L("layout.monocle.name", "Monocle"),
             symbol: LayoutMode.monocle.glyph
         ) {
             SegmentedPicker(
-                "Focus orientation",
+                L(
+                    "monocle.focus_orientation",
+                    "Focus orientation"
+                ),
                 selection: $model.config.settings.monocle
                     .orientation,
                 options: [
                     (
-                        "Horizontal",
+                        L(
+                            "scroll_grid.horizontal",
+                            "Horizontal"
+                        ),
                         MonocleParams.Orientation.horizontal
                     ),
-                    ("Vertical", .vertical),
+                    (
+                        L("scroll_grid.vertical", "Vertical"),
+                        .vertical
+                    ),
                 ]
             )
             CrossReferenceRow(
-                prose: "The app bar shown in monocle is "
-                    + "configured in",
-                linkTitle: "Appearance ▸ App Bar",
+                prose: L(
+                    "monocle.app_bar_xref",
+                    "The app bar shown in monocle is "
+                        + "configured in"
+                ),
+                linkTitle: L(
+                    "scroll_grid.app_bar_xref_link",
+                    "Appearance ▸ App Bar"
+                ),
                 destination: .appearance
             )
         }

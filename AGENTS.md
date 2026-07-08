@@ -310,3 +310,19 @@ Keep this list updated whenever a recurring mistake is found.
   just the `resolved()` lines — sparse `Codable` stays per-field
   either way, so generics rarely buy down the real risk and fight
   §2.4.
+- **`Resources/Locales/*.json` is generated/translation-owned
+  (issue #9).** Every GUI string routes through
+  `L("key", "English")` (`KiwiDeskCore/Localization/
+  LocalizationManager.swift`); English is the source of truth,
+  inlined at the call site, with per-key fallback when a locale
+  omits a key. `en.json` is regenerated wholesale by
+  `scripts/extract-keys` from those call sites — never hand-edit
+  it, and AI agents must not hand-edit any `Resources/Locales/
+  *.json` file: use `scripts/extract-keys <locale>` /
+  `scripts/merge-keys <locale>` (see `docs/translating.md`).
+  Because the same English text can in principle be authored at
+  two different call sites for one key, `extract-keys` fails
+  loudly on any such drift (mismatched English for the same
+  key) rather than silently picking one — backed by
+  `LocalizationDriftGuardTests` so the guard itself is covered
+  by `swift test`/CI, not just the script.

@@ -24,7 +24,12 @@ struct LayoutDefaultsSection: View {
     }
 
     private var minSizeSection: some View {
-        SettingsSection("Minimum window size") {
+        SettingsSection(
+            L(
+                "layout_defaults.min_window_size",
+                "Minimum window size"
+            )
+        ) {
             HStack {
                 SettingsSlider(
                     value: Binding(

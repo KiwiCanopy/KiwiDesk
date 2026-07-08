@@ -32,26 +32,35 @@ struct ShortcutsHeader: View {
                     importButton
                 }
             }
-            Text(
-                "Modes are alternate shortcut sets — only the "
-                    + "active mode's shortcuts fire. Bind a "
-                    + "key below to switch between them. "
-                    + "\u{201C}default\u{201D} is the standard "
-                    + "mode and is always the active one after "
-                    + "the app starts."
-            )
-            .font(.caption)
-            .foregroundStyle(.secondary)
-            if importedNote {
-                Text(
-                    "Shortcuts imported — review below, then "
-                        + "Save."
-                )
+            Text(modesCaption)
                 .font(.caption)
-                .foregroundStyle(.green)
+                .foregroundStyle(.secondary)
+            if importedNote {
+                Text(importedNoteText)
+                    .font(.caption)
+                    .foregroundStyle(.green)
             }
             selectedModeHeader
         }
+    }
+
+    private var modesCaption: String {
+        L(
+            "shortcuts.modes.caption",
+            "Modes are alternate shortcut sets — only the "
+                + "active mode's shortcuts fire. Bind a "
+                + "key below to switch between them. "
+                + "\u{201C}default\u{201D} is the standard "
+                + "mode and is always the active one after "
+                + "the app starts."
+        )
+    }
+
+    private var importedNoteText: String {
+        L(
+            "shortcuts.imported_note",
+            "Shortcuts imported — review below, then Save."
+        )
     }
 
     // MARK: - Mode strip
@@ -100,19 +109,23 @@ struct ShortcutsHeader: View {
                 )
         }
         .buttonStyle(.plain)
-        .help("Add a mode")
+        .help(L("shortcuts.add_mode.help", "Add a mode"))
         .popover(isPresented: $addingMode) {
             HStack {
-                TextField("Mode name", text: $newMode)
+                TextField(modeNamePlaceholder, text: $newMode)
                     .textFieldStyle(.roundedBorder)
                     .frame(width: 140)
                     .onSubmit(addMode)
-                Button("Add", action: addMode)
+                Button(L("shortcuts.add", "Add"), action: addMode)
                     .buttonStyle(.borderedProminent)
                     .disabled(!canAddMode)
             }
             .padding(10)
         }
+    }
+
+    private var modeNamePlaceholder: String {
+        L("shortcuts.mode_name", "Mode name")
     }
 
     // MARK: - Import (#4)
@@ -128,14 +141,22 @@ struct ShortcutsHeader: View {
             importedNote = true
         } label: {
             Label(
-                "Import from init.lua…",
+                L(
+                    "shortcuts.import",
+                    "Import from init.lua…"
+                ),
                 systemImage: "square.and.arrow.down"
             )
         }
         // Small: it sits inline beside the mode chips and
         // must not read as a peer tab.
         .controlSize(.small)
-        .help(
+        .help(importHelp)
+    }
+
+    private var importHelp: String {
+        L(
+            "shortcuts.import.help",
             "Reads the shortcuts active in init.lua and adds "
                 + "them here, matching each combo. Known "
                 + "actions sort into the groups below; "
@@ -151,14 +172,14 @@ struct ShortcutsHeader: View {
     @ViewBuilder private var selectedModeHeader: some View {
         if selected != KeyMode.defaultName {
             HStack(spacing: 10) {
-                Text("Menu bar icon")
+                Text(L("shortcuts.menu_bar_icon", "Menu bar icon"))
                     .foregroundStyle(.secondary)
                 IconPicker(icon: iconBinding, preview: .menuBar)
                 Spacer()
                 if canDeleteSelected {
                     renameModeButton
                     Button(
-                        "Delete mode",
+                        L("shortcuts.delete_mode", "Delete mode"),
                         role: .destructive,
                         action: deleteMode
                     )
@@ -167,9 +188,14 @@ struct ShortcutsHeader: View {
                     // doesn't mention always survives —
                     // removal is not expressible per profile
                     // (#55 phase 7).
-                    Text("Base modes can't be removed here")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    Text(
+                        L(
+                            "shortcuts.base_mode_protected",
+                            "Base modes can't be removed here"
+                        )
+                    )
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 }
             }
             .font(.callout)
@@ -204,19 +230,22 @@ struct ShortcutsHeader: View {
     /// until Save, so chasing stored files at click time
     /// would desync them from an unsaved base).
     private var renameModeButton: some View {
-        Button("Rename…") {
+        Button(L("shortcuts.rename_ellipsis", "Rename…")) {
             renameDraft = selected
             renamingMode = true
         }
         .popover(isPresented: $renamingMode) {
             HStack {
-                TextField("Mode name", text: $renameDraft)
+                TextField(modeNamePlaceholder, text: $renameDraft)
                     .textFieldStyle(.roundedBorder)
                     .frame(width: 140)
                     .onSubmit(renameMode)
-                Button("Rename", action: renameMode)
-                    .buttonStyle(.borderedProminent)
-                    .disabled(!canRenameMode)
+                Button(
+                    L("shortcuts.rename", "Rename"),
+                    action: renameMode
+                )
+                .buttonStyle(.borderedProminent)
+                .disabled(!canRenameMode)
             }
             .padding(10)
         }

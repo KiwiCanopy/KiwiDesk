@@ -19,15 +19,12 @@ struct AppRulesSection: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                SettingsSection("Rules per app") {
-                    Text(
-                        "Pin an app's windows to a space, "
-                            + "keep them floating, or both. "
-                            + "Deleting a row removes all of "
-                            + "the app's rules."
-                    )
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                SettingsSection(
+                    L("app_rules.section.title", "Rules per app")
+                ) {
+                    Text(rulesCaption)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                     ForEach(apps, id: \.self) { app in
                         AppRuleRow(
                             model: model,
@@ -41,6 +38,16 @@ struct AppRulesSection: View {
             }
             .padding(16)
         }
+    }
+
+    private var rulesCaption: String {
+        L(
+            "app_rules.section.caption",
+            "Pin an app's windows to a space, "
+                + "keep them floating, or both. "
+                + "Deleting a row removes all of "
+                + "the app's rules."
+        )
     }
 
     /// One row per distinct app, however its rules are stored:
@@ -67,7 +74,10 @@ struct AppRulesSection: View {
                 }
                 newApp = ""
             } label: {
-                Label("Add app rule", systemImage: "plus")
+                Label(
+                    L("app_rules.add_rule", "Add app rule"),
+                    systemImage: "plus"
+                )
             }
             .disabled(newApp.trimmed.isEmpty)
             Spacer()

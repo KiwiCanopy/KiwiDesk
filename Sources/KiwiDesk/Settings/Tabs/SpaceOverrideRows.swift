@@ -13,15 +13,20 @@ struct SpaceOverrideRows: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(
-                "Gray = inherit the global value (Layout "
-                    + "Defaults). Check a box to override "
-                    + "just that field for this space."
-            )
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            Text(headerCaption)
+                .font(.caption)
+                .foregroundStyle(.secondary)
             modeRows
         }
+    }
+
+    private var headerCaption: String {
+        L(
+            "space_override.caption",
+            "Gray = inherit the global value (Layout "
+                + "Defaults). Check a box to override "
+                + "just that field for this space."
+        )
     }
 
     private var mode: LayoutMode {
@@ -48,7 +53,10 @@ struct SpaceOverrideRows: View {
         case .monocle: monocleRows
         case .floating:
             placeholder(
-                "Floating has no per-space overrides."
+                L(
+                    "space_override.floating.none",
+                    "Floating has no per-space overrides."
+                )
             )
         }
     }
@@ -56,7 +64,7 @@ struct SpaceOverrideRows: View {
     @ViewBuilder
     private var scrollingRows: some View {
         OverridePickerRow(
-            label: "Orientation",
+            label: L("scroll_grid.orientation", "Orientation"),
             value: binding(
                 \.scrolling.override,
                 space,
@@ -64,20 +72,26 @@ struct SpaceOverrideRows: View {
             ),
             global: g.scrolling.orientation,
             options: [
-                (.horizontal, "Horizontal"),
-                (.vertical, "Vertical"),
+                (.horizontal, L("scroll_grid.horizontal", "Horizontal")),
+                (.vertical, L("scroll_grid.vertical", "Vertical")),
             ]
         )
         OverridePickerRow(
-            label: "Focus anchor",
+            label: L("scroll_grid.focus_anchor", "Focus anchor"),
             value: binding(\.scrolling.override, space, \.anchor),
             global: g.scrolling.anchor,
             options: [
-                (.center, "Center"), (.left, "Left"),
-                (.right, "Right"),
+                (.center, L("scroll_grid.anchor.center", "Center")),
+                (.left, L("scroll_grid.anchor.left", "Left")),
+                (.right, L("scroll_grid.anchor.right", "Right")),
             ]
         )
-        placeholder(
+        placeholder(slotSizePlaceholder)
+    }
+
+    private var slotSizePlaceholder: String {
+        L(
+            "space_override.slot_size_placeholder",
             "Slot size override is Lua/JSON-only for now "
                 + "(scroll.set_slot_size)."
         )
@@ -86,16 +100,28 @@ struct SpaceOverrideRows: View {
     @ViewBuilder
     private var bspRows: some View {
         OverridePickerRow(
-            label: "Split strategy",
+            label: L(
+                "layout_params.split_strategy",
+                "Split strategy"
+            ),
             value: binding(\.bsp.override, space, \.strategy),
             global: g.bsp.strategy,
             options: [
-                (.shortestSide, "Shortest side"),
-                (.alternating, "Alternating"),
+                (
+                    .shortestSide,
+                    L(
+                        "layout_params.shortest_side",
+                        "Shortest side"
+                    )
+                ),
+                (
+                    .alternating,
+                    L("layout_params.alternating", "Alternating")
+                ),
             ]
         )
         OverrideFractionRow(
-            label: "Split ratio",
+            label: L("layout_params.split_ratio", "Split ratio"),
             value: binding(\.bsp.override, space, \.splitRatio),
             global: g.bsp.splitRatio
         )
@@ -104,7 +130,10 @@ struct SpaceOverrideRows: View {
     @ViewBuilder
     private var stackRows: some View {
         OverrideStepperRow(
-            label: "Master count",
+            label: L(
+                "layout_params.master_count",
+                "Master count"
+            ),
             value: binding(
                 \.stack.override,
                 space,
@@ -114,7 +143,10 @@ struct SpaceOverrideRows: View {
             range: 1...5
         )
         OverrideFractionRow(
-            label: "Master ratio",
+            label: L(
+                "layout_params.master_ratio",
+                "Master ratio"
+            ),
             value: binding(
                 \.stack.override,
                 space,
@@ -123,7 +155,7 @@ struct SpaceOverrideRows: View {
             global: g.stack.masterRatio
         )
         OverridePickerRow(
-            label: "Overflow",
+            label: L("layout_params.overflow", "Overflow"),
             value: binding(
                 \.stack.override,
                 space,
@@ -131,8 +163,20 @@ struct SpaceOverrideRows: View {
             ),
             global: g.stack.overflowStyle,
             options: [
-                (.cascadeOverflow, "Cascade overflow"),
-                (.cascadeAll, "Cascade all"),
+                (
+                    .cascadeOverflow,
+                    L(
+                        "layout_params.cascade_overflow",
+                        "Cascade overflow"
+                    )
+                ),
+                (
+                    .cascadeAll,
+                    L(
+                        "layout_params.cascade_all",
+                        "Cascade all"
+                    )
+                ),
             ]
         )
     }
@@ -140,13 +184,19 @@ struct SpaceOverrideRows: View {
     @ViewBuilder
     private var gridRows: some View {
         OverridePickerRow(
-            label: "Grid type",
+            label: L("scroll_grid.grid_type", "Grid type"),
             value: binding(\.grid.override, space, \.type),
             global: g.grid.type,
-            options: [(.dynamic, "Dynamic"), (.rigid, "Rigid")]
+            options: [
+                (.dynamic, L("scroll_grid.dynamic", "Dynamic")),
+                (.rigid, L("scroll_grid.rigid", "Rigid")),
+            ]
         )
         OverrideToggleRow(
-            label: "Fill empty space",
+            label: L(
+                "scroll_grid.fill_empty_space",
+                "Fill empty space"
+            ),
             value: binding(
                 \.grid.override,
                 space,
@@ -155,7 +205,10 @@ struct SpaceOverrideRows: View {
             global: g.grid.fillEmptySpace
         )
         OverridePickerRow(
-            label: "Split direction",
+            label: L(
+                "scroll_grid.split_direction",
+                "Split direction"
+            ),
             value: binding(
                 \.grid.override,
                 space,
@@ -163,18 +216,18 @@ struct SpaceOverrideRows: View {
             ),
             global: g.grid.splitDirection,
             options: [
-                (.horizontal, "Horizontal"),
-                (.vertical, "Vertical"),
+                (.horizontal, L("scroll_grid.horizontal", "Horizontal")),
+                (.vertical, L("scroll_grid.vertical", "Vertical")),
             ]
         )
         OverrideStepperRow(
-            label: "Columns",
+            label: L("scroll_grid.columns", "Columns"),
             value: binding(\.grid.override, space, \.columns),
             global: g.grid.columns,
             range: 1...10
         )
         OverrideStepperRow(
-            label: "Rows",
+            label: L("scroll_grid.rows", "Rows"),
             value: binding(\.grid.override, space, \.rows),
             global: g.grid.rows,
             range: 1...10
@@ -184,7 +237,7 @@ struct SpaceOverrideRows: View {
     @ViewBuilder
     private var monocleRows: some View {
         OverridePickerRow(
-            label: "Orientation",
+            label: L("scroll_grid.orientation", "Orientation"),
             value: binding(
                 \.monocle.override,
                 space,
@@ -192,8 +245,8 @@ struct SpaceOverrideRows: View {
             ),
             global: g.monocle.orientation,
             options: [
-                (.horizontal, "Horizontal"),
-                (.vertical, "Vertical"),
+                (.horizontal, L("scroll_grid.horizontal", "Horizontal")),
+                (.vertical, L("scroll_grid.vertical", "Vertical")),
             ]
         )
     }

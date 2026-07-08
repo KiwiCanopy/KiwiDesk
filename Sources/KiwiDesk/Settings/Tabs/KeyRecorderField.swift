@@ -83,8 +83,15 @@ struct KeyRecorderField: View {
             }
             if recording, let takenBy {
                 Text(
-                    "Already used by \u{201C}\(takenBy)\u{201D}"
-                        + " — locking in will ask to replace."
+                    L(
+                        "key_recorder.already_used_prefix",
+                        "Already used by \u{201C}"
+                    ) + takenBy
+                        + L(
+                            "key_recorder.already_used_suffix",
+                            "\u{201D} — locking in will ask "
+                                + "to replace."
+                        )
                 )
                 .font(.caption)
                 .foregroundStyle(.orange)
@@ -152,12 +159,14 @@ struct KeyRecorderField: View {
         .help(Self.recordHelp)
     }
 
-    private static let recordHelp =
+    @MainActor private static let recordHelp = L(
+        "key_recorder.help",
         "A shortcut is one key plus any of "
-        + "⌃ Control, ⌥ Option, ⇧ Shift, "
-        + "and ⌘ Command — it locks in when "
-        + "you release the keys. For more "
-        + "shortcut layers, add Modes."
+            + "⌃ Control, ⌥ Option, ⇧ Shift, "
+            + "and ⌘ Command — it locks in when "
+            + "you release the keys. For more "
+            + "shortcut layers, add Modes."
+    )
 
     // MARK: - Rejection UI (#34)
 
@@ -175,14 +184,17 @@ struct KeyRecorderField: View {
     ) -> some View {
         HStack(spacing: 6) {
             Text(
-                "Assigned to \u{201C}\(rejection.holder)\u{201D}"
+                L(
+                    "key_recorder.assigned_to_prefix",
+                    "Assigned to \u{201C}"
+                ) + rejection.holder + "\u{201D}"
             )
             .foregroundStyle(.red)
-            Button("Steal") {
+            Button(L("key_recorder.steal", "Steal")) {
                 self.rejection = nil
                 rejection.steal()
             }
-            Button("Go to") {
+            Button(L("key_recorder.go_to", "Go to")) {
                 self.rejection = nil
                 coordinator.scrollTarget =
                     rejection.holderRowID
@@ -206,9 +218,13 @@ struct KeyRecorderField: View {
 
     private var label: String {
         if recording {
-            return preview.isEmpty ? "Press keys…" : preview
+            return preview.isEmpty
+                ? L("key_recorder.press_keys", "Press keys…")
+                : preview
         }
-        guard !combo.isEmpty else { return "Record" }
+        guard !combo.isEmpty else {
+            return L("key_recorder.record", "Record")
+        }
         // Show the shortcut as native macOS glyphs, mapped
         // through the active keyboard layout (#23). The stored
         // combo stays the canonical word form; only the display

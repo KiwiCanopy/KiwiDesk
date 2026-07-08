@@ -152,8 +152,11 @@ extension ChordRecorder {
         {
             heldKeys.insert(keyCode)
             onHint(
-                "Only one key besides modifiers — release "
-                    + "it first to switch."
+                L(
+                    "key_recorder.one_key_hint",
+                    "Only one key besides modifiers — "
+                        + "release it first to switch."
+                )
             )
             return true
         }

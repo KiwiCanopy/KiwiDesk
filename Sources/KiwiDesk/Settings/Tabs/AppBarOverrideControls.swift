@@ -1,6 +1,12 @@
 import KiwiDeskCore
 import SwiftUI
 
+/// The Position/Style/Active-item/Content dropdown labels are
+/// data (an array of value/label pairs shared by the global and
+/// per-layout override pickers), so they route through `L()` at
+/// the point of construction (`@MainActor`, matching every
+/// other GUI-only lookup) rather than as call-site literals.
+
 /// An override row, "visible but inherited" (#68 §3.4): the
 /// leading checkbox is on when this scope overrides the field;
 /// off inherits the global value, with the control disabled
@@ -20,8 +26,14 @@ private struct OverrideChrome<Content: View>: View {
                 .toggleStyle(.checkbox)
                 .help(
                     isOn.wrappedValue
-                        ? "Overriding the global value"
-                        : "Inheriting the global value"
+                        ? L(
+                            "app_bar.override.on.help",
+                            "Overriding the global value"
+                        )
+                        : L(
+                            "app_bar.override.off.help",
+                            "Inheriting the global value"
+                        )
                 )
             content
                 .disabled(!isOn.wrappedValue)
@@ -192,18 +204,35 @@ struct OverridePickerRow<Value: Hashable & Sendable>: View {
 /// The shared option lists so the global editor and the
 /// per-layout override pickers stay in sync.
 enum AppBarOptions {
+    @MainActor
     static let position: [(AppBarStyle.Position, String)] = [
-        (.top, "Top"), (.bottom, "Bottom"),
-        (.left, "Left"), (.right, "Right"),
+        (.top, L("app_bar.position.top", "Top")),
+        (.bottom, L("app_bar.position.bottom", "Bottom")),
+        (.left, L("app_bar.position.left", "Left")),
+        (.right, L("app_bar.position.right", "Right")),
     ]
+    @MainActor
     static let style: [(AppBarStyle.Style, String)] = [
-        (.pills, "Pills"), (.segments, "Segments"),
-        (.underline, "Underline"),
+        (.pills, L("app_bar.style.pills", "Pills")),
+        (.segments, L("app_bar.style.segments", "Segments")),
+        (.underline, L("app_bar.style.underline", "Underline")),
     ]
+    @MainActor
     static let activeStyle: [(AppBarStyle.ActiveStyle, String)] =
-        [(.highlight, "Highlight"), (.gap, "Gap")]
+        [
+            (
+                .highlight,
+                L("app_bar.active_style.highlight", "Highlight")
+            ),
+            (.gap, L("app_bar.active_style.gap", "Gap")),
+        ]
+    @MainActor
     static let content: [(AppBarStyle.Content, String)] = [
-        (.icon, "Icon"), (.name, "Name"),
-        (.iconAndName, "Icon & name"),
+        (.icon, L("app_bar.content.icon", "Icon")),
+        (.name, L("app_bar.content.name", "Name")),
+        (
+            .iconAndName,
+            L("app_bar.content.icon_and_name", "Icon & name")
+        ),
     ]
 }

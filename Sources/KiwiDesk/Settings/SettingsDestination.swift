@@ -1,3 +1,4 @@
+import KiwiDeskCore
 import SwiftUI
 
 /// The sidebar's destinations (#68 §3.1): a two-group source
@@ -27,17 +28,20 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         .profiles, .shortcuts, .appRules, .general,
     ]
 
-    var title: String {
+    @MainActor var title: String {
         switch self {
-        case .spaces: return "Spaces"
-        case .layoutDefaults: return "Layout"
-        case .monitors: return "Monitors"
-        case .appearance: return "Appearance"
-        case .behavior: return "Behavior"
-        case .profiles: return "Profiles"
-        case .shortcuts: return "Shortcuts"
-        case .appRules: return "App Rules"
-        case .general: return "General"
+        case .spaces: return L("sidebar.spaces", "Spaces")
+        case .layoutDefaults: return L("sidebar.layout", "Layout")
+        case .monitors: return L("sidebar.monitors", "Monitors")
+        case .appearance:
+            return L("sidebar.appearance", "Appearance")
+        case .behavior: return L("sidebar.behavior", "Behavior")
+        case .profiles: return L("sidebar.profiles", "Profiles")
+        case .shortcuts:
+            return L("sidebar.shortcuts", "Shortcuts")
+        case .appRules:
+            return L("sidebar.app_rules", "App Rules")
+        case .general: return L("sidebar.general", "General")
         }
     }
 

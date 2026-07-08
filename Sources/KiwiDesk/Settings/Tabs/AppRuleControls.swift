@@ -11,8 +11,11 @@ struct AppSelector: View {
     var body: some View {
         if custom {
             HStack(spacing: 4) {
-                TextField("App name", text: $name)
-                    .textFieldStyle(.roundedBorder)
+                TextField(
+                    L("app_selector.app_name", "App name"),
+                    text: $name
+                )
+                .textFieldStyle(.roundedBorder)
                 Button {
                     custom = false
                     name = ""
@@ -31,13 +34,17 @@ struct AppSelector: View {
                     Button(app) { name = app }
                 }
                 Divider()
-                Button("Custom…") {
+                Button(L("app_selector.custom", "Custom…")) {
                     custom = true
                     name = ""
                 }
             } label: {
-                Text(name.isEmpty ? "Choose app…" : name)
-                    .frame(minWidth: 150, alignment: .leading)
+                Text(
+                    name.isEmpty
+                        ? L("shortcuts.choose_app", "Choose app…")
+                        : name
+                )
+                .frame(minWidth: 150, alignment: .leading)
             }
             .controlSize(.large)
         }
@@ -57,8 +64,11 @@ struct SpaceMenu: View {
                 Button(space.raw) { onPick(space) }
             }
         } label: {
-            Text(selected?.raw ?? "Space…")
-                .frame(minWidth: 70, alignment: .leading)
+            Text(
+                selected?.raw
+                    ?? L("space_menu.placeholder", "Space…")
+            )
+            .frame(minWidth: 70, alignment: .leading)
         }
         .controlSize(.large)
         .frame(width: 110)

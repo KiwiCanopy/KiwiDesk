@@ -177,15 +177,31 @@ struct PlacementPicker: View {
     @Binding var placement: SpawnPlacement
 
     var body: some View {
-        DropdownRow(label: "New window") {
-            Picker("New window", selection: $placement) {
-                Text("First").tag(SpawnPlacement.first)
-                Text("Last").tag(SpawnPlacement.last)
-                Text("Before focused")
-                    .tag(SpawnPlacement.beforeFocused)
-                Text("After focused")
-                    .tag(SpawnPlacement.afterFocused)
+        DropdownRow(label: newWindowLabel) {
+            Picker(newWindowLabel, selection: $placement) {
+                Text(L("placement.first", "First"))
+                    .tag(SpawnPlacement.first)
+                Text(L("placement.last", "Last"))
+                    .tag(SpawnPlacement.last)
+                Text(
+                    L(
+                        "placement.before_focused",
+                        "Before focused"
+                    )
+                )
+                .tag(SpawnPlacement.beforeFocused)
+                Text(
+                    L(
+                        "placement.after_focused",
+                        "After focused"
+                    )
+                )
+                .tag(SpawnPlacement.afterFocused)
             }
         }
+    }
+
+    private var newWindowLabel: String {
+        L("placement.new_window", "New window")
     }
 }

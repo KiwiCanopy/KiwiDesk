@@ -13,7 +13,12 @@ struct NativeSpacesSection: View {
     @ObservedObject var model: SettingsModel
 
     var body: some View {
-        SettingsSection("Profiles per macOS Space") {
+        SettingsSection(
+            L(
+                "native_spaces.title",
+                "Profiles per macOS Space"
+            )
+        ) {
             if spaceNumbers.isEmpty {
                 emptyHint
             } else {
@@ -27,9 +32,13 @@ struct NativeSpacesSection: View {
 
     private var intro: some View {
         Text(
-            "Each Desktop is a native macOS Space from "
-                + "Mission Control. Pick a profile to load it "
-                + "automatically when that Desktop activates."
+            L(
+                "native_spaces.intro",
+                "Each Desktop is a native macOS Space from "
+                    + "Mission Control. Pick a profile to load "
+                    + "it automatically when that Desktop "
+                    + "activates."
+            )
         )
         .font(.caption)
         .foregroundStyle(.secondary)
@@ -37,9 +46,13 @@ struct NativeSpacesSection: View {
 
     private var emptyHint: some View {
         Text(
-            "No native macOS Spaces detected. Enable \u{201C}"
-                + "Displays have separate Spaces\u{201D} and add "
-                + "desktops in Mission Control to bind profiles."
+            L(
+                "native_spaces.empty",
+                "No native macOS Spaces detected. Enable "
+                    + "\u{201C}Displays have separate "
+                    + "Spaces\u{201D} and add desktops in "
+                    + "Mission Control to bind profiles."
+            )
         )
         .font(.caption)
         .foregroundStyle(.secondary)
@@ -51,10 +64,15 @@ struct NativeSpacesSection: View {
         HStack {
             Image(systemName: "square.on.square")
                 .foregroundStyle(.secondary)
-            Text("Desktop \(number)")
-                .fontWeight(.medium)
+            Text(
+                L("native_spaces.desktop_prefix", "Desktop ")
+                    + "\(number)"
+            )
+            .fontWeight(.medium)
             if number == model.currentNativeSpace {
-                BadgeChip(label: "current")
+                BadgeChip(
+                    label: L("native_spaces.current", "current")
+                )
             }
             Spacer()
             profileMenu(number)
@@ -63,7 +81,8 @@ struct NativeSpacesSection: View {
 
     private func profileMenu(_ number: Int) -> some View {
         Picker("", selection: binding(number)) {
-            Text("None").tag(String?.none)
+            Text(L("native_spaces.none", "None"))
+                .tag(String?.none)
             ForEach(options(number), id: \.self) { name in
                 Text(name).tag(String?.some(name))
             }

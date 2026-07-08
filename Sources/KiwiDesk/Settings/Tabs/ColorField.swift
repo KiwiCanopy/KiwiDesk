@@ -98,8 +98,19 @@ struct ColorSwatch: View {
                 .onChange(of: focused) { _, now in
                     if !now { commit() }
                 }
-                .help("Type a #RRGGBB or #RRGGBBAA value")
-                .accessibilityLabel("\(label) hex value")
+                .help(
+                    L(
+                        "color_field.hex.help",
+                        "Type a #RRGGBB or #RRGGBBAA value"
+                    )
+                )
+                .accessibilityLabel(
+                    label
+                        + L(
+                            "color_field.hex.a11y_suffix",
+                            " hex value"
+                        )
+                )
         }
         // Track panel picks / external edits into the field —
         // but never mid-edit, or a background write would
@@ -148,9 +159,24 @@ struct ColorSwatch: View {
         .buttonStyle(.plain)
         .pointingHandCursor()
         .onHover { hovering = $0 }
-        .help("Edit the \(hex) color")
-        .accessibilityLabel("\(label) color")
-        .accessibilityHint("Opens the color picker")
+        .help(
+            L("color_field.swatch.help_prefix", "Edit the ")
+                + hex
+                + L("color_field.swatch.help_suffix", " color")
+        )
+        .accessibilityLabel(
+            label
+                + L(
+                    "color_field.swatch.a11y_suffix",
+                    " color"
+                )
+        )
+        .accessibilityHint(
+            L(
+                "color_field.swatch.a11y_hint",
+                "Opens the color picker"
+            )
+        )
     }
 
     /// Falls back to `.clear` (an empty dot) when the stored

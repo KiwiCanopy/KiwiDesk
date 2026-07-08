@@ -21,50 +21,81 @@ struct BehaviorSection: View {
     }
 
     private var mouseSection: some View {
-        SettingsSection("Mouse") {
+        SettingsSection(L("behavior.mouse.title", "Mouse")) {
             SegmentedPicker(
-                "Mouse resize action",
+                L(
+                    "behavior.mouse.resize_action",
+                    "Mouse resize action"
+                ),
                 selection: $model.config.settings
                     .mouseResize,
                 options: [
                     (
-                        "Resize adjacent windows",
+                        L(
+                            "behavior.mouse.resize_layout",
+                            "Resize adjacent windows"
+                        ),
                         MouseResizeMode.layout
                     ),
-                    ("Snap back to slot", .snapBack),
+                    (
+                        L(
+                            "behavior.mouse.resize_snap_back",
+                            "Snap back to slot"
+                        ), .snapBack
+                    ),
                 ]
             )
         }
     }
 
     private var animationsSection: some View {
-        SettingsSection("Animations") {
+        SettingsSection(
+            L("behavior.animations.title", "Animations")
+        ) {
             Toggle(
-                "Animate virtual space switches",
+                L(
+                    "behavior.animations.space_change",
+                    "Animate virtual space switches"
+                ),
                 isOn: $model.config.settings.animations
                     .onSpaceChange
             )
             Toggle(
-                "Animate window resizes",
+                L(
+                    "behavior.animations.window_resize",
+                    "Animate window resizes"
+                ),
                 isOn: $model.config.settings.animations
                     .onWindowResize
             )
             Toggle(
-                "Animate window swaps",
+                L(
+                    "behavior.animations.window_swap",
+                    "Animate window swaps"
+                ),
                 isOn: $model.config.settings.animations
                     .onWindowSwap
             )
             Toggle(
-                "Animate layout reflows",
+                L(
+                    "behavior.animations.relayout",
+                    "Animate layout reflows"
+                ),
                 isOn: $model.config.settings.animations
                     .onRelayout
             )
             Divider()
             durationRow
             CrossReferenceRow(
-                prose: "Scrolling-layout focus shifts have "
-                    + "their own toggle and speed in",
-                linkTitle: "Layout Defaults ▸ Scrolling",
+                prose: L(
+                    "behavior.animations.scrolling_xref",
+                    "Scrolling-layout focus shifts have "
+                        + "their own toggle and speed in"
+                ),
+                linkTitle: L(
+                    "behavior.animations.scrolling_xref_link",
+                    "Layout Defaults ▸ Scrolling"
+                ),
                 destination: .layoutDefaults
             )
         }
@@ -75,8 +106,12 @@ struct BehaviorSection: View {
     /// — paces exactly the four toggles above (#51).
     private var durationRow: some View {
         let ms = model.config.settings.animations.durationMS
+        let durationLabel = L(
+            "behavior.animations.duration",
+            "Duration"
+        )
         return HStack {
-            Text("Duration")
+            Text(durationLabel)
             Spacer()
             Stepper(
                 value: $model.config.settings.animations
@@ -89,7 +124,7 @@ struct BehaviorSection: View {
                     .monospacedDigit()
             }
             .controlSize(.large)
-            .accessibilityLabel("Duration")
+            .accessibilityLabel(durationLabel)
             .accessibilityValue("\(ms) ms")
         }
     }

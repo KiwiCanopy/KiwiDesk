@@ -13,7 +13,12 @@ struct ApplicationsSection: View {
     private var overrideBase
 
     var body: some View {
-        SettingsSection("Open Applications") {
+        SettingsSection(
+            L(
+                "shortcuts.section.open_applications",
+                "Open Applications"
+            )
+        ) {
             ForEach($bindings) { $binding in
                 if binding.kind == .application {
                     row($binding)
@@ -24,7 +29,13 @@ struct ApplicationsSection: View {
                     KeyBinding(kind: .application)
                 )
             } label: {
-                Label("Add application", systemImage: "plus")
+                Label(
+                    L(
+                        "shortcuts.add_application",
+                        "Add application"
+                    ),
+                    systemImage: "plus"
+                )
             }
             .buttonStyle(.bordered)
         }
@@ -113,11 +124,13 @@ struct ApplicationsSection: View {
                 Button(name) { assign(binding, name: name) }
             }
             Divider()
-            Button("Other…") { chooseBundle(binding) }
+            Button(L("shortcuts.other_ellipsis", "Other…")) {
+                chooseBundle(binding)
+            }
         } label: {
             Text(
                 binding.wrappedValue.label.isEmpty
-                    ? "Choose app…"
+                    ? L("shortcuts.choose_app", "Choose app…")
                     : binding.wrappedValue.label
             )
             .frame(minWidth: 160, alignment: .leading)

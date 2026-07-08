@@ -15,35 +15,35 @@ struct GapsEditor: View {
     @State private var innerExpanded = false
 
     var body: some View {
-        SettingsSection("Gaps") {
+        SettingsSection(L("gaps.title", "Gaps")) {
             GapsDiagram(outer: outer, inner: inner)
             masterRow(
-                label: "Outer gap",
+                label: L("gaps.outer", "Outer gap"),
                 unified: outerUnified,
                 mixed: outerMixed
             )
             DisclosureGroup(
-                "Per-edge…",
+                L("gaps.per_edge", "Per-edge…"),
                 isExpanded: outerDisclosure
             ) {
                 VStack(alignment: .leading, spacing: 6) {
                     GapRow(
-                        label: "Top",
+                        label: L("gaps.top", "Top"),
                         value: $model.config.settings
                             .gapsGlobal.outer.top
                     )
                     GapRow(
-                        label: "Bottom",
+                        label: L("gaps.bottom", "Bottom"),
                         value: $model.config.settings
                             .gapsGlobal.outer.bottom
                     )
                     GapRow(
-                        label: "Left",
+                        label: L("gaps.left", "Left"),
                         value: $model.config.settings
                             .gapsGlobal.outer.left
                     )
                     GapRow(
-                        label: "Right",
+                        label: L("gaps.right", "Right"),
                         value: $model.config.settings
                             .gapsGlobal.outer.right
                     )
@@ -52,22 +52,22 @@ struct GapsEditor: View {
             }
             Divider()
             masterRow(
-                label: "Inner gap",
+                label: L("gaps.inner", "Inner gap"),
                 unified: innerUnified,
                 mixed: innerMixed
             )
             DisclosureGroup(
-                "Per-axis…",
+                L("gaps.per_axis", "Per-axis…"),
                 isExpanded: innerDisclosure
             ) {
                 VStack(alignment: .leading, spacing: 6) {
                     GapRow(
-                        label: "Horizontal",
+                        label: L("gaps.horizontal", "Horizontal"),
                         value: $model.config.settings
                             .gapsGlobal.inner.horizontal
                     )
                     GapRow(
-                        label: "Vertical",
+                        label: L("gaps.vertical", "Vertical"),
                         value: $model.config.settings
                             .gapsGlobal.inner.vertical
                     )
@@ -101,7 +101,7 @@ struct GapsEditor: View {
             .disabled(mixed)
             Text(
                 mixed
-                    ? "mixed"
+                    ? L("gaps.mixed", "mixed")
                     : "\(Int(unified.wrappedValue)) pt"
             )
             .frame(
@@ -112,8 +112,11 @@ struct GapsEditor: View {
             .font(.system(.body, design: .monospaced))
             .help(
                 mixed
-                    ? "Edges differ — edit them individually "
-                        + "below."
+                    ? L(
+                        "gaps.mixed.help",
+                        "Edges differ — edit them "
+                            + "individually below."
+                    )
                     : ""
             )
         }

@@ -49,15 +49,13 @@ struct ProfilesSection: View {
     // MARK: - Saved profiles (#36)
 
     private var profileSection: some View {
-        SettingsSection("Saved profiles") {
+        SettingsSection(
+            L("profiles.saved.title", "Saved profiles")
+        ) {
             if model.profileSummaries.isEmpty {
-                Text(
-                    "No profiles saved yet — the built-in "
-                        + "Standard resolves until you save "
-                        + "one."
-                )
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                Text(noProfilesCaption)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
             ForEach(profileCounts, id: \.self) { count in
                 countGroupHeader(count)
@@ -66,6 +64,15 @@ struct ProfilesSection: View {
                 }
             }
         }
+    }
+
+    private var noProfilesCaption: String {
+        L(
+            "profiles.saved.empty",
+            "No profiles saved yet — the built-in "
+                + "Standard resolves until you save "
+                + "one."
+        )
     }
 
     /// The live count's group sorts on top; the rest ascend.
@@ -91,19 +98,30 @@ struct ProfilesSection: View {
             // uses the shared group-header style, one step above
             // a section's headline, instead of caption text.
             SettingsGroupHeader(
-                count == 1 ? "1 screen" : "\(count) screens"
+                count == 1
+                    ? L("profiles.screens.one", "1 screen")
+                    : "\(count) "
+                        + L("profiles.screens.many", "screens")
             )
             if count == model.displays.count {
-                BadgeChip(label: "connected")
+                BadgeChip(
+                    label: L(
+                        "profiles.badge.connected",
+                        "connected"
+                    )
+                )
             }
             if model.duplicateDefaultCounts.contains(count) {
                 Image(systemName: "exclamationmark.triangle")
                     .foregroundStyle(.orange)
                     .font(.caption)
                     .help(
-                        "Several profiles of this count are "
-                            + "marked default; the "
-                            + "alphabetically first wins."
+                        L(
+                            "profiles.duplicate_default.help",
+                            "Several profiles of this count "
+                                + "are marked default; the "
+                                + "alphabetically first wins."
+                        )
                     )
             }
         }
@@ -121,10 +139,20 @@ struct ProfilesSection: View {
                     Text(summary.name)
                     renameButton(summary.name)
                     if summary.name == model.activeProfile {
-                        BadgeChip(label: "active")
+                        BadgeChip(
+                            label: L(
+                                "profiles.badge.active",
+                                "active"
+                            )
+                        )
                     }
                     if summary.isDefault {
-                        BadgeChip(label: "default")
+                        BadgeChip(
+                            label: L(
+                                "profiles.badge.default",
+                                "default"
+                            )
+                        )
                     }
                 }
                 monitorChips(summary)
@@ -133,15 +161,18 @@ struct ProfilesSection: View {
             if !summary.isDefault {
                 makeDefaultLink(summary.name)
             }
-            Button("Load") {
+            Button(L("profiles.load", "Load")) {
                 model.loadProfile(named: summary.name)
             }
             .controlSize(.large)
             .help(
                 summary.matchesLive
                     ? ""
-                    : "Saved for other monitors — loads with "
-                        + "unsaved-changes state."
+                    : L(
+                        "profiles.other_monitors.help",
+                        "Saved for other monitors — loads "
+                            + "with unsaved-changes state."
+                    )
             )
             Button {
                 model.deleteProfile(named: summary.name)
@@ -149,7 +180,7 @@ struct ProfilesSection: View {
                 Image(systemName: "trash")
             }
             .buttonStyle(.borderless)
-            .help("Delete profile")
+            .help(L("profiles.delete.help", "Delete profile"))
         }
     }
 
@@ -162,7 +193,8 @@ struct ProfilesSection: View {
         Button {
             model.makeDefault(named: name)
         } label: {
-            Text("make default").underline()
+            Text(L("profiles.make_default", "make default"))
+                .underline()
         }
         .buttonStyle(.plain)
         .font(.caption)
@@ -182,7 +214,7 @@ struct ProfilesSection: View {
                 .imageScale(.small)
         }
         .buttonStyle(.borderless)
-        .help("Rename profile")
+        .help(L("profiles.rename.help", "Rename profile"))
         .linkHover()
         .popover(
             isPresented: Binding(
@@ -192,14 +224,16 @@ struct ProfilesSection: View {
         ) {
             HStack {
                 TextField(
-                    "Profile name",
+                    L("footer.profile_name", "Profile name"),
                     text: $renameDraft
                 )
                 .textFieldStyle(.roundedBorder)
                 .frame(width: 160)
                 .onSubmit { commitRename(of: name) }
-                Button("Rename") { commitRename(of: name) }
-                    .disabled(!canRename(name))
+                Button(L("profiles.rename", "Rename")) {
+                    commitRename(of: name)
+                }
+                .disabled(!canRename(name))
             }
             .padding(10)
         }

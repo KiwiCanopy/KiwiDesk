@@ -1,3 +1,4 @@
+import KiwiDeskCore
 import SwiftUI
 
 /// The two-group source list (#68 §3.1). Group headers name
@@ -13,12 +14,12 @@ struct SettingsSidebar: View {
 
     var body: some View {
         List(selection: $selection) {
-            Section("Design") {
+            Section(L("sidebar.section.design", "Design")) {
                 ForEach(SettingsDestination.thisProfile) {
                     row($0)
                 }
             }
-            Section("System") {
+            Section(L("sidebar.section.system", "System")) {
                 ForEach(visibleWholeApp) { row($0) }
             }
         }
@@ -45,7 +46,7 @@ struct SettingsSidebar: View {
                     .scaledToFit()
                     .frame(width: 28, height: 28)
             }
-            Text("KiwiDesk")
+            Text(L("sidebar.app_name", "KiwiDesk"))
                 .font(.title3.weight(.semibold))
         }
         .frame(maxWidth: .infinity, alignment: .center)

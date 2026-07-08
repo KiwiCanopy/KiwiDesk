@@ -33,20 +33,21 @@ struct MonitorsSection: View {
     }
 
     private var cardsSection: some View {
-        SettingsSection("Space placement") {
+        SettingsSection(
+            L("monitors.space_placement", "Space placement")
+        ) {
             if model.displays.isEmpty {
-                Text("No monitors detected.")
-                    .foregroundStyle(.secondary)
-            } else {
                 Text(
-                    "Drag a space between cards to pin it to "
-                        + "a monitor or have it follow the "
-                        + "main display. Dimmed spaces are "
-                        + "placed automatically. Right-click "
-                        + "a space for the same moves."
+                    L(
+                        "monitors.none_detected",
+                        "No monitors detected."
+                    )
                 )
-                .font(.caption)
                 .foregroundStyle(.secondary)
+            } else {
+                Text(cardsCaption)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 HStack(alignment: .top, spacing: 10) {
                     ForEach(orderedDisplays, id: \.id) {
                         display in
@@ -59,6 +60,17 @@ struct MonitorsSection: View {
                 }
             }
         }
+    }
+
+    private var cardsCaption: String {
+        L(
+            "monitors.cards.caption",
+            "Drag a space between cards to pin it to "
+                + "a monitor or have it follow the "
+                + "main display. Dimmed spaces are "
+                + "placed automatically. Right-click "
+                + "a space for the same moves."
+        )
     }
 
     /// Cards render connected displays; macOS's Displays pane
@@ -82,7 +94,12 @@ struct MonitorsSection: View {
         }
         .sorted { $0.key.raw < $1.key.raw }
         if !orphans.isEmpty {
-            SettingsSection("Pinned to disconnected monitors") {
+            SettingsSection(
+                L(
+                    "monitors.orphan_pins.title",
+                    "Pinned to disconnected monitors"
+                )
+            ) {
                 ForEach(orphans, id: \.key.raw) { pin in
                     HStack {
                         SpaceChip(label: pin.key.raw)
@@ -105,7 +122,12 @@ struct MonitorsSection: View {
                             Image(systemName: "xmark.circle")
                         }
                         .buttonStyle(.borderless)
-                        .help("Back to automatic placement")
+                        .help(
+                            L(
+                                "monitors.orphan_pin.help",
+                                "Back to automatic placement"
+                            )
+                        )
                     }
                 }
             }
@@ -113,27 +135,37 @@ struct MonitorsSection: View {
     }
 
     private var placementUnavailable: some View {
-        SettingsSection("Space placement") {
+        SettingsSection(
+            L("monitors.space_placement", "Space placement")
+        ) {
             VStack(alignment: .leading, spacing: 8) {
                 Label(
-                    "Monitors not connected",
+                    L(
+                        "monitors.not_connected",
+                        "Monitors not connected"
+                    ),
                     systemImage:
                         "display.trianglebadge.exclamationmark"
                 )
                 .font(.headline)
-                Text(
-                    "This profile's monitors aren't attached "
-                        + "right now, so its space placement "
-                        + "can't be edited here. Connect its "
-                        + "monitor setup to arrange spaces — "
-                        + "the other sections still edit this "
-                        + "profile."
-                )
-                .font(.callout)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+                Text(placementUnavailableCaption)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
+    }
+
+    private var placementUnavailableCaption: String {
+        L(
+            "monitors.not_connected.caption",
+            "This profile's monitors aren't attached "
+                + "right now, so its space placement "
+                + "can't be edited here. Connect its "
+                + "monitor setup to arrange spaces — "
+                + "the other sections still edit this "
+                + "profile."
+        )
     }
 
     /// Diagnostic, read-only, never touched day to day.
@@ -141,8 +173,12 @@ struct MonitorsSection: View {
         DisclosureGroup(isExpanded: $advancedExpanded) {
             VStack(alignment: .leading, spacing: 8) {
                 Text(
-                    "Profiles reattach automatically when a "
-                        + "known monitor setup is reconnected."
+                    L(
+                        "monitors.advanced.caption",
+                        "Profiles reattach automatically when "
+                            + "a known monitor setup is "
+                            + "reconnected."
+                    )
                 )
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -167,8 +203,13 @@ struct MonitorsSection: View {
             .padding(.top, 8)
             .frame(maxWidth: .infinity, alignment: .leading)
         } label: {
-            Text("Advanced — monitor fingerprints")
-                .font(.headline)
+            Text(
+                L(
+                    "monitors.advanced.title",
+                    "Advanced — monitor fingerprints"
+                )
+            )
+            .font(.headline)
         }
         .padding(12)
         .background(

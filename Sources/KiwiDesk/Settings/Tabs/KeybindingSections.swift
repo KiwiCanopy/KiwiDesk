@@ -18,7 +18,7 @@ struct FocusSection: View {
     }
 
     var body: some View {
-        SettingsSection("Focus") {
+        SettingsSection(L("shortcuts.section.focus", "Focus")) {
             ForEach(KeybindingCatalog.focusDirections) {
                 command in
                 NavRow(
@@ -28,7 +28,7 @@ struct FocusSection: View {
                 )
             }
             if !spaces.isEmpty {
-                Text("Go to space")
+                Text(L("shortcuts.go_to_space", "Go to space"))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .padding(.top, 4)
@@ -59,7 +59,9 @@ struct MoveWindowsSection: View {
     }
 
     var body: some View {
-        SettingsSection("Move Windows") {
+        SettingsSection(
+            L("shortcuts.section.move_windows", "Move Windows")
+        ) {
             ForEach(KeybindingCatalog.swapDirections) {
                 command in
                 NavRow(
@@ -69,10 +71,12 @@ struct MoveWindowsSection: View {
                 )
             }
             if !spaces.isEmpty {
-                Text("Move to space")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .padding(.top, 4)
+                Text(
+                    L("shortcuts.move_to_space", "Move to space")
+                )
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .padding(.top, 4)
                 ForEach(
                     KeybindingCatalog.moveToSpace(
                         spaces,
@@ -100,7 +104,9 @@ struct SizeFloatSection: View {
     @Binding var bindings: [KeyBinding]
 
     var body: some View {
-        SettingsSection("Size & Float") {
+        SettingsSection(
+            L("shortcuts.section.size_float", "Size & Float")
+        ) {
             ForEach(KeybindingCatalog.resizeAndFloat) {
                 command in
                 NavRow(
@@ -109,16 +115,21 @@ struct SizeFloatSection: View {
                     command: command
                 )
             }
-            Text(
-                "Shrink/Enlarge only applies in the bsp, "
-                    + "stack, and scrolling layouts; it is a "
-                    + "no-op in monocle, grid, and floating. "
-                    + "It nudges the one split/master ratio, "
-                    + "so it has no separate width and height."
-            )
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            Text(sizeFloatCaption)
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
+    }
+
+    private var sizeFloatCaption: String {
+        L(
+            "shortcuts.size_float.caption",
+            "Shrink/Enlarge only applies in the bsp, "
+                + "stack, and scrolling layouts; it is a "
+                + "no-op in monocle, grid, and floating. "
+                + "It nudges the one split/master ratio, "
+                + "so it has no separate width and height."
+        )
     }
 }
 
@@ -132,7 +143,9 @@ struct ChangeModesSection: View {
     let current: String
 
     var body: some View {
-        SettingsSection("Switch modes") {
+        SettingsSection(
+            L("shortcuts.section.switch_modes", "Switch modes")
+        ) {
             ForEach(others, id: \.self) { name in
                 NavRow(
                     model: model,

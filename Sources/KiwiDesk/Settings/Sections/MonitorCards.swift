@@ -1,6 +1,12 @@
 import KiwiDeskCore
 import SwiftUI
 
+/// Shared by both drop targets (`MonitorCard`, `MainRoleCard`)
+/// so the empty-state copy can't drift between them.
+@MainActor private var dropHereText: String {
+    L("monitor_card.drop_here", "Drop a space here")
+}
+
 /// The monitor cards (#68 §3.13): equal-sized cards in the
 /// displays' physical x-order, each holding the space chips
 /// that resolve to it — one representation instead of the old
@@ -20,11 +26,15 @@ struct MonitorCard: View {
                     .font(.caption)
                     .bold()
                     .lineLimit(1)
-                if isMain { BadgeChip(label: "main") }
+                if isMain {
+                    BadgeChip(
+                        label: L("monitor_card.main_badge", "main")
+                    )
+                }
             }
             Divider()
             if resolved.isEmpty {
-                Text("Drop a space here")
+                Text(dropHereText)
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
             } else {
@@ -124,17 +134,22 @@ struct MainRoleCard: View {
             HStack(spacing: 6) {
                 Image(systemName: "macwindow.on.rectangle")
                     .foregroundStyle(.secondary)
-                Text("Follows main display")
-                    .font(.caption)
-                    .bold()
-                    .lineLimit(1)
+                Text(
+                    L(
+                        "monitor_card.follows_main",
+                        "Follows main display"
+                    )
+                )
+                .font(.caption)
+                .bold()
+                .lineLimit(1)
             }
             Text(annotation)
                 .font(.system(.caption2, design: .monospaced))
                 .foregroundStyle(.secondary)
             Divider()
             if model.config.mainSpaces.isEmpty {
-                Text("Drop a space here")
+                Text(dropHereText)
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
             } else {
@@ -184,7 +199,7 @@ struct MainRoleCard: View {
     /// The abstraction *and* its live resolution.
     private var annotation: String {
         guard let fingerprint = model.mainFingerprint else {
-            return "no display"
+            return L("monitor_card.no_display", "no display")
         }
         return "→ " + model.monitorName(fingerprint)
     }
@@ -201,113 +216,5 @@ struct MainRoleCard: View {
             assigned = true
         }
         return assigned
-    }
-}
-
-struct SpaceAssignment: Identifiable {
-    enum Kind {
-        case pinned
-        case auto
-        case main
-    }
-
-    let space: SpaceID
-    let kind: Kind
-    var id: String { space.raw }
-}
-
-/// One space chip inside a monitor card. Semantic micro-icons
-/// (pin/link) encode the resolution kind — border style alone
-/// would be an accessibility risk (§3.13); auto chips render
-/// dimmed. Explicit chips clear back to automatic via ⓧ on
-/// hover; the context menu is the keyboard-navigable fallback
-/// for every move.
-struct SpaceAssignmentChip: View {
-    @ObservedObject var model: SettingsModel
-    let space: SpaceID
-    let kind: SpaceAssignment.Kind
-    @State private var hovering = false
-
-    var body: some View {
-        HStack(spacing: 4) {
-            if let icon {
-                Image(systemName: icon)
-                    .font(.system(size: 8))
-            }
-            if let spaceIcon = model.config.settings
-                .spaceIcons[space]
-            {
-                IconGlyphLabel(icon: spaceIcon)
-                    .font(.system(size: 10))
-            }
-            Text(space.raw)
-                .font(.caption)
-                .fontWeight(.medium)
-            if kind != .auto, hovering {
-                Button {
-                    clear()
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 9))
-                }
-                .buttonStyle(.borderless)
-                .help("Back to automatic placement")
-            }
-        }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 3)
-        .background(Capsule().fill(.tint.opacity(0.15)))
-        .overlay(
-            Capsule().strokeBorder(.tint.opacity(0.4))
-        )
-        .opacity(kind == .auto ? 0.55 : 1)
-        .onHover { hovering = $0 }
-        .draggable(DraggableSpace(raw: space.raw))
-        .help(hint)
-        .contextMenu { menu }
-    }
-
-    private var icon: String? {
-        switch kind {
-        case .pinned: return "pin.fill"
-        case .main: return "link"
-        case .auto: return nil
-        }
-    }
-
-    private var hint: String {
-        switch kind {
-        case .pinned:
-            return "Pinned to this monitor — drag to move, "
-                + "ⓧ for automatic"
-        case .main:
-            return "Follows the main display — drag to pin, "
-                + "ⓧ for automatic"
-        case .auto:
-            return "Placed automatically — drag to pin"
-        }
-    }
-
-    @ViewBuilder private var menu: some View {
-        Button("Automatic") { clear() }
-            .disabled(kind == .auto)
-        Button("Follows main display") {
-            model.config.mainSpaces.insert(space)
-            model.config.spacePins[space] = nil
-        }
-        .disabled(kind == .main)
-        Divider()
-        ForEach(model.displays, id: \.id) { display in
-            Button("Move to \(display.name)") {
-                model.config.spacePins[space] =
-                    display.fingerprint
-                model.config.mainSpaces.remove(space)
-            }
-        }
-    }
-
-    private func clear() {
-        model.config.spacePins[space] = nil
-        model.config.mainSpaces.remove(space)
     }
 }

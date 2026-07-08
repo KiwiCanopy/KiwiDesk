@@ -1,4 +1,5 @@
 import AppKit
+import KiwiDeskCore
 
 /// Bundled brand images (#68 §3.8/§3.9), rasterized from the
 /// vector masters in `assets/` (see `assets/README.md` for
@@ -23,7 +24,10 @@ enum BrandAssets {
             )
         else { return nil }
         image.isTemplate = true
-        image.accessibilityDescription = "KiwiDesk"
+        image.accessibilityDescription = L(
+            "brand.menu_bar_icon.a11y",
+            "KiwiDesk"
+        )
         return image
     }()
 

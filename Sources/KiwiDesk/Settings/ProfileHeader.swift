@@ -73,25 +73,37 @@ struct ProfileHeaderBar: View {
                 Image(systemName: "xmark.circle")
             }
             .buttonStyle(.borderless)
-            .help("Dismiss")
+            .help(L("profile_header.dismiss", "Dismiss"))
         }
     }
 
     private var statusText: String? {
         if model.editingStoredProfile {
-            return "Editing a saved profile — changes won't "
-                + "switch your layout."
+            return L(
+                "profile_header.status.editing_stored",
+                "Editing a saved profile — changes won't "
+                    + "switch your layout."
+            )
         }
         if model.activeStandard != nil {
-            return "Built-in layout — save as a profile to "
-                + "make it yours."
+            return L(
+                "profile_header.status.built_in",
+                "Built-in layout — save as a profile to "
+                    + "make it yours."
+            )
         }
         if model.profileDirty {
-            return "Unsaved monitor changes — update the "
-                + "profile to keep them."
+            return L(
+                "profile_header.status.unsaved_monitor",
+                "Unsaved monitor changes — update the "
+                    + "profile to keep them."
+            )
         }
         if model.activeProfile == nil {
-            return "No profile matches this monitor setup."
+            return L(
+                "profile_header.status.no_match",
+                "No profile matches this monitor setup."
+            )
         }
         return nil
     }
@@ -135,22 +147,40 @@ struct ProfileEditTargetMenu: View {
         .menuStyle(.borderlessButton)
         .fixedSize()
         .help(
-            "Pick a saved profile to edit — editing it won't "
-                + "switch your layout."
+            L(
+                "profile_header.menu.help",
+                "Pick a saved profile to edit — editing it "
+                    + "won't switch your layout."
+            )
         )
         .confirmationDialog(
-            "Discard unsaved changes?",
+            L(
+                "profile_header.discard.title",
+                "Discard unsaved changes?"
+            ),
             isPresented: $confirmingSwitch,
             titleVisibility: .visible
         ) {
-            Button("Discard & switch", role: .destructive) {
+            Button(
+                L(
+                    "profile_header.discard.confirm",
+                    "Discard & switch"
+                ),
+                role: .destructive
+            ) {
                 model.selectEditTarget(switchTarget)
             }
-            Button("Cancel", role: .cancel) {}
+            Button(
+                L("profile_header.discard.cancel", "Cancel"),
+                role: .cancel
+            ) {}
         } message: {
             Text(
-                "Switching profiles drops the edits you "
-                    + "haven't saved."
+                L(
+                    "profile_header.discard.message",
+                    "Switching profiles drops the edits you "
+                        + "haven't saved."
+                )
             )
         }
     }
@@ -172,19 +202,34 @@ struct ProfileEditTargetMenu: View {
     private var liveEntryLabel: String {
         let mark = model.editingProfile == nil ? "✓ " : ""
         if model.activeProfile != nil {
-            return "\(mark)Live (currently loaded)"
+            return mark
+                + L(
+                    "profile_header.live.loaded",
+                    "Live (currently loaded)"
+                )
         }
         if let standard = model.activeStandard {
-            return "\(mark)Live — Standard: \(standard)"
+            return mark
+                + L(
+                    "profile_header.live.standard_prefix",
+                    "Live — Standard: "
+                ) + standard
         }
-        return "\(mark)Live — transient layout"
+        return mark
+            + L(
+                "profile_header.live.transient",
+                "Live — transient layout"
+            )
     }
 
     private func menuRowLabel(_ name: String) -> String {
         let mark = model.editingProfile == name ? "✓ " : ""
         let loaded =
             name == model.activeProfile
-            ? " (currently loaded)" : ""
+            ? L(
+                "profile_header.menu_row.loaded_suffix",
+                " (currently loaded)"
+            ) : ""
         return "\(mark)\(name)\(loaded)"
     }
 
@@ -192,8 +237,14 @@ struct ProfileEditTargetMenu: View {
         if let editing = model.editingProfile { return editing }
         if let profile = model.activeProfile { return profile }
         if let standard = model.activeStandard {
-            return "Standard: \(standard)"
+            return L(
+                "profile_header.title.standard_prefix",
+                "Standard: "
+            ) + standard
         }
-        return "Transient layout"
+        return L(
+            "profile_header.title.transient",
+            "Transient layout"
+        )
     }
 }

@@ -288,11 +288,17 @@ final class SettingsModel: ObservableObject {
     ) -> String? {
         guard let only = conflicts.first else { return nil }
         guard conflicts.count > 1 else {
-            return "Shortcut for \"\(only.name)\" "
-                + sentenceTail(only)
+            return L(
+                "keybinding.conflict.shortcut_for",
+                "Shortcut for \""
+            )
+                + only.name + "\" " + sentenceTail(only)
         }
         let lines = conflicts.map { "– \(bulletTail($0))" }
-        return "Several shortcuts are conflicting:\n"
+        return L(
+            "keybinding.conflict.several",
+            "Several shortcuts are conflicting:\n"
+        )
             + lines.joined(separator: "\n")
     }
 
@@ -300,13 +306,21 @@ final class SettingsModel: ObservableObject {
     private static func sentenceTail(_ conflict: Conflict) -> String {
         switch conflict.target {
         case .unrecognized:
-            return "isn't a recognized shortcut."
+            return L(
+                "keybinding.conflict.unrecognized",
+                "isn't a recognized shortcut."
+            )
         case .otherBinding(let who):
-            return "is conflicting with \"\(who)\"."
+            return L(
+                "keybinding.conflict.other_binding_prefix",
+                "is conflicting with \""
+            ) + who + "\"."
         case .systemShortcut(let name):
             return
-                "is conflicting with the macOS shortcut "
-                + "\"\(name)\"."
+                L(
+                    "keybinding.conflict.system_prefix",
+                    "is conflicting with the macOS shortcut \""
+                ) + name + "\"."
         }
     }
 
@@ -314,13 +328,23 @@ final class SettingsModel: ObservableObject {
     private static func bulletTail(_ conflict: Conflict) -> String {
         switch conflict.target {
         case .unrecognized:
-            return "\"\(conflict.name)\" isn't a recognized "
-                + "shortcut"
+            return "\"\(conflict.name)\" "
+                + L(
+                    "keybinding.conflict.bullet.unrecognized",
+                    "isn't a recognized shortcut"
+                )
         case .otherBinding(let who):
-            return "\"\(conflict.name)\" with \"\(who)\""
+            return "\"\(conflict.name)\" "
+                + L(
+                    "keybinding.conflict.bullet.with",
+                    "with \""
+                ) + who + "\""
         case .systemShortcut(let name):
-            return "\"\(conflict.name)\" with the macOS "
-                + "shortcut \"\(name)\""
+            return "\"\(conflict.name)\" "
+                + L(
+                    "keybinding.conflict.bullet.system",
+                    "with the macOS shortcut \""
+                ) + name + "\""
         }
     }
 }
