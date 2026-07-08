@@ -158,11 +158,16 @@ native-Space bindings follow, like Delete and make default.
 gives a whole second set of single-key bindings, ergonomically
 better than finger-twister chords.
 
-**The recorder locks on full release.** The chord is
-snapshotted as keys go down (live preview), modifiers only
-accumulate while a base key is held, and the combo commits
-when everything is released — so staggered release order or
-timing can never corrupt it. Correction is
+**The recorder locks on full release, previews live.** The
+preview mirrors exactly what is held — a released key or
+modifier leaves it immediately (a preview that kept showing
+released keys read as stuck). Staggered releases stay safe
+via a release-burst window: the first release that
+downgrades a chord stashes it, and if everything is up
+within ~a third of a second the stashed chord locks (⌘ let
+go a split second before J still locks ⌘J). Disassembling
+slowly instead expires the stash — nothing locks, the field
+stays recording, and re-entry just works. Correction is
 release-then-press (⌘J, J up, K down → ⌘K); an overlapped
 second key keeps the first with a hint. Bare Escape,
 click-away, and app deactivation cancel. (#68 recorder UX)
@@ -170,10 +175,16 @@ click-away, and app deactivation cancel. (#68 recorder UX)
 **Duplicates hard-block; system shortcuts soft-warn.**
 Recording a combo another KiwiDesk row already holds is
 rejected inline with *Steal* (rebind here) and *Go to* (jump
-to the holder) — silent duplicates were the #34 bug class. A
-macOS system-shortcut collision commits with a persistent ⚠
-instead: shadowing a system shortcut can be intentional.
-(#33/#34/#35, #68 §3.6.2)
+to the holder) — silent duplicates were the #34 bug class.
+The taken-by notice already shows *while the chord is being
+formed* (live in-app check against the edited bindings); a
+macOS system-shortcut collision instead commits with a
+persistent ⚠ — shadowing one can be intentional, and a
+live system check could go stale. Conflict surfaces
+(the banner and the "Assigned to…" row) re-derive from live
+bindings on every render, so fixing the conflict anywhere —
+clearing either row, deleting the holder — retires them
+without a dismiss. (#33/#34/#35, #68 §3.6.2)
 
 **One recorder at a time.** Starting a recording snaps any
 other recording field back instantly. (#33)
@@ -234,26 +245,39 @@ adopt the same pattern.
 
 ## Shared controls
 
-**Option tabs are a Liquid Glass segmented pill.** Every
-pick-one-of-few chooser (layout parameters, mouse resize,
-icon picker tabs) uses `GlassSegmentedPicker` instead of the
-native segmented picker: a capsule track where the selection
-is a sliding Liquid Glass pill (`glassEffect` on macOS 26, a
-material capsule earlier) and the selected label zooms
-slightly. The glass is applied to the label itself — glass
-composites above sibling content, so a pill layered behind
-the text would blur it. Segments are equal-width across the
-track (full-bleed, like a native window-toolbar switcher),
-a deliberate trade against content-sized segments. One
-control, one look — a chooser reads as "pick a tab"
-everywhere in the settings.
+**Option tabs are a solid sliding-pill segment control.**
+Every pick-one-of-few chooser (layout parameters, mouse
+resize, icon picker tabs) uses `SegmentedPicker`
+instead of the native segmented picker: a capsule track
+where the selection is a solid white pill (light gray in
+dark mode, no shadow — a drop shadow read as the pill
+"fading out") and the selected label is larger and semibold
+— a real font-size step, because `scaleEffect` rasterizes
+the text and reads as blur. Liquid Glass was tried in three
+variants (bare, accent-tinted, clear + specular rim) and
+dropped: bare glass over the flat settings background reads
+as washed-out, tint reads as "blue, not glass", and the
+glass layer blurs content near it. ONE persistent pill
+slides between segments via matched geometry; styling
+conditionally attached to the selected label proved to
+crossfade on selection change (the view is destroyed and
+recreated), so the pill is a single view that adopts the
+selected segment's anchored frame. Segments are equal-width
+across the track (full-bleed, like a native window-toolbar
+switcher), a deliberate trade against content-sized
+segments. One control, one look — a chooser reads as "pick
+a tab" everywhere in the settings.
 
 **Sliders share the pill design.** Every value adjuster
-(ratios, gaps, sizes) is a `GlassSlider`: the same capsule
-track as the segmented picker, a Liquid Glass pill as the
-knob, and an accent fill up to the knob. Accessibility is
-delegated to a native `Slider` representation, so assistive
-tech sees exactly the control it replaces.
+(ratios, gaps, sizes) is a `SettingsSlider`: the same capsule
+track as the segmented picker, a native-style solid white
+thumb that overhangs the track by 2 pt per edge, and a
+full-strength accent fill up to the knob — the earlier
+translucent fill read as disabled. A clear Liquid Glass
+knob was tried and dropped: it refracted the accent fill
+beneath it and turned blue. Accessibility is delegated to a
+native `Slider` representation, so assistive tech sees
+exactly the control it replaces.
 
 ## Monitors
 
