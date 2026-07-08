@@ -127,6 +127,40 @@ struct ChordRecorderTests {
         #expect(capture.lockedCombo == "command+j")
     }
 
+    @Test("two base keys held at once: last one wins")
+    func multiBaseKeysNotCombined() {
+        // A combo is modifiers + ONE key (Carbon
+        // RegisterEventHotKey can't express ⌘J+K), so holding
+        // a second base key re-snapshots instead of chording.
+        let recorder = ChordRecorder()
+        let capture = Capture()
+        capture.attach(recorder)
+        recorder.handle(
+            .keyDown,
+            keyCode: 38,
+            flags: [.command]
+        )
+        recorder.handle(
+            .keyDown,
+            keyCode: 40,
+            flags: [.command]
+        )
+        // Nothing locks while either key is down.
+        recorder.handle(
+            .keyUp,
+            keyCode: 38,
+            flags: [.command]
+        )
+        recorder.handle(
+            .keyUp,
+            keyCode: 40,
+            flags: [.command]
+        )
+        #expect(capture.outcomes.isEmpty)
+        recorder.handle(.flagsChanged, keyCode: 55, flags: [])
+        #expect(capture.lockedCombo == "command+k")
+    }
+
     @Test("bare key locks without modifiers")
     func bareKey() {
         let recorder = ChordRecorder()
