@@ -15,7 +15,9 @@ final class ConfigIssuesModel: ObservableObject {
 /// menu-bar badge, so a half-loaded config stays visible and
 /// actionable even if Settings never opens (§5.7).
 @MainActor
-final class ConfigIssuesWindowController {
+final class ConfigIssuesWindowController: NSObject,
+    NSWindowDelegate
+{
     let model = ConfigIssuesModel()
     private var window: NSWindow?
 
@@ -41,10 +43,20 @@ final class ConfigIssuesWindowController {
             rootView: ConfigIssuesView(model: model)
         )
         window.isReleasedWhenClosed = false
+        window.delegate = self
         window.center()
         self.window = window
         window.makeKeyAndOrderFront(nil)
         NSApp.activate()
+    }
+
+    /// This window doesn't promote to `.regular` on its own, but
+    /// it *counts* in `deactivateIfNoWindows` (it's a titled,
+    /// main-capable window), so it must also release `.regular`
+    /// on close — otherwise closing Settings then this window
+    /// strands the app `.regular` with no content window.
+    func windowWillClose(_ notification: Notification) {
+        NSApp.deactivateIfNoWindows(excluding: window)
     }
 }
 

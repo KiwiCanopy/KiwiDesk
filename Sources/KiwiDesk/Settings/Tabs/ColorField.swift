@@ -170,7 +170,11 @@ final class ColorPanelController: NSObject {
 
     /// Unconditional teardown, e.g. on window close: stop
     /// routing and put the panel away so it can't write into a
-    /// reloaded config after the window is gone.
+    /// reloaded config after the window is gone. `activeToken`
+    /// is intentionally NOT reset — `present` always advances
+    /// it, so a later `resign(oldToken)` still no-ops; resetting
+    /// to 0 would collide with a never-clicked swatch's initial
+    /// token.
     func dismiss() {
         onChange = nil
         NSColorPanel.shared.orderOut(nil)
