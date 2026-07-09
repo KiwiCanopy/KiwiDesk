@@ -357,8 +357,9 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 0.85rem;
-  margin: 1.4rem 0 0.4rem;
+  margin: 1.75rem 0 0.6rem;
 }
 
 /* A tasteful, self-contained "Download on the App Store" pill —
@@ -465,20 +466,12 @@
 }
 
 .learn__store-note {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-  margin-top: 1rem;
-  font-size: 0.9rem;
+  margin-top: 0.9rem;
+  font-size: 0.82rem;
+  font-style: italic;
   line-height: 1.5;
   color: var(--text-faint);
-}
-
-.learn__store-note svg {
-  flex: 0 0 auto;
-  width: 16px;
-  height: 16px;
-  margin-top: 2px;
+  text-align: center;
 }
 
 /* =========================================================
