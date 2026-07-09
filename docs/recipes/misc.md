@@ -32,8 +32,9 @@ Query state on demand:
 
 The event stream is useful for durable external daemons, shell
 functions, or tools that run in a different sandbox than
-KiwiDesk. Each event has a `type` (e.g., `"space_change"`) and
-a `data` object with fields matching the Lua callback arguments
+KiwiDesk. Each event has an `event` field (e.g.,
+`"space_change"`) and a `data` object with fields matching the
+Lua callback arguments
 (e.g., `space_id`, `mode`).
 
 ## Hammerspoon

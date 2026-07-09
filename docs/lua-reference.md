@@ -33,6 +33,90 @@ them directly. **Saving never rewrites `init.lua`**: the file is
 yours alone, for event hooks and custom Lua. For the full GUI
 workflow, see the [user guide](user-guide.md).
 
+## Navigation & Movement
+
+The verbs you bind to shortcuts to move focus and windows
+around. Direction arguments are `"left"`, `"right"`, `"up"`,
+or `"down"`.
+
+### focus
+
+**Expects:** a direction (`"left"`, `"right"`, `"up"`, or
+`"down"`).
+
+**Does:** moves keyboard focus to the neighboring window in
+that direction, following the active layout's geometry. In
+monocle and scrolling layouts the axis cycles through the
+space's windows (see the layout's orientation).
+
+**Example:**
+
+```lua
+KiwiDesk.focus("left")
+```
+
+### swap
+
+**Expects:** a direction (`"left"`, `"right"`, `"up"`, or
+`"down"`).
+
+**Does:** swaps the focused window with its neighbor in that
+direction, reordering the flat window array — the two windows
+trade slots in the layout.
+
+**Example:**
+
+```lua
+KiwiDesk.swap("right")
+```
+
+### focus_virtual_space
+
+**Expects:** a space identifier (number or string).
+
+**Does:** switches to that virtual space, hiding the current
+space's tiled windows and revealing the target's. Aliased as
+`focus_space`.
+
+**Example:**
+
+```lua
+KiwiDesk.focus_virtual_space(2)
+KiwiDesk.focus_space("mail")   -- alias
+```
+
+### move_to_virtual_space
+
+**Expects:** a space identifier.
+
+**Does:** moves the focused window to that space **without
+following** it — you stay on the current space. The moved
+window becomes the target space's focused window, so the first
+time you switch there it is the window you land on. Aliased as
+`move_to_space`.
+
+**Example:**
+
+```lua
+KiwiDesk.move_to_virtual_space("mail")
+KiwiDesk.move_to_space(3)      -- alias
+```
+
+### move_to_virtual_space_and_follow
+
+**Expects:** a space identifier.
+
+**Does:** moves the focused window to that space **and**
+switches you there with it. Aliased as
+`move_to_space_and_follow`.
+
+**Example:**
+
+```lua
+KiwiDesk.move_to_virtual_space_and_follow("mail")
+KiwiDesk.move_to_space_and_follow(3)   -- alias
+```
+
 ## Layouts & Gaps
 
 ### set_mode
@@ -102,8 +186,9 @@ KiwiDesk.set_gap_override("editor", {
 
 **Expects:** a number (points).
 
-**Does:** windows below this width or height fall back to the
-Overlap Stack instead of shrinking further.
+**Does:** windows below this width or height
+[cascade](#when-windows-run-out-of-space) instead of shrinking
+further.
 
 **Example:**
 
@@ -135,9 +220,10 @@ space forward automatically. Floating windows — including
 picture-in-picture — are never stashed and stay visible across all
 virtual spaces.
 
-Sending a window elsewhere with `move_to_virtual_space` makes it
-that space's focused window, so the first time you switch there it
-is the window you land on — even without `_and_follow`.
+Sending a window elsewhere with
+[`move_to_virtual_space`](#move_to_virtual_space) makes it that
+space's focused window, so the first time you switch there it is
+the window you land on — even without `_and_follow`.
 
 **Minimizing** a window removes it from its space entirely.
 Restoring it from the Dock opens it in the virtual space you are
@@ -875,9 +961,11 @@ app_bar.set_group_badge_text_color("#FFFFFF")
 
 ### Per-Layout App Bar Overrides
 
-Each layout can override any individual bar field for itself.
-Unset fields inherit the global value. The available overrides are
-the same setters prefixed with the layout name:
+Each bar-hosting layout (monocle, scrolling) can override any
+individual bar field for itself. Only these two layouts show a
+bar, so only they expose `set_app_bar_*`. Unset fields inherit
+the global value. The available overrides are the same setters
+prefixed with the layout name:
 
 - `monocle.set_app_bar_enabled`, `monocle.set_app_bar_position`,
   `monocle.set_app_bar_thickness`, etc.
@@ -1255,42 +1343,6 @@ window's current state:
 KiwiDesk.bind("cmd+alt+f", function()
     local state = KiwiDesk.get_state()
     if not state.active_space then return end
-    -- Find the focused window
-    for _, window in ipairs(state.windows) do
-        local space = nil
-        for _, s in ipairs(state.spaces) do
-            if s.focused == window.id then
-                space = s.id
-                break
-            end
-        end
-        if space == state.active_space and
-           window.id == 
-           (function()
-               for _, s in ipairs(state.spaces) do
-                   if s.id == state.active_space then
-                       return s.focused
-                   end
-               end
-           end)()
-        then
-            if window.floating then
-                KiwiDesk.make_tiled()
-            else
-                KiwiDesk.make_floating()
-            end
-            break
-        end
-    end
-end)
-```
-
-A simpler approach using `get_state()` returned table structure:
-
-```lua
-KiwiDesk.bind("cmd+alt+f", function()
-    local state = KiwiDesk.get_state()
-    if not state.active_space then return end
     local active_space = state.active_space
     local focused_id = nil
     for _, space in ipairs(state.spaces) do
@@ -1362,7 +1414,8 @@ end)
 **Modifiers:** `cmd`/`command`, `alt`/`opt`/`option`,
 `ctrl`/`control`, `shift`.
 
-**Keys:** letters, digits, `left`, `right`, `up`, `down`, `space`,
+**Keys:** letters, digits, `left`, `right`, `up`, `down`,
+`home`, `end`, `pageup`, `pagedown`, `space`,
 `return`/`enter`, `tab`, `escape`/`esc`, `f1`–`f12`, and
 punctuation.
 
@@ -1376,8 +1429,8 @@ punctuation.
 - `equal`/`=`
 - `leftbracket`/`[`
 - `rightbracket`/`]`
-- `grave`/`` ` ``
-- `quote`/`'`
+- `grave`/`backtick`/`` ` ``
+- `quote`/`apostrophe`/`'`
 - `return`/`enter`
 - `delete`/`backspace`
 - `escape`/`esc`
@@ -1417,10 +1470,18 @@ end)
 
 **Does:** grows or shrinks the focused window. Only applies in bsp,
 stack, and scrolling layouts; a no-op in monocle, grid, and
-floating. In bsp and stack it nudges the split / master ratio, so
-there is no independent width and height today: the `axis` argument
-only scales the step by the screen's width or height — both axes
-move the same ratio. Prefer a single shrink/enlarge pair (#56).
+floating. What the `delta` actually adjusts depends on the layout:
+
+- **bsp / stack** — it nudges the split / master ratio, so there
+  is no independent width and height today: the `axis` argument
+  only scales the step by the screen's width or height, and both
+  axes move the same ratio.
+- **scrolling** — it adjusts the slot size in real points along
+  the layout's own scroll axis (columns for horizontal, rows for
+  vertical), regardless of which `axis` you pass — the `x`/`y`
+  argument does not steer it.
+
+Prefer a single shrink/enlarge pair (#56).
 
 **Example:**
 
@@ -2104,7 +2165,8 @@ KiwiDesk.debug_log("hello from init.lua")
 **Does:** returns a table with the current window and space state.
 Fields: `active_space` (current space id or `nil`), `spaces` (array of
 space objects), `windows` (array of window objects), `monitor_count`,
-`native_space`.
+`native_space`, `exec_running` (count of `KiwiDesk.exec` children
+still running).
 
 Each space object has: `id`, `mode`, `windows` (array of window ids),
 `focused` (focused window id or `nil`).

@@ -58,6 +58,7 @@ KiwiDesk service restart
 | | `set_mouse_resize` | `layout\|snap_back` |
 | | `set_gap_global` | size |
 | | `set_gap_override` | space, size |
+| | `set_min_window_size` | pt (default 300) |
 | | `set_fallback_space` | space id ("" clears) — rehome target on profile switch |
 | | `set_space_icon` | space id, icon (SF Symbol\|emoji\|char; "" clears) |
 | | `get_state` | — (returns `{active_space, spaces, windows, monitor_count, native_space, exec_running}`) |
@@ -106,7 +107,7 @@ KiwiDesk service restart
 | | `bsp.set_new_window_placement` | placement¹ (default `after_focused`) |
 | Scrolling | `scroll.set_slot_size` | px, `"NN%"`, or `0` (auto) |
 | | `scroll.set_anchor` | `center`, or edge `left\|right` (`top\|bottom` vertical) |
-| | `scroll.set_speed` | ms |
+| | `scroll.set_orientation` | `horizontal\|vertical` |
 | | `scroll.set_new_window_placement` | placement¹ (default `after_focused`) |
 | Grid | `grid.set_type` | `dynamic\|rigid` |
 | | `grid.set_fill_empty_space` | true\|false |
@@ -116,6 +117,11 @@ KiwiDesk service restart
 | Spawn | `set_new_window_placement_override` | space id, placement¹ |
 
 ¹ placement: `first\|last\|before_focused\|after_focused`
+
+The table lists each layout global once. Every layout global
+has a per-space `_override` twin (e.g. `bsp.set_ratio_override`,
+`scroll.set_slot_size_override`) that takes a leading `space id,
+value` and shadows the global for that space only.
 
 `resize` adapts to the active layout: BSP adjusts the split
 ratio, Stack the master ratio, Scrolling the column width.
@@ -141,6 +147,17 @@ Events: `space_change`, `layout_change`, `focus_change`,
 `monitor_change`, `native_space_change`, `window_created`,
 `window_destroyed`, `window_minimized`,
 `window_moved_to_space`.
+
+`focus_change` data carries `window_id`, `app`, **and**
+`title` — but the Lua callback receives only `window_id, app`
+positionally, so the window title is available on the socket
+stream but not to a Lua handler:
+
+```json
+{"event": "focus_change",
+ "data": {"window_id": 4711, "app": "Ghostty",
+          "title": "~/src — zsh"}}
+```
 
 The window lifecycle events fire even when focus does not
 change, so bars can drop stale icons immediately:
