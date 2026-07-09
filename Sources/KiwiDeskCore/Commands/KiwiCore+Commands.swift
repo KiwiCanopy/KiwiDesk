@@ -13,11 +13,11 @@ extension KiwiCore {
             return navigate(args, swapping: false)
         case "swap":
             return navigate(args, swapping: true)
-        case "focus_virtual_space":
+        case "focus_space":
             return focusSpace(args)
-        case "move_to_virtual_space":
+        case "move_to_space":
             return moveToSpace(args, follow: false)
-        case "move_to_virtual_space_and_follow":
+        case "move_to_space_and_follow":
             return moveToSpace(args, follow: true)
         case "make_floating":
             return setFocusedFloating(true)

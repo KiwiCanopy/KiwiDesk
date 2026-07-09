@@ -8,7 +8,7 @@ import Testing
 /// Issue #22: a window moved to another virtual space must
 /// become that space's focused window at move time, so the
 /// FIRST focus of the space raises (surfaces) it. Before the
-/// fix the target space kept no focus, so `focus_virtual_space`
+/// fix the target space kept no focus, so `focus_space`
 /// un-stashed the window frame-wise but never brought it
 /// forward — the space rendered empty until a second focus.
 @Suite("Move to virtual space (issue #22)", .serialized)
@@ -62,7 +62,7 @@ struct MoveToSpaceTests {
         #expect(core.activeSpace?.focused == WindowID(1))
 
         let response = core.execute(
-            "move_to_virtual_space",
+            "move_to_space",
             args: [.string("2")]
         )
         #expect(response.isSuccess)
@@ -84,12 +84,12 @@ struct MoveToSpaceTests {
         let core = makeCore()
         addWindow(core, 1)
         core.execute(
-            "move_to_virtual_space",
+            "move_to_space",
             args: [.string("2")]
         )
         // A single focus is enough — no second switch (#22).
         core.execute(
-            "focus_virtual_space",
+            "focus_space",
             args: [.string("2")]
         )
         #expect(core.state.workspaces.activeSpace == SpaceID(2))
@@ -104,7 +104,7 @@ struct MoveToSpaceTests {
         // Window 2 is the active-space focus; move+follow it.
         #expect(core.activeSpace?.focused == WindowID(2))
         core.execute(
-            "move_to_virtual_space_and_follow",
+            "move_to_space_and_follow",
             args: [.string("3")]
         )
         #expect(core.state.workspaces.activeSpace == SpaceID(3))
@@ -131,13 +131,13 @@ struct MoveToSpaceTests {
         }
         addWindow(core, 1)
         core.execute(
-            "move_to_virtual_space",
+            "move_to_space",
             args: [.string("2")]
         )
         // Count only what the focus + settle apply.
         applies = [:]
         core.execute(
-            "focus_virtual_space",
+            "focus_space",
             args: [.string("2")]
         )
         let onFocus = applies[WindowID(1)] ?? 0
@@ -172,7 +172,7 @@ struct MoveToSpaceTests {
         addWindow(core, 1)
         // Park window 1 on a Scrolling space 2, stay on space 1.
         core.execute(
-            "move_to_virtual_space",
+            "move_to_space",
             args: [.string("2")]
         )
         core.execute(
@@ -182,7 +182,7 @@ struct MoveToSpaceTests {
         // Count only the switch into the Scrolling space.
         animatedApplies = [:]
         core.execute(
-            "focus_virtual_space",
+            "focus_space",
             args: [.string("2")]
         )
         #expect((animatedApplies[WindowID(1)] ?? 0) == 0)
@@ -299,13 +299,13 @@ struct MoveToSpaceTests {
         let core = makeCore()
         addWindow(core, 1)
         core.execute(
-            "focus_virtual_space",
+            "focus_space",
             args: [.string("2")]
         )
         let first = core.deferred.task(for: .spaceSettle)
         #expect(first != nil)
         core.execute(
-            "focus_virtual_space",
+            "focus_space",
             args: [.string("1")]
         )
         // The prior settle is cancelled AND a fresh one scheduled
@@ -324,7 +324,7 @@ struct MoveToSpaceTests {
         // Window 2 is space 1's focus; move it into space 1 again.
         #expect(core.activeSpace?.focused == WindowID(2))
         let response = core.execute(
-            "move_to_virtual_space",
+            "move_to_space",
             args: [.string("1")]
         )
         #expect(response.isSuccess)

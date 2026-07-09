@@ -64,7 +64,7 @@ enum KeybindingCatalog {
         spaces.map { space in
             NavCommand(
                 label: "Go to Space \(space.raw)",
-                lua: "KiwiDesk.focus_virtual_space"
+                lua: "KiwiDesk.focus_space"
                     + "(\(spaceArg(space)))",
                 icon: icons[space],
                 displayLabel: {
@@ -107,7 +107,7 @@ enum KeybindingCatalog {
                 NavCommand(
                     label: "Move to Space \(space.raw)",
                     lua:
-                        "KiwiDesk.move_to_virtual_space(\(arg))",
+                        "KiwiDesk.move_to_space(\(arg))",
                     icon: icons[space],
                     displayLabel: {
                         L(
@@ -121,7 +121,7 @@ enum KeybindingCatalog {
                     label:
                         "Move to Space \(space.raw) & follow",
                     lua: "KiwiDesk."
-                        + "move_to_virtual_space_and_follow"
+                        + "move_to_space_and_follow"
                         + "(\(arg))",
                     icon: icons[space],
                     displayLabel: {

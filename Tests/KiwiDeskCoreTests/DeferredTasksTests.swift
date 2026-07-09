@@ -121,7 +121,7 @@ struct DeferredTasksTests {
     func stopCancelsPendingSettles() {
         let core = makeCore()
         core.execute(
-            "focus_virtual_space",
+            "focus_space",
             args: [.string("2")]
         )
         let settle = core.deferred.task(for: .spaceSettle)

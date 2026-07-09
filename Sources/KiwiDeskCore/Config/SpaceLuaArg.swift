@@ -19,18 +19,18 @@ public enum SpaceLuaArg {
 
     /// The space-targeting Lua calls whose sole argument is a
     /// SpaceID literal. Each pattern includes the opening paren,
-    /// so `move_to_virtual_space` never matches inside
-    /// `move_to_virtual_space_and_follow`.
+    /// so `move_to_space` never matches inside
+    /// `move_to_space_and_follow`.
     static let spaceCalls = [
-        "focus_virtual_space",
-        "move_to_virtual_space",
-        "move_to_virtual_space_and_follow",
+        "focus_space",
+        "move_to_space",
+        "move_to_space_and_follow",
     ]
 
     /// Rewrites every `<call>("from")` to `<call>("to")` within a
     /// single Lua binding body, matching the exact quoted form the
     /// catalog emitted. Only that quoted form is rewritten — a
-    /// hand-written bare-number arg (`focus_virtual_space(2)`) is
+    /// hand-written bare-number arg (`focus_space(2)`) is
     /// left untouched, consistent with such bindings being outside
     /// GUI management.
     public static func rename(
