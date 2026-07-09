@@ -414,9 +414,11 @@ mode (see [Per-Profile Shortcut Overrides](#per-profile-shortcut-overrides)).
 
 ### Built-in Standards & Presets
 
-KiwiDesk ships seven built-in layouts — Standards for 1, 2, or 3
-screens that resolve silently when no saved profile matches, and
-Presets you can apply to spin up a starting point.
+KiwiDesk ships seven built-in **profiles** — Standards for 1, 2, or
+3 screens that resolve silently when no saved profile matches, and
+Presets you can apply to spin up a starting point. (These are whole
+profiles — not to be confused with the six layout *modes* like bsp
+or stack.)
 
 **1 Screen:**
 
@@ -483,8 +485,8 @@ you do not need a rule for them.
 
 The **Shortcuts** section (in the **System** group) binds keyboard
 combos to actions. Every shortcut lives in a **mode** — normally the
-**default** mode where every binding fires, plus optional modal modes
-(vim-style) where only one mode's bindings are active at a time.
+**default** mode (active at startup), plus optional modal modes
+(vim-style); only the active mode's bindings fire at a time.
 
 ### Recording a Shortcut
 
