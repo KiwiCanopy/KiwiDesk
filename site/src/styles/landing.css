@@ -342,6 +342,25 @@ body::before {
   }
 }
 
+/* Very narrow phones: the mode toggle now shows BOTH labels (Simple
+   AND Developer — its whole affordance) so it's wider than the old
+   icon-collapsing pill. To keep the two labels AND fit the crowded
+   cluster (brand + Ko-fi + lang + mode + theme) without overflow at
+   ~320px, shed the "KiwiDesk" brand wordmark text — the logo mark
+   alone still links home — and pull in the wrap padding + cluster
+   gap. This buys back the width the two-label toggle needs. */
+@media (max-width: 400px) {
+  .nav .wrap {
+    padding-inline: 0.7rem;
+  }
+  .nav__inner {
+    gap: 0.3rem;
+  }
+  .nav__brand span {
+    display: none;
+  }
+}
+
 /* The nav resting color adapts per theme via --nav-ink*, since
    the hero band is light in the light theme and dark in dark. */
 .nav__brand {
@@ -1343,40 +1362,36 @@ section {
    Ultra-narrow nav shedding (≤365px)
    -----------------------------------------------------------
    Below the smallest common phone width (iPhone SE is 375px),
-   trim the three nav toggles' (lang / mode / theme) width and
-   gaps further. The mode toggle's wider 74px kiwi-count track
-   needs this shrink starting a bit earlier than the other two, so
-   the breakpoint sits at 365px rather than 375px. Deliberately
-   placed at the very end of the file — after every base rule it
-   overrides, including the toggles defined in landing-modes.css
-   (which @imports before this file's own rules) — so it reliably
-   wins the cascade at equal specificity regardless of source
-   order elsewhere.
+   trim the three nav controls (lang / mode / theme) further. The
+   mode toggle now shows BOTH labels (Simple AND Developer — its
+   whole affordance), so it stays a two-segment control here too,
+   just with tighter segment width and font. The ≤400px rule above
+   already hid the brand wordmark text and pulled in the wrap
+   padding, which is what buys room for the two labels at this
+   width. Deliberately placed at the very end of the file — after
+   every base rule it overrides, including the toggles defined in
+   landing-modes.css (which @imports before this file's own rules)
+   — so it reliably wins the cascade at equal specificity
+   regardless of source order elsewhere.
    ========================================================= */
 @media (max-width: 365px) {
   .nav__inner {
     gap: 0.25rem;
   }
+  /* Tightest segment width that still fits "Developer" /
+     "Entwickler" legibly beside the lead kiwi. */
   .mode-toggle {
-    gap: 0.3rem;
+    --seg-w: 58px;
   }
-  /* Tighter than the 74px default, but still wide enough for the
-     thumb + two extra kiwis to read as three distinct dots rather
-     than an overlapping smear. */
-  .mode-toggle__track {
-    width: 52px;
+  .mode-toggle__seg {
+    font-size: 0.68rem;
+    padding-left: 14px;
   }
   .mode-toggle__extra--2 {
-    left: 5px;
+    left: 18px;
   }
   .mode-toggle__extra--3 {
-    left: 17px;
-  }
-  :root[data-mode="dev"] .mode-toggle__thumb {
-    transform: translateX(22px);
-  }
-  :root[data-mode="dev"] .mode-toggle:hover .mode-toggle__thumb {
-    transform: translateX(25px);
+    left: 29px;
   }
   .theme-toggle__track {
     width: 44px;

@@ -309,52 +309,56 @@ const steps = [
               aria-current={lang === "de" ? "true" : undefined}>DE</a>
           </div>
 
-          <!-- Signature mode toggle: a sliding kiwi-COUNT pill, a
-               deliberate sibling of the theme toggle's track+thumb
-               language. The thumb itself IS a single drawn kiwi
-               slice (green disc, pale flesh ring, seed dots) — that
-               one kiwi is the whole story in Simple mode: an
-               uncluttered track, one clear handle, nothing else.
-               Switching to Developer slides the kiwi thumb right
-               AND pops two more (smaller, secondary) kiwi dots into
-               the track behind it, so the track visibly fills —
-               the contrast between "one kiwi, empty track" and
-               "a few kiwis filling it" is the whole point, so both
-               states are kept deliberately uncluttered on their
-               own. (A label-INSIDE-the-track variant was
-               prototyped and rejected — see landing-modes.css
-               history / the build report for why — in favor of
-               keeping the word label legible beside the track.) -->
-          <button class="mode-toggle" id="modeToggle" type="button"
-            aria-label={t.mode_toggle_aria} aria-pressed="false">
-            <span class="mode-toggle__track" aria-hidden="true">
-              <!-- Extra kiwis, hidden until Developer mode. -->
-              <span class="mode-toggle__extra
-                mode-toggle__extra--2">
+          <!-- Signature mode toggle: a two-segment control, a
+               deliberate sibling of the EN | DE language switcher
+               beside it. BOTH modes are labeled at all times —
+               [ 🥝 Simple | Developer ] — so a first-time visitor
+               instantly sees there's a Developer view to switch TO,
+               and which one they're on (the active segment fills in,
+               like the language switcher's active locale). A sliding
+               kiwi-bearing indicator glides between the two segments;
+               reaching Developer, extra kiwi dots spring in behind
+               the lead kiwi so the indicator visibly "fills" — the
+               "add more kiwis toward Developer" personality, kept.
+
+               ARIA: a radiogroup — the two segments are mutually
+               exclusive options, one always active — with a
+               descriptive group label and aria-checked on each. This
+               is the correct semantics for "pick one of two" and is
+               keyboard operable (arrow keys wired in the script). -->
+          <div class="mode-toggle" id="modeToggle" role="radiogroup"
+            aria-label={t.mode_toggle_aria}>
+            <!-- Sliding kiwi indicator behind the segments. In Simple
+                 it holds one kiwi; sliding to Developer, two smaller
+                 kiwi dots pop in behind the lead so it fills out. -->
+            <span class="mode-toggle__slider" aria-hidden="true">
+              <span class="mode-toggle__extra mode-toggle__extra--2">
                 <Fragment set:html={kiwiSvg(11)} />
               </span>
-              <span class="mode-toggle__extra
-                mode-toggle__extra--3">
+              <span class="mode-toggle__extra mode-toggle__extra--3">
                 <Fragment set:html={kiwiSvg(11)} />
               </span>
-              <!-- Sliding thumb — the always-visible single kiwi. -->
-              <span class="mode-toggle__thumb">
+              <span class="mode-toggle__kiwi-lead">
                 <Fragment set:html={kiwiSvg(15)} />
               </span>
             </span>
-            <span class="mode-toggle__label">
-              <span class="mode-toggle__word mode-toggle__word--simple"
-                >{t.mode_simple}</span>
-              <span class="mode-toggle__word mode-toggle__word--dev"
-                >{t.mode_dev}</span>
-            </span>
+            <button class="mode-toggle__seg mode-toggle__seg--simple"
+              type="button" role="radio" data-mode="simple"
+              aria-checked="true" tabindex="0">
+              <span class="mode-toggle__seg-text">{t.mode_simple}</span>
+            </button>
+            <button class="mode-toggle__seg mode-toggle__seg--dev"
+              type="button" role="radio" data-mode="dev"
+              aria-checked="false" tabindex="-1">
+              <span class="mode-toggle__seg-text">{t.mode_dev}</span>
+            </button>
             <span class="mode-toggle__tip" role="tooltip">
               <span class="mode-toggle__tip--simple"
                 >{t.mode_tooltip_simple}</span>
               <span class="mode-toggle__tip--dev"
                 >{t.mode_tooltip_dev}</span>
             </span>
-          </button>
+          </div>
 
           <button class="theme-toggle" id="themeToggle" type="button"
             aria-label={t.nav_theme_label} aria-pressed="false">
@@ -925,18 +929,39 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
       // ---- Mode toggle (own `kiwidesk-site-mode` key) ----
       // Both modes' content lives in the DOM; `data-mode` on <html>
       // shows/hides via CSS, so switching never reloads and the
-      // reveal can be a pure CSS transition.
+      // reveal can be a pure CSS transition. The control is a
+      // radiogroup of two segments (Simple / Developer).
       const modeToggle = document.getElementById("modeToggle");
+      const modeSegs = modeToggle
+        ? Array.from(
+            modeToggle.querySelectorAll(".mode-toggle__seg")
+          )
+        : [];
       const reduce = window.matchMedia(
         "(prefers-reduced-motion: reduce)"
       ).matches;
+      // Reflect the active mode onto the segments: aria-checked marks
+      // the current option, and a roving tabindex keeps exactly one
+      // segment in the tab order (arrow keys move between them).
       const syncMode = () => {
-        const dev = html.dataset.mode === "dev";
-        modeToggle?.setAttribute("aria-pressed", String(dev));
+        const active = html.dataset.mode === "dev" ? "dev" : "simple";
+        modeSegs.forEach((seg) => {
+          const on = seg.getAttribute("data-mode") === active;
+          seg.setAttribute("aria-checked", String(on));
+          seg.tabIndex = on ? 0 : -1;
+        });
       };
       syncMode();
-      modeToggle?.addEventListener("click", () => {
-        const next = html.dataset.mode === "dev" ? "simple" : "dev";
+
+      // Apply a mode, persist it, and REPLAY the switch flourish. The
+      // flourish is a one-shot @keyframes on <html>; a one-shot
+      // animation only re-runs if the class is removed and re-added
+      // with a reflow between (the browser otherwise sees no change
+      // and won't restart it) — that reflow-restart is what makes the
+      // animation play on EVERY toggle, not just the first. Runs in
+      // both directions so switching back to Simple animates too.
+      const applyMode = (next) => {
+        if (html.dataset.mode === next) return;
         html.dataset.mode = next;
         try {
           localStorage.setItem("kiwidesk-site-mode", next);
@@ -944,9 +969,13 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
           /* storage unavailable — mode still applies in-page */
         }
         syncMode();
-        // Playful reveal flourish: a brief accent glow on the nav
-        // + a "grid forms" class the dev sections animate from.
-        if (!reduce && next === "dev") {
+        if (!reduce) {
+          html.classList.remove("mode-flourish");
+          // Force reflow so the removed class "sticks" before we
+          // re-add it — without this the remove+add collapses into a
+          // no-op and the keyframe never restarts (the animate-once
+          // bug). void reading offsetWidth flushes pending style.
+          void html.offsetWidth;
           html.classList.add("mode-flourish");
           window.setTimeout(
             () => html.classList.remove("mode-flourish"),
@@ -958,6 +987,35 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
         // display:none element). After a switch, reveal any that are
         // now on screen so they aren't stuck invisible.
         window.requestAnimationFrame(revealVisible);
+      };
+
+      // Click either segment to select that mode.
+      modeSegs.forEach((seg) => {
+        seg.addEventListener("click", () => {
+          const m = seg.getAttribute("data-mode");
+          if (m === "simple" || m === "dev") applyMode(m);
+        });
+      });
+      // Keyboard: arrows / Home / End move between the two segments
+      // (radiogroup convention) and select as they move.
+      modeToggle?.addEventListener("keydown", (e) => {
+        const ev = e as KeyboardEvent;
+        let next = null;
+        if (ev.key === "ArrowRight" || ev.key === "ArrowDown") {
+          next = "dev";
+        } else if (ev.key === "ArrowLeft" || ev.key === "ArrowUp") {
+          next = "simple";
+        } else if (ev.key === "Home") {
+          next = "simple";
+        } else if (ev.key === "End") {
+          next = "dev";
+        }
+        if (!next) return;
+        ev.preventDefault();
+        applyMode(next);
+        modeSegs
+          .find((s) => s.getAttribute("data-mode") === next)
+          ?.focus();
       });
 
       // ---- Language switcher (own `kiwidesk-site-lang` key) ----
