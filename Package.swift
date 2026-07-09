@@ -29,6 +29,12 @@ let package = Package(
         // the SwiftUI GUI and the AppKit quick menu can call
         // it; the locale JSON files bundle with this target so
         // its own `Bundle.module` can find them at runtime.
+        // Resources/Locales/en.json itself is a BUILD-TIME
+        // translator manifest, not something the app reads at
+        // runtime — English lives inline at every `L(key,
+        // english)` call site, so there is intentionally no
+        // `en` locale file to load (see `LocaleCatalog`'s
+        // `!= "en"` filter). Don't "fix" that filter.
         .target(
             name: "KiwiDeskCore",
             dependencies: ["CLua"],

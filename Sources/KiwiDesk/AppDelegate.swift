@@ -24,11 +24,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Inject the persisted language pick before any view
-        // reads `L(_:_:)` (issue #9) — the sidecar is the
-        // source of truth; `nil` (absent key) means "System
-        // default".
+        // reads `L(_:_:)` (issue #9). Read directly from
+        // UserDefaults, NOT via `loadGuiConfig()` — a language
+        // pick is a scalar app preference, not gui.json state,
+        // and pulling a full live-state snapshot just to read
+        // one value would be needless coupling (and `KiwiCore`
+        // may not have started event tracking yet this early).
+        // `nil` (absent key) means "System default".
         LocalizationManager.shared.adoptPersistedSelection(
-            core.loadGuiConfig().language
+            LocalizationPreference.read()
         )
 
         let statusItem = StatusItemController()

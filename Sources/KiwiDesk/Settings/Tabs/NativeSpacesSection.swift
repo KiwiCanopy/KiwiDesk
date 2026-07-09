@@ -65,8 +65,11 @@ struct NativeSpacesSection: View {
             Image(systemName: "square.on.square")
                 .foregroundStyle(.secondary)
             Text(
-                L("native_spaces.desktop_prefix", "Desktop ")
-                    + "\(number)"
+                L(
+                    "native_spaces.desktop",
+                    "Desktop %1$d",
+                    number
+                )
             )
             .fontWeight(.medium)
             if number == model.currentNativeSpace {

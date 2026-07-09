@@ -84,14 +84,12 @@ struct KeyRecorderField: View {
             if recording, let takenBy {
                 Text(
                     L(
-                        "key_recorder.already_used_prefix",
-                        "Already used by \u{201C}"
-                    ) + takenBy
-                        + L(
-                            "key_recorder.already_used_suffix",
-                            "\u{201D} — locking in will ask "
-                                + "to replace."
-                        )
+                        "key_recorder.already_used",
+                        "Already used by \u{201C}%1$@\u{201D}"
+                            + " — locking in will ask to "
+                            + "replace.",
+                        takenBy
+                    )
                 )
                 .font(.caption)
                 .foregroundStyle(.orange)
@@ -185,9 +183,10 @@ struct KeyRecorderField: View {
         HStack(spacing: 6) {
             Text(
                 L(
-                    "key_recorder.assigned_to_prefix",
-                    "Assigned to \u{201C}"
-                ) + rejection.holder + "\u{201D}"
+                    "key_recorder.assigned_to",
+                    "Assigned to \u{201C}%1$@\u{201D}",
+                    rejection.holder
+                )
             )
             .foregroundStyle(.red)
             Button(L("key_recorder.steal", "Steal")) {

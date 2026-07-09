@@ -216,13 +216,11 @@ struct IconPicker: View {
                     } label: {
                         Label(
                             L(
-                                "icon_picker.use_as_text_prefix",
-                                "Use \u{201C}"
-                            ) + query
-                                + L(
-                                    "icon_picker.use_as_text_suffix",
-                                    "\u{201D} as text"
-                                ),
+                                "icon_picker.use_as_text",
+                                "Use \u{201C}%1$@\u{201D} as "
+                                    + "text",
+                                query
+                            ),
                             systemImage: "textformat"
                         )
                     }

@@ -33,9 +33,11 @@ extension SettingsModel {
             target = .storedProfile(created)
             reload()
         } catch {
-            profileWarning =
-                L("profiles.copy_failed", "Copying failed: ")
-                + "\(error)"
+            profileWarning = L(
+                "profiles.copy_failed",
+                "Copying failed: %1$@",
+                "\(error)"
+            )
             core.onLog("profile copy failed: \(error)")
         }
     }
@@ -48,9 +50,11 @@ extension SettingsModel {
         do {
             try core.overwriteProfile(named: name, with: config)
         } catch {
-            profileWarning =
-                L("profiles.save_failed", "Saving failed: ")
-                + "\(error)"
+            profileWarning = L(
+                "profiles.save_failed",
+                "Saving failed: %1$@",
+                "\(error)"
+            )
             core.onLog("profile edit save failed: \(error)")
             return
         }

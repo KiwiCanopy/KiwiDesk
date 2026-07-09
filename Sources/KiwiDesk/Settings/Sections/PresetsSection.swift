@@ -92,13 +92,10 @@ struct PresetsSection: View {
                 model.displays.count == layout.screenCount
                     ? ""
                     : L(
-                        "presets.needs_screens_prefix",
-                        "Needs "
-                    ) + "\(layout.screenCount) "
-                        + L(
-                            "presets.needs_screens_suffix",
-                            "connected screen(s)."
-                        )
+                        "presets.needs_screens",
+                        "Needs %1$d connected screen(s).",
+                        layout.screenCount
+                    )
             )
         }
         .padding(.vertical, 2)
@@ -125,8 +122,12 @@ struct PresetThumbnail: View {
                             .foregroundStyle(.secondary)
                     }
                     .help(
-                        L("presets.space_prefix", "Space ")
-                            + "\(n): " + mode.displayName
+                        L(
+                            "presets.space_label",
+                            "Space %1$d: %2$@",
+                            n,
+                            mode.displayName
+                        )
                     )
             }
         }

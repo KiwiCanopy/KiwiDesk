@@ -120,8 +120,11 @@ struct SpaceAssignmentChip: View {
         Divider()
         ForEach(model.displays, id: \.id) { display in
             Button(
-                L("monitor_chip.move_to_prefix", "Move to ")
-                    + display.name
+                L(
+                    "monitor_chip.move_to",
+                    "Move to %1$@",
+                    display.name
+                )
             ) {
                 model.config.spacePins[space] =
                     display.fingerprint

@@ -25,18 +25,14 @@ extension SettingsModel {
                 $0.name == name
             }), summary.count != displays.count
         else { return nil }
-        return "\"\(name)\" "
-            + L("profiles.update_hint.is_for", "is for ")
-            + "\(summary.count)"
-            + L(
-                "profiles.update_hint.screens_connected",
-                " screen(s); "
-            )
-            + "\(displays.count)"
-            + L(
-                "profiles.update_hint.connected_suffix",
-                " connected. Save as new instead."
-            )
+        return L(
+            "profiles.update_hint",
+            "\"%1$@\" is for %2$d screen(s); %3$d connected. "
+                + "Save as new instead.",
+            name,
+            summary.count,
+            displays.count
+        )
     }
 
     /// Update "<profile>": persists the edited tiling into the
@@ -52,18 +48,15 @@ extension SettingsModel {
         // update may show the overlap warning.
         guard persist(named: name) else { return }
         if !overlap.isEmpty {
-            profileWarning =
-                L(
-                    "profiles.overlap_warning.prefix",
-                    "This monitor set is also covered by "
-                )
-                + overlap.map { "\"\($0)\"" }
+            let names = overlap.map { "\"\($0)\"" }
                 .joined(separator: ", ")
-                + L(
-                    "profiles.overlap_warning.suffix",
-                    " — exact-match ties load the "
-                        + "alphabetically first."
-                )
+            profileWarning = L(
+                "profiles.overlap_warning",
+                "This monitor set is also covered by %1$@ "
+                    + "— exact-match ties load the "
+                    + "alphabetically first.",
+                names
+            )
         }
     }
 
@@ -84,9 +77,11 @@ extension SettingsModel {
         do {
             try core.persistProfile(named: name)
         } catch {
-            profileWarning =
-                L("profiles.save_failed", "Saving failed: ")
-                + "\(error)"
+            profileWarning = L(
+                "profiles.save_failed",
+                "Saving failed: %1$@",
+                "\(error)"
+            )
             core.onLog("profile save failed: \(error)")
             saved = false
         }
@@ -163,9 +158,11 @@ extension SettingsModel {
         do {
             try core.renameProfile(from: old, to: name)
         } catch {
-            profileWarning =
-                L("profiles.rename_failed", "Renaming failed: ")
-                + "\(error)"
+            profileWarning = L(
+                "profiles.rename_failed",
+                "Renaming failed: %1$@",
+                "\(error)"
+            )
             return
         }
         if target == .storedProfile(old) {
@@ -182,9 +179,11 @@ extension SettingsModel {
         do {
             try core.applyStandard(layout)
         } catch {
-            profileWarning =
-                L("profiles.apply_failed", "Applying failed: ")
-                + "\(error)"
+            profileWarning = L(
+                "profiles.apply_failed",
+                "Applying failed: %1$@",
+                "\(error)"
+            )
             core.onLog("preset apply failed: \(error)")
         }
         reload()

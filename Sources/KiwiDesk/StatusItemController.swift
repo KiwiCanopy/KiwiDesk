@@ -206,8 +206,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     private func headerItem(active: String?) -> NSMenuItem {
         let title =
             active.map {
-                L("menu.header.active_prefix", "KiwiDesk — ")
-                    + $0
+                L("menu.header.active", "KiwiDesk — %1$@", $0)
             }
             ?? L(
                 "menu.header.no_profile",

@@ -21,8 +21,7 @@ struct LayoutAppBarSection: View {
 
     var body: some View {
         SettingsSection(
-            title
-                + L("app_bar.layout.title_suffix", " bar"),
+            L("app_bar.layout.title", "%1$@ bar", title),
             symbol: mode.glyph
         ) {
             Toggle(

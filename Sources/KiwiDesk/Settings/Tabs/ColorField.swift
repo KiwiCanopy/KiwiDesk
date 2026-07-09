@@ -105,11 +105,11 @@ struct ColorSwatch: View {
                     )
                 )
                 .accessibilityLabel(
-                    label
-                        + L(
-                            "color_field.hex.a11y_suffix",
-                            " hex value"
-                        )
+                    L(
+                        "color_field.hex.a11y",
+                        "%1$@ hex value",
+                        label
+                    )
                 )
         }
         // Track panel picks / external edits into the field —
@@ -160,16 +160,18 @@ struct ColorSwatch: View {
         .pointingHandCursor()
         .onHover { hovering = $0 }
         .help(
-            L("color_field.swatch.help_prefix", "Edit the ")
-                + hex
-                + L("color_field.swatch.help_suffix", " color")
+            L(
+                "color_field.swatch.help",
+                "Edit the %1$@ color",
+                hex
+            )
         )
         .accessibilityLabel(
-            label
-                + L(
-                    "color_field.swatch.a11y_suffix",
-                    " color"
-                )
+            L(
+                "color_field.swatch.a11y",
+                "%1$@ color",
+                label
+            )
         )
         .accessibilityHint(
             L(

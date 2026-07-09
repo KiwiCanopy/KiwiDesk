@@ -15,9 +15,9 @@ public final class LocalizationManager: ObservableObject {
 
     /// `nil` means "System default" — the macOS UI locale when a
     /// matching locale file ships, else English. A non-nil value
-    /// is an explicit user pick (persisted by the GUI layer into
-    /// `gui.json`; this manager does not read or write that
-    /// file itself).
+    /// is an explicit user pick (persisted by the GUI layer via
+    /// `LocalizationPreference`, backed by `UserDefaults`; this
+    /// manager does not read or write that store itself).
     @Published public private(set) var selection: String?
     /// The locale codes shipped as `Resources/Locales/*.json`,
     /// excluding `en`.
@@ -55,10 +55,30 @@ public final class LocalizationManager: ObservableObject {
         strings[key] ?? english
     }
 
+    /// The interpolating counterpart of `string(_:_:)`: resolves
+    /// the template (translation-or-English, same per-key
+    /// fallback) then fills it with `args` via `String(format:)`.
+    /// Templates use POSITIONAL specifiers (`%1$@`, `%2$d`, …),
+    /// never bare `%@`/`%d` — positional lets a translation
+    /// reorder an argument relative to the surrounding words,
+    /// which is the entire reason this overload exists instead
+    /// of `+`-concatenating a prefix and a value (issue #9
+    /// review: a concatenated fragment can never be reordered by
+    /// a translation, no matter how the target language's
+    /// grammar wants it).
+    public func string(
+        _ key: String,
+        _ english: String,
+        _ args: [CVarArg]
+    ) -> String {
+        let template = strings[key] ?? english
+        return String(format: template, arguments: args)
+    }
+
     /// Updates the explicit selection and reloads the effective
     /// locale's strings. Pass `nil` to restore "System default".
-    /// Persisting the choice into `gui.json` is the caller's
-    /// job (`GeneralSection` / the GUI's config-apply seam).
+    /// Persisting the choice (`LocalizationPreference`) is the
+    /// caller's job (`SettingsModel+Language.swift`).
     public func select(_ locale: String?) {
         selection = locale
         reload()
@@ -87,4 +107,21 @@ public final class LocalizationManager: ObservableObject {
 @MainActor
 public func L(_ key: String, _ english: String) -> String {
     LocalizationManager.shared.string(key, english)
+}
+
+/// The interpolating overload: `L("monitor_chip.move_to",
+/// "Move to %1$@", display.name)`. The template's positional
+/// specifiers (`%1$@`, `%2$d`, …) let a translation reorder an
+/// argument, unlike a `+`-concatenated prefix/suffix pair — use
+/// this instead of building a sentence out of literal
+/// concatenation whenever a value needs to sit inside English
+/// prose. See `docs/translating.md` for the convention.
+// swift-format-ignore: AlwaysUseLowerCamelCase
+@MainActor
+public func L(
+    _ key: String,
+    _ english: String,
+    _ args: CVarArg...
+) -> String {
+    LocalizationManager.shared.string(key, english, args)
 }

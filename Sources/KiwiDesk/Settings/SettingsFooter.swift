@@ -104,18 +104,14 @@ struct SettingsFooter: View {
 
     private var saveCopyMessage: String {
         L(
-            "footer.save_copy_as.message_prefix",
-            "Duplicates \u{201C}"
+            "footer.save_copy_as.message",
+            "Duplicates \u{201C}%1$@\u{201D} with your "
+                + "pending edits — monitor sets and shortcut "
+                + "overrides included. The copy becomes the "
+                + "edit target; the running layout is not "
+                + "changed.",
+            model.editingProfile ?? ""
         )
-            + (model.editingProfile ?? "")
-            + L(
-                "footer.save_copy_as.message_suffix",
-                "\u{201D} with your pending edits — "
-                    + "monitor sets and shortcut overrides "
-                    + "included. The copy becomes the edit "
-                    + "target; the running layout is not "
-                    + "changed."
-            )
     }
 
     // MARK: - Secondary slot: Save a Copy As…

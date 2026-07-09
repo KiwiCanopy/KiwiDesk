@@ -211,9 +211,10 @@ struct ProfileEditTargetMenu: View {
         if let standard = model.activeStandard {
             return mark
                 + L(
-                    "profile_header.live.standard_prefix",
-                    "Live — Standard: "
-                ) + standard
+                    "profile_header.live.standard",
+                    "Live — Standard: %1$@",
+                    standard
+                )
         }
         return mark
             + L(
@@ -224,13 +225,15 @@ struct ProfileEditTargetMenu: View {
 
     private func menuRowLabel(_ name: String) -> String {
         let mark = model.editingProfile == name ? "✓ " : ""
-        let loaded =
-            name == model.activeProfile
-            ? L(
-                "profile_header.menu_row.loaded_suffix",
-                " (currently loaded)"
-            ) : ""
-        return "\(mark)\(name)\(loaded)"
+        guard name == model.activeProfile else {
+            return "\(mark)\(name)"
+        }
+        return mark
+            + L(
+                "profile_header.menu_row.loaded",
+                "%1$@ (currently loaded)",
+                name
+            )
     }
 
     private var title: String {
@@ -238,9 +241,10 @@ struct ProfileEditTargetMenu: View {
         if let profile = model.activeProfile { return profile }
         if let standard = model.activeStandard {
             return L(
-                "profile_header.title.standard_prefix",
-                "Standard: "
-            ) + standard
+                "profile_header.title.standard",
+                "Standard: %1$@",
+                standard
+            )
         }
         return L(
             "profile_header.title.transient",
