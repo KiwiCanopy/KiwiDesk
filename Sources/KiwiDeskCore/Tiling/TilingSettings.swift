@@ -13,10 +13,11 @@ public struct TilingSettings: Sendable, Equatable, Codable {
     /// `gap.override[space_id]` beats the global gaps.
     public var gapsOverride: [SpaceID: Gaps] = [:]
     public var minWindowSize: CGFloat = 300
-    /// Global magnitude (points) each Grow/Shrink keybinding
-    /// nudges the layout by (`resize.step`, #58). The catalog
-    /// authors `resize("x", ±step)` from this; import reads a
-    /// recovered magnitude back into it.
+    /// Global magnitude (points) the catalog *authors* Grow/Shrink
+    /// keybindings with (`resize.step`, #58): it emits
+    /// `resize("x", ±step)`, and import reads a recovered magnitude
+    /// back into it. Layout math never reads this — the bound
+    /// row's own literal delta drives an actual resize.
     public var resizeStep: CGFloat = 50
     public var bsp = BspParams()
     public var stack = StackParams()

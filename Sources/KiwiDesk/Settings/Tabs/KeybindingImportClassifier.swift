@@ -12,7 +12,17 @@ enum KeybindingImportClassifier {
     /// rebuilding the navigation and change-mode commands the
     /// keybindings tab would generate from the config's own
     /// spaces and mode names.
-    static func classify(_ config: inout GuiConfig) {
+    /// `recoverResizeStep` reads a recovered Grow/Shrink magnitude
+    /// back into `resize.step` (#58) — pass it ONLY on an explicit
+    /// import, where the pulled-in bindings are the source of
+    /// truth. A plain load-for-edit leaves it `false`: there
+    /// `resize.step` is already authoritative (from tiler/profile
+    /// settings), so a magnitude baked into a stray `.custom` row
+    /// must not overwrite it (#58 review).
+    static func classify(
+        _ config: inout GuiConfig,
+        recoverResizeStep: Bool = false
+    ) {
         let navigation = navigationLabels(for: config)
         var recoveredStep: Int?
         for mode in config.modes.indices {
@@ -25,11 +35,10 @@ enum KeybindingImportClassifier {
                 }
             }
         }
-        // Read a recovered Grow/Shrink magnitude back into the
-        // step, so an imported config's own resize size drives
-        // the setting (#58). Left untouched when no resize row is
-        // present, so an import without one keeps the default.
-        if let recoveredStep {
+        // Grow and Shrink carry the same magnitude, so the last
+        // recovered row wins harmlessly; untouched when the import
+        // has no resize row (keeps the default).
+        if recoverResizeStep, let recoveredStep {
             config.settings.resizeStep = CGFloat(recoveredStep)
         }
     }
