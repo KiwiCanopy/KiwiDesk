@@ -1,0 +1,472 @@
+---
+// KiwiDesk — marketing landing page (custom Astro page at /).
+// Docs live under /docs/*; this page is standalone HTML.
+import { Image } from "astro:assets";
+import wordmark from "../assets/brand/logo_wordmark.svg";
+import poster from "../assets/demo-poster.png";
+import kiwiSolutions from "../assets/brand/kiwi-solutions.png";
+import "../styles/landing.css";
+
+const repo = "https://github.com/hajiboy95/KiwiDesk";
+const desc =
+  "KiwiDesk is a tiling window manager for macOS: flat arrays " +
+  "instead of i3 trees, a sandboxed Lua config, six layouts, " +
+  "and it never disables SIP.";
+
+// Inline feature icons (stroke-based, consistent 24x24 grid).
+function iconSvg(name: string): string {
+  const S = (p: string) =>
+    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ` +
+    `stroke-width="1.9" stroke-linecap="round" ` +
+    `stroke-linejoin="round">${p}</svg>`;
+  switch (name) {
+    case "layers":
+      return S(
+        `<path d="M12 3 2 8l10 5 10-5-10-5Z"/>` +
+          `<path d="M2 13l10 5 10-5"/>`
+      );
+    case "grid":
+      return S(
+        `<rect x="3" y="3" width="7" height="7" rx="1"/>` +
+          `<rect x="14" y="3" width="7" height="7" rx="1"/>` +
+          `<rect x="3" y="14" width="7" height="7" rx="1"/>` +
+          `<rect x="14" y="14" width="7" height="7" rx="1"/>`
+      );
+    case "code":
+      return S(`<path d="m8 8-4 4 4 4"/><path d="m16 8 4 4-4 4"/>`);
+    case "terminal":
+      return S(`<path d="m5 7 5 5-5 5"/><path d="M13 17h6"/>`);
+    case "wave":
+      return S(
+        `<path d="M2 12c2 0 2-5 4-5s2 10 4 10 2-10 4-10 2 5 4 5"/>`
+      );
+    case "shield":
+      return S(
+        `<path d="M12 3 5 6v5c0 4 3 7 7 8 4-1 7-4 7-8V6l-7-3Z"/>` +
+          `<path d="m9 12 2 2 4-4"/>`
+      );
+    default:
+      return S(`<circle cx="12" cy="12" r="9"/>`);
+  }
+}
+
+// Tiny inline diagrams per layout (viewBox 0 0 160 90).
+function layoutDiagram(name: string): string {
+  const svg = (p: string) =>
+    `<svg viewBox="0 0 160 90" preserveAspectRatio="none">${p}</svg>`;
+  const r = (
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    cls = "tile"
+  ) =>
+    `<rect x="${x}" y="${y}" width="${w}" height="${h}" ` +
+    `rx="4" class="${cls}"/>`;
+  switch (name) {
+    case "bsp":
+      return svg(
+        r(8, 8, 70, 74) +
+          r(84, 8, 68, 34) +
+          r(84, 48, 32, 34) +
+          r(120, 48, 32, 34)
+      );
+    case "stack":
+      return svg(
+        r(8, 8, 92, 74, "tile tile--accent") +
+          r(106, 8, 46, 22) +
+          r(106, 34, 46, 22) +
+          r(106, 60, 46, 22)
+      );
+    case "scrolling":
+      return svg(
+        r(-24, 8, 44, 74, "tile tile--ghost") +
+          r(26, 8, 44, 74) +
+          r(76, 8, 44, 74, "tile tile--accent") +
+          r(126, 8, 44, 74) +
+          r(176, 8, 44, 74, "tile tile--ghost")
+      );
+    case "monocle":
+      return svg(
+        r(20, 14, 120, 62, "tile tile--ghost") +
+          r(14, 10, 120, 62, "tile tile--ghost") +
+          r(8, 6, 120, 62, "tile tile--accent")
+      );
+    case "grid":
+      return svg(
+        r(8, 8, 44, 34) +
+          r(58, 8, 44, 34) +
+          r(108, 8, 44, 34) +
+          r(8, 48, 44, 34) +
+          r(58, 48, 44, 34) +
+          r(108, 48, 44, 34)
+      );
+    case "floating":
+      return svg(
+        r(14, 12, 62, 44) +
+          r(60, 34, 66, 46, "tile tile--accent") +
+          r(96, 10, 52, 32)
+      );
+    default:
+      return svg(r(8, 8, 144, 74));
+  }
+}
+
+const features = [
+  {
+    title: "Flat arrays, not trees",
+    body:
+      "Every space is a flat window list. Layouts are pure " +
+      "functions over that array — no tree surgery, ever.",
+    icon: "layers",
+  },
+  {
+    title: "Six layouts",
+    body:
+      "bsp, stack, scrolling (PaperWM), monocle, grid, and " +
+      "floating. Switch between them instantly.",
+    icon: "grid",
+  },
+  {
+    title: "Lua configuration",
+    body:
+      "A sandboxed Lua 5.5 VM reads ~/.config/KiwiDesk/init.lua. " +
+      "A broken config can't freeze your windows — a 500 ms " +
+      "watchdog guards it.",
+    icon: "code",
+  },
+  {
+    title: "CLI + socket IPC",
+    body:
+      "Script everything. Stream events to SketchyBar, " +
+      "JankyBorders, or your own tools over a socket.",
+    icon: "terminal",
+  },
+  {
+    title: "Smooth animations",
+    body:
+      "One display link per monitor, so mixed 60 / 120 Hz " +
+      "setups each animate at their own native cadence.",
+    icon: "wave",
+  },
+  {
+    title: "No SIP disabling",
+    body:
+      "User-space only. Modal keybindings run through Carbon — " +
+      "no Input Monitoring permission, no keylogger.",
+    icon: "shield",
+  },
+];
+
+const layouts = [
+  { name: "bsp", desc: "Binary space partitioning, square-ish splits." },
+  { name: "stack", desc: "A master zone beside a stack column." },
+  { name: "scrolling", desc: "Niri / PaperWM horizontal columns." },
+  { name: "monocle", desc: "Focused window maximized, rest behind." },
+  { name: "grid", desc: "Dynamic or rigid rows × columns." },
+  { name: "floating", desc: "The macOS default, left untouched." },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>KiwiDesk — a tiling window manager for macOS</title>
+    <meta name="description" content={desc} />
+    <meta property="og:title"
+      content="KiwiDesk — a tiling window manager for macOS" />
+    <meta property="og:description" content={desc} />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content={poster.src} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#101d0b" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <!-- ============ Nav ============ -->
+    <nav class="nav" id="nav">
+      <div class="wrap nav__inner">
+        <a class="nav__brand" href="/" aria-label="KiwiDesk home">
+          <svg width="26" height="26" viewBox="0 0 64 64"
+            aria-hidden="true">
+            <circle cx="32" cy="32" r="30" fill="#8b5e3c" />
+            <circle cx="32" cy="32" r="24" fill="#c7e6a6" />
+            <circle cx="32" cy="32" r="9" fill="#f2ebd9" />
+            <g fill="#1c1a17">
+              <ellipse cx="32" cy="14" rx="1.4" ry="4" />
+              <ellipse cx="32" cy="50" rx="1.4" ry="4" />
+              <ellipse cx="14" cy="32" rx="4" ry="1.4" />
+              <ellipse cx="50" cy="32" rx="4" ry="1.4" />
+              <ellipse cx="19" cy="19" rx="3.4" ry="1.3"
+                transform="rotate(45 19 19)" />
+              <ellipse cx="45" cy="45" rx="3.4" ry="1.3"
+                transform="rotate(45 45 45)" />
+              <ellipse cx="45" cy="19" rx="1.3" ry="3.4"
+                transform="rotate(45 45 19)" />
+              <ellipse cx="19" cy="45" rx="1.3" ry="3.4"
+                transform="rotate(45 19 45)" />
+            </g>
+          </svg>
+          <span>KiwiDesk</span>
+        </a>
+        <div class="nav__links">
+          <a class="nav__link" href="/docs/">Docs</a>
+          <a class="nav__link" href={repo} target="_blank"
+            rel="noopener">GitHub</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ============ Hero (light band → dark body) ============ -->
+    <header class="hero">
+      <div class="hero__glow" aria-hidden="true"></div>
+      <div class="wrap">
+        <img class="hero__mark" src={wordmark.src}
+          alt="KiwiDesk" width="230" height="273" />
+        <h1>Tiling window management for macOS.</h1>
+        <p class="hero__sub">
+          KiwiDesk manages windows in
+          <b>flat arrays</b>, not i3-style trees — fully
+          <b>Lua-configurable</b>, with
+          <b>six layouts</b> to switch between. And it
+          <b>never disables SIP</b>.
+        </p>
+        <div class="hero__cta">
+          <a class="btn btn--primary" href="/docs/">
+            Read the Docs
+            <svg width="16" height="16" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2.4"
+              stroke-linecap="round" stroke-linejoin="round"
+              aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </a>
+          <a class="btn btn--ghost btn--ghost-light" href={repo}
+            target="_blank" rel="noopener">
+            <svg width="18" height="18" viewBox="0 0 24 24"
+              fill="currentColor" aria-hidden="true">
+              <path d="M12 .5a11.5 11.5 0 0 0-3.64 22.42c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.3-1.7-1.3-1.7-1.06-.72.08-.71.08-.71 1.17.08 1.78 1.2 1.78 1.2 1.04 1.78 2.73 1.27 3.4.97.1-.75.4-1.27.73-1.56-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.2-3.1-.12-.29-.52-1.46.11-3.05 0 0 .98-.31 3.2 1.18a11.1 11.1 0 0 1 5.82 0c2.22-1.49 3.2-1.18 3.2-1.18.63 1.59.23 2.76.11 3.05.75.81 1.2 1.84 1.2 3.1 0 4.43-2.69 5.4-5.26 5.69.41.36.78 1.07.78 2.15v3.19c0 .31.2.67.8.56A11.5 11.5 0 0 0 12 .5Z" />
+            </svg>
+            View on GitHub
+          </a>
+        </div>
+        <span class="pill pill--light">
+          <span class="pill__dot" aria-hidden="true"></span>
+          🍎 macOS app — coming to the App Store
+        </span>
+      </div>
+      <div class="hero__seam" aria-hidden="true"></div>
+    </header>
+
+    <!-- ============ Demo video ============ -->
+    <section class="tint" id="demo">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <span class="eyebrow">In motion</span>
+          <h2>See it in action.</h2>
+          <p>
+            A short clip of KiwiDesk retiling, switching layouts,
+            and animating across a space.
+          </p>
+        </div>
+        <div class="demo__frame reveal">
+          <video id="demoVideo" controls preload="none"
+            poster={poster.src} playsinline
+            aria-label="KiwiDesk demo">
+            <source src="/kiwidesk-demo.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+          <button class="demo__overlay" id="demoOverlay" type="button"
+            aria-label="Play the KiwiDesk demo video">
+            <span class="demo__play" aria-hidden="true">
+              <svg width="34" height="34" viewBox="0 0 24 24"
+                fill="#08150a">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </span>
+          </button>
+        </div>
+        <p class="demo__caption">See it in action.</p>
+      </div>
+    </section>
+
+    <!-- ============ Features ============ -->
+    <section id="features">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <span class="eyebrow">Why KiwiDesk</span>
+          <h2>Built around one idea, done well.</h2>
+          <p>
+            A flat, one-dimensional window model — and everything
+            fast, scriptable, and safe that falls out of it.
+          </p>
+        </div>
+        <div class="grid">
+          {features.map((f) => (
+            <article class="card reveal">
+              <div class="card__icon" aria-hidden="true">
+                <Fragment set:html={iconSvg(f.icon)} />
+              </div>
+              <h3>{f.title}</h3>
+              <p>{f.body}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Layouts ============ -->
+    <section class="tint" id="layouts">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <span class="eyebrow">The six layouts</span>
+          <h2>One key away, each time.</h2>
+          <p>
+            Every layout is a pure function over the same flat
+            array — so switching is instant and predictable.
+          </p>
+        </div>
+        <div class="layouts">
+          {layouts.map((l) => (
+            <article class="layout-card reveal">
+              <div class="layout-card__diagram" aria-hidden="true">
+                <Fragment set:html={layoutDiagram(l.name)} />
+              </div>
+              <h3>{l.name}</h3>
+              <p>{l.desc}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Quick start ============ -->
+    <section class="quickstart" id="start">
+      <div class="wrap">
+        <div class="reveal">
+          <span class="eyebrow">Quick start</span>
+          <h2>Build it from source.</h2>
+          <p>
+            KiwiDesk is in CLI beta today. Clone the repo and
+            build the release binary — packaged releases and a
+            Homebrew cask land with 1.0.
+          </p>
+          <a class="btn btn--primary" href="/docs/">
+            Read the Docs
+            <svg width="16" height="16" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2.4"
+              stroke-linecap="round" stroke-linejoin="round"
+              aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </a>
+          <p class="req">
+            <svg width="15" height="15" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round"
+              aria-hidden="true">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 8v4l3 2" />
+            </svg>
+            Requires macOS 14 or later.
+          </p>
+        </div>
+        <div class="code reveal"
+          aria-label="Build KiwiDesk from source">
+          <div class="code__bar">
+            <span class="code__dot" aria-hidden="true"></span>
+            <span class="code__dot" aria-hidden="true"></span>
+            <span class="code__dot" aria-hidden="true"></span>
+            <span class="code__title">zsh — build</span>
+          </div>
+          <pre><code><span class="prompt">$</span> git clone {repo}.git
+<span class="prompt">$</span> cd KiwiDesk
+<span class="prompt">$</span> swift build -c release
+<span class="cmt"># packaged releases + Homebrew cask come with 1.0</span></code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Footer ============ -->
+    <footer class="footer">
+      <div class="wrap">
+        <div class="footer__brand">
+          <Image src={kiwiSolutions}
+            alt="Kiwi Solutions — just a bunch of kiwis"
+            widths={[200, 280, 320]}
+            sizes="(max-width: 480px) 70vw, 280px" />
+        </div>
+        <p class="footer__tag">just a bunch of kiwis 🥝</p>
+        <nav class="footer__links" aria-label="Footer">
+          <a href="/docs/">Docs</a>
+          <a href={repo} target="_blank" rel="noopener">GitHub</a>
+          <a href="/docs/design-decisions/">Design decisions</a>
+        </nav>
+        <p class="footer__copy">© 2026 KiwiDesk</p>
+      </div>
+    </footer>
+
+    <script>
+      // Nav background on scroll.
+      const nav = document.getElementById("nav");
+      const onScroll = () => {
+        if (window.scrollY > 12) nav?.classList.add("scrolled");
+        else nav?.classList.remove("scrolled");
+      };
+      onScroll();
+      window.addEventListener("scroll", onScroll, { passive: true });
+
+      // Click-to-play demo video.
+      const video = document.getElementById("demoVideo") as
+        | HTMLVideoElement
+        | null;
+      const overlay = document.getElementById("demoOverlay");
+      overlay?.addEventListener("click", () => {
+        if (overlay) overlay.hidden = true;
+        video?.play?.();
+      });
+      video?.addEventListener("play", () => {
+        if (overlay) overlay.hidden = true;
+      });
+      video?.addEventListener("pause", () => {
+        // Re-show only if playback returned to the very start.
+        if (overlay && video.currentTime === 0) overlay.hidden = false;
+      });
+
+      // Scroll reveal (progressive enhancement, motion-aware).
+      const reduce = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
+      const els = document.querySelectorAll(".reveal");
+      if (reduce || !("IntersectionObserver" in window)) {
+        els.forEach((el) => el.classList.add("in"));
+      } else {
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
+              if (e.isIntersecting) {
+                e.target.classList.add("in");
+                io.unobserve(e.target);
+              }
+            });
+          },
+          { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
+        );
+        els.forEach((el) => io.observe(el));
+      }
+
+      // Card cursor-follow glow.
+      document.querySelectorAll(".card").forEach((card) => {
+        card.addEventListener("pointermove", (e) => {
+          const r = card.getBoundingClientRect();
+          (card as HTMLElement).style.setProperty(
+            "--mx",
+            `${((e.clientX - r.left) / r.width) * 100}%`
+          );
+        });
+      });
+    </script>
+  </body>
+</html>
