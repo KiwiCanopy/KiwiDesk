@@ -61,6 +61,12 @@ enum KeybindingImportClassifier {
             let command = KeybindingCatalog.switchModeCommand(name)
             map[command.lua] = command.label
         }
+        // Step-independent Size & Float row: not in any
+        // navigation group and matched by no shape rule, so it
+        // needs its own entry or an imported `make_floating()`
+        // stays Custom (#91).
+        let float = KeybindingCatalog.makeFloating
+        map[float.lua] = float.label
         return map
     }
 

@@ -76,10 +76,12 @@ translation, see [translating.md](translating.md).
 ## The gui.json File
 
 The file `~/.config/KiwiDesk/gui.json` holds the app's complete
-configuration. It is created the first time you Save in the Settings
-window (it does not exist on a hand-written setup). You normally
-never edit it by hand, but it is documented here for backup and
-transparency.
+configuration. On a truly fresh install (no `init.lua` yet) it is
+created at first launch, pre-filled with the
+[default shortcuts](#default-shortcuts). On a hand-written setup
+(an `init.lua` already exists) it is only created the first time
+you Save in the Settings window. You normally never edit it by
+hand, but it is documented here for backup and transparency.
 
 **Top-level structure:**
 
@@ -487,6 +489,32 @@ The **Shortcuts** section (in the **System** group) binds keyboard
 combos to actions. Every shortcut lives in a **mode** — normally the
 **default** mode (active at startup), plus optional modal modes
 (vim-style); only the active mode's bindings fire at a time.
+
+### Default Shortcuts
+
+A fresh install starts with a usable set in the default mode, so
+you can drive KiwiDesk before configuring anything:
+
+| Action | Shortcut |
+| --- | --- |
+| Focus window left / down / up / right | `⌥H` `⌥J` `⌥K` `⌥L` |
+| Go to space 1–9 | `⌥1` … `⌥9` |
+| Swap with window left / down / up / right | `⌥⇧H` `⌥⇧J` `⌥⇧K` `⌥⇧L` |
+| Move to space 1–9 | `⌥⇧1` … `⌥⇧9` |
+| Shrink / Enlarge | `⌥-` / `⌥=` |
+| Make floating | `⌥T` |
+
+The digits are display-order positions: `⌥3` targets the *third*
+space in your Spaces list, whatever its name. A row is generated
+only for spaces that exist when the set is seeded (at most nine),
+so no shortcut ever targets a space that isn't there.
+
+The set is seeded only while **no** shortcut is bound anywhere —
+into `gui.json` at first launch on a fresh install, or into the
+editable model when your `init.lua` declares no keybindings. It
+never overwrites bindings you (or your Lua) authored, and every
+seeded row is an ordinary catalog row: rebind, clear, or override
+it per profile like any other shortcut.
 
 ### Recording a Shortcut
 

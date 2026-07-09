@@ -278,6 +278,30 @@ persisted data or breaking import classification (issue #9
 follow-up: the original literal-routing sweep covered SwiftUI
 view literals but missed catalog-defined strings).
 
+**First run seeds a starter shortcut set — base tier, only
+into emptiness.** A fresh install used to boot with zero
+shortcuts (the default mode existed but was empty): a GUI-first
+user had no way to focus or move a window until they authored
+every combo. Now `Core.DefaultKeybindings` seeds a starter set
+(⌥HJKL focus, ⌥⇧HJKL swap, ⌥digit / ⌥⇧digit per-space, ⌥-/⌥=
+resize, ⌥T float) with one guard everywhere: **only when no
+mode carries a single binding** — a user- or Lua-authored
+binding anywhere blocks the seed, making it idempotent and
+never destructive. The set lives in the **base `gui.json`
+modes**, never a profile override (profiles stay
+tiling-plus-sparse-behavior, #55): on a true first launch (no
+`init.lua`) the seeded model is persisted so the very first
+boot is GUI-managed and the shortcuts actually fire; with a
+bindings-free `init.lua` the seed appears in the editable
+model and persists on the first Save. Per-space rows are
+**position-based** (⌥3 = third space in display order,
+whatever its name), generated only for spaces that exist at
+seed time and capped at nine — no dead rows targeting
+nonexistent spaces. The seeded Lua and labels mirror
+`KeybindingCatalog` byte-for-byte (guarded by
+`DefaultSeedCatalogParityTests`) so the rows stay presets, not
+Custom (#4). (#91)
+
 ## Overrides & appearance
 
 **Overrides are visible-but-inherited, never hidden.** A

@@ -179,15 +179,23 @@ enum KeybindingCatalog {
                     L("keybinding.enlarge", "Enlarge")
                 }
             ),
-            NavCommand(
-                label: "Make floating",
-                lua: "KiwiDesk.make_floating()",
-                displayLabel: {
-                    L("keybinding.make_floating", "Make floating")
-                }
-            ),
+            makeFloating,
         ]
     }
+
+    /// The Make-floating row — step-independent, so unlike
+    /// Grow/Shrink it is a fixed command. A named single
+    /// authority because the import classifier matches it
+    /// directly (it is in no `navigationGroups` group and has
+    /// no shape rule); without that entry an imported
+    /// `make_floating()` binding demoted to Custom (#4/#91).
+    static let makeFloating = NavCommand(
+        label: "Make floating",
+        lua: "KiwiDesk.make_floating()",
+        displayLabel: {
+            L("keybinding.make_floating", "Make floating")
+        }
+    )
 
     /// The Grow/Shrink magnitude inside a `resize("x", ±N)` row of
     /// ANY step, plus its canonical label — the inverse of
