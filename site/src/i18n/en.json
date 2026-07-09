@@ -15,8 +15,8 @@
 
   "mode_label": "Mode",
   "mode_simple": "Simple",
-  "mode_dev": "Developer",
-  "mode_toggle_aria": "Switch between Simple and Developer views",
+  "mode_dev": "Nerd",
+  "mode_toggle_aria": "Switch between Simple and Nerd views",
   "mode_tooltip_simple": "Curious how it works under the hood?",
   "mode_tooltip_dev": "Back to the friendly view",
 

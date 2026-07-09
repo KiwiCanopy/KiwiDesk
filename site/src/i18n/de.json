@@ -14,9 +14,9 @@
   "nav_lang_de": "Deutsch",
 
   "mode_label": "Ansicht",
-  "mode_simple": "Einfach",
-  "mode_dev": "Entwickler",
-  "mode_toggle_aria": "Zwischen einfacher und Entwickler-Ansicht wechseln",
+  "mode_simple": "Normalo",
+  "mode_dev": "Nerd",
+  "mode_toggle_aria": "Zwischen Normalo- und Nerd-Ansicht wechseln",
   "mode_tooltip_simple": "Neugierig, wie es unter der Haube funktioniert?",
   "mode_tooltip_dev": "Zurück zur freundlichen Ansicht",
 
