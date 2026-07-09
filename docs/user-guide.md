@@ -597,6 +597,24 @@ When you save, every shortcut lives in a mode in `gui.json`. To use
 an action not in the built-in sections, write custom Lua in a row
 under Custom Bindings.
 
+### Inactive Shortcuts
+
+The per-space rows above render one row per space in the current
+space list. A bound shortcut whose target space is *not* in that
+list — say `⌥6 → Go to Space 6` after switching from an 8-space
+to a 4-space profile — appears in a dimmed **Inactive shortcuts**
+section at the bottom instead of disappearing. Such a shortcut:
+
+- **Still works** — pressing it recreates its space and switches
+  to it.
+- **Still holds its combo** — recording the same combo elsewhere
+  is blocked, with *Steal* and *Go to* pointing at the inactive
+  row.
+- **Is never deleted for you** — it becomes a normal row again
+  the moment its space returns (e.g. switching back to the
+  profile that declares it). Rebind or clear it in the section
+  if you want the combo back now.
+
 ### Import & Adopt
 
 If your `init.lua` holds custom keybindings:
