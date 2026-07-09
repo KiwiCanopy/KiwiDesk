@@ -62,7 +62,8 @@ extension KiwiCore {
         // carries the chosen display order — while the
         // sidecar's list can be stale (e.g. right after
         // loading a profile whose order differs). A bare space
-        // only in `gui.json` drops — it wasn't seeded at boot.
+        // only in `gui.json` is seeded into live at boot
+        // (`seedGuiSpaces`, #77), so it is present here too.
         config.spaces = SpaceID.deduplicated(live)
         config.spacePins = spacePins
         config.mainSpaces = mainSpaces
