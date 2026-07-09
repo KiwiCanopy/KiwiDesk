@@ -33,7 +33,7 @@ struct KeybindingLocalizationTests {
         reset()
         LocalizationManager.shared.select("de")
         defer { reset() }
-        let shrink = KeybindingCatalog.resizeAndFloat[0]
+        let shrink = KeybindingCatalog.resizeAndFloat(step: 50)[0]
         #expect(shrink.label == "Shrink")
         #expect(shrink.resolvedLabel == "Verkleinern")
     }

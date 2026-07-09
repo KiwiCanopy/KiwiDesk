@@ -252,14 +252,26 @@ Keep this list updated whenever a recurring mistake is found.
   ceiling repeatedly bit large test files. Break suites into
   focused files before they grow; per-file private helpers are the
   convention and small duplication across suites is fine.
-- **Profiles own tiling only.** A profile serializes tiling state,
-  not keybindings or app rules. Profile-serialized settings belong
-  *inside* `TilingSettings` so they ride the config split for free
-  (see `gap.override`). One designed exception (#55): the sparse
-  per-profile keybinding tier lives in `Profile.modes`
-  (`KeyModeOverride`) — it is an override onto the base `gui.json`
-  modes, not a second home for keybindings, and it must stay the
-  only non-tiling field. `ProfileManager` mutators are `internal` by
+- **Profiles own tiling, plus sparse behavior overrides.** A
+  profile serializes tiling state — that belongs *inside*
+  `TilingSettings` so it rides the config split for free (see
+  `gap.override`). Beyond tiling, a profile may carry a **sparse
+  override of a global _behavior_ setting** — one that shapes how
+  the workspace behaves *while the profile is active* (keybindings
+  today, via `Profile.modes` / `KeyModeOverride`; app rules
+  planned, #109). It may **never** override a setting that *routes
+  or selects* the profile itself (`profile_bindings`, the
+  native-Space→profile map) or that lives outside config ownership
+  (the GUI language pref, which persists in `UserDefaults`) — a
+  profile that could rewrite what selects it is a self-reference
+  hazard. Every override is the base overlaid with a sparse diff
+  (absent = inherit; an explicit tombstone expresses removal),
+  never a second home for the setting. Add each one deliberately —
+  templated on `KeyModeOverride`'s seam and guarded by a round-trip
+  + resolve parity test — NOT via a generic override primitive
+  until a real second flat-map client exists (one client removes no
+  drift; see `.claude/rules/parity-tests.md`).
+  `ProfileManager` mutators are `internal` by
   design — mutate through a `KiwiCore` facade, never re-publicize
   them. `read(name:)` is the public load-for-edit primitive
   (path-traversal guarded, touches no state); `save()` **adopts**

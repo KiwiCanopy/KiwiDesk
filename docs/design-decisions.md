@@ -111,6 +111,29 @@ reference would silently resurrect the space on the next
 profile load. App rules survive by design: they're global,
 and another profile may declare a space of the same name.
 
+**Live state is the single source of truth for which spaces
+exist; `gui.json` mirrors it, never the reverse.** A deletion
+prunes the space from live immediately (windows rehome to the
+fallback), not only when a later profile load happens to drop
+it — otherwise the next save re-captured it from live and it
+reappeared. The sidecar's `spaces` list is kept a faithful
+copy of live *as of the last authoritative reconcile*: every
+explicit prune — a `load_profile` (including a scripted
+Lua/CLI one) or an in-place edit — writes the live set back.
+Hardware-driven applies (monitor change, native-Space
+binding) deliberately don't prune or mirror (the
+no-shuffle-on-reconnect rule), so between such an event and
+the next reconcile the list may lag; the cold-boot seed and
+the next prune re-converge it. The one place `gui.json` seeds
+*into* live is cold boot — a space that lives only in the
+sidecar (no profile, pin, window, or `set_mode` backs it) is
+seeded so it survives the reload. That seed is safe against
+resurrecting a profile-pruned space precisely because the
+mirror keeps the list current. Deletion is per-profile:
+each profile is its own file, so removing a space from the
+active profile never touches another profile that still
+declares a space of the same name. (#77)
+
 **Saved profiles lead; Presets demote once one exists.** On
 the Profiles tab, the built-in Presets top the list only
 while no profile is saved yet — they're a bootstrap tool,
@@ -131,6 +154,25 @@ Binding a profile to a Desktop is dropdown-only: the earlier
 draggable profile chips duplicated the dropdown while adding
 a chip palette row and drop-target styling — a second
 interaction model with zero extra capability. (#7)
+
+**Profiles may override *behavior* settings, never *routing*
+ones.** A profile owns tiling, and may also carry a sparse
+override of a global setting that shapes how the workspace
+*behaves while the profile is active* — keybindings today
+(`Profile.modes`), app rules next (#109). It may never
+override a setting that *selects or routes* the profile
+itself: the native-Space→profile bindings decide *which*
+profile loads, so a profile owning part of that map would be
+a self-reference (load A → A rebinds Desktop 2 → B → …). The
+GUI language is a second hard exclusion for a different
+reason — it lives in `UserDefaults`, outside config ownership
+entirely, and must never touch a sidecar. Every override is
+the base overlaid with a sparse diff (absent inherits; a
+tombstone removes), never a second home for the setting. Each
+new one is added deliberately and parity-tested, templated on
+the keybinding override's seam — not folded into a generic
+primitive, which stays unjustified until a real second
+flat-map client exists (one client removes no duplication).
 
 ## Icons
 
@@ -455,7 +497,14 @@ The color mark is reserved as the `.icns` master for when an
 
 - **Onboarding** is a separate follow-up pass (shares only
   the branding glyph). (#68 §5.9)
-- **Configurable resize step** (#58) and **2-axis resize**
-  (#56) have a reserved slot in Shortcuts ▸ Size & Float;
-  the design there is additive so their arrival won't
-  re-layout the section.
+- **Configurable resize step** (#58): the `resize.step` setting,
+  `set_resize_step` command, and import shape-match have landed;
+  the **in-GUI step control** (a slider in Shortcuts ▸ Size &
+  Float) and the **live-rewrite of already-bound rows** are
+  deferred to the redesign, whose reserved slot is additive so
+  their arrival won't re-layout the section. Until then the
+  setting is authoritative only at *authoring* time — it sizes
+  newly-authored Grow/Shrink bindings and is recovered from
+  bindings on import, but changing it does not rewrite existing
+  bound rows (their literal keeps firing). **2-axis resize**
+  (#56) extends the same slot to per-axis steps.
