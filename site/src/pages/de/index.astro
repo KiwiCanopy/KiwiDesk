@@ -1,0 +1,11 @@
+---
+// KiwiDesk — German marketing landing page at /de/.
+//
+// Renders the same shared <Landing> component as the English root,
+// only with the German strings and locale. Keeping the template in
+// one place means the two routes can never drift structurally.
+import Landing from "../../components/Landing.astro";
+import de from "../../i18n/de.json";
+---
+
+<Landing t={de} lang="de" />

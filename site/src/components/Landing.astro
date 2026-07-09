@@ -1,0 +1,1083 @@
+---
+// KiwiDesk — shared marketing landing component.
+//
+// Rendered by both /src/pages/index.astro (English, `lang="en"`)
+// and /src/pages/de/index.astro (German, `lang="de"`). All
+// user-facing copy arrives via the `t` prop (a per-locale strings
+// object loaded from src/i18n/<lang>.json); this file owns only
+// the structure, assets, and behavior — never inline copy.
+//
+// Three independent client states coexist, each with its own
+// localStorage key and none interfering with the others:
+//   • theme  — `starlight-theme` (shared with the docs)
+//   • mode   — `kiwidesk-site-mode`  ("simple" | "dev")
+//   • lang   — `kiwidesk-site-lang`  ("en" | "de"), paired with
+//              the route (/ ↔ /de/); resolved anti-FOUC in <head>.
+import { Image } from "astro:assets";
+import logoMark from "../assets/brand/logo.svg";
+import kofiIcon from "../assets/brand/kofi_symbol.svg";
+import logoMarkDark from "../assets/brand/logo_dark.svg";
+import wordmark from "../assets/brand/logo_wordmark.svg";
+import wordmarkDark from "../assets/brand/logo_wordmark_dark.svg";
+import ogImage from "../assets/brand/logo_wordmark.png";
+import kiwiSolutions from "../assets/brand/kiwi-solutions.png";
+import "../styles/landing.css";
+
+interface Props {
+  t: Record<string, string>;
+  lang: "en" | "de";
+}
+const { t, lang } = Astro.props;
+
+// Home path for the active locale; the language switcher pairs it
+// with its counterpart. English lives at /, German at /de/.
+const homeHref = lang === "de" ? "/de/" : "/";
+
+const repo = "https://github.com/hajiboy95/KiwiDesk";
+const kofi = "https://ko-fi.com/kiwisolutions";
+// The maker's personal GitHub profile — distinct from the project
+// repo link above, used only for the low-key footer credit.
+const makerProfile = "https://github.com/hajiboy95";
+const buildCmd =
+  `git clone ${repo}.git\ncd KiwiDesk\nswift build -c release`;
+
+// Inline feature icons (stroke-based, consistent 24x24 grid).
+function iconSvg(name: string): string {
+  const S = (p: string) =>
+    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ` +
+    `stroke-width="1.9" stroke-linecap="round" ` +
+    `stroke-linejoin="round">${p}</svg>`;
+  switch (name) {
+    case "layers":
+      return S(
+        `<path d="M12 3 2 8l10 5 10-5-10-5Z"/>` +
+          `<path d="M2 13l10 5 10-5"/>`
+      );
+    case "grid":
+      return S(
+        `<rect x="3" y="3" width="7" height="7" rx="1"/>` +
+          `<rect x="14" y="3" width="7" height="7" rx="1"/>` +
+          `<rect x="3" y="14" width="7" height="7" rx="1"/>` +
+          `<rect x="14" y="14" width="7" height="7" rx="1"/>`
+      );
+    case "code":
+      return S(`<path d="m8 8-4 4 4 4"/><path d="m16 8 4 4-4 4"/>`);
+    case "terminal":
+      return S(`<path d="m5 7 5 5-5 5"/><path d="M13 17h6"/>`);
+    case "wave":
+      return S(
+        `<path d="M2 12c2 0 2-5 4-5s2 10 4 10 2-10 4-10 2 5 4 5"/>`
+      );
+    case "shield":
+      return S(
+        `<path d="M12 3 5 6v5c0 4 3 7 7 8 4-1 7-4 7-8V6l-7-3Z"/>` +
+          `<path d="m9 12 2 2 4-4"/>`
+      );
+    default:
+      return S(`<circle cx="12" cy="12" r="9"/>`);
+  }
+}
+
+// Tiny inline diagrams per layout (viewBox 0 0 160 90).
+function layoutDiagram(name: string): string {
+  const svg = (p: string) =>
+    `<svg viewBox="0 0 160 90" preserveAspectRatio="none">${p}</svg>`;
+  const r = (
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    cls = "tile"
+  ) =>
+    `<rect x="${x}" y="${y}" width="${w}" height="${h}" ` +
+    `rx="4" class="${cls}"/>`;
+  switch (name) {
+    case "bsp":
+      return svg(
+        r(8, 8, 70, 74) +
+          r(84, 8, 68, 34) +
+          r(84, 48, 32, 34) +
+          r(120, 48, 32, 34)
+      );
+    case "stack":
+      return svg(
+        r(8, 8, 92, 74, "tile tile--accent") +
+          r(106, 8, 46, 22) +
+          r(106, 34, 46, 22) +
+          r(106, 60, 46, 22)
+      );
+    case "scrolling":
+      return svg(
+        r(-24, 8, 44, 74, "tile tile--ghost") +
+          r(26, 8, 44, 74) +
+          r(76, 8, 44, 74, "tile tile--accent") +
+          r(126, 8, 44, 74) +
+          r(176, 8, 44, 74, "tile tile--ghost")
+      );
+    case "monocle":
+      return svg(
+        r(20, 14, 120, 62, "tile tile--ghost") +
+          r(14, 10, 120, 62, "tile tile--ghost") +
+          r(8, 6, 120, 62, "tile tile--accent")
+      );
+    case "grid":
+      return svg(
+        r(8, 8, 44, 34) +
+          r(58, 8, 44, 34) +
+          r(108, 8, 44, 34) +
+          r(8, 48, 44, 34) +
+          r(58, 48, 44, 34) +
+          r(108, 48, 44, 34)
+      );
+    case "floating":
+      return svg(
+        r(14, 12, 62, 44) +
+          r(60, 34, 66, 46, "tile tile--accent") +
+          r(96, 10, 52, 32)
+      );
+    default:
+      return svg(r(8, 8, 144, 74));
+  }
+}
+
+const features = [
+  { title: t.feat_1_title, body: t.feat_1_body, icon: "layers" },
+  { title: t.feat_2_title, body: t.feat_2_body, icon: "grid" },
+  { title: t.feat_3_title, body: t.feat_3_body, icon: "code" },
+  { title: t.feat_4_title, body: t.feat_4_body, icon: "terminal" },
+  { title: t.feat_5_title, body: t.feat_5_body, icon: "wave" },
+  { title: t.feat_6_title, body: t.feat_6_body, icon: "shield" },
+];
+
+const layouts = [
+  { name: "bsp", desc: t.layout_bsp },
+  { name: "stack", desc: t.layout_stack },
+  { name: "scrolling", desc: t.layout_scrolling },
+  { name: "monocle", desc: t.layout_monocle },
+  { name: "grid", desc: t.layout_grid },
+  { name: "floating", desc: t.layout_floating },
+];
+
+// The three friendly "how it works" steps (Simple mode).
+const steps = [
+  { n: "1", title: t.how_1_title, body: t.how_1_body },
+  { n: "2", title: t.how_2_title, body: t.how_2_body },
+  { n: "3", title: t.how_3_title, body: t.how_3_body },
+];
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{t.meta_title}</title>
+    <meta name="description" content={t.meta_desc} />
+    <meta property="og:title" content={t.meta_title} />
+    <meta property="og:description" content={t.meta_desc} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale"
+      content={lang === "de" ? "de_DE" : "en_US"} />
+    <meta property="og:image"
+      content={new URL(ogImage.src, Astro.site).href} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#101d0b" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate" hreflang="en" href="/" />
+    <link rel="alternate" hreflang="de" href="/de/" />
+    <link rel="alternate" hreflang="x-default" href="/" />
+    <!-- Anti-FOUC: resolve theme AND mode before first paint so the
+         page never flashes the wrong theme or reveals dev sections.
+         `starlight-theme` is shared with the docs; `kiwidesk-site-
+         mode` is this page's own key (default = simple). -->
+    <script is:inline>
+      (function () {
+        var root = document.documentElement;
+        try {
+          var stored = localStorage.getItem("starlight-theme");
+          root.dataset.theme =
+            stored === "light" || stored === "dark"
+              ? stored
+              : window.matchMedia("(prefers-color-scheme: dark)")
+                  .matches
+                ? "dark"
+                : "light";
+        } catch (e) {
+          root.dataset.theme = "dark";
+        }
+        try {
+          var m = localStorage.getItem("kiwidesk-site-mode");
+          root.dataset.mode = m === "dev" ? "dev" : "simple";
+        } catch (e) {
+          root.dataset.mode = "simple";
+        }
+      })();
+    </script>
+    <!-- Language resolve (anti-redirect-loop). Runs before paint,
+         at most once per load, and only ever redirects between the
+         two known paths (/ ↔ /de/) via replace() so the back
+         button still works.
+           1. A stored `kiwidesk-site-lang` wins — honor an explicit
+              earlier choice by sending the visitor to its path.
+           2. No stored pref: fall back to navigator.language, but
+              ONLY nudge an English URL toward German (never the
+              reverse), so the English root stays the canonical
+              default and there is no path we could bounce back on.
+         The `!== here` guard makes every branch a no-op when we are
+         already on the target, which is what makes loops impossible.
+         `data-lang` on <html> mirrors the active locale so the
+         switcher can render its active state without a round-trip. -->
+    <script is:inline>
+      (function () {
+        var here = location.pathname;
+        var onDe = here === "/de/" || here === "/de";
+        function go(path) {
+          if (path !== here) location.replace(path);
+        }
+        var stored;
+        try {
+          stored = localStorage.getItem("kiwidesk-site-lang");
+        } catch (e) {
+          stored = null;
+        }
+        if (stored === "de") {
+          if (!onDe) return go("/de/");
+        } else if (stored === "en") {
+          if (onDe) return go("/");
+        } else {
+          var nav = (navigator.language || "").toLowerCase();
+          if (nav.indexOf("de") === 0 && !onDe) return go("/de/");
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <!-- ============ Nav ============ -->
+    <nav class="nav" id="nav">
+      <div class="wrap nav__inner">
+        <a class="nav__brand" href={homeHref}
+          aria-label={t.nav_home_label}>
+          <img class="nav__mark nav__mark--light" src={logoMark.src}
+            width="28" height="28" alt="" aria-hidden="true" />
+          <img class="nav__mark nav__mark--dark" src={logoMarkDark.src}
+            width="28" height="28" alt="" aria-hidden="true" />
+          <span>KiwiDesk</span>
+        </a>
+        <div class="nav__links">
+          <!-- Docs + GitHub live in the DOM always but are hidden in
+               Simple mode (dev-only, via .dev-only). -->
+          <a class="nav__link dev-only" href="/docs/">{t.nav_docs}</a>
+          <a class="nav__link dev-only" href={repo} target="_blank"
+            rel="noopener">{t.nav_github}</a>
+          <a class="nav__link nav__support" href={kofi}
+            target="_blank" rel="noopener">
+            <img class="kofi-icon" src={kofiIcon.src} alt=""
+              aria-hidden="true" width="20" height="16" />
+            <span class="nav__support-text">{t.nav_support}</span>
+          </a>
+
+          <!-- Language switcher: a compact EN | DE segmented control,
+               styled as a sibling of the theme + mode toggles. Each
+               segment is a link to that locale's route AND records
+               the choice in `kiwidesk-site-lang` (wired up in the
+               script below), so the preference persists across
+               visits. The active locale is marked aria-current. -->
+          <div class="lang-switch" role="group"
+            aria-label={t.nav_lang_label}>
+            <a class="lang-switch__opt" data-lang="en" href="/"
+              lang="en"
+              aria-current={lang === "en" ? "true" : undefined}>EN</a>
+            <span class="lang-switch__sep" aria-hidden="true"></span>
+            <a class="lang-switch__opt" data-lang="de" href="/de/"
+              lang="de"
+              aria-current={lang === "de" ? "true" : undefined}>DE</a>
+          </div>
+
+          <!-- Signature mode toggle: a sliding kiwi-count pill, a
+               deliberate sibling of the theme toggle's track+thumb
+               language. Simple = one kiwi on the thumb; Developer =
+               the thumb slides right and two more kiwi slices pop
+               in beside it. A tooltip and label keep it
+               discoverable; the track/thumb shape reads as an
+               obvious switch even before the kiwis are noticed. -->
+          <button class="mode-toggle" id="modeToggle" type="button"
+            aria-label={t.mode_toggle_aria} aria-pressed="false">
+            <span class="mode-toggle__track" aria-hidden="true">
+              <!-- Extra kiwi slices revealed as the thumb slides. -->
+              <svg class="mode-toggle__kiwi mode-toggle__kiwi--2"
+                width="15" height="15" viewBox="0 0 15 15">
+                <circle cx="7.5" cy="7.5" r="7" class="kiwi__skin" />
+                <circle cx="7.5" cy="7.5" r="4.6" class="kiwi__flesh" />
+                <circle cx="7.5" cy="7.5" r="1.8" class="kiwi__core" />
+                <g class="kiwi__seeds">
+                  <circle cx="7.5" cy="3.6" r="0.55" />
+                  <circle cx="10.4" cy="5.6" r="0.55" />
+                  <circle cx="9.4" cy="9.1" r="0.55" />
+                  <circle cx="5.6" cy="9.1" r="0.55" />
+                  <circle cx="4.6" cy="5.6" r="0.55" />
+                </g>
+              </svg>
+              <svg class="mode-toggle__kiwi mode-toggle__kiwi--3"
+                width="15" height="15" viewBox="0 0 15 15">
+                <circle cx="7.5" cy="7.5" r="7" class="kiwi__skin" />
+                <circle cx="7.5" cy="7.5" r="4.6" class="kiwi__flesh" />
+                <circle cx="7.5" cy="7.5" r="1.8" class="kiwi__core" />
+                <g class="kiwi__seeds">
+                  <circle cx="7.5" cy="3.6" r="0.55" />
+                  <circle cx="10.4" cy="5.6" r="0.55" />
+                  <circle cx="9.4" cy="9.1" r="0.55" />
+                  <circle cx="5.6" cy="9.1" r="0.55" />
+                  <circle cx="4.6" cy="5.6" r="0.55" />
+                </g>
+              </svg>
+              <!-- Sliding thumb, carries the always-visible kiwi. -->
+              <span class="mode-toggle__thumb">
+                <svg class="mode-toggle__kiwi mode-toggle__kiwi--1"
+                  width="17" height="17" viewBox="0 0 15 15">
+                  <circle cx="7.5" cy="7.5" r="7" class="kiwi__skin" />
+                  <circle cx="7.5" cy="7.5" r="4.6"
+                    class="kiwi__flesh" />
+                  <circle cx="7.5" cy="7.5" r="1.8"
+                    class="kiwi__core" />
+                  <g class="kiwi__seeds">
+                    <circle cx="7.5" cy="3.6" r="0.55" />
+                    <circle cx="10.4" cy="5.6" r="0.55" />
+                    <circle cx="9.4" cy="9.1" r="0.55" />
+                    <circle cx="5.6" cy="9.1" r="0.55" />
+                    <circle cx="4.6" cy="5.6" r="0.55" />
+                  </g>
+                </svg>
+              </span>
+            </span>
+            <span class="mode-toggle__label">
+              <span class="mode-toggle__word mode-toggle__word--simple"
+                >{t.mode_simple}</span>
+              <span class="mode-toggle__word mode-toggle__word--dev"
+                >{t.mode_dev}</span>
+            </span>
+            <span class="mode-toggle__tip" role="tooltip">
+              <span class="mode-toggle__tip--simple"
+                >{t.mode_tooltip_simple}</span>
+              <span class="mode-toggle__tip--dev"
+                >{t.mode_tooltip_dev}</span>
+            </span>
+          </button>
+
+          <button class="theme-toggle" id="themeToggle" type="button"
+            aria-label={t.nav_theme_label} aria-pressed="false">
+            <span class="theme-toggle__track" aria-hidden="true">
+              <span class="theme-toggle__thumb">
+                <svg class="theme-toggle__sun" width="15" height="15"
+                  viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2.2"
+                  stroke-linecap="round" stroke-linejoin="round"
+                  aria-hidden="true">
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7
+                    17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7
+                    6.3l1.4-1.4" />
+                </svg>
+                <svg class="theme-toggle__moon" width="14" height="14"
+                  viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2.2"
+                  stroke-linecap="round" stroke-linejoin="round"
+                  aria-hidden="true">
+                  <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8
+                    9.8Z" />
+                </svg>
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ============ Opening note (Simple only) ============ -->
+    <!-- A short, personal note that sets the tone before the hero
+         even loads — unattributed; the first-person voice reads on
+         its own. Hidden in Developer mode, which speaks to a
+         reader who already knows what a tiling manager is. -->
+    <p class="opening-note simple-only">
+      <span class="wrap">{t.quote_opening}</span>
+    </p>
+
+    <!-- ============ Hero ============ -->
+    <header class="hero">
+      <div class="hero__glow" aria-hidden="true"></div>
+      <div class="wrap">
+        <img class="hero__mark hero__mark--light" src={wordmark.src}
+          alt="KiwiDesk" width="230" height="273" />
+        <img class="hero__mark hero__mark--dark"
+          src={wordmarkDark.src} alt="KiwiDesk" width="230"
+          height="273" />
+
+        <!-- Simple-mode hero copy -->
+        <div class="hero__mode hero__mode--simple">
+          <span class="hero__kicker">{t.hero_kicker}</span>
+          <h1>{t.hero_title}</h1>
+          <p class="hero__sub">{t.hero_sub}</p>
+          <div class="hero__cta">
+            <a class="btn btn--primary" href="#cta">
+              {t.hero_cta_primary}
+            </a>
+            <a class="btn btn--ghost btn--ghost-light" href="#demo">
+              <svg width="17" height="17" viewBox="0 0 24 24"
+                fill="currentColor" aria-hidden="true">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+              {t.hero_cta_secondary}
+            </a>
+          </div>
+          <span class="pill pill--light">
+            <span class="pill__dot" aria-hidden="true"></span>
+            {t.hero_pill}
+          </span>
+        </div>
+
+        <!-- Developer-mode hero copy -->
+        <div class="hero__mode hero__mode--dev">
+          <span class="hero__kicker">{t.hero_dev_kicker}</span>
+          <h1>{t.hero_dev_title}</h1>
+          <p class="hero__sub">
+            KiwiDesk manages windows in
+            <b>{t.hero_dev_sub_a}</b>, not i3-style trees —
+            <b>{t.hero_dev_sub_b}</b>, with
+            <b>{t.hero_dev_sub_c}</b> to switch between. And it
+            <b>{t.hero_dev_sub_d}</b>.
+          </p>
+          <div class="hero__cta">
+            <a class="btn btn--primary" href="/docs/">
+              {t.hero_dev_cta_docs}
+              <svg width="16" height="16" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2.4"
+                stroke-linecap="round" stroke-linejoin="round"
+                aria-hidden="true">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </a>
+            <a class="btn btn--ghost btn--ghost-light" href={repo}
+              target="_blank" rel="noopener">
+              <svg width="18" height="18" viewBox="0 0 24 24"
+                fill="currentColor" aria-hidden="true">
+                <path d="M12 .5a11.5 11.5 0 0 0-3.64 22.42c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.3-1.7-1.3-1.7-1.06-.72.08-.71.08-.71 1.17.08 1.78 1.2 1.78 1.2 1.04 1.78 2.73 1.27 3.4.97.1-.75.4-1.27.73-1.56-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.2-3.1-.12-.29-.52-1.46.11-3.05 0 0 .98-.31 3.2 1.18a11.1 11.1 0 0 1 5.82 0c2.22-1.49 3.2-1.18 3.2-1.18.63 1.59.23 2.76.11 3.05.75.81 1.2 1.84 1.2 3.1 0 4.43-2.69 5.4-5.26 5.69.41.36.78 1.07.78 2.15v3.19c0 .31.2.67.8.56A11.5 11.5 0 0 0 12 .5Z" />
+              </svg>
+              {t.hero_dev_cta_github}
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="hero__seam" aria-hidden="true"></div>
+    </header>
+
+    <!-- ============ Tagline quote (both modes) ============ -->
+    <section class="quote-band" aria-label="Our take">
+      <div class="wrap">
+        <blockquote class="quote-band__mark reveal">
+          <p>“{t.quote_tagline}”</p>
+        </blockquote>
+      </div>
+    </section>
+
+    <!-- ============ What is this? (Simple only) ============ -->
+    <section class="simple-only" id="what">
+      <div class="wrap">
+        <div class="what reveal">
+          <div class="what__copy">
+            <span class="eyebrow">{t.what_eyebrow}</span>
+            <h2>{t.what_title}</h2>
+            <p>{t.what_body}</p>
+            <a class="link-arrow" href="/docs/">
+              {t.what_learn}
+              <svg width="15" height="15" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2.4"
+                stroke-linecap="round" stroke-linejoin="round"
+                aria-hidden="true">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </a>
+          </div>
+          <div class="what__art" aria-hidden="true">
+            <div class="what__win what__win--messy">
+              <span></span><span></span><span></span><span></span>
+            </div>
+            <div class="what__arrow">
+              <svg width="30" height="30" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </div>
+            <div class="what__win what__win--tidy">
+              <span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Demo video (both modes) ============ -->
+    <section class="tint" id="demo">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <span class="eyebrow">{t.demo_eyebrow}</span>
+          <h2>{t.demo_title}</h2>
+          <p>{t.demo_body}</p>
+        </div>
+        <div class="demo__frame reveal">
+          <video id="demoVideo" controls preload="metadata"
+            playsinline aria-label="KiwiDesk demo">
+            <source src="/kiwidesk-demo.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+          <button class="demo__overlay" id="demoOverlay" type="button"
+            aria-label={t.demo_play_aria}>
+            <span class="demo__play" aria-hidden="true">
+              <svg width="34" height="34" viewBox="0 0 24 24"
+                fill="#08150a">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </span>
+          </button>
+        </div>
+        <p class="demo__caption">{t.demo_caption}</p>
+        <blockquote class="quote-aside quote-aside--demo">
+          <p>“{t.quote_demo}”</p>
+        </blockquote>
+      </div>
+    </section>
+
+    <!-- ============ How it works (Simple only) ============ -->
+    <section class="simple-only" id="how">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <span class="eyebrow">{t.how_eyebrow}</span>
+          <h2>{t.how_title}</h2>
+          <p>{t.how_body}</p>
+        </div>
+        <ol class="steps">
+          {steps.map((s) => (
+            <li class="step reveal">
+              <span class="step__num" aria-hidden="true">{s.n}</span>
+              <h3>{s.title}</h3>
+              <p>{s.body}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============ Why it's calmer (Simple only) ============ -->
+    <section class="tint simple-only" id="calm">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <span class="eyebrow">{t.calm_eyebrow}</span>
+          <h2>{t.calm_title}</h2>
+        </div>
+        <div class="ba reveal">
+          <div class="ba__card ba__card--before">
+            <span class="ba__label">{t.calm_before_label}</span>
+            <div class="ba__art ba__art--before" aria-hidden="true">
+              <span></span><span></span><span></span><span></span>
+              <span></span>
+            </div>
+            <p>{t.calm_before_body}</p>
+          </div>
+          <div class="ba__card ba__card--after">
+            <span class="ba__label ba__label--good">
+              {t.calm_after_label}
+            </span>
+            <div class="ba__art ba__art--after" aria-hidden="true">
+              <span></span><span></span><span></span><span></span>
+            </div>
+            <p>{t.calm_after_body}</p>
+          </div>
+        </div>
+        <ul class="perks reveal">
+          <li>
+            <span class="perks__check" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+            </span>
+            {t.calm_point_1}
+          </li>
+          <li>
+            <span class="perks__check" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+            </span>
+            {t.calm_point_2}
+          </li>
+          <li>
+            <span class="perks__check" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+            </span>
+            {t.calm_point_3}
+          </li>
+          <li>
+            <span class="perks__check" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+            </span>
+            {t.calm_point_4}
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ Maker quote (Simple only) ============ -->
+    <section class="simple-only" id="maker-quote-simple">
+      <div class="wrap">
+        <blockquote class="quote-card reveal">
+          <p>“{t.quote_simple}”</p>
+          <footer class="quote-card__byline">
+            {t.quote_byline_simple}
+          </footer>
+        </blockquote>
+      </div>
+    </section>
+
+    <!-- ============ Features (Developer only) ============ -->
+    <section class="dev-only dev-reveal" id="features">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">{t.feat_eyebrow}</span>
+          <h2>{t.feat_title}</h2>
+          <p>{t.feat_body}</p>
+        </div>
+        <div class="grid">
+          {features.map((f) => (
+            <article class="card">
+              <div class="card__icon" aria-hidden="true">
+                <Fragment set:html={iconSvg(f.icon)} />
+              </div>
+              <h3>{f.title}</h3>
+              <p>{f.body}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Maker quote (Developer only) ============ -->
+    <section class="dev-only dev-reveal" id="maker-quote-dev">
+      <div class="wrap">
+        <blockquote class="quote-card quote-card--dev">
+          <p>“{t.quote_dev}”</p>
+          <footer class="quote-card__byline quote-card__byline--two">
+            <a class="quote-card__byline-main" href={makerProfile}
+              target="_blank" rel="noopener">
+              {t.quote_byline_dev_main}
+            </a>
+            <span class="quote-card__byline-sub">
+              {t.quote_byline_dev_sub}
+            </span>
+          </footer>
+        </blockquote>
+      </div>
+    </section>
+
+    <!-- ============ Layouts (Developer only) ============ -->
+    <section class="tint dev-only dev-reveal" id="layouts">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">{t.layouts_eyebrow}</span>
+          <h2>{t.layouts_title}</h2>
+          <p>{t.layouts_body}</p>
+        </div>
+        <div class="layouts">
+          {layouts.map((l) => (
+            <article class="layout-card">
+              <div class="layout-card__diagram" aria-hidden="true">
+                <Fragment set:html={layoutDiagram(l.name)} />
+              </div>
+              <h3>{l.name}</h3>
+              <p>{l.desc}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Lua config (Developer only) ============ -->
+    <section class="split dev-only dev-reveal" id="config">
+      <div class="wrap">
+        <div class="split__copy">
+          <span class="eyebrow">{t.config_eyebrow}</span>
+          <h2>{t.config_title}</h2>
+          <p>{t.config_body}</p>
+        </div>
+        <div class="code" aria-label="Example init.lua">
+          <div class="code__bar">
+            <span class="code__dot" aria-hidden="true"></span>
+            <span class="code__dot" aria-hidden="true"></span>
+            <span class="code__dot" aria-hidden="true"></span>
+            <span class="code__title">{t.config_title_bar}</span>
+          </div>
+          <pre><code><span class="cmt">-- ~/.config/KiwiDesk/init.lua</span>
+KiwiDesk.set_gap_global(<span class="num">10</span>)
+KiwiDesk.set_mode(<span class="str">"music"</span>, <span class="str">"floating"</span>)
+
+<span class="cmt">-- one flat array per space, tidy by default</span>
+KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function</span>()
+    KiwiDesk.focus(<span class="str">"left"</span>)
+<span class="fn">end</span>)</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CLI (Developer only) ============ -->
+    <section class="split split--reverse tint dev-only dev-reveal"
+      id="cli">
+      <div class="wrap">
+        <div class="split__copy">
+          <span class="eyebrow">{t.cli_eyebrow}</span>
+          <h2>{t.cli_title}</h2>
+          <p>{t.cli_body}</p>
+          <blockquote class="quote-aside quote-aside--left">
+            <p>“{t.quote_cli}”</p>
+          </blockquote>
+        </div>
+        <div class="code" aria-label="KiwiDesk CLI examples">
+          <div class="code__bar">
+            <span class="code__dot" aria-hidden="true"></span>
+            <span class="code__dot" aria-hidden="true"></span>
+            <span class="code__dot" aria-hidden="true"></span>
+            <span class="code__title">{t.cli_title_bar}</span>
+          </div>
+          <pre><code><span class="prompt">$</span> KiwiDesk set_mode monocle
+<span class="prompt">$</span> KiwiDesk focus left
+<span class="prompt">$</span> KiwiDesk get_state
+<span class="cmt"># stream live events (feed SketchyBar, your own tools…)</span>
+<span class="prompt">$</span> KiwiDesk subscribe space_change</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Build from source (Developer only) ======== -->
+    <section class="quickstart dev-only dev-reveal" id="start">
+      <div class="wrap">
+        <div>
+          <span class="eyebrow">{t.build_eyebrow}</span>
+          <h2>{t.build_title}</h2>
+          <p>{t.build_body}</p>
+          <a class="btn btn--primary" href="/docs/">
+            {t.build_cta}
+            <svg width="16" height="16" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2.4"
+              stroke-linecap="round" stroke-linejoin="round"
+              aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </a>
+          <p class="req">
+            <svg width="15" height="15" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round"
+              aria-hidden="true">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 8v4l3 2" />
+            </svg>
+            {t.build_req}
+          </p>
+        </div>
+        <div class="code"
+          aria-label="Build KiwiDesk from source">
+          <div class="code__bar">
+            <span class="code__dot" aria-hidden="true"></span>
+            <span class="code__dot" aria-hidden="true"></span>
+            <span class="code__dot" aria-hidden="true"></span>
+            <span class="code__title">{t.build_title_bar}</span>
+            <button class="code__copy" id="copyBuild" type="button"
+              data-copy={buildCmd}
+              data-label-copy={t.build_copy}
+              data-label-done={t.build_copy_done}
+              aria-label={t.build_copy_aria}>
+              <svg class="code__copy-icon" width="15" height="15"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" aria-hidden="true">
+                <rect x="9" y="9" width="12" height="12" rx="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              </svg>
+              <span class="code__copy-label">{t.build_copy}</span>
+            </button>
+          </div>
+          <pre><code><span class="prompt">$</span> git clone {repo}.git
+<span class="prompt">$</span> cd KiwiDesk
+<span class="prompt">$</span> swift build -c release
+<span class="cmt">{t.build_cmt}</span></code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Final CTA (both modes) ============ -->
+    <section class="cta-band" id="cta">
+      <div class="wrap">
+        <div class="cta-band__inner reveal">
+          <span class="eyebrow">{t.cta_eyebrow}</span>
+          <h2>{t.cta_title}</h2>
+          <p>{t.cta_body}</p>
+          <div class="hero__cta">
+            <span class="btn btn--primary btn--soon">
+              {t.cta_primary}
+            </span>
+            <a class="btn btn--ghost" href={kofi} target="_blank"
+              rel="noopener">
+              <img class="kofi-icon" src={kofiIcon.src} alt=""
+                aria-hidden="true" width="20" height="16" />
+              {t.footer_kofi}
+            </a>
+          </div>
+          <blockquote class="quote-aside quote-aside--center">
+            <p>“{t.quote_cta}”</p>
+          </blockquote>
+          <p class="req req--center">
+            <svg width="15" height="15" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round"
+              aria-hidden="true">
+              <path d="M12 3 5 6v5c0 4 3 7 7 8 4-1 7-4 7-8V6l-7-3Z" />
+            </svg>
+            {t.cta_req}
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ Footer ============ -->
+    <footer class="footer">
+      <div class="wrap">
+        <div class="footer__brand">
+          <Image class="footer__logo" src={kiwiSolutions}
+            alt="Kiwi Solutions"
+            widths={[110, 160, 220]}
+            sizes="110px" />
+          <p class="footer__name">{t.footer_org}</p>
+          <p class="footer__tag">{t.footer_tag}</p>
+          <blockquote class="quote-aside quote-aside--center
+            quote-aside--footer">
+            <p>“{t.quote_footer}”</p>
+          </blockquote>
+        </div>
+        <a class="footer__kofi" href={kofi} target="_blank"
+          rel="noopener">
+          <img class="kofi-icon" src={kofiIcon.src} alt=""
+            aria-hidden="true" width="20" height="16" />
+          {t.footer_kofi}
+        </a>
+        <nav class="footer__links" aria-label="Footer">
+          <a class="dev-only" href="/docs/">{t.footer_docs}</a>
+          <a class="dev-only" href={repo} target="_blank"
+            rel="noopener">{t.footer_github}</a>
+          <a class="dev-only" href="/docs/design-decisions/"
+            >{t.footer_design}</a>
+        </nav>
+        <p class="footer__copy">{t.footer_copy}</p>
+        <!-- Low-key maker credit — the maker's personal profile,
+             distinct from the project repo link above. -->
+        <p class="footer__credit">
+          {t.footer_credit_built_by}
+          <a href={makerProfile} target="_blank" rel="noopener">
+            {t.footer_credit_name} · {t.footer_credit_handle}
+          </a>
+        </p>
+        <p class="footer__daily">{t.daily_kiwi}</p>
+      </div>
+    </footer>
+
+    <script>
+      const html = document.documentElement;
+
+      // ---- Theme toggle (shared `starlight-theme` key) ----
+      const themeToggle = document.getElementById("themeToggle");
+      const syncTheme = () => {
+        const dark = html.dataset.theme === "dark";
+        themeToggle?.setAttribute("aria-pressed", String(dark));
+      };
+      syncTheme();
+      themeToggle?.addEventListener("click", () => {
+        const next =
+          html.dataset.theme === "dark" ? "light" : "dark";
+        html.dataset.theme = next;
+        try {
+          localStorage.setItem("starlight-theme", next);
+        } catch (e) {
+          /* storage unavailable — theme still applies in-page */
+        }
+        syncTheme();
+      });
+      window.addEventListener("storage", (e) => {
+        if (e.key === "starlight-theme") {
+          if (e.newValue === "light" || e.newValue === "dark") {
+            html.dataset.theme = e.newValue;
+            syncTheme();
+          }
+        }
+        if (e.key === "kiwidesk-site-mode") {
+          html.dataset.mode = e.newValue === "dev" ? "dev" : "simple";
+          syncMode();
+        }
+      });
+
+      // ---- Mode toggle (own `kiwidesk-site-mode` key) ----
+      // Both modes' content lives in the DOM; `data-mode` on <html>
+      // shows/hides via CSS, so switching never reloads and the
+      // reveal can be a pure CSS transition.
+      const modeToggle = document.getElementById("modeToggle");
+      const reduce = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
+      const syncMode = () => {
+        const dev = html.dataset.mode === "dev";
+        modeToggle?.setAttribute("aria-pressed", String(dev));
+      };
+      syncMode();
+      modeToggle?.addEventListener("click", () => {
+        const next = html.dataset.mode === "dev" ? "simple" : "dev";
+        html.dataset.mode = next;
+        try {
+          localStorage.setItem("kiwidesk-site-mode", next);
+        } catch (e) {
+          /* storage unavailable — mode still applies in-page */
+        }
+        syncMode();
+        // Playful reveal flourish: a brief accent glow on the nav
+        // + a "grid forms" class the dev sections animate from.
+        if (!reduce && next === "dev") {
+          html.classList.add("mode-flourish");
+          window.setTimeout(
+            () => html.classList.remove("mode-flourish"),
+            900
+          );
+        }
+        // Sections hidden while the OTHER mode was active never had
+        // their scroll-reveal fire (IntersectionObserver can't see a
+        // display:none element). After a switch, reveal any that are
+        // now on screen so they aren't stuck invisible.
+        window.requestAnimationFrame(revealVisible);
+      });
+
+      // ---- Language switcher (own `kiwidesk-site-lang` key) ----
+      // Each segment is an <a> that already navigates to the target
+      // route; here we only persist the explicit choice so the
+      // <head> resolver honors it on later visits. Navigation
+      // proceeds normally after the click handler (no preventDefault).
+      document
+        .querySelectorAll(".lang-switch__opt")
+        .forEach((opt) => {
+          opt.addEventListener("click", () => {
+            const lang = opt.getAttribute("data-lang");
+            if (lang !== "en" && lang !== "de") return;
+            try {
+              localStorage.setItem("kiwidesk-site-lang", lang);
+            } catch (e) {
+              /* storage unavailable — route change still works */
+            }
+          });
+        });
+
+      // ---- Nav background on scroll ----
+      const nav = document.getElementById("nav");
+      const onScroll = () => {
+        if (window.scrollY > 12) nav?.classList.add("scrolled");
+        else nav?.classList.remove("scrolled");
+      };
+      onScroll();
+      window.addEventListener("scroll", onScroll, { passive: true });
+
+      // ---- Click-to-play demo video ----
+      const video = document.getElementById("demoVideo") as
+        | HTMLVideoElement
+        | null;
+      const overlay = document.getElementById("demoOverlay");
+      overlay?.addEventListener("click", () => {
+        if (overlay) overlay.hidden = true;
+        video?.play?.();
+      });
+      video?.addEventListener("play", () => {
+        if (overlay) overlay.hidden = true;
+      });
+      video?.addEventListener("pause", () => {
+        if (overlay && video.currentTime === 0) overlay.hidden = false;
+      });
+
+      // ---- Copy the build commands ----
+      // Labels come from data-* attributes so the copied/idle text
+      // is localized (English "Copy"/"Copied", German
+      // "Kopieren"/"Kopiert") without hardcoding either here.
+      const copyBtn = document.getElementById("copyBuild");
+      const copyLabel = copyBtn?.querySelector(".code__copy-label");
+      copyBtn?.addEventListener("click", async () => {
+        const text = copyBtn.getAttribute("data-copy") || "";
+        const idle = copyBtn.getAttribute("data-label-copy") || "";
+        const done = copyBtn.getAttribute("data-label-done") || "";
+        try {
+          await navigator.clipboard.writeText(text);
+          copyBtn.classList.add("is-copied");
+          if (copyLabel) copyLabel.textContent = done;
+          setTimeout(() => {
+            copyBtn.classList.remove("is-copied");
+            if (copyLabel) copyLabel.textContent = idle;
+          }, 1600);
+        } catch (e) {
+          /* clipboard blocked — no-op */
+        }
+      });
+
+      // ---- Scroll reveal (motion-aware) ----
+      // Reveal every .reveal element currently within the viewport.
+      // Called on load's IO fallback path and after a mode switch.
+      function revealVisible() {
+        document.querySelectorAll(".reveal:not(.in)").forEach((el) => {
+          const r = el.getBoundingClientRect();
+          const h = window.innerHeight || 0;
+          // Skip hidden (display:none → zero rect) elements.
+          if (r.width === 0 && r.height === 0) return;
+          if (r.top < h * 0.92 && r.bottom > 0) el.classList.add("in");
+        });
+      }
+
+      const els = document.querySelectorAll(".reveal");
+      if (reduce || !("IntersectionObserver" in window)) {
+        els.forEach((el) => el.classList.add("in"));
+      } else {
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
+              if (e.isIntersecting) {
+                e.target.classList.add("in");
+                io.unobserve(e.target);
+              }
+            });
+          },
+          { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
+        );
+        els.forEach((el) => io.observe(el));
+      }
+
+      // ---- Card cursor-follow glow ----
+      document.querySelectorAll(".card").forEach((card) => {
+        card.addEventListener("pointermove", (e) => {
+          const r = card.getBoundingClientRect();
+          (card as HTMLElement).style.setProperty(
+            "--mx",
+            `${((e.clientX - r.left) / r.width) * 100}%`
+          );
+        });
+      });
+    </script>
+  </body>
+</html>

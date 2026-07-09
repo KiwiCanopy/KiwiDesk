@@ -341,6 +341,12 @@ body::before {
   .nav__support span {
     font-size: 1rem;
   }
+  /* Tighten the language segments so the nav cluster (Ko-fi icon +
+     lang + mode + theme) stays on one line on narrow phones. */
+  .lang-switch__opt {
+    min-width: 22px;
+    padding-inline: 0.3rem;
+  }
 }
 
 /* Below the smallest common phone width (iPhone SE is 375px), trim
@@ -375,6 +381,15 @@ body::before {
   }
   :root[data-theme="dark"] .theme-toggle__thumb {
     transform: translateX(16px);
+  }
+  .lang-switch {
+    margin-left: 0;
+  }
+  .lang-switch__opt {
+    min-width: 20px;
+    height: 22px;
+    padding-inline: 0.25rem;
+    font-size: 0.72rem;
   }
 }
 
@@ -547,6 +562,67 @@ body::before {
   .theme-toggle__thumb {
     transition: none;
   }
+}
+
+/* Language switcher — a compact EN | DE segmented control, a
+   sibling of the theme + mode toggles. Two link "segments" share a
+   pill outline (matching the theme toggle's track), with a hairline
+   divider between; the active locale fills in like the theme
+   thumb. `white-space: nowrap` keeps the two 2-letter labels on one
+   line at every width. */
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  margin-left: 0.15rem;
+  padding: 2px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--nav-hover-bg);
+  white-space: nowrap;
+  transition: border-color 0.25s ease;
+}
+
+.lang-switch:hover {
+  border-color: var(--accent);
+}
+
+.lang-switch__opt {
+  display: inline-grid;
+  place-items: center;
+  min-width: 26px;
+  height: 24px;
+  padding-inline: 0.4rem;
+  border-radius: 999px;
+  color: var(--nav-ink-dim);
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.lang-switch__opt:hover {
+  color: var(--nav-ink);
+}
+
+/* Active locale reads as filled, echoing the theme toggle's thumb
+   gradient so the three controls share one visual language. */
+.lang-switch__opt[aria-current="true"] {
+  color: #10210b;
+  background: linear-gradient(180deg, #cfe0bd, #9db785);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
+}
+
+.lang-switch__opt:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.lang-switch__sep {
+  width: 1px;
+  height: 14px;
+  background: var(--border-strong);
 }
 
 /* =========================================================
