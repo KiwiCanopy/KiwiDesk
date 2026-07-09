@@ -1,37 +1,41 @@
 import AppKit
 import KiwiDeskCore
 
-/// A preset navigation action: a label and the Lua body it
-/// binds to.
-struct NavCommand: Identifiable, Hashable {
-    let label: String
-    let lua: String
-    /// Optional space icon (#68 §6.5) shown before the label
-    /// — recognition sugar only; labels stay authoritative
-    /// (the import classifier matches on label + Lua).
-    var icon: String? = nil
-    var id: String { lua }
-}
-
-/// A collapsible group of navigation commands (Focus — including
-/// go-to-space — and Window Management: move, resize, float).
-struct NavGroup: Identifiable {
-    let title: String
-    let commands: [NavCommand]
-    var id: String { title }
-}
-
 /// The catalog backing the keybindings tab: navigation presets
 /// and installed applications. Known macOS shortcuts used for
 /// conflict detection live in Core's `SystemShortcuts`
 /// (05_GUI_Concept §2, Tab 5).
 enum KeybindingCatalog {
-    // dir is the Lua argument; phrase is the positional wording
-    // used in labels ("above"/"below" read better than "up"/"down").
+    // dir is the Lua argument; phrase is the positional English
+    // wording used in the canonical `label` ("above"/"below"
+    // read better than "up"/"down").
     private static let directions = [
         ("left", "to the left"), ("down", "below"),
         ("up", "above"), ("right", "to the right"),
     ]
+
+    /// The translated phrase for a direction's Lua argument.
+    /// A literal `L(...)` per case (not a dynamic key lookup)
+    /// so `scripts/extract-keys` can enumerate it — the
+    /// extractor only recognizes string-literal key/English
+    /// arguments (`docs/translating.md` § Extraction
+    /// limitations).
+    @MainActor private static func directionPhrase(
+        _ dir: String
+    ) -> String {
+        switch dir {
+        case "left":
+            return L("keybinding.dir.left", "to the left")
+        case "down":
+            return L("keybinding.dir.below", "below")
+        case "up":
+            return L("keybinding.dir.above", "above")
+        case "right":
+            return L("keybinding.dir.right", "to the right")
+        default:
+            return dir
+        }
+    }
 
     /// The fixed step a Grow/Shrink preset nudges the layout by, in
     /// points. The catalog authors one magnitude, so import
@@ -46,11 +50,20 @@ enum KeybindingCatalog {
         phrase in
         NavCommand(
             label: "Focus window \(phrase)",
-            lua: "KiwiDesk.focus(\"\(dir)\")"
+            lua: "KiwiDesk.focus(\"\(dir)\")",
+            displayLabel: {
+                L(
+                    "keybinding.focus_dir",
+                    "Focus window %1$@",
+                    directionPhrase(dir)
+                )
+            }
         )
     }
 
-    /// One "Go to Space …" row per defined space.
+    /// One "Go to Space …" row per defined space. The space
+    /// name is user data (never translated), passed as a
+    /// positional arg into the translated sentence.
     static func goToSpace(
         _ spaces: [SpaceID],
         icons: [SpaceID: String] = [:]
@@ -60,7 +73,14 @@ enum KeybindingCatalog {
                 label: "Go to Space \(space.raw)",
                 lua: "KiwiDesk.focus_virtual_space"
                     + "(\(spaceArg(space)))",
-                icon: icons[space]
+                icon: icons[space],
+                displayLabel: {
+                    L(
+                        "keybinding.go_to_space",
+                        "Go to Space %1$@",
+                        space.raw
+                    )
+                }
             )
         }
     }
@@ -71,11 +91,19 @@ enum KeybindingCatalog {
         phrase in
         NavCommand(
             label: "Swap with window \(phrase)",
-            lua: "KiwiDesk.swap(\"\(dir)\")"
+            lua: "KiwiDesk.swap(\"\(dir)\")",
+            displayLabel: {
+                L(
+                    "keybinding.swap_dir",
+                    "Swap with window %1$@",
+                    directionPhrase(dir)
+                )
+            }
         )
     }
 
-    /// The per-space "Move to …" / "… & follow" row pairs.
+    /// The per-space "Move to …" / "… & follow" row pairs. The
+    /// space name is user data, passed as a positional arg.
     static func moveToSpace(
         _ spaces: [SpaceID],
         icons: [SpaceID: String] = [:]
@@ -87,7 +115,14 @@ enum KeybindingCatalog {
                     label: "Move to Space \(space.raw)",
                     lua:
                         "KiwiDesk.move_to_virtual_space(\(arg))",
-                    icon: icons[space]
+                    icon: icons[space],
+                    displayLabel: {
+                        L(
+                            "keybinding.move_to_space",
+                            "Move to Space %1$@",
+                            space.raw
+                        )
+                    }
                 ),
                 NavCommand(
                     label:
@@ -95,7 +130,14 @@ enum KeybindingCatalog {
                     lua: "KiwiDesk."
                         + "move_to_virtual_space_and_follow"
                         + "(\(arg))",
-                    icon: icons[space]
+                    icon: icons[space],
+                    displayLabel: {
+                        L(
+                            "keybinding.move_to_space_follow",
+                            "Move to Space %1$@ & follow",
+                            space.raw
+                        )
+                    }
                 ),
             ]
         }
@@ -131,15 +173,20 @@ enum KeybindingCatalog {
     static let resizeAndFloat: [NavCommand] = [
         NavCommand(
             label: "Shrink",
-            lua: "KiwiDesk.resize(\"x\", -\(resizeStep))"
+            lua: "KiwiDesk.resize(\"x\", -\(resizeStep))",
+            displayLabel: { L("keybinding.shrink", "Shrink") }
         ),
         NavCommand(
             label: "Enlarge",
-            lua: "KiwiDesk.resize(\"x\", \(resizeStep))"
+            lua: "KiwiDesk.resize(\"x\", \(resizeStep))",
+            displayLabel: { L("keybinding.enlarge", "Enlarge") }
         ),
         NavCommand(
             label: "Make floating",
-            lua: "KiwiDesk.make_floating()"
+            lua: "KiwiDesk.make_floating()",
+            displayLabel: {
+                L("keybinding.make_floating", "Make floating")
+            }
         ),
     ]
 
@@ -164,7 +211,14 @@ enum KeybindingCatalog {
     static func switchModeCommand(_ name: String) -> NavCommand {
         NavCommand(
             label: "Switch to \(name)",
-            lua: "KiwiDesk.switch_mode(\(quote(name)))"
+            lua: "KiwiDesk.switch_mode(\(quote(name)))",
+            displayLabel: {
+                L(
+                    "keybinding.switch_to_mode",
+                    "Switch to %1$@",
+                    name
+                )
+            }
         )
     }
 

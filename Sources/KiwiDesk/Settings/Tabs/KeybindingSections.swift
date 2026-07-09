@@ -181,7 +181,7 @@ struct NavRow: View {
                 IconGlyphLabel(icon: glyph)
                     .frame(width: 18)
             }
-            Text(command.label)
+            Text(command.resolvedLabel)
             Spacer()
             KeyRecorderField(
                 combo: index.map { bindings[$0].combo } ?? "",
