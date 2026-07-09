@@ -103,7 +103,7 @@ extension KiwiCore {
     }
 
     /// Fires on an explicit single-window move
-    /// (`move_to_virtual_space`); bulk reassignments
+    /// (`move_to_space`); bulk reassignments
     /// (snapshot restore, profile load) stay silent.
     func emitWindowMovedToSpace(
         _ id: WindowID,

@@ -83,7 +83,12 @@ enum KeybindingImportClassifier {
             binding.label = shape.label
             return shape.step
         }
-        if let label = navigation[binding.lua] {
+        // Canonicalize legacy `*_virtual_space` space calls to the
+        // short form so a binding authored before the #42 rename
+        // still matches the catalog (which now authors short).
+        if let label = navigation[
+            KeybindingCatalog.canonicalSpaceLua(binding.lua)
+        ] {
             binding.kind = .navigation
             binding.label = label
         } else if let app = KeybindingCatalog.appName(

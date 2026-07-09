@@ -13,11 +13,16 @@ extension KiwiCore {
             return navigate(args, swapping: false)
         case "swap":
             return navigate(args, swapping: true)
-        case "focus_virtual_space":
+        // Bare `space` is canonical; the `*_virtual_space` forms
+        // stay as compatibility aliases the dispatcher still
+        // accepts, so a CLI call or a stored binding using the
+        // long name keeps working (#42).
+        case "focus_space", "focus_virtual_space":
             return focusSpace(args)
-        case "move_to_virtual_space":
+        case "move_to_space", "move_to_virtual_space":
             return moveToSpace(args, follow: false)
-        case "move_to_virtual_space_and_follow":
+        case "move_to_space_and_follow",
+            "move_to_virtual_space_and_follow":
             return moveToSpace(args, follow: true)
         case "make_floating":
             return setFocusedFloating(true)

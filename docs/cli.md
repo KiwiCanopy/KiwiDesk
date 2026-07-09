@@ -46,9 +46,9 @@ KiwiDesk service restart
 |---|---|---|
 | Navigation | `focus` | `left\|right\|up\|down` |
 | | `swap` | `left\|right\|up\|down` |
-| | `focus_virtual_space` | space id |
-| | `move_to_virtual_space` | space id |
-| | `move_to_virtual_space_and_follow` | space id |
+| | `focus_space` | space id (aliased `focus_virtual_space`) |
+| | `move_to_space` | space id (aliased `move_to_virtual_space`) |
+| | `move_to_space_and_follow` | space id |
 | Window | `make_floating` | — |
 | | `make_tiled` | — |
 | | `resize` | `x\|y`, delta (px) |
@@ -186,7 +186,7 @@ for the old desktop's windows and `window_created` when they
 return.
 
 `window_moved_to_space` fires when a window is explicitly
-moved to another virtual space (`move_to_virtual_space`,
+moved to another virtual space (`move_to_space`,
 with or without follow); bulk reassignments (profile load,
 session restore) stay silent:
 

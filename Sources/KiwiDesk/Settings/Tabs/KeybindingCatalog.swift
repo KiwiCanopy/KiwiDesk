@@ -64,7 +64,7 @@ enum KeybindingCatalog {
         spaces.map { space in
             NavCommand(
                 label: "Go to Space \(space.raw)",
-                lua: "KiwiDesk.focus_virtual_space"
+                lua: "KiwiDesk.focus_space"
                     + "(\(spaceArg(space)))",
                 icon: icons[space],
                 displayLabel: {
@@ -107,7 +107,7 @@ enum KeybindingCatalog {
                 NavCommand(
                     label: "Move to Space \(space.raw)",
                     lua:
-                        "KiwiDesk.move_to_virtual_space(\(arg))",
+                        "KiwiDesk.move_to_space(\(arg))",
                     icon: icons[space],
                     displayLabel: {
                         L(
@@ -121,7 +121,7 @@ enum KeybindingCatalog {
                     label:
                         "Move to Space \(space.raw) & follow",
                     lua: "KiwiDesk."
-                        + "move_to_virtual_space_and_follow"
+                        + "move_to_space_and_follow"
                         + "(\(arg))",
                     icon: icons[space],
                     displayLabel: {
@@ -211,6 +211,32 @@ enum KeybindingCatalog {
         }
         let label = value < 0 ? "Shrink" : "Enlarge"
         return (label, abs(value))
+    }
+
+    /// Rewrites the legacy `*_virtual_space` space calls in `lua`
+    /// to their canonical bare-`space` form (#42), so import
+    /// classification recognizes a binding authored before the
+    /// rename against the short-form catalog. Paren-anchored like
+    /// `SpaceLuaArg` (so `move_to_space` can't match inside
+    /// `move_to_space_and_follow`) — a lookup-only transform; the
+    /// stored binding keeps its still-valid long alias.
+    static func canonicalSpaceLua(_ lua: String) -> String {
+        var result = lua
+        let aliases = [
+            (
+                "move_to_virtual_space_and_follow(",
+                "move_to_space_and_follow("
+            ),
+            ("move_to_virtual_space(", "move_to_space("),
+            ("focus_virtual_space(", "focus_space("),
+        ]
+        for (long, short) in aliases {
+            result = result.replacingOccurrences(
+                of: long,
+                with: short
+            )
+        }
+        return result
     }
 
     /// A space id as a quoted, escaped Lua string argument.

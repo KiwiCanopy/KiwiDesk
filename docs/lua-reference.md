@@ -70,22 +70,22 @@ trade slots in the layout.
 KiwiDesk.swap("right")
 ```
 
-### focus_virtual_space
+### focus_space
 
 **Expects:** a space identifier (number or string).
 
 **Does:** switches to that virtual space, hiding the current
 space's tiled windows and revealing the target's. Aliased as
-`focus_space`.
+`focus_virtual_space`.
 
 **Example:**
 
 ```lua
-KiwiDesk.focus_virtual_space(2)
-KiwiDesk.focus_space("mail")   -- alias
+KiwiDesk.focus_space(2)
+KiwiDesk.focus_virtual_space("mail")   -- alias
 ```
 
-### move_to_virtual_space
+### move_to_space
 
 **Expects:** a space identifier.
 
@@ -93,28 +93,28 @@ KiwiDesk.focus_space("mail")   -- alias
 following** it — you stay on the current space. The moved
 window becomes the target space's focused window, so the first
 time you switch there it is the window you land on. Aliased as
-`move_to_space`.
+`move_to_virtual_space`.
 
 **Example:**
 
 ```lua
-KiwiDesk.move_to_virtual_space("mail")
-KiwiDesk.move_to_space(3)      -- alias
+KiwiDesk.move_to_space("mail")
+KiwiDesk.move_to_virtual_space(3)      -- alias
 ```
 
-### move_to_virtual_space_and_follow
+### move_to_space_and_follow
 
 **Expects:** a space identifier.
 
 **Does:** moves the focused window to that space **and**
 switches you there with it. Aliased as
-`move_to_space_and_follow`.
+`move_to_virtual_space_and_follow`.
 
 **Example:**
 
 ```lua
-KiwiDesk.move_to_virtual_space_and_follow("mail")
-KiwiDesk.move_to_space_and_follow(3)   -- alias
+KiwiDesk.move_to_space_and_follow("mail")
+KiwiDesk.move_to_virtual_space_and_follow(3)   -- alias
 ```
 
 ## Layouts & Gaps
@@ -239,7 +239,7 @@ picture-in-picture — are never stashed and stay visible across all
 virtual spaces.
 
 Sending a window elsewhere with
-[`move_to_virtual_space`](#move_to_virtual_space) makes it that
+[`move_to_space`](#move_to_space) makes it that
 space's focused window, so the first time you switch there it is
 the window you land on — even without `_and_follow`.
 
@@ -1599,7 +1599,7 @@ space is not active. A minimize fires only `window_minimized`, never
 Lua callback receives `""` instead, since a positional `nil` would
 truncate the argument list.
 
-`window_moved_to_space` fires on an explicit `move_to_virtual_space`
+`window_moved_to_space` fires on an explicit `move_to_space`
 (with or without follow) when the target differs from the window's
 current space. Bulk reassignments — profile loads, session restore —
 stay silent. JSON keys: `from_space_id` (null if unknown) and

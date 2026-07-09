@@ -100,7 +100,7 @@ struct LifecycleEventTests {
         )
         // ...then the user switches away.
         _ = core.execute(
-            "focus_virtual_space",
+            "focus_space",
             args: [.string("2")]
         )
         var events: [(KiwiNotification, JSONValue)] = []
@@ -138,7 +138,7 @@ struct LifecycleEventTests {
             events.append((event, data))
         }
         let response = core.execute(
-            "move_to_virtual_space",
+            "move_to_space",
             args: [.string("3")]
         )
         #expect(response.isSuccess)
@@ -158,7 +158,7 @@ struct LifecycleEventTests {
         // Moving to the space it is already on stays silent.
         events.removeAll()
         _ = core.execute(
-            "move_to_virtual_space",
+            "move_to_space",
             args: [.string("3")]
         )
         #expect(

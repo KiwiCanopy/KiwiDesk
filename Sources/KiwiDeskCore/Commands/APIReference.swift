@@ -11,17 +11,22 @@ public enum APIReference {
         [
             ("focus", "focus"),
             ("swap", "swap"),
-            ("focus_space", "focus_virtual_space"),
-            ("focus_virtual_space", "focus_virtual_space"),
-            ("move_to_space", "move_to_virtual_space"),
-            ("move_to_virtual_space", "move_to_virtual_space"),
+            // Bare `space` is canonical; the `*_virtual_space`
+            // forms stay as compatibility aliases (#42). Both Lua
+            // names register, both resolve to the short dispatcher
+            // command; `dispatchable`/help/did-you-mean surface
+            // the canonical short form.
+            ("focus_space", "focus_space"),
+            ("focus_virtual_space", "focus_space"),
+            ("move_to_space", "move_to_space"),
+            ("move_to_virtual_space", "move_to_space"),
             (
                 "move_to_space_and_follow",
-                "move_to_virtual_space_and_follow"
+                "move_to_space_and_follow"
             ),
             (
                 "move_to_virtual_space_and_follow",
-                "move_to_virtual_space_and_follow"
+                "move_to_space_and_follow"
             ),
             ("make_floating", "make_floating"),
             ("make_tiled", "make_tiled"),
