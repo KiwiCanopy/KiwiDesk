@@ -1,0 +1,55 @@
+name: Site
+
+# Builds the Astro/Starlight docs site so a broken build is caught
+# in the PR gate, not on Cloudflare after merge. Path-filtered to
+# the site and the content it renders (docs/ and assets/ are
+# symlinked into the site, so a docs edit can break the build).
+# pull_request has no branch filter so it also validates the
+# stacked docs → site PR chain before either reaches main.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - "docs/**"
+      - "assets/**"
+      - ".github/workflows/site.yml"
+  pull_request:
+    paths:
+      - "site/**"
+      - "docs/**"
+      - "assets/**"
+      - ".github/workflows/site.yml"
+
+concurrency:
+  group: site-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build site
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      # Guard the site locale manifests the same way the app locales
+      # are guarded: hard-fail on a malformed <locale>.json and warn on
+      # orphan keys. The script self-resolves the repo root, so the
+      # site working-directory is fine (../scripts reaches it).
+      - name: Check locale manifests
+        run: python3 ../scripts/extract-keys --site --check

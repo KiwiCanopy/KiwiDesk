@@ -1,0 +1,12 @@
+# Cloudflare Pages configuration for the KiwiDesk site.
+#
+# One-time setup in the Cloudflare dashboard (Pages ▸ Create ▸
+# Connect to Git ▸ this repo):
+#   Build command:        npm run build
+#   Build output dir:     site/dist
+#   Root directory:       site
+#   Node version:         20 or newer (Astro 5 needs >=18.20)
+# Every push to main then auto-deploys. Set SITE_URL as an env
+# var per environment to override the default pages.dev domain.
+name = "kiwidesk"
+pages_build_output_dir = "dist"

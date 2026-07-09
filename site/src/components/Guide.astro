@@ -1,0 +1,730 @@
+---
+// KiwiDesk — shared Guide component (the single-page newcomer
+// guide at /guide/).
+//
+// Rendered by both /src/pages/guide/index.astro (English,
+// `lang="en"`) and /src/pages/de/guide/index.astro (German,
+// `lang="de"`). All user-facing copy arrives via the `t` prop (a
+// per-locale strings object from src/i18n/<lang>.json); this file
+// owns only structure, assets, and behavior — never inline copy.
+//
+// Per-key English fallback: `s = { ...en, ...t }` means any key a
+// locale hasn't translated yet renders its English source rather
+// than a blank, so /de/guide/ is safe to ship before German is
+// filled in — it turns German key-by-key as translations land.
+//
+// Released framing: the install copy is written as if KiwiDesk has
+// shipped — a placeholder App Store button (href="#") plus a
+// Homebrew cask — even though the landing hero stays its "coming
+// soon" teaser. This is launch-prep copy.
+//
+// Two client states share their localStorage keys with the
+// landing + docs so a toggle anywhere carries across the site:
+//   • theme — `starlight-theme`
+//   • lang  — `kiwidesk-site-lang` ("en" | "de"), paired with the
+//             route (/guide/ ↔ /de/guide/); resolved anti-FOUC in
+//             <head>. Guide is never mode-gated, so no mode key.
+import { Image } from "astro:assets";
+import { Icon } from "astro-icon/components";
+import logoMark from "../assets/brand/logo.svg";
+import logoMarkDark from "../assets/brand/logo_dark.svg";
+import kofiIcon from "../assets/brand/kofi_symbol.svg";
+import kiwiSolutions from "../assets/brand/kiwi-solutions.png";
+import ogImage from "../assets/brand/logo_wordmark.png";
+import { layoutDiagram } from "../lib/layoutDiagram";
+import en from "../i18n/en.json";
+import "../styles/landing.css";
+import "../styles/learn.css";
+
+interface Props {
+  t: Record<string, string>;
+  lang: "en" | "de";
+}
+const { t, lang } = Astro.props;
+// Per-key English fallback: untranslated keys degrade to English.
+const s = { ...en, ...t } as Record<string, string>;
+
+// Home path for the active locale (landing), and the guide path
+// pair the language switcher toggles between.
+const homeHref = lang === "de" ? "/de/" : "/";
+
+const repo = "https://github.com/hajiboy95/KiwiDesk";
+const kofi = "https://ko-fi.com/kiwisolutions";
+const makerProfile = "https://github.com/hajiboy95";
+
+// The table of contents — drives both the desktop rail and the
+// mobile dropdown. Order matches the sections below. `id` is the
+// anchor (never translated); `label` is localized copy.
+const toc = [
+  { id: "getting-started", label: s.guide_toc_getting_started },
+  { id: "layouts", label: s.guide_toc_layouts },
+  { id: "favorite", label: s.guide_toc_favorite },
+  { id: "settings", label: s.guide_toc_settings },
+  { id: "faq", label: s.guide_toc_faq },
+  { id: "is-it-for-me", label: s.guide_toc_is_it_for_me },
+];
+
+// The six layouts, each a friendly one-liner. Diagrams come from
+// the shared helper so they match the landing exactly. `name` is
+// the technical layout name (kept as-is); `desc` is localized.
+const layouts = [
+  { name: "stack", desc: s.guide_layout_stack },
+  { name: "bsp", desc: s.guide_layout_bsp },
+  { name: "scrolling", desc: s.guide_layout_scrolling },
+  { name: "monocle", desc: s.guide_layout_monocle },
+  { name: "grid", desc: s.guide_layout_grid },
+  { name: "floating", desc: s.guide_layout_floating },
+];
+
+// The Settings window's sections, grouped as the app shows them
+// (Design = per-profile, System = global).
+const tour = [
+  { title: s.guide_tour_spaces_title, body: s.guide_tour_spaces_body },
+  { title: s.guide_tour_layout_title, body: s.guide_tour_layout_body },
+  {
+    title: s.guide_tour_monitors_title,
+    body: s.guide_tour_monitors_body,
+  },
+  {
+    title: s.guide_tour_appearance_title,
+    body: s.guide_tour_appearance_body,
+  },
+  {
+    title: s.guide_tour_behavior_title,
+    body: s.guide_tour_behavior_body,
+  },
+  {
+    title: s.guide_tour_profiles_title,
+    body: s.guide_tour_profiles_body,
+  },
+  {
+    title: s.guide_tour_shortcuts_title,
+    body: s.guide_tour_shortcuts_body,
+  },
+  {
+    title: s.guide_tour_apprules_title,
+    body: s.guide_tour_apprules_body,
+  },
+];
+
+// FAQ pairs. Answers may carry inline HTML (a <code> chip), so
+// they render with set:html below.
+const faq = [
+  { q: s.guide_faq_1_q, a: s.guide_faq_1_a },
+  { q: s.guide_faq_2_q, a: s.guide_faq_2_a },
+  { q: s.guide_faq_3_q, a: s.guide_faq_3_a },
+  { q: s.guide_faq_4_q, a: s.guide_faq_4_a },
+  { q: s.guide_faq_5_q, a: s.guide_faq_5_a },
+];
+
+// Section badges for the "is it for you" scenarios — Lucide icons
+// (rendered via <Icon> below). Order runs broad-audience-first,
+// self-selected nerds last.
+const scenarios = [
+  {
+    icon: "lucide:layers-2",
+    name: s.guide_scenario_everyday_name,
+    before: s.guide_scenario_everyday_before,
+    after: s.guide_scenario_everyday_after,
+  },
+  {
+    icon: "lucide:video",
+    name: s.guide_scenario_calls_name,
+    before: s.guide_scenario_calls_before,
+    after: s.guide_scenario_calls_after,
+  },
+  {
+    icon: "lucide:file-spreadsheet",
+    name: s.guide_scenario_consultant_name,
+    before: s.guide_scenario_consultant_before,
+    after: s.guide_scenario_consultant_after,
+  },
+  {
+    icon: "lucide:pen-line",
+    name: s.guide_scenario_writer_name,
+    before: s.guide_scenario_writer_before,
+    after: s.guide_scenario_writer_after,
+  },
+  {
+    icon: "lucide:palette",
+    name: s.guide_scenario_designer_name,
+    before: s.guide_scenario_designer_before,
+    after: s.guide_scenario_designer_after,
+  },
+  {
+    icon: "lucide:code",
+    name: s.guide_scenario_developer_name,
+    before: s.guide_scenario_developer_before,
+    after: s.guide_scenario_developer_after,
+  },
+];
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+      content="width=device-width, initial-scale=1" />
+    <title>{s.guide_meta_title}</title>
+    <meta name="description" content={s.guide_meta_desc} />
+    <meta property="og:title" content={s.guide_meta_title} />
+    <meta property="og:description" content={s.guide_meta_desc} />
+    <meta property="og:type" content="article" />
+    <meta property="og:locale"
+      content={lang === "de" ? "de_DE" : "en_US"} />
+    <meta property="og:image"
+      content={new URL(ogImage.src, Astro.site).href} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#101d0b" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate" hreflang="en" href="/guide/" />
+    <link rel="alternate" hreflang="de" href="/de/guide/" />
+    <link rel="alternate" hreflang="x-default" href="/guide/" />
+    <!-- Anti-FOUC: resolve the theme before first paint so the
+         page never flashes the wrong theme. Shares the exact
+         `starlight-theme` key with the landing + docs, so a
+         toggle anywhere carries across the whole site. (No mode
+         key here — the Guide is never mode-gated.) -->
+    <script is:inline>
+      (function () {
+        var root = document.documentElement;
+        try {
+          var stored = localStorage.getItem("starlight-theme");
+          root.dataset.theme =
+            stored === "light" || stored === "dark"
+              ? stored
+              : window.matchMedia("(prefers-color-scheme: dark)")
+                  .matches
+                ? "dark"
+                : "light";
+        } catch (e) {
+          root.dataset.theme = "dark";
+        }
+      })();
+    </script>
+    <!-- Language resolve (anti-redirect-loop), scoped to the guide
+         pair /guide/ ↔ /de/guide/. Runs before paint, at most once
+         per load, and only ever redirects between those two known
+         paths via replace() so the back button still works.
+           1. A stored `kiwidesk-site-lang` wins — honor an earlier
+              explicit choice by sending the visitor to its path.
+           2. No stored pref: fall back to navigator.language, but
+              ONLY nudge the English guide toward German (never the
+              reverse), so /guide/ stays the canonical default. -->
+    <script is:inline>
+      (function () {
+        var here = location.pathname;
+        var onDe =
+          here === "/de/guide/" || here === "/de/guide";
+        function go(path) {
+          if (path !== here) location.replace(path);
+        }
+        var stored;
+        try {
+          stored = localStorage.getItem("kiwidesk-site-lang");
+        } catch (e) {
+          stored = null;
+        }
+        if (stored === "de") {
+          if (!onDe) return go("/de/guide/");
+        } else if (stored === "en") {
+          if (onDe) return go("/guide/");
+        } else {
+          var nav = (navigator.language || "").toLowerCase();
+          if (nav.indexOf("de") === 0 && !onDe)
+            return go("/de/guide/");
+        }
+      })();
+    </script>
+    <!-- Restore scroll after a language switch: the EN|DE switcher
+         stashes scrollY before navigating, so switching languages
+         lands you at the same spot instead of jumping to the top. -->
+    <script is:inline>
+      (function () {
+        try {
+          var y = sessionStorage.getItem("kiwidesk-scroll");
+          if (y === null) return;
+          sessionStorage.removeItem("kiwidesk-scroll");
+          addEventListener("DOMContentLoaded", function () {
+            window.scrollTo({
+              top: parseInt(y, 10) || 0,
+              behavior: "instant",
+            });
+          });
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <!-- ============ Site nav (no mode toggle, no tab bar) ====== -->
+    <nav class="nav" id="nav">
+      <div class="wrap nav__inner">
+        <a class="nav__brand" href={homeHref}
+          aria-label={s.nav_home_label}>
+          <img class="nav__mark nav__mark--light" src={logoMark.src}
+            width="28" height="28" alt="" aria-hidden="true" />
+          <img class="nav__mark nav__mark--dark"
+            src={logoMarkDark.src} width="28" height="28" alt=""
+            aria-hidden="true" />
+          <span>KiwiDesk</span>
+        </a>
+        <div class="nav__links">
+          <a class="learn-back" href={homeHref}>
+            <Icon name="lucide:arrow-left" aria-hidden="true" />
+            <span class="learn-back__text">{s.guide_back_home}</span>
+          </a>
+
+          <!-- Language switcher: EN | DE segmented control. Each
+               segment links to that locale's guide route AND records
+               the choice in `kiwidesk-site-lang` (wired below), so
+               the preference persists across visits. -->
+          <div class="lang-switch" role="group"
+            aria-label={s.nav_lang_label}>
+            <a class="lang-switch__opt" data-lang="en" href="/guide/"
+              lang="en"
+              aria-current={lang === "en" ? "true" : undefined}>EN</a>
+            <span class="lang-switch__sep" aria-hidden="true"></span>
+            <a class="lang-switch__opt" data-lang="de"
+              href="/de/guide/" lang="de"
+              aria-current={lang === "de" ? "true" : undefined}>DE</a>
+          </div>
+
+          <button class="theme-toggle" id="themeToggle" type="button"
+            aria-label={s.nav_theme_label} aria-pressed="false">
+            <span class="theme-toggle__track" aria-hidden="true">
+              <span class="theme-toggle__thumb">
+                <Icon name="lucide:sun" class="theme-toggle__sun"
+                  width={15} height={15} aria-hidden="true" />
+                <Icon name="lucide:moon" class="theme-toggle__moon"
+                  width={14} height={14} aria-hidden="true" />
+              </span>
+            </span>
+          </button>
+
+          <!-- Ko-fi support button — last in the cluster, icon-only
+               and compact (matches the landing nav). -->
+          <a class="nav__support" href={kofi} target="_blank"
+            rel="noopener" aria-label={s.nav_support_aria}>
+            <img class="kofi-icon" src={kofiIcon.src} alt=""
+              aria-hidden="true" width="20" height="16" />
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ============ Mobile TOC (sticky "On this page") ========= -->
+    <details class="learn-toc learn-toc--mobile" id="tocMobile">
+      <summary aria-label={s.guide_on_this_page}>
+        <span class="wrap learn-toc__summary-inner">
+          <Icon name="lucide:chevron-down" class="learn-toc__chevron"
+            aria-hidden="true" />
+          {s.guide_on_this_page}
+          <span class="learn-toc__count"
+            >{toc.length} {s.guide_toc_count_suffix}</span>
+        </span>
+      </summary>
+      <div class="learn-toc__panel wrap">
+        <ul class="learn-toc__list">
+          {toc.map((item) => (
+            <li>
+              <a class="learn-toc__link" href={`#${item.id}`}
+                data-toc={item.id}>{item.label}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </details>
+
+    <!-- ============ Page content ============ -->
+    <main class="learn" id="learnMain">
+      <div class="wrap">
+        <div class="learn__layout">
+          <!-- Desktop sticky TOC rail -->
+          <nav class="learn-toc learn-toc--desktop"
+            aria-label={s.guide_on_this_page}>
+            <p class="learn-toc__label">{s.guide_on_this_page}</p>
+            <ul class="learn-toc__list">
+              {toc.map((item) => (
+                <li>
+                  <a class="learn-toc__link" href={`#${item.id}`}
+                    data-toc={item.id}>{item.label}</a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <div class="learn__col">
+            <header class="learn__head">
+              <span class="learn__eyebrow">{s.guide_eyebrow}</span>
+              <h1 class="learn__title">{s.guide_title}</h1>
+              <p class="learn__lede">{s.guide_lede}</p>
+            </header>
+
+            <!-- ===== 1. Getting started ===== -->
+            <section class="learn-section" id="getting-started">
+              <div class="learn-section__head">
+                <span class="learn-section__eyebrow"
+                  >{s.guide_gs_eyebrow}</span>
+                <h2>{s.guide_gs_title}</h2>
+              </div>
+              <p>{s.guide_gs_p1}</p>
+
+              <div class="learn-install">
+                <a class="appstore-btn" href="#"
+                  aria-label={s.guide_gs_appstore_aria}>
+                  <span class="appstore-btn__glyph">
+                    <svg viewBox="0 0 24 24" fill="currentColor"
+                      aria-hidden="true">
+                      <path d="M17.05 12.54c-.02-2.06 1.68-3.05
+                        1.76-3.1-0.96-1.4-2.45-1.6-2.98-1.62-1.27-.13-2.48.75-3.12.75-.64
+                        0-1.64-.73-2.7-.71-1.39.02-2.67.81-3.38
+                        2.05-1.44 2.5-.37 6.2 1.03 8.23.68.99
+                        1.5 2.1 2.56 2.06 1.03-.04 1.42-.66
+                        2.66-.66 1.24 0 1.59.66 2.68.64 1.1-.02
+                        1.8-1.01 2.48-2 .78-1.15 1.1-2.26
+                        1.12-2.32-.02-.01-2.15-.83-2.17-3.27ZM15.1
+                        6.63c.56-.68.94-1.63.84-2.58-.81.03-1.79.54-2.37
+                        1.22-.52.6-.98 1.56-.86 2.48.9.07
+                        1.83-.46 2.39-1.12Z" />
+                    </svg>
+                  </span>
+                  <span class="appstore-btn__copy">
+                    <span class="appstore-btn__small"
+                      >{s.guide_gs_appstore_small}</span>
+                    <span class="appstore-btn__big"
+                      >{s.guide_gs_appstore_big}</span>
+                  </span>
+                </a>
+              </div>
+
+              <p class="learn__store-note">{s.guide_gs_store_note}</p>
+
+              <p class="learn-sub">{s.guide_gs_perm_sub}</p>
+              <p set:html={s.guide_gs_perm_p}></p>
+
+              <div class="learn-callout learn-callout--trust">
+                <span class="learn-callout__icon" aria-hidden="true">
+                  <Icon name="lucide:shield-check" />
+                </span>
+                <div class="learn-callout__body">
+                  <h3>{s.guide_gs_trust_title}</h3>
+                  <p>{s.guide_gs_trust_p}</p>
+                  <ul class="learn-checklist">
+                    <li>
+                      <span class="learn-checklist__check"
+                        aria-hidden="true">
+                        <Icon name="lucide:check" />
+                      </span>
+                      {s.guide_gs_trust_1}
+                    </li>
+                    <li>
+                      <span class="learn-checklist__check"
+                        aria-hidden="true">
+                        <Icon name="lucide:check" />
+                      </span>
+                      {s.guide_gs_trust_2}
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <p class="learn-sub">{s.guide_gs_first_sub}</p>
+              <p>{s.guide_gs_first_p}</p>
+
+              <div class="learn-snap" aria-hidden="true">
+                <svg viewBox="0 0 320 150"
+                  preserveAspectRatio="xMidYMid meet">
+                  <rect x="18" y="24" width="96" height="70" rx="6"
+                    class="tile tile--ghost" />
+                  <path d="M132 59h34m0 0-9-9m9 9-9 9" fill="none"
+                    stroke="currentColor" stroke-width="2.4"
+                    stroke-linecap="round" stroke-linejoin="round"
+                    style="color: var(--text-faint)" />
+                  <rect x="188" y="18" width="56" height="112" rx="6"
+                    class="tile" />
+                  <rect x="248" y="18" width="56" height="53" rx="6"
+                    class="tile tile--accent" />
+                  <rect x="248" y="77" width="56" height="53" rx="6"
+                    class="tile" />
+                </svg>
+              </div>
+            </section>
+
+            <!-- ===== 2. The layouts ===== -->
+            <section class="learn-section" id="layouts">
+              <div class="learn-section__head">
+                <span class="learn-section__eyebrow"
+                  >{s.guide_layouts_eyebrow}</span>
+                <h2>{s.guide_layouts_title}</h2>
+              </div>
+              <p>{s.guide_layouts_p}</p>
+              <div class="layouts">
+                {layouts.map((l) => (
+                  <article class="layout-card">
+                    <div class="layout-card__diagram"
+                      aria-hidden="true">
+                      <Fragment set:html={layoutDiagram(l.name)} />
+                    </div>
+                    <h3>{l.name}</h3>
+                    <p>{l.desc}</p>
+                  </article>
+                ))}
+              </div>
+            </section>
+
+            <!-- ===== 3. Finding your favorite ===== -->
+            <section class="learn-section" id="favorite">
+              <div class="learn-section__head">
+                <span class="learn-section__eyebrow"
+                  >{s.guide_fav_eyebrow}</span>
+                <h2>{s.guide_fav_title}</h2>
+              </div>
+              <p set:html={s.guide_fav_p1}></p>
+              <p set:html={s.guide_fav_p2}></p>
+              <div class="learn-callout">
+                <span class="learn-callout__icon" aria-hidden="true">
+                  <Icon name="lucide:info" />
+                </span>
+                <div class="learn-callout__body">
+                  <h3>{s.guide_fav_callout_title}</h3>
+                  <p>{s.guide_fav_callout_p}</p>
+                </div>
+              </div>
+            </section>
+
+            <!-- ===== 4. The Settings app ===== -->
+            <section class="learn-section" id="settings">
+              <div class="learn-section__head">
+                <span class="learn-section__eyebrow"
+                  >{s.guide_settings_eyebrow}</span>
+                <h2>{s.guide_settings_title}</h2>
+              </div>
+              <p set:html={s.guide_settings_p}></p>
+              <ul class="learn-tour">
+                {tour.map((sec) => (
+                  <li>
+                    <h3>{sec.title}</h3>
+                    <p>{sec.body}</p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            <!-- ===== 5. FAQ ===== -->
+            <section class="learn-section" id="faq">
+              <div class="learn-section__head">
+                <span class="learn-section__eyebrow"
+                  >{s.guide_faq_eyebrow}</span>
+                <h2>{s.guide_faq_title}</h2>
+              </div>
+              <div class="learn-faq">
+                {faq.map((f) => (
+                  <details class="learn-faq__item">
+                    <summary class="learn-faq__q">
+                      {f.q}
+                      <Icon name="lucide:plus" class="learn-faq__icon"
+                        aria-hidden="true" />
+                    </summary>
+                    <div class="learn-faq__a">
+                      <p set:html={f.a}></p>
+                    </div>
+                  </details>
+                ))}
+              </div>
+            </section>
+
+            <!-- ===== 6. Is KiwiDesk for you? ===== -->
+            <section class="learn-section" id="is-it-for-me">
+              <div class="learn-section__head">
+                <span class="learn-section__eyebrow"
+                  >{s.guide_isit_eyebrow}</span>
+                <h2>{s.guide_isit_title}</h2>
+              </div>
+              <p>{s.guide_isit_p}</p>
+              <div class="learn-scenarios">
+                {scenarios.map((sc) => (
+                  <article class="learn-scenario">
+                    <div class="learn-scenario__who">
+                      <span class="learn-scenario__badge">
+                        <Icon name={sc.icon} />
+                      </span>
+                      <p class="learn-scenario__name">{sc.name}</p>
+                    </div>
+                    <div class="learn-scenario__ba">
+                      <div class="learn-scenario__side">
+                        <span class="learn-scenario__label"
+                          >{s.guide_before}</span>
+                        <p>{sc.before}</p>
+                      </div>
+                      <div class="learn-scenario__side">
+                        <span class="learn-scenario__label
+                          learn-scenario__label--after"
+                          >{s.guide_after}</span>
+                        <p>{sc.after}</p>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              <div class="learn-close">
+                <h2>{s.guide_close_title}</h2>
+                <p>{s.guide_close_p}</p>
+                <a class="btn btn--primary"
+                  href={`${homeHref}#getting-started`}>
+                  {s.guide_close_cta}
+                  <Icon name="lucide:arrow-right" width={16} height={16}
+                    aria-hidden="true" />
+                </a>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ============ Footer ============ -->
+    <footer class="footer">
+      <div class="wrap">
+        <div class="footer__brand">
+          <Image class="footer__logo" src={kiwiSolutions}
+            alt="Kiwi Solutions" widths={[110, 160, 220]}
+            sizes="110px" />
+          <p class="footer__name">{s.footer_org}</p>
+          <p class="footer__tag">{s.footer_tag}</p>
+        </div>
+        <a class="footer__kofi" href={kofi} target="_blank"
+          rel="noopener">
+          <img class="kofi-icon" src={kofiIcon.src} alt=""
+            aria-hidden="true" width="20" height="16" />
+          {s.footer_kofi}
+        </a>
+        <nav class="footer__links" aria-label="Footer">
+          <a href={homeHref}>{s.guide_footer_home}</a>
+          <a href="/docs/">{s.footer_docs}</a>
+          <a href={repo} target="_blank" rel="noopener"
+            >{s.footer_github}</a>
+        </nav>
+        <p class="footer__copy">{s.footer_copy}</p>
+        <p class="footer__credit">
+          {s.footer_credit_built_by}
+          <a href={makerProfile} target="_blank" rel="noopener">
+            {s.footer_credit_name} · {s.footer_credit_handle}
+          </a>
+        </p>
+        <p class="footer__daily">{s.daily_kiwi}</p>
+      </div>
+    </footer>
+
+    <script>
+      const html = document.documentElement;
+
+      // ---- Theme toggle (shared `starlight-theme` key) ----
+      const themeToggle = document.getElementById("themeToggle");
+      const syncTheme = () => {
+        const dark = html.dataset.theme === "dark";
+        themeToggle?.setAttribute("aria-pressed", String(dark));
+      };
+      syncTheme();
+      themeToggle?.addEventListener("click", () => {
+        const next =
+          html.dataset.theme === "dark" ? "light" : "dark";
+        html.dataset.theme = next;
+        try {
+          localStorage.setItem("starlight-theme", next);
+        } catch (e) {
+          /* storage unavailable — theme still applies in-page */
+        }
+        syncTheme();
+      });
+      window.addEventListener("storage", (e) => {
+        if (e.key === "starlight-theme") {
+          if (e.newValue === "light" || e.newValue === "dark") {
+            html.dataset.theme = e.newValue;
+            syncTheme();
+          }
+        }
+      });
+
+      // ---- Language switcher (own `kiwidesk-site-lang` key) ----
+      // Each segment is an <a> that already navigates to the target
+      // guide route; here we only persist the explicit choice so the
+      // <head> resolver honors it on later visits.
+      document
+        .querySelectorAll(".lang-switch__opt")
+        .forEach((opt) => {
+          opt.addEventListener("click", () => {
+            const lang = opt.getAttribute("data-lang");
+            if (lang !== "en" && lang !== "de") return;
+            try {
+              localStorage.setItem("kiwidesk-site-lang", lang);
+              // Stash scroll so the destination locale restores it.
+              sessionStorage.setItem(
+                "kiwidesk-scroll",
+                String(window.scrollY)
+              );
+            } catch (e) {
+              /* storage unavailable — route change still works */
+            }
+          });
+        });
+
+      // ---- Nav background on scroll ----
+      const nav = document.getElementById("nav");
+      const onScroll = () => {
+        if (window.scrollY > 12) nav?.classList.add("scrolled");
+        else nav?.classList.remove("scrolled");
+      };
+      onScroll();
+      window.addEventListener("scroll", onScroll, { passive: true });
+
+
+      // ---- Active-section highlight in the TOC ----
+      const tocLinks = Array.from(
+        document.querySelectorAll<HTMLAnchorElement>("[data-toc]")
+      );
+      const sections = Array.from(
+        document.querySelectorAll<HTMLElement>(".learn-section[id]")
+      );
+      const setActive = (id: string) => {
+        tocLinks.forEach((a) => {
+          const on = a.getAttribute("data-toc") === id;
+          if (on) a.setAttribute("aria-current", "true");
+          else a.removeAttribute("aria-current");
+        });
+      };
+
+      if ("IntersectionObserver" in window && sections.length) {
+        const visible = new Set<string>();
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
+              const id = e.target.id;
+              if (e.isIntersecting) visible.add(id);
+              else visible.delete(id);
+            });
+            const current = sections.find((sec) =>
+              visible.has(sec.id)
+            );
+            if (current) setActive(current.id);
+          },
+          { rootMargin: "-45% 0px -45% 0px", threshold: 0 }
+        );
+        sections.forEach((sec) => io.observe(sec));
+      }
+
+      // ---- Close the mobile TOC after a jump ----
+      const tocMobile = document.getElementById(
+        "tocMobile"
+      ) as HTMLDetailsElement | null;
+      tocMobile
+        ?.querySelectorAll(".learn-toc__link")
+        .forEach((link) => {
+          link.addEventListener("click", () => {
+            tocMobile.open = false;
+          });
+        });
+    </script>
+  </body>
+</html>

@@ -11,6 +11,13 @@ localizable. This is a contributor guide for adding or fixing a
 translation. It does not cover Lua/CLI-facing strings — those
 stay English-only by design (they are code, not UI copy).
 
+The **marketing website** (the landing page and, soon, the
+`/learn/` guide) is localized with the *same* `extract-keys` /
+`merge-keys` round-trip, just pointed at the site with a
+`--site` flag — see [The marketing
+site](#the-marketing-site) below. The rest of this page is about
+the app.
+
 > This page will be revisited when the wider docs pass (#63)
 > lands; the workflow below is stable in the meantime.
 
@@ -183,6 +190,79 @@ is the one case that doesn't go through
 what's *absent*, never text you're revising). Small, targeted
 hand-edits to an already-shipped `<locale>.json` are fine and
 welcome; do not touch `en.json` (see below).
+
+## The marketing site
+
+The website under `site/` (the landing page, and the `/learn/`
+guide once it's externalized) keeps its strings in flat
+`{key: string}` manifests under **`site/src/i18n/`** —
+`en.json`, `de.json`, one file per language — exactly the shape
+the app uses, and the Astro components read them as `t.<key>`.
+
+The one difference from the app: **the site's `en.json` is the
+source of truth, authored by hand**, not generated from code.
+There is no Swift to scan — the English copy lives in `en.json`
+itself, and the components reference it by key. So the tooling
+takes a `--site` flag that points it at `site/src/i18n/` and,
+for `extract-keys`, loads `en.json` directly as the key list
+instead of scanning Swift (and never rewrites it — re-emitting
+it sorted would wreck its deliberate grouping).
+
+Everything else is the identical round-trip:
+
+```
+# add a new language (e.g. French) — writes
+# site/src/i18n/missing_fr.json with all keys to fill:
+scripts/extract-keys --site fr
+
+# top up an existing one after new English keys were added to
+# en.json — writes only the delta de.json is still missing:
+scripts/extract-keys --site de
+
+# ...fill each entry's "translation" in missing_<locale>.json...
+
+# fold the finished translations into <locale>.json:
+scripts/merge-keys --site de
+```
+
+The other maintenance verbs take `--site` too:
+
+- `scripts/extract-keys --site --check` — validates every
+  shipped `site/src/i18n/<locale>.json` decodes as a flat
+  `{string: string}` map and warns on orphan keys (present in a
+  locale, absent from `en.json`). It does **not** check
+  `en.json` freshness — there's no code to derive it from; it
+  *is* the source.
+- `scripts/extract-keys --site --prune` — drops orphan keys
+  from the site locale files (without rewriting the hand-authored
+  `en.json`).
+- `scripts/rename-key --site <old> <new>` — renames a key across
+  every `site/src/i18n/*.json`, preserving each translation. As
+  with the app, update the `t.<old>` use sites in the Astro
+  components/pages yourself afterward.
+
+To add a new English string to the site: add the key to
+`site/src/i18n/en.json`, reference it as `t.<key>` in the
+component, then run `scripts/extract-keys --site <locale>` for
+each language so it surfaces as missing to translate.
+
+### Key naming keeps the file structured
+
+The site manifests (`en.json`, `de.json`) are stored **sorted by
+key** — the round-trip tooling (`rename-key --site`) rewrites
+them that way, and a flat sorted list stays diffable and
+merge-friendly. That is fine *because* the keys carry the
+structure themselves: every key is prefixed by the area it
+belongs to (`nav_*`, `hero_*`, `feat_*`, `layout_*`, `footer_*`
+for the landing; `guide_*` for the guide page, sub-grouped like
+`guide_faq_*`, `guide_scenario_*`, `guide_tour_*`). Because the
+files sort by key, a consistent prefix makes every group cluster
+together on its own automatically. **When you add a string,
+follow the existing area prefix** rather than inventing a bare
+name — that is what keeps the manifest navigable as it grows,
+and it means the sorted order and the logical grouping are the
+same thing. A new area gets a new prefix; don't scatter related
+strings under unrelated names.
 
 ## Translating well
 

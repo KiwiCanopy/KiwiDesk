@@ -6,6 +6,12 @@ translations instead of forcing a re-translation.
 
 Usage:
     scripts/rename-key <old_key> <new_key>
+    scripts/rename-key --site <old_key> <new_key>
+
+Add `--site` to rename across the marketing site's manifests
+(`site/src/i18n/*.json`) instead of the Swift app's locale dir;
+there the key also has to be updated at its `t.<key>` use sites
+in the Astro components/pages by hand.
 
 This only touches the JSON files. It does NOT edit Swift source
 — update the `L("<old_key>", ...)` call site(s) to `<new_key>`
@@ -44,10 +50,15 @@ def _locale_files() -> list[Path]:
 
 
 def main(argv: list[str]) -> int:
-    if len(argv) != 3:
+    global LOCALES_DIR
+    args = argv[1:]
+    if "--site" in args:
+        args = [a for a in args if a != "--site"]
+        LOCALES_DIR = ROOT / "site" / "src" / "i18n"
+    if len(args) != 2:
         print(__doc__)
         return 1
-    old_key, new_key = argv[1], argv[2]
+    old_key, new_key = args[0], args[1]
     if old_key == new_key:
         print(
             "rename-key: old and new key are identical — "

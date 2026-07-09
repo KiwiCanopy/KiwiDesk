@@ -1,0 +1,42 @@
+/* KiwiDesk brand palette layered onto Starlight's theme.
+   Kiwi green (flesh) + shell brown, matching the app's
+   default drag/app-bar colors. */
+:root {
+  --kiwi-green: #4e9f3d;
+  --kiwi-green-bright: #6dbf5b;
+  --kiwi-brown: #8b5e3c;
+  --kiwi-cream: #f2ebd9;
+  --kiwi-seed: #1c1a17;
+}
+
+/* Dark theme accents (default). */
+:root {
+  --sl-color-accent-low: #12240d;
+  --sl-color-accent: #4e9f3d;
+  --sl-color-accent-high: #b6e5a8;
+  --sl-color-white: #f4f6f2;
+  --sl-color-gray-1: #e4e8e0;
+  --sl-color-gray-2: #b7bfb2;
+  --sl-color-gray-3: #808a7b;
+  --sl-color-gray-4: #556150;
+  --sl-color-gray-5: #384033;
+  --sl-color-gray-6: #252a22;
+  --sl-color-gray-7: #1e2219;
+  --sl-color-black: #191d17;
+}
+
+/* Light theme accents. */
+:root[data-theme="light"] {
+  --sl-color-accent-low: #cdeac2;
+  --sl-color-accent: #3d8630;
+  --sl-color-accent-high: #16350c;
+  --sl-color-white: #17190f;
+  --sl-color-gray-1: #232619;
+  --sl-color-gray-2: #40453a;
+  --sl-color-gray-3: #5c6355;
+  --sl-color-gray-4: #8b937f;
+  --sl-color-gray-5: #c3c9bc;
+  --sl-color-gray-6: #eef1ea;
+  --sl-color-gray-7: #f6f8f3;
+  --sl-color-black: #ffffff;
+}

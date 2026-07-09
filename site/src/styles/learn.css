@@ -1,0 +1,855 @@
+/* =========================================================
+   KiwiDesk — Learn page styles
+   The single, scroll-through newcomer guide at /learn/. Reuses
+   the landing's design system wholesale (landing.css is imported
+   first, so every custom property, the nav, footer, buttons, code
+   block, .tile fills, .layouts / .layout-card grid, and the .wrap
+   container are all available here). This file adds only what the
+   Learn page needs on top: a two-column layout with a sticky
+   table of contents, the readable article column, section
+   headers, callout cards, the FAQ, the "is it for you" scenarios,
+   and the App Store button. Everything is keyed on the same
+   :root[data-theme] variables so light + dark stay correct.
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   Back-to-home affordance in the nav (replaces the landing's
+   mode toggle / tab bar — Learn is a single friendly view).
+   --------------------------------------------------------- */
+.learn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--nav-ink-dim);
+  padding: 0.5rem 0.7rem 0.5rem 0.55rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  font-weight: 550;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.learn-back:hover {
+  color: var(--nav-ink);
+  background: var(--nav-hover-bg);
+}
+
+.learn-back svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
+/* On tight phones the "Back to home" text is redundant with the
+   brand mark link — shed the words, keep the arrow. */
+@media (max-width: 520px) {
+  .learn-back__text {
+    display: none;
+  }
+}
+
+/* =========================================================
+   Page shell — two columns: sticky TOC rail + article.
+   Below 960px the rail folds into a sticky top "On this page"
+   jump bar (see .learn-toc--mobile).
+   ========================================================= */
+.learn {
+  padding-block: clamp(1.75rem, 4vw, 3rem)
+    clamp(2rem, 5vw, 3.5rem);
+}
+
+.learn__layout {
+  display: grid;
+  /* minmax(0, 1fr), not a bare 1fr: a bare `1fr` track still lets
+     a wide max-content descendant (the Homebrew <pre> below) blow
+     the track (and the whole page) out horizontally on mobile —
+     the same failure mode landing.css's .split .wrap > .code
+     comment documents for the desktop split sections. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(1.5rem, 4vw, 3rem);
+}
+
+@media (min-width: 960px) {
+  .learn__layout {
+    grid-template-columns: 220px minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+/* The article column — a comfortable reading measure (~70ch),
+   centered within its grid track so it reads as a balanced
+   column beside the sticky TOC rail on desktop, and stays
+   centered in the full-width row once the rail collapses on
+   mobile (below the 960px breakpoint above). `min()` against
+   100% is deliberate, not decorative: `ch` is a font-metric
+   unit, and on some font stacks 70ch alone can render WIDER
+   than the grid track itself (a grid item's max-width isn't
+   otherwise clamped by its track), which pushed the column
+   past the viewport on mobile. */
+.learn__col {
+  min-width: 0;
+  width: 100%;
+  max-width: min(70ch, 100%);
+  margin-inline: auto;
+}
+
+/* Page header block */
+.learn__head {
+  margin-bottom: clamp(1.25rem, 3vw, 1.75rem);
+}
+
+.learn__eyebrow {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 650;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.7rem;
+}
+
+.learn__title {
+  font-size: clamp(1.9rem, 5vw, 2.9rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.85rem;
+  color: var(--text);
+}
+
+.learn__lede {
+  font-size: clamp(1.08rem, 2.4vw, 1.28rem);
+  line-height: 1.55;
+  color: var(--text-dim);
+  margin: 0;
+  text-wrap: pretty;
+}
+
+/* =========================================================
+   Table of contents
+   ========================================================= */
+
+/* Desktop: a sticky sidebar rail beside the content. */
+.learn-toc {
+  position: sticky;
+  top: 5.25rem;
+  align-self: start;
+}
+
+.learn-toc__label {
+  font-size: 0.74rem;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin: 0 0 0.7rem;
+  padding-left: 0.75rem;
+}
+
+.learn-toc__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.1rem;
+  border-left: 1px solid var(--border);
+}
+
+.learn-toc__link {
+  display: block;
+  padding: 0.4rem 0.75rem;
+  margin-left: -1px;
+  border-left: 2px solid transparent;
+  color: var(--text-dim);
+  font-size: 0.92rem;
+  line-height: 1.35;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.learn-toc__link:hover {
+  color: var(--text);
+}
+
+.learn-toc__link[aria-current="true"] {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  font-weight: 600;
+  background: rgba(78, 159, 61, 0.1);
+  border-radius: 0 6px 6px 0;
+}
+
+/* Mobile: collapse the rail into a sticky "On this page"
+   <details> dropdown pinned under the nav. It owns its own
+   width and never overflows the viewport. */
+.learn-toc--mobile {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  margin: 0;
+  background: var(--nav-scrolled-bg);
+  backdrop-filter: saturate(160%) blur(14px);
+  -webkit-backdrop-filter: saturate(160%) blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+
+.learn-toc--mobile > summary {
+  display: block;
+  list-style: none;
+  cursor: pointer;
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.learn-toc--mobile > summary::-webkit-details-marker,
+.learn-toc--mobile > summary::marker {
+  display: none;
+  content: "";
+}
+
+/* Tuck the focus ring inward so it doesn't clip against the sticky
+   bar's own bottom border when the full-width summary is focused. */
+.learn-toc--mobile > summary:focus-visible {
+  outline-offset: -2px;
+}
+
+.learn-toc__summary-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding-block: 0.85rem;
+}
+
+.learn-toc__chevron {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  color: var(--accent);
+  transition: transform 0.2s ease;
+}
+
+.learn-toc--mobile[open] .learn-toc__chevron {
+  transform: rotate(180deg);
+}
+
+.learn-toc__count {
+  margin-left: auto;
+  color: var(--text-faint);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.learn-toc--mobile .learn-toc__panel {
+  padding-bottom: 0.85rem;
+}
+
+.learn-toc--mobile .learn-toc__list {
+  border-left: none;
+  gap: 0;
+}
+
+.learn-toc--mobile .learn-toc__link {
+  border-left: none;
+  margin-left: 0;
+  padding: 0.55rem 0.4rem;
+  border-radius: var(--radius-sm);
+}
+
+.learn-toc--mobile .learn-toc__link[aria-current="true"] {
+  background: rgba(78, 159, 61, 0.14);
+}
+
+/* Show only the matching TOC variant at each breakpoint. */
+.learn-toc--desktop {
+  display: none;
+}
+@media (min-width: 960px) {
+  .learn-toc--desktop {
+    display: block;
+  }
+  .learn-toc--mobile {
+    display: none;
+  }
+}
+
+/* =========================================================
+   Content sections
+   ========================================================= */
+.learn-section {
+  scroll-margin-top: 5.5rem;
+}
+
+.learn-section + .learn-section {
+  margin-top: clamp(2rem, 4.5vw, 2.75rem);
+  padding-top: clamp(1.5rem, 3.5vw, 2rem);
+  border-top: 1px solid var(--border);
+}
+
+.learn-section__head {
+  margin-bottom: 1.1rem;
+}
+
+.learn-section__eyebrow {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.learn-section h2 {
+  font-size: clamp(1.45rem, 3.4vw, 2rem);
+  line-height: 1.15;
+  letter-spacing: -0.018em;
+  margin: 0;
+  color: var(--text);
+}
+
+.learn-section p {
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--text-dim);
+  margin: 0 0 1rem;
+  text-wrap: pretty;
+}
+
+.learn-section p:last-child {
+  margin-bottom: 0;
+}
+
+.learn-section strong {
+  color: var(--text);
+  font-weight: 650;
+}
+
+/* Inline code (paths, commands) as a small tinted chip. */
+.learn code {
+  font-family: var(--mono);
+  font-size: 0.86em;
+  background: rgba(78, 159, 61, 0.12);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.1em 0.4em;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+/* A soft subheading within a section. */
+.learn-sub {
+  font-size: 1.12rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin: 1.75rem 0 0.6rem;
+}
+
+/* A filled callout box has a hard bottom edge; a bare sub-heading
+   right after it needs more breathing room than two plain-text
+   elements to feel evenly spaced. */
+.learn-callout + .learn-sub {
+  margin-top: 0.5rem;
+}
+
+/* =========================================================
+   Install: App Store button + code block
+   ========================================================= */
+.learn-install {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  margin: 1.75rem 0 0.6rem;
+}
+
+/* A tasteful, self-contained "Download on the App Store" pill —
+   Apple's badge conventions rebuilt with an inline glyph so we
+   ship no external asset. */
+.appstore-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 1.05rem 0.6rem 0.9rem;
+  border-radius: var(--radius);
+  background-color: var(--appstore-bg, #000);
+  /* Top-highlight gradient gives the pill a raised, 3D face. */
+  background-image: var(
+    --appstore-fill,
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.08),
+      rgba(255, 255, 255, 0) 42%
+    )
+  );
+  color: var(--appstore-ink, #fff);
+  border: 1px solid var(--appstore-border, rgba(255, 255, 255, 0.16));
+  box-shadow: var(
+    --appstore-shadow,
+    0 1px 0 rgba(255, 255, 255, 0.12) inset,
+    0 8px 20px -8px rgba(0, 0, 0, 0.55)
+  );
+  transition: transform 0.2s ease, box-shadow 0.25s ease,
+    border-color 0.2s ease, filter 0.2s ease;
+}
+
+/* Light mode: authentic App-Store blue with a gradient face and a
+   layered shadow so it reads as a raised, dimensional button
+   against the cream page (dark mode keeps the classic black badge,
+   with the same raised treatment). */
+:root[data-theme="light"] .appstore-btn {
+  --appstore-bg: #0a63e0;
+  --appstore-fill: linear-gradient(180deg, #2b7bf2, #0a56c4);
+  --appstore-ink: #fff;
+  --appstore-border: #0847a0;
+  --appstore-shadow: 0 1px 0 rgba(255, 255, 255, 0.35) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.18) inset,
+    0 10px 24px -8px rgba(10, 99, 224, 0.55),
+    0 2px 6px rgba(22, 52, 57, 0.18);
+}
+
+.appstore-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--appstore-shadow-hover, var(--shadow));
+}
+
+:root[data-theme="light"] .appstore-btn:hover {
+  --appstore-shadow-hover: 0 1px 0 rgba(255, 255, 255, 0.4) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.18) inset,
+    0 16px 32px -8px rgba(10, 99, 224, 0.65),
+    0 4px 10px rgba(22, 52, 57, 0.2);
+}
+
+.appstore-btn:active {
+  transform: translateY(0);
+  filter: brightness(0.96);
+}
+
+.appstore-btn__glyph {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+}
+
+.appstore-btn__glyph svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.appstore-btn__copy {
+  display: grid;
+  line-height: 1.1;
+  text-align: left;
+}
+
+.appstore-btn__small {
+  font-size: 0.62rem;
+  letter-spacing: 0.02em;
+  opacity: 0.85;
+}
+
+.appstore-btn__big {
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.learn-install__or {
+  color: var(--text-faint);
+  font-size: 0.95rem;
+}
+
+.learn .code {
+  margin-top: 1.2rem;
+  min-width: 0;
+}
+
+.learn__store-note {
+  margin-top: 0.9rem;
+  font-size: 0.82rem;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--text-faint);
+  text-align: center;
+}
+
+/* =========================================================
+   Callout — reassurance / note blocks
+   ========================================================= */
+.learn-callout {
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-start;
+  margin-block: 1.4rem 2rem;
+  padding: clamp(1.1rem, 3vw, 1.4rem);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+}
+
+.learn-callout__icon {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  color: var(--accent);
+  margin-top: 1px;
+}
+
+.learn-callout__icon svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+.learn-callout__body {
+  min-width: 0;
+}
+
+.learn-callout__body h3 {
+  font-size: 1rem;
+  margin: 0 0 0.3rem;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.learn-callout__body p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 0.97rem;
+  line-height: 1.6;
+}
+
+.learn-callout__body p + p {
+  margin-top: 0.55rem;
+}
+
+.learn-callout--trust {
+  border-left-color: var(--kiwi-bright);
+}
+
+/* =========================================================
+   Reassurance checklist (e.g. "never does X")
+   ========================================================= */
+.learn-checklist {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.learn-checklist li {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  color: var(--text-dim);
+  font-size: 0.99rem;
+  line-height: 1.55;
+}
+
+.learn-checklist__check {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(78, 159, 61, 0.16);
+  color: var(--accent);
+  margin-top: 1px;
+}
+
+.learn-checklist__check svg {
+  width: 13px;
+  height: 13px;
+  display: block;
+}
+
+/* =========================================================
+   Layouts section — reuses .layouts / .layout-card from
+   landing.css. This only adds the friendly one-liner spacing.
+   L2: `overflow-x: auto` on each diagram is a defensive floor,
+   not the primary fix — the grid track itself is bounded (see
+   .learn__layout's minmax(0, 1fr)) so cards wrap to one per row
+   on mobile and the diagrams scale down with their card. This
+   only kicks in if a diagram's own intrinsic content ever
+   outgrows its box, so it scrolls internally instead of
+   pushing the whole page sideways.
+   ========================================================= */
+.learn .layouts {
+  margin-top: 1.5rem;
+}
+
+.learn .layout-card__diagram {
+  overflow-x: auto;
+}
+
+.learn .layout-card h3 {
+  text-transform: capitalize;
+}
+
+/* =========================================================
+   "First window" mini-diagram
+   ========================================================= */
+.learn-snap {
+  margin-top: 1.5rem;
+  border-radius: var(--radius);
+  background: var(--bg-0);
+  border: 1px solid var(--border);
+  padding: clamp(1rem, 3vw, 1.5rem);
+}
+
+.learn-snap svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  max-height: 200px;
+}
+
+/* =========================================================
+   Settings tour — a compact list of the app's sections
+   ========================================================= */
+.learn-tour {
+  list-style: none;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.learn-tour li {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: clamp(1rem, 2.6vw, 1.25rem);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.learn-tour li:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-2px);
+}
+
+.learn-tour h3 {
+  font-size: 1.02rem;
+  margin: 0 0 0.3rem;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.learn-tour p {
+  margin: 0;
+  font-size: 0.97rem;
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+
+/* =========================================================
+   FAQ — <details> accordion
+   ========================================================= */
+.learn-faq {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.learn-faq__item {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.learn-faq__item[open] {
+  border-color: var(--border-strong);
+}
+
+.learn-faq__q {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  list-style: none;
+  cursor: pointer;
+  padding: clamp(0.95rem, 2.5vw, 1.2rem);
+  color: var(--text);
+  font-size: 1.02rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.learn-faq__q::-webkit-details-marker {
+  display: none;
+}
+
+.learn-faq__q:hover {
+  color: var(--accent);
+}
+
+.learn-faq__icon {
+  margin-left: auto;
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  color: var(--accent);
+  transition: transform 0.2s ease;
+}
+
+.learn-faq__item[open] .learn-faq__icon {
+  transform: rotate(45deg);
+}
+
+.learn-faq__a {
+  padding: 0 clamp(0.95rem, 2.5vw, 1.2rem)
+    clamp(0.95rem, 2.5vw, 1.2rem);
+}
+
+.learn-faq__a p {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
+.learn-faq__a p + p {
+  margin-top: 0.6rem;
+}
+
+/* =========================================================
+   "Is it for you" — before/after scenario cards
+   ========================================================= */
+.learn-scenarios {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.learn-scenario {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: clamp(1.2rem, 3vw, 1.6rem);
+}
+
+.learn-scenario__who {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+}
+
+.learn-scenario__badge {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(78, 159, 61, 0.14);
+  border: 1px solid var(--border-strong);
+  color: var(--accent);
+}
+
+.learn-scenario__badge svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+.learn-scenario__name {
+  font-size: 1.08rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin: 0;
+}
+
+.learn-scenario__ba {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (min-width: 560px) {
+  .learn-scenario__ba {
+    grid-template-columns: 1fr 1fr;
+    position: relative;
+  }
+  /* A quiet vertical rule between Before and After so the two
+     columns don't blur together (their body text is the same
+     color/weight; only the After label is accented). */
+  .learn-scenario__side:first-child {
+    padding-right: 1rem;
+    border-right: 1px solid var(--border);
+  }
+  .learn-scenario__side:last-child {
+    padding-left: 1rem;
+  }
+}
+
+.learn-scenario__side {
+  min-width: 0;
+}
+
+.learn-scenario__label {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+  color: var(--text-faint);
+}
+
+.learn-scenario__label--after {
+  color: var(--accent);
+}
+
+.learn-scenario__side p {
+  margin: 0;
+  font-size: 0.96rem;
+  line-height: 1.55;
+  color: var(--text-dim);
+}
+
+/* =========================================================
+   Closing CTA card back to the landing
+   ========================================================= */
+.learn-close {
+  margin-top: clamp(2.5rem, 6vw, 3.5rem);
+  padding: clamp(1.5rem, 4vw, 2rem);
+  text-align: center;
+  background: var(--card-bg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+}
+
+.learn-close h2 {
+  font-size: clamp(1.25rem, 3vw, 1.6rem);
+  letter-spacing: -0.015em;
+  margin: 0 0 0.5rem;
+  color: var(--text);
+}
+
+.learn-close p {
+  margin: 0 0 1.25rem;
+  color: var(--text-dim);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+/* =========================================================
+   Motion preferences — smooth scroll only when allowed.
+   ========================================================= */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .appstore-btn:hover,
+  .learn-close:hover {
+    transform: none;
+  }
+}

@@ -1,0 +1,1463 @@
+@import "./landing-modes.css";
+
+/* =========================================================
+   KiwiDesk — landing page styles
+   Fully themeable: coherent LIGHT (cream, botanical, airy) and
+   DARK (deep green-black, kiwi glows) themes, driven by CSS
+   custom properties keyed on :root[data-theme]. The key matches
+   Starlight's docs (`data-theme` on <html>) so a toggle carries
+   across the whole site.
+   ========================================================= */
+
+:root {
+  /* ---- Brand palette (theme-invariant) ---- */
+  --kiwi-flesh: #4e9f3d;
+  --kiwi-bright: #6dbf5b;
+  --kiwi-shell: #8b5e3c;
+  --kiwi-cream: #f2ebd9;
+  --kiwi-seed: #12240d;
+  --kiwi-ink: #1c1a17;
+
+  /* ---- Spacing scale (8pt-ish, fluid at the edges) ---- */
+  --sp-1: 0.5rem;
+  --sp-2: 0.75rem;
+  --sp-3: 1rem;
+  --sp-4: 1.5rem;
+  --sp-5: 2rem;
+  --sp-6: 3rem;
+  --sp-7: 4.5rem;
+  --sp-8: 7rem;
+
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 24px;
+
+  --maxw: 1120px;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+    "Segoe UI", system-ui, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo,
+    Consolas, "Liberation Mono", monospace;
+}
+
+/* =========================================================
+   DARK theme — deep green-black surface ladder, off-white
+   text, kiwi + brighter-green accents, soft green glows.
+   The stronger of the two; also the default fallback.
+   ========================================================= */
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Surfaces (deep green-black family) */
+  --bg-0: #0c1608;   /* deepest */
+  --bg-1: #101d0b;   /* base */
+  --bg-2: #142310;   /* tinted band */
+  --bg-3: #182a13;   /* card / raised */
+  --border: rgba(109, 191, 91, 0.14);
+  --border-strong: rgba(109, 191, 91, 0.28);
+
+  /* Text */
+  --text: #eef3e6;
+  --text-dim: #b6c4a8;
+  --text-faint: #7f9070;
+
+  /* Accents */
+  --accent: var(--kiwi-bright);
+  --accent-deep: var(--kiwi-flesh);
+  --glow: rgba(78, 159, 61, 0.45);
+
+  /* Hero band — deep green-black, glows read strongly */
+  --hero-bg-top: #12210c;
+  --hero-bg-bot: var(--bg-1);
+  --hero-ink: var(--text);
+  --hero-ink-dim: var(--text-dim);
+  --hero-shell: #c7a06e;
+  --hero-glow: rgba(78, 159, 61, 0.22);
+  --hero-mark-shadow: 0 12px 34px rgba(78, 159, 61, 0.28);
+
+  /* Page ambient wash (body::before) */
+  --wash-a: rgba(78, 159, 61, 0.14);
+  --wash-b: rgba(139, 94, 60, 0.08);
+
+  /* Nav resting text over the hero band */
+  --nav-ink: var(--text);
+  --nav-ink-dim: var(--text-dim);
+  --nav-hover-bg: rgba(109, 191, 91, 0.1);
+  --nav-scrolled-bg: rgba(12, 22, 8, 0.72);
+
+  /* Card & surface fills */
+  --card-bg: linear-gradient(
+    180deg,
+    var(--bg-3),
+    rgba(16, 29, 11, 0.6)
+  );
+  --card-glow: rgba(109, 191, 91, 0.12);
+
+  /* Ghost button on the hero band */
+  --ghost-bg: rgba(109, 191, 91, 0.06);
+  --ghost-ink: var(--text);
+  --ghost-border: var(--border-strong);
+  --ghost-hover-bg: rgba(109, 191, 91, 0.12);
+  --ghost-hover-border: var(--accent);
+
+  /* Pill on the hero band */
+  --pill-ink: var(--hero-shell);
+  --pill-bg: rgba(199, 160, 110, 0.12);
+  --pill-border: rgba(199, 160, 110, 0.32);
+  --pill-dot: var(--kiwi-bright);
+  --pill-dot-glow: rgba(109, 191, 91, 0.9);
+
+  /* Terminal / code block */
+  --code-bg: var(--bg-0);
+  --code-bar-bg: rgba(0, 0, 0, 0.25);
+  --code-dot-idle: #3a4a30;
+
+  /* Diagram tiles */
+  --tile-fill: rgba(109, 191, 91, 0.18);
+  --tile-fill-accent: rgba(109, 191, 91, 0.4);
+  --tile-fill-ghost: rgba(109, 191, 91, 0.08);
+  --tile-stroke: var(--kiwi-bright);
+  --tile-stroke-ghost: rgba(109, 191, 91, 0.4);
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  --shadow-glow: 0 30px 90px -20px var(--glow);
+
+  /* Ko-fi support button (warm, brand-tinted) */
+  --kofi-bg: rgba(199, 160, 110, 0.14);
+  --kofi-ink: #e8c99a;
+  --kofi-border: rgba(199, 160, 110, 0.36);
+  --kofi-hover-bg: rgba(199, 160, 110, 0.24);
+}
+
+/* =========================================================
+   LIGHT theme — cream / off-white surfaces, deep green-teal
+   ink, kiwi-green accents. Warm, airy, botanical.
+   ========================================================= */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  /* Surfaces (cream family, subtle alternating tints) */
+  --bg-0: #ece2c9;   /* deepest (code / diagrams) */
+  --bg-1: #faf6ec;   /* base */
+  --bg-2: #f2ebd9;   /* tinted band */
+  --bg-3: #fffdf7;   /* card / raised */
+  --border: rgba(22, 52, 57, 0.12);
+  --border-strong: rgba(22, 52, 57, 0.22);
+
+  /* Text (deep green-teal ink) */
+  --text: #163439;
+  --text-dim: #3f5a54;
+  --text-faint: #526860;     /* AA (4.5:1) on footer/tint #ece2c9 */
+
+  /* Accents */
+  --accent: #367029;         /* AA on cream + .tint bands */
+  --accent-deep: var(--kiwi-flesh);
+  --glow: rgba(78, 159, 61, 0.35);
+
+  /* Hero band — cream, matches the light wordmark's teal */
+  --hero-bg-top: #fbf9f2;
+  --hero-bg-bot: #f2ebd9;
+  --hero-ink: #163439;
+  --hero-ink-dim: #3f5a54;
+  --hero-shell: #6b4a30;
+  --hero-glow: rgba(78, 159, 61, 0.18);
+  --hero-mark-shadow: 0 10px 28px rgba(22, 52, 57, 0.16);
+
+  /* Page ambient wash (body::before) */
+  --wash-a: rgba(78, 159, 61, 0.08);
+  --wash-b: rgba(139, 94, 60, 0.05);
+
+  /* Nav resting text over the hero band */
+  --nav-ink: var(--hero-ink);
+  --nav-ink-dim: var(--hero-ink-dim);
+  --nav-hover-bg: rgba(78, 159, 61, 0.12);
+  --nav-scrolled-bg: rgba(250, 246, 236, 0.82);
+
+  /* Card & surface fills */
+  --card-bg: linear-gradient(
+    180deg,
+    var(--bg-3),
+    #fbf7ec
+  );
+  --card-glow: rgba(78, 159, 61, 0.1);
+
+  /* Ghost button on the hero band */
+  --ghost-bg: rgba(22, 52, 57, 0.04);
+  --ghost-ink: var(--hero-ink);
+  --ghost-border: rgba(22, 52, 57, 0.28);
+  --ghost-hover-bg: rgba(22, 52, 57, 0.08);
+  --ghost-hover-border: var(--hero-ink);
+
+  /* Pill on the hero band */
+  --pill-ink: var(--hero-shell);
+  --pill-bg: rgba(139, 94, 60, 0.1);
+  --pill-border: rgba(139, 94, 60, 0.3);
+  --pill-dot: var(--kiwi-shell);
+  --pill-dot-glow: rgba(139, 94, 60, 0.55);
+
+  /* Terminal / code block (kept dark for legibility + contrast
+     against the cream page — a familiar terminal look) */
+  --code-bg: #14231a;
+  --code-bar-bg: rgba(0, 0, 0, 0.28);
+  --code-dot-idle: #3a4a30;
+
+  /* Diagram tiles */
+  --tile-fill: rgba(61, 125, 48, 0.16);
+  --tile-fill-accent: rgba(61, 125, 48, 0.34);
+  --tile-fill-ghost: rgba(61, 125, 48, 0.08);
+  --tile-stroke: var(--accent-deep);
+  --tile-stroke-ghost: rgba(61, 125, 48, 0.4);
+
+  --shadow-sm: 0 2px 10px rgba(22, 52, 57, 0.1);
+  --shadow: 0 14px 40px rgba(22, 52, 57, 0.14);
+  --shadow-glow: 0 26px 80px -24px var(--glow);
+
+  /* Ko-fi support button (warm, brand-tinted) */
+  --kofi-bg: rgba(139, 94, 60, 0.1);
+  --kofi-ink: #7a4f2e;
+  --kofi-border: rgba(139, 94, 60, 0.32);
+  --kofi-hover-bg: rgba(139, 94, 60, 0.18);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--text);
+  background: var(--bg-1);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+/* Subtle film grain / gradient overlay on the whole page */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      1200px 600px at 50% -8%,
+      var(--wash-a),
+      transparent 60%
+    ),
+    radial-gradient(
+      900px 700px at 90% 8%,
+      var(--wash-b),
+      transparent 55%
+    );
+}
+
+.wrap {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: clamp(1.1rem, 4vw, 2.5rem);
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------- Focus / accessibility ---------- */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* =========================================================
+   Nav
+   ========================================================= */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  transition: background 0.3s ease, border-color 0.3s ease,
+    backdrop-filter 0.3s ease;
+  border-bottom: 1px solid transparent;
+}
+
+.nav.scrolled {
+  background: var(--nav-scrolled-bg);
+  backdrop-filter: saturate(160%) blur(14px);
+  -webkit-backdrop-filter: saturate(160%) blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding-block: 0.85rem;
+}
+
+/* Shed the "KiwiDesk" brand wordmark text early — the two-label
+   Simple/Nerd toggle widened the nav cluster, and at 401–560px the
+   wordmark would otherwise collide with the Learn link. The logo
+   mark alone still links home. Done well above the phone range so
+   the cluster (Learn + lang + mode + theme) has room to shed
+   further below. */
+@media (max-width: 560px) {
+  .nav__brand span {
+    display: none;
+  }
+}
+
+/* Tight phones: shed the nav's least-critical text before the
+   cluster can overflow. The Ko-fi button is already icon-only, so
+   there's no text left to shed there. */
+@media (max-width: 460px) {
+  .nav__inner {
+    gap: 0.4rem;
+  }
+  .nav__link {
+    padding-inline: 0.55rem;
+  }
+  .nav__link--guide {
+    padding-inline: 0.5rem;
+    font-size: 0.9rem;
+  }
+  /* Tighten the language segments so the nav cluster (Learn +
+     lang + mode + theme) stays on one line on narrow phones. */
+  .lang-switch__opt {
+    min-width: 22px;
+    padding-inline: 0.3rem;
+  }
+}
+
+/* Very narrow phones: pull in the wrap padding + cluster gap so the
+   two-label mode toggle keeps both labels without overflow at
+   ~320px. */
+@media (max-width: 400px) {
+  .nav .wrap {
+    padding-inline: 0.7rem;
+  }
+  .nav__inner {
+    gap: 0.3rem;
+  }
+}
+
+/* The nav resting color adapts per theme via --nav-ink*, since
+   the hero band is light in the light theme and dark in dark. */
+.nav__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--nav-ink);
+  font-size: 1.05rem;
+  transition: color 0.3s ease;
+}
+
+.nav__mark {
+  display: block;
+  width: 28px;
+  height: 28px;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.18));
+  transition: filter 0.3s ease;
+}
+
+.nav.scrolled .nav__mark {
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
+}
+
+/* Swap the nav mark by theme, like the hero wordmark: colored
+   logo in light, golden variant in dark. */
+.nav__mark--dark {
+  display: none;
+}
+:root[data-theme="dark"] .nav__mark--light {
+  display: none;
+}
+:root[data-theme="dark"] .nav__mark--dark {
+  display: block;
+}
+
+.nav__links {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.nav__link {
+  color: var(--nav-ink-dim);
+  padding: 0.5rem 0.85rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  font-weight: 550;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.nav__link:hover {
+  color: var(--nav-ink);
+  background: var(--nav-hover-bg);
+}
+
+/* Ko-fi nav button — icon-only and compact. Counterintuitively this
+   reads as LESS obtrusive than a worded link: a small, recognizable,
+   clearly-clickable button sits quietly among the other nav
+   controls instead of competing for reading attention. Sized and
+   shaped like a sibling of the toggles beside it (same ~30px
+   height, rounded, subtle fill/border at rest). The footer's Ko-fi
+   treatment is intentionally different (a quiet text link) — this
+   is the nav-only variant. */
+.nav__support {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--kofi-border);
+  background: var(--kofi-bg);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.nav__support:hover {
+  background: var(--kofi-hover-bg);
+  border-color: var(--kofi-ink);
+}
+
+/* Drop the icon-only Ko-fi button across the whole phone range —
+   it's still reachable from the footer and the final CTA, and
+   dropping it buys the crowded cluster (Learn + lang + mode +
+   theme) the width it needs. Placed AFTER the base .nav__support
+   rule so the hide wins the cascade (the base display:inline-grid
+   would otherwise override an earlier media-query hide at equal
+   specificity). */
+@media (max-width: 460px) {
+  .nav__support {
+    display: none;
+  }
+}
+
+/* Official Ko-fi cup mark, kept in its brand colors. Sized up
+   slightly from the footer's icon since it now carries the button
+   alone, with no adjacent label text. */
+.kofi-icon {
+  width: 18px;
+  height: 14px;
+  display: block;
+  flex-shrink: 0;
+}
+
+/* Theme toggle — a compact sliding pill (day / night). The thumb
+   slides and the icon crossfades; it reads as a physical switch
+   rather than an icon button, which pairs better with the
+   text-forward mode toggle beside it. */
+.theme-toggle {
+  display: inline-grid;
+  place-items: center;
+  margin-left: 0.15rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  border-radius: 999px;
+}
+
+.theme-toggle__track {
+  position: relative;
+  display: block;
+  width: 52px;
+  height: 30px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--nav-hover-bg);
+  transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+.theme-toggle__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #fff8e6;
+  background: linear-gradient(180deg, #f6c453, #e0932f);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background 0.25s ease;
+}
+
+/* Dark theme → moon on the right; light theme → sun on the left. */
+:root[data-theme="dark"] .theme-toggle__thumb {
+  transform: translateX(22px);
+  background: linear-gradient(180deg, #cfe0bd, #9db785);
+  color: #10210b;
+}
+
+.theme-toggle:hover .theme-toggle__track {
+  border-color: var(--accent);
+}
+.theme-toggle:hover .theme-toggle__thumb {
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.32);
+}
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.theme-toggle svg {
+  display: block;
+}
+
+/* Crossfade the glyph inside the thumb. Show the CURRENT theme's
+   icon (sun in light, moon in dark) since the thumb slides to
+   telegraph the switch direction on its own. */
+.theme-toggle__sun,
+.theme-toggle__moon {
+  grid-area: 1 / 1;
+  transition: opacity 0.2s ease;
+}
+.theme-toggle__moon {
+  opacity: 0;
+}
+:root[data-theme="dark"] .theme-toggle__sun {
+  opacity: 0;
+}
+:root[data-theme="dark"] .theme-toggle__moon {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle__thumb {
+    transition: none;
+  }
+}
+
+/* Language switcher — a compact EN | DE segmented control, a
+   sibling of the theme + mode toggles. Two link "segments" share a
+   pill outline (matching the theme toggle's track), with a hairline
+   divider between; the active locale fills in like the theme
+   thumb. `white-space: nowrap` keeps the two 2-letter labels on one
+   line at every width. */
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  margin-left: 0.15rem;
+  padding: 2px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--nav-hover-bg);
+  white-space: nowrap;
+  transition: border-color 0.25s ease;
+}
+
+.lang-switch:hover {
+  border-color: var(--accent);
+}
+
+.lang-switch__opt {
+  display: inline-grid;
+  place-items: center;
+  min-width: 26px;
+  height: 24px;
+  padding-inline: 0.4rem;
+  border-radius: 999px;
+  color: var(--nav-ink-dim);
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.lang-switch__opt:hover {
+  color: var(--nav-ink);
+}
+
+/* Active locale reads as filled, echoing the theme toggle's thumb
+   gradient so the three controls share one visual language. */
+.lang-switch__opt[aria-current="true"] {
+  color: #10210b;
+  background: linear-gradient(180deg, #cfe0bd, #9db785);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
+}
+
+.lang-switch__opt:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.lang-switch__sep {
+  width: 1px;
+  height: 14px;
+  background: var(--border-strong);
+}
+
+/* =========================================================
+   Buttons & pills
+   ========================================================= */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.85rem 1.5rem;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.25s ease,
+    background 0.2s ease, border-color 0.2s ease;
+  will-change: transform;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn--primary {
+  /* Deep enough green under white text to clear AA contrast
+     even on the light hero (kiwi-bright alone is too pale). */
+  background: linear-gradient(180deg, var(--kiwi-flesh), #357229);
+  color: #ffffff;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.16);
+  box-shadow: 0 10px 30px -8px var(--glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.btn--primary:hover {
+  box-shadow: 0 16px 40px -8px var(--glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* Ghost buttons adapt per theme via --ghost-* — in the light
+   theme they read as a teal-ink outline on cream; in dark, a
+   soft green outline on the green-black band. */
+.btn--ghost,
+.btn--ghost-light {
+  background: var(--ghost-bg);
+  color: var(--ghost-ink);
+  border-color: var(--ghost-border);
+}
+
+.btn--ghost:hover,
+.btn--ghost-light:hover {
+  background: var(--ghost-hover-bg);
+  border-color: var(--ghost-hover-border);
+}
+
+.pill,
+.pill--light {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 550;
+  color: var(--pill-ink);
+  background: var(--pill-bg);
+  border: 1px solid var(--pill-border);
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  letter-spacing: 0.01em;
+}
+
+.pill__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--pill-dot);
+  box-shadow: 0 0 10px var(--pill-dot-glow);
+}
+
+/* =========================================================
+   Section rhythm
+   ========================================================= */
+section {
+  position: relative;
+  z-index: 1;
+  padding-block: clamp(3.5rem, 9vw, var(--sp-8));
+  /* L5: every top-level section doubles as an anchor-jump
+     target (hero CTAs, footer/nav links), so it needs the same
+     clearance under the sticky .nav (~68.5px tall) that
+     /learn/'s .learn-section carries — kept at the identical
+     5.5rem so a jump lands consistently on either page. */
+  scroll-margin-top: 5.5rem;
+}
+
+.tint {
+  background: var(--bg-2);
+  border-block: 1px solid var(--border);
+}
+
+.section-head {
+  max-width: 640px;
+  margin: 0 auto clamp(2rem, 5vw, 3.25rem);
+  text-align: center;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 650;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.75rem;
+}
+
+.section-head h2 {
+  font-size: clamp(1.7rem, 4vw, 2.5rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.75rem;
+}
+
+.section-head p {
+  color: var(--text-dim);
+  font-size: clamp(1rem, 2.2vw, 1.12rem);
+  margin: 0;
+}
+
+/* =========================================================
+   Hero — light cream band, transitioning into the dark body
+   ========================================================= */
+.hero {
+  position: relative;
+  text-align: center;
+  /* Tightened top + bottom so the wordmark sits higher and the
+     hero + its post-hero quote clear a normal laptop viewport. */
+  padding-block: clamp(1.75rem, 4.5vw, 3rem) clamp(3.5rem, 8vw, 6rem);
+  overflow: hidden;
+  background: linear-gradient(
+    180deg,
+    var(--hero-bg-top) 0%,
+    var(--hero-bg-bot) 78%,
+    var(--hero-bg-bot) 100%
+  );
+}
+
+.hero__glow {
+  position: absolute;
+  top: -20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(900px, 120vw);
+  aspect-ratio: 1;
+  background: radial-gradient(
+    circle,
+    var(--hero-glow),
+    transparent 68%
+  );
+  filter: blur(10px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hero .wrap {
+  position: relative;
+  z-index: 1;
+}
+
+/* Soft seam: fades the cream band into the dark body below so
+   the hero doesn't hard-cut into the first dark section. */
+.hero__seam {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: clamp(90px, 16vw, 160px);
+  background: linear-gradient(180deg, transparent, var(--bg-1));
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero__mark {
+  height: clamp(160px, 26vw, 230px);
+  width: auto;
+  margin: 0 auto clamp(1rem, 2.5vw, 1.5rem);
+  filter: drop-shadow(var(--hero-mark-shadow));
+}
+
+/* Swap the wordmark by theme, no layout shift: the hidden one is
+   removed from flow, both share the same clamp()-sized box. */
+.hero__mark--dark {
+  display: none;
+}
+:root[data-theme="dark"] .hero__mark--light {
+  display: none;
+}
+:root[data-theme="dark"] .hero__mark--dark {
+  display: block;
+}
+
+.hero h1 {
+  /* Slightly smaller + a wider line allowance so the longer German
+     titles land in two balanced lines like the English ones (15ch
+     forced German onto three). */
+  font-size: clamp(2rem, 5.2vw, 3.4rem);
+  line-height: 1.07;
+  letter-spacing: -0.03em;
+  margin: 0 auto 1rem;
+  max-width: 24ch;
+  color: var(--hero-ink);
+  text-wrap: balance;
+}
+/* The Nerd title is shorter, so at the Simple title's wide measure it
+   collapses to one line — give it a tighter measure to keep two. */
+.hero__mode--dev h1 {
+  max-width: 19ch;
+}
+
+.hero__sub {
+  font-size: clamp(1.05rem, 2.6vw, 1.3rem);
+  color: var(--hero-ink-dim);
+  max-width: 60ch;
+  margin: 0 auto clamp(1.75rem, 4vw, 2.25rem);
+  text-wrap: balance;
+}
+
+.hero__sub b {
+  color: var(--hero-ink);
+  font-weight: 700;
+}
+
+.hero__cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  justify-content: center;
+  margin-bottom: 1.35rem;
+}
+
+/* =========================================================
+   Demo video
+   ========================================================= */
+.demo__frame {
+  position: relative;
+  max-width: 900px;
+  margin-inline: auto;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-glow), var(--shadow);
+  background: #000;
+  aspect-ratio: 16 / 9;
+}
+
+.demo__frame video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.demo__overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+  width: 100%;
+  background: radial-gradient(
+    circle at center,
+    rgba(12, 22, 8, 0.15),
+    rgba(12, 22, 8, 0.55)
+  );
+  transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+
+.demo__overlay[hidden] {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.demo__play {
+  width: clamp(64px, 12vw, 90px);
+  height: clamp(64px, 12vw, 90px);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(
+    180deg,
+    var(--kiwi-bright),
+    var(--kiwi-flesh)
+  );
+  box-shadow: 0 12px 40px -6px var(--glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.25s ease;
+}
+
+.demo__overlay:hover .demo__play {
+  transform: scale(1.07);
+  box-shadow: 0 18px 55px -6px var(--glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.demo__play svg {
+  margin-left: 5px;
+}
+
+.demo__caption {
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 0.95rem;
+  margin-top: 1rem;
+}
+
+/* =========================================================
+   Feature grid
+   ========================================================= */
+.grid {
+  display: grid;
+  gap: clamp(1rem, 2.2vw, 1.4rem);
+  /* min(280px, 100%) lets a card shrink below 280px on viewports
+     narrower than that (plus padding) instead of forcing overflow
+     — normal-width behavior is unchanged. */
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(280px, 100%), 1fr)
+  );
+}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: clamp(1.4rem, 3vw, 1.85rem);
+  transition: transform 0.22s ease, border-color 0.22s ease,
+    box-shadow 0.25s ease, background 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    340px 180px at var(--mx, 50%) 0%,
+    var(--card-glow),
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow);
+}
+
+.card:hover::after {
+  opacity: 1;
+}
+
+.card__icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(78, 159, 61, 0.14);
+  border: 1px solid var(--border-strong);
+  color: var(--accent);
+  margin-bottom: 1rem;
+}
+
+.card__icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.card h3 {
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.45rem;
+}
+
+.card p {
+  color: var(--text-dim);
+  font-size: 0.97rem;
+  margin: 0;
+}
+
+/* =========================================================
+   Layouts showcase
+   ========================================================= */
+.layouts {
+  display: grid;
+  gap: clamp(1rem, 2.2vw, 1.4rem);
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(250px, 100%), 1fr)
+  );
+}
+
+.layout-card {
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: clamp(1.2rem, 2.5vw, 1.5rem);
+  transition: transform 0.22s ease, border-color 0.22s ease;
+}
+
+.layout-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-strong);
+}
+
+.layout-card__diagram {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-sm);
+  background: var(--bg-0);
+  border: 1px solid var(--border);
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.layout-card__diagram svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.layout-card h3 {
+  font-size: 1.05rem;
+  margin: 0 0 0.3rem;
+  font-family: var(--mono);
+  color: var(--accent);
+  letter-spacing: -0.01em;
+}
+
+.layout-card p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 0.92rem;
+}
+
+/* diagram tile fills (theme-aware) */
+.tile {
+  fill: var(--tile-fill);
+  stroke: var(--tile-stroke);
+  stroke-width: 1.4;
+}
+.tile--accent {
+  fill: var(--tile-fill-accent);
+  stroke: var(--tile-stroke);
+  stroke-width: 1.6;
+}
+.tile--ghost {
+  fill: var(--tile-fill-ghost);
+  stroke: var(--tile-stroke-ghost);
+  stroke-width: 1.2;
+  stroke-dasharray: 3 3;
+}
+
+/* =========================================================
+   Quick start band
+   ========================================================= */
+.quickstart .wrap {
+  display: grid;
+  gap: clamp(1.75rem, 4vw, 2.5rem);
+  align-items: center;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 820px) {
+  .quickstart .wrap {
+    grid-template-columns: 1.05fr 1fr;
+  }
+}
+
+/* Keep a wide <pre> (long git-clone URL) inside its own scroll
+   instead of stretching the grid track and overflowing the page. */
+.quickstart .code {
+  min-width: 0;
+}
+
+.quickstart h2 {
+  font-size: clamp(1.6rem, 3.6vw, 2.3rem);
+  line-height: 1.14;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.85rem;
+}
+
+.quickstart p {
+  color: var(--text-dim);
+  margin: 0 0 1.5rem;
+  max-width: 46ch;
+}
+
+.req {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-faint);
+  margin-top: 1.25rem;
+}
+
+/* The terminal block stays dark in both themes — a familiar
+   terminal look, and it self-contains its own light-on-dark
+   text tokens (below) so it needs no per-theme text vars. */
+.code {
+  background: var(--code-bg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.code__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1rem;
+  background: var(--code-bar-bg);
+  border-bottom: 1px solid rgba(109, 191, 91, 0.14);
+}
+
+.code__dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--code-dot-idle);
+}
+.code__dot:nth-child(1) {
+  background: #8b5e3c;
+}
+.code__dot:nth-child(2) {
+  background: #a98a4b;
+}
+.code__dot:nth-child(3) {
+  background: var(--kiwi-flesh);
+}
+
+.code__title {
+  font-size: 0.78rem;
+  /* Bumped from #7f9070 (~3.6:1 on the dark terminal, fails AA) to
+     ~4.6:1. The terminal is dark-pinned in both themes, so this is
+     theme-invariant. */
+  color: #93a583;
+  font-family: var(--mono);
+}
+
+/* Copy-to-clipboard button, pushed to the right of the title bar. */
+.code__copy {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.55rem;
+  border: 1px solid rgba(109, 191, 91, 0.32);
+  border-radius: 8px;
+  background: rgba(109, 191, 91, 0.1);
+  /* Bumped from #b6c4a8 for a legible copy label against the
+     dark-pinned terminal in both themes (the bright light-mode
+     surround makes the dim text under-read otherwise). */
+  color: #cddbc2;
+  font-size: 0.74rem;
+  font-family: var(--font);
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.code__copy:hover {
+  background: rgba(109, 191, 91, 0.18);
+  border-color: rgba(109, 191, 91, 0.55);
+  color: #f4f8ee;
+}
+
+.code__copy:focus-visible {
+  outline: 2px solid var(--kiwi-bright);
+  outline-offset: 2px;
+}
+
+.code__copy.is-copied {
+  color: var(--kiwi-bright);
+  border-color: var(--kiwi-bright);
+}
+
+.code pre {
+  margin: 0;
+  padding: 1.2rem 1.25rem;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  line-height: 1.85;
+  /* Pinned light-on-dark: the terminal is dark in both themes,
+     so its inner text must not follow the page text color. */
+  color: #eef3e6;
+}
+
+.code .prompt {
+  color: var(--kiwi-bright);
+  user-select: none;
+}
+.code .cmt {
+  color: #93a583;
+}
+
+/* =========================================================
+   Footer
+   ========================================================= */
+.footer {
+  border-top: 1px solid var(--border);
+  background: var(--bg-0);
+  padding-block: clamp(2.5rem, 6vw, 4rem);
+}
+
+.footer .wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.25rem;
+}
+
+/* Center the logo over the name/tagline (a bare block img would
+   otherwise left-align while the text below it centers). */
+.footer__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Transparent logo laid flat — no card treatment, it fades into
+   the footer background. */
+.footer__logo {
+  width: min(104px, 40vw);
+  height: auto;
+  display: block;
+  margin-inline: auto;
+}
+
+.footer__name {
+  font-weight: 650;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  margin: 0.5rem 0 0;
+}
+
+.footer__tag {
+  color: var(--text-dim);
+  margin: 0;
+}
+
+/* Footer Ko-fi link — deliberately quiet, matching the weight of
+   the plain text links beside it (.footer__links) rather than
+   standing out as a filled button. A soft tint only appears on
+   hover/focus, so support stays discoverable, not shouty. */
+.footer__kofi {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.9rem 0 0.2rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 550;
+  color: var(--text-dim);
+  background: none;
+  border: 1px solid transparent;
+  transition: color 0.2s ease, background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.footer__kofi:hover {
+  color: var(--kofi-ink);
+  background: var(--kofi-bg);
+  border-color: var(--kofi-border);
+}
+
+.footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.5rem;
+  justify-content: center;
+  margin-top: 0.6rem;
+}
+
+.footer__links a {
+  color: var(--text-dim);
+  font-size: 0.95rem;
+  transition: color 0.2s ease;
+}
+
+.footer__links a:hover {
+  color: var(--accent);
+}
+
+.footer__copy {
+  color: var(--text-faint);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+/* Low-key maker credit — deliberately quieter than the copyright
+   line above it (smaller, fainter), so the name reads as a warm
+   footnote rather than a second brand mark. */
+.footer__credit {
+  color: var(--text-faint);
+  opacity: 0.82;
+  font-size: 0.78rem;
+  margin: 0.35rem 0 0;
+}
+.footer__credit a {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--border-strong);
+  text-underline-offset: 2px;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+.footer__credit a:hover {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+
+/* Playful sign-off, the very last line of the page. */
+.footer__daily {
+  color: var(--text-faint);
+  font-size: 0.8rem;
+  font-style: italic;
+  margin: 1rem 0 0;
+  opacity: 0.9;
+}
+
+/* =========================================================
+   Scroll reveal
+   ========================================================= */
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .btn:hover,
+  .card:hover,
+  .layout-card:hover,
+  .footer__kofi:hover {
+    transform: none;
+  }
+  * {
+    scroll-behavior: auto !important;
+  }
+}
+
+/* =========================================================
+   Ultra-narrow nav shedding (≤365px)
+   -----------------------------------------------------------
+   Below the smallest common phone width (iPhone SE is 375px),
+   trim the three nav controls (lang / mode / theme) further. The
+   mode toggle now shows BOTH labels (Simple AND Nerd — its
+   whole affordance), so it stays a two-segment control here too,
+   just with tighter segment width and font. The ≤400px rule above
+   already hid the brand wordmark text and pulled in the wrap
+   padding, which is what buys room for the two labels at this
+   width. Deliberately placed at the very end of the file — after
+   every base rule it overrides, including the toggles defined in
+   landing-modes.css (which @imports before this file's own rules)
+   — so it reliably wins the cascade at equal specificity
+   regardless of source order elsewhere.
+   ========================================================= */
+/* Compact the theme + language controls across the whole phone
+   range so the nav cluster fits 320–460px. Coordinated with the
+   mode-toggle seg-w compaction (landing-modes.css, same ≤460
+   breakpoint). */
+@media (max-width: 460px) {
+  .theme-toggle__track {
+    width: 44px;
+  }
+  :root[data-theme="dark"] .theme-toggle__thumb {
+    transform: translateX(16px);
+  }
+  .lang-switch {
+    margin-left: 0;
+  }
+  .lang-switch__opt {
+    min-width: 20px;
+    height: 22px;
+    padding-inline: 0.25rem;
+    font-size: 0.72rem;
+  }
+}
+
+/* Very tight phones (≤365): pull the cluster gap in and trim the
+   Learn link + theme track to the minimum so 320px still clears. */
+@media (max-width: 365px) {
+  .nav__inner {
+    gap: 0.25rem;
+  }
+  .nav__links {
+    gap: 0.2rem;
+  }
+  .nav__link--guide {
+    padding-inline: 0.3rem;
+    font-size: 0.85rem;
+  }
+  .theme-toggle__track {
+    width: 40px;
+  }
+  :root[data-theme="dark"] .theme-toggle__thumb {
+    transform: translateX(12px);
+  }
+}

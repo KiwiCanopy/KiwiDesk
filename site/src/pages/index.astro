@@ -1,0 +1,12 @@
+---
+// KiwiDesk — English marketing landing page at /.
+//
+// The entire page (structure, assets, behavior) lives in the shared
+// <Landing> component; this route only supplies the English strings
+// and locale. The German counterpart is /src/pages/de/index.astro.
+// Docs live under /docs/* (Starlight) and are unaffected.
+import Landing from "../components/Landing.astro";
+import en from "../i18n/en.json";
+---
+
+<Landing t={en} lang="en" />

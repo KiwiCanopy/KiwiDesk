@@ -13,6 +13,25 @@ Usage:
                                        sourced with the English
                                        text for a translator to
                                        fill in place.
+
+    --site                            Operate on the marketing site
+                                       (`site/src/i18n/`) instead of
+                                       the Swift app. Combine with a
+                                       locale or --check/--prune:
+                                       `scripts/extract-keys --site
+                                       fr` writes
+                                       site/src/i18n/missing_fr.json.
+                                       The site's en.json is the
+                                       hand-authored source of truth
+                                       (the Astro components read
+                                       `t.<key>` from it), NOT a
+                                       generated manifest, so --site
+                                       never scans Swift and never
+                                       rewrites en.json — it just
+                                       diffs en.json against the
+                                       target locale. Everything else
+                                       (missing round-trip, --check,
+                                       --prune) behaves the same.
     scripts/extract-keys --check      Compute the mapping and
                                        compare it to the
                                        committed en.json WITHOUT
@@ -115,6 +134,13 @@ LOCALES_DIR = Path(
     )
 )
 EN_JSON = LOCALES_DIR / "en.json"
+
+# The marketing site's flat i18n manifests (issue #63 / Wave 10).
+# Selected by `--site`; unlike the app, this en.json is authored by
+# hand (the Astro components read `t.<key>` from it) rather than
+# generated from code, so site mode loads it directly as the key
+# map instead of scanning Swift.
+SITE_LOCALES_DIR = ROOT / "site" / "src" / "i18n"
 
 # One string piece: a plain "..." literal or a triple-quoted
 # """...""" block (Swift multi-line string, used for the
@@ -481,13 +507,17 @@ def check(mapping: dict[str, str]) -> int:
     return 1
 
 
-def prune(mapping: dict[str, str]) -> int:
+def prune(mapping: dict[str, str], regen: bool = True) -> int:
     """Removes every orphan key from every shipped locale file
     and rewrites en.json. The maintainer's "clean up cruft"
     command — run after a key is deliberately removed/renamed
-    (not via `scripts/rename-key`) in code."""
+    (not via `scripts/rename-key`) in code. `regen=False` (site
+    mode) skips the en.json rewrite: the site's en.json is the
+    hand-authored source of truth, so re-emitting it sorted would
+    destroy its deliberate grouping."""
     orphans = find_orphans(mapping)
-    write_en_json(mapping)
+    if regen:
+        write_en_json(mapping)
     if not orphans:
         print("extract-keys --prune: no orphan keys found.")
         return 0
@@ -559,27 +589,76 @@ def write_missing(locale: str, mapping: dict[str, str]) -> None:
         f"extract-keys: {len(missing)} missing key(s) for "
         f"'{locale}' written to {out}"
     )
+    flag = "--site " if LOCALES_DIR == SITE_LOCALES_DIR else ""
     print(
         'Fill each entry\'s "translation" field, then run: '
-        f"scripts/merge-keys {locale}"
+        f"scripts/merge-keys {flag}{locale}"
     )
 
 
+def _site_mapping() -> dict[str, str]:
+    """Site mode's stand-in for `extract()`: the site's en.json is
+    the hand-authored key map (no Swift to scan), so load it
+    directly. Fails loudly if it is absent or not a flat
+    {string: string} map — the same shape every locale must have."""
+    if not EN_JSON.exists():
+        print(
+            f"extract-keys --site: {EN_JSON} not found.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    try:
+        data = json.loads(EN_JSON.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as error:
+        print(
+            f"extract-keys --site: {EN_JSON} is invalid JSON "
+            f"({error}).",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    if not isinstance(data, dict) or not all(
+        isinstance(value, str) for value in data.values()
+    ):
+        print(
+            f"extract-keys --site: {EN_JSON} must be a flat "
+            "{string: string} map.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    return data
+
+
 def main(argv: list[str]) -> int:
-    if len(argv) > 2:
+    global LOCALES_DIR, EN_JSON
+    args = argv[1:]
+    site = "--site" in args
+    if site:
+        args = [a for a in args if a != "--site"]
+        LOCALES_DIR = SITE_LOCALES_DIR
+        EN_JSON = LOCALES_DIR / "en.json"
+    if len(args) > 1:
         print(__doc__)
         return 1
-    if len(argv) == 2 and argv[1] == "--check":
-        mapping = extract()
+    mode = args[0] if args else None
+    mapping = _site_mapping() if site else extract()
+    if mode == "--check":
         return check(mapping)
-    if len(argv) == 2 and argv[1] == "--prune":
-        mapping = extract()
-        return prune(mapping)
-    mapping = extract()
-    write_en_json(mapping)
-    if len(argv) == 2:
-        write_missing(argv[1], mapping)
-    elif len(argv) == 1:
+    if mode == "--prune":
+        return prune(mapping, regen=not site)
+    # Default action: (re)build the manifest, plus optionally the
+    # missing round-trip for a locale. Site en.json is authored by
+    # hand, so it is never regenerated.
+    if not site:
+        write_en_json(mapping)
+    if mode:
+        write_missing(mode, mapping)
+    elif site:
+        print(
+            "extract-keys --site: no locale given. Run "
+            "`scripts/extract-keys --site <locale>` (e.g. de) to "
+            "compute its missing keys."
+        )
+    else:
         print(
             "extract-keys: no locale given — only en.json was "
             "rebuilt. Run `scripts/extract-keys <locale>` to "
