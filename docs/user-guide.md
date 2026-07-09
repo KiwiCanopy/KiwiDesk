@@ -76,10 +76,12 @@ translation, see [translating.md](translating.md).
 ## The gui.json File
 
 The file `~/.config/KiwiDesk/gui.json` holds the app's complete
-configuration. It is created the first time you Save in the Settings
-window (it does not exist on a hand-written setup). You normally
-never edit it by hand, but it is documented here for backup and
-transparency.
+configuration. On a truly fresh install (no `init.lua` yet) it is
+created at first launch, pre-filled with the
+[default shortcuts](#default-shortcuts). On a hand-written setup
+(an `init.lua` already exists) it is only created the first time
+you Save in the Settings window. You normally never edit it by
+hand, but it is documented here for backup and transparency.
 
 **Top-level structure:**
 
@@ -488,6 +490,32 @@ combos to actions. Every shortcut lives in a **mode** — normally the
 **default** mode (active at startup), plus optional modal modes
 (vim-style); only the active mode's bindings fire at a time.
 
+### Default Shortcuts
+
+A fresh install starts with a usable set in the default mode, so
+you can drive KiwiDesk before configuring anything:
+
+| Action | Shortcut |
+| --- | --- |
+| Focus window left / down / up / right | `⌥H` `⌥J` `⌥K` `⌥L` |
+| Go to space 1–9 | `⌥1` … `⌥9` |
+| Swap with window left / down / up / right | `⌥⇧H` `⌥⇧J` `⌥⇧K` `⌥⇧L` |
+| Move to space 1–9 | `⌥⇧1` … `⌥⇧9` |
+| Shrink / Enlarge | `⌥-` / `⌥=` |
+| Make floating | `⌥T` |
+
+The digits are display-order positions: `⌥3` targets the *third*
+space in your Spaces list, whatever its name. A row is generated
+only for spaces that exist when the set is seeded (at most nine),
+so no shortcut ever targets a space that isn't there.
+
+The set is seeded only while **no** shortcut is bound anywhere —
+into `gui.json` at first launch on a fresh install, or into the
+editable model when your `init.lua` declares no keybindings. It
+never overwrites bindings you (or your Lua) authored, and every
+seeded row is an ordinary catalog row: rebind, clear, or override
+it per profile like any other shortcut.
+
 ### Recording a Shortcut
 
 Click an empty row or the **Edit** pencil on an existing row. Click
@@ -568,6 +596,24 @@ Each row has an action. Built-in actions live under headings:
 When you save, every shortcut lives in a mode in `gui.json`. To use
 an action not in the built-in sections, write custom Lua in a row
 under Custom Bindings.
+
+### Inactive Shortcuts
+
+The per-space rows above render one row per space in the current
+space list. A bound shortcut whose target space is *not* in that
+list — say `⌥6 → Go to Space 6` after switching from an 8-space
+to a 4-space profile — appears in a dimmed **Inactive shortcuts**
+section at the bottom instead of disappearing. Such a shortcut:
+
+- **Still works** — pressing it recreates its space and switches
+  to it.
+- **Still holds its combo** — recording the same combo elsewhere
+  is blocked, with *Steal* and *Go to* pointing at the inactive
+  row.
+- **Is never deleted for you** — it becomes a normal row again
+  the moment its space returns (e.g. switching back to the
+  profile that declares it). Rebind or clear it in the section
+  if you want the combo back now.
 
 ### Import & Adopt
 

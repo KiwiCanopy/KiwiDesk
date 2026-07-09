@@ -58,6 +58,16 @@ struct ShortcutsSection: View {
                         model: model,
                         bindings: bindingsBinding
                     )
+                    // Orphaned space-targeting rows (#92):
+                    // rendered so "Go to" from a rejected
+                    // recording can reach the holder — the
+                    // per-space groups above only render
+                    // live spaces.
+                    OrphanedShortcutsSection(
+                        model: model,
+                        bindings: bindingsBinding,
+                        spaces: model.config.spaces
+                    )
                     advancedDrawer
                 }
                 .padding(16)

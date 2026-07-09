@@ -278,6 +278,51 @@ persisted data or breaking import classification (issue #9
 follow-up: the original literal-routing sweep covered SwiftUI
 view literals but missed catalog-defined strings).
 
+**First run seeds a starter shortcut set — base tier, only
+into emptiness.** A fresh install used to boot with zero
+shortcuts (the default mode existed but was empty): a GUI-first
+user had no way to focus or move a window until they authored
+every combo. Now `Core.DefaultKeybindings` seeds a starter set
+(⌥HJKL focus, ⌥⇧HJKL swap, ⌥digit / ⌥⇧digit per-space, ⌥-/⌥=
+resize, ⌥T float) with one guard everywhere: **only when no
+mode carries a single binding** — a user- or Lua-authored
+binding anywhere blocks the seed, making it idempotent and
+never destructive. The set lives in the **base `gui.json`
+modes**, never a profile override (profiles stay
+tiling-plus-sparse-behavior, #55): on a true first launch (no
+`init.lua`) the seeded model is persisted so the very first
+boot is GUI-managed and the shortcuts actually fire; with a
+bindings-free `init.lua` the seed appears in the editable
+model and persists on the first Save. Per-space rows are
+**position-based** (⌥3 = third space in display order,
+whatever its name), generated only for spaces that exist at
+seed time and capped at nine — no dead rows targeting
+nonexistent spaces. The seeded Lua and labels mirror
+`KeybindingCatalog` byte-for-byte (guarded by
+`DefaultSeedCatalogParityTests`) so the rows stay presets, not
+Custom (#4). (#91)
+
+**Orphaned space shortcuts are surfaced, never pruned.** A
+binding that targets a space by name outlives the space's
+presence in the current profile: it stays Carbon-registered
+(pressing it recreates the space via `ensureSpace`) and keeps
+its combo (the recorder preflight checks every stored row, not
+just visible ones). Before #92 it was also *invisible* — the
+per-space catalog rows render only live spaces, and the
+Advanced drawer shows only `.custom` — so the user was
+hard-blocked by a holder they could not see, and the
+rejection's *Go to* scrolled to a row that did not exist. Now
+a dimmed **Inactive shortcuts** section renders one ordinary
+`NavRow` per orphaned binding (detected via
+`SpaceLuaArg.targetSpace`, the strict inverse of the catalog's
+authoring, against the live-derived space list, #77), so
+rebind / clear / *Go to* all work. Pruning on save was
+explicitly rejected: a binding orphaned under a 4-space
+profile is valid again under the 8-space one — silently
+deleting it would lose config across a routine monitor swap.
+The rows stay live at runtime by design; only their
+*visibility* was broken. (#92)
+
 ## Overrides & appearance
 
 **Overrides are visible-but-inherited, never hidden.** A
