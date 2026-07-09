@@ -36,23 +36,23 @@ extension KiwiCore {
         registerLuaAPI(on: fresh)
 
         ensureDefaultConfig()
-        // Arm the typo-guard recorder for the chunk run: a
-        // guarded unknown call is non-fatal, so it must land
+        // Typo-guard hits are recorded only for the chunk run:
+        // a guarded unknown call is non-fatal, so it must land
         // here as an issue to stay visible (#39).
-        typoIssues = []
-        if case .failure(let error) = fresh.runFile(
-            configURL
-        ) {
-            onLog("init.lua error: \(error)")
-            issues.append(
-                ConfigIssue(
-                    source: "init.lua",
-                    message: "\(error)"
+        let typos = recordingTypoIssues {
+            if case .failure(let error) = fresh.runFile(
+                configURL
+            ) {
+                onLog("init.lua error: \(error)")
+                issues.append(
+                    ConfigIssue(
+                        source: "init.lua",
+                        message: "\(error)"
+                    )
                 )
-            )
+            }
         }
-        issues.append(contentsOf: typoIssues ?? [])
-        typoIssues = nil
+        issues.append(contentsOf: typos)
         // A sidecar that exists but no longer decodes means
         // the visual editor (and the structured loader) can't
         // see the user's rules — half-loaded, must be visible.

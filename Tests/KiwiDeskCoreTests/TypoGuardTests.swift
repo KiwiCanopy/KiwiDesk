@@ -126,6 +126,31 @@ struct TypoGuardTests {
         #expect(core.configIssues.isEmpty)
     }
 
+    @Test("Every namespace table is guarded")
+    func allNamespacesGuarded() {
+        // One typo per namespace: proves the install chunk
+        // compiled and every table got its guard — a broken
+        // install would abort at the first call instead.
+        let tables = APIReference.namespaces.keys.sorted()
+        let core = makeCore(
+            config:
+                tables
+                .map { "\($0).no_such_fn_xyz(1)" }
+                .joined(separator: "\n")
+        )
+        core.loadConfig()
+        for table in tables {
+            #expect(
+                core.configIssues.contains {
+                    $0.message.contains(
+                        "\(table).no_such_fn_xyz"
+                    )
+                },
+                "unguarded namespace: \(table)"
+            )
+        }
+    }
+
     @Test("Namespaced typos get a did-you-mean suggestion")
     func namespacedSuggestion() {
         #expect(

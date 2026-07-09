@@ -18,9 +18,9 @@ extension KiwiCore {
     /// `APIReference.namespaces` table. Must run at the end of
     /// `registerLuaAPI` so all guarded tables already exist.
     func installTypoGuards(on lua: LuaInterpreter) {
-        // Internal reporter, `__`-prefixed: absent from
-        // `APIReference`, so `help()` and did-you-mean can
-        // never surface (or suggest) it.
+        // The reporter is registered only to be captured as an
+        // upvalue below; the chunk removes the table entry, so
+        // user Lua can neither call, spoof, nor break it.
         lua.register("__report_unknown") { [weak self] args in
             guard let self,
                 let table = args.first?.stringValue,
@@ -34,14 +34,15 @@ extension KiwiCore {
         let installs = tables.map {
             "setmetatable(\($0), guard(\"\($0)\"))"
         }.joined(separator: "\n")
-        lua.run(
+        let result = lua.run(
             """
+            local report = KiwiDesk.__report_unknown
+            KiwiDesk.__report_unknown = nil
             local function guard(name)
                 return {
                     __index = function(_, key)
                         return function()
-                            KiwiDesk.__report_unknown(
-                                name, tostring(key))
+                            report(name, tostring(key))
                         end
                     end,
                 }
@@ -49,6 +50,23 @@ extension KiwiCore {
             \(installs)
             """
         )
+        // A failed install would silently revert typos to hard
+        // chunk-aborting errors — the exact #39 failure mode.
+        if case .failure(let error) = result {
+            onLog("typo guard install failed: \(error)")
+        }
+    }
+
+    /// Runs `body` with typo-guard ConfigIssue recording armed
+    /// and returns what it captured. The only way to arm the
+    /// buffer — the `defer` makes a forgotten drain impossible.
+    func recordingTypoIssues(
+        _ body: () -> Void
+    ) -> [ConfigIssue] {
+        typoIssues = []
+        defer { typoIssues = nil }
+        body()
+        return typoIssues ?? []
     }
 
     /// Logs the did-you-mean hint; during a config load (see

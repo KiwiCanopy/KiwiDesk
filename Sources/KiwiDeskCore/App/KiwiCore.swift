@@ -74,9 +74,9 @@ public final class KiwiCore {
     /// profile half without losing these.
     var configLoadIssues: [ConfigIssue] = []
     /// Typo-guard hits from the init.lua chunk currently
-    /// running (#39). Non-nil only while `loadConfig` executes
-    /// the chunk; nil gates runtime hits (a typo inside a
-    /// keybinding closure) to log-only.
+    /// running (#39). Armed exclusively by
+    /// `recordingTypoIssues`; nil gates runtime hits (a typo
+    /// inside a keybinding closure) to log-only.
     var typoIssues: [ConfigIssue]?
     /// Fired whenever `configIssues` changes (including back
     /// to empty, so the badge clears itself).
