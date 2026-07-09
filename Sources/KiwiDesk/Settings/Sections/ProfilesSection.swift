@@ -140,6 +140,13 @@ struct ProfilesSection: View {
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {
                     Text(summary.name)
+                        // Bonus discovery path (low-risk): a
+                        // double-click on the name opens the
+                        // same rename popover as the pencil,
+                        // which stays the primary visible cue.
+                        .onTapGesture(count: 2) {
+                            beginRename(summary.name)
+                        }
                     renameButton(summary.name)
                     if summary.name == model.activeProfile {
                         BadgeChip(
@@ -207,18 +214,23 @@ struct ProfilesSection: View {
     /// Rename is a pencil right beside the profile name (in
     /// front of the badges), opening a popover. The rename is
     /// immediate (file + native-Space bindings follow), like
-    /// Delete and make default.
+    /// Delete and make default. Unlike the other icon-only
+    /// borderless buttons, the pencil stays persistently visible
+    /// (a soft always-on background circle, matching
+    /// `hoverHighlight`'s hover value at rest) rather than
+    /// hover-only — it is the primary discovery path for
+    /// renaming, so it must not require finding it first.
     private func renameButton(_ name: String) -> some View {
         Button {
-            renameDraft = name
-            renaming = name
+            beginRename(name)
         } label: {
             Image(systemName: "pencil")
-                .imageScale(.small)
+                .imageScale(.medium)
         }
         .buttonStyle(.borderless)
+        .frame(width: 22, height: 22)
+        .hoverHighlight(cornerRadius: 11, padding: 0)
         .help(L("profiles.rename.help", "Rename profile"))
-        .linkHover()
         .popover(
             isPresented: Binding(
                 get: { renaming == name },
@@ -257,6 +269,11 @@ struct ProfilesSection: View {
                 && $0.caseInsensitiveCompare(old)
                     != .orderedSame
         }
+    }
+
+    private func beginRename(_ name: String) {
+        renameDraft = name
+        renaming = name
     }
 
     private func commitRename(of old: String) {

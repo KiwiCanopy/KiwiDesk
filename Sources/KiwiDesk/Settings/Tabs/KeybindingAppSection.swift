@@ -128,11 +128,19 @@ struct ApplicationsSection: View {
                 chooseBundle(binding)
             }
         } label: {
-            Text(
-                binding.wrappedValue.label.isEmpty
-                    ? L("shortcuts.choose_app", "Choose app…")
-                    : binding.wrappedValue.label
-            )
+            HStack(spacing: 4) {
+                Text(
+                    binding.wrappedValue.label.isEmpty
+                        ? L(
+                            "shortcuts.choose_app",
+                            "Choose app…"
+                        )
+                        : binding.wrappedValue.label
+                )
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
             .frame(minWidth: 160, alignment: .leading)
         }
         .frame(width: 200)

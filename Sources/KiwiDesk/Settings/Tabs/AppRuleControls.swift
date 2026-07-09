@@ -39,7 +39,7 @@ struct AppSelector: View {
                     name = ""
                 }
             } label: {
-                Text(
+                menuLabel(
                     name.isEmpty
                         ? L("shortcuts.choose_app", "Choose app…")
                         : name
@@ -48,6 +48,18 @@ struct AppSelector: View {
             }
             .controlSize(.large)
         }
+    }
+}
+
+/// The borderless-menu signature (`ProfileEditTargetMenu`): a
+/// trailing chevron on the label so a bare-text menu still reads
+/// as "this opens a menu".
+private func menuLabel(_ text: String) -> some View {
+    HStack(spacing: 4) {
+        Text(text)
+        Image(systemName: "chevron.up.chevron.down")
+            .font(.caption2)
+            .foregroundStyle(.secondary)
     }
 }
 
@@ -64,7 +76,7 @@ struct SpaceMenu: View {
                 Button(space.raw) { onPick(space) }
             }
         } label: {
-            Text(
+            menuLabel(
                 selected?.raw
                     ?? L("space_menu.placeholder", "Space…")
             )
