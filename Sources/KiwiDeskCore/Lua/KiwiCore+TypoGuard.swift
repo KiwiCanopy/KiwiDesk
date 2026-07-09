@@ -60,6 +60,10 @@ extension KiwiCore {
     /// Runs `body` with typo-guard ConfigIssue recording armed
     /// and returns what it captured. The only way to arm the
     /// buffer — the `defer` makes a forgotten drain impossible.
+    /// Not reentrant (a nested call would un-arm the outer
+    /// scope); `loadConfig` is the single caller, and a
+    /// reentrant `loadConfig` is already impossible because
+    /// `reload_config` defers via `Task`.
     func recordingTypoIssues(
         _ body: () -> Void
     ) -> [ConfigIssue] {

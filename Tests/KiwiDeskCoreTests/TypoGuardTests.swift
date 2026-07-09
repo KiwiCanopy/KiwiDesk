@@ -151,6 +151,22 @@ struct TypoGuardTests {
         }
     }
 
+    @Test("Namespace keys never shadow a Lua stdlib global")
+    func namespaceKeysAreFresh() {
+        // The guard-install chunk metatables each namespace
+        // table by name; a key colliding with a stdlib global
+        // would reuse — and metatable — that library table.
+        let stdlib: Set<String> = [
+            "_G", "coroutine", "debug", "io", "math", "os",
+            "package", "string", "table", "utf8",
+        ]
+        #expect(
+            stdlib.isDisjoint(
+                with: APIReference.namespaces.keys
+            )
+        )
+    }
+
     @Test("Namespaced typos get a did-you-mean suggestion")
     func namespacedSuggestion() {
         #expect(
