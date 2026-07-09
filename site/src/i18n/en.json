@@ -17,6 +17,7 @@
   "calm_point_1": "No dragging or resizing by hand",
   "calm_point_2": "Nothing hides behind other windows",
   "calm_point_3": "Feels native — built for macOS, top to bottom",
+  "calm_point_4": "Works out of the box — configurable if you want",
   "calm_title": "Calmer than dragging windows around.",
   "cli_body": "Every action is a command. Bind them to keys, script them, or stream live events over a Unix socket into SketchyBar, JankyBorders, or your own tools.",
   "cli_eyebrow": "Command line",
