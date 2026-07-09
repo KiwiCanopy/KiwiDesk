@@ -855,21 +855,6 @@ section {
   margin-bottom: 1.35rem;
 }
 
-/* Simple-mode opening quote, folded into the hero (replaces the
-   old decorative .hero-proof diagram). Understated italic, sits
-   just under the pill so the hero and its quote fit one screen.
-   Simple-only by inheritance: it lives inside .hero__mode--simple,
-   which landing-modes.css hides in Nerd mode. */
-.hero__quote {
-  margin: clamp(1.25rem, 3vw, 1.75rem) auto 0;
-  max-width: 52ch;
-  font-size: clamp(1rem, 2.2vw, 1.15rem);
-  font-style: italic;
-  line-height: 1.5;
-  color: var(--hero-ink-dim);
-  text-wrap: balance;
-}
-
 /* =========================================================
    Demo video
    ========================================================= */

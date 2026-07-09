@@ -36,6 +36,12 @@ const { t, lang } = Astro.props;
 // with its counterpart. English lives at /, German at /de/.
 const homeHref = lang === "de" ? "/de/" : "/";
 
+// Locale-aware quotation marks: German opens low and closes high
+// („…“); English opens and closes high (“…”). Applied to every
+// quoted line so the marks match the active language.
+const oq = lang === "de" ? "„" : "“";
+const cq = lang === "de" ? "“" : "”";
+
 const repo = "https://github.com/hajiboy95/KiwiDesk";
 const kofi = "https://ko-fi.com/kiwisolutions";
 // The maker's personal GitHub profile — distinct from the project
@@ -318,14 +324,6 @@ const steps = [
             <span class="pill__dot" aria-hidden="true"></span>
             {t.hero_pill}
           </span>
-
-          <!-- Opening quote, folded into the hero (Simple mode): the
-               personal one-liner sits directly under the pill so the
-               hero and its quote fit one screen. Replaces the old
-               decorative layout diagram; this is the ONLY place
-               quote_opening renders now (the post-hero .opening-note
-               slot below was removed to avoid duplication). -->
-          <p class="hero__quote">{t.quote_opening}</p>
         </div>
 
         <!-- Nerd-mode hero copy -->
@@ -360,10 +358,11 @@ const steps = [
          them in one slot (rather than one above + one below the
          hero) means the two modes read consistently as you switch
          between them. -->
-    <section class="quote-band dev-only" aria-label="Our take">
+    <section class="quote-band" aria-label="Our take">
       <div class="wrap">
         <blockquote class="quote-band__mark reveal">
-          <p>“{t.quote_tagline}”</p>
+          <p class="simple-only">{oq}{t.quote_opening}{cq}</p>
+          <p class="dev-only">{oq}{t.quote_tagline}{cq}</p>
         </blockquote>
       </div>
     </section>
@@ -424,7 +423,7 @@ const steps = [
         </div>
         <p class="demo__caption">{t.demo_caption}</p>
         <blockquote class="quote-aside quote-aside--demo">
-          <p>“{t.quote_demo}”</p>
+          <p>{oq}{t.quote_demo}{cq}</p>
         </blockquote>
       </div>
     </section>
@@ -512,7 +511,7 @@ const steps = [
     <section class="simple-only" id="maker-quote-simple">
       <div class="wrap">
         <blockquote class="quote-card reveal">
-          <p>“{t.quote_simple}”</p>
+          <p>{oq}{t.quote_simple}{cq}</p>
           <footer class="quote-card__byline">
             {t.quote_byline_simple}
           </footer>
@@ -546,7 +545,7 @@ const steps = [
     <section class="dev-only dev-reveal" id="maker-quote-dev">
       <div class="wrap">
         <blockquote class="quote-card quote-card--dev">
-          <p>“{t.quote_dev}”</p>
+          <p>{oq}{t.quote_dev}{cq}</p>
           <footer class="quote-card__byline">
             <a class="quote-card__byline-main" href={makerProfile}
               target="_blank" rel="noopener">
@@ -615,7 +614,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
           <h2>{t.cli_title}</h2>
           <p>{t.cli_body}</p>
           <blockquote class="quote-aside quote-aside--left">
-            <p>“{t.quote_cli}”</p>
+            <p>{oq}{t.quote_cli}{cq}</p>
           </blockquote>
         </div>
         <div class="code" aria-label="KiwiDesk CLI examples">
@@ -696,7 +695,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
             </a>
           </div>
           <blockquote class="quote-aside quote-aside--center">
-            <p>“{t.quote_cta}”</p>
+            <p>{oq}{t.quote_cta}{cq}</p>
           </blockquote>
           <p class="req req--center">
             <Icon name="lucide:shield" width={15} height={15}
@@ -719,7 +718,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
           <p class="footer__tag">{t.footer_tag}</p>
           <blockquote class="quote-aside quote-aside--center
             quote-aside--footer">
-            <p>“{t.quote_footer}”</p>
+            <p>{oq}{t.quote_footer}{cq}</p>
           </blockquote>
         </div>
         <a class="footer__kofi" href={kofi} target="_blank"
