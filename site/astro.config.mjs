@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
+import { remarkDocsLinks } from "./remark-docs-links.mjs";
 
 // The public site URL. Override with SITE_URL at build time
 // (Cloudflare Pages sets it per environment); the default is
@@ -9,6 +10,9 @@ const site = process.env.SITE_URL ?? "https://kiwidesk.pages.dev";
 
 export default defineConfig({
   site,
+  // Rewrite the canonical docs' GitHub-style `.md` links to
+  // Starlight routes and drop their duplicate H1 (see the plugin).
+  markdown: { remarkPlugins: [remarkDocsLinks] },
   integrations: [
     starlight({
       title: "KiwiDesk",

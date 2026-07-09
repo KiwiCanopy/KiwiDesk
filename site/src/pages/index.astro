@@ -179,7 +179,8 @@ const layouts = [
       content="KiwiDesk — a tiling window manager for macOS" />
     <meta property="og:description" content={desc} />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content={poster.src} />
+    <meta property="og:image"
+      content={new URL(poster.src, Astro.site).href} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="theme-color" content="#101d0b" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -264,11 +265,11 @@ const layouts = [
     <section class="tint" id="demo">
       <div class="wrap">
         <div class="section-head reveal">
-          <span class="eyebrow">In motion</span>
-          <h2>See it in action.</h2>
+          <span class="eyebrow">Meet the kiwi</span>
+          <h2>Say hello to KiwiDesk.</h2>
           <p>
-            A short clip of KiwiDesk retiling, switching layouts,
-            and animating across a space.
+            Ten seconds of our kiwi happily getting to work — a
+            little nudge to go tidy up your own windows.
           </p>
         </div>
         <div class="demo__frame reveal">
@@ -288,7 +289,7 @@ const layouts = [
             </span>
           </button>
         </div>
-        <p class="demo__caption">See it in action.</p>
+        <p class="demo__caption">Click to play — 10 seconds 🥝</p>
       </div>
     </section>
 
@@ -394,11 +395,10 @@ const layouts = [
       <div class="wrap">
         <div class="footer__brand">
           <Image src={kiwiSolutions}
-            alt="Kiwi Solutions — just a bunch of kiwis"
-            widths={[200, 280, 320]}
-            sizes="(max-width: 480px) 70vw, 280px" />
+            alt="Kiwi Solutions"
+            widths={[260, 360, 440]}
+            sizes="(max-width: 480px) 80vw, 340px" />
         </div>
-        <p class="footer__tag">just a bunch of kiwis 🥝</p>
         <nav class="footer__links" aria-label="Footer">
           <a href="/docs/">Docs</a>
           <a href={repo} target="_blank" rel="noopener">GitHub</a>
