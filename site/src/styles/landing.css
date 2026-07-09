@@ -1,3 +1,5 @@
+@import "./landing-modes.css";
+
 /* =========================================================
    KiwiDesk — landing page styles
    Fully themeable: coherent LIGHT (cream, botanical, airy) and
@@ -424,45 +426,92 @@ body::before {
   flex-shrink: 0;
 }
 
-/* Theme toggle button — sun in dark theme, moon in light. */
+/* Theme toggle — a compact sliding pill (day / night). The thumb
+   slides and the icon crossfades; it reads as a physical switch
+   rather than an icon button, which pairs better with the
+   text-forward mode toggle beside it. */
 .theme-toggle {
   display: inline-grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
   margin-left: 0.15rem;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border-strong);
-  background: var(--nav-hover-bg);
-  color: var(--nav-ink);
+  padding: 0;
+  border: 0;
+  background: none;
   cursor: pointer;
-  transition: color 0.2s ease, background 0.2s ease,
-    border-color 0.2s ease;
+  border-radius: 999px;
 }
 
-.theme-toggle:hover {
-  border-color: var(--accent);
+.theme-toggle__track {
+  position: relative;
+  display: block;
+  width: 52px;
+  height: 30px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
   background: var(--nav-hover-bg);
-  color: var(--accent);
+  transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+.theme-toggle__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #fff8e6;
+  background: linear-gradient(180deg, #f6c453, #e0932f);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.28);
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background 0.25s ease;
+}
+
+/* Dark theme → moon on the right; light theme → sun on the left. */
+:root[data-theme="dark"] .theme-toggle__thumb {
+  transform: translateX(22px);
+  background: linear-gradient(180deg, #cfe0bd, #9db785);
+  color: #10210b;
+}
+
+.theme-toggle:hover .theme-toggle__track {
+  border-color: var(--accent);
+}
+.theme-toggle:hover .theme-toggle__thumb {
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.32);
+}
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }
 
 .theme-toggle svg {
   display: block;
 }
 
-/* Show the icon of the theme you'd switch TO, so the affordance
-   reads: sun-in-dark (go light), moon-in-light (go dark). */
-.theme-toggle__sun {
-  display: none;
+/* Crossfade the glyph inside the thumb. Show the CURRENT theme's
+   icon (sun in light, moon in dark) since the thumb slides to
+   telegraph the switch direction on its own. */
+.theme-toggle__sun,
+.theme-toggle__moon {
+  grid-area: 1 / 1;
+  transition: opacity 0.2s ease;
 }
 .theme-toggle__moon {
-  display: block;
+  opacity: 0;
 }
 :root[data-theme="dark"] .theme-toggle__sun {
-  display: block;
+  opacity: 0;
 }
 :root[data-theme="dark"] .theme-toggle__moon {
-  display: none;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle__thumb {
+    transition: none;
+  }
 }
 
 /* =========================================================
@@ -924,6 +973,12 @@ section {
   .quickstart .wrap {
     grid-template-columns: 1.05fr 1fr;
   }
+}
+
+/* Keep a wide <pre> (long git-clone URL) inside its own scroll
+   instead of stretching the grid track and overflowing the page. */
+.quickstart .code {
+  min-width: 0;
 }
 
 .quickstart h2 {
