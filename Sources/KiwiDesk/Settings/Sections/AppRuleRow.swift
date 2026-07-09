@@ -107,7 +107,9 @@ struct AppRuleRow: View {
                 }
             }
         } label: {
-            Text(model.config.appRules[app]?.raw ?? automatic)
+            menuLabel(
+                model.config.appRules[app]?.raw ?? automatic
+            )
         }
         .menuStyle(.borderlessButton)
         .fixedSize()
@@ -137,10 +139,22 @@ struct AppRuleRow: View {
                 editingTitles = true
             }
         } label: {
-            Text(floatLabel)
+            menuLabel(floatLabel)
         }
         .menuStyle(.borderlessButton)
         .fixedSize()
+    }
+
+    /// The borderless-menu signature (`ProfileEditTargetMenu`):
+    /// a trailing chevron on the label so a bare-text menu
+    /// still reads as "this opens a menu".
+    private func menuLabel(_ text: String) -> some View {
+        HStack(spacing: 4) {
+            Text(text)
+            Image(systemName: "chevron.up.chevron.down")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
     }
 
     private var titledLabel: String {

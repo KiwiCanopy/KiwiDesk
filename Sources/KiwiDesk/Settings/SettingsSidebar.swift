@@ -11,6 +11,11 @@ struct SettingsSidebar: View {
     let editingStoredProfile: Bool
     /// Swaps the identity mark to the golden variant on dark.
     @Environment(\.colorScheme) private var colorScheme
+    /// Subscribes the sidebar to live language changes: without
+    /// it, section headers and row titles (`L(...)` /
+    /// `destination.title`) only refresh when `selection` changes
+    /// (a section switch), not on the language switch itself.
+    @EnvironmentObject private var localization: LocalizationManager
 
     var body: some View {
         List(selection: $selection) {

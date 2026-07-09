@@ -205,3 +205,53 @@ struct PlacementPicker: View {
         L("placement.new_window", "New window")
     }
 }
+
+/// Hover-driven background chip for icon-only borderless
+/// buttons that otherwise show no cue until pressed — the
+/// `ColorSwatch` recipe, generalized: a `RoundedRectangle` fill
+/// that lifts from a faint rest state to a stronger one on
+/// `.onHover`. Buttons never change the cursor (AGENTS.md); this
+/// is chrome only, no `pointingHandCursor()`.
+private struct HoverChip: ViewModifier {
+    @State private var hovering = false
+    var restOpacity: Double
+    var hoverOpacity: Double
+    var cornerRadius: CGFloat
+    var padding: CGFloat
+
+    func body(content: Content) -> some View {
+        content
+            .padding(padding)
+            .background(
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .fill(
+                        Color.primary.opacity(
+                            hovering ? hoverOpacity : restOpacity
+                        )
+                    )
+            )
+            .onHover { hovering = $0 }
+    }
+}
+
+extension View {
+    /// Wraps an icon-only borderless control in a hover
+    /// background chip (0.06 at rest → 0.12 on hover, matching
+    /// `ColorSwatch.swatchButton`), so it reads as clickable
+    /// before the pointer commits to a press.
+    func hoverHighlight(
+        restOpacity: Double = 0.06,
+        hoverOpacity: Double = 0.12,
+        cornerRadius: CGFloat = 6,
+        padding: CGFloat = 4
+    ) -> some View {
+        modifier(
+            HoverChip(
+                restOpacity: restOpacity,
+                hoverOpacity: hoverOpacity,
+                cornerRadius: cornerRadius,
+                padding: padding
+            )
+        )
+    }
+}

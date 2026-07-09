@@ -76,6 +76,7 @@ struct KeyRecorderField: View {
                     }
                     .buttonStyle(.borderless)
                     .foregroundStyle(.secondary)
+                    .hoverHighlight(cornerRadius: 4, padding: 2)
                 }
             }
             if let rejection = liveRejection {
@@ -127,6 +128,14 @@ struct KeyRecorderField: View {
     /// the tint alone only recolors the border. Same
     /// accent-layer vocabulary as OverrideChrome's active rows.
     /// Negative padding keeps the layout footprint unchanged.
+    ///
+    /// Deliberately NOT a rounded pill like Save/Cancel
+    /// (`.borderedProminent`): this is a stateful input well —
+    /// System Settings' own Keyboard Shortcuts recorder reads
+    /// the same way — not a momentary action, so it must not
+    /// read as one. The at-rest tint below is a light nudge
+    /// toward "field", not a restructure: a touch tighter corner
+    /// radius plus a faint recessed fill (`.quaternary`).
     private var recordButton: some View {
         Button(action: toggle) {
             Text(label)
@@ -136,7 +145,11 @@ struct KeyRecorderField: View {
         .buttonStyle(.bordered)
         .tint(buttonTint)
         .background {
-            if recording {
+            if !recording {
+                RoundedRectangle(cornerRadius: 5)
+                    .fill(.quaternary.opacity(0.5))
+                    .allowsHitTesting(false)
+            } else {
                 RoundedRectangle(cornerRadius: 6)
                     .fill(Color.accentColor.opacity(0.08))
                     .padding(-4)
@@ -180,34 +193,19 @@ struct KeyRecorderField: View {
     private func rejectionRow(
         _ rejection: RecorderRejection
     ) -> some View {
-        HStack(spacing: 6) {
-            Text(
-                L(
-                    "key_recorder.assigned_to",
-                    "Assigned to \u{201C}%1$@\u{201D}",
-                    rejection.holder
-                )
-            )
-            .foregroundStyle(.red)
-            Button(L("key_recorder.steal", "Steal")) {
+        KeyRecorderRejectionRow(
+            rejection: rejection,
+            onSteal: {
                 self.rejection = nil
                 rejection.steal()
-            }
-            Button(L("key_recorder.go_to", "Go to")) {
+            },
+            onGoTo: {
                 self.rejection = nil
                 coordinator.scrollTarget =
                     rejection.holderRowID
-            }
-            Button {
-                self.rejection = nil
-            } label: {
-                Image(systemName: "xmark.circle.fill")
-            }
-            .buttonStyle(.borderless)
-            .foregroundStyle(.secondary)
-        }
-        .font(.caption)
-        .buttonStyle(.link)
+            },
+            onDismiss: { self.rejection = nil }
+        )
     }
 
     private var buttonTint: Color? {

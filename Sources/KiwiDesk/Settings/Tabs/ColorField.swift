@@ -157,7 +157,6 @@ struct ColorSwatch: View {
                 )
         }
         .buttonStyle(.plain)
-        .pointingHandCursor()
         .onHover { hovering = $0 }
         .help(
             L(
