@@ -16,13 +16,20 @@ It is created with a commented starter template on first launch
 and re-read on `KiwiDesk reload_config`. The embedded
 interpreter is **Lua 5.5** with the full standard library.
 
-Two safety rails apply to all Lua code:
+Three safety rails apply to all Lua code:
 
 - Any single call into the VM is aborted after **500 ms** —
   an accidental `while true do end` cannot freeze KiwiDesk.
 - A callback (event handler or keybinding) that errors or
   times out is **disabled** and logged; everything else keeps
   working until the next `reload_config`.
+- A typo'd function name on `KiwiDesk` or a layout table
+  (`scroll.set_width(…)` instead of
+  `scroll.set_slot_size(…)`) does **not** abort the config:
+  the call becomes a no-op that logs a did-you-mean hint,
+  and everything below it still runs. During a config load
+  the typo is also reported in the menu bar's **Config
+  Issues** window, so it cannot pass silently.
 
 ## Settings app vs init.lua
 
@@ -70,51 +77,48 @@ trade slots in the layout.
 KiwiDesk.swap("right")
 ```
 
-### focus_virtual_space
+### focus_space
 
 **Expects:** a space identifier (number or string).
 
 **Does:** switches to that virtual space, hiding the current
-space's tiled windows and revealing the target's. Aliased as
-`focus_space`.
+space's tiled windows and revealing the target's.
 
 **Example:**
 
 ```lua
-KiwiDesk.focus_virtual_space(2)
-KiwiDesk.focus_space("mail")   -- alias
+KiwiDesk.focus_space(2)
+KiwiDesk.focus_space("mail")
 ```
 
-### move_to_virtual_space
+### move_to_space
 
 **Expects:** a space identifier.
 
 **Does:** moves the focused window to that space **without
 following** it — you stay on the current space. The moved
 window becomes the target space's focused window, so the first
-time you switch there it is the window you land on. Aliased as
-`move_to_space`.
+time you switch there it is the window you land on.
 
 **Example:**
 
 ```lua
-KiwiDesk.move_to_virtual_space("mail")
-KiwiDesk.move_to_space(3)      -- alias
+KiwiDesk.move_to_space("mail")
+KiwiDesk.move_to_space(3)
 ```
 
-### move_to_virtual_space_and_follow
+### move_to_space_and_follow
 
 **Expects:** a space identifier.
 
 **Does:** moves the focused window to that space **and**
-switches you there with it. Aliased as
-`move_to_space_and_follow`.
+switches you there with it.
 
 **Example:**
 
 ```lua
-KiwiDesk.move_to_virtual_space_and_follow("mail")
-KiwiDesk.move_to_space_and_follow(3)   -- alias
+KiwiDesk.move_to_space_and_follow("mail")
+KiwiDesk.move_to_space_and_follow(3)
 ```
 
 ## Layouts & Gaps
@@ -239,7 +243,7 @@ picture-in-picture — are never stashed and stay visible across all
 virtual spaces.
 
 Sending a window elsewhere with
-[`move_to_virtual_space`](#move_to_virtual_space) makes it that
+[`move_to_space`](#move_to_space) makes it that
 space's focused window, so the first time you switch there it is
 the window you land on — even without `_and_follow`.
 
@@ -1599,7 +1603,7 @@ space is not active. A minimize fires only `window_minimized`, never
 Lua callback receives `""` instead, since a positional `nil` would
 truncate the argument list.
 
-`window_moved_to_space` fires on an explicit `move_to_virtual_space`
+`window_moved_to_space` fires on an explicit `move_to_space`
 (with or without follow) when the target differs from the window's
 current space. Bulk reassignments — profile loads, session restore —
 stay silent. JSON keys: `from_space_id` (null if unknown) and

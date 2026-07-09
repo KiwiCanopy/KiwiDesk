@@ -19,18 +19,46 @@ public enum SpaceLuaArg {
 
     /// The space-targeting Lua calls whose sole argument is a
     /// SpaceID literal. Each pattern includes the opening paren,
-    /// so `move_to_virtual_space` never matches inside
-    /// `move_to_virtual_space_and_follow`.
+    /// so `move_to_space` never matches inside
+    /// `move_to_space_and_follow`.
     static let spaceCalls = [
-        "focus_virtual_space",
-        "move_to_virtual_space",
-        "move_to_virtual_space_and_follow",
+        "focus_space",
+        "move_to_space",
+        "move_to_space_and_follow",
     ]
+
+    /// The space a catalog-authored space-targeting binding
+    /// acts on: the whole body is exactly
+    /// `KiwiDesk.<call>(<quoted space>)` for one of the calls
+    /// above, in the quoted form the catalog emits. Nil for
+    /// anything else — a hand-written bare-number arg
+    /// (`focus_space(2)`), extra statements, or a foreign call
+    /// — consistent with such Lua being outside GUI
+    /// management. This is the orphan-detection basis (#92):
+    /// a `.navigation` binding whose target is not in the
+    /// live space list is orphaned.
+    public static func targetSpace(
+        of lua: String
+    ) -> SpaceID? {
+        guard lua.hasSuffix(")") else { return nil }
+        for call in spaceCalls {
+            let prefix = "KiwiDesk.\(call)("
+            guard lua.hasPrefix(prefix) else { continue }
+            let inner = String(
+                lua.dropFirst(prefix.count).dropLast(1)
+            )
+            guard
+                let raw = LuaLiteral.parseString(inner)
+            else { return nil }
+            return SpaceID(raw)
+        }
+        return nil
+    }
 
     /// Rewrites every `<call>("from")` to `<call>("to")` within a
     /// single Lua binding body, matching the exact quoted form the
     /// catalog emitted. Only that quoted form is rewritten — a
-    /// hand-written bare-number arg (`focus_virtual_space(2)`) is
+    /// hand-written bare-number arg (`focus_space(2)`) is
     /// left untouched, consistent with such bindings being outside
     /// GUI management.
     public static func rename(

@@ -186,6 +186,15 @@ already knows costs more than it saves.
 
 Keep this list updated whenever a recurring mistake is found.
 
+- **Pre-release, single user: no backward-compat shims.** Nothing
+  is publicly released, so nothing external depends on the current
+  command names, Lua/CLI verbs, event names, or file formats.
+  Rename and restructure freely; do **not** add compatibility
+  aliases, deprecation layers, or migration scripts — re-saving or
+  re-editing the config is the migration (#42 renamed the space
+  commands outright instead of keeping `*_virtual_space` aliases;
+  profile JSON likewise needs none). Revisit at the first public
+  release — until then, back-compat is wasted complexity.
 - **One vocabulary across Lua and profile JSON.** A profile
   JSON key is the Lua command name with the `set_` verb
   stripped, snake_case, grouped by namespace:

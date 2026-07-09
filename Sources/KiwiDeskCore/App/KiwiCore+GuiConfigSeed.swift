@@ -102,6 +102,32 @@ extension KiwiCore {
             bindings[number] = name
         }
         config.profileBindings = bindings
+        seedDefaultShortcuts(&config)
         return config
+    }
+
+    /// First-run starter shortcuts (#91): when no mode carries
+    /// a single binding — a fresh install, or an `init.lua`
+    /// that declares none — the base `default` mode gets the
+    /// starter set so a new user can drive KiwiDesk
+    /// immediately. Per-space rows generate from the model's
+    /// final space list (live-derived, after the empty-state
+    /// fallback), so no dead row targeting a nonexistent space
+    /// is authored. Never fires once a user (or Lua) authored
+    /// any binding, in any mode — idempotent by that guard.
+    private func seedDefaultShortcuts(
+        _ config: inout GuiConfig
+    ) {
+        guard
+            config.modes.allSatisfy({ $0.bindings.isEmpty }),
+            let index = config.modes.firstIndex(
+                where: { $0.isDefault }
+            )
+        else { return }
+        config.modes[index].bindings =
+            DefaultKeybindings.bindings(
+                spaces: config.spaces,
+                resizeStep: Int(config.settings.resizeStep)
+            )
     }
 }

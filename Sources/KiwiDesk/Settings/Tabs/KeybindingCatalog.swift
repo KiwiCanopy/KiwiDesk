@@ -64,7 +64,7 @@ enum KeybindingCatalog {
         spaces.map { space in
             NavCommand(
                 label: "Go to Space \(space.raw)",
-                lua: "KiwiDesk.focus_virtual_space"
+                lua: "KiwiDesk.focus_space"
                     + "(\(spaceArg(space)))",
                 icon: icons[space],
                 displayLabel: {
@@ -107,7 +107,7 @@ enum KeybindingCatalog {
                 NavCommand(
                     label: "Move to Space \(space.raw)",
                     lua:
-                        "KiwiDesk.move_to_virtual_space(\(arg))",
+                        "KiwiDesk.move_to_space(\(arg))",
                     icon: icons[space],
                     displayLabel: {
                         L(
@@ -121,7 +121,7 @@ enum KeybindingCatalog {
                     label:
                         "Move to Space \(space.raw) & follow",
                     lua: "KiwiDesk."
-                        + "move_to_virtual_space_and_follow"
+                        + "move_to_space_and_follow"
                         + "(\(arg))",
                     icon: icons[space],
                     displayLabel: {
@@ -179,15 +179,23 @@ enum KeybindingCatalog {
                     L("keybinding.enlarge", "Enlarge")
                 }
             ),
-            NavCommand(
-                label: "Make floating",
-                lua: "KiwiDesk.make_floating()",
-                displayLabel: {
-                    L("keybinding.make_floating", "Make floating")
-                }
-            ),
+            makeFloating,
         ]
     }
+
+    /// The Make-floating row — step-independent, so unlike
+    /// Grow/Shrink it is a fixed command. A named single
+    /// authority because the import classifier matches it
+    /// directly (it is in no `navigationGroups` group and has
+    /// no shape rule); without that entry an imported
+    /// `make_floating()` binding demoted to Custom (#4/#91).
+    static let makeFloating = NavCommand(
+        label: "Make floating",
+        lua: "KiwiDesk.make_floating()",
+        displayLabel: {
+            L("keybinding.make_floating", "Make floating")
+        }
+    )
 
     /// The Grow/Shrink magnitude inside a `resize("x", ±N)` row of
     /// ANY step, plus its canonical label — the inverse of

@@ -35,18 +35,39 @@ extension KiwiCore {
         keys.lua = fresh
         registerLuaAPI(on: fresh)
 
+        // True first launch: no init.lua yet (the starter
+        // template is written just below). Persist the seeded
+        // model — including the default shortcuts (#91) — so
+        // the very first boot is GUI-managed and registers a
+        // usable shortcut set; without a sidecar the
+        // structured loader is a no-op and a fresh install
+        // would boot with zero shortcuts. Never fires when an
+        // init.lua already exists (that config is Lua-owned
+        // until adopted) or when a sidecar is present.
+        let firstLaunch = !FileManager.default.fileExists(
+            atPath: configURL.path
+        )
         ensureDefaultConfig()
-        if case .failure(let error) = fresh.runFile(
-            configURL
-        ) {
-            onLog("init.lua error: \(error)")
-            issues.append(
-                ConfigIssue(
-                    source: "init.lua",
-                    message: "\(error)"
-                )
-            )
+        if firstLaunch, !guiConfigStore.exists {
+            try? guiConfigStore.save(guiConfigSeed())
         }
+        // Typo-guard hits are recorded only for the chunk run:
+        // a guarded unknown call is non-fatal, so it must land
+        // here as an issue to stay visible (#39).
+        let typos = recordingTypoIssues {
+            if case .failure(let error) = fresh.runFile(
+                configURL
+            ) {
+                onLog("init.lua error: \(error)")
+                issues.append(
+                    ConfigIssue(
+                        source: "init.lua",
+                        message: "\(error)"
+                    )
+                )
+            }
+        }
+        issues.append(contentsOf: typos)
         // A sidecar that exists but no longer decodes means
         // the visual editor (and the structured loader) can't
         // see the user's rules — half-loaded, must be visible.

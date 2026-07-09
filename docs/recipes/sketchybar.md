@@ -57,7 +57,7 @@ any of them to keep sketchybar in sync:
   the CLI JSON event stream, the key is `space_id` and the
   value is `null` for unknown spaces.
 - `window_moved_to_space` fires only on explicit
-  `move_to_virtual_space` commands with a different target;
+  `move_to_space` commands with a different target;
   bulk operations like profile loads stay silent.
 
 ## Minimal recipe
@@ -178,7 +178,7 @@ for _, workspace_id in ipairs(workspace_names) do
     local function on_click()
         os.execute(
             kiwidesk_cmd(
-              "focus_virtual_space " .. workspace_id)
+              "focus_space " .. workspace_id)
         )
     end
 

@@ -24,20 +24,20 @@ struct RenameSpaceTests {
                 bindings: [
                     KeyBinding(
                         combo: "alt+1",
-                        lua: "KiwiDesk.focus_virtual_space(\"2\")",
+                        lua: "KiwiDesk.focus_space(\"2\")",
                         kind: .navigation
                     ),
                     KeyBinding(
                         combo: "alt+2",
                         lua:
-                            "KiwiDesk.move_to_virtual_space(\"2\")",
+                            "KiwiDesk.move_to_space(\"2\")",
                         kind: .navigation
                     ),
                     KeyBinding(
                         combo: "alt+3",
                         lua:
                             "KiwiDesk."
-                            + "move_to_virtual_space_and_follow"
+                            + "move_to_space_and_follow"
                             + "(\"2\")",
                         kind: .navigation
                     ),
@@ -67,17 +67,17 @@ struct RenameSpaceTests {
         let lua = config.modes[0].bindings.map(\.lua)
         #expect(
             lua.contains(
-                "KiwiDesk.focus_virtual_space(\"main\")"
+                "KiwiDesk.focus_space(\"main\")"
             )
         )
         #expect(
             lua.contains(
-                "KiwiDesk.move_to_virtual_space(\"main\")"
+                "KiwiDesk.move_to_space(\"main\")"
             )
         )
         #expect(
             lua.contains(
-                "KiwiDesk.move_to_virtual_space_and_follow"
+                "KiwiDesk.move_to_space_and_follow"
                     + "(\"main\")"
             )
         )

@@ -73,6 +73,11 @@ public final class KiwiCore {
     /// gui.json) — kept so profile mutations can refresh the
     /// profile half without losing these.
     var configLoadIssues: [ConfigIssue] = []
+    /// Typo-guard hits from the init.lua chunk currently
+    /// running (#39). Armed exclusively by
+    /// `recordingTypoIssues`; nil gates runtime hits (a typo
+    /// inside a keybinding closure) to log-only.
+    var typoIssues: [ConfigIssue]?
     /// Fired whenever `configIssues` changes (including back
     /// to empty, so the badge clears itself).
     public var onConfigIssuesChange:

@@ -56,7 +56,7 @@ struct ImportClassifierLanguageTests {
                 name: KeyMode.defaultName,
                 bindings: [
                     customRow(
-                        "KiwiDesk.focus_virtual_space(\"1\")"
+                        "KiwiDesk.focus_space(\"1\")"
                     )
                 ]
             )

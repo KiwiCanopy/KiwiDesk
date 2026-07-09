@@ -57,7 +57,7 @@ Or set up space switching via KiwiDesk:
 
 ```lua
 hs.hotkey.bind({"cmd", "alt"}, "1", function()
-    os.execute("'" .. KIWIDESK .. "' focus_virtual_space 1")
+    os.execute("'" .. KIWIDESK .. "' focus_space 1")
 end)
 ```
 
@@ -88,10 +88,10 @@ per-desktop overrides:
 -- Shared binds, active in every mode:
 local common = {
     ["cmd+alt+1"] = function()
-        KiwiDesk.focus_virtual_space("1")
+        KiwiDesk.focus_space("1")
     end,
     ["cmd+alt+2"] = function()
-        KiwiDesk.focus_virtual_space("2")
+        KiwiDesk.focus_space("2")
     end,
     ["cmd+alt+left"] = function()
         KiwiDesk.focus("left")
