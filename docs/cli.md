@@ -1,3 +1,8 @@
+---
+title: CLI & IPC Reference
+description: Every command, the event stream, and the raw socket protocol.
+---
+
 # CLI & IPC Reference
 
 The `KiwiDesk` binary is both the app and the CLI:

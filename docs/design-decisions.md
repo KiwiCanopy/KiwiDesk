@@ -1,3 +1,8 @@
+---
+title: Design Decisions
+description: The reasoning behind settled product and UX choices.
+---
+
 # Design decisions
 
 The major product/design decisions behind KiwiDesk's Settings

@@ -1,3 +1,8 @@
+---
+title: Translating KiwiDesk
+description: The localization workflow — how to add or fix a translation.
+---
+
 # Translating KiwiDesk
 
 KiwiDesk's GUI (Settings window, dashboard, the menu-bar quick
