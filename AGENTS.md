@@ -93,9 +93,11 @@ GUI lives in `Sources/KiwiDesk` (`Settings/`, `Settings/Tabs/`).
    non-Sendable captures in `@Sendable` closures) that the debug
    build silently misses.
 5. **Document:** any user-visible behavior change updates the
-   matching docs in the same change set — `docs/configuration.md`
-   (Lua config & behavior), `docs/cli.md` (commands, events, IPC),
-   `docs/integrations.md` (recipes),
+   matching docs in the same change set —
+   `docs/lua-reference.md` (Lua config & behavior, in
+   *expects → does → example* form), `docs/user-guide.md`
+   (the Settings app & GUI flows), `docs/cli.md` (commands,
+   events, IPC), `docs/recipes/` (integration recipes),
    `docs/design-decisions.md` (when a settled product/UX
    decision is made or changed) — and `plan/` when the design
    itself shifts. Code and docs must never describe different

@@ -104,12 +104,14 @@ end)
 
 ## Documentation
 
-- [Configuration guide](docs/configuration.md) — the full
-  init.lua reference
+- [User guide](docs/user-guide.md) — the Settings app,
+  profiles, and the visual editor
+- [Lua reference](docs/lua-reference.md) — the full init.lua
+  API, every setting in expects → does → example form
 - [CLI reference](docs/cli.md) — every command, IPC protocol,
   event stream
-- [Integrations](docs/integrations.md) — SketchyBar and
-  JankyBorders recipes
+- [Recipes](docs/recipes/index.md) — SketchyBar, JankyBorders,
+  and other ready-to-copy integrations
 - [Design decisions](docs/design-decisions.md) — why the
   Settings app behaves the way it does
 
