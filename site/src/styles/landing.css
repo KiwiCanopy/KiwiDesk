@@ -349,50 +349,6 @@ body::before {
   }
 }
 
-/* Below the smallest common phone width (iPhone SE is 375px), trim
-   the remaining gaps/padding further — verified overflow-free at
-   320px and below in both Simple and Developer mode. Placed after
-   the 460px block above (not in landing-modes.css) so it wins the
-   cascade at equal specificity. */
-@media (max-width: 340px) {
-  .nav__inner {
-    gap: 0.25rem;
-  }
-  .mode-toggle {
-    gap: 0.3rem;
-  }
-  .mode-toggle__track {
-    width: 52px;
-  }
-  .mode-toggle__kiwi--2 {
-    left: 26px;
-  }
-  .mode-toggle__kiwi--3 {
-    left: 37px;
-  }
-  :root[data-mode="dev"] .mode-toggle__thumb {
-    transform: translateX(24px);
-  }
-  :root[data-mode="dev"] .mode-toggle:hover .mode-toggle__thumb {
-    transform: translateX(27px);
-  }
-  .theme-toggle__track {
-    width: 44px;
-  }
-  :root[data-theme="dark"] .theme-toggle__thumb {
-    transform: translateX(16px);
-  }
-  .lang-switch {
-    margin-left: 0;
-  }
-  .lang-switch__opt {
-    min-width: 20px;
-    height: 22px;
-    padding-inline: 0.25rem;
-    font-size: 0.72rem;
-  }
-}
-
 /* The nav resting color adapts per theme via --nav-ink*, since
    the hero band is light in the light theme and dark in dark. */
 .nav__brand {
@@ -450,28 +406,30 @@ body::before {
   background: var(--nav-hover-bg);
 }
 
-/* Compact Ko-fi support link: visible but not loud. */
+/* Ko-fi support link — deliberately quiet: no fill or border at
+   rest, same visual weight as the Docs/GitHub text links beside it,
+   so it reads as a discoverable secondary link rather than a
+   competing CTA. A soft tint only appears on hover/focus. */
 .nav__support {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  color: var(--kofi-ink);
-  background: var(--kofi-bg);
-  border: 1px solid var(--kofi-border);
-  font-weight: 600;
+  gap: 0.3rem;
+  color: var(--nav-ink-dim);
+  font-weight: 550;
 }
 
 .nav__support:hover {
   color: var(--kofi-ink);
-  background: var(--kofi-hover-bg);
+  background: var(--nav-hover-bg);
 }
 
-/* Official Ko-fi cup mark, kept in its brand colors. Fixed px
-   (not em) so it survives the icon-only nav collapse, where the
-   button's font-size drops to 0. */
+/* Official Ko-fi cup mark, kept in its brand colors but shrunk to
+   match the toned-down button. Fixed px (not em) so it survives
+   the icon-only nav collapse, where the button's font-size drops
+   to 0. */
 .kofi-icon {
-  width: 20px;
-  height: 16px;
+  width: 15px;
+  height: 12px;
   display: block;
   flex-shrink: 0;
 }
@@ -1267,27 +1225,30 @@ section {
   margin: 0;
 }
 
-/* Footer Ko-fi button — warm brand-tinted, reads in both themes. */
+/* Footer Ko-fi link — deliberately quiet, matching the weight of
+   the plain text links beside it (.footer__links) rather than
+   standing out as a filled button. A soft tint only appears on
+   hover/focus, so support stays discoverable, not shouty. */
 .footer__kofi {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  margin: 1.1rem 0 0.4rem;
-  padding: 0.6rem 1.15rem;
-  border-radius: var(--radius);
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--kofi-ink);
-  background: var(--kofi-bg);
-  border: 1px solid var(--kofi-border);
-  transition: background 0.2s ease, border-color 0.2s ease,
-    transform 0.18s ease;
+  gap: 0.35rem;
+  margin: 0.9rem 0 0.2rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 550;
+  color: var(--text-dim);
+  background: none;
+  border: 1px solid transparent;
+  transition: color 0.2s ease, background 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .footer__kofi:hover {
-  background: var(--kofi-hover-bg);
-  border-color: var(--kofi-ink);
-  transform: translateY(-2px);
+  color: var(--kofi-ink);
+  background: var(--kofi-bg);
+  border-color: var(--kofi-border);
 }
 
 .footer__links {
@@ -1376,5 +1337,49 @@ section {
   }
   * {
     scroll-behavior: auto !important;
+  }
+}
+
+/* =========================================================
+   Ultra-narrow nav shedding (≤340px)
+   -----------------------------------------------------------
+   Below the smallest common phone width (iPhone SE is 375px),
+   trim the three nav toggles' (lang / mode / theme) width and
+   gaps further. Deliberately placed at the very end of the file —
+   after every base rule it overrides, including the toggles
+   defined in landing-modes.css (which @imports before this file's
+   own rules) — so it reliably wins the cascade at equal
+   specificity regardless of source order elsewhere.
+   ========================================================= */
+@media (max-width: 340px) {
+  .nav__inner {
+    gap: 0.25rem;
+  }
+  .mode-toggle {
+    gap: 0.3rem;
+  }
+  .mode-toggle__track {
+    width: 44px;
+  }
+  :root[data-mode="dev"] .mode-toggle__thumb {
+    transform: translateX(14px);
+  }
+  :root[data-mode="dev"] .mode-toggle:hover .mode-toggle__thumb {
+    transform: translateX(17px);
+  }
+  .theme-toggle__track {
+    width: 44px;
+  }
+  :root[data-theme="dark"] .theme-toggle__thumb {
+    transform: translateX(16px);
+  }
+  .lang-switch {
+    margin-left: 0;
+  }
+  .lang-switch__opt {
+    min-width: 20px;
+    height: 22px;
+    padding-inline: 0.25rem;
+    font-size: 0.72rem;
   }
 }

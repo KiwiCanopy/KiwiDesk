@@ -293,60 +293,24 @@ const steps = [
               aria-current={lang === "de" ? "true" : undefined}>DE</a>
           </div>
 
-          <!-- Signature mode toggle: a sliding kiwi-count pill, a
-               deliberate sibling of the theme toggle's track+thumb
-               language. Simple = one kiwi on the thumb; Developer =
-               the thumb slides right and two more kiwi slices pop
-               in beside it. A tooltip and label keep it
-               discoverable; the track/thumb shape reads as an
-               obvious switch even before the kiwis are noticed. -->
+          <!-- Signature mode toggle: a sliding pill, a deliberate
+               sibling of the theme toggle's track+thumb language.
+               The thumb carries the KiwiDesk logo mark (the same
+               theme-swapped asset as the nav brand mark) and slides
+               left (Simple) ⇄ right (Developer) on a clean
+               two-position track — branded, but unambiguous as a
+               switch, with no cluttered icon count. A tooltip and
+               label spell out what the two positions mean. -->
           <button class="mode-toggle" id="modeToggle" type="button"
             aria-label={t.mode_toggle_aria} aria-pressed="false">
             <span class="mode-toggle__track" aria-hidden="true">
-              <!-- Extra kiwi slices revealed as the thumb slides. -->
-              <svg class="mode-toggle__kiwi mode-toggle__kiwi--2"
-                width="15" height="15" viewBox="0 0 15 15">
-                <circle cx="7.5" cy="7.5" r="7" class="kiwi__skin" />
-                <circle cx="7.5" cy="7.5" r="4.6" class="kiwi__flesh" />
-                <circle cx="7.5" cy="7.5" r="1.8" class="kiwi__core" />
-                <g class="kiwi__seeds">
-                  <circle cx="7.5" cy="3.6" r="0.55" />
-                  <circle cx="10.4" cy="5.6" r="0.55" />
-                  <circle cx="9.4" cy="9.1" r="0.55" />
-                  <circle cx="5.6" cy="9.1" r="0.55" />
-                  <circle cx="4.6" cy="5.6" r="0.55" />
-                </g>
-              </svg>
-              <svg class="mode-toggle__kiwi mode-toggle__kiwi--3"
-                width="15" height="15" viewBox="0 0 15 15">
-                <circle cx="7.5" cy="7.5" r="7" class="kiwi__skin" />
-                <circle cx="7.5" cy="7.5" r="4.6" class="kiwi__flesh" />
-                <circle cx="7.5" cy="7.5" r="1.8" class="kiwi__core" />
-                <g class="kiwi__seeds">
-                  <circle cx="7.5" cy="3.6" r="0.55" />
-                  <circle cx="10.4" cy="5.6" r="0.55" />
-                  <circle cx="9.4" cy="9.1" r="0.55" />
-                  <circle cx="5.6" cy="9.1" r="0.55" />
-                  <circle cx="4.6" cy="5.6" r="0.55" />
-                </g>
-              </svg>
-              <!-- Sliding thumb, carries the always-visible kiwi. -->
               <span class="mode-toggle__thumb">
-                <svg class="mode-toggle__kiwi mode-toggle__kiwi--1"
-                  width="17" height="17" viewBox="0 0 15 15">
-                  <circle cx="7.5" cy="7.5" r="7" class="kiwi__skin" />
-                  <circle cx="7.5" cy="7.5" r="4.6"
-                    class="kiwi__flesh" />
-                  <circle cx="7.5" cy="7.5" r="1.8"
-                    class="kiwi__core" />
-                  <g class="kiwi__seeds">
-                    <circle cx="7.5" cy="3.6" r="0.55" />
-                    <circle cx="10.4" cy="5.6" r="0.55" />
-                    <circle cx="9.4" cy="9.1" r="0.55" />
-                    <circle cx="5.6" cy="9.1" r="0.55" />
-                    <circle cx="4.6" cy="5.6" r="0.55" />
-                  </g>
-                </svg>
+                <img class="mode-toggle__mark
+                  mode-toggle__mark--light" src={logoMark.src}
+                  width="16" height="16" alt="" />
+                <img class="mode-toggle__mark
+                  mode-toggle__mark--dark" src={logoMarkDark.src}
+                  width="16" height="16" alt="" />
               </span>
             </span>
             <span class="mode-toggle__label">

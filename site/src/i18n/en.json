@@ -15,7 +15,7 @@
   "mode_simple": "Simple",
   "mode_dev": "Developer",
   "mode_toggle_aria": "Switch between Simple and Developer views",
-  "mode_tooltip_simple": "Curious how it works? Add more kiwis →",
+  "mode_tooltip_simple": "Curious how it works under the hood?",
   "mode_tooltip_dev": "Back to the friendly view",
 
   "hero_kicker": "For everyone with a Mac",

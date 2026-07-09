@@ -51,13 +51,14 @@
 }
 
 /* =========================================================
-   The signature mode toggle — "kiwi count" sliding pill
-   A deliberate sibling of the theme toggle's track+thumb control
-   language, so it reads as an obvious switch at a glance. Simple =
-   thumb rests left, carrying one kiwi slice. Developer = the thumb
-   slides right and two more kiwi slices pop in beside it in the
-   track, so switching visibly "grows" the kiwi count. Word label +
-   tooltip keep the meaning of the two positions un-cryptic.
+   The signature mode toggle — branded sliding pill
+   A deliberate sibling of the theme toggle: same track/thumb size
+   and motion, so the two read as one control family at a glance.
+   The thumb carries the KiwiDesk logo mark (theme-swapped, same
+   asset as the nav brand mark) and slides left (Simple) ⇄ right
+   (Developer) on a clean two-position track. No icon count, no
+   clutter — the brand mark plus the word label + tooltip carry the
+   meaning, exactly like sun/moon does for the theme toggle.
    ========================================================= */
 .mode-toggle {
   position: relative;
@@ -86,12 +87,11 @@
   border-radius: 999px;
 }
 
-/* ---- Track + thumb, sized like the theme toggle but wider to fit
-   the kiwi count growing from one to three. ---- */
+/* ---- Track + thumb, sized identically to the theme toggle. ---- */
 .mode-toggle__track {
   position: relative;
   display: block;
-  width: 66px;
+  width: 52px;
   height: 30px;
   border-radius: 999px;
   border: 1px solid var(--border-strong);
@@ -103,8 +103,9 @@
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--card-glow);
 }
-/* Subtle tint shift toward the brand green as the track fills with
-   kiwis, reinforcing "more" without relying on color alone. */
+/* Subtle tint shift toward the brand green in Developer mode,
+   reinforcing the switched state without relying on position
+   alone (mirrors the kiwi-tint idea, minus the clutter). */
 :root[data-mode="dev"] .mode-toggle__track {
   background: var(--tile-fill-ghost);
 }
@@ -121,73 +122,39 @@
   background: var(--bg-3);
   border: 1px solid var(--border-strong);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22);
-  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.36s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 :root[data-mode="dev"] .mode-toggle__thumb {
-  transform: translateX(36px);
+  transform: translateX(22px);
+}
+.mode-toggle:hover .mode-toggle__thumb {
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.28);
 }
 
-/* Extra kiwi slices sit in the track, roughly where the thumb ends
-   up when it slides right, so they read as "revealed" rather than
-   floating disconnected from it. */
-.mode-toggle__kiwi--2,
-.mode-toggle__kiwi--3 {
-  position: absolute;
-  top: 7.5px;
-  transform: scale(0);
-  opacity: 0;
-  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-    opacity 0.3s ease;
-}
-.mode-toggle__kiwi--2 {
-  left: 32px;
-}
-.mode-toggle__kiwi--3 {
-  left: 46px;
-}
-:root[data-mode="dev"] .mode-toggle__kiwi--2,
-:root[data-mode="dev"] .mode-toggle__kiwi--3 {
-  transform: scale(1);
-  opacity: 1;
-}
-:root[data-mode="dev"] .mode-toggle__kiwi--2 {
-  transition-delay: 0.12s;
-}
-:root[data-mode="dev"] .mode-toggle__kiwi--3 {
-  transition-delay: 0.2s;
-}
-
-/* Kiwi glyph, drawn (not emoji) so it renders identically and
-   crisply everywhere: green skin, pale-green flesh ring, a small
-   core, and a ring of seed dots — unmistakably a kiwi slice at
-   this size, unlike a flat brand-colored disc. */
-.mode-toggle__kiwi {
+/* Logo mark inside the thumb — theme-swapped like the nav brand
+   mark, so it stays legible against both the light and dark thumb
+   fill. Sized down slightly from its 28px nav rendering. */
+.mode-toggle__mark {
+  grid-area: 1 / 1;
   display: block;
-  overflow: visible;
+  width: 16px;
+  height: 16px;
 }
-.kiwi__skin {
-  fill: var(--kiwi-bright);
-  stroke: var(--kiwi-flesh);
-  stroke-width: 0.6;
+.mode-toggle__mark--dark {
+  display: none;
 }
-.kiwi__flesh {
-  fill: #e9f2c9;
+:root[data-theme="dark"] .mode-toggle__mark--light {
+  display: none;
 }
-:root[data-theme="dark"] .kiwi__flesh {
-  fill: #d8ecb0;
-}
-.kiwi__core {
-  fill: #f6f9e8;
-}
-.kiwi__seeds circle {
-  fill: #2b2411;
+:root[data-theme="dark"] .mode-toggle__mark--dark {
+  display: block;
 }
 
 /* Idle wiggle on the thumb invites the click in Simple mode. */
 :root[data-mode="simple"] .mode-toggle:hover .mode-toggle__thumb {
-  animation: kiwi-thumb-wiggle 0.5s ease;
+  animation: mode-thumb-wiggle 0.5s ease;
 }
-@keyframes kiwi-thumb-wiggle {
+@keyframes mode-thumb-wiggle {
   0%, 100% { transform: translateX(0) rotate(0); }
   35% { transform: translateX(-1px) rotate(-8deg); }
   70% { transform: translateX(1px) rotate(6deg); }
@@ -195,7 +162,7 @@
 /* In Developer mode, hovering nudges the thumb a touch further
    right, reinforcing it's still a live control either way. */
 :root[data-mode="dev"] .mode-toggle:hover .mode-toggle__thumb {
-  transform: translateX(39px);
+  transform: translateX(25px);
 }
 
 /* Word label crossfades Simple ⇄ Developer inside a fixed box so
@@ -256,11 +223,12 @@
   display: inline;
 }
 
-/* Tight phones: shrink the toggle to icon + kiwis, drop the word
-   and tooltip so the nav cluster never overflows. In Developer
-   mode the nav also carries Docs + GitHub, so this needs headroom
-   above the classic ~480px phone breakpoint. */
-@media (max-width: 580px) {
+/* Tight phones: shrink the toggle to icon only, drop the word and
+   tooltip so the nav cluster never overflows. In Developer mode
+   the nav also carries Docs + GitHub alongside the language
+   switcher, so this needs headroom well above the classic ~480px
+   phone breakpoint. */
+@media (max-width: 680px) {
   .mode-toggle__label {
     display: none;
   }
@@ -276,13 +244,15 @@
     padding: 0.5rem 0.6rem;
   }
 }
-/* Developer mode adds Docs + GitHub to the nav; below ~500px the
-   five-item cluster (Docs, GitHub, Support, mode toggle, theme
-   toggle) can't fit even after the Ko-fi-text shedding above (that
-   alone only closes the gap back down to 460px). Both links stay
-   reachable via the dev hero CTAs and the footer, so drop them
-   here rather than let the nav overflow. */
-@media (max-width: 500px) {
+/* Developer mode adds Docs + GitHub to the nav; alongside the
+   language switcher, the resulting six-item cluster (Docs, GitHub,
+   Support, language switcher, mode toggle, theme toggle) can't fit
+   below ~680px even after the Ko-fi-text shedding above. Both
+   links stay reachable via the dev hero CTAs and the footer, so
+   drop them here rather than let the nav overflow. Matches the
+   mode-toggle label-collapse breakpoint above so the nav sheds
+   both at the same width. */
+@media (max-width: 680px) {
   :root[data-mode="dev"] a.nav__link.dev-only {
     display: none;
   }
@@ -911,22 +881,18 @@ a.quote-card__byline-main:hover {
    ========================================================= */
 @media (prefers-reduced-motion: reduce) {
   .mode-toggle__thumb,
-  .mode-toggle__kiwi--2,
-  .mode-toggle__kiwi--3,
   .mode-toggle__word,
   .mode-toggle__tip,
   .theme-toggle__thumb {
     transition: none;
   }
+  /* Kill the idle wiggle/hover-nudge animations entirely — with no
+     transition, the base :root[data-mode] rules above already snap
+     the thumb straight to its resting position (translateX(0) for
+     Simple, translateX(22px) for Developer) with zero motion. */
   :root[data-mode="simple"] .mode-toggle:hover .mode-toggle__thumb,
   :root[data-mode="dev"] .mode-toggle:hover .mode-toggle__thumb {
     animation: none;
-    transform: translateX(0);
-  }
-  :root[data-mode="dev"] .mode-toggle:hover .mode-toggle__thumb {
-    /* Snap straight to the Developer resting position, no extra
-       slide-in-further nudge. */
-    transform: translateX(36px);
   }
   :root[data-mode="dev"] .dev-reveal,
   :root[data-mode="dev"] #features .card {
