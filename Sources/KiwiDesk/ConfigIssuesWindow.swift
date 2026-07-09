@@ -38,9 +38,13 @@ final class ConfigIssuesWindowController: NSObject,
             backing: .buffered,
             defer: false
         )
-        window.title = "Config Issues"
+        window.title = L(
+            "config_issues.title",
+            "Config Issues"
+        )
         window.contentView = NSHostingView(
             rootView: ConfigIssuesView(model: model)
+                .environmentObject(LocalizationManager.shared)
         )
         window.isReleasedWhenClosed = false
         window.delegate = self
@@ -66,6 +70,7 @@ final class ConfigIssuesWindowController: NSObject,
 /// #39/#31.
 struct ConfigIssuesView: View {
     @ObservedObject var model: ConfigIssuesModel
+    @EnvironmentObject private var localization: LocalizationManager
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -86,12 +91,20 @@ struct ConfigIssuesView: View {
             }
             HStack {
                 Spacer()
-                Button("Reload config") {
+                Button(
+                    L(
+                        "config_issues.reload",
+                        "Reload config"
+                    )
+                ) {
                     model.onReload()
                 }
                 .help(
-                    "Re-runs the config load; fixed files "
-                        + "clear their issues."
+                    L(
+                        "config_issues.reload.help",
+                        "Re-runs the config load; fixed files "
+                            + "clear their issues."
+                    )
                 )
             }
         }
@@ -105,7 +118,11 @@ struct ConfigIssuesView: View {
 
     private var header: some View {
         Label(
-            "Parts of the configuration could not be loaded.",
+            L(
+                "config_issues.header",
+                "Parts of the configuration could not be "
+                    + "loaded."
+            ),
             systemImage: "doc.badge.exclamationmark"
         )
         .font(.headline)
@@ -114,13 +131,16 @@ struct ConfigIssuesView: View {
     private var emptyState: some View {
         VStack(alignment: .leading, spacing: 6) {
             Label(
-                "No config issues",
+                L("config_issues.empty.title", "No config issues"),
                 systemImage: "checkmark.circle"
             )
             .font(.headline)
             Text(
-                "The last configuration load completed "
-                    + "cleanly."
+                L(
+                    "config_issues.empty.body",
+                    "The last configuration load completed "
+                        + "cleanly."
+                )
             )
             .font(.callout)
             .foregroundStyle(.secondary)

@@ -25,10 +25,23 @@ let package = Package(
         ),
         // Core: state tracking, event loop, OS bridging.
         // Strictly separated from the GUI (see AGENTS.md).
+        // `LocalizationManager` lives here (issue #9) so both
+        // the SwiftUI GUI and the AppKit quick menu can call
+        // it; the locale JSON files bundle with this target so
+        // its own `Bundle.module` can find them at runtime.
+        // Resources/Locales/en.json itself is a BUILD-TIME
+        // translator manifest, not something the app reads at
+        // runtime — English lives inline at every `L(key,
+        // english)` call site, so there is intentionally no
+        // `en` locale file to load (see `LocaleCatalog`'s
+        // `!= "en"` filter). Don't "fix" that filter.
         .target(
             name: "KiwiDeskCore",
             dependencies: ["CLua"],
-            path: "Sources/KiwiDeskCore"
+            path: "Sources/KiwiDeskCore",
+            resources: [
+                .copy("Resources/Locales")
+            ]
         ),
         // Executable: AppDelegate, menu bar, SwiftUI GUI.
         .executableTarget(

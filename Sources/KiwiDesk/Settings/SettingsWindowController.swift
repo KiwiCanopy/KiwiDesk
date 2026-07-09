@@ -42,7 +42,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
             backing: .buffered,
             defer: false
         )
-        window.title = "KiwiDesk"
+        window.title = L("sidebar.app_name", "KiwiDesk")
         // Titlebar text hidden: the sidebar header carries the
         // app identity and the detail's own header bar shows the
         // section name. `title` still names the Window menu.
@@ -59,6 +59,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         window.toolbarStyle = .unified
         window.contentView = NSHostingView(
             rootView: SettingsView(model: model)
+                .environmentObject(LocalizationManager.shared)
         )
         window.isReleasedWhenClosed = false
         window.delegate = self

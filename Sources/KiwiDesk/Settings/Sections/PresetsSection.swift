@@ -10,20 +10,15 @@ struct PresetsSection: View {
     @ObservedObject var model: SettingsModel
 
     var body: some View {
-        SettingsSection("Presets") {
+        SettingsSection(L("presets.title", "Presets")) {
             rows
         }
     }
 
     @ViewBuilder private var rows: some View {
-        Text(
-            "Built-in layouts per screen count. Apply "
-                + "loads one and saves it as a real, "
-                + "editable profile — only available when "
-                + "the connected screen count matches."
-        )
-        .font(.caption)
-        .foregroundStyle(.secondary)
+        Text(rowsCaption)
+            .font(.caption)
+            .foregroundStyle(.secondary)
         ForEach(presetCounts, id: \.self) { count in
             countHeader(count)
             ForEach(
@@ -35,6 +30,16 @@ struct PresetsSection: View {
         }
     }
 
+    private var rowsCaption: String {
+        L(
+            "presets.caption",
+            "Built-in layouts per screen count. Apply "
+                + "loads one and saves it as a real, "
+                + "editable profile — only available when "
+                + "the connected screen count matches."
+        )
+    }
+
     private var presetCounts: [Int] {
         Array(
             Set(StandardProfiles.all.map(\.screenCount))
@@ -44,7 +49,12 @@ struct PresetsSection: View {
     private func countHeader(_ count: Int) -> some View {
         Text(
             count == 1
-                ? "1 screen" : "\(count) screens"
+                ? L("profiles.screens.one", "1 screen")
+                : L(
+                    "profiles.screens.many",
+                    "%1$d screens",
+                    count
+                )
         )
         .font(.caption)
         .fontWeight(.semibold)
@@ -58,18 +68,23 @@ struct PresetsSection: View {
         HStack {
             VStack(alignment: .leading) {
                 HStack(spacing: 6) {
-                    Text(layout.name).font(.headline)
+                    Text(layout.displayName).font(.headline)
                     if layout.isStandard {
-                        BadgeChip(label: "standard")
+                        BadgeChip(
+                            label: L(
+                                "presets.standard_badge",
+                                "standard"
+                            )
+                        )
                     }
                 }
-                Text(layout.summary)
+                Text(layout.displaySummary)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 PresetThumbnail(layout: layout)
             }
             Spacer()
-            Button("Apply") {
+            Button(L("presets.apply", "Apply")) {
                 model.applyStandardPreset(layout)
             }
             .controlSize(.large)
@@ -79,8 +94,11 @@ struct PresetsSection: View {
             .help(
                 model.displays.count == layout.screenCount
                     ? ""
-                    : "Needs \(layout.screenCount) connected "
-                        + "screen(s)."
+                    : L(
+                        "presets.needs_screens",
+                        "Needs %1$d connected screen(s).",
+                        layout.screenCount
+                    )
             )
         }
         .padding(.vertical, 2)
@@ -106,7 +124,14 @@ struct PresetThumbnail: View {
                             .font(.system(size: 9))
                             .foregroundStyle(.secondary)
                     }
-                    .help("Space \(n): \(mode.displayName)")
+                    .help(
+                        L(
+                            "presets.space_label",
+                            "Space %1$d: %2$@",
+                            n,
+                            mode.displayName
+                        )
+                    )
             }
         }
         .padding(.top, 1)

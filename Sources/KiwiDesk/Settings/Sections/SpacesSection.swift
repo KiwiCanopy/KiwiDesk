@@ -41,28 +41,38 @@ struct SpacesSection: View {
     static let listSpace = "spacesList"
 
     private var spacesSection: some View {
-        SettingsSection("Spaces") {
-            Text(
-                "Each space has its own layout. Add spaces "
-                    + "here; they appear in the shortcut and "
-                    + "app-rule lists too. Drag rows to "
-                    + "reorder."
-            )
-            .font(.caption)
-            .foregroundStyle(.secondary)
-            Text(
-                "When you switch profiles, windows from a "
-                    + "space the new profile doesn't have "
-                    + "land in its fallback space (the first "
-                    + "space when none is chosen)."
-            )
-            .font(.caption)
-            .foregroundStyle(.secondary)
+        SettingsSection(L("spaces.title", "Spaces")) {
+            Text(spacesCaption)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Text(fallbackCaption)
+                .font(.caption)
+                .foregroundStyle(.secondary)
             ForEach(model.config.spaces, id: \.raw) { space in
                 spaceRow(space)
             }
             addRow
         }
+    }
+
+    private var spacesCaption: String {
+        L(
+            "spaces.caption",
+            "Each space has its own layout. Add spaces "
+                + "here; they appear in the shortcut and "
+                + "app-rule lists too. Drag rows to "
+                + "reorder."
+        )
+    }
+
+    private var fallbackCaption: String {
+        L(
+            "spaces.fallback_caption",
+            "When you switch profiles, windows from a "
+                + "space the new profile doesn't have "
+                + "land in its fallback space (the first "
+                + "space when none is chosen)."
+        )
     }
 
     // MARK: - Rows
@@ -88,12 +98,20 @@ struct SpacesSection: View {
                     }
                 )
                 if model.config.fallbackSpace == space {
-                    BadgeChip(label: "Fallback")
-                        .help(
+                    BadgeChip(
+                        label: L(
+                            "spaces.fallback_badge",
+                            "Fallback"
+                        )
+                    )
+                    .help(
+                        L(
+                            "spaces.fallback_badge.help",
                             "Windows from a removed space "
                                 + "land here when you switch "
                                 + "profiles."
                         )
+                    )
                 }
                 Spacer()
                 modePicker(space)
@@ -175,7 +193,12 @@ struct SpacesSection: View {
             )
         }
         .buttonStyle(.borderless)
-        .help("Customize this space")
+        .help(
+            L(
+                "spaces.customize.help",
+                "Customize this space"
+            )
+        )
     }
 
     /// Keyboard-reachable equivalents of the drag/badge
@@ -183,32 +206,46 @@ struct SpacesSection: View {
     @ViewBuilder
     private func contextActions(_ space: SpaceID) -> some View {
         if model.config.fallbackSpace == space {
-            Button("Clear Fallback") {
+            Button(
+                L("spaces.context.clear_fallback", "Clear Fallback")
+            ) {
                 model.config.fallbackSpace = nil
             }
         } else {
-            Button("Make Fallback") {
+            Button(
+                L("spaces.context.make_fallback", "Make Fallback")
+            ) {
                 model.config.fallbackSpace = space
             }
         }
         Divider()
-        Button("Move Up") { nudge(space, by: -1) }
-            .disabled(index(of: space) == 0)
-        Button("Move Down") { nudge(space, by: 1) }
-            .disabled(
-                index(of: space)
-                    == model.config.spaces.count - 1
-            )
+        Button(L("spaces.context.move_up", "Move Up")) {
+            nudge(space, by: -1)
+        }
+        .disabled(index(of: space) == 0)
+        Button(L("spaces.context.move_down", "Move Down")) {
+            nudge(space, by: 1)
+        }
+        .disabled(
+            index(of: space)
+                == model.config.spaces.count - 1
+        )
         Divider()
-        Button("Delete", role: .destructive) {
+        Button(
+            L("spaces.context.delete", "Delete"),
+            role: .destructive
+        ) {
             removeSpace(space)
         }
     }
 
     private var addRow: some View {
         HStack {
-            TextField("New space name", text: $newSpace)
-                .textFieldStyle(.roundedBorder)
+            TextField(
+                L("spaces.add.placeholder", "New space name"),
+                text: $newSpace
+            )
+            .textFieldStyle(.roundedBorder)
             Button {
                 addSpace()
             } label: {

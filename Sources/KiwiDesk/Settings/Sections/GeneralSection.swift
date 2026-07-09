@@ -2,11 +2,12 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Whole App ▸ General (#68 §3.2): genuinely app-wide state,
-/// never affected by which profile the banner has open — the
-/// Advanced config-file tools (and, later passes, the error
-/// surface entry and About area).
+/// never affected by which profile the banner has open —
+/// the Language picker (issue #9), the About area, and the
+/// Advanced config-file tools.
 struct GeneralSection: View {
     @ObservedObject var model: SettingsModel
+    @EnvironmentObject private var localization: LocalizationManager
     /// Advanced is collapsed by default — only interested
     /// users need the config-file path and the raw editor.
     @State private var advancedExpanded = false
@@ -16,6 +17,7 @@ struct GeneralSection: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
+                languageSection
                 aboutSection
                 advancedSection
             }
@@ -23,12 +25,70 @@ struct GeneralSection: View {
         }
     }
 
+    /// Language (issue #9): "System default" first, then every
+    /// shipped locale by its own native name — the picker itself
+    /// is the live control, no Save button (`setLanguage`
+    /// persists immediately).
+    private var languageSection: some View {
+        SettingsSection(
+            L("general.language.title", "Language")
+        ) {
+            // Uses the house `DropdownRow` (shared label axis,
+            // `.menu` style, large control) like every other
+            // dropdown. The native `.menu` first-letter type-ahead
+            // suffices for a short list; revisit with a searchable
+            // list (`.searchable` in a popover) once shipped
+            // locales approach ~15–20.
+            DropdownRow(
+                label: L("general.language.title", "Language")
+            ) {
+                Picker(
+                    L("general.language.title", "Language"),
+                    selection: languageBinding
+                ) {
+                    Text(
+                        L(
+                            "general.language.system_default",
+                            "System default"
+                        )
+                    )
+                    .tag(Optional<String>.none)
+                    Divider()
+                    ForEach(sortedLocales, id: \.code) { locale in
+                        Text(locale.nativeName)
+                            .tag(Optional(locale.code))
+                    }
+                }
+            }
+        }
+    }
+
+    private var languageBinding: Binding<String?> {
+        Binding(
+            get: { localization.selection },
+            set: { model.setLanguage($0) }
+        )
+    }
+
+    /// The picker's concrete languages: every shipped locale file
+    /// plus English, native-name-sorted ("Deutsch", "English",
+    /// "Français"). English never ships as a runtime file (it
+    /// lives inline at call sites) but must be an explicit choice
+    /// — otherwise a user on a non-English OS can only reach
+    /// English via "System default", which resolves to *their* OS
+    /// language, leaving no way to force English.
+    private var sortedLocales: [LocaleOption] {
+        (localization.available + ["en"])
+            .map { LocaleOption(code: $0) }
+            .sorted { $0.nativeName < $1.nativeName }
+    }
+
     /// About (#68 §3.9): the wordmark as the canonical logo +
     /// name placement, version and the discreet support link
     /// beneath. Falls back to the pre-logo glyph row when the
     /// bundled resource is missing.
     private var aboutSection: some View {
-        SettingsSection("About") {
+        SettingsSection(L("general.about.title", "About")) {
             VStack(spacing: 10) {
                 aboutBrand
                 Text(KiwiDeskVersion.displayString)
@@ -37,7 +97,10 @@ struct GeneralSection: View {
                     .textSelection(.enabled)
                 Link(destination: SupportLinks.koFi) {
                     Label(
-                        "Support KiwiDesk",
+                        L(
+                            "general.about.support",
+                            "Support KiwiDesk"
+                        ),
                         systemImage: "heart"
                     )
                 }
@@ -63,7 +126,7 @@ struct GeneralSection: View {
                 Image(systemName: "rectangle.3.group")
                     .font(.system(size: 30))
                     .foregroundStyle(.secondary)
-                Text("KiwiDesk")
+                Text(L("general.about.app_name", "KiwiDesk"))
                     .font(.headline)
             }
         }
@@ -81,9 +144,14 @@ struct GeneralSection: View {
     private var advancedSection: some View {
         DisclosureGroup(isExpanded: $advancedExpanded) {
             VStack(alignment: .leading, spacing: 8) {
-                Text("Configuration file")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                Text(
+                    L(
+                        "general.advanced.config_file",
+                        "Configuration file"
+                    )
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
                 HStack {
                     Image(systemName: "doc.text")
                         .foregroundStyle(.secondary)
@@ -98,7 +166,7 @@ struct GeneralSection: View {
                         .lineLimit(1)
                         .truncationMode(.middle)
                     Spacer()
-                    Button("Reveal") {
+                    Button(L("general.advanced.reveal", "Reveal")) {
                         NSWorkspace.shared
                             .activateFileViewerSelecting(
                                 [model.configURL]
@@ -110,27 +178,47 @@ struct GeneralSection: View {
                     model.showLuaEditor = true
                 } label: {
                     Label(
-                        "Edit init.lua directly",
+                        L(
+                            "general.advanced.edit_lua",
+                            "Edit init.lua directly"
+                        ),
                         systemImage: "curlybraces"
                     )
                 }
-                Text(
-                    "Opens the integrated Lua editor for "
-                        + "custom scripting beyond the visual "
-                        + "controls."
-                )
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                Text(editLuaCaption)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
             .padding(.top, 8)
             .frame(maxWidth: .infinity, alignment: .leading)
         } label: {
-            Text("Advanced").font(.headline)
+            Text(L("general.advanced.title", "Advanced"))
+                .font(.headline)
         }
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 8)
                 .fill(Color(nsColor: .controlBackgroundColor))
         )
+    }
+
+    private var editLuaCaption: String {
+        L(
+            "general.advanced.edit_lua.caption",
+            "Opens the integrated Lua editor for custom "
+                + "scripting beyond the visual controls."
+        )
+    }
+}
+
+/// One shipped locale, presented by its own native name (e.g.
+/// "Deutsch" for `de`) — never the English exonym.
+private struct LocaleOption {
+    let code: String
+
+    var nativeName: String {
+        Locale(identifier: code)
+            .localizedString(forIdentifier: code)
+            ?? code
     }
 }

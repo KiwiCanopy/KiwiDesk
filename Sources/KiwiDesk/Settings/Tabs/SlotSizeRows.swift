@@ -20,7 +20,9 @@ struct SlotSizeRows: View {
     enum Part { case unit, control, both }
 
     private var sizeLabel: String {
-        isVertical ? "Row height" : "Column width"
+        isVertical
+            ? L("slot_size.row_height", "Row height")
+            : L("slot_size.column_width", "Column width")
     }
 
     private enum SizeUnit: Hashable {
@@ -112,12 +114,12 @@ struct SlotSizeRows: View {
 
     private var unitPicker: some View {
         SegmentedPicker(
-            "Size unit",
+            L("slot_size.unit", "Size unit"),
             selection: sizeUnitBinding,
             options: [
-                ("Auto", SizeUnit.auto),
-                ("Points", .points),
-                ("Percent", .percent),
+                (L("slot_size.auto", "Auto"), SizeUnit.auto),
+                (L("slot_size.points", "Points"), .points),
+                (L("slot_size.percent", "Percent"), .percent),
             ]
         )
     }
@@ -137,20 +139,25 @@ struct SlotSizeRows: View {
                 // resolved state in the chips' capsule
                 // language, so it can't be read over as filler
                 // text.
-                Text("Auto — orientation standard")
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 2)
-                    .background(
-                        Capsule().fill(.secondary.opacity(0.08))
+                Text(
+                    L(
+                        "slot_size.auto_standard",
+                        "Auto — orientation standard"
                     )
-                    .overlay(
-                        Capsule().strokeBorder(
-                            .secondary.opacity(0.15),
-                            lineWidth: 0.5
-                        )
+                )
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 2)
+                .background(
+                    Capsule().fill(.secondary.opacity(0.08))
+                )
+                .overlay(
+                    Capsule().strokeBorder(
+                        .secondary.opacity(0.15),
+                        lineWidth: 0.5
                     )
+                )
                 Spacer()
             }
         case .points:

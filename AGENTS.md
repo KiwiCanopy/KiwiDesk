@@ -310,3 +310,43 @@ Keep this list updated whenever a recurring mistake is found.
   just the `resolved()` lines — sparse `Codable` stays per-field
   either way, so generics rarely buy down the real risk and fight
   §2.4.
+- **`Resources/Locales/*.json` is generated/translation-owned
+  (issue #9).** Every GUI string routes through
+  `L("key", "English")` (`KiwiDeskCore/Localization/
+  LocalizationManager.swift`); English is the source of truth,
+  inlined at the call site, with per-key fallback when a locale
+  omits a key. A value interpolated into a sentence (a name, a
+  count) MUST go through the `L(key, english, args...)`
+  overload with POSITIONAL `%1$@`/`%1$d` specifiers, never
+  `+`-concatenated fragments — a translation can't reorder
+  pieces stitched together in Swift, and many languages need to.
+  `en.json` is regenerated wholesale by `scripts/extract-keys`
+  (which scans both `Sources/KiwiDesk` and `Sources/
+  KiwiDeskCore`, and ignores `//`/`///` comments so a doc-comment
+  example call site can't leak a phantom key) from real call
+  sites — never hand-edit it, and AI agents must not hand-edit
+  any `Resources/Locales/*.json` file: use `scripts/extract-keys
+  <locale>` / `scripts/merge-keys <locale>` to translate,
+  `scripts/rename-key <old> <new>` to rename a key without
+  losing translations, and `scripts/extract-keys --prune` to
+  drop orphaned ones (see `docs/translating.md`). Because the
+  same English text can in principle be authored at two
+  different call sites for one key, `extract-keys` fails loudly
+  on any such drift (mismatched English for the same key) rather
+  than silently picking one; `extract-keys --check` (run
+  unconditionally by `scripts/lint.sh` — part of the verify
+  gate, CI, and `scripts/pre-commit` whenever a Swift or locale
+  file is staged) additionally hard-fails if `en.json` is stale
+  or if any shipped `<locale>.json` doesn't decode as a flat
+  `{string: string}` map (a broken file would otherwise make
+  `LocaleCatalog` soft-fail to `[:]` and silently revert that
+  locale to English); an orphan key (in a locale file, absent
+  from code) only warns — clean it up with `extract-keys
+  --prune`. All of this is backed by Swift tests
+  (`LocalizationDriftGuardTests`, `LocalizationOrphanTests`,
+  `RenameKeyTests`) so a regression in the tooling itself is
+  covered by `swift test`, not just by running the script. The
+  GUI language pick persists in `UserDefaults`
+  (`LocalizationPreference`), never `gui.json` — it is
+  documented as side-effect-free and must never create a
+  sidecar or flip `KiwiCore.isGuiManaged`.

@@ -70,3 +70,6 @@ plan/
 !.claude/skills/
 !.claude/rules/
 .agents/skills/
+
+# macOS specific
+.DS_Store

@@ -30,65 +30,88 @@ struct SettingsFooter: View {
         HStack(spacing: 8) {
             if model.isDirty {
                 Label(
-                    "Unsaved changes",
+                    L(
+                        "footer.unsaved_changes",
+                        "Unsaved changes"
+                    ),
                     systemImage: "pencil.circle"
                 )
                 .font(.caption)
                 .foregroundStyle(.orange)
             }
             Spacer()
-            Button("Revert") { model.revert() }
-                .disabled(!model.isDirty)
+            Button(L("footer.revert", "Revert Changes")) {
+                model.revert()
+            }
+            .disabled(!model.isDirty)
             copySlot
             primarySlot
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
         .alert(
-            "Save as new profile",
+            L(
+                "footer.save_as_new.title",
+                "Save as new profile"
+            ),
             isPresented: $namingNewProfile
         ) {
-            TextField("Profile name", text: $newProfileName)
-            Button("Save") {
+            TextField(
+                L("footer.profile_name", "Profile name"),
+                text: $newProfileName
+            )
+            Button(L("footer.save", "Save")) {
                 model.saveAsNewProfile(named: newProfileName)
                 newProfileName = ""
             }
             .disabled(newProfileName.trimmed.isEmpty)
-            Button("Cancel", role: .cancel) {
+            Button(L("footer.cancel", "Cancel"), role: .cancel) {
                 newProfileName = ""
             }
         } message: {
-            Text(
-                "The new profile carries the current tiling "
-                    + "and the connected monitor set."
-            )
+            Text(saveAsNewMessage)
         }
         .alert(
-            "Save a copy as",
+            L("footer.save_copy_as.title", "Save a copy as"),
             isPresented: $namingProfileCopy
         ) {
-            TextField("Profile name", text: $profileCopyName)
-            Button("Save copy") {
+            TextField(
+                L("footer.profile_name", "Profile name"),
+                text: $profileCopyName
+            )
+            Button(L("footer.save_copy", "Save copy")) {
                 model.saveEditedProfileCopy(
                     named: profileCopyName
                 )
                 profileCopyName = ""
             }
             .disabled(profileCopyName.trimmed.isEmpty)
-            Button("Cancel", role: .cancel) {
+            Button(L("footer.cancel", "Cancel"), role: .cancel) {
                 profileCopyName = ""
             }
         } message: {
-            Text(
-                "Duplicates \u{201C}"
-                    + (model.editingProfile ?? "")
-                    + "\u{201D} with your pending edits — "
-                    + "monitor sets and shortcut overrides "
-                    + "included. The copy becomes the edit "
-                    + "target; the running layout is not "
-                    + "changed."
-            )
+            Text(saveCopyMessage)
         }
+    }
+
+    private var saveAsNewMessage: String {
+        L(
+            "footer.save_as_new.message",
+            "The new profile carries the current tiling "
+                + "and the connected monitor set."
+        )
+    }
+
+    private var saveCopyMessage: String {
+        L(
+            "footer.save_copy_as.message",
+            "Duplicates \u{201C}%1$@\u{201D} with your "
+                + "pending edits — monitor sets and shortcut "
+                + "overrides included. The copy becomes the "
+                + "edit target; the running layout is not "
+                + "changed.",
+            model.editingProfile ?? ""
+        )
     }
 
     // MARK: - Secondary slot: Save a Copy As…
@@ -100,31 +123,36 @@ struct SettingsFooter: View {
         if model.editingLua {
             EmptyView()
         } else if model.editingStoredProfile {
-            Button("Save a Copy As…") {
+            Button(saveCopyAsLabel) {
                 namingProfileCopy = true
             }
         } else if model.activeProfile != nil {
-            Button("Save a Copy As…") {
+            Button(saveCopyAsLabel) {
                 namingNewProfile = true
             }
         }
     }
 
+    private var saveCopyAsLabel: String {
+        L("footer.save_a_copy_as", "Save a Copy As…")
+    }
+
     // MARK: - Primary slot: Save (⌘S)
 
     @ViewBuilder private var primarySlot: some View {
+        let save = L("footer.save", "Save")
         if model.editingLua {
-            Button("Save") { model.saveLuaSource() }
+            Button(save) { model.saveLuaSource() }
                 .keyboardShortcut("s")
                 .buttonStyle(.borderedProminent)
                 .disabled(!model.isDirty)
         } else if model.editingStoredProfile {
-            Button("Save") { model.saveEditedProfile() }
+            Button(save) { model.saveEditedProfile() }
                 .keyboardShortcut("s")
                 .buttonStyle(.borderedProminent)
                 .disabled(!model.isDirty)
         } else if model.activeProfile != nil {
-            Button("Save") { model.updateActiveProfile() }
+            Button(save) { model.updateActiveProfile() }
                 .keyboardShortcut("s")
                 .buttonStyle(.borderedProminent)
                 .disabled(
@@ -136,7 +164,12 @@ struct SettingsFooter: View {
         } else {
             // No profile yet — the create action takes the
             // primary slot.
-            Button("Save as New Profile…") {
+            Button(
+                L(
+                    "footer.save_as_new_profile",
+                    "Save as New Profile…"
+                )
+            ) {
                 namingNewProfile = true
             }
             .keyboardShortcut("s")

@@ -68,29 +68,37 @@ final class StatusItemController: NSObject, NSMenuDelegate {
             button.image = NSImage(
                 systemSymbolName:
                     "exclamationmark.triangle.fill",
-                accessibilityDescription:
+                accessibilityDescription: L(
+                    "menu.status.warning.a11y",
                     "KiwiDesk (permission required)"
+                )
             )
             button.title = ""
-            button.toolTip =
+            button.toolTip = L(
+                "menu.status.warning.tooltip",
                 "KiwiDesk needs Accessibility permission. "
-                + "Window management is paused."
+                    + "Window management is paused."
+            )
             return
         }
         if configError {
             button.image = NSImage(
                 systemSymbolName:
                     "doc.badge.exclamationmark",
-                accessibilityDescription:
+                accessibilityDescription: L(
+                    "menu.status.config_error.a11y",
                     "KiwiDesk (config issues)"
+                )
             )
             button.title = ""
-            button.toolTip =
+            button.toolTip = L(
+                "menu.status.config_error.tooltip",
                 "Parts of the configuration could not be "
-                + "loaded — open Config Issues for details."
+                    + "loaded — open Config Issues for details."
+            )
             return
         }
-        button.toolTip = "KiwiDesk"
+        button.toolTip = L("menu.status.tooltip", "KiwiDesk")
         if let modeIcon, !modeIcon.isEmpty {
             applyModeIcon(modeIcon, to: button)
         } else {
@@ -99,7 +107,10 @@ final class StatusItemController: NSObject, NSMenuDelegate {
                 BrandAssets.menuBarIcon
                 ?? NSImage(
                     systemSymbolName: "rectangle.3.group",
-                    accessibilityDescription: "KiwiDesk"
+                    accessibilityDescription: L(
+                        "menu.status.a11y",
+                        "KiwiDesk"
+                    )
                 )
         }
     }
@@ -137,7 +148,10 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         menu.addItem(.separator())
         if configError {
             let issues = NSMenuItem(
-                title: "Config Issues…",
+                title: L(
+                    "menu.config_issues",
+                    "Config Issues…"
+                ),
                 action: #selector(showConfigIssues),
                 keyEquivalent: ""
             )
@@ -147,7 +161,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
             menu.addItem(.separator())
         }
         let settings = NSMenuItem(
-            title: "Settings…",
+            title: L("menu.settings", "Settings…"),
             action: #selector(openDashboard),
             keyEquivalent: ","
         )
@@ -156,7 +170,10 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         menu.addItem(settings)
 
         let accessibility = NSMenuItem(
-            title: "Accessibility Settings…",
+            title: L(
+                "menu.accessibility_settings",
+                "Accessibility Settings…"
+            ),
             action: #selector(openSettings),
             keyEquivalent: ""
         )
@@ -166,7 +183,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
         menu.addItem(.separator())
         let support = NSMenuItem(
-            title: "Support KiwiDesk",
+            title: L("menu.support", "Support KiwiDesk"),
             action: #selector(openSupport),
             keyEquivalent: ""
         )
@@ -176,7 +193,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
         menu.addItem(.separator())
         let quit = NSMenuItem(
-            title: "Quit KiwiDesk",
+            title: L("menu.quit", "Quit KiwiDesk"),
             action: #selector(NSApplication.terminate(_:)),
             keyEquivalent: "q"
         )
@@ -188,8 +205,13 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// is live right now (§3.8/§3.10).
     private func headerItem(active: String?) -> NSMenuItem {
         let title =
-            active.map { "KiwiDesk — \($0)" }
-            ?? "KiwiDesk — no profile"
+            active.map {
+                L("menu.header.active", "KiwiDesk — %1$@", $0)
+            }
+            ?? L(
+                "menu.header.no_profile",
+                "KiwiDesk — no profile"
+            )
         let header = NSMenuItem(
             title: title,
             action: nil,
@@ -209,7 +231,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         _ profiles: (active: String?, all: [String])
     ) -> NSMenuItem {
         let parent = NSMenuItem(
-            title: "Switch Profile",
+            title: L("menu.switch_profile", "Switch Profile"),
             action: nil,
             keyEquivalent: ""
         )
@@ -217,7 +239,10 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         let submenu = NSMenu()
         if profiles.all.isEmpty {
             let empty = NSMenuItem(
-                title: "No saved profiles",
+                title: L(
+                    "menu.no_profiles",
+                    "No saved profiles"
+                ),
                 action: nil,
                 keyEquivalent: ""
             )

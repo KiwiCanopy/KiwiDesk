@@ -217,6 +217,20 @@ without a dismiss. (#33/#34/#35, #68 §3.6.2)
 **One recorder at a time.** Starting a recording snaps any
 other recording field back instantly. (#33)
 
+**A catalog label's identity and its display text are two
+different fields.** `KeybindingCatalog`'s `NavCommand.label`
+(and `StandardLayout.name`/`.summary`) stay the stable,
+English canonical text — persisted into `KeyBinding.label`,
+matched on by `KeybindingImportClassifier` (keyed off `lua`,
+never display text), and used to seed a new saved profile's
+name (`freeName(base: layout.name)`). Only a separate
+`resolvedLabel` / `displayName` / `displaySummary` — resolved
+through `L(...)` at render time, keyed by the stable field —
+translates. This keeps a language switch from ever rewriting
+persisted data or breaking import classification (issue #9
+follow-up: the original literal-routing sweep covered SwiftUI
+view literals but missed catalog-defined strings).
+
 ## Overrides & appearance
 
 **Overrides are visible-but-inherited, never hidden.** A

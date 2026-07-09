@@ -22,7 +22,7 @@ struct ScrollGridEditor: View {
 
     private var scrolling: some View {
         SettingsSection(
-            "Scrolling",
+            L("layout.scrolling.name", "Scrolling"),
             symbol: LayoutMode.scrolling.glyph
         ) {
             SlotSizeRows(
@@ -31,25 +31,54 @@ struct ScrollGridEditor: View {
                 part: .unit
             )
             SegmentedPicker(
-                "Focus anchor",
+                L("scroll_grid.focus_anchor", "Focus anchor"),
                 selection: $model.config.settings.scrolling
                     .anchor,
                 options: [
-                    ("Center", ScrollingParams.Anchor.center),
-                    (isVertical ? "Top" : "Left", .left),
-                    (isVertical ? "Bottom" : "Right", .right),
+                    (
+                        L("scroll_grid.anchor.center", "Center"),
+                        ScrollingParams.Anchor.center
+                    ),
+                    (
+                        isVertical
+                            ? L("scroll_grid.anchor.top", "Top")
+                            : L(
+                                "scroll_grid.anchor.left",
+                                "Left"
+                            ), .left
+                    ),
+                    (
+                        isVertical
+                            ? L(
+                                "scroll_grid.anchor.bottom",
+                                "Bottom"
+                            )
+                            : L(
+                                "scroll_grid.anchor.right",
+                                "Right"
+                            ), .right
+                    ),
                 ]
             )
             SegmentedPicker(
-                "Scroll orientation",
+                L(
+                    "scroll_grid.scroll_orientation",
+                    "Scroll orientation"
+                ),
                 selection: $model.config.settings.scrolling
                     .orientation,
                 options: [
                     (
-                        "Horizontal",
+                        L(
+                            "scroll_grid.horizontal",
+                            "Horizontal"
+                        ),
                         ScrollingParams.Orientation.horizontal
                     ),
-                    ("Vertical", .vertical),
+                    (
+                        L("scroll_grid.vertical", "Vertical"),
+                        .vertical
+                    ),
                 ]
             )
             Divider()
@@ -72,15 +101,24 @@ struct ScrollGridEditor: View {
             // together, like a layout's App Bar enable sits
             // above its overrides.
             Toggle(
-                "Animate focus shifts",
+                L(
+                    "scroll_grid.animate_focus_shifts",
+                    "Animate focus shifts"
+                ),
                 isOn: $model.config.settings.animations
                     .onScrolling
             )
             scrollSpeedRow
             CrossReferenceRow(
-                prose: "The app bar shown in scrolling is "
-                    + "configured in",
-                linkTitle: "Appearance ▸ App Bar",
+                prose: L(
+                    "scroll_grid.app_bar_xref",
+                    "The app bar shown in scrolling is "
+                        + "configured in"
+                ),
+                linkTitle: L(
+                    "scroll_grid.app_bar_xref_link",
+                    "Appearance ▸ App Bar"
+                ),
                 destination: .appearance
             )
         }
@@ -93,7 +131,7 @@ struct ScrollGridEditor: View {
     /// than hand-rolling the same shape.
     private var scrollSpeedRow: some View {
         StepperRow(
-            label: "Scroll speed",
+            label: L("scroll_grid.scroll_speed", "Scroll speed"),
             value: $model.config.settings.animations
                 .scrollSpeedMS,
             in: 50...1000,
@@ -107,41 +145,56 @@ struct ScrollGridEditor: View {
 
     private var grid: some View {
         SettingsSection(
-            "Grid",
+            L("layout.grid.name", "Grid"),
             symbol: LayoutMode.grid.glyph
         ) {
             SegmentedPicker(
-                "Grid type",
+                L("scroll_grid.grid_type", "Grid type"),
                 selection: $model.config.settings.grid.type,
                 options: [
-                    ("Dynamic", GridParams.GridType.dynamic),
-                    ("Rigid", .rigid),
+                    (
+                        L("scroll_grid.dynamic", "Dynamic"),
+                        GridParams.GridType.dynamic
+                    ),
+                    (L("scroll_grid.rigid", "Rigid"), .rigid),
                 ]
             )
             SegmentedPicker(
-                "Split direction",
+                L(
+                    "scroll_grid.split_direction",
+                    "Split direction"
+                ),
                 selection: $model.config.settings.grid
                     .splitDirection,
                 options: [
                     (
-                        "Horizontal",
+                        L(
+                            "scroll_grid.horizontal",
+                            "Horizontal"
+                        ),
                         GridParams.SplitDirection.horizontal
                     ),
-                    ("Vertical", .vertical),
+                    (
+                        L("scroll_grid.vertical", "Vertical"),
+                        .vertical
+                    ),
                 ]
             )
             Divider()
             Toggle(
-                "Fill empty space",
+                L(
+                    "scroll_grid.fill_empty_space",
+                    "Fill empty space"
+                ),
                 isOn: $model.config.settings.grid.fillEmptySpace
             )
             StepperRow(
-                label: "Columns",
+                label: L("scroll_grid.columns", "Columns"),
                 value: $model.config.settings.grid.columns,
                 in: 1...10
             )
             StepperRow(
-                label: "Rows",
+                label: L("scroll_grid.rows", "Rows"),
                 value: $model.config.settings.grid.rows,
                 in: 1...10
             )

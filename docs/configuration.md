@@ -96,6 +96,21 @@ declares. Custom keybinding Lua is stored there and runs on
 reload, so treat `gui.json` with the same trust as `init.lua`
 — don't import one from an untrusted source.
 
+### GUI language
+
+Settings ▸ General ▸ Language picks the display language of
+the Settings window, the dashboard, and the menu-bar quick
+menu — it has no Lua command and never touches `init.lua` or
+`gui.json`. "System default" (the first item) follows the
+macOS UI language when KiwiDesk ships a translation for it,
+falling back to English otherwise; picking a language
+explicitly stores its code in app preferences (`UserDefaults`,
+key `"language"`; absent means "System default") and applies
+immediately, no restart needed — a deliberately side-effect-free
+preference that never touches tiling/keybinding state or config
+ownership. See `docs/translating.md` for the translation
+workflow and how to add a language.
+
 ## Layouts & Gaps
 
 ```lua

@@ -25,19 +25,19 @@ struct AppearanceSection: View {
     }
 
     @ViewBuilder private var appBarGroup: some View {
-        SettingsGroupHeader("App Bar")
+        SettingsGroupHeader(L("app_bar.group.title", "App Bar"))
             .padding(.top, 4)
         GlobalAppBarSection(
             style: $model.config.settings.appBarStyle
         )
         LayoutAppBarSection(
-            title: "Monocle",
+            title: L("layout.monocle.name", "Monocle"),
             mode: .monocle,
             bar: $model.config.settings.monocle.appBar,
             global: model.config.settings.appBarStyle
         )
         LayoutAppBarSection(
-            title: "Scrolling",
+            title: L("layout.scrolling.name", "Scrolling"),
             mode: .scrolling,
             bar: $model.config.settings.scrolling.appBar,
             global: model.config.settings.appBarStyle

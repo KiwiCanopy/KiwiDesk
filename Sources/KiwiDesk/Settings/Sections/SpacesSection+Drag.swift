@@ -25,7 +25,9 @@ extension SpacesSection {
             .foregroundStyle(.secondary)
             .frame(width: 20, height: 24)
             .contentShape(Rectangle())
-            .help("Drag to reorder")
+            .help(
+                L("spaces.drag_handle.help", "Drag to reorder")
+            )
             .onHover { inside in
                 hoveredHandle =
                     inside

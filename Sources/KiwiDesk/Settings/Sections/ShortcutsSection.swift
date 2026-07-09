@@ -103,31 +103,44 @@ struct ShortcutsSection: View {
     /// the base are saved into the profile's sparse override.
     @ViewBuilder private var overrideBanner: some View {
         if model.editingStoredProfile {
-            SettingsSection("Profile shortcuts") {
+            SettingsSection(
+                L(
+                    "shortcuts.override.title",
+                    "Profile shortcuts"
+                )
+            ) {
                 if model.editedProfileOverridesKeys {
                     Label(
-                        "This profile overrides base "
-                            + "keybindings.",
+                        L(
+                            "shortcuts.override.overrides",
+                            "This profile overrides base "
+                                + "keybindings."
+                        ),
                         systemImage:
                             "keyboard.badge.ellipsis"
                     )
                     .font(.callout)
                 }
-                Text(
-                    "Dimmed rows are inherited from the base "
-                        + "shortcuts and stay in sync with "
-                        + "them. Edit a row to override it "
-                        + "for this profile only; matching "
-                        + "the base again makes it inherited "
-                        + "again. Removing an inherited row "
-                        + "only resets it — to disable a "
-                        + "combo in this profile, rebind it "
-                        + "to a no-op action instead."
-                )
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                Text(overrideCaption)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
+    }
+
+    private var overrideCaption: String {
+        L(
+            "shortcuts.override.caption",
+            "Dimmed rows are inherited from the base "
+                + "shortcuts and stay in sync with "
+                + "them. Edit a row to override it "
+                + "for this profile only; matching "
+                + "the base again makes it inherited "
+                + "again. Removing an inherited row "
+                + "only resets it — to disable a "
+                + "combo in this profile, rebind it "
+                + "to a no-op action instead."
+        )
     }
 
     // MARK: - Advanced drawer (§3.6.1)
@@ -135,14 +148,9 @@ struct ShortcutsSection: View {
     private var advancedDrawer: some View {
         DisclosureGroup(isExpanded: $advancedExpanded) {
             VStack(alignment: .leading, spacing: 8) {
-                Text(
-                    "Bind any Lua to a hotkey. This is the "
-                        + "power-user escape hatch — the "
-                        + "groups above cover the built-in "
-                        + "actions."
-                )
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                Text(advancedDrawerCaption)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 AdvancedLuaSection(
                     model: model,
                     bindings: bindingsBinding
@@ -150,12 +158,28 @@ struct ShortcutsSection: View {
             }
             .padding(.top, 8)
         } label: {
-            Text("Advanced: Lua bindings").font(.headline)
+            Text(
+                L(
+                    "shortcuts.advanced.title",
+                    "Advanced: Lua bindings"
+                )
+            )
+            .font(.headline)
         }
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 8)
                 .fill(Color(nsColor: .controlBackgroundColor))
+        )
+    }
+
+    private var advancedDrawerCaption: String {
+        L(
+            "shortcuts.advanced.caption",
+            "Bind any Lua to a hotkey. This is the "
+                + "power-user escape hatch — the "
+                + "groups above cover the built-in "
+                + "actions."
         )
     }
 

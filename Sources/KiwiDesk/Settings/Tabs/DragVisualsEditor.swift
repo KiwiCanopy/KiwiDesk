@@ -13,22 +13,28 @@ struct DragVisualsEditor: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             SettingsSection(
-                "Drag & Drop",
-                caption: "Drag a window onto another to swap "
-                    + "their positions in the layout."
+                L("drag.title", "Drag & Drop"),
+                caption: L(
+                    "drag.caption",
+                    "Drag a window onto another to swap "
+                        + "their positions in the layout."
+                )
             ) {
                 previewStrip
                 PtSlider(
-                    label: "Corner radius",
+                    label: L("drag.corner_radius", "Corner radius"),
                     value: $model.config.settings
                         .dragCornerRadius,
                     range: 0...40
                 )
             }
             SettingsSection(
-                "Ghost",
-                caption: "Marks the position your window is "
-                    + "dragged from.",
+                ghostLabel,
+                caption: L(
+                    "drag.ghost.caption",
+                    "Marks the position your window is "
+                        + "dragged from."
+                ),
                 subsection: true
             ) {
                 DragVisualControls(
@@ -36,9 +42,12 @@ struct DragVisualsEditor: View {
                 )
             }
             SettingsSection(
-                "Drop zone",
-                caption: "Marks the position your window will "
-                    + "snap into when dropped.",
+                dropZoneLabel,
+                caption: L(
+                    "drag.drop_zone.caption",
+                    "Marks the position your window will "
+                        + "snap into when dropped."
+                ),
                 subsection: true
             ) {
                 DragVisualControls(
@@ -49,16 +58,21 @@ struct DragVisualsEditor: View {
         }
     }
 
+    private var ghostLabel: String { L("drag.ghost", "Ghost") }
+    private var dropZoneLabel: String {
+        L("drag.drop_zone", "Drop zone")
+    }
+
     private var previewStrip: some View {
         HStack(spacing: 16) {
             DragVisualPreview(
-                label: "Ghost",
+                label: ghostLabel,
                 visual: model.config.settings.dragGhost,
                 cornerRadius: model.config.settings
                     .dragCornerRadius
             )
             DragVisualPreview(
-                label: "Drop zone",
+                label: dropZoneLabel,
                 visual: model.config.settings.dragDropZone,
                 cornerRadius: model.config.settings
                     .dragCornerRadius
@@ -85,7 +99,7 @@ private struct DragVisualPreview: View {
                 mock
                     .padding(10)
                 if !visual.enabled {
-                    Text("disabled")
+                    Text(L("drag.disabled", "disabled"))
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
@@ -135,32 +149,38 @@ struct DragVisualControls: View {
     @Binding var visual: DragVisual
 
     var body: some View {
-        Toggle("Enabled", isOn: $visual.enabled)
+        Toggle(L("drag.enabled", "Enabled"), isOn: $visual.enabled)
         Divider()
-        Toggle("Border", isOn: $visual.border)
+        Toggle(L("drag.border", "Border"), isOn: $visual.border)
         HexColorField(
-            label: "Border color",
+            label: L("drag.border_color", "Border color"),
             hex: $visual.borderColor
         )
         PtSlider(
-            label: "Border width",
+            label: L("drag.border_width", "Border width"),
             value: $visual.borderThickness,
             range: 0...20
         )
-        DropdownRow(label: "Border alignment") {
+        DropdownRow(label: borderAlignmentLabel) {
             Picker(
-                "Border alignment",
+                borderAlignmentLabel,
                 selection: $visual.borderAlignment
             ) {
-                Text("Inside").tag(BorderAlignment.inside)
-                Text("Outside").tag(BorderAlignment.outside)
+                Text(L("drag.inside", "Inside"))
+                    .tag(BorderAlignment.inside)
+                Text(L("drag.outside", "Outside"))
+                    .tag(BorderAlignment.outside)
             }
         }
         Divider()
-        Toggle("Fill", isOn: $visual.fill)
+        Toggle(L("drag.fill", "Fill"), isOn: $visual.fill)
         HexColorField(
-            label: "Fill color",
+            label: L("drag.fill_color", "Fill color"),
             hex: $visual.fillColor
         )
+    }
+
+    private var borderAlignmentLabel: String {
+        L("drag.border_alignment", "Border alignment")
     }
 }

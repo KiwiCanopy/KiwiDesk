@@ -24,5 +24,17 @@ extension LayoutMode {
         }
     }
 
-    var displayName: String { rawValue.capitalized }
+    @MainActor var displayName: String {
+        switch self {
+        case .bsp: return L("layout.bsp.name", "Bsp")
+        case .stack: return L("layout.stack.name", "Stack")
+        case .scrolling:
+            return L("layout.scrolling.name", "Scrolling")
+        case .grid: return L("layout.grid.name", "Grid")
+        case .monocle:
+            return L("layout.monocle.name", "Monocle")
+        case .floating:
+            return L("layout.floating.name", "Floating")
+        }
+    }
 }

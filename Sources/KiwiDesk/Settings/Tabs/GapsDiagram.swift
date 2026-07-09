@@ -38,10 +38,19 @@ struct GapsDiagram: View {
             miniScreen
             VStack(alignment: .leading, spacing: 4) {
                 legend(
-                    "Outer",
-                    "between windows and the screen edge"
+                    L("gaps.outer_term", "Outer"),
+                    L(
+                        "gaps.outer_meaning",
+                        "between windows and the screen edge"
+                    )
                 )
-                legend("Inner", "between neighboring windows")
+                legend(
+                    L("gaps.inner_term", "Inner"),
+                    L(
+                        "gaps.inner_meaning",
+                        "between neighboring windows"
+                    )
+                )
             }
             Spacer()
         }

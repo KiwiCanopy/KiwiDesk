@@ -1,19 +1,44 @@
 #!/bin/bash
-# KiwiDesk pre-commit hook: lint staged Swift files.
+# KiwiDesk pre-commit hook: lint staged Swift files, and run the
+# locale freshness/drift/shape check whenever a locale JSON file
+# is staged (issue #9) — even if no Swift file is staged, so a
+# translator committing only Resources/Locales/de.json still
+# gets instant local feedback instead of waiting for CI.
 # Installed by scripts/install-hooks.sh
 set -euo pipefail
 
 ROOT="$(git rev-parse --show-toplevel)"
+STATUS=0
 
-STAGED=()
+STAGED_SWIFT=()
 while IFS= read -r f; do
-    STAGED+=("$ROOT/$f")
+    STAGED_SWIFT+=("$ROOT/$f")
 done < <(git diff --cached --name-only --diff-filter=ACM \
     | grep '\.swift$' || true)
 
-if [ "${#STAGED[@]}" -eq 0 ]; then
-    exit 0
+STAGED_LOCALES=()
+while IFS= read -r f; do
+    STAGED_LOCALES+=("$f")
+done < <(git diff --cached --name-only --diff-filter=ACM \
+    | grep '^Sources/KiwiDeskCore/Resources/Locales/.*\.json$' \
+    || true)
+
+if [ "${#STAGED_SWIFT[@]}" -gt 0 ]; then
+    echo "pre-commit: linting ${#STAGED_SWIFT[@]} staged" \
+        "Swift file(s)..."
+    # lint.sh already runs `extract-keys --check` unconditionally
+    # at the end, regardless of the file list passed to it — this
+    # also covers the locale check when both Swift and locale
+    # files are staged together.
+    if ! "$ROOT/scripts/lint.sh" "${STAGED_SWIFT[@]}"; then
+        STATUS=1
+    fi
+elif [ "${#STAGED_LOCALES[@]}" -gt 0 ]; then
+    echo "pre-commit: ${#STAGED_LOCALES[@]} staged locale" \
+        "file(s), running extract-keys --check..."
+    if ! python3 "$ROOT/scripts/extract-keys" --check; then
+        STATUS=1
+    fi
 fi
 
-echo "pre-commit: linting ${#STAGED[@]} staged Swift file(s)..."
-"$ROOT/scripts/lint.sh" "${STAGED[@]}"
+exit $STATUS

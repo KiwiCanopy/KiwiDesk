@@ -1,4 +1,5 @@
 import AppKit
+import KiwiDeskCore
 import SwiftUI
 
 /// The icon chooser (#68 §6.4), one component for mode icons
@@ -25,6 +26,13 @@ struct IconPicker: View {
         case emoji = "Emoji"
         case symbols = "Symbols"
         var id: String { rawValue }
+
+        @MainActor var title: String {
+            switch self {
+            case .emoji: L("icon_picker.emoji", "Emoji")
+            case .symbols: L("icon_picker.symbols", "Symbols")
+            }
+        }
 
         var choices: [IconChoice] {
             switch self {
@@ -69,7 +77,7 @@ struct IconPicker: View {
         // though what it opens is a popover browser, not a
         // menu.
         .controlSize(.large)
-        .help("Choose an icon")
+        .help(L("icon_picker.choose.help", "Choose an icon"))
         .popover(isPresented: $showing) { popover }
     }
 
@@ -79,7 +87,10 @@ struct IconPicker: View {
         VStack(spacing: 8) {
             previewHeader
             TextField(
-                "Search icons (or an SF Symbol name)",
+                L(
+                    "icon_picker.search.placeholder",
+                    "Search icons (or an SF Symbol name)"
+                ),
                 text: $search
             )
             .textFieldStyle(.roundedBorder)
@@ -88,7 +99,7 @@ struct IconPicker: View {
                     SegmentedPicker(
                         selection: $tab,
                         options: IconTab.allCases.map {
-                            ($0.rawValue, $0)
+                            ($0.title, $0)
                         }
                     )
                     clearButton
@@ -98,7 +109,7 @@ struct IconPicker: View {
                 VStack(alignment: .leading, spacing: 10) {
                     if search.trimmed.isEmpty {
                         gridSection(
-                            "Recents",
+                            L("icon_picker.recents", "Recents"),
                             choices: recentChoices
                         )
                         gridSection(
@@ -111,13 +122,13 @@ struct IconPicker: View {
                         // tabs stand back.
                         specialResults
                         gridSection(
-                            "Emoji",
+                            L("icon_picker.emoji", "Emoji"),
                             choices: filtered(
                                 IconCatalog.emoji
                             )
                         )
                         gridSection(
-                            "Symbols",
+                            L("icon_picker.symbols", "Symbols"),
                             choices: filtered(
                                 IconCatalog.symbols
                             )
@@ -139,18 +150,28 @@ struct IconPicker: View {
             HStack(spacing: 8) {
                 menuBarSwatch(scheme: .light)
                 menuBarSwatch(scheme: .dark)
-                Text("Menu bar preview")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                Text(
+                    L(
+                        "icon_picker.preview.menu_bar",
+                        "Menu bar preview"
+                    )
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
                 Spacer()
             }
         case .chip:
             HStack(spacing: 8) {
                 IconGlyphLabel(icon: icon)
                     .font(.caption)
-                Text("Row preview")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                Text(
+                    L(
+                        "icon_picker.preview.row",
+                        "Row preview"
+                    )
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
                 Spacer()
             }
         }
@@ -194,8 +215,12 @@ struct IconPicker: View {
                         choose(query)
                     } label: {
                         Label(
-                            "Use \u{201C}\(query)\u{201D} "
-                                + "as text",
+                            L(
+                                "icon_picker.use_as_text",
+                                "Use \u{201C}%1$@\u{201D} as "
+                                    + "text",
+                                query
+                            ),
                             systemImage: "textformat"
                         )
                     }
@@ -255,7 +280,12 @@ struct IconPicker: View {
                 .foregroundStyle(.secondary)
         }
         .buttonStyle(.bordered)
-        .help("Remove icon (use the default)")
+        .help(
+            L(
+                "icon_picker.clear.help",
+                "Remove icon (use the default)"
+            )
+        )
         .disabled(icon.isEmpty)
     }
 

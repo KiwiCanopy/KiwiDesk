@@ -1,3 +1,4 @@
+import KiwiDeskCore
 import SwiftUI
 
 /// Informational banner shown in the visual editor when
@@ -10,10 +11,13 @@ struct CustomLuaBanner: View {
     var body: some View {
         Label {
             Text(
-                "Your init.lua also has custom Lua. It "
-                    + "doesn\u{2019}t conflict with the "
-                    + "visual editor, and the app never "
-                    + "modifies init.lua."
+                L(
+                    "custom_lua_banner.text",
+                    "Your init.lua also has custom Lua. It "
+                        + "doesn\u{2019}t conflict with the "
+                        + "visual editor, and the app never "
+                        + "modifies init.lua."
+                )
             )
         } icon: {
             Image(systemName: "info.circle")

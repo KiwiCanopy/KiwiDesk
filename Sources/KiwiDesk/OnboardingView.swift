@@ -23,6 +23,7 @@ final class OnboardingModel {
 /// Accessibility permission.
 struct OnboardingView: View {
     @Bindable var model: OnboardingModel
+    @EnvironmentObject private var localization: LocalizationManager
 
     var body: some View {
         VStack(spacing: 24) {
@@ -44,23 +45,13 @@ struct OnboardingView: View {
             Image(systemName: "rectangle.3.group")
                 .font(.system(size: 56))
                 .foregroundStyle(.green)
-            Text("Welcome to KiwiDesk")
+            Text(L("onboarding.welcome.title", "Welcome to KiwiDesk"))
                 .font(.largeTitle.bold())
-            Text(
-                """
-                KiwiDesk arranges your windows automatically. \
-                To move and resize windows of other apps, macOS \
-                requires you to grant Accessibility permission.
-
-                KiwiDesk never reads your keystrokes and does \
-                not require disabling System Integrity \
-                Protection.
-                """
-            )
-            .multilineTextAlignment(.center)
-            .foregroundStyle(.secondary)
+            Text(welcomeBody)
+                .multilineTextAlignment(.center)
+                .foregroundStyle(.secondary)
             Spacer()
-            Button("Continue") {
+            Button(L("onboarding.continue", "Continue")) {
                 model.step = .grant
             }
             .keyboardShortcut(.defaultAction)
@@ -68,39 +59,79 @@ struct OnboardingView: View {
         }
     }
 
+    private var welcomeBody: String {
+        L(
+            "onboarding.welcome.body",
+            """
+            KiwiDesk arranges your windows automatically. \
+            To move and resize windows of other apps, macOS \
+            requires you to grant Accessibility permission.
+
+            KiwiDesk never reads your keystrokes and does \
+            not require disabling System Integrity \
+            Protection.
+            """
+        )
+    }
+
     private var grant: some View {
         VStack(spacing: 16) {
             statusIcon
-            Text("Enable Accessibility")
-                .font(.title.bold())
             Text(
-                """
-                1. Click “Open System Settings” below.
-                2. Find KiwiDesk in the list and turn it on.
-                3. Come back here — we detect it automatically.
-                """
+                L(
+                    "onboarding.grant.title",
+                    "Enable Accessibility"
+                )
             )
-            .foregroundStyle(.secondary)
+            .font(.title.bold())
+            Text(grantBody)
+                .foregroundStyle(.secondary)
             Spacer()
             if model.isTrusted {
-                Text("Permission granted!")
-                    .foregroundStyle(.green)
-                Button("Continue") {
+                Text(
+                    L(
+                        "onboarding.grant.granted",
+                        "Permission granted!"
+                    )
+                )
+                .foregroundStyle(.green)
+                Button(L("onboarding.continue", "Continue")) {
                     advancePastAccessibility()
                 }
                 .keyboardShortcut(.defaultAction)
                 .controlSize(.large)
             } else {
-                Button("Open System Settings") {
+                Button(
+                    L(
+                        "onboarding.grant.open_settings",
+                        "Open System Settings"
+                    )
+                ) {
                     model.onOpenSettings()
                 }
                 .keyboardShortcut(.defaultAction)
                 .controlSize(.large)
-                Text("Waiting for permission…")
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
+                Text(
+                    L(
+                        "onboarding.grant.waiting",
+                        "Waiting for permission…"
+                    )
+                )
+                .font(.callout)
+                .foregroundStyle(.secondary)
             }
         }
+    }
+
+    private var grantBody: String {
+        L(
+            "onboarding.grant.body",
+            """
+            1. Click “Open System Settings” below.
+            2. Find KiwiDesk in the list and turn it on.
+            3. Come back here — we detect it automatically.
+            """
+        )
     }
 
     private var statusIcon: some View {
@@ -129,31 +160,46 @@ struct OnboardingView: View {
             Image(systemName: "rectangle.split.2x1")
                 .font(.system(size: 56))
                 .foregroundStyle(.green)
-            Text("Displays have separate Spaces")
-                .font(.title.bold())
-                .multilineTextAlignment(.center)
             Text(
-                """
-                KiwiDesk maps virtual spaces to specific \
-                monitors. For that, macOS needs “Displays have \
-                separate Spaces” turned on.
-
-                Enable it in System Settings › Desktop & Dock, \
-                then log out and back in. You can also skip this \
-                and set it up later.
-                """
+                L(
+                    "onboarding.spaces.title",
+                    "Displays have separate Spaces"
+                )
             )
+            .font(.title.bold())
             .multilineTextAlignment(.center)
-            .foregroundStyle(.secondary)
+            Text(separateSpacesBody)
+                .multilineTextAlignment(.center)
+                .foregroundStyle(.secondary)
             Spacer()
-            Button("Open Desktop & Dock Settings") {
+            Button(
+                L(
+                    "onboarding.spaces.open_settings",
+                    "Open Desktop & Dock Settings"
+                )
+            ) {
                 model.onOpenSpaceSettings()
             }
             .controlSize(.large)
-            Button("Continue") {
+            Button(L("onboarding.continue", "Continue")) {
                 model.onFinish()
             }
             .keyboardShortcut(.defaultAction)
         }
+    }
+
+    private var separateSpacesBody: String {
+        L(
+            "onboarding.spaces.body",
+            """
+            KiwiDesk maps virtual spaces to specific \
+            monitors. For that, macOS needs “Displays have \
+            separate Spaces” turned on.
+
+            Enable it in System Settings › Desktop & Dock, \
+            then log out and back in. You can also skip this \
+            and set it up later.
+            """
+        )
     }
 }

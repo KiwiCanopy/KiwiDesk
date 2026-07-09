@@ -39,7 +39,12 @@ struct AppRuleRow: View {
                 Image(systemName: "trash")
             }
             .buttonStyle(.borderless)
-            .help("Remove all rules for this app")
+            .help(
+                L(
+                    "app_rules.remove_all.help",
+                    "Remove all rules for this app"
+                )
+            )
         }
     }
 
@@ -73,12 +78,12 @@ struct AppRuleRow: View {
     private var facetRows: some View {
         HStack(spacing: 24) {
             HStack(spacing: 6) {
-                Text("Space")
+                Text(L("app_rules.space", "Space"))
                     .foregroundStyle(.secondary)
                 spaceMenu
             }
             HStack(spacing: 6) {
-                Text("Float")
+                Text(L("app_rules.float", "Float"))
                     .foregroundStyle(.secondary)
                 floatPicker
             }
@@ -90,8 +95,9 @@ struct AppRuleRow: View {
 
     /// `app_rules[app]`; Automatic deletes the entry.
     private var spaceMenu: some View {
-        Menu {
-            Button("Automatic") {
+        let automatic = L("app_rules.automatic", "Automatic")
+        return Menu {
+            Button(automatic) {
                 model.config.appRules[app] = nil
             }
             Divider()
@@ -101,9 +107,7 @@ struct AppRuleRow: View {
                 }
             }
         } label: {
-            Text(
-                model.config.appRules[app]?.raw ?? "Automatic"
-            )
+            Text(model.config.appRules[app]?.raw ?? automatic)
         }
         .menuStyle(.borderlessButton)
         .fixedSize()
@@ -118,9 +122,13 @@ struct AppRuleRow: View {
 
     private var floatPicker: some View {
         Menu {
-            Button("Never") { setNever() }
-            Button("All windows") { setAll() }
-            Button("Windows titled…") {
+            Button(L("app_rules.float.never", "Never")) {
+                setNever()
+            }
+            Button(
+                L("app_rules.float.all_windows", "All windows")
+            ) { setAll() }
+            Button(titledLabel) {
                 // Re-selecting the active choice must not
                 // wipe the pattern list (#68 review m3).
                 if floatFacet != .titled {
@@ -135,12 +143,19 @@ struct AppRuleRow: View {
         .fixedSize()
     }
 
+    private var titledLabel: String {
+        L("app_rules.float.titled", "Windows titled…")
+    }
+
     private var floatLabel: String {
         switch floatFacet {
         case .never:
-            return editingTitles ? "Windows titled…" : "Never"
-        case .all: return "All windows"
-        case .titled: return "Windows titled…"
+            return editingTitles
+                ? titledLabel
+                : L("app_rules.float.never", "Never")
+        case .all:
+            return L("app_rules.float.all_windows", "All windows")
+        case .titled: return titledLabel
         }
     }
 
@@ -164,25 +179,33 @@ struct AppRuleRow: View {
                 addWindowMenu
                 if addingCustom {
                     TextField(
-                        "Title contains…",
+                        L(
+                            "app_rules.title_contains",
+                            "Title contains…"
+                        ),
                         text: $customPattern
                     )
                     .textFieldStyle(.roundedBorder)
                     .frame(maxWidth: 200)
                     .onSubmit { commitCustom() }
-                    Button("Add") { commitCustom() }
-                        .disabled(
-                            customPattern.trimmed.isEmpty
-                        )
+                    Button(L("app_rules.add", "Add")) {
+                        commitCustom()
+                    }
+                    .disabled(customPattern.trimmed.isEmpty)
                 }
             }
-            Text(
-                "Windows whose title contains a pattern "
-                    + "stay floating."
-            )
-            .font(.caption)
-            .foregroundStyle(.tertiary)
+            Text(titledPatternCaption)
+                .font(.caption)
+                .foregroundStyle(.tertiary)
         }
+    }
+
+    private var titledPatternCaption: String {
+        L(
+            "app_rules.titled.caption",
+            "Windows whose title contains a pattern "
+                + "stay floating."
+        )
     }
 
     private func patternChip(_ pattern: String) -> some View {
@@ -214,12 +237,17 @@ struct AppRuleRow: View {
                 Button(title) { addPattern(title) }
             }
             if !openTitles.isEmpty { Divider() }
-            Button("Other (Specify)…") {
+            Button(
+                L("app_rules.other_specify", "Other (Specify)…")
+            ) {
                 addingCustom = true
             }
         } label: {
-            Label("Add Window", systemImage: "plus")
-                .font(.caption)
+            Label(
+                L("app_rules.add_window", "Add Window"),
+                systemImage: "plus"
+            )
+            .font(.caption)
         }
         .menuStyle(.borderlessButton)
         .fixedSize()

@@ -1,3 +1,4 @@
+import KiwiDeskCore
 import SwiftUI
 
 /// The two-group source list (#68 §3.1). Group headers name
@@ -13,12 +14,12 @@ struct SettingsSidebar: View {
 
     var body: some View {
         List(selection: $selection) {
-            Section("Design") {
+            Section(L("sidebar.section.design", "Design")) {
                 ForEach(SettingsDestination.thisProfile) {
                     row($0)
                 }
             }
-            Section("System") {
+            Section(L("sidebar.section.system", "System")) {
                 ForEach(visibleWholeApp) { row($0) }
             }
         }
@@ -45,15 +46,16 @@ struct SettingsSidebar: View {
                     .scaledToFit()
                     .frame(width: 28, height: 28)
             }
-            Text("KiwiDesk")
+            Text(L("sidebar.app_name", "KiwiDesk"))
                 .font(.title3.weight(.semibold))
         }
         .frame(maxWidth: .infinity, alignment: .center)
         .padding(.horizontal, 12)
-        // Tight top gap — the toolbar safe-area inset already
-        // clears the traffic lights, so this just seats the
-        // mark below them without a legacy void.
-        .padding(.top, 2)
+        // Pull the mark up toward the traffic lights: the sidebar
+        // otherwise reserves the full empty-toolbar top safe area,
+        // leaving a void below the lights. A negative inset seats
+        // it just under them — tune -6…-16 if the lights clip.
+        .padding(.top, -10)
         .padding(.bottom, 8)
     }
 

@@ -29,12 +29,17 @@ struct LuaEditorTab: View {
         }
         .padding(16)
         .confirmationDialog(
-            "Adopt this config into the visual editor?",
+            L(
+                "lua_editor.adopt.title",
+                "Adopt this config into the visual editor?"
+            ),
             isPresented: $confirmingAdopt,
             titleVisibility: .visible
         ) {
-            Button("Adopt") { model.adoptIntoGui() }
-            Button("Cancel", role: .cancel) {}
+            Button(L("lua_editor.adopt", "Adopt")) {
+                model.adoptIntoGui()
+            }
+            Button(L("footer.cancel", "Cancel"), role: .cancel) {}
         }
     }
 
@@ -45,12 +50,7 @@ struct LuaEditorTab: View {
             // so it left the footer.
             HStack(spacing: 8) {
                 Label {
-                    Text(
-                        "This init.lua contains hand-written "
-                            + "Lua, so the visual editor is "
-                            + "disabled to avoid overwriting "
-                            + "it."
-                    )
+                    Text(foreignCodeCaption)
                 } icon: {
                     Image(systemName: "curlybraces")
                 }
@@ -62,10 +62,20 @@ struct LuaEditorTab: View {
             }
         } else {
             HStack {
-                Text("Editing init.lua directly.")
-                    .foregroundStyle(.secondary)
+                Text(
+                    L(
+                        "lua_editor.editing_directly",
+                        "Editing init.lua directly."
+                    )
+                )
+                .foregroundStyle(.secondary)
                 Spacer()
-                Button("Back to visual editor") {
+                Button(
+                    L(
+                        "lua_editor.back_to_visual",
+                        "Back to visual editor"
+                    )
+                ) {
                     model.showLuaEditor = false
                     model.reload()
                 }
@@ -74,12 +84,25 @@ struct LuaEditorTab: View {
         }
     }
 
+    private var foreignCodeCaption: String {
+        L(
+            "lua_editor.foreign_code",
+            "This init.lua contains hand-written "
+                + "Lua, so the visual editor is "
+                + "disabled to avoid overwriting "
+                + "it."
+        )
+    }
+
     private var adoptButton: some View {
         Button {
             confirmingAdopt = true
         } label: {
             Label(
-                "Adopt into Visual Editor…",
+                L(
+                    "lua_editor.adopt_into_visual",
+                    "Adopt into Visual Editor…"
+                ),
                 systemImage: "wand.and.stars"
             )
         }
@@ -101,25 +124,35 @@ struct LuaEditorTab: View {
                 helpHovering = hovering
                 showAdoptHelp = hovering
             }
-            .help("What happens to my current code?")
+            .help(
+                L(
+                    "lua_editor.adopt_help",
+                    "What happens to my current code?"
+                )
+            )
             .popover(
                 isPresented: $showAdoptHelp,
                 arrowEdge: .top
             ) {
-                Text(
-                    "Nothing is lost: your current code isn't "
-                        + "deleted, it's kept as a "
-                        + "commented-out backup in init.lua. "
-                        + "Gaps, layouts, rules, and "
-                        + "keybindings are imported; a "
-                        + "shortcut that can't be read back "
-                        + "stays in the backup — re-add it in "
-                        + "the Shortcuts section."
-                )
-                .font(.callout)
-                .frame(width: 300)
-                .padding()
+                Text(adoptHelpBody)
+                    .font(.callout)
+                    .frame(width: 300)
+                    .padding()
             }
+    }
+
+    private var adoptHelpBody: String {
+        L(
+            "lua_editor.adopt_help.body",
+            "Nothing is lost: your current code isn't "
+                + "deleted, it's kept as a "
+                + "commented-out backup in init.lua. "
+                + "Gaps, layouts, rules, and "
+                + "keybindings are imported; a "
+                + "shortcut that can't be read back "
+                + "stays in the backup — re-add it in "
+                + "the Shortcuts section."
+        )
     }
 }
 

@@ -15,21 +15,32 @@ struct LayoutParamsEditor: View {
     }
 
     private var bsp: some View {
-        SettingsSection("BSP", symbol: LayoutMode.bsp.glyph) {
+        SettingsSection(
+            L("layout.bsp.name", "Bsp"),
+            symbol: LayoutMode.bsp.glyph
+        ) {
             SegmentedPicker(
-                "Split strategy",
+                L("layout_params.split_strategy", "Split strategy"),
                 selection: $model.config.settings.bsp
                     .strategy,
                 options: [
                     (
-                        "Shortest side",
+                        L(
+                            "layout_params.shortest_side",
+                            "Shortest side"
+                        ),
                         BspParams.Strategy.shortestSide
                     ),
-                    ("Alternating", .alternating),
+                    (
+                        L(
+                            "layout_params.alternating",
+                            "Alternating"
+                        ), .alternating
+                    ),
                 ]
             )
             RatioRow(
-                label: "Split ratio",
+                label: L("layout_params.split_ratio", "Split ratio"),
                 value: $model.config.settings.bsp.splitRatio
             )
             Divider()
@@ -42,32 +53,48 @@ struct LayoutParamsEditor: View {
 
     private var stack: some View {
         SettingsSection(
-            "Stack",
+            L("layout.stack.name", "Stack"),
             symbol: LayoutMode.stack.glyph
         ) {
             StepperRow(
-                label: "Master count",
+                label: L(
+                    "layout_params.master_count",
+                    "Master count"
+                ),
                 value: $model.config.settings.stack.masterCount,
                 in: 1...10
             )
             RatioRow(
-                label: "Master ratio",
+                label: L(
+                    "layout_params.master_ratio",
+                    "Master ratio"
+                ),
                 value: $model.config.settings.stack.masterRatio
             )
             Divider()
-            DropdownRow(label: "Overflow") {
+            DropdownRow(label: overflowLabel) {
                 Picker(
-                    "Overflow",
+                    overflowLabel,
                     selection: $model.config.settings.stack
                         .overflowStyle
                 ) {
-                    Text("Cascade overflow")
-                        .tag(
-                            StackParams.OverflowStyle
-                                .cascadeOverflow
+                    Text(
+                        L(
+                            "layout_params.cascade_overflow",
+                            "Cascade overflow"
                         )
-                    Text("Cascade all")
-                        .tag(StackParams.OverflowStyle.cascadeAll)
+                    )
+                    .tag(
+                        StackParams.OverflowStyle
+                            .cascadeOverflow
+                    )
+                    Text(
+                        L(
+                            "layout_params.cascade_all",
+                            "Cascade all"
+                        )
+                    )
+                    .tag(StackParams.OverflowStyle.cascadeAll)
                 }
             }
             PlacementPicker(
@@ -75,5 +102,9 @@ struct LayoutParamsEditor: View {
                     .newWindowPlacement
             )
         }
+    }
+
+    private var overflowLabel: String {
+        L("layout_params.overflow", "Overflow")
     }
 }

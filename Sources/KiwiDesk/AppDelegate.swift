@@ -23,6 +23,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     private var sigtermSource: DispatchSourceSignal?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Inject the persisted language pick before any view
+        // reads `L(_:_:)` (issue #9). Read directly from
+        // UserDefaults, NOT via `loadGuiConfig()` — a language
+        // pick is a scalar app preference, not gui.json state,
+        // and pulling a full live-state snapshot just to read
+        // one value would be needless coupling (and `KiwiCore`
+        // may not have started event tracking yet this early).
+        // `nil` (absent key) means "System default".
+        LocalizationManager.shared.adoptPersistedSelection(
+            LocalizationPreference.read()
+        )
+
         let statusItem = StatusItemController()
         statusItem.onOpenSettings = {
             PermissionMonitor.openSystemSettings()
@@ -142,6 +154,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         }
 
         let view = OnboardingView(model: onboardingModel)
+            .environmentObject(LocalizationManager.shared)
         let window = NSWindow(
             contentRect: .zero,
             styleMask: [.titled, .closable, .fullSizeContentView],
@@ -149,7 +162,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             defer: false
         )
         window.titlebarAppearsTransparent = true
-        window.title = "KiwiDesk Setup"
+        window.title = L("onboarding.window.title", "KiwiDesk Setup")
         window.contentView = NSHostingView(rootView: view)
         window.isReleasedWhenClosed = false
         window.delegate = self
@@ -206,17 +219,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             )
             return
         }
+        // Resolved on the main actor before the completion
+        // handler, which runs on an arbitrary queue and can't
+        // call the main-actor-isolated `L()`.
+        let title = L(
+            "notification.permission_lost.title",
+            "KiwiDesk stopped managing windows"
+        )
+        let body = L(
+            "notification.permission_lost.body",
+            "Accessibility permission was revoked. "
+                + "Re-enable it in System Settings > "
+                + "Privacy & Security > Accessibility."
+        )
         let center = UNUserNotificationCenter.current()
         center.requestAuthorization(
             options: [.alert]
         ) { granted, _ in
             guard granted else { return }
             let content = UNMutableNotificationContent()
-            content.title = "KiwiDesk stopped managing windows"
-            content.body =
-                "Accessibility permission was revoked. "
-                + "Re-enable it in System Settings > Privacy "
-                + "& Security > Accessibility."
+            content.title = title
+            content.body = body
             let request = UNNotificationRequest(
                 identifier: "kiwidesk.permission-lost",
                 content: content,

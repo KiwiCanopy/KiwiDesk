@@ -21,7 +21,10 @@ struct AdvancedLuaSection: View {
             Button {
                 bindings.append(KeyBinding(kind: .custom))
             } label: {
-                Label("Add binding", systemImage: "plus")
+                Label(
+                    L("shortcuts.add_binding", "Add binding"),
+                    systemImage: "plus"
+                )
             }
             .buttonStyle(.bordered)
         }
@@ -32,7 +35,10 @@ struct AdvancedLuaSection: View {
     ) -> some View {
         HStack {
             TextField(
-                "Lua, e.g. KiwiDesk.reload_config()",
+                L(
+                    "shortcuts.lua_placeholder",
+                    "Lua, e.g. KiwiDesk.reload_config()"
+                ),
                 text: binding.lua
             )
             .textFieldStyle(.roundedBorder)
