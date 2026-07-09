@@ -16,13 +16,20 @@ It is created with a commented starter template on first launch
 and re-read on `KiwiDesk reload_config`. The embedded
 interpreter is **Lua 5.5** with the full standard library.
 
-Two safety rails apply to all Lua code:
+Three safety rails apply to all Lua code:
 
 - Any single call into the VM is aborted after **500 ms** —
   an accidental `while true do end` cannot freeze KiwiDesk.
 - A callback (event handler or keybinding) that errors or
   times out is **disabled** and logged; everything else keeps
   working until the next `reload_config`.
+- A typo'd function name on `KiwiDesk` or a layout table
+  (`scroll.set_width(…)` instead of
+  `scroll.set_slot_size(…)`) does **not** abort the config:
+  the call becomes a no-op that logs a did-you-mean hint,
+  and everything below it still runs. During a config load
+  the typo is also reported in the menu bar's **Config
+  Issues** window, so it cannot pass silently.
 
 ## Settings app vs init.lua
 

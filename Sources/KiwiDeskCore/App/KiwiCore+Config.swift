@@ -36,6 +36,10 @@ extension KiwiCore {
         registerLuaAPI(on: fresh)
 
         ensureDefaultConfig()
+        // Arm the typo-guard recorder for the chunk run: a
+        // guarded unknown call is non-fatal, so it must land
+        // here as an issue to stay visible (#39).
+        typoIssues = []
         if case .failure(let error) = fresh.runFile(
             configURL
         ) {
@@ -47,6 +51,8 @@ extension KiwiCore {
                 )
             )
         }
+        issues.append(contentsOf: typoIssues ?? [])
+        typoIssues = nil
         // A sidecar that exists but no longer decodes means
         // the visual editor (and the structured loader) can't
         // see the user's rules — half-loaded, must be visible.
