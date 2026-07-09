@@ -13,6 +13,11 @@ public struct TilingSettings: Sendable, Equatable, Codable {
     /// `gap.override[space_id]` beats the global gaps.
     public var gapsOverride: [SpaceID: Gaps] = [:]
     public var minWindowSize: CGFloat = 300
+    /// Global magnitude (points) each Grow/Shrink keybinding
+    /// nudges the layout by (`resize.step`, #58). The catalog
+    /// authors `resize("x", ±step)` from this; import reads a
+    /// recovered magnitude back into it.
+    public var resizeStep: CGFloat = 50
     public var bsp = BspParams()
     public var stack = StackParams()
     public var scrolling = ScrollingParams()
@@ -57,11 +62,16 @@ public struct TilingSettings: Sendable, Equatable, Codable {
         case placementOverride =
             "new_window_placement_override"
         case mouseResize = "mouse_resize"
+        case resize
         case space
     }
 
     private enum SpaceKeys: String, CodingKey {
         case icon
+    }
+
+    private enum ResizeKeys: String, CodingKey {
+        case step
     }
 
     private enum DragKeys: String, CodingKey {
@@ -121,6 +131,22 @@ public struct TilingSettings: Sendable, Equatable, Codable {
         try decodeLayout(from: container)
         try decodeDrag(from: container)
         try decodeSpace(from: container)
+        try decodeResize(from: container)
+    }
+
+    private mutating func decodeResize(
+        from container: Container
+    ) throws {
+        guard container.contains(.resize) else { return }
+        let resize = try container.nestedContainer(
+            keyedBy: ResizeKeys.self,
+            forKey: .resize
+        )
+        resizeStep =
+            try resize.decodeIfPresent(
+                CGFloat.self,
+                forKey: .step
+            ) ?? 50
     }
 
     private mutating func decodeSpace(
@@ -265,5 +291,10 @@ public struct TilingSettings: Sendable, Equatable, Codable {
             forKey: .space
         )
         try space.encode(spaceIcons, forKey: .icon)
+        var resize = container.nestedContainer(
+            keyedBy: ResizeKeys.self,
+            forKey: .resize
+        )
+        try resize.encode(resizeStep, forKey: .step)
     }
 }

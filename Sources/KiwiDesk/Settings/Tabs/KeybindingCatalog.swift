@@ -37,13 +37,6 @@ enum KeybindingCatalog {
         }
     }
 
-    /// The fixed step a Grow/Shrink preset nudges the layout by, in
-    /// points. The catalog authors one magnitude, so import
-    /// classification only upgrades a recovered `resize` that used
-    /// this exact delta (like every preset, the Lua must match
-    /// byte-for-byte); other magnitudes stay Custom.
-    static let resizeStep = 50
-
     /// The four directional focus rows (#68 §3.6.1 Focus).
     static let focusDirections: [NavCommand] = directions.map {
         dir,
@@ -144,8 +137,10 @@ enum KeybindingCatalog {
     }
 
     /// Navigation grouped for the import classifier (#4): the
-    /// same commands the sections render, so a recovered row
-    /// matches byte-for-byte.
+    /// commands the sections render, so a recovered row matches
+    /// byte-for-byte. Grow/Shrink is deliberately absent — its
+    /// magnitude is configurable (#58), so import matches it by
+    /// *shape* via `resizeShape(from:)`, not from this map.
     static func navigationGroups(
         spaces: [SpaceID]
     ) -> [NavGroup] {
@@ -156,39 +151,67 @@ enum KeybindingCatalog {
             ),
             NavGroup(
                 title: "Window Management",
-                commands: resizeAndFloat + swapDirections
-                    + moveToSpace(spaces)
+                commands: swapDirections + moveToSpace(spaces)
             ),
         ]
     }
 
     /// Window-size and float presets (Size & Float, §3.6.1).
     /// Enlarge/Shrink nudge the single bsp split / stack master
-    /// ratio by `resizeStep` — there is no independent
-    /// width/height today, so this is one pair on the `"x"`
-    /// axis, not four (true 2-axis resize is deferred, #56; a
-    /// configurable step is #58 — both land in this group).
-    /// Resize is a no-op in monocle/grid/floating; the section
-    /// caption states this and the docs echo it.
-    static let resizeAndFloat: [NavCommand] = [
-        NavCommand(
-            label: "Shrink",
-            lua: "KiwiDesk.resize(\"x\", -\(resizeStep))",
-            displayLabel: { L("keybinding.shrink", "Shrink") }
-        ),
-        NavCommand(
-            label: "Enlarge",
-            lua: "KiwiDesk.resize(\"x\", \(resizeStep))",
-            displayLabel: { L("keybinding.enlarge", "Enlarge") }
-        ),
-        NavCommand(
-            label: "Make floating",
-            lua: "KiwiDesk.make_floating()",
-            displayLabel: {
-                L("keybinding.make_floating", "Make floating")
-            }
-        ),
-    ]
+    /// ratio by `step` points — the configurable global
+    /// `resize.step` (#58), passed in by the caller from live
+    /// settings. There is no independent width/height today, so
+    /// this is one pair on the `"x"` axis, not four (true 2-axis
+    /// resize is deferred, #56). Resize is a no-op in
+    /// monocle/grid/floating; the section caption states this and
+    /// the docs echo it.
+    static func resizeAndFloat(step: Int) -> [NavCommand] {
+        [
+            NavCommand(
+                label: "Shrink",
+                lua: "KiwiDesk.resize(\"x\", -\(step))",
+                displayLabel: { L("keybinding.shrink", "Shrink") }
+            ),
+            NavCommand(
+                label: "Enlarge",
+                lua: "KiwiDesk.resize(\"x\", \(step))",
+                displayLabel: {
+                    L("keybinding.enlarge", "Enlarge")
+                }
+            ),
+            NavCommand(
+                label: "Make floating",
+                lua: "KiwiDesk.make_floating()",
+                displayLabel: {
+                    L("keybinding.make_floating", "Make floating")
+                }
+            ),
+        ]
+    }
+
+    /// The Grow/Shrink magnitude inside a `resize("x", ±N)` row of
+    /// ANY step, plus its canonical label — the inverse of
+    /// `resizeAndFloat`'s authoring, used by import classification
+    /// (#58). A shape match (not byte-for-byte) so a config whose
+    /// step differs from the current one still lands in Size &
+    /// Float, and its magnitude is read back into `resize.step`.
+    /// Nil unless `lua` is exactly a single-axis `"x"` resize with
+    /// a non-zero integer delta.
+    static func resizeShape(
+        from lua: String
+    ) -> (label: String, step: Int)? {
+        let prefix = "KiwiDesk.resize(\"x\", "
+        let suffix = ")"
+        guard lua.hasPrefix(prefix), lua.hasSuffix(suffix)
+        else { return nil }
+        let inner = lua.dropFirst(prefix.count)
+            .dropLast(suffix.count)
+        guard let value = Int(inner), value != 0 else {
+            return nil
+        }
+        let label = value < 0 ? "Shrink" : "Enlarge"
+        return (label, abs(value))
+    }
 
     /// A space id as a quoted, escaped Lua string argument.
     static func spaceArg(_ space: SpaceID) -> String {

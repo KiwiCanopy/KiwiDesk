@@ -1,3 +1,4 @@
+import CoreGraphics
 import KiwiDeskCore
 
 /// Upgrades imported `.custom` keybinding rows to `.navigation`
@@ -13,13 +14,23 @@ enum KeybindingImportClassifier {
     /// spaces and mode names.
     static func classify(_ config: inout GuiConfig) {
         let navigation = navigationLabels(for: config)
+        var recoveredStep: Int?
         for mode in config.modes.indices {
             for row in config.modes[mode].bindings.indices {
-                reclassify(
+                if let step = reclassify(
                     &config.modes[mode].bindings[row],
                     navigation: navigation
-                )
+                ) {
+                    recoveredStep = step
+                }
             }
+        }
+        // Read a recovered Grow/Shrink magnitude back into the
+        // step, so an imported config's own resize size drives
+        // the setting (#58). Left untouched when no resize row is
+        // present, so an import without one keeps the default.
+        if let recoveredStep {
+            config.settings.resizeStep = CGFloat(recoveredStep)
         }
     }
 
@@ -44,11 +55,25 @@ enum KeybindingImportClassifier {
         return map
     }
 
+    /// Reclassifies one `.custom` row, returning a recovered
+    /// Grow/Shrink magnitude when the row is a resize of any step
+    /// (so `classify` can read it back into `resize.step`, #58).
+    /// Resize is checked first — before the exact-match map — so
+    /// a magnitude differing from the current step still upgrades
+    /// out of Custom.
+    @discardableResult
     private static func reclassify(
         _ binding: inout KeyBinding,
         navigation: [String: String]
-    ) {
-        guard binding.kind == .custom else { return }
+    ) -> Int? {
+        guard binding.kind == .custom else { return nil }
+        if let shape = KeybindingCatalog.resizeShape(
+            from: binding.lua
+        ) {
+            binding.kind = .navigation
+            binding.label = shape.label
+            return shape.step
+        }
         if let label = navigation[binding.lua] {
             binding.kind = .navigation
             binding.label = label
@@ -58,5 +83,6 @@ enum KeybindingImportClassifier {
             binding.kind = .application
             binding.label = app
         }
+        return nil
     }
 }

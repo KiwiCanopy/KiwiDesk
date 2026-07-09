@@ -107,7 +107,11 @@ struct SizeFloatSection: View {
         SettingsSection(
             L("shortcuts.section.size_float", "Size & Float")
         ) {
-            ForEach(KeybindingCatalog.resizeAndFloat) {
+            ForEach(
+                KeybindingCatalog.resizeAndFloat(
+                    step: Int(model.config.settings.resizeStep)
+                )
+            ) {
                 command in
                 NavRow(
                     model: model,

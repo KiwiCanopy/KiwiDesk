@@ -35,6 +35,8 @@ extension KiwiCore {
             return setGaps(command, args)
         case "set_min_window_size":
             return setMinWindowSize(args)
+        case "set_resize_step":
+            return setResizeStep(args)
         case "help", "list_commands":
             return .ok(
                 .array(

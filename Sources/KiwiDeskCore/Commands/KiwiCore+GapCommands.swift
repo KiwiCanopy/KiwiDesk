@@ -70,4 +70,18 @@ extension KiwiCore {
         retile(force: true)
         return .ok()
     }
+
+    func setResizeStep(
+        _ args: [JSONValue]
+    ) -> CommandResponse {
+        guard let step = args.first?.numberValue else {
+            return .fail("expected step")
+        }
+        tiler.settings.resizeStep = CGFloat(step)
+        // No retile (unlike set_min_window_size): the step is
+        // only consulted when the catalog authors a Grow/Shrink
+        // binding and on import read-back — never by layout
+        // math — so it can't move a window (#58).
+        return .ok()
+    }
 }
