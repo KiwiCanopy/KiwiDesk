@@ -134,9 +134,10 @@ To **add a space**, click the **+** button and enter a name
 
 To **rename**, click the space name in the list.
 
-To **delete**, right-click and pick Delete. Any windows in that
-space are reassigned to the fallback space when you load a profile
-that drops them (see Profiles section).
+To **delete**, right-click and pick Delete. The space is removed
+right away — any windows in it move to the fallback space (or the
+first space in the list when no fallback is set), and it stays gone
+across reloads and restarts.
 
 To **set a recognition icon** (optional), click the space name to
 edit it and pick an SF Symbol, emoji, or single character. The icon

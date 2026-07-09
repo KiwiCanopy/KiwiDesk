@@ -95,6 +95,18 @@ extension KiwiCore {
         // same order `overwriteProfile` would — one order
         // representation across both save paths (#75/#55).
         state.workspaces.reorder(matching: config.spaces)
+        // A space the model no longer references anywhere (list,
+        // modes, pins, Main) was deleted in the Spaces tab — drop
+        // it from live too, forwarding any windows, or the next
+        // `buildProfile` would recapture it and it would reappear
+        // on reload (#77). Same reconcile as an explicit
+        // `load_profile`; survivors are exactly the set ensured
+        // above, so the just-added extras are never pruned.
+        pruneSpaces(
+            keeping: inList.union(extra),
+            orderedBy: config.spaces,
+            preferring: config.fallbackSpace
+        )
         for space in state.workspaces.allSpaces {
             state.workspaces.setMode(
                 space.id,
@@ -117,6 +129,46 @@ extension KiwiCore {
         // by ≤2 pt and visibly did nothing (#68).
         retile(force: true)
         emitSpaceChange()
+    }
+
+    /// Cold-boot story for GUI-only spaces (#77): seeds live from
+    /// the sidecar's `spaces` list so a space that lives *only* in
+    /// `gui.json` — no active profile, pin, window, or Lua
+    /// `set_mode` backs it — is present in live and survives the
+    /// next reload (`overlayLiveProfileState` reads live, not the
+    /// sidecar). Runs in `loadConfig` before the first
+    /// `handleMonitorChange` adopts a profile, which then ensures
+    /// its own spaces on top. Only *adds* (never sets modes or
+    /// removes), so a Lua-declared space keeps its mode and no
+    /// live-only space is dropped. Safe against resurrecting a
+    /// profile-pruned space because every authoritative prune
+    /// mirrors live back into the sidecar (`syncGuiSpacesToLive`),
+    /// so its `spaces` list is never stale.
+    func seedGuiSpaces() {
+        guard let config = guiConfigStore.load() else { return }
+        for space in config.spaces {
+            state.workspaces.ensureSpace(space)
+        }
+        state.workspaces.reorder(matching: config.spaces)
+    }
+
+    /// Mirrors the live space set back into `gui.json` after an
+    /// authoritative reconcile changed it (a `load_profile` or an
+    /// in-effect edit that pruned stale spaces), keeping the
+    /// sidecar a faithful copy of live so the cold-boot seed above
+    /// never re-injects a space a profile load dropped (#77).
+    /// GUI-managed only (no sidecar otherwise); writes the store
+    /// directly — NOT `saveGuiConfig`, which would reload the
+    /// config mid-command. A no-op when the list already matches.
+    func syncGuiSpacesToLive() {
+        guard isGuiManaged, var config = guiConfigStore.load()
+        else { return }
+        let live = SpaceID.deduplicated(
+            state.workspaces.allSpaces.map(\.id)
+        )
+        guard config.spaces != live else { return }
+        config.spaces = live
+        try? guiConfigStore.save(config)
     }
 
     /// Whether the GUI owns the configuration — the ownership

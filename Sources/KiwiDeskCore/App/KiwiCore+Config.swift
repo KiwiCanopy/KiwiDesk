@@ -66,6 +66,11 @@ extension KiwiCore {
         // own override via apply(profile:) (#55 phase 6).
         if isGuiManaged {
             applyStructuredConfig()
+            // Seed GUI-only spaces before the active profile
+            // (below) or a monitor change ensures its own on
+            // top — a bare sidecar space would otherwise never
+            // enter live and would drop on reload (#77).
+            seedGuiSpaces()
         } else {
             applyConfigGlobals(from: fresh)
         }

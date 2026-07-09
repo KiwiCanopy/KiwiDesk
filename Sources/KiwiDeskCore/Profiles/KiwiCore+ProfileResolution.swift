@@ -55,6 +55,11 @@ extension KiwiCore {
                 orderedBy: profile.orderedSpaces,
                 preferring: profile.fallbackSpace
             )
+            // An authoritative reconcile just fixed the live space
+            // set — mirror it into the sidecar so the cold-boot
+            // seed can't re-inject a space this prune dropped
+            // (#77). No-op when not GUI-managed.
+            syncGuiSpacesToLive()
         }
         // Dense over all live spaces: a space a (hand-edited,
         // sparse) profile doesn't declare reverts to bsp
@@ -104,7 +109,12 @@ extension KiwiCore {
     /// first space of the new profile's displayed list. When
     /// both lists are empty (degenerate call) the guard skips
     /// pruning entirely.
-    private func pruneSpaces(
+    ///
+    /// `internal` (not `private`): the GUI save path
+    /// (`applyProfileScopedState`) reuses this same reconcile so a
+    /// Spaces-tab deletion drops the space from live too (#77),
+    /// not just profile loads.
+    func pruneSpaces(
         keeping survivors: Set<SpaceID>,
         orderedBy storedOrder: [SpaceID],
         preferring explicit: SpaceID? = nil

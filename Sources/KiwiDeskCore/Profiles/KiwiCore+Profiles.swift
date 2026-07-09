@@ -317,9 +317,15 @@ extension KiwiCore {
         if profiles.currentName == name,
             let fresh = try? profiles.read(name: name)
         {
-            // Explicit: an in-effect edit re-apply whose
-            // delta may sit inside the tolerance.
-            apply(profile: fresh, forceRetile: true)
+            // Explicit re-apply of an in-effect edit; prunes so a
+            // deleted space leaves live now, not at the next
+            // load_profile (#77). Bound branch below keeps
+            // monitor-change's no-prune-on-reconnect rule.
+            apply(
+                profile: fresh,
+                pruneStaleSpaces: true,
+                forceRetile: true
+            )
         } else {
             handleMonitorChange()
         }

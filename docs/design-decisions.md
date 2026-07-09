@@ -111,6 +111,21 @@ reference would silently resurrect the space on the next
 profile load. App rules survive by design: they're global,
 and another profile may declare a space of the same name.
 
+**Live state is the single source of truth for which spaces
+exist; `gui.json` mirrors it, never the reverse.** A deletion
+prunes the space from live immediately (windows rehome to the
+fallback), not only when a later profile load happens to drop
+it — otherwise the next save re-captured it from live and it
+reappeared. The sidecar's `spaces` list is kept a faithful
+copy of live: every authoritative reconcile (a `load_profile`
+or an in-place edit that prunes) writes the live set back, so
+the list can never quietly drift. The one place `gui.json`
+seeds *into* live is cold boot — a space that lives only in
+the sidecar (no profile, pin, window, or `set_mode` backs it)
+is seeded so it survives the reload. That seed is safe against
+resurrecting a profile-pruned space precisely because the
+mirror keeps the list current. (#77)
+
 **Saved profiles lead; Presets demote once one exists.** On
 the Profiles tab, the built-in Presets top the list only
 while no profile is saved yet — they're a bootstrap tool,
