@@ -38,16 +38,15 @@
   "quote_opening": "Tiling-Fenstermanager waren schon immer Spielzeug für Nerds. Ich wollte jedem einen ruhigeren Bildschirm schenken — einen, der einfach funktioniert, wie von Zauberhand.",
 
   "quote_tagline": "Ein Fenstermanager, der mit dir arbeitet — und nicht einer, dem du erst erklären musst, wie er arbeiten soll.",
-  "quote_simple": "Ich habe KiwiDesk gebaut, weil ich meinen Freunden zeigen wollte, wie gut es sich anfühlt, seine Fenster nie wieder aufräumen zu müssen — ruhig, mühelos und ehrlich gesagt ziemlich schön.",
-  "quote_dev": "Selbst im Terminal zu Hause, hatte ich es satt, mir zu merken, in welchem Container ich gerade war, nur um ein Fenster zu verschieben — und Layouts zu bekommen, nach denen ich nie gefragt hatte. KiwiDesk hält jeden Space flach, sodass du dir nichts merken musst und ich mich auf die Arbeit konzentrieren kann, die wirklich zählt.",
-  "quote_byline_simple": "— Maikel, pflanzt Kiwis für einen ruhigeren, glücklicheren Desktop",
+  "quote_simple": "Ich habe KiwiDesk gebaut, weil ich meinen Freunden zeigen wollte, wie entspannt es ist, seine Fenster nie wieder manuell verrücken zu müssen — ruhig, mühelos und spaß macht es auch.",
+  "quote_dev": "Obwohl mir das Terminal und Co. schon lange keine Probleme mehr bereiten, war ich es leid, ständig die aktuelle Containerstruktur im Hinterkopf zu behalten, nur um meine Fenster so anzuordnen, wie ich möchte. KiwiDesk sorgt für eine flache Struktur. Kein unnötiger Overhead, keine Ablenkung: einfach nur Fokus auf meine Projekte.",
+  "quote_byline_simple": "— Maikel, pflanzt Kiwis für ein ruhigeres, glücklicheres Desktoperlebnis",
   "quote_byline_dev_main": "— Maikel, verteilt Kiwis (und ein bisschen mehr Ruhe), wo er nur kann",
-  "quote_byline_dev_sub": "auf einer Mission, ein paar mehr Vitamine auf deinen Bildschirm zu schmuggeln",
 
-  "quote_demo": "Kleine Warnung: Es ist ungefähr so wohltuend, wie Kiwis dabei zuzusehen, wie sie Kiwis stapeln. Du wirst absichtlich Fenster öffnen, nur um zuzusehen, wie sie an ihren Platz schnappen.",
-  "quote_cli": "An dem Tag, an dem mein Fenstermanager skriptbar wurde, fing mein Desktop an, sich selbst zu verwalten. Seitdem habe ich kein Fenster mehr gezogen.",
+  "quote_demo": "Kleine Warnung: Es ist ungefähr so wohltuend, wie Kiwis dabei zuzusehen, wie sie Kiwis stapeln. Du wirst absichtlich Fenster öffnen, nur um zuzusehen, wie sie an ihren Platz wandern.",
+  "quote_cli": "An dem Tag, an dem mein Fenstermanager skriptbar wurde, fing mein Desktop an, sich selbst zu managen. Seitdem habe ich kein Fenster mehr selbst platziert.",
   "quote_footer": "Keine große Firma hier — vorerst nur ich und eine Handvoll Werkzeuge, von denen jedes dir eine lästige Aufgabe abnimmt, damit in deinem Tag mehr Platz für das bleibt, was du liebst — zum Beispiel Kiwis essen. 🥝",
-  "quote_cta": "Man sagt, ein Apfel am Tag — aber die Kiwi hat mehr Vitamine und größere Pläne. 🥝",
+  "quote_cta": "Man sagt, \"an apple a day\" — aber die Kiwi hat mehr Vitamine und größere Pläne... 🥝",
   "daily_kiwi": "Und jetzt: iss eine Kiwi. Deine Vitamine werden es dir danken. 🥝",
 
   "what_eyebrow": "Neu hier? Fang hier an",
@@ -137,7 +136,7 @@
   "build_cmt": "# fertige Releases + Homebrew-Cask kommen mit 1.0",
 
   "footer_org": "Kiwi Solutions",
-  "footer_tag": "einfach ein Haufen Kiwis 🥝🥝🥝",
+  "footer_tag": "nur ein Haufen Kiwis 🥝🥝🥝",
   "footer_kofi": "Auf Ko-fi unterstützen",
   "footer_docs": "Doku",
   "footer_github": "GitHub",

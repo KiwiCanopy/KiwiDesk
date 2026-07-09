@@ -39,15 +39,14 @@
 
   "quote_tagline": "A window manager that works with you — not one you have to tell how to work.",
   "quote_simple": "I built KiwiDesk because I wanted to show my friends how good it feels to never tidy your windows again — calm, effortless, and honestly kind of fun.",
-  "quote_dev": "Even comfortable in the terminal, I got tired of tracking which container I was in just to move a window — and getting layouts I never asked for. KiwiDesk keeps every space flat, so there's nothing to hold in your head, and I can focus on the work that actually matters.",
-  "quote_byline_simple": "— Maikel, planting kiwis for a calmer, happier desktop",
+  "quote_dev": "Even though I'm perfectly comfortable in the terminal, I got tired of having to constantly track container nesting just to arrange my windows the way I want. KiwiDesk keeps everything flat. No unnecessary overhead, no distractions: just pure focus on my projects.",
+  "quote_byline_simple": "— Maikel, planting kiwis for a calmer, happier desktop experience",
   "quote_byline_dev_main": "— Maikel, spreading kiwis (and a little more calm) wherever he can",
-  "quote_byline_dev_sub": "on a mission to sneak a few more vitamins onto your screen",
 
   "quote_demo": "Fair warning: it's about as oddly satisfying as watching kiwis stack kiwis. You'll open windows on purpose, just to watch them snap into place.",
   "quote_cli": "The day my window manager became scriptable, my desktop started running itself. I haven't dragged a window since.",
   "quote_footer": "No big company here — for now, just me and a handful of tools, each taking a tedious job off your plate so your day has more room for what you love — like eating kiwis. 🥝",
-  "quote_cta": "They say an apple a day — but the kiwi's got more vitamins and bigger plans. 🥝",
+  "quote_cta": "They say an apple a day — but the kiwi's got more vitamins and bigger plans... 🥝",
   "daily_kiwi": "Now go eat a kiwi. Your vitamins will thank you. 🥝",
 
   "what_eyebrow": "New here? Start here",
