@@ -1,0 +1,449 @@
+/* =========================================================
+   KiwiDesk — Learn section styles
+   The newcomer-friendly /learn/* pages. Reuses the landing's
+   design system wholesale (landing.css is imported first, so
+   every custom property, the nav, footer, buttons, code block,
+   and .wrap container are all available here). This file adds
+   only what the Learn pages need on top: the sub-nav tab row,
+   the readable article column, a step list, callout cards, and
+   the "next" card. Everything is keyed on the same
+   :root[data-theme] variables so light + dark stay correct.
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   Learn sub-nav — a horizontal tab row under the site nav.
+   Sticky just below the main nav so the section is always
+   navigable; scrolls horizontally on narrow phones rather
+   than wrapping into a tall stack (no page overflow either
+   way — the row owns its own x-scroll).
+   --------------------------------------------------------- */
+.learn-subnav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--nav-scrolled-bg);
+  backdrop-filter: saturate(160%) blur(14px);
+  -webkit-backdrop-filter: saturate(160%) blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+
+.learn-subnav__inner {
+  display: flex;
+  gap: 0.15rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-block: 0.55rem;
+  /* Let the row bleed to the wrap edges so the first/last tab
+     aren't clipped against the padding while scrolling. */
+  scroll-padding-inline: 1rem;
+}
+
+.learn-subnav__inner::-webkit-scrollbar {
+  display: none;
+}
+
+.learn-subnav__tab {
+  flex: 0 0 auto;
+  color: var(--text-dim);
+  padding: 0.5rem 0.9rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.92rem;
+  font-weight: 550;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  transition: color 0.2s ease, background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.learn-subnav__tab:hover {
+  color: var(--text);
+  background: var(--nav-hover-bg);
+}
+
+/* Active tab: filled with a soft accent tint + a clear ink
+   color that clears AA in both themes. aria-current drives it
+   so it stays in sync with assistive tech. */
+.learn-subnav__tab[aria-current="page"] {
+  color: var(--accent);
+  background: rgba(78, 159, 61, 0.14);
+  border-color: var(--border-strong);
+  font-weight: 650;
+}
+
+/* =========================================================
+   Learn article shell
+   ========================================================= */
+.learn {
+  padding-block: clamp(2.25rem, 6vw, 4rem)
+    clamp(3rem, 8vw, 5rem);
+}
+
+/* A comfortable reading measure, centered. Wider than raw prose
+   so cards and step lists have room, but capped for legibility. */
+.learn__col {
+  max-width: 720px;
+  margin-inline: auto;
+}
+
+/* Page header block */
+.learn__head {
+  margin-bottom: clamp(2rem, 5vw, 3rem);
+}
+
+.learn__eyebrow {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 650;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.7rem;
+}
+
+.learn__title {
+  font-size: clamp(1.9rem, 5vw, 2.9rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.85rem;
+  color: var(--text);
+}
+
+.learn__lede {
+  font-size: clamp(1.08rem, 2.4vw, 1.28rem);
+  line-height: 1.55;
+  color: var(--text-dim);
+  margin: 0;
+  text-wrap: pretty;
+}
+
+/* =========================================================
+   Content sections within a Learn page
+   ========================================================= */
+.learn-section {
+  margin-top: clamp(2.25rem, 5vw, 3.25rem);
+}
+
+.learn-section > h2 {
+  font-size: clamp(1.35rem, 3vw, 1.75rem);
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  margin: 0 0 0.6rem;
+  color: var(--text);
+}
+
+.learn-section > p {
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--text-dim);
+  margin: 0 0 1rem;
+  text-wrap: pretty;
+}
+
+.learn-section > p:last-child {
+  margin-bottom: 0;
+}
+
+.learn-section strong {
+  color: var(--text);
+  font-weight: 650;
+}
+
+/* Inline code (paths, commands) reads as a small tinted chip,
+   theme-aware, never breaking the line rhythm. */
+.learn code {
+  font-family: var(--mono);
+  font-size: 0.88em;
+  background: rgba(78, 159, 61, 0.12);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.1em 0.4em;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+/* =========================================================
+   Step list — numbered, friendly, scannable
+   ========================================================= */
+.learn-steps {
+  list-style: none;
+  counter-reset: learn-step;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.learn-step {
+  counter-increment: learn-step;
+  position: relative;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: clamp(1.15rem, 3vw, 1.5rem) clamp(1.15rem, 3vw, 1.5rem)
+    clamp(1.15rem, 3vw, 1.5rem)
+    clamp(3.4rem, 8vw, 4rem);
+}
+
+/* The number badge, sitting in the left gutter reserved above. */
+.learn-step::before {
+  content: counter(learn-step);
+  position: absolute;
+  left: clamp(1rem, 2.5vw, 1.25rem);
+  top: clamp(1.15rem, 3vw, 1.5rem);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(180deg, var(--kiwi-flesh), #357229);
+  box-shadow: 0 4px 12px -4px var(--glow);
+}
+
+.learn-step h3 {
+  font-size: 1.08rem;
+  margin: 0 0 0.35rem;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.learn-step p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 0.98rem;
+  line-height: 1.6;
+}
+
+.learn-step p + p {
+  margin-top: 0.6rem;
+}
+
+/* =========================================================
+   Callout — reassurance / note blocks
+   ========================================================= */
+.learn-callout {
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-start;
+  margin-top: 1.5rem;
+  padding: clamp(1.1rem, 3vw, 1.4rem);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+}
+
+.learn-callout__icon {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  color: var(--accent);
+  margin-top: 1px;
+}
+
+.learn-callout__icon svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+.learn-callout__body {
+  min-width: 0;
+}
+
+.learn-callout__body h3 {
+  font-size: 1rem;
+  margin: 0 0 0.3rem;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.learn-callout__body p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 0.97rem;
+  line-height: 1.6;
+}
+
+.learn-callout__body p + p {
+  margin-top: 0.55rem;
+}
+
+/* A "shield / reassurance" tint variant for the trust note. */
+.learn-callout--trust {
+  border-left-color: var(--kiwi-bright);
+}
+
+/* =========================================================
+   Reassurance checklist (e.g. "never does X")
+   ========================================================= */
+.learn-checklist {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.learn-checklist li {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  color: var(--text-dim);
+  font-size: 0.99rem;
+  line-height: 1.55;
+}
+
+.learn-checklist__check {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(78, 159, 61, 0.16);
+  color: var(--accent);
+  margin-top: 1px;
+}
+
+.learn-checklist__check svg {
+  width: 13px;
+  height: 13px;
+  display: block;
+}
+
+/* =========================================================
+   Install / code block wrapper
+   The .code block from landing.css is reused verbatim; this
+   only constrains its width inside the reading column and lets
+   a long git-clone URL scroll within its own <pre>.
+   ========================================================= */
+.learn .code {
+  margin-top: 1.5rem;
+  min-width: 0;
+}
+
+.learn__store-note {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  font-size: 0.92rem;
+  color: var(--text-faint);
+}
+
+.learn__store-note svg {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+}
+
+/* =========================================================
+   "First window" mini-diagram — a couple of tiles snapping
+   into a tidy pair. Reuses the theme-aware .tile fills.
+   ========================================================= */
+.learn-snap {
+  margin-top: 1.5rem;
+  border-radius: var(--radius);
+  background: var(--bg-0);
+  border: 1px solid var(--border);
+  padding: clamp(1rem, 3vw, 1.5rem);
+}
+
+.learn-snap svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  max-height: 200px;
+}
+
+/* =========================================================
+   Next card — end-of-page call to the next Learn page
+   ========================================================= */
+.learn-next {
+  display: block;
+  margin-top: clamp(2.5rem, 6vw, 3.5rem);
+  padding: clamp(1.4rem, 4vw, 1.85rem);
+  background: var(--card-bg);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, border-color 0.2s ease,
+    box-shadow 0.25s ease;
+}
+
+.learn-next:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent);
+  box-shadow: var(--shadow);
+}
+
+.learn-next__label {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.learn-next__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.learn-next__title {
+  font-size: clamp(1.15rem, 3vw, 1.4rem);
+  letter-spacing: -0.01em;
+  margin: 0 0 0.3rem;
+  color: var(--text);
+}
+
+.learn-next__sub {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 0.98rem;
+  line-height: 1.55;
+}
+
+.learn-next__arrow {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(78, 159, 61, 0.14);
+  border: 1px solid var(--border-strong);
+  color: var(--accent);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.learn-next:hover .learn-next__arrow {
+  background: rgba(78, 159, 61, 0.24);
+  transform: translateX(3px);
+}
+
+.learn-next__arrow svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+/* =========================================================
+   Motion preferences
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  .learn-next:hover {
+    transform: none;
+  }
+  .learn-next:hover .learn-next__arrow {
+    transform: none;
+  }
+}
