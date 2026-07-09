@@ -23,6 +23,9 @@ AGENTS=(
     "04-quality-security/code-reviewer"
     "04-quality-security/architect-reviewer"
     "06-developer-experience/git-workflow-manager"
+    "06-developer-experience/documentation-engineer"
+    "07-specialized-domains/api-documenter"
+    "08-business-product/technical-writer"
     "09-meta-orchestration/codebase-orchestrator"
 )
 
