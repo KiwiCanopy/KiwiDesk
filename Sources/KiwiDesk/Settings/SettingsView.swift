@@ -81,11 +81,11 @@ struct SettingsView: View {
                 title: selection.title,
                 showsProfileContext: selection.showsProfileContext
             )
-            // `content()` stacks on top of the resign-on-click
-            // background (#93): SwiftUI hit-tests top-down, so
-            // any real control inside `content()` still claims
-            // the click first — only genuinely empty area falls
-            // through to the background tap.
+            // `ClickAwayResignsFocus` installs a window-scoped
+            // mouse-down monitor (#93) that commits an edited
+            // field when the click lands outside it. It's a
+            // zero-size, hit-test-transparent probe, so the ZStack
+            // order is incidental — it never intercepts clicks.
             ZStack {
                 ClickAwayResignsFocus()
                 content()
