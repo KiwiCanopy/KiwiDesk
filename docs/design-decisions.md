@@ -132,6 +132,25 @@ draggable profile chips duplicated the dropdown while adding
 a chip palette row and drop-target styling — a second
 interaction model with zero extra capability. (#7)
 
+**Profiles may override *behavior* settings, never *routing*
+ones.** A profile owns tiling, and may also carry a sparse
+override of a global setting that shapes how the workspace
+*behaves while the profile is active* — keybindings today
+(`Profile.modes`), app rules next (#109). It may never
+override a setting that *selects or routes* the profile
+itself: the native-Space→profile bindings decide *which*
+profile loads, so a profile owning part of that map would be
+a self-reference (load A → A rebinds Desktop 2 → B → …). The
+GUI language is a second hard exclusion for a different
+reason — it lives in `UserDefaults`, outside config ownership
+entirely, and must never touch a sidecar. Every override is
+the base overlaid with a sparse diff (absent inherits; a
+tombstone removes), never a second home for the setting. Each
+new one is added deliberately and parity-tested, templated on
+the keybinding override's seam — not folded into a generic
+primitive, which stays unjustified until a real second
+flat-map client exists (one client removes no duplication).
+
 ## Icons
 
 **A curated, keyword-tagged icon catalog — because macOS has
