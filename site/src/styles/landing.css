@@ -334,6 +334,18 @@ body::before {
   .nav__link {
     padding-inline: 0.55rem;
   }
+  /* The Learn link matters most to newcomers, so it stays. To buy
+     back the width it needs in the crowded Simple-mode cluster
+     (Learn + Ko-fi + lang + mode + theme), drop the icon-only
+     Ko-fi button here — it's still reachable from the footer and
+     the final CTA. */
+  .nav__support {
+    display: none;
+  }
+  .nav__link--learn {
+    padding-inline: 0.5rem;
+    font-size: 0.9rem;
+  }
   /* Tighten the language segments so the nav cluster (Ko-fi icon +
      lang + mode + theme) stays on one line on narrow phones. */
   .lang-switch__opt {
