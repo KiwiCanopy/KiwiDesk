@@ -48,7 +48,7 @@ extension KiwiCore {
         registerEventAPI(on: lua)
         registerKeybindingAPI(on: lua)
         registerExecAPI(on: lua)
-        installTypoGuard(on: lua)
+        installTypoGuards(on: lua)
     }
 
     /// `KiwiDesk.bind`, `define_mode`, and `switch_mode`
@@ -126,26 +126,6 @@ extension KiwiCore {
             return nil
         }
         return opts["icon"]?.stringValue
-    }
-
-    /// A metatable on the KiwiDesk table turns typo'd calls
-    /// ("attempt to call a nil value") into a helpful log
-    /// line pointing at KiwiDesk.help().
-    private func installTypoGuard(on lua: LuaInterpreter) {
-        lua.run(
-            """
-            setmetatable(KiwiDesk, {
-                __index = function(_, key)
-                    return function()
-                        KiwiDesk.debug_log(
-                            "unknown KiwiDesk function '"
-                            .. tostring(key)
-                            .. "' — see KiwiDesk.help()")
-                    end
-                end,
-            })
-            """
-        )
     }
 
     private func register(

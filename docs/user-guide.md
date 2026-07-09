@@ -652,6 +652,13 @@ Check the Shortcuts section for a ⚠️ conflict marker. Verify the combo
 is not reserved by macOS. If you hand-edited, reload with
 `KiwiDesk reload_config`.
 
+**Typo in init.lua?**  
+A misspelled function name (e.g. `scroll.set_width` instead of
+`scroll.set_slot_size`) doesn't abort the config: the call is
+skipped with a did-you-mean hint and the rest of the file still
+runs. Every typo the load hits is listed under menu bar › Config
+Issues… — if the error badge is showing, check there first.
+
 **Windows aren't tiling?**  
 Ensure the space has a layout mode other than Floating set in Layout
 Defaults. Check that the app is not in float_rules. If using a

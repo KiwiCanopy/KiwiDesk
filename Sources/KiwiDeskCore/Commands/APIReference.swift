@@ -67,7 +67,11 @@ public enum APIReference {
             ),
         ]
 
-    /// Layout sub-APIs exposed as global Lua tables.
+    /// Layout sub-APIs exposed as global Lua tables. Keys must
+    /// be fresh, valid Lua identifiers: they are interpolated
+    /// bare into the typo-guard install chunk, and a name
+    /// colliding with a stdlib global (`table`, `os`, …) would
+    /// reuse — and metatable — that table.
     public static let namespaces: [String: [String]] = [
         "animations": [
             "set_duration", "set_scroll_speed",

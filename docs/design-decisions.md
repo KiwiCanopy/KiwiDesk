@@ -474,6 +474,16 @@ reachable without opening Settings. Profile issues also
 refresh on save/delete, so repairing one clears its badge
 immediately. (#68 §3.7, #39/#31 own the validation cores)
 
+**A typo is non-fatal, but never invisible.** An unknown call
+on `KiwiDesk` or a layout namespace table is a guarded no-op
+(logged with a did-you-mean), so one wrong name can no longer
+abort init.lua and silently kill every keybinding below it.
+The flip side — non-fatal would mean *unnoticed* — is closed
+by recording each load-time hit as a config issue feeding the
+badge and window above. Runtime hits (a typo inside a
+keybinding closure) only log; a persistent "config error"
+badge for a transient slip would mislead. (#39)
+
 **The quick menu is for daily driving.** Header row naming
 the live profile, a Switch Profile submenu (`load_profile`
 finally has a quick path), Config Issues… only while
