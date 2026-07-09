@@ -33,6 +33,13 @@ export function remarkDocsLinks() {
     //    (.../KiwiDesk/docs/x.md) — both end with `docs/<...>.md`.
     const src = file.path ?? file.history?.[0] ?? "";
     const norm = src.split(path.sep).join("/");
+    // Astro reports the unresolved symlink path
+    // (.../content/docs/docs/x.md), so the marker branch fires in
+    // practice; the lastIndexOf fallback is a safety net in case a
+    // future Astro resolves the symlink first (.../KiwiDesk/docs/
+    // x.md). If neither yields a slug we'd rewrite links against
+    // the site root (silent 404s that CI can't catch, since Astro
+    // doesn't fail on dangling internal links) — so warn loudly.
     const marker = "/content/docs/";
     let slug;
     const i = norm.indexOf(marker);
@@ -41,6 +48,12 @@ export function remarkDocsLinks() {
     } else {
       const j = norm.lastIndexOf("/docs/");
       slug = j !== -1 ? "docs/" + norm.slice(j + "/docs/".length) : "";
+    }
+    if (!slug) {
+      console.warn(
+        `[remark-docs-links] could not derive a route slug from ` +
+          `"${src}" — relative .md links on this page may 404.`
+      );
     }
     slug = slug.replace(/\.md$/, ""); // e.g. docs/recipes/misc
     const curDir = slug.includes("/")
