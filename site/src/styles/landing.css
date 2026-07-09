@@ -414,6 +414,16 @@ body::before {
   background: var(--kofi-hover-bg);
 }
 
+/* Official Ko-fi cup mark, kept in its brand colors. Fixed px
+   (not em) so it survives the icon-only nav collapse, where the
+   button's font-size drops to 0. */
+.kofi-icon {
+  width: 20px;
+  height: 16px;
+  display: block;
+  flex-shrink: 0;
+}
+
 /* Theme toggle button — sun in dark theme, moon in light. */
 .theme-toggle {
   display: inline-grid;

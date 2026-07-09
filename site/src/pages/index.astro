@@ -3,6 +3,7 @@
 // Docs live under /docs/*; this page is standalone HTML.
 import { Image } from "astro:assets";
 import logoMark from "../assets/brand/logo.svg";
+import kofiIcon from "../assets/brand/kofi_symbol.svg";
 import logoMarkDark from "../assets/brand/logo_dark.svg";
 import wordmark from "../assets/brand/logo_wordmark.svg";
 import wordmarkDark from "../assets/brand/logo_wordmark_dark.svg";
@@ -228,7 +229,8 @@ const layouts = [
             rel="noopener">GitHub</a>
           <a class="nav__link nav__support" href={kofi}
             target="_blank" rel="noopener">
-            <span aria-hidden="true">☕</span> Support
+            <img class="kofi-icon" src={kofiIcon.src} alt=""
+              aria-hidden="true" width="20" height="16" /> Support
           </a>
           <button class="theme-toggle" id="themeToggle" type="button"
             aria-label="Switch color theme" aria-pressed="false">
@@ -449,7 +451,9 @@ const layouts = [
         </div>
         <a class="footer__kofi" href={kofi} target="_blank"
           rel="noopener">
-          <span aria-hidden="true">☕</span> Support on Ko-fi
+          <img class="kofi-icon" src={kofiIcon.src} alt=""
+            aria-hidden="true" width="20" height="16" />
+          Support on Ko-fi
         </a>
         <nav class="footer__links" aria-label="Footer">
           <a href="/docs/">Docs</a>
