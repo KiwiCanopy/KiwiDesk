@@ -93,6 +93,19 @@ struct LocalizationManagerTests {
         #expect(value == "Quit KiwiDesk")
     }
 
+    @Test("selecting English forces the inline source")
+    func explicitEnglishOverridesTranslation() {
+        reset()
+        LocalizationManager.shared.select("de")
+        #expect(L("menu.quit", "Quit KiwiDesk") == "KiwiDesk beenden")
+        // English is an explicit pick distinct from System
+        // default: it must use the inline source even when a
+        // German translation exists and the OS is German.
+        LocalizationManager.shared.select("en")
+        defer { reset() }
+        #expect(L("menu.quit", "Quit KiwiDesk") == "Quit KiwiDesk")
+    }
+
     // MARK: - Interpolation overload (issue #9 review)
 
     @Test("the interpolating overload fills English positionally")

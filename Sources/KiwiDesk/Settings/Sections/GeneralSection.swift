@@ -61,11 +61,15 @@ struct GeneralSection: View {
         )
     }
 
-    /// Shipped locales, native-name-sorted (§4 of the design
-    /// brief): "Deutsch", "Français", etc. — never the English
-    /// exonym.
+    /// The picker's concrete languages: every shipped locale file
+    /// plus English, native-name-sorted ("Deutsch", "English",
+    /// "Français"). English never ships as a runtime file (it
+    /// lives inline at call sites) but must be an explicit choice
+    /// — otherwise a user on a non-English OS can only reach
+    /// English via "System default", which resolves to *their* OS
+    /// language, leaving no way to force English.
     private var sortedLocales: [LocaleOption] {
-        localization.available
+        (localization.available + ["en"])
             .map { LocaleOption(code: $0) }
             .sorted { $0.nativeName < $1.nativeName }
     }

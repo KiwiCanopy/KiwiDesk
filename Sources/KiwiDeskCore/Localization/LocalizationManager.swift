@@ -38,6 +38,11 @@ public final class LocalizationManager: ObservableObject {
     /// sites).
     public var effectiveLocale: String? {
         if let selection {
+            // Explicit English: no `en.json` ships (English lives
+            // inline), so it resolves to the empty dictionary —
+            // inline English everywhere — never to the OS
+            // language. Distinct from `nil` (System default).
+            if selection == "en" { return nil }
             return available.contains(selection)
                 ? selection : nil
         }
