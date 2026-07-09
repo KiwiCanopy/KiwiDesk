@@ -286,7 +286,7 @@
   "profiles.save_failed": "Speichern fehlgeschlagen: %1$@",
   "profiles.saved.empty": "Noch keine Profile gespeichert — das Standard-Profil wird verwendet, bis du ein eigenes erstellst.",
   "profiles.saved.title": "Gespeicherte Profile",
-  "profiles.screens.many": "Bildschirme",
+  "profiles.screens.many": "%1$d Bildschirme",
   "profiles.screens.one": "1 Bildschirm",
   "profiles.update_hint": "„%1$@“ ist für %2$d Monitor(e) gedacht, aber %3$d sind angeschlossen. Speichere es am besten als neues Profil.",
   "scroll_grid.anchor.bottom": "Unten",

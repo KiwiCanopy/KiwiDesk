@@ -286,7 +286,7 @@
   "profiles.save_failed": "Saving failed: %1$@",
   "profiles.saved.empty": "No profiles saved yet — the built-in Standard resolves until you save one.",
   "profiles.saved.title": "Saved profiles",
-  "profiles.screens.many": "screens",
+  "profiles.screens.many": "%1$d screens",
   "profiles.screens.one": "1 screen",
   "profiles.update_hint": "\"%1$@\" is for %2$d screen(s); %3$d connected. Save as new instead.",
   "scroll_grid.anchor.bottom": "Bottom",

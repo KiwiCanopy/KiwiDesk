@@ -50,8 +50,11 @@ struct PresetsSection: View {
         Text(
             count == 1
                 ? L("profiles.screens.one", "1 screen")
-                : "\(count) "
-                    + L("profiles.screens.many", "screens")
+                : L(
+                    "profiles.screens.many",
+                    "%1$d screens",
+                    count
+                )
         )
         .font(.caption)
         .fontWeight(.semibold)
