@@ -51,10 +51,11 @@ struct SettingsSidebar: View {
         }
         .frame(maxWidth: .infinity, alignment: .center)
         .padding(.horizontal, 12)
-        // Tight top gap — the toolbar safe-area inset already
-        // clears the traffic lights, so this just seats the
-        // mark below them without a legacy void.
-        .padding(.top, 2)
+        // Pull the mark up toward the traffic lights: the sidebar
+        // otherwise reserves the full empty-toolbar top safe area,
+        // leaving a void below the lights. A negative inset seats
+        // it just under them — tune -6…-16 if the lights clip.
+        .padding(.top, -10)
         .padding(.bottom, 8)
     }
 
