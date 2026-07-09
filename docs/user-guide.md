@@ -123,6 +123,48 @@ To reset the app to what your `init.lua` declares, delete `gui.json`.
 Treat it like `init.lua` — do not import it from an untrusted source,
 since custom Lua in keybindings runs on every reload.
 
+## What Lives Where: Global vs Per-Profile
+
+Your configuration is split across two homes, and knowing which is
+which tells you the *blast radius* of any edit:
+
+- **`gui.json` (global)** — one file, shared by every profile.
+- **Each profile's JSON (per-profile)** — one file per saved
+  profile, applied only while that profile is active.
+
+**Global settings** live in `gui.json`; editing or deleting one
+changes it for **every** profile:
+
+- **Keyboard shortcuts** (the base set)
+- **App rules** (app → space assignment)
+- **Float rules** (apps that never tile)
+- **Native Space → profile bindings**
+
+**Per-profile settings** live in the profile's own JSON; editing
+one touches **only that profile** — another profile that declares
+a space of the same name is left untouched:
+
+- **Which spaces exist** and their order (the list you see is the
+  active profile's)
+- **Layout mode, gaps, and per-layout / per-space tuning**
+- **Space-to-monitor pins, the Main role, and the fallback space**
+
+This is why, when you **edit a stored profile without switching to
+it**, the App Rules and General sections disappear — they hold
+global state a profile edit never writes.
+
+**One hybrid — keyboard shortcuts.** The base set is global, but a
+profile can carry a *sparse override* that adds, changes, or
+removes specific bindings just for itself (see **Per-Profile
+Shortcut Overrides**). Everything else is squarely one or the
+other.
+
+A practical consequence: because app rules are global, an app maps
+to a single space name everywhere. To send an app to a given space
+across profiles, give that space the **same name** in each profile
+(e.g. keep a `comms` space and assign the app to it) — each profile
+can still lay that space out differently.
+
 ## Spaces
 
 The **Spaces** section (in the **Design** group) lists every virtual
