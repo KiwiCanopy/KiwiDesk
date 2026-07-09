@@ -31,23 +31,46 @@ struct SpaceCommandAliasTests {
         #expect(core.state.workspaces.activeSpace == SpaceID("3"))
     }
 
-    @Test("The long aliases resolve to the short command")
-    func aliasesResolveToCanonical() {
+    @Test("The long move aliases route to the move handler")
+    func moveAliasesDispatch() {
+        let core = makeCore()
+        core.state.workspaces.add(WindowID(1), to: SpaceID("1"))
+        core.state.workspaces.activate(SpaceID("1"))
+        core.state.workspaces.focus(WindowID(1), in: SpaceID("1"))
+        // Long alias moves the focused window to space 2.
+        #expect(
+            core.execute(
+                "move_to_virtual_space",
+                args: [.string("2")]
+            ).isSuccess
+        )
+        #expect(
+            core.state.workspaces.space(of: WindowID(1))
+                == SpaceID("2")
+        )
+        // Long alias + follow moves it on and switches there.
+        core.state.workspaces.activate(SpaceID("2"))
+        #expect(
+            core.execute(
+                "move_to_virtual_space_and_follow",
+                args: [.string("3")]
+            ).isSuccess
+        )
+        #expect(core.state.workspaces.activeSpace == SpaceID("3"))
+    }
+
+    @Test("APIReference pins the space aliases to their one source")
+    func apiReferenceMatchesAliasSource() {
         func command(for lua: String) -> String? {
             APIReference.commands.first { $0.lua == lua }?.command
         }
-        #expect(
-            command(for: "focus_virtual_space") == "focus_space"
-        )
-        #expect(
-            command(for: "move_to_virtual_space") == "move_to_space"
-        )
-        #expect(
-            command(for: "move_to_virtual_space_and_follow")
-                == "move_to_space_and_follow"
-        )
-        // The canonical forms map to themselves.
-        #expect(command(for: "focus_space") == "focus_space")
+        // Both the canonical and its legacy alias register, and
+        // both resolve to the canonical dispatcher command — so
+        // the registry can't drift from `spaceCommandAliases`.
+        for (canonical, alias) in SpaceLuaArg.spaceCommandAliases {
+            #expect(command(for: canonical) == canonical)
+            #expect(command(for: alias) == canonical)
+        }
     }
 
     @Test("Did-you-mean surfaces only the canonical short forms")

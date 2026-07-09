@@ -222,18 +222,12 @@ enum KeybindingCatalog {
     /// stored binding keeps its still-valid long alias.
     static func canonicalSpaceLua(_ lua: String) -> String {
         var result = lua
-        let aliases = [
-            (
-                "move_to_virtual_space_and_follow(",
-                "move_to_space_and_follow("
-            ),
-            ("move_to_virtual_space(", "move_to_space("),
-            ("focus_virtual_space(", "focus_space("),
-        ]
-        for (long, short) in aliases {
+        // Paren-anchored, so `move_to_virtual_space(` can't be
+        // rewritten inside `..._and_follow(` — order-independent.
+        for (canonical, alias) in SpaceLuaArg.spaceCommandAliases {
             result = result.replacingOccurrences(
-                of: long,
-                with: short
+                of: "\(alias)(",
+                with: "\(canonical)("
             )
         }
         return result
