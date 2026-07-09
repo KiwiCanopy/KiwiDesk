@@ -864,9 +864,14 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
 
       // Click either segment to select that mode.
       modeSegs.forEach((seg) => {
-        seg.addEventListener("click", () => {
+        seg.addEventListener("click", (e) => {
           const m = seg.getAttribute("data-mode");
           if (m === "simple" || m === "dev") applyMode(m);
+          // Mouse click (detail > 0): drop focus so the hover
+          // tooltip doesn't linger after the pointer leaves. A
+          // keyboard activation (detail === 0) keeps focus, so the
+          // tip still shows for keyboard users via :focus-within.
+          if ((e as MouseEvent).detail > 0) (seg as HTMLElement).blur();
         });
       });
       // Keyboard: arrows / Home / End move between the two segments
