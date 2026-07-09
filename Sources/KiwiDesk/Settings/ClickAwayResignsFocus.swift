@@ -26,9 +26,13 @@ struct ClickAwayResignsFocus: NSViewRepresentable {
     func updateNSView(_ nsView: NSView, context: Context) {}
 }
 
-/// Owns a left-mouse-down monitor scoped to its own window, torn
-/// down when the view leaves the window or is deallocated. Never
-/// intercepts clicks itself (`hitTest` returns nil).
+/// Owns a left-mouse-down monitor scoped to its own window. The
+/// monitor is torn down (and re-installed) in `viewDidMoveToWindow`
+/// whenever the view's window changes — including leaving the
+/// window (`window == nil`), which is the teardown path — so no
+/// `deinit` is needed (a nonisolated `deinit` can't touch the
+/// `@MainActor` monitor state anyway). Never intercepts clicks
+/// itself (`hitTest` returns nil).
 private final class FocusResignMonitorView: NSView {
     private var monitor: Any?
 
@@ -72,6 +76,4 @@ private final class FocusResignMonitorView: NSView {
             self.monitor = nil
         }
     }
-
-    deinit { removeMonitor() }
 }
