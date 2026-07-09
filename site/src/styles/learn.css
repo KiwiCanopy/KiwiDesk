@@ -59,7 +59,12 @@
 
 .learn__layout {
   display: grid;
-  grid-template-columns: 1fr;
+  /* minmax(0, 1fr), not a bare 1fr: a bare `1fr` track still lets
+     a wide max-content descendant (the Homebrew <pre> below) blow
+     the track (and the whole page) out horizontally on mobile —
+     the same failure mode landing.css's .split .wrap > .code
+     comment documents for the desktop split sections. */
+  grid-template-columns: minmax(0, 1fr);
   gap: clamp(1.5rem, 4vw, 3rem);
 }
 
@@ -70,10 +75,21 @@
   }
 }
 
-/* The article column — a comfortable reading measure. */
+/* The article column — a comfortable reading measure (~70ch),
+   centered within its grid track so it reads as a balanced
+   column beside the sticky TOC rail on desktop, and stays
+   centered in the full-width row once the rail collapses on
+   mobile (below the 960px breakpoint above). `min()` against
+   100% is deliberate, not decorative: `ch` is a font-metric
+   unit, and on some font stacks 70ch alone can render WIDER
+   than the grid track itself (a grid item's max-width isn't
+   otherwise clamped by its track), which pushed the column
+   past the viewport on mobile. */
 .learn__col {
   min-width: 0;
-  max-width: 720px;
+  width: 100%;
+  max-width: min(70ch, 100%);
+  margin-inline: auto;
 }
 
 /* Page header block */
@@ -511,9 +527,20 @@
 /* =========================================================
    Layouts section — reuses .layouts / .layout-card from
    landing.css. This only adds the friendly one-liner spacing.
+   L2: `overflow-x: auto` on each diagram is a defensive floor,
+   not the primary fix — the grid track itself is bounded (see
+   .learn__layout's minmax(0, 1fr)) so cards wrap to one per row
+   on mobile and the diagrams scale down with their card. This
+   only kicks in if a diagram's own intrinsic content ever
+   outgrows its box, so it scrolls internally instead of
+   pushing the whole page sideways.
    ========================================================= */
 .learn .layouts {
   margin-top: 1.5rem;
+}
+
+.learn .layout-card__diagram {
+  overflow-x: auto;
 }
 
 .learn .layout-card h3 {

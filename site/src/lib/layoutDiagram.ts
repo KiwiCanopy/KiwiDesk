@@ -2,7 +2,7 @@
 //
 // The six little SVG sketches (bsp, stack, scrolling, monocle,
 // grid, floating) that illustrate each tiling layout. Extracted
-// here so BOTH the marketing landing (Landing.astro, Developer
+// here so BOTH the marketing landing (Landing.astro, Nerd
 // mode "Layouts" grid) and the newcomer /learn/ page render the
 // exact same drawings from one source — no redraw, no drift.
 //

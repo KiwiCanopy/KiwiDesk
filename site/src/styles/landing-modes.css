@@ -1,5 +1,5 @@
 /* =========================================================
-   KiwiDesk — two-mode landing (Simple ⇄ Developer)
+   KiwiDesk — two-mode landing (Simple ⇄ Nerd)
    -----------------------------------------------------------
    Both modes' content ships in the DOM. `data-mode` on <html>
    ("simple" | "dev") gates visibility so switching is a pure
@@ -7,9 +7,9 @@
 
    Visibility contract:
      .simple-only  → shown only in Simple mode
-     .dev-only     → shown only in Developer mode
+     .dev-only     → shown only in Nerd mode
      .dev-reveal   → dev-only section that plays the staggered
-                     "grid forms" reveal when Developer turns on
+                     "grid forms" reveal when Nerd turns on
    All inherit the reduced-motion snap at the bottom of the file.
    ========================================================= */
 
@@ -51,15 +51,15 @@
 }
 
 /* =========================================================
-   The signature mode toggle — a two-segment [ Simple | Developer ]
+   The signature mode toggle — a two-segment [ Simple | Nerd ]
    control. Unlike a one-word label, BOTH modes are named at all
-   times, so a first-time visitor sees there's a Developer view to
+   times, so a first-time visitor sees there's a Nerd view to
    switch TO and which one they're on — the active segment fills in
    (echoing the EN | DE language switcher's active locale, its
    deliberate sibling). A sliding kiwi-bearing indicator glides
-   between the two segments; reaching Developer, two smaller kiwi
+   between the two segments; reaching Nerd, two smaller kiwi
    dots spring in behind the lead kiwi so it visibly "fills" — the
-   "add more kiwis toward Developer" personality, kept.
+   "add more kiwis toward Nerd" personality, kept.
 
    Layout: the two segments are a 2-column grid so the slider can be
    sized/positioned as a fraction of the track and slide by 100% —
@@ -69,7 +69,7 @@
 .mode-toggle {
   /* Both segments share one fixed width so the sliding indicator
      covers either exactly and the control never changes size when
-     the mode switches. Sized to fit the longest label (Developer /
+     the mode switches. Sized to fit the longest label (Nerd /
      Entwickler) with room for the lead kiwi. */
   --seg-w: 88px;
   position: relative;
@@ -88,7 +88,7 @@
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--card-glow);
 }
-/* Subtle tint shift toward brand green in Developer mode. */
+/* Subtle tint shift toward brand green in Nerd mode. */
 :root[data-mode="dev"] .mode-toggle {
   background: var(--tile-fill-ghost);
 }
@@ -97,7 +97,7 @@
 /* Sits under the active segment and carries the kiwi(s). It's
    absolutely positioned and slid via translateX; leaving 2px
    padding on the pill, it starts flush-left under "Simple" and
-   slides to cover "Developer". A spring easing gives it bounce. */
+   slides to cover "Nerd". A spring easing gives it bounce. */
 .mode-toggle__slider {
   position: absolute;
   top: 2px;
@@ -110,8 +110,8 @@
   transition: transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1);
   z-index: 0;
 }
-/* Developer: slide right by exactly the Simple segment's width so
-   the indicator lands under the (wider) Developer segment. */
+/* Nerd: slide right by exactly the Simple segment's width so
+   the indicator lands under the (wider) Nerd segment. */
 :root[data-mode="dev"] .mode-toggle__slider {
   transform: translateX(var(--seg-w));
 }
@@ -130,7 +130,7 @@
 
 /* Extra kiwis: collapsed to nothing (zero scale + opacity) in
    Simple mode, springing in behind the lead kiwi as the slider
-   reaches Developer, so the indicator visibly fills out. */
+   reaches Nerd, so the indicator visibly fills out. */
 .mode-toggle__extra {
   position: absolute;
   width: 11px;
@@ -265,7 +265,7 @@
 
 /* Tight phones: shrink the segments (smaller text, tighter padding)
    and drop the tooltip so the nav cluster never overflows. In
-   Developer mode the nav also carries Docs + GitHub alongside the
+   Nerd mode the nav also carries Docs + GitHub alongside the
    language switcher, so this needs headroom above the classic
    ~480px phone breakpoint. The control keeps BOTH labels — the
    whole point is they stay visible — just more compact. */
@@ -335,7 +335,7 @@
     padding-left: 15px;
   }
 }
-/* Developer mode adds Docs + GitHub to the nav; alongside the
+/* Nerd mode adds Docs + GitHub to the nav; alongside the
    language switcher, the resulting six-item cluster (Docs, GitHub,
    Support, language switcher, mode toggle, theme toggle) can't fit
    below ~680px even after the Ko-fi-text shedding above. Both
@@ -350,7 +350,7 @@
 }
 
 /* =========================================================
-   Reveal flourish — when Developer mode turns on, dev sections
+   Reveal flourish — when Nerd mode turns on, dev sections
    rise + fade with a per-section stagger ("grid forms"), and the
    nav gets a brief accent glow sweep.
    ========================================================= */
@@ -422,6 +422,28 @@
 }
 .link-arrow:hover {
   gap: 0.6rem;
+}
+
+/* ---- M3: modest above-the-fold proof (a single small layout
+   diagram, reusing the shared .tile fills) directly under the
+   hero pill. Deliberately tiny and calm — a glance at what
+   "tidy windows" looks like, not a second hero illustration —
+   and its height is small enough to never push the hero CTA
+   below the fold on a laptop screen. ---- */
+.hero-proof {
+  width: min(190px, 55vw);
+  aspect-ratio: 160 / 90;
+  margin: clamp(1.1rem, 3vw, 1.6rem) auto 0;
+  border-radius: var(--radius-sm);
+  background: var(--bg-0);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+.hero-proof svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 /* ---- "What is this?" — copy beside a messy→tidy mini demo ---- */
@@ -678,7 +700,7 @@
 }
 
 /* =========================================================
-   Split sections (Developer: copy + code side by side)
+   Split sections (Nerd: copy + code side by side)
    ========================================================= */
 .split .wrap {
   display: grid;
@@ -725,7 +747,7 @@
                    hero (Simple mode only) — shares its slot with
                    .quote-band below, so switching modes keeps the
                    same post-hero quote position.
-     .quote-band   a large, centered divider quote (Developer
+     .quote-band   a large, centered divider quote (Nerd
                    mode's tagline, right under the hero) — shares
                    its slot with .opening-note above.
      .quote-card   a warmer, boxed quote with a byline, used once
@@ -736,7 +758,7 @@
    ========================================================= */
 
 /* Opening note — sits directly under the hero, Simple mode only,
-   in the same slot .quote-band occupies for Developer mode.
+   in the same slot .quote-band occupies for Nerd mode.
    Deliberately understated: no box, no icon, just italic
    first-person text continuing straight onto the page's base
    background (matching .quote-band's own treatment) rather than a
@@ -834,7 +856,7 @@
   font-family: var(--font);
 }
 
-/* Two-line byline (Developer quote): a normal-weight main line and
+/* Two-line byline (Nerd quote): a normal-weight main line and
    a smaller, lighter, playful sub-line underneath. */
 .quote-card__byline--two {
   display: flex;
@@ -980,7 +1002,7 @@ a.quote-card__byline-main:hover {
   }
   /* With no transition, the base :root[data-mode] rules above snap
      the slider (translateX(0) Simple / translateX(var(--seg-w))
-     Developer) and the extra kiwis (scale 0 ⇄ 1) straight to their
+     Nerd) and the extra kiwis (scale 0 ⇄ 1) straight to their
      resting state with zero motion. */
   :root[data-mode="dev"] .dev-reveal,
   :root[data-mode="dev"] #features .card {

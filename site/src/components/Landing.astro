@@ -221,7 +221,7 @@ const steps = [
         <div class="nav__links">
           <!-- Learn: shown in BOTH modes — newcomers arriving in
                Simple mode need the single-scroll /learn/ guide, and
-               it's useful in Developer mode too. -->
+               it's useful in Nerd mode too. -->
           <a class="nav__link nav__link--learn" href="/learn/"
             >{t.nav_learn}</a>
           <!-- Docs + GitHub live in the DOM always but are hidden in
@@ -260,14 +260,14 @@ const steps = [
           <!-- Signature mode toggle: a two-segment control, a
                deliberate sibling of the EN | DE language switcher
                beside it. BOTH modes are labeled at all times —
-               [ 🥝 Simple | Developer ] — so a first-time visitor
-               instantly sees there's a Developer view to switch TO,
+               [ 🥝 Simple | Nerd ] — so a first-time visitor
+               instantly sees there's a Nerd view to switch TO,
                and which one they're on (the active segment fills in,
                like the language switcher's active locale). A sliding
                kiwi-bearing indicator glides between the two segments;
-               reaching Developer, extra kiwi dots spring in behind
+               reaching Nerd, extra kiwi dots spring in behind
                the lead kiwi so the indicator visibly "fills" — the
-               "add more kiwis toward Developer" personality, kept.
+               "add more kiwis toward Nerd" personality, kept.
 
                ARIA: a radiogroup — the two segments are mutually
                exclusive options, one always active — with a
@@ -277,7 +277,7 @@ const steps = [
           <div class="mode-toggle" id="modeToggle" role="radiogroup"
             aria-label={t.mode_toggle_aria}>
             <!-- Sliding kiwi indicator behind the segments. In Simple
-                 it holds one kiwi; sliding to Developer, two smaller
+                 it holds one kiwi; sliding to Nerd, two smaller
                  kiwi dots pop in behind the lead so it fills out. -->
             <span class="mode-toggle__slider" aria-hidden="true">
               <span class="mode-toggle__extra mode-toggle__extra--2">
@@ -368,9 +368,20 @@ const steps = [
             <span class="pill__dot" aria-hidden="true"></span>
             {t.hero_pill}
           </span>
+
+          <!-- M3: a modest visual proof of what KiwiDesk actually
+               does — the same shared layout diagram used lower on
+               the page (Nerd mode's "Layouts" grid and /learn/),
+               kept small and calm so it reads as a glance, not a
+               hero illustration, and never pushes the CTA below
+               the fold. Purely decorative (echoes hero_sub above
+               it), so no new copy/label — aria-hidden throughout. -->
+          <div class="hero-proof" aria-hidden="true">
+            <Fragment set:html={layoutDiagram("bsp")} />
+          </div>
         </div>
 
-        <!-- Developer-mode hero copy -->
+        <!-- Nerd-mode hero copy -->
         <div class="hero__mode hero__mode--dev">
           <span class="hero__kicker">{t.hero_dev_kicker}</span>
           <h1>{t.hero_dev_title}</h1>
@@ -402,7 +413,7 @@ const steps = [
     <!-- ============ Post-hero quote (mode-specific, same slot) ===
          Both modes show one quote directly under the hero, in the
          same position — Simple gets the personal opening/motivation
-         note, Developer gets the "works with you" tagline. Keeping
+         note, Nerd gets the "works with you" tagline. Keeping
          them in one slot (rather than one above + one below the
          hero) means the two modes read consistently as you switch
          between them. -->
@@ -588,7 +599,7 @@ const steps = [
       </div>
     </section>
 
-    <!-- ============ Features (Developer only) ============ -->
+    <!-- ============ Features (Nerd only) ============ -->
     <section class="dev-only dev-reveal" id="features">
       <div class="wrap">
         <div class="section-head">
@@ -610,7 +621,7 @@ const steps = [
       </div>
     </section>
 
-    <!-- ============ Maker quote (Developer only) ============ -->
+    <!-- ============ Maker quote (Nerd only) ============ -->
     <section class="dev-only dev-reveal" id="maker-quote-dev">
       <div class="wrap">
         <blockquote class="quote-card quote-card--dev">
@@ -625,7 +636,7 @@ const steps = [
       </div>
     </section>
 
-    <!-- ============ Layouts (Developer only) ============ -->
+    <!-- ============ Layouts (Nerd only) ============ -->
     <section class="tint dev-only dev-reveal" id="layouts">
       <div class="wrap">
         <div class="section-head">
@@ -647,7 +658,7 @@ const steps = [
       </div>
     </section>
 
-    <!-- ============ Lua config (Developer only) ============ -->
+    <!-- ============ Lua config (Nerd only) ============ -->
     <section class="split dev-only dev-reveal" id="config">
       <div class="wrap">
         <div class="split__copy">
@@ -674,7 +685,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
       </div>
     </section>
 
-    <!-- ============ CLI (Developer only) ============ -->
+    <!-- ============ CLI (Nerd only) ============ -->
     <section class="split split--reverse tint dev-only dev-reveal"
       id="cli">
       <div class="wrap">
@@ -702,7 +713,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
       </div>
     </section>
 
-    <!-- ============ Build from source (Developer only) ======== -->
+    <!-- ============ Build from source (Nerd only) ======== -->
     <section class="quickstart dev-only dev-reveal" id="start">
       <div class="wrap">
         <div>
@@ -872,7 +883,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
       // Both modes' content lives in the DOM; `data-mode` on <html>
       // shows/hides via CSS, so switching never reloads and the
       // reveal can be a pure CSS transition. The control is a
-      // radiogroup of two segments (Simple / Developer).
+      // radiogroup of two segments (Simple / Nerd).
       const modeToggle = document.getElementById("modeToggle");
       const modeSegs = modeToggle
         ? Array.from(

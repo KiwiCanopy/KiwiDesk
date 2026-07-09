@@ -711,6 +711,12 @@ section {
   position: relative;
   z-index: 1;
   padding-block: clamp(3.5rem, 9vw, var(--sp-8));
+  /* L5: every top-level section doubles as an anchor-jump
+     target (hero CTAs, footer/nav links), so it needs the same
+     clearance under the sticky .nav (~68.5px tall) that
+     /learn/'s .learn-section carries — kept at the identical
+     5.5rem so a jump lands consistently on either page. */
+  scroll-margin-top: 5.5rem;
 }
 
 .tint {
@@ -1385,7 +1391,7 @@ section {
    -----------------------------------------------------------
    Below the smallest common phone width (iPhone SE is 375px),
    trim the three nav controls (lang / mode / theme) further. The
-   mode toggle now shows BOTH labels (Simple AND Developer — its
+   mode toggle now shows BOTH labels (Simple AND Nerd — its
    whole affordance), so it stays a two-segment control here too,
    just with tighter segment width and font. The ≤400px rule above
    already hid the brand wordmark text and pulled in the wrap
