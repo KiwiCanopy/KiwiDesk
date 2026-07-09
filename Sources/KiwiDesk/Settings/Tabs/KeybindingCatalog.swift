@@ -213,26 +213,6 @@ enum KeybindingCatalog {
         return (label, abs(value))
     }
 
-    /// Rewrites the legacy `*_virtual_space` space calls in `lua`
-    /// to their canonical bare-`space` form (#42), so import
-    /// classification recognizes a binding authored before the
-    /// rename against the short-form catalog. Paren-anchored like
-    /// `SpaceLuaArg` (so `move_to_space` can't match inside
-    /// `move_to_space_and_follow`) — a lookup-only transform; the
-    /// stored binding keeps its still-valid long alias.
-    static func canonicalSpaceLua(_ lua: String) -> String {
-        var result = lua
-        // Paren-anchored, so `move_to_virtual_space(` can't be
-        // rewritten inside `..._and_follow(` — order-independent.
-        for (canonical, alias) in SpaceLuaArg.spaceCommandAliases {
-            result = result.replacingOccurrences(
-                of: "\(alias)(",
-                with: "\(canonical)("
-            )
-        }
-        return result
-    }
-
     /// A space id as a quoted, escaped Lua string argument.
     static func spaceArg(_ space: SpaceID) -> String {
         quote(space.raw)

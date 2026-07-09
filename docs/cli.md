@@ -46,9 +46,9 @@ KiwiDesk service restart
 |---|---|---|
 | Navigation | `focus` | `left\|right\|up\|down` |
 | | `swap` | `left\|right\|up\|down` |
-| | `focus_space` | space id (aliased `focus_virtual_space`) |
-| | `move_to_space` | space id (aliased `move_to_virtual_space`) |
-| | `move_to_space_and_follow` | space id (aliased `move_to_virtual_space_and_follow`) |
+| | `focus_space` | space id |
+| | `move_to_space` | space id |
+| | `move_to_space_and_follow` | space id |
 | Window | `make_floating` | — |
 | | `make_tiled` | — |
 | | `resize` | `x\|y`, delta (px) |

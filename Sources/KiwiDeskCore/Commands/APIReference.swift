@@ -11,23 +11,12 @@ public enum APIReference {
         [
             ("focus", "focus"),
             ("swap", "swap"),
-            // Bare `space` is canonical; the `*_virtual_space`
-            // forms stay as compatibility aliases (#42). Both Lua
-            // names register, both resolve to the short dispatcher
-            // command; `dispatchable`/help/did-you-mean surface
-            // the canonical short form.
+            // Bare `space` is canonical (#42): aligned with the
+            // event namespace, which uses bare `space` for a
+            // virtual space and `native_space` for macOS desktops.
             ("focus_space", "focus_space"),
-            ("focus_virtual_space", "focus_space"),
             ("move_to_space", "move_to_space"),
-            ("move_to_virtual_space", "move_to_space"),
-            (
-                "move_to_space_and_follow",
-                "move_to_space_and_follow"
-            ),
-            (
-                "move_to_virtual_space_and_follow",
-                "move_to_space_and_follow"
-            ),
+            ("move_to_space_and_follow", "move_to_space_and_follow"),
             ("make_floating", "make_floating"),
             ("make_tiled", "make_tiled"),
             ("resize", "resize"),

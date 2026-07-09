@@ -2,8 +2,7 @@ import AppKit
 import Foundation
 
 /// Virtual space commands: `focus_space` and
-/// `move_to_space(_and_follow)` — the `*_virtual_space` forms are
-/// compatibility aliases (#42).
+/// `move_to_space(_and_follow)` (#42).
 extension KiwiCore {
     /// Follows focus into a hidden window's virtual space —
     /// but only if that window is still the frontmost app's

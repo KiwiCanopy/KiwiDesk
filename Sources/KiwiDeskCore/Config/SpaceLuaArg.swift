@@ -17,29 +17,15 @@ public enum SpaceLuaArg {
         LuaLiteral.string(raw)
     }
 
-    /// Every space-targeting command as `(canonical bare-space
-    /// name, legacy *_virtual_space alias)` — the ONE source for
-    /// the rename (#42). The classifier's `canonicalSpaceLua` and
-    /// `spaceCalls` below both derive from this, and
-    /// `APIReference` is pinned to it by a parity test, so a new
-    /// space verb is declared in exactly one place.
-    public static let spaceCommandAliases:
-        [(canonical: String, alias: String)] = [
-            ("focus_space", "focus_virtual_space"),
-            ("move_to_space", "move_to_virtual_space"),
-            (
-                "move_to_space_and_follow",
-                "move_to_virtual_space_and_follow"
-            ),
-        ]
-
     /// The space-targeting Lua calls whose sole argument is a
-    /// SpaceID literal — both canonical and legacy alias forms
-    /// (#42), so a rename rewrites a binding authored in either.
-    /// Each pattern includes the opening paren, so `move_to_space`
-    /// never matches inside `move_to_space_and_follow`.
-    static let spaceCalls: [String] =
-        spaceCommandAliases.flatMap { [$0.canonical, $0.alias] }
+    /// SpaceID literal. Each pattern includes the opening paren,
+    /// so `move_to_space` never matches inside
+    /// `move_to_space_and_follow`.
+    static let spaceCalls = [
+        "focus_space",
+        "move_to_space",
+        "move_to_space_and_follow",
+    ]
 
     /// Rewrites every `<call>("from")` to `<call>("to")` within a
     /// single Lua binding body, matching the exact quoted form the

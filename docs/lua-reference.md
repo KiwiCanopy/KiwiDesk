@@ -75,14 +75,13 @@ KiwiDesk.swap("right")
 **Expects:** a space identifier (number or string).
 
 **Does:** switches to that virtual space, hiding the current
-space's tiled windows and revealing the target's. Aliased as
-`focus_virtual_space`.
+space's tiled windows and revealing the target's.
 
 **Example:**
 
 ```lua
 KiwiDesk.focus_space(2)
-KiwiDesk.focus_virtual_space("mail")   -- alias
+KiwiDesk.focus_space("mail")
 ```
 
 ### move_to_space
@@ -92,14 +91,13 @@ KiwiDesk.focus_virtual_space("mail")   -- alias
 **Does:** moves the focused window to that space **without
 following** it — you stay on the current space. The moved
 window becomes the target space's focused window, so the first
-time you switch there it is the window you land on. Aliased as
-`move_to_virtual_space`.
+time you switch there it is the window you land on.
 
 **Example:**
 
 ```lua
 KiwiDesk.move_to_space("mail")
-KiwiDesk.move_to_virtual_space(3)      -- alias
+KiwiDesk.move_to_space(3)
 ```
 
 ### move_to_space_and_follow
@@ -107,14 +105,13 @@ KiwiDesk.move_to_virtual_space(3)      -- alias
 **Expects:** a space identifier.
 
 **Does:** moves the focused window to that space **and**
-switches you there with it. Aliased as
-`move_to_virtual_space_and_follow`.
+switches you there with it.
 
 **Example:**
 
 ```lua
 KiwiDesk.move_to_space_and_follow("mail")
-KiwiDesk.move_to_virtual_space_and_follow(3)   -- alias
+KiwiDesk.move_to_space_and_follow(3)
 ```
 
 ## Layouts & Gaps
