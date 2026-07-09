@@ -424,28 +424,6 @@
   gap: 0.6rem;
 }
 
-/* ---- M3: modest above-the-fold proof (a single small layout
-   diagram, reusing the shared .tile fills) directly under the
-   hero pill. Deliberately tiny and calm — a glance at what
-   "tidy windows" looks like, not a second hero illustration —
-   and its height is small enough to never push the hero CTA
-   below the fold on a laptop screen. ---- */
-.hero-proof {
-  width: min(190px, 55vw);
-  aspect-ratio: 160 / 90;
-  margin: clamp(1.1rem, 3vw, 1.6rem) auto 0;
-  border-radius: var(--radius-sm);
-  background: var(--bg-0);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
-}
-.hero-proof svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
 /* ---- "What is this?" — copy beside a messy→tidy mini demo ---- */
 .what {
   display: grid;
@@ -757,28 +735,14 @@
                    quieter than .quote-card, no box, no byline
    ========================================================= */
 
-/* Opening note — sits directly under the hero, Simple mode only,
-   in the same slot .quote-band occupies for Nerd mode.
-   Deliberately understated: no box, no icon, just italic
-   first-person text continuing straight onto the page's base
-   background (matching .quote-band's own treatment) rather than a
-   separate banded section. */
-.opening-note {
-  margin: 0;
-  padding-block: clamp(2.5rem, 6vw, 4rem);
-  text-align: center;
-}
-.opening-note .wrap {
-  display: block;
-  margin-inline: auto;
-  max-width: 56ch;
-  font-size: clamp(1rem, 2.2vw, 1.15rem);
-  font-style: italic;
-  line-height: 1.5;
-  color: var(--text-dim);
-}
+/* NOTE: Simple mode's opening quote (quote_opening) now renders
+   INSIDE the hero as .hero__quote (see landing.css) rather than in
+   a post-hero band, so the old .opening-note rules were removed.
+   The Nerd-mode .quote-band still occupies this post-hero slot. */
 .quote-band {
-  padding-block: clamp(2.5rem, 6vw, 4rem);
+  /* Tightened so the hero + this tagline band clear a normal
+     laptop viewport in Nerd mode. */
+  padding-block: clamp(1.75rem, 4vw, 2.75rem);
 }
 .quote-band__mark {
   margin: 0 auto;

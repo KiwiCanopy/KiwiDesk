@@ -1,0 +1,12 @@
+---
+// KiwiDesk — German guide at /de/guide/.
+//
+// Renders the same shared <Guide> component as the English route,
+// only with the German strings and locale. Untranslated keys fall
+// back to English per-key (see Guide.astro), so this page is safe
+// before de.json's guide_* keys are filled in.
+import Guide from "../../../components/Guide.astro";
+import de from "../../../i18n/de.json";
+---
+
+<Guide t={de} lang="de" />

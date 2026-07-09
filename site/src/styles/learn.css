@@ -53,8 +53,8 @@
    jump bar (see .learn-toc--mobile).
    ========================================================= */
 .learn {
-  padding-block: clamp(2rem, 5vw, 3.5rem)
-    clamp(3rem, 8vw, 5rem);
+  padding-block: clamp(1.75rem, 4vw, 3rem)
+    clamp(2rem, 5vw, 3.5rem);
 }
 
 .learn__layout {
@@ -94,7 +94,7 @@
 
 /* Page header block */
 .learn__head {
-  margin-bottom: clamp(1.75rem, 4vw, 2.5rem);
+  margin-bottom: clamp(1.25rem, 3vw, 1.75rem);
 }
 
 .learn__eyebrow {
@@ -172,6 +172,8 @@
   color: var(--accent);
   border-left-color: var(--accent);
   font-weight: 600;
+  background: rgba(78, 159, 61, 0.1);
+  border-radius: 0 6px 6px 0;
 }
 
 /* Mobile: collapse the rail into a sticky "On this page"
@@ -201,6 +203,12 @@
 .learn-toc--mobile > summary::marker {
   display: none;
   content: "";
+}
+
+/* Tuck the focus ring inward so it doesn't clip against the sticky
+   bar's own bottom border when the full-width summary is focused. */
+.learn-toc--mobile > summary:focus-visible {
+  outline-offset: -2px;
 }
 
 .learn-toc__summary-inner {
@@ -270,8 +278,8 @@
 }
 
 .learn-section + .learn-section {
-  margin-top: clamp(2.75rem, 6vw, 4rem);
-  padding-top: clamp(2.25rem, 5vw, 3rem);
+  margin-top: clamp(2rem, 4.5vw, 2.75rem);
+  padding-top: clamp(1.5rem, 3.5vw, 2rem);
   border-top: 1px solid var(--border);
 }
 
@@ -335,6 +343,13 @@
   margin: 1.75rem 0 0.6rem;
 }
 
+/* A filled callout box has a hard bottom edge; a bare sub-heading
+   right after it needs more breathing room than two plain-text
+   elements to feel evenly spaced. */
+.learn-callout + .learn-sub {
+  margin-top: 0.5rem;
+}
+
 /* =========================================================
    Install: App Store button + code block
    ========================================================= */
@@ -350,28 +365,63 @@
    Apple's badge conventions rebuilt with an inline glyph so we
    ship no external asset. */
 .appstore-btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
   padding: 0.6rem 1.05rem 0.6rem 0.9rem;
   border-radius: var(--radius);
-  background: var(--appstore-bg, #000);
+  background-color: var(--appstore-bg, #000);
+  /* Top-highlight gradient gives the pill a raised, 3D face. */
+  background-image: var(
+    --appstore-fill,
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.08),
+      rgba(255, 255, 255, 0) 42%
+    )
+  );
   color: var(--appstore-ink, #fff);
   border: 1px solid var(--appstore-border, rgba(255, 255, 255, 0.16));
+  box-shadow: var(
+    --appstore-shadow,
+    0 1px 0 rgba(255, 255, 255, 0.12) inset,
+    0 8px 20px -8px rgba(0, 0, 0, 0.55)
+  );
   transition: transform 0.2s ease, box-shadow 0.25s ease,
-    border-color 0.2s ease;
+    border-color 0.2s ease, filter 0.2s ease;
 }
 
+/* Light mode: authentic App-Store blue with a gradient face and a
+   layered shadow so it reads as a raised, dimensional button
+   against the cream page (dark mode keeps the classic black badge,
+   with the same raised treatment). */
 :root[data-theme="light"] .appstore-btn {
-  --appstore-bg: #111;
+  --appstore-bg: #0a63e0;
+  --appstore-fill: linear-gradient(180deg, #2b7bf2, #0a56c4);
   --appstore-ink: #fff;
-  --appstore-border: rgba(0, 0, 0, 0.2);
+  --appstore-border: #0847a0;
+  --appstore-shadow: 0 1px 0 rgba(255, 255, 255, 0.35) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.18) inset,
+    0 10px 24px -8px rgba(10, 99, 224, 0.55),
+    0 2px 6px rgba(22, 52, 57, 0.18);
 }
 
 .appstore-btn:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow);
-  border-color: var(--accent);
+  box-shadow: var(--appstore-shadow-hover, var(--shadow));
+}
+
+:root[data-theme="light"] .appstore-btn:hover {
+  --appstore-shadow-hover: 0 1px 0 rgba(255, 255, 255, 0.4) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.18) inset,
+    0 16px 32px -8px rgba(10, 99, 224, 0.65),
+    0 4px 10px rgba(22, 52, 57, 0.2);
+}
+
+.appstore-btn:active {
+  transform: translateY(0);
+  filter: brightness(0.96);
 }
 
 .appstore-btn__glyph {
@@ -438,7 +488,7 @@
   display: flex;
   gap: 0.9rem;
   align-items: flex-start;
-  margin-top: 1.4rem;
+  margin-block: 1.4rem 2rem;
   padding: clamp(1.1rem, 3vw, 1.4rem);
   background: var(--bg-2);
   border: 1px solid var(--border);
@@ -581,6 +631,12 @@
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: clamp(1rem, 2.6vw, 1.25rem);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.learn-tour li:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-2px);
 }
 
 .learn-tour h3 {
@@ -724,6 +780,17 @@
 @media (min-width: 560px) {
   .learn-scenario__ba {
     grid-template-columns: 1fr 1fr;
+    position: relative;
+  }
+  /* A quiet vertical rule between Before and After so the two
+     columns don't blur together (their body text is the same
+     color/weight; only the After label is accented). */
+  .learn-scenario__side:first-child {
+    padding-right: 1rem;
+    border-right: 1px solid var(--border);
+  }
+  .learn-scenario__side:last-child {
+    padding-left: 1rem;
   }
 }
 
@@ -762,7 +829,6 @@
   background: var(--card-bg);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
 }
 
 .learn-close h2 {

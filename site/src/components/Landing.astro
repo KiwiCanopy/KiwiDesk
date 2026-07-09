@@ -219,43 +219,16 @@ const steps = [
           <span>KiwiDesk</span>
         </a>
         <div class="nav__links">
-          <!-- Learn: shown in BOTH modes — newcomers arriving in
-               Simple mode need the single-scroll /learn/ guide, and
+          <!-- Guide: shown in BOTH modes — newcomers arriving in
+               Simple mode need the single-scroll /guide/ page, and
                it's useful in Nerd mode too. -->
-          <a class="nav__link nav__link--learn" href="/learn/"
-            >{t.nav_learn}</a>
+          <a class="nav__link nav__link--guide" href="/guide/"
+            >{t.nav_guide}</a>
           <!-- Docs + GitHub live in the DOM always but are hidden in
                Simple mode (dev-only, via .dev-only). -->
           <a class="nav__link dev-only" href="/docs/">{t.nav_docs}</a>
           <a class="nav__link dev-only" href={repo} target="_blank"
             rel="noopener">{t.nav_github}</a>
-          <!-- Icon-only Ko-fi button: compact and recognizable
-               reads as LESS obtrusive than a worded link here, and
-               keeps it visually in the same "small tidy control"
-               family as the toggles beside it. aria-label carries
-               the meaning since there's no visible text. -->
-          <a class="nav__support" href={kofi} target="_blank"
-            rel="noopener" aria-label={t.nav_support_aria}>
-            <img class="kofi-icon" src={kofiIcon.src} alt=""
-              aria-hidden="true" width="20" height="16" />
-          </a>
-
-          <!-- Language switcher: a compact EN | DE segmented control,
-               styled as a sibling of the theme + mode toggles. Each
-               segment is a link to that locale's route AND records
-               the choice in `kiwidesk-site-lang` (wired up in the
-               script below), so the preference persists across
-               visits. The active locale is marked aria-current. -->
-          <div class="lang-switch" role="group"
-            aria-label={t.nav_lang_label}>
-            <a class="lang-switch__opt" data-lang="en" href="/"
-              lang="en"
-              aria-current={lang === "en" ? "true" : undefined}>EN</a>
-            <span class="lang-switch__sep" aria-hidden="true"></span>
-            <a class="lang-switch__opt" data-lang="de" href="/de/"
-              lang="de"
-              aria-current={lang === "de" ? "true" : undefined}>DE</a>
-          </div>
 
           <!-- Signature mode toggle: a two-segment control, a
                deliberate sibling of the EN | DE language switcher
@@ -308,6 +281,23 @@ const steps = [
             </span>
           </div>
 
+          <!-- Language switcher: a compact EN | DE segmented control,
+               styled as a sibling of the theme + mode toggles. Each
+               segment is a link to that locale's route AND records
+               the choice in `kiwidesk-site-lang` (wired up in the
+               script below), so the preference persists across
+               visits. The active locale is marked aria-current. -->
+          <div class="lang-switch" role="group"
+            aria-label={t.nav_lang_label}>
+            <a class="lang-switch__opt" data-lang="en" href="/"
+              lang="en"
+              aria-current={lang === "en" ? "true" : undefined}>EN</a>
+            <span class="lang-switch__sep" aria-hidden="true"></span>
+            <a class="lang-switch__opt" data-lang="de" href="/de/"
+              lang="de"
+              aria-current={lang === "de" ? "true" : undefined}>DE</a>
+          </div>
+
           <button class="theme-toggle" id="themeToggle" type="button"
             aria-label={t.nav_theme_label} aria-pressed="false">
             <span class="theme-toggle__track" aria-hidden="true">
@@ -333,6 +323,16 @@ const steps = [
               </span>
             </span>
           </button>
+
+          <!-- Ko-fi support button — last in the cluster, icon-only
+               and compact. Reads as LESS obtrusive than a worded
+               link: a small, recognizable control sitting quietly
+               among the toggles. aria-label carries the meaning. -->
+          <a class="nav__support" href={kofi} target="_blank"
+            rel="noopener" aria-label={t.nav_support_aria}>
+            <img class="kofi-icon" src={kofiIcon.src} alt=""
+              aria-hidden="true" width="20" height="16" />
+          </a>
         </div>
       </div>
     </nav>
@@ -369,16 +369,13 @@ const steps = [
             {t.hero_pill}
           </span>
 
-          <!-- M3: a modest visual proof of what KiwiDesk actually
-               does — the same shared layout diagram used lower on
-               the page (Nerd mode's "Layouts" grid and /learn/),
-               kept small and calm so it reads as a glance, not a
-               hero illustration, and never pushes the CTA below
-               the fold. Purely decorative (echoes hero_sub above
-               it), so no new copy/label — aria-hidden throughout. -->
-          <div class="hero-proof" aria-hidden="true">
-            <Fragment set:html={layoutDiagram("bsp")} />
-          </div>
+          <!-- Opening quote, folded into the hero (Simple mode): the
+               personal one-liner sits directly under the pill so the
+               hero and its quote fit one screen. Replaces the old
+               decorative layout diagram; this is the ONLY place
+               quote_opening renders now (the post-hero .opening-note
+               slot below was removed to avoid duplication). -->
+          <p class="hero__quote">{t.quote_opening}</p>
         </div>
 
         <!-- Nerd-mode hero copy -->
@@ -417,9 +414,6 @@ const steps = [
          them in one slot (rather than one above + one below the
          hero) means the two modes read consistently as you switch
          between them. -->
-    <p class="opening-note simple-only">
-      <span class="wrap">{t.quote_opening}</span>
-    </p>
     <section class="quote-band dev-only" aria-label="Our take">
       <div class="wrap">
         <blockquote class="quote-band__mark reveal">
@@ -436,7 +430,7 @@ const steps = [
             <span class="eyebrow">{t.what_eyebrow}</span>
             <h2>{t.what_title}</h2>
             <p>{t.what_body}</p>
-            <a class="link-arrow" href="/learn/#getting-started">
+            <a class="link-arrow" href="/guide/#getting-started">
               {t.what_learn}
               <svg width="15" height="15" viewBox="0 0 24 24"
                 fill="none" stroke="currentColor" stroke-width="2.4"
