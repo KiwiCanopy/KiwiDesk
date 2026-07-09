@@ -15,6 +15,7 @@
 //              the route (/ ↔ /de/); resolved anti-FOUC in <head>.
 import { Image } from "astro:assets";
 import logoMark from "../assets/brand/logo.svg";
+import kiwiMark from "../assets/brand/kiwi-solutions.svg";
 import kofiIcon from "../assets/brand/kofi_symbol.svg";
 import logoMarkDark from "../assets/brand/logo_dark.svg";
 import wordmark from "../assets/brand/logo_wordmark.svg";
@@ -84,18 +85,8 @@ function iconSvg(name: string): string {
 // small sizes across platforms. `size` is the rendered px box.
 function kiwiSvg(size: number): string {
   return (
-    `<svg class="mode-toggle__kiwi" width="${size}" ` +
-    `height="${size}" viewBox="0 0 15 15" aria-hidden="true">` +
-    `<circle cx="7.5" cy="7.5" r="7" class="kiwi__skin"/>` +
-    `<circle cx="7.5" cy="7.5" r="4.6" class="kiwi__flesh"/>` +
-    `<circle cx="7.5" cy="7.5" r="1.8" class="kiwi__core"/>` +
-    `<g class="kiwi__seeds">` +
-    `<circle cx="7.5" cy="3.6" r="0.55"/>` +
-    `<circle cx="10.4" cy="5.6" r="0.55"/>` +
-    `<circle cx="9.4" cy="9.1" r="0.55"/>` +
-    `<circle cx="5.6" cy="9.1" r="0.55"/>` +
-    `<circle cx="4.6" cy="5.6" r="0.55"/>` +
-    `</g></svg>`
+    `<img class="mode-toggle__kiwi" src="${kiwiMark.src}" ` +
+    `width="${size}" height="${size}" alt="" aria-hidden="true" />`
   );
 }
 
