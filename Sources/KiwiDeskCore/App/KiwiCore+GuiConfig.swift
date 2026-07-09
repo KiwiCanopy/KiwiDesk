@@ -101,7 +101,11 @@ extension KiwiCore {
         // `buildProfile` would recapture it and it would reappear
         // on reload (#77). Same reconcile as an explicit
         // `load_profile`; survivors are exactly the set ensured
-        // above, so the just-added extras are never pruned.
+        // above, so the just-added extras are never pruned. The
+        // sidecar half is closed by the caller — `persist`
+        // rewrites gui.json when the space list changed
+        // (`globalsChanged`) — so the cold-boot seed can't re-add
+        // the dropped space; this path needs no direct mirror.
         pruneSpaces(
             keeping: inList.union(extra),
             orderedBy: config.spaces,

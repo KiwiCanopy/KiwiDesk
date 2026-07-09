@@ -183,4 +183,79 @@ struct GuiSpaceReconcileTests {
         #expect(core.state.workspaces[SpaceID("1")] != nil)
         #expect(core.state.workspaces[SpaceID("2")] != nil)
     }
+
+    @Test("A load_profile prune mirrors the live set to gui.json")
+    func loadProfileMirrorsSidecar() throws {
+        let core = makeCore()
+        // GUI-managed: a sidecar exists (no foreign init.lua here).
+        try core.guiConfigStore.save(
+            config(spaces: [SpaceID("A"), SpaceID("B")])
+        )
+        core.state.workspaces.ensureSpace(SpaceID("A"))
+        core.state.workspaces.ensureSpace(SpaceID("B"))
+        try core.profiles.write(
+            Profile(
+                name: "solo",
+                monitorSets: [
+                    MonitorSet(
+                        monitors: ["m"],
+                        spaceMonitorMap: [:]
+                    )
+                ],
+                spaces: [SpaceID("A")],
+                spaceModes: [SpaceID("A"): .bsp],
+                settings: TilingSettings()
+            )
+        )
+        _ = core.execute("load_profile", args: [.string("solo")])
+        // "B" pruned from live and the sidecar now mirrors [A].
+        #expect(core.state.workspaces[SpaceID("B")] == nil)
+        let saved = try #require(core.guiConfigStore.load())
+        #expect(saved.spaces == [SpaceID("A")])
+    }
+
+    @Test("Deleting a space under one profile leaves others intact")
+    func deletionIsPerProfile() throws {
+        let core = makeCore()
+        let mon = [
+            MonitorSet(monitors: ["m"], spaceMonitorMap: [:])
+        ]
+        try core.profiles.write(
+            Profile(
+                name: "one",
+                monitorSets: mon,
+                spaces: [SpaceID("A"), SpaceID("B")],
+                spaceModes: [
+                    SpaceID("A"): .bsp,
+                    SpaceID("B"): .bsp,
+                ],
+                settings: TilingSettings()
+            )
+        )
+        let two = Profile(
+            name: "two",
+            monitorSets: mon,
+            spaces: [SpaceID("A"), SpaceID("C")],
+            spaceModes: [
+                SpaceID("A"): .bsp,
+                SpaceID("C"): .bsp,
+            ],
+            settings: TilingSettings()
+        )
+        try core.profiles.write(two)
+        // Activate "two" and delete the shared space "A" from it.
+        core.apply(
+            profile: two,
+            pruneStaleSpaces: true,
+            forceRetile: false
+        )
+        core.applyProfileScopedState(
+            from: config(spaces: [SpaceID("C")])
+        )
+        #expect(core.state.workspaces[SpaceID("A")] == nil)
+        // Profile "one" still declares "A" — each profile is its
+        // own file, so the delete never touches the other.
+        let reread = try core.profiles.read(name: "one")
+        #expect(reread.declaredSpaces.contains(SpaceID("A")))
+    }
 }
