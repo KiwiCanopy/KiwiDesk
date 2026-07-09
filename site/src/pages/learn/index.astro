@@ -312,8 +312,8 @@ const scenarios = [
 
     <!-- ============ Mobile TOC (sticky "On this page") ========= -->
     <details class="learn-toc learn-toc--mobile" id="tocMobile">
-      <div class="wrap">
-        <summary aria-label="On this page">
+      <summary aria-label="On this page">
+        <span class="wrap learn-toc__summary-inner">
           <svg class="learn-toc__chevron" viewBox="0 0 24 24"
             fill="none" stroke="currentColor" stroke-width="2.2"
             stroke-linecap="round" stroke-linejoin="round"
@@ -322,17 +322,17 @@ const scenarios = [
           </svg>
           On this page
           <span class="learn-toc__count">{toc.length} sections</span>
-        </summary>
-        <div class="learn-toc__panel">
-          <ul class="learn-toc__list">
-            {toc.map((item) => (
-              <li>
-                <a class="learn-toc__link" href={`#${item.id}`}
-                  data-toc={item.id}>{item.label}</a>
-              </li>
-            ))}
-          </ul>
-        </div>
+        </span>
+      </summary>
+      <div class="learn-toc__panel wrap">
+        <ul class="learn-toc__list">
+          {toc.map((item) => (
+            <li>
+              <a class="learn-toc__link" href={`#${item.id}`}
+                data-toc={item.id}>{item.label}</a>
+            </li>
+          ))}
+        </ul>
       </div>
     </details>
 

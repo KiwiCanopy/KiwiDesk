@@ -29,10 +29,7 @@
 
   "hero_dev_kicker": "A tiling window manager for macOS",
   "hero_dev_title": "Tiling window management for macOS.",
-  "hero_dev_sub_a": "flat arrays",
-  "hero_dev_sub_b": "fully Lua-configurable",
-  "hero_dev_sub_c": "six layouts",
-  "hero_dev_sub_d": "never disables SIP",
+  "hero_dev_sub": "KiwiDesk manages windows in <b>flat arrays</b>, not i3-style trees — <b>fully Lua-configurable</b>, with <b>six layouts</b> to switch between. And it <b>never disables SIP</b>.",
   "hero_dev_cta_docs": "Read the Docs",
   "hero_dev_cta_github": "View on GitHub",
 

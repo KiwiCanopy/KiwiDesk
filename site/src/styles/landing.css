@@ -148,10 +148,10 @@
   /* Text (deep green-teal ink) */
   --text: #163439;
   --text-dim: #3f5a54;
-  --text-faint: #6c827a;
+  --text-faint: #526860;     /* AA (4.5:1) on footer/tint #ece2c9 */
 
   /* Accents */
-  --accent: #3d7d30;         /* AA on cream */
+  --accent: #367029;         /* AA on cream + .tint bands */
   --accent-deep: var(--kiwi-flesh);
   --glow: rgba(78, 159, 61, 0.35);
 
@@ -324,6 +324,18 @@ body::before {
   padding-block: 0.85rem;
 }
 
+/* Shed the "KiwiDesk" brand wordmark text early — the two-label
+   Simple/Nerd toggle widened the nav cluster, and at 401–560px the
+   wordmark would otherwise collide with the Learn link. The logo
+   mark alone still links home. Done well above the phone range so
+   the cluster (Learn + lang + mode + theme) has room to shed
+   further below. */
+@media (max-width: 560px) {
+  .nav__brand span {
+    display: none;
+  }
+}
+
 /* Tight phones: shed the nav's least-critical text before the
    cluster can overflow. The Ko-fi button is already icon-only, so
    there's no text left to shed there. */
@@ -334,19 +346,11 @@ body::before {
   .nav__link {
     padding-inline: 0.55rem;
   }
-  /* The Learn link matters most to newcomers, so it stays. To buy
-     back the width it needs in the crowded Simple-mode cluster
-     (Learn + Ko-fi + lang + mode + theme), drop the icon-only
-     Ko-fi button here — it's still reachable from the footer and
-     the final CTA. */
-  .nav__support {
-    display: none;
-  }
   .nav__link--learn {
     padding-inline: 0.5rem;
     font-size: 0.9rem;
   }
-  /* Tighten the language segments so the nav cluster (Ko-fi icon +
+  /* Tighten the language segments so the nav cluster (Learn +
      lang + mode + theme) stays on one line on narrow phones. */
   .lang-switch__opt {
     min-width: 22px;
@@ -354,22 +358,15 @@ body::before {
   }
 }
 
-/* Very narrow phones: the mode toggle now shows BOTH labels (Simple
-   AND Developer — its whole affordance) so it's wider than the old
-   icon-collapsing pill. To keep the two labels AND fit the crowded
-   cluster (brand + Ko-fi + lang + mode + theme) without overflow at
-   ~320px, shed the "KiwiDesk" brand wordmark text — the logo mark
-   alone still links home — and pull in the wrap padding + cluster
-   gap. This buys back the width the two-label toggle needs. */
+/* Very narrow phones: pull in the wrap padding + cluster gap so the
+   two-label mode toggle keeps both labels without overflow at
+   ~320px. */
 @media (max-width: 400px) {
   .nav .wrap {
     padding-inline: 0.7rem;
   }
   .nav__inner {
     gap: 0.3rem;
-  }
-  .nav__brand span {
-    display: none;
   }
 }
 
@@ -452,6 +449,19 @@ body::before {
 .nav__support:hover {
   background: var(--kofi-hover-bg);
   border-color: var(--kofi-ink);
+}
+
+/* Drop the icon-only Ko-fi button across the whole phone range —
+   it's still reachable from the footer and the final CTA, and
+   dropping it buys the crowded cluster (Learn + lang + mode +
+   theme) the width it needs. Placed AFTER the base .nav__support
+   rule so the hide wins the cascade (the base display:inline-grid
+   would otherwise override an earlier media-query hide at equal
+   specificity). */
+@media (max-width: 460px) {
+  .nav__support {
+    display: none;
+  }
 }
 
 /* Official Ko-fi cup mark, kept in its brand colors. Sized up
@@ -1386,25 +1396,11 @@ section {
    — so it reliably wins the cascade at equal specificity
    regardless of source order elsewhere.
    ========================================================= */
-@media (max-width: 365px) {
-  .nav__inner {
-    gap: 0.25rem;
-  }
-  /* Tightest segment width that still fits "Developer" /
-     "Entwickler" legibly beside the lead kiwi. */
-  .mode-toggle {
-    --seg-w: 58px;
-  }
-  .mode-toggle__seg {
-    font-size: 0.68rem;
-    padding-left: 14px;
-  }
-  .mode-toggle__extra--2 {
-    left: 18px;
-  }
-  .mode-toggle__extra--3 {
-    left: 29px;
-  }
+/* Compact the theme + language controls across the whole phone
+   range so the nav cluster fits 320–460px. Coordinated with the
+   mode-toggle seg-w compaction (landing-modes.css, same ≤460
+   breakpoint). */
+@media (max-width: 460px) {
   .theme-toggle__track {
     width: 44px;
   }
@@ -1419,5 +1415,26 @@ section {
     height: 22px;
     padding-inline: 0.25rem;
     font-size: 0.72rem;
+  }
+}
+
+/* Very tight phones (≤365): pull the cluster gap in and trim the
+   Learn link + theme track to the minimum so 320px still clears. */
+@media (max-width: 365px) {
+  .nav__inner {
+    gap: 0.25rem;
+  }
+  .nav__links {
+    gap: 0.2rem;
+  }
+  .nav__link--learn {
+    padding-inline: 0.3rem;
+    font-size: 0.85rem;
+  }
+  .theme-toggle__track {
+    width: 40px;
+  }
+  :root[data-theme="dark"] .theme-toggle__thumb {
+    transform: translateX(12px);
   }
 }

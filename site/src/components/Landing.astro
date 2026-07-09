@@ -374,13 +374,7 @@ const steps = [
         <div class="hero__mode hero__mode--dev">
           <span class="hero__kicker">{t.hero_dev_kicker}</span>
           <h1>{t.hero_dev_title}</h1>
-          <p class="hero__sub">
-            KiwiDesk manages windows in
-            <b>{t.hero_dev_sub_a}</b>, not i3-style trees —
-            <b>{t.hero_dev_sub_b}</b>, with
-            <b>{t.hero_dev_sub_c}</b> to switch between. And it
-            <b>{t.hero_dev_sub_d}</b>.
-          </p>
+          <p class="hero__sub" set:html={t.hero_dev_sub}></p>
           <div class="hero__cta">
             <a class="btn btn--primary" href="/docs/">
               {t.hero_dev_cta_docs}

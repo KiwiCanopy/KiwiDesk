@@ -281,25 +281,58 @@
     display: none;
   }
 }
+/* Phone range (≤460): the mode labels are short (Simple/Nerd,
+   Normalo/Nerd), so the segments compact hard here to give the
+   whole nav cluster (brand mark + Learn + lang + mode + theme)
+   room to fit 320–460px without overflow. */
 @media (max-width: 460px) {
   .mode-toggle {
-    --seg-w: 64px;
+    --seg-w: 58px;
+  }
+  /* Shrink the lead kiwi and tuck it flush to the far left so the
+     gutter it needs shrinks with it — the segment text then clears
+     it with a small padding-left and still leaves room for the
+     widest label ("Normalo") without the kiwi smudging into it. */
+  .mode-toggle__kiwi-lead {
+    left: 2px;
+  }
+  .mode-toggle__kiwi-lead .mode-toggle__kiwi {
+    width: 11px;
+    height: 11px;
   }
   .mode-toggle__seg {
-    font-size: 0.71rem;
-    padding-left: 15px;
+    font-size: 0.64rem;
+    padding-left: 16px;
   }
-  .mode-toggle__extra--2 {
-    left: 12px;
-  }
-  .mode-toggle__extra--3 {
-    left: 16px;
+  /* M1: at these compact segment widths the extra kiwi dots landed
+     on top of the "Nerd"/label text (a smudge, not a flourish), so
+     drop them here — the lead kiwi still rides the slider between
+     the two segments. The springy fill-out flourish stays on the
+     roomier wide layout. */
+  .mode-toggle__extra {
+    display: none;
   }
   .nav__support-text {
     display: none;
   }
   .nav__support {
     padding: 0.5rem 0.6rem;
+  }
+}
+/* Very tight phones (≤365): shrink the mode segments to their
+   floor. The labels stay legible ("Normalo" is the widest) beside
+   the lead kiwi. Extra dots are already hidden at ≤460 (M1). */
+@media (max-width: 365px) {
+  .mode-toggle {
+    --seg-w: 54px;
+  }
+  .mode-toggle__kiwi-lead .mode-toggle__kiwi {
+    width: 10px;
+    height: 10px;
+  }
+  .mode-toggle__seg {
+    font-size: 0.6rem;
+    padding-left: 15px;
   }
 }
 /* Developer mode adds Docs + GitHub to the nav; alongside the

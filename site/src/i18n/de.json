@@ -29,10 +29,7 @@
 
   "hero_dev_kicker": "Ein Tiling-Fenstermanager für macOS",
   "hero_dev_title": "Tiling-Fensterverwaltung für macOS.",
-  "hero_dev_sub_a": "flache Arrays",
-  "hero_dev_sub_b": "voll in Lua konfigurierbar",
-  "hero_dev_sub_c": "sechs Layouts",
-  "hero_dev_sub_d": "deaktiviert nie SIP",
+  "hero_dev_sub": "KiwiDesk verwaltet Fenster in <b>flachen Arrays</b>, nicht in i3-artigen Bäumen — <b>voll in Lua konfigurierbar</b>, mit <b>sechs Layouts</b> zum Umschalten. Und es <b>deaktiviert nie SIP</b>.",
   "hero_dev_cta_docs": "Zur Doku",
   "hero_dev_cta_github": "Auf GitHub ansehen",
 

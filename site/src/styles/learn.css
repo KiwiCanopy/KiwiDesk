@@ -173,19 +173,25 @@
 }
 
 .learn-toc--mobile > summary {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
+  display: block;
   list-style: none;
   cursor: pointer;
-  padding: 0.85rem 0;
   color: var(--text);
   font-size: 0.95rem;
   font-weight: 600;
 }
 
-.learn-toc--mobile > summary::-webkit-details-marker {
+.learn-toc--mobile > summary::-webkit-details-marker,
+.learn-toc--mobile > summary::marker {
   display: none;
+  content: "";
+}
+
+.learn-toc__summary-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding-block: 0.85rem;
 }
 
 .learn-toc__chevron {
