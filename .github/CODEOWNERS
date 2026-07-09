@@ -1,0 +1,21 @@
+# Code owners — GitHub auto-requests a review from the owner when a
+# matching path changes, and (once branch protection turns on
+# "Require review from Code Owners") blocks merge until they approve.
+# Forward-looking: with a single maintainer today it is a no-op on
+# self-authored PRs, and becomes the review gate the moment outside
+# contributors open PRs (see the release-prep hardening lane on #71).
+#
+# Last matching pattern wins, so keep the most specific ones last.
+
+# Website + published docs — content a PR could quietly alter.
+/site/            @hajiboy95
+/docs/            @hajiboy95
+
+# Build + CI + this file itself — highest-trust surfaces.
+/.github/         @hajiboy95
+/scripts/         @hajiboy95
+
+# Dependencies / lockfile — the sneakiest supply-chain vector; a
+# lockfile bump is easy to rubber-stamp, so pin an explicit owner.
+/site/package.json        @hajiboy95
+/site/package-lock.json   @hajiboy95
