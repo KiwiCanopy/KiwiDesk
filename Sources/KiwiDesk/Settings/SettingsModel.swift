@@ -183,7 +183,10 @@ final class SettingsModel: ObservableObject {
             recovered: core.recoverKeybindings(),
             into: &updated
         )
-        KeybindingImportClassifier.classify(&updated)
+        KeybindingImportClassifier.classify(
+            &updated,
+            recoverResizeStep: true
+        )
         config = updated
     }
 

@@ -497,7 +497,14 @@ The color mark is reserved as the `.icns` master for when an
 
 - **Onboarding** is a separate follow-up pass (shares only
   the branding glyph). (#68 §5.9)
-- **Configurable resize step** (#58) and **2-axis resize**
-  (#56) have a reserved slot in Shortcuts ▸ Size & Float;
-  the design there is additive so their arrival won't
-  re-layout the section.
+- **Configurable resize step** (#58): the `resize.step` setting,
+  `set_resize_step` command, and import shape-match have landed;
+  the **in-GUI step control** (a slider in Shortcuts ▸ Size &
+  Float) and the **live-rewrite of already-bound rows** are
+  deferred to the redesign, whose reserved slot is additive so
+  their arrival won't re-layout the section. Until then the
+  setting is authoritative only at *authoring* time — it sizes
+  newly-authored Grow/Shrink bindings and is recovered from
+  bindings on import, but changing it does not rewrite existing
+  bound rows (their literal keeps firing). **2-axis resize**
+  (#56) extends the same slot to per-axis steps.

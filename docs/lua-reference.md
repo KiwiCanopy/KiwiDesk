@@ -196,6 +196,24 @@ further.
 KiwiDesk.set_min_window_size(300)
 ```
 
+### set_resize_step
+
+**Expects:** a number (points).
+
+**Does:** sets the global magnitude the **Grow** / **Shrink**
+keybindings nudge the layout by (default 50). The Shortcuts
+catalog authors those bindings as `resize("x", ±step)` from this
+value, and importing a config reads a recovered magnitude back
+into it. Does not move any window on its own — it only sizes the
+Grow/Shrink presets — so it takes effect the next time such a
+binding fires.
+
+**Example:**
+
+```lua
+KiwiDesk.set_resize_step(75)
+```
+
 ### Space Identity
 
 Spaces are identified by **strings or numbers** — `1` and `"1"`
