@@ -56,7 +56,7 @@ struct GeneralSection: View {
 
     private var languageBinding: Binding<String?> {
         Binding(
-            get: { model.config.language },
+            get: { localization.selection },
             set: { model.setLanguage($0) }
         )
     }

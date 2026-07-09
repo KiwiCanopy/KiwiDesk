@@ -173,21 +173,6 @@ extension KiwiCore {
         loadConfig()
     }
 
-    /// Persists only the language pick (issue #9): unlike
-    /// `saveGuiConfig`, this does NOT `loadConfig()` — a
-    /// language change touches no tiling/keybinding state, and
-    /// reloading the whole Lua VM for it would be a needless,
-    /// visible side effect (retile, keybinding re-registration)
-    /// every time the picker changes. Reads the sidecar fresh
-    /// (or the live seed, mirroring `loadGuiConfig`) so a
-    /// language-only save never clobbers unrelated fields an
-    /// open dashboard hasn't written yet.
-    public func saveLanguage(_ language: String?) throws {
-        var stored = guiConfigStore.load() ?? guiConfigSeed()
-        stored.language = language
-        try guiConfigStore.save(stored)
-    }
-
     /// Recovers the live keybindings as editable modes (#4): each
     /// bound combo plus its action text, sliced from the source
     /// file via `debug.getinfo`. Rows come back as `.custom`; the
