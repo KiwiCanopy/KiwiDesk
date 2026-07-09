@@ -1,11 +1,14 @@
 /* =========================================================
    KiwiDesk — landing page styles
-   Dark, premium, organic. Deep green-black backgrounds,
-   kiwi-green accents, soft radial glows, warm botanical.
+   Fully themeable: coherent LIGHT (cream, botanical, airy) and
+   DARK (deep green-black, kiwi glows) themes, driven by CSS
+   custom properties keyed on :root[data-theme]. The key matches
+   Starlight's docs (`data-theme` on <html>) so a toggle carries
+   across the whole site.
    ========================================================= */
 
 :root {
-  /* Brand palette */
+  /* ---- Brand palette (theme-invariant) ---- */
   --kiwi-flesh: #4e9f3d;
   --kiwi-bright: #6dbf5b;
   --kiwi-shell: #8b5e3c;
@@ -13,7 +16,37 @@
   --kiwi-seed: #12240d;
   --kiwi-ink: #1c1a17;
 
-  /* Derived surfaces (deep green-black family) */
+  /* ---- Spacing scale (8pt-ish, fluid at the edges) ---- */
+  --sp-1: 0.5rem;
+  --sp-2: 0.75rem;
+  --sp-3: 1rem;
+  --sp-4: 1.5rem;
+  --sp-5: 2rem;
+  --sp-6: 3rem;
+  --sp-7: 4.5rem;
+  --sp-8: 7rem;
+
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 24px;
+
+  --maxw: 1120px;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+    "Segoe UI", system-ui, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo,
+    Consolas, "Liberation Mono", monospace;
+}
+
+/* =========================================================
+   DARK theme — deep green-black surface ladder, off-white
+   text, kiwi + brighter-green accents, soft green glows.
+   The stronger of the two; also the default fallback.
+   ========================================================= */
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Surfaces (deep green-black family) */
   --bg-0: #0c1608;   /* deepest */
   --bg-1: #101d0b;   /* base */
   --bg-2: #142310;   /* tinted band */
@@ -31,36 +64,158 @@
   --accent-deep: var(--kiwi-flesh);
   --glow: rgba(78, 159, 61, 0.45);
 
-  /* Light-hero band (matches the light wordmark's own teal) */
-  --hero-bg-top: #fbf9f2;
-  --hero-bg-bot: #f2ebd9;
-  --hero-ink: #163439;
-  --hero-ink-dim: #3f5a54;
-  --hero-shell: #6b4a30;
+  /* Hero band — deep green-black, glows read strongly */
+  --hero-bg-top: #12210c;
+  --hero-bg-bot: var(--bg-1);
+  --hero-ink: var(--text);
+  --hero-ink-dim: var(--text-dim);
+  --hero-shell: #c7a06e;
+  --hero-glow: rgba(78, 159, 61, 0.22);
+  --hero-mark-shadow: 0 12px 34px rgba(78, 159, 61, 0.28);
 
-  /* Spacing scale (8pt-ish, fluid at the edges) */
-  --sp-1: 0.5rem;
-  --sp-2: 0.75rem;
-  --sp-3: 1rem;
-  --sp-4: 1.5rem;
-  --sp-5: 2rem;
-  --sp-6: 3rem;
-  --sp-7: 4.5rem;
-  --sp-8: 7rem;
+  /* Page ambient wash (body::before) */
+  --wash-a: rgba(78, 159, 61, 0.14);
+  --wash-b: rgba(139, 94, 60, 0.08);
 
-  --radius-sm: 10px;
-  --radius: 16px;
-  --radius-lg: 24px;
+  /* Nav resting text over the hero band */
+  --nav-ink: var(--text);
+  --nav-ink-dim: var(--text-dim);
+  --nav-hover-bg: rgba(109, 191, 91, 0.1);
+  --nav-scrolled-bg: rgba(12, 22, 8, 0.72);
+
+  /* Card & surface fills */
+  --card-bg: linear-gradient(
+    180deg,
+    var(--bg-3),
+    rgba(16, 29, 11, 0.6)
+  );
+  --card-glow: rgba(109, 191, 91, 0.12);
+
+  /* Ghost button on the hero band */
+  --ghost-bg: rgba(109, 191, 91, 0.06);
+  --ghost-ink: var(--text);
+  --ghost-border: var(--border-strong);
+  --ghost-hover-bg: rgba(109, 191, 91, 0.12);
+  --ghost-hover-border: var(--accent);
+
+  /* Pill on the hero band */
+  --pill-ink: var(--hero-shell);
+  --pill-bg: rgba(199, 160, 110, 0.12);
+  --pill-border: rgba(199, 160, 110, 0.32);
+  --pill-dot: var(--kiwi-bright);
+  --pill-dot-glow: rgba(109, 191, 91, 0.9);
+
+  /* Terminal / code block */
+  --code-bg: var(--bg-0);
+  --code-bar-bg: rgba(0, 0, 0, 0.25);
+  --code-dot-idle: #3a4a30;
+
+  /* Diagram tiles */
+  --tile-fill: rgba(109, 191, 91, 0.18);
+  --tile-fill-accent: rgba(109, 191, 91, 0.4);
+  --tile-fill-ghost: rgba(109, 191, 91, 0.08);
+  --tile-stroke: var(--kiwi-bright);
+  --tile-stroke-ghost: rgba(109, 191, 91, 0.4);
 
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
   --shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
   --shadow-glow: 0 30px 90px -20px var(--glow);
 
-  --maxw: 1120px;
-  --font: -apple-system, BlinkMacSystemFont, "SF Pro Display",
-    "Segoe UI", system-ui, sans-serif;
-  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo,
-    Consolas, "Liberation Mono", monospace;
+  /* Ko-fi support button (warm, brand-tinted) */
+  --kofi-bg: rgba(199, 160, 110, 0.14);
+  --kofi-ink: #e8c99a;
+  --kofi-border: rgba(199, 160, 110, 0.36);
+  --kofi-hover-bg: rgba(199, 160, 110, 0.24);
+}
+
+/* =========================================================
+   LIGHT theme — cream / off-white surfaces, deep green-teal
+   ink, kiwi-green accents. Warm, airy, botanical.
+   ========================================================= */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  /* Surfaces (cream family, subtle alternating tints) */
+  --bg-0: #ece2c9;   /* deepest (code / diagrams) */
+  --bg-1: #faf6ec;   /* base */
+  --bg-2: #f2ebd9;   /* tinted band */
+  --bg-3: #fffdf7;   /* card / raised */
+  --border: rgba(22, 52, 57, 0.12);
+  --border-strong: rgba(22, 52, 57, 0.22);
+
+  /* Text (deep green-teal ink) */
+  --text: #163439;
+  --text-dim: #3f5a54;
+  --text-faint: #6c827a;
+
+  /* Accents */
+  --accent: #3d7d30;         /* AA on cream */
+  --accent-deep: var(--kiwi-flesh);
+  --glow: rgba(78, 159, 61, 0.35);
+
+  /* Hero band — cream, matches the light wordmark's teal */
+  --hero-bg-top: #fbf9f2;
+  --hero-bg-bot: #f2ebd9;
+  --hero-ink: #163439;
+  --hero-ink-dim: #3f5a54;
+  --hero-shell: #6b4a30;
+  --hero-glow: rgba(78, 159, 61, 0.18);
+  --hero-mark-shadow: 0 10px 28px rgba(22, 52, 57, 0.16);
+
+  /* Page ambient wash (body::before) */
+  --wash-a: rgba(78, 159, 61, 0.08);
+  --wash-b: rgba(139, 94, 60, 0.05);
+
+  /* Nav resting text over the hero band */
+  --nav-ink: var(--hero-ink);
+  --nav-ink-dim: var(--hero-ink-dim);
+  --nav-hover-bg: rgba(78, 159, 61, 0.12);
+  --nav-scrolled-bg: rgba(250, 246, 236, 0.82);
+
+  /* Card & surface fills */
+  --card-bg: linear-gradient(
+    180deg,
+    var(--bg-3),
+    #fbf7ec
+  );
+  --card-glow: rgba(78, 159, 61, 0.1);
+
+  /* Ghost button on the hero band */
+  --ghost-bg: rgba(22, 52, 57, 0.04);
+  --ghost-ink: var(--hero-ink);
+  --ghost-border: rgba(22, 52, 57, 0.28);
+  --ghost-hover-bg: rgba(22, 52, 57, 0.08);
+  --ghost-hover-border: var(--hero-ink);
+
+  /* Pill on the hero band */
+  --pill-ink: var(--hero-shell);
+  --pill-bg: rgba(139, 94, 60, 0.1);
+  --pill-border: rgba(139, 94, 60, 0.3);
+  --pill-dot: var(--kiwi-shell);
+  --pill-dot-glow: rgba(139, 94, 60, 0.55);
+
+  /* Terminal / code block (kept dark for legibility + contrast
+     against the cream page — a familiar terminal look) */
+  --code-bg: #14231a;
+  --code-bar-bg: rgba(0, 0, 0, 0.28);
+  --code-dot-idle: #3a4a30;
+
+  /* Diagram tiles */
+  --tile-fill: rgba(61, 125, 48, 0.16);
+  --tile-fill-accent: rgba(61, 125, 48, 0.34);
+  --tile-fill-ghost: rgba(61, 125, 48, 0.08);
+  --tile-stroke: var(--accent-deep);
+  --tile-stroke-ghost: rgba(61, 125, 48, 0.4);
+
+  --shadow-sm: 0 2px 10px rgba(22, 52, 57, 0.1);
+  --shadow: 0 14px 40px rgba(22, 52, 57, 0.14);
+  --shadow-glow: 0 26px 80px -24px var(--glow);
+
+  /* Ko-fi support button (warm, brand-tinted) */
+  --kofi-bg: rgba(139, 94, 60, 0.1);
+  --kofi-ink: #7a4f2e;
+  --kofi-border: rgba(139, 94, 60, 0.32);
+  --kofi-hover-bg: rgba(139, 94, 60, 0.18);
 }
 
 * {
@@ -102,12 +257,12 @@ body::before {
   background:
     radial-gradient(
       1200px 600px at 50% -8%,
-      rgba(78, 159, 61, 0.14),
+      var(--wash-a),
       transparent 60%
     ),
     radial-gradient(
       900px 700px at 90% 8%,
-      rgba(139, 94, 60, 0.08),
+      var(--wash-b),
       transparent 55%
     );
 }
@@ -153,7 +308,7 @@ body::before {
 }
 
 .nav.scrolled {
-  background: rgba(12, 22, 8, 0.72);
+  background: var(--nav-scrolled-bg);
   backdrop-filter: saturate(160%) blur(14px);
   -webkit-backdrop-filter: saturate(160%) blur(14px);
   border-bottom: 1px solid var(--border);
@@ -163,45 +318,62 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--sp-4);
+  gap: var(--sp-3);
   padding-block: 0.85rem;
 }
 
-/* At scroll-top the nav sits over the light hero: dark text.
-   Once .scrolled (over the dark body) it flips to light text. */
+/* Tight phones: shed the nav's least-critical text before the
+   cluster can overflow (the icon still carries the Ko-fi link). */
+@media (max-width: 460px) {
+  .nav__inner {
+    gap: 0.4rem;
+  }
+  .nav__link {
+    padding-inline: 0.55rem;
+  }
+  .nav__support {
+    font-size: 0;
+    gap: 0;
+    padding: 0.5rem 0.6rem;
+  }
+  .nav__support span {
+    font-size: 1rem;
+  }
+}
+
+/* The nav resting color adapts per theme via --nav-ink*, since
+   the hero band is light in the light theme and dark in dark. */
 .nav__brand {
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
   font-weight: 650;
   letter-spacing: -0.01em;
-  color: var(--hero-ink);
+  color: var(--nav-ink);
   font-size: 1.05rem;
   transition: color 0.3s ease;
 }
 
-.nav.scrolled .nav__brand {
-  color: var(--text);
-}
-
-.nav__brand svg {
+.nav__mark {
   display: block;
+  width: 28px;
+  height: 28px;
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.18));
   transition: filter 0.3s ease;
 }
 
-.nav.scrolled .nav__brand svg {
+.nav.scrolled .nav__mark {
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
 }
 
 .nav__links {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.3rem;
 }
 
 .nav__link {
-  color: var(--hero-ink-dim);
+  color: var(--nav-ink-dim);
   padding: 0.5rem 0.85rem;
   border-radius: var(--radius-sm);
   font-size: 0.95rem;
@@ -209,18 +381,66 @@ body::before {
   transition: color 0.2s ease, background 0.2s ease;
 }
 
-.nav.scrolled .nav__link {
-  color: var(--text-dim);
-}
-
 .nav__link:hover {
-  color: var(--hero-ink);
-  background: rgba(78, 159, 61, 0.12);
+  color: var(--nav-ink);
+  background: var(--nav-hover-bg);
 }
 
-.nav.scrolled .nav__link:hover {
-  color: var(--text);
-  background: rgba(109, 191, 91, 0.1);
+/* Compact Ko-fi support link: visible but not loud. */
+.nav__support {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--kofi-ink);
+  background: var(--kofi-bg);
+  border: 1px solid var(--kofi-border);
+  font-weight: 600;
+}
+
+.nav__support:hover {
+  color: var(--kofi-ink);
+  background: var(--kofi-hover-bg);
+}
+
+/* Theme toggle button — sun in dark theme, moon in light. */
+.theme-toggle {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  margin-left: 0.15rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--nav-hover-bg);
+  color: var(--nav-ink);
+  cursor: pointer;
+  transition: color 0.2s ease, background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent);
+  background: var(--nav-hover-bg);
+  color: var(--accent);
+}
+
+.theme-toggle svg {
+  display: block;
+}
+
+/* Show the icon of the theme you'd switch TO, so the affordance
+   reads: sun-in-dark (go light), moon-in-light (go dark). */
+.theme-toggle__sun {
+  display: none;
+}
+.theme-toggle__moon {
+  display: block;
+}
+:root[data-theme="dark"] .theme-toggle__sun {
+  display: block;
+}
+:root[data-theme="dark"] .theme-toggle__moon {
+  display: none;
 }
 
 /* =========================================================
@@ -265,58 +485,43 @@ body::before {
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
-.btn--ghost {
-  background: rgba(109, 191, 91, 0.06);
-  color: var(--text);
-  border-color: var(--border-strong);
-}
-
-.btn--ghost:hover {
-  background: rgba(109, 191, 91, 0.12);
-  border-color: var(--accent);
-}
-
-/* Ghost button tuned for the light hero: dark outline/text that
-   reads on cream, instead of the dark-surface ghost above. */
+/* Ghost buttons adapt per theme via --ghost-* — in the light
+   theme they read as a teal-ink outline on cream; in dark, a
+   soft green outline on the green-black band. */
+.btn--ghost,
 .btn--ghost-light {
-  background: rgba(22, 52, 57, 0.04);
-  color: var(--hero-ink);
-  border-color: rgba(22, 52, 57, 0.28);
+  background: var(--ghost-bg);
+  color: var(--ghost-ink);
+  border-color: var(--ghost-border);
 }
 
+.btn--ghost:hover,
 .btn--ghost-light:hover {
-  background: rgba(22, 52, 57, 0.08);
-  border-color: var(--hero-ink);
+  background: var(--ghost-hover-bg);
+  border-color: var(--ghost-hover-border);
 }
 
-.pill {
+.pill,
+.pill--light {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   font-size: 0.82rem;
   font-weight: 550;
-  color: var(--text-dim);
-  background: rgba(139, 94, 60, 0.14);
-  border: 1px solid rgba(139, 94, 60, 0.35);
+  color: var(--pill-ink);
+  background: var(--pill-bg);
+  border: 1px solid var(--pill-border);
   padding: 0.4rem 0.9rem;
   border-radius: 999px;
   letter-spacing: 0.01em;
-}
-
-/* Pill tuned for the light hero: muted brown on a translucent
-   cream/shell tint instead of the dark-surface pill above. */
-.pill--light {
-  color: var(--hero-shell);
-  background: rgba(139, 94, 60, 0.1);
-  border-color: rgba(139, 94, 60, 0.3);
 }
 
 .pill__dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--kiwi-shell);
-  box-shadow: 0 0 10px rgba(139, 94, 60, 0.9);
+  background: var(--pill-dot);
+  box-shadow: 0 0 10px var(--pill-dot-glow);
 }
 
 /* =========================================================
@@ -387,8 +592,7 @@ section {
   aspect-ratio: 1;
   background: radial-gradient(
     circle,
-    rgba(78, 159, 61, 0.22),
-    rgba(78, 159, 61, 0.06) 40%,
+    var(--hero-glow),
     transparent 68%
   );
   filter: blur(10px);
@@ -418,7 +622,19 @@ section {
   height: clamp(160px, 26vw, 230px);
   width: auto;
   margin: 0 auto clamp(1.5rem, 4vw, 2.25rem);
-  filter: drop-shadow(0 10px 28px rgba(22, 52, 57, 0.16));
+  filter: drop-shadow(var(--hero-mark-shadow));
+}
+
+/* Swap the wordmark by theme, no layout shift: the hidden one is
+   removed from flow, both share the same clamp()-sized box. */
+.hero__mark--dark {
+  display: none;
+}
+:root[data-theme="dark"] .hero__mark--light {
+  display: none;
+}
+:root[data-theme="dark"] .hero__mark--dark {
+  display: block;
 }
 
 .hero h1 {
@@ -539,11 +755,7 @@ section {
 }
 
 .card {
-  background: linear-gradient(
-    180deg,
-    var(--bg-3),
-    rgba(16, 29, 11, 0.6)
-  );
+  background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: clamp(1.4rem, 3vw, 1.85rem);
@@ -559,7 +771,7 @@ section {
   inset: 0;
   background: radial-gradient(
     340px 180px at var(--mx, 50%) 0%,
-    rgba(109, 191, 91, 0.12),
+    var(--card-glow),
     transparent 70%
   );
   opacity: 0;
@@ -658,20 +870,20 @@ section {
   font-size: 0.92rem;
 }
 
-/* diagram tile fills */
+/* diagram tile fills (theme-aware) */
 .tile {
-  fill: rgba(109, 191, 91, 0.18);
-  stroke: var(--kiwi-bright);
+  fill: var(--tile-fill);
+  stroke: var(--tile-stroke);
   stroke-width: 1.4;
 }
 .tile--accent {
-  fill: rgba(109, 191, 91, 0.4);
-  stroke: var(--kiwi-bright);
+  fill: var(--tile-fill-accent);
+  stroke: var(--tile-stroke);
   stroke-width: 1.6;
 }
 .tile--ghost {
-  fill: rgba(109, 191, 91, 0.08);
-  stroke: rgba(109, 191, 91, 0.4);
+  fill: var(--tile-fill-ghost);
+  stroke: var(--tile-stroke-ghost);
   stroke-width: 1.2;
   stroke-dasharray: 3 3;
 }
@@ -714,8 +926,11 @@ section {
   margin-top: 1.25rem;
 }
 
+/* The terminal block stays dark in both themes — a familiar
+   terminal look, and it self-contains its own light-on-dark
+   text tokens (below) so it needs no per-theme text vars. */
 .code {
-  background: var(--bg-0);
+  background: var(--code-bg);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius);
   overflow: hidden;
@@ -727,15 +942,15 @@ section {
   align-items: center;
   gap: 0.5rem;
   padding: 0.7rem 1rem;
-  background: rgba(0, 0, 0, 0.25);
-  border-bottom: 1px solid var(--border);
+  background: var(--code-bar-bg);
+  border-bottom: 1px solid rgba(109, 191, 91, 0.14);
 }
 
 .code__dot {
   width: 11px;
   height: 11px;
   border-radius: 50%;
-  background: #3a4a30;
+  background: var(--code-dot-idle);
 }
 .code__dot:nth-child(1) {
   background: #8b5e3c;
@@ -750,7 +965,7 @@ section {
 .code__title {
   margin-left: auto;
   font-size: 0.78rem;
-  color: var(--text-faint);
+  color: #7f9070;
   font-family: var(--mono);
 }
 
@@ -761,15 +976,17 @@ section {
   font-family: var(--mono);
   font-size: 0.9rem;
   line-height: 1.85;
-  color: var(--text);
+  /* Pinned light-on-dark: the terminal is dark in both themes,
+     so its inner text must not follow the page text color. */
+  color: #eef3e6;
 }
 
 .code .prompt {
-  color: var(--accent);
+  color: var(--kiwi-bright);
   user-select: none;
 }
 .code .cmt {
-  color: var(--text-faint);
+  color: #7f9070;
 }
 
 /* =========================================================
@@ -786,20 +1003,50 @@ section {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 1.1rem;
+  gap: 0.25rem;
 }
 
-.footer__brand img {
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
-  width: min(280px, 70vw);
+/* Transparent logo laid flat — no card treatment, it fades into
+   the footer background. */
+.footer__logo {
+  width: min(104px, 40vw);
   height: auto;
+  display: block;
+}
+
+.footer__name {
+  font-weight: 650;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  margin: 0.5rem 0 0;
 }
 
 .footer__tag {
-  font-weight: 600;
-  color: var(--text);
+  color: var(--text-dim);
   margin: 0;
+}
+
+/* Footer Ko-fi button — warm brand-tinted, reads in both themes. */
+.footer__kofi {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 1.1rem 0 0.4rem;
+  padding: 0.6rem 1.15rem;
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--kofi-ink);
+  background: var(--kofi-bg);
+  border: 1px solid var(--kofi-border);
+  transition: background 0.2s ease, border-color 0.2s ease,
+    transform 0.18s ease;
+}
+
+.footer__kofi:hover {
+  background: var(--kofi-hover-bg);
+  border-color: var(--kofi-ink);
+  transform: translateY(-2px);
 }
 
 .footer__links {
@@ -807,6 +1054,7 @@ section {
   flex-wrap: wrap;
   gap: 0.35rem 1.5rem;
   justify-content: center;
+  margin-top: 0.6rem;
 }
 
 .footer__links a {
@@ -850,7 +1098,8 @@ section {
   }
   .btn:hover,
   .card:hover,
-  .layout-card:hover {
+  .layout-card:hover,
+  .footer__kofi:hover {
     transform: none;
   }
   * {
