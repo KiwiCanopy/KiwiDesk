@@ -12,6 +12,13 @@ import Testing
 /// output (never a hand-enumerated list), so a new seeded row
 /// that the catalog does not back fails here automatically
 /// (see .claude/rules/parity-tests.md).
+///
+/// Scope: the net is directional — seed ⊆ catalog. It pins that
+/// every *seeded* row round-trips, not that the two files can
+/// never drift on a catalog-only shape (e.g. a
+/// `move_to_space_and_follow` label the seed never emits). That
+/// is the right guarantee for #91 — seeded rows must not demote
+/// — but do not read it as "the label lists can never diverge."
 @Suite("Default seed ↔ catalog parity (#91)")
 @MainActor
 struct DefaultSeedCatalogParityTests {
