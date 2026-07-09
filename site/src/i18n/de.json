@@ -80,6 +80,8 @@
   "guide_faq_4_q": "Verlangsamt es meinen Mac oder saugt den Akku leer?",
   "guide_faq_5_a": "Beende KiwiDesk einfach über das Symbol in der Menüleiste und lösche die App wie gewohnt. Wenn du sie mit Homebrew installiert hast, führe <code>brew uninstall --cask kiwidesk</code> aus. Sobald die App geschlossen ist, verhalten sich deine Fenster sofort wieder wie normale macOS-Fenster — du kannst sie frei ziehen, in der Größe anpassen und überlappen lassen. Nichts bleibt hängen, und an deinen Einstellungen wurde nichts verändert.",
   "guide_faq_5_q": "Wie deinstalliere ich es?",
+  "guide_faq_eyebrow": "Gute Fragen",
+  "guide_faq_title": "FAQ",
   "guide_fav_callout_p": "Nichts hier ist endgültig. Du kannst deine Layouts so oft wechseln, wie du möchtest — es gibt keine falsche Entscheidung, und du kannst jederzeit zurück. KiwiDesk bewegt und skaliert nur deine Fenster; es rührt niemals deine Dateien oder Apps an.",
   "guide_fav_callout_title": "Du darfst deine Meinung jederzeit ändern",
   "guide_fav_eyebrow": "Mach es zu deinem",

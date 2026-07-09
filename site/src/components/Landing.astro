@@ -24,13 +24,17 @@ import wordmarkDark from "../assets/brand/logo_wordmark_dark.svg";
 import ogImage from "../assets/brand/logo_wordmark.png";
 import kiwiSolutions from "../assets/brand/kiwi-solutions.png";
 import { layoutDiagram } from "../lib/layoutDiagram";
+import en from "../i18n/en.json";
 import "../styles/landing.css";
 
 interface Props {
   t: Record<string, string>;
   lang: "en" | "de";
 }
-const { t, lang } = Astro.props;
+const { t: locale, lang } = Astro.props;
+// Per-key English fallback: an untranslated locale key degrades to
+// English rather than rendering blank (mirrors Guide.astro).
+const t = { ...en, ...locale } as Record<string, string>;
 
 // Home path for the active locale; the language switcher pairs it
 // with its counterpart. English lives at /, German at /de/.

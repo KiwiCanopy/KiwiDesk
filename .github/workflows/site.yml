@@ -46,3 +46,10 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      # Guard the site locale manifests the same way the app locales
+      # are guarded: hard-fail on a malformed <locale>.json and warn on
+      # orphan keys. The script self-resolves the repo root, so the
+      # site working-directory is fine (../scripts reaches it).
+      - name: Check locale manifests
+        run: python3 ../scripts/extract-keys --site --check

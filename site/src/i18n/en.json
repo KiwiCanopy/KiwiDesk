@@ -80,6 +80,8 @@
   "guide_faq_4_q": "Will it slow down my Mac or drain the battery?",
   "guide_faq_5_a": "Quit KiwiDesk from its menu-bar icon and remove the app like any other. If you installed it with Homebrew, run <code>brew uninstall --cask kiwidesk</code>. The moment it's off, your windows behave exactly like normal macOS windows again — free to drag, resize, and overlap. Nothing sticks, and nothing of yours was ever changed.",
   "guide_faq_5_q": "How do I uninstall it?",
+  "guide_faq_eyebrow": "Good questions",
+  "guide_faq_title": "FAQ",
   "guide_fav_callout_p": "Nothing here is permanent. Switch layouts as often as you like — there's no wrong choice, and you can always go back. KiwiDesk only ever moves and resizes windows; it never touches your files or your apps.",
   "guide_fav_callout_title": "It's okay to change your mind",
   "guide_fav_eyebrow": "Make it yours",
