@@ -617,10 +617,14 @@ be **dragged** along the bar to reorder the windows.
 
 ### app_bar.set_position
 
-**Expects:** `"top"` or `"bottom"` (default `"top"`).
+**Expects:** `"top"`, `"bottom"`, `"left"`, or `"right"`
+(default `"top"`).
 
-**Does:** sets the default position for all layout bars. Per-layout
-overrides can change it.
+**Does:** sets the default edge for all layout bars. The value is
+clamped to the layout's orientation — a horizontal layout keeps
+top/bottom, a vertical one left/right — so a position that doesn't
+fit is logged and falls back to that orientation's default edge.
+Per-layout overrides can change it.
 
 **Example:**
 
@@ -1240,7 +1244,7 @@ space's tiling layout.
 KiwiDesk.make_tiled()
 ```
 
-### Floating Toggle Recipe
+### Example: toggle floating
 
 There is no built-in toggle; use `get_state()` to check the focused
 window's current state:
@@ -1842,7 +1846,21 @@ stripped, grouped by namespace — `set_gap_override` becomes
   "fallback_space": "1",      // rehome target on switch
   "saved_at": "2026-07-04T12:00:00Z",
   "settings": {
-    "drag": { "show_drop_zone": true, "show_ghost": true },
+    "drag": {
+      "corner_radius": 16,
+      "ghost": {
+        "enabled": true, "border": true,
+        "border_color": "#8B5E3C", "border_thickness": 5,
+        "border_alignment": "inside",
+        "fill": true, "fill_color": "#4E9F3D40"
+      },
+      "drop_zone": {
+        "enabled": true, "border": true,
+        "border_color": "#4E9F3D", "border_thickness": 5,
+        "border_alignment": "inside",
+        "fill": true, "fill_color": "#8B5E3C40"
+      }
+    },
     "gap": {
       "global": {
         "inner": { "horizontal": 20, "vertical": 20 },

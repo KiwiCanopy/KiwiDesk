@@ -38,13 +38,17 @@ a `data` object with fields matching the Lua callback arguments
 
 ## Hammerspoon
 
-Drive KiwiDesk from Hammerspoon (or vice versa) through the CLI:
+Drive KiwiDesk from Hammerspoon (or vice versa) through the CLI.
+Point `KIWIDESK` at your build (it is not on `PATH` before 1.0 —
+see the [recipes intro](index.md)); swap it for plain `kiwidesk`
+once the Homebrew cask symlinks it:
 
 ```lua
+local KIWIDESK = os.getenv("HOME")
+    .. "/path/to/KiwiDesk/.build/release/KiwiDesk"
+
 hs.hotkey.bind({"cmd", "alt"}, "m", function()
-    os.execute(
-        "/opt/homebrew/bin/KiwiDesk set_mode monocle"
-    )
+    os.execute("'" .. KIWIDESK .. "' set_mode monocle")
 end)
 ```
 
@@ -52,9 +56,7 @@ Or set up space switching via KiwiDesk:
 
 ```lua
 hs.hotkey.bind({"cmd", "alt"}, "1", function()
-    os.execute(
-        "/opt/homebrew/bin/KiwiDesk focus_virtual_space 1"
-    )
+    os.execute("'" .. KIWIDESK .. "' focus_virtual_space 1")
 end)
 ```
 

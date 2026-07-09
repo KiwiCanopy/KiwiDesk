@@ -130,6 +130,11 @@ config:
 -- =============================================================
 -- KIWIDESK SPACES WIDGET
 -- =============================================================
+-- SbarLua handle. This script uses `SBAR` throughout; alias it
+-- to whatever your config uses (the SbarLua default global is
+-- `sbar`):
+local SBAR = require("sketchybar")
+
 -- Binary path: point this at your clone; swap to plain
 -- "kiwidesk" once Homebrew symlinks it (version 1.0).
 local KIWIDESK = os.getenv("HOME")
@@ -406,8 +411,9 @@ successful read.
 > **io.popen inside sketchybar's SbarLua**
 >
 > The sketchybar widget script runs in sketchybar's own Lua
-> process, not inside KiwiDesk's. sketchybar's Lua is a normal
-> unrestricted Lua 5.4 runtime, so `io.popen` is fully
+> process, not inside KiwiDesk's. sketchybar bundles its own
+> Lua (SbarLua), separate from KiwiDesk's embedded 5.5 VM, and
+> it is a normal unrestricted runtime — so `io.popen` is fully
 > available. Inside KiwiDesk's Lua VM, `io.popen` is disabled
 > to prevent blocking the main thread — use `KiwiDesk.exec`
 > with a callback instead (see [Lua
