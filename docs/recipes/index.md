@@ -38,9 +38,9 @@ timeout, and output capture.
 > **Binary path note:** KiwiDesk is not yet on PATH. Until
 > Homebrew symlinks it at version 1.0, either use the absolute
 > path to your built binary (e.g.,
-> `~/.build/release/KiwiDesk`) or symlink it yourself. The
+> `~/path/to/KiwiDesk/.build/release/KiwiDesk`) or symlink it yourself. The
 > recipes below assume you've stored the path in a variable
-> like `KIWIDESK=~/.build/release/KiwiDesk`.
+> like `KIWIDESK=~/path/to/KiwiDesk/.build/release/KiwiDesk`.
 
 ## Recipe pages
 
