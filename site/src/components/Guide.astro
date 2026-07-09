@@ -128,8 +128,14 @@ function scenarioIcon(name: string): string {
         `<rect x="3" y="4" width="12" height="9" rx="1.5"/>` +
           `<rect x="9" y="9" width="12" height="9" rx="1.5"/>`
       );
-    case "coder":
+    case "developer":
       return S(`<path d="m8 8-4 4 4 4"/><path d="m16 8 4 4-4 4"/>`);
+    case "consultant":
+      return S(
+        `<rect x="2" y="7" width="20" height="14" rx="2"/>` +
+          `<path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>` +
+          `<path d="M2 13h20"/>`
+      );
     case "writer":
       return S(
         `<path d="M12 20h9"/>` +
@@ -162,10 +168,16 @@ const scenarios = [
     after: s.guide_scenario_everyday_after,
   },
   {
-    icon: "coder",
-    name: s.guide_scenario_coder_name,
-    before: s.guide_scenario_coder_before,
-    after: s.guide_scenario_coder_after,
+    icon: "calls",
+    name: s.guide_scenario_calls_name,
+    before: s.guide_scenario_calls_before,
+    after: s.guide_scenario_calls_after,
+  },
+  {
+    icon: "consultant",
+    name: s.guide_scenario_consultant_name,
+    before: s.guide_scenario_consultant_before,
+    after: s.guide_scenario_consultant_after,
   },
   {
     icon: "writer",
@@ -180,10 +192,10 @@ const scenarios = [
     after: s.guide_scenario_designer_after,
   },
   {
-    icon: "calls",
-    name: s.guide_scenario_calls_name,
-    before: s.guide_scenario_calls_before,
-    after: s.guide_scenario_calls_after,
+    icon: "developer",
+    name: s.guide_scenario_developer_name,
+    before: s.guide_scenario_developer_before,
+    after: s.guide_scenario_developer_after,
   },
 ];
 ---
