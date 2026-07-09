@@ -3,14 +3,17 @@
 // Docs live under /docs/*; this page is standalone HTML.
 import { Image } from "astro:assets";
 import logoMark from "../assets/brand/logo.svg";
+import logoMarkDark from "../assets/brand/logo_dark.svg";
 import wordmark from "../assets/brand/logo_wordmark.svg";
 import wordmarkDark from "../assets/brand/logo_wordmark_dark.svg";
-import poster from "../assets/demo-poster.png";
+import ogImage from "../assets/brand/logo_wordmark.png";
 import kiwiSolutions from "../assets/brand/kiwi-solutions.png";
 import "../styles/landing.css";
 
 const repo = "https://github.com/hajiboy95/KiwiDesk";
 const kofi = "https://ko-fi.com/kiwisolutions";
+const buildCmd =
+  `git clone ${repo}.git\ncd KiwiDesk\nswift build -c release`;
 const desc =
   "KiwiDesk is a tiling window manager for macOS: flat arrays " +
   "instead of i3 trees, a sandboxed Lua config, six layouts, " +
@@ -183,7 +186,7 @@ const layouts = [
     <meta property="og:description" content={desc} />
     <meta property="og:type" content="website" />
     <meta property="og:image"
-      content={new URL(poster.src, Astro.site).href} />
+      content={new URL(ogImage.src, Astro.site).href} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="theme-color" content="#101d0b" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -213,8 +216,10 @@ const layouts = [
     <nav class="nav" id="nav">
       <div class="wrap nav__inner">
         <a class="nav__brand" href="/" aria-label="KiwiDesk home">
-          <img class="nav__mark" src={logoMark.src} width="28"
-            height="28" alt="" aria-hidden="true" />
+          <img class="nav__mark nav__mark--light" src={logoMark.src}
+            width="28" height="28" alt="" aria-hidden="true" />
+          <img class="nav__mark nav__mark--dark" src={logoMarkDark.src}
+            width="28" height="28" alt="" aria-hidden="true" />
           <span>KiwiDesk</span>
         </a>
         <div class="nav__links">
@@ -304,9 +309,8 @@ const layouts = [
           </p>
         </div>
         <div class="demo__frame reveal">
-          <video id="demoVideo" controls preload="none"
-            poster={poster.src} playsinline
-            aria-label="KiwiDesk demo">
+          <video id="demoVideo" controls preload="metadata"
+            playsinline aria-label="KiwiDesk demo">
             <source src="/kiwidesk-demo.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
@@ -412,6 +416,17 @@ const layouts = [
             <span class="code__dot" aria-hidden="true"></span>
             <span class="code__dot" aria-hidden="true"></span>
             <span class="code__title">zsh — build</span>
+            <button class="code__copy" id="copyBuild" type="button"
+              data-copy={buildCmd} aria-label="Copy build commands">
+              <svg class="code__copy-icon" width="15" height="15"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" aria-hidden="true">
+                <rect x="9" y="9" width="12" height="12" rx="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              </svg>
+              <span class="code__copy-label">Copy</span>
+            </button>
           </div>
           <pre><code><span class="prompt">$</span> git clone {repo}.git
 <span class="prompt">$</span> cd KiwiDesk
@@ -500,6 +515,24 @@ const layouts = [
       video?.addEventListener("pause", () => {
         // Re-show only if playback returned to the very start.
         if (overlay && video.currentTime === 0) overlay.hidden = false;
+      });
+
+      // Copy the build commands to the clipboard.
+      const copyBtn = document.getElementById("copyBuild");
+      const copyLabel = copyBtn?.querySelector(".code__copy-label");
+      copyBtn?.addEventListener("click", async () => {
+        const text = copyBtn.getAttribute("data-copy") || "";
+        try {
+          await navigator.clipboard.writeText(text);
+          copyBtn.classList.add("is-copied");
+          if (copyLabel) copyLabel.textContent = "Copied";
+          setTimeout(() => {
+            copyBtn.classList.remove("is-copied");
+            if (copyLabel) copyLabel.textContent = "Copy";
+          }, 1600);
+        } catch (e) {
+          /* clipboard blocked — no-op */
+        }
       });
 
       // Scroll reveal (progressive enhancement, motion-aware).

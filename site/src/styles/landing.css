@@ -366,6 +366,18 @@ body::before {
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
 }
 
+/* Swap the nav mark by theme, like the hero wordmark: colored
+   logo in light, golden variant in dark. */
+.nav__mark--dark {
+  display: none;
+}
+:root[data-theme="dark"] .nav__mark--light {
+  display: none;
+}
+:root[data-theme="dark"] .nav__mark--dark {
+  display: block;
+}
+
 .nav__links {
   display: flex;
   align-items: center;
@@ -963,10 +975,45 @@ section {
 }
 
 .code__title {
-  margin-left: auto;
   font-size: 0.78rem;
   color: #7f9070;
   font-family: var(--mono);
+}
+
+/* Copy-to-clipboard button, pushed to the right of the title bar. */
+.code__copy {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.55rem;
+  border: 1px solid rgba(109, 191, 91, 0.22);
+  border-radius: 8px;
+  background: rgba(109, 191, 91, 0.06);
+  color: #b6c4a8;
+  font-size: 0.74rem;
+  font-family: var(--font);
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.code__copy:hover {
+  background: rgba(109, 191, 91, 0.14);
+  border-color: rgba(109, 191, 91, 0.4);
+  color: #eef3e6;
+}
+
+.code__copy:focus-visible {
+  outline: 2px solid var(--kiwi-bright);
+  outline-offset: 2px;
+}
+
+.code__copy.is-copied {
+  color: var(--kiwi-bright);
+  border-color: var(--kiwi-bright);
 }
 
 .code pre {
@@ -1006,12 +1053,21 @@ section {
   gap: 0.25rem;
 }
 
+/* Center the logo over the name/tagline (a bare block img would
+   otherwise left-align while the text below it centers). */
+.footer__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 /* Transparent logo laid flat — no card treatment, it fades into
    the footer background. */
 .footer__logo {
   width: min(104px, 40vw);
   height: auto;
   display: block;
+  margin-inline: auto;
 }
 
 .footer__name {
