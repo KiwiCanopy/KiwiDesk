@@ -1,16 +1,46 @@
-# KiwiDesk 🥝
+<div align="center">
 
-A modular, high-performance tiling window manager for macOS,
-written in Swift and configured in Lua.
+<picture>
+  <source media="(prefers-color-scheme: dark)"
+    srcset="assets/dark_logo_wordmark.png">
+  <img src="assets/logo_wordmark.png" alt="KiwiDesk" width="220">
+</picture>
 
-KiwiDesk combines robust window tracking with smooth,
-spring-based animations. It runs entirely in user-space and
-**never requires disabling System Integrity Protection**.
+### A tiling window manager for macOS
+
+Flat arrays instead of i3 trees · configured in Lua · six
+layouts · never disables SIP.
+
+<br>
+
+![macOS 14+](https://img.shields.io/badge/macOS-14%2B-000000?logo=apple&logoColor=white)
+![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white)
+[![CI](https://github.com/hajiboy95/KiwiDesk/actions/workflows/ci.yml/badge.svg)](https://github.com/hajiboy95/KiwiDesk/actions/workflows/ci.yml)
+![License MIT](https://img.shields.io/badge/License-MIT-4E9F3D)
+![App Store — coming soon](https://img.shields.io/badge/App_Store-coming_soon-8B5E3C)
+
+<br>
+
+[![Documentation](https://img.shields.io/badge/📖_Documentation-4E9F3D?style=for-the-badge)](https://kiwidesk.pages.dev/docs/)
+[![Quick Start](https://img.shields.io/badge/🚀_Quick_Start-357229?style=for-the-badge)](https://kiwidesk.pages.dev/docs/user-guide/)
+[![Recipes](https://img.shields.io/badge/🧩_Recipes-6DBF5B?style=for-the-badge)](https://kiwidesk.pages.dev/docs/recipes/)
+[![Support on Ko-fi](https://img.shields.io/badge/Support-FF5E5B?style=for-the-badge&logo=kofi&logoColor=white)](https://ko-fi.com/kiwisolutions)
+
+</div>
+
+<!-- Add a screenshot or demo GIF here once one is captured. -->
 
 > **Status: CLI beta.** The core (layouts, Lua config, CLI,
-> profiles, per-native-space profiles, virtual workspace
-> hiding) is functional; the SwiftUI settings GUI and packaged
-> releases are still in progress.
+> profiles, per-native-space profiles, virtual workspace hiding)
+> and the SwiftUI Settings app are functional; packaged releases
+> (`.dmg`, a Homebrew cask) and the macOS App Store build are in
+> progress.
+
+KiwiDesk is a modular, high-performance tiling window manager for
+macOS, written in Swift and configured in Lua. It combines robust
+window tracking with smooth, spring-based animations, runs
+entirely in user-space, and **never requires disabling System
+Integrity Protection**.
 
 ## Why KiwiDesk?
 
@@ -43,14 +73,15 @@ a different formula — no tree surgery, no lost state.
   SketchyBar, JankyBorders, or your own tools.
 - **Modal keybindings** via the Carbon API — no Input Monitoring
   (keylogger) permission needed.
-- **Profiles with monitor fingerprints**: plug in your office
-  display and the matching profile loads automatically.
+- **Profiles that follow your displays**: save a layout per
+  monitor arrangement and it loads automatically when you connect
+  those screens — with per-native-Space bindings on top.
 - **Crash recovery** and **sleep/wake restore** keep your window
   arrangement across restarts and lid cycles.
 
 ## Installation
 
-Beta: build from source (packaged `.dmg` and a Homebrew cask
+Beta: build from source (a packaged `.dmg` and a Homebrew cask
 come with the 1.0 release).
 
 Requirements: macOS 14+, Xcode 16+ / Swift 6.
@@ -84,8 +115,11 @@ KiwiDesk get_state               # inspect everything as JSON
 KiwiDesk help                    # list every command
 ```
 
-Configuration lives in `~/.config/KiwiDesk/init.lua` (created on
-first launch):
+Everyday settings live in the **Settings** app — see the
+[user guide](docs/user-guide.md). Prefer Lua? The config file
+`~/.config/KiwiDesk/init.lua` is created **all-commented** on
+first launch (the built-in defaults apply until you uncomment a
+line); it's for optional custom config and event hooks:
 
 ```lua
 KiwiDesk.set_gap_global(10)
@@ -104,36 +138,44 @@ end)
 
 ## Documentation
 
-- [User guide](docs/user-guide.md) — the Settings app,
-  profiles, and the visual editor
-- [Lua reference](docs/lua-reference.md) — the full init.lua
-  API, every setting in expects → does → example form
+Full docs live at **[kiwidesk.pages.dev](https://kiwidesk.pages.dev)**
+(searchable, light/dark). The same pages are readable here on
+GitHub:
+
+- [User guide](docs/user-guide.md) — the Settings app, profiles,
+  and the visual editor
+- [Lua reference](docs/lua-reference.md) — the full init.lua API,
+  every setting in expects → does → example form
 - [CLI reference](docs/cli.md) — every command, IPC protocol,
   event stream
 - [Recipes](docs/recipes/index.md) — SketchyBar, JankyBorders,
   and other ready-to-copy integrations
-- [Design decisions](docs/design-decisions.md) — why the
-  Settings app behaves the way it does
+- [Design decisions](docs/design-decisions.md) — why the Settings
+  app behaves the way it does
 
 ## Contributing
 
 KiwiDesk is built to be contributor-friendly (including for AI
 coding agents — small files, strict lint, exhaustive tests).
-See [CONTRIBUTING.md](CONTRIBUTING.md) and
-[AGENTS.md](AGENTS.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md).
 
 ```sh
 ./scripts/install-hooks.sh   # once after cloning
-swift test                   # 114 tests and counting
+swift test                   # 700+ tests and counting
 ```
 
 ## Security
 
 KiwiDesk needs only the Accessibility permission. It never asks
-you to disable SIP and never requests Input Monitoring. To
-report a vulnerability, see [SECURITY.md](SECURITY.md).
+you to disable SIP and never requests Input Monitoring. To report
+a vulnerability, see [SECURITY.md](SECURITY.md).
 
 ## License
 
-[MIT](LICENSE). Bundles Lua 5.5
-([MIT](Vendor/CLua/LICENSE)).
+[MIT](LICENSE). Bundles Lua 5.5 ([MIT](Vendor/CLua/LICENSE)).
+
+<div align="center">
+<br>
+<sub>A <strong>Kiwi Solutions</strong> project — just a bunch of
+kiwis 🥝🥝🥝</sub>
+</div>
