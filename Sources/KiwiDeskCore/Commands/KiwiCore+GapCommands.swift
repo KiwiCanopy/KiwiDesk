@@ -74,14 +74,18 @@ extension KiwiCore {
     func setResizeStep(
         _ args: [JSONValue]
     ) -> CommandResponse {
-        guard let step = args.first?.numberValue else {
+        guard let raw = args.first?.numberValue, raw.isFinite
+        else {
             return .fail("expected step")
         }
-        // Whole points ≥ 1: the catalog authors an integer Lua
-        // literal, so store what that path can represent — a
-        // fractional or non-positive step would truncate silently
-        // or author a no-op/inverted resize (#58 review).
-        tiler.settings.resizeStep = CGFloat(max(1, Int(step.rounded())))
+        // Whole points in a sane range: the catalog funnels this
+        // through `Int(...)` when it authors the Lua literal, so
+        // an unbounded or non-finite arg must never reach it
+        // (`Int(1e300)` / `Int(.nan)` trap); a fractional or
+        // non-positive step would author a no-op/inverted resize
+        // (#58 review).
+        let step = min(max(raw.rounded(), 1), 10_000)
+        tiler.settings.resizeStep = CGFloat(step)
         // No retile (unlike set_min_window_size): the step is
         // only consulted when the catalog authors a Grow/Shrink
         // binding and on import read-back — never by layout
