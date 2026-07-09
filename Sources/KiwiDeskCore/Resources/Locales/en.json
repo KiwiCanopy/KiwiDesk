@@ -102,7 +102,7 @@
   "drag.title": "Drag & Drop",
   "footer.cancel": "Cancel",
   "footer.profile_name": "Profile name",
-  "footer.revert": "Revert",
+  "footer.revert": "Revert Changes",
   "footer.save": "Save",
   "footer.save_a_copy_as": "Save a Copy As…",
   "footer.save_as_new.message": "The new profile carries the current tiling and the connected monitor set.",

@@ -33,24 +33,33 @@ struct GeneralSection: View {
         SettingsSection(
             L("general.language.title", "Language")
         ) {
-            Picker(
-                L("general.language.title", "Language"),
-                selection: languageBinding
+            // Uses the house `DropdownRow` (shared label axis,
+            // `.menu` style, large control) like every other
+            // dropdown. The native `.menu` first-letter type-ahead
+            // suffices for a short list; revisit with a searchable
+            // list (`.searchable` in a popover) once shipped
+            // locales approach ~15–20.
+            DropdownRow(
+                label: L("general.language.title", "Language")
             ) {
-                Text(
-                    L(
-                        "general.language.system_default",
-                        "System default"
+                Picker(
+                    L("general.language.title", "Language"),
+                    selection: languageBinding
+                ) {
+                    Text(
+                        L(
+                            "general.language.system_default",
+                            "System default"
+                        )
                     )
-                )
-                .tag(Optional<String>.none)
-                Divider()
-                ForEach(sortedLocales, id: \.code) { locale in
-                    Text(locale.nativeName)
-                        .tag(Optional(locale.code))
+                    .tag(Optional<String>.none)
+                    Divider()
+                    ForEach(sortedLocales, id: \.code) { locale in
+                        Text(locale.nativeName)
+                            .tag(Optional(locale.code))
+                    }
                 }
             }
-            .pickerStyle(.menu)
         }
     }
 

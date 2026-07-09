@@ -40,7 +40,7 @@ struct SettingsFooter: View {
                 .foregroundStyle(.orange)
             }
             Spacer()
-            Button(L("footer.revert", "Revert")) {
+            Button(L("footer.revert", "Revert Changes")) {
                 model.revert()
             }
             .disabled(!model.isDirty)

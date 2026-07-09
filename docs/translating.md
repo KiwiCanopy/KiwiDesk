@@ -94,6 +94,17 @@ added later needs no other registration. It then appears in
 Settings ▸ General ▸ Language, listed by its own native name
 (e.g. "Deutsch", not "German").
 
+These language names are **endonyms** — each language shown in its
+own name, the same regardless of the active UI language (so the
+German UI still shows "English", "Français", "日本語", not
+"Englisch"). This is intentional: a user stranded in a language
+they cannot read must still recognise their own in the list, the
+same convention macOS System Settings uses. The names are derived
+automatically from macOS (`Locale.localizedString(forIdentifier:)`)
+— they are **not** translation keys, never appear in the locale
+JSON files, and must not be added there. There is nothing to
+translate for language names.
+
 ## Adding a new language
 
 1. Pick the locale's ISO code (e.g. `fr`, `ja`, `pt-BR`).
