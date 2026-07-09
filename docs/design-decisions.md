@@ -111,6 +111,29 @@ reference would silently resurrect the space on the next
 profile load. App rules survive by design: they're global,
 and another profile may declare a space of the same name.
 
+**Live state is the single source of truth for which spaces
+exist; `gui.json` mirrors it, never the reverse.** A deletion
+prunes the space from live immediately (windows rehome to the
+fallback), not only when a later profile load happens to drop
+it — otherwise the next save re-captured it from live and it
+reappeared. The sidecar's `spaces` list is kept a faithful
+copy of live *as of the last authoritative reconcile*: every
+explicit prune — a `load_profile` (including a scripted
+Lua/CLI one) or an in-place edit — writes the live set back.
+Hardware-driven applies (monitor change, native-Space
+binding) deliberately don't prune or mirror (the
+no-shuffle-on-reconnect rule), so between such an event and
+the next reconcile the list may lag; the cold-boot seed and
+the next prune re-converge it. The one place `gui.json` seeds
+*into* live is cold boot — a space that lives only in the
+sidecar (no profile, pin, window, or `set_mode` backs it) is
+seeded so it survives the reload. That seed is safe against
+resurrecting a profile-pruned space precisely because the
+mirror keeps the list current. Deletion is per-profile:
+each profile is its own file, so removing a space from the
+active profile never touches another profile that still
+declares a space of the same name. (#77)
+
 **Saved profiles lead; Presets demote once one exists.** On
 the Profiles tab, the built-in Presets top the list only
 while no profile is saved yet — they're a bootstrap tool,
