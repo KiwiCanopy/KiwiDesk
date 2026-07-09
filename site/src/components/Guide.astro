@@ -130,14 +130,14 @@ function scenarioIcon(name: string): string {
       );
     case "developer":
       return S(`<path d="m8 8-4 4 4 4"/><path d="m16 8 4 4-4 4"/>`);
-    // Lucide "grid-3x3" — a spreadsheet grid (the consultant's
-    // Excel chaos), inlined to match the other scenario icons
-    // (the site ships no external assets).
+    // Two monitors — the consultant's multi-screen setup (matches
+    // the "juggling screens" name). Inlined like the other icons.
     case "consultant":
       return S(
-        `<rect x="3" y="3" width="18" height="18" rx="2"/>` +
-          `<path d="M3 9h18"/><path d="M3 15h18"/>` +
-          `<path d="M9 3v18"/><path d="M15 3v18"/>`
+        `<rect x="2" y="4" width="9" height="8" rx="1"/>` +
+          `<rect x="13" y="4" width="9" height="8" rx="1"/>` +
+          `<path d="M6.5 12v2.5M4.5 16.5h4"/>` +
+          `<path d="M17.5 12v2.5M15.5 16.5h4"/>`
       );
     case "writer":
       return S(
