@@ -68,7 +68,7 @@ struct PresetsSection: View {
         HStack {
             VStack(alignment: .leading) {
                 HStack(spacing: 6) {
-                    Text(layout.name).font(.headline)
+                    Text(layout.displayName).font(.headline)
                     if layout.isStandard {
                         BadgeChip(
                             label: L(
@@ -78,7 +78,7 @@ struct PresetsSection: View {
                         )
                     }
                 }
-                Text(layout.summary)
+                Text(layout.displaySummary)
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 PresetThumbnail(layout: layout)

@@ -213,7 +213,7 @@ struct ProfileEditTargetMenu: View {
                 + L(
                     "profile_header.live.standard",
                     "Live — Standard: %1$@",
-                    standard
+                    standardDisplayName(standard)
                 )
         }
         return mark
@@ -243,7 +243,7 @@ struct ProfileEditTargetMenu: View {
             return L(
                 "profile_header.title.standard",
                 "Standard: %1$@",
-                standard
+                standardDisplayName(standard)
             )
         }
         return L(
