@@ -740,13 +740,14 @@
    a post-hero band, so the old .opening-note rules were removed.
    The Nerd-mode .quote-band still occupies this post-hero slot. */
 .quote-band {
-  /* Tightened so the hero + this tagline band clear a normal
+  /* Sits close under the hero (smaller top pad) and clears a normal
      laptop viewport in Nerd mode. */
-  padding-block: clamp(1.75rem, 4vw, 2.75rem);
+  padding-block: clamp(0.75rem, 2vw, 1.5rem)
+    clamp(1.75rem, 4vw, 2.75rem);
 }
 .quote-band__mark {
   margin: 0 auto;
-  max-width: 46ch;
+  max-width: 54ch;
   text-align: center;
   position: relative;
 }

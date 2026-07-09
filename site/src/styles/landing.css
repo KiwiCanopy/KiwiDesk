@@ -826,12 +826,21 @@ section {
 }
 
 .hero h1 {
-  font-size: clamp(2.2rem, 6.2vw, 4rem);
-  line-height: 1.05;
+  /* Slightly smaller + a wider line allowance so the longer German
+     titles land in two balanced lines like the English ones (15ch
+     forced German onto three). */
+  font-size: clamp(2rem, 5.2vw, 3.4rem);
+  line-height: 1.07;
   letter-spacing: -0.03em;
   margin: 0 auto 1rem;
-  max-width: 15ch;
+  max-width: 24ch;
   color: var(--hero-ink);
+  text-wrap: balance;
+}
+/* The Nerd title is shorter, so at the Simple title's wide measure it
+   collapses to one line — give it a tighter measure to keep two. */
+.hero__mode--dev h1 {
+  max-width: 19ch;
 }
 
 .hero__sub {

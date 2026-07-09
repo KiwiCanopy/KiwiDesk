@@ -169,7 +169,7 @@
   "hero_dev_cta_github": "View on GitHub",
   "hero_dev_kicker": "The tiling window manager for macOS that just works",
   "hero_dev_sub": "KiwiDesk manages windows in <b>flat arrays</b>, not i3-style trees — <b>fully Lua-configurable</b>, with <b>six layouts</b> to switch between. And it <b>never disables SIP</b>.",
-  "hero_dev_title": "Tiling window management for macOS.",
+  "hero_dev_title": "Tiling that thinks in flat arrays.",
   "hero_kicker": "For everyone with a Mac",
   "hero_pill": "🍎 macOS app — coming soon",
   "hero_sub": "KiwiDesk arranges your open windows into a neat layout, automatically. No more dragging corners or hunting for that one hidden window. Just a calm, tidy screen.",
