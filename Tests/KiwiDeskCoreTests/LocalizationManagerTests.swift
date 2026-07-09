@@ -92,4 +92,47 @@ struct LocalizationManagerTests {
         let value = L("menu.quit", "Quit KiwiDesk")
         #expect(value == "Quit KiwiDesk")
     }
+
+    // MARK: - Interpolation overload (issue #9 review)
+
+    @Test("the interpolating overload fills English positionally")
+    func interpolatingOverloadFillsEnglish() {
+        reset()
+        let value = L(
+            "a_key_no_locale_will_ever_define_interp",
+            "Move to %1$@",
+            "Studio"
+        )
+        #expect(value == "Move to Studio")
+    }
+
+    @Test("the interpolating overload resolves through a translation")
+    func interpolatingOverloadUsesTranslation() {
+        reset()
+        LocalizationManager.shared.select("de")
+        defer { reset() }
+        // Seeded in de.json: the placeholder moves relative to
+        // the English word order — exactly the point of
+        // positional (not bare %@) specifiers.
+        let value = L(
+            "monitor_chip.move_to",
+            "Move to %1$@",
+            "Studio"
+        )
+        #expect(value == "Nach Studio verschieben")
+    }
+
+    @Test("an untranslated interpolating key falls back to English")
+    func interpolatingOverloadPerKeyFallback() {
+        reset()
+        LocalizationManager.shared.select("de")
+        defer { reset() }
+        let value = L(
+            "a_key_the_german_seed_does_not_translate_interp",
+            "Space %1$d: %2$@",
+            3,
+            "Monocle"
+        )
+        #expect(value == "Space 3: Monocle")
+    }
 }

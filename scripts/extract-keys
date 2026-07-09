@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Extract L("key", "English") call sites from Sources/KiwiDesk
-into the canonical locale manifest (issue #9).
+"""Extract L("key", "English"[, args...]) call sites from
+Sources/KiwiDesk and Sources/KiwiDeskCore into the canonical
+locale manifest (issue #9).
 
 Usage:
     scripts/extract-keys              Rebuild en.json only.
@@ -12,12 +13,60 @@ Usage:
                                        sourced with the English
                                        text for a translator to
                                        fill in place.
+    scripts/extract-keys --check      Compute the mapping and
+                                       compare it to the
+                                       committed en.json WITHOUT
+                                       writing anything. Exits
+                                       non-zero if en.json is
+                                       stale (a call site was
+                                       added/changed/removed
+                                       since the last extract),
+                                       on drift, or if a shipped
+                                       <locale>.json fails to
+                                       decode as a flat
+                                       {string: string} map. Run
+                                       by scripts/lint.sh (and
+                                       scripts/pre-commit when a
+                                       locale file is staged) as
+                                       part of the verify gate/CI.
+                                       Also WARNS (does not fail)
+                                       about orphan keys: entries
+                                       in a <locale>.json with no
+                                       matching code call site.
+    scripts/extract-keys --prune      Removes every orphan key
+                                       (present in a <locale>.json,
+                                       absent from the current
+                                       code-derived key set) from
+                                       every shipped locale file,
+                                       and rewrites en.json as
+                                       usual. Prints what it
+                                       removed per locale. See
+                                       scripts/rename-key for
+                                       renaming a key without
+                                       losing its translations.
 
-Drift guard: if the same key is called with two DIFFERENT English
-strings across call sites, this is a bug (the two occurrences
-would silently disagree until whichever one this script scanned
-last overwrote en.json) — the script fails loudly instead,
-naming the key and every conflicting string it found.
+`L` takes either two arguments (`L(key, english)`) or a key, an
+English template, and interpolation arguments (`L(key, english,
+args...)`, `String(format:)`-style with positional specifiers
+like `%1$@`) — both forms are recognized; the extractor only
+ever reads the key and English template, never the trailing
+arguments.
+
+Both Sources/KiwiDesk (the GUI) and Sources/KiwiDeskCore (where
+`L` itself and `LocalizationManager` live) are scanned — a
+future Core call site must not silently escape extraction.
+
+Drift guard: if the same key is called with two DIFFERENT
+English strings across call sites, this is a bug (the two
+occurrences would silently disagree until whichever one this
+script scanned last overwrote en.json) — the script fails
+loudly instead, naming the key and every conflicting string it
+found. This applies in every mode, including `--check`.
+
+Doc-comment example call sites (e.g. a `///` line showing
+`L("key", "English")` as sample syntax) are stripped before
+scanning, the same as any other `//`/`///` line comment, so
+documentation prose never leaks a phantom key into en.json.
 
 Limitation: the extractor is a regex-based scan tuned to this
 repo's `.swift-format` house style (each `L(` call's two string
@@ -39,13 +88,20 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 # Overridable so `LocalizationDriftGuardTests` (Swift, run via
 # `swift test`) can point the scanner at a small fixture tree
-# instead of the real `Sources/KiwiDesk` — the CLI surface for a
+# instead of the real source trees — the CLI surface for a
 # human running this script is unaffected (never set these).
-SOURCES = Path(
-    os.environ.get(
-        "KIWIDESK_EXTRACT_SOURCES", str(ROOT / "Sources" / "KiwiDesk")
-    )
-)
+# `KIWIDESK_EXTRACT_SOURCES` may be a single path or several
+# separated by `os.pathsep` (`:` on macOS), mirroring the real
+# two-directory scan (KiwiDesk + KiwiDeskCore).
+_default_sources = str(
+    ROOT / "Sources" / "KiwiDesk"
+) + os.pathsep + str(ROOT / "Sources" / "KiwiDeskCore")
+SOURCE_DIRS = [
+    Path(p)
+    for p in os.environ.get(
+        "KIWIDESK_EXTRACT_SOURCES", _default_sources
+    ).split(os.pathsep)
+]
 LOCALES_DIR = Path(
     os.environ.get(
         "KIWIDESK_EXTRACT_LOCALES",
@@ -76,7 +132,9 @@ _STRING_LITERAL = re.compile(
     re.DOTALL,
 )
 
-# `L(` then a string literal, a comma, then a string literal.
+# `L(` then a string literal, a comma, then a string literal,
+# then either `)` (the 2-arg form) or `,` (the interpolating
+# form — trailing `args...` are never captured, only skipped).
 _CALL = re.compile(
     r"\bL\(\s*(?P<key>"
     + _STRING_LITERAL.pattern
@@ -125,15 +183,82 @@ def _join_literal(raw: str) -> str:
     )
 
 
+def _swift_files() -> list[Path]:
+    files: list[Path] = []
+    for directory in SOURCE_DIRS:
+        files.extend(directory.rglob("*.swift"))
+    return sorted(set(files))
+
+
+def _strip_comments(text: str) -> str:
+    """Blanks out every line comment's content (keeping the
+    newline, so line numbers in error messages stay meaningful)
+    -- a string-literal-aware pass so a comment marker inside a
+    string (a URL, say) or inside a triple-quoted block is left
+    alone. Doc-comment prose showing an example call site must
+    never be scanned as a real one."""
+    out: list[str] = []
+    i = 0
+    n = len(text)
+    in_line_comment = False
+    in_string = False
+    in_triple_string = False
+    while i < n:
+        ch = text[i]
+        if in_line_comment:
+            if ch == "\n":
+                in_line_comment = False
+                out.append(ch)
+            i += 1
+            continue
+        if in_triple_string:
+            if text.startswith('"""', i):
+                out.append('"""')
+                in_triple_string = False
+                i += 3
+                continue
+            out.append(ch)
+            i += 1
+            continue
+        if in_string:
+            out.append(ch)
+            if ch == "\\" and i + 1 < n:
+                out.append(text[i + 1])
+                i += 2
+                continue
+            if ch == '"':
+                in_string = False
+            i += 1
+            continue
+        # Not inside a string or comment right now.
+        if text.startswith('"""', i):
+            out.append('"""')
+            in_triple_string = True
+            i += 3
+            continue
+        if ch == '"':
+            out.append(ch)
+            in_string = True
+            i += 1
+            continue
+        if text.startswith("//", i):
+            in_line_comment = True
+            i += 2
+            continue
+        out.append(ch)
+        i += 1
+    return "".join(out)
+
+
 def extract() -> dict[str, str]:
-    """Scans every .swift file for `L(key, english)` call sites
-    and returns the canonical {key: english} map. Fails loudly
-    on a drifted key (same key, different English across sites).
-    """
+    """Scans every .swift file under `SOURCE_DIRS` for
+    `L(key, english[, args...])` call sites and returns the
+    canonical {key: english} map. Fails loudly on a drifted key
+    (same key, different English across sites)."""
     found: dict[str, tuple[str, str]] = {}
     conflicts: dict[str, set[str]] = {}
-    for path in sorted(SOURCES.rglob("*.swift")):
-        text = path.read_text(encoding="utf-8")
+    for path in _swift_files():
+        text = _strip_comments(path.read_text(encoding="utf-8"))
         for match in _CALL.finditer(text):
             key = _join_literal(match.group("key"))
             english = _join_literal(match.group("english"))
@@ -164,6 +289,93 @@ def extract() -> dict[str, str]:
     return {key: english for key, (english, _) in found.items()}
 
 
+def shipped_locale_files() -> list[Path]:
+    """Every `<locale>.json` under `LOCALES_DIR`, excluding
+    `en.json` (the generated manifest) and any leftover
+    `missing_*.json` scratch file. Shared by `--check`'s orphan
+    warning and `--prune` so both agree on what "a locale file"
+    means."""
+    if not LOCALES_DIR.is_dir():
+        return []
+    return sorted(
+        path
+        for path in LOCALES_DIR.glob("*.json")
+        if path.name != "en.json"
+        and not path.name.startswith("missing_")
+    )
+
+
+def find_orphans(
+    mapping: dict[str, str],
+) -> dict[Path, list[str]]:
+    """Keys present in a shipped locale file but absent from the
+    current code-derived key set — translations left behind by a
+    removed or renamed `L(...)` call site. Returns only locales
+    that actually have orphans. Callers are expected to have
+    already run `validate_locale_files()` — a malformed file is
+    silently skipped here rather than re-diagnosed."""
+    orphans: dict[Path, list[str]] = {}
+    for locale_file in shipped_locale_files():
+        try:
+            translations = json.loads(
+                locale_file.read_text(encoding="utf-8")
+            )
+        except json.JSONDecodeError:
+            continue
+        if not isinstance(translations, dict):
+            continue
+        stale = sorted(set(translations) - set(mapping))
+        if stale:
+            orphans[locale_file] = stale
+    return orphans
+
+
+def validate_locale_files() -> list[str]:
+    """Every shipped `<locale>.json` must decode as a flat
+    `{string: string}` map — that is the exact shape
+    `LocaleCatalog.load(_:)` expects at runtime. A malformed file
+    (bad JSON, a nested object, a non-string value) makes
+    `LocaleCatalog` soft-fail to an empty dictionary and the
+    whole locale silently reverts to all-English — a feature
+    dying quietly — so this is a hard-fail check, unlike the
+    orphan-key warning. Returns one human-readable problem
+    description per broken file (empty list = all valid)."""
+    problems: list[str] = []
+    for locale_file in shipped_locale_files():
+        try:
+            text = locale_file.read_text(encoding="utf-8")
+        except OSError as error:
+            problems.append(f"{locale_file.name}: {error}")
+            continue
+        try:
+            decoded = json.loads(text)
+        except json.JSONDecodeError as error:
+            problems.append(
+                f"{locale_file.name}: invalid JSON ({error})"
+            )
+            continue
+        if not isinstance(decoded, dict):
+            problems.append(
+                f"{locale_file.name}: must be a flat "
+                f"{{string: string}} object, found "
+                f"{type(decoded).__name__}"
+            )
+            continue
+        bad_values = sorted(
+            key
+            for key, value in decoded.items()
+            if not isinstance(value, str)
+        )
+        if bad_values:
+            problems.append(
+                f"{locale_file.name}: non-string value(s) for "
+                f"key(s) {', '.join(bad_values)} — every entry "
+                "must be a flat string, not an object/array/"
+                "number"
+            )
+    return problems
+
+
 def write_en_json(mapping: dict[str, str]) -> None:
     LOCALES_DIR.mkdir(parents=True, exist_ok=True)
     EN_JSON.write_text(
@@ -176,7 +388,143 @@ def write_en_json(mapping: dict[str, str]) -> None:
     print(f"extract-keys: wrote {len(mapping)} keys to {EN_JSON}")
 
 
+def _warn_orphans(mapping: dict[str, str]) -> None:
+    """Prints (never fails on its own) every locale key with no
+    matching code call site — cruft left by a removed or renamed
+    key. `scripts/extract-keys --prune` removes them;
+    `scripts/rename-key` avoids creating them for a pure rename."""
+    orphans = find_orphans(mapping)
+    if not orphans:
+        return
+    print(
+        "extract-keys --check: WARNING — orphan key(s) in "
+        "shipped locale file(s) (not a failure; run "
+        "`scripts/extract-keys --prune` to clean up):"
+    )
+    for locale_file, keys in sorted(orphans.items()):
+        print(f"\n  {locale_file.name}:")
+        for key in keys:
+            print(f"    - {key}")
+
+
+def check(mapping: dict[str, str]) -> int:
+    """Compares the freshly-scanned mapping to the committed
+    en.json without writing anything. Non-zero exit (with a
+    diff) means en.json is stale — someone edited/added/removed
+    an `L(...)` call site and forgot to re-run extract-keys.
+    Also HARD-FAILS if any shipped `<locale>.json` doesn't
+    decode as a flat `{string: string}` map (a broken file makes
+    `LocaleCatalog` soft-fail to `[:]` at runtime — the locale
+    reverts to all-English silently, so this must block, not
+    warn) — checked first, so a translator gets the clearest
+    signal. Separately WARNS (without affecting the exit code)
+    about orphan keys in shipped locale files — a lingering
+    unused translation is cruft, not a correctness bug, and must
+    not block an otherwise-clean translator PR."""
+    malformed = validate_locale_files()
+    if malformed:
+        print(
+            "extract-keys --check: FAILED — malformed locale "
+            "file(s) (every shipped <locale>.json must decode "
+            "as a flat {string: string} map):",
+            file=sys.stderr,
+        )
+        for problem in malformed:
+            print(f"    - {problem}", file=sys.stderr)
+        return 1
+    _warn_orphans(mapping)
+    if not EN_JSON.exists():
+        print(
+            f"extract-keys --check: FAILED — {EN_JSON} does "
+            "not exist. Run `scripts/extract-keys` once.",
+            file=sys.stderr,
+        )
+        return 1
+    committed = json.loads(EN_JSON.read_text(encoding="utf-8"))
+    if committed == mapping:
+        print(
+            f"extract-keys --check: OK — en.json matches "
+            f"{len(mapping)} scanned key(s)."
+        )
+        return 0
+    added = sorted(set(mapping) - set(committed))
+    removed = sorted(set(committed) - set(mapping))
+    changed = sorted(
+        key
+        for key in set(mapping) & set(committed)
+        if mapping[key] != committed[key]
+    )
+    print(
+        "extract-keys --check: FAILED — en.json is stale "
+        "(run `scripts/extract-keys` and commit the result):",
+        file=sys.stderr,
+    )
+    if added:
+        print(f"\n  new key(s) not in en.json:", file=sys.stderr)
+        for key in added:
+            print(f"    + {key}: {mapping[key]!r}", file=sys.stderr)
+    if removed:
+        print(
+            f"\n  key(s) in en.json with no call site left:",
+            file=sys.stderr,
+        )
+        for key in removed:
+            print(f"    - {key}", file=sys.stderr)
+    if changed:
+        print(f"\n  key(s) whose English text changed:", file=sys.stderr)
+        for key in changed:
+            print(
+                f"    ~ {key}: {committed[key]!r} -> "
+                f"{mapping[key]!r}",
+                file=sys.stderr,
+            )
+    return 1
+
+
+def prune(mapping: dict[str, str]) -> int:
+    """Removes every orphan key from every shipped locale file
+    and rewrites en.json. The maintainer's "clean up cruft"
+    command — run after a key is deliberately removed/renamed
+    (not via `scripts/rename-key`) in code."""
+    orphans = find_orphans(mapping)
+    write_en_json(mapping)
+    if not orphans:
+        print("extract-keys --prune: no orphan keys found.")
+        return 0
+    for locale_file, keys in sorted(orphans.items()):
+        translations = json.loads(
+            locale_file.read_text(encoding="utf-8")
+        )
+        for key in keys:
+            del translations[key]
+        locale_file.write_text(
+            json.dumps(
+                translations,
+                indent=2,
+                sort_keys=True,
+                ensure_ascii=False,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        print(
+            f"extract-keys --prune: removed {len(keys)} "
+            f"orphan key(s) from {locale_file.name}:"
+        )
+        for key in keys:
+            print(f"    - {key}")
+    return 0
+
+
 def write_missing(locale: str, mapping: dict[str, str]) -> None:
+    """Writes `missing_<locale>.json` as `{key: {"source":
+    <English>, "translation": ""}}` for every key `<locale>.json`
+    doesn't have yet. The empty `translation` slot (not a
+    heuristic comparing against the English source) is the sole
+    "still needs translating" signal — `merge-keys` only folds
+    a key back in once its `translation` is non-empty, so an
+    untranslated entry keeps re-surfacing on every extract run
+    instead of being silently swallowed."""
     locale_file = LOCALES_DIR / f"{locale}.json"
     existing: dict[str, str] = {}
     if locale_file.exists():
@@ -187,7 +535,7 @@ def write_missing(locale: str, mapping: dict[str, str]) -> None:
         except json.JSONDecodeError:
             existing = {}
     missing = {
-        key: english
+        key: {"source": english, "translation": ""}
         for key, english in mapping.items()
         if not existing.get(key)
     }
@@ -212,7 +560,7 @@ def write_missing(locale: str, mapping: dict[str, str]) -> None:
         f"'{locale}' written to {out}"
     )
     print(
-        "Translate the English values in place, then run: "
+        'Fill each entry\'s "translation" field, then run: '
         f"scripts/merge-keys {locale}"
     )
 
@@ -221,6 +569,12 @@ def main(argv: list[str]) -> int:
     if len(argv) > 2:
         print(__doc__)
         return 1
+    if len(argv) == 2 and argv[1] == "--check":
+        mapping = extract()
+        return check(mapping)
+    if len(argv) == 2 and argv[1] == "--prune":
+        mapping = extract()
+        return prune(mapping)
     mapping = extract()
     write_en_json(mapping)
     if len(argv) == 2:

@@ -6,9 +6,18 @@ Usage:
     scripts/merge-keys <locale>
 
 Run after `scripts/extract-keys <locale>` produced
-`missing_<locale>.json` and a translator has replaced its
-English values with the target-language text in place (do not
-change the keys).
+`missing_<locale>.json` — a `{key: {"source": <English>,
+"translation": ""}}` map — and a translator has filled each
+entry's "translation" field in place (do not change the keys or
+the "source" field).
+
+Only entries whose "translation" is non-empty (after trimming
+whitespace) are folded into `<locale>.json`; any left empty are
+skipped so they re-surface the next time `scripts/extract-keys
+<locale>` runs, instead of silently vanishing as "translated"
+with a blank value. `<locale>.json` itself stays a flat `{key:
+string}` map — the source/translation shape is scratch-file-only
+and never reaches the file `LocaleCatalog` loads at runtime.
 """
 
 import json
@@ -37,9 +46,16 @@ def main(argv: list[str]) -> int:
         )
         return 1
 
-    translated = json.loads(
-        missing_file.read_text(encoding="utf-8")
-    )
+    entries = json.loads(missing_file.read_text(encoding="utf-8"))
+    translated: dict[str, str] = {}
+    skipped: list[str] = []
+    for key, entry in entries.items():
+        value = entry.get("translation", "").strip()
+        if value:
+            translated[key] = value
+        else:
+            skipped.append(key)
+
     existing: dict[str, str] = {}
     if locale_file.exists():
         existing = json.loads(
@@ -61,6 +77,15 @@ def main(argv: list[str]) -> int:
         f"{locale_file} ({len(existing)} total); removed "
         f"{missing_file.name}."
     )
+    if skipped:
+        print(
+            f"merge-keys: {len(skipped)} key(s) still had an "
+            "empty \"translation\" and were skipped — they "
+            f"will re-appear next time you run "
+            f"scripts/extract-keys {locale}:"
+        )
+        for key in sorted(skipped):
+            print(f"    - {key}")
     return 0
 
 

@@ -1,0 +1,125 @@
+#!/usr/bin/env python3
+"""Rename a localization key across every locale file (issue
+#9): en.json plus every shipped <locale>.json, preserving each
+file's existing value for the key — a pure rename keeps
+translations instead of forcing a re-translation.
+
+Usage:
+    scripts/rename-key <old_key> <new_key>
+
+This only touches the JSON files. It does NOT edit Swift source
+— update the `L("<old_key>", ...)` call site(s) to `<new_key>`
+yourself (and re-run `scripts/extract-keys --check`, which
+should pass once both sides agree).
+
+Renaming vs. deprecating: use this script when the MEANING of
+the string is unchanged and you're just cleaning up the key
+name — every existing translation carries over untouched. If
+the meaning actually changed (the English text now says
+something different), that is not a rename: delete the old key
+at its call site instead and let `scripts/extract-keys` surface
+the new key as missing, so translators knowingly retranslate it
+rather than silently inheriting a translation of the old
+meaning under the new name.
+"""
+
+import json
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+LOCALES_DIR = (
+    ROOT / "Sources" / "KiwiDeskCore" / "Resources" / "Locales"
+)
+
+
+def _locale_files() -> list[Path]:
+    if not LOCALES_DIR.is_dir():
+        return []
+    return sorted(
+        path
+        for path in LOCALES_DIR.glob("*.json")
+        if not path.name.startswith("missing_")
+    )
+
+
+def main(argv: list[str]) -> int:
+    if len(argv) != 3:
+        print(__doc__)
+        return 1
+    old_key, new_key = argv[1], argv[2]
+    if old_key == new_key:
+        print(
+            "rename-key: old and new key are identical — "
+            "nothing to do.",
+            file=sys.stderr,
+        )
+        return 1
+
+    files = _locale_files()
+    if not files:
+        print(
+            f"rename-key: no locale files found under "
+            f"{LOCALES_DIR}.",
+            file=sys.stderr,
+        )
+        return 1
+
+    # Validate against every file before touching any of them,
+    # so a mid-batch failure can't leave locales inconsistent
+    # (some renamed, some not).
+    missing_old: list[str] = []
+    present_new: list[str] = []
+    for path in files:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if old_key not in data:
+            missing_old.append(path.name)
+        if new_key in data:
+            present_new.append(path.name)
+
+    if missing_old and len(missing_old) == len(files):
+        print(
+            f"rename-key: FAILED — {old_key!r} is not present "
+            "in any locale file.",
+            file=sys.stderr,
+        )
+        return 1
+    if present_new:
+        print(
+            f"rename-key: FAILED — {new_key!r} already exists "
+            f"in: {', '.join(present_new)}. Pick a key that "
+            "isn't taken, or resolve the collision by hand "
+            "first.",
+            file=sys.stderr,
+        )
+        return 1
+
+    renamed_in: list[str] = []
+    for path in files:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if old_key not in data:
+            continue
+        data[new_key] = data.pop(old_key)
+        path.write_text(
+            json.dumps(
+                data, indent=2, sort_keys=True, ensure_ascii=False
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        renamed_in.append(path.name)
+
+    print(
+        f"rename-key: renamed {old_key!r} -> {new_key!r} in: "
+        f"{', '.join(renamed_in)}"
+    )
+    print(
+        "rename-key: now update the L(\"" + old_key + "\", ...) "
+        "call site(s) in Swift to use the new key, then run "
+        "scripts/extract-keys --check to confirm."
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

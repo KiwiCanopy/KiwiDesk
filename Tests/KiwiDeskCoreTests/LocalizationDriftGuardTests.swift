@@ -143,4 +143,58 @@ struct LocalizationDriftGuardTests {
         )
         #expect(result.status == 0)
     }
+
+    @Test("a doc-comment example call site is not extracted")
+    func docCommentExampleIsIgnored() throws {
+        let fixture = try makeFixture([
+            "A.swift": #"""
+            /// Call it like `L("key", "English")`, e.g.
+            /// `L("menu.quit", "Quit KiwiDesk")`.
+            let a = L("real.key", "Real value")
+            """#
+        ])
+        defer { fixture.cleanup() }
+        let result = try runExtractKeys(
+            sources: fixture.sources,
+            locales: fixture.locales
+        )
+        #expect(result.status == 0)
+        let enJSON = fixture.locales.appendingPathComponent(
+            "en.json"
+        )
+        let data = try Data(contentsOf: enJSON)
+        let decoded = try JSONDecoder().decode(
+            [String: String].self,
+            from: data
+        )
+        #expect(decoded == ["real.key": "Real value"])
+        #expect(decoded["key"] == nil)
+        #expect(decoded["menu.quit"] == nil)
+    }
+
+    @Test("a slash pair inside a string literal is preserved")
+    func slashSlashInsideStringIsPreserved() throws {
+        let fixture = try makeFixture([
+            "A.swift": #"""
+            let a = L("url.key", "See https://example.com")
+            """#
+        ])
+        defer { fixture.cleanup() }
+        let result = try runExtractKeys(
+            sources: fixture.sources,
+            locales: fixture.locales
+        )
+        #expect(result.status == 0)
+        let enJSON = fixture.locales.appendingPathComponent(
+            "en.json"
+        )
+        let data = try Data(contentsOf: enJSON)
+        let decoded = try JSONDecoder().decode(
+            [String: String].self,
+            from: data
+        )
+        #expect(
+            decoded["url.key"] == "See https://example.com"
+        )
+    }
 }

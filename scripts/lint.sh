@@ -56,6 +56,14 @@ else
     echo "NOTE: 'swift format' not found; skipping format lint"
 fi
 
+# Locale manifest freshness + drift guard (issue #9): fails if
+# en.json doesn't match the L(...) call sites in Sources/KiwiDesk
+# and Sources/KiwiDeskCore, or if the same key was authored with
+# two different English strings.
+if ! python3 "$ROOT/scripts/extract-keys" --check; then
+    STATUS=1
+fi
+
 if [ "$STATUS" -eq 0 ]; then
     echo "Lint OK"
 fi
