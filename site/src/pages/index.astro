@@ -19,6 +19,9 @@ import "../styles/landing.css";
 
 const repo = "https://github.com/hajiboy95/KiwiDesk";
 const kofi = "https://ko-fi.com/kiwisolutions";
+// The maker's personal GitHub profile — distinct from the project
+// repo link above, used only for the low-key footer credit.
+const makerProfile = "https://github.com/hajiboy95";
 const buildCmd =
   `git clone ${repo}.git\ncd KiwiDesk\nswift build -c release`;
 
@@ -71,8 +74,17 @@ const t = {
   hero_dev_cta_docs: "Read the Docs",
   hero_dev_cta_github: "View on GitHub",
 
-  // pull-quotes — a personal, human voice. All three below are
-  // maker-approved verbatim; do not edit the quote text itself.
+  // pull-quotes — a personal, human voice. All maker-approved
+  // verbatim; do not edit the quote text itself.
+
+  // Opening note (Simple mode only) — sets the tone before the
+  // hero even loads. Unattributed: first-person voice stands on
+  // its own here.
+  quote_opening:
+    "Tiling window managers were always a nerd's toy. I set out " +
+    "to give anyone a calmer screen — and make it feel like " +
+    "magic, not homework.",
+
   quote_tagline:
     "A window manager that works with you — not one you have to " +
     "tell how to work.",
@@ -86,9 +98,34 @@ const t = {
     "getting layouts I never asked for. KiwiDesk keeps every " +
     "space flat, so there's nothing to hold in your head, and I " +
     "can focus on the work that actually matters.",
-  // Attribution byline — see the design notes for the options this
-  // was weighed against (unattributed / byline / avatar).
-  quote_byline: "— Maikel, KiwiDesk's maker",
+  // Byline for the Simple-mode personal quote.
+  quote_byline_simple:
+    "— Maikel, planting kiwis for a calmer, happier desktop",
+  // Byline for the Developer-mode personal quote: a main line plus
+  // a smaller, playful sub-line.
+  quote_byline_dev_main:
+    "— Maikel, spreading kiwis (and a little more calm) wherever " +
+    "he can",
+  quote_byline_dev_sub:
+    "on a mission to sneak a few more vitamins onto your screen",
+
+  // Four short unattributed asides, placed near the demo, the CLI
+  // section, the footer, and the final CTA.
+  quote_demo:
+    "Fair warning: it's about as oddly satisfying as watching " +
+    "kiwis stack kiwis. You'll open windows on purpose, just to " +
+    "watch them snap into place.",
+  quote_cli:
+    "The day my window manager became scriptable, my desktop " +
+    "started running itself. I haven't dragged a window since.",
+  quote_footer:
+    "No big company here — for now, just me and a handful of " +
+    "tools, each taking a tedious job off your plate so your day " +
+    "has more room for what you love — like eating kiwis. 🥝",
+  quote_cta:
+    "They say an apple a day — but the kiwi's got more " +
+    "vitamins and bigger plans. 🥝",
+  daily_kiwi: "Now go eat a kiwi. Your vitamins will thank you. 🥝",
 
   // what is this (simple)
   what_eyebrow: "New here? Start here",
@@ -240,6 +277,10 @@ const t = {
   footer_github: "GitHub",
   footer_design: "Design decisions",
   footer_copy: "© 2026 KiwiDesk",
+  // Low-key maker credit, distinct from the project repo link.
+  footer_credit_built_by: "Built by",
+  footer_credit_name: "Maikel",
+  footer_credit_handle: "@hajiboy95",
 };
 
 // Inline feature icons (stroke-based, consistent 24x24 grid).
@@ -437,37 +478,61 @@ const steps = [
             <span class="nav__support-text">{t.nav_support}</span>
           </a>
 
-          <!-- Signature mode toggle: the "kiwi jar". Simple = one
-               kiwi resting in the jar, Developer = three (jar tilts
-               and the extras spring in). A tooltip and label keep
-               it discoverable; the jar shape + tilt read as a
-               physical, clickable object at a glance. -->
+          <!-- Signature mode toggle: a sliding kiwi-count pill, a
+               deliberate sibling of the theme toggle's track+thumb
+               language. Simple = one kiwi on the thumb; Developer =
+               the thumb slides right and two more kiwi slices pop
+               in beside it. A tooltip and label keep it
+               discoverable; the track/thumb shape reads as an
+               obvious switch even before the kiwis are noticed. -->
           <button class="mode-toggle" id="modeToggle" type="button"
             aria-label={t.mode_toggle_aria} aria-pressed="false">
-            <span class="mode-toggle__jar" aria-hidden="true">
-              <svg class="mode-toggle__jar-g" width="30" height="26"
-                viewBox="0 0 30 26" fill="none">
-                <!-- shelf the jar sits on -->
-                <line class="jar__shelf" x1="1" y1="24.5" x2="29"
-                  y2="24.5" stroke-width="1.4"
-                  stroke-linecap="round" />
-                <!-- tilting group: jar body + kiwi slices -->
-                <g class="jar__tilt">
-                  <path class="jar__glass" d="M8 3.5h14a1 1 0 0 1
-                    1 1V9l1.4 12.6a2 2 0 0 1-2 2.4H7.6a2 2 0 0
-                    1-2-2.4L7 9V4.5a1 1 0 0 1 1-1Z"
-                    stroke-width="1.5" />
-                  <path class="jar__lid" d="M9.5 3.5V2a1.5 1.5 0 0
-                    1 1.5-1.5h8A1.5 1.5 0 0 1 20.5 2v1.5"
-                    stroke-width="1.5" stroke-linecap="round" />
-                  <circle class="jar__kiwi jar__kiwi--1" cx="15"
-                    cy="18" r="3.4" />
-                  <circle class="jar__kiwi jar__kiwi--2" cx="10.6"
-                    cy="19.4" r="3.1" />
-                  <circle class="jar__kiwi jar__kiwi--3" cx="19.3"
-                    cy="19.4" r="3.1" />
+            <span class="mode-toggle__track" aria-hidden="true">
+              <!-- Extra kiwi slices revealed as the thumb slides. -->
+              <svg class="mode-toggle__kiwi mode-toggle__kiwi--2"
+                width="15" height="15" viewBox="0 0 15 15">
+                <circle cx="7.5" cy="7.5" r="7" class="kiwi__skin" />
+                <circle cx="7.5" cy="7.5" r="4.6" class="kiwi__flesh" />
+                <circle cx="7.5" cy="7.5" r="1.8" class="kiwi__core" />
+                <g class="kiwi__seeds">
+                  <circle cx="7.5" cy="3.6" r="0.55" />
+                  <circle cx="10.4" cy="5.6" r="0.55" />
+                  <circle cx="9.4" cy="9.1" r="0.55" />
+                  <circle cx="5.6" cy="9.1" r="0.55" />
+                  <circle cx="4.6" cy="5.6" r="0.55" />
                 </g>
               </svg>
+              <svg class="mode-toggle__kiwi mode-toggle__kiwi--3"
+                width="15" height="15" viewBox="0 0 15 15">
+                <circle cx="7.5" cy="7.5" r="7" class="kiwi__skin" />
+                <circle cx="7.5" cy="7.5" r="4.6" class="kiwi__flesh" />
+                <circle cx="7.5" cy="7.5" r="1.8" class="kiwi__core" />
+                <g class="kiwi__seeds">
+                  <circle cx="7.5" cy="3.6" r="0.55" />
+                  <circle cx="10.4" cy="5.6" r="0.55" />
+                  <circle cx="9.4" cy="9.1" r="0.55" />
+                  <circle cx="5.6" cy="9.1" r="0.55" />
+                  <circle cx="4.6" cy="5.6" r="0.55" />
+                </g>
+              </svg>
+              <!-- Sliding thumb, carries the always-visible kiwi. -->
+              <span class="mode-toggle__thumb">
+                <svg class="mode-toggle__kiwi mode-toggle__kiwi--1"
+                  width="17" height="17" viewBox="0 0 15 15">
+                  <circle cx="7.5" cy="7.5" r="7" class="kiwi__skin" />
+                  <circle cx="7.5" cy="7.5" r="4.6"
+                    class="kiwi__flesh" />
+                  <circle cx="7.5" cy="7.5" r="1.8"
+                    class="kiwi__core" />
+                  <g class="kiwi__seeds">
+                    <circle cx="7.5" cy="3.6" r="0.55" />
+                    <circle cx="10.4" cy="5.6" r="0.55" />
+                    <circle cx="9.4" cy="9.1" r="0.55" />
+                    <circle cx="5.6" cy="9.1" r="0.55" />
+                    <circle cx="4.6" cy="5.6" r="0.55" />
+                  </g>
+                </svg>
+              </span>
             </span>
             <span class="mode-toggle__label">
               <span class="mode-toggle__word mode-toggle__word--simple"
@@ -511,6 +576,15 @@ const steps = [
         </div>
       </div>
     </nav>
+
+    <!-- ============ Opening note (Simple only) ============ -->
+    <!-- A short, personal note that sets the tone before the hero
+         even loads — unattributed; the first-person voice reads on
+         its own. Hidden in Developer mode, which speaks to a
+         reader who already knows what a tiling manager is. -->
+    <p class="opening-note simple-only">
+      <span class="wrap">{t.quote_opening}</span>
+    </p>
 
     <!-- ============ Hero ============ -->
     <header class="hero">
@@ -651,6 +725,9 @@ const steps = [
           </button>
         </div>
         <p class="demo__caption">{t.demo_caption}</p>
+        <blockquote class="quote-aside quote-aside--demo">
+          <p>“{t.quote_demo}”</p>
+        </blockquote>
       </div>
     </section>
 
@@ -751,7 +828,7 @@ const steps = [
         <blockquote class="quote-card reveal">
           <p>“{t.quote_simple}”</p>
           <footer class="quote-card__byline">
-            {t.quote_byline}
+            {t.quote_byline_simple}
           </footer>
         </blockquote>
       </div>
@@ -784,8 +861,14 @@ const steps = [
       <div class="wrap">
         <blockquote class="quote-card quote-card--dev">
           <p>“{t.quote_dev}”</p>
-          <footer class="quote-card__byline">
-            {t.quote_byline}
+          <footer class="quote-card__byline quote-card__byline--two">
+            <a class="quote-card__byline-main" href={makerProfile}
+              target="_blank" rel="noopener">
+              {t.quote_byline_dev_main}
+            </a>
+            <span class="quote-card__byline-sub">
+              {t.quote_byline_dev_sub}
+            </span>
           </footer>
         </blockquote>
       </div>
@@ -848,6 +931,9 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
           <span class="eyebrow">{t.cli_eyebrow}</span>
           <h2>{t.cli_title}</h2>
           <p>{t.cli_body}</p>
+          <blockquote class="quote-aside quote-aside--left">
+            <p>“{t.quote_cli}”</p>
+          </blockquote>
         </div>
         <div class="code" aria-label="KiwiDesk CLI examples">
           <div class="code__bar">
@@ -937,6 +1023,9 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
               {t.footer_kofi}
             </a>
           </div>
+          <blockquote class="quote-aside quote-aside--center">
+            <p>“{t.quote_cta}”</p>
+          </blockquote>
           <p class="req req--center">
             <svg width="15" height="15" viewBox="0 0 24 24"
               fill="none" stroke="currentColor" stroke-width="2"
@@ -960,6 +1049,10 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
             sizes="110px" />
           <p class="footer__name">{t.footer_org}</p>
           <p class="footer__tag">{t.footer_tag}</p>
+          <blockquote class="quote-aside quote-aside--center
+            quote-aside--footer">
+            <p>“{t.quote_footer}”</p>
+          </blockquote>
         </div>
         <a class="footer__kofi" href={kofi} target="_blank"
           rel="noopener">
@@ -975,6 +1068,15 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
             >{t.footer_design}</a>
         </nav>
         <p class="footer__copy">{t.footer_copy}</p>
+        <!-- Low-key maker credit — the maker's personal profile,
+             distinct from the project repo link above. -->
+        <p class="footer__credit">
+          {t.footer_credit_built_by}
+          <a href={makerProfile} target="_blank" rel="noopener">
+            {t.footer_credit_name} · {t.footer_credit_handle}
+          </a>
+        </p>
+        <p class="footer__daily">{t.daily_kiwi}</p>
       </div>
     </footer>
 

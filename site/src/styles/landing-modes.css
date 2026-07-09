@@ -51,128 +51,151 @@
 }
 
 /* =========================================================
-   The signature mode toggle — "kiwi jar"
-   Simple = one kiwi resting in the jar; Developer = three, and the
-   jar tilts as if jostled by the extra weight. A word label +
-   tooltip keep it discoverable and un-cryptic; the jar's shape,
-   shelf line and tilt read as a physical, clickable object even
-   before the label is read.
+   The signature mode toggle — "kiwi count" sliding pill
+   A deliberate sibling of the theme toggle's track+thumb control
+   language, so it reads as an obvious switch at a glance. Simple =
+   thumb rests left, carrying one kiwi slice. Developer = the thumb
+   slides right and two more kiwi slices pop in beside it in the
+   track, so switching visibly "grows" the kiwi count. Word label +
+   tooltip keep the meaning of the two positions un-cryptic.
    ========================================================= */
 .mode-toggle {
   position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.3rem 0.75rem 0.3rem 0.5rem;
+  padding: 0;
   margin-left: 0.1rem;
-  border-radius: 999px;
-  border: 1px solid var(--border-strong);
-  background: var(--nav-hover-bg);
+  border: 0;
+  background: none;
   color: var(--nav-ink);
   font-family: inherit;
   font-size: 0.86rem;
   font-weight: 600;
   line-height: 1;
   cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease,
-    box-shadow 0.25s ease, transform 0.15s ease;
 }
 
-.mode-toggle:hover {
-  border-color: var(--accent);
-  background: var(--nav-hover-bg);
-  box-shadow: 0 0 0 3px var(--card-glow);
-}
-
-.mode-toggle:active {
+.mode-toggle:active .mode-toggle__track {
   transform: scale(0.97);
 }
 
 .mode-toggle:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
+  border-radius: 999px;
 }
 
-/* ---- The jar itself ---- */
-.mode-toggle__jar {
-  display: inline-grid;
-  place-items: center;
-  width: 30px;
-  height: 26px;
-  flex-shrink: 0;
-}
-
-.mode-toggle__jar-g {
+/* ---- Track + thumb, sized like the theme toggle but wider to fit
+   the kiwi count growing from one to three. ---- */
+.mode-toggle__track {
+  position: relative;
   display: block;
-  overflow: visible;
+  width: 66px;
+  height: 30px;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--nav-hover-bg);
+  transition: background 0.25s ease, border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.mode-toggle:hover .mode-toggle__track {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--card-glow);
+}
+/* Subtle tint shift toward the brand green as the track fills with
+   kiwis, reinforcing "more" without relying on color alone. */
+:root[data-mode="dev"] .mode-toggle__track {
+  background: var(--tile-fill-ghost);
 }
 
-.jar__shelf {
-  stroke: var(--border-strong);
+.mode-toggle__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--bg-3);
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+:root[data-mode="dev"] .mode-toggle__thumb {
+  transform: translateX(36px);
 }
 
-.jar__glass {
-  fill: var(--tile-fill-ghost);
-  stroke: var(--tile-stroke-ghost);
-  transition: fill 0.25s ease, stroke 0.25s ease;
-}
-.jar__lid {
-  stroke: var(--text-faint);
-  fill: none;
-}
-
-/* Tilting group: the jar body + kiwi slices rock together, as if
-   jostled by the extra kiwis landing inside. Pivot near the jar's
-   base so it reads as "resting on the shelf, tipping slightly". */
-.jar__tilt {
-  transform-box: fill-box;
-  transform-origin: 50% 100%;
-  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-:root[data-mode="dev"] .jar__tilt {
-  transform: rotate(-6deg);
-}
-
-/* Kiwi slices inside the jar: brand-green discs with a thin ring,
-   consistent with the layout-diagram tile palette used elsewhere.
-   #1 (Simple's lone kiwi) always shows; #2/#3 spring in for Dev. */
-.jar__kiwi {
-  fill: var(--tile-fill-accent);
-  stroke: var(--tile-stroke);
-  stroke-width: 1.2;
-  transform-box: fill-box;
-  transform-origin: center;
-}
-.jar__kiwi--2,
-.jar__kiwi--3 {
-  transform: scale(0) translateY(3px);
+/* Extra kiwi slices sit in the track, roughly where the thumb ends
+   up when it slides right, so they read as "revealed" rather than
+   floating disconnected from it. */
+.mode-toggle__kiwi--2,
+.mode-toggle__kiwi--3 {
+  position: absolute;
+  top: 7.5px;
+  transform: scale(0);
   opacity: 0;
   transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
     opacity 0.3s ease;
 }
-:root[data-mode="dev"] .jar__kiwi--2,
-:root[data-mode="dev"] .jar__kiwi--3 {
-  transform: scale(1) translateY(0);
+.mode-toggle__kiwi--2 {
+  left: 32px;
+}
+.mode-toggle__kiwi--3 {
+  left: 46px;
+}
+:root[data-mode="dev"] .mode-toggle__kiwi--2,
+:root[data-mode="dev"] .mode-toggle__kiwi--3 {
+  transform: scale(1);
   opacity: 1;
 }
-:root[data-mode="dev"] .jar__kiwi--3 {
-  transition-delay: 0.07s;
+:root[data-mode="dev"] .mode-toggle__kiwi--2 {
+  transition-delay: 0.12s;
+}
+:root[data-mode="dev"] .mode-toggle__kiwi--3 {
+  transition-delay: 0.2s;
 }
 
-/* Idle wiggle invites the click in Simple mode: the whole jar
-   rocks a couple of degrees, like it's asking to be topped up. */
-:root[data-mode="simple"] .mode-toggle:hover .jar__tilt {
-  animation: jar-wiggle 0.6s ease;
+/* Kiwi glyph, drawn (not emoji) so it renders identically and
+   crisply everywhere: green skin, pale-green flesh ring, a small
+   core, and a ring of seed dots — unmistakably a kiwi slice at
+   this size, unlike a flat brand-colored disc. */
+.mode-toggle__kiwi {
+  display: block;
+  overflow: visible;
 }
-@keyframes jar-wiggle {
-  0%, 100% { transform: rotate(0); }
-  30% { transform: rotate(-5deg); }
-  65% { transform: rotate(3deg); }
+.kiwi__skin {
+  fill: var(--kiwi-bright);
+  stroke: var(--kiwi-flesh);
+  stroke-width: 0.6;
 }
-/* In Developer mode, hovering nudges the already-tilted jar a
-   little further, reinforcing it's a live control either way. */
-:root[data-mode="dev"] .mode-toggle:hover .jar__tilt {
-  transform: rotate(-9deg);
+.kiwi__flesh {
+  fill: #e9f2c9;
+}
+:root[data-theme="dark"] .kiwi__flesh {
+  fill: #d8ecb0;
+}
+.kiwi__core {
+  fill: #f6f9e8;
+}
+.kiwi__seeds circle {
+  fill: #2b2411;
+}
+
+/* Idle wiggle on the thumb invites the click in Simple mode. */
+:root[data-mode="simple"] .mode-toggle:hover .mode-toggle__thumb {
+  animation: kiwi-thumb-wiggle 0.5s ease;
+}
+@keyframes kiwi-thumb-wiggle {
+  0%, 100% { transform: translateX(0) rotate(0); }
+  35% { transform: translateX(-1px) rotate(-8deg); }
+  70% { transform: translateX(1px) rotate(6deg); }
+}
+/* In Developer mode, hovering nudges the thumb a touch further
+   right, reinforcing it's still a live control either way. */
+:root[data-mode="dev"] .mode-toggle:hover .mode-toggle__thumb {
+  transform: translateX(39px);
 }
 
 /* Word label crossfades Simple ⇄ Developer inside a fixed box so
@@ -234,16 +257,15 @@
 }
 
 /* Tight phones: shrink the toggle to icon + kiwis, drop the word
-   and tooltip so the nav cluster never overflows. */
-@media (max-width: 560px) {
+   and tooltip so the nav cluster never overflows. In Developer
+   mode the nav also carries Docs + GitHub, so this needs headroom
+   above the classic ~480px phone breakpoint. */
+@media (max-width: 580px) {
   .mode-toggle__label {
     display: none;
   }
   .mode-toggle__tip {
     display: none;
-  }
-  .mode-toggle {
-    padding: 0.34rem 0.55rem;
   }
 }
 @media (max-width: 460px) {
@@ -252,6 +274,17 @@
   }
   .nav__support {
     padding: 0.5rem 0.6rem;
+  }
+}
+/* Developer mode adds Docs + GitHub to the nav; below ~500px the
+   five-item cluster (Docs, GitHub, Support, mode toggle, theme
+   toggle) can't fit even after the Ko-fi-text shedding above (that
+   alone only closes the gap back down to 460px). Both links stay
+   reachable via the dev hero CTAs and the footer, so drop them
+   here rather than let the nav overflow. */
+@media (max-width: 500px) {
+  :root[data-mode="dev"] a.nav__link.dev-only {
+    display: none;
   }
 }
 
@@ -420,7 +453,10 @@
   padding: 0;
   display: grid;
   gap: clamp(1rem, 2.4vw, 1.5rem);
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(240px, 100%), 1fr)
+  );
   counter-reset: step;
 }
 .step {
@@ -552,7 +588,10 @@
   padding: 0;
   display: grid;
   gap: 0.85rem clamp(1rem, 3vw, 2rem);
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(250px, 100%), 1fr)
+  );
   max-width: 760px;
   margin-inline: auto;
 }
@@ -620,13 +659,39 @@
 /* =========================================================
    Pull-quotes — a personal, human voice.
 
-   Two variants:
-     .quote-band  a large, centered divider quote (the universal
-                  tagline, right under the hero — hits before the
-                  page forks into a mode)
-     .quote-card  a warmer, boxed quote with a byline, used once
-                  per mode further down the page
+   Variants:
+     .opening-note a single unattributed line above the hero
+                   (Simple mode only — sets the tone before the
+                   page even loads)
+     .quote-band   a large, centered divider quote (the universal
+                   tagline, right under the hero — hits before the
+                   page forks into a mode)
+     .quote-card   a warmer, boxed quote with a byline, used once
+                   per mode further down the page
+     .quote-aside  a small unattributed aside dropped into an
+                   existing section (demo, CLI, CTA, footer) —
+                   quieter than .quote-card, no box, no byline
    ========================================================= */
+
+/* Opening note — thin band directly under the nav, Simple mode
+   only. Deliberately understated: no box, no icon, just italic
+   first-person text that reads like a note left before the page
+   starts its pitch. */
+.opening-note {
+  margin: 0;
+  padding-block: clamp(1rem, 3vw, 1.5rem);
+  text-align: center;
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--border);
+}
+.opening-note .wrap {
+  display: block;
+  max-width: 62ch;
+  font-size: clamp(0.92rem, 2vw, 1.02rem);
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
 .quote-band {
   padding-block: clamp(2.5rem, 6vw, 4rem);
 }
@@ -698,12 +763,88 @@
   text-wrap: balance;
 }
 .quote-card__byline {
+  display: block;
   color: var(--text-faint);
   font-size: 0.88rem;
   font-weight: 600;
 }
 .quote-card--dev p {
   font-family: var(--font);
+}
+
+/* Two-line byline (Developer quote): a normal-weight main line and
+   a smaller, lighter, playful sub-line underneath. */
+.quote-card__byline--two {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.quote-card__byline-main {
+  color: var(--text-faint);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+/* The dev byline links to the maker's GitHub — keep it looking
+   like a byline, not a default link, with a subtle hover. */
+a.quote-card__byline-main {
+  text-decoration: underline;
+  text-decoration-color: var(--border-strong);
+  text-underline-offset: 2px;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+a.quote-card__byline-main:hover {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+.quote-card__byline-sub {
+  color: var(--text-faint);
+  opacity: 0.8;
+  font-size: 0.78rem;
+  font-weight: 500;
+  font-style: italic;
+}
+
+/* Quiet unattributed asides — dropped into an existing section
+   without a card/box, so they read as a whispered comment rather
+   than another testimonial block. */
+.quote-aside {
+  margin: 1.1rem 0 0;
+  max-width: 46ch;
+}
+.quote-aside p {
+  margin: 0;
+  color: var(--text-faint);
+  font-size: 0.92rem;
+  font-style: italic;
+  line-height: 1.5;
+}
+/* Centered under a video, CTA or footer element. */
+.quote-aside--center {
+  margin-inline: auto;
+  text-align: center;
+}
+/* Left-aligned beside a code block (CLI split section). */
+.quote-aside--left {
+  margin-top: 1.4rem;
+}
+/* Footer variant sits centered under the tagline, slightly tighter
+   line length so it doesn't stretch the narrow footer column. */
+.quote-aside--footer {
+  max-width: 38ch;
+  margin-top: 0.9rem;
+}
+
+/* Demo variant sits directly under the video's caption, centered
+   and constrained to the SAME column width as the video frame
+   itself (.demo__frame's 900px) so it visibly belongs to it rather
+   than trailing off toward the section's left edge. Balanced
+   spacing above (matches the caption's own top margin) and below
+   (closes out the section). */
+.quote-aside--demo {
+  max-width: 900px;
+  margin: 0.85rem auto 0;
+  text-align: center;
+  padding-bottom: 0.25rem;
 }
 
 /* =========================================================
@@ -769,22 +910,23 @@
    Reduced motion — snap everything, no reveal animation.
    ========================================================= */
 @media (prefers-reduced-motion: reduce) {
-  .jar__tilt,
-  .jar__kiwi--2,
-  .jar__kiwi--3,
+  .mode-toggle__thumb,
+  .mode-toggle__kiwi--2,
+  .mode-toggle__kiwi--3,
   .mode-toggle__word,
   .mode-toggle__tip,
   .theme-toggle__thumb {
     transition: none;
   }
-  :root[data-mode="simple"] .mode-toggle:hover .jar__tilt,
-  :root[data-mode="dev"] .mode-toggle:hover .jar__tilt {
+  :root[data-mode="simple"] .mode-toggle:hover .mode-toggle__thumb,
+  :root[data-mode="dev"] .mode-toggle:hover .mode-toggle__thumb {
     animation: none;
-    transform: rotate(0);
+    transform: translateX(0);
   }
-  :root[data-mode="dev"] .jar__tilt {
-    /* Snap to the tilted resting pose with no rock-in motion. */
-    transform: rotate(-6deg);
+  :root[data-mode="dev"] .mode-toggle:hover .mode-toggle__thumb {
+    /* Snap straight to the Developer resting position, no extra
+       slide-in-further nudge. */
+    transform: translateX(36px);
   }
   :root[data-mode="dev"] .dev-reveal,
   :root[data-mode="dev"] #features .card {

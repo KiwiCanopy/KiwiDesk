@@ -343,6 +343,41 @@ body::before {
   }
 }
 
+/* Below the smallest common phone width (iPhone SE is 375px), trim
+   the remaining gaps/padding further — verified overflow-free at
+   320px and below in both Simple and Developer mode. Placed after
+   the 460px block above (not in landing-modes.css) so it wins the
+   cascade at equal specificity. */
+@media (max-width: 340px) {
+  .nav__inner {
+    gap: 0.25rem;
+  }
+  .mode-toggle {
+    gap: 0.3rem;
+  }
+  .mode-toggle__track {
+    width: 52px;
+  }
+  .mode-toggle__kiwi--2 {
+    left: 26px;
+  }
+  .mode-toggle__kiwi--3 {
+    left: 37px;
+  }
+  :root[data-mode="dev"] .mode-toggle__thumb {
+    transform: translateX(24px);
+  }
+  :root[data-mode="dev"] .mode-toggle:hover .mode-toggle__thumb {
+    transform: translateX(27px);
+  }
+  .theme-toggle__track {
+    width: 44px;
+  }
+  :root[data-theme="dark"] .theme-toggle__thumb {
+    transform: translateX(16px);
+  }
+}
+
 /* The nav resting color adapts per theme via --nav-ink*, since
    the hero band is light in the light theme and dark in dark. */
 .nav__brand {
@@ -822,7 +857,13 @@ section {
 .grid {
   display: grid;
   gap: clamp(1rem, 2.2vw, 1.4rem);
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  /* min(280px, 100%) lets a card shrink below 280px on viewports
+     narrower than that (plus padding) instead of forcing overflow
+     — normal-width behavior is unchanged. */
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(280px, 100%), 1fr)
+  );
 }
 
 .card {
@@ -895,7 +936,10 @@ section {
 .layouts {
   display: grid;
   gap: clamp(1rem, 2.2vw, 1.4rem);
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(min(250px, 100%), 1fr)
+  );
 }
 
 .layout-card {
@@ -1192,6 +1236,37 @@ section {
   color: var(--text-faint);
   font-size: 0.85rem;
   margin: 0;
+}
+
+/* Low-key maker credit — deliberately quieter than the copyright
+   line above it (smaller, fainter), so the name reads as a warm
+   footnote rather than a second brand mark. */
+.footer__credit {
+  color: var(--text-faint);
+  opacity: 0.82;
+  font-size: 0.78rem;
+  margin: 0.35rem 0 0;
+}
+.footer__credit a {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--border-strong);
+  text-underline-offset: 2px;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+.footer__credit a:hover {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+
+/* Playful sign-off, the very last line of the page. */
+.footer__daily {
+  color: var(--text-faint);
+  font-size: 0.8rem;
+  font-style: italic;
+  margin: 1rem 0 0;
+  opacity: 0.9;
 }
 
 /* =========================================================
