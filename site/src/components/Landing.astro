@@ -14,6 +14,7 @@
 //   • lang   — `kiwidesk-site-lang`  ("en" | "de"), paired with
 //              the route (/ ↔ /de/); resolved anti-FOUC in <head>.
 import { Image } from "astro:assets";
+import { Icon } from "astro-icon/components";
 import logoMark from "../assets/brand/logo.svg";
 import kiwiMark from "../assets/brand/kiwi-solutions.svg";
 import kofiIcon from "../assets/brand/kofi_symbol.svg";
@@ -43,43 +44,6 @@ const makerProfile = "https://github.com/hajiboy95";
 const buildCmd =
   `git clone ${repo}.git\ncd KiwiDesk\nswift build -c release`;
 
-// Inline feature icons (stroke-based, consistent 24x24 grid).
-function iconSvg(name: string): string {
-  const S = (p: string) =>
-    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ` +
-    `stroke-width="1.9" stroke-linecap="round" ` +
-    `stroke-linejoin="round">${p}</svg>`;
-  switch (name) {
-    case "layers":
-      return S(
-        `<path d="M12 3 2 8l10 5 10-5-10-5Z"/>` +
-          `<path d="M2 13l10 5 10-5"/>`
-      );
-    case "grid":
-      return S(
-        `<rect x="3" y="3" width="7" height="7" rx="1"/>` +
-          `<rect x="14" y="3" width="7" height="7" rx="1"/>` +
-          `<rect x="3" y="14" width="7" height="7" rx="1"/>` +
-          `<rect x="14" y="14" width="7" height="7" rx="1"/>`
-      );
-    case "code":
-      return S(`<path d="m8 8-4 4 4 4"/><path d="m16 8 4 4-4 4"/>`);
-    case "terminal":
-      return S(`<path d="m5 7 5 5-5 5"/><path d="M13 17h6"/>`);
-    case "wave":
-      return S(
-        `<path d="M2 12c2 0 2-5 4-5s2 10 4 10 2-10 4-10 2 5 4 5"/>`
-      );
-    case "shield":
-      return S(
-        `<path d="M12 3 5 6v5c0 4 3 7 7 8 4-1 7-4 7-8V6l-7-3Z"/>` +
-          `<path d="m9 12 2 2 4-4"/>`
-      );
-    default:
-      return S(`<circle cx="12" cy="12" r="9"/>`);
-  }
-}
-
 // A crisp kiwi-slice glyph (green skin, pale flesh ring, small
 // core, a ring of seed dots) for the mode toggle — drawn rather
 // than the 🥝 emoji so it renders identically and cleanly at these
@@ -96,12 +60,12 @@ function kiwiSvg(size: number): string {
 // same drawings from one source (imported above).
 
 const features = [
-  { title: t.feat_1_title, body: t.feat_1_body, icon: "layers" },
-  { title: t.feat_2_title, body: t.feat_2_body, icon: "grid" },
-  { title: t.feat_3_title, body: t.feat_3_body, icon: "code" },
-  { title: t.feat_4_title, body: t.feat_4_body, icon: "terminal" },
-  { title: t.feat_5_title, body: t.feat_5_body, icon: "wave" },
-  { title: t.feat_6_title, body: t.feat_6_body, icon: "shield" },
+  { title: t.feat_1_title, body: t.feat_1_body, icon: "lucide:layers" },
+  { title: t.feat_2_title, body: t.feat_2_body, icon: "lucide:layout-grid" },
+  { title: t.feat_3_title, body: t.feat_3_body, icon: "lucide:code" },
+  { title: t.feat_4_title, body: t.feat_4_body, icon: "lucide:square-terminal" },
+  { title: t.feat_5_title, body: t.feat_5_body, icon: "lucide:audio-lines" },
+  { title: t.feat_6_title, body: t.feat_6_body, icon: "lucide:shield-check" },
 ];
 
 const layouts = [
@@ -302,24 +266,10 @@ const steps = [
             aria-label={t.nav_theme_label} aria-pressed="false">
             <span class="theme-toggle__track" aria-hidden="true">
               <span class="theme-toggle__thumb">
-                <svg class="theme-toggle__sun" width="15" height="15"
-                  viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2.2"
-                  stroke-linecap="round" stroke-linejoin="round"
-                  aria-hidden="true">
-                  <circle cx="12" cy="12" r="4" />
-                  <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7
-                    17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7
-                    6.3l1.4-1.4" />
-                </svg>
-                <svg class="theme-toggle__moon" width="14" height="14"
-                  viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="2.2"
-                  stroke-linecap="round" stroke-linejoin="round"
-                  aria-hidden="true">
-                  <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8
-                    9.8Z" />
-                </svg>
+                <Icon name="lucide:sun" class="theme-toggle__sun"
+                  width={15} height={15} aria-hidden="true" />
+                <Icon name="lucide:moon" class="theme-toggle__moon"
+                  width={14} height={14} aria-hidden="true" />
               </span>
             </span>
           </button>
@@ -386,12 +336,8 @@ const steps = [
           <div class="hero__cta">
             <a class="btn btn--primary" href="/docs/">
               {t.hero_dev_cta_docs}
-              <svg width="16" height="16" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" stroke-width="2.4"
-                stroke-linecap="round" stroke-linejoin="round"
-                aria-hidden="true">
-                <path d="M5 12h14M13 6l6 6-6 6" />
-              </svg>
+              <Icon name="lucide:arrow-right" width={16} height={16}
+                aria-hidden="true" />
             </a>
             <a class="btn btn--ghost btn--ghost-light" href={repo}
               target="_blank" rel="noopener">
@@ -432,12 +378,8 @@ const steps = [
             <p>{t.what_body}</p>
             <a class="link-arrow" href="/guide/#getting-started">
               {t.what_learn}
-              <svg width="15" height="15" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" stroke-width="2.4"
-                stroke-linecap="round" stroke-linejoin="round"
-                aria-hidden="true">
-                <path d="M5 12h14M13 6l6 6-6 6" />
-              </svg>
+              <Icon name="lucide:arrow-right" width={15} height={15}
+                aria-hidden="true" />
             </a>
           </div>
           <div class="what__art" aria-hidden="true">
@@ -445,11 +387,8 @@ const steps = [
               <span></span><span></span><span></span><span></span>
             </div>
             <div class="what__arrow">
-              <svg width="30" height="30" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M5 12h14M13 6l6 6-6 6" />
-              </svg>
+              <Icon name="lucide:arrow-right" width={30} height={30}
+                aria-hidden="true" />
             </div>
             <div class="what__win what__win--tidy">
               <span></span><span></span><span></span><span></span>
@@ -539,41 +478,29 @@ const steps = [
         <ul class="perks reveal">
           <li>
             <span class="perks__check" aria-hidden="true">
-              <svg width="14" height="14" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" stroke-width="3"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 6 9 17l-5-5" />
-              </svg>
+              <Icon name="lucide:check" width={14} height={14}
+                aria-hidden="true" />
             </span>
             {t.calm_point_1}
           </li>
           <li>
             <span class="perks__check" aria-hidden="true">
-              <svg width="14" height="14" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" stroke-width="3"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 6 9 17l-5-5" />
-              </svg>
+              <Icon name="lucide:check" width={14} height={14}
+                aria-hidden="true" />
             </span>
             {t.calm_point_2}
           </li>
           <li>
             <span class="perks__check" aria-hidden="true">
-              <svg width="14" height="14" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" stroke-width="3"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 6 9 17l-5-5" />
-              </svg>
+              <Icon name="lucide:check" width={14} height={14}
+                aria-hidden="true" />
             </span>
             {t.calm_point_3}
           </li>
           <li>
             <span class="perks__check" aria-hidden="true">
-              <svg width="14" height="14" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" stroke-width="3"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 6 9 17l-5-5" />
-              </svg>
+              <Icon name="lucide:check" width={14} height={14}
+                aria-hidden="true" />
             </span>
             {t.calm_point_4}
           </li>
@@ -605,7 +532,7 @@ const steps = [
           {features.map((f) => (
             <article class="card">
               <div class="card__icon" aria-hidden="true">
-                <Fragment set:html={iconSvg(f.icon)} />
+                <Icon name={f.icon} />
               </div>
               <h3>{f.title}</h3>
               <p>{f.body}</p>
@@ -716,21 +643,12 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
           <p>{t.build_body}</p>
           <a class="btn btn--primary" href="/docs/">
             {t.build_cta}
-            <svg width="16" height="16" viewBox="0 0 24 24"
-              fill="none" stroke="currentColor" stroke-width="2.4"
-              stroke-linecap="round" stroke-linejoin="round"
-              aria-hidden="true">
-              <path d="M5 12h14M13 6l6 6-6 6" />
-            </svg>
+            <Icon name="lucide:arrow-right" width={16} height={16}
+              aria-hidden="true" />
           </a>
           <p class="req">
-            <svg width="15" height="15" viewBox="0 0 24 24"
-              fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round"
-              aria-hidden="true">
-              <circle cx="12" cy="12" r="9" />
-              <path d="M12 8v4l3 2" />
-            </svg>
+            <Icon name="lucide:clock" width={15} height={15}
+              aria-hidden="true" />
             {t.build_req}
           </p>
         </div>
@@ -746,13 +664,8 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
               data-label-copy={t.build_copy}
               data-label-done={t.build_copy_done}
               aria-label={t.build_copy_aria}>
-              <svg class="code__copy-icon" width="15" height="15"
-                viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round" aria-hidden="true">
-                <rect x="9" y="9" width="12" height="12" rx="2" />
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-              </svg>
+              <Icon name="lucide:copy" class="code__copy-icon"
+                width={15} height={15} aria-hidden="true" />
               <span class="code__copy-label">{t.build_copy}</span>
             </button>
           </div>
@@ -786,12 +699,8 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
             <p>“{t.quote_cta}”</p>
           </blockquote>
           <p class="req req--center">
-            <svg width="15" height="15" viewBox="0 0 24 24"
-              fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round"
-              aria-hidden="true">
-              <path d="M12 3 5 6v5c0 4 3 7 7 8 4-1 7-4 7-8V6l-7-3Z" />
-            </svg>
+            <Icon name="lucide:shield" width={15} height={15}
+              aria-hidden="true" />
             {t.cta_req}
           </p>
         </div>

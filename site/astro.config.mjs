@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
+import icon from "astro-icon";
 import { remarkDocsLinks } from "./remark-docs-links.mjs";
 
 // The public site URL. Override with SITE_URL at build time
@@ -14,6 +15,7 @@ export default defineConfig({
   // Starlight routes and drop their duplicate H1 (see the plugin).
   markdown: { remarkPlugins: [remarkDocsLinks] },
   integrations: [
+    icon(),
     starlight({
       title: "KiwiDesk",
       description:
