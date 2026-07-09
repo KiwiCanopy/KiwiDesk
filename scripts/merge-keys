@@ -4,6 +4,12 @@
 
 Usage:
     scripts/merge-keys <locale>
+    scripts/merge-keys --site <locale>
+
+Add `--site` to fold into the marketing site's manifests
+(`site/src/i18n/<locale>.json`) after `scripts/extract-keys
+--site <locale>`, instead of the Swift app's locale dir. Every
+other rule below is identical for both.
 
 Run after `scripts/extract-keys <locale>` produced
 `missing_<locale>.json` — a `{key: {"source": <English>,
@@ -31,17 +37,24 @@ LOCALES_DIR = (
 
 
 def main(argv: list[str]) -> int:
-    if len(argv) != 2:
+    global LOCALES_DIR
+    args = argv[1:]
+    site = "--site" in args
+    flag = "--site " if site else ""
+    if site:
+        args = [a for a in args if a != "--site"]
+        LOCALES_DIR = ROOT / "site" / "src" / "i18n"
+    if len(args) != 1:
         print(__doc__)
         return 1
-    locale = argv[1]
+    locale = args[0]
     missing_file = LOCALES_DIR / f"missing_{locale}.json"
     locale_file = LOCALES_DIR / f"{locale}.json"
 
     if not missing_file.exists():
         print(
             f"merge-keys: {missing_file} does not exist — run "
-            f"scripts/extract-keys {locale} first.",
+            f"scripts/extract-keys {flag}{locale} first.",
             file=sys.stderr,
         )
         return 1
@@ -82,7 +95,7 @@ def main(argv: list[str]) -> int:
             f"merge-keys: {len(skipped)} key(s) still had an "
             "empty \"translation\" and were skipped — they "
             f"will re-appear next time you run "
-            f"scripts/extract-keys {locale}:"
+            f"scripts/extract-keys {flag}{locale}:"
         )
         for key in sorted(skipped):
             print(f"    - {key}")
