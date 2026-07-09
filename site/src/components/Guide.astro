@@ -50,7 +50,6 @@ const homeHref = lang === "de" ? "/de/" : "/";
 const repo = "https://github.com/hajiboy95/KiwiDesk";
 const kofi = "https://ko-fi.com/kiwisolutions";
 const makerProfile = "https://github.com/hajiboy95";
-const brewCmd = "brew install --cask kiwidesk\nkiwidesk service start";
 
 // The table of contents — drives both the desktop rail and the
 // mobile dropdown. Order matches the sections below. `id` is the
@@ -429,39 +428,6 @@ const scenarios = [
                       >{s.guide_gs_appstore_big}</span>
                   </span>
                 </a>
-                <span class="learn-install__or"
-                  >{s.guide_gs_or_homebrew}</span>
-              </div>
-
-              <div class="code" aria-label={s.guide_gs_code_aria}>
-                <div class="code__bar">
-                  <span class="code__dot" aria-hidden="true"></span>
-                  <span class="code__dot" aria-hidden="true"></span>
-                  <span class="code__dot" aria-hidden="true"></span>
-                  <span class="code__title"
-                    >{s.guide_gs_code_title}</span>
-                  <button class="code__copy" id="copyBrew"
-                    type="button" data-copy={brewCmd}
-                    data-label-copy={s.guide_copy}
-                    data-label-done={s.guide_copy_done}
-                    aria-label={s.guide_gs_copy_aria}>
-                    <svg class="code__copy-icon" width="15"
-                      height="15" viewBox="0 0 24 24" fill="none"
-                      stroke="currentColor" stroke-width="2"
-                      stroke-linecap="round" stroke-linejoin="round"
-                      aria-hidden="true">
-                      <rect x="9" y="9" width="12" height="12"
-                        rx="2" />
-                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1
-                        2-2h9a2 2 0 0 1 2 2v1" />
-                    </svg>
-                    <span class="code__copy-label"
-                      >{s.guide_copy}</span>
-                  </button>
-                </div>
-                <pre><code><span class="prompt">$</span> brew install --cask kiwidesk
-<span class="prompt">$</span> kiwidesk service start
-<span class="cmt">{s.guide_gs_brew_cmt}</span></code></pre>
               </div>
 
               <p class="learn__store-note">
@@ -778,27 +744,6 @@ const scenarios = [
       onScroll();
       window.addEventListener("scroll", onScroll, { passive: true });
 
-      // ---- Copy the install commands ----
-      // Labels come from data-* attributes so the copied/idle text
-      // is localized without hardcoding either here.
-      const copyBtn = document.getElementById("copyBrew");
-      const copyLabel = copyBtn?.querySelector(".code__copy-label");
-      copyBtn?.addEventListener("click", async () => {
-        const text = copyBtn.getAttribute("data-copy") || "";
-        const idle = copyBtn.getAttribute("data-label-copy") || "";
-        const done = copyBtn.getAttribute("data-label-done") || "";
-        try {
-          await navigator.clipboard.writeText(text);
-          copyBtn.classList.add("is-copied");
-          if (copyLabel) copyLabel.textContent = done;
-          setTimeout(() => {
-            copyBtn.classList.remove("is-copied");
-            if (copyLabel) copyLabel.textContent = idle;
-          }, 1600);
-        } catch (e) {
-          /* clipboard blocked — no-op */
-        }
-      });
 
       // ---- Active-section highlight in the TOC ----
       const tocLinks = Array.from(
