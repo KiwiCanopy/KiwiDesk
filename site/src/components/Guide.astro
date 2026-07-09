@@ -237,6 +237,24 @@ const scenarios = [
         }
       })();
     </script>
+    <!-- Restore scroll after a language switch: the EN|DE switcher
+         stashes scrollY before navigating, so switching languages
+         lands you at the same spot instead of jumping to the top. -->
+    <script is:inline>
+      (function () {
+        try {
+          var y = sessionStorage.getItem("kiwidesk-scroll");
+          if (y === null) return;
+          sessionStorage.removeItem("kiwidesk-scroll");
+          addEventListener("DOMContentLoaded", function () {
+            window.scrollTo({
+              top: parseInt(y, 10) || 0,
+              behavior: "instant",
+            });
+          });
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <!-- ============ Site nav (no mode toggle, no tab bar) ====== -->
@@ -641,6 +659,11 @@ const scenarios = [
             if (lang !== "en" && lang !== "de") return;
             try {
               localStorage.setItem("kiwidesk-site-lang", lang);
+              // Stash scroll so the destination locale restores it.
+              sessionStorage.setItem(
+                "kiwidesk-scroll",
+                String(window.scrollY)
+              );
             } catch (e) {
               /* storage unavailable — route change still works */
             }

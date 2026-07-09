@@ -774,10 +774,6 @@
   pointer-events: none;
   z-index: 0;
 }
-/* German opens low — swap the decorative glyph to „ (U+201E). */
-.quote-band__mark:lang(de)::before {
-  content: "\201E";
-}
 
 /* Boxed quote card — sits inline in a mode's content flow, with a
    small kiwi accent and a byline crediting the maker. */
