@@ -51,14 +51,15 @@
 }
 
 /* =========================================================
-   The signature mode toggle — branded sliding pill
-   A deliberate sibling of the theme toggle: same track/thumb size
-   and motion, so the two read as one control family at a glance.
-   The thumb carries the KiwiDesk logo mark (theme-swapped, same
-   asset as the nav brand mark) and slides left (Simple) ⇄ right
-   (Developer) on a clean two-position track. No icon count, no
-   clutter — the brand mark plus the word label + tooltip carry the
-   meaning, exactly like sun/moon does for the theme toggle.
+   The signature mode toggle — "kiwi count" sliding pill
+   A deliberate sibling of the theme toggle's track+thumb language.
+   The thumb IS a single drawn kiwi slice — that one kiwi, alone on
+   an otherwise empty track, is the whole story in Simple mode.
+   Developer mode slides the kiwi thumb right and pops two smaller,
+   secondary kiwi dots into the track behind it, so the track
+   visibly FILLS. The track is deliberately wide (74px, well past
+   the theme toggle's 52px) so a lone kiwi never crowds it and the
+   "empty → filled" contrast reads cleanly in both states.
    ========================================================= */
 .mode-toggle {
   position: relative;
@@ -87,11 +88,11 @@
   border-radius: 999px;
 }
 
-/* ---- Track + thumb, sized identically to the theme toggle. ---- */
+/* ---- Track + thumb ---- */
 .mode-toggle__track {
   position: relative;
   display: block;
-  width: 52px;
+  width: 74px;
   height: 30px;
   border-radius: 999px;
   border: 1px solid var(--border-strong);
@@ -104,8 +105,7 @@
   box-shadow: 0 0 0 3px var(--card-glow);
 }
 /* Subtle tint shift toward the brand green in Developer mode,
-   reinforcing the switched state without relying on position
-   alone (mirrors the kiwi-tint idea, minus the clutter). */
+   reinforcing the switched, "fuller" state. */
 :root[data-mode="dev"] .mode-toggle__track {
   background: var(--tile-fill-ghost);
 }
@@ -123,31 +123,82 @@
   border: 1px solid var(--border-strong);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22);
   transition: transform 0.36s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 2;
 }
 :root[data-mode="dev"] .mode-toggle__thumb {
-  transform: translateX(22px);
+  transform: translateX(44px);
 }
 .mode-toggle:hover .mode-toggle__thumb {
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.28);
 }
 
-/* Logo mark inside the thumb — theme-swapped like the nav brand
-   mark, so it stays legible against both the light and dark thumb
-   fill. Sized down slightly from its 28px nav rendering. */
-.mode-toggle__mark {
-  grid-area: 1 / 1;
+/* The single always-visible kiwi lives inside the thumb — it IS
+   the handle, not a passenger on it. */
+.mode-toggle__thumb .mode-toggle__kiwi {
   display: block;
-  width: 16px;
-  height: 16px;
 }
-.mode-toggle__mark--dark {
-  display: none;
-}
-:root[data-theme="dark"] .mode-toggle__mark--light {
-  display: none;
-}
-:root[data-theme="dark"] .mode-toggle__mark--dark {
+
+/* Extra kiwis: collapsed to nothing (zero scale + opacity) in
+   Simple mode so the track reads as genuinely empty, not just
+   "smaller kiwis". Sit roughly where the thumb's Developer resting
+   spot leaves room behind it, spaced apart so three kiwis read as
+   a loose group, not a packed row. */
+.mode-toggle__extra {
+  position: absolute;
+  top: 8px;
+  width: 14px;
+  height: 14px;
   display: block;
+  transform: scale(0);
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.3s ease;
+}
+.mode-toggle__extra--2 {
+  left: 8px;
+}
+.mode-toggle__extra--3 {
+  left: 26px;
+}
+:root[data-mode="dev"] .mode-toggle__extra {
+  transform: scale(1);
+  opacity: 1;
+}
+:root[data-mode="dev"] .mode-toggle__extra--2 {
+  transition-delay: 0.1s;
+}
+:root[data-mode="dev"] .mode-toggle__extra--3 {
+  transition-delay: 0.18s;
+}
+/* Switching back to Simple: the extras pop back out first, quick
+   and snappy, so the track visibly empties before/as the thumb
+   slides home. */
+:root[data-mode="simple"] .mode-toggle__extra {
+  transition: transform 0.22s ease, opacity 0.18s ease;
+}
+
+/* Kiwi glyph — drawn (not emoji) so it renders identically and
+   crisply everywhere: green skin, pale-green flesh ring, a small
+   core, and a ring of seed dots. */
+.mode-toggle__kiwi {
+  overflow: visible;
+}
+.kiwi__skin {
+  fill: var(--kiwi-bright);
+  stroke: var(--kiwi-flesh);
+  stroke-width: 0.6;
+}
+.kiwi__flesh {
+  fill: #e9f2c9;
+}
+:root[data-theme="dark"] .kiwi__flesh {
+  fill: #d8ecb0;
+}
+.kiwi__core {
+  fill: #f6f9e8;
+}
+.kiwi__seeds circle {
+  fill: #2b2411;
 }
 
 /* Idle wiggle on the thumb invites the click in Simple mode. */
@@ -162,7 +213,7 @@
 /* In Developer mode, hovering nudges the thumb a touch further
    right, reinforcing it's still a live control either way. */
 :root[data-mode="dev"] .mode-toggle:hover .mode-toggle__thumb {
-  transform: translateX(25px);
+  transform: translateX(47px);
 }
 
 /* Word label crossfades Simple ⇄ Developer inside a fixed box so
@@ -630,12 +681,13 @@
    Pull-quotes — a personal, human voice.
 
    Variants:
-     .opening-note a single unattributed line above the hero
-                   (Simple mode only — sets the tone before the
-                   page even loads)
-     .quote-band   a large, centered divider quote (the universal
-                   tagline, right under the hero — hits before the
-                   page forks into a mode)
+     .opening-note a single unattributed line directly under the
+                   hero (Simple mode only) — shares its slot with
+                   .quote-band below, so switching modes keeps the
+                   same post-hero quote position.
+     .quote-band   a large, centered divider quote (Developer
+                   mode's tagline, right under the hero) — shares
+                   its slot with .opening-note above.
      .quote-card   a warmer, boxed quote with a byline, used once
                    per mode further down the page
      .quote-aside  a small unattributed aside dropped into an
@@ -643,21 +695,22 @@
                    quieter than .quote-card, no box, no byline
    ========================================================= */
 
-/* Opening note — thin band directly under the nav, Simple mode
-   only. Deliberately understated: no box, no icon, just italic
-   first-person text that reads like a note left before the page
-   starts its pitch. */
+/* Opening note — sits directly under the hero, Simple mode only,
+   in the same slot .quote-band occupies for Developer mode.
+   Deliberately understated: no box, no icon, just italic
+   first-person text continuing straight onto the page's base
+   background (matching .quote-band's own treatment) rather than a
+   separate banded section. */
 .opening-note {
   margin: 0;
-  padding-block: clamp(1rem, 3vw, 1.5rem);
+  padding-block: clamp(2.5rem, 6vw, 4rem);
   text-align: center;
-  background: var(--bg-2);
-  border-bottom: 1px solid var(--border);
 }
 .opening-note .wrap {
   display: block;
-  max-width: 62ch;
-  font-size: clamp(0.92rem, 2vw, 1.02rem);
+  margin-inline: auto;
+  max-width: 56ch;
+  font-size: clamp(1rem, 2.2vw, 1.15rem);
   font-style: italic;
   line-height: 1.5;
   color: var(--text-dim);
@@ -881,6 +934,7 @@ a.quote-card__byline-main:hover {
    ========================================================= */
 @media (prefers-reduced-motion: reduce) {
   .mode-toggle__thumb,
+  .mode-toggle__extra,
   .mode-toggle__word,
   .mode-toggle__tip,
   .theme-toggle__thumb {
@@ -888,8 +942,9 @@ a.quote-card__byline-main:hover {
   }
   /* Kill the idle wiggle/hover-nudge animations entirely — with no
      transition, the base :root[data-mode] rules above already snap
-     the thumb straight to its resting position (translateX(0) for
-     Simple, translateX(22px) for Developer) with zero motion. */
+     the thumb (translateX(0) Simple / translateX(44px) Developer)
+     and the extra kiwis (scale 0 ⇄ 1) straight to their resting
+     state with zero motion. */
   :root[data-mode="simple"] .mode-toggle:hover .mode-toggle__thumb,
   :root[data-mode="dev"] .mode-toggle:hover .mode-toggle__thumb {
     animation: none;

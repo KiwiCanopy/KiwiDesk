@@ -325,21 +325,14 @@ body::before {
 }
 
 /* Tight phones: shed the nav's least-critical text before the
-   cluster can overflow (the icon still carries the Ko-fi link). */
+   cluster can overflow. The Ko-fi button is already icon-only, so
+   there's no text left to shed there. */
 @media (max-width: 460px) {
   .nav__inner {
     gap: 0.4rem;
   }
   .nav__link {
     padding-inline: 0.55rem;
-  }
-  .nav__support {
-    font-size: 0;
-    gap: 0;
-    padding: 0.5rem 0.6rem;
-  }
-  .nav__support span {
-    font-size: 1rem;
   }
   /* Tighten the language segments so the nav cluster (Ko-fi icon +
      lang + mode + theme) stays on one line on narrow phones. */
@@ -406,30 +399,36 @@ body::before {
   background: var(--nav-hover-bg);
 }
 
-/* Ko-fi support link — deliberately quiet: no fill or border at
-   rest, same visual weight as the Docs/GitHub text links beside it,
-   so it reads as a discoverable secondary link rather than a
-   competing CTA. A soft tint only appears on hover/focus. */
+/* Ko-fi nav button — icon-only and compact. Counterintuitively this
+   reads as LESS obtrusive than a worded link: a small, recognizable,
+   clearly-clickable button sits quietly among the other nav
+   controls instead of competing for reading attention. Sized and
+   shaped like a sibling of the toggles beside it (same ~30px
+   height, rounded, subtle fill/border at rest). The footer's Ko-fi
+   treatment is intentionally different (a quiet text link) — this
+   is the nav-only variant. */
 .nav__support {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  color: var(--nav-ink-dim);
-  font-weight: 550;
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--kofi-border);
+  background: var(--kofi-bg);
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .nav__support:hover {
-  color: var(--kofi-ink);
-  background: var(--nav-hover-bg);
+  background: var(--kofi-hover-bg);
+  border-color: var(--kofi-ink);
 }
 
-/* Official Ko-fi cup mark, kept in its brand colors but shrunk to
-   match the toned-down button. Fixed px (not em) so it survives
-   the icon-only nav collapse, where the button's font-size drops
-   to 0. */
+/* Official Ko-fi cup mark, kept in its brand colors. Sized up
+   slightly from the footer's icon since it now carries the button
+   alone, with no adjacent label text. */
 .kofi-icon {
-  width: 15px;
-  height: 12px;
+  width: 18px;
+  height: 14px;
   display: block;
   flex-shrink: 0;
 }
@@ -1341,31 +1340,43 @@ section {
 }
 
 /* =========================================================
-   Ultra-narrow nav shedding (≤340px)
+   Ultra-narrow nav shedding (≤365px)
    -----------------------------------------------------------
    Below the smallest common phone width (iPhone SE is 375px),
    trim the three nav toggles' (lang / mode / theme) width and
-   gaps further. Deliberately placed at the very end of the file —
-   after every base rule it overrides, including the toggles
-   defined in landing-modes.css (which @imports before this file's
-   own rules) — so it reliably wins the cascade at equal
-   specificity regardless of source order elsewhere.
+   gaps further. The mode toggle's wider 74px kiwi-count track
+   needs this shrink starting a bit earlier than the other two, so
+   the breakpoint sits at 365px rather than 375px. Deliberately
+   placed at the very end of the file — after every base rule it
+   overrides, including the toggles defined in landing-modes.css
+   (which @imports before this file's own rules) — so it reliably
+   wins the cascade at equal specificity regardless of source
+   order elsewhere.
    ========================================================= */
-@media (max-width: 340px) {
+@media (max-width: 365px) {
   .nav__inner {
     gap: 0.25rem;
   }
   .mode-toggle {
     gap: 0.3rem;
   }
+  /* Tighter than the 74px default, but still wide enough for the
+     thumb + two extra kiwis to read as three distinct dots rather
+     than an overlapping smear. */
   .mode-toggle__track {
-    width: 44px;
+    width: 52px;
+  }
+  .mode-toggle__extra--2 {
+    left: 5px;
+  }
+  .mode-toggle__extra--3 {
+    left: 17px;
   }
   :root[data-mode="dev"] .mode-toggle__thumb {
-    transform: translateX(14px);
+    transform: translateX(22px);
   }
   :root[data-mode="dev"] .mode-toggle:hover .mode-toggle__thumb {
-    transform: translateX(17px);
+    transform: translateX(25px);
   }
   .theme-toggle__track {
     width: 44px;

@@ -78,6 +78,27 @@ function iconSvg(name: string): string {
   }
 }
 
+// A crisp kiwi-slice glyph (green skin, pale flesh ring, small
+// core, a ring of seed dots) for the mode toggle — drawn rather
+// than the 🥝 emoji so it renders identically and cleanly at these
+// small sizes across platforms. `size` is the rendered px box.
+function kiwiSvg(size: number): string {
+  return (
+    `<svg class="mode-toggle__kiwi" width="${size}" ` +
+    `height="${size}" viewBox="0 0 15 15" aria-hidden="true">` +
+    `<circle cx="7.5" cy="7.5" r="7" class="kiwi__skin"/>` +
+    `<circle cx="7.5" cy="7.5" r="4.6" class="kiwi__flesh"/>` +
+    `<circle cx="7.5" cy="7.5" r="1.8" class="kiwi__core"/>` +
+    `<g class="kiwi__seeds">` +
+    `<circle cx="7.5" cy="3.6" r="0.55"/>` +
+    `<circle cx="10.4" cy="5.6" r="0.55"/>` +
+    `<circle cx="9.4" cy="9.1" r="0.55"/>` +
+    `<circle cx="5.6" cy="9.1" r="0.55"/>` +
+    `<circle cx="4.6" cy="5.6" r="0.55"/>` +
+    `</g></svg>`
+  );
+}
+
 // Tiny inline diagrams per layout (viewBox 0 0 160 90).
 function layoutDiagram(name: string): string {
   const svg = (p: string) =>
@@ -269,11 +290,15 @@ const steps = [
           <a class="nav__link dev-only" href="/docs/">{t.nav_docs}</a>
           <a class="nav__link dev-only" href={repo} target="_blank"
             rel="noopener">{t.nav_github}</a>
-          <a class="nav__link nav__support" href={kofi}
-            target="_blank" rel="noopener">
+          <!-- Icon-only Ko-fi button: compact and recognizable
+               reads as LESS obtrusive than a worded link here, and
+               keeps it visually in the same "small tidy control"
+               family as the toggles beside it. aria-label carries
+               the meaning since there's no visible text. -->
+          <a class="nav__support" href={kofi} target="_blank"
+            rel="noopener" aria-label={t.nav_support_aria}>
             <img class="kofi-icon" src={kofiIcon.src} alt=""
               aria-hidden="true" width="20" height="16" />
-            <span class="nav__support-text">{t.nav_support}</span>
           </a>
 
           <!-- Language switcher: a compact EN | DE segmented control,
@@ -293,24 +318,37 @@ const steps = [
               aria-current={lang === "de" ? "true" : undefined}>DE</a>
           </div>
 
-          <!-- Signature mode toggle: a sliding pill, a deliberate
-               sibling of the theme toggle's track+thumb language.
-               The thumb carries the KiwiDesk logo mark (the same
-               theme-swapped asset as the nav brand mark) and slides
-               left (Simple) ⇄ right (Developer) on a clean
-               two-position track — branded, but unambiguous as a
-               switch, with no cluttered icon count. A tooltip and
-               label spell out what the two positions mean. -->
+          <!-- Signature mode toggle: a sliding kiwi-COUNT pill, a
+               deliberate sibling of the theme toggle's track+thumb
+               language. The thumb itself IS a single drawn kiwi
+               slice (green disc, pale flesh ring, seed dots) — that
+               one kiwi is the whole story in Simple mode: an
+               uncluttered track, one clear handle, nothing else.
+               Switching to Developer slides the kiwi thumb right
+               AND pops two more (smaller, secondary) kiwi dots into
+               the track behind it, so the track visibly fills —
+               the contrast between "one kiwi, empty track" and
+               "a few kiwis filling it" is the whole point, so both
+               states are kept deliberately uncluttered on their
+               own. (A label-INSIDE-the-track variant was
+               prototyped and rejected — see landing-modes.css
+               history / the build report for why — in favor of
+               keeping the word label legible beside the track.) -->
           <button class="mode-toggle" id="modeToggle" type="button"
             aria-label={t.mode_toggle_aria} aria-pressed="false">
             <span class="mode-toggle__track" aria-hidden="true">
+              <!-- Extra kiwis, hidden until Developer mode. -->
+              <span class="mode-toggle__extra
+                mode-toggle__extra--2">
+                <Fragment set:html={kiwiSvg(11)} />
+              </span>
+              <span class="mode-toggle__extra
+                mode-toggle__extra--3">
+                <Fragment set:html={kiwiSvg(11)} />
+              </span>
+              <!-- Sliding thumb — the always-visible single kiwi. -->
               <span class="mode-toggle__thumb">
-                <img class="mode-toggle__mark
-                  mode-toggle__mark--light" src={logoMark.src}
-                  width="16" height="16" alt="" />
-                <img class="mode-toggle__mark
-                  mode-toggle__mark--dark" src={logoMarkDark.src}
-                  width="16" height="16" alt="" />
+                <Fragment set:html={kiwiSvg(15)} />
               </span>
             </span>
             <span class="mode-toggle__label">
@@ -355,15 +393,6 @@ const steps = [
         </div>
       </div>
     </nav>
-
-    <!-- ============ Opening note (Simple only) ============ -->
-    <!-- A short, personal note that sets the tone before the hero
-         even loads — unattributed; the first-person voice reads on
-         its own. Hidden in Developer mode, which speaks to a
-         reader who already knows what a tiling manager is. -->
-    <p class="opening-note simple-only">
-      <span class="wrap">{t.quote_opening}</span>
-    </p>
 
     <!-- ============ Hero ============ -->
     <header class="hero">
@@ -433,7 +462,16 @@ const steps = [
       <div class="hero__seam" aria-hidden="true"></div>
     </header>
 
-    <!-- ============ Tagline quote (both modes) ============ -->
+    <!-- ============ Post-hero quote (mode-specific, same slot) ===
+         Both modes show one quote directly under the hero, in the
+         same position — Simple gets the personal opening/motivation
+         note, Developer gets the "works with you" tagline. Keeping
+         them in one slot (rather than one above + one below the
+         hero) means the two modes read consistently as you switch
+         between them. -->
+    <p class="opening-note simple-only">
+      <span class="wrap">{t.quote_opening}</span>
+    </p>
     <section class="quote-band dev-only" aria-label="Our take">
       <div class="wrap">
         <blockquote class="quote-band__mark reveal">
