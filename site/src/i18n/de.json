@@ -36,13 +36,13 @@
   "quote_opening": "Tiling-Fenstermanager waren schon immer Spielzeug für Nerds. Ich wollte jedem einen ruhigeren Bildschirm schenken — einen, der einfach funktioniert, wie von Zauberhand.",
 
   "quote_tagline": "Ein Fenstermanager, der mit dir arbeitet — und nicht einer, dem du erst erklären musst, wie er arbeiten soll.",
-  "quote_simple": "Ich habe KiwiDesk gebaut, weil ich meinen Freunden zeigen wollte, wie entspannt es ist, seine Fenster nie wieder manuell verrücken zu müssen — ruhig, mühelos und spaß macht es auch.",
-  "quote_dev": "Obwohl mir das Terminal und Co. schon lange keine Probleme mehr bereiten, war ich es leid, ständig die aktuelle Containerstruktur im Hinterkopf zu behalten, nur um meine Fenster so anzuordnen, wie ich möchte. KiwiDesk sorgt für eine flache Struktur. Kein unnötiger Overhead, keine Ablenkung: einfach nur Fokus auf meine Projekte.",
+  "quote_simple": "Ich habe KiwiDesk gebaut, weil ich meinen Freunden zeigen wollte, wie entspannt es ist, seine Fenster nie wieder manuell verrücken zu müssen — ruhig, mühelos und Spaß macht es auch.",
+  "quote_dev": "Obwohl ich mich im Terminal absolut zuhause fühle, war ich es leid, ständig die verschachtelten Container im Hinterkopf behalten zu müssen, nur um meine Fenster so anzuordnen, wie ich will. KiwiDesk hält alles flach. Kein unnötiger Overhead, keine Ablenkung: einfach nur Fokus auf meine Projekte.",
   "quote_byline_simple": "— Maikel, pflanzt Kiwis für ein ruhigeres, glücklicheres Desktoperlebnis",
   "quote_byline_dev_main": "— Maikel, verteilt Kiwis (und ein bisschen mehr Ruhe), wo er nur kann",
 
   "quote_demo": "Kleine Warnung: Es ist ungefähr so wohltuend, wie Kiwis dabei zuzusehen, wie sie Kiwis stapeln. Du wirst absichtlich Fenster öffnen, nur um zuzusehen, wie sie an ihren Platz wandern.",
-  "quote_cli": "An dem Tag, an dem mein Fenstermanager skriptbar wurde, fing mein Desktop an, sich selbst zu managen. Seitdem habe ich kein Fenster mehr selbst platziert.",
+  "quote_cli": "Als mein Fenstermanager skriptbar wurde, fing mein Desktop an, sich selbst zu verwalten. Seitdem habe ich kein einziges Fenster mehr verschoben.",
   "quote_footer": "Keine große Firma hier — vorerst nur ich und eine Handvoll Werkzeuge, von denen jedes dir eine lästige Aufgabe abnimmt, damit in deinem Tag mehr Platz für das bleibt, was du liebst — zum Beispiel Kiwis essen. 🥝",
   "quote_cta": "Man sagt, \"an apple a day\" — aber die Kiwi hat mehr Vitamine und größere Pläne... 🥝",
   "daily_kiwi": "Und jetzt: iss eine Kiwi. Deine Vitamine werden es dir danken. 🥝",
@@ -94,7 +94,7 @@
   "feat_2_title": "Sechs Layouts",
   "feat_2_body": "bsp, stack, scrolling (PaperWM), monocle, grid und floating. Wechsle blitzschnell zwischen ihnen.",
   "feat_3_title": "Lua-Konfiguration",
-  "feat_3_body": "Eine gekapselte Lua-5.5-VM liest ~/.config/KiwiDesk/init.lua. Eine kaputte Konfiguration kann deine Fenster nicht einfrieren — ein 500-ms-Watchdog passt auf.",
+  "feat_3_body": "Eine isolierte Lua-5.5-VM liest ~/.config/KiwiDesk/init.lua. Eine fehlerhafte Konfiguration kann deine Fenster nicht einfrieren — ein 500-ms-Watchdog passt auf.",
   "feat_4_title": "CLI + Socket-IPC",
   "feat_4_body": "Skripte alles. Streame Events über einen Socket an SketchyBar, JankyBorders oder deine eigenen Tools.",
   "feat_5_title": "Flüssige Animationen",
@@ -104,7 +104,7 @@
 
   "layouts_eyebrow": "Die sechs Layouts",
   "layouts_title": "Jedes nur einen Tastendruck entfernt.",
-  "layouts_body": "Jedes Layout ist eine reine Funktion über dasselbe flache Array — Wechseln ist also sofort und vorhersehbar.",
+  "layouts_body": "Jedes Layout ist eine reine Funktion über dasselbe flache Array — das Umschalten klappt also sofort und vorhersehbar.",
   "layout_bsp": "Binäre Raumaufteilung, annähernd quadratische Splits.",
   "layout_stack": "Ein Master-Bereich neben einer Stapel-Spalte.",
   "layout_scrolling": "Niri- / PaperWM-Spalten, horizontal.",
@@ -119,7 +119,7 @@
 
   "cli_eyebrow": "Kommandozeile",
   "cli_title": "Steuere es vom Terminal aus.",
-  "cli_body": "Jede Aktion ist ein Befehl. Leg sie auf Tasten, skripte sie oder streame Live-Events über einen Unix-Socket in SketchyBar, JankyBorders oder deine eigenen Tools.",
+  "cli_body": "Jede Aktion ist ein Befehl. Binde sie an Tasten, skripte sie oder streame Live-Events über einen Unix-Socket in SketchyBar, JankyBorders oder deine eigenen Tools.",
   "cli_title_bar": "zsh — kiwidesk",
 
   "build_eyebrow": "Schnellstart",
