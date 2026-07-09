@@ -802,17 +802,16 @@
   box-shadow: var(--shadow-sm);
 }
 .quote-card::before {
-  content: "🥝";
+  content: "";
   position: absolute;
   top: -14px;
   left: clamp(1.4rem, 4vw, 2rem);
   width: 30px;
   height: 30px;
-  display: grid;
-  place-items: center;
-  font-size: 1.1rem;
   border-radius: 50%;
-  background: var(--bg-1);
+  background:
+    url("../assets/brand/kiwi-solutions.svg") center / 18px no-repeat,
+    var(--bg-1);
   border: 1px solid var(--border-strong);
   box-shadow: var(--shadow-sm);
 }
