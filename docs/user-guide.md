@@ -23,8 +23,8 @@ shows a two-group sidebar on the left:
 
 At the top you'll see the app name and a banner showing which
 profile is loaded and letting you edit a saved profile without
-switching to it. At the bottom, a three-button footer holds Save,
-Revert, and Save a Copy options.
+switching to it. At the bottom, a stable three-slot footer holds
+Revert, Save a Copy As…, and Save.
 
 ### Permission & First Run
 
@@ -339,17 +339,25 @@ create a variant of a profile without loading it first.
 
 ### Saving
 
-Three buttons appear in the footer:
+The footer always holds the same three slots, clustered at the
+trailing edge — **Revert**, **Save a Copy As…**, and **Save**.
+Only the primary **Save**'s label and target change with
+context; there is no separate fourth button:
 
-- **Save** (default, when an active profile exists) — persists edits to
-  the currently loaded profile and adds/refreshes the connected monitor
-  set. Greyed out if the connected screen count differs from the
-  profile's count ("this profile is for 2 screens").
-- **Save a Copy As…** — creates a new profile from the current state.
-  The new profile covers only the connected monitors. Names are
-  suffixed `_1`, `_2`, … when taken.
-- **Save as New Profile…** (when using a transient layout or
-  built-in Standard) — creates a real profile from scratch.
+- **Revert** — discards pending edits and reloads the target's
+  stored state.
+- **Save a Copy As…** — creates a new profile from the current
+  state. The new profile covers only the connected monitors.
+  Names are suffixed `_1`, `_2`, … when taken.
+- **Save** — persists edits to the current target. When an
+  active profile exists it writes to that profile and
+  adds/refreshes the connected monitor set; it is greyed out if
+  the connected screen count differs from the profile's count
+  ("this profile is for 2 screens"). When you are on a transient
+  layout or a built-in Standard, the same slot instead reads
+  **Save as New Profile…** and creates a real profile from
+  scratch. The banner's profile picker names the edit target
+  authoritatively.
 
 After saving, if a global setting changed (keybindings, app/float
 rules, or native Space bindings), `gui.json` is rewritten. Tiling-only
@@ -484,9 +492,10 @@ persistent ⚠️.
 **Modifiers**: `cmd`/`command`, `alt`/`opt`/`option`,
 `ctrl`/`control`, `shift`.
 
-**Keys**: letters (a–z), digits (0–9), arrows, `space`, `return`,
-`tab`, `escape`, `f1`–`f12`, and punctuation. Punctuation can be
-entered as the symbol or a word name:
+**Keys**: letters (a–z), digits (0–9), arrows, `home`, `end`,
+`pageup`, `pagedown`, `space`, `return`, `tab`, `escape`,
+`f1`–`f12`, and punctuation. Punctuation can be entered as the
+symbol or a word name:
 - `;` or `semicolon`
 - `,` or `comma`
 - `.` or `period`
@@ -496,8 +505,8 @@ entered as the symbol or a word name:
 - `=` or `equal`
 - `[` or `leftbracket`
 - `]` or `rightbracket`
-- `` ` `` or `grave`
-- `'` or `quote`
+- `` ` `` or `grave` / `backtick`
+- `'` or `quote` / `apostrophe`
 
 A combo is one set of modifiers + exactly one key. Multi-key chords
 like `cmd+j+k` are not supported — use modal modes instead.
