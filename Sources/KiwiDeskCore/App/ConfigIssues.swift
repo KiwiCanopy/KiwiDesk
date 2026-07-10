@@ -3,8 +3,12 @@ import Foundation
 /// One config-load or profile-validation problem, surfaced to
 /// the GUI's error badge and Config Issues panel (#68). This is
 /// the *surface* only — the typo-guard and validation cores
-/// stay with #39/#31; anything they learn to detect lands here
-/// as another issue.
+/// stay with #39/#31. Lua typo hits land here (#39); the #31
+/// mode-list normalization is currently SILENT (it runs inside
+/// pure `Codable`, out of the reporter's reach) — surfacing a
+/// "was normalized" issue from a post-decode seam
+/// (`profileConfigIssues()` / `configLoadIssues`) is a
+/// follow-up candidate, not a promise this file already keeps.
 public struct ConfigIssue: Sendable, Equatable, Identifiable {
     /// The offending file, as the user knows it
     /// (`init.lua`, `gui.json`, `<profile>.json`).

@@ -47,21 +47,28 @@ extension KeyMode {
     }
 
     /// The shared core, applied by both flavors:
-    /// - drops modes with an empty name (never addressable —
-    ///   the GUI cannot create, select, or delete them);
-    /// - drops later duplicates of a name (first occurrence
+    /// - drops modes with an empty or whitespace-only name
+    ///   (never addressable — the GUI trims names and cannot
+    ///   create, select, or delete blank ones);
+    /// - drops later duplicates of a name (FIRST occurrence
     ///   wins; mode identity is the name, so a second entry
-    ///   would be unreachable and could shadow-edit the first);
+    ///   would be unreachable and could shadow-edit the first.
+    ///   Deliberately unlike combos WITHIN a mode, which are
+    ///   last-wins at registration — see StructuredConfig);
     /// - strips an icon from the default mode (its menu bar
-    ///   icon is fixed; this replaces #15's debug-only writer
-    ///   assert with unconditional normalization).
+    ///   icon is fixed; this succeeds the #28 debug-only
+    ///   writer assert, gone with the generated-init.lua
+    ///   writer in #55, as unconditional normalization).
     private static func sanitized(
         _ modes: [KeyMode]
     ) -> [KeyMode] {
         var seen: Set<String> = []
         var result: [KeyMode] = []
         for var mode in modes {
-            guard !mode.name.isEmpty else { continue }
+            let name = mode.name.trimmingCharacters(
+                in: .whitespaces
+            )
+            guard !name.isEmpty else { continue }
             guard seen.insert(mode.name).inserted else {
                 continue
             }

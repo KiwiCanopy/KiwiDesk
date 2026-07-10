@@ -48,7 +48,10 @@ public struct KeyModeOverride: Sendable, Equatable {
         onto base: [KeyMode]
     ) -> [KeyMode] {
         guard !isEmpty else { return base }
-        // Index override modes by name for O(n) lookup.
+        // Index override modes by name for O(n) lookup. The
+        // assignment is last-wins, but duplicate names cannot
+        // reach here: decode sanitizes them FIRST-wins
+        // (`KeyMode.normalized`), and `diff` keys by name.
         var overrideByName: [String: KeyMode] = [:]
         for mode in modes {
             overrideByName[mode.name] = mode

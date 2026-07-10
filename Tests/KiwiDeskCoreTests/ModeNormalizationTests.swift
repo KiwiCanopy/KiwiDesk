@@ -106,6 +106,30 @@ struct ModeNormalizationTests {
         #expect(result[0].bindings.first?.combo == "alt+h")
     }
 
+    @Test("Whitespace-only names are dropped like empty ones")
+    func whitespaceNamesDropped() {
+        let result = KeyMode.normalized(full: [
+            mode("default"),
+            mode("  ", combo: "alt+z"),
+        ])
+        #expect(result.map(\.name) == ["default"])
+    }
+
+    @Test("Composite: later default dropped, first moved front")
+    func duplicateDefaultNotFirstComposite() {
+        // The review's worst case in one input: the FIRST
+        // default wins (keeps alt+h, later bindings are
+        // dropped with their entry), then moves to the front.
+        let result = KeyMode.normalized(full: [
+            mode("resize", combo: "alt+r"),
+            mode("default", combo: "alt+h"),
+            mode("default", icon: "gear", combo: "alt+z"),
+        ])
+        #expect(result.map(\.name) == ["default", "resize"])
+        #expect(result[0].bindings.map(\.combo) == ["alt+h"])
+        #expect(result[0].icon == nil)
+    }
+
     // MARK: - Sparse flavor (KeyModeOverride)
 
     @Test("Sparse: no default entry is inserted")
