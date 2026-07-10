@@ -119,6 +119,7 @@ extension TilingSettings {
             focused: space.focused,
             minWindowSize: minWindowSize,
             stackWeights: space.stackWeights,
+            scrollOffset: space.scrollOffset,
             bsp: resolvedBsp(for: space.id),
             stack: resolvedStack(for: space.id),
             scrolling: resolvedScrolling(for: space.id),

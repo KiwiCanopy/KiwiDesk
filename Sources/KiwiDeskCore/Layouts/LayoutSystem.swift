@@ -86,6 +86,10 @@ public struct LayoutContext: Sendable {
     /// Per-window vertical share of a stack column (#67);
     /// absent = 1.0. Snapshot of `Space.stackWeights`.
     public var stackWeights: [WindowID: Double]
+    /// The scrolling layout's viewport offset from the last
+    /// tile (#66); `nil` before the space has ever scrolled.
+    /// Snapshot of `Space.scrollOffset`.
+    public var scrollOffset: CGFloat?
 
     public var bsp: BspParams
     public var stack: StackParams
@@ -102,6 +106,7 @@ public struct LayoutContext: Sendable {
         focused: WindowID? = nil,
         minWindowSize: CGFloat = 300,
         stackWeights: [WindowID: Double] = [:],
+        scrollOffset: CGFloat? = nil,
         bsp: BspParams = BspParams(),
         stack: StackParams = StackParams(),
         scrolling: ScrollingParams = ScrollingParams(),
@@ -114,6 +119,7 @@ public struct LayoutContext: Sendable {
         self.focused = focused
         self.minWindowSize = minWindowSize
         self.stackWeights = stackWeights
+        self.scrollOffset = scrollOffset
         self.bsp = bsp
         self.stack = stack
         self.scrolling = scrolling

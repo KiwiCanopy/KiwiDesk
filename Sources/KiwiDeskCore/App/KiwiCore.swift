@@ -189,6 +189,10 @@ public final class KiwiCore {
             force: force,
             newlyCreatedWindow: newlyCreatedWindow
         )
+        // Scrolling reads back its own last offset (#66); other
+        // modes never write `scrollOffset`, so this is a no-op
+        // for them.
+        persistScrollOffset()
         updateAppBar()
     }
 
