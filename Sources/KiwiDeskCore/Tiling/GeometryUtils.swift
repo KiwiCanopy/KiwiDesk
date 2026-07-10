@@ -8,6 +8,20 @@ import CoreGraphics
 /// BOTTOM-left origin. KiwiDesk works in AX coordinates
 /// everywhere; NSScreen values are flipped at the boundary.
 public enum GeometryUtils {
+    /// The WindowServer's own offscreen-visibility floor: an
+    /// (almost) fully offscreen frame is clamped back until
+    /// roughly this much of it stays visible. Probed
+    /// 2026-07-10 (#148): ~32 pt on bottom/diagonal asks,
+    /// ~40 pt on left/right; partial overflow above the floor
+    /// applies exactly; nothing may go above the top border
+    /// at all (#139). An ask below the floor is unreachable —
+    /// the OS lifts it, the ±2 pt retile tolerance never
+    /// passes, and every retile re-issues the frame (#142,
+    /// #148). Any deliberate offscreen sliver must derive
+    /// from this value (floor + margin), so the next probe
+    /// updates exactly one site.
+    public static let osVisibilityFloor: CGFloat = 40
+
     /// Flips a rect between Cocoa and AX coordinate systems.
     /// The operation is its own inverse.
     public static func flip(

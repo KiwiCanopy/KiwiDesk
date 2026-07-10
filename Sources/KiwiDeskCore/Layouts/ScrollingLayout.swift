@@ -27,12 +27,13 @@ import CoreGraphics
 /// minimum keeps every target achievable.
 public struct ScrollingLayout: LayoutSystem {
     /// Visible sliver of a slot scrolled far past a screen edge
-    /// (#142). macOS clamps fully offscreen frames to an
-    /// undocumented title-bar minimum (~32–40 pt observed);
-    /// sitting safely above it keeps every pinned target
-    /// achievable, so the retile tolerance can settle instead
-    /// of re-issuing unreachable frames forever.
-    static let edgePeek: CGFloat = 48
+    /// (#142): the WindowServer's clamp floor plus a margin
+    /// (see `GeometryUtils.osVisibilityFloor`). Sitting safely
+    /// above the floor keeps every pinned target achievable,
+    /// so the retile tolerance can settle instead of
+    /// re-issuing unreachable frames forever.
+    static let edgePeek: CGFloat =
+        GeometryUtils.osVisibilityFloor + 8
 
     public init() {}
 
