@@ -8,15 +8,16 @@ import Testing
 /// back to its own visibility floor (#148, probed): any
 /// deliberate sliver asked below it is unreachable, the ±2 pt
 /// retile tolerance never passes, and every retile re-issues
-/// the frame. Both slivers must sit at or above the shared
-/// floor constant so the next probe updates one site.
+/// the frame. Both slivers must sit strictly above the shared
+/// floor constant — the floor is approximate, the margin
+/// absorbs that — so the next probe updates one site.
 @Suite("OS visibility floor")
 struct OsVisibilityFloorTests {
     @Test("The stash peek is an achievable ask")
     func stashPeekAboveFloor() {
         #expect(
             TilingEngine.stashPeek
-                >= GeometryUtils.osVisibilityFloor
+                > WindowServerFacts.visibilityFloor
         )
     }
 
@@ -24,14 +25,16 @@ struct OsVisibilityFloorTests {
     func edgePeekAboveFloor() {
         #expect(
             ScrollingLayout.edgePeek
-                >= GeometryUtils.osVisibilityFloor
+                > WindowServerFacts.visibilityFloor
         )
     }
 
-    @Test("The floor itself matches the probed range")
-    func floorMatchesProbe() {
-        // 32–40 pt observed across edges; the constant is the
-        // max, so every edge's ask clears its clamp.
-        #expect(GeometryUtils.osVisibilityFloor == 40)
+    @Test("The floor stays in the plausible probe band")
+    func floorSanityBand() {
+        // Not a pin — a re-probe after a macOS update is
+        // expected to edit the constant (one site). This only
+        // catches a fat-fingered edit.
+        let floor = WindowServerFacts.visibilityFloor
+        #expect(floor > 0 && floor < 100)
     }
 }

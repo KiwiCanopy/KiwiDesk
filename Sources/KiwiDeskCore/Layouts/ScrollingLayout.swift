@@ -27,13 +27,14 @@ import CoreGraphics
 /// minimum keeps every target achievable.
 public struct ScrollingLayout: LayoutSystem {
     /// Visible sliver of a slot scrolled far past a screen edge
-    /// (#142): the WindowServer's clamp floor plus a margin
-    /// (see `GeometryUtils.osVisibilityFloor`). Sitting safely
+    /// (#142): the WindowServer's clamp floor plus this
+    /// sliver's own margin (see
+    /// `WindowServerFacts.visibilityFloor`). Sitting safely
     /// above the floor keeps every pinned target achievable,
     /// so the retile tolerance can settle instead of
     /// re-issuing unreachable frames forever.
     static let edgePeek: CGFloat =
-        GeometryUtils.osVisibilityFloor + 8
+        WindowServerFacts.visibilityFloor + 8
 
     public init() {}
 

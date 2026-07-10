@@ -195,8 +195,8 @@ public final class TilingEngine {
     // MARK: - Hiding inactive virtual spaces
 
     /// Visible sliver of stashed windows: the WindowServer's
-    /// clamp floor plus a margin (see
-    /// `GeometryUtils.osVisibilityFloor`). An ask below the
+    /// clamp floor plus this sliver's own margin (see
+    /// `WindowServerFacts.visibilityFloor`). An ask below the
     /// floor (the old 8 pt) was unreachable — the OS lifted it
     /// to ~32 pt, the ±2 pt tolerance never passed, and
     /// `stashInactive` re-issued a frame for every
@@ -205,7 +205,7 @@ public final class TilingEngine {
     /// windows settle; the visible change is marginal (the OS
     /// already showed ~32–40 pt).
     nonisolated static let stashPeek: CGFloat =
-        GeometryUtils.osVisibilityFloor + 8
+        WindowServerFacts.visibilityFloor + 8
 
     /// Where a hidden window parks: the bottom-right corner
     /// of its screen, AeroSpace style (only the top-left
