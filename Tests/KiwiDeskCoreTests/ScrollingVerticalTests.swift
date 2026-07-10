@@ -89,15 +89,14 @@ struct ScrollingVerticalTests {
         context.scrolling.orientation = .vertical
         context.scrolling.appBar.enabled = false
         context.scrolling.slotSize = .points(400)
-        let bottomFrames = layout.calculateGeometry(
+        // Read offsets the way `persistScrollOffset` does: a
+        // pinned row's frame no longer exposes the raw offset.
+        let bottomOffset = ScrollingLayout.viewportOffset(
             for: [w1, w2, w3],
             in: context
         )
-        let bottomOffset =
-            try #require(bottomFrames[w1]).minY
-            - context.usable.minY
 
-        // Focus the top row (off-screen at the bottom), carrying
+        // Focus the top row (off-screen at the top), carrying
         // the previous offset forward as a real retile would.
         context.focused = w1
         context.scrollOffset = bottomOffset
@@ -105,8 +104,10 @@ struct ScrollingVerticalTests {
             for: [w1, w2, w3],
             in: context
         )
-        let topOffset =
-            try #require(topFrames[w1]).minY - context.usable.minY
+        let topOffset = ScrollingLayout.viewportOffset(
+            for: [w1, w2, w3],
+            in: context
+        )
 
         // The viewport must pan up to reveal it (not freeze at the
         // bottom boundary while the row slides within a static
@@ -116,5 +117,52 @@ struct ScrollingVerticalTests {
         let w1Frame = try #require(topFrames[w1])
         #expect(w1Frame.minY >= context.usable.minY - 0.01)
         #expect(w1Frame.maxY <= context.usable.maxY + 0.01)
+    }
+
+    @Test("Up-overflow rows pin at the top border")
+    func verticalUpOverflowPins() throws {
+        // Focus-down from w1: the outgoing row's ideal frame
+        // straddles the top border, which macOS refuses to
+        // place — it pins at the edge instead, full-size, so
+        // its upper strip peeks above the focused row.
+        var context = makeContext(focused: w2)
+        context.scrolling.orientation = .vertical
+        context.scrolling.appBar.enabled = false
+        context.scrolling.slotSize = .points(800)
+        context.scrollOffset = 0
+        let frames = layout.calculateGeometry(
+            for: [w1, w2, w3],
+            in: context
+        )
+        let pinned = try #require(frames[w1])
+        #expect(pinned.minY == context.usable.minY)
+        #expect(pinned.height == 800)
+        // The focused row is fully visible at the bottom edge.
+        let focused = try #require(frames[w2])
+        #expect(abs(focused.maxY - context.usable.maxY) < 0.01)
+    }
+
+    @Test("Rows scrolled fully past the top pin too")
+    func verticalFarOverflowPins() throws {
+        // Two steps down: w1's ideal frame lies entirely above
+        // the screen. There is no "further up" on macOS, so it
+        // pins at the border just like a straddling row.
+        var context = makeContext(focused: w3)
+        context.scrolling.orientation = .vertical
+        context.scrolling.appBar.enabled = false
+        context.scrolling.slotSize = .points(800)
+        context.scrollOffset = -550
+        let frames = layout.calculateGeometry(
+            for: [w1, w2, w3],
+            in: context
+        )
+        let first = try #require(frames[w1])
+        let second = try #require(frames[w2])
+        #expect(first.minY == context.usable.minY)
+        #expect(second.minY == context.usable.minY)
+        // The focused row still lands fully in view.
+        let focused = try #require(frames[w3])
+        #expect(focused.minY >= context.usable.minY - 0.01)
+        #expect(focused.maxY <= context.usable.maxY + 0.01)
     }
 }

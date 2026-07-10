@@ -521,6 +521,13 @@ scroll.set_anchor("center")
 **Does:** sets the scroll direction. Horizontal: columns scroll
 left/right. Vertical: rows scroll up/down.
 
+Vertical rows overflow only at the bottom: macOS refuses to place
+any window above the top screen border, so a row scrolled past the
+top stays pinned at the border with its upper strip peeking behind
+the focused row, instead of tucking above the screen. See the
+[accepted limitations](design-decisions.md#accepted-limitations)
+table.
+
 **Example:**
 
 ```lua

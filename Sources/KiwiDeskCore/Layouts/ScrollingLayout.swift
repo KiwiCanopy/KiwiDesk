@@ -13,6 +13,15 @@ import CoreGraphics
 /// screen edge so no empty margin appears. With the indicator
 /// bar enabled its strip is carved out of the usable area
 /// first, so windows and bar never overlap.
+///
+/// Vertical rows overflow only at the bottom: macOS refuses any
+/// window position above the top screen border, so a row
+/// scrolled past the top pins at the border — its upper strip
+/// peeks — instead of tucking above the screen (an accepted
+/// OS-blocked limitation, see docs/design-decisions.md). The
+/// viewport *offset* stays the ideal, unpinned value, so the
+/// up/down scroll math remains symmetric; only the materialized
+/// frames pin.
 public struct ScrollingLayout: LayoutSystem {
     public init() {}
 
@@ -210,7 +219,16 @@ public struct ScrollingLayout: LayoutSystem {
     ) -> [WindowID: CGRect] {
         var result: [WindowID: CGRect] = [:]
         for (index, window) in windows.enumerated() {
-            let lead = offset + CGFloat(index) * stride
+            var lead = offset + CGFloat(index) * stride
+            // macOS silently rejects frames above the top
+            // screen border (WindowServer clamp; the SIP
+            // guardrail rules out private workarounds). Pin
+            // vertical up-overflow rows at the edge so targets
+            // stay achievable — otherwise every retile re-issues
+            // an impossible frame that the ±2pt tolerance can
+            // never absorb. The focused row is unaffected: the
+            // offset clamp keeps its lead in view (>= 0).
+            if !horizontal { lead = max(lead, 0) }
             result[window] =
                 horizontal
                 ? CGRect(
