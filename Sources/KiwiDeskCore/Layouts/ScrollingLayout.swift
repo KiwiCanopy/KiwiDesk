@@ -160,8 +160,8 @@ public struct ScrollingLayout: LayoutSystem {
         // The range of offsets that keep the focused slot fully
         // inside the viewport: sliding it any further would clip
         // its leading or trailing edge.
-        let visibleMin = along - size - focusedPos
-        let visibleMax = -focusedPos
+        let visibleMin = -focusedPos
+        let visibleMax = along - size - focusedPos
 
         var target: CGFloat
         if let previous {
