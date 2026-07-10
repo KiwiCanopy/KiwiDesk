@@ -97,25 +97,24 @@ struct ScrollingVerticalTests {
             try #require(bottomFrames[w1]).minY
             - context.usable.minY
 
-        // Step focus up one row, carrying the previous offset
-        // forward exactly as a real retile would.
-        context.focused = w2
+        // Focus the top row (off-screen at the bottom), carrying
+        // the previous offset forward as a real retile would.
+        context.focused = w1
         context.scrollOffset = bottomOffset
-        let midFrames = layout.calculateGeometry(
+        let topFrames = layout.calculateGeometry(
             for: [w1, w2, w3],
             in: context
         )
-        let midOffset =
-            try #require(midFrames[w1]).minY - context.usable.minY
+        let topOffset =
+            try #require(topFrames[w1]).minY - context.usable.minY
 
-        // The viewport must have scrolled (not frozen at the
-        // bottom boundary while the focused row merely slides
-        // within a static viewport — the #66 overlay symptom).
-        #expect(midOffset != bottomOffset)
-        // And the previously-focused row (w3) must have moved
-        // fully out of clipping range, not overlapped w2/w1.
-        let w2Frame = try #require(midFrames[w2])
-        #expect(w2Frame.minY >= context.usable.minY - 0.01)
-        #expect(w2Frame.maxY <= context.usable.maxY + 0.01)
+        // The viewport must pan up to reveal it (not freeze at the
+        // bottom boundary while the row slides within a static
+        // viewport — the #66 overlay symptom).
+        #expect(topOffset > bottomOffset)
+        // And the newly focused row must be fully in view.
+        let w1Frame = try #require(topFrames[w1])
+        #expect(w1Frame.minY >= context.usable.minY - 0.01)
+        #expect(w1Frame.maxY <= context.usable.maxY + 0.01)
     }
 }

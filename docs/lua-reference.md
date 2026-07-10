@@ -498,7 +498,15 @@ scroll.set_slot_size("50%")        -- half of available
 **Expects:** `"center"` or an edge (`left`/`right` for horizontal,
 `top`/`bottom` for vertical).
 
-**Does:** sets the anchor point within the layout.
+**Does:** sets the *preferred resting position* of the focused
+window in the viewport. As focus moves, the viewport scrolls into
+view — it pans by the minimum needed to keep the focused window
+fully visible, so moving focus up and down both scroll
+symmetrically: an off-screen window is revealed by panning toward
+it, and a window that is already fully visible does not move the
+viewport. The anchor decides where a freshly scrolled window comes
+to rest (centered, or against the leading/trailing edge) when the
+viewport had to move to reveal it.
 
 **Example:**
 
