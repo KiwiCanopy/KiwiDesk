@@ -71,6 +71,10 @@ tracked, not abandoned:
   ([#139](https://github.com/hajiboy95/KiwiDesk/issues/139);
   the pin shipped with
   [#66](https://github.com/hajiboy95/KiwiDesk/issues/66)).
+  On the other edges KiwiDesk pins far-offscreen slots at its
+  own fixed sliver, safely above the OS minimum, for the same
+  achievable-target reason
+  ([#142](https://github.com/hajiboy95/KiwiDesk/issues/142)).
 
 All of these are collected in
 [#140](https://github.com/hajiboy95/KiwiDesk/issues/140).

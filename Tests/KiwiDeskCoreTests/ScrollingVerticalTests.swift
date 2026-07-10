@@ -165,4 +165,29 @@ struct ScrollingVerticalTests {
         #expect(focused.minY >= context.usable.minY - 0.01)
         #expect(focused.maxY <= context.usable.maxY + 0.01)
     }
+
+    @Test("Rows far past the bottom pin at a sliver (#142)")
+    func farBottomRowsPin() throws {
+        // Focus at the top: the third row lies fully below the
+        // viewport ideally; it keeps an edgePeek sliver so the
+        // frame stays applicable (macOS clamps fully offscreen
+        // frames to its own minimum anyway).
+        var context = makeContext(focused: w1)
+        context.scrolling.orientation = .vertical
+        context.scrolling.appBar.enabled = false
+        context.scrolling.slotSize = .points(800)
+        context.scrollOffset = 0
+        let frames = layout.calculateGeometry(
+            for: [w1, w2, w3],
+            in: context
+        )
+        let third = try #require(frames[w3])
+        #expect(
+            third.minY
+                == context.usable.maxY - ScrollingLayout.edgePeek
+        )
+        // The partially visible second row is NOT pinned.
+        let second = try #require(frames[w2])
+        #expect(second.minY == context.usable.minY + 810)
+    }
 }

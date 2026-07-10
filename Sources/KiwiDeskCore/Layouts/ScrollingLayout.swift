@@ -14,15 +14,26 @@ import CoreGraphics
 /// bar enabled its strip is carved out of the usable area
 /// first, so windows and bar never overlap.
 ///
-/// Vertical rows overflow only at the bottom: macOS refuses any
-/// window position above the top screen border, so a row
-/// scrolled past the top pins at the border — its upper strip
-/// peeks — instead of tucking above the screen (an accepted
-/// OS-blocked limitation, see docs/design-decisions.md). The
-/// viewport *offset* stays the ideal, unpinned value, so the
-/// up/down scroll math remains symmetric; only the materialized
-/// frames pin.
+/// macOS constrains what frames it will apply, so materialized
+/// frames pin while the viewport *offset* stays the ideal,
+/// unpinned value (keeping the up/down scroll math symmetric):
+/// a vertical row scrolled past the top pins at the border —
+/// its upper strip peeks — because nothing may go above the top
+/// screen edge (an accepted OS-blocked limitation, see
+/// docs/design-decisions.md); and a slot scrolled far past any
+/// other edge pins with an `edgePeek` sliver still visible,
+/// because macOS clamps fully offscreen frames to its own
+/// undocumented minimum anyway (#142) — pinning above that
+/// minimum keeps every target achievable.
 public struct ScrollingLayout: LayoutSystem {
+    /// Visible sliver of a slot scrolled far past a screen edge
+    /// (#142). macOS clamps fully offscreen frames to an
+    /// undocumented title-bar minimum (~32–40 pt observed);
+    /// sitting safely above it keeps every pinned target
+    /// achievable, so the retile tolerance can settle instead
+    /// of re-issuing unreachable frames forever.
+    static let edgePeek: CGFloat = 48
+
     public init() {}
 
     public func calculateGeometry(
@@ -217,18 +228,25 @@ public struct ScrollingLayout: LayoutSystem {
         stride: CGFloat,
         size: CGFloat
     ) -> [WindowID: CGRect] {
+        let along = horizontal ? area.width : area.height
         var result: [WindowID: CGRect] = [:]
         for (index, window) in windows.enumerated() {
             var lead = offset + CGFloat(index) * stride
-            // macOS silently rejects frames above the top
-            // screen border (WindowServer clamp; the SIP
-            // guardrail rules out private workarounds). Pin
-            // vertical up-overflow rows at the edge so targets
-            // stay achievable — otherwise every retile re-issues
-            // an impossible frame that the ±2pt tolerance can
-            // never absorb. The focused row is unaffected: the
-            // offset clamp keeps its lead in view (>= 0).
-            if !horizontal { lead = max(lead, 0) }
+            // Pin what macOS would refuse anyway (#139/#142):
+            // above the top border it applies nothing at all,
+            // and (almost) fully offscreen frames clamp to its
+            // own title-bar minimum. An unreachable target makes
+            // every retile re-issue the frame past the ±2pt
+            // tolerance, so far slots keep `edgePeek` visible at
+            // the trailing edge and (horizontal only) at the
+            // leading edge; the vertical top stays a hard wall
+            // at 0. The focused slot is never touched — the
+            // offset clamp keeps its lead in [0, along - size].
+            lead = min(lead, along - Self.edgePeek)
+            lead =
+                horizontal
+                ? max(lead, Self.edgePeek - size)
+                : max(lead, 0)
             result[window] =
                 horizontal
                 ? CGRect(

@@ -160,4 +160,85 @@ struct ScrollingLayoutTests {
             KiwiCore.scrollingRaiseOrder(windows, focusIndex: 10) == windows
         )
     }
+
+    /// 1000pt usable width, 400pt slots, no gap — the symmetry
+    /// suite's round-number geometry (#142 edge pins).
+    private func pinContext(focused: WindowID) -> LayoutContext {
+        var context = makeContext(
+            bounds: CGRect(x: 0, y: 0, width: 1020, height: 1080),
+            focused: focused
+        )
+        context.scrolling.appBar.enabled = false
+        context.scrolling.slotSize = .points(400)
+        context.gaps.inner.horizontal = 0
+        return context
+    }
+
+    @Test("Slots far past the left edge pin at a sliver (#142)")
+    func farLeftSlotsPin() throws {
+        var context = pinContext(focused: w5)
+        context.scrollOffset = -1000
+        let frames = layout.calculateGeometry(
+            for: [w1, w2, w3, w4, w5],
+            in: context
+        )
+        // w1/w2 are fully off-left ideally; both keep an
+        // edgePeek sliver so macOS can actually apply them.
+        let peek = ScrollingLayout.edgePeek
+        #expect(
+            try #require(frames[w1]).maxX
+                == context.usable.minX + peek
+        )
+        #expect(
+            try #require(frames[w2]).maxX
+                == context.usable.minX + peek
+        )
+        // The focused slot is untouched, fully visible.
+        let focused = try #require(frames[w5])
+        #expect(focused.maxX <= context.usable.maxX + 0.01)
+    }
+
+    @Test("Slots far past the right edge pin at a sliver (#142)")
+    func farRightSlotsPin() throws {
+        var context = pinContext(focused: w1)
+        context.scrollOffset = 0
+        let frames = layout.calculateGeometry(
+            for: [w1, w2, w3, w4, w5],
+            in: context
+        )
+        let peek = ScrollingLayout.edgePeek
+        #expect(
+            try #require(frames[w4]).minX
+                == context.usable.maxX - peek
+        )
+        #expect(
+            try #require(frames[w5]).minX
+                == context.usable.maxX - peek
+        )
+        // A merely partially visible slot is NOT pinned.
+        #expect(
+            try #require(frames[w3]).minX
+                == context.usable.minX + 800
+        )
+    }
+
+    @Test("viewportOffset matches frames when no pin engages")
+    func viewportOffsetFrameParity() throws {
+        // Guards the in-file mirror between `viewportOffset`
+        // and `calculateGeometry`: with three slots nothing
+        // scrolls far enough to pin, so the frame-derived
+        // offset must equal the ideal one exactly.
+        let context = pinContext(focused: w2)
+        let frames = layout.calculateGeometry(
+            for: [w1, w2, w3],
+            in: context
+        )
+        let ideal = ScrollingLayout.viewportOffset(
+            for: [w1, w2, w3],
+            in: context
+        )
+        let fromFrame =
+            try #require(frames[w1]).minX - context.usable.minX
+        #expect(fromFrame == ideal)
+    }
 }
