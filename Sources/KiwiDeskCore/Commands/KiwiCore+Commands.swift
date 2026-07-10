@@ -113,23 +113,36 @@ extension KiwiCore {
         // focus change.
         let defersRaise =
             refocusRetile
-            && activeSpace?.mode == .scrolling
+            && activeSpace?.mode.defersFocusRaise == true
             && space == state.workspaces.activeSpace
         if !defersRaise {
             raiseWindow(id)
         }
         guard refocusRetile,
             activeSpace?.mode.isFocusDriven == true
-        else { return }
-        if defersRaise {
-            pendingFocusRaise = id
+        else {
+            // Unreachable while `defersFocusRaise` stays a
+            // subset of `isFocusDriven` — but if that drifts,
+            // never lose the raise.
+            if defersRaise { raiseWindow(id) }
+            return
         }
         retileWithScrollDuration()
-        // No pan in flight (target already visible, or
-        // animations off): raise immediately — the deferral
-        // must not regress the non-animated paths.
-        if defersRaise, tiler.animation.activeCount == 0 {
-            runPendingFocusRaise()
+        // Armed only AFTER the retile: retiling cancels
+        // in-tolerance animations one by one, and the settle
+        // callback fires synchronously the moment the count
+        // hits zero — a pending raise armed before that would
+        // fire mid-retile, ahead of the new pan (the #143 pop
+        // again). Nothing can interleave between these
+        // synchronous main-actor statements.
+        if defersRaise {
+            pendingFocusRaise = id
+            // No pan in flight (target already visible, or
+            // animations off): raise immediately — the
+            // deferral must not regress non-animated paths.
+            if tiler.animation.activeCount == 0 {
+                runPendingFocusRaise()
+            }
         }
     }
 

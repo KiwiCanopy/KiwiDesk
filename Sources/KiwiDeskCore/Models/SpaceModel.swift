@@ -130,6 +130,18 @@ public enum LayoutMode: String, Sendable, Codable, CaseIterable {
     public var isFocusDriven: Bool {
         self == .scrolling || self == .monocle
     }
+
+    /// Whether a focus move defers its AX raise until the
+    /// focus retile's animations settle (#143). Scrolling
+    /// only: raising first pops a top-pinned row over the
+    /// screen before the pan starts. Monocle must stay
+    /// raise-first — all its windows share one frame, so the
+    /// raise IS the visible focus change. Must stay a subset
+    /// of `isFocusDriven`: the deferred raise is armed on the
+    /// focus retile that predicate gates.
+    public var defersFocusRaise: Bool {
+        self == .scrolling
+    }
 }
 
 /// A virtual workspace holding its windows as a flat 1D array.

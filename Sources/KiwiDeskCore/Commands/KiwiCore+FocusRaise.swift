@@ -18,6 +18,21 @@ import Foundation
 /// the slide (~150–300 ms) still reach the previously focused
 /// app; global Carbon hotkeys are unaffected.
 extension KiwiCore {
+    /// The one `onAllAnimationsEnded` consumer — the slot is a
+    /// single callback by design; this method IS the dispatch.
+    /// Two pending-flag clients today, order-insensitive (the
+    /// z-order restore's async pile raises end by re-asserting
+    /// the focused window on top, healing any interleaving
+    /// with the synchronous focus raise). Fork this into a
+    /// real dispatcher only when (a) a third pending consumer
+    /// appears, (b) ordering between the runners becomes
+    /// semantic, or (c) a client needs per-monitor/per-space
+    /// settle instead of the global count-zero signal.
+    func animationsDidSettle() {
+        runPendingZOrderRestore()
+        runPendingFocusRaise()
+    }
+
     /// Fires a pending deferred raise. Called when animations
     /// settle, and directly by `focusWindow` when no animation
     /// started. Re-validates at fire time: a newer focus

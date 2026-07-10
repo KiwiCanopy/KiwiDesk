@@ -123,6 +123,10 @@ struct ScrollingDeferredRaiseTests {
         core.execute("focus", args: [.string("right")])
         core.tiler.animation.cancelAll()
         #expect(core.pendingFocusRaise == nil)
+        var focusEmits = 0
+        core.bus.addSink { event, _ in
+            if event == .focusChange { focusEmits += 1 }
+        }
         // A settled pan leaves every window at its layout
         // target (the AX echoes updated state frames); mirror
         // that so the tolerance check sees a placed row.
@@ -136,6 +140,35 @@ struct ScrollingDeferredRaiseTests {
         core.eventLoop.onEvent(.windowFocused(WindowID(2)))
         #expect(core.pendingFocusRaise == nil)
         #expect(core.tiler.animation.activeCount == 0)
+        #expect(core.activeSpace?.focused == WindowID(2))
+        #expect(focusEmits == 1)
+    }
+
+    @Test("Animated but pan-free focus raises immediately")
+    func visibleTargetRaisesImmediately() {
+        let core = makeCore()
+        makeScrollingSpace(core, windows: 5, focus: WindowID(1))
+        guard NSScreen.main != nil else { return }
+        // Narrow slots so the neighbor is fully visible (the
+        // 1100 pt auto column would force a pan on any screen).
+        core.execute("scroll.set_slot_size", args: [.number(200)])
+        // Settle the row at its layout targets so the next
+        // focus step needs no pan: the neighbor is already
+        // fully visible, every frame is within tolerance.
+        core.retile(animated: false)
+        for (id, frame) in core.tiler.calculatedFrames(
+            state: core.state
+        ) {
+            core.state.apply(.windowMoved(id, frame))
+        }
+        #expect(
+            core.execute("focus", args: [.string("right")])
+                .isSuccess
+        )
+        // Animations are ON but nothing animates — the raise
+        // must not stay pending until some later settle.
+        #expect(core.tiler.animation.activeCount == 0)
+        #expect(core.pendingFocusRaise == nil)
         #expect(core.activeSpace?.focused == WindowID(2))
     }
 
