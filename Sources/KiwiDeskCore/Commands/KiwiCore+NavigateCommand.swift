@@ -32,6 +32,21 @@ extension KiwiCore {
         {
             return response
         }
+        // Scrolling pins overflowing slots at identical edge
+        // frames (#142), so geometric search ties among them
+        // and picks the wrong window (#147). Directions on the
+        // scroll axis step the flat array instead; the cross
+        // axis falls through, like monocle.
+        if space.mode == .scrolling,
+            let response = scrollingStep(
+                direction,
+                space: space,
+                focused: focused,
+                swapping: swapping
+            )
+        {
+            return response
+        }
         // Navigate the layout's slots, not live AX frames:
         // live frames are stale mid-animation or when an app
         // misses a move notification, and cascaded windows
@@ -80,6 +95,59 @@ extension KiwiCore {
             if crossedZones {
                 scheduleZOrderRestore()
             }
+        } else {
+            focusWindow(target)
+        }
+        return .ok()
+    }
+
+    /// Steps or reorders along the scrolling axis in array
+    /// order (#147).
+    ///
+    /// `focus`/`swap` in the resolved orientation's directions
+    /// move to the previous/next tiled index — the row is the
+    /// flat array, so array order IS spatial order, and slots
+    /// pinned at a shared edge sliver (#142) cannot mislead a
+    /// geometric search. No wrap: past either end the step
+    /// finds nothing and falls through. Nil (→ geometric
+    /// navigation) for cross-axis directions, for a floating
+    /// focused window, and past the row's ends — at an end no
+    /// tiled window lies further along the axis (slot positions
+    /// are monotonic in array index), so geometry can only
+    /// reach floating windows there, never a pinned twin.
+    private func scrollingStep(
+        _ direction: Direction,
+        space: Space,
+        focused: WindowID,
+        swapping: Bool
+    ) -> CommandResponse? {
+        let horizontal =
+            tiler.settings.resolvedScrolling(for: space.id)
+            .orientation == .horizontal
+        let step: Int
+        switch direction {
+        case .left where horizontal: step = -1
+        case .right where horizontal: step = 1
+        case .up where !horizontal: step = -1
+        case .down where !horizontal: step = 1
+        default: return nil
+        }
+        let tiled = space.windows.filter {
+            state.windows[$0]?.isFloating == false
+        }
+        guard let index = tiled.firstIndex(of: focused)
+        else { return nil }
+        let targetIndex = index + step
+        guard tiled.indices.contains(targetIndex)
+        else { return nil }
+        let target = tiled[targetIndex]
+        if swapping {
+            state.workspaces.withSpace(space.id) {
+                $0.swap(focused, target)
+            }
+            retile(
+                animated: tiler.settings.animations.onWindowSwap
+            )
         } else {
             focusWindow(target)
         }

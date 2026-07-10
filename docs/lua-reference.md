@@ -53,8 +53,12 @@ or `"down"`.
 
 **Does:** moves keyboard focus to the neighboring window in
 that direction, following the active layout's geometry. In
-monocle and scrolling layouts the axis cycles through the
-space's windows (see the layout's orientation).
+monocle and scrolling layouts, directions on the layout's
+orientation axis follow the window order instead: monocle
+cycles (wrapping at the ends), scrolling steps to the
+previous/next window and stops at the row's ends. Cross-axis
+directions keep the geometric search (reaching floating
+windows).
 
 **Example:**
 
@@ -69,7 +73,9 @@ KiwiDesk.focus("left")
 
 **Does:** swaps the focused window with its neighbor in that
 direction, reordering the flat window array — the two windows
-trade slots in the layout.
+trade slots in the layout. The neighbor is found the same way
+`focus` finds it, including the window-order stepping on a
+monocle or scrolling orientation axis.
 
 **Example:**
 
