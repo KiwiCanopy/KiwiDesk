@@ -365,7 +365,11 @@ stack.set_master_count(1)
 
 **Expects:** a number between 0 and 1.
 
-**Does:** sets the master zone's share of the space's width.
+**Does:** sets the master zone's share of the space's width. At
+layout time the *effective* ratio is clamped so both zones keep
+`min_window_size` (#44) — the stored value stays untouched and
+is honored again on a wider display; the cascade fallback only
+triggers when two min-size zones cannot coexist at any ratio.
 
 **Example:**
 

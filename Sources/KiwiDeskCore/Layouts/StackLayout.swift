@@ -95,16 +95,27 @@ public struct StackLayout: LayoutSystem {
         }
 
         let gap = context.gaps.inner.horizontal
-        let ratio = CGFloat(context.stack.masterRatio)
-        let masterWidth = (usable.width - gap) * ratio
-        let stackWidth = usable.width - gap - masterWidth
-        if min(masterWidth, stackWidth) < context.minWindowSize {
+        let available = usable.width - gap
+        // The cascade is a genuine last resort: only when two
+        // min-size zones cannot coexist at ANY ratio (#44). A
+        // merely extreme master_ratio is clamped to the widest
+        // value that keeps both zones ≥ min_window_size — the
+        // stored config value stays untouched, so it is honored
+        // again on a wider display.
+        if available < context.minWindowSize * 2 {
             return OverlapStack.frames(
                 for: windows,
                 in: usable,
                 minSize: context.minWindowSize
             )
         }
+        let minFraction = context.minWindowSize / available
+        let ratio = min(
+            max(CGFloat(context.stack.masterRatio), minFraction),
+            1 - minFraction
+        )
+        let masterWidth = available * ratio
+        let stackWidth = available - masterWidth
 
         let masterRegion = CGRect(
             x: usable.minX,
