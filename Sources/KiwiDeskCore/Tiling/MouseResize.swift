@@ -116,6 +116,23 @@ public enum MouseResize {
             && !inner.contains(point)
     }
 
+    /// The side of the first BSP split a slot sits on, as the
+    /// direction the shared ratio must move for that slot's
+    /// region to GROW: +1 first (left/top), -1 second. The
+    /// midpoint rule is a heuristic (deep slots under extreme
+    /// ratios can misread), so the mouse and keyboard paths
+    /// (#122) share this one authority — never re-derive the
+    /// comparison.
+    public static func bspSide(
+        slot: CGRect,
+        bounds: CGRect,
+        horizontal: Bool
+    ) -> CGFloat {
+        horizontal
+            ? (slot.midX <= bounds.midX ? 1 : -1)
+            : (slot.midY <= bounds.midY ? 1 : -1)
+    }
+
     /// The layout change a resize gesture asks for, or nil
     /// when the layout has no parameter for that axis (the
     /// window snaps back).
@@ -137,13 +154,19 @@ public enum MouseResize {
         switch mode {
         case .bsp:
             if abs(dw) >= abs(dh), abs(dw) > threshold {
-                let side: CGFloat =
-                    slot.midX <= bounds.midX ? 1 : -1
+                let side = bspSide(
+                    slot: slot,
+                    bounds: bounds,
+                    horizontal: true
+                )
                 return .bspRatioH(side * dw / bounds.width)
             }
             if abs(dh) > threshold {
-                let side: CGFloat =
-                    slot.midY <= bounds.midY ? 1 : -1
+                let side = bspSide(
+                    slot: slot,
+                    bounds: bounds,
+                    horizontal: false
+                )
                 return .bspRatioV(side * dh / bounds.height)
             }
             return nil

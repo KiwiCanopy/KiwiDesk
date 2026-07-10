@@ -127,10 +127,12 @@ value` and shadows the global for that space only.
 
 `resize` adapts to the active layout and is per-axis (#56): in
 BSP, `x` moves the side-by-side split ratio and `y` the stacked
-one, independently. Stack is focus-aware (#67): `x` moves the
-master/stack split in the direction that grows the *focused*
-window, `y` grows the focused window's vertical share of its
-column (session-scoped weights, reset on relaunch). Scrolling
+one, independently, each in the direction that grows the
+*focused* window's region (#122). Stack is focus-aware too
+(#67): `x` moves the master/stack split in the direction that
+grows the *focused* window, `y` grows the focused window's
+vertical share of its column (session-scoped weights, reset on
+relaunch). Scrolling
 resizes the slot along its own scroll axis for either `x` or
 `y`. monocle, grid, and floating reply "not supported".
 

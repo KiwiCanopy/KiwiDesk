@@ -59,7 +59,11 @@ extension KiwiCore {
     }
 
     /// Per-axis BSP resize (#56): "x" moves the side-by-side
-    /// splits, "y" the stacked splits — independent knobs.
+    /// splits, "y" the stacked splits — independent knobs. The
+    /// delta's sign follows the FOCUSED window (#122): a slot
+    /// in the second (right/bottom) region grows when the
+    /// shared ratio DROPS, so +delta always grows the focused
+    /// region — mouse-path parity (`MouseResize.translate`).
     private func resizeBsp(
         axis: String,
         delta: Double,
@@ -67,20 +71,53 @@ extension KiwiCore {
         space: Space
     ) -> CommandResponse {
         let bsp = tiler.settings.resolvedBsp(for: space.id)
+        let signed =
+            bspFocusSign(axis: axis, space: space)
+            * delta
         if axis == "x" {
-            let value = bsp.splitRatioH + delta / span
+            let value = bsp.splitRatioH + signed / span
             tiler.settings.setSplitRatioH(
                 min(max(value, 0.1), 0.9),
                 for: space.id
             )
         } else {
-            let value = bsp.splitRatioV + delta / span
+            let value = bsp.splitRatioV + signed / span
             tiler.settings.setSplitRatioV(
                 min(max(value, 0.1), 0.9),
                 for: space.id
             )
         }
         return .ok()
+    }
+
+    /// Which way the shared BSP ratio must move so "grow"
+    /// grows the FOCUSED window — the mouse path's side rule,
+    /// via the shared authority (`MouseResize.bspSide`).
+    /// Unknown focus (none, or floating — no slot) keeps +1,
+    /// the first-region direction (the pre-#122 behavior).
+    /// Assumes `space` IS the active space: the slot lookup
+    /// resolves the active space's frames only, so any other
+    /// space silently gets the +1 fallback.
+    private func bspFocusSign(
+        axis: String,
+        space: Space
+    ) -> Double {
+        guard let focused = space.focused,
+            let slot = tiler.calculatedFrames(
+                state: state
+            )[focused],
+            let screen = NSScreen.main
+                ?? NSScreen.screens.first
+        else { return 1 }
+        return Double(
+            MouseResize.bspSide(
+                slot: slot,
+                bounds: GeometryUtils.axVisibleFrame(
+                    of: screen
+                ),
+                horizontal: axis == "x"
+            )
+        )
     }
 
     /// Focus-aware stack resize (#67). "x" moves the

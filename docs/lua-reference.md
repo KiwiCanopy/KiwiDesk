@@ -1535,6 +1535,13 @@ floating. What the `delta` actually adjusts depends on the layout:
 - **bsp** — per-axis (#56): `"x"` nudges the side-by-side split
   ratio (`bsp.set_ratio_h`), `"y"` the stacked one
   (`bsp.set_ratio_v`) — genuinely independent width and height.
+  Focus-aware in direction (#122): a positive delta grows the
+  *focused* window's region, so with a right/bottom window
+  focused it lowers the shared ratio — the same side rule a
+  mouse drag of that window's edge uses. All same-orientation
+  splits still share the one ratio; with no usable focus (no
+  focused window, or a floating one) the delta moves the
+  left/top region, as before.
 - **stack** — focus-aware (#67). `"x"` moves the master/stack
   split *in the direction that grows the focused window*: with
   a master focused, a positive delta raises the master ratio;
