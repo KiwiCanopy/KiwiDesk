@@ -59,8 +59,12 @@ extension KiwiCore {
         // the write target all follow the space's own override,
         // never the global — so a resize can't shift other spaces.
         let stack = tiler.settings.resolvedStack(for: space.id)
-        let isMaster =
-            (tiled.firstIndex(of: id) ?? .max) < stack.masterCount
+        // Zone membership via the partition authority — never
+        // a re-derived boundary comparison (#67 review).
+        let isMaster = StackLayout.partition(
+            tiled,
+            masterCount: stack.masterCount
+        ).master.contains(id)
         let bounds = GeometryUtils.axVisibleFrame(of: screen)
         let adjustment = MouseResize.translate(
             mode: space.mode,
@@ -69,7 +73,11 @@ extension KiwiCore {
             frame: frame,
             bounds: bounds
         )
-        apply(adjustment, in: space, bounds: bounds)
+        applyResizeAdjustment(
+            adjustment,
+            in: space,
+            bounds: bounds
+        )
         retile(
             animated: tiler.settings.animations.onWindowResize
         )
@@ -79,7 +87,10 @@ extension KiwiCore {
     /// Writes one translated adjustment into the space's
     /// settings — split from `handleResizeEnd` so the
     /// case→setter mapping is testable without a screen.
-    func apply(
+    /// (Named apart from the profile `apply(...)` family,
+    /// whose members classify their own forced retile — this
+    /// one never retiles; the caller does.)
+    func applyResizeAdjustment(
         _ adjustment: ResizeAdjustment?,
         in space: Space,
         bounds: CGRect

@@ -11,10 +11,29 @@ public struct StackLayout: LayoutSystem {
     /// Renormalization floor applied when *reading* a stack
     /// weight (#67) — shared with the `resize` command so the
     /// command's step math and the layout's distribution can
-    /// never disagree on the domain.
+    /// never disagree on the domain. Deliberately below
+    /// `weightRange.lowerBound`: the command never stores a
+    /// value this small, so the floor only defends against a
+    /// future writer — do not collapse the two constants.
     public static let weightFloor: Double = 0.05
     /// Clamp for what the `resize` command *stores* (#67).
     public static let weightRange: ClosedRange<Double> = 0.1...10
+
+    /// The largest weight total a column can carry before its
+    /// smallest share drops below `minSize` — the single
+    /// authority behind both the layout's cascade check and
+    /// the resize command's growth cap, so the two formulas
+    /// cannot drift apart (#67 review; parity rule).
+    public static func maxColumnTotal(
+        smallestWeight: Double,
+        height: Double,
+        minSize: Double
+    ) -> Double {
+        // No (or nonsense) minimum → no cliff, matching the
+        // old `share < minSize` comparison for minSize ≤ 0.
+        guard minSize > 0 else { return .infinity }
+        return smallestWeight * height / minSize
+    }
 
     /// The master/stack partition of a tiled window array —
     /// the single authority consumed by `calculateGeometry`
@@ -135,9 +154,12 @@ public struct StackLayout: LayoutSystem {
             max(context.stackWeights[$0] ?? 1, Self.weightFloor)
         }
         let total = weights.reduce(0, +)
-        let smallest =
-            available * (weights.min() ?? 1) / total
-        if smallest < context.minWindowSize {
+        let limit = Self.maxColumnTotal(
+            smallestWeight: weights.min() ?? 1,
+            height: Double(available),
+            minSize: Double(context.minWindowSize)
+        )
+        if total > limit {
             if context.stack.overflowStyle == .cascadeAll {
                 return OverlapStack.frames(
                     for: windows,

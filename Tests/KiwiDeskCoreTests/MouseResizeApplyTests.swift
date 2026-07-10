@@ -5,7 +5,7 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The case→setter mapping of a translated mouse adjustment
-/// (`KiwiCore.apply(_:in:bounds:)`), testable without a
+/// (`KiwiCore.applyResizeAdjustment`), testable without a
 /// screen: a swapped case label in that switch would cross
 /// the axes while `MouseResizeTests` (the translate half)
 /// stayed green (#56 review).
@@ -42,7 +42,11 @@ struct MouseResizeApplyTests {
     func hAppliesToH() {
         let core = makeCore()
         let space = space(core, mode: "bsp")
-        core.apply(.bspRatioH(0.1), in: space, bounds: bounds)
+        core.applyResizeAdjustment(
+            .bspRatioH(0.1),
+            in: space,
+            bounds: bounds
+        )
         let bsp = core.tiler.settings.bsp
         #expect(abs(bsp.splitRatioH - 0.6) < 1e-9)
         #expect(bsp.splitRatioV == 0.5)
@@ -52,7 +56,11 @@ struct MouseResizeApplyTests {
     func vAppliesToV() {
         let core = makeCore()
         let space = space(core, mode: "bsp")
-        core.apply(.bspRatioV(0.1), in: space, bounds: bounds)
+        core.applyResizeAdjustment(
+            .bspRatioV(0.1),
+            in: space,
+            bounds: bounds
+        )
         let bsp = core.tiler.settings.bsp
         #expect(abs(bsp.splitRatioV - 0.6) < 1e-9)
         #expect(bsp.splitRatioH == 0.5)
@@ -62,7 +70,11 @@ struct MouseResizeApplyTests {
     func masterRatioApplies() {
         let core = makeCore()
         let space = space(core, mode: "stack")
-        core.apply(.masterRatio(-0.1), in: space, bounds: bounds)
+        core.applyResizeAdjustment(
+            .masterRatio(-0.1),
+            in: space,
+            bounds: bounds
+        )
         let stack = core.tiler.settings.stack
         #expect(abs(stack.masterRatio - 0.5) < 1e-9)
     }
@@ -76,7 +88,11 @@ struct MouseResizeApplyTests {
         // axis, then the delta lands on top in points.
         let before = core.tiler.settings.scrolling.slotSize
             .editablePoints(along: bounds.width, horizontal: true)
-        core.apply(.scrollWidth(100), in: space, bounds: bounds)
+        core.applyResizeAdjustment(
+            .scrollWidth(100),
+            in: space,
+            bounds: bounds
+        )
         let after = core.tiler.settings.scrolling.slotSize
             .editablePoints(along: bounds.width, horizontal: true)
         #expect(abs(after - before - 100) < 0.5)

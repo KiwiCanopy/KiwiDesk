@@ -159,10 +159,14 @@ extension KiwiCore {
                 .filter { $0.0 != focused }
                 .map(\.1)
             if let smallest = others.min() {
-                let minSize = Double(tiler.settings.minWindowSize)
-                let cap =
-                    smallest * span / minSize
-                    - (total - current)
+                let limit = StackLayout.maxColumnTotal(
+                    smallestWeight: smallest,
+                    height: span,
+                    minSize: Double(
+                        tiler.settings.minWindowSize
+                    )
+                )
+                let cap = limit - (total - current)
                 value = min(value, max(cap, current))
             }
         }
