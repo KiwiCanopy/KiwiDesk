@@ -57,6 +57,23 @@ tracked, not abandoned:
   ([#26](https://github.com/hajiboy95/KiwiDesk/issues/26)).
 - **Restore windows across all native Spaces on quit**
   ([#70](https://github.com/hajiboy95/KiwiDesk/issues/70)).
+- **Place a window above the top screen border** — the
+  WindowServer silently rejects any frame above the visible
+  area's top edge. (Partial left/right/bottom overflow is
+  allowed; fully offscreen frames clamp back to a title-bar
+  sliver on every edge.) So a
+  vertical scrolling row scrolled past the top cannot tuck above
+  the screen with its lower strip peeking, the way a true
+  scroll would; `ScrollingLayout` pins those rows at the border
+  instead — their *upper* strip peeks — so retile targets stay
+  achievable and the already-there tolerance keeps working.
+  Horizontal scrolling is unaffected
+  ([#139](https://github.com/hajiboy95/KiwiDesk/issues/139);
+  the pin shipped with
+  [#66](https://github.com/hajiboy95/KiwiDesk/issues/66)).
+
+All of these are collected in
+[#140](https://github.com/hajiboy95/KiwiDesk/issues/140).
 
 ## Navigation & saving
 

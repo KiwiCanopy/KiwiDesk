@@ -43,11 +43,23 @@ public struct WorkspaceManager: Sendable {
         return space
     }
 
+    /// Sets a space's layout mode; an actual mode *change* also
+    /// clears the scrolling viewport offset (#66): a stale
+    /// offset from a previous scrolling stint (different window
+    /// count, different anchor) is not a meaningful "previous
+    /// position" for a fresh one — re-entering scrolling should
+    /// reseed from the anchor, not resume mid-scroll. A
+    /// same-mode set must NOT clear: profile / GUI applies call
+    /// this densely over all live spaces on every apply, and an
+    /// unconditional clear would snap every scrolling viewport
+    /// home whenever an unrelated setting is edited.
     public mutating func setMode(
         _ id: SpaceID,
         _ mode: LayoutMode
     ) {
+        guard spaces[id]?.mode != mode else { return }
         spaces[id]?.mode = mode
+        spaces[id]?.scrollOffset = nil
     }
 
     /// Reorders the iteration order to follow `desired` for

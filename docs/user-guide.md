@@ -237,8 +237,10 @@ Expand each layout type to adjust its defaults:
   share of its column (a session-only tweak — it resets on
   relaunch and is not saved into profiles).
 - **Scrolling**: orientation (horizontal or vertical), anchor
-  (where the focused column sits: center, left, right), and slot
-  size (auto, pixel count, or percentage of available space).
+  (where a freshly revealed column comes to rest — center, left,
+  right; once scrolled, the viewport pans minimally to keep the
+  focus visible), and slot size (auto, pixel count, or
+  percentage of available space).
 - **Monocle**: orientation (affects which arrow keys cycle focus
   and where the app bar sits).
 - **Grid**: type (dynamic or rigid), fill empty space (yes/no),

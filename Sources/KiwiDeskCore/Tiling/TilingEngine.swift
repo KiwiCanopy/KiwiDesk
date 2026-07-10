@@ -71,29 +71,44 @@ public final class TilingEngine {
         }
     }
 
+    /// The active space's layout inputs — the single source
+    /// that `calculatedFrames` and the scroll-offset persist
+    /// (`KiwiCore.persistScrollOffset`) both consume, so the
+    /// screen pick, floating filter, and context can never
+    /// drift between the frames we apply and the offset we
+    /// store. `nil` without an active space or a screen.
+    func layoutInput(
+        state: StateCoordinator
+    ) -> (space: Space, tiled: [WindowID], context: LayoutContext)? {
+        guard
+            let spaceID = state.workspaces.activeSpace,
+            let space = state.workspaces[spaceID],
+            let screen = NSScreen.main
+                ?? NSScreen.screens.first
+        else { return nil }
+        let bounds = GeometryUtils.axVisibleFrame(of: screen)
+        let tiled = space.windows.filter { id in
+            state.windows[id]?.isFloating == false
+        }
+        return (
+            space,
+            tiled,
+            settings.context(bounds: bounds, space: space)
+        )
+    }
+
     /// The frames the active space's layout assigns right
     /// now, without applying them. Used by retiling and by
     /// drag-and-drop slot detection.
     public func calculatedFrames(
         state: StateCoordinator
     ) -> [WindowID: CGRect] {
-        guard
-            let spaceID = state.workspaces.activeSpace,
-            let space = state.workspaces[spaceID],
-            let screen = NSScreen.main
-                ?? NSScreen.screens.first
+        guard let input = layoutInput(state: state)
         else { return [:] }
-        let bounds = GeometryUtils.axVisibleFrame(of: screen)
-        let tiled = space.windows.filter { id in
-            state.windows[id]?.isFloating == false
-        }
         return LayoutEngine.calculate(
-            mode: space.mode,
-            windows: tiled,
-            context: settings.context(
-                bounds: bounds,
-                space: space
-            )
+            mode: input.space.mode,
+            windows: input.tiled,
+            context: input.context
         )
     }
 
@@ -180,7 +195,10 @@ public final class TilingEngine {
     // MARK: - Hiding inactive virtual spaces
 
     /// Visible sliver of stashed windows: macOS rejects fully
-    /// offscreen frames, so this many points stay on screen.
+    /// offscreen frames — the WindowServer clamps any ask up to
+    /// its own title-bar-sliver minimum (~32–40 pt, empirically)
+    /// — so this many points stay on screen *by intent*; the OS
+    /// keeps somewhat more.
     nonisolated static let stashPeek: CGFloat = 8
 
     /// Where a hidden window parks: the bottom-right corner
