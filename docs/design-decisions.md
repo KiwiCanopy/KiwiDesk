@@ -75,7 +75,10 @@ tracked, not abandoned:
   On the other edges KiwiDesk pins far-offscreen slots at its
   own fixed sliver, safely above the OS minimum, for the same
   achievable-target reason
-  ([#142](https://github.com/hajiboy95/KiwiDesk/issues/142)).
+  ([#142](https://github.com/hajiboy95/KiwiDesk/issues/142));
+  stashed inactive-space windows park at the same
+  floor-derived sliver
+  ([#148](https://github.com/hajiboy95/KiwiDesk/issues/148)).
 
 All of these are collected in
 [#140](https://github.com/hajiboy95/KiwiDesk/issues/140).

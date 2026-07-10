@@ -194,12 +194,18 @@ public final class TilingEngine {
 
     // MARK: - Hiding inactive virtual spaces
 
-    /// Visible sliver of stashed windows: macOS rejects fully
-    /// offscreen frames — the WindowServer clamps any ask up to
-    /// its own title-bar-sliver minimum (~32–40 pt, empirically)
-    /// — so this many points stay on screen *by intent*; the OS
-    /// keeps somewhat more.
-    nonisolated static let stashPeek: CGFloat = 8
+    /// Visible sliver of stashed windows: the WindowServer's
+    /// clamp floor plus this sliver's own margin (see
+    /// `WindowServerFacts.visibilityFloor`). An ask below the
+    /// floor (the old 8 pt) was unreachable — the OS lifted it
+    /// to ~32 pt, the ±2 pt tolerance never passed, and
+    /// `stashInactive` re-issued a frame for every
+    /// inactive-space window on every retile (#148). At
+    /// floor + margin the target is achievable, so stashed
+    /// windows settle; the visible change is marginal (the OS
+    /// already showed ~32–40 pt).
+    nonisolated static let stashPeek: CGFloat =
+        WindowServerFacts.visibilityFloor + 8
 
     /// Where a hidden window parks: the bottom-right corner
     /// of its screen, AeroSpace style (only the top-left
