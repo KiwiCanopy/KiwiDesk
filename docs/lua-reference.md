@@ -526,7 +526,10 @@ any window above the top screen border, so a row scrolled past the
 top stays pinned at the border with its upper strip peeking behind
 the focused row, instead of tucking above the screen. See the
 [accepted limitations](design-decisions.md#accepted-limitations)
-table.
+table. On the other edges, a slot scrolled far offscreen keeps a
+small fixed sliver visible — macOS refuses fully offscreen
+placement, so KiwiDesk pins at a deterministic sliver instead of
+letting the OS clamp unpredictably.
 
 **Example:**
 

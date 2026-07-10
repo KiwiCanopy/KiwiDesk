@@ -30,26 +30,26 @@ private func makeContext(
     return context
 }
 
-/// Drives `calculateGeometry` like a real retile loop: each call
-/// carries the previous call's resulting offset forward as
+/// Drives the offset like a real retile loop: each call carries
+/// the previous call's resulting offset forward as
 /// `context.scrollOffset`, exactly as `KiwiCore.persistScrollOffset`
-/// does between retiles.
+/// does between retiles. Reads `viewportOffset` (the ideal,
+/// persisted value) rather than deriving it from a frame — far
+/// slots pin at the screen edges (#139/#142), so frames no
+/// longer expose the raw offset.
 private func offsets(
     anchor: ScrollingParams.Anchor,
     focusSequence: [WindowID]
 ) -> [CGFloat] {
-    let layout = ScrollingLayout()
     var previous: CGFloat?
     var result: [CGFloat] = []
     for focused in focusSequence {
         var context = makeContext(anchor: anchor, focused: focused)
         context.scrollOffset = previous
-        let frames = layout.calculateGeometry(
+        let offset = ScrollingLayout.viewportOffset(
             for: windows,
             in: context
         )
-        let offset =
-            frames[w1]!.minX - context.usable.minX
         result.append(offset)
         previous = offset
     }
@@ -117,11 +117,10 @@ struct ScrollingFocusSymmetryTests {
                 focused: focused
             )
             context.scrollOffset = previous
-            let frames = layout.calculateGeometry(
+            previous = ScrollingLayout.viewportOffset(
                 for: windows,
                 in: context
             )
-            previous = frames[w1]!.minX - context.usable.minX
         }
         let atEnd = try #require(previous)
 
@@ -134,7 +133,10 @@ struct ScrollingFocusSymmetryTests {
             for: windows,
             in: context
         )
-        let after = frames[w1]!.minX - context.usable.minX
+        let after = ScrollingLayout.viewportOffset(
+            for: windows,
+            in: context
+        )
         #expect(after > atEnd)
 
         // And the newly focused window must be fully in view.
@@ -157,7 +159,10 @@ struct ScrollingFocusSymmetryTests {
             for: windows,
             in: context
         )
-        let seed = seedFrames[w1]!.minX - context.usable.minX
+        let seed = ScrollingLayout.viewportOffset(
+            for: windows,
+            in: context
+        )
 
         // Precondition: w3 is already fully visible at the seed.
         let w3Seed = try #require(seedFrames[w3])
@@ -167,11 +172,10 @@ struct ScrollingFocusSymmetryTests {
         // Focusing it must not pan the viewport.
         context.focused = w3
         context.scrollOffset = seed
-        let frames = layout.calculateGeometry(
+        let offset = ScrollingLayout.viewportOffset(
             for: windows,
             in: context
         )
-        let offset = frames[w1]!.minX - context.usable.minX
         #expect(offset == seed)
     }
 }
