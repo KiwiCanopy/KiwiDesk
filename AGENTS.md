@@ -102,6 +102,22 @@ GUI lives in `Sources/KiwiDesk` (`Settings/`, `Settings/Tabs/`).
    decision is made or changed) — and `plan/` when the design
    itself shifts. Code and docs must never describe different
    behavior.
+   The marketing/docs **site (`site/`)** renders `docs/` through
+   a symlink, so doc *content* edits flow to it automatically —
+   never hand-copy a doc into `site/`. But the site is not fully
+   covered by that symlink: a **new doc page** needs a sidebar
+   entry in `site/astro.config.mjs`, and **site-only surfaces**
+   (the landing page, cross-page callouts) are updated in the
+   same change set when a feature warrants surfacing there —
+   e.g. a new layout mode (#128) adds its user-guide/reference
+   prose *and* whatever nav or callout makes it findable. Run
+   `npm run build` in `site/` when you touch either.
+   When a review or manual pass classifies a behavior as
+   **accepted-by-architecture**, it adds a row to the *Accepted
+   limitations* table in `docs/design-decisions.md` in the same
+   change set — the user-facing twin of the §5 guardrail rule
+   (OS-blocked-by-SIP items are a separate class there, with no
+   in-app escape hatch).
 6. **Review:** once a substantial change is finished, verified,
    and committed, spin up **both** `code-reviewer` and
    `architect-reviewer` on the diff since the last review point —
