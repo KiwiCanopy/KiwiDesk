@@ -82,13 +82,16 @@ public struct ScrollingLayout: LayoutSystem {
 
     /// The row geometry shared by `calculateGeometry` and
     /// `viewportOffset`: slot size, stride, total row length, and
-    /// the focused slot's position along the scroll axis.
+    /// the focused slot's position along the scroll axis — nil
+    /// when the focused window has no slot in the row (a floating
+    /// window, or nothing focused), so the offset math knows there
+    /// is nothing to scroll into view (#141).
     struct Metrics {
         let along: CGFloat
         let size: CGFloat
         let stride: CGFloat
         let rowLength: CGFloat
-        let focusedPos: CGFloat
+        let focusedPos: CGFloat?
     }
 
     static func metrics(
@@ -109,16 +112,17 @@ public struct ScrollingLayout: LayoutSystem {
         let stride = size + gap
         let count = CGFloat(windows.count)
         let rowLength = count * size + (count - 1) * gap
-        let focusedIndex =
-            context.focused.flatMap {
-                windows.firstIndex(of: $0)
-            } ?? 0
+        let focusedIndex = context.focused.flatMap {
+            windows.firstIndex(of: $0)
+        }
         return Metrics(
             along: along,
             size: size,
             stride: stride,
             rowLength: rowLength,
-            focusedPos: CGFloat(focusedIndex) * stride
+            focusedPos: focusedIndex.map {
+                CGFloat($0) * stride
+            }
         )
     }
 
@@ -175,25 +179,39 @@ public struct ScrollingLayout: LayoutSystem {
         along: CGFloat,
         size: CGFloat,
         rowLength: CGFloat,
-        focusedPos: CGFloat
+        focusedPos: CGFloat?
     ) -> CGFloat {
-        // The range of offsets that keep the focused slot fully
-        // inside the viewport: sliding it any further would clip
-        // its leading or trailing edge.
-        let visibleMin = -focusedPos
-        let visibleMax = along - size - focusedPos
-
         var target: CGFloat
-        if let previous {
-            target = min(max(previous, visibleMin), visibleMax)
+        if let focusedPos {
+            // The range of offsets that keep the focused slot
+            // fully inside the viewport: sliding it any further
+            // would clip its leading or trailing edge.
+            let visibleMin = -focusedPos
+            let visibleMax = along - size - focusedPos
+            if let previous {
+                target = min(
+                    max(previous, visibleMin),
+                    visibleMax
+                )
+            } else {
+                target = anchorOffset(
+                    anchor: anchor,
+                    along: along,
+                    size: size,
+                    focusedPos: focusedPos
+                )
+                target = min(
+                    max(target, visibleMin),
+                    visibleMax
+                )
+            }
         } else {
-            target = anchorOffset(
-                anchor: anchor,
-                along: along,
-                size: size,
-                focusedPos: focusedPos
-            )
-            target = min(max(target, visibleMin), visibleMax)
+            // The focused window has no slot in the row (a
+            // floating window, or nothing focused): there is
+            // nothing to scroll into view, so the viewport
+            // stays put instead of snapping home (#141). A
+            // never-scrolled space rests at the row start.
+            target = previous ?? 0
         }
 
         // Boundary awareness: never reveal empty margin past the
