@@ -49,6 +49,12 @@ export default defineConfig({
           items: [
             { label: "Lua Reference", slug: "docs/lua-reference" },
             { label: "CLI & IPC", slug: "docs/cli" },
+            {
+              label: "Accepted Limitations",
+              // User-facing entry point into the table that lives
+              // in the (contributor-facing) Design Decisions page.
+              link: "/docs/design-decisions/#accepted-limitations",
+            },
           ],
         },
         {
