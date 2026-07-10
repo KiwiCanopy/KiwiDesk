@@ -1,0 +1,65 @@
+name: Collector (tracking)
+description: Themed collecting issue grouping related issues
+labels: ["roadmap"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A collector groups **related issues around one theme**
+        (a pipeline, a subsystem, a lane) so the roadmap stays
+        the wave sequence and this stays the themed backlog.
+        Keep checkboxes in sync when issues close — a stale
+        tracker is worse than none (see the #71 retrospective).
+
+        Conventions (see AGENTS.md §3–4): cluster = worktree =
+        branch = PR; parallelize across file-disjoint lanes,
+        serialize within a lane (same files → they conflict).
+
+  - type: textarea
+    id: theme
+    attributes:
+      label: Theme & scope
+      description: |
+        What binds these issues together, and which roadmap
+        wave owns the sequencing.
+      placeholder: |
+        The 1.0 release & distribution pipeline — Roadmap 2
+        (#XXX) Wave 14. Each link consumes the previous one's
+        artifact.
+    validations:
+      required: true
+
+  - type: textarea
+    id: tracked_issues
+    attributes:
+      label: Tracked issues
+      description: |
+        Task list in execution order. Note per-item ordering
+        constraints (→ chains, "do with/after", gates) inline.
+      placeholder: |
+        - [ ] #89 — .app bundle + .icns icon
+        - [ ] #32 — release workflow (needs #89's bundle)
+        - [ ] #105 — Homebrew cask (depends on #89 + #32)
+    validations:
+      required: true
+
+  - type: textarea
+    id: execution
+    attributes:
+      label: Execution notes
+      description: |
+        Lane structure: what serializes (shared files), what
+        can fan out, seams with other collectors/lanes.
+      placeholder: |
+        Sequential by nature — one lane, serialize within.
+        Seam: #117 edits site/ — coordinate with the site lane.
+
+  - type: textarea
+    id: relations
+    attributes:
+      label: Relations
+      description: |
+        Owning roadmap, sibling collectors, related issues that
+        are noted but not gated here.
+      placeholder: |
+        Roadmap: #XXX. Related, not gated here: #106.

@@ -1,0 +1,85 @@
+name: Roadmap
+description: Wave-sequenced execution plan across open issues
+labels: ["roadmap"]
+title: "Roadmap: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A roadmap owns the **wave sequence**: which issues run
+        in which order, what gates what, and what is deferred.
+        Themed sub-backlogs live in **collector** issues that
+        the roadmap links; small standalones may be hosted here
+        directly. Keep checkboxes in sync when issues close —
+        a stale tracker is worse than none.
+
+        Conventions (see AGENTS.md §3–4): cluster = worktree =
+        branch = PR; parallelize across file-disjoint lanes,
+        serialize within a lane; big architectural issues get
+        dedicated solo sessions and merge before fan-out.
+
+        Legend: 🟢 parallel-safe · 🔴 must serialize ·
+        🧠 big — dedicated single session · ⛔ blocked/deferred
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope & guiding rule
+      description: |
+        What this roadmap covers, its predecessor (if any), and
+        the one rule that drives the ordering.
+      placeholder: |
+        Successor to #27 (waves 1–10, closed). Guiding rule:
+        everything that adds or rewrites UI strings lands
+        before localization; release freezes the surface last.
+    validations:
+      required: true
+
+  - type: textarea
+    id: waves
+    attributes:
+      label: Waves
+      description: |
+        One section per wave, in execution order. Reference
+        collector issues for themed groups; list standalones
+        as task-list items with their legend marker.
+      placeholder: |
+        ### Wave N — Quick wins 🟢
+        Disjoint files, run as parallel lanes.
+        - [ ] #66 — scrolling focus-up bug
+        - [ ] #113 — docs-site build warnings
+
+        ### Wave N+1 — Feature tail
+        - [ ] #128 🧠 — track mode (solo)
+        - [ ] Settings-GUI lane → see collector #XXX
+    validations:
+      required: true
+
+  - type: textarea
+    id: merge_gates
+    attributes:
+      label: Merge gates
+      description: |
+        Land the left before starting the right, and why.
+      placeholder: |
+        | Merge first | Before starting | Why |
+        |---|---|---|
+        | #89 | #32 | workflow packages the bundle |
+
+  - type: textarea
+    id: deferred
+    attributes:
+      label: Deferred / icebox
+      description: |
+        Blocked or unscheduled issues, with the blocker named.
+      placeholder: |
+        - [ ] #25 — move window to native Space ⛔ SIP
+
+  - type: textarea
+    id: relations
+    attributes:
+      label: Relations
+      description: |
+        Predecessor roadmaps, linked collectors, plan/ docs.
+      placeholder: |
+        Predecessor: #27. Collectors: #XXX, #YYY, #ZZZ.
