@@ -6,8 +6,10 @@ import CoreGraphics
 /// the layout it does not participate in.
 public enum FloatResize {
     /// The size a shrink stops at: `min_window_size` when set,
-    /// never below 1 pt — AppKit rejects zero/negative frames,
-    /// and a vanished window could not be grown back.
+    /// never below 1 pt — AppKit rejects zero/negative frames.
+    /// `resized` caps this at the CURRENT size, so the floor
+    /// never *lifts* a frame; growing back works from any size
+    /// regardless.
     public static func shrinkFloor(
         minSize: CGFloat
     ) -> CGFloat {

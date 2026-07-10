@@ -67,9 +67,9 @@ struct FloatResizeTests {
 
     @Test("the floor never drops below 1 pt")
     func floorNeverBelowOnePoint() {
-        // min_window_size accepts 0 today; a 0-size frame
-        // would be rejected by AppKit and could not be grown
-        // back, so the floor holds at 1 pt regardless.
+        // min_window_size accepts 0 today; AppKit rejects
+        // 0-size frames, so a shrink from a normal size stops
+        // at 1 pt even with no configured minimum.
         let result = FloatResize.resized(
             base,
             horizontal: true,
