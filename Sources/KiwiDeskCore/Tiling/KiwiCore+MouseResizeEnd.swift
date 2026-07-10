@@ -116,8 +116,16 @@ extension KiwiCore {
             let base =
                 tiler.settings.resolvedStack(for: space.id)
                 .masterRatio
+            // Cap at the display's effective range (#44), like
+            // the keyboard path — no invisible ratchet.
+            let value = StackLayout.cappedRatioWrite(
+                base + delta,
+                base: base,
+                available: Double(bounds.width),
+                minSize: Double(tiler.settings.minWindowSize)
+            )
             tiler.settings.setMasterRatio(
-                min(max(base + delta, 0.1), 0.9),
+                min(max(value, 0.1), 0.9),
                 for: space.id
             )
         case .scrollWidth(let delta):

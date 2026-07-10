@@ -19,6 +19,57 @@ public struct StackLayout: LayoutSystem {
     /// Clamp for what the `resize` command *stores* (#67).
     public static let weightRange: ClosedRange<Double> = 0.1...10
 
+    /// The master_ratio interval that keeps BOTH zones at
+    /// least `minSize` wide within `available` points (#44),
+    /// or nil when two min-size zones cannot coexist at any
+    /// ratio — the cascade case. `minSize` ≤ 0 (or NaN) means
+    /// no minimum: the full 0...1, which also fences nonsense
+    /// stored ratios away from negative zone widths. The
+    /// single authority behind the layout's effective clamp
+    /// and the interactive write cap (parity rule).
+    public static func effectiveRatioRange(
+        available: Double,
+        minSize: Double
+    ) -> ClosedRange<Double>? {
+        // A degenerate region (gaps wider than the usable
+        // area) cascades regardless of the minimum.
+        guard available > 0 else { return nil }
+        guard minSize > 0 else { return 0...1 }
+        guard available >= minSize * 2 else { return nil }
+        let fraction = minSize / available
+        return fraction...(1 - fraction)
+    }
+
+    /// Caps an interactive master_ratio write at the current
+    /// display's effective range (#44): past it the layout
+    /// clamps anyway and the stored value would only ratchet
+    /// invisibly — the same rule as the #67 weight cap. Never
+    /// pushes the value back across `base`, so an already
+    /// out-of-range value stays editable in the direction
+    /// that re-enters the range. (The config verb
+    /// `stack.set_master_ratio` deliberately stays wide: the
+    /// stored value is honored again on a wider display.)
+    public static func cappedRatioWrite(
+        _ proposed: Double,
+        base: Double,
+        available: Double,
+        minSize: Double
+    ) -> Double {
+        guard
+            let range = effectiveRatioRange(
+                available: available,
+                minSize: minSize
+            )
+        else { return proposed }
+        if proposed > base {
+            return min(proposed, max(range.upperBound, base))
+        }
+        if proposed < base {
+            return max(proposed, min(range.lowerBound, base))
+        }
+        return proposed
+    }
+
     /// The largest weight total a column can carry before its
     /// smallest share drops below `minSize` — the single
     /// authority behind both the layout's cascade check and
@@ -102,17 +153,26 @@ public struct StackLayout: LayoutSystem {
         // value that keeps both zones ≥ min_window_size — the
         // stored config value stays untouched, so it is honored
         // again on a wider display.
-        if available < context.minWindowSize * 2 {
+        guard
+            let range = Self.effectiveRatioRange(
+                available: Double(available),
+                minSize: Double(context.minWindowSize)
+            )
+        else {
             return OverlapStack.frames(
                 for: windows,
                 in: usable,
                 minSize: context.minWindowSize
             )
         }
-        let minFraction = context.minWindowSize / available
-        let ratio = min(
-            max(CGFloat(context.stack.masterRatio), minFraction),
-            1 - minFraction
+        let ratio = CGFloat(
+            min(
+                max(
+                    context.stack.masterRatio,
+                    range.lowerBound
+                ),
+                range.upperBound
+            )
         )
         let masterWidth = available * ratio
         let stackWidth = available - masterWidth

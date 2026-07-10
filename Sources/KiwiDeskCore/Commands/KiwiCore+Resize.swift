@@ -112,7 +112,15 @@ extension KiwiCore {
                         ? master.contains(focused) : nil
                 } ?? true
             let sign: Double = inMaster ? 1 : -1
-            let value = stack.masterRatio + sign * delta / span
+            // Interactive writes cap at the display's effective
+            // range (#44) — past it the layout clamps and the
+            // stored value would only ratchet invisibly.
+            let value = StackLayout.cappedRatioWrite(
+                stack.masterRatio + sign * delta / span,
+                base: stack.masterRatio,
+                available: span,
+                minSize: Double(tiler.settings.minWindowSize)
+            )
             tiler.settings.setMasterRatio(
                 min(max(value, 0.1), 0.9),
                 for: space.id

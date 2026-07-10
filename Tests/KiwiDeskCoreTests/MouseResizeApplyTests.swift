@@ -79,6 +79,22 @@ struct MouseResizeApplyTests {
         #expect(abs(stack.masterRatio - 0.5) < 1e-9)
     }
 
+    @Test("masterRatio drag caps at the effective range (#44)")
+    func masterRatioDragCapped() {
+        let core = makeCore()
+        let space = space(core, mode: "stack")
+        // bounds 1000 wide, min 300 → effective [0.3, 0.7]:
+        // an oversized drag stops at the visible cliff instead
+        // of ratcheting the stored value to the 0.9 clamp.
+        core.applyResizeAdjustment(
+            .masterRatio(0.5),
+            in: space,
+            bounds: bounds
+        )
+        let stack = core.tiler.settings.stack
+        #expect(abs(stack.masterRatio - 0.7) < 1e-9)
+    }
+
     @Test("scrollWidth grows the slot from the given bounds")
     func scrollWidthApplies() {
         let core = makeCore()
