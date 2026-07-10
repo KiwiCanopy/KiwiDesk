@@ -146,6 +146,46 @@ struct MonocleOverrideCommandTests {
         )
     }
 
+    @Test("Focus cycle gates on the resolved axis (#149)")
+    func overrideOrientationGatesAxis() {
+        let core = makeCore()
+        for id in 1...3 {
+            core.state.apply(
+                .windowCreated(
+                    ManagedWindow(
+                        id: WindowID(UInt32(id)),
+                        pid: pid_t(id),
+                        appName: "App\(id)"
+                    )
+                )
+            )
+        }
+        let space = core.state.workspaces.space(of: WindowID(1))!
+        _ = core.execute(
+            "set_mode",
+            args: [.string(space.raw), .string("monocle")]
+        )
+        _ = core.execute(
+            "monocle.set_orientation_override",
+            args: [.string(space.raw), .string("vertical")]
+        )
+        core.state.workspaces.focus(WindowID(2), in: space)
+        // Global is horizontal, the space override vertical: the
+        // cycle must step on up/down. Pre-#149 it read the global
+        // axis, so up/down fell through to the (empty) geometric
+        // search and did nothing.
+        #expect(
+            core.execute("focus", args: [.string("up")]).isSuccess
+        )
+        #expect(core.activeSpace?.focused == WindowID(1))
+        // Left/right are now the cross axis — they fall through
+        // and find no geometric neighbor (one shared frame).
+        #expect(
+            !core.execute("focus", args: [.string("left")]).isSuccess
+        )
+        #expect(core.activeSpace?.focused == WindowID(1))
+    }
+
     @Test("Invalid value is rejected and writes nothing")
     func invalidRejected() {
         let core = makeCore()

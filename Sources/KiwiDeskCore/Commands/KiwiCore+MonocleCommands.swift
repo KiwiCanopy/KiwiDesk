@@ -97,8 +97,14 @@ extension KiwiCore {
         focused: WindowID,
         swapping: Bool
     ) -> CommandResponse? {
+        // Resolve per-space (#149): a space with a vertical
+        // orientation override renders vertically, so its focus
+        // cycle must gate on the same resolved axis the layout
+        // and bar edge use — not the global setting. Mirrors
+        // `scrollingStep`'s `resolvedScrolling(for:)`.
         let horizontal =
-            tiler.settings.monocle.orientation == .horizontal
+            tiler.settings.resolvedMonocle(for: space.id)
+            .orientation == .horizontal
         let step: Int
         switch direction {
         case .left where horizontal: step = -1
@@ -121,7 +127,13 @@ extension KiwiCore {
             state.workspaces.withSpace(space.id) {
                 $0.swap(focused, target)
             }
-            retile()
+            // Gate on `on_window_swap` like the geometric path and
+            // `scrollingStep` (#149) — a bare `retile()` obeyed
+            // `on_relayout` instead, so swap animations diverged
+            // from every other swap.
+            retile(
+                animated: tiler.settings.animations.onWindowSwap
+            )
         } else {
             focusWindow(target)
         }
