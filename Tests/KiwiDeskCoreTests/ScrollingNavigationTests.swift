@@ -208,6 +208,48 @@ struct ScrollingNavigationTests {
         #expect(core.activeSpace?.focused == WindowID(2))
     }
 
+    @Test("Focus steps tiled adjacency across a floater")
+    func focusSkipsInterleavedFloater() {
+        let core = makeCore()
+        let space = makeScrollingSpace(
+            core,
+            windows: 3,
+            focus: WindowID(2)
+        )
+        core.execute("make_floating")
+        core.state.workspaces.focus(WindowID(3), in: space)
+        // [1, 2(floating), 3]: the step walks tiled neighbors,
+        // so left of 3 is 1, not the floater between them.
+        #expect(
+            core.execute("focus", args: [.string("left")])
+                .isSuccess
+        )
+        #expect(core.activeSpace?.focused == WindowID(1))
+    }
+
+    @Test("Swap trades raw positions across a floater")
+    func swapCrossesInterleavedFloater() {
+        let core = makeCore()
+        let space = makeScrollingSpace(
+            core,
+            windows: 3,
+            focus: WindowID(2)
+        )
+        core.execute("make_floating")
+        core.state.workspaces.focus(WindowID(3), in: space)
+        // Tiled neighbor left of 3 is 1; the swap exchanges
+        // their raw array slots, leaving the floater in place.
+        #expect(
+            core.execute("swap", args: [.string("left")])
+                .isSuccess
+        )
+        #expect(
+            core.state.workspaces[space]?.windows
+                == [3, 2, 1].map { WindowID($0) }
+        )
+        #expect(core.activeSpace?.focused == WindowID(3))
+    }
+
     @Test("Monocle keeps its wrapping cycle")
     func monocleCycleUntouched() {
         let core = makeCore()

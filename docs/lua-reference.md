@@ -57,8 +57,7 @@ monocle and scrolling layouts, directions on the layout's
 orientation axis follow the window order instead: monocle
 cycles (wrapping at the ends), scrolling steps to the
 previous/next window and stops at the row's ends. Cross-axis
-directions keep the geometric search (reaching floating
-windows).
+directions keep the geometric search.
 
 **Example:**
 

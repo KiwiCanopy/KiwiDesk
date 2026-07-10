@@ -113,8 +113,9 @@ extension KiwiCore {
     /// navigation) for cross-axis directions, for a floating
     /// focused window, and past the row's ends — at an end no
     /// tiled window lies further along the axis (slot positions
-    /// are monotonic in array index), so geometry can only
-    /// reach floating windows there, never a pinned twin.
+    /// are monotonic in array index) and floating windows are
+    /// never candidates, so the geometric search cleanly fails
+    /// there; it can never land on a pinned twin.
     private func scrollingStep(
         _ direction: Direction,
         space: Space,
