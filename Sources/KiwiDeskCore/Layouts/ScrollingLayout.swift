@@ -133,14 +133,22 @@ public struct ScrollingLayout: LayoutSystem {
     /// caller read back the value to persist as the next tile's
     /// `Space.scrollOffset`, so a focus-driven retile can restore
     /// the "previous offset" input without KiwiCore re-deriving
-    /// the anchor/clamp math itself. Mirrors the single-window
-    /// short-circuit in `calculateGeometry` (offset 0: the lone
-    /// window always fills the area).
+    /// the anchor/clamp math itself.
+    ///
+    /// A lone window fills the whole area, so `calculateGeometry`
+    /// ignores the offset for it — but this must still *preserve*
+    /// it, not persist 0 (#155): float one of two scrolled
+    /// windows and the row drops to a single tiled window; a 0
+    /// here overwrites the saved offset, so unfloating rebuilds
+    /// the row from home. Returning the prior offset keeps the
+    /// viewport where it was.
     static func viewportOffset(
         for windows: [WindowID],
         in context: LayoutContext
     ) -> CGFloat {
-        guard windows.count > 1 else { return 0 }
+        guard windows.count > 1 else {
+            return context.scrollOffset ?? 0
+        }
         let area = context.scrolling.windowFrame(
             in: context.usable,
             inner: context.gaps.inner,

@@ -41,6 +41,31 @@ struct ScrollOffsetPlumbingTests {
         #expect(manager["1"]?.scrollOffset == nil)
     }
 
+    @Test("A single tiled window preserves the scroll offset")
+    func singleWindowPreservesOffset() {
+        // Float one of two scrolled windows and the row drops to
+        // one tiled window: `viewportOffset` must return the saved
+        // offset, not 0, or unfloating rebuilds the row from home
+        // (#155). `calculateGeometry` ignores it for one window,
+        // so preserving it is free.
+        let settings = TilingSettings()
+        var space = Space(
+            id: "1",
+            mode: .scrolling,
+            windows: [w1],
+            focused: w1
+        )
+        space.scrollOffset = -400
+        let context = settings.context(
+            bounds: CGRect(x: 0, y: 0, width: 1920, height: 1080),
+            space: space
+        )
+        #expect(
+            ScrollingLayout.viewportOffset(for: [w1], in: context)
+                == -400
+        )
+    }
+
     @Test("A same-mode set preserves the offset")
     func sameModeSetPreservesOffset() {
         // Profile / GUI applies call `setMode` densely over all
