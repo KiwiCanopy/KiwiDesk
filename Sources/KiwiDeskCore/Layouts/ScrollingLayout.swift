@@ -240,12 +240,17 @@ public struct ScrollingLayout: LayoutSystem {
             // tolerance, so far slots keep `edgePeek` visible at
             // the trailing edge and (horizontal only) at the
             // leading edge; the vertical top stays a hard wall
-            // at 0. The focused slot is never touched — the
-            // offset clamp keeps its lead in [0, along - size].
-            lead = min(lead, along - Self.edgePeek)
+            // at 0. The peek caps at the slot size: a slot
+            // smaller than `edgePeek` (possible via `.fraction`,
+            // whose 5% floor has no point minimum) pins fully
+            // visible instead of displacing already-visible
+            // slots — with the cap, the focused slot is provably
+            // never touched (its lead stays in [0, along-size]).
+            let peek = min(Self.edgePeek, size)
+            lead = min(lead, along - peek)
             lead =
                 horizontal
-                ? max(lead, Self.edgePeek - size)
+                ? max(lead, peek - size)
                 : max(lead, 0)
             result[window] =
                 horizontal

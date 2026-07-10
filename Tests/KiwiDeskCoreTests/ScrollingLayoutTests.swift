@@ -193,9 +193,11 @@ struct ScrollingLayoutTests {
             try #require(frames[w2]).maxX
                 == context.usable.minX + peek
         )
-        // The focused slot is untouched, fully visible.
+        // The focused slot is untouched: exactly flush at the
+        // trailing edge (an inward displacement would still
+        // satisfy a <= check, so assert equality).
         let focused = try #require(frames[w5])
-        #expect(focused.maxX <= context.usable.maxX + 0.01)
+        #expect(focused.maxX == context.usable.maxX)
     }
 
     @Test("Slots far past the right edge pin at a sliver (#142)")
@@ -220,6 +222,32 @@ struct ScrollingLayoutTests {
             try #require(frames[w3]).minX
                 == context.usable.minX + 800
         )
+        // The focused slot sits exactly at the leading edge —
+        // a sign error in the leading floor would move it.
+        #expect(
+            try #require(frames[w1]).minX == context.usable.minX
+        )
+    }
+
+    @Test("A slot smaller than edgePeek never displaces focus")
+    func tinySlotsKeepFocusedAtEdge() throws {
+        // `.fraction` can resolve below `edgePeek` (its 5%
+        // floor has no point minimum): 5% of 880pt = 44pt. The
+        // peek caps at the slot size, so the trailing pin must
+        // not pull the fully visible focused slot inward.
+        let many = (1...20).map { WindowID(UInt32($0)) }
+        var context = makeContext(
+            bounds: CGRect(x: 0, y: 0, width: 900, height: 1080),
+            focused: many[19]
+        )
+        context.scrolling.appBar.enabled = false
+        context.scrolling.slotSize = .fraction(0.05)
+        let frames = layout.calculateGeometry(
+            for: many,
+            in: context
+        )
+        let focused = try #require(frames[many[19]])
+        #expect(abs(focused.maxX - context.usable.maxX) < 0.01)
     }
 
     @Test("viewportOffset matches frames when no pin engages")
