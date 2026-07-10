@@ -125,16 +125,18 @@ has a per-space `_override` twin (e.g. `bsp.set_ratio_h_override`,
 `scroll.set_slot_size_override`) that takes a leading `space id,
 value` and shadows the global for that space only.
 
-`resize` adapts to the active layout and is per-axis (#56): in
-BSP, `x` moves the side-by-side split ratio and `y` the stacked
-one, independently, each in the direction that grows the
-*focused* window's region (#122). Stack is focus-aware too
-(#67): `x` moves the master/stack split in the direction that
-grows the *focused* window, `y` grows the focused window's
-vertical share of its column (session-scoped weights, reset on
-relaunch). Scrolling
-resizes the slot along its own scroll axis for either `x` or
-`y`. monocle, grid, and floating reply "not supported".
+`resize` adapts to the active layout and is per-axis (#56). A
+floating focused window resizes itself directly in any mode
+(width for `x`, height for `y`, floored at `min_window_size`).
+For tiled windows: in BSP, `x` moves the side-by-side split
+ratio and `y` the stacked one, independently, each in the
+direction that grows the *focused* window's region (#122).
+Stack is focus-aware too (#67): `x` moves the master/stack
+split in the direction that grows the *focused* window, `y`
+grows the focused window's vertical share of its column
+(session-scoped weights, reset on relaunch). Scrolling resizes
+the slot along its own scroll axis for either `x` or `y`.
+monocle, grid, and floating reply "not supported".
 
 ## Event Stream
 

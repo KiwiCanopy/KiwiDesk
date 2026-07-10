@@ -130,24 +130,51 @@ public final class TilingEngine {
                 animation.cancel(window: id)
                 continue
             }
-            if animated {
-                animation.animate(
-                    window: id,
-                    on: screen,
-                    from: current,
-                    to: target,
-                    isNewWindow: id == newlyCreatedWindow
-                )
-            } else {
-                animation.cancel(window: id)
-                setFrame(id, target)
-            }
+            applyFrame(
+                id,
+                from: current,
+                to: target,
+                animated: animated,
+                isNewWindow: id == newlyCreatedWindow
+            )
         }
         stashInactive(
             state: state,
             fallback: screen,
             force: force
         )
+    }
+
+    /// Applies one frame through the shared animate-or-instant
+    /// policy: animated when asked (and a screen exists),
+    /// otherwise an instant, echo-tracked set with any
+    /// in-flight animation cancelled. The single authority for
+    /// this policy — `retile` and the floating keyboard resize
+    /// both route here; never copy the branch (a copy already
+    /// drifted once, dropping the cancel). The screen pick is
+    /// the pre-existing single-screen ceiling (plan item 8).
+    public func applyFrame(
+        _ id: WindowID,
+        from current: CGRect,
+        to target: CGRect,
+        animated: Bool,
+        isNewWindow: Bool = false
+    ) {
+        if animated,
+            let screen = NSScreen.main
+                ?? NSScreen.screens.first
+        {
+            animation.animate(
+                window: id,
+                on: screen,
+                from: current,
+                to: target,
+                isNewWindow: isNewWindow
+            )
+        } else {
+            animation.cancel(window: id)
+            setFrame(id, target)
+        }
     }
 
     // MARK: - Hiding inactive virtual spaces

@@ -1528,9 +1528,14 @@ end)
 - An axis: `"x"` or `"y"`.
 - A delta (points; positive = grow, negative = shrink).
 
-**Does:** grows or shrinks the focused window. Only applies in bsp,
-stack, and scrolling layouts; a no-op in monocle, grid, and
-floating. What the `delta` actually adjusts depends on the layout:
+**Does:** grows or shrinks the focused window. A **floating**
+focused window resizes itself directly, in every layout mode:
+`"x"` changes its width by the delta, `"y"` its height, top-left
+corner anchored, floored at `min_window_size` (a window already
+smaller than that just shrinks no further). Tiled windows
+only resize in bsp, stack, and scrolling layouts (monocle, grid,
+and the floating layout report "not supported"); what the
+`delta` actually adjusts depends on the layout:
 
 - **bsp** — per-axis (#56): `"x"` nudges the side-by-side split
   ratio (`bsp.set_ratio_h`), `"y"` the stacked one
@@ -1539,9 +1544,8 @@ floating. What the `delta` actually adjusts depends on the layout:
   *focused* window's region, so with a right/bottom window
   focused it lowers the shared ratio — the same side rule a
   mouse drag of that window's edge uses. All same-orientation
-  splits still share the one ratio; with no usable focus (no
-  focused window, or a floating one) the delta moves the
-  left/top region, as before.
+  splits still share the one ratio; with no focused window the
+  delta moves the left/top region, as before.
 - **stack** — focus-aware (#67). `"x"` moves the master/stack
   split *in the direction that grows the focused window*: with
   a master focused, a positive delta raises the master ratio;
@@ -1611,13 +1615,6 @@ The override is **sparse and soft by design**:
   The same applies to a base mode's menu bar icon — a profile
   can *change* it, but clearing it just reverts to the base
   icon.
-- A hand-edited `"modes"` list (in `gui.json` or a profile) is
-  normalized on load: empty-named modes are dropped, a
-  duplicated mode name keeps only its first entry, and an icon
-  on the `default` mode is removed (its menu bar indicator is
-  fixed). In `gui.json` the `default` mode additionally always
-  exists and sits first; a profile's sparse override never
-  gains one (a mode it omits is inherited).
 - Keybindings live in ONE home: the structured config (gui.json +
   profiles) when GUI-managed, or your `init.lua` otherwise —
   never merged. Hand-written binds that evade the managed-
