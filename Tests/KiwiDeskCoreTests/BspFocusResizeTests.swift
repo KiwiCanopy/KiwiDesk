@@ -92,19 +92,21 @@ struct BspFocusResizeTests {
         #expect(core.tiler.settings.bsp.splitRatioV < before)
     }
 
-    @Test("x with a floating focused window keeps first-region")
-    func floatingFocusKeepsDirection() {
+    @Test("x with a floating focused window resizes the float")
+    func floatingFocusResizesTheFloat() {
         let core = makeCore()
         bspSpace(core)
-        // The focused (right) window floats out of the tiled
-        // set: no slot to infer a side from, so the pre-#122
-        // first-region direction must survive — even though a
-        // tiled w2 would have flipped the sign.
+        // A floating focused window resizes ITSELF — the
+        // shared ratio must not move, in either direction.
         core.state.apply(.windowFocused(WindowID(2)))
         core.state.setFloating(WindowID(2), true)
         let before = core.tiler.settings.bsp.splitRatioH
-        core.execute("resize", args: [.string("x"), .number(200)])
-        #expect(core.tiler.settings.bsp.splitRatioH > before)
+        let response = core.execute(
+            "resize",
+            args: [.string("x"), .number(200)]
+        )
+        #expect(response.isSuccess)
+        #expect(core.tiler.settings.bsp.splitRatioH == before)
     }
 
     @Test("right focus writes the space's own override (#17)")

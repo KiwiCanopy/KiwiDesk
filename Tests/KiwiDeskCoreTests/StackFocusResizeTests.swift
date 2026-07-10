@@ -122,17 +122,21 @@ struct StackFocusResizeTests {
         #expect(!response.isSuccess)
     }
 
-    @Test("x with a floating focused window keeps master-grow")
-    func unknownFocusKeepsMasterDirection() {
+    @Test("x with a floating focused window resizes the float")
+    func floatingFocusResizesTheFloat() {
         let core = makeCore()
         stackSpace(core)
-        // The focused window floats out of the tiled set: the
-        // pre-#67 master-grows direction must survive.
+        // A floating focused window resizes ITSELF — the
+        // master/stack ratio must not move.
         core.state.apply(.windowFocused(WindowID(1)))
         core.state.setFloating(WindowID(1), true)
         let before = core.tiler.settings.stack.masterRatio
-        core.execute("resize", args: [.string("x"), .number(500)])
-        #expect(core.tiler.settings.stack.masterRatio > before)
+        let response = core.execute(
+            "resize",
+            args: [.string("x"), .number(500)]
+        )
+        #expect(response.isSuccess)
+        #expect(core.tiler.settings.stack.masterRatio == before)
     }
 
     @Test("y works inside a multi-window master column")

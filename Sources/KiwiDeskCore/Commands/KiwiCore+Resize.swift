@@ -17,6 +17,19 @@ extension KiwiCore {
         guard let space = activeSpace else {
             return .fail("no active space")
         }
+        // A floating focused window resizes ITSELF, in every
+        // layout mode — it does not participate in the layout,
+        // so the ratio paths below (and their unknown-focus
+        // fallbacks) never see a floating focus.
+        if let focused = space.focused,
+            state.windows[focused]?.isFloating == true
+        {
+            return resizeFloating(
+                focused,
+                axis: axis,
+                delta: delta
+            )
+        }
         let span =
             axis == "x"
             ? Double(NSScreen.main?.visibleFrame.width ?? 1920)
