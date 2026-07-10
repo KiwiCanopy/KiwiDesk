@@ -86,6 +86,8 @@ extension KiwiCore {
     /// Static layouts skip it: their targets are unchanged,
     /// and re-applying them just fights apps that clamp our
     /// frames (grid-snapping terminals), wobbling everything.
+    /// In scrolling, the raise waits for the pan to settle
+    /// (#143, see `runPendingFocusRaise`).
     ///
     /// `refocusRetile: false` suppresses that retile for callers
     /// that just retiled themselves — a space switch already
@@ -97,18 +99,51 @@ extension KiwiCore {
         _ id: WindowID,
         refocusRetile: Bool = true
     ) {
-        if let space = state.workspaces.space(of: id) {
+        let space = state.workspaces.space(of: id)
+        if let space {
             state.workspaces.focus(id, in: space)
         }
-        if let window = state.windows[id],
-            let element = eventLoop.element(for: id)
-        {
-            AXHelper.raise(element, pid: window.pid)
+        // Scrolling defers the raise until the pan settles
+        // (#143): raising first pops a top-pinned row over
+        // the whole screen before the slide even starts.
+        // State focus stays immediate — the layout needs it
+        // to compute the pan. Every other path (monocle,
+        // static layouts, space switches, cross-space focus)
+        // keeps raise-first: there the raise IS the visible
+        // focus change.
+        let defersRaise =
+            refocusRetile
+            && activeSpace?.mode.defersFocusRaise == true
+            && space == state.workspaces.activeSpace
+        if !defersRaise {
+            raiseWindow(id)
         }
         guard refocusRetile,
             activeSpace?.mode.isFocusDriven == true
-        else { return }
+        else {
+            // Unreachable while `defersFocusRaise` stays a
+            // subset of `isFocusDriven` — but if that drifts,
+            // never lose the raise.
+            if defersRaise { raiseWindow(id) }
+            return
+        }
         retileWithScrollDuration()
+        // Armed only AFTER the retile: retiling cancels
+        // in-tolerance animations one by one, and the settle
+        // callback fires synchronously the moment the count
+        // hits zero — a pending raise armed before that would
+        // fire mid-retile, ahead of the new pan (the #143 pop
+        // again). Nothing can interleave between these
+        // synchronous main-actor statements.
+        if defersRaise {
+            pendingFocusRaise = id
+            // No pan in flight (target already visible, or
+            // animations off): raise immediately — the
+            // deferral must not regress non-animated paths.
+            if tiler.animation.activeCount == 0 {
+                runPendingFocusRaise()
+            }
+        }
     }
 
     /// Whether a focus-driven re-layout animates. Scrolling's
