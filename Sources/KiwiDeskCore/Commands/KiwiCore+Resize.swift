@@ -91,12 +91,13 @@ extension KiwiCore {
     }
 
     /// Which way the shared BSP ratio must move so "grow"
-    /// grows the FOCUSED window: +1 when its calculated slot
-    /// sits in the first (left/top) half of the screen, -1 in
-    /// the second — the same midpoint rule the mouse path
-    /// infers a drag's side from. Unknown focus (none, or
-    /// floating — no slot) keeps +1, the first-region
-    /// direction (the pre-#122 behavior).
+    /// grows the FOCUSED window — the mouse path's side rule,
+    /// via the shared authority (`MouseResize.bspSide`).
+    /// Unknown focus (none, or floating — no slot) keeps +1,
+    /// the first-region direction (the pre-#122 behavior).
+    /// Assumes `space` IS the active space: the slot lookup
+    /// resolves the active space's frames only, so any other
+    /// space silently gets the +1 fallback.
     private func bspFocusSign(
         axis: String,
         space: Space
@@ -108,11 +109,15 @@ extension KiwiCore {
             let screen = NSScreen.main
                 ?? NSScreen.screens.first
         else { return 1 }
-        let bounds = GeometryUtils.axVisibleFrame(of: screen)
-        if axis == "x" {
-            return slot.midX <= bounds.midX ? 1 : -1
-        }
-        return slot.midY <= bounds.midY ? 1 : -1
+        return Double(
+            MouseResize.bspSide(
+                slot: slot,
+                bounds: GeometryUtils.axVisibleFrame(
+                    of: screen
+                ),
+                horizontal: axis == "x"
+            )
+        )
     }
 
     /// Focus-aware stack resize (#67). "x" moves the
