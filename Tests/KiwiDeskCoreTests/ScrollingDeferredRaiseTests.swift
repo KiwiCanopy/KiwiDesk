@@ -1,0 +1,174 @@
+import AppKit
+import CoreGraphics
+import Foundation
+import Testing
+
+@testable import KiwiDeskCore
+
+@MainActor
+private func makeCore() -> KiwiCore {
+    let directory = FileManager.default.temporaryDirectory
+        .appendingPathComponent(
+            "kiwidesk-tests-\(UUID().uuidString)"
+        )
+    return KiwiCore(configDirectory: directory)
+}
+
+/// Boots `count` windows into the active space, switches it to
+/// scrolling, and focuses `focus`. Returns the space id.
+@MainActor
+private func makeScrollingSpace(
+    _ core: KiwiCore,
+    windows count: Int,
+    focus: WindowID
+) -> SpaceID {
+    for id in 1...count {
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: WindowID(UInt32(id)),
+                    pid: pid_t(id),
+                    appName: "App\(id)"
+                )
+            )
+        )
+    }
+    let space = core.state.workspaces.space(of: WindowID(1))!
+    core.execute(
+        "set_mode",
+        args: [.string(space.raw), .string("scrolling")]
+    )
+    core.state.workspaces.focus(focus, in: space)
+    return space
+}
+
+/// Puts the animation engine mid-flight deterministically: a
+/// dummy animation on an unmanaged window (its frames apply to
+/// no element). Returns false when no display is available —
+/// callers skip, matching the screen-guard convention.
+@MainActor
+private func startDummyPan(_ core: KiwiCore) -> Bool {
+    guard let screen = NSScreen.main else { return false }
+    core.tiler.animation.animate(
+        window: WindowID(999),
+        on: screen,
+        from: CGRect(x: 0, y: 0, width: 100, height: 100),
+        to: CGRect(x: 800, y: 0, width: 100, height: 100)
+    )
+    return core.tiler.animation.activeCount > 0
+}
+
+/// Deferred scrolling focus raise (#143): only the raise
+/// defers to the pan settle; state focus is immediate, rapid
+/// commands supersede, real echoes cancel, and non-animated
+/// paths raise immediately.
+@Suite("Scrolling deferred raise", .serialized)
+@MainActor
+struct ScrollingDeferredRaiseTests {
+    @Test("Key-repeat keeps one pending raise: the last target")
+    func keyRepeatSupersedes() {
+        let core = makeCore()
+        makeScrollingSpace(core, windows: 5, focus: WindowID(1))
+        guard startDummyPan(core) else { return }
+        for _ in 1...3 {
+            #expect(
+                core.execute("focus", args: [.string("right")])
+                    .isSuccess
+            )
+        }
+        // State focus moved each step; only one raise is
+        // pending, for the last target.
+        #expect(core.activeSpace?.focused == WindowID(4))
+        #expect(core.pendingFocusRaise == WindowID(4))
+        core.tiler.animation.cancelAll()
+        #expect(core.pendingFocusRaise == nil)
+        #expect(core.activeSpace?.focused == WindowID(4))
+    }
+
+    @Test("A real focus echo mid-pan cancels the pending raise")
+    func echoCancelsPendingRaise() {
+        let core = makeCore()
+        makeScrollingSpace(core, windows: 5, focus: WindowID(1))
+        guard startDummyPan(core) else { return }
+        core.execute("focus", args: [.string("right")])
+        #expect(core.pendingFocusRaise == WindowID(2))
+        // The user clicks window 5 mid-pan: the OS raised it
+        // itself; a stale raise must not steal focus back.
+        core.eventLoop.onEvent(.windowFocused(WindowID(5)))
+        #expect(core.pendingFocusRaise == nil)
+        core.tiler.animation.cancelAll()
+        #expect(core.activeSpace?.focused == WindowID(5))
+    }
+
+    @Test("A non-animated focus move raises immediately")
+    func nonAnimatedRaisesImmediately() {
+        let core = makeCore()
+        core.tiler.settings.animations.onScrolling = false
+        makeScrollingSpace(core, windows: 5, focus: WindowID(1))
+        #expect(
+            core.execute("focus", args: [.string("right")])
+                .isSuccess
+        )
+        // No pan to wait on: nothing stays pending after the
+        // command returns.
+        #expect(core.pendingFocusRaise == nil)
+        #expect(core.activeSpace?.focused == WindowID(2))
+    }
+
+    @Test("The deferred raise's own echo re-triggers nothing")
+    func ownEchoIsInert() {
+        let core = makeCore()
+        makeScrollingSpace(core, windows: 5, focus: WindowID(1))
+        guard startDummyPan(core) else { return }
+        core.execute("focus", args: [.string("right")])
+        core.tiler.animation.cancelAll()
+        #expect(core.pendingFocusRaise == nil)
+        // A settled pan leaves every window at its layout
+        // target (the AX echoes updated state frames); mirror
+        // that so the tolerance check sees a placed row.
+        for (id, frame) in core.tiler.calculatedFrames(
+            state: core.state
+        ) {
+            core.state.apply(.windowMoved(id, frame))
+        }
+        // The raise's AX echo lands after the pan: it must not
+        // schedule another raise or start a new pan.
+        core.eventLoop.onEvent(.windowFocused(WindowID(2)))
+        #expect(core.pendingFocusRaise == nil)
+        #expect(core.tiler.animation.activeCount == 0)
+        #expect(core.activeSpace?.focused == WindowID(2))
+    }
+
+    @Test("Fire-time re-validation drops a stale target")
+    func staleTargetDropsSilently() {
+        let core = makeCore()
+        makeScrollingSpace(core, windows: 5, focus: WindowID(3))
+        // A pending raise whose target no longer matches the
+        // focused window (state moved on) is dropped, not
+        // raised.
+        core.pendingFocusRaise = WindowID(2)
+        core.tiler.animation.onAllAnimationsEnded()
+        #expect(core.pendingFocusRaise == nil)
+        #expect(core.activeSpace?.focused == WindowID(3))
+    }
+
+    @Test("Monocle keeps the immediate raise path")
+    func monocleStaysImmediate() {
+        let core = makeCore()
+        makeScrollingSpace(core, windows: 3, focus: WindowID(1))
+        let space = core.state.workspaces.space(
+            of: WindowID(1)
+        )!
+        core.execute(
+            "set_mode",
+            args: [.string(space.raw), .string("monocle")]
+        )
+        guard startDummyPan(core) else { return }
+        // Even mid-animation, a monocle focus move never
+        // defers — the raise IS the visible focus change.
+        core.execute("focus", args: [.string("right")])
+        #expect(core.pendingFocusRaise == nil)
+        #expect(core.activeSpace?.focused == WindowID(2))
+        core.tiler.animation.cancelAll()
+    }
+}

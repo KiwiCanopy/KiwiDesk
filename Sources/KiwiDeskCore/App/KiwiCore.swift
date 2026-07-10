@@ -25,6 +25,12 @@ public final class KiwiCore {
     /// animations to settle (see restoreStackZOrder).
     var pendingZOrderRestore = false
 
+    /// A scrolling focus move whose AX raise is waiting for
+    /// the pan to settle (#143) — a single slot, so rapid
+    /// focus commands supersede each other and only the last
+    /// target raises (see runPendingFocusRaise).
+    var pendingFocusRaise: WindowID?
+
     /// The deferred one-shot settle tasks (focus follow, startup
     /// sweep, space settles), keyed so `stop()` cancels them all
     /// without a hand-kept list (#49). Bodies live at the
@@ -147,6 +153,7 @@ public final class KiwiCore {
         }
         tiler.animation.onAllAnimationsEnded = { [weak self] in
             self?.runPendingZOrderRestore()
+            self?.runPendingFocusRaise()
         }
 
         socket.handler = { [weak self] command, args in
@@ -228,6 +235,11 @@ public final class KiwiCore {
             handleMonitorChange()
             emitMonitorChange()
         case .windowFocused(let id):
+            // A real focus echo supersedes a pending deferred
+            // raise (#143): the OS already raised whatever the
+            // user reached (a click mid-pan), and a stale raise
+            // firing after the pan would steal focus back.
+            pendingFocusRaise = nil
             emitFocusChange(id)
             // cmd+tab (or a click) can reach a window hidden
             // in an inactive virtual space; pull that space

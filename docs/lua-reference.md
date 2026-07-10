@@ -2146,6 +2146,17 @@ animations.set_on_space_change(false)
 **Does:** enables or disables the layout slide as focus moves within a
 Scrolling space.
 
+While the slide runs, the target window is brought to the front
+only when the pan settles — raising it first would pop a
+top-pinned row over the whole screen before the slide starts.
+The trade: keystrokes during the slide (one animation length,
+150–1000 ms) still reach the previously focused app, as in
+other scroll-style window managers. Global hotkeys are
+unaffected (they reach KiwiDesk regardless of the key app), and
+with the slide disabled focus transfers instantly. See the
+[accepted limitations](design-decisions.md#accepted-limitations)
+table.
+
 **Example:**
 
 ```lua
