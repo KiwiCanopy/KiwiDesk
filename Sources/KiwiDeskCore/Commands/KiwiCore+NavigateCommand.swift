@@ -92,7 +92,14 @@ extension KiwiCore {
             retile(
                 animated: tiler.settings.animations.onWindowSwap
             )
-            if crossedZones {
+            // A scrolling swap can push a window into an edge pile
+            // whose stacking then goes stale (#150); a stack swap
+            // that crosses the master boundary scrambles the
+            // cascade. `crossesStackBoundary` is stack-only, so
+            // the two are mutually exclusive.
+            if space.mode == .scrolling {
+                scheduleScrollingZOrderRestoreIfOverflowing()
+            } else if crossedZones {
                 scheduleZOrderRestore()
             }
         } else {
@@ -149,6 +156,9 @@ extension KiwiCore {
             retile(
                 animated: tiler.settings.animations.onWindowSwap
             )
+            // The array-step swap moves a window along the row and
+            // can land it in an overflowing edge pile (#150).
+            scheduleScrollingZOrderRestoreIfOverflowing()
         } else {
             focusWindow(target)
         }

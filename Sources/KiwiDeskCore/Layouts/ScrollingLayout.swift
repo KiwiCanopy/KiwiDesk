@@ -163,6 +163,35 @@ public struct ScrollingLayout: LayoutSystem {
         )
     }
 
+    /// Whether the row is longer than the viewport, so slots pile
+    /// up at the edges and their stacking matters (#150). A row
+    /// that fits entirely shows no overlap, so a swap within it
+    /// cannot scramble the edge piles' z-order — there is nothing
+    /// to restore. A superset of "the swapped pair touches a
+    /// pile": the focus that moved in a swap is always panned
+    /// fully into view, so a per-slot test would gate on the
+    /// other window's transient position; the overflow test is
+    /// cheaper and never misses a real scramble.
+    static func rowOverflows(
+        for windows: [WindowID],
+        in context: LayoutContext
+    ) -> Bool {
+        guard windows.count > 1 else { return false }
+        let area = context.scrolling.windowFrame(
+            in: context.usable,
+            inner: context.gaps.inner,
+            global: context.appBarStyle
+        )
+        let horizontal = context.scrolling.barAxisIsHorizontal
+        let m = metrics(
+            for: windows,
+            context: context,
+            area: area,
+            horizontal: horizontal
+        )
+        return m.rowLength > m.along
+    }
+
     /// The viewport offset for a focus at `focusedPos`, given the
     /// offset from the last tile (`previous`).
     ///

@@ -25,6 +25,14 @@ public final class KiwiCore {
     /// animations to settle (see restoreStackZOrder).
     var pendingZOrderRestore = false
 
+    /// A command reordered windows but its paired retile is the
+    /// dispatcher's own trailing `retile(force:)`, not one it
+    /// issued itself (#153) — `layoutCommand` arms the z-order
+    /// restore *after* that retile so it can't fire mid-retile
+    /// from pre-retile frames. Set via
+    /// `requestZOrderRestoreAfterDispatch`; reset each dispatch.
+    var deferredCommandZOrderRestore = false
+
     /// A scrolling focus move whose AX raise is waiting for
     /// the pan to settle (#143) — a single slot, so rapid
     /// focus commands supersede each other and only the last

@@ -26,6 +26,35 @@ extension KiwiCore {
         }
     }
 
+    /// Schedules a scrolling edge-pile restack after a swap, but
+    /// only when the row overflows the viewport (#150): a fully
+    /// visible row has no piles, so nothing overlaps and a swap
+    /// scrambles no stacking. Call *after* the swap's retile, so
+    /// the restore rides the new animations' settle rather than
+    /// firing from the pre-swap frames (the #153 ordering rule).
+    func scheduleScrollingZOrderRestoreIfOverflowing() {
+        guard let input = tiler.layoutInput(state: state),
+            input.space.mode == .scrolling,
+            ScrollingLayout.rowOverflows(
+                for: input.tiled,
+                in: input.context
+            )
+        else { return }
+        scheduleZOrderRestore()
+    }
+
+    /// Requests a z-order restore whose paired retile is the
+    /// command dispatcher's own trailing `retile(force:)`, not
+    /// one issued at the call site (#153). Recorded, not armed:
+    /// `layoutCommand` fires `scheduleZOrderRestore` *after* that
+    /// retile, so the restore can't run mid-retile off pre-retile
+    /// frames and be consumed before the new animations begin.
+    /// `promoteDemote` is the one such site (its reorder's retile
+    /// belongs to the dispatcher).
+    func requestZOrderRestoreAfterDispatch() {
+        deferredCommandZOrderRestore = true
+    }
+
     /// Runs a scheduled restore (called when animations end).
     func runPendingZOrderRestore() {
         guard pendingZOrderRestore else { return }
