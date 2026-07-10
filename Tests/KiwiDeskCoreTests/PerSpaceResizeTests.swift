@@ -18,6 +18,10 @@ struct PerSpaceResizeTests {
         return KiwiCore(configDirectory: dir)
     }
 
+    // NOTE: the grow assertions below assume the host (or
+    // headless-fallback 1920) screen is wide enough that the
+    // #44 interactive cap sits above the tested bases — true
+    // for any visible width > 1000 pt.
     private func stackSpace(_ core: KiwiCore) {
         core.execute(
             "set_mode",

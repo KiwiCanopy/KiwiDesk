@@ -365,7 +365,11 @@ stack.set_master_count(1)
 
 **Expects:** a number between 0 and 1.
 
-**Does:** sets the master zone's share of the space's width.
+**Does:** sets the master zone's share of the space's width. At
+layout time the *effective* ratio is clamped so both zones keep
+`min_window_size` (#44) — the stored value stays untouched and
+is honored again on a wider display; the cascade fallback only
+triggers when two min-size zones cannot coexist at any ratio.
 
 **Example:**
 
@@ -1535,7 +1539,9 @@ floating. What the `delta` actually adjusts depends on the layout:
   split *in the direction that grows the focused window*: with
   a master focused, a positive delta raises the master ratio;
   with a stack window focused, it lowers the ratio (the column
-  grows). `"y"` grows or shrinks the focused window's vertical
+  grows). The write stops at the bound that keeps both zones
+  at `min_window_size` on the current display (#44). `"y"`
+  grows or shrinks the focused window's vertical
   share of its column via per-window weights — session-scoped,
   never saved to a profile, and reset when a window leaves the
   space or KiwiDesk restarts. If the focused window is alone in

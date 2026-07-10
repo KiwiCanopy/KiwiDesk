@@ -349,6 +349,26 @@ One deliberate asymmetry: a stack height *drag* still snaps
 back (the mouse seam is windowless); only the keyboard/CLI
 `resize("y")` moves weights. (#67)
 
+**The stack cascade is a last resort; extreme ratios clamp at
+layout time, and interactive writes cap at the visible cliff.**
+An out-of-range `master_ratio` used to collapse the whole space
+into the OverlapStack cascade the moment a second window opened
+(#44). Now the layout clamps the *effective* ratio to the widest
+value keeping both zones ≥ `min_window_size`
+(`StackLayout.effectiveRatioRange`, the single authority), and
+cascades only when two min-size zones cannot coexist at any
+ratio. The **stored** config value stays untouched — a ratio too
+extreme for this display is honored again on a wider one — but
+the **interactive** paths (keyboard `resize("x")`, mouse drag)
+cap their writes at the current display's effective bound
+(`StackLayout.cappedRatioWrite`): past it the layout clamps
+anyway, so a wider write would only ratchet invisibly — the same
+rule as the #67 vertical weight cap, and the same
+config-wide/interaction-capped split. Known divergence, on
+purpose: **BSP still cascades on an extreme stored ratio** — the
+same clamp principle should migrate there in a follow-up rather
+than ride the #44 fix. (#44)
+
 **Orphaned space shortcuts are surfaced, never pruned.** A
 binding that targets a space by name outlives the space's
 presence in the current profile: it stays Carbon-registered

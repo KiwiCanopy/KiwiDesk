@@ -8,72 +8,6 @@ import CoreGraphics
 public struct StackLayout: LayoutSystem {
     public init() {}
 
-    /// Renormalization floor applied when *reading* a stack
-    /// weight (#67) — shared with the `resize` command so the
-    /// command's step math and the layout's distribution can
-    /// never disagree on the domain. Deliberately below
-    /// `weightRange.lowerBound`: the command never stores a
-    /// value this small, so the floor only defends against a
-    /// future writer — do not collapse the two constants.
-    public static let weightFloor: Double = 0.05
-    /// Clamp for what the `resize` command *stores* (#67).
-    public static let weightRange: ClosedRange<Double> = 0.1...10
-
-    /// The largest weight total a column can carry before its
-    /// smallest share drops below `minSize` — the single
-    /// authority behind both the layout's cascade check and
-    /// the resize command's growth cap, so the two formulas
-    /// cannot drift apart (#67 review; parity rule).
-    public static func maxColumnTotal(
-        smallestWeight: Double,
-        height: Double,
-        minSize: Double
-    ) -> Double {
-        // No (or nonsense) minimum → no cliff, matching the
-        // old `share < minSize` comparison for minSize ≤ 0.
-        guard minSize > 0 else { return .infinity }
-        return smallestWeight * height / minSize
-    }
-
-    /// The master/stack partition of a tiled window array —
-    /// the single authority consumed by `calculateGeometry`
-    /// and the `resize` command (#67 review: a third
-    /// hand-mirror of this rule had crept in). `stack` is nil
-    /// while everything still fits in the master zone.
-    public static func partition(
-        _ windows: [WindowID],
-        masterCount: Int
-    ) -> (
-        master: ArraySlice<WindowID>,
-        stack: ArraySlice<WindowID>?
-    ) {
-        let boundary = max(1, masterCount)
-        guard windows.count > boundary else {
-            return (windows[...], nil)
-        }
-        return (windows[..<boundary], windows[boundary...])
-    }
-
-    /// The column (zone) of `partition` holding `member`, or
-    /// nil when it is not in `windows`.
-    public static func column(
-        containing member: WindowID,
-        in windows: [WindowID],
-        masterCount: Int
-    ) -> ArraySlice<WindowID>? {
-        guard let index = windows.firstIndex(of: member) else {
-            return nil
-        }
-        let (master, stack) = partition(
-            windows,
-            masterCount: masterCount
-        )
-        guard let stack, index >= master.endIndex else {
-            return master
-        }
-        return stack
-    }
-
     public func calculateGeometry(
         for windows: [WindowID],
         in context: LayoutContext
@@ -95,16 +29,36 @@ public struct StackLayout: LayoutSystem {
         }
 
         let gap = context.gaps.inner.horizontal
-        let ratio = CGFloat(context.stack.masterRatio)
-        let masterWidth = (usable.width - gap) * ratio
-        let stackWidth = usable.width - gap - masterWidth
-        if min(masterWidth, stackWidth) < context.minWindowSize {
+        let available = usable.width - gap
+        // The cascade is a genuine last resort: only when two
+        // min-size zones cannot coexist at ANY ratio (#44). A
+        // merely extreme master_ratio is clamped to the widest
+        // value that keeps both zones ≥ min_window_size — the
+        // stored config value stays untouched, so it is honored
+        // again on a wider display.
+        guard
+            let range = Self.effectiveRatioRange(
+                available: Double(available),
+                minSize: Double(context.minWindowSize)
+            )
+        else {
             return OverlapStack.frames(
                 for: windows,
                 in: usable,
                 minSize: context.minWindowSize
             )
         }
+        let ratio = CGFloat(
+            min(
+                max(
+                    context.stack.masterRatio,
+                    range.lowerBound
+                ),
+                range.upperBound
+            )
+        )
+        let masterWidth = available * ratio
+        let stackWidth = available - masterWidth
 
         let masterRegion = CGRect(
             x: usable.minX,
