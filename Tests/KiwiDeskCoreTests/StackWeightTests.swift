@@ -104,4 +104,114 @@ struct StackWeightTests {
         #expect(space.stackWeights[w1] == nil)
         #expect(space.stackWeights[w2] == 3)
     }
+
+    @Test("A cross-space move prunes the weight too")
+    func crossSpaceMovePrunes() {
+        var manager = WorkspaceManager()
+        manager.ensureSpace("1", mode: .stack)
+        manager.ensureSpace("2", mode: .stack)
+        manager.add(w1, to: "1")
+        manager.withSpace("1") { $0.stackWeights[w1] = 2 }
+        manager.add(w1, to: "2")
+        // The weight was a fact about w1's old column; it must
+        // not follow the window or linger behind.
+        #expect(
+            manager[SpaceID("1")]?.stackWeights.isEmpty == true
+        )
+        #expect(
+            manager[SpaceID("2")]?.stackWeights.isEmpty == true
+        )
+    }
+}
+
+/// The master/stack partition helper is the single authority
+/// shared by `calculateGeometry` and the resize command (#67
+/// review) — pin its shape so a drift in either consumer is a
+/// test failure, not a silent reweight of the wrong column.
+@Suite("Stack partition authority (#67)")
+struct StackPartitionTests {
+    @Test("Partition splits at the master boundary")
+    func partitionSplits() {
+        let (master, stack) = StackLayout.partition(
+            [w1, w2, w3],
+            masterCount: 1
+        )
+        #expect(Array(master) == [w1])
+        #expect(stack.map(Array.init) == [w2, w3])
+    }
+
+    @Test("Everything fits in master → single column")
+    func masterOnly() {
+        let (master, stack) = StackLayout.partition(
+            [w1, w2],
+            masterCount: 5
+        )
+        #expect(Array(master) == [w1, w2])
+        #expect(stack == nil)
+    }
+
+    @Test("A zero master count clamps to one")
+    func zeroClampsToOne() {
+        let (master, stack) = StackLayout.partition(
+            [w1, w2],
+            masterCount: 0
+        )
+        #expect(Array(master) == [w1])
+        #expect(stack.map(Array.init) == [w2])
+    }
+
+    @Test("column(containing:) picks the member's zone")
+    func columnContaining() {
+        let windows = [w1, w2, w3]
+        let master = StackLayout.column(
+            containing: w1,
+            in: windows,
+            masterCount: 1
+        )
+        #expect(master.map(Array.init) == [w1])
+        let stack = StackLayout.column(
+            containing: w3,
+            in: windows,
+            masterCount: 1
+        )
+        #expect(stack.map(Array.init) == [w2, w3])
+        #expect(
+            StackLayout.column(
+                containing: WindowID(99),
+                in: windows,
+                masterCount: 1
+            ) == nil
+        )
+    }
+
+    @Test("Partition agrees with the layout's rendered zones")
+    func partitionMatchesLayout() throws {
+        // The net over the mirror: the zones the layout draws
+        // are exactly the partition's slices — same x for
+        // members of one zone, different x across zones.
+        var context = LayoutContext(
+            bounds: CGRect(x: 0, y: 0, width: 1920, height: 1080),
+            gaps: .uniform(10),
+            minWindowSize: 100
+        )
+        context.stack.masterCount = 2
+        let windows = [w1, w2, w3]
+        let frames = StackLayout().calculateGeometry(
+            for: windows,
+            in: context
+        )
+        let (master, stack) = StackLayout.partition(
+            windows,
+            masterCount: 2
+        )
+        let masterXs = Set(
+            master.compactMap { frames[$0]?.minX }
+        )
+        let stackXs = Set(
+            (stack ?? []).compactMap { frames[$0]?.minX }
+        )
+        #expect(masterXs.count == 1)
+        #expect(stackXs.count == 1)
+        #expect(masterXs != stackXs)
+    }
 }

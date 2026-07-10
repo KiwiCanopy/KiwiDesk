@@ -8,18 +8,68 @@ import CoreGraphics
 public struct StackLayout: LayoutSystem {
     public init() {}
 
+    /// Renormalization floor applied when *reading* a stack
+    /// weight (#67) — shared with the `resize` command so the
+    /// command's step math and the layout's distribution can
+    /// never disagree on the domain.
+    public static let weightFloor: Double = 0.05
+    /// Clamp for what the `resize` command *stores* (#67).
+    public static let weightRange: ClosedRange<Double> = 0.1...10
+
+    /// The master/stack partition of a tiled window array —
+    /// the single authority consumed by `calculateGeometry`
+    /// and the `resize` command (#67 review: a third
+    /// hand-mirror of this rule had crept in). `stack` is nil
+    /// while everything still fits in the master zone.
+    public static func partition(
+        _ windows: [WindowID],
+        masterCount: Int
+    ) -> (
+        master: ArraySlice<WindowID>,
+        stack: ArraySlice<WindowID>?
+    ) {
+        let boundary = max(1, masterCount)
+        guard windows.count > boundary else {
+            return (windows[...], nil)
+        }
+        return (windows[..<boundary], windows[boundary...])
+    }
+
+    /// The column (zone) of `partition` holding `member`, or
+    /// nil when it is not in `windows`.
+    public static func column(
+        containing member: WindowID,
+        in windows: [WindowID],
+        masterCount: Int
+    ) -> ArraySlice<WindowID>? {
+        guard let index = windows.firstIndex(of: member) else {
+            return nil
+        }
+        let (master, stack) = partition(
+            windows,
+            masterCount: masterCount
+        )
+        guard let stack, index >= master.endIndex else {
+            return master
+        }
+        return stack
+    }
+
     public func calculateGeometry(
         for windows: [WindowID],
         in context: LayoutContext
     ) -> [WindowID: CGRect] {
         let usable = context.usable
         guard !windows.isEmpty else { return [:] }
-        let masterCount = max(1, context.stack.masterCount)
+        let (master, stack) = Self.partition(
+            windows,
+            masterCount: context.stack.masterCount
+        )
 
-        guard windows.count > masterCount else {
+        guard let stack else {
             // Master only: full width.
             return column(
-                windows[...],
+                master,
                 in: usable,
                 context: context
             )
@@ -51,13 +101,13 @@ public struct StackLayout: LayoutSystem {
         )
 
         var result = column(
-            windows[..<masterCount],
+            master,
             in: masterRegion,
             context: context
         )
         result.merge(
             column(
-                windows[masterCount...],
+                stack,
                 in: stackRegion,
                 context: context
             )
@@ -82,7 +132,7 @@ public struct StackLayout: LayoutSystem {
         let gap = context.gaps.inner.vertical
         let available = region.height - gap * (count - 1)
         let weights = windows.map {
-            max(context.stackWeights[$0] ?? 1, 0.05)
+            max(context.stackWeights[$0] ?? 1, Self.weightFloor)
         }
         let total = weights.reduce(0, +)
         let smallest =

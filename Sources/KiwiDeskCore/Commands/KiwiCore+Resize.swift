@@ -46,6 +46,12 @@ extension KiwiCore {
             )
         }
         guard response.isSuccess else { return response }
+        // Deliberately un-forced (unlike the `set_*` config
+        // applies, AGENTS.md §5): the nudged value persists in
+        // settings/state and re-applies on the next layout, so
+        // the ±2 pt tolerance can only delay a sub-tolerance
+        // step, never lose it — and forcing every keypress
+        // would wobble windows that apps clamp.
         retile(
             animated: tiler.settings.animations.onWindowResize
         )
@@ -93,14 +99,18 @@ extension KiwiCore {
         let tiled = space.windows.filter {
             state.windows[$0]?.isFloating == false
         }
-        let masterCount = max(1, stack.masterCount)
-        let focusedIndex = space.focused.flatMap {
-            tiled.firstIndex(of: $0)
-        }
         guard axis == "y" else {
             // Unknown focus keeps the master-grows direction
             // (the pre-#67 behavior).
-            let inMaster = (focusedIndex ?? 0) < masterCount
+            let (master, _) = StackLayout.partition(
+                tiled,
+                masterCount: stack.masterCount
+            )
+            let inMaster =
+                space.focused.flatMap { focused in
+                    tiled.contains(focused)
+                        ? master.contains(focused) : nil
+                } ?? true
             let sign: Double = inMaster ? 1 : -1
             let value = stack.masterRatio + sign * delta / span
             tiler.settings.setMasterRatio(
@@ -110,16 +120,12 @@ extension KiwiCore {
             return .ok()
         }
         guard let focused = space.focused,
-            let index = focusedIndex
+            let column = StackLayout.column(
+                containing: focused,
+                in: tiled,
+                masterCount: stack.masterCount
+            )
         else { return .fail("no focused tiled window") }
-        let column: ArraySlice<WindowID>
-        if tiled.count <= masterCount {
-            column = tiled[...]  // master-only: one column
-        } else if index < masterCount {
-            column = tiled[..<masterCount]
-        } else {
-            column = tiled[masterCount...]
-        }
         guard column.count > 1 else {
             return .fail("focused window is alone in its column")
         }
@@ -129,14 +135,39 @@ extension KiwiCore {
         // The screen span stands in for the column height A —
         // close enough for a keyboard nudge, and the layout
         // renormalizes whatever we store.
+        let floor = StackLayout.weightFloor
         let weights = column.map {
-            max(space.stackWeights[$0] ?? 1, 0.05)
+            max(space.stackWeights[$0] ?? 1, floor)
         }
         let total = weights.reduce(0, +)
-        let current = max(space.stackWeights[focused] ?? 1, 0.05)
+        let current = max(space.stackWeights[focused] ?? 1, floor)
         let change =
             delta * total * total / (span * (total - current))
-        let value = min(max(current + change, 0.1), 10)
+        var value = current + change
+        if change > 0 {
+            // Growing: cap the write where the smallest OTHER
+            // share hits min_window_size — past that cliff the
+            // layout falls back to the overflow cascade, which
+            // ignores weights, so extra weight would only
+            // ratchet invisibly (review). Never forced below
+            // `current`, so an already-overflowed column stays
+            // editable downwards.
+            let others = zip(column, weights)
+                .filter { $0.0 != focused }
+                .map(\.1)
+            if let smallest = others.min() {
+                let minSize = Double(tiler.settings.minWindowSize)
+                let cap =
+                    smallest * span / minSize
+                    - (total - current)
+                value = min(value, max(cap, current))
+            }
+        }
+        let range = StackLayout.weightRange
+        value = min(
+            max(value, range.lowerBound),
+            range.upperBound
+        )
         state.workspaces.withSpace(space.id) {
             $0.stackWeights[focused] = value
         }

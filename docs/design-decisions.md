@@ -284,7 +284,8 @@ shortcuts (the default mode existed but was empty): a GUI-first
 user had no way to focus or move a window until they authored
 every combo. Now `Core.DefaultKeybindings` seeds a starter set
 (⌥HJKL focus, ⌥⇧HJKL swap, ⌥digit / ⌥⇧digit per-space, ⌥-/⌥=
-width resize, ⌥⇧-/⌥⇧= height resize, ⌥T float) with one guard everywhere: **only when no
+width resize, ⌥⇧-/⌥⇧= height resize, ⌥T float) with one
+guard everywhere: **only when no
 mode carries a single binding** — a user- or Lua-authored
 binding anywhere blocks the seed, making it idempotent and
 never destructive. The set lives in the **base `gui.json`
@@ -340,9 +341,13 @@ weight against — persisting them would at best restore sizes to
 the wrong windows. They are pruned when a window leaves the
 space. When a weighted share drops below `min_window_size`, the
 column falls back to the existing overflow cascade (weights
-apply to the fully-tiled case only); clamping the *master
+apply to the fully-tiled case only), and the resize command
+caps weight *growth* at that cliff so presses past it cannot
+ratchet the stored weight invisibly; clamping the *master
 ratio* against min window size stays a separate issue (#44).
-(#67)
+One deliberate asymmetry: a stack height *drag* still snaps
+back (the mouse seam is windowless); only the keyboard/CLI
+`resize("y")` moves weights. (#67)
 
 **Orphaned space shortcuts are surfaced, never pruned.** A
 binding that targets a space by name outlives the space's

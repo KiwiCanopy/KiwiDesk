@@ -22,6 +22,12 @@ public enum ResizeAdjustment: Equatable, Sendable {
 /// Pure translation of mouse resizes into the same parameter
 /// changes the `resize` command makes, so both paths share one
 /// per-layout behavior. Pure so it is fully testable.
+///
+/// One deliberate exception (#67): a stack HEIGHT drag snaps
+/// back while keyboard `resize("y")` adjusts the focused
+/// window's per-window weight — wiring the drag would need the
+/// dragged window's identity in this deliberately windowless
+/// seam. Revisit if stack height drags are asked for.
 public enum MouseResize {
     /// Size deltas beyond this are a resize gesture; smaller
     /// ones are app-side clamping noise (character grids).

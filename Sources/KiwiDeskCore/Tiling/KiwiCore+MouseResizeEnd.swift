@@ -61,13 +61,29 @@ extension KiwiCore {
         let stack = tiler.settings.resolvedStack(for: space.id)
         let isMaster =
             (tiled.firstIndex(of: id) ?? .max) < stack.masterCount
+        let bounds = GeometryUtils.axVisibleFrame(of: screen)
         let adjustment = MouseResize.translate(
             mode: space.mode,
             isMaster: isMaster,
             slot: slot,
             frame: frame,
-            bounds: GeometryUtils.axVisibleFrame(of: screen)
+            bounds: bounds
         )
+        apply(adjustment, in: space, bounds: bounds)
+        retile(
+            animated: tiler.settings.animations.onWindowResize
+        )
+        focusWindow(id)
+    }
+
+    /// Writes one translated adjustment into the space's
+    /// settings — split from `handleResizeEnd` so the
+    /// case→setter mapping is testable without a screen.
+    func apply(
+        _ adjustment: ResizeAdjustment?,
+        in space: Space,
+        bounds: CGRect
+    ) {
         switch adjustment {
         case .bspRatioH(let delta):
             let base =
@@ -86,8 +102,11 @@ extension KiwiCore {
                 for: space.id
             )
         case .masterRatio(let delta):
+            let base =
+                tiler.settings.resolvedStack(for: space.id)
+                .masterRatio
             tiler.settings.setMasterRatio(
-                min(max(stack.masterRatio + delta, 0.1), 0.9),
+                min(max(base + delta, 0.1), 0.9),
                 for: space.id
             )
         case .scrollWidth(let delta):
@@ -97,7 +116,6 @@ extension KiwiCore {
             let scrolling =
                 tiler.settings.resolvedScrolling(for: space.id)
             let horizontal = scrolling.barAxisIsHorizontal
-            let bounds = GeometryUtils.axVisibleFrame(of: screen)
             let along = horizontal ? bounds.width : bounds.height
             let current = scrolling.slotSize
                 .editablePoints(along: along, horizontal: horizontal)
@@ -108,9 +126,5 @@ extension KiwiCore {
         case nil:
             break
         }
-        retile(
-            animated: tiler.settings.animations.onWindowResize
-        )
-        focusWindow(id)
     }
 }
