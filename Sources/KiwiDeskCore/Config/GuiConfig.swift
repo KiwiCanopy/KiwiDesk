@@ -162,12 +162,17 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             ) ?? []
         profileBindings =
             try decodeProfileBindings(from: container)
-        modes =
-            try container.decodeIfPresent(
+        // Normalized like the spaces below: a hand-edited
+        // sidecar can carry duplicate mode names or an icon on
+        // the default mode (#31) — cleaned here so invalid
+        // entries never reach the loader or the GUI. Empty
+        // input falls back to [KeyMode.defaultMode] as before.
+        modes = KeyMode.normalized(
+            full: try container.decodeIfPresent(
                 [KeyMode].self,
                 forKey: .modes
-            ) ?? [KeyMode.defaultMode]
-        if modes.isEmpty { modes = [KeyMode.defaultMode] }
+            ) ?? []
+        )
         dropEmptyNamedSpaces()
     }
 

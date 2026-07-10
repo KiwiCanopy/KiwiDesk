@@ -1611,6 +1611,13 @@ The override is **sparse and soft by design**:
   The same applies to a base mode's menu bar icon — a profile
   can *change* it, but clearing it just reverts to the base
   icon.
+- A hand-edited `"modes"` list (in `gui.json` or a profile) is
+  normalized on load: empty-named modes are dropped, a
+  duplicated mode name keeps only its first entry, and an icon
+  on the `default` mode is removed (its menu bar indicator is
+  fixed). In `gui.json` the `default` mode additionally always
+  exists and sits first; a profile's sparse override never
+  gains one (a mode it omits is inherited).
 - Keybindings live in ONE home: the structured config (gui.json +
   profiles) when GUI-managed, or your `init.lua` otherwise —
   never merged. Hand-written binds that evade the managed-
