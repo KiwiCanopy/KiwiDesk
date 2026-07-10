@@ -1540,7 +1540,8 @@ floating. What the `delta` actually adjusts depends on the layout:
   a master focused, a positive delta raises the master ratio;
   with a stack window focused, it lowers the ratio (the column
   grows). The write stops at the bound that keeps both zones
-  at `min_window_size` on the current display (#44). `"y"` grows or shrinks the focused window's vertical
+  at `min_window_size` on the current display (#44). `"y"`
+  grows or shrinks the focused window's vertical
   share of its column via per-window weights — session-scoped,
   never saved to a profile, and reset when a window leaves the
   space or KiwiDesk restarts. If the focused window is alone in

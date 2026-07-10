@@ -1,5 +1,3 @@
-import CoreGraphics
-
 /// The stack layout's shared domain rules (#44/#67), split from
 /// `StackLayout` for file size (AGENTS.md §2): the weight
 /// domain, the master/stack partition, and the effective-ratio
@@ -57,7 +55,10 @@ extension StackLayout {
     /// (range nil) the write is deliberately not capped:
     /// there is no visible bound to stop at, and the value
     /// stays editable for a wider display, bounded by the
-    /// 0.1…0.9 store clamp.
+    /// 0.1…0.9 store clamp. Callers must pass the SAME
+    /// `minSize` the layout resolves (the global today) — a
+    /// future per-space min_window_size override must reach
+    /// both sides, or cap and clamp silently diverge.
     public static func cappedRatioWrite(
         _ proposed: Double,
         base: Double,
