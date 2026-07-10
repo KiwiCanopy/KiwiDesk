@@ -185,6 +185,17 @@ struct ScrollingDeferredRaiseTests {
         #expect(core.activeSpace?.focused == WindowID(3))
     }
 
+    @Test("defersFocusRaise stays a subset of isFocusDriven")
+    func deferSubsetInvariant() {
+        // The focusWindow guard sequencing relies on it; the
+        // runtime drift net only keeps the raise, not the
+        // deferral. Make drift loud.
+        let holds = LayoutMode.allCases
+            .filter(\.defersFocusRaise)
+            .allSatisfy { $0.isFocusDriven }
+        #expect(holds)
+    }
+
     @Test("Monocle keeps the immediate raise path")
     func monocleStaysImmediate() {
         let core = makeCore()

@@ -15,8 +15,8 @@ import Foundation
 /// (`AnimationEngine.onAllAnimationsEnded` — the shared slot in
 /// `KiwiCore.init` runs both). Known trade, documented in the
 /// Lua reference and accepted limitations: keystrokes during
-/// the slide (~150–300 ms) still reach the previously focused
-/// app; global Carbon hotkeys are unaffected.
+/// the slide (one animation length, 50–1000 ms) still reach
+/// the previously focused app; Carbon hotkeys are unaffected.
 extension KiwiCore {
     /// The one `onAllAnimationsEnded` consumer — the slot is a
     /// single callback by design; this method IS the dispatch.
