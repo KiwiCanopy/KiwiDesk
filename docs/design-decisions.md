@@ -13,6 +13,51 @@ Settings redesign (#68, PR #88) unless noted; deeper rationale
 lives in the linked issues. Architecture and code guardrails
 live in `AGENTS.md`, not here.
 
+## Accepted limitations
+
+Some behaviors are *bugs by design* — accepted consequences of a
+settled architectural trade, not defects to fix. This table is the
+one place that says, for each: it's known, here's why it's
+accepted, here's the architectural root, and here's the real fix
+where one is planned. Every row links to its full reasoning
+elsewhere on this page (or to the issue that owns it).
+
+Convention: when a review or manual pass classifies a behavior as
+accepted-by-architecture, it adds a row here **in the same change
+set** — the user-facing twin of the `AGENTS.md` §5 guardrail rule.
+A row needs an architectural root and, where one exists, the
+planned escape hatch; it is not a wontfix dumping ground.
+
+| Behavior | Why it's accepted | Architectural root | Escape hatch / planned fix |
+|---|---|---|---|
+| In BSP, the inner window of a nested pair can't grow — a "grow" press (or edge-drag) widens its outer neighbor instead. | Its width `r·(1−r)·W` is already maximized at the default ratio, so no resize direction can widen it. | All same-orientation splits share the one per-space ratio; per-node ratios would need a container tree the flat-array model forbids (#56 trade). | The [`track` layout (#128)](https://github.com/hajiboy95/KiwiDesk/issues/128), where every window has one true resize target. See [BSP resize is focus-aware in *direction* only](#shortcuts). |
+| An extreme *stored* BSP ratio still collapses the space into the overlap cascade — even though the stack layout no longer does. | The stack's layout-time clamp hasn't been migrated to BSP yet; doing it as a follow-up rather than riding the #44 fix keeps that change scoped. | BSP has no effective-ratio clamp authority; the #44 fix (`StackLayout.effectiveRatioRange`) landed in the stack only. | Migrate the clamp principle to BSP (follow-up to [#44](https://github.com/hajiboy95/KiwiDesk/issues/44)). See [The stack cascade is a last resort](#shortcuts). |
+| Dragging a stack window's height with the mouse snaps back; only keyboard/CLI `resize("y")` actually moves the vertical share. | Vertical weights are a windowless keyboard/CLI concept; the mouse-drag seam has no window to anchor a weight against. | Per-window vertical weights are session-scoped and keyboard-only by design ([#67](https://github.com/hajiboy95/KiwiDesk/issues/67)). | Use keyboard/CLI `resize("y")`; the mouse asymmetry is deliberate. See [Stack resize is focus-aware](#shortcuts). |
+| Holding a key to resize a floating window under-accumulates while a slide/resize animation is still in flight. | Each step re-bases on the last AX-reported frame; mid-animation the AX echo lags, so rapid repeats read stale geometry. | Resize re-bases on live AX state, and AX echoes trail an in-flight animation. | Let the frame settle, or press again once the animation completes ([#129](https://github.com/hajiboy95/KiwiDesk/issues/129)). |
+| Animation and screen-selection heuristics assume a single screen; some multi-monitor edge cases aren't fully modeled yet. | These paths were scoped single-screen first; multi-monitor is a tracked frontier, not a regression. | Screen-pick and per-monitor animation heuristics are single-screen by construction. | Multi-monitor hardening (roadmap `plan/06_Roadmap.md`). |
+| At deep BSP splits under extreme ratios, the screen-midpoint side rule can misread which side a "grow" acts on. | Mouse parity is the spec: keyboard matches the mouse's midpoint reading exactly, warts included, so the two never diverge. | The sign is inferred from the focused window's screen-midpoint side (`MouseResize.bspSide`), shared with the mouse for parity. | The [`track` layout (#128)](https://github.com/hajiboy95/KiwiDesk/issues/128) gives each resize one true target; until then parity is intentional ([#122](https://github.com/hajiboy95/KiwiDesk/issues/122)). |
+
+### Blocked by macOS (SIP)
+
+A separate class: capabilities macOS forbids without disabling
+**System Integrity Protection**. KiwiDesk drives native Spaces
+through private SkyLight/CGS symbols resolved at runtime, and the
+few operations that *write* the native-Space arrangement are
+gated by SIP. KiwiDesk **never disables SIP or asks a user to** —
+a disabled-SIP requirement is a non-starter for a window manager
+(`AGENTS.md` §5), so these stay unimplemented rather than shipping
+a fragile fast path with no safe fallback. Unlike the table above,
+the root is the OS, not our architecture, and there is no in-app
+escape hatch — only Apple exposing a supported API. They are
+tracked, not abandoned:
+
+- **Move the focused window to another native Space**
+  ([#25](https://github.com/hajiboy95/KiwiDesk/issues/25)).
+- **Switch the visible native Space programmatically**
+  ([#26](https://github.com/hajiboy95/KiwiDesk/issues/26)).
+- **Restore windows across all native Spaces on quit**
+  ([#70](https://github.com/hajiboy95/KiwiDesk/issues/70)).
+
 ## Navigation & saving
 
 **Two-group sidebar, topic-named: "Design" vs "System".**

@@ -245,6 +245,13 @@ Expand each layout type to adjust its defaults:
   split direction (horizontal or vertical), and for rigid mode,
   column and row counts.
 
+> **A few resize behaviors are accepted limitations, not bugs.**
+> Some tiling quirks — e.g. the inner window of a nested BSP pair
+> not growing, or a stack window's *mouse* height-drag snapping
+> back — are settled architectural trades, each with a reason and,
+> where planned, a real fix. See
+> [Accepted limitations](design-decisions.md#accepted-limitations).
+
 ### Per-Space Overrides
 
 To tune the *same layout type differently in different spaces*, use
