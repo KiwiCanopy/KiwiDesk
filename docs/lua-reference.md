@@ -511,7 +511,9 @@ symmetrically: an off-screen window is revealed by panning toward
 it, and a window that is already fully visible does not move the
 viewport. The anchor decides where a freshly scrolled window comes
 to rest (centered, or against the leading/trailing edge) when the
-viewport had to move to reveal it.
+viewport had to move to reveal it. Focusing a *floating* window
+leaves the viewport where it is — a floating window has no slot
+in the row, so there is nothing to scroll into view.
 
 **Example:**
 
