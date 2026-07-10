@@ -140,17 +140,28 @@ public struct Space: Sendable, Equatable {
     public var mode: LayoutMode
     public var windows: [WindowID]
     public var focused: WindowID?
+    /// Per-window vertical share of a stack column (#67):
+    /// absent = 1.0 = an even share; `resize("y")` bumps the
+    /// focused window's entry. A parallel map next to the flat
+    /// array — never a tree. Ephemeral by design: WindowIDs
+    /// are OS handles, unstable across relaunch, so there is
+    /// nothing to persist the weights against (see
+    /// docs/design-decisions.md); pruned when a window leaves
+    /// the space.
+    public var stackWeights: [WindowID: Double]
 
     public init(
         id: SpaceID,
         mode: LayoutMode = .bsp,
         windows: [WindowID] = [],
-        focused: WindowID? = nil
+        focused: WindowID? = nil,
+        stackWeights: [WindowID: Double] = [:]
     ) {
         self.id = id
         self.mode = mode
         self.windows = windows
         self.focused = focused
+        self.stackWeights = stackWeights
     }
 
     /// Appends a window if it is not already present.
@@ -203,9 +214,11 @@ public struct Space: Sendable, Equatable {
         }
     }
 
-    /// Removes a window; clears focus if it was focused.
+    /// Removes a window; clears focus if it was focused and
+    /// prunes its stack weight (#67).
     public mutating func remove(_ window: WindowID) {
         windows.removeAll { $0 == window }
+        stackWeights[window] = nil
         if focused == window {
             focused = windows.last
         }

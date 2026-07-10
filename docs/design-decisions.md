@@ -322,6 +322,28 @@ monocle/grid/floating stay explicit no-ops. No back-compat alias
 for the old `bsp.set_ratio` / `layout.bsp.ratio` name
 (pre-release, single user). (#56)
 
+**Stack resize is focus-aware, and its vertical weights are
+ephemeral by design.** The stack layout's resize used to always
+move the master/stack split toward the master, whichever window
+was focused. #67 makes both axes act on the *focused* window:
+`resize("x")` moves the split in the direction that grows the
+focused window's zone (flipping the old always-grow-master
+behavior when a stack window is focused — intended), and
+`resize("y")` grows the focused window's vertical share of its
+column via **per-window weights** — a `[WindowID: Double]` map
+in `Space`, parallel to the flat window array (a map, not a
+tree: it adds no structure the flat-array guardrail forbids).
+The weights are **session-scoped and never serialized**: a
+`WindowID` is an OS window handle, unstable across app and
+window relaunches, so there is nothing durable to persist a
+weight against — persisting them would at best restore sizes to
+the wrong windows. They are pruned when a window leaves the
+space. When a weighted share drops below `min_window_size`, the
+column falls back to the existing overflow cascade (weights
+apply to the fully-tiled case only); clamping the *master
+ratio* against min window size stays a separate issue (#44).
+(#67)
+
 **Orphaned space shortcuts are surfaced, never pruned.** A
 binding that targets a space by name outlives the space's
 presence in the current profile: it stays Carbon-registered

@@ -118,6 +118,7 @@ extension TilingSettings {
             gaps: gaps(for: space.id),
             focused: space.focused,
             minWindowSize: minWindowSize,
+            stackWeights: space.stackWeights,
             bsp: resolvedBsp(for: space.id),
             stack: resolvedStack(for: space.id),
             scrolling: resolvedScrolling(for: space.id),

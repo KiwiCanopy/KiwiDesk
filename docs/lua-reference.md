@@ -1531,8 +1531,15 @@ floating. What the `delta` actually adjusts depends on the layout:
 - **bsp** — per-axis (#56): `"x"` nudges the side-by-side split
   ratio (`bsp.set_ratio_h`), `"y"` the stacked one
   (`bsp.set_ratio_v`) — genuinely independent width and height.
-- **stack** — it nudges the master ratio; the `axis` argument
-  only scales the step by the screen's width or height.
+- **stack** — focus-aware (#67). `"x"` moves the master/stack
+  split *in the direction that grows the focused window*: with
+  a master focused, a positive delta raises the master ratio;
+  with a stack window focused, it lowers the ratio (the column
+  grows). `"y"` grows or shrinks the focused window's vertical
+  share of its column via per-window weights — session-scoped,
+  never saved to a profile, and reset when a window leaves the
+  space or KiwiDesk restarts. If the focused window is alone in
+  its column, `"y"` reports an error.
 - **scrolling** — it adjusts the slot size in real points along
   the layout's own scroll axis (columns for horizontal, rows for
   vertical), regardless of which `axis` you pass — the `x`/`y`

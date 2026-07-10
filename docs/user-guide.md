@@ -224,7 +224,11 @@ Expand each layout type to adjust its defaults:
   the per-axis resize shortcuts nudge (#56).
 - **Stack**: master count, master ratio (how much width/height the
   master zone takes), and overflow style (cascade_overflow keeps
-  full windows, cascade_all cascades everything).
+  full windows, cascade_all cascades everything). The resize
+  shortcuts are focus-aware (#67): width grows whichever zone
+  holds the focused window, height grows the focused window's
+  share of its column (a session-only tweak — it resets on
+  relaunch and is not saved into profiles).
 - **Scrolling**: orientation (horizontal or vertical), anchor
   (where the focused column sits: center, left, right), and slot
   size (auto, pixel count, or percentage of available space).

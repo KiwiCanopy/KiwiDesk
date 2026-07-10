@@ -65,10 +65,13 @@ public struct StackLayout: LayoutSystem {
         return result
     }
 
-    /// Distributes windows vertically and evenly in a region.
-    /// When they stop fitting, as many windows as possible
-    /// stay fully tiled and only the overflow collapses into
-    /// a title-bar cascade at the bottom.
+    /// Distributes windows vertically in a region, sized
+    /// proportionally to their `stackWeights` (#67; absent =
+    /// 1.0, so unweighted columns stay even). When the
+    /// smallest weighted share stops fitting, weighting steps
+    /// aside: as many windows as possible stay fully tiled
+    /// (evenly) and only the overflow collapses into a
+    /// title-bar cascade at the bottom.
     private func column(
         _ windows: ArraySlice<WindowID>,
         in region: CGRect,
@@ -77,8 +80,14 @@ public struct StackLayout: LayoutSystem {
         let count = CGFloat(windows.count)
         guard count > 0 else { return [:] }
         let gap = context.gaps.inner.vertical
-        let height = (region.height - gap * (count - 1)) / count
-        if height < context.minWindowSize {
+        let available = region.height - gap * (count - 1)
+        let weights = windows.map {
+            max(context.stackWeights[$0] ?? 1, 0.05)
+        }
+        let total = weights.reduce(0, +)
+        let smallest =
+            available * (weights.min() ?? 1) / total
+        if smallest < context.minWindowSize {
             if context.stack.overflowStyle == .cascadeAll {
                 return OverlapStack.frames(
                     for: windows,
@@ -93,16 +102,17 @@ public struct StackLayout: LayoutSystem {
             )
         }
         var result: [WindowID: CGRect] = [:]
+        var y = region.minY
         for (offset, window) in windows.enumerated() {
-            let y =
-                region.minY
-                + CGFloat(offset) * (height + gap)
+            let height =
+                available * weights[offset] / total
             result[window] = CGRect(
                 x: region.minX,
                 y: y,
                 width: region.width,
                 height: height
             )
+            y += height + gap
         }
         return result
     }
