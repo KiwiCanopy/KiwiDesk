@@ -39,6 +39,15 @@ public final class KiwiCore {
     /// target raises (see runPendingFocusRaise).
     var pendingFocusRaise: WindowID?
 
+    /// The window id KiwiDesk's own last AX raise issued, awaiting
+    /// its focus echo (#152). A matching echo is self-inflicted,
+    /// not a user action: under fast key-repeat it must not
+    /// supersede a newer pending raise nor snap state focus back.
+    /// Consumed on the first matching echo; cleared by any
+    /// non-matching one (the world has moved on). See
+    /// `handle(_:)`'s `.windowFocused` case.
+    var lastSelfRaised: WindowID?
+
     /// The deferred one-shot settle tasks (focus follow, startup
     /// sweep, space settles), keyed so `stop()` cancels them all
     /// without a hand-kept list (#49). Bodies live at the

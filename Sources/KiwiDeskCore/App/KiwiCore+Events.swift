@@ -37,10 +37,30 @@ extension KiwiCore {
             handleMonitorChange()
             emitMonitorChange()
         case .windowFocused(let id):
-            // A real focus echo supersedes a pending deferred
-            // raise (#143): the OS already raised whatever the
-            // user reached (a click mid-pan), and a stale raise
-            // firing after the pan would steal focus back.
+            // Echo provenance (#152): an echo of KiwiDesk's own
+            // raise must not supersede a newer pending raise under
+            // fast key-repeat. If our last self-raise is echoing
+            // while a different target's raise is already pending,
+            // keep that raise and re-assert focus to it — the
+            // stale echo (and the state focus StateCoordinator
+            // just moved onto the echoed window) would otherwise
+            // pan back to the superseded window. Consume/clear the
+            // memo either way: the world has moved on.
+            let selfEcho = id == lastSelfRaised
+            lastSelfRaised = nil
+            if selfEcho, let pending = pendingFocusRaise,
+                pending != id
+            {
+                if let space = state.workspaces.space(of: pending) {
+                    state.workspaces.focus(pending, in: space)
+                }
+                return
+            }
+            // A real focus echo (a user click mid-pan) or our own
+            // echo with nothing newer pending supersedes the
+            // deferred raise (#143): the OS already raised whatever
+            // the user reached, and a stale raise firing after the
+            // pan would steal focus back.
             pendingFocusRaise = nil
             emitFocusChange(id)
             // cmd+tab (or a click) can reach a window hidden

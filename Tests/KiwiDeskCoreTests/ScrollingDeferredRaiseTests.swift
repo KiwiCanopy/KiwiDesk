@@ -100,6 +100,54 @@ struct ScrollingDeferredRaiseTests {
         #expect(core.activeSpace?.focused == WindowID(5))
     }
 
+    @Test("A stale self-echo keeps a newer pending raise (#152)")
+    func selfEchoKeepsPendingRaise() {
+        let core = makeCore()
+        let space = makeScrollingSpace(
+            core,
+            windows: 5,
+            focus: WindowID(1)
+        )
+        guard startDummyPan(core) else { return }
+        // A newer focus step is live: state focus on 3, its raise
+        // pending behind the pan.
+        core.state.workspaces.focus(WindowID(3), in: space)
+        core.pendingFocusRaise = WindowID(3)
+        // The immediate raise of 2 from the previous step now
+        // echoes back mid-pan (its AX focus notification lands).
+        core.lastSelfRaised = WindowID(2)
+        core.eventLoop.onEvent(.windowFocused(WindowID(2)))
+        // The stale self-echo neither clears the pending raise nor
+        // snaps state focus back to 2.
+        #expect(core.pendingFocusRaise == WindowID(3))
+        #expect(core.activeSpace?.focused == WindowID(3))
+        #expect(core.lastSelfRaised == nil)
+        core.tiler.animation.cancelAll()
+        #expect(core.activeSpace?.focused == WindowID(3))
+    }
+
+    @Test("A real echo (not self-raised) still supersedes (#152)")
+    func realEchoStillSupersedes() {
+        let core = makeCore()
+        let space = makeScrollingSpace(
+            core,
+            windows: 5,
+            focus: WindowID(1)
+        )
+        guard startDummyPan(core) else { return }
+        core.state.workspaces.focus(WindowID(3), in: space)
+        core.pendingFocusRaise = WindowID(3)
+        // No self-raise memo: a genuine user click on 2 mid-pan
+        // must still supersede the pending raise (the
+        // misclassification guard — never suppress a real focus
+        // change the user asked for).
+        core.lastSelfRaised = nil
+        core.eventLoop.onEvent(.windowFocused(WindowID(2)))
+        #expect(core.pendingFocusRaise == nil)
+        core.tiler.animation.cancelAll()
+        #expect(core.activeSpace?.focused == WindowID(2))
+    }
+
     @Test("A non-animated focus move raises immediately")
     func nonAnimatedRaisesImmediately() {
         let core = makeCore()
