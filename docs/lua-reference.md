@@ -2231,7 +2231,9 @@ space objects), `windows` (array of window objects), `monitor_count`,
 still running).
 
 Each space object has: `id`, `mode`, `windows` (array of window ids),
-`focused` (focused window id or `nil`).
+`focused` (focused window id or `nil`), and — only while a stack
+column carries an uneven `resize("y")` split — `stack_weights`
+(window id → session weight, #67).
 
 Each window object has: `id`, `app`, `title`, `floating` (boolean).
 

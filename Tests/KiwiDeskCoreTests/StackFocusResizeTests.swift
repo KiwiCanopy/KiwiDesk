@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import Testing
 
@@ -157,22 +158,32 @@ struct StackFocusResizeTests {
     func growthCappedAtOverflowCliff() {
         let core = makeCore()
         stackSpace(core)
+        // Pin the geometry the cap derives from, so the
+        // expected value does not depend on the machine's
+        // screen height (review: a 6K display legitimately
+        // reaches the 10 clamp otherwise).
+        core.execute(
+            "set_min_window_size",
+            args: [.number(300)]
+        )
+        let span = Double(
+            NSScreen.main?.visibleFrame.height ?? 1080
+        )
         core.state.apply(.windowFocused(WindowID(2)))
         // Hammer Grow height far past where the column mate
         // would drop below min_window_size: the stored weight
         // must stop at the cliff instead of ratcheting to the
-        // 10 clamp (review finding).
+        // 10 clamp (review finding). Cap for a 2-window column
+        // with the mate at weight 1: span/minSize − 1.
         for _ in 1...50 {
             core.execute(
                 "resize",
                 args: [.string("y"), .number(400)]
             )
         }
+        let expected = min(max(span / 300 - 1, 1), 10)
         let space = core.state.workspaces[SpaceID("1")]
         let weight = space?.stackWeights[WindowID(2)] ?? 0
-        #expect(weight < 10)
-        // The mate's projected share stays at or above the
-        // min-size cliff (span-basis approximation).
-        #expect(weight > 1)  // it did grow
+        #expect(abs(weight - expected) < 1e-9)
     }
 }

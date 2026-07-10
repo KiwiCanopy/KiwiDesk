@@ -66,4 +66,19 @@ struct MouseResizeApplyTests {
         let stack = core.tiler.settings.stack
         #expect(abs(stack.masterRatio - 0.5) < 1e-9)
     }
+
+    @Test("scrollWidth grows the slot from the given bounds")
+    func scrollWidthApplies() {
+        let core = makeCore()
+        let space = space(core, mode: "scrolling")
+        // The one case that consumes the extracted `bounds`
+        // parameter: the auto slot seeds against its scroll
+        // axis, then the delta lands on top in points.
+        let before = core.tiler.settings.scrolling.slotSize
+            .editablePoints(along: bounds.width, horizontal: true)
+        core.apply(.scrollWidth(100), in: space, bounds: bounds)
+        let after = core.tiler.settings.scrolling.slotSize
+            .editablePoints(along: bounds.width, horizontal: true)
+        #expect(abs(after - before - 100) < 0.5)
+    }
 }

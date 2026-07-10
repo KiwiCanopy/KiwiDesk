@@ -135,12 +135,15 @@ extension KiwiCore {
         // The screen span stands in for the column height A —
         // close enough for a keyboard nudge, and the layout
         // renormalizes whatever we store.
-        let floor = StackLayout.weightFloor
+        let weightFloor = StackLayout.weightFloor
         let weights = column.map {
-            max(space.stackWeights[$0] ?? 1, floor)
+            max(space.stackWeights[$0] ?? 1, weightFloor)
         }
         let total = weights.reduce(0, +)
-        let current = max(space.stackWeights[focused] ?? 1, floor)
+        let current = max(
+            space.stackWeights[focused] ?? 1,
+            weightFloor
+        )
         let change =
             delta * total * total / (span * (total - current))
         var value = current + change
