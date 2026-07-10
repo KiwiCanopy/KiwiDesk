@@ -168,9 +168,15 @@ extension KeyModeOverride: Codable {
     /// Transparent to [KeyMode]: encode/decode as a bare JSON
     /// array, matching the `GuiConfig.modes` shape so both
     /// surfaces share one vocabulary (AGENTS.md §5).
+    /// Decoded input is untrusted (hand-edited profile JSON,
+    /// #31): duplicate names and a default-mode icon are
+    /// normalized away. Sparse flavor — a default entry is
+    /// never inserted (absence means inherit).
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        modes = try container.decode([KeyMode].self)
+        modes = KeyMode.normalized(
+            sparse: try container.decode([KeyMode].self)
+        )
     }
 
     public func encode(to encoder: Encoder) throws {

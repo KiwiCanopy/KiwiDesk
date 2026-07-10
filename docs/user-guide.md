@@ -121,6 +121,13 @@ Each field:
     - **`kind`**: classification ("navigation", "application", or "custom").
     - **`label`**: display name for the row.
 
+If you hand-edit the `modes` list, it is normalized on load:
+modes with an empty name are dropped, a duplicated mode name
+keeps only its first entry, the `default` mode always exists and
+sits first, and an `icon` on the default mode is removed (its
+menu bar indicator is fixed). The cleanup is silent; the next
+Save persists the normalized list.
+
 To reset the app to what your `init.lua` declares, delete `gui.json`.
 Treat it like `init.lua` — do not import it from an untrusted source,
 since custom Lua in keybindings runs on every reload.
