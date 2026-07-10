@@ -121,9 +121,20 @@ struct SpaceOverrideRows: View {
             ]
         )
         OverrideFractionRow(
-            label: L("layout_params.split_ratio", "Split ratio"),
-            value: binding(\.bsp.override, space, \.splitRatio),
-            global: g.bsp.splitRatio
+            label: L(
+                "layout_params.split_ratio_h",
+                "Width split ratio"
+            ),
+            value: binding(\.bsp.override, space, \.splitRatioH),
+            global: g.bsp.splitRatioH
+        )
+        OverrideFractionRow(
+            label: L(
+                "layout_params.split_ratio_v",
+                "Height split ratio"
+            ),
+            value: binding(\.bsp.override, space, \.splitRatioV),
+            global: g.bsp.splitRatioV
         )
     }
 

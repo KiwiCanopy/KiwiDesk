@@ -107,16 +107,55 @@ struct BspLayoutTests {
         #expect(a.minX < b.minX)
     }
 
-    @Test("Split ratio shifts the boundary")
-    func splitRatio() throws {
+    @Test("H ratio shifts the side-by-side boundary")
+    func splitRatioH() throws {
         var context = makeContext()
-        context.bsp.splitRatio = 0.7
+        context.bsp.splitRatioH = 0.7
         let frames = layout.calculateGeometry(
             for: [w1, w2],
             in: context
         )
         let a = try #require(frames[w1])
         #expect(abs(a.width - 1890 * 0.7) < 0.01)
+        // Full height: the V ratio played no part here.
+        #expect(abs(a.height - 1060) < 0.01)
+    }
+
+    @Test("V ratio shifts the stacked boundary")
+    func splitRatioV() throws {
+        // Portrait screen: shortest-side stacks the first
+        // split, so only the V ratio moves the boundary.
+        var context = makeContext(
+            bounds: CGRect(x: 0, y: 0, width: 800, height: 2000)
+        )
+        context.minWindowSize = 100
+        context.bsp.splitRatioV = 0.7
+        let frames = layout.calculateGeometry(
+            for: [w1, w2],
+            in: context
+        )
+        let a = try #require(frames[w1])
+        #expect(abs(a.height - 1970 * 0.7) < 0.01)
+        #expect(abs(a.width - 780) < 0.01)
+    }
+
+    @Test("H and V ratios move their own axis only (#56)")
+    func ratioIndependence() throws {
+        // Three windows: depth 0 splits side by side (H),
+        // depth 1 stacks the tall remainder (V) — one split
+        // per axis, each following its own ratio.
+        var context = makeContext()
+        context.bsp.splitRatioH = 0.6
+        context.bsp.splitRatioV = 0.3
+        let frames = layout.calculateGeometry(
+            for: [w1, w2, w3],
+            in: context
+        )
+        let a = try #require(frames[w1])
+        let b = try #require(frames[w2])
+        #expect(abs(a.width - 1890 * 0.6) < 0.01)
+        // The stacked split follows only the V ratio.
+        #expect(abs(b.height - 1050 * 0.3) < 0.01)
     }
 
     @Test("Overlap stack kicks in below min window size")

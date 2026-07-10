@@ -88,7 +88,7 @@ struct RenameSpaceTests {
         var config = GuiConfig()
         config.spaces = [SpaceID("a"), SpaceID("b")]
         var bsp = BspOverride()
-        bsp.splitRatio = 0.3
+        bsp.splitRatioH = 0.3
         config.settings.bsp.override[SpaceID("a")] = bsp
         var grid = GridOverride()
         grid.columns = 4
@@ -100,7 +100,7 @@ struct RenameSpaceTests {
         #expect(ok)
         #expect(
             config.settings.bsp.override[SpaceID("c")]?
-                .splitRatio == 0.3
+                .splitRatioH == 0.3
         )
         #expect(
             config.settings.grid.override[SpaceID("c")]?

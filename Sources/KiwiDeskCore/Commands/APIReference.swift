@@ -89,9 +89,10 @@ public enum APIReference {
             "set_overflow_style_override",
         ],
         "bsp": [
-            "set_strategy", "set_ratio",
+            "set_strategy", "set_ratio_h", "set_ratio_v",
             "set_new_window_placement",
-            "set_strategy_override", "set_ratio_override",
+            "set_strategy_override",
+            "set_ratio_h_override", "set_ratio_v_override",
         ],
         "scroll": [
             "set_slot_size", "set_anchor", "set_speed",

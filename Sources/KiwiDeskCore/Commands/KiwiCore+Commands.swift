@@ -178,12 +178,22 @@ extension KiwiCore {
         // global — so a CLI resize can't shift other spaces.
         switch space.mode {
         case .bsp:
-            let base =
-                tiler.settings.resolvedBsp(for: space.id).splitRatio
-            tiler.settings.setSplitRatio(
-                min(max(base + delta / Double(span), 0.1), 0.9),
-                for: space.id
-            )
+            // Per-axis (#56): "x" moves the side-by-side splits,
+            // "y" the stacked splits — independent knobs.
+            let bsp = tiler.settings.resolvedBsp(for: space.id)
+            if axis == "x" {
+                let value = bsp.splitRatioH + delta / Double(span)
+                tiler.settings.setSplitRatioH(
+                    min(max(value, 0.1), 0.9),
+                    for: space.id
+                )
+            } else {
+                let value = bsp.splitRatioV + delta / Double(span)
+                tiler.settings.setSplitRatioV(
+                    min(max(value, 0.1), 0.9),
+                    for: space.id
+                )
+            }
         case .stack:
             let base = tiler.settings.resolvedStack(for: space.id)
                 .masterRatio

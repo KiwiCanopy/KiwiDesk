@@ -32,8 +32,10 @@ struct ResizeStepImportTests {
     @Test("The catalog authors Grow/Shrink from the given step")
     func catalogAuthorsFromStep() {
         let rows = KeybindingCatalog.resizeAndFloat(step: 75)
-        #expect(rows[0].lua == "KiwiDesk.resize(\"x\", -75)")
-        #expect(rows[1].lua == "KiwiDesk.resize(\"x\", 75)")
+        #expect(rows[0].lua == "KiwiDesk.resize(\"x\", 75)")
+        #expect(rows[1].lua == "KiwiDesk.resize(\"x\", -75)")
+        #expect(rows[2].lua == "KiwiDesk.resize(\"y\", 75)")
+        #expect(rows[3].lua == "KiwiDesk.resize(\"y\", -75)")
     }
 
     @Test("A non-default resize magnitude still classifies")
@@ -45,7 +47,7 @@ struct ResizeStepImportTests {
         // Old code demoted any non-±50 resize to Custom; now the
         // shape match upgrades it and keeps the canonical label.
         #expect(row.kind == .navigation)
-        #expect(row.label == "Shrink")
+        #expect(row.label == "Shrink width")
     }
 
     @Test("Import reads the resize magnitude back into the step")
@@ -57,7 +59,9 @@ struct ResizeStepImportTests {
             recoverResizeStep: true
         )
         #expect(config.settings.resizeStep == 120)
-        #expect(config.modes[0].bindings[0].label == "Enlarge")
+        #expect(
+            config.modes[0].bindings[0].label == "Grow width"
+        )
     }
 
     @Test("A Shrink+Enlarge pair recovers one agreed magnitude")
@@ -71,8 +75,12 @@ struct ResizeStepImportTests {
             recoverResizeStep: true
         )
         #expect(config.settings.resizeStep == 90)
-        #expect(config.modes[0].bindings[0].label == "Shrink")
-        #expect(config.modes[0].bindings[1].label == "Enlarge")
+        #expect(
+            config.modes[0].bindings[0].label == "Shrink width"
+        )
+        #expect(
+            config.modes[0].bindings[1].label == "Grow width"
+        )
     }
 
     @Test("A load-for-edit never overwrites the step")
@@ -109,10 +117,15 @@ struct ResizeStepImportTests {
                 from: "KiwiDesk.resize(\"x\", 0)"
             ) == nil
         )
-        // The y axis isn't authored yet (2-axis is #56).
+        // The y axis classifies too (2-axis, #56).
         #expect(
             KeybindingCatalog.resizeShape(
                 from: "KiwiDesk.resize(\"y\", 50)"
+            )?.label == "Grow height"
+        )
+        #expect(
+            KeybindingCatalog.resizeShape(
+                from: "KiwiDesk.resize(\"y\", 0)"
             ) == nil
         )
     }

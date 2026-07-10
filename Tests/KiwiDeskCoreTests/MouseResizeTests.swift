@@ -95,7 +95,7 @@ struct MouseResizeTests {
                 slot: left,
                 frame: grown(left, dw: 100),
                 bounds: bounds
-            ) == .bspRatio(0.1)
+            ) == .bspRatioH(0.1)
         )
         let right = slot(x: 600)
         #expect(
@@ -105,7 +105,39 @@ struct MouseResizeTests {
                 slot: right,
                 frame: grown(right, dw: 100),
                 bounds: bounds
-            ) == .bspRatio(-0.1)
+            ) == .bspRatioH(-0.1)
+        )
+    }
+
+    @Test("BSP maps width drags to H and height drags to V")
+    func bspAxes() {
+        // A height-dominant drag on a top slot moves the
+        // stacked (V) ratio, not the side-by-side one (#56).
+        let top = CGRect(x: 0, y: 25, width: 900, height: 300)
+        #expect(
+            MouseResize.translate(
+                mode: .bsp,
+                isMaster: false,
+                slot: top,
+                frame: grown(top, dh: 80),
+                bounds: bounds
+            ) == .bspRatioV(0.1)
+        )
+        // A bottom slot grows by lowering the V ratio.
+        let bottom = CGRect(
+            x: 0,
+            y: 525,
+            width: 900,
+            height: 300
+        )
+        #expect(
+            MouseResize.translate(
+                mode: .bsp,
+                isMaster: false,
+                slot: bottom,
+                frame: grown(bottom, dh: 80),
+                bounds: bounds
+            ) == .bspRatioV(-0.1)
         )
     }
 

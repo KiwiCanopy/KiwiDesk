@@ -33,32 +33,37 @@ struct BspOverrideTests {
     func resolveAppliesAll() {
         var over = BspOverride()
         over.strategy = .alternating
-        over.splitRatio = 0.7
+        over.splitRatioH = 0.7
+        over.splitRatioV = 0.25
         let resolved = over.resolved(onto: BspParams())
         #expect(resolved.strategy == .alternating)
-        #expect(resolved.splitRatio == 0.7)
+        #expect(resolved.splitRatioH == 0.7)
+        #expect(resolved.splitRatioV == 0.25)
     }
 
     @Test("Unset fields inherit the global, per field")
     func partialInheritance() {
         var global = BspParams()
         global.strategy = .alternating
-        global.splitRatio = 0.3
+        global.splitRatioH = 0.3
+        global.splitRatioV = 0.8
         var over = BspOverride()
         over.strategy = .shortestSide  // override only this
         let resolved = over.resolved(onto: global)
         #expect(resolved.strategy == .shortestSide)  // overridden
-        #expect(resolved.splitRatio == 0.3)  // inherited
+        #expect(resolved.splitRatioH == 0.3)  // inherited
+        #expect(resolved.splitRatioV == 0.8)  // inherited
     }
 
     @Test("Sparse encode: only set fields, round-trips")
     func sparseRoundTrip() throws {
         var over = BspOverride()
-        over.splitRatio = 0.7
+        over.splitRatioH = 0.7
         let data = try JSONEncoder().encode(over)
         let json =
             try #require(String(data: data, encoding: .utf8))
-        #expect(json.contains("ratio"))
+        #expect(json.contains("ratio_h"))
+        #expect(!json.contains("ratio_v"))
         #expect(!json.contains("strategy"))
         let back = try JSONDecoder().decode(
             BspOverride.self,
@@ -95,7 +100,7 @@ struct BspOverrideTests {
     func settingsJSONNesting() throws {
         var settings = TilingSettings()
         var over = BspOverride()
-        over.splitRatio = 0.75
+        over.splitRatioH = 0.75
         settings.bsp.override[SpaceID("3")] = over
         let data = try JSONEncoder().encode(settings)
         let json =
@@ -145,17 +150,24 @@ struct BspOverrideCommandTests {
         )
     }
 
-    @Test("ratio override shares the global clamp")
+    @Test("ratio overrides share the global clamp, per axis")
     func ratioOverride() {
         let core = makeCore()
         #expect(
             core.execute(
-                "bsp.set_ratio_override",
+                "bsp.set_ratio_h_override",
                 args: [.string("7"), .number(2)]
             ).isSuccess
         )
+        #expect(
+            core.execute(
+                "bsp.set_ratio_v_override",
+                args: [.string("7"), .number(0.2)]
+            ).isSuccess
+        )
         let over = core.tiler.settings.bsp.override[SpaceID("7")]
-        #expect(over?.splitRatio == 0.9)  // clamped ceiling
+        #expect(over?.splitRatioH == 0.9)  // clamped ceiling
+        #expect(over?.splitRatioV == 0.2)
     }
 
     @Test("Invalid value is rejected and writes nothing")

@@ -15,7 +15,8 @@ import Foundation
 /// per-space override via `new_window_placement_override`).
 public struct BspOverride: Sendable, Equatable {
     public var strategy: BspParams.Strategy?
-    public var splitRatio: Double?
+    public var splitRatioH: Double?
+    public var splitRatioV: Double?
 
     public init() {}
 
@@ -24,7 +25,8 @@ public struct BspOverride: Sendable, Equatable {
     public func resolved(onto global: BspParams) -> BspParams {
         var out = global
         if let strategy { out.strategy = strategy }
-        if let splitRatio { out.splitRatio = splitRatio }
+        if let splitRatioH { out.splitRatioH = splitRatioH }
+        if let splitRatioV { out.splitRatioV = splitRatioV }
         // Merged params hold no override map (see ScrollingOverride).
         out.override = [:]
         return out
@@ -33,7 +35,8 @@ public struct BspOverride: Sendable, Equatable {
     /// True when no field is set — a fully-inherited space needs
     /// no stored override (drives sparse encoding).
     public var isEmpty: Bool {
-        strategy == nil && splitRatio == nil
+        strategy == nil && splitRatioH == nil
+            && splitRatioV == nil
     }
 }
 
@@ -45,7 +48,8 @@ extension BspOverride: Codable {
     /// inherited fields stay absent.
     enum CodingKeys: String, CodingKey {
         case strategy
-        case splitRatio = "ratio"
+        case splitRatioH = "ratio_h"
+        case splitRatioV = "ratio_v"
     }
 
     public init(from decoder: Decoder) throws {
@@ -56,9 +60,13 @@ extension BspOverride: Codable {
             BspParams.Strategy.self,
             forKey: .strategy
         )
-        splitRatio = try container.decodeIfPresent(
+        splitRatioH = try container.decodeIfPresent(
             Double.self,
-            forKey: .splitRatio
+            forKey: .splitRatioH
+        )
+        splitRatioV = try container.decodeIfPresent(
+            Double.self,
+            forKey: .splitRatioV
         )
     }
 
@@ -66,8 +74,12 @@ extension BspOverride: Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(strategy, forKey: .strategy)
         try container.encodeIfPresent(
-            splitRatio,
-            forKey: .splitRatio
+            splitRatioH,
+            forKey: .splitRatioH
+        )
+        try container.encodeIfPresent(
+            splitRatioV,
+            forKey: .splitRatioV
         )
     }
 }

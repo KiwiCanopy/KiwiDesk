@@ -52,10 +52,11 @@ struct LayoutParamsCodingParityTests {
     private static func bsp() -> BspParams {
         var params = BspParams()
         params.strategy = .alternating
-        params.splitRatio = 0.75
+        params.splitRatioH = 0.75
+        params.splitRatioV = 0.25
         params.newWindowPlacement = .last
         var over = BspOverride()
-        over.splitRatio = 0.4
+        over.splitRatioH = 0.4
         params.override[space] = over
         return params
     }

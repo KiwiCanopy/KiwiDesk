@@ -206,9 +206,9 @@ KiwiDesk.set_min_window_size(300)
 
 **Does:** sets the global magnitude the **Grow** / **Shrink**
 keybindings nudge the layout by (default 50). The Shortcuts
-catalog authors those bindings as `resize("x", ±step)` from this
-value, and importing a config reads a recovered magnitude back
-into it. Does not move any window on its own — it only sizes the
+catalog authors all four per-axis bindings as
+`resize("x"|"y", ±step)` from this value, and importing a config
+reads a recovered magnitude back into it. Does not move any window on its own — it only sizes the
 Grow/Shrink presets — so it takes effect the next time such a
 binding fires.
 
@@ -274,16 +274,32 @@ KiwiDesk solves hiding similarly, so the same arrangements work.
 bsp.set_strategy("shortest_side")
 ```
 
-### bsp.set_ratio
+### bsp.set_ratio_h
 
 **Expects:** a number between 0 and 1 (default 0.5).
 
-**Does:** sets the first window's share of a BSP split.
+**Does:** sets the first window's share of every **side-by-side**
+BSP split. `resize("x", …)` nudges this value; the stacked splits
+keep their own ratio (#56).
 
 **Example:**
 
 ```lua
-bsp.set_ratio(0.5)
+bsp.set_ratio_h(0.5)
+```
+
+### bsp.set_ratio_v
+
+**Expects:** a number between 0 and 1 (default 0.5).
+
+**Does:** sets the first window's share of every **stacked**
+(top/bottom) BSP split. `resize("y", …)` nudges this value,
+independently of the side-by-side ratio (#56).
+
+**Example:**
+
+```lua
+bsp.set_ratio_v(0.5)
 ```
 
 ### bsp.set_strategy_override
@@ -302,19 +318,35 @@ spaces inherit the global value.
 bsp.set_strategy_override("3", "alternating")
 ```
 
-### bsp.set_ratio_override
+### bsp.set_ratio_h_override
 
 **Expects:**
 
 - A space identifier.
 - A ratio number.
 
-**Does:** overrides the global BSP ratio for one space.
+**Does:** overrides the global side-by-side BSP ratio for one
+space.
 
 **Example:**
 
 ```lua
-bsp.set_ratio_override("3", 0.6)
+bsp.set_ratio_h_override("3", 0.6)
+```
+
+### bsp.set_ratio_v_override
+
+**Expects:**
+
+- A space identifier.
+- A ratio number.
+
+**Does:** overrides the global stacked BSP ratio for one space.
+
+**Example:**
+
+```lua
+bsp.set_ratio_v_override("3", 0.4)
 ```
 
 ### stack.set_master_count
@@ -1475,6 +1507,8 @@ Define vim-style modes; only the active mode's bindings fire:
 KiwiDesk.define_mode("resize", {
     ["h"]      = function() KiwiDesk.resize("x", -50) end,
     ["l"]      = function() KiwiDesk.resize("x", 50) end,
+    ["j"]      = function() KiwiDesk.resize("y", -50) end,
+    ["k"]      = function() KiwiDesk.resize("y", 50) end,
     ["escape"] = function() KiwiDesk.switch_mode("default") end,
 })
 
@@ -1494,16 +1528,15 @@ end)
 stack, and scrolling layouts; a no-op in monocle, grid, and
 floating. What the `delta` actually adjusts depends on the layout:
 
-- **bsp / stack** — it nudges the split / master ratio, so there
-  is no independent width and height today: the `axis` argument
-  only scales the step by the screen's width or height, and both
-  axes move the same ratio.
+- **bsp** — per-axis (#56): `"x"` nudges the side-by-side split
+  ratio (`bsp.set_ratio_h`), `"y"` the stacked one
+  (`bsp.set_ratio_v`) — genuinely independent width and height.
+- **stack** — it nudges the master ratio; the `axis` argument
+  only scales the step by the screen's width or height.
 - **scrolling** — it adjusts the slot size in real points along
   the layout's own scroll axis (columns for horizontal, rows for
   vertical), regardless of which `axis` you pass — the `x`/`y`
   argument does not steer it.
-
-Prefer a single shrink/enlarge pair (#56).
 
 **Example:**
 
@@ -1909,7 +1942,7 @@ Profiles live as JSON files in `~/.config/KiwiDesk/profiles/` and are
 meant to be readable (and hand-editable — reload with `load_profile`).
 Keys mirror the Lua API: the command name with the `set_` verb
 stripped, grouped by namespace — `set_gap_override` becomes
-`gap.override`, `bsp.set_ratio` becomes `layout.bsp.ratio`.
+`gap.override`, `bsp.set_ratio_h` becomes `layout.bsp.ratio_h`.
 
 **Example:**
 

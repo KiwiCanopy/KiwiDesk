@@ -1,8 +1,11 @@
 import CoreGraphics
 
 /// Binary space partitioning over a flat array (dwindle style):
-/// the first window claims `splitRatio` of the region, the rest
-/// recurse into the remainder.
+/// the first window claims the split ratio of the region, the
+/// rest recurse into the remainder. Side-by-side splits use
+/// `splitRatioH`, stacked splits `splitRatioV` (#56) — two
+/// per-space scalars, not per-node ratios (those need stable
+/// split identity, i.e. a tree, which the flat array forbids).
 public struct BspLayout: LayoutSystem {
     public init() {}
 
@@ -43,11 +46,11 @@ public struct BspLayout: LayoutSystem {
             sideBySide = depth.isMultiple(of: 2)
         }
 
-        let ratio = CGFloat(context.bsp.splitRatio)
         let firstRegion: CGRect
         let restRegion: CGRect
 
         if sideBySide {
+            let ratio = CGFloat(context.bsp.splitRatioH)
             let gap = context.gaps.inner.horizontal
             let available = region.width - gap
             let firstWidth = available * ratio
@@ -71,6 +74,7 @@ public struct BspLayout: LayoutSystem {
                 height: region.height
             )
         } else {
+            let ratio = CGFloat(context.bsp.splitRatioV)
             let gap = context.gaps.inner.vertical
             let available = region.height - gap
             let firstHeight = available * ratio

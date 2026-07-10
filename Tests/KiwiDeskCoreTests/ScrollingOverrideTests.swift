@@ -116,7 +116,7 @@ struct ScrollingOverrideTests {
         scroll.orientation = .vertical
         s.scrolling.override[SpaceID("1")] = scroll
         var bsp = BspOverride()
-        bsp.splitRatio = 0.7
+        bsp.splitRatioH = 0.7
         s.bsp.override[SpaceID("1")] = bsp
         var stack = StackOverride()
         stack.masterCount = 3

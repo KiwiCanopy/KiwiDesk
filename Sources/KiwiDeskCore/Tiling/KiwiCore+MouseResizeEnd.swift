@@ -69,10 +69,19 @@ extension KiwiCore {
             bounds: GeometryUtils.axVisibleFrame(of: screen)
         )
         switch adjustment {
-        case .bspRatio(let delta):
+        case .bspRatioH(let delta):
             let base =
-                tiler.settings.resolvedBsp(for: space.id).splitRatio
-            tiler.settings.setSplitRatio(
+                tiler.settings.resolvedBsp(for: space.id)
+                .splitRatioH
+            tiler.settings.setSplitRatioH(
+                min(max(base + delta, 0.1), 0.9),
+                for: space.id
+            )
+        case .bspRatioV(let delta):
+            let base =
+                tiler.settings.resolvedBsp(for: space.id)
+                .splitRatioV
+            tiler.settings.setSplitRatioV(
                 min(max(base + delta, 0.1), 0.9),
                 for: space.id
             )

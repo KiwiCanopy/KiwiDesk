@@ -11,7 +11,10 @@ public enum MouseResizeMode: String, Sendable, Codable {
 
 /// A mouse resize translated into a layout parameter change.
 public enum ResizeAdjustment: Equatable, Sendable {
-    case bspRatio(CGFloat)
+    /// BSP side-by-side split ratio delta (width drag, #56).
+    case bspRatioH(CGFloat)
+    /// BSP stacked split ratio delta (height drag, #56).
+    case bspRatioV(CGFloat)
     case masterRatio(CGFloat)
     case scrollWidth(CGFloat)
 }
@@ -114,7 +117,8 @@ public enum MouseResize {
     /// Signs follow the dragged window's perspective: growing
     /// a master grows the master zone; growing a stack window
     /// shrinks it. BSP infers the side of the first split
-    /// from the slot's position (flat BSP has one ratio).
+    /// from the slot's position; a width drag moves the
+    /// side-by-side ratio, a height drag the stacked one (#56).
     public static func translate(
         mode: LayoutMode,
         isMaster: Bool,
@@ -129,12 +133,12 @@ public enum MouseResize {
             if abs(dw) >= abs(dh), abs(dw) > threshold {
                 let side: CGFloat =
                     slot.midX <= bounds.midX ? 1 : -1
-                return .bspRatio(side * dw / bounds.width)
+                return .bspRatioH(side * dw / bounds.width)
             }
             if abs(dh) > threshold {
                 let side: CGFloat =
                     slot.midY <= bounds.midY ? 1 : -1
-                return .bspRatio(side * dh / bounds.height)
+                return .bspRatioV(side * dh / bounds.height)
             }
             return nil
         case .stack:

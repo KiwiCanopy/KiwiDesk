@@ -95,13 +95,29 @@ struct PerSpaceResizeTests {
             args: [.string("1"), .string("bsp")]
         )
         core.execute(
-            "bsp.set_ratio_override",
+            "bsp.set_ratio_h_override",
             args: [.string("1"), .number(0.7)]
         )
-        let globalBefore = core.tiler.settings.bsp.splitRatio
+        let globalBefore = core.tiler.settings.bsp.splitRatioH
         core.execute("resize", args: [.string("x"), .number(500)])
         let over = core.tiler.settings.bsp.override[SpaceID("1")]
-        #expect((over?.splitRatio ?? 0) > 0.7)
-        #expect(core.tiler.settings.bsp.splitRatio == globalBefore)
+        #expect((over?.splitRatioH ?? 0) > 0.7)
+        #expect(
+            core.tiler.settings.bsp.splitRatioH == globalBefore
+        )
+    }
+
+    @Test("bsp resize per axis: y edits only the V ratio (#56)")
+    func bspResizeAxisIndependence() {
+        let core = makeCore()
+        core.execute(
+            "set_mode",
+            args: [.string("1"), .string("bsp")]
+        )
+        let hBefore = core.tiler.settings.bsp.splitRatioH
+        core.execute("resize", args: [.string("y"), .number(500)])
+        // The V ratio moved; the H ratio is untouched.
+        #expect(core.tiler.settings.bsp.splitRatioV != 0.5)
+        #expect(core.tiler.settings.bsp.splitRatioH == hBefore)
     }
 }

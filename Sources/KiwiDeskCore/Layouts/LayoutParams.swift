@@ -27,7 +27,12 @@ public struct BspParams: Sendable, Equatable, Codable {
     }
 
     public var strategy: Strategy = .shortestSide
-    public var splitRatio: Double = 0.5
+    /// Ratio of every side-by-side split (#56). `resize("x")`
+    /// nudges this one; the stacked splits keep their own.
+    public var splitRatioH: Double = 0.5
+    /// Ratio of every stacked (top/bottom) split (#56), moved
+    /// by `resize("y")` — independent of the side-by-side one.
+    public var splitRatioV: Double = 0.5
     public var newWindowPlacement: SpawnPlacement = .afterFocused
     /// Per-space overrides (`layout.bsp.override[space_id]`),
     /// resolved via `TilingSettings.resolvedBsp(for:)`.
@@ -35,10 +40,11 @@ public struct BspParams: Sendable, Equatable, Codable {
 
     public init() {}
 
-    /// JSON keys follow the Lua setters (`bsp.set_ratio`).
+    /// JSON keys follow the Lua setters (`bsp.set_ratio_h`).
     private enum CodingKeys: String, CodingKey {
         case strategy
-        case splitRatio = "ratio"
+        case splitRatioH = "ratio_h"
+        case splitRatioV = "ratio_v"
         case newWindowPlacement = "new_window_placement"
         case override
     }
@@ -54,10 +60,15 @@ public struct BspParams: Sendable, Equatable, Codable {
                 Strategy.self,
                 forKey: .strategy
             ) ?? .shortestSide
-        splitRatio =
+        splitRatioH =
             try container.decodeIfPresent(
                 Double.self,
-                forKey: .splitRatio
+                forKey: .splitRatioH
+            ) ?? 0.5
+        splitRatioV =
+            try container.decodeIfPresent(
+                Double.self,
+                forKey: .splitRatioV
             ) ?? 0.5
         newWindowPlacement =
             try container.decodeIfPresent(
@@ -76,7 +87,8 @@ public struct BspParams: Sendable, Equatable, Codable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(strategy, forKey: .strategy)
-        try container.encode(splitRatio, forKey: .splitRatio)
+        try container.encode(splitRatioH, forKey: .splitRatioH)
+        try container.encode(splitRatioV, forKey: .splitRatioV)
         try container.encode(
             newWindowPlacement,
             forKey: .newWindowPlacement

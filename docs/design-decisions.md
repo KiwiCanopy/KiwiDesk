@@ -284,7 +284,7 @@ shortcuts (the default mode existed but was empty): a GUI-first
 user had no way to focus or move a window until they authored
 every combo. Now `Core.DefaultKeybindings` seeds a starter set
 (⌥HJKL focus, ⌥⇧HJKL swap, ⌥digit / ⌥⇧digit per-space, ⌥-/⌥=
-resize, ⌥T float) with one guard everywhere: **only when no
+width resize, ⌥⇧-/⌥⇧= height resize, ⌥T float) with one guard everywhere: **only when no
 mode carries a single binding** — a user- or Lua-authored
 binding anywhere blocks the seed, making it idempotent and
 never destructive. The set lives in the **base `gui.json`
@@ -301,6 +301,26 @@ nonexistent spaces. The seeded Lua and labels mirror
 `KeybindingCatalog` byte-for-byte (guarded by
 `DefaultSeedCatalogParityTests`) so the rows stay presets, not
 Custom (#4). (#91)
+
+**Resize is truly 2-axis via two per-space BSP ratios; per-node
+ratios are rejected.** `resize("x")` and `resize("y")` used to
+write the *same* scalar (one `splitRatio` for every BSP split, one
+`masterRatio` for stack) — the axis only scaled the step, so a
+"resize vertically" key visibly changed column widths. #56 gives
+BSP two ratios per space — `ratio_h` for side-by-side splits,
+`ratio_v` for stacked splits — so each axis moves its own knob,
+in commands and in mouse resize (a width-dominant drag edits H, a
+height-dominant one V). **Per-node ratios were deliberately
+rejected**: they require stable per-split identity, i.e. a
+container tree, which the flat-`[WindowID]`-array model forbids
+(AGENTS.md §5) — two global ratios per space is the design that
+fits the architecture. The Size & Float catalog grows from 3 rows
+to 5 (Grow/Shrink × width/height + Make floating), all authored
+from the one shared `resize.step`; scrolling still resizes its
+slot along its own scroll axis whichever axis is passed, and
+monocle/grid/floating stay explicit no-ops. No back-compat alias
+for the old `bsp.set_ratio` / `layout.bsp.ratio` name
+(pre-release, single user). (#56)
 
 **Orphaned space shortcuts are surfaced, never pruned.** A
 binding that targets a space by name outlives the space's
@@ -562,4 +582,5 @@ The color mark is reserved as the `.icns` master for when an
   newly-authored Grow/Shrink bindings and is recovered from
   bindings on import, but changing it does not rewrite existing
   bound rows (their literal keeps firing). **2-axis resize**
-  (#56) extends the same slot to per-axis steps.
+  (#56) has landed: the slot now sits above four per-axis
+  Grow/Shrink rows sharing the one step.

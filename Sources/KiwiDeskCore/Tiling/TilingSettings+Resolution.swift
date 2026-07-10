@@ -65,14 +65,25 @@ extension TilingSettings {
     /// exactly the value the space currently displays — its
     /// override when it has one, the global otherwise (the
     /// pre-#17 behavior) — never silently shifting other spaces.
-    public mutating func setSplitRatio(
+    public mutating func setSplitRatioH(
         _ value: Double,
         for space: SpaceID
     ) {
-        if bsp.override[space]?.splitRatio != nil {
-            bsp.override[space]?.splitRatio = value
+        if bsp.override[space]?.splitRatioH != nil {
+            bsp.override[space]?.splitRatioH = value
         } else {
-            bsp.splitRatio = value
+            bsp.splitRatioH = value
+        }
+    }
+
+    public mutating func setSplitRatioV(
+        _ value: Double,
+        for space: SpaceID
+    ) {
+        if bsp.override[space]?.splitRatioV != nil {
+            bsp.override[space]?.splitRatioV = value
+        } else {
+            bsp.splitRatioV = value
         }
     }
 

@@ -104,7 +104,8 @@ KiwiDesk service restart
 | | `stack.set_overflow_style` | `cascade_overflow\|cascade_all` |
 | | `stack.set_new_window_placement` | placement¹ (default `first`) |
 | BSP | `bsp.set_strategy` | `shortest_side\|alternating` |
-| | `bsp.set_ratio` | 0.1–0.9 |
+| | `bsp.set_ratio_h` | 0.1–0.9 (side-by-side splits) |
+| | `bsp.set_ratio_v` | 0.1–0.9 (stacked splits) |
 | | `bsp.set_new_window_placement` | placement¹ (default `after_focused`) |
 | Scrolling | `scroll.set_slot_size` | px, `"NN%"`, or `0` (auto) |
 | | `scroll.set_anchor` | `center`, or edge `left\|right` (`top\|bottom` vertical) |
@@ -120,12 +121,15 @@ KiwiDesk service restart
 ¹ placement: `first\|last\|before_focused\|after_focused`
 
 The table lists each layout global once. Every layout global
-has a per-space `_override` twin (e.g. `bsp.set_ratio_override`,
+has a per-space `_override` twin (e.g. `bsp.set_ratio_h_override`,
 `scroll.set_slot_size_override`) that takes a leading `space id,
 value` and shadows the global for that space only.
 
-`resize` adapts to the active layout: BSP adjusts the split
-ratio, Stack the master ratio, Scrolling the column width.
+`resize` adapts to the active layout and is per-axis (#56): in
+BSP, `x` moves the side-by-side split ratio and `y` the stacked
+one, independently. Stack adjusts the master ratio. Scrolling
+resizes the slot along its own scroll axis for either `x` or
+`y`. monocle, grid, and floating reply "not supported".
 
 ## Event Stream
 
