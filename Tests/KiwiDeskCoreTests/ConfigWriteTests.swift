@@ -23,7 +23,7 @@ private func richConfig() -> GuiConfig {
     config.settings.gapsOverride[SpaceID("browser")] =
         .uniform(0)
     config.settings.minWindowSize = 250
-    config.settings.bsp.splitRatio = 0.62
+    config.settings.bsp.splitRatioH = 0.62
     config.settings.bsp.strategy = .alternating
     config.settings.stack.masterCount = 2
     config.settings.scrolling.slotSize = .points(900)
@@ -173,12 +173,14 @@ struct ConfigWriteTests {
     func fractionalRoundTrip() throws {
         let core = makeCore()
         var config = GuiConfig()
-        config.settings.bsp.splitRatio = 1.0 / 3.0
+        config.settings.bsp.splitRatioH = 1.0 / 3.0
+        config.settings.bsp.splitRatioV = 1.0 / 6.0
         config.settings.stack.masterRatio = 2.0 / 7.0
         core.applyProfileScopedState(from: config)
         try core.persistProfile(named: "ratios")
         let saved = try core.profiles.read(name: "ratios")
-        #expect(saved.settings.bsp.splitRatio == 1.0 / 3.0)
+        #expect(saved.settings.bsp.splitRatioH == 1.0 / 3.0)
+        #expect(saved.settings.bsp.splitRatioV == 1.0 / 6.0)
         #expect(
             saved.settings.stack.masterRatio == 2.0 / 7.0
         )

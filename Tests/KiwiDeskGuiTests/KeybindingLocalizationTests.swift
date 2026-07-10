@@ -33,9 +33,9 @@ struct KeybindingLocalizationTests {
         reset()
         LocalizationManager.shared.select("de")
         defer { reset() }
-        let shrink = KeybindingCatalog.resizeAndFloat(step: 50)[0]
-        #expect(shrink.label == "Shrink")
-        #expect(shrink.resolvedLabel == "Verkleinern")
+        let grow = KeybindingCatalog.resizeAndFloat(step: 50)[0]
+        #expect(grow.label == "Grow width")
+        #expect(grow.resolvedLabel == "Breite vergrößern")
     }
 
     @Test("a go-to-space label keeps the space name untranslated")

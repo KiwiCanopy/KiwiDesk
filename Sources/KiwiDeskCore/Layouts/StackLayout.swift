@@ -8,18 +8,87 @@ import CoreGraphics
 public struct StackLayout: LayoutSystem {
     public init() {}
 
+    /// Renormalization floor applied when *reading* a stack
+    /// weight (#67) — shared with the `resize` command so the
+    /// command's step math and the layout's distribution can
+    /// never disagree on the domain. Deliberately below
+    /// `weightRange.lowerBound`: the command never stores a
+    /// value this small, so the floor only defends against a
+    /// future writer — do not collapse the two constants.
+    public static let weightFloor: Double = 0.05
+    /// Clamp for what the `resize` command *stores* (#67).
+    public static let weightRange: ClosedRange<Double> = 0.1...10
+
+    /// The largest weight total a column can carry before its
+    /// smallest share drops below `minSize` — the single
+    /// authority behind both the layout's cascade check and
+    /// the resize command's growth cap, so the two formulas
+    /// cannot drift apart (#67 review; parity rule).
+    public static func maxColumnTotal(
+        smallestWeight: Double,
+        height: Double,
+        minSize: Double
+    ) -> Double {
+        // No (or nonsense) minimum → no cliff, matching the
+        // old `share < minSize` comparison for minSize ≤ 0.
+        guard minSize > 0 else { return .infinity }
+        return smallestWeight * height / minSize
+    }
+
+    /// The master/stack partition of a tiled window array —
+    /// the single authority consumed by `calculateGeometry`
+    /// and the `resize` command (#67 review: a third
+    /// hand-mirror of this rule had crept in). `stack` is nil
+    /// while everything still fits in the master zone.
+    public static func partition(
+        _ windows: [WindowID],
+        masterCount: Int
+    ) -> (
+        master: ArraySlice<WindowID>,
+        stack: ArraySlice<WindowID>?
+    ) {
+        let boundary = max(1, masterCount)
+        guard windows.count > boundary else {
+            return (windows[...], nil)
+        }
+        return (windows[..<boundary], windows[boundary...])
+    }
+
+    /// The column (zone) of `partition` holding `member`, or
+    /// nil when it is not in `windows`.
+    public static func column(
+        containing member: WindowID,
+        in windows: [WindowID],
+        masterCount: Int
+    ) -> ArraySlice<WindowID>? {
+        guard let index = windows.firstIndex(of: member) else {
+            return nil
+        }
+        let (master, stack) = partition(
+            windows,
+            masterCount: masterCount
+        )
+        guard let stack, index >= master.endIndex else {
+            return master
+        }
+        return stack
+    }
+
     public func calculateGeometry(
         for windows: [WindowID],
         in context: LayoutContext
     ) -> [WindowID: CGRect] {
         let usable = context.usable
         guard !windows.isEmpty else { return [:] }
-        let masterCount = max(1, context.stack.masterCount)
+        let (master, stack) = Self.partition(
+            windows,
+            masterCount: context.stack.masterCount
+        )
 
-        guard windows.count > masterCount else {
+        guard let stack else {
             // Master only: full width.
             return column(
-                windows[...],
+                master,
                 in: usable,
                 context: context
             )
@@ -51,13 +120,13 @@ public struct StackLayout: LayoutSystem {
         )
 
         var result = column(
-            windows[..<masterCount],
+            master,
             in: masterRegion,
             context: context
         )
         result.merge(
             column(
-                windows[masterCount...],
+                stack,
                 in: stackRegion,
                 context: context
             )
@@ -65,10 +134,13 @@ public struct StackLayout: LayoutSystem {
         return result
     }
 
-    /// Distributes windows vertically and evenly in a region.
-    /// When they stop fitting, as many windows as possible
-    /// stay fully tiled and only the overflow collapses into
-    /// a title-bar cascade at the bottom.
+    /// Distributes windows vertically in a region, sized
+    /// proportionally to their `stackWeights` (#67; absent =
+    /// 1.0, so unweighted columns stay even). When the
+    /// smallest weighted share stops fitting, weighting steps
+    /// aside: as many windows as possible stay fully tiled
+    /// (evenly) and only the overflow collapses into a
+    /// title-bar cascade at the bottom.
     private func column(
         _ windows: ArraySlice<WindowID>,
         in region: CGRect,
@@ -77,8 +149,17 @@ public struct StackLayout: LayoutSystem {
         let count = CGFloat(windows.count)
         guard count > 0 else { return [:] }
         let gap = context.gaps.inner.vertical
-        let height = (region.height - gap * (count - 1)) / count
-        if height < context.minWindowSize {
+        let available = region.height - gap * (count - 1)
+        let weights = windows.map {
+            max(context.stackWeights[$0] ?? 1, Self.weightFloor)
+        }
+        let total = weights.reduce(0, +)
+        let limit = Self.maxColumnTotal(
+            smallestWeight: weights.min() ?? 1,
+            height: Double(available),
+            minSize: Double(context.minWindowSize)
+        )
+        if total > limit {
             if context.stack.overflowStyle == .cascadeAll {
                 return OverlapStack.frames(
                     for: windows,
@@ -93,16 +174,17 @@ public struct StackLayout: LayoutSystem {
             )
         }
         var result: [WindowID: CGRect] = [:]
+        var y = region.minY
         for (offset, window) in windows.enumerated() {
-            let y =
-                region.minY
-                + CGFloat(offset) * (height + gap)
+            let height =
+                available * weights[offset] / total
             result[window] = CGRect(
                 x: region.minX,
                 y: y,
                 width: region.width,
                 height: height
             )
+            y += height + gap
         }
         return result
     }

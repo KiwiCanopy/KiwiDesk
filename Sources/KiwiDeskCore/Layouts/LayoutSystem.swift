@@ -83,6 +83,9 @@ public struct LayoutContext: Sendable {
     public var focused: WindowID?
     /// Below this width/height the Overlap Stack kicks in.
     public var minWindowSize: CGFloat
+    /// Per-window vertical share of a stack column (#67);
+    /// absent = 1.0. Snapshot of `Space.stackWeights`.
+    public var stackWeights: [WindowID: Double]
 
     public var bsp: BspParams
     public var stack: StackParams
@@ -98,6 +101,7 @@ public struct LayoutContext: Sendable {
         gaps: Gaps = Gaps(),
         focused: WindowID? = nil,
         minWindowSize: CGFloat = 300,
+        stackWeights: [WindowID: Double] = [:],
         bsp: BspParams = BspParams(),
         stack: StackParams = StackParams(),
         scrolling: ScrollingParams = ScrollingParams(),
@@ -109,6 +113,7 @@ public struct LayoutContext: Sendable {
         self.gaps = gaps
         self.focused = focused
         self.minWindowSize = minWindowSize
+        self.stackWeights = stackWeights
         self.bsp = bsp
         self.stack = stack
         self.scrolling = scrolling

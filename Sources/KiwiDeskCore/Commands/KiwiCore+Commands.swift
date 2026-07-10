@@ -157,73 +157,7 @@ extension KiwiCore {
         return .ok()
     }
 
-    private func resize(
-        _ args: [JSONValue]
-    ) -> CommandResponse {
-        guard let axis = args.first?.stringValue,
-            axis == "x" || axis == "y",
-            let delta = args.dropFirst().first?.numberValue
-        else {
-            return .fail("expected axis (x|y) and delta")
-        }
-        guard let space = activeSpace else {
-            return .fail("no active space")
-        }
-        let span =
-            axis == "x"
-            ? (NSScreen.main?.visibleFrame.width ?? 1920)
-            : (NSScreen.main?.visibleFrame.height ?? 1080)
-        // Resolve against the active space (#17): base value and
-        // write target follow the space's own override, never the
-        // global — so a CLI resize can't shift other spaces.
-        switch space.mode {
-        case .bsp:
-            let base =
-                tiler.settings.resolvedBsp(for: space.id).splitRatio
-            tiler.settings.setSplitRatio(
-                min(max(base + delta / Double(span), 0.1), 0.9),
-                for: space.id
-            )
-        case .stack:
-            let base = tiler.settings.resolvedStack(for: space.id)
-                .masterRatio
-            tiler.settings.setMasterRatio(
-                min(max(base + delta / Double(span), 0.1), 0.9),
-                for: space.id
-            )
-        case .scrolling:
-            // The scrolling slot resizes along its own scroll axis,
-            // not the requested x/y axis, so `span` above (keyed by
-            // axis) does not apply here. Take the current magnitude
-            // (stored pt as-is; auto/% seeded against the axis), add
-            // the delta, store as points. Screen basis matches the
-            // mouse-resize path (main screen — the pre-existing
-            // single-screen ceiling, see plan item 8).
-            let scrolling =
-                tiler.settings.resolvedScrolling(for: space.id)
-            let horizontal = scrolling.barAxisIsHorizontal
-            let screen = NSScreen.main ?? NSScreen.screens.first
-            let bounds =
-                screen.map { GeometryUtils.axVisibleFrame(of: $0) }
-                ?? CGRect(x: 0, y: 0, width: 1920, height: 1080)
-            let along = horizontal ? bounds.width : bounds.height
-            let current = scrolling.slotSize
-                .editablePoints(along: along, horizontal: horizontal)
-            tiler.settings.setSlotSize(
-                .points(clamping: current + CGFloat(delta)),
-                for: space.id
-            )
-        default:
-            return .fail(
-                "resize not supported in "
-                    + space.mode.rawValue
-            )
-        }
-        retile(
-            animated: tiler.settings.animations.onWindowResize
-        )
-        return .ok()
-    }
+    // `resize` lives in `KiwiCore+Resize.swift` (#56/#67).
 
     // MARK: - Launching
 

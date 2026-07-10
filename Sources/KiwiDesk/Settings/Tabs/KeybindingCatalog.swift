@@ -156,70 +156,8 @@ enum KeybindingCatalog {
         ]
     }
 
-    /// Window-size and float presets (Size & Float, §3.6.1).
-    /// Enlarge/Shrink nudge the single bsp split / stack master
-    /// ratio by `step` points — the configurable global
-    /// `resize.step` (#58), passed in by the caller from live
-    /// settings. There is no independent width/height today, so
-    /// this is one pair on the `"x"` axis, not four (true 2-axis
-    /// resize is deferred, #56). Resize is a no-op in
-    /// monocle/grid/floating; the section caption states this and
-    /// the docs echo it.
-    static func resizeAndFloat(step: Int) -> [NavCommand] {
-        [
-            NavCommand(
-                label: "Shrink",
-                lua: "KiwiDesk.resize(\"x\", -\(step))",
-                displayLabel: { L("keybinding.shrink", "Shrink") }
-            ),
-            NavCommand(
-                label: "Enlarge",
-                lua: "KiwiDesk.resize(\"x\", \(step))",
-                displayLabel: {
-                    L("keybinding.enlarge", "Enlarge")
-                }
-            ),
-            makeFloating,
-        ]
-    }
-
-    /// The Make-floating row — step-independent, so unlike
-    /// Grow/Shrink it is a fixed command. A named single
-    /// authority because the import classifier matches it
-    /// directly (it is in no `navigationGroups` group and has
-    /// no shape rule); without that entry an imported
-    /// `make_floating()` binding demoted to Custom (#4/#91).
-    static let makeFloating = NavCommand(
-        label: "Make floating",
-        lua: "KiwiDesk.make_floating()",
-        displayLabel: {
-            L("keybinding.make_floating", "Make floating")
-        }
-    )
-
-    /// The Grow/Shrink magnitude inside a `resize("x", ±N)` row of
-    /// ANY step, plus its canonical label — the inverse of
-    /// `resizeAndFloat`'s authoring, used by import classification
-    /// (#58). A shape match (not byte-for-byte) so a config whose
-    /// step differs from the current one still lands in Size &
-    /// Float, and its magnitude is read back into `resize.step`.
-    /// Nil unless `lua` is exactly a single-axis `"x"` resize with
-    /// a non-zero integer delta.
-    static func resizeShape(
-        from lua: String
-    ) -> (label: String, step: Int)? {
-        let prefix = "KiwiDesk.resize(\"x\", "
-        let suffix = ")"
-        guard lua.hasPrefix(prefix), lua.hasSuffix(suffix)
-        else { return nil }
-        let inner = lua.dropFirst(prefix.count)
-            .dropLast(suffix.count)
-        guard let value = Int(inner), value != 0 else {
-            return nil
-        }
-        let label = value < 0 ? "Shrink" : "Enlarge"
-        return (label, abs(value))
-    }
+    // Size & Float presets (resizeAndFloat, makeFloating,
+    // resizeShape) live in `KeybindingCatalog+Resize.swift`.
 
     /// A space id as a quoted, escaped Lua string argument.
     static func spaceArg(_ space: SpaceID) -> String {

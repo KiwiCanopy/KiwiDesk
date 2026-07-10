@@ -94,11 +94,10 @@ struct MoveWindowsSection: View {
     }
 }
 
-/// Size & Float (#68 §3.5): the resize pair, Make floating —
-/// and the reserved slot for the configurable resize step
-/// (#58; grows to a per-axis pair when #56 splits resize into
-/// horizontal/vertical). The step control lands directly
-/// above the rows it parameterizes.
+/// Size & Float (#68 §3.5): the per-axis Grow/Shrink rows
+/// (#56) and Make floating — plus the reserved slot for the
+/// configurable resize step (#58). The step control lands
+/// directly above the rows it parameterizes.
 struct SizeFloatSection: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
@@ -127,12 +126,13 @@ struct SizeFloatSection: View {
 
     private var sizeFloatCaption: String {
         L(
-            "shortcuts.size_float.caption",
-            "Shrink/Enlarge only applies in the bsp, "
-                + "stack, and scrolling layouts; it is a "
-                + "no-op in monocle, grid, and floating. "
-                + "It nudges the one split/master ratio, "
-                + "so it has no separate width and height."
+            "shortcuts.size_float.axes_caption",
+            "Grow/Shrink only applies in the bsp, stack, "
+                + "and scrolling layouts; it is a no-op in "
+                + "monocle, grid, and floating. Width and "
+                + "height resize independently; scrolling "
+                + "resizes its slot along the scroll axis "
+                + "for both."
         )
     }
 }

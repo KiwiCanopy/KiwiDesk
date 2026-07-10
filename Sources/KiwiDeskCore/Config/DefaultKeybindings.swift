@@ -81,7 +81,7 @@ public enum DefaultKeybindings {
                 combo: "option+minus",
                 lua: "KiwiDesk.resize(\"x\", -\(resizeStep))",
                 kind: .navigation,
-                label: "Shrink"
+                label: "Shrink width"
             )
         )
         rows.append(
@@ -89,7 +89,23 @@ public enum DefaultKeybindings {
                 combo: "option+equal",
                 lua: "KiwiDesk.resize(\"x\", \(resizeStep))",
                 kind: .navigation,
-                label: "Enlarge"
+                label: "Grow width"
+            )
+        )
+        rows.append(
+            KeyBinding(
+                combo: "option+shift+minus",
+                lua: "KiwiDesk.resize(\"y\", -\(resizeStep))",
+                kind: .navigation,
+                label: "Shrink height"
+            )
+        )
+        rows.append(
+            KeyBinding(
+                combo: "option+shift+equal",
+                lua: "KiwiDesk.resize(\"y\", \(resizeStep))",
+                kind: .navigation,
+                label: "Grow height"
             )
         )
         rows.append(

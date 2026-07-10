@@ -58,9 +58,10 @@ struct SettingsCodingTests {
                 "bsp", "grid", "monocle", "scroll", "stack",
             ]
         )
-        // Lua `bsp.set_ratio` / `scroll.set_slot_size`.
+        // Lua `bsp.set_ratio_h` / `scroll.set_slot_size`.
         let bsp = try object(layout["bsp"])
-        #expect(bsp["ratio"] as? Double == 0.5)
+        #expect(bsp["ratio_h"] as? Double == 0.5)
+        #expect(bsp["ratio_v"] as? Double == 0.5)
         let scroll = try object(layout["scroll"])
         // Default slot size is `auto`, encoded as 0.
         #expect(scroll["slot_size"] as? Double == 0)
@@ -119,7 +120,8 @@ struct SettingsCodingTests {
     @Test("Round-trip preserves every setting")
     func roundTrip() throws {
         var settings = TilingSettings()
-        settings.bsp.splitRatio = 0.7
+        settings.bsp.splitRatioH = 0.7
+        settings.bsp.splitRatioV = 0.3
         settings.scrolling.slotSize = .points(400)
         settings.stack.masterCount = 2
         settings.grid.rows = 4

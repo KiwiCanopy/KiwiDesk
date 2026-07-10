@@ -59,26 +59,65 @@ extension KiwiCore {
         // the write target all follow the space's own override,
         // never the global — so a resize can't shift other spaces.
         let stack = tiler.settings.resolvedStack(for: space.id)
-        let isMaster =
-            (tiled.firstIndex(of: id) ?? .max) < stack.masterCount
+        // Zone membership via the partition authority — never
+        // a re-derived boundary comparison (#67 review).
+        let isMaster = StackLayout.partition(
+            tiled,
+            masterCount: stack.masterCount
+        ).master.contains(id)
+        let bounds = GeometryUtils.axVisibleFrame(of: screen)
         let adjustment = MouseResize.translate(
             mode: space.mode,
             isMaster: isMaster,
             slot: slot,
             frame: frame,
-            bounds: GeometryUtils.axVisibleFrame(of: screen)
+            bounds: bounds
         )
+        applyResizeAdjustment(
+            adjustment,
+            in: space,
+            bounds: bounds
+        )
+        retile(
+            animated: tiler.settings.animations.onWindowResize
+        )
+        focusWindow(id)
+    }
+
+    /// Writes one translated adjustment into the space's
+    /// settings — split from `handleResizeEnd` so the
+    /// case→setter mapping is testable without a screen.
+    /// (Named apart from the profile `apply(...)` family,
+    /// whose members classify their own forced retile — this
+    /// one never retiles; the caller does.)
+    func applyResizeAdjustment(
+        _ adjustment: ResizeAdjustment?,
+        in space: Space,
+        bounds: CGRect
+    ) {
         switch adjustment {
-        case .bspRatio(let delta):
+        case .bspRatioH(let delta):
             let base =
-                tiler.settings.resolvedBsp(for: space.id).splitRatio
-            tiler.settings.setSplitRatio(
+                tiler.settings.resolvedBsp(for: space.id)
+                .splitRatioH
+            tiler.settings.setSplitRatioH(
+                min(max(base + delta, 0.1), 0.9),
+                for: space.id
+            )
+        case .bspRatioV(let delta):
+            let base =
+                tiler.settings.resolvedBsp(for: space.id)
+                .splitRatioV
+            tiler.settings.setSplitRatioV(
                 min(max(base + delta, 0.1), 0.9),
                 for: space.id
             )
         case .masterRatio(let delta):
+            let base =
+                tiler.settings.resolvedStack(for: space.id)
+                .masterRatio
             tiler.settings.setMasterRatio(
-                min(max(stack.masterRatio + delta, 0.1), 0.9),
+                min(max(base + delta, 0.1), 0.9),
                 for: space.id
             )
         case .scrollWidth(let delta):
@@ -88,7 +127,6 @@ extension KiwiCore {
             let scrolling =
                 tiler.settings.resolvedScrolling(for: space.id)
             let horizontal = scrolling.barAxisIsHorizontal
-            let bounds = GeometryUtils.axVisibleFrame(of: screen)
             let along = horizontal ? bounds.width : bounds.height
             let current = scrolling.slotSize
                 .editablePoints(along: along, horizontal: horizontal)
@@ -99,9 +137,5 @@ extension KiwiCore {
         case nil:
             break
         }
-        retile(
-            animated: tiler.settings.animations.onWindowResize
-        )
-        focusWindow(id)
     }
 }

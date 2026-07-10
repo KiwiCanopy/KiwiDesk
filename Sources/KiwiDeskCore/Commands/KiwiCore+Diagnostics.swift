@@ -54,7 +54,7 @@ extension KiwiCore {
 
     func stateJSON() -> JSONValue {
         let spaces = state.workspaces.allSpaces.map { space in
-            JSONValue.object([
+            var object: [String: JSONValue] = [
                 "id": .string(space.id.raw),
                 "mode": .string(space.mode.rawValue),
                 "windows": .array(
@@ -65,7 +65,24 @@ extension KiwiCore {
                 "focused": space.focused.map {
                     .number(Double($0.raw))
                 } ?? .null,
-            ])
+            ]
+            // Session-only stack weights (#67), surfaced so
+            // resize("y") state is inspectable from the CLI;
+            // absent while the column is evenly split.
+            if !space.stackWeights.isEmpty {
+                object["stack_weights"] = .object(
+                    Dictionary(
+                        uniqueKeysWithValues:
+                            space.stackWeights.map {
+                                (
+                                    String($0.key.raw),
+                                    JSONValue.number($0.value)
+                                )
+                            }
+                    )
+                )
+            }
+            return JSONValue.object(object)
         }
         let windows = state.windows.all.map { window in
             JSONValue.object([

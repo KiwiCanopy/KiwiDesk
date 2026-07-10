@@ -17,10 +17,14 @@ extension KiwiCore {
                 )
             else { return Self.strategyError }
             tiler.settings.bsp.strategy = strategy
-        case "bsp.set_ratio":
+        case "bsp.set_ratio_h":
             guard let ratio = Self.parseSplitRatio(args.first)
             else { return Self.ratioError }
-            tiler.settings.bsp.splitRatio = ratio
+            tiler.settings.bsp.splitRatioH = ratio
+        case "bsp.set_ratio_v":
+            guard let ratio = Self.parseSplitRatio(args.first)
+            else { return Self.ratioError }
+            tiler.settings.bsp.splitRatioV = ratio
         case "bsp.set_new_window_placement":
             guard let placement = parsePlacement(args) else {
                 return placementError
@@ -69,10 +73,14 @@ extension KiwiCore {
                 )
             else { return Self.strategyError }
             over.strategy = strategy
-        case "ratio":
+        case "ratio_h":
             guard let ratio = Self.parseSplitRatio(rest.first)
             else { return Self.ratioError }
-            over.splitRatio = ratio
+            over.splitRatioH = ratio
+        case "ratio_v":
+            guard let ratio = Self.parseSplitRatio(rest.first)
+            else { return Self.ratioError }
+            over.splitRatioV = ratio
         default:
             return .fail(
                 "unknown command: bsp.set_\(field)_override"

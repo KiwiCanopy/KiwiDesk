@@ -220,10 +220,15 @@ carves its space from the layout.
 Expand each layout type to adjust its defaults:
 
 - **BSP**: split strategy (shortest_side or alternating) and the
-  initial split ratio (0.5 = 50/50).
+  width and height split ratios (0.5 = 50/50 each) — the knobs
+  the per-axis resize shortcuts nudge (#56).
 - **Stack**: master count, master ratio (how much width/height the
   master zone takes), and overflow style (cascade_overflow keeps
-  full windows, cascade_all cascades everything).
+  full windows, cascade_all cascades everything). The resize
+  shortcuts are focus-aware (#67): width grows whichever zone
+  holds the focused window, height grows the focused window's
+  share of its column (a session-only tweak — it resets on
+  relaunch and is not saved into profiles).
 - **Scrolling**: orientation (horizontal or vertical), anchor
   (where the focused column sits: center, left, right), and slot
   size (auto, pixel count, or percentage of available space).
@@ -501,7 +506,8 @@ you can drive KiwiDesk before configuring anything:
 | Go to space 1–9 | `⌥1` … `⌥9` |
 | Swap with window left / down / up / right | `⌥⇧H` `⌥⇧J` `⌥⇧K` `⌥⇧L` |
 | Move to space 1–9 | `⌥⇧1` … `⌥⇧9` |
-| Shrink / Enlarge | `⌥-` / `⌥=` |
+| Shrink / Grow width | `⌥-` / `⌥=` |
+| Shrink / Grow height | `⌥⇧-` / `⌥⇧=` |
 | Make floating | `⌥T` |
 
 The digits are display-order positions: `⌥3` targets the *third*

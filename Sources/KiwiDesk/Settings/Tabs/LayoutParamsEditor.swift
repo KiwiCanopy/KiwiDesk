@@ -40,8 +40,18 @@ struct LayoutParamsEditor: View {
                 ]
             )
             RatioRow(
-                label: L("layout_params.split_ratio", "Split ratio"),
-                value: $model.config.settings.bsp.splitRatio
+                label: L(
+                    "layout_params.split_ratio_h",
+                    "Width split ratio"
+                ),
+                value: $model.config.settings.bsp.splitRatioH
+            )
+            RatioRow(
+                label: L(
+                    "layout_params.split_ratio_v",
+                    "Height split ratio"
+                ),
+                value: $model.config.settings.bsp.splitRatioV
             )
             Divider()
             PlacementPicker(
