@@ -172,7 +172,9 @@ public struct ScrollingLayout: LayoutSystem {
     /// nil` (a space that has never scrolled, or just switched
     /// into scrolling mode) falls back to the anchor's preferred
     /// resting position instead, so the very first tile still
-    /// respects `scroll.set_anchor`.
+    /// respects `scroll.set_anchor` — unless `focusedPos` is
+    /// also nil (no slot to anchor on), which rests at the row
+    /// start.
     static func offset(
         anchor: ScrollingParams.Anchor,
         previous: CGFloat?,
@@ -210,7 +212,11 @@ public struct ScrollingLayout: LayoutSystem {
             // floating window, or nothing focused): there is
             // nothing to scroll into view, so the viewport
             // stays put instead of snapping home (#141). A
-            // never-scrolled space rests at the row start.
+            // never-scrolled space rests at the row start —
+            // deliberately consuming the anchor seed (the
+            // persist loop writes the 0 back): re-seeding on
+            // the next slotted focus isn't worth an optional
+            // return through the #66 loop for this niche.
             target = previous ?? 0
         }
 
