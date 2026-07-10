@@ -369,6 +369,33 @@ purpose: **BSP still cascades on an extreme stored ratio** — the
 same clamp principle should migrate there in a follow-up rather
 than ride the #44 fix. (#44)
 
+**BSP keyboard resize is focus-aware in *direction* only — and
+some nested windows cannot grow. Accepted, by architecture.**
+Since #122, `resize` infers its sign from the focused window's
+slot (the same screen-midpoint side rule a mouse drag uses,
+shared as one authority — `MouseResize.bspSide`), so "grow"
+grows the focused window's side instead of always the left/top
+region. What it deliberately does **not** do is give every
+window a growable boundary: all same-orientation splits still
+share the one per-space ratio (#56's settled trade — per-node
+ratios need a container tree, which the flat-array model
+forbids). Concretely: the inner window of a pair nested inside
+the second region has width `r·(1−r)·W`, which is *maximized*
+at the default ratio — no resize direction can widen it, and
+the visible effect of a grow press is its outer neighbor
+widening instead. The same is true when dragging that window's
+edge with the mouse; keyboard and mouse stay in lockstep,
+warts included. This is an **accepted limitation, not a bug to
+fix within BSP**: a smarter sign (derivative-based) was
+considered and rejected — it cannot help the pinned case and
+would split the just-unified mouse/keyboard rule. The real
+answer is the planned `track` layout (#128), where every
+window sits in exactly one track and every resize has one true
+target. A **floating** focused window is exempt from all of
+this: it resizes itself directly, in every mode (width for x,
+height for y, floored at `min_window_size`). (#122, #124,
+#129)
+
 **Orphaned space shortcuts are surfaced, never pruned.** A
 binding that targets a space by name outlives the space's
 presence in the current profile: it stays Carbon-registered
