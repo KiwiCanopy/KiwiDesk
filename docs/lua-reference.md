@@ -1531,7 +1531,8 @@ end)
 **Does:** grows or shrinks the focused window. A **floating**
 focused window resizes itself directly, in every layout mode:
 `"x"` changes its width by the delta, `"y"` its height, top-left
-corner anchored, floored at `min_window_size`. Tiled windows
+corner anchored, floored at `min_window_size` (a window already
+smaller than that just shrinks no further). Tiled windows
 only resize in bsp, stack, and scrolling layouts (monocle, grid,
 and the floating layout report "not supported"); what the
 `delta` actually adjusts depends on the layout:

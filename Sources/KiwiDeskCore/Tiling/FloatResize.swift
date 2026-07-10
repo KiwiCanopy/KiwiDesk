@@ -17,7 +17,11 @@ public enum FloatResize {
     /// The frame after growing along one axis by `delta`
     /// (negative shrinks), anchored at its origin — the
     /// top-left corner stays put, like a mouse drag of the
-    /// bottom/right edge.
+    /// bottom/right edge. The floor never exceeds the CURRENT
+    /// size: a window already below `min_window_size` (floats
+    /// are never layout-clamped, so that state is reachable)
+    /// stays put on a shrink instead of jumping UP to the
+    /// floor, and a grow grows by exactly `delta` (review).
     public static func resized(
         _ frame: CGRect,
         horizontal: Bool,
@@ -28,12 +32,12 @@ public enum FloatResize {
         if horizontal {
             result.size.width = max(
                 frame.width + delta,
-                shrinkFloor(minSize: minSize)
+                min(shrinkFloor(minSize: minSize), frame.width)
             )
         } else {
             result.size.height = max(
                 frame.height + delta,
-                shrinkFloor(minSize: minSize)
+                min(shrinkFloor(minSize: minSize), frame.height)
             )
         }
         return result

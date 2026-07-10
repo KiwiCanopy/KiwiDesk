@@ -53,6 +53,9 @@ struct FloatingResizeCommandTests {
         )
         core.state.apply(.windowFocused(WindowID(2)))
         core.state.setFloating(WindowID(2), true)
+        // Pin the routing: the animated branch must be taken
+        // even if the setting's default ever flips.
+        core.tiler.settings.animations.onWindowResize = true
         core.tiler.animation.isEnabled = false
         core.tiler.animation.apply = { id, frame, _ in
             applied(id, frame)
@@ -109,6 +112,22 @@ struct FloatingResizeCommandTests {
         )
         #expect(response.isSuccess)
         #expect(frames[WindowID(2)]?.height == 650)
+    }
+
+    @Test("animations off routes through the instant path")
+    func instantPathSucceeds() {
+        let core = makeCore()
+        var frames: [WindowID: CGRect] = [:]
+        floatingSetup(core, mode: "bsp") { frames[$0] = $1 }
+        core.tiler.settings.animations.onWindowResize = false
+        let response = core.execute(
+            "resize",
+            args: [.string("x"), .number(200)]
+        )
+        #expect(response.isSuccess)
+        // The instant path (cancel + setFrame) bypasses the
+        // animate hook entirely.
+        #expect(frames.isEmpty)
     }
 
     @Test("a tiled focus in the floating layout still fails")
