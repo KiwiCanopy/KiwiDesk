@@ -59,7 +59,9 @@ tracked, not abandoned:
   ([#70](https://github.com/hajiboy95/KiwiDesk/issues/70)).
 - **Place a window above the top screen border** — the
   WindowServer silently rejects any frame above the visible
-  area's top edge (left/right/bottom overflow is allowed). So a
+  area's top edge. (Partial left/right/bottom overflow is
+  allowed; fully offscreen frames clamp back to a title-bar
+  sliver on every edge.) So a
   vertical scrolling row scrolled past the top cannot tuck above
   the screen with its lower strip peeking, the way a true
   scroll would; `ScrollingLayout` pins those rows at the border

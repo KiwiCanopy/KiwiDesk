@@ -155,8 +155,10 @@ public struct Space: Sendable, Equatable {
     /// mode switch), so the layout falls back to centering on
     /// the anchor instead of scrolling minimally from a stale
     /// position. Ephemeral like `stackWeights` — never
-    /// persisted, reset whenever the space stops being tiled by
-    /// scrolling.
+    /// persisted, cleared only on an actual mode change
+    /// (`setMode`). An emptied space keeps its last value;
+    /// harmless, every consumer re-clamps it against the live
+    /// row.
     public var scrollOffset: CGFloat?
 
     public init(

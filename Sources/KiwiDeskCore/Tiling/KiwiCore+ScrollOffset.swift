@@ -18,25 +18,21 @@ extension KiwiCore {
     /// Re-derives and stores the scrolling viewport offset for
     /// the active space, if it is in scrolling mode. Called after
     /// every retile so the next focus move has an accurate
-    /// "previous offset" to scroll minimally from.
+    /// "previous offset" to scroll minimally from. Reads the
+    /// same `layoutInput` the retile's frames came from, so the
+    /// stored offset always matches what was materialized. An
+    /// emptied space keeps its last offset — harmless, every
+    /// consumer re-clamps against the live row.
     func persistScrollOffset() {
-        guard let space = activeSpace, space.mode == .scrolling
+        guard let input = tiler.layoutInput(state: state),
+            input.space.mode == .scrolling,
+            !input.tiled.isEmpty
         else { return }
-        let tiled = space.windows.filter {
-            state.windows[$0]?.isFloating == false
-        }
-        guard !tiled.isEmpty,
-            let screen = NSScreen.main ?? NSScreen.screens.first
-        else { return }
-        let context = tiler.settings.context(
-            bounds: GeometryUtils.axVisibleFrame(of: screen),
-            space: space
-        )
         let offset = ScrollingLayout.viewportOffset(
-            for: tiled,
-            in: context
+            for: input.tiled,
+            in: input.context
         )
-        state.workspaces.withSpace(space.id) {
+        state.workspaces.withSpace(input.space.id) {
             $0.scrollOffset = offset
         }
     }

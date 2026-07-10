@@ -119,7 +119,7 @@ public struct ScrollingLayout: LayoutSystem {
     /// the anchor/clamp math itself. Mirrors the single-window
     /// short-circuit in `calculateGeometry` (offset 0: the lone
     /// window always fills the area).
-    public static func viewportOffset(
+    static func viewportOffset(
         for windows: [WindowID],
         in context: LayoutContext
     ) -> CGFloat {
