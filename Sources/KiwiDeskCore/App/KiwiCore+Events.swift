@@ -8,48 +8,11 @@ import Foundation
 /// Split from `KiwiCore.swift` (wiring) for file size (§2).
 extension KiwiCore {
     func handle(_ event: KiwiEvent) {
-        // Closing or minimizing the focused window must hand
-        // focus to the space's fallback window (state already
-        // picks one; the AX raise below makes it real). The
-        // gone-event payload needs the window's app and space
-        // captured here too — state.apply removes both.
-        var focusLost = false
-        var goneApp: String? = nil
-        var goneSpace: SpaceID? = nil
-        if case .windowDestroyed(let id, _) = event {
-            focusLost = activeSpace?.focused == id
-            goneApp = state.windows[id]?.appName
-            goneSpace = state.workspaces.space(of: id)
-        }
-        // The active space's focus before `state.apply` moves it
-        // for a `.windowFocused` echo — the intended focus a stale
-        // self-echo must not revert (#152/#158).
-        var focusBeforeEcho: WindowID? = nil
-        if case .windowFocused = event {
-            focusBeforeEcho = activeSpace?.focused
-        }
-        // A title arriving late can restore a remembered float
-        // override (#160) — the only title event that needs a
-        // retile, detected by the float state actually moving.
-        var floatBeforeTitle: Bool? = nil
-        if case .windowTitleChanged(let id, _) = event {
-            floatBeforeTitle = state.windows[id]?.isFloating
-        }
-        // Lifecycle reason (#40), classified pre-apply: the
-        // remembered space (returned) is consulted before
-        // state re-files the window, and the minimized set
-        // (restored) is consumed exactly once.
-        var appearReason: WindowAppearReason? = nil
-        if case .windowCreated(let window) = event {
-            let deminiaturized =
-                minimizedWindows.remove(window.id) != nil
-            let remembered =
-                state.rememberedSpace(of: window.id) != nil
-            appearReason = WindowAppearReason.classify(
-                wasMinimized: deminiaturized,
-                hadRememberedSpace: remembered
-            )
-        }
+        // `state.apply` folds the event in and hands back the
+        // facts the write erases — the gone window's app / space /
+        // focus, the pre-echo focus, a float flip, and the appear
+        // facts (#166). handle() only composes the clock/AX-aware
+        // side effects on top; the pure classifiers stay below.
         state.spawnPlacements = [
             .bsp: tiler.settings.bsp.newWindowPlacement,
             .stack: tiler.settings.stack.newWindowPlacement,
@@ -58,7 +21,7 @@ extension KiwiCore {
             .grid: tiler.settings.grid.newWindowPlacement,
         ]
         state.spawnOverride = tiler.settings.placementOverride
-        state.apply(event)
+        let effects = state.apply(event)
         var newlyCreatedWindow: WindowID? = nil
         switch event {
         case .displaysChanged:
@@ -78,7 +41,7 @@ extension KiwiCore {
             let selfEcho = outstandingSelfRaises.remove(id) != nil
             if selfEcho,
                 activeSpace?.mode.defersFocusRaise == true,
-                let intended = focusBeforeEcho, intended != id,
+                let intended = effects.focusBefore, intended != id,
                 state.workspaces.space(of: id)
                     == state.workspaces.activeSpace
             {
@@ -116,7 +79,10 @@ extension KiwiCore {
             newlyCreatedWindow = window.id
             emitWindowCreated(
                 window,
-                reason: appearReason ?? .new
+                reason: WindowAppearReason.classify(
+                    wasMinimized: effects.appearedWasMinimized,
+                    hadRememberedSpace: effects.hadRememberedSpace
+                )
             )
         case .windowMoved(let id, let frame):
             drag.windowMoved(id, frame: frame)
@@ -152,19 +118,14 @@ extension KiwiCore {
                 sinceNativeSwitch: Date()
                     .timeIntervalSince(lastNativeSwitch)
             )
-            if reason == .minimized {
-                minimizedWindows.insert(id)
-            }
             emitWindowDestroyed(
                 id,
-                app: goneApp,
-                space: goneSpace,
+                app: effects.removedWindow?.app,
+                space: effects.removedWindow?.space,
                 reason: reason
             )
-        case .windowTitleChanged(let id, _):
-            if let before = floatBeforeTitle,
-                state.windows[id]?.isFloating != before
-            {
+        case .windowTitleChanged:
+            if effects.floatFlipped {
                 retile()
             }
         case .nativeSpaceChanged:
@@ -175,10 +136,13 @@ extension KiwiCore {
         if TilingEngine.shouldRetile(after: event) {
             retile(newlyCreatedWindow: newlyCreatedWindow)
         }
-        // Only raise windows the app still lists: after a
-        // native Space switch the fallback may live on the
-        // previous desktop, and raising it would switch back.
-        if focusLost, let next = activeSpace?.focused,
+        // Closing or minimizing the focused window hands focus
+        // to the space's fallback (state picked one; this raise
+        // makes it real). Only raise windows the app still lists:
+        // after a native Space switch the fallback may live on
+        // the previous desktop, and raising it would switch back.
+        if effects.removedWindow?.focusLost == true,
+            let next = activeSpace?.focused,
             eventLoop.isListed(next)
         {
             focusWindow(next)

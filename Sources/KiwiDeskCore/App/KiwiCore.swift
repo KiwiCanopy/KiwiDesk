@@ -56,16 +56,6 @@ public final class KiwiCore {
     /// `schedule*` call sites.
     let deferred = DeferredTasks()
 
-    /// Windows currently minimized, so their deminiaturize
-    /// (`window_created`) classifies as `reason: restored`
-    /// (#40). An entry for a window that closes while
-    /// minimized goes stale (no event fires) — session-scoped
-    /// and tiny, but slightly weaker than rememberedSpaces'
-    /// staleness: these are DEAD ids, so a recycled WindowID
-    /// could pin `restored` onto an unrelated window. The
-    /// payload is advisory; accepted.
-    var minimizedWindows: Set<WindowID> = []
-
     /// Native desktop we are currently on (Mission Control
     /// number), and the virtual space each desktop showed
     /// last, restored when the user returns to it.

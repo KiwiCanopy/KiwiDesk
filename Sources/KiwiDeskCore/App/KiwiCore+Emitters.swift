@@ -120,8 +120,9 @@ extension KiwiCore {
         )
     }
 
-    /// `app` and `space` are captured by handle() before
-    /// state.apply removes the window — the payload reports
+    /// `app` and `space` come from `AppliedEffects` — the
+    /// coordinator captures them as it removes the window, so
+    /// the payload reports
     /// the space the window actually disappeared from, not
     /// whichever space happens to be active. `reason` tells a
     /// real close from a minimize or a native-switch vanish

@@ -39,6 +39,17 @@ public struct StateCoordinator: Sendable {
     /// forgotten: deminiaturize opens in the active space.
     private var rememberedSpaces: [WindowID: SpaceID] = [:]
 
+    /// Windows currently minimized, so their deminiaturize
+    /// (`.windowCreated`) classifies as `restored` (#40). Lives
+    /// here beside `rememberedSpaces` — both are memory carried
+    /// across tracking gaps. An entry for a window that closes
+    /// while minimized goes stale (no event fires): session-
+    /// scoped and tiny, but slightly weaker than
+    /// `rememberedSpaces`' staleness — these are DEAD ids, so a
+    /// recycled WindowID could pin `restored` onto an unrelated
+    /// window. The payload is advisory; accepted.
+    private var minimizedWindows: Set<WindowID> = []
+
     /// Explicit `make_floating` / `make_tiled` verdicts per
     /// tracked window — the only float state worth carrying
     /// across close/reopen; detection re-derives the rest.
@@ -109,7 +120,15 @@ public struct StateCoordinator: Sendable {
         }
     }
 
-    public mutating func apply(_ event: KiwiEvent) {
+    /// Folds an event into state and returns the facts the write
+    /// erases, for `handle(_:)` to compose its side effects from
+    /// (#166). `@discardableResult` — command and test call sites
+    /// apply purely for the state change.
+    @discardableResult
+    public mutating func apply(
+        _ event: KiwiEvent
+    ) -> AppliedEffects {
+        var effects = AppliedEffects()
         switch event {
         case .appLaunched:
             break
@@ -123,6 +142,10 @@ public struct StateCoordinator: Sendable {
             }
 
         case .windowCreated(let window):
+            effects.appearedWasMinimized =
+                minimizedWindows.remove(window.id) != nil
+            effects.hadRememberedSpace =
+                rememberedSpaces[window.id] != nil
             windows.upsert(window)
             restoreFloatOverride(of: window)
             let target =
@@ -142,8 +165,10 @@ public struct StateCoordinator: Sendable {
             }
 
         case .windowDestroyed(let id, let wasMinimized):
+            effects.removedWindow = removalFacts(id)
             if wasMinimized {
                 rememberedSpaces[id] = nil
+                minimizedWindows.insert(id)
             } else if let space = workspaces.space(of: id) {
                 rememberedSpaces[id] = space
             }
@@ -163,11 +188,14 @@ public struct StateCoordinator: Sendable {
             windows.updateFrame(id, frame: frame)
 
         case .windowFocused(let id):
+            effects.focusBefore = workspaces.activeSpace
+                .flatMap { workspaces[$0]?.focused }
             if let space = workspaces.space(of: id) {
                 workspaces.focus(id, in: space)
             }
 
         case .windowTitleChanged(let id, let title):
+            let floatBefore = windows[id]?.isFloating
             windows.updateTitle(id, title: title)
             // Lazy-title apps (Electron/WebKit) are tracked
             // before their titles arrive, so the create-time
@@ -175,6 +203,13 @@ public struct StateCoordinator: Sendable {
             // title lands (#160).
             if let window = windows[id] {
                 restoreFloatOverride(of: window)
+            }
+            // A late title can restore a remembered float
+            // override — the only title change that retiles.
+            if let floatBefore,
+                windows[id]?.isFloating != floatBefore
+            {
+                effects.floatFlipped = true
             }
 
         case .windowFloatChanged(let id, let floating):
@@ -195,6 +230,24 @@ public struct StateCoordinator: Sendable {
             // follows the switch.
             break
         }
+        return effects
+    }
+
+    /// The facts a `.windowDestroyed` will erase: the window's
+    /// app and space, and whether it held the active space's
+    /// focus (so the caller can raise the fallback). Read before
+    /// the removal mutates state.
+    private func removalFacts(
+        _ id: WindowID
+    ) -> AppliedEffects.RemovedWindow {
+        let focused =
+            workspaces.activeSpace
+            .flatMap { workspaces[$0]?.focused }
+        return AppliedEffects.RemovedWindow(
+            app: windows[id]?.appName,
+            space: workspaces.space(of: id),
+            focusLost: focused == id
+        )
     }
 
     /// Moves a window's manual float override (if any) into
