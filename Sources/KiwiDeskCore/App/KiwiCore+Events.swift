@@ -28,6 +28,13 @@ extension KiwiCore {
         if case .windowFocused = event {
             focusBeforeEcho = activeSpace?.focused
         }
+        // A title arriving late can restore a remembered float
+        // override (#160) — the only title event that needs a
+        // retile, detected by the float state actually moving.
+        var floatBeforeTitle: Bool? = nil
+        if case .windowTitleChanged(let id, _) = event {
+            floatBeforeTitle = state.windows[id]?.isFloating
+        }
         state.spawnPlacements = [
             .bsp: tiler.settings.bsp.newWindowPlacement,
             .stack: tiler.settings.stack.newWindowPlacement,
@@ -129,6 +136,12 @@ extension KiwiCore {
                     app: goneApp,
                     space: goneSpace
                 )
+            }
+        case .windowTitleChanged(let id, _):
+            if let before = floatBeforeTitle,
+                state.windows[id]?.isFloating != before
+            {
+                retile()
             }
         case .nativeSpaceChanged:
             handleNativeSpaceChange()

@@ -45,12 +45,16 @@ public struct StateCoordinator: Sendable {
     private var manualFloatOverrides: [WindowID: Bool] = [:]
 
     /// Manual float intent of windows that closed (#160).
-    /// Keyed by app + title, not `WindowID`: the OS reuses
-    /// `CGWindowID`s, so a remembered id could resurrect the
-    /// override onto an unrelated window. A drifted title on
-    /// reopen misses — graceful degradation, the user just
-    /// floats again. Entries are consumed on reopen; the rest
-    /// linger for the session (manual floats are rare).
+    /// Keyed by app + title, not `WindowID`: a reopened window
+    /// gets a fresh id, and old ids can be recycled onto
+    /// unrelated windows (`rememberedSpaces` above can key on
+    /// ids because a native-Space return keeps the window
+    /// alive). Two live windows sharing an identity share one
+    /// slot: last close wins, first reopen consumes — at worst
+    /// one misapplied float, corrected with one command. A
+    /// drifted title on reopen misses the same gracefully.
+    /// Unconsumed entries linger for the session, mirroring
+    /// `rememberedSpaces`' lifetime (manual floats are rare).
     private var rememberedFloating: [WindowIdentity: Bool] = [:]
 
     /// Stable close/reopen identity of a window (#160).
@@ -89,10 +93,9 @@ public struct StateCoordinator: Sendable {
         _ id: WindowID,
         _ floating: Bool
     ) {
+        guard windows[id] != nil else { return }
         windows.setFloating(id, floating)
-        if windows[id] != nil {
-            manualFloatOverrides[id] = floating
-        }
+        manualFloatOverrides[id] = floating
     }
 
     public mutating func apply(_ event: KiwiEvent) {
@@ -110,16 +113,7 @@ public struct StateCoordinator: Sendable {
 
         case .windowCreated(let window):
             windows.upsert(window)
-            // Reopened window: restore the manual float
-            // intent over the fresh detection verdict, and
-            // re-arm the override so the next close cycle
-            // remembers it again (#160).
-            if let intent = rememberedFloating.removeValue(
-                forKey: WindowIdentity(of: window)
-            ) {
-                windows.setFloating(window.id, intent)
-                manualFloatOverrides[window.id] = intent
-            }
+            restoreFloatOverride(of: window)
             let target =
                 rememberedSpaces[window.id]
                 ?? appRules[window.appName]
@@ -164,14 +158,21 @@ public struct StateCoordinator: Sendable {
 
         case .windowTitleChanged(let id, let title):
             windows.updateTitle(id, title: title)
+            // Lazy-title apps (Electron/WebKit) are tracked
+            // before their titles arrive, so the create-time
+            // identity match misses; retry once the real
+            // title lands (#160).
+            if let window = windows[id] {
+                restoreFloatOverride(of: window)
+            }
 
         case .windowFloatChanged(let id, let floating):
-            // A changed detection verdict supersedes the live
-            // window state (pre-existing semantics), so it
-            // drops the manual override too — remembering the
-            // stale intent would resurrect a float state the
-            // user no longer sees (#160).
-            manualFloatOverrides[id] = nil
+            // A manual override always wins over detection:
+            // the title recheck (#160) makes verdicts flip
+            // routinely for `App:Title` rules, and a flip must
+            // not revert an explicit make_floating/make_tiled
+            // (docs promise re-checks never do).
+            guard manualFloatOverrides[id] == nil else { break }
             windows.setFloating(id, floating)
 
         case .displaysChanged(let displays):
@@ -187,15 +188,38 @@ public struct StateCoordinator: Sendable {
 
     /// Moves a window's manual float override (if any) into
     /// the close/reopen memory, keyed by its identity (#160).
+    /// An empty title carries no identity — every pre-title
+    /// window of the app would match it — so the override is
+    /// dropped instead of remembered.
     private mutating func rememberFloatOverride(
         of window: ManagedWindow
     ) {
         guard
             let intent = manualFloatOverrides.removeValue(
                 forKey: window.id
-            )
+            ),
+            !window.title.isEmpty
         else { return }
         rememberedFloating[WindowIdentity(of: window)] = intent
+    }
+
+    /// Restores a remembered float intent onto a (re)tracked
+    /// window: the manual verdict beats the fresh detection
+    /// one, and the override re-arms so the next close cycle
+    /// remembers it again (#160). Runs at creation and again
+    /// on title changes (lazy-title apps); a live manual
+    /// override is never clobbered.
+    private mutating func restoreFloatOverride(
+        of window: ManagedWindow
+    ) {
+        guard manualFloatOverrides[window.id] == nil,
+            !window.title.isEmpty,
+            let intent = rememberedFloating.removeValue(
+                forKey: WindowIdentity(of: window)
+            )
+        else { return }
+        windows.setFloating(window.id, intent)
+        manualFloatOverrides[window.id] = intent
     }
 
     private mutating func reconcile(displays: [Display]) {

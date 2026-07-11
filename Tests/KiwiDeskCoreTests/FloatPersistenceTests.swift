@@ -88,21 +88,79 @@ struct FloatPersistenceTests {
         #expect(state.windows[WindowID(2)]?.isFloating == true)
     }
 
-    @Test("A changed detection verdict drops the override")
-    func detectionChangeDropsOverride() {
+    @Test("A manual override outlives detection verdict flips")
+    func overrideBeatsDetectionFlips() {
         var state = StateCoordinator()
         state.apply(.windowCreated(makeWindow(1)))
         state.setFloating(WindowID(1), true)
+        // A title-rule verdict flip (#160 recheck) must not
+        // revert an explicit make_floating.
         state.apply(
             .windowFloatChanged(
                 WindowID(1),
                 isFloating: false
             )
         )
+        #expect(state.windows[WindowID(1)]?.isFloating == true)
         state.apply(
             .windowDestroyed(WindowID(1), wasMinimized: false)
         )
         state.apply(.windowCreated(makeWindow(2)))
+        #expect(state.windows[WindowID(2)]?.isFloating == true)
+    }
+
+    @Test("Detection verdicts apply to unoverridden windows")
+    func detectionAppliesWithoutOverride() {
+        var state = StateCoordinator()
+        state.apply(.windowCreated(makeWindow(1)))
+        state.apply(
+            .windowFloatChanged(WindowID(1), isFloating: true)
+        )
+        #expect(state.windows[WindowID(1)]?.isFloating == true)
+    }
+
+    @Test("A late-loading title still restores the intent")
+    func lazyTitleRestores() {
+        var state = StateCoordinator()
+        state.apply(.windowCreated(makeWindow(1)))
+        state.setFloating(WindowID(1), true)
+        state.apply(
+            .windowDestroyed(WindowID(1), wasMinimized: false)
+        )
+        // Electron/WebKit reopen: tracked before the title
+        // arrives, so the create-time identity match misses.
+        state.apply(.windowCreated(makeWindow(2, title: "")))
+        #expect(state.windows[WindowID(2)]?.isFloating == false)
+        state.apply(
+            .windowTitleChanged(WindowID(2), "Doc")
+        )
+        #expect(state.windows[WindowID(2)]?.isFloating == true)
+    }
+
+    @Test("The remembered identity uses the latest title")
+    func renamedTitleRemembers() {
+        var state = StateCoordinator()
+        state.apply(.windowCreated(makeWindow(1, title: "A")))
+        state.setFloating(WindowID(1), true)
+        state.apply(
+            .windowTitleChanged(WindowID(1), "B")
+        )
+        state.apply(
+            .windowDestroyed(WindowID(1), wasMinimized: false)
+        )
+        state.apply(.windowCreated(makeWindow(2, title: "B")))
+        #expect(state.windows[WindowID(2)]?.isFloating == true)
+    }
+
+    @Test("Empty titles carry no identity to remember")
+    func emptyTitleNeverRemembered() {
+        var state = StateCoordinator()
+        state.apply(.windowCreated(makeWindow(1, title: "")))
+        state.setFloating(WindowID(1), true)
+        state.apply(
+            .windowDestroyed(WindowID(1), wasMinimized: false)
+        )
+        state.apply(.windowCreated(makeWindow(2, title: "")))
         #expect(state.windows[WindowID(2)]?.isFloating == false)
     }
 
