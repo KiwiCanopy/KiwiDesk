@@ -139,6 +139,7 @@ struct LifecycleEventTests {
         let core = makeCore()
         core.eventLoop.onEvent(.windowCreated(window(6)))
         // Native-switch vanish: the space stays remembered.
+        core.lastNativeSwitch = Date()
         core.eventLoop.onEvent(
             .windowDestroyed(WindowID(6), wasMinimized: false)
         )

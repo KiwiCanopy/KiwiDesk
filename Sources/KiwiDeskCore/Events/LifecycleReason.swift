@@ -1,5 +1,14 @@
 import Foundation
 
+/// The shared settle window after a native desktop switch —
+/// the ONE home for the "1 second" (#40, AGENTS §5 mirror
+/// rule): destroys inside it classify as vanished, and focus
+/// events inside it must not flip virtual spaces
+/// (`KiwiCore+SpaceCommands`).
+public enum NativeSwitch {
+    public static let settle: TimeInterval = 1
+}
+
 /// Why a window left the visible set (#40). Lifecycle events
 /// track visibility, not app lifecycle: a native macOS Space
 /// switch makes every window on the old desktop vanish from
@@ -23,7 +32,8 @@ public enum WindowGoneReason: String, Sendable {
         sinceNativeSwitch: TimeInterval
     ) -> WindowGoneReason {
         if wasMinimized { return .minimized }
-        return sinceNativeSwitch <= 1 ? .vanished : .closed
+        return sinceNativeSwitch <= NativeSwitch.settle
+            ? .vanished : .closed
     }
 }
 

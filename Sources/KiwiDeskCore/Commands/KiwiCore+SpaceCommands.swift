@@ -16,7 +16,8 @@ extension KiwiCore {
         // reference windows that are being re-tracked; they
         // must not flip the virtual space mid-restore.
         guard
-            Date().timeIntervalSince(lastNativeSwitch) > 1
+            Date().timeIntervalSince(lastNativeSwitch)
+                > NativeSwitch.settle
         else { return }
         deferred.schedule(
             .focusFollow,
@@ -129,7 +130,8 @@ extension KiwiCore {
                 // A native desktop switch in this window runs its
                 // own retile + settle and is still re-tracking
                 // windows; don't collide (cf. scheduleFocusFollow).
-                Date().timeIntervalSince(self.lastNativeSwitch) > 1
+                Date().timeIntervalSince(self.lastNativeSwitch)
+                    > NativeSwitch.settle
             else { return }
             self.retile(
                 animated: self.tiler.settings.animations.onSpaceChange,
