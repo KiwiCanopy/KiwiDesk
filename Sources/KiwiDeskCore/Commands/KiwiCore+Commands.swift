@@ -23,6 +23,8 @@ extension KiwiCore {
             return setFocusedFloating(true)
         case "make_tiled":
             return setFocusedFloating(false)
+        case "make_auto":
+            return setFocusedAuto()
         case "resize":
             return resize(args)
         case "pull_or_spawn":
@@ -221,6 +223,30 @@ extension KiwiCore {
             return .fail("no focused window")
         }
         state.setFloating(focused, floating)
+        retile()
+        return .ok()
+    }
+
+    /// `make_auto` (#164): clears the focused window's manual
+    /// float override and returns it to detection control by
+    /// re-applying the event loop's cached verdict. Without a
+    /// cached verdict (untracked window) the current state
+    /// stands until the next detection pass.
+    private func setFocusedAuto() -> CommandResponse {
+        guard let focused = activeSpace?.focused else {
+            return .fail("no focused window")
+        }
+        state.clearFloatOverride(focused)
+        if let detected = eventLoop.detectionVerdict(
+            for: focused
+        ) {
+            state.apply(
+                .windowFloatChanged(
+                    focused,
+                    isFloating: detected
+                )
+            )
+        }
         retile()
         return .ok()
     }

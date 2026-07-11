@@ -98,6 +98,17 @@ public struct StateCoordinator: Sendable {
         manualFloatOverrides[id] = floating
     }
 
+    /// Returns a window to detection control (`make_auto`):
+    /// clears its manual override and the close/reopen memory
+    /// of its identity, so detection verdicts apply again and
+    /// nothing resurrects the old intent on reopen (#164).
+    public mutating func clearFloatOverride(_ id: WindowID) {
+        manualFloatOverrides[id] = nil
+        if let window = windows[id] {
+            rememberedFloating[WindowIdentity(of: window)] = nil
+        }
+    }
+
     public mutating func apply(_ event: KiwiEvent) {
         switch event {
         case .appLaunched:

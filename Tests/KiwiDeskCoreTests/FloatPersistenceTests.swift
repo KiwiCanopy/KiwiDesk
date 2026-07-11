@@ -187,6 +187,25 @@ struct FloatPersistenceTests {
         state.apply(.windowCreated(makeWindow(9)))
         #expect(state.windows[WindowID(9)]?.isFloating == false)
     }
+
+    @Test("Clearing the override returns detection control")
+    func clearRestoresDetection() {
+        var state = StateCoordinator()
+        state.apply(.windowCreated(makeWindow(1)))
+        state.setFloating(WindowID(1), true)
+        state.clearFloatOverride(WindowID(1))
+        // Detection verdicts apply again ...
+        state.apply(
+            .windowFloatChanged(WindowID(1), isFloating: false)
+        )
+        #expect(state.windows[WindowID(1)]?.isFloating == false)
+        // ... and reopen restores nothing (#164).
+        state.apply(
+            .windowDestroyed(WindowID(1), wasMinimized: false)
+        )
+        state.apply(.windowCreated(makeWindow(2)))
+        #expect(state.windows[WindowID(2)]?.isFloating == false)
+    }
 }
 
 /// The titled-rule gate for the title-change recheck (#160).

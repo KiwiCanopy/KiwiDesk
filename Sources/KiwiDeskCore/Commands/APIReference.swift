@@ -19,6 +19,7 @@ public enum APIReference {
             ("move_to_space_and_follow", "move_to_space_and_follow"),
             ("make_floating", "make_floating"),
             ("make_tiled", "make_tiled"),
+            ("make_auto", "make_auto"),
             ("resize", "resize"),
             ("pull_or_spawn", "pull_or_spawn"),
             ("spawn_new", "spawn_new"),

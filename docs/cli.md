@@ -51,6 +51,7 @@ KiwiDesk service restart
 | | `move_to_space_and_follow` | space id |
 | Window | `make_floating` | — |
 | | `make_tiled` | — |
+| | `make_auto` | — |
 | | `resize` | `x\|y`, delta (px) |
 | Launch | `pull_or_spawn` | app name |
 | | `spawn_new` | app name |

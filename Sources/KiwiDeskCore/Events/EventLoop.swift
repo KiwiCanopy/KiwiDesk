@@ -68,6 +68,15 @@ public final class EventLoop {
         ignorePending = []
     }
 
+    /// Last float-detection verdict of a tracked window —
+    /// what `make_auto` returns a window to when the manual
+    /// override is cleared (#164). Nil for untracked windows.
+    public func detectionVerdict(
+        for id: WindowID
+    ) -> Bool? {
+        detectedFloating[id]
+    }
+
     /// AX element of a tracked window, if still known. Used to
     /// apply geometry (animations, wake restore) to windows.
     public func element(for id: WindowID) -> AXUIElement? {
