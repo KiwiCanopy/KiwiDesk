@@ -41,4 +41,13 @@ elif [ "${#STAGED_LOCALES[@]}" -gt 0 ]; then
     fi
 fi
 
+# AGENTS.md (or the brief) edited without a staged Swift file? Then
+# lint.sh — which runs the brief freshness reminder — did not fire
+# above, so run that reminder directly (warn-only, never blocks).
+if [ "${#STAGED_SWIFT[@]}" -eq 0 ] \
+    && git diff --cached --name-only --diff-filter=ACM \
+        | grep -qE '^(AGENTS\.md|\.claude/AGENTS\.brief\.md)$'; then
+    "$ROOT/scripts/check-agent-brief.sh" || true
+fi
+
 exit $STATUS

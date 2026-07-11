@@ -64,6 +64,11 @@ if ! python3 "$ROOT/scripts/extract-keys" --check; then
     STATUS=1
 fi
 
+# Agent-brief freshness reminder (warn-only, never fails lint): the
+# caveman-compressed AGENTS.md that CLAUDE.md loads should be
+# regenerated when AGENTS.md changes.
+"$ROOT/scripts/check-agent-brief.sh" || true
+
 if [ "$STATUS" -eq 0 ]; then
     echo "Lint OK"
 fi
