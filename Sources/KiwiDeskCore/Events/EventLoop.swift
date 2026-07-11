@@ -13,6 +13,10 @@ public final class EventLoop {
     public var onEvent: @MainActor (KiwiEvent) -> Void = { _ in }
 
     /// User float rules from the Lua config (`float_rules`).
+    /// Assigning does NOT resync `detectedFloating`: rules
+    /// change hands inside loadConfig's reset→reassign
+    /// transaction, so any new assignment site outside it must
+    /// follow with `reconcileAll()` or a scoped recheck (#164).
     public var floatRules = FloatRules()
 
     var observers: [pid_t: AXApplicationObserver] = [:]
@@ -66,6 +70,15 @@ public final class EventLoop {
         elements = [:]
         detectedFloating = [:]
         ignorePending = []
+    }
+
+    /// Last float-detection verdict of a tracked window —
+    /// what `make_auto` returns a window to when the manual
+    /// override is cleared (#164). Nil for untracked windows.
+    public func detectionVerdict(
+        for id: WindowID
+    ) -> Bool? {
+        detectedFloating[id]
     }
 
     /// AX element of a tracked window, if still known. Used to

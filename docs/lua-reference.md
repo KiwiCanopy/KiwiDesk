@@ -1422,6 +1422,28 @@ survives the window closing and reopening.
 KiwiDesk.make_tiled()
 ```
 
+### make_auto
+
+**Expects:** nothing.
+
+**Does:** clears the focused window's manual override — the
+third state of the float tri-state (floating-manual /
+tiled-manual / auto). The window returns to detection control:
+`float_rules` and the built-in dialog/panel detection apply
+again, including future rule edits, and the close/reopen
+memory of the window's current identity is forgotten. (A
+remembered intent stored under an *older* title can still
+resurface after a reopen — run `make_auto` again once the
+window shows the wrong state and it is purged for good.) Use
+it when a window "sticks" floating or tiled after a
+`make_floating`/`make_tiled` you no longer want.
+
+**Example:**
+
+```lua
+KiwiDesk.make_auto()
+```
+
 ### Example: toggle floating
 
 There is no built-in toggle; use `get_state()` to check the focused
