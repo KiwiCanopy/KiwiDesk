@@ -21,6 +21,13 @@ extension KiwiCore {
             goneApp = state.windows[id]?.appName
             goneSpace = state.workspaces.space(of: id)
         }
+        // The active space's focus before `state.apply` moves it
+        // for a `.windowFocused` echo — the intended focus a stale
+        // self-echo must not revert (#152/#158).
+        var focusBeforeEcho: WindowID? = nil
+        if case .windowFocused = event {
+            focusBeforeEcho = activeSpace?.focused
+        }
         state.spawnPlacements = [
             .bsp: tiler.settings.bsp.newWindowPlacement,
             .stack: tiler.settings.stack.newWindowPlacement,
@@ -37,10 +44,33 @@ extension KiwiCore {
             handleMonitorChange()
             emitMonitorChange()
         case .windowFocused(let id):
-            // A real focus echo supersedes a pending deferred
-            // raise (#143): the OS already raised whatever the
-            // user reached (a click mid-pan), and a stale raise
-            // firing after the pan would steal focus back.
+            // Echo provenance (#152/#158): an echo of KiwiDesk's
+            // own AX raise is not a user action. When one lands
+            // after focus has already moved on in the active
+            // scrolling space — a later raise, deferred or
+            // forward-immediate — the echo (and the state focus
+            // StateCoordinator just moved onto the echoed window)
+            // would revert to the stale target. Re-assert the
+            // intended focus and drop the echo. Consume the id
+            // from the outstanding set either way.
+            let selfEcho = outstandingSelfRaises.remove(id) != nil
+            if selfEcho,
+                activeSpace?.mode.defersFocusRaise == true,
+                let intended = focusBeforeEcho, intended != id,
+                state.workspaces.space(of: id)
+                    == state.workspaces.activeSpace
+            {
+                if let space = state.workspaces.space(of: intended)
+                {
+                    state.workspaces.focus(intended, in: space)
+                }
+                return
+            }
+            // A real focus echo (a user click mid-pan) or a self
+            // echo that matches the intended focus supersedes the
+            // deferred raise (#143): the OS already raised whatever
+            // the user reached, and a stale raise firing after the
+            // pan would steal focus back.
             pendingFocusRaise = nil
             emitFocusChange(id)
             // cmd+tab (or a click) can reach a window hidden
@@ -80,6 +110,10 @@ extension KiwiCore {
                 )
             }
         case .windowDestroyed(let id, let wasMinimized):
+            // Drop any unechoed self-raise for the gone window: its
+            // echo will never land, and WindowIDs can be reused
+            // (#152/#158).
+            outstandingSelfRaises.remove(id)
             drag.cancel(id)
             dragOverlay.hideAll()
             if wasMinimized {

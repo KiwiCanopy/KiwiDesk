@@ -59,6 +59,20 @@ struct SpaceTests {
         #expect(space.focused == w2)
     }
 
+    @Test("Removing a focused middle window falls to the neighbor")
+    func removeFocusedMiddle() {
+        var space = Space(
+            id: "code",
+            windows: [w1, w2, w3],
+            focused: w2
+        )
+        space.remove(w2)
+        // The window that slid into the slot (w3), not the old
+        // last window — no focus yank across the row (#158).
+        #expect(space.windows == [w1, w3])
+        #expect(space.focused == w3)
+    }
+
     @Test("Swap exchanges positions")
     func swapWindows() {
         var space = Space(id: "code", windows: [w1, w2, w3])

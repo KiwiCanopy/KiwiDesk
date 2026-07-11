@@ -25,11 +25,30 @@ public final class KiwiCore {
     /// animations to settle (see restoreStackZOrder).
     var pendingZOrderRestore = false
 
+    /// A command reordered windows but its paired retile is the
+    /// dispatcher's own trailing `retile(force:)`, not one it
+    /// issued itself (#153) — `layoutCommand` arms the z-order
+    /// restore *after* that retile so it can't fire mid-retile
+    /// from pre-retile frames. Set via
+    /// `requestZOrderRestoreAfterDispatch`; reset each dispatch.
+    var deferredCommandZOrderRestore = false
+
     /// A scrolling focus move whose AX raise is waiting for
     /// the pan to settle (#143) — a single slot, so rapid
     /// focus commands supersede each other and only the last
     /// target raises (see runPendingFocusRaise).
     var pendingFocusRaise: WindowID?
+
+    /// Window ids KiwiDesk's own AX raises issued but whose focus
+    /// echoes have not yet landed (#152). A matching echo is
+    /// self-inflicted, not a user action: it must not supersede a
+    /// newer focus nor snap state focus back. A *set*, not one
+    /// slot, because forward focus raises immediately (#158) while
+    /// a backward raise may still be unechoed — two self-raises
+    /// can be outstanding at once. An id is removed on its own
+    /// echo, and when its window is destroyed (WindowIDs can be
+    /// reused). See `handle(_:)`'s `.windowFocused` case.
+    var outstandingSelfRaises: Set<WindowID> = []
 
     /// The deferred one-shot settle tasks (focus follow, startup
     /// sweep, space settles), keyed so `stop()` cancels them all

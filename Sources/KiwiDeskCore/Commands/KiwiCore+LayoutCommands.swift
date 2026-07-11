@@ -11,6 +11,10 @@ extension KiwiCore {
         _ command: String,
         _ args: [JSONValue]
     ) -> CommandResponse {
+        // Reset the per-dispatch z-order deferral (#153); a
+        // reordering command below arms it, and it is flushed
+        // strictly after this dispatch's forced retile.
+        deferredCommandZOrderRestore = false
         let response: CommandResponse
         if command.hasPrefix("animations.") {
             response = animationsCommand(command, args)
@@ -38,6 +42,13 @@ extension KiwiCore {
             // nudge exactly like the 1 pt gap edit that
             // motivated the guardrail.
             retile(force: true)
+            // Now that the reorder's animations are in flight,
+            // arm the deferred z-order restore (#153) — it rides
+            // their settle instead of the pre-retile frames.
+            if deferredCommandZOrderRestore {
+                deferredCommandZOrderRestore = false
+                scheduleZOrderRestore()
+            }
         }
         return response
     }

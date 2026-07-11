@@ -52,6 +52,11 @@ extension KiwiCore {
         if let window = state.windows[id],
             let element = eventLoop.element(for: id)
         {
+            // Remember what we raised so its focus echo can be
+            // told apart from a user's click (#152). A set: a
+            // forward-immediate raise can fire while a backward
+            // raise is still unechoed (#158).
+            outstandingSelfRaises.insert(id)
             AXHelper.raise(element, pid: window.pid)
         }
     }

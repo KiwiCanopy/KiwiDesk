@@ -2148,16 +2148,18 @@ animations.set_on_space_change(false)
 **Does:** enables or disables the layout slide as focus moves within a
 Scrolling space.
 
-While the slide runs, the target window is brought to the front
-only when the pan settles — raising it first would pop a
-top-pinned row over the whole screen before the slide starts.
-This covers every slide-triggering focus change: focus moves,
-bar-tab clicks, and the focus handoff after closing a window.
-The trade: keystrokes during the slide (one animation length,
-50–1000 ms) still reach the previously focused app, as in
-other scroll-style window managers. Global hotkeys are
-unaffected (they reach KiwiDesk regardless of the key app), and
-with the slide disabled focus transfers instantly. See the
+While the slide runs, a window focused *backward* (up/left)
+toward the row pinned behind the leading edge is brought to the
+front only when the pan settles — raising it first would pop
+that pinned row over the whole screen before the slide starts.
+Forward (down/right) focus moves and the focus handoff after
+closing a window raise immediately, laying the target on top as
+it slides in. The trade: during a backward slide (one animation
+length, 50–1000 ms) keystrokes still reach the previously
+focused app, as in other scroll-style window managers. Global
+hotkeys are unaffected (they reach KiwiDesk regardless of the
+key app), and with the slide disabled focus transfers
+instantly. See the
 [accepted limitations](design-decisions.md#accepted-limitations)
 table.
 

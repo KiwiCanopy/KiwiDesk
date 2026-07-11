@@ -133,14 +133,22 @@ public struct ScrollingLayout: LayoutSystem {
     /// caller read back the value to persist as the next tile's
     /// `Space.scrollOffset`, so a focus-driven retile can restore
     /// the "previous offset" input without KiwiCore re-deriving
-    /// the anchor/clamp math itself. Mirrors the single-window
-    /// short-circuit in `calculateGeometry` (offset 0: the lone
-    /// window always fills the area).
+    /// the anchor/clamp math itself.
+    ///
+    /// A lone window fills the whole area, so `calculateGeometry`
+    /// ignores the offset for it — but this must still *preserve*
+    /// it, not persist 0 (#155): float one of two scrolled
+    /// windows and the row drops to a single tiled window; a 0
+    /// here overwrites the saved offset, so unfloating rebuilds
+    /// the row from home. Returning the prior offset keeps the
+    /// viewport where it was.
     static func viewportOffset(
         for windows: [WindowID],
         in context: LayoutContext
     ) -> CGFloat {
-        guard windows.count > 1 else { return 0 }
+        guard windows.count > 1 else {
+            return context.scrollOffset ?? 0
+        }
         let area = context.scrolling.windowFrame(
             in: context.usable,
             inner: context.gaps.inner,
@@ -161,6 +169,35 @@ public struct ScrollingLayout: LayoutSystem {
             rowLength: metrics.rowLength,
             focusedPos: metrics.focusedPos
         )
+    }
+
+    /// Whether the row is longer than the viewport, so slots pile
+    /// up at the edges and their stacking matters (#150). A row
+    /// that fits entirely shows no overlap, so a swap within it
+    /// cannot scramble the edge piles' z-order — there is nothing
+    /// to restore. A superset of "the swapped pair touches a
+    /// pile": the focus that moved in a swap is always panned
+    /// fully into view, so a per-slot test would gate on the
+    /// other window's transient position; the overflow test is
+    /// cheaper and never misses a real scramble.
+    static func rowOverflows(
+        for windows: [WindowID],
+        in context: LayoutContext
+    ) -> Bool {
+        guard windows.count > 1 else { return false }
+        let area = context.scrolling.windowFrame(
+            in: context.usable,
+            inner: context.gaps.inner,
+            global: context.appBarStyle
+        )
+        let horizontal = context.scrolling.barAxisIsHorizontal
+        let m = metrics(
+            for: windows,
+            context: context,
+            area: area,
+            horizontal: horizontal
+        )
+        return m.rowLength > m.along
     }
 
     /// The viewport offset for a focus at `focusedPos`, given the
