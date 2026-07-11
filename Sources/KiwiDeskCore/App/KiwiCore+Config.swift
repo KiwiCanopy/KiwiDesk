@@ -104,6 +104,10 @@ extension KiwiCore {
         // recheckFloat only emits on changed verdicts, so an
         // unchanged config costs one quiet pass. No-op before
         // the event loop starts (startup load: no observers).
+        // This makes loadConfig emit events MID-LOAD: its
+        // non-reentrancy now also depends on every mutation
+        // verb reachable from a bus callback staying deferred
+        // (reload_config's Task, see KiwiCore+TypoGuard).
         eventLoop.reconcileAll()
         retile()
         // Lua-declared tiling is only the base state: the

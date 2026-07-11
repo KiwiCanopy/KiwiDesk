@@ -13,6 +13,10 @@ public final class EventLoop {
     public var onEvent: @MainActor (KiwiEvent) -> Void = { _ in }
 
     /// User float rules from the Lua config (`float_rules`).
+    /// Assigning does NOT resync `detectedFloating`: rules
+    /// change hands inside loadConfig's reset→reassign
+    /// transaction, so any new assignment site outside it must
+    /// follow with `reconcileAll()` or a scoped recheck (#164).
     public var floatRules = FloatRules()
 
     var observers: [pid_t: AXApplicationObserver] = [:]
