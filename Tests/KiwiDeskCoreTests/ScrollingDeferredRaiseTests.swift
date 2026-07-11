@@ -117,15 +117,37 @@ struct ScrollingDeferredRaiseTests {
         core.pendingFocusRaise = WindowID(3)
         // The immediate raise of 2 from the previous step now
         // echoes back mid-pan (its AX focus notification lands).
-        core.lastSelfRaised = WindowID(2)
+        core.outstandingSelfRaises = [WindowID(2)]
         core.eventLoop.onEvent(.windowFocused(WindowID(2)))
         // The stale self-echo neither clears the pending raise nor
         // snaps state focus back to 2.
         #expect(core.pendingFocusRaise == WindowID(3))
         #expect(core.activeSpace?.focused == WindowID(3))
-        #expect(core.lastSelfRaised == nil)
+        #expect(!core.outstandingSelfRaises.contains(WindowID(2)))
         core.tiler.animation.cancelAll()
         #expect(core.activeSpace?.focused == WindowID(3))
+    }
+
+    @Test("A stale echo can't revert a later forward step (#158)")
+    func staleEchoAfterForwardStep() {
+        let core = makeCore()
+        let space = makeScrollingSpace(
+            core,
+            windows: 5,
+            focus: WindowID(3)
+        )
+        guard startDummyPan(core) else { return }
+        // A backward raise to 2 already fired (echo still in
+        // flight), then a forward-immediate raise to 4 overwrote
+        // focus: two self-raises outstanding at once. The single
+        // slot (#152) only remembered the last, so 2's stale echo
+        // was misread as a user click and stole focus back.
+        core.outstandingSelfRaises = [WindowID(2), WindowID(4)]
+        core.state.workspaces.focus(WindowID(4), in: space)
+        core.eventLoop.onEvent(.windowFocused(WindowID(2)))
+        #expect(core.activeSpace?.focused == WindowID(4))
+        #expect(!core.outstandingSelfRaises.contains(WindowID(2)))
+        core.tiler.animation.cancelAll()
     }
 
     @Test("A real echo (not self-raised) still supersedes (#152)")
@@ -139,11 +161,11 @@ struct ScrollingDeferredRaiseTests {
         guard startDummyPan(core) else { return }
         core.state.workspaces.focus(WindowID(3), in: space)
         core.pendingFocusRaise = WindowID(3)
-        // No self-raise memo: a genuine user click on 2 mid-pan
-        // must still supersede the pending raise (the
+        // No self-raise outstanding: a genuine user click on 2
+        // mid-pan must still supersede the pending raise (the
         // misclassification guard — never suppress a real focus
         // change the user asked for).
-        core.lastSelfRaised = nil
+        core.outstandingSelfRaises = []
         core.eventLoop.onEvent(.windowFocused(WindowID(2)))
         #expect(core.pendingFocusRaise == nil)
         core.tiler.animation.cancelAll()
