@@ -3,6 +3,13 @@
 Binding rules for human developers and AI agents working on this
 repository. Read this file before modifying any code.
 
+This file is the canonical source. Claude Code loads a
+caveman-compressed brief generated from it
+(`.claude/AGENTS.brief.md`, built by
+`scripts/build-agent-brief.sh`) to save per-session context;
+regenerate that brief whenever you edit this file. Other agents
+(Cursor, Codex) and humans read this file directly.
+
 ---
 
 ## 1. Project Overview
@@ -177,6 +184,18 @@ no trailing period. Body (optional) explains the why, wrapped at
 - Install hooks once per clone: `./scripts/install-hooks.sh`.
 - Fetch and install workspace subagents and skills:
   `./scripts/install-subagents.sh`.
+- (Optional, per-developer) install the `caveman` skill to
+  compress agent output — not a build dependency; needs Node
+  `>= 18` (the installer checks):
+  `npx -y github:JuliusBrussee/caveman --non-interactive`.
+  `--non-interactive` avoids a hang when piped; append flags to
+  scope it, e.g. `--only claude`, `--minimal`, `--uninstall`.
+- Regenerate the compressed agent brief after editing this file:
+  `./scripts/build-agent-brief.sh` (needs caveman + a `claude`
+  CLI or `ANTHROPIC_API_KEY`). `scripts/lint.sh` runs
+  `scripts/check-agent-brief.sh`, which only warns (never blocks)
+  if the brief is stale — so editing this file needs no caveman
+  install; the brief just drifts until someone rebuilds it.
 
 ### Subagent delegation (AI agents)
 

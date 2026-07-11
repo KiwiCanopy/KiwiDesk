@@ -69,6 +69,7 @@ plan/
 .claude/*
 !.claude/skills/
 !.claude/rules/
+!.claude/AGENTS.brief.md
 .agents/skills/
 
 # macOS specific
