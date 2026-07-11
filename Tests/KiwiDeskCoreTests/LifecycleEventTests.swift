@@ -50,22 +50,38 @@ struct LifecycleEventTests {
         #expect(payload["space_id"] != .null)
     }
 
-    @Test("closing fires window_destroyed, not minimized")
+    /// The reason of the first matching event, or nil.
+    private func reason(
+        of event: KiwiNotification,
+        in events: [(KiwiNotification, JSONValue)]
+    ) -> JSONValue? {
+        guard
+            let (_, data) = events.first(where: {
+                $0.0 == event
+            }),
+            case .object(let payload) = data
+        else { return nil }
+        return payload["reason"]
+    }
+
+    @Test("closing fires window_destroyed reason closed")
     func destroyed() {
         let core = makeCore()
         core.eventLoop.onEvent(.windowCreated(window(7)))
-        var events: [KiwiNotification] = []
-        core.bus.addSink { event, _ in
-            events.append(event)
+        var events: [(KiwiNotification, JSONValue)] = []
+        core.bus.addSink { event, data in
+            events.append((event, data))
         }
         core.eventLoop.onEvent(
             .windowDestroyed(WindowID(7), wasMinimized: false)
         )
-        #expect(events.contains(.windowDestroyed))
-        #expect(!events.contains(.windowMinimized))
+        #expect(
+            reason(of: .windowDestroyed, in: events)
+                == .string("closed")
+        )
     }
 
-    @Test("minimizing fires window_minimized, not destroyed")
+    @Test("minimizing fires window_destroyed reason minimized")
     func minimized() {
         let core = makeCore()
         core.eventLoop.onEvent(.windowCreated(window(9)))
@@ -76,19 +92,72 @@ struct LifecycleEventTests {
         core.eventLoop.onEvent(
             .windowDestroyed(WindowID(9), wasMinimized: true)
         )
-        let names = events.map(\.0)
-        #expect(names.contains(.windowMinimized))
-        #expect(!names.contains(.windowDestroyed))
-        guard
-            let (_, data) = events.first(where: {
-                $0.0 == .windowMinimized
-            }),
-            case .object(let payload) = data
-        else {
-            Issue.record("expected minimized payload")
-            return
+        #expect(
+            reason(of: .windowDestroyed, in: events)
+                == .string("minimized")
+        )
+    }
+
+    @Test("a destroy right after a native switch is vanished")
+    func vanished() {
+        let core = makeCore()
+        core.eventLoop.onEvent(.windowCreated(window(4)))
+        core.lastNativeSwitch = Date()
+        var events: [(KiwiNotification, JSONValue)] = []
+        core.bus.addSink { event, data in
+            events.append((event, data))
         }
-        #expect(payload["window_id"] == .number(9))
+        core.eventLoop.onEvent(
+            .windowDestroyed(WindowID(4), wasMinimized: false)
+        )
+        #expect(
+            reason(of: .windowDestroyed, in: events)
+                == .string("vanished")
+        )
+    }
+
+    @Test("deminiaturize fires window_created reason restored")
+    func restored() {
+        let core = makeCore()
+        core.eventLoop.onEvent(.windowCreated(window(5)))
+        core.eventLoop.onEvent(
+            .windowDestroyed(WindowID(5), wasMinimized: true)
+        )
+        var events: [(KiwiNotification, JSONValue)] = []
+        core.bus.addSink { event, data in
+            events.append((event, data))
+        }
+        core.eventLoop.onEvent(.windowCreated(window(5)))
+        #expect(
+            reason(of: .windowCreated, in: events)
+                == .string("restored")
+        )
+    }
+
+    @Test("a remembered window returns, a fresh one is new")
+    func returnedAndNew() {
+        let core = makeCore()
+        core.eventLoop.onEvent(.windowCreated(window(6)))
+        // Native-switch vanish: the space stays remembered.
+        core.lastNativeSwitch = Date()
+        core.eventLoop.onEvent(
+            .windowDestroyed(WindowID(6), wasMinimized: false)
+        )
+        var events: [(KiwiNotification, JSONValue)] = []
+        core.bus.addSink { event, data in
+            events.append((event, data))
+        }
+        core.eventLoop.onEvent(.windowCreated(window(6)))
+        #expect(
+            reason(of: .windowCreated, in: events)
+                == .string("returned")
+        )
+        events.removeAll()
+        core.eventLoop.onEvent(.windowCreated(window(60)))
+        #expect(
+            reason(of: .windowCreated, in: events)
+                == .string("new")
+        )
     }
 
     @Test("gone-events report the window's former space")

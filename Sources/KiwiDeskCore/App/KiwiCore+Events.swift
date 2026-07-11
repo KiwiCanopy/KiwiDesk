@@ -35,6 +35,21 @@ extension KiwiCore {
         if case .windowTitleChanged(let id, _) = event {
             floatBeforeTitle = state.windows[id]?.isFloating
         }
+        // Lifecycle reason (#40), classified pre-apply: the
+        // remembered space (returned) is consulted before
+        // state re-files the window, and the minimized set
+        // (restored) is consumed exactly once.
+        var appearReason: WindowAppearReason? = nil
+        if case .windowCreated(let window) = event {
+            let deminiaturized =
+                minimizedWindows.remove(window.id) != nil
+            let remembered =
+                state.rememberedSpace(of: window.id) != nil
+            appearReason = WindowAppearReason.classify(
+                wasMinimized: deminiaturized,
+                hadRememberedSpace: remembered
+            )
+        }
         state.spawnPlacements = [
             .bsp: tiler.settings.bsp.newWindowPlacement,
             .stack: tiler.settings.stack.newWindowPlacement,
@@ -99,7 +114,10 @@ extension KiwiCore {
             // of a hidden window (see above).
             deferred.cancel(.focusFollow)
             newlyCreatedWindow = window.id
-            emitWindowCreated(window)
+            emitWindowCreated(
+                window,
+                reason: appearReason ?? .new
+            )
         case .windowMoved(let id, let frame):
             drag.windowMoved(id, frame: frame)
         case .windowResized(let id, let frame):
@@ -124,19 +142,25 @@ extension KiwiCore {
             outstandingSelfRaises.remove(id)
             drag.cancel(id)
             dragOverlay.hideAll()
-            if wasMinimized {
-                emitWindowMinimized(
-                    id,
-                    app: goneApp,
-                    space: goneSpace
-                )
-            } else {
-                emitWindowDestroyed(
-                    id,
-                    app: goneApp,
-                    space: goneSpace
-                )
+            // The switch timestamp is set by the
+            // .nativeSpaceChanged event, which the event loop
+            // emits BEFORE the reconcile burst on the same
+            // run-loop turn — so vanish classification is
+            // ordering, not a race (#40).
+            let reason = WindowGoneReason.classify(
+                wasMinimized: wasMinimized,
+                sinceNativeSwitch: Date()
+                    .timeIntervalSince(lastNativeSwitch)
+            )
+            if reason == .minimized {
+                minimizedWindows.insert(id)
             }
+            emitWindowDestroyed(
+                id,
+                app: goneApp,
+                space: goneSpace,
+                reason: reason
+            )
         case .windowTitleChanged(let id, _):
             if let before = floatBeforeTitle,
                 state.windows[id]?.isFloating != before
