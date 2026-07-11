@@ -22,6 +22,7 @@ extension TilingSettings {
         move(&scrolling.override, from, to)
         move(&grid.override, from, to)
         move(&monocle.override, from, to)
+        move(&track.override, from, to)
     }
 
     /// Drops `space`'s entry from every per-space map — the
@@ -36,6 +37,7 @@ extension TilingSettings {
         scrolling.override[space] = nil
         grid.override[space] = nil
         monocle.override[space] = nil
+        track.override[space] = nil
     }
 
     private func move<T>(

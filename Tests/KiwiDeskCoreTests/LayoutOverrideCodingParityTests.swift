@@ -76,7 +76,25 @@ struct LayoutOverrideCodingParityTests {
         )
     }
 
+    @Test("TrackOverride round-trips and resolves every field")
+    func track() throws {
+        let over = Self.track()
+        try expectRoundTrips(over, from: TrackOverride())
+        expectResolvesEveryField(
+            resolved: over.resolved(onto: TrackParams()),
+            base: TrackParams(),
+            covered: fieldNames(TrackOverride())
+        )
+    }
+
     // MARK: Exhaustive fixtures (every field set, ≠ its default)
+
+    private static func track() -> TrackOverride {
+        var over = TrackOverride()
+        over.axis = .horizontal
+        over.count = 3
+        return over
+    }
 
     private static func bsp() -> BspOverride {
         var over = BspOverride()

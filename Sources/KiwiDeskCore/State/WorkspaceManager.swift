@@ -60,6 +60,16 @@ public struct WorkspaceManager: Sendable {
         guard spaces[id]?.mode != mode else { return }
         spaces[id]?.mode = mode
         spaces[id]?.scrollOffset = nil
+        // Track boundaries follow the same rule (#128): a
+        // fresh track stint never resumes markers minted for a
+        // different stint. Entering track seeds every window
+        // as its own track (the dynamic default; a positive
+        // cap merges the surplus at read time).
+        spaces[id]?.trackWeights = [:]
+        let seed =
+            mode == .track
+            ? Set(spaces[id]?.windows ?? []) : Set()
+        spaces[id]?.trackBreaks = seed
     }
 
     /// Reorders the iteration order to follow `desired` for
@@ -130,6 +140,28 @@ public struct WorkspaceManager: Sendable {
         remove(window)
         ensureSpace(id)
         spaces[id]?.insert(window, placement: placement)
+    }
+
+    /// Adds a window to a track-mode space per the track
+    /// layout's `new_window` rule (#128), removing it from its
+    /// old space. The track twin of `add(_:to:placement:)`;
+    /// `isTiled` supplies the float knowledge the space does
+    /// not hold.
+    public mutating func add(
+        _ window: WindowID,
+        to id: SpaceID,
+        trackRule: TrackParams.NewWindowTrack,
+        cap: Int,
+        isTiled: (WindowID) -> Bool
+    ) {
+        remove(window)
+        ensureSpace(id)
+        spaces[id]?.insertIntoTrack(
+            window,
+            rule: trackRule,
+            cap: cap,
+            isTiled: isTiled
+        )
     }
 
     /// Removes a window from whatever space contains it.

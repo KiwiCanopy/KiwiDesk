@@ -51,6 +51,13 @@ extension TilingSettings {
             .resolved(onto: monocle)
     }
 
+    /// The track params effective for `space` (#128); see
+    /// `resolvedScrolling`.
+    public func resolvedTrack(for space: SpaceID) -> TrackParams {
+        (track.override[space] ?? TrackOverride())
+            .resolved(onto: track)
+    }
+
     // MARK: - Per-space writes (interactive resize)
     //
     // Only the interactive-resize path routes here — Lua `set_*`
@@ -120,11 +127,14 @@ extension TilingSettings {
             minWindowSize: minWindowSize,
             stackWeights: space.stackWeights,
             scrollOffset: space.scrollOffset,
+            trackBreaks: space.trackBreaks,
+            trackWeights: space.trackWeights,
             bsp: resolvedBsp(for: space.id),
             stack: resolvedStack(for: space.id),
             scrolling: resolvedScrolling(for: space.id),
             grid: resolvedGrid(for: space.id),
             monocle: resolvedMonocle(for: space.id),
+            track: resolvedTrack(for: space.id),
             appBarStyle: appBarStyle
         )
     }

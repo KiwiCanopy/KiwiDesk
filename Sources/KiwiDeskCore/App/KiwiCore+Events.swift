@@ -21,6 +21,7 @@ extension KiwiCore {
             .grid: tiler.settings.grid.newWindowPlacement,
         ]
         state.spawnOverride = tiler.settings.placementOverride
+        state.trackParams = tiler.settings.track
         let effects = state.apply(event)
         var newlyCreatedWindow: WindowID? = nil
         switch event {

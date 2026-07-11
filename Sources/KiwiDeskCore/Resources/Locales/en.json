@@ -184,6 +184,7 @@
   "layout.monocle.name": "Monocle",
   "layout.scrolling.name": "Scrolling",
   "layout.stack.name": "Stack",
+  "layout.track.name": "Track",
   "layout_defaults.min_window_size": "Minimum window size",
   "layout_params.alternating": "Alternating",
   "layout_params.cascade_all": "Cascade all",
@@ -409,5 +410,9 @@
   "spaces.fallback_badge": "Fallback",
   "spaces.fallback_badge.help": "Windows from a removed space land here when you switch profiles.",
   "spaces.fallback_caption": "When you switch profiles, windows from a space the new profile doesn't have land in its fallback space (the first space when none is chosen).",
-  "spaces.title": "Spaces"
+  "spaces.title": "Spaces",
+  "track.axis": "Axis",
+  "track.axis.horizontal": "Horizontal (rows)",
+  "track.axis.vertical": "Vertical (columns)",
+  "track.count": "Track limit"
 }

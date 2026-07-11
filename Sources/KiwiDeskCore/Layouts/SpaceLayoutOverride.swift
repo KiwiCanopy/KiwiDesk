@@ -19,3 +19,4 @@ extension BspOverride: SpaceLayoutOverride {}
 extension StackOverride: SpaceLayoutOverride {}
 extension GridOverride: SpaceLayoutOverride {}
 extension MonocleOverride: SpaceLayoutOverride {}
+extension TrackOverride: SpaceLayoutOverride {}

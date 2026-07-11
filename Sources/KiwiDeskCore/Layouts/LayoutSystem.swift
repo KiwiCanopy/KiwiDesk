@@ -90,12 +90,20 @@ public struct LayoutContext: Sendable {
     /// tile (#66); `nil` before the space has ever scrolled.
     /// Snapshot of `Space.scrollOffset`.
     public var scrollOffset: CGFloat?
+    /// The track layout's break markers (#128): a window in the
+    /// set starts a new track (`TrackLayout.counts`). Snapshot
+    /// of `Space.trackBreaks`.
+    public var trackBreaks: Set<WindowID>
+    /// Per-track size weight, keyed by the track's head window
+    /// (#128). Snapshot of `Space.trackWeights`.
+    public var trackWeights: [WindowID: Double]
 
     public var bsp: BspParams
     public var stack: StackParams
     public var scrolling: ScrollingParams
     public var grid: GridParams
     public var monocle: MonocleParams
+    public var track: TrackParams
     /// The indicator bar's global look; a layout resolves its
     /// own bar against this to carve the strip.
     public var appBarStyle: AppBarStyle
@@ -107,11 +115,14 @@ public struct LayoutContext: Sendable {
         minWindowSize: CGFloat = 300,
         stackWeights: [WindowID: Double] = [:],
         scrollOffset: CGFloat? = nil,
+        trackBreaks: Set<WindowID> = [],
+        trackWeights: [WindowID: Double] = [:],
         bsp: BspParams = BspParams(),
         stack: StackParams = StackParams(),
         scrolling: ScrollingParams = ScrollingParams(),
         grid: GridParams = GridParams(),
         monocle: MonocleParams = MonocleParams(),
+        track: TrackParams = TrackParams(),
         appBarStyle: AppBarStyle = AppBarStyle()
     ) {
         self.bounds = bounds
@@ -120,11 +131,14 @@ public struct LayoutContext: Sendable {
         self.minWindowSize = minWindowSize
         self.stackWeights = stackWeights
         self.scrollOffset = scrollOffset
+        self.trackBreaks = trackBreaks
+        self.trackWeights = trackWeights
         self.bsp = bsp
         self.stack = stack
         self.scrolling = scrolling
         self.grid = grid
         self.monocle = monocle
+        self.track = track
         self.appBarStyle = appBarStyle
     }
 

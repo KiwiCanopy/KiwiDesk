@@ -19,6 +19,8 @@ extension LayoutMode {
             return "square.grid.3x3"
         case .monocle:
             return "rectangle.inset.filled"
+        case .track:
+            return "rectangle.split.3x1"
         case .floating:
             return "rectangle.on.rectangle"
         }
@@ -33,6 +35,8 @@ extension LayoutMode {
         case .grid: return L("layout.grid.name", "Grid")
         case .monocle:
             return L("layout.monocle.name", "Monocle")
+        case .track:
+            return L("layout.track.name", "Track")
         case .floating:
             return L("layout.floating.name", "Floating")
         }
