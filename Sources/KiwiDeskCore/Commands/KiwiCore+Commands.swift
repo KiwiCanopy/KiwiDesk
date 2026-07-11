@@ -232,6 +232,11 @@ extension KiwiCore {
     /// re-applying the event loop's cached verdict. Without a
     /// cached verdict (untracked window) the current state
     /// stands until the next detection pass.
+    ///
+    /// Feeds the fold directly instead of `KiwiCore.handle`
+    /// (like `setFocusedFloating`): commands own their retile.
+    /// If `handle` ever grows a `windowFloatChanged` side
+    /// effect (bus emit), mirror it here.
     private func setFocusedAuto() -> CommandResponse {
         guard let focused = activeSpace?.focused else {
             return .fail("no focused window")

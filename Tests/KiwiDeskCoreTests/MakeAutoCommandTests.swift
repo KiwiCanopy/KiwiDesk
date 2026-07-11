@@ -68,6 +68,20 @@ struct MakeAutoCommandTests {
         )
     }
 
+    @Test("make_auto re-applies the cached detection verdict")
+    func reappliesCachedVerdict() {
+        let core = makeCore()
+        addWindow(core, 1)
+        #expect(core.execute("make_floating").isSuccess)
+        // Seed what the event loop would have cached at track
+        // time: detection said "tiled".
+        core.eventLoop.detectedFloating[WindowID(1)] = false
+        #expect(core.execute("make_auto").isSuccess)
+        #expect(
+            core.state.windows[WindowID(1)]?.isFloating == false
+        )
+    }
+
     @Test("make_auto without a focused window fails")
     func failsWithoutFocus() {
         let core = makeCore()

@@ -95,6 +95,16 @@ extension KiwiCore {
         } else {
             applyConfigGlobals(from: fresh)
         }
+        // The float rules just changed hands: re-sync every
+        // app so `detectedFloating` reflects the NEW rules.
+        // Without this, verdicts stay stale until an unrelated
+        // AX event — user-visible since `make_auto` (#164)
+        // re-applies the cached verdict, and a rule edit +
+        // reload + make_auto would restore the pre-edit state.
+        // recheckFloat only emits on changed verdicts, so an
+        // unchanged config costs one quiet pass. No-op before
+        // the event loop starts (startup load: no observers).
+        eventLoop.reconcileAll()
         retile()
         // Lua-declared tiling is only the base state: the
         // active profile (or transient Standard) owns tiling
