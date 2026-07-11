@@ -68,36 +68,38 @@ struct ScrollingDeferredRaiseTests {
     @Test("Key-repeat keeps one pending raise: the last target")
     func keyRepeatSupersedes() {
         let core = makeCore()
-        makeScrollingSpace(core, windows: 5, focus: WindowID(1))
+        makeScrollingSpace(core, windows: 5, focus: WindowID(5))
         guard startDummyPan(core) else { return }
+        // Backward (left) is the deferring direction: each step
+        // toward an earlier slot arms a raise.
         for _ in 1...3 {
             #expect(
-                core.execute("focus", args: [.string("right")])
+                core.execute("focus", args: [.string("left")])
                     .isSuccess
             )
         }
         // State focus moved each step; only one raise is
         // pending, for the last target.
-        #expect(core.activeSpace?.focused == WindowID(4))
-        #expect(core.pendingFocusRaise == WindowID(4))
+        #expect(core.activeSpace?.focused == WindowID(2))
+        #expect(core.pendingFocusRaise == WindowID(2))
         core.tiler.animation.cancelAll()
         #expect(core.pendingFocusRaise == nil)
-        #expect(core.activeSpace?.focused == WindowID(4))
+        #expect(core.activeSpace?.focused == WindowID(2))
     }
 
     @Test("A real focus echo mid-pan cancels the pending raise")
     func echoCancelsPendingRaise() {
         let core = makeCore()
-        makeScrollingSpace(core, windows: 5, focus: WindowID(1))
+        makeScrollingSpace(core, windows: 5, focus: WindowID(5))
         guard startDummyPan(core) else { return }
-        core.execute("focus", args: [.string("right")])
-        #expect(core.pendingFocusRaise == WindowID(2))
-        // The user clicks window 5 mid-pan: the OS raised it
+        core.execute("focus", args: [.string("left")])
+        #expect(core.pendingFocusRaise == WindowID(4))
+        // The user clicks window 1 mid-pan: the OS raised it
         // itself; a stale raise must not steal focus back.
-        core.eventLoop.onEvent(.windowFocused(WindowID(5)))
+        core.eventLoop.onEvent(.windowFocused(WindowID(1)))
         #expect(core.pendingFocusRaise == nil)
         core.tiler.animation.cancelAll()
-        #expect(core.activeSpace?.focused == WindowID(5))
+        #expect(core.activeSpace?.focused == WindowID(1))
     }
 
     @Test("A stale self-echo keeps a newer pending raise (#152)")
@@ -148,27 +150,44 @@ struct ScrollingDeferredRaiseTests {
         #expect(core.activeSpace?.focused == WindowID(2))
     }
 
+    @Test("A forward (down/right) focus raises immediately")
+    func forwardFocusRaisesImmediately() {
+        let core = makeCore()
+        makeScrollingSpace(core, windows: 5, focus: WindowID(1))
+        guard startDummyPan(core) else { return }
+        // Stepping toward a later slot lays the target on top at
+        // once (#158): only backward (up/left) toward the pinned
+        // row defers. Nothing stays pending even mid-pan.
+        #expect(
+            core.execute("focus", args: [.string("right")])
+                .isSuccess
+        )
+        #expect(core.pendingFocusRaise == nil)
+        #expect(core.activeSpace?.focused == WindowID(2))
+        core.tiler.animation.cancelAll()
+    }
+
     @Test("A non-animated focus move raises immediately")
     func nonAnimatedRaisesImmediately() {
         let core = makeCore()
         core.tiler.settings.animations.onScrolling = false
-        makeScrollingSpace(core, windows: 5, focus: WindowID(1))
+        makeScrollingSpace(core, windows: 5, focus: WindowID(5))
         #expect(
-            core.execute("focus", args: [.string("right")])
+            core.execute("focus", args: [.string("left")])
                 .isSuccess
         )
         // No pan to wait on: nothing stays pending after the
         // command returns.
         #expect(core.pendingFocusRaise == nil)
-        #expect(core.activeSpace?.focused == WindowID(2))
+        #expect(core.activeSpace?.focused == WindowID(4))
     }
 
     @Test("The deferred raise's own echo re-triggers nothing")
     func ownEchoIsInert() {
         let core = makeCore()
-        makeScrollingSpace(core, windows: 5, focus: WindowID(1))
+        makeScrollingSpace(core, windows: 5, focus: WindowID(5))
         guard startDummyPan(core) else { return }
-        core.execute("focus", args: [.string("right")])
+        core.execute("focus", args: [.string("left")])
         core.tiler.animation.cancelAll()
         #expect(core.pendingFocusRaise == nil)
         var focusEmits = 0
@@ -185,17 +204,17 @@ struct ScrollingDeferredRaiseTests {
         }
         // The raise's AX echo lands after the pan: it must not
         // schedule another raise or start a new pan.
-        core.eventLoop.onEvent(.windowFocused(WindowID(2)))
+        core.eventLoop.onEvent(.windowFocused(WindowID(4)))
         #expect(core.pendingFocusRaise == nil)
         #expect(core.tiler.animation.activeCount == 0)
-        #expect(core.activeSpace?.focused == WindowID(2))
+        #expect(core.activeSpace?.focused == WindowID(4))
         #expect(focusEmits == 1)
     }
 
     @Test("Animated but pan-free focus raises immediately")
     func visibleTargetRaisesImmediately() {
         let core = makeCore()
-        makeScrollingSpace(core, windows: 5, focus: WindowID(1))
+        makeScrollingSpace(core, windows: 5, focus: WindowID(5))
         guard NSScreen.main != nil else { return }
         // Narrow slots so the neighbor is fully visible (the
         // 1100 pt auto column would force a pan on any screen).
@@ -209,15 +228,33 @@ struct ScrollingDeferredRaiseTests {
         ) {
             core.state.apply(.windowMoved(id, frame))
         }
+        // Backward (left) is the deferring direction, but the
+        // target is already visible — no pan, so the raise must
+        // fire immediately rather than stay pending.
         #expect(
-            core.execute("focus", args: [.string("right")])
+            core.execute("focus", args: [.string("left")])
                 .isSuccess
         )
-        // Animations are ON but nothing animates — the raise
-        // must not stay pending until some later settle.
         #expect(core.tiler.animation.activeCount == 0)
         #expect(core.pendingFocusRaise == nil)
-        #expect(core.activeSpace?.focused == WindowID(2))
+        #expect(core.activeSpace?.focused == WindowID(4))
+    }
+
+    @Test("Closing the focused window focuses the neighbor")
+    func closeFocusedFocusesNeighbor() {
+        let core = makeCore()
+        makeScrollingSpace(core, windows: 5, focus: WindowID(3))
+        guard startDummyPan(core) else { return }
+        // Close the focused middle window: focus lands on the
+        // window that slid into its slot (#158), not `windows.last`
+        // — no yank to the far end of the row — and the handoff
+        // raises immediately (previous == target), nothing pends.
+        core.eventLoop.onEvent(
+            .windowDestroyed(WindowID(3), wasMinimized: false)
+        )
+        #expect(core.activeSpace?.focused == WindowID(4))
+        #expect(core.pendingFocusRaise == nil)
+        core.tiler.animation.cancelAll()
     }
 
     @Test("Fire-time re-validation drops a stale target")

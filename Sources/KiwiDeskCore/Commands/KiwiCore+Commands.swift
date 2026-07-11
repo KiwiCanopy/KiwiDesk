@@ -99,15 +99,21 @@ extension KiwiCore {
         _ id: WindowID,
         refocusRetile: Bool = true
     ) {
+        let previousFocused = activeSpace?.focused
         let space = state.workspaces.space(of: id)
         if let space {
             state.workspaces.focus(id, in: space)
         }
         // Scrolling defers the raise until the pan settles
-        // (#143): raising first pops a top-pinned row over
-        // the whole screen before the slide even starts.
-        // State focus stays immediate — the layout needs it
-        // to compute the pan. Every other path (monocle,
+        // (#143), but only when stepping *backward* toward the
+        // row pinned behind the leading edge (up/left): raising
+        // it first pops that pinned row over the whole screen
+        // before the slide even starts. Stepping forward
+        // (down/right) — and the neighbor handoff after a close —
+        // raises immediately, so the newly focused window lays on
+        // top as it slides in instead of waiting out the pan.
+        // State focus stays immediate either way: the layout
+        // needs it to compute the pan. Every other path (monocle,
         // static layouts, space switches, cross-space focus)
         // keeps raise-first: there the raise IS the visible
         // focus change.
@@ -115,6 +121,10 @@ extension KiwiCore {
             refocusRetile
             && activeSpace?.mode.defersFocusRaise == true
             && space == state.workspaces.activeSpace
+            && scrollFocusStepsBackward(
+                to: id,
+                from: previousFocused
+            )
         if !defersRaise {
             raiseWindow(id)
         }
@@ -144,6 +154,29 @@ extension KiwiCore {
                 runPendingFocusRaise()
             }
         }
+    }
+
+    /// Whether a scrolling focus move steps to an earlier slot
+    /// than the previously focused window — the row pinned behind
+    /// the leading edge. Only that direction defers the raise
+    /// (#143); stepping forward, a first focus, and the
+    /// close-handoff (`previous == target`) all raise at once.
+    /// Compares tiled array indices: array order is scroll order,
+    /// so a lower index is up/left along the resolved axis.
+    private func scrollFocusStepsBackward(
+        to target: WindowID,
+        from previous: WindowID?
+    ) -> Bool {
+        guard let previous, previous != target,
+            let space = activeSpace
+        else { return false }
+        let tiled = space.windows.filter {
+            state.windows[$0]?.isFloating == false
+        }
+        guard let targetIndex = tiled.firstIndex(of: target),
+            let previousIndex = tiled.firstIndex(of: previous)
+        else { return false }
+        return targetIndex < previousIndex
     }
 
     /// Whether a focus-driven re-layout animates. Scrolling's

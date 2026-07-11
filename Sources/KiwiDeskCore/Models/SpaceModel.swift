@@ -239,13 +239,23 @@ public struct Space: Sendable, Equatable {
         }
     }
 
-    /// Removes a window; clears focus if it was focused and
-    /// prunes its stack weight (#67).
+    /// Removes a window; hands focus to the spatial neighbor if
+    /// it was focused, and prunes its stack weight (#67).
     public mutating func remove(_ window: WindowID) {
+        let removedIndex = windows.firstIndex(of: window)
         windows.removeAll { $0 == window }
         stackWeights[window] = nil
         if focused == window {
-            focused = windows.last
+            // Fall back to the window that slid into the removed
+            // slot (the neighbor further along the array), or the
+            // new last window when the removed one was at the end.
+            // Not `windows.last` unconditionally — that yanked
+            // focus across the whole scrolling row when a middle
+            // window closed, panning every window to the far end.
+            focused =
+                removedIndex.flatMap {
+                    windows.indices.contains($0) ? windows[$0] : nil
+                } ?? windows.last
         }
     }
 
