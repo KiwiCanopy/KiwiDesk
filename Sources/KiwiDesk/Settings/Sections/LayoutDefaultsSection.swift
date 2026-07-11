@@ -18,6 +18,7 @@ struct LayoutDefaultsSection: View {
                 LayoutParamsEditor(model: model)
                 ScrollGridEditor(model: model)
                 MonocleEditor(model: model)
+                TrackEditor(model: model)
             }
             .padding(16)
         }
