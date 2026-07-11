@@ -65,6 +65,9 @@ struct SettingsCodingTests {
         let scroll = try object(layout["scroll"])
         // Default slot size is `auto`, encoded as 0.
         #expect(scroll["slot_size"] as? Double == 0)
+        // `scroll.set_wrap_focus` → `layout.scroll.wrap_focus`,
+        // off by default (#168).
+        #expect(scroll["wrap_focus"] as? Bool == false)
         let stack = try object(layout["stack"])
         #expect(stack["master_ratio"] as? Double == 0.6)
         // SpaceID-keyed maps encode as objects, not arrays.

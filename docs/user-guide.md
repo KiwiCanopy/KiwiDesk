@@ -239,8 +239,11 @@ Expand each layout type to adjust its defaults:
 - **Scrolling**: orientation (horizontal or vertical), anchor
   (where a freshly revealed column comes to rest — center, left,
   right; once scrolled, the viewport pans minimally to keep the
-  focus visible), and slot size (auto, pixel count, or
-  percentage of available space).
+  focus visible), slot size (auto, pixel count, or percentage of
+  available space), and **Wrap focus** — off by default, so
+  stepping focus past a row end stops there; turn it on to wrap
+  from the last window back to the first (and vice versa). Swap
+  never wraps.
 - **Monocle**: orientation (affects which arrow keys cycle focus
   and where the app bar sits).
 - **Grid**: type (dynamic or rigid), fill empty space (yes/no),

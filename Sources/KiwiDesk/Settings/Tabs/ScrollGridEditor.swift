@@ -96,6 +96,15 @@ struct ScrollGridEditor: View {
                     .newWindowPlacement
             )
             Divider()
+            // Bare behavior toggle (#168), grouped with the
+            // section's other plain switches, apart from the
+            // geometry pickers and the animation pair. Off by
+            // default — see `ScrollingParams.wrapFocus`.
+            Toggle(
+                L("scroll_grid.wrap_focus", "Wrap focus"),
+                isOn: $model.config.settings.scrolling.wrapFocus
+            )
+            Divider()
             // The scrolling-specific animation pair (#68
             // §3.5): the on/off switch and its magnitude sit
             // together, like a layout's App Bar enable sits

@@ -48,6 +48,11 @@ extension KiwiCore {
             }
             tiler.settings.scrolling.newWindowPlacement =
                 placement
+        case "scroll.set_wrap_focus":
+            guard let on = args.first?.boolValue else {
+                return .fail("expected a boolean")
+            }
+            tiler.settings.scrolling.wrapFocus = on
         default:
             return scrollFallback(command, args)
         }

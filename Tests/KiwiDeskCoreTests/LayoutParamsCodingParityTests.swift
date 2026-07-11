@@ -93,6 +93,7 @@ struct LayoutParamsCodingParityTests {
         params.anchor = .left
         params.orientation = .vertical
         params.newWindowPlacement = .first
+        params.wrapFocus = true
         params.appBar.enabled = false
         var over = ScrollingOverride()
         over.anchor = .right

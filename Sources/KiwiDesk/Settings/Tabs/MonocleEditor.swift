@@ -10,7 +10,15 @@ struct MonocleEditor: View {
     var body: some View {
         SettingsSection(
             L("layout.monocle.name", "Monocle"),
-            symbol: LayoutMode.monocle.glyph
+            symbol: LayoutMode.monocle.glyph,
+            // Answers "why no Wrap focus toggle here?" in place —
+            // monocle's cycle always wraps (#168). A static line,
+            // not a disabled Toggle (which would imply a setting
+            // that does not exist).
+            caption: L(
+                "monocle.wrap_caption",
+                "Focus always wraps at the ends in monocle."
+            )
         ) {
             SegmentedPicker(
                 L(

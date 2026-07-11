@@ -217,6 +217,15 @@ public struct ScrollingParams: Sendable, Equatable, Codable,
     /// PaperWM-style default: new columns open next to the
     /// one you are working in.
     public var newWindowPlacement: SpawnPlacement = .afterFocused
+    /// Whether stepping `focus` past a row end wraps to the far
+    /// end (#168). OFF by default: the stop-at-ends default
+    /// matches the physical-strip feel of the layout — the row
+    /// has real ends, so focus stopping there reads as reaching
+    /// the edge, not a dead input. Monocle wraps unconditionally
+    /// (all windows share one frame, so there is no strip to
+    /// end); scrolling makes it opt-in. `swap` never wraps (see
+    /// `scrollingStep`).
+    public var wrapFocus = false
     public var appBar = LayoutAppBar()
     /// Per-space overrides (`layout.scroll.override[space_id]`),
     /// resolved via `TilingSettings.resolvedScrolling(for:)`.
@@ -235,6 +244,7 @@ public struct ScrollingParams: Sendable, Equatable, Codable,
         case anchor
         case orientation
         case newWindowPlacement = "new_window_placement"
+        case wrapFocus = "wrap_focus"
         case appBar = "app_bar"
         case override
     }
@@ -265,6 +275,11 @@ public struct ScrollingParams: Sendable, Equatable, Codable,
                 SpawnPlacement.self,
                 forKey: .newWindowPlacement
             ) ?? .afterFocused
+        wrapFocus =
+            try container.decodeIfPresent(
+                Bool.self,
+                forKey: .wrapFocus
+            ) ?? false
         appBar =
             try container.decodeIfPresent(
                 LayoutAppBar.self,
@@ -288,6 +303,7 @@ public struct ScrollingParams: Sendable, Equatable, Codable,
             newWindowPlacement,
             forKey: .newWindowPlacement
         )
+        try container.encode(wrapFocus, forKey: .wrapFocus)
         try container.encode(appBar, forKey: .appBar)
         if !override.isEmpty {
             try container.encode(override, forKey: .override)

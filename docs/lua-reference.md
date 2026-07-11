@@ -56,8 +56,10 @@ that direction, following the active layout's geometry. In
 monocle and scrolling layouts, directions on the layout's
 orientation axis follow the window order instead: monocle
 cycles (wrapping at the ends), scrolling steps to the
-previous/next window and stops at the row's ends. Cross-axis
-directions keep the geometric search.
+previous/next window and stops at the row's ends — unless
+`scroll.set_wrap_focus(true)` is set, which wraps scrolling
+focus at the ends too. Cross-axis directions keep the
+geometric search.
 
 **Example:**
 
@@ -555,6 +557,23 @@ scroll.set_orientation("horizontal")
 
 ```lua
 scroll.set_new_window_placement("after_focused")
+```
+
+### scroll.set_wrap_focus
+
+**Expects:** a boolean.
+
+**Does:** when `true`, stepping `focus` past either end of the
+row wraps to the far end (right off the last window lands on the
+first, and vice versa). Default is `false` — focus stops at the
+ends, matching the physical-strip feel of the layout. Applies to
+`focus` only; `swap` never wraps (it would teleport a window
+across the whole row). Monocle always wraps and has no toggle.
+
+**Example:**
+
+```lua
+scroll.set_wrap_focus(true)
 ```
 
 ### scroll.set_slot_size_override
