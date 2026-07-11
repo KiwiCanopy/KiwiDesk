@@ -60,8 +60,9 @@ extension KiwiCore {
                 state.workspaces.space(of: id)
                     == state.workspaces.activeSpace
             {
-                if let space = state.workspaces.space(of: intended)
-                {
+                if let space = state.workspaces.space(
+                    of: intended
+                ) {
                     state.workspaces.focus(intended, in: space)
                 }
                 return
