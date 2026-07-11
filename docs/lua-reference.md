@@ -1398,8 +1398,9 @@ app_rules = {
 **Does:** marks the focused window as floating. It is no longer
 tiled and stays visible across all virtual spaces. The override
 survives the window closing and reopening (matched by app name
-and title) and applies only to that window — use `float_rules`
-to float every window of an app.
+and title; a window that closes while untitled has no identity
+to match and loses it) and applies only to that window — use
+`float_rules` to float every window of an app.
 
 **Example:**
 
