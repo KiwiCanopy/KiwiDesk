@@ -302,6 +302,17 @@ public final class EventLoop {
                     AXHelper.title(of: element)
                 )
             )
+            // Titles load lazily (Electron/WebKit, and any app
+            // mid-launch): a window tracked before its title
+            // arrives misses `App:Title` float rules forever
+            // without a recheck (#160). Gated on a titled rule
+            // for this app so ordinary title churn (browsers,
+            // terminals) never pays the window-server lookup.
+            if elements[pid]?[id] != nil,
+                floatRules.hasTitleRule(app: appName)
+            {
+                recheckFloat(element, id: id, appName: appName)
+            }
         default:
             break
         }

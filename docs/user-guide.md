@@ -323,6 +323,11 @@ When you drag a tiled window, KiwiDesk shows two overlays:
 - **Drop zone** (the slot under the cursor) — the window this drop
   would swap with.
 
+Floating windows show neither overlay: they have no tile slot to
+preview, and dropping one over a tiled slot does nothing. Use
+*make tiled* to return a window to the grid first (see
+[design decisions](design-decisions.md) for why).
+
 Toggle each visual on/off and customize:
 
 - **Border**: show/hide, color, thickness (pt), and alignment

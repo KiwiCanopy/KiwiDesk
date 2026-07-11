@@ -1355,9 +1355,11 @@ boundary crossing re-stacks the zone.
 every window of the app; "App:Title" matches when the title
 contains the fragment. Dialogs, sheets, and picture-in-picture
 windows float automatically. Detection is re-checked as windows
-come and go, so a window that reported wrong metadata while
-launching corrects itself. A manual `make_floating` override is
-never reverted by these re-checks.
+come and go — and when a title changes, so an "App:Title" rule
+catches windows whose titles load late (Electron/WebKit apps) or
+change into a match later. A window that reported wrong metadata
+while launching corrects itself the same way. A manual
+`make_floating` override is never reverted by these re-checks.
 
 Panels and overlays that live above the normal window layer also
 float automatically, no rule needed.
@@ -1394,7 +1396,11 @@ app_rules = {
 **Expects:** nothing.
 
 **Does:** marks the focused window as floating. It is no longer
-tiled and stays visible across all virtual spaces.
+tiled and stays visible across all virtual spaces. The override
+survives the window closing and reopening (matched by app name
+and title; a window that closes while untitled has no identity
+to match and loses it) and applies only to that window — use
+`float_rules` to float every window of an app.
 
 **Example:**
 
@@ -1407,7 +1413,8 @@ KiwiDesk.make_floating()
 **Expects:** nothing.
 
 **Does:** marks the focused window as tiled. It returns to its
-space's tiling layout.
+space's tiling layout. Like `make_floating`, the override
+survives the window closing and reopening.
 
 **Example:**
 

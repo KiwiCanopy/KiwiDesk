@@ -29,6 +29,13 @@ public struct FloatRules: Sendable, Equatable {
         }
     }
 
+    /// Whether any rule for this app matches on a title
+    /// fragment — the cheap gate before re-running float
+    /// detection on a title change (#160).
+    public func hasTitleRule(app: String) -> Bool {
+        rules.contains { $0.app == app && $0.title != nil }
+    }
+
     public func matches(app: String, title: String) -> Bool {
         rules.contains { rule in
             guard rule.app == app else { return false }
