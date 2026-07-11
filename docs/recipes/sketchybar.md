@@ -40,17 +40,21 @@ any of them to keep sketchybar in sync:
 | `focus_change` | `window_id`, `app` | Focused window changes |
 | `monitor_change` | `monitor_count` | Monitors connect or disconnect |
 | `native_space_change` | `native_space` | The native macOS desktop switches |
-| `window_created` | `window_id`, `app`, `space` | A managed window appears |
-| `window_destroyed` | `window_id`, `app`, `space` | A managed window closes |
-| `window_minimized` | `window_id`, `app`, `space` | A window is minimized |
+| `window_created` | `window_id`, `app`, `space`, `reason` | A managed window appears (`new`/`returned`/`restored`) |
+| `window_destroyed` | `window_id`, `app`, `space`, `reason` | A managed window disappears (`closed`/`minimized`/`vanished`) |
 | `window_moved_to_space` | `window_id`, `app`, `from`, `to` | See caveats |
 
 **Caveats:**
 
-- `window_created` and `window_destroyed` also fire when
-  windows appear or disappear from the accessibility tree
-  (deminiaturizing, native Space switches). Treat the events as
-  "the visible window set changed", not as app lifecycle.
+- `window_created` and `window_destroyed` track the *visible
+  window set*, not app lifecycle — deminiaturizing and native
+  Space switches also fire them. Filter on the `reason`
+  argument to ignore the artifacts (`vanished`/`returned`
+  bursts on every Mission Control round-trip). If you do
+  filter, keep a `native_space_change` handler that re-queries
+  state: a window closed while its desktop was off-screen was
+  already emitted as `vanished` and never gets a corrective
+  `closed`.
 - `space` in Lua callbacks is always a string (the space id).
   A window on an unknown space receives `""` (empty string
   instead of nil, so the argument list doesn't truncate). In
@@ -84,16 +88,25 @@ KiwiDesk.on("native_space_change", function(desktop)
         .. desktop)
 end)
 
--- Window icons stay fresh even when focus doesn't change:
+-- Window icons stay fresh even when focus doesn't change.
+-- Reason-filtered: native-switch bursts (vanished/returned)
+-- spawn no processes; the native_space_change handler above
+-- already refreshes on the round-trip.
 for _, event in ipairs({
-    "window_created", "window_destroyed", "window_minimized",
-    "window_moved_to_space",
+    "window_created", "window_destroyed",
 }) do
-    KiwiDesk.on(event, function()
+    KiwiDesk.on(event, function(id, app, space, reason)
+        if reason == "vanished" or reason == "returned" then
+            return
+        end
         KiwiDesk.exec(
             "sketchybar --trigger kiwi_space_change")
     end)
 end
+KiwiDesk.on("window_moved_to_space", function()
+    KiwiDesk.exec(
+        "sketchybar --trigger kiwi_space_change")
+end)
 ```
 
 In your `sketchybarrc`:
@@ -382,7 +395,6 @@ for _, event in ipairs({
     "focus_change",
     "window_created",
     "window_destroyed",
-    "window_minimized",
     "window_moved_to_space",
 }) do
     KiwiDesk.on(event, function()

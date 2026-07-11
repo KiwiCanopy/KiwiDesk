@@ -67,8 +67,12 @@ extension KiwiCore {
     // MARK: - Window lifecycle (issue #20)
 
     /// Fires after state placed the new window, so `space`
-    /// reflects app_rules / spawn placement.
-    func emitWindowCreated(_ window: ManagedWindow) {
+    /// reflects app_rules / spawn placement. `reason` is
+    /// classified by handle() before state.apply (#40).
+    func emitWindowCreated(
+        _ window: ManagedWindow,
+        reason: WindowAppearReason
+    ) {
         let space = state.workspaces.space(of: window.id)
         bus.emit(
             .windowCreated,
@@ -77,29 +81,15 @@ extension KiwiCore {
                 "app": .string(window.appName),
                 "space_id": space.map { .string($0.raw) }
                     ?? .null,
+                "reason": .string(reason.rawValue),
             ]),
             luaArgs: [
                 .number(Double(window.id.raw)),
                 .string(window.appName),
                 .string(space?.raw ?? ""),
+                .string(reason.rawValue),
             ]
         )
-    }
-
-    func emitWindowDestroyed(
-        _ id: WindowID,
-        app: String?,
-        space: SpaceID?
-    ) {
-        emitWindowGone(.windowDestroyed, id, app, space)
-    }
-
-    func emitWindowMinimized(
-        _ id: WindowID,
-        app: String?,
-        space: SpaceID?
-    ) {
-        emitWindowGone(.windowMinimized, id, app, space)
     }
 
     /// Fires on an explicit single-window move
@@ -133,25 +123,30 @@ extension KiwiCore {
     /// `app` and `space` are captured by handle() before
     /// state.apply removes the window — the payload reports
     /// the space the window actually disappeared from, not
-    /// whichever space happens to be active.
-    private func emitWindowGone(
-        _ event: KiwiNotification,
+    /// whichever space happens to be active. `reason` tells a
+    /// real close from a minimize or a native-switch vanish
+    /// (#40; the retired `window_minimized` event lives on as
+    /// `reason: minimized`).
+    func emitWindowDestroyed(
         _ id: WindowID,
-        _ app: String?,
-        _ space: SpaceID?
+        app: String?,
+        space: SpaceID?,
+        reason: WindowGoneReason
     ) {
         bus.emit(
-            event,
+            .windowDestroyed,
             data: .object([
                 "window_id": .number(Double(id.raw)),
                 "app": .string(app ?? ""),
                 "space_id": space.map { .string($0.raw) }
                     ?? .null,
+                "reason": .string(reason.rawValue),
             ]),
             luaArgs: [
                 .number(Double(id.raw)),
                 .string(app ?? ""),
                 .string(space?.raw ?? ""),
+                .string(reason.rawValue),
             ]
         )
     }

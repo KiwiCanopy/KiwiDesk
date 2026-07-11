@@ -1699,17 +1699,15 @@ end)
 | `focus_change` | `window_id`, `app` |
 | `monitor_change` | `monitor_count` |
 | `native_space_change` | `native_space` (desktop number) |
-| `window_created` | `window_id`, `app`, `space` |
-| `window_destroyed` | `window_id`, `app`, `space` |
-| `window_minimized` | `window_id`, `app`, `space` |
+| `window_created` | `window_id`, `app`, `space`, `reason` |
+| `window_destroyed` | `window_id`, `app`, `space`, `reason` |
 | `window_moved_to_space` | `window_id`, `app`, `from`, `to` |
 
 The window lifecycle events fire even when focus does not change (a
 background window opening or closing), so status bars stay current
 without polling. `space` is always the space the window lives in —
-for the gone-events, the one it disappeared from, even when that
-space is not active. A minimize fires only `window_minimized`, never
-`window_destroyed`. In the CLI event stream the key is `space_id`
+for `window_destroyed`, the one it disappeared from, even when that
+space is not active. In the CLI event stream the key is `space_id`
 (matching `space_change`) and an unknown space is JSON `null`; the
 Lua callback receives `""` instead, since a positional `nil` would
 truncate the argument list.
@@ -1720,13 +1718,38 @@ current space. Bulk reassignments — profile loads, session restore —
 stay silent. JSON keys: `from_space_id` (null if unknown) and
 `to_space_id`.
 
-Two caveats: `window_created` / `window_destroyed` also fire when
-windows *appear to* come and go — deminiaturizing a window surfaces
-as `window_created`, and switching native macOS Spaces makes every
-managed window on the old desktop vanish from the accessibility tree
-(a burst of `window_destroyed`) and reappear on return (a burst of
-`window_created`). Treat the events as "the visible window set
-changed", not as app lifecycle.
+The lifecycle events track the *visible window set*, not app
+lifecycle — windows also *appear to* come and go: deminiaturizing
+surfaces as `window_created`, and switching native macOS Spaces
+makes every managed window on the old desktop vanish from the
+accessibility tree and reappear on return. The `reason` argument
+says which kind of change fired:
+
+- `window_created` — `"new"` (a genuinely new window),
+  `"returned"` (back from another native desktop or a session
+  restore), `"restored"` (deminiaturized).
+- `window_destroyed` — `"closed"` (a real close), `"minimized"`
+  (it will come back as `"restored"`), `"vanished"` (its native
+  desktop was switched away; it comes back as `"returned"`).
+
+So a bar callback that only cares about real lifecycle filters in
+one line:
+
+```lua
+KiwiDesk.on("window_destroyed",
+    function(id, app, space, reason)
+        if reason ~= "closed" then return end
+        KiwiDesk.exec("sketchybar", {
+            "--trigger", "window_closed",
+        })
+    end)
+```
+
+One caveat: a window closed *while its native desktop is
+off-screen* already emitted `"vanished"` at switch time and never
+gets a corrective `"closed"`. If you filter on reasons, also
+refresh on `native_space_change` — the re-query pattern in the
+sketchybar recipe does this already.
 
 ## External Commands
 

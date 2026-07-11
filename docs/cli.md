@@ -158,8 +158,7 @@ Each event is one JSON line:
 
 Events: `space_change`, `layout_change`, `focus_change`,
 `monitor_change`, `native_space_change`, `window_created`,
-`window_destroyed`, `window_minimized`,
-`window_moved_to_space`.
+`window_destroyed`, `window_moved_to_space`.
 
 `focus_change` data carries `window_id`, `app`, **and**
 `title` — but the Lua callback receives only `window_id, app`
@@ -178,24 +177,34 @@ change, so bars can drop stale icons immediately:
 ```json
 {"event": "window_created",
  "data": {"window_id": 4711, "app": "Ghostty",
-          "space_id": "2"}}
+          "space_id": "2", "reason": "new"}}
 {"event": "window_destroyed",
  "data": {"window_id": 4711, "app": "Ghostty",
-          "space_id": "2"}}
+          "space_id": "2", "reason": "closed"}}
 ```
 
 `window_created` carries the space the window was placed in
-(`app_rules` included); `window_destroyed` and
-`window_minimized` carry the space the window disappeared
-from — its own space, even when that space is not active. A
-minimize fires only `window_minimized`, never
-`window_destroyed`.
+(`app_rules` included); `window_destroyed` carries the space
+the window disappeared from — its own space, even when that
+space is not active.
 
-Caveat: these events track the *visible window set*, not app
-lifecycle. Deminiaturize surfaces as `window_created`, and a
-native macOS Space switch fires a burst of `window_destroyed`
-for the old desktop's windows and `window_created` when they
-return.
+These events track the *visible window set*, not app
+lifecycle; the `reason` field says why the set changed:
+
+- `window_created` — `new` (a genuinely new window),
+  `returned` (back from another native macOS desktop or a
+  session restore), `restored` (deminiaturized).
+- `window_destroyed` — `closed` (a real close), `minimized`
+  (only minimized; it will come back as `restored`),
+  `vanished` (its native desktop was switched away; it
+  returns as `returned`).
+
+A native macOS Space switch thus fires a burst of `vanished`
+destroys and a burst of `returned` creates — filter on
+`reason` to ignore them. Caveat: a window closed *while its
+desktop is off-screen* already emitted `vanished` and never
+gets a corrective `closed`; consumers that filter `vanished`
+must also refresh their state on `native_space_change`.
 
 `window_moved_to_space` fires when a window is explicitly
 moved to another virtual space (`move_to_space`,

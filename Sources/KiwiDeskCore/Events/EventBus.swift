@@ -10,9 +10,13 @@ public enum KiwiNotification: String, CaseIterable, Sendable,
     case focusChange = "focus_change"
     case monitorChange = "monitor_change"
     case nativeSpaceChange = "native_space_change"
+    // Lifecycle events carry a `reason` (#40): created =
+    // new | returned | restored, destroyed = closed |
+    // minimized | vanished. The old `window_minimized` event
+    // was retired into `reason: minimized` (pre-release, no
+    // compat alias per AGENTS §5).
     case windowCreated = "window_created"
     case windowDestroyed = "window_destroyed"
-    case windowMinimized = "window_minimized"
     case windowMovedToSpace = "window_moved_to_space"
 }
 
