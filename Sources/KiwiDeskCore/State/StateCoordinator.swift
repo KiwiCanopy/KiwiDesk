@@ -39,6 +39,31 @@ public struct StateCoordinator: Sendable {
     /// forgotten: deminiaturize opens in the active space.
     private var rememberedSpaces: [WindowID: SpaceID] = [:]
 
+    /// Explicit `make_floating` / `make_tiled` verdicts per
+    /// tracked window — the only float state worth carrying
+    /// across close/reopen; detection re-derives the rest.
+    private var manualFloatOverrides: [WindowID: Bool] = [:]
+
+    /// Manual float intent of windows that closed (#160).
+    /// Keyed by app + title, not `WindowID`: the OS reuses
+    /// `CGWindowID`s, so a remembered id could resurrect the
+    /// override onto an unrelated window. A drifted title on
+    /// reopen misses — graceful degradation, the user just
+    /// floats again. Entries are consumed on reopen; the rest
+    /// linger for the session (manual floats are rare).
+    private var rememberedFloating: [WindowIdentity: Bool] = [:]
+
+    /// Stable close/reopen identity of a window (#160).
+    private struct WindowIdentity: Hashable, Sendable {
+        let app: String
+        let title: String
+
+        init(of window: ManagedWindow) {
+            app = window.appName
+            title = window.title
+        }
+    }
+
     public init(defaultSpace: SpaceID = SpaceID(1)) {
         workspaces.ensureSpace(defaultSpace)
     }
@@ -57,12 +82,17 @@ public struct StateCoordinator: Sendable {
         rememberedSpaces[id]
     }
 
-    /// Marks a window floating/tiled (`make_floating`).
+    /// Marks a window floating/tiled (`make_floating`). The
+    /// verdict is remembered as a manual override so it can
+    /// survive the window closing and reopening (#160).
     public mutating func setFloating(
         _ id: WindowID,
         _ floating: Bool
     ) {
         windows.setFloating(id, floating)
+        if windows[id] != nil {
+            manualFloatOverrides[id] = floating
+        }
     }
 
     public mutating func apply(_ event: KiwiEvent) {
@@ -71,12 +101,25 @@ public struct StateCoordinator: Sendable {
             break
 
         case .appTerminated(let pid):
+            for window in windows.windows(pid: pid) {
+                rememberFloatOverride(of: window)
+            }
             for id in windows.removeAll(pid: pid) {
                 workspaces.remove(id)
             }
 
         case .windowCreated(let window):
             windows.upsert(window)
+            // Reopened window: restore the manual float
+            // intent over the fresh detection verdict, and
+            // re-arm the override so the next close cycle
+            // remembers it again (#160).
+            if let intent = rememberedFloating.removeValue(
+                forKey: WindowIdentity(of: window)
+            ) {
+                windows.setFloating(window.id, intent)
+                manualFloatOverrides[window.id] = intent
+            }
             let target =
                 rememberedSpaces[window.id]
                 ?? appRules[window.appName]
@@ -99,6 +142,12 @@ public struct StateCoordinator: Sendable {
             } else if let space = workspaces.space(of: id) {
                 rememberedSpaces[id] = space
             }
+            // Float intent is remembered even for minimized
+            // windows: deminiaturize re-tracks from detection
+            // and would lose a manual override too (#160).
+            if let window = windows[id] {
+                rememberFloatOverride(of: window)
+            }
             windows.remove(id)
             workspaces.remove(id)
 
@@ -117,6 +166,12 @@ public struct StateCoordinator: Sendable {
             windows.updateTitle(id, title: title)
 
         case .windowFloatChanged(let id, let floating):
+            // A changed detection verdict supersedes the live
+            // window state (pre-existing semantics), so it
+            // drops the manual override too — remembering the
+            // stale intent would resurrect a float state the
+            // user no longer sees (#160).
+            manualFloatOverrides[id] = nil
             windows.setFloating(id, floating)
 
         case .displaysChanged(let displays):
@@ -128,6 +183,19 @@ public struct StateCoordinator: Sendable {
             // follows the switch.
             break
         }
+    }
+
+    /// Moves a window's manual float override (if any) into
+    /// the close/reopen memory, keyed by its identity (#160).
+    private mutating func rememberFloatOverride(
+        of window: ManagedWindow
+    ) {
+        guard
+            let intent = manualFloatOverrides.removeValue(
+                forKey: window.id
+            )
+        else { return }
+        rememberedFloating[WindowIdentity(of: window)] = intent
     }
 
     private mutating func reconcile(displays: [Display]) {
