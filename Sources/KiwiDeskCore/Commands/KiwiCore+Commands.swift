@@ -27,6 +27,8 @@ extension KiwiCore {
             return setFocusedAuto()
         case "resize":
             return resize(args)
+        case "move_to_track":
+            return moveToTrack(args)
         case "pull_or_spawn":
             return launch(args, newInstance: false)
         case "spawn_new":

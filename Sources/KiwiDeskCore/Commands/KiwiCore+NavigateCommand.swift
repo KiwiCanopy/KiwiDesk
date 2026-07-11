@@ -47,6 +47,20 @@ extension KiwiCore {
         {
             return response
         }
+        // Track spaces step in array order too (#128): within
+        // the track along the axis, across tracks on the other
+        // one — pure index math, the maintainer-preferred
+        // scrolling precedent. Nil falls through like above.
+        if space.mode == .track,
+            let response = trackStep(
+                direction,
+                space: space,
+                focused: focused,
+                swapping: swapping
+            )
+        {
+            return response
+        }
         // Navigate the layout's slots, not live AX frames:
         // live frames are stale mid-animation or when an app
         // misses a move notification, and cascaded windows

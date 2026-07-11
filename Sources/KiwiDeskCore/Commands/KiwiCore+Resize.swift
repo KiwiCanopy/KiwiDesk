@@ -52,6 +52,13 @@ extension KiwiCore {
             )
         case .scrolling:
             response = resizeScrollingSlot(delta, space: space)
+        case .track:
+            response = resizeTrack(
+                axis: axis,
+                delta: delta,
+                span: span,
+                space: space
+            )
         default:
             return .fail(
                 "resize not supported in "

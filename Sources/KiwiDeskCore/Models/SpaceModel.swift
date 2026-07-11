@@ -267,21 +267,11 @@ public struct Space: Sendable, Equatable {
     /// it was focused, and prunes its stack weight (#67).
     public mutating func remove(_ window: WindowID) {
         let removedIndex = windows.firstIndex(of: window)
-        // A dying track head hands its break (and the track's
-        // weight) to its successor, so closing the first window
-        // of a track does not merge that track away (#128). A
-        // successor that is already a break means the head was
-        // alone — the track collapses, which is the point.
-        if trackBreaks.remove(window) != nil,
-            let index = removedIndex,
-            index + 1 < windows.count
-        {
-            let successor = windows[index + 1]
-            if !trackBreaks.contains(successor) {
-                trackBreaks.insert(successor)
-                trackWeights[successor] = trackWeights[window]
-            }
-        }
+        // A departing track head hands its break (and the
+        // track's weight) to its successor, so closing the
+        // first window of a track does not merge that track
+        // away (#128).
+        handTrackBreakToSuccessor(of: window)
         trackWeights[window] = nil
         windows.removeAll { $0 == window }
         stackWeights[window] = nil

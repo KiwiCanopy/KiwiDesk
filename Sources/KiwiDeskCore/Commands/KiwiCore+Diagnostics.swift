@@ -82,6 +82,30 @@ extension KiwiCore {
                     )
                 )
             }
+            // Session-only track partition (#128), same
+            // rationale as stack_weights: break markers and
+            // per-head track weights, absent outside track
+            // stints.
+            if !space.trackBreaks.isEmpty {
+                object["track_breaks"] = .array(
+                    space.trackBreaks
+                        .map(\.raw).sorted()
+                        .map { .number(Double($0)) }
+                )
+            }
+            if !space.trackWeights.isEmpty {
+                object["track_weights"] = .object(
+                    Dictionary(
+                        uniqueKeysWithValues:
+                            space.trackWeights.map {
+                                (
+                                    String($0.key.raw),
+                                    JSONValue.number($0.value)
+                                )
+                            }
+                    )
+                )
+            }
             return JSONValue.object(object)
         }
         let windows = state.windows.all.map { window in

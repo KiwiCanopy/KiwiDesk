@@ -79,6 +79,29 @@ extension TrackLayout {
 // MARK: - Track state maintenance (Space)
 
 extension Space {
+    /// Hands `window`'s break marker (and the track weight
+    /// riding it) to its array successor — the shared origin
+    /// half of removing a window from its track (#128), used by
+    /// `remove(_:)` and `moveWindowToTrack`. A successor that
+    /// is already a break means the departing head was alone:
+    /// the track collapses, which is the point. The successor
+    /// is the *array* neighbor; a floating one holds the marker
+    /// dormant until it tiles again (accepted edge — the space
+    /// holds no float knowledge here).
+    mutating func handTrackBreakToSuccessor(
+        of window: WindowID
+    ) {
+        guard trackBreaks.remove(window) != nil,
+            let index = windows.firstIndex(of: window),
+            index + 1 < windows.count
+        else { return }
+        let successor = windows[index + 1]
+        if !trackBreaks.contains(successor) {
+            trackBreaks.insert(successor)
+            trackWeights[successor] = trackWeights[window]
+        }
+        trackWeights[window] = nil
+    }
     /// Inserts a window per the track layout's `new_window`
     /// rule (#128): its own new track right after the focused
     /// window's track, or joining the focused track after the
@@ -133,5 +156,69 @@ extension Space {
                 ?? tiled[ranges[track].upperBound - 1]
         }
         insert(window, after: anchor)
+    }
+
+    /// Moves a window into the adjacent track (#128): joining
+    /// its end when one exists, opening a new edge track
+    /// otherwise (keyboard parity with opening tracks by
+    /// spawning). `delta` is ±1 across the axis. Returns false
+    /// when there is nothing to do: cross-axis edge with the
+    /// cap reached, a lone window already forming the edge
+    /// track, or an untracked window.
+    public mutating func moveWindowToTrack(
+        _ window: WindowID,
+        delta: Int,
+        cap: Int,
+        isTiled: (WindowID) -> Bool
+    ) -> Bool {
+        let tiled = windows.filter(isTiled)
+        guard let index = tiled.firstIndex(of: window) else {
+            return false
+        }
+        let counts = TrackLayout.counts(
+            of: tiled,
+            breaks: trackBreaks,
+            cap: cap
+        )
+        let ranges = TrackLayout.ranges(of: counts)
+        guard
+            let track = TrackLayout.trackIndex(
+                ofWindowIndex: index,
+                counts: counts
+            )
+        else { return false }
+        let target = track + delta
+        if ranges.indices.contains(target) {
+            // Join the neighbor track at its end.
+            handTrackBreakToSuccessor(of: window)
+            let anchor = tiled[ranges[target].upperBound - 1]
+            windows.removeAll { $0 == window }
+            insert(window, after: anchor)
+            return true
+        }
+        // Past the edge: open a new track there — unless the
+        // window already IS the edge track alone (a no-op) or
+        // the cap forbids another track.
+        guard counts[track] > 1 else { return false }
+        guard cap <= 0 || counts.count < cap else {
+            return false
+        }
+        handTrackBreakToSuccessor(of: window)
+        windows.removeAll { $0 == window }
+        if delta > 0 {
+            windows.append(window)
+            trackBreaks.insert(window)
+        } else {
+            // The old first window starts the second track now;
+            // index 0 is an implicit head, but the explicit
+            // marker keeps it a boundary if something lands
+            // before it later.
+            if let first = tiled.first(where: { $0 != window }) {
+                trackBreaks.insert(first)
+            }
+            windows.insert(window, at: 0)
+            trackBreaks.insert(window)
+        }
+        return true
     }
 }
