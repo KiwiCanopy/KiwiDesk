@@ -653,7 +653,13 @@ like `cmd+j+k` are not supported — use modal modes instead.
 Each row has an action. Built-in actions live under headings:
 
 - **Focus** — move focus (left, right, up, down).
-- **Move Windows** — swap windows, send to space, resize.
+- **Move Windows** — swap windows, send to space, and (with
+  Advanced track on) the Move-to-track and Swap-with-track rows.
+- **Size & Float** — the per-axis Grow/Shrink rows, Make
+  floating, the resize step, and **Alert sound when resize
+  can't apply** (default on): a resize shortcut pressed in a
+  layout without a resize target (monocle, grid, a floating
+  space) plays the system alert instead of failing silently.
 - **Applications** — open or focus an app.
 - **Custom Bindings** — custom Lua (from Adopt/Import or hand-written).
 

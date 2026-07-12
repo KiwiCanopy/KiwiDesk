@@ -315,6 +315,25 @@ reusable — and re-register when the gate returns.
 KiwiDesk.set_track_advanced(true)
 ```
 
+### set_resize_feedback
+
+**Expects:** `true` or `false` (default `true`).
+
+**Does:** whether a resize hotkey that cannot act in the active
+layout (monocle, grid, a floating space) plays the system alert
+sound (#184). The no-op itself is correct — those layouts have
+no resize target — but silent failure at the keyboard reads as
+"KiwiDesk ignored me"; the beep is the standard macOS answer.
+Only hotkey fires cue; the same command over CLI/IPC stays
+silent (scripted callers branch on the error JSON). The GUI
+twin lives under Shortcuts ▸ Size & Float.
+
+**Example:**
+
+```lua
+KiwiDesk.set_resize_feedback(false)
+```
+
 ### Space Identity
 
 Spaces are identified by **strings or numbers** — `1` and `"1"`
@@ -1920,10 +1939,14 @@ focused window resizes itself directly, in every layout mode:
 `"x"` changes its width by the delta, `"y"` its height, top-left
 corner anchored, floored at `min_window_size` (a window already
 smaller than that just shrinks no further). Tiled windows
-only resize in bsp, stack, scrolling, and track layouts
-(monocle, grid, and the floating layout report "not
-supported"); what the `delta` actually adjusts depends on the
-layout:
+only resize in bsp, stack, scrolling, and track layouts —
+monocle, grid, and the floating layout report "not supported",
+and when that failure comes from a **hotkey** press KiwiDesk
+plays the system alert sound so the no-op is perceivable at
+the keyboard (the Cmd+Z-with-nothing-to-undo idiom; #184).
+Mute it with `set_resize_feedback(false)` — CLI and IPC
+callers never hear it, they read the error JSON. What the
+`delta` actually adjusts depends on the layout:
 
 - **bsp** — per-axis (#56): `"x"` nudges the side-by-side split
   ratio (`bsp.set_ratio_h`), `"y"` the stacked one

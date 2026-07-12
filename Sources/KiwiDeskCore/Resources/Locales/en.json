@@ -378,6 +378,7 @@
   "shortcuts.section.open_applications": "Open Applications",
   "shortcuts.section.size_float": "Size & Float",
   "shortcuts.section.switch_modes": "Switch modes",
+  "shortcuts.size_float.feedback": "Alert sound when resize can't apply",
   "shortcuts.size_float.layouts_caption": "Grow/Shrink only applies in the bsp, stack, scrolling, and track layouts; it is a no-op in monocle, grid, and floating. Width and height resize independently; scrolling resizes its slot along the scroll axis for both, and in track one axis resizes the window's track, the other its share within it.",
   "sidebar.app_name": "KiwiDesk",
   "sidebar.app_rules": "App Rules",

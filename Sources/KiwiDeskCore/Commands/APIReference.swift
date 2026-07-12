@@ -37,6 +37,10 @@ public enum APIReference {
                 "set_track_advanced"
             ),
             ("set_resize_step", "set_resize_step"),
+            (
+                "set_resize_feedback",
+                "set_resize_feedback"
+            ),
             ("set_fallback_space", "set_fallback_space"),
             ("set_space_icon", "set_space_icon"),
             (

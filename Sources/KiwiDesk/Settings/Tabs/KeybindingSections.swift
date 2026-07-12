@@ -147,6 +147,18 @@ struct SizeFloatSection: View {
             Text(sizeFloatCaption)
                 .font(.caption)
                 .foregroundStyle(.secondary)
+            Divider()
+            // Unsupported-resize cue (#184): the beep when a
+            // resize hotkey can't act in the active layout.
+            // Default on; users binding resize keys broadly
+            // across layouts can mute it.
+            Toggle(
+                L(
+                    "shortcuts.size_float.feedback",
+                    "Alert sound when resize can't apply"
+                ),
+                isOn: $model.config.settings.resizeFeedback
+            )
         }
     }
 

@@ -45,6 +45,8 @@ extension KiwiCore {
             return setTrackAdvanced(args)
         case "set_resize_step":
             return setResizeStep(args)
+        case "set_resize_feedback":
+            return setResizeFeedback(args)
         case "help", "list_commands":
             return .ok(
                 .array(
