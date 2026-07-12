@@ -27,7 +27,7 @@ public struct TrackLayout: LayoutSystem {
         let counts = Self.counts(
             of: windows,
             breaks: context.trackBreaks,
-            cap: params.count
+            cap: params.trackCap
         )
         let weights = Self.ranges(of: counts).map {
             Self.weight(

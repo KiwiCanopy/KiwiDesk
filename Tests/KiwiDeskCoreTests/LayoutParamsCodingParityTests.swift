@@ -121,6 +121,7 @@ struct LayoutParamsCodingParityTests {
     private static func track() -> TrackParams {
         var params = TrackParams()
         params.axis = .horizontal
+        params.autoTracks = false
         params.count = 4
         params.overflowStyle = .cascadeAll
         params.newWindow = .focusedTrack

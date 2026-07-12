@@ -32,11 +32,18 @@ public struct TrackParams: Sendable, Equatable, Codable {
     }
 
     public var axis: Axis = .vertical
-    /// Maximum number of tracks; `0` = dynamic (unlimited).
-    /// This is the persistent *rule*; the live partition is
-    /// session state (`Space.trackBreaks`), like
-    /// `stackWeights`.
-    public var count: Int = 0
+    /// Whether the track count is managed automatically (#177):
+    /// on (the default), tracks open and collapse as windows come
+    /// and go — no cap. Off pins the count to `count`. The
+    /// carousel-vs-grid twin of `GridParams.autoSize`; the layout
+    /// reads `trackCap`, never `count` directly.
+    public var autoTracks = true
+    /// The fixed maximum number of tracks used when `autoTracks`
+    /// is off (the remembered magnitude, so toggling auto off
+    /// restores it instead of resetting). Ignored while
+    /// `autoTracks` is on. The live partition is session state
+    /// (`Space.trackBreaks`), like `stackWeights`.
+    public var count: Int = 2
     /// What happens when the tracks (across the axis) or a
     /// track's windows (along it) can't all hold
     /// `min_window_size`. Reuses the stack's vocabulary
@@ -60,9 +67,19 @@ public struct TrackParams: Sendable, Equatable, Codable {
 
     public init() {}
 
+    /// The effective track cap the layout uses: 0 (unlimited,
+    /// dynamic) while `autoTracks` is on, otherwise the fixed
+    /// `count` floored at 1. The single reader of the auto/count
+    /// pair — layout, navigation, and spawn placement all go
+    /// through here so none can disagree.
+    public var trackCap: Int {
+        autoTracks ? 0 : max(1, count)
+    }
+
     /// JSON keys follow the Lua setters (`track.set_axis`).
     private enum CodingKeys: String, CodingKey {
         case axis
+        case autoTracks = "auto_tracks"
         case count
         case overflowStyle = "overflow_style"
         case newWindow = "new_window"
@@ -81,11 +98,16 @@ public struct TrackParams: Sendable, Equatable, Codable {
                 Axis.self,
                 forKey: .axis
             ) ?? .vertical
+        autoTracks =
+            try container.decodeIfPresent(
+                Bool.self,
+                forKey: .autoTracks
+            ) ?? true
         count =
             try container.decodeIfPresent(
                 Int.self,
                 forKey: .count
-            ) ?? 0
+            ) ?? 2
         overflowStyle =
             try container.decodeIfPresent(
                 StackParams.OverflowStyle.self,
@@ -113,6 +135,7 @@ public struct TrackParams: Sendable, Equatable, Codable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(axis, forKey: .axis)
+        try container.encode(autoTracks, forKey: .autoTracks)
         try container.encode(count, forKey: .count)
         try container.encode(
             overflowStyle,

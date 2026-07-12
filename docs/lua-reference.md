@@ -877,18 +877,39 @@ track.set_axis("vertical")
 
 ### track.set_count
 
-**Expects:** an integer ≥ 0 (default 0).
+**Expects:** an integer ≥ 0.
 
-**Does:** caps how many tracks a space can hold. `0` means
-dynamic: tracks open and collapse as windows come and go. With
-a positive cap, surplus tracks merge into the last one, new
-windows join the focused track once the cap is reached, and
-`move_to_track` refuses to open another edge track.
+**Does:** caps how many tracks a space can hold. `0` restores
+**automatic** tracks (the default — tracks open and collapse as
+windows come and go; see `track.set_auto_tracks`). A positive
+value pins the cap *and turns automatic off*, so `set_count(3)`
+takes effect on its own: surplus tracks merge into the last one,
+new windows join the focused track once the cap is reached, and
+`move_to_track` refuses to open another edge track. The last
+positive value is remembered, so flipping automatic back off
+restores it.
 
 **Example:**
 
 ```lua
 track.set_count(3)
+```
+
+### track.set_auto_tracks
+
+**Expects:** `true` or `false` (default `true`).
+
+**Does:** whether the track count is managed automatically. On
+(the default), tracks open and collapse as windows come and go —
+no cap. Off pins the count to the value set by `track.set_count`.
+The track twin of `grid.set_auto_size`. `track.set_count(0)` is
+the shorthand for turning this on; `track.set_count(n)` for
+turning it off with a cap of `n`.
+
+**Example:**
+
+```lua
+track.set_auto_tracks(false)
 ```
 
 ### track.set_overflow_style
@@ -979,12 +1000,29 @@ track.set_axis_override("code", "horizontal")
 - A space identifier.
 - An integer ≥ 0.
 
-**Does:** overrides the global track cap for one space.
+**Does:** overrides the global track cap for one space. Like the
+global setter, a positive value also turns automatic off for that
+space, and `0` turns it back on.
 
 **Example:**
 
 ```lua
 track.set_count_override("code", 2)
+```
+
+### track.set_auto_tracks_override
+
+**Expects:**
+
+- A space identifier.
+- A boolean.
+
+**Does:** overrides the automatic-tracks flag for one space.
+
+**Example:**
+
+```lua
+track.set_auto_tracks_override("code", false)
 ```
 
 ## App Bar

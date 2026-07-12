@@ -37,7 +37,7 @@ extension KiwiCore {
         let counts = TrackLayout.counts(
             of: tiled,
             breaks: space.trackBreaks,
-            cap: params.count
+            cap: params.trackCap
         )
         let ranges = TrackLayout.ranges(of: counts)
         guard
@@ -247,7 +247,7 @@ extension KiwiCore {
             moved = $0.moveWindowToTrack(
                 focused,
                 delta: delta,
-                cap: params.count,
+                cap: params.trackCap,
                 isTiled: { !floating.contains($0) }
             )
         }

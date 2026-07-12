@@ -14,6 +14,7 @@ import Foundation
 /// precedent for `wrapFocus`).
 public struct TrackOverride: Sendable, Equatable {
     public var axis: TrackParams.Axis?
+    public var autoTracks: Bool?
     public var count: Int?
     public var overflowStyle: StackParams.OverflowStyle?
 
@@ -24,6 +25,7 @@ public struct TrackOverride: Sendable, Equatable {
     public func resolved(onto global: TrackParams) -> TrackParams {
         var out = global
         if let axis { out.axis = axis }
+        if let autoTracks { out.autoTracks = autoTracks }
         if let count { out.count = count }
         if let overflowStyle { out.overflowStyle = overflowStyle }
         // Merged params hold no override map (see ScrollingOverride).
@@ -34,7 +36,8 @@ public struct TrackOverride: Sendable, Equatable {
     /// True when no field is set — a fully-inherited space needs
     /// no stored override (drives sparse encoding).
     public var isEmpty: Bool {
-        axis == nil && count == nil && overflowStyle == nil
+        axis == nil && autoTracks == nil && count == nil
+            && overflowStyle == nil
     }
 }
 
@@ -46,6 +49,7 @@ extension TrackOverride: Codable {
     /// inherited fields stay absent.
     enum CodingKeys: String, CodingKey {
         case axis
+        case autoTracks = "auto_tracks"
         case count
         case overflowStyle = "overflow_style"
     }
@@ -57,6 +61,10 @@ extension TrackOverride: Codable {
         axis = try container.decodeIfPresent(
             TrackParams.Axis.self,
             forKey: .axis
+        )
+        autoTracks = try container.decodeIfPresent(
+            Bool.self,
+            forKey: .autoTracks
         )
         count = try container.decodeIfPresent(
             Int.self,
@@ -71,6 +79,10 @@ extension TrackOverride: Codable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(axis, forKey: .axis)
+        try container.encodeIfPresent(
+            autoTracks,
+            forKey: .autoTracks
+        )
         try container.encodeIfPresent(count, forKey: .count)
         try container.encodeIfPresent(
             overflowStyle,

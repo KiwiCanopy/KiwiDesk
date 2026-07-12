@@ -87,7 +87,10 @@ struct SettingsCodingTests {
         // wrap toggle per the #168 vocabulary.
         let track = try object(layout["track"])
         #expect(track["axis"] as? String == "vertical")
-        #expect(track["count"] as? Int == 0)
+        // `track.set_auto_tracks` → `layout.track.auto_tracks`
+        // (#177), on by default; `count` is the remembered cap.
+        #expect(track["auto_tracks"] as? Bool == true)
+        #expect(track["count"] as? Int == 2)
         #expect(
             track["overflow_style"] as? String
                 == "cascade_overflow"
@@ -155,6 +158,7 @@ struct SettingsCodingTests {
         settings.grid.autoSize = true
         settings.monocle.wrapFocus = false
         settings.track.axis = .horizontal
+        settings.track.autoTracks = false
         settings.track.count = 3
         settings.track.overflowStyle = .cascadeAll
         settings.track.newWindow = .focusedTrack

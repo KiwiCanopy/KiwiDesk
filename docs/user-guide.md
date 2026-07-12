@@ -261,8 +261,10 @@ Expand each layout type to adjust its defaults:
   size instead of the typed counts (greying them out), so a
   landscape monitor gets more columns than rows.
 - **Track**: axis (vertical = columns side by side, horizontal =
-  rows), track limit (0 = dynamic — tracks open and collapse as
-  windows come and go), overflow style (when too many tracks or
+  rows), **Automatic tracks** (on by default — tracks open and
+  collapse as windows come and go; turn it off to pin a fixed
+  **Track limit**, which greys out while automatic is on),
+  overflow style (when too many tracks or
   windows to hold the minimum size: `cascade_overflow` keeps the
   fitting ones tiled and cascades only the rest — the same
   choice as the stack layout — or `cascade_all`), where a new
