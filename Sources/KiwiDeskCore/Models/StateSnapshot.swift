@@ -24,12 +24,63 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
         public let mode: LayoutMode
         public let windows: [UInt32]
         public let focused: UInt32?
+        /// The track partition (#128), carried so a same-session
+        /// restore (wake/unlock, crash recovery) preserves the
+        /// visible track topology instead of collapsing every
+        /// space to one implicit track — `adopt` re-files each
+        /// window through `remove`+append, which is blind to the
+        /// keyed break markers. Absent (default `[]`) in older
+        /// snapshots and non-track spaces. The per-window
+        /// `stackWeights` are deliberately NOT carried: an even
+        /// re-split degrades gracefully (the pre-existing stack
+        /// behavior), while a lost partition restructures the
+        /// space.
+        public let trackBreaks: [UInt32]
+        public let trackWeights: [UInt32: Double]
 
         public init(space: Space) {
             self.id = space.id.raw
             self.mode = space.mode
             self.windows = space.windows.map(\.raw)
             self.focused = space.focused?.raw
+            self.trackBreaks = space.trackBreaks.map(\.raw)
+            self.trackWeights = Dictionary(
+                uniqueKeysWithValues: space.trackWeights.map {
+                    ($0.key.raw, $0.value)
+                }
+            )
+        }
+
+        private enum CodingKeys: String, CodingKey {
+            case id, mode, windows, focused
+            case trackBreaks = "track_breaks"
+            case trackWeights = "track_weights"
+        }
+
+        public init(from decoder: Decoder) throws {
+            let c = try decoder.container(
+                keyedBy: CodingKeys.self
+            )
+            id = try c.decode(String.self, forKey: .id)
+            mode = try c.decode(LayoutMode.self, forKey: .mode)
+            windows = try c.decode(
+                [UInt32].self,
+                forKey: .windows
+            )
+            focused = try c.decodeIfPresent(
+                UInt32.self,
+                forKey: .focused
+            )
+            trackBreaks =
+                try c.decodeIfPresent(
+                    [UInt32].self,
+                    forKey: .trackBreaks
+                ) ?? []
+            trackWeights =
+                try c.decodeIfPresent(
+                    [UInt32: Double].self,
+                    forKey: .trackWeights
+                ) ?? [:]
         }
     }
 
@@ -75,6 +126,28 @@ extension StateCoordinator {
                 windows[WindowID(raw)] != nil
             {
                 workspaces.focus(WindowID(raw), in: space)
+            }
+            // Reinstate the track partition after the re-file
+            // churn wiped it (#128): the `remove`+append loop
+            // above is blind to the keyed break markers, so a
+            // live wake/unlock restore would otherwise collapse
+            // every track space to one implicit track. Dormant
+            // markers on windows not (yet) tracked are harmless
+            // — the partition only spans the tiled list.
+            if !record.trackBreaks.isEmpty
+                || !record.trackWeights.isEmpty
+            {
+                workspaces.withSpace(space) {
+                    $0.trackBreaks = Set(
+                        record.trackBreaks.map(WindowID.init)
+                    )
+                    $0.trackWeights = Dictionary(
+                        uniqueKeysWithValues:
+                            record.trackWeights.map {
+                                (WindowID($0.key), $0.value)
+                            }
+                    )
+                }
             }
         }
         if let active = snapshot.activeSpace {

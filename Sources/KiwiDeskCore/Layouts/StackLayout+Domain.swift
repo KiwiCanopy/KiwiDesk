@@ -80,6 +80,51 @@ extension StackLayout {
         return proposed
     }
 
+    /// One interactive weight step (#67/#128): the new value
+    /// for `weights[index]` after a `resize` of `delta` points
+    /// over a span of `span`. The single authority for the
+    /// step math shared by the stack's `"y"` path and both
+    /// track knobs — with heights h = A·w/W, dh/dw =
+    /// A·(W−w)/W², so the exact step for dh = delta is
+    /// dw = delta·W²/(A·(W−w)). Growing is capped where the
+    /// smallest OTHER share would drop below `minSize` (past
+    /// that cliff the layout cascades and extra weight only
+    /// ratchets invisibly), never forced below the current
+    /// value so an overflowed group stays editable downwards;
+    /// the result clamps to `weightRange`. Callers pass
+    /// already-floored weights (`weightFloor`).
+    public static func weightStep(
+        weights: [Double],
+        at index: Int,
+        delta: Double,
+        span: Double,
+        minSize: Double
+    ) -> Double {
+        let current = weights[index]
+        let total = weights.reduce(0, +)
+        let change =
+            delta * total * total / (span * (total - current))
+        var value = current + change
+        if change > 0 {
+            let others = weights.enumerated()
+                .filter { $0.offset != index }
+                .map(\.element)
+            if let smallest = others.min() {
+                let limit = maxColumnTotal(
+                    smallestWeight: smallest,
+                    height: span,
+                    minSize: minSize
+                )
+                let cap = limit - (total - current)
+                value = min(value, max(cap, current))
+            }
+        }
+        return min(
+            max(value, weightRange.lowerBound),
+            weightRange.upperBound
+        )
+    }
+
     /// The largest weight total a column can carry before its
     /// smallest share drops below `minSize` — the single
     /// authority behind both the layout's cascade check and

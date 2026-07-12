@@ -56,6 +56,7 @@ struct SettingsCodingTests {
         #expect(
             Set(layout.keys) == [
                 "bsp", "grid", "monocle", "scroll", "stack",
+                "track",
             ]
         )
         // Lua `bsp.set_ratio_h` / `scroll.set_slot_size`.
@@ -70,6 +71,17 @@ struct SettingsCodingTests {
         #expect(scroll["wrap_focus"] as? Bool == false)
         let stack = try object(layout["stack"])
         #expect(stack["master_ratio"] as? Double == 0.6)
+        // `track.set_axis` → `layout.track.axis` (#128);
+        // wrap toggle per the #168 vocabulary.
+        let track = try object(layout["track"])
+        #expect(track["axis"] as? String == "vertical")
+        #expect(track["count"] as? Int == 0)
+        #expect(
+            track["overflow_style"] as? String
+                == "cascade_overflow"
+        )
+        #expect(track["new_window"] as? String == "own_track")
+        #expect(track["wrap_focus"] as? Bool == false)
         // SpaceID-keyed maps encode as objects, not arrays.
         let gap = try object(root["gap"])
         let gapOverride = try object(gap["override"])
@@ -128,6 +140,11 @@ struct SettingsCodingTests {
         settings.scrolling.slotSize = .points(400)
         settings.stack.masterCount = 2
         settings.grid.rows = 4
+        settings.track.axis = .horizontal
+        settings.track.count = 3
+        settings.track.overflowStyle = .cascadeAll
+        settings.track.newWindow = .focusedTrack
+        settings.track.wrapFocus = true
         settings.minWindowSize = 200
         settings.resizeStep = 75
         settings.dragGhost.enabled = false

@@ -31,6 +31,17 @@ public struct StateCoordinator: Sendable {
     /// layout's spawn placement, like the gap override.
     public var spawnOverride: [SpaceID: SpawnPlacement] = [:]
 
+    /// The track layout's params (#128), mirrored from the
+    /// tiler settings like `spawnPlacements`: a new **tiled**
+    /// window in a track space follows `new_window`/`count`
+    /// instead of a `SpawnPlacement` (the flat-index vocabulary
+    /// cannot say "own track"). A floating window still takes
+    /// the `SpawnPlacement` path (it has no track slot), so its
+    /// array position — and thus which track it would join if
+    /// it later tiles — honors the placement override as in
+    /// every other mode.
+    public var trackParams = TrackParams()
+
     /// Last known space per window. Window ids are stable OS
     /// ids, so a "created" window with a remembered space is
     /// one coming back from another native macOS Space (or a
@@ -154,13 +165,29 @@ public struct StateCoordinator: Sendable {
                 ?? workspaces.activeSpace
             if let target {
                 let mode = workspaces[target]?.mode ?? .bsp
-                workspaces.add(
-                    window.id,
-                    to: target,
-                    placement: spawnOverride[target]
-                        ?? spawnPlacements[mode]
-                        ?? .afterFocused
-                )
+                if mode == .track, !window.isFloating {
+                    let params =
+                        (trackParams.override[target]
+                        ?? TrackOverride())
+                        .resolved(onto: trackParams)
+                    workspaces.add(
+                        window.id,
+                        to: target,
+                        trackRule: params.newWindow,
+                        cap: params.count,
+                        isTiled: { [windows] in
+                            windows[$0]?.isFloating == false
+                        }
+                    )
+                } else {
+                    workspaces.add(
+                        window.id,
+                        to: target,
+                        placement: spawnOverride[target]
+                            ?? spawnPlacements[mode]
+                            ?? .afterFocused
+                    )
+                }
                 workspaces.focus(window.id, in: target)
             }
 

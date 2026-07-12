@@ -30,6 +30,7 @@ private func populated() -> TilingSettings {
     settings.scrolling.override[probe] = ScrollingOverride()
     settings.grid.override[probe] = GridOverride()
     settings.monocle.override[probe] = MonocleOverride()
+    settings.track.override[probe] = TrackOverride()
     return settings
 }
 

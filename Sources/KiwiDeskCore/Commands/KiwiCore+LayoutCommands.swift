@@ -28,6 +28,8 @@ extension KiwiCore {
             response = gridCommand(command, args)
         } else if command.hasPrefix("monocle.") {
             response = monocleCommand(command, args)
+        } else if command.hasPrefix("track.") {
+            response = trackCommand(command, args)
         } else if command.hasPrefix("app_bar.") {
             response = barCommand(command, args)
         } else if command.hasPrefix("drag.") {

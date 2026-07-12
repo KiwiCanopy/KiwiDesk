@@ -21,6 +21,7 @@ public enum APIReference {
             ("make_tiled", "make_tiled"),
             ("make_auto", "make_auto"),
             ("resize", "resize"),
+            ("move_to_track", "move_to_track"),
             ("pull_or_spawn", "pull_or_spawn"),
             ("spawn_new", "spawn_new"),
             ("set_mode", "set_mode"),
@@ -156,6 +157,12 @@ public enum APIReference {
             "set_app_bar_group_adjacent_windows",
             "set_app_bar_group_badge_color",
             "set_app_bar_group_badge_text_color",
+        ],
+        "track": [
+            "set_axis", "set_count", "set_overflow_style",
+            "set_new_window", "set_wrap_focus",
+            "set_axis_override", "set_count_override",
+            "set_overflow_style_override",
         ],
         "drag": [
             "set_ghost_enabled", "set_ghost_border",

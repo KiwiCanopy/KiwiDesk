@@ -45,6 +45,11 @@ struct LayoutParamsCodingParityTests {
         )
     }
 
+    @Test("TrackParams round-trips every field")
+    func track() throws {
+        try expectRoundTrips(Self.track(), from: TrackParams())
+    }
+
     // MARK: Exhaustive fixtures (every field ≠ its default)
 
     private static let space = SpaceID("2")
@@ -107,6 +112,19 @@ struct LayoutParamsCodingParityTests {
         params.appBar.enabled = false
         var over = MonocleOverride()
         over.orientation = .horizontal
+        params.override[space] = over
+        return params
+    }
+
+    private static func track() -> TrackParams {
+        var params = TrackParams()
+        params.axis = .horizontal
+        params.count = 4
+        params.overflowStyle = .cascadeAll
+        params.newWindow = .focusedTrack
+        params.wrapFocus = true
+        var over = TrackOverride()
+        over.count = 2
         params.override[space] = over
         return params
     }

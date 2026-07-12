@@ -24,6 +24,7 @@ public struct TilingSettings: Sendable, Equatable, Codable {
     public var scrolling = ScrollingParams()
     public var grid = GridParams()
     public var monocle = MonocleParams()
+    public var track = TrackParams()
     /// The indicator bar's global look, shared by every layout
     /// that shows a bar. Each layout's own `bar` (enabled +
     /// overrides) resolves against this.
@@ -92,6 +93,7 @@ public struct TilingSettings: Sendable, Equatable, Codable {
         case monocle
         case scroll
         case stack
+        case track
     }
 
     private typealias Container =
@@ -218,6 +220,11 @@ public struct TilingSettings: Sendable, Equatable, Codable {
                 StackParams.self,
                 forKey: .stack
             ) ?? StackParams()
+        track =
+            try layout.decodeIfPresent(
+                TrackParams.self,
+                forKey: .track
+            ) ?? TrackParams()
     }
 
     private mutating func decodeDrag(
@@ -277,6 +284,7 @@ public struct TilingSettings: Sendable, Equatable, Codable {
         try layout.encode(monocle, forKey: .monocle)
         try layout.encode(scrolling, forKey: .scroll)
         try layout.encode(stack, forKey: .stack)
+        try layout.encode(track, forKey: .track)
         var drag = container.nestedContainer(
             keyedBy: DragKeys.self,
             forKey: .drag

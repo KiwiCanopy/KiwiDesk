@@ -177,6 +177,13 @@ public enum MouseResize {
         case .scrolling:
             guard abs(dw) > threshold else { return nil }
             return .scrollWidth(dw)
+        case .track:
+            // Both track adjustments (track weight, in-track
+            // share) key off the dragged window's identity —
+            // the same windowless-seam gap as the stack height
+            // drag above (#67): drags snap back, keyboard
+            // `resize` covers both axes. Revisit together.
+            return nil
         case .monocle, .grid, .floating:
             return nil
         }

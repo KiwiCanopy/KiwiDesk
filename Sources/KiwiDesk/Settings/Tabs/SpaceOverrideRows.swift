@@ -51,6 +51,7 @@ struct SpaceOverrideRows: View {
         case .stack: stackRows
         case .grid: gridRows
         case .monocle: monocleRows
+        case .track: trackRows
         case .floating:
             placeholder(
                 L(
@@ -258,6 +259,56 @@ struct SpaceOverrideRows: View {
             options: [
                 (.horizontal, L("scroll_grid.horizontal", "Horizontal")),
                 (.vertical, L("scroll_grid.vertical", "Vertical")),
+            ]
+        )
+    }
+
+    @ViewBuilder
+    private var trackRows: some View {
+        OverridePickerRow(
+            label: L("track.axis", "Axis"),
+            value: binding(\.track.override, space, \.axis),
+            global: g.track.axis,
+            options: [
+                (
+                    .vertical,
+                    L("track.axis.vertical", "Vertical (columns)")
+                ),
+                (
+                    .horizontal,
+                    L("track.axis.horizontal", "Horizontal (rows)")
+                ),
+            ]
+        )
+        OverrideStepperRow(
+            label: L("track.count", "Track limit"),
+            value: binding(\.track.override, space, \.count),
+            global: g.track.count,
+            range: 0...10
+        )
+        OverridePickerRow(
+            label: L("layout_params.overflow", "Overflow"),
+            value: binding(
+                \.track.override,
+                space,
+                \.overflowStyle
+            ),
+            global: g.track.overflowStyle,
+            options: [
+                (
+                    .cascadeOverflow,
+                    L(
+                        "layout_params.cascade_overflow",
+                        "Cascade overflow"
+                    )
+                ),
+                (
+                    .cascadeAll,
+                    L(
+                        "layout_params.cascade_all",
+                        "Cascade all"
+                    )
+                ),
             ]
         )
     }

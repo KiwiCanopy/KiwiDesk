@@ -123,6 +123,7 @@ public enum LayoutMode: String, Sendable, Codable, CaseIterable {
     case scrolling
     case monocle
     case grid
+    case track
     case floating
 
     /// Whether the layout's output depends on which window
@@ -172,6 +173,25 @@ public struct Space: Sendable, Equatable {
     /// harmless, every consumer re-clamps it against the live
     /// row.
     public var scrollOffset: CGFloat?
+    /// The track layout's boundaries (#128): a window in this
+    /// set STARTS a new track; the partition of the tiled
+    /// window list falls out of the flat array order plus these
+    /// markers (`TrackLayout.counts`) — `masterCount`
+    /// generalized, never a tree. Keyed by WindowID like
+    /// `stackWeights` (not positional) so floating windows drop
+    /// out of the partition with zero maintenance and removal
+    /// prunes naturally; a dying head hands its break to its
+    /// successor (`remove`), and `swap` keeps boundaries at the
+    /// slot, not on the traveling window. Ephemeral: what
+    /// persists is the *rule* (`layout.track.count`/`axis`).
+    /// Seeded to all windows on mode entry, cleared on leave.
+    public var trackBreaks: Set<WindowID>
+    /// Per-track size weight, keyed by the track's head window
+    /// (#128): absent = 1.0 = an even share; `resize` across
+    /// the axis bumps the focused window's track entry.
+    /// Session-only like `stackWeights`; travels with the break
+    /// marker.
+    public var trackWeights: [WindowID: Double]
 
     public init(
         id: SpaceID,
@@ -179,7 +199,9 @@ public struct Space: Sendable, Equatable {
         windows: [WindowID] = [],
         focused: WindowID? = nil,
         stackWeights: [WindowID: Double] = [:],
-        scrollOffset: CGFloat? = nil
+        scrollOffset: CGFloat? = nil,
+        trackBreaks: Set<WindowID> = [],
+        trackWeights: [WindowID: Double] = [:]
     ) {
         self.id = id
         self.mode = mode
@@ -187,6 +209,8 @@ public struct Space: Sendable, Equatable {
         self.focused = focused
         self.stackWeights = stackWeights
         self.scrollOffset = scrollOffset
+        self.trackBreaks = trackBreaks
+        self.trackWeights = trackWeights
     }
 
     /// Appends a window if it is not already present.
@@ -243,6 +267,12 @@ public struct Space: Sendable, Equatable {
     /// it was focused, and prunes its stack weight (#67).
     public mutating func remove(_ window: WindowID) {
         let removedIndex = windows.firstIndex(of: window)
+        // A departing track head hands its break (and the
+        // track's weight) to its successor, so closing the
+        // first window of a track does not merge that track
+        // away (#128).
+        handTrackBreakToSuccessor(of: window)
+        trackWeights[window] = nil
         windows.removeAll { $0 == window }
         stackWeights[window] = nil
         if focused == window {
@@ -260,11 +290,39 @@ public struct Space: Sendable, Equatable {
     }
 
     /// Swaps the positions of two windows in the flat array.
+    /// Track boundaries are positional: a break marker (and the
+    /// head weight riding it) stays at the slot, not on the
+    /// traveling window, so swapping two windows never moves a
+    /// track boundary (#128). Index 0 is an *implicit* head, so
+    /// its weight must stay at the slot too even though it may
+    /// carry no explicit marker.
     public mutating func swap(_ a: WindowID, _ b: WindowID) {
         guard let i = windows.firstIndex(of: a),
             let j = windows.firstIndex(of: b)
         else { return }
         windows.swapAt(i, j)
+        let aBreak = trackBreaks.contains(a)
+        let bBreak = trackBreaks.contains(b)
+        if aBreak != bBreak {
+            // Move the explicit marker to the window that now
+            // holds the head slot.
+            if aBreak {
+                trackBreaks.remove(a)
+                trackBreaks.insert(b)
+            } else {
+                trackBreaks.remove(b)
+                trackBreaks.insert(a)
+            }
+        }
+        // Swap the head weight whenever either slot is a head —
+        // an explicit marker OR index 0 (the implicit first
+        // head), so an index-0 head's weight can't travel with
+        // the moved window.
+        if aBreak || bBreak || i == 0 || j == 0 {
+            let weight = trackWeights[a]
+            trackWeights[a] = trackWeights[b]
+            trackWeights[b] = weight
+        }
     }
 
     /// Moves a window to a new index, clamped to valid bounds.

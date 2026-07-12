@@ -95,6 +95,26 @@ enum KeybindingCatalog {
         )
     }
 
+    /// The four directional move-to-track rows (#128). All four
+    /// directions are offered — which pair acts depends on the
+    /// space's track axis (the cross-axis pair; the other two
+    /// fail with a hint), like the scrolling axis decides which
+    /// focus pair steps the row.
+    static let moveToTrackDirections: [NavCommand] =
+        directions.map { dir, phrase in
+            NavCommand(
+                label: "Move to the track \(phrase)",
+                lua: "KiwiDesk.move_to_track(\"\(dir)\")",
+                displayLabel: {
+                    L(
+                        "keybinding.move_to_track",
+                        "Move to the track %1$@",
+                        directionPhrase(dir)
+                    )
+                }
+            )
+        }
+
     /// The per-space "Move to …" / "… & follow" row pairs. The
     /// space name is user data, passed as a positional arg.
     static func moveToSpace(
@@ -151,7 +171,9 @@ enum KeybindingCatalog {
             ),
             NavGroup(
                 title: "Window Management",
-                commands: swapDirections + moveToSpace(spaces)
+                commands: swapDirections
+                    + moveToTrackDirections
+                    + moveToSpace(spaces)
             ),
         ]
     }

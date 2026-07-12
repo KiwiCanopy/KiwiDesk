@@ -215,3 +215,74 @@ struct StackPartitionTests {
         #expect(masterXs != stackXs)
     }
 }
+
+/// The shared interactive weight step (#67/#128): one authority
+/// for the stack's `resize("y")` and both track resize knobs, so
+/// the step/cap/clamp math cannot drift across the three sites.
+@Suite("Weight step authority (#67/#128)")
+struct WeightStepTests {
+    private let span = 1000.0
+    private let minSize = 100.0
+
+    @Test("A positive delta grows the target, others unchanged")
+    func growsTarget() {
+        let out = StackLayout.weightStep(
+            weights: [1, 1, 1],
+            at: 0,
+            delta: 100,
+            span: span,
+            minSize: minSize
+        )
+        #expect(out > 1)
+    }
+
+    @Test("Growth caps where the smallest other hits min size")
+    func capsAtCliff() {
+        // Two windows, 1000 pt span, 100 pt min: the other
+        // share can shrink to 100 pt = weight 1 out of a total
+        // capped near 10. A huge delta cannot push past that.
+        let out = StackLayout.weightStep(
+            weights: [1, 1],
+            at: 0,
+            delta: 100_000,
+            span: span,
+            minSize: minSize
+        )
+        // Other window keeps ≥ min: focused/other ratio ≤ 9.
+        #expect(out <= 9.0001)
+    }
+
+    @Test("The result clamps to the weight range")
+    func clampsRange() {
+        let big = StackLayout.weightStep(
+            weights: [1, 1],
+            at: 0,
+            delta: 100_000,
+            span: 10,
+            minSize: 0
+        )
+        #expect(big <= StackLayout.weightRange.upperBound)
+        let small = StackLayout.weightStep(
+            weights: [5, 1],
+            at: 0,
+            delta: -100_000,
+            span: 10,
+            minSize: 0
+        )
+        #expect(small >= StackLayout.weightRange.lowerBound)
+    }
+
+    @Test("Shrinking is never blocked by the grow cap")
+    func shrinkNeverCapped() {
+        // Already overflowed (total far above the cliff): a
+        // shrink still moves down.
+        let out = StackLayout.weightStep(
+            weights: [8, 8],
+            at: 0,
+            delta: -50,
+            span: span,
+            minSize: minSize
+        )
+        #expect(out < 8)
+    }
+}

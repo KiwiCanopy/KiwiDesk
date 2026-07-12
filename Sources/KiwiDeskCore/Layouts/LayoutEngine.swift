@@ -19,6 +19,8 @@ public enum LayoutEngine {
             return MonocleLayout()
         case .grid:
             return GridLayout()
+        case .track:
+            return TrackLayout()
         case .floating:
             return FloatingLayout()
         }

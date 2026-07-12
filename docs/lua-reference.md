@@ -59,7 +59,12 @@ cycles (wrapping at the ends), scrolling steps to the
 previous/next window and stops at the row's ends — unless
 `scroll.set_wrap_focus(true)` is set, which wraps scrolling
 focus at the ends too. Cross-axis directions keep the
-geometric search.
+geometric search. The track layout steps in window order on
+both axes: along the axis within the focused track, across it
+to the neighboring track (same relative position); both stop
+at the ends unless `track.set_wrap_focus(true)` is set, which
+wraps within the track along the axis and last ↔ first track
+across it.
 
 **Example:**
 
@@ -76,7 +81,10 @@ KiwiDesk.focus("left")
 direction, reordering the flat window array — the two windows
 trade slots in the layout. The neighbor is found the same way
 `focus` finds it, including the window-order stepping on a
-monocle or scrolling orientation axis.
+monocle or scrolling orientation axis and in track spaces
+(where a cross-axis swap trades the two windows between their
+tracks — the track boundaries stay put). `swap` never wraps at
+the ends, even with a wrap-focus toggle on.
 
 **Example:**
 
@@ -128,6 +136,28 @@ KiwiDesk.move_to_space_and_follow("mail")
 KiwiDesk.move_to_space_and_follow(3)
 ```
 
+### move_to_track
+
+**Expects:** a direction across the space's tracks: `"left"` or
+`"right"` with a vertical axis (columns), `"up"` or `"down"`
+with a horizontal one (rows).
+
+**Does:** in a track-layout space, moves the focused window
+into the adjacent track (joining it at its end). Past the first
+or last track it opens a **new** track at that edge — the
+keyboard way to open tracks, matching what `own_track` spawning
+does. Refused when the space is not in track mode, when
+`track.set_count` already caps the tracks, or when the window
+already forms the edge track alone (nothing would change).
+Never wraps. Along-axis directions report an error naming the
+valid pair.
+
+**Example:**
+
+```lua
+KiwiDesk.move_to_track("right")
+```
+
 ## Layouts & Gaps
 
 ### set_mode
@@ -136,7 +166,7 @@ KiwiDesk.move_to_space_and_follow(3)
 
 - A space identifier (number or string).
 - A layout mode: `bsp`, `stack`, `scrolling`, `monocle`, `grid`,
-  or `floating`.
+  `track`, or `floating`.
 
 **Does:** sets the layout mode for the space. Every space
 defaults to `bsp`.
@@ -758,6 +788,134 @@ monocle.set_orientation("horizontal")
 monocle.set_orientation_override("3", "vertical")
 ```
 
+### track.set_axis
+
+**Expects:** `"vertical"` (default) or `"horizontal"`.
+
+**Does:** sets which way tracks run. Vertical tracks are
+columns side by side (windows stack top-to-bottom inside one);
+horizontal tracks are rows. The axis also decides which
+`resize` axis trades track space and which pair of directions
+`move_to_track` accepts.
+
+**Example:**
+
+```lua
+track.set_axis("vertical")
+```
+
+### track.set_count
+
+**Expects:** an integer ≥ 0 (default 0).
+
+**Does:** caps how many tracks a space can hold. `0` means
+dynamic: tracks open and collapse as windows come and go. With
+a positive cap, surplus tracks merge into the last one, new
+windows join the focused track once the cap is reached, and
+`move_to_track` refuses to open another edge track.
+
+**Example:**
+
+```lua
+track.set_count(3)
+```
+
+### track.set_overflow_style
+
+**Expects:** `"cascade_overflow"` (default) or `"cascade_all"`.
+
+**Does:** what happens when the tracks (across the axis) or a
+track's windows (along it) can't all hold `min_window_size` —
+the same vocabulary as `stack.set_overflow_style`, applied to
+both axes. `cascade_overflow` keeps the fitting prefix tiled and
+cascades only the remainder at a title-bar offset;
+`cascade_all` cascades the whole space.
+
+**Example:**
+
+```lua
+track.set_overflow_style("cascade_overflow")
+```
+
+### track.set_new_window
+
+**Expects:** `"own_track"` (default) or `"focused_track"`.
+
+**Does:** decides where a new window lands in a track space:
+its own new track right after the focused one, or joining the
+focused track right after the focused window. `own_track`
+falls back to joining once `track.set_count` is reached. Track
+spaces follow this instead of the `new_window_placement`
+vocabulary — the flat-index placements cannot say "own track".
+
+**Example:**
+
+```lua
+track.set_new_window("focused_track")
+```
+
+### track.set_wrap_focus
+
+**Expects:** a boolean (default `false`).
+
+**Does:** the track twin of `scroll.set_wrap_focus` (#168):
+with it on, stepping `focus` past an end wraps — within the
+focused track along the axis, last ↔ first track across it.
+Off, focus stops at the ends. `swap` and `move_to_track` never
+wrap. Each layout owns its toggle; this one only affects track
+spaces.
+
+**Example:**
+
+```lua
+track.set_wrap_focus(true)
+```
+
+### track.set_overflow_style_override
+
+**Expects:**
+
+- A space identifier.
+- `"cascade_overflow"` or `"cascade_all"`.
+
+**Does:** overrides the global overflow style for one space.
+
+**Example:**
+
+```lua
+track.set_overflow_style_override("code", "cascade_all")
+```
+
+### track.set_axis_override
+
+**Expects:**
+
+- A space identifier.
+- An axis string.
+
+**Does:** overrides the global axis for one space.
+
+**Example:**
+
+```lua
+track.set_axis_override("code", "horizontal")
+```
+
+### track.set_count_override
+
+**Expects:**
+
+- A space identifier.
+- An integer ≥ 0.
+
+**Does:** overrides the global track cap for one space.
+
+**Example:**
+
+```lua
+track.set_count_override("code", 2)
+```
+
 ## App Bar
 
 The **app bar** lists every window in the current space — for
@@ -1112,6 +1270,12 @@ KiwiDesk.set_new_window_placement_override("mail", "last")
 
 Each layout also has its own global setter (e.g.
 `bsp.set_new_window_placement`, `stack.set_new_window_placement`).
+
+The **track** layout is the exception: it follows
+`track.set_new_window` (`own_track` / `focused_track`) instead,
+and this per-space placement override does not apply to track
+spaces — the flat-index vocabulary cannot express "opens its
+own track".
 
 ## Drag & Drop Rearranging
 
@@ -1606,9 +1770,10 @@ focused window resizes itself directly, in every layout mode:
 `"x"` changes its width by the delta, `"y"` its height, top-left
 corner anchored, floored at `min_window_size` (a window already
 smaller than that just shrinks no further). Tiled windows
-only resize in bsp, stack, and scrolling layouts (monocle, grid,
-and the floating layout report "not supported"); what the
-`delta` actually adjusts depends on the layout:
+only resize in bsp, stack, scrolling, and track layouts
+(monocle, grid, and the floating layout report "not
+supported"); what the `delta` actually adjusts depends on the
+layout:
 
 - **bsp** — per-axis (#56): `"x"` nudges the side-by-side split
   ratio (`bsp.set_ratio_h`), `"y"` the stacked one
@@ -1634,6 +1799,15 @@ and the floating layout report "not supported"); what the
   the layout's own scroll axis (columns for horizontal, rows for
   vertical), regardless of which `axis` you pass — the `x`/`y`
   argument does not steer it.
+- **track** — every resize has one true target (#128, the
+  point of the layout). The axis **across** the tracks (`"x"`
+  for columns, `"y"` for rows) grows or shrinks the focused
+  window's whole *track*; the axis **along** them grows the
+  focused window's *share within its track* — the same
+  per-window weights as the stack's `"y"` path, with the same
+  session-scoped lifetime and `min_window_size` cap. A single
+  track cannot trade cross-axis space, and a window alone in
+  its track has no share to grow; both report an error.
 
 **Example:**
 
@@ -2361,7 +2535,10 @@ still running).
 Each space object has: `id`, `mode`, `windows` (array of window ids),
 `focused` (focused window id or `nil`), and — only while a stack
 column carries an uneven `resize("y")` split — `stack_weights`
-(window id → session weight, #67).
+(window id → session weight, #67). Track spaces additionally
+carry `track_breaks` (ids of the windows that start a track,
+#128) and, while a track holds an uneven cross-axis split,
+`track_weights` (head window id → session weight).
 
 Each window object has: `id`, `app`, `title`, `floating` (boolean).
 

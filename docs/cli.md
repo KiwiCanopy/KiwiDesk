@@ -53,6 +53,7 @@ KiwiDesk service restart
 | | `make_tiled` | — |
 | | `make_auto` | — |
 | | `resize` | `x\|y`, delta (px) |
+| | `move_to_track` | direction across the tracks (track spaces) |
 | Launch | `pull_or_spawn` | app name |
 | | `spawn_new` | app name |
 | System | `set_mode` | [space,] mode |
@@ -112,12 +113,18 @@ KiwiDesk service restart
 | | `scroll.set_anchor` | `center`, or edge `left\|right` (`top\|bottom` vertical) |
 | | `scroll.set_orientation` | `horizontal\|vertical` |
 | | `scroll.set_new_window_placement` | placement¹ (default `after_focused`) |
+| | `scroll.set_wrap_focus` | true\|false (default false) |
 | Grid | `grid.set_type` | `dynamic\|rigid` |
 | | `grid.set_fill_empty_space` | true\|false |
 | | `grid.set_split_direction` | `horizontal\|vertical` |
 | | `grid.set_dimensions` | columns, rows |
 | | `grid.set_new_window_placement` | placement¹ (default `last`) |
-| Spawn | `set_new_window_placement_override` | space id, placement¹ |
+| Track | `track.set_axis` | `vertical\|horizontal` (default vertical = columns) |
+| | `track.set_count` | n (0 = dynamic, the default) |
+| | `track.set_overflow_style` | `cascade_overflow\|cascade_all` (default `cascade_overflow`) |
+| | `track.set_new_window` | `own_track\|focused_track` (default `own_track`) |
+| | `track.set_wrap_focus` | true\|false (default false) |
+| Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
 
 ¹ placement: `first\|last\|before_focused\|after_focused`
 
@@ -136,8 +143,11 @@ Stack is focus-aware too (#67): `x` moves the master/stack
 split in the direction that grows the *focused* window, `y`
 grows the focused window's vertical share of its column
 (session-scoped weights, reset on relaunch). Scrolling resizes
-the slot along its own scroll axis for either `x` or `y`.
-monocle, grid, and floating reply "not supported".
+the slot along its own scroll axis for either `x` or `y`. In a
+track space the axis across the tracks resizes the focused
+window's track, the axis along them its share within the track
+(#128; session-scoped weights too). monocle, grid, and floating
+reply "not supported".
 
 ## Event Stream
 

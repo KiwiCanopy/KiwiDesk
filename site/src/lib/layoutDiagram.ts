@@ -1,7 +1,7 @@
 // KiwiDesk — shared inline layout diagrams.
 //
-// The six little SVG sketches (bsp, stack, scrolling, monocle,
-// grid, floating) that illustrate each tiling layout. Extracted
+// The seven little SVG sketches (bsp, stack, scrolling, monocle,
+// grid, track, floating) that illustrate each tiling layout. Extracted
 // here so BOTH the marketing landing (Landing.astro, Nerd
 // mode "Layouts" grid) and the newcomer /learn/ page render the
 // exact same drawings from one source — no redraw, no drift.
@@ -60,6 +60,15 @@ export function layoutDiagram(name: string): string {
           r(8, 48, 44, 34) +
           r(58, 48, 44, 34) +
           r(108, 48, 44, 34)
+      );
+    case "track":
+      // Three columns, the middle one split — a wider accent
+      // window over a smaller one (per-track resize).
+      return svg(
+        r(8, 8, 40, 74) +
+          r(54, 8, 52, 44, "tile tile--accent") +
+          r(54, 58, 52, 24) +
+          r(112, 8, 40, 74)
       );
     case "floating":
       return svg(
