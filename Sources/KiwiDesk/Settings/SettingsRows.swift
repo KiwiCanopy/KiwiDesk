@@ -175,10 +175,15 @@ struct StepperRow: View {
 /// Stack, Scrolling, Grid).
 struct PlacementPicker: View {
     @Binding var placement: SpawnPlacement
+    /// Row label; defaults to "New window". Track passes
+    /// "Position" — it already has a separate own/focused mode
+    /// row above, so a second "New window" would read wrong.
+    var label: String? = nil
 
     var body: some View {
-        DropdownRow(label: newWindowLabel) {
-            Picker(newWindowLabel, selection: $placement) {
+        let rowLabel = label ?? newWindowLabel
+        return DropdownRow(label: rowLabel) {
+            Picker(rowLabel, selection: $placement) {
                 Text(L("placement.first", "First"))
                     .tag(SpawnPlacement.first)
                 Text(L("placement.last", "Last"))

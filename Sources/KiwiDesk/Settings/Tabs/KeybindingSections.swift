@@ -70,6 +70,38 @@ struct MoveWindowsSection: View {
                     command: command
                 )
             }
+            // Track authoring rows (#188): always rendered — no
+            // gate. The caption tells newcomers these only matter
+            // in the track layout, so unbound rows in another
+            // layout don't read as broken.
+            Text(
+                L(
+                    "shortcuts.move_to_track",
+                    "Move to track"
+                )
+            )
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
+            .padding(.top, 4)
+            Text(
+                L(
+                    "shortcuts.move_to_track.caption",
+                    "(only relevant if you're using the track "
+                        + "layout)"
+                )
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            ForEach(
+                KeybindingCatalog.moveToTrackRows
+                    + KeybindingCatalog.trackSwapRows
+            ) { command in
+                NavRow(
+                    model: model,
+                    bindings: $bindings,
+                    command: command
+                )
+            }
             if !spaces.isEmpty {
                 Text(
                     L("shortcuts.move_to_space", "Move to space")
@@ -121,18 +153,37 @@ struct SizeFloatSection: View {
             Text(sizeFloatCaption)
                 .font(.caption)
                 .foregroundStyle(.secondary)
+            Divider()
+            // Unsupported-resize cue (#184): the beep when a
+            // resize hotkey can't act in the active layout.
+            // Default on; users binding resize keys broadly
+            // across layouts can mute it.
+            Toggle(
+                L(
+                    "shortcuts.size_float.feedback",
+                    "Alert sound when resize can't apply"
+                ),
+                isOn: $model.config.settings.resizeFeedback
+            )
         }
     }
 
+    // A meaning change replaced the old `axes_caption` key
+    // (stale since track landed, #128/#183): per
+    // docs/translating.md a changed English text gets a NEW
+    // key, never a rename — rename-key would carry the stale
+    // translations forward as if still valid.
     private var sizeFloatCaption: String {
         L(
-            "shortcuts.size_float.axes_caption",
+            "shortcuts.size_float.layouts_caption",
             "Grow/Shrink only applies in the bsp, stack, "
-                + "and scrolling layouts; it is a no-op in "
-                + "monocle, grid, and floating. Width and "
-                + "height resize independently; scrolling "
-                + "resizes its slot along the scroll axis "
-                + "for both."
+                + "scrolling, and track layouts; it is a "
+                + "no-op in monocle, grid, and floating. "
+                + "Width and height resize independently; "
+                + "scrolling resizes its slot along the "
+                + "scroll axis for both, and in track one "
+                + "axis resizes the window's track, the "
+                + "other its share within it."
         )
     }
 }

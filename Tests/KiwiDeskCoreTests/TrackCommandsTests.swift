@@ -42,18 +42,57 @@ struct TrackCommandsTests {
                 args: [.bool(true)]
             ).isSuccess
         )
-        #expect(
-            core.execute(
-                "track.set_overflow_style",
-                args: [.string("cascade_all")]
-            ).isSuccess
-        )
         let track = core.tiler.settings.track
         #expect(track.axis == .horizontal)
         #expect(track.count == 3)
         #expect(track.newWindow == .focusedTrack)
         #expect(track.wrapFocus)
-        #expect(track.overflowStyle == .cascadeAll)
+    }
+
+    @Test("overflow_style + new_window_position set (#188)")
+    func overflowAndPositionSetters() {
+        let core = makeCore()
+        // Track defaults to cascade_all (#188).
+        #expect(
+            core.tiler.settings.track.overflowStyle
+                == .cascadeAll
+        )
+        #expect(
+            core.execute(
+                "track.set_overflow_style",
+                args: [.string("cascade_overflow")]
+            ).isSuccess
+        )
+        #expect(
+            core.tiler.settings.track.overflowStyle
+                == .cascadeOverflow
+        )
+        #expect(
+            core.execute(
+                "track.set_overflow_style_override",
+                args: [.string("2"), .string("cascade_all")]
+            ).isSuccess
+        )
+        #expect(
+            core.tiler.settings.track.override[SpaceID("2")]?
+                .overflowStyle == .cascadeAll
+        )
+        #expect(
+            core.execute(
+                "track.set_new_window_position",
+                args: [.string("last")]
+            ).isSuccess
+        )
+        #expect(
+            core.tiler.settings.track.newWindowPosition == .last
+        )
+        // A bad value fails cleanly.
+        #expect(
+            !core.execute(
+                "track.set_overflow_style",
+                args: [.string("nonsense")]
+            ).isSuccess
+        )
     }
 
     @Test("set_count couples the automatic flag (#178)")
@@ -146,12 +185,6 @@ struct TrackCommandsTests {
                 args: [.string("nowhere")]
             ).isSuccess
         )
-        #expect(
-            !core.execute(
-                "track.set_overflow_style",
-                args: [.string("cascade_none")]
-            ).isSuccess
-        )
         #expect(core.tiler.settings.track == TrackParams())
     }
 
@@ -170,22 +203,11 @@ struct TrackCommandsTests {
                 args: [.string("2"), .number(2)]
             ).isSuccess
         )
-        #expect(
-            core.execute(
-                "track.set_overflow_style_override",
-                args: [.string("2"), .string("cascade_all")]
-            ).isSuccess
-        )
         let over = core.tiler.settings.track.override[
             SpaceID("2")
         ]
         #expect(over?.axis == .horizontal)
         #expect(over?.count == 2)
-        #expect(over?.overflowStyle == .cascadeAll)
-        #expect(
-            core.tiler.settings.resolvedTrack(for: "2")
-                .overflowStyle == .cascadeAll
-        )
         // The global params are untouched.
         #expect(core.tiler.settings.track.axis == .vertical)
         #expect(

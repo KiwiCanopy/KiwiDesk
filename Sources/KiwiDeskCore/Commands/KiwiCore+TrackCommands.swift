@@ -40,13 +40,6 @@ extension KiwiCore {
                 return .fail("expected a boolean")
             }
             tiler.settings.track.autoTracks = on
-        case "track.set_overflow_style":
-            guard
-                let style = Self.parseOverflowStyle(
-                    args.first?.stringValue
-                )
-            else { return Self.overflowStyleError }
-            tiler.settings.track.overflowStyle = style
         case "track.set_new_window":
             guard let raw = args.first?.stringValue,
                 let rule = TrackParams.NewWindowTrack(
@@ -58,6 +51,18 @@ extension KiwiCore {
                 )
             }
             tiler.settings.track.newWindow = rule
+        case "track.set_new_window_position":
+            guard let placement = parsePlacement(args) else {
+                return placementError
+            }
+            tiler.settings.track.newWindowPosition = placement
+        case "track.set_overflow_style":
+            guard
+                let style = Self.parseTrackOverflowStyle(
+                    args.first?.stringValue
+                )
+            else { return Self.trackOverflowError }
+            tiler.settings.track.overflowStyle = style
         case "track.set_wrap_focus":
             guard let on = args.first?.boolValue else {
                 return .fail("expected a boolean")
@@ -124,10 +129,10 @@ extension KiwiCore {
             over.autoTracks = on
         case "overflow_style":
             guard
-                let style = Self.parseOverflowStyle(
+                let style = Self.parseTrackOverflowStyle(
                     rest.first?.stringValue
                 )
-            else { return Self.overflowStyleError }
+            else { return Self.trackOverflowError }
             over.overflowStyle = style
         default:
             return .fail(
@@ -145,7 +150,20 @@ extension KiwiCore {
         raw.flatMap(TrackParams.Axis.init(rawValue:))
     }
 
+    /// Shared by the global overflow setter and its per-space
+    /// override; reuses stack's `cascade_overflow`/`cascade_all`
+    /// vocabulary (#188).
+    static func parseTrackOverflowStyle(
+        _ raw: String?
+    ) -> StackParams.OverflowStyle? {
+        raw.flatMap(StackParams.OverflowStyle.init(rawValue:))
+    }
+
     private static let trackAxisError = CommandResponse.fail(
         "expected vertical|horizontal"
+    )
+
+    private static let trackOverflowError = CommandResponse.fail(
+        "expected cascade_overflow|cascade_all"
     )
 }

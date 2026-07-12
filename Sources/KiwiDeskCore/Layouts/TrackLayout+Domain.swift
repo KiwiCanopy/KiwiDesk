@@ -107,61 +107,6 @@ extension Space {
             trackWeights[successor] = weight
         }
     }
-    /// Inserts a window per the track layout's `new_window`
-    /// rule (#128): its own new track right after the focused
-    /// window's track, or joining the focused track after the
-    /// focused window. `ownTrack` falls back to joining when a
-    /// positive `cap` is already reached. `isTiled` supplies
-    /// the float knowledge the space itself does not hold — the
-    /// partition only spans tiled windows.
-    public mutating func insertIntoTrack(
-        _ window: WindowID,
-        rule: TrackParams.NewWindowTrack,
-        cap: Int,
-        isTiled: (WindowID) -> Bool
-    ) {
-        guard !windows.contains(window) else { return }
-        let tiled = windows.filter(isTiled)
-        guard !tiled.isEmpty else {
-            windows.append(window)
-            trackBreaks.insert(window)
-            return
-        }
-        let counts = TrackLayout.counts(
-            of: tiled,
-            breaks: trackBreaks,
-            cap: cap
-        )
-        let ranges = TrackLayout.ranges(of: counts)
-        let focusedIndex = focused.flatMap {
-            tiled.firstIndex(of: $0)
-        }
-        let track =
-            focusedIndex.flatMap { index in
-                TrackLayout.trackIndex(
-                    ofWindowIndex: index,
-                    counts: counts
-                )
-            } ?? counts.count - 1
-        let opensOwn =
-            rule == .ownTrack
-            && (cap <= 0 || counts.count < cap)
-        // Insert after an anchor window: the focused one when
-        // joining, the track's last tiled window when opening a
-        // track behind it. Both positions land inside/behind
-        // the intended track no matter where floating windows
-        // sit in the full array.
-        let anchor: WindowID
-        if opensOwn {
-            anchor = tiled[ranges[track].upperBound - 1]
-            trackBreaks.insert(window)
-        } else {
-            anchor =
-                focusedIndex.map { tiled[$0] }
-                ?? tiled[ranges[track].upperBound - 1]
-        }
-        insert(window, after: anchor)
-    }
 
     /// Moves a window into the adjacent track (#128): joining
     /// its end when one exists, opening a new edge track
@@ -223,6 +168,69 @@ extension Space {
             }
             windows.insert(window, at: 0)
             trackBreaks.insert(window)
+        }
+        return true
+    }
+
+    /// Swaps the focused window's whole track with the adjacent
+    /// one (#182): the two contiguous slices exchange places in
+    /// the tiled order. Break markers and track weights are
+    /// keyed by window and ride their heads, so both follow the
+    /// slices automatically — only an *implicit* head (tiled
+    /// index 0 without an explicit marker) is materialized
+    /// first, or the track it starts would merge into its new
+    /// predecessor after the exchange. Floating windows
+    /// interleaved in the full array keep their slots: only the
+    /// tiled positions are rewritten (the `moveWindowToTrack`
+    /// filter discipline). `delta` is ±1 across the axis, never
+    /// wrapping. Returns false when the window is untracked or
+    /// no track lies in that direction (a single track has no
+    /// neighbor by construction).
+    public mutating func swapTracks(
+        _ window: WindowID,
+        delta: Int,
+        cap: Int,
+        isTiled: (WindowID) -> Bool
+    ) -> Bool {
+        let tiled = windows.filter(isTiled)
+        guard let index = tiled.firstIndex(of: window) else {
+            return false
+        }
+        let counts = TrackLayout.counts(
+            of: tiled,
+            breaks: trackBreaks,
+            cap: cap
+        )
+        let ranges = TrackLayout.ranges(of: counts)
+        guard
+            let track = TrackLayout.trackIndex(
+                ofWindowIndex: index,
+                counts: counts
+            )
+        else { return false }
+        let target = track + delta
+        guard ranges.indices.contains(target) else {
+            return false
+        }
+        let lead = ranges[min(track, target)]
+        let trail = ranges[max(track, target)]
+        // Materialize the implicit index-0 head only when the
+        // exchange moves it: an untouched track 0 keeps its
+        // authored marker set (review m1).
+        if lead.lowerBound == 0 {
+            trackBreaks.insert(tiled[0])
+        }
+        // Adjacent slices exchange; everything around them
+        // keeps its order.
+        var reordered = Array(tiled[..<lead.lowerBound])
+        reordered += tiled[trail]
+        reordered += tiled[lead]
+        reordered += tiled[trail.upperBound...]
+        var next = 0
+        for slot in windows.indices
+        where isTiled(windows[slot]) {
+            windows[slot] = reordered[next]
+            next += 1
         }
         return true
     }

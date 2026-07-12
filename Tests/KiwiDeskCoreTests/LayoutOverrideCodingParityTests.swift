@@ -94,7 +94,9 @@ struct LayoutOverrideCodingParityTests {
         over.axis = .horizontal
         over.autoTracks = false
         over.count = 3
-        over.overflowStyle = .cascadeAll
+        // ≠ the TrackParams default (cascade_all) so resolve is
+        // exercised.
+        over.overflowStyle = .cascadeOverflow
         return over
     }
 

@@ -95,21 +95,65 @@ enum KeybindingCatalog {
         )
     }
 
-    /// The four directional move-to-track rows (#128). All four
-    /// directions are offered — which pair acts depends on the
-    /// space's track axis (the cross-axis pair; the other two
-    /// fail with a hint), like the scrolling axis decides which
-    /// focus pair steps the row.
-    static let moveToTrackDirections: [NavCommand] =
-        directions.map { dir, phrase in
+    /// The track verbs speak prev/next, not compass directions
+    /// (#185 review): they act on the 1D track sequence, so
+    /// two rows replace four (no per-axis inert pair, and a
+    /// binding survives an axis flip). prev = the track toward
+    /// the sequence start — left for columns, top for rows;
+    /// next toward the end — right/bottom.
+    private static let sequenceSteps = [
+        ("prev", "previous"), ("next", "next"),
+    ]
+
+    /// The translated phrase for a sequence step's Lua
+    /// argument (the `directionPhrase` twin). i18n seam: the
+    /// one phrase interpolates into BOTH sentence frames
+    /// (move + swap), which works for en/de but cannot carry
+    /// per-frame case/gender inflection — if a 1.0 language
+    /// (#95) needs it, split into per-frame keys then.
+    @MainActor private static func sequencePhrase(
+        _ step: String
+    ) -> String {
+        switch step {
+        case "prev":
+            return L("keybinding.seq.prev", "previous")
+        case "next":
+            return L("keybinding.seq.next", "next")
+        default:
+            return step
+        }
+    }
+
+    /// The two move-to-track rows (#128, prev/next). Labels
+    /// name the actor — the window moves, not the focus.
+    static let moveToTrackRows: [NavCommand] =
+        sequenceSteps.map { step, phrase in
             NavCommand(
-                label: "Move to the track \(phrase)",
-                lua: "KiwiDesk.move_to_track(\"\(dir)\")",
+                label: "Move window to \(phrase) track",
+                lua: "KiwiDesk.move_to_track(\"\(step)\")",
                 displayLabel: {
                     L(
-                        "keybinding.move_to_track",
-                        "Move to the track %1$@",
-                        directionPhrase(dir)
+                        "keybinding.move_window_to_track",
+                        "Move window to %1$@ track",
+                        sequencePhrase(step)
+                    )
+                }
+            )
+        }
+
+    /// The two whole-track swap rows (#182, prev/next).
+    /// Always rendered like `moveToTrackRows` (the gate was
+    /// dropped in #188); only relevant in the track layout.
+    static let trackSwapRows: [NavCommand] =
+        sequenceSteps.map { step, phrase in
+            NavCommand(
+                label: "Swap with \(phrase) track",
+                lua: "track.swap(\"\(step)\")",
+                displayLabel: {
+                    L(
+                        "keybinding.swap_with_track",
+                        "Swap with %1$@ track",
+                        sequencePhrase(step)
                     )
                 }
             )
@@ -172,7 +216,8 @@ enum KeybindingCatalog {
             NavGroup(
                 title: "Window Management",
                 commands: swapDirections
-                    + moveToTrackDirections
+                    + moveToTrackRows
+                    + trackSwapRows
                     + moveToSpace(spaces)
             ),
         ]

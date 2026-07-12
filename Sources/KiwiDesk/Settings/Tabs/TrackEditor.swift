@@ -13,6 +13,20 @@ struct TrackEditor: View {
             L("layout.track.name", "Track"),
             symbol: LayoutMode.track.glyph
         ) {
+            // Track is a somewhat more advanced layout
+            // (multi-window tracks, caps, per-track resize), so
+            // the caption sets that expectation up front (#188).
+            // Nothing here is gated.
+            Text(
+                L(
+                    "layout.track.header_caption",
+                    "A more advanced layout: several windows can "
+                        + "share one track, with a track limit "
+                        + "and per-track resize."
+                )
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
             SegmentedPicker(
                 L("track.axis", "Axis"),
                 selection: $model.config.settings.track.axis,
@@ -33,14 +47,6 @@ struct TrackEditor: View {
                     ),
                 ]
             )
-            Divider()
-            trackAuto
-            StepperRow(
-                label: L("track.count", "Track limit"),
-                value: $model.config.settings.track.count,
-                in: 1...10
-            )
-            .disabled(model.config.settings.track.autoTracks)
             Divider()
             SegmentedPicker(
                 L("track.new_window", "New window"),
@@ -63,28 +69,23 @@ struct TrackEditor: View {
                     ),
                 ]
             )
-            SegmentedPicker(
-                L("layout_params.overflow", "Overflow"),
-                selection: $model.config.settings.track
-                    .overflowStyle,
-                options: [
-                    (
-                        L(
-                            "layout_params.cascade_overflow",
-                            "Cascade overflow"
-                        ),
-                        StackParams.OverflowStyle
-                            .cascadeOverflow
-                    ),
-                    (
-                        L(
-                            "layout_params.cascade_all",
-                            "Cascade all"
-                        ),
-                        .cascadeAll
-                    ),
-                ]
+            PlacementPicker(
+                placement: $model.config.settings.track
+                    .newWindowPosition,
+                label: L("track.new_window_position", "Position")
             )
+            Divider()
+            trackAuto
+            StepperRow(
+                label: L("track.count", "Track limit"),
+                value: $model.config.settings.track.count,
+                in: 1...10
+            )
+            .disabled(
+                model.config.settings.track.autoTracks
+            )
+            Divider()
+            overflow
             Divider()
             // Bare behavior toggle in its own slot — the #168
             // placement mirrored from the Scrolling section.
@@ -93,6 +94,37 @@ struct TrackEditor: View {
                 L("track.wrap_focus", "Wrap focus"),
                 isOn: $model.config.settings.track.wrapFocus
             )
+        }
+    }
+
+    /// How an over-capacity track renders its windows (#188):
+    /// `cascade_all` (the track default) piles them from the
+    /// top; `cascade_overflow` tiles the fitting ones and piles
+    /// the rest. Reuses stack's `overflow_style` labels.
+    private var overflow: some View {
+        DropdownRow(
+            label: L("layout_params.overflow", "Overflow")
+        ) {
+            Picker(
+                L("layout_params.overflow", "Overflow"),
+                selection: $model.config.settings.track
+                    .overflowStyle
+            ) {
+                Text(
+                    L(
+                        "layout_params.cascade_overflow",
+                        "Cascade overflow"
+                    )
+                )
+                .tag(StackParams.OverflowStyle.cascadeOverflow)
+                Text(
+                    L(
+                        "layout_params.cascade_all",
+                        "Cascade all"
+                    )
+                )
+                .tag(StackParams.OverflowStyle.cascadeAll)
+            }
         }
     }
 

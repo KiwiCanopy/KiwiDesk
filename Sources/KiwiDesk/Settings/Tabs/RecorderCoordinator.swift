@@ -89,6 +89,11 @@ enum RecorderPreflight {
         bindings: Binding<[KeyBinding]>,
         commit: @escaping (String) -> Void
     ) -> RecorderRejection? {
+        // A PURE query: it runs from chord previews (every
+        // in-flight chord change) and from render passes, so
+        // it must never mutate the bindings (#181 review H2 —
+        // a preview keystroke deleted a row, and a body
+        // evaluation mutated state mid-update).
         guard
             let holder = bindings.wrappedValue.first(where: {
                 !$0.combo.isEmpty && $0.combo == combo

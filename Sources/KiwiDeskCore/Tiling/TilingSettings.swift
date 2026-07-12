@@ -19,6 +19,12 @@ public struct TilingSettings: Sendable, Equatable, Codable {
     /// back into it. Layout math never reads this — the bound
     /// row's own literal delta drives an actual resize.
     public var resizeStep: CGFloat = 50
+    /// When true (default), a resize hotkey that cannot act in
+    /// the active layout (monocle, grid, floating space) plays
+    /// the system alert sound (#184) — the "Cmd+Z with nothing
+    /// to undo" idiom. Hotkey fires only: CLI/IPC callers read
+    /// the error JSON and must stay silent. `resize.feedback`.
+    public var resizeFeedback = true
     /// When true (default), a directional `swap` issued from
     /// inside an overflow cascade skips the other windows piled
     /// with the focused one and targets the tiled neighbor
@@ -82,6 +88,7 @@ public struct TilingSettings: Sendable, Equatable, Codable {
     }
 
     private enum ResizeKeys: String, CodingKey {
+        case feedback
         case step
     }
 
@@ -164,6 +171,11 @@ public struct TilingSettings: Sendable, Equatable, Codable {
                 CGFloat.self,
                 forKey: .step
             ) ?? 50
+        resizeFeedback =
+            try resize.decodeIfPresent(
+                Bool.self,
+                forKey: .feedback
+            ) ?? true
     }
 
     private mutating func decodeSpace(
@@ -323,5 +335,6 @@ public struct TilingSettings: Sendable, Equatable, Codable {
             forKey: .resize
         )
         try resize.encode(resizeStep, forKey: .step)
+        try resize.encode(resizeFeedback, forKey: .feedback)
     }
 }

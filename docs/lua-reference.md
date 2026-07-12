@@ -138,24 +138,37 @@ KiwiDesk.move_to_space_and_follow(3)
 
 ### move_to_track
 
-**Expects:** a direction across the space's tracks: `"left"` or
-`"right"` with a vertical axis (columns), `"up"` or `"down"`
-with a horizontal one (rows).
+**Expects:** `"prev"` or `"next"` (exactly these — no
+`previous` alias).
 
 **Does:** in a track-layout space, moves the focused window
-into the adjacent track (joining it at its end). Past the first
-or last track it opens a **new** track at that edge — the
-keyboard way to open tracks, matching what `own_track` spawning
-does. Refused when the space is not in track mode, when
-`track.set_count` already caps the tracks, or when the window
-already forms the edge track alone (nothing would change).
-Never wraps. Along-axis directions report an error naming the
-valid pair.
+into the adjacent track in the sequence (joining it at its
+end). The track verbs speak **prev/next**, not compass
+directions: tracks form a one-dimensional sequence, and the
+same binding keeps working when the axis flips. What that
+means on screen:
+
+| Axis | `"prev"` | `"next"` |
+|---|---|---|
+| `vertical` (columns, default) | the column to the **left** | the column to the **right** |
+| `horizontal` (rows) | the row **above** | the row **below** |
+
+Formally: prev = the lower array index (toward the sequence
+start), next = the higher. Past the first or last track it
+opens a **new** track at that edge — the keyboard way to open
+tracks, matching what `own_track` spawning does. Refused when
+the space is not in track mode, when `track.set_count` already
+caps the tracks, or when the window already forms the edge
+track alone (nothing would change). Never wraps. Focus and
+window `swap` keep their
+spatial left/right/up/down vocabulary — only the two track
+sequence verbs (this and [`track.swap`](#trackswap)) use
+prev/next.
 
 **Example:**
 
 ```lua
-KiwiDesk.move_to_track("right")
+KiwiDesk.move_to_track("next")
 ```
 
 ## Layouts & Gaps
@@ -275,6 +288,25 @@ case, so this lives in config only.
 
 ```lua
 KiwiDesk.set_swap_skips_cascade(true)
+```
+
+### set_resize_feedback
+
+**Expects:** `true` or `false` (default `true`).
+
+**Does:** whether a resize hotkey that cannot act in the active
+layout (monocle, grid, a floating space) plays the system alert
+sound (#184). The no-op itself is correct — those layouts have
+no resize target — but silent failure at the keyboard reads as
+"KiwiDesk ignored me"; the beep is the standard macOS answer.
+Only hotkey fires cue; the same command over CLI/IPC stays
+silent (scripted callers branch on the error JSON). The GUI
+twin lives under Shortcuts ▸ Size & Float.
+
+**Example:**
+
+```lua
+KiwiDesk.set_resize_feedback(false)
 ```
 
 ### Space Identity
@@ -861,6 +893,51 @@ stop at the first/last window. `swap` never wraps.
 monocle.set_wrap_focus(false)
 ```
 
+### monocle.set_new_window_placement
+
+**Expects:** `"first"`, `"last"`, `"before_focused"`, or
+`"after_focused"`.
+
+**Does:** sets where a new window lands in the monocle cycle.
+Since monocle shows one window at a time, this is also where the
+window appears in the focus order. Defaults to `"first"` so a new
+window comes to the front of the carousel rather than being
+buried at the back.
+
+**Example:**
+
+```lua
+monocle.set_new_window_placement("first")
+```
+
+### track.swap
+
+**Expects:** `"prev"` or `"next"` (the
+[`move_to_track`](#move_to_track) sequence vocabulary — see
+its table for what prev/next means per axis: left/right for
+columns, above/below for rows).
+
+**Does:** swaps the focused window's **entire track** — the
+contiguous slice, with its windows, sizes, and in-track shares —
+with the adjacent track in the sequence. The whole-structure
+companion to the window-level `swap` (which is untouched and
+stays spatial), following the
+`stack.promote`/`stack.demote` precedent for layout-specific
+verbs. Never wraps; refused when the space is not in
+track mode, no tiled window is focused, or no track lies that
+way (a single track has no neighbor). Also refused while a
+fixed track limit (`track.set_count` with automatic tracks
+off) is folding extra tracks into the last one: the merged
+view is read-time only — its slices have no marker identity to
+exchange — so raise the limit or re-enable automatic tracks
+first.
+
+**Example:**
+
+```lua
+track.swap("next")
+```
+
 ### track.set_axis
 
 **Expects:** `"vertical"` (default) or `"horizontal"`.
@@ -914,38 +991,65 @@ turning it off with a cap of `n`.
 track.set_auto_tracks(false)
 ```
 
-### track.set_overflow_style
-
-**Expects:** `"cascade_overflow"` (default) or `"cascade_all"`.
-
-**Does:** what happens when the tracks (across the axis) or a
-track's windows (along it) can't all hold `min_window_size` —
-the same vocabulary as `stack.set_overflow_style`, applied to
-both axes. `cascade_overflow` keeps the fitting prefix tiled and
-cascades only the remainder at a title-bar offset;
-`cascade_all` cascades the whole space.
-
-**Example:**
-
-```lua
-track.set_overflow_style("cascade_overflow")
-```
-
 ### track.set_new_window
 
 **Expects:** `"own_track"` (default) or `"focused_track"`.
 
-**Does:** decides where a new window lands in a track space:
-its own new track right after the focused one, or joining the
-focused track right after the focused window. `own_track`
-falls back to joining once `track.set_count` is reached. Track
-spaces follow this instead of the `new_window_placement`
-vocabulary — the flat-index placements cannot say "own track".
+**Does:** decides whether a new window opens its **own** new
+track or **joins** the focused window's track. Where within that
+choice it lands is the separate
+[`track.set_new_window_position`](#track_set_new_window_position).
+`own_track` falls back to joining once `track.set_count` is
+reached. Track spaces use this pair instead of the flat
+`new_window_placement` vocabulary — a flat index cannot say "own
+track".
 
 **Example:**
 
 ```lua
 track.set_new_window("focused_track")
+```
+
+### track.set_new_window_position
+
+**Expects:** `"first"` (default), `"last"`, `"before_focused"`,
+or `"after_focused"`.
+
+**Does:** places the new window within the
+[`track.set_new_window`](#track_set_new_window) choice, reusing
+the shared placement vocabulary. For `own_track` it positions the
+**new track** among the others (`first` = leftmost column /
+topmost row, `last` = the far edge, `before`/`after_focused` =
+beside the focused track). For `focused_track` it positions the
+window among that **track's windows** (`first`/`last` = the
+track's ends, `before`/`after_focused` = around the focused
+window). Defaults to `first` so a new window lands at the visible
+front, never buried in the overflow.
+
+**Example:**
+
+```lua
+track.set_new_window_position("after_focused")
+```
+
+### track.set_overflow_style
+
+**Expects:** `"cascade_all"` (default) or `"cascade_overflow"`.
+
+**Does:** when a track holds more windows than fit at
+`min_window_size`, `cascade_all` piles all of them from the top
+as a title-bar cascade; `cascade_overflow` keeps as many full
+windows as fit and cascades only the rest. Reuses stack's
+overflow vocabulary, but track **defaults to `cascade_all`** (a
+clean top pile) rather than stack's `cascade_overflow`. This
+shapes the windows *inside* a track; when whole tracks stop
+fitting side by side, the fitting tracks always stay tiled and
+only the surplus cascades.
+
+**Example:**
+
+```lua
+track.set_overflow_style("cascade_overflow")
 ```
 
 ### track.set_wrap_focus
@@ -963,21 +1067,6 @@ spaces.
 
 ```lua
 track.set_wrap_focus(true)
-```
-
-### track.set_overflow_style_override
-
-**Expects:**
-
-- A space identifier.
-- `"cascade_overflow"` or `"cascade_all"`.
-
-**Does:** overrides the global overflow style for one space.
-
-**Example:**
-
-```lua
-track.set_overflow_style_override("code", "cascade_all")
 ```
 
 ### track.set_axis_override
@@ -1025,6 +1114,23 @@ track.set_count_override("code", 2)
 
 ```lua
 track.set_auto_tracks_override("code", false)
+```
+
+### track.set_overflow_style_override
+
+**Expects:**
+
+- A space identifier.
+- An overflow style string (`cascade_all` or
+  `cascade_overflow`).
+
+**Does:** overrides the global track overflow style for one
+space.
+
+**Example:**
+
+```lua
+track.set_overflow_style_override("code", "cascade_overflow")
 ```
 
 ## App Bar
@@ -1377,16 +1483,19 @@ KiwiDesk.set_new_window_placement_override("mail", "last")
 - **Scrolling** `after_focused` — opens next to the focused
   column.
 - **Grid** `last` — appending keeps existing cells in place.
-- **Monocle** `last`.
+- **Monocle** `first` — the new window comes to the front of the
+  carousel.
 
 Each layout also has its own global setter (e.g.
-`bsp.set_new_window_placement`, `stack.set_new_window_placement`).
+`bsp.set_new_window_placement`, `stack.set_new_window_placement`,
+`monocle.set_new_window_placement`).
 
 The **track** layout is the exception: it follows
-`track.set_new_window` (`own_track` / `focused_track`) instead,
-and this per-space placement override does not apply to track
-spaces — the flat-index vocabulary cannot express "opens its
-own track".
+`track.set_new_window` (`own_track` / `focused_track`) plus
+`track.set_new_window_position` (`first` default / `last` /
+`before_focused` / `after_focused`) instead, and this per-space
+placement override does not apply to track spaces — a flat index
+cannot express "opens its own track".
 
 ## Drag & Drop Rearranging
 
@@ -1630,7 +1739,10 @@ via title bars.
 The stack layout degrades gradually, per zone: as many windows as
 still fit keep their full size, and only the remainder collapses
 into a cascade at the bottom of the column. Only when not even one
-full window fits does the whole zone cascade.
+full window fits does the whole zone cascade. Track behaves the
+same way on both axes — the fitting prefix of tracks (or of a
+track's windows) stays tiled and only the remainder cascades.
+This is built into the layout, not a setting.
 
 For a cascade to read correctly, upper windows must sit *behind*
 lower ones. KiwiDesk restores this z-order whenever a window
@@ -1885,10 +1997,14 @@ focused window resizes itself directly, in every layout mode:
 `"x"` changes its width by the delta, `"y"` its height, top-left
 corner anchored, floored at `min_window_size` (a window already
 smaller than that just shrinks no further). Tiled windows
-only resize in bsp, stack, scrolling, and track layouts
-(monocle, grid, and the floating layout report "not
-supported"); what the `delta` actually adjusts depends on the
-layout:
+only resize in bsp, stack, scrolling, and track layouts —
+monocle, grid, and the floating layout report "not supported",
+and when that failure comes from a **hotkey** press KiwiDesk
+plays the system alert sound so the no-op is perceivable at
+the keyboard (the Cmd+Z-with-nothing-to-undo idiom; #184).
+Mute it with `set_resize_feedback(false)` — CLI and IPC
+callers never hear it, they read the error JSON. What the
+`delta` actually adjusts depends on the layout:
 
 - **bsp** — per-axis (#56): `"x"` nudges the side-by-side split
   ratio (`bsp.set_ratio_h`), `"y"` the stacked one

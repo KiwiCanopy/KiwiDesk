@@ -13,6 +13,7 @@ struct TrackOverrideTests {
         // Per-layout behavior, not per-space geometry (the
         // ScrollingOverride precedent for wrapFocus).
         "newWindow",
+        "newWindowPosition",
         "wrapFocus",
         // The override map itself.
         "override",
@@ -89,6 +90,22 @@ struct TrackOverrideTests {
         settings.track.override[SpaceID("2")] = over
         #expect(settings.resolvedTrack(for: "2").count == 3)
         #expect(settings.resolvedTrack(for: "1").count == 0)
+    }
+
+    @Test("overflow_style resolves per space (#188)")
+    func overflowResolves() {
+        var global = TrackParams()  // default cascade_all
+        var over = TrackOverride()
+        over.overflowStyle = .cascadeOverflow
+        #expect(
+            over.resolved(onto: global).overflowStyle
+                == .cascadeOverflow
+        )
+        global.overflowStyle = .cascadeAll
+        #expect(
+            TrackOverride().resolved(onto: global).overflowStyle
+                == .cascadeAll
+        )
     }
 
     @Test("override map nests under layout.track and round-trips")

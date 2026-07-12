@@ -47,19 +47,20 @@ public struct TrackLayout: LayoutSystem {
         let total = weights.reduce(0, +)
         // The min-size cap shares the stack's authority (#44/
         // #67): when the smallest track would drop below
-        // min_window_size, the tracks overflow — how they
-        // overflow follows `overflow_style` (below), like a
-        // stack column.
+        // min_window_size, the tracks overflow (below).
         let limit = StackLayout.maxColumnTotal(
             smallestWeight: weights.min() ?? 1,
             height: Double(span),
             minSize: Double(context.minWindowSize)
         )
         // One region per track: proportional when everything
-        // fits; otherwise `cascade_overflow` tiles the fitting
-        // prefix and cascades the rest (the axis-general stack
-        // rule), and `cascade_all` (or a fully-degenerate span)
-        // cascades the whole space.
+        // fits; otherwise cascade-overflow tiles the fitting
+        // prefix and cascades the rest. The cross-axis track
+        // overflow stays hard-coded cascade_overflow so fitting
+        // tracks never dissolve — the `overflow_style` knob
+        // (#188) shapes the windows *inside* a track, along the
+        // axis (see `trackFrames`). A fully-degenerate span
+        // still cascades the whole space (physics, not a knob).
         let regions: [CGRect]
         if span > 0, total <= limit {
             regions = proportionalRegions(
@@ -71,15 +72,13 @@ public struct TrackLayout: LayoutSystem {
                 vertical: vertical,
                 usable: usable
             )
-        } else if context.track.overflowStyle == .cascadeOverflow,
-            let over = OverlapStack.overflowFrames(
-                count: counts.count,
-                in: usable,
-                vertical: !vertical,
-                minSize: context.minWindowSize,
-                gap: gap
-            )
-        {
+        } else if let over = OverlapStack.overflowFrames(
+            count: counts.count,
+            in: usable,
+            vertical: !vertical,
+            minSize: context.minWindowSize,
+            gap: gap
+        ) {
             regions = over
         } else {
             return OverlapStack.frames(
@@ -145,8 +144,12 @@ public struct TrackLayout: LayoutSystem {
     /// 1.0). Vertical tracks stack their windows top to
     /// bottom, horizontal tracks lay them side by side. When
     /// the smallest share stops fitting `minWindowSize`, the
-    /// track overflows per `overflow_style` — the same
-    /// axis-general rule as the cross-axis tracks.
+    /// track overflows per `overflow_style` (#188):
+    /// `cascade_overflow` tiles the fitting prefix and piles the
+    /// rest; `cascade_all` (the track default) piles every
+    /// window from the top. The cross-axis track overflow above
+    /// stays `cascade_overflow` regardless — the knob shapes the
+    /// windows inside a track, never dissolves the tracks.
     private func trackFrames(
         _ windows: ArraySlice<WindowID>,
         in region: CGRect,
@@ -172,16 +175,24 @@ public struct TrackLayout: LayoutSystem {
             minSize: Double(context.minWindowSize)
         )
         guard available > 0, total <= limit else {
-            let ids = Array(windows)
-            if context.track.overflowStyle == .cascadeOverflow,
-                let rects = OverlapStack.overflowFrames(
-                    count: ids.count,
+            // cascade_all piles every window from the top; the
+            // whole-region cascade is also the physics fallback
+            // when not even the fitting prefix holds (#188).
+            if context.track.overflowStyle == .cascadeAll {
+                return OverlapStack.frames(
+                    for: windows,
                     in: region,
-                    vertical: vertical,
-                    minSize: context.minWindowSize,
-                    gap: gap
+                    minSize: context.minWindowSize
                 )
-            {
+            }
+            let ids = Array(windows)
+            if let rects = OverlapStack.overflowFrames(
+                count: ids.count,
+                in: region,
+                vertical: vertical,
+                minSize: context.minWindowSize,
+                gap: gap
+            ) {
                 return Dictionary(
                     uniqueKeysWithValues: zip(ids, rects)
                 )

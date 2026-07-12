@@ -7,6 +7,34 @@ import Foundation
 /// base value and write target follow the space's own override,
 /// never the global — so a CLI resize can't shift other spaces.
 extension KiwiCore {
+    /// The unsupported-command cue seam (#184): the system
+    /// alert sound, only when the failing command runs inside a
+    /// hotkey fire (`KeybindingManager.isFiring`) and the
+    /// `resize.feedback` toggle is on. CommandResponse.fail
+    /// stays the CLI/IPC contract either way. Route future
+    /// hotkey no-ops through here so they inherit the cue —
+    /// deliberately NOT wired to every `.fail` today: routine
+    /// edge failures (focus at a row's end) would beep on
+    /// every press.
+    func cueUnsupportedCommand() {
+        guard keys.isFiring,
+            tiler.settings.resizeFeedback
+        else { return }
+        NSSound.beep()
+    }
+
+    /// `KiwiDesk.set_resize_feedback(bool)` (#184): mute or
+    /// restore the cue. No retile — pure behavior toggle.
+    func setResizeFeedback(
+        _ args: [JSONValue]
+    ) -> CommandResponse {
+        guard let on = args.first?.boolValue else {
+            return .fail("expected a boolean")
+        }
+        tiler.settings.resizeFeedback = on
+        return .ok()
+    }
+
     func resize(_ args: [JSONValue]) -> CommandResponse {
         guard let axis = args.first?.stringValue,
             axis == "x" || axis == "y",
@@ -60,6 +88,12 @@ extension KiwiCore {
                 space: space
             )
         default:
+            // Correct no-op (macOS full-screen/Stage Manager
+            // expose no resize either), but perceivable (#184):
+            // a hotkey press beeps — the Cmd+Z-with-nothing-
+            // to-undo idiom — while CLI/IPC callers only read
+            // the error JSON.
+            cueUnsupportedCommand()
             return .fail(
                 "resize not supported in "
                     + space.mode.rawValue

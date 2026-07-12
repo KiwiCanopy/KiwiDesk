@@ -90,11 +90,11 @@ public final class TilingEngine {
         let tiled = space.windows.filter { id in
             state.windows[id]?.isFloating == false
         }
-        return (
-            space,
-            tiled,
-            settings.context(bounds: bounds, space: space)
+        let context = settings.context(
+            bounds: bounds,
+            space: space
         )
+        return (space, tiled, context)
     }
 
     /// The frames the active space's layout assigns right

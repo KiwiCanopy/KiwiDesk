@@ -8,10 +8,10 @@ import Foundation
 /// shape as `StackOverride`.
 ///
 /// Mirror-parity is guarded by a reflection-based test
-/// (`TrackOverrideTests`) per AGENTS.md §5. `newWindow` and
-/// `wrapFocus` are excluded by design: both are per-layout
-/// behavior, not per-space geometry (the `ScrollingOverride`
-/// precedent for `wrapFocus`).
+/// (`TrackOverrideTests`) per AGENTS.md §5. `newWindow`,
+/// `newWindowPosition`, and `wrapFocus` are excluded by design:
+/// all three are per-layout behavior, not per-space geometry
+/// (the `ScrollingOverride` precedent for `wrapFocus`).
 public struct TrackOverride: Sendable, Equatable {
     public var axis: TrackParams.Axis?
     public var autoTracks: Bool?

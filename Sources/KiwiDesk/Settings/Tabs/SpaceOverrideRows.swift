@@ -282,7 +282,11 @@ struct SpaceOverrideRows: View {
         )
         OverrideStepperRow(
             label: L("track.count", "Track limit"),
-            value: binding(\.track.override, space, \.count),
+            value: binding(
+                \.track.override,
+                space,
+                \.count
+            ),
             global: g.track.count,
             range: 0...10
         )

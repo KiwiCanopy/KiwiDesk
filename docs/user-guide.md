@@ -248,10 +248,12 @@ Expand each layout type to adjust its defaults:
   from the last window back to the first (and vice versa). Swap
   never wraps.
 - **Monocle**: orientation (affects which arrow keys cycle focus
-  and where the app bar sits) and wrap focus. Monocle is a
-  carousel, so wrap focus is **on** by default — cycling past the
-  last window returns to the first; turn it off to stop at the
-  ends.
+  and where the app bar sits), wrap focus, and **New window**
+  placement. Monocle is a carousel, so wrap focus is **on** by
+  default — cycling past the last window returns to the first;
+  turn it off to stop at the ends. New window defaults to
+  **first**, so a new window comes to the front of the cycle
+  rather than the back.
 - **Grid**: type (dynamic or rigid), fill empty space (yes/no),
   split direction (horizontal or vertical), and column and row
   counts. In dynamic mode the counts are an upper bound — the
@@ -260,23 +262,36 @@ Expand each layout type to adjust its defaults:
   columns and rows as the screen allows at the minimum window
   size instead of the typed counts (greying them out), so a
   landscape monitor gets more columns than rows.
-- **Track**: axis (vertical = columns side by side, horizontal =
-  rows), **Automatic tracks** (on by default — tracks open and
-  collapse as windows come and go; turn it off to pin a fixed
-  **Track limit**, which greys out while automatic is on),
-  overflow style (when too many tracks or
-  windows to hold the minimum size: `cascade_overflow` keeps the
-  fitting ones tiled and cascades only the rest — the same
-  choice as the stack layout — or `cascade_all`), where a new
-  window lands (opens its own track next to the focused one, or
-  joins the focused track), and **Wrap focus** — the same opt-in
-  toggle as Scrolling's,
-  off by default: on, focus wraps within the track along the
-  axis and from the last track to the first across it. Swap
-  never wraps. Track sizes and in-track shares are resize
-  state, session-only like the stack's weights; bind
-  `move_to_track` (Shortcuts ▸ Window Management) to move a
-  window across tracks or open a new one at the edge.
+- **Track**: a somewhat more advanced layout (a caption at the
+  top of the section says so) where several windows can share
+  one track. Axis (vertical = columns side by side, horizontal
+  = rows); **New window** — whether it opens its own track or
+  joins the focused one — with a **Position** picker for where
+  within that choice it lands (first, last, before or after the
+  focused track/window; defaults to **first** so a new window
+  isn't buried in the overflow); **Automatic tracks** (on by
+  default — tracks open and collapse as windows come and go;
+  turn it off to pin a fixed **Track limit**, which greys out
+  while automatic is on); **Overflow** — how a track that can't
+  fit all its windows renders them (**cascade all**, the track
+  default, piles them from the top; **cascade overflow** keeps
+  the ones that fit tiled and piles the rest); and **Wrap
+  focus** (the same opt-in toggle as Scrolling's, off by
+  default: on,
+  focus wraps within the track along the axis and from the last
+  track to the first across it; swap never wraps). The track
+  shortcuts live in Shortcuts ▸ Move Windows under the "Move to
+  track" subheader — a caption there notes they only matter if
+  you use the track layout: "Move window to previous/next
+  track" rows move a window across tracks or open a new one at
+  the edge, and "Swap with previous/next track" rows swap the
+  focused window's whole track with its neighbor. Tracks form a
+  sequence, so these say previous/next instead of a compass
+  direction — previous is the column to the left (or the row
+  above), next the column to the right (or the row below) — and
+  a binding keeps working when the axis flips. Track sizes and
+  in-track shares are resize state, session-only like the
+  stack's weights.
 
 > **A few resize behaviors are accepted limitations, not bugs.**
 > Some tiling quirks — e.g. the inner window of a nested BSP pair
@@ -647,7 +662,14 @@ like `cmd+j+k` are not supported — use modal modes instead.
 Each row has an action. Built-in actions live under headings:
 
 - **Focus** — move focus (left, right, up, down).
-- **Move Windows** — swap windows, send to space, resize.
+- **Move Windows** — swap windows, send to space, and the
+  Move-to-track and Swap-with-track rows (always shown; a
+  caption notes they only matter in the track layout).
+- **Size & Float** — the per-axis Grow/Shrink rows, Make
+  floating, the resize step, and **Alert sound when resize
+  can't apply** (default on): a resize shortcut pressed in a
+  layout without a resize target (monocle, grid, a floating
+  space) plays the system alert instead of failing silently.
 - **Applications** — open or focus an app.
 - **Custom Bindings** — custom Lua (from Adopt/Import or hand-written).
 

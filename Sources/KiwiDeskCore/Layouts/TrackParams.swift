@@ -19,15 +19,17 @@ public struct TrackParams: Sendable, Equatable, Codable {
         case horizontal
     }
 
-    /// Where a new window lands (#128 design decision 3).
+    /// Whether a new window opens its own track or joins the
+    /// focused one (#128 design decision 3). Where within that
+    /// choice it lands is the orthogonal `newWindowPosition`.
     public enum NewWindowTrack: String, Sendable, Codable {
-        /// The window opens its own new track right after the
-        /// focused one (niri/PaperWM feel — the dynamic
-        /// default). Falls back to `focusedTrack` when the
-        /// track cap is reached.
+        /// The window opens its own new track; `newWindowPosition`
+        /// places that track among the others. Falls back to
+        /// `focusedTrack` when the track cap is reached.
         case ownTrack = "own_track"
-        /// The window joins the focused window's track, right
-        /// after the focused window.
+        /// The window joins the focused window's track;
+        /// `newWindowPosition` places it among that track's
+        /// windows.
         case focusedTrack = "focused_track"
     }
 
@@ -44,16 +46,26 @@ public struct TrackParams: Sendable, Equatable, Codable {
     /// `autoTracks` is on. The live partition is session state
     /// (`Space.trackBreaks`), like `stackWeights`.
     public var count: Int = 2
-    /// What happens when the tracks (across the axis) or a
-    /// track's windows (along it) can't all hold
-    /// `min_window_size`. Reuses the stack's vocabulary
-    /// verbatim (#128): `cascade_overflow` (default) keeps the
-    /// fitting prefix tiled and cascades only the remainder;
-    /// `cascade_all` cascades the whole space. Applies to both
-    /// axes.
-    public var overflowStyle: StackParams.OverflowStyle =
-        .cascadeOverflow
     public var newWindow: NewWindowTrack = .ownTrack
+    /// Where a new window lands within the `newWindow` choice,
+    /// reusing the shared `SpawnPlacement` vocabulary. For
+    /// `own_track` it positions the new track among the others
+    /// (`first` = leftmost column / topmost row, `last` = the
+    /// far edge, `before`/`after_focused` = beside the focused
+    /// track); for `focused_track` it positions the window among
+    /// that track's windows. `.first` by default so a new window
+    /// is never buried in the overflow. Per-layout, not
+    /// per-space: excluded from `TrackOverride` like `newWindow`.
+    public var newWindowPosition: SpawnPlacement = .first
+    /// How an over-capacity region renders (#188): the same
+    /// `cascade_overflow` / `cascade_all` choice as stack, applied
+    /// when a track can't give its windows `min_window_size` (or,
+    /// when tracks themselves stop fitting, to the tracks). Track
+    /// defaults to **`cascade_all`** — the overflow stacks from
+    /// the top as a clean title-bar pile — unlike stack's
+    /// `cascade_overflow` default. Per-space via `TrackOverride`.
+    public var overflowStyle: StackParams.OverflowStyle =
+        .cascadeAll
     /// Whether stepping `focus` past an end wraps to the far
     /// end (#168 twin): along the axis it wraps within the
     /// focused track, across it wraps last <-> first track.
@@ -81,8 +93,9 @@ public struct TrackParams: Sendable, Equatable, Codable {
         case axis
         case autoTracks = "auto_tracks"
         case count
-        case overflowStyle = "overflow_style"
         case newWindow = "new_window"
+        case newWindowPosition = "new_window_position"
+        case overflowStyle = "overflow_style"
         case wrapFocus = "wrap_focus"
         case override
     }
@@ -108,16 +121,21 @@ public struct TrackParams: Sendable, Equatable, Codable {
                 Int.self,
                 forKey: .count
             ) ?? 2
-        overflowStyle =
-            try container.decodeIfPresent(
-                StackParams.OverflowStyle.self,
-                forKey: .overflowStyle
-            ) ?? .cascadeOverflow
         newWindow =
             try container.decodeIfPresent(
                 NewWindowTrack.self,
                 forKey: .newWindow
             ) ?? .ownTrack
+        newWindowPosition =
+            try container.decodeIfPresent(
+                SpawnPlacement.self,
+                forKey: .newWindowPosition
+            ) ?? .first
+        overflowStyle =
+            try container.decodeIfPresent(
+                StackParams.OverflowStyle.self,
+                forKey: .overflowStyle
+            ) ?? .cascadeAll
         wrapFocus =
             try container.decodeIfPresent(
                 Bool.self,
@@ -137,11 +155,12 @@ public struct TrackParams: Sendable, Equatable, Codable {
         try container.encode(axis, forKey: .axis)
         try container.encode(autoTracks, forKey: .autoTracks)
         try container.encode(count, forKey: .count)
-        try container.encode(
-            overflowStyle,
-            forKey: .overflowStyle
-        )
         try container.encode(newWindow, forKey: .newWindow)
+        try container.encode(
+            newWindowPosition,
+            forKey: .newWindowPosition
+        )
+        try container.encode(overflowStyle, forKey: .overflowStyle)
         try container.encode(wrapFocus, forKey: .wrapFocus)
         if !override.isEmpty {
             try container.encode(override, forKey: .override)

@@ -33,6 +33,10 @@ public enum APIReference {
                 "set_swap_skips_cascade"
             ),
             ("set_resize_step", "set_resize_step"),
+            (
+                "set_resize_feedback",
+                "set_resize_feedback"
+            ),
             ("set_fallback_space", "set_fallback_space"),
             ("set_space_icon", "set_space_icon"),
             (
@@ -147,7 +151,7 @@ public enum APIReference {
         ],
         "monocle": [
             "set_orientation", "set_orientation_override",
-            "set_wrap_focus",
+            "set_wrap_focus", "set_new_window_placement",
             "set_app_bar_enabled", "set_app_bar_position",
             "set_app_bar_thickness", "set_app_bar_style",
             "set_app_bar_active_style", "set_app_bar_item_size",
@@ -166,9 +170,10 @@ public enum APIReference {
             "set_app_bar_group_badge_text_color",
         ],
         "track": [
+            "swap",
             "set_axis", "set_count", "set_auto_tracks",
-            "set_overflow_style",
-            "set_new_window", "set_wrap_focus",
+            "set_new_window", "set_new_window_position",
+            "set_overflow_style", "set_wrap_focus",
             "set_axis_override", "set_count_override",
             "set_auto_tracks_override",
             "set_overflow_style_override",

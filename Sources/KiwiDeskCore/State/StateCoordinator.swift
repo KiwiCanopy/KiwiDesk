@@ -15,11 +15,14 @@ public struct StateCoordinator: Sendable {
     public var appRules: [String: SpaceID] = [:]
 
     /// `new_window_placement` per layout mode. Mirrored from
-    /// the tiler settings before each event (KiwiCore), so it
-    /// survives profile loads and live commands. Modes absent
-    /// here (monocle, floating) fall back to `.afterFocused`.
-    /// Defaults derive from the params structs so unit tests
-    /// see production behavior.
+    /// the tiler settings before each event (KiwiCore) — which
+    /// also seeds `.monocle` from `MonocleParams` — so it
+    /// survives profile loads and live commands. This
+    /// compile-time literal omits monocle (seeded at runtime)
+    /// and floating (no tiled slot); both fall back to
+    /// `.afterFocused` before the first event. Defaults derive
+    /// from the params structs so unit tests see production
+    /// behavior.
     public var spawnPlacements: [LayoutMode: SpawnPlacement] = [
         .bsp: BspParams().newWindowPlacement,
         .stack: StackParams().newWindowPlacement,
@@ -174,6 +177,7 @@ public struct StateCoordinator: Sendable {
                         window.id,
                         to: target,
                         trackRule: params.newWindow,
+                        trackPosition: params.newWindowPosition,
                         cap: params.trackCap,
                         isTiled: { [windows] in
                             windows[$0]?.isFloating == false

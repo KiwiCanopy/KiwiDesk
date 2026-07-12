@@ -13,7 +13,9 @@ extension SettingsModel {
     var liveKeybindingBanner: String? {
         guard keybindingWarning != nil else { return nil }
         return Self.formatConflicts(
-            KeybindingConflicts.conflicts(in: config.modes)
+            KeybindingConflicts.conflicts(
+                in: config.modes
+            )
         )
     }
 
@@ -33,9 +35,10 @@ extension SettingsModel {
         let list = KeybindingConflicts.conflicts(
             in: config.modes
         )
-        if KeybindingConflicts.text(for: binding, in: bindings)
-            != nil
-        {
+        if KeybindingConflicts.text(
+            for: binding,
+            in: bindings
+        ) != nil {
             keybindingWarning = Self.formatConflicts(list)
         } else if list.isEmpty {
             keybindingWarning = nil

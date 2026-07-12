@@ -151,6 +151,7 @@ public struct WorkspaceManager: Sendable {
         _ window: WindowID,
         to id: SpaceID,
         trackRule: TrackParams.NewWindowTrack,
+        trackPosition: SpawnPlacement,
         cap: Int,
         isTiled: (WindowID) -> Bool
     ) {
@@ -159,6 +160,7 @@ public struct WorkspaceManager: Sendable {
         spaces[id]?.insertIntoTrack(
             window,
             rule: trackRule,
+            position: trackPosition,
             cap: cap,
             isTiled: isTiled
         )

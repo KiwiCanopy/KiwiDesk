@@ -29,6 +29,13 @@ extension KiwiCore {
             tiler.settings.monocle.wrapFocus = on
             return .ok()
         }
+        if command == "monocle.set_new_window_placement" {
+            guard let placement = parsePlacement(args) else {
+                return placementError
+            }
+            tiler.settings.monocle.newWindowPlacement = placement
+            return .ok()
+        }
         guard command.hasPrefix("monocle.set_app_bar_") else {
             return .fail("unknown command: \(command)")
         }

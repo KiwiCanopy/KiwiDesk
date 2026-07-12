@@ -251,8 +251,11 @@ struct TrackLayoutTests {
         }
     }
 
-    @Test("cascade_all cascades the whole space")
-    func crossAxisCascadeAll() {
+    @Test("Degenerate span falls back to a whole-space cascade")
+    func degenerateSpanWholeCascade() {
+        // A space too narrow to tile even one min-size column:
+        // the internal physics fallback cascades the whole
+        // space (#180 — hard-coded, no overflow knob).
         let w = ids(10)
         let frames = layout.calculateGeometry(
             for: w,
@@ -260,20 +263,19 @@ struct TrackLayoutTests {
                 bounds: CGRect(
                     x: 0,
                     y: 0,
-                    width: 2000,
+                    width: 400,
                     height: 900
                 ),
                 breaks: Set(w)
             ) {
                 $0.minWindowSize = 300
-                $0.track.overflowStyle = .cascadeAll
             }
         )
         // Every window gets the full usable width (the
         // whole-region OverlapStack), none tiled narrow.
         let widths = Set(w.map { frames[$0]!.width })
         #expect(widths.count == 1)
-        #expect(widths.first! > 300)
+        #expect(widths.first! >= 300)
     }
 
     @Test("Along-axis overflow tiles the fitting prefix too")
@@ -293,6 +295,9 @@ struct TrackLayoutTests {
                 breaks: [w[0]]
             ) {
                 $0.minWindowSize = 300
+                // cascade_overflow keeps a tiled prefix; the
+                // track default (cascade_all) piles everything.
+                $0.track.overflowStyle = .cascadeOverflow
             }
         )
         // Single track: all windows share one column (same x).
@@ -323,6 +328,7 @@ struct TrackLayoutTests {
             ) {
                 $0.track.axis = .horizontal
                 $0.minWindowSize = 300
+                $0.track.overflowStyle = .cascadeOverflow
             }
         )
         let cascaded = w.filter { frames[$0]!.height <= 300.5 }

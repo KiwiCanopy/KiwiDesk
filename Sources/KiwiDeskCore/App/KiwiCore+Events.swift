@@ -19,6 +19,7 @@ extension KiwiCore {
             .scrolling:
                 tiler.settings.scrolling.newWindowPlacement,
             .grid: tiler.settings.grid.newWindowPlacement,
+            .monocle: tiler.settings.monocle.newWindowPlacement,
         ]
         state.spawnOverride = tiler.settings.placementOverride
         state.trackParams = tiler.settings.track

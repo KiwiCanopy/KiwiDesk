@@ -94,10 +94,15 @@ struct ApplicationsSection: View {
         into binding: Binding<KeyBinding>
     ) {
         binding.wrappedValue.combo = combo
-        model.noteRecordedCombo(
-            binding.wrappedValue,
-            in: bindings
-        )
+        let id = binding.wrappedValue.id
+        if let index = bindings.firstIndex(
+            where: { $0.id == id }
+        ) {
+            model.noteRecordedCombo(
+                bindings[index],
+                in: bindings
+            )
+        }
     }
 
     /// Looks the row up by id at write time — safe after any

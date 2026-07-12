@@ -40,9 +40,12 @@ struct SettingsCodingTests {
         let space = try object(root["space"])
         let icons = try object(space["icon"])
         #expect(icons["2"] as? String == "globe")
-        // `set_resize_step` → `resize.step` (#58).
+        // `set_resize_step` → `resize.step` (#58);
+        // `set_resize_feedback` → `resize.feedback` (#184),
+        // on by default.
         let resize = try object(root["resize"])
         #expect(resize["step"] as? Double == 50)
+        #expect(resize["feedback"] as? Bool == true)
         #expect(root["mouse_resize"] as? String == "layout")
         // Toggles (issue #11) and duration knobs (issue #51).
         // Keys mirror the Lua names per the one-vocabulary rule.
@@ -91,10 +94,6 @@ struct SettingsCodingTests {
         // (#178), on by default; `count` is the remembered cap.
         #expect(track["auto_tracks"] as? Bool == true)
         #expect(track["count"] as? Int == 2)
-        #expect(
-            track["overflow_style"] as? String
-                == "cascade_overflow"
-        )
         #expect(track["new_window"] as? String == "own_track")
         #expect(track["wrap_focus"] as? Bool == false)
         // SpaceID-keyed maps encode as objects, not arrays.
@@ -160,12 +159,12 @@ struct SettingsCodingTests {
         settings.track.axis = .horizontal
         settings.track.autoTracks = false
         settings.track.count = 3
-        settings.track.overflowStyle = .cascadeAll
         settings.track.newWindow = .focusedTrack
         settings.track.wrapFocus = true
         settings.minWindowSize = 200
         settings.swapSkipsCascade = false
         settings.resizeStep = 75
+        settings.resizeFeedback = false
         settings.dragGhost.enabled = false
         settings.dragDropZone.fillColor = "#11223344"
         settings.dragCornerRadius = 22
