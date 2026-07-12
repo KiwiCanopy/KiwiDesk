@@ -56,11 +56,9 @@ extension KiwiCore {
         )
     }
 
-    /// Grows the focused window's track: the weight step is the
-    /// stack's #67 formula over the track weights, capped where
-    /// the smallest OTHER track would drop below
-    /// min_window_size (past that cliff the layout cascades and
-    /// extra weight only ratchets invisibly).
+    /// Grows the focused window's track via `weightStep` (the
+    /// shared #67/#128 authority) over the per-head track
+    /// weights.
     private func resizeTrackWeight(
         delta: Double,
         span: Double,
@@ -79,31 +77,12 @@ extension KiwiCore {
                 weights: space.trackWeights
             )
         }
-        let total = weights.reduce(0, +)
-        let current = weights[track]
-        let change =
-            delta * total * total / (span * (total - current))
-        var value = current + change
-        if change > 0 {
-            let others = weights.enumerated()
-                .filter { $0.offset != track }
-                .map(\.element)
-            if let smallest = others.min() {
-                let limit = StackLayout.maxColumnTotal(
-                    smallestWeight: smallest,
-                    height: span,
-                    minSize: Double(
-                        tiler.settings.minWindowSize
-                    )
-                )
-                let cap = limit - (total - current)
-                value = min(value, max(cap, current))
-            }
-        }
-        let range = TrackLayout.weightRange
-        value = min(
-            max(value, range.lowerBound),
-            range.upperBound
+        let value = StackLayout.weightStep(
+            weights: weights,
+            at: track,
+            delta: delta,
+            span: span,
+            minSize: Double(tiler.settings.minWindowSize)
         )
         let head = tiled[ranges[track].lowerBound]
         state.workspaces.withSpace(space.id) {
@@ -113,8 +92,9 @@ extension KiwiCore {
     }
 
     /// Grows the focused window's share within its track — the
-    /// stack's per-window weight path (#67) with the track
-    /// slice standing in for the master/stack column.
+    /// same `weightStep` authority over the per-window
+    /// `stackWeights`, with the track slice standing in for the
+    /// master/stack column.
     private func resizeTrackShare(
         delta: Double,
         span: Double,
@@ -122,41 +102,25 @@ extension KiwiCore {
         focused: WindowID,
         column: ArraySlice<WindowID>
     ) -> CommandResponse {
-        guard column.count > 1 else {
+        guard let offset = column.firstIndex(of: focused),
+            column.count > 1
+        else {
             return .fail("focused window is alone in its track")
         }
         let weightFloor = TrackLayout.weightFloor
         let weights = column.map {
             max(space.stackWeights[$0] ?? 1, weightFloor)
         }
-        let total = weights.reduce(0, +)
-        let current = max(
-            space.stackWeights[focused] ?? 1,
-            weightFloor
+        let index = column.distance(
+            from: column.startIndex,
+            to: offset
         )
-        let change =
-            delta * total * total / (span * (total - current))
-        var value = current + change
-        if change > 0 {
-            let others = zip(column, weights)
-                .filter { $0.0 != focused }
-                .map(\.1)
-            if let smallest = others.min() {
-                let limit = StackLayout.maxColumnTotal(
-                    smallestWeight: smallest,
-                    height: span,
-                    minSize: Double(
-                        tiler.settings.minWindowSize
-                    )
-                )
-                let cap = limit - (total - current)
-                value = min(value, max(cap, current))
-            }
-        }
-        let range = TrackLayout.weightRange
-        value = min(
-            max(value, range.lowerBound),
-            range.upperBound
+        let value = StackLayout.weightStep(
+            weights: weights,
+            at: index,
+            delta: delta,
+            span: span,
+            minSize: Double(tiler.settings.minWindowSize)
         )
         state.workspaces.withSpace(space.id) {
             $0.stackWeights[focused] = value

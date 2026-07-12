@@ -14,8 +14,12 @@ extension KiwiCore {
     /// adjacent track. Past an end, `focus` wraps when
     /// `wrap_focus` is on (#168 twin: within the track along
     /// the axis, last <-> first track across it); `swap` never
-    /// wraps. Nil falls through to the geometric search, which
-    /// cleanly fails at the real edges.
+    /// wraps. Nil falls through to the geometric search — which
+    /// keeps cross-monitor focus alive and, with unequal track
+    /// lengths, may pick a diagonally-nearest window past a
+    /// track end rather than failing outright (the scrolling
+    /// precedent's trade; a real edge with no candidate still
+    /// fails cleanly).
     func trackStep(
         _ direction: Direction,
         space: Space,

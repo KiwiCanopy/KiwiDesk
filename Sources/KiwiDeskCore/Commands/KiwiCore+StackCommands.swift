@@ -127,6 +127,16 @@ extension KiwiCore {
         else {
             return .fail("no focused window")
         }
+        // Stack-only: `promote`/`demote` reorder via raw
+        // `swapAt`, which does not maintain the track layout's
+        // positional break markers (#128) — a marker would ride
+        // the swapped window and mangle the partition. Gated
+        // like `move_to_track` gates to `.track`.
+        guard space.mode == .stack else {
+            return .fail(
+                "promote/demote need a stack space"
+            )
+        }
         // Per-space master boundary (#17), matching layout math.
         let count =
             tiler.settings.resolvedStack(for: space.id).masterCount

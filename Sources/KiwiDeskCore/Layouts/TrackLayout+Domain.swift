@@ -91,16 +91,21 @@ extension Space {
     mutating func handTrackBreakToSuccessor(
         of window: WindowID
     ) {
-        guard trackBreaks.remove(window) != nil,
-            let index = windows.firstIndex(of: window),
+        guard trackBreaks.remove(window) != nil else { return }
+        // Clear the departing head's weight first, so a head at
+        // the array's end (no successor to hand to) can't leave
+        // a stale weight that a later edge-open would resurrect
+        // (review). The hand-off below re-homes it onto the
+        // successor when there is one.
+        let weight = trackWeights.removeValue(forKey: window)
+        guard let index = windows.firstIndex(of: window),
             index + 1 < windows.count
         else { return }
         let successor = windows[index + 1]
         if !trackBreaks.contains(successor) {
             trackBreaks.insert(successor)
-            trackWeights[successor] = trackWeights[window]
+            trackWeights[successor] = weight
         }
-        trackWeights[window] = nil
     }
     /// Inserts a window per the track layout's `new_window`
     /// rule (#128): its own new track right after the focused

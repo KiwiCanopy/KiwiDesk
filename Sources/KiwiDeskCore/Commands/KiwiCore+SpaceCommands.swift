@@ -140,6 +140,37 @@ extension KiwiCore {
         }
     }
 
+    /// Files a window into a target space honoring that space's
+    /// layout: a track-mode target routes through the track
+    /// `new_window` rule (#128) so an incoming window opens its
+    /// own track (or joins the focused one) and respects the
+    /// track cap — the same seam the spawn path uses. A tiled
+    /// window into any other mode keeps the historical append,
+    /// and a floating window always appends (it has no track
+    /// slot). Without this a `move_to_space` into a track space
+    /// silently dropped the window into the last track.
+    private func addFocusedToSpace(
+        _ window: WindowID,
+        to target: SpaceID
+    ) {
+        let floating = state.windows[window]?.isFloating == true
+        guard !floating,
+            state.workspaces[target]?.mode == .track
+        else {
+            state.workspaces.add(window, to: target)
+            return
+        }
+        let params = tiler.settings.resolvedTrack(for: target)
+        let windows = state.windows
+        state.workspaces.add(
+            window,
+            to: target,
+            trackRule: params.newWindow,
+            cap: params.count,
+            isTiled: { windows[$0]?.isFloating == false }
+        )
+    }
+
     func moveToSpace(
         _ args: [JSONValue],
         follow: Bool
@@ -152,7 +183,7 @@ extension KiwiCore {
         }
         let target = SpaceID(raw)
         let from = state.workspaces.space(of: focused)
-        state.workspaces.add(focused, to: target)
+        addFocusedToSpace(focused, to: target)
         // The moved window becomes the target space's focus, so
         // the FIRST focus of that space raises it. Without this,
         // `focusSpace` finds no focus to hand over and the window

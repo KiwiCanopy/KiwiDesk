@@ -191,54 +191,31 @@ extension KiwiCore {
                 masterCount: stack.masterCount
             )
         else { return .fail("no focused tiled window") }
-        guard column.count > 1 else {
+        guard let focusOffset = column.firstIndex(of: focused),
+            column.count > 1
+        else {
             return .fail("focused window is alone in its column")
         }
-        // Convert the pt delta into a weight change: with
-        // heights h = A·w/W, dh/dw = A·(W−w)/W², so the exact
-        // step for dh = delta is dw = delta·W²/(A·(W−w)).
-        // The screen span stands in for the column height A —
-        // close enough for a keyboard nudge, and the layout
-        // renormalizes whatever we store.
+        // The step math (delta → weight change, grow cap,
+        // clamp) is the shared #67/#128 authority; the screen
+        // span stands in for the column height A — close enough
+        // for a keyboard nudge, and the layout renormalizes
+        // whatever we store.
         let weightFloor = StackLayout.weightFloor
         let weights = column.map {
             max(space.stackWeights[$0] ?? 1, weightFloor)
         }
-        let total = weights.reduce(0, +)
-        let current = max(
-            space.stackWeights[focused] ?? 1,
-            weightFloor
-        )
-        let change =
-            delta * total * total / (span * (total - current))
-        var value = current + change
-        if change > 0 {
-            // Growing: cap the write where the smallest OTHER
-            // share hits min_window_size — past that cliff the
-            // layout falls back to the overflow cascade, which
-            // ignores weights, so extra weight would only
-            // ratchet invisibly (review). Never forced below
-            // `current`, so an already-overflowed column stays
-            // editable downwards.
-            let others = zip(column, weights)
-                .filter { $0.0 != focused }
-                .map(\.1)
-            if let smallest = others.min() {
-                let limit = StackLayout.maxColumnTotal(
-                    smallestWeight: smallest,
-                    height: span,
-                    minSize: Double(
-                        tiler.settings.minWindowSize
-                    )
-                )
-                let cap = limit - (total - current)
-                value = min(value, max(cap, current))
-            }
-        }
-        let range = StackLayout.weightRange
-        value = min(
-            max(value, range.lowerBound),
-            range.upperBound
+        let index =
+            column.distance(
+                from: column.startIndex,
+                to: focusOffset
+            )
+        let value = StackLayout.weightStep(
+            weights: weights,
+            at: index,
+            delta: delta,
+            span: span,
+            minSize: Double(tiler.settings.minWindowSize)
         )
         state.workspaces.withSpace(space.id) {
             $0.stackWeights[focused] = value

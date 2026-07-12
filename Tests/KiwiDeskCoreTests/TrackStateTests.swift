@@ -175,6 +175,57 @@ struct TrackStateTests {
         #expect(space.trackWeights[w[1]] == nil)
     }
 
+    @Test("Swapping an implicit index-0 head keeps its weight")
+    func swapImplicitHeadWeight() {
+        let w = ids(3)
+        // Track [w0, w1] with w0 the implicit head (no marker)
+        // carrying a weight; w2 starts a second track.
+        var space = Space(
+            id: "1",
+            mode: .track,
+            windows: w,
+            trackBreaks: [w[2]],
+            trackWeights: [w[0]: 3]
+        )
+        space.swap(w[0], w[1])
+        // Order [w1, w0, w2]: the head weight stays at slot 0,
+        // now held by w1 — it must not travel with w0.
+        #expect(space.windows == [w[1], w[0], w[2]])
+        #expect(space.trackWeights[w[1]] == 3)
+        #expect(space.trackWeights[w[0]] == nil)
+    }
+
+    @Test("Removing a last-array head leaves no stale weight")
+    func removeLastHeadNoStaleWeight() {
+        let w = ids(3)
+        // Three tracks; the last window is a head with a weight.
+        var space = Space(
+            id: "1",
+            mode: .track,
+            windows: w,
+            trackBreaks: [w[1], w[2]],
+            trackWeights: [w[2]: 4]
+        )
+        // moveWindowToTrack joins w2 (last) into w1's track:
+        // its break is removed and its weight must not linger.
+        _ = space.moveWindowToTrack(
+            w[2],
+            delta: -1,
+            cap: 0,
+            isTiled: allTiled
+        )
+        #expect(space.trackWeights[w[2]] == nil)
+        // Re-opening an edge track for w2 starts it fresh (even
+        // share), not resurrecting the old weight of 4.
+        _ = space.moveWindowToTrack(
+            w[2],
+            delta: 1,
+            cap: 0,
+            isTiled: allTiled
+        )
+        #expect(space.trackWeights[w[2]] == nil)
+    }
+
     @Test("Entering track mode seeds every window as a track")
     func modeEntrySeeds() {
         var manager = WorkspaceManager()

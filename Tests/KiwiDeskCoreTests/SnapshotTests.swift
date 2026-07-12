@@ -166,4 +166,75 @@ struct SnapshotTests {
                 == SpaceID("code")
         )
     }
+
+    @Test("Adopt preserves a track space's partition (#128)")
+    func adoptTrackPartition() {
+        // Previous session: a track space with three tracks
+        // and a widened middle track (head weight on window 2).
+        let snapshot = StateSnapshot(
+            windows: [],
+            spaces: [
+                .init(
+                    space: Space(
+                        id: SpaceID(1),
+                        mode: .track,
+                        windows: [
+                            WindowID(1), WindowID(2),
+                            WindowID(3),
+                        ],
+                        focused: WindowID(1),
+                        trackBreaks: [
+                            WindowID(1), WindowID(2),
+                            WindowID(3),
+                        ],
+                        trackWeights: [WindowID(2): 2.5]
+                    )
+                )
+            ],
+            activeSpace: "1"
+        )
+        // Codable round-trip: the new fields survive persistence.
+        let decoded = try! JSONDecoder().decode(
+            StateSnapshot.self,
+            from: try! JSONEncoder().encode(snapshot)
+        )
+        var state = StateCoordinator()
+        for id: UInt32 in [1, 2, 3] {
+            state.apply(
+                .windowCreated(
+                    ManagedWindow(
+                        id: WindowID(id),
+                        pid: 100,
+                        appName: "App"
+                    )
+                )
+            )
+        }
+        state.adopt(decoded)
+        let space = state.workspaces[SpaceID(1)]
+        // Three tracks survive the remove+re-add churn — not
+        // collapsed to one implicit track.
+        #expect(
+            space?.trackBreaks
+                == Set([WindowID(1), WindowID(2), WindowID(3)])
+        )
+        #expect(space?.trackWeights == [WindowID(2): 2.5])
+    }
+
+    @Test("Older snapshots without track fields still decode")
+    func adoptLegacySnapshot() throws {
+        // A pre-#128 space record (no track_breaks/track_weights).
+        let json = #"""
+            {"windows":[],"activeSpace":"1",
+             "capturedAt":0,
+             "spaces":[{"id":"1","mode":"bsp",
+                        "windows":[1],"focused":1}]}
+            """#
+        let snapshot = try JSONDecoder().decode(
+            StateSnapshot.self,
+            from: Data(json.utf8)
+        )
+        #expect(snapshot.spaces.first?.trackBreaks == [])
+        #expect(snapshot.spaces.first?.trackWeights == [:])
+    }
 }

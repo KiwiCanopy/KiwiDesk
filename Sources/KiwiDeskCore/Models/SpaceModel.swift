@@ -290,9 +290,12 @@ public struct Space: Sendable, Equatable {
     }
 
     /// Swaps the positions of two windows in the flat array.
-    /// Track boundaries are positional: a break marker stays at
-    /// the slot, not on the traveling window, so swapping two
-    /// windows never moves a track boundary (#128).
+    /// Track boundaries are positional: a break marker (and the
+    /// head weight riding it) stays at the slot, not on the
+    /// traveling window, so swapping two windows never moves a
+    /// track boundary (#128). Index 0 is an *implicit* head, so
+    /// its weight must stay at the slot too even though it may
+    /// carry no explicit marker.
     public mutating func swap(_ a: WindowID, _ b: WindowID) {
         guard let i = windows.firstIndex(of: a),
             let j = windows.firstIndex(of: b)
@@ -301,6 +304,8 @@ public struct Space: Sendable, Equatable {
         let aBreak = trackBreaks.contains(a)
         let bBreak = trackBreaks.contains(b)
         if aBreak != bBreak {
+            // Move the explicit marker to the window that now
+            // holds the head slot.
             if aBreak {
                 trackBreaks.remove(a)
                 trackBreaks.insert(b)
@@ -309,8 +314,11 @@ public struct Space: Sendable, Equatable {
                 trackBreaks.insert(a)
             }
         }
-        if aBreak || bBreak {
-            // The head weight belongs to the slot too.
+        // Swap the head weight whenever either slot is a head —
+        // an explicit marker OR index 0 (the implicit first
+        // head), so an index-0 head's weight can't travel with
+        // the moved window.
+        if aBreak || bBreak || i == 0 || j == 0 {
             let weight = trackWeights[a]
             trackWeights[a] = trackWeights[b]
             trackWeights[b] = weight

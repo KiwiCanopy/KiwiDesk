@@ -32,11 +32,14 @@ public struct StateCoordinator: Sendable {
     public var spawnOverride: [SpaceID: SpawnPlacement] = [:]
 
     /// The track layout's params (#128), mirrored from the
-    /// tiler settings like `spawnPlacements`: a new window in a
-    /// track space follows `new_window`/`count` instead of a
-    /// `SpawnPlacement` (the flat-index vocabulary cannot say
-    /// "own track"). The per-space placement override does not
-    /// apply to track spaces for the same reason.
+    /// tiler settings like `spawnPlacements`: a new **tiled**
+    /// window in a track space follows `new_window`/`count`
+    /// instead of a `SpawnPlacement` (the flat-index vocabulary
+    /// cannot say "own track"). A floating window still takes
+    /// the `SpawnPlacement` path (it has no track slot), so its
+    /// array position — and thus which track it would join if
+    /// it later tiles — honors the placement override as in
+    /// every other mode.
     public var trackParams = TrackParams()
 
     /// Last known space per window. Window ids are stable OS
