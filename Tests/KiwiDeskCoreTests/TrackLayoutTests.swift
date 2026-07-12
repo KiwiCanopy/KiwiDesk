@@ -212,10 +212,13 @@ struct TrackLayoutTests {
         }
     }
 
-    @Test("cascade_overflow tiles the fitting tracks, piles rest")
-    func crossAxisPartialOverflow() {
-        // 10 single-window tracks on a wide screen: some fit at
-        // min size, the rest cascade — not the whole space.
+    @Test("Surplus tracks merge into one far-edge overflow track")
+    func overflowTrackMerge() {
+        // 10 single-window tracks, 2000 pt / 300 min (gap 10) →
+        // 6 columns fit. The first five tile one window each; the
+        // surplus (w5..w9) merges into the sixth, far-edge
+        // overflow track (default cascade_all → piled), instead
+        // of scattering as separate cascaded columns.
         let w = ids(10)
         let frames = layout.calculateGeometry(
             for: w,
@@ -231,24 +234,23 @@ struct TrackLayoutTests {
                 $0.minWindowSize = 300
             }
         )
-        // A fitting prefix of columns is tiled full-height; the
-        // overflow columns pile as a VERTICAL title-bar cascade
-        // (min height, +40 px DOWNWARD steps) — never a
-        // horizontal pile (title bars must stay visible).
-        let tiled = w.filter { frames[$0]!.height > 300.5 }
-        let cascaded = w.filter { frames[$0]!.height <= 300.5 }
-        #expect(!tiled.isEmpty)
-        #expect(!cascaded.isEmpty)
-        // The tiled prefix spreads across distinct x positions
-        // (not a whole-space pile).
-        #expect(Set(tiled.map { frames[$0]!.minX }).count == tiled.count)
-        // The cascade tail steps DOWN in y, at a shared x.
-        let tailYs = cascaded.map { frames[$0]!.minY }.sorted()
-        let tailXs = Set(cascaded.map { frames[$0]!.minX })
-        #expect(tailXs.count == 1)
-        if tailYs.count >= 2 {
-            #expect(abs((tailYs[1] - tailYs[0]) - 40) < 0.001)
+        let xs = w.map { frames[$0]!.minX }
+        // Five normal columns + one overflow column = six x's.
+        #expect(Set(xs).count == 6)
+        // The overflow track is the far edge and holds the tail.
+        let overflowX = xs.max()!
+        let inOverflow = w.filter { frames[$0]!.minX == overflowX }
+        #expect(Set(inOverflow) == Set(w[5...]))
+        // Each leading track holds exactly one window.
+        for lead in w[..<5] {
+            #expect(
+                xs.filter { $0 == frames[lead]!.minX }.count == 1
+            )
         }
+        // cascade_all piles the overflow windows: they step down
+        // in y at the shared far-edge x.
+        let oy = inOverflow.map { frames[$0]!.minY }.sorted()
+        #expect(abs((oy[1] - oy[0]) - 40) < 0.001)
     }
 
     @Test("Degenerate span falls back to a whole-space cascade")
@@ -295,11 +297,10 @@ struct TrackLayoutTests {
                 breaks: [w[0]]
             ) {
                 $0.minWindowSize = 300
-                // cascade_overflow keeps a tiled prefix; the
-                // track default (cascade_all) piles everything.
-                $0.track.overflowStyle = .cascadeOverflow
             }
         )
+        // A single (normal) track always cascade_overflows its
+        // own windows: a tiled prefix, then a pile.
         // Single track: all windows share one column (same x).
         #expect(Set(w.map { frames[$0]!.minX }).count == 1)
         let tiled = w.filter { frames[$0]!.height > 300.5 }
@@ -328,7 +329,6 @@ struct TrackLayoutTests {
             ) {
                 $0.track.axis = .horizontal
                 $0.minWindowSize = 300
-                $0.track.overflowStyle = .cascadeOverflow
             }
         )
         let cascaded = w.filter { frames[$0]!.height <= 300.5 }

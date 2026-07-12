@@ -57,13 +57,14 @@ public struct TrackParams: Sendable, Equatable, Codable {
     /// is never buried in the overflow. Per-layout, not
     /// per-space: excluded from `TrackOverride` like `newWindow`.
     public var newWindowPosition: SpawnPlacement = .first
-    /// How an over-capacity region renders (#188): the same
-    /// `cascade_overflow` / `cascade_all` choice as stack, applied
-    /// when a track can't give its windows `min_window_size` (or,
-    /// when tracks themselves stop fitting, to the tracks). Track
-    /// defaults to **`cascade_all`** — the overflow stacks from
-    /// the top as a clean title-bar pile — unlike stack's
-    /// `cascade_overflow` default. Per-space via `TrackOverride`.
+    /// How the **overflow track** renders (#192): the far-edge
+    /// track that collects the surplus when more tracks exist
+    /// than fit side by side at `min_window_size`. The same
+    /// `cascade_overflow` / `cascade_all` choice as stack, but
+    /// track defaults to **`cascade_all`** — its windows stack
+    /// from the top as a clean title-bar pile. Applies ONLY to
+    /// the overflow track; every normal track's own overflow is
+    /// always `cascade_overflow`. Per-space via `TrackOverride`.
     public var overflowStyle: StackParams.OverflowStyle =
         .cascadeAll
     /// Whether stepping `focus` past an end wraps to the far

@@ -1036,15 +1036,17 @@ track.set_new_window_position("after_focused")
 
 **Expects:** `"cascade_all"` (default) or `"cascade_overflow"`.
 
-**Does:** when a track holds more windows than fit at
-`min_window_size`, `cascade_all` piles all of them from the top
-as a title-bar cascade; `cascade_overflow` keeps as many full
-windows as fit and cascades only the rest. Reuses stack's
-overflow vocabulary, but track **defaults to `cascade_all`** (a
-clean top pile) rather than stack's `cascade_overflow`. This
-shapes the windows *inside* a track; when whole tracks stop
-fitting side by side, the fitting tracks always stay tiled and
-only the surplus cascades.
+**Does:** shapes only the **overflow track** — the single
+far-edge track that collects the surplus when more tracks exist
+than fit side by side at `min_window_size`. `cascade_all` (the
+default) piles all its windows from the top as a title-bar
+cascade; `cascade_overflow` keeps as many full windows as fit
+and cascades only the rest. Reuses stack's overflow vocabulary.
+
+Every **normal** track (one that fits) always uses
+`cascade_overflow` for its own internal overflow — this setting
+does not change that. And the fitting tracks always stay tiled;
+only the merged surplus in the overflow track is affected.
 
 **Example:**
 
