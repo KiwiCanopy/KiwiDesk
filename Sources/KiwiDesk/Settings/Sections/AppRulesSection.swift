@@ -70,13 +70,15 @@ struct AppRulesSection: View {
                 "app_rules.override.caption",
                 "Space assignments made here apply to this "
                     + "profile only. Dimmed rows are inherited "
-                    + "from the base rules and stay in sync "
-                    + "with them; picking another space "
-                    + "overrides the rule for this profile, "
-                    + "and deleting a row un-pins the app here "
-                    + "even when the base pins it. Float rules "
-                    + "are app-wide — edit them while editing "
-                    + "the live configuration."
+                    + "from the app-wide base rules and stay "
+                    + "in sync with them; picking another "
+                    + "space overrides the rule for this "
+                    + "profile, and deleting a row un-pins "
+                    + "the app here even when the base pins "
+                    + "it. To edit the base rules themselves — "
+                    + "or the Float column, which is always "
+                    + "app-wide — switch back to the currently "
+                    + "loaded profile in the header's picker."
             )
         }
         return L(
