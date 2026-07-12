@@ -49,22 +49,50 @@ struct TrackCommandsTests {
         #expect(track.wrapFocus)
     }
 
-    @Test("overflow_style setters are gone (#180)")
-    func overflowStyleRemoved() {
+    @Test("overflow_style + new_window_position set (#188)")
+    func overflowAndPositionSetters() {
         let core = makeCore()
+        // Track defaults to cascade_all (#188).
         #expect(
-            !core.execute(
+            core.tiler.settings.track.overflowStyle
+                == .cascadeAll
+        )
+        #expect(
+            core.execute(
                 "track.set_overflow_style",
-                args: [.string("cascade_all")]
+                args: [.string("cascade_overflow")]
             ).isSuccess
         )
         #expect(
-            !core.execute(
+            core.tiler.settings.track.overflowStyle
+                == .cascadeOverflow
+        )
+        #expect(
+            core.execute(
                 "track.set_overflow_style_override",
                 args: [.string("2"), .string("cascade_all")]
             ).isSuccess
         )
-        #expect(core.tiler.settings.track == TrackParams())
+        #expect(
+            core.tiler.settings.track.override[SpaceID("2")]?
+                .overflowStyle == .cascadeAll
+        )
+        #expect(
+            core.execute(
+                "track.set_new_window_position",
+                args: [.string("last")]
+            ).isSuccess
+        )
+        #expect(
+            core.tiler.settings.track.newWindowPosition == .last
+        )
+        // A bad value fails cleanly.
+        #expect(
+            !core.execute(
+                "track.set_overflow_style",
+                args: [.string("nonsense")]
+            ).isSuccess
+        )
     }
 
     @Test("set_count couples the automatic flag (#178)")

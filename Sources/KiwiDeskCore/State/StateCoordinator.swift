@@ -42,15 +42,6 @@ public struct StateCoordinator: Sendable {
     /// every other mode.
     public var trackParams = TrackParams()
 
-    /// The advanced-track gate's single storage (#181),
-    /// default OFF. Lives here — not on `KiwiCore` — so the
-    /// two non-command consumers (this coordinator's
-    /// `windowCreated` insertion and the tiling engine's
-    /// `layoutInput(state:)` clamp) read the same bit with no
-    /// mirror to forget. Everything else asks
-    /// `KiwiCore.isTrackAdvanced`, which reads this.
-    public var trackAdvanced = false
-
     /// Last known space per window. Window ids are stable OS
     /// ids, so a "created" window with a remembered space is
     /// one coming back from another native macOS Space (or a
@@ -179,11 +170,11 @@ public struct StateCoordinator: Sendable {
                         (trackParams.override[target]
                         ?? TrackOverride())
                         .resolved(onto: trackParams)
-                        .gated(advanced: trackAdvanced)
                     workspaces.add(
                         window.id,
                         to: target,
                         trackRule: params.newWindow,
+                        trackPosition: params.newWindowPosition,
                         cap: params.trackCap,
                         isTiled: { [windows] in
                             windows[$0]?.isFloating == false

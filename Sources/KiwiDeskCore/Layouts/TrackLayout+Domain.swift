@@ -107,61 +107,6 @@ extension Space {
             trackWeights[successor] = weight
         }
     }
-    /// Inserts a window per the track layout's `new_window`
-    /// rule (#128): its own new track right after the focused
-    /// window's track, or joining the focused track after the
-    /// focused window. `ownTrack` falls back to joining when a
-    /// positive `cap` is already reached. `isTiled` supplies
-    /// the float knowledge the space itself does not hold — the
-    /// partition only spans tiled windows.
-    public mutating func insertIntoTrack(
-        _ window: WindowID,
-        rule: TrackParams.NewWindowTrack,
-        cap: Int,
-        isTiled: (WindowID) -> Bool
-    ) {
-        guard !windows.contains(window) else { return }
-        let tiled = windows.filter(isTiled)
-        guard !tiled.isEmpty else {
-            windows.append(window)
-            trackBreaks.insert(window)
-            return
-        }
-        let counts = TrackLayout.counts(
-            of: tiled,
-            breaks: trackBreaks,
-            cap: cap
-        )
-        let ranges = TrackLayout.ranges(of: counts)
-        let focusedIndex = focused.flatMap {
-            tiled.firstIndex(of: $0)
-        }
-        let track =
-            focusedIndex.flatMap { index in
-                TrackLayout.trackIndex(
-                    ofWindowIndex: index,
-                    counts: counts
-                )
-            } ?? counts.count - 1
-        let opensOwn =
-            rule == .ownTrack
-            && (cap <= 0 || counts.count < cap)
-        // Insert after an anchor window: the focused one when
-        // joining, the track's last tiled window when opening a
-        // track behind it. Both positions land inside/behind
-        // the intended track no matter where floating windows
-        // sit in the full array.
-        let anchor: WindowID
-        if opensOwn {
-            anchor = tiled[ranges[track].upperBound - 1]
-            trackBreaks.insert(window)
-        } else {
-            anchor =
-                focusedIndex.map { tiled[$0] }
-                ?? tiled[ranges[track].upperBound - 1]
-        }
-        insert(window, after: anchor)
-    }
 
     /// Moves a window into the adjacent track (#128): joining
     /// its end when one exists, opening a new edge track

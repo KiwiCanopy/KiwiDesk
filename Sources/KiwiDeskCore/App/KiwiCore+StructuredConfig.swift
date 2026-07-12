@@ -89,9 +89,6 @@ extension KiwiCore {
         state.appRules = config.appRules
         eventLoop.floatRules = FloatRules(config.floatRules)
         nativeSpaceBindings = config.profileBindings
-        // Before the keybinding pass below — registration
-        // consults the gate to skip inert rows (#181).
-        state.trackAdvanced = config.trackAdvanced
     }
 
     // MARK: - Keybindings
@@ -116,16 +113,6 @@ extension KiwiCore {
         for mode in resolved {
             registerStructuredMode(mode, lua: lua)
         }
-    }
-
-    /// Re-registers keybindings against the *currently* active
-    /// profile — the `set_track_advanced` toggle's path (#181):
-    /// flipping the gate changes which rows are inert, and the
-    /// registration pass owns that filter.
-    func refreshStructuredKeybindings() {
-        reapplyStructuredKeybindings(
-            profileModes: activeProfileModes()
-        )
     }
 
     /// The active profile's `KeyModeOverride`, if any. A
@@ -160,15 +147,6 @@ extension KiwiCore {
         var comboRefs: [KeyCombo: Int32] = [:]
         for binding in mode.bindings
         where !binding.combo.isEmpty {
-            // Inert while advanced track is off (#181): the
-            // gated catalog rows stay stored (nothing is
-            // pruned) but register no hotkey. Re-enabling
-            // re-registers them on the next pass.
-            if !isTrackAdvanced,
-                TrackAdvancedBindings.isGated(binding.lua)
-            {
-                continue
-            }
             guard let combo = KeyCombo.parse(binding.combo)
             else {
                 onLog(

@@ -15,6 +15,11 @@ struct MonocleOverrideTests {
         "appBar",
         // Per-layout, like the scrolling/track wrap toggles (#168).
         "wrapFocus",
+        // Placement is the global new-window rule (mirrored into
+        // StateCoordinator.spawnPlacements), overridden per space
+        // by the shared `new_window_placement_override`, not a
+        // monocle-only field (#188).
+        "newWindowPlacement",
         // The override map itself.
         "override",
     ]

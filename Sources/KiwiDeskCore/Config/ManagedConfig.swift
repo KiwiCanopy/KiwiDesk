@@ -54,7 +54,6 @@ public enum ManagedConfig {
         "KiwiDesk.bind(",
         "KiwiDesk.define_mode(",
         "KiwiDesk.bind_profile_to_native_space(",
-        "KiwiDesk.set_track_advanced(",
     ]
 
     // MARK: - Split / merge

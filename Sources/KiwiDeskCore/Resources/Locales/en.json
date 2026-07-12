@@ -188,6 +188,7 @@
   "layout.monocle.name": "Monocle",
   "layout.scrolling.name": "Scrolling",
   "layout.stack.name": "Stack",
+  "layout.track.header_caption": "A more advanced layout: several windows can share one track, with a track limit and per-track resize.",
   "layout.track.name": "Track",
   "layout_defaults.min_window_size": "Minimum window size",
   "layout_params.alternating": "Alternating",
@@ -368,6 +369,7 @@
   "shortcuts.modes.caption": "Modes are alternate shortcut sets — only the active mode's shortcuts fire. Bind a key below to switch between them. “default” is the standard mode and is always the active one after the app starts.",
   "shortcuts.move_to_space": "Move to space",
   "shortcuts.move_to_track": "Move to track",
+  "shortcuts.move_to_track.caption": "(only relevant if you're using the track layout)",
   "shortcuts.other_ellipsis": "Other…",
   "shortcuts.override.caption": "Dimmed rows are inherited from the base shortcuts and stay in sync with them. Edit a row to override it for this profile only; matching the base again makes it inherited again. Removing an inherited row only resets it — to disable a combo in this profile, rebind it to a no-op action instead.",
   "shortcuts.override.overrides": "This profile overrides base keybindings.",
@@ -418,8 +420,6 @@
   "spaces.fallback_badge.help": "Windows from a removed space land here when you switch profiles.",
   "spaces.fallback_caption": "When you switch profiles, windows from a space the new profile doesn't have land in its fallback space (the first space when none is chosen).",
   "spaces.title": "Spaces",
-  "track.advanced": "Advanced track",
-  "track.advanced_caption": "Allows several windows to share one track. Off, every window is its own column or row.",
   "track.auto_tracks": "Automatic tracks",
   "track.auto_tracks_caption": "Opens and collapses tracks automatically as windows come and go.",
   "track.axis": "Axis",
@@ -429,5 +429,6 @@
   "track.new_window": "New window",
   "track.new_window.focused": "Joins the focused track",
   "track.new_window.own": "Opens its own track",
+  "track.new_window_position": "Position",
   "track.wrap_focus": "Wrap focus"
 }

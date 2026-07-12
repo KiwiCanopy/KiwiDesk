@@ -188,6 +188,7 @@
   "layout.monocle.name": "Monocle",
   "layout.scrolling.name": "Scrolling",
   "layout.stack.name": "Stack",
+  "layout.track.header_caption": "Ein etwas fortgeschritteneres Layout: Mehrere Fenster können sich eine Spur teilen, mit Spur-Limit und Größenänderung pro Spur.",
   "layout.track.name": "Spur",
   "layout_defaults.min_window_size": "Minimale Fenstergröße",
   "layout_params.alternating": "Abwechselnd",
@@ -368,6 +369,7 @@
   "shortcuts.modes.caption": "Modi sind verschiedene Tastenkürzel-Sets. Es reagieren immer nur die Kürzel des aktiven Modus. Weise unten eine Taste zu, um zwischen ihnen zu wechseln. „default“ ist der Standardmodus und beim Start immer aktiv.",
   "shortcuts.move_to_space": "In Space verschieben",
   "shortcuts.move_to_track": "In Spur verschieben",
+  "shortcuts.move_to_track.caption": "(nur relevant, wenn du das Spur-Layout verwendest)",
   "shortcuts.other_ellipsis": "Andere…",
   "shortcuts.override.caption": "Ausgegraute Zeilen werden von den Standard-Tastenkürzeln übernommen. Bearbeite eine Zeile, um sie speziell für dieses Profil anzupassen. Wenn du sie zurücksetzt, gilt wieder der Standard. Um ein Kürzel für dieses Profil ganz abzuschalten, weise ihm eine leere Aktion zu.",
   "shortcuts.override.overrides": "Dieses Profil überschreibt Basis-Tastenkürzel.",
@@ -418,8 +420,6 @@
   "spaces.fallback_badge.help": "Fenster aus einem gelöschten Space landen hier, wenn du das Profil wechselst.",
   "spaces.fallback_caption": "Wenn du das Profil wechselst, landen Fenster aus nicht vorhandenen Spaces in diesem Fallback-Space.",
   "spaces.title": "Spaces",
-  "track.advanced": "Erweiterte Spuren",
-  "track.advanced_caption": "Erlaubt mehreren Fenstern, sich eine Spur zu teilen. Aus: Jedes Fenster ist seine eigene Spalte oder Zeile.",
   "track.auto_tracks": "Automatische Spuren",
   "track.auto_tracks_caption": "Öffnet und schließt Spuren automatisch, je nachdem wie Fenster hinzukommen und verschwinden.",
   "track.axis": "Achse",
@@ -429,5 +429,6 @@
   "track.new_window": "Neues Fenster",
   "track.new_window.focused": "Reiht sich in die fokussierte Spur ein",
   "track.new_window.own": "Öffnet seine eigene Spur",
+  "track.new_window_position": "Position",
   "track.wrap_focus": "Fokus umlaufen lassen"
 }

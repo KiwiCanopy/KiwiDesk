@@ -46,11 +46,6 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     /// Profile bound per native macOS Space (Mission Control
     /// number -> profile name).
     public var profileBindings: [Int: String] = [:]
-    /// The advanced-track gate (#181), default off. A global —
-    /// never profile-scoped: it gates authoring surfaces, and a
-    /// per-profile gate would make the inert-keybinding
-    /// semantics circular.
-    public var trackAdvanced = false
     /// Keybinding modes; the first is always the default mode.
     public var modes: [KeyMode] = [KeyMode.defaultMode]
 
@@ -140,7 +135,6 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case appRules = "app_rules"
         case floatRules = "float_rules"
         case profileBindings = "profile_bindings"
-        case trackAdvanced = "track_advanced"
         case modes
     }
 
@@ -168,11 +162,6 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             ) ?? []
         profileBindings =
             try decodeProfileBindings(from: container)
-        trackAdvanced =
-            try container.decodeIfPresent(
-                Bool.self,
-                forKey: .trackAdvanced
-            ) ?? false
         // Normalized like the spaces below: a hand-edited
         // sidecar can carry duplicate mode names or an icon on
         // the default mode (#31) — cleaned here so invalid
@@ -231,10 +220,6 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         try container.encode(
             bindings,
             forKey: .profileBindings
-        )
-        try container.encode(
-            trackAdvanced,
-            forKey: .trackAdvanced
         )
         try container.encode(modes, forKey: .modes)
     }

@@ -70,30 +70,37 @@ struct MoveWindowsSection: View {
                     command: command
                 )
             }
-            // Advanced-track authoring rows (#181): rendered
-            // only while the gate is on. Classification stays
-            // ungated (classify always, render conditionally),
-            // so imports keep them out of Custom either way.
-            if model.config.trackAdvanced {
-                Text(
-                    L(
-                        "shortcuts.move_to_track",
-                        "Move to track"
-                    )
+            // Track authoring rows (#188): always rendered — no
+            // gate. The caption tells newcomers these only matter
+            // in the track layout, so unbound rows in another
+            // layout don't read as broken.
+            Text(
+                L(
+                    "shortcuts.move_to_track",
+                    "Move to track"
                 )
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .padding(.top, 4)
-                ForEach(
-                    KeybindingCatalog.moveToTrackRows
-                        + KeybindingCatalog.trackSwapRows
-                ) { command in
-                    NavRow(
-                        model: model,
-                        bindings: $bindings,
-                        command: command
-                    )
-                }
+            )
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
+            .padding(.top, 4)
+            Text(
+                L(
+                    "shortcuts.move_to_track.caption",
+                    "(only relevant if you're using the track "
+                        + "layout)"
+                )
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            ForEach(
+                KeybindingCatalog.moveToTrackRows
+                    + KeybindingCatalog.trackSwapRows
+            ) { command in
+                NavRow(
+                    model: model,
+                    bindings: $bindings,
+                    command: command
+                )
             }
             if !spaces.isEmpty {
                 Text(
@@ -265,7 +272,7 @@ struct NavRow: View {
         guard let index else { return nil }
         return KeybindingConflicts.text(
             for: bindings[index],
-            in: model.conflictRelevant(bindings)
+            in: bindings
         )
     }
 
@@ -277,21 +284,12 @@ struct NavRow: View {
             excluding: { [lua = command.lua] in
                 $0.kind == .navigation && $0.lua == lua
             },
-            silentSteal: model.isSilentlyStealable,
             bindings: $bindings,
             commit: record
         )
     }
 
     private func record(_ combo: String) {
-        // Commit-time silent steal of inert gated holders
-        // (#181): the preflight query is pure, so the steal
-        // happens here, once the chord actually locks in.
-        RecorderPreflight.stealInert(
-            combo: combo,
-            stealable: model.isSilentlyStealable,
-            bindings: &bindings
-        )
         if let index {
             bindings[index].combo = combo
         } else {

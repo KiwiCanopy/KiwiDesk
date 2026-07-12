@@ -42,6 +42,11 @@ struct MonocleEditor: View {
                 L("scroll_grid.wrap_focus", "Wrap focus"),
                 isOn: $model.config.settings.monocle.wrapFocus
             )
+            Divider()
+            PlacementPicker(
+                placement: $model.config.settings.monocle
+                    .newWindowPlacement
+            )
             CrossReferenceRow(
                 prose: L(
                     "monocle.app_bar_xref",

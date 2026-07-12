@@ -27,14 +27,7 @@ extension KiwiCore {
         else {
             return .fail("no focused tiled window")
         }
-        // In default 1D track every track is a single window, so
-        // a whole-track swap degenerates to the plain `swap`
-        // that already exists — gated like `move_to_track`, with
-        // the same pointer (#181).
-        guard isTrackAdvanced else {
-            return .fail(Self.trackAdvancedHint)
-        }
-        let params = effectiveTrack(for: space.id)
+        let params = tiler.settings.resolvedTrack(for: space.id)
         // Snapshot float verdicts first: the withSpace closure
         // must not touch `state` while it is being mutated.
         let floating = Set(

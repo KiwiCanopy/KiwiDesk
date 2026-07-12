@@ -108,7 +108,6 @@ extension SettingsModel {
             || saved.appRules != config.appRules
             || saved.floatRules != config.floatRules
             || saved.profileBindings != config.profileBindings
-            || saved.trackAdvanced != config.trackAdvanced
             || saved.spaces != config.spaces
     }
 

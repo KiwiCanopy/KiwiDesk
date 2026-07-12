@@ -143,10 +143,6 @@ extension KiwiCore {
     private func resetDeclarativeState() {
         state.appRules = [:]
         eventLoop.floatRules = FloatRules([])
-        // Declarative like the rules: init.lua re-asserts it
-        // via set_track_advanced, or the sidecar re-applies it
-        // (#181); a removed call must fall back to OFF.
-        state.trackAdvanced = false
         tiler.settings.gapsOverride = [:]
         tiler.settings.placementOverride = [:]
         tiler.settings.spaceIcons = [:]

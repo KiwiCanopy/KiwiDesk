@@ -142,8 +142,12 @@ public struct TrackLayout: LayoutSystem {
     /// 1.0). Vertical tracks stack their windows top to
     /// bottom, horizontal tracks lay them side by side. When
     /// the smallest share stops fitting `minWindowSize`, the
-    /// track cascade-overflows — the same axis-general rule as
-    /// the cross-axis tracks (hard-coded, #180).
+    /// track overflows per `overflow_style` (#188):
+    /// `cascade_overflow` tiles the fitting prefix and piles the
+    /// rest; `cascade_all` (the track default) piles every
+    /// window from the top. The cross-axis track overflow above
+    /// stays `cascade_overflow` regardless — the knob shapes the
+    /// windows inside a track, never dissolves the tracks.
     private func trackFrames(
         _ windows: ArraySlice<WindowID>,
         in region: CGRect,
@@ -169,6 +173,16 @@ public struct TrackLayout: LayoutSystem {
             minSize: Double(context.minWindowSize)
         )
         guard available > 0, total <= limit else {
+            // cascade_all piles every window from the top; the
+            // whole-region cascade is also the physics fallback
+            // when not even the fitting prefix holds (#188).
+            if context.track.overflowStyle == .cascadeAll {
+                return OverlapStack.frames(
+                    for: windows,
+                    in: region,
+                    minSize: context.minWindowSize
+                )
+            }
             let ids = Array(windows)
             if let rects = OverlapStack.overflowFrames(
                 count: ids.count,

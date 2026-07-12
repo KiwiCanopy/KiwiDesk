@@ -86,22 +86,18 @@ enum RecorderPreflight {
     static func rejection(
         combo: String,
         excluding isOwn: @escaping (KeyBinding) -> Bool,
-        silentSteal: (KeyBinding) -> Bool = { _ in false },
         bindings: Binding<[KeyBinding]>,
         commit: @escaping (String) -> Void
     ) -> RecorderRejection? {
         // A PURE query: it runs from chord previews (every
         // in-flight chord change) and from render passes, so
         // it must never mutate the bindings (#181 review H2 —
-        // a preview keystroke deleted an inert row, and a
-        // body evaluation mutated state mid-update). A combo
-        // held only by inert gated rows reads as free here;
-        // the commit writers perform the actual silent steal
-        // via `stealInert` once the chord locks in.
+        // a preview keystroke deleted a row, and a body
+        // evaluation mutated state mid-update).
         guard
             let holder = bindings.wrappedValue.first(where: {
                 !$0.combo.isEmpty && $0.combo == combo
-                    && !isOwn($0) && !silentSteal($0)
+                    && !isOwn($0)
             })
         else { return nil }
         let label =
@@ -129,36 +125,5 @@ enum RecorderPreflight {
                 commit(combo)
             }
         )
-    }
-
-    /// Silently unbinds every inert gated holder of `combo`
-    /// (#181): catalog rows unbind by removal (like the
-    /// prompted Steal), dynamic rows keep the row and only
-    /// clear the combo. Called from the commit writers ONLY —
-    /// the preflight query above stays pure; the Steal prompt
-    /// would point at a row the GUI no longer renders, hence
-    /// no prompt.
-    /// `excluding` guards the committing row itself: the
-    /// element-binding writers set the combo BEFORE stealing
-    /// (structural-mutation safety), and a rendered `.custom`
-    /// row whose Lua is byte-exactly a gated body would
-    /// otherwise steal its own fresh combo (review).
-    static func stealInert(
-        combo: String,
-        excluding excluded: UUID? = nil,
-        stealable: (KeyBinding) -> Bool,
-        bindings: inout [KeyBinding]
-    ) {
-        for index in bindings.indices.reversed()
-        where bindings[index].combo == combo
-            && bindings[index].id != excluded
-            && stealable(bindings[index])
-        {
-            if bindings[index].kind == .navigation {
-                bindings.remove(at: index)
-            } else {
-                bindings[index].combo = ""
-            }
-        }
     }
 }

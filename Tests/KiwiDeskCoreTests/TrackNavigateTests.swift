@@ -37,10 +37,6 @@ private func makeTrackSpace(
         "set_mode",
         args: [.string(space.raw), .string("track")]
     )
-    // These suites exercise the 2D authoring surfaces, which
-    // are behind the advanced-track gate (#181) — its own
-    // suite covers the OFF state.
-    core.execute("set_track_advanced", args: [.bool(true)])
     core.state.workspaces.focus(focus, in: space)
     return space
 }

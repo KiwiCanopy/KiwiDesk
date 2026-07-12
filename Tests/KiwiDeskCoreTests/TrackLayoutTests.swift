@@ -295,6 +295,9 @@ struct TrackLayoutTests {
                 breaks: [w[0]]
             ) {
                 $0.minWindowSize = 300
+                // cascade_overflow keeps a tiled prefix; the
+                // track default (cascade_all) piles everything.
+                $0.track.overflowStyle = .cascadeOverflow
             }
         )
         // Single track: all windows share one column (same x).
@@ -325,6 +328,7 @@ struct TrackLayoutTests {
             ) {
                 $0.track.axis = .horizontal
                 $0.minWindowSize = 300
+                $0.track.overflowStyle = .cascadeOverflow
             }
         )
         let cascaded = w.filter { frames[$0]!.height <= 300.5 }

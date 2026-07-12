@@ -111,6 +111,7 @@ struct LayoutParamsCodingParityTests {
         var params = MonocleParams()
         params.orientation = .vertical
         params.wrapFocus = false
+        params.newWindowPlacement = .last
         params.appBar.enabled = false
         var over = MonocleOverride()
         over.orientation = .horizontal
@@ -124,6 +125,8 @@ struct LayoutParamsCodingParityTests {
         params.autoTracks = false
         params.count = 4
         params.newWindow = .focusedTrack
+        params.newWindowPosition = .last
+        params.overflowStyle = .cascadeOverflow
         params.wrapFocus = true
         var over = TrackOverride()
         over.count = 2

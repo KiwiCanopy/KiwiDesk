@@ -156,15 +156,11 @@ means on screen:
 Formally: prev = the lower array index (toward the sequence
 start), next = the higher. Past the first or last track it
 opens a **new** track at that edge — the keyboard way to open
-tracks, matching what `own_track` spawning does. Part of
-**advanced track**: while
-[`set_track_advanced`](#set_track_advanced) is off (the
-default), it rejects with a pointer to the switch — joining
-tracks builds the multi-window arrangements the gate keeps
-out of default 1D track. Also refused when the space is not in
-track mode, when `track.set_count` already caps the tracks, or
-when the window already forms the edge track alone (nothing
-would change). Never wraps. Focus and window `swap` keep their
+tracks, matching what `own_track` spawning does. Refused when
+the space is not in track mode, when `track.set_count` already
+caps the tracks, or when the window already forms the edge
+track alone (nothing would change). Never wraps. Focus and
+window `swap` keep their
 spatial left/right/up/down vocabulary — only the two track
 sequence verbs (this and [`track.swap`](#trackswap)) use
 prev/next.
@@ -292,40 +288,6 @@ case, so this lives in config only.
 
 ```lua
 KiwiDesk.set_swap_skips_cascade(true)
-```
-
-### set_track_advanced
-
-**Expects:** `true` or `false` (default `false`).
-
-**Does:** unlocks **advanced track**: several windows sharing
-one track. By default the track layout is a simple 1D
-columns/rows layout — every window is its own track — and the
-three surfaces that could build a 2D arrangement are gated:
-`move_to_track` (and its shortcuts) rejects with a pointer
-here, new windows always open their own track regardless of
-`track.set_new_window`, and the `track.set_count` cap is
-ignored. The settings themselves keep accepting and storing
-while the gate is off — only their *resolved* effect is
-clamped, so turning the gate on restores exactly what was
-configured. Turning it off later keeps any multi-window tracks
-you built (the gate stops new authoring, never rewrites
-state); a space that relied on the count cap re-expands to its
-underlying partition, since the cap merge is a read-time view.
-
-A **global** flag (`gui.json`'s `track_advanced`, beside
-`app_rules`), never per-profile: profiles may not rewrite
-which authoring surfaces exist. In the GUI it lives in Layout
-Defaults ▸ Track as **Advanced track**; the gated rows (New
-window, Automatic tracks, Track limit, and the Move-to-track
-shortcuts) appear only while it is on. Shortcuts you bound
-stay stored while off — inert, their combos silently
-reusable — and re-register when the gate returns.
-
-**Example:**
-
-```lua
-KiwiDesk.set_track_advanced(true)
 ```
 
 ### set_resize_feedback
@@ -931,6 +893,23 @@ stop at the first/last window. `swap` never wraps.
 monocle.set_wrap_focus(false)
 ```
 
+### monocle.set_new_window_placement
+
+**Expects:** `"first"`, `"last"`, `"before_focused"`, or
+`"after_focused"`.
+
+**Does:** sets where a new window lands in the monocle cycle.
+Since monocle shows one window at a time, this is also where the
+window appears in the focus order. Defaults to `"first"` so a new
+window comes to the front of the carousel rather than being
+buried at the back.
+
+**Example:**
+
+```lua
+monocle.set_new_window_placement("first")
+```
+
 ### track.swap
 
 **Expects:** `"prev"` or `"next"` (the
@@ -944,11 +923,7 @@ with the adjacent track in the sequence. The whole-structure
 companion to the window-level `swap` (which is untouched and
 stays spatial), following the
 `stack.promote`/`stack.demote` precedent for layout-specific
-verbs. Part of **advanced track**: while
-[`set_track_advanced`](#set_track_advanced) is off it rejects
-with a pointer to the switch (in default 1D track every track
-is one window, so it degenerates to the plain `swap` that
-already exists). Never wraps; refused when the space is not in
+verbs. Never wraps; refused when the space is not in
 track mode, no tiled window is focused, or no track lies that
 way (a single track has no neighbor). Also refused while a
 fixed track limit (`track.set_count` with automatic tracks
@@ -1020,17 +995,61 @@ track.set_auto_tracks(false)
 
 **Expects:** `"own_track"` (default) or `"focused_track"`.
 
-**Does:** decides where a new window lands in a track space:
-its own new track right after the focused one, or joining the
-focused track right after the focused window. `own_track`
-falls back to joining once `track.set_count` is reached. Track
-spaces follow this instead of the `new_window_placement`
-vocabulary — the flat-index placements cannot say "own track".
+**Does:** decides whether a new window opens its **own** new
+track or **joins** the focused window's track. Where within that
+choice it lands is the separate
+[`track.set_new_window_position`](#track_set_new_window_position).
+`own_track` falls back to joining once `track.set_count` is
+reached. Track spaces use this pair instead of the flat
+`new_window_placement` vocabulary — a flat index cannot say "own
+track".
 
 **Example:**
 
 ```lua
 track.set_new_window("focused_track")
+```
+
+### track.set_new_window_position
+
+**Expects:** `"first"` (default), `"last"`, `"before_focused"`,
+or `"after_focused"`.
+
+**Does:** places the new window within the
+[`track.set_new_window`](#track_set_new_window) choice, reusing
+the shared placement vocabulary. For `own_track` it positions the
+**new track** among the others (`first` = leftmost column /
+topmost row, `last` = the far edge, `before`/`after_focused` =
+beside the focused track). For `focused_track` it positions the
+window among that **track's windows** (`first`/`last` = the
+track's ends, `before`/`after_focused` = around the focused
+window). Defaults to `first` so a new window lands at the visible
+front, never buried in the overflow.
+
+**Example:**
+
+```lua
+track.set_new_window_position("after_focused")
+```
+
+### track.set_overflow_style
+
+**Expects:** `"cascade_all"` (default) or `"cascade_overflow"`.
+
+**Does:** when a track holds more windows than fit at
+`min_window_size`, `cascade_all` piles all of them from the top
+as a title-bar cascade; `cascade_overflow` keeps as many full
+windows as fit and cascades only the rest. Reuses stack's
+overflow vocabulary, but track **defaults to `cascade_all`** (a
+clean top pile) rather than stack's `cascade_overflow`. This
+shapes the windows *inside* a track; when whole tracks stop
+fitting side by side, the fitting tracks always stay tiled and
+only the surplus cascades.
+
+**Example:**
+
+```lua
+track.set_overflow_style("cascade_overflow")
 ```
 
 ### track.set_wrap_focus
@@ -1095,6 +1114,23 @@ track.set_count_override("code", 2)
 
 ```lua
 track.set_auto_tracks_override("code", false)
+```
+
+### track.set_overflow_style_override
+
+**Expects:**
+
+- A space identifier.
+- An overflow style string (`cascade_all` or
+  `cascade_overflow`).
+
+**Does:** overrides the global track overflow style for one
+space.
+
+**Example:**
+
+```lua
+track.set_overflow_style_override("code", "cascade_overflow")
 ```
 
 ## App Bar
@@ -1447,16 +1483,19 @@ KiwiDesk.set_new_window_placement_override("mail", "last")
 - **Scrolling** `after_focused` — opens next to the focused
   column.
 - **Grid** `last` — appending keeps existing cells in place.
-- **Monocle** `last`.
+- **Monocle** `first` — the new window comes to the front of the
+  carousel.
 
 Each layout also has its own global setter (e.g.
-`bsp.set_new_window_placement`, `stack.set_new_window_placement`).
+`bsp.set_new_window_placement`, `stack.set_new_window_placement`,
+`monocle.set_new_window_placement`).
 
 The **track** layout is the exception: it follows
-`track.set_new_window` (`own_track` / `focused_track`) instead,
-and this per-space placement override does not apply to track
-spaces — the flat-index vocabulary cannot express "opens its
-own track".
+`track.set_new_window` (`own_track` / `focused_track`) plus
+`track.set_new_window_position` (`first` default / `last` /
+`before_focused` / `after_focused`) instead, and this per-space
+placement override does not apply to track spaces — a flat index
+cannot express "opens its own track".
 
 ## Drag & Drop Rearranging
 

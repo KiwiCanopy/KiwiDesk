@@ -15,7 +15,7 @@ extension KiwiCore {
         span: Double,
         space: Space
     ) -> CommandResponse {
-        let params = effectiveTrack(for: space.id)
+        let params = tiler.settings.resolvedTrack(for: space.id)
         let tiled = space.windows.filter {
             state.windows[$0]?.isFloating == false
         }

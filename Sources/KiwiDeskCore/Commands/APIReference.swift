@@ -32,10 +32,6 @@ public enum APIReference {
                 "set_swap_skips_cascade",
                 "set_swap_skips_cascade"
             ),
-            (
-                "set_track_advanced",
-                "set_track_advanced"
-            ),
             ("set_resize_step", "set_resize_step"),
             (
                 "set_resize_feedback",
@@ -155,7 +151,7 @@ public enum APIReference {
         ],
         "monocle": [
             "set_orientation", "set_orientation_override",
-            "set_wrap_focus",
+            "set_wrap_focus", "set_new_window_placement",
             "set_app_bar_enabled", "set_app_bar_position",
             "set_app_bar_thickness", "set_app_bar_style",
             "set_app_bar_active_style", "set_app_bar_item_size",
@@ -176,9 +172,11 @@ public enum APIReference {
         "track": [
             "swap",
             "set_axis", "set_count", "set_auto_tracks",
-            "set_new_window", "set_wrap_focus",
+            "set_new_window", "set_new_window_position",
+            "set_overflow_style", "set_wrap_focus",
             "set_axis_override", "set_count_override",
             "set_auto_tracks_override",
+            "set_overflow_style_override",
         ],
         "drag": [
             "set_ghost_enabled", "set_ghost_border",

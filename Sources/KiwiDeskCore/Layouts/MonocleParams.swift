@@ -23,6 +23,13 @@ public struct MonocleParams: Sendable, Equatable, AppBarHosting {
     /// `swap` never wraps, matching the other array-order layouts.
     /// Per-layout, like the scrolling/track wrap toggles.
     public var wrapFocus = true
+    /// Where a new window lands in the flat array — and, since
+    /// monocle shows one window at a time, where it sits in the
+    /// focus cycle. `.first` by default: a new window comes to
+    /// the front of the carousel (the stack-master instinct),
+    /// never buried mid-cycle. The same `SpawnPlacement`
+    /// vocabulary every other layout uses.
+    public var newWindowPlacement: SpawnPlacement = .first
     public var appBar = LayoutAppBar()
     /// Per-space overrides (`layout.monocle.override[space_id]`),
     /// resolved via `TilingSettings.resolvedMonocle(for:)`.
@@ -42,6 +49,7 @@ extension MonocleParams: Codable {
     private enum CodingKeys: String, CodingKey {
         case orientation
         case wrapFocus = "wrap_focus"
+        case newWindowPlacement = "new_window_placement"
         case appBar = "app_bar"
         case override
     }
@@ -63,6 +71,11 @@ extension MonocleParams: Codable {
                 Bool.self,
                 forKey: .wrapFocus
             ) ?? defaults.wrapFocus
+        newWindowPlacement =
+            try container.decodeIfPresent(
+                SpawnPlacement.self,
+                forKey: .newWindowPlacement
+            ) ?? defaults.newWindowPlacement
         appBar =
             try container.decodeIfPresent(
                 LayoutAppBar.self,
@@ -81,6 +94,10 @@ extension MonocleParams: Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(orientation, forKey: .orientation)
         try container.encode(wrapFocus, forKey: .wrapFocus)
+        try container.encode(
+            newWindowPlacement,
+            forKey: .newWindowPlacement
+        )
         try container.encode(appBar, forKey: .appBar)
         if !override.isEmpty {
             try container.encode(override, forKey: .override)

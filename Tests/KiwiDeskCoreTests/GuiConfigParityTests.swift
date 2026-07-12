@@ -6,14 +6,13 @@ import Testing
 /// The GuiConfig global field list is hand-mirrored in four
 /// places — manual `CodingKeys`/decode/encode, the GUI's
 /// `globalsChanged` comparison, `guiConfigSeed`, and
-/// `applyStructuredRules` — which crossed the AGENTS.md §5
-/// two-mirror threshold with `track_advanced` (#181 review).
-/// Swift reflection cannot inspect those code paths, so the
-/// net has two layers: a field-list tripwire (adding a stored
-/// property fails here until every mirror site is visited) and
-/// a rebuilt-from-JSON round-trip over every sidecar global (a
-/// forgotten encode/decode line fails there).
-@Suite("GuiConfig mirror parity (#181 review)")
+/// `applyStructuredRules` — past the AGENTS.md §5 two-mirror
+/// threshold. Swift reflection cannot inspect those code paths,
+/// so the net has two layers: a field-list tripwire (adding a
+/// stored property fails here until every mirror site is
+/// visited) and a rebuilt-from-JSON round-trip over every
+/// sidecar global (a forgotten encode/decode line fails there).
+@Suite("GuiConfig mirror parity")
 struct GuiConfigParityTests {
     @Test("Field-list tripwire: visit every mirror site")
     func fieldTripwire() {
@@ -31,8 +30,7 @@ struct GuiConfigParityTests {
             fields == [
                 "settings", "spaces", "spaceModes", "appRules",
                 "spacePins", "mainSpaces", "fallbackSpace",
-                "floatRules", "profileBindings",
-                "trackAdvanced", "modes",
+                "floatRules", "profileBindings", "modes",
             ]
         )
     }
@@ -44,7 +42,6 @@ struct GuiConfigParityTests {
         config.appRules = ["Mail": SpaceID("a")]
         config.floatRules = ["Calculator"]
         config.profileBindings = [2: "Studio"]
-        config.trackAdvanced = true
         config.modes = [
             KeyMode(
                 name: "default",
@@ -66,7 +63,6 @@ struct GuiConfigParityTests {
         #expect(back.appRules == config.appRules)
         #expect(back.floatRules == config.floatRules)
         #expect(back.profileBindings == config.profileBindings)
-        #expect(back.trackAdvanced == config.trackAdvanced)
         #expect(back.modes == config.modes)
         // Profile-scoped fields deliberately do NOT ride the
         // sidecar (#36) — they come back default.

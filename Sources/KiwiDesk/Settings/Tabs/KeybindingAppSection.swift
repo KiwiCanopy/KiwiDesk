@@ -51,7 +51,7 @@ struct ApplicationsSection: View {
                 combo: binding.wrappedValue.combo,
                 conflict: KeybindingConflicts.text(
                     for: binding.wrappedValue,
-                    in: model.conflictRelevant(bindings)
+                    in: bindings
                 ),
                 preflight: { combo in
                     RecorderPreflight.rejection(
@@ -60,8 +60,6 @@ struct ApplicationsSection: View {
                             [id = binding.wrappedValue.id] in
                             $0.id == id
                         },
-                        silentSteal:
-                            model.isSilentlyStealable,
                         bindings: $bindings,
                         // Id-based (#68 review M2): Steal
                         // mutates the array before this runs.
@@ -97,16 +95,6 @@ struct ApplicationsSection: View {
     ) {
         binding.wrappedValue.combo = combo
         let id = binding.wrappedValue.id
-        // After the element write (a structural mutation first
-        // would race the element binding — the #68 M2 hazard);
-        // commit-time steal of inert gated holders (#181),
-        // never of the row just committed.
-        RecorderPreflight.stealInert(
-            combo: combo,
-            excluding: id,
-            stealable: model.isSilentlyStealable,
-            bindings: &bindings
-        )
         if let index = bindings.firstIndex(
             where: { $0.id == id }
         ) {
@@ -120,12 +108,6 @@ struct ApplicationsSection: View {
     /// Looks the row up by id at write time — safe after any
     /// structural mutation of the bindings array.
     private func record(_ combo: String, id: UUID) {
-        RecorderPreflight.stealInert(
-            combo: combo,
-            excluding: id,
-            stealable: model.isSilentlyStealable,
-            bindings: &bindings
-        )
         guard
             let index = bindings.firstIndex(where: {
                 $0.id == id

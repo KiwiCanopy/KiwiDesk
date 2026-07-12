@@ -160,12 +160,13 @@ extension KiwiCore {
             state.workspaces.add(window, to: target)
             return
         }
-        let params = effectiveTrack(for: target)
+        let params = tiler.settings.resolvedTrack(for: target)
         let windows = state.windows
         state.workspaces.add(
             window,
             to: target,
             trackRule: params.newWindow,
+            trackPosition: params.newWindowPosition,
             cap: params.trackCap,
             isTiled: { windows[$0]?.isFloating == false }
         )

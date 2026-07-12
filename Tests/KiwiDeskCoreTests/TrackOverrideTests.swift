@@ -13,6 +13,7 @@ struct TrackOverrideTests {
         // Per-layout behavior, not per-space geometry (the
         // ScrollingOverride precedent for wrapFocus).
         "newWindow",
+        "newWindowPosition",
         "wrapFocus",
         // The override map itself.
         "override",
@@ -91,38 +92,20 @@ struct TrackOverrideTests {
         #expect(settings.resolvedTrack(for: "1").count == 0)
     }
 
-    @Test("A retired overflow_style key is ignored on load")
-    func staleOverflowKeyIgnored() throws {
-        // Pre-#180 profiles carried
-        // `layout.track.overflow_style`; decoding ignores the
-        // key and re-saving drops it (re-saving is the
-        // migration — no compat shim, AGENTS.md §5).
-        let params = try JSONDecoder().decode(
-            TrackParams.self,
-            from: Data(
-                """
-                {"axis": "horizontal",
-                 "overflow_style": "cascade_all"}
-                """.utf8
-            )
+    @Test("overflow_style resolves per space (#188)")
+    func overflowResolves() {
+        var global = TrackParams()  // default cascade_all
+        var over = TrackOverride()
+        over.overflowStyle = .cascadeOverflow
+        #expect(
+            over.resolved(onto: global).overflowStyle
+                == .cascadeOverflow
         )
-        #expect(params.axis == .horizontal)
-        let over = try JSONDecoder().decode(
-            TrackOverride.self,
-            from: Data(
-                """
-                {"count": 3, "overflow_style": "cascade_all"}
-                """.utf8
-            )
+        global.overflowStyle = .cascadeAll
+        #expect(
+            TrackOverride().resolved(onto: global).overflowStyle
+                == .cascadeAll
         )
-        #expect(over.count == 3)
-        let json = try #require(
-            String(
-                data: try JSONEncoder().encode(params),
-                encoding: .utf8
-            )
-        )
-        #expect(!json.contains("overflow_style"))
     }
 
     @Test("override map nests under layout.track and round-trips")

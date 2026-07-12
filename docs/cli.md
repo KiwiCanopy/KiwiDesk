@@ -53,7 +53,7 @@ KiwiDesk service restart
 | | `make_tiled` | — |
 | | `make_auto` | — |
 | | `resize` | `x\|y`, delta (px) |
-| | `move_to_track` | `prev\|next` — move window to the adjacent track (track spaces, advanced track) |
+| | `move_to_track` | `prev\|next` — move window to the adjacent track (track spaces) |
 | Launch | `pull_or_spawn` | app name |
 | | `spawn_new` | app name |
 | System | `set_mode` | [space,] mode |
@@ -64,7 +64,6 @@ KiwiDesk service restart
 | | `set_resize_step` | pt (default 50) — Grow/Shrink magnitude |
 | | `set_resize_feedback` | true\|false (default `true`) — alert sound when a resize hotkey can't act |
 | | `set_swap_skips_cascade` | true\|false (default `true`) — swap from a pile targets the outside neighbor |
-| | `set_track_advanced` | true\|false (default `false`) — unlock multi-window tracks (gates `move_to_track`, `track.set_new_window`, the track cap) |
 | | `set_fallback_space` | space id ("" clears) — rehome target on profile switch |
 | | `set_space_icon` | space id, icon (SF Symbol\|emoji\|char; "" clears) |
 | | `get_state` | — (returns `{active_space, spaces, windows, monitor_count, native_space, exec_running}`) |
@@ -125,11 +124,14 @@ KiwiDesk service restart
 | | `grid.set_new_window_placement` | placement¹ (default `last`) |
 | Monocle | `monocle.set_orientation` | `horizontal\|vertical` |
 | | `monocle.set_wrap_focus` | true\|false (default `true` — monocle is a carousel) |
-| Track | `track.swap` | `prev\|next` — swap the focused window's whole track with the adjacent one (advanced track) |
+| | `monocle.set_new_window_placement` | placement¹ (default `first`) |
+| Track | `track.swap` | `prev\|next` — swap the focused window's whole track with the adjacent one |
 | | `track.set_axis` | `vertical\|horizontal` (default vertical = columns) |
 | | `track.set_count` | n (0 = automatic; n>0 pins a cap and turns automatic off) |
 | | `track.set_auto_tracks` | true\|false (default `true`) |
 | | `track.set_new_window` | `own_track\|focused_track` (default `own_track`) |
+| | `track.set_new_window_position` | placement¹ (default `first`) — where within the new_window choice |
+| | `track.set_overflow_style` | `cascade_all\|cascade_overflow` (default `cascade_all` for track) |
 | | `track.set_wrap_focus` | true\|false (default false) |
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
 

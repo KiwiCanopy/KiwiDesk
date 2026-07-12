@@ -36,7 +36,6 @@ private func makeTrackSpace(
         "set_mode",
         args: [.string(space.raw), .string("track")]
     )
-    core.execute("set_track_advanced", args: [.bool(true)])
     core.state.workspaces.focus(WindowID(focus), in: space)
     return space
 }
@@ -226,23 +225,6 @@ struct TrackSwapTests {
         )
         #expect(!response.isSuccess)
         #expect(response.error == "expected prev|next")
-    }
-
-    @Test("Gated: rejects with the pointer while off")
-    func gatedWhileOff() {
-        let core = makeCore()
-        let space = makeTrackSpace(core, windows: 2, focus: 1)
-        _ = space
-        core.execute(
-            "set_track_advanced",
-            args: [.bool(false)]
-        )
-        let response = core.execute(
-            "track.swap",
-            args: [.string("next")]
-        )
-        #expect(!response.isSuccess)
-        #expect(response.error == KiwiCore.trackAdvancedHint)
     }
 
     @Test("Non-track space and bad args fail cleanly")

@@ -33,6 +33,7 @@ struct TrackStateTests {
         space.insertIntoTrack(
             ids(1)[0],
             rule: .ownTrack,
+            position: .afterFocused,
             cap: 0,
             isTiled: allTiled
         )
@@ -53,6 +54,7 @@ struct TrackStateTests {
         space.insertIntoTrack(
             w[2],
             rule: .ownTrack,
+            position: .afterFocused,
             cap: 0,
             isTiled: allTiled
         )
@@ -73,6 +75,7 @@ struct TrackStateTests {
         space.insertIntoTrack(
             w[3],
             rule: .focusedTrack,
+            position: .afterFocused,
             cap: 0,
             isTiled: allTiled
         )
@@ -93,6 +96,7 @@ struct TrackStateTests {
         space.insertIntoTrack(
             w[2],
             rule: .ownTrack,
+            position: .afterFocused,
             cap: 2,
             isTiled: allTiled
         )
@@ -116,6 +120,7 @@ struct TrackStateTests {
         space.insertIntoTrack(
             w[3],
             rule: .ownTrack,
+            position: .afterFocused,
             cap: 0,
             isTiled: { $0 != w[1] }
         )
@@ -254,6 +259,10 @@ struct TrackSpawnTests {
     func spawnOwnTrack() {
         var state = StateCoordinator(defaultSpace: "1")
         state.workspaces.setMode("1", .track)
+        // after_focused keeps a stable left-to-right order for
+        // this partition assertion (the default `first` would
+        // reverse it — covered by its own test below).
+        state.trackParams.newWindowPosition = .afterFocused
         let w = ids(3)
         for id in w {
             state.apply(.windowCreated(window(id)))
@@ -266,9 +275,8 @@ struct TrackSpawnTests {
     func spawnJoinsFocused() {
         var state = StateCoordinator(defaultSpace: "1")
         state.workspaces.setMode("1", .track)
-        // focused_track is 2D authoring — gated (#181).
-        state.trackAdvanced = true
         state.trackParams.newWindow = .focusedTrack
+        state.trackParams.newWindowPosition = .afterFocused
         let w = ids(3)
         for id in w {
             state.apply(.windowCreated(window(id)))
@@ -280,8 +288,7 @@ struct TrackSpawnTests {
     func spawnHonorsOverride() {
         var state = StateCoordinator(defaultSpace: "1")
         state.workspaces.setMode("1", .track)
-        // The cap merge is 2D authoring — gated (#181).
-        state.trackAdvanced = true
+        state.trackParams.newWindowPosition = .afterFocused
         var over = TrackOverride()
         // A fixed cap needs automatic off (#178); count alone is
         // the remembered magnitude, inert while auto is on.
