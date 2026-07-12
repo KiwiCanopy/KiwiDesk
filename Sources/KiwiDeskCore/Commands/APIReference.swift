@@ -159,9 +159,10 @@ public enum APIReference {
             "set_app_bar_group_badge_text_color",
         ],
         "track": [
-            "set_axis", "set_count", "set_new_window",
-            "set_wrap_focus",
+            "set_axis", "set_count", "set_overflow_style",
+            "set_new_window", "set_wrap_focus",
             "set_axis_override", "set_count_override",
+            "set_overflow_style_override",
         ],
         "drag": [
             "set_ghost_enabled", "set_ghost_border",

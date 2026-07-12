@@ -121,6 +121,7 @@ KiwiDesk service restart
 | | `grid.set_new_window_placement` | placement¹ (default `last`) |
 | Track | `track.set_axis` | `vertical\|horizontal` (default vertical = columns) |
 | | `track.set_count` | n (0 = dynamic, the default) |
+| | `track.set_overflow_style` | `cascade_overflow\|cascade_all` (default `cascade_overflow`) |
 | | `track.set_new_window` | `own_track\|focused_track` (default `own_track`) |
 | | `track.set_wrap_focus` | true\|false (default false) |
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |

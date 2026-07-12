@@ -115,7 +115,7 @@ extension KiwiCore {
     private static let masterRatioError = CommandResponse.fail(
         "expected ratio"
     )
-    private static let overflowStyleError = CommandResponse.fail(
+    static let overflowStyleError = CommandResponse.fail(
         "expected cascade_overflow | cascade_all"
     )
 

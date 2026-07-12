@@ -76,6 +76,10 @@ struct SettingsCodingTests {
         let track = try object(layout["track"])
         #expect(track["axis"] as? String == "vertical")
         #expect(track["count"] as? Int == 0)
+        #expect(
+            track["overflow_style"] as? String
+                == "cascade_overflow"
+        )
         #expect(track["new_window"] as? String == "own_track")
         #expect(track["wrap_focus"] as? Bool == false)
         // SpaceID-keyed maps encode as objects, not arrays.
@@ -138,6 +142,7 @@ struct SettingsCodingTests {
         settings.grid.rows = 4
         settings.track.axis = .horizontal
         settings.track.count = 3
+        settings.track.overflowStyle = .cascadeAll
         settings.track.newWindow = .focusedTrack
         settings.track.wrapFocus = true
         settings.minWindowSize = 200

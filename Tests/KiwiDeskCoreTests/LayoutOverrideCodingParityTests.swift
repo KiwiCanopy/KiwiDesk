@@ -93,6 +93,7 @@ struct LayoutOverrideCodingParityTests {
         var over = TrackOverride()
         over.axis = .horizontal
         over.count = 3
+        over.overflowStyle = .cascadeAll
         return over
     }
 

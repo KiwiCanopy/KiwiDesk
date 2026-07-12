@@ -820,6 +820,23 @@ windows join the focused track once the cap is reached, and
 track.set_count(3)
 ```
 
+### track.set_overflow_style
+
+**Expects:** `"cascade_overflow"` (default) or `"cascade_all"`.
+
+**Does:** what happens when the tracks (across the axis) or a
+track's windows (along it) can't all hold `min_window_size` —
+the same vocabulary as `stack.set_overflow_style`, applied to
+both axes. `cascade_overflow` keeps the fitting prefix tiled and
+cascades only the remainder at a title-bar offset;
+`cascade_all` cascades the whole space.
+
+**Example:**
+
+```lua
+track.set_overflow_style("cascade_overflow")
+```
+
 ### track.set_new_window
 
 **Expects:** `"own_track"` (default) or `"focused_track"`.
@@ -852,6 +869,21 @@ spaces.
 
 ```lua
 track.set_wrap_focus(true)
+```
+
+### track.set_overflow_style_override
+
+**Expects:**
+
+- A space identifier.
+- `"cascade_overflow"` or `"cascade_all"`.
+
+**Does:** overrides the global overflow style for one space.
+
+**Example:**
+
+```lua
+track.set_overflow_style_override("code", "cascade_all")
 ```
 
 ### track.set_axis_override

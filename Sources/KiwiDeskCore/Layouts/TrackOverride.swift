@@ -15,6 +15,7 @@ import Foundation
 public struct TrackOverride: Sendable, Equatable {
     public var axis: TrackParams.Axis?
     public var count: Int?
+    public var overflowStyle: StackParams.OverflowStyle?
 
     public init() {}
 
@@ -24,6 +25,7 @@ public struct TrackOverride: Sendable, Equatable {
         var out = global
         if let axis { out.axis = axis }
         if let count { out.count = count }
+        if let overflowStyle { out.overflowStyle = overflowStyle }
         // Merged params hold no override map (see ScrollingOverride).
         out.override = [:]
         return out
@@ -32,7 +34,7 @@ public struct TrackOverride: Sendable, Equatable {
     /// True when no field is set — a fully-inherited space needs
     /// no stored override (drives sparse encoding).
     public var isEmpty: Bool {
-        axis == nil && count == nil
+        axis == nil && count == nil && overflowStyle == nil
     }
 }
 
@@ -45,6 +47,7 @@ extension TrackOverride: Codable {
     enum CodingKeys: String, CodingKey {
         case axis
         case count
+        case overflowStyle = "overflow_style"
     }
 
     public init(from decoder: Decoder) throws {
@@ -59,11 +62,19 @@ extension TrackOverride: Codable {
             Int.self,
             forKey: .count
         )
+        overflowStyle = try container.decodeIfPresent(
+            StackParams.OverflowStyle.self,
+            forKey: .overflowStyle
+        )
     }
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(axis, forKey: .axis)
         try container.encodeIfPresent(count, forKey: .count)
+        try container.encodeIfPresent(
+            overflowStyle,
+            forKey: .overflowStyle
+        )
     }
 }

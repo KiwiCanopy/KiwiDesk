@@ -212,6 +212,97 @@ struct TrackLayoutTests {
         }
     }
 
+    @Test("cascade_overflow tiles the fitting tracks, piles rest")
+    func crossAxisPartialOverflow() {
+        // 10 single-window tracks on a wide screen: some fit at
+        // min size, the rest cascade — not the whole space.
+        let w = ids(10)
+        let frames = layout.calculateGeometry(
+            for: w,
+            in: makeContext(
+                bounds: CGRect(
+                    x: 0,
+                    y: 0,
+                    width: 2000,
+                    height: 900
+                ),
+                breaks: Set(w)
+            ) {
+                $0.minWindowSize = 300
+            }
+        )
+        let xs = w.map { frames[$0]!.minX }
+        // A fitting prefix is tiled (strictly increasing x,
+        // each wider than min); the tail cascades at a fixed
+        // title-bar offset (min width, +40 px steps).
+        let tiled = w.filter { frames[$0]!.width > 300.5 }
+        let cascaded = w.filter { frames[$0]!.width <= 300.5 }
+        #expect(!tiled.isEmpty)
+        #expect(!cascaded.isEmpty)
+        // Not the whole-space cascade: the tiled prefix has
+        // distinct, spread-out x positions.
+        #expect(Set(xs).count == w.count)
+        // The cascade tail steps by the title-bar offset.
+        let tailXs = cascaded.map { frames[$0]!.minX }.sorted()
+        if tailXs.count >= 2 {
+            #expect(
+                abs((tailXs[1] - tailXs[0]) - 40) < 0.001
+            )
+        }
+    }
+
+    @Test("cascade_all cascades the whole space")
+    func crossAxisCascadeAll() {
+        let w = ids(10)
+        let frames = layout.calculateGeometry(
+            for: w,
+            in: makeContext(
+                bounds: CGRect(
+                    x: 0,
+                    y: 0,
+                    width: 2000,
+                    height: 900
+                ),
+                breaks: Set(w)
+            ) {
+                $0.minWindowSize = 300
+                $0.track.overflowStyle = .cascadeAll
+            }
+        )
+        // Every window gets the full usable width (the
+        // whole-region OverlapStack), none tiled narrow.
+        let widths = Set(w.map { frames[$0]!.width })
+        #expect(widths.count == 1)
+        #expect(widths.first! > 300)
+    }
+
+    @Test("Along-axis overflow tiles the fitting prefix too")
+    func alongAxisPartialOverflow() {
+        // One track holding many windows taller than fits: the
+        // prefix tiles, the rest cascade within the column.
+        let w = ids(8)
+        let frames = layout.calculateGeometry(
+            for: w,
+            in: makeContext(
+                bounds: CGRect(
+                    x: 0,
+                    y: 0,
+                    width: 1200,
+                    height: 1600
+                ),
+                breaks: [w[0]]
+            ) {
+                $0.minWindowSize = 300
+            }
+        )
+        // Single track: all windows share one column (same x).
+        #expect(Set(w.map { frames[$0]!.minX }).count == 1)
+        let tiled = w.filter { frames[$0]!.height > 300.5 }
+        let cascaded = w.filter { frames[$0]!.height <= 300.5 }
+        #expect(!tiled.isEmpty)
+        #expect(!cascaded.isEmpty)
+    }
+
     @Test("Empty window list yields no frames")
     func emptyWindows() {
         #expect(

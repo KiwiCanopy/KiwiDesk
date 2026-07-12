@@ -153,49 +153,26 @@ public struct StackLayout: LayoutSystem {
         in region: CGRect,
         context: LayoutContext
     ) -> [WindowID: CGRect] {
-        let minSize = context.minWindowSize
-        let gap = context.gaps.inner.vertical
-        let offset = OverlapStack.offset
         let ids = Array(windows)
-        for tiled in stride(
-            from: ids.count - 1,
-            through: 1,
-            by: -1
-        ) {
-            let buried = CGFloat(ids.count - tiled - 1)
-            let cascadeHeight = minSize + offset * buried
-            let tileHeight =
-                (region.height - cascadeHeight
-                    - gap * CGFloat(tiled))
-                / CGFloat(tiled)
-            guard tileHeight >= minSize else { continue }
-            var result: [WindowID: CGRect] = [:]
-            var y = region.minY
-            for id in ids[..<tiled] {
-                result[id] = CGRect(
-                    x: region.minX,
-                    y: y,
-                    width: region.width,
-                    height: tileHeight
-                )
-                y += tileHeight + gap
-            }
-            for (index, id) in ids[tiled...].enumerated() {
-                result[id] = CGRect(
-                    x: region.minX,
-                    y: y + CGFloat(index) * offset,
-                    width: region.width,
-                    height: minSize
-                )
-            }
-            return result
+        guard
+            let rects = OverlapStack.overflowFrames(
+                count: ids.count,
+                in: region,
+                vertical: true,
+                minSize: context.minWindowSize,
+                gap: context.gaps.inner.vertical
+            )
+        else {
+            // Not even one full window fits above the cascade:
+            // the whole region cascades (emergency fallback).
+            return OverlapStack.frames(
+                for: windows,
+                in: region,
+                minSize: context.minWindowSize
+            )
         }
-        // Not even one full window fits above the cascade:
-        // the whole region cascades (emergency fallback).
-        return OverlapStack.frames(
-            for: windows,
-            in: region,
-            minSize: minSize
+        return Dictionary(
+            uniqueKeysWithValues: zip(ids, rects)
         )
     }
 }

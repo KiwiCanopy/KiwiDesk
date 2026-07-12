@@ -286,6 +286,31 @@ struct SpaceOverrideRows: View {
             global: g.track.count,
             range: 0...10
         )
+        OverridePickerRow(
+            label: L("layout_params.overflow", "Overflow"),
+            value: binding(
+                \.track.override,
+                space,
+                \.overflowStyle
+            ),
+            global: g.track.overflowStyle,
+            options: [
+                (
+                    .cascadeOverflow,
+                    L(
+                        "layout_params.cascade_overflow",
+                        "Cascade overflow"
+                    )
+                ),
+                (
+                    .cascadeAll,
+                    L(
+                        "layout_params.cascade_all",
+                        "Cascade all"
+                    )
+                ),
+            ]
+        )
     }
 
     // MARK: - Binding helper

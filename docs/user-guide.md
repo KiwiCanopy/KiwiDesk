@@ -254,9 +254,13 @@ Expand each layout type to adjust its defaults:
   column and row counts.
 - **Track**: axis (vertical = columns side by side, horizontal =
   rows), track limit (0 = dynamic — tracks open and collapse as
-  windows come and go), where a new window lands (opens its own
-  track next to the focused one, or joins the focused track),
-  and **Wrap focus** — the same opt-in toggle as Scrolling's,
+  windows come and go), overflow style (when too many tracks or
+  windows to hold the minimum size: `cascade_overflow` keeps the
+  fitting ones tiled and cascades only the rest — the same
+  choice as the stack layout — or `cascade_all`), where a new
+  window lands (opens its own track next to the focused one, or
+  joins the focused track), and **Wrap focus** — the same opt-in
+  toggle as Scrolling's,
   off by default: on, focus wraps within the track along the
   axis and from the last track to the first across it. Swap
   never wraps. Track sizes and in-track shares are resize
