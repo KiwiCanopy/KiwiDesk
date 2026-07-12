@@ -135,13 +135,9 @@ extension KiwiCore {
         default:
             break
         }
-        if TilingEngine.shouldRetile(after: event) {
+        let willRetile = TilingEngine.shouldRetile(after: event)
+        if willRetile {
             retile(newlyCreatedWindow: newlyCreatedWindow)
-            // A structural change in a track space (spawn, close)
-            // can push a window into an overflow cascade; fix the
-            // pile's z-order once it settles (#193, self-gated on
-            // track + actual overflow).
-            scheduleTrackZOrderRestoreIfOverflowing()
         }
         // Closing or minimizing the focused window hands focus
         // to the space's fallback (state picked one; this raise
@@ -153,6 +149,16 @@ extension KiwiCore {
             eventLoop.isListed(next)
         {
             focusWindow(next)
+        }
+        // A structural change in a track space (spawn, close) can
+        // push a window into an overflow cascade; fix the pile's
+        // z-order once it settles (#193, self-gated on track +
+        // actual overflow). AFTER the focus fallback above, so the
+        // restore's closing re-focus targets the settled focus,
+        // never a stale/nil one (which would clear focus on a
+        // minimize).
+        if TilingEngine.shouldRetile(after: event) {
+            scheduleTrackZOrderRestoreIfOverflowing()
         }
     }
 

@@ -75,6 +75,8 @@ struct TrackEditor: View {
                 label: L("track.new_window_position", "Position")
             )
             Divider()
+            overflow
+            Divider()
             trackAuto
             StepperRow(
                 label: L("track.count", "Track limit"),
@@ -84,8 +86,6 @@ struct TrackEditor: View {
             .disabled(
                 model.config.settings.track.autoTracks
             )
-            Divider()
-            overflow
             Divider()
             // Bare behavior toggle in its own slot — the #168
             // placement mirrored from the Scrolling section.
@@ -97,10 +97,12 @@ struct TrackEditor: View {
         }
     }
 
-    /// How an over-capacity track renders its windows (#188):
-    /// `cascade_all` (the track default) piles them from the
-    /// top; `cascade_overflow` tiles the fitting ones and piles
-    /// the rest. Reuses stack's `overflow_style` labels.
+    /// How the far-edge **overflow track** renders (#192): the
+    /// track that collects the surplus when more tracks exist
+    /// than fit side by side. `cascade_all` (the default) piles
+    /// its windows from the top; `cascade_overflow` tiles the
+    /// fitting ones and piles the rest. Normal tracks are always
+    /// `cascade_overflow`. Reuses stack's `overflow_style` labels.
     private var overflow: some View {
         DropdownRow(
             label: L("layout_params.overflow", "Overflow")

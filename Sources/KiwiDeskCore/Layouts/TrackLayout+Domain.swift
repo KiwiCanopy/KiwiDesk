@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 
 /// The track layout's shared domain rules (#128), split from
@@ -42,6 +43,27 @@ extension TrackLayout {
         var merged = Array(counts[..<cap])
         merged[cap - 1] += counts[cap...].reduce(0, +)
         return merged
+    }
+
+    /// How many `minSize` tracks fit across `crossSpan` with
+    /// `gap` between them (#192): the read-time geometric cap
+    /// that forms the overflow track. `n` tracks need
+    /// `n·minSize + (n-1)·gap ≤ crossSpan`, so
+    /// `n = ⌊(crossSpan + gap) / (minSize + gap)⌋`. `minSize ≤ 0`
+    /// means no floor (unlimited), matching
+    /// `StackLayout.maxColumnTotal`; a span too small for even
+    /// one track returns 0 (the caller clamps to a single
+    /// overflow track, which then degenerates to the whole-space
+    /// cascade). Purely geometric — the surplus beyond this many
+    /// tracks folds into the last slot via `counts(cap:)`.
+    public static func fitCap(
+        crossSpan: CGFloat,
+        minSize: CGFloat,
+        gap: CGFloat
+    ) -> Int {
+        guard minSize > 0 else { return .max }
+        guard crossSpan > 0 else { return 0 }
+        return Int((crossSpan + gap) / (minSize + gap))
     }
 
     /// The consecutive index ranges the counts carve out of the

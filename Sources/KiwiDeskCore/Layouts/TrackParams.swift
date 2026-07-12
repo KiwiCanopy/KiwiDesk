@@ -37,8 +37,10 @@ public struct TrackParams: Sendable, Equatable, Codable {
     /// Whether the track count is managed automatically (#178):
     /// on (the default), tracks open and collapse as windows come
     /// and go — no cap. Off pins the count to `count`. The
-    /// carousel-vs-grid twin of `GridParams.autoSize`; the layout
-    /// reads `trackCap`, never `count` directly.
+    /// carousel-vs-grid twin of `GridParams.autoSize`. The layout
+    /// reads `count` directly for the normal/overflow split
+    /// (#192); spawn, navigation, and swap read `trackCap`
+    /// (= `count + 1`, the overflow track included).
     public var autoTracks = true
     /// The fixed maximum number of tracks used when `autoTracks`
     /// is off (the remembered magnitude, so toggling auto off
@@ -57,13 +59,14 @@ public struct TrackParams: Sendable, Equatable, Codable {
     /// is never buried in the overflow. Per-layout, not
     /// per-space: excluded from `TrackOverride` like `newWindow`.
     public var newWindowPosition: SpawnPlacement = .first
-    /// How an over-capacity region renders (#188): the same
-    /// `cascade_overflow` / `cascade_all` choice as stack, applied
-    /// when a track can't give its windows `min_window_size` (or,
-    /// when tracks themselves stop fitting, to the tracks). Track
-    /// defaults to **`cascade_all`** — the overflow stacks from
-    /// the top as a clean title-bar pile — unlike stack's
-    /// `cascade_overflow` default. Per-space via `TrackOverride`.
+    /// How the **overflow track** renders (#192): the far-edge
+    /// track that collects the surplus when more tracks exist
+    /// than fit side by side at `min_window_size`. The same
+    /// `cascade_overflow` / `cascade_all` choice as stack, but
+    /// track defaults to **`cascade_all`** — its windows stack
+    /// from the top as a clean title-bar pile. Applies ONLY to
+    /// the overflow track; every normal track's own overflow is
+    /// always `cascade_overflow`. Per-space via `TrackOverride`.
     public var overflowStyle: StackParams.OverflowStyle =
         .cascadeAll
     /// Whether stepping `focus` past an end wraps to the far
@@ -79,13 +82,18 @@ public struct TrackParams: Sendable, Equatable, Codable {
 
     public init() {}
 
-    /// The effective track cap the layout uses: 0 (unlimited,
-    /// dynamic) while `autoTracks` is on, otherwise the fixed
-    /// `count` floored at 1. The single reader of the auto/count
-    /// pair — layout, navigation, and spawn placement all go
-    /// through here so none can disagree.
+    /// The hard cap on **marker** tracks that spawn, navigation,
+    /// and swap enforce: 0 (unlimited, dynamic) while `autoTracks`
+    /// is on, otherwise `count + 1` (#192) — the fixed `count`
+    /// **normal** tracks plus the one extra **overflow track**
+    /// that catches the surplus. A new `own_track` window past
+    /// `count` therefore opens the overflow track rather than
+    /// joining an existing one. The layout reads `count` directly
+    /// for the normal/overflow split; everything that moves
+    /// windows between tracks reads this so none can disagree on
+    /// where the last track is.
     public var trackCap: Int {
-        autoTracks ? 0 : max(1, count)
+        autoTracks ? 0 : max(1, count) + 1
     }
 
     /// JSON keys follow the Lua setters (`track.set_axis`).

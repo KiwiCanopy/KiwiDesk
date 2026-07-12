@@ -106,7 +106,9 @@ struct TrackCommandsTests {
         core.execute("track.set_count", args: [.number(3)])
         #expect(core.tiler.settings.track.count == 3)
         #expect(!core.tiler.settings.track.autoTracks)
-        #expect(core.tiler.settings.track.trackCap == 3)
+        // trackCap = count + 1 (#192): three normal tracks plus
+        // the extra overflow track that catches the surplus.
+        #expect(core.tiler.settings.track.trackCap == 4)
         // 0 restores automatic, leaving the remembered count.
         core.execute("track.set_count", args: [.number(0)])
         #expect(core.tiler.settings.track.autoTracks)
@@ -153,9 +155,11 @@ struct TrackCommandsTests {
         ]
         #expect(over?.count == 3)
         #expect(over?.autoTracks == false)
+        // count + 1 = the three normal tracks plus the overflow
+        // track (#192).
         #expect(
             core.tiler.settings.resolvedTrack(for: "2").trackCap
-                == 3
+                == 4
         )
         // Other spaces stay automatic.
         #expect(

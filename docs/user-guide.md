@@ -272,10 +272,15 @@ Expand each layout type to adjust its defaults:
   isn't buried in the overflow); **Automatic tracks** (on by
   default — tracks open and collapse as windows come and go;
   turn it off to pin a fixed **Track limit**, which greys out
-  while automatic is on); **Overflow** — how a track that can't
-  fit all its windows renders them (**cascade all**, the track
-  default, piles them from the top; **cascade overflow** keeps
-  the ones that fit tiled and piles the rest); and **Wrap
+  while automatic is on — the limit counts *normal* tracks, so a
+  limit of 3 shows up to three tracks plus one overflow track
+  for anything beyond); **Overflow** — how the **overflow
+  track** renders (the far-edge track that collects the surplus
+  when more tracks exist than fit side by side): **cascade all**
+  (the default) piles its windows from the top, **cascade
+  overflow** keeps the ones that fit tiled and piles the rest.
+  Normal tracks always use cascade overflow for their own
+  windows — this only affects the overflow track. And **Wrap
   focus** (the same opt-in toggle as Scrolling's, off by
   default: on,
   focus wraps within the track along the axis and from the last

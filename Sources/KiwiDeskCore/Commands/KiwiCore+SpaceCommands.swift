@@ -167,7 +167,6 @@ extension KiwiCore {
             to: target,
             trackRule: params.newWindow,
             trackPosition: params.newWindowPosition,
-            cap: params.trackCap,
             isTiled: { windows[$0]?.isFloating == false }
         )
     }
