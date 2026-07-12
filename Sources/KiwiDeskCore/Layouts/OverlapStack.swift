@@ -34,17 +34,26 @@ public enum OverlapStack {
 
     /// Partial-overflow layout along one axis: keep the longest
     /// fitting prefix of `count` items fully tiled at ≥ `minSize`
-    /// each, and cascade only the remainder at a fixed title-bar
-    /// `offset` so the buried ones stay reachable — the
+    /// each, and pile the remainder as a **vertical** title-bar
+    /// cascade so the buried ones stay reachable — the
     /// `cascade_overflow` rule. Returns one rect per item (index
-    /// order), spanning the full cross-axis of `region`, or nil
-    /// when not even one item fits above the cascade (the caller
-    /// then cascades the whole region). `vertical` = items stack
-    /// along Y (columns of a track / a stack column); false =
-    /// along X (rows / side-by-side tracks). The single
-    /// authority behind the stack column overflow and both track
-    /// axes (#128), so the "tile the fitting, cascade the rest"
-    /// geometry cannot drift between them.
+    /// order), or nil when not even one item fits above the pile
+    /// (the caller then cascades the whole region).
+    ///
+    /// `vertical` = the *tiling* axis: items tile along Y
+    /// (columns of a track / a stack column) when true, along X
+    /// (rows / side-by-side tracks) when false. The buried pile
+    /// is **always** offset downward (Y), matching the shared
+    /// `frames(_:in:minSize:)` cascade and every other layout's
+    /// title-bar-reveal convention — a horizontal offset would
+    /// reveal side slivers, not title bars. So when tiling is
+    /// vertical the pile extends along the primary axis (and
+    /// consumes `minSize + offset*buried` of it, the stack
+    /// column geometry unchanged); when tiling is horizontal the
+    /// pile extends down the cross axis and only reserves a
+    /// `minSize` strip of the primary. The single authority
+    /// behind the stack column overflow and both track axes
+    /// (#128), so the geometry cannot drift between them.
     public static func overflowFrames(
         count: Int,
         in region: CGRect,
@@ -56,9 +65,14 @@ public enum OverlapStack {
         let primary = vertical ? region.height : region.width
         for tiled in stride(from: count - 1, through: 1, by: -1) {
             let buried = CGFloat(count - tiled - 1)
-            let cascadeExtent = minSize + offset * buried
+            // The pile is vertical: along a vertical tiling axis
+            // it eats `minSize + offset*buried` of the primary;
+            // along a horizontal one it only needs a `minSize`
+            // primary strip (its offset spends the cross axis).
+            let cascadePrimary =
+                vertical ? minSize + offset * buried : minSize
             let tileExtent =
-                (primary - cascadeExtent - gap * CGFloat(tiled))
+                (primary - cascadePrimary - gap * CGFloat(tiled))
                 / CGFloat(tiled)
             guard tileExtent >= minSize else { continue }
             var rects: [CGRect] = []
@@ -75,14 +89,24 @@ public enum OverlapStack {
                 )
                 pos += tileExtent + gap
             }
+            // Buried items: a vertical title-bar cascade anchored
+            // at the trailing edge of the tiled block.
             for index in 0..<(count - tiled) {
+                let step = CGFloat(index) * offset
                 rects.append(
-                    rect(
-                        along: pos + CGFloat(index) * offset,
-                        extent: minSize,
-                        region: region,
-                        vertical: vertical
-                    )
+                    vertical
+                        ? CGRect(
+                            x: region.minX,
+                            y: pos + step,
+                            width: region.width,
+                            height: minSize
+                        )
+                        : CGRect(
+                            x: pos,
+                            y: region.minY + step,
+                            width: region.maxX - pos,
+                            height: minSize
+                        )
                 )
             }
             return rects
@@ -90,8 +114,8 @@ public enum OverlapStack {
         return nil
     }
 
-    /// A rect occupying `[along, along+extent)` on the primary
-    /// axis and the full cross-axis of `region`.
+    /// A tiled rect occupying `[along, along+extent)` on the
+    /// primary axis and the full cross-axis of `region`.
     private static func rect(
         along: CGFloat,
         extent: CGFloat,

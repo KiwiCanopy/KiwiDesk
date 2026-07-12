@@ -231,23 +231,23 @@ struct TrackLayoutTests {
                 $0.minWindowSize = 300
             }
         )
-        let xs = w.map { frames[$0]!.minX }
-        // A fitting prefix is tiled (strictly increasing x,
-        // each wider than min); the tail cascades at a fixed
-        // title-bar offset (min width, +40 px steps).
-        let tiled = w.filter { frames[$0]!.width > 300.5 }
-        let cascaded = w.filter { frames[$0]!.width <= 300.5 }
+        // A fitting prefix of columns is tiled full-height; the
+        // overflow columns pile as a VERTICAL title-bar cascade
+        // (min height, +40 px DOWNWARD steps) — never a
+        // horizontal pile (title bars must stay visible).
+        let tiled = w.filter { frames[$0]!.height > 300.5 }
+        let cascaded = w.filter { frames[$0]!.height <= 300.5 }
         #expect(!tiled.isEmpty)
         #expect(!cascaded.isEmpty)
-        // Not the whole-space cascade: the tiled prefix has
-        // distinct, spread-out x positions.
-        #expect(Set(xs).count == w.count)
-        // The cascade tail steps by the title-bar offset.
-        let tailXs = cascaded.map { frames[$0]!.minX }.sorted()
-        if tailXs.count >= 2 {
-            #expect(
-                abs((tailXs[1] - tailXs[0]) - 40) < 0.001
-            )
+        // The tiled prefix spreads across distinct x positions
+        // (not a whole-space pile).
+        #expect(Set(tiled.map { frames[$0]!.minX }).count == tiled.count)
+        // The cascade tail steps DOWN in y, at a shared x.
+        let tailYs = cascaded.map { frames[$0]!.minY }.sorted()
+        let tailXs = Set(cascaded.map { frames[$0]!.minX })
+        #expect(tailXs.count == 1)
+        if tailYs.count >= 2 {
+            #expect(abs((tailYs[1] - tailYs[0]) - 40) < 0.001)
         }
     }
 
@@ -301,6 +301,39 @@ struct TrackLayoutTests {
         let cascaded = w.filter { frames[$0]!.height <= 300.5 }
         #expect(!tiled.isEmpty)
         #expect(!cascaded.isEmpty)
+    }
+
+    @Test("Overflow always cascades vertically, even in rows")
+    func overflowCascadeAlwaysVertical() {
+        // Horizontal mode, one row holding too many windows:
+        // the windows tile along X, and the overflow piles as a
+        // DOWNWARD title-bar cascade (shared y-offset
+        // convention) — not a horizontal side-sliver pile.
+        let w = ids(10)
+        let frames = layout.calculateGeometry(
+            for: w,
+            in: makeContext(
+                bounds: CGRect(
+                    x: 0,
+                    y: 0,
+                    width: 2400,
+                    height: 700
+                ),
+                breaks: [w[0]]
+            ) {
+                $0.track.axis = .horizontal
+                $0.minWindowSize = 300
+            }
+        )
+        let cascaded = w.filter { frames[$0]!.height <= 300.5 }
+        #expect(!cascaded.isEmpty)
+        // The buried windows step DOWN in y at a shared x — a
+        // vertical cascade, not horizontal.
+        let ys = cascaded.map { frames[$0]!.minY }.sorted()
+        #expect(Set(cascaded.map { frames[$0]!.minX }).count == 1)
+        if ys.count >= 2 {
+            #expect(abs((ys[1] - ys[0]) - 40) < 0.001)
+        }
     }
 
     @Test("Empty window list yields no frames")
