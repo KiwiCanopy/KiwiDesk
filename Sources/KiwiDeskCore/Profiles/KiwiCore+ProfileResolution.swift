@@ -83,12 +83,14 @@ extension KiwiCore {
         fallbackSpace = profile.fallbackSpace.flatMap {
             declared.contains($0) ? $0 : nil
         }
-        // Per-profile keybinding tier (#55 phase 6): register
-        // THIS profile's override (base survives unmentioned,
-        // O4 soft). Passed explicitly — callers adopt after
-        // apply, so `currentName` may still be the old profile.
-        reapplyStructuredKeybindings(
-            profileModes: profile.modes
+        // Per-profile override tiers — keybindings (#55 phase
+        // 6) and app rules (#109): register THIS profile's
+        // overrides (base survives unmentioned). Passed
+        // explicitly — callers adopt after apply, so
+        // `currentName` may still be the old profile.
+        reapplyStructuredOverrides(
+            profileModes: profile.modes,
+            profileAppRules: profile.appRules
         )
         resolveSpaceDisplays()
         retile(force: forceRetile)
@@ -157,9 +159,13 @@ extension KiwiCore {
         spacePins = [:]
         mainSpaces = []
         fallbackSpace = nil
-        // A transient Standard has no keybinding override —
-        // revert to the base gui.json modes (#55 phase 6).
-        reapplyStructuredKeybindings(profileModes: nil)
+        // A transient Standard has no keybinding or app-rule
+        // override — revert to the base gui.json config
+        // (#55 phase 6, #109).
+        reapplyStructuredOverrides(
+            profileModes: nil,
+            profileAppRules: nil
+        )
         resolveSpaceDisplays()
         retile(force: forceRetile)
         emitSpaceChange()

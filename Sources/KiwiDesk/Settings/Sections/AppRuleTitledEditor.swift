@@ -1,0 +1,147 @@
+import KiwiDeskCore
+import SwiftUI
+
+/// The "Windows titled…" pattern editor of an app-rule row
+/// (#68 §3.11): the chip list, the open-window picker, and the
+/// free-text escape. Split from `AppRuleRow` to stay under the
+/// file-size ceiling. `editingTitles` stays owned by the row
+/// (it also gates this editor's visibility) and is bound here
+/// so adding the first pattern keeps the editor open.
+struct AppRuleTitledEditor: View {
+    @ObservedObject var model: SettingsModel
+    let app: String
+    @Binding var editingTitles: Bool
+    @State private var customPattern = ""
+    @State private var addingCustom = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            if !patterns.isEmpty {
+                WrapChips(patterns) { pattern in
+                    patternChip(pattern)
+                }
+            }
+            HStack(spacing: 8) {
+                addWindowMenu
+                if addingCustom {
+                    TextField(
+                        L(
+                            "app_rules.title_contains",
+                            "Title contains…"
+                        ),
+                        text: $customPattern
+                    )
+                    .textFieldStyle(.roundedBorder)
+                    .frame(maxWidth: 200)
+                    .onSubmit { commitCustom() }
+                    Button(L("app_rules.add", "Add")) {
+                        commitCustom()
+                    }
+                    .disabled(customPattern.trimmed.isEmpty)
+                }
+            }
+            Text(titledPatternCaption)
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+        }
+    }
+
+    private var patterns: [String] {
+        FloatFacet.patterns(
+            model.config.floatRules,
+            app: app
+        )
+    }
+
+    private var titledPatternCaption: String {
+        L(
+            "app_rules.titled.caption",
+            "Windows whose title contains a pattern "
+                + "stay floating."
+        )
+    }
+
+    private func patternChip(_ pattern: String) -> some View {
+        HStack(spacing: 4) {
+            Text(pattern)
+                .font(.caption)
+            Button {
+                removePattern(pattern)
+            } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.system(size: 9))
+            }
+            .buttonStyle(.borderless)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 3)
+        .background(Capsule().fill(.tint.opacity(0.15)))
+        .overlay(
+            Capsule().strokeBorder(.tint.opacity(0.4))
+        )
+    }
+
+    /// Lists the app's currently open, not-yet-covered window
+    /// titles, plus the free-text escape for windows that
+    /// aren't open right now.
+    private var addWindowMenu: some View {
+        Menu {
+            ForEach(openTitles, id: \.self) { title in
+                Button(title) { addPattern(title) }
+            }
+            if !openTitles.isEmpty { Divider() }
+            Button(
+                L("app_rules.other_specify", "Other (Specify)…")
+            ) {
+                addingCustom = true
+            }
+        } label: {
+            Label(
+                L("app_rules.add_window", "Add Window"),
+                systemImage: "plus"
+            )
+            .font(.caption)
+        }
+        .menuStyle(.borderlessButton)
+        .fixedSize()
+    }
+
+    private var openTitles: [String] {
+        let covered = patterns
+        return Set(
+            model.core.state.windows.all
+                .filter { $0.appName == app }
+                .map(\.title)
+        )
+        .subtracting(covered)
+        .filter { !$0.isEmpty }
+        .sorted()
+    }
+
+    // MARK: - Mutations (GUI assembles the colon syntax)
+
+    private func addPattern(_ pattern: String) {
+        let rule = "\(app):\(pattern)"
+        model.config.floatRules.removeAll { $0 == app }
+        guard !model.config.floatRules.contains(rule) else {
+            return
+        }
+        model.config.floatRules.append(rule)
+        editingTitles = true
+    }
+
+    private func removePattern(_ pattern: String) {
+        model.config.floatRules.removeAll {
+            $0 == "\(app):\(pattern)"
+        }
+        if patterns.isEmpty { editingTitles = true }
+    }
+
+    private func commitCustom() {
+        let pattern = customPattern.trimmed
+        guard !pattern.isEmpty else { return }
+        addPattern(pattern)
+        customPattern = ""
+        addingCustom = false
+    }
+}

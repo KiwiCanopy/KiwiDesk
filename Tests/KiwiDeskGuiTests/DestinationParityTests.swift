@@ -26,24 +26,23 @@ struct DestinationParityTests {
         )
     }
 
-    // `showsProfileContext` deliberately does NOT match
-    // `visibleWhileEditingStoredProfile` (#68 header rework):
-    // General is the only profile-agnostic surface, while App
-    // Rules is edit-hidden yet context-shown (its rules target
-    // profile spaces). Pin the invariant so a new case can't
-    // silently land in the wrong bucket.
+    // General is the only profile-agnostic surface: it alone
+    // omits the profile-context header AND hides while a
+    // stored profile is edited. The two predicates coincide
+    // since #109 (App Rules joined the edit-visible set with
+    // its per-profile Space facet) but stay separate concepts
+    // — header presence vs edit reachability. Pin both so a
+    // new case can't silently land in the wrong bucket.
     @Test("only General omits the profile-context header")
     func profileContextExcludesOnlyGeneral() {
         for dest in SettingsDestination.allCases {
             #expect(
                 dest.showsProfileContext == (dest != .general)
             )
+            #expect(
+                dest.visibleWhileEditingStoredProfile
+                    == (dest != .general)
+            )
         }
-        // The intentional divergence: shown, but edit-hidden.
-        #expect(SettingsDestination.appRules.showsProfileContext)
-        #expect(
-            !SettingsDestination.appRules
-                .visibleWhileEditingStoredProfile
-        )
     }
 }

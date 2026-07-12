@@ -111,6 +111,11 @@ final class SettingsModel: ObservableObject {
     /// only inside the reload cycle, which republishes
     /// `config`, so views recompute together.
     var profileEditingBaseModes: [KeyMode]?
+    /// The base gui.json app→space rules while editing a
+    /// stored profile — the App Rules tab's override-mode
+    /// baseline (#109), same lifecycle as
+    /// `profileEditingBaseModes`. nil during live editing.
+    var profileEditingBaseAppRules: [String: SpaceID]?
 
     init(core: KiwiCore) {
         self.core = core

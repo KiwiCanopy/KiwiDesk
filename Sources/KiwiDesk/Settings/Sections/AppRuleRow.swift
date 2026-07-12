@@ -8,22 +8,50 @@ import SwiftUI
 struct AppRuleRow: View {
     @ObservedObject var model: SettingsModel
     let app: String
+    /// The base rules while editing a stored profile (#109):
+    /// non-nil switches the row into override mode — the Space
+    /// facet edits this profile's sparse override (inherited
+    /// rows dimmed, like the Shortcuts tab), the Float facet
+    /// is app-wide and renders disabled (grey out, not hide).
+    let overrideBase: [String: SpaceID]?
+    /// Whether the row is a session draft (added this session,
+    /// no stored facet yet) — deleting one always works, it
+    /// removes the draft itself.
+    let isDraft: Bool
     let onDelete: () -> Void
     /// Keeps the titled editor visible while it has no
     /// patterns yet (an empty pattern set stores nothing).
     @State private var editingTitles = false
-    @State private var customPattern = ""
-    @State private var addingCustom = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             header
             facetRows
             if floatFacet == .titled || editingTitles {
-                titledEditor
-                    .padding(.leading, 90)
+                AppRuleTitledEditor(
+                    model: model,
+                    app: app,
+                    editingTitles: $editingTitles
+                )
+                .padding(.leading, 90)
+                // App-wide, like the facet menu above.
+                .disabled(overrideBase != nil)
             }
         }
+        .opacity(inherited ? 0.55 : 1)
+    }
+
+    /// Whether the row is inherited unchanged from the base —
+    /// a base pin exists AND the Space facet matches it. Rows
+    /// with no pin on either side (drafts, float-only apps)
+    /// inherit nothing, so they render at full strength.
+    /// Always false during live editing, mirroring
+    /// `KeyBinding.isInherited(from:)`.
+    private var inherited: Bool {
+        guard let base = overrideBase,
+            let pin = base[app]
+        else { return false }
+        return model.config.appRules[app] == pin
     }
 
     // MARK: - Header
@@ -39,11 +67,28 @@ struct AppRuleRow: View {
                 Image(systemName: "trash")
             }
             .buttonStyle(.borderless)
+            // Override mode can only clear the Space facet: a
+            // row whose facet is already Automatic (float-only
+            // or an un-pinned base app) has nothing to delete —
+            // disable instead of offering a no-op (grey out,
+            // not hide). A session draft stays deletable:
+            // deleting it removes the draft row itself.
+            .disabled(
+                overrideBase != nil
+                    && model.config.appRules[app] == nil
+                    && !isDraft
+            )
             .help(
-                L(
-                    "app_rules.remove_all.help",
-                    "Remove all rules for this app"
-                )
+                overrideBase == nil
+                    ? L(
+                        "app_rules.remove_all.help",
+                        "Remove all rules for this app"
+                    )
+                    : L(
+                        "app_rules.remove_override.help",
+                        "Un-pin this app in this profile "
+                            + "(float rules stay app-wide)"
+                    )
             )
         }
     }
@@ -87,6 +132,19 @@ struct AppRuleRow: View {
                     .foregroundStyle(.secondary)
                 floatPicker
             }
+            // Float rules have no per-profile tier (#109):
+            // grey out, never hide (the #171 convention).
+            .disabled(overrideBase != nil)
+            .help(
+                overrideBase == nil
+                    ? ""
+                    : L(
+                        "app_rules.float.app_wide.help",
+                        "Float rules are app-wide — edit "
+                            + "them while editing the live "
+                            + "configuration."
+                    )
+            )
             Spacer()
         }
         .font(.callout)
@@ -173,112 +231,6 @@ struct AppRuleRow: View {
         }
     }
 
-    // MARK: - Titled patterns
-
-    private var patterns: [String] {
-        FloatFacet.patterns(
-            model.config.floatRules,
-            app: app
-        )
-    }
-
-    private var titledEditor: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            if !patterns.isEmpty {
-                WrapChips(patterns) { pattern in
-                    patternChip(pattern)
-                }
-            }
-            HStack(spacing: 8) {
-                addWindowMenu
-                if addingCustom {
-                    TextField(
-                        L(
-                            "app_rules.title_contains",
-                            "Title contains…"
-                        ),
-                        text: $customPattern
-                    )
-                    .textFieldStyle(.roundedBorder)
-                    .frame(maxWidth: 200)
-                    .onSubmit { commitCustom() }
-                    Button(L("app_rules.add", "Add")) {
-                        commitCustom()
-                    }
-                    .disabled(customPattern.trimmed.isEmpty)
-                }
-            }
-            Text(titledPatternCaption)
-                .font(.caption)
-                .foregroundStyle(.tertiary)
-        }
-    }
-
-    private var titledPatternCaption: String {
-        L(
-            "app_rules.titled.caption",
-            "Windows whose title contains a pattern "
-                + "stay floating."
-        )
-    }
-
-    private func patternChip(_ pattern: String) -> some View {
-        HStack(spacing: 4) {
-            Text(pattern)
-                .font(.caption)
-            Button {
-                removePattern(pattern)
-            } label: {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 9))
-            }
-            .buttonStyle(.borderless)
-        }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 3)
-        .background(Capsule().fill(.tint.opacity(0.15)))
-        .overlay(
-            Capsule().strokeBorder(.tint.opacity(0.4))
-        )
-    }
-
-    /// Lists the app's currently open, not-yet-covered window
-    /// titles, plus the free-text escape for windows that
-    /// aren't open right now.
-    private var addWindowMenu: some View {
-        Menu {
-            ForEach(openTitles, id: \.self) { title in
-                Button(title) { addPattern(title) }
-            }
-            if !openTitles.isEmpty { Divider() }
-            Button(
-                L("app_rules.other_specify", "Other (Specify)…")
-            ) {
-                addingCustom = true
-            }
-        } label: {
-            Label(
-                L("app_rules.add_window", "Add Window"),
-                systemImage: "plus"
-            )
-            .font(.caption)
-        }
-        .menuStyle(.borderlessButton)
-        .fixedSize()
-    }
-
-    private var openTitles: [String] {
-        let covered = patterns
-        return Set(
-            model.core.state.windows.all
-                .filter { $0.appName == app }
-                .map(\.title)
-        )
-        .subtracting(covered)
-        .filter { !$0.isEmpty }
-        .sorted()
-    }
-
     // MARK: - Mutations (GUI assembles the colon syntax)
 
     private func setNever() {
@@ -291,30 +243,5 @@ struct AppRuleRow: View {
     private func setAll() {
         setNever()
         model.config.floatRules.append(app)
-    }
-
-    private func addPattern(_ pattern: String) {
-        let rule = "\(app):\(pattern)"
-        model.config.floatRules.removeAll { $0 == app }
-        guard !model.config.floatRules.contains(rule) else {
-            return
-        }
-        model.config.floatRules.append(rule)
-        editingTitles = true
-    }
-
-    private func removePattern(_ pattern: String) {
-        model.config.floatRules.removeAll {
-            $0 == "\(app):\(pattern)"
-        }
-        if patterns.isEmpty { editingTitles = true }
-    }
-
-    private func commitCustom() {
-        let pattern = customPattern.trimmed
-        guard !pattern.isEmpty else { return }
-        addPattern(pattern)
-        customPattern = ""
-        addingCustom = false
     }
 }
