@@ -27,6 +27,10 @@ private func makeContext(
 struct GridDimensionTests {
     let layout = GridLayout()
 
+    /// A cap large enough never to clamp the balanced result —
+    /// isolates the raw auto-balance progression.
+    private let looseCap = (columns: 100, rows: 100)
+
     @Test(
         "Column-first progression matches the spec",
         arguments: [
@@ -40,7 +44,8 @@ struct GridDimensionTests {
         params.splitDirection = .horizontal
         let dims = layout.dimensions(
             count: spec.n,
-            params: params
+            params: params,
+            cap: looseCap
         )
         #expect(dims.columns == spec.cols)
         #expect(dims.rows == spec.rows)
@@ -58,10 +63,74 @@ struct GridDimensionTests {
         params.splitDirection = .vertical
         let dims = layout.dimensions(
             count: spec.n,
-            params: params
+            params: params,
+            cap: looseCap
         )
         #expect(dims.columns == spec.cols)
         #expect(dims.rows == spec.rows)
+    }
+
+    @Test("Dynamic clamps the balanced arrangement to the cap")
+    func dynamicRespectsCap() {
+        var params = GridParams()
+        params.type = .dynamic
+        params.splitDirection = .horizontal
+        params.columns = 3
+        params.rows = 2
+        // 9 windows balance to 3x3, but the 3x2 cap holds.
+        let dims = layout.dimensions(
+            count: 9,
+            params: params,
+            cap: (3, 2)
+        )
+        #expect(dims.columns == 3)
+        #expect(dims.rows == 2)
+    }
+
+    @Test("Dynamic grows the unpinned axis to fill the cap")
+    func dynamicFillsMismatchedCap() {
+        var params = GridParams()
+        params.type = .dynamic
+        params.splitDirection = .horizontal
+        // 6 windows balance to 3x2 (wide), but the cap is tall
+        // (2x3) — columns pin to 2, rows grow to 3 to hold all 6.
+        let dims = layout.dimensions(
+            count: 6,
+            params: params,
+            cap: (2, 3)
+        )
+        #expect(dims.columns == 2)
+        #expect(dims.rows == 3)
+    }
+
+    @Test("Rigid uses the cap verbatim")
+    func rigidUsesCap() {
+        var params = GridParams()
+        params.type = .rigid
+        let dims = layout.dimensions(
+            count: 1,
+            params: params,
+            cap: (4, 2)
+        )
+        #expect(dims.columns == 4)
+        #expect(dims.rows == 2)
+    }
+
+    @Test("Auto-size fits more columns than rows on landscape")
+    func autoSizeLandscape() {
+        var params = GridParams()
+        params.autoSize = true
+        // 1920x1080 usable, min 300, gap 10: floor(1920/310)=6,
+        // floor(1080/310)=3.
+        let cap = layout.capDimensions(
+            params: params,
+            usable: CGRect(x: 0, y: 0, width: 1920, height: 1080),
+            gapH: 10,
+            gapV: 10,
+            minSize: 300
+        )
+        #expect(cap.columns == 6)
+        #expect(cap.rows == 3)
     }
 }
 
@@ -152,6 +221,54 @@ struct GridLayoutTests {
             fourth.minY - third.minY == OverlapStack.offset
         )
         #expect(third.minX > context.usable.midX - 1)
+    }
+
+    @Test("Dynamic overflow stacks excess past the cap")
+    func dynamicOverflow() throws {
+        // Cap the dynamic grid at 2x1: the 4th window can no
+        // longer balance into a bigger grid, so windows past
+        // capacity cascade in the last cell (the rigid path).
+        let context = makeContext { grid in
+            grid.type = .dynamic
+            grid.columns = 2
+            grid.rows = 1
+        }
+        let frames = layout.calculateGeometry(
+            for: ids(4),
+            in: context
+        )
+        let second = try #require(frames[WindowID(2)])
+        let third = try #require(frames[WindowID(3)])
+        let fourth = try #require(frames[WindowID(4)])
+        // 2,3,4 cascade in the last (right) cell.
+        #expect(second.minX == third.minX)
+        #expect(third.minX == fourth.minX)
+        #expect(
+            third.minY - second.minY == OverlapStack.offset
+        )
+        #expect(second.minX > context.usable.midX - 1)
+    }
+
+    @Test("Auto-size lifts the dynamic cap from the screen")
+    func autoSizeGrid() throws {
+        // 1920x1080, min 300, gap 10 → 6x3 = 18-cell ceiling.
+        // 12 windows balance to 4x3 and all tile; without
+        // auto-size the default 3x2 cap would cascade them.
+        let context = makeContext { grid in
+            grid.autoSize = true
+        }
+        let frames = layout.calculateGeometry(
+            for: ids(12),
+            in: context
+        )
+        #expect(frames.count == 12)
+        // 12 distinct cells: no cascade (a cascade shares minX).
+        let cells = Set(
+            frames.values.map {
+                "\(Int($0.minX)),\(Int($0.minY))"
+            }
+        )
+        #expect(cells.count == 12)
     }
 
     @Test("Tiny screens fall back to the overlap stack")

@@ -654,6 +654,18 @@ make-default link's quiet style, jumping the sidebar
 selection through an injected `settingsNavigate` environment
 action.
 
+**Inapplicable controls are greyed, not hidden.** When a
+setting makes another control inert — Auto-size grid overrides
+the Columns/Rows steppers (#171), Fill empty space does
+nothing in a rigid grid, the scroll-speed row is dead when
+Animate focus shifts is off — the dependent control stays
+visible and `.disabled`, never removed. Hiding it would jump
+the list layout every time the governing toggle flips, and a
+vanished control loses the cue that its stored value is
+*preserved* (turn Auto-size back off and the old counts
+return). Greying reads as "not right now"; hiding reads as
+"gone". Precedent: `scrollSpeedRow` disabled by `onScrolling`.
+
 ## Monitors
 
 **One representation: monitor cards.** The old tab rendered

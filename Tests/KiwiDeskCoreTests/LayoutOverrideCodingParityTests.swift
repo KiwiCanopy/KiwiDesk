@@ -120,6 +120,7 @@ struct LayoutOverrideCodingParityTests {
         over.splitDirection = .vertical
         over.columns = 7
         over.rows = 5
+        over.autoSize = true
         return over
     }
 

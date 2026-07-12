@@ -117,7 +117,8 @@ KiwiDesk service restart
 | Grid | `grid.set_type` | `dynamic\|rigid` |
 | | `grid.set_fill_empty_space` | true\|false |
 | | `grid.set_split_direction` | `horizontal\|vertical` |
-| | `grid.set_dimensions` | columns, rows |
+| | `grid.set_dimensions` | columns, rows (upper bound in dynamic) |
+| | `grid.set_auto_size` | true\|false (default `false`; dims from screen) |
 | | `grid.set_new_window_placement` | placement¹ (default `last`) |
 | Track | `track.set_axis` | `vertical\|horizontal` (default vertical = columns) |
 | | `track.set_count` | n (0 = dynamic, the default) |

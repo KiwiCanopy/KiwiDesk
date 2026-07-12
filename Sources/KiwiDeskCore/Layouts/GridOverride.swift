@@ -19,6 +19,7 @@ public struct GridOverride: Sendable, Equatable {
     public var splitDirection: GridParams.SplitDirection?
     public var columns: Int?
     public var rows: Int?
+    public var autoSize: Bool?
 
     public init() {}
 
@@ -35,6 +36,7 @@ public struct GridOverride: Sendable, Equatable {
         }
         if let columns { out.columns = columns }
         if let rows { out.rows = rows }
+        if let autoSize { out.autoSize = autoSize }
         // Merged params hold no override map (see ScrollingOverride).
         out.override = [:]
         return out
@@ -45,7 +47,7 @@ public struct GridOverride: Sendable, Equatable {
     public var isEmpty: Bool {
         type == nil && fillEmptySpace == nil
             && splitDirection == nil && columns == nil
-            && rows == nil
+            && rows == nil && autoSize == nil
     }
 }
 
@@ -61,6 +63,7 @@ extension GridOverride: Codable {
         case splitDirection = "split_direction"
         case columns
         case rows
+        case autoSize = "auto_size"
     }
 
     public init(from decoder: Decoder) throws {
@@ -87,6 +90,10 @@ extension GridOverride: Codable {
             Int.self,
             forKey: .rows
         )
+        autoSize = try container.decodeIfPresent(
+            Bool.self,
+            forKey: .autoSize
+        )
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -102,5 +109,6 @@ extension GridOverride: Codable {
         )
         try container.encodeIfPresent(columns, forKey: .columns)
         try container.encodeIfPresent(rows, forKey: .rows)
+        try container.encodeIfPresent(autoSize, forKey: .autoSize)
     }
 }

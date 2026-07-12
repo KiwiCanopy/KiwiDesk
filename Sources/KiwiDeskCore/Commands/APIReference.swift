@@ -133,11 +133,13 @@ public enum APIReference {
         "grid": [
             "set_type", "set_fill_empty_space",
             "set_split_direction", "set_dimensions",
+            "set_auto_size",
             "set_new_window_placement",
             "set_type_override",
             "set_fill_empty_space_override",
             "set_split_direction_override",
             "set_dimensions_override",
+            "set_auto_size_override",
         ],
         "monocle": [
             "set_orientation", "set_orientation_override",

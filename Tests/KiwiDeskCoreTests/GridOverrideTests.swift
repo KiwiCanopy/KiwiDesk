@@ -37,12 +37,14 @@ struct GridOverrideTests {
         over.splitDirection = .vertical
         over.columns = 5
         over.rows = 4
+        over.autoSize = true
         let resolved = over.resolved(onto: GridParams())
         #expect(resolved.type == .rigid)
         #expect(resolved.fillEmptySpace == false)
         #expect(resolved.splitDirection == .vertical)
         #expect(resolved.columns == 5)
         #expect(resolved.rows == 4)
+        #expect(resolved.autoSize == true)
     }
 
     @Test("Unset fields inherit the global, per field")
@@ -165,6 +167,36 @@ struct GridOverrideCommandTests {
         // The global dimensions are untouched.
         #expect(core.tiler.settings.grid.columns == 3)
         #expect(core.tiler.settings.grid.rows == 2)
+    }
+
+    @Test("auto_size override writes only that space")
+    func autoSizeOverride() {
+        let core = makeCore()
+        #expect(
+            core.execute(
+                "grid.set_auto_size_override",
+                args: [.string("4"), .bool(true)]
+            ).isSuccess
+        )
+        let over = core.tiler.settings.grid.override[SpaceID("4")]
+        #expect(over?.autoSize == true)
+        // Global stays off.
+        #expect(core.tiler.settings.grid.autoSize == false)
+        #expect(
+            core.tiler.settings.resolvedGrid(for: "4").autoSize
+        )
+    }
+
+    @Test("global auto_size sets the flag")
+    func autoSizeGlobal() {
+        let core = makeCore()
+        #expect(
+            core.execute(
+                "grid.set_auto_size",
+                args: [.bool(true)]
+            ).isSuccess
+        )
+        #expect(core.tiler.settings.grid.autoSize == true)
     }
 
     @Test("Invalid value is rejected and writes nothing")

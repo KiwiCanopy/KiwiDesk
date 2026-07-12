@@ -699,6 +699,24 @@ grid.set_split_direction("horizontal")
 grid.set_dimensions(3, 2)
 ```
 
+### grid.set_auto_size
+
+**Expects:** `true` or `false` (default `false`).
+
+**Does:** when true, derives the grid's dimensions from the
+display — as many columns and rows as fit at `min_window_size`
+(`floor(usable / (min_window_size + gap))` per axis, at least 1)
+— instead of the typed `columns`/`rows`. Orthogonal to the grid
+type: it caps a dynamic grid and fixes a rigid one alike. On a
+landscape monitor this yields more columns than rows. Windows
+past the resulting capacity cascade in the last cell.
+
+**Example:**
+
+```lua
+grid.set_auto_size(true)
+```
+
 ### grid.set_type_override
 
 **Expects:**
@@ -757,6 +775,21 @@ grid.set_split_direction_override("3", "vertical")
 
 ```lua
 grid.set_dimensions_override("3", 4, 3)
+```
+
+### grid.set_auto_size_override
+
+**Expects:**
+
+- A space identifier.
+- A boolean.
+
+**Does:** overrides the global auto-size flag for one space.
+
+**Example:**
+
+```lua
+grid.set_auto_size_override("3", true)
 ```
 
 ### monocle.set_orientation

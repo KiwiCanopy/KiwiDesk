@@ -69,6 +69,10 @@ struct SettingsCodingTests {
         // `scroll.set_wrap_focus` → `layout.scroll.wrap_focus`,
         // off by default (#168).
         #expect(scroll["wrap_focus"] as? Bool == false)
+        // `grid.set_auto_size` → `layout.grid.auto_size` (#171),
+        // off by default.
+        let grid = try object(layout["grid"])
+        #expect(grid["auto_size"] as? Bool == false)
         let stack = try object(layout["stack"])
         #expect(stack["master_ratio"] as? Double == 0.6)
         // `track.set_axis` → `layout.track.axis` (#128);
@@ -140,6 +144,7 @@ struct SettingsCodingTests {
         settings.scrolling.slotSize = .points(400)
         settings.stack.masterCount = 2
         settings.grid.rows = 4
+        settings.grid.autoSize = true
         settings.track.axis = .horizontal
         settings.track.count = 3
         settings.track.overflowStyle = .cascadeAll

@@ -197,21 +197,53 @@ struct ScrollGridEditor: View {
                 ),
                 isOn: $model.config.settings.grid.fillEmptySpace
             )
+            // Fill-empty only applies to dynamic grids; greyed
+            // (not hidden) in rigid so its value stays visible
+            // (see design-decisions "grey inapplicable controls").
+            .disabled(
+                model.config.settings.grid.type == .rigid
+            )
+            gridAutoSize
             StepperRow(
                 label: L("scroll_grid.columns", "Columns"),
                 value: $model.config.settings.grid.columns,
                 in: 1...10
             )
+            .disabled(model.config.settings.grid.autoSize)
             StepperRow(
                 label: L("scroll_grid.rows", "Rows"),
                 value: $model.config.settings.grid.rows,
                 in: 1...10
             )
+            .disabled(model.config.settings.grid.autoSize)
             Divider()
             PlacementPicker(
                 placement: $model.config.settings.grid
                     .newWindowPlacement
             )
+        }
+    }
+
+    /// The auto-size toggle with its caption. A behavior modifier
+    /// like Fill empty space / Wrap focus — not a mode switch —
+    /// so it reads as a plain toggle; when on it greys the
+    /// Columns/Rows steppers below (the screen supplies the dims).
+    private var gridAutoSize: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Toggle(
+                L("scroll_grid.auto_size", "Auto-size grid"),
+                isOn: $model.config.settings.grid.autoSize
+            )
+            Text(
+                L(
+                    "scroll_grid.auto_size_caption",
+                    "Fits as many columns and rows as the "
+                        + "screen allows, using the minimum "
+                        + "window size below."
+                )
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
         }
     }
 }

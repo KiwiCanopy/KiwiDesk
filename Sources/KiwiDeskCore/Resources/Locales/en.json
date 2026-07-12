@@ -330,6 +330,8 @@
   "scroll_grid.animate_focus_shifts": "Animate focus shifts",
   "scroll_grid.app_bar_xref": "The app bar shown in scrolling is configured in",
   "scroll_grid.app_bar_xref_link": "Appearance ▸ App Bar",
+  "scroll_grid.auto_size": "Auto-size grid",
+  "scroll_grid.auto_size_caption": "Fits as many columns and rows as the screen allows, using the minimum window size below.",
   "scroll_grid.columns": "Columns",
   "scroll_grid.dynamic": "Dynamic",
   "scroll_grid.fill_empty_space": "Fill empty space",

@@ -35,6 +35,11 @@ extension KiwiCore {
             }
             tiler.settings.grid.columns = dims.columns
             tiler.settings.grid.rows = dims.rows
+        case "grid.set_auto_size":
+            guard let auto = args.first?.boolValue else {
+                return Self.autoSizeError
+            }
+            tiler.settings.grid.autoSize = auto
         case "grid.set_new_window_placement":
             guard let placement = parsePlacement(args) else {
                 return placementError
@@ -99,6 +104,11 @@ extension KiwiCore {
             }
             over.columns = dims.columns
             over.rows = dims.rows
+        case "auto_size":
+            guard let auto = rest.first?.boolValue else {
+                return Self.autoSizeError
+            }
+            over.autoSize = auto
         default:
             return .fail(
                 "unknown command: grid.set_\(field)_override"
@@ -137,6 +147,9 @@ extension KiwiCore {
         "expected dynamic|rigid"
     )
     private static let fillError = CommandResponse.fail(
+        "expected boolean"
+    )
+    private static let autoSizeError = CommandResponse.fail(
         "expected boolean"
     )
     private static let splitDirectionError = CommandResponse.fail(

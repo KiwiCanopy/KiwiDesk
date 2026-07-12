@@ -250,8 +250,13 @@ Expand each layout type to adjust its defaults:
 - **Monocle**: orientation (affects which arrow keys cycle focus
   and where the app bar sits).
 - **Grid**: type (dynamic or rigid), fill empty space (yes/no),
-  split direction (horizontal or vertical), and for rigid mode,
-  column and row counts.
+  split direction (horizontal or vertical), and column and row
+  counts. In dynamic mode the counts are an upper bound — the
+  grid auto-balances up to that ceiling, then cascades the
+  overflow in the last cell. **Auto-size grid** fits as many
+  columns and rows as the screen allows at the minimum window
+  size instead of the typed counts (greying them out), so a
+  landscape monitor gets more columns than rows.
 - **Track**: axis (vertical = columns side by side, horizontal =
   rows), track limit (0 = dynamic — tracks open and collapse as
   windows come and go), overflow style (when too many tracks or

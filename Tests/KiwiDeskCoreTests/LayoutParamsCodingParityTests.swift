@@ -85,6 +85,7 @@ struct LayoutParamsCodingParityTests {
         params.splitDirection = .vertical
         params.columns = 5
         params.rows = 4
+        params.autoSize = true
         params.newWindowPlacement = .first
         var over = GridOverride()
         over.columns = 6
