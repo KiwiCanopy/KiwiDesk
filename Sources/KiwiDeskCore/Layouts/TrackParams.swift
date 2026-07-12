@@ -37,8 +37,10 @@ public struct TrackParams: Sendable, Equatable, Codable {
     /// Whether the track count is managed automatically (#178):
     /// on (the default), tracks open and collapse as windows come
     /// and go — no cap. Off pins the count to `count`. The
-    /// carousel-vs-grid twin of `GridParams.autoSize`; the layout
-    /// reads `trackCap`, never `count` directly.
+    /// carousel-vs-grid twin of `GridParams.autoSize`. The layout
+    /// reads `count` directly for the normal/overflow split
+    /// (#192); spawn, navigation, and swap read `trackCap`
+    /// (= `count + 1`, the overflow track included).
     public var autoTracks = true
     /// The fixed maximum number of tracks used when `autoTracks`
     /// is off (the remembered magnitude, so toggling auto off

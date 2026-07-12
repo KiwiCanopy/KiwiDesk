@@ -94,6 +94,11 @@ extension KiwiCore {
             for: input.tiled,
             in: input.context
         )
+        // Any overlap = piled, matching the `framesCascade` gate
+        // (raw intersection). Deliberately NOT `Navigation.
+        // pileMates`' 25%-area threshold — that answers "worth
+        // skipping in a swap", a different question. Tiled tracks
+        // never overlap (inner gaps), so both agree in practice.
         let piled = input.tiled.filter { id in
             guard let rect = frames[id] else { return false }
             return input.tiled.contains { other in

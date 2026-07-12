@@ -135,7 +135,8 @@ extension KiwiCore {
         default:
             break
         }
-        if TilingEngine.shouldRetile(after: event) {
+        let willRetile = TilingEngine.shouldRetile(after: event)
+        if willRetile {
             retile(newlyCreatedWindow: newlyCreatedWindow)
         }
         // Closing or minimizing the focused window hands focus
