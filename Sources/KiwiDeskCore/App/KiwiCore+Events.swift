@@ -137,6 +137,11 @@ extension KiwiCore {
         }
         if TilingEngine.shouldRetile(after: event) {
             retile(newlyCreatedWindow: newlyCreatedWindow)
+            // A structural change in a track space (spawn, close)
+            // can push a window into an overflow cascade; fix the
+            // pile's z-order once it settles (#193, self-gated on
+            // track + actual overflow).
+            scheduleTrackZOrderRestoreIfOverflowing()
         }
         // Closing or minimizing the focused window hands focus
         // to the space's fallback (state picked one; this raise

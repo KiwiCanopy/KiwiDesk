@@ -81,6 +81,7 @@ extension KiwiCore {
         retile(
             animated: tiler.settings.animations.onWindowSwap
         )
+        scheduleTrackZOrderRestoreIfOverflowing()
         return .ok()
     }
 }

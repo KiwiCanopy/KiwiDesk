@@ -65,9 +65,62 @@ extension KiwiCore {
             restoreStackZOrder(space)
         case .scrolling:
             restoreScrollingZOrder(space)
+        case .track:
+            restoreTrackZOrder(space)
         default:
             break
         }
+    }
+
+    /// Track (#193): an overflow cascade piles windows — the
+    /// windows inside one track, or whole buried tracks — with
+    /// the title-bar offset. Array order IS the cascade order
+    /// everywhere in the track model (each pile is a contiguous
+    /// slice), so raising the tiled windows in that order puts
+    /// every pile's first window behind and its last in front,
+    /// keeping each title bar visible. The focused window is
+    /// re-raised last — the same override as the stack cascade.
+    private func restoreTrackZOrder(_ space: Space) {
+        let tiled = space.windows.filter {
+            state.windows[$0]?.isFloating == false
+        }
+        guard tiled.count > 1 else { return }
+        raiseSequentially(tiled, thenFocus: space.focused)
+    }
+
+    /// Schedules a track z-order restore, but only when the
+    /// layout actually cascades (the scrolling gate's twin,
+    /// #150): tracks that tile side by side don't overlap, so a
+    /// reorder scrambles no stacking and a needless re-raise
+    /// would flicker focus. Call *after* the reorder's retile.
+    func scheduleTrackZOrderRestoreIfOverflowing() {
+        guard let input = tiler.layoutInput(state: state),
+            input.space.mode == .track,
+            Self.framesCascade(
+                TrackLayout().calculateGeometry(
+                    for: input.tiled,
+                    in: input.context
+                )
+            )
+        else { return }
+        scheduleZOrderRestore()
+    }
+
+    /// Whether any two laid-out frames overlap — the signature
+    /// of an overflow cascade. Tiled tracks never overlap (the
+    /// inner gaps separate them), so this is false whenever the
+    /// space fits without piling. Pure math, unit-tested.
+    nonisolated static func framesCascade(
+        _ frames: [WindowID: CGRect]
+    ) -> Bool {
+        let rects = Array(frames.values)
+        for i in rects.indices {
+            for j in (i + 1)..<rects.count
+            where !rects[i].intersection(rects[j]).isEmpty {
+                return true
+            }
+        }
+        return false
     }
 
     /// Re-raises the stack zone top to bottom, so upper
