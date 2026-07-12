@@ -73,19 +73,37 @@ extension KiwiCore {
     }
 
     /// Track (#193): an overflow cascade piles windows — the
-    /// windows inside one track, or whole buried tracks — with
-    /// the title-bar offset. Array order IS the cascade order
-    /// everywhere in the track model (each pile is a contiguous
-    /// slice), so raising the tiled windows in that order puts
-    /// every pile's first window behind and its last in front,
-    /// keeping each title bar visible. The focused window is
-    /// re-raised last — the same override as the stack cascade.
+    /// windows inside one track, or the merged overflow track —
+    /// with the title-bar offset. Array order IS the cascade
+    /// order everywhere in the track model (each pile is a
+    /// contiguous slice), so raising the piled windows in that
+    /// order puts each pile's first window behind and its last
+    /// in front, keeping every title bar visible.
+    ///
+    /// Raise ONLY the windows that actually overlap (#192): the
+    /// side-by-side tracks that tile need no z-order, and raising
+    /// them across apps only churns focus mid-sequence — a stray
+    /// one can shuffle a pile member behind another and swallow
+    /// its title bar. The focused window is re-raised last, the
+    /// same override as the stack cascade.
     private func restoreTrackZOrder(_ space: Space) {
-        let tiled = space.windows.filter {
-            state.windows[$0]?.isFloating == false
+        guard let input = tiler.layoutInput(state: state) else {
+            return
         }
-        guard tiled.count > 1 else { return }
-        raiseSequentially(tiled, thenFocus: space.focused)
+        let frames = TrackLayout().calculateGeometry(
+            for: input.tiled,
+            in: input.context
+        )
+        let piled = input.tiled.filter { id in
+            guard let rect = frames[id] else { return false }
+            return input.tiled.contains { other in
+                other != id
+                    && !(frames[other]?
+                        .intersection(rect).isEmpty ?? true)
+            }
+        }
+        guard piled.count > 1 else { return }
+        raiseSequentially(piled, thenFocus: space.focused)
     }
 
     /// Schedules a track z-order restore, but only when the
