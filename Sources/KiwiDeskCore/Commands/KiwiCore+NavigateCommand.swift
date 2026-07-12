@@ -124,12 +124,15 @@ extension KiwiCore {
                 animated: tiler.settings.animations.onWindowSwap
             )
             // A scrolling swap can push a window into an edge pile
-            // whose stacking then goes stale (#150); a stack swap
+            // whose stacking then goes stale (#150); a track swap
+            // that fell through to the geometric search can
+            // scramble a track's overflow pile (#193); a stack swap
             // that crosses the master boundary scrambles the
-            // cascade. `crossesStackBoundary` is stack-only, so
-            // the two are mutually exclusive.
+            // cascade. All three gates are mode-exclusive.
             if space.mode == .scrolling {
                 scheduleScrollingZOrderRestoreIfOverflowing()
+            } else if space.mode == .track {
+                scheduleTrackZOrderRestoreIfOverflowing()
             } else if crossedZones {
                 scheduleZOrderRestore()
             }
