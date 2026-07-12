@@ -108,11 +108,27 @@ public final class EventLoop {
 
     // MARK: - Window tracking
 
+    /// KiwiDesk's own windows (the Settings window and any
+    /// panels/overlays it creates) must never be managed —
+    /// tiling or even floating its own UI is wrong. Opening
+    /// Settings promotes the app to `.regular`
+    /// (`activateAsRegular`), which otherwise slips past the
+    /// `attach` activation-policy gate and tiles the Settings
+    /// window, so a retile raises a tiled peer over it and
+    /// steals focus on restore (#174). Keyed on the process, so
+    /// it is policy-independent and covers every self-window.
+    nonisolated static func isOwnProcess(_ pid: pid_t) -> Bool {
+        pid == getpid()
+    }
+
     func track(
         _ element: AXUIElement,
         pid: pid_t,
         appName: String
     ) {
+        // Never manage KiwiDesk's own windows (#174) — the
+        // universal funnel guard, backing the `attach` gate.
+        guard !Self.isOwnProcess(pid) else { return }
         guard AXHelper.role(of: element) == kAXWindowRole,
             !AXHelper.isMinimized(element),
             var window = AXHelper.snapshot(
