@@ -62,13 +62,17 @@ export function layoutDiagram(name: string): string {
           r(108, 48, 44, 34)
       );
     case "track":
-      // Three columns, the middle one split — a wider accent
-      // window over a smaller one (per-track resize).
+      // Four columns holding 1-2-3-1 windows — tracks carry any
+      // number of windows, and each resizes on its own (the
+      // accent window is taller than its track-mate).
       return svg(
-        r(8, 8, 40, 74) +
-          r(54, 8, 52, 44, "tile tile--accent") +
-          r(54, 58, 52, 24) +
-          r(112, 8, 40, 74)
+        r(8, 8, 33, 74) +
+          r(45, 8, 33, 42, "tile tile--accent") +
+          r(45, 53, 33, 29) +
+          r(82, 8, 33, 22) +
+          r(82, 33, 33, 22) +
+          r(82, 58, 33, 24) +
+          r(119, 8, 33, 74)
       );
     case "floating":
       return svg(

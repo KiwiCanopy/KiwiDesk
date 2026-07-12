@@ -113,7 +113,7 @@
   "guide_layout_monocle": "One window fills the screen while the others wait quietly behind it. Pure focus, no distractions.",
   "guide_layout_scrolling": "Windows sit in a row you scroll through, like columns on a long desk — the focused one always front and center.",
   "guide_layout_stack": "One big window holds your focus, with the rest lined up neatly beside it — glance over.",
-  "guide_layout_track": "Windows live in side-by-side columns (or rows). Growing a window always grows the right thing: its own column, or its share of it.",
+  "guide_layout_track": "Side-by-side columns (or rows), each holding as many windows as you like — one column per task or project.",
   "guide_layouts_eyebrow": "The shapes",
   "guide_layouts_p": "A “layout” is just the shape your windows arrange themselves into. KiwiDesk has seven. You don't have to learn them all — most people find one they like and stay there. Here's each, in plain language.",
   "guide_layouts_title": "The layouts",

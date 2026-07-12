@@ -55,10 +55,12 @@ public struct TrackLayout: LayoutSystem {
         )
         // One region per track: proportional when everything
         // fits; otherwise cascade-overflow tiles the fitting
-        // prefix and cascades the rest (the axis-general stack
-        // rule, hard-coded — #180 dropped the knob). A
-        // fully-degenerate span still cascades the whole space
-        // (physics fallback, not a setting).
+        // prefix and cascades the rest. The cross-axis track
+        // overflow stays hard-coded cascade_overflow so fitting
+        // tracks never dissolve — the `overflow_style` knob
+        // (#188) shapes the windows *inside* a track, along the
+        // axis (see `trackFrames`). A fully-degenerate span
+        // still cascades the whole space (physics, not a knob).
         let regions: [CGRect]
         if span > 0, total <= limit {
             regions = proportionalRegions(

@@ -142,7 +142,8 @@ enum KeybindingCatalog {
         }
 
     /// The two whole-track swap rows (#182, prev/next).
-    /// Advanced-track-gated like `moveToTrackRows`.
+    /// Always rendered like `moveToTrackRows` (the gate was
+    /// dropped in #188); only relevant in the track layout.
     static let trackSwapRows: [NavCommand] =
         sequenceSteps.map { step, phrase in
             NavCommand(
