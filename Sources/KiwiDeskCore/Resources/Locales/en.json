@@ -51,7 +51,7 @@
   "app_rules.float.never": "Never",
   "app_rules.float.titled": "Windows titled…",
   "app_rules.other_specify": "Other (Specify)…",
-  "app_rules.override.caption": "Space assignments made here apply to this profile only. Dimmed rows are inherited from the base rules and stay in sync with them; picking another space overrides the rule for this profile, and deleting a row un-pins the app here even when the base pins it. Float rules are app-wide — edit them while editing the live configuration.",
+  "app_rules.override.caption": "Space assignments made here apply to this profile only. Dimmed rows are inherited from the app-wide base rules and stay in sync with them; picking another space overrides the rule for this profile, and deleting a row un-pins the app here even when the base pins it. To edit the base rules themselves — or the Float column, which is always app-wide — switch back to the currently loaded profile in the header's picker.",
   "app_rules.override.overrides": "This profile overrides base app rules.",
   "app_rules.remove_all.help": "Remove all rules for this app",
   "app_rules.remove_override.help": "Un-pin this app in this profile (float rules stay app-wide)",
