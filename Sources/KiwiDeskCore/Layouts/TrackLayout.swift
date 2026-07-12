@@ -71,7 +71,7 @@ public struct TrackLayout: LayoutSystem {
                 vertical: vertical,
                 usable: usable
             )
-        } else if params.overflowStyle == .cascadeOverflow,
+        } else if context.track.overflowStyle == .cascadeOverflow,
             let over = OverlapStack.overflowFrames(
                 count: counts.count,
                 in: usable,
