@@ -248,13 +248,23 @@ Expand each layout type to adjust its defaults:
   from the last window back to the first (and vice versa). Swap
   never wraps.
 - **Monocle**: orientation (affects which arrow keys cycle focus
-  and where the app bar sits).
+  and where the app bar sits) and wrap focus. Monocle is a
+  carousel, so wrap focus is **on** by default — cycling past the
+  last window returns to the first; turn it off to stop at the
+  ends.
 - **Grid**: type (dynamic or rigid), fill empty space (yes/no),
-  split direction (horizontal or vertical), and for rigid mode,
-  column and row counts.
+  split direction (horizontal or vertical), and column and row
+  counts. In dynamic mode the counts are an upper bound — the
+  grid auto-balances up to that ceiling, then cascades the
+  overflow in the last cell. **Auto-size grid** fits as many
+  columns and rows as the screen allows at the minimum window
+  size instead of the typed counts (greying them out), so a
+  landscape monitor gets more columns than rows.
 - **Track**: axis (vertical = columns side by side, horizontal =
-  rows), track limit (0 = dynamic — tracks open and collapse as
-  windows come and go), overflow style (when too many tracks or
+  rows), **Automatic tracks** (on by default — tracks open and
+  collapse as windows come and go; turn it off to pin a fixed
+  **Track limit**, which greys out while automatic is on),
+  overflow style (when too many tracks or
   windows to hold the minimum size: `cascade_overflow` keeps the
   fitting ones tiled and cascades only the rest — the same
   choice as the stack layout — or `cascade_all`), where a new

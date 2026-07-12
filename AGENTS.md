@@ -267,6 +267,18 @@ Keep this list updated whenever a recurring mistake is found.
   their AX tree warm; do not remove this without a replacement.
 - **Windows live in a flat `[WindowID]` per space.** Do not
   introduce tree/container structures into state or layout code.
+- **Cross-layout logic must account for each layout's navigation
+  model.** Anything spanning all layouts — focus/swap navigation,
+  overflow handling, geometric neighbor search — must consider
+  whether a layout is *geometric* (a neighbor search over
+  calculated slots) or *array-order* (steps the flat array), and
+  whether it can produce an *overflow pile* (an `OverlapStack`
+  cascade). The two models need different handling (e.g. #172:
+  exclude pile-mates from the geometric candidate set vs skip
+  their array indices; the shared detector is
+  `Navigation.pileMates`). The authoritative map is the "Layout
+  navigation & overflow models" table in `docs/design-decisions.md`
+  — a **new layout must add its row** there.
 - **Space identifiers are strings** and case-sensitive; numeric
   strings and integers are equivalent (`"1"` == `1`).
 - **Hotkeys use the Carbon API** (`RegisterEventHotKey`), not

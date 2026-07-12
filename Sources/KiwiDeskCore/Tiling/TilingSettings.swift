@@ -19,6 +19,14 @@ public struct TilingSettings: Sendable, Equatable, Codable {
     /// back into it. Layout math never reads this — the bound
     /// row's own literal delta drives an actual resize.
     public var resizeStep: CGFloat = 50
+    /// When true (default), a directional `swap` issued from
+    /// inside an overflow cascade skips the other windows piled
+    /// with the focused one and targets the tiled neighbor
+    /// outside the pile (nothing when there is none), rather than
+    /// reordering the cascade (#172). Global (per profile, all
+    /// spaces), same tier as `minWindowSize`; power-user escape
+    /// hatch, no GUI. `focus` is never affected.
+    public var swapSkipsCascade = true
     public var bsp = BspParams()
     public var stack = StackParams()
     public var scrolling = ScrollingParams()
@@ -61,6 +69,7 @@ public struct TilingSettings: Sendable, Equatable, Codable {
         case gap
         case layout
         case minWindowSize = "min_window_size"
+        case swapSkipsCascade = "swap_skips_cascade"
         case placementOverride =
             "new_window_placement_override"
         case mouseResize = "mouse_resize"
@@ -110,6 +119,11 @@ public struct TilingSettings: Sendable, Equatable, Codable {
                 CGFloat.self,
                 forKey: .minWindowSize
             ) ?? 300
+        swapSkipsCascade =
+            try container.decodeIfPresent(
+                Bool.self,
+                forKey: .swapSkipsCascade
+            ) ?? true
         placementOverride =
             try container.decodeIfPresent(
                 [SpaceID: SpawnPlacement].self,
@@ -261,6 +275,10 @@ public struct TilingSettings: Sendable, Equatable, Codable {
         try container.encode(
             minWindowSize,
             forKey: .minWindowSize
+        )
+        try container.encode(
+            swapSkipsCascade,
+            forKey: .swapSkipsCascade
         )
         try container.encode(
             placementOverride,

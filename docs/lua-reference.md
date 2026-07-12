@@ -255,6 +255,28 @@ binding fires.
 KiwiDesk.set_resize_step(75)
 ```
 
+### set_swap_skips_cascade
+
+**Expects:** `true` or `false` (default `true`).
+
+**Does:** a power-user toggle for how a directional `swap`
+behaves when the focused window sits in an overflow
+[cascade](#when-windows-run-out-of-space). When `true` (the
+default), the swap skips the other windows piled with it and
+trades with the tiled neighbor *outside* the pile in that
+direction — doing nothing when there is none — instead of
+reordering the cascade. Set `false` to restore the raw
+behavior, where a swap trades with whichever piled window lies
+that way. Global (per profile, all spaces); `focus` is never
+affected. There is no Settings toggle — a pile is a corner
+case, so this lives in config only.
+
+**Example:**
+
+```lua
+KiwiDesk.set_swap_skips_cascade(true)
+```
+
 ### Space Identity
 
 Spaces are identified by **strings or numbers** — `1` and `"1"`
@@ -598,7 +620,9 @@ row wraps to the far end (right off the last window lands on the
 first, and vice versa). Default is `false` — focus stops at the
 ends, matching the physical-strip feel of the layout. Applies to
 `focus` only; `swap` never wraps (it would teleport a window
-across the whole row). Monocle always wraps and has no toggle.
+across the whole row). Monocle has the same toggle
+(`monocle.set_wrap_focus`) but defaults it **on**, since it's a
+carousel.
 
 **Example:**
 
@@ -699,6 +723,24 @@ grid.set_split_direction("horizontal")
 grid.set_dimensions(3, 2)
 ```
 
+### grid.set_auto_size
+
+**Expects:** `true` or `false` (default `false`).
+
+**Does:** when true, derives the grid's dimensions from the
+display — as many columns and rows as fit at `min_window_size`
+(`floor(usable / (min_window_size + gap))` per axis, at least 1)
+— instead of the typed `columns`/`rows`. Orthogonal to the grid
+type: it caps a dynamic grid and fixes a rigid one alike. On a
+landscape monitor this yields more columns than rows. Windows
+past the resulting capacity cascade in the last cell.
+
+**Example:**
+
+```lua
+grid.set_auto_size(true)
+```
+
 ### grid.set_type_override
 
 **Expects:**
@@ -759,6 +801,21 @@ grid.set_split_direction_override("3", "vertical")
 grid.set_dimensions_override("3", 4, 3)
 ```
 
+### grid.set_auto_size_override
+
+**Expects:**
+
+- A space identifier.
+- A boolean.
+
+**Does:** overrides the global auto-size flag for one space.
+
+**Example:**
+
+```lua
+grid.set_auto_size_override("3", true)
+```
+
 ### monocle.set_orientation
 
 **Expects:** `"horizontal"` or `"vertical"`.
@@ -788,6 +845,22 @@ monocle.set_orientation("horizontal")
 monocle.set_orientation_override("3", "vertical")
 ```
 
+### monocle.set_wrap_focus
+
+**Expects:** `true` or `false` (default `true`).
+
+**Does:** whether the focus cycle wraps past the ends. Monocle is
+a carousel, so this defaults **on** (unlike the linear scrolling
+and track wraps, which default off) — `focus` past the last window
+returns to the first, and vice versa. Turn it off to make focus
+stop at the first/last window. `swap` never wraps.
+
+**Example:**
+
+```lua
+monocle.set_wrap_focus(false)
+```
+
 ### track.set_axis
 
 **Expects:** `"vertical"` (default) or `"horizontal"`.
@@ -806,18 +879,39 @@ track.set_axis("vertical")
 
 ### track.set_count
 
-**Expects:** an integer ≥ 0 (default 0).
+**Expects:** an integer ≥ 0.
 
-**Does:** caps how many tracks a space can hold. `0` means
-dynamic: tracks open and collapse as windows come and go. With
-a positive cap, surplus tracks merge into the last one, new
-windows join the focused track once the cap is reached, and
-`move_to_track` refuses to open another edge track.
+**Does:** caps how many tracks a space can hold. `0` restores
+**automatic** tracks (the default — tracks open and collapse as
+windows come and go; see `track.set_auto_tracks`). A positive
+value pins the cap *and turns automatic off*, so `set_count(3)`
+takes effect on its own: surplus tracks merge into the last one,
+new windows join the focused track once the cap is reached, and
+`move_to_track` refuses to open another edge track. The last
+positive value is remembered, so flipping automatic back off
+restores it.
 
 **Example:**
 
 ```lua
 track.set_count(3)
+```
+
+### track.set_auto_tracks
+
+**Expects:** `true` or `false` (default `true`).
+
+**Does:** whether the track count is managed automatically. On
+(the default), tracks open and collapse as windows come and go —
+no cap. Off pins the count to the value set by `track.set_count`.
+The track twin of `grid.set_auto_size`. `track.set_count(0)` is
+the shorthand for turning this on; `track.set_count(n)` for
+turning it off with a cap of `n`.
+
+**Example:**
+
+```lua
+track.set_auto_tracks(false)
 ```
 
 ### track.set_overflow_style
@@ -908,12 +1002,29 @@ track.set_axis_override("code", "horizontal")
 - A space identifier.
 - An integer ≥ 0.
 
-**Does:** overrides the global track cap for one space.
+**Does:** overrides the global track cap for one space. Like the
+global setter, a positive value also turns automatic off for that
+space, and `0` turns it back on.
 
 **Example:**
 
 ```lua
 track.set_count_override("code", 2)
+```
+
+### track.set_auto_tracks_override
+
+**Expects:**
+
+- A space identifier.
+- A boolean.
+
+**Does:** overrides the automatic-tracks flag for one space.
+
+**Example:**
+
+```lua
+track.set_auto_tracks_override("code", false)
 ```
 
 ## App Bar

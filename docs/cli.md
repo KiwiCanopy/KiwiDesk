@@ -62,6 +62,7 @@ KiwiDesk service restart
 | | `set_gap_override` | space, size |
 | | `set_min_window_size` | pt (default 300) |
 | | `set_resize_step` | pt (default 50) — Grow/Shrink magnitude |
+| | `set_swap_skips_cascade` | true\|false (default `true`) — swap from a pile targets the outside neighbor |
 | | `set_fallback_space` | space id ("" clears) — rehome target on profile switch |
 | | `set_space_icon` | space id, icon (SF Symbol\|emoji\|char; "" clears) |
 | | `get_state` | — (returns `{active_space, spaces, windows, monitor_count, native_space, exec_running}`) |
@@ -117,10 +118,14 @@ KiwiDesk service restart
 | Grid | `grid.set_type` | `dynamic\|rigid` |
 | | `grid.set_fill_empty_space` | true\|false |
 | | `grid.set_split_direction` | `horizontal\|vertical` |
-| | `grid.set_dimensions` | columns, rows |
+| | `grid.set_dimensions` | columns, rows (upper bound in dynamic) |
+| | `grid.set_auto_size` | true\|false (default `false`; dims from screen) |
 | | `grid.set_new_window_placement` | placement¹ (default `last`) |
+| Monocle | `monocle.set_orientation` | `horizontal\|vertical` |
+| | `monocle.set_wrap_focus` | true\|false (default `true` — monocle is a carousel) |
 | Track | `track.set_axis` | `vertical\|horizontal` (default vertical = columns) |
-| | `track.set_count` | n (0 = dynamic, the default) |
+| | `track.set_count` | n (0 = automatic; n>0 pins a cap and turns automatic off) |
+| | `track.set_auto_tracks` | true\|false (default `true`) |
 | | `track.set_overflow_style` | `cascade_overflow\|cascade_all` (default `cascade_overflow`) |
 | | `track.set_new_window` | `own_track\|focused_track` (default `own_track`) |
 | | `track.set_wrap_focus` | true\|false (default false) |

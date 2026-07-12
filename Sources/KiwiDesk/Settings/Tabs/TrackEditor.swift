@@ -33,20 +33,15 @@ struct TrackEditor: View {
                     ),
                 ]
             )
+            Divider()
+            trackAuto
             StepperRow(
                 label: L("track.count", "Track limit"),
                 value: $model.config.settings.track.count,
-                in: 0...10
+                in: 1...10
             )
-            Text(
-                L(
-                    "track.count_caption",
-                    "0 means dynamic: tracks open and "
-                        + "collapse as windows come and go."
-                )
-            )
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            .disabled(model.config.settings.track.autoTracks)
+            Divider()
             SegmentedPicker(
                 L("track.new_window", "New window"),
                 selection: $model.config.settings.track
@@ -98,6 +93,28 @@ struct TrackEditor: View {
                 L("track.wrap_focus", "Wrap focus"),
                 isOn: $model.config.settings.track.wrapFocus
             )
+        }
+    }
+
+    /// The automatic-tracks toggle with its caption. On (the
+    /// default), tracks open and collapse with the window count
+    /// and the Track limit stepper below greys out; off pins the
+    /// count. The track twin of the grid's "Auto-size grid".
+    private var trackAuto: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Toggle(
+                L("track.auto_tracks", "Automatic tracks"),
+                isOn: $model.config.settings.track.autoTracks
+            )
+            Text(
+                L(
+                    "track.auto_tracks_caption",
+                    "Opens and collapses tracks automatically "
+                        + "as windows come and go."
+                )
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
         }
     }
 }

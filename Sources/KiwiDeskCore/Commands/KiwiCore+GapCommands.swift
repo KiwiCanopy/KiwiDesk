@@ -71,6 +71,18 @@ extension KiwiCore {
         return .ok()
     }
 
+    func setSwapSkipsCascade(
+        _ args: [JSONValue]
+    ) -> CommandResponse {
+        guard let on = args.first?.boolValue else {
+            return .fail("expected boolean")
+        }
+        tiler.settings.swapSkipsCascade = on
+        // No retile: this only steers which window a directional
+        // swap trades with, never any window's frame (#172).
+        return .ok()
+    }
+
     func setResizeStep(
         _ args: [JSONValue]
     ) -> CommandResponse {

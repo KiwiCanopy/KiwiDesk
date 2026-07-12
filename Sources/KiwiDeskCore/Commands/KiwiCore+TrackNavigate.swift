@@ -37,7 +37,7 @@ extension KiwiCore {
         let counts = TrackLayout.counts(
             of: tiled,
             breaks: space.trackBreaks,
-            cap: params.count
+            cap: params.trackCap
         )
         let ranges = TrackLayout.ranges(of: counts)
         guard
@@ -47,6 +47,18 @@ extension KiwiCore {
             )
         else { return nil }
         let vertical = params.axis == .vertical
+        // Array-order twin of the geometric pile skip (#172):
+        // when the focused window sits in an overflow cascade,
+        // a swap steps past the pile's array indices to the
+        // tiled entry outside it. Only for `swap`, only when
+        // enabled; `pile` is empty (no skip) otherwise and for a
+        // window that is not itself piled — so a plain swap is
+        // untouched.
+        let pile =
+            swapping && tiler.settings.swapSkipsCascade
+            ? trackPile(space: space, focused: focused)
+            : []
+        let skip: (WindowID) -> Bool = { pile.contains($0) }
         let target: WindowID?
         switch direction {
         case .up where vertical, .left where !vertical:
@@ -55,7 +67,8 @@ extension KiwiCore {
                 index: index,
                 range: ranges[track],
                 tiled: tiled,
-                wrap: params.wrapFocus && !swapping
+                wrap: params.wrapFocus && !swapping,
+                skip: skip
             )
         case .down where vertical, .right where !vertical:
             target = alongTarget(
@@ -63,7 +76,8 @@ extension KiwiCore {
                 index: index,
                 range: ranges[track],
                 tiled: tiled,
-                wrap: params.wrapFocus && !swapping
+                wrap: params.wrapFocus && !swapping,
+                skip: skip
             )
         case .left where vertical, .up where !vertical:
             target = acrossTarget(
@@ -72,7 +86,8 @@ extension KiwiCore {
                 track: track,
                 ranges: ranges,
                 tiled: tiled,
-                wrap: params.wrapFocus && !swapping
+                wrap: params.wrapFocus && !swapping,
+                skip: skip
             )
         case .right where vertical, .down where !vertical:
             target = acrossTarget(
@@ -81,12 +96,22 @@ extension KiwiCore {
                 track: track,
                 ranges: ranges,
                 tiled: tiled,
-                wrap: params.wrapFocus && !swapping
+                wrap: params.wrapFocus && !swapping,
+                skip: skip
             )
         default:
             target = nil
         }
-        guard let target else { return nil }
+        guard let target else {
+            // A piled swap that found no window outside the pile
+            // is a deliberate no-op — do not fall through to the
+            // geometric search, which would re-enter the same
+            // cascade. A non-piled nil still falls through (edge
+            // steps, cross-monitor focus).
+            return pile.isEmpty
+                ? nil
+                : .fail("no window \(direction.rawValue) of focus")
+        }
         if swapping {
             state.workspaces.withSpace(space.id) {
                 $0.swap(focused, target)
@@ -100,44 +125,76 @@ extension KiwiCore {
         return .ok()
     }
 
-    /// The next window within the track, wrapping at its ends
-    /// when asked (a lone window never wraps onto itself).
+    /// The next window within the track, stepping past any the
+    /// `skip` predicate rejects (cascade-mates, #172), and
+    /// wrapping at the ends when asked (a lone window never wraps
+    /// onto itself). Wrap and skip never co-occur: wrap is a
+    /// `focus`-only concession, skip a `swap`-only one.
     private func alongTarget(
         step: Int,
         index: Int,
         range: Range<Int>,
         tiled: [WindowID],
-        wrap: Bool
+        wrap: Bool,
+        skip: (WindowID) -> Bool
     ) -> WindowID? {
-        let next = index + step
-        if range.contains(next) { return tiled[next] }
+        var next = index + step
+        while range.contains(next) {
+            if !skip(tiled[next]) { return tiled[next] }
+            next += step
+        }
         guard wrap, range.count > 1 else { return nil }
         return tiled[
             step > 0 ? range.lowerBound : range.upperBound - 1
         ]
     }
 
-    /// The window at the same relative position (clamped) in
-    /// the adjacent track, wrapping last <-> first when asked.
+    /// The window at the same relative position (clamped) in the
+    /// nearest track the `skip` predicate accepts, wrapping last
+    /// <-> first when asked. Skipping steps across further tracks
+    /// (a whole cascaded track is all pile-mates); wrap applies
+    /// only to `focus`, where skip is inert.
     private func acrossTarget(
         step: Int,
         index: Int,
         track: Int,
         ranges: [Range<Int>],
         tiled: [WindowID],
-        wrap: Bool
+        wrap: Bool,
+        skip: (WindowID) -> Bool
     ) -> WindowID? {
-        var target = track + step
-        if !ranges.indices.contains(target) {
-            guard wrap, ranges.count > 1 else { return nil }
-            target = step > 0 ? 0 : ranges.count - 1
-        }
         let offset = index - ranges[track].lowerBound
-        let range = ranges[target]
-        return tiled[
-            range.lowerBound
-                + min(offset, range.count - 1)
-        ]
+        func mapped(_ range: Range<Int>) -> WindowID {
+            tiled[range.lowerBound + min(offset, range.count - 1)]
+        }
+        var target = track + step
+        while ranges.indices.contains(target) {
+            let candidate = mapped(ranges[target])
+            if !skip(candidate) { return candidate }
+            target += step
+        }
+        guard wrap, ranges.count > 1 else { return nil }
+        return mapped(ranges[step > 0 ? 0 : ranges.count - 1])
+    }
+
+    /// The focused window's overflow-cascade pile in a track
+    /// space (#172), from the layout's live slots — empty when it
+    /// is not piled. Shares `Navigation.pileMates` with the
+    /// geometric layouts; the track path then skips these array
+    /// indices rather than excluding geometric candidates.
+    private func trackPile(
+        space: Space,
+        focused: WindowID
+    ) -> Set<WindowID> {
+        let slots = tiler.calculatedFrames(state: state)
+        let tiled = space.windows.compactMap {
+            id -> (id: WindowID, frame: CGRect)? in
+            guard state.windows[id]?.isFloating == false,
+                let frame = slots[id]
+            else { return nil }
+            return (id, frame)
+        }
+        return Navigation.pileMates(of: focused, among: tiled)
     }
 
     /// `move_to_track(direction)` (#128): moves the focused
@@ -190,7 +247,7 @@ extension KiwiCore {
             moved = $0.moveWindowToTrack(
                 focused,
                 delta: delta,
-                cap: params.count,
+                cap: params.trackCap,
                 isTiled: { !floating.contains($0) }
             )
         }

@@ -859,7 +859,7 @@ struct MonocleCycleTests {
         )
     }
 
-    @Test("swap reorders the window sequence with wrap")
+    @Test("swap reorders the sequence but never wraps")
     func swapReorders() {
         let core = makeMonocleCore()
         #expect(
@@ -869,12 +869,16 @@ struct MonocleCycleTests {
         #expect(
             core.activeSpace?.windows == [w2, w1, w3]
         )
-        // Wrap: swapping left from the first slot trades with
-        // the last window.
+        // swap never wraps (#168): from the first slot, left is a
+        // no-op — a wrapping swap would teleport the window end to
+        // end. focus wrapping is a separate, opt-out toggle.
         core.state.workspaces.focus(w2, in: SpaceID(1))
-        core.execute("swap", args: [.string("left")])
         #expect(
-            core.activeSpace?.windows == [w3, w1, w2]
+            !core.execute("swap", args: [.string("left")])
+                .isSuccess
+        )
+        #expect(
+            core.activeSpace?.windows == [w2, w1, w3]
         )
     }
 

@@ -85,6 +85,7 @@ struct LayoutParamsCodingParityTests {
         params.splitDirection = .vertical
         params.columns = 5
         params.rows = 4
+        params.autoSize = true
         params.newWindowPlacement = .first
         var over = GridOverride()
         over.columns = 6
@@ -109,6 +110,7 @@ struct LayoutParamsCodingParityTests {
     private static func monocle() -> MonocleParams {
         var params = MonocleParams()
         params.orientation = .vertical
+        params.wrapFocus = false
         params.appBar.enabled = false
         var over = MonocleOverride()
         over.orientation = .horizontal
@@ -119,6 +121,7 @@ struct LayoutParamsCodingParityTests {
     private static func track() -> TrackParams {
         var params = TrackParams()
         params.axis = .horizontal
+        params.autoTracks = false
         params.count = 4
         params.overflowStyle = .cascadeAll
         params.newWindow = .focusedTrack

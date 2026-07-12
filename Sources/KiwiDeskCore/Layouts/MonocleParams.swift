@@ -16,6 +16,13 @@ public struct MonocleParams: Sendable, Equatable, AppBarHosting {
     }
 
     public var orientation: Orientation = .horizontal
+    /// Whether the focus cycle wraps past the ends (#168). Unlike
+    /// scrolling/track (linear, default off), monocle is a
+    /// carousel that has always wrapped, so this defaults **on** —
+    /// turn it off to make focus stop at the first/last window.
+    /// `swap` never wraps, matching the other array-order layouts.
+    /// Per-layout, like the scrolling/track wrap toggles.
+    public var wrapFocus = true
     public var appBar = LayoutAppBar()
     /// Per-space overrides (`layout.monocle.override[space_id]`),
     /// resolved via `TilingSettings.resolvedMonocle(for:)`.
@@ -34,6 +41,7 @@ public struct MonocleParams: Sendable, Equatable, AppBarHosting {
 extension MonocleParams: Codable {
     private enum CodingKeys: String, CodingKey {
         case orientation
+        case wrapFocus = "wrap_focus"
         case appBar = "app_bar"
         case override
     }
@@ -50,6 +58,11 @@ extension MonocleParams: Codable {
                 Orientation.self,
                 forKey: .orientation
             ) ?? defaults.orientation
+        wrapFocus =
+            try container.decodeIfPresent(
+                Bool.self,
+                forKey: .wrapFocus
+            ) ?? defaults.wrapFocus
         appBar =
             try container.decodeIfPresent(
                 LayoutAppBar.self,
@@ -67,6 +80,7 @@ extension MonocleParams: Codable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(orientation, forKey: .orientation)
+        try container.encode(wrapFocus, forKey: .wrapFocus)
         try container.encode(appBar, forKey: .appBar)
         if !override.isEmpty {
             try container.encode(override, forKey: .override)

@@ -28,6 +28,10 @@ public enum APIReference {
             ("set_gap_global", "set_gap_global"),
             ("set_gap_override", "set_gap_override"),
             ("set_min_window_size", "set_min_window_size"),
+            (
+                "set_swap_skips_cascade",
+                "set_swap_skips_cascade"
+            ),
             ("set_resize_step", "set_resize_step"),
             ("set_fallback_space", "set_fallback_space"),
             ("set_space_icon", "set_space_icon"),
@@ -133,14 +137,17 @@ public enum APIReference {
         "grid": [
             "set_type", "set_fill_empty_space",
             "set_split_direction", "set_dimensions",
+            "set_auto_size",
             "set_new_window_placement",
             "set_type_override",
             "set_fill_empty_space_override",
             "set_split_direction_override",
             "set_dimensions_override",
+            "set_auto_size_override",
         ],
         "monocle": [
             "set_orientation", "set_orientation_override",
+            "set_wrap_focus",
             "set_app_bar_enabled", "set_app_bar_position",
             "set_app_bar_thickness", "set_app_bar_style",
             "set_app_bar_active_style", "set_app_bar_item_size",
@@ -159,9 +166,11 @@ public enum APIReference {
             "set_app_bar_group_badge_text_color",
         ],
         "track": [
-            "set_axis", "set_count", "set_overflow_style",
+            "set_axis", "set_count", "set_auto_tracks",
+            "set_overflow_style",
             "set_new_window", "set_wrap_focus",
             "set_axis_override", "set_count_override",
+            "set_auto_tracks_override",
             "set_overflow_style_override",
         ],
         "drag": [

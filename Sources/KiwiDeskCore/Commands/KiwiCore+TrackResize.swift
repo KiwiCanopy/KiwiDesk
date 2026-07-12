@@ -26,7 +26,7 @@ extension KiwiCore {
         let counts = TrackLayout.counts(
             of: tiled,
             breaks: space.trackBreaks,
-            cap: params.count
+            cap: params.trackCap
         )
         guard
             let track = TrackLayout.trackIndex(

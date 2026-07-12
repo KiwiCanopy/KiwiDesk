@@ -56,6 +56,75 @@ struct TrackCommandsTests {
         #expect(track.overflowStyle == .cascadeAll)
     }
 
+    @Test("set_count couples the automatic flag (#178)")
+    func countCouplesAuto() {
+        let core = makeCore()
+        // Default is automatic (dynamic) — cap 0.
+        #expect(core.tiler.settings.track.autoTracks)
+        #expect(core.tiler.settings.track.trackCap == 0)
+        // A positive count pins the cap and turns auto off, so
+        // it takes effect without a second call.
+        core.execute("track.set_count", args: [.number(3)])
+        #expect(core.tiler.settings.track.count == 3)
+        #expect(!core.tiler.settings.track.autoTracks)
+        #expect(core.tiler.settings.track.trackCap == 3)
+        // 0 restores automatic, leaving the remembered count.
+        core.execute("track.set_count", args: [.number(0)])
+        #expect(core.tiler.settings.track.autoTracks)
+        #expect(core.tiler.settings.track.count == 3)
+        #expect(core.tiler.settings.track.trackCap == 0)
+    }
+
+    @Test("set_auto_tracks toggles the flag directly (#178)")
+    func setAutoTracks() {
+        let core = makeCore()
+        core.execute("track.set_count", args: [.number(4)])
+        #expect(!core.tiler.settings.track.autoTracks)
+        #expect(
+            core.execute(
+                "track.set_auto_tracks",
+                args: [.bool(true)]
+            ).isSuccess
+        )
+        #expect(core.tiler.settings.track.autoTracks)
+        // The remembered cap survives for when auto goes off again.
+        #expect(core.tiler.settings.track.count == 4)
+        #expect(core.tiler.settings.track.trackCap == 0)
+        // A non-boolean is rejected.
+        #expect(
+            !core.execute(
+                "track.set_auto_tracks",
+                args: [.string("maybe")]
+            ).isSuccess
+        )
+    }
+
+    @Test("auto_tracks override caps only that space (#178)")
+    func autoTracksOverride() {
+        let core = makeCore()
+        // A fixed cap in one space via the coupled count setter.
+        #expect(
+            core.execute(
+                "track.set_count_override",
+                args: [.string("2"), .number(3)]
+            ).isSuccess
+        )
+        let over = core.tiler.settings.track.override[
+            SpaceID("2")
+        ]
+        #expect(over?.count == 3)
+        #expect(over?.autoTracks == false)
+        #expect(
+            core.tiler.settings.resolvedTrack(for: "2").trackCap
+                == 3
+        )
+        // Other spaces stay automatic.
+        #expect(
+            core.tiler.settings.resolvedTrack(for: "1").trackCap
+                == 0
+        )
+    }
+
     @Test("Invalid values are rejected and write nothing")
     func invalidRejected() {
         let core = makeCore()
@@ -125,7 +194,7 @@ struct TrackCommandsTests {
         )
         #expect(
             core.tiler.settings.resolvedTrack(for: "1").count
-                == 0
+                == 2
         )
     }
 

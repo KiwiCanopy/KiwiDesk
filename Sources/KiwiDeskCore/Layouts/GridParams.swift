@@ -22,6 +22,11 @@ public struct GridParams: Sendable, Equatable, Codable {
     /// Rigid grid dimensions.
     public var columns: Int = 3
     public var rows: Int = 2
+    /// When set, the grid's dimensions come from the display —
+    /// as many columns/rows as fit at `min_window_size` — instead
+    /// of the typed `columns`/`rows`. Orthogonal to `type`: it
+    /// caps a dynamic grid and fixes a rigid one alike.
+    public var autoSize = false
     /// Grids read as ordered cells: appending keeps every
     /// existing cell in place.
     public var newWindowPlacement: SpawnPlacement = .last
@@ -38,6 +43,7 @@ public struct GridParams: Sendable, Equatable, Codable {
         case splitDirection = "split_direction"
         case columns
         case rows
+        case autoSize = "auto_size"
         case newWindowPlacement = "new_window_placement"
         case override
     }
@@ -73,6 +79,11 @@ public struct GridParams: Sendable, Equatable, Codable {
                 Int.self,
                 forKey: .rows
             ) ?? 2
+        autoSize =
+            try container.decodeIfPresent(
+                Bool.self,
+                forKey: .autoSize
+            ) ?? false
         newWindowPlacement =
             try container.decodeIfPresent(
                 SpawnPlacement.self,
@@ -100,6 +111,7 @@ public struct GridParams: Sendable, Equatable, Codable {
         )
         try container.encode(columns, forKey: .columns)
         try container.encode(rows, forKey: .rows)
+        try container.encode(autoSize, forKey: .autoSize)
         try container.encode(
             newWindowPlacement,
             forKey: .newWindowPlacement

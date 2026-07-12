@@ -30,8 +30,12 @@ struct SettingsCodingTests {
                 "animations", "app_bar", "drag", "gap", "layout",
                 "min_window_size", "mouse_resize",
                 "new_window_placement_override", "resize", "space",
+                "swap_skips_cascade",
             ]
         )
+        // `set_swap_skips_cascade` → top-level `swap_skips_cascade`
+        // (#172), on by default.
+        #expect(root["swap_skips_cascade"] as? Bool == true)
         // `set_space_icon` → `space.icon[space_id]` (#68).
         let space = try object(root["space"])
         let icons = try object(space["icon"])
@@ -69,13 +73,24 @@ struct SettingsCodingTests {
         // `scroll.set_wrap_focus` → `layout.scroll.wrap_focus`,
         // off by default (#168).
         #expect(scroll["wrap_focus"] as? Bool == false)
+        // `grid.set_auto_size` → `layout.grid.auto_size` (#171),
+        // off by default.
+        let grid = try object(layout["grid"])
+        #expect(grid["auto_size"] as? Bool == false)
+        // `monocle.set_wrap_focus` → `layout.monocle.wrap_focus`
+        // (#168), on by default (monocle is a carousel).
+        let monocle = try object(layout["monocle"])
+        #expect(monocle["wrap_focus"] as? Bool == true)
         let stack = try object(layout["stack"])
         #expect(stack["master_ratio"] as? Double == 0.6)
         // `track.set_axis` → `layout.track.axis` (#128);
         // wrap toggle per the #168 vocabulary.
         let track = try object(layout["track"])
         #expect(track["axis"] as? String == "vertical")
-        #expect(track["count"] as? Int == 0)
+        // `track.set_auto_tracks` → `layout.track.auto_tracks`
+        // (#178), on by default; `count` is the remembered cap.
+        #expect(track["auto_tracks"] as? Bool == true)
+        #expect(track["count"] as? Int == 2)
         #expect(
             track["overflow_style"] as? String
                 == "cascade_overflow"
@@ -140,12 +155,16 @@ struct SettingsCodingTests {
         settings.scrolling.slotSize = .points(400)
         settings.stack.masterCount = 2
         settings.grid.rows = 4
+        settings.grid.autoSize = true
+        settings.monocle.wrapFocus = false
         settings.track.axis = .horizontal
+        settings.track.autoTracks = false
         settings.track.count = 3
         settings.track.overflowStyle = .cascadeAll
         settings.track.newWindow = .focusedTrack
         settings.track.wrapFocus = true
         settings.minWindowSize = 200
+        settings.swapSkipsCascade = false
         settings.resizeStep = 75
         settings.dragGhost.enabled = false
         settings.dragDropZone.fillColor = "#11223344"

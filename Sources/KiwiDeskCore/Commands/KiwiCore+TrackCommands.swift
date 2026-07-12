@@ -21,10 +21,25 @@ extension KiwiCore {
                 count >= 0
             else {
                 return .fail(
-                    "expected a track limit (0 = dynamic)"
+                    "expected a track limit (0 = automatic)"
                 )
             }
-            tiler.settings.track.count = count
+            // 0 keeps the Lua "0 = automatic" idiom; a positive
+            // count pins the cap and turns automatic off, so
+            // `track.set_count(3)` takes effect without a second
+            // call. The remembered magnitude is left untouched by
+            // the 0 case (#178).
+            if count == 0 {
+                tiler.settings.track.autoTracks = true
+            } else {
+                tiler.settings.track.count = count
+                tiler.settings.track.autoTracks = false
+            }
+        case "track.set_auto_tracks":
+            guard let on = args.first?.boolValue else {
+                return .fail("expected a boolean")
+            }
+            tiler.settings.track.autoTracks = on
         case "track.set_overflow_style":
             guard
                 let style = Self.parseOverflowStyle(
@@ -92,10 +107,21 @@ extension KiwiCore {
                 count >= 0
             else {
                 return .fail(
-                    "expected a track limit (0 = dynamic)"
+                    "expected a track limit (0 = automatic)"
                 )
             }
-            over.count = count
+            // Same coupling as the global setter (#178).
+            if count == 0 {
+                over.autoTracks = true
+            } else {
+                over.count = count
+                over.autoTracks = false
+            }
+        case "auto_tracks":
+            guard let on = rest.first?.boolValue else {
+                return .fail("expected a boolean")
+            }
+            over.autoTracks = on
         case "overflow_style":
             guard
                 let style = Self.parseOverflowStyle(

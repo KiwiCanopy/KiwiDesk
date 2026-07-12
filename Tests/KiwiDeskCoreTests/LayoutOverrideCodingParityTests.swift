@@ -92,6 +92,7 @@ struct LayoutOverrideCodingParityTests {
     private static func track() -> TrackOverride {
         var over = TrackOverride()
         over.axis = .horizontal
+        over.autoTracks = false
         over.count = 3
         over.overflowStyle = .cascadeAll
         return over
@@ -120,6 +121,7 @@ struct LayoutOverrideCodingParityTests {
         over.splitDirection = .vertical
         over.columns = 7
         over.rows = 5
+        over.autoSize = true
         return over
     }
 
