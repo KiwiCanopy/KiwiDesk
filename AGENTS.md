@@ -94,8 +94,9 @@ GUI lives in `Sources/KiwiDesk` (`Settings/`, `Settings/Tabs/`).
    plan (files to change, API surface, tests) before implementing.
 3. **Act:** implement step by step; keep commits focused.
 4. **Verify:** `swift build && swift test && scripts/lint.sh` for
-   the fast inner loop. A **release build** (`swift build -c
-   release`) must also pass before any commit or PR — it enables
+   the fast inner loop. A **release build** (with
+   `swift build -c release`) must also pass before any commit
+   or PR — it enables
    the optimizer and stricter concurrency diagnostics (e.g.
    non-Sendable captures in `@Sendable` closures) that the debug
    build silently misses.
@@ -145,6 +146,17 @@ GUI lives in `Sources/KiwiDesk` (`Settings/`, `Settings/Tabs/`).
    returns no major findings. Brief each re-review with what
    the fixes claim to do, so it verifies claims instead of
    re-reviewing the feature.
+
+   Agent reuse (decision 2026-07-13): round 1 always uses
+   **fresh** agents — independence is the point, and a
+   reviewer carrying opinions from an earlier feature anchors
+   on them. Re-reviews of a fix batch in the **same session**
+   go back to the **round-1 agent** (message it) instead of
+   spawning a new one: it already holds the diff and its own
+   findings, so it verifies "were my findings fixed" directly
+   instead of re-deriving the whole context. Across sessions
+   this is moot — subagent context dies with the session, so
+   a new session always means fresh agents.
 
 ### Branching & Pull Requests
 
@@ -382,8 +394,8 @@ Keep this list updated whenever a recurring mistake is found.
   §2.4.
 - **`Resources/Locales/*.json` is generated/translation-owned
   (issue #9).** Every GUI string routes through
-  `L("key", "English")` (`KiwiDeskCore/Localization/
-  LocalizationManager.swift`); English is the source of truth,
+  `L("key", "English")` (`LocalizationManager.swift` in
+  `KiwiDeskCore/Localization/`); English is the source of truth,
   inlined at the call site, with per-key fallback when a locale
   omits a key. A value interpolated into a sentence (a name, a
   count) MUST go through the `L(key, english, args...)`
@@ -391,12 +403,14 @@ Keep this list updated whenever a recurring mistake is found.
   `+`-concatenated fragments — a translation can't reorder
   pieces stitched together in Swift, and many languages need to.
   `en.json` is regenerated wholesale by `scripts/extract-keys`
-  (which scans both `Sources/KiwiDesk` and `Sources/
-  KiwiDeskCore`, and ignores `//`/`///` comments so a doc-comment
+  (which scans both `Sources/KiwiDesk` and
+  `Sources/KiwiDeskCore`, and ignores `//`/`///` comments so a
+  doc-comment
   example call site can't leak a phantom key) from real call
   sites — never hand-edit it, and AI agents must not hand-edit
-  any `Resources/Locales/*.json` file: use `scripts/extract-keys
-  <locale>` / `scripts/merge-keys <locale>` to translate,
+  any `Resources/Locales/*.json` file: use
+  `scripts/extract-keys <locale>` /
+  `scripts/merge-keys <locale>` to translate,
   `scripts/rename-key <old> <new>` to rename a key without
   losing translations, and `scripts/extract-keys --prune` to
   drop orphaned ones (see `docs/translating.md`). Because the
@@ -411,8 +425,8 @@ Keep this list updated whenever a recurring mistake is found.
   `{string: string}` map (a broken file would otherwise make
   `LocaleCatalog` soft-fail to `[:]` and silently revert that
   locale to English); an orphan key (in a locale file, absent
-  from code) only warns — clean it up with `extract-keys
-  --prune`. All of this is backed by Swift tests
+  from code) only warns — clean it up with
+  `extract-keys --prune`. All of this is backed by Swift tests
   (`LocalizationDriftGuardTests`, `LocalizationOrphanTests`,
   `RenameKeyTests`) so a regression in the tooling itself is
   covered by `swift test`, not just by running the script. The
