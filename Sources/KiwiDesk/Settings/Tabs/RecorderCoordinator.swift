@@ -138,13 +138,20 @@ enum RecorderPreflight {
     /// the preflight query above stays pure; the Steal prompt
     /// would point at a row the GUI no longer renders, hence
     /// no prompt.
+    /// `excluding` guards the committing row itself: the
+    /// element-binding writers set the combo BEFORE stealing
+    /// (structural-mutation safety), and a rendered `.custom`
+    /// row whose Lua is byte-exactly a gated body would
+    /// otherwise steal its own fresh combo (review).
     static func stealInert(
         combo: String,
+        excluding excluded: UUID? = nil,
         stealable: (KeyBinding) -> Bool,
         bindings: inout [KeyBinding]
     ) {
         for index in bindings.indices.reversed()
         where bindings[index].combo == combo
+            && bindings[index].id != excluded
             && stealable(bindings[index])
         {
             if bindings[index].kind == .navigation {

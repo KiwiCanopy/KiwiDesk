@@ -106,7 +106,11 @@ enum KeybindingCatalog {
     ]
 
     /// The translated phrase for a sequence step's Lua
-    /// argument (the `directionPhrase` twin).
+    /// argument (the `directionPhrase` twin). i18n seam: the
+    /// one phrase interpolates into BOTH sentence frames
+    /// (move + swap), which works for en/de but cannot carry
+    /// per-frame case/gender inflection — if a 1.0 language
+    /// (#95) needs it, split into per-frame keys then.
     @MainActor private static func sequencePhrase(
         _ step: String
     ) -> String {

@@ -99,9 +99,11 @@ struct AdvancedLuaSection: View {
         let id = binding.wrappedValue.id
         // After the element write (a structural mutation first
         // would race the element binding — the #68 M2 hazard);
-        // commit-time steal of inert gated holders (#181).
+        // commit-time steal of inert gated holders (#181),
+        // never of the row just committed.
         RecorderPreflight.stealInert(
             combo: combo,
+            excluding: id,
             stealable: model.isSilentlyStealable,
             bindings: &bindings
         )
@@ -120,6 +122,7 @@ struct AdvancedLuaSection: View {
     private func record(_ combo: String, id: UUID) {
         RecorderPreflight.stealInert(
             combo: combo,
+            excluding: id,
             stealable: model.isSilentlyStealable,
             bindings: &bindings
         )

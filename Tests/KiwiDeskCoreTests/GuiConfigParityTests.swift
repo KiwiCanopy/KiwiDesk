@@ -17,10 +17,10 @@ import Testing
 struct GuiConfigParityTests {
     @Test("Field-list tripwire: visit every mirror site")
     func fieldTripwire() {
-        let fields = Set(
-            Mirror(reflecting: GuiConfig())
-                .children.compactMap(\.label)
-        )
+        // The shared primitive (ReflectionParity.swift), never
+        // an inline Mirror copy — a divergent private copy can
+        // silently weaken the guard (tests.md).
+        let fields = fieldNames(GuiConfig())
         // Adding a field? Decide global vs profile-scoped
         // (#36), then update: CodingKeys + decode + encode
         // (GuiConfig.swift, globals only), `globalsChanged`
