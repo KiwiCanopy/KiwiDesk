@@ -248,7 +248,10 @@ Expand each layout type to adjust its defaults:
   from the last window back to the first (and vice versa). Swap
   never wraps.
 - **Monocle**: orientation (affects which arrow keys cycle focus
-  and where the app bar sits).
+  and where the app bar sits) and wrap focus. Monocle is a
+  carousel, so wrap focus is **on** by default — cycling past the
+  last window returns to the first; turn it off to stop at the
+  ends.
 - **Grid**: type (dynamic or rigid), fill empty space (yes/no),
   split direction (horizontal or vertical), and column and row
   counts. In dynamic mode the counts are an upper bound — the

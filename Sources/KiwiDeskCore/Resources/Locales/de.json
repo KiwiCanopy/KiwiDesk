@@ -327,6 +327,8 @@
   "scroll_grid.animate_focus_shifts": "Fokuswechsel animieren",
   "scroll_grid.app_bar_xref": "Die im Scrolling-Layout angezeigte App-Leiste wird konfiguriert unter",
   "scroll_grid.app_bar_xref_link": "Erscheinungsbild ▸ App-Leiste",
+  "scroll_grid.auto_size": "Raster automatisch dimensionieren",
+  "scroll_grid.auto_size_caption": "Passt so viele Spalten und Zeilen ein, wie der Bildschirm zulässt, basierend auf der minimalen Fenstergröße unten.",
   "scroll_grid.columns": "Spalten",
   "scroll_grid.dynamic": "Dynamisch",
   "scroll_grid.fill_empty_space": "Leeren Raum füllen",
@@ -340,6 +342,7 @@
   "scroll_grid.scroll_speed": "Scroll-Geschwindigkeit",
   "scroll_grid.split_direction": "Split-Richtung",
   "scroll_grid.vertical": "Vertikal",
+  "scroll_grid.wrap_focus": "Fokus umlaufen lassen",
   "shortcuts.add": "Hinzufügen",
   "shortcuts.add_application": "App hinzufügen",
   "shortcuts.add_binding": "Tastenkürzel hinzufügen",
@@ -407,5 +410,6 @@
   "spaces.fallback_badge": "Fallback",
   "spaces.fallback_badge.help": "Fenster aus einem gelöschten Space landen hier, wenn du das Profil wechselst.",
   "spaces.fallback_caption": "Wenn du das Profil wechselst, landen Fenster aus nicht vorhandenen Spaces in diesem Fallback-Space.",
-  "spaces.title": "Spaces"
+  "spaces.title": "Spaces",
+  "track.wrap_focus": "Fokus umlaufen lassen"
 }

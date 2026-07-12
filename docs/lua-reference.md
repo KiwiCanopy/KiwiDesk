@@ -843,6 +843,22 @@ monocle.set_orientation("horizontal")
 monocle.set_orientation_override("3", "vertical")
 ```
 
+### monocle.set_wrap_focus
+
+**Expects:** `true` or `false` (default `true`).
+
+**Does:** whether the focus cycle wraps past the ends. Monocle is
+a carousel, so this defaults **on** (unlike the linear scrolling
+and track wraps, which default off) — `focus` past the last window
+returns to the first, and vice versa. Turn it off to make focus
+stop at the first/last window. `swap` never wraps.
+
+**Example:**
+
+```lua
+monocle.set_wrap_focus(false)
+```
+
 ### track.set_axis
 
 **Expects:** `"vertical"` (default) or `"horizontal"`.

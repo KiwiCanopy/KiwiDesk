@@ -10,15 +10,7 @@ struct MonocleEditor: View {
     var body: some View {
         SettingsSection(
             L("layout.monocle.name", "Monocle"),
-            symbol: LayoutMode.monocle.glyph,
-            // Answers "why no Wrap focus toggle here?" in place —
-            // monocle's cycle always wraps (#168). A static line,
-            // not a disabled Toggle (which would imply a setting
-            // that does not exist).
-            caption: L(
-                "monocle.wrap_caption",
-                "Focus always wraps at the ends in monocle."
-            )
+            symbol: LayoutMode.monocle.glyph
         ) {
             SegmentedPicker(
                 L(
@@ -40,6 +32,15 @@ struct MonocleEditor: View {
                         .vertical
                     ),
                 ]
+            )
+            Divider()
+            // Monocle is a carousel, so this defaults on (unlike
+            // the linear scrolling/track wrap). Off = focus stops
+            // at the first/last window. Reuses the shared
+            // "Wrap focus" string.
+            Toggle(
+                L("scroll_grid.wrap_focus", "Wrap focus"),
+                isOn: $model.config.settings.monocle.wrapFocus
             )
             CrossReferenceRow(
                 prose: L(

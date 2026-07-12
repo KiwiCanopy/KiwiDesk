@@ -22,6 +22,13 @@ extension KiwiCore {
         if command == "monocle.set_orientation_override" {
             return applyMonocleOverride(args)
         }
+        if command == "monocle.set_wrap_focus" {
+            guard let on = args.first?.boolValue else {
+                return .fail("expected boolean")
+            }
+            tiler.settings.monocle.wrapFocus = on
+            return .ok()
+        }
         guard command.hasPrefix("monocle.set_app_bar_") else {
             return .fail("unknown command: \(command)")
         }
@@ -119,10 +126,25 @@ extension KiwiCore {
         guard let index = tiled.firstIndex(of: focused)
         else { return nil }
         guard tiled.count > 1 else { return .ok() }
-        let target =
-            tiled[
-                (index + step + tiled.count) % tiled.count
-            ]
+        let wrap =
+            tiler.settings.resolvedMonocle(for: space.id)
+            .wrapFocus
+        let next = index + step
+        let target: WindowID
+        if tiled.indices.contains(next) {
+            target = tiled[next]
+        } else if !swapping, wrap {
+            // Focus wraps the carousel (opt out with wrap_focus);
+            // `swap` never wraps, matching scrolling/track (a
+            // wrapping swap would teleport a window end to end).
+            target = step > 0 ? tiled[0] : tiled[tiled.count - 1]
+        } else {
+            // At an end without a wrap: fall through. Every
+            // monocle window shares one frame, so the geometric
+            // search finds no neighbor and the command cleanly
+            // fails — no accidental jump.
+            return nil
+        }
         if swapping {
             state.workspaces.withSpace(space.id) {
                 $0.swap(focused, target)

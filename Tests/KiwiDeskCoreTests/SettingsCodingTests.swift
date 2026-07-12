@@ -77,6 +77,10 @@ struct SettingsCodingTests {
         // off by default.
         let grid = try object(layout["grid"])
         #expect(grid["auto_size"] as? Bool == false)
+        // `monocle.set_wrap_focus` → `layout.monocle.wrap_focus`
+        // (#172), on by default (monocle is a carousel).
+        let monocle = try object(layout["monocle"])
+        #expect(monocle["wrap_focus"] as? Bool == true)
         let stack = try object(layout["stack"])
         #expect(stack["master_ratio"] as? Double == 0.6)
         // `track.set_axis` → `layout.track.axis` (#128);
@@ -149,6 +153,7 @@ struct SettingsCodingTests {
         settings.stack.masterCount = 2
         settings.grid.rows = 4
         settings.grid.autoSize = true
+        settings.monocle.wrapFocus = false
         settings.track.axis = .horizontal
         settings.track.count = 3
         settings.track.overflowStyle = .cascadeAll

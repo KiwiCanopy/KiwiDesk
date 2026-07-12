@@ -121,6 +121,8 @@ KiwiDesk service restart
 | | `grid.set_dimensions` | columns, rows (upper bound in dynamic) |
 | | `grid.set_auto_size` | true\|false (default `false`; dims from screen) |
 | | `grid.set_new_window_placement` | placement¹ (default `last`) |
+| Monocle | `monocle.set_orientation` | `horizontal\|vertical` |
+| | `monocle.set_wrap_focus` | true\|false (default `true` — monocle is a carousel) |
 | Track | `track.set_axis` | `vertical\|horizontal` (default vertical = columns) |
 | | `track.set_count` | n (0 = dynamic, the default) |
 | | `track.set_overflow_style` | `cascade_overflow\|cascade_all` (default `cascade_overflow`) |

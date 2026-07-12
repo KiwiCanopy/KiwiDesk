@@ -117,7 +117,7 @@ detail:
 | **Stack** | geometric | `Navigation.neighbor` over slots | yes — a column overflow cascade / `cascade_all` (`StackLayout`) |
 | **Grid** | geometric | `Navigation.neighbor` over slots | yes — a last-cell pile (rigid/dynamic past the cap) or a whole-grid cascade at min-size (`GridLayout`) |
 | **Scrolling** | array-order | steps along the scroll axis (`scrollingStep`), geometric fallback cross-axis | no min-size cascade — the edge pile (#142) is a viewport pin, not an `OverlapStack` fallback |
-| **Monocle** | array-order | cycles along the orientation (`monocleCycle`) | no — every window shares one frame |
+| **Monocle** | array-order | steps along the orientation, wraps iff `wrap_focus` (`monocleCycle`) — same 1-D shape as scrolling | no — every window shares one frame |
 | **Track** | array-order | steps both axes (`trackStep`) | yes — an overflow cascade (#128 `overflow_style`, via `OverlapStack.overflowFrames`) |
 | **Floating** | none | no slots | n/a |
 
