@@ -78,7 +78,7 @@ struct SettingsCodingTests {
         let grid = try object(layout["grid"])
         #expect(grid["auto_size"] as? Bool == false)
         // `monocle.set_wrap_focus` → `layout.monocle.wrap_focus`
-        // (#172), on by default (monocle is a carousel).
+        // (#168), on by default (monocle is a carousel).
         let monocle = try object(layout["monocle"])
         #expect(monocle["wrap_focus"] as? Bool == true)
         let stack = try object(layout["stack"])
@@ -88,7 +88,7 @@ struct SettingsCodingTests {
         let track = try object(layout["track"])
         #expect(track["axis"] as? String == "vertical")
         // `track.set_auto_tracks` → `layout.track.auto_tracks`
-        // (#177), on by default; `count` is the remembered cap.
+        // (#178), on by default; `count` is the remembered cap.
         #expect(track["auto_tracks"] as? Bool == true)
         #expect(track["count"] as? Int == 2)
         #expect(

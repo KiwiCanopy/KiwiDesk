@@ -620,7 +620,9 @@ row wraps to the far end (right off the last window lands on the
 first, and vice versa). Default is `false` — focus stops at the
 ends, matching the physical-strip feel of the layout. Applies to
 `focus` only; `swap` never wraps (it would teleport a window
-across the whole row). Monocle always wraps and has no toggle.
+across the whole row). Monocle has the same toggle
+(`monocle.set_wrap_focus`) but defaults it **on**, since it's a
+carousel.
 
 **Example:**
 

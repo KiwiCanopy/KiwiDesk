@@ -32,7 +32,7 @@ public struct TrackParams: Sendable, Equatable, Codable {
     }
 
     public var axis: Axis = .vertical
-    /// Whether the track count is managed automatically (#177):
+    /// Whether the track count is managed automatically (#178):
     /// on (the default), tracks open and collapse as windows come
     /// and go — no cap. Off pins the count to `count`. The
     /// carousel-vs-grid twin of `GridParams.autoSize`; the layout

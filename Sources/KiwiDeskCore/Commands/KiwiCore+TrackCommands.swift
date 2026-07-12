@@ -28,7 +28,7 @@ extension KiwiCore {
             // count pins the cap and turns automatic off, so
             // `track.set_count(3)` takes effect without a second
             // call. The remembered magnitude is left untouched by
-            // the 0 case (#177).
+            // the 0 case (#178).
             if count == 0 {
                 tiler.settings.track.autoTracks = true
             } else {
@@ -110,7 +110,7 @@ extension KiwiCore {
                     "expected a track limit (0 = automatic)"
                 )
             }
-            // Same coupling as the global setter (#177).
+            // Same coupling as the global setter (#178).
             if count == 0 {
                 over.autoTracks = true
             } else {

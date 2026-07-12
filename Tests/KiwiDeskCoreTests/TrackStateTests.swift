@@ -279,7 +279,7 @@ struct TrackSpawnTests {
         var state = StateCoordinator(defaultSpace: "1")
         state.workspaces.setMode("1", .track)
         var over = TrackOverride()
-        // A fixed cap needs automatic off (#177); count alone is
+        // A fixed cap needs automatic off (#178); count alone is
         // the remembered magnitude, inert while auto is on.
         over.autoTracks = false
         over.count = 2

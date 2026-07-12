@@ -56,7 +56,7 @@ struct TrackCommandsTests {
         #expect(track.overflowStyle == .cascadeAll)
     }
 
-    @Test("set_count couples the automatic flag (#177)")
+    @Test("set_count couples the automatic flag (#178)")
     func countCouplesAuto() {
         let core = makeCore()
         // Default is automatic (dynamic) — cap 0.
@@ -75,7 +75,7 @@ struct TrackCommandsTests {
         #expect(core.tiler.settings.track.trackCap == 0)
     }
 
-    @Test("set_auto_tracks toggles the flag directly (#177)")
+    @Test("set_auto_tracks toggles the flag directly (#178)")
     func setAutoTracks() {
         let core = makeCore()
         core.execute("track.set_count", args: [.number(4)])
@@ -99,7 +99,7 @@ struct TrackCommandsTests {
         )
     }
 
-    @Test("auto_tracks override caps only that space (#177)")
+    @Test("auto_tracks override caps only that space (#178)")
     func autoTracksOverride() {
         let core = makeCore()
         // A fixed cap in one space via the coupled count setter.

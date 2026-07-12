@@ -869,7 +869,7 @@ struct MonocleCycleTests {
         #expect(
             core.activeSpace?.windows == [w2, w1, w3]
         )
-        // swap never wraps (#172): from the first slot, left is a
+        // swap never wraps (#168): from the first slot, left is a
         // no-op — a wrapping swap would teleport the window end to
         // end. focus wrapping is a separate, opt-out toggle.
         core.state.workspaces.focus(w2, in: SpaceID(1))

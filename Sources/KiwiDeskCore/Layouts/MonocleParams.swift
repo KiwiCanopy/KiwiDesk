@@ -16,7 +16,7 @@ public struct MonocleParams: Sendable, Equatable, AppBarHosting {
     }
 
     public var orientation: Orientation = .horizontal
-    /// Whether the focus cycle wraps past the ends (#172). Unlike
+    /// Whether the focus cycle wraps past the ends (#168). Unlike
     /// scrolling/track (linear, default off), monocle is a
     /// carousel that has always wrapped, so this defaults **on** —
     /// turn it off to make focus stop at the first/last window.

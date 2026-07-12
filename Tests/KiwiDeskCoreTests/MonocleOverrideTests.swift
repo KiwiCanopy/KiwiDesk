@@ -13,7 +13,7 @@ struct MonocleOverrideTests {
         // Per-space bar *look* lands with the app-bar tier; only
         // the orientation (which drives the bar edge) is per-space.
         "appBar",
-        // Per-layout, like the scrolling/track wrap toggles (#172).
+        // Per-layout, like the scrolling/track wrap toggles (#168).
         "wrapFocus",
         // The override map itself.
         "override",

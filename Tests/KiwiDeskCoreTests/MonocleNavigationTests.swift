@@ -41,10 +41,10 @@ private func makeMonocleSpace(
     return space
 }
 
-/// Monocle focus cycle & the opt-out wrap toggle (#172): monocle
+/// Monocle focus cycle & the opt-out wrap toggle (#168): monocle
 /// is a carousel, so focus wraps by default; `swap` never wraps,
 /// matching the other array-order layouts.
-@Suite("Monocle navigation (#172)", .serialized)
+@Suite("Monocle navigation (#168)", .serialized)
 @MainActor
 struct MonocleNavigationTests {
     @Test("Focus wraps past the ends by default")

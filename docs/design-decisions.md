@@ -696,7 +696,7 @@ action.
 **Inapplicable controls are greyed, not hidden.** When a
 setting makes another control inert — Auto-size grid overrides
 the Columns/Rows steppers (#171), Automatic tracks overrides the
-Track limit stepper (#177), Fill empty space does nothing in a
+Track limit stepper (#178), Fill empty space does nothing in a
 rigid grid, the scroll-speed row is dead when Animate focus
 shifts is off — the dependent control stays
 visible and `.disabled`, never removed. Hiding it would jump
