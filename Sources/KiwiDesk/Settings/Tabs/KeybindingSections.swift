@@ -150,15 +150,22 @@ struct SizeFloatSection: View {
         }
     }
 
+    // A meaning change replaced the old `axes_caption` key
+    // (stale since track landed, #128/#183): per
+    // docs/translating.md a changed English text gets a NEW
+    // key, never a rename — rename-key would carry the stale
+    // translations forward as if still valid.
     private var sizeFloatCaption: String {
         L(
-            "shortcuts.size_float.axes_caption",
+            "shortcuts.size_float.layouts_caption",
             "Grow/Shrink only applies in the bsp, stack, "
-                + "and scrolling layouts; it is a no-op in "
-                + "monocle, grid, and floating. Width and "
-                + "height resize independently; scrolling "
-                + "resizes its slot along the scroll axis "
-                + "for both."
+                + "scrolling, and track layouts; it is a "
+                + "no-op in monocle, grid, and floating. "
+                + "Width and height resize independently; "
+                + "scrolling resizes its slot along the "
+                + "scroll axis for both, and in track one "
+                + "axis resizes the window's track, the "
+                + "other its share within it."
         )
     }
 }

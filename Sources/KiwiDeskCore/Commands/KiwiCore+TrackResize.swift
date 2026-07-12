@@ -104,7 +104,15 @@ extension KiwiCore {
         guard let offset = column.firstIndex(of: focused),
             column.count > 1
         else {
-            return .fail("focused window is alone in its track")
+            // In default 1D track (#181) every window fills its
+            // track, so this fires on every along-axis resize —
+            // phrase it as "use the other axis", not an error
+            // about tracks the user never authored (#183).
+            return .fail(
+                "the focused window fills its track along "
+                    + "this axis — resize across the tracks "
+                    + "to change its size"
+            )
         }
         let weightFloor = TrackLayout.weightFloor
         let weights = column.map {

@@ -378,7 +378,7 @@
   "shortcuts.section.open_applications": "Apps öffnen",
   "shortcuts.section.size_float": "Größe & Schweben",
   "shortcuts.section.switch_modes": "Modi wechseln",
-  "shortcuts.size_float.axes_caption": "Vergrößern/Verkleinern gilt nur für die Layouts Bsp, Stack und Scrolling; in Monocle, Grid und Floating hat es keine Auswirkung. Breite und Höhe werden unabhängig voneinander angepasst; Scrolling ändert die Slot-Größe bei beiden entlang der Scroll-Achse.",
+  "shortcuts.size_float.layouts_caption": "Vergrößern/Verkleinern wirkt nur in den Layouts bsp, stack, scrolling und track; in monocle, grid und floating passiert nichts. Breite und Höhe ändern sich unabhängig; scrolling passt für beide seinen Slot entlang der Scroll-Achse an, und in track ändert eine Achse die Spur des Fensters, die andere seinen Anteil darin.",
   "sidebar.app_name": "KiwiDesk",
   "sidebar.app_rules": "App-Regeln",
   "sidebar.appearance": "Erscheinungsbild",
