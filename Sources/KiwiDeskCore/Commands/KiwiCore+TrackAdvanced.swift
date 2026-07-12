@@ -36,10 +36,10 @@ extension KiwiCore {
             .gated(advanced: isTrackAdvanced)
     }
 
-    /// The reject message actions share (`move_to_track`, and
-    /// `track.swap` when it lands): actions push state toward
-    /// 2D — exactly what the gate prevents — so unlike the
-    /// accept-and-store setters they fail loudly, with the
+    /// The reject message the gated actions share
+    /// (`move_to_track`, `track.swap`): actions push state
+    /// toward 2D — exactly what the gate prevents — so unlike
+    /// the accept-and-store setters they fail loudly, with the
     /// pointer to the switch.
     static let trackAdvancedHint =
         "joining tracks is part of advanced track — enable "
@@ -81,10 +81,12 @@ extension KiwiCore {
 /// with the pointer). The GUI catalog authors these same
 /// strings — pinned by a parity test so neither side drifts.
 public enum TrackAdvancedBindings {
-    /// `track.swap` joins on #182.
     public static let gatedLua: Set<String> = Set(
-        ["left", "down", "up", "right"].map {
-            "KiwiDesk.move_to_track(\"\($0)\")"
+        ["left", "down", "up", "right"].flatMap {
+            [
+                "KiwiDesk.move_to_track(\"\($0)\")",
+                "track.swap(\"\($0)\")",
+            ]
         }
     )
 

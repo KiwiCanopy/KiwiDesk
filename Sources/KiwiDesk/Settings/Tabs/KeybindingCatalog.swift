@@ -115,6 +115,24 @@ enum KeybindingCatalog {
             )
         }
 
+    /// The four directional whole-track swap rows (#182).
+    /// Advanced-track-gated like `moveToTrackDirections`; all
+    /// four directions offered, the cross-axis pair acts.
+    static let trackSwapDirections: [NavCommand] =
+        directions.map { dir, phrase in
+            NavCommand(
+                label: "Swap with the track \(phrase)",
+                lua: "track.swap(\"\(dir)\")",
+                displayLabel: {
+                    L(
+                        "keybinding.track_swap",
+                        "Swap with the track %1$@",
+                        directionPhrase(dir)
+                    )
+                }
+            )
+        }
+
     /// The per-space "Move to …" / "… & follow" row pairs. The
     /// space name is user data, passed as a positional arg.
     static func moveToSpace(
@@ -173,6 +191,7 @@ enum KeybindingCatalog {
                 title: "Window Management",
                 commands: swapDirections
                     + moveToTrackDirections
+                    + trackSwapDirections
                     + moveToSpace(spaces)
             ),
         ]

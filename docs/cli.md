@@ -124,7 +124,8 @@ KiwiDesk service restart
 | | `grid.set_new_window_placement` | placement¹ (default `last`) |
 | Monocle | `monocle.set_orientation` | `horizontal\|vertical` |
 | | `monocle.set_wrap_focus` | true\|false (default `true` — monocle is a carousel) |
-| Track | `track.set_axis` | `vertical\|horizontal` (default vertical = columns) |
+| Track | `track.swap` | direction across the tracks — swaps the focused window's whole track with the adjacent one (advanced track) |
+| | `track.set_axis` | `vertical\|horizontal` (default vertical = columns) |
 | | `track.set_count` | n (0 = automatic; n>0 pins a cap and turns automatic off) |
 | | `track.set_auto_tracks` | true\|false (default `true`) |
 | | `track.set_new_window` | `own_track\|focused_track` (default `own_track`) |

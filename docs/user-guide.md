@@ -273,9 +273,11 @@ Expand each layout type to adjust its defaults:
   a fixed **Track limit**, which greys out while automatic is
   on) and where a new window lands (opens its own track next
   to the focused one, or joins the focused track). It also
-  enables the Move-to-track shortcuts (Shortcuts ▸ Move
-  Windows) that move a window across tracks or open a new one
-  at the edge; while off those shortcuts are hidden and any
+  enables the track shortcuts (Shortcuts ▸ Move Windows):
+  Move-to-track rows that move a window across tracks or open
+  a new one at the edge, and Swap-with-track rows that swap
+  the focused window's whole track with its neighbor; while
+  off those shortcuts are hidden and any
   combos they held are silently free for reuse — turning the
   gate back on restores every binding not reused since.
   Turning it off keeps multi-window tracks you already built.

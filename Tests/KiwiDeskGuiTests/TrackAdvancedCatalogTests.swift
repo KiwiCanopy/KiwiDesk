@@ -14,11 +14,12 @@ import Testing
 struct TrackAdvancedCatalogTests {
     @Test("Gated set matches the catalog rows byte-for-byte")
     func gatedSetMatchesCatalog() {
+        let catalog =
+            KeybindingCatalog.moveToTrackDirections
+            + KeybindingCatalog.trackSwapDirections
         #expect(
-            Set(
-                KeybindingCatalog.moveToTrackDirections
-                    .map(\.lua)
-            ) == TrackAdvancedBindings.gatedLua
+            Set(catalog.map(\.lua))
+                == TrackAdvancedBindings.gatedLua
         )
     }
 

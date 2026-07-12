@@ -170,6 +170,7 @@ public enum APIReference {
             "set_app_bar_group_badge_text_color",
         ],
         "track": [
+            "swap",
             "set_axis", "set_count", "set_auto_tracks",
             "set_new_window", "set_wrap_focus",
             "set_axis_override", "set_count_override",

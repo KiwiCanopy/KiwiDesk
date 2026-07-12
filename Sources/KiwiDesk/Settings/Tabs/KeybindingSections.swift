@@ -86,6 +86,8 @@ struct MoveWindowsSection: View {
                 .padding(.top, 4)
                 ForEach(
                     KeybindingCatalog.moveToTrackDirections
+                        + KeybindingCatalog
+                        .trackSwapDirections
                 ) { command in
                     NavRow(
                         model: model,

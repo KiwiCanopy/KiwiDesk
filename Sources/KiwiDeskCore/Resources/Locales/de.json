@@ -179,6 +179,7 @@
   "keybinding.shrink_width": "Breite verkleinern",
   "keybinding.swap_dir": "Mit Fenster %1$@ tauschen",
   "keybinding.switch_to_mode": "Zu %1$@ wechseln",
+  "keybinding.track_swap": "Mit der Spur %1$@ tauschen",
   "layout.bsp.name": "Bsp",
   "layout.floating.name": "Floating",
   "layout.grid.name": "Grid",

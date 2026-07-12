@@ -226,4 +226,62 @@ extension Space {
         }
         return true
     }
+
+    /// Swaps the focused window's whole track with the adjacent
+    /// one (#182): the two contiguous slices exchange places in
+    /// the tiled order. Break markers and track weights are
+    /// keyed by window and ride their heads, so both follow the
+    /// slices automatically — only an *implicit* head (tiled
+    /// index 0 without an explicit marker) is materialized
+    /// first, or the track it starts would merge into its new
+    /// predecessor after the exchange. Floating windows
+    /// interleaved in the full array keep their slots: only the
+    /// tiled positions are rewritten (the `moveWindowToTrack`
+    /// filter discipline). `delta` is ±1 across the axis, never
+    /// wrapping. Returns false when the window is untracked or
+    /// no track lies in that direction (a single track has no
+    /// neighbor by construction).
+    public mutating func swapTracks(
+        _ window: WindowID,
+        delta: Int,
+        cap: Int,
+        isTiled: (WindowID) -> Bool
+    ) -> Bool {
+        let tiled = windows.filter(isTiled)
+        guard let index = tiled.firstIndex(of: window) else {
+            return false
+        }
+        let counts = TrackLayout.counts(
+            of: tiled,
+            breaks: trackBreaks,
+            cap: cap
+        )
+        let ranges = TrackLayout.ranges(of: counts)
+        guard
+            let track = TrackLayout.trackIndex(
+                ofWindowIndex: index,
+                counts: counts
+            )
+        else { return false }
+        let target = track + delta
+        guard ranges.indices.contains(target) else {
+            return false
+        }
+        trackBreaks.insert(tiled[0])
+        // Adjacent slices exchange; everything around them
+        // keeps its order.
+        let lead = ranges[min(track, target)]
+        let trail = ranges[max(track, target)]
+        var reordered = Array(tiled[..<lead.lowerBound])
+        reordered += tiled[trail]
+        reordered += tiled[lead]
+        reordered += tiled[trail.upperBound...]
+        var next = 0
+        for slot in windows.indices
+        where isTiled(windows[slot]) {
+            windows[slot] = reordered[next]
+            next += 1
+        }
+        return true
+    }
 }

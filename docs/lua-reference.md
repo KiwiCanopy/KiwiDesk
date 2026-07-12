@@ -899,6 +899,32 @@ stop at the first/last window. `swap` never wraps.
 monocle.set_wrap_focus(false)
 ```
 
+### track.swap
+
+**Expects:** a direction across the space's tracks: `"left"` or
+`"right"` with a vertical axis (columns), `"up"` or `"down"`
+with a horizontal one (rows).
+
+**Does:** swaps the focused window's **entire track** — the
+contiguous slice, with its windows, sizes, and in-track shares —
+with the adjacent track. The whole-structure companion to the
+window-level `swap` (which is untouched), following the
+`stack.promote`/`stack.demote` precedent for layout-specific
+verbs. Part of **advanced track**: while
+[`set_track_advanced`](#set_track_advanced) is off it rejects
+with a pointer to the switch (in default 1D track every track
+is one window, so it degenerates to the plain `swap` that
+already exists). Never wraps; along-axis directions report an
+error naming the valid pair; refused when the space is not in
+track mode, no tiled window is focused, or no track lies that
+way (a single track has no neighbor).
+
+**Example:**
+
+```lua
+track.swap("right")
+```
+
 ### track.set_axis
 
 **Expects:** `"vertical"` (default) or `"horizontal"`.
