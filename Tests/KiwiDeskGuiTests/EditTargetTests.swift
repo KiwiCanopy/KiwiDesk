@@ -72,8 +72,10 @@ struct EditTargetTests {
         #expect(model.savedSidecar == nil)
         // The profile's monitors aren't attached.
         #expect(!model.placementEditable)
-        // Override-mode baseline for the Shortcuts tab.
+        // Override-mode baselines for the Shortcuts and App
+        // Rules tabs (#55/#109).
         #expect(model.profileEditingBaseModes != nil)
+        #expect(model.profileEditingBaseAppRules != nil)
         // Pending edits are discarded on switch.
         #expect(!model.isDirty)
     }
@@ -90,6 +92,7 @@ struct EditTargetTests {
         #expect(!model.editingStoredProfile)
         #expect(model.placementEditable)
         #expect(model.profileEditingBaseModes == nil)
+        #expect(model.profileEditingBaseAppRules == nil)
         // GUI-managed: the sidecar baseline is back.
         #expect(model.savedSidecar != nil)
         #expect(!model.isDirty)
@@ -128,6 +131,7 @@ struct EditTargetTests {
         #expect(model.target == .live)
         #expect(model.placementEditable)
         #expect(model.profileEditingBaseModes == nil)
+        #expect(model.profileEditingBaseAppRules == nil)
     }
 
     @Test("forced Lua clears in stored mode, returns on live")

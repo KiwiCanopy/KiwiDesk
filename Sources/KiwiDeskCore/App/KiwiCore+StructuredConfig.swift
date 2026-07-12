@@ -43,54 +43,37 @@ extension KiwiCore {
         )
     }
 
-    /// Re-registers keybindings for the profile being applied
-    /// (#55 phase 6) WITHOUT re-applying rules — the app-rule
-    /// tier has its own sibling below (#109); float rules and
-    /// native-space bindings stay global. Called from
-    /// `apply(profile:)` / `apply(composed:)` so load_profile,
-    /// dock/undock, and native-Space switches update binds.
-    /// Takes the override explicitly: callers adopt AFTER
-    /// applying, so `profiles.currentName` may still point at
-    /// the previous profile here. Resets the active key mode
-    /// to default (the mode set may change with the profile).
-    /// No-op when not GUI-managed (Lua owns bindings, O7) or
-    /// before the first `loadConfig` (no VM yet).
-    func reapplyStructuredKeybindings(
-        profileModes: KeyModeOverride?
-    ) {
-        guard isGuiManaged else { return }
-        guard let config = loadStructuredConfig() else {
-            return
-        }
-        guard let lua = keys.lua else { return }
-        applyStructuredKeybindings(
-            modes: config.modes,
-            profile: profileModes,
-            lua: lua
-        )
-    }
-
-    /// Re-resolves the app→space rules for the profile being
-    /// applied (#109) — the rule sibling of
-    /// `reapplyStructuredKeybindings`, called from the same
-    /// `apply(profile:)` / `apply(composed:)` sites. Takes the
-    /// override explicitly for the same reason (callers adopt
-    /// AFTER applying). Only the app-rule tier is
-    /// profile-scoped: float rules and native-space bindings
-    /// are untouched. No-op when not GUI-managed (Lua owns the
-    /// rules, O7). The caller's `retile(force: true)` on
-    /// explicit applies satisfies §5; rules themselves only
-    /// steer windows created later.
-    func reapplyStructuredRules(
+    /// Re-applies BOTH per-profile override tiers for the
+    /// profile being applied — keybindings (#55 phase 6) and
+    /// app→space rules (#109) — from ONE sidecar decode.
+    /// Called from `apply(profile:)` / `apply(composed:)` so
+    /// load_profile, dock/undock, and native-Space switches
+    /// update both. Takes the overrides explicitly: callers
+    /// adopt AFTER applying, so `profiles.currentName` may
+    /// still point at the previous profile here. Float rules
+    /// and native-space bindings stay global — never touched
+    /// here. Resets the active key mode to default (the mode
+    /// set may change with the profile). No-op when not
+    /// GUI-managed (Lua owns the config, O7); the keybinding
+    /// half additionally no-ops before the first `loadConfig`
+    /// (no VM yet), while rules need no VM.
+    func reapplyStructuredOverrides(
+        profileModes: KeyModeOverride?,
         profileAppRules: AppRuleOverride?
     ) {
         guard isGuiManaged else { return }
         guard let config = loadStructuredConfig() else {
             return
         }
-        state.appRules = ConfigResolver.resolvedAppRules(
+        setResolvedAppRules(
             base: config.appRules,
-            profile: profileAppRules
+            override: profileAppRules
+        )
+        guard let lua = keys.lua else { return }
+        applyStructuredKeybindings(
+            modes: config.modes,
+            profile: profileModes,
+            lua: lua
         )
     }
 
@@ -121,12 +104,26 @@ extension KiwiCore {
         from config: GuiConfig,
         appRules override: AppRuleOverride?
     ) {
-        state.appRules = ConfigResolver.resolvedAppRules(
+        setResolvedAppRules(
             base: config.appRules,
-            profile: override
+            override: override
         )
         eventLoop.floatRules = FloatRules(config.floatRules)
         nativeSpaceBindings = config.profileBindings
+    }
+
+    /// The one write of the resolved app-rule tier — shared by
+    /// the full apply and the profile re-apply, mirroring how
+    /// both keybinding entry points funnel through
+    /// `applyStructuredKeybindings`.
+    private func setResolvedAppRules(
+        base: [String: SpaceID],
+        override: AppRuleOverride?
+    ) {
+        state.appRules = ConfigResolver.resolvedAppRules(
+            base: base,
+            profile: override
+        )
     }
 
     // MARK: - Keybindings

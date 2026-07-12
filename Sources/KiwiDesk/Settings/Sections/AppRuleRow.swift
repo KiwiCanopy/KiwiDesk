@@ -38,12 +38,16 @@ struct AppRuleRow: View {
     }
 
     /// Whether the row is inherited unchanged from the base —
-    /// the Space facet matches the base's (or both are absent).
+    /// a base pin exists AND the Space facet matches it. Rows
+    /// with no pin on either side (drafts, float-only apps)
+    /// inherit nothing, so they render at full strength.
     /// Always false during live editing, mirroring
     /// `KeyBinding.isInherited(from:)`.
     private var inherited: Bool {
-        guard let base = overrideBase else { return false }
-        return model.config.appRules[app] == base[app]
+        guard let base = overrideBase,
+            let pin = base[app]
+        else { return false }
+        return model.config.appRules[app] == pin
     }
 
     // MARK: - Header
@@ -59,6 +63,15 @@ struct AppRuleRow: View {
                 Image(systemName: "trash")
             }
             .buttonStyle(.borderless)
+            // Override mode can only clear the Space facet: a
+            // row whose facet is already Automatic (float-only,
+            // a draft, or an un-pinned base app) has nothing to
+            // delete — disable instead of offering a no-op
+            // (grey out, not hide).
+            .disabled(
+                overrideBase != nil
+                    && model.config.appRules[app] == nil
+            )
             .help(
                 overrideBase == nil
                     ? L(
