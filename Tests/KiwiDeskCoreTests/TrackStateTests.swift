@@ -34,7 +34,6 @@ struct TrackStateTests {
             ids(1)[0],
             rule: .ownTrack,
             position: .afterFocused,
-            cap: 0,
             isTiled: allTiled
         )
         #expect(space.windows == ids(1))
@@ -55,7 +54,6 @@ struct TrackStateTests {
             w[2],
             rule: .ownTrack,
             position: .afterFocused,
-            cap: 0,
             isTiled: allTiled
         )
         #expect(space.windows == [w[0], w[2], w[1]])
@@ -76,15 +74,14 @@ struct TrackStateTests {
             w[3],
             rule: .focusedTrack,
             position: .afterFocused,
-            cap: 0,
             isTiled: allTiled
         )
         #expect(space.windows == [w[0], w[3], w[1], w[2]])
         #expect(space.trackBreaks == [w[2]])
     }
 
-    @Test("own_track falls back to joining at the cap")
-    func capFallsBackToJoin() {
+    @Test("own_track always opens a new track (#192)")
+    func ownTrackAlwaysOpens() {
         let w = ids(3)
         var space = Space(
             id: "1",
@@ -97,12 +94,12 @@ struct TrackStateTests {
             w[2],
             rule: .ownTrack,
             position: .afterFocused,
-            cap: 2,
             isTiled: allTiled
         )
-        // No new break: the third window joins the focused
-        // (second) track.
-        #expect(space.trackBreaks == [w[1]])
+        // No spawn cap (#192): the third window opens its own
+        // track after the focused one; the overflow track is a
+        // read-time view, so spawn never folds windows together.
+        #expect(space.trackBreaks == [w[1], w[2]])
         #expect(space.windows == [w[0], w[1], w[2]])
     }
 
@@ -121,7 +118,6 @@ struct TrackStateTests {
             w[3],
             rule: .ownTrack,
             position: .afterFocused,
-            cap: 0,
             isTiled: { $0 != w[1] }
         )
         #expect(space.windows == [w[0], w[1], w[2], w[3]])

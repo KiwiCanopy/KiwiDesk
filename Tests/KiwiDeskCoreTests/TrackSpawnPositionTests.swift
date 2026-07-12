@@ -32,7 +32,6 @@ struct TrackSpawnPositionTests {
             w[2],
             rule: .ownTrack,
             position: .first,
-            cap: 0,
             isTiled: allTiled
         )
         #expect(space.windows == [w[2], w[0], w[1]])
@@ -54,7 +53,6 @@ struct TrackSpawnPositionTests {
             w[2],
             rule: .ownTrack,
             position: .last,
-            cap: 0,
             isTiled: allTiled
         )
         #expect(space.windows == [w[0], w[1], w[2]])
@@ -76,7 +74,6 @@ struct TrackSpawnPositionTests {
             w[3],
             rule: .ownTrack,
             position: .beforeFocused,
-            cap: 0,
             isTiled: allTiled
         )
         // New track sits just before the focused (third) track.
@@ -101,7 +98,6 @@ struct TrackSpawnPositionTests {
             w[3],
             rule: .focusedTrack,
             position: .first,
-            cap: 0,
             isTiled: allTiled
         )
         // Still one track, but w3 is now its head.
@@ -123,7 +119,6 @@ struct TrackSpawnPositionTests {
             w[3],
             rule: .focusedTrack,
             position: .last,
-            cap: 0,
             isTiled: allTiled
         )
         #expect(space.windows == [w[0], w[1], w[2], w[3]])
@@ -144,7 +139,6 @@ struct TrackSpawnPositionTests {
             w[3],
             rule: .focusedTrack,
             position: .beforeFocused,
-            cap: 0,
             isTiled: allTiled
         )
         #expect(space.windows == [w[0], w[3], w[1], w[2]])
@@ -169,7 +163,6 @@ struct TrackSpawnPositionTests {
             w3,
             rule: .focusedTrack,
             position: .first,
-            cap: 0,
             isTiled: allTiled
         )
         // w3 heads the second track now and carries its weight;

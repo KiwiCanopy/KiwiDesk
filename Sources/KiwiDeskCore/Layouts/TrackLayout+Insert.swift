@@ -10,15 +10,16 @@ extension Space {
     /// (#128) and `new_window_position` (#188): it either opens
     /// its own new track or joins the focused track, and
     /// `position` places it — for a new track, among the tracks;
-    /// for a join, among that track's windows. `ownTrack` falls
-    /// back to joining when a positive `cap` is already reached.
-    /// `isTiled` supplies the float knowledge the space itself
-    /// does not hold — the partition only spans tiled windows.
+    /// for a join, among that track's windows. `ownTrack` ALWAYS
+    /// opens a new track (#192): the overflow track is a read-time
+    /// view, so spawn never caps — the far-edge surplus folds into
+    /// the overflow track when the layout renders. `isTiled`
+    /// supplies the float knowledge the space itself does not hold
+    /// — the partition only spans tiled windows.
     public mutating func insertIntoTrack(
         _ window: WindowID,
         rule: TrackParams.NewWindowTrack,
         position: SpawnPlacement,
-        cap: Int,
         isTiled: (WindowID) -> Bool
     ) {
         guard !windows.contains(window) else { return }
@@ -28,10 +29,13 @@ extension Space {
             trackBreaks.insert(window)
             return
         }
+        // The true (uncapped) marker partition: placement is
+        // relative to real tracks, and the overflow merge is the
+        // layout's job, not spawn's.
         let counts = TrackLayout.counts(
             of: tiled,
             breaks: trackBreaks,
-            cap: cap
+            cap: 0
         )
         let ranges = TrackLayout.ranges(of: counts)
         let focusedIndex = focused.flatMap {
@@ -44,10 +48,7 @@ extension Space {
                     counts: counts
                 )
             } ?? counts.count - 1
-        let opensOwn =
-            rule == .ownTrack
-            && (cap <= 0 || counts.count < cap)
-        if opensOwn {
+        if rule == .ownTrack {
             insertOwnTrack(
                 window,
                 position: position,

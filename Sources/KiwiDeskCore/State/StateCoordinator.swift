@@ -178,7 +178,6 @@ public struct StateCoordinator: Sendable {
                         to: target,
                         trackRule: params.newWindow,
                         trackPosition: params.newWindowPosition,
-                        cap: params.trackCap,
                         isTiled: { [windows] in
                             windows[$0]?.isFloating == false
                         }

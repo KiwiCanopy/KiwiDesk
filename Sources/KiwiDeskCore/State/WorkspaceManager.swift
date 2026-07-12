@@ -152,7 +152,6 @@ public struct WorkspaceManager: Sendable {
         to id: SpaceID,
         trackRule: TrackParams.NewWindowTrack,
         trackPosition: SpawnPlacement,
-        cap: Int,
         isTiled: (WindowID) -> Bool
     ) {
         remove(window)
@@ -161,7 +160,6 @@ public struct WorkspaceManager: Sendable {
             window,
             rule: trackRule,
             position: trackPosition,
-            cap: cap,
             isTiled: isTiled
         )
     }
