@@ -155,6 +155,15 @@ extension EventLoop {
 
     /// Attaches AX observation to a regular (Dock-visible) app.
     func attach(app: NSRunningApplication) {
+        // Never observe KiwiDesk's own process (#174): opening
+        // Settings flips the app to `.regular`, which would
+        // otherwise pass the gate below and tile the Settings
+        // window. Guarding here means no self-observer, so
+        // `reconcile`'s `observers[pid] != nil` check keeps
+        // self out of every downstream path too.
+        guard !Self.isOwnProcess(app.processIdentifier) else {
+            return
+        }
         guard app.activationPolicy == .regular else { return }
         let pid = app.processIdentifier
         guard observers[pid] == nil else { return }

@@ -1551,6 +1551,10 @@ float automatically, no rule needed.
 assignment, no window events. KiwiDesk simply pretends it does not
 exist.
 
+**KiwiDesk's own windows** (the Settings window and any panels it
+shows) are likewise never managed — never tiled, floated, or
+tracked. This is unconditional and not a rule you configure.
+
 **Example:**
 
 ```lua
