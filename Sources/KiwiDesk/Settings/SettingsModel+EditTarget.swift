@@ -27,6 +27,7 @@ extension SettingsModel {
         var placementEditable: Bool
         var savedSidecar: GuiConfig?
         var profileEditingBaseModes: [KeyMode]?
+        var profileEditingBaseAppRules: [String: SpaceID]?
         var keybindingWarning: String?
     }
 
@@ -88,6 +89,8 @@ extension SettingsModel {
         placementEditable = state.placementEditable
         savedSidecar = state.savedSidecar
         profileEditingBaseModes = state.profileEditingBaseModes
+        profileEditingBaseAppRules =
+            state.profileEditingBaseAppRules
         keybindingWarning = state.keybindingWarning
     }
 
@@ -124,6 +127,7 @@ extension SettingsModel {
             // doesn't read as an edit.
             savedSidecar: core.isGuiManaged ? loaded : nil,
             profileEditingBaseModes: nil,
+            profileEditingBaseAppRules: nil,
             // A reload discards the edits the banner was
             // about; batch paths (Lua save, Adopt) re-derive
             // it right after via `warnIfAnyConflict`.
@@ -163,6 +167,9 @@ extension SettingsModel {
             // `KiwiCore.baseKeyModes`) — never the resolved
             // set the tabs edit.
             profileEditingBaseModes: core.baseKeyModes(),
+            // Same baseline role for the App Rules tab's
+            // space-facet override (#109).
+            profileEditingBaseAppRules: core.baseAppRules(),
             keybindingWarning: nil
         )
     }

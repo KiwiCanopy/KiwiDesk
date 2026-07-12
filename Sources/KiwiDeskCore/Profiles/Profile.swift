@@ -98,6 +98,11 @@ public struct Profile: Codable, Sendable, Equatable {
     /// inherits the base modes (gui.json) entirely; present,
     /// it shadows by mode name then combo (O4 soft).
     public var modes: KeyModeOverride?
+    /// Per-profile sparse app→space rule override (#109). nil
+    /// inherits the base `app_rules` (gui.json) entirely;
+    /// present, it shadows per app — with a null tombstone to
+    /// un-pin an app the base pins.
+    public var appRules: AppRuleOverride?
 
     /// Derived from the sets — never stored separately.
     public var monitorCount: Int {
@@ -148,6 +153,7 @@ public struct Profile: Codable, Sendable, Equatable {
         case settings
         case savedAt = "saved_at"
         case modes
+        case appRules = "app_rules"
     }
 
     public init(
@@ -160,7 +166,8 @@ public struct Profile: Codable, Sendable, Equatable {
         spaceModes: [SpaceID: LayoutMode],
         settings: TilingSettings,
         savedAt: Date = .now,
-        modes: KeyModeOverride? = nil
+        modes: KeyModeOverride? = nil,
+        appRules: AppRuleOverride? = nil
     ) {
         self.name = name
         self.monitorSets = Self.sanitized(monitorSets)
@@ -172,6 +179,7 @@ public struct Profile: Codable, Sendable, Equatable {
         self.settings = settings
         self.savedAt = savedAt
         self.modes = modes
+        self.appRules = appRules
     }
 
     /// Lenient where safe (missing flags default), strict where
@@ -235,6 +243,10 @@ public struct Profile: Codable, Sendable, Equatable {
         modes = try container.decodeIfPresent(
             KeyModeOverride.self,
             forKey: .modes
+        )
+        appRules = try container.decodeIfPresent(
+            AppRuleOverride.self,
+            forKey: .appRules
         )
     }
 

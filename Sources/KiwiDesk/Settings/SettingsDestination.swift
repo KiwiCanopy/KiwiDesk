@@ -88,24 +88,20 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
     }
 
     /// Whether the destination is offered while a stored
-    /// profile is being edited (#18): App Rules and the
-    /// Advanced/About General section are global surfaces
-    /// that a profile edit never writes.
+    /// profile is being edited (#18): only the Advanced/About
+    /// General section is a global surface a profile edit
+    /// never writes. App Rules joined the editable set when
+    /// its Space facet grew a per-profile override (#109) —
+    /// the Float facet stays global and renders disabled
+    /// there.
     var visibleWhileEditingStoredProfile: Bool {
-        switch self {
-        case .appRules, .general: return false
-        default: return true
-        }
+        self != .general
     }
 
     /// Whether the profile edit-target header (the toolbar
     /// picker + the status strip) is shown for this
     /// destination. Only General is truly profile-agnostic
-    /// (About + the config-file tools). App Rules is shown
-    /// too — its rules assign apps to spaces, and spaces are
-    /// profile-scoped, so the picker names which profile's
-    /// spaces a rule targets — so this is NOT the same set as
-    /// `visibleWhileEditingStoredProfile`.
+    /// (About + the config-file tools).
     var showsProfileContext: Bool {
         self != .general
     }

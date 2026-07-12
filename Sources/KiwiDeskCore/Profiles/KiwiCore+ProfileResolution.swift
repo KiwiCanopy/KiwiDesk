@@ -90,6 +90,11 @@ extension KiwiCore {
         reapplyStructuredKeybindings(
             profileModes: profile.modes
         )
+        // Per-profile app-rule tier (#109): same explicit
+        // hand-off, same sites.
+        reapplyStructuredRules(
+            profileAppRules: profile.appRules
+        )
         resolveSpaceDisplays()
         retile(force: forceRetile)
         emitSpaceChange()
@@ -157,9 +162,11 @@ extension KiwiCore {
         spacePins = [:]
         mainSpaces = []
         fallbackSpace = nil
-        // A transient Standard has no keybinding override —
-        // revert to the base gui.json modes (#55 phase 6).
+        // A transient Standard has no keybinding or app-rule
+        // override — revert to the base gui.json config
+        // (#55 phase 6, #109).
         reapplyStructuredKeybindings(profileModes: nil)
+        reapplyStructuredRules(profileAppRules: nil)
         resolveSpaceDisplays()
         retile(force: forceRetile)
         emitSpaceChange()

@@ -220,8 +220,8 @@ looking at / in which profile), so they share one titlebar row
 instead of a title stacked over a separate profile banner. The
 picker moves into a trailing toolbar item, shown everywhere
 except General (`showsProfileContext`) — App Rules keeps it
-because its rules target profile-scoped spaces, so it is *not*
-the same exclusion as `visibleWhileEditingStoredProfile`.
+because its rules target profile-scoped spaces (and, since
+#109, its Space facet is itself per-profile-overridable).
 The status sentence is demoted to a conditional strip that
 mounts only when there's something non-nominal to say
 (divergence, unsaved, built-in, no-match, or a warning) — a
@@ -327,8 +327,12 @@ interaction model with zero extra capability. (#7)
 **Profiles may override *behavior* settings, never *routing*
 ones.** A profile owns tiling, and may also carry a sparse
 override of a global setting that shapes how the workspace
-*behaves while the profile is active* — keybindings today
-(`Profile.modes`), app rules next (#109). It may never
+*behaves while the profile is active* — keybindings
+(`Profile.modes`) and app→space rules (`Profile.appRules`,
+#109; the first tier with a tombstone, since un-pinning a base
+rule is a meaningful per-profile intent — float rules stay
+global for now, their per-profile story is a separate set-diff
+design). It may never
 override a setting that *selects or routes* the profile
 itself: the native-Space→profile bindings decide *which*
 profile loads, so a profile owning part of that map would be

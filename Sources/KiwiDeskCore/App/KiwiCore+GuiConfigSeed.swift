@@ -37,6 +37,12 @@ extension KiwiCore {
             base: config.modes,
             profile: profile.modes
         )
+        // App Rules tab in override mode (#109): same
+        // resolve-edit-diff cycle over the flat rule map.
+        config.appRules = ConfigResolver.resolvedAppRules(
+            base: config.appRules,
+            profile: profile.appRules
+        )
     }
 
     /// Copies the live profile-scoped state into the model:

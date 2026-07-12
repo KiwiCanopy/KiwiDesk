@@ -32,6 +32,14 @@ extension KiwiCore {
         (guiConfigStore.load() ?? guiConfigSeed()).modes
     }
 
+    /// The base app→space rules every profile override
+    /// resolves onto AND diffs against — `baseKeyModes()`'s
+    /// app-rule sibling (#109), with the same one-definition
+    /// and read-once-per-cycle caveats.
+    public func baseAppRules() -> [String: SpaceID] {
+        (guiConfigStore.load() ?? guiConfigSeed()).appRules
+    }
+
     /// The editable model for the dashboard: the saved sidecar
     /// if present, otherwise a snapshot of live state. The
     /// sidecar only persists the global fields; the

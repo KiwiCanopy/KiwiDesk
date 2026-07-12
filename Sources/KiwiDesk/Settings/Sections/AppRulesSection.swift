@@ -16,12 +16,19 @@ struct AppRulesSection: View {
     @State private var draftApps: [String] = []
     @State private var newApp = ""
 
+    /// The base rules while editing a stored profile — the
+    /// override-mode switch (#109); nil during live editing.
+    private var overrideBase: [String: SpaceID]? {
+        model.profileEditingBaseAppRules
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 SettingsSection(
                     L("app_rules.section.title", "Rules per app")
                 ) {
+                    overrideIndicator
                     Text(rulesCaption)
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -29,6 +36,7 @@ struct AppRulesSection: View {
                         AppRuleRow(
                             model: model,
                             app: app,
+                            overrideBase: overrideBase,
                             onDelete: { delete(app) }
                         )
                         Divider()
@@ -40,8 +48,37 @@ struct AppRulesSection: View {
         }
     }
 
+    /// Shown while editing a stored profile whose space rules
+    /// diverge from the base — the Shortcuts tab's twin (#109).
+    @ViewBuilder private var overrideIndicator: some View {
+        if model.editedProfileOverridesAppRules {
+            Label(
+                L(
+                    "app_rules.override.overrides",
+                    "This profile overrides base app rules."
+                ),
+                systemImage: "app.badge"
+            )
+            .font(.callout)
+        }
+    }
+
     private var rulesCaption: String {
-        L(
+        if overrideBase != nil {
+            return L(
+                "app_rules.override.caption",
+                "Space assignments made here apply to this "
+                    + "profile only. Dimmed rows are inherited "
+                    + "from the base rules and stay in sync "
+                    + "with them; picking another space "
+                    + "overrides the rule for this profile, "
+                    + "and deleting a row un-pins the app here "
+                    + "even when the base pins it. Float rules "
+                    + "are app-wide — edit them while editing "
+                    + "the live configuration."
+            )
+        }
+        return L(
             "app_rules.section.caption",
             "Pin an app's windows to a space, "
                 + "keep them floating, or both. "
@@ -53,11 +90,17 @@ struct AppRulesSection: View {
     /// One row per distinct app, however its rules are stored:
     /// assignment key, float-rule app segment, or a session
     /// draft. Hand-written float rules for apps that aren't
-    /// installed still render (name as typed).
+    /// installed still render (name as typed). In override
+    /// mode the BASE's pinned apps are included too, so a
+    /// tombstoned (un-pinned) app keeps its row — visible as
+    /// "Automatic" overriding the base pin (#109).
     private var apps: [String] {
         var set = Set(model.config.appRules.keys)
         for rule in model.config.floatRules {
             set.insert(FloatFacet.appSegment(of: rule))
+        }
+        if let base = overrideBase {
+            set.formUnion(base.keys)
         }
         set.formUnion(draftApps)
         return set.sorted()
@@ -87,8 +130,14 @@ struct AppRulesSection: View {
 
     private func delete(_ app: String) {
         model.config.appRules[app] = nil
-        model.config.floatRules.removeAll {
-            FloatFacet.appSegment(of: $0) == app
+        // Float rules are app-wide (#109): a stored-profile
+        // edit must never touch them — the save path only
+        // writes the profile JSON, so the edit would either
+        // vanish silently or, worse, read as a profile change.
+        if overrideBase == nil {
+            model.config.floatRules.removeAll {
+                FloatFacet.appSegment(of: $0) == app
+            }
         }
         draftApps.removeAll { $0 == app }
     }

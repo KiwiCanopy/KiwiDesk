@@ -86,4 +86,17 @@ extension SettingsModel {
             edited: config.modes
         ) != nil
     }
+
+    /// True while the edited profile's app rules diverge from
+    /// the base — drives the "overrides base app rules"
+    /// indicator (#109), the shortcuts twin above.
+    var editedProfileOverridesAppRules: Bool {
+        guard let base = profileEditingBaseAppRules else {
+            return false
+        }
+        return AppRuleOverride.diff(
+            base: base,
+            edited: config.appRules
+        ) != nil
+    }
 }

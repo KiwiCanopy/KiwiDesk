@@ -159,20 +159,24 @@ a space of the same name is left untouched:
 - **Space-to-monitor pins, the Main role, and the fallback space**
 
 This is why, when you **edit a stored profile without switching to
-it**, the App Rules and General sections disappear — they hold
-global state a profile edit never writes.
+it**, the General section disappears — it holds global state a
+profile edit never writes.
 
-**One hybrid — keyboard shortcuts.** The base set is global, but a
-profile can carry a *sparse override* that adds, changes, or
-removes specific bindings just for itself (see **Per-Profile
-Shortcut Overrides**). Everything else is squarely one or the
-other.
+**Two hybrids — keyboard shortcuts and app rules.** The base set
+is global, but a profile can carry a *sparse override* just for
+itself: shortcuts can add or change specific bindings (see
+**Per-Profile Shortcut Overrides**), and app rules can pin an app
+to a different space — or un-pin it entirely — while that profile
+is active (see **Per-Profile Space Assignments** under App
+Rules). Everything else is squarely one or the other.
 
-A practical consequence: because app rules are global, an app maps
-to a single space name everywhere. To send an app to a given space
-across profiles, give that space the **same name** in each profile
-(e.g. keep a `comms` space and assign the app to it) — each profile
-can still lay that space out differently.
+A practical consequence: the base app rules name a single space
+per app. When profiles **share** a space name, one base rule is
+often enough — keep a `comms` space in each profile and assign
+the app to it; each profile still lays that space out
+differently. When profiles have **disjoint** space sets (Work
+`{1, 2, 3}` vs Home `{media, games}`), give each profile its own
+override for the app instead.
 
 ## Spaces
 
@@ -442,11 +446,12 @@ profile (marked "currently loaded"). Click it to:
 - **Edit** a saved profile **without switching** — the Settings
   sidebar becomes profile-scoped: the Design sections (Spaces,
   Layout, Monitors, Appearance, Behavior) edit this profile, and
-  **App Rules and General are hidden** — they hold global state a
-  profile edit never writes. Save writes to this profile's JSON
-  instead of the active one (the caption beside the button names
-  the target). Shortcuts enters override mode and edits only the
-  rows this profile changes; inherited rows stay dimmed.
+  **General is hidden** — it holds global state a profile edit
+  never writes. Save writes to this profile's JSON instead of
+  the active one (the caption beside the button names the
+  target). Shortcuts and App Rules enter override mode and edit
+  only what this profile changes; inherited rows stay dimmed
+  (App Rules' Float facet is app-wide and stays disabled there).
 - **Return to the active profile** by selecting it in the dropdown.
 
 Saving a stored profile hot-reloads the running layout **only if
@@ -455,9 +460,10 @@ active native Space); otherwise the change waits until the
 profile next loads. **Save a Copy As…** while editing a stored
 profile duplicates *that stored profile* — including your pending
 edits, its monitor sets (even for hardware that isn't connected),
-and its shortcut overrides. The count-default flag does not carry
-over, and the running layout is never touched — this is how you
-create a variant of a profile without loading it first.
+and its shortcut and app-rule overrides. The count-default flag
+does not carry over, and the running layout is never touched —
+this is how you create a variant of a profile without loading it
+first.
 
 ### Saving
 
@@ -559,6 +565,30 @@ a title substring match.
 
 Dialogs, sheets, and picture-in-picture windows float automatically —
 you do not need a rule for them.
+
+### Per-Profile Space Assignments
+
+Space assignments are global by default, but each profile can
+carry a **sparse override**: while you edit a stored profile
+(pick **Edit** in the profile dropdown), the App Rules section
+switches into override mode —
+
+- **Dimmed rows are inherited** from the base rules and stay in
+  sync with them.
+- **Pick another space** to override the rule for this profile
+  only; matching the base again makes the row inherited again.
+- **Delete a row to un-pin the app** in this profile, even when
+  the base pins it — new windows of that app open in the active
+  space while this profile is loaded.
+- **Add a rule** for an app the base doesn't mention to pin it
+  only in this profile.
+
+The **Float facet is app-wide** — it has no per-profile tier and
+stays disabled in override mode; edit float rules while editing
+the live configuration. Overrides ride the profile's JSON (an
+`app_rules` object; `null` un-pins) and apply the moment the
+profile loads — including automatic loads from a native-Space
+binding or a monitor change.
 
 ## Shortcuts
 

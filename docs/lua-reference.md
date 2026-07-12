@@ -1806,6 +1806,15 @@ app_rules = {
 }
 ```
 
+When GUI-managed, the base rules live in `gui.json` and a stored
+profile may carry a **sparse per-app override** (`app_rules` in
+the profile JSON): a listed app takes the profile's space while
+that profile is active, a `null` entry un-pins an app the base
+pins, and unlisted apps inherit the base rule. Edit it from the
+Settings app's App Rules section while editing a stored profile.
+Rules declared in a hand-written `init.lua` are never overridden
+— Lua ownership is all-or-nothing.
+
 ## Making Windows Floating or Tiled
 
 ### make_floating
@@ -2359,11 +2368,14 @@ KiwiDesk.set_default_profile("Developer Rig")
 **Profiles are the single source of truth for tiling.** A profile
 owns the gaps, per-space layout modes, layout parameters,
 animations, mouse-resize behavior, and the space→monitor
-assignments — plus, optionally, a **sparse keybinding override**.
-The global, shared declarations — keybindings, `app_rules`,
-`float_rules`, and profile bindings — live in the app's own
-`gui.json` when GUI-managed, or in your hand-written `init.lua`
-otherwise.
+assignments — plus, optionally, **sparse keybinding and
+app-rule overrides** that shadow the base only while the profile
+is active (the app-rule one can also *un-pin* a base rule via a
+`null` entry). The global, shared declarations — keybindings,
+`app_rules`, `float_rules`, and profile bindings — live in the
+app's own `gui.json` when GUI-managed, or in your hand-written
+`init.lua` otherwise; float rules and profile bindings have no
+per-profile tier.
 
 ### set_fallback_space
 
