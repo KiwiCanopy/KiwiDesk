@@ -96,6 +96,103 @@ extension TrackLayout {
     ) -> Double {
         max(weights[tiled[range.lowerBound]] ?? 1, weightFloor)
     }
+
+    /// How many tracks physically fit in `context`'s usable
+    /// area (#192): the geometric cap that forms the overflow
+    /// track, from the cross-axis span, `min_window_size`, and
+    /// the inner gap. `max(1, …)` so a span too small for even
+    /// one track still yields a single (degenerate) track.
+    /// Shared by the layout math and `track.swap`'s guard (#198)
+    /// so neither can disagree on when the far-edge slot folds.
+    public static func geometricCap(
+        for context: LayoutContext
+    ) -> Int {
+        let vertical = context.track.axis == .vertical
+        let gap =
+            vertical
+            ? context.gaps.inner.horizontal
+            : context.gaps.inner.vertical
+        let crossSpan =
+            vertical
+            ? context.usable.width : context.usable.height
+        return max(
+            1,
+            fitCap(
+                crossSpan: crossSpan,
+                minSize: context.minWindowSize,
+                gap: gap
+            )
+        )
+    }
+
+    /// Resolves the marker-track count against the two caps the
+    /// layout applies — `normalCap` (the fixed `count`, or
+    /// `.max` when `auto_tracks` is on) and `geoCap` (how many
+    /// tracks fit) — into the effective render cap and whether a
+    /// far-edge overflow track exists (#192/#198). The cap is
+    /// what `counts(cap:)` folds the surplus into; not
+    /// overflowing leaves every marker track standing. Single
+    /// authority so the layout and the swap guard fold alike.
+    public static func overflowCap(
+        markerCount: Int,
+        normalCap: Int,
+        geoCap: Int
+    ) -> (effectiveCap: Int, overflows: Bool) {
+        let overflows =
+            markerCount > normalCap || markerCount > geoCap
+        guard overflows else { return (markerCount, false) }
+        // Auto on (`normalCap == .max`) caps at the fit count;
+        // a fixed limit adds ONE overflow track past it, but
+        // never more than fits. `.max + 1` is sidestepped by the
+        // branch — it would overflow `Int`.
+        let cap = min(
+            normalCap == .max ? geoCap : normalCap + 1,
+            geoCap
+        )
+        return (cap, true)
+    }
+
+    /// Whether `track.swap` must refuse because the swap would
+    /// disturb the folded overflow track (#198). The far-edge
+    /// slot folds ≥2 marker tracks — none keeping its marker
+    /// identity — whenever `markerCount` exceeds the effective
+    /// render cap, under BOTH a fixed limit AND geometric
+    /// pressure (`auto_tracks` on, a small display). Exchanging
+    /// that slot re-derives a different composition (windows
+    /// leak between tracks; #182 review H1), so a swap that
+    /// touches it — the focused window's own track or its
+    /// target — is rejected. A lone N+1th track folds nothing
+    /// and swaps freely, as do two normal tracks while an
+    /// overflow exists elsewhere.
+    public static func overflowSwapBlocked(
+        tiled: [WindowID],
+        breaks: Set<WindowID>,
+        windowIndex: Int,
+        delta: Int,
+        normalCap: Int,
+        geoCap: Int
+    ) -> Bool {
+        let markerCount = counts(
+            of: tiled,
+            breaks: breaks,
+            cap: 0
+        ).count
+        let (cap, overflows) = overflowCap(
+            markerCount: markerCount,
+            normalCap: normalCap,
+            geoCap: geoCap
+        )
+        guard overflows, markerCount > cap else { return false }
+        let merged = counts(of: tiled, breaks: breaks, cap: cap)
+        guard
+            let track = trackIndex(
+                ofWindowIndex: windowIndex,
+                counts: merged
+            )
+        else { return false }
+        let folded = merged.count - 1
+        return track == folded || track + delta == folded
+    }
 }
 
 // MARK: - Track state maintenance (Space)

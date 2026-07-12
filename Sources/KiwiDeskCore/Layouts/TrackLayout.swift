@@ -43,30 +43,19 @@ public struct TrackLayout: LayoutSystem {
             breaks: context.trackBreaks,
             cap: 0
         ).count
-        let crossSpan = vertical ? usable.width : usable.height
-        let geoCap = max(
-            1,
-            Self.fitCap(
-                crossSpan: crossSpan,
-                minSize: context.minWindowSize,
-                gap: gap
-            )
-        )
+        let geoCap = Self.geometricCap(for: context)
         // Auto on = unlimited normal tracks (geometry alone caps);
         // auto off = the fixed `count` (NOT `trackCap`, which is
         // count + 1 — it already includes the overflow track).
         let normalCap =
             params.autoTracks ? .max : max(1, params.count)
-        // Overflow the moment there are more window-tracks than the
-        // normal capacity OR than fit on screen.
-        let overflows =
-            markerCount > normalCap || markerCount > geoCap
-        // The extra overflow column sits past the normal cap
-        // (`normalCap + 1`), but never past what fits.
-        let effectiveCap =
-            overflows
-            ? min(normalCap == .max ? geoCap : normalCap + 1, geoCap)
-            : markerCount
+        // The render cap folds the surplus past the normal
+        // capacity OR the geometric fit into one far-edge track.
+        let (effectiveCap, overflows) = Self.overflowCap(
+            markerCount: markerCount,
+            normalCap: normalCap,
+            geoCap: geoCap
+        )
         let counts = Self.counts(
             of: windows,
             breaks: context.trackBreaks,

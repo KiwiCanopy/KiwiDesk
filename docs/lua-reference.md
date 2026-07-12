@@ -925,12 +925,16 @@ stays spatial), following the
 `stack.promote`/`stack.demote` precedent for layout-specific
 verbs. Never wraps; refused when the space is not in
 track mode, no tiled window is focused, or no track lies that
-way (a single track has no neighbor). Also refused while a
-fixed track limit (`track.set_count` with automatic tracks
-off) is folding extra tracks into the last one: the merged
-view is read-time only — its slices have no marker identity to
-exchange — so raise the limit or re-enable automatic tracks
-first.
+way (a single track has no neighbor). Also refused when the
+swap would touch the **overflow track** while it is folding two
+or more tracks together — the merged slices are a read-time
+view with no marker identity to exchange, so the swap would
+scramble which windows land in which track. This covers the
+fold under a fixed limit (`track.set_count` with automatic
+tracks off) *and* the geometric fold on a display too narrow to
+fit the tracks at `min_window_size`. Swapping two normal tracks
+is unaffected — only a swap into the folded slot is refused, so
+raise the limit or widen the display to reorder the overflow.
 
 **Example:**
 
