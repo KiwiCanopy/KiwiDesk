@@ -30,8 +30,12 @@ struct SettingsCodingTests {
                 "animations", "app_bar", "drag", "gap", "layout",
                 "min_window_size", "mouse_resize",
                 "new_window_placement_override", "resize", "space",
+                "swap_skips_cascade",
             ]
         )
+        // `set_swap_skips_cascade` → top-level `swap_skips_cascade`
+        // (#172), on by default.
+        #expect(root["swap_skips_cascade"] as? Bool == true)
         // `set_space_icon` → `space.icon[space_id]` (#68).
         let space = try object(root["space"])
         let icons = try object(space["icon"])
@@ -151,6 +155,7 @@ struct SettingsCodingTests {
         settings.track.newWindow = .focusedTrack
         settings.track.wrapFocus = true
         settings.minWindowSize = 200
+        settings.swapSkipsCascade = false
         settings.resizeStep = 75
         settings.dragGhost.enabled = false
         settings.dragDropZone.fillColor = "#11223344"

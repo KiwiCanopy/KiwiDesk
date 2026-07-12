@@ -255,6 +255,28 @@ binding fires.
 KiwiDesk.set_resize_step(75)
 ```
 
+### set_swap_skips_cascade
+
+**Expects:** `true` or `false` (default `true`).
+
+**Does:** a power-user toggle for how a directional `swap`
+behaves when the focused window sits in an overflow
+[cascade](#when-windows-run-out-of-space). When `true` (the
+default), the swap skips the other windows piled with it and
+trades with the tiled neighbor *outside* the pile in that
+direction — doing nothing when there is none — instead of
+reordering the cascade. Set `false` to restore the raw
+behavior, where a swap trades with whichever piled window lies
+that way. Global (per profile, all spaces); `focus` is never
+affected. There is no Settings toggle — a pile is a corner
+case, so this lives in config only.
+
+**Example:**
+
+```lua
+KiwiDesk.set_swap_skips_cascade(true)
+```
+
 ### Space Identity
 
 Spaces are identified by **strings or numbers** — `1` and `"1"`

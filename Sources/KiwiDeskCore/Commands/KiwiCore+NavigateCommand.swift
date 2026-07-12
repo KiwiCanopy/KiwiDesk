@@ -85,11 +85,28 @@ extension KiwiCore {
                 else { return nil }
                 return (id, slot)
             }
+        // A swap from inside an overflow cascade must reach the
+        // tiled neighbor outside the pile, not reorder the pile
+        // (#172): drop the focused window's pile-mates from the
+        // candidate set so the geometric search skips past them.
+        // Not for `focus` — only `swap` — and only when enabled.
+        var searchCandidates = candidates
+        if swapping, tiler.settings.swapSkipsCascade {
+            let pile = Navigation.pileMates(
+                of: focused,
+                among: candidates + [(focused, frame)]
+            )
+            if !pile.isEmpty {
+                searchCandidates = candidates.filter {
+                    !pile.contains($0.0)
+                }
+            }
+        }
         guard
             let target = Navigation.neighbor(
                 from: frame,
                 in: direction,
-                candidates: candidates
+                candidates: searchCandidates
             )
         else {
             return .fail("no window \(raw) of focus")

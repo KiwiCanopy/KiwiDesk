@@ -28,6 +28,10 @@ public enum APIReference {
             ("set_gap_global", "set_gap_global"),
             ("set_gap_override", "set_gap_override"),
             ("set_min_window_size", "set_min_window_size"),
+            (
+                "set_swap_skips_cascade",
+                "set_swap_skips_cascade"
+            ),
             ("set_resize_step", "set_resize_step"),
             ("set_fallback_space", "set_fallback_space"),
             ("set_space_icon", "set_space_icon"),
