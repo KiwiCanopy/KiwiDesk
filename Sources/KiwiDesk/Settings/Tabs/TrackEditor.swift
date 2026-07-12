@@ -63,28 +63,6 @@ struct TrackEditor: View {
                     ),
                 ]
             )
-            SegmentedPicker(
-                L("layout_params.overflow", "Overflow"),
-                selection: $model.config.settings.track
-                    .overflowStyle,
-                options: [
-                    (
-                        L(
-                            "layout_params.cascade_overflow",
-                            "Cascade overflow"
-                        ),
-                        StackParams.OverflowStyle
-                            .cascadeOverflow
-                    ),
-                    (
-                        L(
-                            "layout_params.cascade_all",
-                            "Cascade all"
-                        ),
-                        .cascadeAll
-                    ),
-                ]
-            )
             Divider()
             // Bare behavior toggle in its own slot — the #168
             // placement mirrored from the Scrolling section.

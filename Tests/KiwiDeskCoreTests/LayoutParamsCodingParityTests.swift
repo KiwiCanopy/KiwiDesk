@@ -123,7 +123,6 @@ struct LayoutParamsCodingParityTests {
         params.axis = .horizontal
         params.autoTracks = false
         params.count = 4
-        params.overflowStyle = .cascadeAll
         params.newWindow = .focusedTrack
         params.wrapFocus = true
         var over = TrackOverride()

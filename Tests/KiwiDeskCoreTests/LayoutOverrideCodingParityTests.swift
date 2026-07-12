@@ -94,7 +94,6 @@ struct LayoutOverrideCodingParityTests {
         over.axis = .horizontal
         over.autoTracks = false
         over.count = 3
-        over.overflowStyle = .cascadeAll
         return over
     }
 

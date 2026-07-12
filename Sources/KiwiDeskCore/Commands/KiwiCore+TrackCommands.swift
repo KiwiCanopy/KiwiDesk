@@ -40,13 +40,6 @@ extension KiwiCore {
                 return .fail("expected a boolean")
             }
             tiler.settings.track.autoTracks = on
-        case "track.set_overflow_style":
-            guard
-                let style = Self.parseOverflowStyle(
-                    args.first?.stringValue
-                )
-            else { return Self.overflowStyleError }
-            tiler.settings.track.overflowStyle = style
         case "track.set_new_window":
             guard let raw = args.first?.stringValue,
                 let rule = TrackParams.NewWindowTrack(
@@ -122,13 +115,6 @@ extension KiwiCore {
                 return .fail("expected a boolean")
             }
             over.autoTracks = on
-        case "overflow_style":
-            guard
-                let style = Self.parseOverflowStyle(
-                    rest.first?.stringValue
-                )
-            else { return Self.overflowStyleError }
-            over.overflowStyle = style
         default:
             return .fail(
                 "unknown command: track.set_\(field)_override"

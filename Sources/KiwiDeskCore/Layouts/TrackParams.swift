@@ -44,15 +44,6 @@ public struct TrackParams: Sendable, Equatable, Codable {
     /// `autoTracks` is on. The live partition is session state
     /// (`Space.trackBreaks`), like `stackWeights`.
     public var count: Int = 2
-    /// What happens when the tracks (across the axis) or a
-    /// track's windows (along it) can't all hold
-    /// `min_window_size`. Reuses the stack's vocabulary
-    /// verbatim (#128): `cascade_overflow` (default) keeps the
-    /// fitting prefix tiled and cascades only the remainder;
-    /// `cascade_all` cascades the whole space. Applies to both
-    /// axes.
-    public var overflowStyle: StackParams.OverflowStyle =
-        .cascadeOverflow
     public var newWindow: NewWindowTrack = .ownTrack
     /// Whether stepping `focus` past an end wraps to the far
     /// end (#168 twin): along the axis it wraps within the
@@ -81,7 +72,6 @@ public struct TrackParams: Sendable, Equatable, Codable {
         case axis
         case autoTracks = "auto_tracks"
         case count
-        case overflowStyle = "overflow_style"
         case newWindow = "new_window"
         case wrapFocus = "wrap_focus"
         case override
@@ -108,11 +98,6 @@ public struct TrackParams: Sendable, Equatable, Codable {
                 Int.self,
                 forKey: .count
             ) ?? 2
-        overflowStyle =
-            try container.decodeIfPresent(
-                StackParams.OverflowStyle.self,
-                forKey: .overflowStyle
-            ) ?? .cascadeOverflow
         newWindow =
             try container.decodeIfPresent(
                 NewWindowTrack.self,
@@ -137,10 +122,6 @@ public struct TrackParams: Sendable, Equatable, Codable {
         try container.encode(axis, forKey: .axis)
         try container.encode(autoTracks, forKey: .autoTracks)
         try container.encode(count, forKey: .count)
-        try container.encode(
-            overflowStyle,
-            forKey: .overflowStyle
-        )
         try container.encode(newWindow, forKey: .newWindow)
         try container.encode(wrapFocus, forKey: .wrapFocus)
         if !override.isEmpty {

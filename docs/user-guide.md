@@ -264,10 +264,7 @@ Expand each layout type to adjust its defaults:
   rows), **Automatic tracks** (on by default — tracks open and
   collapse as windows come and go; turn it off to pin a fixed
   **Track limit**, which greys out while automatic is on),
-  overflow style (when too many tracks or
-  windows to hold the minimum size: `cascade_overflow` keeps the
-  fitting ones tiled and cascades only the rest — the same
-  choice as the stack layout — or `cascade_all`), where a new
+  where a new
   window lands (opens its own track next to the focused one, or
   joins the focused track), and **Wrap focus** — the same opt-in
   toggle as Scrolling's,

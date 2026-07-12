@@ -91,10 +91,6 @@ struct SettingsCodingTests {
         // (#178), on by default; `count` is the remembered cap.
         #expect(track["auto_tracks"] as? Bool == true)
         #expect(track["count"] as? Int == 2)
-        #expect(
-            track["overflow_style"] as? String
-                == "cascade_overflow"
-        )
         #expect(track["new_window"] as? String == "own_track")
         #expect(track["wrap_focus"] as? Bool == false)
         // SpaceID-keyed maps encode as objects, not arrays.
@@ -160,7 +156,6 @@ struct SettingsCodingTests {
         settings.track.axis = .horizontal
         settings.track.autoTracks = false
         settings.track.count = 3
-        settings.track.overflowStyle = .cascadeAll
         settings.track.newWindow = .focusedTrack
         settings.track.wrapFocus = true
         settings.minWindowSize = 200

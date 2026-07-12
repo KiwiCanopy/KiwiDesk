@@ -47,19 +47,18 @@ public struct TrackLayout: LayoutSystem {
         let total = weights.reduce(0, +)
         // The min-size cap shares the stack's authority (#44/
         // #67): when the smallest track would drop below
-        // min_window_size, the tracks overflow — how they
-        // overflow follows `overflow_style` (below), like a
-        // stack column.
+        // min_window_size, the tracks overflow (below).
         let limit = StackLayout.maxColumnTotal(
             smallestWeight: weights.min() ?? 1,
             height: Double(span),
             minSize: Double(context.minWindowSize)
         )
         // One region per track: proportional when everything
-        // fits; otherwise `cascade_overflow` tiles the fitting
+        // fits; otherwise cascade-overflow tiles the fitting
         // prefix and cascades the rest (the axis-general stack
-        // rule), and `cascade_all` (or a fully-degenerate span)
-        // cascades the whole space.
+        // rule, hard-coded — #180 dropped the knob). A
+        // fully-degenerate span still cascades the whole space
+        // (physics fallback, not a setting).
         let regions: [CGRect]
         if span > 0, total <= limit {
             regions = proportionalRegions(
@@ -71,15 +70,13 @@ public struct TrackLayout: LayoutSystem {
                 vertical: vertical,
                 usable: usable
             )
-        } else if context.track.overflowStyle == .cascadeOverflow,
-            let over = OverlapStack.overflowFrames(
-                count: counts.count,
-                in: usable,
-                vertical: !vertical,
-                minSize: context.minWindowSize,
-                gap: gap
-            )
-        {
+        } else if let over = OverlapStack.overflowFrames(
+            count: counts.count,
+            in: usable,
+            vertical: !vertical,
+            minSize: context.minWindowSize,
+            gap: gap
+        ) {
             regions = over
         } else {
             return OverlapStack.frames(
@@ -145,8 +142,8 @@ public struct TrackLayout: LayoutSystem {
     /// 1.0). Vertical tracks stack their windows top to
     /// bottom, horizontal tracks lay them side by side. When
     /// the smallest share stops fitting `minWindowSize`, the
-    /// track overflows per `overflow_style` — the same
-    /// axis-general rule as the cross-axis tracks.
+    /// track cascade-overflows — the same axis-general rule as
+    /// the cross-axis tracks (hard-coded, #180).
     private func trackFrames(
         _ windows: ArraySlice<WindowID>,
         in region: CGRect,
@@ -173,15 +170,13 @@ public struct TrackLayout: LayoutSystem {
         )
         guard available > 0, total <= limit else {
             let ids = Array(windows)
-            if context.track.overflowStyle == .cascadeOverflow,
-                let rects = OverlapStack.overflowFrames(
-                    count: ids.count,
-                    in: region,
-                    vertical: vertical,
-                    minSize: context.minWindowSize,
-                    gap: gap
-                )
-            {
+            if let rects = OverlapStack.overflowFrames(
+                count: ids.count,
+                in: region,
+                vertical: vertical,
+                minSize: context.minWindowSize,
+                gap: gap
+            ) {
                 return Dictionary(
                     uniqueKeysWithValues: zip(ids, rects)
                 )

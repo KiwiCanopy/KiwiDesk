@@ -167,11 +167,9 @@ public enum APIReference {
         ],
         "track": [
             "set_axis", "set_count", "set_auto_tracks",
-            "set_overflow_style",
             "set_new_window", "set_wrap_focus",
             "set_axis_override", "set_count_override",
             "set_auto_tracks_override",
-            "set_overflow_style_override",
         ],
         "drag": [
             "set_ghost_enabled", "set_ghost_border",
