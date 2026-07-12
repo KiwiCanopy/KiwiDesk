@@ -53,7 +53,7 @@ KiwiDesk service restart
 | | `make_tiled` | — |
 | | `make_auto` | — |
 | | `resize` | `x\|y`, delta (px) |
-| | `move_to_track` | direction across the tracks (track spaces) |
+| | `move_to_track` | `prev\|next` — move window to the adjacent track (track spaces, advanced track) |
 | Launch | `pull_or_spawn` | app name |
 | | `spawn_new` | app name |
 | System | `set_mode` | [space,] mode |
@@ -125,7 +125,7 @@ KiwiDesk service restart
 | | `grid.set_new_window_placement` | placement¹ (default `last`) |
 | Monocle | `monocle.set_orientation` | `horizontal\|vertical` |
 | | `monocle.set_wrap_focus` | true\|false (default `true` — monocle is a carousel) |
-| Track | `track.swap` | direction across the tracks — swaps the focused window's whole track with the adjacent one (advanced track) |
+| Track | `track.swap` | `prev\|next` — swap the focused window's whole track with the adjacent one (advanced track) |
 | | `track.set_axis` | `vertical\|horizontal` (default vertical = columns) |
 | | `track.set_count` | n (0 = automatic; n>0 pins a cap and turns automatic off) |
 | | `track.set_auto_tracks` | true\|false (default `true`) |

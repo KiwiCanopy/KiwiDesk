@@ -117,7 +117,7 @@ struct TrackAdvancedGateTests {
         core.state.workspaces.focus(WindowID(1), in: space)
         let off = core.execute(
             "move_to_track",
-            args: [.string("right")]
+            args: [.string("next")]
         )
         #expect(!off.isSuccess)
         #expect(off.error == KiwiCore.trackAdvancedHint)
@@ -133,7 +133,7 @@ struct TrackAdvancedGateTests {
         #expect(
             core.execute(
                 "move_to_track",
-                args: [.string("right")]
+                args: [.string("next")]
             ).isSuccess
         )
     }
@@ -176,7 +176,7 @@ struct TrackAdvancedGateTests {
         #expect(
             core.execute(
                 "move_to_track",
-                args: [.string("right")]
+                args: [.string("next")]
             ).isSuccess
         )
         let breaks = core.state.workspaces[space]?.trackBreaks
@@ -231,14 +231,14 @@ struct TrackAdvancedGateTests {
     func gatedBindingShape() {
         #expect(
             TrackAdvancedBindings.isGated(
-                "KiwiDesk.move_to_track(\"left\")"
+                "KiwiDesk.move_to_track(\"prev\")"
             )
         )
         // A custom row merely containing the call registers
         // normally — its other actions must keep firing.
         #expect(
             !TrackAdvancedBindings.isGated(
-                "KiwiDesk.move_to_track(\"left\") "
+                "KiwiDesk.move_to_track(\"prev\") "
                     + "KiwiDesk.focus(\"left\")"
             )
         )

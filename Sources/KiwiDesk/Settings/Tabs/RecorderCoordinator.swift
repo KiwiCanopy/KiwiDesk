@@ -90,39 +90,20 @@ enum RecorderPreflight {
         bindings: Binding<[KeyBinding]>,
         commit: @escaping (String) -> Void
     ) -> RecorderRejection? {
-        let holders = bindings.wrappedValue.filter {
-            !$0.combo.isEmpty && $0.combo == combo && !isOwn($0)
-        }
-        // A visible holder still hard-blocks with the Steal
-        // prompt; inert holders (#181) only lose the combo when
-        // no visible holder stands in the way, so a rejected
-        // recording never mutates them as a side effect.
+        // A PURE query: it runs from chord previews (every
+        // in-flight chord change) and from render passes, so
+        // it must never mutate the bindings (#181 review H2 —
+        // a preview keystroke deleted an inert row, and a
+        // body evaluation mutated state mid-update). A combo
+        // held only by inert gated rows reads as free here;
+        // the commit writers perform the actual silent steal
+        // via `stealInert` once the chord locks in.
         guard
-            let holder = holders.first(where: {
-                !silentSteal($0)
+            let holder = bindings.wrappedValue.first(where: {
+                !$0.combo.isEmpty && $0.combo == combo
+                    && !isOwn($0) && !silentSteal($0)
             })
-        else {
-            guard !holders.isEmpty else { return nil }
-            // Every holder is an inert gated row: steal
-            // silently — the prompt would point at a row the
-            // GUI no longer renders. Catalog rows unbind by
-            // removal, like the prompted Steal below.
-            var rows = bindings.wrappedValue
-            for held in holders {
-                guard
-                    let index = rows.firstIndex(where: {
-                        $0.id == held.id
-                    })
-                else { continue }
-                if held.kind == .navigation {
-                    rows.remove(at: index)
-                } else {
-                    rows[index].combo = ""
-                }
-            }
-            bindings.wrappedValue = rows
-            return nil
-        }
+        else { return nil }
         let label =
             holder.label.isEmpty ? holder.lua : holder.label
         return RecorderRejection(
@@ -148,5 +129,29 @@ enum RecorderPreflight {
                 commit(combo)
             }
         )
+    }
+
+    /// Silently unbinds every inert gated holder of `combo`
+    /// (#181): catalog rows unbind by removal (like the
+    /// prompted Steal), dynamic rows keep the row and only
+    /// clear the combo. Called from the commit writers ONLY —
+    /// the preflight query above stays pure; the Steal prompt
+    /// would point at a row the GUI no longer renders, hence
+    /// no prompt.
+    static func stealInert(
+        combo: String,
+        stealable: (KeyBinding) -> Bool,
+        bindings: inout [KeyBinding]
+    ) {
+        for index in bindings.indices.reversed()
+        where bindings[index].combo == combo
+            && stealable(bindings[index])
+        {
+            if bindings[index].kind == .navigation {
+                bindings.remove(at: index)
+            } else {
+                bindings[index].combo = ""
+            }
+        }
     }
 }

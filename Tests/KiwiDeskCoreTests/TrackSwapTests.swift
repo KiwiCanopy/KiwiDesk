@@ -51,7 +51,7 @@ private func merge(
 ) {
     core.state.workspaces.focus(WindowID(id), in: space)
     #expect(
-        core.execute("move_to_track", args: [.string("left")])
+        core.execute("move_to_track", args: [.string("prev")])
             .isSuccess
     )
 }
@@ -64,11 +64,11 @@ struct TrackSwapTests {
     func swapsSingles() {
         let core = makeCore()
         let space = makeTrackSpace(core, windows: 3, focus: 2)
-        // [1] [2] [3] → swap right → [1] [3] [2].
+        // [1] [2] [3] → swap next → [1] [3] [2].
         #expect(
             core.execute(
                 "track.swap",
-                args: [.string("right")]
+                args: [.string("next")]
             ).isSuccess
         )
         let after = core.state.workspaces[space]!
@@ -92,7 +92,7 @@ struct TrackSwapTests {
         #expect(
             core.execute(
                 "track.swap",
-                args: [.string("left")]
+                args: [.string("prev")]
             ).isSuccess
         )
         let after = core.state.workspaces[space]!
@@ -122,7 +122,7 @@ struct TrackSwapTests {
         #expect(
             core.execute(
                 "track.swap",
-                args: [.string("right")]
+                args: [.string("next")]
             ).isSuccess
         )
         let after = core.state.workspaces[space]!
@@ -143,7 +143,7 @@ struct TrackSwapTests {
         #expect(
             core.execute(
                 "track.swap",
-                args: [.string("right")]
+                args: [.string("next")]
             ).isSuccess
         )
         let after = core.state.workspaces[space]!
@@ -155,6 +155,41 @@ struct TrackSwapTests {
         )
     }
 
+    @Test("Rejected while the cap merge folds tracks")
+    func capMergeRejects() {
+        let core = makeCore()
+        _ = makeTrackSpace(core, windows: 3, focus: 1)
+        // Three marker tracks folded to 2: the merged slices
+        // have no marker identity — a swap would scramble the
+        // composition (review H1), so it rejects.
+        core.execute("track.set_count", args: [.number(2)])
+        let response = core.execute(
+            "track.swap",
+            args: [.string("next")]
+        )
+        #expect(!response.isSuccess)
+        #expect(
+            response.error?.contains("track limit") == true
+        )
+    }
+
+    @Test("A pinned cap that folds nothing still swaps")
+    func capWithoutMergeSwaps() {
+        let core = makeCore()
+        let space = makeTrackSpace(core, windows: 2, focus: 1)
+        core.execute("track.set_count", args: [.number(2)])
+        #expect(
+            core.execute(
+                "track.swap",
+                args: [.string("next")]
+            ).isSuccess
+        )
+        #expect(
+            core.state.workspaces[space]?.windows
+                == [WindowID(2), WindowID(1)]
+        )
+    }
+
     @Test("Never wraps at the edges")
     func neverWraps() {
         let core = makeCore()
@@ -162,10 +197,10 @@ struct TrackSwapTests {
         _ = space
         let response = core.execute(
             "track.swap",
-            args: [.string("left")]
+            args: [.string("prev")]
         )
         #expect(!response.isSuccess)
-        #expect(response.error == "no track left of focus")
+        #expect(response.error == "no prev track of focus")
     }
 
     @Test("A single track has no neighbor")
@@ -176,13 +211,13 @@ struct TrackSwapTests {
         #expect(
             !core.execute(
                 "track.swap",
-                args: [.string("right")]
+                args: [.string("next")]
             ).isSuccess
         )
     }
 
-    @Test("Along-axis directions name the valid pair")
-    func alongAxisHint() {
+    @Test("Compass directions are rejected (prev/next only)")
+    func directionsRejected() {
         let core = makeCore()
         _ = makeTrackSpace(core, windows: 2, focus: 1)
         let response = core.execute(
@@ -190,11 +225,7 @@ struct TrackSwapTests {
             args: [.string("down")]
         )
         #expect(!response.isSuccess)
-        #expect(
-            response.error
-                == "track.swap swaps across the tracks — "
-                + "expected left|right"
-        )
+        #expect(response.error == "expected prev|next")
     }
 
     @Test("Gated: rejects with the pointer while off")
@@ -208,7 +239,7 @@ struct TrackSwapTests {
         )
         let response = core.execute(
             "track.swap",
-            args: [.string("right")]
+            args: [.string("next")]
         )
         #expect(!response.isSuccess)
         #expect(response.error == KiwiCore.trackAdvancedHint)
@@ -231,7 +262,7 @@ struct TrackSwapTests {
         // Default bsp space: refused.
         let response = core.execute(
             "track.swap",
-            args: [.string("right")]
+            args: [.string("next")]
         )
         #expect(
             response.error == "track.swap needs a track space"

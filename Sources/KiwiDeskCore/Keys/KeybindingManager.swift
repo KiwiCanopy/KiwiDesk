@@ -33,8 +33,11 @@ public final class KeybindingManager {
     /// executing inside a fire are keyboard-interactive, so
     /// failure cues (the unsupported-resize beep) key off this —
     /// the same command from CLI/IPC or init.lua stays silent.
-    /// Fires are synchronous on the main thread, so a plain
-    /// flag suffices.
+    /// Deliberately synchronous-only: work a hotkey body defers
+    /// (an `ExecLauncher` completion, a `Task`) runs with the
+    /// flag off and never cues. Save/restore (not set/clear) in
+    /// `fire`, so a callback that pumps a nested run loop and
+    /// delivers a second fire can't clear the outer fire's flag.
     public private(set) var isFiring = false
     private var modes: [String: [KeyCombo: Int32]] = [:]
     /// Menu bar indicator per mode (SF Symbol name or emoji),
@@ -180,8 +183,9 @@ public final class KeybindingManager {
 
     private func fire(ref: Int32, combo: KeyCombo) {
         guard let lua else { return }
+        let wasFiring = isFiring
         isFiring = true
-        defer { isFiring = false }
+        defer { isFiring = wasFiring }
         if case .failure(let error) = lua.call(ref: ref) {
             onLog("keybinding disabled: \(error)")
             // Disable the faulty callback (sandbox rules).

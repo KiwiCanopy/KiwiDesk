@@ -176,11 +176,11 @@ struct MoveToTrackTests {
             windows: 3,
             focus: WindowID(1)
         )
-        // Tracks [1] [2] [3] → move 1 right: [2] holds 1 too.
+        // Tracks [1] [2] [3] → move 1 next: [2] holds 1 too.
         #expect(
             core.execute(
                 "move_to_track",
-                args: [.string("right")]
+                args: [.string("next")]
             ).isSuccess
         )
         let after = core.state.workspaces[space]!
@@ -205,11 +205,11 @@ struct MoveToTrackTests {
             focus: WindowID(2)
         )
         setHeads(core, space: space, heads: [WindowID(3)])
-        // Tracks [1, 2] [3] → move 2 left: new first track.
+        // Tracks [1, 2] [3] → move 2 prev: new first track.
         #expect(
             core.execute(
                 "move_to_track",
-                args: [.string("left")]
+                args: [.string("prev")]
             ).isSuccess
         )
         let after = core.state.workspaces[space]!
@@ -235,7 +235,7 @@ struct MoveToTrackTests {
         #expect(
             !core.execute(
                 "move_to_track",
-                args: [.string("right")]
+                args: [.string("next")]
             ).isSuccess
         )
     }
@@ -254,20 +254,20 @@ struct MoveToTrackTests {
         #expect(
             !core.execute(
                 "move_to_track",
-                args: [.string("right")]
+                args: [.string("next")]
             ).isSuccess
         )
     }
 
-    @Test("Along-axis directions are rejected")
-    func alongRejected() {
+    @Test("Compass directions are rejected (prev/next only)")
+    func directionsRejected() {
         let core = makeCore()
         _ = makeTrackSpace(core, windows: 2, focus: WindowID(1))
-        #expect(
-            !core.execute(
-                "move_to_track",
-                args: [.string("down")]
-            ).isSuccess
+        let response = core.execute(
+            "move_to_track",
+            args: [.string("down")]
         )
+        #expect(!response.isSuccess)
+        #expect(response.error == "expected prev|next")
     }
 }

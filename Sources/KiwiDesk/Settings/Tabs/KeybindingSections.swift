@@ -85,9 +85,8 @@ struct MoveWindowsSection: View {
                 .foregroundStyle(.secondary)
                 .padding(.top, 4)
                 ForEach(
-                    KeybindingCatalog.moveToTrackDirections
-                        + KeybindingCatalog
-                        .trackSwapDirections
+                    KeybindingCatalog.moveToTrackRows
+                        + KeybindingCatalog.trackSwapRows
                 ) { command in
                     NavRow(
                         model: model,
@@ -285,6 +284,14 @@ struct NavRow: View {
     }
 
     private func record(_ combo: String) {
+        // Commit-time silent steal of inert gated holders
+        // (#181): the preflight query is pure, so the steal
+        // happens here, once the chord actually locks in.
+        RecorderPreflight.stealInert(
+            combo: combo,
+            stealable: model.isSilentlyStealable,
+            bindings: &bindings
+        )
         if let index {
             bindings[index].combo = combo
         } else {

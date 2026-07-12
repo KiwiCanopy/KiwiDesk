@@ -274,12 +274,17 @@ Expand each layout type to adjust its defaults:
   on) and where a new window lands (opens its own track next
   to the focused one, or joins the focused track). It also
   enables the track shortcuts (Shortcuts ▸ Move Windows):
-  Move-to-track rows that move a window across tracks or open
-  a new one at the edge, and Swap-with-track rows that swap
-  the focused window's whole track with its neighbor; while
-  off those shortcuts are hidden and any
-  combos they held are silently free for reuse — turning the
-  gate back on restores every binding not reused since.
+  "Move window to previous/next track" rows that move a window
+  across tracks or open a new one at the edge, and "Swap with
+  previous/next track" rows that swap the focused window's
+  whole track with its neighbor. Tracks form a sequence, so
+  these say previous/next instead of a compass direction —
+  previous is the column to the left (or the row above), next
+  the column to the right (or the row below) — and a binding
+  keeps working when the axis flips. While the gate is off
+  those shortcuts are hidden and any combos they held are
+  silently free for reuse — turning it back on restores every
+  binding not reused since.
   Turning it off keeps multi-window tracks you already built.
   Track sizes and in-track shares are resize state,
   session-only like the stack's weights.

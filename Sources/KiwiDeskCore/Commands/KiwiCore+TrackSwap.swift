@@ -9,10 +9,12 @@ import Foundation
 /// for file size.
 extension KiwiCore {
     func trackSwap(_ args: [JSONValue]) -> CommandResponse {
+        // prev/next like `move_to_track` — the sequence
+        // vocabulary; see `trackSequenceDelta`.
         guard let raw = args.first?.stringValue,
-            let direction = Direction(rawValue: raw)
+            let delta = Self.trackSequenceDelta(raw)
         else {
-            return .fail("expected left|right|up|down")
+            return .fail("expected prev|next")
         }
         guard let space = activeSpace else {
             return .fail("no active space")
@@ -33,21 +35,6 @@ extension KiwiCore {
             return .fail(Self.trackAdvancedHint)
         }
         let params = effectiveTrack(for: space.id)
-        let vertical = params.axis == .vertical
-        let delta: Int
-        switch direction {
-        case .left where vertical, .up where !vertical:
-            delta = -1
-        case .right where vertical, .down where !vertical:
-            delta = 1
-        default:
-            return .fail(
-                "track.swap swaps across the tracks — "
-                    + (vertical
-                        ? "expected left|right"
-                        : "expected up|down")
-            )
-        }
         // Snapshot float verdicts first: the withSpace closure
         // must not touch `state` while it is being mutated.
         let floating = Set(
@@ -55,6 +42,30 @@ extension KiwiCore {
                 state.windows[$0]?.isFloating == true
             }
         )
+        // The cap merge is a read-time VIEW (#178): while it is
+        // folding extra tracks into the last slot, the merged
+        // slices have no marker identity — exchanging them
+        // reorders the array but the re-derived merge produces
+        // a different composition (windows leak across tracks;
+        // review H1). Rewriting markers to pin the view would
+        // destroy the grandfathered partition, so reject.
+        let tiled = space.windows.filter {
+            !floating.contains($0)
+        }
+        let unmerged = TrackLayout.counts(
+            of: tiled,
+            breaks: space.trackBreaks,
+            cap: 0
+        )
+        if params.trackCap > 0,
+            unmerged.count > params.trackCap
+        {
+            return .fail(
+                "track.swap is unavailable while the track "
+                    + "limit folds extra tracks — raise the "
+                    + "limit or turn automatic tracks on"
+            )
+        }
         var swapped = false
         state.workspaces.withSpace(space.id) {
             swapped = $0.swapTracks(
@@ -65,11 +76,18 @@ extension KiwiCore {
             )
         }
         guard swapped else {
-            return .fail("no track \(raw) of focus")
+            return .fail("no \(raw) track of focus")
         }
-        // The reorder's retile is the dispatcher's trailing
-        // `retile(force:)` (`layoutCommand`), like
-        // promote/demote.
+        // Self-retile with the window-swap animation toggle,
+        // exactly like `move_to_track` — the two sibling track
+        // reorder verbs must share one animation policy
+        // (review: riding layoutCommand's trailing forced
+        // retile put this one under `on_relayout` instead).
+        // Dispatched directly from `execute`, so no dispatcher
+        // retile follows.
+        retile(
+            animated: tiler.settings.animations.onWindowSwap
+        )
         return .ok()
     }
 }

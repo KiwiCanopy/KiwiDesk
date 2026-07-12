@@ -96,15 +96,33 @@ struct AdvancedLuaSection: View {
         into binding: Binding<KeyBinding>
     ) {
         binding.wrappedValue.combo = combo
-        model.noteRecordedCombo(
-            binding.wrappedValue,
-            in: bindings
+        let id = binding.wrappedValue.id
+        // After the element write (a structural mutation first
+        // would race the element binding — the #68 M2 hazard);
+        // commit-time steal of inert gated holders (#181).
+        RecorderPreflight.stealInert(
+            combo: combo,
+            stealable: model.isSilentlyStealable,
+            bindings: &bindings
         )
+        if let index = bindings.firstIndex(
+            where: { $0.id == id }
+        ) {
+            model.noteRecordedCombo(
+                bindings[index],
+                in: bindings
+            )
+        }
     }
 
     /// Looks the row up by id at write time — safe after any
     /// structural mutation of the bindings array.
     private func record(_ combo: String, id: UUID) {
+        RecorderPreflight.stealInert(
+            combo: combo,
+            stealable: model.isSilentlyStealable,
+            bindings: &bindings
+        )
         guard
             let index = bindings.firstIndex(where: {
                 $0.id == id

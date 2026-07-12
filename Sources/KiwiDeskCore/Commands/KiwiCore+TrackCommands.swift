@@ -9,8 +9,6 @@ extension KiwiCore {
         _ args: [JSONValue]
     ) -> CommandResponse {
         switch command {
-        case "track.swap":
-            return trackSwap(args)
         case "track.set_axis":
             guard
                 let axis = Self.parseTrackAxis(

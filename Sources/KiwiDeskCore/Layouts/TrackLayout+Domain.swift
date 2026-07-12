@@ -267,11 +267,16 @@ extension Space {
         guard ranges.indices.contains(target) else {
             return false
         }
-        trackBreaks.insert(tiled[0])
-        // Adjacent slices exchange; everything around them
-        // keeps its order.
         let lead = ranges[min(track, target)]
         let trail = ranges[max(track, target)]
+        // Materialize the implicit index-0 head only when the
+        // exchange moves it: an untouched track 0 keeps its
+        // authored marker set (review m1).
+        if lead.lowerBound == 0 {
+            trackBreaks.insert(tiled[0])
+        }
+        // Adjacent slices exchange; everything around them
+        // keeps its order.
         var reordered = Array(tiled[..<lead.lowerBound])
         reordered += tiled[trail]
         reordered += tiled[lead]

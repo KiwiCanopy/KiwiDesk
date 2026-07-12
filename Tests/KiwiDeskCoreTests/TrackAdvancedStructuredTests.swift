@@ -43,9 +43,9 @@ struct TrackAdvancedStructuredTests {
                     KeyBinding(
                         combo: "alt+m",
                         lua:
-                            "KiwiDesk.move_to_track(\"left\")",
+                            "KiwiDesk.move_to_track(\"prev\")",
                         kind: .navigation,
-                        label: "Move to the track to the left"
+                        label: "Move window to previous track"
                     ),
                     KeyBinding(
                         combo: "alt+f",

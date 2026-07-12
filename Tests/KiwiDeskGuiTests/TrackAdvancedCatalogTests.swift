@@ -15,8 +15,8 @@ struct TrackAdvancedCatalogTests {
     @Test("Gated set matches the catalog rows byte-for-byte")
     func gatedSetMatchesCatalog() {
         let catalog =
-            KeybindingCatalog.moveToTrackDirections
-            + KeybindingCatalog.trackSwapDirections
+            KeybindingCatalog.moveToTrackRows
+            + KeybindingCatalog.trackSwapRows
         #expect(
             Set(catalog.map(\.lua))
                 == TrackAdvancedBindings.gatedLua
@@ -34,7 +34,7 @@ struct TrackAdvancedCatalogTests {
                     KeyBinding(
                         combo: "alt+m",
                         lua:
-                            "KiwiDesk.move_to_track(\"left\")",
+                            "KiwiDesk.move_to_track(\"prev\")",
                         kind: .custom,
                         label: ""
                     )
@@ -44,6 +44,6 @@ struct TrackAdvancedCatalogTests {
         KeybindingImportClassifier.classify(&config)
         let row = config.modes[0].bindings[0]
         #expect(row.kind == .navigation)
-        #expect(row.label == "Move to the track to the left")
+        #expect(row.label == "Move window to previous track")
     }
 }

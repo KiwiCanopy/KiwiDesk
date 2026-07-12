@@ -62,7 +62,19 @@ extension KiwiCore {
         }
         guard state.trackAdvanced != on else { return .ok() }
         state.trackAdvanced = on
+        // The re-registration resets the active key mode to
+        // default (profile-switch semantics); a settings toggle
+        // must not kick the user out of a mode — least of all
+        // the mode whose hotkey fired this command — so restore
+        // it (review m2). The mode set itself is unchanged
+        // here.
+        let mode = keys.currentMode
         refreshStructuredKeybindings()
+        if keys.currentMode != mode,
+            keys.definedModes.contains(mode)
+        {
+            keys.switchMode(mode)
+        }
         retile(force: true)
         return .ok()
     }
@@ -82,7 +94,7 @@ extension KiwiCore {
 /// strings — pinned by a parity test so neither side drifts.
 public enum TrackAdvancedBindings {
     public static let gatedLua: Set<String> = Set(
-        ["left", "down", "up", "right"].flatMap {
+        ["prev", "next"].flatMap {
             [
                 "KiwiDesk.move_to_track(\"\($0)\")",
                 "track.swap(\"\($0)\")",

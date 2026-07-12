@@ -196,15 +196,23 @@ extension KiwiCore {
         return Navigation.pileMates(of: focused, among: tiled)
     }
 
-    /// `move_to_track(direction)` (#128): moves the focused
-    /// window into the adjacent track across the axis, opening
+    /// `move_to_track("prev"|"next")` (#128): moves the focused
+    /// window into the adjacent track in the sequence, opening
     /// a new edge track past the ends (keyboard parity with
     /// drag & drop and own-track spawning). Never wraps.
     func moveToTrack(_ args: [JSONValue]) -> CommandResponse {
+        // prev/next, not compass directions (#185 review): the
+        // track verbs operate on the 1D track sequence, so the
+        // sequence vocabulary is the honest one — it kills the
+        // per-axis inert direction pair and survives an axis
+        // flip. prev = lower tiled index (the track to the
+        // LEFT with a vertical axis, ABOVE with a horizontal
+        // one); next = higher (right/below). Focus and swap
+        // stay spatial — see `trackStep`.
         guard let raw = args.first?.stringValue,
-            let direction = Direction(rawValue: raw)
+            let delta = Self.trackSequenceDelta(raw)
         else {
-            return .fail("expected left|right|up|down")
+            return .fail("expected prev|next")
         }
         guard let space = activeSpace else {
             return .fail("no active space")
@@ -225,21 +233,6 @@ extension KiwiCore {
             return .fail(Self.trackAdvancedHint)
         }
         let params = effectiveTrack(for: space.id)
-        let vertical = params.axis == .vertical
-        let delta: Int
-        switch direction {
-        case .left where vertical, .up where !vertical:
-            delta = -1
-        case .right where vertical, .down where !vertical:
-            delta = 1
-        default:
-            return .fail(
-                "move_to_track moves across the tracks — "
-                    + (vertical
-                        ? "expected left|right"
-                        : "expected up|down")
-            )
-        }
         // Snapshot float verdicts first: the withSpace closure
         // must not touch `state` while it is being mutated.
         let floating = Set(
@@ -257,11 +250,23 @@ extension KiwiCore {
             )
         }
         guard moved else {
-            return .fail("no track \(raw) of focus")
+            return .fail("no \(raw) track of focus")
         }
         retile(
             animated: tiler.settings.animations.onWindowSwap
         )
         return .ok()
+    }
+
+    /// The one prev/next parser both track sequence verbs use
+    /// (`move_to_track`, `track.swap`): prev = -1 (lower tiled
+    /// index), next = +1. One spelling only — no `previous`
+    /// alias (one-vocabulary rule).
+    static func trackSequenceDelta(_ raw: String) -> Int? {
+        switch raw {
+        case "prev": return -1
+        case "next": return 1
+        default: return nil
+        }
     }
 }

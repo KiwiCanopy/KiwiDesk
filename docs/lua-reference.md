@@ -138,28 +138,41 @@ KiwiDesk.move_to_space_and_follow(3)
 
 ### move_to_track
 
-**Expects:** a direction across the space's tracks: `"left"` or
-`"right"` with a vertical axis (columns), `"up"` or `"down"`
-with a horizontal one (rows).
+**Expects:** `"prev"` or `"next"` (exactly these — no
+`previous` alias).
 
 **Does:** in a track-layout space, moves the focused window
-into the adjacent track (joining it at its end). Past the first
-or last track it opens a **new** track at that edge — the
-keyboard way to open tracks, matching what `own_track` spawning
-does. Part of **advanced track**: while
+into the adjacent track in the sequence (joining it at its
+end). The track verbs speak **prev/next**, not compass
+directions: tracks form a one-dimensional sequence, and the
+same binding keeps working when the axis flips. What that
+means on screen:
+
+| Axis | `"prev"` | `"next"` |
+|---|---|---|
+| `vertical` (columns, default) | the column to the **left** | the column to the **right** |
+| `horizontal` (rows) | the row **above** | the row **below** |
+
+Formally: prev = the lower array index (toward the sequence
+start), next = the higher. Past the first or last track it
+opens a **new** track at that edge — the keyboard way to open
+tracks, matching what `own_track` spawning does. Part of
+**advanced track**: while
 [`set_track_advanced`](#set_track_advanced) is off (the
 default), it rejects with a pointer to the switch — joining
 tracks builds the multi-window arrangements the gate keeps
 out of default 1D track. Also refused when the space is not in
 track mode, when `track.set_count` already caps the tracks, or
 when the window already forms the edge track alone (nothing
-would change). Never wraps. Along-axis directions report an
-error naming the valid pair.
+would change). Never wraps. Focus and window `swap` keep their
+spatial left/right/up/down vocabulary — only the two track
+sequence verbs (this and [`track.swap`](#trackswap)) use
+prev/next.
 
 **Example:**
 
 ```lua
-KiwiDesk.move_to_track("right")
+KiwiDesk.move_to_track("next")
 ```
 
 ## Layouts & Gaps
@@ -920,28 +933,34 @@ monocle.set_wrap_focus(false)
 
 ### track.swap
 
-**Expects:** a direction across the space's tracks: `"left"` or
-`"right"` with a vertical axis (columns), `"up"` or `"down"`
-with a horizontal one (rows).
+**Expects:** `"prev"` or `"next"` (the
+[`move_to_track`](#move_to_track) sequence vocabulary — see
+its table for what prev/next means per axis: left/right for
+columns, above/below for rows).
 
 **Does:** swaps the focused window's **entire track** — the
 contiguous slice, with its windows, sizes, and in-track shares —
-with the adjacent track. The whole-structure companion to the
-window-level `swap` (which is untouched), following the
+with the adjacent track in the sequence. The whole-structure
+companion to the window-level `swap` (which is untouched and
+stays spatial), following the
 `stack.promote`/`stack.demote` precedent for layout-specific
 verbs. Part of **advanced track**: while
 [`set_track_advanced`](#set_track_advanced) is off it rejects
 with a pointer to the switch (in default 1D track every track
 is one window, so it degenerates to the plain `swap` that
-already exists). Never wraps; along-axis directions report an
-error naming the valid pair; refused when the space is not in
+already exists). Never wraps; refused when the space is not in
 track mode, no tiled window is focused, or no track lies that
-way (a single track has no neighbor).
+way (a single track has no neighbor). Also refused while a
+fixed track limit (`track.set_count` with automatic tracks
+off) is folding extra tracks into the last one: the merged
+view is read-time only — its slices have no marker identity to
+exchange — so raise the limit or re-enable automatic tracks
+first.
 
 **Example:**
 
 ```lua
-track.swap("right")
+track.swap("next")
 ```
 
 ### track.set_axis

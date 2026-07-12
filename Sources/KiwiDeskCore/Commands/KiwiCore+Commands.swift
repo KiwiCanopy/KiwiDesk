@@ -29,6 +29,12 @@ extension KiwiCore {
             return resize(args)
         case "move_to_track":
             return moveToTrack(args)
+        case "track.swap":
+            // An action, not a config setter: dispatched here
+            // (not via layoutCommand's forced-retile trailer)
+            // so it self-retiles under `on_window_swap`, the
+            // same policy as its sibling `move_to_track`.
+            return trackSwap(args)
         case "pull_or_spawn":
             return launch(args, newInstance: false)
         case "spawn_new":
