@@ -215,6 +215,9 @@ Pick a layout mode for each space:
 - **Scrolling** (PaperWM style): columns or rows that scroll.
 - **Monocle**: fullscreen focus, all windows hidden behind one.
 - **Grid**: evenly-sized cells in rows and columns.
+- **Track**: columns (or rows) of windows where every resize has
+  one true target — grow *your* track, or *your* share within it
+  (#128).
 - **Floating**: every window floats freely, no tiling.
 
 Set gaps with sliders (uniform gap, or per-edge: top, bottom, left,
@@ -249,6 +252,17 @@ Expand each layout type to adjust its defaults:
 - **Grid**: type (dynamic or rigid), fill empty space (yes/no),
   split direction (horizontal or vertical), and for rigid mode,
   column and row counts.
+- **Track**: axis (vertical = columns side by side, horizontal =
+  rows), track limit (0 = dynamic — tracks open and collapse as
+  windows come and go), where a new window lands (opens its own
+  track next to the focused one, or joins the focused track),
+  and **Wrap focus** — the same opt-in toggle as Scrolling's,
+  off by default: on, focus wraps within the track along the
+  axis and from the last track to the first across it. Swap
+  never wraps. Track sizes and in-track shares are resize
+  state, session-only like the stack's weights; bind
+  `move_to_track` (Shortcuts ▸ Window Management) to move a
+  window across tracks or open a new one at the edge.
 
 > **A few resize behaviors are accepted limitations, not bugs.**
 > Some tiling quirks — e.g. the inner window of a nested BSP pair
