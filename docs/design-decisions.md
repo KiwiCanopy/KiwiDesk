@@ -88,6 +88,45 @@ tracked, not abandoned:
 All of these are collected in
 [#140](https://github.com/hajiboy95/KiwiDesk/issues/140).
 
+## Layout navigation & overflow models
+
+Two facts about each layout are invisible without reading its
+implementation, yet several cross-layout behaviors turn on them:
+**how it navigates** (a geometric neighbor search over calculated
+slots, or an array-order step along the flat window list) and
+**whether it can produce an overflow pile** (an `OverlapStack`
+cascade it falls back to when windows stop fitting at
+`min_window_size`). This bit the swap-skip-cascade fix (#172),
+which needs a geometric path *and* a separate array-index path —
+and track was nearly mis-classified as "already fine" because its
+array navigation plus new overflow piles (#128) were written down
+nowhere.
+
+There are exactly **two** navigation models, and every layout is
+one of them: **geometric** (a neighbor search over calculated
+slots — BSP, Stack, Grid) or **array-order** (steps the flat
+window array — Scrolling, Monocle, Track). The "how" column below
+names only *how that one layout walks its slots* — which axes it
+steps, cycle vs step, any cross-axis fallback — a detail of the
+same model, **not** a further model. Grep the cited symbol for
+detail:
+
+| Layout | Model | How it walks | Overflow → pile? |
+|---|---|---|---|
+| **BSP** | geometric | `Navigation.neighbor` over slots | yes — an extreme stored ratio cascades the whole space (`BspLayout` → `OverlapStack`) |
+| **Stack** | geometric | `Navigation.neighbor` over slots | yes — a column overflow cascade / `cascade_all` (`StackLayout`) |
+| **Grid** | geometric | `Navigation.neighbor` over slots | yes — a last-cell pile (rigid/dynamic past the cap) or a whole-grid cascade at min-size (`GridLayout`) |
+| **Scrolling** | array-order | steps along the scroll axis (`scrollingStep`), geometric fallback cross-axis | no min-size cascade — the edge pile (#142) is a viewport pin, not an `OverlapStack` fallback |
+| **Monocle** | array-order | cycles along the orientation (`monocleCycle`) | no — every window shares one frame |
+| **Track** | array-order | steps both axes (`trackStep`) | yes — an overflow cascade (#128 `overflow_style`, via `OverlapStack.overflowFrames`) |
+| **Floating** | none | no slots | n/a |
+
+The two models need different handling for anything pile-aware:
+geometric layouts **exclude** the focused window's pile-mates from
+the candidate set, array-order layouts **skip** their array
+indices (#172). Both share one geometric detector,
+`Navigation.pileMates`.
+
 ## Navigation & saving
 
 **Two-group sidebar, topic-named: "Design" vs "System".**
