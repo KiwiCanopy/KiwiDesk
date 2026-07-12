@@ -214,5 +214,9 @@ extension KiwiCore {
         if crossedZones {
             scheduleZOrderRestore()
         }
+        // A drop that reorders an overflowing track scrambles its
+        // pile just like a keyboard track.swap (#193); crossedZones
+        // is stack-only, so the two are mutually exclusive.
+        scheduleTrackZOrderRestoreIfOverflowing()
     }
 }

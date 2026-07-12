@@ -136,6 +136,51 @@ struct ZOrderScheduleTests {
         #expect(!core.pendingZOrderRestore)
     }
 
+    @Test("framesCascade: piled frames true, tiled tracks false")
+    func framesCascadePredicate() {
+        // Side-by-side tracks: inner gaps separate them.
+        #expect(
+            !KiwiCore.framesCascade([
+                WindowID(1): CGRect(x: 0, y: 0, width: 90, height: 200),
+                WindowID(2): CGRect(x: 100, y: 0, width: 90, height: 200),
+            ])
+        )
+        // An overflow cascade: title-bar offset overlaps.
+        #expect(
+            KiwiCore.framesCascade([
+                WindowID(1): CGRect(x: 0, y: 0, width: 200, height: 200),
+                WindowID(2): CGRect(x: 0, y: 40, width: 200, height: 200),
+            ])
+        )
+        // A lone window never cascades.
+        #expect(!KiwiCore.framesCascade([WindowID(1): .zero]))
+    }
+
+    @Test("A track swap in an overflowing track arms a restore")
+    func trackSwapSchedulesRestore() {
+        let core = makeCore()
+        let space = makeSpace(core, windows: 8)
+        setMode(core, space, "track")
+        // Cap the space to one track: all eight windows pile into
+        // it and cascade (cascade_all default), so a swap scrambles
+        // the stacking. Turn off swap-skips-cascade (#172) so the
+        // swap targets the in-pile neighbor instead of stepping
+        // past the whole pile.
+        _ = core.execute("track.set_count", args: [.number(1)])
+        _ = core.execute(
+            "set_swap_skips_cascade",
+            args: [.bool(false)]
+        )
+        core.state.workspaces.focus(WindowID(2), in: space)
+        guard startDummyPan(core) else { return }
+        #expect(
+            core.execute("swap", args: [.string("down")]).isSuccess
+        )
+        #expect(core.pendingZOrderRestore)
+        core.tiler.animation.cancelAll()
+        #expect(!core.pendingZOrderRestore)
+    }
+
     @Test("rowOverflows: long row overflows, short row fits")
     func rowOverflowsPredicate() {
         let settings = TilingSettings()

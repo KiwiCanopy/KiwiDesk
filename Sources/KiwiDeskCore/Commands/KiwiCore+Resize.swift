@@ -109,6 +109,10 @@ extension KiwiCore {
         retile(
             animated: tiler.settings.animations.onWindowResize
         )
+        // Resizing a track past min_window_size flips it into an
+        // overflow cascade (or unflips one back); fix the pile's
+        // z-order once it settles (#193, self-gated).
+        scheduleTrackZOrderRestoreIfOverflowing()
         return response
     }
 

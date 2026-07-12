@@ -81,6 +81,9 @@ extension KiwiCore {
         retile(
             animated: tiler.settings.animations.onWindowResize
         )
+        // A track resize can flip a track into/out of an overflow
+        // cascade — restack the pile once it settles (#193).
+        scheduleTrackZOrderRestoreIfOverflowing()
         focusWindow(id)
     }
 
