@@ -114,11 +114,12 @@ struct TrackOverflowStyleTests {
         #expect(Set(track0.map { frames[$0]!.height }).count > 1)
     }
 
-    @Test("A fixed track cap forms the overflow track too")
+    @Test("A fixed limit shows N normal tracks + 1 overflow track")
     func fixedCapOverflowTrack() {
-        // auto off, count 2 on a wide screen: the fixed cap (not
-        // geometry) folds w1..w4 into the overflow track, which
-        // still renders per overflow_style — one unified path.
+        // auto off, limit 2 on a wide screen: 2 normal tracks
+        // (w0, w1) + the overflow track (w2..w4) as the extra
+        // far-edge column — even though more would fit. The limit
+        // is display-agnostic; geometry only reduces below it.
         let w = ids(5)
         let frames = layout.calculateGeometry(
             for: w,
@@ -133,12 +134,37 @@ struct TrackOverflowStyleTests {
             }
         )
         let xs = w.map { frames[$0]!.minX }
-        #expect(Set(xs).count == 2)
+        #expect(Set(xs).count == 3)  // 2 normal + 1 overflow
         let overflowX = xs.max()!
         let inOverflow = w.filter { frames[$0]!.minX == overflowX }
-        #expect(Set(inOverflow) == Set(w[1...]))
+        #expect(Set(inOverflow) == Set(w[2...]))
         // cascade_all piles them: stepped y at a shared x.
         let oy = inOverflow.map { frames[$0]!.minY }.sorted()
         #expect(abs((oy[1] - oy[0]) - 40) < 0.001)
+    }
+
+    @Test("The overflow track is the extra N+1 column, one window")
+    func fixedLimitExtraColumn() {
+        // auto off, limit 3, exactly 4 window-tracks on a wide
+        // screen: three normal columns + a fourth overflow column
+        // holding the single spilled window — the limit forces
+        // the overflow track even with space to spare.
+        let w = ids(4)
+        let frames = layout.calculateGeometry(
+            for: w,
+            in: makeContext(
+                bounds: CGRect(x: 0, y: 0, width: 3000, height: 900),
+                breaks: Set(w)
+            ) {
+                $0.minWindowSize = 300
+                $0.track.autoTracks = false
+                $0.track.count = 3
+            }
+        )
+        // Four distinct columns; the far edge (w3) is the overflow
+        // track, the first three are normal.
+        let xs = w.map { frames[$0]!.minX }
+        #expect(Set(xs).count == 4)
+        #expect(frames[w[3]]!.minX == xs.max()!)
     }
 }

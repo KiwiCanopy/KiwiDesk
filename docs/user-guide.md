@@ -272,7 +272,9 @@ Expand each layout type to adjust its defaults:
   isn't buried in the overflow); **Automatic tracks** (on by
   default — tracks open and collapse as windows come and go;
   turn it off to pin a fixed **Track limit**, which greys out
-  while automatic is on); **Overflow** — how the **overflow
+  while automatic is on — the limit counts *normal* tracks, so a
+  limit of 3 shows up to three tracks plus one overflow track
+  for anything beyond); **Overflow** — how the **overflow
   track** renders (the far-edge track that collects the surplus
   when more tracks exist than fit side by side): **cascade all**
   (the default) piles its windows from the top, **cascade

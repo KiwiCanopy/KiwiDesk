@@ -157,10 +157,12 @@ struct TrackSwapTests {
     @Test("Rejected while the cap merge folds tracks")
     func capMergeRejects() {
         let core = makeCore()
-        _ = makeTrackSpace(core, windows: 3, focus: 1)
-        // Three marker tracks folded to 2: the merged slices
-        // have no marker identity — a swap would scramble the
-        // composition (review H1), so it rejects.
+        _ = makeTrackSpace(core, windows: 4, focus: 1)
+        // Four marker tracks, limit 2 (trackCap = count + 1 = 3):
+        // the surplus past the two normal tracks folds into the
+        // overflow track, which then merges two marker slices with
+        // no identity — a swap would scramble the composition
+        // (review H1), so it rejects.
         core.execute("track.set_count", args: [.number(2)])
         let response = core.execute(
             "track.swap",

@@ -75,6 +75,8 @@ struct TrackEditor: View {
                 label: L("track.new_window_position", "Position")
             )
             Divider()
+            overflow
+            Divider()
             trackAuto
             StepperRow(
                 label: L("track.count", "Track limit"),
@@ -84,8 +86,6 @@ struct TrackEditor: View {
             .disabled(
                 model.config.settings.track.autoTracks
             )
-            Divider()
-            overflow
             Divider()
             // Bare behavior toggle in its own slot — the #168
             // placement mirrored from the Scrolling section.

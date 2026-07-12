@@ -29,13 +29,15 @@ public struct TrackLayout: LayoutSystem {
             vertical
             ? context.gaps.inner.horizontal
             : context.gaps.inner.vertical
-        // The overflow track (#192): the surplus beyond what fits
-        // side by side folds into one far-edge track. The cap is
-        // the tightest of the marker-track count, the geometric
-        // fit, and any fixed `track.set_count` — one boundary
-        // unifies auto-on (geometry governs) and auto-off (fixed
-        // cap governs), so both produce the same "last slot is the
-        // overflow track" shape.
+        // The overflow track (#192): the surplus beyond the normal
+        // capacity folds into ONE far-edge track. Normal capacity
+        // is the fixed `track.set_count` (auto off) or unlimited
+        // (auto on); the overflow track is the EXTRA column past
+        // it, so a limit of N shows up to N normal tracks + 1
+        // overflow. Geometry always caps the total: if capacity+1
+        // columns can't hold min size, the fit-count reduces (the
+        // limit is display-agnostic; the display decides at render
+        // time), never grows past it.
         let markerCount = Self.counts(
             of: windows,
             breaks: context.trackBreaks,
@@ -50,19 +52,30 @@ public struct TrackLayout: LayoutSystem {
                 gap: gap
             )
         )
+        // Auto on = unlimited normal tracks (geometry alone caps);
+        // auto off = the fixed `count` (NOT `trackCap`, which is
+        // count + 1 — it already includes the overflow track).
+        let normalCap =
+            params.autoTracks ? .max : max(1, params.count)
+        // Overflow the moment there are more window-tracks than the
+        // normal capacity OR than fit on screen.
+        let overflows =
+            markerCount > normalCap || markerCount > geoCap
+        // The extra overflow column sits past the normal cap
+        // (`normalCap + 1`), but never past what fits.
         let effectiveCap =
-            [markerCount, geoCap, params.trackCap]
-            .filter { $0 > 0 }
-            .min() ?? markerCount
+            overflows
+            ? min(normalCap == .max ? geoCap : normalCap + 1, geoCap)
+            : markerCount
         let counts = Self.counts(
             of: windows,
             breaks: context.trackBreaks,
             cap: effectiveCap
         )
-        // The last slot is the overflow track only when a merge
-        // actually happened; without one, every track is normal.
-        let overflowTrack =
-            counts.count < markerCount ? counts.count - 1 : nil
+        // The last slot is the overflow track whenever capacity is
+        // exceeded — even when it holds a single window (the N+1th
+        // track past a fixed limit), so no actual merge is needed.
+        let overflowTrack = overflows ? counts.count - 1 : nil
         let weights = Self.ranges(of: counts).map {
             Self.weight(
                 ofTrack: $0,

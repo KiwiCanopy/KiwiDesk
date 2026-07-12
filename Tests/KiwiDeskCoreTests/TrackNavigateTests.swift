@@ -236,7 +236,7 @@ struct MoveToTrackTests {
         )
     }
 
-    @Test("The cap blocks opening another track")
+    @Test("The cap blocks opening past the overflow track (#192)")
     func capBlocks() {
         let core = makeCore()
         let space = makeTrackSpace(
@@ -244,8 +244,10 @@ struct MoveToTrackTests {
             windows: 2,
             focus: WindowID(2)
         )
-        setHeads(core, space: space, heads: [])
-        // One track [1, 2] with cap 1: no second track.
+        // Two tracks [1][2] with limit 1 = one normal track plus
+        // the overflow track (trackCap = count + 1 = 2), already
+        // at the cap: no third track can open.
+        setHeads(core, space: space, heads: [WindowID(2)])
         core.execute("track.set_count", args: [.number(1)])
         #expect(
             !core.execute(

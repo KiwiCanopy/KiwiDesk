@@ -958,15 +958,20 @@ track.set_axis("vertical")
 
 **Expects:** an integer ≥ 0.
 
-**Does:** caps how many tracks a space can hold. `0` restores
-**automatic** tracks (the default — tracks open and collapse as
-windows come and go; see `track.set_auto_tracks`). A positive
-value pins the cap *and turns automatic off*, so `set_count(3)`
-takes effect on its own: surplus tracks merge into the last one,
-new windows join the focused track once the cap is reached, and
-`move_to_track` refuses to open another edge track. The last
-positive value is remembered, so flipping automatic back off
-restores it.
+**Does:** sets how many **normal** tracks a space can hold. `0`
+restores **automatic** tracks (the default — tracks open and
+collapse as windows come and go; see `track.set_auto_tracks`).
+A positive value pins the limit *and turns automatic off*, so
+`set_count(3)` takes effect on its own. Beyond the limit, one
+extra **overflow track** opens at the far edge and collects the
+surplus (#192): a new `own_track` window past the limit opens
+that overflow track, and further windows fold into it (rendered
+per `track.set_overflow_style`). `move_to_track` can open the
+overflow track but refuses to go past it. The limit is
+display-agnostic — if a monitor can't fit the columns at
+`min_window_size`, the layout shows fewer at render time. The
+last positive value is remembered, so flipping automatic back
+off restores it.
 
 **Example:**
 

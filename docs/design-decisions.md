@@ -158,14 +158,20 @@ rows in another layout read as broken rather than simply
 irrelevant. Copy carries the same message with none of that.
 
 **The overflow track is read-time, not stored (#192, 2026-07-12):**
-when more tracks exist than fit side by side at
-`min_window_size`, the fitting prefix tiles and the surplus
-merges into one far-edge overflow track. This is computed at
-**layout time** — the merge boundary is the geometric fit count
-(`TrackLayout.fitCap`), folded through the existing
-`counts(cap:)` primitive — so it moves on its own as windows are
-added or the display changes; nothing is written into the
-window array or the break markers. Spawn placement stays
+when there are more tracks than the space's normal capacity, the
+fitting prefix tiles and the surplus merges into one far-edge
+overflow track. Normal capacity is the **Track limit** N when
+automatic tracks is off (so a limit of N shows up to N normal
+tracks **plus** one overflow track — `trackCap` is `count + 1`,
+and a new `own_track` window past N opens the overflow track
+rather than joining), or **how many fit at `min_window_size`**
+when automatic is on. Geometry always caps the total: if
+capacity + 1 columns can't hold the minimum, the fit count
+(`TrackLayout.fitCap`) reduces the columns at layout time,
+folded through the existing `counts(cap:)` primitive — so the
+overflow track moves on its own as windows are added or the
+display changes; nothing is written into the window array or the
+break markers. Spawn placement stays
 geometry-free (the flat-array / pure-layout invariant, AGENTS.md
 §1/§5): a window lands by `new_window` / `new_window_position`
 and simply falls into the overflow track's slice at render time.

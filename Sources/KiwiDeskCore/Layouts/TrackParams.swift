@@ -80,13 +80,18 @@ public struct TrackParams: Sendable, Equatable, Codable {
 
     public init() {}
 
-    /// The effective track cap the layout uses: 0 (unlimited,
-    /// dynamic) while `autoTracks` is on, otherwise the fixed
-    /// `count` floored at 1. The single reader of the auto/count
-    /// pair — layout, navigation, and spawn placement all go
-    /// through here so none can disagree.
+    /// The hard cap on **marker** tracks that spawn, navigation,
+    /// and swap enforce: 0 (unlimited, dynamic) while `autoTracks`
+    /// is on, otherwise `count + 1` (#192) — the fixed `count`
+    /// **normal** tracks plus the one extra **overflow track**
+    /// that catches the surplus. A new `own_track` window past
+    /// `count` therefore opens the overflow track rather than
+    /// joining an existing one. The layout reads `count` directly
+    /// for the normal/overflow split; everything that moves
+    /// windows between tracks reads this so none can disagree on
+    /// where the last track is.
     public var trackCap: Int {
-        autoTracks ? 0 : max(1, count)
+        autoTracks ? 0 : max(1, count) + 1
     }
 
     /// JSON keys follow the Lua setters (`track.set_axis`).
