@@ -26,8 +26,7 @@ extension KiwiCore {
         focused: WindowID,
         swapping: Bool
     ) -> CommandResponse? {
-        let params =
-            tiler.settings.resolvedTrack(for: space.id)
+        let params = effectiveTrack(for: space.id)
         let tiled = space.windows.filter {
             state.windows[$0]?.isFloating == false
         }
@@ -218,8 +217,14 @@ extension KiwiCore {
         else {
             return .fail("no focused tiled window")
         }
-        let params =
-            tiler.settings.resolvedTrack(for: space.id)
+        // Joining tracks authors a 2D arrangement — the exact
+        // thing the gate prevents. An inert key-bound action
+        // would be an invisible failure, so reject with the
+        // pointer (#181).
+        guard isTrackAdvanced else {
+            return .fail(Self.trackAdvancedHint)
+        }
+        let params = effectiveTrack(for: space.id)
         let vertical = params.axis == .vertical
         let delta: Int
         switch direction {

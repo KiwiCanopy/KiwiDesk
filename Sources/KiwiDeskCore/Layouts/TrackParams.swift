@@ -67,6 +67,22 @@ public struct TrackParams: Sendable, Equatable, Codable {
         autoTracks ? 0 : max(1, count)
     }
 
+    /// The advanced-track clamp (#181): while the global
+    /// `set_track_advanced` flag is off, the 2D authoring
+    /// surfaces are forced back to the 1D defaults — every
+    /// window its own track (no cap merge), new windows open
+    /// their own track. Applied to the *resolved* params, after
+    /// per-space overrides merge ("resolve before layout,
+    /// clamps last"), so stored values — global and override —
+    /// stay untouched and come back when the flag returns.
+    public func gated(advanced: Bool) -> TrackParams {
+        guard !advanced else { return self }
+        var out = self
+        out.autoTracks = true
+        out.newWindow = .ownTrack
+        return out
+    }
+
     /// JSON keys follow the Lua setters (`track.set_axis`).
     private enum CodingKeys: String, CodingKey {
         case axis

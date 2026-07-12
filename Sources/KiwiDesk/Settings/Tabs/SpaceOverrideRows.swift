@@ -280,12 +280,22 @@ struct SpaceOverrideRows: View {
                 ),
             ]
         )
-        OverrideStepperRow(
-            label: L("track.count", "Track limit"),
-            value: binding(\.track.override, space, \.count),
-            global: g.track.count,
-            range: 0...10
-        )
+        // The cap is 2D authoring — per-space override rows
+        // follow the TrackEditor gate (#181): hidden while
+        // advanced track is off (the resolved value is clamped
+        // to automatic anyway).
+        if model.config.trackAdvanced {
+            OverrideStepperRow(
+                label: L("track.count", "Track limit"),
+                value: binding(
+                    \.track.override,
+                    space,
+                    \.count
+                ),
+                global: g.track.count,
+                range: 0...10
+            )
+        }
     }
 
     // MARK: - Binding helper

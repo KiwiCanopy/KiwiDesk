@@ -51,7 +51,7 @@ struct ApplicationsSection: View {
                 combo: binding.wrappedValue.combo,
                 conflict: KeybindingConflicts.text(
                     for: binding.wrappedValue,
-                    in: bindings
+                    in: model.conflictRelevant(bindings)
                 ),
                 preflight: { combo in
                     RecorderPreflight.rejection(
@@ -60,6 +60,8 @@ struct ApplicationsSection: View {
                             [id = binding.wrappedValue.id] in
                             $0.id == id
                         },
+                        silentSteal:
+                            model.isSilentlyStealable,
                         bindings: $bindings,
                         // Id-based (#68 review M2): Steal
                         // mutates the array before this runs.

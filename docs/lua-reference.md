@@ -146,11 +146,15 @@ with a horizontal one (rows).
 into the adjacent track (joining it at its end). Past the first
 or last track it opens a **new** track at that edge — the
 keyboard way to open tracks, matching what `own_track` spawning
-does. Refused when the space is not in track mode, when
-`track.set_count` already caps the tracks, or when the window
-already forms the edge track alone (nothing would change).
-Never wraps. Along-axis directions report an error naming the
-valid pair.
+does. Part of **advanced track**: while
+[`set_track_advanced`](#set_track_advanced) is off (the
+default), it rejects with a pointer to the switch — joining
+tracks builds the multi-window arrangements the gate keeps
+out of default 1D track. Also refused when the space is not in
+track mode, when `track.set_count` already caps the tracks, or
+when the window already forms the edge track alone (nothing
+would change). Never wraps. Along-axis directions report an
+error naming the valid pair.
 
 **Example:**
 
@@ -275,6 +279,40 @@ case, so this lives in config only.
 
 ```lua
 KiwiDesk.set_swap_skips_cascade(true)
+```
+
+### set_track_advanced
+
+**Expects:** `true` or `false` (default `false`).
+
+**Does:** unlocks **advanced track**: several windows sharing
+one track. By default the track layout is a simple 1D
+columns/rows layout — every window is its own track — and the
+three surfaces that could build a 2D arrangement are gated:
+`move_to_track` (and its shortcuts) rejects with a pointer
+here, new windows always open their own track regardless of
+`track.set_new_window`, and the `track.set_count` cap is
+ignored. The settings themselves keep accepting and storing
+while the gate is off — only their *resolved* effect is
+clamped, so turning the gate on restores exactly what was
+configured. Turning it off later keeps any multi-window tracks
+you built (the gate stops new authoring, never rewrites
+state); a space that relied on the count cap re-expands to its
+underlying partition, since the cap merge is a read-time view.
+
+A **global** flag (`gui.json`'s `track_advanced`, beside
+`app_rules`), never per-profile: profiles may not rewrite
+which authoring surfaces exist. In the GUI it lives in Layout
+Defaults ▸ Track as **Advanced track**; the gated rows (New
+window, Automatic tracks, Track limit, and the Move-to-track
+shortcuts) appear only while it is on. Shortcuts you bound
+stay stored while off — inert, their combos silently
+reusable — and re-register when the gate returns.
+
+**Example:**
+
+```lua
+KiwiDesk.set_track_advanced(true)
 ```
 
 ### Space Identity

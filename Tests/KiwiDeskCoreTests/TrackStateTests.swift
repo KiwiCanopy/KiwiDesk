@@ -266,6 +266,8 @@ struct TrackSpawnTests {
     func spawnJoinsFocused() {
         var state = StateCoordinator(defaultSpace: "1")
         state.workspaces.setMode("1", .track)
+        // focused_track is 2D authoring — gated (#181).
+        state.trackAdvanced = true
         state.trackParams.newWindow = .focusedTrack
         let w = ids(3)
         for id in w {
@@ -278,6 +280,8 @@ struct TrackSpawnTests {
     func spawnHonorsOverride() {
         var state = StateCoordinator(defaultSpace: "1")
         state.workspaces.setMode("1", .track)
+        // The cap merge is 2D authoring — gated (#181).
+        state.trackAdvanced = true
         var over = TrackOverride()
         // A fixed cap needs automatic off (#178); count alone is
         // the remembered magnitude, inert while auto is on.

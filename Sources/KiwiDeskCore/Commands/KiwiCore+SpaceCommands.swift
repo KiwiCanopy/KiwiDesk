@@ -160,7 +160,7 @@ extension KiwiCore {
             state.workspaces.add(window, to: target)
             return
         }
-        let params = tiler.settings.resolvedTrack(for: target)
+        let params = effectiveTrack(for: target)
         let windows = state.windows
         state.workspaces.add(
             window,

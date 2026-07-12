@@ -90,11 +90,19 @@ public final class TilingEngine {
         let tiled = space.windows.filter { id in
             state.windows[id]?.isFloating == false
         }
-        return (
-            space,
-            tiled,
-            settings.context(bounds: bounds, space: space)
+        var context = settings.context(
+            bounds: bounds,
+            space: space
         )
+        // Advanced-track clamp (#181), applied after per-space
+        // resolution: while the gate is off the layout sees no
+        // cap merge. Same authority as the command paths
+        // (`TrackParams.gated`); the flag's single storage is
+        // the state handed in.
+        context.track = context.track.gated(
+            advanced: state.trackAdvanced
+        )
+        return (space, tiled, context)
     }
 
     /// The frames the active space's layout assigns right

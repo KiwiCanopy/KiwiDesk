@@ -47,7 +47,7 @@ struct AdvancedLuaSection: View {
                 combo: binding.wrappedValue.combo,
                 conflict: KeybindingConflicts.text(
                     for: binding.wrappedValue,
-                    in: bindings
+                    in: model.conflictRelevant(bindings)
                 ),
                 preflight: { combo in
                     RecorderPreflight.rejection(
@@ -56,6 +56,8 @@ struct AdvancedLuaSection: View {
                             [id = binding.wrappedValue.id] in
                             $0.id == id
                         },
+                        silentSteal:
+                            model.isSilentlyStealable,
                         bindings: $bindings,
                         // Id-based: Steal mutates the array
                         // (removing a navigation holder

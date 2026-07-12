@@ -34,35 +34,47 @@ struct TrackEditor: View {
                 ]
             )
             Divider()
-            trackAuto
-            StepperRow(
-                label: L("track.count", "Track limit"),
-                value: $model.config.settings.track.count,
-                in: 1...10
-            )
-            .disabled(model.config.settings.track.autoTracks)
-            Divider()
-            SegmentedPicker(
-                L("track.new_window", "New window"),
-                selection: $model.config.settings.track
-                    .newWindow,
-                options: [
-                    (
-                        L(
-                            "track.new_window.own",
-                            "Opens its own track"
+            trackAdvanced
+            // The 2D authoring rows exist only behind the gate
+            // (#181): hidden — not greyed — while off, because
+            // default track has no concept they could apply
+            // to (unlike the Track limit stepper below, which
+            // greys while Automatic tracks is on: same section,
+            // still-applicable control).
+            if model.config.trackAdvanced {
+                Divider()
+                trackAuto
+                StepperRow(
+                    label: L("track.count", "Track limit"),
+                    value: $model.config.settings.track.count,
+                    in: 1...10
+                )
+                .disabled(
+                    model.config.settings.track.autoTracks
+                )
+                Divider()
+                SegmentedPicker(
+                    L("track.new_window", "New window"),
+                    selection: $model.config.settings.track
+                        .newWindow,
+                    options: [
+                        (
+                            L(
+                                "track.new_window.own",
+                                "Opens its own track"
+                            ),
+                            TrackParams.NewWindowTrack.ownTrack
                         ),
-                        TrackParams.NewWindowTrack.ownTrack
-                    ),
-                    (
-                        L(
-                            "track.new_window.focused",
-                            "Joins the focused track"
+                        (
+                            L(
+                                "track.new_window.focused",
+                                "Joins the focused track"
+                            ),
+                            .focusedTrack
                         ),
-                        .focusedTrack
-                    ),
-                ]
-            )
+                    ]
+                )
+            }
             Divider()
             // Bare behavior toggle in its own slot — the #168
             // placement mirrored from the Scrolling section.
@@ -71,6 +83,33 @@ struct TrackEditor: View {
                 L("track.wrap_focus", "Wrap focus"),
                 isOn: $model.config.settings.track.wrapFocus
             )
+        }
+    }
+
+    /// The advanced-track gate (#181): a GLOBAL flag
+    /// (`gui.json`, like App Rules), not a profile-scoped
+    /// track param — binding straight into `config`, not
+    /// `config.settings`. Off (the default) keeps track the
+    /// simple 1D columns/rows layout; on unlocks multi-window
+    /// tracks: joining tracks (`move_to_track` + its
+    /// shortcuts), new windows joining the focused track, and
+    /// the fixed track cap below.
+    private var trackAdvanced: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Toggle(
+                L("track.advanced", "Advanced track"),
+                isOn: $model.config.trackAdvanced
+            )
+            Text(
+                L(
+                    "track.advanced_caption",
+                    "Allows several windows to share one "
+                        + "track. Off, every window is its "
+                        + "own column or row."
+                )
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
         }
     }
 

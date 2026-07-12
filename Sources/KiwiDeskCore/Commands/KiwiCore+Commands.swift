@@ -41,6 +41,8 @@ extension KiwiCore {
             return setMinWindowSize(args)
         case "set_swap_skips_cascade":
             return setSwapSkipsCascade(args)
+        case "set_track_advanced":
+            return setTrackAdvanced(args)
         case "set_resize_step":
             return setResizeStep(args)
         case "help", "list_commands":

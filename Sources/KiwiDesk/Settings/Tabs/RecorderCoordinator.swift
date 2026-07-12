@@ -86,15 +86,43 @@ enum RecorderPreflight {
     static func rejection(
         combo: String,
         excluding isOwn: @escaping (KeyBinding) -> Bool,
+        silentSteal: (KeyBinding) -> Bool = { _ in false },
         bindings: Binding<[KeyBinding]>,
         commit: @escaping (String) -> Void
     ) -> RecorderRejection? {
+        let holders = bindings.wrappedValue.filter {
+            !$0.combo.isEmpty && $0.combo == combo && !isOwn($0)
+        }
+        // A visible holder still hard-blocks with the Steal
+        // prompt; inert holders (#181) only lose the combo when
+        // no visible holder stands in the way, so a rejected
+        // recording never mutates them as a side effect.
         guard
-            let holder = bindings.wrappedValue.first(where: {
-                !$0.combo.isEmpty && $0.combo == combo
-                    && !isOwn($0)
+            let holder = holders.first(where: {
+                !silentSteal($0)
             })
-        else { return nil }
+        else {
+            guard !holders.isEmpty else { return nil }
+            // Every holder is an inert gated row: steal
+            // silently — the prompt would point at a row the
+            // GUI no longer renders. Catalog rows unbind by
+            // removal, like the prompted Steal below.
+            var rows = bindings.wrappedValue
+            for held in holders {
+                guard
+                    let index = rows.firstIndex(where: {
+                        $0.id == held.id
+                    })
+                else { continue }
+                if held.kind == .navigation {
+                    rows.remove(at: index)
+                } else {
+                    rows[index].combo = ""
+                }
+            }
+            bindings.wrappedValue = rows
+            return nil
+        }
         let label =
             holder.label.isEmpty ? holder.lua : holder.label
         return RecorderRejection(

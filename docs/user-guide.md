@@ -260,20 +260,27 @@ Expand each layout type to adjust its defaults:
   columns and rows as the screen allows at the minimum window
   size instead of the typed counts (greying them out), so a
   landscape monitor gets more columns than rows.
-- **Track**: axis (vertical = columns side by side, horizontal =
-  rows), **Automatic tracks** (on by default — tracks open and
-  collapse as windows come and go; turn it off to pin a fixed
-  **Track limit**, which greys out while automatic is on),
-  where a new
-  window lands (opens its own track next to the focused one, or
-  joins the focused track), and **Wrap focus** — the same opt-in
-  toggle as Scrolling's,
-  off by default: on, focus wraps within the track along the
-  axis and from the last track to the first across it. Swap
-  never wraps. Track sizes and in-track shares are resize
-  state, session-only like the stack's weights; bind
-  `move_to_track` (Shortcuts ▸ Window Management) to move a
-  window across tracks or open a new one at the edge.
+- **Track**: by default a simple 1D layout — every window is
+  its own column or row. Axis (vertical = columns side by
+  side, horizontal = rows) and **Wrap focus** (the same opt-in
+  toggle as Scrolling's, off by default: on, focus wraps
+  within the track along the axis and from the last track to
+  the first across it; swap never wraps) are always available.
+  **Advanced track** (off by default, a global switch like App
+  Rules) lets several windows share one track and reveals the
+  gated rows: **Automatic tracks** (on by default — tracks
+  open and collapse as windows come and go; turn it off to pin
+  a fixed **Track limit**, which greys out while automatic is
+  on) and where a new window lands (opens its own track next
+  to the focused one, or joins the focused track). It also
+  enables the Move-to-track shortcuts (Shortcuts ▸ Move
+  Windows) that move a window across tracks or open a new one
+  at the edge; while off those shortcuts are hidden and any
+  combos they held are silently free for reuse — turning the
+  gate back on restores every binding not reused since.
+  Turning it off keeps multi-window tracks you already built.
+  Track sizes and in-track shares are resize state,
+  session-only like the stack's weights.
 
 > **A few resize behaviors are accepted limitations, not bugs.**
 > Some tiling quirks — e.g. the inner window of a nested BSP pair

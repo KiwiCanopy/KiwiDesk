@@ -102,6 +102,9 @@ extension KiwiCore {
             bindings[number] = name
         }
         config.profileBindings = bindings
+        // A Lua-set advanced-track flag survives adoption into
+        // GUI management (#181).
+        config.trackAdvanced = state.trackAdvanced
         seedDefaultShortcuts(&config)
         return config
     }

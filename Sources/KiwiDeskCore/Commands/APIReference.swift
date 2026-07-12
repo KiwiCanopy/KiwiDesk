@@ -32,6 +32,10 @@ public enum APIReference {
                 "set_swap_skips_cascade",
                 "set_swap_skips_cascade"
             ),
+            (
+                "set_track_advanced",
+                "set_track_advanced"
+            ),
             ("set_resize_step", "set_resize_step"),
             ("set_fallback_space", "set_fallback_space"),
             ("set_space_icon", "set_space_icon"),

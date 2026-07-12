@@ -70,6 +70,30 @@ struct MoveWindowsSection: View {
                     command: command
                 )
             }
+            // Advanced-track authoring rows (#181): rendered
+            // only while the gate is on. Classification stays
+            // ungated (classify always, render conditionally),
+            // so imports keep them out of Custom either way.
+            if model.config.trackAdvanced {
+                Text(
+                    L(
+                        "shortcuts.move_to_track",
+                        "Move to track"
+                    )
+                )
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .padding(.top, 4)
+                ForEach(
+                    KeybindingCatalog.moveToTrackDirections
+                ) { command in
+                    NavRow(
+                        model: model,
+                        bindings: $bindings,
+                        command: command
+                    )
+                }
+            }
             if !spaces.isEmpty {
                 Text(
                     L("shortcuts.move_to_space", "Move to space")
@@ -221,7 +245,7 @@ struct NavRow: View {
         guard let index else { return nil }
         return KeybindingConflicts.text(
             for: bindings[index],
-            in: bindings
+            in: model.conflictRelevant(bindings)
         )
     }
 
@@ -233,6 +257,7 @@ struct NavRow: View {
             excluding: { [lua = command.lua] in
                 $0.kind == .navigation && $0.lua == lua
             },
+            silentSteal: model.isSilentlyStealable,
             bindings: $bindings,
             commit: record
         )

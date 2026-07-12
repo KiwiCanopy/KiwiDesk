@@ -63,6 +63,7 @@ KiwiDesk service restart
 | | `set_min_window_size` | pt (default 300) |
 | | `set_resize_step` | pt (default 50) — Grow/Shrink magnitude |
 | | `set_swap_skips_cascade` | true\|false (default `true`) — swap from a pile targets the outside neighbor |
+| | `set_track_advanced` | true\|false (default `false`) — unlock multi-window tracks (gates `move_to_track`, `track.set_new_window`, the track cap) |
 | | `set_fallback_space` | space id ("" clears) — rehome target on profile switch |
 | | `set_space_icon` | space id, icon (SF Symbol\|emoji\|char; "" clears) |
 | | `get_state` | — (returns `{active_space, spaces, windows, monitor_count, native_space, exec_running}`) |
