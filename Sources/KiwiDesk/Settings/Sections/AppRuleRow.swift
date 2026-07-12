@@ -14,6 +14,10 @@ struct AppRuleRow: View {
     /// rows dimmed, like the Shortcuts tab), the Float facet
     /// is app-wide and renders disabled (grey out, not hide).
     let overrideBase: [String: SpaceID]?
+    /// Whether the row is a session draft (added this session,
+    /// no stored facet yet) — deleting one always works, it
+    /// removes the draft itself.
+    let isDraft: Bool
     let onDelete: () -> Void
     /// Keeps the titled editor visible while it has no
     /// patterns yet (an empty pattern set stores nothing).
@@ -64,13 +68,15 @@ struct AppRuleRow: View {
             }
             .buttonStyle(.borderless)
             // Override mode can only clear the Space facet: a
-            // row whose facet is already Automatic (float-only,
-            // a draft, or an un-pinned base app) has nothing to
-            // delete — disable instead of offering a no-op
-            // (grey out, not hide).
+            // row whose facet is already Automatic (float-only
+            // or an un-pinned base app) has nothing to delete —
+            // disable instead of offering a no-op (grey out,
+            // not hide). A session draft stays deletable:
+            // deleting it removes the draft row itself.
             .disabled(
                 overrideBase != nil
                     && model.config.appRules[app] == nil
+                    && !isDraft
             )
             .help(
                 overrideBase == nil

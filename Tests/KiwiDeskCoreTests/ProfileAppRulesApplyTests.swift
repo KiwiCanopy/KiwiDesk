@@ -58,6 +58,10 @@ struct ProfileAppRulesApplyTests {
 
     // MARK: - Apply
 
+    /// Also pins the pre-VM ordering inside
+    /// `reapplyStructuredOverrides`: this core never ran
+    /// `loadConfig`, so `keys.lua` is nil and the rule tier
+    /// must apply BEFORE the keybinding half's VM guard.
     @Test("load_profile resolves the override onto the base")
     func loadProfileResolvesOverride() throws {
         let core = makeGuiCore()

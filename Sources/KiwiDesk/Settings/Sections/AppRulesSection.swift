@@ -37,6 +37,7 @@ struct AppRulesSection: View {
                             model: model,
                             app: app,
                             overrideBase: overrideBase,
+                            isDraft: draftApps.contains(app),
                             onDelete: { delete(app) }
                         )
                         Divider()
