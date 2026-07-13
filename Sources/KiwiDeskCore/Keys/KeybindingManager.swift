@@ -39,6 +39,14 @@ public final class KeybindingManager {
     /// `fire`, so a callback that pumps a nested run loop and
     /// delivers a second fire can't clear the outer fire's flag.
     public private(set) var isFiring = false
+    /// Combos the system declined in the most recent
+    /// activation (`RegisterEventHotKey` returned no id — e.g.
+    /// a reserved system shortcut). Rebuilt on every
+    /// activation; the GUI's live-apply (#123) reads it to
+    /// branch its feedback caption ("Active now" vs "the
+    /// system didn't grant it").
+    public private(set) var activationFailures: Set<KeyCombo> =
+        []
     private var modes: [String: [KeyCombo: Int32]] = [:]
     /// Menu bar indicator per mode (SF Symbol name or emoji),
     /// set via `define_mode(name, bindings, { icon = ... })`.
@@ -162,6 +170,7 @@ public final class KeybindingManager {
 
     private func activate(_ mode: String) {
         deactivate()
+        activationFailures = []
         for (combo, ref) in modes[mode] ?? [:] {
             let id = registrar.register(
                 keyCode: combo.keyCode,
@@ -172,6 +181,7 @@ public final class KeybindingManager {
             if let id {
                 activeIDs.append(id)
             } else {
+                activationFailures.insert(combo)
                 onLog(
                     "keybinding conflict: could not "
                         + "register a shortcut in mode "

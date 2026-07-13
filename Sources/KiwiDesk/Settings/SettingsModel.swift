@@ -97,6 +97,13 @@ final class SettingsModel: ObservableObject {
     @Published var keybindingWarning: String?
 
     let core: KiwiCore
+    /// A recorder edit was applied to the running hotkeys
+    /// without being saved (#123, live target only). When the
+    /// staged edits carrying it are discarded (`reload()`),
+    /// the running registration must follow them back to the
+    /// saved config — no ghost hotkeys. See
+    /// `SettingsModel+LiveApply.swift`.
+    var liveKeysApplied = false
     /// Guards the `config.didSet` dirty flag during reload
     /// cycles; its only writer is `apply(_:)` in
     /// `SettingsModel+EditTarget.swift`.

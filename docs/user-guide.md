@@ -644,6 +644,18 @@ then the key), mapped to your active keyboard layout. No `+`
 separator — a literal `+` key shows as `⌘+`. The stored config keeps
 long word forms (`cmd`, `alt`, `semicolon`, …).
 
+**Recordings apply instantly on the live target.** When you are
+editing the live configuration (the active profile or Standard),
+a committed recording — and a clear — takes effect immediately:
+press the new combo and it works, no Save needed. A brief
+"Active now" caption confirms; if macOS refuses the combo (a
+reserved system shortcut), the caption says so instead. The
+change is still *unsaved*: the footer's Save persists it to the
+profile, and Revert (or switching the edit target) restores the
+saved shortcuts, also live. When editing a stored profile from
+the dropdown, nothing applies until that profile is next active
+— the banner above the shortcut groups says so.
+
 ### Conflict Detection
 
 A ⚠️ icon appears next to any row whose combo:

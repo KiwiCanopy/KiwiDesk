@@ -202,6 +202,29 @@ thing?". The membership is unchanged from the earlier "This
 Profile" / "Whole App" split; only the labels are topical.
 (#68 §3.1)
 
+**Live-apply is the rare exception, earned per control — not
+per tab.** (Settled 2026-07-10, full-Settings audit; #123.) A
+control stays staged behind Save unless it clears one of two
+bars: **(a)** it owns no profile state at all (the General ▸
+Language picker persists straight to `UserDefaults`, never
+`gui.json` — there is nothing to stage), or **(b)** its
+feedback loop *is* the live runtime and no in-window
+simulation can substitute (the keybinding recorder: the only
+way to know a shortcut works is to press it). Everything else
+— sliders, colors, pickers, placement grids — stays staged;
+where a raw value is hard to judge, build an in-window
+preview (the `GapsDiagram` / `DragVisualsEditor`-strip
+pattern), never live-apply. Sweep verdicts: Spaces, Behavior,
+App Rules, Shortcuts (minus the recorder), and the
+native-Space profile bindings are plainly staged. Monitors'
+drag-cards and the icon pickers are **self-previewing** (the
+control is its own preview — a third category needing neither
+live-apply nor a bolted-on preview). Profiles-section
+rename/delete/make-default/preset-apply are immediate file
+**actions**, not settings — correctly outside this question.
+The Spaces tab's per-space layout picker stays staged. **No
+control besides the key recorder passes the live-apply bar.**
+
 **One stable save footer: Revert / Save a Copy As… / Save.**
 The old footer showed up to seven differently-labeled verbs
 depending on invisible mode state, but they expressed only
@@ -437,6 +460,29 @@ without a dismiss. (#33/#34/#35, #68 §3.6.2)
 
 **One recorder at a time.** Starting a recording snaps any
 other recording field back instantly. (#33)
+
+**The recorder live-applies on the live target; stored
+profiles stay staged.** (#123 Part 1.) A recorder is an input
+device — "recorded but inert until Save" broke its mental
+model (users pressed the new combo and nothing happened). A
+successfully committed recording (or clear) on the live edit
+target re-registers the running Carbon hotkeys immediately,
+from the edited mode set resolved through the active
+profile's override — exactly what a Save + reload would
+register, with no file writes. `isDirty` and the footer keep
+their meaning ("the file hasn't caught up"); Save persists,
+and Revert / discarding edits re-applies the saved bindings
+live, so no ghost hotkey survives. A transient caption
+("Active now") confirms; when `RegisterEventHotKey` declines
+a system-reserved combo the caption says so — live-apply
+makes that failure observable at record time, a strict
+improvement. Editing a stored profile stays fully staged
+(instant apply would rewrite the RUNNING hotkeys while the
+banner says an inactive profile is being edited); the
+override banner states that its shortcuts take effect the
+next time the profile is active. The active key mode is
+preserved across a live-apply when it survives the edit —
+unlike profile applies, which deliberately reset to default.
 
 **A catalog label's identity and its display text are two
 different fields.** `KeybindingCatalog`'s `NavCommand.label`

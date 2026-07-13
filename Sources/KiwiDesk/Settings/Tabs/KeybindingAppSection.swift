@@ -64,7 +64,7 @@ struct ApplicationsSection: View {
                         // Id-based (#68 review M2): Steal
                         // mutates the array before this runs.
                         commit: {
-                            record(
+                            _ = record(
                                 $0,
                                 id: binding.wrappedValue.id
                             )
@@ -72,7 +72,11 @@ struct ApplicationsSection: View {
                     )
                 },
                 onRecord: { record($0, into: binding) },
-                onClear: { binding.wrappedValue.combo = "" }
+                onClear: {
+                    binding.wrappedValue.combo = ""
+                    // Live target: unregister now (#123).
+                    _ = model.liveApplyRecorded(nil)
+                }
             )
             Button {
                 remove(binding.wrappedValue.id)
@@ -92,7 +96,7 @@ struct ApplicationsSection: View {
     private func record(
         _ combo: String,
         into binding: Binding<KeyBinding>
-    ) {
+    ) -> LiveApplyFeedback? {
         binding.wrappedValue.combo = combo
         let id = binding.wrappedValue.id
         if let index = bindings.firstIndex(
@@ -103,21 +107,27 @@ struct ApplicationsSection: View {
                 in: bindings
             )
         }
+        return model.liveApplyRecorded(combo)
     }
 
     /// Looks the row up by id at write time — safe after any
     /// structural mutation of the bindings array.
-    private func record(_ combo: String, id: UUID) {
+    @discardableResult
+    private func record(
+        _ combo: String,
+        id: UUID
+    ) -> LiveApplyFeedback? {
         guard
             let index = bindings.firstIndex(where: {
                 $0.id == id
             })
-        else { return }
+        else { return nil }
         bindings[index].combo = combo
         model.noteRecordedCombo(
             bindings[index],
             in: bindings
         )
+        return model.liveApplyRecorded(combo)
     }
 
     private func appMenu(
