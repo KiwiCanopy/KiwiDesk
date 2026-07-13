@@ -153,7 +153,10 @@ struct StepperRow: View {
                 .labelsHidden()
                 .controlSize(.large)
                 .accessibilityLabel(label)
-                .accessibilityValue("\(value)")
+                .accessibilityValue(
+                    suffix.map { "\(value) \($0)" }
+                        ?? "\(value)"
+                )
         }
         // Keep the field in step with arrow taps / external
         // changes — but never while the user is mid-edit, or a

@@ -113,27 +113,16 @@ struct BehaviorSection: View {
     /// (`animations.duration`; `animations.set_duration` Lua)
     /// — paces exactly the four toggles above (#51).
     private var durationRow: some View {
-        let ms = model.config.settings.animations.durationMS
-        let durationLabel = L(
-            "behavior.animations.duration",
-            "Duration"
+        StepperRow(
+            label: L(
+                "behavior.animations.duration",
+                "Duration"
+            ),
+            value: $model.config.settings.animations
+                .durationMS,
+            in: 50...1000,
+            step: 10,
+            suffix: "ms"
         )
-        return HStack {
-            Text(durationLabel)
-            Spacer()
-            Stepper(
-                value: $model.config.settings.animations
-                    .durationMS,
-                in: 50...1000,
-                step: 10
-            ) {
-                Text("\(ms) ms")
-                    .frame(minWidth: 52, alignment: .trailing)
-                    .monospacedDigit()
-            }
-            .controlSize(.large)
-            .accessibilityLabel(durationLabel)
-            .accessibilityValue("\(ms) ms")
-        }
     }
 }
