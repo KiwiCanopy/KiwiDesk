@@ -91,6 +91,24 @@ struct ScrollingLayoutTests {
         }
     }
 
+    @Test("A slot never tiles below minWindowSize")
+    func slotHonorsMinWindowSize() throws {
+        // 5% of a 1000-pt axis is ~49 pt — well under the 300-pt
+        // floor, so the column falls back to minWindowSize.
+        var context = makeContext(
+            bounds: CGRect(x: 0, y: 0, width: 1000, height: 800),
+            focused: w1
+        )
+        context.scrolling.appBar.enabled = false
+        context.minWindowSize = 300
+        context.scrolling.slotSize = .fraction(0.05)
+        let frames = layout.calculateGeometry(
+            for: [w1, w2, w3],
+            in: context
+        )
+        #expect(try #require(frames[w1]).width == 300)
+    }
+
     @Test("Short rows left-align without margins")
     func shortRow() throws {
         var context = makeContext(focused: w2)

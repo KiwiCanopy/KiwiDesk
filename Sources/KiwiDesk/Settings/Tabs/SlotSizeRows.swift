@@ -25,6 +25,13 @@ struct SlotSizeRows: View {
             : L("slot_size.column_width", "Column width")
     }
 
+    /// The points slider's floor: the global minimum window size
+    /// (the layout clamps anything smaller up to it). Capped under
+    /// the slider max so the range can never invert.
+    private var minPointsFloor: Double {
+        Double(min(model.config.settings.minWindowSize, 1990))
+    }
+
     private enum SizeUnit: Hashable {
         case auto, points, percent
     }
@@ -168,8 +175,11 @@ struct SlotSizeRows: View {
                         alignment: .leading
                     )
                 SettingsSlider(
+                    // Floored at the global minimum window size: the
+                    // layout clamps a smaller slot up to it anyway,
+                    // so the control shouldn't offer below it.
                     value: pointsBinding,
-                    range: 100...2000,
+                    range: minPointsFloor...2000,
                     step: 10
                 )
                 Text("\(Int(currentPoints)) pt")
