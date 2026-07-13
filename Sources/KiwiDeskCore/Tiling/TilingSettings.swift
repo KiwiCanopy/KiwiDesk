@@ -58,6 +58,8 @@ public struct TilingSettings: Sendable, Equatable, Codable {
     public var animations = AnimationSettings()
     /// What resizing a tiled window with the mouse does.
     public var mouseResize: MouseResizeMode = .layout
+    /// Mouse-pointer behaviour (`mouse.*`, #186).
+    public var mouse = MouseSettings()
     /// Optional recognition icon per space (#68): an SF Symbol
     /// name, an emoji, or a single character — the same grammar
     /// as mode icons. Sparse; the name stays primary everywhere.
@@ -78,6 +80,7 @@ public struct TilingSettings: Sendable, Equatable, Codable {
         case swapSkipsCascade = "swap_skips_cascade"
         case placementOverride =
             "new_window_placement_override"
+        case mouse
         case mouseResize = "mouse_resize"
         case resize
         case space
@@ -151,6 +154,11 @@ public struct TilingSettings: Sendable, Equatable, Codable {
                 MouseResizeMode.self,
                 forKey: .mouseResize
             ) ?? .layout
+        mouse =
+            try container.decodeIfPresent(
+                MouseSettings.self,
+                forKey: .mouse
+            ) ?? MouseSettings()
         try decodeGap(from: container)
         try decodeLayout(from: container)
         try decodeDrag(from: container)
@@ -299,6 +307,7 @@ public struct TilingSettings: Sendable, Equatable, Codable {
         try container.encode(appBarStyle, forKey: .appBar)
         try container.encode(animations, forKey: .animations)
         try container.encode(mouseResize, forKey: .mouseResize)
+        try container.encode(mouse, forKey: .mouse)
         var gap = container.nestedContainer(
             keyedBy: GapKeys.self,
             forKey: .gap

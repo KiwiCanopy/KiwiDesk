@@ -70,6 +70,7 @@
   "behavior.animations.title": "Animations",
   "behavior.animations.window_resize": "Animate window resizes",
   "behavior.animations.window_swap": "Animate window swaps",
+  "behavior.mouse.follows_focus": "Move mouse to focused window",
   "behavior.mouse.resize_action": "Mouse resize action",
   "behavior.mouse.resize_layout": "Resize adjacent windows",
   "behavior.mouse.resize_snap_back": "Snap back to slot",

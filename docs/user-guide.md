@@ -413,6 +413,9 @@ interaction.
 
 - **Mouse resize mode**: "layout" (default) — resize slides the split
   as you drag; "snap_back" — the layout snaps back when you release.
+- **Move mouse to focused window** (checkbox, default off): warp the
+  pointer to the center of the newly-focused window whenever focus
+  changes, so clicks and scrolls land where the keyboard is working.
 - **Minimum window size**: if a window shrinks below this (pt), it
   cascades instead of further shrinking (default 300 pt).
 - **New window placement**: where new windows enter the space's window

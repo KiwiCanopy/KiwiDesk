@@ -1738,6 +1738,28 @@ follow is applied.
 KiwiDesk.set_mouse_resize("snap_back")
 ```
 
+## Mouse Behaviour
+
+### mouse.set_follows_focus
+
+**Expects:** a boolean.
+
+**Does:** when `true`, a focus change warps the mouse pointer to
+the center of the newly-focused window, so the next click,
+scroll, or hover lands on the window the keyboard is working in —
+the standard companion behaviour in i3/sway/yabai. Default is
+**`false`** (off), matching those WMs. The pointer never moves
+when it is already inside the focused window, while a mouse
+button is held down, or when the focused window lives on an
+inactive virtual space. Also togglable in the Settings app under
+**Behavior ▸ Mouse**.
+
+**Example:**
+
+```lua
+mouse.set_follows_focus(true)
+```
+
 ## When Windows Run Out of Space
 
 No layout ever shrinks a window below `min_window_size`. When a

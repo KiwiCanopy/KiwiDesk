@@ -61,6 +61,7 @@ extension KiwiCore {
             // pan would steal focus back.
             pendingFocusRaise = nil
             emitFocusChange(id)
+            warpMouseToFocused(id)
             // cmd+tab (or a click) can reach a window hidden
             // in an inactive virtual space; pull that space
             // forward instead of typing into a stashed window.

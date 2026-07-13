@@ -58,6 +58,7 @@ KiwiDesk service restart
 | | `spawn_new` | app name |
 | System | `set_mode` | [space,] mode |
 | | `set_mouse_resize` | `layout\|snap_back` |
+| | `mouse.set_follows_focus` | true\|false (default `false`) — warp the pointer to the newly-focused window |
 | | `set_gap_global` | size |
 | | `set_gap_override` | space, size |
 | | `set_min_window_size` | pt (default 300) |
