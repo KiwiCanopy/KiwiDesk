@@ -21,12 +21,12 @@ public enum SpawnPlacement: String, Sendable, Codable {
 public struct BspParams: Sendable, Equatable, Codable {
     public enum Strategy: String, Sendable, Codable {
         /// Split the longer side (keeps windows square-ish).
-        case shortestSide = "shortest_side"
+        case longestSide = "longest_side"
         /// Alternate horizontal / vertical by depth.
         case alternating
     }
 
-    public var strategy: Strategy = .shortestSide
+    public var strategy: Strategy = .longestSide
     /// Ratio of every side-by-side split (#56). `resize("x")`
     /// nudges this one; the stacked splits keep their own.
     public var splitRatioH: Double = 0.5
@@ -59,7 +59,7 @@ public struct BspParams: Sendable, Equatable, Codable {
             try container.decodeIfPresent(
                 Strategy.self,
                 forKey: .strategy
-            ) ?? .shortestSide
+            ) ?? .longestSide
         splitRatioH =
             try container.decodeIfPresent(
                 Double.self,

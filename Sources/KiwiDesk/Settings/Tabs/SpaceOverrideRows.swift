@@ -33,7 +33,10 @@ struct SpaceOverrideRows: View {
         model.config.spaceModes[space] ?? .bsp
     }
 
-    private var g: TilingSettings { model.config.settings }
+    /// Internal (not private) so the Grid/Monocle/Track rows,
+    /// which live in `SpaceOverrideRows+ModeRows.swift` to keep
+    /// each file under the line ceiling, can read it.
+    var g: TilingSettings { model.config.settings }
 
     private func placeholder(_ text: String) -> some View {
         Text(text)
@@ -109,10 +112,10 @@ struct SpaceOverrideRows: View {
             global: g.bsp.strategy,
             options: [
                 (
-                    .shortestSide,
+                    .longestSide,
                     L(
-                        "layout_params.shortest_side",
-                        "Shortest side"
+                        "layout_params.longest_side",
+                        "Longest side"
                     )
                 ),
                 (
@@ -193,137 +196,14 @@ struct SpaceOverrideRows: View {
         )
     }
 
-    @ViewBuilder
-    private var gridRows: some View {
-        OverridePickerRow(
-            label: L("scroll_grid.grid_type", "Grid type"),
-            value: binding(\.grid.override, space, \.type),
-            global: g.grid.type,
-            options: [
-                (.dynamic, L("scroll_grid.dynamic", "Dynamic")),
-                (.rigid, L("scroll_grid.rigid", "Rigid")),
-            ]
-        )
-        OverrideToggleRow(
-            label: L(
-                "scroll_grid.fill_empty_space",
-                "Fill empty space"
-            ),
-            value: binding(
-                \.grid.override,
-                space,
-                \.fillEmptySpace
-            ),
-            global: g.grid.fillEmptySpace
-        )
-        OverridePickerRow(
-            label: L(
-                "scroll_grid.split_direction",
-                "Split direction"
-            ),
-            value: binding(
-                \.grid.override,
-                space,
-                \.splitDirection
-            ),
-            global: g.grid.splitDirection,
-            options: [
-                (.horizontal, L("scroll_grid.horizontal", "Horizontal")),
-                (.vertical, L("scroll_grid.vertical", "Vertical")),
-            ]
-        )
-        OverrideStepperRow(
-            label: L("scroll_grid.columns", "Columns"),
-            value: binding(\.grid.override, space, \.columns),
-            global: g.grid.columns,
-            range: 1...10
-        )
-        OverrideStepperRow(
-            label: L("scroll_grid.rows", "Rows"),
-            value: binding(\.grid.override, space, \.rows),
-            global: g.grid.rows,
-            range: 1...10
-        )
-    }
-
-    @ViewBuilder
-    private var monocleRows: some View {
-        OverridePickerRow(
-            label: L("scroll_grid.orientation", "Orientation"),
-            value: binding(
-                \.monocle.override,
-                space,
-                \.orientation
-            ),
-            global: g.monocle.orientation,
-            options: [
-                (.horizontal, L("scroll_grid.horizontal", "Horizontal")),
-                (.vertical, L("scroll_grid.vertical", "Vertical")),
-            ]
-        )
-    }
-
-    @ViewBuilder
-    private var trackRows: some View {
-        OverridePickerRow(
-            label: L("track.axis", "Axis"),
-            value: binding(\.track.override, space, \.axis),
-            global: g.track.axis,
-            options: [
-                (
-                    .vertical,
-                    L("track.axis.vertical", "Vertical (columns)")
-                ),
-                (
-                    .horizontal,
-                    L("track.axis.horizontal", "Horizontal (rows)")
-                ),
-            ]
-        )
-        OverrideStepperRow(
-            label: L("track.count", "Track limit"),
-            value: binding(
-                \.track.override,
-                space,
-                \.count
-            ),
-            global: g.track.count,
-            range: 0...10
-        )
-        OverridePickerRow(
-            label: L("layout_params.overflow", "Overflow"),
-            value: binding(
-                \.track.override,
-                space,
-                \.overflowStyle
-            ),
-            global: g.track.overflowStyle,
-            options: [
-                (
-                    .cascadeOverflow,
-                    L(
-                        "layout_params.cascade_overflow",
-                        "Cascade overflow"
-                    )
-                ),
-                (
-                    .cascadeAll,
-                    L(
-                        "layout_params.cascade_all",
-                        "Cascade all"
-                    )
-                ),
-            ]
-        )
-    }
-
     // MARK: - Binding helper
 
     /// One generic bridge from an override map's optional field
     /// to a `Binding<T?>`. Setting a field to nil that empties
     /// the override drops the map entry, mirroring the Lua
-    /// command.
-    private func binding<O: SpaceLayoutOverride, T>(
+    /// command. Internal so the mode rows split into
+    /// `SpaceOverrideRows+ModeRows.swift` can reach it.
+    func binding<O: SpaceLayoutOverride, T>(
         _ map: WritableKeyPath<TilingSettings, [SpaceID: O]>,
         _ space: SpaceID,
         _ field: WritableKeyPath<O, T?>

@@ -202,6 +202,31 @@ struct GridLayoutTests {
         #expect(sorted[0] < sorted[3])
     }
 
+    @Test("Rigid honours the arrange (fill) order (#217)")
+    func rigidArrange() throws {
+        // 2×2 rigid, 3 windows: columns-first (row-major) puts w2
+        // top-right; rows-first (column-major) puts it bottom-left.
+        func w2Frame(
+            _ dir: GridParams.SplitDirection
+        ) throws -> CGRect {
+            let context = makeContext { grid in
+                grid.type = .rigid
+                grid.columns = 2
+                grid.rows = 2
+                grid.splitDirection = dir
+            }
+            let frames = layout.calculateGeometry(
+                for: ids(3),
+                in: context
+            )
+            return try #require(frames[w2])
+        }
+        let columnsFirst = try w2Frame(.horizontal)
+        let rowsFirst = try w2Frame(.vertical)
+        #expect(columnsFirst.minX > rowsFirst.minX)
+        #expect(columnsFirst.minY < rowsFirst.minY)
+    }
+
     @Test("Rigid overflow stacks excess in the last cell")
     func rigidOverflow() throws {
         let context = makeContext { grid in

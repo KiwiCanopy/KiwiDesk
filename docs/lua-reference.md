@@ -355,14 +355,16 @@ KiwiDesk solves hiding similarly, so the same arrangements work.
 
 ### bsp.set_strategy
 
-**Expects:** `"shortest_side"` or `"alternating"`.
+**Expects:** `"longest_side"` or `"alternating"`.
 
-**Does:** sets the BSP split strategy.
+**Does:** sets the BSP split strategy. `longest_side` cuts the
+longer side of each region (keeps windows square-ish);
+`alternating` alternates horizontal then vertical by depth.
 
 **Example:**
 
 ```lua
-bsp.set_strategy("shortest_side")
+bsp.set_strategy("longest_side")
 ```
 
 ### bsp.set_ratio_h
@@ -574,7 +576,11 @@ or `0` (auto, default).
 
 **Does:** sets the size of columns (horizontal) or rows (vertical)
 in scrolling layouts. Auto is 1100px horizontal, 80% of available
-height vertical.
+height vertical. Any resolved size is floored at the global
+minimum window size (`set_min_window_size`) and capped at the
+axis length — so a small percentage on a narrow display falls
+back to the minimum rather than tiling windows smaller than it.
+Accepted values: `%` clamps to 5–100%, `px` to ≥100.
 
 **Example:**
 
@@ -735,7 +741,10 @@ grid.set_fill_empty_space(true)
 
 **Expects:** `"horizontal"` or `"vertical"`.
 
-**Does:** sets the preferred split direction for new cells.
+**Does:** sets the grid fill order for both grid types (#217):
+`horizontal` (Columns first) fills across a row then wraps down;
+`vertical` (Rows first) fills down a column then wraps across. For
+a dynamic grid it also sets which way the grid grows.
 
 **Example:**
 
@@ -2564,7 +2573,7 @@ stripped, grouped by namespace — `set_gap_override` becomes
       "bsp": {
         "new_window_placement": "after_focused",
         "ratio": 0.5,
-        "strategy": "shortest_side"
+        "strategy": "longest_side"
       },
       "grid": { "columns": 3, "rows": 2, "type": "dynamic",
                 "fill_empty_space": true,

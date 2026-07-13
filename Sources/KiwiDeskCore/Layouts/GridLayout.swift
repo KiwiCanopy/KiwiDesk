@@ -100,9 +100,12 @@ public struct GridLayout: LayoutSystem {
 
         let fillLast =
             params.type == .dynamic && params.fillEmptySpace
+        // Both grid types honour the arrange order (#217): columns
+        // first fills row-major (across a row, then down), rows
+        // first column-major (down a column, then across). It is a
+        // fill-order setting, not only a dynamic-growth one.
         let columnFirst =
             params.splitDirection == .horizontal
-            || params.type == .rigid
 
         for (index, window) in windows.enumerated() {
             let col: Int

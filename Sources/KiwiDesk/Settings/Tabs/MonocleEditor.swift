@@ -12,6 +12,10 @@ struct MonocleEditor: View {
             L("layout.monocle.name", "Monocle"),
             symbol: LayoutMode.monocle.glyph
         ) {
+            MonocleSchematic(
+                orientation: model.config.settings.monocle
+                    .orientation
+            )
             SegmentedPicker(
                 L(
                     "monocle.focus_orientation",
@@ -48,10 +52,14 @@ struct MonocleEditor: View {
                     .newWindowPlacement
             )
             CrossReferenceRow(
+                // Monocle has no schematic, so this row is where
+                // its app-bar presence surfaces: live On/Off
+                // state, with the toggle owned by Appearance.
                 prose: L(
-                    "monocle.app_bar_xref",
-                    "The app bar shown in monocle is "
-                        + "configured in"
+                    "monocle.app_bar_xref_state",
+                    "The monocle app bar (currently %1$@) is "
+                        + "configured in",
+                    barState
                 ),
                 linkTitle: L(
                     "scroll_grid.app_bar_xref_link",
@@ -60,5 +68,10 @@ struct MonocleEditor: View {
                 destination: .appearance
             )
         }
+    }
+
+    private var barState: String {
+        model.config.settings.monocle.appBar.enabled
+            ? L("common.on", "on") : L("common.off", "off")
     }
 }

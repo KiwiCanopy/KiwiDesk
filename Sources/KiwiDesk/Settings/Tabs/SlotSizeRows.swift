@@ -25,6 +25,13 @@ struct SlotSizeRows: View {
             : L("slot_size.column_width", "Column width")
     }
 
+    /// The points slider's floor: the global minimum window size
+    /// (the layout clamps anything smaller up to it). Capped under
+    /// the slider max so the range can never invert.
+    private var minPointsFloor: Double {
+        Double(min(model.config.settings.minWindowSize, 1990))
+    }
+
     private enum SizeUnit: Hashable {
         case auto, points, percent
     }
@@ -42,12 +49,19 @@ struct SlotSizeRows: View {
     /// resolve `.auto` against, so vertical (auto = a fraction)
     /// uses a fixed pt hint rather than the fraction standard.
     private var currentPoints: CGFloat {
+        let stored: CGFloat
         if case .points(let points) =
             model.config.settings.scrolling.slotSize
         {
-            return points
+            stored = points
+        } else {
+            stored =
+                isVertical ? 700 : ScrollSize.autoHorizontalPoints
         }
-        return isVertical ? 700 : ScrollSize.autoHorizontalPoints
+        // Keep the readout and slider thumb inside the slider's
+        // range; a smaller stored slot is floored at minWindowSize
+        // by the engine anyway.
+        return max(stored, CGFloat(minPointsFloor))
     }
 
     /// Seed for the Percent unit: keep an explicit fraction, else
@@ -117,7 +131,10 @@ struct SlotSizeRows: View {
             L("slot_size.unit", "Size unit"),
             selection: sizeUnitBinding,
             options: [
-                (L("slot_size.auto", "Auto"), SizeUnit.auto),
+                // "Default" (not "Auto"): it's a fixed built-in
+                // size, not an adaptive/auto-fitting one — the
+                // grid's "Auto-size" owns that meaning.
+                (L("slot_size.auto", "Default"), SizeUnit.auto),
                 (L("slot_size.points", "Points"), .points),
                 (L("slot_size.percent", "Percent"), .percent),
             ]
@@ -142,7 +159,7 @@ struct SlotSizeRows: View {
                 Text(
                     L(
                         "slot_size.auto_standard",
-                        "Auto — orientation standard"
+                        "Default — orientation standard"
                     )
                 )
                 .font(.callout)
@@ -168,8 +185,11 @@ struct SlotSizeRows: View {
                         alignment: .leading
                     )
                 SettingsSlider(
+                    // Floored at the global minimum window size: the
+                    // layout clamps a smaller slot up to it anyway,
+                    // so the control shouldn't offer below it.
                     value: pointsBinding,
-                    range: 100...2000,
+                    range: minPointsFloor...2000,
                     step: 10
                 )
                 Text("\(Int(currentPoints)) pt")

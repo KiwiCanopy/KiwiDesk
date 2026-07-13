@@ -248,9 +248,22 @@ carves its space from the layout.
 
 ### Per-Layout Tuning
 
-Expand each layout type to adjust its defaults:
+The pane opens on a **tab strip** — one tab per layout mode (BSP,
+Stack, Scrolling, Grid, Monocle, Track), landing on the mode your
+spaces use most — and shows only the selected mode's settings, so
+you tune one mode without scrolling past the others. The global
+**Minimum window size** sits above the strip (it feeds every
+mode). Floating has no tunables, so it has no tab.
 
-- **BSP**: split strategy (shortest_side or alternating) and the
+Each mode's tab leads with a small **schematic** — a static
+mini-diagram that redraws as you change ratios, counts, and
+orientation, so you can judge what a value looks like before you
+save (the same idea as the Gaps diagram in Appearance). It is a
+preview only; nothing applies to your live windows until you Save.
+
+Adjust each mode's defaults:
+
+- **BSP**: split strategy (longest_side or alternating) and the
   width and height split ratios (0.5 = 50/50 each) — the knobs
   the per-axis resize shortcuts nudge (#56).
 - **Stack**: master count, master ratio (how much width/height the
@@ -276,8 +289,14 @@ Expand each layout type to adjust its defaults:
   **first**, so a new window comes to the front of the cycle
   rather than the back.
 - **Grid**: type (dynamic or rigid), fill empty space (yes/no),
-  split direction (horizontal or vertical), and column and row
-  counts. In dynamic mode the counts are an upper bound — the
+  **Arrange** (Columns first or Rows first — the order windows fill
+  the grid: across a row then down, or down a column then across;
+  it also sets which way a dynamic grid grows), and column and row
+  counts. Arrange applies to both grid types. *Arrange* is
+  a clearer label for what used to read "Split direction": its
+  two values map to the unchanged Lua/JSON `split_direction`
+  (`horizontal` = Columns first, `vertical` = Rows first), so
+  configs and scripts are untouched. In dynamic mode the counts are an upper bound — the
   grid auto-balances up to that ceiling, then cascades the
   overflow in the last cell. **Auto-size grid** fits as many
   columns and rows as the screen allows at the minimum window
@@ -300,8 +319,12 @@ Expand each layout type to adjust its defaults:
   when more tracks exist than fit side by side): **cascade all**
   (the default) piles its windows from the top, **cascade
   overflow** keeps the ones that fit tiled and piles the rest.
-  Normal tracks always use cascade overflow for their own
-  windows — this only affects the overflow track. And **Wrap
+  There are two overflow levels: the far **overflow track**
+  collects whole *tracks* that no longer fit side by side, while
+  *within* a single track the surplus *windows* (more than fit at
+  the minimum window size) cascade among themselves. This Overflow
+  setting only tunes the far track; normal tracks always use
+  cascade overflow for their own windows. And **Wrap
   focus** (the same opt-in toggle as Scrolling's, off by
   default: on,
   focus wraps within the track along the axis and from the last
@@ -434,7 +457,9 @@ interaction.
   pointer to the center of the newly-focused window whenever focus
   changes, so clicks and scrolls land where the keyboard is working.
 - **Minimum window size**: if a window shrinks below this (pt), it
-  cascades instead of further shrinking (default 300 pt).
+  cascades instead of further shrinking (default 300 pt). It is a
+  stepper pinned above the layout-mode tab strip in Layout
+  Defaults — type an exact pt value or use the arrows.
 - **New window placement**: where new windows enter the space's window
   order — first, last, before focused, or after focused. Each layout
   has a sensible default; override per-space if needed.

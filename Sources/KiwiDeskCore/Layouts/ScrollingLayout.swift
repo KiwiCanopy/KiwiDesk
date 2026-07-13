@@ -107,10 +107,18 @@ public struct ScrollingLayout: LayoutSystem {
             ? context.gaps.inner.horizontal
             : context.gaps.inner.vertical
         let along = horizontal ? area.width : area.height
-        let size = context.scrolling.slotSize.resolved(
+        let resolved = context.scrolling.slotSize.resolved(
             along: along,
             horizontal: horizontal
         )
+        // Honour the global floor: a scrolling slot never resolves
+        // below minWindowSize, but never wider than the axis — so a
+        // small fraction (e.g. 5% of a narrow display) falls back to
+        // minWindowSize. Note BSP/Stack/Grid use minWindowSize as a
+        // *trigger* to spill into an OverlapStack pile; scrolling has
+        // no pile (its overflow is the scroll itself), so it floors
+        // the slot instead.
+        let size = min(along, max(resolved, context.minWindowSize))
         let stride = size + gap
         let count = CGFloat(windows.count)
         let rowLength = count * size + (count - 1) * gap

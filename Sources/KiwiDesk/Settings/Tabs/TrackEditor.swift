@@ -13,6 +13,16 @@ struct TrackEditor: View {
             L("layout.track.name", "Track"),
             symbol: LayoutMode.track.glyph
         ) {
+            TrackSchematic(
+                axis: model.config.settings.track.axis,
+                overflowStyle: model.config.settings.track
+                    .overflowStyle,
+                newWindow: model.config.settings.track.newWindow,
+                placement: model.config.settings.track
+                    .newWindowPosition,
+                count: model.config.settings.track.count,
+                autoTracks: model.config.settings.track.autoTracks
+            )
             // Track is a somewhat more advanced layout
             // (multi-window tracks, caps, per-track resize), so
             // the caption sets that expectation up front (#188).
@@ -78,11 +88,23 @@ struct TrackEditor: View {
             overflow
             Divider()
             trackAuto
-            StepperRow(
-                label: L("track.count", "Track limit"),
-                value: $model.config.settings.track.count,
-                in: 1...10
-            )
+            VStack(alignment: .leading, spacing: 4) {
+                StepperRow(
+                    label: L("track.count", "Track limit"),
+                    value: $model.config.settings.track.count,
+                    in: 1...10
+                )
+                Text(
+                    L(
+                        "track.count_caption",
+                        "Bounded by the minimum window size above: "
+                            + "more tracks than fit collapse into "
+                            + "the overflow track."
+                    )
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
             .disabled(
                 model.config.settings.track.autoTracks
             )
@@ -143,8 +165,10 @@ struct TrackEditor: View {
             Text(
                 L(
                     "track.auto_tracks_caption",
-                    "Opens and collapses tracks automatically "
-                        + "as windows come and go."
+                    "Fits as many tracks as the screen allows, "
+                        + "using the minimum window size above — "
+                        + "opening and collapsing them as "
+                        + "windows come and go."
                 )
             )
             .font(.caption)
