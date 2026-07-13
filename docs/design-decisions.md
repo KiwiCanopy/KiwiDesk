@@ -401,9 +401,9 @@ grid cell under Recents.
 `RegisterEventHotKey` (one key code + modifier mask) is the
 mechanism, chosen because it needs no Input Monitoring
 permission. Multi-key chords (⌘J+K) are therefore not
-recordable — pressing a second key while the first is held
-keeps the first and shows a one-key hint — and a
-hand-written `cmd+j+k` is inert and flagged ⚠ unrecognized.
+recordable — the first non-modifier key locks the combo
+(#212) — and a hand-written `cmd+j+k` is inert and flagged
+⚠ unrecognized.
 **Switch-mode shortcuts sit right under the mode strip.**
 The rows that switch modes render directly beneath the strip
 that defines the modes, ahead of the action groups — the
@@ -427,29 +427,28 @@ native-Space bindings follow, like Delete and make default.
 gives a whole second set of single-key bindings, ergonomically
 better than finger-twister chords.
 
-**The recorder locks on full release; the preview downgrades
-lazily.** Releases work through a burst window (~a third of
-a second): the first release that downgrades a chord stashes
-it, and a full release within the window locks the stash —
-so staggered release order can't corrupt the combo (⌘ let go
-a split second before J still locks ⌘J). The DISPLAY keeps
-showing the stashed chord for that same window: an instant
-downgrade made the combo visibly vanish right before every
-normal lock-in. Only a genuinely lingering hold settles the
-preview to what is actually held — then nothing stale can
-lock, the field stays recording, and re-entry just works
-(a preview that kept showing released keys read as stuck).
-Correction is release-then-press (⌘J, J up, K down → ⌘K); an
-overlapped second key keeps the first with a hint. Bare
-Escape, click-away, and app deactivation cancel. (#68
-recorder UX)
+**The recorder snaps in on key-down.** (#212, replacing the
+#68 lock-on-full-release machine.) Modifiers can be pressed
+and released freely — the preview mirrors what is held — and
+the first non-modifier keyDown locks the combo instantly:
+that key plus the modifiers held at that moment, the way the
+native System Settings recorder reads. Correction is
+re-recording (one click). The release model's burst window,
+stashed fullest-chord candidate, lazily-downgrading preview,
+one-key overlap hint, and mid-chord letter correction all die
+with it — in practice they were buggier than the correction
+affordance they bought, and their states read as noise. Bare
+Escape cancels (Escape with modifiers records — ⌃Escape is a
+valid hotkey); click-away and app deactivation cancel
+unchanged. The live "Already used by …" notice while forming
+a chord went with the release window (its display window is
+now zero); the post-commit duplicate hard-block below remains
+the conflict surface.
 
 **Duplicates hard-block; system shortcuts soft-warn.**
 Recording a combo another KiwiDesk row already holds is
 rejected inline with *Steal* (rebind here) and *Go to* (jump
-to the holder) — silent duplicates were the #34 bug class.
-The taken-by notice already shows *while the chord is being
-formed* (live in-app check against the edited bindings); a
+to the holder) — silent duplicates were the #34 bug class. A
 macOS system-shortcut collision instead commits with a
 persistent ⚠ — shadowing one can be intentional, and a
 live system check could go stale. Conflict surfaces

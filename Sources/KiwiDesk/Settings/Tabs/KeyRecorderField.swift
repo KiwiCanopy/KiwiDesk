@@ -6,11 +6,10 @@ import SwiftUI
 /// that captures a chord into a canonical combo string, with a
 /// conflict indicator and a clear button.
 ///
-/// Recording is lock-on-full-release (`ChordRecorder`): the
-/// field live-previews the chord as it is formed (modifiers,
-/// then the full combo) and locks in when every key is
-/// released — press order and release timing can never corrupt
-/// the chord, and the base key can be corrected mid-chord.
+/// Recording snaps in on key-down (`ChordRecorder`, #212):
+/// the field live-previews the held modifiers, and the first
+/// non-modifier key locks the combo instantly — correction is
+/// re-recording, one click.
 /// Coordination (#33): at most one recorder is active — the
 /// shared `RecorderCoordinator` tears the previous field down
 /// synchronously when a new one starts. Duplicates (#34):
@@ -47,14 +46,6 @@ struct KeyRecorderField: View {
     /// and must not immediately restart it.
     @State private var cancelledByClick: Date?
     @State private var rejection: RecorderRejection?
-    /// Transient one-key notice (a second key pressed while
-    /// the first was still held).
-    @State private var hint: String?
-    /// The holder of the combo currently being formed, shown
-    /// live while recording (in-app rows only — the macOS
-    /// system-shortcut check would go stale, so it stays the
-    /// per-row warning after commit).
-    @State private var takenBy: String?
     @State private var flashing = false
     /// Transient live-apply caption (#123): "Active now" (or
     /// the system-denied branch), auto-fading after ~1.5 s.
@@ -88,24 +79,6 @@ struct KeyRecorderField: View {
             if let rejection = liveRejection {
                 rejectionRow(rejection)
             }
-            if recording, let takenBy {
-                Text(
-                    L(
-                        "key_recorder.already_used",
-                        "Already used by \u{201C}%1$@\u{201D}"
-                            + " — locking in will ask to "
-                            + "replace.",
-                        takenBy
-                    )
-                )
-                .font(.caption)
-                .foregroundStyle(.orange)
-            }
-            if let hint {
-                Text(hint)
-                    .font(.caption)
-                    .foregroundStyle(.orange)
-            }
             if let liveFeedback {
                 LiveApplyCaption(feedback: liveFeedback)
             }
@@ -129,8 +102,6 @@ struct KeyRecorderField: View {
             rejection = nil
             recorder.stop()
             preview = ""
-            hint = nil
-            takenBy = nil
         }
         .onChange(of: liveRejection == nil) { _, clear in
             // The latch follows the live check out: once the
@@ -158,12 +129,16 @@ struct KeyRecorderField: View {
         .help(Self.recordHelp)
     }
 
+    // A meaning change replaced the old `help` key (#212 —
+    // the recorder no longer locks on release): per
+    // docs/translating.md a changed English text gets a NEW
+    // key, never a rename.
     @MainActor private static let recordHelp = L(
-        "key_recorder.help",
+        "key_recorder.help_press",
         "A shortcut is one key plus any of "
             + "⌃ Control, ⌥ Option, ⇧ Shift, "
-            + "and ⌘ Command — it locks in when "
-            + "you release the keys. For more "
+            + "and ⌘ Command — it locks in the "
+            + "moment you press the key. For more "
             + "shortcut layers, add Modes."
     )
 
@@ -243,8 +218,6 @@ struct KeyRecorderField: View {
     private func start() {
         rejection = nil
         preview = ""
-        hint = nil
-        takenBy = nil
         // Claiming tears down whichever field was recording
         // before — synchronously, so two keyDown monitors
         // never coexist (#33). Captures reach the heap-backed
@@ -253,22 +226,14 @@ struct KeyRecorderField: View {
         // load-bearing — it keeps the recorder alive to run
         // stop() even if the view's state died first.
         let previewBinding = $preview
-        let hintBinding = $hint
-        let takenBinding = $takenBy
         coordinator.claim(fieldID) { [recorder] in
             recorder.stop()
             previewBinding.wrappedValue = ""
-            hintBinding.wrappedValue = nil
-            takenBinding.wrappedValue = nil
         }
         recorder.start(
-            preview: { display, combo in
+            preview: { display in
                 preview = display
-                takenBy = combo.flatMap {
-                    preflight?($0)?.holder
-                }
             },
-            hint: { hint = $0 },
             finish: { outcome in
                 finish(outcome)
             }
@@ -277,8 +242,6 @@ struct KeyRecorderField: View {
 
     private func finish(_ outcome: ChordRecorder.Outcome) {
         preview = ""
-        hint = nil
-        takenBy = nil
         coordinator.release(fieldID)
         switch outcome {
         case .chord(let combo):
@@ -293,8 +256,6 @@ struct KeyRecorderField: View {
     private func stop() {
         recorder.stop()
         preview = ""
-        hint = nil
-        takenBy = nil
         coordinator.release(fieldID)
     }
 

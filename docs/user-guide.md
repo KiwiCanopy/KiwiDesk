@@ -632,12 +632,15 @@ it per profile like any other shortcut.
 Click an empty row or the **Edit** pencil on an existing row. Click
 **Record** and press your key combo. The recorder:
 
-- **Locks on full release** — captures modifiers and one key, commits
-  when everything is released.
-- **Shows live preview** as you form the combo.
-- **Lets you correct mid-chord** — release a key and press another to
-  change it.
-- **Cancels** on Escape, click-away, or app switch.
+- **Snaps in on key press** — hold any modifiers, and the first
+  non-modifier key locks the combo instantly (the way the macOS
+  System Settings recorder works).
+- **Previews held modifiers live** (⌃⌥⇧⌘) while you decide.
+- **Re-record to correct** — recording is one click, so a wrong
+  combo is just recorded again.
+- **Cancels** on bare Escape, click-away, or app switch
+  (Escape *with* modifiers records — ⌃Escape is a valid
+  shortcut).
 
 The shortcut displays as compact macOS glyphs (⌃⌥⇧⌘ for modifiers,
 then the key), mapped to your active keyboard layout. No `+`
