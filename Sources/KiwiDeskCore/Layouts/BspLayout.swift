@@ -39,7 +39,7 @@ public struct BspLayout: LayoutSystem {
 
         let sideBySide: Bool
         switch context.bsp.strategy {
-        case .shortestSide:
+        case .longestSide:
             // Split the longer side to stay square-ish.
             sideBySide = region.width >= region.height
         case .alternating:

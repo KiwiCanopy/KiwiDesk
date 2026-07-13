@@ -67,7 +67,7 @@ struct BspLayoutTests {
     }
 
     @Test("Third window splits the tall remainder vertically")
-    func shortestSideRecursion() throws {
+    func longestSideRecursion() throws {
         let frames = layout.calculateGeometry(
             for: [w1, w2, w3],
             in: makeContext()

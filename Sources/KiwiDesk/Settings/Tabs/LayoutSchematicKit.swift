@@ -1,0 +1,154 @@
+import KiwiDeskCore
+import SwiftUI
+
+/// The shared visual grammar of the Layout Defaults schematics
+/// (#125): the mini-canvas metrics, the accent tile language, the
+/// two ghost conventions, and the damping applied when a staged
+/// value changes. One family, so every mode's schematic — and the
+/// `GapsDiagram` it echoes — reads as one set. Everything here is
+/// pure SwiftUI drawing over the staged config: no live state, no
+/// AX calls (the #123 never-live-apply principle — a schematic
+/// answers "what would this look like", it never touches the
+/// running session).
+enum LayoutSchematic {
+    static let canvasWidth: CGFloat = 140
+    static let canvasHeight: CGFloat = 96
+    static let corner: CGFloat = 3
+    static let inset: CGFloat = 6
+    static let fill = Color.accentColor.opacity(0.25)
+    static let stroke = Color.accentColor.opacity(0.6)
+
+    /// Short enough to track a live slider drag without visible
+    /// lag; still smooths stepper/typed jumps. Mirrors
+    /// `GapsDiagram`.
+    static let damping = Animation.easeOut(duration: 0.12)
+}
+
+/// Value-domain math shared by the schematics, kept apart from
+/// the SwiftUI drawing so the mapping stays unit-testable (like
+/// `GapPreviewScale`).
+enum SchematicMath {
+    /// A 0...1 ratio as a rounded whole percent, for a11y prose.
+    static func pct(_ ratio: Double) -> Int {
+        Int((ratio * 100).rounded())
+    }
+
+    /// Maps an explicit slot-size in points onto a 0.15...0.6
+    /// fraction of the mini-canvas, so the scrolling schematic's
+    /// tiles read narrower or wider without a real screen.
+    static func slotFraction(points: CGFloat) -> CGFloat {
+        let t = (points - 100) / (1200 - 100)
+        return 0.15 + 0.45 * min(max(t, 0), 1)
+    }
+}
+
+/// One schematic tile in the family fill/stroke language. The
+/// `active` variant carries a heavier stroke for a highlighted
+/// slot (the scrolling anchor, the focused track).
+struct SchematicTile: View {
+    var active = false
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: LayoutSchematic.corner)
+            .fill(LayoutSchematic.fill)
+            .overlay(
+                RoundedRectangle(
+                    cornerRadius: LayoutSchematic.corner
+                )
+                .strokeBorder(
+                    LayoutSchematic.stroke,
+                    lineWidth: active ? 2 : 1
+                )
+            )
+    }
+}
+
+/// A small "+N" chip on the last visible tile when a schematic
+/// caps how many windows it draws.
+struct SchematicMoreChip: View {
+    let hidden: Int
+
+    var body: some View {
+        Text("+\(hidden)")
+            .font(.system(size: 9, weight: .semibold))
+            .monospacedDigit()
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 3)
+            .background(
+                Capsule().fill(Color(nsColor: .textBackgroundColor))
+            )
+    }
+}
+
+/// An **empty cell** — permanently unused space a rigid grid
+/// leaves when it has more cells than windows. Dashed, gray:
+/// reads as "no window here", distinct from the spawn ghost
+/// (a *future* window) and the off-monitor ghost (a *real*
+/// window off-screen).
+struct SchematicGap: View {
+    var body: some View {
+        RoundedRectangle(cornerRadius: LayoutSchematic.corner)
+            .strokeBorder(
+                Color.secondary.opacity(0.4),
+                style: StrokeStyle(lineWidth: 1, dash: [3, 2])
+            )
+    }
+}
+
+/// **New-window tile** — "the next window lands here." Stays in
+/// the accent family (it *is* a window) but reads bolder than a
+/// real tile: a denser fill (0.45 vs 0.25) plus a "+" corner
+/// badge that carries the meaning even without colour. The badge,
+/// not the fill alone, is the signal — so it survives low-
+/// contrast / colour-blind viewing. Used where a mode's new-
+/// window placement is the point (BSP, Stack, Grid, Track). Kept
+/// deliberately distinct from the gray `SchematicGap`
+/// (permanently-empty) and `SchematicGhostOverflow` (off-screen):
+/// accent family = a window; gray family = not a window.
+struct SchematicNewWindow: View {
+    /// Which corner the "+" badge sits in. Defaults to the bottom-
+    /// trailing corner; the scrolling schematic overrides it so the
+    /// badge stays in the visible half when the new-window tile is
+    /// cropped by the canvas edge (a first/last window).
+    var badgeAlignment: Alignment = .bottomTrailing
+
+    var body: some View {
+        ZStack(alignment: badgeAlignment) {
+            RoundedRectangle(cornerRadius: LayoutSchematic.corner)
+                .fill(Color.accentColor.opacity(0.45))
+                .overlay(
+                    RoundedRectangle(
+                        cornerRadius: LayoutSchematic.corner
+                    )
+                    .strokeBorder(
+                        LayoutSchematic.stroke,
+                        lineWidth: 1
+                    )
+                )
+            Image(systemName: "plus")
+                .font(.system(size: 7, weight: .bold))
+                .foregroundStyle(.white)
+                .padding(2)
+        }
+    }
+}
+
+/// **Off-monitor ghost** — a *real* window scrolled or overflowed
+/// past the visible screen. Solid gray fill, thin solid stroke,
+/// drawn straddling / outside the monitor rectangle. No "+"
+/// (that would collide with the spawn ghost). Used by Scrolling.
+struct SchematicGhostOverflow: View {
+    var body: some View {
+        RoundedRectangle(cornerRadius: LayoutSchematic.corner)
+            .fill(Color.secondary.opacity(0.15))
+            .overlay(
+                RoundedRectangle(
+                    cornerRadius: LayoutSchematic.corner
+                )
+                .strokeBorder(
+                    Color.secondary.opacity(0.5),
+                    lineWidth: 1
+                )
+            )
+    }
+}

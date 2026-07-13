@@ -13,6 +13,12 @@ struct TrackEditor: View {
             L("layout.track.name", "Track"),
             symbol: LayoutMode.track.glyph
         ) {
+            TrackSchematic(
+                axis: model.config.settings.track.axis,
+                overflowStyle: model.config.settings.track
+                    .overflowStyle,
+                newWindow: model.config.settings.track.newWindow
+            )
             // Track is a somewhat more advanced layout
             // (multi-window tracks, caps, per-track resize), so
             // the caption sets that expectation up front (#188).
@@ -143,8 +149,10 @@ struct TrackEditor: View {
             Text(
                 L(
                     "track.auto_tracks_caption",
-                    "Opens and collapses tracks automatically "
-                        + "as windows come and go."
+                    "Fits as many tracks as the screen allows, "
+                        + "using the minimum window size above — "
+                        + "opening and collapsing them as "
+                        + "windows come and go."
                 )
             )
             .font(.caption)

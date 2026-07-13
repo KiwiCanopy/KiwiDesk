@@ -52,9 +52,22 @@ extension KiwiCore {
                 _ = try profiles.read(name: name)
                 return nil
             } catch {
+                // The raw DecodingError is cryptic (e.g. "Cannot
+                // initialize Strategy from invalid String value
+                // 'shortest_side'"); log it for debugging but show
+                // the user a plain, actionable line. Re-saving the
+                // profile rewrites it in the current format —
+                // pre-release, re-saving IS the migration.
+                onLog("profile '\(name)' is invalid: \(error)")
                 return ConfigIssue(
                     source: "\(name).json",
-                    message: "\(error)"
+                    message: L(
+                        "config_issues.profile_unreadable",
+                        "Couldn't be loaded — it was saved by a "
+                            + "different version or edited by hand. "
+                            + "Open it in Settings and save again "
+                            + "to repair."
+                    )
                 )
             }
         }

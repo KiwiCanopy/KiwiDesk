@@ -104,7 +104,7 @@ extension KiwiCore {
     }
 
     private static let strategyError = CommandResponse.fail(
-        "expected shortest_side|alternating"
+        "expected longest_side|alternating"
     )
     private static let ratioError = CommandResponse.fail(
         "expected ratio"

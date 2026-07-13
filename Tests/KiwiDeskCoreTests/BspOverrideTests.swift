@@ -48,9 +48,9 @@ struct BspOverrideTests {
         global.splitRatioH = 0.3
         global.splitRatioV = 0.8
         var over = BspOverride()
-        over.strategy = .shortestSide  // override only this
+        over.strategy = .longestSide  // override only this
         let resolved = over.resolved(onto: global)
-        #expect(resolved.strategy == .shortestSide)  // overridden
+        #expect(resolved.strategy == .longestSide)  // overridden
         #expect(resolved.splitRatioH == 0.3)  // inherited
         #expect(resolved.splitRatioV == 0.8)  // inherited
     }
@@ -84,7 +84,7 @@ struct BspOverrideTests {
     @Test("TilingSettings resolves bsp per space")
     func settingsResolver() {
         var settings = TilingSettings()
-        settings.bsp.strategy = .shortestSide
+        settings.bsp.strategy = .longestSide
         var over = BspOverride()
         over.strategy = .alternating
         settings.bsp.override[SpaceID("2")] = over
@@ -92,7 +92,7 @@ struct BspOverrideTests {
             settings.resolvedBsp(for: "2").strategy == .alternating
         )
         #expect(
-            settings.resolvedBsp(for: "1").strategy == .shortestSide
+            settings.resolvedBsp(for: "1").strategy == .longestSide
         )
     }
 
@@ -138,7 +138,7 @@ struct BspOverrideCommandTests {
         let over = core.tiler.settings.bsp.override[SpaceID("2")]
         #expect(over?.strategy == .alternating)
         // The global params are untouched.
-        #expect(core.tiler.settings.bsp.strategy == .shortestSide)
+        #expect(core.tiler.settings.bsp.strategy == .longestSide)
         // Resolution reflects it for that space only.
         #expect(
             core.tiler.settings.resolvedBsp(for: "2").strategy
@@ -146,7 +146,7 @@ struct BspOverrideCommandTests {
         )
         #expect(
             core.tiler.settings.resolvedBsp(for: "1").strategy
-                == .shortestSide
+                == .longestSide
         )
     }
 

@@ -124,7 +124,10 @@ struct SlotSizeRows: View {
             L("slot_size.unit", "Size unit"),
             selection: sizeUnitBinding,
             options: [
-                (L("slot_size.auto", "Auto"), SizeUnit.auto),
+                // "Default" (not "Auto"): it's a fixed built-in
+                // size, not an adaptive/auto-fitting one — the
+                // grid's "Auto-size" owns that meaning.
+                (L("slot_size.auto", "Default"), SizeUnit.auto),
                 (L("slot_size.points", "Points"), .points),
                 (L("slot_size.percent", "Percent"), .percent),
             ]
@@ -149,7 +152,7 @@ struct SlotSizeRows: View {
                 Text(
                     L(
                         "slot_size.auto_standard",
-                        "Auto — orientation standard"
+                        "Default — orientation standard"
                     )
                 )
                 .font(.callout)

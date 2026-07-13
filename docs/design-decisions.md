@@ -41,6 +41,7 @@ planned escape hatch; it is not a wontfix dumping ground.
 | Animation and screen-selection heuristics assume a single screen; some multi-monitor edge cases aren't fully modeled yet. | These paths were scoped single-screen first; multi-monitor is a tracked frontier, not a regression. | Screen-pick and per-monitor animation heuristics are single-screen by construction. | Multi-monitor hardening (roadmap `plan/06_Roadmap.md`). |
 | A window closed *while its native desktop is off-screen* is reported as `reason: vanished`, never as a corrective `closed`; and a real close landing within the ~1 s settle window after a desktop switch can also read `vanished`. | The reason payload (#40) classifies visibility changes at emit time; once a desktop is off-screen, a close there is observationally identical to the vanish that already fired, and inside the settle window a close is indistinguishable from the switch burst. Both self-heal under the documented consumer pattern (events as dirty flags + re-query). | macOS AX only reports the current desktop's windows (the same observation limit behind the SIP-blocked items): KiwiDesk cannot see lifecycle on an off-screen desktop, and the burst is only separable from user closes by time. | Consumers filtering `vanished` refresh on `native_space_change` — the [sketchybar recipe](https://github.com/hajiboy95/KiwiDesk/blob/main/docs/recipes/sketchybar.md) pattern does this already. |
 | Dragging a floating window shows no drag ghost and no snap zone, and dropping it over a tiled slot does nothing — in every layout mode. | A floating window has no tile slot: there is no home slot for a ghost to preview and no swap a drop could perform, so a highlight would promise an action that cannot happen. A once-planned opt-in toggle (`drag.ghost.show_for_floating`) was rejected as a no-op for the same reason ([#161](https://github.com/hajiboy95/KiwiDesk/issues/161)); earlier reports of drag visuals on floating windows were [#160](https://github.com/hajiboy95/KiwiDesk/issues/160) — float state silently reverting to tiled on reopen. | Layout algorithms run over the flat array of *tiled* windows only; floating windows are filtered out before slot computation, so no slot geometry exists for them. | `make_tiled` returns the window to the grid; drag visuals resume immediately. |
+| The Layout Defaults schematics are fixed illustrative diagrams (a handful of tiles, capped with a "+N" chip), not a render of your actual window count or arrangement. | They answer "what does this value look like" from the *staged config* alone; a faithful desktop simulation would need live window state (an AX read) and re-introduce exactly the live-apply coupling #123 rejects. Monocle's diagram shows its focus-cycle navigation model, not tiling geometry (it has none). | The schematics are pure SwiftUI over the config model (`LayoutSchematicKit`), by the #123 never-live-apply principle. | None needed — the preview is for judging values pre-Save; Save and observe the real windows ([#125](https://github.com/hajiboy95/KiwiDesk/issues/125)). |
 | At deep BSP splits under extreme ratios, the screen-midpoint side rule can misread which side a "grow" acts on. | Mouse parity is the spec: keyboard matches the mouse's midpoint reading exactly, warts included, so the two never diverge. | The sign is inferred from the focused window's screen-midpoint side (`MouseResize.bspSide`), shared with the mouse for parity. | **Shipped**: the [`track` layout (#128)](https://github.com/hajiboy95/KiwiDesk/issues/128) gives each resize one true target; within BSP the parity is intentional ([#122](https://github.com/hajiboy95/KiwiDesk/issues/122)). |
 | When scrolling focus steps *backward* (up/left) toward a window pinned behind the leading edge, keystrokes still reach the previously focused app until the pan settles (one animation length, 50–1000 ms). Forward (down/right) focus and the handoff after closing a window raise immediately, so only the backward slide has the delay. A genuine click on a window KiwiDesk just raised, before that raise's focus echo lands and while focus has already moved to another window in the same scrolling space, is read as KiwiDesk's own echo, so focus re-asserts to that other window. | Raising a pinned-behind row first pops it over the whole screen before the slide starts ([#143](https://github.com/hajiboy95/KiwiDesk/issues/143)); deferring *only* that direction keeps the pinned row reading as a real scroll, while forward moves and closes lay the target on top at once. Echo provenance ([#152](https://github.com/hajiboy95/KiwiDesk/issues/152)) tells KiwiDesk's own raise echoes apart from user focus — tracking every raise whose echo is still in flight — but AppKit gives a click and a raise echo the same shape, so the window focus has already moved to wins the tie over a still-unechoed self-raise. Normal for scroll-style window managers. | AppKit keyboard status only moves with the real AX raise, and the backward raise waits on the animation-settle signal (shared with the z-order restore). | Global Carbon hotkeys are unaffected (they reach KiwiDesk regardless of the key app); `animations.set_on_scrolling(false)` disables the slide and restores instant transfer. |
 | `mouse.follows_focus` is a **per-profile** setting: switching profiles can silently flip mouse-follows-focus, and a profile saved before the toggle existed loads with it off. | It lives on the settings root profiles serialize — the same home as `animations.*` and `mouse_resize` ([#186](https://github.com/hajiboy95/KiwiDesk/issues/186)); standing up the sparse behavior-override seam (`KeyModeOverride`-style) for one bool is exactly the premature generic override AGENTS.md §5 forbids until a second client exists. | Profiles serialize `TilingSettings` wholesale, and missing keys decode to their defaults by the profile contract. | Set the toggle in each profile you use (re-saving captures it); revisit the placement if a real global-behavior tier ever emerges. |
@@ -785,6 +786,93 @@ knob was tried and dropped: it refracted the accent fill
 beneath it and turned blue. Accessibility is delegated to a
 native `Slider` representation, so assistive tech sees
 exactly the control it replaces.
+
+**Numeric controls pick one of three idioms by a single
+test.** So Settings reads consistently, a numeric setting's
+control is chosen by *would a user say a specific number out
+loud?* — not by which pane it lives in:
+
+- **`StepperRow`** (typeable field + arrows) for discrete,
+  exact values a user names: counts, ms durations, pt
+  thresholds — master count, columns/rows, track limit,
+  minimum window size, animation duration.
+- **Slider + readout** (no typing) for a continuous feel or
+  proportion tuned by eye: split ratios, master ratio, gaps.
+- **Segmented / toggle** for a non-numeric choice.
+
+Minimum window size migrated slider → `StepperRow` on this
+rule (#204): it is a precise pt threshold, not a feel knob.
+
+**Layout Defaults is a per-mode tab strip, not a stacked
+scroll (#204).** The layout modes are a fixed, small,
+mutually-exclusive set (`LayoutMode` minus Floating), so they
+get a segmented tab strip — one mode's editor visible at a
+time — instead of every mode stacked in one `ScrollView`. The
+strip lands on the profile's most-used mode. The global
+minimum window size is pinned *above* the strip because it
+feeds every mode (and gates the `OverlapStack` overflow
+cascade), so it belongs to none of them. The formerly bundled
+`LayoutParamsEditor` (BSP+Stack) and `ScrollGridEditor`
+(Scrolling+Grid) were split at the mode boundary so each mode
+owns one tab and one schematic.
+
+**Layout schematics are static previews of staged values, not
+live (#125).** Every layout mode's tab leads with a small
+`GapsDiagram`-family schematic (`LayoutSchematicKit` /
+`LayoutSchematicCanvas` hold the shared canvas, tile, and ghost
+language) that redraws from the *staged* config as the user
+edits — never from live window state, no AX calls. This is the
+one non-negotiable: it upholds the #123 never-live-apply
+principle (a preview answers "what would this look like" without
+mutating the session). No hover, no tap-to-inspect, no
+drag-to-preview, and **no animation** — a looping animation
+would be architecturally legal (canned, config-driven) but was
+rejected on cost: a timer/reduce-motion state machine in every
+tile for a pane open seconds at a time. *All six modes get a
+schematic, Monocle included* — it draws the **navigation model**
+(a fan of full-screen cards + `orientation` cycle chevrons), not
+geometry, which both honours its one real knob and removes the
+"why is this the one blank tab" inconsistency. Schematics are
+deliberate approximations (a handful of tiles, capped with
+"+N"), never a simulation of the user's real desktop.
+
+**Intuitiveness over strict Apple-native, where they conflict
+(#125, owner call).** The first cut held to Apple's "one static
+frame per control" idiom, but that under-delivered on the knobs
+whose whole meaning is a transition. So the family uses a
+**mixed, deliberately legible grammar**: a **two-frame sequence**
+(mini-screen → arrow → mini-screen) for **BSP**, the one mode
+where strategy divergence *and* new-window placement only appear
+once a third window arrives; **single frames** for the rest,
+carrying the conditional fact with one of a small shared
+**ghost vocabulary** — a **spawn ghost** (dashed accent tile +
+"+", "the next window lands here": BSP's third window, Track's
+own-vs-focused track), an **off-monitor ghost** (solid gray,
+straddling a drawn screen edge, "a real window scrolled
+off-screen": Scrolling), and the pre-existing **empty-cell gap**
+(dashed gray, "unused grid space": rigid Grid). Grid draws five
+windows so the columns-first/rows-first wrap is visible; Stack's
+overflow is a small iconic fanned-pile badge, not a permanently
+cascading column. Reserving the two-frame motif to BSP keeps it
+*meaningful* — if every mode had two frames, "why two frames"
+would stop reading. The app bar shown in Scrolling/Monocle is
+**not** drawn into their schematics (one preview, one job); its
+presence surfaces as live On/Off state in the `CrossReferenceRow`
+that points at Appearance ▸ App Bar, keeping app-bar ownership
+whole.
+
+**A GUI label may diverge from the Lua/JSON wire name when the
+label alone is ambiguous (#217).** The Grid picker shows
+"Arrange: Columns first / Rows first"; the wire vocabulary
+stays `split_direction: horizontal | vertical` (`horizontal` =
+Columns first). "Split direction" collided with two opposed
+real-world conventions (divider-axis vs stack-axis); the
+row/column labels are unambiguous under both. Only the display
+label changes — churning the documented verb would widen the
+blast radius (override commands, existing configs, testers'
+mental model) for no gain. The label locale key was moved with
+`scripts/rename-key` (German preserved); the two option labels
+are new keys.
 
 **Rows share one label axis and one readout column.** Every
 labeled control row (slider, segmented picker, dropdown)
