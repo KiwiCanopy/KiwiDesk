@@ -212,13 +212,13 @@ struct MoveToSpaceTests {
         // On: focusing a different window slides (animates).
         core.tiler.settings.animations.onScrolling = true
         animatedApplies = 0
-        core.focusWindow(WindowID(1))
+        core.focusWindow(WindowID(1), warp: false)
         #expect(animatedApplies >= 1)
 
         // Off: focusing snaps — no animated apply.
         core.tiler.settings.animations.onScrolling = false
         animatedApplies = 0
-        core.focusWindow(WindowID(3))
+        core.focusWindow(WindowID(3), warp: false)
         #expect(animatedApplies == 0)
     }
 

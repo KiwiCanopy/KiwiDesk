@@ -28,11 +28,15 @@ struct SettingsCodingTests {
         #expect(
             Set(root.keys) == [
                 "animations", "app_bar", "drag", "gap", "layout",
-                "min_window_size", "mouse_resize",
+                "min_window_size", "mouse", "mouse_resize",
                 "new_window_placement_override", "resize", "space",
                 "swap_skips_cascade",
             ]
         )
+        // `mouse.set_follows_focus` → `mouse.follows_focus`
+        // (#186), off by default.
+        let mouse = try object(root["mouse"])
+        #expect(mouse["follows_focus"] as? Bool == false)
         // `set_swap_skips_cascade` → top-level `swap_skips_cascade`
         // (#172), on by default.
         #expect(root["swap_skips_cascade"] as? Bool == true)
@@ -177,6 +181,7 @@ struct SettingsCodingTests {
         settings.animations.onRelayout = false
         settings.animations.durationMS = 400
         settings.animations.scrollSpeedMS = 180
+        settings.mouse.followsFocus = true
         let data = try JSONEncoder().encode(settings)
         let decoded = try JSONDecoder().decode(
             TilingSettings.self,

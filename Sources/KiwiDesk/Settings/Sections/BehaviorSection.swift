@@ -45,6 +45,14 @@ struct BehaviorSection: View {
                     ),
                 ]
             )
+            Toggle(
+                L(
+                    "behavior.mouse.follows_focus",
+                    "Move mouse to focused window"
+                ),
+                isOn: $model.config.settings.mouse
+                    .followsFocus
+            )
         }
     }
 

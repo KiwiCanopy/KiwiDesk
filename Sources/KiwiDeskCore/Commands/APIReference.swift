@@ -178,6 +178,9 @@ public enum APIReference {
             "set_auto_tracks_override",
             "set_overflow_style_override",
         ],
+        "mouse": [
+            "set_follows_focus"
+        ],
         "drag": [
             "set_ghost_enabled", "set_ghost_border",
             "set_ghost_border_thickness",

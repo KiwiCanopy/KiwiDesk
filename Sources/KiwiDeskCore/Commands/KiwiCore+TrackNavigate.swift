@@ -120,7 +120,7 @@ extension KiwiCore {
             )
             scheduleTrackZOrderRestoreIfOverflowing()
         } else {
-            focusWindow(target)
+            focusWindow(target, warp: true)
         }
         return .ok()
     }

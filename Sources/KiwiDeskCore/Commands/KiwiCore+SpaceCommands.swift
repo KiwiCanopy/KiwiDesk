@@ -51,6 +51,11 @@ extension KiwiCore {
                 force: true
             )
             self.emitSpaceChange()
+            // The focus echo that triggered this follow found
+            // the window on an inactive space, where the warp
+            // guard skips; now that the space is forward the
+            // slot frames are real — warp here (#186).
+            self.warpMouseToFocused(id)
         }
     }
 
@@ -97,7 +102,7 @@ extension KiwiCore {
         // window — otherwise keystrokes keep going to a
         // window that is now stashed offscreen.
         if let next = activeSpace?.focused {
-            focusWindow(next, refocusRetile: false)
+            focusWindow(next, refocusRetile: false, warp: true)
         }
         emitSpaceChange()
         scheduleSpaceSettle(SpaceID(raw))
@@ -202,7 +207,7 @@ extension KiwiCore {
         if follow {
             state.workspaces.activate(target)
             // The retile below owns placement (see focusWindow).
-            focusWindow(focused, refocusRetile: false)
+            focusWindow(focused, refocusRetile: false, warp: true)
             emitSpaceChange()
             // Following is a space switch too: re-assert so the
             // target's other windows survive a dropped frame.
@@ -210,7 +215,7 @@ extension KiwiCore {
         } else if let next = activeSpace?.focused {
             // The moved window would keep macOS focus while
             // stashed offscreen; refocus the current space.
-            focusWindow(next, refocusRetile: false)
+            focusWindow(next, refocusRetile: false, warp: true)
         }
         retile(
             animated: follow
