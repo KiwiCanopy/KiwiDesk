@@ -4,9 +4,9 @@ import SwiftUI
 /// The per-space layout override rows (issue #17): the fields
 /// the space's current mode can override, each inheriting the
 /// global value (gray) until its checkbox is ticked. Rendered
-/// inline inside a space row's "Customize" expander (#68 §3.2)
-/// — the row set mirrors the app-bar override controls, keyed
-/// by space instead of layout.
+/// in a space row's "Customize" popover (#68 §3.2, moved out of
+/// the inline expander in #205) — the row set mirrors the
+/// app-bar override controls, keyed by space instead of layout.
 struct SpaceOverrideRows: View {
     @ObservedObject var model: SettingsModel
     let space: SpaceID
