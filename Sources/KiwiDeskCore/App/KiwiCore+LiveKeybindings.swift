@@ -77,6 +77,13 @@ extension KiwiCore {
         guard let lua = keys.lua else {
             return .failure(.unavailable)
         }
+        // A recorder must disarm before it commits (see
+        // KeyRecorderField.finish). While suspended nothing is
+        // registered, so `activationFailures` is empty and a
+        // status read here would falsely claim `.active`. Refuse
+        // rather than lie — this is the enforced tripwire behind
+        // that ordering invariant (#213).
+        guard !keys.isSuspended else { return .failure(.unavailable) }
         let profile: KeyModeOverride?
         switch activeProfileModesForLiveApply() {
         case .success(let modes):

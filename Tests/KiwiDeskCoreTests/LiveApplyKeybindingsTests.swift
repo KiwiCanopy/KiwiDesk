@@ -104,6 +104,39 @@ struct LiveApplyKeybindingsTests {
         #expect(saved.modes == baseConfig().modes)
     }
 
+    @Test("A suspended recorder never live-applies as active")
+    func suspendedNeverActive() throws {
+        let core = makeGuiCore()
+        try core.saveGuiConfig(baseConfig())
+
+        var edited = baseConfig().modes
+        let added = binding("alt+j", lua: "hit = true")
+        edited[0].bindings.append(added)
+
+        // Commit while still armed must not claim success: nothing
+        // is registered, so `.active` would be a lie (#213).
+        core.suspendHotkeysForRecording()
+        let armed = core.liveApplyKeybindings(
+            modes: edited,
+            target: .init(mode: "default", binding: added)
+        )
+        guard case .failure(.unavailable) = armed else {
+            Issue.record("suspended apply must refuse, not lie")
+            return
+        }
+
+        // Disarm, then the same apply registers and reports active.
+        core.resumeHotkeysForRecording()
+        let live = core.liveApplyKeybindings(
+            modes: edited,
+            target: .init(mode: "default", binding: added)
+        )
+        guard case .success(.active) = live else {
+            Issue.record("expected active after resume")
+            return
+        }
+    }
+
     @Test("Saved state and the snapshot both restore")
     func restorePaths() throws {
         let core = makeGuiCore()
