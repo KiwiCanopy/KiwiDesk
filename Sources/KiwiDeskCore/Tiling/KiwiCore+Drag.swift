@@ -180,7 +180,7 @@ extension KiwiCore {
                 )
             } else {
                 retile()
-                focusWindow(id)
+                focusWindow(id, warp: false)
             }
             return
         }
@@ -209,8 +209,11 @@ extension KiwiCore {
                 ? tiler.settings.animations.onWindowSwap : nil
         )
         // The dropped window has the user's attention: make
-        // it the focused one, in state and for real.
-        focusWindow(id)
+        // it the focused one, in state and for real. No warp:
+        // this focus is mouse-made (#186), and a no-target
+        // drop snaps the window back to a slot the pointer
+        // may sit outside of.
+        focusWindow(id, warp: false)
         if crossedZones {
             scheduleZOrderRestore()
         }

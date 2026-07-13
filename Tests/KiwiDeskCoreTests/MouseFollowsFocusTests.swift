@@ -99,6 +99,14 @@ struct MouseFollowsFocusTests {
             cursor: CGPoint(x: 101, y: 201)
         )
         #expect(inside == nil)
+        // On the max edge — excluded by `contains`, but a
+        // pointer fresh from an edge resize sits exactly
+        // there; the 1 pt slack treats it as inside.
+        let onEdge = MouseWarp.target(
+            frame: frame,
+            cursor: CGPoint(x: 500, y: 500)
+        )
+        #expect(onEdge == nil)
     }
 
     @Test("An unknown cursor position still warps")

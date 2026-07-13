@@ -15,7 +15,12 @@ enum MouseWarp {
         cursor: CGPoint?
     ) -> CGPoint? {
         guard !frame.isEmpty else { return nil }
-        if let cursor, frame.contains(cursor) {
+        // 1 pt of slack: `contains` excludes the max edges,
+        // and a pointer parked exactly on a border (fresh
+        // from an edge resize) is "inside" for this purpose.
+        if let cursor,
+            frame.insetBy(dx: -1, dy: -1).contains(cursor)
+        {
             return nil
         }
         return CGPoint(x: frame.midX, y: frame.midY)

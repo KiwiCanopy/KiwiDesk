@@ -48,7 +48,7 @@ extension KiwiCore {
             retile(
                 animated: tiler.settings.animations.onWindowResize
             )
-            focusWindow(id)
+            focusWindow(id, warp: false)
             return
         }
         let tiled = space.windows.filter {
@@ -84,7 +84,7 @@ extension KiwiCore {
         // A track resize can flip a track into/out of an overflow
         // cascade — restack the pile once it settles (#193).
         scheduleTrackZOrderRestoreIfOverflowing()
-        focusWindow(id)
+        focusWindow(id, warp: false)
     }
 
     /// Writes one translated adjustment into the space's

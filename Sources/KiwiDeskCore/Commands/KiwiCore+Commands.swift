@@ -111,20 +111,20 @@ extension KiwiCore {
     /// which is the "fly out of the corner" bug (issue #11).
     public func focusWindow(
         _ id: WindowID,
-        refocusRetile: Bool = true
+        refocusRetile: Bool = true,
+        warp: Bool = true
     ) {
         let previousFocused = activeSpace?.focused
         let space = state.workspaces.space(of: id)
         if let space {
             state.workspaces.focus(id, in: space)
         }
-        // Mouse follows focus (#186) fires at the intent
-        // point, not on the AX echo: state focus is set (so a
-        // scrolling pan's slot frames are final), and the echo
-        // of the raise below is a self-echo that must not warp
-        // twice. In-flight z-order re-asserts are held off
-        // inside the call.
-        warpMouseToFocused(id)
+        // Mouse follows focus (#186) fires here, at the intent
+        // point: state focus is set (scrolling slot frames are
+        // final) and the raise echo below must not warp twice.
+        // `warp: false` marks mouse-made focus (drag drop,
+        // resize settle), where the button is already up.
+        if warp { warpMouseToFocused(id) }
         // Scrolling defers the raise until the pan settles
         // (#143), but only when stepping *backward* toward the
         // row pinned behind the leading edge (up/left): raising

@@ -1749,9 +1749,9 @@ the center of the newly-focused window, so the next click,
 scroll, or hover lands on the window the keyboard is working in —
 the standard companion behaviour in i3/sway/yabai. Default is
 **`false`** (off), matching those WMs. The pointer never moves
-while a mouse button is held down, when it is already inside the
-focused window, or during KiwiDesk's own z-order maintenance
-raises. When focus lands on a window in an inactive virtual
+while a mouse button is held down or when it is already inside
+the focused window, and is held while KiwiDesk performs its own
+z-order maintenance raises. When focus lands on a window in an inactive virtual
 space (cmd+tab into a stashed window), the warp waits until
 KiwiDesk follows focus and pulls that space forward. Also
 togglable in the Settings app under **Behavior ▸ Mouse**.
