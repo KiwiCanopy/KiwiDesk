@@ -61,12 +61,18 @@ enum KeybindingImportClassifier {
             let command = KeybindingCatalog.switchModeCommand(name)
             map[command.lua] = command.label
         }
-        // Step-independent Size & Float row: not in any
-        // navigation group and matched by no shape rule, so it
-        // needs its own entry or an imported `make_floating()`
-        // stays Custom (#91).
-        let float = KeybindingCatalog.makeFloating
-        map[float.lua] = float.label
+        // Step-independent Size & Float rows: not in any
+        // navigation group and matched by no shape rule, so each
+        // needs its own entry or an imported binding stays Custom
+        // (#91). `toggle_floating` is the bindable one (#221);
+        // `make_floating` is kept for recognition only so a
+        // hand-written one still classifies.
+        for command in [
+            KeybindingCatalog.toggleFloating,
+            KeybindingCatalog.makeFloating,
+        ] {
+            map[command.lua] = command.label
+        }
         return map
     }
 

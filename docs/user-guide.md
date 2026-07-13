@@ -679,7 +679,7 @@ you can drive KiwiDesk before configuring anything:
 | Move to space 1–9 | `⌥⇧1` … `⌥⇧9` |
 | Shrink / Grow width | `⌥-` / `⌥=` |
 | Shrink / Grow height | `⌥⇧-` / `⌥⇧=` |
-| Make floating | `⌥T` |
+| Toggle floating | `⌥T` |
 
 The digits are display-order positions: `⌥3` targets the *third*
 space in your Spaces list, whatever its name. A row is generated

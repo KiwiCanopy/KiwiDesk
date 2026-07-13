@@ -111,9 +111,9 @@ public enum DefaultKeybindings {
         rows.append(
             KeyBinding(
                 combo: "option+t",
-                lua: "KiwiDesk.make_floating()",
+                lua: "KiwiDesk.toggle_floating()",
                 kind: .navigation,
-                label: "Make floating"
+                label: "Toggle floating"
             )
         )
         return rows

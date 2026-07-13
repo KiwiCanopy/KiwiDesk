@@ -46,16 +46,30 @@ extension KeybindingCatalog {
                     )
                 }
             ),
-            makeFloating,
+            toggleFloating,
         ]
     }
 
-    /// The Make-floating row — step-independent, so unlike
-    /// Grow/Shrink it is a fixed command. A named single
-    /// authority because the import classifier matches it
-    /// directly (it is in no `navigationGroups` group and has
-    /// no shape rule); without that entry an imported
-    /// `make_floating()` binding demoted to Custom (#4/#91).
+    /// The Toggle-floating row — the one float verb offered as a
+    /// bindable preset (#221): flip the focused window between
+    /// floating and tiled. The explicit `make_floating` /
+    /// `make_tiled` / `make_auto` verbs stay Lua/CLI-only (the
+    /// power-user escape hatch), so only this appears in the GUI
+    /// list. Step-independent, so a fixed command like the old
+    /// Make-floating row it replaces.
+    static let toggleFloating = NavCommand(
+        label: "Toggle floating",
+        lua: "KiwiDesk.toggle_floating()",
+        displayLabel: {
+            L("keybinding.toggle_floating", "Toggle floating")
+        }
+    )
+
+    /// Classification-only anchor for a hand-written
+    /// `make_floating()` (#4/#91): not offered as a bindable
+    /// preset anymore (#221), but the import classifier still
+    /// matches it directly so an imported binding lands in Size &
+    /// Float with its proper label instead of demoting to Custom.
     static let makeFloating = NavCommand(
         label: "Make floating",
         lua: "KiwiDesk.make_floating()",
