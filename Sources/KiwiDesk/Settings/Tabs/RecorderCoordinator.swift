@@ -20,6 +20,14 @@ final class RecorderCoordinator: ObservableObject {
     /// "Go to" action of a rejected recording).
     @Published var scrollTarget: String?
 
+    /// Suspends/restores the app's live hotkeys while any
+    /// recorder is armed (#213 safe win): testing an existing
+    /// KiwiDesk shortcut mid-capture must not fire its action.
+    /// The host sets this once; it fires only on the nil↔armed
+    /// edge, so switching between two fields stays armed and
+    /// never bounces the registration.
+    var onArmedChange: (Bool) -> Void = { _ in }
+
     /// Tears down the active field's event monitor — installed
     /// by `claim`, run synchronously before the next claim.
     private var stopActive: (() -> Void)?
@@ -28,13 +36,13 @@ final class RecorderCoordinator: ObservableObject {
     /// any) is stopped before this one becomes active.
     func claim(_ id: UUID, teardown: @escaping () -> Void) {
         stopActive?()
-        active = id
+        setActive(id)
         stopActive = teardown
     }
 
     func release(_ id: UUID) {
         guard active == id else { return }
-        active = nil
+        setActive(nil)
         stopActive = nil
     }
 
@@ -44,8 +52,17 @@ final class RecorderCoordinator: ObservableObject {
     func invalidate() {
         stopActive?()
         stopActive = nil
-        active = nil
+        setActive(nil)
         generation += 1
+    }
+
+    /// Sets `active` and fires `onArmedChange` only when the
+    /// armed/idle state actually flips.
+    private func setActive(_ id: UUID?) {
+        let wasArmed = active != nil
+        active = id
+        let armed = id != nil
+        if armed != wasArmed { onArmedChange(armed) }
     }
 }
 
@@ -96,7 +113,8 @@ enum RecorderPreflight {
         // evaluation mutated state mid-update).
         guard
             let holder = bindings.wrappedValue.first(where: {
-                !$0.combo.isEmpty && $0.combo == combo
+                !$0.combo.isEmpty
+                    && KeyCombo.equivalent($0.combo, combo)
                     && !isOwn($0)
             })
         else { return nil }

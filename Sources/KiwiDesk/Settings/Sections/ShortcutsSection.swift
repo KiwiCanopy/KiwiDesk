@@ -75,6 +75,7 @@ struct ShortcutsSection: View {
                     \.keybindingOverrideBase,
                     model.overrideBaseRows(mode: selected)
                 )
+                .environment(\.keybindingModeName, selected)
                 .environmentObject(coordinator)
             }
             .onChange(of: coordinator.scrollTarget) {
@@ -87,7 +88,15 @@ struct ShortcutsSection: View {
                 coordinator.scrollTarget = nil
             }
         }
-        .onAppear(perform: ensureSelection)
+        .onAppear {
+            ensureSelection()
+            // Arm the recorder ⇒ suspend live hotkeys so testing
+            // an existing shortcut mid-capture can't fire it
+            // (#213). Idempotent across re-appears.
+            coordinator.onArmedChange = { [model] armed in
+                model.setRecorderArmed(armed)
+            }
+        }
         // The section stays mounted across reloads and edit-
         // target switches; a vanished mode must never leave
         // `selected` pointing at modes[0] under a phantom
@@ -119,6 +128,22 @@ struct ShortcutsSection: View {
                     "Profile shortcuts"
                 )
             ) {
+                // #123: the live target applies recordings
+                // instantly; a stored profile stays staged —
+                // say so where the recording happens.
+                if let name = model.editingProfile {
+                    Text(
+                        L(
+                            "shortcuts.override.staged",
+                            "Editing \u{201C}%1$@\u{201D} — "
+                                + "shortcuts take effect the "
+                                + "next time this profile is "
+                                + "active.",
+                            name
+                        )
+                    )
+                    .font(.callout)
+                }
                 if model.editedProfileOverridesKeys {
                     Label(
                         L(

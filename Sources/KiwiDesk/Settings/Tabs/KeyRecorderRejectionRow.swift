@@ -15,6 +15,12 @@ struct KeyRecorderRejectionRow: View {
 
     var body: some View {
         HStack(spacing: 6) {
+            // A shape cue beside the red text — the conflict must
+            // not read by colour alone (WCAG 1.4.1). Hidden from
+            // VoiceOver: the text below already states it.
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundStyle(.red)
+                .accessibilityHidden(true)
             Text(
                 L(
                     "key_recorder.assigned_to",

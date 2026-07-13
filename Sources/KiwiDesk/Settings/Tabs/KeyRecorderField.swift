@@ -6,11 +6,10 @@ import SwiftUI
 /// that captures a chord into a canonical combo string, with a
 /// conflict indicator and a clear button.
 ///
-/// Recording is lock-on-full-release (`ChordRecorder`): the
-/// field live-previews the chord as it is formed (modifiers,
-/// then the full combo) and locks in when every key is
-/// released — press order and release timing can never corrupt
-/// the chord, and the base key can be corrected mid-chord.
+/// Recording snaps in on key-down (`ChordRecorder`, #212):
+/// the field live-previews the held modifiers, and the first
+/// non-modifier key locks the combo instantly — correction is
+/// re-recording, one click.
 /// Coordination (#33): at most one recorder is active — the
 /// shared `RecorderCoordinator` tears the previous field down
 /// synchronously when a new one starts. Duplicates (#34):
@@ -30,7 +29,10 @@ struct KeyRecorderField: View {
     /// commits unconditionally (no other rows to collide
     /// with).
     var preflight: ((String) -> RecorderRejection?)? = nil
-    let onRecord: (String) -> Void
+    /// Commits the combo; returns the live-apply feedback to
+    /// flash under the field (#123), or nil when the edit
+    /// stays staged (stored-profile target).
+    let onRecord: (String) -> LiveApplyFeedback?
     let onClear: () -> Void
 
     @EnvironmentObject private var coordinator: RecorderCoordinator
@@ -44,15 +46,10 @@ struct KeyRecorderField: View {
     /// and must not immediately restart it.
     @State private var cancelledByClick: Date?
     @State private var rejection: RecorderRejection?
-    /// Transient one-key notice (a second key pressed while
-    /// the first was still held).
-    @State private var hint: String?
-    /// The holder of the combo currently being formed, shown
-    /// live while recording (in-app rows only — the macOS
-    /// system-shortcut check would go stale, so it stays the
-    /// per-row warning after commit).
-    @State private var takenBy: String?
     @State private var flashing = false
+    /// Transient live-apply caption (#123): "Active now" (or
+    /// the system-denied branch), auto-fading after ~1.5 s.
+    @State private var liveFeedback: LiveApplyFeedback?
 
     private var recording: Bool {
         coordinator.active == fieldID
@@ -82,33 +79,30 @@ struct KeyRecorderField: View {
             if let rejection = liveRejection {
                 rejectionRow(rejection)
             }
-            if recording, let takenBy {
-                Text(
-                    L(
-                        "key_recorder.already_used",
-                        "Already used by \u{201C}%1$@\u{201D}"
-                            + " — locking in will ask to "
-                            + "replace.",
-                        takenBy
-                    )
-                )
-                .font(.caption)
-                .foregroundStyle(.orange)
+            if let liveFeedback {
+                LiveApplyCaption(feedback: liveFeedback)
             }
-            if let hint {
-                Text(hint)
-                    .font(.caption)
-                    .foregroundStyle(.orange)
+        }
+        .onChange(of: liveFeedback) { _, feedback in
+            guard let feedback else { return }
+            Task { @MainActor in
+                try? await Task.sleep(
+                    nanoseconds: 1_500_000_000
+                )
+                // A newer recording restarted the timer —
+                // only the latest feedback clears itself.
+                if liveFeedback == feedback {
+                    withAnimation { liveFeedback = nil }
+                }
             }
         }
         .onChange(of: coordinator.generation) { _, _ in
             // The edited mode/target changed — any pending
-            // rejection captured stale bindings (#68 review).
+            // rejection or feedback captured stale bindings.
             rejection = nil
+            liveFeedback = nil
             recorder.stop()
             preview = ""
-            hint = nil
-            takenBy = nil
         }
         .onChange(of: liveRejection == nil) { _, clear in
             // The latch follows the live check out: once the
@@ -120,22 +114,10 @@ struct KeyRecorderField: View {
     }
 
     /// Extracted from `body` — the full modifier chain in one
-    /// expression blew the type-checker's budget on CI.
-    ///
-    /// The engagement halo: while recording, an accent fill +
-    /// ring extend slightly past the button so the one armed
-    /// field among dozens of recorder rows reads at a glance —
-    /// the tint alone only recolors the border. Same
-    /// accent-layer vocabulary as OverrideChrome's active rows.
-    /// Negative padding keeps the layout footprint unchanged.
-    ///
-    /// Deliberately NOT a rounded pill like Save/Cancel
-    /// (`.borderedProminent`): this is a stateful input well —
-    /// System Settings' own Keyboard Shortcuts recorder reads
-    /// the same way — not a momentary action, so it must not
-    /// read as one. The at-rest tint below is a light nudge
-    /// toward "field", not a restructure: a touch tighter corner
-    /// radius plus a faint recessed fill (`.quaternary`).
+    /// expression blew the type-checker's budget on CI. The
+    /// input-well chrome lives in `RecorderButtonChrome`
+    /// (same accent-layer vocabulary as OverrideChrome's
+    /// active rows).
     private var recordButton: some View {
         Button(action: toggle) {
             Text(label)
@@ -144,38 +126,20 @@ struct KeyRecorderField: View {
         }
         .buttonStyle(.bordered)
         .tint(buttonTint)
-        .background {
-            if !recording {
-                RoundedRectangle(cornerRadius: 5)
-                    .fill(.quaternary.opacity(0.5))
-                    .allowsHitTesting(false)
-            } else {
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(Color.accentColor.opacity(0.08))
-                    .padding(-4)
-                    .allowsHitTesting(false)
-            }
-        }
-        .overlay {
-            if recording {
-                RoundedRectangle(cornerRadius: 6)
-                    .strokeBorder(
-                        Color.accentColor.opacity(0.4),
-                        lineWidth: 1.5
-                    )
-                    .padding(-4)
-                    .allowsHitTesting(false)
-            }
-        }
+        .modifier(RecorderButtonChrome(recording: recording))
         .help(Self.recordHelp)
     }
 
+    // A meaning change replaced the old `help` key (#212 —
+    // the recorder no longer locks on release): per
+    // docs/translating.md a changed English text gets a NEW
+    // key, never a rename.
     @MainActor private static let recordHelp = L(
-        "key_recorder.help",
+        "key_recorder.help_press",
         "A shortcut is one key plus any of "
             + "⌃ Control, ⌥ Option, ⇧ Shift, "
-            + "and ⌘ Command — it locks in when "
-            + "you release the keys. For more "
+            + "and ⌘ Command — it locks in the "
+            + "moment you press the key. For more "
             + "shortcut layers, add Modes."
     )
 
@@ -255,8 +219,6 @@ struct KeyRecorderField: View {
     private func start() {
         rejection = nil
         preview = ""
-        hint = nil
-        takenBy = nil
         // Claiming tears down whichever field was recording
         // before — synchronously, so two keyDown monitors
         // never coexist (#33). Captures reach the heap-backed
@@ -265,22 +227,14 @@ struct KeyRecorderField: View {
         // load-bearing — it keeps the recorder alive to run
         // stop() even if the view's state died first.
         let previewBinding = $preview
-        let hintBinding = $hint
-        let takenBinding = $takenBy
         coordinator.claim(fieldID) { [recorder] in
             recorder.stop()
             previewBinding.wrappedValue = ""
-            hintBinding.wrappedValue = nil
-            takenBinding.wrappedValue = nil
         }
         recorder.start(
-            preview: { display, combo in
+            preview: { display in
                 preview = display
-                takenBy = combo.flatMap {
-                    preflight?($0)?.holder
-                }
             },
-            hint: { hint = $0 },
             finish: { outcome in
                 finish(outcome)
             }
@@ -289,8 +243,12 @@ struct KeyRecorderField: View {
 
     private func finish(_ outcome: ChordRecorder.Outcome) {
         preview = ""
-        hint = nil
-        takenBy = nil
+        // Release BEFORE commit (#213): release resumes the live
+        // hotkeys, so the subsequent live-apply reads a truthful
+        // `activationFailures` and its "Active now" / system-
+        // denied caption is honest. Committing while still armed
+        // would leave the table unregistered and every recording
+        // would falsely report success.
         coordinator.release(fieldID)
         switch outcome {
         case .chord(let combo):
@@ -305,8 +263,6 @@ struct KeyRecorderField: View {
     private func stop() {
         recorder.stop()
         preview = ""
-        hint = nil
-        takenBy = nil
         coordinator.release(fieldID)
     }
 
@@ -319,7 +275,7 @@ struct KeyRecorderField: View {
             flash()
             return
         }
-        onRecord(string)
+        liveFeedback = onRecord(string)
     }
 
     private func flash() {

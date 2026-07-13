@@ -202,6 +202,29 @@ thing?". The membership is unchanged from the earlier "This
 Profile" / "Whole App" split; only the labels are topical.
 (#68 §3.1)
 
+**Live-apply is the rare exception, earned per control — not
+per tab.** (Settled 2026-07-10, full-Settings audit; #123.) A
+control stays staged behind Save unless it clears one of two
+bars: **(a)** it owns no profile state at all (the General ▸
+Language picker persists straight to `UserDefaults`, never
+`gui.json` — there is nothing to stage), or **(b)** its
+feedback loop *is* the live runtime and no in-window
+simulation can substitute (the keybinding recorder: the only
+way to know a shortcut works is to press it). Everything else
+— sliders, colors, pickers, placement grids — stays staged;
+where a raw value is hard to judge, build an in-window
+preview (the `GapsDiagram` / `DragVisualsEditor`-strip
+pattern), never live-apply. Sweep verdicts: Spaces, Behavior,
+App Rules, Shortcuts (minus the recorder), and the
+native-Space profile bindings are plainly staged. Monitors'
+drag-cards and the icon pickers are **self-previewing** (the
+control is its own preview — a third category needing neither
+live-apply nor a bolted-on preview). Profiles-section
+rename/delete/make-default/preset-apply are immediate file
+**actions**, not settings — correctly outside this question.
+The Spaces tab's per-space layout picker stays staged. **No
+control besides the key recorder passes the live-apply bar.**
+
 **One stable save footer: Revert / Save a Copy As… / Save.**
 The old footer showed up to seven differently-labeled verbs
 depending on invisible mode state, but they expressed only
@@ -378,9 +401,9 @@ grid cell under Recents.
 `RegisterEventHotKey` (one key code + modifier mask) is the
 mechanism, chosen because it needs no Input Monitoring
 permission. Multi-key chords (⌘J+K) are therefore not
-recordable — pressing a second key while the first is held
-keeps the first and shows a one-key hint — and a
-hand-written `cmd+j+k` is inert and flagged ⚠ unrecognized.
+recordable — the first non-modifier key locks the combo
+(#212) — and a hand-written `cmd+j+k` is inert and flagged
+⚠ unrecognized.
 **Switch-mode shortcuts sit right under the mode strip.**
 The rows that switch modes render directly beneath the strip
 that defines the modes, ahead of the action groups — the
@@ -404,29 +427,33 @@ native-Space bindings follow, like Delete and make default.
 gives a whole second set of single-key bindings, ergonomically
 better than finger-twister chords.
 
-**The recorder locks on full release; the preview downgrades
-lazily.** Releases work through a burst window (~a third of
-a second): the first release that downgrades a chord stashes
-it, and a full release within the window locks the stash —
-so staggered release order can't corrupt the combo (⌘ let go
-a split second before J still locks ⌘J). The DISPLAY keeps
-showing the stashed chord for that same window: an instant
-downgrade made the combo visibly vanish right before every
-normal lock-in. Only a genuinely lingering hold settles the
-preview to what is actually held — then nothing stale can
-lock, the field stays recording, and re-entry just works
-(a preview that kept showing released keys read as stuck).
-Correction is release-then-press (⌘J, J up, K down → ⌘K); an
-overlapped second key keeps the first with a hint. Bare
-Escape, click-away, and app deactivation cancel. (#68
-recorder UX)
+**The recorder snaps in on key-down.** (#212, replacing the
+#68 lock-on-full-release machine.) Modifiers can be pressed
+and released freely — the preview mirrors what is held — and
+the first non-modifier keyDown locks the combo instantly:
+that key plus the modifiers held at that moment, the way the
+native System Settings recorder reads. Correction is
+re-recording (one click). The release model's burst window,
+stashed fullest-chord candidate, lazily-downgrading preview,
+one-key overlap hint, and mid-chord letter correction all die
+with it — in practice they were buggier than the correction
+affordance they bought, and their states read as noise. Bare
+Escape cancels (Escape with modifiers records — ⌃Escape is a
+valid hotkey); click-away and app deactivation cancel
+unchanged. A swallowed key-down owns its matching key-up even
+if the field disappears or another recorder takes over; a
+short timeout bounds that handoff monitor. The live "Already
+used by …" notice while forming
+a chord went with the release window (its display window is
+now zero); the post-commit duplicate hard-block below remains
+the conflict surface.
 
 **Duplicates hard-block; system shortcuts soft-warn.**
 Recording a combo another KiwiDesk row already holds is
 rejected inline with *Steal* (rebind here) and *Go to* (jump
-to the holder) — silent duplicates were the #34 bug class.
-The taken-by notice already shows *while the chord is being
-formed* (live in-app check against the edited bindings); a
+to the holder) — silent duplicates were the #34 bug class. A
+collision compares parsed physical shortcuts, so aliases such
+as `alt+j` and `option+j` cannot evade the block. A
 macOS system-shortcut collision instead commits with a
 persistent ⚠ — shadowing one can be intentional, and a
 live system check could go stale. Conflict surfaces
@@ -437,6 +464,61 @@ without a dismiss. (#33/#34/#35, #68 §3.6.2)
 
 **One recorder at a time.** Starting a recording snaps any
 other recording field back instantly. (#33)
+
+**An armed recorder suspends KiwiDesk's hotkeys.** (#213.) A
+combo you are about to bind is often already bound to a window
+action, so pressing it to test it would fire that action
+mid-capture. While any recorder is open, the manager
+unregisters every KiwiDesk Carbon hotkey and re-registers the
+current mode when it closes — the suspend/resume round-trip the
+exact table, so a mode change made while armed is honored on
+resume. The `RecorderCoordinator` drives this on the idle↔armed
+edge only, so hopping between fields never bounces the
+registration. It never touches macOS/system shortcuts (not ours
+to unregister) and needs no Input Monitoring permission — it is
+pure Carbon (un)registration. This is the accepted first slice
+of the recorder-collision redesign (#213): the "Assigned to…"
+row also gains a colour-independent ⚠ glyph so the conflict does
+not read by colour alone. The larger pending-candidate model
+(candidate-only "Not assigned" state, Replace/Change
+transactions) is scoped separately in #213 pending a design
+round — the current *Steal*/*Go to* hard-block stays the
+shipped conflict UX until then.
+
+**The recorder live-applies on the live target; stored
+profiles stay staged.** (#123 Part 1.) A recorder is an input
+device — "recorded but inert until Save" broke its mental
+model (users pressed the new combo and nothing happened). A
+successfully committed recording (or clear) on the live edit
+target re-registers the running Carbon hotkeys immediately,
+with no file writes. The runtime source starts from the clean
+Settings baseline and accumulates **recorder combo mutations
+only**: staged Lua bodies, app choices, mode edits, and other
+shortcut fields never hitchhike on a recording. A new row's
+action is required payload for its first recording; later
+non-recorder edits to it stay staged. The base then resolves
+through the active profile's override, matching Save + reload
+semantics. `isDirty` and the footer keep their meaning ("the
+file hasn't caught up"); Save persists base shortcuts globally
+in `gui.json`, while stored-profile editing owns sparse profile
+overrides.
+
+Re-registration prepares every Lua callback before one atomic
+mode-table swap, then activates the preserved runtime mode once
+(profile/config applies still reset to default). Feedback is
+scoped to the exact row and mode: "Active now" only after that
+combo registered in the active mode; inactive-mode, profile-
+shadowed, compile-failed, and Carbon-denied states say so instead.
+Revert first re-applies persisted state; if the sidecar/profile
+became unreadable, an in-memory pre-edit snapshot removes ghost
+hotkeys. That snapshot is valid only within its loaded config/VM
+generation; a newer authoritative reload wins and retires the
+session instead of replaying stale GUI callbacks. Rollback
+bookkeeping clears only after one path succeeds.
+Editing a stored profile stays fully staged (instant apply would
+rewrite the RUNNING hotkeys while the banner says an inactive
+profile is being edited); the override banner states that its
+shortcuts take effect the next time the profile is active.
 
 **A catalog label's identity and its display text are two
 different fields.** `KeybindingCatalog`'s `NavCommand.label`

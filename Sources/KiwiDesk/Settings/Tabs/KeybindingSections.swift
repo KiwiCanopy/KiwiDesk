@@ -229,6 +229,8 @@ struct NavRow: View {
     let command: NavCommand
     @Environment(\.keybindingOverrideBase)
     private var overrideBase
+    @Environment(\.keybindingModeName)
+    private var modeName
 
     var body: some View {
         HStack {
@@ -285,11 +287,15 @@ struct NavRow: View {
                 $0.kind == .navigation && $0.lua == lua
             },
             bindings: $bindings,
-            commit: record
+            // Steal live-applies too (via `record`); only the
+            // recorder's own commit shows the caption.
+            commit: { _ = record($0) }
         )
     }
 
-    private func record(_ combo: String) {
+    private func record(
+        _ combo: String
+    ) -> LiveApplyFeedback? {
         if let index {
             bindings[index].combo = combo
         } else {
@@ -306,10 +312,25 @@ struct NavRow: View {
             $0.kind == .navigation && $0.lua == command.lua
         }) {
             model.noteRecordedCombo(updated, in: bindings)
+            return model.liveApplyRecorded(
+                modeName: modeName,
+                bindingID: updated.id,
+                combo: combo
+            )
         }
+        return nil
     }
 
     private func clear() {
-        if let index { bindings.remove(at: index) }
+        guard let index else { return }
+        let id = bindings[index].id
+        bindings.remove(at: index)
+        // Live target: the removed hotkey unregisters now
+        // (#123); no caption for a clear.
+        _ = model.liveApplyRecorded(
+            modeName: modeName,
+            bindingID: id,
+            combo: nil
+        )
     }
 }

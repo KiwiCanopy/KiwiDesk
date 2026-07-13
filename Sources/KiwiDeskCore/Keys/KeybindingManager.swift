@@ -39,11 +39,24 @@ public final class KeybindingManager {
     /// `fire`, so a callback that pumps a nested run loop and
     /// delivers a second fire can't clear the outer fire's flag.
     public private(set) var isFiring = false
+    /// Combos the system declined in the most recent
+    /// activation (`RegisterEventHotKey` returned no id — e.g.
+    /// a reserved system shortcut). Rebuilt on every
+    /// activation; the GUI's live-apply (#123) reads it to
+    /// branch its feedback caption ("Active now" vs "the
+    /// system didn't grant it").
+    public private(set) var activationFailures: Set<KeyCombo> =
+        []
     private var modes: [String: [KeyCombo: Int32]] = [:]
     /// Menu bar indicator per mode (SF Symbol name or emoji),
     /// set via `define_mode(name, bindings, { icon = ... })`.
     private var modeIcons: [String: String] = [:]
     private var activeIDs: [UInt32] = []
+    /// True while a Settings recorder is armed (#213): all our
+    /// hotkeys are unregistered so testing an existing shortcut
+    /// mid-capture can't fire its action. Table/mode edits still
+    /// apply but skip registration until `resume()`.
+    private var suspended = false
     private let registrar: HotkeyRegistrar
 
     public init(
@@ -151,6 +164,76 @@ public final class KeybindingManager {
         }
     }
 
+    /// Atomically replaces every mode prepared by the
+    /// structured-config bridge. Preparation happens before
+    /// this call, so the old table remains callable until one
+    /// swap; Carbon registration then runs once for the chosen
+    /// mode instead of once per growing default-mode prefix.
+    ///
+    /// `preferredMode` preserves a recorder session's active
+    /// mode when it still exists. Profile/config applies pass
+    /// `default`, retaining their settled reset semantics.
+    func replaceModes(
+        _ replacements: [String: [KeyCombo: Int32]],
+        icons: [String: String],
+        preferredMode: String
+    ) {
+        let oldModes = modes
+        let oldCurrent = currentMode
+
+        deactivate()
+        modes = replacements
+        if modes[Self.defaultMode] == nil {
+            modes[Self.defaultMode] = [:]
+        }
+        modeIcons = icons
+
+        if preferredMode == Self.defaultMode
+            || modes[preferredMode] != nil
+        {
+            currentMode = preferredMode
+        } else {
+            currentMode = Self.defaultMode
+        }
+
+        if let lua {
+            for bindings in oldModes.values {
+                for ref in bindings.values {
+                    lua.release(ref: ref)
+                }
+            }
+        }
+        activate(currentMode)
+        if currentMode != oldCurrent {
+            onModeChange(currentMode)
+        }
+    }
+
+    // MARK: - Recorder suspension (#213)
+
+    /// True while suspended by an armed Settings recorder.
+    public var isSuspended: Bool { suspended }
+
+    /// Unregisters every hotkey while a Settings recorder is
+    /// armed, so pressing an existing KiwiDesk shortcut to test
+    /// it can't trigger its action. Idempotent. Only touches our
+    /// own Carbon registrations — macOS/system shortcuts are the
+    /// OS's and stay live.
+    public func suspend() {
+        guard !suspended else { return }
+        suspended = true
+        deactivate()
+    }
+
+    /// Restores the hotkeys suspended by `suspend()`, registering
+    /// whatever mode is current now — a mode/table change made
+    /// during suspension is honored. Idempotent.
+    public func resume() {
+        guard suspended else { return }
+        suspended = false
+        activate(currentMode)
+    }
+
     // MARK: - Hotkey activation
 
     private func deactivate() {
@@ -162,6 +245,10 @@ public final class KeybindingManager {
 
     private func activate(_ mode: String) {
         deactivate()
+        activationFailures = []
+        // A recorder is armed: keep the table current but
+        // register nothing, so testing a shortcut can't fire.
+        guard !suspended else { return }
         for (combo, ref) in modes[mode] ?? [:] {
             let id = registrar.register(
                 keyCode: combo.keyCode,
@@ -172,6 +259,7 @@ public final class KeybindingManager {
             if let id {
                 activeIDs.append(id)
             } else {
+                activationFailures.insert(combo)
                 onLog(
                     "keybinding conflict: could not "
                         + "register a shortcut in mode "

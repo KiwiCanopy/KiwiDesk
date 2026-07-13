@@ -54,6 +54,7 @@ extension SettingsModel {
     /// ONE path for both targets: each branch produces a full
     /// `TargetState`, applied wholesale.
     func reload() {
+        restoreLiveKeySessionIfNeeded()
         let state: TargetState
         switch target {
         case .live:

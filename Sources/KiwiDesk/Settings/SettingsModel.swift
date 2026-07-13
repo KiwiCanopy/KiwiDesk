@@ -97,6 +97,9 @@ final class SettingsModel: ObservableObject {
     @Published var keybindingWarning: String?
 
     let core: KiwiCore
+    /// Recorder-only runtime delta + disk-independent rollback
+    /// point (#123). nil outside a live-apply edit session.
+    var liveKeySession: RecorderLiveSession?
     /// Guards the `config.didSet` dirty flag during reload
     /// cycles; its only writer is `apply(_:)` in
     /// `SettingsModel+EditTarget.swift`.
@@ -205,6 +208,10 @@ final class SettingsModel: ObservableObject {
                 atomically: true,
                 encoding: .utf8
             )
+            // The raw file is now authoritative. Its reload
+            // replaces every hotkey, so the recorder snapshot
+            // must not roll the freshly loaded Lua table back.
+            liveKeySession = nil
             core.loadConfig()
             reload()
             // Free-form Lua isn't checked at input time (no

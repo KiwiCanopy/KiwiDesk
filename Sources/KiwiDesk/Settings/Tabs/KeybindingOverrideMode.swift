@@ -13,12 +13,24 @@ private struct KeybindingOverrideBaseKey: EnvironmentKey {
     static let defaultValue: [KeyBinding]? = nil
 }
 
+private struct KeybindingModeNameKey: EnvironmentKey {
+    static let defaultValue = KeyMode.defaultName
+}
+
 extension EnvironmentValues {
     /// The selected mode's base bindings while the Shortcuts
     /// tab edits a stored profile; nil during live editing.
     var keybindingOverrideBase: [KeyBinding]? {
         get { self[KeybindingOverrideBaseKey.self] }
         set { self[KeybindingOverrideBaseKey.self] = newValue }
+    }
+
+    /// Mode whose recorder rows are currently rendered. The
+    /// live-apply seam uses it without threading another value
+    /// through every intent-section wrapper.
+    var keybindingModeName: String {
+        get { self[KeybindingModeNameKey.self] }
+        set { self[KeybindingModeNameKey.self] = newValue }
     }
 }
 

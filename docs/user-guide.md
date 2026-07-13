@@ -632,17 +632,39 @@ it per profile like any other shortcut.
 Click an empty row or the **Edit** pencil on an existing row. Click
 **Record** and press your key combo. The recorder:
 
-- **Locks on full release** — captures modifiers and one key, commits
-  when everything is released.
-- **Shows live preview** as you form the combo.
-- **Lets you correct mid-chord** — release a key and press another to
-  change it.
-- **Cancels** on Escape, click-away, or app switch.
+- **Snaps in on key press** — hold any modifiers, and the first
+  non-modifier key locks the combo instantly (the way the macOS
+  System Settings recorder works).
+- **Previews held modifiers live** (⌃⌥⇧⌘) while you decide.
+- **Re-record to correct** — recording is one click, so a wrong
+  combo is just recorded again.
+- **Cancels** on bare Escape, click-away, or app switch
+  (Escape *with* modifiers records — ⌃Escape is a valid
+  shortcut).
+- **Suspends your KiwiDesk shortcuts while it is open** — so you
+  can test a combo that is already bound to a window action
+  without triggering it. Your shortcuts come back the moment the
+  recorder closes. macOS system shortcuts are unaffected.
 
 The shortcut displays as compact macOS glyphs (⌃⌥⇧⌘ for modifiers,
 then the key), mapped to your active keyboard layout. No `+`
 separator — a literal `+` key shows as `⌘+`. The stored config keeps
 long word forms (`cmd`, `alt`, `semicolon`, …).
+
+**Recordings apply instantly on the live target.** When you are
+editing the live configuration (the active profile or Standard),
+a committed recording — and a clear — takes effect immediately:
+press a combo recorded in the runtime-active mode and it works,
+no Save needed. A brief caption reports the exact outcome:
+"Active now", updated for an inactive mode, refused by macOS,
+shadowed by the active profile, or unable to compile/apply. The
+change is still *unsaved*: the footer's Save persists the base
+shortcut configuration globally in `gui.json`; profile-specific
+shortcut overrides remain separate. Revert (or switching the edit
+target) restores the saved shortcuts, also live. When editing a
+stored profile from the dropdown, nothing applies until that
+profile is next active — the banner above the shortcut groups says
+so.
 
 ### Conflict Detection
 

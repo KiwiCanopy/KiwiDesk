@@ -3,24 +3,19 @@ import Testing
 
 @testable import KiwiDesk
 
-// The lock-on-full-release chord state machine (#68 recorder
-// UX), driven through the testable seam
-// (`handle(_:keyCode:flags:)`) — no NSEvents needed. Key
+// The snap-in recorder (#212), driven through the testable
+// seam (`handle(_:keyCode:flags:)`) — no NSEvents needed. Key
 // codes: 38 = J, 40 = K, 53 = Escape (ANSI layout).
 
 @MainActor
 private final class Capture {
     var outcomes: [ChordRecorder.Outcome] = []
     var previews: [String] = []
-    var hints: [String?] = []
 
     func attach(_ recorder: ChordRecorder) {
         recorder.start(
-            preview: { [weak self] display, _ in
+            preview: { [weak self] display in
                 self?.previews.append(display)
-            },
-            hint: { [weak self] in
-                self?.hints.append($0)
             },
             finish: { [weak self] in
                 self?.outcomes.append($0)
@@ -36,168 +31,80 @@ private final class Capture {
     }
 }
 
-@Suite("Chord recorder lock-on-release")
+@Suite("Chord recorder snap-in (#212)")
 @MainActor
 struct ChordRecorderTests {
-    @Test("mid-chord correction re-snapshots — ⌘J then ⌘K")
-    func midChordCorrection() {
+    @Test("The first key-down locks modifiers + key")
+    func keyDownLocks() {
         let recorder = ChordRecorder()
+        defer { recorder.stop() }
         let capture = Capture()
         capture.attach(recorder)
-        recorder.handle(
-            .keyDown,
-            keyCode: 38,
-            flags: [.command]
-        )
-        recorder.handle(
-            .keyUp,
-            keyCode: 38,
-            flags: [.command]
-        )
-        recorder.handle(
-            .keyDown,
-            keyCode: 40,
-            flags: [.command]
-        )
-        recorder.handle(
-            .keyUp,
-            keyCode: 40,
-            flags: [.command]
-        )
-        recorder.handle(.flagsChanged, keyCode: 55, flags: [])
-        #expect(capture.lockedCombo == "command+k")
-    }
-
-    @Test("modifiers accumulate while the base key is held")
-    func modifierAccumulation() {
-        let recorder = ChordRecorder()
-        let capture = Capture()
-        capture.attach(recorder)
-        // J pressed a hair before ⌘ joins.
-        recorder.handle(.keyDown, keyCode: 38, flags: [])
         recorder.handle(
             .flagsChanged,
             keyCode: 55,
             flags: [.command]
         )
-        // ⌘ dropped again before J releases — the chord
-        // never downgrades.
-        recorder.handle(.flagsChanged, keyCode: 55, flags: [])
-        recorder.handle(.keyUp, keyCode: 38, flags: [])
+        recorder.handle(
+            .keyDown,
+            keyCode: 38,
+            flags: [.command]
+        )
         #expect(capture.lockedCombo == "command+j")
+        #expect(capture.outcomes.count == 1)
+        #expect(
+            recorder.handle(
+                .keyUp,
+                keyCode: 38,
+                flags: [.command]
+            )
+        )
     }
 
-    @Test("second key while first is held: first wins + hint")
-    func overlappedSecondKeyKeepsFirst() {
-        // A combo is modifiers + ONE key (Carbon
-        // RegisterEventHotKey can't express ⌘J+K). A chord
-        // attempt keeps the first key and teaches via the
-        // hint instead of silently switching; correction
-        // requires releasing the key first (see
-        // midChordCorrection).
+    @Test("Released modifiers don't linger — bare key locks")
+    func releasedModifiersDropOut() {
         let recorder = ChordRecorder()
+        defer { recorder.stop() }
         let capture = Capture()
         capture.attach(recorder)
         recorder.handle(
-            .keyDown,
-            keyCode: 38,
+            .flagsChanged,
+            keyCode: 55,
             flags: [.command]
         )
-        recorder.handle(
-            .keyDown,
-            keyCode: 40,
-            flags: [.command]
-        )
-        #expect(capture.hints.last??.isEmpty == false)
-        // Nothing locks while either key is down.
-        recorder.handle(
-            .keyUp,
-            keyCode: 38,
-            flags: [.command]
-        )
-        // Back to one held key: the overlap hint leaves with
-        // the overlap, not on the next press.
-        #expect(capture.hints.last! == nil)
-        recorder.handle(
-            .keyUp,
-            keyCode: 40,
-            flags: [.command]
-        )
-        #expect(capture.outcomes.isEmpty)
-        recorder.handle(.flagsChanged, keyCode: 55, flags: [])
-        #expect(capture.lockedCombo == "command+j")
-    }
-
-    @Test("auto-repeat never re-snapshots the chord")
-    func autoRepeatIsInert() {
-        let recorder = ChordRecorder()
-        let capture = Capture()
-        capture.attach(recorder)
-        recorder.handle(
-            .keyDown,
-            keyCode: 38,
-            flags: [.command]
-        )
-        recorder.handle(
-            .keyDown,
-            keyCode: 40,
-            flags: [.command]
-        )
-        let hintsBefore = capture.hints.count
-        // K held past the repeat threshold: repeats must not
-        // steal the chord or blank the hint (review HIGH).
-        recorder.handle(
-            .keyDown,
-            keyCode: 40,
-            flags: [.command]
-        )
-        #expect(capture.hints.count == hintsBefore)
-        recorder.handle(
-            .keyUp,
-            keyCode: 40,
-            flags: [.command]
-        )
-        recorder.handle(
-            .keyUp,
-            keyCode: 38,
-            flags: [.command]
-        )
-        recorder.handle(.flagsChanged, keyCode: 55, flags: [])
-        #expect(capture.lockedCombo == "command+j")
-    }
-
-    @Test("first-key repeat keeps accumulated modifiers")
-    func repeatKeepsAccumulatedModifiers() {
-        let recorder = ChordRecorder()
-        let capture = Capture()
-        capture.attach(recorder)
-        recorder.handle(
-            .keyDown,
-            keyCode: 38,
-            flags: [.command]
-        )
-        // ⌘ released while J is held — accumulate-only keeps
-        // ⌘J; J's auto-repeat (now with empty flags) must not
-        // rebuild the chord as bare j (review MEDIUM).
         recorder.handle(.flagsChanged, keyCode: 55, flags: [])
         recorder.handle(.keyDown, keyCode: 38, flags: [])
-        recorder.handle(.keyUp, keyCode: 38, flags: [])
-        #expect(capture.lockedCombo == "command+j")
-    }
-
-    @Test("bare key locks without modifiers")
-    func bareKey() {
-        let recorder = ChordRecorder()
-        let capture = Capture()
-        capture.attach(recorder)
-        recorder.handle(.keyDown, keyCode: 38, flags: [])
-        recorder.handle(.keyUp, keyCode: 38, flags: [])
         #expect(capture.lockedCombo == "j")
+        #expect(
+            recorder.handle(.keyUp, keyCode: 38, flags: [])
+        )
     }
 
-    @Test("bare Escape cancels")
-    func escapeCancels() {
+    @Test("The modifier preview mirrors what is held")
+    func modifierPreview() {
         let recorder = ChordRecorder()
+        defer { recorder.stop() }
+        let capture = Capture()
+        capture.attach(recorder)
+        recorder.handle(
+            .flagsChanged,
+            keyCode: 59,
+            flags: [.control]
+        )
+        recorder.handle(
+            .flagsChanged,
+            keyCode: 58,
+            flags: [.control, .option]
+        )
+        recorder.handle(.flagsChanged, keyCode: 59, flags: [])
+        #expect(capture.previews == ["⌃", "⌃⌥", ""])
+        #expect(capture.outcomes.isEmpty)
+    }
+
+    @Test("Bare Escape cancels")
+    func bareEscapeCancels() {
+        let recorder = ChordRecorder()
+        defer { recorder.stop() }
         let capture = Capture()
         capture.attach(recorder)
         recorder.handle(.keyDown, keyCode: 53, flags: [])
@@ -205,42 +112,205 @@ struct ChordRecorderTests {
             Issue.record("expected .cancelled")
             return
         }
-        #expect(capture.outcomes.count == 1)
+        #expect(
+            recorder.handle(.keyUp, keyCode: 53, flags: [])
+        )
     }
 
-    @Test("a key held from before recording passes through")
-    func untrackedKeyUpPassesThrough() {
+    @Test("Escape WITH modifiers records — ⌃Escape is valid")
+    func modifiedEscapeRecords() {
         let recorder = ChordRecorder()
+        defer { recorder.stop() }
         let capture = Capture()
         capture.attach(recorder)
-        // keyUp for a key whose keyDown predates recording:
-        // not swallowed, and no lock (nothing pending).
+        recorder.handle(
+            .keyDown,
+            keyCode: 53,
+            flags: [.control]
+        )
+        #expect(capture.lockedCombo == "control+escape")
+        #expect(
+            recorder.handle(
+                .keyUp,
+                keyCode: 53,
+                flags: [.control]
+            )
+        )
+    }
+
+    @Test("An unrepresentable key is swallowed; recording continues")
+    func unrepresentableKeyContinues() {
+        let recorder = ChordRecorder()
+        defer { recorder.stop() }
+        let capture = Capture()
+        capture.attach(recorder)
+        // 255 maps to no KeyCombo name.
+        let swallowed = recorder.handle(
+            .keyDown,
+            keyCode: 255,
+            flags: [.command]
+        )
+        #expect(swallowed)
+        #expect(capture.outcomes.isEmpty)
+        #expect(
+            recorder.handle(
+                .keyUp,
+                keyCode: 255,
+                flags: [.command]
+            )
+        )
+        recorder.handle(
+            .keyDown,
+            keyCode: 40,
+            flags: [.command]
+        )
+        #expect(capture.lockedCombo == "command+k")
+        #expect(
+            recorder.handle(
+                .keyUp,
+                keyCode: 40,
+                flags: [.command]
+            )
+        )
+    }
+
+    @Test("keyUp events pass through untouched")
+    func keyUpPassesThrough() {
+        let recorder = ChordRecorder()
+        defer { recorder.stop() }
+        let capture = Capture()
+        capture.attach(recorder)
+        // A key held from before the recording started
+        // releases — its keyUp belongs to the original
+        // responder.
         let swallowed = recorder.handle(
             .keyUp,
-            keyCode: 40,
+            keyCode: 38,
             flags: []
         )
         #expect(!swallowed)
         #expect(capture.outcomes.isEmpty)
-        // A tracked key's keyUp IS swallowed.
-        recorder.handle(.keyDown, keyCode: 38, flags: [])
-        #expect(
-            recorder.handle(.keyUp, keyCode: 38, flags: [])
-        )
     }
 
-    @Test("finish fires exactly once; stop() is silent")
-    func finishFiresOnce() {
+    @Test("A swallowed keyDown also swallows its keyUp")
+    func pairedKeyUpIsSwallowed() {
         let recorder = ChordRecorder()
+        defer { recorder.stop() }
         let capture = Capture()
         capture.attach(recorder)
-        recorder.handle(.keyDown, keyCode: 38, flags: [])
-        recorder.handle(.keyUp, keyCode: 38, flags: [])
+
+        #expect(
+            recorder.handle(
+                .keyDown,
+                keyCode: 38,
+                flags: [.command]
+            )
+        )
+        #expect(
+            recorder.handle(
+                .keyUp,
+                keyCode: 38,
+                flags: [.command]
+            )
+        )
+        #expect(
+            !recorder.handle(
+                .keyUp,
+                keyCode: 38,
+                flags: [.command]
+            )
+        )
+        #expect(capture.lockedCombo == "command+j")
+    }
+
+    @Test("Key-up ownership survives stop and restart")
+    func keyUpSurvivesRestart() {
+        let recorder = ChordRecorder()
+        defer { recorder.stop() }
+        let first = Capture()
+        first.attach(recorder)
+        recorder.handle(
+            .keyDown,
+            keyCode: 38,
+            flags: [.command]
+        )
+
+        recorder.stop()
+        let second = Capture()
+        second.attach(recorder)
+
+        #expect(
+            recorder.handle(
+                .keyUp,
+                keyCode: 38,
+                flags: [.command]
+            )
+        )
+        #expect(first.lockedCombo == "command+j")
+        #expect(second.outcomes.isEmpty)
+    }
+
+    @Test("Unrepresentable key-up ownership survives stop")
+    func unrepresentableKeyUpSurvivesStop() {
+        let recorder = ChordRecorder()
+        defer { recorder.stop() }
+        let capture = Capture()
+        capture.attach(recorder)
+
+        #expect(
+            recorder.handle(
+                .keyDown,
+                keyCode: 255,
+                flags: [.command]
+            )
+        )
+        #expect(!recorder.isSuppressingKeyUp)
+
+        recorder.stop()
+        #expect(recorder.isSuppressingKeyUp)
+        #expect(
+            recorder.handle(
+                .keyUp,
+                keyCode: 255,
+                flags: [.command]
+            )
+        )
+        #expect(!recorder.isSuppressingKeyUp)
+        #expect(capture.outcomes.isEmpty)
+    }
+
+    @Test("finish fires exactly once")
+    func finishFiresOnce() {
+        let recorder = ChordRecorder()
+        defer { recorder.stop() }
+        let capture = Capture()
+        capture.attach(recorder)
+        recorder.handle(
+            .keyDown,
+            keyCode: 38,
+            flags: [.command]
+        )
+        // The monitors are torn down after the lock; a stray
+        // second event must not re-fire.
+        recorder.handle(
+            .keyDown,
+            keyCode: 40,
+            flags: [.command]
+        )
         #expect(capture.outcomes.count == 1)
-        // Post-finish events reach a reset machine: no
-        // second outcome without a new start().
-        recorder.handle(.keyDown, keyCode: 40, flags: [])
-        recorder.handle(.keyUp, keyCode: 40, flags: [])
-        #expect(capture.outcomes.count == 1)
+        #expect(
+            recorder.handle(
+                .keyUp,
+                keyCode: 38,
+                flags: [.command]
+            )
+        )
+        #expect(
+            recorder.handle(
+                .keyUp,
+                keyCode: 40,
+                flags: [.command]
+            )
+        )
     }
 }

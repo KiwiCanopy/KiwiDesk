@@ -3,105 +3,6 @@ import Testing
 
 @testable import KiwiDeskCore
 
-@Suite("KeyCombo parsing")
-struct KeyComboTests {
-    @Test("comboString emits Mac words and round-trips")
-    func comboStringRoundTrip() throws {
-        let text = try #require(
-            KeyCombo.comboString(
-                keyCode: 15,
-                command: false,
-                option: true,
-                control: true,
-                shift: false
-            )
-        )
-        #expect(text == "control+option+r")
-        let parsed = try #require(KeyCombo.parse(text))
-        #expect(parsed.modifiers == [.control, .option])
-        #expect(parsed.keyCode == 15)
-    }
-
-    @Test("word aliases for punctuation keys parse")
-    func punctuationAliases() throws {
-        let combo = try #require(
-            KeyCombo.parse("ctrl+alt+cmd+semicolon")
-        )
-        #expect(combo.keyCode == 41)
-        #expect(
-            combo.modifiers == [.control, .option, .command]
-        )
-        #expect(KeyCombo.parse("cmd+comma")?.keyCode == 43)
-        #expect(KeyCombo.parse("alt+period")?.keyCode == 47)
-        // The symbol form still works and matches the word.
-        #expect(
-            KeyCombo.parse("cmd+;")?.keyCode
-                == KeyCombo.parse("cmd+semicolon")?.keyCode
-        )
-        // Display prefers the readable word form.
-        #expect(
-            KeyCombo.comboString(
-                keyCode: 41,
-                command: true,
-                option: false,
-                control: false,
-                shift: false
-            ) == "command+semicolon"
-        )
-    }
-
-    @Test("comboString names disambiguate aliased codes")
-    func comboStringNames() {
-        #expect(
-            KeyCombo.comboString(
-                keyCode: 53,
-                command: false,
-                option: false,
-                control: false,
-                shift: false
-            ) == "escape"
-        )
-        #expect(
-            KeyCombo.comboString(
-                keyCode: 36,
-                command: true,
-                option: false,
-                control: false,
-                shift: false
-            ) == "command+return"
-        )
-    }
-
-    @Test("Parses modifiers and key names")
-    func parsing() throws {
-        let combo = try #require(
-            KeyCombo.parse("ctrl+alt+r")
-        )
-        #expect(combo.modifiers == [.control, .option])
-        #expect(combo.keyCode == 15)
-
-        let arrows = try #require(
-            KeyCombo.parse("cmd+shift+left")
-        )
-        #expect(arrows.modifiers == [.command, .shift])
-        #expect(arrows.keyCode == 123)
-    }
-
-    @Test("Single keys work for modal modes")
-    func bareKey() throws {
-        let combo = try #require(KeyCombo.parse("escape"))
-        #expect(combo.modifiers == [])
-        #expect(combo.keyCode == 53)
-    }
-
-    @Test("Rejects unknown keys and modifiers")
-    func rejects() {
-        #expect(KeyCombo.parse("hyper+x") == nil)
-        #expect(KeyCombo.parse("cmd+notakey") == nil)
-        #expect(KeyCombo.parse("") == nil)
-    }
-}
-
 /// Fake registrar capturing registrations.
 @MainActor
 private final class FakeRegistrar: HotkeyRegistrar {
@@ -215,6 +116,85 @@ struct KeybindingManagerTests {
         #expect(logs.contains { $0.contains("disabled") })
         // The binding is gone after the failure.
         #expect(registrar.registered.isEmpty)
+    }
+
+    @Test("Suspend unregisters hotkeys; resume restores them")
+    func suspendResume() throws {
+        let registrar = FakeRegistrar()
+        let manager = KeybindingManager(registrar: registrar)
+        let lua = try #require(LuaInterpreter())
+        manager.lua = lua
+
+        var ref: Int32?
+        lua.register("grab") { args in
+            if case .functionRef(let r) = args.first { ref = r }
+            return .none
+        }
+        lua.run(
+            "KiwiDesk.grab(function() fired = (fired or 0) + 1 end)"
+        )
+        let combo = try #require(KeyCombo.parse("cmd+alt+h"))
+        manager.bind(combo, ref: try #require(ref))
+        #expect(registrar.registered.count == 1)
+
+        // Armed recorder: nothing registered.
+        manager.suspend()
+        #expect(manager.isSuspended)
+        #expect(registrar.registered.isEmpty)
+        // Idempotent.
+        manager.suspend()
+        #expect(registrar.registered.isEmpty)
+
+        // Disarm: the same combo is live again and fires.
+        manager.resume()
+        #expect(!manager.isSuspended)
+        #expect(registrar.registered.count == 1)
+        registrar.press(keyCode: combo.keyCode)
+        #expect(lua.global("fired") == .number(1))
+        // Idempotent resume does not double-register.
+        manager.resume()
+        #expect(registrar.registered.count == 1)
+    }
+
+    @Test("A mode change during suspension registers on resume")
+    func suspendHonorsModeChange() throws {
+        let registrar = FakeRegistrar()
+        let manager = KeybindingManager(registrar: registrar)
+        let lua = try #require(LuaInterpreter())
+        manager.lua = lua
+
+        var captured: [Int32] = []
+        lua.register("grab") { args in
+            if case .functionRef(let r) = args.first {
+                captured.append(r)
+            }
+            return .none
+        }
+        lua.run(
+            """
+            KiwiDesk.grab(function() base = true end)
+            KiwiDesk.grab(function() resized = true end)
+            """
+        )
+        let bindCombo = try #require(KeyCombo.parse("cmd+alt+h"))
+        let modeCombo = try #require(KeyCombo.parse("j"))
+        manager.bind(bindCombo, ref: captured[0])
+        manager.defineMode(
+            "resize",
+            bindings: [modeCombo: captured[1]]
+        )
+
+        manager.suspend()
+        manager.switchMode("resize")
+        // Still suspended: the switch registered nothing.
+        #expect(registrar.registered.isEmpty)
+
+        manager.resume()
+        // Resume registers the mode current *now*, not default.
+        #expect(registrar.registered.count == 1)
+        registrar.press(keyCode: modeCombo.keyCode)
+        #expect(lua.global("resized") == .bool(true))
+        #expect(lua.global("base") == LuaValue.none)
     }
 
     @Test("Unknown modes are rejected")

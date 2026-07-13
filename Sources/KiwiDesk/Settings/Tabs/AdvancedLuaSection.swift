@@ -10,6 +10,8 @@ struct AdvancedLuaSection: View {
     @Binding var bindings: [KeyBinding]
     @Environment(\.keybindingOverrideBase)
     private var overrideBase
+    @Environment(\.keybindingModeName)
+    private var modeName
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -64,7 +66,7 @@ struct AdvancedLuaSection: View {
                         // ForEach would write the wrong row
                         // (#68 review M2).
                         commit: {
-                            record(
+                            _ = record(
                                 $0,
                                 id: binding.wrappedValue.id
                             )
@@ -72,7 +74,16 @@ struct AdvancedLuaSection: View {
                     )
                 },
                 onRecord: { record($0, into: binding) },
-                onClear: { binding.wrappedValue.combo = "" }
+                onClear: {
+                    let id = binding.wrappedValue.id
+                    binding.wrappedValue.combo = ""
+                    // Live target: unregister now (#123).
+                    _ = model.liveApplyRecorded(
+                        modeName: modeName,
+                        bindingID: id,
+                        combo: nil
+                    )
+                }
             )
             Button {
                 remove(binding.wrappedValue.id)
@@ -92,7 +103,7 @@ struct AdvancedLuaSection: View {
     private func record(
         _ combo: String,
         into binding: Binding<KeyBinding>
-    ) {
+    ) -> LiveApplyFeedback? {
         binding.wrappedValue.combo = combo
         let id = binding.wrappedValue.id
         if let index = bindings.firstIndex(
@@ -103,20 +114,34 @@ struct AdvancedLuaSection: View {
                 in: bindings
             )
         }
+        return model.liveApplyRecorded(
+            modeName: modeName,
+            bindingID: id,
+            combo: combo
+        )
     }
 
     /// Looks the row up by id at write time — safe after any
     /// structural mutation of the bindings array.
-    private func record(_ combo: String, id: UUID) {
+    @discardableResult
+    private func record(
+        _ combo: String,
+        id: UUID
+    ) -> LiveApplyFeedback? {
         guard
             let index = bindings.firstIndex(where: {
                 $0.id == id
             })
-        else { return }
+        else { return nil }
         bindings[index].combo = combo
         model.noteRecordedCombo(
             bindings[index],
             in: bindings
+        )
+        return model.liveApplyRecorded(
+            modeName: modeName,
+            bindingID: id,
+            combo: combo
         )
     }
 
