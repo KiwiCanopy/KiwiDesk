@@ -130,19 +130,13 @@ struct ShortcutsSection: View {
             ) {
                 // #123: the live target applies recordings
                 // instantly; a stored profile stays staged —
-                // say so where the recording happens.
+                // say so where the recording happens. But the
+                // loaded profile's own overrides re-apply on save
+                // (#209), so its banner can't claim "next time
+                // it's active" — it IS active.
                 if let name = model.editingProfile {
-                    Text(
-                        L(
-                            "shortcuts.override.staged",
-                            "Editing \u{201C}%1$@\u{201D} — "
-                                + "shortcuts take effect the "
-                                + "next time this profile is "
-                                + "active.",
-                            name
-                        )
-                    )
-                    .font(.callout)
+                    Text(overrideBannerText(name))
+                        .font(.callout)
                 }
                 if model.editedProfileOverridesKeys {
                     Label(
@@ -161,6 +155,27 @@ struct ShortcutsSection: View {
                     .foregroundStyle(.secondary)
             }
         }
+    }
+
+    /// The loaded profile's overrides re-apply the moment you
+    /// save (it is the layout on screen); every other stored
+    /// profile stays staged until it next loads (#209).
+    private func overrideBannerText(_ name: String) -> String {
+        if name == model.activeProfile {
+            return L(
+                "shortcuts.override.staged_loaded",
+                "Editing \u{201C}%1$@\u{201D} — shortcuts "
+                    + "re-apply as soon as you save.",
+                name
+            )
+        }
+        return L(
+            "shortcuts.override.staged",
+            "Editing \u{201C}%1$@\u{201D} — shortcuts take "
+                + "effect the next time this profile is "
+                + "active.",
+            name
+        )
     }
 
     private var overrideCaption: String {

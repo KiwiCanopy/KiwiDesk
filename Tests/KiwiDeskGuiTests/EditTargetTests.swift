@@ -98,8 +98,8 @@ struct EditTargetTests {
         #expect(!model.isDirty)
     }
 
-    @Test("selecting the active profile normalizes to live")
-    func activeProfileIsLive() {
+    @Test("selecting the loaded profile edits its overrides")
+    func loadedProfileEditsItsOverrides() {
         let model = makeModel()
         // `save` adopts: "active" becomes the current profile.
         try? model.core.profiles.save(
@@ -115,8 +115,14 @@ struct EditTargetTests {
 
         model.selectEditTarget("active")
 
-        #expect(model.target == .live)
-        #expect(model.savedSidecar != nil)
+        // #209: the loaded profile is a real stored target now,
+        // no longer collapsed to Live — its saved overrides are
+        // editable like any other profile's, and saving re-
+        // applies in place instead of writing the global sidecar.
+        #expect(model.target == .storedProfile("active"))
+        #expect(model.editingStoredProfile)
+        #expect(model.editingProfile == "active")
+        #expect(model.savedSidecar == nil)
     }
 
     @Test("a vanished profile falls back to live editing")
