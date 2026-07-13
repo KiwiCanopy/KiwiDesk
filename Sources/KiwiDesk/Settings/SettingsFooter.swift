@@ -39,16 +39,13 @@ struct SettingsFooter: View {
                 .font(.caption)
                 .foregroundStyle(.orange)
             }
-            if model.hasLayoutDrift,
-                let activeSpace = model.core.activeSpace,
-                let savedMode = model.core.savedModeForActiveSpace()
-            {
+            if let drift = model.layoutDrift {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(
                         L(
                             "footer.save.adopts_layout",
                             "Save also adopts the session layout (%1$@).",
-                            activeSpace.mode.displayName
+                            drift.live.displayName
                         )
                     )
                     .font(.caption2)
@@ -58,7 +55,7 @@ struct SettingsFooter: View {
                             "footer.revert.restores_layout",
                             "Revert also restores the profile "
                                 + "layout (%1$@).",
-                            savedMode.displayName
+                            drift.saved.displayName
                         )
                     )
                     .font(.caption2)

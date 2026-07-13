@@ -167,42 +167,8 @@ struct SpacesSection: View {
         )
     }
 
-    private func modePicker(_ space: SpaceID) -> some View {
-        VStack(alignment: .trailing, spacing: 4) {
-            Picker("", selection: modeBinding(space)) {
-                ForEach(LayoutMode.allCases, id: \.self) { mode in
-                    Label(mode.displayName, systemImage: mode.glyph)
-                        .tag(mode)
-                }
-            }
-            .labelsHidden()
-            .controlSize(.large)
-            .frame(width: 150)
-
-            if model.target == .live,
-                let activeProfileName = model.activeProfile,
-                space == model.core.activeSpace?.id,
-                let profile = try? model.core.profiles.read(
-                    name: activeProfileName
-                )
-            {
-                let liveMode = model.config.spaceModes[space] ?? .bsp
-                let savedMode = profile.spaceModes[space] ?? .bsp
-                if liveMode != savedMode {
-                    Text(
-                        L(
-                            "settings.layout.drift",
-                            "Live: %1$@ — profile has %2$@ (not saved)",
-                            liveMode.displayName,
-                            savedMode.displayName
-                        )
-                    )
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                }
-            }
-        }
-    }
+    // `modePicker` and its binding live in
+    // `SpacesSection+ModePicker.swift` (#123 file-size split).
 
     private func expandButton(_ space: SpaceID) -> some View {
         Button {
@@ -332,17 +298,4 @@ struct SpacesSection: View {
         )
     }
 
-    /// Setting a space to the default `bsp` removes its entry
-    /// (the writer treats absent as `bsp`).
-    private func modeBinding(
-        _ space: SpaceID
-    ) -> Binding<LayoutMode> {
-        Binding(
-            get: { model.config.spaceModes[space] ?? .bsp },
-            set: { mode in
-                model.config.spaceModes[space] =
-                    mode == .bsp ? nil : mode
-            }
-        )
-    }
 }

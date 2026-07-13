@@ -15,9 +15,12 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         super.init()
     }
 
-    /// Refreshes the dashboard's view model state.
-    func reload() {
-        model.reload()
+    /// Non-destructive refresh for the quick menu's layout
+    /// actions: recomputes only the live-vs-saved drift
+    /// captions, never reseeding `config` — staged edits
+    /// survive a session layout switch.
+    func refreshLayoutDrift() {
+        model.refreshLayoutDrift()
     }
 
     /// Shows the dashboard, refreshing from the backend so the

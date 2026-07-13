@@ -226,12 +226,16 @@ extension KiwiCore {
             .map(\.name)
     }
 
-    /// Saved layout mode for the active space under the active profile.
+    /// Saved layout mode for the active space under the active
+    /// profile. nil when no profile is active or its JSON is
+    /// unreadable — "unknown", never a phantom `.bsp` that
+    /// would fake drift; an absent entry (a readable profile
+    /// without the space) is the genuine `.bsp` default.
     public func savedModeForActiveSpace() -> LayoutMode? {
         guard let name = profiles.currentName,
-            let space = activeSpace
+            let space = activeSpace,
+            let profile = try? profiles.read(name: name)
         else { return nil }
-        let profile = try? profiles.read(name: name)
-        return profile?.spaceModes[space.id] ?? .bsp
+        return profile.spaceModes[space.id] ?? .bsp
     }
 }

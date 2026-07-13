@@ -153,9 +153,9 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
         menu.addItem(headerItem(active: profiles.active))
         menu.addItem(.separator())
-        menu.addItem(switchProfileItem(profiles))
-        menu.addItem(.separator())
         menu.addItem(layoutItem())
+        menu.addItem(.separator())
+        menu.addItem(switchProfileItem(profiles))
         menu.addItem(.separator())
         if configError {
             let issues = NSMenuItem(

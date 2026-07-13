@@ -44,6 +44,8 @@ planned escape hatch; it is not a wontfix dumping ground.
 | At deep BSP splits under extreme ratios, the screen-midpoint side rule can misread which side a "grow" acts on. | Mouse parity is the spec: keyboard matches the mouse's midpoint reading exactly, warts included, so the two never diverge. | The sign is inferred from the focused window's screen-midpoint side (`MouseResize.bspSide`), shared with the mouse for parity. | **Shipped**: the [`track` layout (#128)](https://github.com/hajiboy95/KiwiDesk/issues/128) gives each resize one true target; within BSP the parity is intentional ([#122](https://github.com/hajiboy95/KiwiDesk/issues/122)). |
 | When scrolling focus steps *backward* (up/left) toward a window pinned behind the leading edge, keystrokes still reach the previously focused app until the pan settles (one animation length, 50–1000 ms). Forward (down/right) focus and the handoff after closing a window raise immediately, so only the backward slide has the delay. A genuine click on a window KiwiDesk just raised, before that raise's focus echo lands and while focus has already moved to another window in the same scrolling space, is read as KiwiDesk's own echo, so focus re-asserts to that other window. | Raising a pinned-behind row first pops it over the whole screen before the slide starts ([#143](https://github.com/hajiboy95/KiwiDesk/issues/143)); deferring *only* that direction keeps the pinned row reading as a real scroll, while forward moves and closes lay the target on top at once. Echo provenance ([#152](https://github.com/hajiboy95/KiwiDesk/issues/152)) tells KiwiDesk's own raise echoes apart from user focus — tracking every raise whose echo is still in flight — but AppKit gives a click and a raise echo the same shape, so the window focus has already moved to wins the tie over a still-unechoed self-raise. Normal for scroll-style window managers. | AppKit keyboard status only moves with the real AX raise, and the backward raise waits on the animation-settle signal (shared with the z-order restore). | Global Carbon hotkeys are unaffected (they reach KiwiDesk regardless of the key app); `animations.set_on_scrolling(false)` disables the slide and restores instant transfer. |
 | `mouse.follows_focus` is a **per-profile** setting: switching profiles can silently flip mouse-follows-focus, and a profile saved before the toggle existed loads with it off. | It lives on the settings root profiles serialize — the same home as `animations.*` and `mouse_resize` ([#186](https://github.com/hajiboy95/KiwiDesk/issues/186)); standing up the sparse behavior-override seam (`KeyModeOverride`-style) for one bool is exactly the premature generic override AGENTS.md §5 forbids until a second client exists. | Profiles serialize `TilingSettings` wholesale, and missing keys decode to their defaults by the profile contract. | Set the toggle in each profile you use (re-saving captures it); revisit the placement if a real global-behavior tier ever emerges. |
+| On macOS 14.0–14.3 the quick menu's checked layout shows no "not saved to profile" subtitle when the session layout drifts from the profile; the menu itself still works. | `NSMenuItem.subtitle` is a macOS 14.4 API and the deployment target is 14.0; a hand-rolled attributed-title fake would fight the system menu rendering for a cosmetic hint ([#123](https://github.com/hajiboy95/KiwiDesk/issues/123)). | The drift hint rides a system menu affordance that arrived mid-major-release; the same drift is still visible in Settings (layout caption + footer lines). | None needed — macOS 14.4+ shows it; older point releases read the drift in Settings. |
+| While the Settings window is open, a `set_mode` issued from a hotkey, Lua, or the CLI does not update the layout-drift captions (Spaces caption, footer lines, Revert enablement) until the window is reopened or a quick-menu layout action fires. | The captions render a snapshot refreshed on window `show()` and by the quick menu's own actions; wiring the GUI into the core event bus for one cosmetic caption would add a GUI↔engine subscription seam nothing else needs ([#123](https://github.com/hajiboy95/KiwiDesk/issues/123)). | Drift is a transient computed by direct comparison (never latched into `isDirty`/`profileDirty`), so nothing marks the view model stale on external commands; the quick menu always recomputes on open and is never stale. | Reopen the Settings window (every `show()` reloads), or switch via the quick menu, which refreshes the captions; revisit if the GUI ever subscribes to core events for another feature. |
 
 ### Blocked by macOS (SIP)
 
@@ -268,8 +270,17 @@ transient layouts (e.g., trying Monocle momentarily) without
 rewriting their configuration. If they want to keep the layout, a
 "Save Current Layout to Profile" row is provided. Saving adopts the
 whole live state (whole-state snapshot semantics), avoiding partial
-saves or complex tracking. Reverting in Settings discards both staged
-edits and session layout drift, re-applying the saved profile.
+saves or complex tracking; a failed save (e.g. a screen-count
+mismatch) raises an alert — the menu has no footer to warn in.
+Reverting in Settings re-applies the saved profile **only while
+layout drift exists** — matching the footer caption that announces
+it; a plain staged-edit revert stays model-only, exactly as before.
+The drift-revert reuses the in-effect re-apply path, so it also
+prunes spaces created since the profile was saved (their windows
+move to the fallback space) — Revert means "back to the profile",
+not "back minus the layout". Drift captions recompute on window
+show and on quick-menu actions, not on external `set_mode`
+(hotkey/Lua/CLI) — the next open catches up.
 
 ## Spaces & profiles
 

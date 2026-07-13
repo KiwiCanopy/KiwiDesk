@@ -40,7 +40,6 @@ support — this is optional but recommended.
 KiwiDesk runs a lightweight menu bar helper for daily controls. Clicking
 the KiwiDesk icon opens the quick menu where you can:
 
-- **Switch Profile**: Load any saved profile into the current layout.
 - **Layout**: Switch the active space's layout algorithm (Bsp, Stack,
   Scrolling, Monocle, Grid, Track, Floating).
   - Switches made through the quick menu are **session-only** (temporary)
@@ -50,7 +49,8 @@ the KiwiDesk icon opens the quick menu where you can:
     "not saved to profile" subtitle.
   - Click **Save Current Layout to Profile** below the separator to persist
     the new layout (adopts the whole live state into the active profile).
-- **Settings...**: Open the full Settings window.
+- **Switch Profile**: Load any saved profile into the current layout.
+- **Settings…**: Open the full Settings window.
 
 ## How the App and init.lua Coexist
 

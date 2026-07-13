@@ -229,6 +229,7 @@
   "menu.header.no_profile": "KiwiDesk — no profile",
   "menu.layout": "Layout",
   "menu.layout.save": "Save Current Layout to Profile",
+  "menu.layout.save_failed.title": "Couldn't Save Layout",
   "menu.layout.unsaved": "not saved to profile",
   "menu.no_profiles": "No saved profiles",
   "menu.quit": "Quit KiwiDesk",
