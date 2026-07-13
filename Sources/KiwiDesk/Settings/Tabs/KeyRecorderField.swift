@@ -243,6 +243,12 @@ struct KeyRecorderField: View {
 
     private func finish(_ outcome: ChordRecorder.Outcome) {
         preview = ""
+        // Release BEFORE commit (#213): release resumes the live
+        // hotkeys, so the subsequent live-apply reads a truthful
+        // `activationFailures` and its "Active now" / system-
+        // denied caption is honest. Committing while still armed
+        // would leave the table unregistered and every recording
+        // would falsely report success.
         coordinator.release(fieldID)
         switch outcome {
         case .chord(let combo):

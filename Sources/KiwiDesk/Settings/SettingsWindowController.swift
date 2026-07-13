@@ -77,6 +77,14 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     /// after the window is gone. The window itself survives
     /// (`isReleasedWhenClosed = false`) for the next `show()`.
     func windowWillClose(_ notification: Notification) {
+        // Guaranteed disarm net (#213): the recorder normally
+        // resumes hotkeys via the field's own teardown, but the
+        // window is retained (`isReleasedWhenClosed = false`) and
+        // merely ordered out, so a close route that never delivers
+        // a local mouse-down / app-deactivation could leave the
+        // hotkeys suspended. Idempotent — a no-op when nothing is
+        // armed.
+        model.setRecorderArmed(false)
         // Put the shared color panel away so it can't write
         // into the config after the window is gone.
         ColorPanelController.shared.dismiss()
