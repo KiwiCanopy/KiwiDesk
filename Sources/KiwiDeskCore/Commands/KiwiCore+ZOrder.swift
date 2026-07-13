@@ -236,7 +236,7 @@ extension KiwiCore {
             // final step of the same sequence.
             Task { @MainActor [weak self] in
                 if let focused {
-                    self?.focusWindow(focused)
+                    self?.focusWindow(focused, warp: false)
                 }
                 self?.zOrderRestoresInFlight -= 1
             }

@@ -112,19 +112,13 @@ extension KiwiCore {
     public func focusWindow(
         _ id: WindowID,
         refocusRetile: Bool = true,
-        warp: Bool = true
+        warp: Bool
     ) {
         let previousFocused = activeSpace?.focused
         let space = state.workspaces.space(of: id)
         if let space {
             state.workspaces.focus(id, in: space)
         }
-        // Mouse follows focus (#186) fires here, at the intent
-        // point: state focus is set (scrolling slot frames are
-        // final) and the raise echo below must not warp twice.
-        // `warp: false` marks mouse-made focus (drag drop,
-        // resize settle), where the button is already up.
-        if warp { warpMouseToFocused(id) }
         // Scrolling defers the raise until the pan settles
         // (#143), but only when stepping *backward* toward the
         // row pinned behind the leading edge (up/left): raising
@@ -149,6 +143,16 @@ extension KiwiCore {
         if !defersRaise {
             raiseWindow(id)
         }
+        // Mouse follows focus (#186) fires at the intent point,
+        // strictly AFTER the raise: synthetic CG mouse activity
+        // right before `NSRunningApplication.activate()` can
+        // make macOS's cooperative activation drop the request
+        // (raise lands, key focus doesn't). State focus is set
+        // (scrolling slot frames final); the raise echo is a
+        // self-echo that must not warp twice. `warp: false`
+        // marks mouse-made focus (drag drop, resize settle),
+        // where the button is already up.
+        if warp { warpMouseToFocused(id) }
         guard refocusRetile,
             activeSpace?.mode.isFocusDriven == true
         else {

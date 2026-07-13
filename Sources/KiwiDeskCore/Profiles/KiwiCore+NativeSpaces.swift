@@ -96,7 +96,11 @@ extension KiwiCore {
                 // The instant retile above already placed the
                 // windows; re-tiling on focus would fly them
                 // from stale frames (issue #11).
-                self.focusWindow(focused, refocusRetile: false)
+                self.focusWindow(
+                    focused,
+                    refocusRetile: false,
+                    warp: true
+                )
             }
         }
     }

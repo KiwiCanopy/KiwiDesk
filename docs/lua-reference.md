@@ -1753,8 +1753,10 @@ while a mouse button is held down or when it is already inside
 the focused window, and is held while KiwiDesk performs its own
 z-order maintenance raises. When focus lands on a window in an inactive virtual
 space (cmd+tab into a stashed window), the warp waits until
-KiwiDesk follows focus and pulls that space forward. Also
-togglable in the Settings app under **Behavior ▸ Mouse**.
+KiwiDesk follows focus and pulls that space forward. Clicking
+an app-bar item warps too — the click targets the bar, not
+the window it focuses. Also togglable in the Settings app
+under **Behavior ▸ Mouse**.
 
 **Example:**
 

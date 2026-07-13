@@ -137,7 +137,7 @@ extension KiwiCore {
                 scheduleZOrderRestore()
             }
         } else {
-            focusWindow(target)
+            focusWindow(target, warp: true)
         }
         return .ok()
     }
@@ -215,7 +215,7 @@ extension KiwiCore {
             // can land it in an overflowing edge pile (#150).
             scheduleScrollingZOrderRestoreIfOverflowing()
         } else {
-            focusWindow(target)
+            focusWindow(target, warp: true)
         }
         return .ok()
     }

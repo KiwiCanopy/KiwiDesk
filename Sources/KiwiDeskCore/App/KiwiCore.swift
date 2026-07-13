@@ -56,6 +56,9 @@ public final class KiwiCore {
     /// (#152's provenance gap), so mouse-follows-focus holds its
     /// warp while any restore is in flight. A count, not a flag:
     /// back-to-back restores overlap on the serial raise queue.
+    /// Warp-scoped by design (`mouseWarpEligible` is the only
+    /// reader); a second consumer is the signal to close #152's
+    /// gap properly — pile-raise provenance — not to extend this.
     var zOrderRestoresInFlight = 0
 
     /// The deferred one-shot settle tasks (focus follow, startup
@@ -173,7 +176,7 @@ public final class KiwiCore {
         }
         wireDrag()
         appBars.onSelect = { [weak self] id in
-            self?.focusWindow(id)
+            self?.focusWindow(id, warp: true)
         }
         appBars.onMove = { [weak self] space, from, to in
             self?.moveBarItem(space: space, from: from, to: to)
