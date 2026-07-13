@@ -15,6 +15,11 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         super.init()
     }
 
+    /// Refreshes the dashboard's view model state.
+    func reload() {
+        model.reload()
+    }
+
     /// Shows the dashboard, refreshing from the backend so the
     /// active profile and any external config edits are current.
     func show() {

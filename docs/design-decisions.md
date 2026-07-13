@@ -260,6 +260,17 @@ undoing an edit clears the footer again — a latched flag
 kept claiming unsaved changes after the user had already
 put everything back.
 
+**Quick-menu layout switch is session-only.** Changing the active
+space's layout mode from the status-bar quick menu updates the running
+state immediately but is session-only by default (temporary). It does
+not write to the active profile JSON, letting users experiment with
+transient layouts (e.g., trying Monocle momentarily) without
+rewriting their configuration. If they want to keep the layout, a
+"Save Current Layout to Profile" row is provided. Saving adopts the
+whole live state (whole-state snapshot semantics), avoiding partial
+saves or complex tracking. Reverting in Settings discards both staged
+edits and session layout drift, re-applying the saved profile.
+
 ## Spaces & profiles
 
 **The fallback space is an explicit choice, not "whichever

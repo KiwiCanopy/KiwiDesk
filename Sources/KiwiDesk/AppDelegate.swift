@@ -55,6 +55,32 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
                 args: [.string(name)]
             )
         }
+        statusItem.layoutInfoProvider = { [weak self] in
+            guard let self else { return (nil, nil, nil) }
+            return (
+                self.core.activeSpace?.mode,
+                self.core.profiles.currentName,
+                self.core.savedModeForActiveSpace()
+            )
+        }
+        statusItem.onSetLayoutMode = { [weak self] mode in
+            _ = self?.core.execute(
+                "set_mode",
+                args: [.string(mode.rawValue)]
+            )
+            self?.dashboard.reload()
+        }
+        statusItem.onSaveLayoutToProfile = { [weak self] in
+            guard let self,
+                let name = self.core.profiles.currentName
+            else { return }
+            do {
+                try self.core.persistProfile(named: name)
+                self.dashboard.reload()
+            } catch {
+                self.core.onLog("profile save failed: \(error)")
+            }
+        }
         statusItem.onShowConfigIssues = { [weak self] in
             self?.configIssues.show()
         }

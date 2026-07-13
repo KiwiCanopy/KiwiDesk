@@ -39,11 +39,37 @@ struct SettingsFooter: View {
                 .font(.caption)
                 .foregroundStyle(.orange)
             }
+            if model.hasLayoutDrift,
+                let activeSpace = model.core.activeSpace,
+                let savedMode = model.core.savedModeForActiveSpace()
+            {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(
+                        L(
+                            "footer.save.adopts_layout",
+                            "Save also adopts the session layout (%1$@).",
+                            activeSpace.mode.displayName
+                        )
+                    )
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    Text(
+                        L(
+                            "footer.revert.restores_layout",
+                            "Revert also restores the profile "
+                                + "layout (%1$@).",
+                            savedMode.displayName
+                        )
+                    )
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                }
+            }
             Spacer()
             Button(L("footer.revert", "Revert Changes")) {
                 model.revert()
             }
-            .disabled(!model.isDirty)
+            .disabled(!(model.isDirty || model.hasLayoutDrift))
             copySlot
             primarySlot
         }
@@ -158,7 +184,8 @@ struct SettingsFooter: View {
                 .disabled(
                     !model.updateEnabled
                         || !(model.isDirty
-                            || model.profileDirty)
+                            || model.profileDirty
+                            || model.hasLayoutDrift)
                 )
                 .help(model.updateHint ?? "")
         } else {

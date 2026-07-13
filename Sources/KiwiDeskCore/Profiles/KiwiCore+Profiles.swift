@@ -225,4 +225,13 @@ extension KiwiCore {
             }
             .map(\.name)
     }
+
+    /// Saved layout mode for the active space under the active profile.
+    public func savedModeForActiveSpace() -> LayoutMode? {
+        guard let name = profiles.currentName,
+            let space = activeSpace
+        else { return nil }
+        let profile = try? profiles.read(name: name)
+        return profile?.spaceModes[space.id] ?? .bsp
+    }
 }

@@ -79,6 +79,17 @@ final class SettingsModel: ObservableObject {
     /// (overlapping monitor sets, save failures).
     @Published var profileWarning: String?
 
+    /// Whether the active space's layout mode has drifted from
+    /// the active profile's saved layout mode.
+    var hasLayoutDrift: Bool {
+        guard target == .live,
+            let activeSpace = core.activeSpace,
+            activeProfile != nil
+        else { return false }
+        let savedMode = core.savedModeForActiveSpace() ?? .bsp
+        return activeSpace.mode != savedMode
+    }
+
     /// Number of native macOS user Spaces (Mission Control
     /// desktops) currently detected — 0 without SkyLight. Drives
     /// the profile-binding rows (#7).
@@ -223,7 +234,12 @@ final class SettingsModel: ObservableObject {
         }
     }
 
-    func revert() { reload() }
+    func revert() {
+        if target == .live, let activeProfileName = activeProfile {
+            core.reapplyIfInEffect(activeProfileName)
+        }
+        reload()
+    }
 
     /// Migrates a hand-written config into GUI management (the
     /// old file is kept as a commented backup) and switches to
