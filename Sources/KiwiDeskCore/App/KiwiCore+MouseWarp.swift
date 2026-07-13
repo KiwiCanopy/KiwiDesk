@@ -7,8 +7,8 @@ import Foundation
 /// center, or nil when no warp should happen — an empty
 /// frame, or the cursor already inside it. The inside check
 /// doubles as the self-warp guard: a same-window re-focus or
-/// the AX echo of KiwiDesk's own raise never moves a pointer
-/// that is already where it belongs.
+/// a click on the window under the pointer never moves a
+/// pointer that is already where it belongs.
 enum MouseWarp {
     static func target(
         frame: CGRect,
@@ -23,36 +23,45 @@ enum MouseWarp {
 }
 
 extension KiwiCore {
+    /// The guard chain before any warp geometry (#186), split
+    /// out so tests can pin it without CoreGraphics moving the
+    /// real pointer: the toggle, any held mouse button (the
+    /// user is mid-click or mid-drag — yanking the pointer
+    /// would hijack the gesture, and a mouse-made focus change
+    /// needs no warp anyway), an in-flight z-order restore
+    /// (whose pile raises steal focus without user intent),
+    /// and the active space (a focus landing on a stashed
+    /// window has no on-screen frame worth warping to — the
+    /// deferred focus follow warps once the space is pulled
+    /// forward).
+    func mouseWarpEligible(_ id: WindowID) -> Bool {
+        tiler.settings.mouse.followsFocus
+            && NSEvent.pressedMouseButtons == 0
+            && zOrderRestoresInFlight == 0
+            && state.workspaces.space(of: id)
+                == state.workspaces.activeSpace
+    }
+
     /// Warps the pointer to the newly-focused window when
     /// `mouse.follows_focus` is on (#186). Called from the
-    /// `.windowFocused` handler, after `emitFocusChange` — the
-    /// event loop never observes KiwiDesk's own process (#174)
-    /// or unmanaged windows, so no extra filter is needed here.
+    /// focus-intent points — `focusWindow` (keyboard focus,
+    /// close fallback, space switches) and the deferred focus
+    /// follow — and, for focus changes KiwiDesk did not make
+    /// itself (cmd+tab, app-driven focus), from the
+    /// `.windowFocused` handler. The event loop never observes
+    /// KiwiDesk's own process (#174) or unmanaged windows, so
+    /// no extra filter is needed here.
     ///
     /// Tiled windows warp to the layout's *assigned* slot, not
     /// the live AX frame: in focus-driven layouts (scrolling,
-    /// monocle) the window is still sliding when the focus echo
-    /// lands, and the AX frame would be a stale mid-flight
-    /// position. Floating windows have no slot and fall back to
-    /// the AX frame (one snapshot, not a loop — §5). Both are
-    /// top-left global coordinates, the space
+    /// monocle) the window is still sliding when the warp
+    /// runs, and the AX frame would be a stale mid-flight
+    /// position. Floating windows have no slot and fall back
+    /// to the AX frame (one snapshot, not a loop — §5). Both
+    /// are top-left global coordinates, the space
     /// `CGWarpMouseCursorPosition` expects.
     func warpMouseToFocused(_ id: WindowID) {
-        guard tiler.settings.mouse.followsFocus else { return }
-        // A held button means the user is mid-click or mid-drag
-        // with the mouse itself — yanking the pointer would
-        // hijack the gesture (and the focus change was
-        // mouse-made anyway, so the pointer is already there).
-        guard NSEvent.pressedMouseButtons & 1 == 0 else {
-            return
-        }
-        // Only windows on the active space: a focus landing on
-        // a stashed window (cmd+tab into an inactive virtual
-        // space) has no on-screen frame worth warping to.
-        guard
-            state.workspaces.space(of: id)
-                == state.workspaces.activeSpace
-        else { return }
+        guard mouseWarpEligible(id) else { return }
         let frame: CGRect
         if let slot = tiler.calculatedFrames(
             state: state
@@ -70,5 +79,11 @@ extension KiwiCore {
             )
         else { return }
         CGWarpMouseCursorPosition(target)
+        // A programmatic warp decouples the hardware mouse for
+        // the local-events suppression interval (~250 ms) —
+        // a dead mouse right when "the next click lands where
+        // the keyboard works" is the whole point. Re-associate
+        // immediately so the pointer is live.
+        CGAssociateMouseAndMouseCursorPosition(1)
     }
 }

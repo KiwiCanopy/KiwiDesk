@@ -217,6 +217,13 @@ extension KiwiCore {
             eventLoop.element(for: $0)
         }
         guard !ordered.isEmpty else { return }
+        // The raises below steal focus window by window (see
+        // the queue comment), and those echoes carry no
+        // self-raise provenance — hold mouse-follows-focus
+        // warps until the closing re-assert ran, so a restore
+        // never ping-pongs the pointer across pile centers
+        // (#186).
+        zOrderRestoresInFlight += 1
         nonisolated(unsafe) let elements = ordered
         zOrderQueue.async { [weak self] in
             for element in elements {
@@ -227,9 +234,11 @@ extension KiwiCore {
             // so the sequence steals focus window by window.
             // Re-assert the intended focus as the ordered
             // final step of the same sequence.
-            guard let focused else { return }
             Task { @MainActor [weak self] in
-                self?.focusWindow(focused)
+                if let focused {
+                    self?.focusWindow(focused)
+                }
+                self?.zOrderRestoresInFlight -= 1
             }
         }
     }

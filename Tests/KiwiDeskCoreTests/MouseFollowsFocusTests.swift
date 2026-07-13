@@ -47,6 +47,31 @@ struct MouseFollowsFocusTests {
         )
     }
 
+    @Test("The warp guard chain gates on toggle, space, piles")
+    func eligibility() {
+        // NSEvent.pressedMouseButtons is assumed 0 while the
+        // suite runs (nobody is clicking during `swift test`).
+        let core = makeCore()
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: WindowID(1), pid: 1, appName: "A")
+            )
+        )
+        let id = WindowID(1)
+        // Toggle off (the default): never eligible.
+        #expect(!core.mouseWarpEligible(id))
+        core.tiler.settings.mouse.followsFocus = true
+        #expect(core.mouseWarpEligible(id))
+        // A z-order restore in flight holds the warp: its pile
+        // raises steal focus without user intent (#186).
+        core.zOrderRestoresInFlight = 1
+        #expect(!core.mouseWarpEligible(id))
+        core.zOrderRestoresInFlight = 0
+        #expect(core.mouseWarpEligible(id))
+        // A window on no (or an inactive) space never warps.
+        #expect(!core.mouseWarpEligible(WindowID(99)))
+    }
+
     @Test("A partial mouse object keeps the off default")
     func partialDecode() throws {
         let decoded = try JSONDecoder().decode(

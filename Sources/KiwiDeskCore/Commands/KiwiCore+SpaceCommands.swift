@@ -51,6 +51,11 @@ extension KiwiCore {
                 force: true
             )
             self.emitSpaceChange()
+            // The focus echo that triggered this follow found
+            // the window on an inactive space, where the warp
+            // guard skips; now that the space is forward the
+            // slot frames are real — warp here (#186).
+            self.warpMouseToFocused(id)
         }
     }
 

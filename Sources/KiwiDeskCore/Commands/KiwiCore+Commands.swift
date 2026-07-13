@@ -118,6 +118,13 @@ extension KiwiCore {
         if let space {
             state.workspaces.focus(id, in: space)
         }
+        // Mouse follows focus (#186) fires at the intent
+        // point, not on the AX echo: state focus is set (so a
+        // scrolling pan's slot frames are final), and the echo
+        // of the raise below is a self-echo that must not warp
+        // twice. In-flight z-order re-asserts are held off
+        // inside the call.
+        warpMouseToFocused(id)
         // Scrolling defers the raise until the pan settles
         // (#143), but only when stepping *backward* toward the
         // row pinned behind the leading edge (up/left): raising

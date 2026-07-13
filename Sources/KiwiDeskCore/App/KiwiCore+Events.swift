@@ -61,7 +61,14 @@ extension KiwiCore {
             // pan would steal focus back.
             pendingFocusRaise = nil
             emitFocusChange(id)
-            warpMouseToFocused(id)
+            // Warp only for focus changes KiwiDesk did not
+            // make itself (cmd+tab, app-driven focus): a
+            // self-raise already warped at intent time in
+            // `focusWindow`, and an echo that moved no focus
+            // (same-window re-focus) is not a change (#186).
+            if !selfEcho, effects.focusBefore != id {
+                warpMouseToFocused(id)
+            }
             // cmd+tab (or a click) can reach a window hidden
             // in an inactive virtual space; pull that space
             // forward instead of typing into a stashed window.

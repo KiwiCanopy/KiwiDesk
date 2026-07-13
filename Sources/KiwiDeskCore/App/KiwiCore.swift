@@ -50,6 +50,14 @@ public final class KiwiCore {
     /// reused). See `handle(_:)`'s `.windowFocused` case.
     var outstandingSelfRaises: Set<WindowID> = []
 
+    /// Z-order restores whose raise sequence has not re-asserted
+    /// focus yet (#186). The pile raises steal focus window by
+    /// window and those echoes are not in `outstandingSelfRaises`
+    /// (#152's provenance gap), so mouse-follows-focus holds its
+    /// warp while any restore is in flight. A count, not a flag:
+    /// back-to-back restores overlap on the serial raise queue.
+    var zOrderRestoresInFlight = 0
+
     /// The deferred one-shot settle tasks (focus follow, startup
     /// sweep, space settles), keyed so `stop()` cancels them all
     /// without a hand-kept list (#49). Bodies live at the
