@@ -5,12 +5,18 @@ import SwiftUI
 /// This Profile ▸ Spaces (#68 §3.2/§3.3): the profile's space
 /// list — rename, reorder (drag or context menu), pick a layout
 /// mode (with its glyph), designate the fallback space, and
-/// tune per-space overrides inline on each row.
+/// tune per-space overrides in a Customize popover (#205).
 struct SpacesSection: View {
     @ObservedObject var model: SettingsModel
     @State private var newSpace = ""
-    /// Rows with an open "Customize" expander.
-    @State private var expanded: Set<SpaceID> = []
+    /// The one row whose "Customize" popover is open, if any.
+    /// A single slot (not a set) makes the popover its own
+    /// accordion — opening one row closes any other (#205).
+    @State var customizing: SpaceID?
+    /// A space awaiting delete confirmation — set only for a
+    /// space that `carriesOverrides`, so a plain empty space
+    /// still deletes in one click (#205).
+    @State var pendingDelete: SpaceID?
     // Drag-reorder state, shared with the handle/gesture
     // extension (`SpacesSection+Drag.swift`), hence not
     // `private` (which is file-scoped).
@@ -21,8 +27,9 @@ struct SpacesSection: View {
     /// drag end and row teardown can restore the right cursor.
     @State var hoveredHandle: SpaceID?
     /// Each row's frame in list space, for retargeting the
-    /// drag — measured via preference, so variable-height
-    /// rows (open expanders) stay accurate.
+    /// drag — measured via preference so the retarget reads live
+    /// row positions (e.g. after a reorder) rather than stale
+    /// ones.
     @State var rowFrames: [SpaceID: CGRect] = [:]
 
     var body: some View {
@@ -36,6 +43,15 @@ struct SpacesSection: View {
                 rowFrames = $0
             }
         }
+        .confirmationDialog(
+            deleteConfirmTitle,
+            isPresented: deleteConfirmPresented,
+            presenting: pendingDelete
+        ) { space in
+            deleteConfirmActions(space)
+        } message: { _ in
+            Text(deleteConfirmMessage)
+        }
     }
 
     static let listSpace = "spacesList"
@@ -48,11 +64,25 @@ struct SpacesSection: View {
             Text(fallbackCaption)
                 .font(.caption)
                 .foregroundStyle(.secondary)
+            if model.config.spaces.isEmpty {
+                Text(emptyCaption)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
             ForEach(model.config.spaces, id: \.raw) { space in
                 spaceRow(space)
             }
             addRow
         }
+    }
+
+    private var emptyCaption: String {
+        L(
+            "spaces.empty",
+            "No spaces yet — add one below. Until you do, "
+                + "every window tiles in a single default "
+                + "space."
+        )
     }
 
     private var spacesCaption: String {
@@ -115,18 +145,20 @@ struct SpacesSection: View {
                 }
                 Spacer()
                 modePicker(space)
-                expandButton(space)
+                // Danger zone: a divider and breathing room set
+                // the destructive delete apart from the mode
+                // picker and Customize, so the trash can't be
+                // hit reaching for either (#205).
+                Divider()
+                    .frame(height: 16)
+                    .padding(.horizontal, 2)
+                customizeButton(space)
                 Button {
-                    removeSpace(space)
+                    requestRemove(space)
                 } label: {
                     Image(systemName: "trash")
                 }
                 .buttonStyle(.borderless)
-            }
-            if expanded.contains(space) {
-                SpaceOverrideRows(model: model, space: space)
-                    .padding(.leading, 24)
-                    .padding(.bottom, 4)
             }
         }
         .padding(8)
@@ -170,27 +202,9 @@ struct SpacesSection: View {
     // `modePicker` and its binding live in
     // `SpacesSection+ModePicker.swift` (#123 file-size split).
 
-    private func expandButton(_ space: SpaceID) -> some View {
-        Button {
-            if expanded.contains(space) {
-                expanded.remove(space)
-            } else {
-                expanded.insert(space)
-            }
-        } label: {
-            Image(
-                systemName: expanded.contains(space)
-                    ? "chevron.down" : "slider.horizontal.3"
-            )
-        }
-        .buttonStyle(.borderless)
-        .help(
-            L(
-                "spaces.customize.help",
-                "Customize this space"
-            )
-        )
-    }
+    // `customizeButton` (the popover anchor), the delete
+    // confirmation, and the empty-state live in
+    // `SpacesSection+Customize.swift` (#205 file-size split).
 
     /// Keyboard-reachable equivalents of the drag/badge
     /// affordances (the §3.13 accessibility pattern).
@@ -226,7 +240,7 @@ struct SpacesSection: View {
             L("spaces.context.delete", "Delete"),
             role: .destructive
         ) {
-            removeSpace(space)
+            requestRemove(space)
         }
     }
 
@@ -260,13 +274,15 @@ struct SpacesSection: View {
         newSpace = ""
     }
 
-    private func removeSpace(_ space: SpaceID) {
-        // Clears the list entry AND every reference (pin,
-        // Main role, fallback, per-space settings maps) — a
-        // leftover reference would resurrect the space on the
-        // next profile load (#68 review).
+    /// The actual delete, reached either straight from
+    /// `requestRemove` (space carries nothing) or after the
+    /// confirmation dialog. Clears the list entry AND every
+    /// reference (pin, Main role, fallback, per-space settings
+    /// maps) — a leftover reference would resurrect the space on
+    /// the next profile load (#68 review).
+    func removeSpace(_ space: SpaceID) {
         model.config.removeSpace(space)
-        expanded.remove(space)
+        if customizing == space { customizing = nil }
     }
 
     private func index(of space: SpaceID) -> Int {

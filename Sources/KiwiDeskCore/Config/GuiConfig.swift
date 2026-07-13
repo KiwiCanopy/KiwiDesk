@@ -127,6 +127,24 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         settings.removeSpace(space)
     }
 
+    /// Whether deleting `space` would silently drop non-trivial
+    /// per-space work — the destructive-delete confirm gate
+    /// (#205). Counts a monitor pin, the Main role, the fallback
+    /// designation, and any per-space settings override (gap,
+    /// placement, icon, or a layout's own override map). The
+    /// bare layout mode is core identity, not "override work",
+    /// so it is not counted. The settings half probes by
+    /// mutating a copy and comparing, so it can never drift from
+    /// `TilingSettings.removeSpace`'s reflection-guarded map list.
+    public func carriesOverrides(_ space: SpaceID) -> Bool {
+        if spacePins[space] != nil { return true }
+        if mainSpaces.contains(space) { return true }
+        if fallbackSpace == space { return true }
+        var probe = settings
+        probe.removeSpace(space)
+        return probe != settings
+    }
+
     /// Only the global fields persist in the sidecar — the
     /// profile-scoped ones (settings, modes, pins) round-trip
     /// through the profile JSON instead (#36).

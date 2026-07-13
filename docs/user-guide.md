@@ -206,10 +206,24 @@ To **add a space**, click the **+** button and enter a name
 
 To **rename**, click the space name in the list.
 
-To **delete**, right-click and pick Delete. The space is removed
-right away — any windows in it move to the fallback space (or the
-first space in the list when no fallback is set), and it stays gone
-across reloads and restarts.
+To **customize a space** (per-space layout overrides), click the
+**Customize** button (the sliders icon) on its row. The override
+editor opens in a popover floating over the list, so it never
+pushes the other rows down, and opening one space's editor closes
+any other that was open. See
+[Per-Space Overrides](#per-space-overrides) for what it contains.
+
+To **delete**, right-click and pick Delete (or click the trash
+icon). The space is removed right away — any windows in it move to
+the fallback space (or the first space in the list when no
+fallback is set), and it stays gone across reloads and restarts.
+A space that carries customized settings (layout overrides, a
+monitor pin, or a Main/Fallback role) asks for confirmation first,
+since deleting it discards that work too.
+
+When the list is empty (you can delete every space), a hint
+explains that every window tiles in a single default space until
+you add one.
 
 To **set a recognition icon** (optional), click the space name to
 edit it and pick an SF Symbol, emoji, or single character. The icon
@@ -353,9 +367,10 @@ Adjust each mode's defaults:
 
 To tune the *same layout type differently in different spaces*, use
 the per-space override toggles. For example, make space "3" scroll
-vertically while every other scrolling space goes horizontal. Click
-the space's override row and adjust just that field — unset fields
-inherit the global value.
+vertically while every other scrolling space goes horizontal. Open
+the space's **Customize** popover from its row in the **Spaces**
+section, tick the box beside a field, and adjust just that field —
+unticked (gray) fields inherit the global value.
 
 ### App Bar
 
