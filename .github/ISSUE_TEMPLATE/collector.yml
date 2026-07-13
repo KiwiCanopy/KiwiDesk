@@ -15,6 +15,11 @@ body:
         branch = PR; parallelize across file-disjoint lanes,
         serialize within a lane (same files → they conflict).
 
+        The collector also owns shipped-history detail: when
+        an issue lands, record the postmortem here (PR link,
+        review outcome, spin-offs) — the owning roadmap keeps
+        only a one-line pointer to this collector.
+
   - type: textarea
     id: theme
     attributes:

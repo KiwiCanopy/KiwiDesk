@@ -21,6 +21,16 @@ body:
         Legend: 🟢 parallel-safe · 🔴 must serialize ·
         🧠 big — dedicated single session · ⛔ blocked/deferred
 
+        Keep the roadmap scannable as it ages (Roadmap 2
+        lesson, 2026-07-13): a wave entry stays a one-liner
+        pointing at its collector — shipped postmortems (PR
+        links, review outcomes, spin-offs) live in the
+        collector or PR, not here. When an entry ships, fold
+        it into a per-wave `<details>` "Shipped log" block
+        (open entries stay above the fold), and maintain an
+        **Open work (fast path)** digest right after Scope
+        listing only what is still open, in execution order.
+
   - type: textarea
     id: scope
     attributes:
@@ -42,7 +52,10 @@ body:
       description: |
         One section per wave, in execution order. Reference
         collector issues for themed groups; list standalones
-        as task-list items with their legend marker.
+        as task-list items with their legend marker. As
+        entries ship, fold them into a per-wave `<details>`
+        Shipped log and update the Open-work digest — detail
+        belongs in the collector/PR, not the roadmap line.
       placeholder: |
         ### Wave N — Quick wins 🟢
         Disjoint files, run as parallel lanes.
