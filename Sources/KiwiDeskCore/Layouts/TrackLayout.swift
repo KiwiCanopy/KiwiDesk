@@ -44,16 +44,13 @@ public struct TrackLayout: LayoutSystem {
             cap: 0
         ).count
         let geoCap = Self.geometricCap(for: context)
-        // Auto on = unlimited normal tracks (geometry alone caps);
-        // auto off = the fixed `count` (NOT `trackCap`, which is
-        // count + 1 — it already includes the overflow track).
-        let normalCap =
-            params.autoTracks ? .max : max(1, params.count)
         // The render cap folds the surplus past the normal
-        // capacity OR the geometric fit into one far-edge track.
+        // capacity (`params.normalCap`: fixed `count`, or `.max`
+        // when auto tracks caps by geometry alone) OR the
+        // geometric fit into one far-edge overflow track.
         let (effectiveCap, overflows) = Self.overflowCap(
             markerCount: markerCount,
-            normalCap: normalCap,
+            normalCap: params.normalCap,
             geoCap: geoCap
         )
         let counts = Self.counts(

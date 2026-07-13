@@ -96,6 +96,18 @@ public struct TrackParams: Sendable, Equatable, Codable {
         autoTracks ? 0 : max(1, count) + 1
     }
 
+    /// The **normal**-track capacity the render and every
+    /// overflow-fold guard gauge against (#192/#198): `.max`
+    /// (geometry alone caps) while `auto_tracks` is on, else the
+    /// fixed `count`. The `.max` sentinel is the contract
+    /// `TrackLayout.overflowCap` reads (`normalCap == .max` = no
+    /// count fold). Sibling of `trackCap`; both live here so no
+    /// site re-derives the fixed-cap rule and drifts from the
+    /// layout (the shared-authority precedent that #198 closed).
+    public var normalCap: Int {
+        autoTracks ? .max : max(1, count)
+    }
+
     /// JSON keys follow the Lua setters (`track.set_axis`).
     private enum CodingKeys: String, CodingKey {
         case axis

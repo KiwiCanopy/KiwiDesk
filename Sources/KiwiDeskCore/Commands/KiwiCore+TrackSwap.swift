@@ -50,8 +50,6 @@ extension KiwiCore {
         // against the render's own cap — geometry included, read
         // from the live layout context (#198). No context (no
         // screen, headless) degrades to the fixed-limit cap.
-        let normalCap =
-            params.autoTracks ? .max : max(1, params.count)
         let geoCap =
             (tiler.layoutInput(state: state)?.context)
             .map(TrackLayout.geometricCap(for:)) ?? .max
@@ -60,7 +58,7 @@ extension KiwiCore {
             breaks: space.trackBreaks,
             windowIndex: index,
             delta: delta,
-            normalCap: normalCap,
+            normalCap: params.normalCap,
             geoCap: geoCap
         ) {
             return .fail(
@@ -78,7 +76,7 @@ extension KiwiCore {
                 breaks: space.trackBreaks,
                 cap: 0
             ).count,
-            normalCap: normalCap,
+            normalCap: params.normalCap,
             geoCap: geoCap
         ).effectiveCap
         var swapped = false
