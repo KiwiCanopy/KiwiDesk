@@ -11,7 +11,7 @@ public final class KiwiCore {
     public let tiler = TilingEngine()
     public let sleepWake = SleepWakeManager()
     public let bus = EventBus()
-    public let keys = KeybindingManager()
+    public let keys: KeybindingManager
     public let drag = DragCoordinator()
     public let dragOverlay = DragOverlay()
     public let appBars = AppBarManager()
@@ -20,6 +20,12 @@ public final class KiwiCore {
     public let crash: CrashRecovery
     public internal(set) var lua: LuaInterpreter?
     public let exec = ExecLauncher()
+
+    /// Effective structured keybinding sources currently
+    /// installed in `keys`. Kept so a recorder-only live edit
+    /// can capture an in-memory rollback point without reading
+    /// gui.json or a profile again (#123 review).
+    var appliedStructuredModes: [KeyMode]?
 
     /// A stack z-order restore is waiting for the current
     /// animations to settle (see restoreStackZOrder).
@@ -137,13 +143,17 @@ public final class KiwiCore {
     }
 
     public init(
-        configDirectory: URL? = nil
+        configDirectory: URL? = nil,
+        hotkeyRegistrar: HotkeyRegistrar = CarbonHotkeyCenter()
     ) {
         let directory =
             configDirectory
             ?? FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent(".config/KiwiDesk")
         self.configDirectory = directory
+        self.keys = KeybindingManager(
+            registrar: hotkeyRegistrar
+        )
         self.socket = SocketServer(
             path:
                 directory

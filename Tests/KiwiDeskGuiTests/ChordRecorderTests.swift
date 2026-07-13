@@ -37,6 +37,7 @@ struct ChordRecorderTests {
     @Test("The first key-down locks modifiers + key")
     func keyDownLocks() {
         let recorder = ChordRecorder()
+        defer { recorder.stop() }
         let capture = Capture()
         capture.attach(recorder)
         recorder.handle(
@@ -56,6 +57,7 @@ struct ChordRecorderTests {
     @Test("Released modifiers don't linger — bare key locks")
     func releasedModifiersDropOut() {
         let recorder = ChordRecorder()
+        defer { recorder.stop() }
         let capture = Capture()
         capture.attach(recorder)
         recorder.handle(
@@ -71,6 +73,7 @@ struct ChordRecorderTests {
     @Test("The modifier preview mirrors what is held")
     func modifierPreview() {
         let recorder = ChordRecorder()
+        defer { recorder.stop() }
         let capture = Capture()
         capture.attach(recorder)
         recorder.handle(
@@ -91,6 +94,7 @@ struct ChordRecorderTests {
     @Test("Bare Escape cancels")
     func bareEscapeCancels() {
         let recorder = ChordRecorder()
+        defer { recorder.stop() }
         let capture = Capture()
         capture.attach(recorder)
         recorder.handle(.keyDown, keyCode: 53, flags: [])
@@ -103,6 +107,7 @@ struct ChordRecorderTests {
     @Test("Escape WITH modifiers records — ⌃Escape is valid")
     func modifiedEscapeRecords() {
         let recorder = ChordRecorder()
+        defer { recorder.stop() }
         let capture = Capture()
         capture.attach(recorder)
         recorder.handle(
@@ -116,6 +121,7 @@ struct ChordRecorderTests {
     @Test("An unrepresentable key is swallowed; recording continues")
     func unrepresentableKeyContinues() {
         let recorder = ChordRecorder()
+        defer { recorder.stop() }
         let capture = Capture()
         capture.attach(recorder)
         // 255 maps to no KeyCombo name.
@@ -126,17 +132,32 @@ struct ChordRecorderTests {
         )
         #expect(swallowed)
         #expect(capture.outcomes.isEmpty)
+        #expect(
+            recorder.handle(
+                .keyUp,
+                keyCode: 255,
+                flags: [.command]
+            )
+        )
         recorder.handle(
             .keyDown,
             keyCode: 40,
             flags: [.command]
         )
         #expect(capture.lockedCombo == "command+k")
+        #expect(
+            recorder.handle(
+                .keyUp,
+                keyCode: 40,
+                flags: [.command]
+            )
+        )
     }
 
     @Test("keyUp events pass through untouched")
     func keyUpPassesThrough() {
         let recorder = ChordRecorder()
+        defer { recorder.stop() }
         let capture = Capture()
         capture.attach(recorder)
         // A key held from before the recording started
@@ -151,9 +172,41 @@ struct ChordRecorderTests {
         #expect(capture.outcomes.isEmpty)
     }
 
+    @Test("A swallowed keyDown also swallows its keyUp")
+    func pairedKeyUpIsSwallowed() {
+        let recorder = ChordRecorder()
+        defer { recorder.stop() }
+        let capture = Capture()
+        capture.attach(recorder)
+
+        #expect(
+            recorder.handle(
+                .keyDown,
+                keyCode: 38,
+                flags: [.command]
+            )
+        )
+        #expect(
+            recorder.handle(
+                .keyUp,
+                keyCode: 38,
+                flags: [.command]
+            )
+        )
+        #expect(
+            !recorder.handle(
+                .keyUp,
+                keyCode: 38,
+                flags: [.command]
+            )
+        )
+        #expect(capture.lockedCombo == "command+j")
+    }
+
     @Test("finish fires exactly once")
     func finishFiresOnce() {
         let recorder = ChordRecorder()
+        defer { recorder.stop() }
         let capture = Capture()
         capture.attach(recorder)
         recorder.handle(

@@ -98,8 +98,9 @@ struct KeyRecorderField: View {
         }
         .onChange(of: coordinator.generation) { _, _ in
             // The edited mode/target changed — any pending
-            // rejection captured stale bindings (#68 review).
+            // rejection or feedback captured stale bindings.
             rejection = nil
+            liveFeedback = nil
             recorder.stop()
             preview = ""
         }

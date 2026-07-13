@@ -3,50 +3,52 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// Live-apply for keybinding edits (#123 Part 1):
-/// `liveApplyKeybindings(modes:)` re-registers the running
-/// hotkeys from an edited, unsaved mode set — resolved through
-/// the active profile's override, persisting nothing — and
-/// `nil` re-registers from the saved sidecar (the Revert /
-/// discard direction).
+@MainActor
+private final class AcceptingLiveRegistrar: HotkeyRegistrar {
+    private var nextID: UInt32 = 1
+
+    func register(
+        keyCode: UInt32,
+        modifiers: HotkeyModifiers,
+        handler: @escaping @MainActor () -> Void
+    ) -> UInt32? {
+        defer { nextID += 1 }
+        return nextID
+    }
+
+    func unregister(id: UInt32) {}
+}
+
+/// Recorder-only live apply: effective registrations change,
+/// persistence does not; saved state and snapshots both restore.
 @Suite("Live-apply keybindings (#123)", .serialized)
 @MainActor
 struct LiveApplyKeybindingsTests {
-
-    // MARK: - Helpers
-
     private func makeGuiCore() -> KiwiCore {
-        let core = KiwiCore(
+        KiwiCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(
                     "kiwi-liveapply-\(UUID().uuidString)"
-                )
+                ),
+            hotkeyRegistrar: AcceptingLiveRegistrar()
         )
-        try? core.guiConfigStore.save(GuiConfig())
-        return core
     }
 
     private func binding(
         _ combo: String,
         lua: String
     ) -> KeyBinding {
-        KeyBinding(
-            combo: combo,
-            lua: lua,
-            kind: .custom,
-            label: ""
-        )
+        KeyBinding(combo: combo, lua: lua)
     }
 
-    /// Base gui.json: one default-mode binding (alt+h).
     private func baseConfig() -> GuiConfig {
         var config = GuiConfig()
         config.modes = [
             KeyMode(
                 name: "default",
                 bindings: [
-                    binding("alt+h", lua: "marker = \"base\"")
+                    binding("alt+h", lua: "marker = 'base'")
                 ]
             )
         ]
@@ -76,53 +78,69 @@ struct LiveApplyKeybindingsTests {
         return lua.global(name)
     }
 
-    // MARK: - Apply / revert directions
-
-    @Test("Edited modes register live; gui.json untouched")
+    @Test("Edited modes register live; gui.json stays untouched")
     func editedModesRegisterWithoutPersisting() throws {
         let core = makeGuiCore()
         try core.saveGuiConfig(baseConfig())
 
         var edited = baseConfig().modes
-        edited[0].bindings.append(
-            binding("alt+j", lua: "hit = true")
+        let added = binding("alt+j", lua: "hit = true")
+        edited[0].bindings.append(added)
+        let result = core.liveApplyKeybindings(
+            modes: edited,
+            target: .init(mode: "default", binding: added)
         )
-        core.liveApplyKeybindings(modes: edited)
 
+        guard case .success(.active) = result else {
+            Issue.record("expected active live apply")
+            return
+        }
         #expect(
             try fire("alt+j", readGlobal: "hit", core: core)
                 == .bool(true)
         )
         #expect(try registered("alt+h", core: core))
-        // Nothing was persisted: the sidecar still holds only
-        // the base binding.
         let saved = try #require(core.guiConfigStore.load())
         #expect(saved.modes == baseConfig().modes)
     }
 
-    @Test("nil re-registers from the saved sidecar (revert)")
-    func nilRevertsToSavedBindings() throws {
+    @Test("Saved state and the snapshot both restore")
+    func restorePaths() throws {
         let core = makeGuiCore()
         try core.saveGuiConfig(baseConfig())
+        let snapshot = try #require(
+            core.liveKeybindingSnapshot()
+        )
 
         var edited = baseConfig().modes
-        edited[0].bindings.append(
-            binding("alt+j", lua: "hit = true")
+        let added = binding("alt+j", lua: "hit = true")
+        edited[0].bindings.append(added)
+        _ = core.liveApplyKeybindings(
+            modes: edited,
+            target: .init(mode: "default", binding: added)
         )
-        core.liveApplyKeybindings(modes: edited)
         #expect(try registered("alt+j", core: core))
 
-        core.liveApplyKeybindings(modes: nil)
+        #expect(core.restoreSavedLiveKeybindings().isSuccess)
+        #expect(!(try registered("alt+j", core: core)))
+
+        _ = core.liveApplyKeybindings(
+            modes: edited,
+            target: .init(mode: "default", binding: added)
+        )
+        #expect(core.restoreLiveKeybindings(snapshot).isSuccess)
         #expect(!(try registered("alt+j", core: core)))
         #expect(try registered("alt+h", core: core))
     }
 
-    // MARK: - Profile override resolution
-
-    @Test("Active profile's override wins over edited base")
-    func profileOverrideResolves() throws {
+    @Test("Active profile shadowing is reported, not active")
+    func profileOverrideShadowReported() throws {
         let core = makeGuiCore()
         try core.saveGuiConfig(baseConfig())
+        let override = binding(
+            "alt+h",
+            lua: "marker = 'override'"
+        )
         try core.profiles.save(
             Profile(
                 name: "Work",
@@ -135,13 +153,7 @@ struct LiveApplyKeybindingsTests {
                     modes: [
                         KeyMode(
                             name: "default",
-                            bindings: [
-                                binding(
-                                    "alt+h",
-                                    lua:
-                                        "marker = \"override\""
-                                )
-                            ]
+                            bindings: [override]
                         )
                     ]
                 )
@@ -154,64 +166,72 @@ struct LiveApplyKeybindingsTests {
             ).isSuccess
         )
 
-        // Live-apply an edited BASE set: a new combo lands,
-        // and the profile's rebind of alt+h still wins — the
-        // exact registration a Save + reload would produce.
         var edited = baseConfig().modes
-        edited[0].bindings.append(
-            binding("alt+j", lua: "hit = true")
+        edited[0].bindings[0].lua = "marker = 'edited'"
+        let target = edited[0].bindings[0]
+        let result = core.liveApplyKeybindings(
+            modes: edited,
+            target: .init(mode: "default", binding: target)
         )
-        core.liveApplyKeybindings(modes: edited)
 
+        guard case .success(.profileShadowed) = result else {
+            Issue.record("expected profile-shadowed status")
+            return
+        }
         #expect(
-            try fire("alt+j", readGlobal: "hit", core: core)
-                == .bool(true)
-        )
-        #expect(
-            try fire("alt+h", readGlobal: "marker", core: core)
-                == .string("override")
+            try fire(
+                "alt+h",
+                readGlobal: "marker",
+                core: core
+            ) == .string("override")
         )
     }
 
-    // MARK: - Mode preservation
-
-    @Test("Active non-default key mode survives a live-apply")
+    @Test("Surviving active mode is preserved")
     func activeModeSurvives() throws {
         let core = makeGuiCore()
         var config = baseConfig()
         config.modes.append(
             KeyMode(
                 name: "resize",
-                bindings: [
-                    binding("h", lua: "shrunk = true")
-                ]
+                bindings: [binding("h", lua: "shrunk = true")]
             )
         )
         try core.saveGuiConfig(config)
-
         core.keys.switchMode("resize")
-        #expect(core.keys.currentMode == "resize")
 
-        core.liveApplyKeybindings(modes: config.modes)
+        _ = core.liveApplyKeybindings(
+            modes: config.modes,
+            target: .init(
+                mode: "default",
+                binding: config.modes[0].bindings[0]
+            )
+        )
         #expect(core.keys.currentMode == "resize")
     }
 
-    @Test("A live-apply that removes the active mode resets")
+    @Test("Removing the active mode falls back to default")
     func removedActiveModeFallsBack() throws {
         let core = makeGuiCore()
         var config = baseConfig()
-        config.modes.append(
-            KeyMode(
-                name: "resize",
-                bindings: [
-                    binding("h", lua: "shrunk = true")
-                ]
-            )
-        )
+        config.modes.append(KeyMode(name: "resize"))
         try core.saveGuiConfig(config)
         core.keys.switchMode("resize")
 
-        core.liveApplyKeybindings(modes: baseConfig().modes)
+        _ = core.liveApplyKeybindings(
+            modes: baseConfig().modes,
+            target: .init(
+                mode: "default",
+                binding: baseConfig().modes[0].bindings[0]
+            )
+        )
         #expect(core.keys.currentMode == "default")
+    }
+}
+
+extension Result {
+    fileprivate var isSuccess: Bool {
+        if case .success = self { return true }
+        return false
     }
 }

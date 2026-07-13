@@ -1,52 +1,207 @@
 import Foundation
 
-/// Live-apply for keybinding edits (#123 Part 1).
-///
-/// The recorder is an input device: a successfully committed
-/// recording must work the moment it is recorded, not after a
-/// Save. This entry point re-registers the running hotkeys
-/// from the GUI's edited (unsaved) base mode set — the same
-/// live-mutate-no-persist shape as `set_mode`. Nothing is
-/// written to disk: the dashboard's dirty flag and its footer
-/// keep their exact meaning ("the file hasn't caught up"),
-/// and Save / Revert stay the only bridges to disk.
+/// Recorder row whose combo just changed. The binding carries
+/// the recorder-only runtime action, which can intentionally
+/// differ from other staged edits in the Settings model.
+public struct LiveKeybindingTarget: Sendable {
+    public let mode: String
+    public let binding: KeyBinding
+
+    public init(mode: String, binding: KeyBinding) {
+        self.mode = mode
+        self.binding = binding
+    }
+}
+
+/// Honest recorder feedback. Only `.active` means Carbon
+/// registered this exact action in the runtime-active mode.
+public enum LiveKeybindingApplyStatus: Equatable, Sendable {
+    case active
+    case inactiveMode(String)
+    case denied
+    case profileShadowed
+    case compileFailed
+}
+
+/// A live apply can fail before changing the running table.
+public enum LiveKeybindingApplyError: Error, Equatable,
+    Sendable
+{
+    case unmanaged
+    case unavailable
+    case unreadableConfig
+    case unreadableProfile
+    case preparationFailed
+}
+
+/// In-memory rollback point captured before the first recorder
+/// mutation. It survives a deleted/corrupt sidecar, avoiding a
+/// clean Settings model with ghost hotkeys still registered.
+public struct LiveKeybindingSnapshot: Sendable {
+    let modes: [KeyMode]
+    let activeMode: String
+}
+
 extension KiwiCore {
-    /// Re-registers all hotkeys from `modes` — the edited BASE
-    /// mode set — resolved through the active profile's sparse
-    /// override: exactly the registration a Save + config
-    /// reload would produce, with no file writes. Passing
-    /// `nil` re-registers from the saved sidecar instead — the
-    /// Revert / discard direction, flushing any live-applied
-    /// recording back out (no ghost hotkeys).
-    ///
-    /// GUI-managed only (Lua-owned configs keep Lua
-    /// authoritative), and a no-op before the first
-    /// `loadConfig` (no VM yet) — the same guards as
-    /// `applyStructuredConfig`.
-    ///
-    /// The active key mode is preserved when it survives the
-    /// edit — unlike profile applies, which deliberately reset
-    /// to default because the mode set changes with the
-    /// profile: re-recording one shortcut must not silently
-    /// drop the user out of the mode they are in.
-    ///
-    /// Registration failures (system-reserved combos) land in
-    /// `keys.activationFailures` for the caller's feedback.
-    public func liveApplyKeybindings(modes: [KeyMode]?) {
-        guard isGuiManaged, let lua = keys.lua else { return }
-        guard
-            let base = modes ?? loadStructuredConfig()?.modes
-        else { return }
+    /// Captures the effective, successfully compiled structured
+    /// bindings currently installed. nil means live apply is
+    /// outside the current ownership/VM state.
+    public func liveKeybindingSnapshot()
+        -> LiveKeybindingSnapshot?
+    {
+        guard isGuiManaged, keys.lua != nil,
+            let modes = appliedStructuredModes
+        else { return nil }
+        return LiveKeybindingSnapshot(
+            modes: modes,
+            activeMode: keys.currentMode
+        )
+    }
+
+    /// Applies recorder-only base modes through the active
+    /// profile override, without persistence. Preparation is
+    /// complete before one manager swap. The target result is
+    /// scoped to its effective action and runtime mode; absence
+    /// from `activationFailures` alone never proves success.
+    public func liveApplyKeybindings(
+        modes base: [KeyMode],
+        target: LiveKeybindingTarget?
+    ) -> Result<
+        LiveKeybindingApplyStatus?,
+        LiveKeybindingApplyError
+    > {
+        guard isGuiManaged else { return .failure(.unmanaged) }
+        guard let lua = keys.lua else {
+            return .failure(.unavailable)
+        }
+        let profile: KeyModeOverride?
+        switch activeProfileModesForLiveApply() {
+        case .success(let modes):
+            profile = modes
+        case .failure(let error):
+            return .failure(error)
+        }
+
+        let resolved = ConfigResolver.resolvedModes(
+            base: base,
+            profile: profile
+        )
+        let shadowed =
+            target.map {
+                effectiveBinding(for: $0, in: resolved)?
+                    .sameAction(as: $0.binding) != true
+            } ?? false
+        let prepared = prepareKeybindings(resolved, lua: lua)
+
+        // A target action that cannot compile must leave the
+        // previously working table intact. Release every newly
+        // minted ref; no manager mutation has happened yet.
+        if let target,
+            !shadowed,
+            prepared.failures.contains(where: {
+                $0.mode == target.mode
+                    && $0.binding.sameAction(
+                        as: target.binding
+                    )
+            })
+        {
+            prepared.release(using: lua)
+            return .success(.compileFailed)
+        }
+
         let active = keys.currentMode
-        applyStructuredKeybindings(
-            modes: base,
-            profile: activeProfileOverrides()?.modes,
+        install(prepared, preferredMode: active)
+        guard let target else { return .success(nil) }
+        if shadowed { return .success(.profileShadowed) }
+        guard target.mode == keys.currentMode else {
+            return .success(.inactiveMode(target.mode))
+        }
+        guard let combo = KeyCombo.parse(target.binding.combo)
+        else { return .success(.compileFailed) }
+        if keys.activationFailures.contains(combo) {
+            return .success(.denied)
+        }
+        return .success(.active)
+    }
+
+    /// Re-applies persisted base + active-profile bindings. A
+    /// reload/discard path tries this first so a successful Save
+    /// adopts the new file rather than restoring the old snapshot.
+    public func restoreSavedLiveKeybindings()
+        -> Result<Void, LiveKeybindingApplyError>
+    {
+        guard isGuiManaged else { return .failure(.unmanaged) }
+        guard let lua = keys.lua else {
+            return .failure(.unavailable)
+        }
+        guard let config = loadStructuredConfig() else {
+            return .failure(.unreadableConfig)
+        }
+        let profile: KeyModeOverride?
+        switch activeProfileModesForLiveApply() {
+        case .success(let modes):
+            profile = modes
+        case .failure(let error):
+            return .failure(error)
+        }
+        let resolved = ConfigResolver.resolvedModes(
+            base: config.modes,
+            profile: profile
+        )
+        let prepared = prepareKeybindings(resolved, lua: lua)
+        install(prepared, preferredMode: keys.currentMode)
+        return .success(())
+    }
+
+    /// Disk-independent rollback fallback. Snapshot sources were
+    /// previously compiled; any preparation failure now aborts
+    /// and leaves the current table untouched for a later retry.
+    public func restoreLiveKeybindings(
+        _ snapshot: LiveKeybindingSnapshot
+    ) -> Result<Void, LiveKeybindingApplyError> {
+        guard let lua = keys.lua else {
+            return .failure(.unavailable)
+        }
+        let prepared = prepareKeybindings(
+            snapshot.modes,
             lua: lua
         )
-        if active != KeybindingManager.defaultMode,
-            keys.definedModes.contains(active)
-        {
-            keys.switchMode(active)
+        guard prepared.failures.isEmpty else {
+            prepared.release(using: lua)
+            return .failure(.preparationFailed)
         }
+        install(
+            prepared,
+            preferredMode: snapshot.activeMode
+        )
+        return .success(())
+    }
+
+    private func activeProfileModesForLiveApply()
+        -> Result<KeyModeOverride?, LiveKeybindingApplyError>
+    {
+        guard let name = profiles.currentName else {
+            return .success(nil)
+        }
+        do {
+            return .success(try profiles.read(name: name).modes)
+        } catch {
+            onLog(
+                "structured: active profile '\(name)' "
+                    + "unreadable — live keybinding apply "
+                    + "cancelled"
+            )
+            return .failure(.unreadableProfile)
+        }
+    }
+
+    private func effectiveBinding(
+        for target: LiveKeybindingTarget,
+        in modes: [KeyMode]
+    ) -> KeyBinding? {
+        modes.first(where: { $0.name == target.mode })?
+            .bindings.last(where: {
+                $0.combo == target.binding.combo
+            })
     }
 }

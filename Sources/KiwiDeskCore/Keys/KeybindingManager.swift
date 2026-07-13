@@ -159,6 +159,51 @@ public final class KeybindingManager {
         }
     }
 
+    /// Atomically replaces every mode prepared by the
+    /// structured-config bridge. Preparation happens before
+    /// this call, so the old table remains callable until one
+    /// swap; Carbon registration then runs once for the chosen
+    /// mode instead of once per growing default-mode prefix.
+    ///
+    /// `preferredMode` preserves a recorder session's active
+    /// mode when it still exists. Profile/config applies pass
+    /// `default`, retaining their settled reset semantics.
+    func replaceModes(
+        _ replacements: [String: [KeyCombo: Int32]],
+        icons: [String: String],
+        preferredMode: String
+    ) {
+        let oldModes = modes
+        let oldCurrent = currentMode
+
+        deactivate()
+        modes = replacements
+        if modes[Self.defaultMode] == nil {
+            modes[Self.defaultMode] = [:]
+        }
+        modeIcons = icons
+
+        if preferredMode == Self.defaultMode
+            || modes[preferredMode] != nil
+        {
+            currentMode = preferredMode
+        } else {
+            currentMode = Self.defaultMode
+        }
+
+        if let lua {
+            for bindings in oldModes.values {
+                for ref in bindings.values {
+                    lua.release(ref: ref)
+                }
+            }
+        }
+        activate(currentMode)
+        if currentMode != oldCurrent {
+            onModeChange(currentMode)
+        }
+    }
+
     // MARK: - Hotkey activation
 
     private func deactivate() {

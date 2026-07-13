@@ -10,6 +10,8 @@ struct AdvancedLuaSection: View {
     @Binding var bindings: [KeyBinding]
     @Environment(\.keybindingOverrideBase)
     private var overrideBase
+    @Environment(\.keybindingModeName)
+    private var modeName
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -73,9 +75,14 @@ struct AdvancedLuaSection: View {
                 },
                 onRecord: { record($0, into: binding) },
                 onClear: {
+                    let id = binding.wrappedValue.id
                     binding.wrappedValue.combo = ""
                     // Live target: unregister now (#123).
-                    _ = model.liveApplyRecorded(nil)
+                    _ = model.liveApplyRecorded(
+                        modeName: modeName,
+                        bindingID: id,
+                        combo: nil
+                    )
                 }
             )
             Button {
@@ -107,7 +114,11 @@ struct AdvancedLuaSection: View {
                 in: bindings
             )
         }
-        return model.liveApplyRecorded(combo)
+        return model.liveApplyRecorded(
+            modeName: modeName,
+            bindingID: id,
+            combo: combo
+        )
     }
 
     /// Looks the row up by id at write time — safe after any
@@ -127,7 +138,11 @@ struct AdvancedLuaSection: View {
             bindings[index],
             in: bindings
         )
-        return model.liveApplyRecorded(combo)
+        return model.liveApplyRecorded(
+            modeName: modeName,
+            bindingID: id,
+            combo: combo
+        )
     }
 
     private func remove(_ id: UUID) {

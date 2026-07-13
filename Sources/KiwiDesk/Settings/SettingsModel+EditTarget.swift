@@ -54,6 +54,7 @@ extension SettingsModel {
     /// ONE path for both targets: each branch produces a full
     /// `TargetState`, applied wholesale.
     func reload() {
+        restoreLiveKeySessionIfNeeded()
         let state: TargetState
         switch target {
         case .live:
@@ -71,17 +72,6 @@ extension SettingsModel {
         apply(state)
         refreshProfiles()
         isDirty = false
-        // #123: this reload discarded (or persisted) the
-        // staged edits a live-applied recording rode on — the
-        // running hotkeys must converge back to the saved
-        // config, or a discarded recording would stay
-        // registered as a ghost. After a Save the config
-        // reload already re-registered from the new file, so
-        // the extra pass is a harmless no-op-shaped repeat.
-        if liveKeysApplied {
-            liveKeysApplied = false
-            core.liveApplyKeybindings(modes: nil)
-        }
     }
 
     private func apply(_ state: TargetState) {

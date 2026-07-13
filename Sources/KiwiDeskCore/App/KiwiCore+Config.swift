@@ -5,6 +5,7 @@ extension KiwiCore {
     /// Loads (or reloads) init.lua into a fresh VM.
     public func loadConfig() {
         bus.resetLuaCallbacks()
+        appliedStructuredModes = nil
         keys.reset()
         nativeSpaceBindings = [:]
         resetDeclarativeState()

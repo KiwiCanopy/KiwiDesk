@@ -1,53 +1,237 @@
 import Foundation
 import KiwiDeskCore
 
-/// The transient feedback a recorder row shows after a
-/// live-applied edit (#123): the recorded shortcut is either
-/// active, or the system declined to register it (a reserved
-/// combo) — live-apply makes that failure observable at
-/// record time instead of after a Save.
-enum LiveApplyStatus {
+enum LiveApplyStatus: Equatable {
     case applied
+    case inactiveMode(String)
     case denied
+    case profileShadowed
+    case compileFailed
+    case unavailable
 }
 
 /// Identity-carrying wrapper so re-recording the same row
-/// re-triggers the caption's fade timer (`onChange` fires on
-/// the fresh `id` even when the status repeats).
+/// restarts the transient caption timer.
 struct LiveApplyFeedback: Equatable {
     let status: LiveApplyStatus
     let id = UUID()
 }
 
-/// Live-apply for keybinding edits (#123 Part 1, live target
-/// only): a successfully committed recording re-registers the
-/// Carbon hotkeys immediately, without writing profile JSON.
-/// `isDirty` and the footer keep their exact meaning ("the
-/// file hasn't caught up"); Save still persists, and Revert /
-/// discard re-applies the reverted bindings live (see
-/// `reload()`).
-///
-/// Stored-profile edits (`target != .live`) stay fully staged:
-/// instant apply would silently rewrite the RUNNING hotkeys
-/// while the banner says an inactive profile is being edited.
+/// Recorder-only runtime state. `modes` starts at the clean
+/// Settings baseline and receives combo mutations only; staged
+/// Lua/app/mode edits therefore cannot hitchhike live. The
+/// snapshot is the disk-independent Revert fallback.
+struct RecorderLiveSession {
+    var modes: [KeyMode]
+    let snapshot: LiveKeybindingSnapshot
+}
+
 extension SettingsModel {
-    /// Applies the edited mode set to the running hotkeys and
-    /// returns the row's feedback caption. `combo` is the
-    /// just-recorded combo, or nil for a clear (re-registers,
-    /// no caption). Returns nil when the edit stays staged
-    /// (stored-profile target) — the recorder shows nothing.
+    /// Applies one recorder combo mutation on the live target.
+    /// Existing rows keep their clean runtime action even when
+    /// their Lua/app fields have unrelated staged edits. A row
+    /// newly created for this recording carries its current
+    /// action because no earlier runnable action exists.
     func liveApplyRecorded(
-        _ combo: String?
+        modeName: String,
+        bindingID: UUID,
+        combo: String?
     ) -> LiveApplyFeedback? {
         guard target == .live else { return nil }
-        core.liveApplyKeybindings(modes: config.modes)
-        liveKeysApplied = true
-        guard let combo, let parsed = KeyCombo.parse(combo)
-        else { return nil }
-        let denied = core.keys.activationFailures
-            .contains(parsed)
-        return LiveApplyFeedback(
-            status: denied ? .denied : .applied
+
+        var session: RecorderLiveSession
+        if let existing = liveKeySession {
+            session = existing
+        } else {
+            guard let snapshot = core.liveKeybindingSnapshot()
+            else {
+                return feedback(
+                    for: combo,
+                    status: .unavailable
+                )
+            }
+            session = RecorderLiveSession(
+                modes: cleanConfig.modes,
+                snapshot: snapshot
+            )
+        }
+
+        let target = applyRecorderMutation(
+            modeName: modeName,
+            bindingID: bindingID,
+            combo: combo,
+            to: &session.modes
         )
+        if combo != nil, target == nil {
+            return feedback(for: combo, status: .unavailable)
+        }
+
+        switch core.liveApplyKeybindings(
+            modes: session.modes,
+            target: target
+        ) {
+        case .success(let status):
+            if status != .compileFailed {
+                liveKeySession = session
+            }
+            return feedback(
+                for: combo,
+                status: map(status)
+            )
+        case .failure:
+            if combo == nil {
+                profileWarning = L(
+                    "key_recorder.live_apply_failed",
+                    "The shortcut change was recorded but "
+                        + "couldn't be applied live. Save or "
+                        + "Revert to retry."
+                )
+            }
+            return feedback(
+                for: combo,
+                status: .unavailable
+            )
+        }
+    }
+
+    /// Runs before `reload()` reads model state. Persisted state
+    /// wins after Save; if disk/profile state is unreadable, the
+    /// captured in-memory snapshot removes ghost hotkeys. Session
+    /// bookkeeping clears only after one rollback path succeeds.
+    func restoreLiveKeySessionIfNeeded() {
+        guard let session = liveKeySession else { return }
+        if case .success = core.restoreSavedLiveKeybindings() {
+            liveKeySession = nil
+            return
+        }
+        if case .success = core.restoreLiveKeybindings(
+            session.snapshot
+        ) {
+            liveKeySession = nil
+            profileWarning = L(
+                "key_recorder.revert_used_snapshot",
+                "Saved shortcuts couldn't be read, so Revert "
+                    + "restored the previous running shortcuts."
+            )
+        } else {
+            profileWarning = L(
+                "key_recorder.revert_failed",
+                "Revert couldn't restore the running shortcuts. "
+                    + "Fix the configuration, then try again."
+            )
+        }
+    }
+
+    private func applyRecorderMutation(
+        modeName: String,
+        bindingID: UUID,
+        combo: String?,
+        to modes: inout [KeyMode]
+    ) -> LiveKeybindingTarget? {
+        // Existing row: find by transient edit-session id across
+        // every mode. A staged mode rename stays staged; runtime
+        // ownership remains with the row's clean mode.
+        for modeIndex in modes.indices {
+            guard
+                let bindingIndex = modes[modeIndex].bindings
+                    .firstIndex(where: { $0.id == bindingID })
+            else { continue }
+            updateCombo(
+                combo,
+                bindingIndex: bindingIndex,
+                modeIndex: modeIndex,
+                modes: &modes
+            )
+            guard combo != nil else { return nil }
+            return LiveKeybindingTarget(
+                mode: modes[modeIndex].name,
+                binding: modes[modeIndex].bindings[
+                    bindingIndex
+                ]
+            )
+        }
+
+        // New row: its action is required payload for its first
+        // recording. Later non-recorder edits stay staged because
+        // subsequent recordings find this session copy by id.
+        guard let combo,
+            let editedMode = config.modes.first(where: {
+                $0.name == modeName
+            }),
+            var binding = editedMode.bindings.first(where: {
+                $0.id == bindingID
+            })
+        else { return nil }
+        binding.combo = combo
+        let modeIndex: Int
+        if let existing = modes.firstIndex(where: {
+            $0.name == modeName
+        }) {
+            modeIndex = existing
+        } else {
+            modes.append(KeyMode(name: modeName))
+            modeIndex = modes.index(before: modes.endIndex)
+        }
+        clearCombo(
+            combo,
+            except: bindingID,
+            in: &modes[modeIndex].bindings
+        )
+        modes[modeIndex].bindings.append(binding)
+        return LiveKeybindingTarget(
+            mode: modes[modeIndex].name,
+            binding: binding
+        )
+    }
+
+    private func updateCombo(
+        _ combo: String?,
+        bindingIndex: Int,
+        modeIndex: Int,
+        modes: inout [KeyMode]
+    ) {
+        if let combo {
+            let id = modes[modeIndex].bindings[bindingIndex].id
+            clearCombo(
+                combo,
+                except: id,
+                in: &modes[modeIndex].bindings
+            )
+        }
+        modes[modeIndex].bindings[bindingIndex].combo = combo ?? ""
+    }
+
+    private func clearCombo(
+        _ combo: String,
+        except id: UUID,
+        in bindings: inout [KeyBinding]
+    ) {
+        for index in bindings.indices
+        where bindings[index].id != id
+            && bindings[index].combo == combo
+        {
+            bindings[index].combo = ""
+        }
+    }
+
+    private func map(
+        _ status: LiveKeybindingApplyStatus?
+    ) -> LiveApplyStatus? {
+        switch status {
+        case .active: .applied
+        case .inactiveMode(let name): .inactiveMode(name)
+        case .denied: .denied
+        case .profileShadowed: .profileShadowed
+        case .compileFailed: .compileFailed
+        case nil: nil
+        }
+    }
+
+    private func feedback(
+        for combo: String?,
+        status: LiveApplyStatus?
+    ) -> LiveApplyFeedback? {
+        guard combo != nil, let status else { return nil }
+        return LiveApplyFeedback(status: status)
     }
 }

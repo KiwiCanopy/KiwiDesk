@@ -220,12 +220,13 @@ struct StructuredConfigTests {
 
     /// Leak canary for stale-block refs: `luaL_ref` reuses
     /// released slots, so after `loadConfig()` a probe
-    /// `makeFunction` must land on the same slot number in a
-    /// core whose init.lua holds a stale managed block as in
-    /// one whose init.lua is empty. If `applyStructuredConfig`
-    /// stopped calling `keys.reset()`, the block's ref would
-    /// stay live, the freelist would be empty, and the probe
-    /// slot in the block core would shift up — red test.
+    /// second `makeFunction` probe must land on the same slot
+    /// number in a core whose init.lua holds a stale managed
+    /// block as in one whose init.lua is empty. Transactional
+    /// replacement prepares the structured ref first, then
+    /// releases the stale ref: the block core's first probe
+    /// reuses that slot, while both second probes match. If the
+    /// stale ref leaked, both block probes would shift up.
     @Test("Stale-block refs are released (slot-reuse canary)")
     func noLeakedRefsAfterLoad() throws {
         var config = GuiConfig()
@@ -252,6 +253,9 @@ struct StructuredConfigTests {
         let bareProbe =
             try bareLua
             .makeFunction(body: "-- probe").get()
+        let bareSecondProbe =
+            try bareLua
+            .makeFunction(body: "-- second probe").get()
 
         // Block core: a stale pre-#55 block also binds alt+h
         // on load; its ref must be released by the reset.
@@ -266,7 +270,11 @@ struct StructuredConfigTests {
         let blockProbe =
             try blockLua
             .makeFunction(body: "-- probe").get()
+        let blockSecondProbe =
+            try blockLua
+            .makeFunction(body: "-- second probe").get()
 
-        #expect(blockProbe == bareProbe)
+        #expect(blockProbe < bareProbe)
+        #expect(blockSecondProbe == bareSecondProbe)
     }
 }

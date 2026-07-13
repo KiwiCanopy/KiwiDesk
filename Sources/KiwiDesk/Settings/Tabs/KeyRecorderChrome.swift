@@ -59,29 +59,64 @@ struct LiveApplyCaption: View {
 
     var body: some View {
         HStack(spacing: 4) {
-            Image(
-                systemName: feedback.status == .applied
-                    ? "checkmark.circle.fill"
-                    : "exclamationmark.circle.fill"
-            )
-            Text(
-                feedback.status == .applied
-                    ? L(
-                        "key_recorder.live_applied",
-                        "Active now"
-                    )
-                    : L(
-                        "key_recorder.live_denied",
-                        "Recorded — the system didn't "
-                            + "grant it"
-                    )
-            )
+            Image(systemName: icon)
+            Text(text)
         }
         .font(.caption)
-        .foregroundStyle(
-            feedback.status == .applied
-                ? Color.green : Color.orange
-        )
+        .foregroundStyle(color)
         .transition(.opacity)
+    }
+
+    private var icon: String {
+        switch feedback.status {
+        case .applied: "checkmark.circle.fill"
+        case .inactiveMode: "clock.badge.checkmark"
+        case .denied, .profileShadowed, .compileFailed,
+            .unavailable:
+            "exclamationmark.circle.fill"
+        }
+    }
+
+    private var color: Color {
+        switch feedback.status {
+        case .applied: .green
+        case .inactiveMode: .secondary
+        case .denied, .profileShadowed, .compileFailed,
+            .unavailable:
+            .orange
+        }
+    }
+
+    private var text: String {
+        switch feedback.status {
+        case .applied:
+            L("key_recorder.live_applied", "Active now")
+        case .inactiveMode(let mode):
+            L(
+                "key_recorder.live_inactive_mode",
+                "Updated for \u{201C}%1$@\u{201D} mode",
+                mode
+            )
+        case .denied:
+            L(
+                "key_recorder.live_denied",
+                "Recorded — the system didn't grant it"
+            )
+        case .profileShadowed:
+            L(
+                "key_recorder.live_profile_shadowed",
+                "Recorded — the active profile overrides it"
+            )
+        case .compileFailed:
+            L(
+                "key_recorder.live_compile_failed",
+                "Recorded — the action couldn't compile"
+            )
+        case .unavailable:
+            L(
+                "key_recorder.live_unavailable",
+                "Recorded — Save to activate"
+            )
+        }
     }
 }

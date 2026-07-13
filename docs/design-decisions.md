@@ -466,22 +466,31 @@ device — "recorded but inert until Save" broke its mental
 model (users pressed the new combo and nothing happened). A
 successfully committed recording (or clear) on the live edit
 target re-registers the running Carbon hotkeys immediately,
-from the edited mode set resolved through the active
-profile's override — exactly what a Save + reload would
-register, with no file writes. `isDirty` and the footer keep
-their meaning ("the file hasn't caught up"); Save persists,
-and Revert / discarding edits re-applies the saved bindings
-live, so no ghost hotkey survives. A transient caption
-("Active now") confirms; when `RegisterEventHotKey` declines
-a system-reserved combo the caption says so — live-apply
-makes that failure observable at record time, a strict
-improvement. Editing a stored profile stays fully staged
-(instant apply would rewrite the RUNNING hotkeys while the
-banner says an inactive profile is being edited); the
-override banner states that its shortcuts take effect the
-next time the profile is active. The active key mode is
-preserved across a live-apply when it survives the edit —
-unlike profile applies, which deliberately reset to default.
+with no file writes. The runtime source starts from the clean
+Settings baseline and accumulates **recorder combo mutations
+only**: staged Lua bodies, app choices, mode edits, and other
+shortcut fields never hitchhike on a recording. A new row's
+action is required payload for its first recording; later
+non-recorder edits to it stay staged. The base then resolves
+through the active profile's override, matching Save + reload
+semantics. `isDirty` and the footer keep their meaning ("the
+file hasn't caught up"); Save persists base shortcuts globally
+in `gui.json`, while stored-profile editing owns sparse profile
+overrides.
+
+Re-registration prepares every Lua callback before one atomic
+mode-table swap, then activates the preserved runtime mode once
+(profile/config applies still reset to default). Feedback is
+scoped to the exact row and mode: "Active now" only after that
+combo registered in the active mode; inactive-mode, profile-
+shadowed, compile-failed, and Carbon-denied states say so instead.
+Revert first re-applies persisted state; if the sidecar/profile
+became unreadable, an in-memory pre-edit snapshot removes ghost
+hotkeys. Rollback bookkeeping clears only after one path succeeds.
+Editing a stored profile stays fully staged (instant apply would
+rewrite the RUNNING hotkeys while the banner says an inactive
+profile is being edited); the override banner states that its
+shortcuts take effect the next time the profile is active.
 
 **A catalog label's identity and its display text are two
 different fields.** `KeybindingCatalog`'s `NavCommand.label`

@@ -48,7 +48,10 @@ final class ChordRecorder {
 
     private var keyMonitor: Any?
     private var mouseMonitor: Any?
+    private var releaseMonitor: Any?
+    private var releaseTimeout: Task<Void, Never>?
     private var deactivation: (any NSObjectProtocol)?
+    private var suppressedKeyUps: Set<UInt16> = []
     var onPreview: (String) -> Void = { _ in }
     var onFinish: (Outcome) -> Void = { _ in }
 
@@ -107,6 +110,13 @@ final class ChordRecorder {
     /// structural). Used when the coordinator hands the
     /// recording to another field or the row disappears.
     func stop() {
+        stopCapture()
+        clearReleaseSuppression()
+        onPreview = { _ in }
+        onFinish = { _ in }
+    }
+
+    private func stopCapture() {
         if let keyMonitor {
             NSEvent.removeMonitor(keyMonitor)
         }
@@ -121,13 +131,14 @@ final class ChordRecorder {
             )
         }
         deactivation = nil
-        onPreview = { _ in }
-        onFinish = { _ in }
     }
 
     func finish(_ outcome: Outcome) {
         let callback = onFinish
-        stop()
+        stopCapture()
+        onPreview = { _ in }
+        onFinish = { _ in }
+        beginReleaseSuppression()
         callback(outcome)
     }
 
@@ -147,6 +158,10 @@ final class ChordRecorder {
             let held = flags.intersection([
                 .command, .option, .control, .shift,
             ])
+            // Every swallowed keyDown owns its matching keyUp;
+            // never leak an orphan release to the focused
+            // control after recorder teardown.
+            suppressedKeyUps.insert(keyCode)
             if keyCode == 53, held.isEmpty {
                 finish(.cancelled)
                 return true
@@ -168,12 +183,10 @@ final class ChordRecorder {
             finish(.chord(combo))
             return true
         case .keyUp:
-            // Never ours: a keyDown either locked (monitors
-            // are already gone) or was an unrepresentable-key
-            // swallow; a keyUp arriving here belongs to a key
-            // that was held before the recording started —
-            // pass it to its original responder.
-            return false
+            // Only releases paired with swallowed keyDowns are
+            // ours. A key held before recording still passes to
+            // its original responder.
+            return consumeSuppressedKeyUp(keyCode)
         case .flagsChanged:
             onPreview(Self.modifierSymbols(flags))
             return false
@@ -190,5 +203,51 @@ final class ChordRecorder {
         if flags.contains(.shift) { symbols += "⇧" }
         if flags.contains(.command) { symbols += "⌘" }
         return symbols
+    }
+
+    /// After a lock/cancel tears down the capture monitor, keep
+    /// a narrow keyUp-only monitor until every swallowed press
+    /// releases. Timeout bounds the lifetime if macOS steals a
+    /// release while focus changes.
+    private func beginReleaseSuppression() {
+        guard !suppressedKeyUps.isEmpty else { return }
+        if let releaseMonitor {
+            NSEvent.removeMonitor(releaseMonitor)
+        }
+        releaseMonitor = NSEvent.addLocalMonitorForEvents(
+            matching: .keyUp
+        ) { [self] event in
+            consumeSuppressedKeyUp(event.keyCode) ? nil : event
+        }
+        releaseTimeout?.cancel()
+        releaseTimeout = Task { @MainActor [self] in
+            try? await Task.sleep(
+                nanoseconds: 2_000_000_000
+            )
+            guard !Task.isCancelled else { return }
+            clearReleaseSuppression()
+        }
+    }
+
+    private func consumeSuppressedKeyUp(
+        _ keyCode: UInt16
+    ) -> Bool {
+        guard suppressedKeyUps.remove(keyCode) != nil else {
+            return false
+        }
+        if suppressedKeyUps.isEmpty {
+            clearReleaseSuppression()
+        }
+        return true
+    }
+
+    private func clearReleaseSuppression() {
+        if let releaseMonitor {
+            NSEvent.removeMonitor(releaseMonitor)
+        }
+        releaseMonitor = nil
+        releaseTimeout?.cancel()
+        releaseTimeout = nil
+        suppressedKeyUps = []
     }
 }

@@ -127,31 +127,6 @@ extension KiwiCore {
         )
     }
 
-    // MARK: - Keybindings
-
-    /// Resolves modes (base + profile override), resets the
-    /// `keys` table (releasing the previous registration's
-    /// refs), then registers the resolved bindings via
-    /// `makeFunction`.
-    /// Internal: shared with `liveApplyKeybindings` (#123).
-    func applyStructuredKeybindings(
-        modes base: [KeyMode],
-        profile: KeyModeOverride?,
-        lua: LuaInterpreter
-    ) {
-        let resolved = ConfigResolver.resolvedModes(
-            base: base,
-            profile: profile
-        )
-        // Reset releases managed-block refs (those refs belong
-        // to `lua` too — VM-consistent). `keys.lua` is NOT
-        // cleared; new refs minted below share the same VM.
-        keys.reset()
-        for mode in resolved {
-            registerStructuredMode(mode, lua: lua)
-        }
-    }
-
     /// The active profile, read once for its override tiers
     /// (`modes`, `appRules`). A profile that exists but cannot
     /// be read degrades to the base config — loudly, matching
@@ -172,55 +147,4 @@ extension KiwiCore {
         return profile
     }
 
-    /// Compiles and registers one mode's bindings via
-    /// `makeFunction`. Empty combos are skipped silently (an
-    /// empty combo is an unassigned GUI row, not an error);
-    /// unparseable combos are logged and skipped. Compile
-    /// errors skip the binding (not the whole mode) — parity
-    /// with `KeybindingManager.fire` per-binding handling.
-    private func registerStructuredMode(
-        _ mode: KeyMode,
-        lua: LuaInterpreter
-    ) {
-        var comboRefs: [KeyCombo: Int32] = [:]
-        for binding in mode.bindings
-        where !binding.combo.isEmpty {
-            guard let combo = KeyCombo.parse(binding.combo)
-            else {
-                onLog(
-                    "structured: invalid combo "
-                        + "'\(binding.combo)'"
-                )
-                continue
-            }
-            switch lua.makeFunction(body: binding.lua) {
-            case .success(let ref):
-                // Duplicate combo within one mode: last wins;
-                // release the displaced ref or it would orphan
-                // a registry slot until the next reload.
-                if let old = comboRefs.updateValue(
-                    ref,
-                    forKey: combo
-                ) {
-                    lua.release(ref: old)
-                }
-            case .failure(let err):
-                onLog(
-                    "structured: bind skipped "
-                        + "[\(binding.combo)]: \(err)"
-                )
-            }
-        }
-        if mode.isDefault {
-            for (combo, ref) in comboRefs {
-                keys.bind(combo, ref: ref)
-            }
-        } else {
-            keys.defineMode(
-                mode.name,
-                bindings: comboRefs,
-                icon: mode.icon
-            )
-        }
-    }
 }

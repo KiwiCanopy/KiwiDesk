@@ -75,6 +75,7 @@ struct ShortcutsSection: View {
                     \.keybindingOverrideBase,
                     model.overrideBaseRows(mode: selected)
                 )
+                .environment(\.keybindingModeName, selected)
                 .environmentObject(coordinator)
             }
             .onChange(of: coordinator.scrollTarget) {
