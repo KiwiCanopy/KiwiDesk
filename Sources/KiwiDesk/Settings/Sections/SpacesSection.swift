@@ -167,17 +167,8 @@ struct SpacesSection: View {
         )
     }
 
-    private func modePicker(_ space: SpaceID) -> some View {
-        Picker("", selection: modeBinding(space)) {
-            ForEach(LayoutMode.allCases, id: \.self) { mode in
-                Label(mode.displayName, systemImage: mode.glyph)
-                    .tag(mode)
-            }
-        }
-        .labelsHidden()
-        .controlSize(.large)
-        .frame(width: 150)
-    }
+    // `modePicker` and its binding live in
+    // `SpacesSection+ModePicker.swift` (#123 file-size split).
 
     private func expandButton(_ space: SpaceID) -> some View {
         Button {
@@ -307,17 +298,4 @@ struct SpacesSection: View {
         )
     }
 
-    /// Setting a space to the default `bsp` removes its entry
-    /// (the writer treats absent as `bsp`).
-    private func modeBinding(
-        _ space: SpaceID
-    ) -> Binding<LayoutMode> {
-        Binding(
-            get: { model.config.spaceModes[space] ?? .bsp },
-            set: { mode in
-                model.config.spaceModes[space] =
-                    mode == .bsp ? nil : mode
-            }
-        )
-    }
 }

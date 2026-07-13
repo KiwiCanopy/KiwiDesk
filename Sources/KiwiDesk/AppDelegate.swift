@@ -14,9 +14,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     private var statusItem: StatusItemController?
     private var onboardingWindow: NSWindow?
     private let onboardingModel = OnboardingModel()
-    private lazy var dashboard = SettingsWindowController(
-        core: core
-    )
+    /// Created on first `dashboard` access. Kept alongside so
+    /// the quick-menu closures can refresh an *already open*
+    /// dashboard without constructing the whole settings stack
+    /// on a mere layout switch.
+    private var dashboardIfCreated: SettingsWindowController?
+    private var dashboard: SettingsWindowController {
+        if let existing = dashboardIfCreated { return existing }
+        let created = SettingsWindowController(core: core)
+        dashboardIfCreated = created
+        return created
+    }
     private let configIssues = ConfigIssuesWindowController()
     /// Held strongly so the source stays active for the
     /// lifetime of the process.
@@ -54,6 +62,35 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
                 "load_profile",
                 args: [.string(name)]
             )
+        }
+        statusItem.layoutInfoProvider = { [weak self] in
+            guard let self else { return (nil, nil, nil) }
+            return (
+                self.core.activeSpace?.mode,
+                self.core.profiles.currentName,
+                self.core.savedModeForActiveSpace()
+            )
+        }
+        statusItem.onSetLayoutMode = { [weak self] mode in
+            _ = self?.core.execute(
+                "set_mode",
+                args: [.string(mode.rawValue)]
+            )
+            // Drift-only refresh: a full `reload()` would
+            // discard staged Settings edits mid-session.
+            self?.dashboardIfCreated?.refreshLayoutDrift()
+        }
+        statusItem.onSaveLayoutToProfile = { [weak self] in
+            guard let self,
+                let name = self.core.profiles.currentName
+            else { return }
+            do {
+                try self.core.persistProfile(named: name)
+                self.dashboardIfCreated?.refreshLayoutDrift()
+            } catch {
+                self.core.onLog("profile save failed: \(error)")
+                self.presentLayoutSaveFailure(error)
+            }
         }
         statusItem.onShowConfigIssues = { [weak self] in
             self?.configIssues.show()
@@ -204,6 +241,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             ?? URL(string: "x-apple.systempreferences:")
         guard let target else { return }
         NSWorkspace.shared.open(target)
+    }
+
+    /// The quick menu has no footer to surface a save error in
+    /// (the Settings path shows `profileWarning`), so a failed
+    /// "Save Current Layout to Profile" — e.g. a screen-count
+    /// mismatch — alerts instead of dying in the log.
+    private func presentLayoutSaveFailure(_ error: Error) {
+        let alert = NSAlert()
+        alert.alertStyle = .warning
+        alert.messageText = L(
+            "menu.layout.save_failed.title",
+            "Couldn't Save Layout"
+        )
+        alert.informativeText = L(
+            "profiles.save_failed",
+            "Saving failed: %1$@",
+            "\(error)"
+        )
+        NSApp.activate()
+        alert.runModal()
     }
 
     // MARK: - Notifications

@@ -79,6 +79,38 @@ final class SettingsModel: ObservableObject {
     /// (overlapping monitor sets, save failures).
     @Published var profileWarning: String?
 
+    /// Live-vs-saved layout drift for the active space (#123):
+    /// a transient snapshot from direct comparison, refreshed by
+    /// `refreshLayoutDrift()` — never latched, never routed
+    /// through `isDirty`/`profileDirty`. nil = no drift.
+    struct LayoutDrift: Equatable {
+        let live: LayoutMode
+        let saved: LayoutMode
+    }
+    /// Snapshotted (not computed per render) so the profile
+    /// JSON isn't re-read on every SwiftUI body pass and views
+    /// re-render when the drift actually changes.
+    @Published private(set) var layoutDrift: LayoutDrift?
+
+    var hasLayoutDrift: Bool { layoutDrift != nil }
+
+    /// Recomputes the drift snapshot without reseeding `config`
+    /// — safe mid-edit; the quick menu calls it after a
+    /// session-only layout switch or save. External `set_mode`
+    /// (hotkey/Lua/CLI) refreshes on the next window `show()`.
+    func refreshLayoutDrift() {
+        layoutDrift = computeLayoutDrift()
+    }
+
+    private func computeLayoutDrift() -> LayoutDrift? {
+        guard target == .live,
+            let space = core.activeSpace,
+            let saved = core.savedModeForActiveSpace(),
+            space.mode != saved
+        else { return nil }
+        return LayoutDrift(live: space.mode, saved: saved)
+    }
+
     /// Number of native macOS user Spaces (Mission Control
     /// desktops) currently detected — 0 without SkyLight. Drives
     /// the profile-binding rows (#7).
@@ -175,6 +207,7 @@ final class SettingsModel: ObservableObject {
         nativeSpaceCount =
             NativeSpaces.allSpaces().filter(\.isUser).count
         currentNativeSpace = NativeSpaces.activeSpaceNumber()
+        refreshLayoutDrift()
     }
 
     // MARK: - Import live keybindings (#4)
@@ -223,7 +256,20 @@ final class SettingsModel: ObservableObject {
         }
     }
 
-    func revert() { reload() }
+    func revert() {
+        // Re-applying the profile (restores the saved layout,
+        // prunes stale spaces, force-retiles) is gated on
+        // actual drift — a plain staged-edit revert stays
+        // model-only, as before #123. Computed fresh, not from
+        // the published snapshot, so a switch the UI hasn't
+        // caught up with still reverts.
+        if computeLayoutDrift() != nil,
+            let activeProfileName = activeProfile
+        {
+            core.reapplyIfInEffect(activeProfileName)
+        }
+        reload()
+    }
 
     /// Migrates a hand-written config into GUI management (the
     /// old file is kept as a commented backup) and switches to

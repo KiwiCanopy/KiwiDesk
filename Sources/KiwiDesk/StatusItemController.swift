@@ -15,6 +15,15 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// each time the menu opens.
     var profilesProvider: () -> (active: String?, all: [String]) =
         { (nil, []) }
+    /// Provider for active layout mode and active profile status.
+    var layoutInfoProvider:
+        () -> (
+            activeMode: LayoutMode?,
+            activeProfileName: String?,
+            savedModeForActiveSpace: LayoutMode?
+        ) = { (nil, nil, nil) }
+    var onSetLayoutMode: (LayoutMode) -> Void = { _ in }
+    var onSaveLayoutToProfile: () -> Void = {}
 
     private let item: NSStatusItem
     private let menu = NSMenu()
@@ -144,6 +153,8 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
         menu.addItem(headerItem(active: profiles.active))
         menu.addItem(.separator())
+        menu.addItem(layoutItem())
+        menu.addItem(.separator())
         menu.addItem(switchProfileItem(profiles))
         menu.addItem(.separator())
         if configError {
@@ -264,7 +275,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         return parent
     }
 
-    private func symbol(_ name: String) -> NSImage? {
+    func symbol(_ name: String) -> NSImage? {
         let image = NSImage(
             systemSymbolName: name,
             accessibilityDescription: nil

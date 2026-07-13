@@ -35,6 +35,23 @@ Security › Accessibility. Once granted, you may also be asked to
 enable "Displays have separate Spaces" for proper multi-monitor
 support — this is optional but recommended.
 
+### The Status Bar Quick Menu
+
+KiwiDesk runs a lightweight menu bar helper for daily controls. Clicking
+the KiwiDesk icon opens the quick menu where you can:
+
+- **Layout**: Switch the active space's layout algorithm (Bsp, Stack,
+  Scrolling, Monocle, Grid, Track, Floating).
+  - Switches made through the quick menu are **session-only** (temporary)
+    by default and do not rewrite the active profile.
+  - When the layout mode has drifted from the profile's saved setting,
+    the active layout in the menu displays a secondary
+    "not saved to profile" subtitle.
+  - Click **Save Current Layout to Profile** below the separator to persist
+    the new layout (adopts the whole live state into the active profile).
+- **Switch Profile**: Load any saved profile into the current layout.
+- **Settings…**: Open the full Settings window.
+
 ## How the App and init.lua Coexist
 
 KiwiDesk keeps your custom Lua code in `~/.config/KiwiDesk/init.lua`

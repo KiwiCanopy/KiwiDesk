@@ -15,6 +15,14 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         super.init()
     }
 
+    /// Non-destructive refresh for the quick menu's layout
+    /// actions: recomputes only the live-vs-saved drift
+    /// captions, never reseeding `config` — staged edits
+    /// survive a session layout switch.
+    func refreshLayoutDrift() {
+        model.refreshLayoutDrift()
+    }
+
     /// Shows the dashboard, refreshing from the backend so the
     /// active profile and any external config edits are current.
     func show() {
