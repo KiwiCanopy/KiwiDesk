@@ -154,15 +154,14 @@ struct TrackSwapTests {
         )
     }
 
-    @Test("Rejected while the cap merge folds tracks")
+    @Test("Rejected when the swap touches the folded overflow")
     func capMergeRejects() {
         let core = makeCore()
-        _ = makeTrackSpace(core, windows: 4, focus: 1)
-        // Four marker tracks, limit 2 (trackCap = count + 1 = 3):
-        // the surplus past the two normal tracks folds into the
-        // overflow track, which then merges two marker slices with
-        // no identity — a swap would scramble the composition
-        // (review H1), so it rejects.
+        _ = makeTrackSpace(core, windows: 4, focus: 3)
+        // Four marker tracks, limit 2: the render folds tracks 3
+        // and 4 into one overflow slot with no marker identity.
+        // Window 3 sits in that folded slot, so a swap would
+        // scramble the composition (review H1) and is refused.
         core.execute("track.set_count", args: [.number(2)])
         let response = core.execute(
             "track.swap",
@@ -170,7 +169,31 @@ struct TrackSwapTests {
         )
         #expect(!response.isSuccess)
         #expect(
-            response.error?.contains("track limit") == true
+            response.error?.contains("overflow") == true
+        )
+    }
+
+    @Test("Normal tracks still swap while the overflow folds")
+    func normalTracksSwapDespiteFold() {
+        let core = makeCore()
+        let space = makeTrackSpace(core, windows: 4, focus: 1)
+        core.execute("track.set_count", args: [.number(2)])
+        // Render: [1] [2] [3, 4 overflow]. Swapping the two
+        // NORMAL tracks (1 and 2) is clean — neither is the
+        // folded slot — so it succeeds even though 3 and 4 fold
+        // (#198: the old blanket guard over-rejected this).
+        #expect(
+            core.execute(
+                "track.swap",
+                args: [.string("next")]
+            ).isSuccess
+        )
+        #expect(
+            core.state.workspaces[space]?.windows
+                == [
+                    WindowID(2), WindowID(1), WindowID(3),
+                    WindowID(4),
+                ]
         )
     }
 

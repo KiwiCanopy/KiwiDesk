@@ -35,36 +35,56 @@ extension KiwiCore {
                 state.windows[$0]?.isFloating == true
             }
         )
-        // The cap merge is a read-time VIEW (#178): while it is
-        // folding extra tracks into the last slot, the merged
-        // slices have no marker identity — exchanging them
-        // reorders the array but the re-derived merge produces
-        // a different composition (windows leak across tracks;
-        // review H1). Rewriting markers to pin the view would
-        // destroy the grandfathered partition, so reject.
         let tiled = space.windows.filter {
             !floating.contains($0)
         }
-        let unmerged = TrackLayout.counts(
-            of: tiled,
+        guard let index = tiled.firstIndex(of: focused) else {
+            return .fail("no focused tiled window")
+        }
+        // The overflow track is a read-time merge (#192): its
+        // folded slices have no marker identity, so exchanging
+        // them by marker would re-derive a different composition
+        // (windows leak across tracks; #182 review H1). The
+        // merge fires under BOTH a fixed limit and geometric
+        // pressure (auto tracks on, small display), so gauge it
+        // against the render's own cap — geometry included, read
+        // from the live layout context (#198). No context (no
+        // screen, headless) degrades to the fixed-limit cap.
+        let geoCap =
+            (tiler.layoutInput(state: state)?.context)
+            .map(TrackLayout.geometricCap(for:)) ?? .max
+        if TrackLayout.overflowSwapBlocked(
+            tiled: tiled,
             breaks: space.trackBreaks,
-            cap: 0
-        )
-        if params.trackCap > 0,
-            unmerged.count > params.trackCap
-        {
+            windowIndex: index,
+            delta: delta,
+            normalCap: params.normalCap,
+            geoCap: geoCap
+        ) {
             return .fail(
-                "track.swap is unavailable while the track "
-                    + "limit folds extra tracks — raise the "
-                    + "limit or turn automatic tracks on"
+                "track.swap can't reorder the folded overflow "
+                    + "track — raise the track limit or free "
+                    + "display space so it stops folding"
             )
         }
+        // Swap on the render's effective partition so what moves
+        // matches what the user sees (identical to `trackCap`
+        // absent geometric pressure).
+        let effectiveCap = TrackLayout.overflowCap(
+            markerCount: TrackLayout.counts(
+                of: tiled,
+                breaks: space.trackBreaks,
+                cap: 0
+            ).count,
+            normalCap: params.normalCap,
+            geoCap: geoCap
+        ).effectiveCap
         var swapped = false
         state.workspaces.withSpace(space.id) {
             swapped = $0.swapTracks(
                 focused,
                 delta: delta,
-                cap: params.trackCap,
+                cap: effectiveCap,
                 isTiled: { !floating.contains($0) }
             )
         }
