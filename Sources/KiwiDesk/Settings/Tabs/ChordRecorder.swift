@@ -105,13 +105,10 @@ final class ChordRecorder {
         }
     }
 
-    /// Silent teardown — no `finish` callback (the closures
-    /// reset to no-ops, making the exactly-once contract
-    /// structural). Used when the coordinator hands the
-    /// recording to another field or the row disappears.
+    /// Silent teardown; key-up ownership survives release or timeout
+    /// even when capture changes field or its row disappears.
     func stop() {
         stopCapture()
-        clearReleaseSuppression()
         onPreview = { _ in }
         onFinish = { _ in }
     }

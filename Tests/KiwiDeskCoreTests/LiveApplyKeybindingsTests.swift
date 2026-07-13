@@ -138,7 +138,7 @@ struct LiveApplyKeybindingsTests {
         let core = makeGuiCore()
         try core.saveGuiConfig(baseConfig())
         let override = binding(
-            "alt+h",
+            "option+h",
             lua: "marker = 'override'"
         )
         try core.profiles.save(

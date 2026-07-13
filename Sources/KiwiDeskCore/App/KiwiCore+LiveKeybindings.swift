@@ -201,7 +201,10 @@ extension KiwiCore {
     ) -> KeyBinding? {
         modes.first(where: { $0.name == target.mode })?
             .bindings.last(where: {
-                $0.combo == target.binding.combo
+                KeyCombo.equivalent(
+                    $0.combo,
+                    target.binding.combo
+                )
             })
     }
 }

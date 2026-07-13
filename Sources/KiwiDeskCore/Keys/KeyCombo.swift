@@ -44,6 +44,18 @@ public struct KeyCombo: Hashable, Sendable {
         )
     }
 
+    /// True when two authored strings resolve to the same
+    /// physical Carbon shortcut. Exact invalid strings remain
+    /// equal so existing validation/conflict behavior is stable.
+    public static func equivalent(
+        _ lhs: String,
+        _ rhs: String
+    ) -> Bool {
+        guard let left = parse(lhs), let right = parse(rhs)
+        else { return lhs == rhs }
+        return left == right
+    }
+
     /// Formats a captured key event into a combo string using
     /// the words printed on Apple keyboards
     /// (`"control+option+r"`) so users can read exactly what a

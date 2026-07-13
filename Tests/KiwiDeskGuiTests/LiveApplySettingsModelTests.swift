@@ -182,4 +182,30 @@ struct LiveApplySettingsModelTests {
         #expect(!(try isRegistered("alt+j", core: core)))
         #expect(try isRegistered("alt+k", core: core))
     }
+
+    @Test("Alias steal removes the clean runtime holder")
+    func aliasSteal() throws {
+        let (model, core) = try makeModel()
+        model.config.modes[0].bindings[0].combo = ""
+        let target = KeyBinding(
+            combo: "option+h",
+            lua: "marker = 'target'"
+        )
+        model.config.modes[0].bindings.append(target)
+
+        let feedback = model.liveApplyRecorded(
+            modeName: "default",
+            bindingID: target.id,
+            combo: target.combo
+        )
+
+        #expect(feedback?.status == .applied)
+        let combo = try #require(KeyCombo.parse("alt+h"))
+        let ref = try #require(
+            core.keys.bindings(for: "default")[combo]
+        )
+        let lua = try #require(core.lua)
+        _ = lua.call(ref: ref)
+        #expect(lua.global("marker") == .string("target"))
+    }
 }

@@ -208,7 +208,10 @@ extension SettingsModel {
     ) {
         for index in bindings.indices
         where bindings[index].id != id
-            && bindings[index].combo == combo
+            && KeyCombo.equivalent(
+                bindings[index].combo,
+                combo
+            )
         {
             bindings[index].combo = ""
         }

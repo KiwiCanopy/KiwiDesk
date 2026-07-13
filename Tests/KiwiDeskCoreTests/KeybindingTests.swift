@@ -94,6 +94,17 @@ struct KeyComboTests {
         #expect(combo.keyCode == 53)
     }
 
+    @Test("Authored aliases identify one physical combo")
+    func aliasesAreEquivalent() {
+        #expect(
+            KeyCombo.equivalent("alt+j", "option+j")
+        )
+        #expect(
+            KeyCombo.equivalent("cmd+;", "command+semicolon")
+        )
+        #expect(!KeyCombo.equivalent("alt+j", "alt+k"))
+    }
+
     @Test("Rejects unknown keys and modifiers")
     func rejects() {
         #expect(KeyCombo.parse("hyper+x") == nil)

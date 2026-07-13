@@ -96,7 +96,8 @@ enum RecorderPreflight {
         // evaluation mutated state mid-update).
         guard
             let holder = bindings.wrappedValue.first(where: {
-                !$0.combo.isEmpty && $0.combo == combo
+                !$0.combo.isEmpty
+                    && KeyCombo.equivalent($0.combo, combo)
                     && !isOwn($0)
             })
         else { return nil }

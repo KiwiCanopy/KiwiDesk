@@ -52,6 +52,13 @@ struct ChordRecorderTests {
         )
         #expect(capture.lockedCombo == "command+j")
         #expect(capture.outcomes.count == 1)
+        #expect(
+            recorder.handle(
+                .keyUp,
+                keyCode: 38,
+                flags: [.command]
+            )
+        )
     }
 
     @Test("Released modifiers don't linger — bare key locks")
@@ -68,6 +75,9 @@ struct ChordRecorderTests {
         recorder.handle(.flagsChanged, keyCode: 55, flags: [])
         recorder.handle(.keyDown, keyCode: 38, flags: [])
         #expect(capture.lockedCombo == "j")
+        #expect(
+            recorder.handle(.keyUp, keyCode: 38, flags: [])
+        )
     }
 
     @Test("The modifier preview mirrors what is held")
@@ -102,6 +112,9 @@ struct ChordRecorderTests {
             Issue.record("expected .cancelled")
             return
         }
+        #expect(
+            recorder.handle(.keyUp, keyCode: 53, flags: [])
+        )
     }
 
     @Test("Escape WITH modifiers records — ⌃Escape is valid")
@@ -116,6 +129,13 @@ struct ChordRecorderTests {
             flags: [.control]
         )
         #expect(capture.lockedCombo == "control+escape")
+        #expect(
+            recorder.handle(
+                .keyUp,
+                keyCode: 53,
+                flags: [.control]
+            )
+        )
     }
 
     @Test("An unrepresentable key is swallowed; recording continues")
@@ -203,6 +223,33 @@ struct ChordRecorderTests {
         #expect(capture.lockedCombo == "command+j")
     }
 
+    @Test("Key-up ownership survives stop and restart")
+    func keyUpSurvivesRestart() {
+        let recorder = ChordRecorder()
+        defer { recorder.stop() }
+        let first = Capture()
+        first.attach(recorder)
+        recorder.handle(
+            .keyDown,
+            keyCode: 38,
+            flags: [.command]
+        )
+
+        recorder.stop()
+        let second = Capture()
+        second.attach(recorder)
+
+        #expect(
+            recorder.handle(
+                .keyUp,
+                keyCode: 38,
+                flags: [.command]
+            )
+        )
+        #expect(first.lockedCombo == "command+j")
+        #expect(second.outcomes.isEmpty)
+    }
+
     @Test("finish fires exactly once")
     func finishFiresOnce() {
         let recorder = ChordRecorder()
@@ -222,5 +269,19 @@ struct ChordRecorderTests {
             flags: [.command]
         )
         #expect(capture.outcomes.count == 1)
+        #expect(
+            recorder.handle(
+                .keyUp,
+                keyCode: 38,
+                flags: [.command]
+            )
+        )
+        #expect(
+            recorder.handle(
+                .keyUp,
+                keyCode: 40,
+                flags: [.command]
+            )
+        )
     }
 }

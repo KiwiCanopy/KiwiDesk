@@ -440,7 +440,10 @@ with it — in practice they were buggier than the correction
 affordance they bought, and their states read as noise. Bare
 Escape cancels (Escape with modifiers records — ⌃Escape is a
 valid hotkey); click-away and app deactivation cancel
-unchanged. The live "Already used by …" notice while forming
+unchanged. A swallowed key-down owns its matching key-up even
+if the field disappears or another recorder takes over; a
+short timeout bounds that handoff monitor. The live "Already
+used by …" notice while forming
 a chord went with the release window (its display window is
 now zero); the post-commit duplicate hard-block below remains
 the conflict surface.
@@ -449,6 +452,8 @@ the conflict surface.
 Recording a combo another KiwiDesk row already holds is
 rejected inline with *Steal* (rebind here) and *Go to* (jump
 to the holder) — silent duplicates were the #34 bug class. A
+collision compares parsed physical shortcuts, so aliases such
+as `alt+j` and `option+j` cannot evade the block. A
 macOS system-shortcut collision instead commits with a
 persistent ⚠ — shadowing one can be intentional, and a
 live system check could go stale. Conflict surfaces
