@@ -641,6 +641,10 @@ Click an empty row or the **Edit** pencil on an existing row. Click
 - **Cancels** on bare Escape, click-away, or app switch
   (Escape *with* modifiers records — ⌃Escape is a valid
   shortcut).
+- **Suspends your KiwiDesk shortcuts while it is open** — so you
+  can test a combo that is already bound to a window action
+  without triggering it. Your shortcuts come back the moment the
+  recorder closes. macOS system shortcuts are unaffected.
 
 The shortcut displays as compact macOS glyphs (⌃⌥⇧⌘ for modifiers,
 then the key), mapped to your active keyboard layout. No `+`

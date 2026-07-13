@@ -88,7 +88,15 @@ struct ShortcutsSection: View {
                 coordinator.scrollTarget = nil
             }
         }
-        .onAppear(perform: ensureSelection)
+        .onAppear {
+            ensureSelection()
+            // Arm the recorder ⇒ suspend live hotkeys so testing
+            // an existing shortcut mid-capture can't fire it
+            // (#213). Idempotent across re-appears.
+            coordinator.onArmedChange = { [model] armed in
+                model.setRecorderArmed(armed)
+            }
+        }
         // The section stays mounted across reloads and edit-
         // target switches; a vanished mode must never leave
         // `selected` pointing at modes[0] under a phantom

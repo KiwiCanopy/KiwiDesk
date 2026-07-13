@@ -52,6 +52,11 @@ public final class KeybindingManager {
     /// set via `define_mode(name, bindings, { icon = ... })`.
     private var modeIcons: [String: String] = [:]
     private var activeIDs: [UInt32] = []
+    /// True while a Settings recorder is armed (#213): all our
+    /// hotkeys are unregistered so testing an existing shortcut
+    /// mid-capture can't fire its action. Table/mode edits still
+    /// apply but skip registration until `resume()`.
+    private var suspended = false
     private let registrar: HotkeyRegistrar
 
     public init(
@@ -204,6 +209,31 @@ public final class KeybindingManager {
         }
     }
 
+    // MARK: - Recorder suspension (#213)
+
+    /// True while suspended by an armed Settings recorder.
+    public var isSuspended: Bool { suspended }
+
+    /// Unregisters every hotkey while a Settings recorder is
+    /// armed, so pressing an existing KiwiDesk shortcut to test
+    /// it can't trigger its action. Idempotent. Only touches our
+    /// own Carbon registrations — macOS/system shortcuts are the
+    /// OS's and stay live.
+    public func suspend() {
+        guard !suspended else { return }
+        suspended = true
+        deactivate()
+    }
+
+    /// Restores the hotkeys suspended by `suspend()`, registering
+    /// whatever mode is current now — a mode/table change made
+    /// during suspension is honored. Idempotent.
+    public func resume() {
+        guard suspended else { return }
+        suspended = false
+        activate(currentMode)
+    }
+
     // MARK: - Hotkey activation
 
     private func deactivate() {
@@ -216,6 +246,9 @@ public final class KeybindingManager {
     private func activate(_ mode: String) {
         deactivate()
         activationFailures = []
+        // A recorder is armed: keep the table current but
+        // register nothing, so testing a shortcut can't fire.
+        guard !suspended else { return }
         for (combo, ref) in modes[mode] ?? [:] {
             let id = registrar.register(
                 keyCode: combo.keyCode,

@@ -465,6 +465,26 @@ without a dismiss. (#33/#34/#35, #68 §3.6.2)
 **One recorder at a time.** Starting a recording snaps any
 other recording field back instantly. (#33)
 
+**An armed recorder suspends KiwiDesk's hotkeys.** (#213.) A
+combo you are about to bind is often already bound to a window
+action, so pressing it to test it would fire that action
+mid-capture. While any recorder is open, the manager
+unregisters every KiwiDesk Carbon hotkey and re-registers the
+current mode when it closes — the suspend/resume round-trip the
+exact table, so a mode change made while armed is honored on
+resume. The `RecorderCoordinator` drives this on the idle↔armed
+edge only, so hopping between fields never bounces the
+registration. It never touches macOS/system shortcuts (not ours
+to unregister) and needs no Input Monitoring permission — it is
+pure Carbon (un)registration. This is the accepted first slice
+of the recorder-collision redesign (#213): the "Assigned to…"
+row also gains a colour-independent ⚠ glyph so the conflict does
+not read by colour alone. The larger pending-candidate model
+(candidate-only "Not assigned" state, Replace/Change
+transactions) is scoped separately in #213 pending a design
+round — the current *Steal*/*Go to* hard-block stays the
+shipped conflict UX until then.
+
 **The recorder live-applies on the live target; stored
 profiles stay staged.** (#123 Part 1.) A recorder is an input
 device — "recorded but inert until Save" broke its mental

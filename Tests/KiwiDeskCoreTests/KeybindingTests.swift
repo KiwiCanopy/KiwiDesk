@@ -228,6 +228,85 @@ struct KeybindingManagerTests {
         #expect(registrar.registered.isEmpty)
     }
 
+    @Test("Suspend unregisters hotkeys; resume restores them")
+    func suspendResume() throws {
+        let registrar = FakeRegistrar()
+        let manager = KeybindingManager(registrar: registrar)
+        let lua = try #require(LuaInterpreter())
+        manager.lua = lua
+
+        var ref: Int32?
+        lua.register("grab") { args in
+            if case .functionRef(let r) = args.first { ref = r }
+            return .none
+        }
+        lua.run(
+            "KiwiDesk.grab(function() fired = (fired or 0) + 1 end)"
+        )
+        let combo = try #require(KeyCombo.parse("cmd+alt+h"))
+        manager.bind(combo, ref: try #require(ref))
+        #expect(registrar.registered.count == 1)
+
+        // Armed recorder: nothing registered.
+        manager.suspend()
+        #expect(manager.isSuspended)
+        #expect(registrar.registered.isEmpty)
+        // Idempotent.
+        manager.suspend()
+        #expect(registrar.registered.isEmpty)
+
+        // Disarm: the same combo is live again and fires.
+        manager.resume()
+        #expect(!manager.isSuspended)
+        #expect(registrar.registered.count == 1)
+        registrar.press(keyCode: combo.keyCode)
+        #expect(lua.global("fired") == .number(1))
+        // Idempotent resume does not double-register.
+        manager.resume()
+        #expect(registrar.registered.count == 1)
+    }
+
+    @Test("A mode change during suspension registers on resume")
+    func suspendHonorsModeChange() throws {
+        let registrar = FakeRegistrar()
+        let manager = KeybindingManager(registrar: registrar)
+        let lua = try #require(LuaInterpreter())
+        manager.lua = lua
+
+        var captured: [Int32] = []
+        lua.register("grab") { args in
+            if case .functionRef(let r) = args.first {
+                captured.append(r)
+            }
+            return .none
+        }
+        lua.run(
+            """
+            KiwiDesk.grab(function() base = true end)
+            KiwiDesk.grab(function() resized = true end)
+            """
+        )
+        let bindCombo = try #require(KeyCombo.parse("cmd+alt+h"))
+        let modeCombo = try #require(KeyCombo.parse("j"))
+        manager.bind(bindCombo, ref: captured[0])
+        manager.defineMode(
+            "resize",
+            bindings: [modeCombo: captured[1]]
+        )
+
+        manager.suspend()
+        manager.switchMode("resize")
+        // Still suspended: the switch registered nothing.
+        #expect(registrar.registered.isEmpty)
+
+        manager.resume()
+        // Resume registers the mode current *now*, not default.
+        #expect(registrar.registered.count == 1)
+        registrar.press(keyCode: modeCombo.keyCode)
+        #expect(lua.global("resized") == .bool(true))
+        #expect(lua.global("base") == LuaValue.none)
+    }
+
     @Test("Unknown modes are rejected")
     func unknownMode() {
         let manager = KeybindingManager(

@@ -27,6 +27,18 @@ struct RecorderLiveSession {
 }
 
 extension SettingsModel {
+    /// Suspends/restores the live hotkeys while a recorder is
+    /// armed (#213), so pressing an existing shortcut to test it
+    /// mid-capture can't fire its action. Independent of the edit
+    /// target: the running hotkeys are the live ones either way.
+    func setRecorderArmed(_ armed: Bool) {
+        if armed {
+            core.suspendHotkeysForRecording()
+        } else {
+            core.resumeHotkeysForRecording()
+        }
+    }
+
     /// Applies one recorder combo mutation on the live target.
     /// Existing rows keep their clean runtime action even when
     /// their Lua/app fields have unrelated staged edits. A row

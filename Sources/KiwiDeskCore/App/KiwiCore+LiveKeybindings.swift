@@ -182,6 +182,20 @@ extension KiwiCore {
         return .success(())
     }
 
+    /// Suspends every KiwiDesk Carbon hotkey while a Settings
+    /// recorder is armed (#213), so pressing an existing shortcut
+    /// to test it can't fire its action. Paired with
+    /// `resumeHotkeysForRecording()` when capture ends. Suspend/
+    /// resume round-trip the exact table, so both are safe no-ops
+    /// when nothing is registered; system shortcuts are untouched.
+    public func suspendHotkeysForRecording() {
+        keys.suspend()
+    }
+
+    public func resumeHotkeysForRecording() {
+        keys.resume()
+    }
+
     private func activeProfileModesForLiveApply()
         -> Result<KeyModeOverride?, LiveKeybindingApplyError>
     {
