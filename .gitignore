@@ -62,7 +62,7 @@ fastlane/screenshots/**/*.png
 fastlane/test_output
 plan/
 
-# Claude Code and Agent customizations
+# Claude Code and Codex customizations
 # Third-party agents are regenerated per-clone via
 # scripts/install-subagents.sh, so they stay ignored. Team-shared
 # workflow config (skills, rules) is committed via the negations.
@@ -71,6 +71,9 @@ plan/
 !.claude/rules/
 !.claude/AGENTS.brief.md
 .agents/skills/
+/.codex/agents/
+# Optional skill installs keep their local resolution state untracked.
+/skills-lock.json
 
 # macOS specific
 .DS_Store

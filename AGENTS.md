@@ -194,8 +194,10 @@ no trailing period. Body (optional) explains the why, wrapped at
   (never hidden in dot-folders): lint, git hooks, localization
   scripts.
 - Install hooks once per clone: `./scripts/install-hooks.sh`.
-- Fetch and install workspace subagents and skills:
-  `./scripts/install-subagents.sh`.
+- Fetch third-party subagents per clone with one explicit target:
+  `./scripts/install-subagents.sh --claude` installs Claude Code
+  agents and workspace skills; `./scripts/install-subagents.sh
+  --codex` installs project-scoped Codex agents.
 - (Optional, per-developer) install the `caveman` skill to
   compress agent output — not a build dependency; needs Node
   `>= 18` (the installer checks):

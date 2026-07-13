@@ -42,9 +42,17 @@ the repo is set up specifically to make them productive:
 (verify/review workflows), teach an assistant KiwiDesk's
 conventions so its output lands on-style instead of generic. The
 project-tailored review agents themselves are *not* committed —
-they are regenerated per-clone: run `./scripts/install-subagents.sh`
-once and it pulls the review agents, appending the committed
-`scripts/kiwidesk-review-context.md` tailoring to each.
+they are regenerated per-clone from the matching VoltAgent catalog.
+Choose the assistant you use:
+
+- `./scripts/install-subagents.sh --claude` installs Claude Code
+  Markdown agents in `.claude/agents/` and their workspace skills in
+  `.agents/skills/`.
+- `./scripts/install-subagents.sh --codex` installs Codex-native TOML
+  agents in `.codex/agents/`.
+
+Both commands append the committed
+`scripts/kiwidesk-review-context.md` tailoring to the review agents.
 
 One rule, though: **understand what you submit.** A pull request is
 yours regardless of how it was written — know what your change does
