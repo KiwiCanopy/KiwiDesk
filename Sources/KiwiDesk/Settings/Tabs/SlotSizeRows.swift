@@ -49,12 +49,19 @@ struct SlotSizeRows: View {
     /// resolve `.auto` against, so vertical (auto = a fraction)
     /// uses a fixed pt hint rather than the fraction standard.
     private var currentPoints: CGFloat {
+        let stored: CGFloat
         if case .points(let points) =
             model.config.settings.scrolling.slotSize
         {
-            return points
+            stored = points
+        } else {
+            stored =
+                isVertical ? 700 : ScrollSize.autoHorizontalPoints
         }
-        return isVertical ? 700 : ScrollSize.autoHorizontalPoints
+        // Keep the readout and slider thumb inside the slider's
+        // range; a smaller stored slot is floored at minWindowSize
+        // by the engine anyway.
+        return max(stored, CGFloat(minPointsFloor))
     }
 
     /// Seed for the Percent unit: keep an explicit fraction, else

@@ -78,6 +78,12 @@ struct GridSchematic: View {
         ) {
             gridFrame(cols: 2, rows: 2, ids: [1, 2, 3, 4])
         } second: {
+            // The 4→5 balanced dims (2×2 → 3×2 columns-first / 2×3
+            // rows-first) mirror `GridLayout.balanced`; the fill
+            // order in `gridCells` mirrors its columnFirst branch.
+            // Both are pinned by `GridDimensionTests` (balance) and
+            // `GridLayoutTests` (fill order / rigidArrange) — keep
+            // these constants in step with the engine.
             gridFrame(
                 cols: columnsFirst ? 3 : 2,
                 rows: columnsFirst ? 2 : 3,
