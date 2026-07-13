@@ -54,6 +54,7 @@ final class ChordRecorder {
     private var suppressedKeyUps: Set<UInt16> = []
     var onPreview: (String) -> Void = { _ in }
     var onFinish: (Outcome) -> Void = { _ in }
+    var isSuppressingKeyUp: Bool { releaseMonitor != nil }
 
     /// Installs the event monitors. `preview` receives the
     /// held-modifier symbols on every change; `finish` fires
@@ -105,10 +106,9 @@ final class ChordRecorder {
         }
     }
 
-    /// Silent teardown; key-up ownership survives release or timeout
-    /// even when capture changes field or its row disappears.
     func stop() {
         stopCapture()
+        beginReleaseSuppression()
         onPreview = { _ in }
         onFinish = { _ in }
     }

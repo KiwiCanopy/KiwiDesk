@@ -250,6 +250,35 @@ struct ChordRecorderTests {
         #expect(second.outcomes.isEmpty)
     }
 
+    @Test("Unrepresentable key-up ownership survives stop")
+    func unrepresentableKeyUpSurvivesStop() {
+        let recorder = ChordRecorder()
+        defer { recorder.stop() }
+        let capture = Capture()
+        capture.attach(recorder)
+
+        #expect(
+            recorder.handle(
+                .keyDown,
+                keyCode: 255,
+                flags: [.command]
+            )
+        )
+        #expect(!recorder.isSuppressingKeyUp)
+
+        recorder.stop()
+        #expect(recorder.isSuppressingKeyUp)
+        #expect(
+            recorder.handle(
+                .keyUp,
+                keyCode: 255,
+                flags: [.command]
+            )
+        )
+        #expect(!recorder.isSuppressingKeyUp)
+        #expect(capture.outcomes.isEmpty)
+    }
+
     @Test("finish fires exactly once")
     func finishFiresOnce() {
         let recorder = ChordRecorder()
