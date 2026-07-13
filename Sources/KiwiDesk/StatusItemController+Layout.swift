@@ -8,7 +8,7 @@ extension StatusItemController {
             action: nil,
             keyEquivalent: ""
         )
-        parent.image = symbol("square.split.2x2")
+        parent.image = symbol("rectangle.3.group")
         let submenu = NSMenu()
         // Manual enablement: under the default auto-enable,
         // AppKit re-enables at display time any item whose

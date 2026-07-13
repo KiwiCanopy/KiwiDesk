@@ -319,8 +319,12 @@ Adjust each mode's defaults:
   when more tracks exist than fit side by side): **cascade all**
   (the default) piles its windows from the top, **cascade
   overflow** keeps the ones that fit tiled and piles the rest.
-  Normal tracks always use cascade overflow for their own
-  windows — this only affects the overflow track. And **Wrap
+  There are two overflow levels: the far **overflow track**
+  collects whole *tracks* that no longer fit side by side, while
+  *within* a single track the surplus *windows* (more than fit at
+  the minimum window size) cascade among themselves. This Overflow
+  setting only tunes the far track; normal tracks always use
+  cascade overflow for their own windows. And **Wrap
   focus** (the same opt-in toggle as Scrolling's, off by
   default: on,
   focus wraps within the track along the axis and from the last

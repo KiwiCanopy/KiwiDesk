@@ -50,8 +50,8 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
     /// else (icons are vocabulary).
     var symbol: String {
         switch self {
-        case .spaces: return "rectangle.split.3x1"
-        case .layoutDefaults: return "slider.horizontal.3"
+        case .spaces: return "squares.below.rectangle"
+        case .layoutDefaults: return "rectangle.3.group"
         case .monitors: return "display.2"
         case .appearance: return "paintbrush.fill"
         case .behavior: return "cursorarrow.motionlines"
