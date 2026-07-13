@@ -104,16 +104,20 @@ extension SettingsModel {
             liveKeySession = nil
             return
         }
-        if case .success = core.restoreLiveKeybindings(
-            session.snapshot
-        ) {
+        switch core.restoreLiveKeybindings(session.snapshot) {
+        case .success:
             liveKeySession = nil
             profileWarning = L(
                 "key_recorder.revert_used_snapshot",
                 "Saved shortcuts couldn't be read, so Revert "
                     + "restored the previous running shortcuts."
             )
-        } else {
+        case .failure(.superseded):
+            // A newer load already replaced the VM/hotkeys;
+            // its ownership is authoritative. Retire the stale
+            // recorder session without replaying old callbacks.
+            liveKeySession = nil
+        case .failure:
             profileWarning = L(
                 "key_recorder.revert_failed",
                 "Revert couldn't restore the running shortcuts. "

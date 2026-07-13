@@ -26,6 +26,10 @@ public final class KiwiCore {
     /// can capture an in-memory rollback point without reading
     /// gui.json or a profile again (#123 review).
     var appliedStructuredModes: [KeyMode]?
+    /// Changes whenever `loadConfig()` replaces the Lua VM and
+    /// hotkey table. Recorder snapshots are valid only within
+    /// the generation that captured them.
+    var keybindingRuntimeGeneration: UInt64 = 0
 
     /// A stack z-order restore is waiting for the current
     /// animations to settle (see restoreStackZOrder).

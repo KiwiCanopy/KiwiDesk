@@ -4,6 +4,7 @@ import Foundation
 extension KiwiCore {
     /// Loads (or reloads) init.lua into a fresh VM.
     public func loadConfig() {
+        keybindingRuntimeGeneration &+= 1
         bus.resetLuaCallbacks()
         appliedStructuredModes = nil
         keys.reset()

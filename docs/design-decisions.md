@@ -491,7 +491,10 @@ combo registered in the active mode; inactive-mode, profile-
 shadowed, compile-failed, and Carbon-denied states say so instead.
 Revert first re-applies persisted state; if the sidecar/profile
 became unreadable, an in-memory pre-edit snapshot removes ghost
-hotkeys. Rollback bookkeeping clears only after one path succeeds.
+hotkeys. That snapshot is valid only within its loaded config/VM
+generation; a newer authoritative reload wins and retires the
+session instead of replaying stale GUI callbacks. Rollback
+bookkeeping clears only after one path succeeds.
 Editing a stored profile stays fully staged (instant apply would
 rewrite the RUNNING hotkeys while the banner says an inactive
 profile is being edited); the override banner states that its

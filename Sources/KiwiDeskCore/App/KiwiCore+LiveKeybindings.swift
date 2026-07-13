@@ -32,6 +32,7 @@ public enum LiveKeybindingApplyError: Error, Equatable,
     case unreadableConfig
     case unreadableProfile
     case preparationFailed
+    case superseded
 }
 
 /// In-memory rollback point captured before the first recorder
@@ -40,6 +41,7 @@ public enum LiveKeybindingApplyError: Error, Equatable,
 public struct LiveKeybindingSnapshot: Sendable {
     let modes: [KeyMode]
     let activeMode: String
+    let generation: UInt64
 }
 
 extension KiwiCore {
@@ -54,7 +56,8 @@ extension KiwiCore {
         else { return nil }
         return LiveKeybindingSnapshot(
             modes: modes,
-            activeMode: keys.currentMode
+            activeMode: keys.currentMode,
+            generation: keybindingRuntimeGeneration
         )
     }
 
@@ -159,6 +162,8 @@ extension KiwiCore {
     public func restoreLiveKeybindings(
         _ snapshot: LiveKeybindingSnapshot
     ) -> Result<Void, LiveKeybindingApplyError> {
+        guard snapshot.generation == keybindingRuntimeGeneration
+        else { return .failure(.superseded) }
         guard let lua = keys.lua else {
             return .failure(.unavailable)
         }

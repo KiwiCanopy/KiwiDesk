@@ -208,4 +208,35 @@ struct LiveApplySettingsModelTests {
         _ = lua.call(ref: ref)
         #expect(lua.global("marker") == .string("target"))
     }
+
+    @Test("Newer raw reload retires the recorder snapshot")
+    func rawReloadSupersedesSnapshot() throws {
+        let (model, core) = try makeModel()
+        let index = try defaultBinding(in: model)
+        let id = model.config.modes[index.mode]
+            .bindings[index.binding].id
+        _ = model.liveApplyRecorded(
+            modeName: "default",
+            bindingID: id,
+            combo: "alt+j"
+        )
+        #expect(try isRegistered("alt+j", core: core))
+
+        try """
+        KiwiDesk.bind("alt+k", function()
+            marker = "raw"
+        end)
+        """.write(
+            to: core.configURL,
+            atomically: true,
+            encoding: .utf8
+        )
+        core.loadConfig()
+        model.revert()
+
+        #expect(model.liveKeySession == nil)
+        #expect(!(try isRegistered("alt+h", core: core)))
+        #expect(!(try isRegistered("alt+j", core: core)))
+        #expect(try isRegistered("alt+k", core: core))
+    }
 }
