@@ -25,6 +25,8 @@ extension KiwiCore {
             return setFocusedFloating(false)
         case "make_auto":
             return setFocusedAuto()
+        case "toggle_floating":
+            return toggleFocusedFloating()
         case "resize":
             return resize(args)
         case "move_to_track":
@@ -106,6 +108,22 @@ extension KiwiCore {
         state.setFloating(focused, floating)
         retile()
         return .ok()
+    }
+
+    /// `toggle_floating` (#221): flip the focused window between
+    /// floating and tiled in one verb. Reads the window's
+    /// *effective* state and writes the explicit opposite as a
+    /// manual override — like `make_floating`/`make_tiled`, it
+    /// never yields `auto` (that stays `make_auto`'s job), so the
+    /// #164 tri-state is preserved by construction.
+    private func toggleFocusedFloating() -> CommandResponse {
+        guard
+            let focused = activeSpace?.focused,
+            let window = state.windows[focused]
+        else {
+            return .fail("no focused window")
+        }
+        return setFocusedFloating(!window.isFloating)
     }
 
     /// `make_auto` (#164): clears the focused window's manual

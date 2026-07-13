@@ -20,6 +20,7 @@ public enum APIReference {
             ("make_floating", "make_floating"),
             ("make_tiled", "make_tiled"),
             ("make_auto", "make_auto"),
+            ("toggle_floating", "toggle_floating"),
             ("resize", "resize"),
             ("move_to_track", "move_to_track"),
             ("pull_or_spawn", "pull_or_spawn"),

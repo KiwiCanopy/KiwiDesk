@@ -199,6 +199,7 @@
   "keybinding.swap_dir": "Swap with window %1$@",
   "keybinding.swap_with_track": "Swap with %1$@ track",
   "keybinding.switch_to_mode": "Switch to %1$@",
+  "keybinding.toggle_floating": "Toggle floating",
   "layout.bsp.name": "Bsp",
   "layout.floating.name": "Floating",
   "layout.grid.name": "Grid",

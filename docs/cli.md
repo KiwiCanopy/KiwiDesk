@@ -52,6 +52,7 @@ KiwiDesk service restart
 | Window | `make_floating` | — |
 | | `make_tiled` | — |
 | | `make_auto` | — |
+| | `toggle_floating` | — |
 | | `resize` | `x\|y`, delta (px) |
 | | `move_to_track` | `prev\|next` — move window to the adjacent track (track spaces) |
 | Launch | `pull_or_spawn` | app name |

@@ -1909,37 +1909,25 @@ it when a window "sticks" floating or tiled after a
 KiwiDesk.make_auto()
 ```
 
-### Example: toggle floating
+### toggle_floating
 
-There is no built-in toggle; use `get_state()` to check the focused
-window's current state:
+**Expects:** nothing.
+
+**Does:** flips the focused window between floating and tiled in
+one verb — if it is effectively floating it becomes tiled, and
+vice versa. Like `make_floating`/`make_tiled`, it writes an
+explicit manual override (which survives close/reopen); it never
+produces the `auto` state, so `make_auto` stays the way back to
+detection control. This is the everyday float shortcut (bound to
+`option+t` by default and the only float verb offered in the
+Settings shortcut list); the explicit `make_*` verbs remain for
+scripts that need a specific direction.
 
 **Example:**
 
 ```lua
 KiwiDesk.bind("cmd+alt+f", function()
-    local state = KiwiDesk.get_state()
-    if not state.active_space then return end
-    local active_space = state.active_space
-    local focused_id = nil
-    for _, space in ipairs(state.spaces) do
-        if space.id == active_space then
-            focused_id = space.focused
-            break
-        end
-    end
-    if focused_id then
-        for _, window in ipairs(state.windows) do
-            if window.id == focused_id then
-                if window.floating then
-                    KiwiDesk.make_tiled()
-                else
-                    KiwiDesk.make_floating()
-                end
-                break
-            end
-        end
-    end
+    KiwiDesk.toggle_floating()
 end)
 ```
 
