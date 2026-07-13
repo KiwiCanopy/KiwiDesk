@@ -31,19 +31,18 @@ extension SettingsModel {
         var keybindingWarning: String?
     }
 
-    /// Switches the dashboard's edit target. Passing `nil` (or
-    /// the active profile's own name) returns to live editing;
-    /// any other saved profile enters edit-without-activating
-    /// mode. Pending edits are discarded — the caller confirms
-    /// first.
+    /// Switches the dashboard's edit target. Passing `nil`
+    /// returns to live editing; any saved profile name — the
+    /// currently-loaded one included (#209) — enters edit-
+    /// without-activating mode on that profile's stored
+    /// overrides. Editing the loaded profile is a real target,
+    /// not a synonym for Live: saving it re-applies in place
+    /// (`saveEditedProfile` → `reapplyIfInEffect`), which Live's
+    /// adopt-on-save path does not do. Pending edits are
+    /// discarded — the caller confirms first.
     func selectEditTarget(_ name: String?) {
-        // Selecting the currently-loaded profile is just
-        // editing live: same data, on the live save path.
         let normalized: EditTarget =
-            name.flatMap { picked in
-                picked == activeProfile
-                    ? nil : .storedProfile(picked)
-            } ?? .live
+            name.map { .storedProfile($0) } ?? .live
         guard normalized != target else { return }
         target = normalized
         reload()

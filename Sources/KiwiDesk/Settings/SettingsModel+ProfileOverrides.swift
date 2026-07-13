@@ -24,12 +24,10 @@ extension SettingsModel {
                 to: trimmed,
                 with: config
             )
-            // `freeName` only returns names absent from
-            // `profiles.list()`, and `activeProfile` is always
-            // a listed name while it exists — so `created` can
-            // never equal `activeProfile`, and the direct
-            // assignment safely skips `selectEditTarget`'s
-            // this-is-live-editing normalization.
+            // The copy is a fresh, non-active profile, so it is
+            // its own stored edit target — assign it directly
+            // (bypassing the discard-confirm round-trip
+            // `selectEditTarget` would run) and reload onto it.
             target = .storedProfile(created)
             reload()
         } catch {

@@ -240,6 +240,57 @@ the button cluster apart, so it was dropped. Adopt is not a
 save verb — it lives with the raw-Lua content it migrates.
 (#68 §3.12)
 
+**The edit-target dropdown lists the loaded profile as its own
+row — no collapse to Live.** (#209.) The top **Live** entry
+edits the running/global config; every saved profile lists
+below, the loaded one included. Picking the loaded profile used
+to silently remap to Live, which made it the one profile whose
+*stored* sparse overrides (key modes #55, app rules #109) could
+never be edited — you could only touch the live/global config.
+The considered fix — listing the loaded profile **twice**, top
+meaning global and list meaning overrides — was rejected as a
+menu anti-pattern: the ✓ can't disambiguate two identical rows,
+the closed title goes ambiguous, and the discard guard keys on
+the profile name. Instead the rows are already textually
+distinct (`Live (currently loaded)` vs `Name (currently
+loaded)`), so the collapse is simply deleted and each profile
+is one real `.storedProfile` target. Editing the loaded
+profile is the sole target whose Save hits the screen at once:
+`saveEditedProfile` → `reapplyIfInEffect` re-applies it **in
+place** (no switch), because it *is* the layout on screen — so
+its status caption drops the generic "changes won't switch your
+layout" for a truthful "saving re-applies *Name* with your
+changes", and the closed menu title reads "*Name* — overrides"
+to stay distinct from Live-with-that-profile-loaded.
+
+*The two doors write different layers, by design.* #209 makes
+the loaded profile reachable through **both** the Live entry and
+its own row, and the two saves touch **disjoint** field sets of
+the same file — intentionally, because they edit different
+layers of the sparse-override model, not the same data twice:
+
+- **Live Save** (`updateActiveProfile` → `persistProfile` →
+  `buildProfile`) adopts the live **tiling** state (`spaces`,
+  `spaceModes`, `mainSpaces`, `fallbackSpace`, `settings`) and
+  **deliberately preserves** the profile's stored `modes` /
+  `appRules` — those are sparse *diffs* against the global base,
+  and Live editing changes the base (`gui.json`), never the
+  diff.
+- **Override-row Save** (`saveEditedProfile` →
+  `overwriteProfile` → `applyProfileEdits`) writes the profile's
+  sparse `modes` / `appRules` **diffs** (against `baseKeyModes()`
+  / `baseAppRules()`) plus its tiling — this is the surface that
+  edits the diff.
+
+So "Live leaves `profile.modes` frozen while the row rewrites
+it" is the model working, not divergence: one door edits the
+base, the other edits the per-profile diff over it. The trap to
+avoid is "fixing" `buildProfile`/`persistProfile` to also adopt
+`modes`/`appRules` — that would collapse the diff into an
+absolute and silently break the sparse override. Pinned by
+`ProfileSaveAsymmetryTests` so a future edit that erases the
+asymmetry fails red.
+
 **One header bar: section title leading, profile picker
 trailing; status only when non-nominal.** The section name and
 the profile edit-target picker are related facts (what am I

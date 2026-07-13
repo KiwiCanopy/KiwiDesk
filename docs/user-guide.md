@@ -499,20 +499,29 @@ layer.
 
 ### The Profile Banner
 
-At the top of any section, a dropdown shows the currently active
-profile (marked "currently loaded"). Click it to:
+At the top of any section, a dropdown picks what your edits target.
+The top entry, **Live (currently loaded)**, edits the running,
+global config; every saved profile is listed below, one row each
+(the loaded profile is marked "currently loaded"). Click it to:
 
-- **Switch to** a saved profile (loads it into the running layout).
+- **Edit Live** (top entry): the running config. Saving here
+  adopts your changes into the loaded profile as usual.
 - **Edit** a saved profile **without switching** — the Settings
   sidebar becomes profile-scoped: the Design sections (Spaces,
   Layout, Monitors, Appearance, Behavior) edit this profile, and
   **General is hidden** — it holds global state a profile edit
   never writes. Save writes to this profile's JSON instead of
   the active one (the caption beside the button names the
-  target). Shortcuts and App Rules enter override mode and edit
-  only what this profile changes; inherited rows stay dimmed
-  (App Rules' Float facet is app-wide and stays disabled there).
-- **Return to the active profile** by selecting it in the dropdown.
+  target, and the menu title shows "*Name* — overrides").
+  Shortcuts and App Rules enter override mode and edit only what
+  this profile changes; inherited rows stay dimmed (App Rules'
+  Float facet is app-wide and stays disabled there).
+- **Edit the loaded profile's own overrides** by picking its row
+  (not the Live entry). This is the one case where saving updates
+  the screen right away — the profile is re-applied in place, no
+  switch — because it *is* the layout you're looking at. Its
+  status caption says so.
+- **Return to Live** by selecting the top **Live** entry.
 
 Saving a stored profile hot-reloads the running layout **only if
 that profile is the one on screen** (loaded, or bound to the

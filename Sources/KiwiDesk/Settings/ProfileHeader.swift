@@ -80,6 +80,20 @@ struct ProfileHeaderBar: View {
 
     private var statusText: String? {
         if model.editingStoredProfile {
+            // Editing the loaded profile's own overrides DOES
+            // hit the screen — saving re-applies it in place
+            // (#209) — so the generic "won't switch" copy is
+            // false for that one target.
+            if let name = model.editingProfile,
+                name == model.activeProfile
+            {
+                return L(
+                    "profile_header.status.editing_loaded",
+                    "Editing %1$@'s saved overrides — saving "
+                        + "re-applies %1$@ with your changes.",
+                    name
+                )
+            }
             return L(
                 "profile_header.status.editing_stored",
                 "Editing a saved profile — changes won't "
@@ -187,11 +201,11 @@ struct ProfileEditTargetMenu: View {
     }
 
     private func requestSelect(_ name: String?) {
-        // Resolve to the same target `selectEditTarget` will
-        // use, so re-picking the open profile is a no-op that
-        // never pops a pointless discard dialog.
-        let target = (name == model.activeProfile) ? nil : name
-        guard target != model.editingProfile else { return }
+        // A `nil` name is Live (`editingProfile == nil`); any
+        // name — the loaded profile included (#209) — is that
+        // stored target. Re-picking the open one is a no-op, so
+        // it never pops a pointless discard dialog.
+        guard name != model.editingProfile else { return }
         if model.isDirty {
             switchTarget = name
             confirmingSwitch = true
@@ -238,7 +252,18 @@ struct ProfileEditTargetMenu: View {
     }
 
     private var title: String {
-        if let editing = model.editingProfile { return editing }
+        // Override mode gets a distinct closed-menu form, so
+        // "MyProfile — overrides" can't be mistaken for Live
+        // with MyProfile loaded — which shows the bare name and
+        // would otherwise collide when editing the loaded
+        // profile (#209).
+        if let editing = model.editingProfile {
+            return L(
+                "profile_header.title.overrides",
+                "%1$@ — overrides",
+                editing
+            )
+        }
         if let profile = model.activeProfile { return profile }
         if let standard = model.activeStandard {
             return L(
