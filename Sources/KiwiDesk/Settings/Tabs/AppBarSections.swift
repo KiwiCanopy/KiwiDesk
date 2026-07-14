@@ -50,19 +50,22 @@ struct GlobalAppBarSection: View {
                 }
             }
         }
-        DropdownRow(label: styleLabel) {
-            Picker(styleLabel, selection: $style.style) {
-                ForEach(AppBarOptions.style, id: \.0) {
+        DropdownRow(label: tabBackgroundLabel) {
+            Picker(
+                tabBackgroundLabel,
+                selection: $style.tabBackground
+            ) {
+                ForEach(AppBarOptions.tabBackground, id: \.0) {
                     Text($0.1).tag($0.0)
                 }
             }
         }
-        DropdownRow(label: activeItemLabel) {
+        DropdownRow(label: activeIndicatorLabel) {
             Picker(
-                activeItemLabel,
-                selection: $style.activeStyle
+                activeIndicatorLabel,
+                selection: $style.activeIndicator
             ) {
-                ForEach(AppBarOptions.activeStyle, id: \.0) {
+                ForEach(AppBarOptions.activeIndicator, id: \.0) {
                     Text($0.1).tag($0.0)
                 }
             }
@@ -83,7 +86,19 @@ struct GlobalAppBarSection: View {
         )
     }
 
+    // Ordered preview → the two Auto toggles → sliders (#228 §3).
+    // "Auto" size/font is a GUI face on the model's 0 = auto
+    // sentinel: the toggle greys its slider and stores 0; turning
+    // it off restores a sensible non-zero value (#171 grey-out).
     @ViewBuilder private var appearance: some View {
+        Toggle(
+            L("app_bar.item_size.auto", "Auto item size"),
+            isOn: AppBarAuto.binding($style.itemSize, restore: 120)
+        )
+        Toggle(
+            L("app_bar.font_size.auto", "Auto font size"),
+            isOn: AppBarAuto.binding($style.fontSize, restore: 14)
+        )
         PtSlider(
             label: L("app_bar.thickness", "Thickness"),
             value: $style.thickness,
@@ -94,6 +109,7 @@ struct GlobalAppBarSection: View {
             value: $style.itemSize,
             range: 0...200
         )
+        .modifier(AppBarGreyOut(active: style.itemSize == 0))
         PtSlider(
             label: L("app_bar.item_gap", "Item gap"),
             value: $style.itemGap,
@@ -104,25 +120,23 @@ struct GlobalAppBarSection: View {
             value: $style.fontSize,
             range: 0...32
         )
-        // Corner radius only rounds Pills (segments are always
-        // square; underline rounds only its transient hover box).
-        // Grey it out otherwise — the "grey, don't hide"
-        // convention (#171) — so it never reads as a no-op knob.
+        .modifier(AppBarGreyOut(active: style.fontSize == 0))
+        // Roundness only shapes a Boxed tab; grey it for Plain —
+        // the "grey, don't hide" convention (#171).
         PtSlider(
-            label: L("app_bar.corner_radius", "Corner radius"),
-            value: $style.cornerRadius,
-            range: 0...40
+            label: L("app_bar.corner_roundness", "Corner roundness"),
+            value: $style.cornerRoundness,
+            range: 0...100,
+            unit: "%"
         )
-        .disabled(style.style != .pills)
-        .opacity(style.style == .pills ? 1 : 0.5)
-        .help(
-            style.style == .pills
-                ? ""
-                : L(
-                    "app_bar.corner_radius.pills_only",
-                    "Corner radius only applies to the Pills "
-                        + "style."
+        .modifier(
+            AppBarGreyOut(
+                active: style.tabBackground != .boxed,
+                help: L(
+                    "app_bar.corner_roundness.boxed_only",
+                    "Corner roundness only applies to Boxed tabs."
                 )
+            )
         )
     }
 
@@ -204,11 +218,11 @@ struct GlobalAppBarSection: View {
     private var positionLabel: String {
         L("app_bar.position.label", "Position")
     }
-    private var styleLabel: String {
-        L("app_bar.style.label", "Style")
+    private var tabBackgroundLabel: String {
+        L("app_bar.tab_background.label", "Tab background")
     }
-    private var activeItemLabel: String {
-        L("app_bar.active_item.label", "Active item")
+    private var activeIndicatorLabel: String {
+        L("app_bar.active_indicator.label", "Active indicator")
     }
     private var contentLabel: String {
         L("app_bar.content.label", "Content")

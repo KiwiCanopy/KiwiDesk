@@ -60,9 +60,11 @@ final class AppBarArrowView: NSView {
             ofSize: AppBarOverlay.arrowZone * 0.7,
             weight: .bold
         )
-        layer?.cornerRadius = min(
-            style.cornerRadius,
-            AppBarOverlay.arrowZone / 2
+        // The shared %-resolve against the arrow box's own
+        // shorter side: 100% is a clean capsule, never an
+        // overlapping arc — so no separate pt clamp is needed.
+        layer?.cornerRadius = style.resolvedCornerRadius(
+            forThickness: min(bounds.width, bounds.height)
         )
         applyColors()
         needsLayout = true

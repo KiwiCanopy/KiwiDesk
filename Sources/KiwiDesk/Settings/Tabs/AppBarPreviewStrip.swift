@@ -55,11 +55,25 @@ struct AppBarPreviewStrip: View {
             ForEach(mockTabs) { tab($0) }
         }
         .padding(4)
-        .background(color(style.backgroundColor))
+        .background(
+            // Plain draws every name on one shared box (the strip
+            // itself); Boxed keeps the strip in the background
+            // color and boxes each tab.
+            RoundedRectangle(
+                cornerRadius: style.tabBackground == .plain
+                    ? corner : 0
+            )
+            .fill(
+                color(
+                    style.tabBackground == .plain
+                        ? style.boxColor : style.backgroundColor
+                )
+            )
+        )
     }
 
     @ViewBuilder private func tab(_ t: MockTab) -> some View {
-        if t.active, style.activeStyle == .gap {
+        if t.active, style.activeIndicator == .gap {
             // Active item hidden — leave the gap it would occupy.
             Color.clear.frame(width: slotLength, height: thickness)
         } else {
@@ -71,8 +85,11 @@ struct AppBarPreviewStrip: View {
         tabContent(t)
             .frame(width: slotLength, height: thickness)
             .background(
-                RoundedRectangle(cornerRadius: corner)
-                    .fill(boxColor(t))
+                RoundedRectangle(
+                    cornerRadius: style.tabBackground == .boxed
+                        ? corner : 0
+                )
+                .fill(boxColor(t))
             )
             .overlay(activeAccent(t))
             .overlay(alignment: .topTrailing) { badge(t) }
@@ -98,30 +115,56 @@ struct AppBarPreviewStrip: View {
         .padding(.horizontal, 4)
     }
 
-    /// Pills ring the active tab in the highlight color; segments
-    /// and underline draw a bar on the window-facing edge (drawn
-    /// here as the strip's inner edge) — both only when the active
-    /// style is `highlight` (a `gap` never reaches here).
+    /// The active indicator, orthogonal to the tab background:
+    /// `ring` outlines the active tab (flush on Boxed, an inset
+    /// capsule on Plain), `edgeMark` draws a bar on the
+    /// window-facing edge inset to the box corner. `gap` never
+    /// reaches here (the slot is hidden).
     @ViewBuilder private func activeAccent(
         _ t: MockTab
     ) -> some View {
-        if t.active, style.activeStyle == .highlight {
-            if style.style == .pills {
-                RoundedRectangle(cornerRadius: corner)
-                    .strokeBorder(
-                        color(style.highlightColor),
-                        lineWidth: 2
-                    )
-            } else {
-                Rectangle()
-                    .fill(color(style.highlightColor))
-                    .frame(height: 2)
-                    .frame(
-                        maxHeight: .infinity,
-                        alignment: .bottom
-                    )
+        if t.active {
+            switch style.activeIndicator {
+            case .ring: ringAccent
+            case .edgeMark: edgeMarkAccent
+            case .gap: EmptyView()
             }
         }
+    }
+
+    @ViewBuilder private var ringAccent: some View {
+        if style.tabBackground == .boxed {
+            RoundedRectangle(cornerRadius: corner)
+                .strokeBorder(
+                    color(style.highlightColor),
+                    lineWidth: 2
+                )
+        } else {
+            RoundedRectangle(cornerRadius: thickness / 2)
+                .strokeBorder(
+                    color(style.highlightColor),
+                    lineWidth: 2
+                )
+                .padding(1.5)
+        }
+    }
+
+    private var edgeMarkAccent: some View {
+        // Start puts the bar on top, so the window-facing edge is
+        // the bottom; End is the reverse. Inset to the box corner
+        // on Boxed so it sits flush inside the curve.
+        Rectangle()
+            .fill(color(style.highlightColor))
+            .frame(height: 2)
+            .padding(
+                .horizontal,
+                style.tabBackground == .boxed ? corner : 0
+            )
+            .frame(
+                maxHeight: .infinity,
+                alignment: style.position == .start
+                    ? .bottom : .top
+            )
     }
 
     @ViewBuilder private func badge(_ t: MockTab) -> some View {
@@ -140,10 +183,10 @@ struct AppBarPreviewStrip: View {
     // MARK: - Colors
 
     private func boxColor(_ t: MockTab) -> Color {
-        switch style.style {
-        case .underline:
+        switch style.tabBackground {
+        case .plain:
             return .clear
-        case .pills, .segments:
+        case .boxed:
             return color(
                 t.active ? style.activeBoxColor : style.boxColor
             )
@@ -178,8 +221,10 @@ struct AppBarPreviewStrip: View {
         scale(style.itemGap, from: 0...40, to: 0...16)
     }
 
+    /// The shared %-resolve against the preview's own (scaled)
+    /// thickness, so the mock rounds like the runtime bar.
     private var corner: CGFloat {
-        min(style.cornerRadius, thickness / 2)
+        style.resolvedCornerRadius(forThickness: thickness)
     }
 
     /// Item length along the bar axis: honor an explicit
@@ -277,21 +322,17 @@ struct AppBarPreviewStrip: View {
 
     private var positionName: String {
         switch style.position {
-        case .top: return L("app_bar.position.top", "Top")
-        case .bottom:
-            return L("app_bar.position.bottom", "Bottom")
-        case .left: return L("app_bar.position.left", "Left")
-        case .right: return L("app_bar.position.right", "Right")
+        case .start: return L("app_bar.position.start", "Start")
+        case .end: return L("app_bar.position.end", "End")
         }
     }
 
     private var styleName: String {
-        switch style.style {
-        case .pills: return L("app_bar.style.pills", "Pills")
-        case .segments:
-            return L("app_bar.style.segments", "Segments")
-        case .underline:
-            return L("app_bar.style.underline", "Underline")
+        switch style.tabBackground {
+        case .boxed:
+            return L("app_bar.tab_background.boxed", "Boxed")
+        case .plain:
+            return L("app_bar.tab_background.plain", "Plain")
         }
     }
 }

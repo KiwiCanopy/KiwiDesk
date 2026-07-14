@@ -30,6 +30,9 @@ final class AppBarItemView: NSView {
     private var windowID = WindowID(0)
     var name = ""
     var horizontal = true
+    /// The concrete edge the bar sits on; the active edge-mark
+    /// hugs it.
+    var edge: AppBarEdge = .top
     private(set) var isActive = false
     private(set) var count = 1
     private var isHovered = false
@@ -140,12 +143,14 @@ final class AppBarItemView: NSView {
         count: Int,
         active: Bool,
         horizontal: Bool,
-        style: AppBarStyle
+        style: AppBarStyle,
+        edge: AppBarEdge
     ) {
         windowID = id
         self.name = name
         self.count = count
         self.horizontal = horizontal
+        self.edge = edge
         self.isActive = active
         self.style = style
         isHovered = false
@@ -170,13 +175,25 @@ final class AppBarItemView: NSView {
         label.textColor = NSColor(kiwiHex: textColorHex)
         layer?.backgroundColor =
             NSColor(kiwiHex: boxColorHex).cgColor
-        // Pills round always; underline items only show their
-        // box while hovered, rounded like a pill.
-        let rounded =
-            style.style == .pills
-            || (style.style == .underline && isHovered)
+        applyCornerRadius()
+    }
+
+    /// The tab's bar-cross dimension (its thickness), which the
+    /// corner radius resolves against.
+    var crossThickness: CGFloat {
+        horizontal ? bounds.height : bounds.width
+    }
+
+    /// Round the box to `cornerRoundness`% of a capsule whenever
+    /// a box is shown. Runs from both `layout()` (bounds known)
+    /// and `applyColors()` (hover toggles the plain box).
+    func applyCornerRadius() {
         layer?.cornerRadius =
-            rounded ? style.cornerRadius : 0
+            hasBox
+            ? style.resolvedCornerRadius(
+                forThickness: crossThickness
+            )
+            : 0
     }
 
     private var textColorHex: String {
@@ -186,41 +203,65 @@ final class AppBarItemView: NSView {
             : style.textColor
     }
 
+    /// Whether this tab paints a box behind its content: always
+    /// when `boxed`, and on hover (a `plain` tab reveals a box
+    /// only while hovered). `plain` is otherwise boxless in every
+    /// combo, including the active ring (which is a pure stroke).
+    private var hasBox: Bool {
+        if isHovered { return true }
+        return style.tabBackground == .boxed
+    }
+
     // The settings App Bar preview (`AppBarPreviewStrip`, GUI
     // target) is a schematic twin of this box/accent logic —
     // keep the two in step when the box or accent rules change.
     private var boxColorHex: String {
         if isHovered { return style.hoverColor }
-        switch style.style {
-        case .pills, .segments:
+        switch style.tabBackground {
+        case .boxed:
             return isActive
                 ? style.activeBoxColor
                 : style.boxColor
-        case .underline:
+        case .plain:
             return "#00000000"
         }
     }
 
-    /// One highlight color, three shapes: a ring around the
-    /// active pill, an edge bar on the window-facing side of
-    /// the active segment, the underline under the active
-    /// name.
-    private func applyAccent() {
-        let highlighted =
-            isActive && style.activeStyle == .highlight
-        if style.style == .pills {
-            layer?.borderWidth = highlighted ? 2 : 0
-            layer?.borderColor =
-                NSColor(
-                    kiwiHex: style.highlightColor
-                ).cgColor
-            accent.isHidden = true
-            return
+    /// How the active tab is marked, gated on the indicator and
+    /// orthogonal to `tabBackground` (the background no longer
+    /// secretly picks the accent). Only the active tab, and never
+    /// under `gap` (its slot is hidden entirely).
+    enum AccentMode { case none, ring, edgeMark }
+
+    var accentMode: AccentMode {
+        guard isActive, style.activeIndicator != .gap else {
+            return .none
         }
+        return style.activeIndicator == .ring ? .ring : .edgeMark
+    }
+
+    /// The ring and edge mark both live on the `accent` subview
+    /// (mutually exclusive); geometry is set in `layoutAccent`.
+    /// The ring is a pure stroke (no fill) in the highlight
+    /// color; the edge mark a filled bar.
+    private func applyAccent() {
         layer?.borderWidth = 0
-        accent.isHidden = !highlighted
-        accent.layer?.backgroundColor =
-            NSColor(kiwiHex: style.highlightColor).cgColor
+        switch accentMode {
+        case .none:
+            accent.isHidden = true
+        case .ring:
+            accent.isHidden = false
+            accent.layer?.borderWidth = 2
+            accent.layer?.borderColor =
+                NSColor(kiwiHex: style.highlightColor).cgColor
+            accent.layer?.backgroundColor =
+                NSColor.clear.cgColor
+        case .edgeMark:
+            accent.isHidden = false
+            accent.layer?.borderWidth = 0
+            accent.layer?.backgroundColor =
+                NSColor(kiwiHex: style.highlightColor).cgColor
+        }
     }
 }
 

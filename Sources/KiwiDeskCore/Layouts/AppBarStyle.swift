@@ -13,31 +13,37 @@ import Foundation
 /// (`LayoutAppBar.enabled`) and the focus/scroll axis
 /// (`MonocleParams.orientation` / `ScrollingParams.orientation`).
 public struct AppBarStyle: Sendable, Equatable {
+    /// Which end of the layout's own axis the bar sits on,
+    /// resolved to a concrete `AppBarEdge` against that axis:
+    /// `start` = top (horizontal axis) / left (vertical),
+    /// `end` = bottom / right. Axis-relative so the bar always
+    /// renders where the label says — no per-layout clamp.
     public enum Position: String, Sendable, Codable {
-        case top, bottom, left, right
-
-        /// Whether this edge belongs to a horizontal bar
-        /// (items in a row) as opposed to a vertical one.
-        public var isHorizontalEdge: Bool {
-            self == .top || self == .bottom
-        }
+        case start, end
     }
 
-    public enum Style: String, Sendable, Codable {
-        /// Rounded floating badges, `itemGap` apart.
-        case pills
-        /// One continuous strip divided into slots.
-        case segments
-        /// Names on a shared translucent box, active item
-        /// underlined.
-        case underline
+    /// How each tab is backed. Orthogonal to `activeIndicator`:
+    /// the background is drawn the same on every tab, the
+    /// indicator marks only the active one. An extensible set —
+    /// more background treatments can join later.
+    public enum TabBackground: String, Sendable, Codable {
+        /// A box per tab, honoring `cornerRoundness`
+        /// (roundness 0 = square).
+        case boxed
+        /// No per-tab box; names sit on one shared translucent
+        /// strip.
+        case plain
     }
 
-    public enum ActiveStyle: String, Sendable, Codable {
-        /// Active item gets the accent (ring / edge bar /
-        /// underline, depending on `style`).
-        case highlight
-        /// Active item is not drawn at all — an empty slot
+    /// How the active tab is marked. Orthogonal to
+    /// `tabBackground`: works on any background.
+    public enum ActiveIndicator: String, Sendable, Codable {
+        /// An outlined border around the active tab.
+        case ring
+        /// An accent bar on the window-facing edge of the
+        /// active tab.
+        case edgeMark = "edge_mark"
+        /// The active tab's slot is left empty — an empty slot
         /// marks the focused window.
         case gap
     }
@@ -50,14 +56,14 @@ public struct AppBarStyle: Sendable, Equatable {
         case iconAndName = "icon_and_name"
     }
 
-    /// Which edge the bar sits on. A layout resolves this
-    /// against its own orientation (see `resolvedPosition`);
-    /// a mismatch falls back to the orientation's default edge.
-    public var position: Position = .top
+    /// Which end of the layout's axis the bar sits on
+    /// (`start`/`end`); the concrete edge is derived once from
+    /// the layout's orientation in `resolvedBar`.
+    public var position: Position = .start
     /// Depth of the reserved strip (pt).
     public var thickness: CGFloat = 32
-    public var style: Style = .pills
-    public var activeStyle: ActiveStyle = .highlight
+    public var tabBackground: TabBackground = .boxed
+    public var activeIndicator: ActiveIndicator = .ring
     /// Item length along the bar (pt) — every item is the
     /// same size. 0 (default) = a standard length per
     /// `content`: a compact square for icon-only, wider once
@@ -78,7 +84,13 @@ public struct AppBarStyle: Sendable, Equatable {
     /// 0 (default) = auto: the text scales with the bar
     /// thickness. Any positive value pins the size.
     public var fontSize: CGFloat = 0
-    public var cornerRadius: CGFloat = 8
+    /// Corner rounding as a percentage (0–100) of the maximum:
+    /// 100 = a full capsule (radius = thickness/2), 0 = square.
+    /// Resolved to a concrete radius in
+    /// `resolvedCornerRadius(forThickness:)`. Percentage, not
+    /// pt, so it can't exceed thickness/2 (which rendered tabs
+    /// as pointed hexagons) and self-adapts to any thickness.
+    public var cornerRoundness: CGFloat = 50
     /// Kiwi theme: cream text in translucent shell-brown
     /// boxes; the active item turns flesh-green while its box
     /// stays brown.
@@ -104,17 +116,15 @@ public struct AppBarStyle: Sendable, Equatable {
 
     public init() {}
 
-    /// The bar's edge resolved against a layout `orientation`:
-    /// a horizontal axis keeps top/bottom (default top), a
-    /// vertical axis keeps left/right (default left). Keeps a
-    /// mismatched setting rather than erroring.
-    public func resolvedPosition(
-        horizontalAxis: Bool
-    ) -> Position {
-        if horizontalAxis {
-            return position.isHorizontalEdge ? position : .top
-        }
-        return position.isHorizontalEdge ? .left : position
+    /// The concrete corner radius (pt) for a tab/strip of the
+    /// given cross dimension: `cornerRoundness`% of its half —
+    /// 100% is a capsule, 0% square. One resolution site shared
+    /// by the item box, the shared strip, the scroll arrows, and
+    /// the GUI preview so they can't drift.
+    public func resolvedCornerRadius(
+        forThickness thickness: CGFloat
+    ) -> CGFloat {
+        max(0, min(cornerRoundness, 100)) / 100 * (thickness / 2)
     }
 }
 
@@ -129,14 +139,14 @@ extension AppBarStyle: Codable {
     enum CodingKeys: String, CodingKey, CaseIterable {
         case position
         case thickness
-        case style
-        case activeStyle = "active_style"
+        case tabBackground = "tab_background"
+        case activeIndicator = "active_indicator"
         case itemSize = "item_size"
         case itemGap = "item_gap"
         case content
         case groupAdjacentWindows = "group_adjacent_windows"
         case fontSize = "font_size"
-        case cornerRadius = "corner_radius"
+        case cornerRoundness = "corner_roundness"
         case textColor = "text_color"
         case boxColor = "box_color"
         case activeTextColor = "active_text_color"
@@ -149,6 +159,24 @@ extension AppBarStyle: Codable {
         case groupBadgeTextColor = "group_badge_text_color"
     }
 
+    /// Decodes a string-raw enum, tolerating both a missing key
+    /// and a present-but-unrecognized raw (an old vocabulary
+    /// token) by falling back to `def`.
+    static func lenientChoice<T: RawRepresentable>(
+        _ container: KeyedDecodingContainer<CodingKeys>,
+        _ key: CodingKeys,
+        default def: T
+    ) -> T where T.RawValue == String {
+        guard
+            let raw = try? container.decodeIfPresent(
+                String.self,
+                forKey: key
+            ),
+            let value = T(rawValue: raw)
+        else { return def }
+        return value
+    }
+
     /// Manual decoding: profiles saved before a field existed
     /// must keep loading (missing keys fall back to defaults).
     public init(from decoder: Decoder) throws {
@@ -156,26 +184,32 @@ extension AppBarStyle: Codable {
             keyedBy: CodingKeys.self
         )
         let defaults = Self()
-        position =
-            try container.decodeIfPresent(
-                Position.self,
-                forKey: .position
-            ) ?? defaults.position
+        // A profile written before the vocabulary change carries
+        // old tokens (`position:"top"`, `shape` under the old
+        // `style` key, …). `decodeIfPresent` only swallows a
+        // *missing* key, not a present-but-unknown raw, so decode
+        // these enums leniently: an unrecognized value falls back
+        // to the default instead of failing the whole profile.
+        position = Self.lenientChoice(
+            container,
+            .position,
+            default: defaults.position
+        )
         thickness =
             try container.decodeIfPresent(
                 CGFloat.self,
                 forKey: .thickness
             ) ?? defaults.thickness
-        style =
-            try container.decodeIfPresent(
-                Style.self,
-                forKey: .style
-            ) ?? defaults.style
-        activeStyle =
-            try container.decodeIfPresent(
-                ActiveStyle.self,
-                forKey: .activeStyle
-            ) ?? defaults.activeStyle
+        tabBackground = Self.lenientChoice(
+            container,
+            .tabBackground,
+            default: defaults.tabBackground
+        )
+        activeIndicator = Self.lenientChoice(
+            container,
+            .activeIndicator,
+            default: defaults.activeIndicator
+        )
         itemSize =
             try container.decodeIfPresent(
                 CGFloat.self,
@@ -208,11 +242,11 @@ extension AppBarStyle: Codable {
                 CGFloat.self,
                 forKey: .fontSize
             ) ?? defaults.fontSize
-        cornerRadius =
+        cornerRoundness =
             try container.decodeIfPresent(
                 CGFloat.self,
-                forKey: .cornerRadius
-            ) ?? defaults.cornerRadius
+                forKey: .cornerRoundness
+            ) ?? defaults.cornerRoundness
         textColor =
             try container.decodeIfPresent(
                 String.self,

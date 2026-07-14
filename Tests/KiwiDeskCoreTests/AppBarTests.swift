@@ -24,12 +24,12 @@ struct AppBarOverrideTests {
     func inheritance() {
         var global = AppBarStyle()
         global.thickness = 20
-        global.style = .segments
+        global.tabBackground = .plain
         global.textColor = "#010203"
         let bar = LayoutAppBar()
         let resolved = bar.resolved(with: global)
         #expect(resolved.thickness == 20)
-        #expect(resolved.style == .segments)
+        #expect(resolved.tabBackground == .plain)
         #expect(resolved.textColor == "#010203")
     }
 
@@ -37,29 +37,41 @@ struct AppBarOverrideTests {
     func overrideOne() {
         var global = AppBarStyle()
         global.thickness = 20
-        global.style = .segments
+        global.tabBackground = .plain
         var bar = LayoutAppBar()
         bar.thickness = 50
         let resolved = bar.resolved(with: global)
         // The one set field wins; the rest still inherit.
         #expect(resolved.thickness == 50)
-        #expect(resolved.style == .segments)
+        #expect(resolved.tabBackground == .plain)
     }
 
-    @Test("Position clamps to the layout's orientation")
-    func positionClamp() {
+    @Test("Axis-relative position resolves to a concrete edge")
+    func positionResolves() {
         var scroll = ScrollingParams()
-        scroll.appBar.position = .top
         scroll.orientation = .vertical
-        // A horizontal edge can't sit on a vertical axis.
+        // On a vertical axis: start = left, end = right.
+        scroll.appBar.position = .start
         #expect(
-            scroll.resolvedBar(global: AppBarStyle()).position
+            scroll.resolvedBar(global: AppBarStyle()).edge
                 == .left
         )
-        scroll.orientation = .horizontal
+        scroll.appBar.position = .end
         #expect(
-            scroll.resolvedBar(global: AppBarStyle()).position
+            scroll.resolvedBar(global: AppBarStyle()).edge
+                == .right
+        )
+        // On a horizontal axis: start = top, end = bottom.
+        scroll.orientation = .horizontal
+        scroll.appBar.position = .start
+        #expect(
+            scroll.resolvedBar(global: AppBarStyle()).edge
                 == .top
+        )
+        scroll.appBar.position = .end
+        #expect(
+            scroll.resolvedBar(global: AppBarStyle()).edge
+                == .bottom
         )
     }
 
@@ -182,12 +194,13 @@ struct AppBarCommandTests {
         #expect(core.tiler.settings.appBarStyle.thickness == 40)
         #expect(
             core.execute(
-                "app_bar.set_style",
-                args: [.string("segments")]
+                "app_bar.set_tab_background",
+                args: [.string("plain")]
             ).isSuccess
         )
         #expect(
-            core.tiler.settings.appBarStyle.style == .segments
+            core.tiler.settings.appBarStyle.tabBackground
+                == .plain
         )
     }
 
@@ -206,13 +219,13 @@ struct AppBarCommandTests {
         )
         #expect(
             core.execute(
-                "scroll.set_app_bar_style",
-                args: [.string("underline")]
+                "scroll.set_app_bar_tab_background",
+                args: [.string("plain")]
             ).isSuccess
         )
         #expect(
-            core.tiler.settings.scrolling.appBar.style
-                == .underline
+            core.tiler.settings.scrolling.appBar.tabBackground
+                == .plain
         )
         // Untouched fields stay nil (inherit the global look).
         #expect(
@@ -272,7 +285,7 @@ struct AppBarCommandTests {
         let core = makeCore()
         #expect(
             !core.execute(
-                "app_bar.set_style",
+                "app_bar.set_tab_background",
                 args: [.string("triangles")]
             ).isSuccess
         )

@@ -801,6 +801,31 @@ titles ("dragged window", "swap target"). Section captions
 are a `SettingsSection` affordance, so other groups can
 adopt the same pattern.
 
+## App Bar
+
+**App Bar position is axis-relative by design.** (#228.) The
+position values `start` and `end` resolve to concrete edges from
+the layout's orientation — `start` → top (horizontal) or left
+(vertical); `end` → bottom or right. The bar always renders on
+the edge the position names, so no clamp or mismatch can occur
+between the layout's axis and the bar's placement. The old clamped
+behavior with four compass values is gone; users can now set one
+position value globally and know it behaves consistently
+everywhere.
+
+**Tab background and active indicator are orthogonal.** (#228.)
+The old coupled `style` enum (`pills` / `segments` / `underline`)
+conflated two orthogonal concerns: the per-tab box rendering and
+the active-tab marking. The redesign splits them into `tab_background`
+(`boxed` / `plain`) and `active_indicator` (`ring` / `edge_mark` /
+`gap`), so all combinations are expressible — e.g. boxed + edge
+mark (the old "segments" look), plain + edge mark (the old
+"underline" look), boxed + ring (the old "pills" look). The two
+render rulings (settled 2026-07-14 by UI designer): plain × ring
+is a pure inset stroke in the highlight color (no fill, keeps
+plain boxless); boxed edge mark insets its ends by the corner
+roundness to sit flush inside the curve.
+
 ## Shared controls
 
 **Option tabs are a solid sliding-pill segment control.**

@@ -25,7 +25,7 @@ private func groups(
         in: space,
         grouping: core.tiler.settings.monocle
             .resolvedBar(global: core.tiler.settings.appBarStyle)
-            .groupAdjacentWindows
+            .style.groupAdjacentWindows
     )
 }
 
@@ -60,17 +60,17 @@ struct MonocleGeometryTests {
     @Test(
         "Bar strip and window never overlap and stay usable",
         arguments: [
-            AppBarStyle.Position.top, .bottom,
-            .left, .right,
+            AppBarEdge.top, .bottom, .left, .right,
         ]
     )
-    func stripCarving(
-        position: AppBarStyle.Position
-    ) throws {
+    func stripCarving(edge: AppBarEdge) throws {
+        // Reach each concrete edge via an axis-relative position
+        // on the matching orientation.
+        let position: AppBarStyle.Position =
+            edge == .top || edge == .left ? .start : .end
         let context = makeContext {
             $0.orientation =
-                position.isHorizontalEdge
-                ? .horizontal : .vertical
+                edge.isHorizontal ? .horizontal : .vertical
             $0.appBar.position = position
         }
         let usable = context.usable
@@ -89,8 +89,8 @@ struct MonocleGeometryTests {
         #expect(usable.contains(window))
         // The strip and the window never overlap.
         #expect(!bar.intersects(window))
-        // The strip sits on the requested edge.
-        switch position {
+        // The strip sits on the resolved edge.
+        switch edge {
         case .top: #expect(bar.minY == usable.minY)
         case .bottom: #expect(bar.maxY == usable.maxY)
         case .left: #expect(bar.minX == usable.minX)
@@ -98,22 +98,28 @@ struct MonocleGeometryTests {
         }
         // One inner gap between strip and window.
         #expect(bar.height == 32 || bar.width == 32)
-        if position == .top {
+        if edge == .top {
             #expect(window.minY == bar.maxY + 10)
         }
     }
 
-    @Test("Mismatched bar position resolves to the default edge")
-    func mismatchFallsBack() {
+    @Test("Axis-relative position resolves to a concrete edge")
+    func positionResolves() {
         var params = MonocleParams()
         params.orientation = .vertical
-        params.appBar.position = .top
-        #expect(params.resolvedBar(global: AppBarStyle()).position == .left)
+        params.appBar.position = .start
+        #expect(
+            params.resolvedBar(global: AppBarStyle()).edge == .left
+        )
+        params.appBar.position = .end
+        #expect(
+            params.resolvedBar(global: AppBarStyle()).edge == .right
+        )
         params.orientation = .horizontal
-        params.appBar.position = .right
-        #expect(params.resolvedBar(global: AppBarStyle()).position == .top)
-        params.appBar.position = .bottom
-        #expect(params.resolvedBar(global: AppBarStyle()).position == .bottom)
+        params.appBar.position = .start
+        #expect(
+            params.resolvedBar(global: AppBarStyle()).edge == .top
+        )
     }
 
     @Test("Oversized thickness never produces negative frames")
@@ -142,10 +148,10 @@ struct MonocleSettingsTests {
         var settings = TilingSettings()
         settings.monocle.orientation = .vertical
         settings.monocle.appBar.enabled = false
-        settings.monocle.appBar.position = .right
+        settings.monocle.appBar.position = .end
         settings.monocle.appBar.thickness = 48
-        settings.monocle.appBar.style = .underline
-        settings.monocle.appBar.activeStyle = .gap
+        settings.monocle.appBar.tabBackground = .plain
+        settings.monocle.appBar.activeIndicator = .gap
         settings.monocle.appBar.itemSize = 90
         settings.monocle.appBar.itemGap = 0
         settings.monocle.appBar.content = .icon
@@ -222,33 +228,74 @@ struct MonocleSettingsTests {
 
 @Suite("App bar math")
 struct AppBarMathTests {
-    @Test("item_size 0 falls back to a standard per content")
-    func standardSlots() {
-        // Icon-only items default to their square.
+    @Test("item_size 0 uses the measured auto width, clamped")
+    func autoSlot() {
+        // The measured auto width passes through when sane.
         #expect(
             AppBarOverlay.slotLength(
                 itemSize: 0,
-                content: .icon,
+                content: .iconAndName,
                 thickness: 32,
-                axis: 1000
+                axis: 1000,
+                autoWidth: 88
+            ) == 88
+        )
+        // Clamped up to the icon minimum when the measurement is
+        // tiny (icons never clip).
+        #expect(
+            AppBarOverlay.slotLength(
+                itemSize: 0,
+                content: .iconAndName,
+                thickness: 32,
+                axis: 1000,
+                autoWidth: 10
             ) == 32
         )
-        // Text content gets wider standards, name-only the
-        // narrower of the two.
-        let name = AppBarOverlay.slotLength(
-            itemSize: 0,
-            content: .name,
-            thickness: 32,
-            axis: 1000
+        // Clamped down to a quarter of the bar when it's huge.
+        #expect(
+            AppBarOverlay.slotLength(
+                itemSize: 0,
+                content: .name,
+                thickness: 32,
+                axis: 1000,
+                autoWidth: 900
+            ) == 250
         )
-        let both = AppBarOverlay.slotLength(
-            itemSize: 0,
-            content: .iconAndName,
-            thickness: 32,
-            axis: 1000
+    }
+
+    @MainActor
+    @Test("Auto width measures horizontally, standard vertically")
+    func autoWidthMeasures() {
+        let short = [item("Hi")]
+        let long = [item("A Much Longer Window Title")]
+        let style = AppBarStyle()
+        let shortW = AppBarOverlay.autoSlotWidth(
+            items: short,
+            style: style,
+            horizontal: true,
+            thickness: 32
         )
-        #expect(name > 32)
-        #expect(both > name)
+        let longW = AppBarOverlay.autoSlotWidth(
+            items: long,
+            style: style,
+            horizontal: true,
+            thickness: 32
+        )
+        // A longer name yields a wider slot; measured, not fixed.
+        #expect(longW > shortW)
+        // Vertical bars fall back to a content standard.
+        #expect(
+            AppBarOverlay.autoSlotWidth(
+                items: long,
+                style: style,
+                horizontal: false,
+                thickness: 32
+            ) == AppBarOverlay.standardIconAndNameLength
+        )
+    }
+
+    private func item(_ name: String) -> AppBarOverlay.Item {
+        AppBarOverlay.Item(id: WindowID(1), name: name, icon: nil)
     }
 
     @Test("Explicit item_size wins, clamped on both sides")
@@ -259,7 +306,8 @@ struct AppBarMathTests {
                 itemSize: 80,
                 content: .iconAndName,
                 thickness: 32,
-                axis: 1000
+                axis: 1000,
+                autoWidth: 140
             ) == 80
         )
         // Too small: icons must survive — at least the
@@ -269,7 +317,8 @@ struct AppBarMathTests {
                 itemSize: 10,
                 content: .iconAndName,
                 thickness: 32,
-                axis: 1000
+                axis: 1000,
+                autoWidth: 140
             ) == 32
         )
         // Too big: capped at a quarter of the bar.
@@ -278,7 +327,8 @@ struct AppBarMathTests {
                 itemSize: 900,
                 content: .iconAndName,
                 thickness: 32,
-                axis: 1000
+                axis: 1000,
+                autoWidth: 140
             ) == 250
         )
         // Tiny bar: the icon minimum beats the quarter cap.
@@ -287,7 +337,8 @@ struct AppBarMathTests {
                 itemSize: 80,
                 content: .iconAndName,
                 thickness: 32,
-                axis: 60
+                axis: 60,
+                autoWidth: 140
             ) == 32
         )
     }
@@ -567,17 +618,17 @@ struct MonocleCommandTests {
         )
         #expect(
             core.execute(
-                "monocle.set_app_bar_style",
-                args: [.string("segments")]
+                "monocle.set_app_bar_tab_background",
+                args: [.string("plain")]
             ).isSuccess
         )
         #expect(
-            core.tiler.settings.monocle.appBar.style
-                == .segments
+            core.tiler.settings.monocle.appBar.tabBackground
+                == .plain
         )
         #expect(
             core.execute(
-                "monocle.set_app_bar_active_style",
+                "monocle.set_app_bar_active_indicator",
                 args: [.string("gap")]
             ).isSuccess
         )
@@ -663,26 +714,31 @@ struct MonocleCommandTests {
         )
     }
 
-    @Test("Orientation/position mismatch warns and falls back")
-    func mismatchWarns() {
+    @Test("Position takes start/end and rejects old edge tokens")
+    func positionTokens() {
         let core = makeCore()
-        var logs: [String] = []
-        core.onLog = { logs.append($0) }
+        // Axis-relative tokens are accepted and resolve to the
+        // layout's own edge — no clamp, no warning.
         core.execute(
             "monocle.set_orientation",
             args: [.string("vertical")]
         )
-        core.execute(
-            "monocle.set_app_bar_position",
-            args: [.string("top")]
+        #expect(
+            core.execute(
+                "monocle.set_app_bar_position",
+                args: [.string("start")]
+            ).isSuccess
         )
         #expect(
-            logs.contains { $0.contains("doesn't fit") }
+            core.tiler.settings.monocle
+                .resolvedBar(global: AppBarStyle()).edge == .left
         )
+        // An old concrete-edge token is no longer a valid value.
         #expect(
-            core.tiler.settings.monocle.resolvedBar(global: AppBarStyle())
-                .position
-                == .left
+            !core.execute(
+                "monocle.set_app_bar_position",
+                args: [.string("top")]
+            ).isSuccess
         )
     }
 }

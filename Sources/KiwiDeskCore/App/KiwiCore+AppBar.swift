@@ -85,7 +85,9 @@ extension KiwiCore {
         host: AppBarHosting,
         settings: TilingSettings
     ) -> AppBarManager.Bar? {
-        let style = host.resolvedBar(global: settings.appBarStyle)
+        let (style, edge) = host.resolvedBar(
+            global: settings.appBarStyle
+        )
         let context = settings.context(
             bounds: bounds,
             space: space
@@ -108,7 +110,8 @@ extension KiwiCore {
                 space.focused.map(group.contains) ?? false
             },
             strip: strip,
-            style: style
+            style: style,
+            edge: edge
         )
     }
 
@@ -154,7 +157,7 @@ extension KiwiCore {
         else { return }
         let style = host.resolvedBar(
             global: tiler.settings.appBarStyle
-        )
+        ).style
         var groups = barGroups(
             in: space,
             grouping: style.groupAdjacentWindows

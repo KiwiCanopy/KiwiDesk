@@ -16,7 +16,6 @@ extension KiwiCore {
                 )
             else { return Self.orientationError }
             tiler.settings.monocle.orientation = orientation
-            warnOnMonocleBarMismatch()
             return .ok()
         }
         if command == "monocle.set_orientation_override" {
@@ -42,15 +41,11 @@ extension KiwiCore {
         let field = String(
             command.dropFirst("monocle.set_app_bar_".count)
         )
-        let response = applyBarOverride(
+        return applyBarOverride(
             field: field,
             args,
             into: &tiler.settings.monocle.appBar
         )
-        if response.isSuccess, field == "position" {
-            warnOnMonocleBarMismatch()
-        }
-        return response
     }
 
     /// `monocle.set_orientation_override(space, value)` — the
@@ -88,15 +83,6 @@ extension KiwiCore {
     private static let orientationError = CommandResponse.fail(
         "expected horizontal|vertical"
     )
-
-    private func warnOnMonocleBarMismatch() {
-        warnOnBarPositionMismatch(
-            host: tiler.settings.monocle,
-            layout: "monocle",
-            orientation: tiler.settings.monocle.orientation
-                .rawValue
-        )
-    }
 
     /// Cycles or reorders along the monocle orientation axis.
     ///

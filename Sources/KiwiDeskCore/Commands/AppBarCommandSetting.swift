@@ -25,14 +25,14 @@ struct AppBarSettingError: Error, Equatable,
 enum AppBarCommandSetting {
     case position(AppBarStyle.Position)
     case thickness(CGFloat)
-    case style(AppBarStyle.Style)
-    case activeStyle(AppBarStyle.ActiveStyle)
+    case tabBackground(AppBarStyle.TabBackground)
+    case activeIndicator(AppBarStyle.ActiveIndicator)
     case itemSize(CGFloat)
     case itemGap(CGFloat)
     case content(AppBarStyle.Content)
     case groupAdjacentWindows(Bool)
     case fontSize(CGFloat)
-    case cornerRadius(CGFloat)
+    case cornerRoundness(CGFloat)
     case textColor(String)
     case boxColor(String)
     case activeTextColor(String)
@@ -73,20 +73,20 @@ enum AppBarCommandSetting {
             return choice(
                 args,
                 AppBarStyle.Position.self,
-                "top|bottom|left|right"
+                "start|end"
             ).map(Self.position)
-        case "style":
+        case "tab_background":
             return choice(
                 args,
-                AppBarStyle.Style.self,
-                "pills|segments|underline"
-            ).map(Self.style)
-        case "active_style":
+                AppBarStyle.TabBackground.self,
+                "boxed|plain"
+            ).map(Self.tabBackground)
+        case "active_indicator":
             return choice(
                 args,
-                AppBarStyle.ActiveStyle.self,
-                "highlight|gap"
-            ).map(Self.activeStyle)
+                AppBarStyle.ActiveIndicator.self,
+                "ring|edge_mark|gap"
+            ).map(Self.activeIndicator)
         case "content":
             return choice(
                 args,
@@ -111,7 +111,7 @@ enum AppBarCommandSetting {
             "item_size": Self.itemSize,
             "item_gap": Self.itemGap,
             "font_size": Self.fontSize,
-            "corner_radius": Self.cornerRadius,
+            "corner_roundness": Self.cornerRoundness,
         ]
     }
 
@@ -169,17 +169,18 @@ enum AppBarCommandSetting {
         switch self {
         case .position(let value): style.position = value
         case .thickness(let value): style.thickness = value
-        case .style(let value): style.style = value
-        case .activeStyle(let value):
-            style.activeStyle = value
+        case .tabBackground(let value):
+            style.tabBackground = value
+        case .activeIndicator(let value):
+            style.activeIndicator = value
         case .itemSize(let value): style.itemSize = value
         case .itemGap(let value): style.itemGap = value
         case .content(let value): style.content = value
         case .groupAdjacentWindows(let value):
             style.groupAdjacentWindows = value
         case .fontSize(let value): style.fontSize = value
-        case .cornerRadius(let value):
-            style.cornerRadius = value
+        case .cornerRoundness(let value):
+            style.cornerRoundness = value
         case .textColor(let value): style.textColor = value
         case .boxColor(let value): style.boxColor = value
         case .activeTextColor(let value):
@@ -205,16 +206,17 @@ enum AppBarCommandSetting {
         switch self {
         case .position(let value): bar.position = value
         case .thickness(let value): bar.thickness = value
-        case .style(let value): bar.style = value
-        case .activeStyle(let value): bar.activeStyle = value
+        case .tabBackground(let value): bar.tabBackground = value
+        case .activeIndicator(let value):
+            bar.activeIndicator = value
         case .itemSize(let value): bar.itemSize = value
         case .itemGap(let value): bar.itemGap = value
         case .content(let value): bar.content = value
         case .groupAdjacentWindows(let value):
             bar.groupAdjacentWindows = value
         case .fontSize(let value): bar.fontSize = value
-        case .cornerRadius(let value):
-            bar.cornerRadius = value
+        case .cornerRoundness(let value):
+            bar.cornerRoundness = value
         case .textColor(let value): bar.textColor = value
         case .boxColor(let value): bar.boxColor = value
         case .activeTextColor(let value):

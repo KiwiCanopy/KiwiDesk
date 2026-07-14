@@ -5,6 +5,7 @@ import AppKit
 extension AppBarItemView {
     override func layout() {
         super.layout()
+        applyCornerRadius()
         layoutAccent()
         if horizontal {
             layoutHorizontal()
@@ -185,37 +186,76 @@ extension AppBarItemView {
 
     private func layoutAccent() {
         guard !accent.isHidden else { return }
+        switch accentMode {
+        case .ring: layoutRing()
+        case .edgeMark: layoutEdgeMark()
+        case .none: break
+        }
+    }
+
+    /// A boxed ring hugs the box (flush, same corner radius); a
+    /// plain ring insets a couple points and reads as a capsule
+    /// outline — a clean native selection mark that keeps `plain`
+    /// boxless (ui-designer 2026-07-14).
+    private func layoutRing() {
+        if style.tabBackground == .boxed {
+            accent.frame = bounds
+            accent.layer?.cornerRadius =
+                style.resolvedCornerRadius(
+                    forThickness: crossThickness
+                )
+        } else {
+            let inset: CGFloat = 1.5
+            accent.frame = bounds.insetBy(dx: inset, dy: inset)
+            accent.layer?.cornerRadius =
+                min(accent.frame.height, accent.frame.width) / 2
+        }
+    }
+
+    /// A ~3pt bar on the slot's window-facing edge (flipped
+    /// coordinates: y grows downward). On a boxed tab the bar
+    /// insets its long ends by the box corner radius so it sits
+    /// flush inside the curve instead of poking past it
+    /// (ui-designer 2026-07-14) — a no-op at roundness 0 / plain.
+    private func layoutEdgeMark() {
+        accent.layer?.cornerRadius = 0
         let thickness: CGFloat = 3
-        // The accent hugs the window-facing edge of the slot
-        // (flipped coordinates: y grows downward).
-        switch style.position {
+        let r =
+            style.tabBackground == .boxed
+            ? style.resolvedCornerRadius(
+                forThickness: crossThickness
+            )
+            : 0
+        let longW = max(bounds.width - r * 2, 0)
+        let longH = max(bounds.height - r * 2, 0)
+        switch edge {
         case .top:
             accent.frame = CGRect(
-                x: 0,
+                x: r,
                 y: bounds.height - thickness,
-                width: bounds.width,
+                width: longW,
                 height: thickness
             )
         case .bottom:
             accent.frame = CGRect(
-                x: 0,
+                x: r,
                 y: 0,
-                width: bounds.width,
+                width: longW,
                 height: thickness
             )
         case .left:
             accent.frame = CGRect(
                 x: bounds.width - thickness,
-                y: 0,
+                y: r,
                 width: thickness,
-                height: bounds.height
+                height: longH
             )
         case .right:
             accent.frame = CGRect(
                 x: 0,
-                y: 0,
+                y: r,
                 width: thickness,
-                height: bounds.height
+                height: longH
             )
         }
     }

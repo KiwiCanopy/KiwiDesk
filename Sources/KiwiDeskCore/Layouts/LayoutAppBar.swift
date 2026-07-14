@@ -12,8 +12,8 @@ import Foundation
 /// merges the two into the concrete style the bar renders with.
 public struct LayoutAppBar: Sendable, Equatable {
     public typealias Position = AppBarStyle.Position
-    public typealias Style = AppBarStyle.Style
-    public typealias ActiveStyle = AppBarStyle.ActiveStyle
+    public typealias TabBackground = AppBarStyle.TabBackground
+    public typealias ActiveIndicator = AppBarStyle.ActiveIndicator
     public typealias Content = AppBarStyle.Content
 
     /// Whether this layout shows the bar. Per-layout, never
@@ -23,14 +23,14 @@ public struct LayoutAppBar: Sendable, Equatable {
     // Optional overrides of the global AppBarStyle. Nil inherits.
     public var position: Position?
     public var thickness: CGFloat?
-    public var style: Style?
-    public var activeStyle: ActiveStyle?
+    public var tabBackground: TabBackground?
+    public var activeIndicator: ActiveIndicator?
     public var itemSize: CGFloat?
     public var itemGap: CGFloat?
     public var content: Content?
     public var groupAdjacentWindows: Bool?
     public var fontSize: CGFloat?
-    public var cornerRadius: CGFloat?
+    public var cornerRoundness: CGFloat?
     public var textColor: String?
     public var boxColor: String?
     public var activeTextColor: String?
@@ -51,8 +51,10 @@ public struct LayoutAppBar: Sendable, Equatable {
         var out = base
         if let position { out.position = position }
         if let thickness { out.thickness = thickness }
-        if let style { out.style = style }
-        if let activeStyle { out.activeStyle = activeStyle }
+        if let tabBackground { out.tabBackground = tabBackground }
+        if let activeIndicator {
+            out.activeIndicator = activeIndicator
+        }
         if let itemSize { out.itemSize = itemSize }
         if let itemGap { out.itemGap = itemGap }
         if let content { out.content = content }
@@ -60,7 +62,9 @@ public struct LayoutAppBar: Sendable, Equatable {
             out.groupAdjacentWindows = groupAdjacentWindows
         }
         if let fontSize { out.fontSize = fontSize }
-        if let cornerRadius { out.cornerRadius = cornerRadius }
+        if let cornerRoundness {
+            out.cornerRoundness = cornerRoundness
+        }
         if let textColor { out.textColor = textColor }
         if let boxColor { out.boxColor = boxColor }
         if let activeTextColor {
@@ -104,14 +108,14 @@ extension LayoutAppBar: Codable {
         case enabled
         case position
         case thickness
-        case style
-        case activeStyle = "active_style"
+        case tabBackground = "tab_background"
+        case activeIndicator = "active_indicator"
         case itemSize = "item_size"
         case itemGap = "item_gap"
         case content
         case groupAdjacentWindows = "group_adjacent_windows"
         case fontSize = "font_size"
-        case cornerRadius = "corner_radius"
+        case cornerRoundness = "corner_roundness"
         case textColor = "text_color"
         case boxColor = "box_color"
         case activeTextColor = "active_text_color"
@@ -124,6 +128,23 @@ extension LayoutAppBar: Codable {
         case groupBadgeTextColor = "group_badge_text_color"
     }
 
+    /// Decodes an optional string-raw enum override, mapping a
+    /// present-but-unrecognized raw (an old vocabulary token) to
+    /// nil (inherit) instead of throwing.
+    static func lenientOverride<T: RawRepresentable>(
+        _ container: KeyedDecodingContainer<Key>,
+        _ key: Key,
+        as type: T.Type
+    ) -> T? where T.RawValue == String {
+        guard
+            let raw = try? container.decodeIfPresent(
+                String.self,
+                forKey: key
+            )
+        else { return nil }
+        return T(rawValue: raw)
+    }
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: Key.self)
         enabled =
@@ -131,21 +152,30 @@ extension LayoutAppBar: Codable {
                 Bool.self,
                 forKey: .enabled
             ) ?? true
-        position = try container.decodeIfPresent(
-            Position.self,
-            forKey: .position
+        // An old profile may carry a stale `position` raw
+        // (`"top"`/`"left"` from before the start/end change);
+        // an unrecognized override raw decodes to nil (inherit)
+        // rather than failing the profile. `shape`/
+        // `active_indicator` are new keys, so an old file simply
+        // lacks them and inherits.
+        position = Self.lenientOverride(
+            container,
+            .position,
+            as: Position.self
         )
         thickness = try container.decodeIfPresent(
             CGFloat.self,
             forKey: .thickness
         )
-        style = try container.decodeIfPresent(
-            Style.self,
-            forKey: .style
+        tabBackground = Self.lenientOverride(
+            container,
+            .tabBackground,
+            as: TabBackground.self
         )
-        activeStyle = try container.decodeIfPresent(
-            ActiveStyle.self,
-            forKey: .activeStyle
+        activeIndicator = Self.lenientOverride(
+            container,
+            .activeIndicator,
+            as: ActiveIndicator.self
         )
         itemSize = try container.decodeIfPresent(
             CGFloat.self,
@@ -173,9 +203,9 @@ extension LayoutAppBar: Codable {
             CGFloat.self,
             forKey: .fontSize
         )
-        cornerRadius = try container.decodeIfPresent(
+        cornerRoundness = try container.decodeIfPresent(
             CGFloat.self,
-            forKey: .cornerRadius
+            forKey: .cornerRoundness
         )
         textColor = try container.decodeIfPresent(
             String.self,
@@ -227,10 +257,13 @@ extension LayoutAppBar: Codable {
             thickness,
             forKey: .thickness
         )
-        try container.encodeIfPresent(style, forKey: .style)
         try container.encodeIfPresent(
-            activeStyle,
-            forKey: .activeStyle
+            tabBackground,
+            forKey: .tabBackground
+        )
+        try container.encodeIfPresent(
+            activeIndicator,
+            forKey: .activeIndicator
         )
         try container.encodeIfPresent(itemSize, forKey: .itemSize)
         try container.encodeIfPresent(itemGap, forKey: .itemGap)
@@ -241,8 +274,8 @@ extension LayoutAppBar: Codable {
         )
         try container.encodeIfPresent(fontSize, forKey: .fontSize)
         try container.encodeIfPresent(
-            cornerRadius,
-            forKey: .cornerRadius
+            cornerRoundness,
+            forKey: .cornerRoundness
         )
         try encodeColors(into: &container)
     }
