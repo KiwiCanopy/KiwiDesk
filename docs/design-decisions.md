@@ -929,11 +929,18 @@ so each field can carry its own text. Shared help copy —
 one string rendered on two surfaces, like a Layout Defaults
 tab and the per-space Customize popover — is authored once
 in a per-domain namespace (`LayoutHelp`); single-call-site
-copy stays inline at its call site. In the Customize
-popover the `?` is rendered by `OverrideChrome` itself, not
-the wrapped row, so it stays clickable while the row
-inherits — help must work exactly while the user decides
-whether to override.
+copy stays inline at its call site (namespace membership =
+2+ call sites, or an override pair like
+`newWindowPlacement`/`trackPosition` — not "it felt
+shared"). In the Customize popover the `?` is rendered by
+`OverrideChrome` itself, not the wrapped row, so it stays
+clickable while the row inherits — help must work exactly
+while the user decides whether to override. Accepted
+consequence: there the `?` sits at the chrome row's
+trailing edge (past the inner row's spacer, a small
+distance in the narrow popover), consistently for every
+override row — do not "fix" it back inside the row, that
+re-enters the disabled scope.
 
 **Option tabs are a solid sliding-pill segment control.**
 Every pick-one-of-few chooser (layout parameters, mouse
