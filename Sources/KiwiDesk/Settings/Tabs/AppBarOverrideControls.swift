@@ -183,11 +183,22 @@ struct OverrideColorRow: View {
     let label: String
     @Binding var value: String?
     let global: String
+    /// Defaults to the narrowed grid column (#2): every caller
+    /// is a cell in `AppBarColorGrid`, and the override checkbox
+    /// already eats the prefix `colorLabelColumn` would leave for
+    /// the swatch. `HexColorField` reads its own `labelWidth`,
+    /// not `OverrideChrome`'s `settingsLabelColumn`, so it must
+    /// be passed here rather than via the environment — the
+    /// `settingsLabelColumn` the chrome sets for its other row
+    /// types is inert for a color cell.
+    var labelWidth: CGFloat =
+        SettingsMetrics.overrideColorLabelColumn
 
     var body: some View {
         OverrideChrome(isOn: overrideToggle($value, global: global)) {
             HexColorField(
                 label: label,
+                labelWidth: labelWidth,
                 hex: overrideValue($value, global: global)
             )
         }

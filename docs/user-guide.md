@@ -470,7 +470,10 @@ make scrolling show segment style while monocle stays pills. When
 you open a layout's **Overrides**, a compact chip leads the rows:
 color swatches of the layout's *resolved* bar (global overlaid with
 its overrides) and a count of how many fields differ — a quick read
-on whether the layout diverges, without a second full preview.
+on whether the layout diverges, without a second full preview. The
+color overrides sit in the same 2-column grid as Global's colors,
+in the same field order; a leading checkbox on each cell unlocks
+that field.
 
 ## Behavior
 
