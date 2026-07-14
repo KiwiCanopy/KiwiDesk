@@ -200,6 +200,9 @@ struct ProfileManagerTests {
         )
         #expect(manager.list() == ["bad", "good"])
         #expect(manager.allProfiles().map(\.name) == ["good"])
+        // The same file `allProfiles()` skips is the one the GUI
+        // greys out and offers a Delete for (#246).
+        #expect(manager.brokenNames() == ["bad"])
     }
 
     @Test("Delete repairs a count left without a default")

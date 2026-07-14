@@ -52,7 +52,9 @@ struct ProfilesSection: View {
         SettingsSection(
             L("profiles.saved.title", "Saved profiles")
         ) {
-            if model.profileSummaries.isEmpty {
+            if model.profileSummaries.isEmpty
+                && model.brokenProfiles.isEmpty
+            {
                 Text(noProfilesCaption)
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -62,6 +64,9 @@ struct ProfilesSection: View {
                 ForEach(summaries(for: count)) { summary in
                     profileRow(summary)
                 }
+            }
+            if !model.brokenProfiles.isEmpty {
+                brokenGroup
             }
         }
     }

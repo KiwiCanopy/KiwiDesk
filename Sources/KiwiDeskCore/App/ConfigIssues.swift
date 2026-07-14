@@ -14,12 +14,22 @@ public struct ConfigIssue: Sendable, Equatable, Identifiable {
     /// (`init.lua`, `gui.json`, `<profile>.json`).
     public let source: String
     public let message: String
+    /// The profile this issue belongs to, when it is an
+    /// unreadable profile — nil for load-scoped issues
+    /// (init.lua/gui.json). Lets the panel offer a per-profile
+    /// remedy (Delete / Reveal) only where one applies (#246).
+    public let profileName: String?
 
     public var id: String { source + "|" + message }
 
-    public init(source: String, message: String) {
+    public init(
+        source: String,
+        message: String,
+        profileName: String? = nil
+    ) {
         self.source = source
         self.message = message
+        self.profileName = profileName
     }
 }
 
@@ -64,10 +74,9 @@ extension KiwiCore {
                     message: L(
                         "config_issues.profile_unreadable",
                         "Couldn't be loaded — it was saved by a "
-                            + "different version or edited by hand. "
-                            + "Open it in Settings and save again "
-                            + "to repair."
-                    )
+                            + "different version or edited by hand."
+                    ),
+                    profileName: name
                 )
             }
         }

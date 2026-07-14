@@ -81,6 +81,21 @@ public final class ProfileManager {
         }
     }
 
+    /// Names in the profiles directory whose JSON won't decode —
+    /// the same files `allProfiles()` skips. Surfaces grey these
+    /// out instead of hiding them, so a broken profile stays
+    /// deletable everywhere it is listed (#246, #171).
+    public func brokenNames() -> [String] {
+        list().filter { (try? read(name: $0)) == nil }
+    }
+
+    /// On-disk path of a profile file, for Reveal in Finder
+    /// (#246). Validated like every other path; the file may or
+    /// may not exist.
+    public func fileURL(name: String) throws -> URL {
+        url(for: try validated(name))
+    }
+
     /// Saves the profile; the first profile of its screen count
     /// is auto-flagged as that count's default.
     func save(_ profile: Profile) throws {

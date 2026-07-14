@@ -72,6 +72,10 @@ final class SettingsModel: ObservableObject {
     /// Rich rows for the saved-profiles list (#36): monitor
     /// sets, screen count, default flag, live match.
     @Published var profileSummaries: [ProfileSummary] = []
+    /// Profiles whose JSON won't decode — shown greyed with a
+    /// Delete, never hidden (#246, #171). No summary: the file
+    /// can't be read to build one.
+    @Published var brokenProfiles: [String] = []
     /// Screen counts where several profiles claim the default
     /// flag (hand-edited files) — warning badge.
     @Published var duplicateDefaultCounts: [Int] = []
@@ -204,6 +208,7 @@ final class SettingsModel: ObservableObject {
                 matchesLive: profile.set(matching: live) != nil
             )
         }
+        brokenProfiles = core.profiles.brokenNames()
         nativeSpaceCount =
             NativeSpaces.allSpaces().filter(\.isUser).count
         currentNativeSpace = NativeSpaces.activeSpaceNumber()
