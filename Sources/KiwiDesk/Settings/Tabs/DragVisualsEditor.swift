@@ -1,12 +1,17 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Drag-and-drop visuals (#68 §3.14): a live preview strip so
-/// color/width/alignment edits are judged without starting an
-/// actual drag, the shared corner radius beside it (it styles
-/// both visuals), and the Ghost / Drop-zone control sets — two
-/// sections on purpose: they style two genuinely distinct
-/// runtime visuals users routinely want different.
+/// Drag-and-drop visuals (#68 §3.14, restructured #231): the
+/// shared corner radius up top (it styles both visuals, so it
+/// belongs to neither column), then Ghost | Drop-zone as two
+/// side-by-side columns. Each column leads with its own live
+/// preview and puts its controls directly beneath, so tuning a
+/// column's border width never scrolls its preview off-screen —
+/// the whole reason the previews were split out of one shared
+/// strip. Genuinely distinct runtime visuals users routinely
+/// want different, edited by comparison, so twin columns state
+/// the pairing once (the System-Settings Displays/Desktop
+/// pattern). Static previews — no live drag (#123).
 struct DragVisualsEditor: View {
     @ObservedObject var model: SettingsModel
 
@@ -20,7 +25,6 @@ struct DragVisualsEditor: View {
                         + "their positions in the layout."
                 )
             ) {
-                previewStrip
                 PtSlider(
                     label: L("drag.corner_radius", "Corner radius"),
                     value: $model.config.settings
@@ -28,127 +32,164 @@ struct DragVisualsEditor: View {
                     range: 0...40
                 )
             }
-            SettingsSection(
-                ghostLabel,
-                caption: L(
-                    "drag.ghost.caption",
-                    "Marks the position your window is "
-                        + "dragged from."
-                ),
-                subsection: true
-            ) {
-                DragVisualControls(
+            HStack(alignment: .top, spacing: 16) {
+                column(
+                    title: ghostLabel,
+                    caption: L(
+                        "drag.ghost.caption",
+                        "Marks the position your window is "
+                            + "dragged from."
+                    ),
                     visual: $model.config.settings.dragGhost
                 )
-            }
-            SettingsSection(
-                dropZoneLabel,
-                caption: L(
-                    "drag.drop_zone.caption",
-                    "Marks the position your window will "
-                        + "snap into when dropped."
-                ),
-                subsection: true
-            ) {
-                DragVisualControls(
-                    visual: $model.config.settings
-                        .dragDropZone
+                column(
+                    title: dropZoneLabel,
+                    caption: L(
+                        "drag.drop_zone.caption",
+                        "Marks the position your window will "
+                            + "snap into when dropped."
+                    ),
+                    visual: $model.config.settings.dragDropZone
                 )
             }
         }
+    }
+
+    /// One self-contained column: preview leads, its controls
+    /// below, on the narrowed Drag label axis (#231) so the
+    /// half-width slider keeps real travel.
+    private func column(
+        title: String,
+        caption: String,
+        visual: Binding<DragVisual>
+    ) -> some View {
+        SettingsSection(title, caption: caption, subsection: true) {
+            DragVisualPreview(
+                visual: visual.wrappedValue,
+                cornerRadius: model.config.settings
+                    .dragCornerRadius
+            )
+            DragVisualControls(visual: visual)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .environment(
+            \.settingsLabelColumn,
+            SettingsMetrics.dragColumnLabelColumn
+        )
     }
 
     private var ghostLabel: String { L("drag.ghost", "Ghost") }
     private var dropZoneLabel: String {
         L("drag.drop_zone", "Drop zone")
     }
-
-    private var previewStrip: some View {
-        HStack(spacing: 16) {
-            DragVisualPreview(
-                label: ghostLabel,
-                visual: model.config.settings.dragGhost,
-                cornerRadius: model.config.settings
-                    .dragCornerRadius
-            )
-            DragVisualPreview(
-                label: dropZoneLabel,
-                visual: model.config.settings.dragDropZone,
-                cornerRadius: model.config.settings
-                    .dragCornerRadius
-            )
-        }
-        .frame(maxWidth: .infinity)
-    }
 }
 
 /// One mock window rect rendered with the current visual's
 /// fill, border, and the shared corner radius.
 private struct DragVisualPreview: View {
-    let label: String
     let visual: DragVisual
     let cornerRadius: CGFloat
 
     var body: some View {
-        VStack(spacing: 4) {
-            ZStack {
-                // A neutral desktop backdrop so translucent
-                // fills read realistically.
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(Color.secondary.opacity(0.12))
-                mock
-                    .padding(10)
-                if !visual.enabled {
-                    Text(L("drag.disabled", "disabled"))
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                }
+        ZStack {
+            // A neutral desktop backdrop so translucent
+            // fills read realistically.
+            RoundedRectangle(cornerRadius: 6)
+                .fill(Color.secondary.opacity(0.12))
+            mock
+                .padding(10)
+            if !visual.enabled {
+                Text(L("drag.disabled", "disabled"))
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
             }
-            .frame(height: 84)
-            Text(label)
-                .font(.caption)
-                .foregroundStyle(.secondary)
         }
+        .frame(height: 84)
         .frame(maxWidth: .infinity)
     }
 
     private var mock: some View {
-        let radius = min(cornerRadius, 20)
+        // Remap the full slider ranges onto the preview's
+        // smaller span (the AppBarPreviewStrip / GapPreviewScale
+        // fix, #231): a hard cap made both sliders visibly stop
+        // responding halfway up, reading as "the setting broke."
+        let radius = scale(cornerRadius, from: 0...40, to: 0...20)
+        let width = scale(
+            visual.borderThickness,
+            from: 0...20,
+            to: 0...10
+        )
         return RoundedRectangle(cornerRadius: radius)
             .fill(
                 visual.fill
                     ? Color(kiwiHex: visual.fillColor) : .clear
             )
-            .overlay {
-                if visual.border {
-                    RoundedRectangle(cornerRadius: radius)
-                        .strokeBorder(
-                            Color(kiwiHex: visual.borderColor),
-                            lineWidth: min(
-                                visual.borderThickness,
-                                10
-                            )
-                        )
-                }
-            }
+            .overlay { border(radius: radius, width: width) }
             .opacity(visual.enabled ? 1 : 0.25)
+    }
+
+    /// Draw the border where it actually lands at runtime
+    /// (`DragOverlay.adjustedFrame`, #231): inset within the
+    /// tile for `.inside`, straddling outward past the tile edge
+    /// for `.outside`. The outward offset is half the (scaled)
+    /// width the slider drives, so the footprint difference
+    /// grows with the same number the user is dragging.
+    @ViewBuilder private func border(
+        radius: CGFloat,
+        width: CGFloat
+    ) -> some View {
+        if visual.border {
+            let color = Color(kiwiHex: visual.borderColor)
+            switch visual.borderAlignment {
+            case .inside:
+                RoundedRectangle(cornerRadius: radius)
+                    .strokeBorder(color, lineWidth: width)
+            case .outside:
+                RoundedRectangle(cornerRadius: radius)
+                    .stroke(color, lineWidth: width)
+                    .padding(-width / 2)
+            }
+        }
+    }
+
+    /// Linear map of `value` from one closed range onto another,
+    /// clamped to the target range at the ends (mirrors
+    /// `AppBarPreviewStrip.scale`).
+    private func scale(
+        _ value: CGFloat,
+        from src: ClosedRange<CGFloat>,
+        to dst: ClosedRange<CGFloat>
+    ) -> CGFloat {
+        let span = src.upperBound - src.lowerBound
+        guard span > 0 else { return dst.lowerBound }
+        let t = min(max((value - src.lowerBound) / span, 0), 1)
+        return dst.lowerBound
+            + t * (dst.upperBound - dst.lowerBound)
     }
 }
 
 /// The border + fill controls shared by ghost and drop zone.
+/// Rows are relabeled to their in-group short forms ("Color",
+/// "Width", "Alignment") since the Border/Fill sub-grouping
+/// already carries the prefix (#231); VoiceOver keeps the full
+/// name via `a11yLabel`. All rows read the narrowed Drag label
+/// axis from the environment.
 struct DragVisualControls: View {
     @Binding var visual: DragVisual
+    @Environment(\.settingsLabelColumn) private var labelColumn
 
     var body: some View {
         Toggle(L("drag.enabled", "Enabled"), isOn: $visual.enabled)
         Divider()
         Toggle(L("drag.border", "Border"), isOn: $visual.border)
         HexColorField(
-            label: L("drag.border_color", "Border color"),
+            label: L("drag.border_color", "Color"),
+            a11yLabel: L("drag.border_color.a11y", "Border color"),
+            labelWidth: labelColumn,
             hex: $visual.borderColor
         )
         PtSlider(
-            label: L("drag.border_width", "Border width"),
+            label: L("drag.border_width", "Width"),
             value: $visual.borderThickness,
             range: 0...20
         )
@@ -166,12 +207,14 @@ struct DragVisualControls: View {
         Divider()
         Toggle(L("drag.fill", "Fill"), isOn: $visual.fill)
         HexColorField(
-            label: L("drag.fill_color", "Fill color"),
+            label: L("drag.fill_color", "Color"),
+            a11yLabel: L("drag.fill_color.a11y", "Fill color"),
+            labelWidth: labelColumn,
             hex: $visual.fillColor
         )
     }
 
     private var borderAlignmentLabel: String {
-        L("drag.border_alignment", "Border alignment")
+        L("drag.border_alignment", "Alignment")
     }
 }

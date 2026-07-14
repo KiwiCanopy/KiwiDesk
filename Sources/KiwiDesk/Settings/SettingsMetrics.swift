@@ -36,6 +36,18 @@ enum SettingsMetrics {
     static let overrideLabelColumn: CGFloat =
         labelColumn - (2 * overrideRowInset + checkboxWidth)
 
+    /// The label column for the Drag & Drop editor's two
+    /// half-width columns (#231). Narrower than the shared 128,
+    /// pushed onto every row in a column via the
+    /// `\.settingsLabelColumn` override (the seam
+    /// `OverrideChrome` uses), so a ~270 pt column leaves the
+    /// slider real travel. The rows there are relabeled to their
+    /// in-group short forms ("Color", "Width", "Alignment") so
+    /// this width holds; headroom over "Alignment" (~58 pt at
+    /// body) covers a longer localization before `lineLimit(1)`
+    /// would truncate.
+    static let dragColumnLabelColumn: CGFloat = 80
+
     /// The trailing numeric readout of a slider row. Sized for
     /// the widest value in use ("2000 pt").
     static let readoutColumn: CGFloat = 64
