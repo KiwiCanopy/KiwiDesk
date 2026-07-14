@@ -836,6 +836,29 @@ corner-radius and
 border-width previews now remap the full slider range instead
 of hard-capping halfway (the `AppBarPreviewStrip` fix).
 
+**Preview alignment splits on standalone-vs-paired, not by
+tab.** (ui-designer consult 2026-07-14.) A settings preview is
+aligned one of two ways, and which one is decided by whether
+controls sit right next to it — never by which tab it's on:
+
+- **Standalone illustration** (a Layout schematic, the App Bar
+  mock strip) — centered in its card with a caption below.
+  Nothing is edited *on* it and no control column shares its
+  row, so there is no leading edge to line up against; it reads
+  as a figure, the way macOS System Settings centers a
+  wallpaper thumbnail or screen-saver preview over its label.
+- **Preview paired with the exact controls in the same card**
+  (the Gaps diagram + its outer/inner legend, the Drag Ghost /
+  Drop-zone columns) — left-aligned, flush with the control
+  rows it drives, so preview and controls read as one stack
+  (the accent-swatch / Displays-arrangement pattern).
+
+So Layout schematics and the App Bar strip are *both* centered
+(they are the same kind of thing); Gaps and Drag are left —
+that apparent Layout-vs-Appearance inconsistency is really this
+one correct rule. A new preview picks its bucket by asking "are
+its controls right here beside it," not by copying its tab.
+
 ## App Bar
 
 **App Bar position is axis-relative by design.** (#228.) The
