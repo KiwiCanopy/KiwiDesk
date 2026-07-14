@@ -28,9 +28,9 @@ Revert, Save a Copy As…, and Save.
 
 ### Contextual Help (?)
 
-Some rows carry a small circled question mark after their
-control. Click it to open a short popover explaining what the
-setting does — for a field with a few named options, the popover
+Some rows carry a small circled question mark right after
+their name. Click it to open a short popover explaining what
+the setting does — for a field with a few named options, the popover
 describes each option in one line. Hovering the question mark
 shows the same text as a tooltip.
 

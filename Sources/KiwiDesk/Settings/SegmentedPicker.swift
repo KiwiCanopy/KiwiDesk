@@ -19,8 +19,10 @@ struct SegmentedPicker<Value: Hashable>: View {
     private let label: String?
     @Binding private var selection: Value
     private let options: [(title: String, value: Value)]
-    /// Optional `?` popover (#94), trailing after the track —
-    /// one per field, never per segment.
+    /// Optional `?` popover (#94), label-adjacent — one per
+    /// field, never per segment. Unlabeled instances (icon
+    /// tabs) have no label to sit beside, so theirs trails
+    /// the track instead.
     private let help: String?
     @Namespace private var pillSpace
     @Environment(\.colorScheme) private var scheme
@@ -40,20 +42,21 @@ struct SegmentedPicker<Value: Hashable>: View {
     }
 
     var body: some View {
-        if label != nil || help != nil {
+        if let label {
             HStack {
-                if let label {
-                    Text(label)
-                        .frame(
-                            width: labelColumn,
-                            alignment: .leading
-                        )
-                        .lineLimit(1)
+                HStack(spacing: 4) {
+                    Text(label).lineLimit(1)
+                    if let help {
+                        HelpButton(explanation: help)
+                    }
                 }
+                .frame(width: labelColumn, alignment: .leading)
                 labeledTrack
-                if let help {
-                    HelpButton(explanation: help)
-                }
+            }
+        } else if let help {
+            HStack {
+                labeledTrack
+                HelpButton(explanation: help)
             }
         } else {
             labeledTrack

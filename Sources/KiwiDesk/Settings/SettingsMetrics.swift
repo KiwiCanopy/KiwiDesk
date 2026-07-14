@@ -8,10 +8,12 @@ import SwiftUI
 enum SettingsMetrics {
     /// The label column in front of sliders, segmented pickers
     /// and dropdowns. The longest row label in use ("Mouse
-    /// resize action") measures ~121 pt at body size — 128
-    /// keeps headroom so a font-metric change can't silently
-    /// wrap it.
-    static let labelColumn: CGFloat = 128
+    /// resize action") measures ~121 pt at body size; 150 also
+    /// holds the label-adjacent help `?` (#94 placement, ~24 pt
+    /// glyph + chip + gap) on rows that carry one — rows
+    /// without help just gain truncation headroom for longer
+    /// locales.
+    static let labelColumn: CGFloat = 150
 
     /// `OverrideChrome`'s leading padding and checkbox
     /// spacing — consumed by the chrome itself, so retuning
