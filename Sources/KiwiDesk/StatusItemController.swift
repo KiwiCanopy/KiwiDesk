@@ -12,10 +12,9 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     var onShowConfigIssues: () -> Void = {}
     var onLoadProfile: (String) -> Void = { _ in }
     /// The saved profiles, the active one, and the unreadable
-    /// ones, pulled fresh each time the menu opens. Broken
-    /// entries stay listed but disabled — greyed, not hidden
-    /// (#246, #171); the remedy lives in the Config Issues panel
-    /// reachable from this same menu.
+    /// ones, pulled fresh each menu open. Broken entries stay
+    /// listed but disabled — greyed, not hidden; the remedy is
+    /// the Config Issues panel, one entry up (#246, #171).
     var profilesProvider:
         () -> (
             active: String?, all: [String], broken: Set<String>

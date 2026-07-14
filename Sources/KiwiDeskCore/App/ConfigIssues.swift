@@ -53,32 +53,32 @@ extension KiwiCore {
         )
     }
 
-    /// Unreadable profile JSONs, as issues — the same files
-    /// `ProfileManager.allProfiles()` skips with only a log
-    /// line today.
+    /// Unreadable profile JSONs, as issues — derived from the
+    /// same `ProfileManager.scan()` that `allProfiles()` and
+    /// `brokenNames()` use, so "broken" means one thing across
+    /// every surface (#246).
     func profileConfigIssues() -> [ConfigIssue] {
-        profiles.list().compactMap { name in
-            do {
-                _ = try profiles.read(name: name)
+        profiles.scan().compactMap { name, result in
+            guard case .failure(let error) = result else {
                 return nil
-            } catch {
-                // The raw DecodingError is cryptic (e.g. "Cannot
-                // initialize Strategy from invalid String value
-                // 'shortest_side'"); log it for debugging but show
-                // the user a plain, actionable line. Re-saving the
-                // profile rewrites it in the current format —
-                // pre-release, re-saving IS the migration.
-                onLog("profile '\(name)' is invalid: \(error)")
-                return ConfigIssue(
-                    source: "\(name).json",
-                    message: L(
-                        "config_issues.profile_unreadable",
-                        "Couldn't be loaded — it was saved by a "
-                            + "different version or edited by hand."
-                    ),
-                    profileName: name
-                )
             }
+            // The raw DecodingError is cryptic (e.g. "Cannot
+            // initialize Strategy from invalid String value
+            // 'shortest_side'"); log it for debugging but show
+            // the user a plain, actionable line. The panel row
+            // now carries the remedy (Delete / Reveal), so the
+            // message no longer tells them to re-save — which was
+            // never possible for a file that can't be read.
+            onLog("profile '\(name)' is invalid: \(error)")
+            return ConfigIssue(
+                source: "\(name).json",
+                message: L(
+                    "config_issues.profile_unreadable",
+                    "Couldn't be loaded — it was saved by a "
+                        + "different version or edited by hand."
+                ),
+                profileName: name
+            )
         }
     }
 }

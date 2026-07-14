@@ -113,6 +113,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
                 "delete_profile",
                 args: [.string(name)]
             )
+            // Keep an already-open dashboard's greyed row in sync
+            // (the command only refreshes the panel/badge) (#246).
+            self?.dashboardIfCreated?.refreshProfiles()
         }
         configIssues.model.onRevealProfile = { [weak self] name in
             guard

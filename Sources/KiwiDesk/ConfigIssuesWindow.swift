@@ -215,12 +215,16 @@ struct ConfigIssuesView: View {
             "config_issues.delete_confirm.body",
             "This removes the profile file. It can't be undone."
         )
-        alert.addButton(
+        let delete = alert.addButton(
             withTitle: L("config_issues.delete", "Delete…")
         )
-        alert.addButton(
+        let cancel = alert.addButton(
             withTitle: L("config_issues.cancel", "Cancel")
         )
+        // Irreversible: Cancel is the default (Return / Escape),
+        // Delete needs a deliberate click (HIG).
+        delete.keyEquivalent = ""
+        cancel.keyEquivalent = "\r"
         if alert.runModal() == .alertFirstButtonReturn {
             model.onDeleteProfile(name)
         }

@@ -23,6 +23,13 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         model.refreshLayoutDrift()
     }
 
+    /// Re-reads the saved-profiles list without discarding staged
+    /// edits — so an open dashboard reflects a profile deleted
+    /// from the Config Issues panel (#246).
+    func refreshProfiles() {
+        model.refreshProfiles()
+    }
+
     /// Shows the dashboard, refreshing from the backend so the
     /// active profile and any external config edits are current.
     func show() {

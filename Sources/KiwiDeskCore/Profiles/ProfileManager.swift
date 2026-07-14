@@ -66,27 +66,38 @@ public final class ProfileManager {
             .sorted()
     }
 
+    /// Every profile file with its decode outcome, in one disk
+    /// pass: a readable `Profile`, or the error that makes it
+    /// broken. The single source `allProfiles`, `brokenNames`,
+    /// and the config-issue scan all derive from (#246).
+    func scan() -> [(name: String, result: Result<Profile, Error>)] {
+        list().map { name in
+            (name, Result { try read(name: name) })
+        }
+    }
+
     /// Every readable profile, sorted by name. Unreadable files
     /// are skipped (and logged), never fatal.
     public func allProfiles() -> [Profile] {
-        list().compactMap { name in
-            do {
-                return try read(name: name)
-            } catch {
-                onLog(
-                    "profile '\(name)' is invalid: \(error)"
-                )
+        scan().compactMap { name, result in
+            switch result {
+            case .success(let profile):
+                return profile
+            case .failure(let error):
+                onLog("profile '\(name)' is invalid: \(error)")
                 return nil
             }
         }
     }
 
-    /// Names in the profiles directory whose JSON won't decode —
-    /// the same files `allProfiles()` skips. Surfaces grey these
-    /// out instead of hiding them, so a broken profile stays
-    /// deletable everywhere it is listed (#246, #171).
+    /// Names whose JSON won't decode — greyed out, never hidden,
+    /// so a broken profile stays deletable wherever listed
+    /// (#246, #171).
     public func brokenNames() -> [String] {
-        list().filter { (try? read(name: $0)) == nil }
+        scan().compactMap { name, result in
+            if case .failure = result { return name }
+            return nil
+        }
     }
 
     /// On-disk path of a profile file, for Reveal in Finder
