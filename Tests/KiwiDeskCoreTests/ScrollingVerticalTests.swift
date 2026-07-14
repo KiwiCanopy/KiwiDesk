@@ -24,14 +24,14 @@ private func makeContext(
 struct ScrollingVerticalTests {
     let layout = ScrollingLayout()
 
-    @Test("Focused row is centered on first scroll")
+    @Test("Center anchor centers the focused row")
     func verticalCenterAnchor() throws {
         // 400×3 + gaps overflows the ~1060pt usable height, so the
         // viewport scrolls and centers the focus (a fitting row
-        // would top-align at offset 0 instead). No previous
-        // offset: the anchor seeds the position.
+        // would top-align at offset 0 instead).
         var context = makeContext(focused: w2)
         context.scrolling.orientation = .vertical
+        context.scrolling.anchor = .center
         context.scrolling.slotSize = .points(400)
         let frames = layout.calculateGeometry(
             for: [w1, w2, w3],

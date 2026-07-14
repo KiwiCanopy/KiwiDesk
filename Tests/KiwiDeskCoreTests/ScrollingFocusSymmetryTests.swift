@@ -65,16 +65,20 @@ private func offsets(
 /// trailing edge going down and the leading edge going up, so the
 /// two offset sequences are not identical reverses — asserting
 /// that would pin behavior no edge anchor can satisfy without
-/// reintroducing the freeze. Pinned for all three anchors since
-/// the bug was an anchor-pin/boundary-clamp interaction.
+/// reintroducing the freeze. Pinned for all four anchors (#239):
+/// `follow` is the direct #66 minimal-pan case, and the fixed
+/// anchors — recomputed every focus — traverse the range
+/// monotonically too, so the anchor-pin/boundary-clamp
+/// interaction that caused the freeze stays covered.
 @Suite("Scrolling focus up/down symmetry (#66)")
 struct ScrollingFocusSymmetryTests {
     @Test(
         "Focus down then up both pan monotonically end to end",
         arguments: [
             ScrollingParams.Anchor.center,
-            .left,
-            .right,
+            .start,
+            .end,
+            .follow,
         ]
     )
     func bothDirectionsPanMonotonically(
@@ -101,8 +105,9 @@ struct ScrollingFocusSymmetryTests {
         "Focus-up reveals an off-screen window at the far end",
         arguments: [
             ScrollingParams.Anchor.center,
-            .left,
-            .right,
+            .start,
+            .end,
+            .follow,
         ]
     )
     func focusUpRevealsOffscreen(
@@ -149,10 +154,12 @@ struct ScrollingFocusSymmetryTests {
     func noGratuitousScroll() throws {
         // A viewport wide enough to hold a full neighbor (three
         // 400pt slots in 1400pt), unlike the tight two-slot
-        // context above: focusing an already-visible window then
-        // pans by the minimal amount — here, zero.
+        // context above: with `follow`, focusing an already-
+        // visible window pans by the minimal amount — here, zero.
+        // (A fixed anchor would re-seat the focus instead, so this
+        // "don't move" property is `follow`'s alone.)
         let layout = ScrollingLayout()
-        var context = makeContext(anchor: .center, focused: w2)
+        var context = makeContext(anchor: .follow, focused: w2)
         context.bounds =
             CGRect(x: 0, y: 0, width: 1420, height: 1080)
         let seedFrames = layout.calculateGeometry(

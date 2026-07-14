@@ -42,11 +42,11 @@ struct ScrollingOverrideTests {
     func resolveAppliesAll() {
         var over = ScrollingOverride()
         over.slotSize = .points(320)
-        over.anchor = .right
+        over.anchor = .end
         over.orientation = .vertical
         let resolved = over.resolved(onto: ScrollingParams())
         #expect(resolved.slotSize == .points(320))
-        #expect(resolved.anchor == .right)
+        #expect(resolved.anchor == .end)
         #expect(resolved.orientation == .vertical)
     }
 
@@ -54,13 +54,13 @@ struct ScrollingOverrideTests {
     func partialInheritance() {
         var global = ScrollingParams()
         global.slotSize = .points(150)
-        global.anchor = .left
+        global.anchor = .start
         global.orientation = .horizontal
         var over = ScrollingOverride()
         over.orientation = .vertical  // override only this
         let resolved = over.resolved(onto: global)
         #expect(resolved.orientation == .vertical)  // overridden
-        #expect(resolved.anchor == .left)  // inherited
+        #expect(resolved.anchor == .start)  // inherited
         #expect(resolved.slotSize == .points(150))  // inherited
     }
 

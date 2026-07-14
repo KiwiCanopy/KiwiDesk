@@ -592,25 +592,35 @@ scroll.set_slot_size("50%")        -- half of available
 
 ### scroll.set_anchor
 
-**Expects:** `"center"` or an edge (`left`/`right` for horizontal,
-`top`/`bottom` for vertical).
+**Expects:** `"center"`, `"start"`, `"end"`, or `"follow"`.
 
-**Does:** sets the *preferred resting position* of the focused
-window in the viewport. As focus moves, the viewport scrolls into
-view — it pans by the minimum needed to keep the focused window
-fully visible, so moving focus up and down both scroll
-symmetrically: an off-screen window is revealed by panning toward
-it, and a window that is already fully visible does not move the
-viewport. The anchor decides where a freshly scrolled window comes
-to rest (centered, or against the leading/trailing edge) when the
-viewport had to move to reveal it. Focusing a *floating* window
-leaves the viewport where it is — a floating window has no slot
-in the row, so there is nothing to scroll into view.
+**Does:** sets where the focused window rests in the viewport,
+applied on *every* focus change.
+
+- **`center`** — the focused window centers in the viewport.
+- **`start`** / **`end`** — the focused window sits flush against
+  the leading or trailing edge of the scroll axis. These are
+  axis-relative: `start` is the left edge when scrolling
+  horizontally, the top edge when vertical; `end` is the right or
+  bottom edge. (The Settings picker shows the concrete edge —
+  Left/Right or Top/Bottom — for the current orientation; the
+  stored value stays axis-neutral.)
+- **`follow`** (default) — the viewport holds its position and
+  pans only the minimum needed to bring the focused window fully
+  into view (Niri/PaperWM scroll-into-view). Moving focus up and
+  down scroll symmetrically, an already-visible window does not
+  move the viewport at all, and the side you came from stays open.
+
+The three fixed anchors re-seat the focus on every focus change;
+only `follow` remembers the prior scroll position. Focusing a
+*floating* window leaves the viewport where it is under any anchor
+— a floating window has no slot in the row, so there is nothing
+to place.
 
 **Example:**
 
 ```lua
-scroll.set_anchor("center")
+scroll.set_anchor("follow")
 ```
 
 ### scroll.set_orientation
@@ -2584,7 +2594,7 @@ stripped, grouped by namespace — `set_gap_override` becomes
                             "position": "top",
                             "style": "pills",
                             "item_size": 0 } },
-      "scroll": { "anchor": "center", "slot_size": 0,
+      "scroll": { "anchor": "follow", "slot_size": 0,
                   "new_window_placement": "after_focused" },
       "stack": { "master_count": 1, "master_ratio": 0.6,
                  "overflow_style": "cascade_overflow",

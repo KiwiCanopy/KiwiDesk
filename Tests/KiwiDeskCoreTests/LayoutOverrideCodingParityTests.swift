@@ -130,7 +130,7 @@ struct LayoutOverrideCodingParityTests {
     private static func scrolling() -> ScrollingOverride {
         var over = ScrollingOverride()
         over.slotSize = .points(250)
-        over.anchor = .left
+        over.anchor = .start
         over.orientation = .vertical
         return over
     }

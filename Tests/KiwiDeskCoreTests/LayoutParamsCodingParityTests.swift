@@ -96,13 +96,13 @@ struct LayoutParamsCodingParityTests {
     private static func scrolling() -> ScrollingParams {
         var params = ScrollingParams()
         params.slotSize = .points(300)
-        params.anchor = .left
+        params.anchor = .start
         params.orientation = .vertical
         params.newWindowPlacement = .first
         params.wrapFocus = true
         params.appBar.enabled = false
         var over = ScrollingOverride()
-        over.anchor = .right
+        over.anchor = .end
         params.override[space] = over
         return params
     }

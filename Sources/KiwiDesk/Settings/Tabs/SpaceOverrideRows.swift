@@ -86,11 +86,30 @@ struct SpaceOverrideRows: View {
             global: g.scrolling.anchor,
             options: [
                 (.center, L("scroll_grid.anchor.center", "Center")),
-                (.left, L("scroll_grid.anchor.left", "Left")),
-                (.right, L("scroll_grid.anchor.right", "Right")),
+                (
+                    .start,
+                    scrollingIsVertical
+                        ? L("scroll_grid.anchor.start_v", "Top")
+                        : L("scroll_grid.anchor.start_h", "Left")
+                ),
+                (
+                    .end,
+                    scrollingIsVertical
+                        ? L("scroll_grid.anchor.end_v", "Bottom")
+                        : L("scroll_grid.anchor.end_h", "Right")
+                ),
+                (.follow, L("scroll_grid.anchor.follow", "Follow")),
             ]
         )
         placeholder(slotSizePlaceholder)
+    }
+
+    /// The effective scroll orientation for this space (its
+    /// override, else the global), so the anchor labels read
+    /// Top/Bottom on a vertical space and Left/Right otherwise —
+    /// the value stored stays axis-neutral `start`/`end` (#239).
+    private var scrollingIsVertical: Bool {
+        g.resolvedScrolling(for: space).orientation == .vertical
     }
 
     private var slotSizePlaceholder: String {

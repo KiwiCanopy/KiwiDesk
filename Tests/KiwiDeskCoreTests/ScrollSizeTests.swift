@@ -195,31 +195,37 @@ struct ScrollSlotSizeCommandTests {
 @Suite("scroll.set_anchor", .serialized)
 @MainActor
 struct ScrollAnchorCommandTests {
-    @Test("top / bottom alias to left / right (vertical spelling)")
-    func verticalAnchorAliases() {
+    @Test("accepts center | start | end | follow (#239)")
+    func canonicalAnchors() {
         let core = makeCore()
-        #expect(
-            core.execute(
-                "scroll.set_anchor",
-                args: [.string("top")]
-            ).isSuccess
-        )
-        #expect(core.tiler.settings.scrolling.anchor == .left)
-        #expect(
-            core.execute(
-                "scroll.set_anchor",
-                args: [.string("bottom")]
-            ).isSuccess
-        )
-        #expect(core.tiler.settings.scrolling.anchor == .right)
-        // The canonical spellings still work.
-        #expect(
-            core.execute(
-                "scroll.set_anchor",
-                args: [.string("center")]
-            ).isSuccess
-        )
-        #expect(core.tiler.settings.scrolling.anchor == .center)
+        let cases: [(String, ScrollingParams.Anchor)] = [
+            ("center", .center),
+            ("start", .start),
+            ("end", .end),
+            ("follow", .follow),
+        ]
+        for (raw, value) in cases {
+            #expect(
+                core.execute(
+                    "scroll.set_anchor",
+                    args: [.string(raw)]
+                ).isSuccess
+            )
+            #expect(core.tiler.settings.scrolling.anchor == value)
+        }
+    }
+
+    @Test("rejects the old compass spellings (#239)")
+    func rejectsCompassSpellings() {
+        let core = makeCore()
+        for raw in ["left", "right", "top", "bottom"] {
+            #expect(
+                !core.execute(
+                    "scroll.set_anchor",
+                    args: [.string(raw)]
+                ).isSuccess
+            )
+        }
     }
 }
 
@@ -266,14 +272,14 @@ struct ScrollOverrideCommandTests {
         #expect(
             core.execute(
                 "scroll.set_anchor_override",
-                args: [.string("7"), .string("top")]
+                args: [.string("7"), .string("end")]
             ).isSuccess
         )
         let over =
             core.tiler.settings.scrolling.override[SpaceID("7")]
-        // Same clamp/normalization as the global setters.
+        // Same clamp/parsing as the global setters.
         #expect(over?.slotSize == .points(100))  // clamped floor
-        #expect(over?.anchor == .left)  // "top" -> left
+        #expect(over?.anchor == .end)
     }
 
     @Test("Invalid value is rejected and writes nothing")

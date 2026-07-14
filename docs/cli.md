@@ -114,7 +114,7 @@ KiwiDesk service restart
 | | `bsp.set_ratio_v` | 0.1–0.9 (stacked splits) |
 | | `bsp.set_new_window_placement` | placement¹ (default `after_focused`) |
 | Scrolling | `scroll.set_slot_size` | px, `"NN%"`, or `0` (auto) |
-| | `scroll.set_anchor` | `center`, or edge `left\|right` (`top\|bottom` vertical) |
+| | `scroll.set_anchor` | `center\|start\|end\|follow` (default `follow`) |
 | | `scroll.set_orientation` | `horizontal\|vertical` |
 | | `scroll.set_new_window_placement` | placement¹ (default `after_focused`) |
 | | `scroll.set_wrap_focus` | true\|false (default false) |

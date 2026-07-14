@@ -148,12 +148,11 @@ extension KiwiCore {
     static func parseAnchor(
         _ raw: String?
     ) -> ScrollingParams.Anchor? {
-        guard let raw else { return nil }
-        // top/bottom are the vertical spellings of the
-        // leading/trailing edge; the stored enum stays
-        // center/left/right (see ScrollGridEditor labels).
-        let normalized = ["top": "left", "bottom": "right"][raw] ?? raw
-        return ScrollingParams.Anchor(rawValue: normalized)
+        // Axis-relative vocabulary (#239): `start`/`end` replace
+        // the old left/right/top/bottom compass spellings — the
+        // GUI resolves the orientation-aware label, the wire value
+        // stays neutral. `follow` is the minimal-pan default.
+        raw.flatMap(ScrollingParams.Anchor.init(rawValue:))
     }
 
     static func parseOrientation(
@@ -166,7 +165,7 @@ extension KiwiCore {
         "expected points, \"NN%\", or 0 for auto"
     )
     private static let anchorError = CommandResponse.fail(
-        "expected center|left|right|top|bottom"
+        "expected center|start|end|follow"
     )
     private static let orientationError = CommandResponse.fail(
         "expected horizontal|vertical"

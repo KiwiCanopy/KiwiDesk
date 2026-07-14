@@ -975,9 +975,13 @@ deliberate approximations (a handful of tiles, capped with
 frame per control" idiom, but that under-delivered on the knobs
 whose whole meaning is a transition. So the family uses a
 **mixed, deliberately legible grammar**: a **two-frame sequence**
-(mini-screen → arrow → mini-screen) for **BSP**, the one mode
-where strategy divergence *and* new-window placement only appear
-once a third window arrives; **single frames** for the rest,
+(mini-screen → arrow → mini-screen) for the modes whose meaning is
+a *transition* — **BSP** (strategy divergence and new-window
+placement only appear once a third window arrives), **Grid** in
+its dynamic mode (the grid rebalances as a fifth window opens),
+and **Scrolling**'s `follow` anchor (#239 — the viewport pans the
+minimum to reveal the focus, leaving the side you came from open);
+**single frames** for the rest,
 carrying the conditional fact with one of a small shared
 **ghost vocabulary** — a **spawn ghost** (dashed accent tile +
 "+", "the next window lands here": BSP's third window, Track's
@@ -987,8 +991,12 @@ off-screen": Scrolling), and the pre-existing **empty-cell gap**
 (dashed gray, "unused grid space": rigid Grid). Grid draws five
 windows so the columns-first/rows-first wrap is visible; Stack's
 overflow is a small iconic fanned-pile badge, not a permanently
-cascading column. Reserving the two-frame motif to BSP keeps it
-*meaningful* — if every mode had two frames, "why two frames"
+cascading column. The two-frame motif is gated by a *principle*,
+not a headcount: a mode earns a second frame only when it must
+teach a fact **inexpressible in one frame** — a transition or a
+rebalance, not a steady resting state. Modes whose meaning is a
+still position (Scrolling's center/start/end anchors, rigid Grid)
+stay single-frame; if every mode had two frames, "why two frames"
 would stop reading. The app bar shown in Scrolling/Monocle is
 **not** drawn into their schematics (one preview, one job); its
 presence surfaces as live On/Off state in the `CrossReferenceRow`

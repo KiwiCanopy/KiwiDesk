@@ -65,23 +65,31 @@ struct ScrollingEditor: View {
                         ScrollingParams.Anchor.center
                     ),
                     (
+                        // Axis-relative value `.start`; the label
+                        // shows the concrete edge for the current
+                        // orientation (Top vertical, Left
+                        // horizontal — presentation only, #239).
                         isVertical
-                            ? L("scroll_grid.anchor.top", "Top")
+                            ? L("scroll_grid.anchor.start_v", "Top")
                             : L(
-                                "scroll_grid.anchor.left",
+                                "scroll_grid.anchor.start_h",
                                 "Left"
-                            ), .left
+                            ), .start
                     ),
                     (
                         isVertical
                             ? L(
-                                "scroll_grid.anchor.bottom",
+                                "scroll_grid.anchor.end_v",
                                 "Bottom"
                             )
                             : L(
-                                "scroll_grid.anchor.right",
+                                "scroll_grid.anchor.end_h",
                                 "Right"
-                            ), .right
+                            ), .end
+                    ),
+                    (
+                        L("scroll_grid.anchor.follow", "Follow"),
+                        .follow
                     ),
                 ]
             )

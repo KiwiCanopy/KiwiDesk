@@ -190,10 +190,23 @@ public struct StackParams: Sendable, Equatable, Codable {
 public struct ScrollingParams: Sendable, Equatable, Codable,
     AppBarHosting
 {
+    /// Where the focused slot rests in the viewport, applied on
+    /// every focus change (#239).
     public enum Anchor: String, Sendable, Codable {
+        /// Focused slot centred in the viewport.
         case center
-        case left
-        case right
+        /// Flush against the leading edge of the scroll axis —
+        /// left when horizontal, top when vertical. Axis-relative
+        /// like `AppBarStyle.Position`, so it lands where the GUI
+        /// label says on either orientation.
+        case start
+        /// Flush against the trailing edge (right / bottom).
+        case end
+        /// Keep the prior viewport offset and pan the minimum
+        /// needed to reveal the focused slot (#66 Niri/PaperWM
+        /// scroll-into-view). The only anchor that reads the
+        /// previous offset; the side you came from stays open.
+        case follow
     }
 
     /// Which axis the columns scroll along — the scrolling
@@ -211,8 +224,10 @@ public struct ScrollingParams: Sendable, Equatable, Codable,
     /// horizontal, row height when vertical). `auto` by default,
     /// resolving to an orientation-aware standard at layout time.
     public var slotSize: ScrollSize = .auto
-    /// Where the focused column sits in the viewport.
-    public var anchor: Anchor = .center
+    /// Where the focused column rests in the viewport (#239).
+    /// `follow` by default: keeps today's minimal-pan feel — the
+    /// viewport holds still and pans only to reveal the focus.
+    public var anchor: Anchor = .follow
     public var orientation: Orientation = .horizontal
     /// PaperWM-style default: new columns open next to the
     /// one you are working in.
@@ -264,7 +279,7 @@ public struct ScrollingParams: Sendable, Equatable, Codable,
             try container.decodeIfPresent(
                 Anchor.self,
                 forKey: .anchor
-            ) ?? .center
+            ) ?? .follow
         orientation =
             try container.decodeIfPresent(
                 Orientation.self,

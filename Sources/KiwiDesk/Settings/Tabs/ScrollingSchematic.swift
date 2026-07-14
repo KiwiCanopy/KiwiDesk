@@ -1,23 +1,30 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Scrolling schematic (#125): a fixed, centred **screen
-/// outline** (the monitor) with one continuous row of windows
-/// moving *through* it. The monitor stays in the middle of the
-/// whole row — windows continue off *both* edges — and the focus
-/// anchor only sets where the **focused window** rests inside the
-/// frame:
+/// The Scrolling schematic (#125, #239): a fixed, centred
+/// **screen outline** (the monitor) with one continuous row of
+/// windows moving *through* it. The monitor stays in the middle of
+/// the whole row — windows continue off *both* edges — and the
+/// focus anchor sets where the **focused window** rests inside the
+/// frame, applied on every focus:
 ///
 /// - **center** → focus centred, a neighbour peeking in on each
 ///   side (two partials).
-/// - **left / top** → focus flush against the leading edge, one
-///   neighbour peeking on the trailing side.
-/// - **right / bottom** → mirror image.
+/// - **start** → focus flush against the leading edge (left when
+///   horizontal, top when vertical), one neighbour peeking on the
+///   trailing side.
+/// - **end** → mirror image (right / bottom).
 ///
 /// The focused window is always fully visible; neighbours are cut
 /// by the frame so their partial width shows the real slot size
 /// (a wide slot shows slivers, a thin slot shows many). The dense
 /// `+` marks where the current placement opens the next window.
+///
+/// **follow** is the one anchor that can't be shown as a resting
+/// position — it is a *transition* (pan the minimum to reveal the
+/// focus), so it renders as a two-frame `ScrollingFollowPair`
+/// instead, branched below exactly as `GridSchematic` branches on
+/// `.dynamic`.
 struct ScrollingSchematic: View {
     let orientation: ScrollingParams.Orientation
     let anchor: ScrollingParams.Anchor
@@ -45,22 +52,34 @@ struct ScrollingSchematic: View {
     }
 
     var body: some View {
-        SchematicCanvas(
-            width: 320,
-            height: 96,
-            caption: caption,
-            axLabel: axLabel
-        ) {
-            GeometryReader { geo in
-                strip(geo.size)
-            }
-            .animation(LayoutSchematic.damping, value: anchor)
-            .animation(
-                LayoutSchematic.damping,
-                value: orientation
+        if anchor == .follow {
+            // A transition, not a resting position: two frames
+            // (#239), like GridSchematic's `.dynamic` pair.
+            ScrollingFollowPair(
+                orientation: orientation,
+                slotSize: slotSize
             )
-            .animation(LayoutSchematic.damping, value: slotSize)
-            .animation(LayoutSchematic.damping, value: placement)
+        } else {
+            SchematicCanvas(
+                width: 320,
+                height: 96,
+                caption: caption,
+                axLabel: axLabel
+            ) {
+                GeometryReader { geo in
+                    strip(geo.size)
+                }
+                .animation(LayoutSchematic.damping, value: anchor)
+                .animation(
+                    LayoutSchematic.damping,
+                    value: orientation
+                )
+                .animation(LayoutSchematic.damping, value: slotSize)
+                .animation(
+                    LayoutSchematic.damping,
+                    value: placement
+                )
+            }
         }
     }
 
@@ -87,9 +106,13 @@ struct ScrollingSchematic: View {
         // shows the peeking neighbour).
         let focusCenter: CGFloat
         switch anchor {
-        case .center: focusCenter = screenStart + screenLen / 2
-        case .left: focusCenter = screenStart + slot / 2
-        case .right:
+        // `.follow` never reaches here (the body branches to the
+        // two-frame pair); folded with center so the switch stays
+        // exhaustive.
+        case .center, .follow:
+            focusCenter = screenStart + screenLen / 2
+        case .start: focusCenter = screenStart + slot / 2
+        case .end:
             focusCenter = screenStart + screenLen - slot / 2
         }
         // Range = the windows actually visible in the canvas (the
