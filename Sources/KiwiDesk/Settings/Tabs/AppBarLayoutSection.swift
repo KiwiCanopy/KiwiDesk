@@ -66,6 +66,13 @@ struct LayoutAppBarSection: View {
         )
     }
 
+    // These override rows deliberately carry no `?` (#251): the
+    // global editor above teaches Position/Group-adjacent, and
+    // this section sits directly below it behind a collapsed
+    // disclosure, so the user has just met the field's help. The
+    // override chrome's own `?` slot is for "should I override",
+    // not to re-explain the field — reserved for a field the
+    // global editor can't already teach.
     @ViewBuilder private var behaviorOverrides: some View {
         OverridePickerRow(
             label: L("app_bar.position.label", "Position"),

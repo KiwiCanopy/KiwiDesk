@@ -24,6 +24,11 @@ struct HelpButton: View {
     /// into this one popover (option name bold, one line each)
     /// instead of hanging a `?` off every segment.
     let explanation: String
+    /// Optional field name folded into the VoiceOver label, so
+    /// the rotor reads "Help: Wrap focus" instead of a list of
+    /// indistinguishable "Help" buttons (#251). Omit where one
+    /// `?` is unambiguous in its row.
+    var subject: String? = nil
     @State private var shown = false
     /// The transient popover already dismisses on this very
     /// click's mouse-down; without the stamp the mouse-up
@@ -62,7 +67,10 @@ struct HelpButton: View {
                 .onDisappear { dismissed = .now }
         }
         .help(plain)
-        .accessibilityLabel(L("help.button", "Help"))
+        .accessibilityLabel(
+            subject.map { L("help.button.for", "Help: %1$@", $0) }
+                ?? L("help.button", "Help")
+        )
         // A short action hint, not the content — VoiceOver
         // reads the explanation inside the popover after
         // activating, and `.help` above already exposes the

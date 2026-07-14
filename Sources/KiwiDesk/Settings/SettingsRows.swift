@@ -61,7 +61,7 @@ struct RatioRow: View {
             HStack(spacing: 4) {
                 Text(label).lineLimit(1)
                 if let help {
-                    HelpButton(explanation: help)
+                    HelpButton(explanation: help, subject: label)
                 }
             }
             .frame(width: labelColumn, alignment: .leading)
@@ -101,7 +101,7 @@ struct DropdownRow<P: View>: View {
             HStack(spacing: 4) {
                 Text(label).lineLimit(1)
                 if let help {
-                    HelpButton(explanation: help)
+                    HelpButton(explanation: help, subject: label)
                 }
             }
             .frame(width: labelColumn, alignment: .leading)
@@ -110,6 +110,37 @@ struct DropdownRow<P: View>: View {
                 .pickerStyle(.menu)
                 .controlSize(.large)
             Spacer()
+        }
+    }
+}
+
+/// A labeled toggle carrying an optional #94 `?`. A plain
+/// `Toggle` has no help slot, so the switches that want one (wrap
+/// focus, the App Bar group-adjacent toggle) route through this.
+/// The `?` is a **sibling** after the toggle, never nested inside
+/// its label: these render in the checkbox style (box left, label
+/// right — a plain `VStack`, not a `Form`), so a trailing sibling
+/// still lands immediately after the label text (#94 placement),
+/// and staying a sibling keeps the `?` an independent hit target
+/// and VoiceOver rotor stop instead of one the Toggle swallows.
+/// `fixedSize` makes the toggle hug its label so the `?` sits
+/// adjacent rather than pushed to the pane edge. Unlike the
+/// dropdown/ratio rows the `?` can't sit inside the shared
+/// `settingsLabelColumn` — a native toggle is full-width — so it
+/// trails variable-width label text instead of column-aligning.
+struct ToggleRow: View {
+    let label: String
+    @Binding var isOn: Bool
+    /// Optional `?` popover (#94). Omit for a self-evident toggle.
+    var help: String? = nil
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Toggle(isOn: $isOn) { Text(label) }
+                .fixedSize()
+            if let help {
+                HelpButton(explanation: help, subject: label)
+            }
         }
     }
 }

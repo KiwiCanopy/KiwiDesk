@@ -42,9 +42,10 @@ struct MonocleEditor: View {
             // the linear scrolling/track wrap). Off = focus stops
             // at the first/last window. Reuses the shared
             // "Wrap focus" string.
-            Toggle(
-                L("scroll_grid.wrap_focus", "Wrap focus"),
-                isOn: $model.config.settings.monocle.wrapFocus
+            ToggleRow(
+                label: L("scroll_grid.wrap_focus", "Wrap focus"),
+                isOn: $model.config.settings.monocle.wrapFocus,
+                help: LayoutHelp.wrapFocusMonocle
             )
             Divider()
             PlacementPicker(

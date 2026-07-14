@@ -117,9 +117,10 @@ struct ScrollingEditor: View {
             // section's other plain switches, apart from the
             // geometry pickers and the animation pair. Off by
             // default — see `ScrollingParams.wrapFocus`.
-            Toggle(
-                L("scroll_grid.wrap_focus", "Wrap focus"),
-                isOn: scrolling.wrapFocus
+            ToggleRow(
+                label: L("scroll_grid.wrap_focus", "Wrap focus"),
+                isOn: scrolling.wrapFocus,
+                help: LayoutHelp.wrapFocus
             )
             Divider()
             // The scrolling-specific animation pair (#68

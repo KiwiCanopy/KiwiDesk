@@ -47,7 +47,7 @@ struct SegmentedPicker<Value: Hashable>: View {
                 HStack(spacing: 4) {
                     Text(label).lineLimit(1)
                     if let help {
-                        HelpButton(explanation: help)
+                        HelpButton(explanation: help, subject: label)
                     }
                 }
                 .frame(width: labelColumn, alignment: .leading)
