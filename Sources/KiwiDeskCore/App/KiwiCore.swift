@@ -244,6 +244,12 @@ public final class KiwiCore {
         // for them.
         persistScrollOffset()
         updateAppBar()
+        // Floats sit outside the layout loop above, so a bar just
+        // switched on (or a window just turned floating) can leave
+        // one hidden under a top strip; correct it here. Must run
+        // after `updateAppBar()`: the clamp reads the strips it
+        // just painted (#242).
+        clampFloatsBelowTopBars()
     }
 
     // MARK: - Accessors

@@ -54,6 +54,11 @@ public final class AppBarManager {
 
     private var overlays: [DisplayID: AppBarOverlay] = [:]
     private var spaceOfDisplay: [DisplayID: SpaceID] = [:]
+    /// The bars actually painted after `sync`'s render filter —
+    /// the single source of truth for anything that must sit clear
+    /// of a bar (the #242 float clamp), so it can never disagree
+    /// with what is on screen.
+    private var shownBars: [Bar] = []
 
     public init() {}
 
@@ -61,6 +66,25 @@ public final class AppBarManager {
     /// surface for tests and diagnostics.
     public var shownDisplays: Set<DisplayID> {
         Set(spaceOfDisplay.keys)
+    }
+
+    /// Every painted TOP bar as `(space, strip)`. A window that
+    /// must clear a top bar (a floating window, whose title bar the
+    /// strip would hide — #242) reads these rendered strips rather
+    /// than re-deriving bar geometry, which drifts (outer gaps,
+    /// empty-bar suppression, per-display screen). Covers all
+    /// displays, so a bar on a non-active monitor is included.
+    public var shownTopStrips: [(space: SpaceID, strip: CGRect)] {
+        shownBars
+            .filter { $0.edge == .top }
+            .map { (space: $0.space, strip: $0.strip) }
+    }
+
+    /// The painted top-bar strip for `space`, or nil when that
+    /// space shows no top bar (off, another edge, or suppressed
+    /// because it has no non-floating windows).
+    public func topStrip(forSpace space: SpaceID) -> CGRect? {
+        shownTopStrips.first { $0.space == space }?.strip
     }
 
     /// Shows exactly `bars` — one per display — and retires the
@@ -78,6 +102,7 @@ public final class AppBarManager {
             !$0.items.isEmpty
                 && $0.strip.width >= 1 && $0.strip.height >= 1
         }
+        shownBars = valid
         let wanted = Set(valid.map(\.display))
         for (id, overlay) in overlays where !wanted.contains(id) {
             overlay.hide()

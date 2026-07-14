@@ -75,6 +75,81 @@ struct AppBarManagerTests {
         #expect(manager.shownDisplays.isEmpty)
     }
 
+    private func bar(
+        display: UInt32,
+        space: String,
+        edge: AppBarEdge,
+        strip: CGRect
+    ) -> AppBarManager.Bar {
+        AppBarManager.Bar(
+            display: DisplayID(display),
+            space: SpaceID(space),
+            items: [
+                AppBarOverlay.Item(
+                    id: WindowID(1),
+                    name: "A",
+                    icon: nil
+                )
+            ],
+            activeIndex: 0,
+            strip: strip,
+            style: AppBarStyle(),
+            edge: edge
+        )
+    }
+
+    @Test("topStrip returns the painted top strip for a space")
+    func topStripForSpace() {
+        let manager = AppBarManager()
+        let strip = CGRect(x: 0, y: 10, width: 1920, height: 32)
+        manager.sync([
+            bar(display: 1, space: "1", edge: .top, strip: strip)
+        ])
+        #expect(manager.topStrip(forSpace: SpaceID("1")) == strip)
+    }
+
+    @Test("topStrip ignores non-top bars")
+    func topStripIgnoresOtherEdges() {
+        let manager = AppBarManager()
+        manager.sync([
+            bar(
+                display: 1,
+                space: "1",
+                edge: .left,
+                strip: CGRect(x: 0, y: 0, width: 32, height: 1080)
+            )
+        ])
+        #expect(manager.topStrip(forSpace: SpaceID("1")) == nil)
+    }
+
+    @Test("topStrip is nil for a space showing no bar")
+    func topStripNilWhenUnpainted() {
+        let manager = AppBarManager()
+        manager.sync([
+            bar(
+                display: 1,
+                space: "1",
+                edge: .top,
+                strip: CGRect(x: 0, y: 10, width: 1920, height: 32)
+            )
+        ])
+        // A space with no synced bar (only floats, or bar off).
+        #expect(manager.topStrip(forSpace: SpaceID("other")) == nil)
+    }
+
+    @Test("shownTopStrips spans all displays' top bars")
+    func shownTopStripsMultiDisplay() {
+        let manager = AppBarManager()
+        let a = CGRect(x: 0, y: 10, width: 1920, height: 32)
+        let b = CGRect(x: 0, y: 10, width: 1440, height: 24)
+        manager.sync([
+            bar(display: 1, space: "1", edge: .top, strip: a),
+            bar(display: 2, space: "web", edge: .top, strip: b),
+        ])
+        let spaces = Set(manager.shownTopStrips.map(\.space))
+        #expect(spaces == [SpaceID("1"), SpaceID("web")])
+    }
+
     @Test("a drag routes to the bar's own space")
     func moveRoutesToSpace() {
         let manager = AppBarManager()

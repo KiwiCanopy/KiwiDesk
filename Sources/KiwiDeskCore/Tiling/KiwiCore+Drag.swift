@@ -128,28 +128,53 @@ extension KiwiCore {
     /// grids — every overflow-cascade window whose app can't
     /// shrink that far) differs from it permanently, and slot
     /// comparison would turn every plain move into a resize.
+    /// The window's true frame at drop time. The last AX event of
+    /// a fast drag lags the real drop, so read it fresh from the
+    /// element; fall back to the reported frame when the element is
+    /// gone or reads empty.
+    private func liveDropFrame(
+        _ id: WindowID,
+        fallback: CGRect
+    ) -> CGRect {
+        guard let element = eventLoop.element(for: id)
+        else { return fallback }
+        let live = AXHelper.frame(of: element)
+        return live == .zero ? fallback : live
+    }
+
     func handleDragEnd(
         _ id: WindowID,
         start: CGRect,
         frame: CGRect
     ) {
         dragOverlay.hideAll()
+        // A floating window is excluded from the layout swap/resize
+        // logic below, but a drop that leaves it under a top app bar
+        // hides its title bar and makes it ungrabbable — clamp it
+        // back below the strip (#242).
+        if state.windows[id]?.isFloating == true {
+            let frame = liveDropFrame(id, fallback: frame)
+            let clamped = floatFrameClampedBelowTopBar(
+                id,
+                frame: frame
+            )
+            if clamped != frame {
+                tiler.applyFrame(
+                    id,
+                    from: frame,
+                    to: clamped,
+                    animated: false
+                )
+            }
+            return
+        }
         guard let space = activeSpace,
             space.mode != .floating,
             space.windows.contains(id),
             state.windows[id]?.isFloating == false
         else { return }
 
-        // The last AX event of a fast drag lags the real
-        // drop; read the frame fresh instead of trusting it.
-        var frame = frame
-        if let element = eventLoop.element(for: id) {
-            let live = AXHelper.frame(of: element)
-            if live != .zero {
-                frame = live
-            }
-        }
-
+        let frame = liveDropFrame(id, fallback: frame)
         let slots = tiler.calculatedFrames(state: state)
         if slots[id] != nil,
             MouseResize.isResize(from: start, to: frame)

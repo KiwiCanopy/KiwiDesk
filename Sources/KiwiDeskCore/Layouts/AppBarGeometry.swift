@@ -61,6 +61,32 @@ public enum AppBarGeometry {
         }
     }
 
+    /// How far a float's top may sit inside a top bar before the
+    /// clamp acts. Mirrors the engine's frame tolerance (#148): an
+    /// app that lands a hair off the exact target (character grids,
+    /// min sizes) must not be re-clamped every retile, which would
+    /// wobble the window.
+    public static let clampTolerance: CGFloat = 2
+
+    /// Pushes `frame` down so its top edge sits at or below the
+    /// bottom of a TOP bar `strip` (AX coordinates, y grows
+    /// downward). Keeps a floating window — which layout never
+    /// clamps — from hiding under a top app bar, where the strip
+    /// covers the window's title bar (its grab handle) and leaves
+    /// it ungrabbable (#242). A no-op once the frame is within
+    /// `clampTolerance` of clear; only the top edge is corrected,
+    /// size unchanged.
+    public static func clampBelowTopStrip(
+        _ frame: CGRect,
+        strip: CGRect
+    ) -> CGRect {
+        guard frame.minY < strip.maxY - clampTolerance
+        else { return frame }
+        var result = frame
+        result.origin.y = strip.maxY
+        return result
+    }
+
     /// `usable` minus the bar `strip` and one inner gap between
     /// strip and window.
     public static func windowFrame(
