@@ -165,6 +165,7 @@
   "general.language.system_default": "System default",
   "general.language.title": "Language",
   "help.button": "Help",
+  "help.button.hint": "Shows an explanation of this setting.",
   "icon_picker.choose.help": "Choose an icon",
   "icon_picker.clear.help": "Remove icon (use the default)",
   "icon_picker.emoji": "Emoji",
@@ -261,7 +262,7 @@
   "layout_params.master_count": "Master count",
   "layout_params.master_ratio": "Master ratio",
   "layout_params.overflow": "Overflow",
-  "layout_params.overflow.help": "**Cascade overflow** — Keeps as many windows fully tiled as fit, then cascades only the extra ones at the bottom.\n**Cascade all** — Cascades the whole stack, showing a sliver of every window.",
+  "layout_params.overflow.stack.help": "**Cascade overflow** — Keeps as many windows fully tiled as fit, then cascades only the extra ones at the bottom.\n**Cascade all** — Cascades the whole stack, showing a sliver of every window.",
   "layout_params.split_ratio_h": "Width split ratio",
   "layout_params.split_ratio_h.help": "How much of a side-by-side split's width goes to the earlier window; the later window gets the rest. Applies to every left/right split.",
   "layout_params.split_ratio_v": "Height split ratio",
@@ -521,5 +522,6 @@
   "track.new_window.focused": "Joins the focused track",
   "track.new_window.own": "Opens its own track",
   "track.new_window_position": "Position",
+  "track.new_window_position.help": "With “Opens own track”, where the new track lands among the tracks; with “Joins the focused track”, where the window lands inside it: First, Last, or right before or after the focused one.",
   "track.wrap_focus": "Wrap focus"
 }

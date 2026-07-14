@@ -894,8 +894,11 @@ explanation carry a small `questionmark.circle` button
 the label column, which would break the shared
 `settingsLabelColumn` alignment every row type relies on.
 Clicking opens a fixed-width popover; `.help()` rides along
-as a hover fallback and the content doubles as the VoiceOver
-hint. A popover, not hover-only `.help()`, because that is
+as a hover fallback carrying the full text, while the
+VoiceOver hint stays a short action phrase ("Shows an
+explanation of this setting") — the content is read inside
+the popover after activation, so a full-text hint would
+announce it twice. A popover, not hover-only `.help()`, because that is
 what System Settings does for explanations: a visible,
 discoverable glyph; a real focusable button (keyboard and
 VoiceOver reach it); dismissible and re-readable — while
@@ -910,7 +913,19 @@ understandable without it — must-know info never lives only
 in the popover), and a field already taught by its live
 preview or schematic (App Bar colors, layout-tab
 geometry) gets no `?` at all. Copy is a normal `L()` string
-under the `<key>.help` suffix convention.
+under the `<key>.help` suffix convention; when a *label* key
+is shared by fields with divergent semantics (Stack's and
+Track's Overflow both use `layout_params.overflow`), the
+help key scopes itself (`layout_params.overflow.stack.help`)
+so each field can carry its own text. Shared help copy —
+one string rendered on two surfaces, like a Layout Defaults
+tab and the per-space Customize popover — is authored once
+in a per-domain namespace (`LayoutHelp`); single-call-site
+copy stays inline at its call site. In the Customize
+popover the `?` is rendered by `OverrideChrome` itself, not
+the wrapped row, so it stays clickable while the row
+inherits — help must work exactly while the user decides
+whether to override.
 
 **Option tabs are a solid sliding-pill segment control.**
 Every pick-one-of-few chooser (layout parameters, mouse

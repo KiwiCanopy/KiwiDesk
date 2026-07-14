@@ -195,19 +195,16 @@ struct PlacementPicker: View {
     /// "Position" — it already has a separate own/focused mode
     /// row above, so a second "New window" would read wrong.
     var label: String? = nil
+    /// Help override for callers whose picker means something
+    /// else — Track positions a whole track in own-track mode,
+    /// so the window-centric default would lie there.
+    var help: String? = nil
 
     var body: some View {
         let rowLabel = label ?? newWindowLabel
         return DropdownRow(
             label: rowLabel,
-            help: L(
-                "placement.new_window.help",
-                "Where a new window lands relative to the "
-                    + "others: First or Last in the layout's "
-                    + "order, or right before or after "
-                    + "whichever window is focused at the "
-                    + "moment it opens."
-            )
+            help: help ?? LayoutHelp.newWindowPlacement
         ) {
             Picker(rowLabel, selection: $placement) {
                 Text(L("placement.first", "First"))

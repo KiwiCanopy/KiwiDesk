@@ -90,7 +90,11 @@ struct TrackEditor: View {
             PlacementPicker(
                 placement: $model.config.settings.track
                     .newWindowPosition,
-                label: L("track.new_window_position", "Position")
+                label: L(
+                    "track.new_window_position",
+                    "Position"
+                ),
+                help: LayoutHelp.trackPosition
             )
             Divider()
             overflow

@@ -22,6 +22,11 @@ struct HelpButton: View {
     /// instead of hanging a `?` off every segment.
     let explanation: String
     @State private var shown = false
+    /// The transient popover already dismisses on this very
+    /// click's mouse-down; without the stamp the mouse-up
+    /// action would immediately reopen it, making the button
+    /// unable to ever close its own popover.
+    @State private var dismissed = Date.distantPast
 
     /// Popover text measure — comfortable for 2–4 short lines
     /// without ballooning over the pane.
@@ -29,7 +34,9 @@ struct HelpButton: View {
 
     var body: some View {
         Button {
-            shown.toggle()
+            if Date.now.timeIntervalSince(dismissed) > 0.3 {
+                shown = true
+            }
         } label: {
             Image(systemName: "questionmark.circle")
                 .foregroundStyle(.secondary)
@@ -45,10 +52,21 @@ struct HelpButton: View {
                     alignment: .leading
                 )
                 .padding(12)
+                .onDisappear { dismissed = .now }
         }
         .help(plain)
         .accessibilityLabel(L("help.button", "Help"))
-        .accessibilityHint(plain)
+        // A short action hint, not the content — VoiceOver
+        // reads the explanation inside the popover after
+        // activating, and `.help` above already exposes the
+        // full text; duplicating it here would announce it
+        // twice on every focus pass.
+        .accessibilityHint(
+            L(
+                "help.button.hint",
+                "Shows an explanation of this setting."
+            )
+        )
     }
 
     /// Markdown-parsed body. `inlineOnlyPreservingWhitespace`
@@ -64,9 +82,12 @@ struct HelpButton: View {
         )) ?? AttributedString(explanation)
     }
 
-    /// The hover tooltip and VoiceOver hint carry the same
-    /// text with the Markdown markers stripped.
+    /// The hover tooltip carries the same text with the
+    /// Markdown markers stripped. The extra replace only bites
+    /// when the Markdown parse failed and `rich` kept the raw
+    /// markers; a successful parse has none left.
     private var plain: String {
         String(rich.characters)
+            .replacingOccurrences(of: "**", with: "")
     }
 }
