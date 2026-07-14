@@ -182,6 +182,33 @@ struct DropKeyTests {
         #expect(result.stderr.contains("fresh.key"))
     }
 
+    @Test("a key repeated in argv drops once, no crash")
+    func duplicateArgvKeyIsDeduplicated() throws {
+        let fixture = try makeFixtureRoot(locales: [
+            "en.json": #"""
+            {"a.key": "A", "b.key": "B"}
+            """#,
+            "de.json": #"""
+            {"b.key": "Be"}
+            """#,
+            "fr.json": #"""
+            {"a.key": "Ah"}
+            """#,
+        ])
+        defer { fixture.cleanup() }
+        // de (sorted first) holds only b.key; a repeated a.key
+        // must not crash after de was already written.
+        let result = try run(
+            ["a.key", "a.key", "b.key"],
+            root: fixture.root
+        )
+        #expect(result.status == 0)
+        let de = try decoded("de.json", in: fixture.root)
+        #expect(de == [:])
+        let fr = try decoded("fr.json", in: fixture.root)
+        #expect(fr == [:])
+    }
+
     @Test("drops multiple keys, including empty-string values")
     func dropsMultipleKeysAndEmptyValues() throws {
         let fixture = try makeFixtureRoot(locales: [

@@ -452,8 +452,10 @@ Keep this list updated whenever a recurring mistake is found.
   locale to English); an orphan key (in a locale file, absent
   from code) only warns — clean it up with
   `extract-keys --prune`. All of this is backed by Swift tests
+  — each localization script has a sibling suite
   (`LocalizationDriftGuardTests`, `LocalizationOrphanTests`,
-  `RenameKeyTests`) so a regression in the tooling itself is
+  `RenameKeyTests`, `DropKeyTests`, and future scripts follow
+  suit) — so a regression in the tooling itself is
   covered by `swift test`, not just by running the script. The
   GUI language pick persists in `UserDefaults`
   (`LocalizationPreference`), never `gui.json` — it is

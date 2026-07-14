@@ -54,13 +54,18 @@ def _translation_files() -> list[Path]:
 def main(argv: list[str]) -> int:
     global LOCALES_DIR
     args = argv[1:]
-    if "--site" in args:
+    site = "--site" in args
+    flag = "--site " if site else ""
+    if site:
         args = [a for a in args if a != "--site"]
         LOCALES_DIR = ROOT / "site" / "src" / "i18n"
     if not args:
         print(__doc__)
         return 1
-    keys = args
+    # Dedupe (order-preserving): a repeated key would delete
+    # twice and crash mid-batch, breaking the all-or-nothing
+    # promise the pre-validation pass exists for.
+    keys = list(dict.fromkeys(args))
 
     files = _translation_files()
     if not files:
@@ -116,7 +121,7 @@ def main(argv: list[str]) -> int:
     print(
         "drop-key: done. The key(s) fall back to English at "
         "runtime and reappear on each locale's to-translate "
-        "list (scripts/extract-keys <locale>)."
+        f"list (scripts/extract-keys {flag}<locale>)."
     )
     return 0
 

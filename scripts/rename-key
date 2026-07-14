@@ -18,15 +18,17 @@ This only touches the JSON files. It does NOT edit Swift source
 yourself (and re-run `scripts/extract-keys --check`, which
 should pass once both sides agree).
 
-Renaming vs. deprecating: use this script when the MEANING of
-the string is unchanged and you're just cleaning up the key
-name — every existing translation carries over untouched. If
-the meaning actually changed (the English text now says
-something different), that is not a rename: delete the old key
-at its call site instead and let `scripts/extract-keys` surface
-the new key as missing, so translators knowingly retranslate it
-rather than silently inheriting a translation of the old
-meaning under the new name.
+Renaming vs. dropping: use this script when the MEANING of the
+string is unchanged and you're just cleaning up the key name —
+every existing translation carries over untouched. If the
+meaning actually changed, that is not a rename. The common
+case (same field, re-explained, key rightly stays) is
+`scripts/drop-key <key>`: it deletes the stale translations so
+every locale falls back to the new English and retranslates
+knowingly. Only when the call site itself goes away or gets a
+new identity do you delete it in code and let
+`scripts/extract-keys` surface the new key as missing. See
+docs/translating.md ("Rename vs. drop vs. deprecate").
 """
 
 import json

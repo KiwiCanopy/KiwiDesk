@@ -261,6 +261,10 @@ The other maintenance verbs take `--site` too:
   every `site/src/i18n/*.json`, preserving each translation. As
   with the app, update the `t.<old>` use sites in the Astro
   components/pages yourself afterward.
+- `scripts/drop-key --site <key> [...]` — drops stale
+  translations of a meaning-changed site string from every
+  `site/src/i18n/<locale>.json`, leaving the hand-authored
+  `en.json` untouched.
 
 To add a new English string to the site: add the key to
 `site/src/i18n/en.json`, reference it as `t.<key>` in the
@@ -383,9 +387,11 @@ CI to reject a broken or stale file.
 
 ## Maintaining the key set (for maintainers)
 
-A key's life cycle spans four operations, all built on the same
-code-derived key set `extract-keys` already scans — nothing
-here re-implements that scan:
+A key's life cycle spans five operations. Four are built on
+the code-derived key set `extract-keys` already scans;
+`drop-key` deliberately isn't — it validates against the
+shipped translation files themselves, since its job is pruning
+their stale values, not deriving keys:
 
 - **Add or refresh.** Add a new `L(key, english[, args...])`
   call site (or edit an existing one's English text), then run
