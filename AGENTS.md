@@ -431,7 +431,13 @@ Keep this list updated whenever a recurring mistake is found.
   `scripts/extract-keys <locale>` /
   `scripts/merge-keys <locale>` to translate,
   `scripts/rename-key <old> <new>` to rename a key without
-  losing translations, and `scripts/extract-keys --prune` to
+  losing translations, `scripts/drop-key <key>` to delete a
+  key's shipped translations when its English **meaning**
+  changed — run in the same change set, so every locale falls
+  back to the new English and the key reappears on its
+  to-translate list; cosmetic English edits (typo,
+  punctuation) keep translations — and
+  `scripts/extract-keys --prune` to
   drop orphaned ones (see `docs/translating.md`). Because the
   same English text can in principle be authored at two
   different call sites for one key, `extract-keys` fails loudly
