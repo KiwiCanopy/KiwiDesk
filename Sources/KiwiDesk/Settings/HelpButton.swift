@@ -2,8 +2,8 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The contextual-help affordance (#94): a small circled `?`
-/// trailing a settings row, opening a click popover with a
-/// sentence or two of explanation.
+/// beside a settings row's label, opening a click popover with
+/// a sentence or two of explanation.
 ///
 /// A click popover, not a hover-only tooltip: visible and
 /// discoverable, a real focusable button (keyboard and
@@ -12,9 +12,12 @@ import SwiftUI
 /// hover fallback. Help is optional reading: a row's label and
 /// options must stay understandable without ever opening it.
 ///
-/// Placement rule: the `?` sits trailing the row, AFTER the
-/// control — never in or before the label column, which would
-/// break the shared `settingsLabelColumn` alignment.
+/// Placement rule: the `?` sits IMMEDIATELY AFTER the field's
+/// label text, inside the shared `settingsLabelColumn` frame —
+/// the question is born at the label, so the affordance sits
+/// where the confusion starts. Exceptions (documented in
+/// design-decisions "Shared controls"): unlabeled controls and
+/// the Customize popover's override rows trail instead.
 struct HelpButton: View {
     /// The explanation. Inline Markdown (`**bold**`) renders in
     /// the popover, so a 2–3-option field folds per-option text
