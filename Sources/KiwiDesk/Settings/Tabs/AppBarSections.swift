@@ -77,7 +77,16 @@ struct GlobalAppBarSection: View {
     }
 
     @ViewBuilder private var behavior: some View {
-        DropdownRow(label: positionLabel) {
+        DropdownRow(
+            label: positionLabel,
+            help: L(
+                "app_bar.position.label.help",
+                "Which end of the bar the window tabs pack "
+                    + "toward. The concrete edge follows the "
+                    + "active layout's axis: Start is the left "
+                    + "(or top) edge, End the right (or bottom)."
+            )
+        ) {
             Picker(positionLabel, selection: $style.position) {
                 ForEach(AppBarOptions.position, id: \.0) {
                     Text($0.1).tag($0.0)
@@ -111,12 +120,18 @@ struct GlobalAppBarSection: View {
                 }
             }
         }
-        Toggle(
-            L(
+        ToggleRow(
+            label: L(
                 "app_bar.group_adjacent",
                 "Group adjacent same-app windows"
             ),
-            isOn: $style.groupAdjacentWindows
+            isOn: $style.groupAdjacentWindows,
+            help: L(
+                "app_bar.group_adjacent.help",
+                "Merges neighbouring windows of the same app "
+                    + "into a single tab, marked with a count "
+                    + "badge, instead of showing one tab each."
+            )
         )
     }
 

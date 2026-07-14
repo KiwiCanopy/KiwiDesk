@@ -8,8 +8,6 @@ import SwiftUI
 struct LuaEditorTab: View {
     @ObservedObject var model: SettingsModel
     @State private var confirmingAdopt = false
-    @State private var showAdoptHelp = false
-    @State private var helpHovering = false
 
     /// A muted, darker green so the action reads as inviting
     /// without shouting over the footer's Save button.
@@ -58,7 +56,7 @@ struct LuaEditorTab: View {
                 .foregroundStyle(.secondary)
                 Spacer()
                 adoptButton
-                helpButton
+                HelpButton(explanation: adoptHelpBody)
             }
         } else {
             HStack {
@@ -108,37 +106,6 @@ struct LuaEditorTab: View {
         }
         .buttonStyle(.borderedProminent)
         .tint(adoptGreen)
-    }
-
-    private var helpButton: some View {
-        Image(systemName: "questionmark.circle")
-            .imageScale(.large)
-            .foregroundStyle(
-                helpHovering ? Color.accentColor : .secondary
-            )
-            .animation(
-                .easeInOut(duration: 0.15),
-                value: helpHovering
-            )
-            .onHover { hovering in
-                helpHovering = hovering
-                showAdoptHelp = hovering
-            }
-            .help(
-                L(
-                    "lua_editor.adopt_help",
-                    "What happens to my current code?"
-                )
-            )
-            .popover(
-                isPresented: $showAdoptHelp,
-                arrowEdge: .top
-            ) {
-                Text(adoptHelpBody)
-                    .font(.callout)
-                    .frame(width: 300)
-                    .padding()
-            }
     }
 
     private var adoptHelpBody: String {

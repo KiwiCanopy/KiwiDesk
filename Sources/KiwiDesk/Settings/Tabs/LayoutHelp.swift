@@ -53,6 +53,61 @@ enum LayoutHelp {
         )
     }
 
+    /// Wrap-focus for the linear layouts (Scrolling, Track),
+    /// where it defaults off. Monocle shares the concept but
+    /// flips the default, so it gets its own scoped text below.
+    ///
+    /// Key deviates from the usual `<label-key>.help` derivation:
+    /// the wrap-focus *label* is itself split across pre-existing
+    /// keys (`scroll_grid.wrap_focus` for Scrolling/Monocle,
+    /// `track.wrap_focus` for Track, from #168), so no single
+    /// label key yields one help key. These live under a neutral
+    /// `layout_params.wrap_focus.*` home instead — unlike
+    /// `trackOverflow`, whose label key `layout_params.overflow`
+    /// does derive cleanly.
+    @MainActor static var wrapFocus: String {
+        L(
+            "layout_params.wrap_focus.help",
+            "When on, moving focus past the last window wraps "
+                + "around to the first, and past the first back "
+                + "to the last, instead of stopping at the end."
+        )
+    }
+
+    /// Monocle's wrap-focus: same behaviour, but on by default
+    /// (a carousel), so the text leads with that.
+    @MainActor static var wrapFocusMonocle: String {
+        L(
+            "layout_params.wrap_focus.monocle.help",
+            "On by default: monocle is a carousel, so moving "
+                + "focus past the last window returns to the "
+                + "first (and the reverse). Turn it off to stop "
+                + "focus at the first and last window."
+        )
+    }
+
+    /// Track's far-edge overflow track. Same enum as Stack's
+    /// overflow but it governs only that one track and the
+    /// default flips to Cascade all, so it can't reuse
+    /// `stackOverflow` (see that property's note). The closing
+    /// line clarifies that ordinary tracks overflow too — they
+    /// are always `cascade_overflow` — and only this far-edge
+    /// track is configurable.
+    @MainActor static var trackOverflow: String {
+        L(
+            "layout_params.overflow.track.help",
+            "How the far-edge **overflow track** — which "
+                + "collects the tracks that don't fit side by "
+                + "side — packs its windows.\n**Cascade all** "
+                + "(the default) — piles every window from the "
+                + "top.\n**Cascade overflow** — tiles what fits, "
+                + "piles the rest.\nAn ordinary track that holds "
+                + "more windows than fit always overflows this "
+                + "second way; only the far-edge track is "
+                + "configurable."
+        )
+    }
+
     /// `PlacementPicker`'s default text — every layout tab
     /// inherits it with the component. Track overrides it
     /// (below); hoisted here so no `+`-chain sits inside a

@@ -124,9 +124,10 @@ struct TrackEditor: View {
             // Bare behavior toggle in its own slot — the #168
             // placement mirrored from the Scrolling section.
             // Off by default — see `TrackParams.wrapFocus`.
-            Toggle(
-                L("track.wrap_focus", "Wrap focus"),
-                isOn: $model.config.settings.track.wrapFocus
+            ToggleRow(
+                label: L("track.wrap_focus", "Wrap focus"),
+                isOn: $model.config.settings.track.wrapFocus,
+                help: LayoutHelp.wrapFocus
             )
         }
     }
@@ -139,7 +140,8 @@ struct TrackEditor: View {
     /// `cascade_overflow`. Reuses stack's `overflow_style` labels.
     private var overflow: some View {
         DropdownRow(
-            label: L("layout_params.overflow", "Overflow")
+            label: L("layout_params.overflow", "Overflow"),
+            help: LayoutHelp.trackOverflow
         ) {
             Picker(
                 L("layout_params.overflow", "Overflow"),

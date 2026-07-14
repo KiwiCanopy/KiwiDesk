@@ -39,6 +39,9 @@ private struct OverrideChrome<Content: View>: View {
     /// `disabled`/dim below — help must stay clickable exactly
     /// while the user decides whether to override.
     var help: String? = nil
+    /// Field name for the `?`'s VoiceOver label (#251), so the
+    /// rotor reads "Help: Split ratio" not a bare "Help".
+    var subject: String? = nil
     @ViewBuilder let content: Content
 
     var body: some View {
@@ -68,7 +71,7 @@ private struct OverrideChrome<Content: View>: View {
                     SettingsMetrics.overrideLabelColumn
                 )
             if let help {
-                HelpButton(explanation: help)
+                HelpButton(explanation: help, subject: subject)
             }
         }
         // The inset keeps daylight between the 2 pt accent
@@ -242,7 +245,8 @@ struct OverrideFractionRow: View {
     var body: some View {
         OverrideChrome(
             isOn: overrideToggle($value, global: global),
-            help: help
+            help: help,
+            subject: label
         ) {
             RatioRow(
                 label: label,
@@ -265,7 +269,8 @@ struct OverridePickerRow<Value: Hashable & Sendable>: View {
     var body: some View {
         OverrideChrome(
             isOn: overrideToggle($value, global: global),
-            help: help
+            help: help,
+            subject: label
         ) {
             DropdownRow(label: label) {
                 Picker(
