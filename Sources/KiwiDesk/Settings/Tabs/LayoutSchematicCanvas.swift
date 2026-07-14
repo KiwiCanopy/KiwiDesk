@@ -36,6 +36,14 @@ struct SchematicArrow: View {
 /// A single-frame schematic: one mini-screen plus a caption,
 /// centred as a self-contained tile. Size defaults to the family
 /// 140×96 but a mode may grow it (Scrolling draws a monitor).
+///
+/// Centered on purpose (the `.frame(maxWidth:.infinity)` with no
+/// alignment): this is a **standalone illustration** — nothing is
+/// edited on it and no control column shares its row, so it reads
+/// as a figure, not a row (see design-decisions "Preview
+/// alignment splits on standalone-vs-paired"). A preview that
+/// *does* sit beside its controls (GapsDiagram, the Drag columns)
+/// is left-aligned instead.
 struct SchematicCanvas<Content: View>: View {
     var width: CGFloat = LayoutSchematic.canvasWidth
     var height: CGFloat = LayoutSchematic.canvasHeight

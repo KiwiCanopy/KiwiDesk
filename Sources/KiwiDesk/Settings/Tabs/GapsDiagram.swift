@@ -29,6 +29,13 @@ enum GapPreviewScale {
 /// so per-edge asymmetry renders honestly as uneven margins.
 /// It teaches the outer/inner vocabulary; it is deliberately
 /// not a layout preview.
+///
+/// Left-aligned beside its legend (not centered like a
+/// `SchematicCanvas`): this preview is **paired with the exact
+/// controls in its card**, so it lines up flush with them as one
+/// stack rather than reading as a standalone figure (see
+/// design-decisions "Preview alignment splits on
+/// standalone-vs-paired").
 struct GapsDiagram: View {
     let outer: Gaps.Outer
     let inner: Gaps.Inner
