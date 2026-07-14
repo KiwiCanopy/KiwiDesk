@@ -123,6 +123,8 @@ struct SettingsView: View {
             MonitorsSection(model: model)
         case .appearance:
             AppearanceSection(model: model)
+        case .appBar:
+            AppBarSection(model: model)
         case .behavior:
             BehaviorSection(model: model)
         case .profiles:

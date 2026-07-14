@@ -1,16 +1,23 @@
 import KiwiDeskCore
 import SwiftUI
 
-// The App Bar sections are hosted by AppearanceSection (#68
-// §3.2): the global look shared by every layout's bar, then a
-// per-layout section for each layout that can show one
-// (monocle, scrolling). A layout's checkbox toggles its bar
-// on; while on, an accordion exposes per-field overrides
-// (unchecked rows inherit the global value shown grayed out).
+// The App Bar sections are hosted by AppBarSection (#229, its
+// own sidebar destination): the global look shared by every
+// layout's bar, then a per-layout section for each layout that
+// can show one (monocle, scrolling). A layout's checkbox
+// toggles its bar on; while on, an accordion exposes per-field
+// overrides (unchecked rows inherit the global value shown
+// grayed out).
 
 /// The global `app_bar.*` look every layout inherits.
 struct GlobalAppBarSection: View {
     @Binding var style: AppBarStyle
+    // The full palette is ~10 hex fields; only Box / Active box
+    // / Highlight (the ones the preview strip most visibly
+    // reflects) stay inline, the rest collapse behind a
+    // disclosure shut by default (#229) — the same
+    // `advancedExpanded` idiom General/Shortcuts/Monitors use.
+    @State private var advancedColorsExpanded = false
 
     var body: some View {
         SettingsSection(
@@ -29,16 +36,35 @@ struct GlobalAppBarSection: View {
         SettingsSection(
             L("app_bar.global_colors.title", "Global colors")
         ) {
-            LazyVGrid(
-                columns: [
-                    GridItem(.flexible(), alignment: .leading),
-                    GridItem(.flexible(), alignment: .leading),
-                ],
-                alignment: .leading,
-                spacing: 8
-            ) {
-                colors
+            colorGrid { inlineColors }
+            DisclosureGroup(isExpanded: $advancedColorsExpanded) {
+                colorGrid { advancedColors }
+                    .padding(.top, 8)
+            } label: {
+                Text(
+                    L(
+                        "app_bar.advanced_colors.title",
+                        "Advanced colors"
+                    )
+                )
+                .font(.subheadline)
             }
+        }
+    }
+
+    /// The 2-column swatch grid both color runs share.
+    private func colorGrid<C: View>(
+        @ViewBuilder _ content: () -> C
+    ) -> some View {
+        LazyVGrid(
+            columns: [
+                GridItem(.flexible(), alignment: .leading),
+                GridItem(.flexible(), alignment: .leading),
+            ],
+            alignment: .leading,
+            spacing: 8
+        ) {
+            content()
         }
     }
 
@@ -154,15 +180,28 @@ struct GlobalAppBarSection: View {
         )
     }
 
-    @ViewBuilder private var colors: some View {
+    // The three the preview strip reflects most, kept inline.
+    @ViewBuilder private var inlineColors: some View {
+        HexColorField(
+            label: L("app_bar.color.box", "Box"),
+            hex: $style.boxColor
+        )
+        HexColorField(
+            label: L("app_bar.color.active_box", "Active box"),
+            hex: $style.activeBoxColor
+        )
+        HexColorField(
+            label: L("app_bar.color.highlight", "Highlight"),
+            hex: $style.highlightColor
+        )
+    }
+
+    // The remaining palette, behind the disclosure.
+    @ViewBuilder private var advancedColors: some View {
         Group {
             HexColorField(
                 label: L("app_bar.color.text", "Text"),
                 hex: $style.textColor
-            )
-            HexColorField(
-                label: L("app_bar.color.box", "Box"),
-                hex: $style.boxColor
             )
             HexColorField(
                 label: L(
@@ -172,25 +211,9 @@ struct GlobalAppBarSection: View {
                 hex: $style.activeTextColor
             )
             HexColorField(
-                label: L(
-                    "app_bar.color.active_box",
-                    "Active box"
-                ),
-                hex: $style.activeBoxColor
-            )
-            HexColorField(
-                label: L(
-                    "app_bar.color.highlight",
-                    "Highlight"
-                ),
-                hex: $style.highlightColor
-            )
-            HexColorField(
                 label: L("app_bar.color.hover", "Hover"),
                 hex: $style.hoverColor
             )
-        }
-        Group {
             HexColorField(
                 label: L(
                     "app_bar.color.hover_text",
@@ -198,6 +221,8 @@ struct GlobalAppBarSection: View {
                 ),
                 hex: $style.hoverTextColor
             )
+        }
+        Group {
             HexColorField(
                 label: L(
                     "app_bar.color.background",

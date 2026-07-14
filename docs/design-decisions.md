@@ -784,12 +784,21 @@ was dropped — the stored value stays a hex string, and
 copy/paste theme sharing works through the panel. (#68
 §3.14, revised)
 
-**Appearance ends with the App Bar block.** Gaps and drag
-visuals — the everyday controls — come first; the App Bar
-(global style + colors + per-layout overrides) is the
-deepest rabbit hole in the tab, so it sits last under one
-"App Bar" group title instead of pushing everything else
-below the fold.
+**The App Bar has its own sidebar destination.** (#229,
+superseding the earlier "Appearance ends with the App Bar
+block" note.) Appearance kept only Gaps and Drag & Drop —
+the everyday controls people revisit — while the App Bar
+(global style + ~10 colors + per-layout overrides) was the
+deepest rabbit hole in that tab and dominated the scroll. It
+became a first-class, deep-linkable destination in the *This
+Profile* group, peer of Appearance. It is **not** a tab
+strip alongside Gaps/Drag: those are co-active concerns tuned
+together in one session, not a mutually-exclusive set, so a
+strip would misapply the #205 "tabs fit a fixed exclusive
+set" principle. On the new page the ~10 hex colors collapse
+behind an **"Advanced colors" disclosure** (shut by default),
+keeping only Box / Active box / Highlight — the ones the
+preview strip most visibly reflects — inline.
 
 **Drag & Drop explains itself in plain words.** The group
 opens with one sentence on what dragging does (swap a
@@ -934,8 +943,8 @@ cascading column. Reserving the two-frame motif to BSP keeps it
 would stop reading. The app bar shown in Scrolling/Monocle is
 **not** drawn into their schematics (one preview, one job); its
 presence surfaces as live On/Off state in the `CrossReferenceRow`
-that points at Appearance ▸ App Bar, keeping app-bar ownership
-whole.
+that points at the App Bar destination (#229), keeping app-bar
+ownership whole.
 
 **A GUI label may diverge from the Lua/JSON wire name when the
 label alone is ambiguous (#217).** The Grid picker shows
