@@ -123,7 +123,7 @@ struct ConfigIssuesView: View {
                 "Parts of the configuration could not be "
                     + "loaded."
             ),
-            systemImage: "doc.badge.exclamationmark"
+            systemImage: "exclamationmark.triangle.fill"
         )
         .font(.headline)
     }

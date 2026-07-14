@@ -74,54 +74,76 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     private func render() {
         guard let button = item.button else { return }
         if warning {
-            button.image = NSImage(
-                systemSymbolName:
-                    "exclamationmark.triangle.fill",
-                accessibilityDescription: L(
+            // Permission failure keeps the loud triangle; config
+            // error uses a distinct, softer circle so the two are
+            // never confused in the always-on glyph (§3.7).
+            setStatusSymbol(
+                "exclamationmark.triangle.fill",
+                on: button,
+                a11y: L(
                     "menu.status.warning.a11y",
                     "KiwiDesk (permission required)"
+                ),
+                tooltip: L(
+                    "menu.status.warning.tooltip",
+                    "KiwiDesk needs Accessibility permission. "
+                        + "Window management is paused."
                 )
-            )
-            button.title = ""
-            button.toolTip = L(
-                "menu.status.warning.tooltip",
-                "KiwiDesk needs Accessibility permission. "
-                    + "Window management is paused."
             )
             return
         }
         if configError {
-            button.image = NSImage(
-                systemSymbolName:
-                    "doc.badge.exclamationmark",
-                accessibilityDescription: L(
+            setStatusSymbol(
+                "exclamationmark.circle.fill",
+                on: button,
+                a11y: L(
                     "menu.status.config_error.a11y",
                     "KiwiDesk (config issues)"
+                ),
+                tooltip: L(
+                    "menu.status.config_error.tooltip",
+                    "Parts of the configuration could not be "
+                        + "loaded — open Config Issues for details."
                 )
-            )
-            button.title = ""
-            button.toolTip = L(
-                "menu.status.config_error.tooltip",
-                "Parts of the configuration could not be "
-                    + "loaded — open Config Issues for details."
             )
             return
         }
         button.toolTip = L("menu.status.tooltip", "KiwiDesk")
         if let modeIcon, !modeIcon.isEmpty {
             applyModeIcon(modeIcon, to: button)
-        } else {
+        } else if let icon = BrandAssets.menuBarIcon
+            ?? symbol("rectangle.3.group")
+        {
+            button.image = icon
             button.title = ""
-            button.image =
-                BrandAssets.menuBarIcon
-                ?? NSImage(
-                    systemSymbolName: "rectangle.3.group",
-                    accessibilityDescription: L(
-                        "menu.status.a11y",
-                        "KiwiDesk"
-                    )
-                )
+        } else {
+            // Last-ditch: never leave the slot blank.
+            button.image = nil
+            button.title = L("menu.status.a11y", "KiwiDesk")
         }
+    }
+
+    /// Sets the status button to the SF Symbol `name`, or — if
+    /// that symbol doesn't resolve on this macOS version — a
+    /// visible text fallback, so the menu bar item is never blank.
+    /// A nil image with an empty title leaves an
+    /// invisible-but-clickable slot that reads as a broken app
+    /// (an invalid symbol name — `doc.badge.exclamationmark`,
+    /// which does not exist — once did exactly that).
+    private func setStatusSymbol(
+        _ name: String,
+        on button: NSStatusBarButton,
+        a11y: String,
+        tooltip: String
+    ) {
+        let image = NSImage(
+            systemSymbolName: name,
+            accessibilityDescription: a11y
+        )
+        image?.isTemplate = true
+        button.image = image
+        button.title = image == nil ? "⚠︎" : ""
+        button.toolTip = tooltip
     }
 
     /// A mode icon is either an SF Symbol name or a flat
@@ -167,7 +189,10 @@ final class StatusItemController: NSObject, NSMenuDelegate {
                 keyEquivalent: ""
             )
             issues.target = self
-            issues.image = symbol("doc.badge.exclamationmark")
+            // A warning triangle makes the entry unmissable in
+            // the quick menu; safe from the §3.7 status-glyph
+            // distinction here because the row is text-labeled.
+            issues.image = symbol("exclamationmark.triangle.fill")
             menu.addItem(issues)
             menu.addItem(.separator())
         }
