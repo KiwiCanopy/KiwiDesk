@@ -37,22 +37,30 @@ struct TrackEditor: View {
             )
             .font(.caption)
             .foregroundStyle(.secondary)
+            // "Arrange: Columns / Rows" (#217 pattern, applied to
+            // Track): "horizontal/vertical" is ambiguous for a
+            // two-axis subdivision layout, so the GUI label names
+            // the window arrangement instead. GUI label only — the
+            // Lua/JSON `track.axis` wire stays geometric
+            // (horizontal/vertical), which is unambiguous in a
+            // scripting context (see design-decisions "geometric
+            // wire, presentational label"). Reuses Grid's shared
+            // `scroll_grid.arrange` label; Track's options are bare
+            // "Columns"/"Rows" (no fill-order "first" — Track has
+            // no growth semantic, unlike Grid).
             SegmentedPicker(
-                L("track.axis", "Axis"),
+                L("scroll_grid.arrange", "Arrange"),
                 selection: $model.config.settings.track.axis,
                 options: [
                     (
                         L(
-                            "track.axis.vertical",
-                            "Vertical (columns)"
+                            "scroll_grid.arrange.columns",
+                            "Columns"
                         ),
                         TrackParams.Axis.vertical
                     ),
                     (
-                        L(
-                            "track.axis.horizontal",
-                            "Horizontal (rows)"
-                        ),
+                        L("scroll_grid.arrange.rows", "Rows"),
                         .horizontal
                     ),
                 ]

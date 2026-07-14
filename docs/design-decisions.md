@@ -1016,6 +1016,34 @@ mental model) for no gain. The label locale key was moved with
 `scripts/rename-key` (German preserved); the two option labels
 are new keys.
 
+**Geometric wire, presentational label — the rule for every
+two-axis layout.** #217 generalizes past Grid: the **Track**
+picker had the same collision ("horizontal/vertical" reads two
+ways for a subdivided layout — do the tracks run horizontally, or
+do windows stack horizontally?), so it takes the same fix — the
+GUI relabels to **"Arrange: Columns / Rows"** (reusing Grid's
+`scroll_grid.arrange` label; Track's options are bare
+`Columns`/`Rows`, no fill-order "first" since Track has no growth
+semantic). The Lua/JSON **wire stays geometric** for both
+(`grid.split_direction`, `track.axis` = `horizontal | vertical`):
+a wire value describes orientation, which is unambiguous in a
+scripting context where nothing is visually parsed, and it keeps
+Grid, Track, and scrolling on one axis vocabulary. Renaming the
+wire to `columns/rows` was **considered and rejected on gain, not
+churn cost** (pre-release makes churn cheap, but cheap is not a
+reason): Grid's value carries fill-order (`columns_first`) and
+Track's carries pure orientation (`columns`), so no single
+key/value shape unifies them — a rename would relocate the
+inconsistency (GUI↔wire becomes Grid-wire↔Track-wire, plus a
+`columns_first`-vs-`columns` shape mismatch) instead of removing
+it, and turn a precise geometric term into a category-error
+presentational one (an "axis" whose value is `columns`).
+Single-axis layouts (Scrolling, Monocle) stay plain
+"Horizontal/Vertical" — one axis, no ambiguity, nothing to
+disambiguate. Fix the label, never the wire; §5's one-vocabulary
+rule (Lua == JSON) holds either way and is orthogonal to this
+GUI↔wire question.
+
 **Rows share one label axis and one readout column.** Every
 labeled control row (slider, segmented picker, dropdown)
 puts its label in the same fixed-width column
