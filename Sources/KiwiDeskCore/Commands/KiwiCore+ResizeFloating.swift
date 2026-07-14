@@ -21,11 +21,16 @@ extension KiwiCore {
         guard let window = state.windows[id] else {
             return .fail("unknown window")
         }
-        let target = FloatResize.resized(
-            window.frame,
-            horizontal: axis == "x",
-            delta: delta,
-            minSize: tiler.settings.minWindowSize
+        // Growing the top edge under a top app bar would re-hide
+        // the title bar; keep the result clear of the strip (#242).
+        let target = floatFrameClampedBelowTopBar(
+            id,
+            frame: FloatResize.resized(
+                window.frame,
+                horizontal: axis == "x",
+                delta: delta,
+                minSize: tiler.settings.minWindowSize
+            )
         )
         tiler.applyFrame(
             id,
