@@ -41,6 +41,11 @@ struct LayoutAppBarSection: View {
 
     /// Split out so `DisclosureGroup` builds it lazily.
     @ViewBuilder private var overrides: some View {
+        // #125 Phase 2: a compact resolved-state chip leads the
+        // rows — swatches of the merged style + how many fields
+        // diverge — so the layout's net look reads at a glance
+        // without a second mock strip inside the lazy drawer.
+        AppBarResolvedStateChip(bar: bar, global: global)
         Text(overridesCaption)
             .font(.caption)
             .foregroundStyle(.secondary)

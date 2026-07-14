@@ -378,6 +378,13 @@ The app bar shows every window in the current space. Configure it
 globally (applies to every layout that shows a bar) or override
 individual fields per layout.
 
+A **live mock strip** sits at the top of the Global Style section:
+three sample tabs — one grouped, one active, one plain — drawn with
+your configured position, style, sizes, corner radius, and colors,
+so you can judge a color or size change in place before Save. It is
+a static preview (no hover or interaction) and never touches your
+running windows.
+
 **Global settings:**
 
 - **Style**: pills (floating rounded buttons), segments (a continuous
@@ -395,7 +402,11 @@ individual fields per layout.
 **Per-layout overrides:**
 
 Click a layout to override one field just for that layout — e.g.,
-make scrolling show segment style while monocle stays pills.
+make scrolling show segment style while monocle stays pills. When
+you open a layout's **Overrides**, a compact chip leads the rows:
+color swatches of the layout's *resolved* bar (global overlaid with
+its overrides) and a count of how many fields differ — a quick read
+on whether the layout diverges, without a second full preview.
 
 ## Monitors
 

@@ -19,6 +19,10 @@ struct GlobalAppBarSection: View {
             Text(globalStyleCaption)
                 .font(.caption)
                 .foregroundStyle(.secondary)
+            // #125 Phase 2: the live mock strip sits above the
+            // controls, GapsDiagram-style, so a color/size edit
+            // is judged in place before Save.
+            AppBarPreviewStrip(style: style)
             behavior
             appearance
         }
@@ -100,10 +104,25 @@ struct GlobalAppBarSection: View {
             value: $style.fontSize,
             range: 0...32
         )
+        // Corner radius only rounds Pills (segments are always
+        // square; underline rounds only its transient hover box).
+        // Grey it out otherwise — the "grey, don't hide"
+        // convention (#171) — so it never reads as a no-op knob.
         PtSlider(
             label: L("app_bar.corner_radius", "Corner radius"),
             value: $style.cornerRadius,
             range: 0...40
+        )
+        .disabled(style.style != .pills)
+        .opacity(style.style == .pills ? 1 : 0.5)
+        .help(
+            style.style == .pills
+                ? ""
+                : L(
+                    "app_bar.corner_radius.pills_only",
+                    "Corner radius only applies to the Pills "
+                        + "style."
+                )
         )
     }
 

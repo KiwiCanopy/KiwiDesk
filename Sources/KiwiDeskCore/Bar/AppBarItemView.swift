@@ -186,6 +186,9 @@ final class AppBarItemView: NSView {
             : style.textColor
     }
 
+    // The settings App Bar preview (`AppBarPreviewStrip`, GUI
+    // target) is a schematic twin of this box/accent logic —
+    // keep the two in step when the box or accent rules change.
     private var boxColorHex: String {
         if isHovered { return style.hoverColor }
         switch style.style {

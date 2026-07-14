@@ -115,12 +115,15 @@ private struct DragVisualPreview: View {
     private var mock: some View {
         let radius = min(cornerRadius, 20)
         return RoundedRectangle(cornerRadius: radius)
-            .fill(visual.fill ? color(visual.fillColor) : .clear)
+            .fill(
+                visual.fill
+                    ? Color(kiwiHex: visual.fillColor) : .clear
+            )
             .overlay {
                 if visual.border {
                     RoundedRectangle(cornerRadius: radius)
                         .strokeBorder(
-                            color(visual.borderColor),
+                            Color(kiwiHex: visual.borderColor),
                             lineWidth: min(
                                 visual.borderThickness,
                                 10
@@ -129,18 +132,6 @@ private struct DragVisualPreview: View {
                 }
             }
             .opacity(visual.enabled ? 1 : 0.25)
-    }
-
-    private func color(_ hex: String) -> Color {
-        guard let rgba = DragVisual.parseHex(hex) else {
-            return .clear
-        }
-        return Color(
-            red: rgba.red,
-            green: rgba.green,
-            blue: rgba.blue,
-            opacity: rgba.alpha
-        )
     }
 }
 
