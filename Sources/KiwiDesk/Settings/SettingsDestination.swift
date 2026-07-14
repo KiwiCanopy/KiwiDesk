@@ -11,6 +11,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
     case layoutDefaults
     case monitors
     case appearance
+    case appBar
     case behavior
     // Whole App
     case profiles
@@ -22,7 +23,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
 
     static let thisProfile: [SettingsDestination] = [
         .spaces, .layoutDefaults, .monitors, .appearance,
-        .behavior,
+        .appBar, .behavior,
     ]
     static let wholeApp: [SettingsDestination] = [
         .profiles, .shortcuts, .appRules, .general,
@@ -35,6 +36,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .monitors: return L("sidebar.monitors", "Monitors")
         case .appearance:
             return L("sidebar.appearance", "Appearance")
+        case .appBar: return L("sidebar.app_bar", "App Bar")
         case .behavior: return L("sidebar.behavior", "Behavior")
         case .profiles: return L("sidebar.profiles", "Profiles")
         case .shortcuts:
@@ -54,6 +56,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .layoutDefaults: return "rectangle.3.group"
         case .monitors: return "display.2"
         case .appearance: return "paintbrush.fill"
+        case .appBar: return "menubar.rectangle"
         case .behavior: return "cursorarrow.motionlines"
         case .profiles: return "square.stack.3d.up"
         case .shortcuts: return "keyboard"
@@ -73,6 +76,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
             return Color(red: 0.09, green: 0.47, blue: 0.53)
         case .monitors: return .blue
         case .appearance: return .purple
+        case .appBar: return .pink
         case .behavior: return .orange
         case .profiles:
             return Color(red: 0.16, green: 0.53, blue: 0.28)

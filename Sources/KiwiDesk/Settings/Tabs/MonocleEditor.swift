@@ -54,7 +54,7 @@ struct MonocleEditor: View {
             CrossReferenceRow(
                 // Monocle has no schematic, so this row is where
                 // its app-bar presence surfaces: live On/Off
-                // state, with the toggle owned by Appearance.
+                // state, with the toggle owned by the App Bar tab.
                 prose: L(
                     "monocle.app_bar_xref_state",
                     "The monocle app bar (currently %1$@) is "
@@ -63,9 +63,9 @@ struct MonocleEditor: View {
                 ),
                 linkTitle: L(
                     "scroll_grid.app_bar_xref_link",
-                    "Appearance ▸ App Bar"
+                    "App Bar"
                 ),
-                destination: .appearance
+                destination: .appBar
             )
         }
     }

@@ -17,7 +17,7 @@ Open Settings from the KiwiDesk menu in the menu bar. The window
 shows a two-group sidebar on the left:
 
 - **Design** — sections scoped to the active profile (Spaces,
-  Layout, Monitors, Appearance, Behavior).
+  Layout, Monitors, Appearance, App Bar, Behavior).
 - **System** — global settings that apply everywhere (Profiles,
   Shortcuts, App Rules, General).
 
@@ -372,49 +372,6 @@ the space's **Customize** popover from its row in the **Spaces**
 section, tick the box beside a field, and adjust just that field —
 unticked (gray) fields inherit the global value.
 
-### App Bar
-
-The app bar shows every window in the current space. Configure it
-globally (applies to every layout that shows a bar) or override
-individual fields per layout.
-
-A **live mock strip** sits at the top of the Global Style section:
-three sample tabs — one grouped, one active, one plain — drawn with
-your configured position, style, sizes, corner radius, and colors,
-so you can judge a color or size change in place before Save. It is
-a static preview (no hover or interaction) and never touches your
-running windows.
-
-**Global settings:**
-
-- **Tab background**: boxed (a box per tab honoring corner
-  roundness) or plain (names on a shared translucent strip).
-- **Position**: start (top edge on horizontal layout, left on
-  vertical) or end (bottom or right). The bar always renders on
-  the edge the position indicates.
-- **Active indicator**: ring (outlined border around the active
-  tab), edge mark (accent bar on the active tab's window-facing
-  edge), or gap (active slot empty). Orthogonal to tab background
-  — all combinations are valid.
-- **Thickness**: the strip's depth in points.
-- **Item size**: auto (0) measures rendered width and sizes slots
-  uniformly to fit the widest item; fixed pixel width.
-- **Content**: icon only, name only, or both.
-- **Colors**: text, box, active highlight, hover states, and group
-  badge.
-- **Font size**: auto (0) or fixed.
-- **Corner roundness**: 0–100% for boxed tabs (0 = square, 100 =
-  full capsule; ignored for plain).
-
-**Per-layout overrides:**
-
-Click a layout to override one field just for that layout — e.g.,
-make scrolling show segment style while monocle stays pills. When
-you open a layout's **Overrides**, a compact chip leads the rows:
-color swatches of the layout's *resolved* bar (global overlaid with
-its overrides) and a count of how many fields differ — a quick read
-on whether the layout diverges, without a second full preview.
-
 ## Monitors
 
 The **Monitors** section (in the **Design** group) pins spaces to
@@ -462,6 +419,54 @@ Toggle each visual on/off and customize:
   (inside or outside the slot edge).
 - **Fill**: show/hide, color (with optional transparency).
 - **Corner radius**: match your windows' corner rounding.
+
+## App Bar
+
+The **App Bar** section (in the **Design** group) is the app bar's
+own destination — the strip that shows every window in the current
+space. Configure it globally (applies to every layout that shows a
+bar) or override individual fields per layout.
+
+A **live mock strip** sits at the top of the Global Style section:
+three sample tabs — one grouped, one active, one plain — drawn with
+your configured position, style, sizes, corner radius, and colors,
+so you can judge a color or size change in place before Save. It is
+a static preview (no hover or interaction) and never touches your
+running windows.
+
+**Global settings:**
+
+- **Tab background**: boxed (a box per tab honoring corner
+  roundness) or plain (names on a shared translucent strip).
+- **Position**: start (top edge on horizontal layout, left on
+  vertical) or end (bottom or right). The bar always renders on
+  the edge the position indicates.
+- **Active indicator**: ring (outlined border around the active
+  tab), edge mark (accent bar on the active tab's window-facing
+  edge), or gap (active slot empty). Orthogonal to tab background
+  — all combinations are valid.
+- **Thickness**: the strip's depth in points.
+- **Item size**: auto (0) measures rendered width and sizes slots
+  uniformly to fit the widest item; fixed pixel width.
+- **Content**: icon only, name only, or both.
+- **Font size**: auto (0) or fixed.
+- **Corner roundness**: 0–100% for boxed tabs (0 = square, 100 =
+  full capsule; ignored for plain).
+
+**Colors:** Box, Active box, and Highlight — the ones the preview
+strip most visibly reflects — sit inline. The rest of the palette
+(text, active text, hover states, background, and group badge)
+collapses behind an **Advanced colors** disclosure, shut by
+default.
+
+**Per-layout overrides:**
+
+Click a layout to override one field just for that layout — e.g.,
+make scrolling show segment style while monocle stays pills. When
+you open a layout's **Overrides**, a compact chip leads the rows:
+color swatches of the layout's *resolved* bar (global overlaid with
+its overrides) and a count of how many fields differ — a quick read
+on whether the layout diverges, without a second full preview.
 
 ## Behavior
 
@@ -526,7 +531,7 @@ global config; every saved profile is listed below, one row each
   adopts your changes into the loaded profile as usual.
 - **Edit** a saved profile **without switching** — the Settings
   sidebar becomes profile-scoped: the Design sections (Spaces,
-  Layout, Monitors, Appearance, Behavior) edit this profile, and
+  Layout, Monitors, Appearance, App Bar, Behavior) edit this profile, and
   **General is hidden** — it holds global state a profile edit
   never writes. Save writes to this profile's JSON instead of
   the active one (the caption beside the button names the

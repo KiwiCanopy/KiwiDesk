@@ -129,8 +129,8 @@ struct ScrollingEditor: View {
             scrollSpeedRow
             CrossReferenceRow(
                 // Live On/Off state inline (design consult): the
-                // enable toggle + all styling stay owned by
-                // Appearance, but Layout Defaults shows the
+                // enable toggle + all styling stay owned by the
+                // App Bar tab, but Layout Defaults shows the
                 // current state so it isn't a dead pointer.
                 prose: L(
                     "scroll_grid.app_bar_xref_state",
@@ -140,9 +140,9 @@ struct ScrollingEditor: View {
                 ),
                 linkTitle: L(
                     "scroll_grid.app_bar_xref_link",
-                    "Appearance ▸ App Bar"
+                    "App Bar"
                 ),
-                destination: .appearance
+                destination: .appBar
             )
         }
     }

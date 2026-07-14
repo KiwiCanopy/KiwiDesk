@@ -2,9 +2,9 @@ import KiwiDeskCore
 import SwiftUI
 
 /// This Profile ▸ Appearance (#68 §3.2): how KiwiDesk looks
-/// while you use it — gaps, the App Bar (global look + the
-/// per-layout overrides), and the drag visuals. One topic even
-/// though the code splits it across editors.
+/// while you use it — gaps and the drag visuals. The App Bar
+/// moved to its own sidebar destination (#229), so this stays a
+/// short scroll of the controls people actually revisit.
 struct AppearanceSection: View {
     @ObservedObject var model: SettingsModel
 
@@ -13,34 +13,8 @@ struct AppearanceSection: View {
             VStack(alignment: .leading, spacing: 20) {
                 GapsEditor(model: model)
                 DragVisualsEditor(model: model)
-                // The App Bar block closes the tab as one
-                // titled group: it is the deepest rabbit hole
-                // here (global style + colors + per-layout
-                // overrides), so it must not push the everyday
-                // gap/drag controls below the fold.
-                appBarGroup
             }
             .padding(16)
         }
-    }
-
-    @ViewBuilder private var appBarGroup: some View {
-        SettingsGroupHeader(L("app_bar.group.title", "App Bar"))
-            .padding(.top, 4)
-        GlobalAppBarSection(
-            style: $model.config.settings.appBarStyle
-        )
-        LayoutAppBarSection(
-            title: L("layout.monocle.name", "Monocle"),
-            mode: .monocle,
-            bar: $model.config.settings.monocle.appBar,
-            global: model.config.settings.appBarStyle
-        )
-        LayoutAppBarSection(
-            title: L("layout.scrolling.name", "Scrolling"),
-            mode: .scrolling,
-            bar: $model.config.settings.scrolling.appBar,
-            global: model.config.settings.appBarStyle
-        )
     }
 }
