@@ -261,6 +261,10 @@ The other maintenance verbs take `--site` too:
   every `site/src/i18n/*.json`, preserving each translation. As
   with the app, update the `t.<old>` use sites in the Astro
   components/pages yourself afterward.
+- `scripts/drop-key --site <key> [...]` — drops stale
+  translations of a meaning-changed site string from every
+  `site/src/i18n/<locale>.json`, leaving the hand-authored
+  `en.json` untouched.
 
 To add a new English string to the site: add the key to
 `site/src/i18n/en.json`, reference it as `t.<key>` in the
@@ -383,9 +387,11 @@ CI to reject a broken or stale file.
 
 ## Maintaining the key set (for maintainers)
 
-A key's life cycle spans four operations, all built on the same
-code-derived key set `extract-keys` already scans — nothing
-here re-implements that scan:
+A key's life cycle spans five operations. Four are built on
+the code-derived key set `extract-keys` already scans;
+`drop-key` deliberately isn't — it validates against the
+shipped translation files themselves, since its job is pruning
+their stale values, not deriving keys:
 
 - **Add or refresh.** Add a new `L(key, english[, args...])`
   call site (or edit an existing one's English text), then run
@@ -415,18 +421,33 @@ here re-implements that scan:
   actually had the old key. It edits JSON only — update the
   `L("<old_key>", ...)` call site(s) in Swift yourself, then
   `scripts/extract-keys --check` should pass again.
+- **Drop stale translations.** `scripts/drop-key <key>
+  [<key> ...]` removes the key(s) from every shipped
+  `<locale>.json` — never from `en.json`, which is generated.
+  Use it in the same change set as a **meaning-changing**
+  English edit (see below): the dropped key falls back to the
+  new English at runtime and reappears on every locale's
+  to-translate list, so the pipeline itself tracks the debt —
+  no side notes or issue comments needed. It fails without
+  touching anything if a key exists in no translation (typo
+  guard). `--site` targets the site manifests instead.
 
-**Rename vs. deprecate — pick based on whether the *meaning*
-changed.** If a key is just getting a tidier name for the exact
-same English text and the exact same UI spot, that's a rename:
-use `scripts/rename-key` so every existing translation carries
-over untouched. If the string's *meaning* actually changed (the
-English text now says something materially different, even at
-the same key), that is NOT a rename — delete the old call site
-in code and let it acquire a new key the normal way
-(`extract-keys` will surface it as missing for every locale).
-Reusing `rename-key` for a meaning change would silently carry
-a translation of the *old* meaning forward under a name that no
+**Rename vs. drop vs. deprecate — pick based on whether the
+*meaning* changed, and where it changed.** If a key is just
+getting a tidier name for the exact same English text and the
+exact same UI spot, that's a rename: use `scripts/rename-key`
+so every existing translation carries over untouched. If the
+string's *meaning* changed but the key rightly stays (the same
+field, re-explained — the common case), run `scripts/drop-key`
+on it in the same change set: a stale translation is
+fluent-but-wrong, and correct-but-English beats that until the
+retranslation lands. Purely cosmetic English edits (typo,
+punctuation, capitalization) keep translations — don't churn
+translators for them. And if the call site itself is going
+away or getting a new identity, delete it in code and let the
+new key surface as missing the normal way. Never reuse
+`rename-key` for a meaning change — it would silently carry a
+translation of the *old* meaning forward under a name that no
 longer matches it, and nothing would flag that for review.
 
 ## Extraction limitations

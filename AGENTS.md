@@ -431,7 +431,13 @@ Keep this list updated whenever a recurring mistake is found.
   `scripts/extract-keys <locale>` /
   `scripts/merge-keys <locale>` to translate,
   `scripts/rename-key <old> <new>` to rename a key without
-  losing translations, and `scripts/extract-keys --prune` to
+  losing translations, `scripts/drop-key <key>` to delete a
+  key's shipped translations when its English **meaning**
+  changed — run in the same change set, so every locale falls
+  back to the new English and the key reappears on its
+  to-translate list; cosmetic English edits (typo,
+  punctuation) keep translations — and
+  `scripts/extract-keys --prune` to
   drop orphaned ones (see `docs/translating.md`). Because the
   same English text can in principle be authored at two
   different call sites for one key, `extract-keys` fails loudly
@@ -446,8 +452,10 @@ Keep this list updated whenever a recurring mistake is found.
   locale to English); an orphan key (in a locale file, absent
   from code) only warns — clean it up with
   `extract-keys --prune`. All of this is backed by Swift tests
+  — each localization script has a sibling suite
   (`LocalizationDriftGuardTests`, `LocalizationOrphanTests`,
-  `RenameKeyTests`) so a regression in the tooling itself is
+  `RenameKeyTests`, `DropKeyTests`, and future scripts follow
+  suit) — so a regression in the tooling itself is
   covered by `swift test`, not just by running the script. The
   GUI language pick persists in `UserDefaults`
   (`LocalizationPreference`), never `gui.json` — it is

@@ -1,0 +1,130 @@
+#!/usr/bin/env python3
+"""Drop localization key(s) from every shipped translation
+(issue #249): removes each <key> from every <locale>.json
+EXCEPT en.json — English is the generated source of truth
+(`scripts/extract-keys`) and is never edited here.
+
+Usage:
+    scripts/drop-key <key> [<key> ...]
+    scripts/drop-key --site <key> [<key> ...]
+
+When to use: the English source string's MEANING changed — the
+sentence now says something different. A stale translation is
+fluent-but-wrong, so it must not linger: dropping the key makes
+every locale fall back to the new English at runtime (per-key
+fallback) and puts the key back on each locale's to-translate
+list (`scripts/extract-keys <locale>`). Run it in the same
+change set as the English edit; the tooling itself is the
+drift ledger, no side notes needed.
+
+When NOT to use: cosmetic English edits (typo, punctuation,
+capitalization) keep existing translations. An unchanged
+meaning under a better key name is `scripts/rename-key`, which
+carries translations over.
+
+Add `--site` to operate on the marketing site's manifests
+(`site/src/i18n/*.json`) instead; there too the hand-authored
+site en.json is left untouched.
+"""
+
+import json
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+LOCALES_DIR = (
+    ROOT / "Sources" / "KiwiDeskCore" / "Resources" / "Locales"
+)
+
+
+def _translation_files() -> list[Path]:
+    """Every shipped translation: <locale>.json except the
+    English source and the transient missing_<locale>.json
+    worksheets."""
+    if not LOCALES_DIR.is_dir():
+        return []
+    return sorted(
+        path
+        for path in LOCALES_DIR.glob("*.json")
+        if not path.name.startswith("missing_")
+        and path.name != "en.json"
+    )
+
+
+def main(argv: list[str]) -> int:
+    global LOCALES_DIR
+    args = argv[1:]
+    site = "--site" in args
+    flag = "--site " if site else ""
+    if site:
+        args = [a for a in args if a != "--site"]
+        LOCALES_DIR = ROOT / "site" / "src" / "i18n"
+    if not args:
+        print(__doc__)
+        return 1
+    # Dedupe (order-preserving): a repeated key would delete
+    # twice and crash mid-batch, breaking the all-or-nothing
+    # promise the pre-validation pass exists for.
+    keys = list(dict.fromkeys(args))
+
+    files = _translation_files()
+    if not files:
+        print(
+            f"drop-key: no translation files found under "
+            f"{LOCALES_DIR}.",
+            file=sys.stderr,
+        )
+        return 1
+
+    # Validate every key against every file before touching
+    # any of them, so a typo can't leave the locales
+    # half-dropped (rename-key's atomicity discipline).
+    data_by_file = {
+        path: json.loads(path.read_text(encoding="utf-8"))
+        for path in files
+    }
+    nowhere = [
+        key
+        for key in keys
+        if not any(key in data for data in data_by_file.values())
+    ]
+    if nowhere:
+        print(
+            "drop-key: FAILED — not present in any translation "
+            f"(typo? already dropped?): {', '.join(nowhere)}. "
+            "Nothing was changed.",
+            file=sys.stderr,
+        )
+        return 1
+
+    for path, data in data_by_file.items():
+        # Membership test, not pop-truthiness: an empty-string
+        # translation ("" counts as untranslated elsewhere)
+        # must still be dropped and reported.
+        dropped = [key for key in keys if key in data]
+        if not dropped:
+            continue
+        for key in dropped:
+            del data[key]
+        path.write_text(
+            json.dumps(
+                data, indent=2, sort_keys=True, ensure_ascii=False
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        print(
+            f"drop-key: {path.name} — dropped "
+            f"{', '.join(dropped)}"
+        )
+
+    print(
+        "drop-key: done. The key(s) fall back to English at "
+        "runtime and reappear on each locale's to-translate "
+        f"list (scripts/extract-keys {flag}<locale>)."
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))
