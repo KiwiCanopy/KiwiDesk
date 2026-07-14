@@ -102,10 +102,13 @@ struct DropdownRow<P: View>: View {
                 .labelsHidden()
                 .pickerStyle(.menu)
                 .controlSize(.large)
-            Spacer()
+            // The ? sits snug against the picker, BEFORE the
+            // spacer — pushed to the pane's far edge it floats
+            // in dead space and gets overlooked (owner-tested).
             if let help {
                 HelpButton(explanation: help)
             }
+            Spacer()
         }
     }
 }

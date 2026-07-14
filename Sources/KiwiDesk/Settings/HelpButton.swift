@@ -43,6 +43,10 @@ struct HelpButton: View {
         }
         .buttonStyle(.plain)
         .controlSize(.small)
+        // The same hover chip every icon-only borderless
+        // button here carries — a bare glyph has nothing to
+        // catch the eye drifting past the bordered control.
+        .hoverHighlight(cornerRadius: 4, padding: 2)
         .popover(isPresented: $shown, arrowEdge: .bottom) {
             Text(rich)
                 .font(.callout)
