@@ -108,8 +108,16 @@ struct LayoutAppBarSection: View {
     }
 
     @ViewBuilder private var appearanceOverrides: some View {
-        // Item/font size lead as Auto-capable rows (#228 §3); an
-        // overridden 0 shows as Auto with its slider greyed.
+        // Same order as the global editor: thickness → the two
+        // Auto-gated size rows (toggle bound above its slider) →
+        // divider → corner roundness. An overridden 0 shows as
+        // Auto with its slider greyed.
+        OverrideSliderRow(
+            label: L("app_bar.thickness", "Thickness"),
+            value: $bar.thickness,
+            global: global.thickness,
+            range: 8...80
+        )
         OverrideAutoSliderRow(
             label: L("app_bar.item_size", "Item size"),
             autoLabel: L("app_bar.item_size.auto", "Auto item size"),
@@ -117,6 +125,12 @@ struct LayoutAppBarSection: View {
             global: global.itemSize,
             restore: 120,
             range: 0...200
+        )
+        OverrideSliderRow(
+            label: L("app_bar.item_gap", "Item gap"),
+            value: $bar.itemGap,
+            global: global.itemGap,
+            range: 0...40
         )
         OverrideAutoSliderRow(
             label: L("app_bar.font_size", "Font size"),
@@ -126,18 +140,7 @@ struct LayoutAppBarSection: View {
             restore: 14,
             range: 0...32
         )
-        OverrideSliderRow(
-            label: L("app_bar.thickness", "Thickness"),
-            value: $bar.thickness,
-            global: global.thickness,
-            range: 8...80
-        )
-        OverrideSliderRow(
-            label: L("app_bar.item_gap", "Item gap"),
-            value: $bar.itemGap,
-            global: global.itemGap,
-            range: 0...40
-        )
+        Divider()
         // Roundness only shapes a Boxed tab; grey it when this
         // layout resolves to Plain (#171 grey-out).
         OverrideSliderRow(
