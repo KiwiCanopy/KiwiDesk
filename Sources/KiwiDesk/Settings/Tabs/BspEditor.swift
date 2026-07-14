@@ -41,21 +41,24 @@ struct BspEditor: View {
                             "Alternating"
                         ), .alternating
                     ),
-                ]
+                ],
+                help: LayoutHelp.splitStrategy
             )
             RatioRow(
                 label: L(
                     "layout_params.split_ratio_h",
                     "Width split ratio"
                 ),
-                value: bsp.splitRatioH
+                value: bsp.splitRatioH,
+                help: LayoutHelp.splitRatioH
             )
             RatioRow(
                 label: L(
                     "layout_params.split_ratio_v",
                     "Height split ratio"
                 ),
-                value: bsp.splitRatioV
+                value: bsp.splitRatioV,
+                help: LayoutHelp.splitRatioV
             )
             Divider()
             PlacementPicker(placement: bsp.newWindowPlacement)

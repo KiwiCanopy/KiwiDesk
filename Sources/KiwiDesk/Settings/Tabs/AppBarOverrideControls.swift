@@ -49,6 +49,11 @@ struct AppBarGreyOut: ViewModifier {
 /// checkerboard of enabled inputs.
 private struct OverrideChrome<Content: View>: View {
     let isOn: Binding<Bool>
+    /// Optional `?` popover (#94). Rendered by the chrome, not
+    /// the wrapped row, so it escapes the inherit-state
+    /// `disabled`/dim below — help must stay clickable exactly
+    /// while the user decides whether to override.
+    var help: String? = nil
     @ViewBuilder let content: Content
 
     var body: some View {
@@ -77,6 +82,9 @@ private struct OverrideChrome<Content: View>: View {
                     \.settingsLabelColumn,
                     SettingsMetrics.overrideLabelColumn
                 )
+            if let help {
+                HelpButton(explanation: help)
+            }
         }
         // The inset keeps daylight between the 2 pt accent
         // bar and the checkbox, so the bar reads as a boundary
@@ -247,9 +255,15 @@ struct OverrideFractionRow: View {
     let label: String
     @Binding var value: Double?
     let global: Double
+    /// Optional `?` popover (#94), rendered by the chrome so
+    /// it stays clickable while the row inherits.
+    var help: String? = nil
 
     var body: some View {
-        OverrideChrome(isOn: overrideToggle($value, global: global)) {
+        OverrideChrome(
+            isOn: overrideToggle($value, global: global),
+            help: help
+        ) {
             RatioRow(
                 label: label,
                 value: overrideValue($value, global: global)
@@ -264,9 +278,15 @@ struct OverridePickerRow<Value: Hashable & Sendable>: View {
     @Binding var value: Value?
     let global: Value
     let options: [(Value, String)]
+    /// Optional `?` popover (#94), rendered by the chrome so
+    /// it stays clickable while the row inherits.
+    var help: String? = nil
 
     var body: some View {
-        OverrideChrome(isOn: overrideToggle($value, global: global)) {
+        OverrideChrome(
+            isOn: overrideToggle($value, global: global),
+            help: help
+        ) {
             DropdownRow(label: label) {
                 Picker(
                     label,

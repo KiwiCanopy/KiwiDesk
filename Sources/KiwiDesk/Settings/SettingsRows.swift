@@ -49,6 +49,8 @@ struct PtSlider: View {
 struct RatioRow: View {
     let label: String
     @Binding var value: Double
+    /// Optional `?` popover (#94), trailing after the readout.
+    var help: String? = nil
     @Environment(\.settingsLabelColumn)
     private var labelColumn
 
@@ -71,6 +73,9 @@ struct RatioRow: View {
                 )
                 .foregroundStyle(.secondary)
                 .font(.system(.body, design: .monospaced))
+            if let help {
+                HelpButton(explanation: help)
+            }
         }
     }
 }
@@ -82,6 +87,8 @@ struct RatioRow: View {
 /// (`labelsHidden` hides it visually only).
 struct DropdownRow<P: View>: View {
     let label: String
+    /// Optional `?` popover (#94), on the trailing edge.
+    var help: String? = nil
     @ViewBuilder let picker: P
     @Environment(\.settingsLabelColumn)
     private var labelColumn
@@ -95,6 +102,12 @@ struct DropdownRow<P: View>: View {
                 .labelsHidden()
                 .pickerStyle(.menu)
                 .controlSize(.large)
+            // The ? sits snug against the picker, BEFORE the
+            // spacer — pushed to the pane's far edge it floats
+            // in dead space and gets overlooked (owner-tested).
+            if let help {
+                HelpButton(explanation: help)
+            }
             Spacer()
         }
     }
@@ -185,10 +198,17 @@ struct PlacementPicker: View {
     /// "Position" — it already has a separate own/focused mode
     /// row above, so a second "New window" would read wrong.
     var label: String? = nil
+    /// Help override for callers whose picker means something
+    /// else — Track positions a whole track in own-track mode,
+    /// so the window-centric default would lie there.
+    var help: String? = nil
 
     var body: some View {
         let rowLabel = label ?? newWindowLabel
-        return DropdownRow(label: rowLabel) {
+        return DropdownRow(
+            label: rowLabel,
+            help: help ?? LayoutHelp.newWindowPlacement
+        ) {
             Picker(rowLabel, selection: $placement) {
                 Text(L("placement.first", "First"))
                     .tag(SpawnPlacement.first)

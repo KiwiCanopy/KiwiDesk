@@ -5,7 +5,14 @@ import SwiftUI
 /// caption (#123), split from `SpacesSection` for file size.
 extension SpacesSection {
     func modePicker(_ space: SpaceID) -> some View {
-        VStack(alignment: .trailing, spacing: 4) {
+        // Hoisted out of the modifier chain (§5 type-checker
+        // budget); doubles as the accessibility label since
+        // the visible label is hidden.
+        let modeHint = L(
+            "spaces.mode.help",
+            "Layout mode for this space"
+        )
+        return VStack(alignment: .trailing, spacing: 4) {
             Picker("", selection: modeBinding(space)) {
                 ForEach(LayoutMode.allCases, id: \.self) { mode in
                     Label(
@@ -18,6 +25,11 @@ extension SpacesSection {
             .labelsHidden()
             .controlSize(.large)
             .frame(width: 150)
+            // Label is hidden, so the picker's purpose is
+            // inferable only from its options — a one-line
+            // hover hint names it (#94).
+            .help(modeHint)
+            .accessibilityLabel(modeHint)
 
             // The one drift source (`model.layoutDrift`), shared
             // with the footer captions — never a second inline

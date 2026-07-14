@@ -75,6 +75,27 @@ the English source. A German translation of the key above is
 free to write `"Nach %1$@ verschieben"` — the placeholder moves,
 the argument doesn't change.
 
+## Help texts: bold markers and line breaks
+
+Keys ending in `.help` hold the contextual-help popover copy
+(#94). Some of these values contain inline Markdown bold and
+literal `\n` line breaks — the pattern is one line per option,
+with the option's name bold:
+
+```json
+"layout_params.overflow.stack.help":
+  "**Cascade overflow** — Keeps as many windows fully tiled
+   as fit…\n**Cascade all** — Cascades the whole stack…"
+```
+
+Preserve both in a translation: keep each `**…**` pair
+balanced around the translated option name (an unbalanced pair
+renders literal asterisks to users), keep the option names
+matching the field's actual option labels (the sibling keys
+without `.help`), and keep the `\n` between option lines. The
+sentence around them is yours to reshape as the language
+needs.
+
 ## Where the files live
 
 ```
