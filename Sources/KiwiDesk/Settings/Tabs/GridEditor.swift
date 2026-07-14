@@ -79,44 +79,42 @@ struct GridEditor: View {
             .disabled(
                 model.config.settings.grid.type == .rigid
             )
-            gridAutoSize
-            StepperRow(
-                label: L("scroll_grid.columns", "Columns"),
-                value: grid.columns,
-                in: 1...10
-            )
-            .disabled(model.config.settings.grid.autoSize)
-            StepperRow(
-                label: L("scroll_grid.rows", "Rows"),
-                value: grid.rows,
-                in: 1...10
-            )
-            .disabled(model.config.settings.grid.autoSize)
+            Divider()
+            // Auto-size + its dimensions read as a distinct block
+            // from the grid-fill behaviour above, mirroring the
+            // Divider BSP/Stack put before their own such content.
+            gridDimensions
             Divider()
             PlacementPicker(placement: grid.newWindowPlacement)
         }
     }
 
-    /// The auto-size toggle with its caption. A behavior modifier
-    /// like Fill empty space / Wrap focus — not a mode switch —
-    /// so it reads as a plain toggle; when on it greys the
-    /// Columns/Rows steppers below (the screen supplies the dims).
-    private var gridAutoSize: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Toggle(
-                L("scroll_grid.auto_size", "Auto-size grid"),
-                isOn: grid.autoSize
+    /// The Auto-size toggle gating the Columns/Rows steppers, via
+    /// the shared `AutoGatedGroup` (#233). A behaviour modifier
+    /// like Fill empty space / Wrap focus — not a mode switch — so
+    /// it reads as a plain toggle; on, it greys the steppers
+    /// (visible but disabled, #171), the screen supplying the dims.
+    private var gridDimensions: some View {
+        AutoGatedGroup(
+            title: L("scroll_grid.auto_size", "Auto-size grid"),
+            isOn: grid.autoSize,
+            caption: L(
+                "scroll_grid.auto_size_caption",
+                "Fits as many columns and rows as the "
+                    + "screen allows, using the minimum "
+                    + "window size above."
             )
-            Text(
-                L(
-                    "scroll_grid.auto_size_caption",
-                    "Fits as many columns and rows as the "
-                        + "screen allows, using the minimum "
-                        + "window size above."
-                )
+        ) {
+            StepperRow(
+                label: L("scroll_grid.columns", "Columns"),
+                value: grid.columns,
+                in: 1...10
             )
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            StepperRow(
+                label: L("scroll_grid.rows", "Rows"),
+                value: grid.rows,
+                in: 1...10
+            )
         }
     }
 }

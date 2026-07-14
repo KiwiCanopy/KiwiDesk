@@ -17,21 +17,6 @@ enum AppBarAuto {
     }
 }
 
-/// The #171 "grey, don't hide" treatment: a control that has no
-/// effect in the current mode stays visible but disabled and
-/// dimmed, with an optional explanatory tooltip.
-struct AppBarGreyOut: ViewModifier {
-    let active: Bool
-    var help: String = ""
-
-    func body(content: Content) -> some View {
-        content
-            .disabled(active)
-            .opacity(active ? 0.5 : 1)
-            .help(active ? help : "")
-    }
-}
-
 /// The Position/Tab-background/Active-indicator/Content dropdown
 /// labels are
 /// data (an array of value/label pairs shared by the global and
@@ -150,10 +135,11 @@ struct OverrideSliderRow: View {
 }
 
 /// An override slider whose 0 = auto sentinel is exposed as an
-/// Auto toggle (#228 §3), mirroring the global editor. While the
-/// row overrides the field, the Auto toggle rides above the
-/// slider and greys it when auto; restoring turns auto off with a
-/// sensible non-zero size.
+/// Auto toggle (#228 §3), mirroring the global editor. A thin
+/// wrapper over `AutoGatedGroup` inside the override chrome: the
+/// shared component binds the Auto toggle above the slider and
+/// greys it when auto; restoring turns auto off with a sensible
+/// non-zero size (#233 — the pattern's origin site).
 struct OverrideAutoSliderRow: View {
     let label: String
     let autoLabel: String
@@ -164,23 +150,17 @@ struct OverrideAutoSliderRow: View {
 
     var body: some View {
         OverrideChrome(isOn: overrideToggle($value, global: global)) {
-            VStack(alignment: .leading, spacing: 4) {
-                Toggle(
-                    autoLabel,
-                    isOn: AppBarAuto.binding(
-                        overrideValue($value, global: global),
-                        restore: restore
-                    )
+            AutoGatedGroup(
+                title: autoLabel,
+                isOn: AppBarAuto.binding(
+                    overrideValue($value, global: global),
+                    restore: restore
                 )
+            ) {
                 PtSlider(
                     label: label,
                     value: overrideValue($value, global: global),
                     range: range
-                )
-                .modifier(
-                    AppBarGreyOut(
-                        active: (value ?? global) == 0
-                    )
                 )
             }
         }

@@ -154,7 +154,7 @@ struct LayoutAppBarSection: View {
             unit: "%"
         )
         .modifier(
-            AppBarGreyOut(
+            GreyOut(
                 active: bar.resolved(with: global)
                     .tabBackground != .boxed
             )
