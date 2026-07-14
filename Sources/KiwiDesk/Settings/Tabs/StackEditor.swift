@@ -42,7 +42,10 @@ struct StackEditor: View {
                 value: stack.masterRatio
             )
             Divider()
-            DropdownRow(label: overflowLabel) {
+            DropdownRow(
+                label: overflowLabel,
+                help: LayoutHelp.stackOverflow
+            ) {
                 Picker(
                     overflowLabel,
                     selection: stack.overflowStyle

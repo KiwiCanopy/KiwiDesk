@@ -49,6 +49,8 @@ struct PtSlider: View {
 struct RatioRow: View {
     let label: String
     @Binding var value: Double
+    /// Optional `?` popover (#94), trailing after the readout.
+    var help: String? = nil
     @Environment(\.settingsLabelColumn)
     private var labelColumn
 
@@ -71,6 +73,9 @@ struct RatioRow: View {
                 )
                 .foregroundStyle(.secondary)
                 .font(.system(.body, design: .monospaced))
+            if let help {
+                HelpButton(explanation: help)
+            }
         }
     }
 }
@@ -82,6 +87,8 @@ struct RatioRow: View {
 /// (`labelsHidden` hides it visually only).
 struct DropdownRow<P: View>: View {
     let label: String
+    /// Optional `?` popover (#94), on the trailing edge.
+    var help: String? = nil
     @ViewBuilder let picker: P
     @Environment(\.settingsLabelColumn)
     private var labelColumn
@@ -96,6 +103,9 @@ struct DropdownRow<P: View>: View {
                 .pickerStyle(.menu)
                 .controlSize(.large)
             Spacer()
+            if let help {
+                HelpButton(explanation: help)
+            }
         }
     }
 }
@@ -188,7 +198,17 @@ struct PlacementPicker: View {
 
     var body: some View {
         let rowLabel = label ?? newWindowLabel
-        return DropdownRow(label: rowLabel) {
+        return DropdownRow(
+            label: rowLabel,
+            help: L(
+                "placement.new_window.help",
+                "Where a new window lands relative to the "
+                    + "others: First or Last in the layout's "
+                    + "order, or right before or after "
+                    + "whichever window is focused at the "
+                    + "moment it opens."
+            )
+        ) {
             Picker(rowLabel, selection: $placement) {
                 Text(L("placement.first", "First"))
                     .tag(SpawnPlacement.first)

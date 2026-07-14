@@ -18,6 +18,21 @@ extension SpacesSection {
             .labelsHidden()
             .controlSize(.large)
             .frame(width: 150)
+            // Label is hidden, so the picker's purpose is
+            // inferable only from its options — a one-line
+            // hover hint names it (#94).
+            .help(
+                L(
+                    "spaces.mode.help",
+                    "Layout mode for this space"
+                )
+            )
+            .accessibilityLabel(
+                L(
+                    "spaces.mode.help",
+                    "Layout mode for this space"
+                )
+            )
 
             // The one drift source (`model.layoutDrift`), shared
             // with the footer captions — never a second inline

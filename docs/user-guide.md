@@ -26,6 +26,19 @@ profile is loaded and letting you edit a saved profile without
 switching to it. At the bottom, a stable three-slot footer holds
 Revert, Save a Copy As…, and Save.
 
+### Contextual Help (?)
+
+Some rows carry a small circled question mark after their
+control. Click it to open a short popover explaining what the
+setting does — for a field with a few named options, the popover
+describes each option in one line. Hovering the question mark
+shows the same text as a tooltip.
+
+The help is optional reading: every setting is meant to be
+understandable from its label, options, and the preview or
+schematic above it. The question mark is there just in case the
+short form didn't explain enough.
+
 ### Permission & First Run
 
 On first launch, a wizard prompts you to grant Accessibility

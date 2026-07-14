@@ -19,6 +19,9 @@ struct SegmentedPicker<Value: Hashable>: View {
     private let label: String?
     @Binding private var selection: Value
     private let options: [(title: String, value: Value)]
+    /// Optional `?` popover (#94), trailing after the track —
+    /// one per field, never per segment.
+    private let help: String?
     @Namespace private var pillSpace
     @Environment(\.colorScheme) private var scheme
     @Environment(\.settingsLabelColumn)
@@ -27,23 +30,30 @@ struct SegmentedPicker<Value: Hashable>: View {
     init(
         _ label: String? = nil,
         selection: Binding<Value>,
-        options: [(title: String, value: Value)]
+        options: [(title: String, value: Value)],
+        help: String? = nil
     ) {
         self.label = label
         self._selection = selection
         self.options = options
+        self.help = help
     }
 
     var body: some View {
-        if let label {
+        if label != nil || help != nil {
             HStack {
-                Text(label)
-                    .frame(
-                        width: labelColumn,
-                        alignment: .leading
-                    )
-                    .lineLimit(1)
+                if let label {
+                    Text(label)
+                        .frame(
+                            width: labelColumn,
+                            alignment: .leading
+                        )
+                        .lineLimit(1)
+                }
                 labeledTrack
+                if let help {
+                    HelpButton(explanation: help)
+                }
             }
         } else {
             labeledTrack

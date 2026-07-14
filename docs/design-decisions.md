@@ -887,6 +887,31 @@ roundness to sit flush inside the curve.
 
 ## Shared controls
 
+**Per-field help is a click popover behind a trailing `?`,
+not a hover tooltip (#94).** Rows that warrant a sentence of
+explanation carry a small `questionmark.circle` button
+*trailing the row, after the control* — never in or before
+the label column, which would break the shared
+`settingsLabelColumn` alignment every row type relies on.
+Clicking opens a fixed-width popover; `.help()` rides along
+as a hover fallback and the content doubles as the VoiceOver
+hint. A popover, not hover-only `.help()`, because that is
+what System Settings does for explanations: a visible,
+discoverable glyph; a real focusable button (keyboard and
+VoiceOver reach it); dismissible and re-readable — while
+hover tooltips are single-line-biased, keyboard-inaccessible
+and invisible to anyone who never rests the pointer.
+`.help()` remains the idiom for one-line hints on ambiguous
+*icon-only controls*. A field with 2–3 named options folds
+per-option text into the ONE field-level popover (option
+name bold, one line each) — never a `?` per segment. Two
+scope guards: help is optional reading (a label must stay
+understandable without it — must-know info never lives only
+in the popover), and a field already taught by its live
+preview or schematic (App Bar colors, layout-tab
+geometry) gets no `?` at all. Copy is a normal `L()` string
+under the `<key>.help` suffix convention.
+
 **Option tabs are a solid sliding-pill segment control.**
 Every pick-one-of-few chooser (layout parameters, mouse
 resize, icon picker tabs) uses `SegmentedPicker`

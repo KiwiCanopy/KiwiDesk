@@ -141,7 +141,8 @@ struct SpaceOverrideRows: View {
                     .alternating,
                     L("layout_params.alternating", "Alternating")
                 ),
-            ]
+            ],
+            help: LayoutHelp.splitStrategy
         )
         OverrideFractionRow(
             label: L(
@@ -149,7 +150,8 @@ struct SpaceOverrideRows: View {
                 "Width split ratio"
             ),
             value: binding(\.bsp.override, space, \.splitRatioH),
-            global: g.bsp.splitRatioH
+            global: g.bsp.splitRatioH,
+            help: LayoutHelp.splitRatioH
         )
         OverrideFractionRow(
             label: L(
@@ -157,7 +159,8 @@ struct SpaceOverrideRows: View {
                 "Height split ratio"
             ),
             value: binding(\.bsp.override, space, \.splitRatioV),
-            global: g.bsp.splitRatioV
+            global: g.bsp.splitRatioV,
+            help: LayoutHelp.splitRatioV
         )
     }
 
@@ -211,7 +214,8 @@ struct SpaceOverrideRows: View {
                         "Cascade all"
                     )
                 ),
-            ]
+            ],
+            help: LayoutHelp.stackOverflow
         )
     }
 

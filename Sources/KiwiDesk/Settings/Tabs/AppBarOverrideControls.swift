@@ -247,12 +247,15 @@ struct OverrideFractionRow: View {
     let label: String
     @Binding var value: Double?
     let global: Double
+    /// Optional `?` popover (#94), forwarded to the inner row.
+    var help: String? = nil
 
     var body: some View {
         OverrideChrome(isOn: overrideToggle($value, global: global)) {
             RatioRow(
                 label: label,
-                value: overrideValue($value, global: global)
+                value: overrideValue($value, global: global),
+                help: help
             )
         }
     }
@@ -264,10 +267,12 @@ struct OverridePickerRow<Value: Hashable & Sendable>: View {
     @Binding var value: Value?
     let global: Value
     let options: [(Value, String)]
+    /// Optional `?` popover (#94), forwarded to the inner row.
+    var help: String? = nil
 
     var body: some View {
         OverrideChrome(isOn: overrideToggle($value, global: global)) {
-            DropdownRow(label: label) {
+            DropdownRow(label: label, help: help) {
                 Picker(
                     label,
                     selection: overrideValue(
