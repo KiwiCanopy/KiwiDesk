@@ -93,17 +93,19 @@ extension SpaceOverrideRows {
     @ViewBuilder
     var trackRows: some View {
         OverridePickerRow(
-            label: L("track.axis", "Axis"),
+            // "Arrange: Columns / Rows" (#217 pattern) — GUI label
+            // only; wire `track.axis` stays horizontal/vertical.
+            label: L("scroll_grid.arrange", "Arrange"),
             value: binding(\.track.override, space, \.axis),
             global: g.track.axis,
             options: [
                 (
                     .vertical,
-                    L("track.axis.vertical", "Vertical (columns)")
+                    L("scroll_grid.arrange.columns", "Columns")
                 ),
                 (
                     .horizontal,
-                    L("track.axis.horizontal", "Horizontal (rows)")
+                    L("scroll_grid.arrange.rows", "Rows")
                 ),
             ]
         )

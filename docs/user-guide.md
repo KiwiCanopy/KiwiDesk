@@ -321,8 +321,9 @@ Adjust each mode's defaults:
   landscape monitor gets more columns than rows.
 - **Track**: a somewhat more advanced layout (a caption at the
   top of the section says so) where several windows can share
-  one track. Axis (vertical = columns side by side, horizontal
-  = rows); **New window** — whether it opens its own track or
+  one track. **Arrange** (Columns = tracks side by side, Rows =
+  tracks stacked); **New window** — whether it opens its own
+  track or
   joins the focused one — with a **Position** picker for where
   within that choice it lands (first, last, before or after the
   focused track/window; defaults to **first** so a new window
