@@ -8,10 +8,12 @@ import SwiftUI
 enum SettingsMetrics {
     /// The label column in front of sliders, segmented pickers
     /// and dropdowns. The longest row label in use ("Mouse
-    /// resize action") measures ~121 pt at body size — 128
-    /// keeps headroom so a font-metric change can't silently
-    /// wrap it.
-    static let labelColumn: CGFloat = 128
+    /// resize action") measures ~121 pt at body size; 150 also
+    /// holds the label-adjacent help `?` (#94 placement, ~24 pt
+    /// glyph + chip + gap) on rows that carry one — rows
+    /// without help just gain truncation headroom for longer
+    /// locales.
+    static let labelColumn: CGFloat = 150
 
     /// `OverrideChrome`'s leading padding and checkbox
     /// spacing — consumed by the chrome itself, so retuning
@@ -29,15 +31,16 @@ enum SettingsMetrics {
     /// chrome re-scopes the shared rows onto this via
     /// `\.settingsLabelColumn`. The discount means a label
     /// that fits `labelColumn` can still wrap here — override
-    /// labels must measure under ~84 pt at body size (it bit
-    /// "Focused anchor" at 97 pt, shortened to "Focus
-    /// anchor"); the shared rows' `lineLimit(1)` makes an
-    /// overflow truncate visibly instead of wrapping quietly.
+    /// labels must measure under ~116 pt at body size (the
+    /// old 94 pt column bit "Focused anchor" at 97 pt,
+    /// shortened to "Focus anchor"; it would fit again now);
+    /// the shared rows' `lineLimit(1)` makes an overflow
+    /// truncate visibly instead of wrapping quietly.
     static let overrideLabelColumn: CGFloat =
         labelColumn - (2 * overrideRowInset + checkboxWidth)
 
     /// The label column for the Drag & Drop editor's two
-    /// half-width columns (#231). Narrower than the shared 128,
+    /// half-width columns (#231). Narrower than the shared 150,
     /// pushed onto every row in a column via the
     /// `\.settingsLabelColumn` override (the seam
     /// `OverrideChrome` uses), so a half-width column still

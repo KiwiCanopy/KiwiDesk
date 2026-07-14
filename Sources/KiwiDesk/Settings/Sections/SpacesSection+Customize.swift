@@ -40,7 +40,11 @@ extension SpacesSection {
             SpaceOverrideRows(model: model, space: space)
                 .padding(14)
         }
-        .frame(width: 360)
+        // 384, not 360: pays back the 22 pt the label column
+        // grew (#94 label-adjacent help), so the ratio sliders
+        // inside keep their drag travel instead of absorbing
+        // the loss on the app's narrowest editing surface.
+        .frame(width: 384)
         .frame(maxHeight: 380)
     }
 

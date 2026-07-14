@@ -887,20 +887,27 @@ roundness to sit flush inside the curve.
 
 ## Shared controls
 
-**Per-field help is a click popover behind a trailing `?`,
-not a hover tooltip (#94).** Rows that warrant a sentence of
-explanation carry a small `questionmark.circle` button
-*trailing the row, after the control* — never in or before
-the label column, which would break the shared
-`settingsLabelColumn` alignment every row type relies on
-(and, in the ~84 pt override column, would reopen the
-label-truncation bug class for longer locales). "After the
-control" means *snug against it*, before any `Spacer`: a `?`
-pushed to the pane's far edge floats in dead space with
-nothing tying it to its control and gets overlooked
-(owner-tested on the first cut). The button also wears the
-shared `hoverHighlight` chip like every other icon-only
-borderless control, so the eye has something to catch.
+**Per-field help is a click popover behind a `?` right after
+the label, not a hover tooltip (#94).** Rows that warrant a
+sentence of explanation carry a small `questionmark.circle`
+button **immediately after the field's label text, inside
+the shared `settingsLabelColumn`**. The question is born at
+the label ("what is *Width split ratio*?"), so the
+affordance sits where the confusion starts — not past a
+control the user has already scanned in confusion.
+Owner-tested twice: the first cut (far trailing edge) and
+the second (snug after the control) were both anchored to
+the wrong end of the row. This is also System Settings' own
+info-glyph convention (Focus/Siri panes put it beside the
+label). `labelColumn` grew 128 → 150 pt to hold the longest
+label plus the glyph; a long label + glyph truncates visibly
+(`lineLimit(1)`) — the accepted fallback, and long German
+labels on help rows are shortening candidates for the de
+review pass. An *unlabeled* `SegmentedPicker` (icon tabs)
+has no label to sit beside, so its `?` trails the track.
+The button wears the shared `hoverHighlight` chip like
+every other icon-only borderless control, so the eye has
+something to catch.
 Clicking opens a fixed-width popover; `.help()` rides along
 as a hover fallback carrying the full text, while the
 VoiceOver hint stays a short action phrase ("Shows an
@@ -939,8 +946,12 @@ while the user decides whether to override. Accepted
 consequence: there the `?` sits at the chrome row's
 trailing edge (past the inner row's spacer, a small
 distance in the narrow popover), consistently for every
-override row — do not "fix" it back inside the row, that
-re-enters the disabled scope.
+override row — the deliberate exception to label-adjacent
+placement, since the label lives inside the disable-able
+content, the checkbox-narrowed column has no width to
+spare, and the user already met the field (with its
+label-adjacent `?`) on the global surface. Do not "fix" it
+back inside the row: that re-enters the disabled scope.
 
 **Option tabs are a solid sliding-pill segment control.**
 Every pick-one-of-few chooser (layout parameters, mouse

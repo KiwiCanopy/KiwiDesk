@@ -49,16 +49,22 @@ struct PtSlider: View {
 struct RatioRow: View {
     let label: String
     @Binding var value: Double
-    /// Optional `?` popover (#94), trailing after the readout.
+    /// Optional `?` popover (#94), label-adjacent: the
+    /// question is born at the label, so the affordance sits
+    /// where the confusion starts.
     var help: String? = nil
     @Environment(\.settingsLabelColumn)
     private var labelColumn
 
     var body: some View {
         HStack {
-            Text(label)
-                .frame(width: labelColumn, alignment: .leading)
-                .lineLimit(1)
+            HStack(spacing: 4) {
+                Text(label).lineLimit(1)
+                if let help {
+                    HelpButton(explanation: help)
+                }
+            }
+            .frame(width: labelColumn, alignment: .leading)
             SettingsSlider(
                 value: $value,
                 range: 0.1...0.9,
@@ -73,9 +79,6 @@ struct RatioRow: View {
                 )
                 .foregroundStyle(.secondary)
                 .font(.system(.body, design: .monospaced))
-            if let help {
-                HelpButton(explanation: help)
-            }
         }
     }
 }
@@ -87,7 +90,7 @@ struct RatioRow: View {
 /// (`labelsHidden` hides it visually only).
 struct DropdownRow<P: View>: View {
     let label: String
-    /// Optional `?` popover (#94), on the trailing edge.
+    /// Optional `?` popover (#94), label-adjacent.
     var help: String? = nil
     @ViewBuilder let picker: P
     @Environment(\.settingsLabelColumn)
@@ -95,19 +98,17 @@ struct DropdownRow<P: View>: View {
 
     var body: some View {
         HStack {
-            Text(label)
-                .frame(width: labelColumn, alignment: .leading)
-                .lineLimit(1)
+            HStack(spacing: 4) {
+                Text(label).lineLimit(1)
+                if let help {
+                    HelpButton(explanation: help)
+                }
+            }
+            .frame(width: labelColumn, alignment: .leading)
             picker
                 .labelsHidden()
                 .pickerStyle(.menu)
                 .controlSize(.large)
-            // The ? sits snug against the picker, BEFORE the
-            // spacer — pushed to the pane's far edge it floats
-            // in dead space and gets overlooked (owner-tested).
-            if let help {
-                HelpButton(explanation: help)
-            }
             Spacer()
         }
     }
