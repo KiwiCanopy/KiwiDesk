@@ -40,8 +40,9 @@ enum SettingsMetrics {
     /// half-width columns (#231). Narrower than the shared 128,
     /// pushed onto every row in a column via the
     /// `\.settingsLabelColumn` override (the seam
-    /// `OverrideChrome` uses), so a ~270 pt column leaves the
-    /// slider real travel. The rows there are relabeled to their
+    /// `OverrideChrome` uses), so a half-width column still
+    /// leaves the slider real travel. The rows there are
+    /// relabeled to their
     /// in-group short forms ("Color", "Width", "Alignment") so
     /// this width holds; headroom over "Alignment" (~58 pt at
     /// body) covers a longer localization before `lineLimit(1)`

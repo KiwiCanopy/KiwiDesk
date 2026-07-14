@@ -827,11 +827,12 @@ color" → "Color", "Border width" → "Width", "Border
 alignment" → "Alignment"), narrowed onto the
 `dragColumnLabelColumn` axis via the `settingsLabelColumn`
 override; VoiceOver keeps the full name through `a11yLabel`.
-The preview honestly renders **Inside vs Outside** border
-alignment (inset within the tile vs straddling outward past
-its edge, offset scaling with the border width) — the
-control was previously dead because SwiftUI `.strokeBorder`
-always draws inside; and both the corner-radius and
+The preview renders **Inside vs Outside** border alignment
+(inset within the tile vs a larger footprint outside its
+edge, offset scaling with the border width) — schematic, not
+pixel-exact, but the control was previously dead because
+SwiftUI `.strokeBorder` always draws inside; and both the
+corner-radius and
 border-width previews now remap the full slider range instead
 of hard-capping halfway (the `AppBarPreviewStrip` fix).
 

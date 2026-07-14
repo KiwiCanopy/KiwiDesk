@@ -128,12 +128,13 @@ private struct DragVisualPreview: View {
             .opacity(visual.enabled ? 1 : 0.25)
     }
 
-    /// Draw the border where it actually lands at runtime
+    /// Illustrate the footprint each alignment gives at runtime
     /// (`DragOverlay.adjustedFrame`, #231): inset within the
-    /// tile for `.inside`, straddling outward past the tile edge
-    /// for `.outside`. The outward offset is half the (scaled)
-    /// width the slider drives, so the footprint difference
-    /// grows with the same number the user is dragging.
+    /// tile for `.inside`, sitting outside the tile edge for
+    /// `.outside`. Schematic, not pixel-exact — the point is the
+    /// larger outward footprint, sized to half the (scaled)
+    /// width the slider drives so the difference grows with the
+    /// same number the user is dragging.
     @ViewBuilder private func border(
         radius: CGFloat,
         width: CGFloat
@@ -145,7 +146,13 @@ private struct DragVisualPreview: View {
                 RoundedRectangle(cornerRadius: radius)
                     .strokeBorder(color, lineWidth: width)
             case .outside:
-                RoundedRectangle(cornerRadius: radius)
+                // Grow the corner radius with the outward offset
+                // (a parallel offset of a rounded rect by d has
+                // radius R + d) so the border's inner corner
+                // stays flush with the tile's rounded corner —
+                // keeping `radius` here left a backdrop sliver in
+                // each corner.
+                RoundedRectangle(cornerRadius: radius + width / 2)
                     .stroke(color, lineWidth: width)
                     .padding(-width / 2)
             }
