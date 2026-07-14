@@ -18,16 +18,24 @@ import SwiftUI
 /// visuals).
 struct HexColorField: View {
     let label: String
+    /// The screen label may be shortened to its in-group form
+    /// ("Color" under a Border/Fill group, #231); VoiceOver
+    /// still needs the disambiguated name, so `a11yLabel`
+    /// overrides what `ColorSwatch` announces. Defaults to the
+    /// visible `label` when they're the same.
+    var a11yLabel: String?
+    /// Label-column width — narrowed in the Drag editor's
+    /// half-width columns (#231); the App Bar color grid keeps
+    /// the default `colorLabelColumn`.
+    var labelWidth: CGFloat = SettingsMetrics.colorLabelColumn
     @Binding var hex: String
 
     var body: some View {
         HStack(spacing: 8) {
             Text(label)
-                .frame(
-                    width: SettingsMetrics.colorLabelColumn,
-                    alignment: .leading
-                )
-            ColorSwatch(label: label, hex: $hex)
+                .frame(width: labelWidth, alignment: .leading)
+                .lineLimit(1)
+            ColorSwatch(label: a11yLabel ?? label, hex: $hex)
         }
     }
 

@@ -810,6 +810,32 @@ titles ("dragged window", "swap target"). Section captions
 are a `SettingsSection` affordance, so other groups can
 adopt the same pattern.
 
+**Ghost and Drop zone are two side-by-side columns.** (#231.)
+Each column leads with its own live preview and puts its
+controls directly beneath, so tuning a column's border width
+never scrolls that preview off-screen — the failure mode of
+the earlier one-strip-then-two-stacked-sections layout. They
+are a genuine A/B pair (same schema, edited by comparison),
+which is exactly where macOS System Settings itself reaches
+for twin panels (Displays' Arrangement, Desktop & Dock's
+light/dark), so twin columns state the pairing once instead
+of duplicating preview-then-controls structure. The shared
+corner radius sits full-width above both (it styles neither
+alone). In the narrower columns, rows drop the group prefix
+already carried by the Border/Fill sub-grouping ("Border
+color" → "Color", "Border width" → "Width", "Border
+alignment" → "Alignment"), narrowed onto the
+`dragColumnLabelColumn` axis via the `settingsLabelColumn`
+override; VoiceOver keeps the full name through `a11yLabel`.
+The preview renders **Inside vs Outside** border alignment
+(inset within the tile vs a larger footprint outside its
+edge, offset scaling with the border width) — schematic, not
+pixel-exact, but the control was previously dead because
+SwiftUI `.strokeBorder` always draws inside; and both the
+corner-radius and
+border-width previews now remap the full slider range instead
+of hard-capping halfway (the `AppBarPreviewStrip` fix).
+
 ## App Bar
 
 **App Bar position is axis-relative by design.** (#228.) The
