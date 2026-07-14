@@ -288,10 +288,13 @@ Adjust each mode's defaults:
   share of its column (a session-only tweak — it resets on
   relaunch and is not saved into profiles).
 - **Scrolling**: orientation (horizontal or vertical), anchor
-  (where a freshly revealed column comes to rest — center, left,
-  right; once scrolled, the viewport pans minimally to keep the
-  focus visible), slot size (auto, pixel count, or percentage of
-  available space), and **Wrap focus** — off by default, so
+  (where the focused column rests on every focus — **Center**, or
+  flush against the leading/trailing edge, shown as **Left**/
+  **Right** when horizontal and **Top**/**Bottom** when vertical;
+  or **Follow**, the default, which holds the viewport and pans
+  the minimum to keep the focus visible), slot size (auto, pixel
+  count, or percentage of available space), and **Wrap focus** —
+  off by default, so
   stepping focus past a row end stops there; turn it on to wrap
   from the last window back to the first (and vice versa). Swap
   never wraps.

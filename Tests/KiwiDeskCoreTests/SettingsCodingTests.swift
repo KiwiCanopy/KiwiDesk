@@ -77,6 +77,9 @@ struct SettingsCodingTests {
         let scroll = try object(layout["scroll"])
         // Default slot size is `auto`, encoded as 0.
         #expect(scroll["slot_size"] as? Double == 0)
+        // `scroll.set_anchor` → `layout.scroll.anchor`; `follow`
+        // by default (#239 — the minimal-pan behavior).
+        #expect(scroll["anchor"] as? String == "follow")
         // `scroll.set_wrap_focus` → `layout.scroll.wrap_focus`,
         // off by default (#168).
         #expect(scroll["wrap_focus"] as? Bool == false)

@@ -18,11 +18,12 @@ private func makeContext(
     LayoutContext(bounds: bounds, gaps: gaps, focused: focused)
 }
 
-/// Scrolling's horizontal mechanics. The anchor only seeds a
-/// fresh scroll (`context.scrollOffset == nil`); once scrolled,
-/// focus moves pan the minimal amount needed to keep the focused
-/// slot fully visible (#66) — see `ScrollingFocusSymmetryTests`
-/// for the up/down regression coverage.
+/// Scrolling's horizontal mechanics. The focus anchor is applied
+/// on every focus (#239): `center`/`start`/`end` rest the focused
+/// slot at a fixed position, while `follow` (the default) pans the
+/// minimal amount needed to keep it visible (#66) — see
+/// `ScrollingFocusSymmetryTests` for the up/down regression
+/// coverage.
 @Suite("Scrolling layout")
 struct ScrollingLayoutTests {
     let layout = ScrollingLayout()
@@ -40,10 +41,10 @@ struct ScrollingLayoutTests {
         #expect(frames[w1] == context.usable)
     }
 
-    @Test("Focused column is centered on first scroll")
+    @Test("Center anchor centers the focused column")
     func centerAnchor() throws {
-        // No previous offset: the anchor seeds the position.
         var context = makeContext(focused: w2)
+        context.scrolling.anchor = .center
         context.scrolling.slotSize = .points(800)
         let frames = layout.calculateGeometry(
             for: [w1, w2, w3],
@@ -52,6 +53,34 @@ struct ScrollingLayoutTests {
         let focused = try #require(frames[w2])
         #expect(abs(focused.midX - context.usable.midX) < 0.01)
         #expect(focused.width == 800)
+    }
+
+    @Test("A fixed anchor re-seats an already-visible focus (#239)")
+    func fixedAnchorReseatsVisibleFocus() throws {
+        // The crux of #239: `center` recomputes the resting
+        // position on every focus. Even with a carried-forward
+        // offset at which the focus is already fully visible (the
+        // old first-placement-only seed would have held it), the
+        // viewport pans to re-center — it is not `follow`.
+        var context = makeContext(focused: w3)
+        context.scrolling.appBar.enabled = false
+        context.scrolling.anchor = .center
+        context.scrolling.slotSize = .points(400)
+        context.bounds = CGRect(x: 0, y: 0, width: 1420, height: 1080)
+        // w3 is fully visible at this prior offset, but off-center.
+        context.scrollOffset = -180
+        let windows = [w1, w2, w3, w4, w5]
+        let frames = layout.calculateGeometry(
+            for: windows,
+            in: context
+        )
+        let offset = ScrollingLayout.viewportOffset(
+            for: windows,
+            in: context
+        )
+        let focused = try #require(frames[w3])
+        #expect(abs(focused.midX - context.usable.midX) < 0.01)
+        #expect(offset != -180)
     }
 
     @Test("First column snaps to the left edge on first scroll")

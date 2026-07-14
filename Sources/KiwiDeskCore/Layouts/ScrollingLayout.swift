@@ -3,16 +3,18 @@ import CoreGraphics
 /// Niri/PaperWM-style scrolling columns.
 ///
 /// Windows sit in an infinite row (horizontal orientation) or
-/// column (vertical) of fixed-size slots. Focus moves scroll the
-/// viewport the minimal amount needed to bring the focused slot
-/// fully into view (#66) — never more, so up and down are
-/// mirror images of each other. The anchor only matters the
-/// first time a space scrolls (or after a mode switch), seeding
-/// where the initial focused slot sits; from then on the
-/// viewport just tracks focus. Slots at the ends snap to the
-/// screen edge so no empty margin appears. With the indicator
-/// bar enabled its strip is carved out of the usable area
-/// first, so windows and bar never overlap.
+/// column (vertical) of fixed-size slots. The **focus anchor**
+/// decides where the focused slot rests, applied on *every* focus
+/// change (#239): `center`/`start`/`end` re-seat it at a fixed
+/// resting position (centred, or flush against the leading
+/// left/top or trailing right/bottom edge — `start`/`end` are
+/// axis-relative like the app bar's), then clamp so no empty
+/// margin shows past the row ends; `follow` (the default) keeps
+/// the prior offset and pans the minimum to reveal the focus
+/// (#66) — up/down mirror, an already-visible slot doesn't move,
+/// the side you came from stays open. Ends snap to the screen
+/// edge. With the indicator bar enabled its strip is carved out
+/// of the usable area first, so windows and bar never overlap.
 ///
 /// macOS constrains what frames it will apply, so materialized
 /// frames pin while the viewport *offset* stays the ideal,
@@ -211,17 +213,18 @@ public struct ScrollingLayout: LayoutSystem {
     /// The viewport offset for a focus at `focusedPos`, given the
     /// offset from the last tile (`previous`).
     ///
-    /// Scroll-into-view (#66): if the focused slot is already
-    /// fully visible at `previous`, the viewport does not move at
-    /// all — panning only ever happens by the minimal amount
-    /// needed to reveal the newly focused slot, so stepping focus
-    /// up is the exact mirror of stepping it down. `previous ==
-    /// nil` (a space that has never scrolled, or just switched
-    /// into scrolling mode) falls back to the anchor's preferred
-    /// resting position instead, so the very first tile still
-    /// respects `scroll.set_anchor` — unless `focusedPos` is
-    /// also nil (no slot to anchor on), which rests at the row
-    /// start.
+    /// Dispatches on `anchor`, not on whether the space has
+    /// scrolled before (#239): `center`/`start`/`end` compute a
+    /// fixed resting position on *every* focus, then clamp it to
+    /// keep the focused slot fully visible. `follow` instead keeps
+    /// `previous` and pans the minimum needed to reveal the
+    /// focused slot (#66) — the only anchor that reads `previous`;
+    /// a `follow` space that has never scrolled seeds at the row
+    /// start (`previous ?? visibleMin`). When `focusedPos` is nil
+    /// (a floating window, or nothing focused) there is no slot to
+    /// place, so the viewport holds its previous offset (#141).
+    /// The result is finally clamped so the row never reveals
+    /// empty margin past its ends.
     static func offset(
         anchor: ScrollingParams.Anchor,
         previous: CGFloat?,
@@ -237,33 +240,28 @@ public struct ScrollingLayout: LayoutSystem {
             // would clip its leading or trailing edge.
             let visibleMin = -focusedPos
             let visibleMax = along - size - focusedPos
-            if let previous {
-                target = min(
-                    max(previous, visibleMin),
-                    visibleMax
-                )
-            } else {
-                target = anchorOffset(
+            switch anchor {
+            case .follow:
+                // Scroll-into-view (#66): hold the prior offset,
+                // pan only enough to reveal the focused slot. A
+                // never-scrolled space seeds at the row start.
+                let base = previous ?? visibleMin
+                target = min(max(base, visibleMin), visibleMax)
+            case .center, .start, .end:
+                // Fixed resting position, recomputed every focus.
+                let resting = anchorOffset(
                     anchor: anchor,
                     along: along,
                     size: size,
                     focusedPos: focusedPos
                 )
-                target = min(
-                    max(target, visibleMin),
-                    visibleMax
-                )
+                target = min(max(resting, visibleMin), visibleMax)
             }
         } else {
             // The focused window has no slot in the row (a
             // floating window, or nothing focused): there is
             // nothing to scroll into view, so the viewport
-            // stays put instead of snapping home (#141). A
-            // never-scrolled space rests at the row start —
-            // deliberately consuming the anchor seed (the
-            // persist loop writes the 0 back): re-seeding on
-            // the next slotted focus isn't worth an optional
-            // return through the #66 loop for this niche.
+            // stays put instead of snapping home (#141).
             target = previous ?? 0
         }
 
@@ -273,8 +271,12 @@ public struct ScrollingLayout: LayoutSystem {
         return min(max(target, along - rowLength), 0)
     }
 
-    /// The anchor's preferred resting position for a freshly
-    /// scrolled focus, before visibility/boundary clamping.
+    /// A fixed anchor's resting offset for a focused slot, before
+    /// visibility/boundary clamping. `start`/`end` are
+    /// axis-relative: the `along` coordinate already runs along
+    /// the scroll axis (x horizontal, y vertical), so `start` is
+    /// the leading edge (left / top) and `end` the trailing edge
+    /// (right / bottom) on both orientations — no per-axis branch.
     private static func anchorOffset(
         anchor: ScrollingParams.Anchor,
         along: CGFloat,
@@ -284,10 +286,14 @@ public struct ScrollingLayout: LayoutSystem {
         switch anchor {
         case .center:
             return (along - size) / 2 - focusedPos
-        case .left:
+        case .start:
             return -focusedPos
-        case .right:
+        case .end:
             return along - size - focusedPos
+        case .follow:
+            // Unreachable: `follow` is resolved from `previous`
+            // in `offset`, never as a fixed resting position.
+            return -focusedPos
         }
     }
 
