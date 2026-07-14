@@ -1,6 +1,30 @@
 import KiwiDeskCore
 import SwiftUI
 
+/// The 2-column swatch grid the App Bar color runs share:
+/// Global's colors and each layout's per-layout overrides (#2)
+/// both wrap their `HexColorField`s in this so the two read as
+/// one grid rather than a grid up top and a stacked list below.
+/// Flexible columns, so both grids span the pane's full width
+/// identically; a row's own label width sets where the swatch
+/// sits inside its (equal-width) cell.
+struct AppBarColorGrid<Content: View>: View {
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        LazyVGrid(
+            columns: [
+                GridItem(.flexible(), alignment: .leading),
+                GridItem(.flexible(), alignment: .leading),
+            ],
+            alignment: .leading,
+            spacing: 8
+        ) {
+            content
+        }
+    }
+}
+
 // The App Bar sections are hosted by AppBarSection (#229, its
 // own sidebar destination): the global look shared by every
 // layout's bar, then a per-layout section for each layout that
@@ -36,9 +60,9 @@ struct GlobalAppBarSection: View {
         SettingsSection(
             L("app_bar.global_colors.title", "Global colors")
         ) {
-            colorGrid { inlineColors }
+            AppBarColorGrid { inlineColors }
             DisclosureGroup(isExpanded: $advancedColorsExpanded) {
-                colorGrid { advancedColors }
+                AppBarColorGrid { advancedColors }
                     .padding(.top, 8)
             } label: {
                 Text(
@@ -49,22 +73,6 @@ struct GlobalAppBarSection: View {
                 )
                 .font(.subheadline)
             }
-        }
-    }
-
-    /// The 2-column swatch grid both color runs share.
-    private func colorGrid<C: View>(
-        @ViewBuilder _ content: () -> C
-    ) -> some View {
-        LazyVGrid(
-            columns: [
-                GridItem(.flexible(), alignment: .leading),
-                GridItem(.flexible(), alignment: .leading),
-            ],
-            alignment: .leading,
-            spacing: 8
-        ) {
-            content()
         }
     }
 

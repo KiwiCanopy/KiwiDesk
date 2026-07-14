@@ -59,6 +59,21 @@ enum SettingsMetrics {
     /// second column) — don't "fix" them onto `labelColumn`.
     static let colorLabelColumn: CGFloat = 140
 
+    /// The label column for a color swatch inside an
+    /// `OverrideChrome` row (#2). An override color cell is a
+    /// half-width grid cell that also spends ~34 pt on the
+    /// leading checkbox (`overrideRowInset` + `checkboxWidth` +
+    /// inset) before the swatch and hex field, so the label is
+    /// deliberately narrower than Global's ungated
+    /// `colorLabelColumn` (140) to keep the cell inside half the
+    /// pane — not to align the swatch onto Global's axis (that
+    /// would need ~106 pt). 80 pt fits the English labels;
+    /// longer locales (e.g. German "Gruppen-Badge") truncate
+    /// with `lineLimit(1)` rather than wrap, and the same field
+    /// still shows full at 140 pt in Global's grid — an
+    /// asymmetry the half-width cell forces, tracked on #135.
+    static let overrideColorLabelColumn: CGFloat = 80
+
     /// The inline hex `TextField` beside each color swatch.
     /// Fixed (not auto-sizing) so the two-column color grid in
     /// `AppBarSections` keeps stable cell widths as values
