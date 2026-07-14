@@ -126,7 +126,14 @@ public final class AppBarOverlay {
         let edge = state.edge
         let panel = self.panel ?? makePanel()
         self.panel = panel
-        styleContainer(panel, style: style)
+        // The plain strip rounds against its real (clamped) cross
+        // depth, not the configured thickness, so a strip squeezed
+        // by a small usable area can't over-round.
+        styleContainer(
+            panel,
+            style: style,
+            depth: edge.isHorizontal ? strip.height : strip.width
+        )
         syncItemViewCount(items.count)
         let m = metrics(
             strip: strip,

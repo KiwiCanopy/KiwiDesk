@@ -159,24 +159,6 @@ extension AppBarStyle: Codable {
         case groupBadgeTextColor = "group_badge_text_color"
     }
 
-    /// Decodes a string-raw enum, tolerating both a missing key
-    /// and a present-but-unrecognized raw (an old vocabulary
-    /// token) by falling back to `def`.
-    static func lenientChoice<T: RawRepresentable>(
-        _ container: KeyedDecodingContainer<CodingKeys>,
-        _ key: CodingKeys,
-        default def: T
-    ) -> T where T.RawValue == String {
-        guard
-            let raw = try? container.decodeIfPresent(
-                String.self,
-                forKey: key
-            ),
-            let value = T(rawValue: raw)
-        else { return def }
-        return value
-    }
-
     /// Manual decoding: profiles saved before a field existed
     /// must keep loading (missing keys fall back to defaults).
     public init(from decoder: Decoder) throws {
@@ -184,32 +166,26 @@ extension AppBarStyle: Codable {
             keyedBy: CodingKeys.self
         )
         let defaults = Self()
-        // A profile written before the vocabulary change carries
-        // old tokens (`position:"top"`, `shape` under the old
-        // `style` key, …). `decodeIfPresent` only swallows a
-        // *missing* key, not a present-but-unknown raw, so decode
-        // these enums leniently: an unrecognized value falls back
-        // to the default instead of failing the whole profile.
-        position = Self.lenientChoice(
-            container,
-            .position,
-            default: defaults.position
-        )
+        position =
+            try container.decodeIfPresent(
+                Position.self,
+                forKey: .position
+            ) ?? defaults.position
         thickness =
             try container.decodeIfPresent(
                 CGFloat.self,
                 forKey: .thickness
             ) ?? defaults.thickness
-        tabBackground = Self.lenientChoice(
-            container,
-            .tabBackground,
-            default: defaults.tabBackground
-        )
-        activeIndicator = Self.lenientChoice(
-            container,
-            .activeIndicator,
-            default: defaults.activeIndicator
-        )
+        tabBackground =
+            try container.decodeIfPresent(
+                TabBackground.self,
+                forKey: .tabBackground
+            ) ?? defaults.tabBackground
+        activeIndicator =
+            try container.decodeIfPresent(
+                ActiveIndicator.self,
+                forKey: .activeIndicator
+            ) ?? defaults.activeIndicator
         itemSize =
             try container.decodeIfPresent(
                 CGFloat.self,

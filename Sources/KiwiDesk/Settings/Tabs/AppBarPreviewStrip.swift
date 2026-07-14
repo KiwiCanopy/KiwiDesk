@@ -14,12 +14,13 @@ import SwiftUI
 /// The strip always draws **horizontally** and names the chosen
 /// position in the caption, rather than rotating to a vertical
 /// bar for left/right. Reason: the real bar's edge is decided by
-/// the *active layout's* axis (`resolvedPosition`), which a
-/// layout-agnostic global preview can't know — a vertical mock
-/// would confidently show a left bar the running layout renders
-/// on top. A horizontal sample + a "Position: Left" label is
-/// honest about what's a color/style choice (shown) vs. an
-/// edge the layout resolves (named).
+/// the *active layout's* axis (`AppBarHosting.resolvedBar` derives
+/// the concrete `AppBarEdge`), which a layout-agnostic global
+/// preview can't know — a vertical mock would confidently show a
+/// left bar the running layout renders on top. A horizontal sample
+/// + a "Position: Start" label is honest about what's a
+/// color/style choice (shown) vs. an edge the layout resolves
+/// (named).
 ///
 /// This is a **schematic, not a pixel-mirror**: it re-expresses
 /// the runtime bar's field→look mapping (box color, active

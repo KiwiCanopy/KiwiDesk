@@ -15,7 +15,8 @@ extension AppBarOverlay {
     /// the (default transparent) background color.
     func styleContainer(
         _ panel: NSPanel,
-        style: AppBarStyle
+        style: AppBarStyle,
+        depth: CGFloat
     ) {
         guard let layer = panel.contentView?.layer else {
             return
@@ -23,9 +24,7 @@ extension AppBarOverlay {
         layer.masksToBounds = true
         layer.cornerRadius =
             style.tabBackground == .plain
-            ? style.resolvedCornerRadius(
-                forThickness: style.thickness
-            )
+            ? style.resolvedCornerRadius(forThickness: depth)
             : 0
         let background =
             style.tabBackground == .plain

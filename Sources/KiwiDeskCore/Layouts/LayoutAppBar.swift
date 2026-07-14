@@ -128,23 +128,6 @@ extension LayoutAppBar: Codable {
         case groupBadgeTextColor = "group_badge_text_color"
     }
 
-    /// Decodes an optional string-raw enum override, mapping a
-    /// present-but-unrecognized raw (an old vocabulary token) to
-    /// nil (inherit) instead of throwing.
-    static func lenientOverride<T: RawRepresentable>(
-        _ container: KeyedDecodingContainer<Key>,
-        _ key: Key,
-        as type: T.Type
-    ) -> T? where T.RawValue == String {
-        guard
-            let raw = try? container.decodeIfPresent(
-                String.self,
-                forKey: key
-            )
-        else { return nil }
-        return T(rawValue: raw)
-    }
-
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: Key.self)
         enabled =
@@ -152,30 +135,21 @@ extension LayoutAppBar: Codable {
                 Bool.self,
                 forKey: .enabled
             ) ?? true
-        // An old profile may carry a stale `position` raw
-        // (`"top"`/`"left"` from before the start/end change);
-        // an unrecognized override raw decodes to nil (inherit)
-        // rather than failing the profile. `shape`/
-        // `active_indicator` are new keys, so an old file simply
-        // lacks them and inherits.
-        position = Self.lenientOverride(
-            container,
-            .position,
-            as: Position.self
+        position = try container.decodeIfPresent(
+            Position.self,
+            forKey: .position
         )
         thickness = try container.decodeIfPresent(
             CGFloat.self,
             forKey: .thickness
         )
-        tabBackground = Self.lenientOverride(
-            container,
-            .tabBackground,
-            as: TabBackground.self
+        tabBackground = try container.decodeIfPresent(
+            TabBackground.self,
+            forKey: .tabBackground
         )
-        activeIndicator = Self.lenientOverride(
-            container,
-            .activeIndicator,
-            as: ActiveIndicator.self
+        activeIndicator = try container.decodeIfPresent(
+            ActiveIndicator.self,
+            forKey: .activeIndicator
         )
         itemSize = try container.decodeIfPresent(
             CGFloat.self,

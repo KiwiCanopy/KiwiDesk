@@ -205,6 +205,10 @@ extension AppBarItemView {
                     forThickness: crossThickness
                 )
         } else {
+            // The plain ring is a full capsule by design —
+            // intentionally roundness-independent (there's no box
+            // whose corners it should match), so it reads as a
+            // clean selection outline rather than a fake pill.
             let inset: CGFloat = 1.5
             accent.frame = bounds.insetBy(dx: inset, dy: inset)
             accent.layer?.cornerRadius =
