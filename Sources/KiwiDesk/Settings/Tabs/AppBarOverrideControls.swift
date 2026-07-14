@@ -1,7 +1,39 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Position/Style/Active-item/Content dropdown labels are
+/// The GUI face of the `item_size`/`font_size` 0 = auto sentinel
+/// (#228 §3): an "Auto" toggle whose on-state stores 0 and whose
+/// off-state restores a sensible non-zero size, so the user never
+/// drags a slider to 0 to mean "auto".
+enum AppBarAuto {
+    static func binding(
+        _ value: Binding<CGFloat>,
+        restore: CGFloat
+    ) -> Binding<Bool> {
+        Binding(
+            get: { value.wrappedValue == 0 },
+            set: { value.wrappedValue = $0 ? 0 : restore }
+        )
+    }
+}
+
+/// The #171 "grey, don't hide" treatment: a control that has no
+/// effect in the current mode stays visible but disabled and
+/// dimmed, with an optional explanatory tooltip.
+struct AppBarGreyOut: ViewModifier {
+    let active: Bool
+    var help: String = ""
+
+    func body(content: Content) -> some View {
+        content
+            .disabled(active)
+            .opacity(active ? 0.5 : 1)
+            .help(active ? help : "")
+    }
+}
+
+/// The Position/Tab-background/Active-indicator/Content dropdown
+/// labels are
 /// data (an array of value/label pairs shared by the global and
 /// per-layout override pickers), so they route through `L()` at
 /// the point of construction (`@MainActor`, matching every
@@ -95,14 +127,54 @@ struct OverrideSliderRow: View {
     @Binding var value: CGFloat?
     let global: CGFloat
     var range: ClosedRange<Double> = 0...100
+    var unit: String = "pt"
 
     var body: some View {
         OverrideChrome(isOn: overrideToggle($value, global: global)) {
             PtSlider(
                 label: label,
                 value: overrideValue($value, global: global),
-                range: range
+                range: range,
+                unit: unit
             )
+        }
+    }
+}
+
+/// An override slider whose 0 = auto sentinel is exposed as an
+/// Auto toggle (#228 §3), mirroring the global editor. While the
+/// row overrides the field, the Auto toggle rides above the
+/// slider and greys it when auto; restoring turns auto off with a
+/// sensible non-zero size.
+struct OverrideAutoSliderRow: View {
+    let label: String
+    let autoLabel: String
+    @Binding var value: CGFloat?
+    let global: CGFloat
+    let restore: CGFloat
+    var range: ClosedRange<Double> = 0...200
+
+    var body: some View {
+        OverrideChrome(isOn: overrideToggle($value, global: global)) {
+            VStack(alignment: .leading, spacing: 4) {
+                Toggle(
+                    autoLabel,
+                    isOn: AppBarAuto.binding(
+                        overrideValue($value, global: global),
+                        restore: restore
+                    )
+                )
+                PtSlider(
+                    label: label,
+                    value: overrideValue($value, global: global),
+                    range: range
+                )
+                .modifier(
+                    AppBarGreyOut(
+                        active: (value ?? global) == 0
+                    )
+                )
+            }
         }
     }
 }
@@ -206,26 +278,26 @@ struct OverridePickerRow<Value: Hashable & Sendable>: View {
 enum AppBarOptions {
     @MainActor
     static let position: [(AppBarStyle.Position, String)] = [
-        (.top, L("app_bar.position.top", "Top")),
-        (.bottom, L("app_bar.position.bottom", "Bottom")),
-        (.left, L("app_bar.position.left", "Left")),
-        (.right, L("app_bar.position.right", "Right")),
+        (.start, L("app_bar.position.start", "Start")),
+        (.end, L("app_bar.position.end", "End")),
     ]
     @MainActor
-    static let style: [(AppBarStyle.Style, String)] = [
-        (.pills, L("app_bar.style.pills", "Pills")),
-        (.segments, L("app_bar.style.segments", "Segments")),
-        (.underline, L("app_bar.style.underline", "Underline")),
+    static let tabBackground: [(AppBarStyle.TabBackground, String)] = [
+        (.boxed, L("app_bar.tab_background.boxed", "Boxed")),
+        (.plain, L("app_bar.tab_background.plain", "Plain")),
     ]
     @MainActor
-    static let activeStyle: [(AppBarStyle.ActiveStyle, String)] =
-        [
-            (
-                .highlight,
-                L("app_bar.active_style.highlight", "Highlight")
-            ),
-            (.gap, L("app_bar.active_style.gap", "Gap")),
-        ]
+    static let activeIndicator: [(AppBarStyle.ActiveIndicator, String)] = [
+        (.ring, L("app_bar.active_indicator.ring", "Ring")),
+        (
+            .edgeMark,
+            L(
+                "app_bar.active_indicator.edge_mark",
+                "Edge mark"
+            )
+        ),
+        (.gap, L("app_bar.active_indicator.gap", "Gap")),
+    ]
     @MainActor
     static let content: [(AppBarStyle.Content, String)] = [
         (.icon, L("app_bar.content.icon", "Icon")),

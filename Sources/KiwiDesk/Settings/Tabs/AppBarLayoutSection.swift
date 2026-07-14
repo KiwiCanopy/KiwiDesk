@@ -74,16 +74,22 @@ struct LayoutAppBarSection: View {
             options: AppBarOptions.position
         )
         OverridePickerRow(
-            label: L("app_bar.style.label", "Style"),
-            value: $bar.style,
-            global: global.style,
-            options: AppBarOptions.style
+            label: L(
+                "app_bar.tab_background.label",
+                "Tab background"
+            ),
+            value: $bar.tabBackground,
+            global: global.tabBackground,
+            options: AppBarOptions.tabBackground
         )
         OverridePickerRow(
-            label: L("app_bar.active_item.label", "Active item"),
-            value: $bar.activeStyle,
-            global: global.activeStyle,
-            options: AppBarOptions.activeStyle
+            label: L(
+                "app_bar.active_indicator.label",
+                "Active indicator"
+            ),
+            value: $bar.activeIndicator,
+            global: global.activeIndicator,
+            options: AppBarOptions.activeIndicator
         )
         OverridePickerRow(
             label: L("app_bar.content.label", "Content"),
@@ -102,6 +108,24 @@ struct LayoutAppBarSection: View {
     }
 
     @ViewBuilder private var appearanceOverrides: some View {
+        // Item/font size lead as Auto-capable rows (#228 §3); an
+        // overridden 0 shows as Auto with its slider greyed.
+        OverrideAutoSliderRow(
+            label: L("app_bar.item_size", "Item size"),
+            autoLabel: L("app_bar.item_size.auto", "Auto item size"),
+            value: $bar.itemSize,
+            global: global.itemSize,
+            restore: 120,
+            range: 0...200
+        )
+        OverrideAutoSliderRow(
+            label: L("app_bar.font_size", "Font size"),
+            autoLabel: L("app_bar.font_size.auto", "Auto font size"),
+            value: $bar.fontSize,
+            global: global.fontSize,
+            restore: 14,
+            range: 0...32
+        )
         OverrideSliderRow(
             label: L("app_bar.thickness", "Thickness"),
             value: $bar.thickness,
@@ -109,28 +133,28 @@ struct LayoutAppBarSection: View {
             range: 8...80
         )
         OverrideSliderRow(
-            label: L("app_bar.item_size", "Item size"),
-            value: $bar.itemSize,
-            global: global.itemSize,
-            range: 0...200
-        )
-        OverrideSliderRow(
             label: L("app_bar.item_gap", "Item gap"),
             value: $bar.itemGap,
             global: global.itemGap,
             range: 0...40
         )
+        // Roundness only shapes a Boxed tab; grey it when this
+        // layout resolves to Plain (#171 grey-out).
         OverrideSliderRow(
-            label: L("app_bar.font_size", "Font size"),
-            value: $bar.fontSize,
-            global: global.fontSize,
-            range: 0...32
+            label: L(
+                "app_bar.corner_roundness",
+                "Corner roundness"
+            ),
+            value: $bar.cornerRoundness,
+            global: global.cornerRoundness,
+            range: 0...100,
+            unit: "%"
         )
-        OverrideSliderRow(
-            label: L("app_bar.corner_radius", "Corner radius"),
-            value: $bar.cornerRadius,
-            global: global.cornerRadius,
-            range: 0...40
+        .modifier(
+            AppBarGreyOut(
+                active: bar.resolved(with: global)
+                    .tabBackground != .boxed
+            )
         )
     }
 }

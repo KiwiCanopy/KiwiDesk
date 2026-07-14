@@ -1,22 +1,50 @@
 import CoreGraphics
 
+/// A concrete screen edge the bar occupies, resolved from an
+/// axis-relative `AppBarStyle.Position` against a layout's own
+/// orientation. Geometry and renderers take this — never a raw
+/// `start`/`end` — so an unresolved position can't reach them.
+public enum AppBarEdge: Sendable, Equatable {
+    case top, bottom, left, right
+
+    /// True on a horizontal bar (items in a row).
+    public var isHorizontal: Bool {
+        self == .top || self == .bottom
+    }
+
+    /// Resolves `position` against the layout axis: `start` = top
+    /// on a horizontal axis / left on a vertical one, `end` =
+    /// bottom / right. The single resolution site.
+    public init(
+        position: AppBarStyle.Position,
+        horizontalAxis: Bool
+    ) {
+        switch (position, horizontalAxis) {
+        case (.start, true): self = .top
+        case (.end, true): self = .bottom
+        case (.start, false): self = .left
+        case (.end, false): self = .right
+        }
+    }
+}
+
 /// Carves the indicator-bar strip out of a layout's usable area
 /// so bar and windows never overlap. Shared by every layout that
 /// hosts a bar (monocle, scrolling) via `AppBarHosting`.
 public enum AppBarGeometry {
     /// The strip the bar occupies, carved from the resolved
-    /// edge of `usable` (AX coordinates, y grows downward).
+    /// `edge` of `usable` (AX coordinates, y grows downward).
     public static func barFrame(
         in usable: CGRect,
-        position: AppBarStyle.Position,
+        edge: AppBarEdge,
         thickness: CGFloat
     ) -> CGRect {
-        switch position {
+        switch edge {
         case .top, .bottom:
             let depth = min(thickness, usable.height)
             return CGRect(
                 x: usable.minX,
-                y: position == .top
+                y: edge == .top
                     ? usable.minY : usable.maxY - depth,
                 width: usable.width,
                 height: depth
@@ -24,7 +52,7 @@ public enum AppBarGeometry {
         case .left, .right:
             let depth = min(thickness, usable.width)
             return CGRect(
-                x: position == .left
+                x: edge == .left
                     ? usable.minX : usable.maxX - depth,
                 y: usable.minY,
                 width: depth,
@@ -38,11 +66,11 @@ public enum AppBarGeometry {
     public static func windowFrame(
         in usable: CGRect,
         minus strip: CGRect,
-        position: AppBarStyle.Position,
+        edge: AppBarEdge,
         inner: Gaps.Inner
     ) -> CGRect {
         var frame = usable
-        switch position {
+        switch edge {
         case .top:
             let cut = strip.height + inner.vertical
             frame.origin.y += cut
@@ -64,7 +92,7 @@ public enum AppBarGeometry {
 
 /// A layout that can show the indicator bar: it owns a
 /// per-layout `LayoutAppBar` and knows whether its focus/scroll
-/// axis runs horizontally (which edges the bar may sit on).
+/// axis runs horizontally (which edge the bar resolves to).
 public protocol AppBarHosting {
     var appBar: LayoutAppBar { get }
     /// True when the layout's axis is horizontal (bar on
@@ -73,15 +101,19 @@ public protocol AppBarHosting {
 }
 
 extension AppBarHosting {
-    /// The concrete style this layout's bar renders with: the
-    /// global `style` overlaid by this layout's overrides, with
-    /// `position` clamped to the layout's own axis.
-    public func resolvedBar(global: AppBarStyle) -> AppBarStyle {
-        var resolved = appBar.resolved(with: global)
-        resolved.position = resolved.resolvedPosition(
+    /// The concrete style this layout's bar renders with (the
+    /// global `style` overlaid by this layout's overrides) plus
+    /// the concrete `edge` its axis-relative position resolves
+    /// to. Resolve once, here, at the layer boundary.
+    public func resolvedBar(
+        global: AppBarStyle
+    ) -> (style: AppBarStyle, edge: AppBarEdge) {
+        let style = appBar.resolved(with: global)
+        let edge = AppBarEdge(
+            position: style.position,
             horizontalAxis: barAxisIsHorizontal
         )
-        return resolved
+        return (style, edge)
     }
 
     /// The strip the bar occupies, or nil while it is off.
@@ -90,10 +122,10 @@ extension AppBarHosting {
         global: AppBarStyle
     ) -> CGRect? {
         guard appBar.enabled else { return nil }
-        let style = resolvedBar(global: global)
+        let (style, edge) = resolvedBar(global: global)
         return AppBarGeometry.barFrame(
             in: usable,
-            position: style.position,
+            edge: edge,
             thickness: style.thickness
         )
     }
@@ -110,7 +142,7 @@ extension AppBarHosting {
         return AppBarGeometry.windowFrame(
             in: usable,
             minus: strip,
-            position: resolvedBar(global: global).position,
+            edge: resolvedBar(global: global).edge,
             inner: inner
         )
     }

@@ -14,16 +14,16 @@ import Foundation
 enum AppBarFixtures {
     static func everyGlobalField() -> AppBarStyle {
         var style = AppBarStyle()
-        style.position = .bottom
+        style.position = .end
         style.thickness = 44
-        style.style = .segments
-        style.activeStyle = .gap
+        style.tabBackground = .plain
+        style.activeIndicator = .gap
         style.itemSize = 120
         style.itemGap = 3
         style.content = .name
         style.groupAdjacentWindows = false
         style.fontSize = 15
-        style.cornerRadius = 5
+        style.cornerRoundness = 5
         style.textColor = "#010101"
         style.boxColor = "#020202"
         style.activeTextColor = "#030303"
@@ -40,16 +40,16 @@ enum AppBarFixtures {
     static func everyOverrideField() -> LayoutAppBar {
         var bar = LayoutAppBar()
         bar.enabled = false
-        bar.position = .right
+        bar.position = .start
         bar.thickness = 50
-        bar.style = .underline
-        bar.activeStyle = .highlight
+        bar.tabBackground = .boxed
+        bar.activeIndicator = .ring
         bar.itemSize = 88
         bar.itemGap = 9
         bar.content = .iconAndName
         bar.groupAdjacentWindows = true
         bar.fontSize = 20
-        bar.cornerRadius = 12
+        bar.cornerRoundness = 12
         bar.textColor = "#111111"
         bar.boxColor = "#222222"
         bar.activeTextColor = "#333333"

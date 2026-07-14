@@ -84,10 +84,11 @@ struct AppBarCommandParityTests {
     /// `applyParity` goes red if this list, either apply switch,
     /// or `AppBarStyle` drift apart.
     private static let everySetting: [AppBarCommandSetting] = [
-        .position(.right), .thickness(50), .style(.underline),
-        .activeStyle(.gap), .itemSize(88), .itemGap(9),
+        .position(.end), .thickness(50),
+        .tabBackground(.plain), .activeIndicator(.gap),
+        .itemSize(88), .itemGap(9),
         .content(.name), .groupAdjacentWindows(false),
-        .fontSize(20), .cornerRadius(12),
+        .fontSize(20), .cornerRoundness(12),
         .textColor("#111111"), .boxColor("#222222"),
         .activeTextColor("#333333"), .activeBoxColor("#444444"),
         .highlightColor("#555555"), .hoverColor("#666666"),

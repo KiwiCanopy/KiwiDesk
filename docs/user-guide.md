@@ -387,17 +387,24 @@ running windows.
 
 **Global settings:**
 
-- **Style**: pills (floating rounded buttons), segments (a continuous
-  strip), or underline (minimal text strip).
-- **Position**: top, bottom, left, or right (layout orientation
-  constrains valid edges).
+- **Tab background**: boxed (a box per tab honoring corner
+  roundness) or plain (names on a shared translucent strip).
+- **Position**: start (top edge on horizontal layout, left on
+  vertical) or end (bottom or right). The bar always renders on
+  the edge the position indicates.
+- **Active indicator**: ring (outlined border around the active
+  tab), edge mark (accent bar on the active tab's window-facing
+  edge), or gap (active slot empty). Orthogonal to tab background
+  — all combinations are valid.
 - **Thickness**: the strip's depth in points.
-- **Item size**: auto (0) or fixed pixel width.
+- **Item size**: auto (0) measures rendered width and sizes slots
+  uniformly to fit the widest item; fixed pixel width.
 - **Content**: icon only, name only, or both.
 - **Colors**: text, box, active highlight, hover states, and group
   badge.
 - **Font size**: auto (0) or fixed.
-- **Corner radius**: rounding of pill/segment corners.
+- **Corner roundness**: 0–100% for boxed tabs (0 = square, 100 =
+  full capsule; ignored for plain).
 
 **Per-layout overrides:**
 

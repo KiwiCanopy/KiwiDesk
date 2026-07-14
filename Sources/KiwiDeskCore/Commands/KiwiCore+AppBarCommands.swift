@@ -50,25 +50,4 @@ extension KiwiCore {
             return .fail(error.message)
         }
     }
-
-    /// A bar position that doesn't fit the layout's orientation
-    /// is kept but resolved to the orientation's default edge —
-    /// warn so the user isn't left guessing.
-    func warnOnBarPositionMismatch(
-        host: AppBarHosting,
-        layout: String,
-        orientation: String
-    ) {
-        let requested =
-            host.appBar.position ?? tiler.settings.appBarStyle.position
-        let resolved = host.resolvedBar(
-            global: tiler.settings.appBarStyle
-        ).position
-        guard requested != resolved else { return }
-        onLog(
-            "\(layout): bar position '\(requested.rawValue)' "
-                + "doesn't fit \(orientation) orientation — "
-                + "using '\(resolved.rawValue)'"
-        )
-    }
 }

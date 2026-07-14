@@ -27,7 +27,6 @@ extension KiwiCore {
                 )
             else { return Self.orientationError }
             tiler.settings.scrolling.orientation = orientation
-            warnOnScrollBarMismatch()
         case "scroll.set_speed":
             // Deprecated alias for `animations.set_scroll_speed`
             // (issue #51). Previously shared `durationMS` with
@@ -80,15 +79,11 @@ extension KiwiCore {
         let field = String(
             command.dropFirst("scroll.set_app_bar_".count)
         )
-        let response = applyBarOverride(
+        return applyBarOverride(
             field: field,
             args,
             into: &tiler.settings.scrolling.appBar
         )
-        if response.isSuccess, field == "position" {
-            warnOnScrollBarMismatch()
-        }
-        return response
     }
 
     /// `scroll.set_<field>_override(space, value)` — the per-space
@@ -176,13 +171,4 @@ extension KiwiCore {
     private static let orientationError = CommandResponse.fail(
         "expected horizontal|vertical"
     )
-
-    private func warnOnScrollBarMismatch() {
-        warnOnBarPositionMismatch(
-            host: tiler.settings.scrolling,
-            layout: "scroll",
-            orientation: tiler.settings.scrolling.orientation
-                .rawValue
-        )
-    }
 }

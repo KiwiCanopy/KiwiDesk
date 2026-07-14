@@ -9,22 +9,25 @@ extension AppBarOverlay {
         override var isFlipped: Bool { true }
     }
 
-    /// Underline style draws all names on one shared box; the
-    /// other styles put boxes on the items and keep the strip
-    /// itself in the (default transparent) background color.
+    /// `plain` draws all names on one shared box (the strip
+    /// itself, painted in `boxColor` and rounded by the
+    /// roundness); `boxed` boxes each item and keeps the strip in
+    /// the (default transparent) background color.
     func styleContainer(
         _ panel: NSPanel,
-        style: AppBarStyle
+        style: AppBarStyle,
+        depth: CGFloat
     ) {
         guard let layer = panel.contentView?.layer else {
             return
         }
         layer.masksToBounds = true
         layer.cornerRadius =
-            style.style == .pills
-            ? 0 : style.cornerRadius
+            style.tabBackground == .plain
+            ? style.resolvedCornerRadius(forThickness: depth)
+            : 0
         let background =
-            style.style == .underline
+            style.tabBackground == .plain
             ? style.boxColor
             : style.backgroundColor
         layer.backgroundColor =

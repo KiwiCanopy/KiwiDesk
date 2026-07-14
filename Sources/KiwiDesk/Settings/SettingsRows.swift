@@ -15,6 +15,9 @@ struct PtSlider: View {
     let label: String
     @Binding var value: CGFloat
     var range: ClosedRange<Double> = 0...100
+    /// The readout unit; `pt` by default, `%` for proportion
+    /// sliders (e.g. the App Bar corner roundness).
+    var unit: String = "pt"
     @Environment(\.settingsLabelColumn)
     private var labelColumn
 
@@ -31,7 +34,7 @@ struct PtSlider: View {
                 range: range,
                 step: 1
             )
-            Text("\(Int(value)) pt")
+            Text("\(Int(value)) \(unit)")
                 .frame(
                     width: SettingsMetrics.readoutColumn,
                     alignment: .trailing

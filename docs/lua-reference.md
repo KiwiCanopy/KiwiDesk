@@ -1172,9 +1172,11 @@ just for itself.
 
 **Orientation** decides which focus axis cycles through the
 windows, and with it which edges the bar may sit on. Position is
-resolved per layout: `app_bar.set_position` (or a per-layout
-`set_app_bar_position` override) is clamped to the layout's own
-orientation.
+resolved per layout from `start`/`end` values — `start` resolves
+to the top edge on horizontal-axis layouts or the left edge on
+vertical-axis layouts; `end` resolves to the bottom or right. The
+bar always renders on the edge the position names, so no clamp or
+mismatch can occur.
 
 Items appear in window order and are always **equal-sized**: `item_size`
 pt along the bar (width on horizontal bars, height on vertical
@@ -1200,19 +1202,19 @@ be **dragged** along the bar to reorder the windows.
 
 ### app_bar.set_position
 
-**Expects:** `"top"`, `"bottom"`, `"left"`, or `"right"`
-(default `"top"`).
+**Expects:** `"start"` or `"end"` (default `"start"`).
 
-**Does:** sets the default edge for all layout bars. The value is
-clamped to the layout's orientation — a horizontal layout keeps
-top/bottom, a vertical one left/right — so a position that doesn't
-fit is logged and falls back to that orientation's default edge.
-Per-layout overrides can change it.
+**Does:** sets the default edge for all layout bars. `start`
+resolves to the top edge (horizontal-axis layout) or left edge
+(vertical-axis layout); `end` resolves to the bottom or right. The
+bar always renders on the edge the value indicates, so it never
+mismatches the layout's orientation. Per-layout overrides can
+change it.
 
 **Example:**
 
 ```lua
-app_bar.set_position("top")
+app_bar.set_position("start")
 ```
 
 ### app_bar.set_thickness
@@ -1227,34 +1229,37 @@ app_bar.set_position("top")
 app_bar.set_thickness(32)
 ```
 
-### app_bar.set_style
+### app_bar.set_tab_background
 
-**Expects:** `"pills"`, `"segments"`, or `"underline"`.
+**Expects:** `"boxed"` or `"plain"`.
 
-**Does:** sets the visual style:
-- **pills** — rounded floating badges, `item_gap` apart.
-- **segments** — one continuous strip divided into slots.
-- **underline** — names on one shared translucent box.
+**Does:** sets the visual style of the tab backgrounds:
+- **boxed** — a box per tab honoring the corner roundness
+  (0% = square, 100% = full capsule).
+- **plain** — no per-tab box; names sit on one shared
+  translucent strip.
 
 **Example:**
 
 ```lua
-app_bar.set_style("pills")
+app_bar.set_tab_background("boxed")
 ```
 
-### app_bar.set_active_style
+### app_bar.set_active_indicator
 
-**Expects:** `"highlight"` or `"gap"`.
+**Expects:** `"ring"`, `"edge_mark"`, or `"gap"`.
 
-**Does:** how the focused window is marked:
-- `"highlight"` — color the active item.
-- `"gap"` — leave the slot empty, so the hole marks the active
-  window.
+**Does:** how the focused window is marked. This is orthogonal to
+`tab_background` — the two combine freely:
+- **ring** — an outlined border around the active tab.
+- **edge_mark** — an accent bar on the active tab's
+  window-facing edge.
+- **gap** — the active tab's slot is left empty.
 
 **Example:**
 
 ```lua
-app_bar.set_active_style("highlight")
+app_bar.set_active_indicator("ring")
 ```
 
 ### app_bar.set_item_size
@@ -1262,7 +1267,9 @@ app_bar.set_active_style("highlight")
 **Expects:** a number (points); `0` means auto (default).
 
 **Does:** sets the width (horizontal) or height (vertical) of each
-item. Auto picks a sensible default per content mode.
+item. Auto measures each item's rendered width (icon + name at the
+effective font) and sizes the uniform slot to fit the widest, so
+long names don't truncate and short ones don't waste space.
 
 **Example:**
 
@@ -1307,16 +1314,19 @@ value pins the font size.
 app_bar.set_font_size(0)
 ```
 
-### app_bar.set_corner_radius
+### app_bar.set_corner_roundness
 
-**Expects:** a non-negative number (points).
+**Expects:** a number 0–100 (percentage; default 50).
 
-**Does:** sets the corner rounding of bar items and backgrounds.
+**Does:** sets the corner rounding of boxed tabs as a percentage,
+where 0 = square and 100 = a full capsule (radius = thickness/2).
+It only affects `boxed` tabs (ignored for `plain`). The percentage
+cannot exceed the maximum, so tabs never render as pointed.
 
 **Example:**
 
 ```lua
-app_bar.set_corner_radius(8)
+app_bar.set_corner_roundness(50)
 ```
 
 ### app_bar.set_group_adjacent_windows
@@ -1386,8 +1396,8 @@ app_bar.set_active_box_color("#8B5E3C66")
 
 **Expects:** a hex color.
 
-**Does:** sets the highlight (ring on pills, accent bar on
-segments, or underline itself).
+**Does:** sets the highlight color of the active indicator (the
+ring outline or the edge mark).
 
 **Example:**
 
@@ -1466,14 +1476,16 @@ prefixed with the layout name:
 
 - `monocle.set_app_bar_enabled`, `monocle.set_app_bar_position`,
   `monocle.set_app_bar_thickness`, etc.
-- `scroll.set_app_bar_enabled`, `scroll.set_app_bar_style`, etc.
+- `scroll.set_app_bar_enabled`, `scroll.set_app_bar_tab_background`,
+  `scroll.set_app_bar_active_indicator`,
+  `scroll.set_app_bar_corner_roundness`, etc.
 
 **Example:**
 
 ```lua
 monocle.set_app_bar_enabled(true)
 scroll.set_app_bar_enabled(true)
-scroll.set_app_bar_style("segments")  -- override for scrolling
+scroll.set_app_bar_tab_background("plain")  -- override for scrolling
 ```
 
 ## Where New Windows Land

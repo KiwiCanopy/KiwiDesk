@@ -18,6 +18,9 @@ public final class AppBarManager {
         public let activeIndex: Int?
         public let strip: CGRect
         public let style: AppBarStyle
+        /// The concrete edge the bar's axis-relative position
+        /// resolved to on this space's layout.
+        public let edge: AppBarEdge
 
         public init(
             display: DisplayID,
@@ -25,7 +28,8 @@ public final class AppBarManager {
             items: [AppBarOverlay.Item],
             activeIndex: Int?,
             strip: CGRect,
-            style: AppBarStyle
+            style: AppBarStyle,
+            edge: AppBarEdge
         ) {
             self.display = display
             self.space = space
@@ -33,6 +37,7 @@ public final class AppBarManager {
             self.activeIndex = activeIndex
             self.strip = strip
             self.style = style
+            self.edge = edge
         }
     }
 
@@ -86,7 +91,8 @@ public final class AppBarManager {
                 items: bar.items,
                 activeIndex: bar.activeIndex,
                 strip: bar.strip,
-                style: bar.style
+                style: bar.style,
+                edge: bar.edge
             )
         }
     }

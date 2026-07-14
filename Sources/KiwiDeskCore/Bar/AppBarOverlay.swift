@@ -58,9 +58,12 @@ public final class AppBarOverlay {
         let activeIndex: Int?
         let strip: CGRect
         /// The already-resolved style (global overlaid by the
-        /// active layout's overrides, position clamped to its
-        /// axis) — the overlay is layout-agnostic.
+        /// active layout's overrides) — the overlay is
+        /// layout-agnostic.
         let style: AppBarStyle
+        /// The concrete edge the bar sits on, resolved from the
+        /// style's axis-relative position by the driver.
+        let edge: AppBarEdge
     }
 
     private var panel: NSPanel?
@@ -83,7 +86,8 @@ public final class AppBarOverlay {
         items: [Item],
         activeIndex: Int?,
         strip: CGRect,
-        style: AppBarStyle
+        style: AppBarStyle,
+        edge: AppBarEdge
     ) {
         guard !items.isEmpty,
             strip.width >= 1, strip.height >= 1
@@ -95,7 +99,8 @@ public final class AppBarOverlay {
             items: items,
             activeIndex: activeIndex,
             strip: strip,
-            style: style
+            style: style,
+            edge: edge
         )
         render(followingFocus: true)
     }
@@ -118,14 +123,24 @@ public final class AppBarOverlay {
         let activeIndex = state.activeIndex
         let strip = state.strip
         let style = state.style
+        let edge = state.edge
         let panel = self.panel ?? makePanel()
         self.panel = panel
-        styleContainer(panel, style: style)
+        // The plain strip rounds against its real (clamped) cross
+        // depth, not the configured thickness, so a strip squeezed
+        // by a small usable area can't over-round.
+        styleContainer(
+            panel,
+            style: style,
+            depth: edge.isHorizontal ? strip.height : strip.width
+        )
         syncItemViewCount(items.count)
         let m = metrics(
             strip: strip,
             count: items.count,
-            style: style
+            style: style,
+            edge: edge,
+            items: items
         )
         lastMetrics = m
         scrollOffset = Self.scrollOffset(
@@ -180,10 +195,10 @@ public final class AppBarOverlay {
         for (index, item) in items.enumerated() {
             let view = itemViews[index]
             let active = index == activeIndex
-            // "gap" active style: the focused window's slot
-            // stays empty instead of being highlighted.
+            // "gap" indicator: the focused window's slot stays
+            // empty instead of being marked.
             view.isHidden =
-                active && style.activeStyle == .gap
+                active && style.activeIndicator == .gap
             view.configure(
                 id: item.id,
                 name: item.name,
@@ -191,7 +206,8 @@ public final class AppBarOverlay {
                 count: item.count,
                 active: active,
                 horizontal: m.horizontal,
-                style: style
+                style: style,
+                edge: edge
             )
             view.onSelect = { [weak self] id in
                 self?.onSelect(id)
