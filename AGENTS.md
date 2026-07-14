@@ -85,6 +85,23 @@ GUI lives in `Sources/KiwiDesk` (`Settings/`, `Settings/Tabs/`).
    fights swift-format. Run `scripts/lint.sh` before committing.
 6. **Concurrency:** AppKit/AX interaction is `@MainActor`. Pure
    state and layout code must stay actor-free and unit-testable.
+7. **GUI north-star — simplicity, intuitiveness, Apple-native
+   feeling, in that order.** The Settings app should feel like it
+   belongs in macOS System Settings, not like a bespoke control
+   panel. When a native pattern exists, use it; when unsure, ask a
+   `ui-designer` consult framed by these three priorities before
+   inventing a layout. Settled conventions that fall out of this
+   (extend, don't relitigate): **group by topic, never by widget
+   type** — a toggle and the control it gates are one decision, so
+   the toggle sits directly *above* the control it gates, never in
+   a separate "toggles" block (colors, which gate nothing, may
+   group by type for grid scannability); **grey, don't hide** a
+   control with no effect in the current mode (#171), keeping the
+   disabled control visible and dimmed; **the live preview leads**
+   its editor; **defer per-control "why" to contextual help**
+   (the planned `?` affordance, #94) rather than bloating labels or
+   captions with glosses that would later duplicate it. A caption's
+   job is to label what's shown, not to teach.
 
 ## 3. Workflow: Refine → Plan → Act → Verify
 

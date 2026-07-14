@@ -86,41 +86,55 @@ struct GlobalAppBarSection: View {
         )
     }
 
-    // Ordered preview → the two Auto toggles → sliders (#228 §3).
-    // "Auto" size/font is a GUI face on the model's 0 = auto
-    // sentinel: the toggle greys its slider and stores 0; turning
-    // it off restores a sensible non-zero value (#171 grey-out).
+    // Ordered thickness → the two Auto-gated size pairs (each
+    // toggle bound directly above the slider it controls, the
+    // Apple-native pattern) → a divider → corner roundness (gated
+    // by a different switch, Tab background). "Auto" size/font is a
+    // GUI face on the model's 0 = auto sentinel: the toggle greys
+    // its slider and stores 0; turning it off restores a sensible
+    // non-zero value (#171 grey-out).
     @ViewBuilder private var appearance: some View {
-        Toggle(
-            L("app_bar.item_size.auto", "Auto item size"),
-            isOn: AppBarAuto.binding($style.itemSize, restore: 120)
-        )
-        Toggle(
-            L("app_bar.font_size.auto", "Auto font size"),
-            isOn: AppBarAuto.binding($style.fontSize, restore: 14)
-        )
         PtSlider(
             label: L("app_bar.thickness", "Thickness"),
             value: $style.thickness,
             range: 8...80
         )
-        PtSlider(
-            label: L("app_bar.item_size", "Item size"),
-            value: $style.itemSize,
-            range: 0...200
-        )
-        .modifier(AppBarGreyOut(active: style.itemSize == 0))
+        VStack(alignment: .leading, spacing: 4) {
+            Toggle(
+                L("app_bar.item_size.auto", "Auto item size"),
+                isOn: AppBarAuto.binding(
+                    $style.itemSize,
+                    restore: 120
+                )
+            )
+            PtSlider(
+                label: L("app_bar.item_size", "Item size"),
+                value: $style.itemSize,
+                range: 0...200
+            )
+            .modifier(AppBarGreyOut(active: style.itemSize == 0))
+        }
         PtSlider(
             label: L("app_bar.item_gap", "Item gap"),
             value: $style.itemGap,
             range: 0...40
         )
-        PtSlider(
-            label: L("app_bar.font_size", "Font size"),
-            value: $style.fontSize,
-            range: 0...32
-        )
-        .modifier(AppBarGreyOut(active: style.fontSize == 0))
+        VStack(alignment: .leading, spacing: 4) {
+            Toggle(
+                L("app_bar.font_size.auto", "Auto font size"),
+                isOn: AppBarAuto.binding(
+                    $style.fontSize,
+                    restore: 14
+                )
+            )
+            PtSlider(
+                label: L("app_bar.font_size", "Font size"),
+                value: $style.fontSize,
+                range: 0...32
+            )
+            .modifier(AppBarGreyOut(active: style.fontSize == 0))
+        }
+        Divider()
         // Roundness only shapes a Boxed tab; grey it for Plain —
         // the "grey, don't hide" convention (#171).
         PtSlider(
