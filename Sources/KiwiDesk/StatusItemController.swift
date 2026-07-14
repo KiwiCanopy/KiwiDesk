@@ -11,10 +11,14 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     var onOpenDashboard: () -> Void = {}
     var onShowConfigIssues: () -> Void = {}
     var onLoadProfile: (String) -> Void = { _ in }
-    /// The saved profiles and the active one, pulled fresh
-    /// each time the menu opens.
-    var profilesProvider: () -> (active: String?, all: [String]) =
-        { (nil, []) }
+    /// The saved profiles, the active one, and the unreadable
+    /// ones, pulled fresh each menu open. Broken entries stay
+    /// listed but disabled — greyed, not hidden; the remedy is
+    /// the Config Issues panel, one entry up (#246, #171).
+    var profilesProvider:
+        () -> (
+            active: String?, all: [String], broken: Set<String>
+        ) = { (nil, [], []) }
     /// Provider for active layout mode and active profile status.
     var layoutInfoProvider:
         () -> (
@@ -264,7 +268,9 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// submenu entry per saved profile, checkmark on the
     /// active one.
     private func switchProfileItem(
-        _ profiles: (active: String?, all: [String])
+        _ profiles: (
+            active: String?, all: [String], broken: Set<String>
+        )
     ) -> NSMenuItem {
         let parent = NSMenuItem(
             title: L("menu.switch_profile", "Switch Profile"),
@@ -286,14 +292,24 @@ final class StatusItemController: NSObject, NSMenuDelegate {
             submenu.addItem(empty)
         }
         for name in profiles.all {
+            // A broken profile carries no action, so the menu
+            // auto-disables it — greyed but still listed (#246).
+            let broken = profiles.broken.contains(name)
             let entry = NSMenuItem(
                 title: name,
-                action: #selector(loadProfile(_:)),
+                action: broken
+                    ? nil : #selector(loadProfile(_:)),
                 keyEquivalent: ""
             )
-            entry.target = self
+            entry.target = broken ? nil : self
             entry.state =
                 name == profiles.active ? .on : .off
+            if broken {
+                entry.toolTip = L(
+                    "menu.profile_broken",
+                    "Can't load — see Config Issues"
+                )
+            }
             submenu.addItem(entry)
         }
         parent.submenu = submenu

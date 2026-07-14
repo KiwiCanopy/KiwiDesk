@@ -54,7 +54,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         statusItem.profilesProvider = { [weak self] in
             (
                 active: self?.core.profiles.currentName,
-                all: self?.core.profiles.list() ?? []
+                all: self?.core.profiles.list() ?? [],
+                broken: Set(
+                    self?.core.profiles.brokenNames() ?? []
+                )
             )
         }
         statusItem.onLoadProfile = { [weak self] name in
@@ -101,6 +104,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         // standalone panel track the last config load.
         configIssues.model.onReload = { [weak self] in
             self?.core.loadConfig()
+        }
+        // Delete routes through the same command as the GUI list;
+        // `delete_profile` refreshes the issues, so the row (and
+        // badge) clear themselves (#246).
+        configIssues.model.onDeleteProfile = { [weak self] name in
+            _ = self?.core.execute(
+                "delete_profile",
+                args: [.string(name)]
+            )
+            // Keep an already-open dashboard's greyed row in sync
+            // (the command only refreshes the panel/badge) (#246).
+            self?.dashboardIfCreated?.refreshProfiles()
+        }
+        configIssues.model.onRevealProfile = { [weak self] name in
+            guard
+                let url = try? self?.core.profiles.fileURL(
+                    name: name
+                )
+            else { return }
+            NSWorkspace.shared.activateFileViewerSelecting([url])
         }
         core.onConfigIssuesChange = { [weak self] issues in
             self?.statusItem?.setConfigError(!issues.isEmpty)

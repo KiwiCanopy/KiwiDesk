@@ -1163,6 +1163,17 @@ reachable without opening Settings. Profile issues also
 refresh on save/delete, so repairing one clears its badge
 immediately. (#68 §3.7, #39/#31 own the validation cores)
 
+**An undecodable profile is greyed, never hidden.** A profile
+whose JSON won't decode yields no summary, but hiding it
+stranded a broken file with no reachable remedy (#246). It now
+stays listed everywhere — a Delete (and Reveal in Finder) on
+its Config Issues row, a greyed "couldn't load" row with a
+Delete in the Settings profile list, and a disabled entry in
+the quick menu's Switch Profile submenu (the remedy is the
+same panel, one entry up). Grey-don't-hide (#171); re-saving
+was never reachable for a file that can't be read, so the
+warning no longer suggests it. (#246)
+
 **A typo is non-fatal, but never invisible.** An unknown call
 on `KiwiDesk` or a layout namespace table is a guarded no-op
 (logged with a did-you-mean), so one wrong name can no longer
