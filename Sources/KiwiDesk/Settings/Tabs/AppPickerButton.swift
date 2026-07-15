@@ -19,8 +19,11 @@ struct AppPickerButton: View {
     let placeholder: String
     /// The current selection's display name, or nil for none.
     let selection: String?
-    /// Trigger width, so pickers line up with their neighbors.
-    var minWidth: CGFloat = 150
+    /// Floor width for the trigger — just enough for the
+    /// "Choose app…" placeholder; it hugs longer names. A caller
+    /// that needs a fixed column (Open Applications) wraps the
+    /// button in its own `.frame(width:)` instead.
+    var minWidth: CGFloat = 110
     let onPick: (KeybindingCatalog.InstalledApp) -> Void
     /// The persistent escape row: its label (Custom… / Other…)
     /// and the action it triggers (reveal a field / open a
@@ -37,6 +40,12 @@ struct AppPickerButton: View {
         } label: {
             HStack(spacing: 4) {
                 Text(selection ?? placeholder)
+                    .lineLimit(1)
+                // Absorbs the slack between text and chevron, so
+                // the chevron pins to the trailing edge (native
+                // pop-up look) instead of floating mid-button when
+                // the frame is wider than the content.
+                Spacer(minLength: 4)
                 Image(systemName: "chevron.up.chevron.down")
                     .font(.caption2)
                     .foregroundStyle(.secondary)

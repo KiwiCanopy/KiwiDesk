@@ -49,6 +49,9 @@ struct AppSelector: View {
                     name = ""
                 }
             )
+            // Hug the content (no fixed column to align with, just
+            // the trailing "+" button) instead of filling the row.
+            .fixedSize()
         }
     }
 }

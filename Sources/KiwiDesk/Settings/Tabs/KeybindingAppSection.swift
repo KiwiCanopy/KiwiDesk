@@ -156,12 +156,14 @@ struct ApplicationsSection: View {
             selection: binding.wrappedValue.label.isEmpty
                 ? nil
                 : binding.wrappedValue.label,
-            minWidth: 160,
             onPick: { assign(binding, app: $0) },
             escapeLabel: L("shortcuts.other_ellipsis", "Other…"),
             onEscape: { chooseBundle(binding) }
         )
-        .frame(width: 200)
+        // Hug the content: the row's `Spacer()` pins the recorder
+        // to the trailing edge, so the picker's width doesn't gate
+        // recorder alignment — no fixed column needed.
+        .fixedSize()
     }
 
     private func assign(
