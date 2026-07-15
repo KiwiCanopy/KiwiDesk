@@ -40,7 +40,8 @@ struct QuitGridFramesTests {
         let frames = QuitGridLayout.frames(
             for: [],
             in: axFrame,
-            minSize: minSize
+            minSize: minSize,
+            frontToBack: [:]
         )
         #expect(frames.isEmpty)
     }
@@ -50,7 +51,8 @@ struct QuitGridFramesTests {
         let frames = QuitGridLayout.frames(
             for: [WindowID(1)],
             in: axFrame,
-            minSize: minSize
+            minSize: minSize,
+            frontToBack: [:]
         )
         let frame = frames[WindowID(1)]
         #expect(
@@ -69,7 +71,8 @@ struct QuitGridFramesTests {
         let frames = QuitGridLayout.frames(
             for: ids(0..<5),
             in: axFrame,
-            minSize: minSize
+            minSize: minSize,
+            frontToBack: [:]
         )
         let f0 = try #require(frames[WindowID(0)])
         let f1 = try #require(frames[WindowID(1)])
@@ -99,7 +102,8 @@ struct QuitGridFramesTests {
         let frames = QuitGridLayout.frames(
             for: ids(0..<8),
             in: axFrame,
-            minSize: minSize
+            minSize: minSize,
+            frontToBack: [:]
         )
         for cell in 0..<4 {
             let first = try #require(
@@ -121,7 +125,8 @@ struct QuitGridFramesTests {
         let frames = QuitGridLayout.frames(
             for: ids(0..<41),
             in: axFrame,
-            minSize: minSize
+            minSize: minSize,
+            frontToBack: [:]
         )
         #expect(frames.count == 41)
         let f1 = try #require(frames[WindowID(1)])
@@ -137,7 +142,8 @@ struct QuitGridFramesTests {
         let frames = QuitGridLayout.frames(
             for: ids(0..<160),
             in: axFrame,
-            minSize: minSize
+            minSize: minSize,
+            frontToBack: [:]
         )
         #expect(frames.count == 160)
         for frame in frames.values {
@@ -148,13 +154,59 @@ struct QuitGridFramesTests {
         }
     }
 
+    @Test("pile slots follow z-order: frontmost lands deepest")
+    func pileFollowsZOrder() throws {
+        // 5 windows on 2×2: cell 0 holds windows 0 and 4.
+        // Make window 0 frontmost (rank 0) and window 4 a
+        // background window (rank 3). Quit never raises, so
+        // window 0 must take the deeper slot — in the top
+        // slot its body would bury window 4's title bar.
+        let frames = QuitGridLayout.frames(
+            for: ids(0..<5),
+            in: axFrame,
+            minSize: minSize,
+            frontToBack: [WindowID(0): 0, WindowID(4): 3]
+        )
+        let f0 = try #require(frames[WindowID(0)])
+        let f4 = try #require(frames[WindowID(4)])
+        #expect(f4.origin == CGPoint(x: 0, y: 25))
+        #expect(
+            f0.origin
+                == CGPoint(
+                    x: 0,
+                    y: 25 + OverlapStack.offset
+                )
+        )
+    }
+
+    @Test("unranked windows count as backmost, order kept")
+    func unrankedTreatedBackmost() throws {
+        // Only window 0 is ranked (frontmost). Windows 4 and
+        // 8 share its cell unranked: they take the upper
+        // slots in round-robin order; window 0 sinks to the
+        // bottom of the pile.
+        let frames = QuitGridLayout.frames(
+            for: ids(0..<9),
+            in: axFrame,
+            minSize: minSize,
+            frontToBack: [WindowID(0): 0]
+        )
+        let f0 = try #require(frames[WindowID(0)])
+        let f4 = try #require(frames[WindowID(4)])
+        let f8 = try #require(frames[WindowID(8)])
+        #expect(f4.minY == 25)
+        #expect(f8.minY == 25 + OverlapStack.offset)
+        #expect(f0.minY == 25 + 2 * OverlapStack.offset)
+    }
+
     @Test("tiny cells are floored at minSize")
     func minSizeFloor() throws {
         let small = CGRect(x: 0, y: 0, width: 400, height: 400)
         let frames = QuitGridLayout.frames(
             for: ids(0..<2),
             in: small,
-            minSize: minSize
+            minSize: minSize,
+            frontToBack: [:]
         )
         // 2×2 cells would be 200×200 — floored to 300×300.
         let f0 = try #require(frames[WindowID(0)])

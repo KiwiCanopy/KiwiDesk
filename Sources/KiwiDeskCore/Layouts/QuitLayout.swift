@@ -43,13 +43,26 @@ public enum QuitGridLayout {
     /// (`OverlapStack.frames`) so every title bar stays
     /// reachable.
     ///
+    /// `frontToBack` ranks windows by stacking order (0 =
+    /// frontmost). Quit placement moves frames but never
+    /// raises (AX raises are blocking IPC the 1 s quit budget
+    /// cannot afford — live layouts restore z-order instead,
+    /// `KiwiCore+ZOrder`), so each pile assigns its slots to
+    /// match the stacking that will remain: backmost window
+    /// on top, frontmost at the deepest offset. Any other
+    /// assignment lets a front window's body bury the title
+    /// bar of the one below it. Unranked windows (not in the
+    /// on-screen list) count as backmost, keeping their
+    /// round-robin order.
+    ///
     /// `axFrame` is the display's visible frame in AX
     /// (top-left-origin) coordinates; the returned rects are
     /// AX too.
     public static func frames(
         for windows: [WindowID],
         in axFrame: CGRect,
-        minSize: CGFloat
+        minSize: CGFloat,
+        frontToBack: [WindowID: Int]
     ) -> [WindowID: CGRect] {
         guard !windows.isEmpty else { return [:] }
         let dim = dimension(for: windows.count)
@@ -74,9 +87,17 @@ public enum QuitGridLayout {
                 width: width,
                 height: height
             )
+            let pile = bucket.enumerated().sorted {
+                let ra =
+                    frontToBack[$0.element] ?? Int.max
+                let rb =
+                    frontToBack[$1.element] ?? Int.max
+                if ra != rb { return ra > rb }
+                return $0.offset < $1.offset
+            }.map(\.element)
             result.merge(
                 OverlapStack.frames(
-                    for: bucket,
+                    for: pile,
                     in: region,
                     minSize: minSize
                 ).mapValues {

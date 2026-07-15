@@ -37,7 +37,8 @@ public enum WindowGather {
         state: StateCoordinator,
         primaryHeight: CGFloat,
         style: QuitLayoutStyle,
-        minSize: CGFloat
+        minSize: CGFloat,
+        frontToBack: [WindowID: Int]
     ) -> [WindowID: CGRect] {
         let displays = state.workspaces.allDisplays
         guard !displays.isEmpty else { return [:] }
@@ -84,7 +85,8 @@ public enum WindowGather {
                     QuitGridLayout.frames(
                         for: windows,
                         in: axFrame,
-                        minSize: minSize
+                        minSize: minSize,
+                        frontToBack: frontToBack
                     )
                 ) { current, _ in current }
             }
@@ -94,6 +96,30 @@ public enum WindowGather {
 }
 
 extension KiwiCore {
+    /// Stacking ranks (0 = frontmost) for every on-screen
+    /// window, snapshotted once per gather from CGWindowList
+    /// (front-to-back by contract; no AX, so it cannot stall
+    /// the quit budget). The grid's piles assign their slots
+    /// to match this order — quit placement never raises.
+    static func frontToBackRanks() -> [WindowID: Int] {
+        let list =
+            CGWindowListCopyWindowInfo(
+                [.optionOnScreenOnly, .excludeDesktopElements],
+                kCGNullWindowID
+            ) as? [[String: Any]] ?? []
+        var ranks: [WindowID: Int] = [:]
+        for (rank, info) in list.enumerated() {
+            guard
+                let number =
+                    info[kCGWindowNumber as String] as? Int,
+                let raw = UInt32(exactly: number)
+            else { continue }
+            let id = WindowID(raw)
+            if ranks[id] == nil { ranks[id] = rank }
+        }
+        return ranks
+    }
+
     /// Moves each managed tiled window onto its owning monitor,
     /// arranged per `quit.layout` within the display's visible
     /// area, so windows are not stranded in tiled frames after
@@ -121,7 +147,8 @@ extension KiwiCore {
             state: state,
             primaryHeight: primaryH,
             style: tiler.settings.quitLayout,
-            minSize: tiler.settings.minWindowSize
+            minSize: tiler.settings.minWindowSize,
+            frontToBack: Self.frontToBackRanks()
         )
         guard !frames.isEmpty else { return }
         SkyLight.suppressDisplay()
