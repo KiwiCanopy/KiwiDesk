@@ -86,8 +86,8 @@ struct MoveWindowsSection: View {
             Text(
                 L(
                     "shortcuts.move_to_track.caption",
-                    "(only relevant if you're using the track "
-                        + "layout)"
+                    "Only relevant if you're using the track "
+                        + "layout."
                 )
             )
             .font(.caption)
