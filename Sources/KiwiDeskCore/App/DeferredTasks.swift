@@ -28,6 +28,9 @@ final class DeferredTasks {
         /// Layout + focus re-assert after a native desktop
         /// switch (`settleAfterNativeSwitch`).
         case nativeSpaceSettle
+        /// Re-orders every desired focus ring after a drag/drop
+        /// transition (`scheduleBorderDropReconcile`).
+        case borderDropSettle
     }
 
     private var tasks: [Key: Task<Void, Never>] = [:]

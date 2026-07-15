@@ -1903,19 +1903,21 @@ border.set_corner_style("rounded")
 **Expects:** no arguments.
 
 **Does:** sizes the global layout gaps so borders never touch a
-neighbour — the outward reach (≈ the width) at the screen edge and
+neighbour — the border's true outward reach at the screen edge and
 between windows, doubled between windows when `unfocused_enabled`
-is on (both neighbours are ringed). A one-shot convenience that
-writes `gap.global`; the layout math itself stays free of any
-border coupling, so this never runs automatically. The GUI's "Fit
-gaps to border" button calls the same logic.
+is on (both neighbours are ringed). The reach depends on the
+corner style (a square border tucks inward and reaches far less
+than its width). A one-shot convenience that writes `gap.global`;
+the layout math itself stays free of any border coupling, so this
+never runs automatically. The GUI's "Fit gaps to border" button
+calls the same logic.
 
 **Example:**
 
 ```lua
 border.set_width(10)
-border.fit_gaps()  -- outer gaps 10, inner gaps 10 (or 20 if
-                   -- unfocused borders are on)
+border.fit_gaps()  -- rounded reach 9: outer gaps 9, inner gaps 9
+                   -- (18 if unfocused borders are on)
 ```
 
 ## Mouse Resizing

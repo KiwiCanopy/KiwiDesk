@@ -135,10 +135,10 @@ extension KiwiCore {
                 )
             )
         case .windowMoved(let id, let frame):
-            // Keep the ring glued to a window the user (or its
-            // own app) is moving: these AX moves bypass the
-            // animation tee, so follow the frame here. Covers a
-            // live drag-and-drop of a tiled or floating window.
+            // Keep the ring glued to a window being moved. `follow`
+            // self-suppresses when the WindowServer stream already
+            // tracks the ring (#285), so an AX echo can't rewind it
+            // behind the live bounds — the guard lives there, once.
             borders.follow(id, windowFrame: frame)
             drag.windowMoved(id, frame: frame)
         case .windowResized(let id, let frame):

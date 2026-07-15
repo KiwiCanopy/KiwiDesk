@@ -40,8 +40,31 @@ public final class BorderManager {
     /// recompute geometry from a fresh frame while reusing the
     /// window's color / width / corner style.
     private var specs: [WindowID: Spec] = [:]
+    private var eventSource: SkyLightWindowEvents?
+    private var triedEventSource = false
+    private var privateRuntimeStarted = false
+    private var skyLightActive = false
+    private var reportedTrackingActive: Bool?
+    var onLog: @MainActor (String) -> Void = { _ in }
 
     public init() {}
+
+    /// Enables the private WindowServer fast path once KiwiDesk's
+    /// application lifecycle has started. Keeping it dormant during
+    /// pure core construction prevents tests and previews from
+    /// registering process-global SkyLight callbacks.
+    func start() {
+        privateRuntimeStarted = true
+    }
+
+    /// Retires every ring and disables private callbacks until the
+    /// next application start.
+    func stop() {
+        clear()
+        privateRuntimeStarted = false
+        skyLightActive = false
+        reportedTrackingActive = nil
+    }
 
     /// Windows currently wearing a ring — the manager's contract
     /// surface for tests and diagnostics.
@@ -54,6 +77,7 @@ public final class BorderManager {
     /// array retires them all).
     public func sync(_ desired: [Spec]) {
         let wanted = Set(desired.map(\.window))
+        updateSkyLightSubscription(wanted)
         for (id, overlay) in overlays where !wanted.contains(id) {
             overlay.hide()
             overlays[id] = nil
@@ -74,17 +98,64 @@ public final class BorderManager {
         }
     }
 
-    /// Animation hot path: move an already-shown ring to track its
-    /// window's current frame. A no-op for windows without a ring
-    /// (unbordered, or the sync hasn't run yet).
+    /// Animation / AX-echo hot path: move an already-shown ring to
+    /// a window's current frame — UNLESS the WindowServer event
+    /// stream is already tracking it, since a coalesced AX echo
+    /// would rewind the ring behind the live WS bounds. This one
+    /// guard is the whole invariant, so no caller can forget it
+    /// (was hand-mirrored across three call sites). A no-op for
+    /// windows without a ring.
     public func follow(_ id: WindowID, windowFrame: CGRect) {
+        guard !usesWindowServerTracking(id) else { return }
+        apply(id, windowFrame: windowFrame)
+    }
+
+    /// Unguarded reposition — the WS bounds re-read (`reconcile`)
+    /// and the steady-state `sync` own the ring's frame directly,
+    /// so they bypass the WS-tracking guard on `follow`.
+    private func apply(
+        _ id: WindowID,
+        windowFrame: CGRect,
+        restoreVisibility: Bool = false
+    ) {
         guard let overlay = overlays[id], let spec = specs[id]
         else { return }
         overlay.update(
             geometry: geometry(spec, frame: windowFrame),
             colorHex: spec.colorHex,
-            screen: screen(for: windowFrame)
+            screen: screen(for: windowFrame),
+            restoreVisibility: restoreVisibility
         )
+    }
+
+    /// Geometry tracking is independent of rendering. If a raw SLS
+    /// window falls back to AppKit, that panel can still follow real
+    /// bounds from a healthy WindowServer event stream.
+    func usesWindowServerTracking(_ id: WindowID) -> Bool {
+        overlays[id] != nil && skyLightActive
+    }
+
+    /// Re-reads the authoritative WindowServer bounds after a mouse
+    /// drag. Floating windows do not retile, so their final ring must
+    /// be reconciled explicitly on button-up.
+    @discardableResult
+    func reconcile(
+        _ id: WindowID,
+        restoreVisibility: Bool = true
+    ) -> Bool {
+        guard let connection = SkyLight.connection,
+            let getBounds = SkyLight.getWindowBounds
+        else { return false }
+        var frame = CGRect.zero
+        guard
+            getBounds(connection, id.raw, &frame) == .success
+        else { return false }
+        apply(
+            id,
+            windowFrame: frame,
+            restoreVisibility: restoreVisibility
+        )
+        return true
     }
 
     /// Retires every ring at once. Used on shutdown (`stop()`)
@@ -94,6 +165,7 @@ public final class BorderManager {
         for overlay in overlays.values { overlay.hide() }
         overlays = [:]
         specs = [:]
+        _ = eventSource?.watch([])
     }
 
     private func geometry(
@@ -109,9 +181,73 @@ public final class BorderManager {
 
     private func overlay(for window: WindowID) -> BorderOverlay {
         if let existing = overlays[window] { return existing }
-        let overlay = BorderOverlay()
+        let overlay = BorderOverlay(
+            window: window.raw,
+            preferSkyLight: skyLightActive,
+            onFallback: { [weak self] reason in
+                self?.onLog(
+                    "border \(window.raw): \(reason); "
+                        + "using AppKit rendering"
+                )
+            }
+        )
         overlays[window] = overlay
         return overlay
+    }
+
+    /// Receives the WindowServer notifications registered by
+    /// `SkyLightWindowEvents`. Bounds are read from SkyLight's cache,
+    /// never AX, then fed through the same geometry path as animation
+    /// and cursor following.
+    func handleSkyLightEvent(
+        _ kind: SkyLightWindowEvents.Kind,
+        window id: WindowID
+    ) {
+        guard let overlay = overlays[id] else { return }
+        switch kind.action {
+        case .follow:
+            _ = reconcile(id)
+        case .reorder:
+            overlay.order(above: id.raw)
+        case .followAndReorder:
+            // Unhide must re-assert order even when the bounds read
+            // fails. Leave restoration to that one explicit order so
+            // a successful reconcile cannot issue it twice.
+            _ = reconcile(id, restoreVisibility: false)
+            overlay.order(above: id.raw)
+        case .hide:
+            overlay.hide()
+        }
+    }
+
+    private func updateSkyLightSubscription(
+        _ wanted: Set<WindowID>
+    ) {
+        guard privateRuntimeStarted else {
+            skyLightActive = false
+            return
+        }
+        if !triedEventSource, !wanted.isEmpty {
+            triedEventSource = true
+            eventSource = SkyLightWindowEvents.shared
+            eventSource?.attach(self)
+        }
+        let wasActive = skyLightActive
+        skyLightActive = eventSource?.watch(wanted) == true
+        if reportedTrackingActive != skyLightActive {
+            reportedTrackingActive = skyLightActive
+            let mode =
+                skyLightActive
+                ? "WindowServer border tracking active"
+                : "WindowServer border tracking unavailable; "
+                    + "using AX fallback"
+            onLog(mode)
+        }
+        if wasActive, !skyLightActive {
+            for overlay in overlays.values {
+                overlay.useAppKitFallback()
+            }
+        }
     }
 
     /// The screen a window's frame center sits on (for the ring's

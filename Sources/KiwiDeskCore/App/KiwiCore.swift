@@ -202,6 +202,9 @@ public final class KiwiCore {
         profiles.onLog = { [weak self] message in
             self?.onLog(message)
         }
+        borders.onLog = { [weak self] message in
+            self?.onLog(message)
+        }
         wireDrag()
         appBars.onSelect = { [weak self] id in
             self?.focusWindow(id, warp: true)
@@ -213,6 +216,8 @@ public final class KiwiCore {
             self?.animationsDidSettle()
         }
         tiler.onFrameApplied = { [weak self] id, frame in
+            // `follow` self-suppresses for WindowServer-tracked
+            // rings (#285), so the animation tee can't rewind them.
             self?.borders.follow(id, windowFrame: frame)
         }
 
@@ -270,6 +275,16 @@ public final class KiwiCore {
         // frames (steady state); per-tick moves come from the
         // animation tee (`tiler.onFrameApplied`).
         updateBorders()
+        // An animated relayout (spawn, close, mode/gap change)
+        // restacks windows, so WindowServer fires the same
+        // hide/reorder events as a drag-swap — which can leave a
+        // ring hidden with no matching unhide. Re-assert the full
+        // ring set once the motion settles (keyed, so a burst of
+        // retiles collapses to one). Only when something animates:
+        // a static retile moves nothing, so no restack, no drop.
+        if tiler.animation.activeCount > 0 {
+            scheduleBorderDropReconcile()
+        }
         // Floats sit outside the layout loop above, so a bar just
         // switched on (or a window just turned floating) can leave
         // one hidden under a top strip; correct it here. Must run

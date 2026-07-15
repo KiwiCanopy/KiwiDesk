@@ -20,7 +20,7 @@ public enum SkyLight {
         )
 
     /// Resolves one C function pointer, or nil if unavailable.
-    private static func symbol<T>(_ name: String, as type: T.Type) -> T? {
+    static func symbol<T>(_ name: String, as type: T.Type) -> T? {
         guard let handle, let sym = dlsym(handle, name) else {
             return nil
         }

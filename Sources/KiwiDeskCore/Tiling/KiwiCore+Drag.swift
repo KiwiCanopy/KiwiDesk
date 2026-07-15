@@ -186,6 +186,7 @@ extension KiwiCore {
         frame: CGRect
     ) {
         dragOverlay.hideAll()
+        defer { scheduleBorderDropReconcile() }
         // A floating window is excluded from the layout swap/resize
         // logic below, but a drop that leaves it under a top app bar
         // hides its title bar and makes it ungrabbable — clamp it

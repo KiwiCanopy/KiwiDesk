@@ -39,10 +39,11 @@ public final class TilingEngine {
 
     /// Tee off every animated frame (AX coords), fired per tick
     /// from `AnimationEngine.apply`. Wired to the focus border
-    /// overlays (`KiwiCore.borders.follow`) so a ring stays glued
-    /// to its window mid-slide; a no-op by default. The instant
-    /// `setFrame` path does NOT tee — `updateBorders` reads the
-    /// layout target for settled (non-animating) windows instead.
+    /// overlays as the AX/AppKit fallback so a ring stays glued to
+    /// its window mid-slide; healthy WindowServer tracking ignores
+    /// this commanded frame and reads the real bounds instead. A
+    /// no-op by default. The instant `setFrame` path does not tee;
+    /// its AX or WindowServer geometry event updates the ring.
     public var onFrameApplied: @MainActor (WindowID, CGRect) -> Void =
         { _, _ in }
 

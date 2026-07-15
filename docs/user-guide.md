@@ -476,6 +476,13 @@ around the focused window so you never lose track of which window
 has focus in a gapped layout — the cue keyboard-driven focus
 otherwise lacks. It is **on by default**.
 
+On supported macOS versions, KiwiDesk draws the ring as a native
+WindowServer overlay and follows move, resize, and ordering events at
+their source. This keeps it attached during app-driven moves as well as
+mouse drags. Every private symbol is resolved at runtime; if that
+surface is missing or an operation fails, the same ring is redrawn with
+the AppKit overlay automatically. Neither path requires disabling SIP.
+
 A live two-window preview leads the controls, showing the ring at
 your current color, width, and corner style before it touches real
 windows. Below it:
@@ -484,10 +491,11 @@ windows. Below it:
 - **Color**: the focused window's ring color (a swatch plus hex
   field, the same control as every other KiwiDesk color).
 - **Show border on unfocused windows**: off by default — when on,
-  every other tiled window gets a ring too, in its own (greyed
-  until enabled) color. Floating windows aren't ringed when
-  unfocused (only the focused window is, whether tiled or
-  floating); monocle always shows only the focused ring.
+  every other tiled window gets a ring too, including every member
+  of an overflow cascade, in its own (greyed until enabled) color.
+  Floating windows aren't ringed when unfocused (only the focused
+  window is, whether tiled or floating); monocle always shows only
+  the focused ring.
 - **Width**: 1–20 pt. The ring covers at most a hairline of window
   content at any width; the rest grows into the gap, so a thick
   border never hides content. Keep gaps at least as wide as the

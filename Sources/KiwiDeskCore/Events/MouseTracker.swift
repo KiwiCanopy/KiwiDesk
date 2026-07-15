@@ -3,11 +3,11 @@ import AppKit
 /// Remembers the most recent left-button press via global
 /// event monitors.
 ///
-/// Needed to classify the trailing AX resize event of a fast
-/// mouse gesture: it arrives after the button release, so
-/// "is the button down?" alone would drop it. Only clicks
-/// are observed (two event types, a handful per interaction)
-/// — never mouse movement — so the cost is negligible.
+/// The press is needed to classify the trailing AX resize event
+/// of a fast mouse gesture: it arrives after the button release,
+/// so "is the button down?" alone would drop it. Only clicks are
+/// observed (two event types, a handful per interaction) — never
+/// mouse movement — so the cost is negligible.
 @MainActor
 public final class MouseTracker {
     public struct Press {

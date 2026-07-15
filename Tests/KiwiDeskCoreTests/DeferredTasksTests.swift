@@ -88,6 +88,7 @@ struct DeferredTasksTests {
         let keys: [DeferredTasks.Key] = [
             .focusFollow, .startupSweep,
             .spaceSettle, .nativeSpaceSettle,
+            .borderDropSettle,
         ]
         for key in keys {
             owner.schedule(key, after: .milliseconds(5), body)

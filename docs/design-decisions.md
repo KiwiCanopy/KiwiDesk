@@ -141,18 +141,30 @@ the candidate set, array-order layouts **skip** their array
 indices (#172). Both share one geometric detector,
 `Navigation.pileMates`.
 
-The **focus border** (#278) is a cross-layout consumer of the same
-pile model: it draws one ring per *visible* slot, so it collapses
-every overflow pile to a single ring on one representative member
-via `Navigation.pileMates` (the other mates are excluded), and in
-monocle — where only the focused window is visible — it stays
-focused-only regardless of `border.unfocused_enabled`. It runs the
-pile detector over **tiled slots only**: a floating window is not a
-cascade mate, so floating windows are excluded from the unfocused
-set (the focused window is still ringed whether tiled or floating).
-Because it dedupes by pile geometry rather than layout identity, it
-needs no per-layout branch: `KiwiCore.borderSpecs` is pure over the
-flat slot list.
+The **focus border** (#278) is a cross-layout overlay that
+deliberately opts OUT of the pile-dedup model above: with
+`border.unfocused_enabled`, every tiled window gets its own ring,
+including every member of an overflow cascade. Buried
+rings naturally show only along their exposed cascade edges because
+each overlay is ordered directly above its target window. This is a
+border-only presentation policy: `Navigation.pileMates` remains the
+shared authority for navigation, swaps, and z-order restoration. In
+monocle — where only the focused window is visible — borders stay
+focused-only. Floating windows are excluded from the unfocused set;
+the focused window is still ringed whether tiled or floating.
+
+The ring's **rendering backend is opportunistic, not architectural**
+(#285): when the complete runtime-linked SkyLight drawing and event
+surface resolves, an SLS window follows WindowServer move/resize/order
+events directly. Drawing and tracking degrade independently: a failed
+raw-window operation replays the ring through the public AppKit panel
+without discarding a healthy WindowServer event stream. Direct mouse
+drags use one movement authority: WindowServer bounds whenever its event
+surface is active, otherwise the stable AX/AppKit fallback. No path
+projects a border from cursor motion, so macOS edge/corner dwell holds
+the ring and target together. No private symbol is linked at launch,
+and the optimization never changes SIP requirements or the layout/state
+model.
 
 **Two vocabularies, one split (#185 review, 2026-07-12):**
 *navigation* (`focus`, window `swap`) is spatial and

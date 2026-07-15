@@ -7,6 +7,7 @@ extension KiwiCore {
     /// Loads the config and starts window management.
     public func start() {
         lastNativeSpace = NativeSpaces.activeSpaceNumber()
+        borders.start()
         loadConfig()
         sleepWake.start()
         eventLoop.start()
@@ -68,7 +69,7 @@ extension KiwiCore {
         // Retire focus rings first: the gather below moves windows
         // by direct AX (no animation tee), so a ring left up would
         // sit stranded over the scattered desktop.
-        borders.clear()
+        borders.stop()
         // Gather windows onto their owning monitors before
         // any subsystem teardown; AX must still be live here.
         gatherWindows()

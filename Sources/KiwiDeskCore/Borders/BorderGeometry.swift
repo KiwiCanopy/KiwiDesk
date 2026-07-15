@@ -42,34 +42,18 @@ struct BorderGeometry: Equatable {
         systemRadius: CGFloat = GeometryUtils
             .systemWindowCornerRadius
     ) -> BorderGeometry {
-        let w = min(
-            BorderStyle.maxWidth,
-            max(BorderStyle.minWidth, width)
+        let w = Self.clamp(width)
+        let inner = Self.innerOverlap(
+            width: w,
+            cornerStyle: cornerStyle,
+            systemRadius: systemRadius
         )
-        // Rounded: inner overlap capped at 1 pt, the rest reaches
-        // outward — a hairline of content lost at any width.
-        let baseInner = min(w / 2, 1)
-        let inner: CGFloat
-        let radius: CGFloat
-        switch cornerStyle {
-        case .square:
-            // Square has no radius to match the window, so its
-            // sharp corner would float outside the window's curve.
-            // Tuck the inner edge to the corner tangent so the
-            // band covers that gap; a wide stroke still reaches
-            // outward (`outer` below can stay positive).
-            inner = max(
-                baseInner,
-                systemRadius * Self.squareCornerTuck
-            )
-            radius = 0
-        case .rounded:
-            inner = baseInner
-            // The centerline sits `w/2 - inner` outside the
-            // window edge; a concentric rounded rect grows its
-            // radius by the same offset.
-            radius = max(0, systemRadius + (w / 2 - inner))
-        }
+        // Rounded: the centerline sits `w/2 - inner` outside the
+        // window edge, so a concentric rounded rect grows its
+        // radius by the same offset. Square has no radius.
+        let radius =
+            cornerStyle == .square
+            ? 0 : max(0, systemRadius + (w / 2 - inner))
         let outer = w - inner
         return BorderGeometry(
             overlayFrame: windowFrame.insetBy(
@@ -79,5 +63,50 @@ struct BorderGeometry: Equatable {
             lineWidth: w,
             cornerRadius: radius
         )
+    }
+
+    /// How far the stroke reaches *outward* past the window edge
+    /// (pt), floored at 0 — a thin square that tucks fully inside
+    /// reaches nothing. `border.fit_gaps` sizes gaps from this so
+    /// the gap math matches what the renderer actually draws.
+    static func outwardReach(
+        width: CGFloat,
+        cornerStyle: BorderStyle.CornerStyle,
+        systemRadius: CGFloat = GeometryUtils
+            .systemWindowCornerRadius
+    ) -> CGFloat {
+        let w = clamp(width)
+        return max(
+            0,
+            w
+                - innerOverlap(
+                    width: w,
+                    cornerStyle: cornerStyle,
+                    systemRadius: systemRadius
+                )
+        )
+    }
+
+    private static func clamp(_ width: CGFloat) -> CGFloat {
+        min(BorderStyle.maxWidth, max(BorderStyle.minWidth, width))
+    }
+
+    /// Depth (pt) the stroke overlaps *into* the window. Rounded
+    /// caps it at 1 pt (a hairline at any width); square tucks to
+    /// the corner tangent so the band covers the corner. One
+    /// source for both `compute` and `outwardReach` so they can't
+    /// drift.
+    private static func innerOverlap(
+        width w: CGFloat,
+        cornerStyle: BorderStyle.CornerStyle,
+        systemRadius: CGFloat
+    ) -> CGFloat {
+        let baseInner = min(w / 2, 1)
+        switch cornerStyle {
+        case .square:
+            return max(baseInner, systemRadius * squareCornerTuck)
+        case .rounded:
+            return baseInner
+        }
     }
 }
