@@ -31,6 +31,41 @@ extension KiwiCore {
             handleMonitorChange()
             emitMonitorChange()
         case .windowFocused(let id):
+            // Dismissing an ignored panel (Ghostty's quick
+            // terminal) leaves the app frontmost and makes AX
+            // re-report its managed main window — which may live
+            // on another space — as focused. Following that
+            // stale report switches spaces, or in a focus-driven
+            // layout yanks focus to the main window on the
+            // active space. The panel was flagged active while
+            // it held focus (#21); consume the flag here and
+            // restore the pre-panel focus instead of acting on
+            // the report (#244). A focus landing on any other
+            // app means the panel's app resigned frontmost, so
+            // drop stale flags to keep a later genuine focus of
+            // that app from being suppressed.
+            if let pid = state.windows[id]?.pid {
+                if ignoredPanelActive.remove(pid) != nil {
+                    // The report is spurious, but the id could
+                    // still be an outstanding self-raise; drop
+                    // it so a later genuine focus of this window
+                    // is not misread as our own echo (cf. the
+                    // .windowDestroyed cleanup below).
+                    outstandingSelfRaises.remove(id)
+                    if let before = effects.focusBefore,
+                        let space = state.workspaces.space(
+                            of: before
+                        )
+                    {
+                        state.workspaces.focus(
+                            before,
+                            in: space
+                        )
+                    }
+                    return
+                }
+                ignoredPanelActive.removeAll()
+            }
             // Echo provenance (#152/#158): an echo of KiwiDesk's
             // own AX raise is not a user action. When one lands
             // after focus has already moved on in the active
