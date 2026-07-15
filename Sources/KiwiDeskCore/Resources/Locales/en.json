@@ -51,6 +51,7 @@
   "app_bar.tab_background.label": "Tab background",
   "app_bar.tab_background.plain": "Plain",
   "app_bar.thickness": "Thickness",
+  "app_picker.search.placeholder": "Search apps",
   "app_rules.add": "Add",
   "app_rules.add_rule": "Add app rule",
   "app_rules.add_window": "Add Window",

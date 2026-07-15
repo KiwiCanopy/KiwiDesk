@@ -32,28 +32,23 @@ struct AppSelector: View {
                 .foregroundStyle(.secondary)
             }
         } else {
-            Menu {
-                ForEach(
-                    KeybindingCatalog.installedApps
-                ) { app in
-                    Button(app.name) { name = app.bundleID }
-                }
-                Divider()
-                Button(L("app_selector.custom", "Custom…")) {
+            AppPickerButton(
+                placeholder: L(
+                    "shortcuts.choose_app",
+                    "Choose app…"
+                ),
+                selection: name.isEmpty
+                    ? nil
+                    : KeybindingCatalog.displayName(
+                        forBundleID: name
+                    ),
+                onPick: { name = $0.bundleID },
+                escapeLabel: L("app_selector.custom", "Custom…"),
+                onEscape: {
                     custom = true
                     name = ""
                 }
-            } label: {
-                menuLabel(
-                    name.isEmpty
-                        ? L("shortcuts.choose_app", "Choose app…")
-                        : KeybindingCatalog.displayName(
-                            forBundleID: name
-                        )
-                )
-                .frame(minWidth: 150, alignment: .leading)
-            }
-            .controlSize(.large)
+            )
         }
     }
 }

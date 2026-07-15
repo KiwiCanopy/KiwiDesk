@@ -148,30 +148,19 @@ struct ApplicationsSection: View {
     private func appMenu(
         _ binding: Binding<KeyBinding>
     ) -> some View {
-        Menu {
-            ForEach(KeybindingCatalog.installedApps) { app in
-                Button(app.name) { assign(binding, app: app) }
-            }
-            Divider()
-            Button(L("shortcuts.other_ellipsis", "Other…")) {
-                chooseBundle(binding)
-            }
-        } label: {
-            HStack(spacing: 4) {
-                Text(
-                    binding.wrappedValue.label.isEmpty
-                        ? L(
-                            "shortcuts.choose_app",
-                            "Choose app…"
-                        )
-                        : binding.wrappedValue.label
-                )
-                Image(systemName: "chevron.up.chevron.down")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
-            .frame(minWidth: 160, alignment: .leading)
-        }
+        AppPickerButton(
+            placeholder: L(
+                "shortcuts.choose_app",
+                "Choose app…"
+            ),
+            selection: binding.wrappedValue.label.isEmpty
+                ? nil
+                : binding.wrappedValue.label,
+            minWidth: 160,
+            onPick: { assign(binding, app: $0) },
+            escapeLabel: L("shortcuts.other_ellipsis", "Other…"),
+            onEscape: { chooseBundle(binding) }
+        )
         .frame(width: 200)
     }
 
