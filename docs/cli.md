@@ -68,6 +68,7 @@ KiwiDesk service restart
 | | `set_swap_skips_cascade` | true\|false (default `true`) — swap from a pile targets the outside neighbor |
 | | `set_fallback_space` | space id ("" clears) — rehome target on profile switch |
 | | `set_space_icon` | space id, icon (SF Symbol\|emoji\|char; "" clears) |
+| | `quit.set_layout` | `grid` (default) — how windows are spread on quit |
 | | `get_state` | — (returns `{active_space, spaces, windows, monitor_count, native_space, exec_running}`) |
 | | `reload_config` | — |
 | | `version` | — (returns `{version, commit}`) |

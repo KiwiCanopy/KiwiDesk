@@ -28,6 +28,7 @@ private let axVisible = CGRect(
     height: 1055
 )
 private let primaryH: CGFloat = 1080
+private let minSize: CGFloat = 300
 
 // MARK: - Helpers
 
@@ -67,87 +68,58 @@ private func addWindow(
     state.apply(.windowCreated(w))
 }
 
-// MARK: - Centered-frame math
-
-@Suite("WindowGather — centeredFrame")
-struct GatherCenteredFrameTests {
-    @Test("window is centered in the display")
-    func centersWindow() {
-        let size = CGSize(width: 800, height: 600)
-        let result = WindowGather.centeredFrame(
-            size: size,
-            in: axVisible
-        )
-        #expect(abs(result.midX - axVisible.midX) < 1)
-        #expect(abs(result.midY - axVisible.midY) < 1)
-        #expect(result.width == 800)
-        #expect(result.height == 600)
-    }
-
-    @Test("window wider than display clamps to left edge")
-    func clampsTooWide() {
-        let size = CGSize(width: 2000, height: 600)
-        let result = WindowGather.centeredFrame(
-            size: size,
-            in: axVisible
-        )
-        #expect(result.minX == axVisible.minX)
-    }
-
-    @Test("window taller than display clamps to top edge")
-    func clampsTooTall() {
-        let size = CGSize(width: 800, height: 2000)
-        let result = WindowGather.centeredFrame(
-            size: size,
-            in: axVisible
-        )
-        #expect(result.minY == axVisible.minY)
-    }
-
-    @Test("result frame sits entirely within axFrame")
-    func staysInsideBounds() {
-        let size = CGSize(width: 400, height: 300)
-        let result = WindowGather.centeredFrame(
-            size: size,
-            in: axVisible
-        )
-        #expect(result.minX >= axVisible.minX)
-        #expect(result.minY >= axVisible.minY)
-        #expect(result.maxX <= axVisible.maxX)
-        #expect(result.maxY <= axVisible.maxY)
-    }
+private func targets(
+    _ state: StateCoordinator
+) -> [WindowID: CGRect] {
+    WindowGather.targets(
+        state: state,
+        primaryHeight: primaryH,
+        style: .grid,
+        minSize: minSize
+    )
 }
 
 // MARK: - Target resolution
 
 @Suite("WindowGather — targets")
 struct GatherTargetsTests {
-    @Test("tiled window gets a centered frame on its display")
-    func tiledWindowCentered() {
+    @Test("a lone tiled window fills the top-left grid cell")
+    func tiledWindowInFirstCell() throws {
         var state = makeState()
         addWindow(&state, id: 42)
-        let frames = WindowGather.targets(
-            state: state,
-            primaryHeight: primaryH
+        let frames = targets(state)
+        let frame = try #require(frames[WindowID(42)])
+        // 2×2 grid over axVisible → 960 × 527.5 cells.
+        #expect(
+            frame
+                == CGRect(
+                    x: 0,
+                    y: 25,
+                    width: 960,
+                    height: 527.5
+                )
         )
-        guard let frame = frames[WindowID(42)] else {
-            Issue.record("no frame resolved for window 42")
-            return
-        }
-        #expect(abs(frame.midX - axVisible.midX) < 1)
-        #expect(abs(frame.midY - axVisible.midY) < 1)
-        #expect(frame.width == 800)
-        #expect(frame.height == 600)
+    }
+
+    @Test("windows are resized to the cell, not kept")
+    func resizesToCell() throws {
+        var state = makeState()
+        addWindow(
+            &state,
+            id: 1,
+            size: CGSize(width: 320, height: 240)
+        )
+        let frames = targets(state)
+        let frame = try #require(frames[WindowID(1)])
+        #expect(frame.width == 960)
+        #expect(frame.height == 527.5)
     }
 
     @Test("floating windows are excluded")
     func skipsFloating() {
         var state = makeState()
         addWindow(&state, id: 99, isFloating: true)
-        let frames = WindowGather.targets(
-            state: state,
-            primaryHeight: primaryH
-        )
+        let frames = targets(state)
         #expect(frames[WindowID(99)] == nil)
     }
 
@@ -161,10 +133,7 @@ struct GatherTargetsTests {
             appName: "App"
         )
         state.apply(.windowCreated(w))
-        let frames = WindowGather.targets(
-            state: state,
-            primaryHeight: primaryH
-        )
+        let frames = targets(state)
         #expect(frames[WindowID(7)] == nil)
     }
 
@@ -173,15 +142,12 @@ struct GatherTargetsTests {
         // No displays registered — targets must be empty.
         var s = StateCoordinator(defaultSpace: SpaceID(1))
         addWindow(&s, id: 5)
-        let frames = WindowGather.targets(
-            state: s,
-            primaryHeight: primaryH
-        )
+        let frames = targets(s)
         #expect(frames.isEmpty)
     }
 
     @Test("window in unassigned space falls back to first display")
-    func fallsBackToFirstDisplay() {
+    func fallsBackToFirstDisplay() throws {
         var state = makeState()
         // Add a second space with no display assignment,
         // then move a window there.
@@ -201,16 +167,39 @@ struct GatherTargetsTests {
         state.apply(.windowCreated(w))
         // Relocate to the display-less space.
         state.workspaces.add(WindowID(55), to: SpaceID(99))
-        let frames = WindowGather.targets(
-            state: state,
-            primaryHeight: primaryH
-        )
+        let frames = targets(state)
         // Falls back to the first (and only) display.
-        guard let frame = frames[WindowID(55)] else {
-            Issue.record("no frame for window 55")
-            return
-        }
-        #expect(abs(frame.midX - axVisible.midX) < 1)
-        #expect(abs(frame.midY - axVisible.midY) < 1)
+        let frame = try #require(frames[WindowID(55)])
+        #expect(frame.minX >= axVisible.minX)
+        #expect(frame.maxX <= axVisible.maxX)
+    }
+
+    @Test("windows across spaces share one display-wide grid")
+    func spacesShareTheDisplayGrid() throws {
+        var state = makeState()
+        // Second space on the same display: its window must
+        // round-robin into the same grid, not restart it.
+        state.workspaces.assign(SpaceID(2), to: DisplayID(1))
+        addWindow(&state, id: 1)
+        let w = ManagedWindow(
+            id: WindowID(2),
+            pid: 99,
+            appName: "App",
+            title: "",
+            frame: CGRect(
+                x: 0,
+                y: 0,
+                width: 800,
+                height: 600
+            )
+        )
+        state.apply(.windowCreated(w))
+        state.workspaces.add(WindowID(2), to: SpaceID(2))
+        let frames = targets(state)
+        let f1 = try #require(frames[WindowID(1)])
+        let f2 = try #require(frames[WindowID(2)])
+        // Cell 0 and cell 1 — no overlap, same row.
+        #expect(f1.origin == CGPoint(x: 0, y: 25))
+        #expect(f2.origin == CGPoint(x: 960, y: 25))
     }
 }

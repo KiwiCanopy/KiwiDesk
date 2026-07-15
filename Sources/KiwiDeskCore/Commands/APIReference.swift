@@ -187,6 +187,9 @@ public enum APIReference {
         "mouse": [
             "set_follows_focus"
         ],
+        "quit": [
+            "set_layout"
+        ],
         "drag": [
             "set_ghost_enabled", "set_ghost_border",
             "set_ghost_border_thickness",

@@ -2827,13 +2827,37 @@ logout/reboot; after that, windows are re-tiled fresh). Crashes
 restore from the last autosave (30 s interval) instead.
 
 On quit or restart, KiwiDesk moves each managed tiled window back onto
-the monitor its virtual space is assigned to and staggers them
-diagonally within the display's visible area, so every window is
-individually findable. Floating windows are left wherever they are.
+the monitor its virtual space is assigned to and arranges them per
+`quit.layout` (see `quit.set_layout` below), so the desktop is usable
+the moment KiwiDesk exits. Floating windows are left wherever they are.
 Because KiwiDesk keeps all managed windows on the single visible native
 Space (inactive virtual spaces are parked off-screen at the peek
 corner — not on a different native macOS Space), every reachable window
-lands there staggered together.
+lands there together. Windows on a display's background native Spaces
+cannot be repositioned without disabling SIP, which KiwiDesk never
+does — the visible Space per display is the arranged scope.
+
+### quit.set_layout
+
+**Expects:** the string `"grid"` (the only strategy today; future
+strategies will accept more values).
+
+**Does:** picks how remaining managed windows are spread on quit.
+`grid` builds a per-display grid and round-robin fills it — window 1
+into cell 1, window 2 into cell 2, wrapping back to cell 1 and
+stacking. Windows sharing a cell cascade vertically like
+`overflow_all`, in **every** cell, so each title bar stays reachable.
+Each display sizes its own grid from its window count `N`:
+`ceil(sqrt(N / 10))`, clamped between 2×2 and 4×4 — up to 40 windows
+get 2×2, up to 90 get 3×3, beyond that 4×4. One-shot teardown
+placement: windows stay on their own display, and nothing is managed
+afterwards. Profile JSON key: `quit.layout`. Default: `grid`.
+
+**Example:**
+
+```lua
+quit.set_layout("grid")
+```
 
 When AX permission is revoked mid-session, KiwiDesk pauses window
 management but cannot gather windows — `setFrame` calls return

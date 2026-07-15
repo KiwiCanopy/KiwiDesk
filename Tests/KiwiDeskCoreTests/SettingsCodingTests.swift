@@ -29,10 +29,14 @@ struct SettingsCodingTests {
             Set(root.keys) == [
                 "animations", "app_bar", "drag", "gap", "layout",
                 "min_window_size", "mouse", "mouse_resize",
-                "new_window_placement_override", "resize", "space",
-                "swap_skips_cascade",
+                "new_window_placement_override", "quit", "resize",
+                "space", "swap_skips_cascade",
             ]
         )
+        // `quit.set_layout` → `quit.layout` (#197); `grid` is
+        // the only strategy today and the default.
+        let quit = try object(root["quit"])
+        #expect(quit["layout"] as? String == "grid")
         // `mouse.set_follows_focus` → `mouse.follows_focus`
         // (#186), off by default.
         let mouse = try object(root["mouse"])

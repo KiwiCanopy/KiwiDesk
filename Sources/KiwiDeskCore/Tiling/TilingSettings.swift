@@ -65,6 +65,10 @@ public struct TilingSettings: Sendable, Equatable, Codable {
     /// as mode icons. Sparse; the name stays primary everywhere.
     /// `space.icon[space_id]`.
     public var spaceIcons: [SpaceID: String] = [:]
+    /// Quit-time teardown placement (#197): how remaining
+    /// managed windows are spread when KiwiDesk exits.
+    /// `quit.layout`; `grid` is the only strategy today.
+    public var quitLayout: QuitLayoutStyle = .grid
 
     public init() {}
 
@@ -82,8 +86,13 @@ public struct TilingSettings: Sendable, Equatable, Codable {
             "new_window_placement_override"
         case mouse
         case mouseResize = "mouse_resize"
+        case quit
         case resize
         case space
+    }
+
+    private enum QuitKeys: String, CodingKey {
+        case layout
     }
 
     private enum SpaceKeys: String, CodingKey {
@@ -164,6 +173,22 @@ public struct TilingSettings: Sendable, Equatable, Codable {
         try decodeDrag(from: container)
         try decodeSpace(from: container)
         try decodeResize(from: container)
+        try decodeQuit(from: container)
+    }
+
+    private mutating func decodeQuit(
+        from container: Container
+    ) throws {
+        guard container.contains(.quit) else { return }
+        let quit = try container.nestedContainer(
+            keyedBy: QuitKeys.self,
+            forKey: .quit
+        )
+        quitLayout =
+            try quit.decodeIfPresent(
+                QuitLayoutStyle.self,
+                forKey: .layout
+            ) ?? .grid
     }
 
     private mutating func decodeResize(
@@ -345,5 +370,10 @@ public struct TilingSettings: Sendable, Equatable, Codable {
         )
         try resize.encode(resizeStep, forKey: .step)
         try resize.encode(resizeFeedback, forKey: .feedback)
+        var quit = container.nestedContainer(
+            keyedBy: QuitKeys.self,
+            forKey: .quit
+        )
+        try quit.encode(quitLayout, forKey: .layout)
     }
 }

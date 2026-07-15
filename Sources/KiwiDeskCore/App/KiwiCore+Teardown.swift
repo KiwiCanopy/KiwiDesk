@@ -4,67 +4,15 @@ import CoreGraphics
 
 /// Pure gather-target computation for KiwiDesk shutdown.
 ///
-/// When KiwiDesk stops (quit or restart), managed tiled
-/// windows are staggered onto their owning display so they
-/// are not left stranded in tiled frames after the WM exits.
-/// All reachable windows land on the single visible native
-/// Space (inactive-virtual-space windows are parked at the
-/// peek corner on that same native Space).
-///
-/// **Floating-size decision**: KiwiDesk does not yet track a
-/// "last-floating size" (no `lastFloatingSize` in state; see
-/// issue #70). Gather keeps the window's current frame size —
-/// the tiled size the AX echoes last reported — and places it
-/// within the display's visible area. A future pass may record
-/// pre-tile sizes for a richer restore.
+/// When KiwiDesk stops (quit or restart), remaining managed
+/// windows are spread onto their owning display per the
+/// configured `quit.layout` strategy (#197) so the desktop is
+/// usable the moment the WM exits. All reachable windows land
+/// on the single visible native Space (inactive-virtual-space
+/// windows are parked at the peek corner on that same native
+/// Space). One-shot teardown placement: no live management
+/// after, and no cross-monitor pull.
 public enum WindowGather {
-    /// Diagonal step between staggered windows (pts).
-    public static let staggerStep: CGFloat = 40
-
-    /// Returns a staggered gather-target frame: `size`
-    /// centered in `axFrame` with a diagonal `index × step`
-    /// offset, each edge clamped inside `axFrame`.
-    /// Index 0 produces the exact center.
-    ///
-    /// `axFrame` must be in AX (top-left-origin) coordinates;
-    /// the returned rect is also in AX coordinates.
-    public static func staggeredFrame(
-        size: CGSize,
-        in axFrame: CGRect,
-        index: Int,
-        step: CGFloat = staggerStep
-    ) -> CGRect {
-        let offset = CGFloat(index) * step
-        let x = axFrame.midX - size.width / 2 + offset
-        let y = axFrame.midY - size.height / 2 + offset
-        let cx = max(
-            axFrame.minX,
-            min(x, axFrame.maxX - size.width)
-        )
-        let cy = max(
-            axFrame.minY,
-            min(y, axFrame.maxY - size.height)
-        )
-        return CGRect(
-            x: cx,
-            y: cy,
-            width: size.width,
-            height: size.height
-        )
-    }
-
-    /// Returns a gather-target frame: `size` centered in
-    /// `axFrame`, with each edge clamped inside `axFrame`.
-    ///
-    /// `axFrame` must be in AX (top-left-origin) coordinates;
-    /// the returned rect is also in AX coordinates.
-    public static func centeredFrame(
-        size: CGSize,
-        in axFrame: CGRect
-    ) -> CGRect {
-        staggeredFrame(size: size, in: axFrame, index: 0)
-    }
-
     /// Returns a gather target for every tracked, tiled window.
     ///
     /// `primaryHeight` is `NSScreen.screens.first?.frame.height`
@@ -74,9 +22,8 @@ public enum WindowGather {
     /// lowest raw ID (deterministic on multi-monitor). Floating
     /// windows and windows with a zero-size frame are excluded.
     ///
-    /// Windows on the same display are staggered diagonally by
-    /// `staggerStep` pts per window so each is at a distinct,
-    /// findable position rather than an overlapping pile.
+    /// Each display collects its own windows (space-iteration
+    /// order) and sizes its own grid — see `QuitGridLayout`.
     ///
     /// NOTE — cross-Space scope (#70): this iterates
     /// `allSpaces`, which is correct because KiwiDesk keeps
@@ -88,40 +35,58 @@ public enum WindowGather {
     /// background-Space windows.
     public static func targets(
         state: StateCoordinator,
-        primaryHeight: CGFloat
+        primaryHeight: CGFloat,
+        style: QuitLayoutStyle,
+        minSize: CGFloat
     ) -> [WindowID: CGRect] {
         let displays = state.workspaces.allDisplays
         guard !displays.isEmpty else { return [:] }
         // Lowest raw ID → deterministic fallback on multi-
         // monitor; Array(dict.values) order is not stable.
         let fallback = displays.min { $0.id.raw < $1.id.raw }!
-        var result: [WindowID: CGRect] = [:]
-        // Per-display stagger counter so each display's
-        // windows cascade independently.
-        var displayIdx: [DisplayID: Int] = [:]
+        // Collect per display first: the grid dimension
+        // depends on each display's total window count.
+        var order: [DisplayID] = []
+        var gathered: [DisplayID: [WindowID]] = [:]
+        var axFrames: [DisplayID: CGRect] = [:]
         for space in state.workspaces.allSpaces {
             let displayID =
                 state.workspaces.display(of: space.id)
             let display =
                 displays.first { $0.id == displayID }
                 ?? fallback
-            let axVisible = GeometryUtils.flip(
-                display.visibleFrame,
-                primaryHeight: primaryHeight
-            )
+            if axFrames[display.id] == nil {
+                order.append(display.id)
+                axFrames[display.id] = GeometryUtils.flip(
+                    display.visibleFrame,
+                    primaryHeight: primaryHeight
+                )
+            }
             for windowID in space.windows {
                 guard
                     let window = state.windows[windowID],
                     !window.isFloating,
                     window.frame.size != .zero
                 else { continue }
-                let idx = displayIdx[display.id, default: 0]
-                displayIdx[display.id] = idx + 1
-                result[windowID] = staggeredFrame(
-                    size: window.frame.size,
-                    in: axVisible,
-                    index: idx
-                )
+                gathered[display.id, default: []]
+                    .append(windowID)
+            }
+        }
+        var result: [WindowID: CGRect] = [:]
+        for displayID in order {
+            guard
+                let windows = gathered[displayID],
+                let axFrame = axFrames[displayID]
+            else { continue }
+            switch style {
+            case .grid:
+                result.merge(
+                    QuitGridLayout.frames(
+                        for: windows,
+                        in: axFrame,
+                        minSize: minSize
+                    )
+                ) { current, _ in current }
             }
         }
         return result
@@ -130,8 +95,9 @@ public enum WindowGather {
 
 extension KiwiCore {
     /// Moves each managed tiled window onto its owning monitor,
-    /// staggered within the display's visible area, so windows
-    /// are not stranded in tiled frames after KiwiDesk exits.
+    /// arranged per `quit.layout` within the display's visible
+    /// area, so windows are not stranded in tiled frames after
+    /// KiwiDesk exits.
     ///
     /// Applies frames synchronously (direct AX IPC) inside a
     /// SkyLight display-suppression bracket so all moves
@@ -153,7 +119,9 @@ extension KiwiCore {
         let primaryH = GeometryUtils.primaryHeight
         let frames = WindowGather.targets(
             state: state,
-            primaryHeight: primaryH
+            primaryHeight: primaryH,
+            style: tiler.settings.quitLayout,
+            minSize: tiler.settings.minWindowSize
         )
         guard !frames.isEmpty else { return }
         SkyLight.suppressDisplay()

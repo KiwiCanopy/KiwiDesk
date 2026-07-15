@@ -553,8 +553,13 @@ interaction.
   restoring (default 1500 ms, giving apps time to settle).
 
 When you quit or restart KiwiDesk, it saves window order and focus
-per virtual space and restores on next launch. Windows land staggered
-on the monitors they were assigned to, so every window is findable.
+per virtual space and restores on next launch. On the way out,
+each monitor's windows are spread into an evenly-filled grid —
+windows take turns claiming a cell, and windows sharing a cell
+cascade so every title bar stays clickable. The desktop is usable
+the moment KiwiDesk exits, with no window pulled to another
+monitor. (Power users can tune this via `quit.set_layout` in the
+Lua reference; `grid` is the only strategy today.)
 
 ## Profiles
 
