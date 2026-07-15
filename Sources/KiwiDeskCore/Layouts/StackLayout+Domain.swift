@@ -112,7 +112,7 @@ extension StackLayout {
             if let smallest = others.min() {
                 let limit = maxColumnTotal(
                     smallestWeight: smallest,
-                    height: span,
+                    span: span,
                     minSize: minSize
                 )
                 let cap = limit - (total - current)
@@ -125,20 +125,21 @@ extension StackLayout {
         )
     }
 
-    /// The largest weight total a column can carry before its
-    /// smallest share drops below `minSize` — the single
-    /// authority behind both the layout's cascade check and
-    /// the resize command's growth cap, so the two formulas
-    /// cannot drift apart (#67 review; parity rule).
+    /// The largest weight total a zone can carry along its
+    /// axis (`span`) before its smallest share drops below
+    /// `minSize` — the single authority behind both the
+    /// layout's cascade check and the resize command's growth
+    /// cap, so the two formulas cannot drift apart (#67
+    /// review; parity rule).
     public static func maxColumnTotal(
         smallestWeight: Double,
-        height: Double,
+        span: Double,
         minSize: Double
     ) -> Double {
         // No (or nonsense) minimum → no cliff, matching the
         // old `share < minSize` comparison for minSize ≤ 0.
         guard minSize > 0 else { return .infinity }
-        return smallestWeight * height / minSize
+        return smallestWeight * span / minSize
     }
 
     /// The master/stack partition of a tiled window array —

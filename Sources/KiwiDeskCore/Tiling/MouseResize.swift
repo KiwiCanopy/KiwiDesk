@@ -23,11 +23,12 @@ public enum ResizeAdjustment: Equatable, Sendable {
 /// changes the `resize` command makes, so both paths share one
 /// per-layout behavior. Pure so it is fully testable.
 ///
-/// One deliberate exception (#67): a stack HEIGHT drag snaps
-/// back while keyboard `resize("y")` adjusts the focused
-/// window's per-window weight — wiring the drag would need the
-/// dragged window's identity in this deliberately windowless
-/// seam. Revisit if stack height drags are asked for.
+/// One deliberate exception (#67): a stack drag along the
+/// zones' own axis snaps back while the keyboard `resize`
+/// adjusts the focused window's per-window weight — wiring the
+/// drag would need the dragged window's identity in this
+/// deliberately windowless seam. Revisit if those drags are
+/// asked for.
 public enum MouseResize {
     /// Size deltas beyond this are a resize gesture; smaller
     /// ones are app-side clamping noise (character grids).
@@ -145,6 +146,7 @@ public enum MouseResize {
     public static func translate(
         mode: LayoutMode,
         isMaster: Bool,
+        stackSplitHorizontal: Bool,
         slot: CGRect,
         frame: CGRect,
         bounds: CGRect
@@ -171,9 +173,16 @@ public enum MouseResize {
             }
             return nil
         case .stack:
-            guard abs(dw) > threshold else { return nil }
+            // The ratio drag follows the split axis (#222);
+            // the cross-axis drag snaps back (the #67
+            // weight-drag exception above).
+            let change = stackSplitHorizontal ? dw : dh
+            guard abs(change) > threshold else { return nil }
             let sign: CGFloat = isMaster ? 1 : -1
-            return .masterRatio(sign * dw / bounds.width)
+            let extent =
+                stackSplitHorizontal
+                ? bounds.width : bounds.height
+            return .masterRatio(sign * change / extent)
         case .scrolling:
             guard abs(dw) > threshold else { return nil }
             return .scrollWidth(dw)

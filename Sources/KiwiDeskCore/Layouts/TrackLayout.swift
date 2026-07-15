@@ -79,7 +79,7 @@ public struct TrackLayout: LayoutSystem {
         // whole space cascades — physics, not a knob.
         let limit = StackLayout.maxColumnTotal(
             smallestWeight: weights.min() ?? 1,
-            height: Double(span),
+            span: Double(span),
             minSize: Double(context.minWindowSize)
         )
         guard span > 0, total <= limit else {
@@ -189,7 +189,7 @@ public struct TrackLayout: LayoutSystem {
         let total = weights.reduce(0, +)
         let limit = StackLayout.maxColumnTotal(
             smallestWeight: weights.min() ?? 1,
-            height: Double(available),
+            span: Double(available),
             minSize: Double(context.minWindowSize)
         )
         guard available > 0, total <= limit else {

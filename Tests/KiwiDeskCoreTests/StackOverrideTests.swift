@@ -35,10 +35,14 @@ struct StackOverrideTests {
         over.masterCount = 3
         over.masterRatio = 0.75
         over.overflowStyle = .cascadeAll
+        over.masterOrientation = .horizontal
+        over.stackPosition = .bottom
         let resolved = over.resolved(onto: StackParams())
         #expect(resolved.masterCount == 3)
         #expect(resolved.masterRatio == 0.75)
         #expect(resolved.overflowStyle == .cascadeAll)
+        #expect(resolved.masterOrientation == .horizontal)
+        #expect(resolved.stackPosition == .bottom)
     }
 
     @Test("Unset fields inherit the global, per field")

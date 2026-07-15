@@ -53,6 +53,28 @@ enum LayoutHelp {
         )
     }
 
+    /// The two #222 arrangement pickers, shared by the Stack
+    /// tab and the per-space Customize rows like the trio above.
+    @MainActor static var stackPosition: String {
+        L(
+            "layout_params.stack_position.help",
+            "Which side of the screen the stack zone takes; "
+                + "the master zone gets the other side. The "
+                + "stack lines up to fit its strip: a left or "
+                + "right stack runs top to bottom, a top or "
+                + "bottom stack side by side."
+        )
+    }
+
+    @MainActor static var masterOrientation: String {
+        L(
+            "layout_params.master_orientation.help",
+            "How the master zone lines up its windows when "
+                + "the master count is more than one: stacked "
+                + "top to bottom, or side by side."
+        )
+    }
+
     /// Wrap-focus, shared by all three array-order layouts
     /// (Scrolling, Track, Monocle) — one string since they now
     /// share the default (off, #257).

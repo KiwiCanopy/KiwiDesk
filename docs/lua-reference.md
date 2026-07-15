@@ -458,11 +458,13 @@ stack.set_master_count(1)
 
 **Expects:** a number between 0 and 1.
 
-**Does:** sets the master zone's share of the space's width. At
-layout time the *effective* ratio is clamped so both zones keep
-`min_window_size` (#44) — the stored value stays untouched and
-is honored again on a wider display; the cascade fallback only
-triggers when two min-size zones cannot coexist at any ratio.
+**Does:** sets the master zone's share of the split axis — the
+width with a left/right stack zone, the height with a top/bottom
+one (`stack.set_stack_position`). At layout time the *effective*
+ratio is clamped so both zones keep `min_window_size` (#44) —
+the stored value stays untouched and is honored again on a wider
+display; the cascade fallback only triggers when two min-size
+zones cannot coexist at any ratio.
 
 **Example:**
 
@@ -507,6 +509,39 @@ many full windows as fit and cascades the rest at the bottom;
 
 ```lua
 stack.set_overflow_style("cascade_overflow")
+```
+
+### stack.set_stack_position
+
+**Expects:** `"top"`, `"right"` (default), `"bottom"`, or
+`"left"`.
+
+**Does:** sets which side of the space the stack zone takes; the
+master zone gets the rest. `left`/`right` split the width,
+`top`/`bottom` the height. The stack zone's lineup derives from
+the position — a left/right zone stacks its windows vertically,
+a top/bottom zone lines them up side by side (there is no
+separate stack orientation knob). Overflow piles always cascade
+downward regardless.
+
+**Example:**
+
+```lua
+stack.set_stack_position("bottom")
+```
+
+### stack.set_master_orientation
+
+**Expects:** `"vertical"` (default) or `"horizontal"`.
+
+**Does:** sets how the master zone lines up its windows when
+`master_count` is more than one: stacked top to bottom, or side
+by side.
+
+**Example:**
+
+```lua
+stack.set_master_orientation("horizontal")
 ```
 
 ### stack.set_new_window_placement
@@ -567,6 +602,36 @@ stack.set_master_ratio_override("3", 0.7)
 
 ```lua
 stack.set_overflow_style_override("3", "cascade_all")
+```
+
+### stack.set_stack_position_override
+
+**Expects:**
+
+- A space identifier.
+- A position string (`"top"`, `"right"`, `"bottom"`, `"left"`).
+
+**Does:** overrides the global stack position for one space.
+
+**Example:**
+
+```lua
+stack.set_stack_position_override("3", "bottom")
+```
+
+### stack.set_master_orientation_override
+
+**Expects:**
+
+- A space identifier.
+- An orientation string (`"vertical"`, `"horizontal"`).
+
+**Does:** overrides the global master orientation for one space.
+
+**Example:**
+
+```lua
+stack.set_master_orientation_override("3", "horizontal")
 ```
 
 ### scroll.set_slot_size

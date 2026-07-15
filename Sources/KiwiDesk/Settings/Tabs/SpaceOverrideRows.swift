@@ -164,60 +164,8 @@ struct SpaceOverrideRows: View {
         )
     }
 
-    @ViewBuilder
-    private var stackRows: some View {
-        OverrideStepperRow(
-            label: L(
-                "layout_params.master_count",
-                "Master count"
-            ),
-            value: binding(
-                \.stack.override,
-                space,
-                \.masterCount
-            ),
-            global: g.stack.masterCount,
-            range: 1...5
-        )
-        OverrideFractionRow(
-            label: L(
-                "layout_params.master_ratio",
-                "Master ratio"
-            ),
-            value: binding(
-                \.stack.override,
-                space,
-                \.masterRatio
-            ),
-            global: g.stack.masterRatio
-        )
-        OverridePickerRow(
-            label: L("layout_params.overflow", "Overflow"),
-            value: binding(
-                \.stack.override,
-                space,
-                \.overflowStyle
-            ),
-            global: g.stack.overflowStyle,
-            options: [
-                (
-                    .cascadeOverflow,
-                    L(
-                        "layout_params.cascade_overflow",
-                        "Cascade overflow"
-                    )
-                ),
-                (
-                    .cascadeAll,
-                    L(
-                        "layout_params.cascade_all",
-                        "Cascade all"
-                    )
-                ),
-            ],
-            help: LayoutHelp.stackOverflow
-        )
-    }
+    // The Stack rows live in `SpaceOverrideRows+StackRows.swift`
+    // (#222 grew them past this file's line budget).
 
     // MARK: - Binding helper
 

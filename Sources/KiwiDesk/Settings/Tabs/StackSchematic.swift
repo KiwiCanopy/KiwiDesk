@@ -1,14 +1,18 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Stack schematic (#125): a master column sized by the staged
-/// master ratio, beside a four-window stack column that shows the
+/// The Stack schematic (#125): a master zone sized by the staged
+/// master ratio, beside a six-window stack zone that shows the
 /// overflow style *directly* rather than with a stand-in glyph —
-/// `cascade_overflow` piles only the last two windows, `cascade_all`
-/// piles the whole column so just the top edges peek. Focus sits on
-/// the first stack window, so the new-window placement (first /
-/// last / before / after focused) reads off which slot the dense
-/// `+` tile takes.
+/// `cascade_overflow` piles only the surplus windows, `cascade_all`
+/// piles the whole zone so just the top edges peek. The #222
+/// arrangement fields feed it too: the split follows the staged
+/// stack position (which also derives the stack zone's lineup)
+/// and the master zone follows its staged orientation (piles
+/// keep cascading downward, like the engine).
+/// Focus sits on the first stack window, so the new-window
+/// placement (first / last / before / after focused) reads off
+/// which slot the dense `+` tile takes.
 ///
 /// The piled tiles are drawn **opaque** (each with its own solid
 /// base), so overlapping them never sums the accent alpha into
@@ -21,7 +25,15 @@ struct StackSchematic: View {
     let masterCount: Int
     let masterRatio: Double
     let overflowStyle: StackParams.OverflowStyle
+    let masterOrientation: StackParams.Orientation
+    let stackPosition: StackParams.StackPosition
     let placement: SpawnPlacement
+
+    /// Derived, like the engine (`StackPosition.stackOrientation`).
+    /// Internal (not private) for `StackSchematic+Slots.swift`.
+    var stackOrientation: StackParams.Orientation {
+        stackPosition.stackOrientation
+    }
 
     /// Existing windows before the new one arrives. Five, because
     /// the new window always lands in the stack zone here (with one
@@ -30,11 +42,13 @@ struct StackSchematic: View {
     /// `cascade_all`, a fixed 3 tiled + 3 piled for
     /// `cascade_overflow`.
     private static let stackWindows = 5
-    /// Tiled windows kept above the cascade-overflow pile; the rest
-    /// (the surplus) pile.
-    private static let overflowTiled = 3
+    /// Tiled windows kept beside the cascade-overflow pile; the
+    /// rest (the surplus) pile. Internal (not private), with
+    /// the offset below and `stackWins`, for the slot math in
+    /// `StackSchematic+Slots.swift`.
+    static let overflowTiled = 3
     /// Scaled-down title-bar reveal (the engine uses 40 pt).
-    private static let cascadeOffset: CGFloat = 9
+    static let cascadeOffset: CGFloat = 9
 
     private var masters: Int { max(1, masterCount) }
     private let newWindow = WindowID(99)
@@ -47,7 +61,7 @@ struct StackSchematic: View {
     /// The windows in array order with the new one spliced in per
     /// `placement` (focus = first stack window) — the same rule as
     /// `SpaceModel.insert`. Partitioning at `masters` then sorts
-    /// them into the two columns exactly as `StackLayout` does.
+    /// them into the two zones exactly as `StackLayout` does.
     private var order: [WindowID] {
         var w = (1...(masters + Self.stackWindows))
             .map { WindowID(UInt32($0)) }
@@ -72,18 +86,14 @@ struct StackSchematic: View {
         Array(order.prefix(masters))
     }
 
-    private var stackWins: [WindowID] {
+    var stackWins: [WindowID] {
         Array(order.dropFirst(masters))
     }
 
     var body: some View {
         SchematicCanvas(caption: caption, axLabel: axLabel) {
             GeometryReader { geo in
-                HStack(spacing: 3) {
-                    masterColumn
-                        .frame(width: masterWidth(geo.size.width))
-                    stackColumn
-                }
+                zones(in: geo.size)
             }
             .animation(LayoutSchematic.damping, value: masterCount)
             .animation(LayoutSchematic.damping, value: masterRatio)
@@ -91,46 +101,90 @@ struct StackSchematic: View {
                 LayoutSchematic.damping,
                 value: overflowStyle
             )
+            .animation(
+                LayoutSchematic.damping,
+                value: masterOrientation
+            )
+            .animation(
+                LayoutSchematic.damping,
+                value: stackPosition
+            )
             .animation(LayoutSchematic.damping, value: placement)
         }
     }
 
-    private func masterWidth(_ total: CGFloat) -> CGFloat {
+    /// The master/stack split along the staged position's axis,
+    /// mirroring `StackLayout.regions`.
+    @ViewBuilder
+    private func zones(in size: CGSize) -> some View {
+        switch stackPosition {
+        case .right:
+            HStack(spacing: 3) {
+                masterZone.frame(width: masterSpan(size.width))
+                stackZone
+            }
+        case .left:
+            HStack(spacing: 3) {
+                stackZone
+                masterZone.frame(width: masterSpan(size.width))
+            }
+        case .bottom:
+            VStack(spacing: 3) {
+                masterZone.frame(height: masterSpan(size.height))
+                stackZone
+            }
+        case .top:
+            VStack(spacing: 3) {
+                stackZone
+                masterZone.frame(height: masterSpan(size.height))
+            }
+        }
+    }
+
+    private func masterSpan(_ total: CGFloat) -> CGFloat {
         max(6, (total - 3) * CGFloat(masterRatio))
     }
 
-    // MARK: - Master column
+    // MARK: - Master zone
 
-    /// The master zone stacked evenly, capped for legibility with a
-    /// "+N" chip when the master count outgrows the mini-canvas.
-    private var masterColumn: some View {
+    /// The master zone lined up along its staged orientation,
+    /// capped for legibility with a "+N" chip when the master
+    /// count outgrows the mini-canvas.
+    @ViewBuilder
+    private var masterZone: some View {
+        if masterOrientation == .vertical {
+            VStack(spacing: 3) { masterTiles }
+        } else {
+            HStack(spacing: 3) { masterTiles }
+        }
+    }
+
+    private var masterTiles: some View {
         let visible = min(masterWins.count, 4)
         let hidden = masterWins.count - visible
-        return VStack(spacing: 3) {
-            ForEach(0..<visible, id: \.self) { i in
-                ZStack(alignment: .bottomTrailing) {
-                    tile(for: masterWins[i])
-                    if i == visible - 1, hidden > 0 {
-                        SchematicMoreChip(hidden: hidden)
-                            .padding(2)
-                    }
+        return ForEach(0..<visible, id: \.self) { i in
+            ZStack(alignment: .bottomTrailing) {
+                tile(for: masterWins[i])
+                if i == visible - 1, hidden > 0 {
+                    SchematicMoreChip(hidden: hidden)
+                        .padding(2)
                 }
             }
         }
     }
 
-    // MARK: - Stack column
+    // MARK: - Stack zone
 
-    /// One slot per stack window, top-to-bottom. Draw order is array
-    /// order, so a pile's lower, later tiles land on top — the front
-    /// window covers the buried ones except their top edge.
-    private struct Slot {
+    /// One slot per stack window, in array order. Draw order is
+    /// array order, so a pile's later tiles land on top — the
+    /// front window covers the buried ones except their top edge.
+    struct Slot {
         var rect: CGRect
         var piled: Bool
         var front: Bool
     }
 
-    private var stackColumn: some View {
+    private var stackZone: some View {
         GeometryReader { geo in
             let slots = stackSlots(in: geo.size)
             ZStack(alignment: .topLeading) {
@@ -151,71 +205,6 @@ struct StackSchematic: View {
             }
             .frame(width: geo.size.width, height: geo.size.height)
         }
-    }
-
-    /// `cascade_all` piles every window; `cascade_overflow` tiles
-    /// the run and piles the last `overflowPile` (the surplus).
-    /// Piled tiles keep full height but overlap by `cascadeOffset`,
-    /// so only their top edge shows above the next.
-    private func stackSlots(in size: CGSize) -> [Slot] {
-        let n = stackWins.count
-        let w = size.width
-        let h = size.height
-        let off = Self.cascadeOffset
-        if overflowStyle == .cascadeAll {
-            let tileH = max(10, h - off * CGFloat(n - 1))
-            return (0..<n).map { i in
-                Slot(
-                    rect: CGRect(
-                        x: 0,
-                        y: CGFloat(i) * off,
-                        width: w,
-                        height: tileH
-                    ),
-                    piled: true,
-                    front: i == n - 1
-                )
-            }
-        }
-        let tiled = min(Self.overflowTiled, n - 1)
-        let piled = n - tiled
-        let g: CGFloat = 3
-        let rowH = max(
-            10,
-            (h - g * CGFloat(tiled) - off * CGFloat(piled - 1))
-                / CGFloat(tiled + 1)
-        )
-        var slots: [Slot] = []
-        for i in 0..<tiled {
-            slots.append(
-                Slot(
-                    rect: CGRect(
-                        x: 0,
-                        y: CGFloat(i) * (rowH + g),
-                        width: w,
-                        height: rowH
-                    ),
-                    piled: false,
-                    front: false
-                )
-            )
-        }
-        let top = CGFloat(tiled) * (rowH + g)
-        for k in 0..<piled {
-            slots.append(
-                Slot(
-                    rect: CGRect(
-                        x: 0,
-                        y: top + CGFloat(k) * off,
-                        width: w,
-                        height: rowH
-                    ),
-                    piled: true,
-                    front: k == piled - 1
-                )
-            )
-        }
-        return slots
     }
 
     @ViewBuilder
@@ -269,14 +258,14 @@ struct StackSchematic: View {
         case .cascadeOverflow:
             return L(
                 "layout.schematic.stack.caption_overflow",
-                "Master column beside the stack; when the stack "
-                    + "fills, the surplus piles at the bottom."
+                "Master zone and stack zone; when the stack "
+                    + "fills, the surplus piles up."
             )
         case .cascadeAll:
             return L(
                 "layout.schematic.stack.caption_all",
-                "Master column beside the stack; when the stack "
-                    + "fills, the whole column piles so only the "
+                "Master zone and stack zone; when the stack "
+                    + "fills, the whole zone piles so only the "
                     + "top edges show."
             )
         }

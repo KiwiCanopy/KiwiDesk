@@ -109,6 +109,8 @@ KiwiDesk service restart
 | | `stack.set_master_count` | n |
 | | `stack.set_master_ratio` | 0.1–0.9 |
 | | `stack.set_overflow_style` | `cascade_overflow\|cascade_all` |
+| | `stack.set_stack_position` | `top\|right\|bottom\|left` (default `right`; derives the stack's lineup) |
+| | `stack.set_master_orientation` | `vertical\|horizontal` (default `vertical`) |
 | | `stack.set_new_window_placement` | placement¹ (default `first`) |
 | BSP | `bsp.set_strategy` | `longest_side\|alternating` |
 | | `bsp.set_ratio_h` | 0.1–0.9 (side-by-side splits) |
@@ -151,10 +153,14 @@ floating focused window resizes itself directly in any mode
 For tiled windows: in BSP, `x` moves the side-by-side split
 ratio and `y` the stacked one, independently, each in the
 direction that grows the *focused* window's region (#122).
-Stack is focus-aware too (#67): `x` moves the master/stack
-split in the direction that grows the *focused* window, `y`
-grows the focused window's vertical share of its column
-(session-scoped weights, reset on relaunch). Scrolling resizes
+Stack is focus-aware too (#67) and arrangement-aware (#222):
+the split axis (`x` for a left/right stack zone, `y` for
+top/bottom) moves the master/stack split in the direction that
+grows the *focused* window; the focused zone's own axis grows
+that window's share of its zone (session-scoped weights, reset
+on relaunch). An axis matching neither fails with the cue — so
+a master zone lined up *along* the split axis has no reachable
+per-window shares (accepted, see design-decisions). Scrolling resizes
 the slot along its own scroll axis for either `x` or `y`. In a
 track space the axis across the tracks resizes the focused
 window's track, the axis along them its share within the track

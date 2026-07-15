@@ -69,6 +69,8 @@ extension KiwiCore {
         let adjustment = MouseResize.translate(
             mode: space.mode,
             isMaster: isMaster,
+            stackSplitHorizontal: stack.stackPosition
+                .splitsHorizontally,
             slot: slot,
             frame: frame,
             bounds: bounds
@@ -116,15 +118,20 @@ extension KiwiCore {
                 for: space.id
             )
         case .masterRatio(let delta):
-            let base =
+            let stack =
                 tiler.settings.resolvedStack(for: space.id)
-                .masterRatio
+            let base = stack.masterRatio
+            // The ratio lives on the split axis (#222), so the
+            // cap's available span follows it too.
+            let available =
+                stack.stackPosition.splitsHorizontally
+                ? bounds.width : bounds.height
             // Cap at the display's effective range (#44), like
             // the keyboard path — no invisible ratchet.
             let value = StackLayout.cappedRatioWrite(
                 base + delta,
                 base: base,
-                available: Double(bounds.width),
+                available: Double(available),
                 minSize: Double(tiler.settings.minWindowSize)
             )
             tiler.settings.setMasterRatio(

@@ -97,6 +97,14 @@ struct SettingsCodingTests {
         #expect(monocle["wrap_focus"] as? Bool == false)
         let stack = try object(layout["stack"])
         #expect(stack["master_ratio"] as? Double == 0.6)
+        // `stack.set_master_orientation` / `set_stack_position`
+        // (#222); the stack zone's lineup derives from the
+        // position, so no `stack_orientation` key exists.
+        #expect(
+            stack["master_orientation"] as? String == "vertical"
+        )
+        #expect(stack["stack_position"] as? String == "right")
+        #expect(stack["stack_orientation"] == nil)
         // `track.set_axis` → `layout.track.axis` (#128);
         // wrap toggle per the #168 vocabulary.
         let track = try object(layout["track"])
@@ -164,6 +172,8 @@ struct SettingsCodingTests {
         settings.bsp.splitRatioV = 0.3
         settings.scrolling.slotSize = .points(400)
         settings.stack.masterCount = 2
+        settings.stack.masterOrientation = .horizontal
+        settings.stack.stackPosition = .top
         settings.grid.rows = 4
         settings.grid.autoSize = true
         settings.monocle.wrapFocus = false

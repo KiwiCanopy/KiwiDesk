@@ -27,6 +27,20 @@ extension KiwiCore {
                 )
             else { return Self.overflowStyleError }
             tiler.settings.stack.overflowStyle = style
+        case "stack.set_master_orientation":
+            guard
+                let orientation = Self.parseStackOrientation(
+                    args.first?.stringValue
+                )
+            else { return Self.stackOrientationError }
+            tiler.settings.stack.masterOrientation = orientation
+        case "stack.set_stack_position":
+            guard
+                let position = Self.parseStackPosition(
+                    args.first?.stringValue
+                )
+            else { return Self.stackPositionError }
+            tiler.settings.stack.stackPosition = position
         case "stack.set_new_window_placement":
             guard let placement = parsePlacement(args) else {
                 return placementError
@@ -83,6 +97,20 @@ extension KiwiCore {
                 )
             else { return Self.overflowStyleError }
             over.overflowStyle = style
+        case "master_orientation":
+            guard
+                let orientation = Self.parseStackOrientation(
+                    rest.first?.stringValue
+                )
+            else { return Self.stackOrientationError }
+            over.masterOrientation = orientation
+        case "stack_position":
+            guard
+                let position = Self.parseStackPosition(
+                    rest.first?.stringValue
+                )
+            else { return Self.stackPositionError }
+            over.stackPosition = position
         default:
             return .fail(
                 "unknown command: stack.set_\(field)_override"
@@ -109,6 +137,18 @@ extension KiwiCore {
         raw.flatMap(StackParams.OverflowStyle.init(rawValue:))
     }
 
+    static func parseStackOrientation(
+        _ raw: String?
+    ) -> StackParams.Orientation? {
+        raw.flatMap(StackParams.Orientation.init(rawValue:))
+    }
+
+    static func parseStackPosition(
+        _ raw: String?
+    ) -> StackParams.StackPosition? {
+        raw.flatMap(StackParams.StackPosition.init(rawValue:))
+    }
+
     private static let masterCountError = CommandResponse.fail(
         "expected count"
     )
@@ -117,6 +157,12 @@ extension KiwiCore {
     )
     static let overflowStyleError = CommandResponse.fail(
         "expected cascade_overflow | cascade_all"
+    )
+    static let stackOrientationError = CommandResponse.fail(
+        "expected vertical | horizontal"
+    )
+    static let stackPositionError = CommandResponse.fail(
+        "expected top | right | bottom | left"
     )
 
     private func promoteDemote(
