@@ -127,29 +127,66 @@ struct AppRuleRow: View {
                 Text(L("app_rules.space", "Space"))
                     .foregroundStyle(.secondary)
                 spaceMenu
+                    .frame(
+                        width: SettingsMetrics.facetControlColumn,
+                        alignment: .leading
+                    )
             }
             HStack(spacing: 6) {
-                Text(L("app_rules.float", "Float"))
-                    .foregroundStyle(.secondary)
-                floatPicker
-            }
-            // Float rules have no per-profile tier (#109):
-            // grey out, never hide (the #171 convention).
-            .disabled(overrideBase != nil)
-            .help(
-                overrideBase == nil
-                    ? ""
-                    : L(
-                        "app_rules.float.app_wide.help",
-                        "Float rules are app-wide — edit "
-                            + "them while editing the live "
-                            + "configuration."
+                // The `?` sits outside the disabled scope below,
+                // so the "what does floating do" hint stays
+                // readable even in override mode where the picker
+                // is greyed (#109 app-wide).
+                HStack(spacing: 4) {
+                    Text(L("app_rules.float", "Float"))
+                        .foregroundStyle(.secondary)
+                    HelpButton(
+                        explanation: floatHelp,
+                        subject: L("app_rules.float", "Float")
                     )
-            )
+                }
+                floatPicker
+                    .frame(
+                        width: SettingsMetrics.facetControlColumn,
+                        alignment: .leading
+                    )
+                    // Float rules have no per-profile tier
+                    // (#109): grey out, never hide (the #171
+                    // convention).
+                    .disabled(overrideBase != nil)
+                    .help(
+                        overrideBase == nil
+                            ? ""
+                            : L(
+                                "app_rules.float.app_wide.help",
+                                "Float rules are app-wide — edit "
+                                    + "them while editing the live "
+                                    + "configuration."
+                            )
+                    )
+            }
             Spacer()
         }
         .font(.callout)
         .padding(.leading, 28)
+    }
+
+    /// Optional "why" depth for the Float facet (#260): what
+    /// floating a window actually does, plus the per-app-vs-
+    /// layout-mode disambiguation (same English word, two
+    /// mechanisms). Must-know scope stays in the section caption;
+    /// the titled-pattern mechanics stay in `AppRuleTitledEditor`
+    /// — don't restate them here or the two drift.
+    private var floatHelp: String {
+        L(
+            "app_rules.float.help",
+            "Floating takes this app's matching windows out of "
+                + "tiling: each keeps its last position and size "
+                + "and appears on every space, instead of living "
+                + "in one space's grid.\n\nThis is per-app "
+                + "floating — not the **Floating** layout mode, "
+                + "which floats every window in a space."
+        )
     }
 
     /// `app_rules[app]`; Automatic deletes the entry.
@@ -171,7 +208,6 @@ struct AppRuleRow: View {
             )
         }
         .menuStyle(.borderlessButton)
-        .fixedSize()
     }
 
     private var floatFacet: FloatFacet {
@@ -201,15 +237,18 @@ struct AppRuleRow: View {
             menuLabel(floatLabel)
         }
         .menuStyle(.borderlessButton)
-        .fixedSize()
     }
 
     /// The borderless-menu signature (`ProfileEditTargetMenu`):
     /// a trailing chevron on the label so a bare-text menu
-    /// still reads as "this opens a menu".
+    /// still reads as "this opens a menu". `lineLimit(1)` lets a
+    /// long value truncate inside the fixed facet slot (#260)
+    /// instead of overflowing it — the menus dropped `.fixedSize`
+    /// so the enclosing `.frame(width:)` constrains them.
     private func menuLabel(_ text: String) -> some View {
         HStack(spacing: 4) {
             Text(text)
+                .lineLimit(1)
             Image(systemName: "chevron.up.chevron.down")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
