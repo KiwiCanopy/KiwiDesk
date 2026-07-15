@@ -7,9 +7,12 @@ import AppKit
 /// geometry; the overlay knows nothing about layouts or focus.
 ///
 /// Non-interactive by design (`ignoresMouseEvents`) — unlike the
-/// app bar, a border is never clicked. Sits at `.floating`, the
-/// same level as the app bar and drag visuals; tiled windows
-/// don't overlap, so a ring above them never buries a neighbor.
+/// app bar, a border is never clicked. Sits at the normal window
+/// level and is stacked directly above its target window with
+/// `order(.above, relativeTo:)` (see `order(above:)`), so a window
+/// layered over the target — an ignored panel, a higher-level
+/// utility window — stays in front of the ring instead of being
+/// covered by it.
 @MainActor
 final class BorderOverlay {
     private var panel: NSPanel?
@@ -19,7 +22,9 @@ final class BorderOverlay {
     /// coords) and strokes it in `colorHex`. Used both for a
     /// steady-state sync and per animation tick — implicit Core
     /// Animation is disabled so the ring snaps to each commanded
-    /// frame instead of easing a step behind the window.
+    /// frame instead of easing a step behind the window. Stacking
+    /// is left to `order(above:)`, called only on sync (not per
+    /// tick) so the ring isn't re-ordered every frame.
     func update(
         geometry: BorderGeometry,
         colorHex: String,
@@ -64,6 +69,16 @@ final class BorderOverlay {
         }
     }
 
+    /// Stacks the ring directly above its target window in the
+    /// global window order (`windowNumber` is the target's
+    /// `CGWindowID`). Anything layered over the target — an
+    /// ignored panel, a higher-level utility window — therefore
+    /// stays in front of the ring. Called on sync, not per tick.
+    /// A no-op until the panel exists (first `update` creates it).
+    func order(above windowNumber: CGWindowID) {
+        panel?.order(.above, relativeTo: Int(windowNumber))
+    }
+
     func hide() {
         panel?.orderOut(nil)
     }
@@ -79,7 +94,11 @@ final class BorderOverlay {
         panel.backgroundColor = .clear
         panel.hasShadow = false
         panel.ignoresMouseEvents = true
-        panel.level = .floating
+        // Normal window level (not floating): the ring is stacked
+        // relative to its target by `order(above:)`, so it must
+        // share the target's band to sit *below* windows layered
+        // over it — a floating level would force it above them.
+        panel.level = .normal
         panel.isReleasedWhenClosed = false
         panel.animationBehavior = .none
         // Stay on the window's own Space; a fullscreen window

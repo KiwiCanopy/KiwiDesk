@@ -61,11 +61,16 @@ public final class BorderManager {
         }
         for spec in desired {
             specs[spec.window] = spec
-            overlay(for: spec.window).update(
+            let overlay = overlay(for: spec.window)
+            overlay.update(
                 geometry: geometry(spec, frame: spec.frame),
                 colorHex: spec.colorHex,
                 screen: screen(for: spec.frame)
             )
+            // Re-assert stacking each sync (focus change, retile,
+            // z-order restore) — the target may have moved in the
+            // window order since the ring last positioned.
+            overlay.order(above: spec.window.raw)
         }
     }
 
@@ -82,7 +87,9 @@ public final class BorderManager {
         )
     }
 
-    /// Retires every ring (display sleep, native-space switch).
+    /// Retires every ring at once. Used on shutdown (`stop()`)
+    /// before the quit gather scatters windows; steady-state
+    /// retirement of individual rings goes through `sync`.
     public func clear() {
         for overlay in overlays.values { overlay.hide() }
         overlays = [:]

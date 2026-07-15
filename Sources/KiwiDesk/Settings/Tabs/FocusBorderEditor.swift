@@ -82,10 +82,34 @@ struct FocusBorderEditor: View {
             .pickerStyle(.segmented)
             .labelsHidden()
         }
+        Divider()
+        VStack(alignment: .leading, spacing: 4) {
+            Button(L("border.fit_gaps", "Fit gaps to border")) {
+                fitGapsToBorder()
+            }
+            Text(
+                L(
+                    "border.fit_gaps.caption",
+                    "Widens the layout gaps so borders never "
+                        + "touch a neighbour — the inner gap "
+                        + "doubles when unfocused borders are on."
+                )
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
+        }
     }
 
     private var cornerLabel: String {
         L("border.corner_style", "Corners")
+    }
+
+    /// Writes the same `gapsGlobal` the Gaps sliders do, using the
+    /// core's shared `BorderStyle.fittingGaps()` so the button and
+    /// the `border.fit_gaps` command can't drift.
+    private func fitGapsToBorder() {
+        model.config.settings.gapsGlobal =
+            model.config.settings.borderStyle.fittingGaps()
     }
 }
 

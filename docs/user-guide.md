@@ -484,8 +484,10 @@ windows. Below it:
 - **Color**: the focused window's ring color (a swatch plus hex
   field, the same control as every other KiwiDesk color).
 - **Show border on unfocused windows**: off by default — when on,
-  every other window gets a ring too, in its own (greyed until
-  enabled) color. Monocle always shows only the focused ring.
+  every other tiled window gets a ring too, in its own (greyed
+  until enabled) color. Floating windows aren't ringed when
+  unfocused (only the focused window is, whether tiled or
+  floating); monocle always shows only the focused ring.
 - **Width**: 1–20 pt. The ring covers at most a hairline of window
   content at any width; the rest grows into the gap, so a thick
   border never hides content. Keep gaps at least as wide as the

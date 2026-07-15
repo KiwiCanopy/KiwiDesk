@@ -13,6 +13,14 @@ extension KiwiCore {
         _ command: String,
         _ args: [JSONValue]
     ) -> CommandResponse {
+        if command == "border.fit_gaps" {
+            // One-shot: size the global gaps to clear the ring.
+            // Shares BorderStyle.fittingGaps with the GUI button;
+            // layoutCommand's forced retile applies it.
+            tiler.settings.gapsGlobal =
+                tiler.settings.borderStyle.fittingGaps()
+            return .ok()
+        }
         guard command.hasPrefix("border.set_") else {
             return .fail("unknown command: \(command)")
         }

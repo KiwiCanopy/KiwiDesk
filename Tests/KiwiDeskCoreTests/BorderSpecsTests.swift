@@ -8,7 +8,6 @@ import Testing
 /// slot only when `unfocusedEnabled` and not monocle; overflow
 /// piles collapse to one ring on their top window
 /// (`Navigation.pileMates`).
-@MainActor
 @Suite("Border who-gets-a-ring")
 struct BorderSpecsTests {
     private let w1 = WindowID(1)
@@ -27,12 +26,14 @@ struct BorderSpecsTests {
         _ style: BorderStyle,
         focused: WindowID?,
         slots: [(id: WindowID, frame: CGRect)],
+        floating: Set<WindowID> = [],
         monocle: Bool = false
     ) -> [BorderManager.Spec] {
         KiwiCore.borderSpecs(
             style: style,
             focused: focused,
             slots: slots,
+            floating: floating,
             isMonocle: monocle
         )
     }
@@ -94,6 +95,29 @@ struct BorderSpecsTests {
         )
         #expect(result.count == 1)
         #expect(result.first?.window == w1)
+    }
+
+    @Test("Floating windows are excluded from unfocused rings")
+    func floatingExcluded() {
+        var style = BorderStyle()
+        style.unfocusedEnabled = true
+        // w2 floats and heavily overlaps the focused tiled w1 — it
+        // must NOT be treated as a pile mate (which would suppress
+        // a ring) and gets no unfocused ring of its own.
+        let slots: [(id: WindowID, frame: CGRect)] = [
+            (w1, CGRect(x: 0, y: 0, width: 100, height: 100)),
+            (w2, CGRect(x: 10, y: 10, width: 100, height: 100)),
+            (w3, CGRect(x: 400, y: 0, width: 100, height: 100)),
+        ]
+        let result = specs(
+            style,
+            focused: w1,
+            slots: slots,
+            floating: [w2]
+        )
+        // Focused w1 + tiled w3; floating w2 neither rings nor
+        // hides w3.
+        #expect(Set(result.map(\.window)) == [w1, w3])
     }
 
     @Test("A pile gets one ring; buried mates are excluded")

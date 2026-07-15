@@ -24,7 +24,8 @@ public struct BorderStyle: Sendable, Equatable {
     }
 
     /// The narrowest and widest the width clamps to. The command
-    /// setter and the GUI slider both mirror this range.
+    /// setter clamps to this exact range; the GUI slider offers
+    /// whole points 1–20 (sub-point widths stay a Lua fine-tune).
     public static let minWidth: CGFloat = 0.5
     public static let maxWidth: CGFloat = 20
 
@@ -46,6 +47,28 @@ public struct BorderStyle: Sendable, Equatable {
     /// range so a hand-edited profile can't paint an absurd ring.
     public var clampedWidth: CGFloat {
         min(Self.maxWidth, max(Self.minWidth, width))
+    }
+
+    /// Layout gaps sized so rings never touch a neighbour: the
+    /// border's outward reach (≈ the width) at the screen edge and
+    /// between windows, doubled between windows when both
+    /// neighbours are ringed (`unfocusedEnabled`). Shared by the
+    /// `border.fit_gaps` command and the GUI button so they can't
+    /// drift. A one-shot convenience — it produces a `Gaps` value
+    /// callers assign; the layout math itself stays free of any
+    /// border coupling (AGENTS.md §5).
+    public func fittingGaps() -> Gaps {
+        let reach = clampedWidth
+        let inner = unfocusedEnabled ? reach * 2 : reach
+        return Gaps(
+            outer: .init(
+                top: reach,
+                bottom: reach,
+                left: reach,
+                right: reach
+            ),
+            inner: .init(horizontal: inner, vertical: inner)
+        )
     }
 }
 

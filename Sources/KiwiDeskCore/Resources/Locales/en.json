@@ -95,6 +95,8 @@
   "border.corner.square": "Square",
   "border.corner_style": "Corners",
   "border.enabled": "Show focus border",
+  "border.fit_gaps": "Fit gaps to border",
+  "border.fit_gaps.caption": "Widens the layout gaps so borders never touch a neighbour — the inner gap doubles when unfocused borders are on.",
   "border.focused_color": "Color",
   "border.focused_color.a11y": "Focused window border color",
   "border.title": "Focus border",

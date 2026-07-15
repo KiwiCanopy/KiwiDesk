@@ -135,8 +135,14 @@ extension KiwiCore {
                 )
             )
         case .windowMoved(let id, let frame):
+            // Keep the ring glued to a window the user (or its
+            // own app) is moving: these AX moves bypass the
+            // animation tee, so follow the frame here. Covers a
+            // live drag-and-drop of a tiled or floating window.
+            borders.follow(id, windowFrame: frame)
             drag.windowMoved(id, frame: frame)
         case .windowResized(let id, let frame):
+            borders.follow(id, windowFrame: frame)
             // Resize gestures share the drag pipeline (same
             // settle debounce). Only mouse-driven resizes
             // count; apps resizing themselves are corrected

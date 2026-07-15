@@ -1898,6 +1898,26 @@ squared frame on rounded ones.
 border.set_corner_style("rounded")
 ```
 
+### border.fit_gaps
+
+**Expects:** no arguments.
+
+**Does:** sizes the global layout gaps so borders never touch a
+neighbour — the outward reach (≈ the width) at the screen edge and
+between windows, doubled between windows when `unfocused_enabled`
+is on (both neighbours are ringed). A one-shot convenience that
+writes `gap.global`; the layout math itself stays free of any
+border coupling, so this never runs automatically. The GUI's "Fit
+gaps to border" button calls the same logic.
+
+**Example:**
+
+```lua
+border.set_width(10)
+border.fit_gaps()  -- outer gaps 10, inner gaps 10 (or 20 if
+                   -- unfocused borders are on)
+```
+
 ## Mouse Resizing
 
 Resizing a tiled window with the mouse adjusts the layout the same

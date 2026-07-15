@@ -114,6 +114,29 @@ struct BorderCommandTests {
         )
     }
 
+    @Test("fit_gaps sizes the global gaps to the border")
+    func fitGaps() {
+        let core = makeCore()
+        _ = core.execute("border.set_width", args: [.number(10)])
+        #expect(
+            core.execute("border.fit_gaps", args: []).isSuccess
+        )
+        #expect(core.tiler.settings.gapsGlobal.outer.top == 10)
+        #expect(
+            core.tiler.settings.gapsGlobal.inner.horizontal == 10
+        )
+        // Unfocused on → inner gaps double.
+        _ = core.execute(
+            "border.set_unfocused_enabled",
+            args: [.bool(true)]
+        )
+        _ = core.execute("border.fit_gaps", args: [])
+        #expect(
+            core.tiler.settings.gapsGlobal.inner.horizontal == 20
+        )
+        #expect(core.tiler.settings.gapsGlobal.outer.top == 10)
+    }
+
     @Test("Unknown border setter fails")
     func unknown() {
         let core = makeCore()

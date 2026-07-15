@@ -49,6 +49,24 @@ struct BorderStyleParityTests {
         #expect(decoded == BorderStyle())
     }
 
+    @Test("fittingGaps sizes gaps to the border reach")
+    func fittingGaps() {
+        var style = BorderStyle()
+        style.width = 10
+        // Focused-only: every gap = the width.
+        let focused = style.fittingGaps()
+        #expect(focused.outer.top == 10)
+        #expect(focused.outer.left == 10)
+        #expect(focused.inner.horizontal == 10)
+        #expect(focused.inner.vertical == 10)
+        // Both: inner gaps double (two neighbouring rings).
+        style.unfocusedEnabled = true
+        let both = style.fittingGaps()
+        #expect(both.outer.top == 10)
+        #expect(both.inner.horizontal == 20)
+        #expect(both.inner.vertical == 20)
+    }
+
     @Test("Width clamps into range, raw value preserved")
     func widthClamp() {
         var style = BorderStyle()

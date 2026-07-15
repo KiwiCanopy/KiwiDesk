@@ -40,7 +40,7 @@ struct BorderGeometryTests {
         #expect(g.cornerRadius == 20)
     }
 
-    @Test("Square style strokes at radius 0, same overlay frame")
+    @Test("Square tucks the inner edge to the corner tangent")
     func square() {
         let g = BorderGeometry.compute(
             windowFrame: window,
@@ -49,7 +49,29 @@ struct BorderGeometryTests {
             systemRadius: 16
         )
         #expect(g.cornerRadius == 0)
-        #expect(g.overlayFrame == window.insetBy(dx: -9, dy: -9))
+        // inner = 16·(1 − √2/2) ≈ 4.686 (> the rounded 1 pt), so
+        // the stroke reaches outward by only width − inner, less
+        // than the rounded case's 9 pt — the band closes the gap.
+        let tuck = 1 - CGFloat(2).squareRoot() / 2
+        let inner = 16 * tuck
+        let outer = 10 - inner
+        #expect(
+            g.overlayFrame == window.insetBy(dx: -outer, dy: -outer)
+        )
+    }
+
+    @Test("A thin square tucks fully inside the window")
+    func thinSquareTucksInside() {
+        let g = BorderGeometry.compute(
+            windowFrame: window,
+            width: 2,
+            cornerStyle: .square,
+            systemRadius: 16
+        )
+        // inner (~4.686) exceeds the width, so outer is negative
+        // and the overlay is inset *into* the window — a thin
+        // square frame just inside the edge, no empty corner.
+        #expect(g.overlayFrame.width < window.width)
     }
 
     @Test("Width is clamped defensively into range")
