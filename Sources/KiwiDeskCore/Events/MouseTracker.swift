@@ -62,4 +62,11 @@ public final class MouseTracker {
     private func recordUp() {
         press?.upAt = Date()
     }
+
+    /// Test seam: seeds the last press directly (already in AX
+    /// coordinates), standing in for the global mouse-down
+    /// monitor, which does not fire under unit tests.
+    func seedPress(at location: CGPoint) {
+        press = Press(location: location, downAt: Date())
+    }
 }
