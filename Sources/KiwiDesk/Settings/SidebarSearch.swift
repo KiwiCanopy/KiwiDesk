@@ -21,8 +21,10 @@ struct SidebarSearchResult: Identifiable, Equatable {
 }
 
 enum SidebarSearch {
-    /// Case-insensitive substring match (the `AppPickerFilter`
-    /// semantics), one row per destination in sidebar order;
+    /// Case- and diacritic-insensitive substring match
+    /// (`localizedStandardContains`, Apple's user-facing
+    /// search comparison — "grosse" finds "Größe"), one row
+    /// per destination in sidebar order;
     /// the first matching subsection wins the caption.
     /// Destinations the sidebar hides while a stored profile
     /// is edited stay out of the results too — the fourth #18
@@ -53,7 +55,7 @@ enum SidebarSearch {
         in destination: SettingsDestination
     ) -> SidebarSearchResult? {
         if destination.title
-            .localizedCaseInsensitiveContains(query)
+            .localizedStandardContains(query)
         {
             return SidebarSearchResult(
                 destination: destination,
@@ -61,7 +63,7 @@ enum SidebarSearch {
             )
         }
         let hit = subsections(of: destination).first {
-            $0.localizedCaseInsensitiveContains(query)
+            $0.localizedStandardContains(query)
         }
         return hit.map {
             SidebarSearchResult(
@@ -91,7 +93,7 @@ enum SidebarSearch {
                     "layout_defaults.min_window_size",
                     "Minimum window size"
                 )
-            ] + layoutModeTabs.map(\.displayName)
+            ] + LayoutMode.placementTabs.map(\.displayName)
         case .monitors:
             return [
                 L(
@@ -184,12 +186,4 @@ enum SidebarSearch {
             ]
         }
     }
-
-    /// The Layout Defaults tab-strip modes, in tab order
-    /// (#204) — the placement layouts, without Floating.
-    /// `displayName` carries the same `L(key, english)`
-    /// tuples the editors' section headers render.
-    private static let layoutModeTabs: [LayoutMode] = [
-        .bsp, .stack, .scrolling, .grid, .monocle, .track,
-    ]
 }

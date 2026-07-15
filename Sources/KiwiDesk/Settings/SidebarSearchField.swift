@@ -36,6 +36,11 @@ struct SidebarSearchField: View {
         .font(.callout)
         // Escape clears, matching `NSSearchField`.
         .onExitCommand { text = "" }
+        // Explicit name, so accessibility does not depend on
+        // the placeholder staying non-decorative.
+        .accessibilityLabel(
+            L("sidebar.search.placeholder", "Search")
+        )
     }
 
     /// Clearing is a control, not a choice (the icon picker's
