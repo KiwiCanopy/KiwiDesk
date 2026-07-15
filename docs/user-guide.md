@@ -328,7 +328,10 @@ Adjust each mode's defaults:
   shortcuts are focus-aware (#67): the split axis grows
   whichever zone holds the focused window, the zone's own axis
   grows the focused window's share of it (a session-only tweak —
-  it resets on relaunch and is not saved into profiles).
+  it resets on relaunch and is not saved into profiles). A
+  master zone lined up *along* the split axis has no reachable
+  shares — the split owns that axis and the other one beeps
+  (see [Accepted limitations](design-decisions.md#accepted-limitations)).
 - **Scrolling**: orientation (horizontal or vertical), anchor
   (where the focused column rests on every focus — **Center**, or
   flush against the leading/trailing edge, shown as **Left**/

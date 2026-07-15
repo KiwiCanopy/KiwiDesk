@@ -158,7 +158,9 @@ the split axis (`x` for a left/right stack zone, `y` for
 top/bottom) moves the master/stack split in the direction that
 grows the *focused* window; the focused zone's own axis grows
 that window's share of its zone (session-scoped weights, reset
-on relaunch). An axis matching neither fails with the cue. Scrolling resizes
+on relaunch). An axis matching neither fails with the cue — so
+a master zone lined up *along* the split axis has no reachable
+per-window shares (accepted, see design-decisions). Scrolling resizes
 the slot along its own scroll axis for either `x` or `y`. In a
 track space the axis across the tracks resizes the focused
 window's track, the axis along them its share within the track

@@ -31,6 +31,7 @@ planned escape hatch; it is not a wontfix dumping ground.
 | Behavior | Why it's accepted | Architectural root | Escape hatch / planned fix |
 |---|---|---|---|
 | In BSP, the inner window of a nested pair can't grow — a "grow" press (or edge-drag) widens its outer neighbor instead. | Its width `r·(1−r)·W` is already maximized at the default ratio, so no resize direction can widen it. | All same-orientation splits share the one per-space ratio; per-node ratios would need a container tree the flat-array model forbids (#56 trade). | **Shipped**: the [`track` layout (#128)](https://github.com/hajiboy95/KiwiDesk/issues/128) — `set_mode(space, "track")` gives every window one true resize target. See [BSP resize is focus-aware in *direction* only](#shortcuts). |
+| In stack, when the master zone lines up *along* the split axis (e.g. horizontal masters beside a right stack), the masters' individual shares can't be resized: that axis always moves the split, and the other axis beeps. | The split ratio owns its whole axis — giving the same keypress two meanings (split vs weight) by focus zone would make "grow" unpredictable at the boundary. | One knob per axis per arrangement ([#222](https://github.com/hajiboy95/KiwiDesk/issues/222)); weights live on a zone's own lineup axis by construction. | Pick the orthogonal master orientation (the default), or put the windows that need individual shares in the stack zone. |
 | An extreme *stored* BSP ratio still collapses the space into the overlap cascade — even though the stack layout no longer does. | The stack's layout-time clamp hasn't been migrated to BSP yet; doing it as a follow-up rather than riding the #44 fix keeps that change scoped. | BSP has no effective-ratio clamp authority; the #44 fix (`StackLayout.effectiveRatioRange`) landed in the stack only. | Migrate the clamp principle to BSP (follow-up to [#44](https://github.com/hajiboy95/KiwiDesk/issues/44)). See [The stack cascade is a last resort](#shortcuts). |
 | Dragging a stack window's height with the mouse snaps back; only keyboard/CLI `resize("y")` actually moves the vertical share. | Vertical weights are a windowless keyboard/CLI concept; the mouse-drag seam has no window to anchor a weight against. | Per-window vertical weights are session-scoped and keyboard-only by design ([#67](https://github.com/hajiboy95/KiwiDesk/issues/67)). | Use keyboard/CLI `resize("y")`; the mouse asymmetry is deliberate. See [Stack resize is focus-aware](#shortcuts). |
 | Mouse-resizing a window in the track layout snaps back on both axes; keyboard/CLI `resize` covers both knobs. | Both track adjustments (the track's weight, the in-track share) key off the dragged window's identity — the same windowless mouse-resize seam as the stack height drag above. | The mouse-resize translation (`MouseResize.translate`) is deliberately windowless; track weights are session-scoped resize state ([#128](https://github.com/hajiboy95/KiwiDesk/issues/128)). | Keyboard/CLI `resize` (both axes) and `move_to_track`; revisit together with the stack height drag if mouse parity is asked for. |
@@ -658,15 +659,16 @@ monocle/grid/floating stay explicit no-ops. No back-compat alias
 for the old `bsp.set_ratio` / `layout.bsp.ratio` name
 (pre-release, single user). (#56)
 
-**Stack resize is focus-aware, and its vertical weights are
+**Stack resize is focus-aware, and its zone weights are
 ephemeral by design.** The stack layout's resize used to always
 move the master/stack split toward the master, whichever window
 was focused. #67 makes both axes act on the *focused* window:
-`resize("x")` moves the split in the direction that grows the
-focused window's zone (flipping the old always-grow-master
-behavior when a stack window is focused — intended), and
-`resize("y")` grows the focused window's vertical share of its
-column via **per-window weights** — a `[WindowID: Double]` map
+the split axis (`x` for a left/right stack zone, `y` for
+top/bottom — #222) moves the split in the direction that grows
+the focused window's zone (flipping the old always-grow-master
+behavior when a stack window is focused — intended), and the
+focused zone's own axis grows the focused window's share of its
+zone via **per-window weights** — a `[WindowID: Double]` map
 in `Space`, parallel to the flat window array (a map, not a
 tree: it adds no structure the flat-array guardrail forbids).
 The weights are **session-scoped and never serialized**: a
@@ -675,14 +677,14 @@ window relaunches, so there is nothing durable to persist a
 weight against — persisting them would at best restore sizes to
 the wrong windows. They are pruned when a window leaves the
 space. When a weighted share drops below `min_window_size`, the
-column falls back to the existing overflow cascade (weights
+zone falls back to the existing overflow cascade (weights
 apply to the fully-tiled case only), and the resize command
 caps weight *growth* at that cliff so presses past it cannot
 ratchet the stored weight invisibly; clamping the *master
 ratio* against min window size stays a separate issue (#44).
-One deliberate asymmetry: a stack height *drag* still snaps
-back (the mouse seam is windowless); only the keyboard/CLI
-`resize("y")` moves weights. (#67)
+One deliberate asymmetry: a *drag* along the zones' own axis
+still snaps back (the mouse seam is windowless); only the
+keyboard/CLI `resize` moves weights. (#67)
 
 **The stack zone's lineup derives from its position — no
 `stack_orientation` knob; piles always cascade downward.** #222

@@ -121,5 +121,9 @@ extension SpaceOverrideRows {
             ],
             help: LayoutHelp.masterOrientation
         )
+        // Greyed at a resolved master count of 1, like the
+        // Layout Defaults picker (§2.7 grey-don't-hide) — this
+        // space's own override decides, not the global.
+        .disabled(g.resolvedStack(for: space).masterCount <= 1)
     }
 }

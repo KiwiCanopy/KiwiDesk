@@ -88,6 +88,34 @@ struct MouseResizeTests {
         #expect(adjustment == nil)
     }
 
+    @Test("A vertical split follows height drags (#222)")
+    func stackVerticalSplitHeight() {
+        let slot = slot(x: 0, width: 600, height: 300)
+        let adjustment = MouseResize.translate(
+            mode: .stack,
+            isMaster: true,
+            stackSplitHorizontal: false,
+            slot: slot,
+            frame: grown(slot, dh: 80),
+            bounds: bounds
+        )
+        #expect(adjustment == .masterRatio(0.1))
+    }
+
+    @Test("A vertical split snaps width drags back (#222)")
+    func stackVerticalSplitWidth() {
+        let slot = slot(x: 0, width: 600, height: 300)
+        let adjustment = MouseResize.translate(
+            mode: .stack,
+            isMaster: false,
+            stackSplitHorizontal: false,
+            slot: slot,
+            frame: grown(slot, dw: 100),
+            bounds: bounds
+        )
+        #expect(adjustment == nil)
+    }
+
     @Test("BSP grows toward the dragged side")
     func bspSides() {
         let left = slot(x: 0)

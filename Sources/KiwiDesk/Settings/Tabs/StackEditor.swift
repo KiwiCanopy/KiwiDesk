@@ -54,6 +54,12 @@ struct StackEditor: View {
                     selection: stack.masterOrientation
                 )
             }
+            // Orientation only matters with several masters;
+            // greyed (not hidden) at count 1 so its value stays
+            // visible (§2.7 grey-don't-hide, #171).
+            .disabled(
+                model.config.settings.stack.masterCount <= 1
+            )
             Divider()
             DropdownRow(
                 label: stackPositionLabel,

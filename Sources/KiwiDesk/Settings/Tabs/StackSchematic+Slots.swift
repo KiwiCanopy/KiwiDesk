@@ -14,6 +14,9 @@ extension StackSchematic {
     /// their top edge shows above the next.
     func stackSlots(in size: CGSize) -> [Slot] {
         let n = stackWins.count
+        // Fixed at 6 by construction today; the guard keeps
+        // the divisions below safe if that ever goes dynamic.
+        guard n > 0 else { return [] }
         let w = size.width
         let h = size.height
         let off = Self.cascadeOffset
