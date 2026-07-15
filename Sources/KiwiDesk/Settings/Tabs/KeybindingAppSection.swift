@@ -13,6 +13,10 @@ struct ApplicationsSection: View {
     private var overrideBase
     @Environment(\.keybindingModeName)
     private var modeName
+    /// The app chosen in the add-row but not yet committed — the
+    /// row only enters the list once an app is picked, so no
+    /// app-less placeholder can exist (matches App Rules).
+    @State private var newApp: KeybindingCatalog.InstalledApp?
 
     var body: some View {
         SettingsSection(
@@ -26,10 +30,36 @@ struct ApplicationsSection: View {
                     row($binding)
                 }
             }
+            addRow
+        }
+    }
+
+    /// Pick an app, then commit it — mirroring App Rules, so a
+    /// new binding always lands with an app identity (its
+    /// shortcut is recorded afterward in the row).
+    private var addRow: some View {
+        HStack {
+            AppPickerButton(
+                placeholder: L(
+                    "shortcuts.choose_app",
+                    "Choose app…"
+                ),
+                selection: newApp?.name,
+                onPick: { newApp = $0 },
+                escapeLabel: L(
+                    "shortcuts.other_ellipsis",
+                    "Other…"
+                ),
+                onEscape: {
+                    if let app = pickBundleFromPanel() {
+                        newApp = app
+                    }
+                }
+            )
+            // Hug the content, like the per-row picker.
+            .fixedSize()
             Button {
-                bindings.append(
-                    KeyBinding(kind: .application)
-                )
+                addApplication()
             } label: {
                 Label(
                     L(
@@ -40,7 +70,17 @@ struct ApplicationsSection: View {
                 )
             }
             .buttonStyle(.bordered)
+            .disabled(newApp == nil)
         }
+    }
+
+    private func addApplication() {
+        guard let app = newApp else { return }
+        var binding = KeyBinding(kind: .application)
+        binding.label = app.name
+        binding.lua = KeybindingCatalog.appCommand(app.bundleID)
+        bindings.append(binding)
+        newApp = nil
     }
 
     private func row(
@@ -158,7 +198,11 @@ struct ApplicationsSection: View {
                 : binding.wrappedValue.label,
             onPick: { assign(binding, app: $0) },
             escapeLabel: L("shortcuts.other_ellipsis", "Other…"),
-            onEscape: { chooseBundle(binding) }
+            onEscape: {
+                if let app = pickBundleFromPanel() {
+                    assign(binding, app: app)
+                }
+            }
         )
         // Hug the content: the row's `Spacer()` pins the recorder
         // to the trailing edge, so the picker's width doesn't gate
@@ -176,7 +220,12 @@ struct ApplicationsSection: View {
         )
     }
 
-    private func chooseBundle(_ binding: Binding<KeyBinding>) {
+    /// The "Other…" escape hatch: pick any app bundle by file,
+    /// returning it as an `InstalledApp` (nil on cancel). Shared
+    /// by the per-row re-pick and the add-row.
+    private func pickBundleFromPanel()
+        -> KeybindingCatalog.InstalledApp?
+    {
         let panel = NSOpenPanel()
         panel.allowedContentTypes = [.application]
         panel.canChooseDirectories = false
@@ -186,14 +235,11 @@ struct ApplicationsSection: View {
         guard panel.runModal() == .OK, let url = panel.url,
             let bundleID = Bundle(url: url)?
                 .bundleIdentifier?.lowercased()
-        else { return }
-        assign(
-            binding,
-            app: .init(
-                bundleID: bundleID,
-                name: KeybindingCatalog.displayName(
-                    forBundleID: bundleID
-                )
+        else { return nil }
+        return .init(
+            bundleID: bundleID,
+            name: KeybindingCatalog.displayName(
+                forBundleID: bundleID
             )
         )
     }
