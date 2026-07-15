@@ -8,6 +8,15 @@ import CoreGraphics
 /// BOTTOM-left origin. KiwiDesk works in AX coordinates
 /// everywhere; NSScreen values are flipped at the boundary.
 public enum GeometryUtils {
+    /// The macOS window corner radius (pt) at the current
+    /// release. ONE shared source so the focus border's rounded
+    /// corners (`BorderGeometry`) and the drag visuals'
+    /// corner-radius default (`TilingSettings.dragCornerRadius`)
+    /// can't drift — tune it here when a release changes the
+    /// system radius. macOS/iOS is converging every window on one
+    /// radius, so no per-window detection is worth its cost.
+    public static let systemWindowCornerRadius: CGFloat = 16
+
     /// Flips a rect between Cocoa and AX coordinate systems.
     /// The operation is its own inverse.
     public static func flip(

@@ -16,6 +16,7 @@ extension TilingSettings: Codable {
     private enum CodingKeys: String, CodingKey {
         case animations
         case appBar = "app_bar"
+        case border
         case drag
         case gap
         case layout
@@ -92,6 +93,11 @@ extension TilingSettings: Codable {
                 AppBarStyle.self,
                 forKey: .appBar
             ) ?? AppBarStyle()
+        borderStyle =
+            try container.decodeIfPresent(
+                BorderStyle.self,
+                forKey: .border
+            ) ?? BorderStyle()
         animations =
             try container.decodeIfPresent(
                 AnimationSettings.self,
@@ -269,6 +275,7 @@ extension TilingSettings: Codable {
             forKey: .placementOverride
         )
         try container.encode(appBarStyle, forKey: .appBar)
+        try container.encode(borderStyle, forKey: .border)
         try container.encode(animations, forKey: .animations)
         try container.encode(mouseResize, forKey: .mouseResize)
         try container.encode(mouse, forKey: .mouse)

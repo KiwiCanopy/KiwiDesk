@@ -208,6 +208,11 @@ public enum APIReference {
             "set_drop_zone_fill_color",
             "set_corner_radius",
         ],
+        "border": [
+            "set_enabled", "set_width", "set_focused_color",
+            "set_unfocused_enabled", "set_unfocused_color",
+            "set_corner_style", "fit_gaps",
+        ],
     ]
 
     /// Lua-only entry points on the `KiwiDesk` table that

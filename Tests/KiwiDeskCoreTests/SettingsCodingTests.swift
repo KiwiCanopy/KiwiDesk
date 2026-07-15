@@ -27,12 +27,27 @@ struct SettingsCodingTests {
         )
         #expect(
             Set(root.keys) == [
-                "animations", "app_bar", "drag", "gap", "layout",
-                "min_window_size", "mouse", "mouse_resize",
+                "animations", "app_bar", "border", "drag", "gap",
+                "layout", "min_window_size", "mouse", "mouse_resize",
                 "new_window_placement_override", "quit", "resize",
                 "space", "swap_skips_cascade",
             ]
         )
+        // `border.set_*` → `border.*` (#278). Default on,
+        // focused-only, 2 pt, rounded, accent-blue focused color.
+        let border = try object(root["border"])
+        #expect(
+            Set(border.keys) == [
+                "enabled", "width", "focused_color",
+                "unfocused_enabled", "unfocused_color",
+                "corner_style",
+            ]
+        )
+        #expect(border["enabled"] as? Bool == true)
+        #expect(border["width"] as? Double == 2)
+        #expect(border["focused_color"] as? String == "#0A84FF")
+        #expect(border["unfocused_enabled"] as? Bool == false)
+        #expect(border["corner_style"] as? String == "rounded")
         // `quit.set_layout` → `quit.layout` (#197); `grid` is
         // the only strategy today and the default.
         let quit = try object(root["quit"])
@@ -189,6 +204,12 @@ struct SettingsCodingTests {
         settings.dragGhost.enabled = false
         settings.dragDropZone.fillColor = "#11223344"
         settings.dragCornerRadius = 22
+        settings.borderStyle.enabled = false
+        settings.borderStyle.width = 6
+        settings.borderStyle.focusedColor = "#010203"
+        settings.borderStyle.unfocusedEnabled = true
+        settings.borderStyle.unfocusedColor = "#04050607"
+        settings.borderStyle.cornerStyle = .square
         settings.gapsOverride[SpaceID(2)] = .uniform(4)
         settings.placementOverride[SpaceID("mail")] = .last
         settings.animations.onSpaceChange = true

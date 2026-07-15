@@ -109,6 +109,7 @@ enum SidebarSearch {
             return [
                 L("gaps.title", "Gaps"),
                 L("drag.title", "Drag & Drop"),
+                L("border.title", "Focus border"),
             ]
         case .appBar:
             return [

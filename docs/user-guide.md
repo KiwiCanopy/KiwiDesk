@@ -469,6 +469,33 @@ Toggle each visual on/off and customize:
 - **Fill**: show/hide, color (with optional transparency).
 - **Corner radius**: match your windows' corner rounding.
 
+### Focus Border
+
+Below Drag Visuals, the **Focus border** group draws a thin ring
+around the focused window so you never lose track of which window
+has focus in a gapped layout — the cue keyboard-driven focus
+otherwise lacks. It is **on by default**.
+
+A live two-window preview leads the controls, showing the ring at
+your current color, width, and corner style before it touches real
+windows. Below it:
+
+- **Show focus border**: the master on/off switch.
+- **Color**: the focused window's ring color (a swatch plus hex
+  field, the same control as every other KiwiDesk color).
+- **Show border on unfocused windows**: off by default — when on,
+  every other tiled window gets a ring too, in its own (greyed
+  until enabled) color. Floating windows aren't ringed when
+  unfocused (only the focused window is, whether tiled or
+  floating); monocle always shows only the focused ring.
+- **Width**: 1–20 pt. The ring covers at most a hairline of window
+  content at any width; the rest grows into the gap, so a thick
+  border never hides content. Keep gaps at least as wide as the
+  border so neighbouring rings don't touch.
+- **Corners**: **Rounded** matches your windows' real corner
+  radius; **Square** draws sharp corners — seamless on windows that
+  are already square, an intentional squared frame on rounded ones.
+
 ## App Bar
 
 The **App Bar** section (in the **Design** group) is the app bar's

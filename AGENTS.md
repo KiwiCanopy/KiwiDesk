@@ -56,6 +56,7 @@ file list; grep within a subsystem for specifics:
 | `Animation` | Per-monitor `DisplayLink` animation |
 | `IPC` | CLI / external command IPC |
 | `Bar` | sketchybar integration |
+| `Borders` | Focus-window border overlays (per-window rings) |
 | `Power` | Power / display-state handling |
 | `Permissions` | AX / permission prompts |
 | `App` | Core bootstrap & wiring |

@@ -1801,6 +1801,123 @@ drag.set_drop_zone_fill_color("#8B5E3C40")
 drag.set_corner_radius(16)
 ```
 
+## Focus Border
+
+KiwiDesk can draw a thin ring around the focused window so it is
+unmistakable in a gapped layout — the feedback keyboard-driven
+focus otherwise lacks. It is **on by default** and marks only the
+focused window; you can optionally ring every other window too.
+
+The ring is a pure overlay: it never changes where windows tile
+(no gap coupling). Its stroke is *capped-inner* — at any width it
+covers at most 1 pt of window content and grows the rest outward
+into the gap, so a thick border can never hide content. Corners
+match the real macOS window radius unless you pick square.
+
+Overflow piles and monocle show a ring only on the visible
+top window; set gaps at least as wide as the border to avoid
+neighbouring rings touching.
+
+### border.set_enabled
+
+**Expects:** a boolean.
+
+**Does:** turns the focus border on or off (default `true`).
+
+**Example:**
+
+```lua
+border.set_enabled(true)
+```
+
+### border.set_width
+
+**Expects:** a number (points). Out-of-range values are clamped
+to `0.5`–`20`.
+
+**Does:** sets the ring width (default `2`).
+
+**Example:**
+
+```lua
+border.set_width(2)
+```
+
+### border.set_focused_color
+
+**Expects:** a hex color string (`"#RRGGBB"` or `"#RRGGBBAA"`) —
+the same format as every other KiwiDesk color.
+
+**Does:** sets the focused window's ring color (default
+`"#0A84FF"`, macOS accent blue).
+
+**Example:**
+
+```lua
+border.set_focused_color("#0A84FF")
+```
+
+### border.set_unfocused_enabled
+
+**Expects:** a boolean.
+
+**Does:** when `true`, also rings the unfocused windows (default
+`false`). Ignored in monocle, where only the focused window shows.
+
+**Example:**
+
+```lua
+border.set_unfocused_enabled(false)
+```
+
+### border.set_unfocused_color
+
+**Expects:** a hex color string (`"#RRGGBB"` or `"#RRGGBBAA"`).
+
+**Does:** sets the unfocused windows' ring color (default
+`"#00000033"`, a subtle translucent grey).
+
+**Example:**
+
+```lua
+border.set_unfocused_color("#00000033")
+```
+
+### border.set_corner_style
+
+**Expects:** `"rounded"` or `"square"`.
+
+**Does:** `rounded` (default) matches the real window corner
+radius; `square` draws sharp corners — seamless on windows that
+are already square (some Electron/utility windows), an intentional
+squared frame on rounded ones.
+
+**Example:**
+
+```lua
+border.set_corner_style("rounded")
+```
+
+### border.fit_gaps
+
+**Expects:** no arguments.
+
+**Does:** sizes the global layout gaps so borders never touch a
+neighbour — the outward reach (≈ the width) at the screen edge and
+between windows, doubled between windows when `unfocused_enabled`
+is on (both neighbours are ringed). A one-shot convenience that
+writes `gap.global`; the layout math itself stays free of any
+border coupling, so this never runs automatically. The GUI's "Fit
+gaps to border" button calls the same logic.
+
+**Example:**
+
+```lua
+border.set_width(10)
+border.fit_gaps()  -- outer gaps 10, inner gaps 10 (or 20 if
+                   -- unfocused borders are on)
+```
+
 ## Mouse Resizing
 
 Resizing a tiled window with the mouse adjusts the layout the same

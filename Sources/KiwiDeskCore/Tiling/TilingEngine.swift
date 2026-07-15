@@ -37,12 +37,22 @@ public final class TilingEngine {
         nil
     }
 
+    /// Tee off every animated frame (AX coords), fired per tick
+    /// from `AnimationEngine.apply`. Wired to the focus border
+    /// overlays (`KiwiCore.borders.follow`) so a ring stays glued
+    /// to its window mid-slide; a no-op by default. The instant
+    /// `setFrame` path does NOT tee — `updateBorders` reads the
+    /// layout target for settled (non-animating) windows instead.
+    public var onFrameApplied: @MainActor (WindowID, CGRect) -> Void =
+        { _, _ in }
+
     public init() {
         applier.elementProvider = { [weak self] id in
             self?.elementProvider(id)
         }
-        animation.apply = { [applier] id, frame, setSize in
+        animation.apply = { [weak self, applier] id, frame, setSize in
             applier.apply(id, frame, setSize: setSize)
+            self?.onFrameApplied(id, frame)
         }
         animation.onAnimationStart = { [applier] id in
             applier.beginAnimating(id)

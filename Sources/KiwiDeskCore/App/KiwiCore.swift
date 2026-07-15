@@ -15,6 +15,9 @@ public final class KiwiCore {
     public let drag = DragCoordinator()
     public let dragOverlay = DragOverlay()
     public let appBars = AppBarManager()
+    /// Focus-window border overlays (#278), one ring per bordered
+    /// window. Driven by `updateBorders()` inside `retile()`.
+    public let borders = BorderManager()
     public let mouse = MouseTracker()
     public let profiles: ProfileManager
     public let crash: CrashRecovery
@@ -209,6 +212,9 @@ public final class KiwiCore {
         tiler.animation.onAllAnimationsEnded = { [weak self] in
             self?.animationsDidSettle()
         }
+        tiler.onFrameApplied = { [weak self] id, frame in
+            self?.borders.follow(id, windowFrame: frame)
+        }
 
         socket.handler = { [weak self] command, args in
             self?.execute(command, args: args)
@@ -258,6 +264,12 @@ public final class KiwiCore {
         // for them.
         persistScrollOffset()
         updateAppBar()
+        // Rings ride the same freshness as the bar: every
+        // structural / focus / mode / settings retile. Runs after
+        // the layout above so it reads the just-updated state
+        // frames (steady state); per-tick moves come from the
+        // animation tee (`tiler.onFrameApplied`).
+        updateBorders()
         // Floats sit outside the layout loop above, so a bar just
         // switched on (or a window just turned floating) can leave
         // one hidden under a top strip; correct it here. Must run
