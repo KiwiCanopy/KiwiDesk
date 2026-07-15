@@ -328,6 +328,82 @@ struct DragDropTests {
         #expect(!core.dragOverlay.isDropZoneVisible)
     }
 
+    @Test(
+        """
+        The gesture's first frame (no motion) shows no preview \
+        so a resize can't flash the ghost (#237)
+        """
+    )
+    func firstFrameShowsNoPreview() throws {
+        guard NSScreen.main != nil else { return }
+        let core = makeCore()
+        addWindow(core, 1)
+        addWindow(core, 2)
+        let slots = core.tiler.calculatedFrames(
+            state: core.state
+        )
+        let home = try #require(slots[WindowID(1)])
+        // start == frame: nothing has translated or resized yet,
+        // so the gesture reads as neither a move nor a resize.
+        // A resize begins here — showing the ghost now would be
+        // the one-frame flash.
+        core.handleDragMove(
+            WindowID(1),
+            start: home,
+            frame: home
+        )
+        #expect(!core.dragOverlay.isGhostVisible)
+        #expect(!core.dragOverlay.isDropZoneVisible)
+    }
+
+    @Test(
+        """
+        An edge-grabbed sub-threshold resize hides the ghost, \
+        while the same drag grabbed in the body shows it (#237)
+        """
+    )
+    func edgePressDiscriminatesSmallResize() throws {
+        guard NSScreen.main != nil else { return }
+        let core = makeCore()
+        addWindow(core, 1)
+        addWindow(core, 2)
+        let slots = core.tiler.calculatedFrames(
+            state: core.state
+        )
+        let home = try #require(slots[WindowID(1)])
+        // A < 10 pt width growth, below the magnitude
+        // threshold, with the origin nudged so movedOrigin is
+        // true — this isolates the pressNearEdge && sizeChanged
+        // path from the first-frame guard.
+        var frame = home
+        frame.size.width += 4
+        frame.origin.x += 1
+
+        // Press on the right edge — a resize grab: hidden.
+        core.mouse.seedPress(
+            at: CGPoint(x: home.maxX, y: home.midY)
+        )
+        core.handleDragMove(
+            WindowID(1),
+            start: home,
+            frame: frame
+        )
+        #expect(!core.dragOverlay.isGhostVisible)
+
+        // Same frames, but the press began in the body: the
+        // sub-threshold size wobble reads as move noise, so the
+        // ghost stays (the character-grid-move fallback).
+        core.mouse.seedPress(
+            at: CGPoint(x: home.midX, y: home.midY)
+        )
+        core.handleDragMove(
+            WindowID(1),
+            start: home,
+            frame: frame
+        )
+        #expect(core.dragOverlay.isGhostVisible)
+    }
+
     @Test("Disabled toggles suppress the drag visuals")
     func previewDisabled() throws {
         guard NSScreen.main != nil else { return }

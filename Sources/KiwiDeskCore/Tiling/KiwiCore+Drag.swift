@@ -81,13 +81,51 @@ extension KiwiCore {
             dragOverlay.hideAll()
             return
         }
-        // A resize gesture adjusts the layout in place; slot
-        // previews would only mislead. Compared against the
-        // gesture's START frame, never the slot: a window
-        // that can't shrink to its slot (min sizes, character
-        // grids) differs from it permanently, which would
-        // turn every plain move into a "resize".
-        if MouseResize.isResize(from: start, to: frame) {
+        // Show the swap overlays only once the gesture is
+        // clearly a MOVE — the window has translated with its
+        // size held; anything else hides them.
+        //
+        // A resize is caught from its first real frame by facts
+        // a magnitude test alone misses (it reads the sub-
+        // threshold start of a pull, and a dip back near the
+        // start size, as a move — flashing the ghost, #237):
+        //  - the press began in the slot's edge band, where
+        //    resize drags start (same signal isResizeGesture
+        //    uses), AND the size has already changed — so an
+        //    edge-grabbed move (drag near the top to swap) keeps
+        //    its ghost while a resize hides with no flash;
+        //  - the 10 pt magnitude test as the press-less
+        //    fallback, measured against the START frame, never
+        //    the slot: a window that can't shrink to its slot
+        //    (min sizes, character grids) differs forever, which
+        //    would call every plain move a resize.
+        // The gesture's FIRST frame has no delta (start ==
+        // frame) so it reads as neither; showing nothing there
+        // avoids a one-frame ghost before the size delta lands.
+        //
+        // This gate is intentionally stricter than the resize-
+        // vs-swap decision in handleDragEnd (plain isResize):
+        // the preview is advisory and biases toward hiding to
+        // kill the flash, so it may suppress a small edge resize
+        // the drop still treats as a swap — harmless, since a
+        // real move holds its size and never enters that band.
+        // Effectiveness rides on the live mouse monitor; with no
+        // recorded press (headless, tests) it falls back to the
+        // 10 pt magnitude test — the pre-fix behavior.
+        let pressNearEdge =
+            mouse.press.map {
+                MouseResize.nearEdge($0.location, of: slot)
+            } ?? false
+        let sizeChanged =
+            abs(frame.width - start.width) > 0.5
+            || abs(frame.height - start.height) > 0.5
+        let movedOrigin =
+            abs(frame.minX - start.minX) > 0.5
+            || abs(frame.minY - start.minY) > 0.5
+        let looksResize =
+            (pressNearEdge && sizeChanged)
+            || MouseResize.isResize(from: start, to: frame)
+        if looksResize || !movedOrigin {
             dragOverlay.hideAll()
             return
         }
