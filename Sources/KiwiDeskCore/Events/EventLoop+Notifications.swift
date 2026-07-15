@@ -63,7 +63,7 @@ extension EventLoop {
             // the panel gaining focus so KiwiCore can distrust
             // the app's stale focus report on dismiss (#244).
             guard elements[pid]?[id] != nil else {
-                if FloatDetection.shouldIgnore(
+                if FloatDetection.isBuiltInIgnoredPanel(
                     bundleID: app.bundleID,
                     id: id
                 ) {
@@ -111,7 +111,12 @@ extension EventLoop {
             if elements[pid]?[id] != nil,
                 floatRules.hasTitleRule(bundleID: app.bundleID)
             {
-                recheckFloat(element, id: id, app: app)
+                recheckFloat(
+                    element,
+                    id: id,
+                    pid: pid,
+                    app: app
+                )
             }
         default:
             break

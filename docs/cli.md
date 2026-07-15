@@ -169,6 +169,21 @@ reply "not supported" — from a hotkey that failure also plays
 the system alert sound (`set_resize_feedback`, default on;
 CLI/IPC callers stay silent).
 
+### Applying Ignore Rules
+
+`ignore_rules` is declarative config, not a session command. Edit
+`ignore_rules = { "bundle.id" }` in `init.lua`, then
+apply it with:
+
+```sh
+KiwiDesk reload_config
+```
+
+For GUI-managed setups, put the array at the root `ignore_rules` key
+in `gui.json`, then run `KiwiDesk reload_config`. Matching apps
+disappear from KiwiDesk state and emit no window events. Removing an
+id and reloading makes its windows manageable again.
+
 ## Event Stream
 
 External tools subscribe over the same socket:

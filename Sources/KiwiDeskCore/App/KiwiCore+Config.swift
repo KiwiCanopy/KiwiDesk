@@ -97,8 +97,9 @@ extension KiwiCore {
         } else {
             applyConfigGlobals(from: fresh)
         }
-        // The float rules just changed hands: re-sync every
-        // app so `detectedFloating` reflects the NEW rules.
+        // The float/ignore rules just changed hands: re-sync
+        // every app so live classification reflects the NEW
+        // rules.
         // Without this, verdicts stay stale until an unrelated
         // AX event — user-visible since `make_auto` (#164)
         // re-applies the cached verdict, and a rule edit +
@@ -145,6 +146,7 @@ extension KiwiCore {
     private func resetDeclarativeState() {
         state.appRules = [:]
         eventLoop.floatRules = FloatRules([])
+        eventLoop.ignoreRules = IgnoreRules([])
         tiler.settings.gapsOverride = [:]
         tiler.settings.placementOverride = [:]
         tiler.settings.spaceIcons = [:]
@@ -159,6 +161,11 @@ extension KiwiCore {
     private func applyConfigGlobals(from lua: LuaInterpreter) {
         if case .array(let rules) = lua.global("float_rules") {
             eventLoop.floatRules = FloatRules(
+                rules.compactMap(\.stringValue)
+            )
+        }
+        if case .array(let rules) = lua.global("ignore_rules") {
+            eventLoop.ignoreRules = IgnoreRules(
                 rules.compactMap(\.stringValue)
             )
         }
@@ -207,10 +214,15 @@ extension KiwiCore {
             -- KiwiDesk.set_mode("music", "floating")
 
             -- Windows that should never be tiled:
-            -- float_rules = { "Calculator", "Finder:Get Info" }
+            -- float_rules = { "com.apple.calculator" }
+
+            -- Apps KiwiDesk should never manage at all:
+            -- ignore_rules = { "eu.exelban.Stats" }
 
             -- Send apps to fixed spaces:
-            -- app_rules = { ["Spotify"] = "music" }
+            -- app_rules = {
+            --   ["com.spotify.client"] = "music"
+            -- }
 
             -- Load a saved profile per native macOS Space
             -- (the Mission Control desktop number):

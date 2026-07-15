@@ -50,9 +50,9 @@ extension KiwiCore {
     /// load_profile, dock/undock, and native-Space switches
     /// update both. Takes the overrides explicitly: callers
     /// adopt AFTER applying, so `profiles.currentName` may
-    /// still point at the previous profile here. Float rules
-    /// and native-space bindings stay global — never touched
-    /// here. Resets the active key mode to default (the mode
+    /// still point at the previous profile here. Float/ignore
+    /// rules and native-space bindings stay global — never
+    /// touched here. Resets the active key mode to default (the
     /// set may change with the profile). No-op when not
     /// GUI-managed (Lua owns the config, O7); the keybinding
     /// half additionally no-ops before the first `loadConfig`
@@ -96,8 +96,8 @@ extension KiwiCore {
 
     // MARK: - Rules
 
-    /// Sets app rules, float rules, and native-space profile
-    /// bindings directly from the GuiConfig — overrides what
+    /// Sets app rules, float/ignore rules, and native-space
+    /// profile bindings directly from GuiConfig — overrides what
     /// the managed block in `init.lua` set via Lua globals.
     /// App rules resolve through the active profile's sparse
     /// override (#109); the rest is global.
@@ -110,6 +110,7 @@ extension KiwiCore {
             override: override
         )
         eventLoop.floatRules = FloatRules(config.floatRules)
+        eventLoop.ignoreRules = IgnoreRules(config.ignoreRules)
         nativeSpaceBindings = config.profileBindings
     }
 

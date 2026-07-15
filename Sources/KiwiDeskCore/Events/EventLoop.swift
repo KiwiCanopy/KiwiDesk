@@ -12,9 +12,9 @@ import ApplicationServices
 public final class EventLoop {
     public var onEvent: @MainActor (KiwiEvent) -> Void = { _ in }
 
-    /// Fired when an app that has an ignore rule reports an
-    /// ignored panel (Ghostty's quick terminal) as its focused
-    /// window. No `.windowFocused` is emitted for the panel
+    /// Fired when Ghostty reports its built-in ignored quick-
+    /// terminal panel as its focused window. No `.windowFocused`
+    /// is emitted for the panel
     /// itself (issue #21), but the panel being active is a
     /// signal KiwiCore keeps: when the panel is dismissed the
     /// app re-reports its managed main window as focused, and
@@ -37,6 +37,10 @@ public final class EventLoop {
     /// transaction, so any new assignment site outside it must
     /// follow with `reconcileAll()` or a scoped recheck (#164).
     public var floatRules = FloatRules()
+
+    /// Global apps KiwiDesk never manages (`ignore_rules`).
+    /// Bundle identifiers match case-insensitively.
+    public var ignoreRules = IgnoreRules()
 
     var observers: [pid_t: AXApplicationObserver] = [:]
     var elements: [pid_t: [WindowID: AXUIElement]] = [:]
@@ -127,27 +131,11 @@ public final class EventLoop {
 
     // MARK: - Window tracking
 
-    /// KiwiDesk's own windows (the Settings window and any
-    /// panels/overlays it creates) must never be managed —
-    /// tiling or even floating its own UI is wrong. Opening
-    /// Settings promotes the app to `.regular`
-    /// (`activateAsRegular`), which otherwise slips past the
-    /// `attach` activation-policy gate and tiles the Settings
-    /// window, so a retile raises a tiled peer over it and
-    /// steals focus on restore (#174). Keyed on the process, so
-    /// it is policy-independent and covers every self-window.
-    nonisolated static func isOwnProcess(_ pid: pid_t) -> Bool {
-        pid == getpid()
-    }
-
     func track(
         _ element: AXUIElement,
         pid: pid_t,
         app: AppRef
     ) {
-        // Never manage KiwiDesk's own windows (#174) — the
-        // universal funnel guard, backing the `attach` gate.
-        guard !Self.isOwnProcess(pid) else { return }
         guard AXHelper.role(of: element) == kAXWindowRole,
             !AXHelper.isMinimized(element),
             var window = AXHelper.snapshot(
@@ -159,17 +147,16 @@ public final class EventLoop {
         guard elements[pid]?[window.id] == nil else { return }
         // Some panels must never be managed at all — merely
         // floating them still pins them to a space (issue #21).
-        guard
-            !FloatDetection.shouldIgnore(
+        guard !shouldIgnore(element, pid: pid, app: app) else {
+            return
+        }
+        window.isFloating =
+            shouldForceFloat(pid: pid)
+            || FloatDetection.shouldFloat(
+                element: element,
                 bundleID: app.bundleID,
-                id: window.id
+                rules: floatRules
             )
-        else { return }
-        window.isFloating = FloatDetection.shouldFloat(
-            element: element,
-            bundleID: app.bundleID,
-            rules: floatRules
-        )
         detectedFloating[window.id] = window.isFloating
         elements[pid, default: [:]][window.id] = element
         observers[pid]?.observe(window: element)
@@ -186,8 +173,9 @@ public final class EventLoop {
         // One window-server snapshot for the whole pass; only
         // apps with an ignore rule need layers at all.
         let layers =
-            FloatDetection.hasIgnoreRule(bundleID: app.bundleID)
-            ? FloatDetection.windowLayers(pid: pid) : [:]
+            FloatDetection.requiresWindowLayers(
+                bundleID: app.bundleID
+            ) ? FloatDetection.windowLayers(pid: pid) : [:]
         var live: Set<WindowID> = []
         var minimized: Set<WindowID> = []
         for element in AXHelper.windows(pid: pid) {
@@ -208,10 +196,20 @@ public final class EventLoop {
             // layers flicker during fullscreen transitions,
             // and untracking on a glitch leaks a spurious
             // destroy/create pair to subscribers.
-            if FloatDetection.shouldIgnore(
-                bundleID: app.bundleID,
-                layer: layers[id] ?? 0
+            if shouldIgnore(
+                element,
+                pid: pid,
+                app: app,
+                layer: layers[id]
             ) {
+                // App-wide user rules are stable config, not a
+                // flickering window-server signal. Apply them
+                // immediately; the one-reading grace below is
+                // only for Ghostty's layer-scoped built-in.
+                if ignoreRules.matches(bundleID: app.bundleID) {
+                    ignorePending.remove(id)
+                    continue
+                }
                 if elements[pid]?[id] != nil,
                     !ignorePending.contains(id)
                 {
@@ -225,7 +223,12 @@ public final class EventLoop {
             if elements[pid]?[id] == nil {
                 track(element, pid: pid, app: app)
             } else {
-                recheckFloat(element, id: id, app: app)
+                recheckFloat(
+                    element,
+                    id: id,
+                    pid: pid,
+                    app: app
+                )
             }
         }
         for id in elements[pid, default: [:]].keys
@@ -253,13 +256,16 @@ public final class EventLoop {
     func recheckFloat(
         _ element: AXUIElement,
         id: WindowID,
+        pid: pid_t,
         app: AppRef
     ) {
-        let floating = FloatDetection.shouldFloat(
-            element: element,
-            bundleID: app.bundleID,
-            rules: floatRules
-        )
+        let floating =
+            shouldForceFloat(pid: pid)
+            || FloatDetection.shouldFloat(
+                element: element,
+                bundleID: app.bundleID,
+                rules: floatRules
+            )
         guard detectedFloating[id] != floating else { return }
         detectedFloating[id] = floating
         onEvent(.windowFloatChanged(id, isFloating: floating))

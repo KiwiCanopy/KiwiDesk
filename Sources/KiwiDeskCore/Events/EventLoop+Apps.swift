@@ -96,6 +96,10 @@ extension EventLoop {
     /// app switch, reconcile the app we just left.
     private func appActivated(_ app: NSRunningApplication) {
         let pid = app.processIdentifier
+        // Retry accessory apps when activated: menu-bar apps
+        // such as Tailscale may expose their first standard
+        // window long after launch (#177).
+        attach(app: app)
         if let previous = lastActivePid, previous != pid {
             reconcile(pid: previous, app: AppRef(pid: previous))
         }
@@ -119,7 +123,7 @@ extension EventLoop {
             // dismiss report can be distrusted later (#244).
             if elements[pid]?[id] != nil {
                 onEvent(.windowFocused(id))
-            } else if FloatDetection.shouldIgnore(
+            } else if FloatDetection.isBuiltInIgnoredPanel(
                 bundleID: AppRef(app).bundleID,
                 id: id
             ) {
@@ -150,20 +154,24 @@ extension EventLoop {
         }
     }
 
-    /// Attaches AX observation to a regular (Dock-visible) app.
+    /// Attaches to a regular app, or an accessory app once it
+    /// exposes a standard window.
     func attach(app: NSRunningApplication) {
-        // Never observe KiwiDesk's own process (#174): opening
-        // Settings flips the app to `.regular`, which would
-        // otherwise pass the gate below and tile the Settings
-        // window. Guarding here means no self-observer, so
-        // `reconcile`'s `observers[pid] != nil` check keeps
-        // self out of every downstream path too.
-        guard !Self.isOwnProcess(app.processIdentifier) else {
-            return
-        }
-        guard app.activationPolicy == .regular else { return }
         let pid = app.processIdentifier
         guard observers[pid] == nil else { return }
+        let windows = AXHelper.windows(pid: pid)
+        let hasStandardWindow = windows.contains {
+            AXHelper.role(of: $0) == kAXWindowRole
+                && AXHelper.subrole(of: $0)
+                    == kAXStandardWindowSubrole
+        }
+        guard
+            Self.shouldAttach(
+                pid: pid,
+                activationPolicy: app.activationPolicy,
+                hasStandardWindow: hasStandardWindow
+            )
+        else { return }
         guard let observer = AXApplicationObserver(pid: pid)
         else { return }
 
@@ -175,7 +183,7 @@ extension EventLoop {
         // Keep Electron/WebKit AX trees warm (see AGENTS.md).
         AXHelper.setEnhancedUserInterface(pid: pid, enabled: true)
 
-        for element in AXHelper.windows(pid: pid) {
+        for element in windows {
             track(element, pid: pid, app: ref)
         }
     }

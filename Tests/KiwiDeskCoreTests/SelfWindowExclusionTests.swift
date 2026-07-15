@@ -1,14 +1,13 @@
+import AppKit
 import Foundation
 import Testing
 
 @testable import KiwiDeskCore
 
-/// KiwiDesk must never manage its own windows (#174): opening
-/// the Settings window promotes the app to `.regular`, which
-/// otherwise slips past the `attach` activation-policy gate and
-/// tiles the Settings window, stealing focus on restore. The
-/// `attach` and `track` guards both key off `isOwnProcess`.
-@Suite("Self-window exclusion (#174)")
+/// Issue #177: Settings is a tracked float; KiwiDesk's panels,
+/// overlays, and border windows remain fully ignored. Accessory
+/// apps with real windows (including Tailscale) are observable.
+@Suite("Own-window and accessory-app classification (#177)")
 struct SelfWindowExclusionTests {
     @Test("The current process is recognized as self")
     func ownProcessIsSelf() {
@@ -21,5 +20,82 @@ struct SelfWindowExclusionTests {
         // other than our own.
         #expect(!EventLoop.isOwnProcess(1))
         #expect(!EventLoop.isOwnProcess(getpid() &+ 1))
+    }
+
+    @Test("Own main windows are managed; own panels stay ignored")
+    func ownWindowClassification() {
+        #expect(
+            !EventLoop.shouldIgnoreOwnWindow(
+                pid: getpid(),
+                canBecomeMain: true
+            )
+        )
+        #expect(
+            EventLoop.shouldIgnoreOwnWindow(
+                pid: getpid(),
+                canBecomeMain: false
+            )
+        )
+    }
+
+    @Test("Accessory apps attach after a standard window appears")
+    func accessoryAttachment() {
+        #expect(
+            EventLoop.shouldAttach(
+                pid: 1,
+                activationPolicy: .regular,
+                hasStandardWindow: false
+            )
+        )
+        #expect(
+            !EventLoop.shouldAttach(
+                pid: 1,
+                activationPolicy: .accessory,
+                hasStandardWindow: false
+            )
+        )
+        #expect(
+            EventLoop.shouldAttach(
+                pid: 1,
+                activationPolicy: .accessory,
+                hasStandardWindow: true
+            )
+        )
+        #expect(
+            !EventLoop.shouldAttach(
+                pid: 1,
+                activationPolicy: .prohibited,
+                hasStandardWindow: true
+            )
+        )
+        #expect(
+            EventLoop.shouldAttach(
+                pid: getpid(),
+                activationPolicy: .accessory,
+                hasStandardWindow: false
+            )
+        )
+    }
+
+    @Test("Accessory and own-process windows force floating")
+    func forceFloatPolicy() {
+        #expect(
+            EventLoop.shouldForceFloat(
+                pid: 1,
+                activationPolicy: .accessory
+            )
+        )
+        #expect(
+            EventLoop.shouldForceFloat(
+                pid: getpid(),
+                activationPolicy: .regular
+            )
+        )
+        #expect(
+            !EventLoop.shouldForceFloat(
+                pid: 1,
+                activationPolicy: .regular
+            )
+        )
     }
 }

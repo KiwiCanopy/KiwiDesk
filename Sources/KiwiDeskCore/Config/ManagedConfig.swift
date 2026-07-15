@@ -27,7 +27,7 @@ public enum ManagedConfig {
     /// (stale) managed block (see `touchesManagedVocabulary`).
     /// A match forces the raw editor because the GUI cannot
     /// safely co-own that vocabulary — it owns app rules,
-    /// float rules, keybindings, and profile bindings in
+    /// float/ignore rules, keybindings, and profile bindings in
     /// `gui.json` (#55). Harmless custom Lua (no matching
     /// token) coexists with the visual editor.
     ///
@@ -35,7 +35,8 @@ public enum ManagedConfig {
     /// - Tokens ending with `(` (method calls): optional
     ///   whitespace before `(` is collapsed first, so
     ///   `KiwiDesk.bind (` also matches `KiwiDesk.bind(`.
-    /// - Bare-identifier tokens (`app_rules`, `float_rules`):
+    /// - Bare-identifier tokens (`app_rules`, `float_rules`,
+    ///   `ignore_rules`):
     ///   require a word boundary and `\s*=` after the token
     ///   so a substring inside a longer identifier
     ///   (`app_rules_count`) or a string literal
@@ -51,6 +52,7 @@ public enum ManagedConfig {
     public static let managedTokens: [String] = [
         "app_rules",
         "float_rules",
+        "ignore_rules",
         "KiwiDesk.bind(",
         "KiwiDesk.define_mode(",
         "KiwiDesk.bind_profile_to_native_space(",
@@ -130,7 +132,8 @@ public enum ManagedConfig {
 
     /// Whether code outside the managed block touches the GUI's
     /// managed vocabulary — verbs the GUI itself writes into the
-    /// block (`app_rules`, `float_rules`, `KiwiDesk.bind(`,
+    /// block (`app_rules`, `float_rules`, `ignore_rules`,
+    /// `KiwiDesk.bind(`,
     /// etc.). When `true` the visual editor cannot safely co-own
     /// those constructs, so it yields to the raw Lua editor.
     ///
@@ -223,7 +226,8 @@ public enum ManagedConfig {
     ///   whitespace before `(` is collapsed first so that
     ///   `KiwiDesk.bind ("alt+h", …)` matches the token
     ///   `KiwiDesk.bind(`.
-    /// - Bare-identifier tokens (`app_rules`, `float_rules`):
+    /// - Bare-identifier tokens (`app_rules`, `float_rules`,
+    ///   `ignore_rules`):
     ///   a word boundary followed by `\s*=` is required so
     ///   that a substring inside a longer identifier
     ///   (`app_rules_count`) or inside a string literal

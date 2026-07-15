@@ -57,13 +57,14 @@ struct StructuredConfigTests {
     /// Proof test: gui.json rules reach live state even when
     /// init.lua is empty (managed block absent — phase-5 state).
     @Test(
-        "app_rules + float_rules set from gui.json alone"
+        "app, float, and ignore rules load from gui.json"
     )
     func structuredRulesNoBlock() throws {
         let core = makeGuiCore()
         var config = GuiConfig()
         config.appRules = ["spotify": SpaceID("music")]
         config.floatRules = ["com.apple.calculator"]
+        config.ignoreRules = ["io.tailscale.ipn.macos"]
         // Write gui.json; init.lua stays empty (hooks-only).
         try core.saveGuiConfig(config)
         try writeInitLua("", core: core)
@@ -76,6 +77,11 @@ struct StructuredConfigTests {
         #expect(
             core.eventLoop.floatRules.rawRules
                 == ["com.apple.calculator"]
+        )
+        #expect(
+            core.eventLoop.ignoreRules.matches(
+                bundleID: "io.tailscale.ipn.macos"
+            )
         )
     }
 

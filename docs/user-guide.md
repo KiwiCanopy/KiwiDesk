@@ -97,13 +97,14 @@ individual profile JSON files (one per saved layout).
 **Key points:**
 
 - Saving in the Settings app never rewrites `init.lua`.
-- Custom Lua (print statements, event hooks, anything that isn't
-  app rules, float rules, keybindings, or profile bindings) lives
-  safely alongside the visual editor.
+- Custom Lua (print statements, event hooks, or anything that
+  isn't app rules, float rules, ignore rules, keybindings, or
+  profile bindings) lives safely alongside the visual editor.
 - A small blue banner confirms "Custom Lua detected" when the
   app finds your own code.
 - If you declare managed vocabulary (`app_rules`,
-  `float_rules`, `KiwiDesk.bind`, keybinding definitions) *and*
+  `float_rules`, `ignore_rules`, `KiwiDesk.bind`, keybinding
+  definitions) *and*
   the Settings app tries to manage them, the app shows a raw Lua
   editor so you can resolve the conflict. You can then click
   **Adopt into the GUI** to import your settings, keeping your
@@ -142,6 +143,7 @@ hand, but it is documented here for backup and transparency.
   "spaces": [ "1", "2", "mail" ],
   "app_rules": { "com.spotify.client": "music" },
   "float_rules": [ "com.apple.calculator" ],
+  "ignore_rules": [ "eu.exelban.Stats" ],
   "profile_bindings": { "1": "Developer" },
   "modes": [
     { "name": "default", "bindings": [...] }
@@ -162,6 +164,9 @@ Each field:
 - **`float_rules`**: array of bundle identifiers (and optionally
   `bundle-id:title` filters). Windows matching these never tile.
   Updated in the App Rules section.
+- **`ignore_rules`**: array of bundle identifiers. Matching apps
+  are never tracked or managed. This power-user field has no
+  Settings control, but Settings preserves it when saving.
 - **`profile_bindings`**: object mapping native macOS Space numbers
   (Mission Control desktops) to profile names. When you switch
   desktops, the bound profile loads. Updated in the Profiles
@@ -671,9 +676,10 @@ context; there is no separate fourth button:
   scratch. The banner's profile picker names the edit target
   authoritatively.
 
-After saving, if a global setting changed (keybindings, app/float
-rules, or native Space bindings), `gui.json` is rewritten. Tiling-only
-edits touch only the profile JSON. `init.lua` is never written.
+After saving, if a global setting changed (keybindings, app/float/
+ignore rules, or native Space bindings), `gui.json` is rewritten.
+Tiling-only edits touch only the profile JSON. `init.lua` is never
+written.
 
 Neither live save carries a keybinding override: the live
 Shortcuts section edits the *base* shortcuts, so both live saves
@@ -755,7 +761,23 @@ never tile — **All windows** floats every window of the app, or
 fragment you add.
 
 Dialogs, sheets, and picture-in-picture windows float automatically —
-you do not need a rule for them.
+you do not need a rule for them. Standard Settings windows from
+menu-bar/accessory apps such as Tailscale are also tracked floating,
+not ignored or tiled.
+
+### Ignore Rules (Power Users)
+
+An ignore rule goes further than floating: KiwiDesk pretends every
+window of that app does not exist. The windows get no virtual-space
+assignment and emit no KiwiDesk window events. This is intended for
+HUDs, menu-bar utilities, and apps that misbehave when AX-tracked;
+ordinary “never tile this app” cases should use Float rules.
+
+Ignore rules are deliberately absent from Settings. Add bundle ids
+to `ignore_rules = { ... }` in a hand-written `init.lua`, or to the
+root `ignore_rules` array in `gui.json`. The list is global and is
+preserved when Settings saves other fields. See
+[ignore_rules](lua-reference.md#ignore_rules) for examples.
 
 ### Per-Profile Space Assignments
 

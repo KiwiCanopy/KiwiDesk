@@ -89,6 +89,7 @@ extension KiwiCore {
         config.fallbackSpace = fallbackSpace
         config.modes = recoverKeybindings()
         config.floatRules = eventLoop.floatRules.rawRules
+        config.ignoreRules = eventLoop.ignoreRules.rawRules
         var modes: [SpaceID: LayoutMode] = [:]
         var defined: [SpaceID] = []
         for space in state.workspaces.allSpaces {

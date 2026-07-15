@@ -131,6 +131,17 @@ struct ManagedConfigTests {
         #expect(ManagedConfig.hasForeignCode(source))
     }
 
+    @Test("ignore_rules outside the block is foreign")
+    func ignoreRulesIsForeign() {
+        let source = """
+            ignore_rules = { "io.tailscale.ipn.macos" }
+
+            \(ManagedConfig.beginMarker)
+            \(ManagedConfig.endMarker)
+            """
+        #expect(ManagedConfig.hasForeignCode(source))
+    }
+
     @Test("define_mode outside the block is foreign")
     func defineModeIsForeign() {
         let source = """

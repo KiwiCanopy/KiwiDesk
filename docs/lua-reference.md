@@ -2026,15 +2026,18 @@ while launching corrects itself the same way. A manual
 `make_floating` override is never reverted by these re-checks.
 
 Panels and overlays that live above the normal window layer also
-float automatically, no rule needed.
+float automatically, no rule needed. Standard windows exposed by
+accessory/menu-bar apps (for example Tailscale Settings) are tracked
+but forced floating; utility UI never joins a tiled layout.
 
 **Ghostty's quick terminal** is not managed at all — no space
 assignment, no window events. KiwiDesk simply pretends it does not
 exist.
 
-**KiwiDesk's own windows** (the Settings window and any panels it
-shows) are likewise never managed — never tiled, floated, or
-tracked. This is unconditional and not a rule you configure.
+**KiwiDesk's Settings window** is tracked as a floating window, so
+window-list integrations can see it and the top App Bar clamp keeps
+its title bar reachable. KiwiDesk's own panels — drag/drop overlays,
+App Bar overlays, and focus borders — remain fully ignored.
 
 **Example:**
 
@@ -2044,6 +2047,36 @@ float_rules = {
     "com.apple.finder:Get Info",
 }
 ```
+
+### ignore_rules
+
+**Expects:** a Lua table of app bundle identifiers.
+
+**Does:** KiwiDesk never manages any window belonging to a matching
+app: no state entry, tiling or floating verdict, virtual-space
+assignment, or window events. Use this for HUDs, menu-bar utilities,
+or apps that misbehave when AX-tracked. Use `float_rules` when an app
+should remain tracked and visible but never tile.
+
+Matching is case-insensitive and app-wide; title fragments are not
+supported. The list is global, like `float_rules`. In `gui.json` it
+lives at the root as `ignore_rules`. There is deliberately no
+Settings control and no session-only `make_unmanaged` command.
+
+**Example:**
+
+```lua
+ignore_rules = {
+    "com.1password.1password",
+    "eu.exelban.Stats",
+}
+```
+
+After editing `init.lua`, run `KiwiDesk reload_config`. Newly ignored
+apps leave KiwiDesk state, and apps removed from the list are
+discovered again. Ghostty's quick terminal remains a built-in
+layer-specific exception because only its panel — not normal Ghostty
+windows — must be ignored.
 
 ### app_rules
 
@@ -2640,10 +2673,10 @@ assignments — plus, optionally, **sparse keybinding and
 app-rule overrides** that shadow the base only while the profile
 is active (the app-rule one can also *un-pin* a base rule via a
 `null` entry). The global, shared declarations — keybindings,
-`app_rules`, `float_rules`, and profile bindings — live in the
-app's own `gui.json` when GUI-managed, or in your hand-written
-`init.lua` otherwise; float rules and profile bindings have no
-per-profile tier.
+`app_rules`, `float_rules`, `ignore_rules`, and profile bindings —
+live in the app's own `gui.json` when GUI-managed, or in your
+hand-written `init.lua` otherwise; float rules, ignore rules, and
+profile bindings have no per-profile tier.
 
 ### set_fallback_space
 
@@ -3123,4 +3156,3 @@ KiwiDesk.help()
 
 For integration recipes and advanced patterns, see the
 [recipes](recipes/index.md).
-

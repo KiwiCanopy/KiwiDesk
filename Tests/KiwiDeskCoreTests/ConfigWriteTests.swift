@@ -45,6 +45,7 @@ private func richConfig() -> GuiConfig {
     ]
     config.appRules = ["spotify": SpaceID("music")]
     config.floatRules = ["Calculator", "Finder:Get Info"]
+    config.ignoreRules = ["io.tailscale.ipn.macos"]
     config.profileBindings = [2: "Studio"]
     config.modes = [
         KeyMode(
@@ -113,6 +114,11 @@ struct ConfigWriteTests {
 
         #expect(core.tiler.settings == config.settings)
         #expect(
+            core.eventLoop.ignoreRules.matches(
+                bundleID: "io.tailscale.ipn.macos"
+            )
+        )
+        #expect(
             core.state.workspaces[SpaceID(1)]?.mode == .stack
         )
         #expect(
@@ -161,6 +167,7 @@ struct ConfigWriteTests {
 
         #expect(core.state.appRules.isEmpty)
         #expect(core.eventLoop.floatRules.rawRules.isEmpty)
+        #expect(core.eventLoop.ignoreRules.rawRules.isEmpty)
         #expect(core.tiler.settings.gapsOverride.isEmpty)
         #expect(core.tiler.settings.placementOverride.isEmpty)
         #expect(core.nativeSpaceBindings.isEmpty)
