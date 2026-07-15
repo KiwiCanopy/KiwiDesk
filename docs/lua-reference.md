@@ -1822,11 +1822,18 @@ boundary crossing re-stacks the zone.
 
 ### float_rules
 
-**Expects:** a Lua table of strings (app or app:title matchers).
+**Expects:** a Lua table of strings (bundle-id or
+bundle-id:title matchers).
 
-**Does:** windows matching any entry always float. "App" matches
-every window of the app; "App:Title" matches when the title
-contains the fragment. Dialogs, sheets, and picture-in-picture
+**Does:** windows matching any entry always float. An app is
+named by its **bundle identifier** (e.g. `com.apple.finder`),
+not its display name — the identifier is stable across system
+language and app renames. `"id"` matches every window of the
+app; `"id:Title"` matches when the title contains the fragment.
+The bundle id is matched case-insensitively; the title fragment
+is case-sensitive. See [Finding a bundle
+identifier](#finding-a-bundle-identifier). Dialogs, sheets, and
+picture-in-picture
 windows float automatically. Detection is re-checked as windows
 come and go — and when a title changes, so an "App:Title" rule
 catches windows whose titles load late (Electron/WebKit apps) or
@@ -1848,21 +1855,28 @@ tracked. This is unconditional and not a rule you configure.
 **Example:**
 
 ```lua
-float_rules = { "Calculator", "Finder:Get Info" }
+float_rules = {
+    "com.apple.calculator",
+    "com.apple.finder:Get Info",
+}
 ```
 
 ### app_rules
 
-**Expects:** a Lua table mapping app names to space identifiers.
+**Expects:** a Lua table mapping app **bundle identifiers** to
+space identifiers.
 
 **Does:** new windows of listed apps go to their assigned space.
+As with `float_rules`, an app is named by its bundle identifier
+(case-insensitive), not its display name. See [Finding a bundle
+identifier](#finding-a-bundle-identifier).
 
 **Example:**
 
 ```lua
 app_rules = {
-    ["Spotify"] = "music",
-    ["Mail"]    = "mail",
+    ["com.spotify.client"] = "music",
+    ["com.apple.mail"]     = "mail",
 }
 ```
 
@@ -1874,6 +1888,24 @@ pins, and unlisted apps inherit the base rule. Edit it from the
 Settings app's App Rules section while editing a stored profile.
 Rules declared in a hand-written `init.lua` are never overridden
 — Lua ownership is all-or-nothing.
+
+### Finding a bundle identifier
+
+App rules and `pull_or_spawn` identify an app by its bundle
+identifier. The Settings app's pickers handle this for you —
+they list installed apps by name and store the identifier
+behind the scenes. To find one by hand:
+
+- Run `KiwiDesk get_state` (or the `get_state` command over
+  IPC): every window carries a `bundle_id` field alongside its
+  display `app` name. Focus a window of the app and read it off.
+- Or ask macOS directly:
+  `osascript -e 'id of app "Safari"'` →  `com.apple.Safari`.
+- Or `mdls -name kMDItemCFBundleIdentifier /Applications/Safari.app`.
+
+Identifiers are matched case-insensitively, so the case you
+write does not matter. An app with no bundle identifier (a rare
+unbundled helper process) cannot be targeted by a rule.
 
 ## Making Windows Floating or Tiled
 
@@ -1956,16 +1988,20 @@ end)
 
 ### pull_or_spawn
 
-**Expects:** an app name (e.g., "Zen", "Safari").
+**Expects:** an app bundle identifier (e.g. `com.apple.safari`).
+See [Finding a bundle identifier](#finding-a-bundle-identifier).
 
 **Does:** if the app is already running, focuses its window. If it
-is not running, launches a new instance.
+is not running, launches a new instance. Matching and launching
+are keyed on the bundle id, so it finds apps anywhere on disk
+(including Finder and apps outside `/Applications`) regardless of
+system language.
 
 **Example:**
 
 ```lua
 KiwiDesk.bind("ctrl+return", function()
-    KiwiDesk.pull_or_spawn("Zen")
+    KiwiDesk.pull_or_spawn("com.apple.safari")
 end)
 ```
 

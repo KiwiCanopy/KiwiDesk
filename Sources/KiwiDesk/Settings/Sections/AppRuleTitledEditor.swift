@@ -110,7 +110,7 @@ struct AppRuleTitledEditor: View {
         let covered = patterns
         return Set(
             model.core.state.windows.all
-                .filter { $0.appName == app }
+                .filter { $0.appBundleID == app }
                 .map(\.title)
         )
         .subtracting(covered)

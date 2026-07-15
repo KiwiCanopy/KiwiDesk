@@ -163,34 +163,38 @@ extension KiwiCore {
         _ args: [JSONValue],
         newInstance: Bool
     ) -> CommandResponse {
-        guard let name = args.first?.stringValue else {
-            return .fail("expected app name")
+        guard
+            let bundleID = args.first?.stringValue?.lowercased()
+        else {
+            return .fail("expected app bundle id")
         }
+        // Pull an existing instance forward, matched by bundle
+        // id (locale- and rename-proof, unlike the display
+        // name — see AppRef).
         if !newInstance,
             let running = NSWorkspace.shared
                 .runningApplications
-                .first(where: { $0.localizedName == name })
+                .first(where: {
+                    $0.bundleIdentifier?.lowercased() == bundleID
+                })
         {
             running.activate()
             return .ok()
         }
-        let candidates = [
-            "/Applications/\(name).app",
-            "/System/Applications/\(name).app",
-        ]
+        // LaunchServices resolves the bundle id to its install
+        // location — finds apps the old /Applications path scan
+        // missed (Finder in CoreServices, apps in ~/Applications).
         guard
-            let path = candidates.first(
-                where: {
-                    FileManager.default.fileExists(atPath: $0)
-                }
+            let url = NSWorkspace.shared.urlForApplication(
+                withBundleIdentifier: bundleID
             )
         else {
-            return .fail("app not found: \(name)")
+            return .fail("app not found: \(bundleID)")
         }
         let config = NSWorkspace.OpenConfiguration()
         config.createsNewApplicationInstance = newInstance
         NSWorkspace.shared.openApplication(
-            at: URL(fileURLWithPath: path),
+            at: url,
             configuration: config
         )
         return .ok()

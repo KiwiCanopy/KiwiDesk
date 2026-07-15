@@ -2,9 +2,14 @@ import ApplicationServices
 import Foundation
 
 /// User-overridable float rules from the Lua config:
-/// `float_rules = { "Finder:Get Info", "Calculator" }`.
-/// `"App"` floats every window of the app; `"App:Title"`
-/// floats windows whose title contains the substring.
+/// `float_rules = { "com.apple.finder:Get Info",
+/// "com.apple.calculator" }`. The identity segment is the app's
+/// **bundle identifier** (stable across locale and rename — see
+/// `AppRef`), not its display name. `"id"` floats every window
+/// of the app; `"id:Title"` floats windows whose title contains
+/// the substring. The bundle id is lower-cased on ingest (case-
+/// insensitive, like LaunchServices); the title fragment keeps
+/// its case (a case-sensitive `contains`).
 public struct FloatRules: Sendable, Equatable {
     private let rules: [(app: String, title: String?)]
 
@@ -15,30 +20,37 @@ public struct FloatRules: Sendable, Equatable {
                 maxSplits: 1
             )
             guard parts.count == 2 else {
-                return (rule, nil)
+                return (rule.lowercased(), nil)
             }
-            return (String(parts[0]), String(parts[1]))
+            return (String(parts[0]).lowercased(), String(parts[1]))
         }
     }
 
-    /// The rules as originally written (`"App"` or
-    /// `"App:Title"`) — used to seed the GUI editor.
+    /// The rules as originally written (`"id"` or `"id:Title"`)
+    /// — used to seed the GUI editor.
     public var rawRules: [String] {
         rules.map { rule in
             rule.title.map { "\(rule.app):\($0)" } ?? rule.app
         }
     }
 
-    /// Whether any rule for this app matches on a title
+    /// Whether any rule for this bundle id matches on a title
     /// fragment — the cheap gate before re-running float
     /// detection on a title change (#160).
-    public func hasTitleRule(app: String) -> Bool {
-        rules.contains { $0.app == app && $0.title != nil }
+    public func hasTitleRule(bundleID: String?) -> Bool {
+        guard let bundleID else { return false }
+        return rules.contains {
+            $0.app == bundleID && $0.title != nil
+        }
     }
 
-    public func matches(app: String, title: String) -> Bool {
-        rules.contains { rule in
-            guard rule.app == app else { return false }
+    public func matches(
+        bundleID: String?,
+        title: String
+    ) -> Bool {
+        guard let bundleID else { return false }
+        return rules.contains { rule in
+            guard rule.app == bundleID else { return false }
             guard let fragment = rule.title else { return true }
             return title.contains(fragment)
         }
@@ -88,6 +100,9 @@ public enum FloatDetection {
         return list?.first?[kCGWindowLayer as String] as? Int
     }
 
+    /// Bundle id of the one hardcoded ignored app (see below).
+    private static let ghosttyBundleID = "com.mitchellh.ghostty"
+
     /// Windows KiwiDesk must not manage at all — no tracking,
     /// no state entry, no events. Ghostty's quick terminal is
     /// a slide-down panel (non-zero CGWindow layer) that macOS
@@ -95,34 +110,34 @@ public enum FloatDetection {
     /// assigns it a space, and focusing it then drags the user
     /// to that space (issue #21). Hardcoded on purpose: no
     /// general ignore-rule machinery until a second case
-    /// exists.
+    /// exists. Keyed on bundle id, like the user float rules.
     public static func shouldIgnore(
-        appName: String,
+        bundleID: String?,
         layer: Int
     ) -> Bool {
-        appName == "Ghostty" && layer != 0
+        bundleID == ghosttyBundleID && layer != 0
     }
 
     /// Whether any ignore rule exists for this app at all —
     /// the cheap gate before every window-list lookup.
     public static func hasIgnoreRule(
-        appName: String
+        bundleID: String?
     ) -> Bool {
-        appName == "Ghostty"
+        bundleID == ghosttyBundleID
     }
 
     /// Window-id variant: skips the CGWindowList lookup for
     /// apps that have no ignore rule at all (the common case
     /// on every reconcile).
     public static func shouldIgnore(
-        appName: String,
+        bundleID: String?,
         id: WindowID
     ) -> Bool {
-        guard hasIgnoreRule(appName: appName) else {
+        guard hasIgnoreRule(bundleID: bundleID) else {
             return false
         }
         return shouldIgnore(
-            appName: appName,
+            bundleID: bundleID,
             layer: windowLayer(of: id) ?? 0
         )
     }
@@ -166,11 +181,11 @@ public enum FloatDetection {
     /// Deliberate: suppressing a follow beats hijacking one.
     public static func hasVisibleIgnoredPanel(
         pid: pid_t,
-        appName: String
+        bundleID: String?
     ) -> Bool {
         // Cheap out before the window-list scan: only apps
         // with an ignore rule can have ignored panels.
-        guard hasIgnoreRule(appName: appName) else {
+        guard hasIgnoreRule(bundleID: bundleID) else {
             return false
         }
         let list =
@@ -181,7 +196,7 @@ public enum FloatDetection {
         return list.contains { info in
             info[kCGWindowOwnerPID as String] as? pid_t == pid
                 && shouldIgnore(
-                    appName: appName,
+                    bundleID: bundleID,
                     layer: info[kCGWindowLayer as String]
                         as? Int ?? 0
                 )
@@ -194,11 +209,11 @@ public enum FloatDetection {
     @MainActor
     public static func shouldFloat(
         element: AXUIElement,
-        appName: String,
+        bundleID: String?,
         rules: FloatRules
     ) -> Bool {
         let title = AXHelper.title(of: element)
-        if rules.matches(app: appName, title: title) {
+        if rules.matches(bundleID: bundleID, title: title) {
             return true
         }
         let layer = AXHelper.windowID(of: element)

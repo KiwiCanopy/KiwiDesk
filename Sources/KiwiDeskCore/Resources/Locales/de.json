@@ -47,7 +47,6 @@
   "app_rules.space": "Space",
   "app_rules.title_contains": "Titel enthält…",
   "app_rules.titled.caption": "Fenster, deren Titel das Muster enthält, bleiben schwebend.",
-  "app_selector.app_name": "App-Name",
   "app_selector.custom": "Benutzerdefiniert…",
   "behavior.animations.duration": "Dauer",
   "behavior.animations.relayout": "Layout-Anpassungen animieren",

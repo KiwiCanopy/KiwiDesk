@@ -193,13 +193,14 @@ public enum AXHelper {
     public static func snapshot(
         element: AXUIElement,
         pid: pid_t,
-        appName: String
+        app: AppRef
     ) -> ManagedWindow? {
         guard let id = windowID(of: element) else { return nil }
         return ManagedWindow(
             id: id,
             pid: pid,
-            appName: appName,
+            appName: app.name,
+            appBundleID: app.bundleID,
             title: title(of: element),
             frame: frame(of: element)
         )

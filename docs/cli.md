@@ -55,8 +55,8 @@ KiwiDesk service restart
 | | `toggle_floating` | — |
 | | `resize` | `x\|y`, delta (px) |
 | | `move_to_track` | `prev\|next` — move window to the adjacent track (track spaces) |
-| Launch | `pull_or_spawn` | app name |
-| | `spawn_new` | app name |
+| Launch | `pull_or_spawn` | app bundle id (e.g. `com.apple.safari`) |
+| | `spawn_new` | app bundle id |
 | System | `set_mode` | [space,] mode |
 | | `set_mouse_resize` | `layout\|snap_back` |
 | | `mouse.set_follows_focus` | true\|false (default `false`) — warp the pointer to the newly-focused window |

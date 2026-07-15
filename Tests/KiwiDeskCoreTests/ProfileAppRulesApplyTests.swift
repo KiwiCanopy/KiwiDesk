@@ -25,8 +25,8 @@ struct ProfileAppRulesApplyTests {
         )
         var config = GuiConfig()
         config.appRules = [
-            "Mail": SpaceID(1),
-            "Music": SpaceID(2),
+            "mail": SpaceID(1),
+            "music": SpaceID(2),
         ]
         try? core.guiConfigStore.save(config)
         return core
@@ -50,9 +50,9 @@ struct ProfileAppRulesApplyTests {
     /// Re-pins Mail, adds Safari, un-pins Music.
     private var override: AppRuleOverride {
         AppRuleOverride(rules: [
-            "Mail": SpaceID(3),
-            "Safari": SpaceID(4),
-            "Music": nil,
+            "mail": SpaceID(3),
+            "safari": SpaceID(4),
+            "music": nil,
         ])
     }
 
@@ -75,10 +75,10 @@ struct ProfileAppRulesApplyTests {
         )
         #expect(result.isSuccess)
 
-        #expect(core.state.appRules["Mail"] == SpaceID(3))
-        #expect(core.state.appRules["Safari"] == SpaceID(4))
+        #expect(core.state.appRules["mail"] == SpaceID(3))
+        #expect(core.state.appRules["safari"] == SpaceID(4))
         // Tombstone: the base pin is gone in this profile.
-        #expect(core.state.appRules["Music"] == nil)
+        #expect(core.state.appRules["music"] == nil)
     }
 
     @Test("Profile without override reverts to base rules")
@@ -90,12 +90,12 @@ struct ProfileAppRulesApplyTests {
         try core.profiles.save(profile(named: "Plain"))
 
         core.execute("load_profile", args: [.string("Work")])
-        #expect(core.state.appRules["Mail"] == SpaceID(3))
+        #expect(core.state.appRules["mail"] == SpaceID(3))
 
         core.execute("load_profile", args: [.string("Plain")])
-        #expect(core.state.appRules["Mail"] == SpaceID(1))
-        #expect(core.state.appRules["Music"] == SpaceID(2))
-        #expect(core.state.appRules["Safari"] == nil)
+        #expect(core.state.appRules["mail"] == SpaceID(1))
+        #expect(core.state.appRules["music"] == SpaceID(2))
+        #expect(core.state.appRules["safari"] == nil)
     }
 
     @Test("Reload keeps the active profile's override")
@@ -111,8 +111,8 @@ struct ProfileAppRulesApplyTests {
         // the structured base apply must not clobber it.
         core.loadConfig()
 
-        #expect(core.state.appRules["Mail"] == SpaceID(3))
-        #expect(core.state.appRules["Music"] == nil)
+        #expect(core.state.appRules["mail"] == SpaceID(3))
+        #expect(core.state.appRules["music"] == nil)
     }
 
     // MARK: - O7 all-or-nothing ownership
@@ -149,7 +149,7 @@ struct ProfileAppRulesApplyTests {
         // The Lua-declared rule survives — the profile's
         // override is structured-config vocabulary and must
         // not touch Lua-owned rules (O7).
-        #expect(core.state.appRules["Mail"] == SpaceID(2))
-        #expect(core.state.appRules["Safari"] == nil)
+        #expect(core.state.appRules["mail"] == SpaceID(2))
+        #expect(core.state.appRules["safari"] == nil)
     }
 }

@@ -213,19 +213,21 @@ struct FloatPersistenceTests {
 struct FloatRulesTitleGateTests {
     @Test("Titled rule for the app gates open")
     func titledRule() {
-        let rules = FloatRules(["Finder:Get Info"])
-        #expect(rules.hasTitleRule(app: "Finder"))
+        let rules = FloatRules(["com.apple.finder:Get Info"])
+        #expect(rules.hasTitleRule(bundleID: "com.apple.finder"))
     }
 
     @Test("App-only rule needs no title recheck")
     func appOnlyRule() {
-        let rules = FloatRules(["Calculator"])
-        #expect(!rules.hasTitleRule(app: "Calculator"))
+        let rules = FloatRules(["com.apple.calculator"])
+        #expect(
+            !rules.hasTitleRule(bundleID: "com.apple.calculator")
+        )
     }
 
     @Test("Other apps stay gated off")
     func otherApp() {
-        let rules = FloatRules(["Finder:Get Info"])
-        #expect(!rules.hasTitleRule(app: "Safari"))
+        let rules = FloatRules(["com.apple.finder:Get Info"])
+        #expect(!rules.hasTitleRule(bundleID: "com.apple.safari"))
     }
 }

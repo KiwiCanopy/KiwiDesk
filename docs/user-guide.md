@@ -118,8 +118,8 @@ hand, but it is documented here for backup and transparency.
 ```json
 {
   "spaces": [ "1", "2", "mail" ],
-  "app_rules": { "Spotify": "music" },
-  "float_rules": [ "Calculator" ],
+  "app_rules": { "com.spotify.client": "music" },
+  "float_rules": [ "com.apple.calculator" ],
   "profile_bindings": { "1": "Developer" },
   "modes": [
     { "name": "default", "bindings": [...] }
@@ -132,12 +132,14 @@ Each field:
 - **`spaces`**: array of space ids (strings). Defines the spaces
   you work with, in order. Updated whenever you add, rename, or
   delete a space in the Spaces section.
-- **`app_rules`**: object mapping app names to space ids. When an
-  app opens, its windows land in the assigned space. Updated in
-  the App Rules section.
-- **`float_rules`**: array of app names (and optionally
-  app-name:title filters). Windows matching these never tile. Updated
-  in the App Rules section.
+- **`app_rules`**: object mapping app **bundle identifiers**
+  (e.g. `com.spotify.client`) to space ids. When an app opens,
+  its windows land in the assigned space. Updated in the App
+  Rules section, which picks apps by name and stores the
+  identifier for you.
+- **`float_rules`**: array of bundle identifiers (and optionally
+  `bundle-id:title` filters). Windows matching these never tile.
+  Updated in the App Rules section.
 - **`profile_bindings`**: object mapping native macOS Space numbers
   (Mission Control desktops) to profile names. When you switch
   desktops, the bound profile loads. Updated in the Profiles
@@ -659,21 +661,27 @@ windows of specific apps land and whether they tile.
 
 ### App Launch Assignment
 
-Click **+** to add a rule. Enter an app name (e.g., "Spotify", "Mail")
-and pick a space — new windows of that app will open in the chosen
-space.
+Click **+** to add a rule. Choose an app from the list — it shows
+installed apps by name and remembers each app by its bundle
+identifier, so a rule keeps working across system-language changes
+and app renames — then pick a space. New windows of that app will
+open in the chosen space. For an app that isn't installed right
+now, use **Custom…** and enter its bundle identifier by hand (see
+[Finding a bundle identifier](lua-reference.md#finding-a-bundle-identifier)).
 
-Click an app row to edit it, or right-click to delete.
+Click an app row to edit it, or use its trash button to delete.
 
-To **match only certain windows** of an app (not all), use the format
-`"App:Title fragment"` — e.g., "Finder:Get Info" floats only the Get
-Info dialog, not all Finder windows.
+To **match only certain windows** of an app (not all), the Float
+picker's **Windows titled…** option lets you add title fragments —
+e.g. a "Get Info" fragment floats only Finder's Get Info dialog,
+not every Finder window.
 
 ### Float Rules
 
-In the same section, add float rules to make windows never tile —
-they always float. Use the same format: app name, or `"App:Title"` for
-a title substring match.
+In the same section, the **Float** picker makes an app's windows
+never tile — **All windows** floats every window of the app, or
+**Windows titled…** floats only those whose title contains a
+fragment you add.
 
 Dialogs, sheets, and picture-in-picture windows float automatically —
 you do not need a rule for them.

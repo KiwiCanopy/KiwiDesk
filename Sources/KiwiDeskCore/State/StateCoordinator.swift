@@ -164,7 +164,7 @@ public struct StateCoordinator: Sendable {
             restoreFloatOverride(of: window)
             let target =
                 rememberedSpaces[window.id]
-                ?? appRules[window.appName]
+                ?? window.appBundleID.flatMap { appRules[$0] }
                 ?? workspaces.activeSpace
             if let target {
                 let mode = workspaces[target]?.mode ?? .bsp

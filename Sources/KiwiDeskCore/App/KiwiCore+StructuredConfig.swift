@@ -121,9 +121,17 @@ extension KiwiCore {
         base: [String: SpaceID],
         override: AppRuleOverride?
     ) {
-        state.appRules = ConfigResolver.resolvedAppRules(
+        let resolved = ConfigResolver.resolvedAppRules(
             base: base,
             profile: override
+        )
+        // Key by lower-cased bundle id to match the normalized
+        // `ManagedWindow.appBundleID` (case-insensitive, like
+        // LaunchServices). Last write wins on a case collision —
+        // bundle ids never legitimately differ only by case.
+        state.appRules = Dictionary(
+            resolved.map { ($0.key.lowercased(), $0.value) },
+            uniquingKeysWith: { _, latest in latest }
         )
     }
 

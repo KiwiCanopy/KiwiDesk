@@ -59,7 +59,8 @@ struct AppRuleRow: View {
     private var header: some View {
         HStack(spacing: 8) {
             appIcon
-            Text(app).fontWeight(.medium)
+            Text(KeybindingCatalog.displayName(forBundleID: app))
+                .fontWeight(.medium)
             Spacer()
             Button {
                 onDelete()
@@ -94,10 +95,10 @@ struct AppRuleRow: View {
     }
 
     @ViewBuilder private var appIcon: some View {
-        if let path = appPath {
+        if let url = appURL {
             Image(
                 nsImage: NSWorkspace.shared.icon(
-                    forFile: path
+                    forFile: url.path
                 )
             )
             .resizable()
@@ -109,13 +110,13 @@ struct AppRuleRow: View {
         }
     }
 
-    private var appPath: String? {
-        [
-            "/Applications/\(app).app",
-            "/System/Applications/\(app).app",
-        ].first {
-            FileManager.default.fileExists(atPath: $0)
-        }
+    /// The installed bundle for this rule's app, resolved from
+    /// its bundle id — nil (dashed placeholder) when the app
+    /// isn't installed on this machine.
+    private var appURL: URL? {
+        NSWorkspace.shared.urlForApplication(
+            withBundleIdentifier: app
+        )
     }
 
     // MARK: - Facets

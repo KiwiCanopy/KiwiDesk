@@ -166,7 +166,10 @@ extension KiwiCore {
             var mapped: [String: SpaceID] = [:]
             for (app, value) in rules {
                 if let space = value.stringValue {
-                    mapped[app] = SpaceID(space)
+                    // Keyed by bundle id, lower-cased to match
+                    // the normalized `ManagedWindow.appBundleID`
+                    // (case-insensitive, like LaunchServices).
+                    mapped[app.lowercased()] = SpaceID(space)
                 }
             }
             state.appRules = mapped
