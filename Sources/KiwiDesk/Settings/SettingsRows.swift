@@ -157,6 +157,13 @@ struct StepperRow: View {
     let range: ClosedRange<Int>
     let step: Int
     let suffix: String?
+    /// Hide the visual label, leaving value + arrows only (#275):
+    /// for a section whose header already names the sole control,
+    /// restating it on the row is native-atypical (Dock "Size").
+    /// `label` still feeds the accessibility label, so VoiceOver
+    /// is unaffected — the control is left-aligned under the
+    /// header instead of trailing an empty label column.
+    let labelHidden: Bool
     /// The field edits a string proxy so intermediate/empty
     /// typing never clobbers `value`; it commits (parse +
     /// clamp) on Return or focus loss, matching the rename
@@ -169,20 +176,24 @@ struct StepperRow: View {
         value: Binding<Int>,
         in range: ClosedRange<Int>,
         step: Int = 1,
-        suffix: String? = nil
+        suffix: String? = nil,
+        labelHidden: Bool = false
     ) {
         self.label = label
         self._value = value
         self.range = range
         self.step = step
         self.suffix = suffix
+        self.labelHidden = labelHidden
         self._text = State(initialValue: "\(value.wrappedValue)")
     }
 
     var body: some View {
         HStack {
-            Text(label)
-            Spacer()
+            if !labelHidden {
+                Text(label)
+                Spacer()
+            }
             TextField("", text: $text)
                 .labelsHidden()
                 .frame(width: 48)
@@ -205,6 +216,12 @@ struct StepperRow: View {
                     suffix.map { "\(value) \($0)" }
                         ?? "\(value)"
                 )
+            // Label hidden → nothing anchors the control to the
+            // leading edge, so a trailing spacer keeps it left
+            // under the section header instead of centering.
+            if labelHidden {
+                Spacer()
+            }
         }
         // Keep the field in step with arrow taps / external
         // changes — but never while the user is mid-edit, or a
