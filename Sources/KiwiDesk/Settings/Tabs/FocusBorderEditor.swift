@@ -82,6 +82,19 @@ struct FocusBorderEditor: View {
             .pickerStyle(.segmented)
             .labelsHidden()
         }
+        if squareSitsInset {
+            Text(
+                L(
+                    "border.square_inset_hint",
+                    "A square border reaches the window edge only "
+                        + "above %1$d pt; thinner, it sits just "
+                        + "inside the window.",
+                    Int(BorderStyle.minSquareWidth)
+                )
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
+        }
         Divider()
         VStack(alignment: .leading, spacing: 4) {
             Button(L("border.fit_gaps", "Fit gaps to border")) {
@@ -102,6 +115,14 @@ struct FocusBorderEditor: View {
 
     private var cornerLabel: String {
         L("border.corner_style", "Corners")
+    }
+
+    /// A square border thinner than its edge-hugging width sits
+    /// inset inside the window — worth a hint, not a restriction.
+    private var squareSitsInset: Bool {
+        let s = model.config.settings.borderStyle
+        return s.cornerStyle == .square
+            && s.clampedWidth < BorderStyle.minSquareWidth
     }
 
     /// Writes the same `gapsGlobal` the Gaps sliders do, using the

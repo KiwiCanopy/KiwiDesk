@@ -29,6 +29,19 @@ public struct BorderStyle: Sendable, Equatable {
     public static let minWidth: CGFloat = 0.5
     public static let maxWidth: CGFloat = 20
 
+    /// The width at which a square border's outer edge meets the
+    /// window edge. Below it a square sits inset *inside* the
+    /// window (the corner is still covered by the tuck, it just
+    /// doesn't hug the edge); above it, it extends outward like a
+    /// frame. Not a clamp — the GUI shows a hint at thinner square
+    /// widths rather than forbidding them. Tied to the real corner
+    /// radius (`R·(1−√2/2)`, the tuck depth) so it tracks the
+    /// true value.
+    public static var minSquareWidth: CGFloat {
+        (GeometryUtils.systemWindowCornerRadius
+            * (1 - CGFloat(2).squareRoot() / 2)).rounded(.up)
+    }
+
     public var enabled = true
     /// Ring width (pt). Raw here; callers clamp to
     /// `minWidth...maxWidth` (`clampedWidth`).
