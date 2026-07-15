@@ -52,6 +52,7 @@ struct MouseResizeTests {
         let adjustment = MouseResize.translate(
             mode: .stack,
             isMaster: true,
+            stackSplitHorizontal: true,
             slot: slot,
             frame: grown(slot, dw: 100),
             bounds: bounds
@@ -65,6 +66,7 @@ struct MouseResizeTests {
         let adjustment = MouseResize.translate(
             mode: .stack,
             isMaster: false,
+            stackSplitHorizontal: true,
             slot: slot,
             frame: grown(slot, dw: 100),
             bounds: bounds
@@ -78,6 +80,7 @@ struct MouseResizeTests {
         let adjustment = MouseResize.translate(
             mode: .stack,
             isMaster: false,
+            stackSplitHorizontal: true,
             slot: slot,
             frame: grown(slot, dh: 100),
             bounds: bounds
@@ -92,6 +95,7 @@ struct MouseResizeTests {
             MouseResize.translate(
                 mode: .bsp,
                 isMaster: false,
+                stackSplitHorizontal: true,
                 slot: left,
                 frame: grown(left, dw: 100),
                 bounds: bounds
@@ -102,6 +106,7 @@ struct MouseResizeTests {
             MouseResize.translate(
                 mode: .bsp,
                 isMaster: false,
+                stackSplitHorizontal: true,
                 slot: right,
                 frame: grown(right, dw: 100),
                 bounds: bounds
@@ -118,6 +123,7 @@ struct MouseResizeTests {
             MouseResize.translate(
                 mode: .bsp,
                 isMaster: false,
+                stackSplitHorizontal: true,
                 slot: top,
                 frame: grown(top, dh: 80),
                 bounds: bounds
@@ -134,6 +140,7 @@ struct MouseResizeTests {
             MouseResize.translate(
                 mode: .bsp,
                 isMaster: false,
+                stackSplitHorizontal: true,
                 slot: bottom,
                 frame: grown(bottom, dh: 80),
                 bounds: bounds
@@ -147,6 +154,7 @@ struct MouseResizeTests {
         let adjustment = MouseResize.translate(
             mode: .scrolling,
             isMaster: false,
+            stackSplitHorizontal: true,
             slot: slot,
             frame: grown(slot, dw: -150),
             bounds: bounds
@@ -257,6 +265,7 @@ struct MouseResizeTests {
                 MouseResize.translate(
                     mode: mode,
                     isMaster: false,
+                    stackSplitHorizontal: true,
                     slot: slot,
                     frame: grown(slot, dw: 100),
                     bounds: bounds

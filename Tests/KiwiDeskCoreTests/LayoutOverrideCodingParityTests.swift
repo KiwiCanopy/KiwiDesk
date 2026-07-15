@@ -113,6 +113,8 @@ struct LayoutOverrideCodingParityTests {
         over.masterCount = 4
         over.masterRatio = 0.3
         over.overflowStyle = .cascadeAll
+        over.masterOrientation = .horizontal
+        over.stackPosition = .top
         return over
     }
 

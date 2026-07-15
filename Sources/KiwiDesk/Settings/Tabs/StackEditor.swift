@@ -23,6 +23,10 @@ struct StackEditor: View {
                     .masterRatio,
                 overflowStyle: model.config.settings.stack
                     .overflowStyle,
+                masterOrientation: model.config.settings.stack
+                    .masterOrientation,
+                stackPosition: model.config.settings.stack
+                    .stackPosition,
                 placement: model.config.settings.stack
                     .newWindowPlacement
             )
@@ -41,6 +45,41 @@ struct StackEditor: View {
                 ),
                 value: stack.masterRatio
             )
+            DropdownRow(
+                label: masterOrientationLabel,
+                help: LayoutHelp.masterOrientation
+            ) {
+                orientationPicker(
+                    masterOrientationLabel,
+                    selection: stack.masterOrientation
+                )
+            }
+            Divider()
+            DropdownRow(
+                label: stackPositionLabel,
+                help: LayoutHelp.stackPosition
+            ) {
+                Picker(
+                    stackPositionLabel,
+                    selection: stack.stackPosition
+                ) {
+                    Text(L("layout_params.position.top", "Top"))
+                        .tag(StackParams.StackPosition.top)
+                    Text(
+                        L("layout_params.position.right", "Right")
+                    )
+                    .tag(StackParams.StackPosition.right)
+                    Text(
+                        L(
+                            "layout_params.position.bottom",
+                            "Bottom"
+                        )
+                    )
+                    .tag(StackParams.StackPosition.bottom)
+                    Text(L("layout_params.position.left", "Left"))
+                        .tag(StackParams.StackPosition.left)
+                }
+            }
             Divider()
             DropdownRow(
                 label: overflowLabel,
@@ -74,5 +113,40 @@ struct StackEditor: View {
 
     private var overflowLabel: String {
         L("layout_params.overflow", "Overflow")
+    }
+
+    private var masterOrientationLabel: String {
+        L(
+            "layout_params.master_orientation",
+            "Master orientation"
+        )
+    }
+
+    private var stackPositionLabel: String {
+        L("layout_params.stack_position", "Stack position")
+    }
+
+    /// One vertical/horizontal picker for both orientation
+    /// rows — same options, same tags.
+    private func orientationPicker(
+        _ label: String,
+        selection: Binding<StackParams.Orientation>
+    ) -> some View {
+        Picker(label, selection: selection) {
+            Text(
+                L(
+                    "layout_params.orientation.vertical",
+                    "Vertical"
+                )
+            )
+            .tag(StackParams.Orientation.vertical)
+            Text(
+                L(
+                    "layout_params.orientation.horizontal",
+                    "Horizontal"
+                )
+            )
+            .tag(StackParams.Orientation.horizontal)
+        }
     }
 }

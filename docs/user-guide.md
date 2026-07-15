@@ -317,13 +317,18 @@ Adjust each mode's defaults:
 - **BSP**: split strategy (longest_side or alternating) and the
   width and height split ratios (0.5 = 50/50 each) — the knobs
   the per-axis resize shortcuts nudge (#56).
-- **Stack**: master count, master ratio (how much width/height the
-  master zone takes), and overflow style (cascade_overflow keeps
-  full windows, cascade_all cascades everything). The resize
-  shortcuts are focus-aware (#67): width grows whichever zone
-  holds the focused window, height grows the focused window's
-  share of its column (a session-only tweak — it resets on
-  relaunch and is not saved into profiles).
+- **Stack**: master count, master ratio (the master zone's share
+  of the split), master orientation (how multiple masters line
+  up), stack position (which side the stack zone takes — left/
+  right split the width, top/bottom the height; the stack's own
+  lineup follows the side, so a tall zone is a column and a wide
+  one a row, #222), and overflow style (cascade_overflow keeps
+  full windows, cascade_all cascades everything — piles always
+  cascade downward, so title bars stay visible). The resize
+  shortcuts are focus-aware (#67): the split axis grows
+  whichever zone holds the focused window, the zone's own axis
+  grows the focused window's share of it (a session-only tweak —
+  it resets on relaunch and is not saved into profiles).
 - **Scrolling**: orientation (horizontal or vertical), anchor
   (where the focused column rests on every focus — **Center**, or
   flush against the leading/trailing edge, shown as **Left**/

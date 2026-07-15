@@ -71,6 +71,8 @@ struct LayoutParamsCodingParityTests {
         params.masterCount = 3
         params.masterRatio = 0.35
         params.overflowStyle = .cascadeAll
+        params.masterOrientation = .horizontal
+        params.stackPosition = .top
         params.newWindowPlacement = .last
         var over = StackOverride()
         over.masterCount = 2

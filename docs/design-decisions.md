@@ -124,7 +124,7 @@ detail:
 | Layout | Model | How it walks | Overflow → pile? |
 |---|---|---|---|
 | **BSP** | geometric | `Navigation.neighbor` over slots | yes — an extreme stored ratio cascades the whole space (`BspLayout` → `OverlapStack`) |
-| **Stack** | geometric | `Navigation.neighbor` over slots | yes — a column overflow cascade / `cascade_all` (`StackLayout`) |
+| **Stack** | geometric | `Navigation.neighbor` over slots | yes — a zone overflow cascade / `cascade_all` (`StackLayout`); piles always cascade downward, whatever the arrangement (#222) |
 | **Grid** | geometric | `Navigation.neighbor` over slots | yes — a last-cell pile (rigid/dynamic past the cap) or a whole-grid cascade at min-size (`GridLayout`) |
 | **Scrolling** | array-order | steps along the scroll axis (`scrollingStep`), geometric fallback cross-axis | no min-size cascade — the edge pile (#142) is a viewport pin, not an `OverlapStack` fallback |
 | **Monocle** | array-order | steps along the orientation, wraps iff `wrap_focus` (`monocleCycle`) — same 1-D shape as scrolling | no — every window shares one frame |
@@ -683,6 +683,28 @@ ratio* against min window size stays a separate issue (#44).
 One deliberate asymmetry: a stack height *drag* still snaps
 back (the mouse seam is windowless); only the keyboard/CLI
 `resize("y")` moves weights. (#67)
+
+**The stack zone's lineup derives from its position — no
+`stack_orientation` knob; piles always cascade downward.** #222
+made the stack arrangement configurable: `stack_position`
+(top/right/bottom/left) picks the split axis, and
+`master_orientation` lines up multiple masters. The stack zone
+deliberately has no orientation setting of its own — a
+left/right zone is a tall strip, so it stacks vertically; a
+top/bottom zone is wide, so windows sit side by side
+(`StackPosition.stackOrientation`, the single authority). Any
+other combination degenerates into slivers, and deriving keeps
+the resize axes orthogonal: the split ratio always moves on the
+split axis, the stack's weights on the other. Overflow piles
+keep cascading downward in every arrangement (ui-designer
+consult, 2026-07-15): the title bar is the affordance unit
+(identify + drag + raise) and one pile vocabulary spans the app
+— a sideways pile would expose blank side slivers and read as a
+glitch. A wide zone's `cascade_all` pile may spill over the
+master zone; that is the same accepted spill tall zones already
+do at the screen's bottom edge, kept coherent by the managed
+z-order. If pile depth ever hurts, the lever is a depth cap —
+not a direction switch. (#222)
 
 **The stack cascade is a last resort; extreme ratios clamp at
 layout time, and interactive writes cap at the visible cliff.**

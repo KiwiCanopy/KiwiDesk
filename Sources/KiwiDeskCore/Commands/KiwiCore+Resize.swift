@@ -178,12 +178,16 @@ extension KiwiCore {
         )
     }
 
-    /// Focus-aware stack resize (#67). "x" moves the
-    /// master/stack split in the direction that grows the
-    /// FOCUSED window: focused in master → +delta raises the
-    /// ratio, focused in the stack column → +delta lowers it
-    /// (the column grows). "y" grows the focused window's
-    /// vertical share of its column via the per-window weights.
+    /// Focus-aware stack resize (#67), arrangement-aware
+    /// (#222). The split axis (x for a left/right stack zone,
+    /// y for top/bottom) moves the master/stack split in the
+    /// direction that grows the FOCUSED window: focused in
+    /// master → +delta raises the ratio, focused in the stack
+    /// zone → +delta lowers it (the zone grows). The other
+    /// axis grows the focused window's share of its zone via
+    /// the per-window weights — but only when the zone lines
+    /// up along that axis; a zone has no cross-axis parameter,
+    /// so that resize fails like any unsupported axis.
     private func resizeStack(
         axis: String,
         delta: Double,
@@ -194,7 +198,9 @@ extension KiwiCore {
         let tiled = space.windows.filter {
             state.windows[$0]?.isFloating == false
         }
-        guard axis == "y" else {
+        let splitAxis =
+            stack.stackPosition.splitsHorizontally ? "x" : "y"
+        guard axis != splitAxis else {
             // Unknown focus keeps the master-grows direction
             // (the pre-#67 behavior).
             let (master, _) = StackLayout.partition(
@@ -229,6 +235,29 @@ extension KiwiCore {
                 masterCount: stack.masterCount
             )
         else { return .fail("no focused tiled window") }
+        // The weight axis is the focused zone's own axis: a
+        // vertical zone divides heights ("y"), a horizontal one
+        // widths ("x"). The stack zone's axis derives from the
+        // position (#222) and is always orthogonal to the split;
+        // only a master zone oriented along the split axis has
+        // no cross-axis parameter — perceivable no-op like
+        // unsupported modes (#184).
+        let (master, _) = StackLayout.partition(
+            tiled,
+            masterCount: stack.masterCount
+        )
+        let orientation =
+            master.contains(focused)
+            ? stack.masterOrientation
+            : stack.stackPosition.stackOrientation
+        let weightAxis =
+            orientation == .vertical ? "y" : "x"
+        guard axis == weightAxis else {
+            cueUnsupportedCommand()
+            return .fail(
+                "no \(axis) parameter for this arrangement"
+            )
+        }
         guard let focusOffset = column.firstIndex(of: focused),
             column.count > 1
         else {
