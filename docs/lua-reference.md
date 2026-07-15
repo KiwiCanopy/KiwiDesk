@@ -2847,13 +2847,14 @@ strategies will accept more values).
 into cell 1, window 2 into cell 2, wrapping back to cell 1 and
 stacking. Windows sharing a cell cascade vertically like
 `overflow_all`, in **every** cell, so each title bar stays reachable.
-Pile slots follow the real stacking order — the frontmost window
-takes the lowest slot, windows behind it the upper ones — because
-quit placement moves frames but never raises: any other assignment
-would let a front window's body bury the title bar beneath it. For
-the same reason a pile's windows shrink so the cascade ends at its
-own cell's bottom edge (floored at `min_window_size`): a pile
-spilling into the row below would bury that row's title bars too.
+After placing, KiwiDesk raises every window in a fixed circle —
+cell 1 through the last cell, each pile top slot first and deepest
+slot last — so the final stacking is deterministic: within a pile
+every title bar stays visible, later cells sit above earlier ones,
+and whichever window had focus at quit makes no difference. A
+pile's windows also shrink so the cascade ends at its own cell's
+bottom edge (floored at `min_window_size`), keeping piles from
+spilling into the row below.
 Each display sizes its own grid from its window count `N`:
 `ceil(sqrt(N / 10))`, clamped between 2×2 and 4×4 — up to 40 windows
 get 2×2, up to 90 get 3×3, beyond that 4×4. One-shot teardown

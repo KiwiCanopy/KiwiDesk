@@ -89,8 +89,7 @@ private func targets(
         state: state,
         primaryHeight: pH,
         style: .grid,
-        minSize: minSize,
-        frontToBack: [:]
+        minSize: minSize
     )
 }
 

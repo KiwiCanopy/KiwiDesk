@@ -100,8 +100,7 @@ public enum WindowGather {
         state: StateCoordinator,
         primaryHeight: CGFloat,
         style: QuitLayoutStyle,
-        minSize: CGFloat,
-        frontToBack: [WindowID: Int]
+        minSize: CGFloat
     ) -> [WindowID: CGRect] {
         var result: [WindowID: CGRect] = [:]
         for group in collect(
@@ -114,8 +113,7 @@ public enum WindowGather {
                     QuitGridLayout.frames(
                         for: group.windows,
                         in: group.axFrame,
-                        minSize: minSize,
-                        frontToBack: frontToBack
+                        minSize: minSize
                     )
                 ) { current, _ in current }
             }
@@ -125,30 +123,6 @@ public enum WindowGather {
 }
 
 extension KiwiCore {
-    /// Stacking ranks (0 = frontmost) for every on-screen
-    /// window, snapshotted once per gather from CGWindowList
-    /// (front-to-back by contract; no AX, so it cannot stall
-    /// the quit budget). The grid's piles assign their slots
-    /// to match this order — quit placement never raises.
-    static func frontToBackRanks() -> [WindowID: Int] {
-        let list =
-            CGWindowListCopyWindowInfo(
-                [.optionOnScreenOnly, .excludeDesktopElements],
-                kCGNullWindowID
-            ) as? [[String: Any]] ?? []
-        var ranks: [WindowID: Int] = [:]
-        for (rank, info) in list.enumerated() {
-            guard
-                let number =
-                    info[kCGWindowNumber as String] as? Int,
-                let raw = UInt32(exactly: number)
-            else { continue }
-            let id = WindowID(raw)
-            if ranks[id] == nil { ranks[id] = rank }
-        }
-        return ranks
-    }
-
     /// Moves each managed tiled window onto its owning monitor,
     /// arranged per `quit.layout` within the display's visible
     /// area, so windows are not stranded in tiled frames after
@@ -161,8 +135,9 @@ extension KiwiCore {
     /// and bounds every AX call in the iteration — EUI reads,
     /// EUI disable/restore, and setFrame — so Electron/WebKit
     /// apps (up to ~6 s with the default timeout) cannot stall
-    /// the quit path; a total wall-clock budget of ~1 s caps
-    /// the worst case across all windows.
+    /// the quit path; wall-clock budgets (~1 s for the moves,
+    /// ~1 s for the raise circle) cap the worst case across
+    /// all windows.
     ///
     /// Called on quit and restart, at the top of `stop()` while
     /// the event loop and AX subsystem are still live. When
@@ -192,8 +167,7 @@ extension KiwiCore {
             state: state,
             primaryHeight: primaryH,
             style: tiler.settings.quitLayout,
-            minSize: tiler.settings.minWindowSize,
-            frontToBack: Self.frontToBackRanks()
+            minSize: tiler.settings.minWindowSize
         )
         guard !frames.isEmpty else { return }
         SkyLight.suppressDisplay()
@@ -252,6 +226,37 @@ extension KiwiCore {
                     pid: pid,
                     enabled: true
                 )
+            }
+        }
+        // Second pass: raise every window in the grid's
+        // deterministic circle (cell 1 → last, each pile top
+        // slot first, deepest last). The frames alone can't
+        // guarantee readable piles — whatever z-order (and
+        // focus) existed at quit would decide which title
+        // bars survive. Raising defines the stacking instead:
+        // pile order holds within every cell, and later rows
+        // sit above earlier ones. Same wall-clock budget
+        // class as the moves: raiseQuietly is blocking IPC,
+        // but each call is bounded by the 0.25 s messaging
+        // timeout set above.
+        let raiseDeadline = Date().addingTimeInterval(1.0)
+        for group in groups {
+            for id in QuitGridLayout.raiseOrder(
+                for: group.windows
+            ) {
+                if Date() > raiseDeadline {
+                    onLog(
+                        "gatherWindows: raise budget "
+                            + "exceeded — stacking left "
+                            + "partial"
+                    )
+                    return
+                }
+                guard
+                    frames[id] != nil,
+                    let element = eventLoop.element(for: id)
+                else { continue }
+                AXHelper.raiseQuietly(element)
             }
         }
     }

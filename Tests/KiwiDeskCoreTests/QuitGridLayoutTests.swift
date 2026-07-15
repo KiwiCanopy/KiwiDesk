@@ -40,8 +40,7 @@ struct QuitGridFramesTests {
         let frames = QuitGridLayout.frames(
             for: [],
             in: axFrame,
-            minSize: minSize,
-            frontToBack: [:]
+            minSize: minSize
         )
         #expect(frames.isEmpty)
     }
@@ -51,8 +50,7 @@ struct QuitGridFramesTests {
         let frames = QuitGridLayout.frames(
             for: [WindowID(1)],
             in: axFrame,
-            minSize: minSize,
-            frontToBack: [:]
+            minSize: minSize
         )
         let frame = frames[WindowID(1)]
         #expect(
@@ -71,8 +69,7 @@ struct QuitGridFramesTests {
         let frames = QuitGridLayout.frames(
             for: ids(0..<5),
             in: axFrame,
-            minSize: minSize,
-            frontToBack: [:]
+            minSize: minSize
         )
         let f0 = try #require(frames[WindowID(0)])
         let f1 = try #require(frames[WindowID(1)])
@@ -102,8 +99,7 @@ struct QuitGridFramesTests {
         let frames = QuitGridLayout.frames(
             for: ids(0..<8),
             in: axFrame,
-            minSize: minSize,
-            frontToBack: [:]
+            minSize: minSize
         )
         for cell in 0..<4 {
             let first = try #require(
@@ -125,8 +121,7 @@ struct QuitGridFramesTests {
         let frames = QuitGridLayout.frames(
             for: ids(0..<41),
             in: axFrame,
-            minSize: minSize,
-            frontToBack: [:]
+            minSize: minSize
         )
         #expect(frames.count == 41)
         let f1 = try #require(frames[WindowID(1)])
@@ -142,8 +137,7 @@ struct QuitGridFramesTests {
         let frames = QuitGridLayout.frames(
             for: ids(0..<160),
             in: axFrame,
-            minSize: minSize,
-            frontToBack: [:]
+            minSize: minSize
         )
         #expect(frames.count == 160)
         for frame in frames.values {
@@ -165,8 +159,7 @@ struct QuitGridFramesTests {
         let frames = QuitGridLayout.frames(
             for: ids(0..<8),
             in: axFrame,
-            minSize: minSize,
-            frontToBack: [:]
+            minSize: minSize
         )
         // Window 4 = cell 0's second (deepest) pile entry.
         let f4 = try #require(frames[WindowID(4)])
@@ -176,49 +169,46 @@ struct QuitGridFramesTests {
         #expect(f2.minY == 552.5)
     }
 
-    @Test("pile slots follow z-order: frontmost lands deepest")
-    func pileFollowsZOrder() throws {
-        // 5 windows on 2×2: cell 0 holds windows 0 and 4.
-        // Make window 0 frontmost (rank 0) and window 4 a
-        // background window (rank 3). Quit never raises, so
-        // window 0 must take the deeper slot — in the top
-        // slot its body would bury window 4's title bar.
-        let frames = QuitGridLayout.frames(
-            for: ids(0..<5),
-            in: axFrame,
-            minSize: minSize,
-            frontToBack: [WindowID(0): 0, WindowID(4): 3]
+    @Test("raise circle: cell by cell, pile top to deepest")
+    func raiseCircle() {
+        // 10 windows on 2×2 — cells hold (0,4,8), (1,5,9),
+        // (2,6), (3,7). The raise circle walks quadrant 1
+        // through 4, each pile top slot first, deepest last,
+        // so the final stacking never depends on which window
+        // had focus at quit and a later row always sits above
+        // the row before it.
+        let order = QuitGridLayout.raiseOrder(
+            for: ids(0..<10)
         )
-        let f0 = try #require(frames[WindowID(0)])
-        let f4 = try #require(frames[WindowID(4)])
-        #expect(f4.origin == CGPoint(x: 0, y: 25))
         #expect(
-            f0.origin
-                == CGPoint(
-                    x: 0,
-                    y: 25 + OverlapStack.offset
-                )
+            order == [
+                WindowID(0), WindowID(4), WindowID(8),
+                WindowID(1), WindowID(5), WindowID(9),
+                WindowID(2), WindowID(6),
+                WindowID(3), WindowID(7),
+            ]
         )
     }
 
-    @Test("unranked windows count as backmost, order kept")
-    func unrankedTreatedBackmost() throws {
-        // Only window 0 is ranked (frontmost). Windows 4 and
-        // 8 share its cell unranked: they take the upper
-        // slots in round-robin order; window 0 sinks to the
-        // bottom of the pile.
+    @Test("raise circle matches the placed pile order")
+    func raiseCircleMatchesFrames() throws {
+        // The deepest-raised window of a pile must be the one
+        // the frames put at the deepest offset — the two
+        // partitions share one bucket function, pinned here.
+        let windows = ids(0..<10)
         let frames = QuitGridLayout.frames(
-            for: ids(0..<9),
+            for: windows,
             in: axFrame,
-            minSize: minSize,
-            frontToBack: [WindowID(0): 0]
+            minSize: minSize
         )
-        let f0 = try #require(frames[WindowID(0)])
-        let f4 = try #require(frames[WindowID(4)])
-        let f8 = try #require(frames[WindowID(8)])
-        #expect(f4.minY == 25)
-        #expect(f8.minY == 25 + OverlapStack.offset)
-        #expect(f0.minY == 25 + 2 * OverlapStack.offset)
+        let order = QuitGridLayout.raiseOrder(for: windows)
+        // Cell 0's pile in raise order is (0, 4, 8): their
+        // frames must descend by exactly one offset each.
+        let f0 = try #require(frames[order[0]])
+        let f4 = try #require(frames[order[1]])
+        let f8 = try #require(frames[order[2]])
+        #expect(f4.minY == f0.minY + OverlapStack.offset)
+        #expect(f8.minY == f4.minY + OverlapStack.offset)
     }
 
     @Test("tiny cells are floored at minSize")
@@ -227,8 +217,7 @@ struct QuitGridFramesTests {
         let frames = QuitGridLayout.frames(
             for: ids(0..<2),
             in: small,
-            minSize: minSize,
-            frontToBack: [:]
+            minSize: minSize
         )
         // 2×2 cells would be 200×200 — floored to 300×300.
         let f0 = try #require(frames[WindowID(0)])

@@ -37,23 +37,34 @@ public enum QuitGridLayout {
         return min(max(Int(needed), 2), maxDimension)
     }
 
+    /// Round-robin cell buckets: window `i` lands in cell
+    /// `i % cells` (row-major). The shared partition behind
+    /// `frames` and `raiseOrder` — both MUST agree, or the
+    /// raise circle stacks a different pile than the one
+    /// placed.
+    private static func buckets(
+        for windows: [WindowID]
+    ) -> [[WindowID]] {
+        let dim = dimension(for: windows.count)
+        var buckets = Array(
+            repeating: [WindowID](),
+            count: dim * dim
+        )
+        for (index, window) in windows.enumerated() {
+            buckets[index % (dim * dim)].append(window)
+        }
+        return buckets
+    }
+
     /// Round-robin targets for one display: window `i` lands
     /// in cell `i % cells` (row-major over `axFrame`), and
     /// each cell's pile cascades like `overflow_all`
-    /// (`OverlapStack.frames`) so every title bar stays
-    /// reachable.
+    /// (`OverlapStack.frames`, fit to the cell) so no pile
+    /// spills into the row below.
     ///
-    /// `frontToBack` ranks windows by stacking order (0 =
-    /// frontmost). Quit placement moves frames but never
-    /// raises (AX raises are blocking IPC the 1 s quit budget
-    /// cannot afford — live layouts restore z-order instead,
-    /// `KiwiCore+ZOrder`), so each pile assigns its slots to
-    /// match the stacking that will remain: backmost window
-    /// on top, frontmost at the deepest offset. Any other
-    /// assignment lets a front window's body bury the title
-    /// bar of the one below it. Unranked windows (not in the
-    /// on-screen list) count as backmost, keeping their
-    /// round-robin order.
+    /// Frames alone don't fix stacking — the quit path raises
+    /// every window in `raiseOrder` after placing, which is
+    /// what makes each pile's title bars visible.
     ///
     /// `axFrame` is the display's visible frame in AX
     /// (top-left-origin) coordinates; the returned rects are
@@ -61,23 +72,15 @@ public enum QuitGridLayout {
     public static func frames(
         for windows: [WindowID],
         in axFrame: CGRect,
-        minSize: CGFloat,
-        frontToBack: [WindowID: Int]
+        minSize: CGFloat
     ) -> [WindowID: CGRect] {
         guard !windows.isEmpty else { return [:] }
         let dim = dimension(for: windows.count)
-        let cells = dim * dim
-        var buckets = Array(
-            repeating: [WindowID](),
-            count: cells
-        )
-        for (index, window) in windows.enumerated() {
-            buckets[index % cells].append(window)
-        }
         let width = axFrame.width / CGFloat(dim)
         let height = axFrame.height / CGFloat(dim)
         var result: [WindowID: CGRect] = [:]
-        for (cell, bucket) in buckets.enumerated()
+        for (cell, bucket) in buckets(for: windows)
+            .enumerated()
         where !bucket.isEmpty {
             let region = CGRect(
                 x: axFrame.minX
@@ -87,17 +90,9 @@ public enum QuitGridLayout {
                 width: width,
                 height: height
             )
-            let pile = bucket.enumerated().sorted {
-                let ra =
-                    frontToBack[$0.element] ?? Int.max
-                let rb =
-                    frontToBack[$1.element] ?? Int.max
-                if ra != rb { return ra > rb }
-                return $0.offset < $1.offset
-            }.map(\.element)
             result.merge(
                 OverlapStack.frames(
-                    for: pile,
+                    for: bucket,
                     in: region,
                     minSize: minSize,
                     fitToRegion: true
@@ -107,6 +102,22 @@ public enum QuitGridLayout {
             ) { current, _ in current }
         }
         return result
+    }
+
+    /// The deterministic raise circle for one display: cell
+    /// by cell (row-major — quadrant 1, 2, 3, 4), each pile
+    /// top slot first and deepest slot last. Raising in this
+    /// order makes the final stacking independent of whatever
+    /// z-order (and focus) existed at quit: within a pile
+    /// every title bar stays visible, and a later row always
+    /// sits above the row before it, so even a degenerate
+    /// pile that spills downward cannot bury the next row's
+    /// headers.
+    public static func raiseOrder(
+        for windows: [WindowID]
+    ) -> [WindowID] {
+        guard !windows.isEmpty else { return [] }
+        return buckets(for: windows).flatMap { $0 }
     }
 
     /// Pins a cascaded frame's origin so at least `minSize`
