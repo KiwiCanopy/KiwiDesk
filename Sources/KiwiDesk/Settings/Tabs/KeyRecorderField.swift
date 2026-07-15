@@ -58,23 +58,9 @@ struct KeyRecorderField: View {
     var body: some View {
         VStack(alignment: .trailing, spacing: 4) {
             HStack(spacing: 6) {
-                if let conflict {
-                    Image(
-                        systemName:
-                            "exclamationmark.triangle.fill"
-                    )
-                    .foregroundStyle(.orange)
-                    .help(conflict)
-                }
+                conflictBadge
                 recordButton
-                if !combo.isEmpty && !recording {
-                    Button(action: onClear) {
-                        Image(systemName: "xmark.circle.fill")
-                    }
-                    .buttonStyle(.borderless)
-                    .foregroundStyle(.secondary)
-                    .hoverHighlight(cornerRadius: 4, padding: 2)
-                }
+                clearButton
             }
             if let rejection = liveRejection {
                 rejectionRow(rejection)
@@ -111,6 +97,52 @@ struct KeyRecorderField: View {
             if clear { rejection = nil }
         }
         .onDisappear(perform: stop)
+    }
+
+    /// The fixed width of a trailing-cluster icon slot (#264).
+    /// `exclamationmark.triangle` / `xmark.circle` plus the
+    /// hover chip's padding fit inside 20 pt. (Deliberately not
+    /// NavRow's 18 pt glyph slot — these icons carry a hover
+    /// chip, that glyph doesn't.)
+    private static let iconSlotWidth: CGFloat = 20
+
+    /// A fixed-width icon slot: `Color.clear` reserves the width
+    /// even when `content` is empty, so the record button's
+    /// leading edge holds its x across unbound/bound/conflict
+    /// states instead of the varying cluster width letting the
+    /// row's `Spacer` push it (#264). The glyph draws in an
+    /// overlay above the reserved base.
+    private func iconSlot<Content: View>(
+        @ViewBuilder _ content: () -> Content
+    ) -> some View {
+        Color.clear
+            .frame(width: Self.iconSlotWidth)
+            .overlay { content() }
+    }
+
+    private var conflictBadge: some View {
+        iconSlot {
+            if let conflict {
+                Image(
+                    systemName: "exclamationmark.triangle.fill"
+                )
+                .foregroundStyle(.orange)
+                .help(conflict)
+            }
+        }
+    }
+
+    private var clearButton: some View {
+        iconSlot {
+            if !combo.isEmpty && !recording {
+                Button(action: onClear) {
+                    Image(systemName: "xmark.circle.fill")
+                }
+                .buttonStyle(.borderless)
+                .foregroundStyle(.secondary)
+                .hoverHighlight(cornerRadius: 4, padding: 2)
+            }
+        }
     }
 
     /// Extracted from `body` — the full modifier chain in one
