@@ -1,4 +1,6 @@
 {
+  "app.already_running.message": "Another KiwiDesk instance is already managing your windows, so this one will quit.",
+  "app.already_running.title": "KiwiDesk Is Already Running",
   "app_bar.active_indicator.edge_mark": "Edge mark",
   "app_bar.active_indicator.gap": "Gap",
   "app_bar.active_indicator.label": "Active indicator",

@@ -61,6 +61,14 @@ Security › Accessibility. Once granted, you may also be asked to
 enable "Displays have separate Spaces" for proper multi-monitor
 support — this is optional but recommended.
 
+KiwiDesk runs as a single instance. Launching it while a copy is
+already running never starts a second manager (two instances
+would fight over your windows and hotkeys): the launch brings
+the running instance forward and quits, or — when the running
+copy can't be surfaced, such as a development binary — shows a
+brief "already running" notice instead. A crashed instance never
+blocks the next launch; the lock dies with the process.
+
 ### The Status Bar Quick Menu
 
 KiwiDesk runs a lightweight menu bar helper for daily controls. Clicking
