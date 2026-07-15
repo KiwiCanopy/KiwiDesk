@@ -8,7 +8,7 @@ import Foundation
 /// `set_gap_override` -> `gap.override`, `bsp.set_ratio` ->
 /// `layout.bsp.ratio`. Profile files and `init.lua` share one
 /// vocabulary (see AGENTS.md §5).
-public struct TilingSettings: Sendable, Equatable, Codable {
+public struct TilingSettings: Sendable, Equatable {
     public var gapsGlobal = Gaps()
     /// `gap.override[space_id]` beats the global gaps.
     public var gapsOverride: [SpaceID: Gaps] = [:]

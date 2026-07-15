@@ -51,11 +51,28 @@ public final class SingleInstanceLock {
             withIntermediateDirectories: true
         )
         let fd = open(path, O_CREAT | O_RDWR, 0o644)
-        guard fd >= 0 else { return true }
+        guard fd >= 0 else {
+            // Pre-KiwiCore bootstrap: no logger exists yet,
+            // stderr keeps the degradation diagnosable.
+            fputs(
+                "KiwiDesk: instance lock unopenable at "
+                    + "\(path) — proceeding unlocked\n",
+                stderr
+            )
+            return true
+        }
         guard flock(fd, LOCK_EX | LOCK_NB) == 0 else {
             // Only real contention reads as "already
             // running"; any other flock failure fails open.
             let contended = errno == EWOULDBLOCK
+            if !contended {
+                fputs(
+                    "KiwiDesk: instance lock flock failed "
+                        + "(errno \(errno)) — proceeding "
+                        + "unlocked\n",
+                    stderr
+                )
+            }
             close(fd)
             return !contended
         }

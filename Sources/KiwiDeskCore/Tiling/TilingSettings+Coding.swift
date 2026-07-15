@@ -5,7 +5,12 @@ import Foundation
 /// struct definition for the 350-line file ceiling. JSON
 /// naming mirrors the Lua API (one vocabulary, AGENTS.md
 /// §5); `SettingsCodingTests` pins the shape.
-extension TilingSettings {
+///
+/// The conformance is declared here, with its implementation:
+/// declared on the struct, a gutted extension would let the
+/// compiler silently synthesize camelCase/flat coding — this
+/// way it is a compile error instead.
+extension TilingSettings: Codable {
     // MARK: - Codable
 
     private enum CodingKeys: String, CodingKey {
