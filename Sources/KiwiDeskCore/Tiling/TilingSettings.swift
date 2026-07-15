@@ -47,13 +47,20 @@ public struct TilingSettings: Sendable, Equatable {
     /// layout's own spawn placement (like the gap override).
     public var placementOverride: [SpaceID: SpawnPlacement] =
         [:]
+    /// Focus-window border look (#278): the ring painted around
+    /// the focused window (and, when enabled, unfocused ones).
+    /// A pure post-layout overlay — never feeds back into layout.
+    public var borderStyle = BorderStyle()
     /// Drag visuals (see DragOverlay): the dragged window's
     /// own slot (ghost) and the swap target slot (drop zone).
     public var dragGhost = DragVisual.ghostDefault
     public var dragDropZone = DragVisual.dropZoneDefault
-    /// Corner rounding of both visuals — tune it to match
-    /// the window corners of the running macOS release.
-    public var dragCornerRadius: CGFloat = 16
+    /// Corner rounding of both visuals — defaults to the shared
+    /// system window radius (one source with the focus border,
+    /// see `GeometryUtils.systemWindowCornerRadius`), still
+    /// tunable per profile to match the running macOS release.
+    public var dragCornerRadius = GeometryUtils
+        .systemWindowCornerRadius
     /// Per-trigger animation toggles (`animations.*`).
     public var animations = AnimationSettings()
     /// What resizing a tiled window with the mouse does.

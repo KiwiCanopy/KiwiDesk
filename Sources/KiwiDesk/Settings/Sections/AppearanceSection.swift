@@ -13,6 +13,7 @@ struct AppearanceSection: View {
             VStack(alignment: .leading, spacing: 20) {
                 GapsEditor(model: model)
                 DragVisualsEditor(model: model)
+                FocusBorderEditor(model: model)
             }
             .padding(16)
         }

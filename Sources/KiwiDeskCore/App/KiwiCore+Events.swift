@@ -96,6 +96,11 @@ extension KiwiCore {
             // pan would steal focus back.
             pendingFocusRaise = nil
             emitFocusChange(id)
+            // Move the focus ring to the newly focused window.
+            // Static layouts don't retile on focus (below), so
+            // this is the only refresh they get; focus-driven
+            // layouts retile and refresh again (cheap, idempotent).
+            updateBorders()
             // Warp only for focus changes KiwiDesk did not
             // make itself (cmd+tab, app-driven focus): a
             // self-raise already warped at intent time in

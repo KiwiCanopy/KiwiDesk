@@ -37,12 +37,20 @@ public final class TilingEngine {
         nil
     }
 
+    /// Tee off every applied frame (AX coords), fired per
+    /// animation tick and on instant applies. Wired to the focus
+    /// border overlays (`KiwiCore.borders.follow`) so a ring stays
+    /// glued to its window mid-flight; a no-op by default.
+    public var onFrameApplied: @MainActor (WindowID, CGRect) -> Void =
+        { _, _ in }
+
     public init() {
         applier.elementProvider = { [weak self] id in
             self?.elementProvider(id)
         }
-        animation.apply = { [applier] id, frame, setSize in
+        animation.apply = { [weak self, applier] id, frame, setSize in
             applier.apply(id, frame, setSize: setSize)
+            self?.onFrameApplied(id, frame)
         }
         animation.onAnimationStart = { [applier] id in
             applier.beginAnimating(id)
