@@ -8,7 +8,9 @@ import CoreGraphics
 /// a case here plus its own pure target function in the
 /// `QuitGridLayout` pattern — `WindowGather.targets` switches
 /// over this enum. `grid` is the only accepted value today.
-public enum QuitLayoutStyle: String, Codable, Sendable {
+public enum QuitLayoutStyle: String, Codable, Sendable,
+    CaseIterable
+{
     case grid
 }
 
@@ -77,9 +79,34 @@ public enum QuitGridLayout {
                     for: bucket,
                     in: region,
                     minSize: minSize
-                )
+                ).mapValues {
+                    pinned($0, in: axFrame, minSize: minSize)
+                }
             ) { current, _ in current }
         }
         return result
+    }
+
+    /// Pins a cascaded frame's origin so at least `minSize`
+    /// of the window stays inside `axFrame`. Deep piles in
+    /// bottom-row cells (up to `maxDepth × offset` of
+    /// cascade) and minSize-floored cells on tiny displays
+    /// would otherwise push title bars off-screen —
+    /// unrecoverable once no manager is alive.
+    private static func pinned(
+        _ frame: CGRect,
+        in axFrame: CGRect,
+        minSize: CGFloat
+    ) -> CGRect {
+        var frame = frame
+        frame.origin.x = max(
+            axFrame.minX,
+            min(frame.origin.x, axFrame.maxX - minSize)
+        )
+        frame.origin.y = max(
+            axFrame.minY,
+            min(frame.origin.y, axFrame.maxY - minSize)
+        )
+        return frame
     }
 }

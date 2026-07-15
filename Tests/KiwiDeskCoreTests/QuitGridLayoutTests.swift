@@ -129,6 +129,25 @@ struct QuitGridFramesTests {
         #expect(f1.minX == 640)
     }
 
+    @Test("deep bottom-row piles stay pinned on screen")
+    func bottomRowPilesPinned() {
+        // 160 windows → 4×4 with 10-deep piles; unpinned,
+        // bottom-row cascades would run 360 pt past a
+        // 264-pt cell and off the display.
+        let frames = QuitGridLayout.frames(
+            for: ids(0..<160),
+            in: axFrame,
+            minSize: minSize
+        )
+        #expect(frames.count == 160)
+        for frame in frames.values {
+            #expect(frame.minX >= axFrame.minX)
+            #expect(frame.minY >= axFrame.minY)
+            #expect(frame.minX <= axFrame.maxX - minSize)
+            #expect(frame.minY <= axFrame.maxY - minSize)
+        }
+    }
+
     @Test("tiny cells are floored at minSize")
     func minSizeFloor() throws {
         let small = CGRect(x: 0, y: 0, width: 400, height: 400)

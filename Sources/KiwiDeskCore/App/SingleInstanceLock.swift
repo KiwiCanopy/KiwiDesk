@@ -31,9 +31,17 @@ public final class SingleInstanceLock {
             ).path
     }
 
-    /// Take the lock without blocking. Returns `false` when
-    /// another live process (or another open descriptor in
-    /// this one) already holds it.
+    /// Take the lock without blocking. Returns `false` only
+    /// when another live process (or another open descriptor
+    /// in this one) already holds it.
+    ///
+    /// I/O failures **fail open** (return `true`): an
+    /// unopenable lock file is not a second instance, and
+    /// blocking every future launch on a permissions oddity
+    /// would be strictly worse than the pre-lock status quo.
+    /// `flock` contends per inode, so deleting the config
+    /// directory while an instance runs lets a second one
+    /// acquire a fresh inode — self-inflicted, accepted.
     public func acquire() -> Bool {
         guard descriptor < 0 else { return true }
         let directory = (path as NSString)
@@ -43,10 +51,13 @@ public final class SingleInstanceLock {
             withIntermediateDirectories: true
         )
         let fd = open(path, O_CREAT | O_RDWR, 0o644)
-        guard fd >= 0 else { return false }
+        guard fd >= 0 else { return true }
         guard flock(fd, LOCK_EX | LOCK_NB) == 0 else {
+            // Only real contention reads as "already
+            // running"; any other flock failure fails open.
+            let contended = errno == EWOULDBLOCK
             close(fd)
-            return false
+            return !contended
         }
         descriptor = fd
         return true

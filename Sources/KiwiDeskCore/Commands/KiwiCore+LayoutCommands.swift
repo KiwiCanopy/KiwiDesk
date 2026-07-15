@@ -36,8 +36,6 @@ extension KiwiCore {
             response = dragCommand(command, args)
         } else if command.hasPrefix("mouse.") {
             response = mouseCommand(command, args)
-        } else if command.hasPrefix("quit.") {
-            response = quitCommand(command, args)
         } else {
             response = settingsCommand(command, args)
         }

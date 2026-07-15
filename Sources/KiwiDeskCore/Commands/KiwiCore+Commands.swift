@@ -92,6 +92,13 @@ extension KiwiCore {
             return profileCommand(command, args)
         case "bind_profile_to_native_space":
             return bindProfileToNativeSpace(args)
+        case let quit where quit.hasPrefix("quit."):
+            // A teardown-only setting: dispatched here (not
+            // via layoutCommand's forced-retile trailer)
+            // because it is read only when the app stops — a
+            // live retile would be a pure no-op. Same policy
+            // as `track.swap` above.
+            return quitCommand(command, args)
         default:
             return layoutCommand(command, args)
         }

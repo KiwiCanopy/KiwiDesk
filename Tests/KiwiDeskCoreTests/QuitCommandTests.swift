@@ -1,0 +1,67 @@
+import Foundation
+import Testing
+
+@testable import KiwiDeskCore
+
+@MainActor
+private func makeCore() -> KiwiCore {
+    let directory = FileManager.default.temporaryDirectory
+        .appendingPathComponent(
+            "kiwidesk-quit-cmd-\(UUID().uuidString)"
+        )
+    return KiwiCore(configDirectory: directory)
+}
+
+/// The `quit.set_layout` dispatch seam (#197): storage,
+/// validation, and the unknown-command fallthrough. The grid
+/// math itself is pinned in `QuitGridLayoutTests`.
+@Suite("Quit layout command (#197)")
+@MainActor
+struct QuitCommandTests {
+    @Test("quit.set_layout stores a valid style")
+    func storesValidStyle() {
+        let core = makeCore()
+        #expect(core.tiler.settings.quitLayout == .grid)
+        #expect(
+            core.execute(
+                "quit.set_layout",
+                args: [.string("grid")]
+            ).isSuccess
+        )
+        #expect(core.tiler.settings.quitLayout == .grid)
+    }
+
+    @Test("an unknown style fails and lists accepted values")
+    func rejectsUnknownStyle() {
+        let core = makeCore()
+        let response = core.execute(
+            "quit.set_layout",
+            args: [.string("stagger")]
+        )
+        #expect(!response.isSuccess)
+        #expect(response.error == "expected grid")
+        #expect(core.tiler.settings.quitLayout == .grid)
+    }
+
+    @Test("a missing argument fails")
+    func rejectsMissingArgument() {
+        let core = makeCore()
+        #expect(
+            !core.execute(
+                "quit.set_layout",
+                args: []
+            ).isSuccess
+        )
+    }
+
+    @Test("an unknown quit.* command fails")
+    func rejectsUnknownCommand() {
+        let core = makeCore()
+        #expect(
+            !core.execute(
+                "quit.set_something",
+                args: [.string("grid")]
+            ).isSuccess
+        )
+    }
+}

@@ -45,6 +45,17 @@ struct SingleInstanceLockTests {
         second.release()
     }
 
+    @Test("An unopenable lock path fails open, not closed")
+    func failsOpenOnIOError() {
+        // /dev/null is not a directory: createDirectory and
+        // open both fail. That is an I/O oddity, not a rival
+        // instance — the launch must proceed.
+        let lock = SingleInstanceLock(
+            path: "/dev/null/nope/KiwiDesk.lock"
+        )
+        #expect(lock.acquire())
+    }
+
     @Test("Re-acquiring an already-held lock is a no-op")
     func reacquireIsIdempotent() {
         let path = tempLockPath()

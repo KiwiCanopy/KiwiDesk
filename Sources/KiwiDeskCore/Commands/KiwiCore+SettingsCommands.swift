@@ -178,7 +178,8 @@ extension KiwiCore {
 
     /// `quit.*` teardown placement (#197). Persists in
     /// `settings.quitLayout`; read only when the app stops
-    /// (`gatherWindows`), so nothing retiles live.
+    /// (`gatherWindows`), so the outer dispatcher routes it
+    /// past layoutCommand's forced-retile trailer.
     func quitCommand(
         _ command: String,
         _ args: [JSONValue]
@@ -189,7 +190,10 @@ extension KiwiCore {
                 let raw = args.first?.stringValue,
                 let style = QuitLayoutStyle(rawValue: raw)
             else {
-                return .fail("expected grid")
+                let expected = QuitLayoutStyle.allCases
+                    .map(\.rawValue)
+                    .joined(separator: "|")
+                return .fail("expected \(expected)")
             }
             tiler.settings.quitLayout = style
         default:
