@@ -206,6 +206,7 @@ changes it for **every** profile:
 - **Keyboard shortcuts** (the base set)
 - **App rules** (app → space assignment)
 - **Float rules** (apps that never tile)
+- **Ignore rules** (apps KiwiDesk never AX-tracks or manages)
 - **Native Space → profile bindings**
 
 **Per-profile settings** live in the profile's own JSON; editing
@@ -761,9 +762,10 @@ never tile — **All windows** floats every window of the app, or
 fragment you add.
 
 Dialogs, sheets, and picture-in-picture windows float automatically —
-you do not need a rule for them. Standard Settings windows from
-menu-bar/accessory apps such as Tailscale are also tracked floating,
-not ignored or tiled.
+you do not need a rule for them. Windows belonging to apps that remain
+accessory processes are also tracked floating. If an app promotes
+itself to a regular process, its standard windows follow the normal
+float-or-tile rules.
 
 ### Ignore Rules (Power Users)
 

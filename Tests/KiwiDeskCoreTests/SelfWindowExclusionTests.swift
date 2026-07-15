@@ -6,7 +6,7 @@ import Testing
 
 /// Issue #177: Settings is a tracked float; KiwiDesk's panels,
 /// overlays, and border windows remain fully ignored. Accessory
-/// apps with real windows (including Tailscale) are observable.
+/// apps are observed before their first real window appears.
 @Suite("Own-window and accessory-app classification (#177)")
 struct SelfWindowExclusionTests {
     @Test("The current process is recognized as self")
@@ -38,41 +38,41 @@ struct SelfWindowExclusionTests {
         )
     }
 
-    @Test("Accessory apps attach after a standard window appears")
+    @Test("Windowless accessory apps attach before a window appears")
     func accessoryAttachment() {
         #expect(
             EventLoop.shouldAttach(
                 pid: 1,
                 activationPolicy: .regular,
-                hasStandardWindow: false
-            )
-        )
-        #expect(
-            !EventLoop.shouldAttach(
-                pid: 1,
-                activationPolicy: .accessory,
-                hasStandardWindow: false
+                isIgnored: false
             )
         )
         #expect(
             EventLoop.shouldAttach(
                 pid: 1,
                 activationPolicy: .accessory,
-                hasStandardWindow: true
+                isIgnored: false
             )
         )
         #expect(
             !EventLoop.shouldAttach(
                 pid: 1,
                 activationPolicy: .prohibited,
-                hasStandardWindow: true
+                isIgnored: false
             )
         )
         #expect(
             EventLoop.shouldAttach(
                 pid: getpid(),
-                activationPolicy: .accessory,
-                hasStandardWindow: false
+                activationPolicy: .prohibited,
+                isIgnored: false
+            )
+        )
+        #expect(
+            !EventLoop.shouldAttach(
+                pid: 1,
+                activationPolicy: .regular,
+                isIgnored: true
             )
         )
     }

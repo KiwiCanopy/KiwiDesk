@@ -70,7 +70,7 @@ extension EventLoop {
     }
 
     private func appLaunched(_ app: NSRunningApplication) {
-        attach(app: app)
+        syncObservation(for: app)
         onEvent(
             .appLaunched(
                 pid: app.processIdentifier,
@@ -81,13 +81,7 @@ extension EventLoop {
 
     private func appTerminated(_ app: NSRunningApplication) {
         let pid = app.processIdentifier
-        observers[pid]?.invalidate()
-        observers[pid] = nil
-        for id in elements[pid, default: [:]].keys {
-            detectedFloating[id] = nil
-            onEvent(.windowDestroyed(id, wasMinimized: false))
-        }
-        elements[pid] = nil
+        detach(pid: pid, disableEnhancedUI: false)
         onEvent(.appTerminated(pid: pid))
     }
 
@@ -96,10 +90,7 @@ extension EventLoop {
     /// app switch, reconcile the app we just left.
     private func appActivated(_ app: NSRunningApplication) {
         let pid = app.processIdentifier
-        // Retry accessory apps when activated: menu-bar apps
-        // such as Tailscale may expose their first standard
-        // window long after launch (#177).
-        attach(app: app)
+        syncObservation(for: app)
         if let previous = lastActivePid, previous != pid {
             reconcile(pid: previous, app: AppRef(pid: previous))
         }
@@ -149,42 +140,14 @@ extension EventLoop {
     /// trees, and slow responders (Electron/WebKit, see
     /// AGENTS.md) list windows late or mis-report subroles.
     public func reconcileAll() {
-        for pid in observers.keys {
+        // Rules can detach an already-observed app or make a
+        // formerly ignored app observable. Synchronize that
+        // app-level boundary without reading ignored AX trees.
+        for app in NSWorkspace.shared.runningApplications {
+            syncObservation(for: app)
+        }
+        for pid in Array(observers.keys) {
             reconcile(pid: pid, app: AppRef(pid: pid))
-        }
-    }
-
-    /// Attaches to a regular app, or an accessory app once it
-    /// exposes a standard window.
-    func attach(app: NSRunningApplication) {
-        let pid = app.processIdentifier
-        guard observers[pid] == nil else { return }
-        let windows = AXHelper.windows(pid: pid)
-        let hasStandardWindow = windows.contains {
-            AXHelper.role(of: $0) == kAXWindowRole
-                && AXHelper.subrole(of: $0)
-                    == kAXStandardWindowSubrole
-        }
-        guard
-            Self.shouldAttach(
-                pid: pid,
-                activationPolicy: app.activationPolicy,
-                hasStandardWindow: hasStandardWindow
-            )
-        else { return }
-        guard let observer = AXApplicationObserver(pid: pid)
-        else { return }
-
-        let ref = AppRef(app)
-        observer.onNotification = { [weak self] note, element in
-            self?.handle(note, element, pid: pid, app: ref)
-        }
-        observers[pid] = observer
-        // Keep Electron/WebKit AX trees warm (see AGENTS.md).
-        AXHelper.setEnhancedUserInterface(pid: pid, enabled: true)
-
-        for element in windows {
-            track(element, pid: pid, app: ref)
         }
     }
 

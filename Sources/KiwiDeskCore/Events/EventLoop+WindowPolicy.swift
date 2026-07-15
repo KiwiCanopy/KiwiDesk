@@ -8,23 +8,23 @@ extension EventLoop {
         pid == getpid()
     }
 
-    /// Accessory apps are observed once they expose a normal app
-    /// window. This covers menu-bar apps such as Tailscale without
-    /// attaching to every windowless agent at startup (#177).
+    /// Regular and accessory apps are observed from launch.
+    /// Accessory observation must begin while the app is still
+    /// windowless: its first standard window may appear without a
+    /// later activation notification (#177).
     nonisolated static func shouldAttach(
         pid: pid_t,
         activationPolicy: NSApplication.ActivationPolicy,
-        hasStandardWindow: Bool
+        isIgnored: Bool
     ) -> Bool {
+        guard !isIgnored else { return false }
         // Observe self before Settings exists, so its eventual
         // AXWindowCreated notification cannot depend on an app-
         // activation notification being delivered.
         if isOwnProcess(pid) { return true }
         return switch activationPolicy {
-        case .regular:
+        case .regular, .accessory:
             true
-        case .accessory:
-            hasStandardWindow
         case .prohibited:
             false
         @unknown default:

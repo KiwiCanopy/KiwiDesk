@@ -44,6 +44,9 @@ public final class EventLoop {
 
     var observers: [pid_t: AXApplicationObserver] = [:]
     var elements: [pid_t: [WindowID: AXUIElement]] = [:]
+    /// Apps for which this loop enabled AXEnhancedUserInterface.
+    /// Kept separately so an ignore-rule transition can undo it.
+    var enhancedUIPids: Set<pid_t> = []
     /// Last float-detection verdict per tracked window, so
     /// reconcile can re-check and emit only actual changes
     /// (manual make_floating overrides stay untouched).
@@ -91,6 +94,7 @@ public final class EventLoop {
         }
         observers = [:]
         elements = [:]
+        enhancedUIPids = []
         detectedFloating = [:]
         ignorePending = []
     }
@@ -170,6 +174,10 @@ public final class EventLoop {
     /// without it, closed windows keep occupying layout slots.
     func reconcile(pid: pid_t, app: AppRef) {
         guard observers[pid] != nil else { return }
+        guard !ignoreRules.matches(bundleID: app.bundleID) else {
+            detach(pid: pid, disableEnhancedUI: true)
+            return
+        }
         // One window-server snapshot for the whole pass; only
         // apps with an ignore rule need layers at all.
         let layers =

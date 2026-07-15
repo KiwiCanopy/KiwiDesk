@@ -2026,9 +2026,10 @@ while launching corrects itself the same way. A manual
 `make_floating` override is never reverted by these re-checks.
 
 Panels and overlays that live above the normal window layer also
-float automatically, no rule needed. Standard windows exposed by
-accessory/menu-bar apps (for example Tailscale Settings) are tracked
-but forced floating; utility UI never joins a tiled layout.
+float automatically, no rule needed. Windows belonging to apps that
+remain accessory processes are tracked but forced floating. If an app
+promotes itself to a regular process, its standard windows follow the
+normal float-or-tile rules.
 
 **Ghostty's quick terminal** is not managed at all — no space
 assignment, no window events. KiwiDesk simply pretends it does not
