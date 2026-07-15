@@ -17,12 +17,13 @@ public struct MonocleParams: Sendable, Equatable, AppBarHosting {
 
     public var orientation: Orientation = .horizontal
     /// Whether the focus cycle wraps past the ends (#168). Unlike
-    /// scrolling/track (linear, default off), monocle is a
-    /// carousel that has always wrapped, so this defaults **on** —
-    /// turn it off to make focus stop at the first/last window.
-    /// `swap` never wraps, matching the other array-order layouts.
-    /// Per-layout, like the scrolling/track wrap toggles.
-    public var wrapFocus = true
+    /// Whether moving focus past the last window wraps to the
+    /// first (and the reverse). Defaults **off**, matching the
+    /// other array-order layouts (scrolling/track) — one default
+    /// across all three. Turn it on for carousel-style cycling.
+    /// `swap` never wraps. Per-layout, like the scrolling/track
+    /// wrap toggles.
+    public var wrapFocus = false
     /// Where a new window lands in the flat array — and, since
     /// monocle shows one window at a time, where it sits in the
     /// focus cycle. `.first` by default: a new window comes to

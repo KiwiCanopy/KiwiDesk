@@ -38,14 +38,13 @@ struct MonocleEditor: View {
                 ]
             )
             Divider()
-            // Monocle is a carousel, so this defaults on (unlike
-            // the linear scrolling/track wrap). Off = focus stops
-            // at the first/last window. Reuses the shared
-            // "Wrap focus" string.
+            // Off by default, same as scrolling/track (#257) —
+            // one wrap default across the array-order layouts, so
+            // it reuses the shared "Wrap focus" string and help.
             ToggleRow(
                 label: L("scroll_grid.wrap_focus", "Wrap focus"),
                 isOn: $model.config.settings.monocle.wrapFocus,
-                help: LayoutHelp.wrapFocusMonocle
+                help: LayoutHelp.wrapFocus
             )
             Divider()
             PlacementPicker(
