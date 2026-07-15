@@ -781,6 +781,11 @@ root `ignore_rules` array in `gui.json`. The list is global and is
 preserved when Settings saves other fields. See
 [ignore_rules](lua-reference.md#ignore_rules) for examples.
 
+KiwiDesk already ignores transient macOS input-source menus and
+switcher overlays, so the Globe-key language picker receives no
+virtual-space assignment or KiwiDesk focus border. Its blue selection
+highlight is drawn by macOS and remains visible.
+
 ### Per-Profile Space Assignments
 
 Space assignments are global by default, but each profile can

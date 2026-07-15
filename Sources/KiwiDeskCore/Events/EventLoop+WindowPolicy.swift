@@ -51,6 +51,16 @@ extension EventLoop {
         )
     }
 
+    /// App-wide hard gate shared by attachment, queued AX
+    /// callbacks, and reconcile. Built-in system overlays use
+    /// the same no-observer path as user `ignore_rules`.
+    func shouldIgnoreApp(bundleID: String?) -> Bool {
+        ignoreRules.matches(bundleID: bundleID)
+            || FloatDetection.isBuiltInIgnoredApp(
+                bundleID: bundleID
+            )
+    }
+
     /// KiwiDesk's normal Settings window can become a main app
     /// window. Its NSPanels cannot, giving one robust distinction
     /// for drag/drop, App Bar, and border overlays regardless of
@@ -81,7 +91,7 @@ extension EventLoop {
                 canBecomeMain: canBecomeMain
             )
         }
-        if ignoreRules.matches(bundleID: app.bundleID) {
+        if shouldIgnoreApp(bundleID: app.bundleID) {
             return true
         }
         guard let id = AXHelper.windowID(of: element) else {

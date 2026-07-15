@@ -284,6 +284,32 @@ struct FloatRuleTests {
         )
     }
 
+    @Test("macOS input-source overlays are never managed")
+    func systemInputOverlays() {
+        for bundleID in [
+            "com.apple.TextInputMenuAgent",
+            "com.apple.TextInputSwitcher",
+        ] {
+            #expect(
+                FloatDetection.isBuiltInIgnoredApp(
+                    bundleID: bundleID
+                )
+            )
+            #expect(
+                FloatDetection.shouldIgnore(
+                    bundleID: bundleID,
+                    layer: 0,
+                    rules: IgnoreRules()
+                )
+            )
+        }
+        #expect(
+            !FloatDetection.isBuiltInIgnoredApp(
+                bundleID: "com.apple.finder"
+            )
+        )
+    }
+
     @Test("Only structural events trigger a retile")
     func retileFilter() throws {
         #expect(

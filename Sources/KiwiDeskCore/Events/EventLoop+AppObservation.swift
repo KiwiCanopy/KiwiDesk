@@ -11,8 +11,8 @@ extension EventLoop {
     ) {
         let pid = app.processIdentifier
         let ref = AppRef(app)
-        guard !ignoreRules.matches(bundleID: ref.bundleID) else {
-            detach(pid: pid, disableEnhancedUI: true)
+        guard !shouldIgnoreApp(bundleID: ref.bundleID) else {
+            detach(pid: pid, restoreEnhancedUI: true)
             return
         }
         attach(app: app, ref: ref)
@@ -36,7 +36,7 @@ extension EventLoop {
             Self.shouldAttach(
                 pid: pid,
                 activationPolicy: app.activationPolicy,
-                isIgnored: ignoreRules.matches(
+                isIgnored: shouldIgnoreApp(
                     bundleID: ref.bundleID
                 )
             )
@@ -69,17 +69,25 @@ extension EventLoop {
     }
 
     func enableEnhancedUI(pid: pid_t) {
-        guard enhancedUIPids.insert(pid).inserted else { return }
+        guard enhancedUIBaselines[pid] == nil,
+            let baseline = AXHelper.getEnhancedUserInterface(
+                pid: pid
+            )
+        else { return }
+        enhancedUIBaselines[pid] = baseline
+        guard !baseline else { return }
         // Keep Electron/WebKit AX trees warm (see AGENTS.md).
         AXHelper.setEnhancedUserInterface(pid: pid, enabled: true)
     }
 
     func detach(
         pid: pid_t,
-        disableEnhancedUI: Bool
+        restoreEnhancedUI: Bool
     ) {
         observers.removeValue(forKey: pid)?.invalidate()
-        if enhancedUIPids.remove(pid) != nil, disableEnhancedUI {
+        if let baseline = enhancedUIBaselines.removeValue(
+            forKey: pid
+        ), restoreEnhancedUI, !baseline {
             AXHelper.setEnhancedUserInterface(
                 pid: pid,
                 enabled: false

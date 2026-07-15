@@ -26,7 +26,7 @@ extension EventLoop {
     ) {
         // A callback may already be queued when a reload adds an
         // app-wide ignore rule. It must not re-enter AX tracking.
-        guard !ignoreRules.matches(bundleID: app.bundleID) else {
+        guard !shouldIgnoreApp(bundleID: app.bundleID) else {
             return
         }
         switch note {

@@ -39,8 +39,22 @@ public enum FloatDetection {
         return list?.first?[kCGWindowLayer as String] as? Int
     }
 
-    /// Bundle id of the one hardcoded ignored app (see below).
     private static let ghosttyBundleID = "com.mitchellh.ghostty"
+
+    /// Transient macOS UI processes whose windows are overlays,
+    /// not user workspaces. Neither should enter state or receive
+    /// a KiwiDesk focus border (#177).
+    private static let ignoredSystemApps: Set<String> = [
+        "com.apple.textinputmenuagent",
+        "com.apple.textinputswitcher",
+    ]
+
+    public static func isBuiltInIgnoredApp(
+        bundleID: String?
+    ) -> Bool {
+        guard let bundleID else { return false }
+        return ignoredSystemApps.contains(bundleID.lowercased())
+    }
 
     /// Windows KiwiDesk must not manage at all — no tracking,
     /// state entry, space assignment, or events. User rules are
@@ -52,7 +66,9 @@ public enum FloatDetection {
         rules: IgnoreRules
     ) -> Bool {
         rules.matches(bundleID: bundleID)
-            || bundleID == ghosttyBundleID && layer != 0
+            || isBuiltInIgnoredApp(bundleID: bundleID)
+            || bundleID?.lowercased() == ghosttyBundleID
+                && layer != 0
     }
 
     /// Only Ghostty's built-in rule depends on CGWindow layer.
@@ -60,7 +76,7 @@ public enum FloatDetection {
     public static func requiresWindowLayers(
         bundleID: String?
     ) -> Bool {
-        bundleID == ghosttyBundleID
+        bundleID?.lowercased() == ghosttyBundleID
     }
 
     /// Window-id check for Ghostty's built-in ignored panel.

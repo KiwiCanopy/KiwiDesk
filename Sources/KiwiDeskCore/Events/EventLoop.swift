@@ -44,9 +44,10 @@ public final class EventLoop {
 
     var observers: [pid_t: AXApplicationObserver] = [:]
     var elements: [pid_t: [WindowID: AXUIElement]] = [:]
-    /// Apps for which this loop enabled AXEnhancedUserInterface.
-    /// Kept separately so an ignore-rule transition can undo it.
-    var enhancedUIPids: Set<pid_t> = []
+    /// AXEnhancedUserInterface state observed before this loop
+    /// changed it. An ignore transition or stop restores that
+    /// exact value instead of assuming KiwiDesk owned `true`.
+    var enhancedUIBaselines: [pid_t: Bool] = [:]
     /// Last float-detection verdict per tracked window, so
     /// reconcile can re-check and emit only actual changes
     /// (manual make_floating overrides stay untouched).
@@ -92,9 +93,16 @@ public final class EventLoop {
         for observer in observers.values {
             observer.invalidate()
         }
+        for (pid, baseline) in enhancedUIBaselines
+        where !baseline {
+            AXHelper.setEnhancedUserInterface(
+                pid: pid,
+                enabled: false
+            )
+        }
         observers = [:]
         elements = [:]
-        enhancedUIPids = []
+        enhancedUIBaselines = [:]
         detectedFloating = [:]
         ignorePending = []
     }
@@ -174,8 +182,8 @@ public final class EventLoop {
     /// without it, closed windows keep occupying layout slots.
     func reconcile(pid: pid_t, app: AppRef) {
         guard observers[pid] != nil else { return }
-        guard !ignoreRules.matches(bundleID: app.bundleID) else {
-            detach(pid: pid, disableEnhancedUI: true)
+        guard !shouldIgnoreApp(bundleID: app.bundleID) else {
+            detach(pid: pid, restoreEnhancedUI: true)
             return
         }
         // One window-server snapshot for the whole pass; only
@@ -214,7 +222,7 @@ public final class EventLoop {
                 // flickering window-server signal. Apply them
                 // immediately; the one-reading grace below is
                 // only for Ghostty's layer-scoped built-in.
-                if ignoreRules.matches(bundleID: app.bundleID) {
+                if shouldIgnoreApp(bundleID: app.bundleID) {
                     ignorePending.remove(id)
                     continue
                 }

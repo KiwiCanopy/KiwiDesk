@@ -81,7 +81,7 @@ extension EventLoop {
 
     private func appTerminated(_ app: NSRunningApplication) {
         let pid = app.processIdentifier
-        detach(pid: pid, disableEnhancedUI: false)
+        detach(pid: pid, restoreEnhancedUI: false)
         onEvent(.appTerminated(pid: pid))
     }
 
@@ -95,6 +95,10 @@ extension EventLoop {
             reconcile(pid: previous, app: AppRef(pid: previous))
         }
         lastActivePid = pid
+        // Ignored and prohibited apps have no observer. Keep the
+        // cross-app bookkeeping above, but never query their AX
+        // tree merely because they became active.
+        guard observers[pid] != nil else { return }
         // Mirror the focused-changed path: reconcile the
         // activated app first, so a window tracked late (cold
         // Electron tree, other native Space) is known before
