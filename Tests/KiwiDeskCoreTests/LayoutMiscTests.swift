@@ -141,13 +141,24 @@ struct FloatRuleTests {
     @Test("Bundle id match is case-insensitive")
     func caseInsensitive() throws {
         // Rules ingest and store lower-cased; a query in any
-        // case still matches (LaunchServices semantics).
+        // case still matches (LaunchServices semantics) — the
+        // matcher normalizes both the stored rule and the query.
         let rules = FloatRules(["com.apple.Calculator"])
         #expect(
             rules.matches(
                 bundleID: "com.apple.calculator",
                 title: "X"
             )
+        )
+        #expect(
+            rules.matches(
+                bundleID: "com.apple.CALCULATOR",
+                title: "X"
+            )
+        )
+        #expect(
+            rules.hasTitleRule(bundleID: "COM.APPLE.CALCULATOR")
+                == false
         )
     }
 

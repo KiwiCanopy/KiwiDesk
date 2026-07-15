@@ -38,7 +38,14 @@ public struct FloatRules: Sendable, Equatable {
     /// fragment — the cheap gate before re-running float
     /// detection on a title change (#160).
     public func hasTitleRule(bundleID: String?) -> Bool {
-        guard let bundleID else { return false }
+        // Normalize the query too, not just the stored rule:
+        // the rule side is lower-cased on ingest, and matching
+        // its case-insensitivity here keeps a caller that hands
+        // over a raw `NSRunningApplication.bundleIdentifier`
+        // from silently missing.
+        guard let bundleID = bundleID?.lowercased() else {
+            return false
+        }
         return rules.contains {
             $0.app == bundleID && $0.title != nil
         }
@@ -48,7 +55,9 @@ public struct FloatRules: Sendable, Equatable {
         bundleID: String?,
         title: String
     ) -> Bool {
-        guard let bundleID else { return false }
+        guard let bundleID = bundleID?.lowercased() else {
+            return false
+        }
         return rules.contains { rule in
             guard rule.app == bundleID else { return false }
             guard let fragment = rule.title else { return true }
