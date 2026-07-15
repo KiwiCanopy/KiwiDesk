@@ -154,6 +154,28 @@ struct QuitGridFramesTests {
         }
     }
 
+    @Test("piles fit their cell: no spill into the row below")
+    func cascadeStaysInsideCell() throws {
+        // 8 windows, 2×2, 2 per cell. Quit keeps the stale
+        // z-order, so an upper-row pile spilling into row 2
+        // would bury a bottom-row header whenever the spiller
+        // happens to be in front. The pile's windows shrink
+        // instead: the deepest one ends at its cell's bottom
+        // edge.
+        let frames = QuitGridLayout.frames(
+            for: ids(0..<8),
+            in: axFrame,
+            minSize: minSize,
+            frontToBack: [:]
+        )
+        // Window 4 = cell 0's second (deepest) pile entry.
+        let f4 = try #require(frames[WindowID(4)])
+        #expect(f4.maxY <= 552.5)
+        // Bottom-row cell tops stay uncovered.
+        let f2 = try #require(frames[WindowID(2)])
+        #expect(f2.minY == 552.5)
+    }
+
     @Test("pile slots follow z-order: frontmost lands deepest")
     func pileFollowsZOrder() throws {
         // 5 windows on 2×2: cell 0 holds windows 0 and 4.

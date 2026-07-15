@@ -11,15 +11,31 @@ public enum OverlapStack {
     public static let offset: CGFloat = 40
 
     /// Cascades `windows` inside `region`.
+    ///
+    /// `fitToRegion` shrinks each window's height (floored at
+    /// `minSize`) so the whole cascade tries to end at the
+    /// region's bottom edge. The quit grid's cross-row guard
+    /// (#197): its piles keep whatever z-order remains after
+    /// exit, so a pile spilling into the cell row below would
+    /// bury unrelated title bars there. Live piles keep the
+    /// full-region size — their z-order is actively managed
+    /// (`KiwiCore+ZOrder`), so the spill is harmless and the
+    /// bigger windows are worth it.
     public static func frames(
         for windows: some Collection<WindowID>,
         in region: CGRect,
-        minSize: CGFloat
+        minSize: CGFloat,
+        fitToRegion: Bool = false
     ) -> [WindowID: CGRect] {
         var result: [WindowID: CGRect] = [:]
+        let cascade =
+            CGFloat(max(windows.count - 1, 0)) * offset
+        let fullHeight = max(region.height, minSize)
         let size = CGSize(
             width: max(region.width, minSize),
-            height: max(region.height, minSize)
+            height: fitToRegion
+                ? max(fullHeight - cascade, minSize)
+                : fullHeight
         )
         for (index, window) in windows.enumerated() {
             result[window] = CGRect(

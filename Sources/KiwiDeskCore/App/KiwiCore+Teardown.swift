@@ -33,20 +33,30 @@ public enum WindowGather {
     /// Space windows, add an explicit native-Space filter here
     /// (cf. `eventLoop.isListed`) or this will silently move
     /// background-Space windows.
-    public static func targets(
+    /// One display's gather group: every eligible window on
+    /// it, in space-iteration order, plus its AX-flipped
+    /// visible frame.
+    public struct Group {
+        public let display: DisplayID
+        public let axFrame: CGRect
+        public let windows: [WindowID]
+    }
+
+    /// The state walk, separated from the placement math so
+    /// the quit path can log exactly what it grouped: every
+    /// display with at least one eligible window, each with
+    /// its full per-display window list (grid dimension
+    /// depends on that total — spaces on one display MUST
+    /// merge into one group, never grid separately).
+    public static func collect(
         state: StateCoordinator,
-        primaryHeight: CGFloat,
-        style: QuitLayoutStyle,
-        minSize: CGFloat,
-        frontToBack: [WindowID: Int]
-    ) -> [WindowID: CGRect] {
+        primaryHeight: CGFloat
+    ) -> [Group] {
         let displays = state.workspaces.allDisplays
-        guard !displays.isEmpty else { return [:] }
+        guard !displays.isEmpty else { return [] }
         // Lowest raw ID → deterministic fallback on multi-
         // monitor; Array(dict.values) order is not stable.
         let fallback = displays.min { $0.id.raw < $1.id.raw }!
-        // Collect per display first: the grid dimension
-        // depends on each display's total window count.
         var order: [DisplayID] = []
         var gathered: [DisplayID: [WindowID]] = [:]
         var axFrames: [DisplayID: CGRect] = [:]
@@ -73,18 +83,37 @@ public enum WindowGather {
                     .append(windowID)
             }
         }
-        var result: [WindowID: CGRect] = [:]
-        for displayID in order {
+        return order.compactMap { id in
             guard
-                let windows = gathered[displayID],
-                let axFrame = axFrames[displayID]
-            else { continue }
+                let windows = gathered[id],
+                let axFrame = axFrames[id]
+            else { return nil }
+            return Group(
+                display: id,
+                axFrame: axFrame,
+                windows: windows
+            )
+        }
+    }
+
+    public static func targets(
+        state: StateCoordinator,
+        primaryHeight: CGFloat,
+        style: QuitLayoutStyle,
+        minSize: CGFloat,
+        frontToBack: [WindowID: Int]
+    ) -> [WindowID: CGRect] {
+        var result: [WindowID: CGRect] = [:]
+        for group in collect(
+            state: state,
+            primaryHeight: primaryHeight
+        ) {
             switch style {
             case .grid:
                 result.merge(
                     QuitGridLayout.frames(
-                        for: windows,
-                        in: axFrame,
+                        for: group.windows,
+                        in: group.axFrame,
                         minSize: minSize,
                         frontToBack: frontToBack
                     )
@@ -143,6 +172,22 @@ extension KiwiCore {
     func gatherWindows() {
         guard eventLoop.isRunning else { return }
         let primaryH = GeometryUtils.primaryHeight
+        // Diagnostic trail for the one-shot placement: a
+        // wrong grid shape at quit is unreproducible after
+        // the fact, so log what was grouped where.
+        let groups = WindowGather.collect(
+            state: state,
+            primaryHeight: primaryH
+        )
+        onLog(
+            "gatherWindows: \(groups.count) display group(s): "
+                + groups.map {
+                    "display \($0.display.raw) → "
+                        + "\($0.windows.count) window(s) in "
+                        + "\(Int($0.axFrame.width))×"
+                        + "\(Int($0.axFrame.height))"
+                }.joined(separator: "; ")
+        )
         let frames = WindowGather.targets(
             state: state,
             primaryHeight: primaryH,
@@ -176,7 +221,13 @@ extension KiwiCore {
             }
             guard
                 let element = eventLoop.element(for: id)
-            else { continue }
+            else {
+                onLog(
+                    "gatherWindows: no AX element for window "
+                        + "\(id.raw) — left in place"
+                )
+                continue
+            }
             // Mirror applyInstant's EUI bracket: EUI-on apps
             // self-animate frame changes (Electron/WebKit) and
             // can clamp or swallow the set — drop it for the

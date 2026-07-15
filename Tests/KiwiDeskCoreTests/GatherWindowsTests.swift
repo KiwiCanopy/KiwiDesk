@@ -175,6 +175,54 @@ struct GatherTargetsTests {
         #expect(frame.maxX <= axVisible.maxX)
     }
 
+    @Test("collect merges all of a display's spaces: 6+2 = one 8")
+    func collectMergesSpacesPerDisplay() throws {
+        // The 3-3-1-1 regression shape: 6 windows on one
+        // virtual space and 2 on another, same display, must
+        // form ONE group of 8 (→ 2-2-2-2 round-robin), never
+        // two separately-gridded batches.
+        var state = makeState()
+        state.workspaces.assign(SpaceID(2), to: DisplayID(1))
+        for id in UInt32(1)...6 {
+            addWindow(&state, id: id)
+        }
+        for id in UInt32(7)...8 {
+            let w = ManagedWindow(
+                id: WindowID(id),
+                pid: 99,
+                appName: "App",
+                title: "",
+                frame: CGRect(
+                    x: 0,
+                    y: 0,
+                    width: 800,
+                    height: 600
+                )
+            )
+            state.apply(.windowCreated(w))
+            state.workspaces.add(WindowID(id), to: SpaceID(2))
+        }
+        let groups = WindowGather.collect(
+            state: state,
+            primaryHeight: primaryH
+        )
+        #expect(groups.count == 1)
+        let group = try #require(groups.first)
+        #expect(group.windows.count == 8)
+        // And the grid over it fills every cell twice.
+        let frames = targets(state)
+        var counts: [String: Int] = [:]
+        for frame in frames.values {
+            // Bucket by cell column/row, ignoring cascade
+            // offsets within the cell.
+            let col = Int(frame.minX / 960)
+            let row = Int((frame.minY - 25) / 527.5)
+            counts["\(col),\(row)", default: 0] += 1
+        }
+        #expect(counts.values.allSatisfy { $0 == 2 })
+        #expect(counts.count == 4)
+    }
+
     @Test("windows across spaces share one display-wide grid")
     func spacesShareTheDisplayGrid() throws {
         var state = makeState()

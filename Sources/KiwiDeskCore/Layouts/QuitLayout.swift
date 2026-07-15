@@ -99,7 +99,8 @@ public enum QuitGridLayout {
                 OverlapStack.frames(
                     for: pile,
                     in: region,
-                    minSize: minSize
+                    minSize: minSize,
+                    fitToRegion: true
                 ).mapValues {
                     pinned($0, in: axFrame, minSize: minSize)
                 }
