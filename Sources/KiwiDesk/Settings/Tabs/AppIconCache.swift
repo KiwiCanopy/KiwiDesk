@@ -69,19 +69,21 @@ final class AppIconCache {
         )
     }
 
-    /// A fresh image drawn at row size — a full-resolution app
-    /// icon is many megabytes of reps we never show that big.
+    /// A row-size image over the full-resolution icon — the
+    /// icon carries megabytes of reps we never show that big.
+    /// The drawing handler redraws at whatever backing scale the
+    /// display asks for, so the icon stays crisp on Retina (a
+    /// `lockFocus` bitmap would bake one environment-fixed rep).
     private static func downsized(_ image: NSImage) -> NSImage {
         let target = NSSize(width: side, height: side)
-        let out = NSImage(size: target)
-        out.lockFocus()
-        image.draw(
-            in: NSRect(origin: .zero, size: target),
-            from: .zero,
-            operation: .copy,
-            fraction: 1
-        )
-        out.unlockFocus()
-        return out
+        return NSImage(size: target, flipped: false) { rect in
+            image.draw(
+                in: rect,
+                from: .zero,
+                operation: .copy,
+                fraction: 1
+            )
+            return true
+        }
     }
 }

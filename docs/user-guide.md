@@ -661,10 +661,11 @@ windows of specific apps land and whether they tile.
 
 ### App Launch Assignment
 
-Click **+** to add a rule. Choose an app from the list — it shows
-installed apps by name and remembers each app by its bundle
-identifier, so a rule keeps working across system-language changes
-and app renames — then pick a space. New windows of that app will
+Click **+** to add a rule. Choose an app from the list — start
+typing to filter it by name, and each app shows its icon. Apps are
+remembered by their bundle identifier, so a rule keeps working
+across system-language changes and app renames — then pick a
+space. New windows of that app will
 open in the chosen space. For an app that isn't installed right
 now, use **Custom…** and enter its bundle identifier by hand (see
 [Finding a bundle identifier](lua-reference.md#finding-a-bundle-identifier)).

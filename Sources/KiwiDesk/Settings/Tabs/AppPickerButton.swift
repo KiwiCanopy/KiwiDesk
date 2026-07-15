@@ -47,6 +47,7 @@ struct AppPickerButton: View {
             }
             .frame(minWidth: minWidth, alignment: .leading)
         }
+        .buttonStyle(.bordered)
         .controlSize(.large)
         .onAppear {
             if apps.isEmpty {
@@ -85,7 +86,11 @@ struct AppPickerButton: View {
     private var escapeRow: some View {
         Button {
             showing = false
-            onEscape()
+            // Let SwiftUI process the dismiss before the escape
+            // action runs — `Other…` opens a modal `NSOpenPanel`
+            // that would otherwise block with the popover still
+            // on screen.
+            DispatchQueue.main.async { onEscape() }
         } label: {
             HStack(spacing: 8) {
                 Image(systemName: "ellipsis.circle")
