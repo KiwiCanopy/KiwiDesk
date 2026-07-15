@@ -162,11 +162,14 @@ struct AppPickerButton: View {
 }
 
 /// The picker's substring filter, split out pure so it is unit
-/// testable without the view. Case-insensitive on the localized
-/// name OR the bundle id — the latter keeps an app findable by
-/// its English/habitual name (typing "preview" matches
-/// `com.apple.preview` even when it's shown localized as
-/// "Vorschau"). An empty (or whitespace) query keeps every app.
+/// testable without the view. Case- and diacritic-insensitive
+/// (`localizedStandardContains`, the app's one search-matching
+/// vocabulary — shared with the sidebar search) on the
+/// localized name OR the bundle id — the latter keeps an app
+/// findable by its English/habitual name (typing "preview"
+/// matches `com.apple.preview` even when it's shown localized
+/// as "Vorschau"). An empty (or whitespace) query keeps every
+/// app.
 enum AppPickerFilter {
     static func matching(
         _ apps: [KeybindingCatalog.InstalledApp],
@@ -175,8 +178,8 @@ enum AppPickerFilter {
         let query = query.trimmed
         guard !query.isEmpty else { return apps }
         return apps.filter {
-            $0.name.localizedCaseInsensitiveContains(query)
-                || $0.bundleID.localizedCaseInsensitiveContains(
+            $0.name.localizedStandardContains(query)
+                || $0.bundleID.localizedStandardContains(
                     query
                 )
         }
