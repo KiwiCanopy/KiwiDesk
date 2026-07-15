@@ -63,10 +63,11 @@ support — this is optional but recommended.
 
 KiwiDesk runs as a single instance. Launching it while a copy is
 already running never starts a second manager (two instances
-would fight over your windows and hotkeys): the launch brings
-the running instance forward and quits, or — when the running
-copy can't be surfaced, such as a development binary — shows a
-brief "already running" notice instead. A crashed instance never
+would fight over your windows and hotkeys): the second launch
+brings the running instance forward and exits with a non-zero
+status, printing `already running` to the terminal. When a
+Finder-launched copy can't surface the running instance, a brief
+notice dialog explains the exit instead. A crashed instance never
 blocks the next launch; the lock dies with the process.
 
 ### The Status Bar Quick Menu
