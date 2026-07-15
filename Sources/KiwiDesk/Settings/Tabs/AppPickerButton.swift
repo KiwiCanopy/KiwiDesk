@@ -47,11 +47,16 @@ struct AppPickerButton: View {
         .controlSize(.large)
         .onAppear {
             AppIconCache.shared.warm()
-            // Build the app snapshot (a one-time Spotlight scan
-            // of ~150–300 apps) off the main thread so the first
-            // open finds it ready instead of paying ~160 ms then.
+            // Warm the heavy part — the one-time Spotlight scan of
+            // ~150–300 disk apps — off the main thread, so the
+            // first open mostly finds it ready. Only the disk scan
+            // moves off-main: it touches no AppKit (FileManager /
+            // Bundle / NSMetadataItem only). The running-app union
+            // in `installedAppsSnapshot` still reads
+            // `NSWorkspace` on the main thread at first open, but
+            // that part is cheap.
             Task.detached {
-                _ = KeybindingCatalog.installedAppsSnapshot
+                _ = KeybindingCatalog.diskAppIconPaths
             }
         }
         .popover(isPresented: $showing) { popover }

@@ -136,8 +136,8 @@ extension KeybindingCatalog {
     /// The localized display name for a bundle id, for showing
     /// a stored rule or binding whose identity is the id. Routed
     /// through the same `localizedName` resolver as the picker,
-    /// so the two surfaces never disagree for one id. Falls back
-    /// to the id itself when the app isn't installed.
+    /// so the two surfaces agree for any installed app. Falls
+    /// back to the id itself when the app isn't installed.
     static func displayName(forBundleID id: String) -> String {
         let id = id.lowercased()
         if let url = NSWorkspace.shared.urlForApplication(
