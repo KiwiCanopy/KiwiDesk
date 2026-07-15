@@ -7,6 +7,15 @@ import SwiftUI
 /// thumbnails — so the association gets learned. The glyph is
 /// never the only signifier; it always accompanies the label.
 extension LayoutMode {
+    /// The placement layouts in the order the Layout Defaults
+    /// pane taught them (#204) — not `allCases` order, and
+    /// without Floating. The one home for that curated list:
+    /// the tab strip renders it and the sidebar search indexes
+    /// it, so the two can't drift (review of #90).
+    static let placementTabs: [LayoutMode] = [
+        .bsp, .stack, .scrolling, .grid, .monocle, .track,
+    ]
+
     var glyph: String {
         switch self {
         case .bsp:

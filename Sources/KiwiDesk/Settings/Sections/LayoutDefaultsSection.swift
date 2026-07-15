@@ -19,12 +19,10 @@ struct LayoutDefaultsSection: View {
     @State private var selected: LayoutMode = .bsp
     @State private var didAutoSelect = false
 
-    /// Tab order (#204): the placement layouts in the order the
-    /// pane taught them, not `allCases` order, and without
-    /// Floating.
-    private let modes: [LayoutMode] = [
-        .bsp, .stack, .scrolling, .grid, .monocle, .track,
-    ]
+    /// Tab order (#204) lives on `LayoutMode.placementTabs` —
+    /// the sidebar search index renders the same list, so the
+    /// curated order has exactly one home.
+    private let modes = LayoutMode.placementTabs
 
     var body: some View {
         ScrollView {

@@ -26,6 +26,19 @@ profile is loaded and letting you edit a saved profile without
 switching to it. At the bottom, a stable three-slot footer holds
 Revert, Save a Copy As…, and Save.
 
+### Sidebar Search
+
+A search field sits at the top of the sidebar, under the app
+name. Typing filters the sidebar to the sections that match —
+by section name or by any of the titled groups inside a section
+(searching "gaps" finds Appearance, "focus" finds Shortcuts).
+When the match is a group inside the section, the result row
+names it in a smaller line under the section name, so you know
+where to look after clicking; for the per-layout editors under
+Layout it names the layout tab to open. Clicking a result opens
+that section. The query stays put while you navigate — press
+Escape or the clear button to get the full sidebar back.
+
 ### Contextual Help (?)
 
 Some rows carry a small circled question mark right after
