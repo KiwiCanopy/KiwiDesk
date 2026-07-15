@@ -1,10 +1,13 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// An app chooser: a dropdown of installed apps plus a "Custom…"
-/// option that reveals a free text field (for apps not in
-/// /Applications, or `App:Title` float patterns).
+/// An app chooser: a dropdown of installed apps (identified by
+/// bundle id, shown by localized name) plus a "Custom…" option
+/// that reveals a free text field for a bundle id an app that
+/// isn't installed right now would use.
 struct AppSelector: View {
+    /// The bundle identifier of the chosen app — the stored
+    /// identity (see `AppRef`), not the display name.
     @Binding var name: String
     @State private var custom = false
 
@@ -12,7 +15,10 @@ struct AppSelector: View {
         if custom {
             HStack(spacing: 4) {
                 TextField(
-                    L("app_selector.app_name", "App name"),
+                    L(
+                        "app_selector.bundle_id",
+                        "Bundle identifier"
+                    ),
                     text: $name
                 )
                 .textFieldStyle(.roundedBorder)
@@ -28,10 +34,9 @@ struct AppSelector: View {
         } else {
             Menu {
                 ForEach(
-                    KeybindingCatalog.installedApps,
-                    id: \.self
+                    KeybindingCatalog.installedApps
                 ) { app in
-                    Button(app) { name = app }
+                    Button(app.name) { name = app.bundleID }
                 }
                 Divider()
                 Button(L("app_selector.custom", "Custom…")) {
@@ -42,7 +47,9 @@ struct AppSelector: View {
                 menuLabel(
                     name.isEmpty
                         ? L("shortcuts.choose_app", "Choose app…")
-                        : name
+                        : KeybindingCatalog.displayName(
+                            forBundleID: name
+                        )
                 )
                 .frame(minWidth: 150, alignment: .leading)
             }

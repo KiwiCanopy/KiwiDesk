@@ -62,8 +62,8 @@ struct StructuredConfigTests {
     func structuredRulesNoBlock() throws {
         let core = makeGuiCore()
         var config = GuiConfig()
-        config.appRules = ["Spotify": SpaceID("music")]
-        config.floatRules = ["Calculator"]
+        config.appRules = ["spotify": SpaceID("music")]
+        config.floatRules = ["com.apple.calculator"]
         // Write gui.json; init.lua stays empty (hooks-only).
         try core.saveGuiConfig(config)
         try writeInitLua("", core: core)
@@ -71,11 +71,11 @@ struct StructuredConfigTests {
         core.loadConfig()
 
         #expect(
-            core.state.appRules["Spotify"] == SpaceID("music")
+            core.state.appRules["spotify"] == SpaceID("music")
         )
         #expect(
             core.eventLoop.floatRules.rawRules
-                == ["Calculator"]
+                == ["com.apple.calculator"]
         )
     }
 
@@ -148,20 +148,20 @@ struct StructuredConfigTests {
         // A core with no gui.json is not GUI-managed.
         let core = makeCore()
         var config = GuiConfig()
-        config.appRules = ["Xcode": SpaceID("code")]
+        config.appRules = ["xcode": SpaceID("code")]
         // Write ONLY init.lua (no gui.json sidecar).
         try writeInitLua("app_rules = {}", core: core)
         // Manually set state to check it isn't overwritten.
         core.state.appRules = [
-            "ShouldSurvive": SpaceID("1")
+            "shouldsurvive": SpaceID("1")
         ]
         core.applyStructuredConfig()
         // Structured loader must be a no-op — state unchanged.
         #expect(
-            core.state.appRules["ShouldSurvive"]
+            core.state.appRules["shouldsurvive"]
                 == SpaceID("1")
         )
-        #expect(core.state.appRules["Xcode"] == nil)
+        #expect(core.state.appRules["xcode"] == nil)
     }
 
     // MARK: - Stale managed block (O6)

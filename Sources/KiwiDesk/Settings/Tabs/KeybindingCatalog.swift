@@ -288,48 +288,4 @@ enum KeybindingCatalog {
             return mode
         }
     }
-
-    /// The Open-Applications action that pulls or launches `name`.
-    /// Paired with `appName(from:)`, its exact inverse.
-    static func appCommand(_ name: String) -> String {
-        "KiwiDesk.pull_or_spawn(\"\(name)\")"
-    }
-
-    /// The app name inside `appCommand`'s output, or nil when
-    /// `lua` isn't exactly that call — the inverse used by import
-    /// classification. An embedded quote means escaped content the
-    /// app menu never authors, so such Lua stays unmatched.
-    static func appName(from lua: String) -> String? {
-        let prefix = "KiwiDesk.pull_or_spawn(\""
-        let suffix = "\")"
-        guard lua.hasPrefix(prefix), lua.hasSuffix(suffix),
-            lua.count > prefix.count + suffix.count
-        else { return nil }
-        let inner = lua.dropFirst(prefix.count)
-            .dropLast(suffix.count)
-        guard !inner.contains("\"") else { return nil }
-        return String(inner)
-    }
-
-    /// Installed application names, scanned once per launch.
-    static let installedApps: [String] = {
-        let manager = FileManager.default
-        let roots = [
-            "/Applications",
-            "/System/Applications",
-            manager.homeDirectoryForCurrentUser
-                .appendingPathComponent("Applications").path,
-        ]
-        var names: Set<String> = []
-        for root in roots {
-            let contents =
-                (try? manager.contentsOfDirectory(
-                    atPath: root
-                )) ?? []
-            for entry in contents where entry.hasSuffix(".app") {
-                names.insert(String(entry.dropLast(4)))
-            }
-        }
-        return names.sorted()
-    }()
 }

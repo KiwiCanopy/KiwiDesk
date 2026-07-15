@@ -34,7 +34,7 @@ extension KiwiCore {
                 // actually typing into (issue #21).
                 !FloatDetection.hasVisibleIgnoredPanel(
                     pid: window.pid,
-                    appName: window.appName
+                    bundleID: window.appBundleID
                 ),
                 let element = AXHelper.focusedWindow(
                     pid: window.pid
@@ -71,7 +71,7 @@ extension KiwiCore {
             let app = NSWorkspace.shared.frontmostApplication,
             !FloatDetection.hasVisibleIgnoredPanel(
                 pid: app.processIdentifier,
-                appName: app.localizedName ?? "?"
+                bundleID: AppRef(app).bundleID
             ),
             let element = AXHelper.focusedWindow(
                 pid: app.processIdentifier

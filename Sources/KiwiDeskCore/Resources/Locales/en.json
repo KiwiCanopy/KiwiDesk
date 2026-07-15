@@ -70,7 +70,7 @@
   "app_rules.space": "Space",
   "app_rules.title_contains": "Title contains…",
   "app_rules.titled.caption": "Windows whose title contains a pattern stay floating.",
-  "app_selector.app_name": "App name",
+  "app_selector.bundle_id": "Bundle identifier",
   "app_selector.custom": "Custom…",
   "behavior.animations.duration": "Duration",
   "behavior.animations.relayout": "Animate layout reflows",

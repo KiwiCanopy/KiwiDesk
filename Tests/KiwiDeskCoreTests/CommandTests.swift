@@ -150,7 +150,8 @@ struct CommandTests {
                 ManagedWindow(
                     id: WindowID(7),
                     pid: 1,
-                    appName: "Editor"
+                    appName: "Editor",
+                    appBundleID: "com.example.editor"
                 )
             )
         )
@@ -166,6 +167,15 @@ struct CommandTests {
             return
         }
         #expect(windows.count == 1)
+        // The bundle id is surfaced so a power user can read
+        // off the value app rules / pull_or_spawn take (#262).
+        guard case .object(let window)? = windows.first else {
+            Issue.record("expected window object")
+            return
+        }
+        #expect(
+            window["bundle_id"] == .string("com.example.editor")
+        )
     }
 
     @Test("Toggles reach space animation and wake-restore")
@@ -373,7 +383,7 @@ struct ConfigTests {
             KiwiDesk.set_gap_global(16)
             stack.set_master_count(3)
             float_rules = { "Calculator" }
-            app_rules = { ["Spotify"] = "music" }
+            app_rules = { ["spotify"] = "music" }
             KiwiDesk.on("layout_change", function(id, mode)
                 last_mode = mode
             end)
@@ -390,7 +400,7 @@ struct ConfigTests {
         )
         #expect(core.tiler.settings.stack.masterCount == 3)
         #expect(
-            core.state.appRules["Spotify"]
+            core.state.appRules["spotify"]
                 == SpaceID("music")
         )
 

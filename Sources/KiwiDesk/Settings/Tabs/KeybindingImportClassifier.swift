@@ -98,11 +98,13 @@ enum KeybindingImportClassifier {
         if let label = navigation[binding.lua] {
             binding.kind = .navigation
             binding.label = label
-        } else if let app = KeybindingCatalog.appName(
+        } else if let bundleID = KeybindingCatalog.appBundleID(
             from: binding.lua
         ) {
             binding.kind = .application
-            binding.label = app
+            binding.label = KeybindingCatalog.displayName(
+                forBundleID: bundleID
+            )
         }
         return nil
     }

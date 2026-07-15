@@ -112,6 +112,13 @@ extension KiwiCore {
             JSONValue.object([
                 "id": .number(Double(window.id.raw)),
                 "app": .string(window.appName),
+                // The bundle id is the value app rules
+                // (`float_rules`, `app_rules`) and
+                // `pull_or_spawn` take — surfaced here so a
+                // power user can read it straight off a window.
+                "bundle_id": window.appBundleID.map {
+                    .string($0)
+                } ?? .null,
                 "title": .string(window.title),
                 "floating": .bool(window.isFloating),
             ])

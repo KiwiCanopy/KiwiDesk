@@ -97,21 +97,14 @@ extension EventLoop {
     private func appActivated(_ app: NSRunningApplication) {
         let pid = app.processIdentifier
         if let previous = lastActivePid, previous != pid {
-            let name =
-                NSRunningApplication(
-                    processIdentifier: previous
-                )?.localizedName ?? "?"
-            reconcile(pid: previous, appName: name)
+            reconcile(pid: previous, app: AppRef(pid: previous))
         }
         lastActivePid = pid
         // Mirror the focused-changed path: reconcile the
         // activated app first, so a window tracked late (cold
         // Electron tree, other native Space) is known before
         // the managed-window guard below.
-        reconcile(
-            pid: pid,
-            appName: app.localizedName ?? "?"
-        )
+        reconcile(pid: pid, app: AppRef(app))
         // Clicking a window of another app only activates the
         // app: if that window was already its app's focused
         // window, no kAXFocusedWindowChanged fires. Report the
@@ -145,11 +138,7 @@ extension EventLoop {
     /// AGENTS.md) list windows late or mis-report subroles.
     public func reconcileAll() {
         for pid in observers.keys {
-            let name =
-                NSRunningApplication(
-                    processIdentifier: pid
-                )?.localizedName ?? "?"
-            reconcile(pid: pid, appName: name)
+            reconcile(pid: pid, app: AppRef(pid: pid))
         }
     }
 
@@ -170,16 +159,16 @@ extension EventLoop {
         guard let observer = AXApplicationObserver(pid: pid)
         else { return }
 
-        let name = app.localizedName ?? "?"
+        let ref = AppRef(app)
         observer.onNotification = { [weak self] note, element in
-            self?.handle(note, element, pid: pid, appName: name)
+            self?.handle(note, element, pid: pid, app: ref)
         }
         observers[pid] = observer
         // Keep Electron/WebKit AX trees warm (see AGENTS.md).
         AXHelper.setEnhancedUserInterface(pid: pid, enabled: true)
 
         for element in AXHelper.windows(pid: pid) {
-            track(element, pid: pid, appName: name)
+            track(element, pid: pid, app: ref)
         }
     }
 
@@ -190,6 +179,29 @@ extension EventLoop {
             screen.kiwiDisplay
         }
         onEvent(.displaysChanged(displays))
+    }
+}
+
+extension AppRef {
+    /// Captures identity + display name from a live app handle.
+    init(_ app: NSRunningApplication) {
+        self.init(
+            bundleID: app.bundleIdentifier,
+            name: app.localizedName ?? "?"
+        )
+    }
+
+    /// Re-derives identity from a pid alone (reconcile paths
+    /// that only hold the process id). An app that has since
+    /// exited yields a nil bundle id and a `"?"` name — so it
+    /// matches no rule, which is the correct outcome for a
+    /// process that is gone.
+    init(pid: pid_t) {
+        let app = NSRunningApplication(processIdentifier: pid)
+        self.init(
+            bundleID: app?.bundleIdentifier,
+            name: app?.localizedName ?? "?"
+        )
     }
 }
 

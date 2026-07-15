@@ -149,9 +149,8 @@ struct ApplicationsSection: View {
         _ binding: Binding<KeyBinding>
     ) -> some View {
         Menu {
-            ForEach(KeybindingCatalog.installedApps, id: \.self) {
-                name in
-                Button(name) { assign(binding, name: name) }
+            ForEach(KeybindingCatalog.installedApps) { app in
+                Button(app.name) { assign(binding, app: app) }
             }
             Divider()
             Button(L("shortcuts.other_ellipsis", "Other…")) {
@@ -178,11 +177,11 @@ struct ApplicationsSection: View {
 
     private func assign(
         _ binding: Binding<KeyBinding>,
-        name: String
+        app: KeybindingCatalog.InstalledApp
     ) {
-        binding.wrappedValue.label = name
+        binding.wrappedValue.label = app.name
         binding.wrappedValue.lua = KeybindingCatalog.appCommand(
-            name
+            app.bundleID
         )
     }
 
@@ -193,11 +192,19 @@ struct ApplicationsSection: View {
         panel.directoryURL = URL(
             fileURLWithPath: "/Applications"
         )
-        guard panel.runModal() == .OK, let url = panel.url
+        guard panel.runModal() == .OK, let url = panel.url,
+            let bundleID = Bundle(url: url)?
+                .bundleIdentifier?.lowercased()
         else { return }
-        let name = url.deletingPathExtension()
-            .lastPathComponent
-        assign(binding, name: name)
+        assign(
+            binding,
+            app: .init(
+                bundleID: bundleID,
+                name: KeybindingCatalog.displayName(
+                    forBundleID: bundleID
+                )
+            )
+        )
     }
 
     private func remove(_ id: UUID) {

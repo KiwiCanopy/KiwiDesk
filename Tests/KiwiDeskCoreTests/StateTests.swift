@@ -6,9 +6,15 @@ import Testing
 private func makeWindow(
     _ id: UInt32,
     pid: pid_t = 100,
-    app: String = "TestApp"
+    app: String = "TestApp",
+    bundleID: String? = nil
 ) -> ManagedWindow {
-    ManagedWindow(id: WindowID(id), pid: pid, appName: app)
+    ManagedWindow(
+        id: WindowID(id),
+        pid: pid,
+        appName: app,
+        appBundleID: bundleID
+    )
 }
 
 @Suite("WindowManager")
@@ -305,16 +311,61 @@ struct StateCoordinatorTests {
         )
     }
 
+    @Test("App rule routes a new window by bundle id")
+    func appRuleRoutesByBundleID() {
+        var state = StateCoordinator()
+        state.appRules = ["com.apple.mail": SpaceID("mail")]
+        state.apply(
+            .windowCreated(
+                makeWindow(1, bundleID: "com.apple.mail")
+            )
+        )
+        #expect(
+            state.workspaces.space(of: WindowID(1))
+                == SpaceID("mail")
+        )
+    }
+
+    @Test("App rule keys on bundle id, not display name")
+    func appRuleIgnoresDisplayName() {
+        var state = StateCoordinator()
+        // Rule keyed by bundle id. A window whose display name
+        // would have matched the old scheme but whose bundle id
+        // differs must NOT route — the whole point of the fix.
+        state.appRules = ["com.apple.mail": SpaceID("music")]
+        state.apply(
+            .windowCreated(
+                makeWindow(
+                    1,
+                    app: "Mail",
+                    bundleID: "com.example.other"
+                )
+            )
+        )
+        #expect(
+            state.workspaces.space(of: WindowID(1))
+                != SpaceID("music")
+        )
+    }
+
     @Test("Remembered space beats app rules")
     func rememberedBeatsAppRules() {
         var state = StateCoordinator()
-        state.appRules = ["TestApp": SpaceID("music")]
-        state.apply(.windowCreated(makeWindow(1)))
+        state.appRules = ["com.apple.mail": SpaceID("music")]
+        state.apply(
+            .windowCreated(
+                makeWindow(1, bundleID: "com.apple.mail")
+            )
+        )
         state.workspaces.add(WindowID(1), to: SpaceID("code"))
         state.apply(
             .windowDestroyed(WindowID(1), wasMinimized: false)
         )
-        state.apply(.windowCreated(makeWindow(1)))
+        state.apply(
+            .windowCreated(
+                makeWindow(1, bundleID: "com.apple.mail")
+            )
+        )
         #expect(
             state.workspaces.space(of: WindowID(1))
                 == SpaceID("code")

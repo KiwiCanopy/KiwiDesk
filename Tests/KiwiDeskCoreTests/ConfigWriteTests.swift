@@ -43,7 +43,7 @@ private func richConfig() -> GuiConfig {
     config.spaceModes = [
         SpaceID(1): .stack, SpaceID("music"): .floating,
     ]
-    config.appRules = ["Spotify": SpaceID("music")]
+    config.appRules = ["spotify": SpaceID("music")]
     config.floatRules = ["Calculator", "Finder:Get Info"]
     config.profileBindings = [2: "Studio"]
     config.modes = [
@@ -119,7 +119,7 @@ struct ConfigWriteTests {
             core.state.workspaces[SpaceID("music")]?.mode
                 == .floating
         )
-        #expect(core.state.appRules["Spotify"] == SpaceID("music"))
+        #expect(core.state.appRules["spotify"] == SpaceID("music"))
         #expect(core.nativeSpaceBindings[2] == "Studio")
         #expect(core.keys.icon(for: "resize") == "📐")
         let combo = KeyCombo.parse("alt+h")
@@ -150,7 +150,7 @@ struct ConfigWriteTests {
         let config = richConfig()
         try core.saveGuiConfig(config)
         core.applyProfileScopedState(from: config)
-        #expect(core.state.appRules["Spotify"] != nil)
+        #expect(core.state.appRules["spotify"] != nil)
         #expect(
             core.state.workspaces[SpaceID(1)]?.mode == .stack
         )

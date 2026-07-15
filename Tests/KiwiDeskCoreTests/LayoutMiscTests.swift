@@ -123,21 +123,67 @@ struct GapsGeometryTests {
 struct FloatRuleTests {
     @Test("App rule floats every window of the app")
     func appRule() throws {
-        let rules = FloatRules(["Calculator"])
-        #expect(rules.matches(app: "Calculator", title: "X"))
-        #expect(!rules.matches(app: "Finder", title: "X"))
+        let rules = FloatRules(["com.apple.calculator"])
+        #expect(
+            rules.matches(
+                bundleID: "com.apple.calculator",
+                title: "X"
+            )
+        )
+        #expect(
+            !rules.matches(
+                bundleID: "com.apple.finder",
+                title: "X"
+            )
+        )
+    }
+
+    @Test("Bundle id match is case-insensitive")
+    func caseInsensitive() throws {
+        // Rules ingest and store lower-cased; a query in any
+        // case still matches (LaunchServices semantics) — the
+        // matcher normalizes both the stored rule and the query.
+        let rules = FloatRules(["com.apple.Calculator"])
+        #expect(
+            rules.matches(
+                bundleID: "com.apple.calculator",
+                title: "X"
+            )
+        )
+        #expect(
+            rules.matches(
+                bundleID: "com.apple.CALCULATOR",
+                title: "X"
+            )
+        )
+        #expect(
+            rules.hasTitleRule(bundleID: "COM.APPLE.CALCULATOR")
+                == false
+        )
+    }
+
+    @Test("A nil bundle id matches no rule")
+    func nilBundleID() throws {
+        let rules = FloatRules(["com.apple.calculator"])
+        #expect(!rules.matches(bundleID: nil, title: "X"))
+        #expect(!rules.hasTitleRule(bundleID: nil))
     }
 
     @Test("App:Title rule needs the title fragment")
     func titleRule() throws {
-        let rules = FloatRules(["Finder:Get Info"])
+        let rules = FloatRules(["com.apple.finder:Get Info"])
         #expect(
             rules.matches(
-                app: "Finder",
+                bundleID: "com.apple.finder",
                 title: "Report.pdf Get Info"
             )
         )
-        #expect(!rules.matches(app: "Finder", title: "Desktop"))
+        #expect(
+            !rules.matches(
+                bundleID: "com.apple.finder",
+                title: "Desktop"
+            )
+        )
     }
 
     @Test("Non-standard subroles float by default")
@@ -187,14 +233,14 @@ struct FloatRuleTests {
         // The quick terminal: Ghostty + non-zero layer.
         #expect(
             FloatDetection.shouldIgnore(
-                appName: "Ghostty",
+                bundleID: "com.mitchellh.ghostty",
                 layer: 3
             )
         )
         // Ghostty's normal windows tile as usual.
         #expect(
             !FloatDetection.shouldIgnore(
-                appName: "Ghostty",
+                bundleID: "com.mitchellh.ghostty",
                 layer: 0
             )
         )
@@ -202,7 +248,7 @@ struct FloatRuleTests {
         // quick terminal is ignored outright (issue #21).
         #expect(
             !FloatDetection.shouldIgnore(
-                appName: "Finder",
+                bundleID: "com.apple.finder",
                 layer: 3
             )
         )

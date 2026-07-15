@@ -124,7 +124,7 @@ public final class EventLoop {
     func track(
         _ element: AXUIElement,
         pid: pid_t,
-        appName: String
+        app: AppRef
     ) {
         // Never manage KiwiDesk's own windows (#174) — the
         // universal funnel guard, backing the `attach` gate.
@@ -134,7 +134,7 @@ public final class EventLoop {
             var window = AXHelper.snapshot(
                 element: element,
                 pid: pid,
-                appName: appName
+                app: app
             )
         else { return }
         guard elements[pid]?[window.id] == nil else { return }
@@ -142,13 +142,13 @@ public final class EventLoop {
         // floating them still pins them to a space (issue #21).
         guard
             !FloatDetection.shouldIgnore(
-                appName: appName,
+                bundleID: app.bundleID,
                 id: window.id
             )
         else { return }
         window.isFloating = FloatDetection.shouldFloat(
             element: element,
-            appName: appName,
+            bundleID: app.bundleID,
             rules: floatRules
         )
         detectedFloating[window.id] = window.isFloating
@@ -162,12 +162,12 @@ public final class EventLoop {
     /// picks up windows we missed (e.g. deminiaturized).
     /// Safety net for macOS's unreliable AX notifications —
     /// without it, closed windows keep occupying layout slots.
-    func reconcile(pid: pid_t, appName: String) {
+    func reconcile(pid: pid_t, app: AppRef) {
         guard observers[pid] != nil else { return }
         // One window-server snapshot for the whole pass; only
         // apps with an ignore rule need layers at all.
         let layers =
-            FloatDetection.hasIgnoreRule(appName: appName)
+            FloatDetection.hasIgnoreRule(bundleID: app.bundleID)
             ? FloatDetection.windowLayers(pid: pid) : [:]
         var live: Set<WindowID> = []
         var minimized: Set<WindowID> = []
@@ -190,7 +190,7 @@ public final class EventLoop {
             // and untracking on a glitch leaks a spurious
             // destroy/create pair to subscribers.
             if FloatDetection.shouldIgnore(
-                appName: appName,
+                bundleID: app.bundleID,
                 layer: layers[id] ?? 0
             ) {
                 if elements[pid]?[id] != nil,
@@ -204,9 +204,9 @@ public final class EventLoop {
             ignorePending.remove(id)
             live.insert(id)
             if elements[pid]?[id] == nil {
-                track(element, pid: pid, appName: appName)
+                track(element, pid: pid, app: app)
             } else {
-                recheckFloat(element, id: id, appName: appName)
+                recheckFloat(element, id: id, app: app)
             }
         }
         for id in elements[pid, default: [:]].keys
@@ -232,11 +232,11 @@ public final class EventLoop {
     private func recheckFloat(
         _ element: AXUIElement,
         id: WindowID,
-        appName: String
+        app: AppRef
     ) {
         let floating = FloatDetection.shouldFloat(
             element: element,
-            appName: appName,
+            bundleID: app.bundleID,
             rules: floatRules
         )
         guard detectedFloating[id] != floating else { return }
@@ -261,11 +261,11 @@ public final class EventLoop {
         _ note: String,
         _ element: AXUIElement,
         pid: pid_t,
-        appName: String
+        app: AppRef
     ) {
         switch note {
         case kAXWindowCreatedNotification:
-            track(element, pid: pid, appName: appName)
+            track(element, pid: pid, app: app)
         case kAXUIElementDestroyedNotification,
             kAXWindowMiniaturizedNotification:
             if let id = windowID(of: element, pid: pid),
@@ -284,13 +284,13 @@ public final class EventLoop {
             // Destroyed elements often cannot be mapped back
             // (and some apps skip the notification entirely),
             // so always diff against the live window list.
-            reconcile(pid: pid, appName: appName)
+            reconcile(pid: pid, app: app)
         case kAXWindowDeminiaturizedNotification:
-            track(element, pid: pid, appName: appName)
+            track(element, pid: pid, app: app)
         case kAXFocusedWindowChangedNotification:
             // Closing a window nearly always moves focus;
             // reconciling here catches missed destroy events.
-            reconcile(pid: pid, appName: appName)
+            reconcile(pid: pid, app: app)
             guard let id = AXHelper.windowID(of: element) else {
                 return
             }
@@ -338,9 +338,9 @@ public final class EventLoop {
             // for this app so ordinary title churn (browsers,
             // terminals) never pays the window-server lookup.
             if elements[pid]?[id] != nil,
-                floatRules.hasTitleRule(app: appName)
+                floatRules.hasTitleRule(bundleID: app.bundleID)
             {
-                recheckFloat(element, id: id, appName: appName)
+                recheckFloat(element, id: id, app: app)
             }
         default:
             break
