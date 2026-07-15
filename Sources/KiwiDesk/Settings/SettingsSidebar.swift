@@ -16,27 +16,83 @@ struct SettingsSidebar: View {
     /// `destination.title`) only refresh when `selection` changes
     /// (a section switch), not on the language switch itself.
     @EnvironmentObject private var localization: LocalizationManager
+    /// The live search query (#90). Typing only filters the
+    /// list — `selection` changes on an explicit click alone —
+    /// and the query survives navigation, so a user can try a
+    /// hit, come back, and pick another (System Settings).
+    @State private var query = ""
 
     var body: some View {
         List(selection: $selection) {
-            Section(L("sidebar.section.design", "Design")) {
-                ForEach(SettingsDestination.thisProfile) {
-                    row($0)
-                }
-            }
-            Section(L("sidebar.section.system", "System")) {
-                ForEach(visibleWholeApp) { row($0) }
+            if query.trimmed.isEmpty {
+                groupedSections
+            } else {
+                searchResults
             }
         }
         .listStyle(.sidebar)
         .safeAreaInset(edge: .top, spacing: 0) {
-            appIdentity
+            VStack(spacing: 0) {
+                appIdentity
+                SidebarSearchField(text: $query)
+            }
         }
         .navigationSplitViewColumnWidth(
             min: 176,
             ideal: 190,
             max: 240
         )
+    }
+
+    @ViewBuilder private var groupedSections: some View {
+        Section(L("sidebar.section.design", "Design")) {
+            ForEach(SettingsDestination.thisProfile) {
+                row($0)
+            }
+        }
+        Section(L("sidebar.section.system", "System")) {
+            ForEach(visibleWholeApp) { row($0) }
+        }
+    }
+
+    /// The flat results list that replaces both groups while a
+    /// query is live (#90): once a query narrows the sidebar,
+    /// two mostly-empty scope headers are clutter. Rows stay
+    /// selectable through the same `List(selection:)` tags.
+    @ViewBuilder private var searchResults: some View {
+        let results = SidebarSearch.results(
+            query: query,
+            editingStoredProfile: editingStoredProfile
+        )
+        if results.isEmpty {
+            Text(
+                L("sidebar.search.no_results", "No results")
+            )
+            .font(.callout)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.vertical, 8)
+        } else {
+            ForEach(results) { resultRow($0) }
+        }
+    }
+
+    private func resultRow(
+        _ result: SidebarSearchResult
+    ) -> some View {
+        Label {
+            VStack(alignment: .leading, spacing: 1) {
+                Text(result.destination.title)
+                if let subsection = result.subsection {
+                    Text(subsection)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        } icon: {
+            SidebarTile(destination: result.destination)
+        }
+        .tag(result.destination)
     }
 
     /// App identity centered at the top of the sidebar (#68):
