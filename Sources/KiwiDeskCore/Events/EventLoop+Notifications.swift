@@ -1,0 +1,120 @@
+import AppKit
+import ApplicationServices
+
+/// Translates a raw AX notification into a typed `KiwiEvent`.
+/// Split from `EventLoop.swift` for file size (§2); the
+/// tracking/lifecycle plumbing it leans on stays there.
+extension EventLoop {
+    private func windowID(
+        of element: AXUIElement,
+        pid: pid_t
+    ) -> WindowID? {
+        if let id = AXHelper.windowID(of: element) {
+            return id
+        }
+        // Destroyed elements no longer answer queries; fall back
+        // to comparing against tracked elements.
+        return elements[pid, default: [:]]
+            .first { CFEqual($1, element) }?.key
+    }
+
+    func handle(
+        _ note: String,
+        _ element: AXUIElement,
+        pid: pid_t,
+        app: AppRef
+    ) {
+        switch note {
+        case kAXWindowCreatedNotification:
+            track(element, pid: pid, app: app)
+        case kAXUIElementDestroyedNotification,
+            kAXWindowMiniaturizedNotification:
+            if let id = windowID(of: element, pid: pid),
+                elements[pid]?[id] != nil
+            {
+                elements[pid]?[id] = nil
+                detectedFloating[id] = nil
+                onEvent(
+                    .windowDestroyed(
+                        id,
+                        wasMinimized: note
+                            == kAXWindowMiniaturizedNotification
+                    )
+                )
+            }
+            // Destroyed elements often cannot be mapped back
+            // (and some apps skip the notification entirely),
+            // so always diff against the live window list.
+            reconcile(pid: pid, app: app)
+        case kAXWindowDeminiaturizedNotification:
+            track(element, pid: pid, app: app)
+        case kAXFocusedWindowChangedNotification:
+            // Closing a window nearly always moves focus;
+            // reconciling here catches missed destroy events.
+            reconcile(pid: pid, app: app)
+            guard let id = AXHelper.windowID(of: element) else {
+                return
+            }
+            // Focus events carry only managed windows: the
+            // reconcile above just settled tracking, so an
+            // absent id is an ignored panel (issue #21) —
+            // reporting it would emit a focus_change with an
+            // empty app and retile focus-driven layouts. Surface
+            // the panel gaining focus so KiwiCore can distrust
+            // the app's stale focus report on dismiss (#244).
+            guard elements[pid]?[id] != nil else {
+                if FloatDetection.shouldIgnore(
+                    bundleID: app.bundleID,
+                    id: id
+                ) {
+                    onIgnoredPanelFocus(pid)
+                }
+                return
+            }
+            onEvent(.windowFocused(id))
+        case kAXWindowMovedNotification:
+            guard let id = AXHelper.windowID(of: element) else {
+                return
+            }
+            onEvent(
+                .windowMoved(
+                    id,
+                    AXHelper.frame(of: element)
+                )
+            )
+        case kAXWindowResizedNotification:
+            guard let id = AXHelper.windowID(of: element) else {
+                return
+            }
+            onEvent(
+                .windowResized(
+                    id,
+                    AXHelper.frame(of: element)
+                )
+            )
+        case kAXTitleChangedNotification:
+            guard let id = AXHelper.windowID(of: element) else {
+                return
+            }
+            onEvent(
+                .windowTitleChanged(
+                    id,
+                    AXHelper.title(of: element)
+                )
+            )
+            // Titles load lazily (Electron/WebKit, and any app
+            // mid-launch): a window tracked before its title
+            // arrives misses `App:Title` float rules forever
+            // without a recheck (#160). Gated on a titled rule
+            // for this app so ordinary title churn (browsers,
+            // terminals) never pays the window-server lookup.
+            if elements[pid]?[id] != nil,
+                floatRules.hasTitleRule(bundleID: app.bundleID)
+            {
+                recheckFloat(element, id: id, app: app)
+            }
+        default:
+            break
+        }
+    }
+}

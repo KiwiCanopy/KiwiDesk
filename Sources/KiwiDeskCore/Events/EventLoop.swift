@@ -12,6 +12,25 @@ import ApplicationServices
 public final class EventLoop {
     public var onEvent: @MainActor (KiwiEvent) -> Void = { _ in }
 
+    /// Fired when an app that has an ignore rule reports an
+    /// ignored panel (Ghostty's quick terminal) as its focused
+    /// window. No `.windowFocused` is emitted for the panel
+    /// itself (issue #21), but the panel being active is a
+    /// signal KiwiCore keeps: when the panel is dismissed the
+    /// app re-reports its managed main window as focused, and
+    /// that stale report must not follow focus to the main
+    /// window's space (issue #244). Carries the app's pid.
+    ///
+    /// Relies on AX reporting the panel *element* as focused at
+    /// least once while it is up (the untracked-window branch in
+    /// EventLoop+Notifications / EventLoop+Apps): that is when
+    /// the pid is flagged. Confirmed for Ghostty's quick
+    /// terminal by manual pass; a future ignored-panel app that
+    /// only ever re-reports its main window would not flag, and
+    /// the dismiss follow would return (the pre-fix behavior).
+    public var onIgnoredPanelFocus: @MainActor (pid_t) -> Void = { _ in
+    }
+
     /// User float rules from the Lua config (`float_rules`).
     /// Assigning does NOT resync `detectedFloating`: rules
     /// change hands inside loadConfig's reset→reassign
@@ -229,7 +248,9 @@ public final class EventLoop {
     /// the startup scan) and would otherwise stay misclassified
     /// until it closes. Only a changed detection verdict emits,
     /// so manual make_floating overrides survive reconciles.
-    private func recheckFloat(
+    // Internal (not private): also called by `handle` in
+    // EventLoop+Notifications.swift.
+    func recheckFloat(
         _ element: AXUIElement,
         id: WindowID,
         app: AppRef
@@ -244,106 +265,4 @@ public final class EventLoop {
         onEvent(.windowFloatChanged(id, isFloating: floating))
     }
 
-    private func windowID(
-        of element: AXUIElement,
-        pid: pid_t
-    ) -> WindowID? {
-        if let id = AXHelper.windowID(of: element) {
-            return id
-        }
-        // Destroyed elements no longer answer queries; fall back
-        // to comparing against tracked elements.
-        return elements[pid, default: [:]]
-            .first { CFEqual($1, element) }?.key
-    }
-
-    func handle(
-        _ note: String,
-        _ element: AXUIElement,
-        pid: pid_t,
-        app: AppRef
-    ) {
-        switch note {
-        case kAXWindowCreatedNotification:
-            track(element, pid: pid, app: app)
-        case kAXUIElementDestroyedNotification,
-            kAXWindowMiniaturizedNotification:
-            if let id = windowID(of: element, pid: pid),
-                elements[pid]?[id] != nil
-            {
-                elements[pid]?[id] = nil
-                detectedFloating[id] = nil
-                onEvent(
-                    .windowDestroyed(
-                        id,
-                        wasMinimized: note
-                            == kAXWindowMiniaturizedNotification
-                    )
-                )
-            }
-            // Destroyed elements often cannot be mapped back
-            // (and some apps skip the notification entirely),
-            // so always diff against the live window list.
-            reconcile(pid: pid, app: app)
-        case kAXWindowDeminiaturizedNotification:
-            track(element, pid: pid, app: app)
-        case kAXFocusedWindowChangedNotification:
-            // Closing a window nearly always moves focus;
-            // reconciling here catches missed destroy events.
-            reconcile(pid: pid, app: app)
-            guard let id = AXHelper.windowID(of: element) else {
-                return
-            }
-            // Focus events carry only managed windows: the
-            // reconcile above just settled tracking, so an
-            // absent id is an ignored panel (issue #21) —
-            // reporting it would emit a focus_change with an
-            // empty app and retile focus-driven layouts.
-            guard elements[pid]?[id] != nil else { return }
-            onEvent(.windowFocused(id))
-        case kAXWindowMovedNotification:
-            guard let id = AXHelper.windowID(of: element) else {
-                return
-            }
-            onEvent(
-                .windowMoved(
-                    id,
-                    AXHelper.frame(of: element)
-                )
-            )
-        case kAXWindowResizedNotification:
-            guard let id = AXHelper.windowID(of: element) else {
-                return
-            }
-            onEvent(
-                .windowResized(
-                    id,
-                    AXHelper.frame(of: element)
-                )
-            )
-        case kAXTitleChangedNotification:
-            guard let id = AXHelper.windowID(of: element) else {
-                return
-            }
-            onEvent(
-                .windowTitleChanged(
-                    id,
-                    AXHelper.title(of: element)
-                )
-            )
-            // Titles load lazily (Electron/WebKit, and any app
-            // mid-launch): a window tracked before its title
-            // arrives misses `App:Title` float rules forever
-            // without a recheck (#160). Gated on a titled rule
-            // for this app so ordinary title churn (browsers,
-            // terminals) never pays the window-server lookup.
-            if elements[pid]?[id] != nil,
-                floatRules.hasTitleRule(bundleID: app.bundleID)
-            {
-                recheckFloat(element, id: id, app: app)
-            }
-        default:
-            break
-        }
-    }
 }

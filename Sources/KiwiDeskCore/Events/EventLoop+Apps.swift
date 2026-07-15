@@ -110,13 +110,21 @@ extension EventLoop {
         // window, no kAXFocusedWindowChanged fires. Report the
         // cross-app focus change ourselves.
         if let element = AXHelper.focusedWindow(pid: pid),
-            let id = AXHelper.windowID(of: element),
+            let id = AXHelper.windowID(of: element)
+        {
             // Only managed windows: an ignored panel (issue
             // #21) or a not-yet-tracked window must not leak
-            // a focus event with no state behind it.
-            elements[pid]?[id] != nil
-        {
-            onEvent(.windowFocused(id))
+            // a focus event with no state behind it. Surface
+            // the ignored panel gaining focus, though, so the
+            // dismiss report can be distrusted later (#244).
+            if elements[pid]?[id] != nil {
+                onEvent(.windowFocused(id))
+            } else if FloatDetection.shouldIgnore(
+                bundleID: AppRef(app).bundleID,
+                id: id
+            ) {
+                onIgnoredPanelFocus(pid)
+            }
         }
     }
 
