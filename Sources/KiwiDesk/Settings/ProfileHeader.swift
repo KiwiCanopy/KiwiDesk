@@ -134,6 +134,25 @@ struct ProfileEditTargetMenu: View {
     @State private var switchTarget: String?
 
     var body: some View {
+        // The menu isn't an icon-only control, so its "why"
+        // rides a label-adjacent `?` popover (#94/#259), not a
+        // hover-only `.help()` a user finds by accident. One `?`
+        // in this shared header → subject omitted (#251). The
+        // live `statusText` caption still carries the dynamic
+        // per-target state beneath.
+        HStack(spacing: 4) {
+            menu
+            HelpButton(
+                explanation: L(
+                    "profile_header.menu.help",
+                    "Pick a saved profile to edit — editing it "
+                        + "won't switch your layout."
+                )
+            )
+        }
+    }
+
+    private var menu: some View {
         Menu {
             Button {
                 requestSelect(nil)
@@ -161,13 +180,6 @@ struct ProfileEditTargetMenu: View {
         }
         .menuStyle(.borderlessButton)
         .fixedSize()
-        .help(
-            L(
-                "profile_header.menu.help",
-                "Pick a saved profile to edit — editing it "
-                    + "won't switch your layout."
-            )
-        )
         .confirmationDialog(
             L(
                 "profile_header.discard.title",
