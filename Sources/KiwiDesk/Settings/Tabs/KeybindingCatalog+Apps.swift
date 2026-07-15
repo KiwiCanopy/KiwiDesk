@@ -41,38 +41,54 @@ extension KeybindingCatalog {
         var id: String { bundleID }
     }
 
-    /// Apps discoverable on disk under the standard roots,
-    /// scanned once. De-duplicated by bundle id (lower-cased,
+    /// The single disk scan under the standard roots, run once:
+    /// the app catalog plus each app's path for the icon cache
+    /// to warm from. De-duplicated by bundle id (lower-cased,
     /// matching the normalized `AppRef.bundleID`).
-    private static let diskApps: [InstalledApp] = {
-        let manager = FileManager.default
-        let roots = [
-            "/Applications",
-            "/System/Applications",
-            manager.homeDirectoryForCurrentUser
-                .appendingPathComponent("Applications").path,
-        ]
-        var byID: [String: InstalledApp] = [:]
-        for root in roots {
-            let contents =
-                (try? manager.contentsOfDirectory(
-                    atPath: root
-                )) ?? []
-            for entry in contents where entry.hasSuffix(".app") {
-                let path = "\(root)/\(entry)"
-                guard
-                    let id = Bundle(
-                        url: URL(fileURLWithPath: path)
-                    )?.bundleIdentifier?.lowercased()
-                else { continue }
-                byID[id] = InstalledApp(
-                    bundleID: id,
-                    name: appDisplayName(path: path)
-                )
+    private static let diskScan:
+        (apps: [InstalledApp], iconPaths: [String: String]) = {
+            let manager = FileManager.default
+            let roots = [
+                "/Applications",
+                "/System/Applications",
+                manager.homeDirectoryForCurrentUser
+                    .appendingPathComponent("Applications").path,
+            ]
+            var byID: [String: InstalledApp] = [:]
+            var paths: [String: String] = [:]
+            for root in roots {
+                let contents =
+                    (try? manager.contentsOfDirectory(
+                        atPath: root
+                    )) ?? []
+                for entry in contents
+                where entry.hasSuffix(".app") {
+                    let path = "\(root)/\(entry)"
+                    guard
+                        let id = Bundle(
+                            url: URL(fileURLWithPath: path)
+                        )?.bundleIdentifier?.lowercased()
+                    else { continue }
+                    byID[id] = InstalledApp(
+                        bundleID: id,
+                        name: appDisplayName(path: path)
+                    )
+                    paths[id] = path
+                }
             }
-        }
-        return Array(byID.values)
-    }()
+            return (Array(byID.values), paths)
+        }()
+
+    /// Apps discoverable on disk under the standard roots.
+    private static var diskApps: [InstalledApp] { diskScan.apps }
+
+    /// Bundle id → app path for every disk app, the seed the
+    /// icon cache warms from (running apps outside the scanned
+    /// roots resolve lazily on miss). Frozen for process life,
+    /// so the cache needs no invalidation.
+    static var diskAppIconPaths: [String: String] {
+        diskScan.iconPaths
+    }
 
     /// The picker list: disk apps unioned with currently
     /// running apps, sorted by display name. Running apps fill
