@@ -458,7 +458,7 @@
   "shortcuts.modes.caption": "Modes are alternate shortcut sets — only the active mode's shortcuts fire. Bind a key below to switch between them. “default” is the standard mode and is always the active one after the app starts.",
   "shortcuts.move_to_space": "Move to space",
   "shortcuts.move_to_track": "Move to track",
-  "shortcuts.move_to_track.caption": "(only relevant if you're using the track layout)",
+  "shortcuts.move_to_track.caption": "Only relevant if you're using the track layout.",
   "shortcuts.other_ellipsis": "Other…",
   "shortcuts.override.caption": "Dimmed rows are inherited from the base shortcuts and stay in sync with them. Edit a row to override it for this profile only; matching the base again makes it inherited again. Removing an inherited row only resets it — to disable a combo in this profile, rebind it to a no-op action instead.",
   "shortcuts.override.overrides": "This profile overrides base keybindings.",
