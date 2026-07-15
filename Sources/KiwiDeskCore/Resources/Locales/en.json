@@ -275,7 +275,6 @@
   "layout_params.split_strategy": "Split strategy",
   "layout_params.split_strategy.help": "**Longest side** — Cuts whichever side of the region is longer, keeping new windows close to square.\n**Alternating** — Alternates left/right and top/bottom cuts as the layout gets deeper, regardless of shape.",
   "layout_params.wrap_focus.help": "When on, moving focus past the last window wraps around to the first, and past the first back to the last, instead of stopping at the end.",
-  "layout_params.wrap_focus.monocle.help": "On by default: monocle is a carousel, so moving focus past the last window returns to the first (and the reverse). Turn it off to stop focus at the first and last window.",
   "lua_editor.adopt": "Adopt",
   "lua_editor.adopt.title": "Adopt this config into the visual editor?",
   "lua_editor.adopt_help.body": "Nothing is lost: your current code isn't deleted, it's kept as a commented-out backup in init.lua. Gaps, layouts, rules, and keybindings are imported; a shortcut that can't be read back stays in the backup — re-add it in the Shortcuts section.",

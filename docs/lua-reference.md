@@ -669,8 +669,7 @@ first, and vice versa). Default is `false` — focus stops at the
 ends, matching the physical-strip feel of the layout. Applies to
 `focus` only; `swap` never wraps (it would teleport a window
 across the whole row). Monocle has the same toggle
-(`monocle.set_wrap_focus`) but defaults it **on**, since it's a
-carousel.
+(`monocle.set_wrap_focus`), with the same **off** default.
 
 **Example:**
 
@@ -898,13 +897,13 @@ monocle.set_orientation_override("3", "vertical")
 
 ### monocle.set_wrap_focus
 
-**Expects:** `true` or `false` (default `true`).
+**Expects:** `true` or `false` (default `false`).
 
-**Does:** whether the focus cycle wraps past the ends. Monocle is
-a carousel, so this defaults **on** (unlike the linear scrolling
-and track wraps, which default off) — `focus` past the last window
-returns to the first, and vice versa. Turn it off to make focus
-stop at the first/last window. `swap` never wraps.
+**Does:** whether the focus cycle wraps past the ends. Defaults
+**off**, matching the scrolling and track wraps — the same default
+across all three array-order layouts. Turn it on and `focus` past
+the last window returns to the first, and vice versa; off, focus
+stops at the first/last window. `swap` never wraps.
 
 **Example:**
 

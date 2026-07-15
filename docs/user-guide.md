@@ -313,9 +313,9 @@ Adjust each mode's defaults:
   never wraps.
 - **Monocle**: orientation (affects which arrow keys cycle focus
   and where the app bar sits), wrap focus, and **New window**
-  placement. Monocle is a carousel, so wrap focus is **on** by
-  default — cycling past the last window returns to the first;
-  turn it off to stop at the ends. New window defaults to
+  placement. Wrap focus is **off** by default, the same as
+  scrolling and track — turn it on and cycling past the last
+  window returns to the first. New window defaults to
   **first**, so a new window comes to the front of the cycle
   rather than the back.
 - **Grid**: type (dynamic or rigid), fill empty space (yes/no),

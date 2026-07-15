@@ -865,9 +865,15 @@ struct MonocleCycleTests {
         return core
     }
 
-    @Test("focus cycles along the orientation axis and wraps")
+    @Test("focus cycles the orientation axis, wraps when on")
     func cycleAndWrap() {
         let core = makeMonocleCore()
+        // Wrap is opt-in (#257: off by default like the other
+        // array-order layouts), so turn it on to exercise it.
+        core.execute(
+            "monocle.set_wrap_focus",
+            args: [.bool(true)]
+        )
         #expect(
             core.execute("focus", args: [.string("right")])
                 .isSuccess

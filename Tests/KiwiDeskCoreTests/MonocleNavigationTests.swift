@@ -41,19 +41,23 @@ private func makeMonocleSpace(
     return space
 }
 
-/// Monocle focus cycle & the opt-out wrap toggle (#168): monocle
-/// is a carousel, so focus wraps by default; `swap` never wraps,
-/// matching the other array-order layouts.
+/// Monocle focus cycle & the opt-in wrap toggle (#168): wrap
+/// defaults off, matching the other array-order layouts (#257);
+/// turn it on and focus wraps past the ends. `swap` never wraps.
 @Suite("Monocle navigation (#168)", .serialized)
 @MainActor
 struct MonocleNavigationTests {
-    @Test("Focus wraps past the ends by default")
-    func focusWrapsByDefault() {
+    @Test("Focus wraps past the ends when wrap_focus is on")
+    func focusWrapsWhenOn() {
         let core = makeCore()
         let space = makeMonocleSpace(
             core,
             windows: 3,
             focus: WindowID(1)
+        )
+        core.execute(
+            "monocle.set_wrap_focus",
+            args: [.bool(true)]
         )
         // Left from the first wraps to the last.
         #expect(

@@ -250,7 +250,7 @@ struct ScrollingNavigationTests {
         #expect(core.activeSpace?.focused == WindowID(3))
     }
 
-    @Test("Monocle keeps its wrapping cycle")
+    @Test("Monocle wraps when wrap_focus is on")
     func monocleCycleUntouched() {
         let core = makeCore()
         for id in 1...3 {
@@ -270,6 +270,11 @@ struct ScrollingNavigationTests {
         core.execute(
             "set_mode",
             args: [.string(space.raw), .string("monocle")]
+        )
+        // Wrap is opt-in (#257); enable it to cycle past the end.
+        core.execute(
+            "monocle.set_wrap_focus",
+            args: [.bool(true)]
         )
         core.state.workspaces.focus(WindowID(1), in: space)
         #expect(

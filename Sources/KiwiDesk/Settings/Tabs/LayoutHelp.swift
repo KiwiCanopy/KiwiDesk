@@ -53,16 +53,16 @@ enum LayoutHelp {
         )
     }
 
-    /// Wrap-focus for the linear layouts (Scrolling, Track),
-    /// where it defaults off. Monocle shares the concept but
-    /// flips the default, so it gets its own scoped text below.
+    /// Wrap-focus, shared by all three array-order layouts
+    /// (Scrolling, Track, Monocle) — one string since they now
+    /// share the default (off, #257).
     ///
     /// Key deviates from the usual `<label-key>.help` derivation:
     /// the wrap-focus *label* is itself split across pre-existing
     /// keys (`scroll_grid.wrap_focus` for Scrolling/Monocle,
     /// `track.wrap_focus` for Track, from #168), so no single
-    /// label key yields one help key. These live under a neutral
-    /// `layout_params.wrap_focus.*` home instead — unlike
+    /// label key yields one help key. It lives under a neutral
+    /// `layout_params.wrap_focus.help` home instead — unlike
     /// `trackOverflow`, whose label key `layout_params.overflow`
     /// does derive cleanly.
     @MainActor static var wrapFocus: String {
@@ -71,18 +71,6 @@ enum LayoutHelp {
             "When on, moving focus past the last window wraps "
                 + "around to the first, and past the first back "
                 + "to the last, instead of stopping at the end."
-        )
-    }
-
-    /// Monocle's wrap-focus: same behaviour, but on by default
-    /// (a carousel), so the text leads with that.
-    @MainActor static var wrapFocusMonocle: String {
-        L(
-            "layout_params.wrap_focus.monocle.help",
-            "On by default: monocle is a carousel, so moving "
-                + "focus past the last window returns to the "
-                + "first (and the reverse). Turn it off to stop "
-                + "focus at the first and last window."
         )
     }
 
