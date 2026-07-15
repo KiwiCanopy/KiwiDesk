@@ -30,7 +30,15 @@ struct LayoutDefaultsSection: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 minSizeSection
-                Divider()
+                // No `Divider()` (#275): every other top-level
+                // pane separates sibling regions with the stack
+                // spacing alone — a rule between top-level
+                // regions exists nowhere else in the app. The
+                // min-size card's own background already reads as
+                // a region boundary, and the segmented strip
+                // self-announces the pivot (Trackpad/Displays
+                // precedent), so whitespace is the native + most
+                // consistent break.
                 tabStrip
                 editor
             }
@@ -91,6 +99,10 @@ struct LayoutDefaultsSection: View {
                     + "sets the auto-size grid's cell size."
             )
         ) {
+            // Label hidden (#275): the section header already
+            // names this sole control, so the row shows value +
+            // unit only (Dock "Size" pattern). `label` still
+            // carries the accessibility name.
             StepperRow(
                 label: L(
                     "layout_defaults.min_window_size",
@@ -99,7 +111,8 @@ struct LayoutDefaultsSection: View {
                 value: minSizeBinding,
                 in: 100...800,
                 step: 10,
-                suffix: "pt"
+                suffix: "pt",
+                labelHidden: true
             )
         }
     }
