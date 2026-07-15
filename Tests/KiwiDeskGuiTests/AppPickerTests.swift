@@ -68,6 +68,20 @@ struct AppPickerTests {
         )
     }
 
+    @Test func filterAlsoMatchesBundleID() {
+        // Keeps an app findable by its English/habitual name via
+        // the bundle id even when the shown name is localized —
+        // "chrome" reaches com.google.chrome.
+        let hits = AppPickerFilter.matching(
+            [
+                app("com.google.chrome", "Chrome-Localized"),
+                app("com.apple.safari", "Safari"),
+            ],
+            query: "chrome"
+        )
+        #expect(hits.map(\.bundleID) == ["com.google.chrome"])
+    }
+
     @Test func iconCacheKeysCaseInsensitively() {
         // Same bundle id in two cases must hit one memo slot —
         // the identity contract the cache is keyed on (#266).

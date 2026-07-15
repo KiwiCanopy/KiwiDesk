@@ -30,10 +30,6 @@ struct AppPickerButton: View {
 
     @State private var showing = false
     @State private var search = ""
-    /// A snapshot taken on appear — the running-app set is
-    /// frozen for this picker's lifetime (#263), replacing the
-    /// per-render `installedApps` re-query.
-    @State private var apps: [KeybindingCatalog.InstalledApp] = []
 
     var body: some View {
         Button {
@@ -50,10 +46,13 @@ struct AppPickerButton: View {
         .buttonStyle(.bordered)
         .controlSize(.large)
         .onAppear {
-            if apps.isEmpty {
-                apps = KeybindingCatalog.installedApps
-            }
             AppIconCache.shared.warm()
+            // Build the app snapshot (a one-time Spotlight scan
+            // of ~150–300 apps) off the main thread so the first
+            // open finds it ready instead of paying ~160 ms then.
+            Task.detached {
+                _ = KeybindingCatalog.installedAppsSnapshot
+            }
         }
         .popover(isPresented: $showing) { popover }
     }
@@ -69,12 +68,21 @@ struct AppPickerButton: View {
             .textFieldStyle(.roundedBorder)
             escapeRow
             Divider()
+            // Eager `VStack`, not `LazyVStack`: a lazy stack
+            // renders blank in a popover until a state change
+            // (a keystroke) forces relayout. Icons come warmed
+            // from the cache, so building every row up front is
+            // cheap.
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: 0) {
+                VStack(alignment: .leading, spacing: 0) {
                     ForEach(filtered) { app in
                         row(app)
                     }
                 }
+                .frame(
+                    maxWidth: .infinity,
+                    alignment: .leading
+                )
             }
         }
         .padding(12)
@@ -126,19 +134,25 @@ struct AppPickerButton: View {
                 Spacer()
             }
             .contentShape(Rectangle())
+            .padding(.vertical, 3)
         }
         .buttonStyle(.plain)
-        .padding(.vertical, 3)
     }
 
     private var filtered: [KeybindingCatalog.InstalledApp] {
-        AppPickerFilter.matching(apps, query: search)
+        AppPickerFilter.matching(
+            KeybindingCatalog.installedAppsSnapshot,
+            query: search
+        )
     }
 }
 
 /// The picker's substring filter, split out pure so it is unit
 /// testable without the view. Case-insensitive on the localized
-/// name; an empty (or whitespace) query keeps every app.
+/// name OR the bundle id — the latter keeps an app findable by
+/// its English/habitual name (typing "preview" matches
+/// `com.apple.preview` even when it's shown localized as
+/// "Vorschau"). An empty (or whitespace) query keeps every app.
 enum AppPickerFilter {
     static func matching(
         _ apps: [KeybindingCatalog.InstalledApp],
@@ -148,6 +162,9 @@ enum AppPickerFilter {
         guard !query.isEmpty else { return apps }
         return apps.filter {
             $0.name.localizedCaseInsensitiveContains(query)
+                || $0.bundleID.localizedCaseInsensitiveContains(
+                    query
+                )
         }
     }
 }
