@@ -15,6 +15,7 @@ struct BehaviorSection: View {
             VStack(alignment: .leading, spacing: 20) {
                 mouseSection
                 animationsSection
+                quitSection
             }
             .padding(16)
         }
@@ -133,5 +134,58 @@ struct BehaviorSection: View {
             step: 10,
             suffix: "ms"
         )
+    }
+
+    /// On Quit (#281): the quit grid's density target
+    /// (`quit.grid_target_depth`). Grid dimensions stay
+    /// automatic (2×2…4×4); no layout picker while `grid` is
+    /// the only strategy.
+    private var quitSection: some View {
+        SettingsSection(
+            L("behavior.quit.title", "On Quit"),
+            caption: L(
+                "behavior.quit.caption",
+                "Before KiwiDesk stops, it arranges managed "
+                    + "windows on each display so their title "
+                    + "bars remain reachable."
+            )
+        ) {
+            StepperRow(
+                label: L(
+                    "behavior.quit.target_depth",
+                    "Target windows per cell"
+                ),
+                value: $model.config.settings
+                    .quitGridTargetDepth,
+                in: QuitGridLayout.targetDepthRange,
+                help: L(
+                    "behavior.quit.target_depth.help",
+                    "Automatic adds a row and column when "
+                        + "cells would exceed this target. The "
+                        + "grid stays between 2×2 and 4×4; "
+                        + "after 4×4, additional windows keep "
+                        + "cascading in its cells."
+                )
+            )
+            gridSummary
+        }
+    }
+
+    /// Neutral live summary of the thresholds the current
+    /// target produces: dimension grows past 4T and 9T.
+    private var gridSummary: some View {
+        let target = model.config.settings
+            .quitGridTargetDepth
+        return Text(
+            L(
+                "behavior.quit.summary",
+                "2×2 up to %1$d windows · 3×3 up to %2$d · "
+                    + "4×4 above %2$d",
+                4 * target,
+                9 * target
+            )
+        )
+        .font(.caption)
+        .foregroundStyle(.secondary)
     }
 }

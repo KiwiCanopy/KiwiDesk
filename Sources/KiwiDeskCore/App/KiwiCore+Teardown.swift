@@ -100,7 +100,8 @@ public enum WindowGather {
         state: StateCoordinator,
         primaryHeight: CGFloat,
         style: QuitLayoutStyle,
-        minSize: CGFloat
+        minSize: CGFloat,
+        targetDepth: Int
     ) -> [WindowID: CGRect] {
         var result: [WindowID: CGRect] = [:]
         for group in collect(
@@ -113,7 +114,8 @@ public enum WindowGather {
                     QuitGridLayout.frames(
                         for: group.windows,
                         in: group.axFrame,
-                        minSize: minSize
+                        minSize: minSize,
+                        targetDepth: targetDepth
                     )
                 ) { current, _ in current }
             }
@@ -167,7 +169,8 @@ extension KiwiCore {
             state: state,
             primaryHeight: primaryH,
             style: tiler.settings.quitLayout,
-            minSize: tiler.settings.minWindowSize
+            minSize: tiler.settings.minWindowSize,
+            targetDepth: tiler.settings.quitGridTargetDepth
         )
         guard !frames.isEmpty else { return }
         SkyLight.suppressDisplay()
@@ -242,7 +245,9 @@ extension KiwiCore {
         let raiseDeadline = Date().addingTimeInterval(1.0)
         for group in groups {
             for id in QuitGridLayout.raiseOrder(
-                for: group.windows
+                for: group.windows,
+                targetDepth: tiler.settings
+                    .quitGridTargetDepth
             ) {
                 if Date() > raiseDeadline {
                     onLog(

@@ -192,7 +192,7 @@ public enum APIReference {
             "set_follows_focus"
         ],
         "quit": [
-            "set_layout"
+            "set_layout", "set_grid_target_depth",
         ],
         "drag": [
             "set_ghost_enabled", "set_ghost_border",

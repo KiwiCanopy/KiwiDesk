@@ -64,4 +64,56 @@ struct QuitCommandTests {
             ).isSuccess
         )
     }
+
+    @Test("quit.set_grid_target_depth stores a valid target")
+    func storesTargetDepth() {
+        let core = makeCore()
+        #expect(
+            core.tiler.settings.quitGridTargetDepth
+                == QuitGridLayout.defaultTargetDepth
+        )
+        #expect(
+            core.execute(
+                "quit.set_grid_target_depth",
+                args: [.number(8)]
+            ).isSuccess
+        )
+        #expect(
+            core.tiler.settings.quitGridTargetDepth == 8
+        )
+    }
+
+    @Test("an out-of-range target fails and names the range")
+    func rejectsOutOfRangeDepth() {
+        let core = makeCore()
+        for bad in [JSONValue.number(0), .number(21)] {
+            let response = core.execute(
+                "quit.set_grid_target_depth",
+                args: [bad]
+            )
+            #expect(!response.isSuccess)
+            #expect(response.error == "expected 1-20")
+        }
+        #expect(
+            core.tiler.settings.quitGridTargetDepth
+                == QuitGridLayout.defaultTargetDepth
+        )
+    }
+
+    @Test("a non-numeric target fails")
+    func rejectsNonNumericDepth() {
+        let core = makeCore()
+        #expect(
+            !core.execute(
+                "quit.set_grid_target_depth",
+                args: [.string("deep")]
+            ).isSuccess
+        )
+        #expect(
+            !core.execute(
+                "quit.set_grid_target_depth",
+                args: []
+            ).isSuccess
+        )
+    }
 }

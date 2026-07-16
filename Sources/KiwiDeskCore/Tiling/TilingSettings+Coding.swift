@@ -33,6 +33,7 @@ extension TilingSettings: Codable {
 
     private enum QuitKeys: String, CodingKey {
         case layout
+        case gridTargetDepth = "grid_target_depth"
     }
 
     private enum SpaceKeys: String, CodingKey {
@@ -134,6 +135,11 @@ extension TilingSettings: Codable {
                 QuitLayoutStyle.self,
                 forKey: .layout
             ) ?? .grid
+        quitGridTargetDepth =
+            try quit.decodeIfPresent(
+                Int.self,
+                forKey: .gridTargetDepth
+            ) ?? QuitGridLayout.defaultTargetDepth
     }
 
     private mutating func decodeResize(
@@ -321,5 +327,9 @@ extension TilingSettings: Codable {
             forKey: .quit
         )
         try quit.encode(quitLayout, forKey: .layout)
+        try quit.encode(
+            quitGridTargetDepth,
+            forKey: .gridTargetDepth
+        )
     }
 }

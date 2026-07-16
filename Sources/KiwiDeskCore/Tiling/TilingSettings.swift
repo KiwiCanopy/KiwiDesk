@@ -76,6 +76,11 @@ public struct TilingSettings: Sendable, Equatable {
     /// managed windows are spread when KiwiDesk exits.
     /// `quit.layout`; `grid` is the only strategy today.
     public var quitLayout: QuitLayoutStyle = .grid
+    /// Density target of the quit grid (#281): the stack depth
+    /// a cell aims for before the grid grows a dimension
+    /// (still hard-clamped 2×2…4×4). `quit.grid_target_depth`.
+    public var quitGridTargetDepth =
+        QuitGridLayout.defaultTargetDepth
 
     public init() {}
 }

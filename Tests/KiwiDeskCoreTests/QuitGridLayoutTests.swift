@@ -16,20 +16,55 @@ private func ids(_ range: Range<UInt32>) -> [WindowID] {
     range.map { WindowID($0) }
 }
 
+/// The standard density target (#281): most suites pin the
+/// default behavior; the custom-target tests pass their own.
+private let depth = QuitGridLayout.defaultTargetDepth
+
 /// Pure math of the `grid` quit layout (#197): dimension
 /// formula, round-robin fill, and the per-cell cascade.
 @Suite("QuitGridLayout — dimension")
 struct QuitGridDimensionTests {
-    @Test("scales with count: ceil(sqrt(N/10)) clamped 2...4")
+    @Test("scales with count: ceil(sqrt(N/T)) clamped 2...4")
     func formulaThresholds() {
-        #expect(QuitGridLayout.dimension(for: 1) == 2)
-        #expect(QuitGridLayout.dimension(for: 40) == 2)
-        #expect(QuitGridLayout.dimension(for: 41) == 3)
-        #expect(QuitGridLayout.dimension(for: 90) == 3)
-        #expect(QuitGridLayout.dimension(for: 91) == 4)
-        #expect(QuitGridLayout.dimension(for: 160) == 4)
+        // Standard target 5: ≤20 → 2×2, ≤45 → 3×3, above 4×4.
+        #expect(dim(1) == 2)
+        #expect(dim(20) == 2)
+        #expect(dim(21) == 3)
+        #expect(dim(45) == 3)
+        #expect(dim(46) == 4)
+        #expect(dim(80) == 4)
         // Cap: never past 4×4, however many windows.
-        #expect(QuitGridLayout.dimension(for: 500) == 4)
+        #expect(dim(500) == 4)
+    }
+
+    @Test("a custom target moves both growth thresholds")
+    func customTargetThresholds() {
+        // Target 10 (the pre-#281 constant): ≤40 → 2×2,
+        // ≤90 → 3×3, above → 4×4.
+        #expect(dim(40, target: 10) == 2)
+        #expect(dim(41, target: 10) == 3)
+        #expect(dim(90, target: 10) == 3)
+        #expect(dim(91, target: 10) == 4)
+        // Target 1 — aggressive spread: grows immediately.
+        #expect(dim(4, target: 1) == 2)
+        #expect(dim(5, target: 1) == 3)
+        #expect(dim(10, target: 1) == 4)
+    }
+
+    @Test("the 2×2 floor and 4×4 cap hold for any target")
+    func floorAndCapHold() {
+        #expect(dim(1, target: 20) == 2)
+        #expect(dim(10_000, target: 1) == 4)
+    }
+
+    private func dim(
+        _ count: Int,
+        target: Int = depth
+    ) -> Int {
+        QuitGridLayout.dimension(
+            for: count,
+            targetDepth: target
+        )
     }
 }
 
@@ -40,7 +75,8 @@ struct QuitGridFramesTests {
         let frames = QuitGridLayout.frames(
             for: [],
             in: axFrame,
-            minSize: minSize
+            minSize: minSize,
+            targetDepth: depth
         )
         #expect(frames.isEmpty)
     }
@@ -50,7 +86,8 @@ struct QuitGridFramesTests {
         let frames = QuitGridLayout.frames(
             for: [WindowID(1)],
             in: axFrame,
-            minSize: minSize
+            minSize: minSize,
+            targetDepth: depth
         )
         let frame = frames[WindowID(1)]
         #expect(
@@ -69,7 +106,8 @@ struct QuitGridFramesTests {
         let frames = QuitGridLayout.frames(
             for: ids(0..<5),
             in: axFrame,
-            minSize: minSize
+            minSize: minSize,
+            targetDepth: depth
         )
         let f0 = try #require(frames[WindowID(0)])
         let f1 = try #require(frames[WindowID(1)])
@@ -99,7 +137,8 @@ struct QuitGridFramesTests {
         let frames = QuitGridLayout.frames(
             for: ids(0..<8),
             in: axFrame,
-            minSize: minSize
+            minSize: minSize,
+            targetDepth: depth
         )
         for cell in 0..<4 {
             let first = try #require(
@@ -121,7 +160,8 @@ struct QuitGridFramesTests {
         let frames = QuitGridLayout.frames(
             for: ids(0..<41),
             in: axFrame,
-            minSize: minSize
+            minSize: minSize,
+            targetDepth: depth
         )
         #expect(frames.count == 41)
         let f1 = try #require(frames[WindowID(1)])
@@ -137,7 +177,8 @@ struct QuitGridFramesTests {
         let frames = QuitGridLayout.frames(
             for: ids(0..<160),
             in: axFrame,
-            minSize: minSize
+            minSize: minSize,
+            targetDepth: depth
         )
         #expect(frames.count == 160)
         for frame in frames.values {
@@ -159,7 +200,8 @@ struct QuitGridFramesTests {
         let frames = QuitGridLayout.frames(
             for: ids(0..<8),
             in: axFrame,
-            minSize: minSize
+            minSize: minSize,
+            targetDepth: depth
         )
         // Window 4 = cell 0's second (deepest) pile entry.
         let f4 = try #require(frames[WindowID(4)])
@@ -178,7 +220,8 @@ struct QuitGridFramesTests {
         // had focus at quit and a later row always sits above
         // the row before it.
         let order = QuitGridLayout.raiseOrder(
-            for: ids(0..<10)
+            for: ids(0..<10),
+            targetDepth: depth
         )
         #expect(
             order == [
@@ -199,9 +242,13 @@ struct QuitGridFramesTests {
         let frames = QuitGridLayout.frames(
             for: windows,
             in: axFrame,
-            minSize: minSize
+            minSize: minSize,
+            targetDepth: depth
         )
-        let order = QuitGridLayout.raiseOrder(for: windows)
+        let order = QuitGridLayout.raiseOrder(
+            for: windows,
+            targetDepth: depth
+        )
         // Cell 0's pile in raise order is (0, 4, 8): their
         // frames must descend by exactly one offset each.
         let f0 = try #require(frames[order[0]])
@@ -217,7 +264,8 @@ struct QuitGridFramesTests {
         let frames = QuitGridLayout.frames(
             for: ids(0..<2),
             in: small,
-            minSize: minSize
+            minSize: minSize,
+            targetDepth: depth
         )
         // 2×2 cells would be 200×200 — floored to 300×300.
         let f0 = try #require(frames[WindowID(0)])

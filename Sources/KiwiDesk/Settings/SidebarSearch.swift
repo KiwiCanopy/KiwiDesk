@@ -129,6 +129,7 @@ enum SidebarSearch {
                     "behavior.animations.title",
                     "Animations"
                 ),
+                L("behavior.quit.title", "On Quit"),
             ]
         case .profiles:
             return [

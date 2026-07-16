@@ -20,18 +20,32 @@ public enum QuitLayoutStyle: String, Codable, Sendable,
 /// over one display's flat window list; the state walk lives
 /// in `WindowGather` (Teardown).
 public enum QuitGridLayout {
-    /// Stack depth a cell targets before the grid grows a
-    /// dimension.
-    public static let maxDepth = 10
-    /// Dimension cap: at most 4×4 = 16 cells per display.
+    /// Standard stack depth a cell targets before the grid
+    /// grows a dimension (`quit.grid_target_depth`, #281). Not
+    /// a hard maximum: past the 4×4 cap, cells keep cascading.
+    public static let defaultTargetDepth = 5
+    /// The accepted density range — one source for the
+    /// `quit.set_grid_target_depth` command and the GUI
+    /// stepper, so their bounds cannot drift.
+    public static let targetDepthRange = 1...20
+    /// Dimension cap: at most 4×4 = 16 cells per display. A
+    /// teardown safety boundary (min window size, cascade
+    /// reachability, no live manager after quit), not a visual
+    /// preference — deliberately not configurable.
     public static let maxDimension = 4
 
     /// Grid dimension for `count` windows:
-    /// `clamp(ceil(sqrt(count / maxDepth)), 2, maxDimension)`.
-    /// One formula, no branch list — ≤40 → 2×2, ≤90 → 3×3,
-    /// ≤160 → 4×4 (capped).
-    public static func dimension(for count: Int) -> Int {
-        let needed = (Double(count) / Double(maxDepth))
+    /// `clamp(ceil(sqrt(count / targetDepth)), 2, maxDimension)`.
+    /// One formula, no branch list — at the standard target 5:
+    /// ≤20 → 2×2, ≤45 → 3×3, above → 4×4 (capped).
+    public static func dimension(
+        for count: Int,
+        targetDepth: Int
+    ) -> Int {
+        // Range enforcement lives at the command/GUI edges;
+        // the pure math only guards the division.
+        let depth = max(targetDepth, 1)
+        let needed = (Double(count) / Double(depth))
             .squareRoot()
             .rounded(.up)
         return min(max(Int(needed), 2), maxDimension)
@@ -43,9 +57,13 @@ public enum QuitGridLayout {
     /// raise circle stacks a different pile than the one
     /// placed.
     private static func buckets(
-        for windows: [WindowID]
+        for windows: [WindowID],
+        targetDepth: Int
     ) -> [[WindowID]] {
-        let dim = dimension(for: windows.count)
+        let dim = dimension(
+            for: windows.count,
+            targetDepth: targetDepth
+        )
         var buckets = Array(
             repeating: [WindowID](),
             count: dim * dim
@@ -72,15 +90,21 @@ public enum QuitGridLayout {
     public static func frames(
         for windows: [WindowID],
         in axFrame: CGRect,
-        minSize: CGFloat
+        minSize: CGFloat,
+        targetDepth: Int
     ) -> [WindowID: CGRect] {
         guard !windows.isEmpty else { return [:] }
-        let dim = dimension(for: windows.count)
+        let dim = dimension(
+            for: windows.count,
+            targetDepth: targetDepth
+        )
         let width = axFrame.width / CGFloat(dim)
         let height = axFrame.height / CGFloat(dim)
         var result: [WindowID: CGRect] = [:]
-        for (cell, bucket) in buckets(for: windows)
-            .enumerated()
+        for (cell, bucket) in buckets(
+            for: windows,
+            targetDepth: targetDepth
+        ).enumerated()
         where !bucket.isEmpty {
             let region = CGRect(
                 x: axFrame.minX
@@ -114,16 +138,20 @@ public enum QuitGridLayout {
     /// pile that spills downward cannot bury the next row's
     /// headers.
     public static func raiseOrder(
-        for windows: [WindowID]
+        for windows: [WindowID],
+        targetDepth: Int
     ) -> [WindowID] {
         guard !windows.isEmpty else { return [] }
-        return buckets(for: windows).flatMap { $0 }
+        return buckets(
+            for: windows,
+            targetDepth: targetDepth
+        ).flatMap { $0 }
     }
 
     /// Pins a cascaded frame's origin so at least `minSize`
     /// of the window stays inside `axFrame`. Deep piles in
-    /// bottom-row cells (up to `maxDepth × offset` of
-    /// cascade) and minSize-floored cells on tiny displays
+    /// bottom-row cells (past 4×4 the cascade depth is
+    /// unbounded) and minSize-floored cells on tiny displays
     /// would otherwise push title bars off-screen —
     /// unrecoverable once no manager is alive.
     private static func pinned(

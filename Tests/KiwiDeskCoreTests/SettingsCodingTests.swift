@@ -50,8 +50,11 @@ struct SettingsCodingTests {
         #expect(border["corner_style"] as? String == "rounded")
         // `quit.set_layout` → `quit.layout` (#197); `grid` is
         // the only strategy today and the default.
+        // `quit.set_grid_target_depth` →
+        // `quit.grid_target_depth` (#281), standard target 5.
         let quit = try object(root["quit"])
         #expect(quit["layout"] as? String == "grid")
+        #expect(quit["grid_target_depth"] as? Double == 5)
         // `mouse.set_follows_focus` → `mouse.follows_focus`
         // (#186), off by default.
         let mouse = try object(root["mouse"])

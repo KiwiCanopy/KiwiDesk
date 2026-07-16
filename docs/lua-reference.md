@@ -3098,16 +3098,37 @@ and whichever window had focus at quit makes no difference. A
 pile's windows also shrink so the cascade ends at its own cell's
 bottom edge (floored at `min_window_size`), keeping piles from
 spilling into the row below.
-Each display sizes its own grid from its window count `N`:
-`ceil(sqrt(N / 10))`, clamped between 2×2 and 4×4 — up to 40 windows
-get 2×2, up to 90 get 3×3, beyond that 4×4. One-shot teardown
-placement: windows stay on their own display, and nothing is managed
-afterwards. Profile JSON key: `quit.layout`. Default: `grid`.
+Each display sizes its own grid from its window count `N` and the
+density target `T` (see `quit.set_grid_target_depth` below):
+`ceil(sqrt(N / T))`, clamped between 2×2 and 4×4 — at the standard
+target 5, up to 20 windows get 2×2, up to 45 get 3×3, beyond that
+4×4. One-shot teardown placement: windows stay on their own display,
+and nothing is managed afterwards. Profile JSON key: `quit.layout`.
+Default: `grid`.
 
 **Example:**
 
 ```lua
 quit.set_layout("grid")
+```
+
+### quit.set_grid_target_depth
+
+**Expects:** an integer between 1 and 20 (whole windows per cell).
+
+**Does:** sets the quit grid's density target — the stack depth a
+cell aims for before the grid grows a row and a column. Grid
+dimensions stay automatic, calculated per display from that
+display's window count, and stay hard-clamped between 2×2 and 4×4;
+the target only moves the growth thresholds (2×2 through `4×T`
+windows, 3×3 through `9×T`, 4×4 above). It is not a hard maximum:
+past 4×4, additional windows keep cascading in its cells. Profile
+JSON key: `quit.grid_target_depth`. Default: `5`.
+
+**Example:**
+
+```lua
+quit.set_grid_target_depth(10)  -- denser piles, later growth
 ```
 
 When AX permission is revoked mid-session, KiwiDesk pauses window

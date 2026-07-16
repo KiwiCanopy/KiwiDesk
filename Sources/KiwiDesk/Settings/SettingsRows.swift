@@ -164,6 +164,11 @@ struct StepperRow: View {
     /// is unaffected — the control is left-aligned under the
     /// header instead of trailing an empty label column.
     let labelHidden: Bool
+    /// Optional #94 `?` popover, label-adjacent like the other
+    /// row kinds. Ignored while `labelHidden` — a floating `?`
+    /// with no visible subject reads unanchored; such sections
+    /// carry their help on the header instead.
+    let help: String?
     /// The field edits a string proxy so intermediate/empty
     /// typing never clobbers `value`; it commits (parse +
     /// clamp) on Return or focus loss, matching the rename
@@ -177,7 +182,8 @@ struct StepperRow: View {
         in range: ClosedRange<Int>,
         step: Int = 1,
         suffix: String? = nil,
-        labelHidden: Bool = false
+        labelHidden: Bool = false,
+        help: String? = nil
     ) {
         self.label = label
         self._value = value
@@ -185,6 +191,7 @@ struct StepperRow: View {
         self.step = step
         self.suffix = suffix
         self.labelHidden = labelHidden
+        self.help = help
         self._text = State(initialValue: "\(value.wrappedValue)")
     }
 
@@ -192,6 +199,12 @@ struct StepperRow: View {
         HStack {
             if !labelHidden {
                 Text(label)
+                if let help {
+                    HelpButton(
+                        explanation: help,
+                        subject: label
+                    )
+                }
                 Spacer()
             }
             TextField("", text: $text)

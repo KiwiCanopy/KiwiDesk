@@ -196,6 +196,22 @@ extension KiwiCore {
                 return .fail("expected \(expected)")
             }
             tiler.settings.quitLayout = style
+        case "quit.set_grid_target_depth":
+            guard
+                let raw = args.first?.numberValue,
+                raw.isFinite
+            else {
+                return .fail("expected depth")
+            }
+            let range = QuitGridLayout.targetDepthRange
+            let depth = Int(raw.rounded())
+            guard range.contains(depth) else {
+                return .fail(
+                    "expected \(range.lowerBound)"
+                        + "-\(range.upperBound)"
+                )
+            }
+            tiler.settings.quitGridTargetDepth = depth
         default:
             return .fail("unknown command: \(command)")
         }

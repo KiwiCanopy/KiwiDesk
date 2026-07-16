@@ -89,7 +89,8 @@ private func targets(
         state: state,
         primaryHeight: pH,
         style: .grid,
-        minSize: minSize
+        minSize: minSize,
+        targetDepth: QuitGridLayout.defaultTargetDepth
     )
 }
 

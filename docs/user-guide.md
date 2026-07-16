@@ -642,14 +642,27 @@ interaction.
 - **Wake restore delay** (ms): how long to wait after wake before
   restoring (default 1500 ms, giving apps time to settle).
 
+### On Quit
+
+Before KiwiDesk stops, it arranges managed windows on each display
+so their title bars remain reachable.
+
+- **Target windows per cell** (1–20, default 5): the quit grid's
+  density target. Automatic adds a row and column when cells would
+  exceed this target; the grid stays between 2×2 and 4×4, and after
+  4×4 additional windows keep cascading in its cells. A live
+  summary shows the thresholds the current target produces (at the
+  standard 5: 2×2 up to 20 windows · 3×3 up to 45 · 4×4 above 45).
+
 When you quit or restart KiwiDesk, it saves window order and focus
 per virtual space and restores on next launch. On the way out,
 each monitor's windows are spread into an evenly-filled grid —
 windows take turns claiming a cell, and windows sharing a cell
 cascade so every title bar stays clickable. The desktop is usable
 the moment KiwiDesk exits, with no window pulled to another
-monitor. (Power users can tune this via `quit.set_layout` in the
-Lua reference; `grid` is the only strategy today.)
+monitor. (Power users can also tune this via `quit.set_layout` and
+`quit.set_grid_target_depth` in the Lua reference; `grid` is the
+only strategy today.)
 
 ## Profiles
 
