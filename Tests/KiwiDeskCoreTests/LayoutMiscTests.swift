@@ -230,18 +230,21 @@ struct FloatRuleTests {
 
     @Test("Ghostty's quick terminal panel is never managed")
     func ignoreDetection() throws {
+        let noRules = IgnoreRules()
         // The quick terminal: Ghostty + non-zero layer.
         #expect(
             FloatDetection.shouldIgnore(
                 bundleID: "com.mitchellh.ghostty",
-                layer: 3
+                layer: 3,
+                rules: noRules
             )
         )
         // Ghostty's normal windows tile as usual.
         #expect(
             !FloatDetection.shouldIgnore(
                 bundleID: "com.mitchellh.ghostty",
-                layer: 0
+                layer: 0,
+                rules: noRules
             )
         )
         // Other apps' panels merely float; only Ghostty's
@@ -249,7 +252,85 @@ struct FloatRuleTests {
         #expect(
             !FloatDetection.shouldIgnore(
                 bundleID: "com.apple.finder",
-                layer: 3
+                layer: 3,
+                rules: noRules
+            )
+        )
+    }
+
+    @Test("User ignore rules match whole apps by bundle id")
+    func userIgnoreRules() {
+        let rules = IgnoreRules(["IO.TAILSCALE.IPN.MACOS"])
+        #expect(
+            FloatDetection.shouldIgnore(
+                bundleID: "io.tailscale.ipn.macos",
+                layer: 0,
+                rules: rules
+            )
+        )
+        #expect(
+            FloatDetection.shouldIgnore(
+                bundleID: "io.tailscale.ipn.macos",
+                layer: 9,
+                rules: rules
+            )
+        )
+        #expect(
+            !FloatDetection.shouldIgnore(
+                bundleID: "com.apple.finder",
+                layer: 0,
+                rules: rules
+            )
+        )
+    }
+
+    @Test("macOS input-source overlays are never managed")
+    func systemInputOverlays() {
+        for bundleID in [
+            "com.apple.TextInputMenuAgent",
+            "com.apple.TextInputSwitcher",
+        ] {
+            #expect(
+                FloatDetection.isBuiltInIgnoredApp(
+                    bundleID: bundleID
+                )
+            )
+            #expect(
+                FloatDetection.shouldIgnore(
+                    bundleID: bundleID,
+                    layer: 0,
+                    rules: IgnoreRules()
+                )
+            )
+        }
+        #expect(
+            !FloatDetection.isBuiltInIgnoredApp(
+                bundleID: "com.apple.finder"
+            )
+        )
+    }
+
+    @Test("Unbacked AX auxiliary proxies are never managed")
+    func unbackedAuxiliaryProxies() {
+        #expect(
+            FloatDetection.isUnbackedAuxiliary(
+                role: "AXWindow",
+                subrole: "AXFloatingWindow",
+                layer: nil
+            )
+        )
+        #expect(
+            !FloatDetection.isUnbackedAuxiliary(
+                role: "AXWindow",
+                subrole: "AXFloatingWindow",
+                layer: 0
+            )
+        )
+        #expect(
+            !FloatDetection.isUnbackedAuxiliary(
+                role: "AXWindow",
+                subrole: "AXStandardWindow",
+                layer: nil
             )
         )
     }

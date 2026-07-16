@@ -107,6 +107,7 @@ extension SettingsModel {
         return saved.modes != config.modes
             || saved.appRules != config.appRules
             || saved.floatRules != config.floatRules
+            || saved.ignoreRules != config.ignoreRules
             || saved.profileBindings != config.profileBindings
             || saved.spaces != config.spaces
     }

@@ -28,9 +28,9 @@ struct SettingsCodingTests {
         #expect(
             Set(root.keys) == [
                 "animations", "app_bar", "border", "drag", "gap",
-                "layout", "min_window_size", "mouse", "mouse_resize",
-                "new_window_placement_override", "quit", "resize",
-                "space", "swap_skips_cascade",
+                "layout", "min_window_size", "mouse",
+                "mouse_resize", "new_window_placement_override", "quit",
+                "resize", "space", "swap_skips_cascade",
             ]
         )
         // `border.set_*` → `border.*` (#278). Default on,

@@ -30,7 +30,8 @@ struct GuiConfigParityTests {
             fields == [
                 "settings", "spaces", "spaceModes", "appRules",
                 "spacePins", "mainSpaces", "fallbackSpace",
-                "floatRules", "profileBindings", "modes",
+                "floatRules", "ignoreRules", "profileBindings",
+                "modes",
             ]
         )
     }
@@ -41,6 +42,7 @@ struct GuiConfigParityTests {
         config.spaces = [SpaceID("a"), SpaceID("b")]
         config.appRules = ["Mail": SpaceID("a")]
         config.floatRules = ["Calculator"]
+        config.ignoreRules = ["io.tailscale.ipn.macos"]
         config.profileBindings = [2: "Studio"]
         config.modes = [
             KeyMode(
@@ -62,6 +64,7 @@ struct GuiConfigParityTests {
         #expect(back.spaces == config.spaces)
         #expect(back.appRules == config.appRules)
         #expect(back.floatRules == config.floatRules)
+        #expect(back.ignoreRules == config.ignoreRules)
         #expect(back.profileBindings == config.profileBindings)
         #expect(back.modes == config.modes)
         // Profile-scoped fields deliberately do NOT ride the

@@ -70,7 +70,7 @@ extension EventLoop {
     }
 
     private func appLaunched(_ app: NSRunningApplication) {
-        attach(app: app)
+        syncObservation(for: app)
         onEvent(
             .appLaunched(
                 pid: app.processIdentifier,
@@ -81,13 +81,7 @@ extension EventLoop {
 
     private func appTerminated(_ app: NSRunningApplication) {
         let pid = app.processIdentifier
-        observers[pid]?.invalidate()
-        observers[pid] = nil
-        for id in elements[pid, default: [:]].keys {
-            detectedFloating[id] = nil
-            onEvent(.windowDestroyed(id, wasMinimized: false))
-        }
-        elements[pid] = nil
+        detach(pid: pid, restoreEnhancedUI: false)
         onEvent(.appTerminated(pid: pid))
     }
 
@@ -96,10 +90,15 @@ extension EventLoop {
     /// app switch, reconcile the app we just left.
     private func appActivated(_ app: NSRunningApplication) {
         let pid = app.processIdentifier
+        syncObservation(for: app)
         if let previous = lastActivePid, previous != pid {
             reconcile(pid: previous, app: AppRef(pid: previous))
         }
         lastActivePid = pid
+        // Ignored and prohibited apps have no observer. Keep the
+        // cross-app bookkeeping above, but never query their AX
+        // tree merely because they became active.
+        guard observers[pid] != nil else { return }
         // Mirror the focused-changed path: reconcile the
         // activated app first, so a window tracked late (cold
         // Electron tree, other native Space) is known before
@@ -119,7 +118,7 @@ extension EventLoop {
             // dismiss report can be distrusted later (#244).
             if elements[pid]?[id] != nil {
                 onEvent(.windowFocused(id))
-            } else if FloatDetection.shouldIgnore(
+            } else if FloatDetection.isBuiltInIgnoredPanel(
                 bundleID: AppRef(app).bundleID,
                 id: id
             ) {
@@ -145,38 +144,14 @@ extension EventLoop {
     /// trees, and slow responders (Electron/WebKit, see
     /// AGENTS.md) list windows late or mis-report subroles.
     public func reconcileAll() {
-        for pid in observers.keys {
+        // Rules can detach an already-observed app or make a
+        // formerly ignored app observable. Synchronize that
+        // app-level boundary without reading ignored AX trees.
+        for app in NSWorkspace.shared.runningApplications {
+            syncObservation(for: app)
+        }
+        for pid in Array(observers.keys) {
             reconcile(pid: pid, app: AppRef(pid: pid))
-        }
-    }
-
-    /// Attaches AX observation to a regular (Dock-visible) app.
-    func attach(app: NSRunningApplication) {
-        // Never observe KiwiDesk's own process (#174): opening
-        // Settings flips the app to `.regular`, which would
-        // otherwise pass the gate below and tile the Settings
-        // window. Guarding here means no self-observer, so
-        // `reconcile`'s `observers[pid] != nil` check keeps
-        // self out of every downstream path too.
-        guard !Self.isOwnProcess(app.processIdentifier) else {
-            return
-        }
-        guard app.activationPolicy == .regular else { return }
-        let pid = app.processIdentifier
-        guard observers[pid] == nil else { return }
-        guard let observer = AXApplicationObserver(pid: pid)
-        else { return }
-
-        let ref = AppRef(app)
-        observer.onNotification = { [weak self] note, element in
-            self?.handle(note, element, pid: pid, app: ref)
-        }
-        observers[pid] = observer
-        // Keep Electron/WebKit AX trees warm (see AGENTS.md).
-        AXHelper.setEnhancedUserInterface(pid: pid, enabled: true)
-
-        for element in AXHelper.windows(pid: pid) {
-            track(element, pid: pid, app: ref)
         }
     }
 

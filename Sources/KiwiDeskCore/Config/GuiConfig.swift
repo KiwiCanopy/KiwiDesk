@@ -1,13 +1,10 @@
 import Foundation
 
 /// The GUI's complete editable configuration.
-///
-/// The model splits along the profile boundary (#36):
-///
-/// - **Global fields** (spaces list, app rules, float rules,
-///   profile bindings, keybindings) persist in the `gui.json`
-///   sidecar and are applied directly by the structured
-///   loader on reload (#55) — `init.lua` is never generated.
+/// Split along the profile boundary (#36):
+/// - **Global fields** (spaces, app/float/ignore rules, profile
+///   bindings, keybindings) persist in `gui.json` and apply
+///   directly on reload (#55) — `init.lua` is never generated.
 /// - **Profile-scoped fields** (tiling settings, space modes,
 ///   monitor pins, Main role) are held in memory for editing
 ///   and persist into the active profile's JSON — never into
@@ -43,6 +40,8 @@ public struct GuiConfig: Codable, Equatable, Sendable {
     public var fallbackSpace: SpaceID?
     /// Windows that never tile (`float_rules`).
     public var floatRules: [String] = []
+    /// Apps never managed (`ignore_rules`); no GUI control (#176).
+    public var ignoreRules: [String] = []
     /// Profile bound per native macOS Space (Mission Control
     /// number -> profile name).
     public var profileBindings: [Int: String] = [:]
@@ -152,6 +151,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case spaces
         case appRules = "app_rules"
         case floatRules = "float_rules"
+        case ignoreRules = "ignore_rules"
         case profileBindings = "profile_bindings"
         case modes
     }
@@ -177,6 +177,11 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             try container.decodeIfPresent(
                 [String].self,
                 forKey: .floatRules
+            ) ?? []
+        ignoreRules =
+            try container.decodeIfPresent(
+                [String].self,
+                forKey: .ignoreRules
             ) ?? []
         profileBindings =
             try decodeProfileBindings(from: container)
@@ -231,6 +236,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         try container.encode(spaces, forKey: .spaces)
         try container.encode(appRules, forKey: .appRules)
         try container.encode(floatRules, forKey: .floatRules)
+        try container.encode(ignoreRules, forKey: .ignoreRules)
         var bindings: [String: String] = [:]
         for (number, name) in profileBindings {
             bindings[String(number)] = name

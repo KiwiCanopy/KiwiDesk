@@ -24,8 +24,31 @@ extension EventLoop {
         pid: pid_t,
         app: AppRef
     ) {
+        // A callback can already be queued when a reload ignores an
+        // app or its policy becomes prohibited. It must not recreate
+        // state after the observer has been detached.
+        let activationPolicy =
+            NSRunningApplication(
+                processIdentifier: pid
+            )?.activationPolicy ?? .prohibited
+        guard
+            Self.ownsObservation(
+                hasObserver: observers[pid] != nil,
+                pid: pid,
+                activationPolicy: activationPolicy,
+                isIgnored: shouldIgnoreApp(
+                    bundleID: app.bundleID
+                )
+            )
+        else {
+            detach(pid: pid, restoreEnhancedUI: true)
+            return
+        }
         switch note {
         case kAXWindowCreatedNotification:
+            if Self.isStandardWindow(element) {
+                enableEnhancedUI(pid: pid)
+            }
             track(element, pid: pid, app: app)
         case kAXUIElementDestroyedNotification,
             kAXWindowMiniaturizedNotification:
@@ -63,7 +86,7 @@ extension EventLoop {
             // the panel gaining focus so KiwiCore can distrust
             // the app's stale focus report on dismiss (#244).
             guard elements[pid]?[id] != nil else {
-                if FloatDetection.shouldIgnore(
+                if FloatDetection.isBuiltInIgnoredPanel(
                     bundleID: app.bundleID,
                     id: id
                 ) {
@@ -111,7 +134,12 @@ extension EventLoop {
             if elements[pid]?[id] != nil,
                 floatRules.hasTitleRule(bundleID: app.bundleID)
             {
-                recheckFloat(element, id: id, app: app)
+                recheckFloat(
+                    element,
+                    id: id,
+                    pid: pid,
+                    app: app
+                )
             }
         default:
             break
