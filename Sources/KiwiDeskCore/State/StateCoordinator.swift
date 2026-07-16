@@ -134,6 +134,32 @@ public struct StateCoordinator: Sendable {
         }
     }
 
+    /// Swaps a window's tracked id in place across every id-keyed
+    /// map this coordinator owns — window snapshot, space slot
+    /// (position + focus + weights), plus the three cross-tracking
+    /// maps below — for a native-tab active-tab change (#308). This
+    /// is the hand-mirrored id-keyed field list AGENTS.md §5 warns
+    /// about: forgetting a map is silent data loss, so
+    /// `WindowRekeyParityTests` discovers every WindowID-keyed
+    /// container by reflection and fails if one still holds `old`.
+    /// `rememberedFloating` is keyed by app+title, not WindowID, so
+    /// it is deliberately untouched. No-op if `old` is untracked.
+    mutating func rekey(_ old: WindowID, to new: WindowID) {
+        windows.rekey(old, to: new)
+        workspaces.rekey(old, to: new)
+        if let space = rememberedSpaces.removeValue(forKey: old) {
+            rememberedSpaces[new] = space
+        }
+        if minimizedWindows.remove(old) != nil {
+            minimizedWindows.insert(new)
+        }
+        if let intent = manualFloatOverrides.removeValue(
+            forKey: old
+        ) {
+            manualFloatOverrides[new] = intent
+        }
+    }
+
     /// Folds an event into state and returns the facts the write
     /// erases, for `handle(_:)` to compose its side effects from
     /// (#166). `@discardableResult` — command and test call sites
@@ -253,6 +279,9 @@ public struct StateCoordinator: Sendable {
             // flag when a window heals back to tiled (#300).
             windows.setFloating(id, floating)
 
+        case .windowRekeyed(let old, let new):
+            rekey(old, to: new)
+
         case .displaysChanged(let displays):
             reconcile(displays: displays)
 
@@ -263,23 +292,6 @@ public struct StateCoordinator: Sendable {
             break
         }
         return effects
-    }
-
-    /// The facts a `.windowDestroyed` will erase: the window's
-    /// app and space, and whether it held the active space's
-    /// focus (so the caller can raise the fallback). Read before
-    /// the removal mutates state.
-    private func removalFacts(
-        _ id: WindowID
-    ) -> AppliedEffects.RemovedWindow {
-        let focused =
-            workspaces.activeSpace
-            .flatMap { workspaces[$0]?.focused }
-        return AppliedEffects.RemovedWindow(
-            app: windows[id]?.appName,
-            space: workspaces.space(of: id),
-            focusLost: focused == id
-        )
     }
 
     /// Moves a window's manual float override (if any) into
@@ -316,16 +328,5 @@ public struct StateCoordinator: Sendable {
         else { return }
         windows.setFloating(window.id, intent)
         manualFloatOverrides[window.id] = intent
-    }
-
-    private mutating func reconcile(displays: [Display]) {
-        let incoming = Set(displays.map(\.id))
-        for old in workspaces.allDisplays
-        where !incoming.contains(old.id) {
-            workspaces.removeDisplay(old.id)
-        }
-        for display in displays {
-            workspaces.upsertDisplay(display)
-        }
     }
 }

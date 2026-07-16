@@ -73,7 +73,12 @@ public final class TilingEngine {
     ) -> Bool {
         switch event {
         case .windowCreated, .windowDestroyed, .appTerminated,
-            .displaysChanged, .windowFloatChanged:
+            .displaysChanged, .windowFloatChanged,
+            .windowRekeyed:
+            // A re-key swaps the tracked id in one slot; the newly
+            // active tab must be placed into that slot's frame
+            // (#308), so retile even though the array shape is
+            // unchanged.
             return true
         case .appLaunched, .windowFocused, .windowMoved,
             .windowResized, .windowTitleChanged,

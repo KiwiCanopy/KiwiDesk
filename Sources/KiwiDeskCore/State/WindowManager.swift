@@ -49,6 +49,18 @@ public struct WindowManager: Sendable {
         return ids
     }
 
+    /// Re-keys a tracked window in place: same snapshot, new id.
+    /// Used when a native tab group's active tab changes (#308).
+    /// The stored `ManagedWindow.id` is immutable, so the entry is
+    /// rebuilt via `withID` (one mirror of the field list, guarded
+    /// by `WindowRekeyParityTests`). No-op if `old` is absent.
+    public mutating func rekey(_ old: WindowID, to new: WindowID) {
+        guard let existing = windows.removeValue(forKey: old) else {
+            return
+        }
+        windows[new] = existing.withID(new)
+    }
+
     /// Windows belonging to one application.
     public func windows(pid: pid_t) -> [ManagedWindow] {
         windows.values.filter { $0.pid == pid }

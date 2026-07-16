@@ -186,6 +186,20 @@ extension KiwiCore {
             }
         case .nativeSpaceChanged:
             handleNativeSpaceChange()
+        case .windowRekeyed(let old, let new):
+            // A native-tab active-tab change: the state fold already
+            // moved the slot's id (position, focus, weights). The OS
+            // made the new tab frontmost itself, so we must NOT raise
+            // — that is the focus jump we are fixing. Retarget our own
+            // id-keyed bookkeeping; the retile below refreshes the
+            // ring, App Bar, and frames onto the new id (#308).
+            if outstandingSelfRaises.remove(old) != nil {
+                outstandingSelfRaises.insert(new)
+            }
+            if pendingFocusRaise == old {
+                pendingFocusRaise = new
+            }
+            drag.cancel(old)
         default:
             break
         }

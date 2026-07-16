@@ -23,6 +23,16 @@ public enum KiwiEvent: Sendable {
     /// verdict changed (a window scanned mid-launch can report
     /// a wrong subrole once; see EventLoop.reconcile).
     case windowFloatChanged(WindowID, isFloating: Bool)
+    /// A managed window's tracked id changed in place, from the
+    /// first id to the second. Native macOS tabs are separate
+    /// `NSWindow`s sharing one frame, one on screen at a time, each
+    /// with its own `CGWindowID`; when the active tab switches (or
+    /// the active tab closes with siblings left), the group's single
+    /// layout slot must adopt the new active id without a
+    /// destroy/create pair — no new tile, no lost focus (#308).
+    /// `TabReconciler` decides when to emit this from the event loop;
+    /// the state fold swaps the id across every id-keyed map in place.
+    case windowRekeyed(WindowID, WindowID)
     case displaysChanged([Display])
     /// The user switched native macOS Spaces (Mission
     /// Control). Consumers query `NativeSpaces` for details.

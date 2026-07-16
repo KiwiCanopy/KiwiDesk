@@ -86,4 +86,24 @@ public struct ManagedWindow: Sendable, Equatable {
         self.isFloating = isFloating
         self.isTransientOverlay = isTransientOverlay
     }
+
+    /// A copy carrying a different id, every other field preserved.
+    /// `id` is a `let` (a window's identity is immutable), so a
+    /// native-tab re-key (#308) — where the tracked `CGWindowID`
+    /// changes as the active tab switches but the window is the
+    /// same — must reconstruct the snapshot. Kept next to the field
+    /// list so the mirror lives in one place; a `WindowManager`
+    /// round-trip test guards it against a forgotten field.
+    public func withID(_ newID: WindowID) -> ManagedWindow {
+        ManagedWindow(
+            id: newID,
+            pid: pid,
+            appName: appName,
+            appBundleID: appBundleID,
+            title: title,
+            frame: frame,
+            isFloating: isFloating,
+            isTransientOverlay: isTransientOverlay
+        )
+    }
 }
