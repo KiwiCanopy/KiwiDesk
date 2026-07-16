@@ -39,8 +39,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         // window must re-raise to get its Dock icon back.
         NSApp.activateAsRegular()
         if let window {
-            window.makeKeyAndOrderFront(nil)
-            NSApp.activate()
+            NSApp.forceFront(window)
             return
         }
         let window = NSWindow(
@@ -95,8 +94,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         }
         self.window = window
 
-        window.makeKeyAndOrderFront(nil)
-        NSApp.activate()
+        NSApp.forceFront(window)
     }
 
     /// Closing the dashboard returns KiwiDesk to menu-bar-only,

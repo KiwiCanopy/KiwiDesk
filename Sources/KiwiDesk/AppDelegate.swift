@@ -198,8 +198,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
 
     private func showOnboarding() {
         if let window = onboardingWindow {
-            window.makeKeyAndOrderFront(nil)
-            NSApp.activate()
+            // No `activateAsRegular()` here (unlike Settings' reuse
+            // branch): `windowWillClose` nils `onboardingWindow` on
+            // close, so a non-nil window is guaranteed still
+            // `.regular` and the promotion never needs repeating.
+            NSApp.forceFront(window)
             return
         }
         onboardingModel.isTrusted = permissions.isTrusted
@@ -233,8 +236,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         onboardingWindow = window
 
         NSApp.activateAsRegular()
-        window.makeKeyAndOrderFront(nil)
-        NSApp.activate()
+        NSApp.forceFront(window)
     }
 
     private func closeOnboarding() {
