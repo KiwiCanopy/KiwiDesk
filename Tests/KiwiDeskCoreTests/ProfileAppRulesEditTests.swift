@@ -25,8 +25,8 @@ struct ProfileAppRulesEditTests {
         )
         var config = GuiConfig()
         config.appRules = [
-            "Mail": SpaceID(1),
-            "Music": SpaceID(2),
+            "mail": SpaceID(1),
+            "music": SpaceID(2),
         ]
         try? core.guiConfigStore.save(config)
         return core
@@ -52,9 +52,9 @@ struct ProfileAppRulesEditTests {
     /// Re-pins Mail, adds Safari, un-pins Music.
     private var override: AppRuleOverride {
         AppRuleOverride(rules: [
-            "Mail": SpaceID(3),
-            "Safari": SpaceID(4),
-            "Music": nil,
+            "mail": SpaceID(3),
+            "safari": SpaceID(4),
+            "music": nil,
         ])
     }
 
@@ -67,11 +67,11 @@ struct ProfileAppRulesEditTests {
 
         let config = try core.loadGuiConfig(editing: "Work")
 
-        #expect(config.appRules["Mail"] == SpaceID(3))
-        #expect(config.appRules["Safari"] == SpaceID(4))
+        #expect(config.appRules["mail"] == SpaceID(3))
+        #expect(config.appRules["safari"] == SpaceID(4))
         // The tombstoned base pin is absent from the resolved
         // map the tabs edit.
-        #expect(config.appRules["Music"] == nil)
+        #expect(config.appRules["music"] == nil)
     }
 
     // MARK: - Saving
@@ -82,9 +82,9 @@ struct ProfileAppRulesEditTests {
         try saveWorkProfile(core)
 
         var config = try core.loadGuiConfig(editing: "Work")
-        config.appRules["Mail"] = SpaceID(3)
-        config.appRules["Safari"] = SpaceID(4)
-        config.appRules["Music"] = nil
+        config.appRules["mail"] = SpaceID(3)
+        config.appRules["safari"] = SpaceID(4)
+        config.appRules["music"] = nil
         try core.overwriteProfile(named: "Work", with: config)
 
         let saved = try core.profiles.read(name: "Work")
@@ -113,8 +113,8 @@ struct ProfileAppRulesEditTests {
         var config = try core.loadGuiConfig(editing: "Work")
         // Put every rule back to its base state.
         config.appRules = [
-            "Mail": SpaceID(1),
-            "Music": SpaceID(2),
+            "mail": SpaceID(1),
+            "music": SpaceID(2),
         ]
         try core.overwriteProfile(named: "Work", with: config)
 
@@ -137,7 +137,7 @@ struct ProfileAppRulesEditTests {
         let before = try Data(contentsOf: sidecarURL)
 
         var config = try core.loadGuiConfig(editing: "Work")
-        config.appRules["Mail"] = SpaceID(9)
+        config.appRules["mail"] = SpaceID(9)
         try core.overwriteProfile(named: "Work", with: config)
 
         let after = try Data(contentsOf: sidecarURL)

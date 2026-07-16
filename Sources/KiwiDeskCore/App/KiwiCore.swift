@@ -41,6 +41,10 @@ public final class KiwiCore {
     var globalAppRuleBase: [String: SpaceID] = [:]
     var globalFloatRuleBase: [String] = []
     var globalIgnoreRuleBase: [String] = []
+    /// `loadConfig` installs several candidate rule states before
+    /// the active native-Space binding is known. Suppress their AX
+    /// reconciles and run one pass after the final profile wins.
+    var defersWindowRuleReconcile = false
 
     /// A stack z-order restore is waiting for the current
     /// animations to settle (see restoreStackZOrder).

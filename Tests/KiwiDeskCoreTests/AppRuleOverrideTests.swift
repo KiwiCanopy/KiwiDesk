@@ -21,14 +21,18 @@ struct AppRuleOverrideTests {
 
     @Test("Empty/nil override inherits the base unchanged")
     func emptyInherits() {
+        let normalized = [
+            "mail": SpaceID(1),
+            "music": SpaceID(2),
+        ]
         #expect(
             ConfigResolver.resolvedAppRules(
                 base: base,
                 profile: nil
-            ) == base
+            ) == normalized
         )
         #expect(
-            AppRuleOverride().resolved(onto: base) == base
+            AppRuleOverride().resolved(onto: base) == normalized
         )
     }
 
@@ -43,9 +47,9 @@ struct AppRuleOverrideTests {
             "Music": nil,
         ])
         let resolved = over.resolved(onto: base)
-        #expect(resolved["Mail"] == SpaceID(3))
-        #expect(resolved["Safari"] == SpaceID(4))
-        #expect(resolved["Music"] == nil)
+        #expect(resolved["mail"] == SpaceID(3))
+        #expect(resolved["safari"] == SpaceID(4))
+        #expect(resolved["music"] == nil)
         #expect(resolved.count == 2)
     }
 
@@ -62,13 +66,16 @@ struct AppRuleOverrideTests {
             base: base,
             edited: edited
         )
-        #expect(over?.resolved(onto: base) == edited)
+        #expect(
+            over?.resolved(onto: base)
+                == AppRuleOverride.normalized(edited)
+        )
         // Shape: sparse — one change, one add, one tombstone.
         let rules = try #require(over).rules
         #expect(rules.count == 3)
-        #expect(rules["Mail"] == SpaceID(3))
-        #expect(rules["Safari"] == SpaceID(4))
-        #expect(rules["Music"] == .some(nil))
+        #expect(rules["mail"] == SpaceID(3))
+        #expect(rules["safari"] == SpaceID(4))
+        #expect(rules["music"] == .some(nil))
     }
 
     @Test("No divergence diffs to nil (never persisted empty)")
@@ -77,6 +84,16 @@ struct AppRuleOverrideTests {
             AppRuleOverride.diff(base: base, edited: base)
                 == nil
         )
+    }
+
+    @Test("Mixed-case tombstone removes inherited app")
+    func mixedCaseTombstone() {
+        let over = AppRuleOverride(rules: ["MAIL": nil])
+
+        let resolved = over.resolved(onto: base)
+
+        #expect(resolved["mail"] == nil)
+        #expect(resolved["music"] == SpaceID(2))
     }
 
     // MARK: - Coding

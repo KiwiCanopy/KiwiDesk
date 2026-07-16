@@ -38,7 +38,10 @@ extension KiwiCore {
     /// and read-once-per-cycle caveats.
     public func baseAppRules() -> [String: SpaceID] {
         guard isGuiManaged else { return globalAppRuleBase }
-        return guiConfigStore.load()?.appRules ?? globalAppRuleBase
+        guard let rules = guiConfigStore.load()?.appRules else {
+            return globalAppRuleBase
+        }
+        return AppRuleOverride.normalized(rules)
     }
 
     /// Global float-rule base for the stored-profile editor.
