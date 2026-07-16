@@ -73,12 +73,14 @@ public struct WindowManager: Sendable {
         _ floating: Bool
     ) {
         windows[id]?.isFloating = floating
-    }
-
-    public mutating func setTransientOverlay(
-        _ id: WindowID,
-        _ overlay: Bool
-    ) {
-        windows[id]?.isTransientOverlay = overlay
+        // A transient overlay always floats, so untiling a window
+        // must clear its overlay flag — the single mutation point
+        // for `isFloating`, so every path (detection self-heal,
+        // make_tiled, remembered-tiled restore) upholds the
+        // invariant overlay ⟹ floating without re-asserting it
+        // (#300). Only track-time init ever sets the flag true.
+        if !floating {
+            windows[id]?.isTransientOverlay = false
+        }
     }
 }

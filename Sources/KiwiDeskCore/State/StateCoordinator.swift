@@ -249,16 +249,9 @@ public struct StateCoordinator: Sendable {
             // not revert an explicit make_floating/make_tiled
             // (docs promise re-checks never do).
             guard manualFloatOverrides[id] == nil else { break }
+            // `windows.setFloating` also clears any stale overlay
+            // flag when a window heals back to tiled (#300).
             windows.setFloating(id, floating)
-            // A transient overlay always floats, so when detection
-            // self-heals a window back to tiled (a mid-launch
-            // subrole/layer flicker corrected by `recheckFloat`),
-            // its overlay flag must clear too — otherwise a now-
-            // tiled standard window would silently keep losing its
-            // focus ring (#300). Overlay ⟹ floating, enforced here.
-            if !floating {
-                windows.setTransientOverlay(id, false)
-            }
 
         case .displaysChanged(let displays):
             reconcile(displays: displays)

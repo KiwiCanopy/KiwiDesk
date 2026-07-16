@@ -142,6 +142,21 @@ struct FloatPersistenceTests {
         )
     }
 
+    @Test("make_tiled also clears a stale overlay flag (#300)")
+    func manualTileClearsOverlay() {
+        var state = StateCoordinator()
+        var overlay = makeWindow(1, floating: true)
+        overlay.isTransientOverlay = true
+        state.apply(.windowCreated(overlay))
+        // The manual make_tiled path routes through the same
+        // `WindowManager.setFloating`, so the invariant holds there
+        // too, not just on the detection path.
+        state.setFloating(WindowID(1), false)
+        #expect(
+            state.windows[WindowID(1)]?.isTransientOverlay == false
+        )
+    }
+
     @Test("A window that stays floating keeps its overlay flag")
     func stillFloatingKeepsOverlay() {
         var state = StateCoordinator()
