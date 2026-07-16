@@ -72,16 +72,14 @@ struct FocusBorderEditor: View {
             value: style.width,
             range: 1...20
         )
-        DropdownRow(label: cornerLabel) {
-            Picker(cornerLabel, selection: style.cornerStyle) {
-                Text(L("border.corner.rounded", "Rounded"))
-                    .tag(BorderStyle.CornerStyle.rounded)
-                Text(L("border.corner.square", "Square"))
-                    .tag(BorderStyle.CornerStyle.square)
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
-        }
+        SegmentedPicker(
+            cornerLabel,
+            selection: style.cornerStyle,
+            options: [
+                (L("border.corner.rounded", "Rounded"), .rounded),
+                (L("border.corner.square", "Square"), .square),
+            ]
+        )
         if squareSitsInset {
             Text(
                 L(

@@ -78,7 +78,8 @@ struct SpaceOverrideRows: View {
             options: [
                 (.horizontal, L("scroll_grid.horizontal", "Horizontal")),
                 (.vertical, L("scroll_grid.vertical", "Vertical")),
-            ]
+            ],
+            style: .menu
         )
         OverridePickerRow(
             label: L("scroll_grid.focus_anchor", "Focus anchor"),
@@ -99,7 +100,8 @@ struct SpaceOverrideRows: View {
                         : L("scroll_grid.anchor.end_h", "Right")
                 ),
                 (.follow, L("scroll_grid.anchor.follow", "Follow")),
-            ]
+            ],
+            style: .menu
         )
         placeholder(slotSizePlaceholder)
     }
@@ -142,6 +144,7 @@ struct SpaceOverrideRows: View {
                     L("layout_params.alternating", "Alternating")
                 ),
             ],
+            style: .menu,
             help: LayoutHelp.splitStrategy
         )
         OverrideFractionRow(

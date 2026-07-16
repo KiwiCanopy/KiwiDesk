@@ -258,10 +258,20 @@ struct OverrideFractionRow: View {
 
 /// An override picker over any labeled, hashable option set.
 struct OverridePickerRow<Value: Hashable & Sendable>: View {
+    /// Which control the row renders (#291). `.segmented` is the
+    /// rule's norm for 2–4 short peers and drives the full-width
+    /// App Bar per-layout overrides; `.menu` is the documented
+    /// compact-surface exception, kept by the narrow per-Space
+    /// popover where the inherit chrome already eats width.
+    /// Required, no default: every call site names its surface so
+    /// a new override row can't silently pick the wrong control.
+    enum Style { case menu, segmented }
+
     let label: String
     @Binding var value: Value?
     let global: Value
     let options: [(Value, String)]
+    let style: Style
     /// Optional `?` popover (#94), rendered by the chrome so
     /// it stays clickable while the row inherits.
     var help: String? = nil
@@ -272,55 +282,35 @@ struct OverridePickerRow<Value: Hashable & Sendable>: View {
             help: help,
             subject: label
         ) {
+            control
+        }
+    }
+
+    // The menu-vs-segmented branch is the only difference between
+    // the two surfaces; everything above (inherit chrome, help,
+    // label-column narrowing) is shared, so one component with a
+    // one-line branch beats forking the chrome wiring (§5 mirror).
+    @ViewBuilder private var control: some View {
+        switch style {
+        case .menu:
             DropdownRow(label: label) {
                 Picker(
                     label,
-                    selection: overrideValue(
-                        $value,
-                        global: global
-                    )
+                    selection: overrideValue($value, global: global)
                 ) {
                     ForEach(options, id: \.0) { option in
                         Text(option.1).tag(option.0)
                     }
                 }
             }
+        case .segmented:
+            // SegmentedPicker wants (title, value); the override
+            // option lists are (value, title), so flip the pair.
+            SegmentedPicker(
+                label,
+                selection: overrideValue($value, global: global),
+                options: options.map { ($0.1, $0.0) }
+            )
         }
     }
-}
-
-/// The shared option lists so the global editor and the
-/// per-layout override pickers stay in sync.
-enum AppBarOptions {
-    @MainActor
-    static let position: [(AppBarStyle.Position, String)] = [
-        (.start, L("app_bar.position.start", "Start")),
-        (.end, L("app_bar.position.end", "End")),
-    ]
-    @MainActor
-    static let tabBackground: [(AppBarStyle.TabBackground, String)] = [
-        (.boxed, L("app_bar.tab_background.boxed", "Boxed")),
-        (.plain, L("app_bar.tab_background.plain", "Plain")),
-    ]
-    @MainActor
-    static let activeIndicator: [(AppBarStyle.ActiveIndicator, String)] = [
-        (.ring, L("app_bar.active_indicator.ring", "Ring")),
-        (
-            .edgeMark,
-            L(
-                "app_bar.active_indicator.edge_mark",
-                "Edge mark"
-            )
-        ),
-        (.gap, L("app_bar.active_indicator.gap", "Gap")),
-    ]
-    @MainActor
-    static let content: [(AppBarStyle.Content, String)] = [
-        (.icon, L("app_bar.content.icon", "Icon")),
-        (.name, L("app_bar.content.name", "Name")),
-        (
-            .iconAndName,
-            L("app_bar.content.icon_and_name", "Icon & name")
-        ),
-    ]
 }

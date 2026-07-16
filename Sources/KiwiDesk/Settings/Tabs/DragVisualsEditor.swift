@@ -200,17 +200,14 @@ struct DragVisualControls: View {
             value: $visual.borderThickness,
             range: 0...20
         )
-        DropdownRow(label: borderAlignmentLabel) {
-            Picker(
-                borderAlignmentLabel,
-                selection: $visual.borderAlignment
-            ) {
-                Text(L("drag.inside", "Inside"))
-                    .tag(BorderAlignment.inside)
-                Text(L("drag.outside", "Outside"))
-                    .tag(BorderAlignment.outside)
-            }
-        }
+        SegmentedPicker(
+            borderAlignmentLabel,
+            selection: $visual.borderAlignment,
+            options: [
+                (L("drag.inside", "Inside"), .inside),
+                (L("drag.outside", "Outside"), .outside),
+            ]
+        )
         Divider()
         Toggle(L("drag.fill", "Fill"), isOn: $visual.fill)
         HexColorField(

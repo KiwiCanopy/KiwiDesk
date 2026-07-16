@@ -73,12 +73,22 @@ struct LayoutAppBarSection: View {
     // override chrome's own `?` slot is for "should I override",
     // not to re-explain the field — reserved for a field the
     // global editor can't already teach.
+    //
+    // Twin of `GlobalAppBarSection.behavior` (#291): the same four
+    // look fields, rendered here as `.segmented` overrides. Keep
+    // the two lists — and their segmented control choice — in
+    // lockstep. A fifth field, or a control-type change, must land
+    // on both surfaces (same field, same control on comparable
+    // full-width surfaces). Convention-guarded, not test-guarded:
+    // a missing row or mismatched pill is visible on first glance,
+    // not silent data loss, so it doesn't warrant a parity test.
     @ViewBuilder private var behaviorOverrides: some View {
         OverridePickerRow(
             label: L("app_bar.position.label", "Position"),
             value: $bar.position,
             global: global.position,
-            options: AppBarOptions.position
+            options: AppBarOptions.position,
+            style: .segmented
         )
         OverridePickerRow(
             label: L(
@@ -87,7 +97,8 @@ struct LayoutAppBarSection: View {
             ),
             value: $bar.tabBackground,
             global: global.tabBackground,
-            options: AppBarOptions.tabBackground
+            options: AppBarOptions.tabBackground,
+            style: .segmented
         )
         OverridePickerRow(
             label: L(
@@ -96,13 +107,15 @@ struct LayoutAppBarSection: View {
             ),
             value: $bar.activeIndicator,
             global: global.activeIndicator,
-            options: AppBarOptions.activeIndicator
+            options: AppBarOptions.activeIndicator,
+            style: .segmented
         )
         OverridePickerRow(
             label: L("app_bar.content.label", "Content"),
             value: $bar.content,
             global: global.content,
-            options: AppBarOptions.content
+            options: AppBarOptions.content,
+            style: .segmented
         )
         OverrideToggleRow(
             label: L(

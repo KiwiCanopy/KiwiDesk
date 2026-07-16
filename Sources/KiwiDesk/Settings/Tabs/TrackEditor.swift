@@ -66,6 +66,15 @@ struct TrackEditor: View {
                 ]
             )
             Divider()
+            overflow
+            // New-window mode + Position is standing placement
+            // policy (tier 3), clustered with Overflow directly
+            // above — no divider between, since dividers mark tier
+            // boundaries, not spacing — and after the
+            // schematic-defining Arrange row. Matches StackEditor,
+            // which keeps Overflow + new-window placement in one
+            // cluster (design-decisions "Row order within a
+            // section").
             SegmentedPicker(
                 L("track.new_window", "New window"),
                 selection: $model.config.settings.track
@@ -96,8 +105,6 @@ struct TrackEditor: View {
                 ),
                 help: LayoutHelp.trackPosition
             )
-            Divider()
-            overflow
             Divider()
             trackAuto
             VStack(alignment: .leading, spacing: 4) {
@@ -139,31 +146,27 @@ struct TrackEditor: View {
     /// fitting ones and piles the rest. Normal tracks are always
     /// `cascade_overflow`. Reuses stack's `overflow_style` labels.
     private var overflow: some View {
-        DropdownRow(
-            label: L("layout_params.overflow", "Overflow"),
-            help: LayoutHelp.trackOverflow
-        ) {
-            Picker(
-                L("layout_params.overflow", "Overflow"),
-                selection: $model.config.settings.track
-                    .overflowStyle
-            ) {
-                Text(
+        SegmentedPicker(
+            L("layout_params.overflow", "Overflow"),
+            selection: $model.config.settings.track.overflowStyle,
+            options: [
+                (
                     L(
                         "layout_params.cascade_overflow",
                         "Cascade overflow"
-                    )
-                )
-                .tag(StackParams.OverflowStyle.cascadeOverflow)
-                Text(
+                    ),
+                    .cascadeOverflow
+                ),
+                (
                     L(
                         "layout_params.cascade_all",
                         "Cascade all"
-                    )
-                )
-                .tag(StackParams.OverflowStyle.cascadeAll)
-            }
-        }
+                    ),
+                    .cascadeAll
+                ),
+            ],
+            help: LayoutHelp.trackOverflow
+        )
     }
 
     /// The automatic-tracks toggle with its caption. On (the

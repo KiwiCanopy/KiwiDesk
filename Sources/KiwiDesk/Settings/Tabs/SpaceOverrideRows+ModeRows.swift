@@ -15,7 +15,8 @@ extension SpaceOverrideRows {
             options: [
                 (.dynamic, L("scroll_grid.dynamic", "Dynamic")),
                 (.rigid, L("scroll_grid.rigid", "Rigid")),
-            ]
+            ],
+            style: .menu
         )
         OverrideToggleRow(
             label: L(
@@ -54,7 +55,8 @@ extension SpaceOverrideRows {
                         "Rows first"
                     )
                 ),
-            ]
+            ],
+            style: .menu
         )
         OverrideStepperRow(
             label: L("scroll_grid.columns", "Columns"),
@@ -86,7 +88,8 @@ extension SpaceOverrideRows {
                     L("scroll_grid.horizontal", "Horizontal")
                 ),
                 (.vertical, L("scroll_grid.vertical", "Vertical")),
-            ]
+            ],
+            style: .menu
         )
     }
 
@@ -107,7 +110,8 @@ extension SpaceOverrideRows {
                     .horizontal,
                     L("scroll_grid.arrange.rows", "Rows")
                 ),
-            ]
+            ],
+            style: .menu
         )
         OverrideStepperRow(
             label: L("track.count", "Track limit"),
@@ -142,7 +146,8 @@ extension SpaceOverrideRows {
                         "Cascade all"
                     )
                 ),
-            ]
+            ],
+            style: .menu
         )
     }
 }

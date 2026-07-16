@@ -59,6 +59,7 @@ extension SpaceOverrideRows {
                     )
                 ),
             ],
+            style: .menu,
             help: LayoutHelp.stackOverflow
         )
         OverridePickerRow(
@@ -90,6 +91,7 @@ extension SpaceOverrideRows {
                     L("layout_params.position.left", "Left")
                 ),
             ],
+            style: .menu,
             help: LayoutHelp.stackPosition
         )
         OverridePickerRow(
@@ -119,6 +121,7 @@ extension SpaceOverrideRows {
                     )
                 ),
             ],
+            style: .menu,
             help: LayoutHelp.masterOrientation
         )
         // Greyed at a resolved master count of 1, like the
