@@ -31,9 +31,13 @@ extension KiwiCore {
                         "expected remaining gap (pt)"
                     )
                 }
-                // Whole points 0–100, clamped like the other
-                // border magnitudes.
-                remaining = min(max(raw.rounded(), 0), 100)
+                // Whole points, clamped like the other border
+                // magnitudes; bounds shared with the GUI field.
+                let range = BorderStyle.remainingGapRange
+                remaining = min(
+                    max(raw.rounded(), range.lowerBound),
+                    range.upperBound
+                )
             }
             tiler.settings.gapsGlobal =
                 tiler.settings.borderStyle.fittingGaps(

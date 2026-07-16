@@ -1908,7 +1908,8 @@ border.set_corner_style("rounded")
 ### border.fit_gaps
 
 **Expects:** an optional remaining gap in whole points, 0–100
-(default 0).
+(default 0). An out-of-range value clamps into that range (like
+the other border magnitudes); a non-numeric argument fails.
 
 **Does:** sizes the global layout gaps so borders never touch a
 neighbour, keeping `remaining` points of deliberate whitespace

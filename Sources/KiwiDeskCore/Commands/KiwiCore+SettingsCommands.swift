@@ -204,14 +204,20 @@ extension KiwiCore {
                 return .fail("expected depth")
             }
             let range = QuitGridLayout.targetDepthRange
-            let depth = Int(raw.rounded())
-            guard range.contains(depth) else {
+            // Bounds-check as Double BEFORE Int(...) —
+            // `Int(1e300)` traps, so a config typo would
+            // otherwise kill the WM (the #58 lesson).
+            let rounded = raw.rounded()
+            guard
+                rounded >= Double(range.lowerBound),
+                rounded <= Double(range.upperBound)
+            else {
                 return .fail(
                     "expected \(range.lowerBound)"
                         + "-\(range.upperBound)"
                 )
             }
-            tiler.settings.quitGridTargetDepth = depth
+            tiler.settings.quitGridTargetDepth = Int(rounded)
         default:
             return .fail("unknown command: \(command)")
         }

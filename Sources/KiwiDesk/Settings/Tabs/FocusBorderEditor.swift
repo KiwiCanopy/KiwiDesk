@@ -161,43 +161,6 @@ struct FocusBorderEditor: View {
     }
 }
 
-/// The compact remaining-gap field (#295): a string proxy that
-/// commits (parse + clamp 0–100) on Return or focus loss, the
-/// StepperRow discipline, so mid-edit typing never clobbers the
-/// value and the action always reads a committed whole number.
-private struct RemainingGapField: View {
-    @Binding var value: Int
-    @State private var text = "0"
-    @FocusState private var focused: Bool
-
-    var body: some View {
-        TextField("", text: $text)
-            .labelsHidden()
-            .frame(width: 44)
-            .multilineTextAlignment(.trailing)
-            .monospacedDigit()
-            .textFieldStyle(.roundedBorder)
-            .focused($focused)
-            .onSubmit(commit)
-            .onChange(of: focused) { _, now in
-                if !now { commit() }
-            }
-            .accessibilityLabel(
-                L(
-                    "border.remaining_gap.a11y",
-                    "Remaining gap after borders"
-                )
-            )
-    }
-
-    private func commit() {
-        if let parsed = Int(text) {
-            value = min(max(parsed, 0), 100)
-        }
-        text = "\(value)"
-    }
-}
-
 /// Two mock windows on a neutral desktop: the focused one always
 /// ringed, the other ringed only when unfocused borders are on.
 /// Reflects width and corner style live so the editor's controls

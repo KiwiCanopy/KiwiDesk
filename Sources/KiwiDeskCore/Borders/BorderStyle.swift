@@ -29,6 +29,13 @@ public struct BorderStyle: Sendable, Equatable {
     public static let minWidth: CGFloat = 0.5
     public static let maxWidth: CGFloat = 20
 
+    /// The remaining-gap action range (#295), whole points —
+    /// one source for the `border.fit_gaps` argument clamp and
+    /// the GUI field, so the bounds cannot drift (the
+    /// `targetDepthRange` pattern).
+    public static let remainingGapRange: ClosedRange<Double> =
+        0...100
+
     /// The width at which a square border's outer edge meets the
     /// window edge. Below it a square sits inset *inside* the
     /// window (the corner is still covered by the tuck, it just

@@ -31,7 +31,12 @@ public enum QuitGridLayout {
     /// Dimension cap: at most 4×4 = 16 cells per display. A
     /// teardown safety boundary (min window size, cascade
     /// reachability, no live manager after quit), not a visual
-    /// preference — deliberately not configurable.
+    /// preference — deliberately not configurable. The 2×2…4×4
+    /// span and its 4T/9T growth thresholds are restated as
+    /// prose in `BehaviorSection` (help + live summary),
+    /// `docs/user-guide.md`, and `docs/lua-reference.md` —
+    /// changing the cap or the formula means updating those
+    /// four sites too.
     public static let maxDimension = 4
 
     /// Grid dimension for `count` windows:

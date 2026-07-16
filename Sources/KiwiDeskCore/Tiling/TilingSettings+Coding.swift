@@ -135,11 +135,20 @@ extension TilingSettings: Codable {
                 QuitLayoutStyle.self,
                 forKey: .layout
             ) ?? .grid
+        // Clamp on decode (the `clampedWidth` precedent): a
+        // hand-edited profile can't smuggle a value past the
+        // range the command and GUI enforce.
+        let range = QuitGridLayout.targetDepthRange
         quitGridTargetDepth =
-            try quit.decodeIfPresent(
+            (try quit.decodeIfPresent(
                 Int.self,
                 forKey: .gridTargetDepth
-            ) ?? QuitGridLayout.defaultTargetDepth
+            )).map {
+                min(
+                    max($0, range.lowerBound),
+                    range.upperBound
+                )
+            } ?? QuitGridLayout.defaultTargetDepth
     }
 
     private mutating func decodeResize(

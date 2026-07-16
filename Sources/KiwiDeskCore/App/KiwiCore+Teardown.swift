@@ -149,6 +149,12 @@ extension KiwiCore {
     func gatherWindows() {
         guard eventLoop.isRunning else { return }
         let primaryH = GeometryUtils.primaryHeight
+        // Snapshot once: frames and the raise circle below MUST
+        // partition identically (shared `buckets`), so both read
+        // this local, not the settings, making the invariant
+        // structural rather than relying on nothing mutating
+        // between the two reads.
+        let targetDepth = tiler.settings.quitGridTargetDepth
         // Diagnostic trail for the one-shot placement: a
         // wrong grid shape at quit is unreproducible after
         // the fact, so log what was grouped where.
@@ -170,7 +176,7 @@ extension KiwiCore {
             primaryHeight: primaryH,
             style: tiler.settings.quitLayout,
             minSize: tiler.settings.minWindowSize,
-            targetDepth: tiler.settings.quitGridTargetDepth
+            targetDepth: targetDepth
         )
         guard !frames.isEmpty else { return }
         SkyLight.suppressDisplay()
@@ -246,8 +252,7 @@ extension KiwiCore {
         for group in groups {
             for id in QuitGridLayout.raiseOrder(
                 for: group.windows,
-                targetDepth: tiler.settings
-                    .quitGridTargetDepth
+                targetDepth: targetDepth
             ) {
                 if Date() > raiseDeadline {
                     onLog(

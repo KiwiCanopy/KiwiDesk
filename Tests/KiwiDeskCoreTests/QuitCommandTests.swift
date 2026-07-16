@@ -100,6 +100,22 @@ struct QuitCommandTests {
         )
     }
 
+    @Test("a huge finite target fails instead of trapping")
+    func rejectsHugeDepth() {
+        // Int(1e300) traps — the bounds check must run on the
+        // Double, before any Int conversion (#58 lesson).
+        let core = makeCore()
+        let response = core.execute(
+            "quit.set_grid_target_depth",
+            args: [.number(1e300)]
+        )
+        #expect(!response.isSuccess)
+        #expect(
+            core.tiler.settings.quitGridTargetDepth
+                == QuitGridLayout.defaultTargetDepth
+        )
+    }
+
     @Test("a non-numeric target fails")
     func rejectsNonNumericDepth() {
         let core = makeCore()

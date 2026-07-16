@@ -223,12 +223,30 @@ struct SettingsCodingTests {
         settings.animations.durationMS = 400
         settings.animations.scrollSpeedMS = 180
         settings.mouse.followsFocus = true
+        settings.quitGridTargetDepth = 12
         let data = try JSONEncoder().encode(settings)
         let decoded = try JSONDecoder().decode(
             TilingSettings.self,
             from: data
         )
         #expect(decoded == settings)
+    }
+
+    @Test("quit.grid_target_depth clamps into range on decode")
+    func targetDepthDecodeClamp() throws {
+        // A hand-edited profile can't smuggle a value past the
+        // range the command and GUI enforce (#281 review).
+        for (raw, expected) in [(999, 20), (0, 1), (-7, 1)] {
+            let json = Data(
+                #"{"quit":{"grid_target_depth":\#(raw)}}"#
+                    .utf8
+            )
+            let decoded = try JSONDecoder().decode(
+                TilingSettings.self,
+                from: json
+            )
+            #expect(decoded.quitGridTargetDepth == expected)
+        }
     }
 
     @Test("A partial animations object keeps the other default")
