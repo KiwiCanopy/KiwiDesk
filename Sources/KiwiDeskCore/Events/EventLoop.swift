@@ -185,12 +185,13 @@ public final class EventLoop {
                 rules: floatRules
             )
         // A transient overlay floats for a *structural* reason
-        // (accessory app, panel subrole, or raised layer), never
-        // just because a float rule matched — so a user-floated
-        // standard window keeps its ring while a launcher does not
-        // (#300).
+        // (third-party accessory app, panel subrole, or raised
+        // layer), never just because a float rule matched — so a
+        // user-floated standard window keeps its ring while a
+        // launcher does not (#300). Our own Settings window is
+        // exempt (#315, see `classifiesAsOverlay`).
         window.isTransientOverlay =
-            shouldForceFloat(pid: pid)
+            classifiesAsOverlay(pid: pid)
             || FloatDetection.shouldFloat(
                 role: role,
                 subrole: subrole,

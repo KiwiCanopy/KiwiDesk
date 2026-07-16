@@ -69,6 +69,37 @@ extension EventLoop {
         )
     }
 
+    /// The *structural* half of the transient-overlay
+    /// classification (#300): third-party accessory-app windows
+    /// — but never our own (#315). Any own window that reaches
+    /// tracking is main-capable by construction
+    /// (`shouldIgnoreOwnWindow` dropped every own panel — ghost,
+    /// drop zone, border ring — before classification), so the
+    /// own-process half of `shouldForceFloat` must not sweep the
+    /// Settings window into the launcher class: it still floats
+    /// by default, it just keeps its focus ring. Third-party
+    /// accessory apps stay swept — their windows are menu-bar
+    /// utility UI, the #300 case.
+    nonisolated static func classifiesAsOverlay(
+        pid: pid_t,
+        activationPolicy: NSApplication.ActivationPolicy
+    ) -> Bool {
+        !isOwnProcess(pid)
+            && shouldForceFloat(
+                pid: pid,
+                activationPolicy: activationPolicy
+            )
+    }
+
+    func classifiesAsOverlay(pid: pid_t) -> Bool {
+        Self.classifiesAsOverlay(
+            pid: pid,
+            activationPolicy: NSRunningApplication(
+                processIdentifier: pid
+            )?.activationPolicy ?? .prohibited
+        )
+    }
+
     /// App-wide hard gate shared by attachment, queued AX
     /// callbacks, and reconcile. Built-in system overlays use
     /// the same no-observer path as user `ignore_rules`.

@@ -105,6 +105,41 @@ struct SelfWindowExclusionTests {
         )
     }
 
+    @Test("Own window is never a transient overlay (#315)")
+    func ownWindowKeepsRing() {
+        // The Settings window floats by default (force-float
+        // below) but must NOT classify as a launcher-style
+        // overlay — that classification suppresses its focus
+        // ring. Any own window that reaches tracking is
+        // main-capable by construction.
+        #expect(
+            !EventLoop.classifiesAsOverlay(
+                pid: getpid(),
+                activationPolicy: .accessory
+            )
+        )
+        #expect(
+            !EventLoop.classifiesAsOverlay(
+                pid: getpid(),
+                activationPolicy: .regular
+            )
+        )
+        // Third-party accessory apps stay swept (#300); regular
+        // apps never classify structurally.
+        #expect(
+            EventLoop.classifiesAsOverlay(
+                pid: 1,
+                activationPolicy: .accessory
+            )
+        )
+        #expect(
+            !EventLoop.classifiesAsOverlay(
+                pid: 1,
+                activationPolicy: .regular
+            )
+        )
+    }
+
     @Test("Accessory and own-process windows force floating")
     func forceFloatPolicy() {
         #expect(
