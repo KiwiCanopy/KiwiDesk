@@ -28,8 +28,7 @@ final class ConfigIssuesWindowController: NSObject,
 
     func show() {
         if let window {
-            window.makeKeyAndOrderFront(nil)
-            NSApp.activate()
+            NSApp.forceFront(window)
             return
         }
         let window = NSWindow(
@@ -55,8 +54,7 @@ final class ConfigIssuesWindowController: NSObject,
         window.delegate = self
         window.center()
         self.window = window
-        window.makeKeyAndOrderFront(nil)
-        NSApp.activate()
+        NSApp.forceFront(window)
     }
 
     /// This window doesn't promote to `.regular` on its own, but
