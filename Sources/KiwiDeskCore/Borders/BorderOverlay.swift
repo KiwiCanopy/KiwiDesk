@@ -10,7 +10,7 @@ protocol BorderOverlayBackend: AnyObject {
         colorHex: String,
         screen: NSScreen?
     ) -> Bool
-    func order(above windowNumber: CGWindowID) -> Bool
+    func order(behind windowNumber: CGWindowID) -> Bool
     func hide() -> Bool
 }
 
@@ -81,18 +81,18 @@ final class BorderOverlay {
             )
         else {
             fallBackToAppKit(reason: "SLS renderer update failed")
-            if shouldRestore { order(above: targetWindow) }
+            if shouldRestore { order(behind: targetWindow) }
             return
         }
         if shouldRestore {
-            order(above: targetWindow)
+            order(behind: targetWindow)
         }
     }
 
-    func order(above windowNumber: CGWindowID) {
+    func order(behind windowNumber: CGWindowID) {
         targetWindow = windowNumber
         isHidden = false
-        guard backend.order(above: windowNumber) else {
+        guard backend.order(behind: windowNumber) else {
             fallBackToAppKit(reason: "SLS renderer ordering failed")
             return
         }
@@ -131,7 +131,7 @@ final class BorderOverlay {
             if isHidden {
                 _ = appKit.hide()
             } else {
-                _ = appKit.order(above: targetWindow)
+                _ = appKit.order(behind: targetWindow)
             }
         }
     }
@@ -145,11 +145,11 @@ final class BorderOverlay {
 ///
 /// Non-interactive by design (`ignoresMouseEvents`) — unlike the
 /// app bar, a border is never clicked. Sits at the normal window
-/// level and is stacked directly above its target window with
-/// `order(.above, relativeTo:)` (see `order(above:)`), so a window
-/// layered over the target — an ignored panel, a higher-level
-/// utility window — stays in front of the ring instead of being
-/// covered by it.
+/// level and is stacked directly behind its target window with
+/// `order(.below, relativeTo:)` (see `order(behind:)`). The stroke's
+/// inner overlap sits under the target while its outward reach stays
+/// visible; child panels and other windows above the target therefore
+/// cover the ring naturally.
 @MainActor
 private final class AppKitBorderOverlay: BorderOverlayBackend {
     private var panel: NSPanel?
@@ -160,7 +160,7 @@ private final class AppKitBorderOverlay: BorderOverlayBackend {
     /// steady-state sync and per animation tick — implicit Core
     /// Animation is disabled so the ring snaps to each commanded
     /// frame instead of easing a step behind the window. Stacking
-    /// is left to `order(above:)`, called only on sync (not per
+    /// is left to `order(behind:)`, called only on sync (not per
     /// tick) so the ring isn't re-ordered every frame.
     func update(
         geometry: BorderGeometry,
@@ -207,14 +207,14 @@ private final class AppKitBorderOverlay: BorderOverlayBackend {
         return true
     }
 
-    /// Stacks the ring directly above its target window in the
+    /// Stacks the ring directly behind its target window in the
     /// global window order (`windowNumber` is the target's
     /// `CGWindowID`). Anything layered over the target — an
     /// ignored panel, a higher-level utility window — therefore
     /// stays in front of the ring. Called on sync, not per tick.
     /// A no-op until the panel exists (first `update` creates it).
-    func order(above windowNumber: CGWindowID) -> Bool {
-        panel?.order(.above, relativeTo: Int(windowNumber))
+    func order(behind windowNumber: CGWindowID) -> Bool {
+        panel?.order(.below, relativeTo: Int(windowNumber))
         return true
     }
 
@@ -235,7 +235,7 @@ private final class AppKitBorderOverlay: BorderOverlayBackend {
         panel.hasShadow = false
         panel.ignoresMouseEvents = true
         // Normal window level (not floating): the ring is stacked
-        // relative to its target by `order(above:)`, so it must
+        // relative to its target by `order(behind:)`, so it must
         // share the target's band to sit *below* windows layered
         // over it — a floating level would force it above them.
         panel.level = .normal

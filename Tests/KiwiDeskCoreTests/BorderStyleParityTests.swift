@@ -53,48 +53,47 @@ struct BorderStyleParityTests {
     func fittingGaps() {
         var style = BorderStyle()
         style.width = 10
-        // Rounded reach = 10 − 1 (inner) = 9, not the raw width.
+        // Hidden overlap does not count toward visible reach.
         let focused = style.fittingGaps()
-        #expect(focused.outer.top == 9)
-        #expect(focused.outer.left == 9)
-        #expect(focused.inner.horizontal == 9)
-        #expect(focused.inner.vertical == 9)
+        #expect(focused.outer.top == 10)
+        #expect(focused.outer.left == 10)
+        #expect(focused.inner.horizontal == 10)
+        #expect(focused.inner.vertical == 10)
         // Both: inner gaps double (two neighbouring rings).
         style.unfocusedEnabled = true
-        #expect(style.fittingGaps().inner.horizontal == 18)
-        #expect(style.fittingGaps().outer.top == 9)
-        // Square tucks inward, so it reaches far less than its
-        // width: 10 − ceil-tuck → ceil(10 − 4.686) = 6.
+        #expect(style.fittingGaps().inner.horizontal == 20)
+        #expect(style.fittingGaps().outer.top == 10)
+        // Corner style does not change the visible thickness.
         style.unfocusedEnabled = false
         style.cornerStyle = .square
-        #expect(style.fittingGaps().outer.top == 6)
+        #expect(style.fittingGaps().outer.top == 10)
     }
 
     @Test("fittingGaps adds the remaining gap after the reach")
     func fittingGapsRemaining() {
         var style = BorderStyle()
         style.width = 10
-        // Rounded reach 9 (#295 formula, focused-only):
+        // Visible reach 10 (#295 formula, focused-only):
         // outer = reach + r, inner = reach + r.
         let gaps = style.fittingGaps(remaining: 6)
-        #expect(gaps.outer.top == 15)
-        #expect(gaps.outer.left == 15)
-        #expect(gaps.inner.horizontal == 15)
-        #expect(gaps.inner.vertical == 15)
+        #expect(gaps.outer.top == 16)
+        #expect(gaps.outer.left == 16)
+        #expect(gaps.inner.horizontal == 16)
+        #expect(gaps.inner.vertical == 16)
         // Unfocused shown: inner = 2 × reach + r — the
         // remaining is whitespace between the two rings, so it
         // is added once, not doubled.
         style.unfocusedEnabled = true
         let both = style.fittingGaps(remaining: 6)
-        #expect(both.inner.horizontal == 24)
-        #expect(both.outer.top == 15)
-        // Square reach 6 (tuck): outer = 6 + r.
+        #expect(both.inner.horizontal == 26)
+        #expect(both.outer.top == 16)
+        // Square uses the same visible reach.
         style.unfocusedEnabled = false
         style.cornerStyle = .square
-        #expect(style.fittingGaps(remaining: 4).outer.top == 10)
+        #expect(style.fittingGaps(remaining: 4).outer.top == 14)
         // Zero remaining stays the plain fit; negative clamps.
-        #expect(style.fittingGaps(remaining: 0).outer.top == 6)
-        #expect(style.fittingGaps(remaining: -9).outer.top == 6)
+        #expect(style.fittingGaps(remaining: 0).outer.top == 10)
+        #expect(style.fittingGaps(remaining: -9).outer.top == 10)
     }
 
     @Test("Width clamps into range, raw value preserved")

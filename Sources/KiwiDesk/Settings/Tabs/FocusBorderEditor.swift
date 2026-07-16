@@ -84,19 +84,6 @@ struct FocusBorderEditor: View {
                 (L("border.corner.square", "Square"), .square),
             ]
         )
-        if squareSitsInset {
-            Text(
-                L(
-                    "border.square_inset_hint",
-                    "A square border reaches the window edge only "
-                        + "above %1$d pt; thinner, it sits just "
-                        + "inside the window.",
-                    Int(BorderStyle.minSquareWidth)
-                )
-            )
-            .font(.caption)
-            .foregroundStyle(.secondary)
-        }
         Divider()
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 8) {
@@ -140,14 +127,6 @@ struct FocusBorderEditor: View {
 
     private var cornerLabel: String {
         L("border.corner_style", "Corners")
-    }
-
-    /// A square border thinner than its edge-hugging width sits
-    /// inset inside the window — worth a hint, not a restriction.
-    private var squareSitsInset: Bool {
-        let s = model.config.settings.borderStyle
-        return s.cornerStyle == .square
-            && s.clampedWidth < BorderStyle.minSquareWidth
     }
 
     /// Writes the same `gapsGlobal` the Gaps sliders do, using the
@@ -203,11 +182,9 @@ private struct FocusBorderPreview: View {
             .fill(Color.secondary.opacity(0.25))
             .overlay {
                 if ringed {
-                    // Capped-inner (#311): at the default the ring
-                    // is ~centred on the window edge (≈1 pt in, the
-                    // rest into the gap). A centred stroke on the
-                    // window's own rect mocks that — half the band
-                    // overlaps content, half reaches outward.
+                    // Preview the configured visible width. The real
+                    // renderer adds a hidden overlap behind the
+                    // window, which does not change this weight.
                     RoundedRectangle(cornerRadius: radius)
                         .stroke(
                             Color(kiwiHex: color),

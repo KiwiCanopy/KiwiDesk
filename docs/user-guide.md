@@ -544,17 +544,18 @@ windows. Below it:
   Floating windows aren't ringed when unfocused (only the focused
   window is, whether tiled or floating); monocle always shows only
   the focused ring.
-- **Width**: 1–20 pt. A rounded ring covers at most a hairline of
-  window content at any width; the rest grows into the gap, so a
-  thick border never hides content. (A square ring tucks a little
-  deeper to cover each rounded corner.) Keep gaps at least as wide
-  as the border so neighbouring rings don't touch.
+- **Width**: 1–20 pt of visible thickness outside the window. The
+  renderer adds a separate hidden overlap behind the window, which
+  does not count toward the width or hide content. Rounded uses a
+  small seam allowance; square reaches deeper to fill the reveal
+  beneath rounded corners. Keep gaps at least as wide as the border
+  so neighbouring rings don't touch.
 - **Corners**: **Rounded** matches your windows' real corner
   radius; **Square** draws sharp corners — seamless on windows that
   are already square, an intentional squared frame on rounded ones.
 - **Remaining gap · Adjust gaps for border**: a one-shot action
   that rewrites the global outer and inner gaps from the border's
-  true reach, so rings never touch a neighbouring window, leaving
+  visible width, so rings never touch a neighbouring window, leaving
   the **Remaining gap** (0–100 pt, default 0) of extra whitespace
   past the reach. Inner gaps account for both borders when
   unfocused borders are shown. The action can grow *or* shrink
@@ -564,6 +565,9 @@ windows. Below it:
 
 Launcher and panel overlays (Spotlight, Raycast, Alfred) never get
 a ring, even while you type into them — only genuine windows do.
+Popovers, sheets, emoji pickers, and other windows above a bordered
+window stay above its ring; the underlying window remains focused
+and keeps the visible part of its border.
 
 ## App Bar
 

@@ -94,7 +94,7 @@ public final class BorderManager {
             // Re-assert stacking each sync (focus change, retile,
             // z-order restore) — the target may have moved in the
             // window order since the ring last positioned.
-            overlay.order(above: spec.window.raw)
+            overlay.order(behind: spec.window.raw)
         }
     }
 
@@ -208,13 +208,13 @@ public final class BorderManager {
         case .follow:
             _ = reconcile(id)
         case .reorder:
-            overlay.order(above: id.raw)
+            overlay.order(behind: id.raw)
         case .followAndReorder:
             // Unhide must re-assert order even when the bounds read
             // fails. Leave restoration to that one explicit order so
             // a successful reconcile cannot issue it twice.
             _ = reconcile(id, restoreVisibility: false)
-            overlay.order(above: id.raw)
+            overlay.order(behind: id.raw)
         case .hide:
             overlay.hide()
         }

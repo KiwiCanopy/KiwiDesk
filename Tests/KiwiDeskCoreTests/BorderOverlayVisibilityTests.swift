@@ -21,7 +21,7 @@ struct BorderOverlayVisibilityTests {
             colorHex: "#FF0000",
             screen: nil
         )
-        overlay.order(above: 7)
+        overlay.order(behind: 7)
         backend.calls = []
 
         overlay.hide()
@@ -68,14 +68,14 @@ struct BorderOverlayVisibilityTests {
             colorHex: "#FF0000",
             screen: nil
         )
-        overlay.order(above: 7)
+        overlay.order(behind: 7)
         primary.calls = []
 
         overlay.hide()
         #expect(primary.calls == [.hide])
         #expect(fallback.calls == [.update, .hide])
 
-        overlay.order(above: 7)
+        overlay.order(behind: 7)
         #expect(fallback.calls == [.update, .hide, .order(7)])
     }
 }
@@ -100,7 +100,7 @@ private final class RecordingBorderBackend: BorderOverlayBackend {
         return true
     }
 
-    func order(above windowNumber: CGWindowID) -> Bool {
+    func order(behind windowNumber: CGWindowID) -> Bool {
         calls.append(.order(windowNumber))
         return true
     }

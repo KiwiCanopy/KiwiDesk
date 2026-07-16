@@ -3,14 +3,14 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The capped-inner ring geometry (#278): inner overlap is pinned
-/// at `min(width/2, 1)` pt so a thick border never hides window
-/// content, and the stroke's rounded radius tracks the offset.
+/// The hidden-overlap ring geometry (#278): configured width stays
+/// fully visible outside the target, with an additional fixed stroke
+/// depth masked behind it.
 @Suite("Border geometry")
 struct BorderGeometryTests {
     private let window = CGRect(x: 100, y: 100, width: 200, height: 150)
 
-    @Test("Default 2 pt: 1 pt in / 1 pt out, like centered")
+    @Test("Default width stays fully visible outside")
     func defaultWidth() {
         let g = BorderGeometry.compute(
             windowFrame: window,
@@ -18,14 +18,18 @@ struct BorderGeometryTests {
             cornerStyle: .rounded,
             systemRadius: 16
         )
-        // outer reach = width - min(width/2, 1) = 1.
-        #expect(g.overlayFrame == window.insetBy(dx: -1, dy: -1))
-        #expect(g.lineWidth == 2)
-        // Offset 0 at default → radius == system radius.
-        #expect(g.cornerRadius == 16)
+        #expect(g.overlayFrame == window.insetBy(dx: -2, dy: -2))
+        #expect(
+            g.lineWidth
+                == 2 + BorderGeometry.roundedHiddenOverlap
+        )
+        #expect(
+            g.cornerRadius
+                == 16 + 2 - g.lineWidth / 2
+        )
     }
 
-    @Test("Thick width caps inner at 1 pt, grows outward")
+    @Test("Thick width also keeps a fixed hidden overlap")
     func thickWidth() {
         let g = BorderGeometry.compute(
             windowFrame: window,
@@ -33,14 +37,18 @@ struct BorderGeometryTests {
             cornerStyle: .rounded,
             systemRadius: 16
         )
-        // inner 1, outer 9.
-        #expect(g.overlayFrame == window.insetBy(dx: -9, dy: -9))
-        #expect(g.lineWidth == 10)
-        // radius = 16 + (10/2 - 1) = 20.
-        #expect(g.cornerRadius == 20)
+        #expect(g.overlayFrame == window.insetBy(dx: -10, dy: -10))
+        #expect(
+            g.lineWidth
+                == 10 + BorderGeometry.roundedHiddenOverlap
+        )
+        #expect(
+            g.cornerRadius
+                == 16 + 10 - g.lineWidth / 2
+        )
     }
 
-    @Test("Square tucks the inner edge to the corner tangent")
+    @Test("Square adds its deeper overlap to visible width")
     func square() {
         let g = BorderGeometry.compute(
             windowFrame: window,
@@ -49,29 +57,28 @@ struct BorderGeometryTests {
             systemRadius: 16
         )
         #expect(g.cornerRadius == 0)
-        // inner = 16·(1 − √2/2) ≈ 4.686 (> the rounded 1 pt), so
-        // the stroke reaches outward by only width − inner, less
-        // than the rounded case's 9 pt — the band closes the gap.
-        let tuck = 1 - CGFloat(2).squareRoot() / 2
-        let inner = 16 * tuck
-        let outer = 10 - inner
         #expect(
-            g.overlayFrame == window.insetBy(dx: -outer, dy: -outer)
+            g.overlayFrame == window.insetBy(dx: -10, dy: -10)
+        )
+        #expect(
+            g.lineWidth
+                == 10 + BorderGeometry.squareHiddenOverlap
         )
     }
 
-    @Test("A thin square tucks fully inside the window")
-    func thinSquareTucksInside() {
+    @Test("A thin square does not lose width to the overlap")
+    func thinSquareRemainsVisible() {
         let g = BorderGeometry.compute(
             windowFrame: window,
             width: 2,
             cornerStyle: .square,
             systemRadius: 16
         )
-        // inner (~4.686) exceeds the width, so outer is negative
-        // and the overlay is inset *into* the window — a thin
-        // square frame just inside the edge, no empty corner.
-        #expect(g.overlayFrame.width < window.width)
+        #expect(g.overlayFrame == window.insetBy(dx: -2, dy: -2))
+        #expect(
+            g.lineWidth
+                == 2 + BorderGeometry.squareHiddenOverlap
+        )
     }
 
     @Test("Width is clamped defensively into range")
@@ -81,19 +88,26 @@ struct BorderGeometryTests {
             width: 0.1,
             cornerStyle: .rounded
         )
-        #expect(tooThin.lineWidth == BorderStyle.minWidth)
+        #expect(
+            tooThin.lineWidth
+                == BorderStyle.minWidth
+                + BorderGeometry.roundedHiddenOverlap
+        )
         let tooThick = BorderGeometry.compute(
             windowFrame: window,
             width: 999,
             cornerStyle: .rounded
         )
-        #expect(tooThick.lineWidth == BorderStyle.maxWidth)
+        #expect(
+            tooThick.lineWidth
+                == BorderStyle.maxWidth
+                + BorderGeometry.roundedHiddenOverlap
+        )
     }
 
     /// Seam guard: `outwardReach` must equal `compute`'s outward
-    /// growth (floored at 0) for every style. Both derive from the
-    /// one `innerOverlap`/`squareCornerTuck`, so this pins them
-    /// together if the tuck constant is ever retuned (#311).
+    /// growth for every style. The renderer-only overlap must never
+    /// leak into this public reach.
     @Test("outwardReach matches compute's outward offset")
     func outwardReachMatchesCompute() {
         let widths: [CGFloat] = [BorderStyle.minWidth, 2, 10, 20]
@@ -107,11 +121,9 @@ struct BorderGeometryTests {
                 )
                 let offset = window.minX - g.overlayFrame.minX
                 let reach = BorderGeometry.outwardReach(
-                    width: width,
-                    cornerStyle: style,
-                    systemRadius: 16
+                    width: width
                 )
-                #expect(abs(reach - max(0, offset)) < 0.0001)
+                #expect(abs(reach - offset) < 0.0001)
             }
         }
     }

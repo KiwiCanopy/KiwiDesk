@@ -13,7 +13,7 @@ final class SkyLightBorderOverlay: BorderOverlayBackend {
         (1 << 1) | (1 << 9) | (1 << 18)
     private static let backingStoreBuffered: Int32 = 2
     private static let orderOut: Int32 = 0
-    private static let orderAbove: Int32 = 1
+    private static let orderBelow: Int32 = -1
     private static let parkedOrigin = CGPoint(x: -9_999, y: -9_999)
 
     private let connection: SkyLight.ConnectionID
@@ -99,14 +99,14 @@ final class SkyLightBorderOverlay: BorderOverlayBackend {
             destroyWindow()
             return false
         }
-        if recreatedForScale && !order(above: targetWindow) {
+        if recreatedForScale && !order(behind: targetWindow) {
             destroyWindow()
             return false
         }
         return true
     }
 
-    func order(above windowNumber: CGWindowID) -> Bool {
+    func order(behind windowNumber: CGWindowID) -> Bool {
         guard window != 0, windowNumber == targetWindow,
             let transaction = makeTransaction()
         else { return false }
@@ -126,7 +126,7 @@ final class SkyLightBorderOverlay: BorderOverlayBackend {
             SkyLight.transactionOrder?(
                 transaction,
                 window,
-                Self.orderAbove,
+                Self.orderBelow,
                 targetWindow
             ) == .success
         else { return false }

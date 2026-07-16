@@ -121,10 +121,10 @@ struct BorderCommandTests {
         #expect(
             core.execute("border.fit_gaps", args: []).isSuccess
         )
-        // Rounded reach = width − 1 = 9.
-        #expect(core.tiler.settings.gapsGlobal.outer.top == 9)
+        // Hidden overlap is excluded: visible reach = width = 10.
+        #expect(core.tiler.settings.gapsGlobal.outer.top == 10)
         #expect(
-            core.tiler.settings.gapsGlobal.inner.horizontal == 9
+            core.tiler.settings.gapsGlobal.inner.horizontal == 10
         )
         // Unfocused on → inner gaps double.
         _ = core.execute(
@@ -133,29 +133,29 @@ struct BorderCommandTests {
         )
         _ = core.execute("border.fit_gaps", args: [])
         #expect(
-            core.tiler.settings.gapsGlobal.inner.horizontal == 18
+            core.tiler.settings.gapsGlobal.inner.horizontal == 20
         )
-        #expect(core.tiler.settings.gapsGlobal.outer.top == 9)
+        #expect(core.tiler.settings.gapsGlobal.outer.top == 10)
     }
 
     @Test("fit_gaps keeps an optional remaining gap (#295)")
     func fitGapsRemaining() {
         let core = makeCore()
         _ = core.execute("border.set_width", args: [.number(10)])
-        // Rounded reach 9, +6 remaining on every edge and axis.
+        // Visible reach 10, +6 remaining on every edge and axis.
         #expect(
             core.execute(
                 "border.fit_gaps",
                 args: [.number(6)]
             ).isSuccess
         )
-        #expect(core.tiler.settings.gapsGlobal.outer.top == 15)
+        #expect(core.tiler.settings.gapsGlobal.outer.top == 16)
         #expect(
             core.tiler.settings.gapsGlobal.inner.horizontal
-                == 15
+                == 16
         )
         // Unfocused on: inner doubles the reach, then adds the
-        // remaining once — 18 + 6.
+        // remaining once — 20 + 6.
         _ = core.execute(
             "border.set_unfocused_enabled",
             args: [.bool(true)]
@@ -163,9 +163,9 @@ struct BorderCommandTests {
         _ = core.execute("border.fit_gaps", args: [.number(6)])
         #expect(
             core.tiler.settings.gapsGlobal.inner.horizontal
-                == 24
+                == 26
         )
-        #expect(core.tiler.settings.gapsGlobal.outer.top == 15)
+        #expect(core.tiler.settings.gapsGlobal.outer.top == 16)
         // A non-numeric argument fails; a negative one clamps
         // to the plain fit.
         #expect(
@@ -178,7 +178,7 @@ struct BorderCommandTests {
             "border.fit_gaps",
             args: [.number(-3)]
         )
-        #expect(core.tiler.settings.gapsGlobal.outer.top == 9)
+        #expect(core.tiler.settings.gapsGlobal.outer.top == 10)
     }
 
     @Test("Unknown border setter fails")

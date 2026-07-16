@@ -1817,13 +1817,14 @@ focus otherwise lacks. It is **on by default** and marks only the
 focused window; you can optionally ring every other window too.
 
 The ring is a pure overlay: it never changes where windows tile
-(no gap coupling). Its stroke is *capped-inner* — a rounded
-border covers at most 1 pt of window content at any width and
-grows the rest outward into the gap, so a thick border can never
-hide content; a square border tucks a little deeper (≈ 0.3× the
-corner radius) so its sharp frame still covers each rounded
-corner. Corners match the real macOS window radius unless you
-pick square.
+(no gap coupling). The configured width is drawn entirely outward
+into the gap. The renderer adds a separate hidden overlap behind the
+target; the target masks it, so the overlap never counts toward the
+visible thickness or hides content. Rounded uses a small seam
+allowance; square reaches deeper to fill the reveal beneath rounded
+window corners. Corners match the real
+macOS window radius unless you pick square. Popovers, sheets, and
+other windows above the target stay above its ring.
 
 Overflow piles and monocle show a ring only on the visible
 top window; set gaps at least as wide as the border to avoid
@@ -1921,9 +1922,9 @@ past the border's reach. Every outer edge becomes
 `reach + remaining`; each inner axis becomes `reach + remaining`,
 or `2 × reach + remaining` when `unfocused_enabled` is on (both
 neighbouring rings need clearance; the whitespace sits between
-them once). The reach is the border's true outward reach, which
-depends on the corner style (a square border tucks inward and
-reaches far less than its width). The action deliberately
+them once). The reach is simply the configured border width; the
+renderer’s hidden overlap is behind the window and does not count.
+The action deliberately
 normalizes asymmetric global gaps. A one-shot convenience that
 writes `gap.global` — the remaining gap is command input, never a
 persisted setting, and the layout math itself stays free of any
@@ -1934,10 +1935,10 @@ border coupling, so this never runs automatically. The GUI's
 
 ```lua
 border.set_width(10)
-border.fit_gaps()   -- rounded reach 9: outer gaps 9, inner gaps 9
-                    -- (18 if unfocused borders are on)
-border.fit_gaps(6)  -- leave 6 pt after the reach: outer 15,
-                    -- inner 15 (24 if unfocused borders are on)
+border.fit_gaps()   -- width 10: outer gaps 10, inner gaps 10
+                    -- (20 if unfocused borders are on)
+border.fit_gaps(6)  -- leave 6 pt after the reach: outer 16,
+                    -- inner 16 (26 if unfocused borders are on)
 ```
 
 ## Mouse Resizing
