@@ -89,10 +89,10 @@ struct ProfileAppRulesApplyTests {
         )
         try core.profiles.save(profile(named: "Plain"))
 
-        core.execute("load_profile", args: [.string("Work")])
+        _ = core.execute("load_profile", args: [.string("Work")])
         #expect(core.state.appRules["mail"] == SpaceID(3))
 
-        core.execute("load_profile", args: [.string("Plain")])
+        _ = core.execute("load_profile", args: [.string("Plain")])
         #expect(core.state.appRules["mail"] == SpaceID(1))
         #expect(core.state.appRules["music"] == SpaceID(2))
         #expect(core.state.appRules["safari"] == nil)
@@ -104,7 +104,7 @@ struct ProfileAppRulesApplyTests {
         try core.profiles.save(
             profile(named: "Work", appRules: override)
         )
-        core.execute("load_profile", args: [.string("Work")])
+        _ = core.execute("load_profile", args: [.string("Work")])
 
         // reapplyActiveProfileState inside loadConfig must
         // re-resolve with the adopted profile's override —
@@ -115,11 +115,11 @@ struct ProfileAppRulesApplyTests {
         #expect(core.state.appRules["music"] == nil)
     }
 
-    // MARK: - O7 all-or-nothing ownership
+    // MARK: - Lua-owned global base
 
-    @Test("Not GUI-managed: apply(profile:) leaves Lua rules")
-    func nonGuiManagedKeepsLuaRules() throws {
-        // No gui.json: Lua owns the rules entirely.
+    @Test("Not GUI-managed: profile resolves onto Lua base")
+    func nonGuiManagedResolvesLuaRules() throws {
+        // No gui.json: Lua owns the global base.
         let core = KiwiCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
@@ -144,12 +144,52 @@ struct ProfileAppRulesApplyTests {
             profile(named: "Work", appRules: override)
         )
 
-        core.execute("load_profile", args: [.string("Work")])
+        _ = core.execute("load_profile", args: [.string("Work")])
 
-        // The Lua-declared rule survives — the profile's
-        // override is structured-config vocabulary and must
-        // not touch Lua-owned rules (O7).
-        #expect(core.state.appRules["mail"] == SpaceID(2))
-        #expect(core.state.appRules["safari"] == nil)
+        #expect(core.state.appRules["mail"] == SpaceID(3))
+        #expect(core.state.appRules["safari"] == SpaceID(4))
+    }
+
+    @Test("GUI base tombstone matches bundle id case-insensitively")
+    func guiMixedCaseTombstone() throws {
+        let core = makeGuiCore()
+        let tombstone = AppRuleOverride(rules: ["MAIL": nil])
+        try core.profiles.save(
+            profile(named: "Work", appRules: tombstone)
+        )
+
+        _ = core.execute("load_profile", args: [.string("Work")])
+
+        #expect(core.state.appRules["mail"] == nil)
+        #expect(core.state.appRules["music"] == SpaceID(2))
+    }
+
+    @Test("Lua base tombstone matches bundle id case-insensitively")
+    func luaMixedCaseTombstone() throws {
+        let core = KiwiCore(
+            configDirectory: FileManager.default
+                .temporaryDirectory
+                .appendingPathComponent(
+                    "kiwi-profrules-\(UUID().uuidString)"
+                )
+        )
+        try FileManager.default.createDirectory(
+            at: core.configDirectory,
+            withIntermediateDirectories: true
+        )
+        try "app_rules = { Mail = \"2\" }".write(
+            to: core.configURL,
+            atomically: true,
+            encoding: .utf8
+        )
+        core.loadConfig()
+        let tombstone = AppRuleOverride(rules: ["MAIL": nil])
+        try core.profiles.save(
+            profile(named: "Work", appRules: tombstone)
+        )
+
+        _ = core.execute("load_profile", args: [.string("Work")])
+
+        #expect(core.state.appRules["mail"] == nil)
     }
 }

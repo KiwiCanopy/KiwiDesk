@@ -37,7 +37,30 @@ extension KiwiCore {
     /// app-rule sibling (#109), with the same one-definition
     /// and read-once-per-cycle caveats.
     public func baseAppRules() -> [String: SpaceID] {
-        (guiConfigStore.load() ?? guiConfigSeed()).appRules
+        guard isGuiManaged else { return globalAppRuleBase }
+        guard let rules = guiConfigStore.load()?.appRules else {
+            return globalAppRuleBase
+        }
+        return AppRuleOverride.normalized(rules)
+    }
+
+    /// Global float-rule base for the stored-profile editor.
+    public func baseFloatRules() -> [String] {
+        guard isGuiManaged else { return globalFloatRuleBase }
+        guard let rules = guiConfigStore.load()?.floatRules else {
+            return globalFloatRuleBase
+        }
+        return FloatRules(rules).rawRules
+    }
+
+    /// Global ignore-rule base. The GUI has no ignore editor yet,
+    /// but stored-profile loads resolve it for preservation parity.
+    public func baseIgnoreRules() -> [String] {
+        guard isGuiManaged else { return globalIgnoreRuleBase }
+        guard let rules = guiConfigStore.load()?.ignoreRules else {
+            return globalIgnoreRuleBase
+        }
+        return IgnoreRules(rules).rawRules
     }
 
     /// The editable model for the dashboard: the saved sidecar
@@ -66,6 +89,9 @@ extension KiwiCore {
     ) throws -> GuiConfig {
         let profile = try profiles.read(name: name)
         var config = guiConfigStore.load() ?? guiConfigSeed()
+        config.appRules = baseAppRules()
+        config.floatRules = baseFloatRules()
+        config.ignoreRules = baseIgnoreRules()
         overlayProfileState(&config, from: profile)
         return config
     }

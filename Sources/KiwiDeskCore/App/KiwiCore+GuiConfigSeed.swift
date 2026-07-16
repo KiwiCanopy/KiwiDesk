@@ -43,6 +43,16 @@ extension KiwiCore {
             base: config.appRules,
             profile: profile.appRules
         )
+        config.floatRules =
+            profile.floatRules?.resolved(
+                onto: config.floatRules,
+                normalizing: FloatRules.normalizedRule
+            ) ?? config.floatRules
+        config.ignoreRules =
+            profile.ignoreRules?.resolved(
+                onto: config.ignoreRules,
+                normalizing: IgnoreRules.normalizedRule
+            ) ?? config.ignoreRules
     }
 
     /// Copies the live profile-scoped state into the model:
@@ -83,13 +93,13 @@ extension KiwiCore {
     func guiConfigSeed() -> GuiConfig {
         var config = GuiConfig()
         config.settings = tiler.settings
-        config.appRules = state.appRules
+        config.appRules = globalAppRuleBase
         config.spacePins = spacePins
         config.mainSpaces = mainSpaces
         config.fallbackSpace = fallbackSpace
         config.modes = recoverKeybindings()
-        config.floatRules = eventLoop.floatRules.rawRules
-        config.ignoreRules = eventLoop.ignoreRules.rawRules
+        config.floatRules = globalFloatRuleBase
+        config.ignoreRules = globalIgnoreRuleBase
         var modes: [SpaceID: LayoutMode] = [:]
         var defined: [SpaceID] = []
         for space in state.workspaces.allSpaces {

@@ -90,7 +90,9 @@ extension KiwiCore {
         // `currentName` may still be the old profile.
         reapplyStructuredOverrides(
             profileModes: profile.modes,
-            profileAppRules: profile.appRules
+            profileAppRules: profile.appRules,
+            profileFloatRules: profile.floatRules,
+            profileIgnoreRules: profile.ignoreRules
         )
         resolveSpaceDisplays()
         retile(force: forceRetile)
@@ -164,7 +166,9 @@ extension KiwiCore {
         // (#55 phase 6, #109).
         reapplyStructuredOverrides(
             profileModes: nil,
-            profileAppRules: nil
+            profileAppRules: nil,
+            profileFloatRules: nil,
+            profileIgnoreRules: nil
         )
         resolveSpaceDisplays()
         retile(force: forceRetile)

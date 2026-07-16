@@ -34,6 +34,18 @@ public final class KiwiCore {
     /// the generation that captured them.
     var keybindingRuntimeGeneration: UInt64 = 0
 
+    /// Global window-rule bases captured from the active config
+    /// owner before any profile sparse diff is applied. Required
+    /// for Lua-managed profiles: live state holds the effective
+    /// rules and therefore cannot serve as the next profile's base.
+    var globalAppRuleBase: [String: SpaceID] = [:]
+    var globalFloatRuleBase: [String] = []
+    var globalIgnoreRuleBase: [String] = []
+    /// `loadConfig` installs several candidate rule states before
+    /// the active native-Space binding is known. Suppress their AX
+    /// reconciles and run one pass after the final profile wins.
+    var defersWindowRuleReconcile = false
+
     /// A stack z-order restore is waiting for the current
     /// animations to settle (see restoreStackZOrder).
     var pendingZOrderRestore = false

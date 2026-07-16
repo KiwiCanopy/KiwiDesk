@@ -128,7 +128,7 @@ translation, see [translating.md](translating.md).
 
 ## The gui.json File
 
-The file `~/.config/KiwiDesk/gui.json` holds the app's complete
+The file `~/.config/KiwiDesk/gui.json` holds the app's global base
 configuration. On a truly fresh install (no `init.lua` yet) it is
 created at first launch, pre-filled with the
 [default shortcuts](#default-shortcuts). On a hand-written setup
@@ -616,7 +616,7 @@ Lua reference; `grid` is the only strategy today.)
 The **Profiles** section (in the **System** group) manages saved
 layouts. Each profile captures tiling (modes, gaps, parameters),
 space-to-monitor pins, and optionally a sparse keybinding override
-layer.
+layer plus sparse app, float, and ignore rule overrides.
 
 ### The Profile Banner
 
@@ -635,8 +635,8 @@ global config; every saved profile is listed below, one row each
   the active one (the caption beside the button names the
   target, and the menu title shows "*Name* — overrides").
   Shortcuts and App Rules enter override mode and edit only what
-  this profile changes; inherited rows stay dimmed (App Rules'
-  Float facet is app-wide and stays disabled there).
+  this profile changes; inherited shortcut rows and App Rules
+  facets stay dimmed. Both Space and Float remain editable.
 - **Edit the loaded profile's own overrides** by picking its row
   (not the Live entry). This is the one case where saving updates
   the screen right away — the profile is re-applied in place, no
@@ -777,8 +777,9 @@ ordinary “never tile this app” cases should use Float rules.
 
 Ignore rules are deliberately absent from Settings. Add bundle ids
 to `ignore_rules = { ... }` in a hand-written `init.lua`, or to the
-root `ignore_rules` array in `gui.json`. The list is global and is
-preserved when Settings saves other fields. See
+root `ignore_rules` array in `gui.json`. This is the global base and
+is preserved when Settings saves other fields. A profile can add or
+remove entries through its JSON, as described below. See
 [ignore_rules](lua-reference.md#ignore_rules) for examples.
 
 KiwiDesk already ignores transient macOS input-source menus and
@@ -787,27 +788,51 @@ virtual-space assignment or KiwiDesk focus border.
 
 ### Per-Profile Space Assignments
 
-Space assignments are global by default, but each profile can
-carry a **sparse override**: while you edit a stored profile
+Space assignments and float rules are global by default, but each
+profile can carry **sparse overrides**: while you edit a stored profile
 (pick **Edit** in the profile dropdown), the App Rules section
 switches into override mode —
 
-- **Dimmed rows are inherited** from the base rules and stay in
-  sync with them.
-- **Pick another space** to override the rule for this profile
-  only; matching the base again makes the row inherited again.
-- **Delete a row to un-pin the app** in this profile, even when
-  the base pins it — new windows of that app open in the active
-  space while this profile is loaded.
-- **Add a rule** for an app the base doesn't mention to pin it
-  only in this profile.
+- **Dimmed facets are inherited** from the global base and stay in
+  sync with it. Space and Float inherit independently.
+- **Change either facet** to override only that decision for this
+  profile. Matching the base again removes that sparse override.
+- **Delete a row** to remove the effective space and float rules
+  for that app in this profile, including inherited rules.
+- **Add a rule** for an app the base does not mention to make it
+  profile-only.
 
-The **Float facet is app-wide** — it has no per-profile tier and
-stays disabled in override mode; edit float rules while editing
-the live configuration. Overrides ride the profile's JSON (an
-`app_rules` object; `null` un-pins) and apply the moment the
-profile loads — including automatic loads from a native-Space
-binding or a monitor change.
+The global base lives in `gui.json` when Settings owns the config,
+or in `init.lua` for a hand-written setup. The profile stores only a
+sparse diff. `app_rules` maps apps to spaces, while `float_rules` and
+`ignore_rules` are objects whose `true` entries add rules and `null`
+entries remove inherited rules:
+
+```json
+{
+  "app_rules": { "com.apple.mail": null },
+  "float_rules": {
+    "com.apple.calculator": null,
+    "com.apple.finder:Get Info": true
+  },
+  "ignore_rules": {
+    "eu.exelban.Stats": true,
+    "com.example.inherited": null
+  }
+}
+```
+
+An absent entry inherits. A tombstone whose base rule no longer
+exists is harmless and becomes effective again if that base rule
+returns. The three families resolve independently; effective Ignore
+is applied last as the hard gate. Removing an inherited Ignore rule
+therefore lets the app follow its effective Space and Float rules.
+
+Ignore has no GUI control yet. Hand-edit its profile object when
+needed; Settings preserves that hidden object across profile saves,
+copies, and renames. Overrides apply the moment a profile loads,
+including automatic loads from a native-Space binding or monitor
+change.
 
 ## Shortcuts
 

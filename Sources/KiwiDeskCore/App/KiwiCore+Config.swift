@@ -10,6 +10,8 @@ extension KiwiCore {
         keys.reset()
         nativeSpaceBindings = [:]
         resetDeclarativeState()
+        defersWindowRuleReconcile = true
+        defer { defersWindowRuleReconcile = false }
         var issues: [ConfigIssue] = []
         guard let fresh = LuaInterpreter() else {
             onLog("failed to create Lua VM")
@@ -97,29 +99,21 @@ extension KiwiCore {
         } else {
             applyConfigGlobals(from: fresh)
         }
-        // The float/ignore rules just changed hands: re-sync
-        // every app so live classification reflects the NEW
-        // rules.
-        // Without this, verdicts stay stale until an unrelated
-        // AX event — user-visible since `make_auto` (#164)
-        // re-applies the cached verdict, and a rule edit +
-        // reload + make_auto would restore the pre-edit state.
-        // recheckFloat only emits on changed verdicts, so an
-        // unchanged config costs one quiet pass. No-op before
-        // the event loop starts (startup load: no observers).
-        // This makes loadConfig emit events MID-LOAD: its
-        // non-reentrancy now also depends on every mutation
-        // verb reachable from a bus callback staying deferred
-        // (reload_config's Task, see KiwiCore+TypoGuard).
-        eventLoop.reconcileAll()
-        retile()
-        // Lua-declared tiling is only the base state: the
-        // active profile (or transient Standard) owns tiling
-        // and goes back on top after a reload (#36).
+        // Lua declarations are only the global base. Put the
+        // active profile's tiling and sparse behavior overrides
+        // back on top before the native-Space binding gets the
+        // final say below.
         reapplyActiveProfileState()
         // The current native space may carry a binding that
-        // the config just (re)declared.
+        // the config just (re)declared. Window-rule reconcile
+        // stays deferred until this final profile wins.
         applyNativeSpaceBinding()
+        defersWindowRuleReconcile = false
+        // The rule owner/profile just changed: re-sync every app
+        // once against the FINAL effective rules. Without this,
+        // verdicts stay stale until an unrelated AX event (#164).
+        eventLoop.reconcileAll()
+        retile()
         // Publish what this load could not apply (#68): the
         // Lua/sidecar problems above plus any profile JSON
         // that no longer decodes.
@@ -147,6 +141,9 @@ extension KiwiCore {
         state.appRules = [:]
         eventLoop.floatRules = FloatRules([])
         eventLoop.ignoreRules = IgnoreRules([])
+        globalAppRuleBase = [:]
+        globalFloatRuleBase = []
+        globalIgnoreRuleBase = []
         tiler.settings.gapsOverride = [:]
         tiler.settings.placementOverride = [:]
         tiler.settings.spaceIcons = [:]
@@ -181,6 +178,11 @@ extension KiwiCore {
             }
             state.appRules = mapped
         }
+        captureGlobalWindowRuleBase(
+            appRules: state.appRules,
+            floatRules: eventLoop.floatRules.rawRules,
+            ignoreRules: eventLoop.ignoreRules.rawRules
+        )
     }
 
     /// Writes a starter init.lua on first launch.

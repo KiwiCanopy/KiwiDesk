@@ -76,6 +76,7 @@ struct EditTargetTests {
         // Rules tabs (#55/#109).
         #expect(model.profileEditingBaseModes != nil)
         #expect(model.profileEditingBaseAppRules != nil)
+        #expect(model.profileEditingBaseFloatRules != nil)
         // Pending edits are discarded on switch.
         #expect(!model.isDirty)
     }
@@ -93,6 +94,7 @@ struct EditTargetTests {
         #expect(model.placementEditable)
         #expect(model.profileEditingBaseModes == nil)
         #expect(model.profileEditingBaseAppRules == nil)
+        #expect(model.profileEditingBaseFloatRules == nil)
         // GUI-managed: the sidecar baseline is back.
         #expect(model.savedSidecar != nil)
         #expect(!model.isDirty)
@@ -138,6 +140,7 @@ struct EditTargetTests {
         #expect(model.placementEditable)
         #expect(model.profileEditingBaseModes == nil)
         #expect(model.profileEditingBaseAppRules == nil)
+        #expect(model.profileEditingBaseFloatRules == nil)
     }
 
     @Test("forced Lua clears in stored mode, returns on live")
@@ -195,5 +198,65 @@ struct EditTargetTests {
         model.selectEditTarget("p")
 
         #expect(model.placementEditable)
+    }
+
+    @Test("Live float edit writes the global sidecar")
+    func liveFloatEditWritesGlobal() throws {
+        let model = makeModel()
+        model.config.floatRules = ["global.float"]
+
+        model.saveAsNewProfile(named: "Live")
+
+        let global = try #require(
+            model.core.guiConfigStore.load()
+        )
+        #expect(global.floatRules == ["global.float"])
+        let profile = try model.core.profiles.read(name: "Live")
+        #expect(profile.floatRules == nil)
+    }
+
+    @Test("Stored float edit writes only the profile diff")
+    func storedFloatEditWritesProfile() throws {
+        let model = makeModel()
+        var global = try #require(
+            model.core.guiConfigStore.load()
+        )
+        global.floatRules = ["base.float"]
+        try model.core.guiConfigStore.save(global)
+        storeProfile(model, named: "p")
+        model.selectEditTarget("p")
+        model.config.floatRules = ["profile.float"]
+
+        model.saveEditedProfile()
+
+        let savedGlobal = try #require(
+            model.core.guiConfigStore.load()
+        )
+        #expect(savedGlobal.floatRules == ["base.float"])
+        let profile = try model.core.profiles.read(name: "p")
+        #expect(
+            profile.floatRules
+                == RuleListOverride(rules: [
+                    "base.float": nil,
+                    "profile.float": true,
+                ])
+        )
+    }
+
+    @Test("Float divergence drives the app-rule indicator")
+    func floatDivergenceShowsOverride() throws {
+        let model = makeModel()
+        var global = try #require(
+            model.core.guiConfigStore.load()
+        )
+        global.floatRules = ["base.float"]
+        try model.core.guiConfigStore.save(global)
+        storeProfile(model, named: "p")
+        model.selectEditTarget("p")
+        #expect(!model.editedProfileOverridesAppRules)
+
+        model.config.floatRules = ["profile.float"]
+
+        #expect(model.editedProfileOverridesAppRules)
     }
 }

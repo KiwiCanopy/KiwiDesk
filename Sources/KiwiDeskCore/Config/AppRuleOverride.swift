@@ -3,7 +3,7 @@ import Foundation
 // MARK: - AppRuleOverride
 
 /// Sparse per-profile app→space rule override (#109). nil
-/// (absent) inherits the base `app_rules` (gui.json) entirely;
+/// (absent) inherits the global `app_rules` base entirely;
 /// present, it shadows the base per app: an app the override
 /// mentions takes its space, apps it does not mention survive
 /// unchanged. Unlike `KeyModeOverride`, a TOMBSTONE exists — a
@@ -38,9 +38,8 @@ public struct AppRuleOverride: Sendable, Equatable {
     public func resolved(
         onto base: [String: SpaceID]
     ) -> [String: SpaceID] {
-        guard !isEmpty else { return base }
-        var result = base
-        for (app, target) in rules {
+        var result = Self.normalized(base)
+        for (app, target) in normalizedRules {
             if let target {
                 result[app] = target
             } else {
@@ -66,6 +65,8 @@ extension AppRuleOverride {
         base: [String: SpaceID],
         edited: [String: SpaceID]
     ) -> AppRuleOverride? {
+        let base = normalized(base)
+        let edited = normalized(edited)
         var rules: [String: SpaceID?] = [:]
         for (app, space) in edited where base[app] != space {
             rules[app] = space
@@ -75,6 +76,38 @@ extension AppRuleOverride {
         }
         let over = AppRuleOverride(rules: rules)
         return over.isEmpty ? nil : over
+    }
+
+    /// Canonical bundle-id map shared by resolve, diff, and the
+    /// global-base cache. Case collisions are invalid in practice;
+    /// sorting makes the fallback deterministic for hand edits.
+    public static func normalized(
+        _ rules: [String: SpaceID]
+    ) -> [String: SpaceID] {
+        var result: [String: SpaceID] = [:]
+        for (app, target) in rules.sorted(by: {
+            $0.key < $1.key
+        }) {
+            result[app.lowercased()] = target
+        }
+        return result
+    }
+
+    /// A tombstone wins when hand-edited case variants collapse
+    /// onto one bundle id; otherwise the sorted fallback is stable.
+    private var normalizedRules: [String: SpaceID?] {
+        var result: [String: SpaceID?] = [:]
+        for (app, target) in rules.sorted(by: {
+            $0.key < $1.key
+        }) {
+            let app = app.lowercased()
+            if target == nil {
+                result.updateValue(nil, forKey: app)
+            } else if result[app] != .some(nil) {
+                result.updateValue(target, forKey: app)
+            }
+        }
+        return result
     }
 }
 
@@ -150,6 +183,7 @@ extension ConfigResolver {
         base: [String: SpaceID],
         profile: AppRuleOverride?
     ) -> [String: SpaceID] {
-        profile?.resolved(onto: base) ?? base
+        profile?.resolved(onto: base)
+            ?? AppRuleOverride.normalized(base)
     }
 }

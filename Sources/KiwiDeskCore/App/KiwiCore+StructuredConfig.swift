@@ -3,7 +3,7 @@ import Foundation
 /// Structured (GUI-direct) config application (#55 phase 4).
 /// Runs AFTER `init.lua` in `loadConfig()` when GUI-managed.
 /// Reads rules and keybindings directly from `gui.json` and
-/// the active profile's `KeyModeOverride` — no Lua intermediary.
+/// the active profile's sparse overrides — no Lua intermediary.
 ///
 /// Double-registration prevention: this function calls
 /// `keys.reset()` before registering, which releases the refs
@@ -30,7 +30,9 @@ extension KiwiCore {
         // Rules need no VM — apply them before the Lua guard.
         applyStructuredRules(
             from: config,
-            appRules: profile?.appRules
+            appRules: profile?.appRules,
+            floatRules: profile?.floatRules,
+            ignoreRules: profile?.ignoreRules
         )
         // Mint refs from the SAME interpreter that releases
         // them (`keys.lua`, see `KeybindingManager.reset`),
@@ -43,33 +45,39 @@ extension KiwiCore {
         )
     }
 
-    /// Re-applies BOTH per-profile override tiers for the
-    /// profile being applied — keybindings (#55 phase 6) and
-    /// app→space rules (#109) — from ONE sidecar decode.
+    /// Re-applies the profile's behavior overrides from one
+    /// sidecar decode: keybindings and all window-rule families.
     /// Called from `apply(profile:)` / `apply(composed:)` so
     /// load_profile, dock/undock, and native-Space switches
     /// update both. Takes the overrides explicitly: callers
     /// adopt AFTER applying, so `profiles.currentName` may
-    /// still point at the previous profile here. Float/ignore
-    /// rules and native-space bindings stay global — never
-    /// touched here. Resets the active key mode to default (the
-    /// set may change with the profile). No-op when not
-    /// GUI-managed (Lua owns the config, O7); the keybinding
-    /// half additionally no-ops before the first `loadConfig`
-    /// (no VM yet), while rules need no VM.
+    /// still point at the previous profile here. Resets the
+    /// active key mode to default (the set may change with the
+    /// profile). Window-rule overrides apply for either global
+    /// owner; only the keybinding half is GUI-managed and needs
+    /// a live VM.
     func reapplyStructuredOverrides(
         profileModes: KeyModeOverride?,
-        profileAppRules: AppRuleOverride?
+        profileAppRules: AppRuleOverride?,
+        profileFloatRules: RuleListOverride?,
+        profileIgnoreRules: RuleListOverride?
     ) {
-        guard isGuiManaged else { return }
-        guard let config = loadStructuredConfig() else {
-            return
+        var structured: GuiConfig?
+        if isGuiManaged {
+            guard let config = loadStructuredConfig() else {
+                return
+            }
+            structured = config
+            captureGlobalWindowRuleBase(from: config)
         }
-        setResolvedAppRules(
-            base: config.appRules,
-            override: profileAppRules
+        setResolvedWindowRules(
+            appRules: profileAppRules,
+            floatRules: profileFloatRules,
+            ignoreRules: profileIgnoreRules
         )
+        guard isGuiManaged else { return }
         guard let lua = keys.lua else { return }
+        guard let config = structured else { return }
         applyStructuredKeybindings(
             modes: config.modes,
             profile: profileModes,
@@ -96,22 +104,67 @@ extension KiwiCore {
 
     // MARK: - Rules
 
-    /// Sets app rules, float/ignore rules, and native-space
-    /// profile bindings directly from GuiConfig — overrides what
-    /// the managed block in `init.lua` set via Lua globals.
-    /// App rules resolve through the active profile's sparse
-    /// override (#109); the rest is global.
+    /// Sets window rules and native-space profile bindings
+    /// directly from GuiConfig — overrides what the managed
+    /// block in `init.lua` set via Lua globals. Each rule family
+    /// resolves through the active profile's sparse override.
     private func applyStructuredRules(
         from config: GuiConfig,
-        appRules override: AppRuleOverride?
+        appRules: AppRuleOverride?,
+        floatRules: RuleListOverride?,
+        ignoreRules: RuleListOverride?
+    ) {
+        captureGlobalWindowRuleBase(from: config)
+        setResolvedWindowRules(
+            appRules: appRules,
+            floatRules: floatRules,
+            ignoreRules: ignoreRules
+        )
+        nativeSpaceBindings = config.profileBindings
+    }
+
+    func captureGlobalWindowRuleBase(from config: GuiConfig) {
+        captureGlobalWindowRuleBase(
+            appRules: config.appRules,
+            floatRules: config.floatRules,
+            ignoreRules: config.ignoreRules
+        )
+    }
+
+    func captureGlobalWindowRuleBase(
+        appRules: [String: SpaceID],
+        floatRules: [String],
+        ignoreRules: [String]
+    ) {
+        globalAppRuleBase = AppRuleOverride.normalized(appRules)
+        globalFloatRuleBase = FloatRules(floatRules).rawRules
+        globalIgnoreRuleBase = IgnoreRules(ignoreRules).rawRules
+    }
+
+    private func setResolvedWindowRules(
+        appRules: AppRuleOverride?,
+        floatRules: RuleListOverride?,
+        ignoreRules: RuleListOverride?
     ) {
         setResolvedAppRules(
-            base: config.appRules,
-            override: override
+            base: globalAppRuleBase,
+            override: appRules
         )
-        eventLoop.floatRules = FloatRules(config.floatRules)
-        eventLoop.ignoreRules = IgnoreRules(config.ignoreRules)
-        nativeSpaceBindings = config.profileBindings
+        let resolvedFloat =
+            floatRules?.resolved(
+                onto: globalFloatRuleBase,
+                normalizing: FloatRules.normalizedRule
+            ) ?? globalFloatRuleBase
+        let resolvedIgnore =
+            ignoreRules?.resolved(
+                onto: globalIgnoreRuleBase,
+                normalizing: IgnoreRules.normalizedRule
+            ) ?? globalIgnoreRuleBase
+        eventLoop.floatRules = FloatRules(resolvedFloat)
+        eventLoop.ignoreRules = IgnoreRules(resolvedIgnore)
+        if !defersWindowRuleReconcile {
+            eventLoop.reconcileAll()
+        }
     }
 
     /// The one write of the resolved app-rule tier — shared by
@@ -122,22 +175,14 @@ extension KiwiCore {
         base: [String: SpaceID],
         override: AppRuleOverride?
     ) {
-        let resolved = ConfigResolver.resolvedAppRules(
+        state.appRules = ConfigResolver.resolvedAppRules(
             base: base,
             profile: override
         )
-        // Key by lower-cased bundle id to match the normalized
-        // `ManagedWindow.appBundleID` (case-insensitive, like
-        // LaunchServices). Last write wins on a case collision —
-        // bundle ids never legitimately differ only by case.
-        state.appRules = Dictionary(
-            resolved.map { ($0.key.lowercased(), $0.value) },
-            uniquingKeysWith: { _, latest in latest }
-        )
     }
 
-    /// The active profile, read once for its override tiers
-    /// (`modes`, `appRules`). A profile that exists but cannot
+    /// The active profile, read once for its override tiers.
+    /// A profile that exists but cannot
     /// be read degrades to the base config — loudly, matching
     /// the corrupt-gui.json policy above.
     /// Internal: shared with `liveApplyKeybindings` (#123).

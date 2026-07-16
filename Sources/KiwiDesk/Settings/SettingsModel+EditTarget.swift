@@ -28,6 +28,7 @@ extension SettingsModel {
         var savedSidecar: GuiConfig?
         var profileEditingBaseModes: [KeyMode]?
         var profileEditingBaseAppRules: [String: SpaceID]?
+        var profileEditingBaseFloatRules: [String]?
         var keybindingWarning: String?
     }
 
@@ -91,6 +92,8 @@ extension SettingsModel {
         profileEditingBaseModes = state.profileEditingBaseModes
         profileEditingBaseAppRules =
             state.profileEditingBaseAppRules
+        profileEditingBaseFloatRules =
+            state.profileEditingBaseFloatRules
         keybindingWarning = state.keybindingWarning
     }
 
@@ -128,6 +131,7 @@ extension SettingsModel {
             savedSidecar: core.isGuiManaged ? loaded : nil,
             profileEditingBaseModes: nil,
             profileEditingBaseAppRules: nil,
+            profileEditingBaseFloatRules: nil,
             // A reload discards the edits the banner was
             // about; batch paths (Lua save, Adopt) re-derive
             // it right after via `warnIfAnyConflict`.
@@ -170,6 +174,7 @@ extension SettingsModel {
             // Same baseline role for the App Rules tab's
             // space-facet override (#109).
             profileEditingBaseAppRules: core.baseAppRules(),
+            profileEditingBaseFloatRules: core.baseFloatRules(),
             keybindingWarning: nil
         )
     }
