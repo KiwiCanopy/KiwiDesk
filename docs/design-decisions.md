@@ -152,6 +152,20 @@ monocle — where only the focused window is visible — borders stay
 focused-only. Floating windows are excluded from the unfocused set;
 the focused window is still ringed whether tiled or floating.
 
+A **transient overlay** — a launcher or panel (Spotlight, Raycast,
+Alfred) that floats for a *structural* reason (accessory activation
+policy, a non-standard panel subrole, or a raised CGWindow layer)
+rather than a matched `float_rules` entry — never receives a ring,
+even while it holds focus (#300). The suppression is a **draw-time
+heuristic**, not an entry in the `ignore_rules`/built-in ignore
+list (#176/#177): these overlays float and behave correctly, so
+they belong in managed state; only the ring is wrong, and the fix
+belongs where the ring is drawn. This is deliberately narrower than
+excluding *all* focused floats — a user who floats a standard
+window still wants its ring; a launcher does not. The classification
+is captured once at track time (`ManagedWindow.isTransientOverlay`),
+so the pure `borderSpecs` decision stays AX-free.
+
 The ring's **rendering backend is opportunistic, not architectural**
 (#285): when the complete runtime-linked SkyLight drawing and event
 surface resolves, an SLS window follows WindowServer move/resize/order

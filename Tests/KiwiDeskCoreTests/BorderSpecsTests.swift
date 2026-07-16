@@ -26,6 +26,7 @@ struct BorderSpecsTests {
         focused: WindowID?,
         slots: [(id: WindowID, frame: CGRect)],
         floating: Set<WindowID> = [],
+        overlays: Set<WindowID> = [],
         monocle: Bool = false
     ) -> [BorderManager.Spec] {
         KiwiCore.borderSpecs(
@@ -33,6 +34,7 @@ struct BorderSpecsTests {
             focused: focused,
             slots: slots,
             floating: floating,
+            overlays: overlays,
             isMonocle: monocle
         )
     }
@@ -115,6 +117,56 @@ struct BorderSpecsTests {
         )
         // Focused w1 + tiled w3; floating w2 neither rings nor
         // hides w3.
+        #expect(Set(result.map(\.window)) == [w1, w3])
+    }
+
+    @Test("A focused transient overlay gets no ring")
+    func focusedOverlaySuppressed() {
+        // A launcher (Spotlight/Raycast) momentarily takes focus.
+        // It floats and is classified an overlay, so it gets no
+        // focus ring even though it is the focused window.
+        #expect(
+            specs(
+                BorderStyle(),
+                focused: w1,
+                slots: disjoint,
+                floating: [w1],
+                overlays: [w1]
+            ).isEmpty
+        )
+    }
+
+    @Test("A focused user-floated window still gets a ring")
+    func focusedFloatStillRinged() {
+        // A user-floated *standard* window (float rule, not an
+        // overlay) keeps its focus ring — only overlays lose it.
+        let result = specs(
+            BorderStyle(),
+            focused: w1,
+            slots: disjoint,
+            floating: [w1],
+            overlays: []
+        )
+        #expect(result.map(\.window) == [w1])
+    }
+
+    @Test("An overlay is excluded from unfocused rings too")
+    func overlayExcludedWhenUnfocused() {
+        var style = BorderStyle()
+        style.unfocusedEnabled = true
+        // w2 is an unfocused overlay; w1 focused, w3 a tiled slot.
+        let slots: [(id: WindowID, frame: CGRect)] = [
+            (w1, CGRect(x: 0, y: 0, width: 100, height: 100)),
+            (w2, CGRect(x: 10, y: 10, width: 100, height: 100)),
+            (w3, CGRect(x: 400, y: 0, width: 100, height: 100)),
+        ]
+        let result = specs(
+            style,
+            focused: w1,
+            slots: slots,
+            floating: [w2],
+            overlays: [w2]
+        )
         #expect(Set(result.map(\.window)) == [w1, w3])
     }
 

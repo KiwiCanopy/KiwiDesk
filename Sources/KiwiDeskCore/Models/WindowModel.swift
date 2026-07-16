@@ -58,6 +58,14 @@ public struct ManagedWindow: Sendable, Equatable {
     public var title: String
     public var frame: CGRect
     public var isFloating: Bool
+    /// A transient overlay — a launcher/panel that floats for a
+    /// structural reason (accessory activation policy, non-standard
+    /// panel subrole, or a raised CGWindow layer), NOT because a
+    /// `float_rules` entry matched. Such windows (Spotlight,
+    /// Raycast, Alfred) take focus momentarily and must not receive
+    /// a KiwiDesk focus ring, unlike a user-floated standard window
+    /// (#300). Classified once at track time (`EventLoop.track`).
+    public var isTransientOverlay: Bool
 
     public init(
         id: WindowID,
@@ -66,7 +74,8 @@ public struct ManagedWindow: Sendable, Equatable {
         appBundleID: String? = nil,
         title: String = "",
         frame: CGRect = .zero,
-        isFloating: Bool = false
+        isFloating: Bool = false,
+        isTransientOverlay: Bool = false
     ) {
         self.id = id
         self.pid = pid
@@ -75,5 +84,6 @@ public struct ManagedWindow: Sendable, Equatable {
         self.title = title
         self.frame = frame
         self.isFloating = isFloating
+        self.isTransientOverlay = isTransientOverlay
     }
 }
