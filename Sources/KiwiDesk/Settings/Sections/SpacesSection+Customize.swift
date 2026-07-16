@@ -8,6 +8,20 @@ import SwiftUI
 /// height from the pane scroll: the space list stays short and
 /// scannable, and the floating surface is its own card, instead
 /// of an inline block pushing every row below it down.
+/// The widest Overrides-button label currently on screen, so every
+/// row's button locks to one shared column width instead of each
+/// hugging its own (variable-count / variable-locale) label —
+/// mirrors `SpaceRowFrames` in `SpacesSection+Drag.swift`.
+struct OverridesButtonWidth: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+    static func reduce(
+        value: inout CGFloat,
+        nextValue: () -> CGFloat
+    ) {
+        value = max(value, nextValue())
+    }
+}
+
 extension SpacesSection {
     /// The Customize button anchors a bounded popover holding
     /// the space's override rows. `customizing` is a single slot,
@@ -44,6 +58,28 @@ extension SpacesSection {
         }
         .buttonStyle(.bordered)
         .controlSize(.small)
+        // Hug the label so the GeometryReader below measures its
+        // true (untruncated) width, not a compressed one.
+        .fixedSize()
+        // Report this row's intrinsic width upward; the list-wide
+        // max (measured, never a hardcoded guess, so it survives
+        // longer locales) is fed back as every row's column width
+        // below. A bigger count or longer label only widens the
+        // shared column — it can never truncate one, and every
+        // button lines up in a stable column across rows.
+        .background(
+            GeometryReader { proxy in
+                Color.clear.preference(
+                    key: OverridesButtonWidth.self,
+                    value: proxy.size.width
+                )
+            }
+        )
+        .frame(
+            width: overridesButtonWidth > 0
+                ? overridesButtonWidth : nil,
+            alignment: .center
+        )
         .disabled(isFloating)
         .help(
             isFloating

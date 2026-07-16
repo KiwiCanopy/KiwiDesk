@@ -36,6 +36,10 @@ struct SpacesSection: View {
     /// row positions (e.g. after a reorder) rather than stale
     /// ones.
     @State var rowFrames: [SpaceID: CGRect] = [:]
+    /// The widest Overrides-button label on screen, measured (never
+    /// guessed) so every row's button locks to one column width
+    /// that stays correct across locales and counts (#290).
+    @State var overridesButtonWidth: CGFloat = 0
 
     var body: some View {
         ScrollView {
@@ -46,6 +50,9 @@ struct SpacesSection: View {
             .coordinateSpace(name: Self.listSpace)
             .onPreferenceChange(SpaceRowFrames.self) {
                 rowFrames = $0
+            }
+            .onPreferenceChange(OverridesButtonWidth.self) {
+                overridesButtonWidth = $0
             }
         }
         .confirmationDialog(
