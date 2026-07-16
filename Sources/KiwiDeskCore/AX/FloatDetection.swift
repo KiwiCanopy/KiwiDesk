@@ -31,12 +31,88 @@ public enum FloatDetection {
     /// CGWindow layer of a window, nil if the system does not
     /// list it (e.g. another native Space).
     public static func windowLayer(of id: WindowID) -> Int? {
+        serverSnapshot(of: id).layer
+    }
+
+    /// One window's WindowServer signals — layer, alpha, and
+    /// bounds (CG global, top-left-origin coordinates) — read in
+    /// a single round trip, so ignore/float/helper classification
+    /// shares one snapshot (never query the server in a loop).
+    public struct WindowServerSnapshot: Sendable {
+        public let layer: Int?
+        public let alpha: Double?
+        public let bounds: CGRect?
+    }
+
+    public static func serverSnapshot(
+        of id: WindowID
+    ) -> WindowServerSnapshot {
         let list =
             CGWindowListCopyWindowInfo(
                 [.optionIncludingWindow],
                 CGWindowID(id.raw)
             ) as? [[String: Any]]
-        return list?.first?[kCGWindowLayer as String] as? Int
+        guard let info = list?.first else {
+            return WindowServerSnapshot(
+                layer: nil,
+                alpha: nil,
+                bounds: nil
+            )
+        }
+        let bounds =
+            (info[kCGWindowBounds as String] as? [String: Any])
+            .flatMap {
+                CGRect(
+                    dictionaryRepresentation: $0 as CFDictionary
+                )
+            }
+        return WindowServerSnapshot(
+            layer: info[kCGWindowLayer as String] as? Int,
+            alpha: info[kCGWindowAlpha as String] as? Double,
+            bounds: bounds
+        )
+    }
+
+    /// #309: a clearly-non-user helper window — a *raised-layer*
+    /// window that is fully transparent or entirely off every
+    /// display (CodexBar's 20×20 alpha-0 lifecycle keepalive at
+    /// (-5000, 6116)). Such a window must never be tracked: a
+    /// tracked float still earns a Space assignment and an App
+    /// Bar slot, so the menu-bar app reads as an open app.
+    /// Normal-layer (0) windows are never helpers — KiwiDesk
+    /// itself parks inactive-space windows off-screen at the
+    /// peek corner, and those must stay managed. Track-time
+    /// classification: a genuine overlay caught mid fade-in
+    /// (alpha still 0) self-heals — it stays untracked for one
+    /// beat and the next reconcile pass re-tracks it once
+    /// visible.
+    public static func isInvisibleHelper(
+        layer: Int?,
+        alpha: Double?,
+        bounds: CGRect?,
+        displays: [CGRect]
+    ) -> Bool {
+        guard let layer, layer != 0 else { return false }
+        if alpha == 0 { return true }
+        guard let bounds, !displays.isEmpty else {
+            return false
+        }
+        return !displays.contains { $0.intersects(bounds) }
+    }
+
+    /// CG global bounds of every active display — the coordinate
+    /// space `kCGWindowBounds` reports in (top-left origin, no
+    /// Cocoa flip needed).
+    public static func activeDisplayBounds() -> [CGRect] {
+        var count: UInt32 = 0
+        CGGetActiveDisplayList(0, nil, &count)
+        guard count > 0 else { return [] }
+        var ids = [CGDirectDisplayID](
+            repeating: 0,
+            count: Int(count)
+        )
+        CGGetActiveDisplayList(count, &ids, &count)
+        return ids.prefix(Int(count)).map { CGDisplayBounds($0) }
     }
 
     /// AX can expose a transient proxy as an auxiliary window even

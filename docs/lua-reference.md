@@ -2112,6 +2112,13 @@ discovered again. Ghostty's quick terminal remains a built-in
 layer-specific exception because only its panel — not normal Ghostty
 windows — must be ignored.
 
+Invisible helper windows are ignored automatically: a raised-layer
+window that is fully transparent or sits entirely off-screen (the
+lifecycle keepalive some menu-bar apps create) is never tracked,
+so the app doesn't read as an open app with a Space assignment and
+an App Bar slot. No rule needed — `ignore_rules` remains the
+whole-app escape hatch for anything the heuristic misses.
+
 ### app_rules
 
 **Expects:** a Lua table mapping app **bundle identifiers** to

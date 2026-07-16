@@ -156,12 +156,31 @@ public final class EventLoop {
         else { return }
         guard elements[pid]?[window.id] == nil else { return }
         let subrole = AXHelper.subrole(of: element)
-        let layer = FloatDetection.windowLayer(of: window.id)
+        // One WindowServer round trip feeds every
+        // classification below (layer, alpha, bounds).
+        let server = FloatDetection.serverSnapshot(
+            of: window.id
+        )
+        let layer = server.layer
         guard
             !FloatDetection.isUnbackedAuxiliary(
                 role: role,
                 subrole: subrole,
                 layer: layer
+            )
+        else { return }
+        // #309: an invisible raised-layer helper (alpha-0 or
+        // fully off-screen lifecycle keepalive) never enters
+        // state — tracked, it would earn a Space slot and an
+        // App Bar item and read as an open app. A genuine
+        // overlay caught mid fade-in is re-tracked by a later
+        // reconcile pass once visible.
+        guard
+            !FloatDetection.isInvisibleHelper(
+                layer: layer,
+                alpha: server.alpha,
+                bounds: server.bounds,
+                displays: FloatDetection.activeDisplayBounds()
             )
         else { return }
         // Some panels must never be managed at all — merely
