@@ -5,7 +5,7 @@ import SwiftUI
 @MainActor
 @Observable
 final class OnboardingModel {
-    enum Step {
+    enum Step: Equatable {
         case welcome
         case grant
         case separateSpaces
@@ -17,6 +17,19 @@ final class OnboardingModel {
     /// Opens System Settings › Desktop & Dock (#8).
     var onOpenSpaceSettings: () -> Void = {}
     var onFinish: () -> Void = {}
+
+    /// Shared display Spaces match KiwiDesk's one-active-profile
+    /// model. Separate Spaces remain usable for basic tiling, so
+    /// this is a recommendation the user may skip.
+    func continueAfterAccessibility(
+        hasSeparateSpaces: Bool
+    ) {
+        if hasSeparateSpaces {
+            step = .separateSpaces
+        } else {
+            onFinish()
+        }
+    }
 }
 
 /// First-launch wizard guiding the user through granting
@@ -145,14 +158,13 @@ struct OnboardingView: View {
         .animation(.spring, value: model.isTrusted)
     }
 
-    /// After Accessibility, guide the display/Space model — but
-    /// skip straight to finish when it's already enabled.
+    /// Recommend shared display Spaces only when the separate
+    /// display model is currently enabled.
     private func advancePastAccessibility() {
-        if DisplaySpacesSetting.hasSeparateSpaces() {
-            model.onFinish()
-        } else {
-            model.step = .separateSpaces
-        }
+        model.continueAfterAccessibility(
+            hasSeparateSpaces:
+                DisplaySpacesSetting.hasSeparateSpaces()
+        )
     }
 
     private var separateSpaces: some View {
@@ -163,7 +175,7 @@ struct OnboardingView: View {
             Text(
                 L(
                     "onboarding.spaces.title",
-                    "Displays have separate Spaces"
+                    "Use shared Spaces across displays"
                 )
             )
             .font(.title.bold())
@@ -192,13 +204,12 @@ struct OnboardingView: View {
         L(
             "onboarding.spaces.body",
             """
-            KiwiDesk maps virtual spaces to specific \
-            monitors. For that, macOS needs “Displays have \
-            separate Spaces” turned on.
+            KiwiDesk uses one active profile across all \
+            displays. For predictable Desktop-to-profile \
+            bindings, turn off “Displays have separate Spaces.”
 
-            Enable it in System Settings › Desktop & Dock, \
-            then log out and back in. You can also skip this \
-            and set it up later.
+            Basic tiling still works if you keep it on. Changing \
+            this setting requires logging out and back in.
             """
         )
     }

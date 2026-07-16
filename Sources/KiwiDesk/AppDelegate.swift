@@ -207,7 +207,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             PermissionMonitor.openSystemSettings()
         }
         onboardingModel.onOpenSpaceSettings = {
-            Self.openDesktopAndDockSettings()
+            DisplaySpacesSetting.openSystemSettings()
         }
         onboardingModel.onFinish = { [weak self] in
             self?.closeOnboarding()
@@ -250,20 +250,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         // Demote only if no other content window remains (the
         // still-visible closing window is excluded).
         NSApp.deactivateIfNoWindows(excluding: closing)
-    }
-
-    /// Opens System Settings › Desktop & Dock, where "Displays
-    /// have separate Spaces" lives (#8). Falls back to the
-    /// Settings root if the pane identifier is ever renamed.
-    private static func openDesktopAndDockSettings() {
-        let pane =
-            "x-apple.systempreferences:"
-            + "com.apple.Desktop-Settings.extension"
-        let target =
-            URL(string: pane)
-            ?? URL(string: "x-apple.systempreferences:")
-        guard let target else { return }
-        NSWorkspace.shared.open(target)
     }
 
     /// The quick menu has no footer to surface a save error in

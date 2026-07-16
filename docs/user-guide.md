@@ -63,8 +63,11 @@ On first launch, a wizard prompts you to grant Accessibility
 permission — KiwiDesk needs it to move and resize windows.
 Follow the steps to enable it in System Settings › Privacy &
 Security › Accessibility. Once granted, you may also be asked to
-enable "Displays have separate Spaces" for proper multi-monitor
-support — this is optional but recommended.
+turn off "Displays have separate Spaces." KiwiDesk uses one active
+profile across all displays, so shared display Spaces make native
+Desktop-to-profile bindings predictable. This is optional: basic
+tiling still works with separate display Spaces. Changing the macOS
+option requires logging out and back in.
 
 KiwiDesk runs as a single instance. Launching it while a copy is
 already running never starts a second manager (two instances
@@ -1122,6 +1125,15 @@ shortcut can never be lost by omission.
 The **Profiles** section in the **System** group has a **Native Spaces**
 subsection listing each macOS desktop (Mission Control number). Assign
 a profile to each desktop using the dropdown.
+
+KiwiDesk has one active profile across the whole display setup. When
+multiple displays are connected while "Displays have separate Spaces"
+is on, this subsection shows a warning: independent Desktop choices on
+each display cannot be represented unambiguously by one active profile.
+The bindings remain visible and editable because basic tiling still
+works and a user may be preparing a shared-Spaces setup. For predictable
+bindings, open Desktop & Dock Settings from the warning, turn the option
+off, then log out and back in.
 
 When you switch desktops (Ctrl+arrow, Mission Control, …), the bound
 profile loads with its spaces, layouts, and settings. Desktops without

@@ -2933,6 +2933,13 @@ settings. Unsure which number you're on? Check `KiwiDesk
 get_state` (field `native_space`), or subscribe to the
 `native_space_change` event.
 
+KiwiDesk resolves one active native Desktop number and one active
+profile across the whole display setup. For predictable bindings on
+multiple displays, turn off macOS's "Displays have separate Spaces"
+option and log out and back in. Basic tiling still works when the
+option remains on, but independent Desktop choices on each display
+cannot map unambiguously to the single active profile.
+
 KiwiDesk never moves windows between native Spaces — windows stay on
 their desktop, and KiwiDesk manages the ones on the desktop you're
 looking at.

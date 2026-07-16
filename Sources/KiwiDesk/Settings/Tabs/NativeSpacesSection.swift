@@ -19,6 +19,11 @@ struct NativeSpacesSection: View {
                 "Profiles per macOS Space"
             )
         ) {
+            if model.displays.count > 1
+                && DisplaySpacesSetting.hasSeparateSpaces()
+            {
+                separateSpacesWarning
+            }
             if spaceNumbers.isEmpty {
                 emptyHint
             } else {
@@ -28,6 +33,40 @@ struct NativeSpacesSection: View {
                 }
             }
         }
+    }
+
+    private var separateSpacesWarning: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundStyle(.orange)
+            VStack(alignment: .leading, spacing: 8) {
+                Text(
+                    L(
+                        "native_spaces.separate_warning",
+                        "Separate display Spaces are on. "
+                            + "KiwiDesk uses one active profile "
+                            + "across all displays, so Desktop "
+                            + "bindings may be ambiguous."
+                    )
+                )
+                .font(.callout)
+                Button(
+                    L(
+                        "native_spaces.open_settings",
+                        "Open Desktop & Dock Settings"
+                    )
+                ) {
+                    DisplaySpacesSetting.openSystemSettings()
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.large)
+            }
+        }
+        .padding(10)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(Color.orange.opacity(0.12))
+        )
     }
 
     private var intro: some View {
@@ -48,10 +87,9 @@ struct NativeSpacesSection: View {
         Text(
             L(
                 "native_spaces.empty",
-                "No native macOS Spaces detected. Enable "
-                    + "\u{201C}Displays have separate "
-                    + "Spaces\u{201D} and add desktops in "
-                    + "Mission Control to bind profiles."
+                "No native macOS Desktops detected. Add "
+                    + "desktops in Mission Control to bind "
+                    + "profiles."
             )
         )
         .font(.caption)

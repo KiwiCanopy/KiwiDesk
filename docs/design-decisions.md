@@ -30,6 +30,7 @@ planned escape hatch; it is not a wontfix dumping ground.
 
 | Behavior | Why it's accepted | Architectural root | Escape hatch / planned fix |
 |---|---|---|---|
+| With **"Displays have separate Spaces" on**, native Desktop→profile bindings cannot represent an independent Desktop choice on every connected display; KiwiDesk applies one global active profile. | Basic tiling remains valid, single-display use is unaffected, and users may want to inspect or prepare bindings before changing the macOS option, so hiding or disabling the controls would overstate the limitation. | Native-Space routing resolves one active Desktop number and one active profile for the whole display setup, not a per-display profile tuple ([#8](https://github.com/hajiboy95/KiwiDesk/issues/8)). | Turn the option off in Desktop & Dock Settings, then log out and back in. Onboarding recommends this; the binding section warns only in the affected multi-display state. See [Shared display Spaces are recommended, not required](#shared-display-spaces-are-recommended-not-required). |
 | In BSP, the inner window of a nested pair can't grow — a "grow" press (or edge-drag) widens its outer neighbor instead. | Its width `r·(1−r)·W` is already maximized at the default ratio, so no resize direction can widen it. | All same-orientation splits share the one per-space ratio; per-node ratios would need a container tree the flat-array model forbids (#56 trade). | **Shipped**: the [`track` layout (#128)](https://github.com/hajiboy95/KiwiDesk/issues/128) — `set_mode(space, "track")` gives every window one true resize target. See [BSP resize is focus-aware in *direction* only](#shortcuts). |
 | In stack, when the master zone lines up *along* the split axis (e.g. horizontal masters beside a right stack), the masters' individual shares can't be resized: that axis always moves the split, and the other axis beeps. | The split ratio owns its whole axis — giving the same keypress two meanings (split vs weight) by focus zone would make "grow" unpredictable at the boundary. | One knob per axis per arrangement ([#222](https://github.com/hajiboy95/KiwiDesk/issues/222)); weights live on a zone's own lineup axis by construction. | Pick the orthogonal (vertical) master orientation — since the 2026-07-16 default flip the standard side-by-side arrangement sits *inside* this limitation once `master_count` exceeds one — or put the windows that need individual shares in the stack zone. |
 | With a leading stack and parallel master lineup, `cascade_overflow` piles the array-earliest masters at the master zone's trailing edge instead of the latest. | Mirroring the master render order keeps the promote/demote boundary beside the stack seam; preserving one trailing-edge, downward-cascade vocabulary matters more than which seniority subset enters that pile. | `StackLayout.mirrorsMasterZone` reverses the master render order before the shared zone-overflow path takes its trailing suffix ([#313](https://github.com/hajiboy95/KiwiDesk/issues/313)). | Use a trailing stack (`right`/`bottom`), an orthogonal master orientation, or `cascade_all` if the subset distinction matters. See [The master zone fills from the stack seam](#shortcuts). |
@@ -510,6 +511,25 @@ Binding a profile to a Desktop is dropdown-only: the earlier
 draggable profile chips duplicated the dropdown while adding
 a chip palette row and drop-target styling — a second
 interaction model with zero extra capability. (#7)
+
+**Shared display Spaces are recommended, not required.**
+KiwiDesk resolves one active native Desktop number and one active
+profile across the whole display setup. With macOS's "Displays have
+separate Spaces" option on, multiple displays can show independent
+Desktop combinations that this one-profile model cannot represent
+unambiguously. Shared display Spaces therefore make Desktop→profile
+bindings predictable, but they are not a prerequisite for basic
+tiling.
+
+Onboarding recommends turning the option off only when it is on and
+lets the user continue without changing it. The Profiles tab keeps the
+specific Desktop-binding controls visible and editable; when multiple
+displays are connected in the separate-Spaces mode, an inline warning
+explains the limitation and opens Desktop & Dock Settings. The saved
+profile list and its Load actions are unrelated and never warned or
+disabled. Hiding the binding section would erase context and existing
+configuration; disabling it would incorrectly claim that every binding
+is inert. (#8)
 
 **Profiles may override *behavior* settings, never *routing*
 ones.** A profile owns tiling, and may also carry a sparse
