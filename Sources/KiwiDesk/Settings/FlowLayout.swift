@@ -25,12 +25,20 @@ struct FlowLayout: Layout {
         let rows = arrange(subviews, in: bounds.width).rows
         for row in rows {
             for item in row.items {
+                // Clamp to the row width so a lone item wider
+                // than the bounds (the first-in-row case that
+                // arrange can't wrap) truncates to fit instead
+                // of overflowing — otherwise a trailing control
+                // spills past the container's edge.
                 subviews[item.index].place(
                     at: CGPoint(
                         x: bounds.minX + item.x,
                         y: bounds.minY + row.y
                     ),
-                    proposal: ProposedViewSize(item.size)
+                    proposal: ProposedViewSize(
+                        width: min(item.size.width, bounds.width),
+                        height: item.size.height
+                    )
                 )
             }
         }
