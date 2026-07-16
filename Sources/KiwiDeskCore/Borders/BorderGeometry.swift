@@ -3,33 +3,23 @@ import CoreGraphics
 /// Pure geometry of one focus-border ring (#278). Turns a window
 /// frame + width + corner style into the overlay window's frame
 /// and the stroke's line width / corner radius, with no AppKit —
-/// so the capped-inner rule is unit-testable in isolation.
+/// so the outset rule is unit-testable in isolation.
 ///
-/// Capped-inner: the stroke eats at most `min(width/2, 1)` pt of
-/// window content (a hairline at any width) and grows the rest
-/// outward into the gutter. At the 2 pt default that's 1 pt in /
-/// 1 pt out — identical to a plain centered stroke — so the
-/// shipped default look is unchanged while thick borders never
-/// hide content.
+/// Pure outset (#303): the whole stroke is drawn *outside* the
+/// window frame — one uniform outward offset of `width` on every
+/// side, every corner style — so the ring never touches the
+/// focused window's own content. macOS focus cues (keyboard
+/// outline, VoiceOver, sidebar selection) all draw this way.
 struct BorderGeometry: Equatable {
     /// The overlay window's frame in AX (top-left) coordinates:
-    /// the window grown by the ring's outward reach on every
-    /// side, big enough to hold the whole stroke.
+    /// the window grown by the stroke width on every side, big
+    /// enough to hold the whole outset stroke.
     let overlayFrame: CGRect
     /// The stroke's line width (pt) = the clamped border width.
     let lineWidth: CGFloat
     /// Corner radius (pt) of the stroke's centerline path, drawn
     /// in the overlay's own bounds inset by `lineWidth / 2`.
     let cornerRadius: CGFloat
-
-    /// How deep a square stroke tucks into the window, as a
-    /// fraction of the corner radius: the rounded corner's tangent
-    /// point, `1 − √2/2`. Insetting the sharp inner edge this far
-    /// puts it just inside the window's curve, so the stroke band
-    /// paints over the gap a square frame would otherwise leave in
-    /// each rounded corner (the reveal #278's design flagged).
-    private static let squareCornerTuck =
-        1 - CGFloat(2).squareRoot() / 2
 
     /// Builds the ring geometry for `windowFrame` (AX coords).
     /// `width` is clamped defensively; `systemRadius` is the
@@ -43,70 +33,28 @@ struct BorderGeometry: Equatable {
             .systemWindowCornerRadius
     ) -> BorderGeometry {
         let w = Self.clamp(width)
-        let inner = Self.innerOverlap(
-            width: w,
-            cornerStyle: cornerStyle,
-            systemRadius: systemRadius
-        )
-        // Rounded: the centerline sits `w/2 - inner` outside the
-        // window edge, so a concentric rounded rect grows its
-        // radius by the same offset. Square has no radius.
+        // The overlay grows by `w` on each side, so its bounds
+        // inset by `lineWidth / 2` (the centerline) sit `w / 2`
+        // outside the window edge — a concentric rounded rect
+        // grows its radius by the same offset. Square has none.
         let radius =
-            cornerStyle == .square
-            ? 0 : max(0, systemRadius + (w / 2 - inner))
-        let outer = w - inner
+            cornerStyle == .square ? 0 : systemRadius + w / 2
         return BorderGeometry(
-            overlayFrame: windowFrame.insetBy(
-                dx: -outer,
-                dy: -outer
-            ),
+            overlayFrame: windowFrame.insetBy(dx: -w, dy: -w),
             lineWidth: w,
             cornerRadius: radius
         )
     }
 
     /// How far the stroke reaches *outward* past the window edge
-    /// (pt), floored at 0 — a thin square that tucks fully inside
-    /// reaches nothing. `border.fit_gaps` sizes gaps from this so
-    /// the gap math matches what the renderer actually draws.
-    static func outwardReach(
-        width: CGFloat,
-        cornerStyle: BorderStyle.CornerStyle,
-        systemRadius: CGFloat = GeometryUtils
-            .systemWindowCornerRadius
-    ) -> CGFloat {
-        let w = clamp(width)
-        return max(
-            0,
-            w
-                - innerOverlap(
-                    width: w,
-                    cornerStyle: cornerStyle,
-                    systemRadius: systemRadius
-                )
-        )
+    /// (pt) — the full width now that the stroke is pure outset.
+    /// `border.fit_gaps` sizes gaps from this so the gap math
+    /// matches what the renderer actually draws.
+    static func outwardReach(width: CGFloat) -> CGFloat {
+        clamp(width)
     }
 
     private static func clamp(_ width: CGFloat) -> CGFloat {
         min(BorderStyle.maxWidth, max(BorderStyle.minWidth, width))
-    }
-
-    /// Depth (pt) the stroke overlaps *into* the window. Rounded
-    /// caps it at 1 pt (a hairline at any width); square tucks to
-    /// the corner tangent so the band covers the corner. One
-    /// source for both `compute` and `outwardReach` so they can't
-    /// drift.
-    private static func innerOverlap(
-        width w: CGFloat,
-        cornerStyle: BorderStyle.CornerStyle,
-        systemRadius: CGFloat
-    ) -> CGFloat {
-        let baseInner = min(w / 2, 1)
-        switch cornerStyle {
-        case .square:
-            return max(baseInner, systemRadius * squareCornerTuck)
-        case .rounded:
-            return baseInner
-        }
     }
 }

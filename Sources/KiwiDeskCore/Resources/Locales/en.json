@@ -98,7 +98,6 @@
   "border.fit_gaps.caption": "Widens the layout gaps so borders never touch a neighbour — the inner gap doubles when unfocused borders are on.",
   "border.focused_color": "Color",
   "border.focused_color.a11y": "Focused window border color",
-  "border.square_inset_hint": "A square border reaches the window edge only above %1$d pt; thinner, it sits just inside the window.",
   "border.title": "Focus border",
   "border.unfocused_color": "Color",
   "border.unfocused_color.a11y": "Unfocused window border color",
