@@ -153,11 +153,16 @@ private struct FocusBorderPreview: View {
             .fill(Color.secondary.opacity(0.25))
             .overlay {
                 if ringed {
-                    RoundedRectangle(cornerRadius: radius)
-                        .strokeBorder(
+                    // Pure outset (#303): the ring sits entirely
+                    // outside the window — grow the stroke rect by
+                    // half the width and centre the stroke, so it
+                    // never paints over the mock window's content.
+                    RoundedRectangle(cornerRadius: radius + width / 2)
+                        .stroke(
                             Color(kiwiHex: color),
                             lineWidth: width
                         )
+                        .padding(-width / 2)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
