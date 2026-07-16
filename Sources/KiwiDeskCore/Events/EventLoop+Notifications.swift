@@ -53,8 +53,13 @@ extension EventLoop {
             // (the old tab vanishes as this one appears). Route it
             // through reconcile so it can coalesce into a re-key
             // instead of a spurious new tile; a genuinely new tabbed
-            // window still tracks there when nothing vanished (#308).
-            if AXHelper.hasNativeTabs(element) {
+            // window still tracks there when nothing vanished. Also
+            // route when the app already has a carrier: at the 1→2
+            // boundary the promoted single tab has no group of its own
+            // yet (#308).
+            if AXHelper.hasNativeTabs(element)
+                || appHasTabCarrier(pid: pid)
+            {
                 reconcile(pid: pid, app: app)
             } else {
                 track(element, pid: pid, app: app)
@@ -64,17 +69,21 @@ extension EventLoop {
             if let id = windowID(of: element, pid: pid),
                 elements[pid]?[id] != nil
             {
-                // A destroyed native-tab carrier may be a switch or
-                // active-tab close; leave it tracked and let the
-                // reconcile below coalesce a re-key or emit the real
-                // destroy. A minimize is never a tab close (#308).
+                // A destroyed native-tab carrier (or any window of an
+                // app that has one) may be a switch or active-tab
+                // close; leave it tracked and let the reconcile below
+                // coalesce a re-key or emit the real destroy. A
+                // minimize is never a tab close (#308).
                 if note == kAXUIElementDestroyedNotification,
-                    tabFrames[id] != nil
+                    tabCarriers.contains(id)
+                        || appHasTabCarrier(pid: pid)
                 {
                     // Deferred to reconcile.
                 } else {
                     elements[pid]?[id] = nil
                     detectedFloating[id] = nil
+                    trackedFrames[id] = nil
+                    tabCarriers.remove(id)
                     onEvent(
                         .windowDestroyed(
                             id,
@@ -119,14 +128,14 @@ extension EventLoop {
                 return
             }
             let frame = AXHelper.frame(of: element)
-            if tabFrames[id] != nil { tabFrames[id] = frame }
+            if elements[pid]?[id] != nil { trackedFrames[id] = frame }
             onEvent(.windowMoved(id, frame))
         case kAXWindowResizedNotification:
             guard let id = AXHelper.windowID(of: element) else {
                 return
             }
             let frame = AXHelper.frame(of: element)
-            if tabFrames[id] != nil { tabFrames[id] = frame }
+            if elements[pid]?[id] != nil { trackedFrames[id] = frame }
             onEvent(.windowResized(id, frame))
         case kAXTitleChangedNotification:
             guard let id = AXHelper.windowID(of: element) else {

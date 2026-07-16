@@ -29,9 +29,9 @@ public enum KiwiEvent: Sendable {
     /// with its own `CGWindowID`; when the active tab switches (or
     /// the active tab closes with siblings left), the group's single
     /// layout slot must adopt the new active id without a
-    /// destroy/create pair — no new tile, no lost focus (#308). The
-    /// resolver (`TabGroupResolver`) decides when to emit this; the
-    /// state fold swaps the id across every id-keyed map in place.
+    /// destroy/create pair — no new tile, no lost focus (#308).
+    /// `TabReconciler` decides when to emit this from the event loop;
+    /// the state fold swaps the id across every id-keyed map in place.
     case windowRekeyed(WindowID, WindowID)
     case displaysChanged([Display])
     /// The user switched native macOS Spaces (Mission

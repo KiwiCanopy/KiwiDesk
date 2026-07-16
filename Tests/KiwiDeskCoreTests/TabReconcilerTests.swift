@@ -28,20 +28,32 @@ struct TabReconcilerTests {
         #expect(rekeys == [.init(from: WindowID(1), to: WindowID(2))])
     }
 
-    @Test("appeared window without a tab group does not merge")
-    func appearedGate() {
+    @Test("close 2→1: carrier vanishes, single tab appears → re-key")
+    func carrierVanishesNonGroupAppears() {
+        // The survivor of a close-to-one-tab has no AXTabGroup of its
+        // own yet, but the vanished side was a carrier — a tab group
+        // on either side is enough (#308).
         let rekeys = TabReconciler.rekeys(
             vanished: [win(1, frame: frame)],
             appeared: [win(2, frame: frame, tabGroup: false)]
         )
-        #expect(rekeys.isEmpty)
+        #expect(rekeys == [.init(from: WindowID(1), to: WindowID(2))])
     }
 
-    @Test("vanished window without a tab group does not merge")
-    func vanishedGate() {
+    @Test("open 1→2: single tab vanishes, carrier appears → re-key")
+    func nonGroupVanishesCarrierAppears() {
         let rekeys = TabReconciler.rekeys(
             vanished: [win(1, frame: frame, tabGroup: false)],
             appeared: [win(2, frame: frame)]
+        )
+        #expect(rekeys == [.init(from: WindowID(1), to: WindowID(2))])
+    }
+
+    @Test("no tab group on either side → no merge")
+    func neitherSideTabGroup() {
+        let rekeys = TabReconciler.rekeys(
+            vanished: [win(1, frame: frame, tabGroup: false)],
+            appeared: [win(2, frame: frame, tabGroup: false)]
         )
         #expect(rekeys.isEmpty)
     }

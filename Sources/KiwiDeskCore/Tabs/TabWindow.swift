@@ -2,11 +2,12 @@ import CoreGraphics
 import Foundation
 
 /// The signals the native-tab reconciler needs about one window,
-/// snapshotted so the matcher stays pure (no AX access). A window is
-/// eligible to take part in a tab-group re-key only when it carries
-/// an `AXTabGroup` (`hasTabGroup`); `frame` is the group's on-screen
-/// frame, which is stable across a tab switch and is the key the
-/// matcher pairs on.
+/// snapshotted so the matcher stays pure (no AX access). `frame` is
+/// the group's on-screen frame, stable across a tab switch and the
+/// key the matcher pairs on. `hasTabGroup` means an `AXTabGroup` is
+/// (for an appearing window) or was (for a vanished one, from the
+/// event loop's carrier set) present — a re-key needs it on only one
+/// side, since an app like Ghostty exposes the group only at 2+ tabs.
 ///
 /// Native tabs (Finder, Terminal, Ghostty) are separate `NSWindow`s
 /// sharing one on-screen frame, only the active one visible to AX at

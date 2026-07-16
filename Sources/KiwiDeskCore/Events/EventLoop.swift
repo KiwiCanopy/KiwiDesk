@@ -56,11 +56,19 @@ public final class EventLoop {
     /// once; untracked only if the reading persists (layers
     /// flicker during fullscreen transitions).
     var ignorePending: Set<WindowID> = []
-    /// Last-known on-screen frame of each tracked native-tab window
-    /// (an `AXTabGroup` carrier). Membership marks a window as a tab
-    /// carrier; the frame is the key `TabReconciler` matches a
-    /// vanished tab against the appearing one on a switch (#308).
-    var tabFrames: [WindowID: CGRect] = [:]
+    /// Last-known on-screen frame of every tracked window — the key
+    /// `TabReconciler` matches a vanished window against an appearing
+    /// one on a native-tab switch (#308). Kept for all windows (not
+    /// just carriers) so the 1↔2 tab boundary — where the vanishing
+    /// or appearing window has no tab group yet — still matches by
+    /// frame. Set at track, refreshed on move/resize/reconcile,
+    /// moved on re-key, cleared on destroy/detach/stop.
+    var trackedFrames: [WindowID: CGRect] = [:]
+    /// Tracked windows that carry (or last carried) an `AXTabGroup`.
+    /// A re-key needs a tab group on only one side, so this preserves
+    /// the "was a carrier" fact for a window that vanishes after a
+    /// switch even though its element is gone (#308).
+    var tabCarriers: Set<WindowID> = []
     var workspaceTokens: [NSObjectProtocol] = []
     var screenToken: NSObjectProtocol?
     var lastActivePid: pid_t?
@@ -110,7 +118,8 @@ public final class EventLoop {
         enhancedUIBaselines = [:]
         detectedFloating = [:]
         ignorePending = []
-        tabFrames = [:]
+        trackedFrames = [:]
+        tabCarriers = []
     }
 
     // Read-only lookups (detectionVerdict, observes, element,
@@ -177,11 +186,13 @@ public final class EventLoop {
         detectedFloating[window.id] = window.isFloating
         elements[pid, default: [:]][window.id] = element
         observers[pid]?.observe(window: element)
-        // Remember native-tab carriers so a later switch (this window
-        // vanishing as a sibling appears at the same frame) coalesces
-        // into a re-key instead of a destroy + create (#308).
+        // Remember every window's frame, and which windows carry a
+        // native tab group, so a later switch (this window vanishing
+        // as a sibling appears at the same frame) coalesces into a
+        // re-key instead of a destroy + create (#308).
+        trackedFrames[window.id] = window.frame
         if AXHelper.hasNativeTabs(element) {
-            tabFrames[window.id] = window.frame
+            tabCarriers.insert(window.id)
         }
         onEvent(.windowCreated(window))
     }
@@ -191,7 +202,11 @@ public final class EventLoop {
     /// picks up windows we missed (e.g. deminiaturized).
     /// Safety net for macOS's unreliable AX notifications —
     /// without it, closed windows keep occupying layout slots.
-    func reconcile(pid: pid_t, app: AppRef) {
+    func reconcile(
+        pid: pid_t,
+        app: AppRef,
+        coalesceTabs: Bool = true
+    ) {
         let activationPolicy =
             NSRunningApplication(
                 processIdentifier: pid
@@ -282,11 +297,11 @@ public final class EventLoop {
                     pid: pid,
                     app: app
                 )
-                // Keep a tab carrier's frame current so a later
-                // switch matches against its real on-screen frame.
-                if tabFrames[id] != nil {
-                    tabFrames[id] = AXHelper.frame(of: element)
-                }
+                // Keep every tracked window's frame current so a
+                // later switch matches against its real on-screen
+                // frame (the vanished side of a tab switch may be a
+                // window that had no tab group of its own — #308).
+                trackedFrames[id] = AXHelper.frame(of: element)
             }
         }
         reconcileTabsAndSweep(
@@ -294,7 +309,8 @@ public final class EventLoop {
             app: app,
             appeared: appeared,
             live: live,
-            minimized: minimized
+            minimized: minimized,
+            coalesceTabs: coalesceTabs
         )
     }
 

@@ -39,25 +39,30 @@ public enum TabReconciler {
     }
 
     /// Pair windows that vanished this reconcile with ones that
-    /// appeared, when both carry a tab group and share a frame.
-    /// Greedy and deterministic (lowest id first); each appeared
-    /// window is claimed at most once, so N simultaneous switches in
-    /// one app pair off by frame. `vanished` should exclude
-    /// minimized windows — a minimize is not a tab close.
+    /// appeared, when they share a frame and a tab group is present
+    /// on **either** side. The either-side rule handles the 1↔2 tab
+    /// boundary: an app like Ghostty exposes an `AXTabGroup` only
+    /// once a second tab exists, so opening the first extra tab
+    /// vanishes a *non*-carrier single-tab window as a carrier 2-tab
+    /// window appears, and closing back to one tab does the reverse.
+    /// Requiring the group on both sides would miss both. A pair with
+    /// no tab group on either side never merges (ordinary windows are
+    /// untouched). Greedy and deterministic (lowest id first); each
+    /// appeared window is claimed at most once, so N simultaneous
+    /// switches in one app pair off by frame. `vanished` should
+    /// exclude minimized windows — a minimize is not a tab close.
     public static func rekeys(
         vanished: [TabWindow],
         appeared: [TabWindow],
         tolerance: CGFloat = frameTolerance
     ) -> [Rekey] {
-        let candidates = appeared.filter(\.hasTabGroup)
-            .sorted { $0.id.raw < $1.id.raw }
+        let candidates = appeared.sorted { $0.id.raw < $1.id.raw }
         var claimed = Set<WindowID>()
         var rekeys: [Rekey] = []
-        for gone in vanished.filter(\.hasTabGroup)
-            .sorted(by: { $0.id.raw < $1.id.raw })
-        {
+        for gone in vanished.sorted(by: { $0.id.raw < $1.id.raw }) {
             let match = candidates.first {
                 !claimed.contains($0.id)
+                    && (gone.hasTabGroup || $0.hasTabGroup)
                     && framesMatch($0.frame, gone.frame, tolerance)
             }
             guard let match else { continue }

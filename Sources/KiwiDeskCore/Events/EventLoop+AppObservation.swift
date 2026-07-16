@@ -103,6 +103,8 @@ extension EventLoop {
         for id in Array(elements[pid, default: [:]].keys) {
             detectedFloating[id] = nil
             ignorePending.remove(id)
+            trackedFrames[id] = nil
+            tabCarriers.remove(id)
             onEvent(.windowDestroyed(id, wasMinimized: false))
         }
         elements[pid] = nil

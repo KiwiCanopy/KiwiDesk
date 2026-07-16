@@ -150,8 +150,14 @@ extension EventLoop {
         for app in NSWorkspace.shared.runningApplications {
             syncObservation(for: app)
         }
+        // Suppress native-tab coalescing here: a native-space switch
+        // presents the departed space's windows as vanished and the
+        // arrived space's as appeared in one pass, and same-app
+        // windows tile to identical frames — they would false-merge
+        // into a re-key (#308 review). Genuine switches coalesce via
+        // the per-window reconciles the AX notifications drive.
         for pid in Array(observers.keys) {
-            reconcile(pid: pid, app: AppRef(pid: pid))
+            reconcile(pid: pid, app: AppRef(pid: pid), coalesceTabs: false)
         }
     }
 
