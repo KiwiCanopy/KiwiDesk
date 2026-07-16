@@ -71,6 +71,15 @@ basic tiling still works with separate display Spaces, and a single
 display is never affected. Changing the macOS option requires
 logging out and back in.
 
+If Accessibility permission is ever missing — you dismissed the
+wizard, or the permission was revoked later — window management
+pauses and KiwiDesk makes it easy to find your way back. The menu
+bar icon shows a warning triangle, the quick menu gains a
+**Window Management Paused…** row at the top, and the Settings
+window shows a banner across every section. Any of them reopens
+the wizard at the grant step so you can turn the permission back
+on; management resumes automatically once you do.
+
 KiwiDesk runs as a single instance. Launching it while a copy is
 already running never starts a second manager (two instances
 would fight over your windows and hotkeys): the second launch
@@ -96,6 +105,9 @@ the KiwiDesk icon opens the quick menu where you can:
     the new layout (adopts the whole live state into the active profile).
 - **Switch Profile**: Load any saved profile into the current layout.
 - **Settings…**: Open the full Settings window.
+- **Window Management Paused…** (only when Accessibility permission
+  is missing): appears at the top of the menu and reopens the
+  permission wizard so tiling can resume.
 
 ## How the App and init.lua Coexist
 

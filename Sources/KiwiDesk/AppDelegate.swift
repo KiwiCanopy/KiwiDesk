@@ -22,6 +22,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     private var dashboard: SettingsWindowController {
         if let existing = dashboardIfCreated { return existing }
         let created = SettingsWindowController(core: core)
+        // Seed the dashboard's permission banner from live state
+        // and route its "Enable Accessibility…" button through the
+        // same guided fix as the quick-menu warning row.
+        created.setResolvePermission { [weak self] in
+            self?.showAccessibilityHelp()
+        }
+        created.setPermissionPaused(!permissions.isTrusted)
         dashboardIfCreated = created
         return created
     }
@@ -97,6 +104,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         }
         statusItem.onShowConfigIssues = { [weak self] in
             self?.configIssues.show()
+        }
+        statusItem.onShowAccessibilityHelp = { [weak self] in
+            self?.showAccessibilityHelp()
         }
         self.statusItem = statusItem
 
@@ -177,6 +187,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
 
     private func permissionChanged(_ trusted: Bool) {
         onboardingModel.isTrusted = trusted
+        // Keep an already-open dashboard's paused banner in sync
+        // (the window survives close, so it may be up right now).
+        dashboardIfCreated?.setPermissionPaused(!trusted)
         if trusted {
             statusItem?.setWarning(false)
             startManaging()
@@ -187,6 +200,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             notifyPermissionLost()
             showOnboarding()
         }
+    }
+
+    /// The shared "fix Accessibility" entry point for both the
+    /// quick-menu warning row and the Settings banner: reopen the
+    /// onboarding wizard straight at its grant step (skipping the
+    /// welcome copy) so both routes land in the one explainer.
+    private func showAccessibilityHelp() {
+        onboardingModel.step = .grant
+        showOnboarding()
     }
 
     private func startManaging() {
