@@ -28,9 +28,22 @@ public enum DisplaySpacesSetting {
         return number.intValue != 1
     }
 
+    /// True when the display setup makes shared Spaces worth
+    /// recommending: separate Spaces are on *and* more than one
+    /// display is present. A single display has no Desktop→profile
+    /// binding ambiguity, so the recommendation must not fire for
+    /// it. The one predicate both onboarding and the Canvas
+    /// section share, so the two surfaces can't drift (#8).
+    public static func recommendsSharedSpaces(
+        displayCount: Int
+    ) -> Bool {
+        displayCount > 1 && hasSeparateSpaces()
+    }
+
     /// Opens System Settings › Desktop & Dock, where the option
     /// lives. Falls back to the Settings root if Apple renames
     /// the pane identifier.
+    @MainActor
     public static func openSystemSettings() {
         let pane =
             "x-apple.systempreferences:"

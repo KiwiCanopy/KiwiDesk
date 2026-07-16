@@ -19,9 +19,9 @@ struct NativeSpacesSection: View {
                 "Profiles per macOS Space"
             )
         ) {
-            if model.displays.count > 1
-                && DisplaySpacesSetting.hasSeparateSpaces()
-            {
+            if DisplaySpacesSetting.recommendsSharedSpaces(
+                displayCount: model.displays.count
+            ) {
                 separateSpacesWarning
             }
             if spaceNumbers.isEmpty {

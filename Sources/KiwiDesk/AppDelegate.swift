@@ -209,6 +209,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         onboardingModel.onOpenSpaceSettings = {
             DisplaySpacesSetting.openSystemSettings()
         }
+        onboardingModel.displayCount = { [weak self] in
+            self?.core.state.workspaces.allDisplays.count ?? 1
+        }
         onboardingModel.onFinish = { [weak self] in
             self?.closeOnboarding()
         }

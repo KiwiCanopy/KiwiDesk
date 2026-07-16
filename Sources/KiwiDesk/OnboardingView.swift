@@ -17,14 +17,18 @@ final class OnboardingModel {
     /// Opens System Settings › Desktop & Dock (#8).
     var onOpenSpaceSettings: () -> Void = {}
     var onFinish: () -> Void = {}
+    /// Live count of connected displays, so the recommendation
+    /// fires only in the multi-display state that can actually
+    /// suffer ambiguous Desktop→profile bindings (#8).
+    var displayCount: () -> Int = { 1 }
 
     /// Shared display Spaces match KiwiDesk's one-active-profile
     /// model. Separate Spaces remain usable for basic tiling, so
-    /// this is a recommendation the user may skip.
-    func continueAfterAccessibility(
-        hasSeparateSpaces: Bool
-    ) {
-        if hasSeparateSpaces {
+    /// this is a recommendation the user may skip. `recommend`
+    /// already folds in the display-count gate (a single display
+    /// is never ambiguous), matching the Canvas section's shape.
+    func continueAfterAccessibility(recommendSharedSpaces recommend: Bool) {
+        if recommend {
             step = .separateSpaces
         } else {
             onFinish()
@@ -158,12 +162,15 @@ struct OnboardingView: View {
         .animation(.spring, value: model.isTrusted)
     }
 
-    /// Recommend shared display Spaces only when the separate
-    /// display model is currently enabled.
+    /// Recommend shared display Spaces only when separate Spaces
+    /// are on *and* more than one display is connected — the
+    /// gate the Canvas section already applies (#8).
     private func advancePastAccessibility() {
         model.continueAfterAccessibility(
-            hasSeparateSpaces:
-                DisplaySpacesSetting.hasSeparateSpaces()
+            recommendSharedSpaces:
+                DisplaySpacesSetting.recommendsSharedSpaces(
+                    displayCount: model.displayCount()
+                )
         )
     }
 
