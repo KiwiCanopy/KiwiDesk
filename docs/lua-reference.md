@@ -1813,9 +1813,12 @@ focus otherwise lacks. It is **on by default** and marks only the
 focused window; you can optionally ring every other window too.
 
 The ring is a pure overlay: it never changes where windows tile
-(no gap coupling). Its stroke is *pure outset* — drawn entirely
-outside the window frame, so it never touches window content at
-any width. Corners match the real macOS window radius unless you
+(no gap coupling). Its stroke is *capped-inner* — a rounded
+border covers at most 1 pt of window content at any width and
+grows the rest outward into the gap, so a thick border can never
+hide content; a square border tucks a little deeper (≈ 0.3× the
+corner radius) so its sharp frame still covers each rounded
+corner. Corners match the real macOS window radius unless you
 pick square.
 
 Overflow piles and monocle show a ring only on the visible
@@ -1909,9 +1912,9 @@ border.set_corner_style("rounded")
 **Does:** sizes the global layout gaps so borders never touch a
 neighbour — the border's true outward reach at the screen edge and
 between windows, doubled between windows when `unfocused_enabled`
-is on (both neighbours are ringed). The stroke is pure outset, so
-the reach is simply the border width, the same for both corner
-styles. A one-shot convenience that writes `gap.global`;
+is on (both neighbours are ringed). The reach depends on the
+corner style (a square border tucks inward and reaches far less
+than its width). A one-shot convenience that writes `gap.global`;
 the layout math itself stays free of any border coupling, so this
 never runs automatically. The GUI's "Fit gaps to border" button
 calls the same logic.

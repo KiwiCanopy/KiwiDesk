@@ -49,24 +49,25 @@ struct BorderStyleParityTests {
         #expect(decoded == BorderStyle())
     }
 
-    @Test("fittingGaps sizes gaps to the full outward reach")
+    @Test("fittingGaps sizes gaps to the true outward reach")
     func fittingGaps() {
         var style = BorderStyle()
         style.width = 10
-        // Pure outset: reach = the full width.
+        // Rounded reach = 10 − 1 (inner) = 9, not the raw width.
         let focused = style.fittingGaps()
-        #expect(focused.outer.top == 10)
-        #expect(focused.outer.left == 10)
-        #expect(focused.inner.horizontal == 10)
-        #expect(focused.inner.vertical == 10)
+        #expect(focused.outer.top == 9)
+        #expect(focused.outer.left == 9)
+        #expect(focused.inner.horizontal == 9)
+        #expect(focused.inner.vertical == 9)
         // Both: inner gaps double (two neighbouring rings).
         style.unfocusedEnabled = true
-        #expect(style.fittingGaps().inner.horizontal == 20)
-        #expect(style.fittingGaps().outer.top == 10)
-        // Square reaches outward by the full width too.
+        #expect(style.fittingGaps().inner.horizontal == 18)
+        #expect(style.fittingGaps().outer.top == 9)
+        // Square tucks inward, so it reaches far less than its
+        // width: 10 − ceil-tuck → ceil(10 − 4.686) = 6.
         style.unfocusedEnabled = false
         style.cornerStyle = .square
-        #expect(style.fittingGaps().outer.top == 10)
+        #expect(style.fittingGaps().outer.top == 6)
     }
 
     @Test("Width clamps into range, raw value preserved")

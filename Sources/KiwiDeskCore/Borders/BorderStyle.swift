@@ -9,9 +9,10 @@ import Foundation
 /// loop keyboard-driven focus otherwise lacks.
 ///
 /// The ring is a pure post-layout overlay: it never feeds back
-/// into layout math (no gap coupling). The stroke is drawn pure
-/// outset — entirely outside the window frame — so it never
-/// touches the window's own content (see `Borders/BorderGeometry`).
+/// into layout math (no gap coupling). The stroke uses a
+/// capped-inner geometry — it eats at most `min(width/2, 1)` pt
+/// of window content at any width and grows the rest outward — so
+/// a thick border can't hide content (see `Borders/BorderGeometry`).
 public struct BorderStyle: Sendable, Equatable {
     /// Rounded matches the real macOS window radius; Square
     /// strokes with sharp corners (radius 0). Square is seamless
@@ -27,6 +28,20 @@ public struct BorderStyle: Sendable, Equatable {
     /// whole points 1–20 (sub-point widths stay a Lua fine-tune).
     public static let minWidth: CGFloat = 0.5
     public static let maxWidth: CGFloat = 20
+
+    /// The width at which a square border's outer edge meets the
+    /// window edge. Below it a square sits inset *inside* the
+    /// window (the corner is still covered by the tuck, it just
+    /// doesn't hug the edge); above it, it extends outward like a
+    /// frame. Not a clamp — the GUI shows a hint at thinner square
+    /// widths rather than forbidding them. Tied to the real corner
+    /// radius times the tuck depth (`R · squareCornerTuck`) so it
+    /// tracks the true value — one shared constant with the
+    /// renderer, so the hint can't drift from what's drawn (#311).
+    public static var minSquareWidth: CGFloat {
+        (GeometryUtils.systemWindowCornerRadius
+            * BorderGeometry.squareCornerTuck).rounded(.up)
+    }
 
     public var enabled = true
     /// Ring width (pt). Raw here; callers clamp to
@@ -52,14 +67,16 @@ public struct BorderStyle: Sendable, Equatable {
     /// border's true **outward reach** at the screen edge and
     /// between windows, doubled between windows when both
     /// neighbours are ringed (`unfocusedEnabled`). Uses
-    /// `BorderGeometry.outwardReach` — the full stroke width now
-    /// that the stroke is pure outset. Shared by the
-    /// `border.fit_gaps` command and the GUI button so they can't
-    /// drift. A one-shot convenience — the layout math itself
-    /// stays free of any border coupling (AGENTS.md §5).
+    /// `BorderGeometry.outwardReach` (not the raw width) so square
+    /// — which tucks inward and reaches far less than its width —
+    /// isn't over-provisioned. Shared by the `border.fit_gaps`
+    /// command and the GUI button so they can't drift. A one-shot
+    /// convenience — the layout math itself stays free of any
+    /// border coupling (AGENTS.md §5).
     public func fittingGaps() -> Gaps {
         let reach = BorderGeometry.outwardReach(
-            width: clampedWidth
+            width: clampedWidth,
+            cornerStyle: cornerStyle
         ).rounded(.up)
         let inner = unfocusedEnabled ? reach * 2 : reach
         return Gaps(
