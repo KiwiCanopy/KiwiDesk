@@ -121,10 +121,10 @@ struct BorderCommandTests {
         #expect(
             core.execute("border.fit_gaps", args: []).isSuccess
         )
-        // Rounded reach = width − 1 = 9.
-        #expect(core.tiler.settings.gapsGlobal.outer.top == 9)
+        // Pure outset: reach = the full width = 10.
+        #expect(core.tiler.settings.gapsGlobal.outer.top == 10)
         #expect(
-            core.tiler.settings.gapsGlobal.inner.horizontal == 9
+            core.tiler.settings.gapsGlobal.inner.horizontal == 10
         )
         // Unfocused on → inner gaps double.
         _ = core.execute(
@@ -133,9 +133,9 @@ struct BorderCommandTests {
         )
         _ = core.execute("border.fit_gaps", args: [])
         #expect(
-            core.tiler.settings.gapsGlobal.inner.horizontal == 18
+            core.tiler.settings.gapsGlobal.inner.horizontal == 20
         )
-        #expect(core.tiler.settings.gapsGlobal.outer.top == 9)
+        #expect(core.tiler.settings.gapsGlobal.outer.top == 10)
     }
 
     @Test("Unknown border setter fails")
