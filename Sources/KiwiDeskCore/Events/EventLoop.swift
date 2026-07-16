@@ -148,7 +148,8 @@ public final class EventLoop {
         pid: pid_t,
         app: AppRef
     ) {
-        guard AXHelper.role(of: element) == kAXWindowRole,
+        let role = AXHelper.role(of: element)
+        guard role == kAXWindowRole,
             !AXHelper.isMinimized(element),
             var window = AXHelper.snapshot(
                 element: element,
@@ -157,9 +158,25 @@ public final class EventLoop {
             )
         else { return }
         guard elements[pid]?[window.id] == nil else { return }
+        let subrole = AXHelper.subrole(of: element)
+        let layer = FloatDetection.windowLayer(of: window.id)
+        guard
+            !FloatDetection.isUnbackedAuxiliary(
+                role: role,
+                subrole: subrole,
+                layer: layer
+            )
+        else { return }
         // Some panels must never be managed at all — merely
         // floating them still pins them to a space (issue #21).
-        guard !shouldIgnore(element, pid: pid, app: app) else {
+        guard
+            !shouldIgnore(
+                element,
+                pid: pid,
+                app: app,
+                layer: layer ?? 0
+            )
+        else {
             return
         }
         window.isFloating =
@@ -167,6 +184,7 @@ public final class EventLoop {
             || FloatDetection.shouldFloat(
                 element: element,
                 bundleID: app.bundleID,
+                layer: layer,
                 rules: floatRules
             )
         detectedFloating[window.id] = window.isFloating
@@ -192,9 +210,21 @@ public final class EventLoop {
             FloatDetection.requiresWindowLayers(
                 bundleID: app.bundleID
             ) ? FloatDetection.windowLayers(pid: pid) : [:]
+        let liveElements = AXHelper.windows(pid: pid)
+        let activationPolicy = NSRunningApplication(
+            processIdentifier: pid
+        )?.activationPolicy
+        if activationPolicy == .regular
+            || liveElements.contains(where: Self.isStandardWindow)
+        {
+            // A cold app may not answer the baseline EUI read at
+            // attach time. Retry on later reconciles until one
+            // succeeds, without taking another window snapshot.
+            enableEnhancedUI(pid: pid)
+        }
         var live: Set<WindowID> = []
         var minimized: Set<WindowID> = []
-        for element in AXHelper.windows(pid: pid) {
+        for element in liveElements {
             guard let id = AXHelper.windowID(of: element)
             else { continue }
             // Minimized windows count as gone. Unlike windows

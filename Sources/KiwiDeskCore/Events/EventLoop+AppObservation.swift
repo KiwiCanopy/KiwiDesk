@@ -11,7 +11,14 @@ extension EventLoop {
     ) {
         let pid = app.processIdentifier
         let ref = AppRef(app)
-        guard !shouldIgnoreApp(bundleID: ref.bundleID) else {
+        let isIgnored = shouldIgnoreApp(bundleID: ref.bundleID)
+        guard
+            Self.shouldAttach(
+                pid: pid,
+                activationPolicy: app.activationPolicy,
+                isIgnored: isIgnored
+            )
+        else {
             detach(pid: pid, restoreEnhancedUI: true)
             return
         }

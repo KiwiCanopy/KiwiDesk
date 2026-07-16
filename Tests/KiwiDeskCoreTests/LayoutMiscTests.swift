@@ -310,6 +310,31 @@ struct FloatRuleTests {
         )
     }
 
+    @Test("Unbacked AX auxiliary proxies are never managed")
+    func unbackedAuxiliaryProxies() {
+        #expect(
+            FloatDetection.isUnbackedAuxiliary(
+                role: "AXWindow",
+                subrole: "AXFloatingWindow",
+                layer: nil
+            )
+        )
+        #expect(
+            !FloatDetection.isUnbackedAuxiliary(
+                role: "AXWindow",
+                subrole: "AXFloatingWindow",
+                layer: 0
+            )
+        )
+        #expect(
+            !FloatDetection.isUnbackedAuxiliary(
+                role: "AXWindow",
+                subrole: "AXStandardWindow",
+                layer: nil
+            )
+        )
+    }
+
     @Test("Only structural events trigger a retile")
     func retileFilter() throws {
         #expect(

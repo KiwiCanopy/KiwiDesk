@@ -39,6 +39,20 @@ public enum FloatDetection {
         return list?.first?[kCGWindowLayer as String] as? Int
     }
 
+    /// AX can expose a transient proxy as an auxiliary window even
+    /// though no matching WindowServer window exists. Managing that
+    /// proxy creates a floating state entry and an AppKit fallback
+    /// border around system UI shown at the same location. Real
+    /// dialogs and panels have a layer; standard windows may be
+    /// absent because they live on another native Space.
+    public static func isUnbackedAuxiliary(
+        role: String,
+        subrole: String,
+        layer: Int?
+    ) -> Bool {
+        layer == nil && shouldFloat(role: role, subrole: subrole)
+    }
+
     private static let ghosttyBundleID = "com.mitchellh.ghostty"
 
     /// Transient macOS UI processes whose windows are overlays,
@@ -167,12 +181,30 @@ public enum FloatDetection {
         bundleID: String?,
         rules: FloatRules
     ) -> Bool {
+        let layer = AXHelper.windowID(of: element)
+            .flatMap { windowLayer(of: $0) }
+        return shouldFloat(
+            element: element,
+            bundleID: bundleID,
+            layer: layer,
+            rules: rules
+        )
+    }
+
+    /// Variant for callers that already read the WindowServer layer.
+    /// Tracking uses it to keep ignore and float classification on
+    /// the same snapshot instead of making two server round trips.
+    @MainActor
+    public static func shouldFloat(
+        element: AXUIElement,
+        bundleID: String?,
+        layer: Int?,
+        rules: FloatRules
+    ) -> Bool {
         let title = AXHelper.title(of: element)
         if rules.matches(bundleID: bundleID, title: title) {
             return true
         }
-        let layer = AXHelper.windowID(of: element)
-            .flatMap { windowLayer(of: $0) }
         return shouldFloat(
             role: AXHelper.role(of: element),
             subrole: AXHelper.subrole(of: element),

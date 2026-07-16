@@ -783,8 +783,7 @@ preserved when Settings saves other fields. See
 
 KiwiDesk already ignores transient macOS input-source menus and
 switcher overlays, so the Globe-key language picker receives no
-virtual-space assignment or KiwiDesk focus border. Its blue selection
-highlight is drawn by macOS and remains visible.
+virtual-space assignment or KiwiDesk focus border.
 
 ### Per-Profile Space Assignments
 
