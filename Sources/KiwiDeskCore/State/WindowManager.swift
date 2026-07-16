@@ -74,4 +74,11 @@ public struct WindowManager: Sendable {
     ) {
         windows[id]?.isFloating = floating
     }
+
+    public mutating func setTransientOverlay(
+        _ id: WindowID,
+        _ overlay: Bool
+    ) {
+        windows[id]?.isTransientOverlay = overlay
+    }
 }

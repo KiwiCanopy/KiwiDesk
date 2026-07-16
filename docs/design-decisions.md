@@ -163,8 +163,13 @@ they belong in managed state; only the ring is wrong, and the fix
 belongs where the ring is drawn. This is deliberately narrower than
 excluding *all* focused floats — a user who floats a standard
 window still wants its ring; a launcher does not. The classification
-is captured once at track time (`ManagedWindow.isTransientOverlay`),
-so the pure `borderSpecs` decision stays AX-free.
+is captured at track time (`ManagedWindow.isTransientOverlay`), so
+the pure `borderSpecs` decision stays AX-free, and it clears the
+moment detection self-heals a window back to tiled — the flag can
+never outlive the float state it depends on (overlay ⟹ floating). A
+window that is genuinely an overlay is caught by the stable
+accessory-policy path at track time, independent of any one-off
+subrole read.
 
 The ring's **rendering backend is opportunistic, not architectural**
 (#285): when the complete runtime-linked SkyLight drawing and event
