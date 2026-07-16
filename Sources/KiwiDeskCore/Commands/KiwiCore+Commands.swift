@@ -4,6 +4,7 @@ import Foundation
 /// Command execution: the single entry point shared by the
 /// Lua API, the CLI, and the IPC socket (see 04_API_Contract).
 extension KiwiCore {
+    @discardableResult
     public func execute(
         _ command: String,
         args: [JSONValue] = []

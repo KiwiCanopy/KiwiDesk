@@ -356,6 +356,14 @@ Keep this list updated whenever a recurring mistake is found.
   ceiling repeatedly bit large test files. Break suites into
   focused files before they grow; per-file private helpers are the
   convention and small duplication across suites is fine.
+- **Discardable test results must express side-effect intent.**
+  When a command or setup helper primarily mutates state but also
+  returns optional convenience data, mark the declaration
+  `@discardableResult` if valid callers commonly ignore that data.
+  Keep pure queries non-discardable — an ignored result there is
+  probably a bug. A test whose subject is command success or
+  failure still asserts the returned response; never remove tests
+  or assertions merely to silence an unused-result warning.
 - **Profiles own tiling, plus sparse behavior overrides.** A
   profile serializes tiling state — that belongs *inside*
   `TilingSettings` so it rides the config split for free (see

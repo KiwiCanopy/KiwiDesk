@@ -17,6 +17,7 @@ private func makeCore() -> KiwiCore {
 /// Boots `count` windows into the active space, switches it to
 /// scrolling, and focuses `focus`. Returns the space id.
 @MainActor
+@discardableResult
 private func makeScrollingSpace(
     _ core: KiwiCore,
     windows count: Int,
