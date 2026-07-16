@@ -49,21 +49,40 @@ extension EventLoop {
             if Self.isStandardWindow(element) {
                 enableEnhancedUI(pid: pid)
             }
-            track(element, pid: pid, app: app)
+            // A native-tab window's create may really be a tab switch
+            // (the old tab vanishes as this one appears). Route it
+            // through reconcile so it can coalesce into a re-key
+            // instead of a spurious new tile; a genuinely new tabbed
+            // window still tracks there when nothing vanished (#308).
+            if AXHelper.hasNativeTabs(element) {
+                reconcile(pid: pid, app: app)
+            } else {
+                track(element, pid: pid, app: app)
+            }
         case kAXUIElementDestroyedNotification,
             kAXWindowMiniaturizedNotification:
             if let id = windowID(of: element, pid: pid),
                 elements[pid]?[id] != nil
             {
-                elements[pid]?[id] = nil
-                detectedFloating[id] = nil
-                onEvent(
-                    .windowDestroyed(
-                        id,
-                        wasMinimized: note
-                            == kAXWindowMiniaturizedNotification
+                // A destroyed native-tab carrier may be a switch or
+                // active-tab close; leave it tracked and let the
+                // reconcile below coalesce a re-key or emit the real
+                // destroy. A minimize is never a tab close (#308).
+                if note == kAXUIElementDestroyedNotification,
+                    tabFrames[id] != nil
+                {
+                    // Deferred to reconcile.
+                } else {
+                    elements[pid]?[id] = nil
+                    detectedFloating[id] = nil
+                    onEvent(
+                        .windowDestroyed(
+                            id,
+                            wasMinimized: note
+                                == kAXWindowMiniaturizedNotification
+                        )
                     )
-                )
+                }
             }
             // Destroyed elements often cannot be mapped back
             // (and some apps skip the notification entirely),
@@ -99,22 +118,16 @@ extension EventLoop {
             guard let id = AXHelper.windowID(of: element) else {
                 return
             }
-            onEvent(
-                .windowMoved(
-                    id,
-                    AXHelper.frame(of: element)
-                )
-            )
+            let frame = AXHelper.frame(of: element)
+            if tabFrames[id] != nil { tabFrames[id] = frame }
+            onEvent(.windowMoved(id, frame))
         case kAXWindowResizedNotification:
             guard let id = AXHelper.windowID(of: element) else {
                 return
             }
-            onEvent(
-                .windowResized(
-                    id,
-                    AXHelper.frame(of: element)
-                )
-            )
+            let frame = AXHelper.frame(of: element)
+            if tabFrames[id] != nil { tabFrames[id] = frame }
+            onEvent(.windowResized(id, frame))
         case kAXTitleChangedNotification:
             guard let id = AXHelper.windowID(of: element) else {
                 return

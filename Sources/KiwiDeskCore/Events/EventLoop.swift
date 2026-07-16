@@ -56,6 +56,11 @@ public final class EventLoop {
     /// once; untracked only if the reading persists (layers
     /// flicker during fullscreen transitions).
     var ignorePending: Set<WindowID> = []
+    /// Last-known on-screen frame of each tracked native-tab window
+    /// (an `AXTabGroup` carrier). Membership marks a window as a tab
+    /// carrier; the frame is the key `TabReconciler` matches a
+    /// vanished tab against the appearing one on a switch (#308).
+    var tabFrames: [WindowID: CGRect] = [:]
     var workspaceTokens: [NSObjectProtocol] = []
     var screenToken: NSObjectProtocol?
     var lastActivePid: pid_t?
@@ -105,6 +110,7 @@ public final class EventLoop {
         enhancedUIBaselines = [:]
         detectedFloating = [:]
         ignorePending = []
+        tabFrames = [:]
     }
 
     // Read-only lookups (detectionVerdict, observes, element,
@@ -171,6 +177,12 @@ public final class EventLoop {
         detectedFloating[window.id] = window.isFloating
         elements[pid, default: [:]][window.id] = element
         observers[pid]?.observe(window: element)
+        // Remember native-tab carriers so a later switch (this window
+        // vanishing as a sibling appears at the same frame) coalesces
+        // into a re-key instead of a destroy + create (#308).
+        if AXHelper.hasNativeTabs(element) {
+            tabFrames[window.id] = window.frame
+        }
         onEvent(.windowCreated(window))
     }
 
@@ -214,6 +226,11 @@ public final class EventLoop {
         }
         var live: Set<WindowID> = []
         var minimized: Set<WindowID> = []
+        // Untracked live windows: their `track` is DEFERRED to the
+        // sweep so a native-tab switch (a window appearing as its
+        // sibling vanishes) coalesces into a re-key before either a
+        // create or a destroy is emitted (#308).
+        var appeared: [(element: AXUIElement, id: WindowID)] = []
         for element in liveElements {
             guard let id = AXHelper.windowID(of: element)
             else { continue }
@@ -257,7 +274,7 @@ public final class EventLoop {
             ignorePending.remove(id)
             live.insert(id)
             if elements[pid]?[id] == nil {
-                track(element, pid: pid, app: app)
+                appeared.append((element: element, id: id))
             } else {
                 recheckFloat(
                     element,
@@ -265,20 +282,20 @@ public final class EventLoop {
                     pid: pid,
                     app: app
                 )
+                // Keep a tab carrier's frame current so a later
+                // switch matches against its real on-screen frame.
+                if tabFrames[id] != nil {
+                    tabFrames[id] = AXHelper.frame(of: element)
+                }
             }
         }
-        for id in elements[pid, default: [:]].keys
-        where !live.contains(id) {
-            elements[pid]?[id] = nil
-            detectedFloating[id] = nil
-            ignorePending.remove(id)
-            onEvent(
-                .windowDestroyed(
-                    id,
-                    wasMinimized: minimized.contains(id)
-                )
-            )
-        }
+        reconcileTabsAndSweep(
+            pid: pid,
+            app: app,
+            appeared: appeared,
+            live: live,
+            minimized: minimized
+        )
     }
 
     /// Re-runs float detection on an already-tracked window.
