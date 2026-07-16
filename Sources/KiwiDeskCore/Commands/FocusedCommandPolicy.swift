@@ -22,6 +22,15 @@ public enum FocusedCommandPolicy {
     /// `stack.promote`/`demote`) and reach dispatch through the
     /// layout-command prefix router, so they are listed by their
     /// full dotted name exactly as `execute` sees them.
+    ///
+    /// **Invariant:** a focused-window command must never be named
+    /// `set_*` / `*.set_*`. The parity net
+    /// (`FocusedCommandPolicyTests`) treats that spelling as a
+    /// config setter (unrestricted), so a focused command named
+    /// that way would slip the guard *without* failing the build.
+    /// The repo convention keeps `set_` for config that never
+    /// touches the focused window (see config-vocabulary), so this
+    /// holds — but it is load-bearing here, not incidental.
     public static let focusedCommands: Set<String> = [
         "focus",
         "swap",

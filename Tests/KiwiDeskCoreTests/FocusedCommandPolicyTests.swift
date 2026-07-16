@@ -39,6 +39,12 @@ struct FocusedCommandPolicyTests {
 
     /// A command that does not act on the implicit focused window:
     /// a setter (`set_*` / `*.set_*`) or a recognized non-setter.
+    /// This treats the `set_` spelling as unrestricted, so the
+    /// exhaustiveness net below only forces enrollment for
+    /// *non-setter* new commands — focused commands must never be
+    /// named `set_*` (invariant documented on
+    /// `FocusedCommandPolicy.focusedCommands`; `disjoint` catches
+    /// an enrolled violation).
     private func isUnrestricted(_ command: String) -> Bool {
         command.hasPrefix("set_")
             || command.contains(".set_")

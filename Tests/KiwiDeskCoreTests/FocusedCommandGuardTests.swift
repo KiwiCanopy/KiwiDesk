@@ -40,15 +40,16 @@ struct FocusedCommandGuardTests {
     }
 
     /// Registers a real self observer so `observes(pid)` is true —
-    /// the condition unit tests can't get from AX. Returns false if
-    /// the platform declines the observer (then the caller skips
-    /// the allow-path assertion rather than flaking).
-    private func observe(_ core: KiwiCore, pid: pid_t) -> Bool {
+    /// the condition unit tests can't get from AX. `AXObserverCreate`
+    /// on the own pid needs no Accessibility grant, so this is
+    /// reliable; a nil result is a hard failure (not a silent skip)
+    /// so a lost allow-path can never pass unnoticed.
+    private func observe(_ core: KiwiCore, pid: pid_t) {
         guard let observer = AXApplicationObserver(pid: pid) else {
-            return false
+            Issue.record("could not create a self AX observer")
+            return
         }
         core.eventLoop.observers[pid] = observer
-        return true
     }
 
     @Test("Inert without a provider: focused command runs")
@@ -103,7 +104,7 @@ struct FocusedCommandGuardTests {
         let core = makeCore()
         let pid = getpid()
         addFocused(core, pid: pid)
-        guard observe(core, pid: pid) else { return }
+        observe(core, pid: pid)
         core.frontmostPIDProvider = { pid }
         #expect(core.execute("make_floating").isSuccess)
         #expect(core.state.windows[WindowID(1)]?.isFloating == true)
@@ -114,7 +115,7 @@ struct FocusedCommandGuardTests {
         let core = makeCore()
         let pid = getpid()
         addFocused(core, pid: pid)
-        guard observe(core, pid: pid) else { return }
+        observe(core, pid: pid)
         core.frontmostPIDProvider = { pid }
         // The app's ignored panel took focus (Ghostty-style): the
         // managed main window is stale behind it.
