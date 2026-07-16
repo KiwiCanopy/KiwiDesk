@@ -538,10 +538,11 @@ windows. Below it:
   Floating windows aren't ringed when unfocused (only the focused
   window is, whether tiled or floating); monocle always shows only
   the focused ring.
-- **Width**: 1–20 pt. The ring covers at most a hairline of window
-  content at any width; the rest grows into the gap, so a thick
-  border never hides content. Keep gaps at least as wide as the
-  border so neighbouring rings don't touch.
+- **Width**: 1–20 pt. A rounded ring covers at most a hairline of
+  window content at any width; the rest grows into the gap, so a
+  thick border never hides content. (A square ring tucks a little
+  deeper to cover each rounded corner.) Keep gaps at least as wide
+  as the border so neighbouring rings don't touch.
 - **Corners**: **Rounded** matches your windows' real corner
   radius; **Square** draws sharp corners — seamless on windows that
   are already square, an intentional squared frame on rounded ones.

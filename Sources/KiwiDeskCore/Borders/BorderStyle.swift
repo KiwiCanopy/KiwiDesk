@@ -35,11 +35,12 @@ public struct BorderStyle: Sendable, Equatable {
     /// doesn't hug the edge); above it, it extends outward like a
     /// frame. Not a clamp — the GUI shows a hint at thinner square
     /// widths rather than forbidding them. Tied to the real corner
-    /// radius (`R·(1−√2/2)`, the tuck depth) so it tracks the
-    /// true value.
+    /// radius times the tuck depth (`R · squareCornerTuck`) so it
+    /// tracks the true value — one shared constant with the
+    /// renderer, so the hint can't drift from what's drawn (#311).
     public static var minSquareWidth: CGFloat {
         (GeometryUtils.systemWindowCornerRadius
-            * (1 - CGFloat(2).squareRoot() / 2)).rounded(.up)
+            * BorderGeometry.squareCornerTuck).rounded(.up)
     }
 
     public var enabled = true

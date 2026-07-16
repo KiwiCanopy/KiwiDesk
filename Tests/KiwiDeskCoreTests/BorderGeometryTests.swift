@@ -89,4 +89,30 @@ struct BorderGeometryTests {
         )
         #expect(tooThick.lineWidth == BorderStyle.maxWidth)
     }
+
+    /// Seam guard: `outwardReach` must equal `compute`'s outward
+    /// growth (floored at 0) for every style. Both derive from the
+    /// one `innerOverlap`/`squareCornerTuck`, so this pins them
+    /// together if the tuck constant is ever retuned (#311).
+    @Test("outwardReach matches compute's outward offset")
+    func outwardReachMatchesCompute() {
+        let widths: [CGFloat] = [BorderStyle.minWidth, 2, 10, 20]
+        for style in [BorderStyle.CornerStyle.rounded, .square] {
+            for width in widths {
+                let g = BorderGeometry.compute(
+                    windowFrame: window,
+                    width: width,
+                    cornerStyle: style,
+                    systemRadius: 16
+                )
+                let offset = window.minX - g.overlayFrame.minX
+                let reach = BorderGeometry.outwardReach(
+                    width: width,
+                    cornerStyle: style,
+                    systemRadius: 16
+                )
+                #expect(abs(reach - max(0, offset)) < 0.0001)
+            }
+        }
+    }
 }

@@ -1813,10 +1813,13 @@ focus otherwise lacks. It is **on by default** and marks only the
 focused window; you can optionally ring every other window too.
 
 The ring is a pure overlay: it never changes where windows tile
-(no gap coupling). Its stroke is *capped-inner* — at any width it
-covers at most 1 pt of window content and grows the rest outward
-into the gap, so a thick border can never hide content. Corners
-match the real macOS window radius unless you pick square.
+(no gap coupling). Its stroke is *capped-inner* — a rounded
+border covers at most 1 pt of window content at any width and
+grows the rest outward into the gap, so a thick border can never
+hide content; a square border tucks a little deeper (≈ 0.3× the
+corner radius) so its sharp frame still covers each rounded
+corner. Corners match the real macOS window radius unless you
+pick square.
 
 Overflow piles and monocle show a ring only on the visible
 top window; set gaps at least as wide as the border to avoid

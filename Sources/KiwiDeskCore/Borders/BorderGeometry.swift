@@ -28,7 +28,10 @@ struct BorderGeometry: Equatable {
     /// puts it just inside the window's curve, so the stroke band
     /// paints over the gap a square frame would otherwise leave in
     /// each rounded corner (the reveal #278's design flagged).
-    private static let squareCornerTuck =
+    /// The one authority for this fraction — `BorderStyle`'s
+    /// `minSquareWidth` GUI threshold derives from it too, so the
+    /// render depth and the hint can't drift (#311).
+    static let squareCornerTuck =
         1 - CGFloat(2).squareRoot() / 2
 
     /// Builds the ring geometry for `windowFrame` (AX coords).
