@@ -212,12 +212,12 @@ struct StackArrangementCommandTests {
         #expect(
             core.execute(
                 "stack.set_master_orientation",
-                args: [.string("horizontal")]
+                args: [.string("vertical")]
             ).isSuccess
         )
         #expect(
             core.tiler.settings.stack.masterOrientation
-                == .horizontal
+                == .vertical
         )
         #expect(
             !core.execute(
@@ -227,7 +227,7 @@ struct StackArrangementCommandTests {
         )
         #expect(
             core.tiler.settings.stack.masterOrientation
-                == .horizontal
+                == .vertical
         )
     }
 
@@ -260,7 +260,7 @@ struct StackArrangementCommandTests {
         #expect(
             core.execute(
                 "stack.set_master_orientation_override",
-                args: [.string("3"), .string("horizontal")]
+                args: [.string("3"), .string("vertical")]
             ).isSuccess
         )
         #expect(
@@ -270,12 +270,12 @@ struct StackArrangementCommandTests {
             ).isSuccess
         )
         let over = core.tiler.settings.stack.override[SpaceID("3")]
-        #expect(over?.masterOrientation == .horizontal)
+        #expect(over?.masterOrientation == .vertical)
         #expect(over?.stackPosition == .left)
         // Globals stay at their defaults.
         #expect(
             core.tiler.settings.stack.masterOrientation
-                == .vertical
+                == .horizontal
         )
         #expect(
             core.tiler.settings.stack.stackPosition == .right

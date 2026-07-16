@@ -532,7 +532,7 @@ stack.set_stack_position("bottom")
 
 ### stack.set_master_orientation
 
-**Expects:** `"vertical"` (default) or `"horizontal"`.
+**Expects:** `"vertical"` or `"horizontal"` (default).
 
 **Does:** sets how the master zone lines up its windows when
 `master_count` is more than one: stacked top to bottom, or side
@@ -541,7 +541,7 @@ by side.
 **Example:**
 
 ```lua
-stack.set_master_orientation("horizontal")
+stack.set_master_orientation("vertical")
 ```
 
 ### stack.set_new_window_placement
@@ -631,7 +631,7 @@ stack.set_stack_position_override("3", "bottom")
 **Example:**
 
 ```lua
-stack.set_master_orientation_override("3", "horizontal")
+stack.set_master_orientation_override("3", "vertical")
 ```
 
 ### scroll.set_slot_size

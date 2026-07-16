@@ -147,6 +147,13 @@ struct StackFocusResizeTests {
             "stack.set_master_count",
             args: [.number(2)]
         )
+        // Weights live on a column lineup — pin the non-default
+        // vertical orientation (side-by-side masters have no y
+        // parameter; that beep is pinned elsewhere).
+        core.execute(
+            "stack.set_master_orientation",
+            args: [.string("vertical")]
+        )
         // Windows are [3, 2, 1]: w3+w2 master, w1 the stack.
         core.state.apply(.windowFocused(WindowID(3)))
         let response = core.execute(

@@ -234,10 +234,26 @@ struct StackLayoutTests {
         #expect(abs(s3.minY - s2.maxY - 10) < 0.01)
     }
 
-    @Test("masterCount 2 stacks two masters vertically")
+    @Test("masterCount 2: masters sit side by side by default")
     func multiMaster() throws {
         var context = makeContext()
         context.stack.masterCount = 2
+        let frames = layout.calculateGeometry(
+            for: [w1, w2, w3],
+            in: context
+        )
+        let m1 = try #require(frames[w1])
+        let m2 = try #require(frames[w2])
+        #expect(m1.minY == m2.minY)
+        #expect(m2.minX > m1.minX)
+        #expect(frames[w3]?.minX ?? 0 > m2.maxX)
+    }
+
+    @Test("vertical master orientation stacks masters in a column")
+    func multiMasterVertical() throws {
+        var context = makeContext()
+        context.stack.masterCount = 2
+        context.stack.masterOrientation = .vertical
         let frames = layout.calculateGeometry(
             for: [w1, w2, w3],
             in: context

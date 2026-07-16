@@ -111,7 +111,7 @@ KiwiDesk service restart
 | | `stack.set_master_ratio` | 0.1–0.9 |
 | | `stack.set_overflow_style` | `cascade_overflow\|cascade_all` |
 | | `stack.set_stack_position` | `top\|right\|bottom\|left` (default `right`; derives the stack's lineup) |
-| | `stack.set_master_orientation` | `vertical\|horizontal` (default `vertical`) |
+| | `stack.set_master_orientation` | `vertical\|horizontal` (default `horizontal`) |
 | | `stack.set_new_window_placement` | placement¹ (default `first`) |
 | BSP | `bsp.set_strategy` | `longest_side\|alternating` |
 | | `bsp.set_ratio_h` | 0.1–0.9 (side-by-side splits) |

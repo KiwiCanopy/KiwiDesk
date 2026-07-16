@@ -60,7 +60,7 @@ public struct StackParams: Sendable, Equatable, Codable {
     /// How the master zone lines up its windows (#222). The
     /// stack zone has no such knob — its lineup derives from
     /// `stackPosition` (see `StackPosition.stackOrientation`).
-    public var masterOrientation: Orientation = .vertical
+    public var masterOrientation: Orientation = .horizontal
     /// Where the stack zone sits (#222); `right` is the
     /// classic dwm arrangement (master left).
     public var stackPosition: StackPosition = .right
@@ -109,7 +109,7 @@ public struct StackParams: Sendable, Equatable, Codable {
             try container.decodeIfPresent(
                 Orientation.self,
                 forKey: .masterOrientation
-            ) ?? .vertical
+            ) ?? .horizontal
         stackPosition =
             try container.decodeIfPresent(
                 StackPosition.self,

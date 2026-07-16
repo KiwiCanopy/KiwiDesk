@@ -8,9 +8,9 @@ import CoreGraphics
 /// stack zone sits (`stack_position`) and how the master zone
 /// lines up its windows (`master_orientation`) are parameters
 /// (#222); the stack zone's lineup derives from the position
-/// (`StackPosition.stackOrientation`). The classic dwm
-/// arrangement (master left, both zones vertical) is the
-/// default.
+/// (`StackPosition.stackOrientation`). The default is master
+/// left / stack right (the classic dwm split) with multiple
+/// masters side by side (`master_orientation` `horizontal`).
 public struct StackLayout: LayoutSystem {
     public init() {}
 

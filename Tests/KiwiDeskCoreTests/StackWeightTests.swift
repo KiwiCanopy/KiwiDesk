@@ -195,6 +195,9 @@ struct StackPartitionTests {
             minWindowSize: 100
         )
         context.stack.masterCount = 2
+        // Pin the vertical master column: the same-x-per-zone
+        // net below is meaningless for side-by-side masters.
+        context.stack.masterOrientation = .vertical
         let windows = [w1, w2, w3]
         let frames = StackLayout().calculateGeometry(
             for: windows,

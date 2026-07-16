@@ -342,7 +342,11 @@ Adjust each mode's defaults:
   grows the focused window's share of it (a session-only tweak —
   it resets on relaunch and is not saved into profiles). A
   master zone lined up *along* the split axis has no reachable
-  shares — the split owns that axis and the other one beeps
+  shares — the split owns that axis and the other one beeps.
+  With the standard arrangement (side-by-side masters beside a
+  right stack) that is the out-of-the-box behavior once the
+  master count exceeds one; switch the orientation to vertical
+  for individually resizable masters
   (see [Accepted limitations](design-decisions.md#accepted-limitations)).
 - **Scrolling**: orientation (horizontal or vertical), anchor
   (where the focused column rests on every focus — **Center**, or

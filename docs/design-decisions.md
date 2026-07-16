@@ -31,7 +31,7 @@ planned escape hatch; it is not a wontfix dumping ground.
 | Behavior | Why it's accepted | Architectural root | Escape hatch / planned fix |
 |---|---|---|---|
 | In BSP, the inner window of a nested pair can't grow — a "grow" press (or edge-drag) widens its outer neighbor instead. | Its width `r·(1−r)·W` is already maximized at the default ratio, so no resize direction can widen it. | All same-orientation splits share the one per-space ratio; per-node ratios would need a container tree the flat-array model forbids (#56 trade). | **Shipped**: the [`track` layout (#128)](https://github.com/hajiboy95/KiwiDesk/issues/128) — `set_mode(space, "track")` gives every window one true resize target. See [BSP resize is focus-aware in *direction* only](#shortcuts). |
-| In stack, when the master zone lines up *along* the split axis (e.g. horizontal masters beside a right stack), the masters' individual shares can't be resized: that axis always moves the split, and the other axis beeps. | The split ratio owns its whole axis — giving the same keypress two meanings (split vs weight) by focus zone would make "grow" unpredictable at the boundary. | One knob per axis per arrangement ([#222](https://github.com/hajiboy95/KiwiDesk/issues/222)); weights live on a zone's own lineup axis by construction. | Pick the orthogonal master orientation (the default), or put the windows that need individual shares in the stack zone. |
+| In stack, when the master zone lines up *along* the split axis (e.g. horizontal masters beside a right stack), the masters' individual shares can't be resized: that axis always moves the split, and the other axis beeps. | The split ratio owns its whole axis — giving the same keypress two meanings (split vs weight) by focus zone would make "grow" unpredictable at the boundary. | One knob per axis per arrangement ([#222](https://github.com/hajiboy95/KiwiDesk/issues/222)); weights live on a zone's own lineup axis by construction. | Pick the orthogonal (vertical) master orientation — since the 2026-07-16 default flip the standard side-by-side arrangement sits *inside* this limitation once `master_count` exceeds one — or put the windows that need individual shares in the stack zone. |
 | An extreme *stored* BSP ratio still collapses the space into the overlap cascade — even though the stack layout no longer does. | The stack's layout-time clamp hasn't been migrated to BSP yet; doing it as a follow-up rather than riding the #44 fix keeps that change scoped. | BSP has no effective-ratio clamp authority; the #44 fix (`StackLayout.effectiveRatioRange`) landed in the stack only. | Migrate the clamp principle to BSP (follow-up to [#44](https://github.com/hajiboy95/KiwiDesk/issues/44)). See [The stack cascade is a last resort](#shortcuts). |
 | Dragging a stack window's height with the mouse snaps back; only keyboard/CLI `resize("y")` actually moves the vertical share. | Vertical weights are a windowless keyboard/CLI concept; the mouse-drag seam has no window to anchor a weight against. | Per-window vertical weights are session-scoped and keyboard-only by design ([#67](https://github.com/hajiboy95/KiwiDesk/issues/67)). | Use keyboard/CLI `resize("y")`; the mouse asymmetry is deliberate. See [Stack resize is focus-aware](#shortcuts). |
 | Mouse-resizing a window in the track layout snaps back on both axes; keyboard/CLI `resize` covers both knobs. | Both track adjustments (the track's weight, the in-track share) key off the dragged window's identity — the same windowless mouse-resize seam as the stack height drag above. | The mouse-resize translation (`MouseResize.translate`) is deliberately windowless; track weights are session-scoped resize state ([#128](https://github.com/hajiboy95/KiwiDesk/issues/128)). | Keyboard/CLI `resize` (both axes) and `move_to_track`; revisit together with the stack height drag if mouse parity is asked for. |
@@ -788,6 +788,19 @@ master zone; that is the same accepted spill tall zones already
 do at the screen's bottom edge, kept coherent by the managed
 z-order. If pile depth ever hurts, the lever is a depth cap —
 not a direction switch. (#222)
+
+The `master_orientation` default flipped `vertical` →
+`horizontal` on 2026-07-16 (designer-consulted): side-by-side
+masters beside a right stack turn a raised master count into
+columns — the arrangement wide screens actually want — whereas
+a vertical master column duplicated the stack's own shape next
+to it. The trade is conscious: the standard arrangement now
+sits inside the along-axis resize limitation above (masters'
+individual shares are unreachable until the orientation is
+switched back to vertical), and the leading-edge promotion path
+became the default-adjacent bug #313. Existing profiles that
+omit `layout.stack.master_orientation` change meaning on next
+load — pre-release, no migration (§5).
 
 **The stack cascade is a last resort; extreme ratios clamp at
 layout time, and interactive writes cap at the visible cliff.**

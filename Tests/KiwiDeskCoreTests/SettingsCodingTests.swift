@@ -118,8 +118,9 @@ struct SettingsCodingTests {
         // `stack.set_master_orientation` / `set_stack_position`
         // (#222); the stack zone's lineup derives from the
         // position, so no `stack_orientation` key exists.
+        // Masters sit side by side by default.
         #expect(
-            stack["master_orientation"] as? String == "vertical"
+            stack["master_orientation"] as? String == "horizontal"
         )
         #expect(stack["stack_position"] as? String == "right")
         #expect(stack["stack_orientation"] == nil)
@@ -190,7 +191,7 @@ struct SettingsCodingTests {
         settings.bsp.splitRatioV = 0.3
         settings.scrolling.slotSize = .points(400)
         settings.stack.masterCount = 2
-        settings.stack.masterOrientation = .horizontal
+        settings.stack.masterOrientation = .vertical
         settings.stack.stackPosition = .top
         settings.grid.rows = 4
         settings.grid.autoSize = true
