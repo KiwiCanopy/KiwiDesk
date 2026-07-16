@@ -1036,6 +1036,100 @@ switcher), a deliberate trade against content-sized
 segments. One control, one look — a chooser reads as "pick
 a tab" everywhere in the settings.
 
+**Segmented vs. menu is decided by a rule, not per row
+(#291).** A pick-one control is a `SegmentedPicker` when the
+choices are a *fixed set of 2–4 peers*, every label stays
+short and untruncated at the minimum Settings width **and**
+in the longest shipped localization, and seeing all choices
+at once helps the decision. It is a **menu** (`DropdownRow`)
+when any of: five or more choices; dynamic or user-generated
+choices; long, explanatory, or localization-risk labels; or
+a constrained repeated surface where showing every choice
+would crowd or truncate. A binary is a **toggle**, never two
+segments. Fixed editor-navigation tabs (the Layout Defaults
+mode strip) may exceed four — they switch the visible editor
+rather than edit a value, so the count cap doesn't apply.
+The *same semantic field uses the same control on comparable
+full-width surfaces*: the App Bar global editor and its
+per-layout override rows both render Position / Tab
+background / Active indicator / Content as segments, so the
+two never sit adjacent showing one field two ways. The audit
+(#291) converted those four App Bar fields (global and
+override), Stack's Master orientation / Stack position /
+Overflow, Track's Overflow, Drag's Border alignment, and the
+Focus border Corners (which had been a native `.segmented`
+`Picker` nested in a menu-styled `DropdownRow` — two
+segmented implementations at once — flattened to the shared
+`SegmentedPicker`). Menus were kept where the rule keeps
+them: new-window placement (comparative labels like "Before
+focused"), the Space layout mode (seven icon-bearing
+options), Language and Native-Desktop→Profile (dynamic
+lists).
+
+**The 384 pt per-Space popover is the documented
+compact-surface exception (#291).** There the inherit
+chrome (a checkbox plus accent bar, `OverrideChrome`) eats
+horizontal width, so its override rows stay menus even for
+2–4-peer fields. `OverridePickerRow` carries a **required**
+`Style` (`.menu` / `.segmented`, no default): the full-width
+App Bar per-layout overrides pass `.segmented`, the per-Space
+popover rows pass `.menu`, and a new override row can't
+silently pick the wrong control for its surface. The
+inherited (unchecked) state comes free from the chrome's
+existing `.disabled` + `.opacity(0.5)` — the segmented pill
+sits on the resolved global value, dimmed. App Bar Content
+("Icon &amp; name" → German "Symbol &amp; Name") is the one
+segmented label tight enough to warrant a real render at
+minimum width; kept segmented by width headroom, it is a
+truncation candidate to re-check when each new locale ships
+(#95), the same recurring de-review discipline the help-glyph
+labels already carry.
+
+**Row order within a section is fixed-tier, not
+usage-frequency.** A field's vertical position is decided by
+what *kind* of decision it represents, not by how often a
+user reaches for it — a canonical tier order is what lets the
+eye learn one shape across every editor. Natural adjust-order
+("what you'd tune right before/after this") only breaks ties
+*within* a tier, once the tier is fixed. A contributor
+placing a new field first asks **which tier**, then **where
+in it**. The tiers, top to bottom:
+
+1. **Preview / schematic** — leads unconditionally, *unless*
+   the section has one master on/off toggle whose own state
+   the preview depicts (Focus border's dimmed-when-off
+   preview): then the toggle sits directly above the preview,
+   the gate-above-gated rule extended to treat the preview as
+   a gated control.
+2. **Defining / structural fields** the schematic takes as
+   params — counts, ratios, axis / arrangement, positions —
+   ordered coarse-to-fine (what fixes the shape before what
+   refines it). A *numeric-threshold* gate needs no strict
+   adjacency to what it greys (Stack's Master count gates
+   Master orientation, yet the unconditionally-relevant
+   Master ratio sits between them): unconditional-before-
+   conditional outranks adjacency, because the greyed state
+   already signals the gating. Strict adjacency stays
+   mandatory only for a boolean-toggle-controls-one-row pair.
+3. **Standing placement / overflow policy** — New-window
+   placement and Overflow style, steady-state behaviour
+   rather than static geometry, cluster together and sit last
+   among the schematic-tied fields.
+4. **Secondary, occasional-use toggles** with their own
+   captions (auto-derivation, wrap-focus), each still
+   gate-above-gated internally.
+5. **Escape-hatch buttons / actions** ("Fit gaps to border")
+   — always last.
+
+Dividers mark tier boundaries, not just breathing room, so a
+new field's tier decides which divider-bounded cluster it
+joins — never wedge a field mid-cluster to dodge adding a
+divider. The audit that set this rule (#291) moved Track's
+New-window mode + Position out of tier 2 (it had sat right
+after Arrange) down to tier 3 after Overflow, so all five
+layout editors now place new-window placement last among
+their schematic-tied rows.
+
 **Sliders share the pill design.** Every value adjuster
 (ratios, gaps, sizes) is a `SettingsSlider`: the same capsule
 track as the segmented picker, a native-style solid white

@@ -45,15 +45,27 @@ struct StackEditor: View {
                 ),
                 value: stack.masterRatio
             )
-            DropdownRow(
-                label: masterOrientationLabel,
+            SegmentedPicker(
+                masterOrientationLabel,
+                selection: stack.masterOrientation,
+                options: [
+                    (
+                        L(
+                            "layout_params.orientation.vertical",
+                            "Vertical"
+                        ),
+                        .vertical
+                    ),
+                    (
+                        L(
+                            "layout_params.orientation.horizontal",
+                            "Horizontal"
+                        ),
+                        .horizontal
+                    ),
+                ],
                 help: LayoutHelp.masterOrientation
-            ) {
-                orientationPicker(
-                    masterOrientationLabel,
-                    selection: stack.masterOrientation
-                )
-            }
+            )
             // Orientation only matters with several masters;
             // greyed (not hidden) at count 1 so its value stays
             // visible (§2.7 grey-don't-hide, #171).
@@ -61,58 +73,51 @@ struct StackEditor: View {
                 model.config.settings.stack.masterCount <= 1
             )
             Divider()
-            DropdownRow(
-                label: stackPositionLabel,
-                help: LayoutHelp.stackPosition
-            ) {
-                Picker(
-                    stackPositionLabel,
-                    selection: stack.stackPosition
-                ) {
-                    Text(L("layout_params.position.top", "Top"))
-                        .tag(StackParams.StackPosition.top)
-                    Text(
-                        L("layout_params.position.right", "Right")
-                    )
-                    .tag(StackParams.StackPosition.right)
-                    Text(
+            SegmentedPicker(
+                stackPositionLabel,
+                selection: stack.stackPosition,
+                options: [
+                    (L("layout_params.position.top", "Top"), .top),
+                    (
+                        L("layout_params.position.right", "Right"),
+                        .right
+                    ),
+                    (
                         L(
                             "layout_params.position.bottom",
                             "Bottom"
-                        )
-                    )
-                    .tag(StackParams.StackPosition.bottom)
-                    Text(L("layout_params.position.left", "Left"))
-                        .tag(StackParams.StackPosition.left)
-                }
-            }
+                        ),
+                        .bottom
+                    ),
+                    (
+                        L("layout_params.position.left", "Left"),
+                        .left
+                    ),
+                ],
+                help: LayoutHelp.stackPosition
+            )
             Divider()
-            DropdownRow(
-                label: overflowLabel,
-                help: LayoutHelp.stackOverflow
-            ) {
-                Picker(
-                    overflowLabel,
-                    selection: stack.overflowStyle
-                ) {
-                    Text(
+            SegmentedPicker(
+                overflowLabel,
+                selection: stack.overflowStyle,
+                options: [
+                    (
                         L(
                             "layout_params.cascade_overflow",
                             "Cascade overflow"
-                        )
-                    )
-                    .tag(
-                        StackParams.OverflowStyle.cascadeOverflow
-                    )
-                    Text(
+                        ),
+                        .cascadeOverflow
+                    ),
+                    (
                         L(
                             "layout_params.cascade_all",
                             "Cascade all"
-                        )
-                    )
-                    .tag(StackParams.OverflowStyle.cascadeAll)
-                }
-            }
+                        ),
+                        .cascadeAll
+                    ),
+                ],
+                help: LayoutHelp.stackOverflow
+            )
             PlacementPicker(placement: stack.newWindowPlacement)
         }
     }
@@ -130,29 +135,5 @@ struct StackEditor: View {
 
     private var stackPositionLabel: String {
         L("layout_params.stack_position", "Stack position")
-    }
-
-    /// One vertical/horizontal picker for both orientation
-    /// rows — same options, same tags.
-    private func orientationPicker(
-        _ label: String,
-        selection: Binding<StackParams.Orientation>
-    ) -> some View {
-        Picker(label, selection: selection) {
-            Text(
-                L(
-                    "layout_params.orientation.vertical",
-                    "Vertical"
-                )
-            )
-            .tag(StackParams.Orientation.vertical)
-            Text(
-                L(
-                    "layout_params.orientation.horizontal",
-                    "Horizontal"
-                )
-            )
-            .tag(StackParams.Orientation.horizontal)
-        }
     }
 }

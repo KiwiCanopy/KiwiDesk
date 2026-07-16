@@ -77,8 +77,10 @@ struct GlobalAppBarSection: View {
     }
 
     @ViewBuilder private var behavior: some View {
-        DropdownRow(
-            label: positionLabel,
+        SegmentedPicker(
+            positionLabel,
+            selection: $style.position,
+            options: AppBarOptions.position.map { ($0.1, $0.0) },
             help: L(
                 "app_bar.position.label.help",
                 "Which end of the bar the window tabs pack "
@@ -86,40 +88,23 @@ struct GlobalAppBarSection: View {
                     + "active layout's axis: Start is the left "
                     + "(or top) edge, End the right (or bottom)."
             )
-        ) {
-            Picker(positionLabel, selection: $style.position) {
-                ForEach(AppBarOptions.position, id: \.0) {
-                    Text($0.1).tag($0.0)
-                }
-            }
-        }
-        DropdownRow(label: tabBackgroundLabel) {
-            Picker(
-                tabBackgroundLabel,
-                selection: $style.tabBackground
-            ) {
-                ForEach(AppBarOptions.tabBackground, id: \.0) {
-                    Text($0.1).tag($0.0)
-                }
-            }
-        }
-        DropdownRow(label: activeIndicatorLabel) {
-            Picker(
-                activeIndicatorLabel,
-                selection: $style.activeIndicator
-            ) {
-                ForEach(AppBarOptions.activeIndicator, id: \.0) {
-                    Text($0.1).tag($0.0)
-                }
-            }
-        }
-        DropdownRow(label: contentLabel) {
-            Picker(contentLabel, selection: $style.content) {
-                ForEach(AppBarOptions.content, id: \.0) {
-                    Text($0.1).tag($0.0)
-                }
-            }
-        }
+        )
+        SegmentedPicker(
+            tabBackgroundLabel,
+            selection: $style.tabBackground,
+            options: AppBarOptions.tabBackground.map { ($0.1, $0.0) }
+        )
+        SegmentedPicker(
+            activeIndicatorLabel,
+            selection: $style.activeIndicator,
+            options: AppBarOptions.activeIndicator
+                .map { ($0.1, $0.0) }
+        )
+        SegmentedPicker(
+            contentLabel,
+            selection: $style.content,
+            options: AppBarOptions.content.map { ($0.1, $0.0) }
+        )
         ToggleRow(
             label: L(
                 "app_bar.group_adjacent",
