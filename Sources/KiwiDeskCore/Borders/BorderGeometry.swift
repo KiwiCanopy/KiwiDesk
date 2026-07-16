@@ -26,6 +26,14 @@ struct BorderGeometry: Equatable {
     /// depth to fill tighter utility-window corner reveals. Both
     /// are renderer-only and do not change the visible thickness.
     static let roundedHiddenOverlap: CGFloat = 1
+    /// Fixed rather than derived from `systemRadius` (the old
+    /// `systemRadius · (1 − √2/2)` tuck): because the overlap is
+    /// masked behind the target, over-provisioning is free and
+    /// only *under*-provisioning re-opens the corner reveal this
+    /// fills. 8 pt comfortably clears the square reveal for every
+    /// macOS window radius seen to date; the invariant to keep is
+    /// simply `squareHiddenOverlap ≥ that reveal` — raise it if a
+    /// future radius bump ever exposes a corner gap.
     static let squareHiddenOverlap: CGFloat = 8
 
     /// Builds the ring geometry for `windowFrame` (AX coords).
