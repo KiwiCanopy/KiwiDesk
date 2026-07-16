@@ -9,7 +9,8 @@ import CoreGraphics
 /// Every tiled window gets its own ring when unfocused borders are
 /// enabled, including every member of an overflow cascade. Monocle
 /// is always focused-only because only one window is visible;
-/// floating windows get a ring only while focused.
+/// floating windows get a ring only while focused, and transient
+/// overlays (launchers/panels, #300) never do.
 extension KiwiCore {
     func updateBorders() {
         let style = tiler.settings.borderStyle
@@ -26,6 +27,13 @@ extension KiwiCore {
                 state.windows[$0]?.isFloating == true
             }
         )
+        // Transient overlays (launchers, panels) never get a ring,
+        // even while focused — see `borderSpecs` (#300).
+        let overlays = Set(
+            space.windows.filter {
+                state.windows[$0]?.isTransientOverlay == true
+            }
+        )
         let slots = space.windows.compactMap {
             id -> (id: WindowID, frame: CGRect)? in
             guard let frame = targets[id] ?? state.windows[id]?.frame
@@ -37,6 +45,7 @@ extension KiwiCore {
             focused: space.focused,
             slots: slots,
             floating: floating,
+            overlays: overlays,
             isMonocle: space.mode == .monocle
         )
         // Draw each ring around the window's REAL frame (its
@@ -75,16 +84,20 @@ extension KiwiCore {
     }
 
     /// The rings to show for one space. Focused window always
-    /// (when borders are on); every other visible tiled slot only
-    /// when `unfocusedEnabled` and the space isn't monocle. Cascade
-    /// members remain independent: border presentation must not
-    /// change the shared pile semantics used by navigation and swap.
-    /// Pure over the flat slot list — no `self`, no AX.
+    /// (when borders are on), unless it is a transient overlay
+    /// (`overlays` — a launcher/panel that momentarily takes focus,
+    /// #300); every other visible tiled slot only when
+    /// `unfocusedEnabled` and the space isn't monocle. Overlays and
+    /// unfocused floating windows never get a ring. Cascade members
+    /// remain independent: border presentation must not change the
+    /// shared pile semantics used by navigation and swap. Pure over
+    /// the flat slot list — no `self`, no AX.
     nonisolated static func borderSpecs(
         style: BorderStyle,
         focused: WindowID?,
         slots: [(id: WindowID, frame: CGRect)],
         floating: Set<WindowID>,
+        overlays: Set<WindowID>,
         isMonocle: Bool
     ) -> [BorderManager.Spec] {
         guard style.enabled, let focused,
@@ -93,20 +106,29 @@ extension KiwiCore {
             })?.frame
         else { return [] }
         let width = style.clampedWidth
-        var specs = [
-            BorderManager.Spec(
-                window: focused,
-                frame: focusedFrame,
-                colorHex: style.focusedColor,
-                width: width,
-                cornerStyle: style.cornerStyle
+        var specs: [BorderManager.Spec] = []
+        // A focused transient overlay (Spotlight/Raycast/Alfred)
+        // gets no ring; a focused user-floated standard window
+        // still does.
+        if !overlays.contains(focused) {
+            specs.append(
+                BorderManager.Spec(
+                    window: focused,
+                    frame: focusedFrame,
+                    colorHex: style.focusedColor,
+                    width: width,
+                    cornerStyle: style.cornerStyle
+                )
             )
-        ]
+        }
         guard style.unfocusedEnabled, !isMonocle else {
             return specs
         }
         for slot in slots
-        where slot.id != focused && !floating.contains(slot.id) {
+        where slot.id != focused
+            && !floating.contains(slot.id)
+            && !overlays.contains(slot.id)
+        {
             specs.append(
                 BorderManager.Spec(
                     window: slot.id,

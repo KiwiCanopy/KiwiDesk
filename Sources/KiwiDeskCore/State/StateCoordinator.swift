@@ -249,6 +249,8 @@ public struct StateCoordinator: Sendable {
             // not revert an explicit make_floating/make_tiled
             // (docs promise re-checks never do).
             guard manualFloatOverrides[id] == nil else { break }
+            // `windows.setFloating` also clears any stale overlay
+            // flag when a window heals back to tiled (#300).
             windows.setFloating(id, floating)
 
         case .displaysChanged(let displays):

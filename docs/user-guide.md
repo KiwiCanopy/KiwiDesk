@@ -545,6 +545,9 @@ windows. Below it:
   radius; **Square** draws sharp corners — seamless on windows that
   are already square, an intentional squared frame on rounded ones.
 
+Launcher and panel overlays (Spotlight, Raycast, Alfred) never get
+a ring, even while you type into them — only genuine windows do.
+
 ## App Bar
 
 The **App Bar** section (in the **Design** group) is the app bar's

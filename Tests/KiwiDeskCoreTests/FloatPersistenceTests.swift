@@ -119,6 +119,59 @@ struct FloatPersistenceTests {
         #expect(state.windows[WindowID(1)]?.isFloating == true)
     }
 
+    @Test("Detection self-heal clears a stale overlay flag (#300)")
+    func selfHealClearsOverlay() {
+        var state = StateCoordinator()
+        // A window mis-snapshotted at track time as a floating
+        // overlay (a one-off bad subrole/layer read).
+        var overlay = makeWindow(1, floating: true)
+        overlay.isTransientOverlay = true
+        state.apply(.windowCreated(overlay))
+        #expect(
+            state.windows[WindowID(1)]?.isTransientOverlay == true
+        )
+        // `recheckFloat` corrects it back to a tiled standard
+        // window; the overlay flag must clear with the float state
+        // so it keeps its focus ring.
+        state.apply(
+            .windowFloatChanged(WindowID(1), isFloating: false)
+        )
+        #expect(state.windows[WindowID(1)]?.isFloating == false)
+        #expect(
+            state.windows[WindowID(1)]?.isTransientOverlay == false
+        )
+    }
+
+    @Test("make_tiled also clears a stale overlay flag (#300)")
+    func manualTileClearsOverlay() {
+        var state = StateCoordinator()
+        var overlay = makeWindow(1, floating: true)
+        overlay.isTransientOverlay = true
+        state.apply(.windowCreated(overlay))
+        // The manual make_tiled path routes through the same
+        // `WindowManager.setFloating`, so the invariant holds there
+        // too, not just on the detection path.
+        state.setFloating(WindowID(1), false)
+        #expect(
+            state.windows[WindowID(1)]?.isTransientOverlay == false
+        )
+    }
+
+    @Test("A window that stays floating keeps its overlay flag")
+    func stillFloatingKeepsOverlay() {
+        var state = StateCoordinator()
+        var overlay = makeWindow(1, floating: true)
+        overlay.isTransientOverlay = true
+        state.apply(.windowCreated(overlay))
+        // A verdict that stays floating leaves the flag intact.
+        state.apply(
+            .windowFloatChanged(WindowID(1), isFloating: true)
+        )
+        #expect(
+            state.windows[WindowID(1)]?.isTransientOverlay == true
+        )
+    }
+
     @Test("A late-loading title still restores the intent")
     func lazyTitleRestores() {
         var state = StateCoordinator()
