@@ -31,6 +31,13 @@ struct StepperRow: View {
     /// field's commit discipline.
     @State private var text: String
     @FocusState private var focused: Bool
+    /// Also parse+clamp on every keystroke, not just on commit.
+    /// For a row whose adjacent action reads `value` directly:
+    /// clicking that action on macOS doesn't blur the field, so
+    /// without this the action would use the last committed value
+    /// while a newer number sits unread onscreen. Off for plain
+    /// settings, where commit-on-blur is the native rhythm.
+    let liveCommit: Bool
 
     init(
         label: String,
@@ -39,7 +46,8 @@ struct StepperRow: View {
         step: Int = 1,
         suffix: String? = nil,
         labelHidden: Bool = false,
-        help: String? = nil
+        help: String? = nil,
+        liveCommit: Bool = false
     ) {
         // The drop is deliberate (see `help` above) — make the
         // contract self-enforcing rather than silent.
@@ -55,6 +63,7 @@ struct StepperRow: View {
         self.suffix = suffix
         self.labelHidden = labelHidden
         self.help = help
+        self.liveCommit = liveCommit
         self._text = State(initialValue: "\(value.wrappedValue)")
     }
 
@@ -80,6 +89,14 @@ struct StepperRow: View {
                 .onSubmit(commit)
                 .onChange(of: focused) { _, now in
                     if !now { commit() }
+                }
+                .onChange(of: text) { _, now in
+                    guard liveCommit, let parsed = Int(now)
+                    else { return }
+                    value = min(
+                        max(parsed, range.lowerBound),
+                        range.upperBound
+                    )
                 }
             if let suffix {
                 Text(suffix).foregroundStyle(.secondary)

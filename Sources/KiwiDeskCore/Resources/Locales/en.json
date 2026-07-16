@@ -109,7 +109,6 @@
   "border.fit_gaps.help": "Calculates global outer and inner gaps from the border width. Inner gaps allow for both borders when borders on unfocused windows are shown.",
   "border.fit_gaps.preview": "Will set Outer to %1$d pt and Inner to %2$d pt.",
   "border.fit_gaps.replaces_edges": "Replaces per-edge gap values.",
-  "border.fit_gaps.spacing.a11y_value": "%1$d points",
   "border.fit_gaps.title": "Fit layout gaps",
   "border.fit_gaps.unit": "pt",
   "border.fit_gaps.updated": "Draft updated — Save (⌘S) to apply and persist.",

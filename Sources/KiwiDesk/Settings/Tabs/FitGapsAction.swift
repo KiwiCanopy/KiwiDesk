@@ -14,14 +14,15 @@ struct FitGapsAction: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             title
-            FitGapsSpacingRow(
+            StepperRow(
                 label: L(
                     "border.fit_gaps.extra_spacing",
                     "Extra spacing"
                 ),
                 value: $extraSpacing,
                 in: spacingRange,
-                suffix: L("border.fit_gaps.unit", "pt")
+                suffix: L("border.fit_gaps.unit", "pt"),
+                liveCommit: true
             )
             result
             Button(
@@ -142,27 +143,29 @@ struct FitGapsAction: View {
             )
     }
 
+    /// Reads `model.primarySaveAction` — the same classifier the
+    /// footer's primary slot uses — so the "press Save" hint can
+    /// never point at a verb the footer isn't showing.
     private var appliedStatus: String {
-        if let editing = model.editingProfile,
-            editing != model.activeProfile
-        {
+        switch model.primarySaveAction {
+        case .updateStoredProfile:
             return L(
                 "border.fit_gaps.updated_inactive",
                 "Draft updated — Save (⌘S) to persist; it "
                     + "applies when this profile is loaded."
             )
-        }
-        if model.activeProfile == nil {
+        case .saveAsNewProfile:
             return L(
                 "border.fit_gaps.updated_new",
                 "Draft updated — Save as New Profile… to "
                     + "apply and persist."
             )
+        case .updateActiveProfile, .saveLua:
+            return L(
+                "border.fit_gaps.updated",
+                "Draft updated — Save (⌘S) to apply and persist."
+            )
         }
-        return L(
-            "border.fit_gaps.updated",
-            "Draft updated — Save (⌘S) to apply and persist."
-        )
     }
 
     private var actionWasApplied: Bool {

@@ -170,19 +170,20 @@ struct SettingsFooter: View {
 
     @ViewBuilder private var primarySlot: some View {
         let save = L("footer.save", "Save")
-        if model.editingLua {
+        switch model.primarySaveAction {
+        case .saveLua:
             Button(save) { model.saveLuaSource() }
                 .keyboardShortcut("s")
                 .buttonStyle(.borderedProminent)
                 .controlSize(.regular)
                 .disabled(!model.isDirty)
-        } else if model.editingStoredProfile {
+        case .updateStoredProfile:
             Button(save) { model.saveEditedProfile() }
                 .keyboardShortcut("s")
                 .buttonStyle(.borderedProminent)
                 .controlSize(.regular)
                 .disabled(!model.isDirty)
-        } else if model.activeProfile != nil {
+        case .updateActiveProfile:
             Button(save) { model.updateActiveProfile() }
                 .keyboardShortcut("s")
                 .buttonStyle(.borderedProminent)
@@ -194,7 +195,7 @@ struct SettingsFooter: View {
                             || model.hasLayoutDrift)
                 )
                 .help(model.updateHint ?? "")
-        } else {
+        case .saveAsNewProfile:
             // No profile yet — the create action takes the
             // primary slot.
             Button(

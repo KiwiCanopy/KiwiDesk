@@ -275,14 +275,20 @@ final class ColorPanelController: NSObject {
     /// token.
     func dismiss() {
         onChange = nil
-        NSColorPanel.shared.orderOut(nil)
+        let panel = NSColorPanel.shared
+        // Detach our Done bar so it can't linger on the shared
+        // panel for the process lifetime and bleed into any other
+        // future `NSColorPanel.shared` user.
+        panel.accessoryView = nil
+        panel.orderOut(nil)
     }
 
     private func makeDoneAccessory() -> NSView {
-        let panel = NSColorPanel.shared
-        let width = panel.contentView?.bounds.width ?? 300
+        // The accessory is built before the panel is on screen, so
+        // its content width isn't laid out yet; start at a sane
+        // default and let `autoresizingMask` size it to the panel.
         let container = NSView(
-            frame: NSRect(x: 0, y: 0, width: width, height: 42)
+            frame: NSRect(x: 0, y: 0, width: 300, height: 42)
         )
         container.autoresizingMask = [.width]
         let button = NSButton(
