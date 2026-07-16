@@ -69,6 +69,19 @@ public final class EventLoop {
     /// the "was a carrier" fact for a window that vanishes after a
     /// switch even though its element is gone (#308).
     var tabCarriers: Set<WindowID> = []
+    /// When the user last switched native Spaces. Tab coalescing is
+    /// suppressed for a short window afterward: a space switch shows
+    /// the departed space's windows as vanished and the arrived
+    /// space's as appeared, and a *targeted* reconcile (focus-changed
+    /// / app-activation) racing the bulk `reconcileAll` could pair a
+    /// tab carrier across spaces (identical tiled frames) into a bogus
+    /// re-key. `reconcileAll` itself passes `coalesceTabs: false`;
+    /// this closes the stray-targeted-reconcile residual (#308 review).
+    var lastNativeSpaceChange: Date = .distantPast
+    /// Grace window after a native-Space change during which no
+    /// reconcile coalesces tabs. A genuine tab switch within it
+    /// falls back to destroy + create (self-healing), which is rare.
+    static let spaceSwitchCoalesceGrace: TimeInterval = 0.75
     var workspaceTokens: [NSObjectProtocol] = []
     var screenToken: NSObjectProtocol?
     var lastActivePid: pid_t?
@@ -195,123 +208,6 @@ public final class EventLoop {
             tabCarriers.insert(window.id)
         }
         onEvent(.windowCreated(window))
-    }
-
-    /// Syncs tracked windows with the app's live AX window
-    /// list. Removes windows that closed or minimized, and
-    /// picks up windows we missed (e.g. deminiaturized).
-    /// Safety net for macOS's unreliable AX notifications —
-    /// without it, closed windows keep occupying layout slots.
-    func reconcile(
-        pid: pid_t,
-        app: AppRef,
-        coalesceTabs: Bool = true
-    ) {
-        let activationPolicy =
-            NSRunningApplication(
-                processIdentifier: pid
-            )?.activationPolicy ?? .prohibited
-        guard
-            Self.ownsObservation(
-                hasObserver: observers[pid] != nil,
-                pid: pid,
-                activationPolicy: activationPolicy,
-                isIgnored: shouldIgnoreApp(
-                    bundleID: app.bundleID
-                )
-            )
-        else {
-            detach(pid: pid, restoreEnhancedUI: true)
-            return
-        }
-        // One window-server snapshot for the whole pass; only
-        // apps with an ignore rule need layers at all.
-        let layers =
-            FloatDetection.requiresWindowLayers(
-                bundleID: app.bundleID
-            ) ? FloatDetection.windowLayers(pid: pid) : [:]
-        let liveElements = AXHelper.windows(pid: pid)
-        if activationPolicy == .regular
-            || liveElements.contains(where: Self.isStandardWindow)
-        {
-            // A cold app may not answer the baseline EUI read at
-            // attach time. Retry on later reconciles until one
-            // succeeds, without taking another window snapshot.
-            enableEnhancedUI(pid: pid)
-        }
-        var live: Set<WindowID> = []
-        var minimized: Set<WindowID> = []
-        // Untracked live windows: their `track` is DEFERRED to the
-        // sweep so a native-tab switch (a window appearing as its
-        // sibling vanishes) coalesces into a re-key before either a
-        // create or a destroy is emitted (#308).
-        var appeared: [(element: AXUIElement, id: WindowID)] = []
-        for element in liveElements {
-            guard let id = AXHelper.windowID(of: element)
-            else { continue }
-            // Minimized windows count as gone. Unlike windows
-            // missing from the list entirely (other native
-            // Space), they are flagged so state forgets their
-            // space (see KiwiEvent.windowDestroyed).
-            guard !AXHelper.isMinimized(element) else {
-                minimized.insert(id)
-                continue
-            }
-            // An ignored panel stays out of `live`: if the
-            // startup scan mistracked it (its layer reads
-            // wrong mid-launch), the sweep below untracks it.
-            // A tracked window gets one reading of grace —
-            // layers flicker during fullscreen transitions,
-            // and untracking on a glitch leaks a spurious
-            // destroy/create pair to subscribers.
-            if shouldIgnore(
-                element,
-                pid: pid,
-                app: app,
-                layer: layers[id]
-            ) {
-                // App-wide user rules are stable config, not a
-                // flickering window-server signal. Apply them
-                // immediately; the one-reading grace below is
-                // only for Ghostty's layer-scoped built-in.
-                if shouldIgnoreApp(bundleID: app.bundleID) {
-                    ignorePending.remove(id)
-                    continue
-                }
-                if elements[pid]?[id] != nil,
-                    !ignorePending.contains(id)
-                {
-                    ignorePending.insert(id)
-                    live.insert(id)
-                }
-                continue
-            }
-            ignorePending.remove(id)
-            live.insert(id)
-            if elements[pid]?[id] == nil {
-                appeared.append((element: element, id: id))
-            } else {
-                recheckFloat(
-                    element,
-                    id: id,
-                    pid: pid,
-                    app: app
-                )
-                // Keep every tracked window's frame current so a
-                // later switch matches against its real on-screen
-                // frame (the vanished side of a tab switch may be a
-                // window that had no tab group of its own — #308).
-                trackedFrames[id] = AXHelper.frame(of: element)
-            }
-        }
-        reconcileTabsAndSweep(
-            pid: pid,
-            app: app,
-            appeared: appeared,
-            live: live,
-            minimized: minimized,
-            coalesceTabs: coalesceTabs
-        )
     }
 
     /// Re-runs float detection on an already-tracked window.

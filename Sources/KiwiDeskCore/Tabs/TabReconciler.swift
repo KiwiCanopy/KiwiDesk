@@ -17,9 +17,16 @@ import Foundation
 /// so it never reaches here; a **whole-group close** leaves nothing
 /// appearing at the frame, so it stays a normal destroy.
 ///
-/// Biased to NOT merge: both sides must carry a tab group and share
-/// the frame within tolerance. A false merge would hide a real
-/// window; a false split is only today's extra tile.
+/// Conservative, but not maximally so: a pair merges only when it
+/// shares the frame within tolerance AND carries a tab group on at
+/// least one side (the 1↔2 boundary needs the either-side rule, since
+/// an app exposes the group only at 2+ tabs). A pair with no tab
+/// group on either side never merges. A false merge would hide a real
+/// window; a false split is only today's extra tile. The residual
+/// exposure is same-app windows deliberately stacked at one frame (an
+/// `OverlapStack` pile): a carrier closing in the same pass a new
+/// same-app window appears there could merge — accepted, as it needs
+/// both to land in one reconcile.
 public enum TabReconciler {
     /// Per-edge frame-match tolerance, in points — the group's
     /// on-screen frame is stable across a switch; the slack only

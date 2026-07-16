@@ -824,6 +824,14 @@ KiwiDesk already ignores transient macOS input-source menus and
 switcher overlays, so the Globe-key language picker receives no
 virtual-space assignment or KiwiDesk focus border.
 
+Apps that use **macOS native tabs** (Finder, Terminal, Ghostty) are
+handled automatically: a tabbed window is one tile that follows
+whichever tab is active — opening, switching, and closing tabs never
+add a stray tile or jump focus, and the App Bar shows one item per
+window, not one per tab. Tabs cannot be split into separate tiles
+(they are one window as far as macOS is concerned). If a specific
+app's tab behavior misbehaves, an ignore rule opts the whole app out.
+
 ### Per-Profile Space Assignments
 
 Space assignments and float rules are global by default, but each

@@ -299,6 +299,22 @@ Keep this list updated whenever a recurring mistake is found.
   their AX tree warm; do not remove this without a replacement.
 - **Windows live in a flat `[WindowID]` per space.** Do not
   introduce tree/container structures into state or layout code.
+- **macOS native tabs are one `NSWindow` per tab, coalesced
+  temporally.** Finder/Terminal/Ghostty native tabs are separate
+  `NSWindow`s sharing one on-screen frame, each with its own
+  `CGWindowID`, and **only the active tab is ever visible to AX** —
+  background tabs never appear in `kAXWindowsAttribute`, and a fresh
+  id is minted per switch (#308 probe). So a tab switch surfaces to
+  reconcile as one window vanishing while another appears at the same
+  frame; `TabReconciler` coalesces that pair into a `.windowRekeyed`
+  (id swapped in place — no tree, one slot per group) instead of a
+  destroy + create. The gate needs an `AXTabGroup` on **either** side
+  (Ghostty exposes one only at 2+ tabs, so the 1↔2 boundary window
+  has none). Coalescing is suppressed on the native-Space-switch
+  `reconcileAll` (`coalesceTabs: false`) — same-app windows across
+  spaces tile to identical frames and would false-merge. When editing
+  tracking/reconcile, keep these facts in view; never assume a
+  window's `CGWindowID` is stable or that every tab is an AX window.
 - **Cross-layout logic must account for each layout's navigation
   model.** Anything spanning all layouts — focus/swap navigation,
   overflow handling, geometric neighbor search — must consider

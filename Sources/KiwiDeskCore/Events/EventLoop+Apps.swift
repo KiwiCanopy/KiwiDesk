@@ -134,6 +134,10 @@ extension EventLoop {
     /// first so a bound profile is in place before the new
     /// space's windows are tiled.
     private func nativeSpaceChanged() {
+        // Stamp before the resync so both the bulk reconcileAll and
+        // any targeted reconcile racing it suppress tab coalescing
+        // (departed/arrived windows tile to identical frames, #308).
+        lastNativeSpaceChange = Date()
         onEvent(.nativeSpaceChanged)
         reconcileAll()
     }
