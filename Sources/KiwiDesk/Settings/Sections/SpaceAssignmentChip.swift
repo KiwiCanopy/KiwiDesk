@@ -43,6 +43,13 @@ struct SpaceAssignmentChip: View {
             Text(space.raw)
                 .font(.caption)
                 .fontWeight(.medium)
+                .lineLimit(1)
+                .truncationMode(.tail)
+                // Provisional cap; the full name lives in the
+                // tooltip when elided. Re-evaluate with the
+                // 8-language add (#95) — localized names run
+                // longer.
+                .frame(maxWidth: 120, alignment: .leading)
             if kind != .auto, hovering {
                 Button {
                     clear()
@@ -69,7 +76,14 @@ struct SpaceAssignmentChip: View {
         .opacity(kind == .auto ? 0.55 : 1)
         .onHover { hovering = $0 }
         .draggable(DraggableSpace(raw: space.raw))
-        .help(hint)
+        .help(
+            L(
+                "monitor_chip.help_full",
+                "%1$@\n%2$@",
+                space.raw,
+                hint
+            )
+        )
         .contextMenu { menu }
     }
 
