@@ -17,6 +17,11 @@ struct SpacesSection: View {
     /// space that `carriesOverrides`, so a plain empty space
     /// still deletes in one click (#205).
     @State var pendingDelete: SpaceID?
+    /// A space awaiting `Reset All Layout Overrides` confirmation
+    /// (#290). Held here, not on the popover, so the dialog
+    /// outlives the popover closing — same shape as
+    /// `pendingDelete`. The override rows set it through a binding.
+    @State var pendingResetAll: SpaceID?
     // Drag-reorder state, shared with the handle/gesture
     // extension (`SpacesSection+Drag.swift`), hence not
     // `private` (which is file-scoped).
@@ -51,6 +56,15 @@ struct SpacesSection: View {
             deleteConfirmActions(space)
         } message: { _ in
             Text(deleteConfirmMessage)
+        }
+        .confirmationDialog(
+            resetAllConfirmTitle,
+            isPresented: resetAllConfirmPresented,
+            presenting: pendingResetAll
+        ) { space in
+            resetAllConfirmActions(space)
+        } message: { _ in
+            Text(resetAllConfirmMessage)
         }
     }
 

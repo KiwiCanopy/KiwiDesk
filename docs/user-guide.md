@@ -250,10 +250,13 @@ To **add a space**, click the **+** button and enter a name
 To **rename**, click the space name in the list.
 
 To **customize a space** (per-space layout overrides), click the
-**Customize** button (the sliders icon) on its row. The override
-editor opens in a popover floating over the list, so it never
-pushes the other rows down, and opening one space's editor closes
-any other that was open. See
+**Overrides…** button on its row. When the space already has saved
+overrides the button shows the count (e.g. **Overrides (3)**),
+including any saved for layouts other than the one it currently
+uses. The editor opens in a popover floating over the list, so it
+never pushes the other rows down, and opening one space's editor
+closes any other that was open. A space set to **Floating** has no
+layout overrides, so its button is visible but disabled. See
 [Per-Space Overrides](#per-space-overrides) for what it contains.
 
 To **delete**, right-click and pick Delete (or click the trash
@@ -421,11 +424,41 @@ Adjust each mode's defaults:
 ### Per-Space Overrides
 
 To tune the *same layout type differently in different spaces*, use
-the per-space override toggles. For example, make space "3" scroll
+the per-space override editor. For example, make space "3" scroll
 vertically while every other scrolling space goes horizontal. Open
-the space's **Customize** popover from its row in the **Spaces**
+the space's **Overrides…** popover from its row in the **Spaces**
 section, tick the box beside a field, and adjust just that field —
-unticked (gray) fields inherit the global value.
+unticked fields inherit the Layout Defaults value.
+
+The popover is titled `<Space> — <Layout> overrides` and edits the
+layout the space currently uses; the caption reminds you that
+unchecked settings inherit that layout's defaults. Each field has a
+checkbox: unchecked inherits (the control is dimmed and shows the
+inherited value), checked overrides just that field for this space
+and seeds the current value so nothing jumps.
+
+**Scrolling slot size** is one override with a size unit
+(**Default**, **Points**, **Percent**) and a value. It sets each
+window's size along the scroll direction — **Column width** when
+the space scrolls horizontally, **Row height** when vertical. The
+single checkbox owns the whole setting; **Default** is an explicit
+orientation standard and stays distinct from inheriting.
+
+**Overrides for other layouts.** Changing a space's layout never
+deletes overrides — each layout keeps its own. Switch from
+Scrolling to BSP and you see only BSP's fields; switch back and the
+Scrolling values return unchanged. When a space carries values for
+layouts other than its current one, a **Saved for other layouts
+(N)** disclosure lists each layout and how many fields it holds, so
+the retained data stays discoverable without turning the popover
+into an all-layout editor.
+
+**Resetting.** **Reset `<Layout>` Overrides** clears the current
+layout's overrides for this space (greyed when it has none). When
+other layouts hold saved values, **Reset All Layout Overrides**
+clears every layout's overrides for the space and asks for
+confirmation first, since it also discards the dormant values the
+popover doesn't show.
 
 ## Monitors
 

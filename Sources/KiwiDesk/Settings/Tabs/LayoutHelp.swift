@@ -118,6 +118,35 @@ enum LayoutHelp {
         )
     }
 
+    /// Scrolling's per-space slot-size override (#290). Names the
+    /// orientation-driven meaning (column width vs row height) and
+    /// the two auto standards so the checkbox's inherited value
+    /// reads clearly.
+    @MainActor static var slotSize: String {
+        L(
+            "space_override.slot_size.help",
+            "Sets each scrolling window's size along the scroll "
+                + "direction. Horizontal uses column width; "
+                + "vertical uses row height. Default is 1100 pt "
+                + "horizontally and 80% of the available height "
+                + "vertically."
+        )
+    }
+
+    /// Scrolling's focus-shift animation toggle (#290). Its
+    /// static schematic can't demonstrate motion, so the help
+    /// carries the behavior and points at how Scroll speed relates.
+    @MainActor static var animateFocusShifts: String {
+        L(
+            "scroll_grid.animate_focus_shifts.help",
+            "Moves windows smoothly when focus changes in a "
+                + "Scrolling space. Turn this off to move the "
+                + "layout immediately. Scroll speed sets how long "
+                + "the movement takes and has no effect while "
+                + "animation is off."
+        )
+    }
+
     /// `PlacementPicker`'s default text — every layout tab
     /// inherits it with the component. Track overrides it
     /// (below); hoisted here so no `+`-chain sits inside a

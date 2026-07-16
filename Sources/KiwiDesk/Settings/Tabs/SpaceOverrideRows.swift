@@ -10,26 +10,51 @@ import SwiftUI
 struct SpaceOverrideRows: View {
     @ObservedObject var model: SettingsModel
     let space: SpaceID
+    /// Set by the `Reset All Layout Overrides` button to arm the
+    /// confirmation dialog (#290). The dialog lives on
+    /// `SpacesSection`, not here, so it survives the popover
+    /// dismissing — this row set only requests it.
+    @Binding var pendingResetAll: SpaceID?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(headerCaption)
+            Text(title)
+                .font(.headline)
+            Text(caption)
                 .font(.caption)
                 .foregroundStyle(.secondary)
             modeRows
+            footer
         }
     }
 
-    private var headerCaption: String {
+    /// `<Space> — <Layout> overrides` (#290): names the space and
+    /// the layout being edited so the popover isn't a context-free
+    /// row set.
+    private var title: String {
         L(
-            "space_override.caption",
-            "Gray = inherit the global value (Layout "
-                + "Defaults). Check a box to override "
-                + "just that field for this space."
+            "space_override.title",
+            "%1$@ — %2$@ overrides",
+            space.raw,
+            mode.displayName
         )
     }
 
-    private var mode: LayoutMode {
+    /// Dynamic caption naming the active layout whose defaults an
+    /// unchecked row inherits (#290), replacing the old generic
+    /// "gray = inherit" gloss.
+    private var caption: String {
+        L(
+            "space_override.caption",
+            "Unchecked settings inherit %1$@ defaults.",
+            mode.displayName
+        )
+    }
+
+    /// Internal so the footer extension
+    /// (`SpaceOverrideRows+Footer.swift`) can read the active
+    /// layout for its reset label and dormant filter.
+    var mode: LayoutMode {
         model.config.spaceModes[space] ?? .bsp
     }
 
@@ -103,23 +128,24 @@ struct SpaceOverrideRows: View {
             ],
             style: .menu
         )
-        placeholder(slotSizePlaceholder)
+        OverrideSlotSizeRow(
+            model: model,
+            isVertical: scrollingIsVertical,
+            value: binding(\.scrolling.override, space, \.slotSize),
+            // The inherited value is the global slot size (the
+            // per-space override is the only layer above it), so
+            // unchecked shows it and checking seeds it — no jump.
+            global: g.scrolling.slotSize
+        )
     }
 
     /// The effective scroll orientation for this space (its
-    /// override, else the global), so the anchor labels read
-    /// Top/Bottom on a vertical space and Left/Right otherwise —
-    /// the value stored stays axis-neutral `start`/`end` (#239).
+    /// override, else the global), so the slot-size and anchor
+    /// labels read Row height / Top-Bottom on a vertical space and
+    /// Column width / Left-Right otherwise — the values stored
+    /// stay axis-neutral (`start`/`end`, `ScrollSize`) (#239).
     private var scrollingIsVertical: Bool {
         g.resolvedScrolling(for: space).orientation == .vertical
-    }
-
-    private var slotSizePlaceholder: String {
-        L(
-            "space_override.slot_size_placeholder",
-            "Slot size override is Lua/JSON-only for now "
-                + "(scroll.set_slot_size)."
-        )
     }
 
     @ViewBuilder

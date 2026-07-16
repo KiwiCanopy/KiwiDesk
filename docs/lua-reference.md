@@ -636,22 +636,22 @@ stack.set_master_orientation_override("3", "horizontal")
 
 ### scroll.set_slot_size
 
-**Expects:** a number (px), `"NN%"` (fraction of available axis),
-or `0` (auto, default).
+**Expects:** a number (macOS points), `"NN%"` (fraction of
+available axis), or `0` (auto, default).
 
 **Does:** sets the size of columns (horizontal) or rows (vertical)
-in scrolling layouts. Auto is 1100px horizontal, 80% of available
+in scrolling layouts. Auto is 1100 pt horizontal, 80% of available
 height vertical. Any resolved size is floored at the global
 minimum window size (`set_min_window_size`) and capped at the
 axis length — so a small percentage on a narrow display falls
 back to the minimum rather than tiling windows smaller than it.
-Accepted values: `%` clamps to 5–100%, `px` to ≥100.
+Accepted values: `%` clamps to 5–100%, points to ≥100.
 
 **Example:**
 
 ```lua
 scroll.set_slot_size(0)            -- auto
-scroll.set_slot_size(400)          -- 400 px
+scroll.set_slot_size(400)          -- 400 pt
 scroll.set_slot_size("50%")        -- half of available
 ```
 
@@ -747,14 +747,18 @@ scroll.set_wrap_focus(true)
 **Expects:**
 
 - A space identifier.
-- A slot size (same shape as `scroll.set_slot_size`).
+- A slot size in macOS points (same shape as
+  `scroll.set_slot_size`).
 
-**Does:** overrides the global slot size for one space.
+**Does:** overrides the global slot size for one space. Editable
+in the GUI from the space's **Overrides…** popover (check the
+slot-size box to override; leave it unchecked to inherit the
+Layout Defaults value).
 
 **Example:**
 
 ```lua
-scroll.set_slot_size_override("3", 400)
+scroll.set_slot_size_override("3", 400)   -- 400 pt in space "3"
 ```
 
 ### scroll.set_anchor_override

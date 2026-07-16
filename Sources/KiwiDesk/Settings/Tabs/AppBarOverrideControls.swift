@@ -32,8 +32,14 @@ enum AppBarAuto {
 /// overridden rows carry a left accent bar and a subtle tint
 /// so active overrides form a scannable boundary instead of a
 /// checkerboard of enabled inputs.
-private struct OverrideChrome<Content: View>: View {
+struct OverrideChrome<Content: View>: View {
     let isOn: Binding<Bool>
+    /// Vertical alignment of the checkbox against its wrapped
+    /// content. `.center` for a single-row override (the norm);
+    /// `.top` when the content is a multi-row group (the slot-size
+    /// override, #290) so the checkbox reads as governing the
+    /// stack from its first row rather than floating at its middle.
+    var alignment: VerticalAlignment = .center
     /// Optional `?` popover (#94). Rendered by the chrome, not
     /// the wrapped row, so it escapes the inherit-state
     /// `disabled`/dim below — help must stay clickable exactly
@@ -45,7 +51,10 @@ private struct OverrideChrome<Content: View>: View {
     @ViewBuilder let content: Content
 
     var body: some View {
-        HStack(spacing: SettingsMetrics.overrideRowInset) {
+        HStack(
+            alignment: alignment,
+            spacing: SettingsMetrics.overrideRowInset
+        ) {
             Toggle("", isOn: isOn)
                 .labelsHidden()
                 .toggleStyle(.checkbox)
@@ -98,7 +107,10 @@ private struct OverrideChrome<Content: View>: View {
 
 /// Bindings that map an optional override field + its global
 /// default onto the on/off checkbox and the concrete control.
-private func overrideToggle<T: Sendable>(
+/// Internal (not private): the multi-row slot-size override
+/// (`OverrideSlotSizeRow`, #290) drives the same chrome from
+/// another file and must share this exact seed-on-check semantics.
+func overrideToggle<T: Sendable>(
     _ value: Binding<T?>,
     global: T
 ) -> Binding<Bool> {
@@ -108,7 +120,7 @@ private func overrideToggle<T: Sendable>(
     )
 }
 
-private func overrideValue<T: Sendable>(
+func overrideValue<T: Sendable>(
     _ value: Binding<T?>,
     global: T
 ) -> Binding<T> {

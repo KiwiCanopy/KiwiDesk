@@ -8,6 +8,12 @@ import SwiftUI
 /// the rows they feed.
 struct SlotSizeRows: View {
     @ObservedObject var model: SettingsModel
+    /// The slot size the rows edit. Injected as a binding so the
+    /// same unit picker + value control drives both the global
+    /// scrolling params and the per-space `ScrollSize?` override
+    /// (via `overrideValue`, #290) — one control, no hand-rolled
+    /// second copy to drift (§5).
+    @Binding var size: ScrollSize
     /// Swaps the label to "Row height" and the pt seed to the
     /// vertical default (frontend only; the stored `slot_size`
     /// is orientation-neutral).
@@ -16,6 +22,22 @@ struct SlotSizeRows: View {
     /// other segmented pickers, the value control re-homes
     /// below them (#68) — `.both` keeps the paired default.
     var part: Part = .both
+
+    /// How the unit picker renders. `.segmented` on the full-width
+    /// Layout Defaults surface, where it lines up with the
+    /// orientation/anchor segmented pickers; `.menu` in the narrow
+    /// per-Space override popover, matching that surface's other
+    /// (dropdown) override rows — the #291 compact-surface
+    /// exception, where segments would be cramped.
+    var unitStyle: UnitStyle = .segmented
+
+    enum UnitStyle { case segmented, menu }
+
+    /// The label-column width, read from the environment like the
+    /// sibling row types (`PtSlider`, `RatioRow`), so the value
+    /// row narrows to the override column when `OverrideChrome`
+    /// wraps it and stays at the full width otherwise (#290).
+    @Environment(\.settingsLabelColumn) private var labelColumn
 
     enum Part { case unit, control, both }
 
@@ -37,7 +59,7 @@ struct SlotSizeRows: View {
     }
 
     private var sizeUnit: SizeUnit {
-        switch model.config.settings.scrolling.slotSize {
+        switch size {
         case .auto: return .auto
         case .points: return .points
         case .fraction: return .percent
@@ -51,7 +73,7 @@ struct SlotSizeRows: View {
     private var currentPoints: CGFloat {
         let stored: CGFloat
         if case .points(let points) =
-            model.config.settings.scrolling.slotSize
+            size
         {
             stored = points
         } else {
@@ -68,7 +90,7 @@ struct SlotSizeRows: View {
     /// the orientation's auto standard (vertical) or a neutral half.
     private var currentFraction: Double {
         if case .fraction(let fraction) =
-            model.config.settings.scrolling.slotSize
+            size
         {
             return fraction
         }
@@ -81,12 +103,12 @@ struct SlotSizeRows: View {
             set: { unit in
                 switch unit {
                 case .auto:
-                    model.config.settings.scrolling.slotSize = .auto
+                    size = .auto
                 case .points:
-                    model.config.settings.scrolling.slotSize =
+                    size =
                         .points(currentPoints)
                 case .percent:
-                    model.config.settings.scrolling.slotSize =
+                    size =
                         .fraction(currentFraction)
                 }
             }
@@ -97,7 +119,7 @@ struct SlotSizeRows: View {
         Binding(
             get: { Double(currentPoints) },
             set: {
-                model.config.settings.scrolling.slotSize =
+                size =
                     .points(CGFloat($0))
             }
         )
@@ -107,7 +129,7 @@ struct SlotSizeRows: View {
         Binding(
             get: { currentFraction * 100 },
             set: {
-                model.config.settings.scrolling.slotSize =
+                size =
                     .fraction($0 / 100)
             }
         )
@@ -126,19 +148,38 @@ struct SlotSizeRows: View {
         }
     }
 
+    private var unitOptions: [(String, SizeUnit)] {
+        [
+            // "Default" (not "Auto"): it's a fixed built-in size,
+            // not an adaptive/auto-fitting one — the grid's
+            // "Auto-size" owns that meaning.
+            (L("slot_size.auto", "Default"), SizeUnit.auto),
+            (L("slot_size.points", "Points"), .points),
+            (L("slot_size.percent", "Percent"), .percent),
+        ]
+    }
+
+    @ViewBuilder
     private var unitPicker: some View {
-        SegmentedPicker(
-            L("slot_size.unit", "Size unit"),
-            selection: sizeUnitBinding,
-            options: [
-                // "Default" (not "Auto"): it's a fixed built-in
-                // size, not an adaptive/auto-fitting one — the
-                // grid's "Auto-size" owns that meaning.
-                (L("slot_size.auto", "Default"), SizeUnit.auto),
-                (L("slot_size.points", "Points"), .points),
-                (L("slot_size.percent", "Percent"), .percent),
-            ]
-        )
+        switch unitStyle {
+        case .segmented:
+            SegmentedPicker(
+                L("slot_size.unit", "Size unit"),
+                selection: sizeUnitBinding,
+                options: unitOptions
+            )
+        case .menu:
+            DropdownRow(label: L("slot_size.unit", "Size unit")) {
+                Picker(
+                    L("slot_size.unit", "Size unit"),
+                    selection: sizeUnitBinding
+                ) {
+                    ForEach(unitOptions, id: \.1) { option in
+                        Text(option.0).tag(option.1)
+                    }
+                }
+            }
+        }
     }
 
     @ViewBuilder
@@ -148,7 +189,7 @@ struct SlotSizeRows: View {
             HStack {
                 Text(sizeLabel)
                     .frame(
-                        width: SettingsMetrics.labelColumn,
+                        width: labelColumn,
                         alignment: .leading
                     )
                 // A value chip, not prose: the row where the
@@ -181,7 +222,7 @@ struct SlotSizeRows: View {
             HStack {
                 Text(sizeLabel)
                     .frame(
-                        width: SettingsMetrics.labelColumn,
+                        width: labelColumn,
                         alignment: .leading
                     )
                 SettingsSlider(
@@ -204,7 +245,7 @@ struct SlotSizeRows: View {
             HStack {
                 Text(sizeLabel)
                     .frame(
-                        width: SettingsMetrics.labelColumn,
+                        width: labelColumn,
                         alignment: .leading
                     )
                 SettingsSlider(

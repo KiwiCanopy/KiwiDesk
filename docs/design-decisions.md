@@ -817,6 +817,31 @@ overrides form a scannable boundary. Discoverable without an
 "Add override…" hunt, quiet without a wall of enabled inputs.
 (#68 §3.4)
 
+**A per-space override is eligible only when it is
+layout-local.** A field belongs in the Spaces → `Overrides…`
+tier when three things hold: it belongs to the space's
+**active layout**, it **resolves before** the pure layout
+calculation (so the resolved value can feed layout math over
+the flat array), and it has an **unambiguous layout default
+to inherit** (the checkbox has a meaningful "off"). That
+admits exactly the six per-layout override models — BSP,
+Stack, Scrolling, Grid, Monocle, Track — and nothing else.
+Explicitly **excluded**: animations, mouse/drag behavior,
+borders, quit behavior, keybindings and window rules, profile
+routing (`profile_bindings`), and GUI language — none are
+layout geometry, and several are owned outside profile config
+(#290). This is parity work over the existing per-layout
+mirrors, not a promise that every setting is space-wise
+configurable; a generic `SpaceSettingsOverride` was rejected
+for exactly that reason. Two boundary notes: **Monocle** has a
+single eligible override, focus **orientation** (which
+directional keys cycle the window order and which axis the App
+Bar follows); **Wrap focus** is a layout-wide Monocle/Scrolling
+behavior, deliberately *not* per-space. The `Overrides…`
+button's count and the *Saved for other layouts (N)* disclosure
+read one reflective `fieldCount` over these six models, so a
+new override field is counted without a hand-kept tally. (#290)
+
 **Gaps are uniform-first.** One Outer and one Inner slider
 for the everyday "more breathing room" action, per-edge
 sliders behind a disclosure. When stored edges differ, the

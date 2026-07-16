@@ -95,6 +95,7 @@ struct ScrollingEditor: View {
             )
             SlotSizeRows(
                 model: model,
+                size: scrolling.slotSize,
                 isVertical: isVertical,
                 part: .unit
             )
@@ -104,6 +105,7 @@ struct ScrollingEditor: View {
             // the size control gets its own breathing room.
             SlotSizeRows(
                 model: model,
+                size: scrolling.slotSize,
                 isVertical: isVertical,
                 part: .control
             )
@@ -127,13 +129,14 @@ struct ScrollingEditor: View {
             // §3.5): the on/off switch and its magnitude sit
             // together, like a layout's App Bar enable sits
             // above its overrides.
-            Toggle(
-                L(
+            ToggleRow(
+                label: L(
                     "scroll_grid.animate_focus_shifts",
                     "Animate focus shifts"
                 ),
                 isOn: $model.config.settings.animations
-                    .onScrolling
+                    .onScrolling,
+                help: LayoutHelp.animateFocusShifts
             )
             scrollSpeedRow
             CrossReferenceRow(
