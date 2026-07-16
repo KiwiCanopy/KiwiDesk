@@ -388,11 +388,16 @@ end)
 Wire up the events to trigger sketchybar updates:
 
 ```lua
--- Fire kiwidesk_update on all relevant events
+-- Fire kiwidesk_update on all relevant events.
+-- native_space_change is not optional: a window closed while
+-- its desktop was off-screen never gets a corrective event,
+-- so the Mission Control round-trip must re-query (see the
+-- caveats above).
 for _, event in ipairs({
     "space_change",
     "layout_change",
     "focus_change",
+    "native_space_change",
     "window_created",
     "window_destroyed",
     "window_moved_to_space",
@@ -404,6 +409,17 @@ for _, event in ipairs({
     end)
 end
 ```
+
+> **Keep your hooks in init.lua under GUI-managed settings**
+>
+> When the Settings app takes ownership of your config
+> (adopting it into `gui.json`), only the *managed* parts of
+> `init.lua` go inert — tiling settings, keybindings, window
+> rules. `KiwiDesk.on(...)` event hooks are not managed: they
+> keep running from `init.lua` on every reload, and `init.lua`
+> stays the only place they can live. Don't delete your
+> sketchybar hooks because "the GUI owns the config now" —
+> that silently kills the bar.
 
 ### Cold-start race condition
 
