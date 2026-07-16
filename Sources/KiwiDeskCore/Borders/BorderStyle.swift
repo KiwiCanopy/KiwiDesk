@@ -46,7 +46,7 @@ public struct BorderStyle: Sendable, Equatable {
     public var unfocusedEnabled = false
     /// A subtle translucent grey — present without competing with
     /// the focused ring for attention.
-    public var unfocusedColor = "#00000033"
+    public var unfocusedColor = "#8E8E93CC"
     public var cornerStyle: CornerStyle = .rounded
 
     public init() {}

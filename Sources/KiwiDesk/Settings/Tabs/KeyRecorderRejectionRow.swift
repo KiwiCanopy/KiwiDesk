@@ -38,6 +38,12 @@ struct KeyRecorderRejectionRow: View {
             }
             .buttonStyle(.borderless)
             .foregroundStyle(.secondary)
+            .iconButtonAffordance(
+                L(
+                    "key_recorder.dismiss_conflict",
+                    "Dismiss shortcut conflict"
+                )
+            )
         }
         .font(.caption)
         .buttonStyle(.link)

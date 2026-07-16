@@ -1229,8 +1229,16 @@ in it**. The tiers, top to bottom:
 4. **Secondary, occasional-use toggles** with their own
    captions (auto-derivation, wrap-focus), each still
    gate-above-gated internally.
-5. **Escape-hatch buttons / actions** ("Fit gaps to border")
+5. **Escape-hatch buttons / actions** ("Fit layout gaps")
    — always last.
+
+An escape hatch that transforms other staged settings must expose
+the transaction locally: label transient inputs as action parameters,
+preview the resulting values before activation, warn when structure
+will be flattened, and confirm that the draft changed while footer
+Save is still required. Focus Border's **Fit layout gaps** group is
+the reference pattern; its action remains opt-in and one-shot rather
+than introducing automatic border-to-gap coupling.
 
 Dividers mark tier boundaries, not just breathing room, so a
 new field's tier decides which divider-bounded cluster it
@@ -1405,22 +1413,37 @@ from the behavior dropdowns (overflow, new-window placement)
 — eight-point uniform spacing alone let unrelated rows read
 as one group.
 
-**Buttons stay native; only size marks their class.** No
+**Buttons stay native; semantic role chooses their class.** No
 gradients, borders, or shadows on buttons — the crisp shadow
 is reserved for controls that slide (pill, slider thumb).
-Class is expressed through the system styles: one
-`.borderedProminent` per surface for the commit action
-(footer Save, popover confirms), `.bordered` at
-`.controlSize(.large)` for row actions (Load, Apply) so they
-sit level with the large dropdowns, `.bordered` for list-add
-actions (a `.borderless` "Add …" read as caption text), and
-`.plain` + underline + hover lift only for inline prose
-links. Icon-only inline row actions (trash, ×-clear, the
-rename pencil) stay `.borderless` — the native list-row
-convention; only text "Add …" actions warrant a border. The
-one smaller control is the Shortcuts import button
-(`.controlSize(.small)`): it sits inline beside the mode
-chips and must not read as a peer tab.
+Class is expressed through native style + control size:
+`.borderedProminent` regular for the one surface commit
+(footer Save, popover confirms); `.bordered` large for row
+actions (Load, Apply, Overrides, Set Gap Values), level with
+large dropdowns; `.bordered` regular for stateful input
+triggers (the shortcut recorder); and `.borderless` regular
+for icon-only row actions (trash, ×-clear, rename). List-add
+actions stay `.bordered`; `.plain` + underline is reserved
+for inline prose links. Small controls are subordinate inline
+or popover utilities (Shortcuts import, override resets), never
+a normal row action. Native macOS shape differences between
+these classes are intentional — choose by semantic role, not
+by a desired silhouette.
+
+**Hover confirms custom hit areas; it never creates the only
+affordance.** Native bordered/prominent buttons, sidebars,
+toggles, sliders, and fields keep system hover. Ambiguous
+icon-only borderless actions use the shared adaptive chip
+(`0.06` rest → `0.12` hover); custom full-row picker entries
+use a hover-only `0.06` fill; unselected custom segments and
+mode chips lift their existing fill by about `0.05`. No scale,
+movement, shadow, or pointing-hand cursor on ordinary buttons
+(the hand remains link-only). Disabled controls never react;
+under Reduce Motion the color change is immediate. Every such
+control also needs an explicit accessibility label (and concise
+hint when the action is not obvious), a visible keyboard-focus
+state, and a recognizable rest treatment or list context —
+`.help()` and hover alone do not make a control discoverable.
 
 **A recording shortcut field wears an accent halo.** The
 armed recorder among dozens of identical rows gets an accent

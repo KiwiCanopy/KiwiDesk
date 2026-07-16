@@ -49,6 +49,11 @@ struct BorderStyleParityTests {
         #expect(decoded == BorderStyle())
     }
 
+    @Test("Unfocused border defaults to visible neutral grey")
+    func unfocusedDefaultColor() {
+        #expect(BorderStyle().unfocusedColor == "#8E8E93CC")
+    }
+
     @Test("fittingGaps sizes gaps to the true outward reach")
     func fittingGaps() {
         var style = BorderStyle()

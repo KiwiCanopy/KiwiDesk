@@ -35,6 +35,8 @@ A search field sits at the top of the sidebar, under the app
 name. Typing filters the sidebar to the sections that match —
 by section name or by any of the titled groups inside a section
 (searching "gaps" finds Appearance, "focus" finds Shortcuts).
+While active, a subtle blue outline marks keyboard focus; the
+lighter placeholder gives way to normal text as soon as you type.
 When the match is a group inside the section, the result row
 names it in a smaller line under the section name, so you know
 where to look after clicking; for the per-layout editors under
@@ -496,6 +498,11 @@ this hardware.
 The **Appearance** section (in the **Design** group) customizes
 visual feedback.
 
+Color controls pair a swatch with an exact hex field. Clicking the
+swatch opens the native Colors panel and updates the staged value as
+you pick; **Done** or the red window close button closes the panel and
+keeps the selected color.
+
 ### Drag Visuals
 
 When you drag a tiled window, KiwiDesk shows two overlays:
@@ -553,15 +560,15 @@ windows. Below it:
 - **Corners**: **Rounded** matches your windows' real corner
   radius; **Square** draws sharp corners — seamless on windows that
   are already square, an intentional squared frame on rounded ones.
-- **Remaining gap · Adjust gaps for border**: a one-shot action
-  that rewrites the global outer and inner gaps from the border's
-  visible width, so rings never touch a neighbouring window, leaving
-  the **Remaining gap** (0–100 pt, default 0) of extra whitespace
-  past the reach. Inner gaps account for both borders when
-  unfocused borders are shown. The action can grow *or* shrink
-  gaps, and it normalizes asymmetric gaps. The field is an action
-  parameter — the resulting gaps persist in the profile, the field
-  itself resets. (Lua: `border.fit_gaps(remaining)`.)
+- **Fit layout gaps**: previews the exact global **Outer** and
+  **Inner** values needed to keep rings apart, plus the requested
+  **Extra spacing** (0–100 pt, default 0). Inner gaps account for
+  both borders when unfocused borders are shown. **Set Gap Values**
+  stages those values and warns before replacing asymmetric
+  per-edge gaps; the local confirmation tells you which footer Save
+  action applies or persists them. Extra spacing is an action
+  parameter, not another saved setting. The action can grow or
+  shrink gaps. (Lua: `border.fit_gaps(remaining)`.)
 
 Launcher and panel overlays (Spotlight, Raycast, Alfred) never get
 a ring, even while you type into them — only genuine windows do.

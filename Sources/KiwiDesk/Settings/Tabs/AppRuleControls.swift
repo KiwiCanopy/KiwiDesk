@@ -30,6 +30,12 @@ struct AppSelector: View {
                 }
                 .buttonStyle(.borderless)
                 .foregroundStyle(.secondary)
+                .iconButtonAffordance(
+                    L(
+                        "app_selector.clear_custom",
+                        "Clear custom app"
+                    )
+                )
             }
         } else {
             AppPickerButton(

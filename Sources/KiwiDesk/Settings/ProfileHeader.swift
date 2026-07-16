@@ -73,8 +73,9 @@ struct ProfileHeaderBar: View {
                 Image(systemName: "xmark.circle")
             }
             .buttonStyle(.borderless)
-            .hoverHighlight(cornerRadius: 4, padding: 2)
-            .help(L("profile_header.dismiss", "Dismiss"))
+            .iconButtonAffordance(
+                L("profile_header.dismiss", "Dismiss")
+            )
         }
     }
 

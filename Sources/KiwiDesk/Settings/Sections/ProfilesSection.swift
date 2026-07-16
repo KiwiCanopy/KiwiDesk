@@ -179,6 +179,7 @@ struct ProfilesSection: View {
             Button(L("profiles.load", "Load")) {
                 model.loadProfile(named: summary.name)
             }
+            .buttonStyle(.bordered)
             .controlSize(.large)
             .help(
                 summary.matchesLive
@@ -195,7 +196,9 @@ struct ProfilesSection: View {
                 Image(systemName: "trash")
             }
             .buttonStyle(.borderless)
-            .help(L("profiles.delete.help", "Delete profile"))
+            .iconButtonAffordance(
+                L("profiles.delete.help", "Delete profile")
+            )
         }
     }
 
@@ -234,8 +237,11 @@ struct ProfilesSection: View {
         }
         .buttonStyle(.borderless)
         .frame(width: 22, height: 22)
-        .hoverHighlight(cornerRadius: 11, padding: 0)
-        .help(L("profiles.rename.help", "Rename profile"))
+        .iconButtonAffordance(
+            L("profiles.rename.help", "Rename profile"),
+            cornerRadius: 11,
+            padding: 0
+        )
         .popover(
             isPresented: Binding(
                 get: { renaming == name },

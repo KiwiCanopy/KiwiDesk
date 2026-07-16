@@ -44,7 +44,9 @@ extension ProfilesSection {
                 Image(systemName: "trash")
             }
             .buttonStyle(.borderless)
-            .help(L("profiles.delete.help", "Delete profile"))
+            .iconButtonAffordance(
+                L("profiles.delete.help", "Delete profile")
+            )
         }
     }
 }

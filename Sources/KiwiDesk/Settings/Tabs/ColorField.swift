@@ -79,7 +79,6 @@ struct ColorSwatch: View {
     /// never clobbers `hex`; it commits (parse + normalize) on
     /// Return or focus loss, matching `StepperRow`'s discipline.
     @State private var draft: String
-    @State private var hovering = false
     @FocusState private var focused: Bool
     /// The panel-ownership token from the last `present`, so
     /// this swatch can resign the shared panel when it goes
@@ -148,14 +147,6 @@ struct ColorSwatch: View {
                     )
                 )
                 .frame(width: 22, height: 22)
-                .background(
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(
-                            Color.primary.opacity(
-                                hovering ? 0.12 : 0.06
-                            )
-                        )
-                )
                 .overlay(
                     RoundedRectangle(cornerRadius: 6)
                         .strokeBorder(
@@ -165,7 +156,12 @@ struct ColorSwatch: View {
                 )
         }
         .buttonStyle(.plain)
-        .onHover { hovering = $0 }
+        .hoverHighlight(
+            restOpacity: 0.06,
+            hoverOpacity: 0.12,
+            cornerRadius: 6,
+            padding: 0
+        )
         .help(
             L(
                 "color_field.swatch.help",
@@ -238,6 +234,7 @@ final class ColorPanelController: NSObject {
     static let shared = ColorPanelController()
 
     private var onChange: ((NSColor) -> Void)?
+    private lazy var doneAccessory: NSView = makeDoneAccessory()
     /// Bumped per `present`; identifies the current owner so a
     /// swatch only resigns the panel while it still owns it.
     private var activeToken = 0
@@ -251,6 +248,7 @@ final class ColorPanelController: NSObject {
         self.onChange = onChange
         let panel = NSColorPanel.shared
         panel.showsAlpha = true
+        panel.accessoryView = doneAccessory
         // Open on the colour wheel (preferred over the sliders
         // pane, even though hex entry lives there).
         panel.mode = .wheel
@@ -278,6 +276,45 @@ final class ColorPanelController: NSObject {
     func dismiss() {
         onChange = nil
         NSColorPanel.shared.orderOut(nil)
+    }
+
+    private func makeDoneAccessory() -> NSView {
+        let panel = NSColorPanel.shared
+        let width = panel.contentView?.bounds.width ?? 300
+        let container = NSView(
+            frame: NSRect(x: 0, y: 0, width: width, height: 42)
+        )
+        container.autoresizingMask = [.width]
+        let button = NSButton(
+            title: L("color_panel.done", "Done"),
+            target: self,
+            action: #selector(donePicking)
+        )
+        button.bezelStyle = .rounded
+        button.keyEquivalent = "\r"
+        button.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(button)
+        NSLayoutConstraint.activate([
+            button.centerXAnchor.constraint(
+                equalTo: container.centerXAnchor
+            ),
+            button.centerYAnchor.constraint(
+                equalTo: container.centerYAnchor
+            ),
+            button.leadingAnchor.constraint(
+                greaterThanOrEqualTo: container.leadingAnchor,
+                constant: 12
+            ),
+            button.trailingAnchor.constraint(
+                lessThanOrEqualTo: container.trailingAnchor,
+                constant: -12
+            ),
+        ])
+        return container
+    }
+
+    @objc private func donePicking() {
+        dismiss()
     }
 
     @objc private func panelColorChanged(

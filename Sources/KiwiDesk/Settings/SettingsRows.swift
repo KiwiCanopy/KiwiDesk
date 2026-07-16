@@ -153,6 +153,9 @@ struct ToggleRow: View {
 /// is chrome only, no `pointingHandCursor()`.
 private struct HoverChip: ViewModifier {
     @State private var hovering = false
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
+    @Environment(\.isEnabled) private var isEnabled
     var restOpacity: Double
     var hoverOpacity: Double
     var cornerRadius: CGFloat
@@ -165,11 +168,19 @@ private struct HoverChip: ViewModifier {
                 RoundedRectangle(cornerRadius: cornerRadius)
                     .fill(
                         Color.primary.opacity(
-                            hovering ? hoverOpacity : restOpacity
+                            hovering && isEnabled
+                                ? hoverOpacity : restOpacity
                         )
                     )
             )
-            .onHover { hovering = $0 }
+            .animation(
+                reduceMotion ? nil : .easeOut(duration: 0.12),
+                value: hovering
+            )
+            .onHover { hovering = isEnabled && $0 }
+            .onChange(of: isEnabled) { _, now in
+                if !now { hovering = false }
+            }
     }
 }
 
@@ -191,6 +202,35 @@ extension View {
                 cornerRadius: cornerRadius,
                 padding: padding
             )
+        )
+    }
+
+    /// Complete treatment for an ambiguous icon-only button:
+    /// visible chip, pointer confirmation, tooltip, and a real
+    /// VoiceOver name. The call site supplies one action phrase
+    /// so those four surfaces cannot drift.
+    func iconButtonAffordance(
+        _ label: String,
+        cornerRadius: CGFloat = 4,
+        padding: CGFloat = 2
+    ) -> some View {
+        hoverHighlight(
+            cornerRadius: cornerRadius,
+            padding: padding
+        )
+        .help(label)
+        .accessibilityLabel(label)
+    }
+
+    /// Hover confirmation for a custom full-row button whose
+    /// list context is its rest affordance. Unlike icon chips,
+    /// it adds no fill until the pointer enters the hit area.
+    func rowHoverHighlight() -> some View {
+        hoverHighlight(
+            restOpacity: 0,
+            hoverOpacity: 0.06,
+            cornerRadius: 5,
+            padding: 0
         )
     }
 }

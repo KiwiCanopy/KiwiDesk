@@ -66,6 +66,8 @@ struct SettingsFooter: View {
             Button(L("footer.revert", "Revert Changes")) {
                 model.revert()
             }
+            .buttonStyle(.bordered)
+            .controlSize(.regular)
             .disabled(!(model.isDirty || model.hasLayoutDrift))
             copySlot
             primarySlot
@@ -149,10 +151,14 @@ struct SettingsFooter: View {
             Button(saveCopyAsLabel) {
                 namingProfileCopy = true
             }
+            .buttonStyle(.bordered)
+            .controlSize(.regular)
         } else if model.activeProfile != nil {
             Button(saveCopyAsLabel) {
                 namingNewProfile = true
             }
+            .buttonStyle(.bordered)
+            .controlSize(.regular)
         }
     }
 
@@ -168,16 +174,19 @@ struct SettingsFooter: View {
             Button(save) { model.saveLuaSource() }
                 .keyboardShortcut("s")
                 .buttonStyle(.borderedProminent)
+                .controlSize(.regular)
                 .disabled(!model.isDirty)
         } else if model.editingStoredProfile {
             Button(save) { model.saveEditedProfile() }
                 .keyboardShortcut("s")
                 .buttonStyle(.borderedProminent)
+                .controlSize(.regular)
                 .disabled(!model.isDirty)
         } else if model.activeProfile != nil {
             Button(save) { model.updateActiveProfile() }
                 .keyboardShortcut("s")
                 .buttonStyle(.borderedProminent)
+                .controlSize(.regular)
                 .disabled(
                     !model.updateEnabled
                         || !(model.isDirty
@@ -198,6 +207,7 @@ struct SettingsFooter: View {
             }
             .keyboardShortcut("s")
             .buttonStyle(.borderedProminent)
+            .controlSize(.regular)
         }
     }
 }

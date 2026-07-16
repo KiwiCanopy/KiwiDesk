@@ -122,7 +122,7 @@ struct MonitorsSection: View {
                             Image(systemName: "xmark.circle")
                         }
                         .buttonStyle(.borderless)
-                        .help(
+                        .iconButtonAffordance(
                             L(
                                 "monitors.orphan_pin.help",
                                 "Back to automatic placement"

@@ -91,6 +91,12 @@ struct AdvancedLuaSection: View {
                 Image(systemName: "trash")
             }
             .buttonStyle(.borderless)
+            .iconButtonAffordance(
+                L(
+                    "shortcuts.remove_binding",
+                    "Remove shortcut"
+                )
+            )
         }
         .keybindingRowStyle(
             inherited: binding.wrappedValue.isInherited(

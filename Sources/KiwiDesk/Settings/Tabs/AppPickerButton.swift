@@ -121,9 +121,10 @@ struct AppPickerButton: View {
                 Spacer()
             }
             .contentShape(Rectangle())
+            .padding(.vertical, 3)
         }
         .buttonStyle(.plain)
-        .padding(.vertical, 3)
+        .rowHoverHighlight()
     }
 
     private func row(
@@ -151,6 +152,7 @@ struct AppPickerButton: View {
             .padding(.vertical, 3)
         }
         .buttonStyle(.plain)
+        .rowHoverHighlight()
     }
 
     private var filtered: [KeybindingCatalog.InstalledApp] {

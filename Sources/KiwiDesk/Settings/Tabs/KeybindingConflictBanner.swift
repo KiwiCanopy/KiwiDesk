@@ -1,3 +1,4 @@
+import KiwiDeskCore
 import SwiftUI
 
 /// A dismissible in-app warning shown when a keybinding
@@ -26,6 +27,12 @@ struct KeybindingConflictBanner: View {
                 }
                 .buttonStyle(.borderless)
                 .foregroundStyle(.secondary)
+                .iconButtonAffordance(
+                    L(
+                        "keybinding_conflict.dismiss",
+                        "Dismiss conflict warning"
+                    )
+                )
             }
             .padding(12)
             .background(

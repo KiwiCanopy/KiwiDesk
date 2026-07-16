@@ -60,8 +60,7 @@ struct SpaceAssignmentChip: View {
                         .font(.system(size: 9))
                 }
                 .buttonStyle(.borderless)
-                .hoverHighlight(cornerRadius: 4, padding: 2)
-                .help(
+                .iconButtonAffordance(
                     L(
                         "monitors.orphan_pin.help",
                         "Back to automatic placement"

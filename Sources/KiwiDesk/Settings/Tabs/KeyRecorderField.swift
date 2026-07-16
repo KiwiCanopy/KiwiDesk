@@ -140,7 +140,12 @@ struct KeyRecorderField: View {
                 }
                 .buttonStyle(.borderless)
                 .foregroundStyle(.secondary)
-                .hoverHighlight(cornerRadius: 4, padding: 2)
+                .iconButtonAffordance(
+                    L(
+                        "key_recorder.clear",
+                        "Clear shortcut"
+                    )
+                )
             }
         }
     }
@@ -157,6 +162,7 @@ struct KeyRecorderField: View {
                 .monospaced()
         }
         .buttonStyle(.bordered)
+        .controlSize(.regular)
         .tint(buttonTint)
         .modifier(RecorderButtonChrome(recording: recording))
         .help(Self.recordHelp)

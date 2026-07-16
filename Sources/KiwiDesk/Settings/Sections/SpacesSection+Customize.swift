@@ -23,6 +23,21 @@ struct OverridesButtonWidth: PreferenceKey {
 }
 
 extension SpacesSection {
+    /// Destructive row action, kept behind the divider in the
+    /// trailing danger slot. The shared icon affordance supplies
+    /// its persistent chip, hover confirmation, and VoiceOver name.
+    func deleteButton(_ space: SpaceID) -> some View {
+        Button {
+            requestRemove(space)
+        } label: {
+            Image(systemName: "trash")
+        }
+        .buttonStyle(.borderless)
+        .iconButtonAffordance(
+            L("spaces.delete.help", "Delete space")
+        )
+    }
+
     /// The Customize button anchors a bounded popover holding
     /// the space's override rows. `customizing` is a single slot,
     /// so only one popover is ever open (the accordion the issue
@@ -57,7 +72,7 @@ extension SpacesSection {
             )
         }
         .buttonStyle(.bordered)
-        .controlSize(.small)
+        .controlSize(.large)
         // Hug the label so the GeometryReader below measures its
         // true (untruncated) width, not a compressed one.
         .fixedSize()

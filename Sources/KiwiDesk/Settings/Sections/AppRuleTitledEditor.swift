@@ -72,6 +72,12 @@ struct AppRuleTitledEditor: View {
                     .font(.system(size: 9))
             }
             .buttonStyle(.borderless)
+            .iconButtonAffordance(
+                L(
+                    "app_rules.remove_pattern",
+                    "Remove title pattern"
+                )
+            )
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 3)

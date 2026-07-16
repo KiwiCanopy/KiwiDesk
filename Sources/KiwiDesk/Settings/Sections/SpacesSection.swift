@@ -161,20 +161,15 @@ struct SpacesSection: View {
                 }
                 Spacer()
                 modePicker(space)
+                customizeButton(space)
                 // Danger zone: a divider and breathing room set
                 // the destructive delete apart from the mode
-                // picker and Customize, so the trash can't be
+                // picker and Overrides, so the trash can't be
                 // hit reaching for either (#205).
                 Divider()
                     .frame(height: 16)
                     .padding(.horizontal, 2)
-                customizeButton(space)
-                Button {
-                    requestRemove(space)
-                } label: {
-                    Image(systemName: "trash")
-                }
-                .buttonStyle(.borderless)
+                deleteButton(space)
             }
         }
         .padding(8)

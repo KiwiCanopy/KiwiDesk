@@ -1887,12 +1887,12 @@ border.set_unfocused_enabled(false)
 **Expects:** a hex color string (`"#RRGGBB"` or `"#RRGGBBAA"`).
 
 **Does:** sets the unfocused windows' ring color (default
-`"#00000033"`, a subtle translucent grey).
+`"#8E8E93CC"`, a neutral grey at 80% opacity).
 
 **Example:**
 
 ```lua
-border.set_unfocused_color("#00000033")
+border.set_unfocused_color("#8E8E93CC")
 ```
 
 ### border.set_corner_style
@@ -1929,7 +1929,8 @@ normalizes asymmetric global gaps. A one-shot convenience that
 writes `gap.global` — the remaining gap is command input, never a
 persisted setting, and the layout math itself stays free of any
 border coupling, so this never runs automatically. The GUI's
-"Adjust gaps for border" action calls the same logic.
+**Fit layout gaps → Set Gap Values** action previews and stages the
+same calculation.
 
 **Example:**
 

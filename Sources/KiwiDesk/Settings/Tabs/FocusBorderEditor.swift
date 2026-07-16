@@ -9,10 +9,6 @@ import SwiftUI
 /// control and format as the App Bar and drag colors.
 struct FocusBorderEditor: View {
     @ObservedObject var model: SettingsModel
-    /// Action parameter for Adjust gaps (#295): whitespace (pt)
-    /// kept past the border's reach. Transient by design — the
-    /// resulting gaps persist; this input does not.
-    @State private var remainingGap = 0
 
     private var style: Binding<BorderStyle> {
         $model.config.settings.borderStyle
@@ -33,7 +29,14 @@ struct FocusBorderEditor: View {
             )
             FocusBorderPreview(style: style.wrappedValue)
             controls.modifier(
-                GreyOut(active: !style.wrappedValue.enabled)
+                GreyOut(
+                    active: !style.wrappedValue.enabled,
+                    help: L(
+                        "border.controls.disabled",
+                        "Turn on Show focus border to edit "
+                            + "these settings."
+                    )
+                )
             )
         }
     }
@@ -85,58 +88,11 @@ struct FocusBorderEditor: View {
             ]
         )
         Divider()
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 8) {
-                Text(
-                    L("border.remaining_gap", "Remaining gap")
-                )
-                RemainingGapField(value: $remainingGap)
-                Text(L("border.remaining_gap.unit", "pt"))
-                    .foregroundStyle(.secondary)
-                Button(
-                    L(
-                        "border.fit_gaps",
-                        "Adjust gaps for border"
-                    )
-                ) {
-                    fitGapsToBorder()
-                }
-                .help(
-                    L(
-                        "border.fit_gaps.hint",
-                        "Changes the global outer and inner "
-                            + "gaps."
-                    )
-                )
-            }
-            Text(
-                L(
-                    "border.fit_gaps.caption",
-                    "Adjusts layout gaps so borders do not "
-                        + "touch neighbouring windows and "
-                        + "leaves the remaining gap shown "
-                        + "above. Inner gaps account for both "
-                        + "borders when unfocused borders are "
-                        + "shown."
-                )
-            )
-            .font(.caption)
-            .foregroundStyle(.secondary)
-        }
+        FitGapsAction(model: model)
     }
 
     private var cornerLabel: String {
         L("border.corner_style", "Corners")
-    }
-
-    /// Writes the same `gapsGlobal` the Gaps sliders do, using the
-    /// core's shared `BorderStyle.fittingGaps(remaining:)` so the
-    /// action and the `border.fit_gaps` command can't drift.
-    private func fitGapsToBorder() {
-        model.config.settings.gapsGlobal =
-            model.config.settings.borderStyle.fittingGaps(
-                remaining: CGFloat(remainingGap)
-            )
     }
 }
 

@@ -14,6 +14,10 @@ struct ShortcutsHeader: View {
     @State private var importedNote = false
     @State private var renamingMode = false
     @State private var renameDraft = ""
+    @State private var addModeHovered = false
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
+    @Environment(\.isEnabled) private var isEnabled
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -41,6 +45,9 @@ struct ShortcutsHeader: View {
                     .foregroundStyle(.green)
             }
             selectedModeHeader
+        }
+        .onChange(of: isEnabled) { _, now in
+            if !now { addModeHovered = false }
         }
     }
 
@@ -75,22 +82,12 @@ struct ShortcutsHeader: View {
     }
 
     private func modeChip(_ name: String) -> some View {
-        Button {
+        ShortcutModeChip(
+            name: name,
+            selected: selected == name
+        ) {
             selected = name
-        } label: {
-            Text(name)
-                .font(.callout)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 4)
-                .background(
-                    Capsule().fill(
-                        selected == name
-                            ? Color.accentColor.opacity(0.25)
-                            : Color.secondary.opacity(0.12)
-                    )
-                )
         }
-        .buttonStyle(.plain)
     }
 
     /// Defining a mode is rare — the "+" chip's popover
@@ -104,11 +101,16 @@ struct ShortcutsHeader: View {
                 .padding(.vertical, 5)
                 .background(
                     Capsule().fill(
-                        Color.secondary.opacity(0.12)
+                        Color.secondary.opacity(
+                            isEnabled && addModeHovered
+                                ? 0.18 : 0.12
+                        )
                     )
                 )
+                .animation(hoverAnimation, value: addModeHovered)
         }
         .buttonStyle(.plain)
+        .onHover { addModeHovered = isEnabled && $0 }
         .help(L("shortcuts.add_mode.help", "Add a mode"))
         .popover(isPresented: $addingMode) {
             HStack {
@@ -126,6 +128,10 @@ struct ShortcutsHeader: View {
 
     private var modeNamePlaceholder: String {
         L("shortcuts.mode_name", "Mode name")
+    }
+
+    private var hoverAnimation: Animation? {
+        reduceMotion ? nil : .easeOut(duration: 0.12)
     }
 
     // MARK: - Import (#4)

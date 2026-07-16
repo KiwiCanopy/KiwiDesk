@@ -87,6 +87,7 @@ struct PresetsSection: View {
             Button(L("presets.apply", "Apply")) {
                 model.applyStandardPreset(layout)
             }
+            .buttonStyle(.bordered)
             .controlSize(.large)
             .disabled(
                 model.displays.count != layout.screenCount

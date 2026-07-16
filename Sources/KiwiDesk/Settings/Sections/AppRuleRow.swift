@@ -72,25 +72,27 @@ struct AppRuleRow: View {
                 Image(systemName: "trash")
             }
             .buttonStyle(.borderless)
+            .iconButtonAffordance(removeHelp)
             .disabled(
                 overrideBase != nil
                     && model.config.appRules[app] == nil
                     && floatFacet == .never
                     && !isDraft
             )
-            .help(
-                overrideBase == nil
-                    ? L(
-                        "app_rules.remove_all.help",
-                        "Remove all rules for this app"
-                    )
-                    : L(
-                        "app_rules.remove_override.help",
-                        "Remove this profile's effective space "
-                            + "and float rules for this app"
-                    )
-            )
         }
+    }
+
+    private var removeHelp: String {
+        overrideBase == nil
+            ? L(
+                "app_rules.remove_all.help",
+                "Remove all rules for this app"
+            )
+            : L(
+                "app_rules.remove_override.help",
+                "Remove this profile's effective space "
+                    + "and float rules for this app"
+            )
     }
 
     @ViewBuilder private var appIcon: some View {

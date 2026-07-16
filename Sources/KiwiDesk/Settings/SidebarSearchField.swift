@@ -11,6 +11,7 @@ import SwiftUI
 /// precedent instead.
 struct SidebarSearchField: View {
     @Binding var text: String
+    @FocusState private var focused: Bool
 
     var body: some View {
         HStack(spacing: 6) {
@@ -25,16 +26,24 @@ struct SidebarSearchField: View {
         .background(fieldShape)
         .inactiveDimmed()
         .padding(.horizontal, 10)
-        .padding(.bottom, 8)
+        // Shift the field down within the same 8 pt vertical
+        // allowance so it sits midway between identity and header.
+        .padding(.top, 6)
+        .padding(.bottom, 2)
     }
 
     private var field: some View {
         TextField(
-            L("sidebar.search.placeholder", "Search"),
-            text: $text
+            "",
+            text: $text,
+            prompt: Text(
+                L("sidebar.search.placeholder", "Search")
+            )
+            .foregroundStyle(Color.secondary.opacity(0.42))
         )
         .textFieldStyle(.plain)
-        .font(.callout)
+        .font(.body)
+        .focused($focused)
         // Escape clears, matching `NSSearchField`.
         .onExitCommand { text = "" }
         // Explicit name, so accessibility does not depend on
@@ -57,16 +66,35 @@ struct SidebarSearchField: View {
                 .foregroundStyle(.secondary)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(
+        .iconButtonAffordance(
             L("sidebar.search.clear", "Clear search")
         )
     }
 
-    /// A full pill: `Capsule` derives its radius from the
-    /// field's height, so a future type-size change keeps the
-    /// shape right for free (settled by eye against radius 9).
+    /// A full pill: `Capsule` derives its radius from the field's
+    /// height. Keyboard focus gets the restrained accent outline
+    /// of System Settings, not SwiftUI's oversized default halo.
     private var fieldShape: some View {
         Capsule()
-            .fill(.quaternary)
+            .fill(Color.primary.opacity(0.06))
+            .overlay {
+                Capsule()
+                    .strokeBorder(
+                        Color.accentColor.opacity(
+                            focused ? 0.38 : 0
+                        ),
+                        lineWidth: 3
+                    )
+            }
+            .shadow(
+                color: Color.accentColor.opacity(
+                    focused ? 0.12 : 0
+                ),
+                radius: 2
+            )
+            .animation(
+                .easeOut(duration: 0.12),
+                value: focused
+            )
     }
 }

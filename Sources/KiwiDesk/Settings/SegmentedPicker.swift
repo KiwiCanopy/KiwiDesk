@@ -25,7 +25,11 @@ struct SegmentedPicker<Value: Hashable>: View {
     /// the track instead.
     private let help: String?
     @Namespace private var pillSpace
+    @State private var hoveredIndex: Int?
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
     @Environment(\.colorScheme) private var scheme
+    @Environment(\.isEnabled) private var isEnabled
     @Environment(\.settingsLabelColumn)
     private var labelColumn
 
@@ -96,6 +100,9 @@ struct SegmentedPicker<Value: Hashable>: View {
             )
         )
         .accessibilityElement(children: .contain)
+        .onChange(of: isEnabled) { _, now in
+            if !now { hoveredIndex = nil }
+        }
     }
 
     private func segment(
@@ -104,15 +111,22 @@ struct SegmentedPicker<Value: Hashable>: View {
     ) -> some View {
         let selected = option.value == selection
         return Button {
-            withAnimation(
-                .spring(response: 0.32, dampingFraction: 0.75)
-            ) {
-                selection = option.value
-            }
+            select(option.value)
         } label: {
-            segmentLabel(option.title, selected: selected)
+            segmentLabel(
+                option.title,
+                selected: selected,
+                index: index
+            )
         }
         .buttonStyle(.plain)
+        .onHover { inside in
+            updateHover(
+                inside: inside,
+                selected: selected,
+                index: index
+            )
+        }
         .matchedGeometryEffect(
             id: index,
             in: pillSpace,
@@ -125,7 +139,8 @@ struct SegmentedPicker<Value: Hashable>: View {
 
     private func segmentLabel(
         _ title: String,
-        selected: Bool
+        selected: Bool,
+        index: Int
     ) -> some View {
         Text(title)
             // A real font-size step, not `scaleEffect` — a
@@ -141,7 +156,44 @@ struct SegmentedPicker<Value: Hashable>: View {
             .padding(.vertical, 4)
             .padding(.horizontal, 10)
             .frame(maxWidth: .infinity)
+            .background(
+                Capsule().fill(
+                    Color.primary.opacity(
+                        isEnabled && !selected
+                            && hoveredIndex == index
+                            ? 0.05 : 0
+                    )
+                )
+            )
+            .animation(
+                reduceMotion ? nil : .easeOut(duration: 0.12),
+                value: hoveredIndex
+            )
             .contentShape(Capsule())
+    }
+
+    private func updateHover(
+        inside: Bool,
+        selected: Bool,
+        index: Int
+    ) {
+        if inside, isEnabled, !selected {
+            hoveredIndex = index
+        } else if hoveredIndex == index {
+            hoveredIndex = nil
+        }
+    }
+
+    private func select(_ value: Value) {
+        if reduceMotion {
+            selection = value
+        } else {
+            withAnimation(
+                .spring(response: 0.32, dampingFraction: 0.75)
+            ) {
+                selection = value
+            }
+        }
     }
 
     /// The one persistent pill. It adopts the selected

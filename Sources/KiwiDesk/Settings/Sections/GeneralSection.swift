@@ -96,15 +96,20 @@ struct GeneralSection: View {
                     .foregroundStyle(.secondary)
                     .textSelection(.enabled)
                 Link(destination: SupportLinks.koFi) {
-                    Label(
-                        L(
-                            "general.about.support",
-                            "Support KiwiDesk"
-                        ),
-                        systemImage: "heart"
-                    )
+                    HStack(spacing: 4) {
+                        Image(systemName: "heart")
+                        Text(
+                            L(
+                                "general.about.support",
+                                "Support KiwiDesk"
+                            )
+                        )
+                        .underline()
+                    }
                 }
+                .buttonStyle(.plain)
                 .font(.callout)
+                .linkHover()
             }
             .frame(maxWidth: .infinity)
         }
