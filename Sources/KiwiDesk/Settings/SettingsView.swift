@@ -96,6 +96,19 @@ struct SettingsView: View {
                 title: selection.title,
                 showsProfileContext: selection.showsProfileContext
             )
+            // Paused-permission banner outranks the per-section
+            // Lua banner: it renders in the shared chrome (every
+            // section *and* the raw Lua editor), because missing
+            // Accessibility makes the whole dashboard inert, not
+            // just one tab. Gated here (not self-gating) so the
+            // padding never reserves empty space when trusted.
+            if model.permissionPaused {
+                PermissionPausedBanner(
+                    onResolve: model.onResolvePermission
+                )
+                .padding(.horizontal, 12)
+                .padding(.top, 10)
+            }
             // `ClickAwayResignsFocus` installs a window-scoped
             // mouse-down monitor (#93) that commits an edited
             // field when the click lands outside it. It's a

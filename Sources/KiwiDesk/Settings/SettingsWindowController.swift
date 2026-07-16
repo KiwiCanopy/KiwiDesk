@@ -15,6 +15,19 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         super.init()
     }
 
+    /// Routes the paused-permission banner's "Enable
+    /// Accessibility…" button; the app wires it to the shared
+    /// onboarding grant flow.
+    func setResolvePermission(_ handler: @escaping () -> Void) {
+        model.onResolvePermission = handler
+    }
+
+    /// Drives the dashboard-wide paused banner: true while
+    /// Accessibility is missing and window management is inert.
+    func setPermissionPaused(_ paused: Bool) {
+        model.permissionPaused = paused
+    }
+
     /// Non-destructive refresh for the quick menu's layout
     /// actions: recomputes only the live-vs-saved drift
     /// captions, never reseeding `config` — staged edits

@@ -132,6 +132,18 @@ final class SettingsModel: ObservableObject {
     /// tooltip are unaffected and always reflect live state.
     @Published var keybindingWarning: String?
 
+    /// True while macOS Accessibility permission is missing, so
+    /// window management is fully paused and every tiling control
+    /// below is silently inert. Drives the dashboard-wide
+    /// `PermissionPausedBanner`. Pushed from `AppDelegate` (the
+    /// permission owner) — the Settings layer never reads AX
+    /// state directly. Not dismissible: it tracks a persistent
+    /// fact, unlike the transient `keybindingWarning`.
+    @Published var permissionPaused = false
+    /// Routes the paused banner's "Enable Accessibility…" button
+    /// to the shared onboarding grant flow (wired by the app).
+    var onResolvePermission: () -> Void = {}
+
     let core: KiwiCore
     /// Recorder-only runtime delta + disk-independent rollback
     /// point (#123). nil outside a live-apply edit session.
