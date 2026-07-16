@@ -50,9 +50,29 @@ struct LayoutParamsCodingParityTests {
         try expectRoundTrips(Self.track(), from: TrackParams())
     }
 
+    @Test("Missing keys decode every params initializer default")
+    func missingKeysUseDefaults() throws {
+        try expectDefaults(BspParams())
+        try expectDefaults(StackParams())
+        try expectDefaults(GridParams())
+        try expectDefaults(ScrollingParams())
+        try expectDefaults(MonocleParams())
+        try expectDefaults(TrackParams())
+    }
+
     // MARK: Exhaustive fixtures (every field ≠ its default)
 
     private static let space = SpaceID("2")
+
+    private func expectDefaults<T: Decodable & Equatable>(
+        _ defaults: T
+    ) throws {
+        let decoded = try JSONDecoder().decode(
+            T.self,
+            from: Data("{}".utf8)
+        )
+        #expect(decoded == defaults)
+    }
 
     private static func bsp() -> BspParams {
         var params = BspParams()

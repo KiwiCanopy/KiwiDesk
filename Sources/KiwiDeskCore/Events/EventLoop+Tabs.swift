@@ -71,9 +71,15 @@ extension EventLoop {
             elementByID[rekey.to] = nil
         }
         // Genuine new windows: track normally (emits windowCreated).
+        let displayBounds = FloatDetection.activeDisplayBounds()
         for pair in appeared.sorted(by: { $0.id.raw < $1.id.raw })
         where elementByID[pair.id] != nil {
-            track(pair.element, pid: pid, app: app)
+            track(
+                pair.element,
+                pid: pid,
+                app: app,
+                displayBounds: displayBounds
+            )
         }
         // Genuine closes: emit the destroy the eager path deferred.
         for id in vanishedIDs.sorted(by: { $0.raw < $1.raw })

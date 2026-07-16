@@ -62,8 +62,14 @@ extension EventLoop {
         {
             enableEnhancedUI(pid: pid)
         }
+        let displayBounds = FloatDetection.activeDisplayBounds()
         for element in windows {
-            track(element, pid: pid, app: ref)
+            track(
+                element,
+                pid: pid,
+                app: ref,
+                displayBounds: displayBounds
+            )
         }
     }
 

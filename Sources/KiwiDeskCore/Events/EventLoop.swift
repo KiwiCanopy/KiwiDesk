@@ -143,7 +143,8 @@ public final class EventLoop {
     func track(
         _ element: AXUIElement,
         pid: pid_t,
-        app: AppRef
+        app: AppRef,
+        displayBounds: [CGRect]? = nil
     ) {
         let role = AXHelper.role(of: element)
         guard role == kAXWindowRole,
@@ -162,6 +163,11 @@ public final class EventLoop {
             of: window.id
         )
         let layer = server.layer
+        let displays =
+            layer == nil || layer == 0
+            ? []
+            : displayBounds
+                ?? FloatDetection.activeDisplayBounds()
         guard
             !FloatDetection.isUnbackedAuxiliary(
                 role: role,
@@ -180,7 +186,7 @@ public final class EventLoop {
                 layer: layer,
                 alpha: server.alpha,
                 bounds: server.bounds,
-                displays: FloatDetection.activeDisplayBounds()
+                displays: displays
             )
         else { return }
         // Some panels must never be managed at all — merely

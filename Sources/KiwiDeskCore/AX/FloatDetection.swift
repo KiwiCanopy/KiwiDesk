@@ -105,13 +105,17 @@ public enum FloatDetection {
     /// Cocoa flip needed).
     public static func activeDisplayBounds() -> [CGRect] {
         var count: UInt32 = 0
-        CGGetActiveDisplayList(0, nil, &count)
-        guard count > 0 else { return [] }
+        guard
+            CGGetActiveDisplayList(0, nil, &count) == .success,
+            count > 0
+        else { return [] }
         var ids = [CGDirectDisplayID](
             repeating: 0,
             count: Int(count)
         )
-        CGGetActiveDisplayList(count, &ids, &count)
+        guard
+            CGGetActiveDisplayList(count, &ids, &count) == .success
+        else { return [] }
         return ids.prefix(Int(count)).map { CGDisplayBounds($0) }
     }
 
