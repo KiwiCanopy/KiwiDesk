@@ -8,6 +8,13 @@ extension KiwiCore {
         _ command: String,
         args: [JSONValue] = []
     ) -> CommandResponse {
+        // Fail closed before dispatch when a focused-window command
+        // is issued while an ignored panel or unmanaged app holds
+        // the foreground (#292). Inert until `start()` wires the
+        // provider, so this never fires in unit tests.
+        if let denial = focusedCommandDenial(for: command) {
+            return denial
+        }
         switch command {
         case "focus":
             return navigate(args, swapping: false)
