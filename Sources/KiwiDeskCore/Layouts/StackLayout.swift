@@ -26,10 +26,19 @@ public struct StackLayout: LayoutSystem {
             masterCount: params.masterCount
         )
 
+        // #313: render order for the master zone. Mirrored, the
+        // boundary master sits at the stack seam instead of the
+        // far edge. Applied in the master-only branch too, so
+        // closing the last stack window never reorders masters.
+        let masterOrdered =
+            Self.mirrorsMasterZone(params)
+            ? ArraySlice(master.reversed())
+            : master
+
         guard let stack else {
             // Master only: the full usable region.
             return zone(
-                master,
+                masterOrdered,
                 in: usable,
                 vertical: params.masterOrientation == .vertical,
                 context: context
@@ -80,7 +89,7 @@ public struct StackLayout: LayoutSystem {
         )
 
         var result = zone(
-            master,
+            masterOrdered,
             in: masterRegion,
             vertical: params.masterOrientation == .vertical,
             context: context
@@ -95,6 +104,38 @@ public struct StackLayout: LayoutSystem {
             )
         ) { _, new in new }
         return result
+    }
+
+    /// #313: whether the master zone lays its slots from the
+    /// stack seam instead of the region's min edge. True when
+    /// the stack *leads* (`left`/`top`) AND the master lineup
+    /// runs *parallel* to the split axis — otherwise the
+    /// boundary master (index `masterCount − 1`) would render
+    /// at the point farthest from the stack, and every boundary
+    /// crossing (minimize-promotion, `promote`/`demote`) would
+    /// teleport across the master zone. A pure render mapping:
+    /// array order and the promote/demote swaps stay untouched,
+    /// and geometric navigation follows the frames. Deliberately
+    /// NOT applied to perpendicular lineups — there every master
+    /// already touches the seam, and reversing would flip the
+    /// natural top-to-bottom (left-to-right) reading for no seam
+    /// gain. Side effect, accepted: in a mirrored zone the
+    /// `cascade_overflow` pile at the trailing end holds the
+    /// array-earliest masters instead of the latest — the pile
+    /// keeps its screen position and downward cascade either
+    /// way. `StackSchematic` mirrors in lockstep via this same
+    /// predicate.
+    public static func mirrorsMasterZone(
+        _ params: StackParams
+    ) -> Bool {
+        let leads =
+            params.stackPosition == .left
+            || params.stackPosition == .top
+        guard leads else { return false }
+        let parallel: StackParams.Orientation =
+            params.stackPosition.splitsHorizontally
+            ? .horizontal : .vertical
+        return params.masterOrientation == parallel
     }
 
     /// The master and stack regions for a split of the usable

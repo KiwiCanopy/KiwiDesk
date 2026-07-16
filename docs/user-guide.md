@@ -334,7 +334,8 @@ Adjust each mode's defaults:
   up), stack position (which side the stack zone takes — left/
   right split the width, top/bottom the height; the stack's own
   lineup follows the side, so a tall zone is a column and a wide
-  one a row, #222), and overflow style (cascade_overflow keeps
+  one a row, #222 — with a leading stack the masters fill from
+  the stack seam, so promotions stay local), and overflow style (cascade_overflow keeps
   full windows, cascade_all cascades everything — piles always
   cascade downward, so title bars stay visible). The resize
   shortcuts are focus-aware (#67): the split axis grows

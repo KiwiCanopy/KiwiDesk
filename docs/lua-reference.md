@@ -522,7 +522,11 @@ master zone gets the rest. `left`/`right` split the width,
 the position — a left/right zone stacks its windows vertically,
 a top/bottom zone lines them up side by side (there is no
 separate stack orientation knob). Overflow piles always cascade
-downward regardless.
+downward regardless. When the stack leads (`left`/`top`) and the
+masters line up along the split axis, the master zone fills from
+the stack seam instead of the screen edge, so a promoted window
+appears beside the stack it just left rather than teleporting to
+the far edge.
 
 **Example:**
 

@@ -802,6 +802,22 @@ became the default-adjacent bug #313. Existing profiles that
 omit `layout.stack.master_orientation` change meaning on next
 load — pre-release, no migration (§5).
 
+**The master zone fills from the stack seam when the stack
+leads.** (#313) `StackLayout.zone` lays array order from a
+region's min edge, which put the boundary master (the
+promote/demote swap slot) at the point *farthest* from a
+leading stack — every boundary crossing teleported across the
+master zone. Mirrored slot order (leading stack + parallel
+master lineup only) is a pure render mapping: the flat array,
+the promote/demote swaps, and seniority stay untouched;
+geometric navigation follows the frames; `StackSchematic`
+mirrors via the same `StackLayout.mirrorsMasterZone` predicate
+so the preview cannot lie. Perpendicular lineups stay in
+natural reading order — every master already touches the seam.
+Boundary crossings now read identically to the trailing-stack
+(default) arrangement: the crossing window moves locally,
+survivors shift one slot.
+
 **The stack cascade is a last resort; extreme ratios clamp at
 layout time, and interactive writes cap at the visible cliff.**
 An out-of-range `master_ratio` used to collapse the whole space

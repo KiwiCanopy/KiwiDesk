@@ -86,6 +86,19 @@ struct StackSchematic: View {
         Array(order.prefix(masters))
     }
 
+    /// Master tiles in render order — mirrored in lockstep with
+    /// the engine (#313, `StackLayout.mirrorsMasterZone`), so
+    /// the preview never lies about where the boundary master
+    /// sits when the stack leads.
+    private var masterDisplay: [WindowID] {
+        var params = StackParams()
+        params.masterOrientation = masterOrientation
+        params.stackPosition = stackPosition
+        return StackLayout.mirrorsMasterZone(params)
+            ? masterWins.reversed()
+            : masterWins
+    }
+
     var stackWins: [WindowID] {
         Array(order.dropFirst(masters))
     }
@@ -160,11 +173,12 @@ struct StackSchematic: View {
     }
 
     private var masterTiles: some View {
-        let visible = min(masterWins.count, 4)
-        let hidden = masterWins.count - visible
+        let wins = masterDisplay
+        let visible = min(wins.count, 4)
+        let hidden = wins.count - visible
         return ForEach(0..<visible, id: \.self) { i in
             ZStack(alignment: .bottomTrailing) {
-                tile(for: masterWins[i])
+                tile(for: wins[i])
                 if i == visible - 1, hidden > 0 {
                     SchematicMoreChip(hidden: hidden)
                         .padding(2)
