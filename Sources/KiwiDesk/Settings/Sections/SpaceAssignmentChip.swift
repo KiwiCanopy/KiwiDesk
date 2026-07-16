@@ -19,14 +19,16 @@ struct SpaceAssignment: Identifiable {
 /// One space chip inside a monitor card. Semantic micro-icons
 /// (pin/link) encode the resolution kind — border style alone
 /// would be an accessibility risk (§3.13); auto chips render
-/// dimmed. Explicit chips clear back to automatic via ⓧ on
-/// hover; the context menu is the keyboard-navigable fallback
-/// for every move.
+/// dimmed. Explicit chips clear back to automatic via an
+/// always-visible ⓧ (a reserved trailing slot, like a Mail
+/// address token — a hover-only button grew the chip after the
+/// flow layout had sized it, so its ⓧ overflowed a narrow card);
+/// the context menu is the keyboard-navigable fallback for every
+/// move.
 struct SpaceAssignmentChip: View {
     @ObservedObject var model: SettingsModel
     let space: SpaceID
     let kind: SpaceAssignment.Kind
-    @State private var hovering = false
 
     var body: some View {
         HStack(spacing: 4) {
@@ -43,7 +45,14 @@ struct SpaceAssignmentChip: View {
             Text(space.raw)
                 .font(.caption)
                 .fontWeight(.medium)
-            if kind != .auto, hovering {
+                .lineLimit(1)
+                .truncationMode(.tail)
+                // Provisional cap; the full name lives in the
+                // tooltip when elided. Re-evaluate with the
+                // 8-language add (#95) — localized names run
+                // longer.
+                .frame(maxWidth: 120, alignment: .leading)
+            if kind != .auto {
                 Button {
                     clear()
                 } label: {
@@ -67,9 +76,15 @@ struct SpaceAssignmentChip: View {
             Capsule().strokeBorder(.tint.opacity(0.4))
         )
         .opacity(kind == .auto ? 0.55 : 1)
-        .onHover { hovering = $0 }
         .draggable(DraggableSpace(raw: space.raw))
-        .help(hint)
+        .help(
+            L(
+                "monitor_chip.help_full",
+                "%1$@\n%2$@",
+                space.raw,
+                hint
+            )
+        )
         .contextMenu { menu }
     }
 
