@@ -170,6 +170,13 @@ public struct WorkspaceManager: Sendable {
         spaces[id]?.remove(window)
     }
 
+    /// Re-keys a window in its space, preserving slot and focus
+    /// (#308). No-op if `old` is in no space.
+    public mutating func rekey(_ old: WindowID, to new: WindowID) {
+        guard let id = space(of: old) else { return }
+        spaces[id]?.rekey(old, to: new)
+    }
+
     public mutating func focus(
         _ window: WindowID,
         in id: SpaceID
