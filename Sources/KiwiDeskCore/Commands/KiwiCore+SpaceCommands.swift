@@ -200,6 +200,7 @@ extension KiwiCore {
             emitWindowMovedToSpace(
                 focused,
                 app: state.windows[focused]?.appName ?? "",
+                bundleID: state.windows[focused]?.appBundleID,
                 from: from,
                 to: target
             )

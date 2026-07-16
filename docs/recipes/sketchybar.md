@@ -37,12 +37,12 @@ any of them to keep sketchybar in sync:
 |---|---|---|
 | `space_change` | `space_id`, `mode` | Virtual space switches |
 | `layout_change` | `space_id`, `mode` | Layout mode changes on a space |
-| `focus_change` | `window_id`, `app` | Focused window changes |
+| `focus_change` | `window_id`, `app`, `bundle_id` | Focused window changes |
 | `monitor_change` | `monitor_count` | Monitors connect or disconnect |
 | `native_space_change` | `native_space` | The native macOS desktop switches |
-| `window_created` | `window_id`, `app`, `space`, `reason` | A managed window appears (`new`/`returned`/`restored`) |
-| `window_destroyed` | `window_id`, `app`, `space`, `reason` | A managed window disappears (`closed`/`minimized`/`vanished`) |
-| `window_moved_to_space` | `window_id`, `app`, `from`, `to` | See caveats |
+| `window_created` | `window_id`, `app`, `space`, `reason`, `bundle_id` | A managed window appears (`new`/`returned`/`restored`) |
+| `window_destroyed` | `window_id`, `app`, `space`, `reason`, `bundle_id` | A managed window disappears (`closed`/`minimized`/`vanished`) |
+| `window_moved_to_space` | `window_id`, `app`, `from`, `to`, `bundle_id` | See caveats |
 
 **Caveats:**
 

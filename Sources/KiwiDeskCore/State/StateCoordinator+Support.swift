@@ -13,6 +13,7 @@ extension StateCoordinator {
             .flatMap { workspaces[$0]?.focused }
         return AppliedEffects.RemovedWindow(
             app: windows[id]?.appName,
+            bundleID: windows[id]?.appBundleID,
             space: workspaces.space(of: id),
             focusLost: focused == id
         )

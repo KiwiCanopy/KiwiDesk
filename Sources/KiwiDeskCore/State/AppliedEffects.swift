@@ -41,6 +41,7 @@ public struct AppliedEffects: Sendable {
     /// window, snapshotted before the removal.
     struct RemovedWindow: Sendable {
         let app: String?
+        let bundleID: String?
         let space: SpaceID?
         let focusLost: Bool
     }

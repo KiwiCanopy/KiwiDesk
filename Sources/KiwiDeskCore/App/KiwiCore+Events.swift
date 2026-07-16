@@ -177,6 +177,7 @@ extension KiwiCore {
             emitWindowDestroyed(
                 id,
                 app: effects.removedWindow?.app,
+                bundleID: effects.removedWindow?.bundleID,
                 space: effects.removedWindow?.space,
                 reason: reason
             )

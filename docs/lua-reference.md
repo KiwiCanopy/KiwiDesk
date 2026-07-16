@@ -2458,12 +2458,12 @@ end)
 |---|---|
 | `space_change` | `space_id`, `mode` |
 | `layout_change` | `space_id`, `mode` |
-| `focus_change` | `window_id`, `app` |
+| `focus_change` | `window_id`, `app`, `bundle_id` |
 | `monitor_change` | `monitor_count` |
 | `native_space_change` | `native_space` (desktop number) |
-| `window_created` | `window_id`, `app`, `space`, `reason` |
-| `window_destroyed` | `window_id`, `app`, `space`, `reason` |
-| `window_moved_to_space` | `window_id`, `app`, `from`, `to` |
+| `window_created` | `window_id`, `app`, `space`, `reason`, `bundle_id` |
+| `window_destroyed` | `window_id`, `app`, `space`, `reason`, `bundle_id` |
+| `window_moved_to_space` | `window_id`, `app`, `from`, `to`, `bundle_id` |
 
 The window lifecycle events fire even when focus does not change (a
 background window opening or closing), so status bars stay current
@@ -2473,6 +2473,13 @@ space is not active. In the CLI event stream the key is `space_id`
 (matching `space_change`) and an unknown space is JSON `null`; the
 Lua callback receives `""` instead, since a positional `nil` would
 truncate the argument list.
+
+Every window event also carries the owning app's `bundle_id` — the
+stable identity key that app rules (`float_rules`, `app_rules`) and
+`pull_or_spawn` match on, unlike the locale-dependent display `app`
+name. It is the trailing Lua argument (skip it if you don't need
+it), `""` for unbundled processes; in the CLI event stream the key
+is `bundle_id`, JSON `null` when unknown.
 
 `window_moved_to_space` fires on an explicit `move_to_space`
 (with or without follow) when the target differs from the window's

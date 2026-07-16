@@ -210,14 +210,21 @@ Events: `space_change`, `layout_change`, `focus_change`,
 `monitor_change`, `native_space_change`, `window_created`,
 `window_destroyed`, `window_moved_to_space`.
 
-`focus_change` data carries `window_id`, `app`, **and**
-`title` — but the Lua callback receives only `window_id, app`
-positionally, so the window title is available on the socket
-stream but not to a Lua handler:
+Every window event carries `bundle_id` — the stable identity
+key (the one app rules and `pull_or_spawn` match on) — next to
+the locale-dependent display `app` name. It is JSON `null` for
+unbundled processes; the Lua callback receives it as the
+trailing positional argument, `""` when unknown.
+
+`focus_change` data carries `window_id`, `app`, `bundle_id`,
+**and** `title` — but the Lua callback receives only
+`window_id, app, bundle_id` positionally, so the window title
+is available on the socket stream but not to a Lua handler:
 
 ```json
 {"event": "focus_change",
  "data": {"window_id": 4711, "app": "Ghostty",
+          "bundle_id": "com.mitchellh.ghostty",
           "title": "~/src — zsh"}}
 ```
 
@@ -227,10 +234,12 @@ change, so bars can drop stale icons immediately:
 ```json
 {"event": "window_created",
  "data": {"window_id": 4711, "app": "Ghostty",
-          "space_id": "2", "reason": "new"}}
+          "space_id": "2", "reason": "new",
+          "bundle_id": "com.mitchellh.ghostty"}}
 {"event": "window_destroyed",
  "data": {"window_id": 4711, "app": "Ghostty",
-          "space_id": "2", "reason": "closed"}}
+          "space_id": "2", "reason": "closed",
+          "bundle_id": "com.mitchellh.ghostty"}}
 ```
 
 `window_created` carries the space the window was placed in
@@ -264,7 +273,8 @@ session restore) stay silent:
 ```json
 {"event": "window_moved_to_space",
  "data": {"window_id": 4711, "app": "Spotify",
-          "from_space_id": "1", "to_space_id": "3"}}
+          "from_space_id": "1", "to_space_id": "3",
+          "bundle_id": "com.spotify.client"}}
 ```
 
 `native_space_change` fires when the user switches native

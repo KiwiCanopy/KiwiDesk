@@ -45,12 +45,21 @@ extension KiwiCore {
                 "window_id": .number(Double(id.raw)),
                 "app": .string(window?.appName ?? ""),
                 "title": .string(window?.title ?? ""),
+                "bundle_id": bundleValue(window?.appBundleID),
             ]),
             luaArgs: [
                 .number(Double(id.raw)),
                 .string(window?.appName ?? ""),
+                .string(window?.appBundleID ?? ""),
             ]
         )
+    }
+
+    /// `bundle_id` payload convention, matching `get_state`:
+    /// string in `data` when known, JSON null when not; the
+    /// positional Lua arg uses `""` so the list can't truncate.
+    private func bundleValue(_ id: String?) -> JSONValue {
+        id.map { .string($0) } ?? .null
     }
 
     func emitMonitorChange() {
@@ -82,12 +91,14 @@ extension KiwiCore {
                 "space_id": space.map { .string($0.raw) }
                     ?? .null,
                 "reason": .string(reason.rawValue),
+                "bundle_id": bundleValue(window.appBundleID),
             ]),
             luaArgs: [
                 .number(Double(window.id.raw)),
                 .string(window.appName),
                 .string(space?.raw ?? ""),
                 .string(reason.rawValue),
+                .string(window.appBundleID ?? ""),
             ]
         )
     }
@@ -98,6 +109,7 @@ extension KiwiCore {
     func emitWindowMovedToSpace(
         _ id: WindowID,
         app: String,
+        bundleID: String?,
         from: SpaceID?,
         to: SpaceID
     ) {
@@ -110,12 +122,14 @@ extension KiwiCore {
                     .string($0.raw)
                 } ?? .null,
                 "to_space_id": .string(to.raw),
+                "bundle_id": bundleValue(bundleID),
             ]),
             luaArgs: [
                 .number(Double(id.raw)),
                 .string(app),
                 .string(from?.raw ?? ""),
                 .string(to.raw),
+                .string(bundleID ?? ""),
             ]
         )
     }
@@ -131,6 +145,7 @@ extension KiwiCore {
     func emitWindowDestroyed(
         _ id: WindowID,
         app: String?,
+        bundleID: String?,
         space: SpaceID?,
         reason: WindowGoneReason
     ) {
@@ -142,12 +157,14 @@ extension KiwiCore {
                 "space_id": space.map { .string($0.raw) }
                     ?? .null,
                 "reason": .string(reason.rawValue),
+                "bundle_id": bundleValue(bundleID),
             ]),
             luaArgs: [
                 .number(Double(id.raw)),
                 .string(app ?? ""),
                 .string(space?.raw ?? ""),
                 .string(reason.rawValue),
+                .string(bundleID ?? ""),
             ]
         )
     }
