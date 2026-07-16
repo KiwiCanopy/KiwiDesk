@@ -32,6 +32,24 @@ extension EventLoop {
         }
     }
 
+    /// Complete ownership gate for an already-delivered callback or
+    /// reconcile. Requiring the observer prevents a callback queued
+    /// before detach from recreating state; re-reading policy closes
+    /// the interval before the next workspace lifecycle notification.
+    nonisolated static func ownsObservation(
+        hasObserver: Bool,
+        pid: pid_t,
+        activationPolicy: NSApplication.ActivationPolicy,
+        isIgnored: Bool
+    ) -> Bool {
+        hasObserver
+            && shouldAttach(
+                pid: pid,
+                activationPolicy: activationPolicy,
+                isIgnored: isIgnored
+            )
+    }
+
     /// Standard windows from accessory/menu-bar apps are real
     /// managed windows, but float by default: their utility UI
     /// should never be absorbed into a desktop layout.

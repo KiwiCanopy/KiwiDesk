@@ -24,9 +24,24 @@ extension EventLoop {
         pid: pid_t,
         app: AppRef
     ) {
-        // A callback may already be queued when a reload adds an
-        // app-wide ignore rule. It must not re-enter AX tracking.
-        guard !shouldIgnoreApp(bundleID: app.bundleID) else {
+        // A callback can already be queued when a reload ignores an
+        // app or its policy becomes prohibited. It must not recreate
+        // state after the observer has been detached.
+        let activationPolicy =
+            NSRunningApplication(
+                processIdentifier: pid
+            )?.activationPolicy ?? .prohibited
+        guard
+            Self.ownsObservation(
+                hasObserver: observers[pid] != nil,
+                pid: pid,
+                activationPolicy: activationPolicy,
+                isIgnored: shouldIgnoreApp(
+                    bundleID: app.bundleID
+                )
+            )
+        else {
+            detach(pid: pid, restoreEnhancedUI: true)
             return
         }
         switch note {

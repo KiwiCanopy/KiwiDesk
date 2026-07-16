@@ -2037,8 +2037,8 @@ exist.
 
 Transient macOS input-source menus and switcher overlays are likewise
 ignored, so pressing the Globe key never creates a managed window or
-KiwiDesk focus border. AX proxy windows with no matching WindowServer
-window are ignored by the same policy.
+KiwiDesk focus border. Auxiliary AX proxy windows with no matching
+WindowServer window are ignored by the same policy.
 
 **KiwiDesk's Settings window** is tracked as a floating window, so
 window-list integrations can see it and the top App Bar clamp keeps

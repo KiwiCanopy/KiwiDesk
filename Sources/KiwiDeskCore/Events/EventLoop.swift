@@ -199,8 +199,20 @@ public final class EventLoop {
     /// Safety net for macOS's unreliable AX notifications —
     /// without it, closed windows keep occupying layout slots.
     func reconcile(pid: pid_t, app: AppRef) {
-        guard observers[pid] != nil else { return }
-        guard !shouldIgnoreApp(bundleID: app.bundleID) else {
+        let activationPolicy =
+            NSRunningApplication(
+                processIdentifier: pid
+            )?.activationPolicy ?? .prohibited
+        guard
+            Self.ownsObservation(
+                hasObserver: observers[pid] != nil,
+                pid: pid,
+                activationPolicy: activationPolicy,
+                isIgnored: shouldIgnoreApp(
+                    bundleID: app.bundleID
+                )
+            )
+        else {
             detach(pid: pid, restoreEnhancedUI: true)
             return
         }
@@ -211,9 +223,6 @@ public final class EventLoop {
                 bundleID: app.bundleID
             ) ? FloatDetection.windowLayers(pid: pid) : [:]
         let liveElements = AXHelper.windows(pid: pid)
-        let activationPolicy = NSRunningApplication(
-            processIdentifier: pid
-        )?.activationPolicy
         if activationPolicy == .regular
             || liveElements.contains(where: Self.isStandardWindow)
         {

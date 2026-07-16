@@ -77,6 +77,34 @@ struct SelfWindowExclusionTests {
         )
     }
 
+    @Test("Prohibited transitions and queued callbacks lose ownership")
+    func callbackOwnershipTransition() {
+        #expect(
+            EventLoop.ownsObservation(
+                hasObserver: true,
+                pid: 1,
+                activationPolicy: .regular,
+                isIgnored: false
+            )
+        )
+        #expect(
+            !EventLoop.ownsObservation(
+                hasObserver: true,
+                pid: 1,
+                activationPolicy: .prohibited,
+                isIgnored: false
+            )
+        )
+        #expect(
+            !EventLoop.ownsObservation(
+                hasObserver: false,
+                pid: 1,
+                activationPolicy: .regular,
+                isIgnored: false
+            )
+        )
+    }
+
     @Test("Accessory and own-process windows force floating")
     func forceFloatPolicy() {
         #expect(
