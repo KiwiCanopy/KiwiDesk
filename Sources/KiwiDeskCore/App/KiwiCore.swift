@@ -75,6 +75,15 @@ public final class KiwiCore {
     /// reused). See `handle(_:)`'s `.windowFocused` case.
     var outstandingSelfRaises: Set<WindowID> = []
 
+    /// Resolves the OS foreground app's pid for the focused-command
+    /// preflight (#292). `nil` disables the guard — the default, so
+    /// unit tests exercising focused commands directly are
+    /// unaffected; `start()` installs the real
+    /// `NSWorkspace.frontmostApplication` reader, and guard tests
+    /// inject a stub. When wired, a `nil` *return* means foreground
+    /// ownership is unknown, which fails the command closed.
+    var frontmostPIDProvider: (@MainActor () -> pid_t?)?
+
     /// Pids of apps currently showing a focused ignored panel
     /// (Ghostty's quick terminal). Set when the event loop
     /// filters the panel's own focus report (#21); consumed by

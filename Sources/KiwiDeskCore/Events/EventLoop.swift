@@ -107,39 +107,8 @@ public final class EventLoop {
         ignorePending = []
     }
 
-    /// Last float-detection verdict of a tracked window —
-    /// what `make_auto` returns a window to when the manual
-    /// override is cleared (#164). Nil for untracked windows.
-    public func detectionVerdict(
-        for id: WindowID
-    ) -> Bool? {
-        detectedFloating[id]
-    }
-
-    /// AX element of a tracked window, if still known. Used to
-    /// apply geometry (animations, wake restore) to windows.
-    public func element(for id: WindowID) -> AXUIElement? {
-        for perApp in elements.values {
-            if let element = perApp[id] {
-                return element
-            }
-        }
-        return nil
-    }
-
-    /// Whether the window's app still lists it via AX. False
-    /// for windows on another native macOS Space — raising
-    /// one of those would yank macOS back to that Space.
-    public func isListed(_ id: WindowID) -> Bool {
-        guard
-            let pid = elements.first(
-                where: { $1[id] != nil }
-            )?.key
-        else { return false }
-        return AXHelper.windows(pid: pid).contains {
-            AXHelper.windowID(of: $0) == id
-        }
-    }
+    // Read-only lookups (detectionVerdict, observes, element,
+    // isListed) live in `EventLoop+Queries.swift`.
 
     // MARK: - Window tracking
 

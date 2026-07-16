@@ -6,6 +6,14 @@ import Foundation
 extension KiwiCore {
     /// Loads the config and starts window management.
     public func start() {
+        // Arm the focused-command foreground guard (#292): from now
+        // on, an implicit-focused command fails closed unless the OS
+        // frontmost app is KiwiDesk's focused managed window. Left
+        // nil until here so unit tests are unaffected.
+        frontmostPIDProvider = {
+            NSWorkspace.shared.frontmostApplication?
+                .processIdentifier
+        }
         lastNativeSpace = NativeSpaces.activeSpaceNumber()
         borders.start()
         loadConfig()
