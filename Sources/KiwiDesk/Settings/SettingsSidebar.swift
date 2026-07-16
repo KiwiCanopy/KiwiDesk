@@ -11,6 +11,9 @@ struct SettingsSidebar: View {
     let editingStoredProfile: Bool
     /// Swaps the identity mark to the golden variant on dark.
     @Environment(\.colorScheme) private var colorScheme
+    /// Solidifies the card wash while the window is inactive
+    /// (#297) — per-element fades ride `InactiveDimmed` instead.
+    @Environment(\.controlActiveState) private var activeState
     /// Subscribes the sidebar to live language changes: without
     /// it, section headers and row titles (`L(...)` /
     /// `destination.title`) only refresh when `selection` changes
@@ -31,17 +34,63 @@ struct SettingsSidebar: View {
             }
         }
         .listStyle(.sidebar)
+        // The shell is a plain `HStack`, not a split view (#297),
+        // so the sidebar look is assembled by hand: hide the
+        // list's own backdrop and put the source-list vibrancy
+        // behind the whole column instead.
+        .scrollContentBackground(.hidden)
         .safeAreaInset(edge: .top, spacing: 0) {
             VStack(spacing: 0) {
                 appIdentity
                 SidebarSearchField(text: $query)
             }
         }
-        .navigationSplitViewColumnWidth(
-            min: 176,
-            ideal: 190,
-            max: 240
+        // Fixed, non-resizable column (#297) — matching System
+        // Settings. A closed ~9-row icon+label taxonomy never
+        // needs more/less room, so a resize handle is the same
+        // "bespoke panel" tell we killed the collapse toggle for
+        // (#68). Sized to clear the worst-case *translated* label
+        // ("Erscheinungsbild"); revisit when the 8 languages land
+        // (#95 / #135).
+        .frame(width: 190)
+        // Floating pane, the macOS 26 System Settings look: a
+        // rounded translucent card in near-window-background
+        // gray, carrying a soft shadow, with the traffic lights
+        // inside its top edge (hence the ignored top safe area —
+        // the card runs up under the titlebar strip).
+        .background(cardBackground)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .padding(8)
+    }
+
+    /// The floating card's surface, out of `body` (§5 shallow-
+    /// body guardrail): vibrant material under a window-tone
+    /// wash while active; flat gray while inactive — #F7F7F7,
+    /// sampled straight from System Settings' inactive sidebar
+    /// on macOS 26. Carries the card's drop shadow, so header
+    /// text and tiles in the content subtree can't cast smudge
+    /// shadows of their own.
+    private var cardBackground: some View {
+        ZStack {
+            if activeState == .inactive {
+                inactiveCardColor
+            } else {
+                SidebarMaterial()
+                // Lift the material toward the window tone —
+                // System Settings' pane is lighter than the
+                // raw material. Adaptive, so it brightens
+                // light mode and stays dark in dark.
+                Color(nsColor: .windowBackgroundColor)
+                    .opacity(0.8)
+            }
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .shadow(
+            color: .black.opacity(0.18),
+            radius: 7,
+            y: 2
         )
+        .animation(InactiveDimmed.fade, value: activeState)
     }
 
     @ViewBuilder private var groupedSections: some View {
@@ -110,14 +159,28 @@ struct SettingsSidebar: View {
             Text(L("sidebar.app_name", "KiwiDesk"))
                 .font(.title3.weight(.semibold))
         }
+        .inactiveDimmed()
         .frame(maxWidth: .infinity, alignment: .center)
         .padding(.horizontal, 12)
-        // Pull the mark up toward the traffic lights: the sidebar
-        // otherwise reserves the full empty-toolbar top safe area,
-        // leaving a void below the lights. A negative inset seats
-        // it just under them — tune -6…-16 if the lights clip.
-        .padding(.top, -10)
+        // The card runs up under the titlebar, so the traffic
+        // lights sit inside its top-left corner — the identity
+        // row drops below them.
+        .padding(.top, 34)
         .padding(.bottom, 8)
+    }
+
+    /// The flat inactive-card tone: #F7F7F7 is System
+    /// Settings' exact inactive sidebar gray (sampled); dark
+    /// mode has no sampled twin, so it falls back to the flat
+    /// window background.
+    private var inactiveCardColor: Color {
+        colorScheme == .dark
+            ? Color(nsColor: .windowBackgroundColor)
+            : Color(
+                red: 247 / 255,
+                green: 247 / 255,
+                blue: 247 / 255
+            )
     }
 
     /// The golden dark mark on dark, colour mark on light;
@@ -140,7 +203,12 @@ struct SettingsSidebar: View {
         _ destination: SettingsDestination
     ) -> some View {
         Label {
+            // Single-line insurance (#297): the column is now a
+            // fixed 190pt, so an over-long translated label
+            // truncates on one line instead of wrapping to two —
+            // matching System Settings' single-line rows.
             Text(destination.title)
+                .lineLimit(1)
         } icon: {
             SidebarTile(destination: destination)
         }
@@ -162,5 +230,17 @@ struct SidebarTile: View {
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(.white)
             }
+            // The soft lift System Settings gives its sidebar
+            // icons — kept inside `inactiveDimmed` so the
+            // shadow fades with the tile.
+            .shadow(
+                color: .black.opacity(0.25),
+                radius: 1.5,
+                y: 1
+            )
+            // The colored fill has no notion of window key
+            // state; System Settings' tiles fade, hue kept
+            // (#297).
+            .inactiveDimmed()
     }
 }

@@ -23,7 +23,10 @@ struct SettingsView: View {
                 structuredShell
             }
         }
-        .frame(minWidth: 760, minHeight: 540)
+        // 840, not 760: the floating sidebar card (#297) costs
+        // ~16pt of column width in insets, so the old minimum
+        // squeezed the detail pane (settled by eye).
+        .frame(minWidth: 840, minHeight: 540)
         .onChange(of: model.editingStoredProfile) { _, editing in
             // The selection must never point at a destination
             // the sidebar just hid (#18).
@@ -35,24 +38,36 @@ struct SettingsView: View {
         }
     }
 
-    /// The structured settings shell: a non-collapsible source
-    /// list, and a detail column that carries the full-width
-    /// header bar (section title + profile dropdown + status),
-    /// the scrolling section content, and the save footer. The
-    /// split view's auto collapse toggle is removed (#68 — a
-    /// nine-row taxonomy never needs to hide).
+    /// The structured settings shell: a fixed-width source list
+    /// and a detail column that carries the full-width header
+    /// bar (section title + profile dropdown + status), the
+    /// scrolling section content, and the save footer.
+    ///
+    /// A plain `HStack`, deliberately not `NavigationSplitView`
+    /// (#297): on macOS 26 the split view's divider cannot be
+    /// locked — `navigationSplitViewColumnWidth(min:ideal:max:)`
+    /// is ignored, `NSSplitViewItem` thickness writes are
+    /// reverted by the private controller on the next layout,
+    /// and replacing its delegate crashes. A static column is
+    /// non-resizable and non-collapsible by construction — the
+    /// System Settings behavior #68 wanted when it removed the
+    /// collapse toggle (a nine-row taxonomy never needs to
+    /// hide).
     private var structuredShell: some View {
-        NavigationSplitView {
+        HStack(spacing: 0) {
             SettingsSidebar(
                 selection: $selection,
                 editingStoredProfile: model.editingStoredProfile
             )
-            // Applied to the sidebar column's content (not the
-            // split view) so it actually drops the auto toggle.
-            .toolbar(removing: .sidebarToggle)
-        } detail: {
             chrome { detailPane }
+                .frame(maxWidth: .infinity)
         }
+        // Both columns own the titlebar region themselves: the
+        // sidebar card floats up under the traffic lights (the
+        // System Settings look), the detail header sits flush at
+        // the top. Ignored here at the shell — a child's own
+        // `ignoresSafeArea` cannot reach past the stack cell.
+        .ignoresSafeArea(.container, edges: .top)
         .environment(\.settingsNavigate) { destination in
             // Third #18 enforcement point beside the sidebar's
             // offer filter and the onChange repair above: links

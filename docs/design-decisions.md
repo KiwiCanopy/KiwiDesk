@@ -239,6 +239,34 @@ thing?". The membership is unchanged from the earlier "This
 Profile" / "Whole App" split; only the labels are topical.
 (#68 §3.1)
 
+**The sidebar is a fixed-width, floating, non-resizable
+column.** (#297) A closed ~9-row icon+label taxonomy never
+needs more or less room, so a draggable divider is the same
+"bespoke panel" tell that got the collapse toggle removed
+(#68) — and a collapsed sidebar had no affordance to reopen
+it. System Settings, the GUI north star, fixes its sidebar
+too. Mechanically the shell composes the two columns with a
+plain `HStack`, not `NavigationSplitView`: on macOS 26 the
+split view's divider cannot be locked by any supported means
+(the column-width modifier is ignored, `NSSplitViewItem`
+thickness writes are reverted by the private controller,
+delegate interception crashes), so the static column is fixed
+by construction rather than by fighting the framework —
+revisit if a later macOS/SwiftUI exposes a supported
+fixed-width sidebar. The
+column renders as the macOS 26 floating pane: a rounded,
+shadowed card inset from the window edges with the traffic
+lights inside its top-left, in near-window-background gray
+(settled by eye against System Settings), with no divider
+line, and softly-shadowed icon tiles. When the window resigns
+key the card goes flat #F7F7F7 (sampled from System Settings'
+inactive sidebar; dark mode falls back to the flat window
+background) and the hand-built chrome above the list
+(identity, search, icon tiles) fades uniformly — hue kept,
+never desaturated (`InactiveDimmed`), keyed to fully-inactive
+only so the shared color panel taking key does not dim the
+sidebar.
+
 **Live-apply is the rare exception, earned per control — not
 per tab.** (Settled 2026-07-10, full-Settings audit; #123.) A
 control stays staged behind Save unless it clears one of two

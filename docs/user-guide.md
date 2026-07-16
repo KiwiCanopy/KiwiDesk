@@ -21,6 +21,9 @@ shows a two-group sidebar on the left:
 - **System** — global settings that apply everywhere (Profiles,
   Shortcuts, App Rules, General).
 
+The sidebar is a fixed-width column, like System Settings — it
+cannot be resized or collapsed.
+
 At the top you'll see the app name and a banner showing which
 profile is loaded and letting you edit a saved profile without
 switching to it. At the bottom, a stable three-slot footer holds

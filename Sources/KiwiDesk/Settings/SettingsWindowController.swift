@@ -47,7 +47,9 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
             contentRect: NSRect(
                 x: 0,
                 y: 0,
-                width: 820,
+                // Tracks the shell's 840pt minimum (#297) with
+                // a little slack on first launch.
+                width: 860,
                 height: 620
             ),
             styleMask: [
@@ -80,6 +82,17 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         window.delegate = self
         window.center()
         window.setFrameAutosaveName("KiwiDeskSettings")
+        // A frame saved by a pre-#297 build can be narrower
+        // than the shell's new 840pt minimum; min-size only
+        // gates user resizing, not the restore, so clamp once.
+        if window.frame.width < 840 {
+            let content = window.contentRect(
+                forFrameRect: window.frame
+            )
+            window.setContentSize(
+                NSSize(width: 860, height: content.height)
+            )
+        }
         self.window = window
 
         window.makeKeyAndOrderFront(nil)

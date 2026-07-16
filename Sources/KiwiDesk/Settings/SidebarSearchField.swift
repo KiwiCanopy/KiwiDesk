@@ -13,16 +13,17 @@ struct SidebarSearchField: View {
     @Binding var text: String
 
     var body: some View {
-        HStack(spacing: 5) {
+        HStack(spacing: 6) {
             Image(systemName: "magnifyingglass")
-                .font(.system(size: 11, weight: .medium))
+                .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(.secondary)
             field
             if !text.isEmpty { clearButton }
         }
-        .padding(.horizontal, 6)
-        .padding(.vertical, 3)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 5)
         .background(fieldShape)
+        .inactiveDimmed()
         .padding(.horizontal, 10)
         .padding(.bottom, 8)
     }
@@ -52,7 +53,7 @@ struct SidebarSearchField: View {
             text = ""
         } label: {
             Image(systemName: "xmark.circle.fill")
-                .font(.system(size: 11))
+                .font(.system(size: 12))
                 .foregroundStyle(.secondary)
         }
         .buttonStyle(.plain)
@@ -61,8 +62,11 @@ struct SidebarSearchField: View {
         )
     }
 
+    /// A full pill: `Capsule` derives its radius from the
+    /// field's height, so a future type-size change keeps the
+    /// shape right for free (settled by eye against radius 9).
     private var fieldShape: some View {
-        RoundedRectangle(cornerRadius: 6)
+        Capsule()
             .fill(.quaternary)
     }
 }
