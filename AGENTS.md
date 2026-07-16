@@ -345,20 +345,25 @@ Keep this list updated whenever a recurring mistake is found.
   `TilingSettings` so it rides the config split for free (see
   `gap.override`). Beyond tiling, a profile may carry a **sparse
   override of a global _behavior_ setting** — one that shapes how
-  the workspace behaves *while the profile is active* (keybindings
-  today, via `Profile.modes` / `KeyModeOverride`; app rules
-  planned, #109). It may **never** override a setting that *routes
+  the workspace behaves *while the profile is active*: keybindings
+  (`Profile.modes`), app→space rules (`Profile.appRules`), float
+  rules (`Profile.floatRules`), and ignore rules
+  (`Profile.ignoreRules`). Global bases come from the active config
+  owner (`gui.json` or `init.lua`); the profile layer resolves over
+  either owner. Window-rule families resolve independently, with
+  effective ignore remaining the hard management gate. It may
+  **never** override a setting that *routes
   or selects* the profile itself (`profile_bindings`, the
   native-Space→profile map) or that lives outside config ownership
   (the GUI language pref, which persists in `UserDefaults`) — a
   profile that could rewrite what selects it is a self-reference
   hazard. Every override is the base overlaid with a sparse diff
   (absent = inherit; an explicit tombstone expresses removal),
-  never a second home for the setting. Add each one deliberately —
-  templated on `KeyModeOverride`'s seam and guarded by a round-trip
-  + resolve parity test — NOT via a generic override primitive
-  until a real second flat-map client exists (one client removes no
-  drift; see `.claude/rules/parity-tests.md`).
+  never a second home for the setting. Add each one deliberately,
+  guarded by a round-trip + resolve parity test. App→space uses a
+  value-map override; float and ignore share the generic list-rule
+  primitive because two real clients now remove drift (see
+  `.claude/rules/parity-tests.md`).
   `ProfileManager` mutators are `internal` by
   design — mutate through a `KiwiCore` facade, never re-publicize
   them. `read(name:)` is the public load-for-edit primitive

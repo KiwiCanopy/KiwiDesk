@@ -22,6 +22,10 @@ struct AppRulesSection: View {
         model.profileEditingBaseAppRules
     }
 
+    private var overrideFloatBase: [String]? {
+        model.profileEditingBaseFloatRules
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
@@ -37,6 +41,7 @@ struct AppRulesSection: View {
                             model: model,
                             app: app,
                             overrideBase: overrideBase,
+                            overrideFloatBase: overrideFloatBase,
                             isDraft: draftApps.contains(app),
                             onDelete: { delete(app) }
                         )
@@ -68,16 +73,14 @@ struct AppRulesSection: View {
         if overrideBase != nil {
             return L(
                 "app_rules.override.caption",
-                "Space assignments made here apply to this "
-                    + "profile only. Dimmed rows are inherited "
+                "Space and float rules made here apply to this "
+                    + "profile only. Dimmed facets are inherited "
                     + "from the app-wide base rules and stay "
-                    + "in sync with them; picking another "
-                    + "space overrides the rule for this "
-                    + "profile, and deleting a row un-pins "
-                    + "the app here even when the base pins "
-                    + "it. To edit the base rules themselves — "
-                    + "or the Float column, which is always "
-                    + "app-wide — switch back to the currently "
+                    + "in sync with them; changing a facet "
+                    + "overrides it for this profile, and "
+                    + "deleting a row removes inherited rules "
+                    + "here. To edit the base rules themselves, "
+                    + "switch back to the currently "
                     + "loaded profile in the header's picker."
             )
         }
@@ -104,6 +107,11 @@ struct AppRulesSection: View {
         }
         if let base = overrideBase {
             set.formUnion(base.keys)
+        }
+        if let base = overrideFloatBase {
+            for rule in base {
+                set.insert(FloatFacet.appSegment(of: rule))
+            }
         }
         set.formUnion(draftApps)
         return set.sorted()
@@ -139,14 +147,8 @@ struct AppRulesSection: View {
 
     private func delete(_ app: String) {
         model.config.appRules[app] = nil
-        // Float rules are app-wide (#109): a stored-profile
-        // edit must never touch them — the save path only
-        // writes the profile JSON, so the edit would either
-        // vanish silently or, worse, read as a profile change.
-        if overrideBase == nil {
-            model.config.floatRules.removeAll {
-                FloatFacet.appSegment(of: $0) == app
-            }
+        model.config.floatRules.removeAll {
+            FloatFacet.appSegment(of: $0) == app
         }
         draftApps.removeAll { $0 == app }
     }
@@ -196,5 +198,9 @@ enum FloatFacet: Equatable {
             else { return nil }
             return String(parts[1])
         }
+    }
+
+    static func rules(_ rules: [String], app: String) -> [String] {
+        rules.filter { appSegment(of: $0) == app }
     }
 }

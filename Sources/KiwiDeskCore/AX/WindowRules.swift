@@ -21,6 +21,15 @@ public struct FloatRules: Sendable, Equatable {
         }
     }
 
+    /// Canonical identity used by profile sparse diffs: bundle ids
+    /// compare case-insensitively, while title fragments preserve
+    /// their current case-sensitive matching semantics.
+    public static func normalizedRule(_ rule: String) -> String {
+        let parts = rule.split(separator: ":", maxSplits: 1)
+        guard parts.count == 2 else { return rule.lowercased() }
+        return String(parts[0]).lowercased() + ":" + String(parts[1])
+    }
+
     /// Rules as normalized for matching and config seeding.
     public var rawRules: [String] {
         rules.map { rule in
@@ -65,6 +74,11 @@ public struct IgnoreRules: Sendable, Equatable {
 
     public init(_ bundleIDs: [String] = []) {
         self.bundleIDs = Set(bundleIDs.map { $0.lowercased() })
+    }
+
+    /// Canonical identity shared by matching and profile diffs.
+    public static func normalizedRule(_ rule: String) -> String {
+        rule.lowercased()
     }
 
     /// Rules normalized for matching and config seeding.

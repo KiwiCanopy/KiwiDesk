@@ -9,11 +9,10 @@ struct AppRuleRow: View {
     @ObservedObject var model: SettingsModel
     let app: String
     /// The base rules while editing a stored profile (#109):
-    /// non-nil switches the row into override mode — the Space
-    /// facet edits this profile's sparse override (inherited
-    /// rows dimmed, like the Shortcuts tab), the Float facet
-    /// is app-wide and renders disabled (grey out, not hide).
+    /// non-nil switches the row into override mode. Each facet
+    /// independently dims while it still matches its base.
     let overrideBase: [String: SpaceID]?
+    let overrideFloatBase: [String]?
     /// Whether the row is a session draft (added this session,
     /// no stored facet yet) — deleting one always works, it
     /// removes the draft itself.
@@ -34,24 +33,29 @@ struct AppRuleRow: View {
                     editingTitles: $editingTitles
                 )
                 .padding(.leading, 90)
-                // App-wide, like the facet menu above.
-                .disabled(overrideBase != nil)
+                .opacity(floatInherited ? 0.55 : 1)
             }
         }
-        .opacity(inherited ? 0.55 : 1)
     }
 
-    /// Whether the row is inherited unchanged from the base —
-    /// a base pin exists AND the Space facet matches it. Rows
-    /// with no pin on either side (drafts, float-only apps)
-    /// inherit nothing, so they render at full strength.
-    /// Always false during live editing, mirroring
-    /// `KeyBinding.isInherited(from:)`.
-    private var inherited: Bool {
-        guard let base = overrideBase,
-            let pin = base[app]
-        else { return false }
-        return model.config.appRules[app] == pin
+    private var spaceInherited: Bool {
+        guard let base = overrideBase, !isDraft else {
+            return false
+        }
+        return model.config.appRules[app] == base[app]
+    }
+
+    private var floatInherited: Bool {
+        guard let base = overrideFloatBase, !isDraft else {
+            return false
+        }
+        return Set(FloatFacet.rules(base, app: app))
+            == Set(
+                FloatFacet.rules(
+                    model.config.floatRules,
+                    app: app
+                )
+            )
     }
 
     // MARK: - Header
@@ -68,15 +72,10 @@ struct AppRuleRow: View {
                 Image(systemName: "trash")
             }
             .buttonStyle(.borderless)
-            // Override mode can only clear the Space facet: a
-            // row whose facet is already Automatic (float-only
-            // or an un-pinned base app) has nothing to delete —
-            // disable instead of offering a no-op (grey out,
-            // not hide). A session draft stays deletable:
-            // deleting it removes the draft row itself.
             .disabled(
                 overrideBase != nil
                     && model.config.appRules[app] == nil
+                    && floatFacet == .never
                     && !isDraft
             )
             .help(
@@ -87,8 +86,8 @@ struct AppRuleRow: View {
                     )
                     : L(
                         "app_rules.remove_override.help",
-                        "Un-pin this app in this profile "
-                            + "(float rules stay app-wide)"
+                        "Remove this profile's effective space "
+                            + "and float rules for this app"
                     )
             )
         }
@@ -132,11 +131,8 @@ struct AppRuleRow: View {
                         alignment: .leading
                     )
             }
+            .opacity(spaceInherited ? 0.55 : 1)
             HStack(spacing: 6) {
-                // The `?` sits outside the disabled scope below,
-                // so the "what does floating do" hint stays
-                // readable even in override mode where the picker
-                // is greyed (#109 app-wide).
                 HStack(spacing: 4) {
                     Text(L("app_rules.float", "Float"))
                         .foregroundStyle(.secondary)
@@ -150,21 +146,8 @@ struct AppRuleRow: View {
                         width: SettingsMetrics.facetControlColumn,
                         alignment: .leading
                     )
-                    // Float rules have no per-profile tier
-                    // (#109): grey out, never hide (the #171
-                    // convention).
-                    .disabled(overrideBase != nil)
-                    .help(
-                        overrideBase == nil
-                            ? ""
-                            : L(
-                                "app_rules.float.app_wide.help",
-                                "Float rules are app-wide — edit "
-                                    + "them while editing the live "
-                                    + "configuration."
-                            )
-                    )
             }
+            .opacity(floatInherited ? 0.55 : 1)
             Spacer()
         }
         .font(.callout)

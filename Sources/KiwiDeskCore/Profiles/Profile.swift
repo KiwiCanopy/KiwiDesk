@@ -99,10 +99,14 @@ public struct Profile: Codable, Sendable, Equatable {
     /// it shadows by mode name then combo (O4 soft).
     public var modes: KeyModeOverride?
     /// Per-profile sparse app→space rule override (#109). nil
-    /// inherits the base `app_rules` (gui.json) entirely;
+    /// inherits the global `app_rules` base entirely;
     /// present, it shadows per app — with a null tombstone to
     /// un-pin an app the base pins.
     public var appRules: AppRuleOverride?
+    /// Sparse additions/removals over the global `float_rules`.
+    public var floatRules: RuleListOverride?
+    /// Hidden sparse additions/removals over global `ignore_rules`.
+    public var ignoreRules: RuleListOverride?
 
     /// Derived from the sets — never stored separately.
     public var monitorCount: Int {
@@ -154,6 +158,8 @@ public struct Profile: Codable, Sendable, Equatable {
         case savedAt = "saved_at"
         case modes
         case appRules = "app_rules"
+        case floatRules = "float_rules"
+        case ignoreRules = "ignore_rules"
     }
 
     public init(
@@ -167,7 +173,9 @@ public struct Profile: Codable, Sendable, Equatable {
         settings: TilingSettings,
         savedAt: Date = .now,
         modes: KeyModeOverride? = nil,
-        appRules: AppRuleOverride? = nil
+        appRules: AppRuleOverride? = nil,
+        floatRules: RuleListOverride? = nil,
+        ignoreRules: RuleListOverride? = nil
     ) {
         self.name = name
         self.monitorSets = Self.sanitized(monitorSets)
@@ -180,6 +188,8 @@ public struct Profile: Codable, Sendable, Equatable {
         self.savedAt = savedAt
         self.modes = modes
         self.appRules = appRules
+        self.floatRules = floatRules
+        self.ignoreRules = ignoreRules
     }
 
     /// Lenient where safe (missing flags default), strict where
@@ -247,6 +257,14 @@ public struct Profile: Codable, Sendable, Equatable {
         appRules = try container.decodeIfPresent(
             AppRuleOverride.self,
             forKey: .appRules
+        )
+        floatRules = try container.decodeIfPresent(
+            RuleListOverride.self,
+            forKey: .floatRules
+        )
+        ignoreRules = try container.decodeIfPresent(
+            RuleListOverride.self,
+            forKey: .ignoreRules
         )
     }
 

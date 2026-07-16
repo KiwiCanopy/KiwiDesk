@@ -115,11 +115,11 @@ struct ProfileAppRulesApplyTests {
         #expect(core.state.appRules["music"] == nil)
     }
 
-    // MARK: - O7 all-or-nothing ownership
+    // MARK: - Lua-owned global base
 
-    @Test("Not GUI-managed: apply(profile:) leaves Lua rules")
-    func nonGuiManagedKeepsLuaRules() throws {
-        // No gui.json: Lua owns the rules entirely.
+    @Test("Not GUI-managed: profile resolves onto Lua base")
+    func nonGuiManagedResolvesLuaRules() throws {
+        // No gui.json: Lua owns the global base.
         let core = KiwiCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
@@ -146,10 +146,7 @@ struct ProfileAppRulesApplyTests {
 
         core.execute("load_profile", args: [.string("Work")])
 
-        // The Lua-declared rule survives — the profile's
-        // override is structured-config vocabulary and must
-        // not touch Lua-owned rules (O7).
-        #expect(core.state.appRules["mail"] == SpaceID(2))
-        #expect(core.state.appRules["safari"] == nil)
+        #expect(core.state.appRules["mail"] == SpaceID(3))
+        #expect(core.state.appRules["safari"] == SpaceID(4))
     }
 }

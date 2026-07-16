@@ -89,12 +89,20 @@ extension SettingsModel {
     /// the base — drives the "overrides base app rules"
     /// indicator (#109), the shortcuts twin above.
     var editedProfileOverridesAppRules: Bool {
-        guard let base = profileEditingBaseAppRules else {
+        guard let appBase = profileEditingBaseAppRules,
+            let floatBase = profileEditingBaseFloatRules
+        else {
             return false
         }
-        return AppRuleOverride.diff(
-            base: base,
-            edited: config.appRules
-        ) != nil
+        return
+            AppRuleOverride.diff(
+                base: appBase,
+                edited: config.appRules
+            ) != nil
+            || RuleListOverride.diff(
+                base: floatBase,
+                edited: config.floatRules,
+                normalizing: FloatRules.normalizedRule
+            ) != nil
     }
 }

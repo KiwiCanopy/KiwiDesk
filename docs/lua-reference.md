@@ -2031,6 +2031,11 @@ remain accessory processes are tracked but forced floating. If an app
 promotes itself to a regular process, its standard windows follow the
 normal float-or-tile rules.
 
+This table is the global base. A profile may add rules or remove
+inherited ones with its sparse `float_rules` object (`true` adds,
+`null` removes). The same profile diff resolves whether the base is
+owned by `gui.json` or this hand-written `init.lua`.
+
 **Ghostty's quick terminal** is not managed at all — no space
 assignment, no window events. KiwiDesk simply pretends it does not
 exist.
@@ -2065,9 +2070,12 @@ or apps that misbehave when AX-tracked. Use `float_rules` when an app
 should remain tracked and visible but never tile.
 
 Matching is case-insensitive and app-wide; title fragments are not
-supported. The list is global, like `float_rules`. In `gui.json` it
-lives at the root as `ignore_rules`. There is deliberately no
-Settings control and no session-only `make_unmanaged` command.
+supported. This table is the global base. In `gui.json` it lives at
+the root as `ignore_rules`. A profile may add rules or tombstone
+inherited ones through its sparse `ignore_rules` object. There is
+deliberately no Settings control and no session-only
+`make_unmanaged` command; GUI profile saves preserve that hidden
+override unchanged.
 
 **Example:**
 
@@ -2103,14 +2111,14 @@ app_rules = {
 }
 ```
 
-When GUI-managed, the base rules live in `gui.json` and a stored
-profile may carry a **sparse per-app override** (`app_rules` in
+The global base lives in `gui.json` when GUI-managed, or in this
+`init.lua` otherwise. A stored profile may carry a **sparse per-app
+override** (`app_rules` in
 the profile JSON): a listed app takes the profile's space while
 that profile is active, a `null` entry un-pins an app the base
 pins, and unlisted apps inherit the base rule. Edit it from the
 Settings app's App Rules section while editing a stored profile.
-Rules declared in a hand-written `init.lua` are never overridden
-— Lua ownership is all-or-nothing.
+Profile overrides resolve the same way over a Lua-owned base.
 
 ### Finding a bundle identifier
 
@@ -2675,14 +2683,12 @@ KiwiDesk.set_default_profile("Developer Rig")
 **Profiles are the single source of truth for tiling.** A profile
 owns the gaps, per-space layout modes, layout parameters,
 animations, mouse-resize behavior, and the space→monitor
-assignments — plus, optionally, **sparse keybinding and
-app-rule overrides** that shadow the base only while the profile
-is active (the app-rule one can also *un-pin* a base rule via a
-`null` entry). The global, shared declarations — keybindings,
-`app_rules`, `float_rules`, `ignore_rules`, and profile bindings —
-live in the app's own `gui.json` when GUI-managed, or in your
-hand-written `init.lua` otherwise; float rules, ignore rules, and
-profile bindings have no per-profile tier.
+assignments — plus, optionally, **sparse keybinding and window-rule
+overrides** that shadow the base only while the profile is active.
+The global declarations live in `gui.json` when GUI-managed, or in
+your hand-written `init.lua` otherwise. `app_rules`, `float_rules`,
+and `ignore_rules` all have a per-profile tier; profile bindings do
+not, because they select the profile itself.
 
 ### set_fallback_space
 

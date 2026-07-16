@@ -155,6 +155,8 @@ final class SettingsModel: ObservableObject {
     /// baseline (#109), same lifecycle as
     /// `profileEditingBaseModes`. nil during live editing.
     var profileEditingBaseAppRules: [String: SpaceID]?
+    /// Global float rules used to resolve and diff a stored profile.
+    var profileEditingBaseFloatRules: [String]?
 
     init(core: KiwiCore) {
         self.core = core

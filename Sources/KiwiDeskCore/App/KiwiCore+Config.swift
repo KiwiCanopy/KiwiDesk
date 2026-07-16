@@ -97,6 +97,11 @@ extension KiwiCore {
         } else {
             applyConfigGlobals(from: fresh)
         }
+        // Lua declarations are only the global base. Put the
+        // active profile's tiling and sparse behavior overrides
+        // back on top before reconciling live windows, so a
+        // reload never exposes a transient base-only verdict.
+        reapplyActiveProfileState()
         // The float/ignore rules just changed hands: re-sync
         // every app so live classification reflects the NEW
         // rules.
@@ -113,10 +118,6 @@ extension KiwiCore {
         // (reload_config's Task, see KiwiCore+TypoGuard).
         eventLoop.reconcileAll()
         retile()
-        // Lua-declared tiling is only the base state: the
-        // active profile (or transient Standard) owns tiling
-        // and goes back on top after a reload (#36).
-        reapplyActiveProfileState()
         // The current native space may carry a binding that
         // the config just (re)declared.
         applyNativeSpaceBinding()
@@ -147,6 +148,9 @@ extension KiwiCore {
         state.appRules = [:]
         eventLoop.floatRules = FloatRules([])
         eventLoop.ignoreRules = IgnoreRules([])
+        globalAppRuleBase = [:]
+        globalFloatRuleBase = []
+        globalIgnoreRuleBase = []
         tiler.settings.gapsOverride = [:]
         tiler.settings.placementOverride = [:]
         tiler.settings.spaceIcons = [:]
@@ -181,6 +185,11 @@ extension KiwiCore {
             }
             state.appRules = mapped
         }
+        captureGlobalWindowRuleBase(
+            appRules: state.appRules,
+            floatRules: eventLoop.floatRules.rawRules,
+            ignoreRules: eventLoop.ignoreRules.rawRules
+        )
     }
 
     /// Writes a starter init.lua on first launch.

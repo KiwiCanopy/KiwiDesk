@@ -184,6 +184,11 @@ in `gui.json`, then run `KiwiDesk reload_config`. Matching apps
 disappear from KiwiDesk state and emit no window events. Removing an
 id and reloading makes its windows manageable again.
 
+Those declarations are the global base. A profile JSON may carry a
+sparse `ignore_rules` object: `true` adds an id and `null` removes an
+inherited one while that profile is active. `load_profile` applies the
+resolved rules immediately over either a Lua- or GUI-owned base.
+
 ## Event Stream
 
 External tools subscribe over the same socket:

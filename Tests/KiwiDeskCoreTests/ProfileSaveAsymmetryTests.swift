@@ -8,13 +8,13 @@ import Testing
 /// reachable through both save doors, and they touch disjoint
 /// field sets *by design*: the Live-adopt save
 /// (`persistProfile` / `buildProfile`) adopts only tiling and
-/// MUST preserve the profile's sparse `modes` / `appRules`
+/// MUST preserve the profile's sparse behavior overrides
 /// overrides (Live editing changes the global base, not the
 /// diff), while the override-row save (`overwriteProfile`)
 /// rewrites those diffs — that half is covered by
 /// `ProfileModesEditTests` / `ProfileAppRulesEditTests`. A
 /// future edit that made the adopt path also write
-/// `modes`/`appRules` would collapse the sparse diff into an
+/// those overrides would collapse the sparse diff into an
 /// absolute and silently break overrides; these fail red first.
 @Suite("Profile save-path asymmetry (#209)", .serialized)
 @MainActor
@@ -64,7 +64,9 @@ struct ProfileSaveAsymmetryTests {
     private func saveWork(
         _ core: KiwiCore,
         modes: KeyModeOverride? = nil,
-        appRules: AppRuleOverride? = nil
+        appRules: AppRuleOverride? = nil,
+        floatRules: RuleListOverride? = nil,
+        ignoreRules: RuleListOverride? = nil
     ) throws {
         try core.profiles.save(
             Profile(
@@ -75,7 +77,9 @@ struct ProfileSaveAsymmetryTests {
                 spaceModes: [:],
                 settings: TilingSettings(),
                 modes: modes,
-                appRules: appRules
+                appRules: appRules,
+                floatRules: floatRules,
+                ignoreRules: ignoreRules
             )
         )
     }
@@ -107,11 +111,36 @@ struct ProfileSaveAsymmetryTests {
         #expect(saved.appRules == rules)
     }
 
+    @Test("Live-adopt preserves float and ignore overrides")
+    func liveAdoptPreservesListRules() throws {
+        let core = makeCore()
+        attachDisplay(core)
+        let floats = RuleListOverride(
+            rules: ["Calculator": true]
+        )
+        let ignores = RuleListOverride(
+            rules: ["Terminal": nil]
+        )
+        try saveWork(
+            core,
+            floatRules: floats,
+            ignoreRules: ignores
+        )
+
+        try core.persistProfile(named: "Work")
+
+        let saved = try core.profiles.read(name: "Work")
+        #expect(saved.floatRules == floats)
+        #expect(saved.ignoreRules == ignores)
+    }
+
     @Test("buildProfile never fabricates the override diffs")
     func buildProfileHasNoDiffs() {
         let core = makeCore()
         let built = core.buildProfile(name: "Work")
         #expect(built.modes == nil)
         #expect(built.appRules == nil)
+        #expect(built.floatRules == nil)
+        #expect(built.ignoreRules == nil)
     }
 }

@@ -306,21 +306,22 @@ layers of the sparse-override model, not the same data twice:
 - **Live Save** (`updateActiveProfile` → `persistProfile` →
   `buildProfile`) adopts the live **tiling** state (`spaces`,
   `spaceModes`, `mainSpaces`, `fallbackSpace`, `settings`) and
-  **deliberately preserves** the profile's stored `modes` /
-  `appRules` — those are sparse *diffs* against the global base,
-  and Live editing changes the base (`gui.json`), never the
-  diff.
+  **deliberately preserves** the profile's stored `modes`,
+  `appRules`, `floatRules`, and `ignoreRules` — those are sparse
+  *diffs* against the global base, and Live editing changes the
+  base (`gui.json` or `init.lua`), never the diff.
 - **Override-row Save** (`saveEditedProfile` →
   `overwriteProfile` → `applyProfileEdits`) writes the profile's
-  sparse `modes` / `appRules` **diffs** (against `baseKeyModes()`
-  / `baseAppRules()`) plus its tiling — this is the surface that
-  edits the diff.
+  sparse behavior **diffs** (against the matching global bases)
+  plus its tiling — this is the surface that edits the diff.
+  Ignore rules have no GUI control yet, so that hidden diff is
+  preserved verbatim rather than reconstructed from resolved state.
 
 So "Live leaves `profile.modes` frozen while the row rewrites
 it" is the model working, not divergence: one door edits the
 base, the other edits the per-profile diff over it. The trap to
 avoid is "fixing" `buildProfile`/`persistProfile` to also adopt
-`modes`/`appRules` — that would collapse the diff into an
+the behavior overrides — that would collapse the diff into an
 absolute and silently break the sparse override. Pinned by
 `ProfileSaveAsymmetryTests` so a future edit that erases the
 asymmetry fails red.
@@ -460,12 +461,14 @@ interaction model with zero extra capability. (#7)
 ones.** A profile owns tiling, and may also carry a sparse
 override of a global setting that shapes how the workspace
 *behaves while the profile is active* — keybindings
-(`Profile.modes`) and app→space rules (`Profile.appRules`,
-#109; the first tier with a tombstone, since un-pinning a base
-rule is a meaningful per-profile intent — float rules stay
-global for now; ignore rules join them as a global app policy,
-and their per-profile story is a separate set-diff design). It
-may never
+(`Profile.modes`) and the three window-rule families:
+app→space (`Profile.appRules`), float (`Profile.floatRules`),
+and ignore (`Profile.ignoreRules`). The global base lives in
+the active config owner (`gui.json` or hand-written `init.lua`).
+Each profile stores only additions and explicit tombstones;
+families resolve independently, then effective ignore remains
+the hard management gate. Thus an ignore tombstone exposes an
+app to its independently resolved app/float rules. It may never
 override a setting that *selects or routes* the profile
 itself: the native-Space→profile bindings decide *which*
 profile loads, so a profile owning part of that map would be
@@ -475,10 +478,9 @@ reason — it lives in `UserDefaults`, outside config ownership
 entirely, and must never touch a sidecar. Every override is
 the base overlaid with a sparse diff (absent inherits; a
 tombstone removes), never a second home for the setting. Each
-new one is added deliberately and parity-tested, templated on
-the keybinding override's seam — not folded into a generic
-primitive, which stays unjustified until a real second
-flat-map client exists (one client removes no duplication).
+new one is added deliberately and parity-tested. App→space uses
+its value-map override; float and ignore share a list-set sparse
+primitive now that there are two real clients.
 
 ## Icons
 

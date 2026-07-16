@@ -33,12 +33,12 @@ extension KiwiCore {
     /// so live state, `current`/`dirty`, `gui.json`, and
     /// `init.lua` stay untouched. The copy inherits the
     /// source's monitor sets (including other-hardware ones)
-    /// and its sparse keybinding and app-rule overrides
+    /// and its sparse keybinding and window-rule overrides
     /// re-diffed with the edits; the count-default flag is NOT
     /// copied (two defaults per count would be ambiguous).
     /// Built on `profiles.read` — deliberately NOT
     /// `buildProfile`, which snapshots live tiling and would
-    /// drop `modes` and `appRules`. Returns the name actually
+    /// drop its behavior overrides. Returns the name actually
     /// used (`_1`, `_2`, … when `requested` is taken).
     @discardableResult
     public func copyProfile(
@@ -93,8 +93,8 @@ extension KiwiCore {
         profile.mainSpaces = config.mainSpaces.sorted {
             $0.raw < $1.raw
         }
-        // Per-profile keybinding and app-rule overrides (#55
-        // phase 7, #109): the edited modes/rules are the
+        // Per-profile keybinding and window-rule overrides: the
+        // edited modes/rules are the
         // RESOLVED sets (seeded by `overlayProfileState`);
         // store only the sparse diffs against the SAME base
         // the seed resolved onto (`baseKeyModes()` /
@@ -104,13 +104,14 @@ extension KiwiCore {
         // exists but fails to decode gives no trustworthy
         // base — keep the stored overrides untouched rather
         // than capturing the whole resolved sets.
-        let sidecar = guiConfigStore.load()
-        if guiConfigStore.exists, sidecar == nil {
+        let guiOwned = isGuiManaged
+        let sidecar = guiOwned ? guiConfigStore.load() : nil
+        if guiOwned, guiConfigStore.exists, sidecar == nil {
             // `profile.name` is the SOURCE here even on the
             // copy path (rename happens after the transform).
             onLog(
                 "profiles: gui.json unreadable — keeping the "
-                    + "stored keybinding and app-rule "
+                    + "stored behavior "
                     + "overrides of '\(profile.name)' unchanged"
             )
         } else {
@@ -120,9 +121,17 @@ extension KiwiCore {
                 edited: config.modes
             )
             profile.appRules = AppRuleOverride.diff(
-                base: base.appRules,
+                base: sidecar?.appRules ?? globalAppRuleBase,
                 edited: config.appRules
             )
+            profile.floatRules = RuleListOverride.diff(
+                base: sidecar?.floatRules ?? globalFloatRuleBase,
+                edited: config.floatRules,
+                normalizing: FloatRules.normalizedRule
+            )
+            // `ignoreRules` is deliberately untouched: the GUI has
+            // no ignore editor, so even an inert hidden tombstone must
+            // survive overwrite/copy until an external edit removes it.
         }
         let live = state.workspaces.allDisplays
             .map(\.fingerprint)
