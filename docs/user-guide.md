@@ -546,6 +546,15 @@ windows. Below it:
 - **Corners**: **Rounded** matches your windows' real corner
   radius; **Square** draws sharp corners — seamless on windows that
   are already square, an intentional squared frame on rounded ones.
+- **Remaining gap · Adjust gaps for border**: a one-shot action
+  that rewrites the global outer and inner gaps from the border's
+  true reach, so rings never touch a neighbouring window, leaving
+  the **Remaining gap** (0–100 pt, default 0) of extra whitespace
+  past the reach. Inner gaps account for both borders when
+  unfocused borders are shown. The action can grow *or* shrink
+  gaps, and it normalizes asymmetric gaps. The field is an action
+  parameter — the resulting gaps persist in the profile, the field
+  itself resets. (Lua: `border.fit_gaps(remaining)`.)
 
 Launcher and panel overlays (Spotlight, Raycast, Alfred) never get
 a ring, even while you type into them — only genuine windows do.

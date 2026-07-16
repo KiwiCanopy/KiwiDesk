@@ -1907,24 +1907,32 @@ border.set_corner_style("rounded")
 
 ### border.fit_gaps
 
-**Expects:** no arguments.
+**Expects:** an optional remaining gap in whole points, 0–100
+(default 0).
 
 **Does:** sizes the global layout gaps so borders never touch a
-neighbour — the border's true outward reach at the screen edge and
-between windows, doubled between windows when `unfocused_enabled`
-is on (both neighbours are ringed). The reach depends on the
-corner style (a square border tucks inward and reaches far less
-than its width). A one-shot convenience that writes `gap.global`;
-the layout math itself stays free of any border coupling, so this
-never runs automatically. The GUI's "Fit gaps to border" button
-calls the same logic.
+neighbour, keeping `remaining` points of deliberate whitespace
+past the border's reach. Every outer edge becomes
+`reach + remaining`; each inner axis becomes `reach + remaining`,
+or `2 × reach + remaining` when `unfocused_enabled` is on (both
+neighbouring rings need clearance; the whitespace sits between
+them once). The reach is the border's true outward reach, which
+depends on the corner style (a square border tucks inward and
+reaches far less than its width). The action deliberately
+normalizes asymmetric global gaps. A one-shot convenience that
+writes `gap.global` — the remaining gap is command input, never a
+persisted setting, and the layout math itself stays free of any
+border coupling, so this never runs automatically. The GUI's
+"Adjust gaps for border" action calls the same logic.
 
 **Example:**
 
 ```lua
 border.set_width(10)
-border.fit_gaps()  -- rounded reach 9: outer gaps 9, inner gaps 9
-                   -- (18 if unfocused borders are on)
+border.fit_gaps()   -- rounded reach 9: outer gaps 9, inner gaps 9
+                    -- (18 if unfocused borders are on)
+border.fit_gaps(6)  -- leave 6 pt after the reach: outer 15,
+                    -- inner 15 (24 if unfocused borders are on)
 ```
 
 ## Mouse Resizing

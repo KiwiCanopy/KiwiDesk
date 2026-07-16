@@ -70,6 +70,33 @@ struct BorderStyleParityTests {
         #expect(style.fittingGaps().outer.top == 6)
     }
 
+    @Test("fittingGaps adds the remaining gap after the reach")
+    func fittingGapsRemaining() {
+        var style = BorderStyle()
+        style.width = 10
+        // Rounded reach 9 (#295 formula, focused-only):
+        // outer = reach + r, inner = reach + r.
+        let gaps = style.fittingGaps(remaining: 6)
+        #expect(gaps.outer.top == 15)
+        #expect(gaps.outer.left == 15)
+        #expect(gaps.inner.horizontal == 15)
+        #expect(gaps.inner.vertical == 15)
+        // Unfocused shown: inner = 2 × reach + r — the
+        // remaining is whitespace between the two rings, so it
+        // is added once, not doubled.
+        style.unfocusedEnabled = true
+        let both = style.fittingGaps(remaining: 6)
+        #expect(both.inner.horizontal == 24)
+        #expect(both.outer.top == 15)
+        // Square reach 6 (tuck): outer = 6 + r.
+        style.unfocusedEnabled = false
+        style.cornerStyle = .square
+        #expect(style.fittingGaps(remaining: 4).outer.top == 10)
+        // Zero remaining stays the plain fit; negative clamps.
+        #expect(style.fittingGaps(remaining: 0).outer.top == 6)
+        #expect(style.fittingGaps(remaining: -9).outer.top == 6)
+    }
+
     @Test("Width clamps into range, raw value preserved")
     func widthClamp() {
         var style = BorderStyle()

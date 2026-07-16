@@ -9,6 +9,10 @@ import SwiftUI
 /// control and format as the App Bar and drag colors.
 struct FocusBorderEditor: View {
     @ObservedObject var model: SettingsModel
+    /// Action parameter for Adjust gaps (#295): whitespace (pt)
+    /// kept past the border's reach. Transient by design — the
+    /// resulting gaps persist; this input does not.
+    @State private var remainingGap = 0
 
     private var style: Binding<BorderStyle> {
         $model.config.settings.borderStyle
@@ -95,15 +99,38 @@ struct FocusBorderEditor: View {
         }
         Divider()
         VStack(alignment: .leading, spacing: 4) {
-            Button(L("border.fit_gaps", "Fit gaps to border")) {
-                fitGapsToBorder()
+            HStack(spacing: 8) {
+                Text(
+                    L("border.remaining_gap", "Remaining gap")
+                )
+                RemainingGapField(value: $remainingGap)
+                Text(L("border.remaining_gap.unit", "pt"))
+                    .foregroundStyle(.secondary)
+                Button(
+                    L(
+                        "border.fit_gaps",
+                        "Adjust gaps for border"
+                    )
+                ) {
+                    fitGapsToBorder()
+                }
+                .help(
+                    L(
+                        "border.fit_gaps.hint",
+                        "Changes the global outer and inner "
+                            + "gaps."
+                    )
+                )
             }
             Text(
                 L(
                     "border.fit_gaps.caption",
-                    "Widens the layout gaps so borders never "
-                        + "touch a neighbour — the inner gap "
-                        + "doubles when unfocused borders are on."
+                    "Adjusts layout gaps so borders do not "
+                        + "touch neighbouring windows and "
+                        + "leaves the remaining gap shown "
+                        + "above. Inner gaps account for both "
+                        + "borders when unfocused borders are "
+                        + "shown."
                 )
             )
             .font(.caption)
@@ -124,11 +151,50 @@ struct FocusBorderEditor: View {
     }
 
     /// Writes the same `gapsGlobal` the Gaps sliders do, using the
-    /// core's shared `BorderStyle.fittingGaps()` so the button and
-    /// the `border.fit_gaps` command can't drift.
+    /// core's shared `BorderStyle.fittingGaps(remaining:)` so the
+    /// action and the `border.fit_gaps` command can't drift.
     private func fitGapsToBorder() {
         model.config.settings.gapsGlobal =
-            model.config.settings.borderStyle.fittingGaps()
+            model.config.settings.borderStyle.fittingGaps(
+                remaining: CGFloat(remainingGap)
+            )
+    }
+}
+
+/// The compact remaining-gap field (#295): a string proxy that
+/// commits (parse + clamp 0–100) on Return or focus loss, the
+/// StepperRow discipline, so mid-edit typing never clobbers the
+/// value and the action always reads a committed whole number.
+private struct RemainingGapField: View {
+    @Binding var value: Int
+    @State private var text = "0"
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        TextField("", text: $text)
+            .labelsHidden()
+            .frame(width: 44)
+            .multilineTextAlignment(.trailing)
+            .monospacedDigit()
+            .textFieldStyle(.roundedBorder)
+            .focused($focused)
+            .onSubmit(commit)
+            .onChange(of: focused) { _, now in
+                if !now { commit() }
+            }
+            .accessibilityLabel(
+                L(
+                    "border.remaining_gap.a11y",
+                    "Remaining gap after borders"
+                )
+            )
+    }
+
+    private func commit() {
+        if let parsed = Int(text) {
+            value = min(max(parsed, 0), 100)
+        }
+        text = "\(value)"
     }
 }
 

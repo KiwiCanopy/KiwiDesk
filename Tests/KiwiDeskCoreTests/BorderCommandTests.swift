@@ -138,6 +138,49 @@ struct BorderCommandTests {
         #expect(core.tiler.settings.gapsGlobal.outer.top == 9)
     }
 
+    @Test("fit_gaps keeps an optional remaining gap (#295)")
+    func fitGapsRemaining() {
+        let core = makeCore()
+        _ = core.execute("border.set_width", args: [.number(10)])
+        // Rounded reach 9, +6 remaining on every edge and axis.
+        #expect(
+            core.execute(
+                "border.fit_gaps",
+                args: [.number(6)]
+            ).isSuccess
+        )
+        #expect(core.tiler.settings.gapsGlobal.outer.top == 15)
+        #expect(
+            core.tiler.settings.gapsGlobal.inner.horizontal
+                == 15
+        )
+        // Unfocused on: inner doubles the reach, then adds the
+        // remaining once — 18 + 6.
+        _ = core.execute(
+            "border.set_unfocused_enabled",
+            args: [.bool(true)]
+        )
+        _ = core.execute("border.fit_gaps", args: [.number(6)])
+        #expect(
+            core.tiler.settings.gapsGlobal.inner.horizontal
+                == 24
+        )
+        #expect(core.tiler.settings.gapsGlobal.outer.top == 15)
+        // A non-numeric argument fails; a negative one clamps
+        // to the plain fit.
+        #expect(
+            !core.execute(
+                "border.fit_gaps",
+                args: [.string("wide")]
+            ).isSuccess
+        )
+        _ = core.execute(
+            "border.fit_gaps",
+            args: [.number(-3)]
+        )
+        #expect(core.tiler.settings.gapsGlobal.outer.top == 9)
+    }
+
     @Test("Unknown border setter fails")
     func unknown() {
         let core = makeCore()

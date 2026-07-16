@@ -14,11 +14,31 @@ extension KiwiCore {
         _ args: [JSONValue]
     ) -> CommandResponse {
         if command == "border.fit_gaps" {
-            // One-shot: size the global gaps to clear the ring.
-            // Shares BorderStyle.fittingGaps with the GUI button;
-            // layoutCommand's forced retile applies it.
+            // One-shot: size the global gaps to clear the ring,
+            // keeping an optional remaining gap (pt) of
+            // whitespace past the reach (#295) — command input,
+            // not a persisted setting; the zero-argument form
+            // stays valid. Shares BorderStyle.fittingGaps with
+            // the GUI action; layoutCommand's forced retile
+            // applies it.
+            var remaining: CGFloat = 0
+            if let first = args.first {
+                guard
+                    let raw = first.numberValue,
+                    raw.isFinite
+                else {
+                    return .fail(
+                        "expected remaining gap (pt)"
+                    )
+                }
+                // Whole points 0–100, clamped like the other
+                // border magnitudes.
+                remaining = min(max(raw.rounded(), 0), 100)
+            }
             tiler.settings.gapsGlobal =
-                tiler.settings.borderStyle.fittingGaps()
+                tiler.settings.borderStyle.fittingGaps(
+                    remaining: remaining
+                )
             return .ok()
         }
         guard command.hasPrefix("border.set_") else {

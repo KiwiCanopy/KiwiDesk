@@ -66,25 +66,31 @@ public struct BorderStyle: Sendable, Equatable {
     /// Layout gaps sized so rings never touch a neighbour: the
     /// border's true **outward reach** at the screen edge and
     /// between windows, doubled between windows when both
-    /// neighbours are ringed (`unfocusedEnabled`). Uses
+    /// neighbours are ringed (`unfocusedEnabled`), plus an
+    /// optional `remaining` gap of deliberate whitespace kept
+    /// after the reach on every edge and axis (#295). Uses
     /// `BorderGeometry.outwardReach` (not the raw width) so square
     /// — which tucks inward and reaches far less than its width —
     /// isn't over-provisioned. Shared by the `border.fit_gaps`
-    /// command and the GUI button so they can't drift. A one-shot
-    /// convenience — the layout math itself stays free of any
-    /// border coupling (AGENTS.md §5).
-    public func fittingGaps() -> Gaps {
+    /// command and the GUI action so they can't drift. A one-shot
+    /// convenience — `remaining` is an action parameter, never a
+    /// persisted setting, and the layout math itself stays free of
+    /// any border coupling (AGENTS.md §5).
+    public func fittingGaps(remaining: CGFloat = 0) -> Gaps {
         let reach = BorderGeometry.outwardReach(
             width: clampedWidth,
             cornerStyle: cornerStyle
         ).rounded(.up)
-        let inner = unfocusedEnabled ? reach * 2 : reach
+        let extra = max(0, remaining)
+        let outer = reach + extra
+        let inner =
+            (unfocusedEnabled ? reach * 2 : reach) + extra
         return Gaps(
             outer: .init(
-                top: reach,
-                bottom: reach,
-                left: reach,
-                right: reach
+                top: outer,
+                bottom: outer,
+                left: outer,
+                right: outer
             ),
             inner: .init(horizontal: inner, vertical: inner)
         )
