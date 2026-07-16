@@ -8,6 +8,12 @@ import SwiftUI
 /// constrained, while here the row itself steps slot to slot
 /// and never leaves the column.
 extension SpacesSection {
+    /// The rows to render: the live drag order while a drag is in
+    /// flight, otherwise the model's own order (#299).
+    var displayedSpaces: [SpaceID] {
+        dragOrder ?? model.config.spaces
+    }
+
     /// The open-hand cursor on hover is the drag affordance
     /// the handle glyph alone doesn't deliver. Cursor changes
     /// use `set()` rather than push/pop: the pointer leaves
@@ -50,7 +56,13 @@ extension SpacesSection {
                 if hoveredHandle == space {
                     hoveredHandle = nil
                 }
-                if dragged == space { dragged = nil }
+                if dragged == space {
+                    // A cancelled drag skips onEnded — flush the
+                    // in-flight order so the reorder isn't lost
+                    // and dragOrder can't linger stale.
+                    commitDragOrder()
+                    dragged = nil
+                }
                 (hoveredHandle != nil
                     ? NSCursor.openHand : .arrow)
                     .set()
@@ -67,6 +79,10 @@ extension SpacesSection {
         .onChanged { value in
             if dragged == nil {
                 dragged = space
+                // Snapshot the model into the live drag order
+                // so every crossing reorders a local array,
+                // not the @Published/profile-backed one.
+                dragOrder = model.config.spaces
                 NSCursor.closedHand.set()
             }
             retarget(space, at: value.location.y)
@@ -79,9 +95,8 @@ extension SpacesSection {
             (hoveredHandle != nil
                 ? NSCursor.openHand : .arrow)
                 .set()
-            withAnimation(
-                .spring(response: 0.35, dampingFraction: 0.7)
-            ) {
+            commitDragOrder()
+            withAnimation(Self.reorderSpring) {
                 dragged = nil
             }
         }
@@ -95,29 +110,48 @@ extension SpacesSection {
     /// tall row's new band and the next movement swaps them
     /// straight back).
     private func retarget(_ space: SpaceID, at y: CGFloat) {
+        var order = dragOrder ?? model.config.spaces
         guard
             let candidate = rowFrames.first(where: {
                 $0.key != space
                     && $0.value.minY <= y
                     && y <= $0.value.maxY
             }),
-            let from = model.config.spaces.firstIndex(
-                of: space
-            ),
-            let to = model.config.spaces.firstIndex(
-                of: candidate.key
-            ),
+            let from = order.firstIndex(of: space),
+            let to = order.firstIndex(of: candidate.key),
             from != to,
             to > from
                 ? y >= candidate.value.midY
                 : y <= candidate.value.midY
         else { return }
-        withAnimation(.easeInOut(duration: 0.15)) {
-            model.config.spaces.move(
+        withAnimation(Self.reorderSpring) {
+            order.move(
                 fromOffsets: IndexSet(integer: from),
                 toOffset: to > from ? to + 1 : to
             )
+            dragOrder = order
         }
+    }
+
+    /// One light spring for both the per-swap shuffle and the
+    /// drop settle — replaces the old stacked `easeInOut(0.15)`
+    /// per swap plus a separate drop spring, whose compounding
+    /// read as sluggish on a fast multi-row drag (#299).
+    static let reorderSpring: Animation = .interactiveSpring(
+        response: 0.25,
+        dampingFraction: 0.86
+    )
+
+    /// Flush the live drag order into the model exactly once, at
+    /// the end of a drag (or if the row tears down mid-drag). No-op
+    /// when nothing moved, so a plain click never dirties the
+    /// profile. Clearing `dragOrder` hands rendering back to the
+    /// model — identical order, so no visual jump.
+    func commitDragOrder() {
+        if let order = dragOrder, order != model.config.spaces {
+            model.config.spaces = order
+        }
+        dragOrder = nil
     }
 
     /// Row frames in list space, keyed by space — the drag
