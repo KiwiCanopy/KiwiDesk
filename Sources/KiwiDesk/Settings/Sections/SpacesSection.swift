@@ -27,6 +27,14 @@ struct SpacesSection: View {
     // `private` (which is file-scoped).
     /// The space being handle-dragged, if any.
     @State var dragged: SpaceID?
+    /// The live display order *during* a drag — seeded from the
+    /// model on drag start, reordered locally on each threshold
+    /// cross, and written back to `model.config.spaces` once on
+    /// drop. Keeps the per-swap cost to a cheap array move instead
+    /// of a `@Published`/profile write (which re-evaluated the
+    /// whole config every crossing, #299). `nil` when idle: the
+    /// list then renders straight from the model.
+    @State var dragOrder: [SpaceID]?
     /// The handle currently under the pointer — tracked even
     /// mid-drag (when hover no longer drives the cursor), so
     /// drag end and row teardown can restore the right cursor.
@@ -40,6 +48,11 @@ struct SpacesSection: View {
     /// guessed) so every row's button locks to one column width
     /// that stays correct across locales and counts (#290).
     @State var overridesButtonWidth: CGFloat = 0
+    /// Whether this window is key/active — watched so a drag the
+    /// app deactivates out of (Cmd-Tab, a mouse-up delivered to
+    /// another app) still commits, since that path reaches
+    /// neither `onEnded` nor `onDisappear` (#299).
+    @Environment(\.controlActiveState) var activeState
 
     var body: some View {
         ScrollView {
@@ -53,6 +66,15 @@ struct SpacesSection: View {
             }
             .onPreferenceChange(OverridesButtonWidth.self) {
                 overridesButtonWidth = $0
+            }
+        }
+        .onChange(of: activeState) { _, now in
+            // The app deactivating mid-drag abandons the gesture
+            // without an onEnded — commit the live order so the
+            // list can't keep showing an unsaved reorder (#299).
+            if now != .key, dragged != nil {
+                commitDragOrder()
+                dragged = nil
             }
         }
         .confirmationDialog(
@@ -90,41 +112,14 @@ struct SpacesSection: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-            ForEach(model.config.spaces, id: \.raw) { space in
+            ForEach(displayedSpaces, id: \.raw) { space in
                 spaceRow(space)
             }
             addRow
         }
     }
 
-    private var emptyCaption: String {
-        L(
-            "spaces.empty",
-            "No spaces yet — add one below. Until you do, "
-                + "every window tiles in a single default "
-                + "space."
-        )
-    }
-
-    private var spacesCaption: String {
-        L(
-            "spaces.caption",
-            "Each space has its own layout. Add spaces "
-                + "here; they appear in the shortcut and "
-                + "app-rule lists too. Drag rows to "
-                + "reorder."
-        )
-    }
-
-    private var fallbackCaption: String {
-        L(
-            "spaces.fallback_caption",
-            "When you switch profiles, windows from a "
-                + "space the new profile doesn't have "
-                + "land in its fallback space (the first "
-                + "space when none is chosen)."
-        )
-    }
+    // Captions live in `SpacesSection+Captions.swift`.
 
     // MARK: - Rows
 
