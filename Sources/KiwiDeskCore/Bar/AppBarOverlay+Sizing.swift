@@ -101,18 +101,33 @@ extension AppBarOverlay {
             ? 0 : max(thickness - pad * 2, 0)
         // The uniform slot fits the widest item, so measure every
         // name and take the max: icon square + gap + text + pads,
-        // mirroring `layoutHorizontal`'s own composition.
+        // mirroring `layoutHorizontal`'s own composition. Measure
+        // through a label configured EXACTLY like the item's own —
+        // notably `.center` alignment, which alone widens the cell
+        // by 4 pt; a left-aligned or raw-string measurement leaves
+        // the widest name's slot those 4 pt short of itself,
+        // tail-truncating exactly the tab that defined the width.
+        let measure = NSTextField(labelWithString: "")
+        measure.alignment = .center
+        measure.font = font
+        measure.usesSingleLineMode = true
+        measure.maximumNumberOfLines = 1
+        measure.lineBreakMode = .byTruncatingTail
         return items.reduce(0) { widest, item in
-            let text =
-                style.content == .icon
-                ? 0
-                : ceil(
-                    (item.name as NSString).size(
-                        withAttributes: [.font: font]
-                    ).width
+            let text: CGFloat
+            if style.content == .icon {
+                text = 0
+            } else {
+                measure.stringValue = item.name
+                text = ceil(
+                    measure.cell?.cellSize.width ?? 0
                 )
-            let spacing = iconSide > 0 && text > 0 ? pad : 0
-            let natural = iconSide + spacing + text + pad * 2
+            }
+            let spacing =
+                iconSide > 0 && text > 0 ? pad / 2 : 0
+            let natural =
+                iconSide + spacing + text
+                + AppBarItemView.edgePadding * 2
             return max(widest, natural)
         }
     }
@@ -140,6 +155,11 @@ extension AppBarOverlay {
     /// slot must hold its square (side = thickness − padding,
     /// plus the padding back — i.e. the thickness itself);
     /// text-only bars just keep a sliver of legibility.
+    /// Load-bearing beyond looks: icon-bearing slots flooring
+    /// at `thickness` is what makes the measurement's
+    /// `iconSide = thickness - pad*2` equal the layout's
+    /// `min(bounds.height, bounds.width) - pad*2` — the
+    /// slot-fits-widest-name invariant leans on it.
     nonisolated static func minimumSlot(
         thickness: CGFloat,
         content: AppBarStyle.Content

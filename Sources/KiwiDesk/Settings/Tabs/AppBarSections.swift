@@ -105,6 +105,43 @@ struct GlobalAppBarSection: View {
             selection: $style.content,
             options: AppBarOptions.content.map { ($0.1, $0.0) }
         )
+        // #294 icon rendering, directly below the Content
+        // control it depends on; greyed (never hidden, #171)
+        // when Name-only content shows no icons at all.
+        DropdownRow(
+            label: iconSourceLabel,
+            help: L(
+                "app_bar.icon_source.help",
+                "How app icons are drawn. Glyphs shows a "
+                    + "monochrome symbol from KiwiDesk's "
+                    + "built-in icon set, colored by the bar's "
+                    + "text colors — Text, Active text, and "
+                    + "Hover text below — so those colors also "
+                    + "decide how the glyphs look. Apps "
+                    + "without a symbol keep their app icon."
+            )
+        ) {
+            Picker(
+                iconSourceLabel,
+                selection: $style.iconSource
+            ) {
+                ForEach(
+                    AppBarOptions.iconSource,
+                    id: \.0
+                ) { option in
+                    Text(option.1).tag(option.0)
+                }
+            }
+        }
+        .modifier(
+            GreyOut(
+                active: style.content == .name,
+                help: L(
+                    "app_bar.icon_source.name_only",
+                    "Icons are hidden while Content is Name."
+                )
+            )
+        )
         ToggleRow(
             label: L(
                 "app_bar.group_adjacent",
@@ -263,5 +300,8 @@ struct GlobalAppBarSection: View {
     }
     private var contentLabel: String {
         L("app_bar.content.label", "Content")
+    }
+    private var iconSourceLabel: String {
+        L("app_bar.icon_source.label", "App symbol style")
     }
 }

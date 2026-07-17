@@ -15,6 +15,11 @@ struct ShortcutRow: Identifiable {
     var icon: String? = nil
     /// App bundle id for a real 20pt icon (Apps band). Nil = none.
     var bundleID: String? = nil
+    /// App Font ligature (#294): set when the bar's icon source
+    /// is Glyphs and this app has one, so the panel's Apps band
+    /// matches the bar. Wins over `bundleID`; nil falls back to
+    /// the bundle icon.
+    var glyph: String? = nil
     /// Custom-Lua rows render their label monospaced.
     var monospaced: Bool = false
     /// Trailing accessory glyph for a non-default launch behavior
@@ -36,10 +41,13 @@ struct ShortcutSubgroup: Identifiable {
 /// (Controls grouped by subgroup, Apps, Custom). Empty bands are
 /// dropped by the builder, so an empty band never renders.
 struct ShortcutsReference {
-    let modeName: String
-    let controls: [ShortcutSubgroup]
-    let apps: [ShortcutRow]
-    let custom: [ShortcutRow]
+    // `var`, not `let`: post-processing (the #294 glyph pass)
+    // mutates a copy instead of re-initializing memberwise,
+    // which would be one more hand-mirrored field list.
+    var modeName: String
+    var controls: [ShortcutSubgroup]
+    var apps: [ShortcutRow]
+    var custom: [ShortcutRow]
 
     /// True when the active mode has no bound shortcuts at all —
     /// the view shows a "nothing bound yet" placeholder.

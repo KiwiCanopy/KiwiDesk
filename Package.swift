@@ -40,7 +40,11 @@ let package = Package(
             dependencies: ["CLua"],
             path: "Sources/KiwiDeskCore",
             resources: [
-                .copy("Resources/Locales")
+                .copy("Resources/Locales"),
+                // Vendored SketchyBar App Font (#294) —
+                // refresh with scripts/update-app-font.sh,
+                // never hand-edit (see AppFont/UPSTREAM.md).
+                .copy("Resources/AppFont"),
             ]
         ),
         // Executable: AppDelegate, menu bar, SwiftUI GUI.

@@ -28,6 +28,7 @@ public struct LayoutAppBar: Sendable, Equatable {
     public var itemSize: CGFloat?
     public var itemGap: CGFloat?
     public var content: Content?
+    public var iconSource: BarAppIconSource?
     public var groupAdjacentWindows: Bool?
     public var fontSize: CGFloat?
     public var cornerRoundness: CGFloat?
@@ -58,6 +59,7 @@ public struct LayoutAppBar: Sendable, Equatable {
         if let itemSize { out.itemSize = itemSize }
         if let itemGap { out.itemGap = itemGap }
         if let content { out.content = content }
+        if let iconSource { out.iconSource = iconSource }
         if let groupAdjacentWindows {
             out.groupAdjacentWindows = groupAdjacentWindows
         }
@@ -113,6 +115,7 @@ extension LayoutAppBar: Codable {
         case itemSize = "item_size"
         case itemGap = "item_gap"
         case content
+        case iconSource = "icon_source"
         case groupAdjacentWindows = "group_adjacent_windows"
         case fontSize = "font_size"
         case cornerRoundness = "corner_roundness"
@@ -162,6 +165,10 @@ extension LayoutAppBar: Codable {
         content = try container.decodeIfPresent(
             Content.self,
             forKey: .content
+        )
+        iconSource = try container.decodeIfPresent(
+            BarAppIconSource.self,
+            forKey: .iconSource
         )
         groupAdjacentWindows = try container.decodeIfPresent(
             Bool.self,
@@ -242,6 +249,10 @@ extension LayoutAppBar: Codable {
         try container.encodeIfPresent(itemSize, forKey: .itemSize)
         try container.encodeIfPresent(itemGap, forKey: .itemGap)
         try container.encodeIfPresent(content, forKey: .content)
+        try container.encodeIfPresent(
+            iconSource,
+            forKey: .iconSource
+        )
         try container.encodeIfPresent(
             groupAdjacentWindows,
             forKey: .groupAdjacentWindows

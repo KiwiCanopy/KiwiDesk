@@ -671,6 +671,17 @@ running windows.
 - **Item size**: auto (0) measures rendered width and sizes slots
   uniformly to fit the widest item; fixed pixel width.
 - **Content**: icon only, name only, or both.
+- **App symbol style**: how app icons are drawn (greyed while
+  Content is Name, which shows no icons). **System default**
+  shows each app's icon as macOS provides it — including your
+  system-wide Icon & widget style choice. **Glyphs** shows a
+  monochrome symbol from the bundled [SketchyBar App
+  Font](https://github.com/kvndrsslr/sketchybar-app-font)
+  instead, colored by the bar's text colors (Text, Active
+  text, Hover text — so those colors also style the glyphs);
+  apps without a symbol keep their icon. With Glyphs active,
+  the shortcuts panel's Apps band shows the same symbols
+  (following the global style — the panel spans all layouts).
 - **Font size**: auto (0) or fixed.
 - **Corner roundness**: 0–100% for boxed tabs (0 = square, 100 =
   full capsule; ignored for plain).

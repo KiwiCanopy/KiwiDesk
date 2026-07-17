@@ -58,6 +58,7 @@ planned escape hatch; it is not a wontfix dumping ground.
 | An extreme *stored* BSP ratio still collapses the space into the overlap cascade — even though the stack layout no longer does. | The stack's layout-time clamp hasn't been migrated to BSP yet; doing it as a follow-up rather than riding the #44 fix keeps that change scoped. | BSP has no effective-ratio clamp authority; the #44 fix (`StackLayout.effectiveRatioRange`) landed in the stack only. | Migrate the clamp principle to BSP (follow-up to [#44](https://github.com/hajiboy95/KiwiDesk/issues/44)). See [The stack cascade is a last resort](#shortcuts). |
 | Dragging a stack window's height with the mouse snaps back; only keyboard/CLI `resize("y")` actually moves the vertical share. | Vertical weights are a windowless keyboard/CLI concept; the mouse-drag seam has no window to anchor a weight against. | Per-window vertical weights are session-scoped and keyboard-only by design ([#67](https://github.com/hajiboy95/KiwiDesk/issues/67)). | Use keyboard/CLI `resize("y")`; the mouse asymmetry is deliberate. See [Stack resize is focus-aware](#shortcuts). |
 | Mouse-resizing a window in the track layout snaps back on both axes; keyboard/CLI `resize` covers both knobs. | Both track adjustments (the track's weight, the in-track share) key off the dragged window's identity — the same windowless mouse-resize seam as the stack height drag above. | The mouse-resize translation (`MouseResize.translate`) is deliberately windowless; track weights are session-scoped resize state ([#128](https://github.com/hajiboy95/KiwiDesk/issues/128)). | Keyboard/CLI `resize` (both axes) and `move_to_track`; revisit together with the stack height drag if mouse parity is asked for. |
+| The App Bar's icon styles offer System default and Glyphs — never the system's **Dark**, **Clear**, or **Tinted** icon looks as distinct in-app choices. | A synthesized tinted mode was built and stripped (2026-07-17): a luminance ramp over the flattened bitmap can't match Apple's plate-plus-glyph regeneration, and the system-wide Icon & widget style already tints what "System default" shows. Shipping a knock-off would misrepresent the real styles. | macOS exposes no public API that hands an app another app's (or even its own) styled icon rendering or its icon layers — Apple DTS calls it unsupported ([#294](https://github.com/hajiboy95/KiwiDesk/issues/294)). | A private-IconServices probe with public fallback, the SkyLight `dlsym` pattern ([#362](https://github.com/hajiboy95/KiwiDesk/issues/362)); if viable the picker grows the true system styles. |
 | While window management is paused (no Accessibility permission), the read-only shortcuts panel shows base `gui.json` bindings *without* the active profile's sparse keybinding override applied. | The panel is a "defined, not live right now" glance while paused; a profile that overrides `modes` (rather than only tiling) is rare, and reading the authored base avoids the empty-live-space-list that would otherwise misfile every space shortcut into Custom. | Without AX the live resolved snapshot (`liveKeybindingSnapshot`) is nil, so the paused path reads `persistedGuiConfig()` (authored `gui.json`) directly instead of resolving base⊕profile ([#326](https://github.com/hajiboy95/KiwiDesk/issues/326)). | Grant Accessibility — the live resolved snapshot then drives the panel. The divergence exists only while paused *and* only for a profile carrying a keybinding override. |
 | In the track layout, when more tracks exist than fit side by side at `min_window_size`, the fitting prefix tiles and every surplus track merges into one far-edge **overflow track** whose windows then pile among themselves. | It is the honest answer to "more tracks than can hold the minimum side by side": the fitting tracks stay tiled (the layout keeps its identity), and the surplus collects into a single overflow track whose windows keep a reachable title bar via the downward cascade offset (the app-wide reveal convention). One collector reads better than scattering each surplus track into its own buried slot. | The overflow track is the cap-merge with the cap set to the geometric fit count (`TrackLayout.fitCap` + `counts(cap:)`), rendered by `trackFrames` per `overflow_style`; a fully-degenerate span still falls back to the whole-region `OverlapStack.frames` ([#192](https://github.com/hajiboy95/KiwiDesk/issues/192)). | Widen the display or raise nothing — it is read-time: the overflow track appears and grows as the fit boundary moves. Adjust its pile with `track.set_overflow_style` (`cascade_all` default). |
 | `reload_config` (and re-issuing `set_mode(space, "track")`) reseeds a track space's partition to one window per track, dropping a hand-merged arrangement and its track weights. In-track window shares (`stackWeights`) survive. | Reloading re-runs the declarative config, whose `set_mode` is a statement of the space's *declared* default arrangement; re-applying it resets runtime topology, exactly as it re-centers a scrolling viewport. A same-session **wake/unlock** restore is different — it is involuntary, so it *preserves* the partition (carried in the state snapshot). | The break markers/track weights are session-scoped runtime state ([#128](https://github.com/hajiboy95/KiwiDesk/issues/128)), the `scrollOffset` precedent; an explicit `set_mode` re-apply reseeds by design. | Rebuild the arrangement after a reload (a few `move_to_track` presses); the wake/unlock path already survives it. |
@@ -1116,6 +1117,50 @@ render rulings (settled 2026-07-14 by UI designer): plain × ring
 is a pure inset stroke in the highlight color (no fill, keeps
 plain boxless); boxed edge mark insets its ends by the corner
 roundness to sit flush inside the curve.
+
+**App icon rendering is one global choice with two honest
+options.** (#294.) `icon_source` — GUI label "App symbol style" —
+offers `app_image` (System default) and `app_font` (Glyphs).
+Decisions folded in, 2026-07-17/18 (ui-designer consult + user
+direction in chat):
+
+- **Global in the GUI, per-layout only in Lua.** A per-layout
+  override row for icon rendering has no user story (it exists in
+  the schema because the field mechanically mirrors every other
+  bar style field, and stays there as power-layer depth); the
+  Settings surface shows exactly one dropdown, directly below
+  Content, greyed while Content is Name (#171 grey-don't-hide).
+  Accepted side effect: the per-layout override chip counts a
+  Lua-set `icon_source` override even though the override editor
+  shows no row for it — the chip discovers fields by reflection
+  on purpose, and hiding Lua-only depth from it would be the
+  bigger lie.
+- **Glyphs follow the bar's state text colors** (normal / active
+  / hover) — one color system with the labels. Glyph-less apps
+  keep their native image.
+- **A synthesized Tinted mode was built and stripped** (with its
+  `tint_appearance` sub-setting): the system-wide Icon & widget
+  style already covers the want for System default icons, and a
+  luminance-ramp approximation misrepresents Apple's
+  plate-regenerated styles. Dark / Clear / Tinted as true in-app
+  choices remain API-blocked — see the accepted-limitations row;
+  [#362](https://github.com/hajiboy95/KiwiDesk/issues/362)
+  tracks the private-IconServices probe that could add them.
+- **The glyph map format is JSON** (`icon_map.json` vendored from
+  upstream): decoded directly in Swift, validated once, cached —
+  keeps bar rendering independent of the user's Lua VM. The Lua
+  and shell forms upstream ships were rejected (coupling static
+  vendor data to an interpreter buys nothing).
+- **Vendored, not user-supplied**: the TTF + map ship in the app
+  (CC0-1.0), refreshed by `scripts/update-app-font.sh` which pins
+  the upstream release in `UPSTREAM.md`. CC0 waives copyright but
+  not third-party trademark rights in the depicted app marks —
+  accepted deliberately pre-release; revisit at public 1.0 with
+  the other distribution decisions.
+- **The shortcuts panel follows the GLOBAL symbol style**: with
+  Glyphs active its Apps band leads with the same ligatures. The
+  panel spans all layouts, so a Lua-only per-layout
+  `icon_source` override deliberately does not steer it.
 
 ## Shared controls
 

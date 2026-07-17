@@ -48,6 +48,11 @@ extension AppBarItemView {
 
     /// Shared with the overlay's natural-width measurement.
     nonisolated static let contentPadding: CGFloat = 4
+    /// The slot's own leading/trailing inset — a touch wider
+    /// than the inner content padding (manual QA 2026-07-18);
+    /// shared with the natural-width measurement so widening
+    /// it can never re-truncate the widest name.
+    nonisolated static let edgePadding: CGFloat = 6
 
     /// `bar_font_size` 0 = auto: scale with the bar's cross
     /// dimension (its thickness), so a fat bar gets readable
@@ -73,6 +78,7 @@ extension AppBarItemView {
     /// always survives.
     private func layoutHorizontal() {
         let pad = Self.contentPadding
+        let edge = Self.edgePadding
         let font = NSFont.systemFont(ofSize: effectiveFontSize)
         label.font = font
         label.usesSingleLineMode = true
@@ -80,7 +86,7 @@ extension AppBarItemView {
         label.lineBreakMode = .byTruncatingTail
         label.stringValue = name
         let side =
-            iconView.isHidden
+            iconSlotHidden
             ? 0
             : max(
                 min(bounds.height, bounds.width) - pad * 2,
@@ -96,28 +102,35 @@ extension AppBarItemView {
         textSize.width = ceil(textSize.width)
         textSize.height = ceil(textSize.height)
         let showText = style.content != .icon
+        // Half a pad: the full pad read too airy between icon
+        // and name (manual QA 2026-07-18).
         var spacing: CGFloat =
-            side > 0 && showText ? pad : 0
+            side > 0 && showText ? pad / 2 : 0
         textSize.width = min(
             textSize.width,
-            bounds.width - side - spacing - pad * 2
+            bounds.width - side - spacing - edge * 2
         )
         if textSize.width < 8 {
             textSize.width = 0
             spacing = 0
         }
         label.isHidden = !showText || textSize.width == 0
+        // The edge floor exists for text; an icon-only tab at
+        // the minimum slot keeps the tighter pad so its glyph
+        // box can't poke past the trailing border.
         var x = max(
             (bounds.width - side - spacing - textSize.width)
                 / 2,
-            pad
+            showText ? edge : pad
         )
-        if !iconView.isHidden {
-            iconView.frame = CGRect(
-                x: x,
-                y: (bounds.height - side) / 2,
-                width: side,
-                height: side
+        if !iconSlotHidden {
+            layoutIconSlot(
+                in: CGRect(
+                    x: x,
+                    y: (bounds.height - side) / 2,
+                    width: side,
+                    height: side
+                )
             )
             x += side + spacing
         }
@@ -136,7 +149,7 @@ extension AppBarItemView {
         let font = NSFont.systemFont(ofSize: effectiveFontSize)
         label.font = font
         let side =
-            iconView.isHidden
+            iconSlotHidden
             ? 0
             : max(
                 min(bounds.width, bounds.height) - pad * 2,
@@ -167,12 +180,14 @@ extension AppBarItemView {
                 / 2,
             pad
         )
-        if !iconView.isHidden {
-            iconView.frame = CGRect(
-                x: (bounds.width - side) / 2,
-                y: top,
-                width: side,
-                height: side
+        if !iconSlotHidden {
+            layoutIconSlot(
+                in: CGRect(
+                    x: (bounds.width - side) / 2,
+                    y: top,
+                    width: side,
+                    height: side
+                )
             )
             top += side + spacing
         }

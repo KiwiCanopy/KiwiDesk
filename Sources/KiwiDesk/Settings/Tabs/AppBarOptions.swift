@@ -28,6 +28,21 @@ enum AppBarOptions {
         ),
         (.gap, L("app_bar.active_indicator.gap", "Gap")),
     ]
+    /// #294 icon rendering. "System default" = the icon as
+    /// macOS hands it out (the system-wide Icon & widget
+    /// style already covers tinting wants); styled variants
+    /// are not obtainable via public API (#362).
+    @MainActor
+    static let iconSource: [(BarAppIconSource, String)] = [
+        (
+            .appImage,
+            L("app_bar.icon_source.app_image", "System default")
+        ),
+        (
+            .appFont,
+            L("app_bar.icon_source.app_font", "Glyphs")
+        ),
+    ]
     @MainActor
     static let content: [(AppBarStyle.Content, String)] = [
         (.icon, L("app_bar.content.icon", "Icon")),

@@ -12,6 +12,16 @@ import AppKit
 /// AppBarItemView+Layout.swift.
 final class AppBarItemView: NSView {
     let iconView = NSImageView()
+    /// SketchyBar App Font ligature shown in the icon slot when
+    /// the item carries a glyph (#294). Text, so it follows the
+    /// bar's text colors; purely presentational to AX (the item
+    /// announces the app name, never the ligature).
+    let glyphLabel: NSTextField = {
+        let tf = NSTextField(labelWithString: "")
+        tf.alignment = .center
+        tf.setAccessibilityElement(false)
+        return tf
+    }()
     let label = NSTextField(labelWithString: "")
     let accent = NSView()
     let badge: NSTextField = {
@@ -61,6 +71,7 @@ final class AppBarItemView: NSView {
         badge.wantsLayer = true
         badge.alignment = .center
         addSubview(iconView)
+        addSubview(glyphLabel)
         addSubview(label)
         addSubview(accent)
         addSubview(badge)
@@ -140,6 +151,7 @@ final class AppBarItemView: NSView {
         id: WindowID,
         name: String,
         icon: NSImage?,
+        glyph: String?,
         count: Int,
         active: Bool,
         horizontal: Bool,
@@ -155,8 +167,15 @@ final class AppBarItemView: NSView {
         self.style = style
         isHovered = false
         iconView.image = icon
+        // Empty ligature (bad vendor drop) must not reserve a
+        // blank square — treat it as no glyph.
+        let showsGlyph =
+            glyph?.isEmpty == false && style.content != .name
+        glyphLabel.isHidden = !showsGlyph
+        glyphLabel.stringValue = glyph ?? ""
         iconView.isHidden =
-            style.content == .name || icon == nil
+            showsGlyph || style.content == .name
+            || icon == nil
         label.isHidden = style.content == .icon
         badge.isHidden = count < 2
         badge.stringValue = "\(count)"
@@ -173,6 +192,7 @@ final class AppBarItemView: NSView {
     /// top would muddy the icon and text) and the text color.
     private func applyColors() {
         label.textColor = NSColor(kiwiHex: textColorHex)
+        glyphLabel.textColor = NSColor(kiwiHex: textColorHex)
         layer?.backgroundColor =
             NSColor(kiwiHex: boxColorHex).cgColor
         applyCornerRadius()
@@ -262,29 +282,5 @@ final class AppBarItemView: NSView {
             accent.layer?.backgroundColor =
                 NSColor(kiwiHex: style.highlightColor).cgColor
         }
-    }
-}
-
-/// A text field cell that centers its text vertically.
-final class IndicatorBarBadgeCell: NSTextFieldCell {
-    override func titleRect(forBounds rect: NSRect) -> NSRect {
-        var titleRect = super.titleRect(forBounds: rect)
-        let minimumHeight = cellSize(forBounds: rect).height
-        if titleRect.size.height > minimumHeight {
-            titleRect.origin.y +=
-                (titleRect.size.height - minimumHeight) / 2
-            titleRect.size.height = minimumHeight
-        }
-        return titleRect
-    }
-
-    override func drawInterior(
-        withFrame cellFrame: NSRect,
-        in controlView: NSView
-    ) {
-        super.drawInterior(
-            withFrame: titleRect(forBounds: cellFrame),
-            in: controlView
-        )
     }
 }

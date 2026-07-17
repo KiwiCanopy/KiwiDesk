@@ -1430,6 +1430,26 @@ app_bar.set_item_gap(6)
 app_bar.set_content("icon_and_name")
 ```
 
+### app_bar.set_icon_source
+
+**Expects:** `"app_image"` or `"app_font"`.
+
+**Does:** sets how app icons are drawn. `app_image` (default)
+shows the app's icon as macOS provides it — including whatever
+system-wide Icon & widget style the user picked. `app_font`
+shows a monochrome glyph from the bundled [SketchyBar App
+Font](https://github.com/kvndrsslr/sketchybar-app-font)
+instead, colored by the bar's text colors (normal / active /
+hover); apps without a glyph keep their icon. Styled icon
+variants (the system's Dark/Clear/Tinted renderings) cannot be
+fetched by apps — no public API hands them out.
+
+**Example:**
+
+```lua
+app_bar.set_icon_source("app_font")
+```
+
 ### app_bar.set_font_size
 
 **Expects:** a number (points); `0` means auto (default).
