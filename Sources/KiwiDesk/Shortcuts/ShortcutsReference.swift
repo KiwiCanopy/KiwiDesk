@@ -231,9 +231,14 @@ enum ShortcutsReferenceBuilder {
                         : ""
                 )
             }
-            .sorted {
-                $0.label.localizedCaseInsensitiveCompare($1.label)
-                    == .orderedAscending
+            .sorted { lhs, rhs in
+                let order = lhs.label
+                    .localizedCaseInsensitiveCompare(rhs.label)
+                // Two rows for the same app (Open or Focus + Open
+                // New) share a label; the id tiebreaker pins their
+                // order, matching the editor's `recomputeOrder`.
+                if order == .orderedSame { return lhs.id < rhs.id }
+                return order == .orderedAscending
             }
     }
 

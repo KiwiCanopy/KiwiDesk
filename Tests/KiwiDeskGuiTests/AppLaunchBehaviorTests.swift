@@ -54,6 +54,20 @@ struct AppLaunchBehaviorTests {
         )
     }
 
+    @Test("every behavior verb is a real API command")
+    func verbsExistInAPIReference() {
+        // The GUI hardcodes these verb strings to author and parse
+        // `lua`; `APIReference` is their single source of truth.
+        // Pin the two so a pre-release rename (§5 allows them) can't
+        // silently orphan the GUI into authoring a dead verb — the
+        // round-trip tests above check the GUI against itself and
+        // would stay green through such a drift.
+        let known = Set(APIReference.commands.map(\.lua))
+        for behavior in AppLaunchBehavior.allCases {
+            #expect(known.contains(behavior.verb))
+        }
+    }
+
     @Test("non-app Lua matches neither inverse")
     func nonAppLua() {
         for lua in [

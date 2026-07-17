@@ -3,9 +3,10 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Section 2 — Open Applications: launch hotkeys. Each row picks
-/// an installed app (or any bundle via "Other…") and records a
-/// combo. The Lua action pulls the app into the current space,
-/// launching it if needed.
+/// an installed app (or any bundle via "Other…"), a launch
+/// behavior (Open or Focus / Open New, #334), and a combo. The
+/// default action pulls the app into the current space, launching
+/// it if needed.
 struct ApplicationsSection: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
@@ -153,8 +154,12 @@ struct ApplicationsSection: View {
         _ binding: Binding<KeyBinding>
     ) -> some View {
         HStack {
-            appMenu(binding)
-            behaviorMenu(binding)
+            // Tighter than the row's ambient spacing so "app + how
+            // to open it" reads as one unit (ui-designer, #334).
+            HStack(spacing: 6) {
+                appMenu(binding)
+                behaviorMenu(binding)
+            }
             Spacer()
             KeyRecorderField(
                 combo: binding.wrappedValue.combo,
@@ -287,9 +292,16 @@ struct ApplicationsSection: View {
         _ binding: Binding<KeyBinding>,
         app: KeybindingCatalog.InstalledApp
     ) {
+        // Preserve the row's launch behavior across a re-pick — the
+        // app changed, not the open-vs-new choice (#334 review).
+        let behavior =
+            KeybindingCatalog.appLaunchBehavior(
+                from: binding.wrappedValue.lua
+            ) ?? .openOrFocus
         binding.wrappedValue.label = app.name
         binding.wrappedValue.lua = KeybindingCatalog.appCommand(
-            app.bundleID
+            app.bundleID,
+            behavior: behavior
         )
     }
 

@@ -115,9 +115,11 @@ extension ApplicationsSection {
         }
     }
 
-    /// The borderless-menu signature: a trailing chevron so a
-    /// bare-text menu still reads as "this opens a menu" (matches
-    /// `AppRuleRow`'s facet menus).
+    /// The borderless-menu signature: primary-ink label + a
+    /// trailing secondary chevron so a bare-text menu still reads
+    /// as "this opens a menu" — byte-for-byte the same treatment as
+    /// `AppRuleRow`'s Float/Space facet menus, so the two sibling
+    /// surfaces stay visually consistent.
     private func behaviorLabelView(
         _ text: String
     ) -> some View {

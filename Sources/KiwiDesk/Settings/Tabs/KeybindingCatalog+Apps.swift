@@ -1,11 +1,6 @@
 import AppKit
 import KiwiDeskCore
 
-/// The installed-application catalog and the `pull_or_spawn`
-/// command inverse, split from `KeybindingCatalog` to stay under
-/// the file-size ceiling. Apps are identified by bundle id (the
-/// stable, locale- and rename-proof key — see `AppRef`) and
-/// shown by their localized display name.
 /// The launch behavior an Open-Applications binding encodes,
 /// derived from its `lua` verb rather than a persisted field
 /// (#334) — so surfacing the choice adds no `KeyBinding` shape to
@@ -29,6 +24,11 @@ enum AppLaunchBehavior: String, CaseIterable {
     }
 }
 
+/// The installed-application catalog and the app-launch command
+/// inverse, split from `KeybindingCatalog` to stay under the
+/// file-size ceiling. Apps are identified by bundle id (the
+/// stable, locale- and rename-proof key — see `AppRef`) and
+/// shown by their localized display name.
 extension KeybindingCatalog {
     /// The Open-Applications action for this bundle id and launch
     /// behavior. Paired with `appBundleID(from:)` /
