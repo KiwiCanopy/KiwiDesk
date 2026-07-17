@@ -9,10 +9,10 @@
     "preview": "astro preview"
   },
   "dependencies": {
-    "@astrojs/starlight": "^0.30.0",
-    "@iconify-json/lucide": "^1.2.116",
-    "astro": "^5.0.0",
+    "@astrojs/starlight": "^0.41.3",
+    "@iconify-json/lucide": "^1.2.117",
+    "astro": "^7.1.1",
     "astro-icon": "^1.1.5",
-    "sharp": "^0.33.5"
+    "sharp": "^0.35.3"
   }
 }
