@@ -38,7 +38,15 @@ KiwiDesk service start     # LaunchAgent: run at login,
                            # restart after crashes
 KiwiDesk service stop
 KiwiDesk service restart
+KiwiDesk service status    # loaded? running? pid?
 ```
+
+`start` no-ops with `KiwiDesk service is already running` when
+the agent is loaded (use `restart` to force a relaunch); `stop`
+prints `KiwiDesk service is not running` cleanly when nothing is
+loaded. `status` reports the loaded/running state and the pid.
+A real `launchctl` failure exits non-zero; the ordinary
+already-running / not-running cases exit 0.
 
 ## Commands
 

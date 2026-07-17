@@ -43,9 +43,145 @@ public enum ServiceManager {
         """
     }
 
+    /// The result of a service verb: a line to print plus whether
+    /// it succeeded, so the CLI can map a real launchctl failure
+    /// to a non-zero exit while the ordinary already-running /
+    /// not-running cases stay exit 0 (#328).
+    public struct Outcome {
+        public let message: String
+        public let ok: Bool
+
+        public init(_ message: String, ok: Bool) {
+            self.message = message
+            self.ok = ok
+        }
+    }
+
     // MARK: - Commands
 
-    public static func start() -> String {
+    /// Bootstraps the agent, or no-ops when it is already loaded.
+    /// The plist is always (re)written first so a moved binary is
+    /// picked up on the next `start`.
+    public static func start() -> Outcome {
+        if let failure = writePlist() {
+            return Outcome(failure, ok: false)
+        }
+        if isLoaded() {
+            return Outcome(
+                "KiwiDesk service is already running",
+                ok: true
+            )
+        }
+        return bootstrap()
+    }
+
+    /// Boots out the agent, or reports cleanly when nothing is
+    /// loaded — never leaking launchctl's "re-run as root" noise
+    /// for the ordinary not-running case (#328).
+    public static func stop() -> Outcome {
+        guard isLoaded() else {
+            return Outcome(
+                "KiwiDesk service is not running",
+                ok: true
+            )
+        }
+        let (status, output) = launchctl([
+            "bootout", domain, agentURL.path,
+        ])
+        return status == 0
+            ? Outcome("KiwiDesk service stopped", ok: true)
+            : Outcome(
+                "launchctl bootout failed: \(output)",
+                ok: false
+            )
+    }
+
+    /// The explicit kill-and-relaunch path: boots out any prior
+    /// registration (result discarded — it may not be loaded)
+    /// and bootstraps fresh.
+    public static func restart() -> Outcome {
+        if let failure = writePlist() {
+            return Outcome(failure, ok: false)
+        }
+        _ = launchctl(["bootout", domain, agentURL.path])
+        let started = bootstrap()
+        guard started.ok else { return started }
+        return Outcome("KiwiDesk service restarted", ok: true)
+    }
+
+    /// Reports whether the agent is loaded and, if launchd has it
+    /// running, its pid. A query — always exit 0.
+    public static func status() -> Outcome {
+        let (status, output) = printState()
+        guard status == 0 else {
+            return Outcome(
+                "KiwiDesk service is not running",
+                ok: true
+            )
+        }
+        return Outcome(
+            statusMessage(pid: parsePID(from: output)),
+            ok: true
+        )
+    }
+
+    // MARK: - Helpers (pure — unit-tested)
+
+    /// The `status` line for a loaded agent: names the pid when
+    /// launchd is running the process, else flags loaded-but-idle.
+    static func statusMessage(pid: Int32?) -> String {
+        if let pid {
+            return "KiwiDesk service is running (pid \(pid))"
+        }
+        return "KiwiDesk service is loaded but not running"
+    }
+
+    /// Extracts the `pid = N` line from `launchctl print` output.
+    static func parsePID(from output: String) -> Int32? {
+        for raw in output.split(separator: "\n") {
+            let line = raw.trimmingCharacters(in: .whitespaces)
+            guard line.hasPrefix("pid = ") else { continue }
+            let value = line.dropFirst("pid = ".count)
+                .trimmingCharacters(in: .whitespaces)
+            // Keep scanning if this line's value is malformed
+            // rather than giving up on the whole output.
+            if let pid = Int32(value) { return pid }
+        }
+        return nil
+    }
+
+    // MARK: - launchctl
+
+    private static var domain: String {
+        "gui/\(getuid())"
+    }
+
+    /// True when launchd has the agent loaded in this GUI domain.
+    private static func isLoaded() -> Bool {
+        printState().status == 0
+    }
+
+    private static func printState() -> (
+        status: Int32, output: String
+    ) {
+        launchctl(["print", "\(domain)/\(label)"])
+    }
+
+    private static func bootstrap() -> Outcome {
+        let (status, output) = launchctl([
+            "bootstrap", domain, agentURL.path,
+        ])
+        return status == 0
+            ? Outcome("KiwiDesk service started", ok: true)
+            : Outcome(
+                "launchctl bootstrap failed: \(output)",
+                ok: false
+            )
+    }
+
+    /// (Re)writes the LaunchAgent plist. Returns an error message
+    /// on failure, `nil` on success.
+    private static func writePlist() -> String? {
         let executable =
             Bundle.main.executableURL?.path
             ?? CommandLine.arguments[0]
@@ -59,38 +195,10 @@ public enum ServiceManager {
                 atomically: true,
                 encoding: .utf8
             )
+            return nil
         } catch {
             return "failed to write LaunchAgent: \(error)"
         }
-        // A previous registration blocks bootstrap.
-        _ = launchctl(["bootout", domain, agentURL.path])
-        let (status, output) = launchctl([
-            "bootstrap", domain, agentURL.path,
-        ])
-        return status == 0
-            ? "KiwiDesk service started"
-            : "launchctl bootstrap failed: \(output)"
-    }
-
-    public static func stop() -> String {
-        let (status, output) = launchctl([
-            "bootout", domain, agentURL.path,
-        ])
-        return status == 0
-            ? "KiwiDesk service stopped"
-            : "launchctl bootout failed: \(output)"
-    }
-
-    public static func restart() -> String {
-        let stopped = stop()
-        let started = start()
-        return "\(stopped)\n\(started)"
-    }
-
-    // MARK: - launchctl
-
-    private static var domain: String {
-        "gui/\(getuid())"
     }
 
     private static func launchctl(

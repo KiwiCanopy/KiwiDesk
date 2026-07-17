@@ -22,21 +22,35 @@ func runCLI(_ arguments: [String]) -> Int32 {
 
 private func runService(_ arguments: [String]) -> Int32 {
     guard arguments.count > 2 else {
-        print("usage: KiwiDesk service start|stop|restart")
+        print("usage: KiwiDesk service start|stop|restart|status")
         return 1
     }
+    let outcome: ServiceManager.Outcome
     switch arguments[2] {
     case "start":
-        print(ServiceManager.start())
+        outcome = ServiceManager.start()
     case "stop":
-        print(ServiceManager.stop())
+        outcome = ServiceManager.stop()
     case "restart":
-        print(ServiceManager.restart())
+        outcome = ServiceManager.restart()
+    case "status":
+        outcome = ServiceManager.status()
     default:
         print("unknown service command: \(arguments[2])")
         return 1
     }
-    return 0
+    // Real launchctl failures exit non-zero and go to stderr per
+    // the CLI's stream contract (message on stderr, data on
+    // stdout); the ordinary already-running / not-running cases
+    // stay 0 on stdout (#328).
+    if outcome.ok {
+        print(outcome.message)
+    } else {
+        FileHandle.standardError.write(
+            Data("\(outcome.message)\n".utf8)
+        )
+    }
+    return outcome.ok ? 0 : 1
 }
 
 private func runSocketCommand(
@@ -106,7 +120,7 @@ private let cliUsage = """
       KiwiDesk                        run the app
       KiwiDesk <command> [args...]    send an IPC command
       KiwiDesk --version              print version and exit
-      KiwiDesk service start|stop|restart
+      KiwiDesk service start|stop|restart|status
       KiwiDesk subscribe [events...]  stream events (NDJSON)
 
     examples:
