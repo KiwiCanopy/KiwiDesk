@@ -40,6 +40,53 @@ them directly. **Saving never rewrites `init.lua`**: the file is
 yours alone, for event hooks and custom Lua. For the full GUI
 workflow, see the [user guide](user-guide.md).
 
+### What coexists with the Settings app, and what doesn't
+
+Whether the Settings app or `init.lua` owns your configuration
+depends on **what your `init.lua` declares** — not merely on
+whether the file exists.
+
+**Coexists — stays GUI-managed.** Anything that isn't a setting
+runs happily alongside `gui.json`. On first launch KiwiDesk still
+seeds the default profile, spaces, and shortcuts, and your code
+still runs:
+
+```lua
+-- Event hooks, control flow, helpers, print, locals — all fine.
+for _, event in ipairs({ "space_change", "focus_change" }) do
+  KiwiDesk.on(event, function()
+    KiwiDesk.exec("sketchybar --trigger kiwidesk_update")
+  end)
+end
+```
+
+**Makes `init.lua` the owner — Lua-managed.** Declaring any
+*setting* hands ownership to the file: KiwiDesk will **not** seed a
+`gui.json` over it (that would silently override your Lua), and the
+Settings app offers **Adopt into the GUI** instead. Settings are:
+
+- Any `set_*` verb on the `KiwiDesk` table — `set_mode`,
+  `set_gap_global`, `set_min_window_size`, …
+- Any namespaced layout setter — `bsp.set_ratio_h`,
+  `stack.set_master_ratio`, `scroll.set_slot_size`,
+  `grid.set_type`, `monocle.*`, `track.*`, `drag.*`, `border.*`,
+  `app_bar.*`, `animations.*`, `mouse.*`, `quit.*` — plus
+  `border.fit_gaps`.
+- Window-rule tables — `app_rules`, `float_rules`, `ignore_rules`.
+- Keybindings — `KiwiDesk.bind`, `KiwiDesk.define_mode`,
+  `KiwiDesk.bind_profile_to_native_space`.
+
+```lua
+-- Any one of these makes init.lua the config owner:
+KiwiDesk.set_mode(1, "stack")
+bsp.set_ratio_h(0.6)
+float_rules = { "com.apple.calculator" }
+```
+
+To keep the GUI in charge, put settings like these in the Settings
+app (or **Adopt** an existing file), and reserve `init.lua` for
+hooks and custom Lua.
+
 ## Navigation & Movement
 
 The verbs you bind to shortcuts to move focus and windows
