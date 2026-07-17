@@ -86,6 +86,27 @@ struct ShortcutsReferenceTests {
         #expect(focus?.rows.first?.icon == "1.square")
     }
 
+    @Test("a space named a direction word doesn't get an arrow")
+    func spaceNamedDirectionNoArrow() {
+        reset()
+        // A space literally named "left" must get its space glyph,
+        // not the directional arrow (substring false-match guard).
+        let reference = build(
+            [
+                binding(
+                    "option+0",
+                    "KiwiDesk.focus_space(\"left\")",
+                    .navigation
+                )
+            ],
+            spaces: [SpaceID("left")]
+        )
+        let focus = reference.controls.first {
+            $0.title == "Focus"
+        }
+        #expect(focus?.rows.first?.icon == "squares.below.rectangle")
+    }
+
     @Test("empty bands are dropped, not rendered blank")
     func emptyBandsDropped() {
         reset()

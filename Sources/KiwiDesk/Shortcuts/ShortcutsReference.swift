@@ -242,6 +242,12 @@ enum ShortcutsReferenceBuilder {
     /// switch-mode, custom Lua) stay label-only by design. Panel-only:
     /// the shared catalog and the editor rows are untouched.
     private static func directionalIcon(for lua: String) -> String? {
+        // A space or mode literally named a direction word would
+        // otherwise false-match on the substring — those commands own
+        // their own glyphs (space fallback / none), so bail first.
+        guard !lua.contains("_space"),
+            !lua.contains("switch_mode")
+        else { return nil }
         if lua.contains("\"left\"") { return "arrow.left" }
         if lua.contains("\"right\"") { return "arrow.right" }
         if lua.contains("\"up\"") { return "arrow.up" }

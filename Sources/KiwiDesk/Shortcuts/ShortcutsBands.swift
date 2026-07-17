@@ -59,7 +59,7 @@ struct ShortcutSubgroupView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(subgroup.title)
-                .font(.subheadline)
+                .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
             ForEach(subgroup.rows) { ShortcutRowView(row: $0) }
         }
@@ -92,7 +92,12 @@ struct ControlsBand: View {
         let split = Self.balance(subgroups)
         HStack(alignment: .top, spacing: 32) {
             column(split.left)
-            if !split.right.isEmpty {
+            if split.right.isEmpty {
+                // Keep a solo column at half width so its rows don't
+                // stretch across the whole panel with a ballooning
+                // label↔combo gap.
+                Color.clear.frame(maxWidth: .infinity)
+            } else {
                 column(split.right)
             }
         }

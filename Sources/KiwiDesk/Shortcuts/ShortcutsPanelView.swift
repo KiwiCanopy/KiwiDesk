@@ -20,7 +20,9 @@ struct ShortcutsPanelView: View {
         }
         .frame(width: 760)
         .background(.regularMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .clipShape(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+        )
     }
 
     // MARK: - Mode label
@@ -33,9 +35,21 @@ struct ShortcutsPanelView: View {
         if let name = reference?.modeName,
             name != KeyMode.defaultName
         {
+            // Capsule treatment (the Shortcuts editor's mode-chip
+            // vocabulary) so it reads as state, not chrome — it's the
+            // only mode indicator now. Bounded + truncated so a long
+            // custom name can't collide with the hint or the button.
             Text(name)
                 .font(.caption.weight(.medium))
-                .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 3)
+                .background(
+                    Capsule()
+                        .fill(Color.accentColor.opacity(0.2))
+                )
+                .frame(maxWidth: 280)
         }
     }
 
