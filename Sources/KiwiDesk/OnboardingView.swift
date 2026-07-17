@@ -9,6 +9,7 @@ final class OnboardingModel {
         case welcome
         case grant
         case separateSpaces
+        case readyToExplore
     }
 
     var step: Step = .welcome
@@ -17,6 +18,13 @@ final class OnboardingModel {
     /// Opens System Settings › Desktop & Dock (#8).
     var onOpenSpaceSettings: () -> Void = {}
     var onFinish: () -> Void = {}
+    /// Closes onboarding and opens the dashboard on Layout — the
+    /// "Open Settings" action of the discovery card (#331).
+    var onExploreSettings: () -> Void = {}
+    /// Whether the one-time post-setup discovery card should be
+    /// shown now (false once its persisted flag is set). Gated on
+    /// that flag, NEVER AX trust (#331).
+    var wantsDiscovery: () -> Bool = { false }
     /// Live count of connected displays, so the recommendation
     /// fires only in the multi-display state that can actually
     /// suffer ambiguous Desktop→profile bindings (#8).
@@ -30,6 +38,17 @@ final class OnboardingModel {
     func continueAfterAccessibility(recommendSharedSpaces recommend: Bool) {
         if recommend {
             step = .separateSpaces
+        } else {
+            finishOrDiscover()
+        }
+    }
+
+    /// The shared completion point every grant path converges on
+    /// (grant-only and grant+Spaces): show the one-time discovery
+    /// card if it's still pending, else just close (#331).
+    func finishOrDiscover() {
+        if wantsDiscovery() {
+            step = .readyToExplore
         } else {
             onFinish()
         }
@@ -51,6 +70,8 @@ struct OnboardingView: View {
                 grant
             case .separateSpaces:
                 separateSpaces
+            case .readyToExplore:
+                readyToExplore
             }
         }
         .padding(32)
@@ -201,7 +222,7 @@ struct OnboardingView: View {
             }
             .controlSize(.large)
             Button(L("onboarding.continue", "Continue")) {
-                model.onFinish()
+                model.finishOrDiscover()
             }
             .keyboardShortcut(.defaultAction)
         }
@@ -217,6 +238,47 @@ struct OnboardingView: View {
 
             Basic tiling still works if you keep it on. Changing \
             this setting requires logging out and back in.
+            """
+        )
+    }
+
+    /// The one-time closing card (#331): points a fresh user at
+    /// Settings and teaches that the app lives in the menu bar.
+    /// "Not Now" is a real equal-weight exit — no forced visit,
+    /// no repeat. Both routes hand off to the menu-bar popover.
+    private var readyToExplore: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "sparkles")
+                .font(.system(size: 56))
+                .foregroundStyle(.green)
+            Text(L("onboarding.ready.title", "You're ready to go"))
+                .font(.title.bold())
+                .multilineTextAlignment(.center)
+            Text(readyToExploreBody)
+                .multilineTextAlignment(.center)
+                .foregroundStyle(.secondary)
+            Spacer()
+            Button(
+                L("onboarding.ready.open_settings", "Open Settings")
+            ) {
+                model.onExploreSettings()
+            }
+            .keyboardShortcut(.defaultAction)
+            .controlSize(.large)
+            Button(L("onboarding.ready.not_now", "Not Now")) {
+                model.onFinish()
+            }
+        }
+    }
+
+    private var readyToExploreBody: String {
+        L(
+            "onboarding.ready.body",
+            """
+            KiwiDesk is now arranging your windows. Open Settings \
+            to choose a layout, set up your spaces, and make it \
+            feel like yours — you can always get back here from \
+            the menu bar.
             """
         )
     }

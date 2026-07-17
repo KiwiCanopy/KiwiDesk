@@ -34,6 +34,48 @@ struct OnboardingTests {
         #expect(finished)
     }
 
+    @Test("discovery pending routes grant completion to the card")
+    func discoveryCardWhenPending() {
+        let model = OnboardingModel()
+        var finished = false
+        model.onFinish = { finished = true }
+        model.wantsDiscovery = { true }
+
+        model.continueAfterAccessibility(
+            recommendSharedSpaces: false
+        )
+
+        #expect(model.step == .readyToExplore)
+        #expect(!finished)
+    }
+
+    @Test("the Spaces path also converges on the discovery card")
+    func discoveryCardAfterSeparateSpaces() {
+        let model = OnboardingModel()
+        var finished = false
+        model.onFinish = { finished = true }
+        model.wantsDiscovery = { true }
+
+        // The `separateSpaces` "Continue" button's action.
+        model.finishOrDiscover()
+
+        #expect(model.step == .readyToExplore)
+        #expect(!finished)
+    }
+
+    @Test("an already-shown discovery just finishes")
+    func noDiscoveryCardWhenShown() {
+        let model = OnboardingModel()
+        var finished = false
+        model.onFinish = { finished = true }
+        model.wantsDiscovery = { false }
+
+        model.finishOrDiscover()
+
+        #expect(model.step == .welcome)
+        #expect(finished)
+    }
+
     @Test("single display never triggers the recommendation")
     func singleDisplayNeverRecommends() {
         // A single display can't have ambiguous Desktop→profile

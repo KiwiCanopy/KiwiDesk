@@ -7,6 +7,10 @@ import KiwiDeskCore
 /// `StatusItemController` file.
 extension StatusItemController {
     func menuNeedsUpdate(_ menu: NSMenu) {
+        // Opening the quick menu IS the discovery popover's success
+        // case — the user found the icon. Close it so the hint and
+        // the menu never overlap (#331).
+        dismissDiscoveryPopover()
         menu.removeAllItems()
         let profiles = profilesProvider()
 
