@@ -43,6 +43,14 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         model.refreshProfiles()
     }
 
+    /// Shows the dashboard already navigated to `destination` —
+    /// the read-only shortcuts panel's "Edit in Settings…" bridge
+    /// (#326). The request is one-shot; `SettingsView` clears it.
+    func show(navigatingTo destination: SettingsDestination) {
+        model.pendingDestination = destination
+        show()
+    }
+
     /// Shows the dashboard, refreshing from the backend so the
     /// active profile and any external config edits are current.
     func show() {

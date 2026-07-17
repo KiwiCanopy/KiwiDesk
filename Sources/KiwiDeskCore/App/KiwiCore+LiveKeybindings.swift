@@ -42,6 +42,14 @@ public struct LiveKeybindingSnapshot: Sendable {
     let modes: [KeyMode]
     let activeMode: String
     let generation: UInt64
+
+    /// The resolved key modes currently installed — read by the
+    /// read-only shortcuts reference panel (#326). The rollback
+    /// token (`generation`) stays internal; only the display data
+    /// is exposed.
+    public var keyModes: [KeyMode] { modes }
+    /// The runtime-active mode's name.
+    public var activeModeName: String { activeMode }
 }
 
 extension KiwiCore {

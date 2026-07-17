@@ -1,0 +1,220 @@
+import AppKit
+import KiwiDeskCore
+import SwiftUI
+
+/// A floating panel that closes on Esc and, via the controller's
+/// resign-key handler, on click-away. Borderless, so it must opt
+/// into key status (`canBecomeKey`) to receive the keystroke — and
+/// the app is activated on show, or an accessory app's key window
+/// never actually receives keyboard events.
+final class ShortcutsPanel: NSPanel {
+    var onCancel: () -> Void = {}
+
+    override var canBecomeKey: Bool { true }
+
+    override func cancelOperation(_ sender: Any?) {
+        onCancel()
+    }
+
+    /// Explicit Esc handler as well as `cancelOperation` — a
+    /// borderless panel hosting a SwiftUI view doesn't always route
+    /// Esc through the cancel action, so catch the keystroke here
+    /// too (53 = Escape).
+    override func keyDown(with event: NSEvent) {
+        if event.keyCode == 53 {
+            onCancel()
+            return
+        }
+        super.keyDown(with: event)
+    }
+}
+
+/// Owns the read-only shortcuts reference panel (#326). Retained by
+/// `AppDelegate` so it survives close/reopen. Every show reads the
+/// live keybinding snapshot fresh and re-centers on the screen
+/// under the pointer — the panel has no placement of its own to
+/// remember (a summoned reference, not a window the user parks).
+@MainActor
+final class ShortcutsPanelController: NSObject, NSWindowDelegate {
+    private let core: KiwiCore
+    /// Opens Settings ▸ Shortcuts — the one bridge to editing.
+    private let onEdit: () -> Void
+    private var panel: ShortcutsPanel?
+
+    init(core: KiwiCore, onEdit: @escaping () -> Void) {
+        self.core = core
+        self.onEdit = onEdit
+        super.init()
+    }
+
+    func show() {
+        let reference = buildReference()
+        let root = ShortcutsPanelView(
+            reference: reference,
+            onEdit: { [weak self] in
+                self?.close()
+                self?.onEdit()
+            }
+        )
+        let panel = self.panel ?? makePanel()
+        self.panel = panel
+        panel.contentView = NSHostingView(
+            rootView: root.environmentObject(
+                LocalizationManager.shared
+            )
+        )
+        resize(panel)
+        center(panel)
+        // Activate the app so a menu-bar (accessory) app's key window
+        // actually receives keystrokes — without this, Esc and
+        // click-away never fire and the panel can't be dismissed.
+        // Accessory-level: no Dock icon appears (unlike the dashboard,
+        // which promotes to regular). KiwiDesk's tiling hotkeys stay
+        // global Carbon and keep firing while it's open; the panel is
+        // a stateless summon that rebuilds its content on each open,
+        // so a mode switch is reflected the next time it's opened.
+        NSApp.activate(ignoringOtherApps: true)
+        panel.makeKeyAndOrderFront(nil)
+    }
+
+    /// Re-summoning while open dismisses it (the menu row toggles),
+    /// so there is a focus-independent close even if the pointer
+    /// never leaves the panel.
+    func toggle() {
+        if let panel, panel.isVisible {
+            close()
+        } else {
+            show()
+        }
+    }
+
+    private func close() {
+        panel?.orderOut(nil)
+    }
+
+    // MARK: - Panel construction
+
+    private func makePanel() -> ShortcutsPanel {
+        let panel = ShortcutsPanel(
+            contentRect: .zero,
+            styleMask: [.borderless, .fullSizeContentView],
+            backing: .buffered,
+            defer: true
+        )
+        panel.isOpaque = false
+        panel.backgroundColor = .clear
+        panel.hasShadow = true
+        panel.level = .floating
+        panel.isReleasedWhenClosed = false
+        panel.animationBehavior = .utilityWindow
+        panel.collectionBehavior = [
+            .canJoinAllSpaces, .fullScreenAuxiliary,
+        ]
+        panel.delegate = self
+        panel.onCancel = { [weak self] in self?.close() }
+        return panel
+    }
+
+    // MARK: - Sizing & placement
+
+    /// Hug the content, capped at 70% of the active screen's
+    /// height (hard ceiling 720pt) — past that the inner scroll
+    /// view takes over. Width is fixed by the view (760pt).
+    private func resize(_ panel: ShortcutsPanel) {
+        guard let content = panel.contentView else { return }
+        let fitting = content.fittingSize
+        let screen =
+            screenUnderPointer()?.visibleFrame.height
+            ?? fitting.height
+        let ceiling = min(screen * 0.7, 720)
+        let height = min(fitting.height, ceiling)
+        panel.setContentSize(
+            NSSize(width: fitting.width, height: height)
+        )
+    }
+
+    private func center(_ panel: ShortcutsPanel) {
+        guard let screen = screenUnderPointer() else {
+            panel.center()
+            return
+        }
+        let frame = screen.visibleFrame
+        let size = panel.frame.size
+        let origin = NSPoint(
+            x: frame.midX - size.width / 2,
+            y: frame.midY - size.height / 2
+        )
+        panel.setFrameOrigin(origin)
+    }
+
+    private func screenUnderPointer() -> NSScreen? {
+        let mouse = NSEvent.mouseLocation
+        return NSScreen.screens.first {
+            NSMouseInRect(mouse, $0.frame, false)
+        } ?? NSScreen.main
+    }
+
+    // MARK: - Reference data
+
+    /// The shortcuts for the active mode. Nil ONLY when the config
+    /// is genuinely owned by `init.lua` (not GUI-managed) — the view
+    /// then shows its "managed by init.lua" placeholder.
+    ///
+    /// Prefers the live, resolved snapshot (what Carbon actually has
+    /// installed). When window management is paused — no Accessibility
+    /// permission, or bindings not applied yet — there is no snapshot;
+    /// for a GUI-managed config we fall back to the CONFIGURED modes
+    /// from gui.json so the user still sees their shortcuts (defined,
+    /// just not live right now) rather than a misleading placeholder.
+    private func buildReference() -> ShortcutsReference? {
+        let modes: [KeyMode]
+        let activeMode: String
+        let config: GuiConfig
+        if let snapshot = core.liveKeybindingSnapshot() {
+            // Live: the running engine's spaces match the resolved
+            // bindings, so the live-overlaid config is correct.
+            modes = snapshot.keyModes
+            activeMode = snapshot.activeModeName
+            config = core.loadGuiConfig()
+        } else if core.isGuiManaged,
+            let raw = core.persistedGuiConfig()
+        {
+            // Paused (no Accessibility): the engine hasn't discovered
+            // any spaces, so loadGuiConfig would overlay an EMPTY live
+            // space list and misfile every space shortcut into Custom.
+            // Read the persisted gui.json directly — it keeps the
+            // authored spaces and modes.
+            modes = raw.modes
+            activeMode = raw.modes.first?.name ?? KeyMode.defaultName
+            config = raw
+        } else {
+            return nil
+        }
+        let mode =
+            modes.first { $0.name == activeMode }
+            ?? modes.first
+            ?? KeyMode.defaultMode
+        // Two-source read: the modes supply the bindings; the config
+        // supplies only spaces / icons / step, used to *generate
+        // candidate preset rows* that are then intersected with the
+        // actual bindings. A transient disagreement (space or step
+        // edited but not yet re-applied) can only misfile a binding
+        // into Custom, never hide or invent one — safe for a
+        // read-only glance panel.
+        return ShortcutsReferenceBuilder.build(
+            mode: mode,
+            spaces: config.spaces,
+            spaceIcons: config.settings.spaceIcons,
+            resizeStep: Int(config.settings.resizeStep),
+            modeNames: modes.map(\.name)
+        )
+    }
+
+    // MARK: - NSWindowDelegate
+
+    /// Click-away dismissal: losing key closes the panel, the
+    /// Character-Viewer / Quick-Look dismissal gesture.
+    func windowDidResignKey(_ notification: Notification) {
+        close()
+    }
+}

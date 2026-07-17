@@ -36,6 +36,23 @@ struct SettingsView: View {
                 selection = .spaces
             }
         }
+        // A deep-link request (#326 "Edit in Settings…") navigates
+        // the sidebar, then clears so it fires once. Guarded by the
+        // same reachability filter as every other nav path (#18).
+        .onChange(of: model.pendingDestination) { _, destination in
+            consume(destination)
+        }
+        .onAppear { consume(model.pendingDestination) }
+    }
+
+    private func consume(_ destination: SettingsDestination?) {
+        guard let destination else { return }
+        if destination.isReachable(
+            editingStoredProfile: model.editingStoredProfile
+        ) {
+            selection = destination
+        }
+        model.pendingDestination = nil
     }
 
     /// The structured settings shell: a fixed-width source list

@@ -36,6 +36,11 @@ final class SettingsModel: ObservableObject {
     /// against the as-loaded baselines, not a latched flag —
     /// manually undoing an edit clears the footer again.
     @Published var isDirty = false
+    /// A one-shot deep-link request: set to open the dashboard on
+    /// a specific sidebar destination (the read-only shortcuts
+    /// panel's "Edit in Settings…" bridge, #326). `SettingsView`
+    /// consumes and clears it.
+    @Published var pendingDestination: SettingsDestination?
     /// The state as last loaded/saved — what `isDirty`
     /// compares against. Set only by `apply(_:)` (every clean
     /// transition funnels through `reload()`).

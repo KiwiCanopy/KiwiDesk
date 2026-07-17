@@ -69,8 +69,17 @@ extension StatusItemController {
 
         // App chrome: Settings sits low, next to Quit, as in
         // every native menu-bar extra — not mid-list among the
-        // workspace actions.
+        // workspace actions. "View Shortcuts…" shares Settings'
+        // separator group and reads glance → editor (#326).
         menu.addItem(.separator())
+        let shortcuts = NSMenuItem(
+            title: L("menu.view_shortcuts", "View Shortcuts…"),
+            action: #selector(showShortcuts),
+            keyEquivalent: ""
+        )
+        shortcuts.target = self
+        shortcuts.image = symbol("keyboard")
+        menu.addItem(shortcuts)
         let settings = NSMenuItem(
             title: L("menu.settings", "Settings…"),
             action: #selector(openDashboard),
@@ -146,6 +155,10 @@ extension StatusItemController {
 
     @objc private func openDashboard() {
         onOpenDashboard()
+    }
+
+    @objc private func showShortcuts() {
+        onShowShortcuts()
     }
 
     @objc private func showConfigIssues() {

@@ -33,6 +33,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         return created
     }
     private let configIssues = ConfigIssuesWindowController()
+    /// The read-only shortcuts reference panel (#326), retained so
+    /// it survives close/reopen. Its "Edit in Settings…" bridge
+    /// opens the dashboard already navigated to Shortcuts.
+    private var shortcutsPanel: ShortcutsPanelController?
     /// Held strongly so the source stays active for the
     /// lifetime of the process.
     private var sigtermSource: DispatchSourceSignal?
@@ -118,6 +122,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
                 self.core.onLog("profile save failed: \(error)")
                 self.presentLayoutSaveFailure(error)
             }
+        }
+        let shortcutsPanel = ShortcutsPanelController(
+            core: core
+        ) { [weak self] in
+            self?.dashboard.show(navigatingTo: .shortcuts)
+        }
+        self.shortcutsPanel = shortcutsPanel
+        statusItem.onShowShortcuts = { [weak shortcutsPanel] in
+            shortcutsPanel?.toggle()
         }
         statusItem.onShowConfigIssues = { [weak self] in
             self?.configIssues.show()
