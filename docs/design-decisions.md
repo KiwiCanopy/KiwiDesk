@@ -13,6 +13,27 @@ Settings redesign (#68, PR #88) unless noted; deeper rationale
 lives in the linked issues. Architecture and code guardrails
 live in `AGENTS.md`, not here.
 
+## Product principle: approachable by default, powerful on demand
+
+KiwiDesk should give a new user a good tiling setup with almost no
+configuration — strong defaults and a handful of obvious controls.
+That simplicity must never cap what's achievable: beneath every easy
+surface is a deeper layer (Lua config, profiles, advanced layouts,
+per-space overrides) that's there when wanted and never required to
+begin. Depth is a capability you grow into, not a cost you pay
+upfront.
+
+This sits alongside the GUI north-star (`AGENTS.md` §2 — simplicity,
+intuitiveness, Apple-native feeling), not inside it: the north-star
+governs how a surface *feels* and how to break ties; this principle
+governs the *shape of capability* — a shallow floor with a high
+ceiling. It's why "simplicity-first" doesn't mean "underpowered," and
+it's a deeply Apple-native ethos (products that read simple but
+reward digging in). The read-only shortcuts panel (#326) is the shape
+in miniature: a dead-simple glance surface, with one "Edit in
+Settings…" bridge down to the full editor — simple entry, deeper
+layer one click away, never forced.
+
 ## Accepted limitations
 
 Some behaviors are *bugs by design* — accepted consequences of a

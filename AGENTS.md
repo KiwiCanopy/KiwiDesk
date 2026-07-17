@@ -95,7 +95,18 @@ at directory altitude — see **`docs/architecture.md`**.
    belongs in macOS System Settings, not like a bespoke control
    panel. When a native pattern exists, use it; when unsure, ask a
    `ui-designer` consult framed by these three priorities before
-   inventing a layout. Settled conventions that fall out of this
+   inventing a layout.
+   Companion principle — **approachable by default, powerful on
+   demand.** A new user gets a good tiling setup with almost no
+   configuration; that simplicity must never *cap* what's
+   achievable — beneath every easy surface is a deeper layer (Lua
+   config, profiles, advanced layouts, per-space overrides) there
+   when wanted and never required to begin. Depth is a capability
+   the user grows into, not a cost paid upfront; simplicity-first is
+   the entry point, not the ceiling (the #326 panel is the shape: a
+   glance surface with one "Edit in Settings…" bridge down to the
+   full editor). See `docs/design-decisions.md`.
+   Settled conventions that fall out of this
    (extend, don't relitigate): **group by topic, never by widget
    type** — a toggle and the control it gates are one decision, so
    the toggle sits directly *above* the control it gates, never in

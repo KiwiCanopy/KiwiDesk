@@ -1,3 +1,8 @@
+---
+title: Architecture
+description: How work flows through KiwiDesk's subsystems — the end-to-end pipelines, at directory altitude.
+---
+
 # Architecture — how work flows through KiwiDesk
 
 Contributor-facing companion to **AGENTS.md §1** (the subsystem map).

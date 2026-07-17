@@ -11,6 +11,11 @@
 Flat arrays instead of i3 trees · configured in Lua · six
 layouts · never disables SIP.
 
+**Start simple. Grow without limits.** KiwiDesk tiles your windows
+the moment you install it — no config required. When you want more,
+go deeper: custom Lua, profiles, advanced layouts, per-space rules.
+Powerful when you reach for it, never in your way.
+
 <br>
 
 ![macOS 14+](https://img.shields.io/badge/macOS-14%2B-000000?logo=apple&logoColor=white)
