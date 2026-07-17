@@ -16,6 +16,10 @@ public final class AppBarOverlay {
         public let id: WindowID
         public let name: String
         public let icon: NSImage?
+        /// SketchyBar App Font ligature to render instead of
+        /// `icon` (#294); nil = native image. Resolved by the
+        /// driver so the overlay stays a dumb renderer.
+        public let glyph: String?
         /// Windows behind this item; > 1 for a group of
         /// adjacent same-app windows (shown as a badge).
         public let count: Int
@@ -24,11 +28,13 @@ public final class AppBarOverlay {
             id: WindowID,
             name: String,
             icon: NSImage?,
+            glyph: String? = nil,
             count: Int = 1
         ) {
             self.id = id
             self.name = name
             self.icon = icon
+            self.glyph = glyph
             self.count = count
         }
     }
@@ -203,6 +209,7 @@ public final class AppBarOverlay {
                 id: item.id,
                 name: item.name,
                 icon: item.icon,
+                glyph: item.glyph,
                 count: item.count,
                 active: active,
                 horizontal: m.horizontal,

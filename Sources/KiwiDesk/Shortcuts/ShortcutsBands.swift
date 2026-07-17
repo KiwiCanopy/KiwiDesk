@@ -37,7 +37,19 @@ struct ShortcutRowView: View {
     }
 
     @ViewBuilder private var leadingGlyph: some View {
-        if let bundleID = row.bundleID {
+        if let glyph = row.glyph {
+            // #294 App Font ligature, following the panel's
+            // text color like every glyph surface. Fixed slot
+            // width keeps the label indent uniform.
+            Text(glyph)
+                .font(
+                    Font(
+                        AppFont.font(size: 14)
+                            ?? .systemFont(ofSize: 14)
+                    )
+                )
+                .frame(width: 16, height: 16)
+        } else if let bundleID = row.bundleID {
             Image(
                 nsImage: AppIconCache.shared.icon(
                     forBundleID: bundleID

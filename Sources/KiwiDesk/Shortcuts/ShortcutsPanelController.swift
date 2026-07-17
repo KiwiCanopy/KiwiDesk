@@ -201,12 +201,39 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         // edited but not yet re-applied) can only misfile a binding
         // into Custom, never hide or invent one — safe for a
         // read-only glance panel.
-        return ShortcutsReferenceBuilder.build(
+        let reference = ShortcutsReferenceBuilder.build(
             mode: mode,
             spaces: config.spaces,
             spaceIcons: config.settings.spaceIcons,
             resizeStep: Int(config.settings.resizeStep),
             modeNames: modes.map(\.name)
+        )
+        return withAppGlyphs(
+            reference,
+            settings: config.settings
+        )
+    }
+
+    /// #294: when the bar renders App Font glyphs, the Apps
+    /// band leads with the same glyph so the two surfaces
+    /// agree; apps without one keep their bundle icon.
+    private func withAppGlyphs(
+        _ reference: ShortcutsReference,
+        settings: TilingSettings
+    ) -> ShortcutsReference {
+        guard settings.appBarStyle.iconSource == .appFont
+        else { return reference }
+        return ShortcutsReference(
+            modeName: reference.modeName,
+            controls: reference.controls,
+            apps: reference.apps.map { row in
+                var row = row
+                row.glyph = core.appFont.glyph(
+                    forAppName: row.label
+                )
+                return row
+            },
+            custom: reference.custom
         )
     }
 

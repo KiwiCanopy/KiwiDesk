@@ -12,6 +12,16 @@ import AppKit
 /// AppBarItemView+Layout.swift.
 final class AppBarItemView: NSView {
     let iconView = NSImageView()
+    /// SketchyBar App Font ligature shown in the icon slot when
+    /// the item carries a glyph (#294). Text, so it follows the
+    /// bar's text colors; purely presentational to AX (the item
+    /// announces the app name, never the ligature).
+    let glyphLabel: NSTextField = {
+        let tf = NSTextField(labelWithString: "")
+        tf.alignment = .center
+        tf.setAccessibilityElement(false)
+        return tf
+    }()
     let label = NSTextField(labelWithString: "")
     let accent = NSView()
     let badge: NSTextField = {
@@ -28,6 +38,9 @@ final class AppBarItemView: NSView {
     }()
 
     private var windowID = WindowID(0)
+    /// The untinted native icon, kept so state color changes
+    /// (hover, focus) can re-tint from the original (#294).
+    private var originalIcon: NSImage?
     var name = ""
     var horizontal = true
     /// The concrete edge the bar sits on; the active edge-mark
@@ -61,6 +74,7 @@ final class AppBarItemView: NSView {
         badge.wantsLayer = true
         badge.alignment = .center
         addSubview(iconView)
+        addSubview(glyphLabel)
         addSubview(label)
         addSubview(accent)
         addSubview(badge)
@@ -140,6 +154,7 @@ final class AppBarItemView: NSView {
         id: WindowID,
         name: String,
         icon: NSImage?,
+        glyph: String?,
         count: Int,
         active: Bool,
         horizontal: Bool,
@@ -154,9 +169,14 @@ final class AppBarItemView: NSView {
         self.isActive = active
         self.style = style
         isHovered = false
-        iconView.image = icon
+        originalIcon = icon
+        let showsGlyph =
+            glyph != nil && style.content != .name
+        glyphLabel.isHidden = !showsGlyph
+        glyphLabel.stringValue = glyph ?? ""
         iconView.isHidden =
-            style.content == .name || icon == nil
+            showsGlyph || style.content == .name
+            || icon == nil
         label.isHidden = style.content == .icon
         badge.isHidden = count < 2
         badge.stringValue = "\(count)"
@@ -173,9 +193,54 @@ final class AppBarItemView: NSView {
     /// top would muddy the icon and text) and the text color.
     private func applyColors() {
         label.textColor = NSColor(kiwiHex: textColorHex)
+        glyphLabel.textColor = NSColor(kiwiHex: textColorHex)
+        applyIcon()
         layer?.backgroundColor =
             NSColor(kiwiHex: boxColorHex).cgColor
         applyCornerRadius()
+    }
+
+    /// Icon recoloring per source (#294). `tinted_image` — and
+    /// the glyph mode's no-glyph fallback, so a glyph bar
+    /// stays monochrome — recolor the native image into the
+    /// state text color (normal/active/hover), the same ladder
+    /// the glyphs and labels follow; re-run on every state
+    /// color change. Tinted additionally honors
+    /// `tint_appearance`: a dark ramp renders the icon dark
+    /// (for light bars); `auto` follows the system appearance.
+    private func applyIcon() {
+        guard !iconView.isHidden,
+            let icon = originalIcon
+        else { return }
+        iconView.image =
+            style.iconSource == .appImage
+            ? icon
+            : icon.kiwiTinted(
+                with: NSColor(kiwiHex: textColorHex),
+                darkRamp: style.iconSource == .tintedImage
+                    && resolvedDarkRamp
+            )
+    }
+
+    /// `auto` = contrast the system appearance, like the
+    /// system's Tinted icon style: light mode gets dark icons,
+    /// dark mode light ones.
+    private var resolvedDarkRamp: Bool {
+        switch style.tintAppearance {
+        case .light: return false
+        case .dark: return true
+        case .auto:
+            return effectiveAppearance.bestMatch(
+                from: [.aqua, .darkAqua]
+            ) == .aqua
+        }
+    }
+
+    /// Re-resolve `auto` tinting when the system appearance
+    /// flips while the bar is showing.
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        applyColors()
     }
 
     /// The tab's bar-cross dimension (its thickness), which the
@@ -262,29 +327,5 @@ final class AppBarItemView: NSView {
             accent.layer?.backgroundColor =
                 NSColor(kiwiHex: style.highlightColor).cgColor
         }
-    }
-}
-
-/// A text field cell that centers its text vertically.
-final class IndicatorBarBadgeCell: NSTextFieldCell {
-    override func titleRect(forBounds rect: NSRect) -> NSRect {
-        var titleRect = super.titleRect(forBounds: rect)
-        let minimumHeight = cellSize(forBounds: rect).height
-        if titleRect.size.height > minimumHeight {
-            titleRect.origin.y +=
-                (titleRect.size.height - minimumHeight) / 2
-            titleRect.size.height = minimumHeight
-        }
-        return titleRect
-    }
-
-    override func drawInterior(
-        withFrame cellFrame: NSRect,
-        in controlView: NSView
-    ) {
-        super.drawInterior(
-            withFrame: titleRect(forBounds: cellFrame),
-            in: controlView
-        )
     }
 }

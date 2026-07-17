@@ -15,6 +15,9 @@ extension KiwiCore {
                 .processIdentifier
         }
         lastNativeSpace = NativeSpaces.activeSpaceNumber()
+        // Cheap and off-main; kicked here so the first glyph
+        // bar never renders an image-fallback frame.
+        appFont.preload()
         borders.start()
         loadConfig()
         sleepWake.start()

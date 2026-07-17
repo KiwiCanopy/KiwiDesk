@@ -21,6 +21,8 @@ enum AppBarFixtures {
         style.itemSize = 120
         style.itemGap = 3
         style.content = .name
+        style.iconSource = .appFont
+        style.tintAppearance = .dark
         style.groupAdjacentWindows = false
         style.fontSize = 15
         style.cornerRoundness = 5
@@ -47,6 +49,8 @@ enum AppBarFixtures {
         bar.itemSize = 88
         bar.itemGap = 9
         bar.content = .iconAndName
+        bar.iconSource = .appImage
+        bar.tintAppearance = .light
         bar.groupAdjacentWindows = true
         bar.fontSize = 20
         bar.cornerRoundness = 12

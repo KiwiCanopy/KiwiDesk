@@ -68,6 +68,34 @@ extension AppBarItemView {
         min(max(thickness * 0.42, 9), 28)
     }
 
+    /// Whether the icon slot is occupied at all — by the app
+    /// image or by an App Font glyph (#294); both share the
+    /// same square.
+    private var iconSlotHidden: Bool {
+        iconView.isHidden && glyphLabel.isHidden
+    }
+
+    /// Places whichever occupant the icon slot has: the image
+    /// fills the square; the glyph (text) sizes to its cell
+    /// and centers in it.
+    private func layoutIconSlot(in square: CGRect) {
+        if glyphLabel.isHidden {
+            iconView.frame = square
+            return
+        }
+        let size = square.height * 0.82
+        glyphLabel.font =
+            AppFont.font(size: size)
+            ?? .systemFont(ofSize: size)
+        let cell = glyphLabel.cell?.cellSize ?? .zero
+        glyphLabel.frame = CGRect(
+            x: square.midX - cell.width / 2,
+            y: square.midY - cell.height / 2,
+            width: cell.width,
+            height: cell.height
+        )
+    }
+
     /// Icon and name sit centered in the slot as one group;
     /// when space runs out, only the name shrinks — the icon
     /// always survives.
@@ -80,7 +108,7 @@ extension AppBarItemView {
         label.lineBreakMode = .byTruncatingTail
         label.stringValue = name
         let side =
-            iconView.isHidden
+            iconSlotHidden
             ? 0
             : max(
                 min(bounds.height, bounds.width) - pad * 2,
@@ -112,12 +140,14 @@ extension AppBarItemView {
                 / 2,
             pad
         )
-        if !iconView.isHidden {
-            iconView.frame = CGRect(
-                x: x,
-                y: (bounds.height - side) / 2,
-                width: side,
-                height: side
+        if !iconSlotHidden {
+            layoutIconSlot(
+                in: CGRect(
+                    x: x,
+                    y: (bounds.height - side) / 2,
+                    width: side,
+                    height: side
+                )
             )
             x += side + spacing
         }
@@ -136,7 +166,7 @@ extension AppBarItemView {
         let font = NSFont.systemFont(ofSize: effectiveFontSize)
         label.font = font
         let side =
-            iconView.isHidden
+            iconSlotHidden
             ? 0
             : max(
                 min(bounds.width, bounds.height) - pad * 2,
@@ -167,12 +197,14 @@ extension AppBarItemView {
                 / 2,
             pad
         )
-        if !iconView.isHidden {
-            iconView.frame = CGRect(
-                x: (bounds.width - side) / 2,
-                y: top,
-                width: side,
-                height: side
+        if !iconSlotHidden {
+            layoutIconSlot(
+                in: CGRect(
+                    x: (bounds.width - side) / 2,
+                    y: top,
+                    width: side,
+                    height: side
+                )
             )
             top += side + spacing
         }

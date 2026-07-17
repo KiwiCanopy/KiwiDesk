@@ -15,6 +15,11 @@ struct ShortcutRow: Identifiable {
     var icon: String? = nil
     /// App bundle id for a real 20pt icon (Apps band). Nil = none.
     var bundleID: String? = nil
+    /// App Font ligature (#294): set when the bar's icon source
+    /// is Glyphs and this app has one, so the panel's Apps band
+    /// matches the bar. Wins over `bundleID`; nil falls back to
+    /// the bundle icon.
+    var glyph: String? = nil
     /// Custom-Lua rows render their label monospaced.
     var monospaced: Bool = false
     /// Trailing accessory glyph for a non-default launch behavior

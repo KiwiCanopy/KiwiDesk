@@ -59,22 +59,28 @@ extension KiwiCore {
     }
 
     func barItem(
-        for group: [WindowID]
+        for group: [WindowID],
+        style: AppBarStyle
     ) -> AppBarOverlay.Item {
         let window = group.first.flatMap {
             state.windows[$0]
         }
+        let name = window?.appName ?? "?"
         // Clicking a collapsed group focuses its first
         // member; the resulting re-render expands the group
         // into individual items (see barGroups).
         return AppBarOverlay.Item(
             id: group.first ?? WindowID(0),
-            name: window?.appName ?? "?",
+            name: name,
             icon: window.flatMap {
                 NSRunningApplication(
                     processIdentifier: $0.pid
                 )?.icon
             },
+            // Nil (no glyph / map still loading / font absent)
+            // falls back to the native image in the item view.
+            glyph: style.iconSource == .appFont
+                ? appFont.glyph(forAppName: name) : nil,
             count: group.count
         )
     }

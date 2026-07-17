@@ -15,6 +15,10 @@ public final class KiwiCore {
     public let drag = DragCoordinator()
     public let dragOverlay = DragOverlay()
     public let appBars = AppBarManager()
+    /// Glyph-vs-image icon decisions for bar items (#294),
+    /// shared by the App Bar, the Space Bar (#293) and the
+    /// shortcuts panel.
+    public let appFont = AppFontResolver()
     /// Focus-window border overlays (#278), one ring per bordered
     /// window. Driven by `updateBorders()` inside `retile()`.
     public let borders = BorderManager()
@@ -229,6 +233,11 @@ public final class KiwiCore {
         wireDrag()
         appBars.onSelect = { [weak self] id in
             self?.focusWindow(id, warp: true)
+        }
+        appFont.onLoad = { [weak self] in
+            // Bars built before the glyph map arrived rendered
+            // image fallbacks; one refresh swaps glyphs in.
+            self?.updateAppBar()
         }
         appBars.onMove = { [weak self] space, from, to in
             self?.moveBarItem(space: space, from: from, to: to)

@@ -28,6 +28,42 @@ enum AppBarOptions {
         ),
         (.gap, L("app_bar.active_indicator.gap", "Gap")),
     ]
+    /// #294 icon rendering. "System default" = the icon as
+    /// macOS hands it out; Dark/Clear system styles are not
+    /// obtainable via public API, so they are deliberately
+    /// absent here.
+    @MainActor
+    static let iconSource: [(BarAppIconSource, String)] = [
+        (
+            .appImage,
+            L("app_bar.icon_source.app_image", "System default")
+        ),
+        (
+            .tintedImage,
+            L("app_bar.icon_source.tinted_image", "Tinted")
+        ),
+        (
+            .appFont,
+            L("app_bar.icon_source.app_font", "Glyphs")
+        ),
+    ]
+    /// Brightness of Tinted icons; Auto follows the system
+    /// appearance like the system's own Tinted style.
+    @MainActor
+    static let tintAppearance: [(BarTintAppearance, String)] = [
+        (
+            .auto,
+            L("app_bar.tint_appearance.auto", "Auto")
+        ),
+        (
+            .light,
+            L("app_bar.tint_appearance.light", "Light")
+        ),
+        (
+            .dark,
+            L("app_bar.tint_appearance.dark", "Dark")
+        ),
+    ]
     @MainActor
     static let content: [(AppBarStyle.Content, String)] = [
         (.icon, L("app_bar.content.icon", "Icon")),

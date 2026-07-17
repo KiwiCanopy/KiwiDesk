@@ -105,6 +105,78 @@ struct GlobalAppBarSection: View {
             selection: $style.content,
             options: AppBarOptions.content.map { ($0.1, $0.0) }
         )
+        // #294 icon rendering, directly below the Content
+        // control it depends on; greyed (never hidden, #171)
+        // when Name-only content shows no icons at all.
+        DropdownRow(
+            label: iconSourceLabel,
+            help: L(
+                "app_bar.icon_source.help",
+                "How app icons are drawn. Tinted recolors each "
+                    + "icon to match the bar's text colors — "
+                    + "Text, Active text, and Hover text in the "
+                    + "color settings below — so those colors "
+                    + "also decide the icon tint. Glyphs shows "
+                    + "a symbol from KiwiDesk's built-in icon "
+                    + "set instead, following the same colors; "
+                    + "apps without a symbol get a tinted icon."
+            )
+        ) {
+            Picker(
+                iconSourceLabel,
+                selection: $style.iconSource
+            ) {
+                ForEach(
+                    AppBarOptions.iconSource,
+                    id: \.0
+                ) { option in
+                    Text(option.1).tag(option.0)
+                }
+            }
+        }
+        .modifier(
+            GreyOut(
+                active: style.content == .name,
+                help: L(
+                    "app_bar.icon_source.name_only",
+                    "Icons are hidden while Content is Name."
+                )
+            )
+        )
+        // Tinted's brightness, directly below the control that
+        // gates it; greyed for the other symbol styles.
+        DropdownRow(
+            label: tintAppearanceLabel,
+            help: L(
+                "app_bar.tint_appearance.help",
+                "Whether Tinted icons render light or dark. "
+                    + "Auto follows the system appearance: "
+                    + "light icons in Dark Mode, dark icons in "
+                    + "Light Mode."
+            )
+        ) {
+            Picker(
+                tintAppearanceLabel,
+                selection: $style.tintAppearance
+            ) {
+                ForEach(
+                    AppBarOptions.tintAppearance,
+                    id: \.0
+                ) { option in
+                    Text(option.1).tag(option.0)
+                }
+            }
+        }
+        .modifier(
+            GreyOut(
+                active: style.iconSource != .tintedImage
+                    || style.content == .name,
+                help: L(
+                    "app_bar.tint_appearance.tinted_only",
+                    "Applies to the Tinted symbol style."
+                )
+            )
+        )
         ToggleRow(
             label: L(
                 "app_bar.group_adjacent",
@@ -263,5 +335,11 @@ struct GlobalAppBarSection: View {
     }
     private var contentLabel: String {
         L("app_bar.content.label", "Content")
+    }
+    private var iconSourceLabel: String {
+        L("app_bar.icon_source.label", "App symbol style")
+    }
+    private var tintAppearanceLabel: String {
+        L("app_bar.tint_appearance.label", "Tint appearance")
     }
 }

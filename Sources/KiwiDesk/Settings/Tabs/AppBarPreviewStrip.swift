@@ -30,6 +30,8 @@ import SwiftUI
 /// it below a count of 2), and hover states are omitted.
 struct AppBarPreviewStrip: View {
     let style: AppBarStyle
+    /// Resolves the Tinted `auto` appearance schematically.
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         VStack(spacing: 4) {
@@ -103,17 +105,46 @@ struct AppBarPreviewStrip: View {
             if style.content != .name {
                 Image(systemName: t.icon)
                     .font(.system(size: font))
+                    .foregroundStyle(iconColor(t))
+                    .brightness(iconBrightness)
             }
             if style.content != .icon {
                 Text(t.name)
                     .font(.system(size: font))
                     .lineLimit(1)
+                    .foregroundStyle(textColor(t))
             }
         }
-        .foregroundStyle(
-            color(t.active ? style.activeTextColor : style.textColor)
-        )
         .padding(.horizontal, 4)
+    }
+
+    private func textColor(_ t: MockTab) -> Color {
+        color(
+            t.active ? style.activeTextColor : style.textColor
+        )
+    }
+
+    /// #294 `icon_source`, schematically: System default keeps
+    /// each mock icon's own color (full-color app images);
+    /// Tinted and Glyphs recolor into the state text ladder —
+    /// the same rule `AppBarItemView` applies to real icons.
+    private func iconColor(_ t: MockTab) -> Color {
+        style.iconSource == .appImage
+            ? t.nativeColor
+            : textColor(t)
+    }
+
+    /// Tinted's dark ramp, schematically: darken the mock icon
+    /// instead of running the real luminance inversion. `auto`
+    /// contrasts the settings window's own color scheme.
+    private var iconBrightness: Double {
+        guard style.iconSource == .tintedImage else { return 0 }
+        switch style.tintAppearance {
+        case .light: return 0
+        case .dark: return -0.35
+        case .auto:
+            return colorScheme == .light ? -0.35 : 0
+        }
     }
 
     /// The active indicator, orthogonal to the tab background:
@@ -263,77 +294,5 @@ struct AppBarPreviewStrip: View {
             style.fontSize > 0
             ? style.fontSize : thickness * 0.42
         return min(base, thickness * 0.55)
-    }
-
-    // MARK: - Mock content
-
-    private struct MockTab: Identifiable {
-        let id: Int
-        let icon: String
-        let name: String
-        let active: Bool
-        let badge: Int?
-    }
-
-    private var mockTabs: [MockTab] {
-        [
-            MockTab(
-                id: 0,
-                icon: "globe",
-                name: L("app_bar.preview.app_web", "Web"),
-                active: false,
-                badge: 2
-            ),
-            MockTab(
-                id: 1,
-                icon: "envelope",
-                name: L("app_bar.preview.app_mail", "Mail"),
-                active: true,
-                badge: nil
-            ),
-            MockTab(
-                id: 2,
-                icon: "terminal",
-                name: L("app_bar.preview.app_code", "Code"),
-                active: false,
-                badge: nil
-            ),
-        ]
-    }
-
-    // MARK: - Caption & accessibility
-
-    private var caption: String {
-        L(
-            "app_bar.preview.caption",
-            "Position: %1$@ · %2$@",
-            positionName,
-            styleName
-        )
-    }
-
-    private var axLabel: String {
-        L(
-            "app_bar.preview.ax",
-            "App bar preview: %1$@ position, %2$@ style.",
-            positionName,
-            styleName
-        )
-    }
-
-    private var positionName: String {
-        switch style.position {
-        case .start: return L("app_bar.position.start", "Start")
-        case .end: return L("app_bar.position.end", "End")
-        }
-    }
-
-    private var styleName: String {
-        switch style.tabBackground {
-        case .boxed:
-            return L("app_bar.tab_background.boxed", "Boxed")
-        case .plain:
-            return L("app_bar.tab_background.plain", "Plain")
-        }
     }
 }

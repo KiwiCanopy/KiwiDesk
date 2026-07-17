@@ -671,6 +671,23 @@ running windows.
 - **Item size**: auto (0) measures rendered width and sizes slots
   uniformly to fit the widest item; fixed pixel width.
 - **Content**: icon only, name only, or both.
+- **App symbol style**: how app icons are drawn (greyed while
+  Content is Name, which shows no icons). **System default** is
+  the app's normal full-color icon. **Tinted** recolors each
+  icon to match the bar's text colors — normal, active, and
+  hover — like the system's Tinted icon style. **Glyphs** shows
+  a monochrome symbol from the bundled [SketchyBar App
+  Font](https://github.com/kvndrsslr/sketchybar-app-font)
+  instead, following the same colors; apps without a symbol get
+  a tinted icon so the bar stays monochrome. (macOS offers no
+  way for apps to obtain its Dark or Clear icon renderings, so
+  those styles can't be offered here.) With Glyphs active, the
+  shortcuts panel's Apps band shows the same symbols.
+- **Tint appearance** (greyed unless Tinted): whether tinted
+  icons render **Light** (bright icons, for dark bars), **Dark**
+  (dark icons, for light bars), or **Auto** — following the
+  system appearance like the system's own Tinted style, light
+  icons in Dark Mode and dark icons in Light Mode.
 - **Font size**: auto (0) or fixed.
 - **Corner roundness**: 0–100% for boxed tabs (0 = square, 100 =
   full capsule; ignored for plain).

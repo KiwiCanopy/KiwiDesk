@@ -74,6 +74,15 @@ public struct AppBarStyle: Sendable, Equatable {
     /// Spacing between items (pt); 0 = touching.
     public var itemGap: CGFloat = 6
     public var content: Content = .iconAndName
+    /// Where app icons come from: the native app image, or a
+    /// monochrome SketchyBar App Font glyph that follows the
+    /// bar's text colors (#294). Apps without a glyph keep
+    /// their image.
+    public var iconSource: BarAppIconSource = .appImage
+    /// Brightness of Tinted icons; `auto` follows the system
+    /// appearance like the system's own Tinted style. Only
+    /// consulted while `iconSource` is `tinted_image`.
+    public var tintAppearance: BarTintAppearance = .auto
     /// Adjacent windows of the same app collapse into one
     /// item wearing a count badge. Clicking the group
     /// focuses its first member, which expands the group
@@ -144,6 +153,8 @@ extension AppBarStyle: Codable {
         case itemSize = "item_size"
         case itemGap = "item_gap"
         case content
+        case iconSource = "icon_source"
+        case tintAppearance = "tint_appearance"
         case groupAdjacentWindows = "group_adjacent_windows"
         case fontSize = "font_size"
         case cornerRoundness = "corner_roundness"
@@ -201,6 +212,16 @@ extension AppBarStyle: Codable {
                 Content.self,
                 forKey: .content
             ) ?? defaults.content
+        iconSource =
+            try container.decodeIfPresent(
+                BarAppIconSource.self,
+                forKey: .iconSource
+            ) ?? defaults.iconSource
+        tintAppearance =
+            try container.decodeIfPresent(
+                BarTintAppearance.self,
+                forKey: .tintAppearance
+            ) ?? defaults.tintAppearance
         groupAdjacentWindows =
             try container.decodeIfPresent(
                 Bool.self,
