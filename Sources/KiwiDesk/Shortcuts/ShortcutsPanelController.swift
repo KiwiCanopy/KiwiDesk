@@ -138,6 +138,15 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
             }
             ?? snapshot.keyModes.first
             ?? KeyMode.defaultMode
+        // Two-source read: the snapshot supplies the installed
+        // bindings; loadGuiConfig supplies only spaces / icons /
+        // step, used to *generate candidate preset rows* that are
+        // then intersected with the snapshot's actual bindings. A
+        // transient disagreement (space or step edited but not yet
+        // re-applied) can only misfile a binding into Custom, never
+        // hide or invent one — safe for a read-only glance panel, so
+        // the snapshot stays a pure keybinding rollback point rather
+        // than growing space/settings context.
         let config = core.loadGuiConfig()
         return ShortcutsReferenceBuilder.build(
             mode: mode,

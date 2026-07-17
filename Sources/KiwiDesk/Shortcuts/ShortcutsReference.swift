@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 
 /// One row in the read-only shortcuts reference: a label, the
@@ -58,7 +59,14 @@ enum ShortcutsReferenceBuilder {
         resizeStep: Int,
         modeNames: [String]
     ) -> ShortcutsReference {
-        var consumed = Set<String>()
+        // Keyed by row identity (UUID), not `lua`: two bindings can
+        // share a command's Lua with different combos (vim keys +
+        // arrows both bound to `focus("left")`). Keying by `lua`
+        // would consume the whole command on the first match and
+        // drop the second from every band — invisible, breaking the
+        // "never drop a bound shortcut" contract. By id, only the
+        // matched row is consumed; the twin falls through to Custom.
+        var consumed = Set<UUID>()
 
         // A bound binding (non-empty combo) for a preset's Lua.
         func bound(_ lua: String) -> KeyBinding? {
@@ -72,7 +80,7 @@ enum ShortcutsReferenceBuilder {
                 guard let binding = bound(cmd.lua) else {
                     return nil
                 }
-                consumed.insert(binding.lua)
+                consumed.insert(binding.id)
                 return ShortcutRow(
                     id: cmd.lua,
                     label: cmd.resolvedLabel,
@@ -83,6 +91,7 @@ enum ShortcutsReferenceBuilder {
         }
 
         let controls = buildControls(
+            activeMode: mode.name,
             spaces: spaces,
             spaceIcons: spaceIcons,
             resizeStep: resizeStep,
@@ -102,7 +111,15 @@ enum ShortcutsReferenceBuilder {
 
     // MARK: - Bands
 
+    /// Membership twin of the editor's `FocusSection` /
+    /// `MoveWindowsSection` / `SizeFloatSection` / `ChangeModesSection`
+    /// (`KeybindingSections.swift`) and `KeybindingCatalog`'s
+    /// `navigationGroups`. Row identity (label / icon / Lua) is
+    /// single-sourced from the catalog, so only the *grouping* is
+    /// mirrored here — and a forgotten command degrades to Custom via
+    /// the fallthrough, never vanishes. Keep the three in step.
     private static func buildControls(
+        activeMode: String,
         spaces: [SpaceID],
         spaceIcons: [SpaceID: String],
         resizeStep: Int,
@@ -120,9 +137,13 @@ enum ShortcutsReferenceBuilder {
                 spaces,
                 icons: spaceIcons
             )
-        let switchModes = modeNames.map {
-            KeybindingCatalog.switchModeCommand($0)
-        }
+        // Exclude the active mode: you never switch to the mode
+        // you're already in, and the editor's ChangeModesSection
+        // filters it out the same way — keep the two in parity.
+        let switchModes =
+            modeNames
+            .filter { $0 != activeMode }
+            .map { KeybindingCatalog.switchModeCommand($0) }
         return [
             ShortcutSubgroup(
                 title: L("shortcuts.section.focus", "Focus"),
@@ -158,14 +179,14 @@ enum ShortcutsReferenceBuilder {
 
     private static func buildApps(
         _ mode: KeyMode,
-        consumed: inout Set<String>
+        consumed: inout Set<UUID>
     ) -> [ShortcutRow] {
         mode.bindings
             .filter {
                 $0.kind == .application && !$0.combo.isEmpty
             }
             .map { binding -> ShortcutRow in
-                consumed.insert(binding.lua)
+                consumed.insert(binding.id)
                 let bundleID = KeybindingCatalog.appBundleID(
                     from: binding.lua
                 )
@@ -190,11 +211,11 @@ enum ShortcutsReferenceBuilder {
 
     private static func buildCustom(
         _ mode: KeyMode,
-        consumed: Set<String>
+        consumed: Set<UUID>
     ) -> [ShortcutRow] {
         mode.bindings
             .filter {
-                !$0.combo.isEmpty && !consumed.contains($0.lua)
+                !$0.combo.isEmpty && !consumed.contains($0.id)
             }
             .map { binding in
                 ShortcutRow(

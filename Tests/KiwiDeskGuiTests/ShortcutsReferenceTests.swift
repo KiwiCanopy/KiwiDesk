@@ -145,4 +145,53 @@ struct ShortcutsReferenceTests {
         reset()
         #expect(build([]).isEmpty)
     }
+
+    @Test("a second combo for the same command is never invisible")
+    func duplicateLuaSurfaces() {
+        reset()
+        // Two combos bound to the same nav command (vim keys +
+        // arrows). Only one renders in Controls; the other must
+        // still surface — in Custom, not vanish.
+        let reference = build([
+            binding(
+                "ctrl+left",
+                "KiwiDesk.focus(\"left\")",
+                .navigation
+            ),
+            binding(
+                "alt+h",
+                "KiwiDesk.focus(\"left\")",
+                .navigation
+            ),
+        ])
+        let focus = reference.controls.first {
+            $0.title == "Focus"
+        }
+        #expect(focus?.rows.count == 1)
+        #expect(reference.custom.count == 1)
+    }
+
+    @Test("the active mode is excluded from Switch modes")
+    func activeModeExcludedFromSwitch() {
+        reset()
+        // A self-switch row (switch to the mode you're in) must not
+        // render — mirrors the editor's ChangeModesSection filter.
+        let reference = build(
+            [
+                binding(
+                    "alt+d",
+                    "KiwiDesk.switch_mode(\"default\")",
+                    .navigation
+                )
+            ],
+            modeNames: [KeyMode.defaultName, "Coding"]
+        )
+        let switchModes = reference.controls.first {
+            $0.title == "Switch modes"
+        }
+        // The only bound switch row targets the active mode, so the
+        // subgroup is absent; the row falls through to Custom.
+        #expect(switchModes == nil)
+        #expect(reference.custom.count == 1)
+    }
 }
