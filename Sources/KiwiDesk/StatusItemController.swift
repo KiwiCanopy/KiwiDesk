@@ -7,7 +7,6 @@ import KiwiDeskCore
 /// menu (#68 §3.10) is built in `StatusItemController+Menu`.
 @MainActor
 final class StatusItemController: NSObject, NSMenuDelegate {
-    var onOpenSettings: () -> Void = {}
     var onOpenDashboard: () -> Void = {}
     var onShowConfigIssues: () -> Void = {}
     /// Opens the guided permission fix (the onboarding wizard at
