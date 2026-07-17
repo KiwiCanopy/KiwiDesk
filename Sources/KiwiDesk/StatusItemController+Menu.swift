@@ -63,9 +63,18 @@ extension StatusItemController {
 
         // Daily actions — Layout first (the most-used control),
         // Switch Profile under it: same topic, no separator
-        // between them.
+        // between them. Switch Profile appears only when there is
+        // something to switch *to* — a saved profile that isn't the
+        // active one and isn't broken; with none, switching is a
+        // no-op or impossible, so the row is pure noise.
         menu.addItem(layoutItem())
-        menu.addItem(switchProfileItem(profiles))
+        let hasSwitchTarget = profiles.all.contains {
+            $0 != profiles.active
+                && !profiles.broken.contains($0)
+        }
+        if hasSwitchTarget {
+            menu.addItem(switchProfileItem(profiles))
+        }
 
         // App chrome: Settings sits low, next to Quit, as in
         // every native menu-bar extra — not mid-list among the
