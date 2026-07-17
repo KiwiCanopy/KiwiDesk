@@ -69,9 +69,10 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         // actually receives keystrokes — without this, Esc and
         // click-away never fire and the panel can't be dismissed.
         // Accessory-level: no Dock icon appears (unlike the dashboard,
-        // which promotes to regular). KiwiDesk's tiling hotkeys are
-        // global Carbon and keep firing regardless, so the panel still
-        // live-updates on a mode switch while it's open.
+        // which promotes to regular). KiwiDesk's tiling hotkeys stay
+        // global Carbon and keep firing while it's open; the panel is
+        // a stateless summon that rebuilds its content on each open,
+        // so a mode switch is reflected the next time it's opened.
         NSApp.activate(ignoringOtherApps: true)
         panel.makeKeyAndOrderFront(nil)
     }
@@ -176,7 +177,7 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
             activeMode = snapshot.activeModeName
             config = core.loadGuiConfig()
         } else if core.isGuiManaged,
-            let raw = core.guiConfigStore.load()
+            let raw = core.persistedGuiConfig()
         {
             // Paused (no Accessibility): the engine hasn't discovered
             // any spaces, so loadGuiConfig would overlay an EMPTY live

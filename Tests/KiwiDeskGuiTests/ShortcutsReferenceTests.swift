@@ -235,4 +235,37 @@ struct ShortcutsReferenceTests {
         #expect(switchModes == nil)
         #expect(reference.custom.count == 1)
     }
+
+    @Test("every catalog nav command lands in Controls, not Custom")
+    func controlsCompleteness() {
+        reset()
+        let spaces = [SpaceID("1"), SpaceID("2")]
+        let modeNames = [KeyMode.defaultName, "Coding"]
+        // Sourced from the same catalog membership the editor and the
+        // import classifier use — so if buildControls ever drifts from
+        // it, these commands fall to Custom and this test fails,
+        // instead of the drift being silently absorbed.
+        let commands =
+            KeybindingCatalog.navigationGroups(spaces: spaces)
+            .flatMap(\.commands)
+            + KeybindingCatalog.resizeAndFloat(step: 50)
+            + [KeybindingCatalog.switchModeCommand("Coding")]
+        let bindings = commands.map {
+            KeyBinding(
+                combo: "alt+z",
+                lua: $0.lua,
+                kind: .navigation
+            )
+        }
+        let reference = build(
+            bindings,
+            spaces: spaces,
+            modeNames: modeNames
+        )
+        #expect(reference.custom.isEmpty)
+        let controlRows = reference.controls.reduce(0) {
+            $0 + $1.rows.count
+        }
+        #expect(controlRows == commands.count)
+    }
 }

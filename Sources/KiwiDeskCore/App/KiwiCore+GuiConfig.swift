@@ -32,6 +32,16 @@ extension KiwiCore {
         (guiConfigStore.load() ?? guiConfigSeed()).modes
     }
 
+    /// The authored gui.json config WITHOUT `loadGuiConfig()`'s
+    /// live-profile overlay — the persisted shape as written. The
+    /// read-only shortcuts panel reads this while window management
+    /// is paused (#326): the live overlay carries an empty space
+    /// list when the engine hasn't discovered spaces, which would
+    /// misfile space shortcuts. nil when no sidecar exists.
+    public func persistedGuiConfig() -> GuiConfig? {
+        guiConfigStore.load()
+    }
+
     /// The base app→space rules every profile override
     /// resolves onto AND diffs against — `baseKeyModes()`'s
     /// app-rule sibling (#109), with the same one-definition
