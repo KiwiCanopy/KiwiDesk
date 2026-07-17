@@ -65,6 +65,10 @@ file list; grep within a subsystem for specifics:
 
 GUI lives in `Sources/KiwiDesk` (`Settings/`, `Settings/Tabs/`).
 
+This table is the *where*. For the *how* — end-to-end pipelines
+(event→placement, command dispatch, config resolve, animation) traced
+at directory altitude — see **`docs/architecture.md`**.
+
 ## 2. Code Rules
 
 1. **File size:** target **100–250 lines** per Swift file. Hard
