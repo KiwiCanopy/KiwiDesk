@@ -48,7 +48,11 @@ quick-menu Quit leaves behind (the app exits cleanly, so
 registered). It no-ops with `KiwiDesk service is already
 running` only when a process is actually running. `stop` prints
 `KiwiDesk service is not running` cleanly when nothing is
-loaded. `status` reports the loaded/running state and the pid.
+loaded. `restart` boots the job out and back in; when nothing
+was loaded it reports `KiwiDesk service was not running —
+started it` rather than claiming to have restarted something
+that wasn't there. `status` reports the loaded/running state and
+the pid.
 A real `launchctl` failure exits non-zero; the ordinary
 already-running / not-running cases exit 0.
 

@@ -114,14 +114,21 @@ public enum ServiceManager {
     /// The explicit kill-and-relaunch path: boots out any prior
     /// registration (result discarded — it may not be loaded)
     /// and bootstraps fresh.
+    ///
+    /// Reports honestly whether it actually *restarted* a loaded
+    /// job or merely *started* one that wasn't running — a plain
+    /// "restarted" would otherwise claim it stopped something that
+    /// was never there (matches the loaded-aware wording `start`
+    /// and `stop` already give, #328).
     public static func restart() -> Outcome {
         if let failure = writePlist() {
             return Outcome(failure, ok: false)
         }
+        let wasLoaded = isLoaded()
         _ = launchctl(["bootout", domain, agentURL.path])
         let started = bootstrap()
         guard started.ok else { return started }
-        return Outcome("KiwiDesk service restarted", ok: true)
+        return Outcome(restartMessage(wasLoaded: wasLoaded), ok: true)
     }
 
     /// Reports whether the agent is loaded and, if launchd has it
@@ -167,6 +174,15 @@ public enum ServiceManager {
             return "KiwiDesk service is running (pid \(pid))"
         }
         return "KiwiDesk service is loaded but not running"
+    }
+
+    /// The `restart` line: a genuine restart when the job was
+    /// already loaded, otherwise a plain start so the CLI never
+    /// claims to have stopped a service that wasn't running.
+    static func restartMessage(wasLoaded: Bool) -> String {
+        wasLoaded
+            ? "KiwiDesk service restarted"
+            : "KiwiDesk service was not running — started it"
     }
 
     /// Extracts the `pid = N` line from `launchctl print` output.

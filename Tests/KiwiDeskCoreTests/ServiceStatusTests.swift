@@ -57,4 +57,20 @@ struct ServiceStatusTests {
                 == "KiwiDesk service is loaded but not running"
         )
     }
+
+    @Test("Restart of a loaded job reads as a real restart")
+    func restartLoadedMessage() {
+        #expect(
+            ServiceManager.restartMessage(wasLoaded: true)
+                == "KiwiDesk service restarted"
+        )
+    }
+
+    @Test("Restart of a stopped job reads as a plain start")
+    func restartNotLoadedMessage() {
+        #expect(
+            ServiceManager.restartMessage(wasLoaded: false)
+                == "KiwiDesk service was not running — started it"
+        )
+    }
 }
