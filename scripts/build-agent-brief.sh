@@ -9,6 +9,12 @@
 # ANTHROPIC_API_KEY or a signed-in `claude` CLI — compression is an LLM
 # pass, so output is not byte-reproducible. The freshness guard pins
 # the SOURCE hash, not the compressed text, so any faithful run passes.
+#
+# NOTE: the compression pass is a full-document LLM call and commonly
+# takes SEVERAL MINUTES. Run it without a short timeout (or in the
+# background) — a 2-minute cap will kill it mid-pass and leave the
+# brief stale. A stale brief only warns (never blocks), so it is safe
+# to defer, but do not mistake "slow" for "hung".
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
