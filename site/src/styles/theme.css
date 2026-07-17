@@ -50,3 +50,11 @@
   font-size: var(--sl-text-xs);
   color: var(--sl-color-gray-3);
 }
+
+/* Match the landing's ink "KiwiDesk" wordmark: override Starlight's
+   accent-green default site title so the brand name reads the same
+   across the docs and marketing surfaces. --sl-color-white is the
+   strong-text token, so it adapts per theme. */
+.site-title {
+  color: var(--sl-color-white);
+}
