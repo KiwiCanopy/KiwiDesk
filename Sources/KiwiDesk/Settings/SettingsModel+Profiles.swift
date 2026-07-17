@@ -6,6 +6,29 @@ import SwiftUI
 /// two-button save UX (Update / Save as new), the preset Apply
 /// flow, list actions, and the Canvas placement resolution.
 extension SettingsModel {
+    /// Non-nil while a profile save that captures the live
+    /// monitor set must be blocked (#335): with Accessibility
+    /// off the engine has discovered no displays, so persisting
+    /// records a degenerate 0-screen set that can never resolve.
+    /// Gates the monitor-capturing actions — Save as New Profile,
+    /// Update, and Save a Copy As from the live active profile —
+    /// and doubles as their disabled-button tooltip. Stored-
+    /// profile edits are NOT gated: their write path only upserts
+    /// a monitor set that already matches the live set, and while
+    /// paused `set(matching: [])` finds none, so the refresh is
+    /// inert and no degenerate set is written (see
+    /// `KiwiCore+ProfileEdit.applyProfileEdits`).
+    var profileSaveBlockedReason: String? {
+        guard permissionPaused else { return nil }
+        return L(
+            "profiles.save_blocked_paused",
+            "Window management is paused because Accessibility "
+                + "access is off, so no displays are detected. "
+                + "Grant access first — a profile saved now would "
+                + "capture no monitors and never resolve."
+        )
+    }
+
     /// Whether Update can write into the active profile: it
     /// exists and covers the live screen count. A different
     /// count (extra screen attached) needs "Save as new…".

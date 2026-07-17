@@ -796,6 +796,15 @@ context; there is no separate fourth button:
   scratch. The banner's profile picker names the edit target
   authoritatively.
 
+While window management is **paused** because Accessibility access
+is off, KiwiDesk has detected no displays — so any save that would
+capture the live monitor set (**Save as New Profile…**, **Save a
+Copy As…** from the active profile, and **Save** when it refreshes
+the active profile's monitor set) is greyed out, with a tooltip
+explaining why. A profile saved with no monitors could never
+resolve later. Grant access first; editing a *stored* profile
+(which keeps its own on-disk monitor set) stays available.
+
 After saving, if a global setting changed (keybindings, app/float/
 ignore rules, or native Space bindings), `gui.json` is rewritten.
 Tiling-only edits touch only the profile JSON. `init.lua` is never

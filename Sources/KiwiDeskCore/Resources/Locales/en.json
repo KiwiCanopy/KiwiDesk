@@ -467,6 +467,7 @@
   "profiles.rename": "Rename",
   "profiles.rename.help": "Rename profile",
   "profiles.rename_failed": "Renaming failed: %1$@",
+  "profiles.save_blocked_paused": "Window management is paused because Accessibility access is off, so no displays are detected. Grant access first — a profile saved now would capture no monitors and never resolve.",
   "profiles.save_failed": "Saving failed: %1$@",
   "profiles.saved.empty": "No profiles saved yet — the built-in Standard resolves until you save one.",
   "profiles.saved.title": "Saved profiles",

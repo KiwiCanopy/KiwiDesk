@@ -154,11 +154,15 @@ struct SettingsFooter: View {
             .buttonStyle(.bordered)
             .controlSize(.regular)
         } else if model.activeProfile != nil {
+            // Live active profile → a copy captures the live
+            // monitor set, so it is blocked while paused (#335).
             Button(saveCopyAsLabel) {
                 namingNewProfile = true
             }
             .buttonStyle(.bordered)
             .controlSize(.regular)
+            .disabled(model.profileSaveBlockedReason != nil)
+            .help(model.profileSaveBlockedReason ?? "")
         }
     }
 
@@ -184,20 +188,27 @@ struct SettingsFooter: View {
                 .controlSize(.regular)
                 .disabled(!model.isDirty)
         case .updateActiveProfile:
+            // Update refreshes the live monitor set, so it is
+            // blocked while paused (#335).
             Button(save) { model.updateActiveProfile() }
                 .keyboardShortcut("s")
                 .buttonStyle(.borderedProminent)
                 .controlSize(.regular)
                 .disabled(
-                    !model.updateEnabled
+                    model.profileSaveBlockedReason != nil
+                        || !model.updateEnabled
                         || !(model.isDirty
                             || model.profileDirty
                             || model.hasLayoutDrift)
                 )
-                .help(model.updateHint ?? "")
+                .help(
+                    model.profileSaveBlockedReason
+                        ?? model.updateHint ?? ""
+                )
         case .saveAsNewProfile:
             // No profile yet — the create action takes the
-            // primary slot.
+            // primary slot; it captures the live monitor set,
+            // so it is blocked while paused (#335).
             Button(
                 L(
                     "footer.save_as_new_profile",
@@ -209,6 +220,8 @@ struct SettingsFooter: View {
             .keyboardShortcut("s")
             .buttonStyle(.borderedProminent)
             .controlSize(.regular)
+            .disabled(model.profileSaveBlockedReason != nil)
+            .help(model.profileSaveBlockedReason ?? "")
         }
     }
 }
