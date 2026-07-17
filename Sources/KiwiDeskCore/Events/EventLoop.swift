@@ -48,6 +48,16 @@ public final class EventLoop {
     /// changed it. An ignore transition or stop restores that
     /// exact value instead of assuming KiwiDesk owned `true`.
     var enhancedUIBaselines: [pid_t: Bool] = [:]
+    /// Apps sent `AXManualAccessibility` — the Chromium warm-up used
+    /// when an app never answers the EUI read (#360). Set-once per
+    /// process: unlike the EUI baseline, a Chromium app answers that
+    /// read permanently with nil, so without this the warm-up would
+    /// re-fire a blocking AX write on every reconcile. Deliberately
+    /// not restored on detach — unlike EUI, an eager AX tree is what a
+    /// managed app wants and Chromium's does not tear down, so re-poking
+    /// it costs more than it buys; only the pid is cleared so a
+    /// re-attach re-applies the warm-up.
+    var manualAXApplied: Set<pid_t> = []
     /// Last float-detection verdict per tracked window, so
     /// reconcile can re-check and emit only actual changes
     /// (manual make_floating overrides stay untouched).
@@ -129,6 +139,7 @@ public final class EventLoop {
         observers = [:]
         elements = [:]
         enhancedUIBaselines = [:]
+        manualAXApplied = []
         detectedFloating = [:]
         ignorePending = []
         trackedFrames = [:]

@@ -60,7 +60,7 @@ extension EventLoop {
         if app.activationPolicy == .regular
             || windows.contains(where: Self.isStandardWindow)
         {
-            enableEnhancedUI(pid: pid)
+            warmAccessibilityTree(pid: pid)
         }
         let displayBounds = FloatDetection.activeDisplayBounds()
         for element in windows {
@@ -81,12 +81,33 @@ extension EventLoop {
                 == kAXStandardWindowSubrole
     }
 
-    func enableEnhancedUI(pid: pid_t) {
-        guard enhancedUIBaselines[pid] == nil,
+    /// Makes an app's AX tree materialize so its windows show up in
+    /// `kAXWindowsAttribute`, by whichever mechanism the app honors:
+    /// `AXEnhancedUserInterface` for Electron/WebKit, or
+    /// `AXManualAccessibility` for Chromium-family browsers (which
+    /// never answer the EUI read). Idempotent; called at attach and
+    /// re-tried on later reconciles for cold apps.
+    func warmAccessibilityTree(pid: pid_t) {
+        guard enhancedUIBaselines[pid] == nil else { return }
+        guard
             let baseline = AXHelper.getEnhancedUserInterface(
                 pid: pid
             )
-        else { return }
+        else {
+            // The app does not answer the EUI read. Chromium-family
+            // browsers (Chrome, Brave, Edge, Arc, …) behave this way
+            // and gate their AX tree behind AXManualAccessibility, so
+            // the EUI warm-up below can never reach them and their
+            // windows never appear in kAXWindowsAttribute. The *set* is
+            // what materializes the tree; the ordinary reconcile
+            // window re-scan then finds the windows — so set it once
+            // (the attribute sticks) rather than re-writing on every
+            // reconcile, since the EUI read that would record a
+            // baseline stays nil for a Chromium app forever (#360).
+            guard manualAXApplied.insert(pid).inserted else { return }
+            AXHelper.setManualAccessibility(pid: pid, enabled: true)
+            return
+        }
         enhancedUIBaselines[pid] = baseline
         guard !baseline else { return }
         // Keep Electron/WebKit AX trees warm (see AGENTS.md).
@@ -106,6 +127,10 @@ extension EventLoop {
                 enabled: false
             )
         }
+        // AXManualAccessibility is left set on the app (an eager AX
+        // tree is what a managed app wants); only forget the pid so a
+        // re-attach re-applies the warm-up (#360).
+        manualAXApplied.remove(pid)
         for id in Array(elements[pid, default: [:]].keys) {
             detectedFloating[id] = nil
             ignorePending.remove(id)

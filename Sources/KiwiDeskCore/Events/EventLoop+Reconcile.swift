@@ -50,7 +50,7 @@ extension EventLoop {
             // A cold app may not answer the baseline EUI read at
             // attach time. Retry on later reconciles until one
             // succeeds, without taking another window snapshot.
-            enableEnhancedUI(pid: pid)
+            warmAccessibilityTree(pid: pid)
         }
         var live: Set<WindowID> = []
         var minimized: Set<WindowID> = []
