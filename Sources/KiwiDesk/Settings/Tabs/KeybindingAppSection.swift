@@ -250,10 +250,25 @@ struct ApplicationsSection: View {
         _ binding: Binding<KeyBinding>,
         app: KeybindingCatalog.InstalledApp
     ) {
+        let id = binding.wrappedValue.id
+        // Decline a re-pick onto an app every behavior of which is
+        // already bound on *other* rows — any assignment would
+        // duplicate. The picker hides these, but the "Other…"
+        // escape bypasses that list, so guard at this choke point
+        // (mirrors the add-row's `addApplication` bail — #334
+        // review).
+        let taken = KeybindingCatalog.takenBehaviors(
+            for: app.bundleID,
+            in: bindings,
+            excluding: id
+        )
+        guard taken.count < AppLaunchBehavior.allCases.count else {
+            return
+        }
         // Keep the row's launch behavior across a re-pick when it's
         // still free for the new app, else take the first free one —
         // so a re-pick can't silently collide with another row's
-        // app+behavior (#334 review).
+        // app+behavior.
         let current =
             KeybindingCatalog.appLaunchBehavior(
                 from: binding.wrappedValue.lua
@@ -262,7 +277,7 @@ struct ApplicationsSection: View {
             to: app.bundleID,
             preferred: current,
             in: bindings,
-            excluding: binding.wrappedValue.id
+            excluding: id
         )
         binding.wrappedValue.label = app.name
         binding.wrappedValue.lua = KeybindingCatalog.appCommand(

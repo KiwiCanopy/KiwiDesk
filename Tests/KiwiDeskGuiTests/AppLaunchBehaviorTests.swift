@@ -140,10 +140,11 @@ struct AppLaunchBehaviorTests {
 
     @Test("re-pick keeps a free behavior, else takes the first free")
     func assignmentBehavior() {
-        // Row being edited (id `self`) is excluded; another row
-        // holds com.a / Open New.
-        let selfID = UUID()
-        let bindings = [appBinding("com.a", .openNew)]
+        // The edited row lives in the array and is genuinely
+        // excluded (its old com.b binding must not count against
+        // the com.a target); another row holds com.a / Open New.
+        let edited = appBinding("com.b", .openOrFocus)
+        let bindings = [appBinding("com.a", .openNew), edited]
         // Preferred (.openNew) is taken by the other row ⇒ fall to
         // the first free (.openOrFocus): no collision.
         #expect(
@@ -151,7 +152,7 @@ struct AppLaunchBehaviorTests {
                 to: "com.a",
                 preferred: .openNew,
                 in: bindings,
-                excluding: selfID
+                excluding: edited.id
             ) == .openOrFocus
         )
         // Preferred is free ⇒ preserved.
@@ -160,16 +161,17 @@ struct AppLaunchBehaviorTests {
                 to: "com.a",
                 preferred: .openOrFocus,
                 in: bindings,
-                excluding: selfID
+                excluding: edited.id
             ) == .openOrFocus
         )
-        // Fresh app ⇒ preferred preserved.
+        // Fresh app ⇒ preferred preserved (the edited row's own
+        // old com.b binding is excluded, so it doesn't interfere).
         #expect(
             KeybindingCatalog.behaviorForAssignment(
                 to: "com.b",
                 preferred: .openNew,
                 in: bindings,
-                excluding: selfID
+                excluding: edited.id
             ) == .openNew
         )
     }
