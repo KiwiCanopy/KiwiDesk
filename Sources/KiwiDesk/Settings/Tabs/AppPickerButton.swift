@@ -30,6 +30,11 @@ struct AppPickerButton: View {
     /// panel). Runs after the popover dismisses.
     let escapeLabel: String
     let onEscape: () -> Void
+    /// Bundle ids to omit from the list. Open Applications drops
+    /// apps that already carry every launch behavior, since
+    /// re-adding could only duplicate (#334). Empty by default, so
+    /// a per-row re-pick still offers every app.
+    var exclude: Set<String> = []
 
     @State private var showing = false
     @State private var search = ""
@@ -157,7 +162,9 @@ struct AppPickerButton: View {
 
     private var filtered: [KeybindingCatalog.InstalledApp] {
         AppPickerFilter.matching(
-            KeybindingCatalog.installedAppsSnapshot,
+            KeybindingCatalog.installedAppsSnapshot.filter {
+                !exclude.contains($0.bundleID)
+            },
             query: search
         )
     }

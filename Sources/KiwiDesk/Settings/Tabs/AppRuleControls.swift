@@ -9,6 +9,10 @@ struct AppSelector: View {
     /// The bundle identifier of the chosen app — the stored
     /// identity (see `AppRef`), not the display name.
     @Binding var name: String
+    /// Bundle ids to omit from the picker — App Rules passes the
+    /// apps that already have a rule row, since each app carries at
+    /// most one (its space + float facets live on that single row).
+    var exclude: Set<String> = []
     @State private var custom = false
 
     var body: some View {
@@ -53,7 +57,8 @@ struct AppSelector: View {
                 onEscape: {
                     custom = true
                     name = ""
-                }
+                },
+                exclude: exclude
             )
             // Hug the content (no fixed column to align with, just
             // the trailing "+" button) instead of filling the row.

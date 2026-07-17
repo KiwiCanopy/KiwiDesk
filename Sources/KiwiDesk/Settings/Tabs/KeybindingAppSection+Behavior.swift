@@ -96,23 +96,32 @@ extension ApplicationsSection {
         )
     }
 
-    /// Whether another application row already binds this exact
-    /// app+behavior — the row being edited excluded.
+    /// Whether an application row already binds this exact
+    /// app+behavior. `excluding` drops the row being edited.
     private func behaviorTaken(
         _ behavior: AppLaunchBehavior,
         bundleID: String?,
-        excluding id: UUID
+        excluding id: UUID?
     ) -> Bool {
         guard let bundleID else { return false }
-        return bindings.contains { other in
-            other.id != id
-                && other.kind == .application
-                && KeybindingCatalog.appBundleID(from: other.lua)
-                    == bundleID
-                && (KeybindingCatalog.appLaunchBehavior(
-                    from: other.lua
-                ) ?? .openOrFocus) == behavior
-        }
+        return KeybindingCatalog.takenBehaviors(
+            for: bundleID,
+            in: bindings,
+            excluding: id
+        ).contains(behavior)
+    }
+
+    /// The first launch behavior not yet bound for this app, or nil
+    /// when every behavior is already taken. Seeds a newly added row
+    /// so a second binding for the same app lands on a *distinct*
+    /// behavior instead of duplicating the default (#334).
+    func firstAvailableBehavior(
+        for bundleID: String
+    ) -> AppLaunchBehavior? {
+        KeybindingCatalog.firstAvailableBehavior(
+            for: bundleID,
+            in: bindings
+        )
     }
 
     /// The borderless-menu signature: primary-ink label + a

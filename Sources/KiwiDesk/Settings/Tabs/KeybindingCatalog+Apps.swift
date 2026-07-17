@@ -57,6 +57,38 @@ extension KeybindingCatalog {
         parseAppCommand(lua)?.behavior
     }
 
+    /// The launch behaviors already bound for `bundleID` across
+    /// these application bindings, `excluding` one row (the one
+    /// being edited). The single basis the GUI reasons over for the
+    /// per-row grey-out, the add-row seed, and the fully-bound
+    /// exclusion (#334) — pure, so it is unit-testable without the
+    /// view.
+    static func takenBehaviors(
+        for bundleID: String,
+        in bindings: [KeyBinding],
+        excluding id: UUID? = nil
+    ) -> Set<AppLaunchBehavior> {
+        Set(
+            bindings.filter {
+                $0.kind == .application && $0.id != id
+                    && appBundleID(from: $0.lua) == bundleID
+            }
+            .map { appLaunchBehavior(from: $0.lua) ?? .openOrFocus }
+        )
+    }
+
+    /// The first launch behavior not yet bound for `bundleID`, or
+    /// nil when every behavior is already taken (#334).
+    static func firstAvailableBehavior(
+        for bundleID: String,
+        in bindings: [KeyBinding]
+    ) -> AppLaunchBehavior? {
+        let taken = takenBehaviors(for: bundleID, in: bindings)
+        return AppLaunchBehavior.allCases.first {
+            !taken.contains($0)
+        }
+    }
+
     /// Decomposes an app-launch Lua call into its bundle id and
     /// behavior, or nil when `lua` isn't exactly such a call. An
     /// embedded quote means escaped content the app menu never

@@ -68,6 +68,75 @@ struct AppLaunchBehaviorTests {
         }
     }
 
+    // MARK: - Taken / available behaviors (add-row seed, grey-out)
+
+    private func appBinding(
+        _ bundleID: String,
+        _ behavior: AppLaunchBehavior
+    ) -> KeyBinding {
+        KeyBinding(
+            lua: KeybindingCatalog.appCommand(
+                bundleID,
+                behavior: behavior
+            ),
+            kind: .application
+        )
+    }
+
+    @Test("seed skips a behavior already bound for the app")
+    func seedSkipsTaken() {
+        let bindings = [appBinding("com.a", .openOrFocus)]
+        // Re-adding com.a lands on the free behavior, not a
+        // duplicate default.
+        #expect(
+            KeybindingCatalog.firstAvailableBehavior(
+                for: "com.a",
+                in: bindings
+            ) == .openNew
+        )
+        // A fresh app takes the default first.
+        #expect(
+            KeybindingCatalog.firstAvailableBehavior(
+                for: "com.b",
+                in: bindings
+            ) == .openOrFocus
+        )
+    }
+
+    @Test("both behaviors bound ⇒ no available behavior")
+    func fullyBound() {
+        let bindings = [
+            appBinding("com.a", .openOrFocus),
+            appBinding("com.a", .openNew),
+        ]
+        #expect(
+            KeybindingCatalog.firstAvailableBehavior(
+                for: "com.a",
+                in: bindings
+            ) == nil
+        )
+    }
+
+    @Test("takenBehaviors excludes the edited row")
+    func takenExcludesSelf() {
+        let row = appBinding("com.a", .openNew)
+        // Only the row itself binds com.a; excluding it leaves the
+        // set empty, so its own behavior isn't greyed against it.
+        #expect(
+            KeybindingCatalog.takenBehaviors(
+                for: "com.a",
+                in: [row],
+                excluding: row.id
+            ).isEmpty
+        )
+        #expect(
+            KeybindingCatalog.takenBehaviors(
+                for: "com.a",
+                in: [row]
+            ) == [.openNew]
+        )
+    }
+
     @Test("non-app Lua matches neither inverse")
     func nonAppLua() {
         for lua in [

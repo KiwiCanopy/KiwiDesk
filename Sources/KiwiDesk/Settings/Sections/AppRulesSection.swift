@@ -134,7 +134,10 @@ struct AppRulesSection: View {
 
     private var addRow: some View {
         HStack {
-            AppSelector(name: $newApp)
+            // Each app has at most one rule row, so hide the ones
+            // already listed — re-adding would only re-select the
+            // existing row.
+            AppSelector(name: $newApp, exclude: Set(apps))
             Button {
                 // Lower-case so a hand-typed Custom bundle id
                 // (e.g. the mixed-case `com.apple.Safari` that

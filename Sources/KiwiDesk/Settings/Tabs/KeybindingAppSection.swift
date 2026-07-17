@@ -16,8 +16,9 @@ struct ApplicationsSection: View {
     private var modeName
     /// The app chosen in the add-row but not yet committed — the
     /// row only enters the list once an app is picked, so no
-    /// app-less placeholder can exist (matches App Rules).
-    @State private var newApp: KeybindingCatalog.InstalledApp?
+    /// app-less placeholder can exist (matches App Rules). Read by
+    /// the add-row in `+AddRow`, so not `private`.
+    @State var newApp: KeybindingCatalog.InstalledApp?
     /// Alphabetical display order snapshotted on section entry and
     /// mode change (#333). NOT recomputed on `bindings` mutation:
     /// the row's control is a `KeyRecorderField` capture, so a live
@@ -99,55 +100,6 @@ struct ApplicationsSection: View {
                 }
             }
         )
-    }
-
-    /// Pick an app, then commit it — mirroring App Rules, so a
-    /// new binding always lands with an app identity (its
-    /// shortcut is recorded afterward in the row).
-    private var addRow: some View {
-        HStack {
-            AppPickerButton(
-                placeholder: L(
-                    "shortcuts.choose_app",
-                    "Choose app…"
-                ),
-                selection: newApp?.name,
-                onPick: { newApp = $0 },
-                escapeLabel: L(
-                    "shortcuts.other_ellipsis",
-                    "Other…"
-                ),
-                onEscape: {
-                    if let app = pickBundleFromPanel() {
-                        newApp = app
-                    }
-                }
-            )
-            // Hug the content, like the per-row picker.
-            .fixedSize()
-            Button {
-                addApplication()
-            } label: {
-                Label(
-                    L(
-                        "shortcuts.add_application",
-                        "Add application"
-                    ),
-                    systemImage: "plus"
-                )
-            }
-            .buttonStyle(.bordered)
-            .disabled(newApp == nil)
-        }
-    }
-
-    private func addApplication() {
-        guard let app = newApp else { return }
-        var binding = KeyBinding(kind: .application)
-        binding.label = app.name
-        binding.lua = KeybindingCatalog.appCommand(app.bundleID)
-        bindings.append(binding)
-        newApp = nil
     }
 
     private func row(
@@ -307,8 +259,8 @@ struct ApplicationsSection: View {
 
     /// The "Other…" escape hatch: pick any app bundle by file,
     /// returning it as an `InstalledApp` (nil on cancel). Shared
-    /// by the per-row re-pick and the add-row.
-    private func pickBundleFromPanel()
+    /// by the per-row re-pick and the add-row (in `+AddRow`).
+    func pickBundleFromPanel()
         -> KeybindingCatalog.InstalledApp?
     {
         let panel = NSOpenPanel()
