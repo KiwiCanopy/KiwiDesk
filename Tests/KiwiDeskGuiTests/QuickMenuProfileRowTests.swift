@@ -4,9 +4,10 @@ import Testing
 @testable import KiwiDesk
 @testable import KiwiDeskCore
 
-/// The Switch Profile quick-menu row appears only when there is a
-/// profile worth switching to — one that isn't the active one and
-/// isn't broken. `.serialized` because `LocalizationManager` is a
+/// The Switch Profile quick-menu row — and the active-profile
+/// context line above it — appear only when there is a profile
+/// worth switching to: one that isn't the active one and isn't
+/// broken. `.serialized` because `LocalizationManager` is a
 /// process-wide singleton (titles are matched in English).
 @Suite("Quick menu Switch Profile row", .serialized)
 @MainActor
@@ -33,6 +34,16 @@ struct QuickMenuProfileRowTests {
         let menu = NSMenu()
         controller.menuNeedsUpdate(menu)
         return menu.items.contains { $0.title == "Switch Profile" }
+    }
+
+    private func activeLine(
+        _ controller: StatusItemController
+    ) -> NSMenuItem? {
+        let menu = NSMenu()
+        controller.menuNeedsUpdate(menu)
+        return menu.items.first {
+            $0.title.hasPrefix("Profile: ")
+        }
     }
 
     @Test("hidden with no profiles")
@@ -85,6 +96,53 @@ struct QuickMenuProfileRowTests {
                     all: ["Work", "Play"]
                 )
             )
+        )
+    }
+
+    // MARK: - Active-profile context line
+
+    @Test("active line names the profile when a choice exists")
+    func activeLineShown() {
+        reset()
+        let line = activeLine(
+            controller(active: "Work", all: ["Work", "Play"])
+        )
+        #expect(line?.title == "Profile: Work")
+        // Context only — never an action.
+        #expect(line?.isEnabled == false)
+    }
+
+    @Test("active line hidden with only the active profile")
+    func activeLineLoneProfile() {
+        reset()
+        #expect(
+            activeLine(
+                controller(active: "Work", all: ["Work"])
+            ) == nil
+        )
+    }
+
+    @Test("active line hidden when no profile is loaded")
+    func activeLineNoActive() {
+        reset()
+        #expect(
+            activeLine(
+                controller(active: nil, all: ["Work"])
+            ) == nil
+        )
+    }
+
+    @Test("active line hidden when the only other is broken")
+    func activeLineOnlyBrokenAlternative() {
+        reset()
+        #expect(
+            activeLine(
+                controller(
+                    active: "Work",
+                    all: ["Work", "Bad"],
+                    broken: ["Bad"]
+                )
+            ) == nil
         )
     }
 }

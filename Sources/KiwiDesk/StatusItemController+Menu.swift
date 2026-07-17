@@ -67,11 +67,32 @@ extension StatusItemController {
         // something to switch *to* — a saved profile that isn't the
         // active one and isn't broken; with none, switching is a
         // no-op or impossible, so the row is pure noise.
-        menu.addItem(layoutItem())
         let hasSwitchTarget = profiles.all.contains {
             $0 != profiles.active
                 && !profiles.broken.contains($0)
         }
+        // A disabled context line naming the active profile — shown
+        // only when a profile is loaded *and* a real alternative
+        // exists to switch to (the same gate as the Switch Profile
+        // row). With one profile or none there is no choice to
+        // orient, so the name would be permanent chrome the
+        // declutter (#324) removed. Any profile is loadable
+        // regardless of screen count (#36), so this does not filter
+        // by display setup.
+        if let active = profiles.active, hasSwitchTarget {
+            let current = NSMenuItem(
+                title: L(
+                    "menu.active_profile",
+                    "Profile: %1$@",
+                    active
+                ),
+                action: nil,
+                keyEquivalent: ""
+            )
+            current.isEnabled = false
+            menu.addItem(current)
+        }
+        menu.addItem(layoutItem())
         if hasSwitchTarget {
             menu.addItem(switchProfileItem(profiles))
         }

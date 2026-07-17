@@ -333,6 +333,7 @@
   "lua_editor.foreign_code": "This init.lua contains hand-written Lua, so the visual editor is disabled to avoid overwriting it.",
   "menu.accessibility_paused": "Window Management Paused…",
   "menu.accessibility_paused.tooltip": "Click to grant Accessibility permission and resume tiling.",
+  "menu.active_profile": "Profile: %1$@",
   "menu.app.about": "About %1$@",
   "menu.app.hide": "Hide %1$@",
   "menu.app.hide_others": "Hide Others",

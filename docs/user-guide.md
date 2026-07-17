@@ -105,6 +105,10 @@ the KiwiDesk icon opens the quick menu where you can:
   - Click **Save Current Layout to Profile** below the separator to persist
     the new layout (adopts the whole live state into the active profile).
 - **Switch Profile**: Load any saved profile into the current layout.
+  A non-clickable **Profile: ‹name›** line appears above the actions
+  naming the profile you are currently on — shown only when there is
+  another profile to switch to, so it never adds noise when there is
+  no choice to make.
 - **View Shortcuts…**: Open a read-only reference of every shortcut
   bound in the currently active mode — see below.
 - **Settings…**: Open the full Settings window.
