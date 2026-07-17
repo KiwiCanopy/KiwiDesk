@@ -28,7 +28,7 @@ extension ApplicationsSection {
                 },
                 // Drop apps that already carry every launch
                 // behavior — re-adding could only duplicate (#334).
-                exclude: fullyBoundBundleIDs
+                exclude: fullyBoundBundleIDs()
             )
             // Hug the content, like the per-row picker.
             .fixedSize()
@@ -81,12 +81,17 @@ extension ApplicationsSection {
     }
 
     /// Bundle ids that already carry every launch behavior, hidden
-    /// from the add-row picker (#334).
-    private var fullyBoundBundleIDs: Set<String> {
+    /// from the app pickers (#334). The add-row passes no exclusion;
+    /// a per-row re-pick excludes its own row, so an app fully bound
+    /// only *because of that row* stays pickable.
+    func fullyBoundBundleIDs(
+        excluding id: UUID? = nil
+    ) -> Set<String> {
         var seen: [String: Set<AppLaunchBehavior>] = [:]
-        for binding in bindings where binding.kind == .application {
+        for binding in bindings
+        where binding.kind == .application && binding.id != id {
             guard
-                let id = KeybindingCatalog.appBundleID(
+                let bundleID = KeybindingCatalog.appBundleID(
                     from: binding.lua
                 )
             else { continue }
@@ -94,7 +99,7 @@ extension ApplicationsSection {
                 KeybindingCatalog.appLaunchBehavior(
                     from: binding.lua
                 ) ?? .openOrFocus
-            seen[id, default: []].insert(behavior)
+            seen[bundleID, default: []].insert(behavior)
         }
         let all = Set(AppLaunchBehavior.allCases)
         return Set(

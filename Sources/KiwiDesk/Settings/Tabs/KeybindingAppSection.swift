@@ -232,7 +232,13 @@ struct ApplicationsSection: View {
                 if let app = pickBundleFromPanel() {
                     assign(binding, app: app)
                 }
-            }
+            },
+            // Drop apps every behavior of which is already bound on
+            // *other* rows — re-picking to one could only duplicate
+            // (this row excluded, so its own app stays pickable).
+            exclude: fullyBoundBundleIDs(
+                excluding: binding.wrappedValue.id
+            )
         )
         // Hug the content: the row's `Spacer()` pins the recorder
         // to the trailing edge, so the picker's width doesn't gate
@@ -244,12 +250,20 @@ struct ApplicationsSection: View {
         _ binding: Binding<KeyBinding>,
         app: KeybindingCatalog.InstalledApp
     ) {
-        // Preserve the row's launch behavior across a re-pick — the
-        // app changed, not the open-vs-new choice (#334 review).
-        let behavior =
+        // Keep the row's launch behavior across a re-pick when it's
+        // still free for the new app, else take the first free one —
+        // so a re-pick can't silently collide with another row's
+        // app+behavior (#334 review).
+        let current =
             KeybindingCatalog.appLaunchBehavior(
                 from: binding.wrappedValue.lua
             ) ?? .openOrFocus
+        let behavior = KeybindingCatalog.behaviorForAssignment(
+            to: app.bundleID,
+            preferred: current,
+            in: bindings,
+            excluding: binding.wrappedValue.id
+        )
         binding.wrappedValue.label = app.name
         binding.wrappedValue.lua = KeybindingCatalog.appCommand(
             app.bundleID,

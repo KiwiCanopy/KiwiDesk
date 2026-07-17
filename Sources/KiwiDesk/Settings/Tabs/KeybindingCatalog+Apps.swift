@@ -89,6 +89,29 @@ extension KeybindingCatalog {
         }
     }
 
+    /// The behavior a row should carry after (re-)assigning it to
+    /// `bundleID`: keep `preferred` when it's still free for that
+    /// app, else the first free behavior, else `preferred` as a
+    /// last resort (every behavior is already bound on other rows).
+    /// `excluding` drops the row being reassigned. Keeps a re-pick
+    /// from silently colliding with another row (#334).
+    static func behaviorForAssignment(
+        to bundleID: String,
+        preferred: AppLaunchBehavior,
+        in bindings: [KeyBinding],
+        excluding id: UUID
+    ) -> AppLaunchBehavior {
+        let taken = takenBehaviors(
+            for: bundleID,
+            in: bindings,
+            excluding: id
+        )
+        if !taken.contains(preferred) { return preferred }
+        return AppLaunchBehavior.allCases.first {
+            !taken.contains($0)
+        } ?? preferred
+    }
+
     /// Decomposes an app-launch Lua call into its bundle id and
     /// behavior, or nil when `lua` isn't exactly such a call. An
     /// embedded quote means escaped content the app menu never

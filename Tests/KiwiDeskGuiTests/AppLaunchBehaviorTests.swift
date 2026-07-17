@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 import Testing
 
@@ -134,6 +135,42 @@ struct AppLaunchBehaviorTests {
                 for: "com.a",
                 in: [row]
             ) == [.openNew]
+        )
+    }
+
+    @Test("re-pick keeps a free behavior, else takes the first free")
+    func assignmentBehavior() {
+        // Row being edited (id `self`) is excluded; another row
+        // holds com.a / Open New.
+        let selfID = UUID()
+        let bindings = [appBinding("com.a", .openNew)]
+        // Preferred (.openNew) is taken by the other row ⇒ fall to
+        // the first free (.openOrFocus): no collision.
+        #expect(
+            KeybindingCatalog.behaviorForAssignment(
+                to: "com.a",
+                preferred: .openNew,
+                in: bindings,
+                excluding: selfID
+            ) == .openOrFocus
+        )
+        // Preferred is free ⇒ preserved.
+        #expect(
+            KeybindingCatalog.behaviorForAssignment(
+                to: "com.a",
+                preferred: .openOrFocus,
+                in: bindings,
+                excluding: selfID
+            ) == .openOrFocus
+        )
+        // Fresh app ⇒ preferred preserved.
+        #expect(
+            KeybindingCatalog.behaviorForAssignment(
+                to: "com.b",
+                preferred: .openNew,
+                in: bindings,
+                excluding: selfID
+            ) == .openNew
         )
     }
 
