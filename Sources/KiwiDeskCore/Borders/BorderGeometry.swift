@@ -22,10 +22,15 @@ struct BorderGeometry: Equatable {
     /// in the overlay's own bounds inset by `lineWidth / 2`.
     let cornerRadius: CGFloat
 
-    /// Rounded needs only a seam allowance; square needs enough
-    /// depth to fill tighter utility-window corner reveals. Both
-    /// are renderer-only and do not change the visible thickness.
-    static let roundedHiddenOverlap: CGFloat = 1
+    /// Rounded needs a seam allowance deep enough to close the
+    /// corner reveal on *very*-rounded windows (Settings-class
+    /// radii), where a 1 pt tuck left a visible gap; square needs
+    /// more still, to fill the harder 90° utility-window reveal.
+    /// Both are masked behind the target — over-provisioning is
+    /// free (the inner edge sits at `systemRadius − overlap`, so
+    /// a larger overlap only tucks deeper under the corner) — so
+    /// the value is set by the widest reveal seen, not minimized.
+    static let roundedHiddenOverlap: CGFloat = 2.5
     /// Fixed rather than derived from `systemRadius` (the old
     /// `systemRadius · (1 − √2/2)` tuck): because the overlap is
     /// masked behind the target, over-provisioning is free and
