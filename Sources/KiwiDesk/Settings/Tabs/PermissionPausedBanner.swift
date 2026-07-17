@@ -17,7 +17,13 @@ struct PermissionPausedBanner: View {
     let onResolve: () -> Void
 
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
+        // Center-aligned, not `.top`: the message is a single
+        // line and the action button is taller than it, so a
+        // top alignment leaves the icon + text hugging the top
+        // while the button sits centered (the
+        // KeybindingConflictBanner uses `.top` only because its
+        // text can wrap to several lines).
+        HStack(alignment: .center, spacing: 10) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundStyle(.orange)
             Text(
