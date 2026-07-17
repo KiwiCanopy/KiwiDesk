@@ -2,23 +2,27 @@ import AppKit
 import KiwiDeskCore
 
 /// The quick menu (#68 §3.10): rebuilt on every open so the
-/// header, the profile list, and the conditional warning rows
-/// are always current. The icon state machine lives in the main
+/// profile list and the conditional warning rows are always
+/// current. The icon state machine lives in the main
 /// `StatusItemController` file.
 extension StatusItemController {
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
         let profiles = profilesProvider()
 
-        menu.addItem(headerItem(active: profiles.active))
-        menu.addItem(.separator())
+        // Problem zone (top): warning rows appear only when they
+        // apply, so a healthy menu opens straight on Layout with
+        // no permanent chrome above it. A missing permission
+        // blocks everything, so it outranks a broken-config
+        // issue. The fence separator is derived from presence —
+        // "fence iff a warning exists" stays structural, so a
+        // future third warning source can't forget it.
+        var warnings: [NSMenuItem] = []
         if warning {
-            // Without Accessibility nothing tiles, so the fix
-            // outranks every daily action: a loud row naming the
-            // *consequence* (not the jargon "Accessibility"),
-            // right under the header, above Layout. Click routes
-            // to the onboarding grant step — the app's one "why +
-            // how" explainer — not a bare System Settings link.
+            // A loud row naming the *consequence* (not the jargon
+            // "Accessibility"); click routes to the onboarding
+            // grant step — the app's one "why + how" explainer —
+            // not a bare System Settings link.
             let paused = NSMenuItem(
                 title: L(
                     "menu.accessibility_paused",
@@ -34,13 +38,8 @@ extension StatusItemController {
                 "Click to grant Accessibility permission and "
                     + "resume tiling."
             )
-            menu.addItem(paused)
-            menu.addItem(.separator())
+            warnings.append(paused)
         }
-        menu.addItem(layoutItem())
-        menu.addItem(.separator())
-        menu.addItem(switchProfileItem(profiles))
-        menu.addItem(.separator())
         if configError {
             let issues = NSMenuItem(
                 title: L(
@@ -55,9 +54,23 @@ extension StatusItemController {
             // the quick menu; safe from the §3.7 status-glyph
             // distinction here because the row is text-labeled.
             issues.image = symbol("exclamationmark.triangle.fill")
-            menu.addItem(issues)
+            warnings.append(issues)
+        }
+        if !warnings.isEmpty {
+            warnings.forEach(menu.addItem)
             menu.addItem(.separator())
         }
+
+        // Daily actions — Layout first (the most-used control),
+        // Switch Profile under it: same topic, no separator
+        // between them.
+        menu.addItem(layoutItem())
+        menu.addItem(switchProfileItem(profiles))
+
+        // App chrome: Settings sits low, next to Quit, as in
+        // every native menu-bar extra — not mid-list among the
+        // workspace actions.
+        menu.addItem(.separator())
         let settings = NSMenuItem(
             title: L("menu.settings", "Settings…"),
             action: #selector(openDashboard),
@@ -67,28 +80,6 @@ extension StatusItemController {
         settings.image = symbol("gearshape")
         menu.addItem(settings)
 
-        let accessibility = NSMenuItem(
-            title: L(
-                "menu.accessibility_settings",
-                "Accessibility Settings…"
-            ),
-            action: #selector(openSettings),
-            keyEquivalent: ""
-        )
-        accessibility.target = self
-        accessibility.image = symbol("accessibility")
-        menu.addItem(accessibility)
-
-        menu.addItem(.separator())
-        let support = NSMenuItem(
-            title: L("menu.support", "Support KiwiDesk"),
-            action: #selector(openSupport),
-            keyEquivalent: ""
-        )
-        support.target = self
-        support.image = symbol("heart")
-        menu.addItem(support)
-
         menu.addItem(.separator())
         let quit = NSMenuItem(
             title: L("menu.quit", "Quit KiwiDesk"),
@@ -97,29 +88,6 @@ extension StatusItemController {
         )
         quit.image = symbol("power")
         menu.addItem(quit)
-    }
-
-    /// The disabled header row: branding slot + which profile
-    /// is live right now (§3.8/§3.10).
-    private func headerItem(active: String?) -> NSMenuItem {
-        let title =
-            active.map {
-                L("menu.header.active", "KiwiDesk — %1$@", $0)
-            }
-            ?? L(
-                "menu.header.no_profile",
-                "KiwiDesk — no profile"
-            )
-        let header = NSMenuItem(
-            title: title,
-            action: nil,
-            keyEquivalent: ""
-        )
-        header.isEnabled = false
-        header.image =
-            BrandAssets.menuBarIcon
-            ?? symbol("rectangle.3.group")
-        return header
     }
 
     /// `load_profile` had no quick path before (§3.10): one
@@ -176,10 +144,6 @@ extension StatusItemController {
 
     // MARK: - Actions
 
-    @objc private func openSettings() {
-        onOpenSettings()
-    }
-
     @objc private func openDashboard() {
         onOpenDashboard()
     }
@@ -190,10 +154,6 @@ extension StatusItemController {
 
     @objc private func showAccessibilityHelp() {
         onShowAccessibilityHelp()
-    }
-
-    @objc private func openSupport() {
-        NSWorkspace.shared.open(SupportLinks.koFi)
     }
 
     @objc private func loadProfile(_ sender: NSMenuItem) {

@@ -51,9 +51,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         )
 
         let statusItem = StatusItemController()
-        statusItem.onOpenSettings = {
-            PermissionMonitor.openSystemSettings()
-        }
         statusItem.onOpenDashboard = { [weak self] in
             self?.dashboard.show()
         }

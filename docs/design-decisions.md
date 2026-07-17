@@ -1559,12 +1559,31 @@ badge and window above. Runtime hits (a typo inside a
 keybinding closure) only log; a persistent "config error"
 badge for a transient slip would mislead. (#39)
 
-**The quick menu is for daily driving.** Header row naming
-the live profile, a Switch Profile submenu (`load_profile`
-finally has a quick path), Config Issues… only while
-something is wrong, Support near Quit. Menu entries stay
-monochrome template symbols; the colored tiles are a
-Settings-window device. (#68 §3.10, §6.2)
+**The quick menu is for daily driving.** A healthy menu opens
+straight on **Layout** (the most-used control), then Switch
+Profile (`load_profile`'s quick path) — same topic, no
+separator between them — then **Settings… low, next to Quit**,
+where every native menu-bar extra keeps Preferences. Warning
+rows (**Window Management Paused…** when Accessibility is
+missing, **Config Issues…** when a config load failed) appear
+**only when they apply**, at the top, fenced by a single
+separator that is itself present only when a warning fired;
+permission outranks config since without it nothing tiles.
+Menu entries stay monochrome template symbols; the colored
+tiles are a Settings-window device. (#68 §3.10, §6.2)
+
+Deliberately *not* in the menu: a **header row** naming the
+live profile (the active profile is already checkmarked in the
+Switch Profile submenu — a permanent top line is near-zero-info
+chrome above the thing you came for); a permanent
+**Accessibility Settings…** deep link (a standing nag for the
+99% granted case — the paused warning row covers the untrusted
+case, and onboarding's own "Open System Settings" is the fix
+path); and a **Support** row (it lives in Settings ▸ About as a
+discreet link — a menu opened daily for Layout is no place for a
+recurring support ask). Trimmed from thirteen possible rows to
+~six, each of which either does something you came for or is app
+chrome you expect near Quit.
 
 **The real logo ships pre-rasterized, no asset catalog.**
 Vector masters live in `/assets`; the app bundles plain
