@@ -13,8 +13,9 @@ unless you want custom Lua.
 
 ## Getting Started
 
-Open Settings from the KiwiDesk menu in the menu bar. The window
-shows a two-group sidebar on the left:
+Open Settings from the KiwiDesk menu in the menu bar, or press
+**⌘,** while KiwiDesk is the active app. The window shows a
+two-group sidebar on the left:
 
 - **Design** — sections scoped to the active profile (Spaces,
   Layout, Monitors, Appearance, App Bar, Behavior).

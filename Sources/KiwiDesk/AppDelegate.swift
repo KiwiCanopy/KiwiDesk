@@ -1,7 +1,7 @@
 import AppKit
+import Combine
 import KiwiDeskCore
 import SwiftUI
-@preconcurrency import UserNotifications
 
 /// Entry point: permissions, menu bar, and windows. All window
 /// management logic lives in `KiwiCore`.
@@ -36,6 +36,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
     /// Held strongly so the source stays active for the
     /// lifetime of the process.
     private var sigtermSource: DispatchSourceSignal?
+    /// Rebuilds the fixed-string main menu when the GUI language
+    /// changes, so it honors the live-switch contract (#9) the
+    /// rest of the app upholds.
+    private var localeObserver: AnyCancellable?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Inject the persisted language pick before any view
@@ -49,6 +53,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         LocalizationManager.shared.adoptPersistedSelection(
             LocalizationPreference.read()
         )
+
+        // Install the application menu bar. A bare executable
+        // ships none, so without this the auto-hide menu bar
+        // never reveals while KiwiDesk is the active `.regular`
+        // app (Settings focused) and text fields lack the
+        // standard Edit shortcuts (#329). Rebuild it on a live
+        // language change: its titles are fixed at build time,
+        // so it must be reinstalled to re-localize (#9). `select`
+        // reloads the catalog *after* republishing `selection`,
+        // so hop to the main queue to read the new strings; the
+        // initial value is dropped (the menu is built here).
+        installMainMenu()
+        localeObserver = LocalizationManager.shared.$selection
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.installMainMenu() }
 
         let statusItem = StatusItemController()
         statusItem.onOpenDashboard = { [weak self] in
@@ -180,6 +200,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         permissions.stop()
     }
 
+    /// The App menu's "Settings…" item (⌘,) — opens the
+    /// dashboard just like the quick menu's entry.
+    @objc private func openDashboardFromMenu(_ sender: Any?) {
+        dashboard.show()
+    }
+
+    private func installMainMenu() {
+        NSApp.mainMenu = MainMenu.make(
+            settingsTarget: self,
+            settingsAction: #selector(openDashboardFromMenu)
+        )
+    }
+
     // MARK: - Permission transitions
 
     private func permissionChanged(_ trusted: Bool) {
@@ -294,48 +327,5 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         )
         NSApp.activate()
         alert.runModal()
-    }
-
-    // MARK: - Notifications
-
-    /// Posts a system notification about revoked permission.
-    /// `UNUserNotificationCenter` requires a real app bundle, so
-    /// bare SwiftPM executables fall back to logging only.
-    private func notifyPermissionLost() {
-        guard Bundle.main.bundleIdentifier != nil else {
-            NSLog(
-                "KiwiDesk: Accessibility permission revoked; "
-                    + "window management paused."
-            )
-            return
-        }
-        // Resolved on the main actor before the completion
-        // handler, which runs on an arbitrary queue and can't
-        // call the main-actor-isolated `L()`.
-        let title = L(
-            "notification.permission_lost.title",
-            "KiwiDesk stopped managing windows"
-        )
-        let body = L(
-            "notification.permission_lost.body",
-            "Accessibility permission was revoked. "
-                + "Re-enable it in System Settings > "
-                + "Privacy & Security > Accessibility."
-        )
-        let center = UNUserNotificationCenter.current()
-        center.requestAuthorization(
-            options: [.alert]
-        ) { granted, _ in
-            guard granted else { return }
-            let content = UNMutableNotificationContent()
-            content.title = title
-            content.body = body
-            let request = UNNotificationRequest(
-                identifier: "kiwidesk.permission-lost",
-                content: content,
-                trigger: nil
-            )
-            center.add(request)
-        }
     }
 }
