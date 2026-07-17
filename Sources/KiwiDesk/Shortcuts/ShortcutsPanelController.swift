@@ -2,8 +2,11 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// A floating panel that closes on Esc (`cancelOperation`) and,
-/// via the controller's resign-key handler, on click-away.
+/// A floating panel that closes on Esc and, via the controller's
+/// resign-key handler, on click-away. Borderless, so it must opt
+/// into key status (`canBecomeKey`) to receive the keystroke — and
+/// the app is activated on show, or an accessory app's key window
+/// never actually receives keyboard events.
 final class ShortcutsPanel: NSPanel {
     var onCancel: () -> Void = {}
 
@@ -11,6 +14,18 @@ final class ShortcutsPanel: NSPanel {
 
     override func cancelOperation(_ sender: Any?) {
         onCancel()
+    }
+
+    /// Explicit Esc handler as well as `cancelOperation` — a
+    /// borderless panel hosting a SwiftUI view doesn't always route
+    /// Esc through the cancel action, so catch the keystroke here
+    /// too (53 = Escape).
+    override func keyDown(with event: NSEvent) {
+        if event.keyCode == 53 {
+            onCancel()
+            return
+        }
+        super.keyDown(with: event)
     }
 }
 
@@ -50,7 +65,26 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         )
         resize(panel)
         center(panel)
+        // Activate the app so a menu-bar (accessory) app's key window
+        // actually receives keystrokes — without this, Esc and
+        // click-away never fire and the panel can't be dismissed.
+        // Accessory-level: no Dock icon appears (unlike the dashboard,
+        // which promotes to regular). KiwiDesk's tiling hotkeys are
+        // global Carbon and keep firing regardless, so the panel still
+        // live-updates on a mode switch while it's open.
+        NSApp.activate(ignoringOtherApps: true)
         panel.makeKeyAndOrderFront(nil)
+    }
+
+    /// Re-summoning while open dismisses it (the menu row toggles),
+    /// so there is a focus-independent close even if the pointer
+    /// never leaves the panel.
+    func toggle() {
+        if let panel, panel.isVisible {
+            close()
+        } else {
+            show()
+        }
     }
 
     private func close() {
@@ -62,10 +96,7 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
     private func makePanel() -> ShortcutsPanel {
         let panel = ShortcutsPanel(
             contentRect: .zero,
-            styleMask: [
-                .borderless, .nonactivatingPanel,
-                .fullSizeContentView,
-            ],
+            styleMask: [.borderless, .fullSizeContentView],
             backing: .buffered,
             defer: true
         )
@@ -124,36 +155,57 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
 
     // MARK: - Reference data
 
-    /// The live, resolved bindings for the currently-active mode.
-    /// Nil when the panel can't read them (config owned by
-    /// init.lua, or the engine isn't running) — the view then
-    /// shows its "managed by init.lua" placeholder.
+    /// The shortcuts for the active mode. Nil ONLY when the config
+    /// is genuinely owned by `init.lua` (not GUI-managed) — the view
+    /// then shows its "managed by init.lua" placeholder.
+    ///
+    /// Prefers the live, resolved snapshot (what Carbon actually has
+    /// installed). When window management is paused — no Accessibility
+    /// permission, or bindings not applied yet — there is no snapshot;
+    /// for a GUI-managed config we fall back to the CONFIGURED modes
+    /// from gui.json so the user still sees their shortcuts (defined,
+    /// just not live right now) rather than a misleading placeholder.
     private func buildReference() -> ShortcutsReference? {
-        guard let snapshot = core.liveKeybindingSnapshot() else {
+        let modes: [KeyMode]
+        let activeMode: String
+        let config: GuiConfig
+        if let snapshot = core.liveKeybindingSnapshot() {
+            // Live: the running engine's spaces match the resolved
+            // bindings, so the live-overlaid config is correct.
+            modes = snapshot.keyModes
+            activeMode = snapshot.activeModeName
+            config = core.loadGuiConfig()
+        } else if core.isGuiManaged,
+            let raw = core.guiConfigStore.load()
+        {
+            // Paused (no Accessibility): the engine hasn't discovered
+            // any spaces, so loadGuiConfig would overlay an EMPTY live
+            // space list and misfile every space shortcut into Custom.
+            // Read the persisted gui.json directly — it keeps the
+            // authored spaces and modes.
+            modes = raw.modes
+            activeMode = raw.modes.first?.name ?? KeyMode.defaultName
+            config = raw
+        } else {
             return nil
         }
         let mode =
-            snapshot.keyModes.first {
-                $0.name == snapshot.activeModeName
-            }
-            ?? snapshot.keyModes.first
+            modes.first { $0.name == activeMode }
+            ?? modes.first
             ?? KeyMode.defaultMode
-        // Two-source read: the snapshot supplies the installed
-        // bindings; loadGuiConfig supplies only spaces / icons /
-        // step, used to *generate candidate preset rows* that are
-        // then intersected with the snapshot's actual bindings. A
-        // transient disagreement (space or step edited but not yet
-        // re-applied) can only misfile a binding into Custom, never
-        // hide or invent one — safe for a read-only glance panel, so
-        // the snapshot stays a pure keybinding rollback point rather
-        // than growing space/settings context.
-        let config = core.loadGuiConfig()
+        // Two-source read: the modes supply the bindings; the config
+        // supplies only spaces / icons / step, used to *generate
+        // candidate preset rows* that are then intersected with the
+        // actual bindings. A transient disagreement (space or step
+        // edited but not yet re-applied) can only misfile a binding
+        // into Custom, never hide or invent one — safe for a
+        // read-only glance panel.
         return ShortcutsReferenceBuilder.build(
             mode: mode,
             spaces: config.spaces,
             spaceIcons: config.settings.spaceIcons,
             resizeStep: Int(config.settings.resizeStep),
-            modeNames: snapshot.keyModes.map(\.name)
+            modeNames: modes.map(\.name)
         )
     }
 

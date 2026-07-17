@@ -130,7 +130,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         }
         self.shortcutsPanel = shortcutsPanel
         statusItem.onShowShortcuts = { [weak shortcutsPanel] in
-            shortcutsPanel?.show()
+            shortcutsPanel?.toggle()
         }
         statusItem.onShowConfigIssues = { [weak self] in
             self?.configIssues.show()
