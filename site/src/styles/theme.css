@@ -40,3 +40,13 @@
   --sl-color-gray-7: #f6f8f3;
   --sl-color-black: #ffffff;
 }
+
+/* Quiet KiwiCanopy parent-brand mention appended below the docs
+   footer (src/components/Footer.astro). Held at Starlight's own
+   low-emphasis footer weight so it reads as footer metadata. */
+.kiwicanopy-credit {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: var(--sl-text-xs);
+  color: var(--sl-color-gray-3);
+}

@@ -32,6 +32,11 @@ export default defineConfig({
       social: {
         github: "https://github.com/hajiboy95/KiwiDesk",
       },
+      // Append a quiet KiwiCanopy parent-brand mention below the
+      // default docs footer (see src/components/Footer.astro).
+      components: {
+        Footer: "./src/components/Footer.astro",
+      },
       customCss: ["./src/styles/theme.css"],
       // Docs live under /docs/* (repo docs/ is symlinked into
       // src/content/docs/docs/). The landing page at / is a

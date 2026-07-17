@@ -14,6 +14,16 @@ an asset catalog — `swift build` on CI does not run actool).
 | `logo_dark.svg` | `AppMarkDark.png` (512 px) | Sidebar identity (dark mode) — golden variant |
 | `logo.svg` | — (reserved) | App-icon (`.icns`) master, once an `.app` bundle exists (#89) |
 
+## Website-only assets
+
+Not bundled in the app — consumed directly by the marketing site
+(`site/src/assets/brand` is a symlink to this directory).
+
+| File | Used by |
+|---|---|
+| `kiwi-canopy.png` | Parent-brand (**KiwiCanopy**) logo in the landing + guide footers (#317). Supplied raster master; no SVG. Astro downsamples it per `widths`. |
+| `kiwi-mark.svg` | The kiwi-slice glyph in the site's Simple/Nerd mode toggle. A generic mark, unrelated to any parent-brand wordmark. |
+
 ## Regenerating after editing a master
 
 Only macOS built-ins needed (`sips` reads SVG; `tiffutil`
