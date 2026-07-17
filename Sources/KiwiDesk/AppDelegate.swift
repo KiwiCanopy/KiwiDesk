@@ -9,17 +9,27 @@ import SwiftUI
 final class AppDelegate: NSObject, NSApplicationDelegate,
     NSWindowDelegate
 {
-    private let core = KiwiCore()
-    private let permissions = PermissionMonitor()
-    private var statusItem: StatusItemController?
-    private var onboardingWindow: NSWindow?
-    private let onboardingModel = OnboardingModel()
+    // These are `internal` (not `private`) so the onboarding-window
+    // lifecycle can live in `AppDelegate+Onboarding.swift` (§2.1
+    // file-size split); the class is `final` in a single executable
+    // target, so this is module-internal, not real API surface.
+    let core = KiwiCore()
+    let permissions = PermissionMonitor()
+    var statusItem: StatusItemController?
+    var onboardingWindow: NSWindow?
+    let onboardingModel = OnboardingModel()
+    /// One-shot: the discovery card's "Open Settings" close routes
+    /// the user into the app, so the menu-bar "look here" popover
+    /// is redundant there and stays suppressed for that one close.
+    /// The Not Now / red-button routes leave it false, so they
+    /// fire the hint (#331).
+    var openedSettingsFromDiscovery = false
     /// Created on first `dashboard` access. Kept alongside so
     /// the quick-menu closures can refresh an *already open*
     /// dashboard without constructing the whole settings stack
     /// on a mere layout switch.
     private var dashboardIfCreated: SettingsWindowController?
-    private var dashboard: SettingsWindowController {
+    var dashboard: SettingsWindowController {
         if let existing = dashboardIfCreated { return existing }
         let created = SettingsWindowController(core: core)
         // Seed the dashboard's permission banner from live state
@@ -250,107 +260,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         }
     }
 
-    /// The shared "fix Accessibility" entry point for both the
-    /// quick-menu warning row and the Settings banner: reopen the
-    /// onboarding wizard straight at its grant step (skipping the
-    /// welcome copy) so both routes land in the one explainer.
-    private func showAccessibilityHelp() {
-        onboardingModel.step = .grant
-        showOnboarding()
-    }
-
     private func startManaging() {
         statusItem?.setWarning(false)
         core.start()
-    }
-
-    // MARK: - Onboarding window
-
-    private func showOnboarding() {
-        if let window = onboardingWindow {
-            // No `activateAsRegular()` here (unlike Settings' reuse
-            // branch): `windowWillClose` nils `onboardingWindow` on
-            // close, so a non-nil window is guaranteed still
-            // `.regular` and the promotion never needs repeating.
-            NSApp.forceFront(window)
-            return
-        }
-        onboardingModel.isTrusted = permissions.isTrusted
-        onboardingModel.onOpenSettings = {
-            PermissionMonitor.openSystemSettings()
-        }
-        onboardingModel.onOpenSpaceSettings = {
-            DisplaySpacesSetting.openSystemSettings()
-        }
-        onboardingModel.displayCount = { [weak self] in
-            self?.core.state.workspaces.allDisplays.count ?? 1
-        }
-        onboardingModel.onFinish = { [weak self] in
-            self?.closeOnboarding()
-        }
-        // The post-setup discovery card fires once, gated on its
-        // own persisted flag — never AX trust, so a later TCC
-        // reset never re-pitches (#331).
-        onboardingModel.wantsDiscovery = { !OnboardingDiscovery.hasShown() }
-        onboardingModel.onExploreSettings = { [weak self] in
-            self?.exploreFromDiscovery()
-        }
-
-        let view = OnboardingView(model: onboardingModel)
-            .environmentObject(LocalizationManager.shared)
-        let window = NSWindow(
-            contentRect: .zero,
-            styleMask: [.titled, .closable, .fullSizeContentView],
-            backing: .buffered,
-            defer: false
-        )
-        window.titlebarAppearsTransparent = true
-        window.title = L("onboarding.window.title", "KiwiDesk Setup")
-        window.contentView = NSHostingView(rootView: view)
-        window.isReleasedWhenClosed = false
-        window.delegate = self
-        window.center()
-        onboardingWindow = window
-
-        NSApp.activateAsRegular()
-        NSApp.forceFront(window)
-    }
-
-    private func closeOnboarding() {
-        // Closing routes through `windowWillClose`, which does
-        // the demote + teardown (also covers the red-button
-        // close, which the "finish" button used to bypass).
-        onboardingWindow?.close()
-    }
-
-    /// The discovery card's "Open Settings": open the dashboard on
-    /// Layout (its schematic preview is the most persuasive first
-    /// impression) *before* closing onboarding, so the still-open
-    /// dashboard keeps the app `.regular` and the close doesn't
-    /// demote it. Closing fires the menu-bar popover (#331).
-    private func exploreFromDiscovery() {
-        dashboard.show(navigatingTo: .layoutDefaults)
-        closeOnboarding()
-    }
-
-    func windowWillClose(_ notification: Notification) {
-        guard
-            let closing = notification.object as? NSWindow,
-            closing === onboardingWindow
-        else { return }
-        onboardingWindow = nil
-        // Every discovery exit route (Open Settings, Not Now, the
-        // red button) leaves the card as the active step, so fire
-        // the one-time "look here" popover and burn the shared flag
-        // here — the single close funnel both routes pass through
-        // (#331).
-        if onboardingModel.step == .readyToExplore {
-            OnboardingDiscovery.markShown()
-            statusItem?.showDiscoveryPopover()
-        }
-        // Demote only if no other content window remains (the
-        // still-visible closing window is excluded).
-        NSApp.deactivateIfNoWindows(excluding: closing)
     }
 
     /// The quick menu has no footer to surface a save error in

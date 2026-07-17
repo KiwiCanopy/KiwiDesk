@@ -1626,9 +1626,13 @@ The color mark is reserved as the `.icns` master for when an
   appended wizard card ("You're ready to go" → **Open Settings**
   on Layout, or an equal-weight **Not Now**) plus a one-time
   `NSPopover` anchored to the menu bar icon ("KiwiDesk lives
-  here…"). Deliberately *not* a guided tour of every tab — that
-  fights the contextual-help convention (#94) and is the classic
-  skipped-onboarding trap. Both fire exactly once, gated on a
+  here…"). The popover fires only on the *decline* routes (Not
+  Now or closing the card): choosing Open Settings already leads
+  the user into the app, so a menu-bar hint at a far corner would
+  just be a competing second surface. Deliberately *not* a guided
+  tour of every tab — that fights the contextual-help convention
+  (#94) and is the classic skipped-onboarding trap. Both the card
+  and the popover fire exactly once, gated on a
   dedicated `UserDefaults` flag (`onboarding.discoveryShown`),
   **never** the Accessibility trust state: the wizard reopens on
   any AX revoke, so a trust-gated beat would re-pitch a user

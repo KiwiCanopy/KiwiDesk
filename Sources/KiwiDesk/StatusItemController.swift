@@ -7,7 +7,9 @@ import SwiftUI
 /// active mode's custom icon beats the standard glyph. The quick
 /// menu (#68 §3.10) is built in `StatusItemController+Menu`.
 @MainActor
-final class StatusItemController: NSObject, NSMenuDelegate {
+final class StatusItemController: NSObject, NSMenuDelegate,
+    NSPopoverDelegate
+{
     var onOpenDashboard: () -> Void = {}
     /// Opens the read-only shortcuts reference panel (#326).
     var onShowShortcuts: () -> Void = {}
@@ -54,6 +56,11 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// while shown so the auto-dismiss and menu-open paths can
     /// close it.
     private var discoveryPopover: NSPopover?
+    /// Cancellable auto-dismiss for the popover, so dismissing it
+    /// early (menu open, outside click) drops the pending fire —
+    /// the repo's cancellable-`Task` timer convention over a
+    /// non-cancellable `asyncAfter`.
+    private var discoveryDismiss: Task<Void, Never>?
 
     override init() {
         item = NSStatusBar.system.statusItem(
@@ -204,10 +211,19 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// any outside click dismisses it; opening the quick menu (the
     /// success case) closes it via `menuNeedsUpdate`; a ~5s
     /// fallback covers the ignore case.
+    ///
+    /// Skipped when the icon is offscreen — an auto-hidden menu bar
+    /// leaves the item with no on-screen pixels to point at, so a
+    /// popover would land in a garbage corner. The wizard card's
+    /// "you can get back from the menu bar" copy covers that user
+    /// instead (#331).
     func showDiscoveryPopover() {
-        guard let button = item.button else { return }
+        guard let button = item.button,
+            statusItemIsOnScreen(button)
+        else { return }
         let popover = NSPopover()
         popover.behavior = .transient
+        popover.delegate = self
         popover.contentViewController = NSHostingController(
             rootView: DiscoveryPopoverView()
         )
@@ -217,8 +233,10 @@ final class StatusItemController: NSObject, NSMenuDelegate {
             of: button,
             preferredEdge: .minY
         )
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-            [weak self] in self?.dismissDiscoveryPopover()
+        discoveryDismiss = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: 5_000_000_000)
+            guard !Task.isCancelled else { return }
+            self?.dismissDiscoveryPopover()
         }
     }
 
@@ -226,26 +244,31 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// menu-open success path and the timed fallback; safe to call
     /// when nothing is showing.
     func dismissDiscoveryPopover() {
+        discoveryDismiss?.cancel()
+        discoveryDismiss = nil
         discoveryPopover?.performClose(nil)
         discoveryPopover = nil
     }
-}
 
-/// The discovery popover's single line (#331): no buttons —
-/// dismissal is ambient (click away, open the menu, or time out).
-/// Deliberately jargon-free for a first-run, non-power user.
-private struct DiscoveryPopoverView: View {
-    var body: some View {
-        Text(
-            L(
-                "onboarding.discovery.popover",
-                "KiwiDesk lives here. Click anytime for layouts "
-                    + "and settings."
-            )
-        )
-        .font(.callout)
-        .fixedSize(horizontal: false, vertical: true)
-        .frame(width: 220)
-        .padding(14)
+    /// The `.transient` outside-click path closes the popover
+    /// without routing through `dismissDiscoveryPopover`, so clear
+    /// the retained reference and pending timer here too.
+    func popoverDidClose(_ notification: Notification) {
+        discoveryDismiss?.cancel()
+        discoveryDismiss = nil
+        discoveryPopover = nil
+    }
+
+    /// Whether the status-item button currently has on-screen
+    /// pixels. A menu bar set to auto-hide (and not revealed)
+    /// parks the item offscreen; anchoring there misplaces the
+    /// popover, so callers skip it (#331).
+    private func statusItemIsOnScreen(
+        _ button: NSStatusBarButton
+    ) -> Bool {
+        guard let window = button.window else { return false }
+        let frame = window.convertToScreen(button.frame)
+        let mid = CGPoint(x: frame.midX, y: frame.midY)
+        return NSScreen.screens.contains { $0.frame.contains(mid) }
     }
 }
