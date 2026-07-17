@@ -70,11 +70,25 @@ struct AppBarGlyphLayoutTests {
     }
 
     /// The widest name defines the uniform slot — and must then
-    /// FIT that slot untruncated (the raw-string-vs-cell metric
-    /// mismatch that tail-truncated exactly the longest tab).
-    @Test("The widest name fits the slot it defined")
-    func widestNameFitsItsOwnSlot() {
+    /// FIT that slot untruncated (the center-alignment cell
+    /// metric that tail-truncated exactly the longest tab).
+    /// Parameterized over the formula's branches: content mode
+    /// (icon side present or not) and fixed-vs-auto font.
+    @Test(
+        "The widest name fits the slot it defined",
+        arguments: [
+            (AppBarStyle.Content.iconAndName, CGFloat(0)),
+            (AppBarStyle.Content.iconAndName, CGFloat(18)),
+            (AppBarStyle.Content.name, CGFloat(0)),
+        ]
+    )
+    func widestNameFitsItsOwnSlot(
+        variant: (AppBarStyle.Content, CGFloat)
+    ) {
         let thickness: CGFloat = 32
+        var style = AppBarStyle()
+        style.content = variant.0
+        style.fontSize = variant.1
         let items = [
             AppBarOverlay.Item(
                 id: WindowID(1),
@@ -89,7 +103,7 @@ struct AppBarGlyphLayoutTests {
         ]
         let slot = AppBarOverlay.autoSlotWidth(
             items: items,
-            style: AppBarStyle(),
+            style: style,
             horizontal: true,
             thickness: thickness
         )
@@ -105,16 +119,17 @@ struct AppBarGlyphLayoutTests {
             id: WindowID(1),
             name: "Systemeinstellungen",
             icon: nil,
-            glyph: ":settings:",
+            glyph: variant.0 == .name ? nil : ":settings:",
             count: 1,
             active: false,
             horizontal: true,
-            style: AppBarStyle(),
+            style: style,
             edge: .top
         )
         view.layout()
         // The label must have been given its full cell width —
         // a clamped width is what renders the "…" tail.
+        #expect(!view.label.isHidden)
         let needed = ceil(view.label.cell?.cellSize.width ?? 0)
         #expect(view.label.frame.width >= needed)
     }

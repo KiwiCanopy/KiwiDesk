@@ -155,6 +155,11 @@ extension AppBarOverlay {
     /// slot must hold its square (side = thickness − padding,
     /// plus the padding back — i.e. the thickness itself);
     /// text-only bars just keep a sliver of legibility.
+    /// Load-bearing beyond looks: icon-bearing slots flooring
+    /// at `thickness` is what makes the measurement's
+    /// `iconSide = thickness - pad*2` equal the layout's
+    /// `min(bounds.height, bounds.width) - pad*2` — the
+    /// slot-fits-widest-name invariant leans on it.
     nonisolated static func minimumSlot(
         thickness: CGFloat,
         content: AppBarStyle.Content

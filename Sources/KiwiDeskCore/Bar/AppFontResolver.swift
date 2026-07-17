@@ -74,6 +74,12 @@ public final class AppFontResolver {
         guard source == .appFont, AppFont.registered else {
             return nil
         }
-        return map?[name]
+        // Empty ligatures are rejected HERE so no item view
+        // ever needs its own blank-glyph guard (the map loader
+        // also drops degenerate entries — that's hygiene, this
+        // is the gate).
+        return map?[name].flatMap {
+            $0.isEmpty ? nil : $0
+        }
     }
 }
