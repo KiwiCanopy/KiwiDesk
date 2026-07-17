@@ -237,10 +237,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
             statusItem?.setWarning(false)
             startManaging()
         } else {
-            // Revoked mid-session: pause management, warn.
+            // Revoked mid-session: pause management, warn. Reopen
+            // straight at the grant step — the user already saw
+            // the welcome, and the model may still rest on a prior
+            // terminal step (e.g. the discovery card) that the
+            // bare reuse path would otherwise redisplay.
             core.stop()
             statusItem?.setWarning(true)
             notifyPermissionLost()
+            onboardingModel.step = .grant
             showOnboarding()
         }
     }
@@ -283,6 +288,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         onboardingModel.onFinish = { [weak self] in
             self?.closeOnboarding()
         }
+        // The post-setup discovery card fires once, gated on its
+        // own persisted flag — never AX trust, so a later TCC
+        // reset never re-pitches (#331).
+        onboardingModel.wantsDiscovery = { !OnboardingDiscovery.hasShown() }
+        onboardingModel.onExploreSettings = { [weak self] in
+            self?.exploreFromDiscovery()
+        }
 
         let view = OnboardingView(model: onboardingModel)
             .environmentObject(LocalizationManager.shared)
@@ -311,12 +323,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         onboardingWindow?.close()
     }
 
+    /// The discovery card's "Open Settings": open the dashboard on
+    /// Layout (its schematic preview is the most persuasive first
+    /// impression) *before* closing onboarding, so the still-open
+    /// dashboard keeps the app `.regular` and the close doesn't
+    /// demote it. Closing fires the menu-bar popover (#331).
+    private func exploreFromDiscovery() {
+        dashboard.show(navigatingTo: .layoutDefaults)
+        closeOnboarding()
+    }
+
     func windowWillClose(_ notification: Notification) {
         guard
             let closing = notification.object as? NSWindow,
             closing === onboardingWindow
         else { return }
         onboardingWindow = nil
+        // Every discovery exit route (Open Settings, Not Now, the
+        // red button) leaves the card as the active step, so fire
+        // the one-time "look here" popover and burn the shared flag
+        // here — the single close funnel both routes pass through
+        // (#331).
+        if onboardingModel.step == .readyToExplore {
+            OnboardingDiscovery.markShown()
+            statusItem?.showDiscoveryPopover()
+        }
         // Demote only if no other content window remains (the
         // still-visible closing window is excluded).
         NSApp.deactivateIfNoWindows(excluding: closing)

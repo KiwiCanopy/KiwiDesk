@@ -72,6 +72,14 @@ basic tiling still works with separate display Spaces, and a single
 display is never affected. Changing the macOS option requires
 logging out and back in.
 
+When setup finishes, a final card confirms KiwiDesk is now
+arranging your windows and offers to **Open Settings** (landing on
+Layout) — or **Not Now** to jump straight in; neither is required.
+A one-time hint then points at the menu bar icon, where KiwiDesk
+lives, so it's easy to find again. Both appear only once, on that
+first setup — losing and regranting Accessibility later never
+repeats them.
+
 If Accessibility permission is ever missing — you dismissed the
 wizard, or the permission was revoked later — window management
 pauses and KiwiDesk makes it easy to find your way back. The menu

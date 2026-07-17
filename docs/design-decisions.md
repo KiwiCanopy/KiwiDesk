@@ -1621,8 +1621,21 @@ The color mark is reserved as the `.icns` master for when an
 
 ## Out of scope, on purpose
 
-- **Onboarding** is a separate follow-up pass (shares only
-  the branding glyph). (#68 §5.9)
+- **Post-setup discovery** (#331) closes the first-run
+  discovery gap with the smallest surface that works: one
+  appended wizard card ("You're ready to go" → **Open Settings**
+  on Layout, or an equal-weight **Not Now**) plus a one-time
+  `NSPopover` anchored to the menu bar icon ("KiwiDesk lives
+  here…"). Deliberately *not* a guided tour of every tab — that
+  fights the contextual-help convention (#94) and is the classic
+  skipped-onboarding trap. Both fire exactly once, gated on a
+  dedicated `UserDefaults` flag (`onboarding.discoveryShown`),
+  **never** the Accessibility trust state: the wizard reopens on
+  any AX revoke, so a trust-gated beat would re-pitch a user
+  whose TCC a macOS update reset. Copy is jargon-free (no
+  "profile", "Accessibility", "tiling") for a first-run
+  non-power user. (Supersedes the earlier "onboarding is a
+  separate follow-up pass" note, #68 §5.9.)
 - **Configurable resize step** (#58): the `resize.step` setting,
   `set_resize_step` command, and import shape-match have landed;
   the **in-GUI step control** (a slider in Shortcuts ▸ Size &

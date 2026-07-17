@@ -1,5 +1,6 @@
 import AppKit
 import KiwiDeskCore
+import SwiftUI
 
 /// Owns the menu bar item: the status icon's state machine
 /// (§3.7) — permission warning beats config error beats the
@@ -49,6 +50,10 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// Active keybinding mode indicator (SF Symbol or emoji);
     /// nil restores the standard KiwiDesk icon.
     private var modeIcon: String?
+    /// The one-time post-setup "look here" popover (#331), held
+    /// while shown so the auto-dismiss and menu-open paths can
+    /// close it.
+    private var discoveryPopover: NSPopover?
 
     override init() {
         item = NSStatusBar.system.statusItem(
@@ -188,5 +193,59 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         )
         image?.isTemplate = true
         return image
+    }
+
+    // MARK: - Discovery popover (#331)
+
+    /// Fires the one-time "look here" hint the instant onboarding
+    /// closes. Anchored to the real status-item button — the only
+    /// mechanism that maps to the icon's pixels (a centered window
+    /// can't point at the menu bar). Non-modal `.transient`, so
+    /// any outside click dismisses it; opening the quick menu (the
+    /// success case) closes it via `menuNeedsUpdate`; a ~5s
+    /// fallback covers the ignore case.
+    func showDiscoveryPopover() {
+        guard let button = item.button else { return }
+        let popover = NSPopover()
+        popover.behavior = .transient
+        popover.contentViewController = NSHostingController(
+            rootView: DiscoveryPopoverView()
+        )
+        discoveryPopover = popover
+        popover.show(
+            relativeTo: button.bounds,
+            of: button,
+            preferredEdge: .minY
+        )
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            [weak self] in self?.dismissDiscoveryPopover()
+        }
+    }
+
+    /// Closes the discovery popover if it's still up. Shared by the
+    /// menu-open success path and the timed fallback; safe to call
+    /// when nothing is showing.
+    func dismissDiscoveryPopover() {
+        discoveryPopover?.performClose(nil)
+        discoveryPopover = nil
+    }
+}
+
+/// The discovery popover's single line (#331): no buttons —
+/// dismissal is ambient (click away, open the menu, or time out).
+/// Deliberately jargon-free for a first-run, non-power user.
+private struct DiscoveryPopoverView: View {
+    var body: some View {
+        Text(
+            L(
+                "onboarding.discovery.popover",
+                "KiwiDesk lives here. Click anytime for layouts "
+                    + "and settings."
+            )
+        )
+        .font(.callout)
+        .fixedSize(horizontal: false, vertical: true)
+        .frame(width: 220)
+        .padding(14)
     }
 }
