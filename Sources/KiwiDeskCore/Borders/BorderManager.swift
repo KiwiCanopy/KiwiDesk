@@ -40,6 +40,12 @@ public final class BorderManager {
     /// recompute geometry from a fresh frame while reusing the
     /// window's color / width / corner style.
     private var specs: [WindowID: Spec] = [:]
+    /// Each window's real corner radius, resolved once per window and
+    /// reused. A window's radius is a fixed OS attribute, and a query
+    /// that comes back empty (a square/borderless window reporting no
+    /// radius) is a permanent answer, not a transient one — so a
+    /// resolved default is cached too, never re-queried every sync.
+    private var cornerRadii: [WindowID: CGFloat] = [:]
     private var eventSource: SkyLightWindowEvents?
     private var triedEventSource = false
     private var privateRuntimeStarted = false
@@ -82,19 +88,23 @@ public final class BorderManager {
             overlay.hide()
             overlays[id] = nil
             specs[id] = nil
+            cornerRadii[id] = nil
         }
         for spec in desired {
             specs[spec.window] = spec
             let overlay = overlay(for: spec.window)
             overlay.update(
-                geometry: geometry(spec, frame: spec.frame),
+                frame: spec.frame,
+                width: spec.width,
+                cornerStyle: spec.cornerStyle,
+                cornerRadius: cornerRadius(for: spec.window),
                 colorHex: spec.colorHex,
                 screen: screen(for: spec.frame)
             )
             // Re-assert stacking each sync (focus change, retile,
             // z-order restore) — the target may have moved in the
             // window order since the ring last positioned.
-            overlay.order(behind: spec.window.raw)
+            overlay.order(relativeTo: spec.window.raw)
         }
     }
 
@@ -121,11 +131,27 @@ public final class BorderManager {
         guard let overlay = overlays[id], let spec = specs[id]
         else { return }
         overlay.update(
-            geometry: geometry(spec, frame: windowFrame),
+            frame: windowFrame,
+            width: spec.width,
+            cornerStyle: spec.cornerStyle,
+            cornerRadius: cornerRadius(for: id),
             colorHex: spec.colorHex,
             screen: screen(for: windowFrame),
             restoreVisibility: restoreVisibility
         )
+    }
+
+    /// The window's real corner radius so the ring's arc hugs it,
+    /// resolved once and cached (#357). Falls back to the shared
+    /// default when SkyLight reports none — that default is cached
+    /// too, so a radius-less window isn't re-queried on every sync.
+    private func cornerRadius(for id: WindowID) -> CGFloat {
+        if let cached = cornerRadii[id] { return cached }
+        let resolved =
+            SkyLight.windowCornerRadius(id.raw)
+            ?? GeometryUtils.systemWindowCornerRadius
+        cornerRadii[id] = resolved
+        return resolved
     }
 
     /// Geometry tracking is independent of rendering. If a raw SLS
@@ -165,18 +191,8 @@ public final class BorderManager {
         for overlay in overlays.values { overlay.hide() }
         overlays = [:]
         specs = [:]
+        cornerRadii = [:]
         _ = eventSource?.watch([])
-    }
-
-    private func geometry(
-        _ spec: Spec,
-        frame: CGRect
-    ) -> BorderGeometry {
-        BorderGeometry.compute(
-            windowFrame: frame,
-            width: spec.width,
-            cornerStyle: spec.cornerStyle
-        )
     }
 
     private func overlay(for window: WindowID) -> BorderOverlay {
@@ -208,13 +224,13 @@ public final class BorderManager {
         case .follow:
             _ = reconcile(id)
         case .reorder:
-            overlay.order(behind: id.raw)
+            overlay.order(relativeTo: id.raw)
         case .followAndReorder:
             // Unhide must re-assert order even when the bounds read
             // fails. Leave restoration to that one explicit order so
             // a successful reconcile cannot issue it twice.
             _ = reconcile(id, restoreVisibility: false)
-            overlay.order(behind: id.raw)
+            overlay.order(relativeTo: id.raw)
         case .hide:
             overlay.hide()
         }

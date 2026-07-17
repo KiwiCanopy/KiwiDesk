@@ -13,8 +13,15 @@ final class SkyLightBorderOverlay: BorderOverlayBackend {
         (1 << 1) | (1 << 9) | (1 << 18)
     private static let backingStoreBuffered: Int32 = 2
     private static let orderOut: Int32 = 0
-    private static let orderBelow: Int32 = -1
+    private static let orderAbove: Int32 = 1
     private static let parkedOrigin = CGPoint(x: -9_999, y: -9_999)
+
+    /// The ring stacks *above* its target so its own clean corner
+    /// arc is the only visible edge — nothing occludes it, so
+    /// rounded corners read symmetric (#357). Occlusion by child
+    /// windows is preserved by pinning the ring's sub-level to the
+    /// target's (see `order(relativeTo:)`), not by ordering below.
+    let orderMode: BorderGeometry.Order = .above
 
     private let connection: SkyLight.ConnectionID
     private let targetWindow: CGWindowID
@@ -90,60 +97,71 @@ final class SkyLightBorderOverlay: BorderOverlayBackend {
         // inverse transform that anchors the raw surface, while a
         // move-only update is one cheap origin transaction.
         let resetTransform = previous == nil || needsRedraw
-        guard
-            move(
-                to: geometry.overlayFrame.origin,
-                resetTransform: resetTransform
-            )
-        else {
-            destroyWindow()
-            return false
-        }
-        if recreatedForScale && !order(behind: targetWindow) {
+        // Fire-and-forget: `move` commits a transaction whose ops
+        // report no meaningful status, so it cannot fail in a way
+        // worth a fallback (unlike create/reshape/draw above).
+        move(
+            to: geometry.overlayFrame.origin,
+            resetTransform: resetTransform
+        )
+        if recreatedForScale && !order(relativeTo: targetWindow) {
             destroyWindow()
             return false
         }
         return true
     }
 
-    func order(behind windowNumber: CGWindowID) -> Bool {
+    func order(relativeTo windowNumber: CGWindowID) -> Bool {
         guard window != 0, windowNumber == targetWindow,
             let transaction = makeTransaction()
         else { return false }
+        // The `SLSTransaction*` mutators return no meaningful status
+        // (JankyBorders fires them and only commits), so they are
+        // best-effort: gating them on `.success` reads a junk register
+        // and would falsely retire this backend to the AppKit
+        // below-order fallback. Only `makeTransaction` is load-bearing.
         var level: Int64 = 0
-        guard
-            SkyLight.getWindowLevel?(
-                connection,
-                targetWindow,
-                &level
-            ) == .success,
-            level >= Int64(Int32.min), level <= Int64(Int32.max),
-            SkyLight.transactionLevel?(
+        if SkyLight.getWindowLevel?(connection, targetWindow, &level)
+            == .success,
+            level >= Int64(Int32.min), level <= Int64(Int32.max)
+        {
+            _ = SkyLight.transactionLevel?(
                 transaction,
                 window,
                 Int32(level)
-            ) == .success,
-            SkyLight.transactionOrder?(
-                transaction,
-                window,
-                Self.orderBelow,
-                targetWindow
-            ) == .success
-        else { return false }
-        return commit(transaction)
+            )
+        }
+        // Pin the ring into the target's exact sub-level band. A child
+        // the OS stacks over the target (a popover, a sheet) sits at a
+        // *higher* sub-level, so it keeps rendering above a
+        // sub-level-pinned ring even though the ring is ordered above
+        // the target itself. Without this pin, above-order paints over
+        // child popups — the #320 regression below-order avoided
+        // (#357).
+        let subLevel =
+            SkyLight.getWindowSubLevel?(connection, targetWindow) ?? 0
+        _ = SkyLight.transactionSubLevel?(transaction, window, subLevel)
+        _ = SkyLight.transactionOrder?(
+            transaction,
+            window,
+            Self.orderAbove,
+            targetWindow
+        )
+        commit(transaction)
+        return true
     }
 
     func hide() -> Bool {
         guard window != 0 else { return true }
-        guard let transaction = makeTransaction(),
-            SkyLight.transactionOrder?(
-                transaction,
-                window,
-                Self.orderOut,
-                targetWindow
-            ) == .success
-        else { return false }
-        return commit(transaction)
+        guard let transaction = makeTransaction() else { return false }
+        _ = SkyLight.transactionOrder?(
+            transaction,
+            window,
+            Self.orderOut,
+            targetWindow
+        )
+        commit(transaction)
+        return true
     }
 
     private func createWindow(frame: CGRect, scale: CGFloat) -> Bool {
@@ -272,41 +290,35 @@ final class SkyLightBorderOverlay: BorderOverlayBackend {
     private func move(
         to origin: CGPoint,
         resetTransform: Bool
-    ) -> Bool {
-        guard let transaction = makeTransaction(),
-            SkyLight.transactionMove?(
-                transaction,
-                window,
-                origin
-            ) == .success
-        else { return false }
+    ) {
+        guard let transaction = makeTransaction() else { return }
+        // Fire-and-forget mutators; only `makeTransaction` gates.
+        _ = SkyLight.transactionMove?(transaction, window, origin)
         if resetTransform {
             let transform = CGAffineTransform(
                 translationX: -origin.x,
                 y: -origin.y
             )
-            guard
-                SkyLight.transactionTransform?(
-                    transaction,
-                    window,
-                    0,
-                    0,
-                    transform
-                ) == .success
-            else { return false }
+            _ = SkyLight.transactionTransform?(
+                transaction,
+                window,
+                0,
+                0,
+                transform
+            )
         }
-        return commit(transaction)
+        commit(transaction)
     }
 
     private func makeTransaction() -> CFTypeRef? {
         SkyLight.transactionCreate?(connection)?.takeRetainedValue()
     }
 
-    private func commit(_ transaction: CFTypeRef) -> Bool {
-        SkyLight.transactionCommit?(
-            transaction,
-            0
-        ) == .success
+    /// Commits and releases the transaction. `SLSTransactionCommit`
+    /// returns no meaningful status (JankyBorders ignores it), so this
+    /// is fire-and-forget — a garbage return must not read as failure.
+    private func commit(_ transaction: CFTypeRef) {
+        _ = SkyLight.transactionCommit?(transaction, 0)
     }
 
     private func makeRegion(_ rect: CGRect) -> CFTypeRef? {

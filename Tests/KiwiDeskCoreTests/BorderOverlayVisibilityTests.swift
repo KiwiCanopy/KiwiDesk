@@ -10,29 +10,34 @@ struct BorderOverlayVisibilityTests {
     func reconcileRestoresHiddenOverlayOnce() {
         let backend = RecordingBorderBackend()
         let overlay = BorderOverlay(window: 7, backend: backend)
-        let geometry = BorderGeometry.compute(
-            windowFrame: CGRect(x: 10, y: 20, width: 300, height: 200),
-            width: 4,
-            cornerStyle: .rounded
-        )
+        let frame = CGRect(x: 10, y: 20, width: 300, height: 200)
 
         overlay.update(
-            geometry: geometry,
+            frame: frame,
+            width: 4,
+            cornerStyle: .rounded,
+            cornerRadius: 16,
             colorHex: "#FF0000",
             screen: nil
         )
-        overlay.order(behind: 7)
+        overlay.order(relativeTo: 7)
         backend.calls = []
 
         overlay.hide()
         overlay.update(
-            geometry: geometry,
+            frame: frame,
+            width: 4,
+            cornerStyle: .rounded,
+            cornerRadius: 16,
             colorHex: "#FF0000",
             screen: nil,
             restoreVisibility: true
         )
         overlay.update(
-            geometry: geometry,
+            frame: frame,
+            width: 4,
+            cornerStyle: .rounded,
+            cornerRadius: 16,
             colorHex: "#FF0000",
             screen: nil,
             restoreVisibility: true
@@ -58,24 +63,22 @@ struct BorderOverlayVisibilityTests {
             backend: primary,
             fallback: fallback
         )
-        let geometry = BorderGeometry.compute(
-            windowFrame: CGRect(x: 10, y: 20, width: 300, height: 200),
-            width: 4,
-            cornerStyle: .rounded
-        )
         overlay.update(
-            geometry: geometry,
+            frame: CGRect(x: 10, y: 20, width: 300, height: 200),
+            width: 4,
+            cornerStyle: .rounded,
+            cornerRadius: 16,
             colorHex: "#FF0000",
             screen: nil
         )
-        overlay.order(behind: 7)
+        overlay.order(relativeTo: 7)
         primary.calls = []
 
         overlay.hide()
         #expect(primary.calls == [.hide])
         #expect(fallback.calls == [.update, .hide])
 
-        overlay.order(behind: 7)
+        overlay.order(relativeTo: 7)
         #expect(fallback.calls == [.update, .hide, .order(7)])
     }
 }
@@ -90,6 +93,7 @@ private final class RecordingBorderBackend: BorderOverlayBackend {
 
     var calls: [Call] = []
     var hideSucceeds = true
+    let orderMode: BorderGeometry.Order = .below
 
     func update(
         geometry: BorderGeometry,
@@ -100,7 +104,7 @@ private final class RecordingBorderBackend: BorderOverlayBackend {
         return true
     }
 
-    func order(behind windowNumber: CGWindowID) -> Bool {
+    func order(relativeTo windowNumber: CGWindowID) -> Bool {
         calls.append(.order(windowNumber))
         return true
     }

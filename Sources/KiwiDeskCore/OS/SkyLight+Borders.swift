@@ -86,6 +86,10 @@ extension SkyLight {
             CGWindowID,
             UnsafeMutablePointer<Int64>
         ) -> CGError
+    typealias GetWindowSubLevelFn =
+        @convention(c) (
+            ConnectionID, CGWindowID
+        ) -> Int32
 
     typealias TransactionCreateFn =
         @convention(c) (
@@ -96,6 +100,10 @@ extension SkyLight {
             CFTypeRef, CGWindowID, CGPoint
         ) -> CGError
     typealias TransactionLevelFn =
+        @convention(c) (
+            CFTypeRef, CGWindowID, Int32
+        ) -> CGError
+    typealias TransactionSubLevelFn =
         @convention(c) (
             CFTypeRef, CGWindowID, Int32
         ) -> CGError
@@ -172,6 +180,10 @@ extension SkyLight {
         "SLSGetWindowLevel",
         as: GetWindowLevelFn.self
     )
+    static let getWindowSubLevel: GetWindowSubLevelFn? = symbol(
+        "SLSGetWindowSubLevel",
+        as: GetWindowSubLevelFn.self
+    )
     static let transactionCreate: TransactionCreateFn? = symbol(
         "SLSTransactionCreate",
         as: TransactionCreateFn.self
@@ -183,6 +195,10 @@ extension SkyLight {
     static let transactionLevel: TransactionLevelFn? = symbol(
         "SLSTransactionSetWindowLevel",
         as: TransactionLevelFn.self
+    )
+    static let transactionSubLevel: TransactionSubLevelFn? = symbol(
+        "SLSTransactionSetWindowSubLevel",
+        as: TransactionSubLevelFn.self
     )
     static let transactionTransform: TransactionTransformFn? = symbol(
         "SLSTransactionSetWindowTransform",
@@ -210,8 +226,10 @@ extension SkyLight {
             && windowContextCreate != nil
             && flushWindowContent != nil && windowFreeze != nil
             && windowThaw != nil && getWindowBounds != nil
-            && getWindowLevel != nil && transactionCreate != nil
+            && getWindowLevel != nil && getWindowSubLevel != nil
+            && transactionCreate != nil
             && transactionMove != nil && transactionLevel != nil
+            && transactionSubLevel != nil
             && transactionTransform != nil
             && transactionOrder != nil && transactionCommit != nil
     }
