@@ -867,6 +867,8 @@ now, use **Custom…** and enter its bundle identifier by hand (see
 [Finding a bundle identifier](lua-reference.md#finding-a-bundle-identifier)).
 
 Click an app row to edit it, or use its trash button to delete.
+Rows are ordered alphabetically by the app's display name so a long
+list stays scannable.
 
 To **match only certain windows** of an app (not all), the Float
 picker's **Windows titled…** option lets you add title fragments —
@@ -1098,7 +1100,10 @@ Each row has an action. Built-in actions live under headings:
   can't apply** (default on): a resize shortcut pressed in a
   layout without a resize target (monocle, grid, a floating
   space) plays the system alert instead of failing silently.
-- **Applications** — open or focus an app.
+- **Applications** — open or focus an app. Rows are sorted
+  alphabetically by app name (settled when the section opens, so a
+  row never shifts out from under you while you are recording its
+  shortcut).
 - **Custom Bindings** — custom Lua (from Adopt/Import or hand-written).
 
 When you save, every shortcut lives in a mode in `gui.json`. To use

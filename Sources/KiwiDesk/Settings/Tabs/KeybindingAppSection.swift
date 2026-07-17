@@ -17,6 +17,14 @@ struct ApplicationsSection: View {
     /// row only enters the list once an app is picked, so no
     /// app-less placeholder can exist (matches App Rules).
     @State private var newApp: KeybindingCatalog.InstalledApp?
+    /// Alphabetical display order snapshotted on section entry and
+    /// mode change (#333). NOT recomputed on `bindings` mutation:
+    /// the row's control is a `KeyRecorderField` capture, so a live
+    /// re-sort could yank a row out from under the cursor
+    /// mid-record. A committed *new* row stays at the bottom this
+    /// session and takes its alpha slot next entry; re-picking an
+    /// app keeps the row's id, so it holds its existing slot.
+    @State private var displayOrder: [UUID] = []
 
     var body: some View {
         SettingsSection(
@@ -25,13 +33,71 @@ struct ApplicationsSection: View {
                 "Open Applications"
             )
         ) {
-            ForEach($bindings) { $binding in
-                if binding.kind == .application {
-                    row($binding)
+            ForEach(orderedAppIDs, id: \.self) { id in
+                if let binding = bindingFor(id) {
+                    row(binding)
                 }
             }
             addRow
         }
+        .onAppear(perform: recomputeOrder)
+        // The section view is reused across keybinding modes (no
+        // per-mode `.id`), so `onAppear` fires once — re-snapshot
+        // when the mode changes or later modes would render in raw
+        // array order. Recording is invalidated on mode switch, so
+        // re-sorting here can't yank an in-flight recorder.
+        .onChange(of: modeName) { _, _ in recomputeOrder() }
+    }
+
+    /// Application-binding ids in the snapshot's alpha order, with
+    /// any added since (absent from the snapshot) kept in array
+    /// order at the bottom for this session (#333).
+    private var orderedAppIDs: [UUID] {
+        let appIDs =
+            bindings
+            .filter { $0.kind == .application }
+            .map(\.id)
+        let present = Set(appIDs)
+        let known = displayOrder.filter(present.contains)
+        let knownSet = Set(known)
+        return known + appIDs.filter { !knownSet.contains($0) }
+    }
+
+    private func recomputeOrder() {
+        displayOrder =
+            bindings
+            .filter { $0.kind == .application }
+            .sorted { lhs, rhs in
+                let order = lhs.label
+                    .localizedCaseInsensitiveCompare(rhs.label)
+                if order == .orderedSame {
+                    return lhs.id.uuidString < rhs.id.uuidString
+                }
+                return order == .orderedAscending
+            }
+            .map(\.id)
+    }
+
+    /// A stable, id-keyed binding into `bindings` — resolved at
+    /// access time so it survives any structural mutation of the
+    /// array (add / remove / Steal reorder).
+    private func bindingFor(_ id: UUID) -> Binding<KeyBinding>? {
+        guard bindings.contains(where: { $0.id == id }) else {
+            return nil
+        }
+        return Binding(
+            get: {
+                bindings.first { $0.id == id }
+                    ?? KeyBinding(kind: .application)
+            },
+            set: { newValue in
+                if let index = bindings.firstIndex(where: {
+                    $0.id == id
+                }) {
+                    bindings[index] = newValue
+                }
+            }
+        )
     }
 
     /// Pick an app, then commit it — mirroring App Rules, so a

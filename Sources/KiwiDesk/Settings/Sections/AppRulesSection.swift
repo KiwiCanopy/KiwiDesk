@@ -114,7 +114,22 @@ struct AppRulesSection: View {
             }
         }
         set.formUnion(draftApps)
-        return set.sorted()
+        // Sort by the display name the row actually shows, not
+        // the raw bundle id (#333). Resolve each name once into a
+        // map so the O(n log n) compare doesn't re-hit NSWorkspace/
+        // Spotlight per comparison; tie-break on the id for a
+        // stable order when two apps share a display name.
+        let names = Dictionary(
+            uniqueKeysWithValues: set.map {
+                ($0, KeybindingCatalog.displayName(forBundleID: $0))
+            }
+        )
+        return set.sorted { lhs, rhs in
+            let order = (names[lhs] ?? lhs)
+                .localizedCaseInsensitiveCompare(names[rhs] ?? rhs)
+            if order == .orderedSame { return lhs < rhs }
+            return order == .orderedAscending
+        }
     }
 
     private var addRow: some View {

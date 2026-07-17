@@ -133,6 +133,20 @@ extension KeybindingCatalog {
     /// the bulk, are already frozen for process life.
     static let installedAppsSnapshot: [InstalledApp] = installedApps
 
+    /// Process-life `bundleID → localized name` index over the
+    /// snapshot, so `displayName(forBundleID:)` resolves an
+    /// installed app with a dictionary hit instead of a live
+    /// `NSWorkspace` + Spotlight read. Immutable (`static let`), so
+    /// it's concurrency-safe and shared by every render that
+    /// resolves or sorts app rows (#333 sorts by display name, so
+    /// the App Rules list would otherwise re-hit Spotlight per app
+    /// on every pass — a §5 main-thread cost).
+    static let installedNameByID: [String: String] =
+        Dictionary(
+            installedAppsSnapshot.map { ($0.bundleID, $0.name) },
+            uniquingKeysWith: { first, _ in first }
+        )
+
     /// The localized display name for a bundle id, for showing
     /// a stored rule or binding whose identity is the id. Routed
     /// through the same `localizedName` resolver as the picker,
@@ -140,6 +154,9 @@ extension KeybindingCatalog {
     /// back to the id itself when the app isn't installed.
     static func displayName(forBundleID id: String) -> String {
         let id = id.lowercased()
+        // The snapshot covers every app present at launch; a live
+        // lookup only remains for one installed mid-session.
+        if let name = installedNameByID[id] { return name }
         if let url = NSWorkspace.shared.urlForApplication(
             withBundleIdentifier: id
         ) {
