@@ -36,8 +36,11 @@ enum AppFontGlyphMap {
             )
         else { return nil }
         var map: [String: String] = [:]
-        for entry in entries {
-            for name in entry.appNames {
+        // Skip degenerate entries (empty ligature or name):
+        // a bad vendor drop must not reserve blank glyph
+        // slots downstream.
+        for entry in entries where !entry.iconName.isEmpty {
+            for name in entry.appNames where !name.isEmpty {
                 map[name] = entry.iconName
             }
         }

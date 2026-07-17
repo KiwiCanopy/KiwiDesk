@@ -68,4 +68,54 @@ struct AppBarGlyphLayoutTests {
         #expect(view.glyphLabel.isHidden)
         #expect(view.iconView.isHidden)
     }
+
+    /// The widest name defines the uniform slot — and must then
+    /// FIT that slot untruncated (the raw-string-vs-cell metric
+    /// mismatch that tail-truncated exactly the longest tab).
+    @Test("The widest name fits the slot it defined")
+    func widestNameFitsItsOwnSlot() {
+        let thickness: CGFloat = 32
+        let items = [
+            AppBarOverlay.Item(
+                id: WindowID(1),
+                name: "Systemeinstellungen",
+                icon: nil
+            ),
+            AppBarOverlay.Item(
+                id: WindowID(2),
+                name: "Zen",
+                icon: nil
+            ),
+        ]
+        let slot = AppBarOverlay.autoSlotWidth(
+            items: items,
+            style: AppBarStyle(),
+            horizontal: true,
+            thickness: thickness
+        )
+        let view = AppBarItemView(
+            frame: NSRect(
+                x: 0,
+                y: 0,
+                width: slot,
+                height: thickness
+            )
+        )
+        view.configure(
+            id: WindowID(1),
+            name: "Systemeinstellungen",
+            icon: nil,
+            glyph: ":settings:",
+            count: 1,
+            active: false,
+            horizontal: true,
+            style: AppBarStyle(),
+            edge: .top
+        )
+        view.layout()
+        // The label must have been given its full cell width —
+        // a clamped width is what renders the "…" tail.
+        let needed = ceil(view.label.cell?.cellSize.width ?? 0)
+        #expect(view.label.frame.width >= needed)
+    }
 }

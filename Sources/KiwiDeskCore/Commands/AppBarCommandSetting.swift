@@ -31,7 +31,6 @@ enum AppBarCommandSetting {
     case itemGap(CGFloat)
     case content(AppBarStyle.Content)
     case iconSource(BarAppIconSource)
-    case tintAppearance(BarTintAppearance)
     case groupAdjacentWindows(Bool)
     case fontSize(CGFloat)
     case cornerRoundness(CGFloat)
@@ -99,14 +98,8 @@ enum AppBarCommandSetting {
             return choice(
                 args,
                 BarAppIconSource.self,
-                "app_image|tinted_image|app_font"
+                "app_image|app_font"
             ).map(Self.iconSource)
-        case "tint_appearance":
-            return choice(
-                args,
-                BarTintAppearance.self,
-                "auto|light|dark"
-            ).map(Self.tintAppearance)
         case "group_adjacent_windows":
             guard let flag = args.first?.boolValue else {
                 return .failure("expected boolean")
@@ -191,8 +184,6 @@ enum AppBarCommandSetting {
         case .itemGap(let value): style.itemGap = value
         case .content(let value): style.content = value
         case .iconSource(let value): style.iconSource = value
-        case .tintAppearance(let value):
-            style.tintAppearance = value
         case .groupAdjacentWindows(let value):
             style.groupAdjacentWindows = value
         case .fontSize(let value): style.fontSize = value
@@ -230,8 +221,6 @@ enum AppBarCommandSetting {
         case .itemGap(let value): bar.itemGap = value
         case .content(let value): bar.content = value
         case .iconSource(let value): bar.iconSource = value
-        case .tintAppearance(let value):
-            bar.tintAppearance = value
         case .groupAdjacentWindows(let value):
             bar.groupAdjacentWindows = value
         case .fontSize(let value): bar.fontSize = value

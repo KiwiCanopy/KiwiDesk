@@ -30,8 +30,6 @@ import SwiftUI
 /// it below a count of 2), and hover states are omitted.
 struct AppBarPreviewStrip: View {
     let style: AppBarStyle
-    /// Resolves the Tinted `auto` appearance schematically.
-    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         VStack(spacing: 4) {
@@ -106,7 +104,6 @@ struct AppBarPreviewStrip: View {
                 Image(systemName: t.icon)
                     .font(.system(size: font))
                     .foregroundStyle(iconColor(t))
-                    .brightness(iconBrightness)
             }
             if style.content != .icon {
                 Text(t.name)
@@ -126,25 +123,12 @@ struct AppBarPreviewStrip: View {
 
     /// #294 `icon_source`, schematically: System default keeps
     /// each mock icon's own color (full-color app images);
-    /// Tinted and Glyphs recolor into the state text ladder —
-    /// the same rule `AppBarItemView` applies to real icons.
+    /// Glyphs recolor into the state text ladder — the same
+    /// colors the real glyph labels follow.
     private func iconColor(_ t: MockTab) -> Color {
         style.iconSource == .appImage
             ? t.nativeColor
             : textColor(t)
-    }
-
-    /// Tinted's dark ramp, schematically: darken the mock icon
-    /// instead of running the real luminance inversion. `auto`
-    /// contrasts the settings window's own color scheme.
-    private var iconBrightness: Double {
-        guard style.iconSource == .tintedImage else { return 0 }
-        switch style.tintAppearance {
-        case .light: return 0
-        case .dark: return -0.35
-        case .auto:
-            return colorScheme == .light ? -0.35 : 0
-        }
     }
 
     /// The active indicator, orthogonal to the tab background:

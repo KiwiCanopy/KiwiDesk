@@ -215,26 +215,27 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
     }
 
     /// #294: when the bar renders App Font glyphs, the Apps
-    /// band leads with the same glyph so the two surfaces
-    /// agree; apps without one keep their bundle icon.
+    /// band leads with the same glyph; apps without one keep
+    /// their bundle icon. Deliberately keyed on the GLOBAL
+    /// symbol style — the panel spans all layouts, so a
+    /// Lua-only per-layout override can't (and shouldn't)
+    /// steer it.
     private func withAppGlyphs(
         _ reference: ShortcutsReference,
         settings: TilingSettings
     ) -> ShortcutsReference {
-        guard settings.appBarStyle.iconSource == .appFont
-        else { return reference }
-        return ShortcutsReference(
-            modeName: reference.modeName,
-            controls: reference.controls,
-            apps: reference.apps.map { row in
-                var row = row
-                row.glyph = core.appFont.glyph(
-                    forAppName: row.label
-                )
-                return row
-            },
-            custom: reference.custom
-        )
+        let source = settings.appBarStyle.iconSource
+        guard source == .appFont else { return reference }
+        var out = reference
+        out.apps = reference.apps.map { row in
+            var row = row
+            row.glyph = core.appFont.glyph(
+                forAppName: row.label,
+                source: source
+            )
+            return row
+        }
+        return out
     }
 
     // MARK: - NSWindowDelegate

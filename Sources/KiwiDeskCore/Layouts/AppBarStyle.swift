@@ -79,10 +79,6 @@ public struct AppBarStyle: Sendable, Equatable {
     /// bar's text colors (#294). Apps without a glyph keep
     /// their image.
     public var iconSource: BarAppIconSource = .appImage
-    /// Brightness of Tinted icons; `auto` follows the system
-    /// appearance like the system's own Tinted style. Only
-    /// consulted while `iconSource` is `tinted_image`.
-    public var tintAppearance: BarTintAppearance = .auto
     /// Adjacent windows of the same app collapse into one
     /// item wearing a count badge. Clicking the group
     /// focuses its first member, which expands the group
@@ -154,7 +150,6 @@ extension AppBarStyle: Codable {
         case itemGap = "item_gap"
         case content
         case iconSource = "icon_source"
-        case tintAppearance = "tint_appearance"
         case groupAdjacentWindows = "group_adjacent_windows"
         case fontSize = "font_size"
         case cornerRoundness = "corner_roundness"
@@ -217,11 +212,6 @@ extension AppBarStyle: Codable {
                 BarAppIconSource.self,
                 forKey: .iconSource
             ) ?? defaults.iconSource
-        tintAppearance =
-            try container.decodeIfPresent(
-                BarTintAppearance.self,
-                forKey: .tintAppearance
-            ) ?? defaults.tintAppearance
         groupAdjacentWindows =
             try container.decodeIfPresent(
                 Bool.self,

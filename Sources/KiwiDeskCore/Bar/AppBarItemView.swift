@@ -38,9 +38,6 @@ final class AppBarItemView: NSView {
     }()
 
     private var windowID = WindowID(0)
-    /// The untinted native icon, kept so state color changes
-    /// (hover, focus) can re-tint from the original (#294).
-    private var originalIcon: NSImage?
     var name = ""
     var horizontal = true
     /// The concrete edge the bar sits on; the active edge-mark
@@ -169,9 +166,11 @@ final class AppBarItemView: NSView {
         self.isActive = active
         self.style = style
         isHovered = false
-        originalIcon = icon
+        iconView.image = icon
+        // Empty ligature (bad vendor drop) must not reserve a
+        // blank square — treat it as no glyph.
         let showsGlyph =
-            glyph != nil && style.content != .name
+            glyph?.isEmpty == false && style.content != .name
         glyphLabel.isHidden = !showsGlyph
         glyphLabel.stringValue = glyph ?? ""
         iconView.isHidden =
@@ -194,53 +193,9 @@ final class AppBarItemView: NSView {
     private func applyColors() {
         label.textColor = NSColor(kiwiHex: textColorHex)
         glyphLabel.textColor = NSColor(kiwiHex: textColorHex)
-        applyIcon()
         layer?.backgroundColor =
             NSColor(kiwiHex: boxColorHex).cgColor
         applyCornerRadius()
-    }
-
-    /// Icon recoloring per source (#294). `tinted_image` — and
-    /// the glyph mode's no-glyph fallback, so a glyph bar
-    /// stays monochrome — recolor the native image into the
-    /// state text color (normal/active/hover), the same ladder
-    /// the glyphs and labels follow; re-run on every state
-    /// color change. Tinted additionally honors
-    /// `tint_appearance`: a dark ramp renders the icon dark
-    /// (for light bars); `auto` follows the system appearance.
-    private func applyIcon() {
-        guard !iconView.isHidden,
-            let icon = originalIcon
-        else { return }
-        iconView.image =
-            style.iconSource == .appImage
-            ? icon
-            : icon.kiwiTinted(
-                with: NSColor(kiwiHex: textColorHex),
-                darkRamp: style.iconSource == .tintedImage
-                    && resolvedDarkRamp
-            )
-    }
-
-    /// `auto` = contrast the system appearance, like the
-    /// system's Tinted icon style: light mode gets dark icons,
-    /// dark mode light ones.
-    private var resolvedDarkRamp: Bool {
-        switch style.tintAppearance {
-        case .light: return false
-        case .dark: return true
-        case .auto:
-            return effectiveAppearance.bestMatch(
-                from: [.aqua, .darkAqua]
-            ) == .aqua
-        }
-    }
-
-    /// Re-resolve `auto` tinting when the system appearance
-    /// flips while the bar is showing.
-    override func viewDidChangeEffectiveAppearance() {
-        super.viewDidChangeEffectiveAppearance()
-        applyColors()
     }
 
     /// The tab's bar-cross dimension (its thickness), which the

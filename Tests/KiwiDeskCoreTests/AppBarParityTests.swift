@@ -88,7 +88,6 @@ struct AppBarCommandParityTests {
         .tabBackground(.plain), .activeIndicator(.gap),
         .itemSize(88), .itemGap(9),
         .content(.name), .iconSource(.appFont),
-        .tintAppearance(.dark),
         .groupAdjacentWindows(false),
         .fontSize(20), .cornerRoundness(12),
         .textColor("#111111"), .boxColor("#222222"),

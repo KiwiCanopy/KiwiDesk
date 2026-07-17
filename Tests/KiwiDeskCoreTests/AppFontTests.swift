@@ -39,32 +39,23 @@ struct AppFontResourceTests {
     func bundledFontLoads() {
         #expect(AppFont.font(size: 12) != nil)
     }
-}
 
-/// The `tinted_image` recolor helper (#294): output keeps the
-/// input's size and never comes back blank.
-@Suite("App icon tinting")
-struct AppIconTintTests {
-    @Test("Tinting preserves size and yields a drawable image")
-    func tintPreservesSize() {
-        let size = NSSize(width: 32, height: 32)
-        let icon = NSImage(size: size)
-        icon.lockFocus()
-        NSColor.systemBlue.setFill()
-        NSRect(x: 0, y: 0, width: 32, height: 32).fill()
-        icon.unlockFocus()
-        let tinted = icon.kiwiTinted(with: .white)
-        #expect(tinted.size == size)
-        #expect(!tinted.representations.isEmpty)
-    }
-
-    @Test("An empty image degrades to itself, not a crash")
-    func emptyImageFallsBack() {
-        let empty = NSImage(
-            size: NSSize(width: 16, height: 16)
-        )
-        let tinted = empty.kiwiTinted(with: .black)
-        #expect(tinted.size.width == 16)
+    @Test("Degenerate map entries are dropped, not served")
+    func degenerateEntriesDropped() throws {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("kiwi-degenerate-map.json")
+        let json = """
+            [
+              {"iconName": "", "appNames": ["Ghost"]},
+              {"iconName": ":ok:", "appNames": ["", "Real"]}
+            ]
+            """
+        try Data(json.utf8).write(to: url)
+        defer { try? FileManager.default.removeItem(at: url) }
+        let map = AppFontGlyphMap.load(from: url)
+        #expect(map?["Ghost"] == nil)
+        #expect(map?[""] == nil)
+        #expect(map?["Real"] == ":ok:")
     }
 }
 
@@ -73,6 +64,23 @@ struct AppIconTintTests {
 @Suite("App font resolver")
 @MainActor
 struct AppFontResolverTests {
+    /// Awaits the resolver's one-shot load, disarming the
+    /// callback after the first fire so a double `onLoad`
+    /// regression fails the test instead of double-resuming
+    /// (crashing) the continuation.
+    private func loaded(
+        _ resolver: AppFontResolver,
+        kick: @MainActor () -> Void
+    ) async {
+        await withCheckedContinuation { done in
+            resolver.onLoad = {
+                resolver.onLoad = {}
+                done.resume()
+            }
+            kick()
+        }
+    }
+
     @Test("Lookups before the map loads fall back to nil")
     func preLoadFallback() async {
         let gate = DispatchSemaphore(value: 0)
@@ -80,28 +88,53 @@ struct AppFontResolverTests {
             gate.wait()
             return ["Zed": ":zed:"]
         })
-        await withCheckedContinuation { done in
-            resolver.onLoad = { done.resume() }
+        await loaded(resolver) {
             // Kicks the load; the loader is still gated, so
             // the lookup answers nil (image fallback).
-            #expect(resolver.glyph(forAppName: "Zed") == nil)
+            #expect(
+                resolver.glyph(
+                    forAppName: "Zed",
+                    source: .appFont
+                ) == nil
+            )
             gate.signal()
         }
-        #expect(resolver.glyph(forAppName: "Zed") == ":zed:")
+        #expect(
+            resolver.glyph(forAppName: "Zed", source: .appFont)
+                == ":zed:"
+        )
     }
 
-    @Test("Known name hits, unknown app falls back to nil")
+    @Test("Known name hits; unknown app and image source nil")
     func glyphHit() async {
         let resolver = AppFontResolver(loader: {
             ["Zed": ":zed:", "Éditeur": ":zed:"]
         })
-        await withCheckedContinuation { done in
-            resolver.onLoad = { done.resume() }
-            resolver.preload()
-        }
-        #expect(resolver.glyph(forAppName: "Zed") == ":zed:")
-        #expect(resolver.glyph(forAppName: "Éditeur") == ":zed:")
-        #expect(resolver.glyph(forAppName: "NoSuchApp") == nil)
+        await loaded(resolver) { resolver.preload() }
+        #expect(
+            resolver.glyph(forAppName: "Zed", source: .appFont)
+                == ":zed:"
+        )
+        #expect(
+            resolver.glyph(
+                forAppName: "Éditeur",
+                source: .appFont
+            ) == ":zed:"
+        )
+        #expect(
+            resolver.glyph(
+                forAppName: "NoSuchApp",
+                source: .appFont
+            ) == nil
+        )
+        // The icon-source gate lives in the resolver: an
+        // image source never yields a glyph, even on a hit.
+        #expect(
+            resolver.glyph(
+                forAppName: "Zed",
+                source: .appImage
+            ) == nil
+        )
     }
 
     @Test("Loader runs once across repeated lookups")
@@ -125,22 +158,23 @@ struct AppFontResolverTests {
             count.bump()
             return [:]
         })
-        await withCheckedContinuation { done in
-            resolver.onLoad = { done.resume() }
-            _ = resolver.glyph(forAppName: "A")
-            _ = resolver.glyph(forAppName: "B")
+        await loaded(resolver) {
+            _ = resolver.glyph(forAppName: "A", source: .appFont)
+            _ = resolver.glyph(forAppName: "B", source: .appFont)
         }
-        _ = resolver.glyph(forAppName: "C")
+        _ = resolver.glyph(forAppName: "C", source: .appFont)
         #expect(count.value == 1)
     }
 
     @Test("Missing map degrades to image-only, never crashes")
     func corruptMapDegrades() async {
         let resolver = AppFontResolver(loader: { nil })
-        await withCheckedContinuation { done in
-            resolver.onLoad = { done.resume() }
-            resolver.preload()
-        }
-        #expect(resolver.glyph(forAppName: "Safari") == nil)
+        await loaded(resolver) { resolver.preload() }
+        #expect(
+            resolver.glyph(
+                forAppName: "Safari",
+                source: .appFont
+            ) == nil
+        )
     }
 }

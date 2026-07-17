@@ -77,10 +77,13 @@ extension KiwiCore {
                     processIdentifier: $0.pid
                 )?.icon
             },
-            // Nil (no glyph / map still loading / font absent)
-            // falls back to the native image in the item view.
-            glyph: style.iconSource == .appFont
-                ? appFont.glyph(forAppName: name) : nil,
+            // Nil (source wants images / map still loading /
+            // no glyph / font absent) falls back to the
+            // native image in the item view.
+            glyph: appFont.glyph(
+                forAppName: name,
+                source: style.iconSource
+            ),
             count: group.count
         )
     }

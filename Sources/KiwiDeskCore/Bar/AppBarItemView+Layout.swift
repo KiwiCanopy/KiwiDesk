@@ -48,6 +48,11 @@ extension AppBarItemView {
 
     /// Shared with the overlay's natural-width measurement.
     nonisolated static let contentPadding: CGFloat = 4
+    /// The slot's own leading/trailing inset — a touch wider
+    /// than the inner content padding (manual QA 2026-07-18);
+    /// shared with the natural-width measurement so widening
+    /// it can never re-truncate the widest name.
+    nonisolated static let edgePadding: CGFloat = 6
 
     /// `bar_font_size` 0 = auto: scale with the bar's cross
     /// dimension (its thickness), so a fat bar gets readable
@@ -68,39 +73,12 @@ extension AppBarItemView {
         min(max(thickness * 0.42, 9), 28)
     }
 
-    /// Whether the icon slot is occupied at all — by the app
-    /// image or by an App Font glyph (#294); both share the
-    /// same square.
-    private var iconSlotHidden: Bool {
-        iconView.isHidden && glyphLabel.isHidden
-    }
-
-    /// Places whichever occupant the icon slot has: the image
-    /// fills the square; the glyph (text) sizes to its cell
-    /// and centers in it.
-    private func layoutIconSlot(in square: CGRect) {
-        if glyphLabel.isHidden {
-            iconView.frame = square
-            return
-        }
-        let size = square.height * 0.82
-        glyphLabel.font =
-            AppFont.font(size: size)
-            ?? .systemFont(ofSize: size)
-        let cell = glyphLabel.cell?.cellSize ?? .zero
-        glyphLabel.frame = CGRect(
-            x: square.midX - cell.width / 2,
-            y: square.midY - cell.height / 2,
-            width: cell.width,
-            height: cell.height
-        )
-    }
-
     /// Icon and name sit centered in the slot as one group;
     /// when space runs out, only the name shrinks — the icon
     /// always survives.
     private func layoutHorizontal() {
         let pad = Self.contentPadding
+        let edge = Self.edgePadding
         let font = NSFont.systemFont(ofSize: effectiveFontSize)
         label.font = font
         label.usesSingleLineMode = true
@@ -124,11 +102,13 @@ extension AppBarItemView {
         textSize.width = ceil(textSize.width)
         textSize.height = ceil(textSize.height)
         let showText = style.content != .icon
+        // Half a pad: the full pad read too airy between icon
+        // and name (manual QA 2026-07-18).
         var spacing: CGFloat =
-            side > 0 && showText ? pad : 0
+            side > 0 && showText ? pad / 2 : 0
         textSize.width = min(
             textSize.width,
-            bounds.width - side - spacing - pad * 2
+            bounds.width - side - spacing - edge * 2
         )
         if textSize.width < 8 {
             textSize.width = 0
@@ -138,7 +118,7 @@ extension AppBarItemView {
         var x = max(
             (bounds.width - side - spacing - textSize.width)
                 / 2,
-            pad
+            edge
         )
         if !iconSlotHidden {
             layoutIconSlot(

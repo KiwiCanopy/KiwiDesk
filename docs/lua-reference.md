@@ -1432,44 +1432,22 @@ app_bar.set_content("icon_and_name")
 
 ### app_bar.set_icon_source
 
-**Expects:** `"app_image"`, `"tinted_image"`, or `"app_font"`.
+**Expects:** `"app_image"` or `"app_font"`.
 
 **Does:** sets how app icons are drawn. `app_image` (default)
-shows the app's native full-color icon. `tinted_image` recolors
-the icon into the bar's text colors (normal / active / hover) —
-an approximation of the system's "Tinted" icon look (the exact
-look regenerates the icon from its separate layers, which macOS
-does not expose). `app_font` shows a monochrome
-glyph from the bundled [SketchyBar App
-Font](https://github.com/kvndrsslr/sketchybar-app-font) instead,
-following the same text colors; apps without a glyph fall back
-to a tinted icon so the bar stays monochrome. The system's Dark
-and Clear icon styles cannot be offered: macOS exposes no API
-that hands other apps those renderings.
+shows the app's icon as macOS provides it — including whatever
+system-wide Icon & widget style the user picked. `app_font`
+shows a monochrome glyph from the bundled [SketchyBar App
+Font](https://github.com/kvndrsslr/sketchybar-app-font)
+instead, colored by the bar's text colors (normal / active /
+hover); apps without a glyph keep their icon. Styled icon
+variants (the system's Dark/Clear/Tinted renderings) cannot be
+fetched by apps — no public API hands them out.
 
 **Example:**
 
 ```lua
-app_bar.set_icon_source("tinted_image")
-```
-
-### app_bar.set_tint_appearance
-
-**Expects:** `"auto"`, `"light"`, or `"dark"` (default
-`"auto"`).
-
-**Does:** sets whether `tinted_image` icons render light or
-dark. `light` keeps the natural luminance ramp (bright icons,
-right for dark bars); `dark` inverts it (dark icons, right for
-light bars); `auto` follows the system appearance the way the
-system's own Tinted icon style does — Dark Mode gets light
-icons and vice versa. Only consulted while `icon_source` is
-`"tinted_image"`.
-
-**Example:**
-
-```lua
-app_bar.set_tint_appearance("auto")
+app_bar.set_icon_source("app_font")
 ```
 
 ### app_bar.set_font_size

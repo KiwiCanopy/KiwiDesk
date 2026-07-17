@@ -32,6 +32,12 @@ if [ -z "$TAG" ]; then
     TAG="$(gh release view --repo "$REPO" \
         --json tagName --jq .tagName)"
 fi
+# A leading '-' would be parsed by gh as a flag.
+if ! printf '%s' "$TAG" | grep -Eq '^v?[0-9][A-Za-z0-9._-]*$'
+then
+    echo "error: suspicious tag '$TAG'" >&2
+    exit 1
+fi
 
 echo "Vendoring $REPO@$TAG -> $DEST"
 TMP="$(mktemp -d)"
@@ -73,6 +79,8 @@ cat > "$DEST/UPSTREAM.md" <<EOF
 - Release: $TAG
 - Vendored: $(date +%Y-%m-%d)
 - License: CC0-1.0 (see upstream)
+- SHA-256:
+$(cd "$DEST" && shasum -a 256 "${ASSETS[@]}" | sed 's/^/  - /')
 
 Snapshot of the release assets \`sketchybar-app-font.ttf\` and
 \`icon_map.json\`. Do not hand-edit either file — refresh with
