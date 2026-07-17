@@ -371,6 +371,17 @@ Keep this list updated whenever a recurring mistake is found.
   ceiling repeatedly bit large test files. Break suites into
   focused files before they grow; per-file private helpers are the
   convention and small duplication across suites is fine.
+- **`ExecTests` flakes under full-suite load — it is not a
+  regression.** The *External command execution* suite
+  (`Tests/KiwiDeskCoreTests/ExecTests.swift`) spawns real external
+  processes with sub-second timeouts; swift-testing runs suites
+  concurrently, so under the full ~1390-test load a child can miss
+  its window and an assertion sees `.none` (e.g. `ExecTests.swift`
+  exit-code check) or a timeout trips. It passes 14/14 in isolation
+  (`swift test --filter ExecTests`). So a **lone ExecTests
+  failure** on a full run is environmental: re-run isolated to
+  confirm, don't re-diagnose or block a merge on it. Real fix
+  tracked in #344; until then this is the known-good triage.
 - **Discardable test results must express side-effect intent.**
   When a command or setup helper primarily mutates state but also
   returns optional convenience data, mark the declaration
