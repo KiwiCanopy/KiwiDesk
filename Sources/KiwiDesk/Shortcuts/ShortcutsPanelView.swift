@@ -135,6 +135,17 @@ struct ShortcutsPanelView: View {
 
     private var footer: some View {
         HStack {
+            // A chromeless panel has no titlebar to teach dismissal,
+            // so the one non-obvious interaction gets a quiet hint on
+            // the idle side, opposite the action button.
+            Text(
+                L(
+                    "shortcuts.panel.dismiss_hint",
+                    "Esc or click away to close"
+                )
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
             Spacer()
             Button(action: onEdit) {
                 Text(

@@ -536,6 +536,7 @@
   "shortcuts.panel.apps": "Apps",
   "shortcuts.panel.controls": "Controls",
   "shortcuts.panel.custom": "Custom",
+  "shortcuts.panel.dismiss_hint": "Esc or click away to close",
   "shortcuts.panel.edit_in_settings": "Edit in Settings…",
   "shortcuts.panel.empty": "No shortcuts bound yet.",
   "shortcuts.panel.title": "Shortcuts",
