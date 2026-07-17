@@ -29,9 +29,13 @@ export default defineConfig({
         dark: "./src/assets/brand/logo_dark.svg",
       },
       favicon: "/favicon.svg",
-      social: {
-        github: "https://github.com/hajiboy95/KiwiDesk",
-      },
+      social: [
+        {
+          icon: "github",
+          label: "GitHub",
+          href: "https://github.com/hajiboy95/KiwiDesk",
+        },
+      ],
       // Append a quiet KiwiCanopy parent-brand mention below the
       // default docs footer (see src/components/Footer.astro).
       components: {
