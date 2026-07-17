@@ -239,7 +239,10 @@ no trailing period. Body (optional) explains the why, wrapped at
   scope it, e.g. `--only claude`, `--minimal`, `--uninstall`.
 - Regenerate the compressed agent brief after editing this file:
   `./scripts/build-agent-brief.sh` (needs caveman + a `claude`
-  CLI or `ANTHROPIC_API_KEY`). `scripts/lint.sh` runs
+  CLI or `ANTHROPIC_API_KEY`). The compression is a full-document
+  LLM pass and commonly takes **several minutes** — run it in the
+  background, not under a short (e.g. 2-minute) timeout that would
+  kill it mid-pass; slow is not hung. `scripts/lint.sh` runs
   `scripts/check-agent-brief.sh`, which only warns (never blocks)
   if the brief is stale — so editing this file needs no caveman
   install; the brief just drifts until someone rebuilds it.
