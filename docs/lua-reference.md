@@ -1864,14 +1864,15 @@ focus otherwise lacks. It is **on by default** and marks only the
 focused window; you can optionally ring every other window too.
 
 The ring is a pure overlay: it never changes where windows tile
-(no gap coupling). The configured width is drawn entirely outward
-into the gap. The renderer adds a separate hidden overlap behind the
-target; the target masks it, so the overlap never counts toward the
-visible thickness or hides content. Rounded uses a small seam
-allowance; square reaches deeper to fill the reveal beneath rounded
-window corners. Corners match the real
-macOS window radius unless you pick square. Popovers, sheets, and
-other windows above the target stay above its ring.
+(no gap coupling). The configured width is the thickness drawn
+outward into the gap — the value `border.fit_gaps` sizes gaps from.
+The ring is stacked just above its window so its own rounded arc
+reads cleanly, with a small overlap lapping onto the window edge to
+keep the corners closed; that overlap isn't part of the width.
+Rounded corners match the real macOS window radius (queried per
+window); square draws sharp corners. The ring is pinned to its
+window's stacking level, so popovers, sheets, and other windows the
+system places above the target still stay above its ring.
 
 Overflow piles and monocle show a ring only on the visible
 top window; set gaps at least as wide as the border to avoid

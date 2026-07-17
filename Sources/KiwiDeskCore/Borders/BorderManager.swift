@@ -87,14 +87,16 @@ public final class BorderManager {
             specs[spec.window] = spec
             let overlay = overlay(for: spec.window)
             overlay.update(
-                geometry: geometry(spec, frame: spec.frame),
+                frame: spec.frame,
+                width: spec.width,
+                cornerStyle: spec.cornerStyle,
                 colorHex: spec.colorHex,
                 screen: screen(for: spec.frame)
             )
             // Re-assert stacking each sync (focus change, retile,
             // z-order restore) — the target may have moved in the
             // window order since the ring last positioned.
-            overlay.order(behind: spec.window.raw)
+            overlay.order(relativeTo: spec.window.raw)
         }
     }
 
@@ -121,7 +123,9 @@ public final class BorderManager {
         guard let overlay = overlays[id], let spec = specs[id]
         else { return }
         overlay.update(
-            geometry: geometry(spec, frame: windowFrame),
+            frame: windowFrame,
+            width: spec.width,
+            cornerStyle: spec.cornerStyle,
             colorHex: spec.colorHex,
             screen: screen(for: windowFrame),
             restoreVisibility: restoreVisibility
@@ -168,17 +172,6 @@ public final class BorderManager {
         _ = eventSource?.watch([])
     }
 
-    private func geometry(
-        _ spec: Spec,
-        frame: CGRect
-    ) -> BorderGeometry {
-        BorderGeometry.compute(
-            windowFrame: frame,
-            width: spec.width,
-            cornerStyle: spec.cornerStyle
-        )
-    }
-
     private func overlay(for window: WindowID) -> BorderOverlay {
         if let existing = overlays[window] { return existing }
         let overlay = BorderOverlay(
@@ -208,13 +201,13 @@ public final class BorderManager {
         case .follow:
             _ = reconcile(id)
         case .reorder:
-            overlay.order(behind: id.raw)
+            overlay.order(relativeTo: id.raw)
         case .followAndReorder:
             // Unhide must re-assert order even when the bounds read
             // fails. Leave restoration to that one explicit order so
             // a successful reconcile cannot issue it twice.
             _ = reconcile(id, restoreVisibility: false)
-            overlay.order(behind: id.raw)
+            overlay.order(relativeTo: id.raw)
         case .hide:
             overlay.hide()
         }

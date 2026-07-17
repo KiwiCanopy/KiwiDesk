@@ -5,12 +5,18 @@ import AppKit
 /// and replay the latest state through the mandatory AppKit fallback.
 @MainActor
 protocol BorderOverlayBackend: AnyObject {
+    /// Where this backend stacks its ring, which the facade needs to
+    /// build the matching geometry: SkyLight draws `above` the target
+    /// (visible hairline overlap), AppKit draws `below` it (masked
+    /// overlap). The facade recomputes geometry for this mode on
+    /// every render and after a fallback swap (#357).
+    var orderMode: BorderGeometry.Order { get }
     func update(
         geometry: BorderGeometry,
         colorHex: String,
         screen: NSScreen?
     ) -> Bool
-    func order(behind windowNumber: CGWindowID) -> Bool
+    func order(relativeTo windowNumber: CGWindowID) -> Bool
     func hide() -> Bool
 }
 
@@ -20,10 +26,20 @@ protocol BorderOverlayBackend: AnyObject {
 @MainActor
 final class BorderOverlay {
     private var backend: any BorderOverlayBackend
-    private var lastGeometry: BorderGeometry?
+    /// The raw inputs of the last render, kept so a fallback swap can
+    /// rebuild geometry for the new backend's order mode — the
+    /// `above` SkyLight geometry cannot be reused by the `below`
+    /// AppKit panel (#357).
+    private var lastFrame: CGRect?
+    private var lastWidth: CGFloat = 0
+    private var lastCornerStyle: BorderStyle.CornerStyle = .rounded
     private var lastColorHex = ""
     private weak var lastScreen: NSScreen?
     private var targetWindow: CGWindowID
+    /// The target's real corner radius, cached once a query succeeds.
+    /// Until then each render retries, so a window that reports its
+    /// radius late still gets matched corners (#357).
+    private var resolvedRadius: CGFloat?
     private var isHidden = false
     private let makeFallback: @MainActor () -> any BorderOverlayBackend
     private let onFallback: @MainActor (String) -> Void
@@ -63,39 +79,74 @@ final class BorderOverlay {
         onFallback = { _ in }
     }
 
+    /// Renders the ring around `frame` (AX coords). Takes the raw
+    /// inputs, not a finished `BorderGeometry`, because the geometry
+    /// depends on the current backend's order mode — the facade owns
+    /// that choice and rebuilds it here and on any fallback swap.
     func update(
-        geometry: BorderGeometry,
+        frame: CGRect,
+        width: CGFloat,
+        cornerStyle: BorderStyle.CornerStyle,
         colorHex: String,
         screen: NSScreen?,
         restoreVisibility: Bool = false
     ) {
-        lastGeometry = geometry
+        lastFrame = frame
+        lastWidth = width
+        lastCornerStyle = cornerStyle
         lastColorHex = colorHex
         lastScreen = screen
         let shouldRestore = restoreVisibility && isHidden
         guard
             backend.update(
-                geometry: geometry,
+                geometry: geometry(for: backend),
                 colorHex: colorHex,
                 screen: screen
             )
         else {
             fallBackToAppKit(reason: "SLS renderer update failed")
-            if shouldRestore { order(behind: targetWindow) }
+            if shouldRestore { order(relativeTo: targetWindow) }
             return
         }
         if shouldRestore {
-            order(behind: targetWindow)
+            order(relativeTo: targetWindow)
         }
     }
 
-    func order(behind windowNumber: CGWindowID) {
+    func order(relativeTo windowNumber: CGWindowID) {
         targetWindow = windowNumber
         isHidden = false
-        guard backend.order(behind: windowNumber) else {
+        guard backend.order(relativeTo: windowNumber) else {
             fallBackToAppKit(reason: "SLS renderer ordering failed")
             return
         }
+    }
+
+    /// Builds the ring geometry for a backend's order mode from the
+    /// last rendered inputs.
+    private func geometry(
+        for backend: any BorderOverlayBackend
+    ) -> BorderGeometry {
+        BorderGeometry.compute(
+            windowFrame: lastFrame ?? .zero,
+            width: lastWidth,
+            cornerStyle: lastCornerStyle,
+            order: backend.orderMode,
+            systemRadius: cornerRadius()
+        )
+    }
+
+    /// The target window's real corner radius, so the ring's rounded
+    /// arc hugs the window instead of a fixed 16 pt guess (#357).
+    /// Retries until a query succeeds, then caches; falls back to the
+    /// shared default meanwhile.
+    private func cornerRadius() -> CGFloat {
+        if let resolvedRadius { return resolvedRadius }
+        if let queried = SkyLight.windowCornerRadius(targetWindow) {
+            resolvedRadius = queried
+            return queried
+        }
+        return GeometryUtils.systemWindowCornerRadius
     }
 
     func hide() {
@@ -122,16 +173,16 @@ final class BorderOverlay {
         if retireBackend { _ = backend.hide() }
         let appKit = makeFallback()
         backend = appKit
-        if let lastGeometry {
+        if lastFrame != nil {
             _ = appKit.update(
-                geometry: lastGeometry,
+                geometry: geometry(for: appKit),
                 colorHex: lastColorHex,
                 screen: lastScreen
             )
             if isHidden {
                 _ = appKit.hide()
             } else {
-                _ = appKit.order(behind: targetWindow)
+                _ = appKit.order(relativeTo: targetWindow)
             }
         }
     }
@@ -146,7 +197,7 @@ final class BorderOverlay {
 /// Non-interactive by design (`ignoresMouseEvents`) — unlike the
 /// app bar, a border is never clicked. Sits at the normal window
 /// level and is stacked directly behind its target window with
-/// `order(.below, relativeTo:)` (see `order(behind:)`). The stroke's
+/// `order(.below, relativeTo:)` (see `order(relativeTo:)`). The stroke's
 /// inner overlap sits under the target while its outward reach stays
 /// visible; child panels and other windows above the target therefore
 /// cover the ring naturally.
@@ -155,12 +206,19 @@ private final class AppKitBorderOverlay: BorderOverlayBackend {
     private var panel: NSPanel?
     private let shape = CAShapeLayer()
 
+    /// The AppKit panel stacks below its target (it cannot express a
+    /// SkyLight sub-level, so `above` here would paint over child
+    /// popovers — the #320 regression). Below keeps that occlusion
+    /// correct at the cost of the rounded corner seam, which only
+    /// the SkyLight `above` path fixes.
+    let orderMode: BorderGeometry.Order = .below
+
     /// Positions the ring around `geometry.overlayFrame` (AX
     /// coords) and strokes it in `colorHex`. Used both for a
     /// steady-state sync and per animation tick — implicit Core
     /// Animation is disabled so the ring snaps to each commanded
     /// frame instead of easing a step behind the window. Stacking
-    /// is left to `order(behind:)`, called only on sync (not per
+    /// is left to `order(relativeTo:)`, called only on sync (not per
     /// tick) so the ring isn't re-ordered every frame.
     func update(
         geometry: BorderGeometry,
@@ -213,7 +271,7 @@ private final class AppKitBorderOverlay: BorderOverlayBackend {
     /// ignored panel, a higher-level utility window — therefore
     /// stays in front of the ring. Called on sync, not per tick.
     /// A no-op until the panel exists (first `update` creates it).
-    func order(behind windowNumber: CGWindowID) -> Bool {
+    func order(relativeTo windowNumber: CGWindowID) -> Bool {
         panel?.order(.below, relativeTo: Int(windowNumber))
         return true
     }
@@ -235,7 +293,7 @@ private final class AppKitBorderOverlay: BorderOverlayBackend {
         panel.hasShadow = false
         panel.ignoresMouseEvents = true
         // Normal window level (not floating): the ring is stacked
-        // relative to its target by `order(behind:)`, so it must
+        // relative to its target by `order(relativeTo:)`, so it must
         // share the target's band to sit *below* windows layered
         // over it — a floating level would force it above them.
         panel.level = .normal

@@ -81,6 +81,50 @@ struct BorderGeometryTests {
         )
     }
 
+    @Test("Above-order caps the overlap to a visible hairline")
+    func aboveRoundedCap() {
+        let g = BorderGeometry.compute(
+            windowFrame: window,
+            width: 4,
+            cornerStyle: .rounded,
+            order: .above,
+            systemRadius: 16
+        )
+        // Outer reach unchanged (fit-gaps invariant); only the inner
+        // edge moves onto the window by the capped lap.
+        #expect(g.overlayFrame == window.insetBy(dx: -4, dy: -4))
+        // min(4 / 2, 1) == 1 — the on-window lap, not the hidden 5.
+        #expect(g.lineWidth == 5.0)
+        #expect(g.cornerRadius == 16 + 4 - g.lineWidth / 2)
+    }
+
+    @Test("Above-order lap never exceeds half the visible width")
+    func aboveThinLap() {
+        let g = BorderGeometry.compute(
+            windowFrame: window,
+            width: 1,
+            cornerStyle: .rounded,
+            order: .above,
+            systemRadius: 16
+        )
+        // min(1 / 2, 1) == 0.5 — ring stays predominantly outside.
+        #expect(g.lineWidth == 1.5)
+    }
+
+    @Test("Above-order square uses the capped lap, not the 8 tuck")
+    func aboveSquareCap() {
+        let g = BorderGeometry.compute(
+            windowFrame: window,
+            width: 10,
+            cornerStyle: .square,
+            order: .above,
+            systemRadius: 16
+        )
+        #expect(g.cornerRadius == 0)
+        // The visible cap (1), never squareHiddenOverlap (8).
+        #expect(g.lineWidth == 11.0)
+    }
+
     @Test("Width is clamped defensively into range")
     func clamp() {
         let tooThin = BorderGeometry.compute(
@@ -105,25 +149,31 @@ struct BorderGeometryTests {
         )
     }
 
-    /// Seam guard: `outwardReach` must equal `compute`'s outward
-    /// growth for every style. The renderer-only overlap must never
-    /// leak into this public reach.
+    /// Seam guard + `border.fit_gaps` invariant (#295/#357):
+    /// `outwardReach` must equal `compute`'s outward growth for every
+    /// style **and both order modes**. The overlap (hidden below,
+    /// on-window above) must never leak into this public reach, or
+    /// the fit-gaps math would drift when the ring flips order.
     @Test("outwardReach matches compute's outward offset")
     func outwardReachMatchesCompute() {
         let widths: [CGFloat] = [BorderStyle.minWidth, 2, 10, 20]
-        for style in [BorderStyle.CornerStyle.rounded, .square] {
-            for width in widths {
-                let g = BorderGeometry.compute(
-                    windowFrame: window,
-                    width: width,
-                    cornerStyle: style,
-                    systemRadius: 16
-                )
-                let offset = window.minX - g.overlayFrame.minX
-                let reach = BorderGeometry.outwardReach(
-                    width: width
-                )
-                #expect(abs(reach - offset) < 0.0001)
+        let orders: [BorderGeometry.Order] = [.below, .above]
+        for order in orders {
+            for style in [BorderStyle.CornerStyle.rounded, .square] {
+                for width in widths {
+                    let g = BorderGeometry.compute(
+                        windowFrame: window,
+                        width: width,
+                        cornerStyle: style,
+                        order: order,
+                        systemRadius: 16
+                    )
+                    let offset = window.minX - g.overlayFrame.minX
+                    let reach = BorderGeometry.outwardReach(
+                        width: width
+                    )
+                    #expect(abs(reach - offset) < 0.0001)
+                }
             }
         }
     }
