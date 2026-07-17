@@ -16,6 +16,7 @@ struct BorderOverlayVisibilityTests {
             frame: frame,
             width: 4,
             cornerStyle: .rounded,
+            cornerRadius: 16,
             colorHex: "#FF0000",
             screen: nil
         )
@@ -27,6 +28,7 @@ struct BorderOverlayVisibilityTests {
             frame: frame,
             width: 4,
             cornerStyle: .rounded,
+            cornerRadius: 16,
             colorHex: "#FF0000",
             screen: nil,
             restoreVisibility: true
@@ -35,6 +37,7 @@ struct BorderOverlayVisibilityTests {
             frame: frame,
             width: 4,
             cornerStyle: .rounded,
+            cornerRadius: 16,
             colorHex: "#FF0000",
             screen: nil,
             restoreVisibility: true
@@ -64,6 +67,7 @@ struct BorderOverlayVisibilityTests {
             frame: CGRect(x: 10, y: 20, width: 300, height: 200),
             width: 4,
             cornerStyle: .rounded,
+            cornerRadius: 16,
             colorHex: "#FF0000",
             screen: nil
         )

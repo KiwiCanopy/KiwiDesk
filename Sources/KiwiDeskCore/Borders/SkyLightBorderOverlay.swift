@@ -97,15 +97,13 @@ final class SkyLightBorderOverlay: BorderOverlayBackend {
         // inverse transform that anchors the raw surface, while a
         // move-only update is one cheap origin transaction.
         let resetTransform = previous == nil || needsRedraw
-        guard
-            move(
-                to: geometry.overlayFrame.origin,
-                resetTransform: resetTransform
-            )
-        else {
-            destroyWindow()
-            return false
-        }
+        // Fire-and-forget: `move` commits a transaction whose ops
+        // report no meaningful status, so it cannot fail in a way
+        // worth a fallback (unlike create/reshape/draw above).
+        move(
+            to: geometry.overlayFrame.origin,
+            resetTransform: resetTransform
+        )
         if recreatedForScale && !order(relativeTo: targetWindow) {
             destroyWindow()
             return false
@@ -292,8 +290,8 @@ final class SkyLightBorderOverlay: BorderOverlayBackend {
     private func move(
         to origin: CGPoint,
         resetTransform: Bool
-    ) -> Bool {
-        guard let transaction = makeTransaction() else { return false }
+    ) {
+        guard let transaction = makeTransaction() else { return }
         // Fire-and-forget mutators; only `makeTransaction` gates.
         _ = SkyLight.transactionMove?(transaction, window, origin)
         if resetTransform {
@@ -310,7 +308,6 @@ final class SkyLightBorderOverlay: BorderOverlayBackend {
             )
         }
         commit(transaction)
-        return true
     }
 
     private func makeTransaction() -> CFTypeRef? {

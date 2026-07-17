@@ -66,6 +66,12 @@ extension SkyLight {
         else { return nil }
         let targets = [number] as CFArray
 
+        // `takeRetainedValue` on all three: despite the `…Get…` name,
+        // `SLSWindowIteratorGetCornerRadii` returns an **owned** (+1)
+        // array — JankyBorders `CFRelease`s it (`windows.c`), and it is
+        // too widely deployed for that to be an over-release. So one
+        // release (ARC at scope end) is the correct balance; do NOT
+        // switch this to `takeUnretainedValue` — that would leak.
         guard
             let query = queryWindows(connection, targets, 0)?
                 .takeRetainedValue(),
@@ -75,6 +81,8 @@ extension SkyLight {
             CFArrayGetCount(radiiRef) > 0
         else { return nil }
 
+        // Radii are whole points (10/12/16 …); JankyBorders reads them
+        // as `sInt32` the same way.
         let first = unsafeBitCast(
             CFArrayGetValueAtIndex(radiiRef, 0),
             to: CFNumber.self

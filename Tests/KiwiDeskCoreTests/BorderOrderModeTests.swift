@@ -21,6 +21,7 @@ struct BorderOrderModeTests {
             frame: frame,
             width: 6,
             cornerStyle: .rounded,
+            cornerRadius: 16,
             colorHex: "#0A84FF",
             screen: nil
         )
@@ -35,6 +36,39 @@ struct BorderOrderModeTests {
         #expect(backend.lastGeometry?.lineWidth == 7.0)
     }
 
+    @Test("The injected corner radius drives the arc")
+    func injectedRadiusDrivesGeometry() {
+        let backend = GeometryCapturingBackend(orderMode: .above)
+        let overlay = BorderOverlay(window: 7, backend: backend)
+        // A non-default radius (10, not the 16 fallback) must flow
+        // through to the stroke's corner radius — the radius path is
+        // injectable rather than queried inside the facade (#357).
+        overlay.update(
+            frame: frame,
+            width: 6,
+            cornerStyle: .rounded,
+            cornerRadius: 10,
+            colorHex: "#0A84FF",
+            screen: nil
+        )
+        let atTen = BorderGeometry.compute(
+            windowFrame: frame,
+            width: 6,
+            cornerStyle: .rounded,
+            order: .above,
+            systemRadius: 10
+        )
+        let atDefault = BorderGeometry.compute(
+            windowFrame: frame,
+            width: 6,
+            cornerStyle: .rounded,
+            order: .above,
+            systemRadius: 16
+        )
+        #expect(backend.lastGeometry?.cornerRadius == atTen.cornerRadius)
+        #expect(atTen.cornerRadius != atDefault.cornerRadius)
+    }
+
     @Test("A below backend receives below-order geometry")
     func belowBackendGetsBelowGeometry() {
         let backend = GeometryCapturingBackend(orderMode: .below)
@@ -43,6 +77,7 @@ struct BorderOrderModeTests {
             frame: frame,
             width: 6,
             cornerStyle: .rounded,
+            cornerRadius: 16,
             colorHex: "#0A84FF",
             screen: nil
         )
@@ -70,6 +105,7 @@ struct BorderOrderModeTests {
             frame: frame,
             width: 6,
             cornerStyle: .rounded,
+            cornerRadius: 16,
             colorHex: "#0A84FF",
             screen: nil
         )

@@ -40,6 +40,12 @@ public final class BorderManager {
     /// recompute geometry from a fresh frame while reusing the
     /// window's color / width / corner style.
     private var specs: [WindowID: Spec] = [:]
+    /// Each window's real corner radius, resolved once per window and
+    /// reused. A window's radius is a fixed OS attribute, and a query
+    /// that comes back empty (a square/borderless window reporting no
+    /// radius) is a permanent answer, not a transient one — so a
+    /// resolved default is cached too, never re-queried every sync.
+    private var cornerRadii: [WindowID: CGFloat] = [:]
     private var eventSource: SkyLightWindowEvents?
     private var triedEventSource = false
     private var privateRuntimeStarted = false
@@ -82,6 +88,7 @@ public final class BorderManager {
             overlay.hide()
             overlays[id] = nil
             specs[id] = nil
+            cornerRadii[id] = nil
         }
         for spec in desired {
             specs[spec.window] = spec
@@ -90,6 +97,7 @@ public final class BorderManager {
                 frame: spec.frame,
                 width: spec.width,
                 cornerStyle: spec.cornerStyle,
+                cornerRadius: cornerRadius(for: spec.window),
                 colorHex: spec.colorHex,
                 screen: screen(for: spec.frame)
             )
@@ -126,10 +134,24 @@ public final class BorderManager {
             frame: windowFrame,
             width: spec.width,
             cornerStyle: spec.cornerStyle,
+            cornerRadius: cornerRadius(for: id),
             colorHex: spec.colorHex,
             screen: screen(for: windowFrame),
             restoreVisibility: restoreVisibility
         )
+    }
+
+    /// The window's real corner radius so the ring's arc hugs it,
+    /// resolved once and cached (#357). Falls back to the shared
+    /// default when SkyLight reports none — that default is cached
+    /// too, so a radius-less window isn't re-queried on every sync.
+    private func cornerRadius(for id: WindowID) -> CGFloat {
+        if let cached = cornerRadii[id] { return cached }
+        let resolved =
+            SkyLight.windowCornerRadius(id.raw)
+            ?? GeometryUtils.systemWindowCornerRadius
+        cornerRadii[id] = resolved
+        return resolved
     }
 
     /// Geometry tracking is independent of rendering. If a raw SLS
@@ -169,6 +191,7 @@ public final class BorderManager {
         for overlay in overlays.values { overlay.hide() }
         overlays = [:]
         specs = [:]
+        cornerRadii = [:]
         _ = eventSource?.watch([])
     }
 

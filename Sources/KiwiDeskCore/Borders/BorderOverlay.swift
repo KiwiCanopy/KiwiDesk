@@ -36,10 +36,11 @@ final class BorderOverlay {
     private var lastColorHex = ""
     private weak var lastScreen: NSScreen?
     private var targetWindow: CGWindowID
-    /// The target's real corner radius, cached once a query succeeds.
-    /// Until then each render retries, so a window that reports its
-    /// radius late still gets matched corners (#357).
-    private var resolvedRadius: CGFloat?
+    /// The target's real corner radius, resolved by `BorderManager`
+    /// (which owns OS I/O) and passed in, so the facade stays a pure
+    /// backend assembler and the radius path is injectable (#357).
+    private var lastCornerRadius: CGFloat =
+        GeometryUtils.systemWindowCornerRadius
     private var isHidden = false
     private let makeFallback: @MainActor () -> any BorderOverlayBackend
     private let onFallback: @MainActor (String) -> Void
@@ -87,6 +88,7 @@ final class BorderOverlay {
         frame: CGRect,
         width: CGFloat,
         cornerStyle: BorderStyle.CornerStyle,
+        cornerRadius: CGFloat,
         colorHex: String,
         screen: NSScreen?,
         restoreVisibility: Bool = false
@@ -94,6 +96,7 @@ final class BorderOverlay {
         lastFrame = frame
         lastWidth = width
         lastCornerStyle = cornerStyle
+        lastCornerRadius = cornerRadius
         lastColorHex = colorHex
         lastScreen = screen
         let shouldRestore = restoreVisibility && isHidden
@@ -132,21 +135,8 @@ final class BorderOverlay {
             width: lastWidth,
             cornerStyle: lastCornerStyle,
             order: backend.orderMode,
-            systemRadius: cornerRadius()
+            systemRadius: lastCornerRadius
         )
-    }
-
-    /// The target window's real corner radius, so the ring's rounded
-    /// arc hugs the window instead of a fixed 16 pt guess (#357).
-    /// Retries until a query succeeds, then caches; falls back to the
-    /// shared default meanwhile.
-    private func cornerRadius() -> CGFloat {
-        if let resolvedRadius { return resolvedRadius }
-        if let queried = SkyLight.windowCornerRadius(targetWindow) {
-            resolvedRadius = queried
-            return queried
-        }
-        return GeometryUtils.systemWindowCornerRadius
     }
 
     func hide() {
