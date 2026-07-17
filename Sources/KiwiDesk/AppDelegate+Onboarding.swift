@@ -65,16 +65,24 @@ extension AppDelegate {
         window.isReleasedWhenClosed = false
         window.delegate = self
         window.center()
-        // Float above managed windows: granting Accessibility
-        // starts tiling, which raises other apps' windows, and a
-        // normal-level wizard would sink behind them mid-flow. The
-        // window always closes on finish, so nothing floats after
-        // setup (#331).
-        window.level = .floating
+        // Stays `.normal` until Accessibility is granted — see
+        // `floatOnboardingAboveManagedWindows()`. Floating it now
+        // would park it over the System Settings window the grant
+        // step sends the user to (#331).
         onboardingWindow = window
 
         NSApp.activateAsRegular()
         NSApp.forceFront(window)
+    }
+
+    /// Raise the still-open wizard above the windows tiling is
+    /// about to move. Called on the grant transition, not at
+    /// creation: before Accessibility is granted no tiling runs,
+    /// so a `.normal` wizard can't be buried — and floating it
+    /// early would cover the System Settings window the grant
+    /// step opens (#331).
+    func floatOnboardingAboveManagedWindows() {
+        onboardingWindow?.level = .floating
     }
 
     func closeOnboarding() {

@@ -245,6 +245,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         dashboardIfCreated?.setPermissionPaused(!trusted)
         if trusted {
             statusItem?.setWarning(false)
+            // Float the still-open wizard above the windows
+            // `startManaging` is about to tile up, so the "granted →
+            // Continue" screen (and the discovery card after it)
+            // can't sink behind them (#331).
+            floatOnboardingAboveManagedWindows()
             startManaging()
         } else {
             // Revoked mid-session: pause management, warn. Reopen
