@@ -225,6 +225,9 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         settings: TilingSettings
     ) -> ShortcutsReference {
         let source = settings.appBarStyle.iconSource
+        // Allocation early-out only — the authoritative gate
+        // lives in the resolver; mapping through it with an
+        // image source would just write nils.
         guard source == .appFont else { return reference }
         var out = reference
         out.apps = reference.apps.map { row in

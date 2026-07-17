@@ -27,20 +27,23 @@ extension AppBarItemView {
         }
         // The glyph's working box grows past the image square —
         // the font's glyphs carry internal margins, so the
-        // padded square reads undersized — but only DOWNWARD-
-        // vertically and toward the text: the leading edge
-        // stays pinned to the square so a wide glyph never
-        // shifts toward (or out of) the tab border.
+        // padded square reads undersized. Horizontal: grow
+        // vertically plus toward the text by exactly the
+        // icon-name gap (pad/2), leading edge pinned, so the
+        // glyph can neither reach the tab border nor overlap
+        // the label. Vertical: grow along the bar axis only —
+        // the sides stay pinned so a wide ligature never
+        // touches the tab's side borders.
         let pad = Self.contentPadding
         let box =
             horizontal
             ? CGRect(
                 x: square.minX,
                 y: square.minY - pad,
-                width: square.width + pad,
+                width: square.width + pad / 2,
                 height: square.height + pad * 2
             )
-            : square.insetBy(dx: -pad, dy: -pad)
+            : square.insetBy(dx: 0, dy: -pad)
         // 0.9: full box height read a touch heavy in manual QA.
         var size = box.height * 0.9
         glyphLabel.font =

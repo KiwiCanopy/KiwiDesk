@@ -115,10 +115,13 @@ extension AppBarItemView {
             spacing = 0
         }
         label.isHidden = !showText || textSize.width == 0
+        // The edge floor exists for text; an icon-only tab at
+        // the minimum slot keeps the tighter pad so its glyph
+        // box can't poke past the trailing border.
         var x = max(
             (bounds.width - side - spacing - textSize.width)
                 / 2,
-            edge
+            showText ? edge : pad
         )
         if !iconSlotHidden {
             layoutIconSlot(
