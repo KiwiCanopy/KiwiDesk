@@ -85,7 +85,7 @@ enum ShortcutsReferenceBuilder {
                     id: cmd.lua,
                     label: cmd.resolvedLabel,
                     combo: glyphs(binding.combo),
-                    icon: cmd.icon
+                    icon: cmd.icon ?? directionalIcon(for: cmd.lua)
                 )
             }
         }
@@ -225,6 +225,20 @@ enum ShortcutsReferenceBuilder {
                     monospaced: true
                 )
             }
+    }
+
+    /// A directional SF Symbol for a compass-direction command
+    /// (`focus`/`swap` left/right/up/down) — the one clearly-spatial
+    /// glyph the hybrid symbol scheme adds beyond space/app icons.
+    /// Non-spatial commands (prev/next track, resize axes,
+    /// switch-mode, custom Lua) stay label-only by design. Panel-only:
+    /// the shared catalog and the editor rows are untouched.
+    private static func directionalIcon(for lua: String) -> String? {
+        if lua.contains("\"left\"") { return "arrow.left" }
+        if lua.contains("\"right\"") { return "arrow.right" }
+        if lua.contains("\"up\"") { return "arrow.up" }
+        if lua.contains("\"down\"") { return "arrow.down" }
+        return nil
     }
 
     /// The combo string rendered as native glyphs via the same

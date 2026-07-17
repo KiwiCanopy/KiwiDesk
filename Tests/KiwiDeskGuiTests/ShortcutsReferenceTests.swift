@@ -60,6 +60,9 @@ struct ShortcutsReferenceTests {
         #expect(focus?.rows.count == 1)
         #expect(focus?.rows.first?.label == "Focus window to the left")
         #expect(focus?.rows.first?.combo.isEmpty == false)
+        // Compass directions carry a directional glyph (hybrid
+        // symbol scheme); non-spatial commands stay label-only.
+        #expect(focus?.rows.first?.icon == "arrow.left")
         // Only the bound preset renders; the other three focus
         // directions have no binding and are absent.
         #expect(reference.apps.isEmpty)
