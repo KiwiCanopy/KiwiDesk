@@ -17,6 +17,11 @@ struct ShortcutRow: Identifiable {
     var bundleID: String? = nil
     /// Custom-Lua rows render their label monospaced.
     var monospaced: Bool = false
+    /// Trailing accessory glyph for a non-default launch behavior
+    /// (#334: Open New). Nil = default row, which renders exactly
+    /// as before. `accessoryHelp` is its hover tooltip.
+    var accessoryIcon: String? = nil
+    var accessoryHelp: String = ""
 }
 
 /// A named group of rows inside the Controls band (Focus / Move
@@ -204,11 +209,26 @@ enum ShortcutsReferenceBuilder {
                             forBundleID: $0
                         )
                     } ?? binding.label
+                // A trailing badge marks a non-default (Open New)
+                // launch behavior; default rows carry none, so they
+                // render identically to before (#334).
+                let openNew =
+                    KeybindingCatalog.appLaunchBehavior(
+                        from: binding.lua
+                    ) == .openNew
                 return ShortcutRow(
                     id: binding.id.uuidString,
                     label: name,
                     combo: glyphs(binding.combo),
-                    bundleID: bundleID
+                    bundleID: bundleID,
+                    accessoryIcon: openNew
+                        ? "macwindow.badge.plus" : nil,
+                    accessoryHelp: openNew
+                        ? L(
+                            "shortcuts.app_behavior.open_new.badge",
+                            "Opens a new instance"
+                        )
+                        : ""
                 )
             }
             .sorted {

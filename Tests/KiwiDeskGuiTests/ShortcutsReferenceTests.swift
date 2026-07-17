@@ -135,6 +135,34 @@ struct ShortcutsReferenceTests {
         ])
         #expect(reference.apps.count == 1)
         #expect(reference.controls.isEmpty)
+        // A default open-or-focus row carries no behavior badge.
+        #expect(reference.apps.first?.accessoryIcon == nil)
+    }
+
+    @Test("Open New app bindings carry a behavior badge (#334)")
+    func openNewBadge() {
+        reset()
+        let reference = build([
+            binding(
+                "cmd+1",
+                "KiwiDesk.pull_or_spawn(\"com.apple.safari\")",
+                .application
+            ),
+            binding(
+                "cmd+2",
+                "KiwiDesk.spawn_new(\"com.apple.safari\")",
+                .application
+            ),
+        ])
+        // Both surface in the Apps band (spawn_new isn't dropped to
+        // Custom); only the Open New row gets the badge.
+        #expect(reference.apps.count == 2)
+        let badged = reference.apps.filter {
+            $0.accessoryIcon != nil
+        }
+        #expect(badged.count == 1)
+        #expect(badged.first?.accessoryIcon == "macwindow.badge.plus")
+        #expect(badged.first?.accessoryHelp.isEmpty == false)
     }
 
     @Test("custom Lua renders monospaced in the Custom band")

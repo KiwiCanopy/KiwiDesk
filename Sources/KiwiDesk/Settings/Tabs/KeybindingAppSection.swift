@@ -154,6 +154,7 @@ struct ApplicationsSection: View {
     ) -> some View {
         HStack {
             appMenu(binding)
+            behaviorMenu(binding)
             Spacer()
             KeyRecorderField(
                 combo: binding.wrappedValue.combo,

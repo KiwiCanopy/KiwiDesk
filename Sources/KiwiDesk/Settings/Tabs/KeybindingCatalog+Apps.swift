@@ -6,28 +6,76 @@ import KiwiDeskCore
 /// the file-size ceiling. Apps are identified by bundle id (the
 /// stable, locale- and rename-proof key — see `AppRef`) and
 /// shown by their localized display name.
+/// The launch behavior an Open-Applications binding encodes,
+/// derived from its `lua` verb rather than a persisted field
+/// (#334) — so surfacing the choice adds no `KeyBinding` shape to
+/// migrate or parity-test. Both verbs already dispatch to the same
+/// engine helper (`launch(newInstance:)`); the GUI only exposes the
+/// flag. Default is `openOrFocus`, the single most useful behavior.
+enum AppLaunchBehavior: String, CaseIterable {
+    /// `pull_or_spawn` — pull a running instance into the current
+    /// space, or launch it if absent. The default.
+    case openOrFocus
+    /// `spawn_new` — always launch a fresh instance, even when one
+    /// is already running.
+    case openNew
+
+    /// The Lua verb this behavior dispatches to.
+    var verb: String {
+        switch self {
+        case .openOrFocus: return "pull_or_spawn"
+        case .openNew: return "spawn_new"
+        }
+    }
+}
+
 extension KeybindingCatalog {
-    /// The Open-Applications action that pulls or launches the
-    /// app with this bundle id. Paired with `appBundleID(from:)`,
-    /// its exact inverse.
-    static func appCommand(_ bundleID: String) -> String {
-        "KiwiDesk.pull_or_spawn(\"\(bundleID)\")"
+    /// The Open-Applications action for this bundle id and launch
+    /// behavior. Paired with `appBundleID(from:)` /
+    /// `appLaunchBehavior(from:)`, its exact inverse. Behavior
+    /// defaults to open-or-focus so existing call sites keep their
+    /// meaning.
+    static func appCommand(
+        _ bundleID: String,
+        behavior: AppLaunchBehavior = .openOrFocus
+    ) -> String {
+        "KiwiDesk.\(behavior.verb)(\"\(bundleID)\")"
     }
 
     /// The bundle id inside `appCommand`'s output, or nil when
-    /// `lua` isn't exactly that call — the inverse used by import
-    /// classification. An embedded quote means escaped content the
-    /// app menu never authors, so such Lua stays unmatched.
+    /// `lua` isn't exactly one of the app-launch calls — the
+    /// inverse used by import classification. Matches either verb.
     static func appBundleID(from lua: String) -> String? {
-        let prefix = "KiwiDesk.pull_or_spawn(\""
+        parseAppCommand(lua)?.bundleID
+    }
+
+    /// The launch behavior `lua` encodes, or nil when it isn't an
+    /// app-launch call. The sibling inverse to `appBundleID(from:)`.
+    static func appLaunchBehavior(
+        from lua: String
+    ) -> AppLaunchBehavior? {
+        parseAppCommand(lua)?.behavior
+    }
+
+    /// Decomposes an app-launch Lua call into its bundle id and
+    /// behavior, or nil when `lua` isn't exactly such a call. An
+    /// embedded quote means escaped content the app menu never
+    /// authors, so such Lua stays unmatched.
+    private static func parseAppCommand(
+        _ lua: String
+    ) -> (bundleID: String, behavior: AppLaunchBehavior)? {
         let suffix = "\")"
-        guard lua.hasPrefix(prefix), lua.hasSuffix(suffix),
-            lua.count > prefix.count + suffix.count
-        else { return nil }
-        let inner = lua.dropFirst(prefix.count)
-            .dropLast(suffix.count)
-        guard !inner.contains("\"") else { return nil }
-        return String(inner)
+        for behavior in AppLaunchBehavior.allCases {
+            let prefix = "KiwiDesk.\(behavior.verb)(\""
+            guard lua.hasPrefix(prefix), lua.hasSuffix(suffix),
+                lua.count > prefix.count + suffix.count
+            else { continue }
+            let inner = lua.dropFirst(prefix.count)
+                .dropLast(suffix.count)
+            guard !inner.contains("\"") else { continue }
+            return (String(inner), behavior)
+        }
+        return nil
     }
 
     /// One app a picker can target: the bundle identifier is

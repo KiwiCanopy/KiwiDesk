@@ -125,7 +125,9 @@ bound, grouped into three sections:
 
 - **Controls** — window and focus actions (Focus, Move Windows, Size &
   Float, Switch modes), laid out in two columns.
-- **Apps** — your app-launch shortcuts, each with the app's icon.
+- **Apps** — your app-launch shortcuts, each with the app's icon. A
+  small window-plus badge marks a shortcut set to *Open New* (always
+  a fresh instance).
 - **Custom** — any raw-Lua shortcuts, shown as their Lua source.
 
 The panel always appears centered on the screen under your pointer and
@@ -1113,10 +1115,15 @@ Each row has an action. Built-in actions live under headings:
   can't apply** (default on): a resize shortcut pressed in a
   layout without a resize target (monocle, grid, a floating
   space) plays the system alert instead of failing silently.
-- **Applications** — open or focus an app. Rows are sorted
-  alphabetically by app name (settled when the section opens, so a
-  row never shifts out from under you while you are recording its
-  shortcut).
+- **Applications** — launch an app. Each row carries a **Launch
+  behavior** menu: *Open or Focus* (the default — pull a running
+  instance into the current space, or launch it if it isn't
+  running) or *Open New* (always launch a fresh instance). You can
+  add the same app twice to bind one shortcut per behavior; the
+  menu greys a behavior already bound for that app so the two can't
+  collide. Rows are sorted alphabetically by app name (settled when
+  the section opens, so a row never shifts out from under you while
+  you are recording its shortcut).
 - **Custom Bindings** — custom Lua (from Adopt/Import or hand-written).
 
 When you save, every shortcut lives in a mode in `gui.json`. To use
