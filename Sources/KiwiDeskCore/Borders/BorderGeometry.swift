@@ -23,14 +23,16 @@ struct BorderGeometry: Equatable {
     let cornerRadius: CGFloat
 
     /// Rounded needs a seam allowance deep enough to close the
-    /// corner reveal on *very*-rounded windows (Settings-class
-    /// radii), where a 1 pt tuck left a visible gap; square needs
-    /// more still, to fill the harder 90° utility-window reveal.
-    /// Both are masked behind the target — over-provisioning is
-    /// free (the inner edge sits at `systemRadius − overlap`, so
-    /// a larger overlap only tucks deeper under the corner) — so
+    /// corner reveal on rounded windows, where a 1 pt tuck left a
+    /// visible gap; square needs more still, to fill the harder 90°
+    /// utility-window reveal. Both are masked behind the target —
+    /// over-provisioning is free (the visible outer edge stays at
+    /// `systemRadius + visible` regardless; a larger overlap only
+    /// tucks the hidden inner edge deeper under the corner) — so
     /// the value is set by the widest reveal seen, not minimized.
-    static let roundedHiddenOverlap: CGFloat = 2.5
+    /// Raised 2.5 → 5 after a hairline gap persisted at small
+    /// windows; the invariant is simply `≥ that reveal`.
+    static let roundedHiddenOverlap: CGFloat = 5
     /// Fixed rather than derived from `systemRadius` (the old
     /// `systemRadius · (1 − √2/2)` tuck): because the overlap is
     /// masked behind the target, over-provisioning is free and
