@@ -3,9 +3,10 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Section 2 — Open Applications: launch hotkeys. Each row picks
-/// an installed app (or any bundle via "Other…") and records a
-/// combo. The Lua action pulls the app into the current space,
-/// launching it if needed.
+/// an installed app (or any bundle via "Other…"), a launch
+/// behavior (Open or Focus / Open New, #334), and a combo. The
+/// default action pulls the app into the current space, launching
+/// it if needed.
 struct ApplicationsSection: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
@@ -15,8 +16,9 @@ struct ApplicationsSection: View {
     private var modeName
     /// The app chosen in the add-row but not yet committed — the
     /// row only enters the list once an app is picked, so no
-    /// app-less placeholder can exist (matches App Rules).
-    @State private var newApp: KeybindingCatalog.InstalledApp?
+    /// app-less placeholder can exist (matches App Rules). Read by
+    /// the add-row in `+AddRow`, so not `private`.
+    @State var newApp: KeybindingCatalog.InstalledApp?
     /// Alphabetical display order snapshotted on section entry and
     /// mode change (#333). NOT recomputed on `bindings` mutation:
     /// the row's control is a `KeyRecorderField` capture, so a live
@@ -100,60 +102,16 @@ struct ApplicationsSection: View {
         )
     }
 
-    /// Pick an app, then commit it — mirroring App Rules, so a
-    /// new binding always lands with an app identity (its
-    /// shortcut is recorded afterward in the row).
-    private var addRow: some View {
-        HStack {
-            AppPickerButton(
-                placeholder: L(
-                    "shortcuts.choose_app",
-                    "Choose app…"
-                ),
-                selection: newApp?.name,
-                onPick: { newApp = $0 },
-                escapeLabel: L(
-                    "shortcuts.other_ellipsis",
-                    "Other…"
-                ),
-                onEscape: {
-                    if let app = pickBundleFromPanel() {
-                        newApp = app
-                    }
-                }
-            )
-            // Hug the content, like the per-row picker.
-            .fixedSize()
-            Button {
-                addApplication()
-            } label: {
-                Label(
-                    L(
-                        "shortcuts.add_application",
-                        "Add application"
-                    ),
-                    systemImage: "plus"
-                )
-            }
-            .buttonStyle(.bordered)
-            .disabled(newApp == nil)
-        }
-    }
-
-    private func addApplication() {
-        guard let app = newApp else { return }
-        var binding = KeyBinding(kind: .application)
-        binding.label = app.name
-        binding.lua = KeybindingCatalog.appCommand(app.bundleID)
-        bindings.append(binding)
-        newApp = nil
-    }
-
     private func row(
         _ binding: Binding<KeyBinding>
     ) -> some View {
         HStack {
-            appMenu(binding)
+            // Tighter than the row's ambient spacing so "app + how
+            // to open it" reads as one unit (ui-designer, #334).
+            HStack(spacing: 6) {
+                appMenu(binding)
+                behaviorMenu(binding)
+            }
             Spacer()
             KeyRecorderField(
                 combo: binding.wrappedValue.combo,
@@ -274,7 +232,13 @@ struct ApplicationsSection: View {
                 if let app = pickBundleFromPanel() {
                     assign(binding, app: app)
                 }
-            }
+            },
+            // Drop apps every behavior of which is already bound on
+            // *other* rows — re-picking to one could only duplicate
+            // (this row excluded, so its own app stays pickable).
+            exclude: fullyBoundBundleIDs(
+                excluding: binding.wrappedValue.id
+            )
         )
         // Hug the content: the row's `Spacer()` pins the recorder
         // to the trailing edge, so the picker's width doesn't gate
@@ -286,16 +250,46 @@ struct ApplicationsSection: View {
         _ binding: Binding<KeyBinding>,
         app: KeybindingCatalog.InstalledApp
     ) {
+        let id = binding.wrappedValue.id
+        // Decline a re-pick onto an app every behavior of which is
+        // already bound on *other* rows — any assignment would
+        // duplicate. The picker hides these, but the "Other…"
+        // escape bypasses that list, so guard at this choke point
+        // (mirrors the add-row's `addApplication` bail — #334
+        // review).
+        let taken = KeybindingCatalog.takenBehaviors(
+            for: app.bundleID,
+            in: bindings,
+            excluding: id
+        )
+        guard taken.count < AppLaunchBehavior.allCases.count else {
+            return
+        }
+        // Keep the row's launch behavior across a re-pick when it's
+        // still free for the new app, else take the first free one —
+        // so a re-pick can't silently collide with another row's
+        // app+behavior.
+        let current =
+            KeybindingCatalog.appLaunchBehavior(
+                from: binding.wrappedValue.lua
+            ) ?? .openOrFocus
+        let behavior = KeybindingCatalog.behaviorForAssignment(
+            to: app.bundleID,
+            preferred: current,
+            in: bindings,
+            excluding: id
+        )
         binding.wrappedValue.label = app.name
         binding.wrappedValue.lua = KeybindingCatalog.appCommand(
-            app.bundleID
+            app.bundleID,
+            behavior: behavior
         )
     }
 
     /// The "Other…" escape hatch: pick any app bundle by file,
     /// returning it as an `InstalledApp` (nil on cancel). Shared
-    /// by the per-row re-pick and the add-row.
-    private func pickBundleFromPanel()
+    /// by the per-row re-pick and the add-row (in `+AddRow`).
+    func pickBundleFromPanel()
         -> KeybindingCatalog.InstalledApp?
     {
         let panel = NSOpenPanel()

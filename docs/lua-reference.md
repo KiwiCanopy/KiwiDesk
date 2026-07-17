@@ -2267,18 +2267,25 @@ end)
 
 ### spawn_new
 
-**Expects:** an app name.
+**Expects:** an app bundle identifier (e.g. `com.apple.Terminal`).
+See [Finding a bundle identifier](#finding-a-bundle-identifier).
 
 **Does:** always launches a new instance of the app, even if one is
-already running.
+already running. Matching is keyed on the bundle id, exactly like
+`pull_or_spawn`.
 
 **Example:**
 
 ```lua
 KiwiDesk.bind("ctrl+alt+return", function()
-    KiwiDesk.spawn_new("Terminal")
+    KiwiDesk.spawn_new("com.apple.Terminal")
 end)
 ```
+
+Both launch verbs are also reachable from the Settings app: an Open
+Applications shortcut carries a per-row **Launch behavior** menu —
+*Open or Focus* (`pull_or_spawn`, the default) or *Open New*
+(`spawn_new`).
 
 ## Keybindings
 

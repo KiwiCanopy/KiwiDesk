@@ -21,6 +21,12 @@ struct ShortcutRowView: View {
                 .lineLimit(1)
                 .truncationMode(.tail)
             Spacer(minLength: 12)
+            if let accessory = row.accessoryIcon {
+                Image(systemName: accessory)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .help(row.accessoryHelp)
+            }
             Text(row.combo)
                 .font(.callout)
                 .foregroundStyle(.secondary)
