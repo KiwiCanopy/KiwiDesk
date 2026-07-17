@@ -105,10 +105,32 @@ the KiwiDesk icon opens the quick menu where you can:
   - Click **Save Current Layout to Profile** below the separator to persist
     the new layout (adopts the whole live state into the active profile).
 - **Switch Profile**: Load any saved profile into the current layout.
+- **View Shortcuts…**: Open a read-only reference of every shortcut
+  bound in the currently active mode — see below.
 - **Settings…**: Open the full Settings window.
 - **Window Management Paused…** (only when Accessibility permission
   is missing): appears at the top of the menu and reopens the
   permission wizard so tiling can resume.
+
+### The Shortcuts Reference
+
+**View Shortcuts…** opens a floating, read-only panel that mirrors the
+shortcuts bound in the currently active mode — a fast "what can I press
+right now" lookup. It is not an editor: it only shows what is already
+bound, grouped into three sections:
+
+- **Controls** — window and focus actions (Focus, Move Windows, Size &
+  Float, Switch modes), laid out in two columns.
+- **Apps** — your app-launch shortcuts, each with the app's icon.
+- **Custom** — any raw-Lua shortcuts, shown as their Lua source.
+
+The panel always appears centered on the screen under your pointer and
+never remembers a position. Press **Esc**, click anywhere outside it, or
+choose **View Shortcuts…** again to close it. Empty sections are hidden;
+a mode with nothing bound shows a short placeholder. To change any
+shortcut, click **Edit in Settings…** at the bottom — it opens Settings
+▸ Shortcuts, the one place bindings are edited. If your configuration is
+owned by `init.lua`, the panel says so instead of listing shortcuts.
 
 ## How the App and init.lua Coexist
 

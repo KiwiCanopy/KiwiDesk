@@ -8,6 +8,8 @@ import KiwiDeskCore
 @MainActor
 final class StatusItemController: NSObject, NSMenuDelegate {
     var onOpenDashboard: () -> Void = {}
+    /// Opens the read-only shortcuts reference panel (#326).
+    var onShowShortcuts: () -> Void = {}
     var onShowConfigIssues: () -> Void = {}
     /// Opens the guided permission fix (the onboarding wizard at
     /// its grant step). Wired unconditionally; the *row* that
