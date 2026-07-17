@@ -42,6 +42,11 @@ struct ShortcutRowView: View {
         } else if let icon = row.icon, !icon.isEmpty {
             IconGlyphLabel(icon: icon)
                 .foregroundStyle(.secondary)
+        } else {
+            // Reserve the slot so a row with no glyph aligns its
+            // label with the ones that have one — uniform indent
+            // across the whole panel.
+            Color.clear
         }
     }
 }

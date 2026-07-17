@@ -539,8 +539,6 @@
   "shortcuts.panel.dismiss_hint": "Esc or click away to close",
   "shortcuts.panel.edit_in_settings": "Edit in Settings…",
   "shortcuts.panel.empty": "No shortcuts bound yet.",
-  "shortcuts.panel.title": "Shortcuts",
-  "shortcuts.panel.title_mode": "Shortcuts — %1$@",
   "shortcuts.panel.unavailable": "Shortcuts are managed by your init.lua.",
   "shortcuts.remove_binding": "Remove shortcut",
   "shortcuts.rename": "Rename",

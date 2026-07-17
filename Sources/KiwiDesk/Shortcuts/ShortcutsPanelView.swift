@@ -13,8 +13,6 @@ struct ShortcutsPanelView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            header
-            Divider()
             body(for: reference)
                 .frame(maxWidth: .infinity, alignment: .leading)
             Divider()
@@ -25,29 +23,20 @@ struct ShortcutsPanelView: View {
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
-    // MARK: - Header
+    // MARK: - Mode label
 
-    private var header: some View {
-        Text(title)
-            .font(.title3.weight(.semibold))
-            .padding(.horizontal, 20)
-            .padding(.vertical, 14)
-    }
-
-    /// "Shortcuts" for the default mode; "Shortcuts — <mode>"
-    /// while a custom mode is active, so a user always knows which
-    /// set they're looking at.
-    private var title: String {
-        guard let name = reference?.modeName,
+    /// The active mode's name, centered in the footer and shown only
+    /// for a non-default mode — the default is the implicit case. It
+    /// sits in the footer rather than a top header so it costs no
+    /// vertical space above the bands.
+    @ViewBuilder private var modeLabel: some View {
+        if let name = reference?.modeName,
             name != KeyMode.defaultName
-        else {
-            return L("shortcuts.panel.title", "Shortcuts")
+        {
+            Text(name)
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.secondary)
         }
-        return L(
-            "shortcuts.panel.title_mode",
-            "Shortcuts — %1$@",
-            name
-        )
     }
 
     // MARK: - Body
@@ -156,6 +145,9 @@ struct ShortcutsPanelView: View {
                 )
             }
         }
+        // Centered in the full footer width, independent of the
+        // hint / button widths on either side.
+        .overlay(alignment: .center) { modeLabel }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
     }

@@ -69,6 +69,23 @@ struct ShortcutsReferenceTests {
         #expect(reference.custom.isEmpty)
     }
 
+    @Test("a space with no custom icon gets a numbered fallback")
+    func spaceFallbackIcon() {
+        reset()
+        // Default spaces is ["1"], so bind the space-1 row.
+        let reference = build([
+            binding(
+                "option+1",
+                "KiwiDesk.focus_space(\"1\")",
+                .navigation
+            )
+        ])
+        let focus = reference.controls.first {
+            $0.title == "Focus"
+        }
+        #expect(focus?.rows.first?.icon == "1.square")
+    }
+
     @Test("empty bands are dropped, not rendered blank")
     func emptyBandsDropped() {
         reset()

@@ -81,11 +81,19 @@ enum ShortcutsReferenceBuilder {
                     return nil
                 }
                 consumed.insert(binding.id)
+                // Custom space icon first, then a directional arrow
+                // for compass commands, then a space fallback so a
+                // space row always carries a glyph even when the user
+                // set no icon for it.
+                let icon =
+                    cmd.icon.flatMap { $0.isEmpty ? nil : $0 }
+                    ?? directionalIcon(for: cmd.lua)
+                    ?? spaceFallbackIcon(for: cmd.lua)
                 return ShortcutRow(
                     id: cmd.lua,
                     label: cmd.resolvedLabel,
                     combo: glyphs(binding.combo),
-                    icon: cmd.icon ?? directionalIcon(for: cmd.lua)
+                    icon: icon
                 )
             }
         }
@@ -239,6 +247,32 @@ enum ShortcutsReferenceBuilder {
         if lua.contains("\"up\"") { return "arrow.up" }
         if lua.contains("\"down\"") { return "arrow.down" }
         return nil
+    }
+
+    /// A fallback glyph for a space command whose space has no
+    /// custom icon: the space number in a square (`3.square`) — a
+    /// space-shaped symbol carrying the number, matching how the row
+    /// reads ("Go to Space 3"). Non-numeric space ids get the generic
+    /// Spaces glyph. Nil for non-space commands.
+    private static func spaceFallbackIcon(
+        for lua: String
+    ) -> String? {
+        guard lua.contains("_space") else { return nil }
+        if let id = quotedArg(in: lua), let n = Int(id),
+            (0...50).contains(n)
+        {
+            return "\(n).square"
+        }
+        return "squares.below.rectangle"
+    }
+
+    /// The first double-quoted argument in a Lua call, e.g. `"3"`
+    /// from `KiwiDesk.focus_space("3")`.
+    private static func quotedArg(in lua: String) -> String? {
+        guard let open = lua.range(of: "(\"") else { return nil }
+        let rest = lua[open.upperBound...]
+        guard let close = rest.range(of: "\"") else { return nil }
+        return String(rest[..<close.lowerBound])
     }
 
     /// The combo string rendered as native glyphs via the same
