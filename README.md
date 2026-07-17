@@ -29,7 +29,7 @@ Powerful when you reach for it, never in your way.
 [![Documentation](https://img.shields.io/badge/📖_Documentation-4E9F3D?style=for-the-badge)](https://kiwidesk.pages.dev/docs/)
 [![Quick Start](https://img.shields.io/badge/🚀_Quick_Start-357229?style=for-the-badge)](https://kiwidesk.pages.dev/docs/user-guide/)
 [![Recipes](https://img.shields.io/badge/🧩_Recipes-6DBF5B?style=for-the-badge)](https://kiwidesk.pages.dev/docs/recipes/)
-[![Support on Ko-fi](https://img.shields.io/badge/Support-FF5E5B?style=for-the-badge&logo=kofi&logoColor=white)](https://ko-fi.com/kiwisolutions)
+[![Support on Ko-fi](https://img.shields.io/badge/Support-FF5E5B?style=for-the-badge&logo=kofi&logoColor=white)](https://ko-fi.com/kiwicanopy)
 
 </div>
 
@@ -181,6 +181,6 @@ a vulnerability, see [SECURITY.md](SECURITY.md).
 
 <div align="center">
 <br>
-<sub>A <strong>Kiwi Solutions</strong> project — just a bunch of
-kiwis 🥝🥝🥝</sub>
+<sub>A <strong>KiwiCanopy</strong> project — Planting Kiwis for a
+richer world 🥝🥝🥝</sub>
 </div>

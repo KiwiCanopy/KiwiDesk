@@ -5,6 +5,6 @@ enum SupportLinks {
     /// The Ko-fi page (one constant, two surfaces: quick menu
     /// + About).
     static let koFi = URL(
-        string: "https://ko-fi.com/kiwisolutions"
+        string: "https://ko-fi.com/kiwicanopy"
     )!
 }

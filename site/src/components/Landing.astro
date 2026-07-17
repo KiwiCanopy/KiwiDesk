@@ -16,13 +16,13 @@
 import { Image } from "astro:assets";
 import { Icon } from "astro-icon/components";
 import logoMark from "../assets/brand/logo.svg";
-import kiwiMark from "../assets/brand/kiwi-solutions.svg";
+import kiwiMark from "../assets/brand/kiwi-mark.svg";
 import kofiIcon from "../assets/brand/kofi_symbol.svg";
 import logoMarkDark from "../assets/brand/logo_dark.svg";
 import wordmark from "../assets/brand/logo_wordmark.svg";
 import wordmarkDark from "../assets/brand/logo_wordmark_dark.svg";
 import ogImage from "../assets/brand/logo_wordmark.png";
-import kiwiSolutions from "../assets/brand/kiwi-solutions.png";
+import kiwiCanopy from "../assets/brand/kiwi-canopy.png";
 import { layoutDiagram } from "../lib/layoutDiagram";
 import en from "../i18n/en.json";
 import "../styles/landing.css";
@@ -47,7 +47,7 @@ const oq = lang === "de" ? "„" : "“";
 const cq = lang === "de" ? "“" : "”";
 
 const repo = "https://github.com/hajiboy95/KiwiDesk";
-const kofi = "https://ko-fi.com/kiwisolutions";
+const kofi = "https://ko-fi.com/kiwicanopy";
 // The maker's personal GitHub profile — distinct from the project
 // repo link above, used only for the low-key footer credit.
 const makerProfile = "https://github.com/hajiboy95";
@@ -307,7 +307,7 @@ const steps = [
                and compact. Reads as LESS obtrusive than a worded
                link: a small, recognizable control sitting quietly
                among the toggles. aria-label carries the meaning. -->
-          <a class="nav__support" href={kofi} target="_blank"
+          <a class="nav__support dev-only" href={kofi} target="_blank"
             rel="noopener" aria-label={t.nav_support_aria}>
             <img class="kofi-icon" src={kofiIcon.src} alt=""
               aria-hidden="true" width="20" height="16" />
@@ -710,8 +710,8 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
             <span class="btn btn--primary btn--soon">
               {t.cta_primary}
             </span>
-            <a class="btn btn--ghost" href={kofi} target="_blank"
-              rel="noopener">
+            <a class="btn btn--ghost dev-only" href={kofi}
+              target="_blank" rel="noopener">
               <img class="kofi-icon" src={kofiIcon.src} alt=""
                 aria-hidden="true" width="20" height="16" />
               {t.footer_kofi}
@@ -733,8 +733,8 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
     <footer class="footer">
       <div class="wrap">
         <div class="footer__brand">
-          <Image class="footer__logo" src={kiwiSolutions}
-            alt="Kiwi Solutions"
+          <Image class="footer__logo" src={kiwiCanopy}
+            alt="KiwiCanopy"
             widths={[110, 160, 220]}
             sizes="110px" />
           <p class="footer__name">{t.footer_org}</p>
@@ -754,8 +754,6 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
           <a class="dev-only" href="/docs/">{t.footer_docs}</a>
           <a class="dev-only" href={repo} target="_blank"
             rel="noopener">{t.footer_github}</a>
-          <a class="dev-only" href="/docs/design-decisions/"
-            >{t.footer_design}</a>
         </nav>
         <p class="footer__copy">{t.footer_copy}</p>
         <!-- Low-key maker credit — the maker's personal profile,

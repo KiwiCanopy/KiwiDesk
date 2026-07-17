@@ -1,0 +1,18 @@
+---
+// Docs (Starlight) Footer override. Renders Starlight's default
+// footer chrome (pagination, last-updated, edit link) unchanged,
+// then appends one quiet parent-brand copyright so the docs
+// surface carries the same KiwiCanopy identity as the landing and
+// guide (#317) — matching the marketing footer's `© 2026
+// KiwiCanopy`, unlinked, at the low-emphasis `--sl-color-gray-3`
+// weight Starlight uses for its own footer metadata so it reads as
+// footer chrome rather than a brand mark. The credit string is the
+// same `footer_copy` the landing/guide footers use (docs are
+// English-only, so en.json is the single source) — no third
+// hand-maintained copy of the brand line.
+import Default from "@astrojs/starlight/components/Footer.astro";
+import en from "../i18n/en.json";
+---
+
+<Default {...Astro.props}><slot /></Default>
+<p class="kiwicanopy-credit">{en.footer_copy}</p>
