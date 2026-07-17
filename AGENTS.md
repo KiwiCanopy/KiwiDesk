@@ -191,6 +191,23 @@ at directory altitude — see **`docs/architecture.md`**.
    this is moot — subagent context dies with the session, so
    a new session always means fresh agents.
 
+   Reuse by **cache warmth**, not just the session boundary
+   (decision 2026-07-17): reusing the round-1 agent only wins
+   while its context is still cache-warm — then it's cheapest
+   and keeps its own findings. After a long gap (many edits,
+   a slow rebuild) the cache has cooled, so resuming reloads
+   its whole now-stale transcript uncached — a large context
+   just to answer a small question. In that case a **fresh**
+   agent with a tight "here's what each fix claims to do"
+   brief is usually cheaper and nearly as good, trading the
+   agent's memory of its findings for a small cold start. So:
+   reuse while warm; go fresh once it's cooled (or across
+   sessions). If the reuse target was stopped or died, fresh
+   is the only option — brief it fully. And the re-review loop
+   itself is gated on substance: a substantial fix batch earns
+   a round, a lone comment or guard tweak that closes a finding
+   does not — self-verify it and stop.
+
 ### Branching & Pull Requests
 
 Branch from `main` with a name that matches the Conventional
