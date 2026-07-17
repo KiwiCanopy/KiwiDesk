@@ -39,20 +39,23 @@ extension KiwiCore {
         keys.lua = fresh
         registerLuaAPI(on: fresh)
 
-        // True first launch: no init.lua yet (the starter
-        // template is written just below). Persist the seeded
-        // model — including the default shortcuts (#91) — so
-        // the very first boot is GUI-managed and registers a
-        // usable shortcut set; without a sidecar the
-        // structured loader is a no-op and a fresh install
-        // would boot with zero shortcuts. Never fires when an
-        // init.lua already exists (that config is Lua-owned
-        // until adopted) or when a sidecar is present.
-        let firstLaunch = !FileManager.default.fileExists(
-            atPath: configURL.path
-        )
+        // Seed a default gui.json so the boot is GUI-managed with
+        // the default profile, spaces, and shortcuts (#91) —
+        // without a sidecar the structured loader is a no-op and a
+        // fresh install would boot with zero shortcuts. This also
+        // covers an init.lua that carries only harmless custom Lua
+        // (e.g. sketchybar event hooks): it declares no managed
+        // settings, so it should still get the GUI defaults and
+        // keep firing its hooks, rather than booting to a bare
+        // single space (#354). Skip only when init.lua declares
+        // managed settings of its own (Lua-owned until adopted —
+        // seeding would let the GUI defaults override the user's
+        // Lua settings) or a sidecar already exists. Read the
+        // user's file *before* ensureDefaultConfig writes the
+        // all-comment starter template (which declares nothing).
+        let luaOwnsSettings = configDeclaresManagedSettings
         ensureDefaultConfig()
-        if firstLaunch, !guiConfigStore.exists {
+        if !guiConfigStore.exists, !luaOwnsSettings {
             try? guiConfigStore.save(guiConfigSeed())
         }
         // Typo-guard hits are recorded only for the chunk run:
@@ -186,6 +189,21 @@ extension KiwiCore {
     }
 
     /// Writes a starter init.lua on first launch.
+    /// Whether `init.lua` declares any managed *setting* (the
+    /// `KiwiDesk.set_*` verbs plus the rule/bind/mode tokens) —
+    /// gates the first-launch `gui.json` seed above so a Lua-owned
+    /// settings config is never seeded over (#354). Absent file or
+    /// a hooks-only file → `false`.
+    var configDeclaresManagedSettings: Bool {
+        guard
+            let source = try? String(
+                contentsOf: configURL,
+                encoding: .utf8
+            )
+        else { return false }
+        return ManagedConfig.declaresManagedSettings(source)
+    }
+
     private func ensureDefaultConfig() {
         let files = FileManager.default
         guard !files.fileExists(atPath: configURL.path) else {

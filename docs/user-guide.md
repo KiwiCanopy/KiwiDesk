@@ -176,6 +176,16 @@ layout tuning). Hand-written `set_gap_global` calls stop applying
 on monitor changes — the built-in layout rules take over instead.
 To persist custom tiling, save it as a profile in the Settings app.
 
+**First launch with an existing `init.lua`:** KiwiDesk seeds the
+default `gui.json` (with the default profile, spaces, and
+shortcuts) as long as your `init.lua` declares no managed
+settings. So an `init.lua` that carries only event hooks or other
+harmless custom Lua still boots GUI-managed *and* keeps firing your
+hooks. Only an `init.lua` that already sets tiling itself
+(`KiwiDesk.set_*`, app/float/ignore rules, or keybindings) is left
+Lua-owned — no `gui.json` is seeded, and the **Adopt into the GUI**
+path is offered instead.
+
 ## GUI Language
 
 Go to **General** (in the **System** group) and pick a display

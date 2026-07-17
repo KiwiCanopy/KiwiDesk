@@ -157,6 +157,56 @@ public enum ManagedConfig {
         classify(source).custom
     }
 
+    /// Whether the config declares any managed **setting** — the
+    /// signal that gates the first-launch `gui.json` seed (#354).
+    ///
+    /// A *superset* of `hasForeignCode`: on top of the foreign
+    /// tokens (rules/binds/modes) it also catches the `set_*`
+    /// setting verbs — `KiwiDesk.set_gap_global`, and crucially the
+    /// **namespaced** layout verbs (`bsp.set_ratio_h`,
+    /// `stack.set_master_ratio`, …) — that the editor-fallback
+    /// check deliberately ignores. Those verbs configure tiling
+    /// directly, so a hand-written config using them is Lua-owned
+    /// and must never be seeded over (the GUI defaults would
+    /// silently overwrite the user's Lua settings, #354). Harmless
+    /// custom Lua — event hooks (`KiwiDesk.on`/`KiwiDesk.exec`),
+    /// `print`, control flow — matches nothing and returns `false`,
+    /// so a hooks-only file still earns the GUI defaults.
+    public static func declaresManagedSettings(
+        _ source: String
+    ) -> Bool {
+        classify(source).foreign || hasLiveSettingVerb(source)
+    }
+
+    /// A live (non-comment) call to a `set_*` settings verb, on the
+    /// `KiwiDesk` table or any layout namespace. The namespace set
+    /// is `APIReference.namespaces` — the authoritative registry —
+    /// so this can't drift as sub-APIs (`bsp`, `stack`, `scroll`,
+    /// …) or their verbs are added. Anchoring to those known table
+    /// names avoids false positives from an unrelated
+    /// `foo.set_bar()`.
+    private static func hasLiveSettingVerb(
+        _ source: String
+    ) -> Bool {
+        for raw in source.components(separatedBy: "\n") {
+            let line = raw.trimmed
+            guard !line.isEmpty, !line.hasPrefix("--") else {
+                continue
+            }
+            if line.contains("KiwiDesk.set_") { return true }
+            // `border.fit_gaps` is the one config-writing verb
+            // without a `set_` name — it rewrites the global gap
+            // from the border width (`KiwiCore+BorderCommands`), so
+            // a config tuning gaps that way must not be seeded over.
+            if line.contains("border.fit_gaps") { return true }
+            for ns in APIReference.namespaces.keys
+            where line.contains("\(ns).set_") {
+                return true
+            }
+        }
+        return false
+    }
+
     /// Classifies a config source in a single scan: returns
     /// both `foreign` and `custom` flags without reading the
     /// file twice. `foreign` implies `custom` by construction.

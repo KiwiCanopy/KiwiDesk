@@ -755,11 +755,29 @@ mode carries a single binding** — a user- or Lua-authored
 binding anywhere blocks the seed, making it idempotent and
 never destructive. The set lives in the **base `gui.json`
 modes**, never a profile override (profiles stay
-tiling-plus-sparse-behavior, #55): on a true first launch (no
-`init.lua`) the seeded model is persisted so the very first
-boot is GUI-managed and the shortcuts actually fire; with a
-bindings-free `init.lua` the seed appears in the editable
-model and persists on the first Save. Per-space rows are
+tiling-plus-sparse-behavior, #55): on first launch the seeded
+model is persisted so the very first boot is GUI-managed and the
+shortcuts actually fire.
+
+**The seed fires whenever `init.lua` declares no managed
+_settings_ — not only when `init.lua` is absent (#354).** The
+original gate ("no `init.lua` yet") silently punished a user
+whose `init.lua` carries only harmless custom Lua — the
+documented sketchybar event-hook bridge — booting them to a bare
+single space with no profile. The seed now gates on
+`ManagedConfig.declaresManagedSettings`: a superset of
+`hasForeignCode` that also catches the `set_*` verbs, including
+the **namespaced** layout setters (`bsp.set_ratio_h`,
+`stack.set_master_ratio`, …) that editor-fallback ignores. Those
+verbs are derived from `APIReference.namespaces` (the one
+registry) so the check can't drift as sub-APIs grow. Result: a
+hooks-only or comment-only `init.lua` boots GUI-managed with the
+defaults **and** keeps firing its hooks; an `init.lua` that
+declares tiling settings of its own stays Lua-owned (no seed —
+seeding would let the GUI defaults overwrite its Lua tiling) and
+is offered the **Adopt** path instead. With a settings-free
+`init.lua` the seed appears in the editable model and persists on
+the first Save. Per-space rows are
 **position-based** (⌥3 = third space in display order,
 whatever its name), generated only for spaces that exist at
 seed time and capped at nine — no dead rows targeting

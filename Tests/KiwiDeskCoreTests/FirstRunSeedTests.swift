@@ -70,12 +70,63 @@ struct FirstRunSeedTests {
         )
     }
 
-    @Test("existing init.lua: no sidecar is created")
-    func existingConfigUntouched() throws {
+    @Test("settings-bearing init.lua stays Lua-owned, no sidecar")
+    func settingsBearingConfigUntouched() throws {
+        let core = makeCore()
+        // A `set_*` verb declares managed settings, so seeding a
+        // default gui.json would silently override it (#354).
+        try writeInitLua(
+            "KiwiDesk.set_mode(1, \"stack\")\n",
+            core: core
+        )
+        core.loadConfig()
+        #expect(!core.guiConfigStore.exists)
+        #expect(!core.isGuiManaged)
+    }
+
+    @Test("namespaced-setter init.lua stays Lua-owned, no sidecar")
+    func namespacedSetterConfigUntouched() throws {
+        let core = makeCore()
+        // The common way to tune per-layout tiling is a namespace
+        // verb (bsp/stack/scroll/…), not KiwiDesk.set_*. Seeding a
+        // default gui.json would silently override it (#354).
+        try writeInitLua(
+            "bsp.set_ratio_h(0.6)\n",
+            core: core
+        )
+        core.loadConfig()
+        #expect(!core.guiConfigStore.exists)
+        #expect(!core.isGuiManaged)
+    }
+
+    @Test("hooks-only init.lua still gets the GUI seed (#354)")
+    func hooksOnlyConfigSeeds() throws {
+        let core = makeCore()
+        // The documented sketchybar bridge: event hooks + control
+        // flow, no managed settings. Should still boot GUI-managed
+        // with defaults, and the hooks are untouched.
+        try writeInitLua(
+            """
+            for _, event in ipairs({ "space_change" }) do
+                KiwiDesk.on(event, function()
+                    KiwiDesk.exec("sketchybar --trigger x")
+                end)
+            end
+            """,
+            core: core
+        )
+        core.loadConfig()
+        #expect(core.guiConfigStore.exists)
+        #expect(core.isGuiManaged)
+    }
+
+    @Test("comment-only init.lua gets the GUI seed (#354)")
+    func commentOnlyConfigSeeds() throws {
         let core = makeCore()
         try writeInitLua("-- user config\n", core: core)
         core.loadConfig()
-        #expect(!core.guiConfigStore.exists)
+        #expect(core.guiConfigStore.exists)
+        #expect(core.isGuiManaged)
     }
 
     @Test("existing sidecar survives a reload unchanged")
