@@ -59,20 +59,35 @@ public enum ServiceManager {
 
     // MARK: - Commands
 
-    /// Bootstraps the agent, or no-ops when it is already loaded.
-    /// The plist is always (re)written first so a moved binary is
+    /// Bootstraps the agent, relaunches it when the job is loaded
+    /// but idle, or no-ops when a process is already running. The
+    /// plist is always (re)written first so a moved binary is
     /// picked up on the next `start`.
+    ///
+    /// The loaded-but-idle case matters: quitting via the quick
+    /// menu exits cleanly, and `KeepAlive{SuccessfulExit=false}`
+    /// leaves launchd holding the job registered without a process
+    /// — a bare `isLoaded()` check would then wrongly report
+    /// "already running" and never bring it back (#341).
     public static func start() -> Outcome {
         if let failure = writePlist() {
             return Outcome(failure, ok: false)
         }
-        if isLoaded() {
+        let (status, output) = printState()
+        switch startAction(
+            loaded: status == 0,
+            pid: parsePID(from: output)
+        ) {
+        case .bootstrap:
+            return bootstrap()
+        case .kickstart:
+            return kickstart()
+        case .alreadyRunning:
             return Outcome(
                 "KiwiDesk service is already running",
                 ok: true
             )
         }
-        return bootstrap()
     }
 
     /// Boots out the agent, or reports cleanly when nothing is
@@ -127,6 +142,24 @@ public enum ServiceManager {
 
     // MARK: - Helpers (pure — unit-tested)
 
+    /// What `start` must do given the agent's launchd state.
+    /// Loaded-but-idle (registered, no pid) means the process was
+    /// quit while the job stayed registered, so it is relaunched
+    /// rather than reported as already running (#341).
+    enum StartAction: Equatable {
+        case bootstrap
+        case kickstart
+        case alreadyRunning
+    }
+
+    static func startAction(
+        loaded: Bool,
+        pid: Int32?
+    ) -> StartAction {
+        guard loaded else { return .bootstrap }
+        return pid != nil ? .alreadyRunning : .kickstart
+    }
+
     /// The `status` line for a loaded agent: names the pid when
     /// launchd is running the process, else flags loaded-but-idle.
     static func statusMessage(pid: Int32?) -> String {
@@ -175,6 +208,21 @@ public enum ServiceManager {
             ? Outcome("KiwiDesk service started", ok: true)
             : Outcome(
                 "launchctl bootstrap failed: \(output)",
+                ok: false
+            )
+    }
+
+    /// Relaunches an already-loaded but idle job in place (#341) —
+    /// the job stays registered, launchd just spawns the process
+    /// again.
+    private static func kickstart() -> Outcome {
+        let (status, output) = launchctl([
+            "kickstart", "\(domain)/\(label)",
+        ])
+        return status == 0
+            ? Outcome("KiwiDesk service started", ok: true)
+            : Outcome(
+                "launchctl kickstart failed: \(output)",
                 ok: false
             )
     }

@@ -41,9 +41,13 @@ KiwiDesk service restart
 KiwiDesk service status    # loaded? running? pid?
 ```
 
-`start` no-ops with `KiwiDesk service is already running` when
-the agent is loaded (use `restart` to force a relaunch); `stop`
-prints `KiwiDesk service is not running` cleanly when nothing is
+`start` bootstraps the agent when it isn't loaded, and
+**relaunches it when the job is loaded but idle** — the state a
+quick-menu Quit leaves behind (the app exits cleanly, so
+`KeepAlive` doesn't restart it, but the launchd job stays
+registered). It no-ops with `KiwiDesk service is already
+running` only when a process is actually running. `stop` prints
+`KiwiDesk service is not running` cleanly when nothing is
 loaded. `status` reports the loaded/running state and the pid.
 A real `launchctl` failure exits non-zero; the ordinary
 already-running / not-running cases exit 0.
