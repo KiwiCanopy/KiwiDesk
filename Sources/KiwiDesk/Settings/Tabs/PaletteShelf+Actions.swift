@@ -1,0 +1,129 @@
+import AppKit
+import KiwiDeskCore
+import SwiftUI
+import UniformTypeIdentifiers
+
+/// The palette shelf's actions: save-current, rename, delete, and
+/// export/import through Finder panels. Every mutation goes through
+/// the stateless `PaletteStore` and then `reload()`s the local
+/// list so the grid refreshes (#375).
+extension PaletteShelf {
+    func reload() {
+        userPalettes = store.userPalettes()
+    }
+
+    func trimmed(_ text: String) -> String {
+        text.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    // MARK: - Save current
+
+    var canSave: Bool {
+        let name = trimmed(saveName)
+        return !name.isEmpty && !store.isBuiltinName(name)
+    }
+
+    /// "Overwrite" when the name is an existing user palette, else
+    /// "Save" — the Finder duplicate-file idiom.
+    var saveLabel: String {
+        store.hasUserPalette(trimmed(saveName))
+            ? L("palettes.overwrite", "Overwrite")
+            : L("palettes.save", "Save")
+    }
+
+    func saveCurrent() {
+        let name = trimmed(saveName)
+        guard canSave else { return }
+        let palette = ColorPalette(
+            name: name,
+            colors: ColorPaletteKeys.extract(
+                from: model.config.settings
+            )
+        )
+        try? store.save(palette)
+        savingCurrent = false
+        reload()
+    }
+
+    /// The next free "My Palette N" for the save field's default.
+    func nextUserName() -> String {
+        uniqueName(base: L("palettes.default_name", "My Palette"))
+    }
+
+    /// `base`, then `base 2`, `base 3`, … skipping every built-in
+    /// and existing user name.
+    func uniqueName(base: String) -> String {
+        guard taken(base) else { return base }
+        var n = 2
+        while taken("\(base) \(n)") { n += 1 }
+        return "\(base) \(n)"
+    }
+
+    private func taken(_ name: String) -> Bool {
+        store.isBuiltinName(name) || store.hasUserPalette(name)
+    }
+
+    // MARK: - Rename / delete
+
+    /// A rename is allowed to a non-empty name that isn't a
+    /// built-in's and isn't already another user palette's (a
+    /// no-op rename to the same name is fine).
+    func canRename(from oldName: String) -> Bool {
+        let name = trimmed(renameDraft)
+        guard !name.isEmpty, !store.isBuiltinName(name) else {
+            return false
+        }
+        return name == oldName || !store.hasUserPalette(name)
+    }
+
+    /// Drives a per-tile rename popover: on for the tile whose name
+    /// is `renaming`, dismiss clears it.
+    func renameBinding(_ name: String) -> Binding<Bool> {
+        Binding(
+            get: { renaming == name },
+            set: { if !$0 { renaming = nil } }
+        )
+    }
+
+    func renamePalette(from oldName: String) {
+        let name = trimmed(renameDraft)
+        guard canRename(from: oldName) else { return }
+        try? store.rename(from: oldName, to: name)
+        renaming = nil
+        reload()
+    }
+
+    func deletePalette(_ name: String) {
+        try? store.delete(name)
+        reload()
+    }
+
+    // MARK: - Export / import
+
+    func exportPalette(_ palette: ColorPalette) {
+        let panel = NSSavePanel()
+        panel.allowedContentTypes = [.json]
+        panel.nameFieldStringValue = "\(palette.name).json"
+        guard panel.runModal() == .OK, let url = panel.url
+        else { return }
+        try? store.export(palette, to: url)
+    }
+
+    func importPalette() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.json]
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        guard panel.runModal() == .OK, let url = panel.url,
+            let imported = try? store.importPalette(from: url)
+        else { return }
+        // Never shadow a built-in or an existing user palette on
+        // import — settle on the next free name.
+        let named = ColorPalette(
+            name: uniqueName(base: imported.name),
+            colors: imported.colors
+        )
+        try? store.save(named)
+        reload()
+    }
+}

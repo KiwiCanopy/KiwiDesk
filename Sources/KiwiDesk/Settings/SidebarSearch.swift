@@ -112,6 +112,7 @@ enum SidebarSearch {
             ]
         case .appearance:
             return [
+                L("palettes.title", "Color Palette"),
                 L("gaps.title", "Gaps"),
                 L("drag.title", "Drag & Drop"),
                 L("border.title", "Focus border"),

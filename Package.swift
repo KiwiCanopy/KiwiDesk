@@ -45,6 +45,8 @@ let package = Package(
                 // refresh with scripts/update-app-font.sh,
                 // never hand-edit (see AppFont/UPSTREAM.md).
                 .copy("Resources/AppFont"),
+                // Bundled color palettes (#375).
+                .copy("Resources/Palettes"),
             ]
         ),
         // Executable: AppDelegate, menu bar, SwiftUI GUI.

@@ -11,6 +11,7 @@ struct AppearanceSection: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
+                PaletteShelf(model: model)
                 GapsEditor(model: model)
                 DragVisualsEditor(model: model)
                 FocusBorderEditor(model: model)

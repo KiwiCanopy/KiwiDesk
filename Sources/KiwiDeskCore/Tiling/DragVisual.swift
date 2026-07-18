@@ -57,7 +57,10 @@ public struct DragVisual: Sendable, Equatable, Encodable {
         self.fillColor = fillColor
     }
 
-    private enum CodingKeys: String, CodingKey {
+    /// `CaseIterable` so the palette color-key reflection
+    /// (#375) can enumerate the two color keys the way it does
+    /// for the bars; the `_color`-suffix filter picks them out.
+    enum CodingKeys: String, CodingKey, CaseIterable {
         case enabled
         case border
         case borderColor = "border_color"
