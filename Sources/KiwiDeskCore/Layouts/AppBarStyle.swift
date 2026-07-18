@@ -17,9 +17,7 @@ public struct AppBarStyle: Sendable, Equatable {
     /// the background is drawn the same on every tab, the
     /// indicator marks only the active one. An extensible set —
     /// more background treatments can join later.
-    public enum TabBackground: String, Sendable, Codable,
-        CaseIterable
-    {
+    public enum TabBackground: String, Sendable, Codable {
         /// A box per tab, honoring `cornerRoundness`
         /// (roundness 0 = square).
         case boxed

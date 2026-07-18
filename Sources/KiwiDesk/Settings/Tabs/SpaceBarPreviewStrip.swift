@@ -94,7 +94,7 @@ struct SpaceBarPreviewStrip: View {
         .padding(4)
         .background(
             RoundedRectangle(
-                cornerRadius: style.tabBackground == .plain
+                cornerRadius: style.tabBackground != .boxed
                     ? corner : 0
             )
             .fill(

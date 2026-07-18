@@ -1337,9 +1337,10 @@ top, no per-item box — matching Control Center / Spotlight (one
 glass plate, never glass-per-tab). It reuses existing color
 vocabulary rather than adding keys: `background_color` becomes the
 glass tint (transparent default = clear glass, mapping to
-`NSGlassEffectView.tintColor`), `box_color` goes dormant (greyed,
-like `background_color` is under `plain`), and `corner_roundness`
-stays live (it rounds the plate). The default stays `boxed`: the
+`NSGlassEffectView.tintColor`), `box_color` goes inert (unused —
+the color rows group by type and are never mode-greyed, §2.7,
+just as `background_color` is unused under `plain`), and
+`corner_roundness` stays live (it rounds the plate). The default stays `boxed`: the
 earthy Kiwi identity is deliberate, and — decisively — an
 OS-gated look *can't* be a universal default without a shared
 profile or screenshot rendering differently per macOS. The stored

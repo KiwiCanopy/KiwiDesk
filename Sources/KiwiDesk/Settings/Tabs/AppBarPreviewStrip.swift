@@ -66,7 +66,7 @@ struct AppBarPreviewStrip: View {
             // itself); Boxed keeps the strip in the background
             // color and boxes each tab.
             RoundedRectangle(
-                cornerRadius: style.tabBackground == .plain
+                cornerRadius: style.tabBackground != .boxed
                     ? corner : 0
             )
             .fill(
