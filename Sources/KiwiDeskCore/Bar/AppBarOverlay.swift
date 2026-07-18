@@ -76,6 +76,10 @@ public final class AppBarOverlay {
     let itemContainer = FlippedView()
     let backArrow = BarArrowView()
     let forwardArrow = BarArrowView()
+    /// The Liquid Glass plate under the items when `tabBackground`
+    /// resolves to `material` (#390); nil otherwise / below macOS
+    /// 26. Stored as a plain view — the concrete type is 26-only.
+    var glassPlate: NSView?
     var scrollOffset: CGFloat = 0
     /// The last render's geometry, kept for the drag
     /// handlers (AppBarOverlay+Drag).
@@ -136,6 +140,11 @@ public final class AppBarOverlay {
             panel,
             style: style,
             depth: edge.isHorizontal ? strip.height : strip.width
+        )
+        updateGlassPlate(
+            panel,
+            style: style,
+            strip: strip
         )
         syncItemViewCount(items.count)
         let m = metrics(

@@ -1382,18 +1382,24 @@ app_bar.set_thickness(32)
 
 ### app_bar.set_tab_background
 
-**Expects:** `"boxed"` or `"plain"`.
+**Expects:** `"boxed"`, `"plain"`, or `"material"`.
 
 **Does:** sets the visual style of the tab backgrounds:
 - **boxed** — a box per tab honoring the corner roundness
   (0% = square, 100% = full capsule).
 - **plain** — no per-tab box; names sit on one shared
   translucent strip.
+- **material** — a macOS 26 Liquid Glass plate under the items
+  (like `plain`, but a live glass material), tinted by
+  `background_color` (transparent = clear glass) and rounded by
+  the corner roundness. The value is accepted and round-trips on
+  any macOS; below macOS 26 it *renders* as `boxed` (the GUI
+  offers it only where it can render).
 
 **Example:**
 
 ```lua
-app_bar.set_tab_background("boxed")
+app_bar.set_tab_background("material")
 ```
 
 ### app_bar.set_active_indicator
@@ -1816,7 +1822,9 @@ space_bar.set_icon_source("app_font")
 
 ### space_bar.set_tab_background
 
-**Expects:** `"boxed"` or `"plain"` (default `"boxed"`).
+**Expects:** `"boxed"`, `"plain"`, or `"material"` (default
+`"boxed"`). `material` is the macOS 26 Liquid Glass plate — see
+`app_bar.set_tab_background`; below macOS 26 it renders as `boxed`.
 
 **Does:** boxes each Space item, or draws all items on one
 shared strip — same vocabulary as the App Bar.

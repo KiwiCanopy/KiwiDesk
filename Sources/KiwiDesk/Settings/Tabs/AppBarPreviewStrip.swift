@@ -244,7 +244,8 @@ struct AppBarPreviewStrip: View {
 
     private func boxColor(_ t: MockTab) -> Color {
         switch style.tabBackground {
-        case .plain:
+        // Glass renders boxless like plain in the static preview.
+        case .plain, .material:
             return .clear
         case .boxed:
             return color(

@@ -690,7 +690,12 @@ running windows.
 **Global settings:**
 
 - **Tab background**: boxed (a box per tab honoring corner
-  roundness) or plain (names on a shared translucent strip).
+  roundness), plain (names on a shared translucent strip), or
+  **Liquid Glass** — a macOS&nbsp;26 glass plate under the items,
+  tinted by the Background color (transparent = clear glass) and
+  rounded by corner roundness. Liquid Glass appears in the picker
+  only on macOS&nbsp;26 and later; a profile that selects it still
+  opens on older macOS, where it falls back to Boxed.
 - **Position**: the screen edge the bar occupies — top, bottom,
   left, or right (default top). Absolute for every layout; the
   preview strip rotates vertical for left/right. When the Space

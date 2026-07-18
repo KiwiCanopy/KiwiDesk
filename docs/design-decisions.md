@@ -51,6 +51,7 @@ planned escape hatch; it is not a wontfix dumping ground.
 
 | Behavior | Why it's accepted | Architectural root | Escape hatch / planned fix |
 |---|---|---|---|
+| A bar whose `tab_background` is `material` (Liquid Glass) renders as **Boxed** on macOS earlier than 26 — the glass plate does not appear there. | Liquid Glass is a macOS 26 API (`NSGlassEffectView`); the value must still round-trip so a shared profile stays portable, so an older machine degrades to the shipped default look rather than an unbacked strip. The GUI never *offers* the option below 26 (an OS-capability gate, absent not greyed), so only a hand-written config or a profile authored on 26 reaches this state. | The stored `"material"` value is portable; only the render path is `#available(macOS 26)`-gated, resolving to `boxed` at paint time without rewriting the field ([#390](https://github.com/hajiboy95/KiwiDesk/issues/390)). | Use macOS 26+ to see the glass, or pick `boxed`/`plain` for a look identical on every macOS. |
 | With **"Displays have separate Spaces" on**, native Desktop→profile bindings cannot represent an independent Desktop choice on every connected display; KiwiDesk applies one global active profile. | Basic tiling remains valid, single-display use is unaffected, and users may want to inspect or prepare bindings before changing the macOS option, so hiding or disabling the controls would overstate the limitation. | Native-Space routing resolves one active Desktop number and one active profile for the whole display setup, not a per-display profile tuple ([#8](https://github.com/hajiboy95/KiwiDesk/issues/8)). | Turn the option off in Desktop & Dock Settings, then log out and back in. Onboarding and the binding-section warning share one gate and fire only in the affected multi-display state, never on a single display. See [Shared display Spaces are recommended, not required](#shared-display-spaces-are-recommended-not-required). |
 | In BSP, the inner window of a nested pair can't grow — a "grow" press (or edge-drag) widens its outer neighbor instead. | Its width `r·(1−r)·W` is already maximized at the default ratio, so no resize direction can widen it. | All same-orientation splits share the one per-space ratio; per-node ratios would need a container tree the flat-array model forbids (#56 trade). | **Shipped**: the [`track` layout (#128)](https://github.com/hajiboy95/KiwiDesk/issues/128) — `set_mode(space, "track")` gives every window one true resize target. See [BSP resize is focus-aware in *direction* only](#shortcuts). |
 | In stack, when the master zone lines up *along* the split axis (e.g. horizontal masters beside a right stack), the masters' individual shares can't be resized: that axis always moves the split, and the other axis beeps. | The split ratio owns its whole axis — giving the same keypress two meanings (split vs weight) by focus zone would make "grow" unpredictable at the boundary. | One knob per axis per arrangement ([#222](https://github.com/hajiboy95/KiwiDesk/issues/222)); weights live on a zone's own lineup axis by construction. | Pick the orthogonal (vertical) master orientation — since the 2026-07-16 default flip the standard side-by-side arrangement sits *inside* this limitation once `master_count` exceeds one — or put the windows that need individual shares in the stack zone. |
@@ -1323,6 +1324,35 @@ fonts, icon source with colors, or a tab restructure) waits on a
 real signal that people want to share the *whole look* as one
 artifact — not merely "more than seven palettes," which
 save/export/import already answers.
+
+**Liquid Glass is a third `tab_background`, macOS-26-gated.**
+(#390.) The glass treatment is a third `TabBackground` case
+(`material`) beside `boxed`/`plain`, not an orthogonal
+translucency toggle: the three are mutually-exclusive answers to
+one question ("how is the strip backed"), and a toggle would
+create a real ambiguity ("boxed + translucent" = glass boxes or a
+glass strip under opaque boxes?). Glass renders structurally like
+`plain` — one shared rounded plate (`NSGlassEffectView`), items on
+top, no per-item box — matching Control Center / Spotlight (one
+glass plate, never glass-per-tab). It reuses existing color
+vocabulary rather than adding keys: `background_color` becomes the
+glass tint (transparent default = clear glass, mapping to
+`NSGlassEffectView.tintColor`), `box_color` goes dormant (greyed,
+like `background_color` is under `plain`), and `corner_roundness`
+stays live (it rounds the plate). The default stays `boxed`: the
+earthy Kiwi identity is deliberate, and — decisively — an
+OS-gated look *can't* be a universal default without a shared
+profile or screenshot rendering differently per macOS. The stored
+value `"material"` round-trips on every macOS (portability), but
+only the *render* path is OS-conditional: below macOS 26 it
+resolves to `boxed` at paint time (never rewriting the field), and
+the GUI offers the case only where it can render — an
+OS-capability gate, so the option is *absent* below 26, not greyed
+(grey-don't-hide is for mode-inert controls, not missing
+hardware/OS capability). Explicitly out of scope: a glass
+border/stroke, a shadow (`BarPanel` is deliberately shadowless),
+and vibrancy-following text (glass replaces only the plate, never
+foreground color resolution) — each a separate issue if wanted.
 
 **Tab background and active indicator are orthogonal.** (#228.)
 The old coupled `style` enum (`pills` / `segments` / `underline`)

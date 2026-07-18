@@ -216,6 +216,11 @@ struct SpaceBarPreviewStrip: View {
             return L("app_bar.tab_background.boxed", "Boxed")
         case .plain:
             return L("app_bar.tab_background.plain", "Plain")
+        case .material:
+            return L(
+                "app_bar.tab_background.material",
+                "Liquid Glass"
+            )
         }
     }
 }

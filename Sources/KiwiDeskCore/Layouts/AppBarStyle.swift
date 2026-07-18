@@ -17,13 +17,42 @@ public struct AppBarStyle: Sendable, Equatable {
     /// the background is drawn the same on every tab, the
     /// indicator marks only the active one. An extensible set —
     /// more background treatments can join later.
-    public enum TabBackground: String, Sendable, Codable {
+    public enum TabBackground: String, Sendable, Codable,
+        CaseIterable
+    {
         /// A box per tab, honoring `cornerRoundness`
         /// (roundness 0 = square).
         case boxed
         /// No per-tab box; names sit on one shared translucent
         /// strip.
         case plain
+        /// A macOS 26 Liquid Glass plate under the items — one
+        /// shared plate like `plain`, but a live glass material
+        /// tinted by `background_color` (#390). macOS 26+ only:
+        /// the value round-trips everywhere, but on older macOS it
+        /// *renders* as `boxed` (see `rendered(glassAvailable:)`);
+        /// the GUI only offers it where it can render.
+        case material
+
+        /// True when this platform can render the glass material.
+        public static var glassAvailable: Bool {
+            if #available(macOS 26, *) { return true }
+            return false
+        }
+
+        /// The treatment actually painted: `material` degrades to
+        /// `boxed` where glass is unavailable, so an older macOS
+        /// opening a glass profile shows the default look rather
+        /// than an unbacked strip — without rewriting the stored
+        /// value. Pure (`glassAvailable` injected) for tests.
+        public func rendered(glassAvailable: Bool) -> TabBackground {
+            self == .material && !glassAvailable ? .boxed : self
+        }
+
+        /// The treatment painted on this platform.
+        public var rendered: TabBackground {
+            rendered(glassAvailable: Self.glassAvailable)
+        }
     }
 
     /// How the active tab is marked. Orthogonal to

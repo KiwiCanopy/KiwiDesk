@@ -227,7 +227,9 @@ struct GlobalAppBarSection: View {
         )
         .modifier(
             GreyOut(
-                active: style.tabBackground != .boxed,
+                // Roundness rounds a box or the glass plate — dead
+                // only for the boxless Plain strip.
+                active: style.tabBackground == .plain,
                 help: L(
                     "app_bar.corner_roundness.boxed_only",
                     "Corner roundness only applies to Boxed tabs."

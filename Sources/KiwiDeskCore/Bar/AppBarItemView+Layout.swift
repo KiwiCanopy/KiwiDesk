@@ -213,7 +213,7 @@ extension AppBarItemView {
     /// outline — a clean native selection mark that keeps `plain`
     /// boxless (ui-designer 2026-07-14).
     private func layoutRing() {
-        if style.tabBackground == .boxed {
+        if style.tabBackground.rendered == .boxed {
             accent.frame = bounds
             accent.layer?.cornerRadius =
                 style.resolvedCornerRadius(
@@ -240,7 +240,7 @@ extension AppBarItemView {
         accent.layer?.cornerRadius = 0
         let thickness: CGFloat = 3
         let r =
-            style.tabBackground == .boxed
+            style.tabBackground.rendered == .boxed
             ? style.resolvedCornerRadius(
                 forThickness: crossThickness
             )

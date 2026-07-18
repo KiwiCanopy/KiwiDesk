@@ -242,7 +242,7 @@ struct SpaceBarEditorSection: View {
         .modifier(
             GreyOut(
                 active: style.wrappedValue.tabBackground
-                    != .boxed,
+                    == .plain,
                 help: L(
                     "space_bar.corner_roundness.boxed_only",
                     "Corner roundness only applies to Boxed "

@@ -91,7 +91,7 @@ enum SpaceBarCommandSetting {
             return choice(
                 args,
                 SpaceBarStyle.TabBackground.self,
-                "boxed|plain"
+                "boxed|plain|material"
             ).map(Self.tabBackground)
         case "active_indicator":
             return choice(

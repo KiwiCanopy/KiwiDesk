@@ -9,7 +9,7 @@ extension SpaceBarItemView {
     func restyle() {
         layer?.masksToBounds = true
         layer?.cornerRadius =
-            style.tabBackground == .boxed ? cornerRadius : 0
+            style.tabBackground.rendered == .boxed ? cornerRadius : 0
         layer?.backgroundColor = boxColor.cgColor
         styleIdentifier()
         styleApps()
@@ -57,14 +57,14 @@ extension SpaceBarItemView {
         // Active wins over hover (matching `stateColor` and the
         // mouseEntered guard): a click that activates the item
         // under the pointer must not leave it hover-tinted.
-        if isActive, style.tabBackground == .boxed {
+        if isActive, style.tabBackground.rendered == .boxed {
             return NSColor(kiwiHex: style.activeBoxColor)
         }
         if isActive { return .clear }
         if isHovered || isDragHovered {
             return NSColor(kiwiHex: style.hoverColor)
         }
-        guard style.tabBackground == .boxed else {
+        guard style.tabBackground.rendered == .boxed else {
             return .clear
         }
         return NSColor(kiwiHex: style.boxColor)
@@ -132,7 +132,7 @@ extension SpaceBarItemView {
             accent.layer?.borderColor = highlight.cgColor
             accent.layer?.borderWidth = 2
             accent.layer?.cornerRadius =
-                style.tabBackground == .boxed ? cornerRadius : 0
+                style.tabBackground.rendered == .boxed ? cornerRadius : 0
         case .edgeMark:
             accent.layer?.borderWidth = 0
             accent.layer?.cornerRadius = 0

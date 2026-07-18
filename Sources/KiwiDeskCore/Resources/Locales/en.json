@@ -62,6 +62,7 @@
   "app_bar.resolved.overrides": "%1$d field(s) override the global bar.",
   "app_bar.tab_background.boxed": "Boxed",
   "app_bar.tab_background.label": "Tab background",
+  "app_bar.tab_background.material": "Liquid Glass",
   "app_bar.tab_background.plain": "Plain",
   "app_bar.thickness": "Thickness",
   "app_picker.search.placeholder": "Search apps",
