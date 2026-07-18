@@ -1668,8 +1668,9 @@ profile order — each item shows the Space's identifier
 two-letter monogram for named ones) plus a compact glyph per
 window in that Space. Adjacent windows of the same app collapse
 into one glyph wearing a count badge (non-adjacent duplicates
-stay separate); past five glyph slots the rest fold into a
-`+n` badge counting the hidden windows. Badges use the
+stay separate); past the configured glyph cap
+(`space_bar.set_glyph_cap`, default 5, range 1–12) the rest fold
+into a `+n` badge counting the hidden windows. Badges use the
 configured badge colors on the active Space and render muted on
 inactive ones. Clicking a Space switches to it. App glyphs are
 informational — not click targets, and a group holding the
@@ -1778,6 +1779,24 @@ thickness).
 
 ```lua
 space_bar.set_font_size(0)
+```
+
+### space_bar.set_glyph_cap
+
+**Expects:** an integer `1`–`12` (default `5`); out-of-range
+values clamp.
+
+**Does:** sets how many app-group glyphs a Space item shows before
+the rest collapse into the trailing `+n` badge. Grouping runs
+first, so the cap counts app *groups* (adjacent same-app windows
+share one glyph), while `+n` counts the hidden *windows*. This is
+the per-Space glyph limit only — it does not change how many
+Spaces the whole bar shows.
+
+**Example:**
+
+```lua
+space_bar.set_glyph_cap(8)
 ```
 
 ### space_bar.set_icon_source

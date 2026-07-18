@@ -137,6 +137,7 @@ public enum APIReference {
         "space_bar": [
             "set_enabled", "set_edge", "set_alignment", "set_thickness",
             "set_box_size", "set_box_gap", "set_font_size",
+            "set_glyph_cap",
             "set_icon_source", "set_tab_background",
             "set_active_indicator", "set_corner_roundness",
             "set_show_front_app", "set_hide_empty",

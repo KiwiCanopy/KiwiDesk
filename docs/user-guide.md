@@ -723,9 +723,10 @@ one bar per display, listing that display's Spaces in profile
 order. Each item shows the Space's identifier (its configured
 icon, else a numbered square or a two-letter monogram) plus a
 compact glyph per window — adjacent windows of the same app
-collapse into one glyph with a count badge, and past five slots
-the rest fold into a `+n` badge. Click a Space to switch to it;
-glyphs are informational.
+collapse into one glyph with a count badge, and past the
+configured glyph cap (default 5, adjustable 1–12) the rest fold
+into a `+n` badge. Click a Space to switch to it; glyphs are
+informational.
 
 **Drag a window onto a Space** to move it there — a two-speed
 gesture. Drag a window's title bar over another Space's item and
@@ -752,7 +753,9 @@ inline note in both editors explains the order when both share
 one), **Alignment** (start / center / end along the bar,
 edge-relative, like the App Bar's), item background, active
 indicator and **App symbol style**, the two behavior toggles,
-sizes, then colors.
+sizes and **Glyphs per Space** (how many app glyphs an item
+shows before the rest collapse into the `+n` badge, 1–12), then
+colors.
 
 The color ladder is the bar's signature: **Text** paints
 inactive Spaces, **Active space** the Space currently shown on

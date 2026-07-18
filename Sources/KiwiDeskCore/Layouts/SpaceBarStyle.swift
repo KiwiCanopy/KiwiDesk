@@ -42,6 +42,12 @@ public struct SpaceBarStyle: Sendable, Equatable {
     public var boxGap: CGFloat = 6
     /// 0 (default) = auto: text scales with the bar thickness.
     public var fontSize: CGFloat = 0
+    /// Max app-group glyphs rendered per Space item (#376);
+    /// grouping runs first, then this cap, and any further groups
+    /// fold into the trailing "+n" badge. Read through
+    /// `resolvedGlyphCap`, which clamps to `glyphCapRange`.
+    /// Default 5 (the shipped #293 value).
+    public var glyphCap = 5
     /// How app glyphs are drawn (#294): the native app image or
     /// a monochrome App Font glyph following the bar's text
     /// colors. Apps without a resolvable image fall back to the
@@ -100,7 +106,25 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// pre-delay) still has visible fill time.
     public static let springDelayRange = 1000...4000
 
+    /// Valid glyph-cap bounds (#376): 1 (a lone glyph + "+n",
+    /// matching the PR #381 "0 is toggle-only, floor at 1" idiom)
+    /// through 12 (past ~a dozen a status glyph row stops being
+    /// scannable at any box size). A fixed clamp, not fit-derived —
+    /// a display-dependent cap would resolve differently per screen
+    /// and break the bar's otherwise-uniform model.
+    public static let glyphCapRange = 1...12
+
     public init() {}
+
+    /// The glyph cap clamped to `glyphCapRange` — the driver reads
+    /// this so a stored out-of-range value can't render nothing or
+    /// an unscannable row.
+    public var resolvedGlyphCap: Int {
+        min(
+            max(glyphCap, Self.glyphCapRange.lowerBound),
+            Self.glyphCapRange.upperBound
+        )
+    }
 
     /// The drag-drop spring dwell in seconds, clamped to
     /// `springDelayRange` — the coordinator and the sweep both
@@ -137,6 +161,7 @@ extension SpaceBarStyle: Codable {
         case boxSize = "box_size"
         case boxGap = "box_gap"
         case fontSize = "font_size"
+        case glyphCap = "glyph_cap"
         case iconSource = "icon_source"
         case tabBackground = "tab_background"
         case activeIndicator = "active_indicator"
@@ -199,6 +224,11 @@ extension SpaceBarStyle: Codable {
                 CGFloat.self,
                 forKey: .fontSize
             ) ?? defaults.fontSize
+        glyphCap =
+            try container.decodeIfPresent(
+                Int.self,
+                forKey: .glyphCap
+            ) ?? defaults.glyphCap
         iconSource =
             try container.decodeIfPresent(
                 BarAppIconSource.self,

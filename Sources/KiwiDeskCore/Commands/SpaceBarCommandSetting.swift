@@ -14,6 +14,7 @@ enum SpaceBarCommandSetting {
     case boxSize(CGFloat)
     case boxGap(CGFloat)
     case fontSize(CGFloat)
+    case glyphCap(Int)
     case iconSource(BarAppIconSource)
     case tabBackground(SpaceBarStyle.TabBackground)
     case activeIndicator(SpaceBarStyle.ActiveIndicator)
@@ -47,6 +48,9 @@ enum SpaceBarCommandSetting {
         }
         if field == "spring_delay" {
             return springDelay(args)
+        }
+        if field == "glyph_cap" {
+            return glyphCap(args)
         }
         if let setting = parseChoice(field: field, args: args) {
             return setting
@@ -155,6 +159,27 @@ enum SpaceBarCommandSetting {
         return .success(.springDelay(clamped))
     }
 
+    /// App-group glyph count, clamped to the Space Bar's valid
+    /// cap range (#376) — a stored out-of-range value can't
+    /// render an empty item or an unscannable row.
+    private static func glyphCap(
+        _ args: [JSONValue]
+    ) -> Result<SpaceBarCommandSetting, AppBarSettingError> {
+        guard let value = args.first?.numberValue,
+            value.isFinite
+        else {
+            return .failure("expected a glyph count")
+        }
+        let range = SpaceBarStyle.glyphCapRange
+        // Clamp as Double BEFORE Int(...) — `Int(1e300)` traps,
+        // so a config typo would otherwise kill the WM (#58).
+        let clamped = min(
+            max(value.rounded(), Double(range.lowerBound)),
+            Double(range.upperBound)
+        )
+        return .success(.glyphCap(Int(clamped)))
+    }
+
     private static func number(
         _ args: [JSONValue]
     ) -> Result<CGFloat, AppBarSettingError> {
@@ -200,6 +225,7 @@ enum SpaceBarCommandSetting {
         case .boxSize(let value): style.boxSize = value
         case .boxGap(let value): style.boxGap = value
         case .fontSize(let value): style.fontSize = value
+        case .glyphCap(let value): style.glyphCap = value
         case .iconSource(let value): style.iconSource = value
         case .tabBackground(let value):
             style.tabBackground = value

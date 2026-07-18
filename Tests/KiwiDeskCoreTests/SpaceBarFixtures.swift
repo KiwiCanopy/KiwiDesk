@@ -18,6 +18,7 @@ enum SpaceBarFixtures {
         style.boxSize = 120
         style.boxGap = 3
         style.fontSize = 15
+        style.glyphCap = 8
         style.iconSource = .appFont
         style.tabBackground = .plain
         style.activeIndicator = .gap

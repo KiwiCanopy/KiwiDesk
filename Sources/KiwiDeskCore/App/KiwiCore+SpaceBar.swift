@@ -106,16 +106,14 @@ extension KiwiCore {
             }
     }
 
-    /// Visible glyph slots per space item (#293 stage 2):
-    /// grouping runs first, then the cap.
-    static let spaceBarGlyphCap = 5
-
     /// Adjacent same-app runs in the space's flat array order
     /// collapse into one glyph + count (the App Bar's grouping
     /// model, without focused-inside expansion), then the cap
-    /// keeps the first `spaceBarGlyphCap` slots. Returns the
-    /// visible slots and the number of *windows* hidden past
-    /// the cap (the "+n" badge).
+    /// keeps the first `style.resolvedGlyphCap` slots (#376).
+    /// Grouping runs first by design so the cap counts app
+    /// *groups*, not raw windows. Returns the visible slots and
+    /// the number of *windows* hidden past the cap (the "+n"
+    /// badge).
     func spaceBarApps(
         in space: Space,
         style: SpaceBarStyle
@@ -128,8 +126,9 @@ extension KiwiCore {
         let windows = pairs.map(\.0)
         let groups = Self.adjacentRuns(of: pairs.map(\.1))
             .map { Array(windows[$0]) }
-        let visible = groups.prefix(Self.spaceBarGlyphCap)
-        let hidden = groups.dropFirst(Self.spaceBarGlyphCap)
+        let cap = style.resolvedGlyphCap
+        let visible = groups.prefix(cap)
+        let hidden = groups.dropFirst(cap)
         let apps = visible.compactMap { group in
             spaceBarApp(group: group, space: space, style: style)
         }
