@@ -58,6 +58,10 @@ struct ShortcutsSection: View {
                         model: model,
                         bindings: bindingsBinding
                     )
+                    GeneralShortcutsSection(
+                        model: model,
+                        bindings: bindingsBinding
+                    )
                     // Orphaned space-targeting rows (#92):
                     // rendered so "Go to" from a rejected
                     // recording can reach the holder — the

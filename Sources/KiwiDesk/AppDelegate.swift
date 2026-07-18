@@ -142,6 +142,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         statusItem.onShowShortcuts = { [weak shortcutsPanel] in
             shortcutsPanel?.toggle()
         }
+        // The bindable Lua open-hotkey (#330) toggles the same
+        // panel — one close action for the key, the menu row, and
+        // click-away, so the footer's "press it again to close"
+        // hint holds.
+        core.onShowShortcuts = { [weak shortcutsPanel] in
+            shortcutsPanel?.toggle()
+        }
+        // The quick-menu row shows the bound open-combo (if any),
+        // read live from the resolved binding on each menu open.
+        statusItem.shortcutsComboProvider = { [weak self] in
+            guard let self else { return nil }
+            return ShortcutsOpenBinding.comboGlyphs(core: self.core)
+        }
         statusItem.onShowConfigIssues = { [weak self] in
             self?.configIssues.show()
         }

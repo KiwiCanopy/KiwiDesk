@@ -238,6 +238,20 @@ enum KeybindingCatalog {
         SpaceLuaArg.quote(raw)
     }
 
+    /// The bindable "open the shortcuts reference panel" row
+    /// (#330): a GUI action verb (`KiwiDesk.show_shortcuts()`).
+    /// Ships **unbound** — a rarely-summoned reference, so no
+    /// presumed factory combo. The Lua comes from
+    /// `ShortcutsOpenBinding` so the row, the classifier, and the
+    /// quick-menu combo all speak of one binding.
+    static let showShortcuts = NavCommand(
+        label: "Show shortcuts panel",
+        lua: ShortcutsOpenBinding.lua,
+        displayLabel: {
+            L("keybinding.show_shortcuts", "Show shortcuts panel")
+        }
+    )
+
     // MARK: - Change-mode & application commands (single source)
 
     /// The Change-Modes row that switches to `name`. The one

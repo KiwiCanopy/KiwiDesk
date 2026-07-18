@@ -106,13 +106,27 @@ extension StatusItemController {
         // workspace actions. "View Shortcuts…" shares Settings'
         // separator group and reads glance → editor (#326).
         menu.addItem(.separator())
+        let shortcutsTitle = L(
+            "menu.view_shortcuts",
+            "View Shortcuts…"
+        )
         let shortcuts = NSMenuItem(
-            title: L("menu.view_shortcuts", "View Shortcuts…"),
+            title: shortcutsTitle,
             action: #selector(showShortcuts),
             keyEquivalent: ""
         )
         shortcuts.target = self
         shortcuts.image = symbol("keyboard")
+        // Show the bound open-combo beside the row (#330) — drawn
+        // via attributedTitle, NEVER keyEquivalent (that would be a
+        // live second trigger, and a mirrored MainMenu item would
+        // fire it globally while frontmost). Nothing shown unbound.
+        if let combo = shortcutsComboProvider() {
+            shortcuts.attributedTitle = Self.menuRowTitle(
+                shortcutsTitle,
+                trailing: combo
+            )
+        }
         menu.addItem(shortcuts)
         let settings = NSMenuItem(
             title: L("menu.settings", "Settings…"),
@@ -183,6 +197,48 @@ extension StatusItemController {
         }
         parent.submenu = submenu
         return parent
+    }
+
+    /// A menu title with a dimmed, right-aligned trailing hint —
+    /// the bound open-combo beside "View Shortcuts…" (#330). A
+    /// right tab stop pushes the combo toward the row's trailing
+    /// edge, matching how a native `⌘,` key equivalent sits.
+    private static func menuRowTitle(
+        _ title: String,
+        trailing: String
+    ) -> NSAttributedString {
+        let font = NSFont.menuFont(ofSize: 0)
+        // Right tab positions the combo so its right edge sits at
+        // `location`. Derive it from the rendered title + combo
+        // widths (plus a gap) so a long localized title can't run
+        // into the combo; floor at 200pt so short titles still
+        // align consistently.
+        let attrs: [NSAttributedString.Key: Any] = [.font: font]
+        let titleWidth = (title as NSString)
+            .size(withAttributes: attrs).width
+        let comboWidth = (trailing as NSString)
+            .size(withAttributes: attrs).width
+        let location = max(200, ceil(titleWidth + 16 + comboWidth))
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.tabStops = [
+            NSTextTab(textAlignment: .right, location: location)
+        ]
+        let result = NSMutableAttributedString(
+            string: title,
+            attributes: [.font: font, .paragraphStyle: paragraph]
+        )
+        result.append(
+            NSAttributedString(
+                string: "\t" + trailing,
+                attributes: [
+                    .font: font,
+                    .paragraphStyle: paragraph,
+                    .foregroundColor:
+                        NSColor.secondaryLabelColor,
+                ]
+            )
+        )
+        return result
     }
 
     // MARK: - Actions

@@ -176,6 +176,7 @@ enum SidebarSearch {
                     "shortcuts.section.open_applications",
                     "Open Applications"
                 ),
+                L("shortcuts.section.general", "General"),
                 L(
                     "shortcuts.section.inactive",
                     "Inactive shortcuts"

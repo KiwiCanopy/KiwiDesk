@@ -14,6 +14,11 @@ final class StatusItemController: NSObject, NSMenuDelegate,
     /// Opens the read-only shortcuts reference panel (#326).
     var onShowShortcuts: () -> Void = {}
     var onShowConfigIssues: () -> Void = {}
+    /// The combo bound to open the shortcuts panel (#330), rendered
+    /// as native glyphs, or nil when unbound. Read fresh on each
+    /// menu open so the "View Shortcuts…" row shows the live
+    /// binding beside it (like `profilesProvider`).
+    var shortcutsComboProvider: () -> String? = { nil }
     /// Opens the guided permission fix (the onboarding wizard at
     /// its grant step). Wired unconditionally; the *row* that
     /// invokes it appears only while Accessibility is missing.

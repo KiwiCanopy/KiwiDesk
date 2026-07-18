@@ -140,6 +140,12 @@ bound, grouped into three sections:
   a fresh instance).
 - **Custom** — any raw-Lua shortcuts, shown as their Lua source.
 
+You can also give the panel its own **hotkey**: under Settings ▸
+Shortcuts ▸ **General**, bind "Show shortcuts panel" to any combo (it
+ships unbound). That key both opens and closes the panel, and once set
+it appears beside the menu bar's **View Shortcuts…** row and in the
+panel's own close hint.
+
 The panel always appears centered on the screen under your pointer and
 never remembers a position. Press **Esc**, click anywhere outside it, or
 choose **View Shortcuts…** again to close it. Empty sections are hidden;

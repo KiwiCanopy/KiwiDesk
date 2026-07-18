@@ -188,6 +188,27 @@ struct SizeFloatSection: View {
     }
 }
 
+/// General app actions (#330): today just the bindable
+/// "Show shortcuts panel" hotkey — app chrome, not a workspace
+/// action, so it sits in its own low section rather than among
+/// Focus / Move / Size. Unbound by default.
+struct GeneralShortcutsSection: View {
+    @ObservedObject var model: SettingsModel
+    @Binding var bindings: [KeyBinding]
+
+    var body: some View {
+        SettingsSection(
+            L("shortcuts.section.general", "General")
+        ) {
+            NavRow(
+                model: model,
+                bindings: $bindings,
+                command: KeybindingCatalog.showShortcuts
+            )
+        }
+    }
+}
+
 /// Switch modes: one row per other mode, binding a
 /// `switch_mode` shortcut. Shown only when more than one mode
 /// exists.

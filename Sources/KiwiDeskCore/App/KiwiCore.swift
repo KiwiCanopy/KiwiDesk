@@ -172,6 +172,13 @@ public final class KiwiCore {
         @MainActor ([ConfigIssue])
             -> Void = { _ in }
 
+    /// Fired by the `KiwiDesk.show_shortcuts()` Lua verb (#330):
+    /// a bindable action that opens (toggles) the read-only
+    /// shortcuts reference panel (#326). The VM holds no UI ref —
+    /// Core just raises this hook and the GUI (`AppDelegate`) wires
+    /// it to the panel controller, weakly. No-op until wired.
+    public var onShowShortcuts: @MainActor () -> Void = {}
+
     /// `~/.config/KiwiDesk/` (created on demand).
     public let configDirectory: URL
     public var configURL: URL {
@@ -331,17 +338,5 @@ public final class KiwiCore {
         // after `updateAppBar()`: the clamp reads the strips it
         // just painted (#242).
         clampFloatsBelowTopBars()
-    }
-
-    // MARK: - Accessors
-
-    public var activeSpace: Space? {
-        state.workspaces.activeSpace.flatMap {
-            state.workspaces[$0]
-        }
-    }
-
-    public var focusedWindow: ManagedWindow? {
-        activeSpace?.focused.flatMap { state.windows[$0] }
     }
 }

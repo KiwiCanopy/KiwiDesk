@@ -9,6 +9,10 @@ import SwiftUI
 /// engine isn't running).
 struct ShortcutsPanelView: View {
     let reference: ShortcutsReference?
+    /// The combo bound to open this panel (native glyphs), or nil
+    /// when unbound (#330). Drives the footer hint: the same key
+    /// that opened it also closes it, so it leads the copy.
+    let dismissCombo: String?
     let onEdit: () -> Void
 
     var body: some View {
@@ -136,19 +140,33 @@ struct ShortcutsPanelView: View {
 
     // MARK: - Footer
 
+    /// Bound → lead with the live open-combo ("⌥␣ or Esc to close"),
+    /// the two dismissals worth the characters — the same key that
+    /// opened it is the most self-evident way to close it, and it
+    /// teaches a mouse-opener the shortcut. Unbound → the generic
+    /// hint, which keeps "click away" (#330, #326).
+    private var dismissHint: String {
+        if let combo = dismissCombo {
+            return L(
+                "shortcuts.panel.dismiss_hint.bound",
+                "%1$@ or Esc to close",
+                combo
+            )
+        }
+        return L(
+            "shortcuts.panel.dismiss_hint",
+            "Esc or click away to close"
+        )
+    }
+
     private var footer: some View {
         HStack {
             // A chromeless panel has no titlebar to teach dismissal,
             // so the one non-obvious interaction gets a quiet hint on
             // the idle side, opposite the action button.
-            Text(
-                L(
-                    "shortcuts.panel.dismiss_hint",
-                    "Esc or click away to close"
-                )
-            )
-            .font(.caption)
-            .foregroundStyle(.secondary)
+            Text(dismissHint)
+                .font(.caption)
+                .foregroundStyle(.secondary)
             Spacer()
             Button(action: onEdit) {
                 Text(

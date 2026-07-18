@@ -47,8 +47,21 @@ extension KiwiCore {
         }
         registerEventAPI(on: lua)
         registerKeybindingAPI(on: lua)
+        registerUIAPI(on: lua)
         registerExecAPI(on: lua)
         installTypoGuards(on: lua)
+    }
+
+    /// UI-bridge verbs that cross Core → GUI (#330). They carry no
+    /// dispatcher `CommandResponse` — they raise a `@MainActor`
+    /// hook the app wires to a window — so, like `bind`/`on`, they
+    /// live outside `APIReference.commands` and are listed in
+    /// `luaOnly` for `help()`. The VM never holds the UI ref.
+    private func registerUIAPI(on lua: LuaInterpreter) {
+        lua.register("show_shortcuts") { [weak self] _ in
+            self?.onShowShortcuts()
+            return .none
+        }
     }
 
     /// `KiwiDesk.bind`, `define_mode`, and `switch_mode`

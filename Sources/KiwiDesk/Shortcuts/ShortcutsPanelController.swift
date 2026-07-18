@@ -51,6 +51,9 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         let reference = buildReference()
         let root = ShortcutsPanelView(
             reference: reference,
+            dismissCombo: ShortcutsOpenBinding.comboGlyphs(
+                core: core
+            ),
             onEdit: { [weak self] in
                 self?.close()
                 self?.onEdit()

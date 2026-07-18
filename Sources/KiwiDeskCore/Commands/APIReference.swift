@@ -244,6 +244,7 @@ public enum APIReference {
     /// caller's channel can invoke (issue #37).
     public static let luaOnly: [String] = [
         "exec", "bind", "on", "define_mode", "switch_mode",
+        "show_shortcuts",
     ]
 
     /// Command names reachable through the dispatcher (and thus

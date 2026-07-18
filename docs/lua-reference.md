@@ -2685,6 +2685,33 @@ Applications shortcut carries a per-row **Launch behavior** menu —
 *Open or Focus* (`pull_or_spawn`, the default) or *Open New*
 (`spawn_new`).
 
+## User Interface
+
+### show_shortcuts
+
+**Expects:** nothing.
+
+**Does:** opens the read-only **shortcuts reference** panel — a
+live glance at the active mode's bindings — or closes it if it is
+already open (the verb toggles). Bind it to a hotkey to summon the
+reference from anywhere. This is the same panel reached from the
+menu bar's *View Shortcuts…* row; when you bind a combo here, that
+combo also shows beside the menu row and in the panel's own close
+hint. It ships **unbound** — a rarely-summoned reference gets no
+presumed default combo.
+
+It is also offered as a bindable preset in the Settings app under
+**Shortcuts ▸ General** ("Show shortcuts panel"), so you need not
+hand-write the bind.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("alt+space", function()
+    KiwiDesk.show_shortcuts()
+end)
+```
+
 ## Keybindings
 
 ```lua
