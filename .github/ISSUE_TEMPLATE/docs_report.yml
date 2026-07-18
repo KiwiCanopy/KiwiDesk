@@ -1,0 +1,53 @@
+name: Docs
+description: Report missing, wrong, or unclear documentation
+labels: ["documentation"]
+title: "📝 "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For docs that are **wrong** (describe behavior the app
+        doesn't have), please include what the app actually
+        does — code and docs must never disagree.
+
+  - type: input
+    id: doc_location
+    attributes:
+      label: Which doc?
+      description: |
+        File or page (e.g. `docs/lua-reference.md`, the
+        user-guide page on profiles), plus section if known.
+      placeholder: "docs/lua-reference.md — space_bar section"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: problem_kind
+    attributes:
+      label: What kind of problem?
+      options:
+        - Wrong — doc contradicts actual behavior
+        - Missing — behavior/setting isn't documented
+        - Unclear — documented but confusing
+        - Structure — hard to find / poorly organized
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's wrong or missing?
+      description: |
+        Quote the current text if it exists; describe the
+        actual behavior if the doc contradicts it.
+      placeholder: |
+        The doc says `space_bar.set_glyph_cap` accepts 0-10,
+        but the command clamps to 1-8.
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested fix (optional)
+      placeholder: "Proposed wording, structure, or example."
