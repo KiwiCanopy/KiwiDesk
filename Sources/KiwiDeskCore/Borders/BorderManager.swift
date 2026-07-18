@@ -46,6 +46,11 @@ public final class BorderManager {
     /// radius) is a permanent answer, not a transient one — so a
     /// resolved default is cached too, never re-queried every sync.
     private var cornerRadii: [WindowID: CGFloat] = [:]
+    /// The draw order every ring is currently built for (#367).
+    /// Global, not per-window: flipping it retires all overlays so
+    /// each rebuilds on the matching backend (below → AppKit,
+    /// above → SkyLight) at the next `sync`.
+    private var activeOrder: BorderGeometry.Order = .below
     private var eventSource: SkyLightWindowEvents?
     private var triedEventSource = false
     private var privateRuntimeStarted = false
@@ -76,6 +81,21 @@ public final class BorderManager {
     /// surface for tests and diagnostics.
     public var borderedWindows: Set<WindowID> {
         Set(overlays.keys)
+    }
+
+    /// Selects whether rings stack behind or in front of windows
+    /// (#367). A no-op when unchanged; a real flip retires every
+    /// live overlay so the next `sync` rebuilds it on the backend
+    /// that matches the new order (front → SkyLight above-order,
+    /// behind → AppKit below-order). Per-window `specs` and cached
+    /// radii are kept — only the render backend changes.
+    public func setDrawOrder(_ order: BorderStyle.DrawOrder) {
+        let mapped: BorderGeometry.Order =
+            order == .front ? .above : .below
+        guard mapped != activeOrder else { return }
+        for overlay in overlays.values { overlay.hide() }
+        overlays.removeAll()
+        activeOrder = mapped
     }
 
     /// Shows exactly `desired` — one ring per window — and retires
@@ -199,16 +219,16 @@ public final class BorderManager {
         if let existing = overlays[window] { return existing }
         let overlay = BorderOverlay(
             window: window.raw,
-            // Below-order (AppKit) is the default ring for every window
-            // (#361): its `order(.below)` re-stack is flicker-free —
-            // unlike the SkyLight above-order transaction — so it holds
-            // steady under the per-keystroke compositor churn Firefox/
-            // Zen emit, and with each window's real radius the corner
-            // hugs cleanly. The
-            // SkyLight above-order path stays in the tree, retained for
-            // a planned user-facing draw-order toggle. WS geometry
-            // tracking is unaffected (see `usesWindowServerTracking`).
-            preferSkyLight: false,
+            // Below-order (AppKit) is the default (#361): its
+            // `order(.below)` re-stack is flicker-free — unlike the
+            // SkyLight above-order transaction — so it holds steady
+            // under the per-keystroke compositor churn Firefox/Zen
+            // emit, and with each window's real radius the corner hugs
+            // cleanly. `border.set_draw_order("front")` opts into the
+            // crisp SkyLight above-order path (#367); `activeOrder`
+            // carries that choice. WS geometry tracking is unaffected
+            // (see `usesWindowServerTracking`).
+            order: activeOrder,
             onFallback: { [weak self] reason in
                 self?.onLog(
                     "border \(window.raw): \(reason); "

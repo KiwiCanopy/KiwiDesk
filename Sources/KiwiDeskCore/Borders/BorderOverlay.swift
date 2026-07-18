@@ -47,12 +47,18 @@ final class BorderOverlay {
 
     init(
         window: CGWindowID,
-        preferSkyLight: Bool,
+        order: BorderGeometry.Order,
         onFallback: @escaping @MainActor (String) -> Void
     ) {
         targetWindow = window
         self.onFallback = onFallback
         makeFallback = { AppKitBorderOverlay() }
+        // `above`-order is the SkyLight fast path; `below`-order is
+        // AppKit. The transport follows the requested draw order —
+        // AppKit cannot express a visible above-window ring, and the
+        // SkyLight sub-level path is what makes `above` non-flickering
+        // occlusion-correct (#357/#367).
+        let preferSkyLight = order == .above
         if preferSkyLight,
             let skyLight = SkyLightBorderOverlay(targetWindow: window)
         {

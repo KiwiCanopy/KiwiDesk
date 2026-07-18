@@ -2189,13 +2189,19 @@ focused window; you can optionally ring every other window too.
 The ring is a pure overlay: it never changes where windows tile
 (no gap coupling). The configured width is the thickness drawn
 outward into the gap — the value `border.fit_gaps` sizes gaps from.
-The ring is stacked just above its window so its own rounded arc
-reads cleanly, with a small overlap lapping onto the window edge to
-keep the corners closed; that overlap isn't part of the width.
-Rounded corners match the real macOS window radius (queried per
-window); square draws sharp corners. The ring is pinned to its
-window's stacking level, so popovers, sheets, and other windows the
-system places above the target still stay above its ring.
+By default the ring is stacked **behind** its window: a flicker-free
+placement that holds steady even when a window redraws rapidly (some
+browsers repaint on every keystroke) and hugs each window's real
+corner radius. The trade is that the window's drop-shadow falls
+across the ring's lower reach and the corner meets the window with a
+filled seam rather than a floating hairline.
+`border.set_draw_order("front")` switches to an in-front placement
+that is crisper and shadowless but can flicker on those browsers —
+a power-user opt-in (see below). Rounded corners match the real
+macOS window radius (queried per window); square draws sharp
+corners. The ring is pinned to its window's stacking level, so
+popovers, sheets, and other windows the system places above the
+target still stay above its ring.
 
 Overflow piles and monocle show a ring only on the visible
 top window; set gaps at least as wide as the border to avoid
@@ -2279,6 +2285,27 @@ squared frame on rounded ones.
 
 ```lua
 border.set_corner_style("rounded")
+```
+
+### border.set_draw_order
+
+**Expects:** `"behind"` or `"front"`.
+
+**Does:** chooses where the ring stacks relative to windows.
+`behind` (default) draws it below the window — flicker-free, hugs
+the real corner radius, but carries the window's drop-shadow on its
+lower reach and a filled corner seam. `front` draws it above the
+window — a crisp, shadowless hairline — but can flicker on windows
+that repaint rapidly (Firefox/Zen and other Gecko browsers emit a
+compositor reorder on every keystroke). There is no GUI control for
+this: `behind` is the right default for everyone, and `front` is a
+niche preference exposed to Lua only. Changing it re-draws every
+ring immediately.
+
+**Example:**
+
+```lua
+border.set_draw_order("front")
 ```
 
 ### border.fit_gaps

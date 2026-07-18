@@ -41,7 +41,7 @@ struct SettingsCodingTests {
             Set(border.keys) == [
                 "enabled", "width", "focused_color",
                 "unfocused_enabled", "unfocused_color",
-                "corner_style",
+                "corner_style", "draw_order",
             ]
         )
         #expect(border["enabled"] as? Bool == true)
@@ -49,6 +49,7 @@ struct SettingsCodingTests {
         #expect(border["focused_color"] as? String == "#0A84FF")
         #expect(border["unfocused_enabled"] as? Bool == false)
         #expect(border["corner_style"] as? String == "rounded")
+        #expect(border["draw_order"] as? String == "behind")
         // `quit.set_layout` → `quit.layout` (#197); `grid` is
         // the only strategy today and the default.
         // `quit.set_grid_target_depth` →

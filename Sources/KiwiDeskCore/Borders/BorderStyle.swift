@@ -24,6 +24,17 @@ public struct BorderStyle: Sendable, Equatable {
         case square
     }
 
+    /// Where the focus ring stacks relative to windows. `behind`
+    /// (the default, #319/#361) uses the flicker-free below-order
+    /// AppKit path; `front` uses the crisp, shadowless above-order
+    /// SkyLight path — a power-user opt-in that can flicker under
+    /// the per-keystroke compositor churn Firefox/Zen emit, so it
+    /// stays a Lua-only setting with no GUI toggle (#367).
+    public enum DrawOrder: String, Sendable, Codable {
+        case behind
+        case front
+    }
+
     /// The narrowest and widest the width clamps to. The command
     /// setter clamps to this exact range; the GUI slider offers
     /// whole points 1–20 (sub-point widths stay a Lua fine-tune).
@@ -48,6 +59,9 @@ public struct BorderStyle: Sendable, Equatable {
     /// the focused ring for attention.
     public var unfocusedColor = "#8E8E93CC"
     public var cornerStyle: CornerStyle = .rounded
+    /// Ring stacked behind windows (default) or in front. A niche
+    /// Lua-only preference with no GUI control (#367).
+    public var drawOrder: DrawOrder = .behind
 
     public init() {}
 
@@ -104,6 +118,7 @@ extension BorderStyle: Codable {
         case unfocusedEnabled = "unfocused_enabled"
         case unfocusedColor = "unfocused_color"
         case cornerStyle = "corner_style"
+        case drawOrder = "draw_order"
     }
 
     /// Manual decoding: profiles saved before a field existed
@@ -143,5 +158,10 @@ extension BorderStyle: Codable {
                 CornerStyle.self,
                 forKey: .cornerStyle
             ) ?? defaults.cornerStyle
+        drawOrder =
+            try container.decodeIfPresent(
+                DrawOrder.self,
+                forKey: .drawOrder
+            ) ?? defaults.drawOrder
     }
 }

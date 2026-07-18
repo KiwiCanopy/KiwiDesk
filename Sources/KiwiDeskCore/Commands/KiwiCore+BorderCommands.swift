@@ -85,6 +85,14 @@ extension KiwiCore {
             }
             tiler.settings.borderStyle.cornerStyle = style
             return .ok()
+        case "draw_order":
+            guard let raw = args.first?.stringValue,
+                let order = BorderStyle.DrawOrder(rawValue: raw)
+            else {
+                return .fail("expected 'behind' or 'front'")
+            }
+            tiler.settings.borderStyle.drawOrder = order
+            return .ok()
         default:
             return .fail("unknown command: \(command)")
         }

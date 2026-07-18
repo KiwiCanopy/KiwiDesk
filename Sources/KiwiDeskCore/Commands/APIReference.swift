@@ -231,7 +231,7 @@ public enum APIReference {
         "border": [
             "set_enabled", "set_width", "set_focused_color",
             "set_unfocused_enabled", "set_unfocused_color",
-            "set_corner_style", "fit_gaps",
+            "set_corner_style", "set_draw_order", "fit_gaps",
         ],
     ]
 

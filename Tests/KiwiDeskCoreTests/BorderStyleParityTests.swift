@@ -21,6 +21,7 @@ struct BorderStyleParityTests {
         style.unfocusedEnabled = true
         style.unfocusedColor = "#222222"
         style.cornerStyle = .square
+        style.drawOrder = .front
         return style
     }
 

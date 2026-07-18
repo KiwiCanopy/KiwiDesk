@@ -14,6 +14,9 @@ import CoreGraphics
 extension KiwiCore {
     func updateBorders() {
         let style = tiler.settings.borderStyle
+        // Global draw order (behind / front, #367) — set before the
+        // enabled guard so a re-enable rebuilds on the right backend.
+        borders.setDrawOrder(style.drawOrder)
         guard style.enabled, let space = activeSpace else {
             borders.sync([])
             return

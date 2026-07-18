@@ -93,6 +93,30 @@ struct BorderCommandTests {
         )
     }
 
+    @Test("set_draw_order parses the enum, rejects unknown")
+    func drawOrder() {
+        let core = makeCore()
+        // Default is behind (#319/#367).
+        #expect(
+            core.tiler.settings.borderStyle.drawOrder == .behind
+        )
+        #expect(
+            core.execute(
+                "border.set_draw_order",
+                args: [.string("front")]
+            ).isSuccess
+        )
+        #expect(
+            core.tiler.settings.borderStyle.drawOrder == .front
+        )
+        #expect(
+            !core.execute(
+                "border.set_draw_order",
+                args: [.string("sideways")]
+            ).isSuccess
+        )
+    }
+
     @Test("set_focused_color validates hex")
     func colors() {
         let core = makeCore()
