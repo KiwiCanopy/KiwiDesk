@@ -1871,7 +1871,7 @@ space_bar.set_hide_empty(true)
 ### space_bar.set_spring_delay
 
 **Expects:** milliseconds (default `1500`, clamped to
-`500`–`4000`).
+`1000`–`4000`).
 
 **Does:** sets how long a window dragged onto a Space item must
 hover before the view springs to that Space (the "hold to place"

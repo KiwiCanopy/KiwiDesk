@@ -34,7 +34,9 @@ struct SpaceBarDropCoordinatorTests {
         coord.hitTest = { _ in hit }
         coord.currentSpace = { _ in current }
         coord.setHover = { rec.hovered.append($0) }
-        coord.beginSweep = { space, _ in rec.sweeps.append(space) }
+        coord.beginSweep = { space, _, _ in
+            rec.sweeps.append(space)
+        }
         coord.clearFeedback = { rec.clears += 1 }
         coord.spring = { rec.sprang.append(($0, $1)) }
         return (coord, rec)
@@ -123,6 +125,21 @@ struct SpaceBarDropCoordinatorTests {
                 )
         )
         #expect(coord.sprungSpace == nil)
+    }
+
+    @Test("Re-arming a new item clears the previous sweep")
+    func rearmClearsPrevious() {
+        let (coord, rec) = make(
+            current: SpaceID("A"),
+            hit: SpaceID("B")
+        )
+        coord.moved(win, cursor: cursor)
+        let clearsAfterFirst = rec.clears
+        // Move straight onto another item without leaving the bar.
+        coord.hitTest = { _ in SpaceID("C") }
+        coord.moved(win, cursor: cursor)
+        #expect(rec.clears > clearsAfterFirst)
+        #expect(rec.sweeps == [SpaceID("B"), SpaceID("C")])
     }
 
     @Test("reset cancels a pending spring (abandoned drag)")

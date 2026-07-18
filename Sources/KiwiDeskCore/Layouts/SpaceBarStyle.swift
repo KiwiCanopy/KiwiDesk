@@ -95,8 +95,10 @@ public struct SpaceBarStyle: Sendable, Equatable {
     public static let frontDividerAlpha: CGFloat = 0.4
 
     /// Valid drag-drop dwell bounds (ms): fast enough to feel
-    /// responsive, slow enough not to spring by accident.
-    public static let springDelayRange = 500...4000
+    /// responsive, slow enough not to spring by accident. Floored
+    /// at 1000 so the sweep (which starts after a 0.5 s quiet
+    /// pre-delay) still has visible fill time.
+    public static let springDelayRange = 1000...4000
 
     public init() {}
 

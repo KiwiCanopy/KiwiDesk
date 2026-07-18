@@ -20,7 +20,10 @@ extension SpaceBarItemView {
     /// 0→1 over `duration`, sitting on top of the hover tint as
     /// the "this will become active" cue. Reuses the active
     /// indicator's ring vocabulary (2 pt, `highlightColor`).
-    func beginSpringSweep(duration: TimeInterval) {
+    func beginSpringSweep(
+        duration: TimeInterval,
+        delay: TimeInterval
+    ) {
         let inset = springRing.lineWidth / 2
         CATransaction.begin()
         CATransaction.setDisableActions(true)
@@ -42,9 +45,13 @@ extension SpaceBarItemView {
         sweep.fromValue = 0
         sweep.toValue = 1
         sweep.duration = duration
+        // Stay empty for `delay` first: `.both` shows the
+        // fromValue (0) before beginTime, so a quick flick shows
+        // no ring until the hold is deliberate (#372 QA).
+        sweep.beginTime = CACurrentMediaTime() + delay
         sweep.timingFunction =
             CAMediaTimingFunction(name: .linear)
-        sweep.fillMode = .forwards
+        sweep.fillMode = .both
         sweep.isRemovedOnCompletion = false
         springRing.strokeEnd = 1
         springRing.add(sweep, forKey: "springSweep")

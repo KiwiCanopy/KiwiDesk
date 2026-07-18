@@ -33,13 +33,18 @@ extension SpaceBarOverlay {
         }
     }
 
-    /// Starts the pending-spring sweep on `space`'s item.
+    /// Starts the pending-spring sweep on `space`'s item — empty
+    /// for `delay`, then filling over `duration`.
     func beginSpringSweep(
         on space: SpaceID,
-        duration: TimeInterval
+        duration: TimeInterval,
+        delay: TimeInterval
     ) {
         for view in itemViews where view.space == space {
-            view.beginSpringSweep(duration: duration)
+            view.beginSpringSweep(
+                duration: duration,
+                delay: delay
+            )
         }
     }
 

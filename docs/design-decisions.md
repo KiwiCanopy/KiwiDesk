@@ -1212,12 +1212,18 @@ The load-bearing details, so they are not relitigated:
   cardinality change is deliberate; hooks keyed on the event see
   the intermediate moves.
 - The dwell defaults to **1.5 s** and is user-configurable
-  (`space_bar.spring_delay`, clamped 500–4000 ms; a Spring delay
+  (`space_bar.spring_delay`, clamped 1000–4000 ms; a Spring delay
   slider in the Space Bar editor). Longer than Finder's ~0.7 s:
   the ring sweep shows progress and a whole-view switch is a
   bigger disruption than a folder opening, so the accidental-
   trigger floor sits higher. The sweep animation tracks the
-  configured value. Always-on, no enable toggle; focus-after-drop
+  configured value, but only *starts* after a fixed 0.5 s quiet
+  pre-delay (`SpaceBarDropCoordinator.springPreDelay`) so a quick
+  flick-to-relocate never flashes a loading ring; the spring still
+  fires at the full dwell, so the sweep fills over
+  `dwell − 0.5 s`, and the range floors at 1 s to keep that fill
+  visible. The pre-delay is a `beginTime` offset on the stroke
+  animation, so leaving before it elapses shows nothing. Always-on, no enable toggle; focus-after-drop
   is not a new setting (`move_to_space_and_follow` already models
   following). Option-held-drop → follow is a deferred second gear.
 

@@ -46,11 +46,21 @@ final class SpaceBarDropCoordinator {
     /// Tint a space's item with the synthetic drag-hover (nil
     /// clears all).
     var setHover: @MainActor (SpaceID?) -> Void = { _ in }
-    /// Start the pending-spring ring sweep on a space's item.
-    var beginSweep: @MainActor (SpaceID, TimeInterval) -> Void = {
-        _,
-        _ in
-    }
+    /// Start the pending-spring ring sweep on a space's item: it
+    /// stays empty for `delay`, then fills over `fill`.
+    var beginSweep:
+        @MainActor (
+            _ space: SpaceID, _ fill: TimeInterval,
+            _ delay: TimeInterval
+        ) -> Void = { _, _, _ in }
+
+    /// Quiet time after entering an item before the sweep starts
+    /// (#372 QA): a quick flick-to-relocate shows no loading ring.
+    /// The spring still fires at the full dwell, so the sweep fills
+    /// over `dwell - springPreDelay`; the dwell range floors above
+    /// this so the sweep is always visible.
+    static let springPreDelay: TimeInterval = 0.5
+
     /// Clear every hover tint and pending sweep.
     var clearFeedback: @MainActor () -> Void = {}
     /// Spring the visible space to `target` while `window` stays
@@ -116,12 +126,18 @@ final class SpaceBarDropCoordinator {
     }
 
     private func arm(_ target: SpaceID, _ id: WindowID) {
+        // Clear the previously-armed item first: moving straight
+        // from one Space item to another re-arms without a gap, and
+        // the old item's ring sweep would otherwise keep animating
+        // (#372 QA). Covers every bar/display.
+        clearFeedback()
         armedSpace = target
         // Read the dwell once, so the ring sweep and the timer
         // that fires the spring share the exact same duration.
         let dwell = dwellProvider()
+        let delay = min(Self.springPreDelay, dwell)
         setHover(target)
-        beginSweep(target, dwell)
+        beginSweep(target, dwell - delay, delay)
         dwellTask?.cancel()
         dwellTask = Task { [weak self] in
             let ns = UInt64(dwell * 1_000_000_000)

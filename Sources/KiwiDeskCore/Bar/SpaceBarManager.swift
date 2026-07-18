@@ -120,13 +120,19 @@ public final class SpaceBarManager {
         overlays.values.forEach { $0.setDragHover(space) }
     }
 
-    /// Starts the pending-spring sweep on `space`'s item.
+    /// Starts the pending-spring sweep on `space`'s item — empty
+    /// for `delay`, then filling over `duration`.
     public func beginSpringSweep(
         on space: SpaceID,
-        duration: TimeInterval
+        duration: TimeInterval,
+        delay: TimeInterval
     ) {
         overlays.values.forEach {
-            $0.beginSpringSweep(on: space, duration: duration)
+            $0.beginSpringSweep(
+                on: space,
+                duration: duration,
+                delay: delay
+            )
         }
     }
 

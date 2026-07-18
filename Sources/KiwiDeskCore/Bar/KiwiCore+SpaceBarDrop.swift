@@ -21,10 +21,12 @@ extension KiwiCore {
         spaceBarDrop.setHover = { [weak self] space in
             self?.spaceBars.setDragHover(space)
         }
-        spaceBarDrop.beginSweep = { [weak self] space, duration in
+        spaceBarDrop.beginSweep = {
+            [weak self] space, fill, delay in
             self?.spaceBars.beginSpringSweep(
                 on: space,
-                duration: duration
+                duration: fill,
+                delay: delay
             )
         }
         spaceBarDrop.clearFeedback = { [weak self] in

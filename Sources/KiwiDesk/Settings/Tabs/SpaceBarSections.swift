@@ -154,7 +154,7 @@ struct SpaceBarEditorSection: View {
         SecondsRow(
             label: L("space_bar.spring_delay", "Spring delay"),
             ms: style.springDelay,
-            range: 0.5...4.0,
+            range: 1.0...4.0,
             help: L(
                 "space_bar.spring_delay.help",
                 "Drag a window onto a Space and hold this long "

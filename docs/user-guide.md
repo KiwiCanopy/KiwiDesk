@@ -739,7 +739,7 @@ either:
   where you want (the usual drag preview shows the slot).
 
 The hold length is the **Spring delay** (Space Bar editor,
-default 1.5 s, adjustable 0.5–4 s). Move the cursor off the item
+default 1.5 s, adjustable 1–4 s). Move the cursor off the item
 before the ring completes to cancel. The whole item is the target
 (glyphs and the `+n` badge are not separate drop zones), and
 dropping onto the Space a window is already on does nothing.
@@ -770,7 +770,7 @@ shortcut) and **Show front app** — a trailing segment with the
 focused window of the Space each display currently shows
 (icon-only on vertical bars). **Spring delay** sets how long a
 dragged window must hover a Space before the view springs to it
-(default 1.5 s, 0.5–4 s).
+(default 1.5 s, 1–4 s).
 
 ## Behavior
 
