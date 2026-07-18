@@ -1169,6 +1169,16 @@ per display means per-display content, consistent with every
 other per-display fact in the bar; a secondary display shows
 its own space's remembered focus.
 
+**The two bar editors share one canonical row order.** (#374.)
+App Bar's shape is the reference: enable, Position (with the
+same-edge note under it, in both editors), item-look
+(background, indicator, symbol style), content toggles, sizes,
+then colors — signature colors inline, the rest behind a shut
+"Advanced colors" disclosure in both. Differences remain only
+where the bars genuinely differ (per-layout tier, front-app
+segment, copy button). A new bar-editor row must slot into
+this order on both sides, not grow a per-editor one.
+
 **Tab background and active indicator are orthogonal.** (#228.)
 The old coupled `style` enum (`pills` / `segments` / `underline`)
 conflated two orthogonal concerns: the per-tab box rendering and

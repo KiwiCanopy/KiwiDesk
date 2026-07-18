@@ -36,6 +36,12 @@ struct AppBarColorGrid<Content: View>: View {
 /// The global `app_bar.*` look every layout inherits.
 struct GlobalAppBarSection: View {
     @Binding var style: AppBarStyle
+    /// The Space Bar's resolved edge when both enabled bars
+    /// share one, else nil (#374) — one optional, so the
+    /// illegal "not shared, but has an edge" state can't be
+    /// expressed. Kept a plain value: this view stays
+    /// model-free.
+    var spaceBarSharedEdge: AppBarEdge? = nil
     // The full palette is ~10 hex fields; only Box / Active box
     // / Highlight (the ones the preview strip most visibly
     // reflects) stay inline, the rest collapse behind a
@@ -66,10 +72,7 @@ struct GlobalAppBarSection: View {
                     .padding(.top, 8)
             } label: {
                 Text(
-                    L(
-                        "app_bar.advanced_colors.title",
-                        "Advanced colors"
-                    )
+                    L("bars.advanced_colors", "Advanced colors")
                 )
                 .font(.subheadline)
             }
@@ -88,6 +91,9 @@ struct GlobalAppBarSection: View {
                     + "shows it."
             )
         )
+        if let spaceBarSharedEdge {
+            BarSameEdgeRow(edge: spaceBarSharedEdge)
+        }
         SegmentedPicker(
             tabBackgroundLabel,
             selection: $style.tabBackground,
@@ -214,72 +220,8 @@ struct GlobalAppBarSection: View {
         )
     }
 
-    // The three the preview strip reflects most, kept inline.
-    @ViewBuilder private var inlineColors: some View {
-        HexColorField(
-            label: L("app_bar.color.box", "Box"),
-            hex: $style.boxColor
-        )
-        HexColorField(
-            label: L("app_bar.color.active_box", "Active box"),
-            hex: $style.activeBoxColor
-        )
-        HexColorField(
-            label: L("app_bar.color.highlight", "Highlight"),
-            hex: $style.highlightColor
-        )
-    }
-
-    // The remaining palette, behind the disclosure.
-    @ViewBuilder private var advancedColors: some View {
-        Group {
-            HexColorField(
-                label: L("app_bar.color.text", "Text"),
-                hex: $style.textColor
-            )
-            HexColorField(
-                label: L(
-                    "app_bar.color.active_text",
-                    "Active text"
-                ),
-                hex: $style.activeTextColor
-            )
-            HexColorField(
-                label: L("app_bar.color.hover", "Hover"),
-                hex: $style.hoverColor
-            )
-            HexColorField(
-                label: L(
-                    "app_bar.color.hover_text",
-                    "Hover text"
-                ),
-                hex: $style.hoverTextColor
-            )
-        }
-        Group {
-            HexColorField(
-                label: L(
-                    "app_bar.color.background",
-                    "Background"
-                ),
-                hex: $style.backgroundColor
-            )
-            HexColorField(
-                label: L(
-                    "app_bar.color.group_badge",
-                    "Group badge"
-                ),
-                hex: $style.groupBadgeColor
-            )
-            HexColorField(
-                label: L(
-                    "app_bar.color.badge_text",
-                    "Badge text"
-                ),
-                hex: $style.groupBadgeTextColor
-            )
-        }
-    }
+    // Color rows live in AppBarSections+Colors.swift (#374,
+    // the SpaceBarColorsSection sibling split).
 
     private var globalStyleCaption: String {
         L(
