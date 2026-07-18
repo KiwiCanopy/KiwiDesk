@@ -40,8 +40,10 @@ struct GlobalAppBarSection: View {
     /// share one, else nil (#374) — one optional, so the
     /// illegal "not shared, but has an edge" state can't be
     /// expressed. Kept a plain value: this view stays
-    /// model-free.
-    var spaceBarSharedEdge: AppBarEdge? = nil
+    /// model-free. No default on purpose: every call site
+    /// must decide, or the row silently vanishes for App Bar
+    /// users.
+    var spaceBarSharedEdge: AppBarEdge?
     // The full palette is ~10 hex fields; only Box / Active box
     // / Highlight (the ones the preview strip most visibly
     // reflects) stay inline, the rest collapse behind a
@@ -94,6 +96,9 @@ struct GlobalAppBarSection: View {
         if let spaceBarSharedEdge {
             BarSameEdgeRow(edge: spaceBarSharedEdge)
         }
+        // The Alignment row (#293 QA Batch B) slots in here,
+        // between Position and the item-look cluster — the
+        // Space Bar editor marks the same slot.
         SegmentedPicker(
             tabBackgroundLabel,
             selection: $style.tabBackground,

@@ -667,7 +667,10 @@ running windows.
   roundness) or plain (names on a shared translucent strip).
 - **Position**: the screen edge the bar occupies — top, bottom,
   left, or right (default top). Absolute for every layout; the
-  preview strip rotates vertical for left/right.
+  preview strip rotates vertical for left/right. When the Space
+  Bar shares the edge, an inline note under this control
+  explains the stacking order (Space Bar at the screen edge,
+  App Bar next to the windows).
 - **Active indicator**: ring (outlined border around the active
   tab), edge mark (accent bar on the active tab's window-facing
   edge), or gap (active slot empty). Orthogonal to tab background
