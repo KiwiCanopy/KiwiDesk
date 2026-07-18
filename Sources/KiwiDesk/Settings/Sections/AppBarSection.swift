@@ -1,39 +1,63 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// This Profile ▸ App Bar (#229): the App Bar earned its own
-/// sidebar destination, out of Appearance's one long scroll. It
-/// hosts the global look every layout inherits plus the two
-/// per-layout override sections (monocle, scrolling) — the same
-/// content that used to close Appearance, now a first-class,
-/// deep-linkable place. Being its own page, it needs no group
-/// title (the sidebar label already names it).
-struct AppBarSection: View {
+/// This Profile ▸ Bars (#293): one destination hosting both bar
+/// editors behind a fixed `App Bar | Space Bar` switch — each
+/// editor leads with its own preview and owns its settings;
+/// never both stacked. Renamed from the #229 App Bar page; the
+/// App Bar editor keeps every control and per-layout override,
+/// the switch only re-homes it.
+struct BarsSection: View {
+    /// The two editors behind the switch.
+    enum Editor: String, CaseIterable {
+        case appBar
+        case spaceBar
+    }
+
     @ObservedObject var model: SettingsModel
+    @State private var editor: Editor = .appBar
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                GlobalAppBarSection(
-                    style: $model.config.settings.appBarStyle
-                )
-                LayoutAppBarSection(
-                    title: L("layout.monocle.name", "Monocle"),
-                    mode: .monocle,
-                    bar: $model.config.settings.monocle.appBar,
-                    global: model.config.settings.appBarStyle
-                )
-                LayoutAppBarSection(
-                    title: L(
-                        "layout.scrolling.name",
-                        "Scrolling"
-                    ),
-                    mode: .scrolling,
-                    bar: $model.config.settings.scrolling.appBar,
-                    global: model.config.settings.appBarStyle
-                )
+                Picker("", selection: $editor) {
+                    Text(L("bars.switch.app_bar", "App Bar"))
+                        .tag(Editor.appBar)
+                    Text(
+                        L("bars.switch.space_bar", "Space Bar")
+                    )
+                    .tag(Editor.spaceBar)
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                switch editor {
+                case .appBar: appBarEditor
+                case .spaceBar:
+                    SpaceBarEditorSection(model: model)
+                }
             }
             .padding(16)
         }
+    }
+
+    /// The pre-#293 App Bar page, unchanged: the global look
+    /// every layout inherits plus the two per-layout override
+    /// sections.
+    @ViewBuilder private var appBarEditor: some View {
+        GlobalAppBarSection(
+            style: $model.config.settings.appBarStyle
+        )
+        LayoutAppBarSection(
+            title: L("layout.monocle.name", "Monocle"),
+            mode: .monocle,
+            bar: $model.config.settings.monocle.appBar,
+            global: model.config.settings.appBarStyle
+        )
+        LayoutAppBarSection(
+            title: L("layout.scrolling.name", "Scrolling"),
+            mode: .scrolling,
+            bar: $model.config.settings.scrolling.appBar,
+            global: model.config.settings.appBarStyle
+        )
     }
 }

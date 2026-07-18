@@ -111,7 +111,7 @@ enum SidebarSearch {
                 L("drag.title", "Drag & Drop"),
                 L("border.title", "Focus border"),
             ]
-        case .appBar:
+        case .bars:
             return [
                 L(
                     "app_bar.global_style.title",
@@ -120,6 +120,14 @@ enum SidebarSearch {
                 L(
                     "app_bar.global_colors.title",
                     "Global colors"
+                ),
+                L(
+                    "space_bar.global_style.title",
+                    "Global style"
+                ),
+                L(
+                    "space_bar.colors.title",
+                    "Space Bar colors"
                 ),
             ]
         case .behavior:

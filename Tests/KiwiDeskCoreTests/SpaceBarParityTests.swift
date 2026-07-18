@@ -40,6 +40,50 @@ struct SpaceBarParityTests {
         #expect(decoded == style)
     }
 
+    /// The copy-appearance contract (#293): every CodingKey
+    /// the two styles share — minus the two named exclusions —
+    /// is copied, and nothing else moves. Discovery is by key
+    /// intersection, never a hand list, so a field added to
+    /// both styles joins the copy or turns this red.
+    @Test("Copy-appearance covers exactly the shared keys")
+    func copyAppearanceParity() {
+        // Source differs from the default target on EVERY
+        // field, so an uncopied shared field is visible.
+        let source = AppBarFixtures.everyGlobalField()
+        var target = SpaceBarStyle()
+        target.copyAppearance(from: source)
+        let changed = changedFields(target, from: SpaceBarStyle())
+        let expected = Set(
+            SpaceBarStyle.copyAppearanceKeys.map { key in
+                SpaceBarStyle.CodingKeys.allCases.first {
+                    $0.stringValue == key
+                }
+            }
+            .compactMap { key -> String? in
+                guard let key else { return nil }
+                return fieldNames(SpaceBarStyle()).first {
+                    snakeCased($0) == key.stringValue
+                }
+            }
+        )
+        #expect(changed == expected)
+        // The exclusions stay untouched.
+        #expect(target.enabled == SpaceBarStyle().enabled)
+        #expect(target.edge == SpaceBarStyle().edge)
+        // Sanity: the intersection is non-trivial and the
+        // space-only fields never join it.
+        #expect(
+            SpaceBarStyle.copyAppearanceKeys.contains(
+                "text_color"
+            )
+        )
+        #expect(
+            !SpaceBarStyle.copyAppearanceKeys.contains(
+                "focused_item_color"
+            )
+        )
+    }
+
     @Test("Missing keys decode to defaults")
     func sparseDecode() throws {
         let decoded = try JSONDecoder().decode(
