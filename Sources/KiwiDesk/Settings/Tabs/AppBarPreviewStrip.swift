@@ -34,6 +34,9 @@ struct AppBarPreviewStrip: View {
                 strip.padding(6)
             }
             .frame(height: 84)
+            // Belt-and-braces (SpaceBar twin has the same):
+            // a mock must never spill over the caption below.
+            .clipShape(RoundedRectangle(cornerRadius: 6))
             .animation(LayoutSchematic.damping, value: style)
             .accessibilityElement()
             .accessibilityLabel(axLabel)
@@ -270,7 +273,7 @@ struct AppBarPreviewStrip: View {
     private var gap: CGFloat {
         style.edge.isHorizontal
             ? scale(style.itemGap, from: 0...40, to: 0...16)
-            : scale(style.itemGap, from: 0...40, to: 0...8)
+            : scale(style.itemGap, from: 0...40, to: 0...5)
     }
 
     /// The shared %-resolve against the preview's own (scaled)
@@ -299,14 +302,15 @@ struct AppBarPreviewStrip: View {
     }
 
     /// Length along a **vertical** bar's axis, compressed so
-    /// three slots plus gaps stay inside the 84 pt canvas
-    /// (3 × 20 + 2 × 8 + padding = 84 at the maxima). The
-    /// item-size slider still visibly moves the mock.
+    /// three slots plus gaps stay inside the 72 pt inner box
+    /// (the 84 pt canvas minus the 12 pt edge-hug inset):
+    /// 3 × 18 + 2 × 5 + 8 strip padding = 72 at the maxima.
+    /// The item-size slider still visibly moves the mock.
     private var verticalSlotLength: CGFloat {
         if style.itemSize > 0 {
-            return scale(style.itemSize, from: 1...200, to: 16...20)
+            return scale(style.itemSize, from: 1...200, to: 14...18)
         }
-        return 18
+        return 16
     }
 
     /// Concrete slot frame for the current orientation: along a

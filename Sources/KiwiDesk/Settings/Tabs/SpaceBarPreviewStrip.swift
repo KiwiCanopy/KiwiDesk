@@ -125,8 +125,9 @@ struct SpaceBarPreviewStrip: View {
     // MARK: - Metrics
 
     /// Cross-axis depth. The vertical range is tighter so two
-    /// whole items + the strip padding stay inside the 96 pt
-    /// canvas at every thickness.
+    /// whole items + the strip padding stay inside the 84 pt
+    /// inner box (96 pt canvas minus the 12 pt edge-hug
+    /// inset) at every thickness.
     var thickness: CGFloat {
         style.edge.isHorizontal
             ? scale(style.thickness, from: 8...80, to: 16...40)
@@ -135,7 +136,9 @@ struct SpaceBarPreviewStrip: View {
 
     /// Square glyph cell. Vertical budget: two items of
     /// (2 cells + 2 spacing + 6 padding) + one gap + 8 strip
-    /// padding ≤ 96 → cell ≤ 13 at the maxima.
+    /// padding ≤ 84 (canvas minus edge-hug inset) → cell ≤ 13
+    /// exactly at the maxima — no slack left; re-derive before
+    /// touching any of these constants.
     var cell: CGFloat {
         style.edge.isHorizontal
             ? thickness * 0.62

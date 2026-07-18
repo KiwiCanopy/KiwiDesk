@@ -36,6 +36,9 @@ struct BarsSection: View {
                         ),
                     ]
                 )
+                .accessibilityLabel(
+                    L("bars.switch", "Bar")
+                )
                 switch editor {
                 case .appBar: appBarEditor
                 case .spaceBar:

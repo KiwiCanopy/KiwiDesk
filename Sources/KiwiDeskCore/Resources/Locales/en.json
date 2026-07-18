@@ -84,6 +84,7 @@
   "app_selector.bundle_id": "Bundle identifier",
   "app_selector.clear_custom": "Clear custom app",
   "app_selector.custom": "Custom…",
+  "bars.switch": "Bar",
   "bars.switch.app_bar": "App Bar",
   "bars.switch.space_bar": "Space Bar",
   "behavior.animations.duration": "Duration",
