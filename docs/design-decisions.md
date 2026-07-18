@@ -1169,6 +1169,64 @@ per display means per-display content, consistent with every
 other per-display fact in the bar; a secondary display shows
 its own space's remembered focus.
 
+**Space Bar drag-drop is a two-speed spring, not a blind
+relocate.** (#372.) Dragging a window onto a Space item either
+relocates it (fast drop, `move_to_space`) or, after a 2 s dwell,
+springs the view to that Space so the window is dropped into its
+live layout. A first design pass rejected spring-loading over a
+cross-process race fear; it was reconsidered once grounded in the
+code, because KiwiDesk's Spaces are *virtual* (a retile, not a
+WindowServer Space change), which narrows the risk to one place.
+The load-bearing details, so they are not relitigated:
+- The dragged window is exempted from `stashInactive` for the
+  gesture's life (`TilingEngine.dragExemptWindow`), the same kind
+  of pin as the existing `!isFloating` exemption — otherwise the
+  spring's retile would stash it under the cursor mid-drag.
+- The spring uses a private activate-plus-retile helper, **not**
+  `focusSpace`: that command warps the cursor to hand off AX
+  focus, which would rip the pointer out of the OS drag loop. No
+  focus hand-off, no warp, and the spring retile is
+  `animated: false` regardless of `animations.on_space_change`
+  (a crisp switch must not add motion competing with the live
+  foreign-app drag).
+- Space membership flips **eagerly at spring** (QA revision): the
+  window is moved into the target the moment the view springs, so
+  the live drag shows the ordinary drop preview (ghost + drop-
+  zone) in the target's layout and the release lands it in the
+  exact slot. An earlier design flipped membership lazily at drop
+  to avoid stale state, but that left no preview during placement.
+  Eager membership needs no rollback: an abnormal end (window
+  closed / tab rekeyed) means the window is gone, so stranding is
+  moot, and a normal drop is *meant* to place into the sprung
+  space — `cancelDrag` only tears down the gesture bookkeeping
+  (pending spring, `dragExemptWindow`); it does not, and need not,
+  move the window back. The dragged window is exempt from **all**
+  frame application in `retile` for the gesture's life — both the
+  layout loop and `stashInactive`, via `dragExemptWindow` — so the
+  spring's retile places the target's OTHER windows but leaves the
+  dragged one under the cursor. Without the layout-loop exemption
+  the retile yanks it to its computed slot mid-drag (a small
+  dwindled BSP corner, say). Because the move commits at spring,
+  `window_moved_to_space` fires then rather than once at drop, and
+  once per spring — a chained A→B→C dwell emits two moves. That
+  cardinality change is deliberate; hooks keyed on the event see
+  the intermediate moves.
+- The dwell defaults to **1.5 s** and is user-configurable
+  (`space_bar.spring_delay`, clamped 1000–4000 ms; a Spring delay
+  slider in the Space Bar editor). Longer than Finder's ~0.7 s:
+  the ring sweep shows progress and a whole-view switch is a
+  bigger disruption than a folder opening, so the accidental-
+  trigger floor sits higher. The sweep animation tracks the
+  configured value, but only *starts* after a fixed 0.5 s quiet
+  pre-delay (`SpaceBarDropCoordinator.springPreDelay`) so a quick
+  flick-to-relocate never flashes a loading ring; the spring still
+  fires at the full dwell, so the sweep fills over
+  `dwell − 0.5 s`, and the range floors at 1 s to keep that fill
+  visible. The pre-delay is a `beginTime` offset on the stroke
+  animation, so leaving before it elapses shows nothing. Always-on, no enable toggle; focus-after-drop
+  is not a new setting (`move_to_space_and_follow` already models
+  following). Option-held-drop → follow is a deferred second gear.
+
 **Bar alignment is edge-relative, one shared default.**
 (#293 QA.) Both bars place their content run via `alignment` —
 `start` / `center` / `end`, values edge-relative (a left bar's

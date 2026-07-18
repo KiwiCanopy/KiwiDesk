@@ -154,7 +154,7 @@ extension KiwiCore {
     /// and a floating window always appends (it has no track
     /// slot). Without this a `move_to_space` into a track space
     /// silently dropped the window into the last track.
-    private func addFocusedToSpace(
+    func addFocusedToSpace(
         _ window: WindowID,
         to target: SpaceID
     ) {
@@ -186,21 +186,38 @@ extension KiwiCore {
         guard let focused = activeSpace?.focused else {
             return .fail("no focused window")
         }
-        let target = SpaceID(raw)
-        let from = state.workspaces.space(of: focused)
-        addFocusedToSpace(focused, to: target)
+        moveWindow(focused, to: SpaceID(raw), follow: follow)
+        return .ok()
+    }
+
+    /// Relocates an explicit `window` into `target`. `follow`
+    /// switches the visible space to the target; otherwise the
+    /// caller's space stays put and the moved window becomes the
+    /// target's focus for its next visit. The window-explicit
+    /// core behind `move_to_space(_and_follow)` and the Space Bar
+    /// drag-drop (#372) — the drag knows the window id, the
+    /// command resolves the focused one. When the target is
+    /// already the active space (a Space Bar spring drop), this
+    /// files the window into the visible layout and focuses it.
+    func moveWindow(
+        _ window: WindowID,
+        to target: SpaceID,
+        follow: Bool
+    ) {
+        let from = state.workspaces.space(of: window)
+        addFocusedToSpace(window, to: target)
         // The moved window becomes the target space's focus, so
         // the FIRST focus of that space raises it. Without this,
         // `focusSpace` finds no focus to hand over and the window
         // is un-stashed frame-wise but never brought forward —
         // the space renders empty until a later focus event
         // stamps the focus and a second switch surfaces it (#22).
-        state.workspaces.focus(focused, in: target)
+        state.workspaces.focus(window, in: target)
         if from != target {
             emitWindowMovedToSpace(
-                focused,
-                app: state.windows[focused]?.appName ?? "",
-                bundleID: state.windows[focused]?.appBundleID,
+                window,
+                app: state.windows[window]?.appName ?? "",
+                bundleID: state.windows[window]?.appBundleID,
                 from: from,
                 to: target
             )
@@ -208,7 +225,7 @@ extension KiwiCore {
         if follow {
             state.workspaces.activate(target)
             // The retile below owns placement (see focusWindow).
-            focusWindow(focused, refocusRetile: false, warp: true)
+            focusWindow(window, refocusRetile: false, warp: true)
             emitSpaceChange()
             // Following is a space switch too: re-assert so the
             // target's other windows survive a dropped frame.
@@ -223,6 +240,5 @@ extension KiwiCore {
                 ? tiler.settings.animations.onSpaceChange : true,
             force: follow
         )
-        return .ok()
     }
 }

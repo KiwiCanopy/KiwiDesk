@@ -24,6 +24,12 @@ public final class SpaceBarOverlay {
 
     private var panel: NSPanel?
     var itemViews: [SpaceBarItemView] = []
+    /// Last-rendered strip in AX coordinates and the per-item
+    /// frames within it (strip-local, top-left), for the #372
+    /// drag-drop hit test. Kept in lockstep with what `render()`
+    /// drew so a drop target can never disagree with the layout.
+    var hitStrip: CGRect = .zero
+    var hitFrames: [(space: SpaceID, frame: CGRect)] = []
     // The optional trailing front-app segment (#293 verdict 6):
     // a divider rule, the focused app's glyph, and — on
     // horizontal bars only — its name.
@@ -73,8 +79,14 @@ public final class SpaceBarOverlay {
 
     public func hide() {
         lastShown = nil
+        hitStrip = .zero
+        hitFrames = []
         panel?.orderOut(nil)
     }
+
+    /// Whether the panel is on screen — the hit test is only
+    /// meaningful for a visible bar.
+    var isPanelVisible: Bool { panel?.isVisible == true }
 
     // MARK: - Rendering
 
@@ -99,40 +111,27 @@ public final class SpaceBarOverlay {
         // Items plus the trailing front segment align as ONE
         // run — an end-aligned bar must end at the strip's
         // rim including the segment, not push it past.
-        let total =
-            lengths.reduce(0, +)
-            + style.boxGap
-            * CGFloat(max(items.count - 1, 0))
-            + frontExtent(
+        let metrics = Self.runMetrics(
+            lengths: lengths,
+            gap: style.boxGap,
+            frontExtent: frontExtent(
                 frontApp,
                 depth: depth,
                 horizontal: horizontal,
                 style: style
-            )
-        var cursor = Self.contentStart(
-            total: total,
-            axis: horizontal ? strip.width : strip.height,
+            ),
+            strip: strip,
+            horizontal: horizontal,
             alignment: style.alignment,
             pad: SpaceBarItemView.pad
         )
+        hitStrip = strip
+        hitFrames = zip(items, metrics.itemFrames).map {
+            ($0.space, $1)
+        }
         for (index, item) in items.enumerated() {
             let view = itemViews[index]
-            let length = lengths[index]
-            view.frame =
-                horizontal
-                ? CGRect(
-                    x: cursor,
-                    y: 0,
-                    width: length,
-                    height: strip.height
-                )
-                : CGRect(
-                    x: 0,
-                    y: cursor,
-                    width: strip.width,
-                    height: length
-                )
-            cursor += length + style.boxGap
+            view.frame = metrics.itemFrames[index]
             view.configure(
                 space: item.space,
                 spaceGlyph: item.spaceGlyph,
@@ -148,7 +147,7 @@ public final class SpaceBarOverlay {
         }
         renderFrontSegment(
             frontApp,
-            after: cursor,
+            after: metrics.frontStart,
             strip: strip,
             style: style,
             horizontal: horizontal

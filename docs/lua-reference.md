@@ -162,6 +162,10 @@ following** it — you stay on the current space. The moved
 window becomes the target space's focused window, so the first
 time you switch there it is the window you land on.
 
+A quick drag-and-drop of a window onto a Space item in the Space
+Bar performs this same move (see the user guide); there is no
+separate verb for it.
+
 **Example:**
 
 ```lua
@@ -1862,6 +1866,23 @@ reachable by shortcut.
 
 ```lua
 space_bar.set_hide_empty(true)
+```
+
+### space_bar.set_spring_delay
+
+**Expects:** milliseconds (default `1500`, clamped to
+`1000`–`4000`).
+
+**Does:** sets how long a window dragged onto a Space item must
+hover before the view springs to that Space (the "hold to place"
+half of the drag-drop gesture — see the user guide). A quicker
+drop, before this delay, moves the window without switching. The
+ring sweep around the item fills over the same duration.
+
+**Example:**
+
+```lua
+space_bar.set_spring_delay(1000)
 ```
 
 ### Space Bar colors

@@ -16,6 +16,8 @@ public final class KiwiCore {
     public let dragOverlay = DragOverlay()
     public let appBars = AppBarManager()
     public let spaceBars = SpaceBarManager()
+    /// Space Bar drag-drop gesture state (#372).
+    let spaceBarDrop = SpaceBarDropCoordinator()
     /// Glyph-vs-image icon decisions for bar items (#294),
     /// shared by the App Bar, the Space Bar (#293) and the
     /// shortcuts panel.

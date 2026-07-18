@@ -20,6 +20,7 @@ enum SpaceBarCommandSetting {
     case cornerRoundness(CGFloat)
     case showFrontApp(Bool)
     case hideEmpty(Bool)
+    case springDelay(Int)
     case textColor(String)
     case activeTextColor(String)
     case focusedItemColor(String)
@@ -43,6 +44,9 @@ enum SpaceBarCommandSetting {
                 return .failure("expected boolean")
             }
             return .success(keyword(flag))
+        }
+        if field == "spring_delay" {
+            return springDelay(args)
         }
         if let setting = parseChoice(field: field, args: args) {
             return setting
@@ -134,6 +138,23 @@ enum SpaceBarCommandSetting {
         ]
     }
 
+    /// Milliseconds, clamped to the Space Bar's valid dwell
+    /// range — a stored out-of-range value can't spring instantly
+    /// or hang.
+    private static func springDelay(
+        _ args: [JSONValue]
+    ) -> Result<SpaceBarCommandSetting, AppBarSettingError> {
+        guard let value = args.first?.numberValue else {
+            return .failure("expected milliseconds")
+        }
+        let range = SpaceBarStyle.springDelayRange
+        let clamped = min(
+            max(Int(value), range.lowerBound),
+            range.upperBound
+        )
+        return .success(.springDelay(clamped))
+    }
+
     private static func number(
         _ args: [JSONValue]
     ) -> Result<CGFloat, AppBarSettingError> {
@@ -189,6 +210,8 @@ enum SpaceBarCommandSetting {
         case .showFrontApp(let value):
             style.showFrontApp = value
         case .hideEmpty(let value): style.hideEmpty = value
+        case .springDelay(let value):
+            style.springDelay = value
         case .textColor(let value): style.textColor = value
         case .activeTextColor(let value):
             style.activeTextColor = value

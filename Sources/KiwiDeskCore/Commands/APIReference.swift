@@ -140,6 +140,7 @@ public enum APIReference {
             "set_icon_source", "set_tab_background",
             "set_active_indicator", "set_corner_roundness",
             "set_show_front_app", "set_hide_empty",
+            "set_spring_delay",
             "set_text_color", "set_active_text_color",
             "set_focused_item_color",
             "set_hover_color", "set_hover_text_color",

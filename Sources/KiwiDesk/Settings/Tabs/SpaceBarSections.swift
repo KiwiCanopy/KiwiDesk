@@ -151,6 +151,19 @@ struct SpaceBarEditorSection: View {
                     + "bars."
             )
         )
+        SecondsRow(
+            label: L("space_bar.spring_delay", "Spring delay"),
+            ms: style.springDelay,
+            range: 1.0...4.0,
+            help: L(
+                "space_bar.spring_delay.help",
+                "Drag a window onto a Space and hold this long "
+                    + "for the view to spring to that Space, so "
+                    + "you can drop the window into its layout. A "
+                    + "quicker drop moves the window there "
+                    + "without switching."
+            )
+        )
     }
 
     /// Gate stays here (needs the model); chrome and text are

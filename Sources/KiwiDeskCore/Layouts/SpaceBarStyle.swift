@@ -58,6 +58,13 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// Hides empty spaces except the current one (verdict 4);
     /// off by default.
     public var hideEmpty = false
+    /// Drag-drop spring dwell (#372): how long a dragged window
+    /// must hover a Space item before the visible space springs
+    /// to it, in milliseconds. Read through `resolvedSpringDelay`,
+    /// which clamps to `springDelayRange`. Default 1500 (1.5 s).
+    /// (Named without the `MS` suffix so the reflected field name
+    /// snakes to the `spring_delay` key the parity guard expects.)
+    public var springDelay = 1500
     /// Inactive spaces: identifier + glyphs (muted tier).
     public var textColor = "#F2EBD966"
     /// The active space's accent (identifier + its glyphs).
@@ -87,7 +94,24 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// shared the same way.
     public static let frontDividerAlpha: CGFloat = 0.4
 
+    /// Valid drag-drop dwell bounds (ms): fast enough to feel
+    /// responsive, slow enough not to spring by accident. Floored
+    /// at 1000 so the sweep (which starts after a 0.5 s quiet
+    /// pre-delay) still has visible fill time.
+    public static let springDelayRange = 1000...4000
+
     public init() {}
+
+    /// The drag-drop spring dwell in seconds, clamped to
+    /// `springDelayRange` — the coordinator and the sweep both
+    /// read this so a stored out-of-range value can't misbehave.
+    public var resolvedSpringDelay: TimeInterval {
+        let ms = min(
+            max(springDelay, Self.springDelayRange.lowerBound),
+            Self.springDelayRange.upperBound
+        )
+        return TimeInterval(ms) / 1000
+    }
 
     /// Same %-resolve as `AppBarStyle.resolvedCornerRadius` —
     /// small duplicated helper over a shared protocol (§2.4).
@@ -119,6 +143,7 @@ extension SpaceBarStyle: Codable {
         case cornerRoundness = "corner_roundness"
         case showFrontApp = "show_front_app"
         case hideEmpty = "hide_empty"
+        case springDelay = "spring_delay"
         case textColor = "text_color"
         case activeTextColor = "active_text_color"
         case focusedItemColor = "focused_item_color"
@@ -204,6 +229,11 @@ extension SpaceBarStyle: Codable {
                 Bool.self,
                 forKey: .hideEmpty
             ) ?? defaults.hideEmpty
+        springDelay =
+            try container.decodeIfPresent(
+                Int.self,
+                forKey: .springDelay
+            ) ?? defaults.springDelay
         try decodeColors(from: container)
     }
 

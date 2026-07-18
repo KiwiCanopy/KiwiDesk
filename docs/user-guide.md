@@ -727,6 +727,23 @@ collapse into one glyph with a count badge, and past five slots
 the rest fold into a `+n` badge. Click a Space to switch to it;
 glyphs are informational.
 
+**Drag a window onto a Space** to move it there — a two-speed
+gesture. Drag a window's title bar over another Space's item and
+either:
+
+- **Flick and drop** — release before the ring fills and the
+  window jumps straight to that Space; you stay where you are.
+- **Hold to place** — pause over the item; a ring sweeps around
+  it and after a short hold the view springs to that Space, with
+  the window now in its live layout so you can drop it exactly
+  where you want (the usual drag preview shows the slot).
+
+The hold length is the **Spring delay** (Space Bar editor,
+default 1.5 s, adjustable 1–4 s). Move the cursor off the item
+before the ring completes to cancel. The whole item is the target
+(glyphs and the `+n` badge are not separate drop zones), and
+dropping onto the Space a window is already on does nothing.
+
 The editor's order matches the App Bar editor's: preview,
 **Show Space Bar**, **Position** (any of the four screen edges
 — sharing an edge with the App Bar is fine, the Space Bar sits
@@ -751,7 +768,9 @@ Two behavior toggles: **Hide empty Spaces** (the current Space
 always stays visible; hidden Spaces remain reachable by
 shortcut) and **Show front app** — a trailing segment with the
 focused window of the Space each display currently shows
-(icon-only on vertical bars).
+(icon-only on vertical bars). **Spring delay** sets how long a
+dragged window must hover a Space before the view springs to it
+(default 1.5 s, 1–4 s).
 
 ## Behavior
 
