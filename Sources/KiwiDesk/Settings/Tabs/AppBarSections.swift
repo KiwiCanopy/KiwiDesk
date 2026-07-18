@@ -198,7 +198,7 @@ struct GlobalAppBarSection: View {
             PtSlider(
                 label: L("app_bar.box_size", "Box size"),
                 value: $style.boxSize,
-                range: 0...200
+                range: 1...200
             )
         }
         PtSlider(
@@ -213,7 +213,7 @@ struct GlobalAppBarSection: View {
             PtSlider(
                 label: L("app_bar.font_size", "Font size"),
                 value: $style.fontSize,
-                range: 0...32
+                range: 1...32
             )
         }
         Divider()
