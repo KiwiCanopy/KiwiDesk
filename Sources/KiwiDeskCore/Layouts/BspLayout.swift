@@ -50,17 +50,32 @@ public struct BspLayout: LayoutSystem {
         let restRegion: CGRect
 
         if sideBySide {
-            let ratio = CGFloat(context.bsp.splitRatioH)
             let gap = context.gaps.inner.horizontal
             let available = region.width - gap
-            let firstWidth = available * ratio
-            let restWidth = available - firstWidth
-            if min(firstWidth, restWidth)
-                < context.minWindowSize
-            {
+            // Clamp the shared ratio into this region's own
+            // effective range (#383): a value too extreme for the
+            // region pins the neighbor to min_window_size instead
+            // of collapsing the subtree into an OverlapStack. The
+            // pile stays reserved for a region genuinely too
+            // narrow for two min-size windows (range nil), the
+            // honest last resort — matching the stack (#44).
+            guard
+                let range = BspLayout.effectiveRatioRange(
+                    available: Double(available),
+                    minSize: Double(context.minWindowSize)
+                )
+            else {
                 overlap(windows, in: region, context, &result)
                 return
             }
+            let ratio = CGFloat(
+                min(
+                    max(context.bsp.splitRatioH, range.lowerBound),
+                    range.upperBound
+                )
+            )
+            let firstWidth = available * ratio
+            let restWidth = available - firstWidth
             firstRegion = CGRect(
                 x: region.minX,
                 y: region.minY,
@@ -74,17 +89,26 @@ public struct BspLayout: LayoutSystem {
                 height: region.height
             )
         } else {
-            let ratio = CGFloat(context.bsp.splitRatioV)
             let gap = context.gaps.inner.vertical
             let available = region.height - gap
-            let firstHeight = available * ratio
-            let restHeight = available - firstHeight
-            if min(firstHeight, restHeight)
-                < context.minWindowSize
-            {
+            // Same per-region clamp on the stacked axis (#383).
+            guard
+                let range = BspLayout.effectiveRatioRange(
+                    available: Double(available),
+                    minSize: Double(context.minWindowSize)
+                )
+            else {
                 overlap(windows, in: region, context, &result)
                 return
             }
+            let ratio = CGFloat(
+                min(
+                    max(context.bsp.splitRatioV, range.lowerBound),
+                    range.upperBound
+                )
+            )
+            let firstHeight = available * ratio
+            let restHeight = available - firstHeight
             firstRegion = CGRect(
                 x: region.minX,
                 y: region.minY,

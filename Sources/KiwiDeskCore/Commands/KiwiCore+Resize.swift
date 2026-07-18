@@ -132,14 +132,31 @@ extension KiwiCore {
         let signed =
             bspFocusSign(axis: axis, space: space)
             * delta
+        // Cap the write at the display's effective range (#383):
+        // past it the layout clamps anyway and the stored value
+        // would only ratchet invisibly, exactly like the stack
+        // path (#44). Span is the raw screen extent (a superset of
+        // the gap-adjusted range) so the cap never blocks reaching
+        // the visible bound.
+        let minSize = Double(tiler.settings.minWindowSize)
         if axis == "x" {
-            let value = bsp.splitRatioH + signed / span
+            let value = BspLayout.cappedRatioWrite(
+                bsp.splitRatioH + signed / span,
+                base: bsp.splitRatioH,
+                available: span,
+                minSize: minSize
+            )
             tiler.settings.setSplitRatioH(
                 min(max(value, 0.1), 0.9),
                 for: space.id
             )
         } else {
-            let value = bsp.splitRatioV + signed / span
+            let value = BspLayout.cappedRatioWrite(
+                bsp.splitRatioV + signed / span,
+                base: bsp.splitRatioV,
+                available: span,
+                minSize: minSize
+            )
             tiler.settings.setSplitRatioV(
                 min(max(value, 0.1), 0.9),
                 for: space.id

@@ -66,6 +66,35 @@ struct MouseResizeApplyTests {
         #expect(bsp.splitRatioH == 0.5)
     }
 
+    @Test("bspRatioH drag caps at the effective range (#383)")
+    func bspRatioHDragCapped() {
+        let core = makeCore()
+        let space = space(core, mode: "bsp")
+        // bounds 1000 wide, min 300 → effective [0.3, 0.7]: an
+        // oversized drag stops at the visible cliff instead of
+        // ratcheting the stored ratio to the 0.9 clamp and
+        // collapsing the neighbor into the overlap pile.
+        core.applyResizeAdjustment(
+            .bspRatioH(0.5),
+            in: space,
+            bounds: bounds
+        )
+        #expect(abs(core.tiler.settings.bsp.splitRatioH - 0.7) < 1e-9)
+    }
+
+    @Test("bspRatioV drag caps at the effective range (#383)")
+    func bspRatioVDragCapped() {
+        let core = makeCore()
+        let space = space(core, mode: "bsp")
+        // bounds 800 tall, min 300 → effective [0.375, 0.625].
+        core.applyResizeAdjustment(
+            .bspRatioV(0.5),
+            in: space,
+            bounds: bounds
+        )
+        #expect(abs(core.tiler.settings.bsp.splitRatioV - 0.625) < 1e-9)
+    }
+
     @Test("masterRatio applies onto the resolved base")
     func masterRatioApplies() {
         let core = makeCore()

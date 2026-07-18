@@ -2725,7 +2725,10 @@ callers never hear it, they read the error JSON. What the
   focused it lowers the shared ratio — the same side rule a
   mouse drag of that window's edge uses. All same-orientation
   splits still share the one ratio; with no focused window the
-  delta moves the left/top region, as before.
+  delta moves the left/top region, as before. Like the stack,
+  the write stops at the bound that keeps both regions at
+  `min_window_size` on the current display (#383), so a resize
+  no longer suddenly collapses the split into an overlap pile.
 - **stack** — focus-aware (#67). `"x"` moves the master/stack
   split *in the direction that grows the focused window*: with
   a master focused, a positive delta raises the master ratio;
