@@ -13,6 +13,7 @@ enum SpaceBarFixtures {
         var style = SpaceBarStyle()
         style.enabled = true
         style.edge = .bottom
+        style.alignment = .end
         style.thickness = 44
         style.boxSize = 120
         style.boxGap = 3

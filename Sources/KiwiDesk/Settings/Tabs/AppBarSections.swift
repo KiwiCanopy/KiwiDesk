@@ -96,9 +96,20 @@ struct GlobalAppBarSection: View {
         if let spaceBarSharedEdge {
             BarSameEdgeRow(edge: spaceBarSharedEdge)
         }
-        // The Alignment row (#293 QA Batch B) slots in here,
-        // between Position and the item-look cluster — the
-        // Space Bar editor marks the same slot.
+        SegmentedPicker(
+            alignmentLabel,
+            selection: $style.alignment,
+            options: AppBarOptions.alignment
+                .map { ($0.1, $0.0) },
+            help: L(
+                "app_bar.alignment.label.help",
+                "Where the tab group sits along the bar while "
+                    + "it fits. Start and End follow the edge "
+                    + "(a left bar's Start is its top); once "
+                    + "tabs overflow and scroll, all three "
+                    + "behave the same."
+            )
+        )
         SegmentedPicker(
             tabBackgroundLabel,
             selection: $style.tabBackground,
@@ -237,6 +248,9 @@ struct GlobalAppBarSection: View {
     }
     private var edgeLabel: String {
         L("app_bar.edge.label", "Position")
+    }
+    private var alignmentLabel: String {
+        L("app_bar.alignment.label", "Alignment")
     }
     private var tabBackgroundLabel: String {
         L("app_bar.tab_background.label", "Tab background")

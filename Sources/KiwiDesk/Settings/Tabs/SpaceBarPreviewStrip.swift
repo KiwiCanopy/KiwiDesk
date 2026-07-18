@@ -45,16 +45,11 @@ struct SpaceBarPreviewStrip: View {
 
     // MARK: - Composition
 
-    /// The composite hugs the canvas side matching the chosen
-    /// edge (`AppBarPreviewStrip` twin) — edge choice is seen,
-    /// not just captioned; off-axis emptiness is deliberate.
+    /// Edge picks the hugged canvas side, alignment the
+    /// along-axis seat (`AppBarPreviewStrip` twin) — the
+    /// shared mapping in `BarCanvasAlignment.swift`.
     private var canvasAlignment: Alignment {
-        switch style.edge {
-        case .top: .top
-        case .bottom: .bottom
-        case .left: .leading
-        case .right: .trailing
-        }
+        style.edge.canvasAlignment(style.alignment)
     }
 
     /// The strip plus, when stacked, the App Bar stand-in on

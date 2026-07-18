@@ -496,6 +496,7 @@ struct AppBarMathTests {
             in: CGRect(x: 0, y: 0, width: 320, height: 32),
             gap: 0,
             horizontal: true,
+            alignment: .center,
             scrolledBy: 250
         )
         #expect(frames[0].minX == -250)
@@ -531,7 +532,8 @@ struct AppBarMathTests {
             lengths: [100, 100],
             in: CGRect(x: 0, y: 0, width: 320, height: 32),
             gap: 10,
-            horizontal: true
+            horizontal: true,
+            alignment: .center
         )
         // 210 used of 320: the group starts at 55.
         #expect(frames[0].minX == 55)
@@ -542,7 +544,8 @@ struct AppBarMathTests {
             lengths: [40, 40],
             in: CGRect(x: 0, y: 0, width: 32, height: 100),
             gap: 0,
-            horizontal: false
+            horizontal: false,
+            alignment: .center
         )
         #expect(vertical[0].minY == 10)
         #expect(vertical[1].minY == 50)

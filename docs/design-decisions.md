@@ -1169,6 +1169,20 @@ per display means per-display content, consistent with every
 other per-display fact in the bar; a secondary display shows
 its own space's remembered focus.
 
+**Bar alignment is edge-relative, one shared default.**
+(#293 QA.) Both bars place their content run via `alignment` —
+`start` / `center` / `end`, values edge-relative (a left bar's
+`start` is its top) for the same reason `edge` is absolute:
+correct on every edge without a per-edge remap. One default
+(`center`) for both bars and every edge — never per-edge
+defaults. The Space Bar's pre-QA left/top anchoring was an
+omission, not a decision. Once an App Bar group overflows and
+scrolls, the three alignments deliberately collapse to the
+scroll offset; the control is not greyed for it (a static
+preview can't know real overflow). Copy-appearance copies
+alignment (arrangement is appearance); `edge` stays excluded
+(placement is not).
+
 **The two bar editors share one canonical row order.** (#374.)
 App Bar's shape is the reference: enable, Position (with the
 same-edge note under it, in both editors), item-look

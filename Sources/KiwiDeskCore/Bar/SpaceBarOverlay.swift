@@ -87,17 +87,37 @@ public final class SpaceBarOverlay {
         syncItemViewCount(items.count)
         let horizontal = style.edge.isHorizontal
         let depth = horizontal ? strip.height : strip.width
-        var cursor: CGFloat = SpaceBarItemView.pad
-        for (index, item) in items.enumerated() {
-            let view = itemViews[index]
-            let length =
-                style.boxSize > 0
+        let lengths = items.map { item in
+            style.boxSize > 0
                 ? style.boxSize
                 : SpaceBarItemView.autoLength(
                     appCount: item.apps.count,
                     overflow: item.overflow,
                     depth: depth
                 )
+        }
+        // Items plus the trailing front segment align as ONE
+        // run — an end-aligned bar must end at the strip's
+        // rim including the segment, not push it past.
+        let total =
+            lengths.reduce(0, +)
+            + style.boxGap
+            * CGFloat(max(items.count - 1, 0))
+            + frontExtent(
+                frontApp,
+                depth: depth,
+                horizontal: horizontal,
+                style: style
+            )
+        var cursor = Self.contentStart(
+            total: total,
+            axis: horizontal ? strip.width : strip.height,
+            alignment: style.alignment,
+            pad: SpaceBarItemView.pad
+        )
+        for (index, item) in items.enumerated() {
+            let view = itemViews[index]
+            let length = lengths[index]
             view.frame =
                 horizontal
                 ? CGRect(
@@ -142,6 +162,26 @@ public final class SpaceBarOverlay {
         )
         if !panel.isVisible {
             panel.orderFrontRegardless()
+        }
+    }
+
+    /// Axis start of the content run per `alignment` (#293
+    /// QA). `pad` keeps the run off the strip's rim and floors
+    /// every case — a run larger than the axis falls back to
+    /// start (the space count is bounded, no scroll here).
+    /// `pad` is a parameter (callers pass
+    /// `SpaceBarItemView.pad`) so this stays nonisolated and
+    /// unit-testable.
+    nonisolated static func contentStart(
+        total: CGFloat,
+        axis: CGFloat,
+        alignment: SpaceBarStyle.Alignment,
+        pad: CGFloat
+    ) -> CGFloat {
+        switch alignment {
+        case .start: return pad
+        case .center: return max((axis - total) / 2, pad)
+        case .end: return max(axis - total - pad, pad)
         }
     }
 

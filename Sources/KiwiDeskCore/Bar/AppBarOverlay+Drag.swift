@@ -76,6 +76,7 @@ extension AppBarOverlay {
             in: container.bounds,
             gap: m.gap,
             horizontal: m.horizontal,
+            alignment: m.alignment,
             scrolledBy: scrollOffset
         )
         for (index, view) in order.enumerated()
@@ -85,11 +86,16 @@ extension AppBarOverlay {
     }
 
     /// Where the first item's slot starts along the axis in
-    /// viewport coordinates (mirrors `frames`).
+    /// viewport coordinates (mirrors `frames`, alignment
+    /// included — drop-index math must see the same origin
+    /// the rendered slots use).
     private func contentStart(_ m: Metrics) -> CGFloat {
-        m.total > m.viewport
-            ? -scrollOffset
-            : max((m.viewport - m.total) / 2, 0)
+        if m.total > m.viewport { return -scrollOffset }
+        switch m.alignment {
+        case .start: return 0
+        case .center: return (m.viewport - m.total) / 2
+        case .end: return m.viewport - m.total
+        }
     }
 
     /// The slot whose span contains `center`, clamped to the

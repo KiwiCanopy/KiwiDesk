@@ -9,6 +9,7 @@ import Foundation
 enum SpaceBarCommandSetting {
     case enabled(Bool)
     case edge(AppBarEdge)
+    case alignment(SpaceBarStyle.Alignment)
     case thickness(CGFloat)
     case boxSize(CGFloat)
     case boxGap(CGFloat)
@@ -66,6 +67,12 @@ enum SpaceBarCommandSetting {
                 AppBarEdge.self,
                 "top|bottom|left|right"
             ).map(Self.edge)
+        case "alignment":
+            return choice(
+                args,
+                SpaceBarStyle.Alignment.self,
+                "start|center|end"
+            ).map(Self.alignment)
         case "icon_source":
             return choice(
                 args,
@@ -167,6 +174,7 @@ enum SpaceBarCommandSetting {
         switch self {
         case .enabled(let value): style.enabled = value
         case .edge(let value): style.edge = value
+        case .alignment(let value): style.alignment = value
         case .thickness(let value): style.thickness = value
         case .boxSize(let value): style.boxSize = value
         case .boxGap(let value): style.boxGap = value

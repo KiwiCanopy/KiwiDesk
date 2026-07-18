@@ -52,6 +52,46 @@ extension SpaceBarOverlay {
         )
     }
 
+    /// Axis length the segment will consume, for the render
+    /// pass's alignment total — the leading box gap, the
+    /// divider and glyph (`layoutDivider`/`layoutFrontGlyph`
+    /// mirrors), and on horizontal bars the glyph→name pad
+    /// plus the measured name. Vertical bars end at the glyph
+    /// (no name), so no trailing pad is counted there. The
+    /// horizontal name is an estimate on both ends —
+    /// `sizeToFit` at layout time pads a little wider than
+    /// `NSString.size`, the trailing pad here absorbs that —
+    /// and the name still clamps to the remaining strip, so
+    /// no alignment can push content past the rim.
+    func frontExtent(
+        _ app: SpaceBarItemView.App?,
+        depth: CGFloat,
+        horizontal: Bool,
+        style: SpaceBarStyle
+    ) -> CGFloat {
+        guard let app else { return 0 }
+        let pad = SpaceBarItemView.pad
+        let cell = max(depth - pad * 2, 8)
+        var extent = style.boxGap + 1 + pad + cell
+        if horizontal {
+            extent += pad
+            let size =
+                style.fontSize > 0
+                ? style.fontSize : depth * 0.42
+            extent +=
+                ceil(
+                    (app.name as NSString).size(
+                        withAttributes: [
+                            .font: NSFont.systemFont(
+                                ofSize: size
+                            )
+                        ]
+                    ).width
+                ) + pad
+        }
+        return extent
+    }
+
     private func attachFrontViewsIfNeeded() {
         guard let content = panelContentView else { return }
         // Re-added every render so the segment stays ABOVE item

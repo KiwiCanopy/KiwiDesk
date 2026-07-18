@@ -21,6 +21,27 @@ enum AppBarOptions {
         case .right: return L("app_bar.edge.right", "Right")
         }
     }
+    /// Same exhaustive-switch guard as `edge`.
+    @MainActor
+    static let alignment: [(AppBarStyle.BarAlignment, String)] =
+        AppBarStyle.BarAlignment.allCases.map {
+            ($0, label($0))
+        }
+
+    @MainActor
+    private static func label(
+        _ alignment: AppBarStyle.BarAlignment
+    ) -> String {
+        switch alignment {
+        case .start:
+            return L("app_bar.alignment.start", "Start")
+        case .center:
+            return L("app_bar.alignment.center", "Center")
+        case .end:
+            return L("app_bar.alignment.end", "End")
+        }
+    }
+
     @MainActor
     static let tabBackground: [(AppBarStyle.TabBackground, String)] = [
         (.boxed, L("app_bar.tab_background.boxed", "Boxed")),

@@ -671,6 +671,10 @@ running windows.
   Bar shares the edge, an inline note under this control
   explains the stacking order (Space Bar at the screen edge,
   App Bar next to the windows).
+- **Alignment**: where the tab group sits along the bar while
+  it fits — start, center (default), or end. Edge-relative: a
+  left bar's start is its top. Once tabs overflow and scroll,
+  the three behave the same.
 - **Active indicator**: ring (outlined border around the active
   tab), edge mark (accent bar on the active tab's window-facing
   edge), or gap (active slot empty). Orthogonal to tab background
@@ -728,8 +732,10 @@ The editor's order matches the App Bar editor's: preview,
 — sharing an edge with the App Bar is fine, the Space Bar sits
 at the screen edge and the App Bar next to the windows, and an
 inline note in both editors explains the order when both share
-one), item background, active indicator and **App symbol
-style**, the two behavior toggles, sizes, then colors.
+one), **Alignment** (start / center / end along the bar,
+edge-relative, like the App Bar's), item background, active
+indicator and **App symbol style**, the two behavior toggles,
+sizes, then colors.
 
 The color ladder is the bar's signature: **Text** paints
 inactive Spaces, **Active space** the Space currently shown on

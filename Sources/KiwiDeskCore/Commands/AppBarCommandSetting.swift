@@ -24,6 +24,7 @@ struct AppBarSettingError: Error, Equatable,
 /// override, via `monocle.set_app_bar_*` / `scroll.set_app_bar_*`).
 enum AppBarCommandSetting {
     case edge(AppBarEdge)
+    case alignment(AppBarStyle.BarAlignment)
     case thickness(CGFloat)
     case tabBackground(AppBarStyle.TabBackground)
     case activeIndicator(AppBarStyle.ActiveIndicator)
@@ -76,6 +77,12 @@ enum AppBarCommandSetting {
                 AppBarEdge.self,
                 "top|bottom|left|right"
             ).map(Self.edge)
+        case "alignment":
+            return choice(
+                args,
+                AppBarStyle.BarAlignment.self,
+                "start|center|end"
+            ).map(Self.alignment)
         case "tab_background":
             return choice(
                 args,
@@ -175,6 +182,7 @@ enum AppBarCommandSetting {
     func apply(to style: inout AppBarStyle) {
         switch self {
         case .edge(let value): style.edge = value
+        case .alignment(let value): style.alignment = value
         case .thickness(let value): style.thickness = value
         case .tabBackground(let value):
             style.tabBackground = value
@@ -213,6 +221,7 @@ enum AppBarCommandSetting {
     func apply(to bar: inout LayoutAppBar) {
         switch self {
         case .edge(let value): bar.edge = value
+        case .alignment(let value): bar.alignment = value
         case .thickness(let value): bar.thickness = value
         case .tabBackground(let value): bar.tabBackground = value
         case .activeIndicator(let value):

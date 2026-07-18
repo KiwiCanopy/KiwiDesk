@@ -1345,6 +1345,25 @@ same edge everywhere. Per-layout overrides can change it.
 app_bar.set_edge("top")
 ```
 
+### app_bar.set_alignment
+
+**Expects:** `"start"`, `"center"`, or `"end"`
+(default `"center"`).
+
+**Does:** places the tab group along the bar while it fits.
+Values are edge-relative, so they stay correct on every edge —
+a left bar's `start` is its top, a top bar's `start` is its
+left. Once the tabs overflow and scroll, all three values
+behave the same (the group follows the scroll offset).
+Per-layout overrides can change it
+(`monocle.set_app_bar_alignment`, `scroll.set_app_bar_alignment`).
+
+**Example:**
+
+```lua
+app_bar.set_alignment("start")
+```
+
 ### app_bar.set_thickness
 
 **Expects:** a positive number (points).
@@ -1690,6 +1709,21 @@ screen-facing, the App Bar window-facing.
 
 ```lua
 space_bar.set_edge("left")
+```
+
+### space_bar.set_alignment
+
+**Expects:** `"start"`, `"center"`, or `"end"`
+(default `"center"`).
+
+**Does:** places the Space items (and the front-app segment)
+along the bar. Values are edge-relative — a left bar's
+`start` is its top.
+
+**Example:**
+
+```lua
+space_bar.set_alignment("center")
 ```
 
 ### space_bar.set_thickness
