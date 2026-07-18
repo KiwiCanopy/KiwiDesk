@@ -99,40 +99,23 @@ public final class SpaceBarOverlay {
         // Items plus the trailing front segment align as ONE
         // run — an end-aligned bar must end at the strip's
         // rim including the segment, not push it past.
-        let total =
-            lengths.reduce(0, +)
-            + style.boxGap
-            * CGFloat(max(items.count - 1, 0))
-            + frontExtent(
+        let metrics = Self.runMetrics(
+            lengths: lengths,
+            gap: style.boxGap,
+            frontExtent: frontExtent(
                 frontApp,
                 depth: depth,
                 horizontal: horizontal,
                 style: style
-            )
-        var cursor = Self.contentStart(
-            total: total,
-            axis: horizontal ? strip.width : strip.height,
+            ),
+            strip: strip,
+            horizontal: horizontal,
             alignment: style.alignment,
             pad: SpaceBarItemView.pad
         )
         for (index, item) in items.enumerated() {
             let view = itemViews[index]
-            let length = lengths[index]
-            view.frame =
-                horizontal
-                ? CGRect(
-                    x: cursor,
-                    y: 0,
-                    width: length,
-                    height: strip.height
-                )
-                : CGRect(
-                    x: 0,
-                    y: cursor,
-                    width: strip.width,
-                    height: length
-                )
-            cursor += length + style.boxGap
+            view.frame = metrics.itemFrames[index]
             view.configure(
                 space: item.space,
                 spaceGlyph: item.spaceGlyph,
@@ -148,7 +131,7 @@ public final class SpaceBarOverlay {
         }
         renderFrontSegment(
             frontApp,
-            after: cursor,
+            after: metrics.frontStart,
             strip: strip,
             style: style,
             horizontal: horizontal
