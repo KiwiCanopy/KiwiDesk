@@ -148,15 +148,19 @@ enum SpaceBarCommandSetting {
     private static func springDelay(
         _ args: [JSONValue]
     ) -> Result<SpaceBarCommandSetting, AppBarSettingError> {
-        guard let value = args.first?.numberValue else {
+        guard let value = args.first?.numberValue,
+            value.isFinite
+        else {
             return .failure("expected milliseconds")
         }
         let range = SpaceBarStyle.springDelayRange
+        // Clamp as Double BEFORE Int(...) — `Int(1e300)` traps,
+        // so a config typo would otherwise kill the WM (#58/#386).
         let clamped = min(
-            max(Int(value), range.lowerBound),
-            range.upperBound
+            max(value.rounded(), Double(range.lowerBound)),
+            Double(range.upperBound)
         )
-        return .success(.springDelay(clamped))
+        return .success(.springDelay(Int(clamped)))
     }
 
     /// App-group glyph count, clamped to the Space Bar's valid

@@ -27,7 +27,7 @@ public indirect enum LuaValue: Sendable, Equatable {
     }
 
     public var intValue: Int? {
-        numberValue.map { Int($0) }
+        numberValue?.finiteInt
     }
 
     public var boolValue: Bool? {
