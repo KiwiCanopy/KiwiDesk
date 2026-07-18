@@ -12,6 +12,7 @@ extension SpaceBarOverlay {
         _ app: SpaceBarItemView.App?,
         after cursor: CGFloat,
         strip: CGRect,
+        viewport: CGFloat,
         style: SpaceBarStyle,
         horizontal: Bool
     ) {
@@ -45,7 +46,7 @@ extension SpaceBarOverlay {
             app,
             at: offset,
             depth: depth,
-            strip: strip,
+            viewport: viewport,
             horizontal: horizontal,
             accent: accent,
             style: style
@@ -93,10 +94,12 @@ extension SpaceBarOverlay {
     }
 
     private func attachFrontViewsIfNeeded() {
-        guard let content = panelContentView else { return }
-        // Re-added every render so the segment stays ABOVE item
+        // The segment lives inside the clipping viewport so it
+        // scrolls (and clips) with the items — the tail of one
+        // run (#385). Re-added every render so it stays ABOVE item
         // views created later (`syncItemViewCount` appends on
         // top) — otherwise a long item row paints over it.
+        let content = itemContainer
         for view in [
             frontDivider, frontIcon, frontGlyph, frontName,
         ] {
@@ -213,7 +216,7 @@ extension SpaceBarOverlay {
         _ app: SpaceBarItemView.App,
         at offset: CGFloat,
         depth: CGFloat,
-        strip: CGRect,
+        viewport: CGFloat,
         horizontal: Bool,
         accent: NSColor,
         style: SpaceBarStyle
@@ -232,10 +235,10 @@ extension SpaceBarOverlay {
         frontName.lineBreakMode = .byTruncatingTail
         frontName.sizeToFit()
         let height = frontName.frame.height
-        // Clamp to the strip's remaining length so a long name
+        // Clamp to the viewport's remaining length so a long name
         // ellipsizes instead of hard-clipping at the panel edge.
         let available = max(
-            strip.width - offset - SpaceBarItemView.pad,
+            viewport - offset - SpaceBarItemView.pad,
             0
         )
         frontName.frame = CGRect(

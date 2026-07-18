@@ -141,6 +141,21 @@ public final class SpaceBarManager {
         overlays.values.forEach { $0.clearDragFeedback() }
     }
 
+    /// Feeds the live drag cursor to every bar so a dwell over a
+    /// scroll-arrow zone autoscrolls that bar toward its hidden
+    /// Spaces (#385), letting a window reach an off-screen Space.
+    public func updateDragAutoScroll(atGlobal point: CGPoint) {
+        overlays.values.forEach {
+            $0.updateDragAutoScroll(atGlobal: point)
+        }
+    }
+
+    /// Stops any drag autoscroll across all bars — the drag ended
+    /// or was abandoned.
+    public func endDragAutoScroll() {
+        overlays.values.forEach { $0.cancelDragAutoScroll() }
+    }
+
     #if DEBUG
         /// Test seam: the overlay currently backing a display.
         func overlayForTesting(

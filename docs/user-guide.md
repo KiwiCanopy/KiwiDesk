@@ -745,13 +745,25 @@ before the ring completes to cancel. The whole item is the target
 (glyphs and the `+n` badge are not separate drop zones), and
 dropping onto the Space a window is already on does nothing.
 
+**Many Spaces:** when the Spaces don't all fit the strip the bar
+scrolls instead of clipping — the same as the App Bar. Items keep
+their size; small chevrons appear at the ends toward the hidden
+Spaces, and the bar follows the active Space into view. Click a
+chevron to scroll, or — while dragging a window — hold the cursor
+over a chevron and the bar autoscrolls so you can drop onto a
+Space that started off-screen. The front-app segment scrolls with
+the row (it's the row's tail), so it's at the far end when you
+scroll there.
+
 The editor's order matches the App Bar editor's: preview,
 **Show Space Bar**, **Position** (any of the four screen edges
 — sharing an edge with the App Bar is fine, the Space Bar sits
 at the screen edge and the App Bar next to the windows, and an
 inline note in both editors explains the order when both share
 one), **Alignment** (start / center / end along the bar,
-edge-relative, like the App Bar's), item background, active
+edge-relative, like the App Bar's — and, like it, the three read
+the same once the bar overflows and scrolls), item background,
+active
 indicator and **App symbol style**, the two behavior toggles,
 sizes and **Glyphs per Space** (how many app glyphs an item
 shows before the rest collapse into the `+n` badge, 1–12), then

@@ -1252,6 +1252,41 @@ preview can't know real overflow). Copy-appearance copies
 alignment (arrangement is appearance); `edge` stays excluded
 (placement is not).
 
+**The Space Bar scrolls the whole bar when the Spaces overflow.**
+(#385, retiring the #293 stage-2 "spaces are a small, bounded set
+— clip, no scroll" assumption once a 100-Space case was stated.)
+It reuses the App Bar's overflow model rather than inventing a
+second one: an arrow zone (`BarArrowView.zone`, 24 pt) reserved at
+each end while the run overflows, the item viewport inset by that
+zone plus a gap, clickable chevrons toward the hidden Spaces, and
+a scroll that follows the active Space into view — the three
+alignments collapsing to the scroll offset exactly as the App Bar
+does. Items are **not** shrunk to fit: a Space item is a drag-drop
+well (#372), and shrinking the target a dragging cursor must land
+on, at the moment precision matters most, is worse than scrolling.
+Because a Space item is a drop target — unlike a click-only App
+Bar tab — an off-screen Space would be unreachable mid-drag, so a
+drag dwelling over an arrow zone **autoscrolls** the bar
+(`SpaceBarOverlay+Scroll`, 0.2 s dwell then a step every 0.3 s;
+proposed defaults, not user-configurable — no new knob). This
+never contends with the drop-spring: the arrow zones are chrome
+structurally excluded from every item's hit frame (hit frames are
+clamped to the visible viewport), so a drag cursor is over an
+arrow XOR a Space item, never both, and the autoscroll and the
+spring govern disjoint zones with no shared dwell state. The
+front-app segment is the tail of the one aligned run, so it
+scrolls **with** the items (reachable at the forward end) rather
+than pinning at the rim — pinning would carve a second permanent
+reserved region and break the one-run invariant for a narrow
+combo (100+ Spaces and front-app on and caring while scrolled);
+an explicit pinned-segment mode stays an easy additive follow-up
+if real use proves it painful. The arrow view is shared with the
+App Bar (`BarArrowView`, style-agnostic — each bar hands it
+resolved `BarArrowColors`), with the one addition the Space Bar
+needs: a `setDragHover` synthetic-hover path, because a foreign
+AX-tracked window drag delivers no `mouseEntered`, so the arrow
+would otherwise go dark during the one gesture it exists for.
+
 **The two bar editors share one canonical row order.** (#374.)
 App Bar's shape is the reference: enable, Position (with the
 same-edge note under it, in both editors), item-look
