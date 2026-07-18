@@ -21,17 +21,67 @@ extension AppBarOverlay {
         guard let layer = panel.contentView?.layer else {
             return
         }
+        let rendered = style.tabBackground.rendered
         layer.masksToBounds = true
+        // `boxed` keeps square corners; `plain` and `material`
+        // round the shared plate.
         layer.cornerRadius =
-            style.tabBackground == .plain
-            ? style.resolvedCornerRadius(forThickness: depth)
-            : 0
-        let background =
-            style.tabBackground == .plain
-            ? style.boxColor
-            : style.backgroundColor
+            rendered == .boxed
+            ? 0
+            : style.resolvedCornerRadius(forThickness: depth)
+        // `plain` paints the strip in the box color; `material`
+        // stays clear (the glass plate is the background);
+        // `boxed` keeps the (default transparent) background.
+        let background: String
+        switch rendered {
+        case .plain: background = style.boxColor
+        case .material: background = "#00000000"
+        case .boxed: background = style.backgroundColor
+        }
         layer.backgroundColor =
             NSColor(kiwiHex: background).cgColor
+    }
+
+    /// Shows / sizes the Liquid Glass plate under the items when
+    /// the background resolves to `material`, else hides it (#390).
+    func updateGlassPlate(
+        _ panel: NSPanel,
+        style: AppBarStyle,
+        strip: CGRect
+    ) {
+        let depth =
+            style.edge.isHorizontal ? strip.height : strip.width
+        guard style.tabBackground.rendered == .material,
+            let content = panel.contentView
+        else {
+            glassPlate?.isHidden = true
+            return
+        }
+        guard let plate = glassPlate ?? GlassPlate.make() else {
+            return
+        }
+        glassPlate = plate
+        if plate.superview !== content {
+            content.addSubview(
+                plate,
+                positioned: .below,
+                relativeTo: nil
+            )
+        }
+        plate.isHidden = false
+        GlassPlate.update(
+            plate,
+            frame: CGRect(
+                x: 0,
+                y: 0,
+                width: strip.width,
+                height: strip.height
+            ),
+            cornerRadius: style.resolvedCornerRadius(
+                forThickness: depth
+            ),
+            tintHex: style.backgroundColor
+        )
     }
 
     func syncItemViewCount(_ count: Int) {

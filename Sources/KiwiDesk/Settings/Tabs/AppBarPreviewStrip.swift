@@ -66,7 +66,7 @@ struct AppBarPreviewStrip: View {
             // itself); Boxed keeps the strip in the background
             // color and boxes each tab.
             RoundedRectangle(
-                cornerRadius: style.tabBackground == .plain
+                cornerRadius: style.tabBackground != .boxed
                     ? corner : 0
             )
             .fill(
@@ -244,7 +244,8 @@ struct AppBarPreviewStrip: View {
 
     private func boxColor(_ t: MockTab) -> Color {
         switch style.tabBackground {
-        case .plain:
+        // Glass renders boxless like plain in the static preview.
+        case .plain, .material:
             return .clear
         case .boxed:
             return color(

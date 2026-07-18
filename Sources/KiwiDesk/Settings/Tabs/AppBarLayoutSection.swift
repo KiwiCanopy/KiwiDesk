@@ -183,8 +183,11 @@ struct LayoutAppBarSection: View {
         )
         .modifier(
             GreyOut(
+                // Roundness rounds a box or the glass plate — dead
+                // only for the boxless Plain strip (matches the
+                // global + Space editors).
                 active: bar.resolved(with: global)
-                    .tabBackground != .boxed
+                    .tabBackground == .plain
             )
         )
     }

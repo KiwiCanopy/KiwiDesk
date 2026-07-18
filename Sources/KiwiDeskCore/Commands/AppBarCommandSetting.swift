@@ -87,7 +87,7 @@ enum AppBarCommandSetting {
             return choice(
                 args,
                 AppBarStyle.TabBackground.self,
-                "boxed|plain"
+                "boxed|plain|material"
             ).map(Self.tabBackground)
         case "active_indicator":
             return choice(
