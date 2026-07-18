@@ -22,8 +22,8 @@ extension AppBarPreviewStrip {
     /// where the inner-box height budgets the axis).
     var gap: CGFloat {
         style.edge.isHorizontal
-            ? scale(style.itemGap, from: 0...40, to: 0...16)
-            : scale(style.itemGap, from: 0...40, to: 0...5)
+            ? scale(style.boxGap, from: 0...40, to: 0...16)
+            : scale(style.boxGap, from: 0...40, to: 0...5)
     }
 
     /// The shared %-resolve against the preview's own (scaled)
@@ -37,12 +37,12 @@ extension AppBarPreviewStrip {
         )
     }
 
-    /// Item length along the bar axis: honor an explicit
-    /// `itemSize` (mapped 1–200 pt → 20–72 pt), else size to the
+    /// Box length along the bar axis: honor an explicit
+    /// `boxSize` (mapped 1–200 pt → 20–72 pt), else size to the
     /// content kind.
     var slotLength: CGFloat {
-        if style.itemSize > 0 {
-            return scale(style.itemSize, from: 1...200, to: 20...72)
+        if style.boxSize > 0 {
+            return scale(style.boxSize, from: 1...200, to: 20...72)
         }
         switch style.content {
         case .icon: return max(thickness, 22)
@@ -55,10 +55,10 @@ extension AppBarPreviewStrip {
     /// three slots plus gaps stay inside the 72 pt inner box
     /// (the 84 pt canvas minus the 12 pt edge-hug inset):
     /// 3 × 18 + 2 × 5 + 8 strip padding = 72 at the maxima.
-    /// The item-size slider still visibly moves the mock.
+    /// The box-size slider still visibly moves the mock.
     var verticalSlotLength: CGFloat {
-        if style.itemSize > 0 {
-            return scale(style.itemSize, from: 1...200, to: 14...18)
+        if style.boxSize > 0 {
+            return scale(style.boxSize, from: 1...200, to: 14...18)
         }
         return 16
     }

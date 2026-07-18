@@ -1,7 +1,7 @@
 import AppKit
 
-/// Item sizing: every item gets the same slot length — the
-/// configured `item_size`, or a standard length per content
+/// Box sizing: every item gets the same slot length — the
+/// configured `box_size`, or a standard length per content
 /// mode when unset (0). The length is clamped between the
 /// icon square (icons never clip) and a quarter of the bar
 /// (single items never balloon). Items that overflow the
@@ -32,9 +32,9 @@ extension AppBarOverlay {
         let horizontal = style.edge.isHorizontal
         let axis = horizontal ? strip.width : strip.height
         let thickness = horizontal ? strip.height : strip.width
-        let gap = style.itemGap
+        let gap = style.boxGap
         let slot = Self.slotLength(
-            itemSize: style.itemSize,
+            boxSize: style.boxSize,
             content: style.content,
             thickness: thickness,
             axis: axis,
@@ -59,14 +59,14 @@ extension AppBarOverlay {
         )
     }
 
-    /// Standard `item_size = 0` lengths for a *vertical* bar,
+    /// Standard `box_size = 0` lengths for a *vertical* bar,
     /// where items stack single letters and auto keeps a fixed
     /// length per content rather than growing to a window title.
     nonisolated static let standardNameLength: CGFloat = 100
     nonisolated static let standardIconAndNameLength: CGFloat =
         140
 
-    /// The auto (`item_size = 0`) slot length: on a horizontal
+    /// The auto (`box_size = 0`) slot length: on a horizontal
     /// bar, the widest item measured at the effective font (so
     /// slots fit their real names instead of a fixed guess); on a
     /// vertical bar, a standard length per content (stacked
@@ -132,15 +132,15 @@ extension AppBarOverlay {
     }
 
     /// The shared slot length for one bar layout pass. `autoWidth`
-    /// is the measured/standard length used when `item_size` is 0.
+    /// is the measured/standard length used when `box_size` is 0.
     nonisolated static func slotLength(
-        itemSize: CGFloat,
+        boxSize: CGFloat,
         content: AppBarStyle.Content,
         thickness: CGFloat,
         axis: CGFloat,
         autoWidth: CGFloat
     ) -> CGFloat {
-        let requested = itemSize > 0 ? itemSize : autoWidth
+        let requested = boxSize > 0 ? boxSize : autoWidth
         // When the quarter cap and the icon minimum collide
         // (a tiny bar), the minimum wins: a clipped icon
         // looks worse than a bar that has to scroll.

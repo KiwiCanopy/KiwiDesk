@@ -139,17 +139,17 @@ struct LayoutAppBarSection: View {
             range: 8...80
         )
         OverrideAutoSliderRow(
-            label: L("app_bar.item_size", "Item size"),
-            autoLabel: L("app_bar.item_size.auto", "Auto item size"),
-            value: $bar.itemSize,
-            global: global.itemSize,
+            label: L("app_bar.box_size", "Box size"),
+            autoLabel: L("app_bar.box_size.auto", "Auto box size"),
+            value: $bar.boxSize,
+            global: global.boxSize,
             restore: 120,
             range: 0...200
         )
         OverrideSliderRow(
-            label: L("app_bar.item_gap", "Item gap"),
-            value: $bar.itemGap,
-            global: global.itemGap,
+            label: L("app_bar.box_gap", "Box gap"),
+            value: $bar.boxGap,
+            global: global.boxGap,
             range: 0...40
         )
         OverrideAutoSliderRow(

@@ -18,8 +18,8 @@ enum AppBarFixtures {
         style.thickness = 44
         style.tabBackground = .plain
         style.activeIndicator = .gap
-        style.itemSize = 120
-        style.itemGap = 3
+        style.boxSize = 120
+        style.boxGap = 3
         style.content = .name
         style.iconSource = .appFont
         style.groupAdjacentWindows = false
@@ -45,8 +45,8 @@ enum AppBarFixtures {
         bar.thickness = 50
         bar.tabBackground = .boxed
         bar.activeIndicator = .ring
-        bar.itemSize = 88
-        bar.itemGap = 9
+        bar.boxSize = 88
+        bar.boxGap = 9
         bar.content = .iconAndName
         bar.iconSource = .appImage
         bar.groupAdjacentWindows = true

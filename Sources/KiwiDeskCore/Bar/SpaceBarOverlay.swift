@@ -91,8 +91,8 @@ public final class SpaceBarOverlay {
         for (index, item) in items.enumerated() {
             let view = itemViews[index]
             let length =
-                style.itemSize > 0
-                ? style.itemSize
+                style.boxSize > 0
+                ? style.boxSize
                 : SpaceBarItemView.autoLength(
                     appCount: item.apps.count,
                     overflow: item.overflow,
@@ -112,7 +112,7 @@ public final class SpaceBarOverlay {
                     width: strip.width,
                     height: length
                 )
-            cursor += length + style.itemGap
+            cursor += length + style.boxGap
             view.configure(
                 space: item.space,
                 spaceGlyph: item.spaceGlyph,

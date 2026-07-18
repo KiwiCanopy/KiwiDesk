@@ -14,8 +14,8 @@ enum SpaceBarFixtures {
         style.enabled = true
         style.edge = .bottom
         style.thickness = 44
-        style.itemSize = 120
-        style.itemGap = 3
+        style.boxSize = 120
+        style.boxGap = 3
         style.fontSize = 15
         style.iconSource = .appFont
         style.tabBackground = .plain

@@ -161,23 +161,23 @@ struct SpaceBarEditorSection: View {
         )
         AutoGatedGroup(
             title: L(
-                "space_bar.item_size.auto",
-                "Auto item size"
+                "space_bar.box_size.auto",
+                "Auto box size"
             ),
             isOn: AppBarAuto.binding(
-                style.itemSize,
+                style.boxSize,
                 restore: 120
             )
         ) {
             PtSlider(
-                label: L("space_bar.item_size", "Item size"),
-                value: style.itemSize,
+                label: L("space_bar.box_size", "Box size"),
+                value: style.boxSize,
                 range: 0...200
             )
         }
         PtSlider(
-            label: L("space_bar.item_gap", "Item gap"),
-            value: style.itemGap,
+            label: L("space_bar.box_gap", "Box gap"),
+            value: style.boxGap,
             range: 0...40
         )
         AutoGatedGroup(

@@ -103,7 +103,7 @@ struct SpaceBarCommandParityTests {
     /// to differ from the field's default so the write shows.
     private static let everySetting: [SpaceBarCommandSetting] = [
         .enabled(true), .edge(.bottom), .thickness(44),
-        .itemSize(120), .itemGap(3), .fontSize(15),
+        .boxSize(120), .boxGap(3), .fontSize(15),
         .iconSource(.appFont), .tabBackground(.plain),
         .activeIndicator(.gap), .cornerRoundness(5),
         .showFrontApp(true), .hideEmpty(true),
@@ -186,7 +186,7 @@ struct SpaceBarCommandParityTests {
         case .iconSource: return [.string("app_font")]
         case .tabBackground: return [.string("plain")]
         case .activeIndicator: return [.string("gap")]
-        case .thickness, .itemSize, .itemGap, .fontSize,
+        case .thickness, .boxSize, .boxGap, .fontSize,
             .cornerRoundness:
             return [.number(10)]
         default:

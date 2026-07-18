@@ -676,7 +676,7 @@ running windows.
   edge), or gap (active slot empty). Orthogonal to tab background
   — all combinations are valid.
 - **Thickness**: the strip's depth in points.
-- **Item size**: auto (0) measures rendered width and sizes slots
+- **Box size**: auto (0) measures rendered width and sizes slots
   uniformly to fit the widest item; fixed pixel width.
 - **Content**: icon only, name only, or both.
 - **App symbol style**: how app icons are drawn (greyed while
