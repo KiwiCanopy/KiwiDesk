@@ -146,6 +146,40 @@ struct SpaceBarDriverTests {
         #expect(overflow == 4)
     }
 
+    @Test("glyph_cap drives the visible/overflow split (#376)")
+    func glyphCapAdjustable() throws {
+        let core = makeCore()
+        core.state.workspaces.assign(SpaceID("1"), to: display)
+        core.state.workspaces.activate(SpaceID("1"))
+        // 6 distinct apps → 6 single-window groups.
+        for id in 1...6 {
+            core.state.apply(
+                .windowCreated(window(UInt32(id), app: "App\(id)"))
+            )
+        }
+        let space = core.state.workspaces[SpaceID("1")]!
+        // A lower cap shows fewer glyphs, hides the rest as
+        // WINDOWS in the +n badge.
+        var low = SpaceBarStyle()
+        low.glyphCap = 2
+        let capped = core.spaceBarApps(in: space, style: low)
+        #expect(capped.apps.count == 2)
+        #expect(capped.overflow == 4)
+        // An out-of-range cap clamps via resolvedGlyphCap: 0 → 1,
+        // and a cap past the group count shows all with no badge.
+        var floored = SpaceBarStyle()
+        floored.glyphCap = 0
+        #expect(
+            core.spaceBarApps(in: space, style: floored)
+                .apps.count == 1
+        )
+        var wide = SpaceBarStyle()
+        wide.glyphCap = 99
+        let all = core.spaceBarApps(in: space, style: wide)
+        #expect(all.apps.count == 6)
+        #expect(all.overflow == 0)
+    }
+
     @Test("Front segment follows the toggle and the focus")
     func frontSegment() throws {
         let core = seededCore()

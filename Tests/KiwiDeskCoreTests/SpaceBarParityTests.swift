@@ -105,6 +105,7 @@ struct SpaceBarCommandParityTests {
         .enabled(true), .edge(.bottom), .alignment(.end),
         .thickness(44),
         .boxSize(120), .boxGap(3), .fontSize(15),
+        .glyphCap(8),
         .iconSource(.appFont), .tabBackground(.plain),
         .activeIndicator(.gap), .cornerRoundness(5),
         .showFrontApp(true), .hideEmpty(true),
@@ -193,6 +194,7 @@ struct SpaceBarCommandParityTests {
             .cornerRoundness:
             return [.number(10)]
         case .springDelay: return [.number(1000)]
+        case .glyphCap: return [.number(8)]
         default:
             return [.string("#123456")]
         }

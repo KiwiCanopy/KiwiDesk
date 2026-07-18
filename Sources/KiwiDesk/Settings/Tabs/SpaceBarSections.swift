@@ -217,6 +217,18 @@ struct SpaceBarEditorSection: View {
                 range: 1...32
             )
         }
+        StepperRow(
+            label: L("space_bar.glyph_cap", "Glyphs per Space"),
+            value: style.glyphCap,
+            in: SpaceBarStyle.glyphCapRange,
+            help: L(
+                "space_bar.glyph_cap.help",
+                "How many app glyphs a Space shows before the "
+                    + "rest collapse into a +n badge. Adjacent "
+                    + "windows of the same app count as one glyph."
+            )
+        )
+        glyphCapSummary
         Divider()
         PtSlider(
             label: L(
@@ -238,6 +250,23 @@ struct SpaceBarEditorSection: View {
                 )
             )
         )
+    }
+
+    /// Neutral live summary of the current cap — a caption that
+    /// states what shows, not why (#94 defers the why to `help`).
+    /// The preview strip is a fixed stand-in and cannot honestly
+    /// render N synthetic glyphs, so the fact lives here.
+    private var glyphCapSummary: some View {
+        Text(
+            L(
+                "space_bar.glyph_cap.summary",
+                "Up to %1$d app groups per Space; more collapse "
+                    + "into a +n badge.",
+                style.wrappedValue.resolvedGlyphCap
+            )
+        )
+        .font(.caption)
+        .foregroundStyle(.secondary)
     }
 
     private var caption: String {
