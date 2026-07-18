@@ -65,12 +65,15 @@ file list; grep within a subsystem for specifics:
 | `App` | Core bootstrap & wiring |
 | `Models` | Shared value types |
 | `Service` | Long-running service glue |
-| `Resources` | Bundled assets (locales, vendored app font, palettes) |
+| `Resources` | Bundled assets (locales, vendored app font, palettes) (assets, not code) |
 
 GUI lives in `Sources/KiwiDesk`: section bodies in
 `Settings/Sections/`, their widgets in
 `Settings/Components/<area>/` (Layouts, Keybindings, Bars,
-SpaceOverrides, Icons, Appearance, Lua, Common).
+SpaceOverrides, Icons, Appearance, Lua, Common), and shell/model
+files plus root-composed widgets at `Settings/` root. `Common/`
+admits only primitives shared across multiple component areas;
+root-owned widgets stay at `Settings/` root.
 
 This table is the *where*. For the *how* — end-to-end pipelines
 (event→placement, command dispatch, config resolve, animation) traced
