@@ -1107,6 +1107,23 @@ Space Bar requiring free four-edge placement for both bars, the
 derivation (and its rationale) fell away. The GUI preview strip
 is edge-aware and rotates vertical for left/right.
 
+**The Space Bar reserves space-first.** (#293.) The Space
+Bar's strip is carved from the display's original visible frame,
+and the remainder becomes the bounds every layout — and the App
+Bar's own reservation — operates inside. Layouts never learn the
+Space Bar exists (resolution before layout; layout functions
+stay pure over the flat array). Two rules fall out for free:
+same-edge stacking (Space Bar screen-facing, App Bar
+window-facing, insets add) and perpendicular corners that
+cannot overlap (the App Bar strip spans the already-inset
+frame).
+
+**Same-edge bar stacking is a supported layout, not an error.**
+(#293.) Both bars on one edge is a reversible, deliberate
+choice: no conflict dialog, no automatic relocation, no blocked
+picker. The GUI explains the resulting order inline; profile
+load/import accepts it silently.
+
 **Tab background and active indicator are orthogonal.** (#228.)
 The old coupled `style` enum (`pills` / `segments` / `underline`)
 conflated two orthogonal concerns: the per-tab box rendering and

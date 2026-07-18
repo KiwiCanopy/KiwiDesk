@@ -15,6 +15,7 @@ public final class KiwiCore {
     public let drag = DragCoordinator()
     public let dragOverlay = DragOverlay()
     public let appBars = AppBarManager()
+    public let spaceBars = SpaceBarManager()
     /// Glyph-vs-image icon decisions for bar items (#294),
     /// shared by the App Bar, the Space Bar (#293) and the
     /// shortcuts panel.
@@ -234,10 +235,16 @@ public final class KiwiCore {
         appBars.onSelect = { [weak self] id in
             self?.focusWindow(id, warp: true)
         }
+        spaceBars.onSelectSpace = { [weak self] id in
+            // The existing focus_space path — retile, focus
+            // handoff, space-change event, settle.
+            _ = self?.focusSpace([.string(id.raw)])
+        }
         appFont.onLoad = { [weak self] in
             // Bars built before the glyph map arrived rendered
             // image fallbacks; one refresh swaps glyphs in.
             self?.updateAppBar()
+            self?.updateSpaceBar()
         }
         appBars.onMove = { [weak self] space, from, to in
             self?.moveBarItem(space: space, from: from, to: to)
@@ -299,6 +306,7 @@ public final class KiwiCore {
         // for them.
         persistScrollOffset()
         updateAppBar()
+        updateSpaceBar()
         // Rings ride the same freshness as the bar: every
         // structural / focus / mode / settings retile. Runs after
         // the layout above so it reads the just-updated state

@@ -32,6 +32,8 @@ extension KiwiCore {
             response = trackCommand(command, args)
         } else if command.hasPrefix("app_bar.") {
             response = barCommand(command, args)
+        } else if command.hasPrefix("space_bar.") {
+            response = spaceBarCommand(command, args)
         } else if command.hasPrefix("drag.") {
             response = dragCommand(command, args)
         } else if command.hasPrefix("border.") {

@@ -22,10 +22,36 @@ extension KiwiCore {
         _ id: WindowID,
         frame: CGRect
     ) -> CGRect {
-        guard let space = state.workspaces.space(of: id),
-            let strip = appBars.topStrip(forSpace: space)
+        guard let space = state.workspaces.space(of: id)
         else { return frame }
-        return AppBarGeometry.clampBelowTopStrip(frame, strip: strip)
+        var result = frame
+        // Combined top reservation (#293): a top Space Bar and a
+        // top App Bar stack, so clamp below each painted strip
+        // in turn — the deeper one wins.
+        if let strip = spaceBarTopStrip(forSpace: space) {
+            result = AppBarGeometry.clampBelowTopStrip(
+                result,
+                strip: strip
+            )
+        }
+        if let strip = appBars.topStrip(forSpace: space) {
+            result = AppBarGeometry.clampBelowTopStrip(
+                result,
+                strip: strip
+            )
+        }
+        return result
+    }
+
+    /// The painted top Space Bar strip covering `space`, or nil.
+    /// The Space Bar is per-display; a space is covered by the
+    /// bar of the display currently showing it.
+    private func spaceBarTopStrip(
+        forSpace space: SpaceID
+    ) -> CGRect? {
+        spaceBars.shownTopStrips.first { display, _ in
+            state.workspaces.currentSpace(on: display) == space
+        }?.strip
     }
 
     /// Re-asserts the top-bar clamp for every floating window under
@@ -35,7 +61,15 @@ extension KiwiCore {
     /// switched on over an existing float, is corrected here. Drag
     /// and resize clamp their own fresh frame directly.
     func clampFloatsBelowTopBars() {
-        for (space, strip) in appBars.shownTopStrips {
+        var strips = appBars.shownTopStrips
+        // Top Space Bars occlude the same way (#293): clamp the
+        // floats of the space each covered display is showing.
+        strips += spaceBars.shownTopStrips.compactMap {
+            display, strip in
+            state.workspaces.currentSpace(on: display)
+                .map { (space: $0, strip: strip) }
+        }
+        for (space, strip) in strips {
             guard let windows = state.workspaces[space]?.windows
             else { continue }
             for id in windows {

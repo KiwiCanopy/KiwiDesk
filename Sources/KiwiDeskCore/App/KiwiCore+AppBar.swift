@@ -88,8 +88,14 @@ extension KiwiCore {
         let style = host.resolvedBar(
             global: settings.appBarStyle
         )
+        // Space-first reservation (#293): the App Bar carves
+        // inside the frame the Space Bar already inset — same
+        // rule the retile path applies.
         let context = settings.context(
-            bounds: bounds,
+            bounds: SpaceBarGeometry.remainingFrame(
+                in: bounds,
+                style: settings.spaceBarStyle
+            ),
             space: space
         )
         let groups = barGroups(
@@ -117,7 +123,7 @@ extension KiwiCore {
     /// The `NSScreen` backing a tracked display, matched by its
     /// `CGDirectDisplayID`. Nil when the display is not currently
     /// connected to a screen.
-    private func screen(for display: DisplayID) -> NSScreen? {
+    func screen(for display: DisplayID) -> NSScreen? {
         NSScreen.screens.first { $0.kiwiDisplay?.id == display }
     }
 

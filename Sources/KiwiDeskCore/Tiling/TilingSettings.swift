@@ -43,6 +43,11 @@ public struct TilingSettings: Sendable, Equatable {
     /// that shows a bar. Each layout's own `bar` (enabled +
     /// overrides) resolves against this.
     public var appBarStyle = AppBarStyle()
+    /// The Space Bar (#293): per-display Spaces overview,
+    /// layout-independent, global-only (no per-layout mirror).
+    /// Its strip is reserved from the visible frame *before*
+    /// layouts see their bounds (space-first reservation).
+    public var spaceBarStyle = SpaceBarStyle()
     /// `new_window_placement_override[space_id]` beats the
     /// layout's own spawn placement (like the gap override).
     public var placementOverride: [SpaceID: SpawnPlacement] =
