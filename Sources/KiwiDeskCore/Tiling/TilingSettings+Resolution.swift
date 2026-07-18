@@ -116,12 +116,6 @@ extension TilingSettings {
         }
     }
 
-    /// The bounds layouts may use on a display whose visible
-    /// frame is `visible`: the frame minus the Space Bar's
-    /// reservation (#293). The one seam between a screen's raw
-    /// visible frame and `context(bounds:space:)` — every
-    /// caller routes through it so no flow can silently skip
-    /// the inset.
     /// True while the Space Bar and at least one *enabled*
     /// layout App Bar resolve to the same edge (#293) — the
     /// predicate behind the Settings same-edge info row and the
@@ -136,6 +130,12 @@ extension TilingSettings {
         }
     }
 
+    /// The bounds layouts may use on a display whose visible
+    /// frame is `visible`: the frame minus the Space Bar's
+    /// reservation (#293). The one seam between a screen's raw
+    /// visible frame and `context(bounds:space:)` — every
+    /// caller routes through it so no flow can silently skip
+    /// the inset.
     public func layoutBounds(from visible: CGRect) -> CGRect {
         SpaceBarGeometry.remainingFrame(
             in: visible,
