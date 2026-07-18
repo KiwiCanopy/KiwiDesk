@@ -92,6 +92,31 @@ struct BspFocusResizeTests {
         #expect(core.tiler.settings.bsp.splitRatioV < before)
     }
 
+    @Test("a huge x resize caps at the effective range (#383)")
+    func resizeCapsAtEffectiveRange() {
+        let core = makeCore()
+        bspSpace(core)
+        core.state.apply(.windowFocused(WindowID(1)))
+        // The keyboard path passes the screen width as the cap
+        // span; an outsized delta must stop at THAT display's
+        // effective bound, not the blind 0.9 store clamp. Recompute
+        // the bound from the same live span the command uses, so
+        // the check is display-independent: if the cap were removed
+        // the stored ratio would be 0.9 and diverge from `expected`
+        // on any display narrow enough for the bound to sit below
+        // 0.9 (the deterministic cap-vs-pile proof is the mouse
+        // twin `MouseResizeApplyTests.bspRatioHDragCapped`).
+        let span = Double(NSScreen.main?.visibleFrame.width ?? 1920)
+        let minSize = Double(core.tiler.settings.minWindowSize)
+        let bound = SplitDomain.effectiveRatioRange(
+            available: span,
+            minSize: minSize
+        )!.upperBound
+        let expected = min(max(bound, 0.1), 0.9)
+        core.execute("resize", args: [.string("x"), .number(9000)])
+        #expect(abs(core.tiler.settings.bsp.splitRatioH - expected) < 1e-9)
+    }
+
     @Test("x with a floating focused window resizes the float")
     func floatingFocusResizesTheFloat() {
         let core = makeCore()

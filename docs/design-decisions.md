@@ -894,26 +894,26 @@ An out-of-range `master_ratio` used to collapse the whole space
 into the OverlapStack cascade the moment a second window opened
 (#44). Now the layout clamps the *effective* ratio to the widest
 value keeping both zones ≥ `min_window_size`
-(`StackLayout.effectiveRatioRange`, the single authority), and
+(`SplitDomain.effectiveRatioRange`, the single authority), and
 cascades only when two min-size zones cannot coexist at any
 ratio. The **stored** config value stays untouched — a ratio too
 extreme for this display is honored again on a wider one — but
 the **interactive** paths (keyboard `resize("x")`, mouse drag)
 cap their writes at the current display's effective bound
-(`StackLayout.cappedRatioWrite`): past it the layout clamps
+(`SplitDomain.cappedRatioWrite`): past it the layout clamps
 anyway, so a wider write would only ratchet invisibly — the same
 rule as the #67 vertical weight cap, and the same
 config-wide/interaction-capped split. **#383 migrated the same
 principle to BSP.** An extreme BSP split ratio no longer collapses
 the subtree into the overlap pile: the layout clamps the effective
 ratio *per region* at every recursion depth
-(`BspLayout.effectiveRatioRange`), so a value too extreme for a
+(`SplitDomain.effectiveRatioRange`), so a value too extreme for a
 deep sub-region pins that region's neighbor to `min_window_size`
 rather than piling — the shared per-space scalar ratio needs no
 per-node tree for this, because the clamp runs against each
 region's own span. Both BSP interactive paths (keyboard
 `resize`, mouse drag) cap their writes too
-(`BspLayout.cappedRatioWrite`), and the pile stays reserved for a
+(`SplitDomain.cappedRatioWrite`), and the pile stays reserved for a
 region genuinely too narrow for two min-size windows at any ratio.
 (#44, #383)
 

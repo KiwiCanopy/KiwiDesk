@@ -108,7 +108,7 @@ extension KiwiCore {
             // Cap at the display's effective range (#383): no
             // invisible ratchet past the min-size cliff, matching
             // the keyboard path and the stack drag (#44).
-            let value = BspLayout.cappedRatioWrite(
+            let value = SplitDomain.cappedRatioWrite(
                 base + Double(delta),
                 base: base,
                 available: Double(bounds.width),
@@ -122,7 +122,7 @@ extension KiwiCore {
             let base =
                 tiler.settings.resolvedBsp(for: space.id)
                 .splitRatioV
-            let value = BspLayout.cappedRatioWrite(
+            let value = SplitDomain.cappedRatioWrite(
                 base + Double(delta),
                 base: base,
                 available: Double(bounds.height),
@@ -143,7 +143,7 @@ extension KiwiCore {
                 ? bounds.width : bounds.height
             // Cap at the display's effective range (#44), like
             // the keyboard path — no invisible ratchet.
-            let value = StackLayout.cappedRatioWrite(
+            let value = SplitDomain.cappedRatioWrite(
                 base + delta,
                 base: base,
                 available: Double(available),

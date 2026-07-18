@@ -60,7 +60,7 @@ public struct BspLayout: LayoutSystem {
             // narrow for two min-size windows (range nil), the
             // honest last resort — matching the stack (#44).
             guard
-                let range = BspLayout.effectiveRatioRange(
+                let range = SplitDomain.effectiveRatioRange(
                     available: Double(available),
                     minSize: Double(context.minWindowSize)
                 )
@@ -93,7 +93,7 @@ public struct BspLayout: LayoutSystem {
             let available = region.height - gap
             // Same per-region clamp on the stacked axis (#383).
             guard
-                let range = BspLayout.effectiveRatioRange(
+                let range = SplitDomain.effectiveRatioRange(
                     available: Double(available),
                     minSize: Double(context.minWindowSize)
                 )

@@ -99,20 +99,20 @@ struct StackRatioClampTests {
     @Test("effectiveRatioRange edges: too narrow, no minimum")
     func rangeEdges() {
         #expect(
-            StackLayout.effectiveRatioRange(
+            SplitDomain.effectiveRatioRange(
                 available: 599,
                 minSize: 300
             ) == nil
         )
         #expect(
-            StackLayout.effectiveRatioRange(
+            SplitDomain.effectiveRatioRange(
                 available: 1000,
                 minSize: 0
             ) == 0...1
         )
         // Degenerate region cascades even with no minimum.
         #expect(
-            StackLayout.effectiveRatioRange(
+            SplitDomain.effectiveRatioRange(
                 available: -20,
                 minSize: 0
             ) == nil
@@ -122,7 +122,7 @@ struct StackRatioClampTests {
     @Test("cappedRatioWrite stops at the range, never reverses")
     func cappedWrite() {
         // available 1000, min 300 → range [0.3, 0.7].
-        let capped = StackLayout.cappedRatioWrite(
+        let capped = SplitDomain.cappedRatioWrite(
             0.95,
             base: 0.6,
             available: 1000,
@@ -131,7 +131,7 @@ struct StackRatioClampTests {
         #expect(abs(capped - 0.7) < 1e-9)
         // A base already past the bound is not pushed back on
         // a grow — it just stops moving.
-        let held = StackLayout.cappedRatioWrite(
+        let held = SplitDomain.cappedRatioWrite(
             0.92,
             base: 0.9,
             available: 1000,
@@ -139,7 +139,7 @@ struct StackRatioClampTests {
         )
         #expect(abs(held - 0.9) < 1e-9)
         // Shrinking from out-of-range re-enters the range.
-        let back = StackLayout.cappedRatioWrite(
+        let back = SplitDomain.cappedRatioWrite(
             0.85,
             base: 0.9,
             available: 1000,

@@ -59,7 +59,7 @@ public struct StackLayout: LayoutSystem {
         // stored config value stays untouched, so it is honored
         // again on a wider display.
         guard
-            let range = Self.effectiveRatioRange(
+            let range = SplitDomain.effectiveRatioRange(
                 available: Double(available),
                 minSize: Double(context.minWindowSize)
             )

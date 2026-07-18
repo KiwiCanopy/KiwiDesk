@@ -140,7 +140,7 @@ extension KiwiCore {
         // the visible bound.
         let minSize = Double(tiler.settings.minWindowSize)
         if axis == "x" {
-            let value = BspLayout.cappedRatioWrite(
+            let value = SplitDomain.cappedRatioWrite(
                 bsp.splitRatioH + signed / span,
                 base: bsp.splitRatioH,
                 available: span,
@@ -151,7 +151,7 @@ extension KiwiCore {
                 for: space.id
             )
         } else {
-            let value = BspLayout.cappedRatioWrite(
+            let value = SplitDomain.cappedRatioWrite(
                 bsp.splitRatioV + signed / span,
                 base: bsp.splitRatioV,
                 available: span,
@@ -233,7 +233,7 @@ extension KiwiCore {
             // Interactive writes cap at the display's effective
             // range (#44) — past it the layout clamps and the
             // stored value would only ratchet invisibly.
-            let value = StackLayout.cappedRatioWrite(
+            let value = SplitDomain.cappedRatioWrite(
                 stack.masterRatio + sign * delta / span,
                 base: stack.masterRatio,
                 available: span,
