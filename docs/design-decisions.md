@@ -5,15 +5,21 @@ description: The reasoning behind settled product and UX choices.
 
 # Design decisions
 
-The major product/design decisions behind KiwiDesk's Settings
-app and menu bar, with the reasoning — so users understand why
-things behave the way they do, and contributors don't relitigate
-(or accidentally undo) a settled choice. Decisions from the
-Settings redesign (#68, PR #88) unless noted; deeper rationale
-lives in the linked issues. Architecture and code guardrails
-live in `AGENTS.md`, not here.
+The settled product and design decisions behind KiwiDesk,
+with the reasoning — so users understand why things behave
+the way they do, and contributors don't relitigate (or
+accidentally undo) a settled choice. Two parts: **Architecture
+& product model** (decisions rooted in the engine and config
+model) and **Settings GUI & UX** (decisions about the Settings
+app and menu bar; many from the #68/PR #88 redesign). Deeper
+rationale lives in the linked issues. The cross-cutting
+Settings control conventions live in
+[Settings UI patterns](ui-patterns.md); binding code rules and
+guardrails live in `AGENTS.md`, not here.
 
-## Product principle: approachable by default, powerful on demand
+## Architecture & product model
+
+### Product principle: approachable by default, powerful on demand
 
 KiwiDesk should give a new user a good tiling setup with almost no
 configuration — strong defaults and a handful of obvious controls.
@@ -34,7 +40,7 @@ in miniature: a dead-simple glance surface, with one "Edit in
 Settings…" bridge down to the full editor — simple entry, deeper
 layer one click away, never forced.
 
-## Accepted limitations
+### Accepted limitations
 
 Some behaviors are *bugs by design* — accepted consequences of a
 settled architectural trade, not defects to fix. This table is the
@@ -52,11 +58,11 @@ planned escape hatch; it is not a wontfix dumping ground.
 | Behavior | Why it's accepted | Architectural root | Escape hatch / planned fix |
 |---|---|---|---|
 | A bar whose `tab_background` is `material` (Liquid Glass) renders as **Boxed** on macOS earlier than 26 — the glass plate does not appear there. | Liquid Glass is a macOS 26 API (`NSGlassEffectView`); the value must still round-trip so a shared profile stays portable, so an older machine degrades to the shipped default look rather than an unbacked strip. The GUI never *offers* the option below 26 (an OS-capability gate, absent not greyed), so only a hand-written config or a profile authored on 26 reaches this state. | The stored `"material"` value is portable; only the render path is `#available(macOS 26)`-gated, resolving to `boxed` at paint time without rewriting the field ([#390](https://github.com/hajiboy95/KiwiDesk/issues/390)). | Use macOS 26+ to see the glass, or pick `boxed`/`plain` for a look identical on every macOS. |
-| With **"Displays have separate Spaces" on**, native Desktop→profile bindings cannot represent an independent Desktop choice on every connected display; KiwiDesk applies one global active profile. | Basic tiling remains valid, single-display use is unaffected, and users may want to inspect or prepare bindings before changing the macOS option, so hiding or disabling the controls would overstate the limitation. | Native-Space routing resolves one active Desktop number and one active profile for the whole display setup, not a per-display profile tuple ([#8](https://github.com/hajiboy95/KiwiDesk/issues/8)). | Turn the option off in Desktop & Dock Settings, then log out and back in. Onboarding and the binding-section warning share one gate and fire only in the affected multi-display state, never on a single display. See [Shared display Spaces are recommended, not required](#shared-display-spaces-are-recommended-not-required). |
-| In BSP, the inner window of a nested pair can't grow — a "grow" press (or edge-drag) widens its outer neighbor instead. | Its width `r·(1−r)·W` is already maximized at the default ratio, so no resize direction can widen it. | All same-orientation splits share the one per-space ratio; per-node ratios would need a container tree the flat-array model forbids (#56 trade). | **Shipped**: the [`track` layout (#128)](https://github.com/hajiboy95/KiwiDesk/issues/128) — `set_mode(space, "track")` gives every window one true resize target. See [BSP resize is focus-aware in *direction* only](#shortcuts). |
+| With **"Displays have separate Spaces" on**, native Desktop→profile bindings cannot represent an independent Desktop choice on every connected display; KiwiDesk applies one global active profile. | Basic tiling remains valid, single-display use is unaffected, and users may want to inspect or prepare bindings before changing the macOS option, so hiding or disabling the controls would overstate the limitation. | Native-Space routing resolves one active Desktop number and one active profile for the whole display setup, not a per-display profile tuple ([#8](https://github.com/hajiboy95/KiwiDesk/issues/8)). | Turn the option off in Desktop & Dock Settings, then log out and back in. Onboarding and the binding-section warning share one gate and fire only in the affected multi-display state, never on a single display. See [Shared display Spaces are recommended, not required](#spaces-profiles--config-ownership). |
+| In BSP, the inner window of a nested pair can't grow — a "grow" press (or edge-drag) widens its outer neighbor instead. | Its width `r·(1−r)·W` is already maximized at the default ratio, so no resize direction can widen it. | All same-orientation splits share the one per-space ratio; per-node ratios would need a container tree the flat-array model forbids (#56 trade). | **Shipped**: the [`track` layout (#128)](https://github.com/hajiboy95/KiwiDesk/issues/128) — `set_mode(space, "track")` gives every window one true resize target. See [BSP resize is focus-aware in *direction* only](#layout-and-resize-behavior). |
 | In stack, when the master zone lines up *along* the split axis (e.g. horizontal masters beside a right stack), the masters' individual shares can't be resized: that axis always moves the split, and the other axis beeps. | The split ratio owns its whole axis — giving the same keypress two meanings (split vs weight) by focus zone would make "grow" unpredictable at the boundary. | One knob per axis per arrangement ([#222](https://github.com/hajiboy95/KiwiDesk/issues/222)); weights live on a zone's own lineup axis by construction. | Pick the orthogonal (vertical) master orientation — since the 2026-07-16 default flip the standard side-by-side arrangement sits *inside* this limitation once `master_count` exceeds one — or put the windows that need individual shares in the stack zone. |
-| With a leading stack and parallel master lineup, `cascade_overflow` piles the array-earliest masters at the master zone's trailing edge instead of the latest. | Mirroring the master render order keeps the promote/demote boundary beside the stack seam; preserving one trailing-edge, downward-cascade vocabulary matters more than which seniority subset enters that pile. | `StackLayout.mirrorsMasterZone` reverses the master render order before the shared zone-overflow path takes its trailing suffix ([#313](https://github.com/hajiboy95/KiwiDesk/issues/313)). | Use a trailing stack (`right`/`bottom`), an orthogonal master orientation, or `cascade_all` if the subset distinction matters. See [The master zone fills from the stack seam](#shortcuts). |
-| Dragging a stack window's height with the mouse snaps back; only keyboard/CLI `resize("y")` actually moves the vertical share. | Vertical weights are a windowless keyboard/CLI concept; the mouse-drag seam has no window to anchor a weight against. | Per-window vertical weights are session-scoped and keyboard-only by design ([#67](https://github.com/hajiboy95/KiwiDesk/issues/67)). | Use keyboard/CLI `resize("y")`; the mouse asymmetry is deliberate. See [Stack resize is focus-aware](#shortcuts). |
+| With a leading stack and parallel master lineup, `cascade_overflow` piles the array-earliest masters at the master zone's trailing edge instead of the latest. | Mirroring the master render order keeps the promote/demote boundary beside the stack seam; preserving one trailing-edge, downward-cascade vocabulary matters more than which seniority subset enters that pile. | `StackLayout.mirrorsMasterZone` reverses the master render order before the shared zone-overflow path takes its trailing suffix ([#313](https://github.com/hajiboy95/KiwiDesk/issues/313)). | Use a trailing stack (`right`/`bottom`), an orthogonal master orientation, or `cascade_all` if the subset distinction matters. See [The master zone fills from the stack seam](#layout-and-resize-behavior). |
+| Dragging a stack window's height with the mouse snaps back; only keyboard/CLI `resize("y")` actually moves the vertical share. | Vertical weights are a windowless keyboard/CLI concept; the mouse-drag seam has no window to anchor a weight against. | Per-window vertical weights are session-scoped and keyboard-only by design ([#67](https://github.com/hajiboy95/KiwiDesk/issues/67)). | Use keyboard/CLI `resize("y")`; the mouse asymmetry is deliberate. See [Stack resize is focus-aware](#layout-and-resize-behavior). |
 | Mouse-resizing a window in the track layout snaps back on both axes; keyboard/CLI `resize` covers both knobs. | Both track adjustments (the track's weight, the in-track share) key off the dragged window's identity — the same windowless mouse-resize seam as the stack height drag above. | The mouse-resize translation (`MouseResize.translate`) is deliberately windowless; track weights are session-scoped resize state ([#128](https://github.com/hajiboy95/KiwiDesk/issues/128)). | Keyboard/CLI `resize` (both axes) and `move_to_track`; revisit together with the stack height drag if mouse parity is asked for. |
 | The App Bar's icon styles offer System default and Glyphs — never the system's **Dark**, **Clear**, or **Tinted** icon looks as distinct in-app choices. | A synthesized tinted mode was built and stripped (2026-07-17): a luminance ramp over the flattened bitmap can't match Apple's plate-plus-glyph regeneration, and the system-wide Icon & widget style already tints what "System default" shows. Shipping a knock-off would misrepresent the real styles. | macOS exposes no public API that hands an app another app's (or even its own) styled icon rendering or its icon layers — Apple DTS calls it unsupported ([#294](https://github.com/hajiboy95/KiwiDesk/issues/294)). | A private-IconServices probe with public fallback, the SkyLight `dlsym` pattern ([#362](https://github.com/hajiboy95/KiwiDesk/issues/362)); if viable the picker grows the true system styles. |
 | While window management is paused (no Accessibility permission), the read-only shortcuts panel shows base `gui.json` bindings *without* the active profile's sparse keybinding override applied. | The panel is a "defined, not live right now" glance while paused; a profile that overrides `modes` (rather than only tiling) is rare, and reading the authored base avoids the empty-live-space-list that would otherwise misfile every space shortcut into Custom. | Without AX the live resolved snapshot (`liveKeybindingSnapshot`) is nil, so the paused path reads `persistedGuiConfig()` (authored `gui.json`) directly instead of resolving base⊕profile ([#326](https://github.com/hajiboy95/KiwiDesk/issues/326)). | Grant Accessibility — the live resolved snapshot then drives the panel. The divergence exists only while paused *and* only for a profile carrying a keybinding override. |
@@ -132,7 +138,7 @@ tracked, not abandoned:
 All of these are collected in
 [#140](https://github.com/hajiboy95/KiwiDesk/issues/140).
 
-## Layout navigation & overflow models
+### Layout navigation & overflow models
 
 Two facts about each layout are invisible without reading its
 implementation, yet several cross-layout behaviors turn on them:
@@ -273,7 +279,266 @@ shifting windows into a new track at spawn based on available
 space — was rejected for putting geometry into state (it would
 make spawn outcomes monitor-dependent and non-deterministic).
 
-## Navigation & saving
+### Layout and resize behavior
+
+How the layout engine answers resize, orientation, and
+overflow questions — settled trades, most of them consequences
+of the flat-array model (`AGENTS.md` §1/§5). Navigation and
+overflow-pile classification live in the table above; how a
+two-axis layout's wire keys are named follows the
+geometric-wire rule in
+[Settings UI patterns](ui-patterns.md#labels--wire-names).
+
+**Resize is truly 2-axis via two per-space BSP ratios; per-node
+ratios are rejected.** `resize("x")` and `resize("y")` used to
+write the *same* scalar (one `splitRatio` for every BSP split, one
+`masterRatio` for stack) — the axis only scaled the step, so a
+"resize vertically" key visibly changed column widths. #56 gives
+BSP two ratios per space — `ratio_h` for side-by-side splits,
+`ratio_v` for stacked splits — so each axis moves its own knob,
+in commands and in mouse resize (a width-dominant drag edits H, a
+height-dominant one V). **Per-node ratios were deliberately
+rejected**: they require stable per-split identity, i.e. a
+container tree, which the flat-`[WindowID]`-array model forbids
+(AGENTS.md §5) — two global ratios per space is the design that
+fits the architecture. The Size & Float catalog grows from 3 rows
+to 5 (Grow/Shrink × width/height + Make floating), all authored
+from the one shared `resize.step`; scrolling still resizes its
+slot along its own scroll axis whichever axis is passed, and
+monocle/grid/floating stay explicit no-ops. No back-compat alias
+for the old `bsp.set_ratio` / `layout.bsp.ratio` name
+(pre-release, single user). (#56)
+
+**Stack resize is focus-aware, and its zone weights are
+ephemeral by design.** The stack layout's resize used to always
+move the master/stack split toward the master, whichever window
+was focused. #67 makes both axes act on the *focused* window:
+the split axis (`x` for a left/right stack zone, `y` for
+top/bottom — #222) moves the split in the direction that grows
+the focused window's zone (flipping the old always-grow-master
+behavior when a stack window is focused — intended), and the
+focused zone's own axis grows the focused window's share of its
+zone via **per-window weights** — a `[WindowID: Double]` map
+in `Space`, parallel to the flat window array (a map, not a
+tree: it adds no structure the flat-array guardrail forbids).
+The weights are **session-scoped and never serialized**: a
+`WindowID` is an OS window handle, unstable across app and
+window relaunches, so there is nothing durable to persist a
+weight against — persisting them would at best restore sizes to
+the wrong windows. They are pruned when a window leaves the
+space. When a weighted share drops below `min_window_size`, the
+zone falls back to the existing overflow cascade (weights
+apply to the fully-tiled case only), and the resize command
+caps weight *growth* at that cliff so presses past it cannot
+ratchet the stored weight invisibly; clamping the *master
+ratio* against min window size stays a separate issue (#44).
+One deliberate asymmetry: a *drag* along the zones' own axis
+still snaps back (the mouse seam is windowless); only the
+keyboard/CLI `resize` moves weights. (#67)
+
+**The stack zone's lineup derives from its position — no
+`stack_orientation` knob; piles always cascade downward.** #222
+made the stack arrangement configurable: `stack_position`
+(top/right/bottom/left) picks the split axis, and
+`master_orientation` lines up multiple masters. The stack zone
+deliberately has no orientation setting of its own — a
+left/right zone is a tall strip, so it stacks vertically; a
+top/bottom zone is wide, so windows sit side by side
+(`StackPosition.stackOrientation`, the single authority). Any
+other combination degenerates into slivers, and deriving keeps
+the resize axes orthogonal: the split ratio always moves on the
+split axis, the stack's weights on the other. Overflow piles
+keep cascading downward in every arrangement (ui-designer
+consult, 2026-07-15): the title bar is the affordance unit
+(identify + drag + raise) and one pile vocabulary spans the app
+— a sideways pile would expose blank side slivers and read as a
+glitch. A wide zone's `cascade_all` pile may spill over the
+master zone; that is the same accepted spill tall zones already
+do at the screen's bottom edge, kept coherent by the managed
+z-order. If pile depth ever hurts, the lever is a depth cap —
+not a direction switch. (#222)
+
+The `master_orientation` default flipped `vertical` →
+`horizontal` on 2026-07-16 (designer-consulted): side-by-side
+masters beside a right stack turn a raised master count into
+columns — the arrangement wide screens actually want — whereas
+a vertical master column duplicated the stack's own shape next
+to it. The trade is conscious: the standard arrangement now
+sits inside the along-axis resize limitation above (masters'
+individual shares are unreachable until the orientation is
+switched back to vertical), and the leading-edge promotion path
+became the default-adjacent bug #313. Existing profiles that
+omit `layout.stack.master_orientation` change meaning on next
+load — pre-release, no migration (§5).
+
+**The master zone fills from the stack seam when the stack
+leads.** (#313) `StackLayout.zone` lays array order from a
+region's min edge, which put the boundary master (the
+promote/demote swap slot) at the point *farthest* from a
+leading stack — every boundary crossing teleported across the
+master zone. Mirrored slot order (leading stack + parallel
+master lineup only) is a pure render mapping: the flat array,
+the promote/demote swaps, and seniority stay untouched;
+geometric navigation follows the frames; `StackSchematic`
+mirrors via the same `StackLayout.mirrorsMasterZone` predicate
+so the preview cannot lie. Perpendicular lineups stay in
+natural reading order — every master already touches the seam.
+Boundary crossings now read identically to the trailing-stack
+(default) arrangement: the crossing window moves locally,
+survivors shift one slot. Accepted side effect: when a mirrored
+master zone uses `cascade_overflow`, its trailing pile contains
+the array-earliest masters instead of the latest; the pile keeps
+the same screen position and downward cascade either way.
+
+**The stack cascade is a last resort; extreme ratios clamp at
+layout time, and interactive writes cap at the visible cliff.**
+An out-of-range `master_ratio` used to collapse the whole space
+into the OverlapStack cascade the moment a second window opened
+(#44). Now the layout clamps the *effective* ratio to the widest
+value keeping both zones ≥ `min_window_size`
+(`SplitDomain.effectiveRatioRange`, the single authority), and
+cascades only when two min-size zones cannot coexist at any
+ratio. The **stored** config value stays untouched — a ratio too
+extreme for this display is honored again on a wider one — but
+the **interactive** paths (keyboard `resize("x")`, mouse drag)
+cap their writes at the current display's effective bound
+(`SplitDomain.cappedRatioWrite`): past it the layout clamps
+anyway, so a wider write would only ratchet invisibly — the same
+rule as the #67 vertical weight cap, and the same
+config-wide/interaction-capped split. **#383 migrated the same
+principle to BSP.** An extreme BSP split ratio no longer collapses
+the subtree into the overlap pile: the layout clamps the effective
+ratio *per region* at every recursion depth
+(`SplitDomain.effectiveRatioRange`), so a value too extreme for a
+deep sub-region pins that region's neighbor to `min_window_size`
+rather than piling — the shared per-space scalar ratio needs no
+per-node tree for this, because the clamp runs against each
+region's own span. Both BSP interactive paths (keyboard
+`resize`, mouse drag) cap their writes too
+(`SplitDomain.cappedRatioWrite`), and the pile stays reserved for a
+region genuinely too narrow for two min-size windows at any ratio.
+(#44, #383)
+
+**BSP keyboard resize is focus-aware in *direction* only — and
+some nested windows cannot grow. Accepted, by architecture.**
+Since #122, `resize` infers its sign from the focused window's
+slot (the same screen-midpoint side rule a mouse drag uses,
+shared as one authority — `MouseResize.bspSide`), so "grow"
+grows the focused window's side instead of always the left/top
+region. What it deliberately does **not** do is give every
+window a growable boundary: all same-orientation splits still
+share the one per-space ratio (#56's settled trade — per-node
+ratios need a container tree, which the flat-array model
+forbids). Concretely: the inner window of a pair nested inside
+the second region has width `r·(1−r)·W`, which is *maximized*
+at the default ratio — no resize direction can widen it, and
+the visible effect of a grow press is its outer neighbor
+widening instead. The same is true when dragging that window's
+edge with the mouse; keyboard and mouse stay in lockstep,
+warts included. This is an **accepted limitation, not a bug to
+fix within BSP**: a smarter sign (derivative-based) was
+considered and rejected — it cannot help the pinned case and
+would split the just-unified mouse/keyboard rule. The real
+answer is the `track` layout (#128, shipped), where every
+window sits in exactly one track and every resize has one true
+target. A **floating** focused window is exempt from all of
+this: it resizes itself directly, in every mode (width for x,
+height for y, floored at `min_window_size`). (#122, #124,
+#129)
+
+### Spaces, profiles & config ownership
+
+**The fallback space is an explicit choice, not "whichever
+row is first".** When a profile switch drops a space, its
+windows need a home. Tying that to the first list row (the
+#75 interim rule) forces users to order spaces by system
+constraint instead of preference — and the redesign made the
+order user-owned (drag to reorder). So the rehome target is a
+dedicated per-profile reference (`fallback_space`,
+`KiwiDesk.set_fallback_space`), shown as a badge on the row;
+without one, the first-of-list rule still applies, so old
+profiles behave unchanged. Pull-to-first was considered and
+rejected: it would have made reordering silently change the
+fallback. (#68 §3.3, #75)
+
+**Deleting a space removes every reference it holds** (pin,
+Main role, fallback, per-space overrides) — a leftover
+reference would silently resurrect the space on the next
+profile load. App rules survive by design: they're global,
+and another profile may declare a space of the same name.
+
+**Live state is the single source of truth for which spaces
+exist; `gui.json` mirrors it, never the reverse.** A deletion
+prunes the space from live immediately (windows rehome to the
+fallback), not only when a later profile load happens to drop
+it — otherwise the next save re-captured it from live and it
+reappeared. The sidecar's `spaces` list is kept a faithful
+copy of live *as of the last authoritative reconcile*: every
+explicit prune — a `load_profile` (including a scripted
+Lua/CLI one) or an in-place edit — writes the live set back.
+Hardware-driven applies (monitor change, native-Space
+binding) deliberately don't prune or mirror (the
+no-shuffle-on-reconnect rule), so between such an event and
+the next reconcile the list may lag; the cold-boot seed and
+the next prune re-converge it. The one place `gui.json` seeds
+*into* live is cold boot — a space that lives only in the
+sidecar (no profile, pin, window, or `set_mode` backs it) is
+seeded so it survives the reload. That seed is safe against
+resurrecting a profile-pruned space precisely because the
+mirror keeps the list current. Deletion is per-profile:
+each profile is its own file, so removing a space from the
+active profile never touches another profile that still
+declares a space of the same name. (#77)
+
+**Shared display Spaces are recommended, not required.**
+KiwiDesk resolves one active native Desktop number and one active
+profile across the whole display setup. With macOS's "Displays have
+separate Spaces" option on, multiple displays can show independent
+Desktop combinations that this one-profile model cannot represent
+unambiguously. Shared display Spaces therefore make Desktop→profile
+bindings predictable, but they are not a prerequisite for basic
+tiling.
+
+Both surfaces share one gate — separate Spaces on *and* two or more
+displays connected — so a single-display setup, which has no binding
+ambiguity, is never prompted. Onboarding recommends turning the option
+off only in that state and lets the user continue without changing it.
+The Profiles tab keeps the specific Desktop-binding controls visible
+and editable; in the same multi-display state an inline warning
+explains the limitation and opens Desktop & Dock Settings. The saved
+profile list and its Load actions are unrelated and never warned or
+disabled. Hiding the binding section would erase context and existing
+configuration; disabling it would incorrectly claim that every binding
+is inert. (#8)
+
+**Profiles may override *behavior* settings, never *routing*
+ones.** A profile owns tiling, and may also carry a sparse
+override of a global setting that shapes how the workspace
+*behaves while the profile is active* — keybindings
+(`Profile.modes`) and the three window-rule families:
+app→space (`Profile.appRules`), float (`Profile.floatRules`),
+and ignore (`Profile.ignoreRules`). The global base lives in
+the active config owner (`gui.json` or hand-written `init.lua`).
+Each profile stores only additions and explicit tombstones;
+families resolve independently, then effective ignore remains
+the hard management gate. Thus an ignore tombstone exposes an
+app to its independently resolved app/float rules. It may never
+override a setting that *selects or routes* the profile
+itself: the native-Space→profile bindings decide *which*
+profile loads, so a profile owning part of that map would be
+a self-reference (load A → A rebinds Desktop 2 → B → …). The
+GUI language is a second hard exclusion for a different
+reason — it lives in `UserDefaults`, outside config ownership
+entirely, and must never touch a sidecar. Every override is
+the base overlaid with a sparse diff (absent inherits; a
+tombstone removes), never a second home for the setting. The
+binding rules for adding one — sparse-diff mechanics, parity
+tests, mutation through the `KiwiCore` facade — live in
+`AGENTS.md` §5.
+
+## Settings GUI & UX
+
+### Navigation & saving
 
 **Two-group sidebar, topic-named: "Design" vs "System".**
 Every control either travels with the profile being edited or
@@ -450,20 +715,7 @@ not "back minus the layout". Drift captions recompute on window
 show and on quick-menu actions, not on external `set_mode`
 (hotkey/Lua/CLI) — the next open catches up.
 
-## Spaces & profiles
-
-**The fallback space is an explicit choice, not "whichever
-row is first".** When a profile switch drops a space, its
-windows need a home. Tying that to the first list row (the
-#75 interim rule) forces users to order spaces by system
-constraint instead of preference — and the redesign made the
-order user-owned (drag to reorder). So the rehome target is a
-dedicated per-profile reference (`fallback_space`,
-`KiwiDesk.set_fallback_space`), shown as a badge on the row;
-without one, the first-of-list rule still applies, so old
-profiles behave unchanged. Pull-to-first was considered and
-rejected: it would have made reordering silently change the
-fallback. (#68 §3.3, #75)
+### Spaces
 
 **Space rows are bordered cards; reorder is an axis-locked
 handle drag, not a drag session.** A system drag session's
@@ -488,35 +740,6 @@ many small items pays off — space rows, monitor chips,
 per-space shortcut labels — never as the only signifier.
 (#68 §6.5)
 
-**Deleting a space removes every reference it holds** (pin,
-Main role, fallback, per-space overrides) — a leftover
-reference would silently resurrect the space on the next
-profile load. App rules survive by design: they're global,
-and another profile may declare a space of the same name.
-
-**Live state is the single source of truth for which spaces
-exist; `gui.json` mirrors it, never the reverse.** A deletion
-prunes the space from live immediately (windows rehome to the
-fallback), not only when a later profile load happens to drop
-it — otherwise the next save re-captured it from live and it
-reappeared. The sidecar's `spaces` list is kept a faithful
-copy of live *as of the last authoritative reconcile*: every
-explicit prune — a `load_profile` (including a scripted
-Lua/CLI one) or an in-place edit — writes the live set back.
-Hardware-driven applies (monitor change, native-Space
-binding) deliberately don't prune or mirror (the
-no-shuffle-on-reconnect rule), so between such an event and
-the next reconcile the list may lag; the cold-boot seed and
-the next prune re-converge it. The one place `gui.json` seeds
-*into* live is cold boot — a space that lives only in the
-sidecar (no profile, pin, window, or `set_mode` backs it) is
-seeded so it survives the reload. That seed is safe against
-resurrecting a profile-pruned space precisely because the
-mirror keeps the list current. Deletion is per-profile:
-each profile is its own file, so removing a space from the
-active profile never touches another profile that still
-declares a space of the same name. (#77)
-
 **Saved profiles lead; Presets demote once one exists.** On
 the Profiles tab, the built-in Presets top the list only
 while no profile is saved yet — they're a bootstrap tool,
@@ -538,53 +761,7 @@ draggable profile chips duplicated the dropdown while adding
 a chip palette row and drop-target styling — a second
 interaction model with zero extra capability. (#7)
 
-**Shared display Spaces are recommended, not required.**
-KiwiDesk resolves one active native Desktop number and one active
-profile across the whole display setup. With macOS's "Displays have
-separate Spaces" option on, multiple displays can show independent
-Desktop combinations that this one-profile model cannot represent
-unambiguously. Shared display Spaces therefore make Desktop→profile
-bindings predictable, but they are not a prerequisite for basic
-tiling.
-
-Both surfaces share one gate — separate Spaces on *and* two or more
-displays connected — so a single-display setup, which has no binding
-ambiguity, is never prompted. Onboarding recommends turning the option
-off only in that state and lets the user continue without changing it.
-The Profiles tab keeps the specific Desktop-binding controls visible
-and editable; in the same multi-display state an inline warning
-explains the limitation and opens Desktop & Dock Settings. The saved
-profile list and its Load actions are unrelated and never warned or
-disabled. Hiding the binding section would erase context and existing
-configuration; disabling it would incorrectly claim that every binding
-is inert. (#8)
-
-**Profiles may override *behavior* settings, never *routing*
-ones.** A profile owns tiling, and may also carry a sparse
-override of a global setting that shapes how the workspace
-*behaves while the profile is active* — keybindings
-(`Profile.modes`) and the three window-rule families:
-app→space (`Profile.appRules`), float (`Profile.floatRules`),
-and ignore (`Profile.ignoreRules`). The global base lives in
-the active config owner (`gui.json` or hand-written `init.lua`).
-Each profile stores only additions and explicit tombstones;
-families resolve independently, then effective ignore remains
-the hard management gate. Thus an ignore tombstone exposes an
-app to its independently resolved app/float rules. It may never
-override a setting that *selects or routes* the profile
-itself: the native-Space→profile bindings decide *which*
-profile loads, so a profile owning part of that map would be
-a self-reference (load A → A rebinds Desktop 2 → B → …). The
-GUI language is a second hard exclusion for a different
-reason — it lives in `UserDefaults`, outside config ownership
-entirely, and must never touch a sidecar. Every override is
-the base overlaid with a sparse diff (absent inherits; a
-tombstone removes), never a second home for the setting. Each
-new one is added deliberately and parity-tested. App→space uses
-its value-map override; float and ignore share a list-set sparse
-primitive now that there are two real clients.
-
-## Icons
+### Icons
 
 **A curated, keyword-tagged icon catalog — because macOS has
 no API to list SF Symbols.** The system ships the glyphs but
@@ -608,7 +785,7 @@ control, not a choice: the remove button sits beside the
 tabs (disabled when nothing is set) instead of posing as a
 grid cell under Recents.
 
-## Shortcuts
+### Shortcuts
 
 **A shortcut is modifiers plus exactly one key.** Carbon's
 `RegisterEventHotKey` (one key code + modifier mask) is the
@@ -646,20 +823,16 @@ and released freely — the preview mirrors what is held — and
 the first non-modifier keyDown locks the combo instantly:
 that key plus the modifiers held at that moment, the way the
 native System Settings recorder reads. Correction is
-re-recording (one click). The release model's burst window,
-stashed fullest-chord candidate, lazily-downgrading preview,
-one-key overlap hint, and mid-chord letter correction all die
-with it — in practice they were buggier than the correction
-affordance they bought, and their states read as noise. Bare
+re-recording (one click). The release model's chord-forming
+machinery (burst window, stashed candidate, downgrading
+preview, mid-chord correction) died with it — buggier in
+practice than the one-click correction it bought. Bare
 Escape cancels (Escape with modifiers records — ⌃Escape is a
 valid hotkey); click-away and app deactivation cancel
 unchanged. A swallowed key-down owns its matching key-up even
 if the field disappears or another recorder takes over; a
-short timeout bounds that handoff monitor. The live "Already
-used by …" notice while forming
-a chord went with the release window (its display window is
-now zero); the post-commit duplicate hard-block below remains
-the conflict surface.
+short timeout bounds that handoff monitor. The post-commit
+duplicate hard-block below is now the sole conflict surface.
 
 **Duplicates hard-block; system shortcuts soft-warn.**
 Recording a combo another KiwiDesk row already holds is
@@ -790,163 +963,6 @@ nonexistent spaces. The seeded Lua and labels mirror
 `DefaultSeedCatalogParityTests`) so the rows stay presets, not
 Custom (#4). (#91)
 
-**Resize is truly 2-axis via two per-space BSP ratios; per-node
-ratios are rejected.** `resize("x")` and `resize("y")` used to
-write the *same* scalar (one `splitRatio` for every BSP split, one
-`masterRatio` for stack) — the axis only scaled the step, so a
-"resize vertically" key visibly changed column widths. #56 gives
-BSP two ratios per space — `ratio_h` for side-by-side splits,
-`ratio_v` for stacked splits — so each axis moves its own knob,
-in commands and in mouse resize (a width-dominant drag edits H, a
-height-dominant one V). **Per-node ratios were deliberately
-rejected**: they require stable per-split identity, i.e. a
-container tree, which the flat-`[WindowID]`-array model forbids
-(AGENTS.md §5) — two global ratios per space is the design that
-fits the architecture. The Size & Float catalog grows from 3 rows
-to 5 (Grow/Shrink × width/height + Make floating), all authored
-from the one shared `resize.step`; scrolling still resizes its
-slot along its own scroll axis whichever axis is passed, and
-monocle/grid/floating stay explicit no-ops. No back-compat alias
-for the old `bsp.set_ratio` / `layout.bsp.ratio` name
-(pre-release, single user). (#56)
-
-**Stack resize is focus-aware, and its zone weights are
-ephemeral by design.** The stack layout's resize used to always
-move the master/stack split toward the master, whichever window
-was focused. #67 makes both axes act on the *focused* window:
-the split axis (`x` for a left/right stack zone, `y` for
-top/bottom — #222) moves the split in the direction that grows
-the focused window's zone (flipping the old always-grow-master
-behavior when a stack window is focused — intended), and the
-focused zone's own axis grows the focused window's share of its
-zone via **per-window weights** — a `[WindowID: Double]` map
-in `Space`, parallel to the flat window array (a map, not a
-tree: it adds no structure the flat-array guardrail forbids).
-The weights are **session-scoped and never serialized**: a
-`WindowID` is an OS window handle, unstable across app and
-window relaunches, so there is nothing durable to persist a
-weight against — persisting them would at best restore sizes to
-the wrong windows. They are pruned when a window leaves the
-space. When a weighted share drops below `min_window_size`, the
-zone falls back to the existing overflow cascade (weights
-apply to the fully-tiled case only), and the resize command
-caps weight *growth* at that cliff so presses past it cannot
-ratchet the stored weight invisibly; clamping the *master
-ratio* against min window size stays a separate issue (#44).
-One deliberate asymmetry: a *drag* along the zones' own axis
-still snaps back (the mouse seam is windowless); only the
-keyboard/CLI `resize` moves weights. (#67)
-
-**The stack zone's lineup derives from its position — no
-`stack_orientation` knob; piles always cascade downward.** #222
-made the stack arrangement configurable: `stack_position`
-(top/right/bottom/left) picks the split axis, and
-`master_orientation` lines up multiple masters. The stack zone
-deliberately has no orientation setting of its own — a
-left/right zone is a tall strip, so it stacks vertically; a
-top/bottom zone is wide, so windows sit side by side
-(`StackPosition.stackOrientation`, the single authority). Any
-other combination degenerates into slivers, and deriving keeps
-the resize axes orthogonal: the split ratio always moves on the
-split axis, the stack's weights on the other. Overflow piles
-keep cascading downward in every arrangement (ui-designer
-consult, 2026-07-15): the title bar is the affordance unit
-(identify + drag + raise) and one pile vocabulary spans the app
-— a sideways pile would expose blank side slivers and read as a
-glitch. A wide zone's `cascade_all` pile may spill over the
-master zone; that is the same accepted spill tall zones already
-do at the screen's bottom edge, kept coherent by the managed
-z-order. If pile depth ever hurts, the lever is a depth cap —
-not a direction switch. (#222)
-
-The `master_orientation` default flipped `vertical` →
-`horizontal` on 2026-07-16 (designer-consulted): side-by-side
-masters beside a right stack turn a raised master count into
-columns — the arrangement wide screens actually want — whereas
-a vertical master column duplicated the stack's own shape next
-to it. The trade is conscious: the standard arrangement now
-sits inside the along-axis resize limitation above (masters'
-individual shares are unreachable until the orientation is
-switched back to vertical), and the leading-edge promotion path
-became the default-adjacent bug #313. Existing profiles that
-omit `layout.stack.master_orientation` change meaning on next
-load — pre-release, no migration (§5).
-
-**The master zone fills from the stack seam when the stack
-leads.** (#313) `StackLayout.zone` lays array order from a
-region's min edge, which put the boundary master (the
-promote/demote swap slot) at the point *farthest* from a
-leading stack — every boundary crossing teleported across the
-master zone. Mirrored slot order (leading stack + parallel
-master lineup only) is a pure render mapping: the flat array,
-the promote/demote swaps, and seniority stay untouched;
-geometric navigation follows the frames; `StackSchematic`
-mirrors via the same `StackLayout.mirrorsMasterZone` predicate
-so the preview cannot lie. Perpendicular lineups stay in
-natural reading order — every master already touches the seam.
-Boundary crossings now read identically to the trailing-stack
-(default) arrangement: the crossing window moves locally,
-survivors shift one slot. Accepted side effect: when a mirrored
-master zone uses `cascade_overflow`, its trailing pile contains
-the array-earliest masters instead of the latest; the pile keeps
-the same screen position and downward cascade either way.
-
-**The stack cascade is a last resort; extreme ratios clamp at
-layout time, and interactive writes cap at the visible cliff.**
-An out-of-range `master_ratio` used to collapse the whole space
-into the OverlapStack cascade the moment a second window opened
-(#44). Now the layout clamps the *effective* ratio to the widest
-value keeping both zones ≥ `min_window_size`
-(`SplitDomain.effectiveRatioRange`, the single authority), and
-cascades only when two min-size zones cannot coexist at any
-ratio. The **stored** config value stays untouched — a ratio too
-extreme for this display is honored again on a wider one — but
-the **interactive** paths (keyboard `resize("x")`, mouse drag)
-cap their writes at the current display's effective bound
-(`SplitDomain.cappedRatioWrite`): past it the layout clamps
-anyway, so a wider write would only ratchet invisibly — the same
-rule as the #67 vertical weight cap, and the same
-config-wide/interaction-capped split. **#383 migrated the same
-principle to BSP.** An extreme BSP split ratio no longer collapses
-the subtree into the overlap pile: the layout clamps the effective
-ratio *per region* at every recursion depth
-(`SplitDomain.effectiveRatioRange`), so a value too extreme for a
-deep sub-region pins that region's neighbor to `min_window_size`
-rather than piling — the shared per-space scalar ratio needs no
-per-node tree for this, because the clamp runs against each
-region's own span. Both BSP interactive paths (keyboard
-`resize`, mouse drag) cap their writes too
-(`SplitDomain.cappedRatioWrite`), and the pile stays reserved for a
-region genuinely too narrow for two min-size windows at any ratio.
-(#44, #383)
-
-**BSP keyboard resize is focus-aware in *direction* only — and
-some nested windows cannot grow. Accepted, by architecture.**
-Since #122, `resize` infers its sign from the focused window's
-slot (the same screen-midpoint side rule a mouse drag uses,
-shared as one authority — `MouseResize.bspSide`), so "grow"
-grows the focused window's side instead of always the left/top
-region. What it deliberately does **not** do is give every
-window a growable boundary: all same-orientation splits still
-share the one per-space ratio (#56's settled trade — per-node
-ratios need a container tree, which the flat-array model
-forbids). Concretely: the inner window of a pair nested inside
-the second region has width `r·(1−r)·W`, which is *maximized*
-at the default ratio — no resize direction can widen it, and
-the visible effect of a grow press is its outer neighbor
-widening instead. The same is true when dragging that window's
-edge with the mouse; keyboard and mouse stay in lockstep,
-warts included. This is an **accepted limitation, not a bug to
-fix within BSP**: a smarter sign (derivative-based) was
-considered and rejected — it cannot help the pinned case and
-would split the just-unified mouse/keyboard rule. The real
-answer is the `track` layout (#128, shipped), where every
-window sits in exactly one track and every resize has one true
-target. A **floating** focused window is exempt from all of
-this: it resizes itself directly, in every mode (width for x,
-height for y, floored at `min_window_size`). (#122, #124,
-#129)
-
 **Orphaned space shortcuts are surfaced, never pruned.** A
 binding that targets a space by name outlives the space's
 presence in the current profile: it stays Carbon-registered
@@ -968,7 +984,7 @@ deleting it would lose config across a routine monitor swap.
 The rows stay live at runtime by design; only their
 *visibility* was broken. (#92)
 
-## Overrides & appearance
+### Overrides & appearance
 
 **Overrides are visible-but-inherited, never hidden.** A
 per-layout or per-space override row always shows — dimmed
@@ -1082,30 +1098,7 @@ corner-radius and
 border-width previews now remap the full slider range instead
 of hard-capping halfway (the `AppBarPreviewStrip` fix).
 
-**Preview alignment splits on standalone-vs-paired, not by
-tab.** (ui-designer consult 2026-07-14.) A settings preview is
-aligned one of two ways, and which one is decided by whether
-controls sit right next to it — never by which tab it's on:
-
-- **Standalone illustration** (a Layout schematic, the App Bar
-  mock strip) — centered in its card with a caption below.
-  Nothing is edited *on* it and no control column shares its
-  row, so there is no leading edge to line up against; it reads
-  as a figure, the way macOS System Settings centers a
-  wallpaper thumbnail or screen-saver preview over its label.
-- **Preview paired with the exact controls in the same card**
-  (the Gaps diagram + its outer/inner legend, the Drag Ghost /
-  Drop-zone columns) — left-aligned, flush with the control
-  rows it drives, so preview and controls read as one stack
-  (the accent-swatch / Displays-arrangement pattern).
-
-So Layout schematics and the App Bar strip are *both* centered
-(they are the same kind of thing); Gaps and Drag are left —
-that apparent Layout-vs-Appearance inconsistency is really this
-one correct rule. A new preview picks its bucket by asking "are
-its controls right here beside it," not by copying its tab.
-
-## App Bar
+### App Bar
 
 **App Bar edge is absolute.** (#293, supersedes the #228
 axis-relative model.) The stored value is one of the four screen
@@ -1413,434 +1406,15 @@ direction in chat):
   panel spans all layouts, so a Lua-only per-layout
   `icon_source` override deliberately does not steer it.
 
-## Shared controls
+### Shared control patterns
 
-**Per-field help is a click popover behind a `?` right after
-the label, not a hover tooltip (#94).** Rows that warrant a
-sentence of explanation carry a small `questionmark.circle`
-button **immediately after the field's label text, inside
-the shared `settingsLabelColumn`**. The question is born at
-the label ("what is *Width split ratio*?"), so the
-affordance sits where the confusion starts — not past a
-control the user has already scanned in confusion.
-Owner-tested twice: the first cut (far trailing edge) and
-the second (snug after the control) were both anchored to
-the wrong end of the row. This is also System Settings' own
-info-glyph convention (Focus/Siri panes put it beside the
-label). `labelColumn` grew 128 → 150 pt to hold the longest
-label plus the glyph; a long label + glyph truncates visibly
-(`lineLimit(1)`) — the accepted fallback, and long German
-labels on help rows are shortening candidates for the de
-review pass. An *unlabeled* `SegmentedPicker` (icon tabs)
-has no label to sit beside, so its `?` trails the track.
-The button wears the shared `hoverHighlight` chip like
-every other icon-only borderless control, so the eye has
-something to catch.
-Clicking opens a fixed-width popover; `.help()` rides along
-as a hover fallback carrying the full text, while the
-VoiceOver hint stays a short action phrase ("Shows an
-explanation of this setting") — the content is read inside
-the popover after activation, so a full-text hint would
-announce it twice. A popover, not hover-only `.help()`, because that is
-what System Settings does for explanations: a visible,
-discoverable glyph; a real focusable button (keyboard and
-VoiceOver reach it); dismissible and re-readable — while
-hover tooltips are single-line-biased, keyboard-inaccessible
-and invisible to anyone who never rests the pointer.
-`.help()` remains the idiom for one-line hints on ambiguous
-*icon-only controls*. A field with 2–3 named options folds
-per-option text into the ONE field-level popover (option
-name bold, one line each) — never a `?` per segment. Two
-scope guards: help is optional reading (a label must stay
-understandable without it — must-know info never lives only
-in the popover), and a field already taught by its live
-preview or schematic (App Bar colors, layout-tab
-geometry) gets no `?` at all. Copy is a normal `L()` string
-under the `<key>.help` suffix convention; when a *label* key
-is shared by fields with divergent semantics (Stack's and
-Track's Overflow both use `layout_params.overflow`), the
-help key scopes itself (`layout_params.overflow.stack.help`)
-so each field can carry its own text. Shared help copy —
-one string rendered on two surfaces, like a Layout Defaults
-tab and the per-space Customize popover — is authored once
-in a per-domain namespace (`LayoutHelp`); single-call-site
-copy stays inline at its call site (namespace membership =
-2+ call sites, or an override pair like
-`newWindowPlacement`/`trackPosition` — not "it felt
-shared"). In the Customize popover the `?` is rendered by
-`OverrideChrome` itself, not the wrapped row, so it stays
-clickable while the row inherits — help must work exactly
-while the user decides whether to override. Accepted
-consequence: there the `?` sits at the chrome row's
-trailing edge (past the inner row's spacer, a small
-distance in the narrow popover), consistently for every
-override row — the deliberate exception to label-adjacent
-placement, since the label lives inside the disable-able
-content, the checkbox-narrowed column has no width to
-spare, and the user already met the field (with its
-label-adjacent `?`) on the global surface. Do not "fix" it
-back inside the row: that re-enters the disabled scope.
+The cross-cutting Settings control conventions — help
+popovers, the segmented-vs-menu rule, row tiers, label axes,
+button classes, hover, grey-don't-hide — live in
+[Settings UI patterns](ui-patterns.md), one page for anyone
+building or reviewing a Settings surface.
 
-**Option tabs are a solid sliding-pill segment control.**
-Every pick-one-of-few chooser (layout parameters, mouse
-resize, icon picker tabs) uses `SegmentedPicker`
-instead of the native segmented picker: a capsule track
-where the selection is a solid white pill (light gray in
-dark mode) wearing the slider thumb's exact crisp shadow —
-the earlier soft glass-era shadow read as the pill "fading
-out" — and the selected label is larger and semibold
-— a real font-size step, because `scaleEffect` rasterizes
-the text and reads as blur. Liquid Glass was tried in three
-variants (bare, accent-tinted, clear + specular rim) and
-dropped: bare glass over the flat settings background reads
-as washed-out, tint reads as "blue, not glass", and the
-glass layer blurs content near it. ONE persistent pill
-slides between segments via matched geometry; styling
-conditionally attached to the selected label proved to
-crossfade on selection change (the view is destroyed and
-recreated), so the pill is a single view that adopts the
-selected segment's anchored frame. Segments are equal-width
-across the track (full-bleed, like a native window-toolbar
-switcher), a deliberate trade against content-sized
-segments. One control, one look — a chooser reads as "pick
-a tab" everywhere in the settings.
-
-**Segmented vs. menu is decided by a rule, not per row
-(#291).** A pick-one control is a `SegmentedPicker` when the
-choices are a *fixed set of 2–4 peers*, every label stays
-short and untruncated at the minimum Settings width **and**
-in the longest shipped localization, and seeing all choices
-at once helps the decision. It is a **menu** (`DropdownRow`)
-when any of: five or more choices; dynamic or user-generated
-choices; long, explanatory, or localization-risk labels; or
-a constrained repeated surface where showing every choice
-would crowd or truncate. A binary is a **toggle**, never two
-segments. Fixed editor-navigation tabs (the Layout Defaults
-mode strip) may exceed four — they switch the visible editor
-rather than edit a value, so the count cap doesn't apply.
-The *same semantic field uses the same control on comparable
-full-width surfaces*: the App Bar global editor and its
-per-layout override rows both render Position / Tab
-background / Active indicator / Content as segments, so the
-two never sit adjacent showing one field two ways. The audit
-(#291) converted those four App Bar fields (global and
-override), Stack's Master orientation / Stack position /
-Overflow, Track's Overflow, Drag's Border alignment, and the
-Focus border Corners (which had been a native `.segmented`
-`Picker` nested in a menu-styled `DropdownRow` — two
-segmented implementations at once — flattened to the shared
-`SegmentedPicker`). Menus were kept where the rule keeps
-them: new-window placement (comparative labels like "Before
-focused"), the Space layout mode (seven icon-bearing
-options), Language and Native-Desktop→Profile (dynamic
-lists).
-
-**The 384 pt per-Space popover is the documented
-compact-surface exception (#291).** There the inherit
-chrome (a checkbox plus accent bar, `OverrideChrome`) eats
-horizontal width, so its override rows stay menus even for
-2–4-peer fields. `OverridePickerRow` carries a **required**
-`Style` (`.menu` / `.segmented`, no default): the full-width
-App Bar per-layout overrides pass `.segmented`, the per-Space
-popover rows pass `.menu`, and a new override row can't
-silently pick the wrong control for its surface. The
-inherited (unchecked) state comes free from the chrome's
-existing `.disabled` + `.opacity(0.5)` — the segmented pill
-sits on the resolved global value, dimmed. App Bar Content
-("Icon &amp; name" → German "Symbol &amp; Name") is the one
-segmented label tight enough to warrant a real render at
-minimum width; kept segmented by width headroom, it is a
-truncation candidate to re-check when each new locale ships
-(#95), the same recurring de-review discipline the help-glyph
-labels already carry.
-
-**Row order within a section is fixed-tier, not
-usage-frequency.** A field's vertical position is decided by
-what *kind* of decision it represents, not by how often a
-user reaches for it — a canonical tier order is what lets the
-eye learn one shape across every editor. Natural adjust-order
-("what you'd tune right before/after this") only breaks ties
-*within* a tier, once the tier is fixed. A contributor
-placing a new field first asks **which tier**, then **where
-in it**. The tiers, top to bottom:
-
-1. **Preview / schematic** — leads unconditionally, *unless*
-   the section has one master on/off toggle whose own state
-   the preview depicts (Focus border's dimmed-when-off
-   preview): then the toggle sits directly above the preview,
-   the gate-above-gated rule extended to treat the preview as
-   a gated control.
-2. **Defining / structural fields** the schematic takes as
-   params — counts, ratios, axis / arrangement, positions —
-   ordered coarse-to-fine (what fixes the shape before what
-   refines it). A *numeric-threshold* gate needs no strict
-   adjacency to what it greys (Stack's Master count gates
-   Master orientation, yet the unconditionally-relevant
-   Master ratio sits between them): unconditional-before-
-   conditional outranks adjacency, because the greyed state
-   already signals the gating. Strict adjacency stays
-   mandatory only for a boolean-toggle-controls-one-row pair.
-3. **Standing placement / overflow policy** — New-window
-   placement and Overflow style, steady-state behaviour
-   rather than static geometry, cluster together and sit last
-   among the schematic-tied fields.
-4. **Secondary, occasional-use toggles** with their own
-   captions (auto-derivation, wrap-focus), each still
-   gate-above-gated internally.
-5. **Escape-hatch buttons / actions** ("Fit layout gaps")
-   — always last.
-
-An escape hatch that transforms other staged settings must expose
-the transaction locally: label transient inputs as action parameters,
-preview the resulting values before activation, warn when structure
-will be flattened, and confirm that the draft changed while footer
-Save is still required. Focus Border's **Fit layout gaps** group is
-the reference pattern; its action remains opt-in and one-shot rather
-than introducing automatic border-to-gap coupling.
-
-Dividers mark tier boundaries, not just breathing room, so a
-new field's tier decides which divider-bounded cluster it
-joins — never wedge a field mid-cluster to dodge adding a
-divider. The audit that set this rule (#291) moved Track's
-New-window mode + Position out of tier 2 (it had sat right
-after Arrange) down to tier 3 after Overflow, so all five
-layout editors now place new-window placement last among
-their schematic-tied rows.
-
-**Sliders share the pill design.** Every value adjuster
-(ratios, gaps, sizes) is a `SettingsSlider`: the same capsule
-track as the segmented picker, a native-style solid white
-thumb that overhangs the track by 2 pt per edge, and a
-full-strength accent fill up to the knob — the earlier
-translucent fill read as disabled. A clear Liquid Glass
-knob was tried and dropped: it refracted the accent fill
-beneath it and turned blue. Accessibility is delegated to a
-native `Slider` representation, so assistive tech sees
-exactly the control it replaces.
-
-**Numeric controls pick one of three idioms by a single
-test.** So Settings reads consistently, a numeric setting's
-control is chosen by *would a user say a specific number out
-loud?* — not by which pane it lives in:
-
-- **`StepperRow`** (typeable field + arrows) for discrete,
-  exact values a user names: counts, ms durations, pt
-  thresholds — master count, columns/rows, track limit,
-  minimum window size, animation duration.
-- **Slider + readout** (no typing) for a continuous feel or
-  proportion tuned by eye: split ratios, master ratio, gaps.
-- **Segmented / toggle** for a non-numeric choice.
-
-Minimum window size migrated slider → `StepperRow` on this
-rule (#204): it is a precise pt threshold, not a feel knob.
-
-**Layout Defaults is a per-mode tab strip, not a stacked
-scroll (#204).** The layout modes are a fixed, small,
-mutually-exclusive set (`LayoutMode` minus Floating), so they
-get a segmented tab strip — one mode's editor visible at a
-time — instead of every mode stacked in one `ScrollView`. The
-strip lands on the profile's most-used mode. The global
-minimum window size is pinned *above* the strip because it
-feeds every mode (and gates the `OverlapStack` overflow
-cascade), so it belongs to none of them. The formerly bundled
-`LayoutParamsEditor` (BSP+Stack) and `ScrollGridEditor`
-(Scrolling+Grid) were split at the mode boundary so each mode
-owns one tab and one schematic.
-
-**Layout schematics are static previews of staged values, not
-live (#125).** Every layout mode's tab leads with a small
-`GapsDiagram`-family schematic (`LayoutSchematicKit` /
-`LayoutSchematicCanvas` hold the shared canvas, tile, and ghost
-language) that redraws from the *staged* config as the user
-edits — never from live window state, no AX calls. This is the
-one non-negotiable: it upholds the #123 never-live-apply
-principle (a preview answers "what would this look like" without
-mutating the session). No hover, no tap-to-inspect, no
-drag-to-preview, and **no animation** — a looping animation
-would be architecturally legal (canned, config-driven) but was
-rejected on cost: a timer/reduce-motion state machine in every
-tile for a pane open seconds at a time. *All six modes get a
-schematic, Monocle included* — it draws the **navigation model**
-(a fan of full-screen cards + `orientation` cycle chevrons), not
-geometry, which both honours its one real knob and removes the
-"why is this the one blank tab" inconsistency. Schematics are
-deliberate approximations (a handful of tiles, capped with
-"+N"), never a simulation of the user's real desktop.
-
-**Intuitiveness over strict Apple-native, where they conflict
-(#125, owner call).** The first cut held to Apple's "one static
-frame per control" idiom, but that under-delivered on the knobs
-whose whole meaning is a transition. So the family uses a
-**mixed, deliberately legible grammar**: a **two-frame sequence**
-(mini-screen → arrow → mini-screen) for the modes whose meaning is
-a *transition* — **BSP** (strategy divergence and new-window
-placement only appear once a third window arrives), **Grid** in
-its dynamic mode (the grid rebalances as a fifth window opens),
-and **Scrolling**'s `follow` anchor (#239 — the viewport pans the
-minimum to reveal the focus, leaving the side you came from open);
-**single frames** for the rest,
-carrying the conditional fact with one of a small shared
-**ghost vocabulary** — a **spawn ghost** (dashed accent tile +
-"+", "the next window lands here": BSP's third window, Track's
-own-vs-focused track), an **off-monitor ghost** (solid gray,
-straddling a drawn screen edge, "a real window scrolled
-off-screen": Scrolling), and the pre-existing **empty-cell gap**
-(dashed gray, "unused grid space": rigid Grid). Grid draws five
-windows so the columns-first/rows-first wrap is visible; Stack's
-overflow is a small iconic fanned-pile badge, not a permanently
-cascading column. The two-frame motif is gated by a *principle*,
-not a headcount: a mode earns a second frame only when it must
-teach a fact **inexpressible in one frame** — a transition or a
-rebalance, not a steady resting state. Modes whose meaning is a
-still position (Scrolling's center/start/end anchors, rigid Grid)
-stay single-frame; if every mode had two frames, "why two frames"
-would stop reading. The app bar shown in Scrolling/Monocle is
-**not** drawn into their schematics (one preview, one job); its
-presence surfaces as live On/Off state in the `CrossReferenceRow`
-that points at the App Bar destination (#229), keeping app-bar
-ownership whole.
-
-**A GUI label may diverge from the Lua/JSON wire name when the
-label alone is ambiguous (#217).** The Grid picker shows
-"Arrange: Columns first / Rows first"; the wire vocabulary
-stays `split_direction: horizontal | vertical` (`horizontal` =
-Columns first). "Split direction" collided with two opposed
-real-world conventions (divider-axis vs stack-axis); the
-row/column labels are unambiguous under both. Only the display
-label changes — churning the documented verb would widen the
-blast radius (override commands, existing configs, testers'
-mental model) for no gain. The label locale key was moved with
-`scripts/rename-key` (German preserved); the two option labels
-are new keys.
-
-**Geometric wire, presentational label — the rule for every
-two-axis layout.** #217 generalizes past Grid: the **Track**
-picker had the same collision ("horizontal/vertical" reads two
-ways for a subdivided layout — do the tracks run horizontally, or
-do windows stack horizontally?), so it takes the same fix — the
-GUI relabels to **"Arrange: Columns / Rows"** (reusing Grid's
-`scroll_grid.arrange` label; Track's options are bare
-`Columns`/`Rows`, no fill-order "first" since Track has no growth
-semantic). The Lua/JSON **wire stays geometric** for both
-(`grid.split_direction`, `track.axis` = `horizontal | vertical`):
-a wire value describes orientation, which is unambiguous in a
-scripting context where nothing is visually parsed, and it keeps
-Grid, Track, and scrolling on one axis vocabulary. Renaming the
-wire to `columns/rows` was **considered and rejected on gain, not
-churn cost** (pre-release makes churn cheap, but cheap is not a
-reason): Grid's value carries fill-order (`columns_first`) and
-Track's carries pure orientation (`columns`), so no single
-key/value shape unifies them — a rename would relocate the
-inconsistency (GUI↔wire becomes Grid-wire↔Track-wire, plus a
-`columns_first`-vs-`columns` shape mismatch) instead of removing
-it, and turn a precise geometric term into a category-error
-presentational one (an "axis" whose value is `columns`).
-Single-axis layouts (Scrolling, Monocle) stay plain
-"Horizontal/Vertical" — one axis, no ambiguity, nothing to
-disambiguate. Fix the label, never the wire; §5's one-vocabulary
-rule (Lua == JSON) holds either way and is orthogonal to this
-GUI↔wire question.
-
-**Rows share one label axis and one readout column.** Every
-labeled control row (slider, segmented picker, dropdown)
-puts its label in the same fixed-width column
-(`SettingsMetrics.labelColumn`), so controls start on one
-imaginary line across sections instead of each row picking
-its own label width; slider readouts share one trailing
-column the same way. The rows read the column from the
-environment (`\.settingsLabelColumn`), and `OverrideChrome`
-narrows it once (`overrideLabelColumn`, paying for its
-checkbox prefix) — so a shared row dropped into override
-chrome lands on the plain rows' control axis by
-construction, not by remembering a width parameter. Numeric steppers are the
-deliberate exception: label leading, then an **editable
-monospaced field** plus arrows trailing (the native
-System-Settings numeric layout) — a value embedded in the
-label string ("Columns: 3") read as static text, and even a
-plain readout beside arrows read as passive, so the value is
-a real `TextField` (type a number, or use the arrows) that
-commits and clamps on Return / focus loss. An optional unit
-`suffix` ("ms") sits between the field and the arrows. The color grid is the other exception: its
-two-column `HexColorField` layout keeps its own label width
-(`colorLabelColumn`), because the shared axis would misalign
-the grid's second column. Dropdowns ride the axis via
-`DropdownRow` and take `.controlSize(.large)` so a menu
-button's height sits with the capsule tracks around it.
-Within a section, a `Divider` separates geometry controls
-from the behavior dropdowns (overflow, new-window placement)
-— eight-point uniform spacing alone let unrelated rows read
-as one group.
-
-**Buttons stay native; semantic role chooses their class.** No
-gradients, borders, or shadows on buttons — the crisp shadow
-is reserved for controls that slide (pill, slider thumb).
-Class is expressed through native style + control size:
-`.borderedProminent` regular for the one surface commit
-(footer Save, popover confirms); `.bordered` large for row
-actions (Load, Apply, Overrides, Set Gap Values), level with
-large dropdowns; `.bordered` regular for stateful input
-triggers (the shortcut recorder); and `.borderless` regular
-for icon-only row actions (trash, ×-clear, rename). List-add
-actions stay `.bordered`; `.plain` + underline is reserved
-for inline prose links. Small controls are subordinate inline
-or popover utilities (Shortcuts import, override resets), never
-a normal row action. Native macOS shape differences between
-these classes are intentional — choose by semantic role, not
-by a desired silhouette.
-
-**Hover confirms custom hit areas; it never creates the only
-affordance.** Native bordered/prominent buttons, sidebars,
-toggles, sliders, and fields keep system hover. Ambiguous
-icon-only borderless actions use the shared adaptive chip
-(`0.06` rest → `0.12` hover); custom full-row picker entries
-use a hover-only `0.06` fill; unselected custom segments and
-mode chips lift their existing fill by about `0.05`. No scale,
-movement, shadow, or pointing-hand cursor on ordinary buttons
-(the hand remains link-only). Disabled controls never react;
-under Reduce Motion the color change is immediate. Every such
-control also needs an explicit accessibility label (and concise
-hint when the action is not obvious), a visible keyboard-focus
-state, and a recognizable rest treatment or list context —
-`.help()` and hover alone do not make a control discoverable.
-
-**A recording shortcut field wears an accent halo.** The
-armed recorder among dozens of identical rows gets an accent
-fill + ring extending slightly past the button — the same
-accent-layer vocabulary as `OverrideChrome`'s active rows —
-because a tinted border plus a label swap alone was too
-quiet to spot at list speed.
-
-**Status badges stay flat.** The thumb/pill shadow is the
-settings' vocabulary for "interactive, movable"; putting it
-on a passive `BadgeChip` would promise interaction the chip
-doesn't have. Depth comes from the hairline stroke both chip
-types now share, matching the flat capsule language of
-native tags. A non-interactive value state in a control row
-(the slot size's "Auto — orientation standard") renders in
-the same capsule language rather than as bare gray prose,
-which read as skippable filler.
-
-**"Lives elsewhere" pointers are links.** Prose that names
-another tab ("configured in the App Bar tab") is a dead end;
-those pointers are `CrossReferenceLink`s in the
-make-default link's quiet style, jumping the sidebar
-selection through an injected `settingsNavigate` environment
-action.
-
-**Inapplicable controls are greyed, not hidden.** When a
-setting makes another control inert — Auto-size grid overrides
-the Columns/Rows steppers (#171), Automatic tracks overrides the
-Track limit stepper (#178), Fill empty space does nothing in a
-rigid grid, the scroll-speed row is dead when Animate focus
-shifts is off — the dependent control stays
-visible and `.disabled`, never removed. Hiding it would jump
-the list layout every time the governing toggle flips, and a
-vanished control loses the cue that its stored value is
-*preserved* (turn Auto-size back off and the old counts
-return). Greying reads as "not right now"; hiding reads as
-"gone". Precedent: `scrollSpeedRow` disabled by `onScrolling`.
-
-## Monitors
+### Monitors
 
 **One representation: monitor cards.** The old tab rendered
 the same space→monitor mapping three ways (proportional
@@ -1853,7 +1427,7 @@ automatic, and the context menu is the keyboard/VoiceOver
 fallback. macOS's Displays pane owns true spatial layout —
 identity + order is enough here. (#68 §3.13)
 
-## App rules
+### App rules
 
 **One row per app, two facets.** "Finder lives on space 2
 but its Get Info windows float" used to be two entries in two
@@ -1862,7 +1436,7 @@ a Float facet; the `App:Title` colon syntax is assembled by
 the GUI and never shown (it's serialization, not UI). Storage
 is untouched, so hand-written configs round-trip. (#68 §3.11)
 
-## Errors & the menu bar
+### Errors & the menu bar
 
 **A half-loaded config is visible state, not a log line.**
 `KiwiCore` publishes the issues of the last config load
@@ -1933,27 +1507,23 @@ the artwork's compound path, so it cannot follow dark mode.
 The color mark is reserved as the `.icns` master for when an
 `.app` bundle exists. (#68 §3.8/§3.9)
 
-## Out of scope, on purpose
+
+### Out of scope, on purpose
 
 - **Post-setup discovery** (#331) closes the first-run
   discovery gap with the smallest surface that works: one
   appended wizard card ("You're ready to go" → **Open Settings**
   on Layout, or an equal-weight **Not Now**) plus a one-time
-  `NSPopover` anchored to the menu bar icon ("KiwiDesk lives
-  here…"). The popover fires only on the *decline* routes (Not
-  Now or closing the card): choosing Open Settings already leads
-  the user into the app, so a menu-bar hint at a far corner would
-  just be a competing second surface. Deliberately *not* a guided
-  tour of every tab — that fights the contextual-help convention
-  (#94) and is the classic skipped-onboarding trap. Both the card
-  and the popover fire exactly once, gated on a
-  dedicated `UserDefaults` flag (`onboarding.discoveryShown`),
-  **never** the Accessibility trust state: the wizard reopens on
-  any AX revoke, so a trust-gated beat would re-pitch a user
-  whose TCC a macOS update reset. Copy is jargon-free (no
-  "profile", "Accessibility", "tiling") for a first-run
-  non-power user. (Supersedes the earlier "onboarding is a
-  separate follow-up pass" note, #68 §5.9.)
+  `NSPopover` at the menu bar icon, fired only on the decline
+  routes (Open Settings already leads into the app). Not a
+  guided tour of every tab — that fights the contextual-help
+  convention (#94) and is the classic skipped-onboarding trap.
+  Both fire exactly once, gated on a dedicated `UserDefaults`
+  flag (`onboarding.discoveryShown`), never the Accessibility
+  trust state — the wizard reopens on any AX revoke, and a
+  trust-gated beat would re-pitch a user whose TCC a macOS
+  update reset. Copy is jargon-free for a first-run non-power
+  user. (Supersedes #68 §5.9's "separate follow-up pass" note.)
 - **Configurable resize step** (#58): the `resize.step` setting,
   `set_resize_step` command, and import shape-match have landed;
   the **in-GUI step control** (a slider in Shortcuts ▸ Size &

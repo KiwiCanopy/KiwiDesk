@@ -34,6 +34,8 @@ your monitor setup, and native macOS Spaces integration.
 
 - **[Design Decisions](design-decisions.md)** — the why behind
   settled product and UX behavior.
+- **[Settings UI Patterns](ui-patterns.md)** — the shared
+  control conventions every Settings surface follows.
 - **[Translating](translating.md)** — the localization
   workflow and how to add a language.
 

@@ -85,6 +85,10 @@ export default defineConfig({
               label: "Design Decisions",
               slug: "docs/design-decisions",
             },
+            {
+              label: "Settings UI Patterns",
+              slug: "docs/ui-patterns",
+            },
             { label: "Translating", slug: "docs/translating" },
           ],
         },
