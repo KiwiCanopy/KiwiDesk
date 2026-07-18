@@ -28,12 +28,15 @@ struct AppBarPreviewStrip: View {
 
     var body: some View {
         VStack(spacing: 4) {
-            ZStack {
+            ZStack(alignment: canvasAlignment) {
                 RoundedRectangle(cornerRadius: 6)
                     .fill(Color.secondary.opacity(0.12))
-                strip
+                strip.padding(6)
             }
             .frame(height: 84)
+            // Belt-and-braces (SpaceBar twin has the same):
+            // a mock must never spill over the caption below.
+            .clipShape(RoundedRectangle(cornerRadius: 6))
             .animation(LayoutSchematic.damping, value: style)
             .accessibilityElement()
             .accessibilityLabel(axLabel)
@@ -45,6 +48,20 @@ struct AppBarPreviewStrip: View {
     }
 
     // MARK: - Strip
+
+    /// The strip hugs the canvas side matching the chosen
+    /// edge (top bar sits at the canvas top), so the edge
+    /// choice is visible, not just captioned. The off-axis
+    /// emptiness is the point — it mirrors the bar's real
+    /// relationship to the desktop.
+    private var canvasAlignment: Alignment {
+        switch style.edge {
+        case .top: .top
+        case .bottom: .bottom
+        case .left: .leading
+        case .right: .trailing
+        }
+    }
 
     private var strip: some View {
         stack {
@@ -102,23 +119,38 @@ struct AppBarPreviewStrip: View {
             .overlay(alignment: .topTrailing) { badge(t) }
     }
 
+    /// Vertical edges never draw a horizontal name: the real
+    /// bar letter-stacks it ("S/a/f/…", `AppBarItemView`'s
+    /// stacked()) and hides text a slot can't fit. The mock's
+    /// mini slots can't fit a stack, so the icon — or the
+    /// name's initial in Name-only mode — stands in.
     @ViewBuilder private func tabContent(
         _ t: MockTab
     ) -> some View {
-        HStack(spacing: 3) {
-            if style.content != .name {
-                Image(systemName: t.icon)
-                    .font(.system(size: font))
-                    .foregroundStyle(iconColor(t))
+        if style.edge.isHorizontal {
+            HStack(spacing: 3) {
+                if style.content != .name {
+                    Image(systemName: t.icon)
+                        .font(.system(size: font))
+                        .foregroundStyle(iconColor(t))
+                }
+                if style.content != .icon {
+                    Text(t.name)
+                        .font(.system(size: font))
+                        .lineLimit(1)
+                        .foregroundStyle(textColor(t))
+                }
             }
-            if style.content != .icon {
-                Text(t.name)
-                    .font(.system(size: font))
-                    .lineLimit(1)
-                    .foregroundStyle(textColor(t))
-            }
+            .padding(.horizontal, 4)
+        } else if style.content == .name {
+            Text(String(t.name.prefix(1)))
+                .font(.system(size: font))
+                .foregroundStyle(textColor(t))
+        } else {
+            Image(systemName: t.icon)
+                .font(.system(size: font))
+                .foregroundStyle(iconColor(t))
         }
-        .padding(.horizontal, 4)
     }
 
     private func textColor(_ t: MockTab) -> Color {
@@ -236,95 +268,6 @@ struct AppBarPreviewStrip: View {
         Color(kiwiHex: hex)
     }
 
-    // MARK: - Geometry
-
-    // The mock can't be to-scale (a 200 pt tab won't fit an 84 pt
-    // canvas), so each dimension maps its full real range onto a
-    // legible preview range *proportionally* — dragging any
-    // slider always keeps moving the mock, rather than hitting a
-    // hard cap partway (which read as "the setting stopped
-    // working"). Relative, not absolute; the slider readouts show
-    // the true pt values.
-
-    /// Real thickness 8–80 pt → 14–44 pt of canvas depth.
-    private var thickness: CGFloat {
-        scale(style.thickness, from: 8...80, to: 14...44)
-    }
-
-    /// Real gap 0–40 pt → 0–16 pt (0–8 pt on a vertical bar,
-    /// where the canvas height budgets the axis).
-    private var gap: CGFloat {
-        style.edge.isHorizontal
-            ? scale(style.itemGap, from: 0...40, to: 0...16)
-            : scale(style.itemGap, from: 0...40, to: 0...8)
-    }
-
-    /// The shared %-resolve against the preview's own (scaled)
-    /// thickness, so the mock rounds like the runtime bar;
-    /// clamped to the slot's smaller dimension so a vertical
-    /// bar's short slots keep sane corners.
-    private var corner: CGFloat {
-        min(
-            style.resolvedCornerRadius(forThickness: thickness),
-            min(slotWidth, slotHeight) / 2
-        )
-    }
-
-    /// Item length along the bar axis: honor an explicit
-    /// `itemSize` (mapped 1–200 pt → 20–72 pt), else size to the
-    /// content kind.
-    private var slotLength: CGFloat {
-        if style.itemSize > 0 {
-            return scale(style.itemSize, from: 1...200, to: 20...72)
-        }
-        switch style.content {
-        case .icon: return max(thickness, 22)
-        case .name: return 44
-        case .iconAndName: return 56
-        }
-    }
-
-    /// Length along a **vertical** bar's axis, compressed so
-    /// three slots plus gaps stay inside the 84 pt canvas
-    /// (3 × 20 + 2 × 8 + padding = 84 at the maxima). The
-    /// item-size slider still visibly moves the mock.
-    private var verticalSlotLength: CGFloat {
-        if style.itemSize > 0 {
-            return scale(style.itemSize, from: 1...200, to: 16...20)
-        }
-        return 18
-    }
-
-    /// Concrete slot frame for the current orientation: along a
-    /// horizontal bar the length runs in x and the thickness in
-    /// y; a vertical bar swaps them.
-    private var slotWidth: CGFloat {
-        style.edge.isHorizontal ? slotLength : thickness
-    }
-    private var slotHeight: CGFloat {
-        style.edge.isHorizontal ? thickness : verticalSlotLength
-    }
-
-    /// Linear map of `value` from one closed range onto another,
-    /// clamped to the target range at the ends.
-    private func scale(
-        _ value: CGFloat,
-        from src: ClosedRange<CGFloat>,
-        to dst: ClosedRange<CGFloat>
-    ) -> CGFloat {
-        let span = src.upperBound - src.lowerBound
-        guard span > 0 else { return dst.lowerBound }
-        let t = (value - src.lowerBound) / span
-        let mapped =
-            dst.lowerBound
-            + min(max(t, 0), 1) * (dst.upperBound - dst.lowerBound)
-        return mapped
-    }
-
-    private var font: CGFloat {
-        let base =
-            style.fontSize > 0
-            ? style.fontSize : thickness * 0.42
-        return min(base, thickness * 0.55, slotHeight * 0.55)
-    }
+    // Geometry/scale mapping lives in
+    // AppBarPreviewStrip+Geometry.swift.
 }

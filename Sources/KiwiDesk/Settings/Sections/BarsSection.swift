@@ -20,16 +20,25 @@ struct BarsSection: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                Picker("", selection: $editor) {
-                    Text(L("bars.switch.app_bar", "App Bar"))
-                        .tag(Editor.appBar)
-                    Text(
-                        L("bars.switch.space_bar", "Space Bar")
-                    )
-                    .tag(Editor.spaceBar)
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
+                SegmentedPicker(
+                    selection: $editor,
+                    options: [
+                        (
+                            L("bars.switch.app_bar", "App Bar"),
+                            Editor.appBar
+                        ),
+                        (
+                            L(
+                                "bars.switch.space_bar",
+                                "Space Bar"
+                            ),
+                            Editor.spaceBar
+                        ),
+                    ]
+                )
+                .accessibilityLabel(
+                    L("bars.switch", "Bar")
+                )
                 switch editor {
                 case .appBar: appBarEditor
                 case .spaceBar:
