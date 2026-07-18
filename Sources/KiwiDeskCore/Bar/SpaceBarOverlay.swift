@@ -4,9 +4,12 @@ import AppKit
 /// items into a strip handed to it in AX coordinates. A dumb
 /// renderer like `AppBarOverlay` — the driver resolves state,
 /// identifiers, and glyphs. Items size to their content
-/// (identifier + app glyphs), so lengths vary per item; items
-/// that overflow the strip clip at its end (spaces are a small,
-/// bounded set — no scroll machinery in v1).
+/// (identifier + app glyphs), so lengths vary per item. When the
+/// run overflows the strip the bar scrolls rather than clipping
+/// (#385): items render inside a clipping viewport inset by an
+/// arrow zone at each end, with clickable chevrons toward the
+/// hidden Spaces and a scroll that follows the active Space — the
+/// App Bar's overflow model (see `SpaceBarOverlay+Scroll`).
 @MainActor
 public final class SpaceBarOverlay {
     /// One Space's resolved content.
