@@ -642,10 +642,15 @@ Popovers, sheets, emoji pickers, and other windows above a bordered
 window stay above its ring, which is pinned to the focused window's
 stacking level; the window stays focused and keeps its full ring.
 
-## App Bar
+## Bars
 
-The **App Bar** section (in the **Design** group) is the app bar's
-own destination — the strip that shows every window in the current
+The **Bars** section hosts both bar editors behind a fixed
+**App Bar | Space Bar** switch at the top — each editor leads
+with its own preview and owns its settings.
+
+### App Bar
+
+The App Bar is the strip that shows every window in the current
 space. Configure it globally (applies to every layout that shows a
 bar) or override individual fields per layout.
 
@@ -703,6 +708,38 @@ on whether the layout diverges, without a second full preview. The
 color overrides sit in the same 2-column grid as Global's colors,
 in the same field order; a leading checkbox on each cell unlocks
 that field.
+
+### Space Bar
+
+The **Space Bar** is an always-visible overview of your Spaces:
+one bar per display, listing that display's Spaces in profile
+order. Each item shows the Space's identifier (its configured
+icon, else a numbered square or a two-letter monogram) plus a
+compact glyph per window — adjacent windows of the same app
+collapse into one glyph with a count badge, and past five slots
+the rest fold into a `+n` badge. Click a Space to switch to it;
+glyphs are informational.
+
+The editor's order: preview, **Show Space Bar**, **Position**
+(any of the four screen edges — sharing an edge with the App Bar
+is fine, the Space Bar sits at the screen edge and the App Bar
+next to the windows, and an inline note explains the order when
+both share one), sizes and **App symbol style**, item background
+and active indicator, then colors.
+
+The color ladder is the bar's signature: **Text** paints
+inactive Spaces, **Active space** the Space currently shown on
+the display, and **Focused window** the focused window's glyph
+inside the active Space. **Copy App Bar appearance…** takes the
+App Bar's current sizes, style, and colors once — edits
+afterwards stay independent (position and visibility are never
+copied).
+
+Two behavior toggles: **Hide empty Spaces** (the current Space
+always stays visible; hidden Spaces remain reachable by
+shortcut) and **Show front app** — a trailing segment with the
+focused window of the Space each display currently shows
+(icon-only on vertical bars).
 
 ## Behavior
 

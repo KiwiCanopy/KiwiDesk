@@ -116,6 +116,20 @@ extension TilingSettings {
         }
     }
 
+    /// True while the Space Bar and at least one *enabled*
+    /// layout App Bar resolve to the same edge (#293) — the
+    /// predicate behind the Settings same-edge info row and the
+    /// preview's coexistence stand-in, kept here so the two
+    /// can't drift. Honors per-layout edge overrides.
+    public var spaceBarSharesEdgeWithAppBar: Bool {
+        guard spaceBarStyle.enabled else { return false }
+        return [monocle.appBar, scrolling.appBar].contains {
+            $0.enabled
+                && $0.resolved(with: appBarStyle).edge
+                    == spaceBarStyle.edge
+        }
+    }
+
     /// The bounds layouts may use on a display whose visible
     /// frame is `visible`: the frame minus the Space Bar's
     /// reservation (#293). The one seam between a screen's raw

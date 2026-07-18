@@ -154,7 +154,7 @@ struct ScrollingEditor: View {
                     "scroll_grid.app_bar_xref_link",
                     "App Bar"
                 ),
-                destination: .appBar
+                destination: .bars
             )
         }
     }

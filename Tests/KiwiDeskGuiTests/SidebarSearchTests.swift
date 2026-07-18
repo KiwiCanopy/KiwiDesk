@@ -83,7 +83,7 @@ struct SidebarSearchTests {
             query: "obAl coLo",
             editingStoredProfile: false
         )
-        #expect(results.map(\.destination) == [.appBar])
+        #expect(results.map(\.destination) == [.bars])
         #expect(results.first?.subsection == "Global colors")
     }
 

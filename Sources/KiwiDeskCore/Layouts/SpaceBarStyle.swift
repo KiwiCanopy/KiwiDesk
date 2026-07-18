@@ -73,6 +73,14 @@ public struct SpaceBarStyle: Sendable, Equatable {
     public var groupBadgeColor = "#FF3B30"
     public var groupBadgeTextColor = "#FFFFFF"
 
+    /// Muted-badge background alpha over `text_color` on
+    /// inactive spaces — one derivation shared by the runtime
+    /// item view and the Settings preview.
+    public static let mutedBadgeAlpha: CGFloat = 0.3
+    /// The front-app divider rule's alpha over `text_color`,
+    /// shared the same way.
+    public static let frontDividerAlpha: CGFloat = 0.4
+
     public init() {}
 
     /// Same %-resolve as `AppBarStyle.resolvedCornerRadius` —
