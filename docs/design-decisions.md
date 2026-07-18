@@ -1297,6 +1297,33 @@ where the bars genuinely differ (per-layout tier, front-app
 segment, copy button). A new bar-editor row must slot into
 this order on both sides, not grow a per-editor one.
 
+**A palette is a color recipe; a Profile owns the colors.**
+(#375.) A palette is a named color recipe you apply once to
+overwrite the active profile's colors; a Profile is the
+persistent, addressable configuration — tiling, layout, and
+sparse behavior overrides — that owns those colors afterward. So
+the palette shelf is a **colors-only, one-shot paint** (the
+`copyAppearance` model — never a live link), and the palette
+*library* is **global**, not profile-scoped: scoping the recipe
+book per-profile would fragment a palette you saved while editing
+one profile away from the next, for no gain, since profiles
+already own the color *state* a palette writes into. A palette is
+a sparse map keyed by the same fully-qualified color paths the
+profile JSON uses (`app_bar.box_color` vs `space_bar.box_color` —
+bare wire keys collide between the two bars), so it is **not** a
+`TilingSettings` field and never widens the profile schema; it
+lives in its own global `palettes.json` plus a bundled resource.
+The seven built-ins are read-only with reserved names (a user
+palette can't shadow one — rename/delete are *omitted*, not
+greyed, because the constraint is never-meaningful-for-this-kind,
+not mode-inert); "Kiwi (Default)" is derived from the shipped
+struct defaults at load, so it never drifts and doubles as a
+reset. Escalating to a full design-package (bundling geometry,
+fonts, icon source with colors, or a tab restructure) waits on a
+real signal that people want to share the *whole look* as one
+artifact — not merely "more than seven palettes," which
+save/export/import already answers.
+
 **Tab background and active indicator are orthogonal.** (#228.)
 The old coupled `style` enum (`pills` / `segments` / `underline`)
 conflated two orthogonal concerns: the per-tab box rendering and

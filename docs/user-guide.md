@@ -569,6 +569,32 @@ swatch opens the native Colors panel and updates the staged value as
 you pick; **Done** or the red window close button closes the panel and
 keeps the selected color.
 
+### Color Palette
+
+At the top of Appearance, the **Color Palette** shelf paints a whole
+set of colors across the App Bar, Space Bar, focus borders, and drag
+visuals in one click. Each palette shows a small scene thumbnail —
+a mock bar, a ringed window, and a drag swatch — in its own colors,
+so you judge the whole look, not isolated chips. Applying a palette
+is a **one-time paint**, not a live link: it overwrites the current
+colors (you can still tweak any individual color afterward), and the
+change is staged until you Save the profile like any other edit.
+
+- **Bundled** palettes (Kiwi, Clean Light, Slate, True Dark,
+  Sunset, Ultraviolet, Monochrome) are built in and marked
+  "Built-in" — they can't be renamed or deleted. "Kiwi" is the
+  shipped default, so applying it is a reset to the default colors.
+- **My palettes** are yours. The **＋** tile saves the current
+  colors as a new palette; right-click a saved palette to **Rename**,
+  **Export…**, or **Delete** it. **Import…** loads a palette file
+  someone shared (unknown keys are ignored, and the name is made
+  unique so it can't shadow a bundled one).
+
+The palette library is **global** — the same saved palettes are
+available whichever profile you're editing (a palette is a color
+recipe; a Profile is the configuration that owns the colors after
+you apply one).
+
 ### Drag Visuals
 
 When you drag a tiled window, KiwiDesk shows two overlays:

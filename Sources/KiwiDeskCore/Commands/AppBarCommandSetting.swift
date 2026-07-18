@@ -134,8 +134,7 @@ enum AppBarCommandSetting {
     /// the same validated field setters instead of re-mapping
     /// them. Values are validated via `DragVisual.parseHex` before
     /// this is called.
-    static var colorFields: [String: (String) -> AppBarCommandSetting]
-    {
+    static var colorFields: [String: (String) -> AppBarCommandSetting] {
         [
             "text_color": Self.textColor,
             "box_color": Self.boxColor,

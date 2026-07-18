@@ -127,9 +127,7 @@ enum SpaceBarCommandSetting {
     /// Wire-key → color-field constructor. Internal (not private)
     /// so the palette shelf (#375) can route a color path through
     /// the same validated field setters; see the AppBar twin.
-    static var colorFields:
-        [String: (String) -> SpaceBarCommandSetting]
-    {
+    static var colorFields: [String: (String) -> SpaceBarCommandSetting] {
         [
             "text_color": Self.textColor,
             "active_text_color": Self.activeTextColor,

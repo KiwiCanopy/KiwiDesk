@@ -79,9 +79,11 @@ public final class PaletteStore {
     /// Deletes the user palette named `name`.
     public func delete(_ name: String) throws {
         var palettes = userPalettes()
-        guard let index = palettes.firstIndex(where: {
-            $0.name == name
-        }) else {
+        guard
+            let index = palettes.firstIndex(where: {
+                $0.name == name
+            })
+        else {
             throw StoreError.notFound(name)
         }
         palettes.remove(at: index)
@@ -95,9 +97,11 @@ public final class PaletteStore {
             throw StoreError.reservedName(to)
         }
         var palettes = userPalettes()
-        guard let index = palettes.firstIndex(where: {
-            $0.name == from
-        }) else {
+        guard
+            let index = palettes.firstIndex(where: {
+                $0.name == from
+            })
+        else {
             throw StoreError.notFound(from)
         }
         palettes[index].name = to
@@ -107,8 +111,7 @@ public final class PaletteStore {
     // MARK: - Export / import
 
     /// Writes one palette to `url` (a Finder Save panel location).
-    public func export(_ palette: ColorPalette, to url: URL) throws
-    {
+    public func export(_ palette: ColorPalette, to url: URL) throws {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [
             .prettyPrinted, .sortedKeys,
@@ -119,8 +122,7 @@ public final class PaletteStore {
     /// Reads one palette from `url` (a Finder Open panel location).
     /// Filters the colors to known paths so an alien file can't
     /// smuggle junk keys into the library.
-    public func importPalette(from url: URL) throws -> ColorPalette
-    {
+    public func importPalette(from url: URL) throws -> ColorPalette {
         guard let data = try? Data(contentsOf: url),
             let raw = try? JSONDecoder().decode(
                 ColorPalette.self,

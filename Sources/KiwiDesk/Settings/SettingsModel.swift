@@ -184,6 +184,14 @@ final class SettingsModel: ObservableObject {
     var configURL: URL { core.configURL }
     var displays: [Display] { core.state.workspaces.allDisplays }
 
+    /// The global color-palette library (#375). Stateless and
+    /// file-backed, keyed off the config directory — built once
+    /// since the directory never changes for a session. Apply is
+    /// in `SettingsModel+Palette`.
+    lazy var paletteStore = PaletteStore(
+        directory: core.configDirectory
+    )
+
     /// Whether the raw Lua editor is currently shown.
     var editingLua: Bool { forcedLuaEditor || showLuaEditor }
 

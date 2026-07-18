@@ -62,9 +62,10 @@ struct ColorPaletteTests {
         let def = PaletteCatalog.defaultPalette()
         #expect(def.name == PaletteCatalog.defaultName)
         #expect(
-            def.colors == ColorPaletteKeys.extract(
-                from: TilingSettings()
-            )
+            def.colors
+                == ColorPaletteKeys.extract(
+                    from: TilingSettings()
+                )
         )
         #expect(def.colors.count == 27)
     }
