@@ -37,7 +37,7 @@ extension AppBarPreviewStrip {
         )
     }
 
-    /// Item length along the bar axis: honor an explicit
+    /// Box length along the bar axis: honor an explicit
     /// `boxSize` (mapped 1–200 pt → 20–72 pt), else size to the
     /// content kind.
     var slotLength: CGFloat {

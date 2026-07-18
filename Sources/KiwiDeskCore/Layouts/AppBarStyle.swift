@@ -61,7 +61,7 @@ public struct AppBarStyle: Sendable, Equatable {
     /// square (icons never clip) and a quarter of the bar;
     /// items that overflow anyway scroll instead of shrinking.
     public var boxSize: CGFloat = 0
-    /// Spacing between items (pt); 0 = touching.
+    /// Spacing between boxes (pt); 0 = touching.
     public var boxGap: CGFloat = 6
     public var content: Content = .iconAndName
     /// Where app icons come from: the native app image, or a

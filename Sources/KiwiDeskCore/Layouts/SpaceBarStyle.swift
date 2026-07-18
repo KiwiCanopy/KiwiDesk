@@ -30,9 +30,9 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// Depth of the reserved strip (pt); aligned with the App
     /// Bar default.
     public var thickness: CGFloat = 32
-    /// Item length along the bar (pt); 0 (default) = auto.
+    /// Box length along the bar (pt); 0 (default) = auto.
     public var boxSize: CGFloat = 0
-    /// Spacing between space items (pt).
+    /// Spacing between space boxes (pt).
     public var boxGap: CGFloat = 6
     /// 0 (default) = auto: text scales with the bar thickness.
     public var fontSize: CGFloat = 0

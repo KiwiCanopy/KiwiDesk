@@ -1,6 +1,6 @@
 import AppKit
 
-/// Item sizing: every item gets the same slot length — the
+/// Box sizing: every item gets the same slot length — the
 /// configured `box_size`, or a standard length per content
 /// mode when unset (0). The length is clamped between the
 /// icon square (icons never clip) and a quarter of the bar
