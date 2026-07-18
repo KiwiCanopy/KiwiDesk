@@ -604,7 +604,7 @@
   "slot_size.unit": "Size unit",
   "space_bar.active_indicator.label": "Active indicator",
   "space_bar.alignment.label": "Alignment",
-  "space_bar.alignment.label.help": "Where the Space items sit along the bar. Start and End follow the edge — a left bar's Start is its top.",
+  "space_bar.alignment.label.help": "Where the Space items — and the front-app segment, when shown — sit along the bar. Start and End follow the edge — a left bar's Start is its top.",
   "space_bar.box_gap": "Box gap",
   "space_bar.box_size": "Box size",
   "space_bar.box_size.auto": "Auto box size",

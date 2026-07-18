@@ -55,11 +55,14 @@ extension SpaceBarOverlay {
     /// Axis length the segment will consume, for the render
     /// pass's alignment total — the leading box gap, the
     /// divider and glyph (`layoutDivider`/`layoutFrontGlyph`
-    /// mirrors), and on horizontal bars the measured name.
-    /// The name still clamps to the remaining strip at layout
-    /// time, so a long name can shrink the real extent below
-    /// this estimate — alignment then errs toward start,
-    /// never past the rim.
+    /// mirrors), and on horizontal bars the glyph→name pad
+    /// plus the measured name. Vertical bars end at the glyph
+    /// (no name), so no trailing pad is counted there. The
+    /// horizontal name is an estimate on both ends —
+    /// `sizeToFit` at layout time pads a little wider than
+    /// `NSString.size`, the trailing pad here absorbs that —
+    /// and the name still clamps to the remaining strip, so
+    /// no alignment can push content past the rim.
     func frontExtent(
         _ app: SpaceBarItemView.App?,
         depth: CGFloat,
@@ -69,8 +72,9 @@ extension SpaceBarOverlay {
         guard let app else { return 0 }
         let pad = SpaceBarItemView.pad
         let cell = max(depth - pad * 2, 8)
-        var extent = style.boxGap + 1 + pad + cell + pad
+        var extent = style.boxGap + 1 + pad + cell
         if horizontal {
+            extent += pad
             let size =
                 style.fontSize > 0
                 ? style.fontSize : depth * 0.42

@@ -71,9 +71,10 @@ struct SpaceBarEditorSection: View {
                 .map { ($0.1, $0.0) },
             help: L(
                 "space_bar.alignment.label.help",
-                "Where the Space items sit along the bar. "
-                    + "Start and End follow the edge — a left "
-                    + "bar's Start is its top."
+                "Where the Space items — and the front-app "
+                    + "segment, when shown — sit along the "
+                    + "bar. Start and End follow the edge — a "
+                    + "left bar's Start is its top."
             )
         )
         SegmentedPicker(

@@ -215,7 +215,7 @@ extension AppBarOverlay {
         in bounds: CGRect,
         gap: CGFloat,
         horizontal: Bool,
-        alignment: AppBarStyle.BarAlignment = .center,
+        alignment: AppBarStyle.BarAlignment,
         scrolledBy offset: CGFloat = 0
     ) -> [CGRect] {
         let total =
