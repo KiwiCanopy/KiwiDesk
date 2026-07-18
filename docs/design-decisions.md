@@ -55,7 +55,6 @@ planned escape hatch; it is not a wontfix dumping ground.
 | In BSP, the inner window of a nested pair can't grow — a "grow" press (or edge-drag) widens its outer neighbor instead. | Its width `r·(1−r)·W` is already maximized at the default ratio, so no resize direction can widen it. | All same-orientation splits share the one per-space ratio; per-node ratios would need a container tree the flat-array model forbids (#56 trade). | **Shipped**: the [`track` layout (#128)](https://github.com/hajiboy95/KiwiDesk/issues/128) — `set_mode(space, "track")` gives every window one true resize target. See [BSP resize is focus-aware in *direction* only](#shortcuts). |
 | In stack, when the master zone lines up *along* the split axis (e.g. horizontal masters beside a right stack), the masters' individual shares can't be resized: that axis always moves the split, and the other axis beeps. | The split ratio owns its whole axis — giving the same keypress two meanings (split vs weight) by focus zone would make "grow" unpredictable at the boundary. | One knob per axis per arrangement ([#222](https://github.com/hajiboy95/KiwiDesk/issues/222)); weights live on a zone's own lineup axis by construction. | Pick the orthogonal (vertical) master orientation — since the 2026-07-16 default flip the standard side-by-side arrangement sits *inside* this limitation once `master_count` exceeds one — or put the windows that need individual shares in the stack zone. |
 | With a leading stack and parallel master lineup, `cascade_overflow` piles the array-earliest masters at the master zone's trailing edge instead of the latest. | Mirroring the master render order keeps the promote/demote boundary beside the stack seam; preserving one trailing-edge, downward-cascade vocabulary matters more than which seniority subset enters that pile. | `StackLayout.mirrorsMasterZone` reverses the master render order before the shared zone-overflow path takes its trailing suffix ([#313](https://github.com/hajiboy95/KiwiDesk/issues/313)). | Use a trailing stack (`right`/`bottom`), an orthogonal master orientation, or `cascade_all` if the subset distinction matters. See [The master zone fills from the stack seam](#shortcuts). |
-| An extreme *stored* BSP ratio still collapses the space into the overlap cascade — even though the stack layout no longer does. | The stack's layout-time clamp hasn't been migrated to BSP yet; doing it as a follow-up rather than riding the #44 fix keeps that change scoped. | BSP has no effective-ratio clamp authority; the #44 fix (`StackLayout.effectiveRatioRange`) landed in the stack only. | Migrate the clamp principle to BSP (follow-up to [#44](https://github.com/hajiboy95/KiwiDesk/issues/44)). See [The stack cascade is a last resort](#shortcuts). |
 | Dragging a stack window's height with the mouse snaps back; only keyboard/CLI `resize("y")` actually moves the vertical share. | Vertical weights are a windowless keyboard/CLI concept; the mouse-drag seam has no window to anchor a weight against. | Per-window vertical weights are session-scoped and keyboard-only by design ([#67](https://github.com/hajiboy95/KiwiDesk/issues/67)). | Use keyboard/CLI `resize("y")`; the mouse asymmetry is deliberate. See [Stack resize is focus-aware](#shortcuts). |
 | Mouse-resizing a window in the track layout snaps back on both axes; keyboard/CLI `resize` covers both knobs. | Both track adjustments (the track's weight, the in-track share) key off the dragged window's identity — the same windowless mouse-resize seam as the stack height drag above. | The mouse-resize translation (`MouseResize.translate`) is deliberately windowless; track weights are session-scoped resize state ([#128](https://github.com/hajiboy95/KiwiDesk/issues/128)). | Keyboard/CLI `resize` (both axes) and `move_to_track`; revisit together with the stack height drag if mouse parity is asked for. |
 | The App Bar's icon styles offer System default and Glyphs — never the system's **Dark**, **Clear**, or **Tinted** icon looks as distinct in-app choices. | A synthesized tinted mode was built and stripped (2026-07-17): a luminance ramp over the flattened bitmap can't match Apple's plate-plus-glyph regeneration, and the system-wide Icon & widget style already tints what "System default" shows. Shipping a knock-off would misrepresent the real styles. | macOS exposes no public API that hands an app another app's (or even its own) styled icon rendering or its icon layers — Apple DTS calls it unsupported ([#294](https://github.com/hajiboy95/KiwiDesk/issues/294)). | A private-IconServices probe with public fallback, the SkyLight `dlsym` pattern ([#362](https://github.com/hajiboy95/KiwiDesk/issues/362)); if viable the picker grows the true system styles. |
@@ -895,19 +894,28 @@ An out-of-range `master_ratio` used to collapse the whole space
 into the OverlapStack cascade the moment a second window opened
 (#44). Now the layout clamps the *effective* ratio to the widest
 value keeping both zones ≥ `min_window_size`
-(`StackLayout.effectiveRatioRange`, the single authority), and
+(`SplitDomain.effectiveRatioRange`, the single authority), and
 cascades only when two min-size zones cannot coexist at any
 ratio. The **stored** config value stays untouched — a ratio too
 extreme for this display is honored again on a wider one — but
 the **interactive** paths (keyboard `resize("x")`, mouse drag)
 cap their writes at the current display's effective bound
-(`StackLayout.cappedRatioWrite`): past it the layout clamps
+(`SplitDomain.cappedRatioWrite`): past it the layout clamps
 anyway, so a wider write would only ratchet invisibly — the same
 rule as the #67 vertical weight cap, and the same
-config-wide/interaction-capped split. Known divergence, on
-purpose: **BSP still cascades on an extreme stored ratio** — the
-same clamp principle should migrate there in a follow-up rather
-than ride the #44 fix. (#44)
+config-wide/interaction-capped split. **#383 migrated the same
+principle to BSP.** An extreme BSP split ratio no longer collapses
+the subtree into the overlap pile: the layout clamps the effective
+ratio *per region* at every recursion depth
+(`SplitDomain.effectiveRatioRange`), so a value too extreme for a
+deep sub-region pins that region's neighbor to `min_window_size`
+rather than piling — the shared per-space scalar ratio needs no
+per-node tree for this, because the clamp runs against each
+region's own span. Both BSP interactive paths (keyboard
+`resize`, mouse drag) cap their writes too
+(`SplitDomain.cappedRatioWrite`), and the pile stays reserved for a
+region genuinely too narrow for two min-size windows at any ratio.
+(#44, #383)
 
 **BSP keyboard resize is focus-aware in *direction* only — and
 some nested windows cannot grow. Accepted, by architecture.**
