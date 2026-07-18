@@ -82,20 +82,22 @@ extension SpaceBarItemView {
             accent.frame = bounds
         case .edgeMark:
             // On the window-facing side of the slot: a top bar
-            // faces down, a left bar right, and so on.
+            // faces down, a left bar right, and so on. The view
+            // is flipped (y grows down), so a top bar's mark
+            // sits at maxY.
             let mark: CGFloat = 3
             switch style.edge {
             case .top:
                 accent.frame = CGRect(
                     x: 0,
-                    y: 0,
+                    y: bounds.height - mark,
                     width: bounds.width,
                     height: mark
                 )
             case .bottom:
                 accent.frame = CGRect(
                     x: 0,
-                    y: bounds.height - mark,
+                    y: 0,
                     width: bounds.width,
                     height: mark
                 )

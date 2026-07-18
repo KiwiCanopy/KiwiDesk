@@ -92,10 +92,7 @@ extension KiwiCore {
         // inside the frame the Space Bar already inset — same
         // rule the retile path applies.
         let context = settings.context(
-            bounds: SpaceBarGeometry.remainingFrame(
-                in: bounds,
-                style: settings.spaceBarStyle
-            ),
+            bounds: settings.layoutBounds(from: bounds),
             space: space
         )
         let groups = barGroups(

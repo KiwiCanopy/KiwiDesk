@@ -15,18 +15,6 @@ public final class SpaceBarOverlay {
         let spaceGlyph: SpaceBarItemView.Identifier
         let apps: [SpaceBarItemView.App]
         let active: Bool
-
-        init(
-            space: SpaceID,
-            spaceGlyph: SpaceBarItemView.Identifier,
-            apps: [SpaceBarItemView.App],
-            active: Bool
-        ) {
-            self.space = space
-            self.spaceGlyph = spaceGlyph
-            self.apps = apps
-            self.active = active
-        }
     }
 
     /// Click-to-focus hook; wired to `KiwiCore.focusSpace`.
@@ -34,9 +22,10 @@ public final class SpaceBarOverlay {
 
     private var panel: NSPanel?
     var itemViews: [SpaceBarItemView] = []
-    private var lastShown: (
-        items: [Item], strip: CGRect, style: SpaceBarStyle
-    )?
+    private var lastShown:
+        (
+            items: [Item], strip: CGRect, style: SpaceBarStyle
+        )?
 
     public init() {}
 
@@ -131,7 +120,8 @@ public final class SpaceBarOverlay {
         guard let layer = panel.contentView?.layer else {
             return
         }
-        let depth = style.edge.isHorizontal
+        let depth =
+            style.edge.isHorizontal
             ? strip.height : strip.width
         layer.masksToBounds = true
         layer.cornerRadius =
@@ -162,9 +152,6 @@ public final class SpaceBarOverlay {
         let view = AppBarOverlay.FlippedView()
         view.wantsLayer = true
         panel.contentView = view
-        // Item views created before the panel existed (first
-        // render) attach here.
-        itemViews.forEach { view.addSubview($0) }
         return panel
     }
 }

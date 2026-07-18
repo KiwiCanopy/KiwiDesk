@@ -89,9 +89,7 @@ enum SpaceBarCommandSetting {
         }
     }
 
-    private static var boolFields:
-        [String: (Bool) -> SpaceBarCommandSetting]
-    {
+    private static var boolFields: [String: (Bool) -> SpaceBarCommandSetting] {
         [
             "enabled": Self.enabled,
             "show_front_app": Self.showFrontApp,

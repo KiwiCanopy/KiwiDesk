@@ -53,6 +53,11 @@ final class SpaceBarItemView: NSView {
     var style = SpaceBarStyle()
     var onSelect: (SpaceID) -> Void = { _ in }
 
+    /// Flipped so the identifier leads at the visual top on
+    /// vertical bars and glyphs read in flat-array order (same
+    /// convention as `AppBarOverlay.FlippedView`).
+    override var isFlipped: Bool { true }
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         wantsLayer = true
@@ -113,7 +118,9 @@ final class SpaceBarItemView: NSView {
         self.isActive = active
         self.horizontal = horizontal
         self.style = style
-        isHovered = false
+        // Hover is NOT reset here: a retile under the pointer
+        // (focus changes are frequent) must not drop the tint —
+        // mouseExited still fires when the pointer leaves.
         syncAppViews()
         restyle()
         needsLayout = true
@@ -143,7 +150,9 @@ final class SpaceBarItemView: NSView {
     }
 
     /// One subview per app: a text field for App Font glyphs, an
-    /// image view otherwise.
+    /// image view otherwise. Recreating (not pooling) is
+    /// load-bearing: `styleApps` never re-sets an image view's
+    /// `image`, so naive reuse would show stale icons.
     private func syncAppViews() {
         appViews.forEach { $0.removeFromSuperview() }
         appViews = apps.map { app in
@@ -215,6 +224,11 @@ final class SpaceBarItemView: NSView {
                 systemSymbolName: name,
                 accessibilityDescription: nil
             )
+            identifierImage.symbolConfiguration =
+                NSImage.SymbolConfiguration(
+                    pointSize: identifierFont,
+                    weight: .regular
+                )
             identifierImage.contentTintColor = stateColor
         case .text(let text, let tinted):
             identifierImage.isHidden = true
@@ -265,7 +279,8 @@ final class SpaceBarItemView: NSView {
     }
 
     var identifierFont: CGFloat {
-        let thickness = horizontal
+        let thickness =
+            horizontal
             ? bounds.height : bounds.width
         let base =
             style.fontSize > 0

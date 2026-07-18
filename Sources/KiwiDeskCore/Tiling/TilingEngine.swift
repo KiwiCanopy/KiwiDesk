@@ -105,9 +105,8 @@ public final class TilingEngine {
         // Space-first reservation (#293): the Space Bar strip
         // comes off the visible frame before any layout — or
         // the App Bar — sees its bounds.
-        let bounds = SpaceBarGeometry.remainingFrame(
-            in: GeometryUtils.axVisibleFrame(of: screen),
-            style: settings.spaceBarStyle
+        let bounds = settings.layoutBounds(
+            from: GeometryUtils.axVisibleFrame(of: screen)
         )
         let tiled = space.windows.filter { id in
             state.windows[id]?.isFloating == false

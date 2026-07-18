@@ -50,9 +50,11 @@ public final class SpaceBarManager {
     /// Every painted TOP strip as `(display, strip)`. Floats
     /// must clear a top Space Bar exactly like a top App Bar
     /// (#242) — read the painted strips, never re-derive.
-    public var shownTopStrips: [(
-        display: DisplayID, strip: CGRect
-    )] {
+    public var shownTopStrips:
+        [(
+            display: DisplayID, strip: CGRect
+        )]
+    {
         shownBars
             .filter { $0.style.edge == .top }
             .map { (display: $0.display, strip: $0.strip) }
@@ -69,6 +71,9 @@ public final class SpaceBarManager {
     /// Shows exactly `bars` — one per display — and retires the
     /// overlays of any display no longer in the set.
     public func sync(_ bars: [Bar]) {
+        // This filter, not the overlay's identical guard, is
+        // the one `shownTopStrips` — and thus the float clamp —
+        // depends on: never "simplify" it away.
         let valid = bars.filter {
             !$0.items.isEmpty
                 && $0.strip.width >= 1 && $0.strip.height >= 1

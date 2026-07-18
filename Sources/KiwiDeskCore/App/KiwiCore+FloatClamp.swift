@@ -65,7 +65,8 @@ extension KiwiCore {
         // Top Space Bars occlude the same way (#293): clamp the
         // floats of the space each covered display is showing.
         strips += spaceBars.shownTopStrips.compactMap {
-            display, strip in
+            display,
+            strip in
             state.workspaces.currentSpace(on: display)
                 .map { (space: $0, strip: strip) }
         }

@@ -54,7 +54,7 @@ extension KiwiCore {
     /// identifier and app glyphs. `hide_empty` drops empty
     /// spaces except the current one (it always stays — cold
     /// start must not collapse the strip).
-    private func spaceBarItems(
+    func spaceBarItems(
         display: DisplayID,
         style: SpaceBarStyle
     ) -> [SpaceBarOverlay.Item] {
@@ -128,7 +128,7 @@ extension KiwiCore {
     /// character), or the settled fallbacks: numeric id →
     /// `N.square`, named space → 2-character uppercase
     /// monogram.
-    private func spaceIdentifier(
+    func spaceIdentifier(
         for id: SpaceID
     ) -> SpaceBarItemView.Identifier {
         if let icon = tiler.settings.spaceIcons[id],
@@ -142,12 +142,23 @@ extension KiwiCore {
             }
             // Emoji render untinted (they take no template
             // tint); plain characters follow the state color.
+            // U+FE0F covers text-default scalars forced into
+            // emoji presentation ("❤️", "☀️").
             let emoji = icon.unicodeScalars.contains {
                 $0.properties.isEmojiPresentation
+                    || $0.value == 0xFE0F
             }
             return .text(icon, tinted: !emoji)
         }
-        if Int(id.raw) != nil {
+        // `N.square` exists only for a bounded range (0–50);
+        // probe before trusting it, else fall through to the
+        // monogram like any named space.
+        if Int(id.raw) != nil,
+            NSImage(
+                systemSymbolName: "\(id.raw).square",
+                accessibilityDescription: nil
+            ) != nil
+        {
             return .symbol("\(id.raw).square")
         }
         return .text(
