@@ -83,7 +83,7 @@ struct BorderOrderModeTests {
         )
         #expect(
             backend.lastGeometry?.lineWidth
-                == 6 + BorderGeometry.roundedHiddenOverlap
+                == 6 + BorderGeometry.hiddenOverlapCushion
         )
     }
 
@@ -111,7 +111,7 @@ struct BorderOrderModeTests {
         )
         #expect(
             fallback.lastGeometry?.lineWidth
-                == 6 + BorderGeometry.roundedHiddenOverlap
+                == 6 + BorderGeometry.hiddenOverlapCushion
         )
     }
 }
