@@ -157,6 +157,14 @@ final class SpaceBarItemView: NSView {
         style: SpaceBarStyle,
         overflow: Int = 0
     ) {
+        // A pooled view reused for a different Space drops any
+        // drag-drop cues it was showing for the old one — a stale
+        // hover tint or half-swept spring ring would otherwise
+        // paint on the wrong item (#372, review).
+        if self.space != space {
+            cancelSpringSweep()
+            isDragHovered = false
+        }
         self.space = space
         self.spaceGlyph = spaceGlyph
         self.apps = apps

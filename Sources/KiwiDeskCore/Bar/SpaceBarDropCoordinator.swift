@@ -64,6 +64,10 @@ final class SpaceBarDropCoordinator {
     private(set) var armedSpace: SpaceID?
     /// The space this drag has already sprung into, if any.
     private(set) var sprungSpace: SpaceID?
+    /// The window this gesture is dragging, or nil between
+    /// gestures. Lets an abnormal drag end (window closed / tab
+    /// rekeyed mid-drag) scope its teardown to the right window.
+    private(set) var draggingWindow: WindowID?
     private var dwellTask: Task<Void, Never>?
 
     /// True while a bar target is armed pre-spring — the caller
@@ -72,6 +76,7 @@ final class SpaceBarDropCoordinator {
 
     /// Feed every live drag move (button down).
     func moved(_ id: WindowID, cursor: CGPoint) {
+        draggingWindow = id
         let target = hitTest(cursor)
         // A valid spring target is a bar item that is neither the
         // window's own space nor one we already sprang into.
@@ -92,6 +97,7 @@ final class SpaceBarDropCoordinator {
         let sprung = sprungSpace
         disarm()
         sprungSpace = nil
+        draggingWindow = nil
         if let sprung { return .placeInSprung(sprung) }
         if let target = hitTest(cursor),
             target != currentSpace(id)
@@ -105,6 +111,7 @@ final class SpaceBarDropCoordinator {
     func reset() {
         disarm()
         sprungSpace = nil
+        draggingWindow = nil
     }
 
     private func arm(_ target: SpaceID, _ id: WindowID) {

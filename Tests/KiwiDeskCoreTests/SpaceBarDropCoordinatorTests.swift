@@ -125,6 +125,25 @@ struct SpaceBarDropCoordinatorTests {
         #expect(coord.sprungSpace == nil)
     }
 
+    @Test("reset cancels a pending spring (abandoned drag)")
+    func resetCancelsSpring() async throws {
+        let (coord, rec) = make(
+            current: SpaceID("A"),
+            hit: SpaceID("B"),
+            dwell: 0.05
+        )
+        coord.moved(win, cursor: cursor)
+        #expect(coord.isArmed)
+        #expect(coord.draggingWindow == win)
+        coord.reset()
+        #expect(!coord.isArmed)
+        #expect(coord.draggingWindow == nil)
+        // Wait well past the (tiny) dwell: the spring must never
+        // fire — proven by the gap (200ms vs the 50ms dwell).
+        try await Task.sleep(nanoseconds: 200_000_000)
+        #expect(rec.sprang.isEmpty)
+    }
+
     /// Polls `condition` until true or `timeout` seconds elapse,
     /// yielding between checks. Passing runs exit at once.
     private func untilTrue(

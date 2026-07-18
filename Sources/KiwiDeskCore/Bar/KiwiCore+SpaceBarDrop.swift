@@ -31,6 +31,23 @@ extension KiwiCore {
         }
     }
 
+    /// Abnormal drag end (window closed / native tab rekeyed
+    /// mid-drag): `DragCoordinator.cancel` never fires `onDragEnd`,
+    /// so the gesture teardown that lives there is bypassed. Tear
+    /// the Space Bar drop state down here too, scoped to `id`, so a
+    /// pending dwell can't fire a phantom spring, `sprungSpace`
+    /// can't teleport the next drag, and `dragExemptWindow` can't
+    /// leak onto a reused WindowID (#372, review).
+    func cancelDrag(_ id: WindowID) {
+        drag.cancel(id)
+        if tiler.dragExemptWindow == id {
+            tiler.dragExemptWindow = nil
+        }
+        if spaceBarDrop.draggingWindow == id {
+            spaceBarDrop.reset()
+        }
+    }
+
     /// Springs the visible space to `target` mid-drag without
     /// touching the dragged window (#372): activate + a forced,
     /// un-animated retile, with `window` exempt from

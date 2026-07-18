@@ -166,7 +166,7 @@ extension KiwiCore {
             // echo will never land, and WindowIDs can be reused
             // (#152/#158).
             outstandingSelfRaises.remove(id)
-            drag.cancel(id)
+            cancelDrag(id)
             dragOverlay.hideAll()
             // The switch timestamp is set by the
             // .nativeSpaceChanged event, which the event loop
@@ -204,7 +204,7 @@ extension KiwiCore {
             if pendingFocusRaise == old {
                 pendingFocusRaise = new
             }
-            drag.cancel(old)
+            cancelDrag(old)
         default:
             break
         }

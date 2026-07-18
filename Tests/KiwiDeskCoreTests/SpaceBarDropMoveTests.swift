@@ -57,6 +57,24 @@ struct SpaceBarDropMoveTests {
         )
     }
 
+    @Test("cancelDrag tears down drop state, scoped to the window")
+    func cancelDragTearsDown() {
+        let core = makeCore()
+        addWindow(core, 1)
+        core.tiler.dragExemptWindow = WindowID(1)
+        core.spaceBarDrop.moved(WindowID(1), cursor: .zero)
+        #expect(core.spaceBarDrop.draggingWindow == WindowID(1))
+        // A cancel for a different window leaves the gesture alone.
+        core.cancelDrag(WindowID(2))
+        #expect(core.tiler.dragExemptWindow == WindowID(1))
+        #expect(core.spaceBarDrop.draggingWindow == WindowID(1))
+        // A cancel for the dragged window clears both — no leaked
+        // exemption, no stale spring target for the next drag.
+        core.cancelDrag(WindowID(1))
+        #expect(core.tiler.dragExemptWindow == nil)
+        #expect(core.spaceBarDrop.draggingWindow == nil)
+    }
+
     @Test("Dropping into the sprung (now-active) space files it")
     func filesIntoSprungSpace() {
         let core = makeCore()
