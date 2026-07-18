@@ -10,7 +10,11 @@ app — extracted from [Design decisions](design-decisions.md)
 so feature pages stay about features. Audience: anyone building
 or reviewing a Settings surface. The GUI north-star these serve
 (simplicity, intuitiveness, Apple-native feeling, in that
-order) is defined in `AGENTS.md` §2.
+order) is defined in `AGENTS.md` §2. Entries are cross-cutting
+conventions; the layout-editor entries are included because
+they span all six layout editors, not one pane.
+
+## Help & cross-references
 
 **Per-field help is a click popover behind a `?` right after
 the label, not a hover tooltip (#94).** Rows that warrant a
@@ -78,6 +82,92 @@ spare, and the user already met the field (with its
 label-adjacent `?`) on the global surface. Do not "fix" it
 back inside the row: that re-enters the disabled scope.
 
+**"Lives elsewhere" pointers are links.** Prose that names
+another tab ("configured in the App Bar tab") is a dead end;
+those pointers are `CrossReferenceLink`s in the
+make-default link's quiet style, jumping the sidebar
+selection through an injected `settingsNavigate` environment
+action.
+
+## Choosing a control
+
+**Segmented vs. menu is decided by a rule, not per row
+(#291).** A pick-one control is a `SegmentedPicker` when the
+choices are a *fixed set of 2–4 peers*, every label stays
+short and untruncated at the minimum Settings width **and**
+in the longest shipped localization, and seeing all choices
+at once helps the decision. It is a **menu** (`DropdownRow`)
+when any of: five or more choices; dynamic or user-generated
+choices; long, explanatory, or localization-risk labels; or
+a constrained repeated surface where showing every choice
+would crowd or truncate. A binary is a **toggle**, never two
+segments. Fixed editor-navigation tabs (the Layout Defaults
+mode strip) may exceed four — they switch the visible editor
+rather than edit a value, so the count cap doesn't apply.
+The *same semantic field uses the same control on comparable
+full-width surfaces*: the App Bar global editor and its
+per-layout override rows both render Position / Tab
+background / Active indicator / Content as segments, so the
+two never sit adjacent showing one field two ways. The #291
+audit applied the rule across every editor — converting the
+App Bar fields (global and override), Stack's Master
+orientation / Stack position / Overflow, Track's Overflow,
+Drag's Border alignment, and the Focus border Corners — and
+kept menus where the rule keeps them:
+new-window placement (comparative labels), the seven-option
+Space layout mode, and the dynamic Language and
+Desktop→Profile lists.
+
+**The 384 pt per-Space popover is the documented
+compact-surface exception (#291).** There the inherit
+chrome (a checkbox plus accent bar, `OverrideChrome`) eats
+horizontal width, so its override rows stay menus even for
+2–4-peer fields. `OverridePickerRow` carries a **required**
+`Style` (`.menu` / `.segmented`, no default): the full-width
+App Bar per-layout overrides pass `.segmented`, the per-Space
+popover rows pass `.menu`, and a new override row can't
+silently pick the wrong control for its surface. The
+inherited (unchecked) state comes free from the chrome's
+existing `.disabled` + `.opacity(0.5)` — the segmented pill
+sits on the resolved global value, dimmed. App Bar Content
+("Icon &amp; name" → German "Symbol &amp; Name") is the one
+segmented label tight enough to warrant a real render at
+minimum width; kept segmented by width headroom, it is a
+truncation candidate to re-check when each new locale ships
+(#95), the same recurring de-review discipline the help-glyph
+labels already carry.
+
+**Numeric controls pick one of three idioms by a single
+test.** So Settings reads consistently, a numeric setting's
+control is chosen by *would a user say a specific number out
+loud?* — not by which pane it lives in:
+
+- **`StepperRow`** (typeable field + arrows) for discrete,
+  exact values a user names: counts, ms durations, pt
+  thresholds — master count, columns/rows, track limit,
+  minimum window size, animation duration.
+- **Slider + readout** (no typing) for a continuous feel or
+  proportion tuned by eye: split ratios, master ratio, gaps.
+- **Segmented / toggle** for a non-numeric choice.
+
+Minimum window size migrated slider → `StepperRow` on this
+rule (#204): it is a precise pt threshold, not a feel knob.
+
+**Layout Defaults is a per-mode tab strip, not a stacked
+scroll (#204).** The layout modes are a fixed, small,
+mutually-exclusive set (`LayoutMode` minus Floating), so they
+get a segmented tab strip — one mode's editor visible at a
+time — instead of every mode stacked in one `ScrollView`. The
+strip lands on the profile's most-used mode. The global
+minimum window size is pinned *above* the strip because it
+feeds every mode (and gates the `OverlapStack` overflow
+cascade), so it belongs to none of them. The formerly bundled
+`LayoutParamsEditor` (BSP+Stack) and `ScrollGridEditor`
+(Scrolling+Grid) were split at the mode boundary so each mode
+owns one tab and one schematic.
+
+## Shared visual language
+
 **Option tabs are a solid sliding-pill segment control.**
 Every pick-one-of-few chooser (layout parameters, mouse
 resize, icon picker tabs) uses `SegmentedPicker`
@@ -102,50 +192,52 @@ switcher), a deliberate trade against content-sized
 segments. One control, one look — a chooser reads as "pick
 a tab" everywhere in the settings.
 
-**Segmented vs. menu is decided by a rule, not per row
-(#291).** A pick-one control is a `SegmentedPicker` when the
-choices are a *fixed set of 2–4 peers*, every label stays
-short and untruncated at the minimum Settings width **and**
-in the longest shipped localization, and seeing all choices
-at once helps the decision. It is a **menu** (`DropdownRow`)
-when any of: five or more choices; dynamic or user-generated
-choices; long, explanatory, or localization-risk labels; or
-a constrained repeated surface where showing every choice
-would crowd or truncate. A binary is a **toggle**, never two
-segments. Fixed editor-navigation tabs (the Layout Defaults
-mode strip) may exceed four — they switch the visible editor
-rather than edit a value, so the count cap doesn't apply.
-The *same semantic field uses the same control on comparable
-full-width surfaces*: the App Bar global editor and its
-per-layout override rows both render Position / Tab
-background / Active indicator / Content as segments, so the
-two never sit adjacent showing one field two ways. The #291 audit applied the rule across every editor —
-converting the App Bar fields (global and override), Stack's
-Master orientation / Stack position / Overflow, Track's
-Overflow, Drag's Border alignment, and the Focus border
-Corners — and kept menus where the rule keeps them:
-new-window placement (comparative labels), the seven-option
-Space layout mode, and the dynamic Language and
-Desktop→Profile lists.
+**Sliders share the pill design.** Every value adjuster
+(ratios, gaps, sizes) is a `SettingsSlider`: the same capsule
+track as the segmented picker, a native-style solid white
+thumb that overhangs the track by 2 pt per edge, and a
+full-strength accent fill up to the knob — the earlier
+translucent fill read as disabled. A clear Liquid Glass
+knob was tried and dropped: it refracted the accent fill
+beneath it and turned blue. Accessibility is delegated to a
+native `Slider` representation, so assistive tech sees
+exactly the control it replaces.
 
-**The 384 pt per-Space popover is the documented
-compact-surface exception (#291).** There the inherit
-chrome (a checkbox plus accent bar, `OverrideChrome`) eats
-horizontal width, so its override rows stay menus even for
-2–4-peer fields. `OverridePickerRow` carries a **required**
-`Style` (`.menu` / `.segmented`, no default): the full-width
-App Bar per-layout overrides pass `.segmented`, the per-Space
-popover rows pass `.menu`, and a new override row can't
-silently pick the wrong control for its surface. The
-inherited (unchecked) state comes free from the chrome's
-existing `.disabled` + `.opacity(0.5)` — the segmented pill
-sits on the resolved global value, dimmed. App Bar Content
-("Icon &amp; name" → German "Symbol &amp; Name") is the one
-segmented label tight enough to warrant a real render at
-minimum width; kept segmented by width headroom, it is a
-truncation candidate to re-check when each new locale ships
-(#95), the same recurring de-review discipline the help-glyph
-labels already carry.
+**Buttons stay native; semantic role chooses their class.** No
+gradients, borders, or shadows on buttons — the crisp shadow
+is reserved for controls that slide (pill, slider thumb).
+Class is expressed through native style + control size:
+`.borderedProminent` regular for the one surface commit
+(footer Save, popover confirms); `.bordered` large for row
+actions (Load, Apply, Overrides, Set Gap Values), level with
+large dropdowns; `.bordered` regular for stateful input
+triggers (the shortcut recorder); and `.borderless` regular
+for icon-only row actions (trash, ×-clear, rename). List-add
+actions stay `.bordered`; `.plain` + underline is reserved
+for inline prose links. Small controls are subordinate inline
+or popover utilities (Shortcuts import, override resets), never
+a normal row action. Native macOS shape differences between
+these classes are intentional — choose by semantic role, not
+by a desired silhouette.
+
+**A recording shortcut field wears an accent halo.** The
+armed recorder among dozens of identical rows gets an accent
+fill + ring extending slightly past the button — the same
+accent-layer vocabulary as `OverrideChrome`'s active rows —
+because a tinted border plus a label swap alone was too
+quiet to spot at list speed.
+
+**Status badges stay flat.** The thumb/pill shadow is the
+settings' vocabulary for "interactive, movable"; putting it
+on a passive `BadgeChip` would promise interaction the chip
+doesn't have. Depth comes from the hairline stroke both chip
+types now share, matching the flat capsule language of
+native tags. A non-interactive value state in a control row
+(the slot size's "Auto — orientation standard") renders in
+the same capsule language rather than as bare gray prose,
+which read as skippable filler.
+
+## Row layout & alignment
 
 **Row order within a section is fixed-tier, not
 usage-frequency.** A field's vertical position is decided by
@@ -200,45 +292,60 @@ after Arrange) down to tier 3 after Overflow, so all five
 layout editors now place new-window placement last among
 their schematic-tied rows.
 
-**Sliders share the pill design.** Every value adjuster
-(ratios, gaps, sizes) is a `SettingsSlider`: the same capsule
-track as the segmented picker, a native-style solid white
-thumb that overhangs the track by 2 pt per edge, and a
-full-strength accent fill up to the knob — the earlier
-translucent fill read as disabled. A clear Liquid Glass
-knob was tried and dropped: it refracted the accent fill
-beneath it and turned blue. Accessibility is delegated to a
-native `Slider` representation, so assistive tech sees
-exactly the control it replaces.
+**Rows share one label axis and one readout column.** Every
+labeled control row (slider, segmented picker, dropdown)
+puts its label in the same fixed-width column
+(`SettingsMetrics.labelColumn`), so controls start on one
+imaginary line across sections instead of each row picking
+its own label width; slider readouts share one trailing
+column the same way. The rows read the column from the
+environment (`\.settingsLabelColumn`), and `OverrideChrome`
+narrows it once (`overrideLabelColumn`, paying for its
+checkbox prefix) — so a shared row dropped into override
+chrome lands on the plain rows' control axis by
+construction, not by remembering a width parameter. Numeric steppers are the
+deliberate exception: label leading, then an **editable
+monospaced field** plus arrows trailing (the native
+System-Settings numeric layout) — a value embedded in the
+label string ("Columns: 3") read as static text, and even a
+plain readout beside arrows read as passive, so the value is
+a real `TextField` (type a number, or use the arrows) that
+commits and clamps on Return / focus loss. An optional unit
+`suffix` ("ms") sits between the field and the arrows. The color grid is the other exception: its
+two-column `HexColorField` layout keeps its own label width
+(`colorLabelColumn`), because the shared axis would misalign
+the grid's second column. Dropdowns ride the axis via
+`DropdownRow` and take `.controlSize(.large)` so a menu
+button's height sits with the capsule tracks around it.
+Within a section, a `Divider` separates geometry controls
+from the behavior dropdowns (overflow, new-window placement)
+— eight-point uniform spacing alone let unrelated rows read
+as one group.
 
-**Numeric controls pick one of three idioms by a single
-test.** So Settings reads consistently, a numeric setting's
-control is chosen by *would a user say a specific number out
-loud?* — not by which pane it lives in:
+**Preview alignment splits on standalone-vs-paired, not by
+tab.** (ui-designer consult 2026-07-14.) A settings preview is
+aligned one of two ways, and which one is decided by whether
+controls sit right next to it — never by which tab it's on:
 
-- **`StepperRow`** (typeable field + arrows) for discrete,
-  exact values a user names: counts, ms durations, pt
-  thresholds — master count, columns/rows, track limit,
-  minimum window size, animation duration.
-- **Slider + readout** (no typing) for a continuous feel or
-  proportion tuned by eye: split ratios, master ratio, gaps.
-- **Segmented / toggle** for a non-numeric choice.
+- **Standalone illustration** (a Layout schematic, the App Bar
+  mock strip) — centered in its card with a caption below.
+  Nothing is edited *on* it and no control column shares its
+  row, so there is no leading edge to line up against; it reads
+  as a figure, the way macOS System Settings centers a
+  wallpaper thumbnail or screen-saver preview over its label.
+- **Preview paired with the exact controls in the same card**
+  (the Gaps diagram + its outer/inner legend, the Drag Ghost /
+  Drop-zone columns) — left-aligned, flush with the control
+  rows it drives, so preview and controls read as one stack
+  (the accent-swatch / Displays-arrangement pattern).
 
-Minimum window size migrated slider → `StepperRow` on this
-rule (#204): it is a precise pt threshold, not a feel knob.
+So Layout schematics and the App Bar strip are *both* centered
+(they are the same kind of thing); Gaps and Drag are left —
+that apparent Layout-vs-Appearance inconsistency is really this
+one correct rule. A new preview picks its bucket by asking "are
+its controls right here beside it," not by copying its tab.
 
-**Layout Defaults is a per-mode tab strip, not a stacked
-scroll (#204).** The layout modes are a fixed, small,
-mutually-exclusive set (`LayoutMode` minus Floating), so they
-get a segmented tab strip — one mode's editor visible at a
-time — instead of every mode stacked in one `ScrollView`. The
-strip lands on the profile's most-used mode. The global
-minimum window size is pinned *above* the strip because it
-feeds every mode (and gates the `OverlapStack` overflow
-cascade), so it belongs to none of them. The formerly bundled
-`LayoutParamsEditor` (BSP+Stack) and `ScrollGridEditor`
-(Scrolling+Grid) were split at the mode boundary so each mode
-owns one tab and one schematic.
+## Previews & schematics
 
 **Layout schematics are static previews of staged values, not
 live (#125).** Every layout mode's tab leads with a small
@@ -293,6 +400,8 @@ presence surfaces as live On/Off state in the `CrossReferenceRow`
 that points at the App Bar destination (#229), keeping app-bar
 ownership whole.
 
+## Labels & wire names
+
 **A GUI label may diverge from the Lua/JSON wire name when the
 label alone is ambiguous (#217).** The Grid picker shows
 "Arrange: Columns first / Rows first"; the wire vocabulary
@@ -334,75 +443,7 @@ disambiguate. Fix the label, never the wire; §5's one-vocabulary
 rule (Lua == JSON) holds either way and is orthogonal to this
 GUI↔wire question.
 
-**Rows share one label axis and one readout column.** Every
-labeled control row (slider, segmented picker, dropdown)
-puts its label in the same fixed-width column
-(`SettingsMetrics.labelColumn`), so controls start on one
-imaginary line across sections instead of each row picking
-its own label width; slider readouts share one trailing
-column the same way. The rows read the column from the
-environment (`\.settingsLabelColumn`), and `OverrideChrome`
-narrows it once (`overrideLabelColumn`, paying for its
-checkbox prefix) — so a shared row dropped into override
-chrome lands on the plain rows' control axis by
-construction, not by remembering a width parameter. Numeric steppers are the
-deliberate exception: label leading, then an **editable
-monospaced field** plus arrows trailing (the native
-System-Settings numeric layout) — a value embedded in the
-label string ("Columns: 3") read as static text, and even a
-plain readout beside arrows read as passive, so the value is
-a real `TextField` (type a number, or use the arrows) that
-commits and clamps on Return / focus loss. An optional unit
-`suffix` ("ms") sits between the field and the arrows. The color grid is the other exception: its
-two-column `HexColorField` layout keeps its own label width
-(`colorLabelColumn`), because the shared axis would misalign
-the grid's second column. Dropdowns ride the axis via
-`DropdownRow` and take `.controlSize(.large)` so a menu
-button's height sits with the capsule tracks around it.
-Within a section, a `Divider` separates geometry controls
-from the behavior dropdowns (overflow, new-window placement)
-— eight-point uniform spacing alone let unrelated rows read
-as one group.
-
-**Preview alignment splits on standalone-vs-paired, not by
-tab.** (ui-designer consult 2026-07-14.) A settings preview is
-aligned one of two ways, and which one is decided by whether
-controls sit right next to it — never by which tab it's on:
-
-- **Standalone illustration** (a Layout schematic, the App Bar
-  mock strip) — centered in its card with a caption below.
-  Nothing is edited *on* it and no control column shares its
-  row, so there is no leading edge to line up against; it reads
-  as a figure, the way macOS System Settings centers a
-  wallpaper thumbnail or screen-saver preview over its label.
-- **Preview paired with the exact controls in the same card**
-  (the Gaps diagram + its outer/inner legend, the Drag Ghost /
-  Drop-zone columns) — left-aligned, flush with the control
-  rows it drives, so preview and controls read as one stack
-  (the accent-swatch / Displays-arrangement pattern).
-
-So Layout schematics and the App Bar strip are *both* centered
-(they are the same kind of thing); Gaps and Drag are left —
-that apparent Layout-vs-Appearance inconsistency is really this
-one correct rule. A new preview picks its bucket by asking "are
-its controls right here beside it," not by copying its tab.
-
-**Buttons stay native; semantic role chooses their class.** No
-gradients, borders, or shadows on buttons — the crisp shadow
-is reserved for controls that slide (pill, slider thumb).
-Class is expressed through native style + control size:
-`.borderedProminent` regular for the one surface commit
-(footer Save, popover confirms); `.bordered` large for row
-actions (Load, Apply, Overrides, Set Gap Values), level with
-large dropdowns; `.bordered` regular for stateful input
-triggers (the shortcut recorder); and `.borderless` regular
-for icon-only row actions (trash, ×-clear, rename). List-add
-actions stay `.bordered`; `.plain` + underline is reserved
-for inline prose links. Small controls are subordinate inline
-or popover utilities (Shortcuts import, override resets), never
-a normal row action. Native macOS shape differences between
-these classes are intentional — choose by semantic role, not
-by a desired silhouette.
+## Interaction states
 
 **Hover confirms custom hit areas; it never creates the only
 affordance.** Native bordered/prominent buttons, sidebars,
@@ -418,30 +459,6 @@ control also needs an explicit accessibility label (and concise
 hint when the action is not obvious), a visible keyboard-focus
 state, and a recognizable rest treatment or list context —
 `.help()` and hover alone do not make a control discoverable.
-
-**A recording shortcut field wears an accent halo.** The
-armed recorder among dozens of identical rows gets an accent
-fill + ring extending slightly past the button — the same
-accent-layer vocabulary as `OverrideChrome`'s active rows —
-because a tinted border plus a label swap alone was too
-quiet to spot at list speed.
-
-**Status badges stay flat.** The thumb/pill shadow is the
-settings' vocabulary for "interactive, movable"; putting it
-on a passive `BadgeChip` would promise interaction the chip
-doesn't have. Depth comes from the hairline stroke both chip
-types now share, matching the flat capsule language of
-native tags. A non-interactive value state in a control row
-(the slot size's "Auto — orientation standard") renders in
-the same capsule language rather than as bare gray prose,
-which read as skippable filler.
-
-**"Lives elsewhere" pointers are links.** Prose that names
-another tab ("configured in the App Bar tab") is a dead end;
-those pointers are `CrossReferenceLink`s in the
-make-default link's quiet style, jumping the sidebar
-selection through an injected `settingsNavigate` environment
-action.
 
 **Inapplicable controls are greyed, not hidden.** When a
 setting makes another control inert — Auto-size grid overrides

@@ -155,8 +155,8 @@ GitHub:
   event stream
 - [Recipes](docs/recipes/index.md) — SketchyBar, JankyBorders,
   and other ready-to-copy integrations
-- [Design decisions](docs/design-decisions.md) — why the Settings
-  app behaves the way it does
+- [Design decisions](docs/design-decisions.md) — the why behind
+  settled product and UX behavior
 
 ## Contributing
 

@@ -105,7 +105,9 @@ at directory altitude — see **`docs/architecture.md`**.
    the user grows into, not a cost paid upfront; simplicity-first is
    the entry point, not the ceiling (the #326 panel is the shape: a
    glance surface with one "Edit in Settings…" bridge down to the
-   full editor). See `docs/design-decisions.md`.
+   full editor). See `docs/design-decisions.md`; the shared
+   Settings control conventions (help affordance, control
+   choice, row tiers) are elaborated in `docs/ui-patterns.md`.
    Settled conventions that fall out of this
    (extend, don't relitigate): **group by topic, never by widget
    type** — a toggle and the control it gates are one decision, so
@@ -140,9 +142,10 @@ at directory altitude — see **`docs/architecture.md`**.
    (the Settings app & GUI flows), `docs/cli.md` (commands,
    events, IPC), `docs/recipes/` (integration recipes),
    `docs/design-decisions.md` (when a settled product/UX
-   decision is made or changed) — and `plan/` when the design
-   itself shifts. Code and docs must never describe different
-   behavior.
+   decision is made or changed), `docs/ui-patterns.md` (when a
+   shared Settings control convention is added or changed) —
+   and `plan/` when the design itself shifts. Code and docs
+   must never describe different behavior.
    The marketing/docs **site (`site/`)** renders `docs/` through
    a symlink, so doc *content* edits flow to it automatically —
    never hand-copy a doc into `site/`. But the site is not fully
