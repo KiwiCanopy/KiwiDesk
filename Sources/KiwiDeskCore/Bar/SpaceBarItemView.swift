@@ -191,16 +191,20 @@ final class SpaceBarItemView: NSView {
     }
 
     private var boxColor: NSColor {
+        // Active wins over hover (matching `stateColor` and the
+        // mouseEntered guard): a click that activates the item
+        // under the pointer must not leave it hover-tinted.
+        if isActive, style.tabBackground == .boxed {
+            return NSColor(kiwiHex: style.activeBoxColor)
+        }
+        if isActive { return .clear }
         if isHovered {
             return NSColor(kiwiHex: style.hoverColor)
         }
         guard style.tabBackground == .boxed else {
             return .clear
         }
-        return NSColor(
-            kiwiHex: isActive
-                ? style.activeBoxColor : style.boxColor
-        )
+        return NSColor(kiwiHex: style.boxColor)
     }
 
     /// The state tier a tinted element takes: active space

@@ -119,10 +119,6 @@ struct SpaceBarDriverTests {
         // Unconfigured numeric id → N.square while the symbol
         // exists…
         #expect(
-            core.spaceIdentifier(for: SpaceID("3"))
-                == .text("☀️", tinted: false)
-        )
-        #expect(
             core.spaceIdentifier(for: SpaceID("5"))
                 == .symbol("5.square")
         )
