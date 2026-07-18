@@ -13,9 +13,10 @@ import Foundation
 extension TilingSettings: Codable {
     // MARK: - Codable
 
-    private enum CodingKeys: String, CodingKey {
+    enum CodingKeys: String, CodingKey {
         case animations
         case appBar = "app_bar"
+        case spaceBar = "space_bar"
         case border
         case drag
         case gap
@@ -31,32 +32,32 @@ extension TilingSettings: Codable {
         case space
     }
 
-    private enum QuitKeys: String, CodingKey {
+    enum QuitKeys: String, CodingKey {
         case layout
         case gridTargetDepth = "grid_target_depth"
     }
 
-    private enum SpaceKeys: String, CodingKey {
+    enum SpaceKeys: String, CodingKey {
         case icon
     }
 
-    private enum ResizeKeys: String, CodingKey {
+    enum ResizeKeys: String, CodingKey {
         case feedback
         case step
     }
 
-    private enum DragKeys: String, CodingKey {
+    enum DragKeys: String, CodingKey {
         case cornerRadius = "corner_radius"
         case dropZone = "drop_zone"
         case ghost
     }
 
-    private enum GapKeys: String, CodingKey {
+    enum GapKeys: String, CodingKey {
         case global
         case `override`
     }
 
-    private enum LayoutKeys: String, CodingKey {
+    enum LayoutKeys: String, CodingKey {
         case bsp
         case grid
         case monocle
@@ -94,6 +95,11 @@ extension TilingSettings: Codable {
                 AppBarStyle.self,
                 forKey: .appBar
             ) ?? AppBarStyle()
+        spaceBarStyle =
+            try container.decodeIfPresent(
+                SpaceBarStyle.self,
+                forKey: .spaceBar
+            ) ?? SpaceBarStyle()
         borderStyle =
             try container.decodeIfPresent(
                 BorderStyle.self,
@@ -271,74 +277,5 @@ extension TilingSettings: Codable {
                 defaults: .dropZoneDefault
             )
         }
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(
-            keyedBy: CodingKeys.self
-        )
-        try container.encode(
-            minWindowSize,
-            forKey: .minWindowSize
-        )
-        try container.encode(
-            swapSkipsCascade,
-            forKey: .swapSkipsCascade
-        )
-        try container.encode(
-            placementOverride,
-            forKey: .placementOverride
-        )
-        try container.encode(appBarStyle, forKey: .appBar)
-        try container.encode(borderStyle, forKey: .border)
-        try container.encode(animations, forKey: .animations)
-        try container.encode(mouseResize, forKey: .mouseResize)
-        try container.encode(mouse, forKey: .mouse)
-        var gap = container.nestedContainer(
-            keyedBy: GapKeys.self,
-            forKey: .gap
-        )
-        try gap.encode(gapsGlobal, forKey: .global)
-        try gap.encode(gapsOverride, forKey: .override)
-        var layout = container.nestedContainer(
-            keyedBy: LayoutKeys.self,
-            forKey: .layout
-        )
-        try layout.encode(bsp, forKey: .bsp)
-        try layout.encode(grid, forKey: .grid)
-        try layout.encode(monocle, forKey: .monocle)
-        try layout.encode(scrolling, forKey: .scroll)
-        try layout.encode(stack, forKey: .stack)
-        try layout.encode(track, forKey: .track)
-        var drag = container.nestedContainer(
-            keyedBy: DragKeys.self,
-            forKey: .drag
-        )
-        try drag.encode(
-            dragCornerRadius,
-            forKey: .cornerRadius
-        )
-        try drag.encode(dragGhost, forKey: .ghost)
-        try drag.encode(dragDropZone, forKey: .dropZone)
-        var space = container.nestedContainer(
-            keyedBy: SpaceKeys.self,
-            forKey: .space
-        )
-        try space.encode(spaceIcons, forKey: .icon)
-        var resize = container.nestedContainer(
-            keyedBy: ResizeKeys.self,
-            forKey: .resize
-        )
-        try resize.encode(resizeStep, forKey: .step)
-        try resize.encode(resizeFeedback, forKey: .feedback)
-        var quit = container.nestedContainer(
-            keyedBy: QuitKeys.self,
-            forKey: .quit
-        )
-        try quit.encode(quitLayout, forKey: .layout)
-        try quit.encode(
-            quitGridTargetDepth,
-            forKey: .gridTargetDepth
-        )
     }
 }

@@ -101,6 +101,10 @@ extension KiwiCore {
             // this is the only refresh they get; focus-driven
             // layouts retile and refresh again (cheap, idempotent).
             updateBorders()
+            // The Space Bar's focused-glyph accent follows the
+            // same rule (#293): layout-independent, so it can't
+            // ride the focus-driven retile alone.
+            updateSpaceBar()
             // Warp only for focus changes KiwiDesk did not
             // make itself (cmd+tab, app-driven focus): a
             // self-raise already warped at intent time in

@@ -26,6 +26,30 @@ extension KiwiCore {
         }
     }
 
+    /// `space_bar.set_*` (#293) — the Space Bar is global-only,
+    /// so this is the whole command surface (no override route).
+    func spaceBarCommand(
+        _ command: String,
+        _ args: [JSONValue]
+    ) -> CommandResponse {
+        guard command.hasPrefix("space_bar.set_") else {
+            return .fail("unknown command: \(command)")
+        }
+        let field = String(
+            command.dropFirst("space_bar.set_".count)
+        )
+        switch SpaceBarCommandSetting.parse(
+            field: field,
+            args: args
+        ) {
+        case .success(let setting):
+            setting.apply(to: &tiler.settings.spaceBarStyle)
+            return .ok()
+        case .failure(let error):
+            return .fail(error.message)
+        }
+    }
+
     /// Applies a layout's `*.set_app_bar_<field>` override.
     /// `enabled` is the layout's own concrete toggle; every
     /// other field writes an override of the global style.

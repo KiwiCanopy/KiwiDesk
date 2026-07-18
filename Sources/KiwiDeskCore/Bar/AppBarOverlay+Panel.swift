@@ -45,28 +45,10 @@ extension AppBarOverlay {
         }
     }
 
-    /// Like the drag visuals' panels, but clickable: items
-    /// focus their window on click. `.nonactivatingPanel`
-    /// keeps KiwiDesk out of the key window order anyway.
+    /// Items focus their window on click; the shared panel
+    /// shell comes from `BarPanel` (#293).
     func makePanel() -> NSPanel {
-        let panel = NSPanel(
-            contentRect: .zero,
-            styleMask: [.borderless, .nonactivatingPanel],
-            backing: .buffered,
-            defer: true
-        )
-        panel.isOpaque = false
-        panel.backgroundColor = .clear
-        panel.hasShadow = false
-        panel.ignoresMouseEvents = false
-        panel.level = .floating
-        panel.isReleasedWhenClosed = false
-        panel.animationBehavior = .none
-        panel.collectionBehavior = [
-            .canJoinAllSpaces,
-            .fullScreenAuxiliary,
-            .ignoresCycle,
-        ]
+        let panel = BarPanel.makeNonActivating()
         let view = FlippedView()
         view.wantsLayer = true
         panel.contentView = view

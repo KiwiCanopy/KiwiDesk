@@ -1636,6 +1636,218 @@ scroll.set_app_bar_enabled(true)
 scroll.set_app_bar_tab_background("plain")  -- override for scrolling
 ```
 
+## Space Bar
+
+The Space Bar (#293) is an always-visible overview of your
+Spaces: one bar per display, listing that display's Spaces in
+profile order — each item shows the Space's identifier
+(configured icon, else `N.square` for numeric ids or a
+two-letter monogram for named ones) plus a compact glyph per
+window in that Space. Clicking a Space switches to it. App
+glyphs are informational — not click targets.
+
+The bar is **layout-independent** and reserves real screen area
+on its edge before any layout runs. It may share an edge with
+the App Bar: the Space Bar always sits at the screen edge, the
+App Bar next to the windows, and the insets add. All settings
+are global — there are no per-layout overrides.
+
+Two accents distinguish states: `text_color` paints inactive
+Spaces, `active_text_color` the active Space, and
+`focused_item_color` the focused window's glyph inside the
+active Space.
+
+### space_bar.set_enabled
+
+**Expects:** boolean (default `false`).
+
+**Does:** shows or hides the Space Bar. A disabled bar reserves
+no area.
+
+**Example:**
+
+```lua
+space_bar.set_enabled(true)
+```
+
+### space_bar.set_edge
+
+**Expects:** `"top"`, `"bottom"`, `"left"`, or `"right"`
+(default `"left"`).
+
+**Does:** sets the screen edge the bar occupies. Sharing an
+edge with the App Bar is supported: the Space Bar stays
+screen-facing, the App Bar window-facing.
+
+**Example:**
+
+```lua
+space_bar.set_edge("left")
+```
+
+### space_bar.set_thickness
+
+**Expects:** depth in points (default `32`).
+
+**Does:** sets the depth of the reserved strip.
+
+**Example:**
+
+```lua
+space_bar.set_thickness(28)
+```
+
+### space_bar.set_item_size
+
+**Expects:** length in points; `0` (default) = auto.
+
+**Does:** pins every Space item to one length along the bar.
+Auto sizes each item to its content (identifier + glyphs).
+
+**Example:**
+
+```lua
+space_bar.set_item_size(0)
+```
+
+### space_bar.set_item_gap
+
+**Expects:** points (default `6`).
+
+**Does:** sets the spacing between Space items.
+
+**Example:**
+
+```lua
+space_bar.set_item_gap(6)
+```
+
+### space_bar.set_font_size
+
+**Expects:** points; `0` (default) = auto (scales with
+thickness).
+
+**Does:** pins the identifier / glyph text size.
+
+**Example:**
+
+```lua
+space_bar.set_font_size(0)
+```
+
+### space_bar.set_icon_source
+
+**Expects:** `"app_image"` or `"app_font"` (default
+`"app_image"`).
+
+**Does:** how app glyphs are drawn — the native app image, or a
+monochrome App Font glyph following the bar's text colors. An
+app with no image falls back to the App Font either way.
+
+**Example:**
+
+```lua
+space_bar.set_icon_source("app_font")
+```
+
+### space_bar.set_tab_background
+
+**Expects:** `"boxed"` or `"plain"` (default `"boxed"`).
+
+**Does:** boxes each Space item, or draws all items on one
+shared strip — same vocabulary as the App Bar.
+
+**Example:**
+
+```lua
+space_bar.set_tab_background("boxed")
+```
+
+### space_bar.set_active_indicator
+
+**Expects:** `"ring"`, `"edge_mark"`, or `"gap"` (default
+`"ring"`).
+
+**Does:** how the active Space is marked. `gap` draws no shape
+marker (colors alone carry the state) — unlike the App Bar, the
+active Space's item is never hidden.
+
+**Example:**
+
+```lua
+space_bar.set_active_indicator("ring")
+```
+
+### space_bar.set_corner_roundness
+
+**Expects:** percent 0–100 (default `50`).
+
+**Does:** corner rounding as a percentage of the maximum, like
+the App Bar.
+
+**Example:**
+
+```lua
+space_bar.set_corner_roundness(50)
+```
+
+### space_bar.set_show_front_app
+
+**Expects:** boolean (default `false`).
+
+**Does:** reserved for the trailing front-app segment
+(`| <icon + app name>`); rendering lands with the runtime
+polish stage.
+
+**Example:**
+
+```lua
+space_bar.set_show_front_app(false)
+```
+
+### space_bar.set_hide_empty
+
+**Expects:** boolean (default `false`).
+
+**Does:** hides Spaces with no windows from the bar — except
+the Space you are currently on, which always stays (so a cold
+start never collapses the strip). Hidden Spaces remain
+reachable by shortcut.
+
+**Example:**
+
+```lua
+space_bar.set_hide_empty(true)
+```
+
+### Space Bar colors
+
+Same `#RRGGBB` / `#RRGGBBAA` grammar as every other color
+setting. The three-state ladder is the bar's signature:
+
+- `space_bar.set_text_color` — inactive Spaces (default
+  `#F2EBD966`).
+- `space_bar.set_active_text_color` — the active Space's
+  identifier and glyphs (default `#4E9F3D`).
+- `space_bar.set_focused_item_color` — the focused window's
+  glyph inside the active Space (default `#6DBF5B`).
+- `space_bar.set_hover_color` / `space_bar.set_hover_text_color`
+  — hover tint on non-active items.
+- `space_bar.set_box_color` / `space_bar.set_active_box_color` /
+  `space_bar.set_highlight_color` /
+  `space_bar.set_background_color` — as the App Bar.
+- `space_bar.set_group_badge_color` /
+  `space_bar.set_group_badge_text_color` — the count badges
+  (grouping and the overflow cap land with the runtime polish
+  stage).
+
+**Example:**
+
+```lua
+space_bar.set_active_text_color("#4E9F3D")
+space_bar.set_focused_item_color("#6DBF5B")
+```
+
 ## Where New Windows Land
 
 ### set_new_window_placement_override

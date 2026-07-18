@@ -116,6 +116,19 @@ extension TilingSettings {
         }
     }
 
+    /// The bounds layouts may use on a display whose visible
+    /// frame is `visible`: the frame minus the Space Bar's
+    /// reservation (#293). The one seam between a screen's raw
+    /// visible frame and `context(bounds:space:)` — every
+    /// caller routes through it so no flow can silently skip
+    /// the inset.
+    public func layoutBounds(from visible: CGRect) -> CGRect {
+        SpaceBarGeometry.remainingFrame(
+            in: visible,
+            style: spaceBarStyle
+        )
+    }
+
     public func context(
         bounds: CGRect,
         space: Space
