@@ -78,15 +78,14 @@ struct GlobalAppBarSection: View {
 
     @ViewBuilder private var behavior: some View {
         SegmentedPicker(
-            positionLabel,
-            selection: $style.position,
-            options: AppBarOptions.position.map { ($0.1, $0.0) },
+            edgeLabel,
+            selection: $style.edge,
+            options: AppBarOptions.edge.map { ($0.1, $0.0) },
             help: L(
-                "app_bar.position.label.help",
-                "Which end of the bar the window tabs pack "
-                    + "toward. The concrete edge follows the "
-                    + "active layout's axis: Start is the left "
-                    + "(or top) edge, End the right (or bottom)."
+                "app_bar.edge.label.help",
+                "Which screen edge the bar occupies. The bar "
+                    + "reserves this edge in every layout that "
+                    + "shows it."
             )
         )
         SegmentedPicker(
@@ -289,8 +288,8 @@ struct GlobalAppBarSection: View {
                 + "override any of these below."
         )
     }
-    private var positionLabel: String {
-        L("app_bar.position.label", "Position")
+    private var edgeLabel: String {
+        L("app_bar.edge.label", "Position")
     }
     private var tabBackgroundLabel: String {
         L("app_bar.tab_background.label", "Tab background")

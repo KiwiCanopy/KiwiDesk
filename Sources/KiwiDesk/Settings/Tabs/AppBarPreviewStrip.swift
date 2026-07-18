@@ -11,16 +11,11 @@ import SwiftUI
 /// the normal / active / badge color sets in one glance; hover
 /// colors have no static state to show and are left to the rows.
 ///
-/// The strip always draws **horizontally** and names the chosen
-/// position in the caption, rather than rotating to a vertical
-/// bar for left/right. Reason: the real bar's edge is decided by
-/// the *active layout's* axis (`AppBarHosting.resolvedBar` derives
-/// the concrete `AppBarEdge`), which a layout-agnostic global
-/// preview can't know — a vertical mock would confidently show a
-/// left bar the running layout renders on top. A horizontal sample
-/// + a "Position: Start" label is honest about what's a
-/// color/style choice (shown) vs. an edge the layout resolves
-/// (named).
+/// The strip is **edge-aware** (#293): the stored `edge` is
+/// absolute (no longer resolved from the active layout's axis),
+/// so the mock can honestly rotate — a vertical column for
+/// left/right, a horizontal row for top/bottom — and the caption
+/// names the chosen edge.
 ///
 /// This is a **schematic, not a pixel-mirror**: it re-expresses
 /// the runtime bar's field→look mapping (box color, active
@@ -52,7 +47,7 @@ struct AppBarPreviewStrip: View {
     // MARK: - Strip
 
     private var strip: some View {
-        HStack(spacing: gap) {
+        stack {
             ForEach(mockTabs) { tab($0) }
         }
         .padding(4)
@@ -73,10 +68,21 @@ struct AppBarPreviewStrip: View {
         )
     }
 
+    /// Row on top/bottom, column on left/right.
+    @ViewBuilder private func stack<C: View>(
+        @ViewBuilder content: () -> C
+    ) -> some View {
+        if style.edge.isHorizontal {
+            HStack(spacing: gap) { content() }
+        } else {
+            VStack(spacing: gap) { content() }
+        }
+    }
+
     @ViewBuilder private func tab(_ t: MockTab) -> some View {
         if t.active, style.activeIndicator == .gap {
             // Active item hidden — leave the gap it would occupy.
-            Color.clear.frame(width: slotLength, height: thickness)
+            Color.clear.frame(width: slotWidth, height: slotHeight)
         } else {
             tabBox(t)
         }
@@ -84,7 +90,7 @@ struct AppBarPreviewStrip: View {
 
     private func tabBox(_ t: MockTab) -> some View {
         tabContent(t)
-            .frame(width: slotLength, height: thickness)
+            .frame(width: slotWidth, height: slotHeight)
             .background(
                 RoundedRectangle(
                     cornerRadius: style.tabBackground == .boxed
@@ -165,22 +171,33 @@ struct AppBarPreviewStrip: View {
         }
     }
 
-    private var edgeMarkAccent: some View {
-        // Start puts the bar on top, so the window-facing edge is
-        // the bottom; End is the reverse. Inset to the box corner
-        // on Boxed so it sits flush inside the curve.
-        Rectangle()
-            .fill(color(style.highlightColor))
-            .frame(height: 2)
-            .padding(
-                .horizontal,
-                style.tabBackground == .boxed ? corner : 0
-            )
-            .frame(
-                maxHeight: .infinity,
-                alignment: style.position == .start
-                    ? .bottom : .top
-            )
+    @ViewBuilder private var edgeMarkAccent: some View {
+        // The mark sits on the tab's window-facing side: a top
+        // bar faces down, a bottom bar up, a left bar right, a
+        // right bar left. Inset to the box corner on Boxed so it
+        // sits flush inside the curve.
+        let inset = style.tabBackground == .boxed ? corner : 0
+        if style.edge.isHorizontal {
+            Rectangle()
+                .fill(color(style.highlightColor))
+                .frame(height: 2)
+                .padding(.horizontal, inset)
+                .frame(
+                    maxHeight: .infinity,
+                    alignment: style.edge == .top
+                        ? .bottom : .top
+                )
+        } else {
+            Rectangle()
+                .fill(color(style.highlightColor))
+                .frame(width: 2)
+                .padding(.vertical, inset)
+                .frame(
+                    maxWidth: .infinity,
+                    alignment: style.edge == .left
+                        ? .trailing : .leading
+                )
+        }
     }
 
     @ViewBuilder private func badge(_ t: MockTab) -> some View {
@@ -232,15 +249,23 @@ struct AppBarPreviewStrip: View {
         scale(style.thickness, from: 8...80, to: 14...44)
     }
 
-    /// Real gap 0–40 pt → 0–16 pt.
+    /// Real gap 0–40 pt → 0–16 pt (0–8 pt on a vertical bar,
+    /// where the canvas height budgets the axis).
     private var gap: CGFloat {
-        scale(style.itemGap, from: 0...40, to: 0...16)
+        style.edge.isHorizontal
+            ? scale(style.itemGap, from: 0...40, to: 0...16)
+            : scale(style.itemGap, from: 0...40, to: 0...8)
     }
 
     /// The shared %-resolve against the preview's own (scaled)
-    /// thickness, so the mock rounds like the runtime bar.
+    /// thickness, so the mock rounds like the runtime bar;
+    /// clamped to the slot's smaller dimension so a vertical
+    /// bar's short slots keep sane corners.
     private var corner: CGFloat {
-        style.resolvedCornerRadius(forThickness: thickness)
+        min(
+            style.resolvedCornerRadius(forThickness: thickness),
+            min(slotWidth, slotHeight) / 2
+        )
     }
 
     /// Item length along the bar axis: honor an explicit
@@ -255,6 +280,27 @@ struct AppBarPreviewStrip: View {
         case .name: return 44
         case .iconAndName: return 56
         }
+    }
+
+    /// Length along a **vertical** bar's axis, compressed so
+    /// three slots plus gaps stay inside the 84 pt canvas
+    /// (3 × 20 + 2 × 8 + padding = 84 at the maxima). The
+    /// item-size slider still visibly moves the mock.
+    private var verticalSlotLength: CGFloat {
+        if style.itemSize > 0 {
+            return scale(style.itemSize, from: 1...200, to: 16...20)
+        }
+        return 18
+    }
+
+    /// Concrete slot frame for the current orientation: along a
+    /// horizontal bar the length runs in x and the thickness in
+    /// y; a vertical bar swaps them.
+    private var slotWidth: CGFloat {
+        style.edge.isHorizontal ? slotLength : thickness
+    }
+    private var slotHeight: CGFloat {
+        style.edge.isHorizontal ? thickness : verticalSlotLength
     }
 
     /// Linear map of `value` from one closed range onto another,
@@ -277,6 +323,6 @@ struct AppBarPreviewStrip: View {
         let base =
             style.fontSize > 0
             ? style.fontSize : thickness * 0.42
-        return min(base, thickness * 0.55)
+        return min(base, thickness * 0.55, slotHeight * 0.55)
     }
 }

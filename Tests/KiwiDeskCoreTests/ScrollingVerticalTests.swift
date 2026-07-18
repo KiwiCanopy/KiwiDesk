@@ -13,11 +13,20 @@ private func makeContext(
     gaps: Gaps = .uniform(10),
     focused: WindowID? = nil
 ) -> LayoutContext {
-    LayoutContext(bounds: bounds, gaps: gaps, focused: focused)
+    var context = LayoutContext(
+        bounds: bounds,
+        gaps: gaps,
+        focused: focused
+    )
+    // Bar on the left (edge is absolute since #293), carving
+    // width, so top/bottom snapping is against the full usable
+    // height.
+    context.scrolling.appBar.edge = .left
+    return context
 }
 
-/// Vertical mirrors the horizontal mechanics onto the y axis; the
-/// bar (default on) resolves to the left edge, carving width, so
+/// Vertical mirrors the horizontal mechanics onto the y axis;
+/// the suite pins its bar to the left edge, carving width, so
 /// top/bottom snapping is against the full usable height. (Row
 /// stacking + strip carving live in AppBarTests.)
 @Suite("Scrolling layout (vertical)")

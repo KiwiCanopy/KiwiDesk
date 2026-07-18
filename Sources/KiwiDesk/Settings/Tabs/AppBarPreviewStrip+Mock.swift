@@ -52,7 +52,7 @@ extension AppBarPreviewStrip {
         L(
             "app_bar.preview.caption",
             "Position: %1$@ · %2$@",
-            positionName,
+            edgeName,
             styleName
         )
     }
@@ -61,15 +61,17 @@ extension AppBarPreviewStrip {
         L(
             "app_bar.preview.ax",
             "App bar preview: %1$@ position, %2$@ style.",
-            positionName,
+            edgeName,
             styleName
         )
     }
 
-    private var positionName: String {
-        switch style.position {
-        case .start: return L("app_bar.position.start", "Start")
-        case .end: return L("app_bar.position.end", "End")
+    private var edgeName: String {
+        switch style.edge {
+        case .top: return L("app_bar.edge.top", "Top")
+        case .bottom: return L("app_bar.edge.bottom", "Bottom")
+        case .left: return L("app_bar.edge.left", "Left")
+        case .right: return L("app_bar.edge.right", "Right")
         }
     }
 

@@ -23,7 +23,7 @@ struct AppBarSettingError: Error, Equatable,
 /// (concrete, via `app_bar.set_*`) or a layout's `LayoutAppBar` (as an
 /// override, via `monocle.set_app_bar_*` / `scroll.set_app_bar_*`).
 enum AppBarCommandSetting {
-    case position(AppBarStyle.Position)
+    case edge(AppBarEdge)
     case thickness(CGFloat)
     case tabBackground(AppBarStyle.TabBackground)
     case activeIndicator(AppBarStyle.ActiveIndicator)
@@ -70,12 +70,12 @@ enum AppBarCommandSetting {
         args: [JSONValue]
     ) -> Result<AppBarCommandSetting, AppBarSettingError>? {
         switch field {
-        case "position":
+        case "edge":
             return choice(
                 args,
-                AppBarStyle.Position.self,
-                "start|end"
-            ).map(Self.position)
+                AppBarEdge.self,
+                "top|bottom|left|right"
+            ).map(Self.edge)
         case "tab_background":
             return choice(
                 args,
@@ -174,7 +174,7 @@ enum AppBarCommandSetting {
     /// Writes the value into the global style (concrete).
     func apply(to style: inout AppBarStyle) {
         switch self {
-        case .position(let value): style.position = value
+        case .edge(let value): style.edge = value
         case .thickness(let value): style.thickness = value
         case .tabBackground(let value):
             style.tabBackground = value
@@ -212,7 +212,7 @@ enum AppBarCommandSetting {
     /// Writes the value into a layout's bar as an override.
     func apply(to bar: inout LayoutAppBar) {
         switch self {
-        case .position(let value): bar.position = value
+        case .edge(let value): bar.edge = value
         case .thickness(let value): bar.thickness = value
         case .tabBackground(let value): bar.tabBackground = value
         case .activeIndicator(let value):

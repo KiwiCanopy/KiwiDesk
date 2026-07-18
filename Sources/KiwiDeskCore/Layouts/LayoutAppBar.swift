@@ -11,7 +11,6 @@ import Foundation
 /// it just for this layout" (shown black). `resolved(with:)`
 /// merges the two into the concrete style the bar renders with.
 public struct LayoutAppBar: Sendable, Equatable {
-    public typealias Position = AppBarStyle.Position
     public typealias TabBackground = AppBarStyle.TabBackground
     public typealias ActiveIndicator = AppBarStyle.ActiveIndicator
     public typealias Content = AppBarStyle.Content
@@ -21,7 +20,7 @@ public struct LayoutAppBar: Sendable, Equatable {
     public var enabled = true
 
     // Optional overrides of the global AppBarStyle. Nil inherits.
-    public var position: Position?
+    public var edge: AppBarEdge?
     public var thickness: CGFloat?
     public var tabBackground: TabBackground?
     public var activeIndicator: ActiveIndicator?
@@ -50,7 +49,7 @@ public struct LayoutAppBar: Sendable, Equatable {
     /// applied on top.
     public func resolved(with base: AppBarStyle) -> AppBarStyle {
         var out = base
-        if let position { out.position = position }
+        if let edge { out.edge = edge }
         if let thickness { out.thickness = thickness }
         if let tabBackground { out.tabBackground = tabBackground }
         if let activeIndicator {
@@ -108,7 +107,7 @@ extension LayoutAppBar: Codable {
     /// every field has a key — do not drop it as "unused".
     enum Key: String, CodingKey, CaseIterable {
         case enabled
-        case position
+        case edge
         case thickness
         case tabBackground = "tab_background"
         case activeIndicator = "active_indicator"
@@ -138,9 +137,9 @@ extension LayoutAppBar: Codable {
                 Bool.self,
                 forKey: .enabled
             ) ?? true
-        position = try container.decodeIfPresent(
-            Position.self,
-            forKey: .position
+        edge = try container.decodeIfPresent(
+            AppBarEdge.self,
+            forKey: .edge
         )
         thickness = try container.decodeIfPresent(
             CGFloat.self,
@@ -233,7 +232,7 @@ extension LayoutAppBar: Codable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: Key.self)
         try container.encode(enabled, forKey: .enabled)
-        try container.encodeIfPresent(position, forKey: .position)
+        try container.encodeIfPresent(edge, forKey: .edge)
         try container.encodeIfPresent(
             thickness,
             forKey: .thickness

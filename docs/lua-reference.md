@@ -1329,21 +1329,20 @@ widen out into individual items, so any member can be picked
 directly. Focus leaving the group collapses it again. Items can also
 be **dragged** along the bar to reorder the windows.
 
-### app_bar.set_position
+### app_bar.set_edge
 
-**Expects:** `"start"` or `"end"` (default `"start"`).
+**Expects:** `"top"`, `"bottom"`, `"left"`, or `"right"`
+(default `"top"`).
 
-**Does:** sets the default edge for all layout bars. `start`
-resolves to the top edge (horizontal-axis layout) or left edge
-(vertical-axis layout); `end` resolves to the bottom or right. The
-bar always renders on the edge the value indicates, so it never
-mismatches the layout's orientation. Per-layout overrides can
-change it.
+**Does:** sets the screen edge the bar occupies, for every layout
+that shows a bar. The edge is absolute — it no longer follows the
+layout's orientation (#293) — so one value places the bar on the
+same edge everywhere. Per-layout overrides can change it.
 
 **Example:**
 
 ```lua
-app_bar.set_position("start")
+app_bar.set_edge("top")
 ```
 
 ### app_bar.set_thickness
@@ -1623,7 +1622,7 @@ bar, so only they expose `set_app_bar_*`. Unset fields inherit
 the global value. The available overrides are the same setters
 prefixed with the layout name:
 
-- `monocle.set_app_bar_enabled`, `monocle.set_app_bar_position`,
+- `monocle.set_app_bar_enabled`, `monocle.set_app_bar_edge`,
   `monocle.set_app_bar_thickness`, etc.
 - `scroll.set_app_bar_enabled`, `scroll.set_app_bar_tab_background`,
   `scroll.set_app_bar_active_indicator`,

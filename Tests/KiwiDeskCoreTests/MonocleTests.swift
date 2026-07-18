@@ -64,14 +64,9 @@ struct MonocleGeometryTests {
         ]
     )
     func stripCarving(edge: AppBarEdge) throws {
-        // Reach each concrete edge via an axis-relative position
-        // on the matching orientation.
-        let position: AppBarStyle.Position =
-            edge == .top || edge == .left ? .start : .end
+        // The edge is stored absolute (#293) — set it directly.
         let context = makeContext {
-            $0.orientation =
-                edge.isHorizontal ? .horizontal : .vertical
-            $0.appBar.position = position
+            $0.appBar.edge = edge
         }
         let usable = context.usable
         let bar = try #require(
@@ -103,22 +98,24 @@ struct MonocleGeometryTests {
         }
     }
 
-    @Test("Axis-relative position resolves to a concrete edge")
-    func positionResolves() {
+    @Test("Stored edge resolves absolute, override beats global")
+    func edgeResolves() {
         var params = MonocleParams()
-        params.orientation = .vertical
-        params.appBar.position = .start
+        // No override: the global edge wins.
+        var global = AppBarStyle()
+        global.edge = .right
         #expect(
-            params.resolvedBar(global: AppBarStyle()).edge == .left
+            params.resolvedBar(global: global).edge == .right
         )
-        params.appBar.position = .end
+        // A per-layout override beats the global.
+        params.appBar.edge = .left
         #expect(
-            params.resolvedBar(global: AppBarStyle()).edge == .right
+            params.resolvedBar(global: global).edge == .left
         )
+        // Orientation no longer affects the edge (#293).
         params.orientation = .horizontal
-        params.appBar.position = .start
         #expect(
-            params.resolvedBar(global: AppBarStyle()).edge == .top
+            params.resolvedBar(global: global).edge == .left
         )
     }
 
@@ -148,7 +145,7 @@ struct MonocleSettingsTests {
         var settings = TilingSettings()
         settings.monocle.orientation = .vertical
         settings.monocle.appBar.enabled = false
-        settings.monocle.appBar.position = .end
+        settings.monocle.appBar.edge = .bottom
         settings.monocle.appBar.thickness = 48
         settings.monocle.appBar.tabBackground = .plain
         settings.monocle.appBar.activeIndicator = .gap
@@ -696,7 +693,7 @@ struct MonocleCommandTests {
         )
         #expect(
             !core.execute(
-                "monocle.set_app_bar_position",
+                "monocle.set_app_bar_edge",
                 args: [.string("middle")]
             ).isSuccess
         )
@@ -714,30 +711,26 @@ struct MonocleCommandTests {
         )
     }
 
-    @Test("Position takes start/end and rejects old edge tokens")
-    func positionTokens() {
+    @Test("Edge takes the four edges, rejects start/end")
+    func edgeTokens() {
         let core = makeCore()
-        // Axis-relative tokens are accepted and resolve to the
-        // layout's own edge — no clamp, no warning.
-        core.execute(
-            "monocle.set_orientation",
-            args: [.string("vertical")]
-        )
+        // Absolute tokens are stored as-is (#293) — the layout
+        // orientation plays no part.
         #expect(
             core.execute(
-                "monocle.set_app_bar_position",
-                args: [.string("start")]
+                "monocle.set_app_bar_edge",
+                args: [.string("left")]
             ).isSuccess
         )
         #expect(
             core.tiler.settings.monocle
                 .resolvedBar(global: AppBarStyle()).edge == .left
         )
-        // An old concrete-edge token is no longer a valid value.
+        // The old axis-relative tokens are no longer valid.
         #expect(
             !core.execute(
-                "monocle.set_app_bar_position",
-                args: [.string("top")]
+                "monocle.set_app_bar_edge",
+                args: [.string("start")]
             ).isSuccess
         )
     }

@@ -52,7 +52,7 @@ public struct ScrollingLayout: LayoutSystem {
             inner: context.gaps.inner,
             global: context.appBarStyle
         )
-        let horizontal = context.scrolling.barAxisIsHorizontal
+        let horizontal = context.scrolling.axisIsHorizontal
 
         // A single window always fills the whole window area.
         if windows.count == 1, let only = windows.first {
@@ -164,7 +164,7 @@ public struct ScrollingLayout: LayoutSystem {
             inner: context.gaps.inner,
             global: context.appBarStyle
         )
-        let horizontal = context.scrolling.barAxisIsHorizontal
+        let horizontal = context.scrolling.axisIsHorizontal
         let metrics = metrics(
             for: windows,
             context: context,
@@ -200,7 +200,7 @@ public struct ScrollingLayout: LayoutSystem {
             inner: context.gaps.inner,
             global: context.appBarStyle
         )
-        let horizontal = context.scrolling.barAxisIsHorizontal
+        let horizontal = context.scrolling.axisIsHorizontal
         let m = metrics(
             for: windows,
             context: context,

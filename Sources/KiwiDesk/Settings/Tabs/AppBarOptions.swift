@@ -7,9 +7,11 @@ import KiwiDeskCore
 /// under the line ceiling.
 enum AppBarOptions {
     @MainActor
-    static let position: [(AppBarStyle.Position, String)] = [
-        (.start, L("app_bar.position.start", "Start")),
-        (.end, L("app_bar.position.end", "End")),
+    static let edge: [(AppBarEdge, String)] = [
+        (.top, L("app_bar.edge.top", "Top")),
+        (.bottom, L("app_bar.edge.bottom", "Bottom")),
+        (.left, L("app_bar.edge.left", "Left")),
+        (.right, L("app_bar.edge.right", "Right")),
     ]
     @MainActor
     static let tabBackground: [(AppBarStyle.TabBackground, String)] = [

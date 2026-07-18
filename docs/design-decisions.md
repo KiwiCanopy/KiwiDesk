@@ -1096,15 +1096,16 @@ its controls right here beside it," not by copying its tab.
 
 ## App Bar
 
-**App Bar position is axis-relative by design.** (#228.) The
-position values `start` and `end` resolve to concrete edges from
-the layout's orientation — `start` → top (horizontal) or left
-(vertical); `end` → bottom or right. The bar always renders on
-the edge the position names, so no clamp or mismatch can occur
-between the layout's axis and the bar's placement. The old clamped
-behavior with four compass values is gone; users can now set one
-position value globally and know it behaves consistently
-everywhere.
+**App Bar edge is absolute.** (#293, supersedes the #228
+axis-relative model.) The stored value is one of the four screen
+edges (`top` / `bottom` / `left` / `right`, default top) and the
+bar renders exactly there in every layout — the earlier
+`start`/`end` values that resolved against the layout's
+orientation are gone. Axis-relativity existed to prevent an
+edge/axis mismatch when the edge was derived per layout; with the
+Space Bar requiring free four-edge placement for both bars, the
+derivation (and its rationale) fell away. The GUI preview strip
+is edge-aware and rotates vertical for left/right.
 
 **Tab background and active indicator are orthogonal.** (#228.)
 The old coupled `style` enum (`pills` / `segments` / `underline`)

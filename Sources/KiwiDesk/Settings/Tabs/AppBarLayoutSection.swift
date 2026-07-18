@@ -84,10 +84,10 @@ struct LayoutAppBarSection: View {
     // not silent data loss, so it doesn't warrant a parity test.
     @ViewBuilder private var behaviorOverrides: some View {
         OverridePickerRow(
-            label: L("app_bar.position.label", "Position"),
-            value: $bar.position,
-            global: global.position,
-            options: AppBarOptions.position,
+            label: L("app_bar.edge.label", "Position"),
+            value: $bar.edge,
+            global: global.edge,
+            options: AppBarOptions.edge,
             style: .segmented
         )
         OverridePickerRow(
