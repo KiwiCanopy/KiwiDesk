@@ -90,6 +90,80 @@ struct SpaceBarDriverTests {
         )
     }
 
+    @Test("Adjacent same-app runs group; non-adjacent stay")
+    func grouping() throws {
+        let core = makeCore()
+        core.state.workspaces.assign(SpaceID("1"), to: display)
+        core.state.workspaces.activate(SpaceID("1"))
+        for (id, app) in [
+            (1, "Zed"), (2, "Zed"), (3, "Finder"), (4, "Zed"),
+        ] {
+            core.state.apply(
+                .windowCreated(window(UInt32(id), app: app))
+            )
+        }
+        // Focus a member of the leading run: the group takes
+        // the focused flag, and stays collapsed (no expansion).
+        core.state.apply(.windowFocused(WindowID(1)))
+        let (apps, overflow) = core.spaceBarApps(
+            in: core.state.workspaces[SpaceID("1")]!,
+            style: SpaceBarStyle()
+        )
+        #expect(overflow == 0)
+        #expect(apps.map(\.name) == ["Zed", "Finder", "Zed"])
+        #expect(apps.map(\.count) == [2, 1, 1])
+        #expect(apps.map(\.focused) == [true, false, false])
+    }
+
+    @Test("Groups past the cap collapse into the +n overflow")
+    func overflowCap() throws {
+        let core = makeCore()
+        core.state.workspaces.assign(SpaceID("1"), to: display)
+        core.state.workspaces.activate(SpaceID("1"))
+        // 7 apps → 7 groups; cap 5 → 2 hidden groups of two
+        // windows each, so n counts WINDOWS (4), not slots (2).
+        for id in 1...6 {
+            core.state.apply(
+                .windowCreated(
+                    window(UInt32(id), app: "App\(id)")
+                )
+            )
+        }
+        core.state.apply(
+            .windowCreated(window(7, app: "App6"))
+        )
+        core.state.apply(
+            .windowCreated(window(8, app: "App7"))
+        )
+        core.state.apply(
+            .windowCreated(window(9, app: "App7"))
+        )
+        let (apps, overflow) = core.spaceBarApps(
+            in: core.state.workspaces[SpaceID("1")]!,
+            style: SpaceBarStyle()
+        )
+        #expect(apps.count == 5)
+        #expect(overflow == 4)
+    }
+
+    @Test("Front segment follows the toggle and the focus")
+    func frontSegment() throws {
+        let core = seededCore()
+        // Toggle off → nil.
+        #expect(
+            core.frontApp(
+                display: display,
+                style: SpaceBarStyle()
+            ) == nil
+        )
+        // Toggle on → the focused window's app ("Mail").
+        var style = SpaceBarStyle()
+        style.showFrontApp = true
+        let app = core.frontApp(display: display, style: style)
+        #expect(app?.name == "Mail")
+        #expect(app?.count == 1)
+    }
+
     @Test("Identifier ladder: icon, symbol probe, monogram")
     func identifierLadder() {
         let core = makeCore()

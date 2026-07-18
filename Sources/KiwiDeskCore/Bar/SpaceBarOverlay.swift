@@ -15,6 +15,8 @@ public final class SpaceBarOverlay {
         let spaceGlyph: SpaceBarItemView.Identifier
         let apps: [SpaceBarItemView.App]
         let active: Bool
+        /// Windows hidden past the glyph cap ("+n" badge).
+        let overflow: Int
     }
 
     /// Click-to-focus hook; wired to `KiwiCore.focusSpace`.
@@ -22,18 +24,40 @@ public final class SpaceBarOverlay {
 
     private var panel: NSPanel?
     var itemViews: [SpaceBarItemView] = []
+    // The optional trailing front-app segment (#293 verdict 6):
+    // a divider rule, the focused app's glyph, and — on
+    // horizontal bars only — its name.
+    let frontDivider = NSView()
+    let frontIcon = NSImageView()
+    let frontGlyph: NSTextField = {
+        let tf = NSTextField(labelWithString: "")
+        tf.alignment = .center
+        tf.setAccessibilityElement(false)
+        return tf
+    }()
+    let frontName = NSTextField(labelWithString: "")
     private var lastShown:
         (
-            items: [Item], strip: CGRect, style: SpaceBarStyle
+            items: [Item],
+            frontApp: SpaceBarItemView.App?,
+            strip: CGRect,
+            style: SpaceBarStyle
         )?
 
     public init() {}
 
     public var isVisible: Bool { panel?.isVisible ?? false }
 
+    /// The panel's content view, for the front-segment
+    /// extension (the panel itself stays private).
+    var panelContentView: NSView? { panel?.contentView }
+
     /// Renders `items` into `strip` (AX coordinates).
-    public func show(
+    /// `frontApp` is the trailing segment's app; nil while the
+    /// toggle is off or no window is focused.
+    func show(
         items: [Item],
+        frontApp: SpaceBarItemView.App? = nil,
         strip: CGRect,
         style: SpaceBarStyle
     ) {
@@ -43,7 +67,7 @@ public final class SpaceBarOverlay {
             hide()
             return
         }
-        lastShown = (items, strip, style)
+        lastShown = (items, frontApp, strip, style)
         render()
     }
 
@@ -56,7 +80,7 @@ public final class SpaceBarOverlay {
 
     private func render() {
         guard let state = lastShown else { return }
-        let (items, strip, style) = state
+        let (items, frontApp, strip, style) = state
         let panel = self.panel ?? makePanel()
         self.panel = panel
         styleContainer(panel, style: style, strip: strip)
@@ -71,6 +95,7 @@ public final class SpaceBarOverlay {
                 ? style.itemSize
                 : SpaceBarItemView.autoLength(
                     appCount: item.apps.count,
+                    overflow: item.overflow,
                     depth: depth
                 )
             view.frame =
@@ -94,12 +119,20 @@ public final class SpaceBarOverlay {
                 apps: item.apps,
                 active: item.active,
                 horizontal: horizontal,
-                style: style
+                style: style,
+                overflow: item.overflow
             )
             view.onSelect = { [weak self] space in
                 self?.onSelect(space)
             }
         }
+        renderFrontSegment(
+            frontApp,
+            after: cursor,
+            strip: strip,
+            style: style,
+            horizontal: horizontal
+        )
         panel.setFrame(
             GeometryUtils.flip(
                 strip,
