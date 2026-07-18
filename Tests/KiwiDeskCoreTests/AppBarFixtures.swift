@@ -14,7 +14,7 @@ import Foundation
 enum AppBarFixtures {
     static func everyGlobalField() -> AppBarStyle {
         var style = AppBarStyle()
-        style.position = .end
+        style.edge = .bottom
         style.thickness = 44
         style.tabBackground = .plain
         style.activeIndicator = .gap
@@ -41,7 +41,7 @@ enum AppBarFixtures {
     static func everyOverrideField() -> LayoutAppBar {
         var bar = LayoutAppBar()
         bar.enabled = false
-        bar.position = .start
+        bar.edge = .right
         bar.thickness = 50
         bar.tabBackground = .boxed
         bar.activeIndicator = .ring

@@ -302,7 +302,7 @@ extension KiwiCore {
     ) -> CommandResponse {
         let scrolling =
             tiler.settings.resolvedScrolling(for: space.id)
-        let horizontal = scrolling.barAxisIsHorizontal
+        let horizontal = scrolling.axisIsHorizontal
         let screen = NSScreen.main ?? NSScreen.screens.first
         let bounds =
             screen.map { GeometryUtils.axVisibleFrame(of: $0) }

@@ -37,11 +37,6 @@ public struct MonocleParams: Sendable, Equatable, AppBarHosting {
     public var override: [SpaceID: MonocleOverride] = [:]
 
     public init() {}
-
-    /// AppBarHosting: monocle's bar axis follows its orientation.
-    public var barAxisIsHorizontal: Bool {
-        orientation == .horizontal
-    }
 }
 
 // MARK: - Codable

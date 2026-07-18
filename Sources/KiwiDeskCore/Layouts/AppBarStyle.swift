@@ -13,15 +13,6 @@ import Foundation
 /// (`LayoutAppBar.enabled`) and the focus/scroll axis
 /// (`MonocleParams.orientation` / `ScrollingParams.orientation`).
 public struct AppBarStyle: Sendable, Equatable {
-    /// Which end of the layout's own axis the bar sits on,
-    /// resolved to a concrete `AppBarEdge` against that axis:
-    /// `start` = top (horizontal axis) / left (vertical),
-    /// `end` = bottom / right. Axis-relative so the bar always
-    /// renders where the label says — no per-layout clamp.
-    public enum Position: String, Sendable, Codable {
-        case start, end
-    }
-
     /// How each tab is backed. Orthogonal to `activeIndicator`:
     /// the background is drawn the same on every tab, the
     /// indicator marks only the active one. An extensible set —
@@ -56,10 +47,9 @@ public struct AppBarStyle: Sendable, Equatable {
         case iconAndName = "icon_and_name"
     }
 
-    /// Which end of the layout's axis the bar sits on
-    /// (`start`/`end`); the concrete edge is derived once from
-    /// the layout's orientation in `resolvedBar`.
-    public var position: Position = .start
+    /// The absolute screen edge the bar occupies (#293) — no
+    /// longer derived from the layout's axis.
+    public var edge: AppBarEdge = .top
     /// Depth of the reserved strip (pt).
     public var thickness: CGFloat = 32
     public var tabBackground: TabBackground = .boxed
@@ -142,7 +132,7 @@ extension AppBarStyle: Codable {
     /// (`AppBarParityTests`) reflects over `allCases` to prove
     /// every field has a key — do not drop it as "unused".
     enum CodingKeys: String, CodingKey, CaseIterable {
-        case position
+        case edge
         case thickness
         case tabBackground = "tab_background"
         case activeIndicator = "active_indicator"
@@ -172,11 +162,11 @@ extension AppBarStyle: Codable {
             keyedBy: CodingKeys.self
         )
         let defaults = Self()
-        position =
+        edge =
             try container.decodeIfPresent(
-                Position.self,
-                forKey: .position
-            ) ?? defaults.position
+                AppBarEdge.self,
+                forKey: .edge
+            ) ?? defaults.edge
         thickness =
             try container.decodeIfPresent(
                 CGFloat.self,

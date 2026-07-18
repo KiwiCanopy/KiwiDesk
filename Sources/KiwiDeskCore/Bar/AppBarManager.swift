@@ -17,10 +17,10 @@ public final class AppBarManager {
         public let items: [AppBarOverlay.Item]
         public let activeIndex: Int?
         public let strip: CGRect
+        /// The resolved style; its `edge` is the stored absolute
+        /// edge the bar sits on (#293) — no separate channel, so
+        /// strip and edge can't disagree.
         public let style: AppBarStyle
-        /// The concrete edge the bar's axis-relative position
-        /// resolved to on this space's layout.
-        public let edge: AppBarEdge
 
         public init(
             display: DisplayID,
@@ -28,8 +28,7 @@ public final class AppBarManager {
             items: [AppBarOverlay.Item],
             activeIndex: Int?,
             strip: CGRect,
-            style: AppBarStyle,
-            edge: AppBarEdge
+            style: AppBarStyle
         ) {
             self.display = display
             self.space = space
@@ -37,7 +36,6 @@ public final class AppBarManager {
             self.activeIndex = activeIndex
             self.strip = strip
             self.style = style
-            self.edge = edge
         }
     }
 
@@ -76,7 +74,7 @@ public final class AppBarManager {
     /// displays, so a bar on a non-active monitor is included.
     public var shownTopStrips: [(space: SpaceID, strip: CGRect)] {
         shownBars
-            .filter { $0.edge == .top }
+            .filter { $0.style.edge == .top }
             .map { (space: $0.space, strip: $0.strip) }
     }
 
@@ -116,8 +114,7 @@ public final class AppBarManager {
                 items: bar.items,
                 activeIndex: bar.activeIndex,
                 strip: bar.strip,
-                style: bar.style,
-                edge: bar.edge
+                style: bar.style
             )
         }
     }

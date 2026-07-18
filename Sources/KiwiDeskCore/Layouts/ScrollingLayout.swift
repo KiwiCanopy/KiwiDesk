@@ -8,7 +8,7 @@ import CoreGraphics
 /// change (#239): `center`/`start`/`end` re-seat it at a fixed
 /// resting position (centred, or flush against the leading
 /// left/top or trailing right/bottom edge — `start`/`end` are
-/// axis-relative like the app bar's), then clamp so no empty
+/// relative to the scroll axis), then clamp so no empty
 /// margin shows past the row ends; `follow` (the default) keeps
 /// the prior offset and pans the minimum to reveal the focus
 /// (#66) — up/down mirror, an already-visible slot doesn't move,
@@ -52,7 +52,7 @@ public struct ScrollingLayout: LayoutSystem {
             inner: context.gaps.inner,
             global: context.appBarStyle
         )
-        let horizontal = context.scrolling.barAxisIsHorizontal
+        let horizontal = context.scrolling.axisIsHorizontal
 
         // A single window always fills the whole window area.
         if windows.count == 1, let only = windows.first {
@@ -164,7 +164,7 @@ public struct ScrollingLayout: LayoutSystem {
             inner: context.gaps.inner,
             global: context.appBarStyle
         )
-        let horizontal = context.scrolling.barAxisIsHorizontal
+        let horizontal = context.scrolling.axisIsHorizontal
         let metrics = metrics(
             for: windows,
             context: context,
@@ -200,7 +200,7 @@ public struct ScrollingLayout: LayoutSystem {
             inner: context.gaps.inner,
             global: context.appBarStyle
         )
-        let horizontal = context.scrolling.barAxisIsHorizontal
+        let horizontal = context.scrolling.axisIsHorizontal
         let m = metrics(
             for: windows,
             context: context,

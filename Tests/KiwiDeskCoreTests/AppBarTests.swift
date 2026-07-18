@@ -46,32 +46,25 @@ struct AppBarOverrideTests {
         #expect(resolved.tabBackground == .plain)
     }
 
-    @Test("Axis-relative position resolves to a concrete edge")
-    func positionResolves() {
+    @Test("Stored edge is absolute; override beats global")
+    func edgeResolves() {
         var scroll = ScrollingParams()
+        // No override: the global edge wins, orientation is
+        // irrelevant (#293 — the edge is stored absolute).
+        var global = AppBarStyle()
+        global.edge = .bottom
         scroll.orientation = .vertical
-        // On a vertical axis: start = left, end = right.
-        scroll.appBar.position = .start
         #expect(
-            scroll.resolvedBar(global: AppBarStyle()).edge
-                == .left
+            scroll.resolvedBar(global: global).edge == .bottom
         )
-        scroll.appBar.position = .end
+        // A per-layout override beats the global on any axis.
+        scroll.appBar.edge = .right
         #expect(
-            scroll.resolvedBar(global: AppBarStyle()).edge
-                == .right
+            scroll.resolvedBar(global: global).edge == .right
         )
-        // On a horizontal axis: start = top, end = bottom.
         scroll.orientation = .horizontal
-        scroll.appBar.position = .start
         #expect(
-            scroll.resolvedBar(global: AppBarStyle()).edge
-                == .top
-        )
-        scroll.appBar.position = .end
-        #expect(
-            scroll.resolvedBar(global: AppBarStyle()).edge
-                == .bottom
+            scroll.resolvedBar(global: global).edge == .right
         )
     }
 
@@ -106,7 +99,8 @@ struct ScrollingBarGeometryTests {
 
     private func context(
         orientation: ScrollingParams.Orientation = .horizontal,
-        barEnabled: Bool = true
+        barEnabled: Bool = true,
+        edge: AppBarEdge = .top
     ) -> LayoutContext {
         var context = LayoutContext(
             bounds: CGRect(x: 0, y: 0, width: 1920, height: 1080),
@@ -114,6 +108,7 @@ struct ScrollingBarGeometryTests {
         )
         context.scrolling.orientation = orientation
         context.scrolling.appBar.enabled = barEnabled
+        context.scrolling.appBar.edge = edge
         return context
     }
 
@@ -152,11 +147,11 @@ struct ScrollingBarGeometryTests {
         #expect(first.minX == context.usable.minX)
     }
 
-    @Test("Vertical orientation carves a left strip")
+    @Test("A left edge carves a left strip")
     func verticalStrip() throws {
-        // A vertical axis resolves the default top edge to the
-        // left, so the strip eats window *width*, not height.
-        let context = context(orientation: .vertical)
+        // The edge is absolute (#293): a left bar eats window
+        // *width*, not height, on any orientation.
+        let context = context(orientation: .vertical, edge: .left)
         let frames = layout.calculateGeometry(
             for: [w1],
             in: context
@@ -176,6 +171,46 @@ struct ScrollingBarGeometryTests {
             in: context
         )
         #expect(frames[w1] == context.usable)
+    }
+
+    // The decoupled combos are the point of #293: the strip may
+    // now carve along OR across the scroll axis.
+
+    @Test("Vertical scrolling under a top bar loses height")
+    func verticalScrollTopBar() throws {
+        // The new default for vertical scrolling: a top strip
+        // carves the same axis the rows scroll along.
+        var context = context(orientation: .vertical, edge: .top)
+        context.scrolling.slotSize = .points(300)
+        let frames = layout.calculateGeometry(
+            for: [w1, w2],
+            in: context
+        )
+        let usable = context.usable
+        let first = try #require(frames[w1])
+        // Rows keep full width and start below strip + gap.
+        #expect(first.width == usable.width)
+        #expect(first.minY == usable.minY + 32 + 10)
+        #expect(first.height == 300)
+    }
+
+    @Test("Horizontal scrolling beside a left bar loses width")
+    func horizontalScrollLeftBar() throws {
+        var context = context(
+            orientation: .horizontal,
+            edge: .left
+        )
+        context.scrolling.slotSize = .points(500)
+        let frames = layout.calculateGeometry(
+            for: [w1, w2],
+            in: context
+        )
+        let usable = context.usable
+        let first = try #require(frames[w1])
+        // Columns keep full height, shifted right of the strip.
+        #expect(first.height == usable.height)
+        #expect(first.minX == usable.minX + 32 + 10)
+        #expect(first.width == 500)
     }
 }
 

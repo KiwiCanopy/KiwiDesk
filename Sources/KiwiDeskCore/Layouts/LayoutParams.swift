@@ -111,8 +111,8 @@ public struct ScrollingParams: Sendable, Equatable, Codable,
         case center
         /// Flush against the leading edge of the scroll axis —
         /// left when horizontal, top when vertical. Axis-relative
-        /// like `AppBarStyle.Position`, so it lands where the GUI
-        /// label says on either orientation.
+        /// so it lands where the GUI label says on either
+        /// orientation.
         case start
         /// Flush against the trailing edge (right / bottom).
         case end
@@ -162,8 +162,10 @@ public struct ScrollingParams: Sendable, Equatable, Codable,
 
     public init() {}
 
-    /// AppBarHosting: the bar axis follows the scroll axis.
-    public var barAxisIsHorizontal: Bool {
+    /// True while the scroll axis runs horizontally (the app
+    /// bar's edge is absolute since #293 and no longer follows
+    /// this).
+    public var axisIsHorizontal: Bool {
         orientation == .horizontal
     }
 

@@ -144,7 +144,7 @@ extension KiwiCore {
             // the scroll axis), add the delta, store as points.
             let scrolling =
                 tiler.settings.resolvedScrolling(for: space.id)
-            let horizontal = scrolling.barAxisIsHorizontal
+            let horizontal = scrolling.axisIsHorizontal
             let along = horizontal ? bounds.width : bounds.height
             let current = scrolling.slotSize
                 .editablePoints(along: along, horizontal: horizontal)

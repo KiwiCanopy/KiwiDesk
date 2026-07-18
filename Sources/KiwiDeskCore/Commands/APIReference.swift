@@ -115,7 +115,7 @@ public enum APIReference {
             "set_wrap_focus",
             "set_slot_size_override", "set_anchor_override",
             "set_orientation_override",
-            "set_app_bar_enabled", "set_app_bar_position",
+            "set_app_bar_enabled", "set_app_bar_edge",
             "set_app_bar_thickness",
             "set_app_bar_tab_background",
             "set_app_bar_active_indicator",
@@ -135,7 +135,7 @@ public enum APIReference {
             "set_app_bar_group_badge_text_color",
         ],
         "app_bar": [
-            "set_position", "set_thickness", "set_tab_background",
+            "set_edge", "set_thickness", "set_tab_background",
             "set_active_indicator", "set_item_size",
             "set_item_gap", "set_content", "set_icon_source",
             "set_font_size",
@@ -162,7 +162,7 @@ public enum APIReference {
         "monocle": [
             "set_orientation", "set_orientation_override",
             "set_wrap_focus", "set_new_window_placement",
-            "set_app_bar_enabled", "set_app_bar_position",
+            "set_app_bar_enabled", "set_app_bar_edge",
             "set_app_bar_thickness",
             "set_app_bar_tab_background",
             "set_app_bar_active_indicator",

@@ -6,11 +6,21 @@ import KiwiDeskCore
 /// Split out of `AppBarOverrideControls.swift` to keep that file
 /// under the line ceiling.
 enum AppBarOptions {
+    /// Built from `allCases` through an exhaustive switch, so a
+    /// new edge case can't silently vanish from the pickers.
     @MainActor
-    static let position: [(AppBarStyle.Position, String)] = [
-        (.start, L("app_bar.position.start", "Start")),
-        (.end, L("app_bar.position.end", "End")),
-    ]
+    static let edge: [(AppBarEdge, String)] =
+        AppBarEdge.allCases.map { ($0, label($0)) }
+
+    @MainActor
+    private static func label(_ edge: AppBarEdge) -> String {
+        switch edge {
+        case .top: return L("app_bar.edge.top", "Top")
+        case .bottom: return L("app_bar.edge.bottom", "Bottom")
+        case .left: return L("app_bar.edge.left", "Left")
+        case .right: return L("app_bar.edge.right", "Right")
+        }
+    }
     @MainActor
     static let tabBackground: [(AppBarStyle.TabBackground, String)] = [
         (.boxed, L("app_bar.tab_background.boxed", "Boxed")),

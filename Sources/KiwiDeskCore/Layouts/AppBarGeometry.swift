@@ -1,30 +1,18 @@
 import CoreGraphics
 
-/// A concrete screen edge the bar occupies, resolved from an
-/// axis-relative `AppBarStyle.Position` against a layout's own
-/// orientation. Geometry and renderers take this — never a raw
-/// `start`/`end` — so an unresolved position can't reach them.
-public enum AppBarEdge: Sendable, Equatable {
+/// The concrete screen edge a bar occupies. Stored directly in
+/// bar styles (`app_bar.edge`) — absolute, never derived from a
+/// layout's axis, so both bars can sit on any of the four edges
+/// regardless of layout (#293). `CaseIterable` feeds the GUI
+/// picker and the CodingKeys parity net.
+public enum AppBarEdge: String, Sendable, Codable, CaseIterable,
+    Equatable
+{
     case top, bottom, left, right
 
     /// True on a horizontal bar (items in a row).
     public var isHorizontal: Bool {
         self == .top || self == .bottom
-    }
-
-    /// Resolves `position` against the layout axis: `start` = top
-    /// on a horizontal axis / left on a vertical one, `end` =
-    /// bottom / right. The single resolution site.
-    public init(
-        position: AppBarStyle.Position,
-        horizontalAxis: Bool
-    ) {
-        switch (position, horizontalAxis) {
-        case (.start, true): self = .top
-        case (.end, true): self = .bottom
-        case (.start, false): self = .left
-        case (.end, false): self = .right
-        }
     }
 }
 
@@ -117,29 +105,22 @@ public enum AppBarGeometry {
 }
 
 /// A layout that can show the indicator bar: it owns a
-/// per-layout `LayoutAppBar` and knows whether its focus/scroll
-/// axis runs horizontally (which edge the bar resolves to).
+/// per-layout `LayoutAppBar` (whose `edge` override, like every
+/// look field, falls back to the global style).
 public protocol AppBarHosting {
     var appBar: LayoutAppBar { get }
-    /// True when the layout's axis is horizontal (bar on
-    /// top/bottom); false for a vertical axis (bar left/right).
-    var barAxisIsHorizontal: Bool { get }
 }
 
 extension AppBarHosting {
-    /// The concrete style this layout's bar renders with (the
-    /// global `style` overlaid by this layout's overrides) plus
-    /// the concrete `edge` its axis-relative position resolves
-    /// to. Resolve once, here, at the layer boundary.
+    /// The concrete style this layout's bar renders with: the
+    /// global `style` overlaid by this layout's overrides. Its
+    /// `edge` is the stored absolute one — the single source
+    /// everything downstream reads. Resolve once, here, at the
+    /// layer boundary.
     public func resolvedBar(
         global: AppBarStyle
-    ) -> (style: AppBarStyle, edge: AppBarEdge) {
-        let style = appBar.resolved(with: global)
-        let edge = AppBarEdge(
-            position: style.position,
-            horizontalAxis: barAxisIsHorizontal
-        )
-        return (style, edge)
+    ) -> AppBarStyle {
+        appBar.resolved(with: global)
     }
 
     /// The strip the bar occupies, or nil while it is off.
@@ -148,10 +129,10 @@ extension AppBarHosting {
         global: AppBarStyle
     ) -> CGRect? {
         guard appBar.enabled else { return nil }
-        let (style, edge) = resolvedBar(global: global)
+        let style = resolvedBar(global: global)
         return AppBarGeometry.barFrame(
             in: usable,
-            edge: edge,
+            edge: style.edge,
             thickness: style.thickness
         )
     }
