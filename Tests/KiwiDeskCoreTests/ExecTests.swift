@@ -21,13 +21,25 @@ private func makeCore() -> KiwiCore {
     return core
 }
 
+/// Generous hang-guard for the async waits below (#344). These
+/// tests spawn real subprocesses and await their callbacks on the
+/// main actor; because swift-testing runs suites concurrently, the
+/// shared main actor can be starved for seconds under full-suite
+/// load, so a tight deadline tripped spuriously (the reported
+/// `code → .none` flake). The happy path exits the instant the
+/// condition holds, so a large value never slows a passing run — it
+/// only bounds a genuine hang. What proves the *behavior* is the gap
+/// between a watchdog and its sleep, not this deadline (see
+/// `execTimeout` / `timeoutChildExitsFirst`).
+private let execHangGuard: TimeInterval = 30
+
 /// Polls the Lua global until it is non-nil or the timeout
 /// elapses (exec callbacks arrive via the main-actor queue).
 @MainActor
 private func awaitGlobal(
     _ lua: LuaInterpreter,
     _ name: String,
-    timeout: TimeInterval = 5
+    timeout: TimeInterval = execHangGuard
 ) async throws -> LuaValue {
     let deadline = Date().addingTimeInterval(timeout)
     while Date() < deadline {
@@ -36,6 +48,20 @@ private func awaitGlobal(
         try await Task.sleep(nanoseconds: 20_000_000)
     }
     return .none
+}
+
+/// Waits for the launcher to reap every child (running count back to
+/// zero) or the hang-guard elapses. Centralizes the reap-wait the
+/// async tests repeat, on the same generous deadline (#344).
+@MainActor
+private func awaitReaped(
+    _ core: KiwiCore,
+    timeout: TimeInterval = execHangGuard
+) async throws {
+    let deadline = Date().addingTimeInterval(timeout)
+    while core.exec.runningCount > 0, Date() < deadline {
+        try await Task.sleep(nanoseconds: 20_000_000)
+    }
 }
 
 @Suite("External command execution", .serialized)
@@ -102,10 +128,7 @@ struct ExecTests {
         }
         #expect(pid > 0)
         // The launcher lets go of the Process once reaped.
-        let deadline = Date().addingTimeInterval(5)
-        while core.exec.runningCount > 0, Date() < deadline {
-            try await Task.sleep(nanoseconds: 20_000_000)
-        }
+        try await awaitReaped(core)
         #expect(core.exec.runningCount == 0)
     }
 
@@ -126,10 +149,7 @@ struct ExecTests {
         // minted in the old one and must never cross over.
         core.loadConfig()
         let lua2 = try #require(core.lua)
-        let deadline = Date().addingTimeInterval(5)
-        while core.exec.runningCount > 0, Date() < deadline {
-            try await Task.sleep(nanoseconds: 20_000_000)
-        }
+        try await awaitReaped(core)
         // Child was reaped, but the callback went nowhere:
         // neither VM saw it.
         #expect(core.exec.runningCount == 0)
@@ -185,11 +205,7 @@ struct ExecTests {
                 end)
             """
         #expect(lua.run(script).succeeded)
-        let out = try await awaitGlobal(
-            lua,
-            "cap_out",
-            timeout: 10
-        )
+        let out = try await awaitGlobal(lua, "cap_out")
         guard case .string(let text) = out else {
             Issue.record("expected string output")
             return
@@ -203,7 +219,6 @@ struct ExecTests {
     func execTimeout() async throws {
         let core = makeCore()
         let lua = try #require(core.lua)
-        let started = Date()
         // Third arg is timeout in seconds.
         let script = """
             KiwiDesk.exec("sleep 30",
@@ -212,23 +227,16 @@ struct ExecTests {
                 end, 0.4)
             """
         #expect(lua.run(script).succeeded)
-        // Watchdog fires after ~0.4s; wait up to 10s.
-        let code = try await awaitGlobal(
-            lua,
-            "timeout_code",
-            timeout: 10
-        )
-        let elapsed = Date().timeIntervalSince(started)
+        let code = try await awaitGlobal(lua, "timeout_code")
+        // Prove the 0.4s watchdog terminated the child via its exit
+        // code, not wall-clock: a SIGTERM-killed `sleep 30` exits
+        // non-zero, whereas a completed one exits 0. This can't be
+        // tripped by main-actor starvation delaying the callback (a
+        // tight `elapsed <` bound could).
         #expect(code != .none)
-        // Definitely did not run for 30s.
-        #expect(elapsed < 10)
+        #expect(code != .number(0))
         // Process was reaped after termination.
-        let deadline = Date().addingTimeInterval(5)
-        while core.exec.runningCount > 0,
-            Date() < deadline
-        {
-            try await Task.sleep(nanoseconds: 20_000_000)
-        }
+        try await awaitReaped(core)
         #expect(core.exec.runningCount == 0)
     }
 
@@ -236,25 +244,23 @@ struct ExecTests {
     func timeoutChildExitsFirst() async throws {
         let core = makeCore()
         let lua = try #require(core.lua)
-        // The child exits immediately; the 5s watchdog must
-        // not fire (the normal reap cancels it) and the
-        // callback must run exactly once with the real code.
+        // The child exits immediately; the long 30s watchdog must
+        // not fire (the normal reap cancels it) and the callback must
+        // run exactly once with the real code. The watchdog is wide so
+        // a load-starved exit callback still lands well before it.
         let script = """
             _calls = 0
             KiwiDesk.exec("true",
                 function(code, out, err)
                     _calls = _calls + 1
                     _code = code
-                end, 5)
+                end, 30)
             """
         #expect(lua.run(script).succeeded)
-        let code = try await awaitGlobal(lua, "_code", timeout: 5)
+        let code = try await awaitGlobal(lua, "_code")
         #expect(code == .number(0))
         // Reaped promptly; the pending watchdog was cancelled.
-        let deadline = Date().addingTimeInterval(2)
-        while core.exec.runningCount > 0, Date() < deadline {
-            try await Task.sleep(nanoseconds: 20_000_000)
-        }
+        try await awaitReaped(core)
         #expect(core.exec.runningCount == 0)
         #expect(lua.global("_calls") == .number(1))
     }
