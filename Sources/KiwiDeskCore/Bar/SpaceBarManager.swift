@@ -11,19 +11,24 @@ public final class SpaceBarManager {
     public struct Bar {
         public let display: DisplayID
         public let items: [SpaceBarOverlay.Item]
+        /// The trailing front-app segment's app; nil while the
+        /// toggle is off or nothing is focused.
+        let frontApp: SpaceBarItemView.App?
         public let strip: CGRect
         /// The resolved style; its `edge` is the stored
         /// absolute edge — single source, like the App Bar.
         public let style: SpaceBarStyle
 
-        public init(
+        init(
             display: DisplayID,
             items: [SpaceBarOverlay.Item],
+            frontApp: SpaceBarItemView.App? = nil,
             strip: CGRect,
             style: SpaceBarStyle
         ) {
             self.display = display
             self.items = items
+            self.frontApp = frontApp
             self.strip = strip
             self.style = style
         }
@@ -88,6 +93,7 @@ public final class SpaceBarManager {
         for bar in valid {
             overlay(for: bar.display).show(
                 items: bar.items,
+                frontApp: bar.frontApp,
                 strip: bar.strip,
                 style: bar.style
             )

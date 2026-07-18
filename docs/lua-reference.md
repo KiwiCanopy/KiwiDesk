@@ -1643,8 +1643,15 @@ Spaces: one bar per display, listing that display's Spaces in
 profile order — each item shows the Space's identifier
 (configured icon, else `N.square` for numeric ids or a
 two-letter monogram for named ones) plus a compact glyph per
-window in that Space. Clicking a Space switches to it. App
-glyphs are informational — not click targets.
+window in that Space. Adjacent windows of the same app collapse
+into one glyph wearing a count badge (non-adjacent duplicates
+stay separate); past five glyph slots the rest fold into a
+`+n` badge counting the hidden windows. Badges use the
+configured badge colors on the active Space and render muted on
+inactive ones. Clicking a Space switches to it. App glyphs are
+informational — not click targets, and a group holding the
+focused window stays collapsed (it just takes the focused
+accent).
 
 The bar is **layout-independent** and reserves real screen area
 on its edge before any layout runs. It may share an edge with
@@ -1795,9 +1802,10 @@ space_bar.set_corner_roundness(50)
 
 **Expects:** boolean (default `false`).
 
-**Does:** reserved for the trailing front-app segment
-(`| <icon + app name>`); rendering lands with the runtime
-polish stage.
+**Does:** shows a trailing front-app segment after the last
+Space item — a divider, then the focused app's glyph and name.
+On vertical (left/right) bars the segment is icon-only; the
+divider flips to a horizontal rule.
 
 **Example:**
 
@@ -1837,9 +1845,9 @@ setting. The three-state ladder is the bar's signature:
   `space_bar.set_highlight_color` /
   `space_bar.set_background_color` — as the App Bar.
 - `space_bar.set_group_badge_color` /
-  `space_bar.set_group_badge_text_color` — the count badges
-  (grouping and the overflow cap land with the runtime polish
-  stage).
+  `space_bar.set_group_badge_text_color` — the count and `+n`
+  overflow badges (active Space; inactive Spaces mute them
+  from `text_color`).
 
 **Example:**
 

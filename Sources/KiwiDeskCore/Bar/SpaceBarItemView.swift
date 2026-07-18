@@ -21,7 +21,12 @@ final class SpaceBarItemView: NSView {
         case text(String, tinted: Bool)
     }
 
-    /// One app glyph in the space's row.
+    /// One app glyph in the space's row — one slot per
+    /// adjacent same-app run (#293 stage 2), wearing a count
+    /// badge when the run holds several windows. No
+    /// focused-inside expansion: glyphs aren't click targets,
+    /// so a group containing the focused window just takes the
+    /// focused accent.
     struct App: Equatable {
         let name: String
         let icon: NSImage?
@@ -29,6 +34,8 @@ final class SpaceBarItemView: NSView {
         /// follows the text-color ladder (#294).
         let glyph: String?
         let focused: Bool
+        /// Windows behind this glyph; > 1 shows a count badge.
+        let count: Int
     }
 
     let identifierImage = NSImageView()
@@ -39,6 +46,10 @@ final class SpaceBarItemView: NSView {
         return tf
     }()
     var appViews: [NSView] = []
+    /// One count badge per glyph slot (hidden below 2).
+    var badgeViews: [NSTextField] = []
+    /// The "+n" overflow badge, its own trailing slot.
+    let overflowBadge = SpaceBarItemView.makeBadge()
     let accent = NSView()
 
     private(set) var space = SpaceID("1")
@@ -47,8 +58,9 @@ final class SpaceBarItemView: NSView {
         tinted: true
     )
     private(set) var apps: [App] = []
+    private(set) var overflow = 0
     private(set) var isActive = false
-    private var isHovered = false
+    private(set) var isHovered = false
     var horizontal = true
     var style = SpaceBarStyle()
     var onSelect: (SpaceID) -> Void = { _ in }
@@ -64,7 +76,25 @@ final class SpaceBarItemView: NSView {
         accent.wantsLayer = true
         addSubview(identifierImage)
         addSubview(identifierLabel)
+        addSubview(overflowBadge)
         addSubview(accent)
+    }
+
+    /// The App Bar's badge shape: a filled circle around a
+    /// bold centered count (`IndicatorBarBadgeCell`).
+    static func makeBadge() -> NSTextField {
+        let tf = NSTextField(labelWithString: "")
+        let cell = IndicatorBarBadgeCell(textCell: "")
+        cell.alignment = .center
+        cell.isEditable = false
+        cell.isSelectable = false
+        cell.isBordered = false
+        cell.isBezeled = false
+        cell.drawsBackground = false
+        tf.cell = cell
+        tf.wantsLayer = true
+        tf.setAccessibilityElement(false)
+        return tf
     }
 
     @available(*, unavailable)
@@ -110,11 +140,13 @@ final class SpaceBarItemView: NSView {
         apps: [App],
         active: Bool,
         horizontal: Bool,
-        style: SpaceBarStyle
+        style: SpaceBarStyle,
+        overflow: Int = 0
     ) {
         self.space = space
         self.spaceGlyph = spaceGlyph
         self.apps = apps
+        self.overflow = overflow
         self.isActive = active
         self.horizontal = horizontal
         self.style = style
@@ -130,11 +162,15 @@ final class SpaceBarItemView: NSView {
     }
 
     private var axLabel: String {
+        // Windows, not visible slots: grouped and past-the-cap
+        // windows still count.
+        let windows =
+            apps.reduce(0) { $0 + $1.count } + overflow
         let name = L(
             "space_bar.item.ax.space",
             "Space %1$@, %2$d applications",
             space.raw,
-            apps.count
+            windows
         )
         return isActive
             ? L(
@@ -155,6 +191,7 @@ final class SpaceBarItemView: NSView {
     /// `image`, so naive reuse would show stale icons.
     private func syncAppViews() {
         appViews.forEach { $0.removeFromSuperview() }
+        badgeViews.forEach { $0.removeFromSuperview() }
         appViews = apps.map { app in
             if app.glyph != nil {
                 let tf = NSTextField(labelWithString: "")
@@ -170,131 +207,13 @@ final class SpaceBarItemView: NSView {
             addSubview(iv)
             return iv
         }
-    }
-
-    // MARK: - Styling
-
-    func restyle() {
-        layer?.masksToBounds = true
-        layer?.cornerRadius =
-            style.tabBackground == .boxed ? cornerRadius : 0
-        layer?.backgroundColor = boxColor.cgColor
-        styleIdentifier()
-        styleApps()
-        styleAccent()
-    }
-
-    var cornerRadius: CGFloat {
-        style.resolvedCornerRadius(
-            forThickness: min(bounds.width, bounds.height)
-        )
-    }
-
-    private var boxColor: NSColor {
-        // Active wins over hover (matching `stateColor` and the
-        // mouseEntered guard): a click that activates the item
-        // under the pointer must not leave it hover-tinted.
-        if isActive, style.tabBackground == .boxed {
-            return NSColor(kiwiHex: style.activeBoxColor)
-        }
-        if isActive { return .clear }
-        if isHovered {
-            return NSColor(kiwiHex: style.hoverColor)
-        }
-        guard style.tabBackground == .boxed else {
-            return .clear
-        }
-        return NSColor(kiwiHex: style.boxColor)
-    }
-
-    /// The state tier a tinted element takes: active space
-    /// accent, hover text, or the inactive tier.
-    private var stateColor: NSColor {
-        if isActive {
-            return NSColor(kiwiHex: style.activeTextColor)
-        }
-        if isHovered {
-            return NSColor(kiwiHex: style.hoverTextColor)
-        }
-        return NSColor(kiwiHex: style.textColor)
-    }
-
-    private func styleIdentifier() {
-        switch spaceGlyph {
-        case .symbol(let name):
-            identifierLabel.isHidden = true
-            identifierImage.isHidden = false
-            identifierImage.image = NSImage(
-                systemSymbolName: name,
-                accessibilityDescription: nil
-            )
-            identifierImage.symbolConfiguration =
-                NSImage.SymbolConfiguration(
-                    pointSize: identifierFont,
-                    weight: .regular
-                )
-            identifierImage.contentTintColor = stateColor
-        case .text(let text, let tinted):
-            identifierImage.isHidden = true
-            identifierLabel.isHidden = false
-            identifierLabel.stringValue = text
-            identifierLabel.textColor =
-                tinted ? stateColor : .labelColor
+        badgeViews = apps.map { _ in
+            let badge = Self.makeBadge()
+            addSubview(badge)
+            return badge
         }
     }
 
-    private func styleApps() {
-        for (index, app) in apps.enumerated() {
-            guard index < appViews.count else { break }
-            if let glyphField = appViews[index] as? NSTextField {
-                glyphField.stringValue = app.glyph ?? ""
-                glyphField.font =
-                    AppFont.font(size: glyphSize)
-                    ?? .systemFont(ofSize: glyphSize)
-                glyphField.textColor =
-                    app.focused && isActive
-                    ? NSColor(kiwiHex: style.focusedItemColor)
-                    : stateColor
-            }
-        }
-    }
-
-    private func styleAccent() {
-        accent.isHidden = !isActive
-        guard isActive else { return }
-        let highlight = NSColor(kiwiHex: style.highlightColor)
-        switch style.activeIndicator {
-        case .ring:
-            accent.layer?.backgroundColor = nil
-            accent.layer?.borderColor = highlight.cgColor
-            accent.layer?.borderWidth = 2
-            accent.layer?.cornerRadius =
-                style.tabBackground == .boxed ? cornerRadius : 0
-        case .edgeMark:
-            accent.layer?.borderWidth = 0
-            accent.layer?.cornerRadius = 0
-            accent.layer?.backgroundColor = highlight.cgColor
-        case .gap:
-            // No shape marker: `gap` hides the App Bar's active
-            // item, which cannot apply to a space identifier —
-            // colors alone carry the state.
-            accent.isHidden = true
-        }
-    }
-
-    var identifierFont: CGFloat {
-        let thickness =
-            horizontal
-            ? bounds.height : bounds.width
-        let base =
-            style.fontSize > 0
-            ? style.fontSize : thickness * 0.5
-        return min(base, max(thickness - 8, 8))
-    }
-
-    var glyphSize: CGFloat {
-        identifierFont * 0.9
-    }
-
-    // Layout lives in SpaceBarItemView+Layout.swift.
+    // Styling lives in SpaceBarItemView+Style.swift;
+    // layout in SpaceBarItemView+Layout.swift.
 }

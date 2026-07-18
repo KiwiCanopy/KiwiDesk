@@ -18,13 +18,16 @@ extension SpaceBarItemView {
 
     /// The slot length an item with `appCount` glyphs wants
     /// along the bar axis: identifier cell + one cell per app
-    /// glyph + padding. The overlay uses this for auto sizing.
+    /// glyph (+ one for the "+n" overflow badge) + padding.
+    /// The overlay uses this for auto sizing.
     static func autoLength(
         appCount: Int,
+        overflow: Int = 0,
         depth: CGFloat
     ) -> CGFloat {
         let cell = max(depth - pad * 2, 8)
-        return pad * 2 + cell + CGFloat(appCount) * cell
+        let slots = appCount + (overflow > 0 ? 1 : 0)
+        return pad * 2 + cell + CGFloat(slots) * cell
     }
 
     override func layout() {
@@ -42,13 +45,84 @@ extension SpaceBarItemView {
         place(identifierImage, at: cursor, cell: cell)
         place(identifierLabel, at: cursor, cell: cell)
         cursor += cell
-        for view in appViews {
+        for (index, view) in appViews.enumerated() {
             place(view, at: cursor, cell: cell)
+            if index < badgeViews.count {
+                layoutBadge(
+                    badgeViews[index],
+                    onCellAt: cursor,
+                    cell: cell
+                )
+            }
+            cursor += cell
+        }
+        if overflow > 0 {
+            // The "+n" badge occupies its own trailing slot,
+            // centered like a glyph.
+            layoutBadge(
+                overflowBadge,
+                onCellAt: cursor,
+                cell: cell,
+                centered: true
+            )
             cursor += cell
         }
         layoutAccent()
         // Corner radius and fonts depend on the final bounds.
         restyle()
+    }
+
+    /// A count badge hugging its glyph cell's top-trailing
+    /// corner (flipped coordinates), or centered in the cell
+    /// for the overflow slot. Circle grows for multi-digit
+    /// counts — same shape as the App Bar's badge.
+    private func layoutBadge(
+        _ badge: NSTextField,
+        onCellAt offset: CGFloat,
+        cell: CGFloat,
+        centered: Bool = false
+    ) {
+        guard !badge.isHidden else { return }
+        let base = min(max(cell * 0.5, 9), 13)
+        badge.font = .systemFont(
+            ofSize: base * 0.9,
+            weight: .bold
+        )
+        let textWidth = ceil(badge.cell?.cellSize.width ?? 0)
+        let diameter = max(base, textWidth + 2)
+        let cellRect =
+            horizontal
+            ? CGRect(
+                x: offset,
+                y: (bounds.height - cell) / 2,
+                width: cell,
+                height: cell
+            )
+            : CGRect(
+                x: (bounds.width - cell) / 2,
+                y: offset,
+                width: cell,
+                height: cell
+            )
+        let rect =
+            centered
+            ? CGRect(
+                x: cellRect.midX - diameter / 2,
+                y: cellRect.midY - diameter / 2,
+                width: diameter,
+                height: diameter
+            )
+            : CGRect(
+                x: cellRect.maxX - diameter + 1,
+                y: cellRect.minY - 1,
+                width: diameter,
+                height: diameter
+            )
+        badge.frame = backingAlignedRect(
+            rect,
+            options: .alignAllEdgesNearest
+        )
+        badge.layer?.cornerRadius = diameter / 2
     }
 
     private func place(
