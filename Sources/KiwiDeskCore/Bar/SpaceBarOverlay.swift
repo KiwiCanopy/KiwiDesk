@@ -24,6 +24,12 @@ public final class SpaceBarOverlay {
 
     private var panel: NSPanel?
     var itemViews: [SpaceBarItemView] = []
+    /// Last-rendered strip in AX coordinates and the per-item
+    /// frames within it (strip-local, top-left), for the #372
+    /// drag-drop hit test. Kept in lockstep with what `render()`
+    /// drew so a drop target can never disagree with the layout.
+    var hitStrip: CGRect = .zero
+    var hitFrames: [(space: SpaceID, frame: CGRect)] = []
     // The optional trailing front-app segment (#293 verdict 6):
     // a divider rule, the focused app's glyph, and — on
     // horizontal bars only — its name.
@@ -73,8 +79,14 @@ public final class SpaceBarOverlay {
 
     public func hide() {
         lastShown = nil
+        hitStrip = .zero
+        hitFrames = []
         panel?.orderOut(nil)
     }
+
+    /// Whether the panel is on screen — the hit test is only
+    /// meaningful for a visible bar.
+    var isPanelVisible: Bool { panel?.isVisible == true }
 
     // MARK: - Rendering
 
@@ -113,6 +125,10 @@ public final class SpaceBarOverlay {
             alignment: style.alignment,
             pad: SpaceBarItemView.pad
         )
+        hitStrip = strip
+        hitFrames = zip(items, metrics.itemFrames).map {
+            ($0.space, $1)
+        }
         for (index, item) in items.enumerated() {
             let view = itemViews[index]
             view.frame = metrics.itemFrames[index]

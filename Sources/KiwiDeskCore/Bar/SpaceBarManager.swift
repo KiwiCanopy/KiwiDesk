@@ -100,6 +100,41 @@ public final class SpaceBarManager {
         }
     }
 
+    // MARK: - Drag-drop routing (#372)
+
+    /// The Space whose item contains a global (Cocoa) screen
+    /// point, across every painted bar; nil when the point is on
+    /// no bar. Point-based hit test — see `SpaceBarOverlay`.
+    public func spaceItem(atGlobal point: CGPoint) -> SpaceID? {
+        for overlay in overlays.values {
+            if let space = overlay.spaceItem(atGlobal: point) {
+                return space
+            }
+        }
+        return nil
+    }
+
+    /// Tints `space`'s item with the synthetic drag-hover and
+    /// clears every other bar's items; nil clears all.
+    public func setDragHover(_ space: SpaceID?) {
+        overlays.values.forEach { $0.setDragHover(space) }
+    }
+
+    /// Starts the pending-spring sweep on `space`'s item.
+    public func beginSpringSweep(
+        on space: SpaceID,
+        duration: TimeInterval
+    ) {
+        overlays.values.forEach {
+            $0.beginSpringSweep(on: space, duration: duration)
+        }
+    }
+
+    /// Clears every hover tint and pending sweep across all bars.
+    public func clearDragFeedback() {
+        overlays.values.forEach { $0.clearDragFeedback() }
+    }
+
     #if DEBUG
         /// Test seam: the overlay currently backing a display.
         func overlayForTesting(

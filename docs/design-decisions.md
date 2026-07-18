@@ -1169,6 +1169,36 @@ per display means per-display content, consistent with every
 other per-display fact in the bar; a secondary display shows
 its own space's remembered focus.
 
+**Space Bar drag-drop is a two-speed spring, not a blind
+relocate.** (#372.) Dragging a window onto a Space item either
+relocates it (fast drop, `move_to_space`) or, after a 2 s dwell,
+springs the view to that Space so the window is dropped into its
+live layout. A first design pass rejected spring-loading over a
+cross-process race fear; it was reconsidered once grounded in the
+code, because KiwiDesk's Spaces are *virtual* (a retile, not a
+WindowServer Space change), which narrows the risk to one place.
+The load-bearing details, so they are not relitigated:
+- The dragged window is exempted from `stashInactive` for the
+  gesture's life (`TilingEngine.dragExemptWindow`), the same kind
+  of pin as the existing `!isFloating` exemption — otherwise the
+  spring's retile would stash it under the cursor mid-drag.
+- The spring uses a private activate-plus-retile helper, **not**
+  `focusSpace`: that command warps the cursor to hand off AX
+  focus, which would rip the pointer out of the OS drag loop. No
+  focus hand-off, no warp, and the spring retile is
+  `animated: false` regardless of `animations.on_space_change`
+  (a crisp switch must not add motion competing with the live
+  foreign-app drag).
+- Space membership flips lazily at drop (reading the active Space
+  then), never eagerly at spring, so a mind-change or cancel
+  leaves no stale state.
+- The dwell is 2 s (longer than Finder's ~0.7 s): the ring sweep
+  shows progress, and a whole-view switch is a bigger disruption
+  than a folder opening, so the accidental-trigger bar sits
+  higher. Always-on, no enable toggle; focus-after-drop is not a
+  new setting (`move_to_space_and_follow` already models
+  following). Option-held-drop → follow is a deferred second gear.
+
 **Bar alignment is edge-relative, one shared default.**
 (#293 QA.) Both bars place their content run via `alignment` —
 `start` / `center` / `end`, values edge-relative (a left bar's

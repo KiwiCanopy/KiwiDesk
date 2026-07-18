@@ -162,6 +162,10 @@ following** it — you stay on the current space. The moved
 window becomes the target space's focused window, so the first
 time you switch there it is the window you land on.
 
+A quick drag-and-drop of a window onto a Space item in the Space
+Bar performs this same move (see the user guide); there is no
+separate verb for it.
+
 **Example:**
 
 ```lua

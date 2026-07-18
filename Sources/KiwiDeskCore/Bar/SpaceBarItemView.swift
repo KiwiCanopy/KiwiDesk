@@ -61,6 +61,15 @@ final class SpaceBarItemView: NSView {
     private(set) var overflow = 0
     private(set) var isActive = false
     private(set) var isHovered = false
+    /// Synthetic hover during a window drag (#372). Tracking
+    /// areas stay silent while another app owns the drag loop,
+    /// so the driver sets this from the AX cursor position; it
+    /// routes through the same `hoverColor` path as `isHovered`.
+    /// Mutated via `setDragHover` (SpaceBarItemView+DragDrop).
+    var isDragHovered = false
+    /// The pending-spring sweep ring (#372): a stroke that fills
+    /// 0→1 over the dwell, layered on top of the hover tint.
+    let springRing = CAShapeLayer()
     var horizontal = true
     var style = SpaceBarStyle()
     var onSelect: (SpaceID) -> Void = { _ in }
@@ -78,6 +87,11 @@ final class SpaceBarItemView: NSView {
         addSubview(identifierLabel)
         addSubview(overflowBadge)
         addSubview(accent)
+        springRing.fillColor = nil
+        springRing.lineWidth = 2
+        springRing.strokeEnd = 0
+        springRing.isHidden = true
+        layer?.addSublayer(springRing)
     }
 
     /// The App Bar's badge shape: a filled circle around a

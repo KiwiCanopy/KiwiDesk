@@ -61,7 +61,7 @@ extension SpaceBarItemView {
             return NSColor(kiwiHex: style.activeBoxColor)
         }
         if isActive { return .clear }
-        if isHovered {
+        if isHovered || isDragHovered {
             return NSColor(kiwiHex: style.hoverColor)
         }
         guard style.tabBackground == .boxed else {
@@ -76,7 +76,7 @@ extension SpaceBarItemView {
         if isActive {
             return NSColor(kiwiHex: style.activeTextColor)
         }
-        if isHovered {
+        if isHovered || isDragHovered {
             return NSColor(kiwiHex: style.hoverTextColor)
         }
         return NSColor(kiwiHex: style.textColor)

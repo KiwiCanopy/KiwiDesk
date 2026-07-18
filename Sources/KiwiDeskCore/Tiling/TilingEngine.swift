@@ -31,6 +31,16 @@ public final class TilingEngine {
     /// and per-app EnhancedUserInterface toggling.
     private let applier = FrameApplier()
 
+    /// A window in an active drag gesture, exempt from
+    /// `stashInactive` (#372). While the user drags a window and
+    /// the Space Bar springs to another virtual space, the
+    /// dragged window is still a member of its SOURCE space, so
+    /// the spring's retile would stash it into the corner under
+    /// the cursor mid-drag. The drag handlers set this for the
+    /// gesture's life and clear it at drop. Same rationale as the
+    /// existing `!isFloating` exemption: pinned for the duration.
+    public var dragExemptWindow: WindowID?
+
     /// Resolves the AX element of a window (wired to the
     /// event loop's registry).
     public var elementProvider: @MainActor (WindowID) -> AXUIElement? = { _ in
@@ -259,7 +269,8 @@ public final class TilingEngine {
         where space.id != active {
             for id in space.windows {
                 guard let window = state.windows[id],
-                    !window.isFloating
+                    !window.isFloating,
+                    id != dragExemptWindow
                 else { continue }
                 let screen =
                     NSScreen.screens.first {

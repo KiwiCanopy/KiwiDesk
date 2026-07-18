@@ -53,6 +53,7 @@ extension KiwiCore {
         drag.isMousePressed = {
             NSEvent.pressedMouseButtons & 1 == 1
         }
+        wireSpaceBarDrop()
     }
 
     /// Live feedback while a tiled window is dragged: a ghost
@@ -64,6 +65,19 @@ extension KiwiCore {
         start: CGRect,
         frame: CGRect
     ) {
+        // Pin the dragged window against `stashInactive` for the
+        // gesture's life, so a Space Bar spring can't stash it
+        // mid-drag (#372). Cleared at drop.
+        tiler.dragExemptWindow = id
+        // Feed the Space Bar drop machine the live cursor. While a
+        // bar target is armed (hover + pending spring), suppress
+        // the in-space ghost/drop-zone — the drag is heading off
+        // this space, not swapping within it.
+        spaceBarDrop.moved(id, cursor: NSEvent.mouseLocation)
+        if spaceBarDrop.isArmed {
+            dragOverlay.hideAll()
+            return
+        }
         let settings = tiler.settings
         guard
             settings.dragGhost.enabled
@@ -185,8 +199,24 @@ extension KiwiCore {
         start: CGRect,
         frame: CGRect
     ) {
+        tiler.dragExemptWindow = nil
         dragOverlay.hideAll()
         defer { scheduleBorderDropReconcile() }
+        // Space Bar drop resolves first (#372). A fast drop onto a
+        // different space's item relocates the window (stay put);
+        // a drop after the space sprang files it into the now-
+        // visible target layout. Both route through `moveWindow`,
+        // which handles either active-space case. Anything else
+        // (own space, off-bar) falls through to the in-space
+        // swap/snap-back logic unchanged.
+        switch spaceBarDrop.ended(id, cursor: NSEvent.mouseLocation)
+        {
+        case .relocate(let target), .placeInSprung(let target):
+            moveWindow(id, to: target, follow: false)
+            return
+        case .none:
+            break
+        }
         // A floating window is excluded from the layout swap/resize
         // logic below, but a drop that leaves it under a top app bar
         // hides its title bar and makes it ungrabbable — clamp it
