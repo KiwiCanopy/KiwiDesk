@@ -165,11 +165,18 @@ extension TilingSettings: Codable {
             keyedBy: ResizeKeys.self,
             forKey: .resize
         )
-        resizeStep =
+        // Clamp at the decode boundary so `resizeStep` is always
+        // finite and in the command's range — a hand-edited
+        // `resize.step: 1e300` would otherwise trap the `Int(...)`
+        // read sites (GUI seed, keybinding rows) that assume a
+        // sane value (#386). Mirrors `set_resize_step`.
+        let rawStep =
             try resize.decodeIfPresent(
                 CGFloat.self,
                 forKey: .step
             ) ?? 50
+        resizeStep =
+            rawStep.isFinite ? min(max(rawStep, 1), 10_000) : 50
         resizeFeedback =
             try resize.decodeIfPresent(
                 Bool.self,
