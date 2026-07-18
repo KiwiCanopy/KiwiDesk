@@ -5,6 +5,15 @@ import Testing
 
 @testable import KiwiDeskCore
 
+/// Generous hang-guard for waits on the settle Task's `onDragEnd`
+/// (#344). The drag settle fires from an unstructured `Task` on the
+/// main actor; because swift-testing runs suites concurrently, that
+/// actor can be starved for seconds under full-suite load, so the old
+/// 5s deadline tripped spuriously (the `ended` still empty flake).
+/// The loops exit the instant `ended` fills, so a large value never
+/// slows a passing run — it only bounds a genuine hang.
+private let dragSettleHangGuard: Duration = .seconds(30)
+
 @Suite("DragCoordinator", .serialized)
 @MainActor
 struct DragCoordinatorTests {
@@ -33,7 +42,7 @@ struct DragCoordinatorTests {
         pressed = false
         // Poll instead of a fixed sleep: under full-suite
         // load the settle task can get main-actor time late.
-        let deadline = ContinuousClock.now + .seconds(5)
+        let deadline = ContinuousClock.now + dragSettleHangGuard
         while ended.isEmpty, ContinuousClock.now < deadline {
             try await Task.sleep(nanoseconds: 20_000_000)
         }
@@ -80,7 +89,7 @@ struct DragCoordinatorTests {
             frame: frame,
             validated: true
         )
-        let deadline = ContinuousClock.now + .seconds(5)
+        let deadline = ContinuousClock.now + dragSettleHangGuard
         while ended.isEmpty, ContinuousClock.now < deadline {
             try await Task.sleep(nanoseconds: 20_000_000)
         }
@@ -106,7 +115,7 @@ struct DragCoordinatorTests {
         pressed = false
         let trailing = CGRect(x: 400, y: 0, width: 10, height: 10)
         drag.windowMoved(WindowID(1), frame: trailing)
-        let deadline = ContinuousClock.now + .seconds(5)
+        let deadline = ContinuousClock.now + dragSettleHangGuard
         while ended.isEmpty, ContinuousClock.now < deadline {
             try await Task.sleep(nanoseconds: 20_000_000)
         }
@@ -188,7 +197,7 @@ struct DragCoordinatorTests {
         try await Task.sleep(nanoseconds: 150_000_000)
         #expect(ended.isEmpty)
         pressed = false
-        let deadline = ContinuousClock.now + .seconds(5)
+        let deadline = ContinuousClock.now + dragSettleHangGuard
         while ended.isEmpty, ContinuousClock.now < deadline {
             try await Task.sleep(nanoseconds: 20_000_000)
         }

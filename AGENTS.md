@@ -391,17 +391,21 @@ Keep this list updated whenever a recurring mistake is found.
   ceiling repeatedly bit large test files. Break suites into
   focused files before they grow; per-file private helpers are the
   convention and small duplication across suites is fine.
-- **`ExecTests` flakes under full-suite load — it is not a
-  regression.** The *External command execution* suite
-  (`Tests/KiwiDeskCoreTests/ExecTests.swift`) spawns real external
-  processes with sub-second timeouts; swift-testing runs suites
-  concurrently, so under the full ~1390-test load a child can miss
-  its window and an assertion sees `.none` (e.g. `ExecTests.swift`
-  exit-code check) or a timeout trips. It passes 14/14 in isolation
-  (`swift test --filter ExecTests`). So a **lone ExecTests
-  failure** on a full run is environmental: re-run isolated to
-  confirm, don't re-diagnose or block a merge on it. Real fix
-  tracked in #344; until then this is the known-good triage.
+- **An async test that awaits real spawned work needs a generous
+  hang-guard, not a tight deadline (#344).** A test that spawns a
+  real subprocess (`ExecTests`) or schedules an unstructured `Task`
+  (`DragCoordinatorTests`) and then awaits its **main-actor
+  callback** cannot use a sub-second or few-second poll deadline:
+  swift-testing runs suites concurrently, so under full-suite load
+  the shared main actor is starved for seconds and the tight
+  deadline tripped spuriously (the callback landed, just late)
+  while the suite passed in isolation. Fixed by giving each such
+  wait one shared generous hang-guard (`execHangGuard` /
+  `dragSettleHangGuard`, 30s): the poll exits the instant the
+  condition holds, so a passing run is never slowed — the deadline
+  only bounds a genuine hang. Prove the *behavior* by the gap (a
+  short watchdog against a much longer sleep), never by a tight
+  wait. New async tests here follow suit.
 - **Discardable test results must express side-effect intent.**
   When a command or setup helper primarily mutates state but also
   returns optional convenience data, mark the declaration
