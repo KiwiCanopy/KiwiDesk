@@ -120,15 +120,14 @@ extension KiwiCore {
         in space: Space,
         style: SpaceBarStyle
     ) -> (apps: [SpaceBarItemView.App], overflow: Int) {
-        let windows = space.windows.filter {
-            state.windows[$0] != nil
+        // One pass: ids and names stay index-aligned with no
+        // unreachable "?" fallback.
+        let pairs = space.windows.compactMap { id in
+            state.windows[id].map { (id, $0.appName) }
         }
-        let names = windows.map {
-            state.windows[$0]?.appName ?? "?"
-        }
-        let groups = Self.adjacentRuns(of: names).map {
-            Array(windows[$0])
-        }
+        let windows = pairs.map(\.0)
+        let groups = Self.adjacentRuns(of: pairs.map(\.1))
+            .map { Array(windows[$0]) }
         let visible = groups.prefix(Self.spaceBarGlyphCap)
         let hidden = groups.dropFirst(Self.spaceBarGlyphCap)
         let apps = visible.compactMap { group in

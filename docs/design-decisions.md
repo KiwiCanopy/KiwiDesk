@@ -1124,6 +1124,26 @@ choice: no conflict dialog, no automatic relocation, no blocked
 picker. The GUI explains the resulting order inline; profile
 load/import accepts it silently.
 
+**The Space Bar always groups; there is no knob.** (#293.)
+Adjacent same-app runs collapse into one glyph + count badge
+unconditionally — unlike the App Bar's `group_adjacent_windows`
+toggle. The asymmetry is structural, not an oversight: App Bar
+tabs are click targets, so grouping changes interaction and
+earns a toggle; Space Bar glyphs are informational, and the
+fixed cap of five glyph slots depends on grouping running
+first (an ungrouped mode would burn the cap on duplicates
+while conveying less). The overflow badge's `+n` counts hidden
+**windows**, not slots — the same unit as the per-glyph count
+badges and the item's accessibility label.
+
+**The front-app segment is per-display.** (#293.) With
+`space_bar.show_front_app` on, each display's bar shows the
+focused window of the Space that display currently shows — not
+the globally frontmost app (sketchybar's `front_app`). One bar
+per display means per-display content, consistent with every
+other per-display fact in the bar; a secondary display shows
+its own space's remembered focus.
+
 **Tab background and active indicator are orthogonal.** (#228.)
 The old coupled `style` enum (`pills` / `segments` / `underline`)
 conflated two orthogonal concerns: the per-tab box rendering and

@@ -5,6 +5,9 @@ import AppKit
 /// overflow badges, and the active indicator. Split from
 /// `SpaceBarItemView.swift` for the file ceiling.
 extension SpaceBarItemView {
+    /// Muted-badge background alpha over `text_color` — named
+    /// so the stage-3 preview can share the derivation.
+    static let mutedBadgeAlpha: CGFloat = 0.3
 
     func restyle() {
         layer?.masksToBounds = true
@@ -27,7 +30,7 @@ extension SpaceBarItemView {
             isActive
             ? NSColor(kiwiHex: style.groupBadgeColor)
             : NSColor(kiwiHex: style.textColor)
-                .withAlphaComponent(0.3)
+                .withAlphaComponent(Self.mutedBadgeAlpha)
         let text =
             isActive
             ? NSColor(kiwiHex: style.groupBadgeTextColor)

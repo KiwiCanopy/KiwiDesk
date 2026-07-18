@@ -89,7 +89,12 @@ extension SpaceBarItemView {
             weight: .bold
         )
         let textWidth = ceil(badge.cell?.cellSize.width ?? 0)
-        let diameter = max(base, textWidth + 2)
+        // Capped at the cell so a "+42" on a thin bar squeezes
+        // rather than clipping top/bottom under masksToBounds.
+        let diameter = min(
+            max(base, textWidth + 2),
+            cell + 2
+        )
         let cellRect =
             horizontal
             ? CGRect(

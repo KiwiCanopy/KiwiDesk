@@ -120,9 +120,8 @@ struct SpaceBarDriverTests {
         let core = makeCore()
         core.state.workspaces.assign(SpaceID("1"), to: display)
         core.state.workspaces.activate(SpaceID("1"))
-        // 7 distinct apps → 7 groups; cap 5 → 2 hidden groups.
-        // The last hidden one holds two windows, so n counts
-        // WINDOWS (3), not slots.
+        // 7 apps → 7 groups; cap 5 → 2 hidden groups of two
+        // windows each, so n counts WINDOWS (4), not slots (2).
         for id in 1...6 {
             core.state.apply(
                 .windowCreated(

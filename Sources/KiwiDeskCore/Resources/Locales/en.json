@@ -593,6 +593,7 @@
   "slot_size.points": "Points",
   "slot_size.row_height": "Row height",
   "slot_size.unit": "Size unit",
+  "space_bar.front_app.ax": "Front app: %1$@",
   "space_bar.item.ax.current": "%1$@, current",
   "space_bar.item.ax.not_current": "%1$@, not current",
   "space_bar.item.ax.space": "Space %1$@, %2$d applications",

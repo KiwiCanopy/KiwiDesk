@@ -6,6 +6,10 @@ import AppKit
 /// text, never hidden — and the divider flips to a horizontal
 /// rule. Informational; no click target.
 extension SpaceBarOverlay {
+    /// The divider rule's alpha over `text_color` — named so
+    /// the stage-3 preview can share it instead of re-deriving.
+    static let frontDividerAlpha: CGFloat = 0.4
+
     /// Lays out (or hides) the segment starting at `cursor`
     /// along the bar axis.
     func renderFrontSegment(
@@ -38,12 +42,14 @@ extension SpaceBarOverlay {
             depth: depth,
             cell: cell,
             horizontal: horizontal,
-            accent: accent
+            accent: accent,
+            style: style
         )
         layoutFrontName(
             app,
             at: offset,
             depth: depth,
+            strip: strip,
             horizontal: horizontal,
             accent: accent,
             style: style
@@ -52,13 +58,21 @@ extension SpaceBarOverlay {
 
     private func attachFrontViewsIfNeeded() {
         guard let content = panelContentView else { return }
+        // Re-added every render so the segment stays ABOVE item
+        // views created later (`syncItemViewCount` appends on
+        // top) — otherwise a long item row paints over it.
         for view in [
             frontDivider, frontIcon, frontGlyph, frontName,
-        ]
-        where view.superview == nil {
-            content.addSubview(view)
+        ] {
+            content.addSubview(
+                view,
+                positioned: .above,
+                relativeTo: nil
+            )
         }
         frontDivider.wantsLayer = true
+        frontIcon.setAccessibilityElement(false)
+        frontName.setAccessibilityElement(false)
     }
 
     /// The separator rule; returns the axis length consumed.
@@ -71,7 +85,8 @@ extension SpaceBarOverlay {
     ) -> CGFloat {
         frontDivider.isHidden = false
         frontDivider.layer?.backgroundColor =
-            color.withAlphaComponent(0.4).cgColor
+            color.withAlphaComponent(Self.frontDividerAlpha)
+            .cgColor
         let inset = (depth - cell) / 2
         frontDivider.frame =
             horizontal
@@ -88,7 +103,8 @@ extension SpaceBarOverlay {
         depth: CGFloat,
         cell: CGFloat,
         horizontal: Bool,
-        accent: NSColor
+        accent: NSColor,
+        style: SpaceBarStyle
     ) -> CGFloat {
         let inset = (depth - cell) / 2
         let frame =
@@ -105,21 +121,39 @@ extension SpaceBarOverlay {
                 width: cell,
                 height: cell
             )
+        // The one AX element the segment exposes: the visible
+        // glyph carries "Front app: <name>"; everything else
+        // stays silent (glyphs are informational).
+        let axLabel = L(
+            "space_bar.front_app.ax",
+            "Front app: %1$@",
+            app.name
+        )
         if let glyph = app.glyph {
             frontIcon.isHidden = true
             frontGlyph.isHidden = false
             frontGlyph.stringValue = glyph
+            // Same ladder as item glyphs: an explicit font_size
+            // wins, else scale with the cell.
+            let size =
+                style.fontSize > 0
+                ? style.fontSize * 0.9 : cell * 0.72
             frontGlyph.font =
-                AppFont.font(size: cell * 0.72)
-                ?? .systemFont(ofSize: cell * 0.72)
+                AppFont.font(size: size)
+                ?? .systemFont(ofSize: size)
             frontGlyph.textColor = accent
             frontGlyph.frame = frame
+            frontGlyph.setAccessibilityElement(true)
+            frontGlyph.setAccessibilityLabel(axLabel)
         } else {
             frontGlyph.isHidden = true
+            frontGlyph.setAccessibilityElement(false)
             frontIcon.isHidden = false
             frontIcon.image = app.icon
             frontIcon.imageScaling = .scaleProportionallyUpOrDown
             frontIcon.frame = frame
+            frontIcon.setAccessibilityElement(true)
+            frontIcon.setAccessibilityLabel(axLabel)
         }
         return cell + SpaceBarItemView.pad
     }
@@ -130,6 +164,7 @@ extension SpaceBarOverlay {
         _ app: SpaceBarItemView.App,
         at offset: CGFloat,
         depth: CGFloat,
+        strip: CGRect,
         horizontal: Bool,
         accent: NSColor,
         style: SpaceBarStyle
@@ -148,10 +183,16 @@ extension SpaceBarOverlay {
         frontName.lineBreakMode = .byTruncatingTail
         frontName.sizeToFit()
         let height = frontName.frame.height
+        // Clamp to the strip's remaining length so a long name
+        // ellipsizes instead of hard-clipping at the panel edge.
+        let available = max(
+            strip.width - offset - SpaceBarItemView.pad,
+            0
+        )
         frontName.frame = CGRect(
             x: offset,
             y: (depth - height) / 2,
-            width: frontName.frame.width,
+            width: min(frontName.frame.width, available),
             height: height
         )
     }

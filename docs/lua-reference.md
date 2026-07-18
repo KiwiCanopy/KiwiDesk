@@ -1803,9 +1803,11 @@ space_bar.set_corner_roundness(50)
 **Expects:** boolean (default `false`).
 
 **Does:** shows a trailing front-app segment after the last
-Space item — a divider, then the focused app's glyph and name.
-On vertical (left/right) bars the segment is icon-only; the
-divider flips to a horizontal rule.
+Space item — a divider, then the glyph and name of the focused
+window of the Space **this display currently shows** (per
+display, not the globally frontmost app — one bar per display,
+per-display content). On vertical (left/right) bars the
+segment is icon-only; the divider flips to a horizontal rule.
 
 **Example:**
 
