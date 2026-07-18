@@ -8,7 +8,7 @@ import CoreGraphics
 /// change (#239): `center`/`start`/`end` re-seat it at a fixed
 /// resting position (centred, or flush against the leading
 /// left/top or trailing right/bottom edge — `start`/`end` are
-/// axis-relative like the app bar's), then clamp so no empty
+/// relative to the scroll axis), then clamp so no empty
 /// margin shows past the row ends; `follow` (the default) keeps
 /// the prior offset and pans the minimum to reveal the focus
 /// (#66) — up/down mirror, an already-visible slot doesn't move,

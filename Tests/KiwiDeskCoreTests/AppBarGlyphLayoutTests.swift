@@ -30,8 +30,7 @@ struct AppBarGlyphLayoutTests {
             count: 1,
             active: false,
             horizontal: true,
-            style: style,
-            edge: .top
+            style: style
         )
         view.layout()
         return view
@@ -123,8 +122,7 @@ struct AppBarGlyphLayoutTests {
             count: 1,
             active: false,
             horizontal: true,
-            style: style,
-            edge: .top
+            style: style
         )
         view.layout()
         // The label must have been given its full cell width —

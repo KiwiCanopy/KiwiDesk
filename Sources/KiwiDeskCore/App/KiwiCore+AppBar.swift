@@ -85,7 +85,7 @@ extension KiwiCore {
         host: AppBarHosting,
         settings: TilingSettings
     ) -> AppBarManager.Bar? {
-        let (style, edge) = host.resolvedBar(
+        let style = host.resolvedBar(
             global: settings.appBarStyle
         )
         let context = settings.context(
@@ -110,8 +110,7 @@ extension KiwiCore {
                 space.focused.map(group.contains) ?? false
             },
             strip: strip,
-            style: style,
-            edge: edge
+            style: style
         )
     }
 
@@ -123,10 +122,10 @@ extension KiwiCore {
     }
 
     /// The bar-hosting layout for a space, resolving per-space
-    /// layout overrides (#17) so the bar edge follows that
-    /// space's own orientation. Used when building a display's
-    /// bar; `barHost(for mode:)` stays for the reorder path,
-    /// which needs no per-space geometry.
+    /// layout overrides (#17) so the bar honors that space's own
+    /// `app_bar` overrides and enabled flag. Used when building
+    /// a display's bar; `barHost(for mode:)` stays for the
+    /// reorder path, which needs no per-space geometry.
     func barHost(for space: Space) -> AppBarHosting? {
         switch space.mode {
         case .monocle:
@@ -157,7 +156,7 @@ extension KiwiCore {
         else { return }
         let style = host.resolvedBar(
             global: tiler.settings.appBarStyle
-        ).style
+        )
         var groups = barGroups(
             in: space,
             grouping: style.groupAdjacentWindows

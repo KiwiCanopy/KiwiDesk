@@ -112,15 +112,15 @@ public protocol AppBarHosting {
 }
 
 extension AppBarHosting {
-    /// The concrete style this layout's bar renders with (the
-    /// global `style` overlaid by this layout's overrides) plus
-    /// its stored absolute `edge`. Resolve once, here, at the
+    /// The concrete style this layout's bar renders with: the
+    /// global `style` overlaid by this layout's overrides. Its
+    /// `edge` is the stored absolute one — the single source
+    /// everything downstream reads. Resolve once, here, at the
     /// layer boundary.
     public func resolvedBar(
         global: AppBarStyle
-    ) -> (style: AppBarStyle, edge: AppBarEdge) {
-        let style = appBar.resolved(with: global)
-        return (style, style.edge)
+    ) -> AppBarStyle {
+        appBar.resolved(with: global)
     }
 
     /// The strip the bar occupies, or nil while it is off.
@@ -129,10 +129,10 @@ extension AppBarHosting {
         global: AppBarStyle
     ) -> CGRect? {
         guard appBar.enabled else { return nil }
-        let (style, edge) = resolvedBar(global: global)
+        let style = resolvedBar(global: global)
         return AppBarGeometry.barFrame(
             in: usable,
-            edge: edge,
+            edge: style.edge,
             thickness: style.thickness
         )
     }

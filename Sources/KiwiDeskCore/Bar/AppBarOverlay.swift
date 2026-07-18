@@ -65,11 +65,9 @@ public final class AppBarOverlay {
         let strip: CGRect
         /// The already-resolved style (global overlaid by the
         /// active layout's overrides) — the overlay is
-        /// layout-agnostic.
+        /// layout-agnostic. Its `edge` is the stored absolute
+        /// edge the bar sits on (#293).
         let style: AppBarStyle
-        /// The concrete edge the bar sits on, resolved from the
-        /// style's axis-relative position by the driver.
-        let edge: AppBarEdge
     }
 
     private var panel: NSPanel?
@@ -92,8 +90,7 @@ public final class AppBarOverlay {
         items: [Item],
         activeIndex: Int?,
         strip: CGRect,
-        style: AppBarStyle,
-        edge: AppBarEdge
+        style: AppBarStyle
     ) {
         guard !items.isEmpty,
             strip.width >= 1, strip.height >= 1
@@ -105,8 +102,7 @@ public final class AppBarOverlay {
             items: items,
             activeIndex: activeIndex,
             strip: strip,
-            style: style,
-            edge: edge
+            style: style
         )
         render(followingFocus: true)
     }
@@ -129,7 +125,7 @@ public final class AppBarOverlay {
         let activeIndex = state.activeIndex
         let strip = state.strip
         let style = state.style
-        let edge = state.edge
+        let edge = state.style.edge
         let panel = self.panel ?? makePanel()
         self.panel = panel
         // The plain strip rounds against its real (clamped) cross
@@ -145,7 +141,6 @@ public final class AppBarOverlay {
             strip: strip,
             count: items.count,
             style: style,
-            edge: edge,
             items: items
         )
         lastMetrics = m
@@ -213,8 +208,7 @@ public final class AppBarOverlay {
                 count: item.count,
                 active: active,
                 horizontal: m.horizontal,
-                style: style,
-                edge: edge
+                style: style
             )
             view.onSelect = { [weak self] id in
                 self?.onSelect(id)

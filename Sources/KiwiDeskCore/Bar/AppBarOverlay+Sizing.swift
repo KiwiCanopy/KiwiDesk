@@ -27,10 +27,9 @@ extension AppBarOverlay {
         strip: CGRect,
         count: Int,
         style: AppBarStyle,
-        edge: AppBarEdge,
         items: [Item]
     ) -> Metrics {
-        let horizontal = edge.isHorizontal
+        let horizontal = style.edge.isHorizontal
         let axis = horizontal ? strip.width : strip.height
         let thickness = horizontal ? strip.height : strip.width
         let gap = style.itemGap

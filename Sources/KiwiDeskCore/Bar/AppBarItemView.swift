@@ -40,9 +40,9 @@ final class AppBarItemView: NSView {
     private var windowID = WindowID(0)
     var name = ""
     var horizontal = true
-    /// The concrete edge the bar sits on; the active edge-mark
-    /// hugs it.
-    var edge: AppBarEdge = .top
+    /// The concrete edge the bar sits on (from the resolved
+    /// style); the active edge-mark hugs it.
+    var edge: AppBarEdge { style.edge }
     private(set) var isActive = false
     private(set) var count = 1
     private var isHovered = false
@@ -155,14 +155,12 @@ final class AppBarItemView: NSView {
         count: Int,
         active: Bool,
         horizontal: Bool,
-        style: AppBarStyle,
-        edge: AppBarEdge
+        style: AppBarStyle
     ) {
         windowID = id
         self.name = name
         self.count = count
         self.horizontal = horizontal
-        self.edge = edge
         self.isActive = active
         self.style = style
         isHovered = false

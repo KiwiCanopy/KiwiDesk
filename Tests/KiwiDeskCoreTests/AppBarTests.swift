@@ -172,6 +172,46 @@ struct ScrollingBarGeometryTests {
         )
         #expect(frames[w1] == context.usable)
     }
+
+    // The decoupled combos are the point of #293: the strip may
+    // now carve along OR across the scroll axis.
+
+    @Test("Vertical scrolling under a top bar loses height")
+    func verticalScrollTopBar() throws {
+        // The new default for vertical scrolling: a top strip
+        // carves the same axis the rows scroll along.
+        var context = context(orientation: .vertical, edge: .top)
+        context.scrolling.slotSize = .points(300)
+        let frames = layout.calculateGeometry(
+            for: [w1, w2],
+            in: context
+        )
+        let usable = context.usable
+        let first = try #require(frames[w1])
+        // Rows keep full width and start below strip + gap.
+        #expect(first.width == usable.width)
+        #expect(first.minY == usable.minY + 32 + 10)
+        #expect(first.height == 300)
+    }
+
+    @Test("Horizontal scrolling beside a left bar loses width")
+    func horizontalScrollLeftBar() throws {
+        var context = context(
+            orientation: .horizontal,
+            edge: .left
+        )
+        context.scrolling.slotSize = .points(500)
+        let frames = layout.calculateGeometry(
+            for: [w1, w2],
+            in: context
+        )
+        let usable = context.usable
+        let first = try #require(frames[w1])
+        // Columns keep full height, shifted right of the strip.
+        #expect(first.height == usable.height)
+        #expect(first.minX == usable.minX + 32 + 10)
+        #expect(first.width == 500)
+    }
 }
 
 @Suite("App bar commands", .serialized)

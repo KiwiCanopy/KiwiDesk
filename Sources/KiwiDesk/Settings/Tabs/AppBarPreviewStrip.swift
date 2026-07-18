@@ -162,12 +162,14 @@ struct AppBarPreviewStrip: View {
                     lineWidth: 2
                 )
         } else {
-            RoundedRectangle(cornerRadius: thickness / 2)
-                .strokeBorder(
-                    color(style.highlightColor),
-                    lineWidth: 2
-                )
-                .padding(1.5)
+            RoundedRectangle(
+                cornerRadius: min(slotWidth, slotHeight) / 2
+            )
+            .strokeBorder(
+                color(style.highlightColor),
+                lineWidth: 2
+            )
+            .padding(1.5)
         }
     }
 
