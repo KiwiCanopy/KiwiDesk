@@ -15,14 +15,16 @@ struct SpaceBarEditorSection: View {
 
     var body: some View {
         SettingsSection(
-            L("space_bar.global_style.title", "Global style")
+            L("space_bar.global_style.title", "Space Bar style")
         ) {
             Text(caption)
                 .font(.caption)
                 .foregroundStyle(.secondary)
             SpaceBarPreviewStrip(
                 style: style.wrappedValue,
-                appBar: model.config.settings.appBarStyle
+                appBar: model.config.settings.appBarStyle,
+                sameEdge: model.config.settings
+                    .spaceBarSharesEdgeWithAppBar
             )
             ToggleRow(
                 label: L("space_bar.enabled", "Show Space Bar"),
@@ -93,13 +95,12 @@ struct SpaceBarEditorSection: View {
     }
 
     /// The neutral same-edge explainer (#293): shown only when
-    /// both *enabled* bars resolve to the same edge — never a
-    /// warning, never a popup.
+    /// both *enabled* bars resolve to the same edge — the
+    /// shared `spaceBarSharesEdgeWithAppBar` predicate honors
+    /// per-layout App Bar enablement and edge overrides. Never
+    /// a warning, never a popup.
     @ViewBuilder private var sameEdgeRow: some View {
-        if style.wrappedValue.enabled,
-            style.wrappedValue.edge
-                == model.config.settings.appBarStyle.edge
-        {
+        if model.config.settings.spaceBarSharesEdgeWithAppBar {
             Label {
                 Text(sameEdgeText)
                     .font(.caption)

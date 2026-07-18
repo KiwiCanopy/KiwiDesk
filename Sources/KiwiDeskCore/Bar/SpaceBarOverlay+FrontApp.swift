@@ -6,10 +6,6 @@ import AppKit
 /// text, never hidden — and the divider flips to a horizontal
 /// rule. Informational; no click target.
 extension SpaceBarOverlay {
-    /// The divider rule's alpha over `text_color` — named so
-    /// the stage-3 preview can share it instead of re-deriving.
-    static let frontDividerAlpha: CGFloat = 0.4
-
     /// Lays out (or hides) the segment starting at `cursor`
     /// along the bar axis.
     func renderFrontSegment(
@@ -85,7 +81,7 @@ extension SpaceBarOverlay {
     ) -> CGFloat {
         frontDivider.isHidden = false
         frontDivider.layer?.backgroundColor =
-            color.withAlphaComponent(Self.frontDividerAlpha)
+            color.withAlphaComponent(SpaceBarStyle.frontDividerAlpha)
             .cgColor
         let inset = (depth - cell) / 2
         frontDivider.frame =

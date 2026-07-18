@@ -1136,6 +1136,31 @@ while conveying less). The overflow badge's `+n` counts hidden
 **windows**, not slots — the same unit as the per-glyph count
 badges and the item's accessibility label.
 
+**The Space Bar's two-accent model.** (#293.) Three tinted
+states, all GUI-exposed inline (never behind a disclosure —
+the system is the bar's defining signature): `text_color`
+paints inactive Spaces, `active_text_color` the active Space's
+identifier and glyphs, and `focused_item_color` the focused
+window's glyph inside the active Space. Emoji identifiers and
+native app images stay untinted; shape (the active indicator)
+carries the active state there, so color is never the only
+signal.
+
+**Space Bar content is fixed in v1.** (#293.) Identifier plus
+app glyphs — no clone of the App Bar's `Icon | Name |
+Icon & name` chooser. The identifier is structural and the
+compact glyphs are the point of the overview; an app-name mode
+needs its own demonstrated use case first.
+
+**Space identifiers are icon-only, with settled fallbacks.**
+(#293.) The configured Space icon (SF Symbol | emoji | single
+character) renders alone — no emoji-vs-name chooser. Without
+one: a numeric id becomes the `N.square` SF Symbol (probed —
+past the symbol range it falls through), any other id becomes
+a two-letter uppercase monogram ("mail" → "MA"). Keeps the
+square glyph-slot footprint and stays distinguishable where a
+shared generic glyph would not.
+
 **The front-app segment is per-display.** (#293.) With
 `space_bar.show_front_app` on, each display's bar shows the
 focused window of the Space that display currently shows — not

@@ -209,6 +209,38 @@ struct SpaceBarDriverTests {
     }
 }
 
+/// The same-edge info-row predicate (#293): true only while
+/// the Space Bar and at least one ENABLED layout App Bar
+/// resolve to the same edge — per-layout enablement and edge
+/// overrides both count.
+@Suite("Space bar same-edge predicate")
+struct SpaceBarSameEdgeTests {
+    @Test("Predicate honors enablement and overrides")
+    func predicate() {
+        var settings = TilingSettings()
+        // Space Bar off → never.
+        #expect(!settings.spaceBarSharesEdgeWithAppBar)
+        settings.spaceBarStyle.enabled = true
+        // Defaults: space left, app bars top → no.
+        #expect(!settings.spaceBarSharesEdgeWithAppBar)
+        // Global App Bar moves to left → yes.
+        settings.appBarStyle.edge = .left
+        #expect(settings.spaceBarSharesEdgeWithAppBar)
+        // Both layout bars disabled → the App Bar exists
+        // nowhere, so no.
+        settings.monocle.appBar.enabled = false
+        settings.scrolling.appBar.enabled = false
+        #expect(!settings.spaceBarSharesEdgeWithAppBar)
+        // One layout re-enabled with a DIVERGING override → no;
+        // override matching the space edge → yes.
+        settings.monocle.appBar.enabled = true
+        settings.monocle.appBar.edge = .top
+        #expect(!settings.spaceBarSharesEdgeWithAppBar)
+        settings.monocle.appBar.edge = .left
+        #expect(settings.spaceBarSharesEdgeWithAppBar)
+    }
+}
+
 /// Stacked top strips (#293): the float clamp composes — the
 /// space bar strip pushes first, the app bar strip (carved
 /// below it) pushes further.

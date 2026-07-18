@@ -81,6 +81,11 @@ enum SidebarSearch {
     /// still has a rendering call site. Computed titles (the
     /// per-layout "%1$@ bar") and per-control labels stay out
     /// until #277.
+    /// Known limit (recorded, #293): `.bars` hosts two
+    /// editors behind a local switch that always opens on App
+    /// Bar, so a hit on a `space_bar.*` header lands one click
+    /// away (the caption names the section). Sub-target
+    /// navigation is #277's per-control catalog territory.
     @MainActor static func subsections(
         of destination: SettingsDestination
     ) -> [String] {
@@ -123,7 +128,7 @@ enum SidebarSearch {
                 ),
                 L(
                     "space_bar.global_style.title",
-                    "Global style"
+                    "Space Bar style"
                 ),
                 L(
                     "space_bar.colors.title",

@@ -122,6 +122,20 @@ extension TilingSettings {
     /// visible frame and `context(bounds:space:)` — every
     /// caller routes through it so no flow can silently skip
     /// the inset.
+    /// True while the Space Bar and at least one *enabled*
+    /// layout App Bar resolve to the same edge (#293) — the
+    /// predicate behind the Settings same-edge info row and the
+    /// preview's coexistence stand-in, kept here so the two
+    /// can't drift. Honors per-layout edge overrides.
+    public var spaceBarSharesEdgeWithAppBar: Bool {
+        guard spaceBarStyle.enabled else { return false }
+        return [monocle.appBar, scrolling.appBar].contains {
+            $0.enabled
+                && $0.resolved(with: appBarStyle).edge
+                    == spaceBarStyle.edge
+        }
+    }
+
     public func layoutBounds(from visible: CGRect) -> CGRect {
         SpaceBarGeometry.remainingFrame(
             in: visible,

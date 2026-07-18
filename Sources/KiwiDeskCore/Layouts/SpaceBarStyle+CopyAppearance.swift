@@ -7,13 +7,16 @@ import Foundation
 /// live inherit.
 ///
 /// The copied set is the **CodingKey intersection** of the two
-/// styles minus two deliberate exclusions, so a field added to
+/// styles minus deliberate exclusions, so a field added to
 /// both styles joins the copy automatically (no hand list to
 /// forget — `SpaceBarParityTests.copyAppearanceParity` pins
 /// this):
-/// - `enabled` — visibility is not appearance.
 /// - `edge` — placement is not appearance; copying it would
 ///   silently relocate the bar onto the App Bar's edge.
+/// - `enabled` — visibility is not appearance. Inert today
+///   (the global `AppBarStyle` has no `enabled` key; the App
+///   Bar's toggle is per-layout), listed so the exclusion is
+///   already in force the day one appears.
 extension SpaceBarStyle {
     /// JSON key spellings excluded from the copy.
     public static let copyAppearanceExclusions: Set<String> = [
