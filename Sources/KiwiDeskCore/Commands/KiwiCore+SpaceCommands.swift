@@ -154,7 +154,7 @@ extension KiwiCore {
     /// and a floating window always appends (it has no track
     /// slot). Without this a `move_to_space` into a track space
     /// silently dropped the window into the last track.
-    private func addFocusedToSpace(
+    func addFocusedToSpace(
         _ window: WindowID,
         to target: SpaceID
     ) {

@@ -75,23 +75,25 @@ struct SpaceBarDropMoveTests {
         #expect(core.spaceBarDrop.draggingWindow == nil)
     }
 
-    @Test("Dropping into the sprung (now-active) space files it")
-    func filesIntoSprungSpace() {
+    @Test("Spring eager-moves the dragged window into the target")
+    func springEagerMovesWindow() {
         let core = makeCore()
         addWindow(core, 1)
-        // Emulate a spring: the visible space is now 2 while the
-        // dragged window still lives in its source space 1.
-        core.state.workspaces.activate(SpaceID("2"))
+        #expect(core.state.workspaces.activeSpace == SpaceID(1))
+
+        // Fire the spring the dwell would trigger (the coordinator
+        // calls this closure). Eager membership: the window moves
+        // into the target NOW, so the live drag can preview and the
+        // drop places it precisely.
+        core.spaceBarDrop.spring(SpaceID("2"), WindowID(1))
+
         #expect(core.state.workspaces.activeSpace == SpaceID("2"))
-
-        core.moveWindow(WindowID(1), to: SpaceID("2"), follow: false)
-
-        // The window joins the active target as its focus.
         #expect(
             core.state.workspaces[SpaceID("2")]?.windows
                 == [WindowID(1)]
         )
         #expect(core.activeSpace?.focused == WindowID(1))
-        #expect(core.state.workspaces.activeSpace == SpaceID("2"))
+        // Pinned against stashInactive for the rest of the drag.
+        #expect(core.tiler.dragExemptWindow == WindowID(1))
     }
 }

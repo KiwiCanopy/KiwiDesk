@@ -48,13 +48,22 @@ extension KiwiCore {
         }
     }
 
-    /// Springs the visible space to `target` mid-drag without
-    /// touching the dragged window (#372): activate + a forced,
-    /// un-animated retile, with `window` exempt from
-    /// `stashInactive` (it is still a member of its source space).
+    /// Springs the visible space to `target` mid-drag (#372):
+    /// eager-moves the dragged window into the target, activates
+    /// it, and does a forced, un-animated retile.
+    ///
+    /// Eager membership (QA fix): moving the window into the target
+    /// NOW — not at drop — means the live drag shows the ordinary
+    /// drop preview (ghost + drop-zone) in the target's layout, and
+    /// the release lands the window in the exact slot under the
+    /// cursor. `window` is exempt from `stashInactive` (pinned at
+    /// the gesture's first move and re-pinned here), so neither the
+    /// membership move nor the retile stashes it mid-drag; an
+    /// abnormal end is cleaned up by `cancelDrag`.
+    ///
     /// Deliberately NOT `focusSpace` — that warps the cursor to
-    /// hand off AX focus, which would rip the pointer out of the
-    /// OS drag loop. No focus hand-off, no warp, no settle timer.
+    /// hand off AX focus, which would rip the pointer out of the OS
+    /// drag loop. No focus hand-off, no warp, no settle timer.
     private func springSwitchSpace(
         to target: SpaceID,
         dragging window: WindowID
@@ -62,10 +71,19 @@ extension KiwiCore {
         guard state.workspaces.activeSpace != target else {
             return
         }
-        // Belt-and-suspenders: the move handler set this at the
-        // gesture's first frame, but pin it again so the retile
-        // below can never stash the in-flight window.
         tiler.dragExemptWindow = window
+        let from = state.workspaces.space(of: window)
+        if from != target {
+            addFocusedToSpace(window, to: target)
+            state.workspaces.focus(window, in: target)
+            emitWindowMovedToSpace(
+                window,
+                app: state.windows[window]?.appName ?? "",
+                bundleID: state.windows[window]?.appBundleID,
+                from: from,
+                to: target
+            )
+        }
         state.workspaces.activate(target)
         retile(animated: false, force: true)
         emitSpaceChange()

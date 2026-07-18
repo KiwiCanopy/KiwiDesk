@@ -1868,6 +1868,23 @@ reachable by shortcut.
 space_bar.set_hide_empty(true)
 ```
 
+### space_bar.set_spring_delay
+
+**Expects:** milliseconds (default `1500`, clamped to
+`500`–`4000`).
+
+**Does:** sets how long a window dragged onto a Space item must
+hover before the view springs to that Space (the "hold to place"
+half of the drag-drop gesture — see the user guide). A quicker
+drop, before this delay, moves the window without switching. The
+ring sweep around the item fills over the same duration.
+
+**Example:**
+
+```lua
+space_bar.set_spring_delay(1000)
+```
+
 ### Space Bar colors
 
 Same `#RRGGBB` / `#RRGGBBAA` grammar as every other color

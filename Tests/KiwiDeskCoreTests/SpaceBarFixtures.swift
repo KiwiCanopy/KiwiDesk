@@ -24,6 +24,7 @@ enum SpaceBarFixtures {
         style.cornerRoundness = 5
         style.showFrontApp = true
         style.hideEmpty = true
+        style.springDelay = 1000
         style.textColor = "#010101"
         style.activeTextColor = "#020202"
         style.focusedItemColor = "#030303"

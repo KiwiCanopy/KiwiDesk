@@ -45,6 +45,49 @@ struct PtSlider: View {
     }
 }
 
+/// A seconds-valued slider backed by a millisecond `Int` store,
+/// with a `1.5 s` readout — the Space Bar drag-drop spring dwell
+/// (#372). Bounds come in seconds; the binding converts to/from
+/// the stored milliseconds.
+struct SecondsRow: View {
+    let label: String
+    @Binding var ms: Int
+    var range: ClosedRange<Double> = 0.5...4.0
+    /// Optional `?` popover (#94), label-adjacent.
+    var help: String? = nil
+    @Environment(\.settingsLabelColumn)
+    private var labelColumn
+
+    var body: some View {
+        HStack {
+            HStack(spacing: 4) {
+                Text(label).lineLimit(1)
+                if let help {
+                    HelpButton(explanation: help, subject: label)
+                }
+            }
+            .frame(width: labelColumn, alignment: .leading)
+            SettingsSlider(
+                value: Binding(
+                    get: { Double(ms) / 1000 },
+                    set: { ms = Int(($0 * 1000).rounded()) }
+                ),
+                range: range,
+                step: 0.1
+            )
+            Text(
+                String(format: "%.1f s", Double(ms) / 1000)
+            )
+            .frame(
+                width: SettingsMetrics.readoutColumn,
+                alignment: .trailing
+            )
+            .foregroundStyle(.secondary)
+            .font(.system(.body, design: .monospaced))
+        }
+    }
+}
+
 /// A 0.1–0.9 ratio slider with a percentage readout.
 struct RatioRow: View {
     let label: String

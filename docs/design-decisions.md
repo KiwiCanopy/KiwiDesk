@@ -1189,14 +1189,24 @@ The load-bearing details, so they are not relitigated:
   `animated: false` regardless of `animations.on_space_change`
   (a crisp switch must not add motion competing with the live
   foreign-app drag).
-- Space membership flips lazily at drop (reading the active Space
-  then), never eagerly at spring, so a mind-change or cancel
-  leaves no stale state.
-- The dwell is 2 s (longer than Finder's ~0.7 s): the ring sweep
-  shows progress, and a whole-view switch is a bigger disruption
-  than a folder opening, so the accidental-trigger bar sits
-  higher. Always-on, no enable toggle; focus-after-drop is not a
-  new setting (`move_to_space_and_follow` already models
+- Space membership flips **eagerly at spring** (QA revision): the
+  window is moved into the target the moment the view springs, so
+  the live drag shows the ordinary drop preview (ghost + drop-
+  zone) in the target's layout and the release lands it in the
+  exact slot. An earlier design flipped membership lazily at drop
+  to avoid stale state on cancel, but that left no preview during
+  placement; the abnormal-end teardown (`cancelDrag` → `reset` +
+  clear `dragExemptWindow`) covers the cancel case instead, so
+  eager membership is safe. The window stays exempt from
+  `stashInactive` throughout, so the eager move never strands it.
+- The dwell defaults to **1.5 s** and is user-configurable
+  (`space_bar.spring_delay`, clamped 500–4000 ms; a Spring delay
+  slider in the Space Bar editor). Longer than Finder's ~0.7 s:
+  the ring sweep shows progress and a whole-view switch is a
+  bigger disruption than a folder opening, so the accidental-
+  trigger floor sits higher. The sweep animation tracks the
+  configured value. Always-on, no enable toggle; focus-after-drop
+  is not a new setting (`move_to_space_and_follow` already models
   following). Option-held-drop → follow is a deferred second gear.
 
 **Bar alignment is edge-relative, one shared default.**

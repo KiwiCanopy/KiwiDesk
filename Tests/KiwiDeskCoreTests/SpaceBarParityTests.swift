@@ -108,6 +108,7 @@ struct SpaceBarCommandParityTests {
         .iconSource(.appFont), .tabBackground(.plain),
         .activeIndicator(.gap), .cornerRoundness(5),
         .showFrontApp(true), .hideEmpty(true),
+        .springDelay(1000),
         .textColor("#010101"), .activeTextColor("#020202"),
         .focusedItemColor("#030303"), .hoverColor("#040404"),
         .hoverTextColor("#050505"), .boxColor("#060606"),
@@ -191,6 +192,7 @@ struct SpaceBarCommandParityTests {
         case .thickness, .boxSize, .boxGap, .fontSize,
             .cornerRoundness:
             return [.number(10)]
+        case .springDelay: return [.number(1000)]
         default:
             return [.string("#123456")]
         }

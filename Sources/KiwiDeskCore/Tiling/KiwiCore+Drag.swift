@@ -203,18 +203,18 @@ extension KiwiCore {
         dragOverlay.hideAll()
         defer { scheduleBorderDropReconcile() }
         // Space Bar drop resolves first (#372). A fast drop onto a
-        // different space's item relocates the window (stay put);
-        // a drop after the space sprang files it into the now-
-        // visible target layout. Both route through `moveWindow`,
-        // which handles either active-space case. Anything else
-        // (own space, off-bar) falls through to the in-space
-        // swap/snap-back logic unchanged.
+        // different space's item relocates the window (stay put).
+        // A drop after the space sprang needs no move here — the
+        // window was already eager-moved into the now-active target
+        // at spring time — so it falls through to the ordinary in-
+        // space drop, which places it at the cursor's slot. Own-
+        // space / off-bar also fall through unchanged.
         switch spaceBarDrop.ended(id, cursor: NSEvent.mouseLocation)
         {
-        case .relocate(let target), .placeInSprung(let target):
+        case .relocate(let target):
             moveWindow(id, to: target, follow: false)
             return
-        case .none:
+        case .placeInSprung, .none:
             break
         }
         // A floating window is excluded from the layout swap/resize

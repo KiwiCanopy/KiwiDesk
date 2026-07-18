@@ -10,6 +10,9 @@ import AppKit
 extension KiwiCore {
     func updateSpaceBar() {
         let style = tiler.settings.spaceBarStyle
+        // Keep the drag-drop dwell (and its ring sweep) in sync
+        // with the configured value on every settings apply (#372).
+        spaceBarDrop.dwell = style.resolvedSpringDelay
         guard style.enabled else {
             spaceBars.sync([])
             return
