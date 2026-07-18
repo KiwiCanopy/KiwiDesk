@@ -65,9 +65,15 @@ extension PaletteShelf {
 
     // MARK: - Rename / delete
 
-    var canRename: Bool {
+    /// A rename is allowed to a non-empty name that isn't a
+    /// built-in's and isn't already another user palette's (a
+    /// no-op rename to the same name is fine).
+    func canRename(from oldName: String) -> Bool {
         let name = trimmed(renameDraft)
-        return !name.isEmpty && !store.isBuiltinName(name)
+        guard !name.isEmpty, !store.isBuiltinName(name) else {
+            return false
+        }
+        return name == oldName || !store.hasUserPalette(name)
     }
 
     /// Drives a per-tile rename popover: on for the tile whose name
@@ -81,7 +87,7 @@ extension PaletteShelf {
 
     func renamePalette(from oldName: String) {
         let name = trimmed(renameDraft)
-        guard canRename else { return }
+        guard canRename(from: oldName) else { return }
         try? store.rename(from: oldName, to: name)
         renaming = nil
         reload()

@@ -213,7 +213,7 @@ struct PaletteShelf: View {
                 renamePalette(from: palette.name)
             }
             .buttonStyle(.borderedProminent)
-            .disabled(!canRename)
+            .disabled(!canRename(from: palette.name))
         }
         .padding(10)
     }

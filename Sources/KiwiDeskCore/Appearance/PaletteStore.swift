@@ -16,6 +16,8 @@ public final class PaletteStore {
         case reservedName(String)
         /// Rename/delete targeted a name no user palette has.
         case notFound(String)
+        /// A rename would collide with another user palette's name.
+        case duplicateName(String)
         /// The imported file wasn't a valid palette.
         case invalidFile
     }
@@ -96,6 +98,11 @@ public final class PaletteStore {
         guard !isBuiltinName(to) else {
             throw StoreError.reservedName(to)
         }
+        // A rename onto another user palette's name would create a
+        // duplicate — orphaning data and colliding the grid's id.
+        guard to == from || !hasUserPalette(to) else {
+            throw StoreError.duplicateName(to)
+        }
         var palettes = userPalettes()
         guard
             let index = palettes.firstIndex(where: {
@@ -145,6 +152,12 @@ public final class PaletteStore {
         encoder.outputFormatting = [
             .prettyPrinted, .sortedKeys,
         ]
-        try encoder.encode(palettes).write(to: fileURL)
+        // Atomic: a crash mid-flush must not truncate the library
+        // — a corrupt file decodes to [] and the next save would
+        // then rewrite it with only the new palette, losing it all.
+        try encoder.encode(palettes).write(
+            to: fileURL,
+            options: .atomic
+        )
     }
 }

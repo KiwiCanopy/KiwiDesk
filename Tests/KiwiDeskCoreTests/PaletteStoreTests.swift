@@ -87,6 +87,23 @@ struct PaletteStoreTests {
         }
     }
 
+    @Test("Renaming onto another user palette's name throws")
+    func renameCollision() throws {
+        let (store, _) = makeStore()
+        try store.save(sample)  // "Mine"
+        try store.save(
+            ColorPalette(name: "Other", colors: [:])
+        )
+        #expect(throws: PaletteStore.StoreError.self) {
+            try store.rename(from: "Mine", to: "Other")
+        }
+        // Both survive — no duplicate, no data loss.
+        #expect(store.userPalettes().count == 2)
+        // Renaming to its own name is a harmless no-op.
+        try store.rename(from: "Mine", to: "Mine")
+        #expect(store.hasUserPalette("Mine"))
+    }
+
     @Test("Export then import round-trips a palette")
     func exportImport() throws {
         let (store, dir) = makeStore()
