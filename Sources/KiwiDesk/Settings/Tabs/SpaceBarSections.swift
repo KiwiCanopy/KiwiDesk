@@ -39,11 +39,11 @@ struct SpaceBarEditorSection: View {
             )
             behavior
             appearance
-            copyAppearance
         }
         SettingsSection(
             L("space_bar.colors.title", "Space Bar colors")
         ) {
+            copyAppearance
             accentLadder
             AppBarColorGrid { otherColors }
         }
@@ -236,29 +236,47 @@ struct SpaceBarEditorSection: View {
 
     /// One-shot copy, then fully independent — never a live
     /// inherit. Excludes enabled and edge (visibility and
-    /// placement are not appearance).
+    /// placement are not appearance). Leads the colors section
+    /// (colors are its most consequential effect), leading-
+    /// aligned in the Reset-Overrides button language; the
+    /// one-shot caveat rides a persistent caption, never
+    /// hover alone.
     private var copyAppearance: some View {
-        Button {
-            model.config.settings.spaceBarStyle
-                .copyAppearance(
-                    from: model.config.settings.appBarStyle
+        VStack(alignment: .leading, spacing: 4) {
+            Button {
+                model.config.settings.spaceBarStyle
+                    .copyAppearance(
+                        from: model.config.settings.appBarStyle
+                    )
+            } label: {
+                Text(
+                    L(
+                        "space_bar.copy_appearance",
+                        "Copy App Bar appearance…"
+                    )
                 )
-        } label: {
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .help(
+                L(
+                    "space_bar.copy_appearance.help",
+                    "Takes the App Bar's current sizes, style, "
+                        + "and colors once; edits afterwards "
+                        + "stay independent."
+                )
+            )
             Text(
                 L(
-                    "space_bar.copy_appearance",
-                    "Copy App Bar appearance…"
+                    "space_bar.copy_appearance.caption",
+                    "Copies the App Bar's current sizes, "
+                        + "style, and colors — a one-time "
+                        + "starting point, not a live link."
                 )
             )
+            .font(.caption)
+            .foregroundStyle(.secondary)
         }
-        .help(
-            L(
-                "space_bar.copy_appearance.help",
-                "Takes the App Bar's current sizes, style, "
-                    + "and colors once; edits afterwards stay "
-                    + "independent."
-            )
-        )
     }
 
     private var caption: String {

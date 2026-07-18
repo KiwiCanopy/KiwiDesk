@@ -24,10 +24,10 @@ struct SpaceBarPreviewStrip: View {
 
     var body: some View {
         VStack(spacing: 4) {
-            ZStack {
+            ZStack(alignment: canvasAlignment) {
                 RoundedRectangle(cornerRadius: 6)
                     .fill(Color.secondary.opacity(0.12))
-                content
+                content.padding(6)
             }
             .frame(height: 96)
             // Belt-and-braces: a mock must never spill over
@@ -44,6 +44,18 @@ struct SpaceBarPreviewStrip: View {
     }
 
     // MARK: - Composition
+
+    /// The composite hugs the canvas side matching the chosen
+    /// edge (`AppBarPreviewStrip` twin) — edge choice is seen,
+    /// not just captioned; off-axis emptiness is deliberate.
+    private var canvasAlignment: Alignment {
+        switch style.edge {
+        case .top: .top
+        case .bottom: .bottom
+        case .left: .leading
+        case .right: .trailing
+        }
+    }
 
     /// The strip plus, when stacked, the App Bar stand-in on
     /// the window-facing side of the shared edge.

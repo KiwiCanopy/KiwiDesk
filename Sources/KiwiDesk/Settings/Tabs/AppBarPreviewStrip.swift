@@ -28,10 +28,10 @@ struct AppBarPreviewStrip: View {
 
     var body: some View {
         VStack(spacing: 4) {
-            ZStack {
+            ZStack(alignment: canvasAlignment) {
                 RoundedRectangle(cornerRadius: 6)
                     .fill(Color.secondary.opacity(0.12))
-                strip
+                strip.padding(6)
             }
             .frame(height: 84)
             .animation(LayoutSchematic.damping, value: style)
@@ -45,6 +45,20 @@ struct AppBarPreviewStrip: View {
     }
 
     // MARK: - Strip
+
+    /// The strip hugs the canvas side matching the chosen
+    /// edge (top bar sits at the canvas top), so the edge
+    /// choice is visible, not just captioned. The off-axis
+    /// emptiness is the point — it mirrors the bar's real
+    /// relationship to the desktop.
+    private var canvasAlignment: Alignment {
+        switch style.edge {
+        case .top: .top
+        case .bottom: .bottom
+        case .left: .leading
+        case .right: .trailing
+        }
+    }
 
     private var strip: some View {
         stack {

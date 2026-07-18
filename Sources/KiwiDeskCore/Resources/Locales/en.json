@@ -612,6 +612,7 @@
   "space_bar.color.text": "Text",
   "space_bar.colors.title": "Space Bar colors",
   "space_bar.copy_appearance": "Copy App Bar appearance…",
+  "space_bar.copy_appearance.caption": "Copies the App Bar's current sizes, style, and colors — a one-time starting point, not a live link.",
   "space_bar.copy_appearance.help": "Takes the App Bar's current sizes, style, and colors once; edits afterwards stay independent.",
   "space_bar.corner_roundness": "Corner roundness",
   "space_bar.corner_roundness.boxed_only": "Corner roundness only applies to Boxed items.",
