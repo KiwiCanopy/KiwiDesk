@@ -1,7 +1,7 @@
 name: Roadmap
 description: Wave-sequenced execution plan across open issues
 labels: ["roadmap"]
-title: "Roadmap: "
+title: "🗺️ Roadmap: "
 body:
   - type: markdown
     attributes:
