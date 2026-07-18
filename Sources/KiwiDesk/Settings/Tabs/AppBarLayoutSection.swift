@@ -152,7 +152,7 @@ struct LayoutAppBarSection: View {
             value: $bar.boxSize,
             global: global.boxSize,
             restore: 120,
-            range: 0...200
+            range: 1...200
         )
         OverrideSliderRow(
             label: L("app_bar.box_gap", "Box gap"),
@@ -166,7 +166,7 @@ struct LayoutAppBarSection: View {
             value: $bar.fontSize,
             global: global.fontSize,
             restore: 14,
-            range: 0...32
+            range: 1...32
         )
         Divider()
         // Roundness only shapes a Boxed tab; grey it when this

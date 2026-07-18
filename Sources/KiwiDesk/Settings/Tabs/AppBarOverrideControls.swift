@@ -161,7 +161,10 @@ struct OverrideAutoSliderRow: View {
     @Binding var value: CGFloat?
     let global: CGFloat
     let restore: CGFloat
-    var range: ClosedRange<Double> = 0...200
+    /// Floors at 1 pt: 0 is the auto sentinel and only the
+    /// toggle may write it — a slider dragged to its minimum
+    /// must never silently flip Auto on (#293 QA).
+    var range: ClosedRange<Double> = 1...200
 
     var body: some View {
         OverrideChrome(isOn: overrideToggle($value, global: global)) {
