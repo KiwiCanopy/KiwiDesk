@@ -206,6 +206,9 @@ struct ConfigWriteTests {
             KiwiDesk.bind("cmd+h", function()
                 KiwiDesk.focus("left")
             end)
+            KiwiDesk.on("space_changed", function()
+                print("space changed")
+            end)
             """
         try handwritten.write(
             to: core.configURL,
@@ -219,27 +222,31 @@ struct ConfigWriteTests {
 
         // Now GUI-managed: no foreign code, sidecar written.
         #expect(!core.configHasForeignCode)
+        #expect(core.isGuiManaged)
         #expect(core.guiConfigStore.exists)
         // Executed settings carried into the adopted state.
         #expect(core.tiler.settings.gapsGlobal.outer.top == 7)
         #expect(
             core.state.workspaces[SpaceID(1)]?.mode == .stack
         )
-        // Original preserved verbatim as a comment; NO managed
-        // block is generated — init.lua is hooks-only (#55),
-        // so no active Lua remains in the file.
         let file = try String(
             contentsOf: core.configURL,
             encoding: .utf8
         )
+        // Managed settings + the bind are commented out; NO
+        // managed block is generated (#55).
         #expect(file.contains("-- KiwiDesk.bind(\"cmd+h\""))
+        #expect(file.contains("-- KiwiDesk.set_gap_global(7)"))
         #expect(!file.contains(ManagedConfig.beginMarker))
-        for line in file.components(separatedBy: "\n") {
-            let t = line.trimmingCharacters(
-                in: .whitespaces
-            )
-            #expect(t.isEmpty || t.hasPrefix("--"))
+        // The harmless hook stays LIVE so integrations keep
+        // firing after adoption (#355) — its head line is not
+        // commented.
+        let hookLive = file.components(separatedBy: "\n").contains {
+            let t = $0.trimmingCharacters(in: .whitespaces)
+            return !t.hasPrefix("--")
+                && t == "KiwiDesk.on(\"space_changed\", function()"
         }
+        #expect(hookLive)
         // Keybindings are recovered from the original file into
         // gui.json (#4) and registered by the structured loader
         // — the combo is live again after adopt.
