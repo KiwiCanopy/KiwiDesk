@@ -667,7 +667,10 @@ running windows.
   roundness) or plain (names on a shared translucent strip).
 - **Position**: the screen edge the bar occupies — top, bottom,
   left, or right (default top). Absolute for every layout; the
-  preview strip rotates vertical for left/right.
+  preview strip rotates vertical for left/right. When the Space
+  Bar shares the edge, an inline note under this control
+  explains the stacking order (Space Bar at the screen edge,
+  App Bar next to the windows).
 - **Active indicator**: ring (outlined border around the active
   tab), edge mark (accent bar on the active tab's window-facing
   edge), or gap (active slot empty). Orthogonal to tab background
@@ -720,20 +723,23 @@ collapse into one glyph with a count badge, and past five slots
 the rest fold into a `+n` badge. Click a Space to switch to it;
 glyphs are informational.
 
-The editor's order: preview, **Show Space Bar**, **Position**
-(any of the four screen edges — sharing an edge with the App Bar
-is fine, the Space Bar sits at the screen edge and the App Bar
-next to the windows, and an inline note explains the order when
-both share one), sizes and **App symbol style**, item background
-and active indicator, then colors.
+The editor's order matches the App Bar editor's: preview,
+**Show Space Bar**, **Position** (any of the four screen edges
+— sharing an edge with the App Bar is fine, the Space Bar sits
+at the screen edge and the App Bar next to the windows, and an
+inline note in both editors explains the order when both share
+one), item background, active indicator and **App symbol
+style**, the two behavior toggles, sizes, then colors.
 
 The color ladder is the bar's signature: **Text** paints
 inactive Spaces, **Active space** the Space currently shown on
 the display, and **Focused window** the focused window's glyph
-inside the active Space. **Copy App Bar appearance…** takes the
-App Bar's current sizes, style, and colors once — edits
-afterwards stay independent (position and visibility are never
-copied).
+inside the active Space. The ladder sits inline; the rest of
+the palette collapses behind an **Advanced colors** disclosure,
+shut by default — the App Bar's exact tiering. **Copy App Bar
+appearance…** takes the App Bar's current sizes, style, and
+colors once — edits afterwards stay independent (position and
+visibility are never copied).
 
 Two behavior toggles: **Hide empty Spaces** (the current Space
 always stays visible; hidden Spaces remain reachable by

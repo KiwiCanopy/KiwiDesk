@@ -1,17 +1,84 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Space Bar color rows (#293), split from
-/// `SpaceBarSections.swift` for the file ceiling. The
-/// three-state accent ladder (Text / Active space / Focused
-/// window) leads inline — the two-accent system is the bar's
-/// defining signature, never hidden behind a disclosure.
-extension SpaceBarEditorSection {
-    // MARK: - Colors
+/// The Space Bar colors block (#293/#374): copy button, the
+/// three-state accent ladder inline (the two-accent system is
+/// the bar's defining signature, never behind a disclosure),
+/// then the remaining palette shut behind "Advanced colors" —
+/// the App Bar's exact tiering. A standalone struct, not an
+/// extension: the disclosure owns `@State`, which extensions
+/// cannot hold. Expansion resets when the editor is torn down
+/// (tab switch) — the app-wide disclosure precedent.
+struct SpaceBarColorsSection: View {
+    @ObservedObject var model: SettingsModel
+    @State private var advancedColorsExpanded = false
+
+    private var style: Binding<SpaceBarStyle> {
+        $model.config.settings.spaceBarStyle
+    }
+
+    var body: some View {
+        copyAppearance
+        accentLadder
+        DisclosureGroup(isExpanded: $advancedColorsExpanded) {
+            AppBarColorGrid { advancedColors }
+                .padding(.top, 8)
+        } label: {
+            Text(
+                L("bars.advanced_colors", "Advanced colors")
+            )
+            .font(.subheadline)
+        }
+    }
+
+    /// One-shot copy, then fully independent — never a live
+    /// inherit. Excludes enabled and edge (visibility and
+    /// placement are not appearance). Leads the colors section
+    /// (colors are its most consequential effect), leading-
+    /// aligned in the Reset-Overrides button language; the
+    /// one-shot caveat rides a persistent caption, never
+    /// hover alone.
+    private var copyAppearance: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Button {
+                model.config.settings.spaceBarStyle
+                    .copyAppearance(
+                        from: model.config.settings.appBarStyle
+                    )
+            } label: {
+                Text(
+                    L(
+                        "space_bar.copy_appearance",
+                        "Copy App Bar appearance…"
+                    )
+                )
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .help(
+                L(
+                    "space_bar.copy_appearance.help",
+                    "Takes the App Bar's current sizes, style, "
+                        + "and colors once; edits afterwards "
+                        + "stay independent."
+                )
+            )
+            Text(
+                L(
+                    "space_bar.copy_appearance.caption",
+                    "Copies the App Bar's current sizes, "
+                        + "style, and colors — a one-time "
+                        + "starting point, not a live link."
+                )
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
+        }
+    }
 
     /// The three-state ladder is the bar's defining signature —
     /// inline, never behind a disclosure (ui-designer verdict).
-    @ViewBuilder var accentLadder: some View {
+    @ViewBuilder private var accentLadder: some View {
         AppBarColorGrid {
             HexColorField(
                 label: L("space_bar.color.text", "Text"),
@@ -46,10 +113,9 @@ extension SpaceBarEditorSection {
                 )
             )
         }
-        Divider()
     }
 
-    @ViewBuilder var otherColors: some View {
+    @ViewBuilder private var advancedColors: some View {
         Group {
             HexColorField(
                 label: L("space_bar.color.box", "Box"),

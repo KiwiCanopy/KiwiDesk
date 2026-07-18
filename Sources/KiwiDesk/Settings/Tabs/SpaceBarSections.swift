@@ -1,11 +1,13 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Space Bar editor (#293), behind the Bars switch. Order
-/// per the issue: preview, Show, Position, sizes + icon source,
-/// tab treatment + indicator, colors. All settings are global —
-/// the bar is layout-independent, so there is no per-layout
-/// override tier here.
+/// The Space Bar editor (#293), behind the Bars switch. Row
+/// order follows the canonical bar-editor shape (#374, App
+/// Bar is the reference): preview, Show, Position (+ same-
+/// edge row), item-look (background, indicator, symbol
+/// style), content toggles, sizes, colors. All settings are
+/// global — the bar is layout-independent, so there is no
+/// per-layout override tier here.
 struct SpaceBarEditorSection: View {
     @ObservedObject var model: SettingsModel
 
@@ -43,9 +45,7 @@ struct SpaceBarEditorSection: View {
         SettingsSection(
             L("space_bar.colors.title", "Space Bar colors")
         ) {
-            copyAppearance
-            accentLadder
-            AppBarColorGrid { otherColors }
+            SpaceBarColorsSection(model: model)
         }
     }
 
@@ -64,6 +64,54 @@ struct SpaceBarEditorSection: View {
             )
         )
         sameEdgeRow
+        // The Alignment row (#293 QA Batch B) slots in here,
+        // between Position and the item-look cluster.
+        SegmentedPicker(
+            L(
+                "space_bar.tab_background.label",
+                "Item background"
+            ),
+            selection: style.tabBackground,
+            options: AppBarOptions.tabBackground
+                .map { ($0.1, $0.0) }
+        )
+        SegmentedPicker(
+            L(
+                "space_bar.active_indicator.label",
+                "Active indicator"
+            ),
+            selection: style.activeIndicator,
+            options: AppBarOptions.activeIndicator
+                .map { ($0.1, $0.0) }
+        )
+        DropdownRow(
+            label: L(
+                "space_bar.icon_source.label",
+                "App symbol style"
+            ),
+            help: L(
+                "space_bar.icon_source.help",
+                "How app glyphs are drawn. Glyphs shows a "
+                    + "monochrome symbol colored by the bar's "
+                    + "text colors; apps without a symbol keep "
+                    + "their app icon."
+            )
+        ) {
+            Picker(
+                L(
+                    "space_bar.icon_source.label",
+                    "App symbol style"
+                ),
+                selection: style.iconSource
+            ) {
+                ForEach(
+                    AppBarOptions.iconSource,
+                    id: \.0
+                ) { option in
+                    Text(option.1).tag(option.0)
+                }
+            }
+        }
         ToggleRow(
             label: L(
                 "space_bar.hide_empty",
@@ -94,36 +142,13 @@ struct SpaceBarEditorSection: View {
         )
     }
 
-    /// The neutral same-edge explainer (#293): shown only when
-    /// both *enabled* bars resolve to the same edge — the
-    /// shared `spaceBarSharesEdgeWithAppBar` predicate honors
-    /// per-layout App Bar enablement and edge overrides. Never
-    /// a warning, never a popup.
+    /// Gate stays here (needs the model); chrome and text are
+    /// the shared `BarSameEdgeRow` (#374) — App Bar's editor
+    /// shows the same row.
     @ViewBuilder private var sameEdgeRow: some View {
         if model.config.settings.spaceBarSharesEdgeWithAppBar {
-            Label {
-                Text(sameEdgeText)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            } icon: {
-                Image(systemName: "info.circle")
-                    .foregroundStyle(.secondary)
-            }
+            BarSameEdgeRow(edge: style.wrappedValue.edge)
         }
-    }
-
-    private var sameEdgeText: String {
-        let edge =
-            AppBarOptions.edge.first {
-                $0.0 == style.wrappedValue.edge
-            }?.1 ?? ""
-        return L(
-            "space_bar.same_edge",
-            "Both bars share the %1$@ edge — Space Bar sits "
-                + "at the screen edge, App Bar sits next to "
-                + "the windows.",
-            edge
-        )
     }
 
     // MARK: - Appearance
@@ -168,50 +193,7 @@ struct SpaceBarEditorSection: View {
                 range: 0...32
             )
         }
-        DropdownRow(
-            label: L(
-                "space_bar.icon_source.label",
-                "App symbol style"
-            ),
-            help: L(
-                "space_bar.icon_source.help",
-                "How app glyphs are drawn. Glyphs shows a "
-                    + "monochrome symbol colored by the bar's "
-                    + "text colors; apps without a symbol keep "
-                    + "their app icon."
-            )
-        ) {
-            Picker(
-                L(
-                    "space_bar.icon_source.label",
-                    "App symbol style"
-                ),
-                selection: style.iconSource
-            ) {
-                ForEach(
-                    AppBarOptions.iconSource,
-                    id: \.0
-                ) { option in
-                    Text(option.1).tag(option.0)
-                }
-            }
-        }
         Divider()
-        SegmentedPicker(
-            L("space_bar.tab_background.label", "Item background"),
-            selection: style.tabBackground,
-            options: AppBarOptions.tabBackground
-                .map { ($0.1, $0.0) }
-        )
-        SegmentedPicker(
-            L(
-                "space_bar.active_indicator.label",
-                "Active indicator"
-            ),
-            selection: style.activeIndicator,
-            options: AppBarOptions.activeIndicator
-                .map { ($0.1, $0.0) }
-        )
         PtSlider(
             label: L(
                 "space_bar.corner_roundness",
@@ -232,51 +214,6 @@ struct SpaceBarEditorSection: View {
                 )
             )
         )
-    }
-
-    /// One-shot copy, then fully independent — never a live
-    /// inherit. Excludes enabled and edge (visibility and
-    /// placement are not appearance). Leads the colors section
-    /// (colors are its most consequential effect), leading-
-    /// aligned in the Reset-Overrides button language; the
-    /// one-shot caveat rides a persistent caption, never
-    /// hover alone.
-    private var copyAppearance: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Button {
-                model.config.settings.spaceBarStyle
-                    .copyAppearance(
-                        from: model.config.settings.appBarStyle
-                    )
-            } label: {
-                Text(
-                    L(
-                        "space_bar.copy_appearance",
-                        "Copy App Bar appearance…"
-                    )
-                )
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
-            .help(
-                L(
-                    "space_bar.copy_appearance.help",
-                    "Takes the App Bar's current sizes, style, "
-                        + "and colors once; edits afterwards "
-                        + "stay independent."
-                )
-            )
-            Text(
-                L(
-                    "space_bar.copy_appearance.caption",
-                    "Copies the App Bar's current sizes, "
-                        + "style, and colors — a one-time "
-                        + "starting point, not a live link."
-                )
-            )
-            .font(.caption)
-            .foregroundStyle(.secondary)
-        }
     }
 
     private var caption: String {

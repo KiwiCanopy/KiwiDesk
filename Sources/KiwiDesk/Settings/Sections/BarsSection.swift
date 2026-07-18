@@ -54,7 +54,11 @@ struct BarsSection: View {
     /// sections.
     @ViewBuilder private var appBarEditor: some View {
         GlobalAppBarSection(
-            style: $model.config.settings.appBarStyle
+            style: $model.config.settings.appBarStyle,
+            spaceBarSharedEdge: model.config.settings
+                .spaceBarSharesEdgeWithAppBar
+                ? model.config.settings.spaceBarStyle.edge
+                : nil
         )
         LayoutAppBarSection(
             title: L("layout.monocle.name", "Monocle"),
