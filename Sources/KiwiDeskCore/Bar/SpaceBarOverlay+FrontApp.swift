@@ -138,7 +138,20 @@ extension SpaceBarOverlay {
                 AppFont.font(size: size)
                 ?? .systemFont(ofSize: size)
             frontGlyph.textColor = accent
-            frontGlyph.frame = frame
+            // Text draws from the frame's top: shrink to the
+            // measured height, centered in the cell — the
+            // `SpaceBarItemView.place` twin.
+            var glyphFrame = frame
+            let height = ceil(
+                frontGlyph.cell?.cellSize.height ?? 0
+            )
+            if height > 0, height < glyphFrame.height {
+                glyphFrame.origin.y +=
+                    ((glyphFrame.height - height) / 2)
+                    .rounded()
+                glyphFrame.size.height = height
+            }
+            frontGlyph.frame = glyphFrame
             frontGlyph.setAccessibilityElement(true)
             frontGlyph.setAccessibilityLabel(axLabel)
         } else {

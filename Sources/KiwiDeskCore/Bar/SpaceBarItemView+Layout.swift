@@ -41,6 +41,10 @@ extension SpaceBarItemView {
                 ofSize: identifierFont
             )
         }
+        // Restyle BEFORE placing: `place` measures each text
+        // glyph to center it vertically, and the glyph fonts
+        // are set in `restyle` (bounds are already final here).
+        restyle()
         var cursor = Self.pad
         place(identifierImage, at: cursor, cell: cell)
         place(identifierLabel, at: cursor, cell: cell)
@@ -68,8 +72,6 @@ extension SpaceBarItemView {
             cursor += cell
         }
         layoutAccent()
-        // Corner radius and fonts depend on the final bounds.
-        restyle()
     }
 
     /// A count badge hugging its glyph cell's top-trailing
@@ -135,7 +137,7 @@ extension SpaceBarItemView {
         at offset: CGFloat,
         cell: CGFloat
     ) {
-        let rect =
+        var rect =
             horizontal
             ? CGRect(
                 x: offset,
@@ -149,6 +151,22 @@ extension SpaceBarItemView {
                 width: cell,
                 height: cell
             )
+        // AppKit draws text from the frame's TOP, so a text
+        // glyph (App Font ligature, character identifier)
+        // handed the whole square cell reads top-aligned.
+        // Shrink to its measured height, centered — the
+        // `AppBarItemView+GlyphSlot` midY idiom. Images
+        // center natively and keep the full cell.
+        if let field = view as? NSTextField {
+            let height = ceil(
+                field.cell?.cellSize.height ?? 0
+            )
+            if height > 0, height < rect.height {
+                rect.origin.y +=
+                    ((rect.height - height) / 2).rounded()
+                rect.size.height = height
+            }
+        }
         view.frame = backingAlignedRect(
             rect,
             options: .alignAllEdgesNearest
