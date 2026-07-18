@@ -53,8 +53,9 @@ public final class AppBarOverlay {
 
     /// Depth of the clickable scroll-arrow zones at the
     /// strip's ends; doubles as the visibility margin the
-    /// active item keeps clear of them.
-    nonisolated static let arrowZone: CGFloat = 24
+    /// active item keeps clear of them. The shared constant
+    /// lives on `BarArrowView` (the Space Bar reuses it, #385).
+    nonisolated static let arrowZone = BarArrowView.zone
 
     /// The inputs of the last `show()`, kept so manual arrow
     /// scrolling can re-render without a new layout pass from
@@ -73,8 +74,8 @@ public final class AppBarOverlay {
     private var panel: NSPanel?
     var itemViews: [AppBarItemView] = []
     let itemContainer = FlippedView()
-    let backArrow = AppBarArrowView()
-    let forwardArrow = AppBarArrowView()
+    let backArrow = BarArrowView()
+    let forwardArrow = BarArrowView()
     var scrollOffset: CGFloat = 0
     /// The last render's geometry, kept for the drag
     /// handlers (AppBarOverlay+Drag).
@@ -277,13 +278,20 @@ public final class AppBarOverlay {
                 width: strip.width,
                 height: zone
             )
-        backArrow.style(
-            glyph: m.horizontal ? "◂" : "▴",
-            style: style
+        let colors = BarArrowColors(
+            text: NSColor(kiwiHex: style.textColor),
+            hoverText: NSColor(kiwiHex: style.hoverTextColor),
+            box: NSColor(kiwiHex: style.boxColor),
+            hover: NSColor(kiwiHex: style.hoverColor),
+            cornerRoundness: style.cornerRoundness
         )
-        forwardArrow.style(
+        backArrow.configure(
+            glyph: m.horizontal ? "◂" : "▴",
+            colors: colors
+        )
+        forwardArrow.configure(
             glyph: m.horizontal ? "▸" : "▾",
-            style: style
+            colors: colors
         )
         let step = m.slot + m.gap
         backArrow.onClick = { [weak self] in

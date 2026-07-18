@@ -72,8 +72,14 @@ extension KiwiCore {
         // Feed the Space Bar drop machine the live cursor. While a
         // bar target is armed (hover + pending spring), suppress
         // the in-space ghost/drop-zone — the drag is heading off
-        // this space, not swapping within it.
-        spaceBarDrop.moved(id, cursor: NSEvent.mouseLocation)
+        // this space, not swapping within it. The autoscroll runs
+        // in parallel off the same cursor: a dwell over an arrow
+        // zone scrolls hidden Spaces into reach (#385). The zones
+        // are disjoint from item hit frames, so at most one of the
+        // two arms for any given cursor position.
+        let cursor = NSEvent.mouseLocation
+        spaceBars.updateDragAutoScroll(atGlobal: cursor)
+        spaceBarDrop.moved(id, cursor: cursor)
         if spaceBarDrop.isArmed {
             dragOverlay.hideAll()
             return
@@ -201,6 +207,7 @@ extension KiwiCore {
     ) {
         tiler.dragExemptWindow = nil
         dragOverlay.hideAll()
+        spaceBars.endDragAutoScroll()
         defer { scheduleBorderDropReconcile() }
         // Space Bar drop resolves first (#372). A fast drop onto a
         // different space's item relocates the window (stay put).

@@ -25,9 +25,11 @@ struct SpaceBarRunMetricsTests {
             gap: 4,
             frontExtent: 0,
             strip: horizontalStrip,
+            viewport: 200,
             horizontal: true,
             alignment: .start,
-            pad: 4
+            pad: 4,
+            scrollOffset: 0
         )
         #expect(m.itemFrames.map(\.minX) == [4, 28, 52])
         #expect(m.itemFrames.allSatisfy { $0.width == 20 })
@@ -44,9 +46,11 @@ struct SpaceBarRunMetricsTests {
             gap: 4,
             frontExtent: 0,
             strip: horizontalStrip,
+            viewport: 200,
             horizontal: true,
             alignment: .center,
-            pad: 4
+            pad: 4,
+            scrollOffset: 0
         )
         #expect(m.itemFrames.map(\.minX) == [66, 90, 114])
     }
@@ -59,9 +63,11 @@ struct SpaceBarRunMetricsTests {
             gap: 4,
             frontExtent: 12,
             strip: horizontalStrip,
+            viewport: 200,
             horizontal: true,
             alignment: .end,
-            pad: 4
+            pad: 4,
+            scrollOffset: 0
         )
         #expect(m.itemFrames.first?.minX == 116)
         // The cursor advances a gap after every item (including
@@ -80,9 +86,11 @@ struct SpaceBarRunMetricsTests {
             gap: 4,
             frontExtent: 0,
             strip: strip,
+            viewport: 200,
             horizontal: false,
             alignment: .start,
-            pad: 4
+            pad: 4,
+            scrollOffset: 0
         )
         #expect(m.itemFrames.map(\.minY) == [4, 28, 52])
         #expect(m.itemFrames.allSatisfy { $0.minX == 0 })
@@ -90,17 +98,21 @@ struct SpaceBarRunMetricsTests {
         #expect(m.itemFrames.map(\.height) == [20, 20, 20])
     }
 
-    @Test("An oversized run floors to the pad (no scroll)")
-    func oversizedFloorsToStart() {
+    @Test("An overflowing run starts at the scroll offset")
+    func overflowStartsAtOffset() {
+        // total 404 > viewport 180: alignment collapses, the run
+        // begins at -scrollOffset regardless of alignment.
         let m = SpaceBarOverlay.runMetrics(
             lengths: [200, 200],
             gap: 4,
             frontExtent: 0,
             strip: horizontalStrip,
+            viewport: 180,
             horizontal: true,
             alignment: .center,
-            pad: 4
+            pad: 4,
+            scrollOffset: 50
         )
-        #expect(m.itemFrames.first?.minX == 4)
+        #expect(m.itemFrames.map(\.minX) == [-50, 154])
     }
 }

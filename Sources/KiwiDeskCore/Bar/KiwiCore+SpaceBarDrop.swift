@@ -52,6 +52,9 @@ extension KiwiCore {
         if spaceBarDrop.draggingWindow == id {
             spaceBarDrop.reset()
         }
+        // Stop any drag autoscroll (#385) — this gesture is over,
+        // and no `handleDragEnd` fires on an abnormal cancel.
+        spaceBars.endDragAutoScroll()
     }
 
     /// Springs the visible space to `target` mid-drag (#372):
