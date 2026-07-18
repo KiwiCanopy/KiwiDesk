@@ -159,6 +159,23 @@ public enum AXHelper {
         )
     }
 
+    /// Chromium-family browsers (Chrome, Brave, Edge, Arc, …) build
+    /// their AX tree lazily and gate it behind `AXManualAccessibility`
+    /// rather than `AXEnhancedUserInterface` — until it is set,
+    /// `kAXWindowsAttribute` stays empty and their windows are never
+    /// discovered or tiled. Setting it makes that tree materialize.
+    /// Harmless no-op on apps that do not recognize the attribute.
+    public static func setManualAccessibility(
+        pid: pid_t,
+        enabled: Bool
+    ) {
+        AXUIElementSetAttributeValue(
+            appElement(pid: pid),
+            "AXManualAccessibility" as CFString,
+            enabled as CFBoolean
+        )
+    }
+
     /// Raises a window without focusing it or activating its
     /// app — z-order only. Blocking IPC (returns after the
     /// target app processed the action), safe off the main

@@ -47,7 +47,7 @@ extension EventLoop {
         switch note {
         case kAXWindowCreatedNotification:
             if Self.isStandardWindow(element) {
-                enableEnhancedUI(pid: pid)
+                warmAccessibilityTree(pid: pid)
             }
             // A native-tab window's create may really be a tab switch
             // (the old tab vanishes as this one appears). Route it
