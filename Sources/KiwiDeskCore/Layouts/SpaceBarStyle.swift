@@ -19,6 +19,7 @@ import Foundation
 public struct SpaceBarStyle: Sendable, Equatable {
     public typealias TabBackground = AppBarStyle.TabBackground
     public typealias ActiveIndicator = AppBarStyle.ActiveIndicator
+    public typealias Alignment = AppBarStyle.BarAlignment
 
     /// Off by default — the Space Bar is opt-in.
     public var enabled = false
@@ -27,6 +28,11 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// screen-facing and the App Bar window-facing (space-first
     /// reservation) — never a conflict.
     public var edge: AppBarEdge = .left
+    /// Item-group placement along the bar (#293 QA); one
+    /// shared default with the App Bar — the bar's pre-QA
+    /// de-facto start anchoring was an omission, not a
+    /// decision.
+    public var alignment: Alignment = .center
     /// Depth of the reserved strip (pt); aligned with the App
     /// Bar default.
     public var thickness: CGFloat = 32
@@ -102,6 +108,7 @@ extension SpaceBarStyle: Codable {
     enum CodingKeys: String, CodingKey, CaseIterable {
         case enabled
         case edge
+        case alignment
         case thickness
         case boxSize = "box_size"
         case boxGap = "box_gap"
@@ -142,6 +149,11 @@ extension SpaceBarStyle: Codable {
                 AppBarEdge.self,
                 forKey: .edge
             ) ?? defaults.edge
+        alignment =
+            try container.decodeIfPresent(
+                Alignment.self,
+                forKey: .alignment
+            ) ?? defaults.alignment
         thickness =
             try container.decodeIfPresent(
                 CGFloat.self,

@@ -64,8 +64,18 @@ struct SpaceBarEditorSection: View {
             )
         )
         sameEdgeRow
-        // The Alignment row (#293 QA Batch B) slots in here,
-        // between Position and the item-look cluster.
+        SegmentedPicker(
+            L("space_bar.alignment.label", "Alignment"),
+            selection: style.alignment,
+            options: AppBarOptions.alignment
+                .map { ($0.1, $0.0) },
+            help: L(
+                "space_bar.alignment.label.help",
+                "Where the Space items sit along the bar. "
+                    + "Start and End follow the edge — a left "
+                    + "bar's Start is its top."
+            )
+        )
         SegmentedPicker(
             L(
                 "space_bar.tab_background.label",

@@ -115,7 +115,7 @@ public enum APIReference {
             "set_wrap_focus",
             "set_slot_size_override", "set_anchor_override",
             "set_orientation_override",
-            "set_app_bar_enabled", "set_app_bar_edge",
+            "set_app_bar_enabled", "set_app_bar_edge", "set_app_bar_alignment",
             "set_app_bar_thickness",
             "set_app_bar_tab_background",
             "set_app_bar_active_indicator",
@@ -135,7 +135,7 @@ public enum APIReference {
             "set_app_bar_group_badge_text_color",
         ],
         "space_bar": [
-            "set_enabled", "set_edge", "set_thickness",
+            "set_enabled", "set_edge", "set_alignment", "set_thickness",
             "set_box_size", "set_box_gap", "set_font_size",
             "set_icon_source", "set_tab_background",
             "set_active_indicator", "set_corner_roundness",
@@ -149,7 +149,7 @@ public enum APIReference {
             "set_group_badge_text_color",
         ],
         "app_bar": [
-            "set_edge", "set_thickness", "set_tab_background",
+            "set_edge", "set_alignment", "set_thickness", "set_tab_background",
             "set_active_indicator", "set_box_size",
             "set_box_gap", "set_content", "set_icon_source",
             "set_font_size",
@@ -176,7 +176,7 @@ public enum APIReference {
         "monocle": [
             "set_orientation", "set_orientation_override",
             "set_wrap_focus", "set_new_window_placement",
-            "set_app_bar_enabled", "set_app_bar_edge",
+            "set_app_bar_enabled", "set_app_bar_edge", "set_app_bar_alignment",
             "set_app_bar_thickness",
             "set_app_bar_tab_background",
             "set_app_bar_active_indicator",

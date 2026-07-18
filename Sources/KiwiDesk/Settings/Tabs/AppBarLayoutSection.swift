@@ -74,20 +74,28 @@ struct LayoutAppBarSection: View {
     // not to re-explain the field — reserved for a field the
     // global editor can't already teach.
     //
-    // Twin of `GlobalAppBarSection.behavior` (#291): the same four
-    // look fields, rendered here as `.segmented` overrides. Keep
-    // the two lists — and their segmented control choice — in
-    // lockstep. A fifth field, or a control-type change, must land
-    // on both surfaces (same field, same control on comparable
-    // full-width surfaces). Convention-guarded, not test-guarded:
-    // a missing row or mismatched pill is visible on first glance,
-    // not silent data loss, so it doesn't warrant a parity test.
+    // Twin of `GlobalAppBarSection.behavior` (#291): the same
+    // five look fields, rendered here as `.segmented`
+    // overrides. Keep the two lists — and their segmented
+    // control choice — in lockstep. A sixth field, or a
+    // control-type change, must land on both surfaces (same
+    // field, same control on comparable full-width surfaces).
+    // Convention-guarded, not test-guarded: a missing row or
+    // mismatched pill is visible on first glance, not silent
+    // data loss, so it doesn't warrant a parity test.
     @ViewBuilder private var behaviorOverrides: some View {
         OverridePickerRow(
             label: L("app_bar.edge.label", "Position"),
             value: $bar.edge,
             global: global.edge,
             options: AppBarOptions.edge,
+            style: .segmented
+        )
+        OverridePickerRow(
+            label: L("app_bar.alignment.label", "Alignment"),
+            value: $bar.alignment,
+            global: global.alignment,
+            options: AppBarOptions.alignment,
             style: .segmented
         )
         OverridePickerRow(

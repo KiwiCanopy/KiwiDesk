@@ -49,18 +49,11 @@ struct AppBarPreviewStrip: View {
 
     // MARK: - Strip
 
-    /// The strip hugs the canvas side matching the chosen
-    /// edge (top bar sits at the canvas top), so the edge
-    /// choice is visible, not just captioned. The off-axis
-    /// emptiness is the point — it mirrors the bar's real
-    /// relationship to the desktop.
+    /// Edge picks the hugged canvas side, alignment the
+    /// along-axis seat — the shared mapping in
+    /// `BarCanvasAlignment.swift`.
     private var canvasAlignment: Alignment {
-        switch style.edge {
-        case .top: .top
-        case .bottom: .bottom
-        case .left: .leading
-        case .right: .trailing
-        }
+        style.edge.canvasAlignment(style.alignment)
     }
 
     private var strip: some View {

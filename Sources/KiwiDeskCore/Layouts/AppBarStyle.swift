@@ -47,9 +47,30 @@ public struct AppBarStyle: Sendable, Equatable {
         case iconAndName = "icon_and_name"
     }
 
+    /// Where the item group sits along the bar's long axis
+    /// (#293 QA). Values are edge-relative (`start`/`end`),
+    /// never `left`/`right` — the same reasoning that made
+    /// `edge` absolute: correct across all four edges without
+    /// a per-edge remap. A left bar's `start` is its top; a
+    /// top bar's `start` is its left. Shared by both bars
+    /// (`SpaceBarStyle.Alignment` aliases this). Once an App
+    /// Bar group overflows and scrolls, the three collapse to
+    /// the same visual (the group starts at the scroll
+    /// offset).
+    public enum BarAlignment: String, Sendable, Codable,
+        CaseIterable
+    {
+        case start
+        case center
+        case end
+    }
+
     /// The absolute screen edge the bar occupies (#293) — no
     /// longer derived from the layout's axis.
     public var edge: AppBarEdge = .top
+    /// Item-group placement along the bar; center matches the
+    /// pre-#293-QA shipped behavior.
+    public var alignment: BarAlignment = .center
     /// Depth of the reserved strip (pt).
     public var thickness: CGFloat = 32
     public var tabBackground: TabBackground = .boxed
@@ -133,6 +154,7 @@ extension AppBarStyle: Codable {
     /// every field has a key — do not drop it as "unused".
     enum CodingKeys: String, CodingKey, CaseIterable {
         case edge
+        case alignment
         case thickness
         case tabBackground = "tab_background"
         case activeIndicator = "active_indicator"
@@ -167,6 +189,11 @@ extension AppBarStyle: Codable {
                 AppBarEdge.self,
                 forKey: .edge
             ) ?? defaults.edge
+        alignment =
+            try container.decodeIfPresent(
+                BarAlignment.self,
+                forKey: .alignment
+            ) ?? defaults.alignment
         thickness =
             try container.decodeIfPresent(
                 CGFloat.self,

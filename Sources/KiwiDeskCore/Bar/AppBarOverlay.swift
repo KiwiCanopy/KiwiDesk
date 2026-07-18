@@ -175,6 +175,7 @@ public final class AppBarOverlay {
             in: itemContainer.bounds,
             gap: m.gap,
             horizontal: m.horizontal,
+            alignment: m.alignment,
             scrolledBy: scrollOffset
         )
         // Frame changes ease into place so group expansion

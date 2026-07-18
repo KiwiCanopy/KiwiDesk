@@ -21,6 +21,7 @@ public struct LayoutAppBar: Sendable, Equatable {
 
     // Optional overrides of the global AppBarStyle. Nil inherits.
     public var edge: AppBarEdge?
+    public var alignment: AppBarStyle.BarAlignment?
     public var thickness: CGFloat?
     public var tabBackground: TabBackground?
     public var activeIndicator: ActiveIndicator?
@@ -50,6 +51,7 @@ public struct LayoutAppBar: Sendable, Equatable {
     public func resolved(with base: AppBarStyle) -> AppBarStyle {
         var out = base
         if let edge { out.edge = edge }
+        if let alignment { out.alignment = alignment }
         if let thickness { out.thickness = thickness }
         if let tabBackground { out.tabBackground = tabBackground }
         if let activeIndicator {
@@ -108,6 +110,7 @@ extension LayoutAppBar: Codable {
     enum Key: String, CodingKey, CaseIterable {
         case enabled
         case edge
+        case alignment
         case thickness
         case tabBackground = "tab_background"
         case activeIndicator = "active_indicator"
@@ -140,6 +143,10 @@ extension LayoutAppBar: Codable {
         edge = try container.decodeIfPresent(
             AppBarEdge.self,
             forKey: .edge
+        )
+        alignment = try container.decodeIfPresent(
+            AppBarStyle.BarAlignment.self,
+            forKey: .alignment
         )
         thickness = try container.decodeIfPresent(
             CGFloat.self,
@@ -233,6 +240,10 @@ extension LayoutAppBar: Codable {
         var container = encoder.container(keyedBy: Key.self)
         try container.encode(enabled, forKey: .enabled)
         try container.encodeIfPresent(edge, forKey: .edge)
+        try container.encodeIfPresent(
+            alignment,
+            forKey: .alignment
+        )
         try container.encodeIfPresent(
             thickness,
             forKey: .thickness

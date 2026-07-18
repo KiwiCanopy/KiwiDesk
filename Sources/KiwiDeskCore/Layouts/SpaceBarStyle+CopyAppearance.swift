@@ -51,6 +51,7 @@ extension SpaceBarStyle {
         from appBar: AppBarStyle
     ) {
         switch key {
+        case "alignment": alignment = appBar.alignment
         case "thickness": thickness = appBar.thickness
         case "box_size": boxSize = appBar.boxSize
         case "box_gap": boxGap = appBar.boxGap

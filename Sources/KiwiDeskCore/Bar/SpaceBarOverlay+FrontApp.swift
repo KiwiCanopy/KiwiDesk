@@ -52,6 +52,42 @@ extension SpaceBarOverlay {
         )
     }
 
+    /// Axis length the segment will consume, for the render
+    /// pass's alignment total — the leading box gap, the
+    /// divider and glyph (`layoutDivider`/`layoutFrontGlyph`
+    /// mirrors), and on horizontal bars the measured name.
+    /// The name still clamps to the remaining strip at layout
+    /// time, so a long name can shrink the real extent below
+    /// this estimate — alignment then errs toward start,
+    /// never past the rim.
+    func frontExtent(
+        _ app: SpaceBarItemView.App?,
+        depth: CGFloat,
+        horizontal: Bool,
+        style: SpaceBarStyle
+    ) -> CGFloat {
+        guard let app else { return 0 }
+        let pad = SpaceBarItemView.pad
+        let cell = max(depth - pad * 2, 8)
+        var extent = style.boxGap + 1 + pad + cell + pad
+        if horizontal {
+            let size =
+                style.fontSize > 0
+                ? style.fontSize : depth * 0.42
+            extent +=
+                ceil(
+                    (app.name as NSString).size(
+                        withAttributes: [
+                            .font: NSFont.systemFont(
+                                ofSize: size
+                            )
+                        ]
+                    ).width
+                ) + pad
+        }
+        return extent
+    }
+
     private func attachFrontViewsIfNeeded() {
         guard let content = panelContentView else { return }
         // Re-added every render so the segment stays ABOVE item

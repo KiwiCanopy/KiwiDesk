@@ -21,6 +21,7 @@ extension AppBarOverlay {
         let total: CGFloat
         let inset: CGFloat
         let viewport: CGFloat
+        let alignment: AppBarStyle.BarAlignment
     }
 
     func metrics(
@@ -55,7 +56,8 @@ extension AppBarOverlay {
             gap: gap,
             total: total,
             inset: inset,
-            viewport: max(axis - inset * 2, 0)
+            viewport: max(axis - inset * 2, 0),
+            alignment: style.alignment
         )
     }
 
@@ -204,24 +206,32 @@ extension AppBarOverlay {
     /// Lays the lengths out along the bar axis, `gap` apart,
     /// in the container's flipped local coordinates (first
     /// item at the left / top). While everything fits the
-    /// group is centered; an overflowing group starts at
-    /// `-offset` instead (the scrolled-away part sticks out
-    /// of the strip and is clipped).
+    /// group sits per `alignment` (start/center/end, edge-
+    /// relative); an overflowing group starts at `-offset`
+    /// regardless — once the group scrolls, the three
+    /// alignments collapse to one visual (#293 QA, plan Q1).
     nonisolated static func frames(
         lengths: [CGFloat],
         in bounds: CGRect,
         gap: CGFloat,
         horizontal: Bool,
+        alignment: AppBarStyle.BarAlignment = .center,
         scrolledBy offset: CGFloat = 0
     ) -> [CGRect] {
         let total =
             lengths.reduce(0, +)
             + gap * CGFloat(max(lengths.count - 1, 0))
         let axis = horizontal ? bounds.width : bounds.height
-        var position =
-            total > axis
-            ? -offset
-            : max((axis - total) / 2, 0)
+        var position: CGFloat
+        if total > axis {
+            position = -offset
+        } else {
+            switch alignment {
+            case .start: position = 0
+            case .center: position = (axis - total) / 2
+            case .end: position = axis - total
+            }
+        }
         return lengths.map { length in
             defer { position += length + gap }
             return horizontal
