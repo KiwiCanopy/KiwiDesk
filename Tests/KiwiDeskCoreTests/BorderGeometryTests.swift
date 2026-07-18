@@ -21,7 +21,7 @@ struct BorderGeometryTests {
         #expect(g.overlayFrame == window.insetBy(dx: -2, dy: -2))
         #expect(
             g.lineWidth
-                == 2 + BorderGeometry.roundedHiddenOverlap
+                == 2 + BorderGeometry.hiddenOverlapCushion
         )
         #expect(
             g.cornerRadius
@@ -40,7 +40,7 @@ struct BorderGeometryTests {
         #expect(g.overlayFrame == window.insetBy(dx: -10, dy: -10))
         #expect(
             g.lineWidth
-                == 10 + BorderGeometry.roundedHiddenOverlap
+                == 10 + BorderGeometry.hiddenOverlapCushion
         )
         #expect(
             g.cornerRadius
@@ -62,7 +62,10 @@ struct BorderGeometryTests {
         )
         #expect(
             g.lineWidth
-                == 10 + BorderGeometry.squareHiddenOverlap
+                == 10
+                + BorderGeometry.squareHiddenOverlap(
+                    systemRadius: 16
+                )
         )
     }
 
@@ -77,7 +80,37 @@ struct BorderGeometryTests {
         #expect(g.overlayFrame == window.insetBy(dx: -2, dy: -2))
         #expect(
             g.lineWidth
-                == 2 + BorderGeometry.squareHiddenOverlap
+                == 2
+                + BorderGeometry.squareHiddenOverlap(
+                    systemRadius: 16
+                )
+        )
+    }
+
+    @Test("Square overlap scales with the window's corner radius")
+    func squareOverlapScalesWithRadius() {
+        let small = BorderGeometry.compute(
+            windowFrame: window,
+            width: 4,
+            cornerStyle: .square,
+            systemRadius: 8
+        )
+        let large = BorderGeometry.compute(
+            windowFrame: window,
+            width: 4,
+            cornerStyle: .square,
+            systemRadius: 40
+        )
+        // A larger radius carves a deeper corner reveal, so the hidden
+        // overlap (and total stroke) grows to fill it (#361) — where
+        // the old fixed 8 pt left a gap on large-radius windows.
+        #expect(large.lineWidth > small.lineWidth)
+        #expect(
+            large.lineWidth
+                == 4
+                + BorderGeometry.squareHiddenOverlap(
+                    systemRadius: 40
+                )
         )
     }
 
@@ -93,7 +126,7 @@ struct BorderGeometryTests {
         // Outer reach unchanged (fit-gaps invariant); only the inner
         // edge moves onto the window by the capped lap.
         #expect(g.overlayFrame == window.insetBy(dx: -4, dy: -4))
-        // min(4 / 2, 1) == 1 — the on-window lap, not the hidden 5.
+        // min(4 / 2, 1) == 1 — the on-window lap, not the below tuck.
         #expect(g.lineWidth == 5.0)
         #expect(g.cornerRadius == 16 + 4 - g.lineWidth / 2)
     }
@@ -111,7 +144,7 @@ struct BorderGeometryTests {
         #expect(g.lineWidth == 1.5)
     }
 
-    @Test("Above-order square uses the capped lap, not the 8 tuck")
+    @Test("Above-order square uses the capped lap, not below tuck")
     func aboveSquareCap() {
         let g = BorderGeometry.compute(
             windowFrame: window,
@@ -121,7 +154,7 @@ struct BorderGeometryTests {
             systemRadius: 16
         )
         #expect(g.cornerRadius == 0)
-        // The visible cap (1), never squareHiddenOverlap (8).
+        // The visible cap (1), never the below-order square tuck.
         #expect(g.lineWidth == 11.0)
     }
 
@@ -135,7 +168,7 @@ struct BorderGeometryTests {
         #expect(
             tooThin.lineWidth
                 == BorderStyle.minWidth
-                + BorderGeometry.roundedHiddenOverlap
+                + BorderGeometry.hiddenOverlapCushion
         )
         let tooThick = BorderGeometry.compute(
             windowFrame: window,
@@ -145,7 +178,7 @@ struct BorderGeometryTests {
         #expect(
             tooThick.lineWidth
                 == BorderStyle.maxWidth
-                + BorderGeometry.roundedHiddenOverlap
+                + BorderGeometry.hiddenOverlapCushion
         )
     }
 

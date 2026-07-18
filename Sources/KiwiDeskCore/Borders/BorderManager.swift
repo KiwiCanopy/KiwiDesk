@@ -199,7 +199,16 @@ public final class BorderManager {
         if let existing = overlays[window] { return existing }
         let overlay = BorderOverlay(
             window: window.raw,
-            preferSkyLight: skyLightActive,
+            // Below-order (AppKit) is the default ring for every window
+            // (#361): its `order(.below)` re-stack is flicker-free —
+            // unlike the SkyLight above-order transaction — so it holds
+            // steady under the per-keystroke compositor churn Firefox/
+            // Zen emit, and with each window's real radius the corner
+            // hugs cleanly. The
+            // SkyLight above-order path stays in the tree, retained for
+            // a planned user-facing draw-order toggle. WS geometry
+            // tracking is unaffected (see `usesWindowServerTracking`).
+            preferSkyLight: false,
             onFallback: { [weak self] reason in
                 self?.onLog(
                     "border \(window.raw): \(reason); "

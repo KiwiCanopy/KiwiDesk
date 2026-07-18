@@ -32,30 +32,39 @@ struct BorderGeometry: Equatable {
     /// in the overlay's own bounds inset by `lineWidth / 2`.
     let cornerRadius: CGFloat
 
-    /// **`below`-order only** (the AppKit fallback). Rounded needs a
-    /// seam allowance deep enough to close the corner reveal on
-    /// rounded windows, where a 1 pt tuck left a visible gap; square
-    /// needs more still, to fill the harder 90° utility-window
-    /// reveal. Both are masked behind the target — over-provisioning
-    /// is free (the visible outer edge stays at `systemRadius +
-    /// visible` regardless; a larger overlap only tucks the hidden
-    /// inner edge deeper under the corner) — so the value is set by
-    /// the widest reveal seen, not minimized. Raised 2.5 → 5 after a
-    /// hairline gap persisted at small windows; the invariant is
-    /// simply `≥ that reveal`. Never used by `above`-order, where the
-    /// overlap is on-screen and must instead stay a hairline (see
+    /// **`below`-order only.** The one cushion beyond what corner
+    /// geometry strictly requires, shared by both styles: rounded's arc
+    /// already hugs the window's real radius, so its whole overlap is
+    /// this cushion; square adds it on top of the mandatory
+    /// `0.29 · radius` reveal (see `squareHiddenOverlap`). Kept to a
+    /// sliver because a below-order ring lingers through a minimize
+    /// genie — macOS reports the minimize only once the window lands at
+    /// the Dock, so there is no earlier signal to hide on — and the
+    /// shrinking window un-masks the overlap as a band whose thickness
+    /// this sets. It only has to hide the hairline where our circular
+    /// corner arc meets the window's continuous squircle, which the
+    /// real per-window radius already all but closes (#361). Nudge up
+    /// if a faint corner seam ever shows. Never used by `above`-order,
+    /// where the overlap is on-screen and stays a hairline (see
     /// `aboveVisibleLapCap`).
-    static let roundedHiddenOverlap: CGFloat = 5
-    /// **`below`-order only.** Fixed rather than derived from
-    /// `systemRadius` (the old `systemRadius · (1 − √2/2)` tuck):
-    /// because the overlap is masked behind the target,
-    /// over-provisioning is free and only *under*-provisioning
-    /// re-opens the corner reveal this fills. 8 pt comfortably clears
-    /// the square reveal for every macOS window radius seen to date;
-    /// the invariant to keep is simply `squareHiddenOverlap ≥ that
-    /// reveal` — raise it if a future radius bump ever exposes a
-    /// corner gap.
-    static let squareHiddenOverlap: CGFloat = 8
+    static let hiddenOverlapCushion: CGFloat = 0.1
+
+    /// **`below`-order only.** The corner reveal a *square* ring must
+    /// fill sits at `systemRadius · (1 − √2/2)` — the deepest point of
+    /// a rounded window's corner, on the diagonal. Derived per window
+    /// from its real radius (`BorderManager` reads it via SkyLight)
+    /// plus `hiddenOverlapCushion`, rather than a fixed constant that
+    /// could not scale and left a corner gap on large-radius windows
+    /// (the old fixed 8 pt; #361). Under-provisioning re-opens the
+    /// reveal in steady state. Never used by `above`-order, where the
+    /// overlap is on-screen and stays a hairline (see
+    /// `aboveVisibleLapCap`).
+    static func squareHiddenOverlap(
+        systemRadius: CGFloat
+    ) -> CGFloat {
+        let tuck = 1 - CGFloat(2).squareRoot() / 2
+        return systemRadius * tuck + hiddenOverlapCushion
+    }
     /// **`above`-order cap.** With the ring stacked above the target
     /// the overlap laps *on top of* the window and is therefore
     /// visible, so over-provisioning is no longer free — a 5/8 pt
@@ -85,7 +94,8 @@ struct BorderGeometry: Equatable {
         let overlap = overlap(
             for: cornerStyle,
             order: order,
-            visible: visible
+            visible: visible,
+            systemRadius: systemRadius
         )
         let stroke = visible + overlap
         // The rounded stroke's outer edge stays concentric with the
@@ -117,13 +127,15 @@ struct BorderGeometry: Equatable {
     private static func overlap(
         for style: BorderStyle.CornerStyle,
         order: Order,
-        visible: CGFloat
+        visible: CGFloat,
+        systemRadius: CGFloat
     ) -> CGFloat {
         switch order {
         case .below:
             switch style {
-            case .rounded: roundedHiddenOverlap
-            case .square: squareHiddenOverlap
+            case .rounded: hiddenOverlapCushion
+            case .square:
+                squareHiddenOverlap(systemRadius: systemRadius)
             }
         case .above:
             min(visible / 2, aboveVisibleLapCap)
