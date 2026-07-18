@@ -30,7 +30,7 @@ struct SpaceBarDropCoordinatorTests {
     ) -> (SpaceBarDropCoordinator, Recorder) {
         let rec = Recorder()
         let coord = SpaceBarDropCoordinator()
-        coord.dwell = dwell
+        coord.dwellProvider = { dwell }
         coord.hitTest = { _ in hit }
         coord.currentSpace = { _ in current }
         coord.setHover = { rec.hovered.append($0) }

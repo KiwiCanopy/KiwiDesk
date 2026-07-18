@@ -8,6 +8,10 @@ extension KiwiCore {
     /// Connects the Space Bar drop coordinator to the bars, state,
     /// and the spring-switch action.
     func wireSpaceBarDrop() {
+        spaceBarDrop.dwellProvider = { [weak self] in
+            self?.tiler.settings.spaceBarStyle.resolvedSpringDelay
+                ?? 1.5
+        }
         spaceBarDrop.hitTest = { [weak self] point in
             self?.spaceBars.spaceItem(atGlobal: point)
         }

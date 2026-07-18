@@ -31,14 +31,16 @@ public final class TilingEngine {
     /// and per-app EnhancedUserInterface toggling.
     private let applier = FrameApplier()
 
-    /// A window in an active drag gesture, exempt from
-    /// `stashInactive` (#372). While the user drags a window and
-    /// the Space Bar springs to another virtual space, the
-    /// dragged window is still a member of its SOURCE space, so
-    /// the spring's retile would stash it into the corner under
-    /// the cursor mid-drag. The drag handlers set this for the
-    /// gesture's life and clear it at drop. Same rationale as the
-    /// existing `!isFloating` exemption: pinned for the duration.
+    /// A window in an active drag gesture, exempt from ALL frame
+    /// application in `retile` — both the main layout loop and
+    /// `stashInactive` (#372). The pointer owns a dragged window's
+    /// frame, so a retile triggered mid-drag (notably a Space Bar
+    /// spring, which reframes the target space's other windows)
+    /// must not yank it to its computed slot or stash it into the
+    /// corner. The drag handlers set this for the gesture's life
+    /// and clear it at drop, when the window's real placement runs
+    /// un-exempt. Same spirit as the `!isFloating` stash exemption:
+    /// pinned for the duration.
     public var dragExemptWindow: WindowID?
 
     /// Resolves the AX element of a window (wired to the
@@ -166,6 +168,14 @@ public final class TilingEngine {
         let frames = calculatedFrames(state: state)
 
         for (id, target) in frames {
+            // A window in an active drag keeps its user-driven
+            // frame: the pointer owns it. Reframing it here would
+            // yank it to its computed slot mid-drag — a Space Bar
+            // spring retiles the target's OTHER windows but must
+            // leave the dragged one under the cursor (#372). Its
+            // real placement happens at drop, once the exemption
+            // clears.
+            if id == dragExemptWindow { continue }
             guard let current = state.windows[id]?.frame
             else { continue }
             // Tolerance: apps clamp what we set (character

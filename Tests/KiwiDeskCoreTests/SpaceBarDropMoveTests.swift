@@ -75,6 +75,29 @@ struct SpaceBarDropMoveTests {
         #expect(core.spaceBarDrop.draggingWindow == nil)
     }
 
+    @Test("A dragged window is exempt from retile frame apply")
+    func dragExemptWindowNotReframed() {
+        // Slot geometry needs a real screen (headless CI skips).
+        guard NSScreen.main != nil else { return }
+        let core = makeCore()
+        addWindow(core, 1)
+        addWindow(core, 2)
+        core.tiler.animation.isEnabled = false
+        var applied: Set<WindowID> = []
+        core.tiler.animation.apply = { id, _, _ in
+            applied.insert(id)
+        }
+        // With window 1 pinned as the in-flight drag, a forced
+        // retile must place the others but never reframe it — the
+        // pointer owns its frame (#372). Reframing it here is what
+        // yanked it to a slot mid-drag and tripped the echo guard.
+        core.tiler.dragExemptWindow = WindowID(1)
+        applied = []
+        core.retile(force: true)
+        #expect(!applied.contains(WindowID(1)))
+        #expect(applied.contains(WindowID(2)))
+    }
+
     @Test("Spring eager-moves the dragged window into the target")
     func springEagerMovesWindow() {
         let core = makeCore()

@@ -1194,11 +1194,23 @@ The load-bearing details, so they are not relitigated:
   the live drag shows the ordinary drop preview (ghost + drop-
   zone) in the target's layout and the release lands it in the
   exact slot. An earlier design flipped membership lazily at drop
-  to avoid stale state on cancel, but that left no preview during
-  placement; the abnormal-end teardown (`cancelDrag` → `reset` +
-  clear `dragExemptWindow`) covers the cancel case instead, so
-  eager membership is safe. The window stays exempt from
-  `stashInactive` throughout, so the eager move never strands it.
+  to avoid stale state, but that left no preview during placement.
+  Eager membership needs no rollback: an abnormal end (window
+  closed / tab rekeyed) means the window is gone, so stranding is
+  moot, and a normal drop is *meant* to place into the sprung
+  space — `cancelDrag` only tears down the gesture bookkeeping
+  (pending spring, `dragExemptWindow`); it does not, and need not,
+  move the window back. The dragged window is exempt from **all**
+  frame application in `retile` for the gesture's life — both the
+  layout loop and `stashInactive`, via `dragExemptWindow` — so the
+  spring's retile places the target's OTHER windows but leaves the
+  dragged one under the cursor. Without the layout-loop exemption
+  the retile yanks it to its computed slot mid-drag (a small
+  dwindled BSP corner, say). Because the move commits at spring,
+  `window_moved_to_space` fires then rather than once at drop, and
+  once per spring — a chained A→B→C dwell emits two moves. That
+  cardinality change is deliberate; hooks keyed on the event see
+  the intermediate moves.
 - The dwell defaults to **1.5 s** and is user-configurable
   (`space_bar.spring_delay`, clamped 500–4000 ms; a Spring delay
   slider in the Space Bar editor). Longer than Finder's ~0.7 s:

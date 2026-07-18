@@ -30,11 +30,12 @@ final class SpaceBarDropCoordinator {
         case placeInSprung(SpaceID)
     }
 
-    /// Dwell before a hover springs the space. Designer verdict
-    /// (#372): 2.0s — longer than Finder's ~0.7s is right here
-    /// because the ring-sweep shows progress and a space switch
-    /// is a bigger disruption than a folder opening.
-    var dwell: TimeInterval = 2.0
+    /// The dwell before a hover springs the space, read fresh at
+    /// arm time so a live `space_bar.set_spring_delay` change takes
+    /// effect on the next gesture with no cached-value staleness
+    /// (#372). Injected so this type stays settings-free; the
+    /// default is only a pre-wiring placeholder.
+    var dwellProvider: @MainActor () -> TimeInterval = { 1.5 }
 
     /// Space whose item contains a Cocoa screen point, else nil.
     var hitTest: @MainActor (CGPoint) -> SpaceID? = { _ in nil }
@@ -116,11 +117,14 @@ final class SpaceBarDropCoordinator {
 
     private func arm(_ target: SpaceID, _ id: WindowID) {
         armedSpace = target
+        // Read the dwell once, so the ring sweep and the timer
+        // that fires the spring share the exact same duration.
+        let dwell = dwellProvider()
         setHover(target)
         beginSweep(target, dwell)
         dwellTask?.cancel()
         dwellTask = Task { [weak self] in
-            let ns = UInt64((self?.dwell ?? 2) * 1_000_000_000)
+            let ns = UInt64(dwell * 1_000_000_000)
             try? await Task.sleep(nanoseconds: ns)
             guard !Task.isCancelled else { return }
             self?.fire(target, id)
