@@ -147,8 +147,8 @@ struct SpaceBarPreviewStrip: View {
 
     var gap: CGFloat {
         style.edge.isHorizontal
-            ? scale(style.itemGap, from: 0...40, to: 0...14)
-            : scale(style.itemGap, from: 0...40, to: 0...4)
+            ? scale(style.boxGap, from: 0...40, to: 0...14)
+            : scale(style.boxGap, from: 0...40, to: 0...4)
     }
 
     var corner: CGFloat {

@@ -60,9 +60,9 @@ public struct AppBarStyle: Sendable, Equatable {
     /// text is shown. Clamped at layout time between the icon
     /// square (icons never clip) and a quarter of the bar;
     /// items that overflow anyway scroll instead of shrinking.
-    public var itemSize: CGFloat = 0
+    public var boxSize: CGFloat = 0
     /// Spacing between items (pt); 0 = touching.
-    public var itemGap: CGFloat = 6
+    public var boxGap: CGFloat = 6
     public var content: Content = .iconAndName
     /// Where app icons come from: the native app image, or a
     /// monochrome SketchyBar App Font glyph that follows the
@@ -136,8 +136,8 @@ extension AppBarStyle: Codable {
         case thickness
         case tabBackground = "tab_background"
         case activeIndicator = "active_indicator"
-        case itemSize = "item_size"
-        case itemGap = "item_gap"
+        case boxSize = "box_size"
+        case boxGap = "box_gap"
         case content
         case iconSource = "icon_source"
         case groupAdjacentWindows = "group_adjacent_windows"
@@ -182,16 +182,16 @@ extension AppBarStyle: Codable {
                 ActiveIndicator.self,
                 forKey: .activeIndicator
             ) ?? defaults.activeIndicator
-        itemSize =
+        boxSize =
             try container.decodeIfPresent(
                 CGFloat.self,
-                forKey: .itemSize
-            ) ?? defaults.itemSize
-        itemGap =
+                forKey: .boxSize
+            ) ?? defaults.boxSize
+        boxGap =
             try container.decodeIfPresent(
                 CGFloat.self,
-                forKey: .itemGap
-            ) ?? defaults.itemGap
+                forKey: .boxGap
+            ) ?? defaults.boxGap
         content =
             try container.decodeIfPresent(
                 Content.self,

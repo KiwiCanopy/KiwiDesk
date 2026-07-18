@@ -1307,7 +1307,7 @@ vertical-axis layouts; `end` resolves to the bottom or right. The
 bar always renders on the edge the position names, so no clamp or
 mismatch can occur.
 
-Items appear in window order and are always **equal-sized**: `item_size`
+Items appear in window order and are always **equal-sized**: `box_size`
 pt along the bar (width on horizontal bars, height on vertical
 ones). Left at `0` (the default), each `content` mode gets a
 sensible standard. The size is clamped: at least the icon square
@@ -1390,7 +1390,7 @@ app_bar.set_tab_background("boxed")
 app_bar.set_active_indicator("ring")
 ```
 
-### app_bar.set_item_size
+### app_bar.set_box_size
 
 **Expects:** a number (points); `0` means auto (default).
 
@@ -1402,10 +1402,10 @@ long names don't truncate and short ones don't waste space.
 **Example:**
 
 ```lua
-app_bar.set_item_size(0)
+app_bar.set_box_size(0)
 ```
 
-### app_bar.set_item_gap
+### app_bar.set_box_gap
 
 **Expects:** a non-negative number (points).
 
@@ -1414,7 +1414,7 @@ app_bar.set_item_size(0)
 **Example:**
 
 ```lua
-app_bar.set_item_gap(6)
+app_bar.set_box_gap(6)
 ```
 
 ### app_bar.set_content
@@ -1704,7 +1704,7 @@ space_bar.set_edge("left")
 space_bar.set_thickness(28)
 ```
 
-### space_bar.set_item_size
+### space_bar.set_box_size
 
 **Expects:** length in points; `0` (default) = auto.
 
@@ -1714,10 +1714,10 @@ Auto sizes each item to its content (identifier + glyphs).
 **Example:**
 
 ```lua
-space_bar.set_item_size(0)
+space_bar.set_box_size(0)
 ```
 
-### space_bar.set_item_gap
+### space_bar.set_box_gap
 
 **Expects:** points (default `6`).
 
@@ -1726,7 +1726,7 @@ space_bar.set_item_size(0)
 **Example:**
 
 ```lua
-space_bar.set_item_gap(6)
+space_bar.set_box_gap(6)
 ```
 
 ### space_bar.set_font_size
@@ -3189,7 +3189,7 @@ stripped, grouped by namespace — `set_gap_override` becomes
                    "bar": { "enabled": true,
                             "position": "top",
                             "style": "pills",
-                            "item_size": 0 } },
+                            "box_size": 0 } },
       "scroll": { "anchor": "follow", "slot_size": 0,
                   "new_window_placement": "after_focused" },
       "stack": { "master_count": 1, "master_ratio": 0.6,

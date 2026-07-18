@@ -86,7 +86,7 @@ struct AppBarCommandParityTests {
     private static let everySetting: [AppBarCommandSetting] = [
         .edge(.bottom), .thickness(50),
         .tabBackground(.plain), .activeIndicator(.gap),
-        .itemSize(88), .itemGap(9),
+        .boxSize(88), .boxGap(9),
         .content(.name), .iconSource(.appFont),
         .groupAdjacentWindows(false),
         .fontSize(20), .cornerRoundness(12),

@@ -10,8 +10,8 @@ enum SpaceBarCommandSetting {
     case enabled(Bool)
     case edge(AppBarEdge)
     case thickness(CGFloat)
-    case itemSize(CGFloat)
-    case itemGap(CGFloat)
+    case boxSize(CGFloat)
+    case boxGap(CGFloat)
     case fontSize(CGFloat)
     case iconSource(BarAppIconSource)
     case tabBackground(SpaceBarStyle.TabBackground)
@@ -102,8 +102,8 @@ enum SpaceBarCommandSetting {
     {
         [
             "thickness": Self.thickness,
-            "item_size": Self.itemSize,
-            "item_gap": Self.itemGap,
+            "box_size": Self.boxSize,
+            "box_gap": Self.boxGap,
             "font_size": Self.fontSize,
             "corner_roundness": Self.cornerRoundness,
         ]
@@ -168,8 +168,8 @@ enum SpaceBarCommandSetting {
         case .enabled(let value): style.enabled = value
         case .edge(let value): style.edge = value
         case .thickness(let value): style.thickness = value
-        case .itemSize(let value): style.itemSize = value
-        case .itemGap(let value): style.itemGap = value
+        case .boxSize(let value): style.boxSize = value
+        case .boxGap(let value): style.boxGap = value
         case .fontSize(let value): style.fontSize = value
         case .iconSource(let value): style.iconSource = value
         case .tabBackground(let value):

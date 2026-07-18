@@ -149,8 +149,8 @@ struct MonocleSettingsTests {
         settings.monocle.appBar.thickness = 48
         settings.monocle.appBar.tabBackground = .plain
         settings.monocle.appBar.activeIndicator = .gap
-        settings.monocle.appBar.itemSize = 90
-        settings.monocle.appBar.itemGap = 0
+        settings.monocle.appBar.boxSize = 90
+        settings.monocle.appBar.boxGap = 0
         settings.monocle.appBar.content = .icon
         settings.monocle.appBar.highlightColor = "#FF0000"
         settings.monocle.appBar.groupAdjacentWindows = false
@@ -170,12 +170,12 @@ struct MonocleSettingsTests {
             try JSONSerialization.jsonObject(with: data)
                 as? [String: Any]
         )
-        // The global look sits top-level; item_size is a
+        // The global look sits top-level; box_size is a
         // concrete field there.
         let global = try #require(
             json["app_bar"] as? [String: Any]
         )
-        #expect(global["item_size"] as? Double == 0)
+        #expect(global["box_size"] as? Double == 0)
         // The per-layout bar under monocle only carries its
         // own enabled flag until a field is overridden.
         let layout = try #require(
@@ -188,7 +188,7 @@ struct MonocleSettingsTests {
             monocle["app_bar"] as? [String: Any]
         )
         #expect(bar["enabled"] as? Bool == true)
-        #expect(bar["item_size"] == nil)
+        #expect(bar["box_size"] == nil)
     }
 
     @Test("Profiles without a monocle key keep the defaults")
@@ -201,7 +201,7 @@ struct MonocleSettingsTests {
         #expect(decoded.monocle == MonocleParams())
         #expect(decoded.monocle.appBar.enabled)
         // Nothing is overridden, so every look field inherits.
-        #expect(decoded.monocle.appBar.itemSize == nil)
+        #expect(decoded.monocle.appBar.boxSize == nil)
         #expect(decoded.monocle.orientation == .horizontal)
     }
 
@@ -209,14 +209,14 @@ struct MonocleSettingsTests {
     func lenientBarDecoding() throws {
         let json = #"""
             {"layout": {"monocle": {
-                "app_bar": {"item_size": 90}
+                "app_bar": {"box_size": 90}
             }}}
             """#
         let decoded = try JSONDecoder().decode(
             TilingSettings.self,
             from: Data(json.utf8)
         )
-        #expect(decoded.monocle.appBar.itemSize == 90)
+        #expect(decoded.monocle.appBar.boxSize == 90)
         // Unlisted fields stay nil (inherit the global style).
         #expect(decoded.monocle.appBar.thickness == nil)
         #expect(decoded.monocle.appBar.enabled)
@@ -225,12 +225,12 @@ struct MonocleSettingsTests {
 
 @Suite("App bar math")
 struct AppBarMathTests {
-    @Test("item_size 0 uses the measured auto width, clamped")
+    @Test("box_size 0 uses the measured auto width, clamped")
     func autoSlot() {
         // The measured auto width passes through when sane.
         #expect(
             AppBarOverlay.slotLength(
-                itemSize: 0,
+                boxSize: 0,
                 content: .iconAndName,
                 thickness: 32,
                 axis: 1000,
@@ -241,7 +241,7 @@ struct AppBarMathTests {
         // tiny (icons never clip).
         #expect(
             AppBarOverlay.slotLength(
-                itemSize: 0,
+                boxSize: 0,
                 content: .iconAndName,
                 thickness: 32,
                 axis: 1000,
@@ -251,7 +251,7 @@ struct AppBarMathTests {
         // Clamped down to a quarter of the bar when it's huge.
         #expect(
             AppBarOverlay.slotLength(
-                itemSize: 0,
+                boxSize: 0,
                 content: .name,
                 thickness: 32,
                 axis: 1000,
@@ -295,12 +295,12 @@ struct AppBarMathTests {
         AppBarOverlay.Item(id: WindowID(1), name: name, icon: nil)
     }
 
-    @Test("Explicit item_size wins, clamped on both sides")
+    @Test("Explicit box_size wins, clamped on both sides")
     func explicitSlot() {
         // The user's size as-is while it is sane.
         #expect(
             AppBarOverlay.slotLength(
-                itemSize: 80,
+                boxSize: 80,
                 content: .iconAndName,
                 thickness: 32,
                 axis: 1000,
@@ -311,7 +311,7 @@ struct AppBarMathTests {
         // icon square.
         #expect(
             AppBarOverlay.slotLength(
-                itemSize: 10,
+                boxSize: 10,
                 content: .iconAndName,
                 thickness: 32,
                 axis: 1000,
@@ -321,7 +321,7 @@ struct AppBarMathTests {
         // Too big: capped at a quarter of the bar.
         #expect(
             AppBarOverlay.slotLength(
-                itemSize: 900,
+                boxSize: 900,
                 content: .iconAndName,
                 thickness: 32,
                 axis: 1000,
@@ -331,7 +331,7 @@ struct AppBarMathTests {
         // Tiny bar: the icon minimum beats the quarter cap.
         #expect(
             AppBarOverlay.slotLength(
-                itemSize: 80,
+                boxSize: 80,
                 content: .iconAndName,
                 thickness: 32,
                 axis: 60,
@@ -637,12 +637,12 @@ struct MonocleCommandTests {
         )
         #expect(
             core.execute(
-                "monocle.set_app_bar_item_size",
+                "monocle.set_app_bar_box_size",
                 args: [.number(150)]
             ).isSuccess
         )
         #expect(
-            core.tiler.settings.monocle.appBar.itemSize == 150
+            core.tiler.settings.monocle.appBar.boxSize == 150
         )
         #expect(
             core.execute(
@@ -699,7 +699,7 @@ struct MonocleCommandTests {
         )
         #expect(
             !core.execute(
-                "monocle.set_app_bar_item_size",
+                "monocle.set_app_bar_box_size",
                 args: [.string("wide")]
             ).isSuccess
         )

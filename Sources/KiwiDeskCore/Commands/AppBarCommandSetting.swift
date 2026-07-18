@@ -27,8 +27,8 @@ enum AppBarCommandSetting {
     case thickness(CGFloat)
     case tabBackground(AppBarStyle.TabBackground)
     case activeIndicator(AppBarStyle.ActiveIndicator)
-    case itemSize(CGFloat)
-    case itemGap(CGFloat)
+    case boxSize(CGFloat)
+    case boxGap(CGFloat)
     case content(AppBarStyle.Content)
     case iconSource(BarAppIconSource)
     case groupAdjacentWindows(Bool)
@@ -115,8 +115,8 @@ enum AppBarCommandSetting {
     {
         [
             "thickness": Self.thickness,
-            "item_size": Self.itemSize,
-            "item_gap": Self.itemGap,
+            "box_size": Self.boxSize,
+            "box_gap": Self.boxGap,
             "font_size": Self.fontSize,
             "corner_roundness": Self.cornerRoundness,
         ]
@@ -180,8 +180,8 @@ enum AppBarCommandSetting {
             style.tabBackground = value
         case .activeIndicator(let value):
             style.activeIndicator = value
-        case .itemSize(let value): style.itemSize = value
-        case .itemGap(let value): style.itemGap = value
+        case .boxSize(let value): style.boxSize = value
+        case .boxGap(let value): style.boxGap = value
         case .content(let value): style.content = value
         case .iconSource(let value): style.iconSource = value
         case .groupAdjacentWindows(let value):
@@ -217,8 +217,8 @@ enum AppBarCommandSetting {
         case .tabBackground(let value): bar.tabBackground = value
         case .activeIndicator(let value):
             bar.activeIndicator = value
-        case .itemSize(let value): bar.itemSize = value
-        case .itemGap(let value): bar.itemGap = value
+        case .boxSize(let value): bar.boxSize = value
+        case .boxGap(let value): bar.boxGap = value
         case .content(let value): bar.content = value
         case .iconSource(let value): bar.iconSource = value
         case .groupAdjacentWindows(let value):

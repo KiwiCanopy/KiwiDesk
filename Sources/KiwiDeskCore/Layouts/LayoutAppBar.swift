@@ -24,8 +24,8 @@ public struct LayoutAppBar: Sendable, Equatable {
     public var thickness: CGFloat?
     public var tabBackground: TabBackground?
     public var activeIndicator: ActiveIndicator?
-    public var itemSize: CGFloat?
-    public var itemGap: CGFloat?
+    public var boxSize: CGFloat?
+    public var boxGap: CGFloat?
     public var content: Content?
     public var iconSource: BarAppIconSource?
     public var groupAdjacentWindows: Bool?
@@ -55,8 +55,8 @@ public struct LayoutAppBar: Sendable, Equatable {
         if let activeIndicator {
             out.activeIndicator = activeIndicator
         }
-        if let itemSize { out.itemSize = itemSize }
-        if let itemGap { out.itemGap = itemGap }
+        if let boxSize { out.boxSize = boxSize }
+        if let boxGap { out.boxGap = boxGap }
         if let content { out.content = content }
         if let iconSource { out.iconSource = iconSource }
         if let groupAdjacentWindows {
@@ -111,8 +111,8 @@ extension LayoutAppBar: Codable {
         case thickness
         case tabBackground = "tab_background"
         case activeIndicator = "active_indicator"
-        case itemSize = "item_size"
-        case itemGap = "item_gap"
+        case boxSize = "box_size"
+        case boxGap = "box_gap"
         case content
         case iconSource = "icon_source"
         case groupAdjacentWindows = "group_adjacent_windows"
@@ -153,13 +153,13 @@ extension LayoutAppBar: Codable {
             ActiveIndicator.self,
             forKey: .activeIndicator
         )
-        itemSize = try container.decodeIfPresent(
+        boxSize = try container.decodeIfPresent(
             CGFloat.self,
-            forKey: .itemSize
+            forKey: .boxSize
         )
-        itemGap = try container.decodeIfPresent(
+        boxGap = try container.decodeIfPresent(
             CGFloat.self,
-            forKey: .itemGap
+            forKey: .boxGap
         )
         content = try container.decodeIfPresent(
             Content.self,
@@ -245,8 +245,8 @@ extension LayoutAppBar: Codable {
             activeIndicator,
             forKey: .activeIndicator
         )
-        try container.encodeIfPresent(itemSize, forKey: .itemSize)
-        try container.encodeIfPresent(itemGap, forKey: .itemGap)
+        try container.encodeIfPresent(boxSize, forKey: .boxSize)
+        try container.encodeIfPresent(boxGap, forKey: .boxGap)
         try container.encodeIfPresent(content, forKey: .content)
         try container.encodeIfPresent(
             iconSource,
