@@ -12,16 +12,15 @@ import Foundation
 /// (`MonocleOverrideTests`) per AGENTS.md §5: adding a user-tunable
 /// field to `MonocleParams` without mirroring it here turns that
 /// test red. `appBar` is excluded — per-space bar *look* overrides
-/// land with the app-bar tier (only the orientation, which drives
-/// the bar edge, is per-space here).
+/// land with the app-bar tier; only the orientation is per-space
+/// here (since #293 it no longer affects the bar edge).
 public struct MonocleOverride: Sendable, Equatable {
     public var orientation: MonocleParams.Orientation?
 
     public init() {}
 
     /// `global` (the layout's own params) with every non-nil
-    /// override applied on top, per field. The bar edge re-resolves
-    /// downstream against the merged orientation.
+    /// override applied on top, per field.
     public func resolved(
         onto global: MonocleParams
     ) -> MonocleParams {

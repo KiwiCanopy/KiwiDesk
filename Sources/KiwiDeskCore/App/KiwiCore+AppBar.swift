@@ -121,11 +121,14 @@ extension KiwiCore {
         NSScreen.screens.first { $0.kiwiDisplay?.id == display }
     }
 
-    /// The bar-hosting layout for a space, resolving per-space
-    /// layout overrides (#17) so the bar honors that space's own
-    /// `app_bar` overrides and enabled flag. Used when building
-    /// a display's bar; `barHost(for mode:)` stays for the
-    /// reorder path, which needs no per-space geometry.
+    /// The bar-hosting layout for a space, resolved through the
+    /// per-space override path (#17) like every other layout
+    /// consumer — today no per-space field is bar-visible (the
+    /// overrides carry no `app_bar` tier and, since #293, the
+    /// orientation no longer decides the edge), but a future
+    /// per-space bar override lands here for free. The reorder
+    /// path uses `barHost(for mode:)`, which needs no per-space
+    /// geometry.
     func barHost(for space: Space) -> AppBarHosting? {
         switch space.mode {
         case .monocle:
