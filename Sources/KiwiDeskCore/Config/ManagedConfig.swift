@@ -97,36 +97,8 @@ public enum ManagedConfig {
         )
     }
 
-    /// Builds an "adopted" file: the user's entire previous
-    /// config, preserved verbatim but commented out (so it is
-    /// inert). Used when migrating a hand-written config into
-    /// GUI management — nothing is dropped or reordered, and
-    /// even old marker lines are safe because every original
-    /// line is prefixed with `-- `. No managed block is
-    /// generated (#55): the app owns the settings in
-    /// `gui.json`, and `init.lua` stays hooks-only.
-    public static func adopt(
-        original: String,
-        date: String
-    ) -> String {
-        let commented =
-            original
-            .components(separatedBy: "\n")
-            .map { $0.isEmpty ? "--" : "-- " + $0 }
-            .joined(separator: "\n")
-        let header = [
-            "-- Previous configuration, adopted by KiwiDesk on "
-                + date + ".",
-            "-- The app now manages these settings itself "
-                + "(gui.json);",
-            "-- recovered keybindings appear in the "
-                + "Keybindings tab.",
-            "-- Anything below stays inert — delete this "
-                + "backup once",
-            "-- you no longer need it.",
-        ].joined(separator: "\n")
-        return header + "\n" + commented + "\n"
-    }
+    // `adopt` and its selective-comment machinery live in
+    // `ManagedConfig+Adopt.swift` (file-size split, §2).
 
     // MARK: - Foreign-code detection
 
@@ -193,18 +165,54 @@ public enum ManagedConfig {
             guard !line.isEmpty, !line.hasPrefix("--") else {
                 continue
             }
-            if line.contains("KiwiDesk.set_") { return true }
-            // `border.fit_gaps` is the one config-writing verb
-            // without a `set_` name — it rewrites the global gap
-            // from the border width (`KiwiCore+BorderCommands`), so
-            // a config tuning gaps that way must not be seeded over.
-            if line.contains("border.fit_gaps") { return true }
-            for ns in APIReference.namespaces.keys
-            where line.contains("\(ns).set_") {
-                return true
-            }
+            if lineHasSettingVerb(line) { return true }
         }
         return false
+    }
+
+    /// Whether one line calls a `set_*` settings verb (on the
+    /// `KiwiDesk` table or a layout namespace) or `border.fit_gaps`.
+    /// The **single** definition of the setting-verb vocabulary,
+    /// shared by the file-level `hasLiveSettingVerb` and the
+    /// per-line `lineDeclaresManaged`, so the two can't drift as
+    /// verbs are added (§5 hand-mirrored-list rule).
+    static func lineHasSettingVerb(_ line: String) -> Bool {
+        if line.contains("KiwiDesk.set_") { return true }
+        // `border.fit_gaps` is the one config-writing verb without
+        // a `set_` name — it rewrites the global gap from the
+        // border width (`KiwiCore+BorderCommands`), so a config
+        // tuning gaps that way must not be seeded over.
+        if line.contains("border.fit_gaps") { return true }
+        for ns in APIReference.namespaces.keys
+        where line.contains("\(ns).set_") {
+            return true
+        }
+        return false
+    }
+
+    /// Whether one line opens a **foreign** construct — a
+    /// `managedTokens` match (`KiwiDesk.bind(`, `app_rules =`, …).
+    /// The per-line half of `touchesManagedVocabulary`, shared so
+    /// the file-level foreign scan and `lineDeclaresManaged` use
+    /// one matcher.
+    static func lineMatchesForeignToken(_ line: String) -> Bool {
+        for token in managedTokens
+        where lineMatchesToken(line, token: token) {
+            return true
+        }
+        return false
+    }
+
+    /// Whether a single trimmed, non-comment `line` opens a
+    /// **managed** construct — a foreign token or a `set_*` setting
+    /// verb — i.e. a statement `adopt` comments out because
+    /// `gui.json` now owns it. The per-line union of the two
+    /// vocabularies above; harmless custom Lua (hooks, `print`,
+    /// helpers) matches nothing (#355). Used to classify a
+    /// statement by its head line so a hook that *contains* an
+    /// inner `set_` still reads as custom.
+    static func lineDeclaresManaged(_ line: String) -> Bool {
+        lineMatchesForeignToken(line) || lineHasSettingVerb(line)
     }
 
     /// Classifies a config source in a single scan: returns
@@ -261,11 +269,7 @@ public enum ManagedConfig {
             let t = line.trimmed
             guard !t.isEmpty else { continue }
             if t.hasPrefix("--") { continue }
-            for token in managedTokens {
-                if lineMatchesToken(t, token: token) {
-                    return true
-                }
-            }
+            if lineMatchesForeignToken(t) { return true }
         }
         return false
     }

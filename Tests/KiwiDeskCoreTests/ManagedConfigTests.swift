@@ -60,20 +60,22 @@ struct ManagedConfigTests {
         #expect(split.before.contains("-- header"))
     }
 
-    @Test("adopt comments out every original line, no block")
-    func adoptCommentsOriginal() {
+    @Test("adopt comments managed lines, keeps custom live")
+    func adoptSelective() {
+        // The managed `bind` is commented; the harmless `print`
+        // stays live (#355). Full adopt matrix lives in
+        // `ManagedConfigAdoptTests`.
         let adopted = ManagedConfig.adopt(
-            original: "KiwiDesk.bind(\"alt+h\", fn)\n\nx = 1",
+            original: "KiwiDesk.bind(\"alt+h\", fn)\n\nprint(\"hi\")",
             date: "2026-07-07"
         )
         #expect(!adopted.contains(ManagedConfig.beginMarker))
-        for line in adopted.components(separatedBy: "\n") {
-            let t = line.trimmingCharacters(in: .whitespaces)
-            #expect(t.isEmpty || t.hasPrefix("--"))
-        }
-        // Nothing foreign remains — the adopted file is inert.
+        #expect(
+            adopted.contains("-- KiwiDesk.bind(\"alt+h\", fn)")
+        )
+        #expect(adopted.contains("\nprint(\"hi\")"))
+        // Ownership invariant: nothing foreign remains.
         #expect(!ManagedConfig.hasForeignCode(adopted))
-        #expect(!ManagedConfig.hasCustomCode(adopted))
     }
 
     // MARK: - Token-scoped detection (#14)

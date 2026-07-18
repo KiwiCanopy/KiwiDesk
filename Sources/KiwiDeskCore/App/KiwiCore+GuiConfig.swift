@@ -294,14 +294,15 @@ extension KiwiCore {
     }
 
     /// Migrates a hand-written config into GUI management: the
-    /// current file is preserved verbatim as a commented backup
-    /// (no managed block is generated — the seeded `gui.json`
-    /// now owns rules and keybindings, #55). Gaps, layouts,
-    /// rules, and keybindings carry over from the live
-    /// (executed) state — bindings are recovered from the file
-    /// via `recoverKeybindings`; any that can't be read back
-    /// stay only in the backup. Returns the seeded model now
-    /// under GUI ownership.
+    /// settings, rules, and keybindings the seeded `gui.json` now
+    /// owns are commented out as a dated backup, while harmless
+    /// custom Lua (event hooks, helpers) is kept **live** so
+    /// integrations keep firing (#355; no managed block is
+    /// generated, #55). Gaps, layouts, rules, and keybindings
+    /// carry over from the live (executed) state — bindings are
+    /// recovered from the file via `recoverKeybindings`; any that
+    /// can't be read back stay only in the commented backup.
+    /// Returns the seeded model now under GUI ownership.
     @discardableResult
     public func adoptConfigIntoGui() throws -> GuiConfig {
         let original =

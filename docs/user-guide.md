@@ -168,8 +168,11 @@ individual profile JSON files (one per saved layout).
   definitions) *and*
   the Settings app tries to manage them, the app shows a raw Lua
   editor so you can resolve the conflict. You can then click
-  **Adopt into the GUI** to import your settings, keeping your
-  old file as a commented backup, or keep editing raw Lua.
+  **Adopt into the GUI** to import your settings. Adopt comments
+  out the migrated settings, rules, and keybindings as a backup
+  while keeping your custom Lua — event hooks like the sketchybar
+  bridge — **live**, so your integrations keep firing. Or keep
+  editing raw Lua.
 
 Once `gui.json` exists, the visual editor owns tiling (gaps, modes,
 layout tuning). Hand-written `set_gap_global` calls stop applying
@@ -1302,8 +1305,11 @@ If your `init.lua` holds custom keybindings:
   them, and adds them before you Save. Each binding must be an inline
   `function() … end` on one line for the import to recognize it.
 - **Adopt into the GUI** (shown when managed vocabulary conflicts are
-  detected) imports your entire `init.lua` settings into the app,
-  keeps your file as a commented backup, and drops the raw Lua editor.
+  detected) imports your `init.lua` settings into the app and drops
+  the raw Lua editor. It comments out the migrated settings, rules,
+  and keybindings as a backup but keeps your custom Lua (event hooks,
+  helpers) live, so integrations like the sketchybar bridge keep
+  firing.
 
 ### Modal Modes
 
