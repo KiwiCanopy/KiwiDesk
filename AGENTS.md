@@ -48,22 +48,29 @@ file list; grep within a subsystem for specifics:
 | `Commands` | Command dispatch (the `set_*` verbs) |
 | `Config` | Decoding the Lua/profile config into settings |
 | `Profiles` | Profile JSON load/save & defaults |
+| `Appearance` | Color palettes (bundled + user, one-shot apply) |
 | `Lua` | Lua VM bridge, watchdog, registry refs |
 | `AX` | Accessibility bridge & `AXObserver` callbacks |
 | `OS` | Private SkyLight/CGS symbols via `dlsym`, AX fallback |
 | `Keys` | Carbon hotkey registration |
 | `Events` | Event listening / mouse drag taps |
+| `Tabs` | Native-tab reconciliation (`windowRekeyed` coalescing) |
 | `Animation` | Per-monitor `DisplayLink` animation |
 | `IPC` | CLI / external command IPC |
-| `Bar` | sketchybar integration |
+| `Bar` | In-app App Bar & Space Bar overlays |
 | `Borders` | Focus-window border overlays (per-window rings) |
 | `Power` | Power / display-state handling |
 | `Permissions` | AX / permission prompts |
+| `Localization` | `L()` string routing & locale catalogs |
 | `App` | Core bootstrap & wiring |
 | `Models` | Shared value types |
 | `Service` | Long-running service glue |
+| `Resources` | Bundled assets (locales, vendored app font, palettes) |
 
-GUI lives in `Sources/KiwiDesk` (`Settings/`, `Settings/Tabs/`).
+GUI lives in `Sources/KiwiDesk`: section bodies in
+`Settings/Sections/`, their widgets in
+`Settings/Components/<area>/` (Layouts, Keybindings, Bars,
+SpaceOverrides, Icons, Appearance, Lua, Common).
 
 This table is the *where*. For the *how* — end-to-end pipelines
 (event→placement, command dispatch, config resolve, animation) traced
