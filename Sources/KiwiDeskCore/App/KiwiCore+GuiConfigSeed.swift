@@ -86,6 +86,30 @@ extension KiwiCore {
         config.fallbackSpace = fallbackSpace
     }
 
+    /// Save-time freshness net for the dashboard: appends
+    /// spaces that appeared live *after* the model was seeded
+    /// (a profile load or a hotkey-created space while the
+    /// dashboard sat open). Without it, `applyProfileScopedState`
+    /// read those spaces as deleted-in-the-Spaces-tab and pruned
+    /// them — snapping focus to the first space on every save.
+    /// Staged edits stay authoritative: a space present in
+    /// `seed` but removed from the model was deleted by the
+    /// user this session and is not resurrected.
+    public func mergeLiveSpaces(
+        into config: inout GuiConfig,
+        seededWith seed: [SpaceID]
+    ) {
+        var known = Set(seed)
+        known.formUnion(config.spaces)
+        for space in state.workspaces.allSpaces
+        where !known.contains(space.id) {
+            config.spaces.append(space.id)
+            if space.mode != .bsp {
+                config.spaceModes[space.id] = space.mode
+            }
+        }
+    }
+
     /// Builds an editable model from the running configuration.
     /// Keybindings and mode icons are recovered from the source
     /// file via `recoverKeybindings` (#4); the sidecar owns them

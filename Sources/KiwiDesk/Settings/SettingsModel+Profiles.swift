@@ -95,6 +95,15 @@ extension SettingsModel {
 
     @discardableResult
     private func persist(named name: String) -> Bool {
+        // Freshness net: a space that appeared live while the
+        // dashboard sat open (profile load, hotkey-created) is
+        // absent from the staged model; without the merge the
+        // apply below would prune it — and pruning the active
+        // space snapped focus to the first space on save.
+        core.mergeLiveSpaces(
+            into: &config,
+            seededWith: seedSpaces
+        )
         core.applyProfileScopedState(from: config)
         var saved = true
         do {
