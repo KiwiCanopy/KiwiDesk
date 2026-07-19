@@ -61,6 +61,15 @@ struct AppBarPreviewStrip: View {
             ForEach(mockTabs) { tab($0) }
         }
         .padding(4)
+        // The shared plate honors `tab_background_fit`: the
+        // mock naturally hugs its tabs, so `full` stretches it
+        // to the canvas edge instead (QA 2026-07-19).
+        .frame(
+            maxWidth: plateSpansCanvas
+                && style.edge.isHorizontal ? .infinity : nil,
+            maxHeight: plateSpansCanvas
+                && !style.edge.isHorizontal ? .infinity : nil
+        )
         .background(
             // Plain draws every name on one shared box (the strip
             // itself); Boxed keeps the strip in the background
@@ -76,6 +85,11 @@ struct AppBarPreviewStrip: View {
                 )
             )
         )
+    }
+
+    private var plateSpansCanvas: Bool {
+        style.tabBackground != .boxed
+            && style.tabBackgroundFit == .full
     }
 
     /// Row on top/bottom, column on left/right.

@@ -80,6 +80,10 @@ public final class AppBarOverlay {
     /// resolves to `material` (#390); nil otherwise / below macOS
     /// 26. Stored as a plain view — the concrete type is 26-only.
     var glassPlate: NSView?
+    /// `plain`'s shared fill plate — its own view (not the
+    /// container layer) so it can hug the run
+    /// (`tab_background_fit`, QA 2026-07-19).
+    var plainPlate: NSView?
     var scrollOffset: CGFloat = 0
     /// The last render's geometry, kept for the drag
     /// handlers (AppBarOverlay+Drag).
@@ -141,11 +145,6 @@ public final class AppBarOverlay {
             style: style,
             depth: edge.isHorizontal ? strip.height : strip.width
         )
-        updateGlassPlate(
-            panel,
-            style: style,
-            strip: strip
-        )
         syncItemViewCount(items.count)
         let m = metrics(
             strip: strip,
@@ -187,6 +186,38 @@ public final class AppBarOverlay {
             horizontal: m.horizontal,
             alignment: m.alignment,
             scrolledBy: scrollOffset
+        )
+        // The shared plate (plain fill / glass) hugs or spans
+        // per `tab_background_fit`. With no arrow inset the
+        // viewport is the strip, so viewport-local frames are
+        // already strip-local; while inset > 0 the plate is
+        // full anyway.
+        let runStart: CGFloat
+        if let first = frames.first {
+            runStart = m.horizontal ? first.minX : first.minY
+        } else {
+            runStart = 0
+        }
+        let plateFrame = BarPlate.frame(
+            strip: strip,
+            runStart: runStart,
+            runTotal: m.total,
+            inset: m.inset,
+            gap: m.gap,
+            horizontal: m.horizontal,
+            fit: style.tabBackgroundFit
+        )
+        updatePlainPlate(
+            panel,
+            style: style,
+            strip: strip,
+            plateFrame: plateFrame
+        )
+        updateGlassPlate(
+            panel,
+            style: style,
+            strip: strip,
+            plateFrame: plateFrame
         )
         // Frame changes ease into place so group expansion
         // (and scroll-follow) widens out instead of popping;

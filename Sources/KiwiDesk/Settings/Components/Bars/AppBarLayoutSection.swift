@@ -110,6 +110,30 @@ struct LayoutAppBarSection: View {
         )
         OverridePickerRow(
             label: L(
+                "app_bar.tab_background_fit.label",
+                "Background size"
+            ),
+            value: $bar.tabBackgroundFit,
+            global: global.tabBackgroundFit,
+            options: AppBarOptions.tabBackgroundFit,
+            style: .segmented
+        )
+        .modifier(
+            GreyOut(
+                // No shared plate under an effective Boxed —
+                // same gate as the global editor, via the one
+                // resolve authority.
+                active: bar.resolved(with: global)
+                    .tabBackground == .boxed,
+                help: L(
+                    "app_bar.tab_background_fit.boxed_only",
+                    "Boxed draws a box per tab, not a shared "
+                        + "plate, so there is nothing to size."
+                )
+            )
+        )
+        OverridePickerRow(
+            label: L(
                 "app_bar.active_indicator.label",
                 "Active indicator"
             ),
@@ -128,9 +152,11 @@ struct LayoutAppBarSection: View {
         .modifier(
             GreyOut(
                 // Same vertical rule as the global editor,
-                // against this layout's EFFECTIVE edge.
-                active: !(bar.edge ?? global.edge)
-                    .isHorizontal,
+                // against this layout's EFFECTIVE edge — via
+                // the one resolve authority, never a hand
+                // mirror of it.
+                active: !bar.resolved(with: global)
+                    .edge.isHorizontal,
                 help: L(
                     "app_bar.content.vertical_only",
                     "Left and right bars always show icons "

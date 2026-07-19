@@ -115,6 +115,25 @@ struct GlobalAppBarSection: View {
             selection: $style.tabBackground,
             options: AppBarOptions.tabBackground.map { ($0.1, $0.0) }
         )
+        // Directly below the background it sizes (topic
+        // grouping); greyed for Boxed, which draws no shared
+        // plate (#171).
+        SegmentedPicker(
+            tabBackgroundFitLabel,
+            selection: $style.tabBackgroundFit,
+            options: AppBarOptions.tabBackgroundFit
+                .map { ($0.1, $0.0) }
+        )
+        .modifier(
+            GreyOut(
+                active: style.tabBackground == .boxed,
+                help: L(
+                    "app_bar.tab_background_fit.boxed_only",
+                    "Boxed draws a box per tab, not a shared "
+                        + "plate, so there is nothing to size."
+                )
+            )
+        )
         SegmentedPicker(
             activeIndicatorLabel,
             selection: $style.activeIndicator,
@@ -276,6 +295,12 @@ struct GlobalAppBarSection: View {
     }
     private var tabBackgroundLabel: String {
         L("app_bar.tab_background.label", "Tab background")
+    }
+    private var tabBackgroundFitLabel: String {
+        L(
+            "app_bar.tab_background_fit.label",
+            "Background size"
+        )
     }
     private var activeIndicatorLabel: String {
         L("app_bar.active_indicator.label", "Active indicator")

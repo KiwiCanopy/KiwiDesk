@@ -144,6 +144,28 @@ struct ColorPaletteTests {
         }
     }
 
+    @Test("Focused accent differs from the active accent")
+    func focusedAccentDistinct() {
+        // The two-accent rule applied to palette DATA
+        // (QA 2026-07-19): an identical pair erases the
+        // focused-window state (the original Monochrome
+        // defect, #FFFFFF == #FFFFFF). Inequality, not hue
+        // distance — cheap and catches the real failure.
+        for palette in PaletteCatalog.bundled() {
+            let focused =
+                palette.colors["space_bar.focused_item_color"]
+            let active =
+                palette.colors["space_bar.active_text_color"]
+            if let focused, let active {
+                #expect(
+                    focused.lowercased()
+                        != active.lowercased(),
+                    Comment(rawValue: palette.name)
+                )
+            }
+        }
+    }
+
     @Test("A palette round-trips through JSON")
     func roundTrip() throws {
         let palette = ColorPalette(

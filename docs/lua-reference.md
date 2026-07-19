@@ -1402,6 +1402,26 @@ app_bar.set_thickness(32)
 app_bar.set_tab_background("material")
 ```
 
+### app_bar.set_tab_background_fit
+
+**Expects:** `"full"` or `"hug"` (default `"hug"`).
+
+**Does:** sets how far the shared background plate reaches
+under `plain` and `material` (Liquid Glass): `hug` wraps the
+tab run plus one box gap of breathing room per end (the Dock's
+read), `full` spans the whole strip. Hug falls back to full
+while the tabs overflow and scroll. Inert under `boxed`, which
+draws a box per tab instead of a shared plate (the Settings
+control greys there). Per-layout override:
+`monocle.set_app_bar_tab_background_fit` /
+`scroll.set_app_bar_tab_background_fit`.
+
+**Example:**
+
+```lua
+app_bar.set_tab_background_fit("full")
+```
+
 ### app_bar.set_active_indicator
 
 **Expects:** `"ring"`, `"edge_mark"`, or `"gap"`.
@@ -1843,6 +1863,20 @@ shared strip — same vocabulary as the App Bar.
 
 ```lua
 space_bar.set_tab_background("boxed")
+```
+
+### space_bar.set_tab_background_fit
+
+**Expects:** `"full"` or `"hug"` (default `"hug"`).
+
+**Does:** how far the shared plate reaches under `plain` /
+`material` — see `app_bar.set_tab_background_fit`; same
+vocabulary, same boxed inertness and overflow fallback.
+
+**Example:**
+
+```lua
+space_bar.set_tab_background_fit("hug")
 ```
 
 ### space_bar.set_active_indicator

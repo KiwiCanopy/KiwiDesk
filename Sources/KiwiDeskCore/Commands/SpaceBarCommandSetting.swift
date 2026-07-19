@@ -17,6 +17,7 @@ enum SpaceBarCommandSetting {
     case glyphCap(Int)
     case iconSource(BarAppIconSource)
     case tabBackground(SpaceBarStyle.TabBackground)
+    case tabBackgroundFit(SpaceBarStyle.TabBackgroundFit)
     case activeIndicator(SpaceBarStyle.ActiveIndicator)
     case cornerRoundness(CGFloat)
     case showFrontApp(Bool)
@@ -93,6 +94,12 @@ enum SpaceBarCommandSetting {
                 SpaceBarStyle.TabBackground.self,
                 "boxed|plain|material"
             ).map(Self.tabBackground)
+        case "tab_background_fit":
+            return choice(
+                args,
+                SpaceBarStyle.TabBackgroundFit.self,
+                "full|hug"
+            ).map(Self.tabBackgroundFit)
         case "active_indicator":
             return choice(
                 args,
@@ -234,6 +241,8 @@ enum SpaceBarCommandSetting {
         case .iconSource(let value): style.iconSource = value
         case .tabBackground(let value):
             style.tabBackground = value
+        case .tabBackgroundFit(let value):
+            style.tabBackgroundFit = value
         case .activeIndicator(let value):
             style.activeIndicator = value
         case .cornerRoundness(let value):

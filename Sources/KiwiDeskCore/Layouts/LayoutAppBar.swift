@@ -12,6 +12,8 @@ import Foundation
 /// merges the two into the concrete style the bar renders with.
 public struct LayoutAppBar: Sendable, Equatable {
     public typealias TabBackground = AppBarStyle.TabBackground
+    public typealias TabBackgroundFit =
+        AppBarStyle.TabBackgroundFit
     public typealias ActiveIndicator = AppBarStyle.ActiveIndicator
     public typealias Content = AppBarStyle.Content
 
@@ -24,6 +26,7 @@ public struct LayoutAppBar: Sendable, Equatable {
     public var alignment: AppBarStyle.BarAlignment?
     public var thickness: CGFloat?
     public var tabBackground: TabBackground?
+    public var tabBackgroundFit: TabBackgroundFit?
     public var activeIndicator: ActiveIndicator?
     public var boxSize: CGFloat?
     public var boxGap: CGFloat?
@@ -54,6 +57,9 @@ public struct LayoutAppBar: Sendable, Equatable {
         if let alignment { out.alignment = alignment }
         if let thickness { out.thickness = thickness }
         if let tabBackground { out.tabBackground = tabBackground }
+        if let tabBackgroundFit {
+            out.tabBackgroundFit = tabBackgroundFit
+        }
         if let activeIndicator {
             out.activeIndicator = activeIndicator
         }
@@ -113,6 +119,7 @@ extension LayoutAppBar: Codable {
         case alignment
         case thickness
         case tabBackground = "tab_background"
+        case tabBackgroundFit = "tab_background_fit"
         case activeIndicator = "active_indicator"
         case boxSize = "box_size"
         case boxGap = "box_gap"
@@ -155,6 +162,10 @@ extension LayoutAppBar: Codable {
         tabBackground = try container.decodeIfPresent(
             TabBackground.self,
             forKey: .tabBackground
+        )
+        tabBackgroundFit = try container.decodeIfPresent(
+            TabBackgroundFit.self,
+            forKey: .tabBackgroundFit
         )
         activeIndicator = try container.decodeIfPresent(
             ActiveIndicator.self,
@@ -251,6 +262,10 @@ extension LayoutAppBar: Codable {
         try container.encodeIfPresent(
             tabBackground,
             forKey: .tabBackground
+        )
+        try container.encodeIfPresent(
+            tabBackgroundFit,
+            forKey: .tabBackgroundFit
         )
         try container.encodeIfPresent(
             activeIndicator,

@@ -705,6 +705,12 @@ running windows.
   rounded by corner roundness. Liquid Glass appears in the picker
   only on macOS&nbsp;26 and later; a profile that selects it still
   opens on older macOS, where it falls back to Boxed.
+- **Background size**: how far Plain's strip or the Liquid Glass
+  plate reaches — **Hug items** (default; the plate wraps the
+  tabs like the Dock wraps its icons) or **Full width**
+  (edge-to-edge). Hug falls back to full width once the tabs
+  overflow and scroll. Greyed for Boxed, which draws no shared
+  plate. The Space Bar has the same control.
 - **Position**: the screen edge the bar occupies — top, bottom,
   left, or right (default top). Absolute for every layout; the
   preview strip rotates vertical for left/right. When the Space

@@ -92,6 +92,15 @@ struct SpaceBarPreviewStrip: View {
             if style.edge.isHorizontal { item(.empty) }
         }
         .padding(4)
+        // The shared plate honors `tab_background_fit`: the
+        // mock naturally hugs its items, so `full` stretches
+        // it to the canvas edge instead (QA 2026-07-19).
+        .frame(
+            maxWidth: plateSpansCanvas
+                && style.edge.isHorizontal ? .infinity : nil,
+            maxHeight: plateSpansCanvas
+                && !style.edge.isHorizontal ? .infinity : nil
+        )
         .background(
             RoundedRectangle(
                 cornerRadius: style.tabBackground != .boxed
@@ -105,6 +114,11 @@ struct SpaceBarPreviewStrip: View {
                 )
             )
         )
+    }
+
+    private var plateSpansCanvas: Bool {
+        style.tabBackground != .boxed
+            && style.tabBackgroundFit == .full
     }
 
     @ViewBuilder private func stack<C: View>(

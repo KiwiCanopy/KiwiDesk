@@ -18,6 +18,7 @@ enum AppBarFixtures {
         style.alignment = .end
         style.thickness = 44
         style.tabBackground = .plain
+        style.tabBackgroundFit = .full
         style.activeIndicator = .gap
         style.boxSize = 120
         style.boxGap = 3
@@ -46,6 +47,9 @@ enum AppBarFixtures {
         bar.alignment = .start
         bar.thickness = 50
         bar.tabBackground = .boxed
+        // The global fixture uses .full, so the override must
+        // differ for the resolve parity to see the write.
+        bar.tabBackgroundFit = .hug
         bar.activeIndicator = .ring
         bar.boxSize = 88
         bar.boxGap = 9

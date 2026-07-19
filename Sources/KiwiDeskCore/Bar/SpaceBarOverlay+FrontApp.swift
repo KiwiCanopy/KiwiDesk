@@ -31,9 +31,7 @@ extension SpaceBarOverlay {
             depth: depth,
             cell: cell,
             horizontal: horizontal,
-            color: BarDivider.color(
-                textColor: style.textColor
-            )
+            style: style
         )
         offset += layoutFrontGlyph(
             app,
@@ -117,15 +115,19 @@ extension SpaceBarOverlay {
     }
 
     /// The separator rule; returns the axis length consumed.
+    /// Derives its own treatment from the style so no caller
+    /// can hand it an untreated color.
     private func layoutDivider(
         at offset: CGFloat,
         depth: CGFloat,
         cell: CGFloat,
         horizontal: Bool,
-        color: NSColor
+        style: SpaceBarStyle
     ) -> CGFloat {
         frontDivider.isHidden = false
-        frontDivider.layer?.backgroundColor = color.cgColor
+        frontDivider.layer?.backgroundColor =
+            BarDivider.color(textColor: style.textColor)
+            .cgColor
         frontDivider.frame = BarDivider.frame(
             at: offset,
             depth: depth,

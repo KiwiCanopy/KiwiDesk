@@ -27,6 +27,7 @@ enum AppBarCommandSetting {
     case alignment(AppBarStyle.BarAlignment)
     case thickness(CGFloat)
     case tabBackground(AppBarStyle.TabBackground)
+    case tabBackgroundFit(AppBarStyle.TabBackgroundFit)
     case activeIndicator(AppBarStyle.ActiveIndicator)
     case boxSize(CGFloat)
     case boxGap(CGFloat)
@@ -89,6 +90,12 @@ enum AppBarCommandSetting {
                 AppBarStyle.TabBackground.self,
                 "boxed|plain|material"
             ).map(Self.tabBackground)
+        case "tab_background_fit":
+            return choice(
+                args,
+                AppBarStyle.TabBackgroundFit.self,
+                "full|hug"
+            ).map(Self.tabBackgroundFit)
         case "active_indicator":
             return choice(
                 args,
@@ -190,6 +197,8 @@ enum AppBarCommandSetting {
         case .thickness(let value): style.thickness = value
         case .tabBackground(let value):
             style.tabBackground = value
+        case .tabBackgroundFit(let value):
+            style.tabBackgroundFit = value
         case .activeIndicator(let value):
             style.activeIndicator = value
         case .boxSize(let value): style.boxSize = value
@@ -228,6 +237,8 @@ enum AppBarCommandSetting {
         case .alignment(let value): bar.alignment = value
         case .thickness(let value): bar.thickness = value
         case .tabBackground(let value): bar.tabBackground = value
+        case .tabBackgroundFit(let value):
+            bar.tabBackgroundFit = value
         case .activeIndicator(let value):
             bar.activeIndicator = value
         case .boxSize(let value): bar.boxSize = value

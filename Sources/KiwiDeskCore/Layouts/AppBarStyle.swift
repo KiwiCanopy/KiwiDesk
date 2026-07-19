@@ -53,6 +53,22 @@ public struct AppBarStyle: Sendable, Equatable {
         }
     }
 
+    /// How big the shared background plate is (QA 2026-07-19).
+    /// Orthogonal to `TabBackground` — "what the plate is made
+    /// of" vs "how far it reaches": `plain` and `material` both
+    /// draw one shared plate and both honor this; `boxed` draws
+    /// no shared plate, so the setting is inert there (the GUI
+    /// greys it).
+    public enum TabBackgroundFit: String, Sendable, Codable {
+        /// The plate spans the whole strip edge-to-edge.
+        case full
+        /// The plate wraps the content run plus one box gap of
+        /// breathing room per end — the Dock's read; falls back
+        /// to `full` once the run overflows and scrolls
+        /// (content fills the strip there, nothing to hug).
+        case hug
+    }
+
     /// How the active tab is marked. Orthogonal to
     /// `tabBackground`: works on any background.
     public enum ActiveIndicator: String, Sendable, Codable {
@@ -111,6 +127,9 @@ public struct AppBarStyle: Sendable, Equatable {
     /// Depth of the reserved strip (pt).
     public var thickness: CGFloat = 32
     public var tabBackground: TabBackground = .boxed
+    /// Hug by default: a tight plate reads calmer than an
+    /// edge-to-edge strip (ui-designer, QA 2026-07-19).
+    public var tabBackgroundFit: TabBackgroundFit = .hug
     public var activeIndicator: ActiveIndicator = .ring
     /// Item length along the bar (pt) — every item is the
     /// same size. 0 (default) = a standard length per
@@ -194,6 +213,7 @@ extension AppBarStyle: Codable {
         case alignment
         case thickness
         case tabBackground = "tab_background"
+        case tabBackgroundFit = "tab_background_fit"
         case activeIndicator = "active_indicator"
         case boxSize = "box_size"
         case boxGap = "box_gap"
@@ -241,6 +261,11 @@ extension AppBarStyle: Codable {
                 TabBackground.self,
                 forKey: .tabBackground
             ) ?? defaults.tabBackground
+        tabBackgroundFit =
+            try container.decodeIfPresent(
+                TabBackgroundFit.self,
+                forKey: .tabBackgroundFit
+            ) ?? defaults.tabBackgroundFit
         activeIndicator =
             try container.decodeIfPresent(
                 ActiveIndicator.self,

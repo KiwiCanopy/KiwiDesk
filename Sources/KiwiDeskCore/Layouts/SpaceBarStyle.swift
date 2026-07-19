@@ -18,6 +18,8 @@ import Foundation
 /// `space_focused_window`).
 public struct SpaceBarStyle: Sendable, Equatable {
     public typealias TabBackground = AppBarStyle.TabBackground
+    public typealias TabBackgroundFit =
+        AppBarStyle.TabBackgroundFit
     public typealias ActiveIndicator = AppBarStyle.ActiveIndicator
     public typealias Alignment = AppBarStyle.BarAlignment
 
@@ -58,6 +60,8 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// App Font `Default` glyph either way.
     public var iconSource: BarAppIconSource = .appImage
     public var tabBackground: TabBackground = .boxed
+    /// Hug by default, like the App Bar (QA 2026-07-19).
+    public var tabBackgroundFit: TabBackgroundFit = .hug
     public var activeIndicator: ActiveIndicator = .ring
     /// Corner rounding as a percentage (0–100) of thickness/2,
     /// like the App Bar.
@@ -192,6 +196,7 @@ extension SpaceBarStyle: Codable {
         case glyphCap = "glyph_cap"
         case iconSource = "icon_source"
         case tabBackground = "tab_background"
+        case tabBackgroundFit = "tab_background_fit"
         case activeIndicator = "active_indicator"
         case cornerRoundness = "corner_roundness"
         case showFrontApp = "show_front_app"
@@ -267,6 +272,11 @@ extension SpaceBarStyle: Codable {
                 TabBackground.self,
                 forKey: .tabBackground
             ) ?? defaults.tabBackground
+        tabBackgroundFit =
+            try container.decodeIfPresent(
+                TabBackgroundFit.self,
+                forKey: .tabBackgroundFit
+            ) ?? defaults.tabBackgroundFit
         activeIndicator =
             try container.decodeIfPresent(
                 ActiveIndicator.self,

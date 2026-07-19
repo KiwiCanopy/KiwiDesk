@@ -9,10 +9,11 @@ extension AppBarOverlay {
         override var isFlipped: Bool { true }
     }
 
-    /// `plain` draws all names on one shared box (the strip
-    /// itself, painted in `boxColor` and rounded by the
-    /// roundness); `boxed` boxes each item and keeps the strip in
-    /// the (default transparent) background color.
+    /// `plain` and `material` draw their shared plate as its
+    /// own view (`updatePlainPlate` / `updateGlassPlate`) so it
+    /// can hug the run (`tab_background_fit`); the container
+    /// itself only ever paints `boxed`'s (default transparent)
+    /// background.
     func styleContainer(
         _ panel: NSPanel,
         style: AppBarStyle,
@@ -21,25 +22,48 @@ extension AppBarOverlay {
         guard let layer = panel.contentView?.layer else {
             return
         }
-        let rendered = style.tabBackground.rendered
         layer.masksToBounds = true
-        // `boxed` keeps square corners; `plain` and `material`
-        // round the shared plate.
-        layer.cornerRadius =
-            rendered == .boxed
-            ? 0
-            : style.resolvedCornerRadius(forThickness: depth)
-        // `plain` paints the strip in the box color; `material`
-        // stays clear (the glass plate is the background);
-        // `boxed` keeps the (default transparent) background.
-        let background: String
-        switch rendered {
-        case .plain: background = style.boxColor
-        case .material: background = "#00000000"
-        case .boxed: background = style.backgroundColor
-        }
+        layer.cornerRadius = 0
+        let background =
+            style.tabBackground.rendered == .boxed
+            ? style.backgroundColor : "#00000000"
         layer.backgroundColor =
             NSColor(kiwiHex: background).cgColor
+    }
+
+    /// Shows / sizes `plain`'s shared fill plate at
+    /// `plateFrame`, else hides it. Rounds against the real
+    /// (clamped) cross depth, like the glass plate.
+    func updatePlainPlate(
+        _ panel: NSPanel,
+        style: AppBarStyle,
+        strip: CGRect,
+        plateFrame: CGRect
+    ) {
+        guard style.tabBackground.rendered == .plain,
+            let content = panel.contentView
+        else {
+            plainPlate?.isHidden = true
+            return
+        }
+        let plate = plainPlate ?? NSView()
+        plainPlate = plate
+        plate.wantsLayer = true
+        if plate.superview !== content {
+            content.addSubview(
+                plate,
+                positioned: .below,
+                relativeTo: nil
+            )
+        }
+        plate.isHidden = false
+        plate.frame = plateFrame
+        let depth =
+            style.edge.isHorizontal ? strip.height : strip.width
+        plate.layer?.cornerRadius =
+            style.resolvedCornerRadius(forThickness: depth)
+        plate.layer?.backgroundColor =
+            NSColor(kiwiHex: style.boxColor).cgColor
     }
 
     /// Shows / sizes the Liquid Glass plate under the items when
@@ -47,7 +71,8 @@ extension AppBarOverlay {
     func updateGlassPlate(
         _ panel: NSPanel,
         style: AppBarStyle,
-        strip: CGRect
+        strip: CGRect,
+        plateFrame: CGRect
     ) {
         let depth =
             style.edge.isHorizontal ? strip.height : strip.width
@@ -71,12 +96,7 @@ extension AppBarOverlay {
         plate.isHidden = false
         GlassPlate.update(
             plate,
-            frame: CGRect(
-                x: 0,
-                y: 0,
-                width: strip.width,
-                height: strip.height
-            ),
+            frame: plateFrame,
             cornerRadius: style.resolvedCornerRadius(
                 forThickness: depth
             ),

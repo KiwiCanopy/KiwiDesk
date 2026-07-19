@@ -1340,6 +1340,27 @@ fonts, icon source with colors, or a tab restructure) waits on a
 real signal that people want to share the *whole look* as one
 artifact — not merely "more than seven palettes," which
 save/export/import already answers.
+Every bundled palette keeps `space_bar.focused_item_color` a
+**different hue** from its active accent (the two-accent rule,
+QA 2026-07-19) — Monochrome included: color is the only channel
+the focused-window state has, so even a mono palette carries one
+deliberate accent (`#FFD60A`) rather than erasing the state.
+`ColorPaletteTests` pins the inequality for every bundled
+palette.
+
+**Plate reach is its own property, not a fourth background.**
+(QA 2026-07-19.) `tab_background_fit` (`full` | `hug`, default
+hug) answers "how far does the shared plate reach" — a different
+question from `tab_background`'s "what is it made of", so it is
+orthogonal, and `plain` gets the choice as well as Liquid Glass
+(folding hug into `material` alone would have locked `plain`
+full-width forever). Hug wraps the run plus one box gap per end
+(the Dock's read — the calmer default for "approachable by
+default") and falls back to full while the run overflows and
+scrolls, where content fills the strip and there is nothing to
+hug. Inert under `boxed` (no shared plate): the GUI greys the
+control, per #171. One geometry authority: `BarPlate.frame`,
+shared by both bars and pinned by `BarPlateTests`.
 
 **Liquid Glass is a third `tab_background`, macOS-26-gated.**
 (#390.) The glass treatment is a third `TabBackground` case

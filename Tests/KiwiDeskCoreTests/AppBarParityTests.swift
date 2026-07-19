@@ -85,7 +85,8 @@ struct AppBarCommandParityTests {
     /// or `AppBarStyle` drift apart.
     private static let everySetting: [AppBarCommandSetting] = [
         .edge(.bottom), .alignment(.end), .thickness(50),
-        .tabBackground(.plain), .activeIndicator(.gap),
+        .tabBackground(.plain), .tabBackgroundFit(.full),
+        .activeIndicator(.gap),
         .boxSize(88), .boxGap(9),
         .content(.name), .iconSource(.appFont),
         .groupAdjacentWindows(false),

@@ -39,6 +39,10 @@ public final class SpaceBarOverlay {
     /// resolves to `material` (#390); nil otherwise / below macOS
     /// 26. Stored as a plain view — the concrete type is 26-only.
     var glassPlate: NSView?
+    /// `plain`'s shared fill plate — its own view (not the
+    /// container layer) so it can hug the run
+    /// (`tab_background_fit`, QA 2026-07-19).
+    var plainPlate: NSView?
     /// Whole-bar scroll offset (#385); 0 while the run fits.
     var scrollOffset: CGFloat = 0
     /// Cached scroll geometry, kept for the arrow-zone hit test
@@ -127,7 +131,6 @@ public final class SpaceBarOverlay {
         let panel = self.panel ?? makePanel()
         self.panel = panel
         styleContainer(panel, style: style, strip: strip)
-        updateGlassPlate(panel, style: style, strip: strip)
         syncItemViewCount(items.count)
         let horizontal = style.edge.isHorizontal
         let depth = horizontal ? strip.height : strip.width
@@ -186,6 +189,38 @@ public final class SpaceBarOverlay {
             alignment: style.alignment,
             pad: SpaceBarItemView.pad,
             scrollOffset: scrollOffset
+        )
+        // The shared plate (plain fill / glass) hugs or spans
+        // per `tab_background_fit`. With no arrow inset the
+        // viewport is the strip, so viewport-local run
+        // coordinates are already strip-local; while inset > 0
+        // the plate is full anyway.
+        let runStart: CGFloat
+        if let first = metrics.itemFrames.first {
+            runStart = horizontal ? first.minX : first.minY
+        } else {
+            runStart = metrics.frontStart
+        }
+        let plateFrame = BarPlate.frame(
+            strip: strip,
+            runStart: runStart,
+            runTotal: total,
+            inset: inset,
+            gap: gap,
+            horizontal: horizontal,
+            fit: style.tabBackgroundFit
+        )
+        updatePlainPlate(
+            panel,
+            style: style,
+            strip: strip,
+            plateFrame: plateFrame
+        )
+        updateGlassPlate(
+            panel,
+            style: style,
+            strip: strip,
+            plateFrame: plateFrame
         )
         recordHitFrames(
             items: items,
