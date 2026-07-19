@@ -215,6 +215,7 @@ struct SettingsFooter: View {
                     "Save as New Profile…"
                 )
             ) {
+                prefillNewProfileName()
                 namingNewProfile = true
             }
             .keyboardShortcut("s")
@@ -223,5 +224,26 @@ struct SettingsFooter: View {
             .disabled(model.profileSaveBlockedReason != nil)
             .help(model.profileSaveBlockedReason ?? "")
         }
+    }
+
+    /// Pre-fills the first-save naming sheet (ui-designer
+    /// 2026-07-19) so confirming is one Enter instead of
+    /// composing a name cold. Uniqued against existing
+    /// profiles for the edge where profiles exist but none is
+    /// active; a name the user already typed is never
+    /// overwritten.
+    private func prefillNewProfileName() {
+        guard newProfileName.trimmed.isEmpty else { return }
+        let base = L(
+            "footer.default_profile_name",
+            "My Setup"
+        )
+        var name = base
+        var suffix = 2
+        while model.profiles.contains(name) {
+            name = "\(base) \(suffix)"
+            suffix += 1
+        }
+        newProfileName = name
     }
 }

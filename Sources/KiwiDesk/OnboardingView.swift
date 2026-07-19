@@ -275,10 +275,11 @@ struct OnboardingView: View {
         L(
             "onboarding.ready.body",
             """
-            KiwiDesk is now arranging your windows. Open Settings \
-            to choose a layout, set up your spaces, and make it \
-            feel like yours — you can always get back here from \
-            the menu bar.
+            KiwiDesk is already arranging your windows with \
+            sensible defaults. Open Settings and apply a \
+            preset for your setup — then fine-tune anything \
+            from there. You can always get back here from the \
+            menu bar.
             """
         )
     }

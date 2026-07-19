@@ -9,6 +9,12 @@ struct SettingsSidebar: View {
     /// Hides the global-only destinations while a stored
     /// profile is being edited (#18).
     let editingStoredProfile: Bool
+    /// Accent dot on the Profiles tile while no profile exists
+    /// yet (ui-designer 2026-07-19) — the Software Update
+    /// "something to look at here" idiom, state-driven: gone
+    /// the instant a profile exists, back if the last one is
+    /// deleted. Never a gate.
+    let spotlightProfiles: Bool
     /// Swaps the identity mark to the golden variant on dark.
     @Environment(\.colorScheme) private var colorScheme
     /// Solidifies the card wash while the window is inactive
@@ -210,7 +216,11 @@ struct SettingsSidebar: View {
             Text(destination.title)
                 .lineLimit(1)
         } icon: {
-            SidebarTile(destination: destination)
+            SidebarTile(
+                destination: destination,
+                badged: spotlightProfiles
+                    && destination == .profiles
+            )
         }
         .tag(destination)
     }
@@ -220,6 +230,9 @@ struct SettingsSidebar: View {
 /// rounded-rect color (§6.1).
 struct SidebarTile: View {
     let destination: SettingsDestination
+    /// Accent dot on the tile's top-trailing corner — the
+    /// native "something to look at in this section" cue.
+    var badged = false
 
     var body: some View {
         RoundedRectangle(cornerRadius: 6)
@@ -229,6 +242,14 @@ struct SidebarTile: View {
                 Image(systemName: destination.symbol)
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(.white)
+            }
+            .overlay(alignment: .topTrailing) {
+                if badged {
+                    Circle()
+                        .fill(Color.accentColor)
+                        .frame(width: 7, height: 7)
+                        .offset(x: 2, y: -2)
+                }
             }
             // The soft lift System Settings gives its sidebar
             // icons — kept inside `inactiveDimmed` so the

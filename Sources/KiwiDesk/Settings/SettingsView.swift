@@ -74,7 +74,9 @@ struct SettingsView: View {
         HStack(spacing: 0) {
             SettingsSidebar(
                 selection: $selection,
-                editingStoredProfile: model.editingStoredProfile
+                editingStoredProfile: model.editingStoredProfile,
+                spotlightProfiles:
+                    model.profileSummaries.isEmpty
             )
             chrome { detailPane }
                 .frame(maxWidth: .infinity)
