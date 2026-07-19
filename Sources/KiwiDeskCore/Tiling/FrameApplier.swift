@@ -168,6 +168,14 @@ final class FrameApplier {
     // MARK: - Internals
 
     private func queue(for pid: pid_t) -> DispatchQueue {
+        // Frame-sets for our own windows (the floating Settings
+        // window) must run on the main queue: an in-process AX
+        // call never crosses to the AX server — HIServices runs
+        // the AppKit window move synchronously on the calling
+        // thread, and AppKit traps off the main thread.
+        if pid == getpid() {
+            return DispatchQueue.main
+        }
         if let existing = queues[pid] {
             return existing
         }
