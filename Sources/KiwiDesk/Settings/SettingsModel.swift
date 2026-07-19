@@ -94,37 +94,12 @@ final class SettingsModel: ObservableObject {
     /// (overlapping monitor sets, save failures).
     @Published var profileWarning: String?
 
-    /// Live-vs-saved layout drift for the active space (#123):
-    /// a transient snapshot from direct comparison, refreshed by
-    /// `refreshLayoutDrift()` — never latched, never routed
-    /// through `isDirty`/`profileDirty`. nil = no drift.
-    struct LayoutDrift: Equatable {
-        let live: LayoutMode
-        let saved: LayoutMode
-    }
     /// Snapshotted (not computed per render) so the profile
     /// JSON isn't re-read on every SwiftUI body pass and views
-    /// re-render when the drift actually changes.
-    @Published private(set) var layoutDrift: LayoutDrift?
-
-    var hasLayoutDrift: Bool { layoutDrift != nil }
-
-    /// Recomputes the drift snapshot without reseeding `config`
-    /// — safe mid-edit; the quick menu calls it after a
-    /// session-only layout switch or save. External `set_mode`
-    /// (hotkey/Lua/CLI) refreshes on the next window `show()`.
-    func refreshLayoutDrift() {
-        layoutDrift = computeLayoutDrift()
-    }
-
-    private func computeLayoutDrift() -> LayoutDrift? {
-        guard target == .live,
-            let space = core.activeSpace,
-            let saved = core.savedModeForActiveSpace(),
-            space.mode != saved
-        else { return nil }
-        return LayoutDrift(live: space.mode, saved: saved)
-    }
+    /// re-render when the drift actually changes. Type and
+    /// refresh logic live in SettingsModel+LayoutDrift.swift;
+    /// write only through `refreshLayoutDrift()` there.
+    @Published var layoutDrift: LayoutDrift?
 
     /// Number of native macOS user Spaces (Mission Control
     /// desktops) currently detected — 0 without SkyLight. Drives
