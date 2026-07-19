@@ -100,6 +100,7 @@
   "bars.same_edge": "Both bars share the %1$@ edge — Space Bar sits at the screen edge, App Bar sits next to the windows.",
   "bars.switch": "Bar",
   "bars.switch.app_bar": "App Bar",
+  "bars.switch.caption": "KiwiDesk draws two bars — choose which one to configure.",
   "bars.switch.space_bar": "Space Bar",
   "behavior.animations.duration": "Duration",
   "behavior.animations.relayout": "Animate layout reflows",

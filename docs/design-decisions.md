@@ -752,6 +752,17 @@ directly beneath — and the full preset list closes the tab.
 No disclosure folding on any section — collapsed content
 was tried and rejected as visual clutter; a plain order
 swap carries the same priority signal.
+The zero-profile state additionally gets a **soft
+spotlight, never a gate** (QA 2026-07-19): a "Start here"
+lead-in with accent-prominent Apply on the appliable
+presets, an accent dot on the Profiles sidebar tile, and a
+pre-filled first-save name. A hard first-run gate was
+considered and rejected — System Settings never gates a
+pane, the zero-profile state recurs whenever the last
+profile is deleted, and KiwiDesk tiles fine with no
+profile, so wandering must stay legal. All of it is
+state-driven on "no saved profiles" (no persisted
+seen-flag) and vanishes with the first profile.
 
 **Native macOS Spaces read as "Desktop n", never "Space n".**
 "Space n" is how KiwiDesk's own virtual spaces read, so

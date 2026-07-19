@@ -588,6 +588,10 @@ so you judge the whole look, not isolated chips. Applying a palette
 is a **one-time paint**, not a live link: it overwrites the current
 colors (you can still tweak any individual color afterward), and the
 change is staged until you Save the profile like any other edit.
+Below the shelf, a compact pair of bar previews mirrors the staged
+App Bar and Space Bar — the bars take most of a palette's paint but
+are edited on their own tab, so the mirror shows a click landing
+without leaving Appearance.
 
 - **Bundled** palettes (Kiwi, Clean Light, Slate, True Dark,
   Sunset, Ultraviolet, Monochrome) are built in and marked
@@ -680,7 +684,9 @@ stacking level; the window stays focused and keeps its full ring.
 ## Bars
 
 The **Bars** section hosts both bar editors behind a fixed
-**App Bar | Space Bar** switch at the top — each editor leads
+**App Bar | Space Bar** switch at the top — two picker cards,
+each showing a small schematic of the bar it opens (a row of
+app icons vs numbered space tabs) — and each editor leads
 with its own preview and owns its settings.
 
 ### App Bar
@@ -971,8 +977,19 @@ context; there is no separate fourth button:
   ("this profile is for 2 screens"). When you are on a transient
   layout or a built-in Standard, the same slot instead reads
   **Save as New Profile…** and creates a real profile from
-  scratch. The banner's profile picker names the edit target
+  scratch — the naming sheet arrives pre-filled with a unique
+  default name, so confirming is one press of Return. The
+  banner's profile picker names the edit target
   authoritatively.
+
+Until your first profile exists, Settings points the way
+without gating anything: the Profiles sidebar tile carries a
+small accent dot, and the Presets list leads with a "Start
+here" line plus an accent-colored **Apply** on the presets
+matching your connected screen count. Applying one (or saving
+from any tab) creates the first profile and the emphasis
+disappears — it returns only if you ever delete your last
+profile.
 
 While window management is **paused** because Accessibility access
 is off, KiwiDesk has detected no displays — so any save that would

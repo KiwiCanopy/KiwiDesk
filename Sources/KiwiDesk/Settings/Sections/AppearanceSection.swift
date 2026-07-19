@@ -12,6 +12,11 @@ struct AppearanceSection: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 PaletteShelf(model: model)
+                // The bars take most of a palette's paint but
+                // preview in their own tab — mirror them here
+                // so a shelf click visibly changes something
+                // (ui-designer 2026-07-19).
+                PaletteBarMirror(model: model)
                 GapsEditor(model: model)
                 DragVisualsEditor(model: model)
                 FocusBorderEditor(model: model)

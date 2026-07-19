@@ -20,25 +20,21 @@ struct BarsSection: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                SegmentedPicker(
-                    selection: $editor,
-                    options: [
-                        (
-                            L("bars.switch.app_bar", "App Bar"),
-                            Editor.appBar
-                        ),
-                        (
-                            L(
-                                "bars.switch.space_bar",
-                                "Space Bar"
-                            ),
-                            Editor.spaceBar
-                        ),
-                    ]
-                )
-                .accessibilityLabel(
-                    L("bars.switch", "Bar")
-                )
+                // Recognition chips, not a text segment (QA
+                // 2026-07-19): the switch itself must show
+                // that two different bars exist.
+                VStack(alignment: .leading, spacing: 6) {
+                    BarEditorPicker(selection: $editor)
+                    Text(
+                        L(
+                            "bars.switch.caption",
+                            "KiwiDesk draws two bars — choose "
+                                + "which one to configure."
+                        )
+                    )
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                }
                 switch editor {
                 case .appBar: appBarEditor
                 case .spaceBar:
