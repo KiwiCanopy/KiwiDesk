@@ -289,6 +289,7 @@ struct FloatRuleTests {
         for bundleID in [
             "com.apple.TextInputMenuAgent",
             "com.apple.TextInputSwitcher",
+            "com.apple.controlcenter",
         ] {
             #expect(
                 FloatDetection.isBuiltInIgnoredApp(
