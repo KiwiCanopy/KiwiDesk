@@ -25,15 +25,9 @@ struct BarsSection: View {
                 // that two different bars exist.
                 VStack(alignment: .leading, spacing: 6) {
                     BarEditorPicker(selection: $editor)
-                    Text(
-                        L(
-                            "bars.switch.caption",
-                            "KiwiDesk draws two bars — choose "
-                                + "which one to configure."
-                        )
-                    )
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    Text(switchCaption)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
                 switch editor {
                 case .appBar: appBarEditor
@@ -43,6 +37,16 @@ struct BarsSection: View {
             }
             .padding(16)
         }
+    }
+
+    /// Hoisted out of `body` (§5 shallow-body guardrail:
+    /// concatenated literals inside one body expression).
+    private var switchCaption: String {
+        L(
+            "bars.switch.caption",
+            "KiwiDesk draws two bars — choose "
+                + "which one to configure."
+        )
     }
 
     /// The pre-#293 App Bar page, unchanged: the global look

@@ -49,12 +49,13 @@ extension AppBarPreviewStrip {
     // MARK: - Caption & accessibility
 
     var caption: String {
-        L(
-            "app_bar.preview.caption",
-            "Position: %1$@ · %2$@",
-            edgeName,
-            styleName
-        )
+        captionOverride
+            ?? L(
+                "app_bar.preview.caption",
+                "Position: %1$@ · %2$@",
+                edgeName,
+                styleName
+            )
     }
 
     var axLabel: String {

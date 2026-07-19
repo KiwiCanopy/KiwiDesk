@@ -21,6 +21,11 @@ struct SpaceBarPreviewStrip: View {
     let style: SpaceBarStyle
     let appBar: AppBarStyle
     let sameEdge: Bool
+    /// Replaces the "Position: … · …" caption when the strip
+    /// renders outside its own editor — the palette mirror
+    /// names the bar instead, since there colors are the
+    /// topic, not edge/style (review 2026-07-19).
+    var captionOverride: String?
 
     var body: some View {
         VStack(spacing: 4) {
@@ -198,12 +203,13 @@ struct SpaceBarPreviewStrip: View {
     // MARK: - Caption & AX
 
     private var caption: String {
-        L(
-            "space_bar.preview.caption",
-            "Position: %1$@ · %2$@",
-            edgeName,
-            styleName
-        )
+        captionOverride
+            ?? L(
+                "space_bar.preview.caption",
+                "Position: %1$@ · %2$@",
+                edgeName,
+                styleName
+            )
     }
 
     private var axLabel: String {

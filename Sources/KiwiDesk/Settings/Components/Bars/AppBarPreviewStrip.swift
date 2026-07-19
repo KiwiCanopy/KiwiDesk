@@ -25,6 +25,11 @@ import SwiftUI
 /// it below a count of 2), and hover states are omitted.
 struct AppBarPreviewStrip: View {
     let style: AppBarStyle
+    /// Replaces the "Position: … · …" caption when the strip
+    /// renders outside its own editor — the palette mirror
+    /// names the bar instead, since there colors are the
+    /// topic, not edge/style (review 2026-07-19).
+    var captionOverride: String?
 
     var body: some View {
         VStack(spacing: 4) {

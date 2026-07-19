@@ -21,16 +21,9 @@ struct PresetsSection: View {
             // the lead-in labels the bootstrap the section
             // already is; state-driven, gone once any profile
             // exists.
-            Text(
-                L(
-                    "presets.start_here",
-                    "Start here — apply a preset for your "
-                        + "setup, then adjust anything from "
-                        + "any tab."
-                )
-            )
-            .font(.callout)
-            .fontWeight(.medium)
+            Text(startHereText)
+                .font(.callout)
+                .fontWeight(.medium)
         }
         Text(rowsCaption)
             .font(.caption)
@@ -44,6 +37,17 @@ struct PresetsSection: View {
                 presetRow(layout)
             }
         }
+    }
+
+    /// Hoisted out of the builder (§5 shallow-body guardrail:
+    /// concatenated literals inside one body expression).
+    private var startHereText: String {
+        L(
+            "presets.start_here",
+            "Start here — apply a preset for your "
+                + "setup, then adjust anything from "
+                + "any tab."
+        )
     }
 
     private var rowsCaption: String {
@@ -105,10 +109,12 @@ struct PresetsSection: View {
         .padding(.vertical, 2)
     }
 
-    /// Zero-profile spotlight (ui-designer 2026-07-19): the
-    /// appliable presets' Apply goes accent-prominent — the
-    /// footer's one-accent-action vocabulary — until the first
-    /// profile exists; then everything reverts to `.bordered`.
+    /// Zero-profile spotlight (ui-designer 2026-07-19): ONE
+    /// Apply goes accent-prominent until the first profile
+    /// exists — the appliable count's Standard preset, so the
+    /// spotlight stays a single primary (review 2026-07-19:
+    /// prominence on every appliable preset put three accent
+    /// buttons in one field, four with the footer's).
     @ViewBuilder private func applyButton(
         _ layout: StandardLayout
     ) -> some View {
@@ -128,7 +134,9 @@ struct PresetsSection: View {
                     layout.screenCount
                 )
         )
-        if appliable, model.profileSummaries.isEmpty {
+        if appliable, layout.isStandard,
+            model.profileSummaries.isEmpty
+        {
             button.buttonStyle(.borderedProminent)
         } else {
             button.buttonStyle(.bordered)

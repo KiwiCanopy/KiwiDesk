@@ -47,6 +47,7 @@ struct BarEditorPicker: View {
                 Text(title)
                     .font(.callout)
                     .fontWeight(selected ? .semibold : .regular)
+                    .lineLimit(1)
             }
             .frame(width: 132)
             .padding(.vertical, 10)

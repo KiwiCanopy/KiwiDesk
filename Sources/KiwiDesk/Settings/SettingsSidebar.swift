@@ -145,9 +145,19 @@ struct SettingsSidebar: View {
                 }
             }
         } icon: {
-            SidebarTile(destination: result.destination)
+            // Same badge rule as the grouped rows: the cue is
+            // state-driven, so which list renders the tile
+            // must not change it (review 2026-07-19).
+            SidebarTile(
+                destination: result.destination,
+                badged: spotlightProfiles
+                    && result.destination == .profiles
+            )
         }
         .tag(result.destination)
+        .accessibilityValue(
+            axBadgeValue(for: result.destination)
+        )
     }
 
     /// App identity centered at the top of the sidebar (#68):
@@ -223,6 +233,23 @@ struct SettingsSidebar: View {
             )
         }
         .tag(destination)
+        .accessibilityValue(
+            axBadgeValue(for: destination)
+        )
+    }
+
+    /// The spotlight dot's VoiceOver twin (review 2026-07-19)
+    /// — the visual badge alone would leave AX users without
+    /// the sidebar-level cue. Empty when unbadged.
+    func axBadgeValue(
+        for destination: SettingsDestination
+    ) -> String {
+        guard spotlightProfiles, destination == .profiles
+        else { return "" }
+        return L(
+            "sidebar.profiles.badge_ax",
+            "start here"
+        )
     }
 }
 

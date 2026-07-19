@@ -213,11 +213,19 @@ public final class ProfileManager {
 
     /// `base`, or `base_1`, `base_2`, … up to the next free
     /// name — repeated preset Applies accumulate copies (#53).
+    /// Case-insensitive, matching the rename path: profile
+    /// files live on case-insensitive APFS, so "My Setup"
+    /// passing a case-sensitive check would silently overwrite
+    /// "my setup.json" (QA round 2 review).
     public func freeName(base: String) -> String {
-        let taken = Set(list())
-        guard taken.contains(base) else { return base }
+        let taken = Set(list().map { $0.lowercased() })
+        guard taken.contains(base.lowercased()) else {
+            return base
+        }
         var suffix = 1
-        while taken.contains("\(base)_\(suffix)") {
+        while taken.contains(
+            "\(base)_\(suffix)".lowercased()
+        ) {
             suffix += 1
         }
         return "\(base)_\(suffix)"

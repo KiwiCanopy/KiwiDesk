@@ -15,14 +15,35 @@ struct PaletteBarMirror: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
+            // Captions name the bars — here colors are the
+            // topic, not edge/style, and two unnamed mocks
+            // side by side would read as one.
             AppBarPreviewStrip(
-                style: model.config.settings.appBarStyle
+                style: model.config.settings.appBarStyle,
+                captionOverride: L(
+                    "bars.switch.app_bar",
+                    "App Bar"
+                )
             )
             SpaceBarPreviewStrip(
                 style: model.config.settings.spaceBarStyle,
                 appBar: model.config.settings.appBarStyle,
                 sameEdge: model.config.settings
-                    .spaceBarSharesEdgeWithAppBar
+                    .spaceBarSharesEdgeWithAppBar,
+                captionOverride: L(
+                    "bars.switch.space_bar",
+                    "Space Bar"
+                )
+            )
+            // Grey-don't-hide (#171): a disabled Space Bar
+            // still previews its colors, dimmed, so the
+            // mirror never implies an on-screen change that
+            // isn't there. The App Bar has no global enabled
+            // bit (enablement is per-layout), so it stays
+            // full strength.
+            .opacity(
+                model.config.settings.spaceBarStyle.enabled
+                    ? 1 : 0.45
             )
         }
     }

@@ -183,6 +183,20 @@ struct ProfileManagerTests {
         )
     }
 
+    @Test("freeName collides case-insensitively (APFS)")
+    func freeNameCaseInsensitive() throws {
+        let manager = makeManager()
+        try manager.save(
+            makeProfile(name: "my setup", monitors: ["A:1x1"])
+        )
+        // "My Setup.json" would overwrite "my setup.json" on
+        // a case-insensitive filesystem — the availability
+        // rule must treat them as the same name.
+        #expect(
+            manager.freeName(base: "My Setup") == "My Setup_1"
+        )
+    }
+
     @Test("Invalid profile files are skipped, not fatal")
     func invalidSkipped() throws {
         let directory = FileManager.default.temporaryDirectory

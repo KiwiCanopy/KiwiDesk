@@ -620,6 +620,7 @@
   "sidebar.layout": "Layout",
   "sidebar.monitors": "Monitors",
   "sidebar.profiles": "Profiles",
+  "sidebar.profiles.badge_ax": "start here",
   "sidebar.search.clear": "Clear search",
   "sidebar.search.no_results": "No results",
   "sidebar.search.placeholder": "Search",
