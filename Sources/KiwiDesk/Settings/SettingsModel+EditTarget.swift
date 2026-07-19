@@ -79,6 +79,7 @@ extension SettingsModel {
         config = state.config
         luaSource = state.luaSource
         suppressDirty = false
+        seedSpaces = state.config.spaces
         // The dirty baselines: `isDirty` is a live comparison
         // against the as-applied state, so manually undoing
         // an edit reads as clean again.

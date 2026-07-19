@@ -46,6 +46,12 @@ final class SettingsModel: ObservableObject {
     /// transition funnels through `reload()`).
     var cleanConfig = GuiConfig()
     var cleanLuaSource = ""
+    /// The space list as last seeded from live/stored state.
+    /// `persist` diffs the edited list against it so a save can
+    /// tell a user deletion (in seed, removed from the model)
+    /// from model staleness (a space that appeared live while
+    /// the dashboard sat open) — see `KiwiCore.mergeLiveSpaces`.
+    var seedSpaces: [SpaceID] = []
 
     func recomputeDirty() {
         isDirty =
