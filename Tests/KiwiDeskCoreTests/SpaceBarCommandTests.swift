@@ -68,7 +68,7 @@ struct SpaceBarCommandTests {
         )
         #expect(
             !core.execute(
-                "space_bar.set_text_color",
+                "space_bar.set_item_color",
                 args: [.string("red")]
             ).isSuccess
         )

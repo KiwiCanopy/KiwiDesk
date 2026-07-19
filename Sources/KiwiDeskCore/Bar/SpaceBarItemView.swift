@@ -7,8 +7,8 @@ import AppKit
 /// informational in v1 — never nested click targets.
 ///
 /// Two-accent rendering: inactive spaces draw everything in
-/// `textColor`; the active space draws identifier + glyphs in
-/// `activeTextColor`, and the focused window's glyph in
+/// `itemColor`; the active space draws identifier + glyphs in
+/// `activeItemColor`, and the focused window's glyph in
 /// `focusedItemColor`. Emoji identifiers and native app images
 /// stay untinted — shape (the active indicator) carries the
 /// active state there.
@@ -68,7 +68,7 @@ final class SpaceBarItemView: NSView {
     /// Synthetic hover during a window drag (#372). Tracking
     /// areas stay silent while another app owns the drag loop,
     /// so the driver sets this from the AX cursor position; it
-    /// routes through the same `hoverColor` path as `isHovered`.
+    /// routes through the same `hoverFillColor` path as `isHovered`.
     /// Mutated via `setDragHover` (SpaceBarItemView+DragDrop).
     var isDragHovered = false
     /// The pending-spring sweep ring (#372): a stroke that fills

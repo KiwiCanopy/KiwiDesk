@@ -118,7 +118,12 @@ struct SpaceBarEditorSection: View {
                 "Active indicator"
             ),
             selection: style.activeIndicator,
+            // No `.gap` here: an empty slot marking the active
+            // Space reads as a missing Space, not a highlight
+            // (QA 2026-07-19). The App Bar keeps it (an empty
+            // window slot is legible there).
             options: AppBarOptions.activeIndicator
+                .filter { $0.0 != .gap }
                 .map { ($0.1, $0.0) }
         )
         DropdownRow(
@@ -207,7 +212,7 @@ struct SpaceBarEditorSection: View {
         PtSlider(
             label: L("space_bar.thickness", "Thickness"),
             value: style.thickness,
-            range: 8...80
+            range: 20...80
         )
         AutoGatedGroup(
             title: L(

@@ -13,9 +13,9 @@ import SwiftUI
 // SpaceBar twin keeps its metrics inline — its budget block is
 // smaller.
 extension AppBarPreviewStrip {
-    /// Real thickness 8–80 pt → 14–44 pt of canvas depth.
+    /// Real thickness 20–80 pt → 14–44 pt of canvas depth.
     var thickness: CGFloat {
-        scale(style.thickness, from: 8...80, to: 14...44)
+        scale(style.thickness, from: 20...80, to: 14...44)
     }
 
     /// Real gap 0–40 pt → 0–16 pt (0–5 pt on a vertical bar,

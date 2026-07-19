@@ -10,7 +10,7 @@ extension SpaceBarItemView {
         layer?.masksToBounds = true
         layer?.cornerRadius =
             style.tabBackground.rendered == .boxed ? cornerRadius : 0
-        layer?.backgroundColor = boxColor.cgColor
+        layer?.backgroundColor = fillColor.cgColor
         styleIdentifier()
         styleApps()
         styleBadges()
@@ -19,13 +19,13 @@ extension SpaceBarItemView {
     }
 
     /// The identifier↔glyphs rule (QA 2026-07-19): structural
-    /// chrome, so it stays on the muted `textColor` tier
+    /// chrome, so it stays on the muted `itemColor` tier
     /// regardless of state — a third state-driven color would
     /// compete with the two accents rather than separate.
     private func styleDivider() {
         identifierDivider.isHidden = apps.isEmpty
         identifierDivider.layer?.backgroundColor =
-            BarDivider.color(textColor: style.textColor)
+            BarDivider.color(textColor: style.itemColor)
             .cgColor
     }
 
@@ -42,19 +42,19 @@ extension SpaceBarItemView {
 
     /// Count and overflow badges follow the space state (#293
     /// verdict 5, amended): configured badge colors on the
-    /// active space, muted (derived from `textColor`) on
+    /// active space, muted (derived from `itemColor`) on
     /// inactive ones — a saturated badge on a muted space would
     /// fight the two-accent hierarchy.
     private func styleBadges() {
         let background =
             isActive
             ? NSColor(kiwiHex: style.groupBadgeColor)
-            : NSColor(kiwiHex: style.textColor)
+            : NSColor(kiwiHex: style.itemColor)
                 .withAlphaComponent(SpaceBarStyle.mutedBadgeAlpha)
         let text =
             isActive
             ? NSColor(kiwiHex: style.groupBadgeTextColor)
-            : NSColor(kiwiHex: style.textColor)
+            : NSColor(kiwiHex: style.itemColor)
         for (index, app) in apps.enumerated() {
             guard index < badgeViews.count else { break }
             let badge = badgeViews[index]
@@ -76,33 +76,33 @@ extension SpaceBarItemView {
         )
     }
 
-    private var boxColor: NSColor {
+    private var fillColor: NSColor {
         // Active wins over hover (matching `stateColor` and the
         // mouseEntered guard): a click that activates the item
         // under the pointer must not leave it hover-tinted.
         if isActive, style.tabBackground.rendered == .boxed {
-            return NSColor(kiwiHex: style.activeBoxColor)
+            return NSColor(kiwiHex: style.fillColor)
         }
         if isActive { return .clear }
         if isHovered || isDragHovered {
-            return NSColor(kiwiHex: style.hoverColor)
+            return NSColor(kiwiHex: style.hoverFillColor)
         }
         guard style.tabBackground.rendered == .boxed else {
             return .clear
         }
-        return NSColor(kiwiHex: style.boxColor)
+        return NSColor(kiwiHex: style.fillColor)
     }
 
     /// The state tier a tinted element takes: active space
     /// accent, hover text, or the inactive tier.
     private var stateColor: NSColor {
         if isActive {
-            return NSColor(kiwiHex: style.activeTextColor)
+            return NSColor(kiwiHex: style.activeItemColor)
         }
         if isHovered || isDragHovered {
-            return NSColor(kiwiHex: style.hoverTextColor)
+            return NSColor(kiwiHex: style.hoverItemColor)
         }
-        return NSColor(kiwiHex: style.textColor)
+        return NSColor(kiwiHex: style.itemColor)
     }
 
     private func styleIdentifier() {

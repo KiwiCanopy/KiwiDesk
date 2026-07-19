@@ -1071,8 +1071,8 @@ together in one session, not a mutually-exclusive set, so a
 strip would misapply the #205 "tabs fit a fixed exclusive
 set" principle. On the new page the ~10 hex colors collapse
 behind an **"Advanced colors" disclosure** (shut by default),
-keeping only Box / Active box / Highlight — the ones the
-preview strip most visibly reflects — inline.
+keeping only Fill / Highlight — the ones the preview strip
+most visibly reflects — inline.
 
 **Drag & Drop explains itself in plain words.** The group
 opens with one sentence on what dragging does (swap a
@@ -1156,14 +1156,21 @@ per-glyph count badges and the item's accessibility label.
 
 **The Space Bar's two-accent model.** (#293.) Three tinted
 states, all GUI-exposed inline (never behind a disclosure —
-the system is the bar's defining signature): `text_color`
-paints inactive Spaces, `active_text_color` the active Space's
+the system is the bar's defining signature): `item_color`
+paints inactive Spaces, `active_item_color` the active Space's
 identifier and glyphs, and `focused_item_color` the focused
-window's glyph inside the active Space. The focused accent is
-a deliberately **different hue** (amber `#E8A33D` in the Kiwi
-theme), not a tint of the active green — a lighter shade of
-the same hue washed into "active space" and the two states
-read as one (QA 2026-07-19). Emoji identifiers and native app
+window **wherever it shows** — its glyph inside the active
+Space AND the front-app segment's glyph + name (QA 2026-07-19:
+the front-app segment IS the focused window, so it belongs to
+the focused accent, not the active-Space one; each accent now
+maps to exactly one concept — the Space vs the focused window).
+The focused accent is a deliberately **different hue** (amber
+`#E8A33D` in the Kiwi theme), not a tint of the active green —
+a lighter shade of the same hue washed into "active space" and
+the two states read as one. In Settings the `Focused window`
+row greys out (#171) when its only surfaces are untintable:
+native-image glyphs *and* no front-app name shown. Emoji
+identifiers and native app
 images stay untinted; shape (the active indicator) carries the
 active state there, plus a half-strength alpha dim on inactive
 Spaces (alpha respects "never tint" while still reading as
@@ -1338,7 +1345,7 @@ book per-profile would fragment a palette you saved while editing
 one profile away from the next, for no gain, since profiles
 already own the color *state* a palette writes into. A palette is
 a sparse map keyed by the same fully-qualified color paths the
-profile JSON uses (`app_bar.box_color` vs `space_bar.box_color` —
+profile JSON uses (`app_bar.fill_color` vs `space_bar.fill_color` —
 bare wire keys collide between the two bars), so it is **not** a
 `TilingSettings` field and never widens the profile schema; it
 lives in its own global `palettes.json` plus a bundled resource.
@@ -1383,13 +1390,13 @@ create a real ambiguity ("boxed + translucent" = glass boxes or a
 glass strip under opaque boxes?). Glass renders structurally like
 `plain` — one shared rounded plate (`NSGlassEffectView`), items on
 top, no per-item box — matching Control Center / Spotlight (one
-glass plate, never glass-per-tab). It reuses existing color
-vocabulary rather than adding keys: `background_color` becomes the
-glass tint (transparent default = clear glass, mapping to
-`NSGlassEffectView.tintColor`), `box_color` goes inert (unused —
-the color rows group by type and are never mode-greyed, §2.7,
-just as `background_color` is unused under `plain`), and
-`corner_roundness` stays live (it rounds the plate). The default stays `boxed`: the
+glass plate, never glass-per-tab). It reuses the one merged
+fill key rather than adding keys: `fill_color` is the glass
+tint (transparent value = clear glass, mapping to
+`NSGlassEffectView.tintColor`) — the same key that fills the
+Boxed boxes and the Plain plate, so a palette re-tints the
+glass for free — and `corner_roundness` stays live (it rounds
+the plate). The default stays `boxed`: the
 earthy Kiwi identity is deliberate, and — decisively — an
 OS-gated look *can't* be a universal default without a shared
 profile or screenshot rendering differently per macOS. The stored

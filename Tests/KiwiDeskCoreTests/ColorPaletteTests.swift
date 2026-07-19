@@ -18,16 +18,16 @@ struct ColorPaletteTests {
         )
     }
 
-    @Test("The color surface is the 27 namespaced color paths")
+    @Test("The color surface is the 23 namespaced color paths")
     func colorSurface() {
         let all = ColorPaletteKeys.all
-        #expect(all.count == 27)
+        #expect(all.count == 23)
         #expect(all.allSatisfy { $0.contains(".") })
         // Every path is a color key.
         #expect(all.allSatisfy { $0.hasSuffix("_color") })
         // A colliding wire key appears once per bar, disambiguated.
-        #expect(all.contains("app_bar.box_color"))
-        #expect(all.contains("space_bar.box_color"))
+        #expect(all.contains("app_bar.fill_color"))
+        #expect(all.contains("space_bar.fill_color"))
         // Space-only key present; border + both drag elements too.
         #expect(all.contains("space_bar.focused_item_color"))
         #expect(all.contains("border.focused_color"))
@@ -67,21 +67,21 @@ struct ColorPaletteTests {
                     from: TilingSettings()
                 )
         )
-        #expect(def.colors.count == 27)
+        #expect(def.colors.count == 23)
     }
 
     @Test("Applying the default palette restores default colors")
     func defaultPaletteRestores() {
         var settings = TilingSettings()
-        settings.appBarStyle.boxColor = "#123456"
-        settings.spaceBarStyle.textColor = "#654321"
+        settings.appBarStyle.fillColor = "#123456"
+        settings.spaceBarStyle.itemColor = "#654321"
         settings.borderStyle.focusedColor = "#ABCDEF"
         PaletteCatalog.defaultPalette().apply(to: &settings)
         let fresh = TilingSettings()
-        #expect(settings.appBarStyle.boxColor == fresh.appBarStyle.boxColor)
+        #expect(settings.appBarStyle.fillColor == fresh.appBarStyle.fillColor)
         #expect(
-            settings.spaceBarStyle.textColor
-                == fresh.spaceBarStyle.textColor
+            settings.spaceBarStyle.itemColor
+                == fresh.spaceBarStyle.itemColor
         )
         #expect(
             settings.borderStyle.focusedColor
@@ -92,29 +92,29 @@ struct ColorPaletteTests {
     @Test("A sparse palette leaves absent colors untouched")
     func sparseApply() {
         var settings = TilingSettings()
-        let before = settings.spaceBarStyle.textColor
+        let before = settings.spaceBarStyle.itemColor
         ColorPalette(
             name: "S",
-            colors: ["app_bar.box_color": "#111111"]
+            colors: ["app_bar.fill_color": "#111111"]
         ).apply(to: &settings)
-        #expect(settings.appBarStyle.boxColor == "#111111")
+        #expect(settings.appBarStyle.fillColor == "#111111")
         // An untouched key keeps its value.
-        #expect(settings.spaceBarStyle.textColor == before)
+        #expect(settings.spaceBarStyle.itemColor == before)
     }
 
     @Test("An invalid hex or unknown path is skipped, not fatal")
     func skipsBadInput() {
         var settings = TilingSettings()
-        let before = settings.appBarStyle.boxColor
+        let before = settings.appBarStyle.fillColor
         ColorPalette(
             name: "X",
             colors: [
-                "app_bar.box_color": "not-a-hex",
+                "app_bar.fill_color": "not-a-hex",
                 "app_bar.nonsense_color": "#222222",
                 "made_up.path.deep": "#333333",
             ]
         ).apply(to: &settings)
-        #expect(settings.appBarStyle.boxColor == before)
+        #expect(settings.appBarStyle.fillColor == before)
     }
 
     @Test("The bundled catalog is 7 palettes, default first, unique")
@@ -155,7 +155,7 @@ struct ColorPaletteTests {
             let focused =
                 palette.colors["space_bar.focused_item_color"]
             let active =
-                palette.colors["space_bar.active_text_color"]
+                palette.colors["space_bar.active_item_color"]
             if let focused, let active {
                 #expect(
                     focused.lowercased()

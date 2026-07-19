@@ -74,7 +74,7 @@ struct SpaceBarParityTests {
         // space-only fields never join it.
         #expect(
             SpaceBarStyle.copyAppearanceKeys.contains(
-                "text_color"
+                "item_color"
             )
         )
         #expect(
@@ -111,11 +111,10 @@ struct SpaceBarCommandParityTests {
         .activeIndicator(.gap), .cornerRoundness(5),
         .showFrontApp(true), .hideEmpty(true),
         .springDelay(1000),
-        .textColor("#010101"), .activeTextColor("#020202"),
-        .focusedItemColor("#030303"), .hoverColor("#040404"),
-        .hoverTextColor("#050505"), .boxColor("#060606"),
-        .activeBoxColor("#070707"), .highlightColor("#080808"),
-        .backgroundColor("#090909"),
+        .itemColor("#010101"), .activeItemColor("#020202"),
+        .focusedItemColor("#030303"), .hoverFillColor("#040404"),
+        .hoverItemColor("#050505"), .fillColor("#060606"),
+        .highlightColor("#080808"),
         .groupBadgeColor("#0A0A0A"),
         .groupBadgeTextColor("#0B0B0B"),
     ]
@@ -167,7 +166,7 @@ struct SpaceBarCommandParityTests {
         )
         #expect(
             (try? SpaceBarCommandSetting.parse(
-                field: "text_color",
+                field: "item_color",
                 args: [.string("red")]
             ).get()) == nil
         )

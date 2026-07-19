@@ -7,7 +7,7 @@ import AppKit
 extension SpaceBarItemView {
 
     /// Lights (or clears) the synthetic drag-hover tint — the
-    /// same `hoverColor` an ordinary mouse hover shows, driven
+    /// same `hoverFillColor` an ordinary mouse hover shows, driven
     /// from the AX cursor position because tracking areas stay
     /// silent while another app owns the drag.
     func setDragHover(_ on: Bool) {

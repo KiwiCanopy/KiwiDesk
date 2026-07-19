@@ -183,7 +183,7 @@ struct LayoutAppBarSection: View {
             label: L("app_bar.thickness", "Thickness"),
             value: $bar.thickness,
             global: global.thickness,
-            range: 8...80
+            range: 20...80
         )
         OverrideAutoSliderRow(
             label: L("app_bar.box_size", "Box size"),
@@ -228,117 +228,73 @@ struct LayoutAppBarSection: View {
 
 /// The color override rows, in `AppBarColorGrid` so they read
 /// as the same 2-column grid as Global's colors (#2). Field
-/// order mirrors the global editor exactly — the inline trio
-/// (Box, Active box, Highlight) first, then the rest of the
-/// palette — so a field keeps the same reading order in both
-/// editors. (Column positions match only for the inline trio:
-/// Global splits its colors into two grids — inline three plus
-/// seven advanced behind a disclosure — while these ten flow as
-/// one continuous grid, so the seven advanced fields land in
-/// different columns.) Two `Group`s of five keep each under the
-/// view builder's child limit; `Group` is transparent to the
-/// grid, so the ten rows flow as ten cells.
+/// order mirrors the global editor — the inline pair (Fill,
+/// Highlight) first, then the rest of the palette — so a field
+/// keeps the same reading order in both editors. (Column
+/// positions match only for the inline pair: Global splits its
+/// colors into an inline grid plus an advanced disclosure, while
+/// these eight flow as one continuous grid.)
 struct LayoutAppBarColorOverrides: View {
     @Binding var bar: LayoutAppBar
     let global: AppBarStyle
 
     var body: some View {
         AppBarColorGrid {
-            Group {
-                OverrideColorRow(
-                    label: L("app_bar.color.box", "Box"),
-                    value: $bar.boxColor,
-                    global: global.boxColor
-                )
-                OverrideColorRow(
-                    label: L(
-                        "app_bar.color.active_box",
-                        "Active box"
-                    ),
-                    value: $bar.activeBoxColor,
-                    global: global.activeBoxColor
-                )
-                OverrideColorRow(
-                    label: L(
-                        "app_bar.color.highlight",
-                        "Highlight"
-                    ),
-                    value: $bar.highlightColor,
-                    global: global.highlightColor
-                )
-                OverrideColorRow(
-                    label: L("app_bar.color.text", "Text"),
-                    value: $bar.textColor,
-                    global: global.textColor
-                )
-                OverrideColorRow(
-                    label: L(
-                        "app_bar.color.active_text",
-                        "Active text"
-                    ),
-                    value: $bar.activeTextColor,
-                    global: global.activeTextColor
-                )
-            }
-            Group {
-                OverrideColorRow(
-                    label: L("app_bar.color.hover", "Hover"),
-                    value: $bar.hoverColor,
-                    global: global.hoverColor
-                )
-                OverrideColorRow(
-                    label: L(
-                        "app_bar.color.hover_text",
-                        "Hover text"
-                    ),
-                    value: $bar.hoverTextColor,
-                    global: global.hoverTextColor
-                )
-                // Same mode-dependent role as the global
-                // editor: Tint under an effective Liquid
-                // Glass, greyed under an effective Plain
-                // (resolve pattern of the roundness row).
-                OverrideColorRow(
-                    label: bar.resolved(with: global)
-                        .tabBackground == .material
-                        ? L("app_bar.color.tint", "Tint")
-                        : L(
-                            "app_bar.color.background",
-                            "Background"
-                        ),
-                    value: $bar.backgroundColor,
-                    global: global.backgroundColor
-                )
-                .modifier(
-                    GreyOut(
-                        active: bar.resolved(with: global)
-                            .tabBackground == .plain,
-                        help: L(
-                            "app_bar.color.background.plain",
-                            "Plain fills the whole strip with "
-                                + "the Box color, so the "
-                                + "background color is never "
-                                + "visible."
-                        )
-                    )
-                )
-                OverrideColorRow(
-                    label: L(
-                        "app_bar.color.group_badge",
-                        "Group badge"
-                    ),
-                    value: $bar.groupBadgeColor,
-                    global: global.groupBadgeColor
-                )
-                OverrideColorRow(
-                    label: L(
-                        "app_bar.color.badge_text",
-                        "Badge text"
-                    ),
-                    value: $bar.groupBadgeTextColor,
-                    global: global.groupBadgeTextColor
-                )
-            }
+            OverrideColorRow(
+                label: L("app_bar.color.fill", "Fill"),
+                value: $bar.fillColor,
+                global: global.fillColor
+            )
+            OverrideColorRow(
+                label: L(
+                    "app_bar.color.highlight",
+                    "Highlight"
+                ),
+                value: $bar.highlightColor,
+                global: global.highlightColor
+            )
+            OverrideColorRow(
+                label: L("app_bar.color.item", "Item"),
+                value: $bar.itemColor,
+                global: global.itemColor
+            )
+            OverrideColorRow(
+                label: L(
+                    "app_bar.color.active_item",
+                    "Active item"
+                ),
+                value: $bar.activeItemColor,
+                global: global.activeItemColor
+            )
+            OverrideColorRow(
+                label: L("app_bar.color.hover_fill", "Hover fill"),
+                value: $bar.hoverFillColor,
+                global: global.hoverFillColor
+            )
+            OverrideColorRow(
+                label: L(
+                    "app_bar.color.hover_item",
+                    "Hover item"
+                ),
+                value: $bar.hoverItemColor,
+                global: global.hoverItemColor
+            )
+            OverrideColorRow(
+                label: L(
+                    "app_bar.color.group_badge",
+                    "Group badge"
+                ),
+                value: $bar.groupBadgeColor,
+                global: global.groupBadgeColor
+            )
+            OverrideColorRow(
+                label: L(
+                    "app_bar.color.badge_text",
+                    "Badge text"
+                ),
+                value: $bar.groupBadgeTextColor,
+                global: global.groupBadgeTextColor
+            )
         }
     }
 }

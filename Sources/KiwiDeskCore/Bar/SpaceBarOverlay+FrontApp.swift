@@ -17,14 +17,16 @@ extension SpaceBarOverlay {
         horizontal: Bool
     ) {
         guard let app else {
-            [frontDivider, frontIcon, frontGlyph, frontName]
+            [frontBox, frontDivider, frontIcon, frontGlyph, frontName]
                 .forEach { $0.isHidden = true }
             return
         }
         attachFrontViewsIfNeeded()
         let depth = horizontal ? strip.height : strip.width
         let cell = max(depth - SpaceBarItemView.pad * 2, 8)
-        let accent = NSColor(kiwiHex: style.activeTextColor)
+        // The focused window's accent paints the front-app glyph
+        // and name — the segment IS the focused window.
+        let accent = NSColor(kiwiHex: style.focusedItemColor)
         var offset = cursor
         offset += layoutDivider(
             at: offset,
@@ -33,6 +35,7 @@ extension SpaceBarOverlay {
             horizontal: horizontal,
             style: style
         )
+        let contentStart = offset
         offset += layoutFrontGlyph(
             app,
             at: offset,
@@ -51,6 +54,66 @@ extension SpaceBarOverlay {
             accent: accent,
             style: style
         )
+        layoutFrontBox(
+            app,
+            from: contentStart,
+            depth: depth,
+            cell: cell,
+            horizontal: horizontal,
+            style: style
+        )
+    }
+
+    /// A Boxed-only fill box behind the front-app content, so the
+    /// segment reads as a chip like the Space items (Plain and
+    /// Material draw their shared plate under it instead). Sits
+    /// below the glyph/name, filled `fillColor`, rounded to match.
+    /// Mirrors `SpaceBarItemView`'s box (fill + corner) — keep the
+    /// two in step on any fill/corner change. The radius here
+    /// resolves from cross-axis `depth`; the chip's from
+    /// `min(width, height)` — they read alike but aren't identical.
+    private func layoutFrontBox(
+        _ app: SpaceBarItemView.App,
+        from start: CGFloat,
+        depth: CGFloat,
+        cell: CGFloat,
+        horizontal: Bool,
+        style: SpaceBarStyle
+    ) {
+        guard style.tabBackground.rendered == .boxed else {
+            frontBox.isHidden = true
+            return
+        }
+        frontBox.isHidden = false
+        frontBox.wantsLayer = true
+        let pad = SpaceBarItemView.pad
+        let content: NSView = app.glyph != nil ? frontGlyph : frontIcon
+        let end =
+            horizontal
+            ? (frontName.isHidden
+                ? content.frame.maxX : frontName.frame.maxX)
+            : content.frame.maxY
+        let length = max(end - start, cell) + pad * 2
+        let cross = cell + pad * 2
+        let crossOrigin = max((depth - cross) / 2, 0)
+        frontBox.frame =
+            horizontal
+            ? CGRect(
+                x: start - pad,
+                y: crossOrigin,
+                width: length,
+                height: cross
+            )
+            : CGRect(
+                x: crossOrigin,
+                y: start - pad,
+                width: cross,
+                height: length
+            )
+        frontBox.layer?.cornerRadius =
+            style.resolvedCornerRadius(forThickness: depth)
+        frontBox.layer?.backgroundColor =
+            NSColor(kiwiHex: style.fillColor).cgColor
     }
 
     /// Axis length the segment will consume, for the render
@@ -73,7 +136,8 @@ extension SpaceBarOverlay {
         guard let app else { return 0 }
         let pad = SpaceBarItemView.pad
         let cell = max(depth - pad * 2, 8)
-        var extent = style.boxGap + 1 + pad + cell
+        var extent =
+            style.boxGap + BarDivider.sectionThickness + pad + cell
         if horizontal {
             extent += pad
             let size =
@@ -100,8 +164,10 @@ extension SpaceBarOverlay {
         // views created later (`syncItemViewCount` appends on
         // top) — otherwise a long item row paints over it.
         let content = itemContainer
+        // frontBox first so it lands beneath the divider/glyph/
+        // name added above it — the box is the chip behind them.
         for view in [
-            frontDivider, frontIcon, frontGlyph, frontName,
+            frontBox, frontDivider, frontIcon, frontGlyph, frontName,
         ] {
             content.addSubview(
                 view,
@@ -126,15 +192,17 @@ extension SpaceBarOverlay {
     ) -> CGFloat {
         frontDivider.isHidden = false
         frontDivider.layer?.backgroundColor =
-            BarDivider.color(textColor: style.textColor)
+            BarDivider.color(textColor: style.itemColor)
             .cgColor
         frontDivider.frame = BarDivider.frame(
             at: offset,
             depth: depth,
             cell: cell,
-            horizontal: horizontal
+            horizontal: horizontal,
+            thickness: BarDivider.sectionThickness,
+            fullDepth: true
         )
-        return 1 + SpaceBarItemView.pad
+        return BarDivider.sectionThickness + SpaceBarItemView.pad
     }
 
     /// The focused app's glyph (App Font ligature or image);

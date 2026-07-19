@@ -47,7 +47,7 @@ extension SpaceBarPreviewStrip {
             dividerRule
             if style.edge.isHorizontal {
                 glyphCell(
-                    tint: color(style.activeTextColor),
+                    tint: color(style.activeItemColor),
                     badge: false
                 )
             }
@@ -73,7 +73,7 @@ extension SpaceBarPreviewStrip {
         .font(.system(size: font))
         .foregroundStyle(
             state == .active
-                ? color(style.activeTextColor) : mutedColor
+                ? color(style.activeItemColor) : mutedColor
         )
         .frame(width: cell, height: cell)
     }
@@ -81,7 +81,7 @@ extension SpaceBarPreviewStrip {
     /// The identifier↔glyphs rule occupied items draw — the
     /// runtime's `BarDivider` treatment.
     @ViewBuilder private var dividerRule: some View {
-        let rule = color(style.textColor)
+        let rule = color(style.itemColor)
             .opacity(SpaceBarStyle.dividerAlpha)
         if style.edge.isHorizontal {
             Rectangle().fill(rule)
@@ -110,11 +110,11 @@ extension SpaceBarPreviewStrip {
     private var badgeDot: some View {
         Text("2")
             .font(.system(size: 6, weight: .bold))
-            .foregroundStyle(color(style.textColor))
+            .foregroundStyle(color(style.itemColor))
             .padding(2)
             .background(
                 Circle().fill(
-                    color(style.textColor)
+                    color(style.itemColor)
                         .opacity(SpaceBarStyle.mutedBadgeAlpha)
                 )
             )
@@ -124,10 +124,9 @@ extension SpaceBarPreviewStrip {
         guard style.tabBackground == .boxed else {
             return .clear
         }
-        return color(
-            state == .active
-                ? style.activeBoxColor : style.boxColor
-        )
+        // One fill for every box — active is marked by the
+        // indicator, not a distinct fill (color merge).
+        return color(style.fillColor)
     }
 
     @ViewBuilder private func indicator(

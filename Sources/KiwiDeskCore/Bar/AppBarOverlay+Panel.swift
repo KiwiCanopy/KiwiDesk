@@ -11,9 +11,8 @@ extension AppBarOverlay {
 
     /// `plain` and `material` draw their shared plate as its
     /// own view (`updatePlainPlate` / `updateGlassPlate`) so it
-    /// can hug the run (`tab_background_fit`); the container
-    /// itself only ever paints `boxed`'s (default transparent)
-    /// background.
+    /// can hug the run (`tab_background_fit`); `boxed` boxes each
+    /// tab. The container itself never paints.
     func styleContainer(
         _ panel: NSPanel,
         style: AppBarStyle,
@@ -24,11 +23,9 @@ extension AppBarOverlay {
         }
         layer.masksToBounds = true
         layer.cornerRadius = 0
-        let background =
-            style.tabBackground.rendered == .boxed
-            ? style.backgroundColor : "#00000000"
-        layer.backgroundColor =
-            NSColor(kiwiHex: background).cgColor
+        // The container never paints: the fill is drawn per item
+        // (Boxed) or as a shared plate (Plain / Material glass).
+        layer.backgroundColor = NSColor.clear.cgColor
     }
 
     /// Shows / sizes `plain`'s shared fill plate at
@@ -73,7 +70,7 @@ extension AppBarOverlay {
         plate.layer?.cornerRadius =
             style.resolvedCornerRadius(forThickness: depth)
         plate.layer?.backgroundColor =
-            NSColor(kiwiHex: style.boxColor).cgColor
+            NSColor(kiwiHex: style.fillColor).cgColor
     }
 
     /// Shows / sizes the Liquid Glass plate under the items when
@@ -111,7 +108,7 @@ extension AppBarOverlay {
             cornerRadius: style.resolvedCornerRadius(
                 forThickness: depth
             ),
-            tintHex: style.backgroundColor,
+            tintHex: style.fillColor,
             animated: animated
         )
     }

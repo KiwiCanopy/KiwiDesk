@@ -665,22 +665,22 @@ struct MonocleCommandTests {
         )
         #expect(
             core.execute(
-                "monocle.set_app_bar_hover_color",
+                "monocle.set_app_bar_hover_fill_color",
                 args: [.string("#4E9F3D40")]
             ).isSuccess
         )
         #expect(
-            core.tiler.settings.monocle.appBar.hoverColor
+            core.tiler.settings.monocle.appBar.hoverFillColor
                 == "#4E9F3D40"
         )
         #expect(
             core.execute(
-                "monocle.set_app_bar_hover_text_color",
+                "monocle.set_app_bar_hover_item_color",
                 args: [.string("#101010")]
             ).isSuccess
         )
         #expect(
-            core.tiler.settings.monocle.appBar.hoverTextColor
+            core.tiler.settings.monocle.appBar.hoverItemColor
                 == "#101010"
         )
     }
@@ -688,7 +688,7 @@ struct MonocleCommandTests {
     @Test("Hover default is a shade off the highlight")
     func hoverDefault() {
         let bar = AppBarStyle()
-        #expect(bar.hoverColor != bar.highlightColor)
+        #expect(bar.hoverFillColor != bar.highlightColor)
     }
 
     @Test("Invalid values are rejected")
@@ -714,7 +714,7 @@ struct MonocleCommandTests {
         )
         #expect(
             !core.execute(
-                "monocle.set_app_bar_text_color",
+                "monocle.set_app_bar_item_color",
                 args: [.string("red")]
             ).isSuccess
         )

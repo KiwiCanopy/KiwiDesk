@@ -17,9 +17,8 @@ struct AppBarResolvedStateChip: View {
     var body: some View {
         let resolved = bar.resolved(with: global)
         HStack(spacing: 6) {
-            swatch(resolved.boxColor)
-            swatch(resolved.activeBoxColor)
-            swatch(resolved.textColor)
+            swatch(resolved.fillColor)
+            swatch(resolved.itemColor)
             swatch(resolved.highlightColor)
             Text(summary)
                 .font(.caption)

@@ -81,21 +81,21 @@ struct SpaceBarColorsSection: View {
     @ViewBuilder private var accentLadder: some View {
         AppBarColorGrid {
             HexColorField(
-                label: L("space_bar.color.text", "Text"),
-                hex: style.textColor
+                label: L("space_bar.color.item", "Item"),
+                hex: style.itemColor
             )
             HexColorField(
                 label: L(
-                    "space_bar.color.active_text",
+                    "space_bar.color.active_space",
                     "Active space"
                 ),
-                hex: style.activeTextColor
+                hex: style.activeItemColor
             )
             .help(
                 L(
-                    "space_bar.color.active_text.help",
-                    "Tints the icon of the space currently "
-                        + "shown on this display."
+                    "space_bar.color.active_space.help",
+                    "Tints the active space's identifier and "
+                        + "its app glyphs."
                 )
             )
             HexColorField(
@@ -105,11 +105,26 @@ struct SpaceBarColorsSection: View {
                 ),
                 hex: style.focusedItemColor
             )
-            .help(
-                L(
-                    "space_bar.color.focused_item.help",
-                    "Tints the glyph of the focused window, "
-                        + "shown only inside the active space."
+            .modifier(
+                GreyOut(
+                    // Nothing to tint when in-chip glyphs are
+                    // native images AND there's no front-app
+                    // name (native images take no tint). The
+                    // "name only on horizontal" half mirrors
+                    // SpaceBarOverlay+FrontApp's name-visibility
+                    // rule — keep in step if that changes.
+                    active: style.wrappedValue.iconSource
+                        == .appImage
+                        && !(style.wrappedValue.showFrontApp
+                            && style.wrappedValue.edge
+                                .isHorizontal),
+                    help: L(
+                        "space_bar.color.focused_item.help",
+                        "Tints the focused window — its glyph in "
+                            + "the active Space and the front-app "
+                            + "segment. Glyph tint needs Glyphs "
+                            + "icon mode."
+                    )
                 )
             )
         }
@@ -118,15 +133,8 @@ struct SpaceBarColorsSection: View {
     @ViewBuilder private var advancedColors: some View {
         Group {
             HexColorField(
-                label: L("space_bar.color.box", "Box"),
-                hex: style.boxColor
-            )
-            HexColorField(
-                label: L(
-                    "space_bar.color.active_box",
-                    "Active box"
-                ),
-                hex: style.activeBoxColor
+                label: L("space_bar.color.fill", "Fill"),
+                hex: style.fillColor
             )
             HexColorField(
                 label: L(
@@ -136,44 +144,18 @@ struct SpaceBarColorsSection: View {
                 hex: style.highlightColor
             )
             HexColorField(
-                label: L("space_bar.color.hover", "Hover"),
-                hex: style.hoverColor
+                label: L("space_bar.color.hover_fill", "Hover fill"),
+                hex: style.hoverFillColor
             )
             HexColorField(
                 label: L(
-                    "space_bar.color.hover_text",
-                    "Hover text"
+                    "space_bar.color.hover_item",
+                    "Hover item"
                 ),
-                hex: style.hoverTextColor
+                hex: style.hoverItemColor
             )
         }
         Group {
-            // Under Liquid Glass this field IS the glass tint
-            // (QA 2026-07-19) — relabel so that's discoverable.
-            // Plain fills the strip from Box, so it's the one
-            // mode where this color never shows: grey (#171).
-            HexColorField(
-                label: style.wrappedValue.tabBackground
-                    == .material
-                    ? L("space_bar.color.tint", "Tint")
-                    : L(
-                        "space_bar.color.background",
-                        "Background"
-                    ),
-                hex: style.backgroundColor
-            )
-            .modifier(
-                GreyOut(
-                    active: style.wrappedValue.tabBackground
-                        == .plain,
-                    help: L(
-                        "space_bar.color.background.plain",
-                        "Plain fills the whole strip with the "
-                            + "Box color, so the background "
-                            + "color is never visible."
-                    )
-                )
-            )
             HexColorField(
                 label: L(
                     "space_bar.color.group_badge",
@@ -186,7 +168,7 @@ struct SpaceBarColorsSection: View {
                     "space_bar.color.group_badge.help",
                     "Count and overflow badges on the active "
                         + "space; inactive spaces mute them "
-                        + "from the text color. Grouping is "
+                        + "from the item color. Grouping is "
                         + "always on."
                 )
             )

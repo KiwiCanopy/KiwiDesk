@@ -11,11 +11,11 @@ import Foundation
 /// parity surface for one). `enabled` lives here for the same
 /// reason: no layout owns the bar.
 ///
-/// The two-accent model is the bar's signature: `textColor`
-/// paints inactive spaces, `activeTextColor` the active space's
+/// The two-accent model is the bar's signature: `itemColor`
+/// paints inactive spaces, `activeItemColor` the active space's
 /// identifier and glyphs, and `focusedItemColor` the focused
-/// window's glyph inside the active space (spaces.lua's
-/// `space_focused_window`).
+/// window — its glyph inside the active space AND the front-app
+/// segment (spaces.lua's `space_focused_window`).
 public struct SpaceBarStyle: Sendable, Equatable {
     public typealias TabBackground = AppBarStyle.TabBackground
     public typealias TabBackgroundFit =
@@ -80,25 +80,24 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// snakes to the `spring_delay` key the parity guard expects.)
     public var springDelay = 1500
     /// Inactive spaces: identifier + glyphs (muted tier).
-    public var textColor = "#F2EBD966"
+    public var itemColor = "#F2EBD966"
     /// The active space's accent (identifier + its glyphs).
-    public var activeTextColor = "#4E9F3D"
-    /// The focused window's glyph inside the active space — the
-    /// second accent. A genuinely different hue, not a tint of
-    /// the active color: a lighter green washed into the
-    /// active-space green and the two states read as one
-    /// (QA 2026-07-19).
+    public var activeItemColor = "#4E9F3D"
+    /// The focused window's accent — its glyph inside the active
+    /// space AND the front-app segment (glyph + name). A
+    /// genuinely different hue, not a tint of the active-space
+    /// color, so the two states read apart (QA 2026-07-19).
     public var focusedItemColor = "#E8A33D"
     /// Hover tint on non-active space items.
-    public var hoverColor = "#6DBF5B80"
-    public var hoverTextColor = "#F2EBD9"
-    public var boxColor = "#8B5E3C66"
-    public var activeBoxColor = "#8B5E3C66"
+    public var hoverFillColor = "#6DBF5B80"
+    public var hoverItemColor = "#F2EBD9"
+    /// The fill under the items — a box per Space (Boxed), one
+    /// shared plate (Plain), or the Liquid Glass tint (Material).
+    public var fillColor = "#8B5E3C66"
     public var highlightColor = "#4E9F3D"
-    public var backgroundColor = "#00000000"
     /// Count badges (grouped duplicates and the "+n" overflow),
     /// shown in these colors on the active space and muted from
-    /// `textColor` on inactive ones.
+    /// `itemColor` on inactive ones.
     public var groupBadgeColor = "#FF3B30"
     public var groupBadgeTextColor = "#FFFFFF"
 
@@ -130,15 +129,13 @@ extension SpaceBarStyle: Codable {
         case showFrontApp = "show_front_app"
         case hideEmpty = "hide_empty"
         case springDelay = "spring_delay"
-        case textColor = "text_color"
-        case activeTextColor = "active_text_color"
+        case itemColor = "item_color"
+        case activeItemColor = "active_item_color"
         case focusedItemColor = "focused_item_color"
-        case hoverColor = "hover_color"
-        case hoverTextColor = "hover_text_color"
-        case boxColor = "box_color"
-        case activeBoxColor = "active_box_color"
+        case hoverFillColor = "hover_fill_color"
+        case hoverItemColor = "hover_item_color"
+        case fillColor = "fill_color"
         case highlightColor = "highlight_color"
-        case backgroundColor = "background_color"
         case groupBadgeColor = "group_badge_color"
         case groupBadgeTextColor = "group_badge_text_color"
     }
@@ -165,11 +162,13 @@ extension SpaceBarStyle: Codable {
                 Alignment.self,
                 forKey: .alignment
             ) ?? defaults.alignment
-        thickness =
+        thickness = max(
+            AppBarStyle.minThickness,
             try container.decodeIfPresent(
                 CGFloat.self,
                 forKey: .thickness
             ) ?? defaults.thickness
+        )
         boxSize =
             try container.decodeIfPresent(
                 CGFloat.self,
@@ -237,51 +236,41 @@ extension SpaceBarStyle: Codable {
         from container: KeyedDecodingContainer<CodingKeys>
     ) throws {
         let defaults = Self()
-        textColor =
+        itemColor =
             try container.decodeIfPresent(
                 String.self,
-                forKey: .textColor
-            ) ?? defaults.textColor
-        activeTextColor =
+                forKey: .itemColor
+            ) ?? defaults.itemColor
+        activeItemColor =
             try container.decodeIfPresent(
                 String.self,
-                forKey: .activeTextColor
-            ) ?? defaults.activeTextColor
+                forKey: .activeItemColor
+            ) ?? defaults.activeItemColor
         focusedItemColor =
             try container.decodeIfPresent(
                 String.self,
                 forKey: .focusedItemColor
             ) ?? defaults.focusedItemColor
-        hoverColor =
+        hoverFillColor =
             try container.decodeIfPresent(
                 String.self,
-                forKey: .hoverColor
-            ) ?? defaults.hoverColor
-        hoverTextColor =
+                forKey: .hoverFillColor
+            ) ?? defaults.hoverFillColor
+        hoverItemColor =
             try container.decodeIfPresent(
                 String.self,
-                forKey: .hoverTextColor
-            ) ?? defaults.hoverTextColor
-        boxColor =
+                forKey: .hoverItemColor
+            ) ?? defaults.hoverItemColor
+        fillColor =
             try container.decodeIfPresent(
                 String.self,
-                forKey: .boxColor
-            ) ?? defaults.boxColor
-        activeBoxColor =
-            try container.decodeIfPresent(
-                String.self,
-                forKey: .activeBoxColor
-            ) ?? defaults.activeBoxColor
+                forKey: .fillColor
+            ) ?? defaults.fillColor
         highlightColor =
             try container.decodeIfPresent(
                 String.self,
                 forKey: .highlightColor
             ) ?? defaults.highlightColor
-        backgroundColor =
-            try container.decodeIfPresent(
-                String.self,
-                forKey: .backgroundColor
-            ) ?? defaults.backgroundColor
         groupBadgeColor =
             try container.decodeIfPresent(
                 String.self,

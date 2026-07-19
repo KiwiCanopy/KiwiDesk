@@ -6,12 +6,12 @@ import Foundation
 /// conformance stays with the struct (synthesized `encode`
 /// requires same-file).
 extension SpaceBarStyle {
-    /// Muted-badge background alpha over `text_color` on
+    /// Muted-badge background alpha over `item_color` on
     /// inactive spaces — one derivation shared by the runtime
     /// item view and the Settings preview.
     public static let mutedBadgeAlpha: CGFloat = 0.3
 
-    /// The divider rules' alpha over `text_color` — the
+    /// The divider rules' alpha over `item_color` — the
     /// identifier↔glyphs rule and the front-app rule share it,
     /// like `mutedBadgeAlpha` above.
     public static let dividerAlpha: CGFloat = 0.4

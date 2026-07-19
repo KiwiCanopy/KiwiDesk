@@ -58,7 +58,9 @@ public enum StandardProfiles {
             + "preview space.",
         screenCount: 1,
         spaceCount: 4,
-        spaceModes: ["2": .stack, "3": .scrolling, "4": .monocle],
+        spaceModes: [
+            "1": .grid, "2": .stack, "3": .scrolling, "4": .monocle,
+        ],
         spaceScreens: [:],
         isStandard: true,
         settings: flavored(gap: 8)

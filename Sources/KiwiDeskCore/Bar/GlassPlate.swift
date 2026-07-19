@@ -2,17 +2,17 @@ import AppKit
 
 /// A macOS 26 Liquid Glass plate for a bar strip (#390): one
 /// shared, rounded glass background under the items, tinted by the
-/// bar's `background_color`. Wrapped behind a plain `NSView?` so
+/// bar's `fill_color`. Wrapped behind a plain `NSView?` so
 /// the overlays can store it without an availability annotation
 /// (the concrete `NSGlassEffectView` type is macOS-26-only) and
 /// drive it through one guarded entry point. Shared by both bars.
 enum GlassPlate {
     /// A fresh glass plate, or nil below macOS 26.
-    /// `.clear` is deliberate (QA 2026-07-19): `.regular` is the
-    /// frosted, adaptive variant and read as a milky slab over
-    /// the desktop; `.clear` matches the Dock's near-transparent
-    /// glass. Legibility over bright wallpaper is the user's
-    /// `background_color` tint — the HIG's dimming-layer lever.
+    /// Style is under on-device A/B (macOS 26): `.regular` is the
+    /// frosted, adaptive variant that carries a real `fill_color`
+    /// hue; `.clear` is near-transparent (Dock-like) and tints by
+    /// luminance only. Under on-device A/B — flip the one line
+    /// below between `.clear` and `.regular` to compare.
     @MainActor
     static func make() -> NSView? {
         if #available(macOS 26, *) {
@@ -24,7 +24,7 @@ enum GlassPlate {
     }
 
     /// Sizes and tints an existing plate. A fully transparent
-    /// `background_color` means clear glass (no tint).
+    /// `fill_color` means clear glass (no tint).
     /// `animated` eases a frame change through the caller's
     /// `NSAnimationContext` group (the App Bar moves its plate
     /// alongside its sliding tabs); fresh plates snap direct.

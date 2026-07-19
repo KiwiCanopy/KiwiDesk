@@ -1391,7 +1391,7 @@ app_bar.set_thickness(32)
   translucent strip.
 - **material** — a macOS 26 Liquid Glass plate under the items
   (like `plain`, but a live glass material), tinted by
-  `background_color` (transparent = clear glass) and rounded by
+  `fill_color` (transparent = clear glass) and rounded by
   the corner roundness. The value is accepted and round-trips on
   any macOS; below macOS 26 it *renders* as `boxed` (the GUI
   offers it only where it can render).
@@ -1542,54 +1542,46 @@ item with a count badge.
 app_bar.set_group_adjacent_windows(true)
 ```
 
-### app_bar.set_text_color
+### app_bar.set_item_color
 
 **Expects:** a hex color (`#RRGGBB` or `#RRGGBBAA`).
 
-**Does:** sets the text color (default `#F2EBD9`).
+**Does:** sets the item's text and glyph color (default
+`#F2EBD9`).
 
 **Example:**
 
 ```lua
-app_bar.set_text_color("#F2EBD9")
+app_bar.set_item_color("#F2EBD9")
 ```
 
-### app_bar.set_box_color
+### app_bar.set_fill_color
 
 **Expects:** a hex color.
 
-**Does:** sets the background box color (default
-`#8B5E3C66`, translucent shell-brown).
+**Does:** sets the fill under the items — a box per item
+(`boxed`), one shared plate (`plain`), or the Liquid Glass tint
+(`material`). Default `#8B5E3C66`, translucent shell-brown; a
+fully transparent value means clear, untinted glass under
+`material`.
 
 **Example:**
 
 ```lua
-app_bar.set_box_color("#8B5E3C66")
+app_bar.set_fill_color("#8B5E3C66")
 ```
 
-### app_bar.set_active_text_color
+### app_bar.set_active_item_color
 
 **Expects:** a hex color.
 
-**Does:** sets the text color of the focused item (default
-`#4E9F3D`, flesh-green).
+**Does:** sets the text and glyph color of the active item — the
+focused tab (default `#4E9F3D`, flesh-green).
 
 **Example:**
 
 ```lua
-app_bar.set_active_text_color("#4E9F3D")
-```
-
-### app_bar.set_active_box_color
-
-**Expects:** a hex color.
-
-**Does:** sets the background box color of the focused item.
-
-**Example:**
-
-```lua
-app_bar.set_active_box_color("#8B5E3C66")
+app_bar.set_active_item_color("#4E9F3D")
 ```
 
 ### app_bar.set_highlight_color
@@ -1605,7 +1597,7 @@ ring outline or the edge mark).
 app_bar.set_highlight_color("#4E9F3D")
 ```
 
-### app_bar.set_hover_color
+### app_bar.set_hover_fill_color
 
 **Expects:** a hex color.
 
@@ -1615,10 +1607,10 @@ app_bar.set_highlight_color("#4E9F3D")
 **Example:**
 
 ```lua
-app_bar.set_hover_color("#6DBF5B80")
+app_bar.set_hover_fill_color("#6DBF5B80")
 ```
 
-### app_bar.set_hover_text_color
+### app_bar.set_hover_item_color
 
 **Expects:** a hex color.
 
@@ -1627,24 +1619,7 @@ app_bar.set_hover_color("#6DBF5B80")
 **Example:**
 
 ```lua
-app_bar.set_hover_text_color("#F2EBD9")
-```
-
-### app_bar.set_background_color
-
-**Expects:** a hex color.
-
-**Does:** sets the strip background (default fully
-transparent). Under `tab_background` `material` this color is
-the Liquid Glass **tint** (the Settings field relabels to
-"Tint" there); fully transparent means clear, untinted glass.
-Under `plain` the strip fills from `box_color`, so this color
-is never visible (the Settings field greys out).
-
-**Example:**
-
-```lua
-app_bar.set_background_color("#00000000")
+app_bar.set_hover_item_color("#F2EBD9")
 ```
 
 ### app_bar.set_group_badge_color
@@ -1718,8 +1693,8 @@ the App Bar: the Space Bar always sits at the screen edge, the
 App Bar next to the windows, and the insets add. All settings
 are global — there are no per-layout overrides.
 
-Two accents distinguish states: `text_color` paints inactive
-Spaces, `active_text_color` the active Space, and
+Two accents distinguish states: `item_color` paints inactive
+Spaces, `active_item_color` the active Space, and
 `focused_item_color` the focused window's glyph inside the
 active Space. Untinted content — emoji identifiers and native
 app images — dims to half strength on inactive Spaces instead.
@@ -1961,28 +1936,28 @@ space_bar.set_spring_delay(1000)
 Same `#RRGGBB` / `#RRGGBBAA` grammar as every other color
 setting. The three-state ladder is the bar's signature:
 
-- `space_bar.set_text_color` — inactive Spaces (default
+- `space_bar.set_item_color` — inactive Spaces (default
   `#F2EBD966`).
-- `space_bar.set_active_text_color` — the active Space's
+- `space_bar.set_active_item_color` — the active Space's
   identifier and glyphs (default `#4E9F3D`).
-- `space_bar.set_focused_item_color` — the focused window's
-  glyph inside the active Space (default `#E8A33D`, a
-  deliberately different hue so "focused window" never washes
-  into the active-Space green).
-- `space_bar.set_hover_color` / `space_bar.set_hover_text_color`
+- `space_bar.set_focused_item_color` — the focused window
+  wherever it shows: its glyph inside the active Space and the
+  front-app segment (default `#E8A33D`, a deliberately different
+  hue so "focused window" never washes into the active-Space
+  green).
+- `space_bar.set_hover_fill_color` / `space_bar.set_hover_item_color`
   — hover tint on non-active items.
-- `space_bar.set_box_color` / `space_bar.set_active_box_color` /
-  `space_bar.set_highlight_color` /
-  `space_bar.set_background_color` — as the App Bar.
+- `space_bar.set_fill_color` / `space_bar.set_highlight_color` —
+  as the App Bar (`fill_color` is the box / plate / glass tint).
 - `space_bar.set_group_badge_color` /
   `space_bar.set_group_badge_text_color` — the count and `+n`
   overflow badges (active Space; inactive Spaces mute them
-  from `text_color`).
+  from `item_color`).
 
 **Example:**
 
 ```lua
-space_bar.set_active_text_color("#4E9F3D")
+space_bar.set_active_item_color("#4E9F3D")
 space_bar.set_focused_item_color("#E8A33D")
 ```
 

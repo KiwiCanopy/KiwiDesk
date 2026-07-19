@@ -6,6 +6,13 @@ import Foundation
 /// JSON spellings; the Codable conformance stays with the
 /// struct (synthesized `encode` requires same-file).
 extension AppBarStyle {
+    /// The floor for `thickness` (pt), shared by both bars. Below
+    /// this the plate/border stroke and the glyph run collide and
+    /// the bar reads broken (QA 2026-07-19), so every entry point
+    /// clamps to it: profile decode, the Lua/CLI setter, and the
+    /// GUI slider's lower bound.
+    public static let minThickness: CGFloat = 20
+
     /// How each tab is backed. Orthogonal to `activeIndicator`:
     /// the background is drawn the same on every tab, the
     /// indicator marks only the active one. An extensible set —
@@ -19,7 +26,7 @@ extension AppBarStyle {
         case plain
         /// A macOS 26 Liquid Glass plate under the items — one
         /// shared plate like `plain`, but a live glass material
-        /// tinted by `background_color` (#390). macOS 26+ only:
+        /// tinted by `fill_color` (#390). macOS 26+ only:
         /// the value round-trips everywhere, but on older macOS it
         /// *renders* as `boxed` (see `rendered(glassAvailable:)`);
         /// the GUI only offers it where it can render.

@@ -58,25 +58,26 @@ public struct AppBarStyle: Sendable, Equatable {
     /// pt, so it can't exceed thickness/2 (which rendered tabs
     /// as pointed hexagons) and self-adapts to any thickness.
     public var cornerRoundness: CGFloat = 50
-    /// Kiwi theme: cream text in translucent shell-brown
-    /// boxes; the active item turns flesh-green while its box
-    /// stays brown.
-    public var textColor = "#F2EBD9"
-    public var boxColor = "#8B5E3C66"
-    public var activeTextColor = "#4E9F3D"
-    public var activeBoxColor = "#8B5E3C66"
+    /// Kiwi theme: cream item text/glyph, a translucent
+    /// shell-brown fill (box, plate, or glass tint), a
+    /// flesh-green active accent.
+    public var itemColor = "#F2EBD9"
+    /// The fill under the items — a box per item (Boxed), one
+    /// shared plate (Plain), or the Liquid Glass tint
+    /// (Material). One knob, three renders.
+    public var fillColor = "#8B5E3C66"
+    public var activeItemColor = "#4E9F3D"
     public var highlightColor = "#4E9F3D"
     /// Hover feedback on clickable (non-active) items: a
     /// lighter, translucent kiwi green, deliberately a shade
     /// off the highlight so hover and active never read as
     /// the same state.
-    public var hoverColor = "#6DBF5B80"
-    /// Text while hovered; defaults to the normal text color
-    /// (the hover tint is translucent, so cream stays
-    /// readable through it) — the knob exists for themes
+    public var hoverFillColor = "#6DBF5B80"
+    /// Item text/glyph while hovered; defaults to the normal
+    /// item color (the hover tint is translucent, so cream
+    /// stays readable through it) — the knob exists for themes
     /// whose hover tint needs darker text.
-    public var hoverTextColor = "#F2EBD9"
-    public var backgroundColor = "#00000000"
+    public var hoverItemColor = "#F2EBD9"
     /// The count badge on grouped items.
     public var groupBadgeColor = "#FF3B30"
     public var groupBadgeTextColor = "#FFFFFF"
@@ -117,14 +118,12 @@ extension AppBarStyle: Codable {
         case groupAdjacentWindows = "group_adjacent_windows"
         case fontSize = "font_size"
         case cornerRoundness = "corner_roundness"
-        case textColor = "text_color"
-        case boxColor = "box_color"
-        case activeTextColor = "active_text_color"
-        case activeBoxColor = "active_box_color"
+        case itemColor = "item_color"
+        case fillColor = "fill_color"
+        case activeItemColor = "active_item_color"
         case highlightColor = "highlight_color"
-        case hoverColor = "hover_color"
-        case hoverTextColor = "hover_text_color"
-        case backgroundColor = "background_color"
+        case hoverFillColor = "hover_fill_color"
+        case hoverItemColor = "hover_item_color"
         case groupBadgeColor = "group_badge_color"
         case groupBadgeTextColor = "group_badge_text_color"
     }
@@ -146,11 +145,13 @@ extension AppBarStyle: Codable {
                 BarAlignment.self,
                 forKey: .alignment
             ) ?? defaults.alignment
-        thickness =
+        thickness = max(
+            Self.minThickness,
             try container.decodeIfPresent(
                 CGFloat.self,
                 forKey: .thickness
             ) ?? defaults.thickness
+        )
         tabBackground =
             try container.decodeIfPresent(
                 TabBackground.self,
@@ -208,46 +209,36 @@ extension AppBarStyle: Codable {
                 CGFloat.self,
                 forKey: .cornerRoundness
             ) ?? defaults.cornerRoundness
-        textColor =
+        itemColor =
             try container.decodeIfPresent(
                 String.self,
-                forKey: .textColor
-            ) ?? defaults.textColor
-        boxColor =
+                forKey: .itemColor
+            ) ?? defaults.itemColor
+        fillColor =
             try container.decodeIfPresent(
                 String.self,
-                forKey: .boxColor
-            ) ?? defaults.boxColor
-        activeTextColor =
+                forKey: .fillColor
+            ) ?? defaults.fillColor
+        activeItemColor =
             try container.decodeIfPresent(
                 String.self,
-                forKey: .activeTextColor
-            ) ?? defaults.activeTextColor
-        activeBoxColor =
-            try container.decodeIfPresent(
-                String.self,
-                forKey: .activeBoxColor
-            ) ?? defaults.activeBoxColor
+                forKey: .activeItemColor
+            ) ?? defaults.activeItemColor
         highlightColor =
             try container.decodeIfPresent(
                 String.self,
                 forKey: .highlightColor
             ) ?? defaults.highlightColor
-        hoverColor =
+        hoverFillColor =
             try container.decodeIfPresent(
                 String.self,
-                forKey: .hoverColor
-            ) ?? defaults.hoverColor
-        hoverTextColor =
+                forKey: .hoverFillColor
+            ) ?? defaults.hoverFillColor
+        hoverItemColor =
             try container.decodeIfPresent(
                 String.self,
-                forKey: .hoverTextColor
-            ) ?? defaults.hoverTextColor
-        backgroundColor =
-            try container.decodeIfPresent(
-                String.self,
-                forKey: .backgroundColor
-            ) ?? defaults.backgroundColor
+                forKey: .hoverItemColor
+            ) ?? defaults.hoverItemColor
         groupBadgeColor =
             try container.decodeIfPresent(
                 String.self,

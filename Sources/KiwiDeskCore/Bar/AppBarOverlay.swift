@@ -315,10 +315,10 @@ public final class AppBarOverlay {
                 height: zone
             )
         let colors = BarArrowColors(
-            text: NSColor(kiwiHex: style.textColor),
-            hoverText: NSColor(kiwiHex: style.hoverTextColor),
-            box: NSColor(kiwiHex: style.boxColor),
-            hover: NSColor(kiwiHex: style.hoverColor),
+            text: NSColor(kiwiHex: style.itemColor),
+            hoverText: NSColor(kiwiHex: style.hoverItemColor),
+            box: NSColor(kiwiHex: style.fillColor),
+            hover: NSColor(kiwiHex: style.hoverFillColor),
             cornerRoundness: style.cornerRoundness
         )
         backArrow.configure(

@@ -65,19 +65,15 @@ extension SpaceBarStyle {
             activeIndicator = appBar.activeIndicator
         case "corner_roundness":
             cornerRoundness = appBar.cornerRoundness
-        case "text_color": textColor = appBar.textColor
-        case "active_text_color":
-            activeTextColor = appBar.activeTextColor
-        case "hover_color": hoverColor = appBar.hoverColor
-        case "hover_text_color":
-            hoverTextColor = appBar.hoverTextColor
-        case "box_color": boxColor = appBar.boxColor
-        case "active_box_color":
-            activeBoxColor = appBar.activeBoxColor
+        case "item_color": itemColor = appBar.itemColor
+        case "active_item_color":
+            activeItemColor = appBar.activeItemColor
+        case "hover_fill_color": hoverFillColor = appBar.hoverFillColor
+        case "hover_item_color":
+            hoverItemColor = appBar.hoverItemColor
+        case "fill_color": fillColor = appBar.fillColor
         case "highlight_color":
             highlightColor = appBar.highlightColor
-        case "background_color":
-            backgroundColor = appBar.backgroundColor
         case "group_badge_color":
             groupBadgeColor = appBar.groupBadgeColor
         case "group_badge_text_color":

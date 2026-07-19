@@ -3,9 +3,9 @@ import Foundation
 /// The color surface a palette can set (#375): every color across
 /// the App Bar, Space Bar, focus borders, and drag visuals, as
 /// fully-qualified dotted paths matching the profile-JSON
-/// vocabulary (`app_bar.box_color`, `space_bar.box_color`,
+/// vocabulary (`app_bar.fill_color`, `space_bar.fill_color`,
 /// `border.focused_color`, `drag.ghost.fill_color`, …). The dotted
-/// namespace is load-bearing: bare wire keys like `box_color`
+/// namespace is load-bearing: bare wire keys like `fill_color`
 /// collide between the two bars.
 ///
 /// Reflection-derived: each struct's `_color`-suffixed CodingKeys,

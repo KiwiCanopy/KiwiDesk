@@ -63,8 +63,10 @@ public final class SpaceBarOverlay {
     var hitStrip: CGRect = .zero
     var hitFrames: [(space: SpaceID, frame: CGRect)] = []
     // The optional trailing front-app segment (#293 verdict 6):
-    // a divider rule, the focused app's glyph, and — on
-    // horizontal bars only — its name.
+    // a Boxed-only fill box behind the content, a divider rule,
+    // the focused app's glyph, and — on horizontal bars only —
+    // its name.
+    let frontBox = NSView()
     let frontDivider = NSView()
     let frontIcon = NSImageView()
     let frontGlyph: NSTextField = {

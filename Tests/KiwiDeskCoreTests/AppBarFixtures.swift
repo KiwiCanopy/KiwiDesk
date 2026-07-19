@@ -27,14 +27,12 @@ enum AppBarFixtures {
         style.groupAdjacentWindows = false
         style.fontSize = 15
         style.cornerRoundness = 5
-        style.textColor = "#010101"
-        style.boxColor = "#020202"
-        style.activeTextColor = "#030303"
-        style.activeBoxColor = "#040404"
+        style.itemColor = "#010101"
+        style.fillColor = "#020202"
+        style.activeItemColor = "#030303"
         style.highlightColor = "#050505"
-        style.hoverColor = "#060606"
-        style.hoverTextColor = "#070707"
-        style.backgroundColor = "#080808"
+        style.hoverFillColor = "#060606"
+        style.hoverItemColor = "#070707"
         style.groupBadgeColor = "#090909"
         style.groupBadgeTextColor = "#0A0A0A"
         return style
@@ -58,14 +56,12 @@ enum AppBarFixtures {
         bar.groupAdjacentWindows = true
         bar.fontSize = 20
         bar.cornerRoundness = 12
-        bar.textColor = "#111111"
-        bar.boxColor = "#222222"
-        bar.activeTextColor = "#333333"
-        bar.activeBoxColor = "#444444"
+        bar.itemColor = "#111111"
+        bar.fillColor = "#222222"
+        bar.activeItemColor = "#333333"
         bar.highlightColor = "#555555"
-        bar.hoverColor = "#666666"
-        bar.hoverTextColor = "#777777"
-        bar.backgroundColor = "#888888"
+        bar.hoverFillColor = "#666666"
+        bar.hoverItemColor = "#777777"
         bar.groupBadgeColor = "#999999"
         bar.groupBadgeTextColor = "#AAAAAA"
         return bar

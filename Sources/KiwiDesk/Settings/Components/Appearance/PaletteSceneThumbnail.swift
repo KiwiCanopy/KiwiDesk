@@ -42,12 +42,12 @@ struct PaletteSceneThumbnail: View {
     /// active (accent), and a plain one.
     private var barStrip: some View {
         RoundedRectangle(cornerRadius: 4)
-            .fill(color("app_bar.box_color"))
+            .fill(color("app_bar.fill_color"))
             .frame(height: 16)
             .overlay(
                 HStack(spacing: 4) {
-                    pill(color("app_bar.text_color"))
-                    pill(color("app_bar.active_text_color"))
+                    pill(color("app_bar.item_color"))
+                    pill(color("app_bar.active_item_color"))
                         .overlay(
                             RoundedRectangle(cornerRadius: 2)
                                 .stroke(
@@ -55,7 +55,7 @@ struct PaletteSceneThumbnail: View {
                                     lineWidth: 1
                                 )
                         )
-                    pill(color("app_bar.text_color").opacity(0.6))
+                    pill(color("app_bar.item_color").opacity(0.6))
                     Spacer(minLength: 0)
                 }
                 .padding(.horizontal, 4)

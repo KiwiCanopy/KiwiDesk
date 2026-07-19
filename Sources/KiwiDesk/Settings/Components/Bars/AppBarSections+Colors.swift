@@ -7,15 +7,12 @@ import SwiftUI
 /// stays in `GlobalAppBarSection` (extensions can't hold
 /// state); only the row builders live here.
 extension GlobalAppBarSection {
-    // The three the preview strip reflects most, kept inline.
+    // The two the preview reflects most, kept inline: the fill
+    // under the tabs and the active-tab indicator accent.
     @ViewBuilder var inlineColors: some View {
         HexColorField(
-            label: L("app_bar.color.box", "Box"),
-            hex: $style.boxColor
-        )
-        HexColorField(
-            label: L("app_bar.color.active_box", "Active box"),
-            hex: $style.activeBoxColor
+            label: L("app_bar.color.fill", "Fill"),
+            hex: $style.fillColor
         )
         HexColorField(
             label: L("app_bar.color.highlight", "Highlight"),
@@ -27,53 +24,29 @@ extension GlobalAppBarSection {
     @ViewBuilder var advancedColors: some View {
         Group {
             HexColorField(
-                label: L("app_bar.color.text", "Text"),
-                hex: $style.textColor
+                label: L("app_bar.color.item", "Item"),
+                hex: $style.itemColor
             )
             HexColorField(
                 label: L(
-                    "app_bar.color.active_text",
-                    "Active text"
+                    "app_bar.color.active_item",
+                    "Active item"
                 ),
-                hex: $style.activeTextColor
+                hex: $style.activeItemColor
             )
             HexColorField(
-                label: L("app_bar.color.hover", "Hover"),
-                hex: $style.hoverColor
+                label: L("app_bar.color.hover_fill", "Hover fill"),
+                hex: $style.hoverFillColor
             )
             HexColorField(
                 label: L(
-                    "app_bar.color.hover_text",
-                    "Hover text"
+                    "app_bar.color.hover_item",
+                    "Hover item"
                 ),
-                hex: $style.hoverTextColor
+                hex: $style.hoverItemColor
             )
         }
         Group {
-            // Under Liquid Glass this field IS the glass tint
-            // (QA 2026-07-19) — relabel so that's discoverable.
-            // Plain fills the strip from Box, so it's the one
-            // mode where this color never shows: grey (#171).
-            HexColorField(
-                label: style.tabBackground == .material
-                    ? L("app_bar.color.tint", "Tint")
-                    : L(
-                        "app_bar.color.background",
-                        "Background"
-                    ),
-                hex: $style.backgroundColor
-            )
-            .modifier(
-                GreyOut(
-                    active: style.tabBackground == .plain,
-                    help: L(
-                        "app_bar.color.background.plain",
-                        "Plain fills the whole strip with the "
-                            + "Box color, so the background "
-                            + "color is never visible."
-                    )
-                )
-            )
             HexColorField(
                 label: L(
                     "app_bar.color.group_badge",

@@ -25,12 +25,12 @@ struct AppBarOverrideTests {
         var global = AppBarStyle()
         global.thickness = 20
         global.tabBackground = .plain
-        global.textColor = "#010203"
+        global.itemColor = "#010203"
         let bar = LayoutAppBar()
         let resolved = bar.resolved(with: global)
         #expect(resolved.thickness == 20)
         #expect(resolved.tabBackground == .plain)
-        #expect(resolved.textColor == "#010203")
+        #expect(resolved.itemColor == "#010203")
     }
 
     @Test("Set fields override just themselves")

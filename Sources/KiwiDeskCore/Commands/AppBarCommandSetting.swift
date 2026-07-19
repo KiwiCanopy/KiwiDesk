@@ -36,19 +36,17 @@ enum AppBarCommandSetting {
     case groupAdjacentWindows(Bool)
     case fontSize(CGFloat)
     case cornerRoundness(CGFloat)
-    case textColor(String)
-    case boxColor(String)
-    case activeTextColor(String)
-    case activeBoxColor(String)
+    case itemColor(String)
+    case fillColor(String)
+    case activeItemColor(String)
     case highlightColor(String)
-    case hoverColor(String)
-    case hoverTextColor(String)
-    case backgroundColor(String)
+    case hoverFillColor(String)
+    case hoverItemColor(String)
     case groupBadgeColor(String)
     case groupBadgeTextColor(String)
 
     /// Parses a setter `field` — the command name minus its
-    /// prefix (`thickness`, `active_style`, `text_color`, …) —
+    /// prefix (`thickness`, `active_style`, `item_color`, …) —
     /// and its args. `.failure` carries the error message.
     static func parse(
         field: String,
@@ -143,14 +141,12 @@ enum AppBarCommandSetting {
     /// this is called.
     static var colorFields: [String: (String) -> AppBarCommandSetting] {
         [
-            "text_color": Self.textColor,
-            "box_color": Self.boxColor,
-            "active_text_color": Self.activeTextColor,
-            "active_box_color": Self.activeBoxColor,
+            "item_color": Self.itemColor,
+            "fill_color": Self.fillColor,
+            "active_item_color": Self.activeItemColor,
             "highlight_color": Self.highlightColor,
-            "hover_color": Self.hoverColor,
-            "hover_text_color": Self.hoverTextColor,
-            "background_color": Self.backgroundColor,
+            "hover_fill_color": Self.hoverFillColor,
+            "hover_item_color": Self.hoverItemColor,
             "group_badge_color": Self.groupBadgeColor,
             "group_badge_text_color": Self.groupBadgeTextColor,
         ]
@@ -194,7 +190,8 @@ enum AppBarCommandSetting {
         switch self {
         case .edge(let value): style.edge = value
         case .alignment(let value): style.alignment = value
-        case .thickness(let value): style.thickness = value
+        case .thickness(let value):
+            style.thickness = max(AppBarStyle.minThickness, value)
         case .tabBackground(let value):
             style.tabBackground = value
         case .tabBackgroundFit(let value):
@@ -210,19 +207,15 @@ enum AppBarCommandSetting {
         case .fontSize(let value): style.fontSize = value
         case .cornerRoundness(let value):
             style.cornerRoundness = value
-        case .textColor(let value): style.textColor = value
-        case .boxColor(let value): style.boxColor = value
-        case .activeTextColor(let value):
-            style.activeTextColor = value
-        case .activeBoxColor(let value):
-            style.activeBoxColor = value
+        case .itemColor(let value): style.itemColor = value
+        case .fillColor(let value): style.fillColor = value
+        case .activeItemColor(let value):
+            style.activeItemColor = value
         case .highlightColor(let value):
             style.highlightColor = value
-        case .hoverColor(let value): style.hoverColor = value
-        case .hoverTextColor(let value):
-            style.hoverTextColor = value
-        case .backgroundColor(let value):
-            style.backgroundColor = value
+        case .hoverFillColor(let value): style.hoverFillColor = value
+        case .hoverItemColor(let value):
+            style.hoverItemColor = value
         case .groupBadgeColor(let value):
             style.groupBadgeColor = value
         case .groupBadgeTextColor(let value):
@@ -235,7 +228,8 @@ enum AppBarCommandSetting {
         switch self {
         case .edge(let value): bar.edge = value
         case .alignment(let value): bar.alignment = value
-        case .thickness(let value): bar.thickness = value
+        case .thickness(let value):
+            bar.thickness = max(AppBarStyle.minThickness, value)
         case .tabBackground(let value): bar.tabBackground = value
         case .tabBackgroundFit(let value):
             bar.tabBackgroundFit = value
@@ -250,19 +244,15 @@ enum AppBarCommandSetting {
         case .fontSize(let value): bar.fontSize = value
         case .cornerRoundness(let value):
             bar.cornerRoundness = value
-        case .textColor(let value): bar.textColor = value
-        case .boxColor(let value): bar.boxColor = value
-        case .activeTextColor(let value):
-            bar.activeTextColor = value
-        case .activeBoxColor(let value):
-            bar.activeBoxColor = value
+        case .itemColor(let value): bar.itemColor = value
+        case .fillColor(let value): bar.fillColor = value
+        case .activeItemColor(let value):
+            bar.activeItemColor = value
         case .highlightColor(let value):
             bar.highlightColor = value
-        case .hoverColor(let value): bar.hoverColor = value
-        case .hoverTextColor(let value):
-            bar.hoverTextColor = value
-        case .backgroundColor(let value):
-            bar.backgroundColor = value
+        case .hoverFillColor(let value): bar.hoverFillColor = value
+        case .hoverItemColor(let value):
+            bar.hoverItemColor = value
         case .groupBadgeColor(let value):
             bar.groupBadgeColor = value
         case .groupBadgeTextColor(let value):

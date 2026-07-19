@@ -75,21 +75,28 @@ struct AppBarPreviewStrip: View {
             maxHeight: plateSpansCanvas
                 && !style.edge.isHorizontal ? .infinity : nil
         )
-        .background(
-            // Plain draws every name on one shared box (the strip
-            // itself); Boxed keeps the strip in the background
-            // color and boxes each tab.
-            RoundedRectangle(
-                cornerRadius: style.tabBackground.rendered
-                    != .boxed ? corner : 0
-            )
-            .fill(
-                color(
-                    style.tabBackground == .plain
-                        ? style.boxColor : style.backgroundColor
-                )
-            )
+        .background(stripBackground)
+    }
+
+    /// The shared plate under the tabs: Plain fills it with the
+    /// Fill color; Material shows a frosted-glass proxy (the mock
+    /// can't host a live `NSGlassEffectView`) tinted by Fill;
+    /// Boxed draws no shared plate (each tab boxes itself).
+    @ViewBuilder private var stripBackground: some View {
+        let shape = RoundedRectangle(
+            cornerRadius: style.tabBackground.rendered
+                != .boxed ? corner : 0
         )
+        switch style.tabBackground.rendered {
+        case .material:
+            shape
+                .fill(.ultraThinMaterial)
+                .overlay(shape.fill(color(style.fillColor)))
+        case .plain:
+            shape.fill(color(style.fillColor))
+        case .boxed:
+            shape.fill(Color.clear)
+        }
     }
 
     private var plateSpansCanvas: Bool {
@@ -125,7 +132,7 @@ struct AppBarPreviewStrip: View {
                     cornerRadius: style.tabBackground == .boxed
                         ? corner : 0
                 )
-                .fill(boxColor(t))
+                .fill(boxFill(t))
             )
             .overlay(activeAccent(t))
             .overlay(alignment: .topTrailing) { badge(t) }
@@ -173,7 +180,7 @@ struct AppBarPreviewStrip: View {
 
     private func textColor(_ t: MockTab) -> Color {
         color(
-            t.active ? style.activeTextColor : style.textColor
+            t.active ? style.activeItemColor : style.itemColor
         )
     }
 
@@ -267,15 +274,15 @@ struct AppBarPreviewStrip: View {
 
     // MARK: - Colors
 
-    private func boxColor(_ t: MockTab) -> Color {
+    private func boxFill(_ t: MockTab) -> Color {
         switch style.tabBackground {
-        // Glass renders boxless like plain in the static preview.
+        // Plain / Material draw one shared plate, no per-tab box.
         case .plain, .material:
             return .clear
+        // One Fill for every box; the active tab is marked by the
+        // indicator, not a different fill.
         case .boxed:
-            return color(
-                t.active ? style.activeBoxColor : style.boxColor
-            )
+            return color(style.fillColor)
         }
     }
 

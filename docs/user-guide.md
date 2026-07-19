@@ -759,14 +759,15 @@ running windows.
   Rounds the boxed tabs, or the shared plate under Plain and
   Liquid Glass.
 
-**Colors:** Box, Active box, and Highlight — the ones the preview
-strip most visibly reflects — sit inline. The rest of the palette
-(text, active text, hover states, background, and group badge)
-collapses behind an **Advanced colors** disclosure, shut by
-default. The Background field relabels to **Tint** while Liquid
-Glass is selected (it tints the glass; transparent = clear), and
-greys while Plain is selected (Plain fills the strip from the
-Box color, so a background is never visible).
+**Colors:** Fill and Highlight — the ones the preview strip most
+visibly reflects — sit inline. The rest of the palette (item,
+active item, hover states, and group badge) collapses behind an
+**Advanced colors** disclosure, shut by default. **Fill** is one
+knob for every filled surface: the box per tab (Boxed), the shared
+plate (Plain), or the Liquid Glass **tint** (Material) — a
+transparent Fill means clear, untinted glass. The active tab is
+marked by the indicator (ring or edge mark), so there is no
+separate active-fill color.
 
 **Per-layout overrides:**
 

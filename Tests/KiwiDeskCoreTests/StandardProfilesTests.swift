@@ -134,7 +134,7 @@ struct ProfileCompositionTests {
         )
         #expect(composed.sourceName == "Developer")
         #expect(composed.spaces.count == 4)
-        #expect(composed.spaceModes[SpaceID(1)] == .bsp)
+        #expect(composed.spaceModes[SpaceID(1)] == .grid)
         #expect(composed.spaceModes[SpaceID(2)] == .stack)
         for space in composed.spaces {
             #expect(composed.assignment[space] == DisplayID(1))

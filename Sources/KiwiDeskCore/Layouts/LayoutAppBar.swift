@@ -35,14 +35,12 @@ public struct LayoutAppBar: Sendable, Equatable {
     public var groupAdjacentWindows: Bool?
     public var fontSize: CGFloat?
     public var cornerRoundness: CGFloat?
-    public var textColor: String?
-    public var boxColor: String?
-    public var activeTextColor: String?
-    public var activeBoxColor: String?
+    public var itemColor: String?
+    public var fillColor: String?
+    public var activeItemColor: String?
     public var highlightColor: String?
-    public var hoverColor: String?
-    public var hoverTextColor: String?
-    public var backgroundColor: String?
+    public var hoverFillColor: String?
+    public var hoverItemColor: String?
     public var groupBadgeColor: String?
     public var groupBadgeTextColor: String?
 
@@ -55,7 +53,13 @@ public struct LayoutAppBar: Sendable, Equatable {
         var out = base
         if let edge { out.edge = edge }
         if let alignment { out.alignment = alignment }
-        if let thickness { out.thickness = thickness }
+        // Clamp here too: an override decoded straight from a
+        // hand-edited profile skips the command-path floor, and
+        // `resolved(with:)` is the single funnel producing the
+        // effective style — so the `minThickness` invariant holds.
+        if let thickness {
+            out.thickness = max(AppBarStyle.minThickness, thickness)
+        }
         if let tabBackground { out.tabBackground = tabBackground }
         if let tabBackgroundFit {
             out.tabBackgroundFit = tabBackgroundFit
@@ -74,23 +78,17 @@ public struct LayoutAppBar: Sendable, Equatable {
         if let cornerRoundness {
             out.cornerRoundness = cornerRoundness
         }
-        if let textColor { out.textColor = textColor }
-        if let boxColor { out.boxColor = boxColor }
-        if let activeTextColor {
-            out.activeTextColor = activeTextColor
-        }
-        if let activeBoxColor {
-            out.activeBoxColor = activeBoxColor
+        if let itemColor { out.itemColor = itemColor }
+        if let fillColor { out.fillColor = fillColor }
+        if let activeItemColor {
+            out.activeItemColor = activeItemColor
         }
         if let highlightColor {
             out.highlightColor = highlightColor
         }
-        if let hoverColor { out.hoverColor = hoverColor }
-        if let hoverTextColor {
-            out.hoverTextColor = hoverTextColor
-        }
-        if let backgroundColor {
-            out.backgroundColor = backgroundColor
+        if let hoverFillColor { out.hoverFillColor = hoverFillColor }
+        if let hoverItemColor {
+            out.hoverItemColor = hoverItemColor
         }
         if let groupBadgeColor {
             out.groupBadgeColor = groupBadgeColor
@@ -128,14 +126,12 @@ extension LayoutAppBar: Codable {
         case groupAdjacentWindows = "group_adjacent_windows"
         case fontSize = "font_size"
         case cornerRoundness = "corner_roundness"
-        case textColor = "text_color"
-        case boxColor = "box_color"
-        case activeTextColor = "active_text_color"
-        case activeBoxColor = "active_box_color"
+        case itemColor = "item_color"
+        case fillColor = "fill_color"
+        case activeItemColor = "active_item_color"
         case highlightColor = "highlight_color"
-        case hoverColor = "hover_color"
-        case hoverTextColor = "hover_text_color"
-        case backgroundColor = "background_color"
+        case hoverFillColor = "hover_fill_color"
+        case hoverItemColor = "hover_item_color"
         case groupBadgeColor = "group_badge_color"
         case groupBadgeTextColor = "group_badge_text_color"
     }
@@ -205,37 +201,29 @@ extension LayoutAppBar: Codable {
             CGFloat.self,
             forKey: .cornerRoundness
         )
-        textColor = try container.decodeIfPresent(
+        itemColor = try container.decodeIfPresent(
             String.self,
-            forKey: .textColor
+            forKey: .itemColor
         )
-        boxColor = try container.decodeIfPresent(
+        fillColor = try container.decodeIfPresent(
             String.self,
-            forKey: .boxColor
+            forKey: .fillColor
         )
-        activeTextColor = try container.decodeIfPresent(
+        activeItemColor = try container.decodeIfPresent(
             String.self,
-            forKey: .activeTextColor
-        )
-        activeBoxColor = try container.decodeIfPresent(
-            String.self,
-            forKey: .activeBoxColor
+            forKey: .activeItemColor
         )
         highlightColor = try container.decodeIfPresent(
             String.self,
             forKey: .highlightColor
         )
-        hoverColor = try container.decodeIfPresent(
+        hoverFillColor = try container.decodeIfPresent(
             String.self,
-            forKey: .hoverColor
+            forKey: .hoverFillColor
         )
-        hoverTextColor = try container.decodeIfPresent(
+        hoverItemColor = try container.decodeIfPresent(
             String.self,
-            forKey: .hoverTextColor
-        )
-        backgroundColor = try container.decodeIfPresent(
-            String.self,
-            forKey: .backgroundColor
+            forKey: .hoverItemColor
         )
         groupBadgeColor = try container.decodeIfPresent(
             String.self,
@@ -294,33 +282,25 @@ extension LayoutAppBar: Codable {
         into container: inout KeyedEncodingContainer<Key>
     ) throws {
         try container.encodeIfPresent(
-            textColor,
-            forKey: .textColor
+            itemColor,
+            forKey: .itemColor
         )
-        try container.encodeIfPresent(boxColor, forKey: .boxColor)
+        try container.encodeIfPresent(fillColor, forKey: .fillColor)
         try container.encodeIfPresent(
-            activeTextColor,
-            forKey: .activeTextColor
-        )
-        try container.encodeIfPresent(
-            activeBoxColor,
-            forKey: .activeBoxColor
+            activeItemColor,
+            forKey: .activeItemColor
         )
         try container.encodeIfPresent(
             highlightColor,
             forKey: .highlightColor
         )
         try container.encodeIfPresent(
-            hoverColor,
-            forKey: .hoverColor
+            hoverFillColor,
+            forKey: .hoverFillColor
         )
         try container.encodeIfPresent(
-            hoverTextColor,
-            forKey: .hoverTextColor
-        )
-        try container.encodeIfPresent(
-            backgroundColor,
-            forKey: .backgroundColor
+            hoverItemColor,
+            forKey: .hoverItemColor
         )
         try container.encodeIfPresent(
             groupBadgeColor,

@@ -228,10 +228,10 @@ final class AppBarItemView: NSView {
     }
 
     private var textColorHex: String {
-        if isHovered { return style.hoverTextColor }
+        if isHovered { return style.hoverItemColor }
         return isActive
-            ? style.activeTextColor
-            : style.textColor
+            ? style.activeItemColor
+            : style.itemColor
     }
 
     /// Whether this tab paints a box behind its content: always
@@ -247,12 +247,12 @@ final class AppBarItemView: NSView {
     // target) is a schematic twin of this box/accent logic —
     // keep the two in step when the box or accent rules change.
     private var boxColorHex: String {
-        if isHovered { return style.hoverColor }
+        if isHovered { return style.hoverFillColor }
         switch style.tabBackground.rendered {
         case .boxed:
-            return isActive
-                ? style.activeBoxColor
-                : style.boxColor
+            // One fill for every box — active is marked by the
+            // indicator, not a distinct fill (color merge).
+            return style.fillColor
         // `material` is boxless like `plain` — the glass plate is
         // the background, so items paint no box of their own.
         case .plain, .material:

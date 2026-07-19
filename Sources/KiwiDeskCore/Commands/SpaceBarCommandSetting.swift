@@ -23,15 +23,13 @@ enum SpaceBarCommandSetting {
     case showFrontApp(Bool)
     case hideEmpty(Bool)
     case springDelay(Int)
-    case textColor(String)
-    case activeTextColor(String)
+    case itemColor(String)
+    case activeItemColor(String)
     case focusedItemColor(String)
-    case hoverColor(String)
-    case hoverTextColor(String)
-    case boxColor(String)
-    case activeBoxColor(String)
+    case hoverFillColor(String)
+    case hoverItemColor(String)
+    case fillColor(String)
     case highlightColor(String)
-    case backgroundColor(String)
     case groupBadgeColor(String)
     case groupBadgeTextColor(String)
 
@@ -136,15 +134,13 @@ enum SpaceBarCommandSetting {
     /// the same validated field setters; see the AppBar twin.
     static var colorFields: [String: (String) -> SpaceBarCommandSetting] {
         [
-            "text_color": Self.textColor,
-            "active_text_color": Self.activeTextColor,
+            "item_color": Self.itemColor,
+            "active_item_color": Self.activeItemColor,
             "focused_item_color": Self.focusedItemColor,
-            "hover_color": Self.hoverColor,
-            "hover_text_color": Self.hoverTextColor,
-            "box_color": Self.boxColor,
-            "active_box_color": Self.activeBoxColor,
+            "hover_fill_color": Self.hoverFillColor,
+            "hover_item_color": Self.hoverItemColor,
+            "fill_color": Self.fillColor,
             "highlight_color": Self.highlightColor,
-            "background_color": Self.backgroundColor,
             "group_badge_color": Self.groupBadgeColor,
             "group_badge_text_color": Self.groupBadgeTextColor,
         ]
@@ -233,7 +229,8 @@ enum SpaceBarCommandSetting {
         case .enabled(let value): style.enabled = value
         case .edge(let value): style.edge = value
         case .alignment(let value): style.alignment = value
-        case .thickness(let value): style.thickness = value
+        case .thickness(let value):
+            style.thickness = max(AppBarStyle.minThickness, value)
         case .boxSize(let value): style.boxSize = value
         case .boxGap(let value): style.boxGap = value
         case .fontSize(let value): style.fontSize = value
@@ -252,21 +249,17 @@ enum SpaceBarCommandSetting {
         case .hideEmpty(let value): style.hideEmpty = value
         case .springDelay(let value):
             style.springDelay = value
-        case .textColor(let value): style.textColor = value
-        case .activeTextColor(let value):
-            style.activeTextColor = value
+        case .itemColor(let value): style.itemColor = value
+        case .activeItemColor(let value):
+            style.activeItemColor = value
         case .focusedItemColor(let value):
             style.focusedItemColor = value
-        case .hoverColor(let value): style.hoverColor = value
-        case .hoverTextColor(let value):
-            style.hoverTextColor = value
-        case .boxColor(let value): style.boxColor = value
-        case .activeBoxColor(let value):
-            style.activeBoxColor = value
+        case .hoverFillColor(let value): style.hoverFillColor = value
+        case .hoverItemColor(let value):
+            style.hoverItemColor = value
+        case .fillColor(let value): style.fillColor = value
         case .highlightColor(let value):
             style.highlightColor = value
-        case .backgroundColor(let value):
-            style.backgroundColor = value
         case .groupBadgeColor(let value):
             style.groupBadgeColor = value
         case .groupBadgeTextColor(let value):

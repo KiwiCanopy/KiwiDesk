@@ -28,15 +28,13 @@ enum SpaceBarFixtures {
         style.showFrontApp = true
         style.hideEmpty = true
         style.springDelay = 1000
-        style.textColor = "#010101"
-        style.activeTextColor = "#020202"
+        style.itemColor = "#010101"
+        style.activeItemColor = "#020202"
         style.focusedItemColor = "#030303"
-        style.hoverColor = "#040404"
-        style.hoverTextColor = "#050505"
-        style.boxColor = "#060606"
-        style.activeBoxColor = "#070707"
+        style.hoverFillColor = "#040404"
+        style.hoverItemColor = "#050505"
+        style.fillColor = "#060606"
         style.highlightColor = "#080808"
-        style.backgroundColor = "#090909"
         style.groupBadgeColor = "#0A0A0A"
         style.groupBadgeTextColor = "#0B0B0B"
         return style

@@ -79,7 +79,7 @@ struct SpaceBarPreviewStrip: View {
     @ViewBuilder private var coexistence: some View {
         if sameEdge {
             RoundedRectangle(cornerRadius: 3)
-                .fill(color(appBar.boxColor))
+                .fill(color(appBar.fillColor))
                 .frame(
                     width: style.edge.isHorizontal
                         ? nil : thickness * 0.6,
@@ -106,19 +106,28 @@ struct SpaceBarPreviewStrip: View {
             maxHeight: plateSpansCanvas
                 && !style.edge.isHorizontal ? .infinity : nil
         )
-        .background(
-            RoundedRectangle(
-                cornerRadius: style.tabBackground.rendered
-                    != .boxed ? corner : 0
-            )
-            .fill(
-                color(
-                    style.tabBackground == .plain
-                        ? style.boxColor
-                        : style.backgroundColor
-                )
-            )
+        .background(stripBackground)
+    }
+
+    /// The shared plate under the Space items: Plain fills it
+    /// with the Fill color; Material shows a frosted-glass proxy
+    /// (the mock can't host a live `NSGlassEffectView`) tinted by
+    /// Fill; Boxed draws no shared plate.
+    @ViewBuilder private var stripBackground: some View {
+        let shape = RoundedRectangle(
+            cornerRadius: style.tabBackground.rendered
+                != .boxed ? corner : 0
         )
+        switch style.tabBackground.rendered {
+        case .material:
+            shape
+                .fill(.ultraThinMaterial)
+                .overlay(shape.fill(color(style.fillColor)))
+        case .plain:
+            shape.fill(color(style.fillColor))
+        case .boxed:
+            shape.fill(Color.clear)
+        }
     }
 
     private var plateSpansCanvas: Bool {
@@ -144,8 +153,8 @@ struct SpaceBarPreviewStrip: View {
     /// inset) at every thickness.
     var thickness: CGFloat {
         style.edge.isHorizontal
-            ? scale(style.thickness, from: 8...80, to: 16...40)
-            : scale(style.thickness, from: 8...80, to: 14...24)
+            ? scale(style.thickness, from: 20...80, to: 16...40)
+            : scale(style.thickness, from: 20...80, to: 14...24)
     }
 
     /// Square glyph cell. Vertical budget: two items of
@@ -181,7 +190,7 @@ struct SpaceBarPreviewStrip: View {
         return min(base, thickness * 0.5, cell)
     }
 
-    var mutedColor: Color { color(style.textColor) }
+    var mutedColor: Color { color(style.itemColor) }
 
     private func scale(
         _ value: CGFloat,
