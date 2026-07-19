@@ -25,17 +25,27 @@ enum GlassPlate {
 
     /// Sizes and tints an existing plate. A fully transparent
     /// `background_color` means clear glass (no tint).
+    /// `animated` eases a frame change through the caller's
+    /// `NSAnimationContext` group (the App Bar moves its plate
+    /// alongside its sliding tabs); fresh plates snap direct.
     @MainActor
     static func update(
         _ view: NSView,
         frame: CGRect,
         cornerRadius: CGFloat,
-        tintHex: String
+        tintHex: String,
+        animated: Bool = false
     ) {
         guard #available(macOS 26, *),
             let glass = view as? NSGlassEffectView
         else { return }
-        glass.frame = frame
+        if animated, glass.frame != .zero,
+            glass.frame != frame
+        {
+            glass.animator().frame = frame
+        } else {
+            glass.frame = frame
+        }
         glass.cornerRadius = cornerRadius
         let tint = NSColor(kiwiHex: tintHex)
         glass.tintColor =

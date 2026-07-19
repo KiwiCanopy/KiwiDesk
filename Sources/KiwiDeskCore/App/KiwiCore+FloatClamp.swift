@@ -28,9 +28,9 @@ extension KiwiCore {
         guard let space = state.workspaces.space(of: id)
         else { return frame }
         var result = frame
-        // Space Bar first, then App Bar: on a shared edge the
-        // App Bar sits window-facing (deeper), so its strip
-        // decides last and wins.
+        // Order is immaterial: each clamp is a monotonic push
+        // off its edge, so on a shared edge the deeper strip's
+        // push subsumes the shallower one's either way.
         for (strip, edge) in spaceBarStrips(forSpace: space) {
             result = AppBarGeometry.clampClear(
                 result,
@@ -70,29 +70,22 @@ extension KiwiCore {
     /// corrected here. Drag and resize clamp their own fresh
     /// frame directly.
     func clampFloatsClearOfBars() {
-        var strips: [(
-            space: SpaceID, strip: CGRect, edge: AppBarEdge
-        )] = appBars.shownStrips
-        // Space Bars occlude the same way (#293): clamp the
-        // floats of the space each covered display is showing.
-        strips += spaceBars.shownStrips.compactMap {
-            display,
-            strip,
-            edge in
-            state.workspaces.currentSpace(on: display)
-                .map { (space: $0, strip: strip, edge: edge) }
-        }
-        for (space, strip, edge) in strips {
+        for space in spacesWithShownBars {
             guard let windows = state.workspaces[space]?.windows
             else { continue }
             for id in windows {
                 guard let window = state.windows[id],
                     window.isFloating
                 else { continue }
-                let clamped = AppBarGeometry.clampClear(
-                    window.frame,
-                    of: strip,
-                    edge: edge
+                // One fold over every strip, one apply: the
+                // per-strip loop this replaces re-read the same
+                // stale state frame for each strip (applyFrame
+                // is async), so with stacked bars the second
+                // clamp overwrote the first instead of
+                // composing with it.
+                let clamped = floatFrameClampedClearOfBars(
+                    id,
+                    frame: window.frame
                 )
                 guard clamped != window.frame else { continue }
                 tiler.applyFrame(
@@ -103,5 +96,21 @@ extension KiwiCore {
                 )
             }
         }
+    }
+
+    /// Every space with at least one painted strip: the App
+    /// Bars' own spaces, plus the space each Space-Bar-covered
+    /// display is showing (#293: per-display bar, occludes the
+    /// current space).
+    private var spacesWithShownBars: Set<SpaceID> {
+        var spaces = Set(appBars.shownStrips.map(\.space))
+        for (display, _, _) in spaceBars.shownStrips {
+            guard
+                let space =
+                    state.workspaces.currentSpace(on: display)
+            else { continue }
+            spaces.insert(space)
+        }
+        return spaces
     }
 }

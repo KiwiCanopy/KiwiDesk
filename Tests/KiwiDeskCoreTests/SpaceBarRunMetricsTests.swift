@@ -57,7 +57,12 @@ struct SpaceBarRunMetricsTests {
 
     @Test("End alignment right-justifies, front extent included")
     func endAlignmentWithFront() {
-        // total = 68 + front 12 = 80; start = 200 - 80 - 4 = 116.
+        // total = 3 items (60) + 2 gaps (8) + the gap ahead of
+        // the front segment (4) + front 12 = 84;
+        // start = 200 - 84 - 4 = 112. `runTotal` counts that
+        // leading front gap since the QA round 2 review — it
+        // was missing, leaving the hug plate flush against the
+        // front app's trailing end.
         let m = SpaceBarOverlay.runMetrics(
             lengths: lengths,
             gap: 4,
@@ -69,13 +74,14 @@ struct SpaceBarRunMetricsTests {
             pad: 4,
             scrollOffset: 0
         )
-        #expect(m.itemFrames.first?.minX == 116)
+        #expect(m.itemFrames.first?.minX == 112)
         // The cursor advances a gap after every item (including
-        // the last), so the front segment starts one gap past the
-        // last item — a faithfully-preserved pre-extraction quirk:
-        // start 116 + 3 items (60) + 3 gaps (12) = 188.
-        #expect(m.frontStart == 188)
-        #expect(m.frontStart + 12 == 200)
+        // the last), so the front segment starts one gap past
+        // the last item: start 112 + 3 items (60) + 3 gaps (12)
+        // = 184, and the front segment ends a gap short of the
+        // viewport edge — its breathing room.
+        #expect(m.frontStart == 184)
+        #expect(m.frontStart + 12 + 4 == 200)
     }
 
     @Test("Vertical strip lays the run down the y axis")

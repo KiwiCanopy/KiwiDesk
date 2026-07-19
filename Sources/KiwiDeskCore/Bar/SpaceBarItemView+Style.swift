@@ -36,7 +36,8 @@ extension SpaceBarItemView {
     /// active space and under the pointer — legible enough to
     /// identify, clearly secondary.
     private var untintedAlpha: CGFloat {
-        isActive || isHovered || isDragHovered ? 1 : 0.5
+        isActive || isHovered || isDragHovered
+            ? 1 : BarAccent.untintedAlpha
     }
 
     /// Count and overflow badges follow the space state (#293
@@ -163,12 +164,13 @@ extension SpaceBarItemView {
             // old square accent poked past them (QA 2026-07-19).
             // Bounds-derived (not `accent.frame`): restyle runs
             // before layout places the accent, so the frame may
-            // be stale here. 3 = the 1.5pt capsule inset, twice.
+            // be stale here.
             accent.layer?.cornerRadius =
                 style.tabBackground.rendered == .boxed
                 ? cornerRadius
                 : max(
-                    (min(bounds.width, bounds.height) - 3) / 2,
+                    (min(bounds.width, bounds.height)
+                        - BarAccent.capsuleInset * 2) / 2,
                     0
                 )
         case .edgeMark:

@@ -100,8 +100,11 @@ struct SpaceBarEditorSection: View {
         )
         .modifier(
             GreyOut(
+                // `rendered`, not the raw field: a portable
+                // `material` config renders Boxed below
+                // macOS 26, where no plate exists to size.
                 active: style.wrappedValue.tabBackground
-                    == .boxed,
+                    .rendered == .boxed,
                 help: L(
                     "space_bar.tab_background_fit.boxed_only",
                     "Boxed draws a box per item, not a shared "

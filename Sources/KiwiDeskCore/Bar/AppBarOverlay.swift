@@ -207,25 +207,21 @@ public final class AppBarOverlay {
             horizontal: m.horizontal,
             fit: style.tabBackgroundFit
         )
-        updatePlainPlate(
-            panel,
-            style: style,
-            strip: strip,
-            plateFrame: plateFrame
-        )
-        updateGlassPlate(
-            panel,
-            style: style,
-            strip: strip,
-            plateFrame: plateFrame
-        )
         // Frame changes ease into place so group expansion
         // (and scroll-follow) widens out instead of popping;
-        // freshly created views take their frame directly.
+        // fresh views snap. The plates ride the same group —
+        // a hug plate must slide with the tabs it wraps.
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.15
             context.timingFunction = CAMediaTimingFunction(
                 name: .easeOut
+            )
+            updatePlates(
+                panel,
+                style: style,
+                strip: strip,
+                plateFrame: plateFrame,
+                animated: true
             )
             for (index, view) in itemViews.enumerated() {
                 if view.frame == .zero {

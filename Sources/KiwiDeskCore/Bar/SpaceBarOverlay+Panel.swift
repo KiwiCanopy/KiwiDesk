@@ -127,3 +127,28 @@ extension SpaceBarOverlay {
         return panel
     }
 }
+
+extension SpaceBarOverlay {
+    /// Both shared plates (plain fill, Liquid Glass) in one
+    /// call — exactly one is visible per mode, and both take
+    /// the same `BarPlate` frame authority.
+    func updatePlates(
+        _ panel: NSPanel,
+        style: SpaceBarStyle,
+        strip: CGRect,
+        plateFrame: CGRect
+    ) {
+        updatePlainPlate(
+            panel,
+            style: style,
+            strip: strip,
+            plateFrame: plateFrame
+        )
+        updateGlassPlate(
+            panel,
+            style: style,
+            strip: strip,
+            plateFrame: plateFrame
+        )
+    }
+}

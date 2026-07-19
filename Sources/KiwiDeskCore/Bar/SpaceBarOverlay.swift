@@ -210,13 +210,7 @@ public final class SpaceBarOverlay {
             horizontal: horizontal,
             fit: style.tabBackgroundFit
         )
-        updatePlainPlate(
-            panel,
-            style: style,
-            strip: strip,
-            plateFrame: plateFrame
-        )
-        updateGlassPlate(
+        updatePlates(
             panel,
             style: style,
             strip: strip,

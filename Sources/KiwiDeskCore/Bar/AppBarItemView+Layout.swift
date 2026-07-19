@@ -20,9 +20,11 @@ extension AppBarItemView {
     /// grows into a larger circle for multi-digit counts.
     private func layoutBadge() {
         guard !badge.isHidden else { return }
-        // 0.32/9: matches the Space Bar badge shrink (QA
-        // 2026-07-19) — the 0.38 ratio with a 10pt floor read
-        // oversized next to small icons.
+        // 0.32/9: same QA 2026-07-19 shrink decision as the
+        // Space Bar badge (whose numbers differ deliberately —
+        // it scales off the glyph cell, this off the slot) —
+        // the 0.38 ratio with a 10pt floor read oversized next
+        // to small icons.
         let baseHeight = min(
             max(
                 min(bounds.width, bounds.height) * 0.32,
@@ -197,7 +199,7 @@ extension AppBarItemView {
             // intentionally roundness-independent (there's no box
             // whose corners it should match), so it reads as a
             // clean selection outline rather than a fake pill.
-            let inset: CGFloat = 1.5
+            let inset = BarAccent.capsuleInset
             accent.frame = bounds.insetBy(dx: inset, dy: inset)
             accent.layer?.cornerRadius =
                 min(accent.frame.height, accent.frame.width) / 2

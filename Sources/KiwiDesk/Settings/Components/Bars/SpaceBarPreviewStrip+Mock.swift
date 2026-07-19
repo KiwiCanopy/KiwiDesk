@@ -138,8 +138,9 @@ extension SpaceBarPreviewStrip {
             case .ring:
                 // Runtime twin: flush box ring when Boxed, the
                 // App Bar's inset capsule on Plain/Liquid Glass
-                // (QA 2026-07-19).
-                if style.tabBackground == .boxed {
+                // (QA 2026-07-19). `rendered`: material shows
+                // its Boxed fallback below macOS 26.
+                if style.tabBackground.rendered == .boxed {
                     RoundedRectangle(cornerRadius: corner)
                         .strokeBorder(
                             color(style.highlightColor),
@@ -151,7 +152,7 @@ extension SpaceBarPreviewStrip {
                             color(style.highlightColor),
                             lineWidth: 2
                         )
-                        .padding(1.5)
+                        .padding(BarAccent.capsuleInset)
                 }
             case .edgeMark:
                 edgeMark

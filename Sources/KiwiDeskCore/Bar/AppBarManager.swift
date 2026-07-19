@@ -73,8 +73,7 @@ public final class AppBarManager {
     /// drifts (outer gaps, empty-bar suppression, per-display
     /// screen). Covers all displays, so a bar on a non-active
     /// monitor is included.
-    public var shownStrips:
-        [(space: SpaceID, strip: CGRect, edge: AppBarEdge)]
+    public var shownStrips: [(space: SpaceID, strip: CGRect, edge: AppBarEdge)]
     {
         shownBars.map {
             (

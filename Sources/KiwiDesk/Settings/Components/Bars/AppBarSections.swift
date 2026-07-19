@@ -126,7 +126,10 @@ struct GlobalAppBarSection: View {
         )
         .modifier(
             GreyOut(
-                active: style.tabBackground == .boxed,
+                // `rendered`, not the raw field: a portable
+                // `material` config renders Boxed below
+                // macOS 26, where no plate exists to size.
+                active: style.tabBackground.rendered == .boxed,
                 help: L(
                     "app_bar.tab_background_fit.boxed_only",
                     "Boxed draws a box per tab, not a shared "

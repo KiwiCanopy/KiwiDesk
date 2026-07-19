@@ -24,15 +24,26 @@ extension SpaceBarItemView {
         duration: TimeInterval,
         delay: TimeInterval
     ) {
-        let inset = springRing.lineWidth / 2
+        // Track the accent it morphs into: flush box ring when
+        // Boxed, the inset capsule on Plain/Liquid Glass (QA
+        // 2026-07-19 — a square sweep would poke past the hug
+        // plate's corners exactly like the old square accent).
+        let boxed = style.tabBackground.rendered == .boxed
+        var inset = springRing.lineWidth / 2
+        if !boxed { inset += BarAccent.capsuleInset }
+        let rect = bounds.insetBy(dx: inset, dy: inset)
+        let radius =
+            boxed
+            ? cornerRadius
+            : min(rect.width, rect.height) / 2
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         springRing.frame = bounds
         springRing.path =
             CGPath(
-                roundedRect: bounds.insetBy(dx: inset, dy: inset),
-                cornerWidth: cornerRadius,
-                cornerHeight: cornerRadius,
+                roundedRect: rect,
+                cornerWidth: radius,
+                cornerHeight: radius,
                 transform: nil
             )
         springRing.strokeColor =

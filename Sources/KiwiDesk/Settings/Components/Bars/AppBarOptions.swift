@@ -67,23 +67,22 @@ enum AppBarOptions {
     /// How far the shared plate reaches (QA 2026-07-19).
     /// Default (hug) first, like every options list here.
     @MainActor
-    static let tabBackgroundFit:
-        [(AppBarStyle.TabBackgroundFit, String)] = [
-            (
-                .hug,
-                L(
-                    "app_bar.tab_background_fit.hug",
-                    "Hug items"
-                )
-            ),
-            (
-                .full,
-                L(
-                    "app_bar.tab_background_fit.full",
-                    "Full width"
-                )
-            ),
-        ]
+    static let tabBackgroundFit: [(AppBarStyle.TabBackgroundFit, String)] = [
+        (
+            .hug,
+            L(
+                "app_bar.tab_background_fit.hug",
+                "Hug items"
+            )
+        ),
+        (
+            .full,
+            L(
+                "app_bar.tab_background_fit.full",
+                "Full width"
+            )
+        ),
+    ]
     @MainActor
     static let activeIndicator: [(AppBarStyle.ActiveIndicator, String)] = [
         (.ring, L("app_bar.active_indicator.ring", "Ring")),

@@ -85,8 +85,13 @@ extension SpaceBarOverlay {
         return RunMetrics(itemFrames: frames, frontStart: cursor)
     }
 
-    /// The full run length along the axis: every item, the gaps
-    /// between them, and the trailing front segment.
+    /// The full run length along the axis: every item, the
+    /// gaps between them, the gap ahead of the front segment
+    /// (`runMetrics`' cursor adds one after the last item), and
+    /// the front segment itself. Missing that gap left the hug
+    /// plate flush against the front app's trailing end while
+    /// the leading end kept its breathing room (QA round 2
+    /// review).
     nonisolated static func runTotal(
         lengths: [CGFloat],
         gap: CGFloat,
@@ -94,6 +99,7 @@ extension SpaceBarOverlay {
     ) -> CGFloat {
         lengths.reduce(0, +)
             + gap * CGFloat(max(lengths.count - 1, 0))
+            + (frontExtent > 0 && !lengths.isEmpty ? gap : 0)
             + frontExtent
     }
 

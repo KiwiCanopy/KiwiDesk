@@ -75,8 +75,8 @@ struct AppBarPreviewStrip: View {
             // itself); Boxed keeps the strip in the background
             // color and boxes each tab.
             RoundedRectangle(
-                cornerRadius: style.tabBackground != .boxed
-                    ? corner : 0
+                cornerRadius: style.tabBackground.rendered
+                    != .boxed ? corner : 0
             )
             .fill(
                 color(
@@ -88,7 +88,7 @@ struct AppBarPreviewStrip: View {
     }
 
     private var plateSpansCanvas: Bool {
-        style.tabBackground != .boxed
+        style.tabBackground.rendered != .boxed
             && style.tabBackgroundFit == .full
     }
 
@@ -162,7 +162,8 @@ struct AppBarPreviewStrip: View {
     /// 2026-07-19) — shape plus opacity carry the state, since
     /// a full-color icon takes no tint.
     private func iconOpacity(_ t: MockTab) -> Double {
-        style.iconSource == .appImage && !t.active ? 0.5 : 1
+        style.iconSource == .appImage && !t.active
+            ? BarAccent.untintedAlpha : 1
     }
 
     private func textColor(_ t: MockTab) -> Color {
@@ -213,7 +214,7 @@ struct AppBarPreviewStrip: View {
                 color(style.highlightColor),
                 lineWidth: 2
             )
-            .padding(1.5)
+            .padding(BarAccent.capsuleInset)
         }
     }
 

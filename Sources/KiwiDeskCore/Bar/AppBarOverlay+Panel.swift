@@ -38,7 +38,8 @@ extension AppBarOverlay {
         _ panel: NSPanel,
         style: AppBarStyle,
         strip: CGRect,
-        plateFrame: CGRect
+        plateFrame: CGRect,
+        animated: Bool = false
     ) {
         guard style.tabBackground.rendered == .plain,
             let content = panel.contentView
@@ -57,7 +58,16 @@ extension AppBarOverlay {
             )
         }
         plate.isHidden = false
-        plate.frame = plateFrame
+        // Ease alongside the tabs (same animation group): a
+        // snapping hug plate pops while the tabs it wraps are
+        // still sliding. Fresh plates take their frame direct.
+        if animated, plate.frame != .zero,
+            plate.frame != plateFrame
+        {
+            plate.animator().frame = plateFrame
+        } else {
+            plate.frame = plateFrame
+        }
         let depth =
             style.edge.isHorizontal ? strip.height : strip.width
         plate.layer?.cornerRadius =
@@ -72,7 +82,8 @@ extension AppBarOverlay {
         _ panel: NSPanel,
         style: AppBarStyle,
         strip: CGRect,
-        plateFrame: CGRect
+        plateFrame: CGRect,
+        animated: Bool = false
     ) {
         let depth =
             style.edge.isHorizontal ? strip.height : strip.width
@@ -100,7 +111,8 @@ extension AppBarOverlay {
             cornerRadius: style.resolvedCornerRadius(
                 forThickness: depth
             ),
-            tintHex: style.backgroundColor
+            tintHex: style.backgroundColor,
+            animated: animated
         )
     }
 
@@ -131,5 +143,33 @@ extension AppBarOverlay {
         view.addSubview(backArrow)
         view.addSubview(forwardArrow)
         return panel
+    }
+}
+
+extension AppBarOverlay {
+    /// Both shared plates (plain fill, Liquid Glass) in one
+    /// call — exactly one is visible per mode, and both take
+    /// the same `BarPlate` frame authority.
+    func updatePlates(
+        _ panel: NSPanel,
+        style: AppBarStyle,
+        strip: CGRect,
+        plateFrame: CGRect,
+        animated: Bool = false
+    ) {
+        updatePlainPlate(
+            panel,
+            style: style,
+            strip: strip,
+            plateFrame: plateFrame,
+            animated: animated
+        )
+        updateGlassPlate(
+            panel,
+            style: style,
+            strip: strip,
+            plateFrame: plateFrame,
+            animated: animated
+        )
     }
 }

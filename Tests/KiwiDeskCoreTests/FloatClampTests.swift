@@ -4,11 +4,12 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The pure geometry that keeps a floating window from hiding
-/// under a top app bar (#242; the top cases of `clampClear` —
-/// the other edges are covered in `SpaceBarGeometryTests`). AX coordinates: y grows downward,
+/// under a bar (#242; these are the top-edge cases of
+/// `clampClear` — the other edges are covered in
+/// `SpaceBarGeometryTests`). AX coordinates: y grows downward,
 /// `minY` is the top edge.
 @Suite("Float bar clamp, top edge")
-struct FloatTopBarClampTests {
+struct FloatClampTests {
     // A 40 pt top strip carved from the top of the usable area.
     private let strip = CGRect(x: 0, y: 0, width: 1920, height: 40)
 

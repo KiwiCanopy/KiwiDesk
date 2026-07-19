@@ -200,7 +200,10 @@ extension SpaceBarItemView {
             accent.frame =
                 style.tabBackground.rendered == .boxed
                 ? bounds
-                : bounds.insetBy(dx: 1.5, dy: 1.5)
+                : bounds.insetBy(
+                    dx: BarAccent.capsuleInset,
+                    dy: BarAccent.capsuleInset
+                )
         case .edgeMark:
             // On the window-facing side of the slot: a top bar
             // faces down, a left bar right, and so on. The view

@@ -199,7 +199,8 @@ final class AppBarItemView: NSView {
         // `untintedAlpha` rule: half strength when inactive,
         // shape (accent) plus opacity carry the state.
         iconView.alphaValue =
-            isActive || isHovered ? 1 : 0.5
+            isActive || isHovered
+            ? 1 : BarAccent.untintedAlpha
         layer?.backgroundColor =
             NSColor(kiwiHex: boxColorHex).cgColor
         applyCornerRadius()

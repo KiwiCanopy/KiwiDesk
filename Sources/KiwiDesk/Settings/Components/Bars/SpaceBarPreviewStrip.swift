@@ -103,8 +103,8 @@ struct SpaceBarPreviewStrip: View {
         )
         .background(
             RoundedRectangle(
-                cornerRadius: style.tabBackground != .boxed
-                    ? corner : 0
+                cornerRadius: style.tabBackground.rendered
+                    != .boxed ? corner : 0
             )
             .fill(
                 color(
@@ -117,7 +117,7 @@ struct SpaceBarPreviewStrip: View {
     }
 
     private var plateSpansCanvas: Bool {
-        style.tabBackground != .boxed
+        style.tabBackground.rendered != .boxed
             && style.tabBackgroundFit == .full
     }
 
