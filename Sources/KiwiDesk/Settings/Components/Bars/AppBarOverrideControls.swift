@@ -178,7 +178,8 @@ struct OverrideAutoSliderRow: View {
                 PtSlider(
                     label: label,
                     value: overrideValue($value, global: global),
-                    range: range
+                    range: range,
+                    autoAtZero: true
                 )
             }
         }

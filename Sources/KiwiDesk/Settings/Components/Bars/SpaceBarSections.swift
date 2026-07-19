@@ -196,7 +196,8 @@ struct SpaceBarEditorSection: View {
             PtSlider(
                 label: L("space_bar.box_size", "Box size"),
                 value: style.boxSize,
-                range: 1...200
+                range: 1...200,
+                autoAtZero: true
             )
         }
         PtSlider(
@@ -214,7 +215,8 @@ struct SpaceBarEditorSection: View {
             PtSlider(
                 label: L("space_bar.font_size", "Font size"),
                 value: style.fontSize,
-                range: 1...32
+                range: 1...32,
+                autoAtZero: true
             )
         }
         StepperRow(

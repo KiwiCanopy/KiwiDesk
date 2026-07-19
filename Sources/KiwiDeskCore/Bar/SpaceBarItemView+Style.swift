@@ -25,8 +25,7 @@ extension SpaceBarItemView {
     private func styleDivider() {
         identifierDivider.isHidden = apps.isEmpty
         identifierDivider.layer?.backgroundColor =
-            NSColor(kiwiHex: style.textColor)
-            .withAlphaComponent(SpaceBarStyle.frontDividerAlpha)
+            BarDivider.color(textColor: style.textColor)
             .cgColor
     }
 
@@ -172,19 +171,16 @@ extension SpaceBarItemView {
         }
     }
 
+    /// Both sizes read `SpaceBarStyle`'s one ladder — the
+    /// front-app glyph reads the same one, so every glyph
+    /// renders an app at one size.
     var identifierFont: CGFloat {
-        let thickness =
-            horizontal
-            ? bounds.height : bounds.width
-        let base =
-            style.fontSize > 0
-            ? style.fontSize : thickness * 0.5
-        return min(base, max(thickness - 8, 8))
+        style.identifierFontSize(
+            forDepth: horizontal ? bounds.height : bounds.width
+        )
     }
 
     var glyphSize: CGFloat {
-        // The shared ladder — the front-app glyph reads the
-        // same one, so both render an app at one size.
         style.glyphFontSize(
             forDepth: horizontal ? bounds.height : bounds.width
         )

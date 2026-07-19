@@ -169,7 +169,12 @@ struct GlobalAppBarSection: View {
         }
         .modifier(
             GreyOut(
-                active: style.content == .name,
+                // Gate on the RENDERED content: a vertical bar
+                // collapses Name to icon-only, so icons are on
+                // screen and this control must stay live.
+                active: style.content.rendered(
+                    horizontal: style.edge.isHorizontal
+                ) == .name,
                 help: L(
                     "app_bar.icon_source.name_only",
                     "Icons are hidden while Content is Name."
@@ -211,7 +216,8 @@ struct GlobalAppBarSection: View {
             PtSlider(
                 label: L("app_bar.box_size", "Box size"),
                 value: $style.boxSize,
-                range: 1...200
+                range: 1...200,
+                autoAtZero: true
             )
         }
         PtSlider(
@@ -226,7 +232,8 @@ struct GlobalAppBarSection: View {
             PtSlider(
                 label: L("app_bar.font_size", "Font size"),
                 value: $style.fontSize,
-                range: 1...32
+                range: 1...32,
+                autoAtZero: true
             )
         }
         Divider()

@@ -274,13 +274,33 @@ struct LayoutAppBarColorOverrides: View {
                     value: $bar.hoverTextColor,
                     global: global.hoverTextColor
                 )
+                // Same mode-dependent role as the global
+                // editor: Tint under an effective Liquid
+                // Glass, greyed under an effective Plain
+                // (resolve pattern of the roundness row).
                 OverrideColorRow(
-                    label: L(
-                        "app_bar.color.background",
-                        "Background"
-                    ),
+                    label: bar.resolved(with: global)
+                        .tabBackground == .material
+                        ? L("app_bar.color.tint", "Tint")
+                        : L(
+                            "app_bar.color.background",
+                            "Background"
+                        ),
                     value: $bar.backgroundColor,
                     global: global.backgroundColor
+                )
+                .modifier(
+                    GreyOut(
+                        active: bar.resolved(with: global)
+                            .tabBackground == .plain,
+                        help: L(
+                            "app_bar.color.background.plain",
+                            "Plain fills the whole strip with "
+                                + "the Box color, so the "
+                                + "background color is never "
+                                + "visible."
+                        )
+                    )
                 )
                 OverrideColorRow(
                     label: L(

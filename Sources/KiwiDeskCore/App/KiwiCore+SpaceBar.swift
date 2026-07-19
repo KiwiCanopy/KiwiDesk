@@ -178,8 +178,8 @@ extension KiwiCore {
 
     /// The configured Space icon (SF Symbol | emoji | single
     /// character), or the settled fallbacks: numeric id →
-    /// `N.square`, named space → 2-character uppercase
-    /// monogram.
+    /// plain tinted digits, named space → 2-character
+    /// uppercase monogram.
     func spaceIdentifier(
         for id: SpaceID
     ) -> SpaceBarItemView.Identifier {
@@ -210,7 +210,13 @@ extension KiwiCore {
         // uppercase-prefix (they are already their own short
         // string).
         if Int(id.raw) != nil {
-            return .text(id.raw, tinted: true)
+            // Three digits still fit the square cell; longer
+            // ids truncate like the monogram rather than clip
+            // under the item's masksToBounds.
+            return .text(
+                String(id.raw.prefix(3)),
+                tinted: true
+            )
         }
         return .text(
             String(id.raw.prefix(2)).uppercased(),

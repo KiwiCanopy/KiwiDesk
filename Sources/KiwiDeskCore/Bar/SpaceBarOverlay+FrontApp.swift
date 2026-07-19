@@ -31,7 +31,9 @@ extension SpaceBarOverlay {
             depth: depth,
             cell: cell,
             horizontal: horizontal,
-            color: NSColor(kiwiHex: style.textColor)
+            color: BarDivider.color(
+                textColor: style.textColor
+            )
         )
         offset += layoutFrontGlyph(
             app,
@@ -123,9 +125,7 @@ extension SpaceBarOverlay {
         color: NSColor
     ) -> CGFloat {
         frontDivider.isHidden = false
-        frontDivider.layer?.backgroundColor =
-            color.withAlphaComponent(SpaceBarStyle.frontDividerAlpha)
-            .cgColor
+        frontDivider.layer?.backgroundColor = color.cgColor
         frontDivider.frame = BarDivider.frame(
             at: offset,
             depth: depth,

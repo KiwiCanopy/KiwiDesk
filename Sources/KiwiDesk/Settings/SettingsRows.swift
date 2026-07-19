@@ -18,6 +18,12 @@ struct PtSlider: View {
     /// The readout unit; `pt` by default, `%` for proportion
     /// sliders (e.g. the App Bar corner roundness).
     var unit: String = "pt"
+    /// Opt-in: 0 is this slider's Auto sentinel (an
+    /// `AutoGatedGroup` toggle wrote it), so the readout says
+    /// "Auto" instead of "0 pt". Explicit, never inferred from
+    /// the range — a 1-floored slider without a sentinel must
+    /// keep printing its number (QA 2026-07-19).
+    var autoAtZero: Bool = false
     @Environment(\.settingsLabelColumn)
     private var labelColumn
 
@@ -34,11 +40,8 @@ struct PtSlider: View {
                 range: range,
                 step: 1
             )
-            // A 1-floored range can only hold 0 as the Auto
-            // sentinel (the gating toggle wrote it); "0 pt"
-            // there read like a broken value (QA 2026-07-19).
             Text(
-                value == 0 && range.lowerBound >= 1
+                autoAtZero && value == 0
                     ? L("settings.readout.auto", "Auto")
                     : "\(Int(value)) \(unit)"
             )

@@ -112,11 +112,10 @@ struct AppBarPreviewStrip: View {
             .overlay(alignment: .topTrailing) { badge(t) }
     }
 
-    /// Vertical edges never draw a horizontal name: the real
-    /// bar letter-stacks it ("S/a/f/…", `AppBarItemView`'s
-    /// stacked()) and hides text a slot can't fit. The mock's
-    /// mini slots can't fit a stack, so the icon — or the
-    /// name's initial in Name-only mode — stands in.
+    /// Vertical edges render icon-only — the real bar
+    /// collapses every content mode to `.icon` there
+    /// (`Content.rendered(horizontal:)`, QA 2026-07-19), so
+    /// the mock shows exactly that.
     @ViewBuilder private func tabContent(
         _ t: MockTab
     ) -> some View {
@@ -135,10 +134,6 @@ struct AppBarPreviewStrip: View {
                 }
             }
             .padding(.horizontal, 4)
-        } else if style.content == .name {
-            Text(String(t.name.prefix(1)))
-                .font(.system(size: font))
-                .foregroundStyle(textColor(t))
         } else {
             Image(systemName: t.icon)
                 .font(.system(size: font))

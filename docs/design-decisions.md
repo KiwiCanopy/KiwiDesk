@@ -1171,10 +1171,14 @@ needs its own demonstrated use case first.
 emoji-vs-name chooser. Without one: a numeric id renders as
 its plain tinted digits, any other id as a two-letter
 uppercase monogram ("mail" → "MA"). The earlier `N.square`
-SF Symbol fallback was dropped: a self-bordered glyph inside
-the default boxed background read as a box-in-a-box, and the
-symbol only existed for 0–50 — plain digits unify both
-fallback paths and have no range limit.
+SF Symbol fallback was dropped **in the bar**: a self-bordered
+glyph inside the default boxed background read as a
+box-in-a-box, and the symbol only existed for 0–50 — plain
+digits unify both fallback paths and have no range limit
+(capped at three digits so the square cell never clips). The
+shortcuts panel's symbol rows keep `N.square` deliberately:
+a symbol slot in a plain list row has no boxed wrapper, so
+the rationale doesn't apply there.
 
 **The Space Bar ships enabled.** (QA 2026-07-19.) It is the
 only surface where KiwiDesk's virtual Spaces are visible at

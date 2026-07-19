@@ -102,9 +102,10 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// inactive spaces — one derivation shared by the runtime
     /// item view and the Settings preview.
     public static let mutedBadgeAlpha: CGFloat = 0.3
-    /// The front-app divider rule's alpha over `text_color`,
-    /// shared the same way.
-    public static let frontDividerAlpha: CGFloat = 0.4
+    /// The divider rules' alpha over `text_color` — the
+    /// identifier↔glyphs rule and the front-app rule share it,
+    /// like `mutedBadgeAlpha` above.
+    public static let dividerAlpha: CGFloat = 0.4
 
     /// Valid drag-drop dwell bounds (ms): fast enough to feel
     /// responsive, slow enough not to spring by accident. Floored
@@ -143,17 +144,25 @@ public struct SpaceBarStyle: Sendable, Equatable {
         return TimeInterval(ms) / 1000
     }
 
-    /// One auto ladder for every app glyph the bar draws: an
-    /// explicit `font_size` wins; auto scales with half the
-    /// strip depth, clamped to the depth minus padding. Shared
-    /// by the item glyphs and the front-app glyph — two
-    /// independent formulas rendered the same app at visibly
-    /// different sizes in auto mode (QA 2026-07-19).
-    public func glyphFontSize(
+    /// The identifier's font ladder: an explicit `font_size`
+    /// wins; auto scales with half the strip depth, clamped to
+    /// the depth minus padding.
+    public func identifierFontSize(
         forDepth depth: CGFloat
     ) -> CGFloat {
         let base = fontSize > 0 ? fontSize : depth * 0.5
-        return min(base, max(depth - 8, 8)) * 0.9
+        return min(base, max(depth - 8, 8))
+    }
+
+    /// App glyphs sit a step below the identifier — defined as
+    /// a ratio of ONE ladder so the item glyphs, the front-app
+    /// glyph, and the identifier can never desync (two
+    /// independent formulas rendered the same app at visibly
+    /// different sizes in auto mode, QA 2026-07-19).
+    public func glyphFontSize(
+        forDepth depth: CGFloat
+    ) -> CGFloat {
+        identifierFontSize(forDepth: depth) * 0.9
     }
 
     /// Same %-resolve as `AppBarStyle.resolvedCornerRadius` —

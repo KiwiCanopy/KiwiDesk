@@ -28,7 +28,8 @@ extension SpaceBarPreviewStrip {
         .overlay(indicator(state))
     }
 
-    /// Identifier leads; the active item shows the two-accent
+    /// Identifier leads; occupied items add the divider rule
+    /// then glyphs — the active item shows the two-accent
     /// pair, the inactive one a muted count badge. Vertical
     /// bars show one glyph per item (budget).
     @ViewBuilder private func cellViews(
@@ -37,11 +38,13 @@ extension SpaceBarPreviewStrip {
         identifierCell(state)
         switch state {
         case .inactive:
+            dividerRule
             glyphCell(tint: mutedColor, badge: true)
             if style.edge.isHorizontal {
                 glyphCell(tint: mutedColor, badge: false)
             }
         case .active:
+            dividerRule
             if style.edge.isHorizontal {
                 glyphCell(
                     tint: color(style.activeTextColor),
@@ -60,11 +63,12 @@ extension SpaceBarPreviewStrip {
     private func identifierCell(
         _ state: MockState
     ) -> some View {
-        Image(
-            systemName: state == .active
-                ? "2.square"
-                : state == .empty
-                    ? "3.square" : "1.square"
+        // Plain digits, matching the runtime's fallback — the
+        // old bordered N.square read as a box-in-a-box
+        // (QA 2026-07-19).
+        Text(
+            state == .active
+                ? "2" : state == .empty ? "3" : "1"
         )
         .font(.system(size: font))
         .foregroundStyle(
@@ -72,6 +76,20 @@ extension SpaceBarPreviewStrip {
                 ? color(style.activeTextColor) : mutedColor
         )
         .frame(width: cell, height: cell)
+    }
+
+    /// The identifier↔glyphs rule occupied items draw — the
+    /// runtime's `BarDivider` treatment.
+    @ViewBuilder private var dividerRule: some View {
+        let rule = color(style.textColor)
+            .opacity(SpaceBarStyle.dividerAlpha)
+        if style.edge.isHorizontal {
+            Rectangle().fill(rule)
+                .frame(width: 1, height: cell * 0.8)
+        } else {
+            Rectangle().fill(rule)
+                .frame(width: cell * 0.8, height: 1)
+        }
     }
 
     private func glyphCell(

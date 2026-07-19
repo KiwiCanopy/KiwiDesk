@@ -235,6 +235,12 @@ struct SpaceBarDriverTests {
             core.spaceIdentifier(for: SpaceID("99"))
                 == .text("99", tinted: true)
         )
+        // Long numeric ids truncate to three digits so the
+        // square cell never clips.
+        #expect(
+            core.spaceIdentifier(for: SpaceID("2026"))
+                == .text("202", tinted: true)
+        )
         // Named space → two-letter uppercase monogram.
         #expect(
             core.spaceIdentifier(for: SpaceID("mail"))

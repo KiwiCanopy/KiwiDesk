@@ -291,8 +291,11 @@ enum ShortcutsReferenceBuilder {
     /// A fallback glyph for a space command whose space has no
     /// custom icon: the space number in a square (`3.square`) — a
     /// space-shaped symbol carrying the number, matching how the row
-    /// reads ("Go to Space 3"). Non-numeric space ids get the generic
-    /// Spaces glyph. Nil for non-space commands.
+    /// reads ("Go to Space 3"). Deliberately NOT the Space Bar's
+    /// plain-digit fallback: this is a symbol slot in a list row
+    /// with no boxed wrapper, so the bar's box-in-a-box problem
+    /// (QA 2026-07-19) doesn't apply. Non-numeric space ids get the
+    /// generic Spaces glyph. Nil for non-space commands.
     private static func spaceFallbackIcon(
         for lua: String
     ) -> String? {
