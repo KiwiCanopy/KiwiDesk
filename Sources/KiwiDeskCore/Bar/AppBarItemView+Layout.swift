@@ -20,10 +20,13 @@ extension AppBarItemView {
     /// grows into a larger circle for multi-digit counts.
     private func layoutBadge() {
         guard !badge.isHidden else { return }
+        // 0.32/9: matches the Space Bar badge shrink (QA
+        // 2026-07-19) — the 0.38 ratio with a 10pt floor read
+        // oversized next to small icons.
         let baseHeight = min(
             max(
-                min(bounds.width, bounds.height) * 0.38,
-                10
+                min(bounds.width, bounds.height) * 0.32,
+                9
             ),
             14
         )

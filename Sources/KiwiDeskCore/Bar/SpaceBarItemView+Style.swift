@@ -157,8 +157,20 @@ extension SpaceBarItemView {
             accent.layer?.backgroundColor = nil
             accent.layer?.borderColor = highlight.cgColor
             accent.layer?.borderWidth = 2
+            // Plain/material: the App Bar's capsule ring —
+            // roundness-independent, and its fully-curved ends
+            // tuck inside the shared plate's corners where the
+            // old square accent poked past them (QA 2026-07-19).
+            // Bounds-derived (not `accent.frame`): restyle runs
+            // before layout places the accent, so the frame may
+            // be stale here. 3 = the 1.5pt capsule inset, twice.
             accent.layer?.cornerRadius =
-                style.tabBackground.rendered == .boxed ? cornerRadius : 0
+                style.tabBackground.rendered == .boxed
+                ? cornerRadius
+                : max(
+                    (min(bounds.width, bounds.height) - 3) / 2,
+                    0
+                )
         case .edgeMark:
             accent.layer?.borderWidth = 0
             accent.layer?.cornerRadius = 0

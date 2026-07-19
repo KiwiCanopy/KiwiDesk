@@ -62,14 +62,19 @@ extension AppBarItemView {
         // so a wide glyph can never hang out of the tab.
         // Icon-only tabs center.
         let snugToName = horizontal && !label.isHidden
+        // Clamp BEFORE positioning: centering the unclamped
+        // cell width then clamping the frame shifted the glyph
+        // toward the leading edge whenever the measured cell
+        // exceeded its box (QA 2026-07-19, vertical bars).
+        let width = min(cell.width, box.width)
         let x =
             snugToName
-            ? max(square.maxX - cell.width, box.minX)
-            : box.midX - cell.width / 2
+            ? max(square.maxX - width, box.minX)
+            : box.midX - width / 2
         glyphLabel.frame = CGRect(
             x: x.rounded(),
             y: (box.midY - cell.height / 2).rounded(),
-            width: min(cell.width, box.width),
+            width: width,
             height: cell.height
         )
     }

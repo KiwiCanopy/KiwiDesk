@@ -724,7 +724,9 @@ running windows.
 - **Active indicator**: ring (outlined border around the active
   tab), edge mark (accent bar on the active tab's window-facing
   edge), or gap (active slot empty). Orthogonal to tab background
-  — all combinations are valid.
+  — all combinations are valid. Full-color app icons (System
+  default) also dim to half strength on inactive tabs, so the
+  active app reads even though those icons take no tint.
 - **Thickness**: the strip's depth in points.
 - **Box size**: auto (0) measures rendered width and sizes slots
   uniformly to fit the widest item; fixed pixel width.

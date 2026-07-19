@@ -99,7 +99,10 @@ extension SpaceBarItemView {
         centered: Bool = false
     ) {
         guard !badge.isHidden else { return }
-        let base = min(max(cell * 0.5, 9), 13)
+        // 0.42/8: the 0.5-of-cell badge with its 9pt floor read
+        // oversized next to small glyphs (QA 2026-07-19); the
+        // cap still stops ballooning on fat bars.
+        let base = min(max(cell * 0.42, 8), 13)
         badge.font = .systemFont(
             ofSize: base * 0.9,
             weight: .bold
@@ -190,7 +193,14 @@ extension SpaceBarItemView {
     private func layoutAccent() {
         switch style.activeIndicator {
         case .ring:
-            accent.frame = bounds
+            // Boxed hugs the box; plain/material insets to the
+            // App Bar's capsule ring (ui-designer 2026-07-14) —
+            // a full-bounds square poked past the shared plate's
+            // rounded corners in hug mode (QA 2026-07-19).
+            accent.frame =
+                style.tabBackground.rendered == .boxed
+                ? bounds
+                : bounds.insetBy(dx: 1.5, dy: 1.5)
         case .edgeMark:
             // On the window-facing side of the slot: a top bar
             // faces down, a left bar right, and so on. The view

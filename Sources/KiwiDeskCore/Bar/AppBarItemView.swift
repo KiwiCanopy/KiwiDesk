@@ -194,6 +194,12 @@ final class AppBarItemView: NSView {
     private func applyColors() {
         label.textColor = NSColor(kiwiHex: textColorHex)
         glyphLabel.textColor = NSColor(kiwiHex: textColorHex)
+        // The app image never tints, so it carried no active
+        // cue at all (QA 2026-07-19). The Space Bar's
+        // `untintedAlpha` rule: half strength when inactive,
+        // shape (accent) plus opacity carry the state.
+        iconView.alphaValue =
+            isActive || isHovered ? 1 : 0.5
         layer?.backgroundColor =
             NSColor(kiwiHex: boxColorHex).cgColor
         applyCornerRadius()

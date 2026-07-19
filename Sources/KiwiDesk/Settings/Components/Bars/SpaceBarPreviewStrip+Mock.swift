@@ -136,11 +136,23 @@ extension SpaceBarPreviewStrip {
         if state == .active {
             switch style.activeIndicator {
             case .ring:
-                RoundedRectangle(cornerRadius: corner)
-                    .strokeBorder(
-                        color(style.highlightColor),
-                        lineWidth: 2
-                    )
+                // Runtime twin: flush box ring when Boxed, the
+                // App Bar's inset capsule on Plain/Liquid Glass
+                // (QA 2026-07-19).
+                if style.tabBackground == .boxed {
+                    RoundedRectangle(cornerRadius: corner)
+                        .strokeBorder(
+                            color(style.highlightColor),
+                            lineWidth: 2
+                        )
+                } else {
+                    Capsule()
+                        .strokeBorder(
+                            color(style.highlightColor),
+                            lineWidth: 2
+                        )
+                        .padding(1.5)
+                }
             case .edgeMark:
                 edgeMark
             case .gap:

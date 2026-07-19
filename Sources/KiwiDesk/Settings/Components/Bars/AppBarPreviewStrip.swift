@@ -139,6 +139,7 @@ struct AppBarPreviewStrip: View {
                     Image(systemName: t.icon)
                         .font(.system(size: font))
                         .foregroundStyle(iconColor(t))
+                        .opacity(iconOpacity(t))
                 }
                 if style.content != .icon {
                     Text(t.name)
@@ -152,7 +153,16 @@ struct AppBarPreviewStrip: View {
             Image(systemName: t.icon)
                 .font(.system(size: font))
                 .foregroundStyle(iconColor(t))
+                .opacity(iconOpacity(t))
         }
+    }
+
+    /// Runtime twin of `AppBarItemView.applyColors`: untinted
+    /// app images dim to half strength when inactive (QA
+    /// 2026-07-19) — shape plus opacity carry the state, since
+    /// a full-color icon takes no tint.
+    private func iconOpacity(_ t: MockTab) -> Double {
+        style.iconSource == .appImage && !t.active ? 0.5 : 1
     }
 
     private func textColor(_ t: MockTab) -> Color {
