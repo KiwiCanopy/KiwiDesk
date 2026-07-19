@@ -141,6 +141,10 @@ public enum FloatDetection {
     private static let ignoredSystemApps: Set<String> = [
         "com.apple.textinputmenuagent",
         "com.apple.textinputswitcher",
+        // Menu-bar popovers (Wi-Fi, Bluetooth, sliders) are
+        // accessory windows that would otherwise be tracked
+        // and shown in the bars.
+        "com.apple.controlcenter",
     ]
 
     public static func isBuiltInIgnoredApp(
