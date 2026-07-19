@@ -684,10 +684,12 @@ stacking level; the window stays focused and keeps its full ring.
 ## Bars
 
 The **Bars** section hosts both bar editors behind a fixed
-**App Bar | Space Bar** switch at the top — two picker cards,
-each showing a small schematic of the bar it opens (a row of
-app icons vs numbered space tabs) — and each editor leads
-with its own preview and owns its settings.
+**Space Bar | App Bar** switch at the top — two picker cards,
+each showing a small schematic of the bar it opens (numbered
+space tabs vs a row of app icons). The Space Bar leads and is
+the default: it appears in every layout, while the App Bar
+only renders in Monocle and Scrolling. Each editor leads with
+its own preview and owns its settings.
 
 ### App Bar
 
@@ -753,8 +755,9 @@ running windows.
   (following the global style — the panel spans all layouts).
 - **Font size**: auto or fixed. Auto-gated sliders (box size,
   font size) read "Auto" while their toggle is on.
-- **Corner roundness**: 0–100% for boxed tabs (0 = square, 100 =
-  full capsule; ignored for plain).
+- **Corner roundness**: 0–100% (0 = square, 100 = full capsule).
+  Rounds the boxed tabs, or the shared plate under Plain and
+  Liquid Glass.
 
 **Colors:** Box, Active box, and Highlight — the ones the preview
 strip most visibly reflects — sit inline. The rest of the palette
@@ -789,8 +792,12 @@ adjacent windows of the same app collapse into one glyph with a
 count badge, and past the configured glyph cap (default 5,
 adjustable 1–12) the rest fold into a `+n` badge. Emoji
 identifiers and app-image icons dim to half strength on
-inactive Spaces. Click a Space to switch to it; glyphs are
-informational.
+inactive Spaces; on the active Space, app-image glyphs keep a
+three-step ladder — the focused app full strength, its
+neighbors slightly dimmed — so the focused app reads even
+though native icons take no tint (App Font glyphs use the
+Focused item color instead). Click a Space to switch to it;
+glyphs are informational.
 
 **Drag a window onto a Space** to move it there — a two-speed
 gesture. Drag a window's title bar over another Space's item and

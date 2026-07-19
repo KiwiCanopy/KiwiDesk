@@ -18,7 +18,6 @@
   "app_bar.edge.label": "Position",
   "app_bar.font_size": "Schriftgröße",
   "app_bar.global_colors.title": "Globale Farben",
-  "app_bar.global_style.caption": "Gilt standardmäßig für alle Layouts. Du kannst die Werte für jedes Layout einzeln anpassen.",
   "app_bar.global_style.title": "Globaler Stil",
   "app_bar.group_adjacent": "Benachbarte Fenster derselben App gruppieren",
   "app_bar.layout.overrides": "Überschreibungen",

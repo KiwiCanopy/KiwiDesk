@@ -220,15 +220,9 @@ struct LayoutAppBarSection: View {
             range: 0...100,
             unit: "%"
         )
-        .modifier(
-            GreyOut(
-                // Roundness rounds a box or the glass plate — dead
-                // only for the boxless Plain strip (matches the
-                // global + Space editors).
-                active: bar.resolved(with: global)
-                    .tabBackground == .plain
-            )
-        )
+        // Never greyed since tab_background_fit: roundness
+        // also shapes Plain's own shared plate (matches the
+        // global + Space editors, QA 2026-07-19).
     }
 }
 

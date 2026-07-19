@@ -15,7 +15,11 @@ struct BarsSection: View {
     }
 
     @ObservedObject var model: SettingsModel
-    @State private var editor: Editor = .appBar
+    /// Space Bar leads and is the default (ui-designer
+    /// 2026-07-19): it is omnipresent across every layout,
+    /// while the App Bar renders only in Monocle/Scrolling —
+    /// landing in the always-relevant editor first.
+    @State private var editor: Editor = .spaceBar
 
     var body: some View {
         ScrollView {

@@ -258,6 +258,10 @@ struct SpaceBarEditorSection: View {
         )
         glyphCapSummary
         Divider()
+        // Never greyed since tab_background_fit: roundness
+        // shapes the Boxed items, the glass plate, AND Plain's
+        // own shared plate (BarPlate) — the old Plain grey
+        // predated Plain getting a plate (QA 2026-07-19).
         PtSlider(
             label: L(
                 "space_bar.corner_roundness",
@@ -266,17 +270,6 @@ struct SpaceBarEditorSection: View {
             value: style.cornerRoundness,
             range: 0...100,
             unit: "%"
-        )
-        .modifier(
-            GreyOut(
-                active: style.wrappedValue.tabBackground
-                    == .plain,
-                help: L(
-                    "space_bar.corner_roundness.boxed_only",
-                    "Corner roundness only applies to Boxed "
-                        + "items."
-                )
-            )
         )
     }
 

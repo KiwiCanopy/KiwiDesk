@@ -14,18 +14,21 @@ struct BarEditorPicker: View {
     @Binding var selection: BarsSection.Editor
 
     var body: some View {
+        // Space Bar first — the omnipresent bar leads
+        // (ui-designer 2026-07-19), matching the default
+        // editor selection.
         HStack(spacing: 12) {
-            chip(
-                .appBar,
-                title: L("bars.switch.app_bar", "App Bar")
-            ) {
-                appBarMock
-            }
             chip(
                 .spaceBar,
                 title: L("bars.switch.space_bar", "Space Bar")
             ) {
                 spaceBarMock
+            }
+            chip(
+                .appBar,
+                title: L("bars.switch.app_bar", "App Bar")
+            ) {
+                appBarMock
             }
         }
         .accessibilityElement(children: .contain)

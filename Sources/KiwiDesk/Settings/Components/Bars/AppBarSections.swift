@@ -259,24 +259,15 @@ struct GlobalAppBarSection: View {
             )
         }
         Divider()
-        // Roundness only shapes a Boxed tab; grey it for Plain —
-        // the "grey, don't hide" convention (#171).
+        // Never greyed since tab_background_fit: roundness
+        // shapes the Boxed tabs, the glass plate, AND Plain's
+        // own shared plate (BarPlate) — the old Plain grey
+        // predated Plain getting a plate (QA 2026-07-19).
         PtSlider(
             label: L("app_bar.corner_roundness", "Corner roundness"),
             value: $style.cornerRoundness,
             range: 0...100,
             unit: "%"
-        )
-        .modifier(
-            GreyOut(
-                // Roundness rounds a box or the glass plate — dead
-                // only for the boxless Plain strip.
-                active: style.tabBackground == .plain,
-                help: L(
-                    "app_bar.corner_roundness.boxed_only",
-                    "Corner roundness only applies to Boxed tabs."
-                )
-            )
         )
     }
 
@@ -286,8 +277,10 @@ struct GlobalAppBarSection: View {
     private var globalStyleCaption: String {
         L(
             "app_bar.global_style.caption",
-            "Shared by every layout's bar. A layout can "
-                + "override any of these below."
+            "The App Bar appears in the layouts that show "
+                + "one — Monocle and Scrolling. These settings "
+                + "are shared; a layout can override any of "
+                + "them below."
         )
     }
     private var edgeLabel: String {

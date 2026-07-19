@@ -144,9 +144,28 @@ extension SpaceBarItemView {
                     ? NSColor(kiwiHex: style.focusedItemColor)
                     : stateColor
             } else {
-                appViews[index].alphaValue = untintedAlpha
+                appViews[index].alphaValue =
+                    untintedAppAlpha(focused: app.focused)
             }
         }
+    }
+
+    /// Three-tier ladder for untinted app glyphs (QA
+    /// 2026-07-19): full for the focused app on the active
+    /// space, `activeUnfocusedAlpha` for its unfocused
+    /// siblings — without it a native icon carried no focus
+    /// cue at all — and `untintedAlpha` on inactive spaces.
+    /// Hover always lifts to full (explicit intent; one hover
+    /// rule, no fourth value).
+    private func untintedAppAlpha(
+        focused: Bool
+    ) -> CGFloat {
+        if isHovered || isDragHovered { return 1 }
+        guard isActive else {
+            return BarAccent.untintedAlpha
+        }
+        return focused
+            ? 1 : BarAccent.activeUnfocusedAlpha
     }
 
     private func styleAccent() {
