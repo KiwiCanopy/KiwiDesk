@@ -8,11 +8,16 @@ import AppKit
 /// drive it through one guarded entry point. Shared by both bars.
 enum GlassPlate {
     /// A fresh glass plate, or nil below macOS 26.
+    /// `.clear` is deliberate (QA 2026-07-19): `.regular` is the
+    /// frosted, adaptive variant and read as a milky slab over
+    /// the desktop; `.clear` matches the Dock's near-transparent
+    /// glass. Legibility over bright wallpaper is the user's
+    /// `background_color` tint — the HIG's dimming-layer lever.
     @MainActor
     static func make() -> NSView? {
         if #available(macOS 26, *) {
             let view = NSGlassEffectView()
-            view.style = .regular
+            view.style = .clear
             return view
         }
         return nil
