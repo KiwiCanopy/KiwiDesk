@@ -97,32 +97,40 @@ struct AppBarManagerTests {
         )
     }
 
-    @Test("topStrip returns the painted top strip for a space")
-    func topStripForSpace() {
+    @Test("strips returns the painted strips for a space")
+    func stripsForSpace() {
         let manager = AppBarManager()
         let strip = CGRect(x: 0, y: 10, width: 1920, height: 32)
         manager.sync([
             bar(display: 1, space: "1", edge: .top, strip: strip)
         ])
-        #expect(manager.topStrip(forSpace: SpaceID("1")) == strip)
+        let strips = manager.strips(forSpace: SpaceID("1"))
+        #expect(strips.count == 1)
+        #expect(strips.first?.strip == strip)
+        #expect(strips.first?.edge == .top)
     }
 
-    @Test("topStrip ignores non-top bars")
-    func topStripIgnoresOtherEdges() {
+    @Test("strips carries every edge, not just top")
+    func stripsCoverAllEdges() {
         let manager = AppBarManager()
+        let strip = CGRect(x: 0, y: 0, width: 32, height: 1080)
         manager.sync([
             bar(
                 display: 1,
                 space: "1",
                 edge: .left,
-                strip: CGRect(x: 0, y: 0, width: 32, height: 1080)
+                strip: strip
             )
         ])
-        #expect(manager.topStrip(forSpace: SpaceID("1")) == nil)
+        // Floats nudge off every edge (QA 2026-07-19), so a
+        // left bar's strip is part of the contract surface.
+        let strips = manager.strips(forSpace: SpaceID("1"))
+        #expect(strips.first?.edge == .left)
+        #expect(strips.first?.strip == strip)
     }
 
-    @Test("topStrip is nil for a space showing no bar")
-    func topStripNilWhenUnpainted() {
+    @Test("strips is empty for a space showing no bar")
+    func stripsEmptyWhenUnpainted() {
         let manager = AppBarManager()
         manager.sync([
             bar(
@@ -133,19 +141,21 @@ struct AppBarManagerTests {
             )
         ])
         // A space with no synced bar (only floats, or bar off).
-        #expect(manager.topStrip(forSpace: SpaceID("other")) == nil)
+        #expect(
+            manager.strips(forSpace: SpaceID("other")).isEmpty
+        )
     }
 
-    @Test("shownTopStrips spans all displays' top bars")
-    func shownTopStripsMultiDisplay() {
+    @Test("shownStrips spans all displays' bars")
+    func shownStripsMultiDisplay() {
         let manager = AppBarManager()
         let a = CGRect(x: 0, y: 10, width: 1920, height: 32)
         let b = CGRect(x: 0, y: 10, width: 1440, height: 24)
         manager.sync([
             bar(display: 1, space: "1", edge: .top, strip: a),
-            bar(display: 2, space: "web", edge: .top, strip: b),
+            bar(display: 2, space: "web", edge: .bottom, strip: b),
         ])
-        let spaces = Set(manager.shownTopStrips.map(\.space))
+        let spaces = Set(manager.shownStrips.map(\.space))
         #expect(spaces == [SpaceID("1"), SpaceID("web")])
     }
 

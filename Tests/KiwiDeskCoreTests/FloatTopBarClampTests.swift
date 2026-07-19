@@ -4,9 +4,10 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The pure geometry that keeps a floating window from hiding
-/// under a top app bar (#242). AX coordinates: y grows downward,
+/// under a top app bar (#242; the top cases of `clampClear` —
+/// the other edges are covered in `SpaceBarGeometryTests`). AX coordinates: y grows downward,
 /// `minY` is the top edge.
-@Suite("Float top-bar clamp")
+@Suite("Float bar clamp, top edge")
 struct FloatTopBarClampTests {
     // A 40 pt top strip carved from the top of the usable area.
     private let strip = CGRect(x: 0, y: 0, width: 1920, height: 40)
@@ -14,9 +15,10 @@ struct FloatTopBarClampTests {
     @Test("A float under the top strip is pushed below it")
     func intrusionPushedDown() {
         let frame = CGRect(x: 100, y: 10, width: 300, height: 200)
-        let clamped = AppBarGeometry.clampBelowTopStrip(
+        let clamped = AppBarGeometry.clampClear(
             frame,
-            strip: strip
+            of: strip,
+            edge: .top
         )
         // Top edge snaps to the strip's bottom; size and x unchanged.
         #expect(clamped.minY == strip.maxY)
@@ -27,9 +29,10 @@ struct FloatTopBarClampTests {
     @Test("A float already clear of the strip is untouched")
     func clearIsNoOp() {
         let frame = CGRect(x: 100, y: 200, width: 300, height: 200)
-        let clamped = AppBarGeometry.clampBelowTopStrip(
+        let clamped = AppBarGeometry.clampClear(
             frame,
-            strip: strip
+            of: strip,
+            edge: .top
         )
         #expect(clamped == frame)
     }
@@ -42,9 +45,10 @@ struct FloatTopBarClampTests {
             width: 300,
             height: 200
         )
-        let clamped = AppBarGeometry.clampBelowTopStrip(
+        let clamped = AppBarGeometry.clampClear(
             frame,
-            strip: strip
+            of: strip,
+            edge: .top
         )
         #expect(clamped == frame)
     }
@@ -53,9 +57,10 @@ struct FloatTopBarClampTests {
     func partialIntrusionPushedDown() {
         // Top edge 5 pt above the strip bottom → intrudes.
         let frame = CGRect(x: 0, y: 35, width: 300, height: 200)
-        let clamped = AppBarGeometry.clampBelowTopStrip(
+        let clamped = AppBarGeometry.clampClear(
             frame,
-            strip: strip
+            of: strip,
+            edge: .top
         )
         #expect(clamped.minY == strip.maxY)
     }
@@ -71,9 +76,10 @@ struct FloatTopBarClampTests {
             width: 300,
             height: 200
         )
-        let clamped = AppBarGeometry.clampBelowTopStrip(
+        let clamped = AppBarGeometry.clampClear(
             frame,
-            strip: strip
+            of: strip,
+            edge: .top
         )
         #expect(clamped == frame)
     }

@@ -230,7 +230,7 @@ extension KiwiCore {
         // back below the strip (#242).
         if state.windows[id]?.isFloating == true {
             let frame = liveDropFrame(id, fallback: frame)
-            let clamped = floatFrameClampedBelowTopBar(
+            let clamped = floatFrameClampedClearOfBars(
                 id,
                 frame: frame
             )

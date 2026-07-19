@@ -49,29 +49,46 @@ public enum AppBarGeometry {
         }
     }
 
-    /// How far a float's top may sit inside a top bar before the
-    /// clamp acts. Mirrors the engine's frame tolerance (#148): an
+    /// How far a float may sit inside a bar before the clamp
+    /// acts. Mirrors the engine's frame tolerance (#148): an
     /// app that lands a hair off the exact target (character grids,
     /// min sizes) must not be re-clamped every retile, which would
     /// wobble the window.
     public static let clampTolerance: CGFloat = 2
 
-    /// Pushes `frame` down so its top edge sits at or below the
-    /// bottom of a TOP bar `strip` (AX coordinates, y grows
-    /// downward). Keeps a floating window — which layout never
-    /// clamps — from hiding under a top app bar, where the strip
-    /// covers the window's title bar (its grab handle) and leaves
-    /// it ungrabbable (#242). A no-op once the frame is within
-    /// `clampTolerance` of clear; only the top edge is corrected,
-    /// size unchanged.
-    public static func clampBelowTopStrip(
+    /// Nudges `frame` clear of a painted bar `strip` on its
+    /// `edge` (AX coordinates, y grows downward). Keeps a
+    /// floating window — which layout never clamps — from
+    /// sliding under a bar: the original motivator was a TOP
+    /// bar covering the title bar (#242), but a bar reserves
+    /// its edge for every window kind, the way the Dock
+    /// reserves `visibleFrame` (QA 2026-07-19). A no-op once
+    /// the frame is within `clampTolerance` of clear; position
+    /// only, size unchanged.
+    public static func clampClear(
         _ frame: CGRect,
-        strip: CGRect
+        of strip: CGRect,
+        edge: AppBarEdge
     ) -> CGRect {
-        guard frame.minY < strip.maxY - clampTolerance
-        else { return frame }
         var result = frame
-        result.origin.y = strip.maxY
+        switch edge {
+        case .top:
+            guard frame.minY < strip.maxY - clampTolerance
+            else { return frame }
+            result.origin.y = strip.maxY
+        case .bottom:
+            guard frame.maxY > strip.minY + clampTolerance
+            else { return frame }
+            result.origin.y = strip.minY - frame.height
+        case .left:
+            guard frame.minX < strip.maxX - clampTolerance
+            else { return frame }
+            result.origin.x = strip.maxX
+        case .right:
+            guard frame.maxX > strip.minX + clampTolerance
+            else { return frame }
+            result.origin.x = strip.minX - frame.width
+        }
         return result
     }
 

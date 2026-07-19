@@ -23,7 +23,7 @@ extension KiwiCore {
         }
         // Growing the top edge under a top app bar would re-hide
         // the title bar; keep the result clear of the strip (#242).
-        let target = floatFrameClampedBelowTopBar(
+        let target = floatFrameClampedClearOfBars(
             id,
             frame: FloatResize.resized(
                 window.frame,

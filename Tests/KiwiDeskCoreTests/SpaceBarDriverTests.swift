@@ -306,13 +306,15 @@ struct CombinedClampTests {
             thickness: 32
         )
         let float = CGRect(x: 10, y: 5, width: 400, height: 300)
-        var clamped = AppBarGeometry.clampBelowTopStrip(
+        var clamped = AppBarGeometry.clampClear(
             float,
-            strip: spaceStrip
+            of: spaceStrip,
+            edge: .top
         )
-        clamped = AppBarGeometry.clampBelowTopStrip(
+        clamped = AppBarGeometry.clampClear(
             clamped,
-            strip: appStrip
+            of: appStrip,
+            edge: .top
         )
         // Below the combined reservation: 32 + 32.
         #expect(clamped.minY == 64)

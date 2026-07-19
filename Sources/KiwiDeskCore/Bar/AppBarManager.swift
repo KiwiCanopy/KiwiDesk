@@ -66,23 +66,34 @@ public final class AppBarManager {
         Set(spaceOfDisplay.keys)
     }
 
-    /// Every painted TOP bar as `(space, strip)`. A window that
-    /// must clear a top bar (a floating window, whose title bar the
-    /// strip would hide — #242) reads these rendered strips rather
-    /// than re-deriving bar geometry, which drifts (outer gaps,
-    /// empty-bar suppression, per-display screen). Covers all
-    /// displays, so a bar on a non-active monitor is included.
-    public var shownTopStrips: [(space: SpaceID, strip: CGRect)] {
-        shownBars
-            .filter { $0.style.edge == .top }
-            .map { (space: $0.space, strip: $0.strip) }
+    /// Every painted bar as `(space, strip, edge)`. A window
+    /// that must clear a bar (a floating window — #242, all
+    /// four edges since QA 2026-07-19) reads these rendered
+    /// strips rather than re-deriving bar geometry, which
+    /// drifts (outer gaps, empty-bar suppression, per-display
+    /// screen). Covers all displays, so a bar on a non-active
+    /// monitor is included.
+    public var shownStrips:
+        [(space: SpaceID, strip: CGRect, edge: AppBarEdge)]
+    {
+        shownBars.map {
+            (
+                space: $0.space,
+                strip: $0.strip,
+                edge: $0.style.edge
+            )
+        }
     }
 
-    /// The painted top-bar strip for `space`, or nil when that
-    /// space shows no top bar (off, another edge, or suppressed
-    /// because it has no non-floating windows).
-    public func topStrip(forSpace space: SpaceID) -> CGRect? {
-        shownTopStrips.first { $0.space == space }?.strip
+    /// The painted strips covering `space` (empty when it shows
+    /// no bar: off, or suppressed because it has no non-floating
+    /// windows).
+    public func strips(
+        forSpace space: SpaceID
+    ) -> [(strip: CGRect, edge: AppBarEdge)] {
+        shownStrips
+            .filter { $0.space == space }
+            .map { (strip: $0.strip, edge: $0.edge) }
     }
 
     /// Shows exactly `bars` — one per display — and retires the

@@ -52,25 +52,23 @@ public final class SpaceBarManager {
         Set(shownBars.map(\.display))
     }
 
-    /// Every painted TOP strip as `(display, strip)`. Floats
-    /// must clear a top Space Bar exactly like a top App Bar
-    /// (#242) — read the painted strips, never re-derive.
-    public var shownTopStrips:
+    /// Every painted strip as `(display, strip, edge)`. Floats
+    /// must clear a Space Bar exactly like an App Bar (#242,
+    /// all four edges since QA 2026-07-19) — read the painted
+    /// strips, never re-derive.
+    public var shownStrips:
         [(
-            display: DisplayID, strip: CGRect
+            display: DisplayID, strip: CGRect,
+            edge: AppBarEdge
         )]
     {
-        shownBars
-            .filter { $0.style.edge == .top }
-            .map { (display: $0.display, strip: $0.strip) }
-    }
-
-    /// The painted top strip on `display`, or nil when that
-    /// display shows no top Space Bar.
-    public func topStrip(
-        forDisplay display: DisplayID
-    ) -> CGRect? {
-        shownTopStrips.first { $0.display == display }?.strip
+        shownBars.map {
+            (
+                display: $0.display,
+                strip: $0.strip,
+                edge: $0.style.edge
+            )
+        }
     }
 
     /// Shows exactly `bars` — one per display — and retires the

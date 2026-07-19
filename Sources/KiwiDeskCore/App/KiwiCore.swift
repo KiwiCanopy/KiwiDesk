@@ -337,6 +337,6 @@ public final class KiwiCore {
         // one hidden under a top strip; correct it here. Must run
         // after `updateAppBar()`: the clamp reads the strips it
         // just painted (#242).
-        clampFloatsBelowTopBars()
+        clampFloatsClearOfBars()
     }
 }
