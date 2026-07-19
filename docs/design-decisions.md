@@ -57,7 +57,7 @@ planned escape hatch; it is not a wontfix dumping ground.
 
 | Behavior | Why it's accepted | Architectural root | Escape hatch / planned fix |
 |---|---|---|---|
-| A bar whose `tab_background` is `material` (Liquid Glass) renders as **Boxed** on macOS earlier than 26 — the glass plate does not appear there. | Liquid Glass is a macOS 26 API (`NSGlassEffectView`); the value must still round-trip so a shared profile stays portable, so an older machine degrades to the shipped default look rather than an unbacked strip. The GUI never *offers* the option below 26 (an OS-capability gate, absent not greyed), so only a hand-written config or a profile authored on 26 reaches this state. | The stored `"material"` value is portable; only the render path is `#available(macOS 26)`-gated, resolving to `boxed` at paint time without rewriting the field ([#390](https://github.com/hajiboy95/KiwiDesk/issues/390)). | Use macOS 26+ to see the glass, or pick `boxed`/`plain` for a look identical on every macOS. |
+| A bar with the `liquid_glass` finish on shows its plain **solid** shape on macOS earlier than 26 — the glass material does not appear there. | Liquid Glass is a macOS 26 API (`NSGlassEffectView`); the boolean must still round-trip so a shared profile stays portable, so an older machine shows the underlying `boxed`/`plain` shape rather than an unbacked strip. The GUI never *offers* the toggle below 26 (an OS-capability gate, absent not greyed), so only a hand-written config or a profile authored on 26 reaches this state. | The stored `liquid_glass` value is portable; only the render path is `#available(macOS 26)`-gated (`glassEnabled`), painting the solid shape without rewriting the field ([#390](https://github.com/hajiboy95/KiwiDesk/issues/390)). | Use macOS 26+ to see the glass; the finish is colorless there and near-colorless even on 26. |
 | With **"Displays have separate Spaces" on**, native Desktop→profile bindings cannot represent an independent Desktop choice on every connected display; KiwiDesk applies one global active profile. | Basic tiling remains valid, single-display use is unaffected, and users may want to inspect or prepare bindings before changing the macOS option, so hiding or disabling the controls would overstate the limitation. | Native-Space routing resolves one active Desktop number and one active profile for the whole display setup, not a per-display profile tuple ([#8](https://github.com/hajiboy95/KiwiDesk/issues/8)). | Turn the option off in Desktop & Dock Settings, then log out and back in. Onboarding and the binding-section warning share one gate and fire only in the affected multi-display state, never on a single display. See [Shared display Spaces are recommended, not required](#spaces-profiles--config-ownership). |
 | In BSP, the inner window of a nested pair can't grow — a "grow" press (or edge-drag) widens its outer neighbor instead. | Its width `r·(1−r)·W` is already maximized at the default ratio, so no resize direction can widen it. | All same-orientation splits share the one per-space ratio; per-node ratios would need a container tree the flat-array model forbids (#56 trade). | **Shipped**: the [`track` layout (#128)](https://github.com/hajiboy95/KiwiDesk/issues/128) — `set_mode(space, "track")` gives every window one true resize target. See [BSP resize is focus-aware in *direction* only](#layout-and-resize-behavior). |
 | In stack, when the master zone lines up *along* the split axis (e.g. horizontal masters beside a right stack), the masters' individual shares can't be resized: that axis always moves the split, and the other axis beeps. | The split ratio owns its whole axis — giving the same keypress two meanings (split vs weight) by focus zone would make "grow" unpredictable at the boundary. | One knob per axis per arrangement ([#222](https://github.com/hajiboy95/KiwiDesk/issues/222)); weights live on a zone's own lineup axis by construction. | Pick the orthogonal (vertical) master orientation — since the 2026-07-16 default flip the standard side-by-side arrangement sits *inside* this limitation once `master_count` exceeds one — or put the windows that need individual shares in the stack zone. |
@@ -1381,35 +1381,37 @@ hug. Inert under `boxed` (no shared plate): the GUI greys the
 control, per #171. One geometry authority: `BarPlate.frame`,
 shared by both bars and pinned by `BarPlateTests`.
 
-**Liquid Glass is a third `tab_background`, macOS-26-gated.**
-(#390.) The glass treatment is a third `TabBackground` case
-(`material`) beside `boxed`/`plain`, not an orthogonal
-translucency toggle: the three are mutually-exclusive answers to
-one question ("how is the strip backed"), and a toggle would
-create a real ambiguity ("boxed + translucent" = glass boxes or a
-glass strip under opaque boxes?). Glass renders structurally like
-`plain` — one shared rounded plate (`NSGlassEffectView`), items on
-top, no per-item box — matching Control Center / Spotlight (one
-glass plate, never glass-per-tab). It reuses the one merged
-fill key rather than adding keys: `fill_color` is the glass
-tint (transparent value = clear glass, mapping to
-`NSGlassEffectView.tintColor`) — the same key that fills the
-Boxed boxes and the Plain plate, so a palette re-tints the
-glass for free — and `corner_roundness` stays live (it rounds
-the plate). The default stays `boxed`: the
-earthy Kiwi identity is deliberate, and — decisively — an
-OS-gated look *can't* be a universal default without a shared
-profile or screenshot rendering differently per macOS. The stored
-value `"material"` round-trips on every macOS (portability), but
-only the *render* path is OS-conditional: below macOS 26 it
-resolves to `boxed` at paint time (never rewriting the field), and
-the GUI offers the case only where it can render — an
-OS-capability gate, so the option is *absent* below 26, not greyed
-(grey-don't-hide is for mode-inert controls, not missing
-hardware/OS capability). Explicitly out of scope: a glass
-border/stroke, a shadow (`BarPanel` is deliberately shadowless),
-and vibrancy-following text (glass replaces only the plate, never
-foreground color resolution) — each a separate issue if wanted.
+**Liquid Glass is an orthogonal finish toggle, not a third
+`tab_background`.** (#390; revised 2026-07-20.) It was first
+shipped as a third `TabBackground` case (`material`) beside
+`boxed`/`plain`, on the reasoning that a toggle would be ambiguous
+("boxed + glass" = glass boxes or a glass strip under opaque
+boxes?). On-device testing (macOS 26.5.2) forced a rethink on two
+fronts. **First**, `NSGlassEffectView` reads **near-colorless**
+here — `tintColor` only nudges luminance, and `.clear` vs
+`.regular` are visually identical — so glass is a *finish*, not a
+colorable surface that could be a peer of the solid shapes.
+**Second**, the ambiguity dissolves once each combination has a
+defined rendering: `boxed + glass` = a glass view **per box**
+(grouped in an `NSGlassEffectContainerView`), `plain + glass` = one
+shared glass plate. So the model is now shape (`boxed` | `plain`)
+× a separate `liquid_glass: Bool` finish that lays over either.
+`fill_color` is still forwarded as the glass tint for forward-
+compatibility (should a future macOS honor a saturated tint), but
+the earlier "a palette re-tints the glass for free" claim is
+**walked back** — on current macOS the glass is effectively
+colorless, and the GUI notes the tint is subtle. Correct
+`NSGlassEffectView` usage requires embedding the content as the
+view's `contentView` (never a bare sibling backdrop, which renders
+degraded — the bug that first read as "glass has no color").
+The default stays no-glass; the finish is OS-gated: ignored below
+macOS 26 (`glassEnabled` = `liquidGlass && glassAvailable`), and
+its Settings toggle is *hidden* there — an OS-capability gate, so
+absent not greyed (grey-don't-hide is for mode-inert controls, not
+missing OS capability). The stored `liquid_glass` value still
+round-trips everywhere (portability). Explicitly out of scope: a
+glass border/stroke, a shadow (`BarPanel` is deliberately
+shadowless), and vibrancy-following text.
 
 **Tab background and active indicator are orthogonal.** (#228.)
 The old coupled `style` enum (`pills` / `segments` / `underline`)

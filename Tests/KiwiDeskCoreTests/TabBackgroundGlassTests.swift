@@ -3,63 +3,69 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The Liquid Glass `tab_background` case (#390): its render
-/// fallback, round-trip, and command parse. The actual glass
-/// rendering is AppKit and OS-gated, so it's exercised by hand;
-/// these pin the pure, portable behavior.
+/// The Liquid Glass finish (#390): an orthogonal `liquidGlass`
+/// bool over the `boxed | plain` shape, OS-gated by
+/// `glassAvailable`. The actual glass rendering is AppKit and
+/// OS-gated (exercised by hand); these pin the pure, portable
+/// behavior — the gate, `hasBox`, round-trip, and command parse.
 @Suite("Tab background — Liquid Glass")
 struct TabBackgroundGlassTests {
-    typealias TB = AppBarStyle.TabBackground
-
-    @Test("material renders as boxed only where glass is missing")
-    func renderFallback() {
-        #expect(TB.material.rendered(glassAvailable: false) == .boxed)
-        #expect(
-            TB.material.rendered(glassAvailable: true) == .material
-        )
-        // boxed and plain are unaffected either way.
-        for base in [TB.boxed, .plain] {
-            #expect(base.rendered(glassAvailable: false) == base)
-            #expect(base.rendered(glassAvailable: true) == base)
-        }
+    @Test("glassEnabled gates the finish on OS capability")
+    func glassGate() {
+        var style = AppBarStyle()
+        #expect(style.glassEnabled == false)  // default off
+        style.liquidGlass = true
+        // Effective only where the platform can render glass.
+        #expect(style.glassEnabled == AppBarStyle.glassAvailable)
     }
 
-    @Test("tab_background round-trips material through JSON")
+    @Test("hasBox is the Boxed shape without the glass finish")
+    func hasBox() {
+        var style = AppBarStyle()
+        style.tabBackground = .boxed
+        #expect(style.hasBox == !style.glassEnabled)
+        style.tabBackground = .plain
+        #expect(style.hasBox == false)
+    }
+
+    @Test("liquid_glass round-trips through JSON")
     func roundTrip() throws {
         var style = AppBarStyle()
-        style.tabBackground = .material
+        style.liquidGlass = true
+        style.tabBackground = .plain
         let data = try JSONEncoder().encode(style)
         let back = try JSONDecoder().decode(
             AppBarStyle.self,
             from: data
         )
-        #expect(back.tabBackground == .material)
+        #expect(back.liquidGlass == true)
+        #expect(back.tabBackground == .plain)
     }
 
-    @Test("both bar parsers accept material")
-    func parseMaterial() {
+    @Test("both bar parsers accept liquid_glass")
+    func parseGlass() {
         let app = AppBarCommandSetting.parse(
-            field: "tab_background",
-            args: [.string("material")]
+            field: "liquid_glass",
+            args: [.bool(true)]
         )
         guard case .success(let appSetting) = app else {
-            Issue.record("app bar rejected material")
+            Issue.record("app bar rejected liquid_glass")
             return
         }
         var appStyle = AppBarStyle()
         appSetting.apply(to: &appStyle)
-        #expect(appStyle.tabBackground == .material)
+        #expect(appStyle.liquidGlass == true)
 
         let space = SpaceBarCommandSetting.parse(
-            field: "tab_background",
-            args: [.string("material")]
+            field: "liquid_glass",
+            args: [.bool(true)]
         )
         guard case .success(let spaceSetting) = space else {
-            Issue.record("space bar rejected material")
+            Issue.record("space bar rejected liquid_glass")
             return
         }
         var spaceStyle = SpaceBarStyle()
         spaceSetting.apply(to: &spaceStyle)
-        #expect(spaceStyle.tabBackground == .material)
+        #expect(spaceStyle.liquidGlass == true)
     }
 }

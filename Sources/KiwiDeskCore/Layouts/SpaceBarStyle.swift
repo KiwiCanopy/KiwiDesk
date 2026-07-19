@@ -60,6 +60,9 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// App Font `Default` glyph either way.
     public var iconSource: BarAppIconSource = .appImage
     public var tabBackground: TabBackground = .boxed
+    /// Liquid Glass finish (macOS 26+), orthogonal to the shape —
+    /// see `AppBarStyle.liquidGlass`. Ignored below 26.
+    public var liquidGlass: Bool = false
     /// Hug by default, like the App Bar (QA 2026-07-19).
     public var tabBackgroundFit: TabBackgroundFit = .hug
     public var activeIndicator: ActiveIndicator = .ring
@@ -103,6 +106,17 @@ public struct SpaceBarStyle: Sendable, Equatable {
 
     public init() {}
 
+    /// Liquid Glass paints only where the platform renders it —
+    /// false below macOS 26 even if `liquidGlass` is stored true.
+    public var glassEnabled: Bool {
+        liquidGlass && AppBarStyle.glassAvailable
+    }
+
+    /// An item paints its own box: Boxed shape, no glass finish.
+    public var hasBox: Bool {
+        tabBackground == .boxed && !glassEnabled
+    }
+
 }
 
 // MARK: - Codable
@@ -123,6 +137,7 @@ extension SpaceBarStyle: Codable {
         case glyphCap = "glyph_cap"
         case iconSource = "icon_source"
         case tabBackground = "tab_background"
+        case liquidGlass = "liquid_glass"
         case tabBackgroundFit = "tab_background_fit"
         case activeIndicator = "active_indicator"
         case cornerRoundness = "corner_roundness"
@@ -199,6 +214,11 @@ extension SpaceBarStyle: Codable {
                 TabBackground.self,
                 forKey: .tabBackground
             ) ?? defaults.tabBackground
+        liquidGlass =
+            try container.decodeIfPresent(
+                Bool.self,
+                forKey: .liquidGlass
+            ) ?? defaults.liquidGlass
         tabBackgroundFit =
             try container.decodeIfPresent(
                 TabBackgroundFit.self,

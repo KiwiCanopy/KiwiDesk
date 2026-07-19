@@ -240,7 +240,7 @@ final class AppBarItemView: NSView {
     /// combo, including the active ring (which is a pure stroke).
     private var hasBox: Bool {
         if isHovered { return true }
-        return style.tabBackground.rendered == .boxed
+        return style.hasBox
     }
 
     // The settings App Bar preview (`AppBarPreviewStrip`, GUI
@@ -248,16 +248,10 @@ final class AppBarItemView: NSView {
     // keep the two in step when the box or accent rules change.
     private var boxColorHex: String {
         if isHovered { return style.hoverFillColor }
-        switch style.tabBackground.rendered {
-        case .boxed:
-            // One fill for every box — active is marked by the
-            // indicator, not a distinct fill (color merge).
-            return style.fillColor
-        // `material` is boxless like `plain` — the glass plate is
-        // the background, so items paint no box of their own.
-        case .plain, .material:
-            return "#00000000"
-        }
+        // One fill for every box (active marked by the indicator,
+        // not a distinct fill). Plain — and any glass finish, whose
+        // shared plate is the background — paint no per-item box.
+        return style.hasBox ? style.fillColor : "#00000000"
     }
 
     /// How the active tab is marked, gated on the indicator and

@@ -77,16 +77,11 @@ extension AppBarPreviewStrip {
     }
 
     private var styleName: String {
-        switch style.tabBackground {
-        case .boxed:
-            return L("app_bar.tab_background.boxed", "Boxed")
-        case .plain:
-            return L("app_bar.tab_background.plain", "Plain")
-        case .material:
-            return L(
-                "app_bar.tab_background.material",
-                "Liquid Glass"
-            )
+        if style.glassEnabled {
+            return L("app_bar.liquid_glass", "Liquid Glass")
         }
+        return style.tabBackground == .boxed
+            ? L("app_bar.tab_background.boxed", "Boxed")
+            : L("app_bar.tab_background.plain", "Plain")
     }
 }

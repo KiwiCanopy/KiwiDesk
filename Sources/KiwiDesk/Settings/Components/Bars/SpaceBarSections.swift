@@ -86,6 +86,20 @@ struct SpaceBarEditorSection: View {
             options: AppBarOptions.tabBackground
                 .map { ($0.1, $0.0) }
         )
+        // Liquid Glass finish — offered only on macOS 26+ (#390).
+        if AppBarStyle.glassAvailable {
+            ToggleRow(
+                label: L("app_bar.liquid_glass", "Liquid Glass"),
+                isOn: style.liquidGlass,
+                help: L(
+                    "app_bar.liquid_glass.help",
+                    "Lays a translucent glass material over the "
+                        + "boxes or the plate. The Fill color tints "
+                        + "it, though the tint reads subtle on "
+                        + "current macOS."
+                )
+            )
+        }
         // Directly below the background it sizes (topic
         // grouping); greyed for Boxed, which draws no shared
         // plate (#171).
@@ -100,11 +114,9 @@ struct SpaceBarEditorSection: View {
         )
         .modifier(
             GreyOut(
-                // `rendered`, not the raw field: a portable
-                // `material` config renders Boxed below
-                // macOS 26, where no plate exists to size.
-                active: style.wrappedValue.tabBackground
-                    .rendered == .boxed,
+                // No shared plate to size when items box themselves
+                // (Boxed without the glass finish).
+                active: style.wrappedValue.hasBox,
                 help: L(
                     "space_bar.tab_background_fit.boxed_only",
                     "Boxed draws a box per item, not a shared "

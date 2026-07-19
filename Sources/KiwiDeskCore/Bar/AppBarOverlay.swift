@@ -162,7 +162,7 @@ public final class AppBarOverlay {
             axis: m.viewport,
             margin: m.gap
         )
-        itemContainer.frame =
+        let viewport =
             m.horizontal
             ? CGRect(
                 x: m.inset,
@@ -176,6 +176,7 @@ public final class AppBarOverlay {
                 width: strip.width,
                 height: m.viewport
             )
+        itemContainer.frame = viewport
         let frames = Self.frames(
             lengths: Array(
                 repeating: m.slot,
@@ -221,6 +222,7 @@ public final class AppBarOverlay {
                 style: style,
                 strip: strip,
                 plateFrame: plateFrame,
+                viewport: viewport,
                 animated: true
             )
             for (index, view) in itemViews.enumerated() {

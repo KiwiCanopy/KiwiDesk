@@ -107,6 +107,7 @@ struct SpaceBarCommandParityTests {
         .boxSize(120), .boxGap(3), .fontSize(15),
         .glyphCap(8),
         .iconSource(.appFont), .tabBackground(.plain),
+        .liquidGlass(true),
         .tabBackgroundFit(.full),
         .activeIndicator(.gap), .cornerRoundness(5),
         .showFrontApp(true), .hideEmpty(true),
@@ -183,7 +184,7 @@ struct SpaceBarCommandParityTests {
         for key: SpaceBarStyle.CodingKeys
     ) -> [JSONValue] {
         switch key {
-        case .enabled, .showFrontApp, .hideEmpty:
+        case .enabled, .showFrontApp, .hideEmpty, .liquidGlass:
             return [.bool(true)]
         case .edge: return [.string("bottom")]
         case .alignment: return [.string("end")]

@@ -175,7 +175,7 @@ public final class SpaceBarOverlay {
             viewport: viewport,
             margin: gap
         )
-        placeItemContainer(
+        let viewportRect = placeItemContainer(
             inset: inset,
             viewport: viewport,
             strip: strip,
@@ -216,7 +216,8 @@ public final class SpaceBarOverlay {
             panel,
             style: style,
             strip: strip,
-            plateFrame: plateFrame
+            plateFrame: plateFrame,
+            viewport: viewportRect
         )
         recordHitFrames(
             items: items,
@@ -276,13 +277,16 @@ public final class SpaceBarOverlay {
 
     /// Positions the clipping viewport: inset by an arrow zone at
     /// each end while overflowing, the full strip otherwise.
+    /// Returns the rect so the glass plate can adopt it as its
+    /// `contentView` frame.
+    @discardableResult
     private func placeItemContainer(
         inset: CGFloat,
         viewport: CGFloat,
         strip: CGRect,
         horizontal: Bool
-    ) {
-        itemContainer.frame =
+    ) -> CGRect {
+        let frame =
             horizontal
             ? CGRect(
                 x: inset,
@@ -296,6 +300,8 @@ public final class SpaceBarOverlay {
                 width: strip.width,
                 height: viewport
             )
+        itemContainer.frame = frame
+        return frame
     }
 
     /// Records the drag-drop hit frames in strip-local

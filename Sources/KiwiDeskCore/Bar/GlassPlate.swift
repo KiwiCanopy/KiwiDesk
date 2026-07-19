@@ -51,4 +51,44 @@ enum GlassPlate {
         glass.tintColor =
             tint.alphaComponent > 0 ? tint : nil
     }
+
+    /// Embeds `content` as the glass's `contentView` — the
+    /// supported usage (Apple: "set each one's contentView …
+    /// avoid placing the view behind your content as a sibling").
+    /// Only this makes the tint and style actually render; a bare
+    /// backdrop plate renders degraded. The glass auto-sizes the
+    /// content to its own rounded bounds.
+    @MainActor
+    static func setContent(_ view: NSView, _ content: NSView) {
+        guard #available(macOS 26, *),
+            let glass = view as? NSGlassEffectView
+        else { return }
+        if glass.contentView !== content {
+            glass.contentView = content
+        }
+    }
+
+    /// Releases the embedded content so the caller can reparent it
+    /// (leaving Material for Plain/Boxed).
+    @MainActor
+    static func detach(_ view: NSView) {
+        guard #available(macOS 26, *),
+            let glass = view as? NSGlassEffectView
+        else { return }
+        glass.contentView = nil
+    }
+
+    /// True when `content` is currently the glass's `contentView`.
+    /// The reparent decision MUST use this, not `content.superview`:
+    /// `NSGlassEffectView` nests its content in an internal wrapper,
+    /// so `content.superview` is that wrapper, never the glass view —
+    /// checking `=== glassView` there is always false, and the
+    /// content would stay trapped in a hidden glass (no items/bar).
+    @MainActor
+    static func holds(_ view: NSView, _ content: NSView) -> Bool {
+        guard #available(macOS 26, *),
+            let glass = view as? NSGlassEffectView
+        else { return false }
+        return glass.contentView === content
+    }
 }

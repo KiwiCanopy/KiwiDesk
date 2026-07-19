@@ -26,6 +26,7 @@ public struct LayoutAppBar: Sendable, Equatable {
     public var alignment: AppBarStyle.BarAlignment?
     public var thickness: CGFloat?
     public var tabBackground: TabBackground?
+    public var liquidGlass: Bool?
     public var tabBackgroundFit: TabBackgroundFit?
     public var activeIndicator: ActiveIndicator?
     public var boxSize: CGFloat?
@@ -61,6 +62,7 @@ public struct LayoutAppBar: Sendable, Equatable {
             out.thickness = max(AppBarStyle.minThickness, thickness)
         }
         if let tabBackground { out.tabBackground = tabBackground }
+        if let liquidGlass { out.liquidGlass = liquidGlass }
         if let tabBackgroundFit {
             out.tabBackgroundFit = tabBackgroundFit
         }
@@ -117,6 +119,7 @@ extension LayoutAppBar: Codable {
         case alignment
         case thickness
         case tabBackground = "tab_background"
+        case liquidGlass = "liquid_glass"
         case tabBackgroundFit = "tab_background_fit"
         case activeIndicator = "active_indicator"
         case boxSize = "box_size"
@@ -158,6 +161,10 @@ extension LayoutAppBar: Codable {
         tabBackground = try container.decodeIfPresent(
             TabBackground.self,
             forKey: .tabBackground
+        )
+        liquidGlass = try container.decodeIfPresent(
+            Bool.self,
+            forKey: .liquidGlass
         )
         tabBackgroundFit = try container.decodeIfPresent(
             TabBackgroundFit.self,
@@ -250,6 +257,10 @@ extension LayoutAppBar: Codable {
         try container.encodeIfPresent(
             tabBackground,
             forKey: .tabBackground
+        )
+        try container.encodeIfPresent(
+            liquidGlass,
+            forKey: .liquidGlass
         )
         try container.encodeIfPresent(
             tabBackgroundFit,

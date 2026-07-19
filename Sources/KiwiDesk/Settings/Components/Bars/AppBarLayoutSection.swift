@@ -124,7 +124,7 @@ struct LayoutAppBarSection: View {
                 // (the one resolve authority; `rendered` folds
                 // in material's sub-macOS-26 Boxed fallback).
                 active: bar.resolved(with: global)
-                    .tabBackground.rendered == .boxed,
+                    .hasBox,
                 help: L(
                     "app_bar.tab_background_fit.boxed_only",
                     "Boxed draws a box per tab, not a shared "

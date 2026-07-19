@@ -22,6 +22,12 @@ public struct AppBarStyle: Sendable, Equatable {
     /// Depth of the reserved strip (pt).
     public var thickness: CGFloat = 32
     public var tabBackground: TabBackground = .boxed
+    /// Liquid Glass finish (macOS 26+), orthogonal to the shape:
+    /// a colorless glass material laid over the Boxed boxes or the
+    /// Plain plate. Ignored below macOS 26 (`glassEnabled`). Fill
+    /// is still forwarded as the glass tint, though the tint reads
+    /// near-colorless on current macOS (#390).
+    public var liquidGlass: Bool = false
     /// Hug by default: a tight plate reads calmer than an
     /// edge-to-edge strip (ui-designer, QA 2026-07-19).
     public var tabBackgroundFit: TabBackgroundFit = .hug
@@ -94,6 +100,22 @@ public struct AppBarStyle: Sendable, Equatable {
     ) -> CGFloat {
         max(0, min(cornerRoundness, 100)) / 100 * (thickness / 2)
     }
+
+    /// The Liquid Glass finish is painted only where the platform
+    /// can render it — false below macOS 26 even if `liquidGlass`
+    /// is stored true, so a glass profile opened on older macOS
+    /// shows the solid shape (the toggle is hidden there too).
+    public var glassEnabled: Bool {
+        liquidGlass && Self.glassAvailable
+    }
+
+    /// An item paints its own box: the Boxed shape without the
+    /// glass finish. Plain (shared plate) and any glass finish
+    /// draw no per-item box, so item fill/accent geometry that
+    /// keyed on "boxed" keys on this instead.
+    public var hasBox: Bool {
+        tabBackground == .boxed && !glassEnabled
+    }
 }
 
 // MARK: - Codable
@@ -109,6 +131,7 @@ extension AppBarStyle: Codable {
         case alignment
         case thickness
         case tabBackground = "tab_background"
+        case liquidGlass = "liquid_glass"
         case tabBackgroundFit = "tab_background_fit"
         case activeIndicator = "active_indicator"
         case boxSize = "box_size"
@@ -157,6 +180,11 @@ extension AppBarStyle: Codable {
                 TabBackground.self,
                 forKey: .tabBackground
             ) ?? defaults.tabBackground
+        liquidGlass =
+            try container.decodeIfPresent(
+                Bool.self,
+                forKey: .liquidGlass
+            ) ?? defaults.liquidGlass
         tabBackgroundFit =
             try container.decodeIfPresent(
                 TabBackgroundFit.self,

@@ -198,7 +198,7 @@ extension SpaceBarItemView {
             // a full-bounds square poked past the shared plate's
             // rounded corners in hug mode (QA 2026-07-19).
             accent.frame =
-                style.tabBackground.rendered == .boxed
+                style.hasBox
                 ? bounds
                 : bounds.insetBy(
                     dx: BarAccent.capsuleInset,

@@ -38,7 +38,9 @@ extension AppBarOverlay {
         plateFrame: CGRect,
         animated: Bool = false
     ) {
-        guard style.tabBackground.rendered == .plain,
+        // Solid Plain plate: the Plain shape without the glass
+        // finish (Plain + glass draws the glass plate instead).
+        guard style.tabBackground == .plain, !style.glassEnabled,
             let content = panel.contentView
         else {
             plainPlate?.isHidden = true
@@ -73,20 +75,28 @@ extension AppBarOverlay {
             NSColor(kiwiHex: style.fillColor).cgColor
     }
 
-    /// Shows / sizes the Liquid Glass plate under the items when
-    /// the background resolves to `material`, else hides it (#390).
+    /// Liquid Glass path (#390): embeds the item run as the glass
+    /// `contentView` — the supported usage that actually renders
+    /// the tint (a bare backdrop plate renders degraded). The
+    /// glass takes the `viewport` frame, so in Phase 1 material's
+    /// `hug` (`tab_background_fit`) is inert; a run wrapper will
+    /// restore it later. Leaving material hands the viewport back
+    /// below the arrows and hides the glass.
     func updateGlassPlate(
         _ panel: NSPanel,
         style: AppBarStyle,
         strip: CGRect,
-        plateFrame: CGRect,
+        viewport: CGRect,
         animated: Bool = false
     ) {
         let depth =
             style.edge.isHorizontal ? strip.height : strip.width
-        guard style.tabBackground.rendered == .material,
-            let content = panel.contentView
-        else {
+        guard let content = panel.contentView else { return }
+        // Glass fires on the finish, over either shape (Boxed +
+        // glass renders as one plate for now — per-box glass is a
+        // follow-up). Leaving glass restores the plain hierarchy.
+        guard style.glassEnabled else {
+            restoreItemContainer(to: content, viewport: viewport)
             glassPlate?.isHidden = true
             return
         }
@@ -98,19 +108,39 @@ extension AppBarOverlay {
             content.addSubview(
                 plate,
                 positioned: .below,
-                relativeTo: nil
+                relativeTo: backArrow
             )
         }
         plate.isHidden = false
+        GlassPlate.setContent(plate, itemContainer)
         GlassPlate.update(
             plate,
-            frame: plateFrame,
+            frame: viewport,
             cornerRadius: style.resolvedCornerRadius(
                 forThickness: depth
             ),
             tintHex: style.fillColor,
             animated: animated
         )
+    }
+
+    /// Reparents the item viewport out of a glass plate back to
+    /// the panel content, below the arrows, at its viewport frame.
+    /// No-op unless it currently rides the glass.
+    private func restoreItemContainer(
+        to content: NSView,
+        viewport: CGRect
+    ) {
+        guard let plate = glassPlate,
+            GlassPlate.holds(plate, itemContainer)
+        else { return }
+        GlassPlate.detach(plate)
+        content.addSubview(
+            itemContainer,
+            positioned: .below,
+            relativeTo: backArrow
+        )
+        itemContainer.frame = viewport
     }
 
     func syncItemViewCount(_ count: Int) {
@@ -152,6 +182,7 @@ extension AppBarOverlay {
         style: AppBarStyle,
         strip: CGRect,
         plateFrame: CGRect,
+        viewport: CGRect,
         animated: Bool = false
     ) {
         updatePlainPlate(
@@ -165,7 +196,7 @@ extension AppBarOverlay {
             panel,
             style: style,
             strip: strip,
-            plateFrame: plateFrame,
+            viewport: viewport,
             animated: animated
         )
     }

@@ -27,6 +27,7 @@ enum AppBarCommandSetting {
     case alignment(AppBarStyle.BarAlignment)
     case thickness(CGFloat)
     case tabBackground(AppBarStyle.TabBackground)
+    case liquidGlass(Bool)
     case tabBackgroundFit(AppBarStyle.TabBackgroundFit)
     case activeIndicator(AppBarStyle.ActiveIndicator)
     case boxSize(CGFloat)
@@ -86,8 +87,13 @@ enum AppBarCommandSetting {
             return choice(
                 args,
                 AppBarStyle.TabBackground.self,
-                "boxed|plain|material"
+                "boxed|plain"
             ).map(Self.tabBackground)
+        case "liquid_glass":
+            guard let flag = args.first?.boolValue else {
+                return .failure("expected boolean")
+            }
+            return .success(.liquidGlass(flag))
         case "tab_background_fit":
             return choice(
                 args,
@@ -194,6 +200,7 @@ enum AppBarCommandSetting {
             style.thickness = max(AppBarStyle.minThickness, value)
         case .tabBackground(let value):
             style.tabBackground = value
+        case .liquidGlass(let value): style.liquidGlass = value
         case .tabBackgroundFit(let value):
             style.tabBackgroundFit = value
         case .activeIndicator(let value):
@@ -231,6 +238,7 @@ enum AppBarCommandSetting {
         case .thickness(let value):
             bar.thickness = max(AppBarStyle.minThickness, value)
         case .tabBackground(let value): bar.tabBackground = value
+        case .liquidGlass(let value): bar.liquidGlass = value
         case .tabBackgroundFit(let value):
             bar.tabBackgroundFit = value
         case .activeIndicator(let value):

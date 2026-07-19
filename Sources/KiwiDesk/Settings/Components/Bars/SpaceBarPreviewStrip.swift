@@ -115,24 +115,22 @@ struct SpaceBarPreviewStrip: View {
     /// Fill; Boxed draws no shared plate.
     @ViewBuilder private var stripBackground: some View {
         let shape = RoundedRectangle(
-            cornerRadius: style.tabBackground.rendered
-                != .boxed ? corner : 0
+            cornerRadius: style.hasBox ? 0 : corner
         )
-        switch style.tabBackground.rendered {
-        case .material:
+        if style.glassEnabled {
+            // Frosted proxy over either shape; Fill layered on.
             shape
                 .fill(.ultraThinMaterial)
                 .overlay(shape.fill(color(style.fillColor)))
-        case .plain:
+        } else if style.tabBackground == .plain {
             shape.fill(color(style.fillColor))
-        case .boxed:
+        } else {
             shape.fill(Color.clear)
         }
     }
 
     private var plateSpansCanvas: Bool {
-        style.tabBackground.rendered != .boxed
-            && style.tabBackgroundFit == .full
+        !style.hasBox && style.tabBackgroundFit == .full
     }
 
     @ViewBuilder private func stack<C: View>(
@@ -240,16 +238,11 @@ struct SpaceBarPreviewStrip: View {
     }
 
     private var styleName: String {
-        switch style.tabBackground {
-        case .boxed:
-            return L("app_bar.tab_background.boxed", "Boxed")
-        case .plain:
-            return L("app_bar.tab_background.plain", "Plain")
-        case .material:
-            return L(
-                "app_bar.tab_background.material",
-                "Liquid Glass"
-            )
+        if style.glassEnabled {
+            return L("app_bar.liquid_glass", "Liquid Glass")
         }
+        return style.tabBackground == .boxed
+            ? L("app_bar.tab_background.boxed", "Boxed")
+            : L("app_bar.tab_background.plain", "Plain")
     }
 }

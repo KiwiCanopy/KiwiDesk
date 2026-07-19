@@ -59,6 +59,8 @@ extension SpaceBarStyle {
         case "icon_source": iconSource = appBar.iconSource
         case "tab_background":
             tabBackground = appBar.tabBackground
+        case "liquid_glass":
+            liquidGlass = appBar.liquidGlass
         case "tab_background_fit":
             tabBackgroundFit = appBar.tabBackgroundFit
         case "active_indicator":

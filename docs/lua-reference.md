@@ -1382,24 +1382,42 @@ app_bar.set_thickness(32)
 
 ### app_bar.set_tab_background
 
-**Expects:** `"boxed"`, `"plain"`, or `"material"`.
+**Expects:** `"boxed"` or `"plain"`.
 
-**Does:** sets the visual style of the tab backgrounds:
+**Does:** sets the SHAPE of the tab backgrounds:
 - **boxed** — a box per tab honoring the corner roundness
   (0% = square, 100% = full capsule).
 - **plain** — no per-tab box; names sit on one shared
   translucent strip.
-- **material** — a macOS 26 Liquid Glass plate under the items
-  (like `plain`, but a live glass material), tinted by
-  `fill_color` (transparent = clear glass) and rounded by
-  the corner roundness. The value is accepted and round-trips on
-  any macOS; below macOS 26 it *renders* as `boxed` (the GUI
-  offers it only where it can render).
+
+Liquid Glass is no longer a shape here — it is a separate finish
+toggle, `set_liquid_glass` (below), that lays over either shape.
 
 **Example:**
 
 ```lua
-app_bar.set_tab_background("material")
+app_bar.set_tab_background("plain")
+```
+
+### app_bar.set_liquid_glass
+
+**Expects:** a boolean.
+
+**Does:** lays a macOS 26 Liquid Glass material over the tab
+backgrounds (the boxes or the plate) — an orthogonal finish, so
+it combines with either shape. `fill_color` is forwarded as the
+glass tint, though on current macOS the glass reads near-colorless
+(the tint only nudges luminance). Ignored below macOS 26, where
+the Settings toggle is hidden (an OS-capability gate, absent not
+greyed); the stored value still round-trips so a profile stays
+portable. Per-layout override:
+`monocle.set_app_bar_liquid_glass` /
+`scroll.set_app_bar_liquid_glass`.
+
+**Example:**
+
+```lua
+app_bar.set_liquid_glass(true)
 ```
 
 ### app_bar.set_tab_background_fit
@@ -1407,10 +1425,11 @@ app_bar.set_tab_background("material")
 **Expects:** `"full"` or `"hug"` (default `"hug"`).
 
 **Does:** sets how far the shared background plate reaches
-under `plain` and `material` (Liquid Glass): `hug` wraps the
-tab run plus one box gap of breathing room per end (the Dock's
-read), `full` spans the whole strip. Hug falls back to full
-while the tabs overflow and scroll. Inert under `boxed`, which
+under `plain` (and the Liquid Glass finish over it): `hug` wraps
+the tab run plus one box gap of breathing room per end (the
+Dock's read), `full` spans the whole strip. Hug falls back to
+full while the tabs overflow and scroll. Inert under `boxed`,
+which
 draws a box per tab instead of a shared plate (the Settings
 control greys there). Per-layout override:
 `monocle.set_app_bar_tab_background_fit` /
@@ -1560,10 +1579,10 @@ app_bar.set_item_color("#F2EBD9")
 **Expects:** a hex color.
 
 **Does:** sets the fill under the items — a box per item
-(`boxed`), one shared plate (`plain`), or the Liquid Glass tint
-(`material`). Default `#8B5E3C66`, translucent shell-brown; a
-fully transparent value means clear, untinted glass under
-`material`.
+(`boxed`) or one shared plate (`plain`). Default `#8B5E3C66`,
+translucent shell-brown. With the `liquid_glass` finish on it is
+also forwarded as the glass tint, though on current macOS the
+glass reads near-colorless (the tint only nudges luminance).
 
 **Example:**
 
@@ -1827,12 +1846,11 @@ space_bar.set_icon_source("app_font")
 
 ### space_bar.set_tab_background
 
-**Expects:** `"boxed"`, `"plain"`, or `"material"` (default
-`"boxed"`). `material` is the macOS 26 Liquid Glass plate — see
-`app_bar.set_tab_background`; below macOS 26 it renders as `boxed`.
+**Expects:** `"boxed"` or `"plain"` (default `"boxed"`).
 
 **Does:** boxes each Space item, or draws all items on one
-shared strip — same vocabulary as the App Bar.
+shared strip — same vocabulary as the App Bar. Liquid Glass is a
+separate finish, `space_bar.set_liquid_glass`.
 
 **Example:**
 
@@ -1840,12 +1858,27 @@ shared strip — same vocabulary as the App Bar.
 space_bar.set_tab_background("boxed")
 ```
 
+### space_bar.set_liquid_glass
+
+**Expects:** a boolean.
+
+**Does:** lays the macOS 26 Liquid Glass finish over the Space
+items — see `app_bar.set_liquid_glass` for the full behavior
+(orthogonal to the shape, `fill_color` forwarded as a subtle
+tint, hidden and inert below macOS 26).
+
+**Example:**
+
+```lua
+space_bar.set_liquid_glass(true)
+```
+
 ### space_bar.set_tab_background_fit
 
 **Expects:** `"full"` or `"hug"` (default `"hug"`).
 
-**Does:** how far the shared plate reaches under `plain` /
-`material` — see `app_bar.set_tab_background_fit`; same
+**Does:** how far the shared plate reaches under `plain` (and the
+Liquid Glass finish) — see `app_bar.set_tab_background_fit`; same
 vocabulary, same boxed inertness and overflow fallback.
 
 **Example:**

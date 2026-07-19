@@ -42,28 +42,14 @@ enum AppBarOptions {
         }
     }
 
-    /// Liquid Glass (#390) is offered only where it can render —
-    /// an OS-capability gate, so the option is absent (not greyed)
-    /// below macOS 26. The stored value still round-trips there.
+    /// The tab-background SHAPE. Liquid Glass is no longer a shape
+    /// here — it is a separate `liquidGlass` finish toggle (#390),
+    /// offered only where it can render (macOS 26+).
     @MainActor
-    static var tabBackground: [(AppBarStyle.TabBackground, String)] {
-        var options: [(AppBarStyle.TabBackground, String)] = [
-            (.boxed, L("app_bar.tab_background.boxed", "Boxed")),
-            (.plain, L("app_bar.tab_background.plain", "Plain")),
-        ]
-        if AppBarStyle.TabBackground.glassAvailable {
-            options.append(
-                (
-                    .material,
-                    L(
-                        "app_bar.tab_background.material",
-                        "Liquid Glass"
-                    )
-                )
-            )
-        }
-        return options
-    }
+    static let tabBackground: [(AppBarStyle.TabBackground, String)] = [
+        (.boxed, L("app_bar.tab_background.boxed", "Boxed")),
+        (.plain, L("app_bar.tab_background.plain", "Plain")),
+    ]
     /// How far the shared plate reaches (QA 2026-07-19).
     /// Default (hug) first, like every options list here.
     @MainActor

@@ -22,6 +22,7 @@ enum SpaceBarFixtures {
         style.glyphCap = 8
         style.iconSource = .appFont
         style.tabBackground = .plain
+        style.liquidGlass = true
         style.tabBackgroundFit = .full
         style.activeIndicator = .gap
         style.cornerRoundness = 5

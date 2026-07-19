@@ -28,7 +28,7 @@ extension SpaceBarItemView {
         // Boxed, the inset capsule on Plain/Liquid Glass (QA
         // 2026-07-19 — a square sweep would poke past the hug
         // plate's corners exactly like the old square accent).
-        let boxed = style.tabBackground.rendered == .boxed
+        let boxed = style.hasBox
         var inset = springRing.lineWidth / 2
         if !boxed { inset += BarAccent.capsuleInset }
         let rect = bounds.insetBy(dx: inset, dy: inset)

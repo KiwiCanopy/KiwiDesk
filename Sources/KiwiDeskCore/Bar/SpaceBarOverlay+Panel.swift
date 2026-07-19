@@ -32,7 +32,8 @@ extension SpaceBarOverlay {
         strip: CGRect,
         plateFrame: CGRect
     ) {
-        guard style.tabBackground.rendered == .plain,
+        // Solid Plain plate: Plain shape without the glass finish.
+        guard style.tabBackground == .plain, !style.glassEnabled,
             let content = panel.contentView
         else {
             plainPlate?.isHidden = true
@@ -58,19 +59,26 @@ extension SpaceBarOverlay {
             NSColor(kiwiHex: style.fillColor).cgColor
     }
 
-    /// Shows / sizes the Liquid Glass plate under the items when
-    /// the background resolves to `material`, else hides it (#390).
+    /// Liquid Glass path (#390): embeds the item run as the glass
+    /// `contentView` — the supported usage that actually renders
+    /// the tint (a bare backdrop plate renders degraded). The
+    /// glass takes the `viewport` frame, so in Phase 1 material's
+    /// `hug` (`tab_background_fit`) is inert; a run wrapper will
+    /// restore it later. Leaving material hands the viewport back
+    /// below the arrows and hides the glass. The front segment
+    /// rides `itemContainer`, so it is tinted as part of the run.
     func updateGlassPlate(
         _ panel: NSPanel,
         style: SpaceBarStyle,
         strip: CGRect,
-        plateFrame: CGRect
+        viewport: CGRect
     ) {
         let depth =
             style.edge.isHorizontal ? strip.height : strip.width
-        guard style.tabBackground.rendered == .material,
-            let content = panel.contentView
-        else {
+        guard let content = panel.contentView else { return }
+        // Glass fires on the finish, over either shape.
+        guard style.glassEnabled else {
+            restoreItemContainer(to: content, viewport: viewport)
             glassPlate?.isHidden = true
             return
         }
@@ -82,18 +90,38 @@ extension SpaceBarOverlay {
             content.addSubview(
                 plate,
                 positioned: .below,
-                relativeTo: nil
+                relativeTo: backArrow
             )
         }
         plate.isHidden = false
+        GlassPlate.setContent(plate, itemContainer)
         GlassPlate.update(
             plate,
-            frame: plateFrame,
+            frame: viewport,
             cornerRadius: style.resolvedCornerRadius(
                 forThickness: depth
             ),
             tintHex: style.fillColor
         )
+    }
+
+    /// Reparents the item viewport out of a glass plate back to
+    /// the panel content, below the arrows, at its viewport frame.
+    /// No-op unless it currently rides the glass.
+    private func restoreItemContainer(
+        to content: NSView,
+        viewport: CGRect
+    ) {
+        guard let plate = glassPlate,
+            GlassPlate.holds(plate, itemContainer)
+        else { return }
+        GlassPlate.detach(plate)
+        content.addSubview(
+            itemContainer,
+            positioned: .below,
+            relativeTo: backArrow
+        )
+        itemContainer.frame = viewport
     }
 
     func syncItemViewCount(_ count: Int) {
@@ -133,7 +161,8 @@ extension SpaceBarOverlay {
         _ panel: NSPanel,
         style: SpaceBarStyle,
         strip: CGRect,
-        plateFrame: CGRect
+        plateFrame: CGRect,
+        viewport: CGRect
     ) {
         updatePlainPlate(
             panel,
@@ -145,7 +174,7 @@ extension SpaceBarOverlay {
             panel,
             style: style,
             strip: strip,
-            plateFrame: plateFrame
+            viewport: viewport
         )
     }
 }

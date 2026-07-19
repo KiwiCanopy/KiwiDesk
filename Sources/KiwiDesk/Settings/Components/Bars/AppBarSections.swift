@@ -115,6 +115,22 @@ struct GlobalAppBarSection: View {
             selection: $style.tabBackground,
             options: AppBarOptions.tabBackground.map { ($0.1, $0.0) }
         )
+        // Liquid Glass is a finish over either shape, offered only
+        // where it can render (macOS 26+) — hidden, not greyed,
+        // below that, matching the OS-capability gate (#390).
+        if AppBarStyle.glassAvailable {
+            ToggleRow(
+                label: L("app_bar.liquid_glass", "Liquid Glass"),
+                isOn: $style.liquidGlass,
+                help: L(
+                    "app_bar.liquid_glass.help",
+                    "Lays a translucent glass material over the "
+                        + "boxes or the plate. The Fill color tints "
+                        + "it, though the tint reads subtle on "
+                        + "current macOS."
+                )
+            )
+        }
         // Directly below the background it sizes (topic
         // grouping); greyed for Boxed, which draws no shared
         // plate (#171).
@@ -129,7 +145,7 @@ struct GlobalAppBarSection: View {
                 // `rendered`, not the raw field: a portable
                 // `material` config renders Boxed below
                 // macOS 26, where no plate exists to size.
-                active: style.tabBackground.rendered == .boxed,
+                active: style.hasBox,
                 help: L(
                     "app_bar.tab_background_fit.boxed_only",
                     "Boxed draws a box per tab, not a shared "

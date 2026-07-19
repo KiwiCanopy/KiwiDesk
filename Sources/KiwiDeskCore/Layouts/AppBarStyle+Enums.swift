@@ -13,10 +13,20 @@ extension AppBarStyle {
     /// GUI slider's lower bound.
     public static let minThickness: CGFloat = 20
 
-    /// How each tab is backed. Orthogonal to `activeIndicator`:
-    /// the background is drawn the same on every tab, the
-    /// indicator marks only the active one. An extensible set —
-    /// more background treatments can join later.
+    /// True when this platform can render Liquid Glass (macOS 26+).
+    /// Gates the `liquidGlass` finish everywhere: rendering falls
+    /// back to the solid shape below 26, and the GUI hides the
+    /// toggle there (#390).
+    public static var glassAvailable: Bool {
+        if #available(macOS 26, *) { return true }
+        return false
+    }
+
+    /// The SHAPE of the tab background — orthogonal both to
+    /// `activeIndicator` (which marks only the active tab) and to
+    /// the `liquidGlass` finish (a colorless glass material laid
+    /// over either shape on macOS 26). Boxed = a box per tab
+    /// (honors `cornerRoundness`); Plain = one shared strip.
     public enum TabBackground: String, Sendable, Codable {
         /// A box per tab, honoring `cornerRoundness`
         /// (roundness 0 = square).
@@ -24,41 +34,13 @@ extension AppBarStyle {
         /// No per-tab box; names sit on one shared translucent
         /// strip.
         case plain
-        /// A macOS 26 Liquid Glass plate under the items — one
-        /// shared plate like `plain`, but a live glass material
-        /// tinted by `fill_color` (#390). macOS 26+ only:
-        /// the value round-trips everywhere, but on older macOS it
-        /// *renders* as `boxed` (see `rendered(glassAvailable:)`);
-        /// the GUI only offers it where it can render.
-        case material
-
-        /// True when this platform can render the glass material.
-        public static var glassAvailable: Bool {
-            if #available(macOS 26, *) { return true }
-            return false
-        }
-
-        /// The treatment actually painted: `material` degrades to
-        /// `boxed` where glass is unavailable, so an older macOS
-        /// opening a glass profile shows the default look rather
-        /// than an unbacked strip — without rewriting the stored
-        /// value. Pure (`glassAvailable` injected) for tests.
-        public func rendered(glassAvailable: Bool) -> TabBackground {
-            self == .material && !glassAvailable ? .boxed : self
-        }
-
-        /// The treatment painted on this platform.
-        public var rendered: TabBackground {
-            rendered(glassAvailable: Self.glassAvailable)
-        }
     }
 
     /// How big the shared background plate is (QA 2026-07-19).
     /// Orthogonal to `TabBackground` — "what the plate is made
-    /// of" vs "how far it reaches": `plain` and `material` both
-    /// draw one shared plate and both honor this; `boxed` draws
-    /// no shared plate, so the setting is inert there (the GUI
-    /// greys it).
+    /// of" vs "how far it reaches": `plain` draws one shared plate
+    /// and honors this; `boxed` draws no shared plate, so the
+    /// setting is inert there (the GUI greys it).
     public enum TabBackgroundFit: String, Sendable, Codable {
         /// The plate spans the whole strip edge-to-edge.
         case full

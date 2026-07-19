@@ -84,24 +84,23 @@ struct AppBarPreviewStrip: View {
     /// Boxed draws no shared plate (each tab boxes itself).
     @ViewBuilder private var stripBackground: some View {
         let shape = RoundedRectangle(
-            cornerRadius: style.tabBackground.rendered
-                != .boxed ? corner : 0
+            cornerRadius: style.hasBox ? 0 : corner
         )
-        switch style.tabBackground.rendered {
-        case .material:
+        if style.glassEnabled {
+            // Frosted proxy over either shape (the mock can't host a
+            // live NSGlassEffectView); Fill layered on as the tint.
             shape
                 .fill(.ultraThinMaterial)
                 .overlay(shape.fill(color(style.fillColor)))
-        case .plain:
+        } else if style.tabBackground == .plain {
             shape.fill(color(style.fillColor))
-        case .boxed:
+        } else {
             shape.fill(Color.clear)
         }
     }
 
     private var plateSpansCanvas: Bool {
-        style.tabBackground.rendered != .boxed
-            && style.tabBackgroundFit == .full
+        !style.hasBox && style.tabBackgroundFit == .full
     }
 
     /// Row on top/bottom, column on left/right.
@@ -275,15 +274,10 @@ struct AppBarPreviewStrip: View {
     // MARK: - Colors
 
     private func boxFill(_ t: MockTab) -> Color {
-        switch style.tabBackground {
-        // Plain / Material draw one shared plate, no per-tab box.
-        case .plain, .material:
-            return .clear
-        // One Fill for every box; the active tab is marked by the
-        // indicator, not a different fill.
-        case .boxed:
-            return color(style.fillColor)
-        }
+        // Plain and any glass finish draw one shared plate, no
+        // per-tab box. Boxed-solid draws one Fill for every box;
+        // the active tab is marked by the indicator, not a fill.
+        style.hasBox ? color(style.fillColor) : .clear
     }
 
     private func color(_ hex: String) -> Color {

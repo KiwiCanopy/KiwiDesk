@@ -80,7 +80,7 @@ extension SpaceBarOverlay {
         horizontal: Bool,
         style: SpaceBarStyle
     ) {
-        guard style.tabBackground.rendered == .boxed else {
+        guard style.hasBox else {
             frontBox.isHidden = true
             return
         }

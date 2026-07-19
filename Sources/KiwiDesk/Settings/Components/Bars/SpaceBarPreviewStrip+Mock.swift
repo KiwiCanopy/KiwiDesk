@@ -139,7 +139,7 @@ extension SpaceBarPreviewStrip {
                 // App Bar's inset capsule on Plain/Liquid Glass
                 // (QA 2026-07-19). `rendered`: material shows
                 // its Boxed fallback below macOS 26.
-                if style.tabBackground.rendered == .boxed {
+                if style.hasBox {
                     RoundedRectangle(cornerRadius: corner)
                         .strokeBorder(
                             color(style.highlightColor),
