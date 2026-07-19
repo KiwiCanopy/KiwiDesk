@@ -14,7 +14,30 @@ extension SpaceBarItemView {
         styleIdentifier()
         styleApps()
         styleBadges()
+        styleDivider()
         styleAccent()
+    }
+
+    /// The identifier↔glyphs rule (QA 2026-07-19): structural
+    /// chrome, so it stays on the muted `textColor` tier
+    /// regardless of state — a third state-driven color would
+    /// compete with the two accents rather than separate.
+    private func styleDivider() {
+        identifierDivider.isHidden = apps.isEmpty
+        identifierDivider.layer?.backgroundColor =
+            NSColor(kiwiHex: style.textColor)
+            .withAlphaComponent(SpaceBarStyle.frontDividerAlpha)
+            .cgColor
+    }
+
+    /// Untinted content (emoji identifiers, native app images)
+    /// takes no state color, so it carried no inactive cue at
+    /// all (QA 2026-07-19). Alpha is the channel that respects
+    /// "never tint": half strength when inactive, full on the
+    /// active space and under the pointer — legible enough to
+    /// identify, clearly secondary.
+    private var untintedAlpha: CGFloat {
+        isActive || isHovered || isDragHovered ? 1 : 0.5
     }
 
     /// Count and overflow badges follow the space state (#293
@@ -103,6 +126,8 @@ extension SpaceBarItemView {
             identifierLabel.stringValue = text
             identifierLabel.textColor =
                 tinted ? stateColor : .labelColor
+            identifierLabel.alphaValue =
+                tinted ? 1 : untintedAlpha
         }
     }
 
@@ -118,6 +143,8 @@ extension SpaceBarItemView {
                     app.focused && isActive
                     ? NSColor(kiwiHex: style.focusedItemColor)
                     : stateColor
+            } else {
+                appViews[index].alphaValue = untintedAlpha
             }
         }
     }
@@ -156,6 +183,10 @@ extension SpaceBarItemView {
     }
 
     var glyphSize: CGFloat {
-        identifierFont * 0.9
+        // The shared ladder — the front-app glyph reads the
+        // same one, so both render an app at one size.
+        style.glyphFontSize(
+            forDepth: horizontal ? bounds.height : bounds.width
+        )
     }
 }

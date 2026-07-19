@@ -126,6 +126,19 @@ struct GlobalAppBarSection: View {
             selection: $style.content,
             options: AppBarOptions.content.map { ($0.1, $0.0) }
         )
+        .modifier(
+            GreyOut(
+                // Vertical bars render icon-only (names would
+                // need stacked or rotated text) — the stored
+                // preference survives an edge round-trip.
+                active: !style.edge.isHorizontal,
+                help: L(
+                    "app_bar.content.vertical_only",
+                    "Left and right bars always show icons "
+                        + "only."
+                )
+            )
+        )
         // #294 icon rendering, directly below the Content
         // control it depends on; greyed (never hidden, #171)
         // when Name-only content shows no icons at all.

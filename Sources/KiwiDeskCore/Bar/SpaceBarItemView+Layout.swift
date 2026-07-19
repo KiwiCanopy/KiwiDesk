@@ -17,9 +17,10 @@ extension SpaceBarItemView {
     }
 
     /// The slot length an item with `appCount` glyphs wants
-    /// along the bar axis: identifier cell + one cell per app
-    /// glyph (+ one for the "+n" overflow badge) + padding.
-    /// The overlay uses this for auto sizing.
+    /// along the bar axis: identifier cell + the divider rule
+    /// (when glyphs follow) + one cell per app glyph (+ one for
+    /// the "+n" overflow badge) + padding. The overlay uses
+    /// this for auto sizing.
     static func autoLength(
         appCount: Int,
         overflow: Int = 0,
@@ -27,7 +28,8 @@ extension SpaceBarItemView {
     ) -> CGFloat {
         let cell = max(depth - pad * 2, 8)
         let slots = appCount + (overflow > 0 ? 1 : 0)
-        return pad * 2 + cell + CGFloat(slots) * cell
+        let divider: CGFloat = slots > 0 ? pad + 1 + pad : 0
+        return pad * 2 + cell + divider + CGFloat(slots) * cell
     }
 
     override func layout() {
@@ -49,6 +51,18 @@ extension SpaceBarItemView {
         place(identifierImage, at: cursor, cell: cell)
         place(identifierLabel, at: cursor, cell: cell)
         cursor += cell
+        if !identifierDivider.isHidden {
+            cursor += Self.pad
+            let depth =
+                horizontal ? bounds.height : bounds.width
+            identifierDivider.frame = BarDivider.frame(
+                at: cursor,
+                depth: depth,
+                cell: cell,
+                horizontal: horizontal
+            )
+            cursor += 1 + Self.pad
+        }
         for (index, view) in appViews.enumerated() {
             place(view, at: cursor, cell: cell)
             if index < badgeViews.count {

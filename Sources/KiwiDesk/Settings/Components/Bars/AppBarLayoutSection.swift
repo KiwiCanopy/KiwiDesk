@@ -125,6 +125,19 @@ struct LayoutAppBarSection: View {
             options: AppBarOptions.content,
             style: .segmented
         )
+        .modifier(
+            GreyOut(
+                // Same vertical rule as the global editor,
+                // against this layout's EFFECTIVE edge.
+                active: !(bar.edge ?? global.edge)
+                    .isHorizontal,
+                help: L(
+                    "app_bar.content.vertical_only",
+                    "Left and right bars always show icons "
+                        + "only."
+                )
+            )
+        )
         OverrideToggleRow(
             label: L(
                 "app_bar.group_adjacent",

@@ -126,11 +126,12 @@ extension SpaceBarOverlay {
         frontDivider.layer?.backgroundColor =
             color.withAlphaComponent(SpaceBarStyle.frontDividerAlpha)
             .cgColor
-        let inset = (depth - cell) / 2
-        frontDivider.frame =
-            horizontal
-            ? CGRect(x: offset, y: inset, width: 1, height: cell)
-            : CGRect(x: inset, y: offset, width: cell, height: 1)
+        frontDivider.frame = BarDivider.frame(
+            at: offset,
+            depth: depth,
+            cell: cell,
+            horizontal: horizontal
+        )
         return 1 + SpaceBarItemView.pad
     }
 
@@ -172,11 +173,10 @@ extension SpaceBarOverlay {
             frontIcon.isHidden = true
             frontGlyph.isHidden = false
             frontGlyph.stringValue = glyph
-            // Same ladder as item glyphs: an explicit font_size
-            // wins, else scale with the cell.
-            let size =
-                style.fontSize > 0
-                ? style.fontSize * 0.9 : cell * 0.72
+            // The item glyphs' shared ladder — a second formula
+            // here rendered the same app at a visibly different
+            // size in auto mode (QA 2026-07-19).
+            let size = style.glyphFontSize(forDepth: depth)
             frontGlyph.font =
                 AppFont.font(size: size)
                 ?? .systemFont(ofSize: size)

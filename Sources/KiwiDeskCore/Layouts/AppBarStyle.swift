@@ -72,6 +72,16 @@ public struct AppBarStyle: Sendable, Equatable {
         /// Truncation only ever eats the name; the icon
         /// always survives.
         case iconAndName = "icon_and_name"
+
+        /// The content actually drawn: vertical bars render
+        /// icon-only — letter-stacked names read terribly and
+        /// rotated text is not native (QA 2026-07-19; the Space
+        /// Bar settled the same rule for its front-app name).
+        /// The stored preference round-trips, mirroring
+        /// `TabBackground.rendered(glassAvailable:)`.
+        public func rendered(horizontal: Bool) -> Content {
+            horizontal ? self : .icon
+        }
     }
 
     /// Where the item group sits along the bar's long axis

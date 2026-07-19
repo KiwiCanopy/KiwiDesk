@@ -165,16 +165,19 @@ final class AppBarItemView: NSView {
         self.style = style
         isHovered = false
         iconView.image = icon
+        let content = style.content.rendered(
+            horizontal: horizontal
+        )
         // Empty ligature (bad vendor drop) must not reserve a
         // blank square — treat it as no glyph.
         let showsGlyph =
-            glyph?.isEmpty == false && style.content != .name
+            glyph?.isEmpty == false && content != .name
         glyphLabel.isHidden = !showsGlyph
         glyphLabel.stringValue = glyph ?? ""
         iconView.isHidden =
-            showsGlyph || style.content == .name
+            showsGlyph || content == .name
             || icon == nil
-        label.isHidden = style.content == .icon
+        label.isHidden = content == .icon
         badge.isHidden = count < 2
         badge.stringValue = "\(count)"
         badge.textColor =

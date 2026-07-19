@@ -224,13 +224,13 @@ struct SpaceBarDriverTests {
             core.spaceIdentifier(for: SpaceID("4"))
                 == .text("K", tinted: true)
         )
-        // Unconfigured numeric id → N.square while the symbol
-        // exists…
+        // Unconfigured numeric id → plain tinted digits — the
+        // bordered N.square read as a box-in-a-box inside the
+        // boxed background (QA 2026-07-19). No range limit.
         #expect(
             core.spaceIdentifier(for: SpaceID("5"))
-                == .symbol("5.square")
+                == .text("5", tinted: true)
         )
-        // …and falls to the monogram past the symbol range.
         #expect(
             core.spaceIdentifier(for: SpaceID("99"))
                 == .text("99", tinted: true)

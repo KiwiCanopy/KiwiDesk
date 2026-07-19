@@ -36,7 +36,9 @@ extension AppBarOverlay {
         let gap = style.boxGap
         let slot = Self.slotLength(
             boxSize: style.boxSize,
-            content: style.content,
+            content: style.content.rendered(
+                horizontal: horizontal
+            ),
             thickness: thickness,
             axis: axis,
             autoWidth: Self.autoSlotWidth(
@@ -61,18 +63,11 @@ extension AppBarOverlay {
         )
     }
 
-    /// Standard `box_size = 0` lengths for a *vertical* bar,
-    /// where items stack single letters and auto keeps a fixed
-    /// length per content rather than growing to a window title.
-    nonisolated static let standardNameLength: CGFloat = 100
-    nonisolated static let standardIconAndNameLength: CGFloat =
-        140
-
     /// The auto (`box_size = 0`) slot length: on a horizontal
     /// bar, the widest item measured at the effective font (so
-    /// slots fit their real names instead of a fixed guess); on a
-    /// vertical bar, a standard length per content (stacked
-    /// letters make a measured width meaningless). The caller
+    /// slots fit their real names instead of a fixed guess); a
+    /// vertical bar renders icon-only (QA 2026-07-19), so its
+    /// slot is the icon square — the thickness. The caller
     /// still clamps this between the icon minimum and a quarter
     /// of the bar in `slotLength`.
     @MainActor
@@ -82,13 +77,7 @@ extension AppBarOverlay {
         horizontal: Bool,
         thickness: CGFloat
     ) -> CGFloat {
-        guard horizontal else {
-            switch style.content {
-            case .icon: return thickness
-            case .name: return standardNameLength
-            case .iconAndName: return standardIconAndNameLength
-            }
-        }
+        guard horizontal else { return thickness }
         let pad = AppBarItemView.contentPadding
         let font = NSFont.systemFont(
             ofSize: style.fontSize > 0

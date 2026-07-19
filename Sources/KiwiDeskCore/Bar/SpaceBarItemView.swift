@@ -50,6 +50,10 @@ final class SpaceBarItemView: NSView {
     var badgeViews: [NSTextField] = []
     /// The "+n" overflow badge, its own trailing slot.
     let overflowBadge = SpaceBarItemView.makeBadge()
+    /// The identifier↔glyphs rule (QA 2026-07-19) — the front
+    /// segment's divider, reused inside the item. Hidden on
+    /// empty spaces (nothing to separate).
+    let identifierDivider = NSView()
     let accent = NSView()
 
     private(set) var space = SpaceID("1")
@@ -83,8 +87,10 @@ final class SpaceBarItemView: NSView {
         super.init(frame: frame)
         wantsLayer = true
         accent.wantsLayer = true
+        identifierDivider.wantsLayer = true
         addSubview(identifierImage)
         addSubview(identifierLabel)
+        addSubview(identifierDivider)
         addSubview(overflowBadge)
         addSubview(accent)
         springRing.fillColor = nil

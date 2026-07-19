@@ -34,13 +34,20 @@ struct PtSlider: View {
                 range: range,
                 step: 1
             )
-            Text("\(Int(value)) \(unit)")
-                .frame(
-                    width: SettingsMetrics.readoutColumn,
-                    alignment: .trailing
-                )
-                .foregroundStyle(.secondary)
-                .font(.system(.body, design: .monospaced))
+            // A 1-floored range can only hold 0 as the Auto
+            // sentinel (the gating toggle wrote it); "0 pt"
+            // there read like a broken value (QA 2026-07-19).
+            Text(
+                value == 0 && range.lowerBound >= 1
+                    ? L("settings.readout.auto", "Auto")
+                    : "\(Int(value)) \(unit)"
+            )
+            .frame(
+                width: SettingsMetrics.readoutColumn,
+                alignment: .trailing
+            )
+            .foregroundStyle(.secondary)
+            .font(.system(.body, design: .monospaced))
         }
     }
 }

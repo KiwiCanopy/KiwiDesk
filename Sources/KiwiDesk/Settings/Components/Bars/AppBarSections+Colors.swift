@@ -50,12 +50,29 @@ extension GlobalAppBarSection {
             )
         }
         Group {
+            // Under Liquid Glass this field IS the glass tint
+            // (QA 2026-07-19) — relabel so that's discoverable.
+            // Plain fills the strip from Box, so it's the one
+            // mode where this color never shows: grey (#171).
             HexColorField(
-                label: L(
-                    "app_bar.color.background",
-                    "Background"
-                ),
+                label: style.tabBackground == .material
+                    ? L("app_bar.color.tint", "Tint")
+                    : L(
+                        "app_bar.color.background",
+                        "Background"
+                    ),
                 hex: $style.backgroundColor
+            )
+            .modifier(
+                GreyOut(
+                    active: style.tabBackground == .plain,
+                    help: L(
+                        "app_bar.color.background.plain",
+                        "Plain fills the whole strip with the "
+                            + "Box color, so the background "
+                            + "color is never visible."
+                    )
+                )
             )
             HexColorField(
                 label: L(

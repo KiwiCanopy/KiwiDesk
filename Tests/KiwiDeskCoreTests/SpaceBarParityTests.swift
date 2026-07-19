@@ -102,7 +102,7 @@ struct SpaceBarCommandParityTests {
     /// One representative setting per case, each value chosen
     /// to differ from the field's default so the write shows.
     private static let everySetting: [SpaceBarCommandSetting] = [
-        .enabled(true), .edge(.bottom), .alignment(.end),
+        .enabled(false), .edge(.bottom), .alignment(.end),
         .thickness(44),
         .boxSize(120), .boxGap(3), .fontSize(15),
         .glyphCap(8),

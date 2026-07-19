@@ -1450,7 +1450,10 @@ app_bar.set_box_gap(6)
 
 **Expects:** `"icon"`, `"name"`, or `"icon_and_name"`.
 
-**Does:** sets what each item displays.
+**Does:** sets what each item displays. Vertical bars (edge
+`left`/`right`) always render icon-only — names would need
+stacked or rotated text; the stored preference returns when the
+bar moves back to a horizontal edge.
 
 **Example:**
 
@@ -1611,7 +1614,12 @@ app_bar.set_hover_text_color("#F2EBD9")
 
 **Expects:** a hex color.
 
-**Does:** sets the strip background (default fully transparent).
+**Does:** sets the strip background (default fully
+transparent). Under `tab_background` `material` this color is
+the Liquid Glass **tint** (the Settings field relabels to
+"Tint" there); fully transparent means clear, untinted glass.
+Under `plain` the strip fills from `box_color`, so this color
+is never visible (the Settings field greys out).
 
 **Example:**
 
@@ -1670,9 +1678,10 @@ scroll.set_app_bar_tab_background("plain")  -- override for scrolling
 The Space Bar (#293) is an always-visible overview of your
 Spaces: one bar per display, listing that display's Spaces in
 profile order — each item shows the Space's identifier
-(configured icon, else `N.square` for numeric ids or a
-two-letter monogram for named ones) plus a compact glyph per
-window in that Space. Adjacent windows of the same app collapse
+(configured icon, else the plain digits for numeric ids or a
+two-letter monogram for named ones), a thin divider, then a
+compact glyph per window in that Space. Adjacent windows of
+the same app collapse
 into one glyph wearing a count badge (non-adjacent duplicates
 stay separate); past the configured glyph cap
 (`space_bar.set_glyph_cap`, default 5, range 1–12) the rest fold
@@ -1692,11 +1701,12 @@ are global — there are no per-layout overrides.
 Two accents distinguish states: `text_color` paints inactive
 Spaces, `active_text_color` the active Space, and
 `focused_item_color` the focused window's glyph inside the
-active Space.
+active Space. Untinted content — emoji identifiers and native
+app images — dims to half strength on inactive Spaces instead.
 
 ### space_bar.set_enabled
 
-**Expects:** boolean (default `false`).
+**Expects:** boolean (default `true`).
 
 **Does:** shows or hides the Space Bar. A disabled bar reserves
 no area.
@@ -1922,7 +1932,9 @@ setting. The three-state ladder is the bar's signature:
 - `space_bar.set_active_text_color` — the active Space's
   identifier and glyphs (default `#4E9F3D`).
 - `space_bar.set_focused_item_color` — the focused window's
-  glyph inside the active Space (default `#6DBF5B`).
+  glyph inside the active Space (default `#E8A33D`, a
+  deliberately different hue so "focused window" never washes
+  into the active-Space green).
 - `space_bar.set_hover_color` / `space_bar.set_hover_text_color`
   — hover tint on non-active items.
 - `space_bar.set_box_color` / `space_bar.set_active_box_color` /
@@ -1937,7 +1949,7 @@ setting. The three-state ladder is the bar's signature:
 
 ```lua
 space_bar.set_active_text_color("#4E9F3D")
-space_bar.set_focused_item_color("#6DBF5B")
+space_bar.set_focused_item_color("#E8A33D")
 ```
 
 ## Where New Windows Land

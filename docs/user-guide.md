@@ -722,7 +722,10 @@ running windows.
 - **Thickness**: the strip's depth in points.
 - **Box size**: auto (0) measures rendered width and sizes slots
   uniformly to fit the widest item; fixed pixel width.
-- **Content**: icon only, name only, or both.
+- **Content**: icon only, name only, or both. Left/right bars
+  always render icon-only (names would need stacked or rotated
+  text), so the control greys there; your choice returns when
+  the bar moves back to a horizontal edge.
 - **App symbol style**: how app icons are drawn (greyed while
   Content is Name, which shows no icons). **System default**
   shows each app's icon as macOS provides it — including your
@@ -734,7 +737,8 @@ running windows.
   apps without a symbol keep their icon. With Glyphs active,
   the shortcuts panel's Apps band shows the same symbols
   (following the global style — the panel spans all layouts).
-- **Font size**: auto (0) or fixed.
+- **Font size**: auto or fixed. Auto-gated sliders (box size,
+  font size) read "Auto" while their toggle is on.
 - **Corner roundness**: 0–100% for boxed tabs (0 = square, 100 =
   full capsule; ignored for plain).
 
@@ -742,7 +746,10 @@ running windows.
 strip most visibly reflects — sit inline. The rest of the palette
 (text, active text, hover states, background, and group badge)
 collapses behind an **Advanced colors** disclosure, shut by
-default.
+default. The Background field relabels to **Tint** while Liquid
+Glass is selected (it tints the glass; transparent = clear), and
+greys while Plain is selected (Plain fills the strip from the
+Box color, so a background is never visible).
 
 **Per-layout overrides:**
 
@@ -758,14 +765,17 @@ that field.
 
 ### Space Bar
 
-The **Space Bar** is an always-visible overview of your Spaces:
-one bar per display, listing that display's Spaces in profile
-order. Each item shows the Space's identifier (its configured
-icon, else a numbered square or a two-letter monogram) plus a
-compact glyph per window — adjacent windows of the same app
-collapse into one glyph with a count badge, and past the
-configured glyph cap (default 5, adjustable 1–12) the rest fold
-into a `+n` badge. Click a Space to switch to it; glyphs are
+The **Space Bar** is an always-visible overview of your Spaces,
+**on by default** — it's the one place your virtual Spaces are
+visible at all: one bar per display, listing that display's
+Spaces in profile order. Each item shows the Space's identifier
+(its configured icon, else its plain number or a two-letter
+monogram), a thin divider, then a compact glyph per window —
+adjacent windows of the same app collapse into one glyph with a
+count badge, and past the configured glyph cap (default 5,
+adjustable 1–12) the rest fold into a `+n` badge. Emoji
+identifiers and app-image icons dim to half strength on
+inactive Spaces. Click a Space to switch to it; glyphs are
 informational.
 
 **Drag a window onto a Space** to move it there — a two-speed

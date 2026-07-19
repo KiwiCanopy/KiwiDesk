@@ -101,6 +101,8 @@ extension AppBarItemView {
             : (label.cell?.cellSize ?? .zero)
         textSize.width = ceil(textSize.width)
         textSize.height = ceil(textSize.height)
+        // Horizontal-only path, so the raw preference IS the
+        // rendered content here.
         let showText = style.content != .icon
         // Half a pad: the full pad read too airy between icon
         // and name (manual QA 2026-07-18).
@@ -142,12 +144,13 @@ extension AppBarItemView {
         )
     }
 
-    /// Vertical bars: icon on top, letters stacked below,
-    /// the whole group vertically centered in the slot.
+    /// Vertical bars render icon-only (QA 2026-07-19): names
+    /// letter-stacked terribly and rotated text is not native,
+    /// so `Content.rendered(horizontal:)` collapses the
+    /// preference to `.icon` and the label never shows here
+    /// (`configure` hides it).
     private func layoutVertical() {
         let pad = Self.contentPadding
-        let font = NSFont.systemFont(ofSize: effectiveFontSize)
-        label.font = font
         let side =
             iconSlotHidden
             ? 0
@@ -155,47 +158,14 @@ extension AppBarItemView {
                 min(bounds.width, bounds.height) - pad * 2,
                 0
             )
-        let spacing: CGFloat = side > 0 ? pad : 0
-        let lineHeight = font.pointSize * 1.3
-        let available =
-            bounds.height - side - spacing - pad * 2
-        let maxLines = Int(available / max(lineHeight, 1))
-        let showText =
-            style.content != .icon && maxLines >= 1
-        label.isHidden = !showText
-        let lines =
-            showText ? min(name.count, maxLines) : 0
-        let textHeight = CGFloat(lines) * lineHeight
-        if showText {
-            label.usesSingleLineMode = false
-            label.maximumNumberOfLines = 0
-            label.lineBreakMode = .byClipping
-            label.stringValue = Self.stacked(
-                name,
-                limit: maxLines
+        guard side > 0 else { return }
+        layoutIconSlot(
+            in: CGRect(
+                x: (bounds.width - side) / 2,
+                y: max((bounds.height - side) / 2, pad),
+                width: side,
+                height: side
             )
-        }
-        var top = max(
-            (bounds.height - side - spacing - textHeight)
-                / 2,
-            pad
-        )
-        if !iconSlotHidden {
-            layoutIconSlot(
-                in: CGRect(
-                    x: (bounds.width - side) / 2,
-                    y: top,
-                    width: side,
-                    height: side
-                )
-            )
-            top += side + spacing
-        }
-        label.frame = CGRect(
-            x: 0,
-            y: top,
-            width: bounds.width,
-            height: textHeight
         )
     }
 
@@ -279,16 +249,4 @@ extension AppBarItemView {
         }
     }
 
-    /// "Safari" -> "S\na\nf\n…" for narrow vertical bars.
-    nonisolated static func stacked(
-        _ name: String,
-        limit: Int
-    ) -> String {
-        guard limit > 0 else { return "" }
-        var letters = name.map(String.init)
-        if letters.count > limit {
-            letters = Array(letters.prefix(limit - 1)) + ["…"]
-        }
-        return letters.joined(separator: "\n")
-    }
 }

@@ -202,16 +202,15 @@ extension KiwiCore {
             }
             return .text(icon, tinted: !emoji)
         }
-        // `N.square` exists only for a bounded range (0–50);
-        // probe before trusting it, else fall through to the
-        // monogram like any named space.
-        if Int(id.raw) != nil,
-            NSImage(
-                systemSymbolName: "\(id.raw).square",
-                accessibilityDescription: nil
-            ) != nil
-        {
-            return .symbol("\(id.raw).square")
+        // Numeric ids render as plain digits (QA 2026-07-19):
+        // the old `N.square` symbol is self-bordered, and with
+        // the default boxed background wrapping the item it
+        // read as a box-in-a-box. Plain text also drops the
+        // symbol's 0–50 range limit. Digits skip the monogram's
+        // uppercase-prefix (they are already their own short
+        // string).
+        if Int(id.raw) != nil {
+            return .text(id.raw, tinted: true)
         }
         return .text(
             String(id.raw.prefix(2)).uppercased(),

@@ -1147,10 +1147,17 @@ states, all GUI-exposed inline (never behind a disclosure —
 the system is the bar's defining signature): `text_color`
 paints inactive Spaces, `active_text_color` the active Space's
 identifier and glyphs, and `focused_item_color` the focused
-window's glyph inside the active Space. Emoji identifiers and
-native app images stay untinted; shape (the active indicator)
-carries the active state there, so color is never the only
-signal.
+window's glyph inside the active Space. The focused accent is
+a deliberately **different hue** (amber `#E8A33D` in the Kiwi
+theme), not a tint of the active green — a lighter shade of
+the same hue washed into "active space" and the two states
+read as one (QA 2026-07-19). Emoji identifiers and native app
+images stay untinted; shape (the active indicator) carries the
+active state there, plus a half-strength alpha dim on inactive
+Spaces (alpha respects "never tint" while still reading as
+inactive), so color is never the only signal. A thin divider
+(the front-app segment's rule, shared helper) separates the
+identifier from the glyph row inside every occupied item.
 
 **Space Bar content is fixed in v1.** (#293.) Identifier plus
 app glyphs — no clone of the App Bar's `Icon | Name |
@@ -1159,13 +1166,24 @@ compact glyphs are the point of the overview; an app-name mode
 needs its own demonstrated use case first.
 
 **Space identifiers are icon-only, with settled fallbacks.**
-(#293.) The configured Space icon (SF Symbol | emoji | single
-character) renders alone — no emoji-vs-name chooser. Without
-one: a numeric id becomes the `N.square` SF Symbol (probed —
-past the symbol range it falls through), any other id becomes
-a two-letter uppercase monogram ("mail" → "MA"). Keeps the
-square glyph-slot footprint and stays distinguishable where a
-shared generic glyph would not.
+(#293, revised QA 2026-07-19.) The configured Space icon
+(SF Symbol | emoji | single character) renders alone — no
+emoji-vs-name chooser. Without one: a numeric id renders as
+its plain tinted digits, any other id as a two-letter
+uppercase monogram ("mail" → "MA"). The earlier `N.square`
+SF Symbol fallback was dropped: a self-bordered glyph inside
+the default boxed background read as a box-in-a-box, and the
+symbol only existed for 0–50 — plain digits unify both
+fallback paths and have no range limit.
+
+**The Space Bar ships enabled.** (QA 2026-07-19.) It is the
+only surface where KiwiDesk's virtual Spaces are visible at
+all — macOS's own Spaces have Mission Control and gestures;
+ours have nothing else. "Approachable by default" is better
+served by a new user seeing the core organizing concept on
+first launch than by a cleaner-but-mute one. The App Bar
+stays per-layout (monocle/scrolling default it on; other
+layouts off).
 
 **The front-app segment is per-display.** (#293.) With
 `space_bar.show_front_app` on, each display's bar shows the

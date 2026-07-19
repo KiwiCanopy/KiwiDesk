@@ -280,14 +280,15 @@ struct AppBarMathTests {
         )
         // A longer name yields a wider slot; measured, not fixed.
         #expect(longW > shortW)
-        // Vertical bars fall back to a content standard.
+        // Vertical bars render icon-only: the slot is the
+        // icon square (QA 2026-07-19).
         #expect(
             AppBarOverlay.autoSlotWidth(
                 items: long,
                 style: style,
                 horizontal: false,
                 thickness: 32
-            ) == AppBarOverlay.standardIconAndNameLength
+            ) == 32
         )
     }
 
@@ -574,19 +575,24 @@ struct AppBarMathTests {
         )
     }
 
-    @Test("Stacked names truncate to the lines that fit")
-    func stackedText() {
+    @Test("Vertical bars render icon-only")
+    func verticalContentCollapses() {
+        // The stored preference survives; only rendering
+        // collapses (QA 2026-07-19).
         #expect(
-            AppBarItemView.stacked("Safari", limit: 10)
-                == "S\na\nf\na\nr\ni"
+            AppBarStyle.Content.iconAndName.rendered(
+                horizontal: false
+            ) == .icon
         )
         #expect(
-            AppBarItemView.stacked("Safari", limit: 4)
-                == "S\na\nf\n…"
+            AppBarStyle.Content.name.rendered(
+                horizontal: false
+            ) == .icon
         )
         #expect(
-            AppBarItemView.stacked("Safari", limit: 0)
-                .isEmpty
+            AppBarStyle.Content.iconAndName.rendered(
+                horizontal: true
+            ) == .iconAndName
         )
     }
 }

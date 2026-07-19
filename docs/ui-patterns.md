@@ -465,10 +465,26 @@ setting makes another control inert — Auto-size grid overrides
 the Columns/Rows steppers (#171), Automatic tracks overrides the
 Track limit stepper (#178), Fill empty space does nothing in a
 rigid grid, the scroll-speed row is dead when Animate focus
-shifts is off — the dependent control stays
+shifts is off, the bars' Content picker is inert on a vertical
+edge and their Background color inert under Plain — the
+dependent control stays
 visible and `.disabled`, never removed. Hiding it would jump
 the list layout every time the governing toggle flips, and a
 vanished control loses the cue that its stored value is
 *preserved* (turn Auto-size back off and the old counts
 return). Greying reads as "not right now"; hiding reads as
 "gone". Precedent: `scrollSpeedRow` disabled by `onScrolling`.
+
+**Sentinel values read as words, not numbers.** A slider gated
+by an Auto toggle stores `0` as the sentinel but its readout
+prints "Auto" while gated — "0 pt" next to a greyed slider
+reads like a broken value (QA 2026-07-19). The slider itself
+stays floored at 1 so dragging can never write the sentinel
+(#381).
+
+**A control may relabel with the mode it serves.** One field,
+one topic, but a mode-dependent role gets a mode-dependent
+name: the bars' Background color relabels to **Tint** while
+Liquid Glass is selected — the same stored field tints the
+glass there. Prefer relabeling an existing control over adding
+a parallel enum value or a second field.

@@ -21,8 +21,12 @@ public struct SpaceBarStyle: Sendable, Equatable {
     public typealias ActiveIndicator = AppBarStyle.ActiveIndicator
     public typealias Alignment = AppBarStyle.BarAlignment
 
-    /// Off by default — the Space Bar is opt-in.
-    public var enabled = false
+    /// On by default (QA 2026-07-19): the bar is the only
+    /// surface where KiwiDesk's virtual spaces are visible at
+    /// all — without it a new user may never discover the
+    /// concept. macOS's own Spaces have Mission Control; ours
+    /// have only this.
+    public var enabled = true
     /// The absolute screen edge the bar occupies. When it
     /// matches the App Bar's edge, the Space Bar is always
     /// screen-facing and the App Bar window-facing (space-first
@@ -76,9 +80,11 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// The active space's accent (identifier + its glyphs).
     public var activeTextColor = "#4E9F3D"
     /// The focused window's glyph inside the active space — the
-    /// second accent; deliberately a shade off the active color
-    /// so the two never read as one state.
-    public var focusedItemColor = "#6DBF5B"
+    /// second accent. A genuinely different hue, not a tint of
+    /// the active color: a lighter green washed into the
+    /// active-space green and the two states read as one
+    /// (QA 2026-07-19).
+    public var focusedItemColor = "#E8A33D"
     /// Hover tint on non-active space items.
     public var hoverColor = "#6DBF5B80"
     public var hoverTextColor = "#F2EBD9"
@@ -135,6 +141,19 @@ public struct SpaceBarStyle: Sendable, Equatable {
             Self.springDelayRange.upperBound
         )
         return TimeInterval(ms) / 1000
+    }
+
+    /// One auto ladder for every app glyph the bar draws: an
+    /// explicit `font_size` wins; auto scales with half the
+    /// strip depth, clamped to the depth minus padding. Shared
+    /// by the item glyphs and the front-app glyph — two
+    /// independent formulas rendered the same app at visibly
+    /// different sizes in auto mode (QA 2026-07-19).
+    public func glyphFontSize(
+        forDepth depth: CGFloat
+    ) -> CGFloat {
+        let base = fontSize > 0 ? fontSize : depth * 0.5
+        return min(base, max(depth - 8, 8)) * 0.9
     }
 
     /// Same %-resolve as `AppBarStyle.resolvedCornerRadius` —
