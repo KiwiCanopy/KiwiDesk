@@ -52,13 +52,18 @@ extension SpaceBarItemView {
     /// inactive ones — a saturated badge on a muted space would
     /// fight the two-accent hierarchy.
     private func styleBadges() {
+        // Brighten to the configured badge color on hover as well as
+        // on the active space — the glyphs already un-mute on hover
+        // (`untintedAlpha`), so a badge left grey would read
+        // inconsistent (owner 2026-07-20).
+        let lit = isActive || isHovered || isDragHovered
         let background =
-            isActive
+            lit
             ? NSColor(kiwiHex: style.groupBadgeColor)
             : NSColor(kiwiHex: style.itemColor)
                 .withAlphaComponent(SpaceBarStyle.mutedBadgeAlpha)
         let text =
-            isActive
+            lit
             ? NSColor(kiwiHex: style.groupBadgeTextColor)
             : NSColor(kiwiHex: style.itemColor)
         for (index, app) in apps.enumerated() {
@@ -208,21 +213,16 @@ extension SpaceBarItemView {
             accent.layer?.backgroundColor = nil
             accent.layer?.borderColor = highlight.cgColor
             accent.layer?.borderWidth = 2
-            // Plain/material: the App Bar's capsule ring —
-            // roundness-independent, and its fully-curved ends
-            // tuck inside the shared plate's corners where the
-            // old square accent poked past them (QA 2026-07-19).
-            // Bounds-derived (not `accent.frame`): restyle runs
-            // before layout places the accent, so the frame may
-            // be stale here.
+            // Plain/material: the ring tracks the shared plate's
+            // roundness and stays concentric — inner radius = the
+            // plate's resolved corner radius minus the ring inset
+            // (owner 2026-07-20). Bounds-derived (not `accent.frame`):
+            // restyle runs before layout places the accent, so the
+            // frame may be stale here.
             accent.layer?.cornerRadius =
                 style.hasBox
                 ? cornerRadius
-                : max(
-                    (min(bounds.width, bounds.height)
-                        - BarAccent.capsuleInset * 2) / 2,
-                    0
-                )
+                : max(0, cornerRadius - BarAccent.capsuleInset)
         case .edgeMark:
             accent.layer?.borderWidth = 0
             accent.layer?.cornerRadius = 0

@@ -218,8 +218,12 @@ struct AppBarPreviewStrip: View {
                     lineWidth: 2
                 )
         } else {
+            // Concentric with the plate corner (twin of the
+            // runtime's `layoutRing`): inner radius = corner minus
+            // the ring inset, so it tracks roundness (owner
+            // 2026-07-20) rather than always a capsule.
             RoundedRectangle(
-                cornerRadius: min(slotWidth, slotHeight) / 2
+                cornerRadius: max(0, corner - BarAccent.capsuleInset)
             )
             .strokeBorder(
                 color(style.highlightColor),

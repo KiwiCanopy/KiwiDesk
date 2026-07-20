@@ -86,6 +86,36 @@ extension SpaceBarItemView {
             cursor += cell
         }
         layoutAccent()
+        layoutSeparator()
+    }
+
+    /// A thin rule on the trailing edge marking the boundary to the
+    /// next Space, under Plain only (Boxed separates via its box) and
+    /// never on the last Space. Same `BarDivider` chrome and cell
+    /// span as the in-item identifier rule.
+    private func layoutSeparator() {
+        guard showsSeparator, !style.hasBox else {
+            itemSeparator.isHidden = true
+            return
+        }
+        itemSeparator.isHidden = false
+        itemSeparator.layer?.backgroundColor =
+            BarDivider.color(textColor: style.itemColor).cgColor
+        let cell = cellLength
+        itemSeparator.frame =
+            horizontal
+            ? CGRect(
+                x: bounds.width - 1,
+                y: (bounds.height - cell) / 2,
+                width: 1,
+                height: cell
+            )
+            : CGRect(
+                x: (bounds.width - cell) / 2,
+                y: bounds.height - 1,
+                width: cell,
+                height: 1
+            )
     }
 
     /// A count badge hugging its glyph cell's top-trailing
@@ -99,12 +129,14 @@ extension SpaceBarItemView {
         centered: Bool = false
     ) {
         guard !badge.isHidden else { return }
-        // 0.42/8: the 0.5-of-cell badge with its 9pt floor read
-        // oversized next to small glyphs (QA 2026-07-19); the
-        // cap still stops ballooning on fat bars.
-        let base = min(max(cell * 0.42, 8), 13)
+        // The overflow "+n" fills its cell like a glyph, so it reads
+        // as the run's final icon rather than a small detached dot
+        // (owner/designer 2026-07-20). A per-app count stays the
+        // small corner dot (0.42/8, QA 2026-07-19 — the 0.5-of-cell
+        // badge read oversized next to small glyphs).
+        let base = centered ? cell : min(max(cell * 0.42, 8), 13)
         badge.font = .systemFont(
-            ofSize: base * 0.9,
+            ofSize: base * (centered ? 0.5 : 0.9),
             weight: .bold
         )
         let textWidth = ceil(badge.cell?.cellSize.width ?? 0)

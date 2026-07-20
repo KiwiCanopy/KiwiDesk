@@ -261,6 +261,9 @@ public final class SpaceBarOverlay {
             view.isFirstInRun = index == 0
             view.isLastInRun =
                 index == items.count - 1 && frontApp == nil
+            // A trailing separator between Spaces (Plain only), never
+            // after the last Space.
+            view.showsSeparator = index < items.count - 1
         }
         renderFrontSegment(
             frontApp,

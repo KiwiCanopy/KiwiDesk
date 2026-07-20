@@ -210,14 +210,20 @@ extension AppBarItemView {
                     forThickness: crossThickness
                 )
         } else {
-            // The plain ring is a full capsule by design —
-            // intentionally roundness-independent (there's no box
-            // whose corners it should match), so it reads as a
-            // clean selection outline rather than a fake pill.
+            // The plain ring tracks the shared plate's roundness
+            // and stays concentric with it: inner radius = the
+            // plate's resolved corner radius minus the ring inset
+            // (owner 2026-07-20). Deriving it from the ring's own
+            // shrunk frame only matched at max roundness and bowed
+            // off the corner below it.
             let inset = BarAccent.capsuleInset
             accent.frame = bounds.insetBy(dx: inset, dy: inset)
-            accent.layer?.cornerRadius =
-                min(accent.frame.height, accent.frame.width) / 2
+            accent.layer?.cornerRadius = max(
+                0,
+                style.resolvedCornerRadius(
+                    forThickness: crossThickness
+                ) - inset
+            )
         }
     }
 

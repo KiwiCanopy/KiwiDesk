@@ -14,18 +14,16 @@ public enum BarAccent {
 
     /// Alpha for untinted content (native app images, emoji
     /// identifiers) on an inactive item. Untinted content takes
-    /// no state color, so shape plus this dim carry the state —
-    /// half strength reads clearly secondary yet identifiable.
-    public static let untintedAlpha: CGFloat = 0.5
+    /// no state color, so shape plus this dim carry the state.
+    /// 0.4 (was 0.5): a clearer "not active" read (owner 2026-07-20).
+    public static let untintedAlpha: CGFloat = 0.4
 
-    /// The Space Bar's MIDDLE tier (ui-designer 2026-07-19):
-    /// an unfocused app's untinted glyph on the ACTIVE space.
-    /// 0.7 spaces the 1.0 / mid / 0.5 ladder evenly at glyph
-    /// sizes — 0.75 reads as unchanged, 0.6 collapses into the
-    /// inactive tier on dark wallpapers. The App Bar stays at
-    /// `untintedAlpha` on purpose: its dim is a binary signal
-    /// reinforced by the accent ring, with no third tier below
-    /// it to collide with — semantic parity over literal-value
-    /// parity.
-    public static let activeUnfocusedAlpha: CGFloat = 0.7
+    /// The Space Bar's MIDDLE tier: an unfocused app's untinted
+    /// glyph on the ACTIVE space. 0.6 (was 0.7) sits between the
+    /// 1.0 focused and 0.4 inactive tiers, a firmer step than 0.7
+    /// so the ladder reads clearly (owner 2026-07-20). The App Bar
+    /// stays at `untintedAlpha`: its dim is a binary signal
+    /// reinforced by the accent ring, no third tier to collide
+    /// with — semantic parity over literal-value parity.
+    public static let activeUnfocusedAlpha: CGFloat = 0.6
 }

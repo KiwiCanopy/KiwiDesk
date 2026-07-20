@@ -54,6 +54,12 @@ final class SpaceBarItemView: NSView {
     /// segment's divider, reused inside the item. Hidden on
     /// empty spaces (nothing to separate).
     let identifierDivider = NSView()
+    /// A thin rule on the item's trailing edge separating adjacent
+    /// Spaces under Plain, where nothing else marks the boundary
+    /// (Boxed separates via each item's own box). Hidden on the last
+    /// Space and under Boxed. Set by the overlay via `showsSeparator`.
+    let itemSeparator = NSView()
+    var showsSeparator = false
     let accent = NSView()
     /// Rounds/clips only the active mark to the item's corner
     /// without clipping the item itself — so the mark cuts on the
@@ -100,6 +106,8 @@ final class SpaceBarItemView: NSView {
         accent.wantsLayer = true
         accentClip.wantsLayer = true
         identifierDivider.wantsLayer = true
+        itemSeparator.wantsLayer = true
+        addSubview(itemSeparator)
         addSubview(identifierImage)
         addSubview(identifierLabel)
         addSubview(identifierDivider)
