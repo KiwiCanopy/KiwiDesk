@@ -94,6 +94,13 @@ public final class AppBarOverlay {
     /// container layer) so it can hug the run
     /// (`tab_background_fit`, QA 2026-07-19).
     var plainPlate: NSView?
+    /// Under plain + glass when the run fits (no overflow), the
+    /// glass hosts this flipped run wrapper at the hugged plate
+    /// frame with the items positioned run-local inside it — so the
+    /// frosted plate hugs the run instead of spanning the viewport.
+    /// On overflow the glass falls back to hosting `itemContainer`
+    /// at the viewport (piece 1). Empty otherwise / below macOS 26.
+    var glassRun: AppBarOverlay.FlippedView?
     var scrollOffset: CGFloat = 0
     /// The last render's geometry, kept for the drag
     /// handlers (AppBarOverlay+Drag).
@@ -235,7 +242,12 @@ public final class AppBarOverlay {
                 viewport: viewport,
                 animated: true
             )
-            for (index, view) in itemViews.enumerated() {
+            for (index, view) in itemViews.enumerated()
+            where view.superview === itemContainer {
+                // Items hosted in a glass wrapper (per-box, or the
+                // plain-glass run) are placed by the glass path;
+                // animating them here in container coords would
+                // fight that and flicker.
                 if view.frame == .zero {
                     view.frame = frames[index]
                 } else {
@@ -284,6 +296,18 @@ public final class AppBarOverlay {
                 depth: edge.isHorizontal
                     ? strip.height : strip.width,
                 animated: true
+            )
+        } else if style.glassEnabled {
+            // Plain + glass: hug the run when it fits (piece 1).
+            updatePlainGlass(
+                panel: panel,
+                frames: frames,
+                viewport: viewport,
+                plateFrame: plateFrame,
+                overflow: m.inset > 0,
+                style: style,
+                depth: edge.isHorizontal
+                    ? strip.height : strip.width
             )
         }
         layoutArrows(strip: strip, m: m, style: style)

@@ -82,6 +82,10 @@ extension AppBarOverlay {
     /// `hug` (`tab_background_fit`) is inert; a run wrapper will
     /// restore it later. Leaving material hands the viewport back
     /// below the arrows and hides the glass.
+    /// Resolves the glass hierarchy for every non-plain-glass mode
+    /// (teardown / restore); the plain + glass plate itself is
+    /// hosted at the end of `render` by `updatePlainGlass`, which
+    /// needs the item frames to hug the run.
     func updateGlassPlate(
         _ panel: NSPanel,
         style: AppBarStyle,
@@ -89,8 +93,6 @@ extension AppBarOverlay {
         viewport: CGRect,
         animated: Bool = false
     ) {
-        let depth =
-            style.edge.isHorizontal ? strip.height : strip.width
         guard let content = panel.contentView else { return }
         // Boxed + glass hosts each item in its own glass box
         // (per-box, driven at the end of `render`); leave the single
@@ -98,41 +100,22 @@ extension AppBarOverlay {
         // reparent the items out of it.
         if wantsBoxGlass(style) {
             restoreItemContainer(to: content, viewport: viewport)
+            teardownGlassRun()
             glassPlate?.isHidden = true
             return
         }
         // Any other mode: no per-box glass — return items to the
         // container before the plain/single-plate hierarchy resolves.
         teardownBoxGlasses()
-        // Glass fires on the finish, over the plain shape (one shared
-        // plate). Leaving glass restores the plain hierarchy.
+        // Leaving glass entirely: unwind the run wrapper too and
+        // restore the plain hierarchy.
         guard style.glassEnabled else {
             restoreItemContainer(to: content, viewport: viewport)
+            teardownGlassRun()
             glassPlate?.isHidden = true
             return
         }
-        guard let plate = glassPlate ?? GlassPlate.make() else {
-            return
-        }
-        glassPlate = plate
-        if plate.superview !== content {
-            content.addSubview(
-                plate,
-                positioned: .below,
-                relativeTo: backArrow
-            )
-        }
-        plate.isHidden = false
-        GlassPlate.setContent(plate, itemContainer)
-        GlassPlate.update(
-            plate,
-            frame: viewport,
-            cornerRadius: style.resolvedCornerRadius(
-                forThickness: depth
-            ),
-            tintHex: style.fillColor,
-            animated: animated
-        )
+        // Plain + glass: hosted post-loop by `updatePlainGlass`.
     }
 
     /// Reparents the item viewport out of a glass plate back to

@@ -48,6 +48,12 @@ public final class SpaceBarOverlay {
     /// The segment is non-interactive, so this sits as a backdrop
     /// behind its loose views rather than hosting them.
     var frontGlass: NSView?
+    /// Under plain + glass when the run fits, the glass hosts this
+    /// flipped run wrapper at the hugged plate frame with the run
+    /// (items + front segment) placed run-local — so the frosted
+    /// plate hugs instead of spanning the viewport (piece 1). On
+    /// overflow the glass falls back to hosting `itemContainer`.
+    var glassRun: AppBarOverlay.FlippedView?
     /// `plain`'s shared fill plate — its own view (not the
     /// container layer) so it can hug the run
     /// (`tab_background_fit`, QA 2026-07-19).
@@ -270,6 +276,16 @@ public final class SpaceBarOverlay {
         if wantsBoxGlass(style) {
             updateBoxGlasses(
                 frames: metrics.itemFrames,
+                style: style,
+                depth: horizontal ? strip.height : strip.width
+            )
+        } else if style.glassEnabled {
+            // Plain + glass: hug the run when it fits (piece 1).
+            updatePlainGlass(
+                panel: panel,
+                viewport: viewportRect,
+                plateFrame: plateFrame,
+                overflow: inset > 0,
                 style: style,
                 depth: horizontal ? strip.height : strip.width
             )
