@@ -129,6 +129,18 @@ extension KiwiCore {
             return
         }
         retileWithScrollDuration()
+        // Monocle overlaps every window at one full-screen frame and
+        // has no other z-order backstop (stack/scrolling/track arm
+        // their own on their nav paths), so a focus change must
+        // re-assert stacking through the reliable ordered raise —
+        // the lone `AXHelper.raise` above works only intermittently
+        // across apps from a background app. Guard on the in-flight
+        // count so the restore's own closing re-assert (which calls
+        // back here) can't re-arm and loop (owner 2026-07-20).
+        if activeSpace?.mode == .monocle, zOrderRestoresInFlight == 0
+        {
+            scheduleZOrderRestore()
+        }
         // Armed only AFTER the retile: retiling cancels
         // in-tolerance animations one by one, and the settle
         // callback fires synchronously the moment the count

@@ -67,9 +67,28 @@ extension KiwiCore {
             restoreScrollingZOrder(space)
         case .track:
             restoreTrackZOrder(space)
+        case .monocle:
+            restoreMonocleZOrder(space)
         default:
             break
         }
+    }
+
+    /// Monocle stacks every window at the same full-screen frame,
+    /// so they all overlap and only the focused one shows. A plain
+    /// focus change leans on the main-thread `AXHelper.raise`, which
+    /// is unreliable across apps when KiwiDesk isn't frontmost (a
+    /// non-activating App Bar click), so the clicked window can stay
+    /// buried. Re-raise ONLY that one through the blocking ordered
+    /// queue: raising the others too would churn focus window by
+    /// window (AXRaise makes a same-app window key) and make the bar
+    /// jump — and they overlap fully, so their order never shows
+    /// (owner 2026-07-20).
+    private func restoreMonocleZOrder(_ space: Space) {
+        guard let focused = space.focused,
+            state.windows[focused]?.isFloating == false
+        else { return }
+        raiseSequentially([focused], thenFocus: focused)
     }
 
     /// Track (#193): an overflow cascade piles windows — the
