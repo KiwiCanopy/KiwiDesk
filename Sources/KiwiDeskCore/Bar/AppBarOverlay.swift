@@ -101,6 +101,12 @@ public final class AppBarOverlay {
     /// On overflow the glass falls back to hosting `itemContainer`
     /// at the viewport (piece 1). Empty otherwise / below macOS 26.
     var glassRun: AppBarOverlay.FlippedView?
+    /// The hugging plate's span geometry from the last render,
+    /// so a reorder drag that begins mid-hug can hand the items
+    /// back to `itemContainer` and span the plate for the drag
+    /// (`spanPlainGlassForDrag`) — the mover and its reflowing
+    /// siblings then share one coordinate space.
+    var glassDragSpan: (viewport: CGRect, radius: CGFloat, tint: String)?
     var scrollOffset: CGFloat = 0
     /// The last render's geometry, kept for the drag
     /// handlers (AppBarOverlay+Drag).

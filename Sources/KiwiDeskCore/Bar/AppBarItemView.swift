@@ -216,12 +216,12 @@ final class AppBarItemView: NSView {
         label.textColor = NSColor(kiwiHex: textColorHex)
         glyphLabel.textColor = NSColor(kiwiHex: textColorHex)
         // The app image never tints, so it carried no active
-        // cue at all (QA 2026-07-19): half strength when
-        // inactive, shape (accent) plus opacity carry the
-        // state. Deliberately the full 0.5 dim, NOT the Space
-        // Bar's 0.7 middle tier — this is a binary signal
-        // reinforced by the ring, with no lower tier to
-        // collide with (see `BarAccent.activeUnfocusedAlpha`).
+        // cue at all (QA 2026-07-19): dimmed when inactive,
+        // shape (accent) plus opacity carry the state.
+        // Deliberately the full 0.4 dim, NOT the Space Bar's
+        // 0.6 middle tier — this is a binary signal reinforced
+        // by the outline, with no lower tier to collide with
+        // (see `BarAccent.activeUnfocusedAlpha`).
         iconView.alphaValue =
             isActive || isHovered
             ? 1 : style.dimFactor

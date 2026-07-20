@@ -30,11 +30,12 @@ extension AppBarOverlay {
         plate.isHidden = false
         let radius = style.resolvedCornerRadius(forThickness: depth)
         if overflow {
+            glassDragSpan = nil
             spanViewport(
                 plate: plate,
                 viewport: viewport,
                 radius: radius,
-                style: style
+                tintHex: style.fillColor
             )
         } else {
             hugRun(
@@ -55,7 +56,7 @@ extension AppBarOverlay {
         plate: NSView,
         viewport: CGRect,
         radius: CGFloat,
-        style: AppBarStyle
+        tintHex: String
     ) {
         returnItemsFromGlassRun()
         if !GlassPlate.holds(plate, itemContainer) {
@@ -65,7 +66,28 @@ extension AppBarOverlay {
             plate,
             frame: viewport,
             cornerRadius: radius,
-            tintHex: style.fillColor
+            tintHex: tintHex
+        )
+    }
+
+    /// A reorder drag beginning while the plain+glass plate hugs the
+    /// run would split the mover (reparented to `itemContainer`) from
+    /// its reflowing siblings (still in `glassRun` at the plate's
+    /// origin), shifting the siblings by the run offset for the drag.
+    /// Pre-empt it: hand the items back and span the plate over the
+    /// viewport — the same state overflow renders in, where the drag
+    /// already works. Idempotent (a no-op once the run is empty);
+    /// `render()` re-hugs on drop. Only fires under plain + glass hug.
+    func spanPlainGlassForDrag() {
+        guard let plate = glassPlate, let run = glassRun,
+            let span = glassDragSpan,
+            itemViews.contains(where: { $0.superview === run })
+        else { return }
+        spanViewport(
+            plate: plate,
+            viewport: span.viewport,
+            radius: span.radius,
+            tintHex: span.tint
         )
     }
 
@@ -109,6 +131,8 @@ extension AppBarOverlay {
             cornerRadius: radius,
             tintHex: style.fillColor
         )
+        // Remember the viewport span so a drag can leave hug mode.
+        glassDragSpan = (viewport, radius, style.fillColor)
     }
 
     /// Returns any run-hosted items to `itemContainer` (leaving hug

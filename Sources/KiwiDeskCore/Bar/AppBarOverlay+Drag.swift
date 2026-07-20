@@ -13,6 +13,10 @@ extension AppBarOverlay {
         to windowPoint: CGPoint
     ) {
         guard let m = lastMetrics else { return }
+        // Plain + glass hug hosts the items in `glassRun` at the
+        // plate's origin; leave hug mode so the mover and its
+        // siblings share `itemContainer`'s coordinate space.
+        spanPlainGlassForDrag()
         // The mover is the item under `boxed`/`plain`, or its glass
         // box under per-box glass — both live in `itemContainer`,
         // so the run coordinate space is the same either way.
