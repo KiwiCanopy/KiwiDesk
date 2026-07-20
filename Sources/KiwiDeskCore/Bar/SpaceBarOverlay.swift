@@ -20,6 +20,9 @@ public final class SpaceBarOverlay {
         let active: Bool
         /// Windows hidden past the glyph cap ("+n" badge).
         let overflow: Int
+        /// The focused window is one hidden past the cap — the "+n"
+        /// tints to signal focus is behind it (#376).
+        let focusInOverflow: Bool
     }
 
     /// Click-to-focus hook; wired to `KiwiCore.focusSpace`.
@@ -249,7 +252,8 @@ public final class SpaceBarOverlay {
                 active: item.active,
                 horizontal: horizontal,
                 style: style,
-                overflow: item.overflow
+                overflow: item.overflow,
+                focusInOverflow: item.focusInOverflow
             )
             view.onSelect = { [weak self] space in
                 self?.onSelect(space)

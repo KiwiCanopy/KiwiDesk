@@ -87,7 +87,7 @@ extension KiwiCore {
                 guard let space = state.workspaces[id] else {
                     return nil
                 }
-                let (apps, overflow) = spaceBarApps(
+                let (apps, overflow, focusHidden) = spaceBarApps(
                     in: space,
                     style: style
                 )
@@ -101,7 +101,11 @@ extension KiwiCore {
                     spaceGlyph: spaceIdentifier(for: id),
                     apps: apps,
                     active: id == current,
-                    overflow: overflow
+                    overflow: overflow,
+                    // Only the active space carries the system focus;
+                    // an inactive space's `focused` is just its own
+                    // last-focused window, not the tint's subject.
+                    focusInOverflow: id == current && focusHidden
                 )
             }
     }
@@ -117,7 +121,11 @@ extension KiwiCore {
     func spaceBarApps(
         in space: Space,
         style: SpaceBarStyle
-    ) -> (apps: [SpaceBarItemView.App], overflow: Int) {
+    ) -> (
+        apps: [SpaceBarItemView.App],
+        overflow: Int,
+        focusHidden: Bool
+    ) {
         // One pass: ids and names stay index-aligned with no
         // unreachable "?" fallback.
         let pairs = space.windows.compactMap { id in
@@ -132,7 +140,13 @@ extension KiwiCore {
         let apps = visible.compactMap { group in
             spaceBarApp(group: group, space: space, style: style)
         }
-        return (apps, hidden.reduce(0) { $0 + $1.count })
+        // The focused window can be hidden past the cap: the "+n"
+        // then tints to signal focus is behind it (#376).
+        let focusHidden =
+            space.focused.map { focus in
+                hidden.contains { $0.contains(focus) }
+            } ?? false
+        return (apps, hidden.reduce(0) { $0 + $1.count }, focusHidden)
     }
 
     /// One glyph slot for a same-app run.

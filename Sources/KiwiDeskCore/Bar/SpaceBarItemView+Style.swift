@@ -52,33 +52,34 @@ extension SpaceBarItemView {
     /// inactive ones — a saturated badge on a muted space would
     /// fight the two-accent hierarchy.
     private func styleBadges() {
-        // Brighten to the configured badge color on hover as well as
-        // on the active space — the glyphs already un-mute on hover
-        // (`untintedAlpha`), so a badge left grey would read
-        // inconsistent (owner 2026-07-20).
-        let lit = isActive || isHovered || isDragHovered
-        let background =
-            lit
-            ? NSColor(kiwiHex: style.groupBadgeColor)
-            : NSColor(kiwiHex: style.itemColor)
-                .withAlphaComponent(SpaceBarStyle.mutedBadgeAlpha)
-        let text =
-            lit
-            ? NSColor(kiwiHex: style.groupBadgeTextColor)
-            : NSColor(kiwiHex: style.itemColor)
         for (index, app) in apps.enumerated() {
             guard index < badgeViews.count else { break }
             let badge = badgeViews[index]
             badge.isHidden = app.count < 2
             badge.stringValue = "\(app.count)"
-            badge.layer?.backgroundColor = background.cgColor
-            badge.textColor = text
+            applyBadge(badge, appFocused: app.focused)
         }
         overflowBadge.isHidden = overflow < 1
         overflowBadge.stringValue = "+\(overflow)"
-        overflowBadge.layer?.backgroundColor =
-            background.cgColor
-        overflowBadge.textColor = text
+        applyBadge(overflowBadge, appFocused: focusInOverflow)
+    }
+
+    /// A count / overflow badge follows the same 3-tier ladder as the
+    /// glyphs (owner 2026-07-20): the whole badge (fill AND text)
+    /// dims via `alphaValue` to the app's focus tier — full for the
+    /// focused app (or on hover), `activeUnfocusedAlpha` for an
+    /// unfocused app on the active space, `untintedAlpha` on an
+    /// inactive one. Its text takes the focused-window color when
+    /// this badge's app holds the focus (walks back #293's muted
+    /// itemColor on inactive spaces — one uniform ladder now).
+    private func applyBadge(_ badge: NSTextField, appFocused: Bool) {
+        badge.layer?.backgroundColor =
+            NSColor(kiwiHex: style.groupBadgeColor).cgColor
+        badge.textColor =
+            appFocused && isActive
+            ? NSColor(kiwiHex: style.focusedItemColor)
+            : NSColor(kiwiHex: style.groupBadgeTextColor)
+        badge.alphaValue = untintedAppAlpha(focused: appFocused)
     }
 
     var cornerRadius: CGFloat {

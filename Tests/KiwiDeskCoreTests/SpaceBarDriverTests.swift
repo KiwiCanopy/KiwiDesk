@@ -105,7 +105,7 @@ struct SpaceBarDriverTests {
         // Focus a member of the leading run: the group takes
         // the focused flag, and stays collapsed (no expansion).
         core.state.apply(.windowFocused(WindowID(1)))
-        let (apps, overflow) = core.spaceBarApps(
+        let (apps, overflow, _) = core.spaceBarApps(
             in: core.state.workspaces[SpaceID("1")]!,
             style: SpaceBarStyle()
         )
@@ -138,7 +138,7 @@ struct SpaceBarDriverTests {
         core.state.apply(
             .windowCreated(window(9, app: "App7"))
         )
-        let (apps, overflow) = core.spaceBarApps(
+        let (apps, overflow, _) = core.spaceBarApps(
             in: core.state.workspaces[SpaceID("1")]!,
             style: SpaceBarStyle()
         )

@@ -74,6 +74,9 @@ final class SpaceBarItemView: NSView {
     )
     private(set) var apps: [App] = []
     private(set) var overflow = 0
+    /// The focused window is hidden past the cap (its glyph isn't
+    /// visible) — the "+n" tints to signal focus is behind it (#376).
+    private(set) var focusInOverflow = false
     private(set) var isActive = false
     private(set) var isHovered = false
     /// Synthetic hover during a window drag (#372). Tracking
@@ -174,7 +177,8 @@ final class SpaceBarItemView: NSView {
         active: Bool,
         horizontal: Bool,
         style: SpaceBarStyle,
-        overflow: Int = 0
+        overflow: Int = 0,
+        focusInOverflow: Bool = false
     ) {
         // A pooled view reused for a different Space drops any
         // drag-drop cues it was showing for the old one — a stale
@@ -188,6 +192,7 @@ final class SpaceBarItemView: NSView {
         self.spaceGlyph = spaceGlyph
         self.apps = apps
         self.overflow = overflow
+        self.focusInOverflow = focusInOverflow
         self.isActive = active
         self.horizontal = horizontal
         self.style = style
