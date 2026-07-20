@@ -145,12 +145,24 @@ extension AppBarItemView {
             spacing = 0
         }
         label.isHidden = !showText || textSize.width == 0
+        // Fold the badge's own footprint (a 2 pt gap + the circle)
+        // into the centering so a grouped tab's badge doesn't crowd
+        // the trailing edge — icon + name + badge center as one
+        // group, so the trailing gap matches the leading one (owner
+        // 2026-07-20). Only when the name shows: an icon-only badge
+        // overlaps the corner instead (see `layoutBadge`), and the
+        // slot already reserved this room (`badgeReserve`), so the
+        // shift never re-truncates the name.
+        let badgeExtent: CGFloat =
+            badgeReserve > 0 && textSize.width > 0
+            ? badgeReserve - pad + 2
+            : 0
         // The edge floor exists for text; an icon-only tab at
         // the minimum slot keeps the tighter pad so its glyph
         // box can't poke past the trailing border.
         var x = max(
-            (bounds.width - side - spacing - textSize.width)
-                / 2,
+            (bounds.width - side - spacing - textSize.width
+                - badgeExtent) / 2,
             showText ? edge : pad
         )
         if !iconSlotHidden {
