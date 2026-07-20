@@ -110,11 +110,12 @@ final class AppBarItemView: NSView {
         {
             isDragging = true
         }
-        guard isDragging, let superview else { return }
-        onDragMoved(
-            self,
-            superview.convert(location, from: nil)
-        )
+        guard isDragging else { return }
+        // Window-space point; the overlay maps it into the item
+        // container's coordinates. Not the item's own `superview`:
+        // under per-box glass the item is nested in a glass wrapper,
+        // so its superview is not the run's coordinate space.
+        onDragMoved(self, location)
     }
 
     override func mouseUp(with event: NSEvent) {

@@ -39,6 +39,15 @@ public final class SpaceBarOverlay {
     /// resolves to `material` (#390); nil otherwise / below macOS
     /// 26. Stored as a plain view — the concrete type is 26-only.
     var glassPlate: NSView?
+    /// Per-box Liquid Glass: one `NSGlassEffectView` per Space item
+    /// under `boxed + liquid_glass`, each hosting its item as
+    /// `contentView` (piece 2, App Bar twin). Empty otherwise /
+    /// below macOS 26. See SpaceBarOverlay+BoxGlass.
+    var boxGlasses: [NSView] = []
+    /// The front-app segment's own frosted box under per-box glass.
+    /// The segment is non-interactive, so this sits as a backdrop
+    /// behind its loose views rather than hosting them.
+    var frontGlass: NSView?
     /// `plain`'s shared fill plate — its own view (not the
     /// container layer) so it can hug the run
     /// (`tab_background_fit`, QA 2026-07-19).
@@ -248,6 +257,16 @@ public final class SpaceBarOverlay {
             style: style,
             horizontal: horizontal
         )
+        // Per-box glass rides the authoritative item frames (the
+        // item's own frame is overridden once it's a glass
+        // contentView), after the item + front passes.
+        if wantsBoxGlass(style) {
+            updateBoxGlasses(
+                frames: metrics.itemFrames,
+                style: style,
+                depth: horizontal ? strip.height : strip.width
+            )
+        }
         layoutArrows(
             strip: strip,
             inset: inset,
@@ -273,59 +292,6 @@ public final class SpaceBarOverlay {
     /// The index of the active Space, for scroll-follow.
     private func activeIndex(_ items: [Item]) -> Int? {
         items.firstIndex(where: \.active)
-    }
-
-    /// Positions the clipping viewport: inset by an arrow zone at
-    /// each end while overflowing, the full strip otherwise.
-    /// Returns the rect so the glass plate can adopt it as its
-    /// `contentView` frame.
-    @discardableResult
-    private func placeItemContainer(
-        inset: CGFloat,
-        viewport: CGFloat,
-        strip: CGRect,
-        horizontal: Bool
-    ) -> CGRect {
-        let frame =
-            horizontal
-            ? CGRect(
-                x: inset,
-                y: 0,
-                width: viewport,
-                height: strip.height
-            )
-            : CGRect(
-                x: 0,
-                y: inset,
-                width: strip.width,
-                height: viewport
-            )
-        itemContainer.frame = frame
-        return frame
-    }
-
-    /// Records the drag-drop hit frames in strip-local
-    /// coordinates, offset by the viewport origin and clamped to
-    /// the visible viewport (#385): a point over an arrow zone or
-    /// a scrolled-off item resolves to no Space.
-    private func recordHitFrames(
-        items: [Item],
-        frames: [CGRect],
-        strip: CGRect
-    ) {
-        hitStrip = strip
-        let container = itemContainer.frame
-        hitFrames = zip(items, frames).compactMap { item, frame in
-            let stripLocal = frame.offsetBy(
-                dx: container.minX,
-                dy: container.minY
-            )
-            let visible = stripLocal.intersection(container)
-            guard !visible.isNull, visible.width >= 1,
-                visible.height >= 1
-            else { return nil }
-            return (item.space, visible)
-        }
     }
 
     /// Axis start of the content run per `alignment` (#293

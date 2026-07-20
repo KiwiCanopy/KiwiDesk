@@ -76,7 +76,19 @@ extension SpaceBarOverlay {
         let depth =
             style.edge.isHorizontal ? strip.height : strip.width
         guard let content = panel.contentView else { return }
-        // Glass fires on the finish, over either shape.
+        // Boxed + glass hosts each item in its own glass box
+        // (per-box, driven at the end of `render`); leave the single
+        // plate hidden and hand the run back so the boxes can
+        // reparent the items out of it.
+        if wantsBoxGlass(style) {
+            restoreItemContainer(to: content, viewport: viewport)
+            glassPlate?.isHidden = true
+            return
+        }
+        // Any other mode: no per-box glass — return items to the
+        // container before the plain/single-plate hierarchy resolves.
+        teardownBoxGlasses()
+        // Glass fires on the finish, over the plain shape.
         guard style.glassEnabled else {
             restoreItemContainer(to: content, viewport: viewport)
             glassPlate?.isHidden = true

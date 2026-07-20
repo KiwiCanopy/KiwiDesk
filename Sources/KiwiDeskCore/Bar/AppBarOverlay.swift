@@ -80,6 +80,16 @@ public final class AppBarOverlay {
     /// resolves to `material` (#390); nil otherwise / below macOS
     /// 26. Stored as a plain view — the concrete type is 26-only.
     var glassPlate: NSView?
+    /// Per-box Liquid Glass: one `NSGlassEffectView` per item under
+    /// `boxed + liquid_glass`, each hosting its item as `contentView`
+    /// (piece 2). Empty otherwise / below macOS 26. Plain views —
+    /// the concrete type is 26-only (see AppBarOverlay+BoxGlass).
+    var boxGlasses: [NSView] = []
+    /// The scroll arrows' own frosted backdrop boxes under per-box
+    /// glass, so they read as glass, not solid islands. The arrow
+    /// stays interactive on top (its own box goes transparent).
+    var backArrowGlass: NSView?
+    var forwardArrowGlass: NSView?
     /// `plain`'s shared fill plate — its own view (not the
     /// container layer) so it can hug the run
     /// (`tab_background_fit`, QA 2026-07-19).
@@ -264,6 +274,18 @@ public final class AppBarOverlay {
                 self?.dragEnded(view)
             }
         }
+        // Per-box glass rides the authoritative frames (the item's
+        // own frame is overridden once it's a glass contentView), so
+        // it runs after the item loop with the gap-hidden state set.
+        if wantsBoxGlass(style) {
+            updateBoxGlasses(
+                frames: frames,
+                style: style,
+                depth: edge.isHorizontal
+                    ? strip.height : strip.width,
+                animated: true
+            )
+        }
         layoutArrows(strip: strip, m: m, style: style)
         panel.setFrame(
             GeometryUtils.flip(
@@ -275,78 +297,6 @@ public final class AppBarOverlay {
         if !panel.isVisible {
             panel.orderFrontRegardless()
         }
-    }
-
-    // MARK: - Scroll arrows
-
-    /// Arrows sit at the strip's ends, shown only toward
-    /// hidden items; clicking shifts the bar by one slot.
-    private func layoutArrows(
-        strip: CGRect,
-        m: Metrics,
-        style: AppBarStyle
-    ) {
-        backArrow.isHidden =
-            m.inset == 0 || scrollOffset <= 0.5
-        forwardArrow.isHidden =
-            m.inset == 0
-            || m.total - m.viewport - scrollOffset <= 0.5
-        let zone = Self.arrowZone
-        backArrow.frame =
-            m.horizontal
-            ? CGRect(
-                x: 0,
-                y: 0,
-                width: zone,
-                height: strip.height
-            )
-            : CGRect(
-                x: 0,
-                y: 0,
-                width: strip.width,
-                height: zone
-            )
-        forwardArrow.frame =
-            m.horizontal
-            ? CGRect(
-                x: strip.width - zone,
-                y: 0,
-                width: zone,
-                height: strip.height
-            )
-            : CGRect(
-                x: 0,
-                y: strip.height - zone,
-                width: strip.width,
-                height: zone
-            )
-        let colors = BarArrowColors(
-            text: NSColor(kiwiHex: style.itemColor),
-            hoverText: NSColor(kiwiHex: style.hoverItemColor),
-            box: NSColor(kiwiHex: style.fillColor),
-            hover: NSColor(kiwiHex: style.hoverFillColor),
-            cornerRoundness: style.cornerRoundness
-        )
-        backArrow.configure(
-            glyph: m.horizontal ? "◂" : "▴",
-            colors: colors
-        )
-        forwardArrow.configure(
-            glyph: m.horizontal ? "▸" : "▾",
-            colors: colors
-        )
-        let step = m.slot + m.gap
-        backArrow.onClick = { [weak self] in
-            self?.scroll(by: -step)
-        }
-        forwardArrow.onClick = { [weak self] in
-            self?.scroll(by: step)
-        }
-    }
-
-    private func scroll(by delta: CGFloat) {
-        scrollOffset += delta
-        render(followingFocus: false)
     }
 
 }

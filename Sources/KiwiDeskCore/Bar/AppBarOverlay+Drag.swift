@@ -10,21 +10,24 @@ extension AppBarOverlay {
     /// pinned), floating above its siblings.
     func dragMoved(
         _ view: AppBarItemView,
-        to point: CGPoint
+        to windowPoint: CGPoint
     ) {
-        guard let m = lastMetrics,
-            let container = view.superview
-        else { return }
-        if container.subviews.last !== view {
-            container.addSubview(view)
+        guard let m = lastMetrics else { return }
+        // The mover is the item under `boxed`/`plain`, or its glass
+        // box under per-box glass — both live in `itemContainer`,
+        // so the run coordinate space is the same either way.
+        let mover = draggableView(for: view)
+        let point = itemContainer.convert(windowPoint, from: nil)
+        if itemContainer.subviews.last !== mover {
+            itemContainer.addSubview(mover)
         }
-        var frame = view.frame
+        var frame = mover.frame
         if m.horizontal {
             frame.origin.x = point.x - frame.width / 2
         } else {
             frame.origin.y = point.y - frame.height / 2
         }
-        view.frame = frame
+        mover.frame = frame
         reflow(around: view, m: m)
     }
 
@@ -32,9 +35,10 @@ extension AppBarOverlay {
         guard let m = lastMetrics,
             let from = itemViews.firstIndex(of: view)
         else { return }
+        let mover = draggableView(for: view)
         let to = Self.dropIndex(
             center: m.horizontal
-                ? view.frame.midX : view.frame.midY,
+                ? mover.frame.midX : mover.frame.midY,
             start: contentStart(m),
             slot: m.slot,
             gap: m.gap,
@@ -54,12 +58,12 @@ extension AppBarOverlay {
         around dragged: AppBarItemView,
         m: Metrics
     ) {
-        guard let container = dragged.superview,
-            let from = itemViews.firstIndex(of: dragged)
+        guard let from = itemViews.firstIndex(of: dragged)
         else { return }
+        let draggedMover = draggableView(for: dragged)
         let to = Self.dropIndex(
             center: m.horizontal
-                ? dragged.frame.midX : dragged.frame.midY,
+                ? draggedMover.frame.midX : draggedMover.frame.midY,
             start: contentStart(m),
             slot: m.slot,
             gap: m.gap,
@@ -73,7 +77,7 @@ extension AppBarOverlay {
                 repeating: m.slot,
                 count: order.count
             ),
-            in: container.bounds,
+            in: itemContainer.bounds,
             gap: m.gap,
             horizontal: m.horizontal,
             alignment: m.alignment,
@@ -81,7 +85,7 @@ extension AppBarOverlay {
         )
         for (index, view) in order.enumerated()
         where view !== dragged {
-            view.frame = frames[index]
+            draggableView(for: view).frame = frames[index]
         }
     }
 

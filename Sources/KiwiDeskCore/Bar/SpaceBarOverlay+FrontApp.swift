@@ -19,6 +19,7 @@ extension SpaceBarOverlay {
         guard let app else {
             [frontBox, frontDivider, frontIcon, frontGlyph, frontName]
                 .forEach { $0.isHidden = true }
+            frontGlass?.isHidden = true
             return
         }
         attachFrontViewsIfNeeded()
@@ -80,12 +81,15 @@ extension SpaceBarOverlay {
         horizontal: Bool,
         style: SpaceBarStyle
     ) {
-        guard style.hasBox else {
+        // Boxed fills the chip; per-box glass frosts it as a
+        // backdrop; plain (shared plate) draws neither here.
+        let boxed = style.hasBox
+        let glass = wantsBoxGlass(style)
+        guard boxed || glass else {
             frontBox.isHidden = true
+            updateFrontGlass(nil, radius: 0, style: style)
             return
         }
-        frontBox.isHidden = false
-        frontBox.wantsLayer = true
         let pad = SpaceBarItemView.pad
         let content: NSView = app.glyph != nil ? frontGlyph : frontIcon
         let end =
@@ -96,7 +100,7 @@ extension SpaceBarOverlay {
         let length = max(end - start, cell) + pad * 2
         let cross = cell + pad * 2
         let crossOrigin = max((depth - cross) / 2, 0)
-        frontBox.frame =
+        let rect =
             horizontal
             ? CGRect(
                 x: start - pad,
@@ -110,10 +114,19 @@ extension SpaceBarOverlay {
                 width: cross,
                 height: length
             )
-        frontBox.layer?.cornerRadius =
-            style.resolvedCornerRadius(forThickness: depth)
-        frontBox.layer?.backgroundColor =
-            NSColor(kiwiHex: style.fillColor).cgColor
+        let radius = style.resolvedCornerRadius(forThickness: depth)
+        if boxed {
+            frontBox.isHidden = false
+            frontBox.wantsLayer = true
+            frontBox.frame = rect
+            frontBox.layer?.cornerRadius = radius
+            frontBox.layer?.backgroundColor =
+                NSColor(kiwiHex: style.fillColor).cgColor
+            updateFrontGlass(nil, radius: 0, style: style)
+        } else {
+            frontBox.isHidden = true
+            updateFrontGlass(rect, radius: radius, style: style)
+        }
     }
 
     /// Axis length the segment will consume, for the render
