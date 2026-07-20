@@ -230,8 +230,13 @@ public final class SpaceBarOverlay {
             horizontal: horizontal,
             fit: style.tabBackgroundFit
         )
-        updatePlates(
-            panel,
+        // The one hosting mode for this render (#407): prepared
+        // (non-target teardown) here, then installed post-passes
+        // once the item frames are laid out.
+        let hosting = glassHosting(style, overflow: inset > 0)
+        prepareGlassHosting(
+            hosting,
+            panel: panel,
             style: style,
             strip: strip,
             plateFrame: plateFrame,
@@ -274,26 +279,19 @@ public final class SpaceBarOverlay {
             style: style,
             horizontal: horizontal
         )
-        // Per-box glass rides the authoritative item frames (the
-        // item's own frame is overridden once it's a glass
-        // contentView), after the item + front passes.
-        if wantsBoxGlass(style) {
-            updateBoxGlasses(
-                frames: metrics.itemFrames,
-                style: style,
-                depth: horizontal ? strip.height : strip.width
-            )
-        } else if style.glassEnabled {
-            // Plain + glass: hug the run when it fits (piece 1).
-            updatePlainGlass(
-                panel: panel,
-                viewport: viewportRect,
-                plateFrame: plateFrame,
-                overflow: inset > 0,
-                style: style,
-                depth: horizontal ? strip.height : strip.width
-            )
-        }
+        // Install the target hosting from the now-laid-out item
+        // frames (per-box glass and the plain-glass run both position
+        // from them, so this runs after the item + front passes).
+        // #407: one dispatch, no per-mode branching at the call site.
+        installGlassHosting(
+            hosting,
+            panel: panel,
+            frames: metrics.itemFrames,
+            viewport: viewportRect,
+            plateFrame: plateFrame,
+            style: style,
+            depth: horizontal ? strip.height : strip.width
+        )
         layoutArrows(
             strip: strip,
             inset: inset,

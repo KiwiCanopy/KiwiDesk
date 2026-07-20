@@ -6,9 +6,9 @@ import AppKit
 /// App Bar's `+Panel` twin.
 extension SpaceBarOverlay {
     /// `plain` and `material` draw their shared plate as its
-    /// own view (`updatePlainPlate` / `updateGlassPlate`) so it
-    /// can hug the run (`tab_background_fit`); `boxed` boxes each
-    /// item. The container itself never paints.
+    /// own view (`updatePlainPlate` / the glass-hosting dispatch)
+    /// so it can hug the run (`tab_background_fit`); `boxed` boxes
+    /// each item. The container itself never paints.
     func styleContainer(
         _ panel: NSPanel,
         style: SpaceBarStyle,
@@ -59,47 +59,95 @@ extension SpaceBarOverlay {
             NSColor(kiwiHex: style.fillColor).cgColor
     }
 
-    /// Liquid Glass path (#390): embeds the item run as the glass
-    /// `contentView` — the supported usage that actually renders
-    /// the tint (a bare backdrop plate renders degraded). The
-    /// glass takes the `viewport` frame, so in Phase 1 material's
-    /// `hug` (`tab_background_fit`) is inert; a run wrapper will
-    /// restore it later. Leaving material hands the viewport back
-    /// below the arrows and hides the glass. The front segment
-    /// rides `itemContainer`, so it is tinted as part of the run.
-    /// Resolves the glass hierarchy for every non-plain-glass mode
-    /// (teardown / restore); the plain + glass plate itself is
-    /// hosted at the end of `render` by `updatePlainGlass`, which
-    /// needs the run's frames to hug it.
-    func updateGlassPlate(
-        _ panel: NSPanel,
+    /// The one hosting mode for this render (#407), from the
+    /// resolved style and whether the run overflows.
+    func glassHosting(
+        _ style: SpaceBarStyle,
+        overflow: Bool
+    ) -> GlassHosting {
+        GlassHosting.resolve(
+            available: AppBarStyle.glassAvailable,
+            glassEnabled: style.glassEnabled,
+            boxed: style.tabBackground == .boxed,
+            overflow: overflow
+        )
+    }
+
+    /// Teardown half of the one glass-hosting dispatch (#407, App Bar
+    /// twin): run once per render, *before* the item + front passes,
+    /// so the run sits in the container the target mode expects while
+    /// frames are laid out. Tears down every mode except `mode`; the
+    /// target is installed post-passes by `installGlassHosting`. The
+    /// front segment rides `itemContainer`, so it is tinted as part of
+    /// the run. The solid plain plate self-gates in `updatePlainPlate`.
+    func prepareGlassHosting(
+        _ mode: GlassHosting,
+        panel: NSPanel,
         style: SpaceBarStyle,
         strip: CGRect,
+        plateFrame: CGRect,
         viewport: CGRect
     ) {
+        updatePlainPlate(
+            panel,
+            style: style,
+            strip: strip,
+            plateFrame: plateFrame
+        )
         guard let content = panel.contentView else { return }
-        // Boxed + glass hosts each item in its own glass box
-        // (per-box, driven at the end of `render`); leave the single
-        // plate hidden and hand the run back so the boxes can
-        // reparent the items out of it.
-        if wantsBoxGlass(style) {
+        switch mode {
+        case .boxGlass:
+            // Per-box glass keeps its boxes; hand the run back so the
+            // boxes can reparent items out of it, unwind any
+            // plain-glass run, and hide the single plate.
             restoreItemContainer(to: content, viewport: viewport)
             teardownGlassRun()
             glassPlate?.isHidden = true
-            return
-        }
-        // Any other mode: no per-box glass — return items to the
-        // container before the plain/single-plate hierarchy resolves.
-        teardownBoxGlasses()
-        // Leaving glass entirely: unwind the run wrapper too and
-        // restore the plain hierarchy.
-        guard style.glassEnabled else {
+        case .plainGlassHug, .plainGlassSpan:
+            // The run + single plate are hosted post-passes by
+            // `updatePlainGlass`; only the boxes must go first.
+            teardownBoxGlasses()
+        case .plainPlate, .none:
+            // No glass: unwind boxes and run, restore the plain
+            // hierarchy, and hide the glass plate.
+            teardownBoxGlasses()
             restoreItemContainer(to: content, viewport: viewport)
             teardownGlassRun()
             glassPlate?.isHidden = true
-            return
         }
-        // Plain + glass: hosted post-loop by `updatePlainGlass`.
+    }
+
+    /// Install half of the one glass-hosting dispatch (#407, App Bar
+    /// twin): run once per render, *after* the item + front passes,
+    /// to host the target mode from the laid-out `frames`.
+    func installGlassHosting(
+        _ mode: GlassHosting,
+        panel: NSPanel,
+        frames: [CGRect],
+        viewport: CGRect,
+        plateFrame: CGRect,
+        style: SpaceBarStyle,
+        depth: CGFloat
+    ) {
+        switch mode {
+        case .boxGlass:
+            updateBoxGlasses(
+                frames: frames,
+                style: style,
+                depth: depth
+            )
+        case .plainGlassHug, .plainGlassSpan:
+            updatePlainGlass(
+                panel: panel,
+                viewport: viewport,
+                plateFrame: plateFrame,
+                overflow: mode == .plainGlassSpan,
+                style: style,
+                depth: depth
+            )
+        case .plainPlate, .none:
+            break
+        }
     }
 
     /// Reparents the item viewport out of a glass plate back to
@@ -147,31 +195,5 @@ extension SpaceBarOverlay {
         view.addSubview(backArrow)
         view.addSubview(forwardArrow)
         return panel
-    }
-}
-
-extension SpaceBarOverlay {
-    /// Both shared plates (plain fill, Liquid Glass) in one
-    /// call — exactly one is visible per mode, and both take
-    /// the same `BarPlate` frame authority.
-    func updatePlates(
-        _ panel: NSPanel,
-        style: SpaceBarStyle,
-        strip: CGRect,
-        plateFrame: CGRect,
-        viewport: CGRect
-    ) {
-        updatePlainPlate(
-            panel,
-            style: style,
-            strip: strip,
-            plateFrame: plateFrame
-        )
-        updateGlassPlate(
-            panel,
-            style: style,
-            strip: strip,
-            viewport: viewport
-        )
     }
 }

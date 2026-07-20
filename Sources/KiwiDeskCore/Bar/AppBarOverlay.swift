@@ -236,6 +236,11 @@ public final class AppBarOverlay {
             horizontal: m.horizontal,
             fit: style.tabBackgroundFit
         )
+        // The one hosting mode for this render (#407): prepared
+        // (non-target teardown) in the animation group below, then
+        // installed post-loop once the item frames are laid out.
+        let depth = edge.isHorizontal ? strip.height : strip.width
+        let hosting = glassHosting(style, overflow: m.inset > 0)
         // Frame changes ease into place so group expansion
         // (and scroll-follow) widens out instead of popping;
         // fresh views snap. The plates ride the same group —
@@ -245,8 +250,9 @@ public final class AppBarOverlay {
             context.timingFunction = CAMediaTimingFunction(
                 name: .easeOut
             )
-            updatePlates(
-                panel,
+            prepareGlassHosting(
+                hosting,
+                panel: panel,
                 style: style,
                 strip: strip,
                 plateFrame: plateFrame,
@@ -297,30 +303,21 @@ public final class AppBarOverlay {
                 self?.dragEnded(view)
             }
         }
-        // Per-box glass rides the authoritative frames (the item's
-        // own frame is overridden once it's a glass contentView), so
-        // it runs after the item loop with the gap-hidden state set.
-        if wantsBoxGlass(style) {
-            updateBoxGlasses(
-                frames: frames,
-                style: style,
-                depth: edge.isHorizontal
-                    ? strip.height : strip.width,
-                animated: true
-            )
-        } else if style.glassEnabled {
-            // Plain + glass: hug the run when it fits (piece 1).
-            updatePlainGlass(
-                panel: panel,
-                frames: frames,
-                viewport: viewport,
-                plateFrame: plateFrame,
-                overflow: m.inset > 0,
-                style: style,
-                depth: edge.isHorizontal
-                    ? strip.height : strip.width
-            )
-        }
+        // Install the target hosting from the now-laid-out frames
+        // (per-box glass and the plain-glass run both position items
+        // from them, so this runs after the item loop with the
+        // gap-hidden state set). #407: one dispatch, no per-mode
+        // branching at the call site.
+        installGlassHosting(
+            hosting,
+            panel: panel,
+            frames: frames,
+            viewport: viewport,
+            plateFrame: plateFrame,
+            style: style,
+            depth: depth,
+            animated: true
+        )
         layoutArrows(strip: strip, m: m, style: style)
         panel.setFrame(
             GeometryUtils.flip(
