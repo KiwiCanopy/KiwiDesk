@@ -76,6 +76,36 @@ extension SpaceBarOverlay {
             cornerRadius: radius,
             tintHex: style.fillColor
         )
+        applyPlateTint(
+            plate: plate,
+            frame: viewport,
+            radius: radius,
+            hex: style.fillColor
+        )
+    }
+
+    /// Solid colored backdrop behind the glass plate so the near-
+    /// colorless glass refracts a hue (#408); hidden for a
+    /// transparent Fill (clear glass). Tracks the plate's frame.
+    private func applyPlateTint(
+        plate: NSView,
+        frame: CGRect,
+        radius: CGFloat,
+        hex: String
+    ) {
+        let backdrop = glassTint ?? NSView()
+        glassTint = backdrop
+        if GlassTint.wanted(hex) {
+            GlassTint.apply(
+                backdrop,
+                below: plate,
+                frame: frame,
+                cornerRadius: radius,
+                hex: hex
+            )
+        } else {
+            backdrop.isHidden = true
+        }
     }
 
     /// Hug: the glass takes the plate frame and hosts a run wrapper
@@ -115,6 +145,12 @@ extension SpaceBarOverlay {
             frame: plateFrame,
             cornerRadius: radius,
             tintHex: style.fillColor
+        )
+        applyPlateTint(
+            plate: plate,
+            frame: plateFrame,
+            radius: radius,
+            hex: style.fillColor
         )
     }
 

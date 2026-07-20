@@ -103,6 +103,7 @@ extension SpaceBarOverlay {
             restoreItemContainer(to: content, viewport: viewport)
             teardownGlassRun()
             glassPlate?.isHidden = true
+            glassTint?.isHidden = true
         case .plainGlassHug, .plainGlassSpan:
             // The run + single plate are hosted post-passes by
             // `updatePlainGlass`; only the boxes must go first.
@@ -114,6 +115,7 @@ extension SpaceBarOverlay {
             restoreItemContainer(to: content, viewport: viewport)
             teardownGlassRun()
             glassPlate?.isHidden = true
+            glassTint?.isHidden = true
         }
     }
 

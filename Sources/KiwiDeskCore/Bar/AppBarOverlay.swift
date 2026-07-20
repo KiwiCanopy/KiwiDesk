@@ -85,11 +85,22 @@ public final class AppBarOverlay {
     /// (piece 2). Empty otherwise / below macOS 26. Plain views —
     /// the concrete type is 26-only (see AppBarOverlay+BoxGlass).
     var boxGlasses: [NSView] = []
+    /// Solid colored backdrops behind each per-box glass, filled
+    /// with the box Fill so the near-colorless glass refracts a hue
+    /// (#408). Kept parallel to `boxGlasses`. Empty / below macOS 26.
+    var boxTints: [NSView] = []
     /// The scroll arrows' own frosted backdrop boxes under per-box
     /// glass, so they read as glass, not solid islands. The arrow
     /// stays interactive on top (its own box goes transparent).
     var backArrowGlass: NSView?
     var forwardArrowGlass: NSView?
+    /// Colored backdrops behind the arrow glasses (#408), so the
+    /// arrows tint with the boxes instead of staying grey.
+    var backArrowTint: NSView?
+    var forwardArrowTint: NSView?
+    /// Colored backdrop behind the single glass plate (plain +
+    /// glass, hug and span), filled with the bar Fill (#408).
+    var glassTint: NSView?
     /// `plain`'s shared fill plate — its own view (not the
     /// container layer) so it can hug the run
     /// (`tab_background_fit`, QA 2026-07-19).

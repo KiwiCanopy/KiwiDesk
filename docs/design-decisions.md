@@ -57,7 +57,7 @@ planned escape hatch; it is not a wontfix dumping ground.
 
 | Behavior | Why it's accepted | Architectural root | Escape hatch / planned fix |
 |---|---|---|---|
-| A bar with the `liquid_glass` finish on shows its plain **solid** shape on macOS earlier than 26 — the glass material does not appear there. | Liquid Glass is a macOS 26 API (`NSGlassEffectView`); the boolean must still round-trip so a shared profile stays portable, so an older machine shows the underlying `boxed`/`plain` shape rather than an unbacked strip. The GUI never *offers* the toggle below 26 (an OS-capability gate, absent not greyed), so only a hand-written config or a profile authored on 26 reaches this state. | The stored `liquid_glass` value is portable; only the render path is `#available(macOS 26)`-gated (`glassEnabled`), painting the solid shape without rewriting the field ([#390](https://github.com/hajiboy95/KiwiDesk/issues/390)). | Use macOS 26+ to see the glass; the finish is colorless there and near-colorless even on 26. |
+| A bar with the `liquid_glass` finish on shows its plain **solid** shape on macOS earlier than 26 — the glass material does not appear there. | Liquid Glass is a macOS 26 API (`NSGlassEffectView`); the boolean must still round-trip so a shared profile stays portable, so an older machine shows the underlying `boxed`/`plain` shape rather than an unbacked strip. The GUI never *offers* the toggle below 26 (an OS-capability gate, absent not greyed), so only a hand-written config or a profile authored on 26 reaches this state. | The stored `liquid_glass` value is portable; only the render path is `#available(macOS 26)`-gated (`glassEnabled`), painting the solid shape without rewriting the field ([#390](https://github.com/hajiboy95/KiwiDesk/issues/390)). | Use macOS 26+ to see the glass; there the `fill_color` tints it (a colored backdrop the glass refracts, #408). |
 | With **"Displays have separate Spaces" on**, native Desktop→profile bindings cannot represent an independent Desktop choice on every connected display; KiwiDesk applies one global active profile. | Basic tiling remains valid, single-display use is unaffected, and users may want to inspect or prepare bindings before changing the macOS option, so hiding or disabling the controls would overstate the limitation. | Native-Space routing resolves one active Desktop number and one active profile for the whole display setup, not a per-display profile tuple ([#8](https://github.com/hajiboy95/KiwiDesk/issues/8)). | Turn the option off in Desktop & Dock Settings, then log out and back in. Onboarding and the binding-section warning share one gate and fire only in the affected multi-display state, never on a single display. See [Shared display Spaces are recommended, not required](#spaces-profiles--config-ownership). |
 | In BSP, the inner window of a nested pair can't grow — a "grow" press (or edge-drag) widens its outer neighbor instead. | Its width `r·(1−r)·W` is already maximized at the default ratio, so no resize direction can widen it. | All same-orientation splits share the one per-space ratio; per-node ratios would need a container tree the flat-array model forbids (#56 trade). | **Shipped**: the [`track` layout (#128)](https://github.com/hajiboy95/KiwiDesk/issues/128) — `set_mode(space, "track")` gives every window one true resize target. See [BSP resize is focus-aware in *direction* only](#layout-and-resize-behavior). |
 | In stack, when the master zone lines up *along* the split axis (e.g. horizontal masters beside a right stack), the masters' individual shares can't be resized: that axis always moves the split, and the other axis beeps. | The split ratio owns its whole axis — giving the same keypress two meanings (split vs weight) by focus zone would make "grow" unpredictable at the boundary. | One knob per axis per arrangement ([#222](https://github.com/hajiboy95/KiwiDesk/issues/222)); weights live on a zone's own lineup axis by construction. | Pick the orthogonal (vertical) master orientation — since the 2026-07-16 default flip the standard side-by-side arrangement sits *inside* this limitation once `master_count` exceeds one — or put the windows that need individual shares in the stack zone. |
@@ -1387,23 +1387,25 @@ shipped as a third `TabBackground` case (`material`) beside
 `boxed`/`plain`, on the reasoning that a toggle would be ambiguous
 ("boxed + glass" = glass boxes or a glass strip under opaque
 boxes?). On-device testing (macOS 26.5.2) forced a rethink on two
-fronts. **First**, `NSGlassEffectView` reads **near-colorless**
-here — `tintColor` only nudges luminance, and `.clear` vs
-`.regular` are visually identical — so glass is a *finish*, not a
-colorable surface that could be a peer of the solid shapes.
+fronts. **First**, `NSGlassEffectView`'s own `tintColor` reads
+**near-colorless** here — it only nudges luminance, and `.clear`
+vs `.regular` are visually identical — so glass is a *finish*, not
+a colorable surface that could be a peer of the solid shapes.
 **Second**, the ambiguity dissolves once each combination has a
 defined rendering: `boxed + glass` = a glass view **per box**
 (grouped in an `NSGlassEffectContainerView`), `plain + glass` = one
 shared glass plate. So the model is now shape (`boxed` | `plain`)
 × a separate `liquid_glass: Bool` finish that lays over either.
-`fill_color` is still forwarded as the glass tint for forward-
-compatibility (should a future macOS honor a saturated tint), but
-the earlier "a palette re-tints the glass for free" claim is
-**walked back** — on current macOS the glass is effectively
-colorless, and the GUI notes the tint is subtle. Correct
-`NSGlassEffectView` usage requires embedding the content as the
-view's `contentView` (never a bare sibling backdrop, which renders
-degraded — the bug that first read as "glass has no color").
+**`fill_color` still tints the glass (#408)** — not through the
+inert `tintColor`, but by placing a solid colored view *behind*
+the glass, which the glass refracts into its hue (the way the Dock
+and Control Center tint their glass). This is distinct from the
+earlier degraded-render bug: the items stay embedded as the glass's
+`contentView` (the required usage); the colored view is an
+*additional* backdrop sibling **behind** the whole glass, supplying
+a hue for it to sample — never a replacement for the content. A
+fully transparent `fill_color` leaves the glass clear. One seam
+owns the five hosting modes (`GlassHosting` / `GlassTint`, #407).
 The default stays no-glass; the finish is OS-gated: ignored below
 macOS 26 (`glassEnabled` = `liquidGlass && glassAvailable`), and
 its Settings toggle is *hidden* there — an OS-capability gate, so

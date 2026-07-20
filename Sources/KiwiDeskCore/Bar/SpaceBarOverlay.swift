@@ -47,10 +47,17 @@ public final class SpaceBarOverlay {
     /// `contentView` (piece 2, App Bar twin). Empty otherwise /
     /// below macOS 26. See SpaceBarOverlay+BoxGlass.
     var boxGlasses: [NSView] = []
+    /// Colored backdrops behind each per-box glass (`GlassTint`,
+    /// #408); parallel to `boxGlasses`, empty / below macOS 26.
+    var boxTints: [NSView] = []
     /// The front-app segment's own frosted box under per-box glass.
     /// The segment is non-interactive, so this sits as a backdrop
     /// behind its loose views rather than hosting them.
     var frontGlass: NSView?
+    /// Colored backdrop behind the front segment's glass (#408).
+    var frontTint: NSView?
+    /// Colored backdrop behind the single glass plate (#408).
+    var glassTint: NSView?
     /// Under plain + glass when the run fits, the glass hosts this
     /// flipped run wrapper at the hugged plate frame with the run
     /// (items + front segment) placed run-local — so the frosted

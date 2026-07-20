@@ -68,6 +68,37 @@ extension AppBarOverlay {
             cornerRadius: radius,
             tintHex: tintHex
         )
+        applyPlateTint(
+            plate: plate,
+            frame: viewport,
+            radius: radius,
+            hex: tintHex
+        )
+    }
+
+    /// Solid colored backdrop behind the glass plate so the near-
+    /// colorless glass refracts a hue (#408); hidden for a
+    /// transparent Fill (clear glass). Tracks the plate's frame.
+    private func applyPlateTint(
+        plate: NSView,
+        frame: CGRect,
+        radius: CGFloat,
+        hex: String
+    ) {
+        let backdrop = glassTint ?? NSView()
+        glassTint = backdrop
+        if GlassTint.wanted(hex) {
+            GlassTint.apply(
+                backdrop,
+                below: plate,
+                frame: frame,
+                cornerRadius: radius,
+                hex: hex,
+                animated: true
+            )
+        } else {
+            backdrop.isHidden = true
+        }
     }
 
     /// A reorder drag beginning while the plain+glass plate hugs the
@@ -130,6 +161,12 @@ extension AppBarOverlay {
             frame: plateFrame,
             cornerRadius: radius,
             tintHex: style.fillColor
+        )
+        applyPlateTint(
+            plate: plate,
+            frame: plateFrame,
+            radius: radius,
+            hex: style.fillColor
         )
         // Remember the viewport span so a drag can leave hug mode.
         glassDragSpan = GlassDragSpan(

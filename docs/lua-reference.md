@@ -1405,9 +1405,13 @@ app_bar.set_tab_background("plain")
 
 **Does:** lays a macOS 26 Liquid Glass material over the tab
 backgrounds (the boxes or the plate) — an orthogonal finish, so
-it combines with either shape. `fill_color` is forwarded as the
-glass tint, though on current macOS the glass reads near-colorless
-(the tint only nudges luminance). Ignored below macOS 26, where
+it combines with either shape. `fill_color` tints the glass: a
+solid colored layer sits behind the glass and the glass refracts
+it (an `NSGlassEffectView`'s own tint reads near-colorless on
+macOS 26.5.2 — it shifts luminance, not hue — so the color is
+supplied behind it, the way the Dock tints its glass). A fully
+transparent `fill_color` leaves the glass clear. Ignored below
+macOS 26, where
 the Settings toggle is hidden (an OS-capability gate, absent not
 greyed); the stored value still round-trips so a profile stays
 portable. Per-layout override:
@@ -1595,9 +1599,9 @@ app_bar.set_item_color("#F2EBD9")
 
 **Does:** sets the fill under the items — a box per item
 (`boxed`) or one shared plate (`plain`). Default `#8B5E3C66`,
-translucent shell-brown. With the `liquid_glass` finish on it is
-also forwarded as the glass tint, though on current macOS the
-glass reads near-colorless (the tint only nudges luminance).
+translucent shell-brown. With the `liquid_glass` finish on, it
+also tints the glass: the color sits behind the glass, which
+refracts it into its hue (see `app_bar.set_liquid_glass`).
 
 **Example:**
 
@@ -1879,8 +1883,8 @@ space_bar.set_tab_background("boxed")
 
 **Does:** lays the macOS 26 Liquid Glass finish over the Space
 items — see `app_bar.set_liquid_glass` for the full behavior
-(orthogonal to the shape, `fill_color` forwarded as a subtle
-tint, hidden and inert below macOS 26).
+(orthogonal to the shape, `fill_color` tints the glass via a
+colored backdrop behind it, hidden and inert below macOS 26).
 
 **Example:**
 

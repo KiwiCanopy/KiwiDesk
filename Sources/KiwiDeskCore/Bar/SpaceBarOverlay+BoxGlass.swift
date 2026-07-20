@@ -24,6 +24,7 @@ extension SpaceBarOverlay {
         let n = min(frames.count, itemViews.count)
         syncBoxGlassCount(n)
         let radius = style.resolvedCornerRadius(forThickness: depth)
+        let tinted = GlassTint.wanted(style.fillColor)
         for i in 0..<n {
             let glass = boxGlasses[i]
             glass.isHidden = itemViews[i].isHidden
@@ -34,6 +35,21 @@ extension SpaceBarOverlay {
                 cornerRadius: radius,
                 tintHex: style.fillColor
             )
+            // Colored backdrop behind the box so the glass refracts
+            // a hue (#408); hidden with the box, or for a transparent
+            // Fill (clear glass).
+            let tint = boxTints[i]
+            if tinted && !itemViews[i].isHidden {
+                GlassTint.apply(
+                    tint,
+                    below: glass,
+                    frame: frames[i],
+                    cornerRadius: radius,
+                    hex: style.fillColor
+                )
+            } else {
+                tint.isHidden = true
+            }
         }
     }
 
@@ -42,11 +58,14 @@ extension SpaceBarOverlay {
             let glass = boxGlasses.removeLast()
             GlassPlate.detach(glass)
             glass.removeFromSuperview()
+            boxTints.removeLast().removeFromSuperview()
         }
         while boxGlasses.count < n {
             guard let glass = GlassPlate.make() else { break }
             itemContainer.addSubview(glass)
             boxGlasses.append(glass)
+            // One tint backdrop per box, kept parallel (#408).
+            boxTints.append(NSView())
         }
     }
 
@@ -59,6 +78,7 @@ extension SpaceBarOverlay {
     ) {
         guard let rect else {
             frontGlass?.isHidden = true
+            frontTint?.isHidden = true
             return
         }
         guard let glass = frontGlass ?? GlassPlate.make() else {
@@ -84,6 +104,21 @@ extension SpaceBarOverlay {
             cornerRadius: radius,
             tintHex: style.fillColor
         )
+        // Colored backdrop so the front glass tints with the boxes
+        // (#408), or hidden for a transparent Fill (clear glass).
+        let tint = frontTint ?? NSView()
+        frontTint = tint
+        if GlassTint.wanted(style.fillColor) {
+            GlassTint.apply(
+                tint,
+                below: glass,
+                frame: rect,
+                cornerRadius: radius,
+                hex: style.fillColor
+            )
+        } else {
+            tint.isHidden = true
+        }
     }
 
     /// Returns every hosted item to `itemContainer` and tears the
@@ -91,6 +126,7 @@ extension SpaceBarOverlay {
     /// `holds` per the reparent-restore gotcha so no item is trapped.
     func teardownBoxGlasses() {
         frontGlass?.isHidden = true
+        frontTint?.isHidden = true
         guard !boxGlasses.isEmpty else { return }
         for glass in boxGlasses {
             for item in itemViews where GlassPlate.holds(glass, item) {
@@ -100,5 +136,7 @@ extension SpaceBarOverlay {
             glass.removeFromSuperview()
         }
         boxGlasses.removeAll()
+        for tint in boxTints { tint.removeFromSuperview() }
+        boxTints.removeAll()
     }
 }

@@ -28,6 +28,7 @@ extension AppBarOverlay {
         let n = min(frames.count, itemViews.count)
         syncBoxGlassCount(n)
         let radius = style.resolvedCornerRadius(forThickness: depth)
+        let tinted = GlassTint.wanted(style.fillColor)
         for i in 0..<n {
             let glass = boxGlasses[i]
             glass.isHidden = itemViews[i].isHidden
@@ -39,6 +40,22 @@ extension AppBarOverlay {
                 tintHex: style.fillColor,
                 animated: animated
             )
+            // Colored backdrop behind the box so the glass refracts
+            // a hue (#408); hidden with the box, or when the Fill is
+            // transparent (clear glass).
+            let tint = boxTints[i]
+            if tinted && !itemViews[i].isHidden {
+                GlassTint.apply(
+                    tint,
+                    below: glass,
+                    frame: frames[i],
+                    cornerRadius: radius,
+                    hex: style.fillColor,
+                    animated: animated
+                )
+            } else {
+                tint.isHidden = true
+            }
         }
     }
 
@@ -49,11 +66,14 @@ extension AppBarOverlay {
             let glass = boxGlasses.removeLast()
             GlassPlate.detach(glass)
             glass.removeFromSuperview()
+            boxTints.removeLast().removeFromSuperview()
         }
         while boxGlasses.count < n {
             guard let glass = GlassPlate.make() else { break }
             itemContainer.addSubview(glass)
             boxGlasses.append(glass)
+            // One tint backdrop per box, kept parallel (#408).
+            boxTints.append(NSView())
         }
     }
 
@@ -67,12 +87,14 @@ extension AppBarOverlay {
         guard let content = itemContainer.superview else { return }
         updateArrowGlass(
             &backArrowGlass,
+            tint: &backArrowTint,
             behind: backArrow,
             in: content,
             style: style
         )
         updateArrowGlass(
             &forwardArrowGlass,
+            tint: &forwardArrowTint,
             behind: forwardArrow,
             in: content,
             style: style
@@ -81,12 +103,14 @@ extension AppBarOverlay {
 
     private func updateArrowGlass(
         _ glass: inout NSView?,
+        tint: inout NSView?,
         behind arrow: BarArrowView,
         in content: NSView,
         style: AppBarStyle
     ) {
         guard !arrow.isHidden else {
             glass?.isHidden = true
+            tint?.isHidden = true
             return
         }
         guard let box = glass ?? GlassPlate.make() else { return }
@@ -107,6 +131,21 @@ extension AppBarOverlay {
             cornerRadius: radius,
             tintHex: style.fillColor
         )
+        // Colored backdrop so the arrow glass tints with the boxes
+        // (#408), or hidden for a transparent Fill (clear glass).
+        let backdrop = tint ?? NSView()
+        tint = backdrop
+        if GlassTint.wanted(style.fillColor) {
+            GlassTint.apply(
+                backdrop,
+                below: box,
+                frame: arrow.frame,
+                cornerRadius: radius,
+                hex: style.fillColor
+            )
+        } else {
+            backdrop.isHidden = true
+        }
     }
 
     /// The view drag moves for `item`: its glass box while per-box
@@ -128,6 +167,8 @@ extension AppBarOverlay {
     func teardownBoxGlasses() {
         backArrowGlass?.isHidden = true
         forwardArrowGlass?.isHidden = true
+        backArrowTint?.isHidden = true
+        forwardArrowTint?.isHidden = true
         guard !boxGlasses.isEmpty else { return }
         for glass in boxGlasses {
             for item in itemViews where GlassPlate.holds(glass, item) {
@@ -137,5 +178,7 @@ extension AppBarOverlay {
             glass.removeFromSuperview()
         }
         boxGlasses.removeAll()
+        for tint in boxTints { tint.removeFromSuperview() }
+        boxTints.removeAll()
     }
 }

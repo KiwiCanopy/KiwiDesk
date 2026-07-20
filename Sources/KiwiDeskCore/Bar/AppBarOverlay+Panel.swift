@@ -123,6 +123,7 @@ extension AppBarOverlay {
             restoreItemContainer(to: content, viewport: viewport)
             teardownGlassRun()
             glassPlate?.isHidden = true
+            glassTint?.isHidden = true
         case .plainGlassHug, .plainGlassSpan:
             // The run + single plate are hosted post-loop by
             // `updatePlainGlass`; only the boxes must go first.
@@ -134,6 +135,7 @@ extension AppBarOverlay {
             restoreItemContainer(to: content, viewport: viewport)
             teardownGlassRun()
             glassPlate?.isHidden = true
+            glassTint?.isHidden = true
         }
     }
 
