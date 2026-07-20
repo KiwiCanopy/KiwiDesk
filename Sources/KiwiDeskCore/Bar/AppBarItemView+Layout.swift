@@ -15,9 +15,8 @@ extension AppBarItemView {
         layoutBadge()
     }
 
-    /// The group-count badge hugs the slot's top-right
-    /// corner (flipped coordinates): a filled circle that
-    /// grows into a larger circle for multi-digit counts.
+    /// The group-count badge: a filled circle just after the
+    /// content, growing into a larger circle for multi-digit counts.
     private func layoutBadge() {
         guard !badge.isHidden else { return }
         // 0.32/9: same QA 2026-07-19 shrink decision as the
@@ -41,10 +40,23 @@ extension AppBarItemView {
         // padding to keep the badge tight around the text.
         let textWidth = ceil(badge.cell?.cellSize.width ?? 0)
         let diameter = max(baseHeight, textWidth + 2)
-        let cornerPadding: CGFloat = 3
+        // Sit just after the content — the name if shown, else the
+        // glyph or icon — vertically centered, rather than floating
+        // in the corner (owner 2026-07-20). Clamped to the slot.
+        let gap: CGFloat = 3
+        let contentEnd: CGFloat
+        if !label.isHidden, label.frame.width > 0 {
+            contentEnd = label.frame.maxX
+        } else if !glyphLabel.isHidden {
+            contentEnd = glyphLabel.frame.maxX
+        } else if !iconView.isHidden {
+            contentEnd = iconView.frame.maxX
+        } else {
+            contentEnd = bounds.midX
+        }
         badge.frame = CGRect(
-            x: bounds.width - diameter - cornerPadding,
-            y: cornerPadding,
+            x: min(contentEnd + gap, bounds.width - diameter),
+            y: (bounds.height - diameter) / 2,
             width: diameter,
             height: diameter
         )

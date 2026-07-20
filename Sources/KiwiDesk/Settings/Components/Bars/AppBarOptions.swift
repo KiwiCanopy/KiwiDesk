@@ -58,7 +58,7 @@ enum AppBarOptions {
             .hug,
             L(
                 "app_bar.tab_background_fit.hug",
-                "Hug items"
+                "Hug"
             )
         ),
         (

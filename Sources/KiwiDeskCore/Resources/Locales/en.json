@@ -65,7 +65,7 @@
   "app_bar.tab_background.plain": "Plain",
   "app_bar.tab_background_fit.boxed_only": "Boxed draws a box per tab, not a shared plate, so there is nothing to size.",
   "app_bar.tab_background_fit.full": "Full width",
-  "app_bar.tab_background_fit.hug": "Hug items",
+  "app_bar.tab_background_fit.hug": "Hug",
   "app_bar.tab_background_fit.label": "Background size",
   "app_bar.thickness": "Thickness",
   "app_picker.search.placeholder": "Search apps",
