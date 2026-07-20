@@ -137,8 +137,7 @@ extension KiwiCore {
         // across apps from a background app. Guard on the in-flight
         // count so the restore's own closing re-assert (which calls
         // back here) can't re-arm and loop (owner 2026-07-20).
-        if activeSpace?.mode == .monocle, zOrderRestoresInFlight == 0
-        {
+        if activeSpace?.mode == .monocle, zOrderRestoresInFlight == 0 {
             scheduleZOrderRestore()
         }
         // Armed only AFTER the retile: retiling cancels
