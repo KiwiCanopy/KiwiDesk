@@ -1598,15 +1598,18 @@ app_bar.set_item_color("#F2EBD9")
 **Expects:** a hex color.
 
 **Does:** sets the fill under the items — a box per item
-(`boxed`) or one shared plate (`plain`). Default `#8B5E3C66`,
-translucent shell-brown. With the `liquid_glass` finish on, it
+(`boxed`) or one shared plate (`plain`). Default `#37452E66`,
+translucent dark moss. With the `liquid_glass` finish on, it
 also tints the glass: the color sits behind the glass, which
-refracts it into its hue (see `app_bar.set_liquid_glass`).
+refracts it into its hue (see `app_bar.set_liquid_glass`). Under
+glass the backdrop's opacity is held at ~65 % so the blur stays
+visible; the stored value is unchanged (Boxed/Plain use it in
+full).
 
 **Example:**
 
 ```lua
-app_bar.set_fill_color("#8B5E3C66")
+app_bar.set_fill_color("#37452E66")
 ```
 
 ### app_bar.set_active_item_color

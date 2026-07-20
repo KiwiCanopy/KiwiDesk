@@ -107,7 +107,8 @@ public struct SpaceBarStyle: Sendable, Equatable {
     public var hoverItemColor = "#F2EBD9"
     /// The fill under the items — a box per Space (Boxed), one
     /// shared plate (Plain), or the Liquid Glass tint (Material).
-    public var fillColor = "#8B5E3C66"
+    /// Dark moss, one green family with the accent (2026-07-20).
+    public var fillColor = "#37452E66"
     public var highlightColor = "#4E9F3D"
     /// Count badges (grouped duplicates and the "+n" overflow),
     /// shown in these colors on the active space and muted from

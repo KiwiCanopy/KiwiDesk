@@ -1058,6 +1058,54 @@ was dropped — the stored value stays a hex string, and
 copy/paste theme sharing works through the panel. (#68
 §3.14, revised)
 
+**Palette colors follow a rough matching guide.** (#408
+follow-up, 2026-07-20.) A palette (the bar + border + drag
+colors, bundled or user-saved) reads as one system when its
+roles relate by a few loose heuristics — a guide to eyeball a
+new palette against, not a spec the reflection-based
+`ColorPaletteKeys` surface enforces:
+
+- **Hue budget: 1–3 chromatic hues, 2 is the sweet spot.**
+  Count only saturated identity hues, not neutrals or the
+  badge red. The common shape is one *primary accent* +
+  one *focused accent*; >3 hues is a smell (Monochrome and
+  the deliberately-busier Sunset/Ultraviolet are the ratified
+  exceptions).
+- **Primary vs. focused accent differ by *temperature*, not
+  just hue.** `active_item_color` / `highlight_color` /
+  `border.focused_color` share the *primary* hue;
+  `space_bar.focused_item_color` is the complementary
+  temperature (cool primary → warm focused, and vice-versa),
+  so "active space" and "focused window" read as two signals.
+- **Focus is one color across bar and border.**
+  `border.focused_color` = the primary accent; `highlight_color`
+  defaults to it too (borrow the secondary only as a flourish,
+  never invent a third hue for it).
+- **`border.unfocused_color` is always near-neutral grey**,
+  low saturation, ~35–60 % alpha — it must never compete with
+  the focused ring.
+- **`fill_color` sets the light/dark base; `item_color`
+  inverts against it** (`hover_item_color` mirrors the item
+  family, doesn't flip it). Fill alpha ~40–85 % for solid
+  shapes; **under `liquid_glass` the backdrop is render-capped
+  to ~65 %** so the glass stays glassy (`GlassTint.maxAlpha`).
+- **`hover_fill_color` ~50 % alpha** (`0x80`) of a hue *a
+  shade off* the accent — legible feedback that never reads as
+  the active state.
+- **`group_badge_color` defaults to the universal `#B00020` /
+  white**; a bespoke badge echoes the palette temperature and
+  pairs a text color chosen for contrast against *that* badge.
+- **Drag ghost / drop-zone:** either single-accent (same hue,
+  border opaque + fill ~15–25 %) or a deliberate two-hue swap
+  of hues already established elsewhere — never a fresh color
+  just for drag.
+
+The Kiwi (Default) palette was refreshed the same day from a
+brown/green pair to one green family (dark-moss fill `#37452E66`,
+flesh-green accent `#4E9F3D`, cream text, amber focused) — brown
+now lives on only in the transient drag visuals, exactly the
+"minor flourish" band above.
+
 **The App Bar has its own sidebar destination.** (#229,
 superseding the earlier "Appearance ends with the App Bar
 block" note.) Appearance kept only Gaps and Drag & Drop —

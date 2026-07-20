@@ -70,13 +70,14 @@ public struct AppBarStyle: Sendable, Equatable {
     /// matches `BarAccent.untintedAlpha`. Clamped in `resolvedDim`.
     public var dimFactor: CGFloat = BarAccent.untintedAlpha
     /// Kiwi theme: cream item text/glyph, a translucent
-    /// shell-brown fill (box, plate, or glass tint), a
-    /// flesh-green active accent.
+    /// dark-moss fill (box, plate, or glass tint), a flesh-green
+    /// active accent — one green family, not the old brown/green
+    /// pair (2026-07-20; brown lives on only in the drag visuals).
     public var itemColor = "#F2EBD9"
     /// The fill under the items — a box per item (Boxed), one
     /// shared plate (Plain), or the Liquid Glass tint
     /// (Material). One knob, three renders.
-    public var fillColor = "#8B5E3C66"
+    public var fillColor = "#37452E66"
     public var activeItemColor = "#4E9F3D"
     public var highlightColor = "#4E9F3D"
     /// Hover feedback on clickable (non-active) items: a
