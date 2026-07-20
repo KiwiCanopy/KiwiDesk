@@ -106,7 +106,12 @@ public final class AppBarOverlay {
     /// back to `itemContainer` and span the plate for the drag
     /// (`spanPlainGlassForDrag`) — the mover and its reflowing
     /// siblings then share one coordinate space.
-    var glassDragSpan: (viewport: CGRect, radius: CGFloat, tint: String)?
+    struct GlassDragSpan {
+        let viewport: CGRect
+        let radius: CGFloat
+        let tint: String
+    }
+    var glassDragSpan: GlassDragSpan?
     var scrollOffset: CGFloat = 0
     /// The last render's geometry, kept for the drag
     /// handlers (AppBarOverlay+Drag).

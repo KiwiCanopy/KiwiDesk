@@ -132,7 +132,11 @@ extension AppBarOverlay {
             tintHex: style.fillColor
         )
         // Remember the viewport span so a drag can leave hug mode.
-        glassDragSpan = (viewport, radius, style.fillColor)
+        glassDragSpan = GlassDragSpan(
+            viewport: viewport,
+            radius: radius,
+            tint: style.fillColor
+        )
     }
 
     /// Returns any run-hosted items to `itemContainer` (leaving hug
