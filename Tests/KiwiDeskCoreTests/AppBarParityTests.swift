@@ -91,7 +91,7 @@ struct AppBarCommandParityTests {
         .boxSize(88), .boxGap(9),
         .content(.name), .iconSource(.appFont),
         .groupAdjacentWindows(false),
-        .fontSize(20), .cornerRoundness(12),
+        .fontSize(20), .cornerRoundness(12), .dimFactor(0.3),
         .itemColor("#111111"), .fillColor("#222222"),
         .activeItemColor("#333333"),
         .highlightColor("#555555"), .hoverFillColor("#666666"),

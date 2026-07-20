@@ -43,7 +43,7 @@ extension SpaceBarItemView {
     /// identify, clearly secondary.
     private var untintedAlpha: CGFloat {
         isActive || isHovered || isDragHovered
-            ? 1 : BarAccent.untintedAlpha
+            ? 1 : style.dimFactor
     }
 
     /// Count and overflow badges follow the space state (#293
@@ -199,10 +199,10 @@ extension SpaceBarItemView {
     ) -> CGFloat {
         if isHovered || isDragHovered { return 1 }
         guard isActive else {
-            return BarAccent.untintedAlpha
+            return style.dimFactor
         }
         return focused
-            ? 1 : BarAccent.activeUnfocusedAlpha
+            ? 1 : style.activeDimFactor
     }
 
     private func styleAccent() {

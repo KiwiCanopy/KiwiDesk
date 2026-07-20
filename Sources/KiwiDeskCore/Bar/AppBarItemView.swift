@@ -224,7 +224,7 @@ final class AppBarItemView: NSView {
         // collide with (see `BarAccent.activeUnfocusedAlpha`).
         iconView.alphaValue =
             isActive || isHovered
-            ? 1 : BarAccent.untintedAlpha
+            ? 1 : style.dimFactor
         layer?.backgroundColor =
             NSColor(kiwiHex: boxColorHex).cgColor
         applyCornerRadius()

@@ -1548,6 +1548,21 @@ cannot exceed the maximum, so tabs never render as pointed.
 app_bar.set_corner_roundness(50)
 ```
 
+### app_bar.set_dim_factor
+
+**Expects:** a number 0.05–1 (default 0.4).
+
+**Does:** sets the opacity of an inactive tab's untinted icon — the
+dim that carries "not focused" for content that takes no state color.
+Lua-only (no GUI); values are clamped to a legible range. Lower = a
+stronger inactive cue.
+
+**Example:**
+
+```lua
+app_bar.set_dim_factor(0.4)
+```
+
 ### app_bar.set_group_adjacent_windows
 
 **Expects:** `true` or `false`.
@@ -1913,6 +1928,36 @@ the App Bar.
 
 ```lua
 space_bar.set_corner_roundness(50)
+```
+
+### space_bar.set_dim_factor
+
+**Expects:** a number 0.05–1 (default 0.4).
+
+**Does:** sets the opacity of everything on an **inactive** Space —
+the outer dim tier. Lua-only (no GUI), clamped to a legible range.
+
+**Example:**
+
+```lua
+space_bar.set_dim_factor(0.4)
+```
+
+### space_bar.set_active_dim_factor
+
+**Expects:** a number 0.05–1 (default 0.6).
+
+**Does:** sets the opacity of an **unfocused window's glyph on the
+active Space** — the middle dim tier, between the focused window (1.0)
+and inactive Spaces (`set_dim_factor`). Lua-only, clamped. Independent
+of `set_dim_factor`: no ordering is enforced, so setting it below the
+outer tier will invert the ladder — the GUI is the curated gate, Lua
+the open one.
+
+**Example:**
+
+```lua
+space_bar.set_active_dim_factor(0.6)
 ```
 
 ### space_bar.set_show_front_app

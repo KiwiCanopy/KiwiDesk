@@ -64,6 +64,11 @@ public struct AppBarStyle: Sendable, Equatable {
     /// pt, so it can't exceed thickness/2 (which rendered tabs
     /// as pointed hexagons) and self-adapts to any thickness.
     public var cornerRoundness: CGFloat = 50
+    /// Opacity of an inactive tab's untinted icon (0.05–1). The dim
+    /// carries "not focused" for content that takes no state color.
+    /// Lua-only power knob (`set_dim_factor`, no GUI); the default
+    /// matches `BarAccent.untintedAlpha`. Clamped in `resolvedDim`.
+    public var dimFactor: CGFloat = BarAccent.untintedAlpha
     /// Kiwi theme: cream item text/glyph, a translucent
     /// shell-brown fill (box, plate, or glass tint), a
     /// flesh-green active accent.
@@ -99,6 +104,15 @@ public struct AppBarStyle: Sendable, Equatable {
         forThickness thickness: CGFloat
     ) -> CGFloat {
         max(0, min(cornerRoundness, 100)) / 100 * (thickness / 2)
+    }
+
+    /// Guards a dim factor to a legible, sane range — the only
+    /// restriction on the Lua-only knob (a fully invisible or >1
+    /// alpha is a bug, not a preference). No ordering is enforced
+    /// across the Space Bar's two factors: Lua users may set what
+    /// they want; the GUI is the curated gate, Lua the open one.
+    public static func clampDim(_ value: CGFloat) -> CGFloat {
+        max(0.05, min(value, 1))
     }
 
     /// The Liquid Glass finish is painted only where the platform
@@ -141,6 +155,7 @@ extension AppBarStyle: Codable {
         case groupAdjacentWindows = "group_adjacent_windows"
         case fontSize = "font_size"
         case cornerRoundness = "corner_roundness"
+        case dimFactor = "dim_factor"
         case itemColor = "item_color"
         case fillColor = "fill_color"
         case activeItemColor = "active_item_color"
@@ -237,6 +252,12 @@ extension AppBarStyle: Codable {
                 CGFloat.self,
                 forKey: .cornerRoundness
             ) ?? defaults.cornerRoundness
+        dimFactor = Self.clampDim(
+            try container.decodeIfPresent(
+                CGFloat.self,
+                forKey: .dimFactor
+            ) ?? defaults.dimFactor
+        )
         itemColor =
             try container.decodeIfPresent(
                 String.self,

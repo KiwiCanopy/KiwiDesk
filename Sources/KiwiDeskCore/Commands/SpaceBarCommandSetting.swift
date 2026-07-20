@@ -21,6 +21,8 @@ enum SpaceBarCommandSetting {
     case tabBackgroundFit(SpaceBarStyle.TabBackgroundFit)
     case activeIndicator(SpaceBarStyle.ActiveIndicator)
     case cornerRoundness(CGFloat)
+    case dimFactor(CGFloat)
+    case activeDimFactor(CGFloat)
     case showFrontApp(Bool)
     case hideEmpty(Bool)
     case springDelay(Int)
@@ -128,6 +130,8 @@ enum SpaceBarCommandSetting {
             "box_gap": Self.boxGap,
             "font_size": Self.fontSize,
             "corner_roundness": Self.cornerRoundness,
+            "dim_factor": Self.dimFactor,
+            "active_dim_factor": Self.activeDimFactor,
         ]
     }
 
@@ -247,6 +251,10 @@ enum SpaceBarCommandSetting {
             style.activeIndicator = value
         case .cornerRoundness(let value):
             style.cornerRoundness = value
+        case .dimFactor(let value):
+            style.dimFactor = AppBarStyle.clampDim(value)
+        case .activeDimFactor(let value):
+            style.activeDimFactor = AppBarStyle.clampDim(value)
         case .showFrontApp(let value):
             style.showFrontApp = value
         case .hideEmpty(let value): style.hideEmpty = value

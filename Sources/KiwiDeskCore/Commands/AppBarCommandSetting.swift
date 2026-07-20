@@ -37,6 +37,7 @@ enum AppBarCommandSetting {
     case groupAdjacentWindows(Bool)
     case fontSize(CGFloat)
     case cornerRoundness(CGFloat)
+    case dimFactor(CGFloat)
     case itemColor(String)
     case fillColor(String)
     case activeItemColor(String)
@@ -137,6 +138,7 @@ enum AppBarCommandSetting {
             "box_gap": Self.boxGap,
             "font_size": Self.fontSize,
             "corner_roundness": Self.cornerRoundness,
+            "dim_factor": Self.dimFactor,
         ]
     }
 
@@ -214,6 +216,8 @@ enum AppBarCommandSetting {
         case .fontSize(let value): style.fontSize = value
         case .cornerRoundness(let value):
             style.cornerRoundness = value
+        case .dimFactor(let value):
+            style.dimFactor = AppBarStyle.clampDim(value)
         case .itemColor(let value): style.itemColor = value
         case .fillColor(let value): style.fillColor = value
         case .activeItemColor(let value):
@@ -252,6 +256,8 @@ enum AppBarCommandSetting {
         case .fontSize(let value): bar.fontSize = value
         case .cornerRoundness(let value):
             bar.cornerRoundness = value
+        case .dimFactor(let value):
+            bar.dimFactor = AppBarStyle.clampDim(value)
         case .itemColor(let value): bar.itemColor = value
         case .fillColor(let value): bar.fillColor = value
         case .activeItemColor(let value):

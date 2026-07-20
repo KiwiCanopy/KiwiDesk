@@ -67,6 +67,7 @@ extension SpaceBarStyle {
             activeIndicator = appBar.activeIndicator
         case "corner_roundness":
             cornerRoundness = appBar.cornerRoundness
+        case "dim_factor": dimFactor = appBar.dimFactor
         case "item_color": itemColor = appBar.itemColor
         case "active_item_color":
             activeItemColor = appBar.activeItemColor

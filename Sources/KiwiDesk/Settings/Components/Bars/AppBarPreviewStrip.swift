@@ -174,7 +174,7 @@ struct AppBarPreviewStrip: View {
     /// a full-color icon takes no tint.
     private func iconOpacity(_ t: MockTab) -> Double {
         style.iconSource == .appImage && !t.active
-            ? BarAccent.untintedAlpha : 1
+            ? style.dimFactor : 1
     }
 
     private func textColor(_ t: MockTab) -> Color {

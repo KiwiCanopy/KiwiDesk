@@ -26,6 +26,8 @@ enum SpaceBarFixtures {
         style.tabBackgroundFit = .full
         style.activeIndicator = .gap
         style.cornerRoundness = 5
+        style.dimFactor = 0.3
+        style.activeDimFactor = 0.7
         style.showFrontApp = true
         style.hideEmpty = true
         style.springDelay = 1000

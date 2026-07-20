@@ -28,6 +28,7 @@ enum AppBarFixtures {
         style.groupAdjacentWindows = false
         style.fontSize = 15
         style.cornerRoundness = 5
+        style.dimFactor = 0.3
         style.itemColor = "#010101"
         style.fillColor = "#020202"
         style.activeItemColor = "#030303"
@@ -60,6 +61,7 @@ enum AppBarFixtures {
         bar.groupAdjacentWindows = true
         bar.fontSize = 20
         bar.cornerRoundness = 12
+        bar.dimFactor = 0.5
         bar.itemColor = "#111111"
         bar.fillColor = "#222222"
         bar.activeItemColor = "#333333"

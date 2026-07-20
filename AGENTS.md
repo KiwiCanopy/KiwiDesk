@@ -118,6 +118,16 @@ at directory altitude — see **`docs/architecture.md`**.
    full editor). See `docs/design-decisions.md`; the shared
    Settings control conventions (help affordance, control
    choice, row tiers) are elaborated in `docs/ui-patterns.md`.
+   Corollary — **the GUI curates, Lua is open.** The GUI is the
+   opinionated gate that decides what most people *should* touch
+   (safe defaults for the rest); Lua is the unrestricted power
+   layer. A Lua setter clamps or rejects only genuinely-broken /
+   unrenderable values (an invisible alpha, a >1 factor, a
+   malformed color) — never to enforce taste or a ratio the GUI
+   keeps tidy. Risky-but-valid knob → hide from the GUI, expose it
+   Lua-only, don't add a guard that second-guesses the power user
+   (e.g. the bars' `dim_factor` / `active_dim_factor`: Lua-only,
+   clamped to a legible range yet free to invert the dim ladder).
    Settled conventions that fall out of this
    (extend, don't relitigate): **group by topic, never by widget
    type** — a toggle and the control it gates are one decision, so

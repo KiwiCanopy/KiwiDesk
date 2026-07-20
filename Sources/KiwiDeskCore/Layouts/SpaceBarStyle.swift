@@ -69,6 +69,17 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// Corner rounding as a percentage (0–100) of thickness/2,
     /// like the App Bar.
     public var cornerRoundness: CGFloat = 50
+    /// Opacity (0.05–1) of everything on an INACTIVE space — the
+    /// outer dim tier. Lua-only (`set_dim_factor`, no GUI); default
+    /// = `BarAccent.untintedAlpha`.
+    public var dimFactor: CGFloat = BarAccent.untintedAlpha
+    /// Opacity (0.05–1) of an UNFOCUSED window's glyph on the
+    /// ACTIVE space — the middle dim tier. Lua-only
+    /// (`set_active_dim_factor`); default =
+    /// `BarAccent.activeUnfocusedAlpha`. Independent of `dimFactor`
+    /// (Lua may invert the ladder; the GUI is the curated gate).
+    public var activeDimFactor: CGFloat =
+        BarAccent.activeUnfocusedAlpha
     /// Trailing `| <front app>` segment (spaces.lua's front_app);
     /// off by default (ui-designer verdict 6).
     public var showFrontApp = false
@@ -141,6 +152,8 @@ extension SpaceBarStyle: Codable {
         case tabBackgroundFit = "tab_background_fit"
         case activeIndicator = "active_indicator"
         case cornerRoundness = "corner_roundness"
+        case dimFactor = "dim_factor"
+        case activeDimFactor = "active_dim_factor"
         case showFrontApp = "show_front_app"
         case hideEmpty = "hide_empty"
         case springDelay = "spring_delay"
@@ -234,6 +247,18 @@ extension SpaceBarStyle: Codable {
                 CGFloat.self,
                 forKey: .cornerRoundness
             ) ?? defaults.cornerRoundness
+        dimFactor = AppBarStyle.clampDim(
+            try container.decodeIfPresent(
+                CGFloat.self,
+                forKey: .dimFactor
+            ) ?? defaults.dimFactor
+        )
+        activeDimFactor = AppBarStyle.clampDim(
+            try container.decodeIfPresent(
+                CGFloat.self,
+                forKey: .activeDimFactor
+            ) ?? defaults.activeDimFactor
+        )
         showFrontApp =
             try container.decodeIfPresent(
                 Bool.self,

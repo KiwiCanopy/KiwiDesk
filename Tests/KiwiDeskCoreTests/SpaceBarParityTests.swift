@@ -110,6 +110,7 @@ struct SpaceBarCommandParityTests {
         .liquidGlass(true),
         .tabBackgroundFit(.full),
         .activeIndicator(.gap), .cornerRoundness(5),
+        .dimFactor(0.3), .activeDimFactor(0.7),
         .showFrontApp(true), .hideEmpty(true),
         .springDelay(1000),
         .itemColor("#010101"), .activeItemColor("#020202"),
@@ -193,7 +194,7 @@ struct SpaceBarCommandParityTests {
         case .tabBackgroundFit: return [.string("full")]
         case .activeIndicator: return [.string("gap")]
         case .thickness, .boxSize, .boxGap, .fontSize,
-            .cornerRoundness:
+            .cornerRoundness, .dimFactor, .activeDimFactor:
             return [.number(10)]
         case .springDelay: return [.number(1000)]
         case .glyphCap: return [.number(8)]

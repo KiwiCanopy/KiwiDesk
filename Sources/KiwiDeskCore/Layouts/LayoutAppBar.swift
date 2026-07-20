@@ -36,6 +36,7 @@ public struct LayoutAppBar: Sendable, Equatable {
     public var groupAdjacentWindows: Bool?
     public var fontSize: CGFloat?
     public var cornerRoundness: CGFloat?
+    public var dimFactor: CGFloat?
     public var itemColor: String?
     public var fillColor: String?
     public var activeItemColor: String?
@@ -80,6 +81,7 @@ public struct LayoutAppBar: Sendable, Equatable {
         if let cornerRoundness {
             out.cornerRoundness = cornerRoundness
         }
+        if let dimFactor { out.dimFactor = dimFactor }
         if let itemColor { out.itemColor = itemColor }
         if let fillColor { out.fillColor = fillColor }
         if let activeItemColor {
@@ -129,6 +131,7 @@ extension LayoutAppBar: Codable {
         case groupAdjacentWindows = "group_adjacent_windows"
         case fontSize = "font_size"
         case cornerRoundness = "corner_roundness"
+        case dimFactor = "dim_factor"
         case itemColor = "item_color"
         case fillColor = "fill_color"
         case activeItemColor = "active_item_color"
@@ -208,6 +211,10 @@ extension LayoutAppBar: Codable {
             CGFloat.self,
             forKey: .cornerRoundness
         )
+        dimFactor = try container.decodeIfPresent(
+            CGFloat.self,
+            forKey: .dimFactor
+        )
         itemColor = try container.decodeIfPresent(
             String.self,
             forKey: .itemColor
@@ -286,6 +293,7 @@ extension LayoutAppBar: Codable {
             cornerRoundness,
             forKey: .cornerRoundness
         )
+        try container.encodeIfPresent(dimFactor, forKey: .dimFactor)
         try encodeColors(into: &container)
     }
 
