@@ -72,7 +72,8 @@ public struct AppBarStyle: Sendable, Equatable {
     /// Kiwi theme: cream item text/glyph, a translucent
     /// dark-moss fill (box, plate, or glass tint), a flesh-green
     /// active accent — one green family, not the old brown/green
-    /// pair (2026-07-20; brown lives on only in the drag visuals).
+    /// pair (2026-07-20; brown fully retired, drag visuals now
+    /// green/amber).
     public var itemColor = "#F2EBD9"
     /// The fill under the items — a box per item (Boxed), one
     /// shared plate (Plain), or the Liquid Glass tint

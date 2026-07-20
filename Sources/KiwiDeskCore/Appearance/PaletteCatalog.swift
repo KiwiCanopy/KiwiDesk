@@ -3,13 +3,13 @@ import Foundation
 /// The built-in palettes (#375). "Kiwi (Default)" is derived from
 /// the shipped struct defaults at load — so it always equals a
 /// reset-to-default and never drifts from the real defaults — then
-/// the six authored palettes come from the bundled resource. The
+/// the eight authored palettes come from the bundled resource. The
 /// user-saved palettes live in `PaletteStore`, not here.
 public enum PaletteCatalog {
     /// The name of the always-present default palette.
     public static let defaultName = "Kiwi (Default)"
 
-    /// All seven built-ins, default first.
+    /// All nine built-ins, default first.
     public static func bundled() -> [ColorPalette] {
         [defaultPalette()] + authored()
     }
@@ -23,7 +23,7 @@ public enum PaletteCatalog {
         )
     }
 
-    /// The six authored palettes from `Resources/Palettes`.
+    /// The eight authored palettes from `Resources/Palettes`.
     static func authored() -> [ColorPalette] {
         guard
             let url = Bundle.module.url(

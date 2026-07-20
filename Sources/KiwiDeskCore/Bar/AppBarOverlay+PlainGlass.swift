@@ -78,7 +78,11 @@ extension AppBarOverlay {
 
     /// Solid colored backdrop behind the glass plate so the near-
     /// colorless glass refracts a hue (#408); hidden for a
-    /// transparent Fill (clear glass). Tracks the plate's frame.
+    /// transparent Fill (clear glass). Snaps to the plate's frame —
+    /// the glass plate itself snaps (`GlassPlate.update` un-animated
+    /// in `hugRun`/`spanViewport`, installed outside the animation
+    /// group), so an animated backdrop would lag a color edge past
+    /// the plate on a run-size change. Matches the Space Bar twin.
     private func applyPlateTint(
         plate: NSView,
         frame: CGRect,
@@ -93,8 +97,7 @@ extension AppBarOverlay {
                 below: plate,
                 frame: frame,
                 cornerRadius: radius,
-                hex: hex,
-                animated: true
+                hex: hex
             )
         } else {
             backdrop.isHidden = true
