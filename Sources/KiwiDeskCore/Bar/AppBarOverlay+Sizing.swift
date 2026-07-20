@@ -115,8 +115,16 @@ extension AppBarOverlay {
             }
             let spacing =
                 iconSide > 0 && text > 0 ? pad / 2 : 0
+            // A grouped tab's count badge sits after the name, so
+            // the slot must be wide enough for it too or the widest
+            // name over-truncates (owner 2026-07-20) — same reserve
+            // as `layoutHorizontal`.
+            let badge =
+                item.count >= 2 && text > 0
+                ? min(max(thickness * 0.32, 9), 14) + pad
+                : 0
             let natural =
-                iconSide + spacing + text
+                iconSide + spacing + text + badge
                 + AppBarItemView.edgePadding * 2
             return max(widest, natural)
         }
