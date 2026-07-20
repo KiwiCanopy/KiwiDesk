@@ -57,9 +57,27 @@ extension AppBarItemView {
             x = box.maxX - diameter / 2
             y = box.minY - diameter / 2
         }
+        // Keep the corner badge clear of the tab's rounded corner
+        // (#411): the badge overlaps the top-trailing corner, and the
+        // rounding cuts it — hard under any glass finish (the item is
+        // the glass's clipped contentView), and off the rounded box
+        // otherwise. Inset it by the MINIMAL amount that nestles the
+        // circle tangent-inside the corner arc: for a badge radius r
+        // in a corner radius R, that's `(R - r)(1 - 1/√2)` off the
+        // top and trailing edges (0 when the badge already spans the
+        // arc). Every mode, so the placement stays consistent; square
+        // corners (radius 0) keep the flush overlap.
+        let corner = style.resolvedCornerRadius(
+            forThickness: crossThickness
+        )
+        let inset =
+            max(0, corner - diameter / 2)
+            * (1 - 1 / 2.0.squareRoot())
+        let maxX = max(0, bounds.width - diameter - inset)
+        let maxY = max(0, bounds.height - diameter)
         badge.frame = CGRect(
-            x: min(max(x, 0), bounds.width - diameter),
-            y: min(max(y, 0), bounds.height - diameter),
+            x: min(max(x, 0), maxX),
+            y: min(max(y, inset), maxY),
             width: diameter,
             height: diameter
         )
