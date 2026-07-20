@@ -71,7 +71,7 @@ enum AppBarOptions {
     ]
     @MainActor
     static let activeIndicator: [(AppBarStyle.ActiveIndicator, String)] = [
-        (.ring, L("app_bar.active_indicator.ring", "Ring")),
+        (.outline, L("app_bar.active_indicator.outline", "Outline")),
         (
             .edgeMark,
             L(

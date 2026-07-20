@@ -203,7 +203,7 @@ struct AppBarPreviewStrip: View {
     ) -> some View {
         if t.active {
             switch style.activeIndicator {
-            case .ring: ringAccent
+            case .outline: ringAccent
             case .edgeMark: edgeMarkAccent
             case .gap: EmptyView()
             }

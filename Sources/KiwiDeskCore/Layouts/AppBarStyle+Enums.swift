@@ -54,8 +54,9 @@ extension AppBarStyle {
     /// How the active tab is marked. Orthogonal to
     /// `tabBackground`: works on any background.
     public enum ActiveIndicator: String, Sendable, Codable {
-        /// An outlined border around the active tab.
-        case ring
+        /// An outline around the active tab, tracing its shape at
+        /// the bar's roundness (a capsule at max, square at 0).
+        case outline
         /// An accent bar on the window-facing edge of the
         /// active tab.
         case edgeMark = "edge_mark"

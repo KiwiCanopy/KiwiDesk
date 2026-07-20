@@ -192,7 +192,7 @@ extension AppBarItemView {
     private func layoutAccent() {
         guard !accent.isHidden else { return }
         switch accentMode {
-        case .ring: layoutRing()
+        case .outline: layoutRing()
         case .edgeMark: layoutEdgeMark()
         case .none: break
         }

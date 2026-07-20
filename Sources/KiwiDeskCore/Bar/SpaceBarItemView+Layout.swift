@@ -86,36 +86,6 @@ extension SpaceBarItemView {
             cursor += cell
         }
         layoutAccent()
-        layoutSeparator()
-    }
-
-    /// A thin rule on the trailing edge marking the boundary to the
-    /// next Space, under Plain only (Boxed separates via its box) and
-    /// never on the last Space. Same `BarDivider` chrome and cell
-    /// span as the in-item identifier rule.
-    private func layoutSeparator() {
-        guard showsSeparator, !style.hasBox else {
-            itemSeparator.isHidden = true
-            return
-        }
-        itemSeparator.isHidden = false
-        itemSeparator.layer?.backgroundColor =
-            BarDivider.color(textColor: style.itemColor).cgColor
-        let cell = cellLength
-        itemSeparator.frame =
-            horizontal
-            ? CGRect(
-                x: bounds.width - 1,
-                y: (bounds.height - cell) / 2,
-                width: 1,
-                height: cell
-            )
-            : CGRect(
-                x: (bounds.width - cell) / 2,
-                y: bounds.height - 1,
-                width: cell,
-                height: 1
-            )
     }
 
     /// A count badge hugging its glyph cell's top-trailing
@@ -134,7 +104,8 @@ extension SpaceBarItemView {
         // (owner/designer 2026-07-20). A per-app count stays the
         // small corner dot (0.42/8, QA 2026-07-19 — the 0.5-of-cell
         // badge read oversized next to small glyphs).
-        let base = centered ? cell : min(max(cell * 0.42, 8), 13)
+        let base =
+            centered ? cell * 0.8 : min(max(cell * 0.42, 8), 13)
         badge.font = .systemFont(
             ofSize: base * (centered ? 0.5 : 0.9),
             weight: .bold
@@ -224,7 +195,7 @@ extension SpaceBarItemView {
 
     private func layoutAccent() {
         switch style.activeIndicator {
-        case .ring:
+        case .outline:
             // Boxed hugs the box; plain/material insets to the
             // App Bar's capsule ring (ui-designer 2026-07-14) —
             // a full-bounds square poked past the shared plate's

@@ -1443,11 +1443,11 @@ app_bar.set_tab_background_fit("full")
 
 ### app_bar.set_active_indicator
 
-**Expects:** `"ring"`, `"edge_mark"`, or `"gap"`.
+**Expects:** `"outline"`, `"edge_mark"`, or `"gap"`.
 
 **Does:** how the focused window is marked. This is orthogonal to
 `tab_background` — the two combine freely:
-- **ring** — an outlined border around the active tab.
+- **outline** — an outlined border around the active tab.
 - **edge_mark** — an accent bar on the active tab's
   window-facing edge.
 - **gap** — the active tab's slot is left empty.
@@ -1455,7 +1455,7 @@ app_bar.set_tab_background_fit("full")
 **Example:**
 
 ```lua
-app_bar.set_active_indicator("ring")
+app_bar.set_active_indicator("outline")
 ```
 
 ### app_bar.set_box_size
@@ -1608,7 +1608,7 @@ app_bar.set_active_item_color("#4E9F3D")
 **Expects:** a hex color.
 
 **Does:** sets the highlight color of the active indicator (the
-ring outline or the edge mark).
+outline or the edge mark).
 
 **Example:**
 
@@ -1889,8 +1889,8 @@ space_bar.set_tab_background_fit("hug")
 
 ### space_bar.set_active_indicator
 
-**Expects:** `"ring"`, `"edge_mark"`, or `"gap"` (default
-`"ring"`).
+**Expects:** `"outline"`, `"edge_mark"`, or `"gap"` (default
+`"outline"`).
 
 **Does:** how the active Space is marked. `gap` draws no shape
 marker (colors alone carry the state) — unlike the App Bar, the
@@ -1899,7 +1899,7 @@ active Space's item is never hidden.
 **Example:**
 
 ```lua
-space_bar.set_active_indicator("ring")
+space_bar.set_active_indicator("outline")
 ```
 
 ### space_bar.set_corner_roundness

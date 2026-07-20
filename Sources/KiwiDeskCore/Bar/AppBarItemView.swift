@@ -310,13 +310,14 @@ final class AppBarItemView: NSView {
     /// orthogonal to `tabBackground` (the background no longer
     /// secretly picks the accent). Only the active tab, and never
     /// under `gap` (its slot is hidden entirely).
-    enum AccentMode { case none, ring, edgeMark }
+    enum AccentMode { case none, outline, edgeMark }
 
     var accentMode: AccentMode {
         guard isActive, style.activeIndicator != .gap else {
             return .none
         }
-        return style.activeIndicator == .ring ? .ring : .edgeMark
+        return style.activeIndicator == .outline
+            ? .outline : .edgeMark
     }
 
     /// The ring and edge mark both live on the `accent` subview
@@ -328,7 +329,7 @@ final class AppBarItemView: NSView {
         switch accentMode {
         case .none:
             accent.isHidden = true
-        case .ring:
+        case .outline:
             accent.isHidden = false
             accent.layer?.borderWidth = 2
             accent.layer?.borderColor =

@@ -52,7 +52,7 @@ enum AppBarFixtures {
         // The global fixture uses .full, so the override must
         // differ for the resolve parity to see the write.
         bar.tabBackgroundFit = .hug
-        bar.activeIndicator = .ring
+        bar.activeIndicator = .outline
         bar.boxSize = 88
         bar.boxGap = 9
         bar.content = .iconAndName

@@ -65,7 +65,7 @@ public struct SpaceBarStyle: Sendable, Equatable {
     public var liquidGlass: Bool = false
     /// Hug by default, like the App Bar (QA 2026-07-19).
     public var tabBackgroundFit: TabBackgroundFit = .hug
-    public var activeIndicator: ActiveIndicator = .ring
+    public var activeIndicator: ActiveIndicator = .outline
     /// Corner rounding as a percentage (0–100) of thickness/2,
     /// like the App Bar.
     public var cornerRoundness: CGFloat = 50

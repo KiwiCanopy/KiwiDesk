@@ -209,7 +209,7 @@ extension SpaceBarItemView {
         guard isActive else { return }
         let highlight = NSColor(kiwiHex: style.highlightColor)
         switch style.activeIndicator {
-        case .ring:
+        case .outline:
             accent.layer?.backgroundColor = nil
             accent.layer?.borderColor = highlight.cgColor
             accent.layer?.borderWidth = 2

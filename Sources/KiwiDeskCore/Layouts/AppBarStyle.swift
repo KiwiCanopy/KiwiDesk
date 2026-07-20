@@ -31,7 +31,7 @@ public struct AppBarStyle: Sendable, Equatable {
     /// Hug by default: a tight plate reads calmer than an
     /// edge-to-edge strip (ui-designer, QA 2026-07-19).
     public var tabBackgroundFit: TabBackgroundFit = .hug
-    public var activeIndicator: ActiveIndicator = .ring
+    public var activeIndicator: ActiveIndicator = .outline
     /// Item length along the bar (pt) — every item is the
     /// same size. 0 (default) = a standard length per
     /// `content`: a compact square for icon-only, wider once

@@ -134,7 +134,7 @@ extension SpaceBarPreviewStrip {
     ) -> some View {
         if state == .active {
             switch style.activeIndicator {
-            case .ring:
+            case .outline:
                 // Runtime twin: flush box ring when Boxed, the
                 // App Bar's inset capsule on Plain/Liquid Glass
                 // (QA 2026-07-19). `rendered`: material shows
