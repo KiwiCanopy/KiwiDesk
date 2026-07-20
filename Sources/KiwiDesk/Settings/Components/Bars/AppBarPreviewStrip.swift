@@ -232,9 +232,10 @@ struct AppBarPreviewStrip: View {
     @ViewBuilder private var edgeMarkAccent: some View {
         // The mark sits on the tab's window-facing side: a top
         // bar faces down, a bottom bar up, a left bar right, a
-        // right bar left. Inset to the box corner on Boxed so it
-        // sits flush inside the curve.
-        let inset = style.tabBackground == .boxed ? corner : 0
+        // right bar left. Full-width, no corner inset — matching
+        // the Space Bar (owner call 2026-07-20; twin of
+        // `layoutEdgeMark`).
+        let inset: CGFloat = 0
         if style.edge.isHorizontal {
             Rectangle()
                 .fill(color(style.highlightColor))

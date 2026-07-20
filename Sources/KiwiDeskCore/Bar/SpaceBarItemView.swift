@@ -55,6 +55,17 @@ final class SpaceBarItemView: NSView {
     /// empty spaces (nothing to separate).
     let identifierDivider = NSView()
     let accent = NSView()
+    /// Rounds/clips only the active mark to the item's corner
+    /// without clipping the item itself — so the mark cuts on the
+    /// curve while corner badges stay whole (owner 2026-07-20).
+    /// Flipped to match the item, so the accent's y math is unchanged.
+    let accentClip = AppBarOverlay.FlippedView()
+    /// Whether this item sits at the run's leading / trailing end.
+    /// Under Plain the shared plate rounds only there. The trailing
+    /// end may be the front-app segment's, not the last item's, so
+    /// the overlay sets `isLastInRun` false when a front app trails.
+    var isFirstInRun = false
+    var isLastInRun = false
 
     private(set) var space = SpaceID("1")
     private(set) var spaceGlyph = Identifier.text(
@@ -87,12 +98,14 @@ final class SpaceBarItemView: NSView {
         super.init(frame: frame)
         wantsLayer = true
         accent.wantsLayer = true
+        accentClip.wantsLayer = true
         identifierDivider.wantsLayer = true
         addSubview(identifierImage)
         addSubview(identifierLabel)
         addSubview(identifierDivider)
         addSubview(overflowBadge)
-        addSubview(accent)
+        addSubview(accentClip)
+        accentClip.addSubview(accent)
         springRing.fillColor = nil
         springRing.lineWidth = 2
         springRing.strokeEnd = 0

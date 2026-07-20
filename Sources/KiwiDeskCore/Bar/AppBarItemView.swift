@@ -24,6 +24,12 @@ final class AppBarItemView: NSView {
     }()
     let label = NSTextField(labelWithString: "")
     let accent = NSView()
+    /// Rounds/clips only the active mark (and ring) to the tab's
+    /// corner without clipping the tab itself — so the mark cuts on
+    /// the curve while the corner badge stays whole (owner
+    /// 2026-07-20). Covers the tab bounds; the accent lives inside.
+    /// Flipped to match the tab, so the accent's y math is unchanged.
+    let accentClip = AppBarOverlay.FlippedView()
     let badge: NSTextField = {
         let tf = NSTextField(labelWithString: "")
         let cell = IndicatorBarBadgeCell(textCell: "")
@@ -45,12 +51,10 @@ final class AppBarItemView: NSView {
     var edge: AppBarEdge { style.edge }
     private(set) var isActive = false
     private(set) var count = 1
-    /// Whether this tab sits at the run's leading / trailing end,
-    /// where the shared plain plate rounds its corner. Set by the
-    /// overlay each render (index 0 / last). A plain active tab's
-    /// edge mark insets that outer end by the plate radius so it
-    /// stays inside the curve; interior plain tabs keep the
-    /// full-width mark (ui-designer 2026-07-14).
+    /// Whether this tab sits at the run's leading / trailing end.
+    /// Set by the overlay each render (index 0 / last). Under Plain
+    /// the shared plate rounds only there, so only these tabs clip
+    /// their outer corner; Boxed clips every tab (its own box).
     var isFirstInRun = false
     var isLastInRun = false
     private var isHovered = false
@@ -75,13 +79,15 @@ final class AppBarItemView: NSView {
         super.init(frame: frame)
         wantsLayer = true
         accent.wantsLayer = true
+        accentClip.wantsLayer = true
         label.alignment = .center
         badge.wantsLayer = true
         badge.alignment = .center
         addSubview(iconView)
         addSubview(glyphLabel)
         addSubview(label)
-        addSubview(accent)
+        addSubview(accentClip)
+        accentClip.addSubview(accent)
         addSubview(badge)
     }
 
@@ -224,16 +230,47 @@ final class AppBarItemView: NSView {
         horizontal ? bounds.height : bounds.width
     }
 
-    /// Round the box to `cornerRoundness`% of a capsule whenever
-    /// a box is shown. Runs from both `layout()` (bounds known)
-    /// and `applyColors()` (hover toggles the plain box).
+    /// Round the box fill to `cornerRoundness`% of a capsule, and
+    /// clip the active mark to the same corner through `accentClip`
+    /// so it cuts on the curve like the Space Bar (owner 2026-07-20)
+    /// instead of a square end — the tab itself does NOT clip, so a
+    /// corner count badge stays whole. Which corners round follows
+    /// `maskedCorners`.
     func applyCornerRadius() {
-        layer?.cornerRadius =
-            hasBox
-            ? style.resolvedCornerRadius(
-                forThickness: crossThickness
-            )
-            : 0
+        let radius = style.resolvedCornerRadius(
+            forThickness: crossThickness
+        )
+        layer?.cornerRadius = radius
+        accentClip.frame = bounds
+        accentClip.layer?.masksToBounds = true
+        accentClip.layer?.cornerRadius = radius
+        accentClip.layer?.maskedCorners = maskedCorners
+    }
+
+    /// Boxed clips all four corners (each tab is its own box). Plain
+    /// clips only where the shared plate actually rounds — the run's
+    /// outer end — so the mark cuts on the curve there and runs
+    /// square (touching a neighbour) between (owner 2026-07-20). The
+    /// horizontal run maps the outer end to the X side (flip-safe);
+    /// the vertical run to the Y side.
+    private var maskedCorners: CACornerMask {
+        let all: CACornerMask = [
+            .layerMinXMinYCorner, .layerMaxXMinYCorner,
+            .layerMinXMaxYCorner, .layerMaxXMaxYCorner,
+        ]
+        if style.hasBox { return all }
+        let leading: CACornerMask =
+            horizontal
+            ? [.layerMinXMinYCorner, .layerMinXMaxYCorner]
+            : [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        let trailing: CACornerMask =
+            horizontal
+            ? [.layerMaxXMinYCorner, .layerMaxXMaxYCorner]
+            : [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+        var corners: CACornerMask = []
+        if isFirstInRun { corners.formUnion(leading) }
+        if isLastInRun { corners.formUnion(trailing) }
+        return corners
     }
 
     private var textColorHex: String {

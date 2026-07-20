@@ -206,53 +206,42 @@ extension AppBarItemView {
         }
     }
 
-    /// A ~3pt bar on the slot's window-facing edge (flipped
-    /// coordinates: y grows downward). Its long ends inset so the
-    /// mark stays inside the rounded corner it meets instead of
-    /// poking past it (ui-designer 2026-07-14). A boxed tab curves
-    /// at both ends (its own box), so both ends inset by the box
-    /// radius. A plain tab has no per-tab box — the shared plate
-    /// rounds only the run's outer ends, so a plain mark insets
-    /// solely at the run's first / last end and stays full-width
-    /// on interior tabs.
+    /// A ~3pt bar spanning the slot's full window-facing edge
+    /// (flipped coordinates: y grows downward): a top bar faces
+    /// down, a bottom bar up, a left bar right, a right bar left.
+    /// Full-width, no corner inset — matching the Space Bar's mark
+    /// (owner call 2026-07-20).
     private func layoutEdgeMark() {
         accent.layer?.cornerRadius = 0
         let thickness: CGFloat = 3
-        let r = style.resolvedCornerRadius(
-            forThickness: crossThickness
-        )
-        let lead = style.hasBox || isFirstInRun ? r : 0
-        let trail = style.hasBox || isLastInRun ? r : 0
-        let longW = max(bounds.width - lead - trail, 0)
-        let longH = max(bounds.height - lead - trail, 0)
         switch edge {
         case .top:
             accent.frame = CGRect(
-                x: lead,
+                x: 0,
                 y: bounds.height - thickness,
-                width: longW,
+                width: bounds.width,
                 height: thickness
             )
         case .bottom:
             accent.frame = CGRect(
-                x: lead,
+                x: 0,
                 y: 0,
-                width: longW,
+                width: bounds.width,
                 height: thickness
             )
         case .left:
             accent.frame = CGRect(
                 x: bounds.width - thickness,
-                y: lead,
+                y: 0,
                 width: thickness,
-                height: longH
+                height: bounds.height
             )
         case .right:
             accent.frame = CGRect(
                 x: 0,
-                y: lead,
+                y: 0,
                 width: thickness,
-                height: longH
+                height: bounds.height
             )
         }
     }

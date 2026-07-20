@@ -120,11 +120,12 @@ struct LayoutAppBarSection: View {
         )
         .modifier(
             GreyOut(
-                // No shared plate under an effective Boxed
-                // (the one resolve authority; `rendered` folds
-                // in material's sub-macOS-26 Boxed fallback).
+                // Boxed never draws a shared plate to size (glass
+                // hugs each box, solid draws each box), so fit is
+                // inert for Boxed — resolve to see the effective
+                // shape under any override.
                 active: bar.resolved(with: global)
-                    .hasBox,
+                    .tabBackground == .boxed,
                 help: L(
                     "app_bar.tab_background_fit.boxed_only",
                     "Boxed draws a box per tab, not a shared "

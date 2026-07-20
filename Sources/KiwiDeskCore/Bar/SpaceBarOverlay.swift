@@ -248,6 +248,13 @@ public final class SpaceBarOverlay {
             view.onSelect = { [weak self] space in
                 self?.onSelect(space)
             }
+            // Only the run's outer items meet a rounded plate end.
+            // The trailing end is the front-app segment's when one
+            // trails, so the last Space item clips its trailing
+            // corner only without a front app.
+            view.isFirstInRun = index == 0
+            view.isLastInRun =
+                index == items.count - 1 && frontApp == nil
         }
         renderFrontSegment(
             frontApp,

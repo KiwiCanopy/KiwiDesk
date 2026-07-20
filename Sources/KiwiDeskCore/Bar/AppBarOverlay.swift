@@ -260,8 +260,8 @@ public final class AppBarOverlay {
                 horizontal: m.horizontal,
                 style: style
             )
-            // The run's outer ends meet the shared plate's rounded
-            // corners; a plain active mark insets there (piece 3).
+            // Only the run's outer tabs meet a rounded plate end,
+            // so only they clip their outer corner (Plain).
             view.isFirstInRun = index == 0
             view.isLastInRun = index == items.count - 1
             view.onSelect = { [weak self] id in

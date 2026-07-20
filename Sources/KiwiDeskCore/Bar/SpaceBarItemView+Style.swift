@@ -7,10 +7,16 @@ import AppKit
 extension SpaceBarItemView {
 
     func restyle() {
-        layer?.masksToBounds = true
-        layer?.cornerRadius =
-            style.hasBox ? cornerRadius : 0
+        // The item does NOT clip (corner badges must stay whole);
+        // the box fill still rounds via cornerRadius, and the active
+        // mark clips through `accentClip` to the same corner.
+        layer?.masksToBounds = false
+        layer?.cornerRadius = cornerRadius
         layer?.backgroundColor = fillColor.cgColor
+        accentClip.frame = bounds
+        accentClip.layer?.masksToBounds = true
+        accentClip.layer?.cornerRadius = cornerRadius
+        accentClip.layer?.maskedCorners = maskedCorners
         styleIdentifier()
         styleApps()
         styleBadges()
@@ -74,6 +80,31 @@ extension SpaceBarItemView {
         style.resolvedCornerRadius(
             forThickness: min(bounds.width, bounds.height)
         )
+    }
+
+    /// Which corners `accentClip` rounds. Boxed clips all four (its
+    /// own box). Plain clips only the run's outer end — leading on
+    /// the first item, trailing on the last (when no front app
+    /// trails it) — so the mark cuts on the plate's curve there and
+    /// stays square between (owner 2026-07-20).
+    private var maskedCorners: CACornerMask {
+        let all: CACornerMask = [
+            .layerMinXMinYCorner, .layerMaxXMinYCorner,
+            .layerMinXMaxYCorner, .layerMaxXMaxYCorner,
+        ]
+        if style.hasBox { return all }
+        let leading: CACornerMask =
+            horizontal
+            ? [.layerMinXMinYCorner, .layerMinXMaxYCorner]
+            : [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        let trailing: CACornerMask =
+            horizontal
+            ? [.layerMaxXMinYCorner, .layerMaxXMaxYCorner]
+            : [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+        var corners: CACornerMask = []
+        if isFirstInRun { corners.formUnion(leading) }
+        if isLastInRun { corners.formUnion(trailing) }
+        return corners
     }
 
     private var fillColor: NSColor {
