@@ -2153,13 +2153,13 @@ drag.set_ghost_border_alignment("inside")
 
 **Expects:** a hex color.
 
-**Does:** sets the ghost border color (default `#8B5E3C`,
-shell-brown).
+**Does:** sets the ghost border color (default `#4E9F3D`,
+flesh-green — the ghost, drag's origin, is all-green).
 
 **Example:**
 
 ```lua
-drag.set_ghost_border_color("#8B5E3C")
+drag.set_ghost_border_color("#4E9F3D")
 ```
 
 ### drag.set_ghost_fill
@@ -2239,13 +2239,14 @@ drag.set_drop_zone_border_alignment("inside")
 
 **Expects:** a hex color.
 
-**Does:** sets the drop zone border color (default `#4E9F3D`,
-flesh-green).
+**Does:** sets the drop zone border color (default `#E8A33D`,
+amber — the drop zone, drag's target, is all-amber so it reads
+apart from the green ghost).
 
 **Example:**
 
 ```lua
-drag.set_drop_zone_border_color("#4E9F3D")
+drag.set_drop_zone_border_color("#E8A33D")
 ```
 
 ### drag.set_drop_zone_fill
@@ -2264,13 +2265,13 @@ drag.set_drop_zone_fill(true)
 
 **Expects:** a hex color.
 
-**Does:** sets the drop zone fill color (default `#8B5E3C40`,
-shell-brown with 25% alpha).
+**Does:** sets the drop zone fill color (default `#E8A33D40`,
+amber with 25% alpha).
 
 **Example:**
 
 ```lua
-drag.set_drop_zone_fill_color("#8B5E3C40")
+drag.set_drop_zone_fill_color("#E8A33D40")
 ```
 
 ### drag.set_corner_radius
@@ -3400,15 +3401,15 @@ stripped, grouped by namespace — `set_gap_override` becomes
       "corner_radius": 16,
       "ghost": {
         "enabled": true, "border": true,
-        "border_color": "#8B5E3C", "border_thickness": 5,
+        "border_color": "#4E9F3D", "border_thickness": 5,
         "border_alignment": "inside",
         "fill": true, "fill_color": "#4E9F3D40"
       },
       "drop_zone": {
         "enabled": true, "border": true,
-        "border_color": "#4E9F3D", "border_thickness": 5,
+        "border_color": "#E8A33D", "border_thickness": 5,
         "border_alignment": "inside",
-        "fill": true, "fill_color": "#8B5E3C40"
+        "fill": true, "fill_color": "#E8A33D40"
       }
     },
     "gap": {

@@ -17,26 +17,31 @@ public struct DragVisual: Sendable, Equatable, Encodable {
     public var fill: Bool
     public var fillColor: String
 
-    /// Ghost: kiwi-green fill inside a kiwi-brown border.
+    /// Ghost (drag origin): all kiwi-green — same hue as the
+    /// focus accent. Origin vs. target reads by hue against the
+    /// drop zone's amber (2026-07-20; was a brown/green swap, but
+    /// brown left the palette with the moss-fill refresh).
     public static let ghostDefault = DragVisual(
-        enabled: true,
-        border: true,
-        borderColor: "#8B5E3C",
-        borderThickness: 5,
-        borderAlignment: .inside,
-        fill: true,
-        fillColor: "#4E9F3D40"
-    )
-
-    /// Drop zone: kiwi-brown fill inside a kiwi-green border.
-    public static let dropZoneDefault = DragVisual(
         enabled: true,
         border: true,
         borderColor: "#4E9F3D",
         borderThickness: 5,
         borderAlignment: .inside,
         fill: true,
-        fillColor: "#8B5E3C40"
+        fillColor: "#4E9F3D40"
+    )
+
+    /// Drop zone (drag target): all amber — the palette's other
+    /// established hue (`focused_item_color`), so the target draws
+    /// the eye apart from the green origin.
+    public static let dropZoneDefault = DragVisual(
+        enabled: true,
+        border: true,
+        borderColor: "#E8A33D",
+        borderThickness: 5,
+        borderAlignment: .inside,
+        fill: true,
+        fillColor: "#E8A33D40"
     )
 
     public init(

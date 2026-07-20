@@ -1102,9 +1102,16 @@ new palette against, not a spec the reflection-based
 
 The Kiwi (Default) palette was refreshed the same day from a
 brown/green pair to one green family (dark-moss fill `#37452E66`,
-flesh-green accent `#4E9F3D`, cream text, amber focused) — brown
-now lives on only in the transient drag visuals, exactly the
-"minor flourish" band above.
+flesh-green accent `#4E9F3D`, cream text, amber focused). Brown
+was retired entirely, including the drag visuals — the ghost/drop
+-zone swap now re-sources its two hues from the palette's own
+green (ghost = origin) and amber (drop zone = target), per the
+two-hue drag pattern above, so nothing spends a stray third hue.
+Two branded siblings ship alongside the default and lead the
+shelf right after it: **Kiwi Dark** (a dark-base green identity,
+distinct from the neutral True Dark) and **Kiwi Gold** (a warm
+gold-fruit variant, green as its secondary) — both authored in
+`bundled.json`, both following the same guide.
 
 **The App Bar has its own sidebar destination.** (#229,
 superseding the earlier "Appearance ends with the App Bar

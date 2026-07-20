@@ -157,15 +157,15 @@ struct SettingsCodingTests {
                 "border_alignment", "enabled", "fill", "fill_color",
             ]
         )
-        // Kiwi defaults: green fill / brown border (ghost),
-        // brown fill / green border (drop zone).
-        #expect(ghost["border_color"] as? String == "#8B5E3C")
+        // Kiwi defaults: all-green ghost (origin), all-amber
+        // drop zone (target) — hue carries origin vs. target.
+        #expect(ghost["border_color"] as? String == "#4E9F3D")
         #expect(ghost["fill_color"] as? String == "#4E9F3D40")
         #expect(ghost["border_thickness"] as? Double == 5)
         #expect(ghost["border_alignment"] as? String == "inside")
         let zone = try object(drag["drop_zone"])
-        #expect(zone["border_color"] as? String == "#4E9F3D")
-        #expect(zone["fill_color"] as? String == "#8B5E3C40")
+        #expect(zone["border_color"] as? String == "#E8A33D")
+        #expect(zone["fill_color"] as? String == "#E8A33D40")
         #expect(zone["border_thickness"] as? Double == 5)
         #expect(zone["border_alignment"] as? String == "inside")
     }
