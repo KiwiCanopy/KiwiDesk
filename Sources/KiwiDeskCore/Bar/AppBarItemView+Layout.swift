@@ -128,9 +128,17 @@ extension AppBarItemView {
         // and name (manual QA 2026-07-18).
         var spacing: CGFloat =
             side > 0 && showText ? pad / 2 : 0
+        // A grouped tab reserves room after the name for its count
+        // badge, so the badge sits beside the name instead of
+        // clamping over it (owner 2026-07-20).
+        let badgeReserve: CGFloat =
+            count >= 2 && showText
+            ? min(max(min(bounds.height, bounds.width) * 0.32, 9), 14)
+                + pad
+            : 0
         textSize.width = min(
             textSize.width,
-            bounds.width - side - spacing - edge * 2
+            bounds.width - side - spacing - edge * 2 - badgeReserve
         )
         if textSize.width < 8 {
             textSize.width = 0
