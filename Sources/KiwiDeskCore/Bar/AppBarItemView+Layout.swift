@@ -40,23 +40,26 @@ extension AppBarItemView {
         // padding to keep the badge tight around the text.
         let textWidth = ceil(badge.cell?.cellSize.width ?? 0)
         let diameter = max(baseHeight, textWidth + 2)
-        // Sit just after the content — the name if shown, else the
-        // glyph or icon — vertically centered, rather than floating
-        // in the corner (owner 2026-07-20). Clamped to the slot.
-        let gap: CGFloat = 3
-        let contentEnd: CGFloat
+        // With a name shown, sit just after it at its top corner —
+        // not over it (overlapping text reads badly). Icon- or
+        // glyph-only: overlap the top-right corner like a
+        // notification badge (owner 2026-07-20). Clamped to the slot.
+        let x: CGFloat
+        let y: CGFloat
         if !label.isHidden, label.frame.width > 0 {
-            contentEnd = label.frame.maxX
-        } else if !glyphLabel.isHidden {
-            contentEnd = glyphLabel.frame.maxX
-        } else if !iconView.isHidden {
-            contentEnd = iconView.frame.maxX
+            x = label.frame.maxX + 2
+            y = label.frame.minY - diameter / 3
         } else {
-            contentEnd = bounds.midX
+            let box =
+                !glyphLabel.isHidden
+                ? glyphLabel.frame
+                : (!iconView.isHidden ? iconView.frame : bounds)
+            x = box.maxX - diameter / 2
+            y = box.minY - diameter / 2
         }
         badge.frame = CGRect(
-            x: min(contentEnd + gap, bounds.width - diameter),
-            y: (bounds.height - diameter) / 2,
+            x: min(max(x, 0), bounds.width - diameter),
+            y: min(max(y, 0), bounds.height - diameter),
             width: diameter,
             height: diameter
         )

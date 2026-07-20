@@ -78,6 +78,12 @@ final class AppBarItemView: NSView {
     override init(frame: NSRect) {
         super.init(frame: frame)
         wantsLayer = true
+        // Scale the app icon up as well as down: the default
+        // `scaleProportionallyDown` capped it at the image's native
+        // size, so it stopped growing on thick bars (owner
+        // 2026-07-20). App icons carry high-res reps, so upscaling
+        // to the slot stays crisp.
+        iconView.imageScaling = .scaleProportionallyUpOrDown
         accent.wantsLayer = true
         accentClip.wantsLayer = true
         label.alignment = .center
