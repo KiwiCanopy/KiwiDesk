@@ -13,6 +13,18 @@ import AppKit
 /// Shared by both bars, one per glass surface (each box, the plate,
 /// each arrow / the front segment).
 enum GlassTint {
+    /// The most opaque a backdrop is allowed to render (#408): above
+    /// this the solid color crowds out the blur / refraction and the
+    /// "glass" reads as a flat colored plate — the pointless case.
+    /// A *render* cap, not a stored-value clamp: the `fill_color`
+    /// keeps whatever alpha the user set (GUI or Lua, used in full by
+    /// the solid boxed/plain shapes and when glass is off); only the
+    /// glass backdrop is held translucent so glass always looks like
+    /// glass. Below it any alpha is honored, including 0 (clear
+    /// glass). Chosen on-device (macOS 26.5.2) — the top of the
+    /// legible tinted-glass band; the sweet spot sits ~35–50 %.
+    static let maxAlpha: CGFloat = 0.65
+
     /// Whether a tint backdrop should be drawn: only on macOS 26
     /// (where glass renders at all) and only for a visible Fill —
     /// a fully transparent Fill means clear, untinted glass.
@@ -55,7 +67,12 @@ enum GlassTint {
             backdrop.frame = frame
         }
         backdrop.layer?.cornerRadius = cornerRadius
-        backdrop.layer?.backgroundColor =
-            NSColor(kiwiHex: hex).cgColor
+        // Cap the backdrop's opacity so the glass keeps its blur;
+        // the stored Fill is untouched (see `maxAlpha`).
+        let fill = NSColor(kiwiHex: hex)
+        let capped =
+            fill.alphaComponent > maxAlpha
+            ? fill.withAlphaComponent(maxAlpha) : fill
+        backdrop.layer?.backgroundColor = capped.cgColor
     }
 }
