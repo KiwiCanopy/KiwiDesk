@@ -112,7 +112,7 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// Count badges (grouped duplicates and the "+n" overflow),
     /// shown in these colors on the active space and muted from
     /// `itemColor` on inactive ones.
-    public var groupBadgeColor = "#FF3B30"
+    public var groupBadgeColor = "#B00020"
     public var groupBadgeTextColor = "#FFFFFF"
 
     public init() {}

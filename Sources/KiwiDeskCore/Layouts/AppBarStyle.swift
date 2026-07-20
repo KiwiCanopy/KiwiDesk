@@ -90,7 +90,7 @@ public struct AppBarStyle: Sendable, Equatable {
     /// whose hover tint needs darker text.
     public var hoverItemColor = "#F2EBD9"
     /// The count badge on grouped items.
-    public var groupBadgeColor = "#FF3B30"
+    public var groupBadgeColor = "#B00020"
     public var groupBadgeTextColor = "#FFFFFF"
 
     public init() {}

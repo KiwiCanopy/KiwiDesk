@@ -52,8 +52,9 @@ public struct BorderStyle: Sendable, Equatable {
     /// Ring width (pt). Raw here; callers clamp to
     /// `minWidth...maxWidth` (`clampedWidth`).
     public var width: CGFloat = 2
-    /// Accent blue, macOS's own focus-cue color.
-    public var focusedColor = "#0A84FF"
+    /// Kiwi flesh-green — the theme's focus accent, matching the
+    /// bars' active/focus signal rather than macOS's generic blue.
+    public var focusedColor = "#4E9F3D"
     public var unfocusedEnabled = false
     /// A subtle translucent grey — present without competing with
     /// the focused ring for attention.

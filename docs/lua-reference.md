@@ -2337,12 +2337,12 @@ border.set_width(2)
 the same format as every other KiwiDesk color.
 
 **Does:** sets the focused window's ring color (default
-`"#0A84FF"`, macOS accent blue).
+`"#4E9F3D"`, the Kiwi theme's flesh-green focus accent).
 
 **Example:**
 
 ```lua
-border.set_focused_color("#0A84FF")
+border.set_focused_color("#4E9F3D")
 ```
 
 ### border.set_unfocused_enabled
