@@ -45,6 +45,14 @@ final class AppBarItemView: NSView {
     var edge: AppBarEdge { style.edge }
     private(set) var isActive = false
     private(set) var count = 1
+    /// Whether this tab sits at the run's leading / trailing end,
+    /// where the shared plain plate rounds its corner. Set by the
+    /// overlay each render (index 0 / last). A plain active tab's
+    /// edge mark insets that outer end by the plate radius so it
+    /// stays inside the curve; interior plain tabs keep the
+    /// full-width mark (ui-designer 2026-07-14).
+    var isFirstInRun = false
+    var isLastInRun = false
     private var isHovered = false
     var style = AppBarStyle()
     var onSelect: (WindowID) -> Void = { _ in }

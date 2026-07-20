@@ -207,32 +207,35 @@ extension AppBarItemView {
     }
 
     /// A ~3pt bar on the slot's window-facing edge (flipped
-    /// coordinates: y grows downward). On a boxed tab the bar
-    /// insets its long ends by the box corner radius so it sits
-    /// flush inside the curve instead of poking past it
-    /// (ui-designer 2026-07-14) — a no-op at roundness 0 / plain.
+    /// coordinates: y grows downward). Its long ends inset so the
+    /// mark stays inside the rounded corner it meets instead of
+    /// poking past it (ui-designer 2026-07-14). A boxed tab curves
+    /// at both ends (its own box), so both ends inset by the box
+    /// radius. A plain tab has no per-tab box — the shared plate
+    /// rounds only the run's outer ends, so a plain mark insets
+    /// solely at the run's first / last end and stays full-width
+    /// on interior tabs.
     private func layoutEdgeMark() {
         accent.layer?.cornerRadius = 0
         let thickness: CGFloat = 3
-        let r =
-            style.hasBox
-            ? style.resolvedCornerRadius(
-                forThickness: crossThickness
-            )
-            : 0
-        let longW = max(bounds.width - r * 2, 0)
-        let longH = max(bounds.height - r * 2, 0)
+        let r = style.resolvedCornerRadius(
+            forThickness: crossThickness
+        )
+        let lead = style.hasBox || isFirstInRun ? r : 0
+        let trail = style.hasBox || isLastInRun ? r : 0
+        let longW = max(bounds.width - lead - trail, 0)
+        let longH = max(bounds.height - lead - trail, 0)
         switch edge {
         case .top:
             accent.frame = CGRect(
-                x: r,
+                x: lead,
                 y: bounds.height - thickness,
                 width: longW,
                 height: thickness
             )
         case .bottom:
             accent.frame = CGRect(
-                x: r,
+                x: lead,
                 y: 0,
                 width: longW,
                 height: thickness
@@ -240,14 +243,14 @@ extension AppBarItemView {
         case .left:
             accent.frame = CGRect(
                 x: bounds.width - thickness,
-                y: r,
+                y: lead,
                 width: thickness,
                 height: longH
             )
         case .right:
             accent.frame = CGRect(
                 x: 0,
-                y: r,
+                y: lead,
                 width: thickness,
                 height: longH
             )
