@@ -110,7 +110,7 @@ extension SpaceBarItemView {
         // small corner dot (0.42/8, QA 2026-07-19 — the 0.5-of-cell
         // badge read oversized next to small glyphs).
         let base =
-            centered ? cell * 0.8 : min(max(cell * 0.42, 8), 13)
+            centered ? cell * 0.8 : max(cell * 0.42, 8)
         badge.font = .systemFont(
             ofSize: base * (centered ? 0.5 : 0.9),
             weight: .bold
@@ -167,7 +167,7 @@ extension SpaceBarItemView {
         onCellAt offset: CGFloat,
         cell: CGFloat
     ) {
-        let side = min(max(cell * 0.42, 8), 13)
+        let side = max(cell * 0.42, 8)
         let cellRect =
             horizontal
             ? CGRect(

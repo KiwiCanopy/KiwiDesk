@@ -4,7 +4,7 @@ import Foundation
 /// Serial queue for z-order raises. AX raise calls are
 /// blocking IPC; running them here keeps the main thread free
 /// and their order strict.
-private let zOrderQueue = DispatchQueue(
+let zOrderQueue = DispatchQueue(
     label: "org.kiwidesk.zorder",
     qos: .userInteractive
 )
@@ -190,9 +190,10 @@ extension KiwiCore {
     /// so the piles read as the row receding to the left and
     /// to the right of the viewport.
     private func restoreScrollingZOrder(_ space: Space) {
-        let tiled = space.windows.filter {
-            state.windows[$0]?.isFloating == false
-        }
+        let tiled = state.effectiveTiledMembers(
+            of: space,
+            activeSpace: activeSpace?.id
+        )
         guard tiled.count > 1 else { return }
         let focusIndex =
             space.focused.flatMap {
@@ -242,87 +243,9 @@ extension KiwiCore {
         // warps until the closing re-assert ran, so a restore
         // never ping-pongs the pointer across pile centers
         // (#186).
-        zOrderRestoresInFlight += 1
-        nonisolated(unsafe) let elements = ordered
-        zOrderQueue.async { [weak self] in
-            for element in elements {
-                AXHelper.raiseQuietly(element)
-            }
-            // AXRaise on a window of the ACTIVE app makes it
-            // key (AppKit's handler does makeKeyAndOrderFront),
-            // so the sequence steals focus window by window.
-            // Re-assert the intended focus as the ordered
-            // final step of the same sequence.
-            Task { @MainActor [weak self] in
-                if let focused {
-                    self?.focusWindow(focused, warp: false)
-                }
-                self?.zOrderRestoresInFlight -= 1
-            }
-        }
-    }
-
-    /// Quiet-raises the windows that belong ABOVE the tiled
-    /// plane after a space activation (#412/#414 QA): the
-    /// active space's floating windows — their stash restore
-    /// repositions but cannot re-order, so the switch's focus
-    /// raise buried them behind full-frame tiled windows —
-    /// and every sticky window (visible on all spaces, never
-    /// stashed, equally buried). Then hands focus over as the
-    /// sequence's ordered final step (the `raiseSequentially`
-    /// pattern: AXRaise on the active app's windows steals
-    /// focus window by window, so the intended focus must be
-    /// re-asserted after the raises, and the focused window
-    /// ends on top). The re-assert never warps — it runs while
-    /// `zOrderRestoresInFlight` holds, where `mouseWarpEligible`
-    /// swallows warps by design — so callers that want the
-    /// pointer to follow warp at INTENT time, before calling
-    /// this (as `focusSpace` does). With nothing to raise,
-    /// focus is handed over directly.
-    func raiseFloatsAndSticky(
-        thenFocus focused: WindowID?
-    ) {
-        var targets: [WindowID] = []
-        if let space = activeSpace {
-            targets = space.windows.filter {
-                state.windows[$0]?.isFloating == true
-            }
-        }
-        // Sorted: `all` is dictionary-ordered, and overlapping
-        // sticky windows must not shuffle z-order per switch.
-        for window in state.windows.all
-            .sorted(by: { $0.id.raw < $1.id.raw })
-        where window.isSticky && !targets.contains(window.id) {
-            targets.append(window.id)
-        }
-        let ordered = targets.compactMap {
-            eventLoop.element(for: $0)
-        }
-        guard !ordered.isEmpty else {
+        performZOrderSequence(elements: ordered) { [weak self] in
             if let focused {
-                focusWindow(
-                    focused,
-                    refocusRetile: false,
-                    warp: false
-                )
-            }
-            return
-        }
-        zOrderRestoresInFlight += 1
-        nonisolated(unsafe) let elements = ordered
-        zOrderQueue.async { [weak self] in
-            for element in elements {
-                AXHelper.raiseQuietly(element)
-            }
-            Task { @MainActor [weak self] in
-                if let focused {
-                    self?.focusWindow(
-                        focused,
-                        refocusRetile: false,
-                        warp: false
-                    )
-                }
-                self?.zOrderRestoresInFlight -= 1
+                self?.focusWindow(focused, warp: false)
             }
         }
     }
@@ -346,3 +269,4 @@ extension KiwiCore {
         return (indexA < boundary) != (indexB < boundary)
     }
 }
+

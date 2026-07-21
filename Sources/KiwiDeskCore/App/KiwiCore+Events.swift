@@ -246,11 +246,7 @@ extension KiwiCore {
             // it and the window stays parked at the stash
             // corner forever — #412's "floating vanishes"
             // failure mode, reintroduced on this one path.
-            if let frame = tiler.stashedFrames
-                .removeValue(forKey: old)
-            {
-                tiler.stashedFrames[new] = frame
-            }
+            tiler.rekeyStash(oldID: old, newID: new)
             cancelDrag(old)
         default:
             break
