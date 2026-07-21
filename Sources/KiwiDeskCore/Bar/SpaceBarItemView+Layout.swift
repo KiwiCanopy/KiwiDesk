@@ -72,6 +72,11 @@ extension SpaceBarItemView {
                     cell: cell
                 )
             }
+            layoutStateBadges(
+                at: index,
+                onCellAt: cursor,
+                cell: cell
+            )
             cursor += cell
         }
         if overflow > 0 {
@@ -150,6 +155,60 @@ extension SpaceBarItemView {
             options: .alignAllEdgesNearest
         )
         badge.layer?.cornerRadius = diameter / 2
+    }
+
+    /// The state badges (#414) on one glyph cell: sticky hugs
+    /// the top-LEADING corner, floating the bottom-leading —
+    /// the count badge owns top-trailing. Same footprint as the
+    /// corner count dot, no circle plate (a state mark, not a
+    /// count).
+    private func layoutStateBadges(
+        at index: Int,
+        onCellAt offset: CGFloat,
+        cell: CGFloat
+    ) {
+        let side = min(max(cell * 0.42, 8), 13)
+        let cellRect =
+            horizontal
+            ? CGRect(
+                x: offset,
+                y: (bounds.height - cell) / 2,
+                width: cell,
+                height: cell
+            )
+            : CGRect(
+                x: (bounds.width - cell) / 2,
+                y: offset,
+                width: cell,
+                height: cell
+            )
+        // Flipped coordinates: minY is the visual top.
+        if index < stickyBadgeViews.count,
+            !stickyBadgeViews[index].isHidden
+        {
+            stickyBadgeViews[index].frame = backingAlignedRect(
+                CGRect(
+                    x: cellRect.minX - 1,
+                    y: cellRect.minY - 1,
+                    width: side,
+                    height: side
+                ),
+                options: .alignAllEdgesNearest
+            )
+        }
+        if index < floatingBadgeViews.count,
+            !floatingBadgeViews[index].isHidden
+        {
+            floatingBadgeViews[index].frame = backingAlignedRect(
+                CGRect(
+                    x: cellRect.minX - 1,
+                    y: cellRect.maxY - side + 1,
+                    width: side,
+                    height: side
+                ),
+                options: .alignAllEdgesNearest
+            )
+        }
     }
 
     private func place(

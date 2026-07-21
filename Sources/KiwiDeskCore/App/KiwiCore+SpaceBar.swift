@@ -186,7 +186,15 @@ extension KiwiCore {
             icon: icon,
             glyph: glyph,
             focused: space.focused.map(group.contains) ?? false,
-            count: group.count
+            count: group.count,
+            // Badge inheritance (#414): a group aggregates its
+            // children's states — an "at least one" signal.
+            sticky: group.contains {
+                state.windows[$0]?.isSticky == true
+            },
+            floating: group.contains {
+                state.windows[$0]?.isFloating == true
+            }
         )
     }
 

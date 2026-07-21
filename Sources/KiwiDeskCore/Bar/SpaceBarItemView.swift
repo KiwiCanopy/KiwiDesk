@@ -36,6 +36,14 @@ final class SpaceBarItemView: NSView {
         let focused: Bool
         /// Windows behind this glyph; > 1 shows a count badge.
         let count: Int
+        /// State badges (#414): aggregates over the run — an
+        /// explicit "at least one" signal, honest for a group
+        /// (badge inheritance). Sticky wears the top-left
+        /// badge, floating the bottom-left; the group count
+        /// keeps top-right. Space Bar only — in the bar there
+        /// is otherwise no way to tell these states apart.
+        var sticky = false
+        var floating = false
     }
 
     let identifierImage = NSImageView()
@@ -48,6 +56,11 @@ final class SpaceBarItemView: NSView {
     var appViews: [NSView] = []
     /// One count badge per glyph slot (hidden below 2).
     var badgeViews: [NSTextField] = []
+    /// Per-slot state badges (#414): sticky top-left, floating
+    /// bottom-left. Small tinted symbols, no circle plate — a
+    /// state mark, not a count.
+    var stickyBadgeViews: [NSImageView] = []
+    var floatingBadgeViews: [NSImageView] = []
     /// The "+n" overflow badge, its own trailing slot.
     let overflowBadge = SpaceBarItemView.makeBadge()
     /// The identifier↔glyphs rule (QA 2026-07-19) — the front
@@ -132,6 +145,24 @@ final class SpaceBarItemView: NSView {
         tf.setAccessibilityElement(false)
         return tf
     }
+
+    /// A corner state badge (#414): a template SF Symbol tinted
+    /// through the item's color ladder.
+    static func makeStateBadge(symbol: String) -> NSImageView {
+        let iv = NSImageView()
+        iv.image = NSImage(
+            systemSymbolName: symbol,
+            accessibilityDescription: nil
+        )
+        iv.imageScaling = .scaleProportionallyUpOrDown
+        iv.setAccessibilityElement(false)
+        return iv
+    }
+
+    /// The sticky mark — one glyph everywhere (#414): the same
+    /// symbol marks the window itself (StickyIndicatorOverlay).
+    static let stickySymbol = "square.stack.3d.up.fill"
+    static let floatingSymbol = "macwindow.on.rectangle"
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError() }
@@ -238,6 +269,8 @@ final class SpaceBarItemView: NSView {
     private func syncAppViews() {
         appViews.forEach { $0.removeFromSuperview() }
         badgeViews.forEach { $0.removeFromSuperview() }
+        stickyBadgeViews.forEach { $0.removeFromSuperview() }
+        floatingBadgeViews.forEach { $0.removeFromSuperview() }
         appViews = apps.map { app in
             if app.glyph != nil {
                 let tf = NSTextField(labelWithString: "")
@@ -255,6 +288,20 @@ final class SpaceBarItemView: NSView {
         }
         badgeViews = apps.map { _ in
             let badge = Self.makeBadge()
+            addSubview(badge)
+            return badge
+        }
+        stickyBadgeViews = apps.map { _ in
+            let badge = Self.makeStateBadge(
+                symbol: Self.stickySymbol
+            )
+            addSubview(badge)
+            return badge
+        }
+        floatingBadgeViews = apps.map { _ in
+            let badge = Self.makeStateBadge(
+                symbol: Self.floatingSymbol
+            )
             addSubview(badge)
             return badge
         }

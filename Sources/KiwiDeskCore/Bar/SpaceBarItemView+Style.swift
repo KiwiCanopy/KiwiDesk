@@ -62,6 +62,34 @@ extension SpaceBarItemView {
         overflowBadge.isHidden = overflow < 1
         overflowBadge.stringValue = "+\(overflow)"
         applyBadge(overflowBadge, appFocused: focusInOverflow)
+        styleStateBadges()
+    }
+
+    /// The sticky / floating corner badges (#414): shown per
+    /// slot from the group aggregate ("at least one"), gated by
+    /// the Lua-only `space_bar.sticky_badge`, tinted through
+    /// the same ladder as the glyph they mark.
+    private func styleStateBadges() {
+        for (index, app) in apps.enumerated() {
+            guard index < stickyBadgeViews.count,
+                index < floatingBadgeViews.count
+            else { break }
+            let tint =
+                app.focused && isActive
+                ? NSColor(kiwiHex: style.focusedItemColor)
+                : stateColor
+            let alpha = untintedAppAlpha(focused: app.focused)
+            let sticky = stickyBadgeViews[index]
+            sticky.isHidden =
+                !(style.stickyBadge && app.sticky)
+            sticky.contentTintColor = tint
+            sticky.alphaValue = alpha
+            let floating = floatingBadgeViews[index]
+            floating.isHidden =
+                !(style.stickyBadge && app.floating)
+            floating.contentTintColor = tint
+            floating.alphaValue = alpha
+        }
     }
 
     /// A count / overflow badge follows the same 3-tier ladder as the
