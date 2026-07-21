@@ -681,6 +681,27 @@ Popovers, sheets, emoji pickers, and other windows above a bordered
 window stay above its ring, which is pinned to the focused window's
 stacking level; the window stays focused and keeps its full ring.
 
+### Sticky Windows
+
+A **sticky** window stays visible on every virtual space
+instead of hiding with its home space when you switch — mark
+one with the **Toggle sticky** shortcut (Shortcuts ▸ Size &
+Float; there is no app rule list, stickiness is per window).
+The flag survives closing and reopening the window, and it is
+independent of floating: a floating sticky window keeps its
+own frame everywhere, a tiled one keeps its current place.
+
+Because a sticky window can look identical to a normal one,
+KiwiDesk marks it with a small badge chip in its top-right
+corner. **Show mark on sticky windows** (on by default) turns
+the chip off — unless the Space Bar is hidden, in which case
+the toggle greys out and stays on: with the bar off the chip
+is the only sticky indicator, and sticky state must never be
+invisible. (From Lua both indicators are freely configurable —
+`sticky.set_indicator`, `space_bar.set_sticky_badge`.) The
+Space Bar shows its own sticky badge either way, and floating
+windows get a bar badge too — see the Space Bar section.
+
 ## Bars
 
 The **Bars** section hosts both bar editors behind a fixed
@@ -799,6 +820,15 @@ neighbors slightly dimmed — so the focused app reads even
 though native icons take no tint (App Font glyphs use the
 Focused item color instead). Click a Space to switch to it;
 glyphs are informational.
+
+Window state shows on the glyphs as small corner badges:
+**sticky** windows wear a badge on the glyph's top-left,
+**floating** windows on the bottom-left (the top-right corner
+stays the group count). A grouped glyph aggregates its
+windows — its badge means "at least one window in this group".
+The badges follow the item's color ladder, so they mute on
+inactive Spaces. They have no Settings toggle; Lua can hide
+them with `space_bar.set_sticky_badge(false)`.
 
 **Drag a window onto a Space** to move it there — a two-speed
 gesture. Drag a window's title bar over another Space's item and

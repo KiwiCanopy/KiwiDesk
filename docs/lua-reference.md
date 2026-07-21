@@ -1999,6 +1999,23 @@ reachable by shortcut.
 space_bar.set_hide_empty(true)
 ```
 
+### space_bar.set_sticky_badge
+
+**Expects:** boolean (default `true`).
+
+**Does:** shows or hides the window-state badges on Space Bar
+items: sticky windows wear a badge on their glyph's top-left
+corner, floating windows on the bottom-left (the top-right
+stays the group count). A grouped glyph aggregates its
+windows' states — the badge means "at least one". Lua-only; the
+Settings app offers no toggle for these badges.
+
+**Example:**
+
+```lua
+space_bar.set_sticky_badge(false)
+```
+
 ### space_bar.set_spring_delay
 
 **Expects:** milliseconds (default `1500`, clamped to
@@ -2751,6 +2768,94 @@ scripts that need a specific direction.
 KiwiDesk.bind("cmd+alt+f", function()
     KiwiDesk.toggle_floating()
 end)
+```
+
+## Sticky Windows
+
+A **sticky** window stays present on every virtual space
+instead of hiding with its home space when you switch — the
+macOS-native analog is Mission Control's "Assign To → All
+Desktops". Stickiness is a per-window flag, flipped on a
+specific live window after it spawns; there is no app-matcher
+rule list. It is orthogonal to floating: a floating sticky
+window keeps its own frame everywhere, while a tiled window
+marked sticky keeps its current place for now (tiling into
+every space's layout is a planned second phase). The flag
+survives the window closing and reopening (matched by app name
+and title, like the float override), and the window remains a
+member of exactly one space — its home — for layout and bar
+purposes.
+
+Because a sticky window can look identical to a normal one,
+KiwiDesk marks it: a small badge chip in the window's top-right
+corner (toggleable — see `sticky.set_indicator`) and a sticky
+badge on its Space Bar item (see
+`space_bar.set_sticky_badge`).
+
+Prefer sticky over an `ignore_rules` entry for "keep this
+visible everywhere": an ignored window loses tracking, focus
+navigation, borders, and its bar tile; a sticky window stays
+fully managed.
+
+### make_sticky
+
+**Expects:** nothing.
+
+**Does:** marks the focused window sticky — it stays visible on
+every virtual space. No mode argument: the window keeps its
+existing floating or tiled state.
+
+**Example:**
+
+```lua
+KiwiDesk.make_sticky()
+```
+
+### make_unsticky
+
+**Expects:** nothing.
+
+**Does:** clears the focused window's sticky flag — it hides
+with its home space again like any other window.
+
+**Example:**
+
+```lua
+KiwiDesk.make_unsticky()
+```
+
+### toggle_sticky
+
+**Expects:** nothing.
+
+**Does:** flips the focused window's sticky flag in one verb.
+This is the everyday sticky command and the only sticky verb
+offered in the Settings shortcut list; the explicit `make_*`
+verbs remain for scripts that need a specific direction.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("cmd+alt+s", function()
+    KiwiDesk.toggle_sticky()
+end)
+```
+
+### sticky.set_indicator
+
+**Expects:** boolean (default `true`).
+
+**Does:** shows or hides the on-window sticky mark — the small
+chip at a sticky window's top-right corner. Applies exactly
+what you set: turning it off while the Space Bar is also off
+leaves sticky state with no indicator at all, which is a valid
+power-user choice from Lua (the Settings app, by contrast,
+keeps the mark forced on while the Space Bar is off).
+
+**Example:**
+
+```lua
+sticky.set_indicator(false)
 ```
 
 ## Launching Apps

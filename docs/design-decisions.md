@@ -537,6 +537,31 @@ binding rules for adding one — sparse-diff mechanics, parity
 tests, mutation through the `KiwiCore` facade — live in
 `AGENTS.md` §5.
 
+**Floating windows hide with their space; visible-everywhere
+is Sticky, an explicit flag.** Historically a floating window
+was exempt from the inactive-space stash and followed you
+across virtual spaces — the stash comment even blessed it as
+intended "for PIP". #412 reclassified it as a bug: state
+always scoped the window to one space, only rendering
+disagreed, and a user who floats a scratchpad on space A does
+not expect it over space B. Now every window — tiled or
+floating — parks with its inactive space (the engine captures
+a floating window's frame on first stash and restores it when
+the space returns; layouts recompute tiled frames anyway).
+The deliberate "present on every space" behavior is the
+per-window **Sticky** flag (#414, `toggle_sticky`) — fully
+managed, unlike the blunt `ignore_rules` gate. Consequence,
+accepted: a Picture-in-Picture panel that presents as a
+*managed floating* window now parks with its home space until
+marked sticky; most PIP/quick-terminal overlays are tracked
+as transient overlays or ignored outright and never stashed
+at all. "Sticky" is the settled user-facing term (tiling-WM
+lineage: X11 `_NET_WM_STATE_STICKY`, i3, yabai); "pin" was
+rejected — Apple's own apps use pin for "fixed here", the
+opposite direction. Sticky is per-instance state, never a
+rule list, never a profile key, and never stored by
+duplicating the id into other spaces' arrays. (#412, #414)
+
 ## Settings GUI & UX
 
 ### Navigation & saving
@@ -997,6 +1022,27 @@ The rows stay live at runtime by design; only their
 *visibility* was broken. (#92)
 
 ### Overrides & appearance
+
+**Sticky state must never be invisible from the GUI.** A
+sticky window can look identical to a normal one, so it gets
+two indicators: an on-window chip (top-RIGHT corner —
+top-left belongs to the traffic lights) and a Space Bar badge
+(top-LEFT of its glyph — the bar reserves top-right for the
+group count; an intentional cross-surface difference).
+Floating gets a badge only in the bar, where tiled and
+floating are otherwise indistinguishable — on the window
+itself floating is self-evident. Badges are Space-Bar-only
+(the per-layout App Bar shows no state badges), survive
+grouping as an "at least one" aggregate, and have no GUI
+toggle. The coverage guard: the on-window chip's toggle greys
+out and renders forced ON while the Space Bar is off, because
+that chip is then the only sticky indicator and — unlike a
+focus border, which duplicates an OS cue — sticky has no
+native fallback. The guard is presentation-only; Lua's
+`sticky.set_indicator` and `space_bar.set_sticky_badge` apply
+unclamped, so a deliberate zero-indicator setup stays
+reachable from the open layer (`dim_factor` precedent).
+(#414)
 
 **Overrides are visible-but-inherited, never hidden.** A
 per-layout or per-space override row always shows — dimmed
