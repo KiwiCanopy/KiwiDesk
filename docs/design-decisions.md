@@ -1093,17 +1093,21 @@ pill.** In steady state the chip is a passive glyph, identical
 on every space. But a tiled-sticky window belongs to exactly
 one *home* space, and nothing said which — so when a drag on a
 foreign space snaps the tile back (the one friction moment the
-question exists), the chip briefly expands leftward into a
-pill naming that home space, then auto-collapses. It is
-deliberately **transient, not persistent**: a permanent
-home-space label would be an always-on caption crowding a tiny
-corner badge, against "captions label, don't teach." And it
-names the home *space* (prose "Space N" or the space's name),
-not a focus/z-order state — the chip is not a focus cue, it
-marks every sticky window on every space at once. The glyph
-stays pinned in the rightmost square through the morph (its
-screen position never moves); Reduce Motion swaps the morph
-for an instant show/hide. (#421)
+question exists), the chip expands leftward into a pill —
+"Can only be moved in its home space *N*" — then auto-collapses.
+The expand waits for the snap-back to settle first (expanding
+mid-snap reads as lag). It is deliberately **transient, not
+persistent**: a permanent home-space label would be an always-on
+caption crowding a tiny corner badge, against "captions label,
+don't teach." It names the home *space* by its configured Space
+Bar identifier (SF Symbol or emoji, id/name as fallback) so the
+pill and the space's bar tile read as the same place — not a
+focus/z-order state, since the chip is not a focus cue: it marks
+every sticky window on every space at once.
+The glyph stays pinned in the rightmost square through the morph
+(its screen position never moves), and the pill clamps to the
+window width so it never overruns its own edge; Reduce Motion
+swaps the morph for an instant show/hide. (#421)
 
 **Overrides are visible-but-inherited, never hidden.** A
 per-layout or per-space override row always shows — dimmed

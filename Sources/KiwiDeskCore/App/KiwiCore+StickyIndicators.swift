@@ -1,3 +1,4 @@
+import AppKit
 import CoreGraphics
 
 /// Drives the on-window sticky marks (#414): every sticky
@@ -38,19 +39,28 @@ extension KiwiCore {
         else { return }
         stickyIndicators.flash(
             id,
-            spaceName: stickyHomeLabel(home)
+            format: L(
+                "sticky.home.pill",
+                "Can only be moved in its home space %1$@"
+            ),
+            mark: homeSpaceMark(home)
         )
     }
 
-    /// A named space is its own label; a numeric id reads as
-    /// "Space N" so the pill never shows a bare digit. This is
-    /// deliberately the *prose* form ("Space 3"), NOT the Space
-    /// Bar's bare-digit identifier glyph (`spaceIdentifier`) — the
-    /// pill is a sentence-like cue, not a bar tile, so don't
-    /// "align" it to the glyph. `internal` for a unit test.
-    func stickyHomeLabel(_ id: SpaceID) -> String {
-        Int(id.raw) != nil
-            ? L("sticky.home.space", "Space %1$@", id.raw)
-            : id.raw
+    /// The pill's home-space mark: the space's configured Space Bar
+    /// icon (SF Symbol or emoji/character) so the pill matches the
+    /// bar tile, else the bare id/name. Mirrors `spaceIdentifier`'s
+    /// icon lookup but falls back to the FULL id — the pill has room
+    /// for a real name, unlike the bar's 2-char monogram.
+    private func homeSpaceMark(_ id: SpaceID) -> SpaceMark {
+        if let icon = tiler.settings.spaceIcons[id], !icon.isEmpty {
+            let isSymbol =
+                NSImage(
+                    systemSymbolName: icon,
+                    accessibilityDescription: nil
+                ) != nil
+            return isSymbol ? .symbol(icon) : .text(icon)
+        }
+        return .text(id.raw)
     }
 }

@@ -98,12 +98,17 @@ public final class StickyIndicatorManager {
         overlays[id]?.order()
     }
 
-    /// Briefly expands a window's chip into a pill naming its
-    /// home space, then auto-collapses (#421) — the friction-
+    /// Briefly expands a window's chip into a pill showing its
+    /// home-space reorder hint (`format` with the space's `mark`
+    /// substituted), then auto-collapses (#421) — the friction-
     /// moment cue when a tiled-sticky traveler snaps back on a
     /// foreign space. A no-op for unmarked windows.
-    public func flash(_ id: WindowID, spaceName: String) {
-        overlays[id]?.flash(spaceName: spaceName)
+    public func flash(
+        _ id: WindowID,
+        format: String,
+        mark: SpaceMark
+    ) {
+        overlays[id]?.flash(format: format, mark: mark)
     }
 
     /// Retires every chip at once (shutdown).

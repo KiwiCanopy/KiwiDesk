@@ -1,5 +1,15 @@
 import AppKit
 
+/// How a home space is shown inside the pill (#421): its
+/// configured Space Bar identifier — an SF Symbol or an
+/// emoji/character — or the bare id/name as fallback. The same
+/// identity the Space Bar shows, so the pill and a bar tile read
+/// as the same space.
+public enum SpaceMark: Equatable {
+    case symbol(String)
+    case text(String)
+}
+
 /// The sticky mark's rounded plate (#414/#421): the sticky glyph
 /// pinned in the rightmost square, and a home-space name to its
 /// left, hidden until the chip flashes into a pill. Lays its two
@@ -15,9 +25,10 @@ final class StickyIndicatorPlate: NSVisualEffectView {
     /// glyph.
     static let namePad: CGFloat = 8
     static let nameGap: CGFloat = 4
-    /// Max pill width; a longer space name tail-truncates rather
-    /// than sprawling across the title bar.
-    static let maxWidth: CGFloat = 160
+    /// Sanity ceiling on pill width; the caller also clamps to the
+    /// window so the pill never overruns its own window edge, and
+    /// only a genuinely long space name tail-truncates.
+    static let maxWidth: CGFloat = 360
     /// Collapsed reads as a rounded square badge, expanded as a
     /// full capsule — the shape change is the "shows more" signal.
     static let collapsedRadius: CGFloat = size / 4
@@ -84,17 +95,95 @@ final class StickyIndicatorPlate: NSVisualEffectView {
         )
     }
 
-    /// The expanded pill width for `text`, capped so a long name
-    /// truncates instead of sprawling.
-    func expandedWidth(for text: String) -> CGFloat {
-        name.stringValue = text
+    /// Builds the pill content by substituting `mark` into the
+    /// localized `format` at its `%1$@` slot — an SF Symbol renders
+    /// as an inline image, an emoji/name as text — sets it on the
+    /// label, and returns the expanded pill width (capped so a
+    /// genuinely long name truncates rather than sprawls; +1pt so
+    /// the last glyph never clips under `byTruncatingTail`).
+    func prepare(format: String, mark: SpaceMark) -> CGFloat {
+        let content = attributedContent(format: format, mark: mark)
+        name.attributedStringValue = content
+        let textWidth = ceil(content.size().width) + 1
         let cap =
             Self.maxWidth - Self.namePad - Self.nameGap - Self.size
-        let measured = min(
-            ceil(name.intrinsicContentSize.width),
-            cap
-        )
+        let measured = min(textWidth, cap)
         return Self.namePad + measured + Self.nameGap + Self.size
+    }
+
+    private var nameFont: NSFont {
+        name.font ?? .systemFont(ofSize: 11, weight: .semibold)
+    }
+
+    private func attributedContent(
+        format: String,
+        mark: SpaceMark
+    ) -> NSAttributedString {
+        let attrs: [NSAttributedString.Key: Any] = [
+            .font: nameFont,
+            .foregroundColor: NSColor.labelColor,
+        ]
+        // Split on the positional slot so the substituted mark
+        // keeps whatever order the translation puts it in.
+        let parts = format.components(separatedBy: "%1$@")
+        let out = NSMutableAttributedString(
+            string: parts.first ?? "",
+            attributes: attrs
+        )
+        switch mark {
+        case .text(let value):
+            out.append(
+                NSAttributedString(string: value, attributes: attrs)
+            )
+        case .symbol(let symbolName):
+            out.append(symbolRun(symbolName, attrs: attrs))
+        }
+        if parts.count > 1 {
+            out.append(
+                NSAttributedString(
+                    string: parts[1],
+                    attributes: attrs
+                )
+            )
+        }
+        return out
+    }
+
+    /// The space's SF Symbol as an inline, baseline-centered image
+    /// tinted to match the text; falls back to the bare symbol name
+    /// if the symbol can't be realized.
+    private func symbolRun(
+        _ symbolName: String,
+        attrs: [NSAttributedString.Key: Any]
+    ) -> NSAttributedString {
+        let config = NSImage.SymbolConfiguration(
+            pointSize: nameFont.pointSize,
+            weight: .semibold
+        )
+        .applying(
+            NSImage.SymbolConfiguration(paletteColors: [.labelColor])
+        )
+        guard
+            let image = NSImage(
+                systemSymbolName: symbolName,
+                accessibilityDescription: nil
+            )?.withSymbolConfiguration(config)
+        else {
+            return NSAttributedString(
+                string: symbolName,
+                attributes: attrs
+            )
+        }
+        let attachment = NSTextAttachment()
+        attachment.image = image
+        let mid = (nameFont.capHeight - image.size.height) / 2
+        attachment.bounds = CGRect(
+            x: 0,
+            y: mid,
+            width: image.size.width,
+            height: image.size.height
+        )
+        return NSAttributedString(attachment: attachment)
     }
 
     /// Shows or hides the home-space name, taking the plate from

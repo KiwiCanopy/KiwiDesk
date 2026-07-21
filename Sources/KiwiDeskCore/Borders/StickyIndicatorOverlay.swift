@@ -27,7 +27,10 @@ final class StickyIndicatorOverlay {
     static let size: CGFloat = StickyIndicatorPlate.size
     static let inset: CGFloat = 6
 
-    /// Expand settles in; hold; collapse exits a touch snappier.
+    /// Let the window finish snapping back before expanding, so
+    /// the pill doesn't fight the snap animation; then expand,
+    /// hold, and collapse a touch snappier.
+    private static let snapBackDelay: TimeInterval = 0.22
     private static let expandDuration: TimeInterval = 0.22
     private static let holdDuration: TimeInterval = 1.6
     private static let collapseDuration: TimeInterval = 0.16
@@ -39,8 +42,10 @@ final class StickyIndicatorOverlay {
     /// expanded pill width. `update` re-corners against this so a
     /// frame follow arriving mid-pill keeps the plate anchored.
     private var currentWidth: CGFloat = size
-    /// Auto-collapse timer, cancelled/restarted on a repeat flash
+    /// Deferred expand (after the snap-back settles) and auto-
+    /// collapse timers — both cancelled/restarted on a repeat flash
     /// so a rapid series of rejected drags never flickers.
+    private var expandWork: DispatchWorkItem?
     private var collapseWork: DispatchWorkItem?
     /// The last window frame this chip positioned against (AX
     /// coords) — the observable seam that lets the manager's
@@ -79,6 +84,8 @@ final class StickyIndicatorOverlay {
     }
 
     func hide() {
+        expandWork?.cancel()
+        expandWork = nil
         collapseWork?.cancel()
         collapseWork = nil
         // Retire in the collapsed state so a later re-show (a
@@ -89,14 +96,33 @@ final class StickyIndicatorOverlay {
         panel?.orderOut(nil)
     }
 
-    /// Briefly expands into a pill naming the home space, then
-    /// auto-collapses (#421). A no-op if the chip isn't shown.
-    func flash(spaceName: String) {
-        guard panel != nil, let frame = lastFrame else { return }
-        let width = plate.expandedWidth(for: spaceName)
+    /// After the snap-back settles, briefly expands the chip into a
+    /// pill showing `format` with `mark` substituted, then auto-
+    /// collapses (#421). A no-op if the chip isn't shown.
+    func flash(format: String, mark: SpaceMark) {
+        guard panel != nil, lastFrame != nil else { return }
+        expandWork?.cancel()
+        collapseWork?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            self?.expandThenHold(format: format, mark: mark)
+        }
+        expandWork = work
+        DispatchQueue.main.asyncAfter(
+            deadline: .now() + Self.snapBackDelay,
+            execute: work
+        )
+    }
+
+    /// Expands to fit the content (clamped to the window so the
+    /// pill never overruns its own edge), holds, then collapses.
+    private func expandThenHold(format: String, mark: SpaceMark) {
+        guard let frame = lastFrame else { return }
+        let width = min(
+            plate.prepare(format: format, mark: mark),
+            frame.width - Self.inset * 2
+        )
         setPill(width: width, nameShown: true, on: frame)
 
-        collapseWork?.cancel()
         let work = DispatchWorkItem { [weak self] in
             guard let self, let frame = self.lastFrame else {
                 return

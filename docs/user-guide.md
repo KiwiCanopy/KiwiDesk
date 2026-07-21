@@ -698,8 +698,8 @@ overflow). Rearrange it on its home space to move it
 everywhere; on other spaces it cannot be reordered or mouse-resized — the gesture snaps back. The `?` beside **Toggle
 sticky** in Shortcuts spells this out. When such a drag snaps
 back, the window's chip briefly expands into a pill naming its
-**home space**, so you can see where the tile actually
-belongs.
+**home space** — by the same icon or name its Space Bar tile
+shows — so you can see where the tile actually belongs.
 
 Because a sticky window can look identical to a normal one,
 KiwiDesk marks it with a small badge chip in its top-right

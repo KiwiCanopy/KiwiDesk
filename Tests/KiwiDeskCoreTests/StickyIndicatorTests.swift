@@ -45,8 +45,9 @@ struct StickyIndicatorManagerTests {
         manager.sync([spec(1)])
         // Marked window flashes (#421); an unmarked one must
         // not create a chip or crash.
-        manager.flash(WindowID(1), spaceName: "Work")
-        manager.flash(WindowID(2), spaceName: "Home")
+        let fmt = "Home space %1$@"
+        manager.flash(WindowID(1), format: fmt, mark: .text("1"))
+        manager.flash(WindowID(2), format: fmt, mark: .symbol("star"))
         #expect(manager.markedWindows == [WindowID(1)])
     }
 }
@@ -60,7 +61,16 @@ struct StickyIndicatorPlateTests {
     func expands() {
         let plate = StickyIndicatorPlate()
         #expect(
-            plate.expandedWidth(for: "Work")
+            plate.prepare(format: "Home %1$@", mark: .text("Work"))
+                > StickyIndicatorPlate.size
+        )
+    }
+
+    @Test("A symbol mark also expands (renders inline)")
+    func symbolExpands() {
+        let plate = StickyIndicatorPlate()
+        #expect(
+            plate.prepare(format: "Home %1$@", mark: .symbol("star"))
                 > StickyIndicatorPlate.size
         )
     }
@@ -68,8 +78,9 @@ struct StickyIndicatorPlateTests {
     @Test("A long name caps at the max pill width")
     func caps() {
         let plate = StickyIndicatorPlate()
-        let width = plate.expandedWidth(
-            for: String(repeating: "W", count: 80)
+        let width = plate.prepare(
+            format: "%1$@",
+            mark: .text(String(repeating: "W", count: 120))
         )
         #expect(width == StickyIndicatorPlate.maxWidth)
     }
@@ -148,14 +159,5 @@ struct StickyIndicatorDriverTests {
         core.state.setSticky(WindowID(1), false)
         core.updateStickyIndicators()
         #expect(core.stickyIndicators.markedWindows.isEmpty)
-    }
-
-    @Test("Home-space label: numeric reads Space N, named is raw")
-    func homeLabel() {
-        let core = makeCore()
-        // Numeric id → prose "Space N" (never a bare digit); a
-        // named space is its own label (#421).
-        #expect(core.stickyHomeLabel("3") == "Space 3")
-        #expect(core.stickyHomeLabel("Work") == "Work")
     }
 }

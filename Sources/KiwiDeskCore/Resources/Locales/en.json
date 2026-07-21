@@ -726,7 +726,7 @@
   "spaces.overrides.none": "Overrides…",
   "spaces.title": "Spaces",
   "sticky.caption": "Sticky windows stay visible on every space (Toggle sticky, in Shortcuts).",
-  "sticky.home.space": "Space %1$@",
+  "sticky.home.pill": "Can only be moved in its home space %1$@",
   "sticky.indicator": "Show mark on sticky windows",
   "sticky.indicator.ax": "Sticky window",
   "sticky.indicator.forced": "On — the Space Bar is off, so this is the only sticky indicator.",
