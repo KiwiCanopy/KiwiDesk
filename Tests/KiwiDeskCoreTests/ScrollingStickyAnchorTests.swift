@@ -5,7 +5,7 @@ import Testing
 
 /// #431: a tiled-sticky traveler is injected into the active
 /// space's scrolling row but can never be its membership-guarded
-/// `focused` slot, so `scrollAnchor` lets a focus-driven layout
+/// `focused` slot, so `focusAnchor` lets a focus-driven layout
 /// still pan to it while it is the frontmost window.
 @Suite("Scrolling sticky anchor", .serialized)
 struct ScrollingStickyAnchorTests {
@@ -51,7 +51,7 @@ struct ScrollingStickyAnchorTests {
             of: s1,
             activeSpace: "1"
         )
-        return state.scrollAnchor(of: s1, tiled: tiled)
+        return state.focusAnchor(of: s1, tiled: tiled)
     }
 
     @Test("A frontmost traveler becomes the pan anchor")
@@ -92,5 +92,40 @@ struct ScrollingStickyAnchorTests {
     func emptyFocusYieldsNil() {
         let state = makeState(locals: 2)
         #expect(anchor(state) == nil)
+    }
+
+    @Test("The more recently focused traveler wins")
+    func frontmostOfTwoTravelersWins() {
+        // A second sticky homes on space2; focusing traveler 50
+        // then 51 makes 51 the frontmost, so it anchors.
+        var state = makeState(locals: 2)
+        state.windows.upsert(makeWindow(51, isSticky: true))
+        state.workspaces.add(WindowID(51), to: "2")
+        state.workspaces.focus(WindowID(50), in: "2")
+        state.workspaces.focus(WindowID(51), in: "2")
+        #expect(anchor(state) == WindowID(51))
+    }
+
+    @Test("On its home space a traveler yields the home slot")
+    func homeSpaceYieldsOwnFocus() {
+        // Resolving the anchor for the traveler's OWN home space:
+        // it is a real member there, so the guard falls through to
+        // `space.focused` (which is the traveler) — never a
+        // cross-space steal.
+        var state = makeState(locals: 2)
+        state.workspaces.focus(WindowID(50), in: "2")
+        guard let s2 = state.workspaces["2"] else {
+            Issue.record("Expected space")
+            return
+        }
+        // space2 is inactive, so its members are local-only.
+        let tiled = state.effectiveTiledMembers(
+            of: s2,
+            activeSpace: "1"
+        )
+        #expect(
+            state.focusAnchor(of: s2, tiled: tiled)
+                == WindowID(50)
+        )
     }
 }

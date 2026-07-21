@@ -142,13 +142,14 @@ public final class TilingEngine {
                     .filter(\.isSticky)
                     .map(\.id)
             ),
-            // Scroll to a tiled-sticky traveler when it is the
+            // Surface a tiled-sticky traveler when it is the
             // frontmost window (#431): it has a slot in `tiled`
             // but can never be the membership-guarded `focused`
-            // slot. `persistScrollOffset` reads this same
+            // slot. Only Scrolling reads `context.focused`, to
+            // pan; `persistScrollOffset` reads this same
             // `layoutInput`, so the pan and the stored offset stay
             // consistent.
-            focusedOverride: state.scrollAnchor(
+            focusedOverride: state.focusAnchor(
                 of: space,
                 tiled: tiled
             )

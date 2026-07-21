@@ -64,28 +64,33 @@ extension StateCoordinator {
         return members
     }
 
-    /// The window a focus-driven layout (Scrolling) should pan to
-    /// on `space` — its own `focused` slot, except when a
-    /// tiled-sticky traveler is the frontmost window
+    /// The window a focus-driven layout should surface on `space`
+    /// — the target a Scrolling space pans to and a Monocle space
+    /// raises on top. Normally its own `focused` slot, except when
+    /// a tiled-sticky traveler is the frontmost window
     /// (`lastFocused`) and can never BE that slot (#431). A
     /// traveler is injected into the active space's row (present
     /// in `tiled`) yet is a member only of its home space, so
     /// `WorkspaceManager.focus`'s membership guard keeps
-    /// `space.focused` off it; without this the viewport cannot
-    /// scroll to it — clicking its bar item, or navigating to it,
-    /// would leave it off-screen. Reverts to `space.focused` the
-    /// moment a real member is focused (`lastFocused` then points
-    /// at that member), and an inactive space injects no travelers
+    /// `space.focused` off it; without this the layout cannot
+    /// surface it — clicking its bar item, or navigating to it,
+    /// would leave it off-screen (Scrolling) or buried (Monocle).
+    ///
+    /// `lastFocused` is a **global** field, so the anchor tracks
+    /// the last-focused window across the whole workspace: it
+    /// yields the traveler until any real member is next focused,
+    /// not the instant a space is switched (a bare switch fires no
+    /// focus event). An inactive space injects no travelers
     /// (`tiled` is local-only) so it always yields its own focus.
     ///
     /// - Parameters:
-    ///   - space: the space whose pan anchor is wanted.
+    ///   - space: the space whose surface target is wanted.
     ///   - tiled: the space's `effectiveTiledMembers`, passed in
     ///     so the caller's already-computed list is reused rather
     ///     than recomputed.
-    /// - Returns: the traveler to pan to, or `space.focused` when
+    /// - Returns: the traveler to surface, or `space.focused` when
     ///   no frontmost traveler applies (may itself be `nil`).
-    public func scrollAnchor(
+    public func focusAnchor(
         of space: Space,
         tiled: [WindowID]
     ) -> WindowID? {
