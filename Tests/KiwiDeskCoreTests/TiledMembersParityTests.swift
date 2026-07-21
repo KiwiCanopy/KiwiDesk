@@ -86,6 +86,56 @@ struct TiledMembersParityTests {
         #expect(helperOutput == [WindowID(1), WindowID(3)])
     }
 
+    @Test("Tiled members never inject a tiled-sticky homed elsewhere")
+    func tiledStickyStaysHomeForLayout() {
+        var state = StateCoordinator()
+        let space1 = SpaceID("1")
+        let space2 = SpaceID("2")
+        state.workspaces.ensureSpace(space1)
+        state.workspaces.ensureSpace(space2)
+        state.workspaces.activate(space1)
+
+        // A TILED sticky window (isFloating: false) homed on the
+        // inactive space2 — the reachable v1 state a `!isFloating`
+        // predicate does NOT filter out.
+        let w1 = makeWindow(1, isFloating: false)
+        let wSticky = makeWindow(2, isFloating: false, isSticky: true)
+        state.windows.upsert(w1)
+        state.windows.upsert(wSticky)
+        state.workspaces.add(WindowID(1), to: space1)
+        state.workspaces.add(WindowID(2), to: space2)
+
+        guard let s1 = state.workspaces[space1],
+            let s2 = state.workspaces[space2]
+        else {
+            Issue.record("Expected spaces to exist")
+            return
+        }
+
+        // Active space1: the traveler must NOT join the tiled
+        // layout (its glyph travels, its tile stays home in v1).
+        let s1Old = s1.windows.filter {
+            state.windows[$0]?.isFloating == false
+        }
+        let s1Tiled = state.effectiveTiledMembers(
+            of: s1,
+            activeSpace: space1
+        )
+        #expect(s1Tiled == s1Old)
+        #expect(s1Tiled == [WindowID(1)])
+
+        // Inactive home space2 still lays out its own member.
+        let s2Old = s2.windows.filter {
+            state.windows[$0]?.isFloating == false
+        }
+        let s2Tiled = state.effectiveTiledMembers(
+            of: s2,
+            activeSpace: space1
+        )
+        #expect(s2Tiled == s2Old)
+        #expect(s2Tiled == [WindowID(2)])
+    }
+
     @Test("Effective members handles traveling sticky windows across spaces")
     func effectiveMembersTravelingSticky() {
         var state = StateCoordinator()
