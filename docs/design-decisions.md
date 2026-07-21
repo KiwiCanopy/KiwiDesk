@@ -1096,7 +1096,9 @@ foreign space snaps the tile back (the one friction moment the
 question exists), the chip expands leftward into a pill —
 "Can only be moved in its home space *N*" — then auto-collapses.
 The expand waits for the snap-back to settle first (expanding
-mid-snap reads as lag). It is deliberately **transient, not
+mid-snap reads as lag) — the wait tracks the live relayout
+animation duration, not a fixed delay, so a slow or long-travel
+snap-back still lands the pill only once the window arrives. It is deliberately **transient, not
 persistent**: a permanent home-space label would be an always-on
 caption crowding a tiny corner badge, against "captions label,
 don't teach." It names the home *space* by its configured Space

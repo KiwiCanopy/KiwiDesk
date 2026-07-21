@@ -27,10 +27,14 @@ final class StickyIndicatorOverlay {
     static let size: CGFloat = StickyIndicatorPlate.size
     static let inset: CGFloat = 6
 
-    /// Let the window finish snapping back before expanding, so
-    /// the pill doesn't fight the snap animation; then expand,
-    /// hold, and collapse a touch snappier.
-    private static let snapBackDelay: TimeInterval = 0.22
+    /// The pill's own HUD timings — expand settles in, holds long
+    /// enough to READ, collapses a touch snappier. Deliberately
+    /// FIXED, not bound to the window animation-speed setting (like
+    /// the border ring's timings and macOS's own volume/brightness
+    /// HUDs): the hold is a reading duration, and a user who slows
+    /// window tiling to watch it glide should not get a pill that
+    /// also crawls open. Only the snap-back `delay` (a `flash` arg)
+    /// tracks the setting, because it waits on a window animation.
     private static let expandDuration: TimeInterval = 0.22
     private static let holdDuration: TimeInterval = 1.6
     private static let collapseDuration: TimeInterval = 0.16
@@ -96,10 +100,14 @@ final class StickyIndicatorOverlay {
         panel?.orderOut(nil)
     }
 
-    /// After the snap-back settles, briefly expands the chip into a
-    /// pill showing `format` with `mark` substituted, then auto-
-    /// collapses (#421). A no-op if the chip isn't shown.
-    func flash(format: String, mark: SpaceMark) {
+    /// Waits `delay` for the snap-back animation to settle (so the
+    /// pill doesn't chase a still-moving window), then briefly
+    /// expands the chip into a pill showing `format` with `mark`
+    /// substituted, then auto-collapses (#421). `delay` tracks the
+    /// caller's relayout duration, so a slow/long snap-back holds
+    /// the pill back exactly as long as the window travels. A no-op
+    /// if the chip isn't shown.
+    func flash(format: String, mark: SpaceMark, delay: TimeInterval) {
         guard panel != nil, lastFrame != nil else { return }
         expandWork?.cancel()
         collapseWork?.cancel()
@@ -108,7 +116,7 @@ final class StickyIndicatorOverlay {
         }
         expandWork = work
         DispatchQueue.main.asyncAfter(
-            deadline: .now() + Self.snapBackDelay,
+            deadline: .now() + max(0, delay),
             execute: work
         )
     }

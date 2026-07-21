@@ -46,8 +46,18 @@ struct StickyIndicatorManagerTests {
         // Marked window flashes (#421); an unmarked one must
         // not create a chip or crash.
         let fmt = "Home space %1$@"
-        manager.flash(WindowID(1), format: fmt, mark: .text("1"))
-        manager.flash(WindowID(2), format: fmt, mark: .symbol("star"))
+        manager.flash(
+            WindowID(1),
+            format: fmt,
+            mark: .text("1"),
+            delay: 0
+        )
+        manager.flash(
+            WindowID(2),
+            format: fmt,
+            mark: .symbol("star"),
+            delay: 0
+        )
         #expect(manager.markedWindows == [WindowID(1)])
     }
 }

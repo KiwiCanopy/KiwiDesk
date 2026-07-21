@@ -43,8 +43,23 @@ extension KiwiCore {
                 "sticky.home.pill",
                 "Can only be moved in its home space %1$@"
             ),
-            mark: homeSpaceMark(home)
+            mark: homeSpaceMark(home),
+            delay: snapBackSettleDelay
         )
+    }
+
+    /// How long to hold the pill back so it appears only once the
+    /// snap-back has settled: the relayout animation duration (the
+    /// snap-back is an `onRelayout` reflow) plus a small buffer, or
+    /// nearly instant when relayout animation is off. Tracks the
+    /// live animation-speed setting, so a slow or long snap-back no
+    /// longer spawns the pill early.
+    private var snapBackSettleDelay: TimeInterval {
+        guard tiler.settings.animations.onRelayout else {
+            return 0.05
+        }
+        return Double(tiler.settings.animations.durationMS) / 1000
+            + 0.08
     }
 
     /// The pill's home-space mark: the space's configured Space Bar

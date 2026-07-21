@@ -106,9 +106,14 @@ public final class StickyIndicatorManager {
     public func flash(
         _ id: WindowID,
         format: String,
-        mark: SpaceMark
+        mark: SpaceMark,
+        delay: TimeInterval
     ) {
-        overlays[id]?.flash(format: format, mark: mark)
+        overlays[id]?.flash(
+            format: format,
+            mark: mark,
+            delay: delay
+        )
     }
 
     /// Retires every chip at once (shutdown).
