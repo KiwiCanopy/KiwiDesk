@@ -244,7 +244,7 @@ struct SpaceBarEditorSection: View {
         PtSlider(
             label: L("space_bar.thickness", "Thickness"),
             value: style.thickness,
-            range: 20...80
+            range: 30...80
         )
         AutoGatedGroup(
             title: L(

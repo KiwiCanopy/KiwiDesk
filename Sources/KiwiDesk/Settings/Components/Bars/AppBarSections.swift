@@ -246,7 +246,7 @@ struct GlobalAppBarSection: View {
         PtSlider(
             label: L("app_bar.thickness", "Thickness"),
             value: $style.thickness,
-            range: 20...80
+            range: 30...80
         )
         AutoGatedGroup(
             title: L("app_bar.box_size.auto", "Auto box size"),
