@@ -70,6 +70,9 @@ enum KeybindingImportClassifier {
         for command in [
             KeybindingCatalog.toggleFloating,
             KeybindingCatalog.makeFloating,
+            KeybindingCatalog.toggleSticky,
+            KeybindingCatalog.makeSticky,
+            KeybindingCatalog.makeUnsticky,
             KeybindingCatalog.showShortcuts,
         ] {
             map[command.lua] = command.label

@@ -47,6 +47,7 @@ extension KeybindingCatalog {
                 }
             ),
             toggleFloating,
+            toggleSticky,
         ]
     }
 
@@ -62,6 +63,38 @@ extension KeybindingCatalog {
         lua: "KiwiDesk.toggle_floating()",
         displayLabel: {
             L("keybinding.toggle_floating", "Toggle floating")
+        }
+    )
+
+    /// The Toggle-sticky row (#414) — the one sticky verb
+    /// offered as a bindable preset (the #221 pattern): keep
+    /// the window on every space, or stop. `make_sticky` /
+    /// `make_unsticky` stay Lua/CLI-only, recognized below.
+    static let toggleSticky = NavCommand(
+        label: "Toggle sticky",
+        lua: "KiwiDesk.toggle_sticky()",
+        displayLabel: {
+            L("keybinding.toggle_sticky", "Toggle sticky")
+        }
+    )
+
+    /// Classification-only anchors (#4/#91) for hand-written
+    /// sticky verbs, mirroring `makeFloating` below: imported
+    /// bindings land in Size & Float with proper labels
+    /// instead of demoting to Custom.
+    static let makeSticky = NavCommand(
+        label: "Make sticky",
+        lua: "KiwiDesk.make_sticky()",
+        displayLabel: {
+            L("keybinding.make_sticky", "Make sticky")
+        }
+    )
+
+    static let makeUnsticky = NavCommand(
+        label: "Make unsticky",
+        lua: "KiwiDesk.make_unsticky()",
+        displayLabel: {
+            L("keybinding.make_unsticky", "Make unsticky")
         }
     )
 

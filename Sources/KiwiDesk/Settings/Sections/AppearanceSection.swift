@@ -20,6 +20,7 @@ struct AppearanceSection: View {
                 GapsEditor(model: model)
                 DragVisualsEditor(model: model)
                 FocusBorderEditor(model: model)
+                StickyIndicatorEditor(model: model)
             }
             .padding(16)
         }
