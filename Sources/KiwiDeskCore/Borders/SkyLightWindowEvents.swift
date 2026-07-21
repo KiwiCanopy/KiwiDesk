@@ -179,8 +179,9 @@ final class SkyLightWindowEvents {
     /// API's replacement-vs-additive semantics are undocumented;
     /// `lastRequested` only suppresses an identical repeat. If it is
     /// additive, stale deliveries continue but the manager drops any
-    /// window without a current overlay. An empty request is therefore
-    /// a best-effort clear, not a teardown guarantee.
+    /// window it no longer watches (no overlay and not sticky-tracked
+    /// — see `handleSkyLightEvent`). An empty request is therefore a
+    /// best-effort clear, not a teardown guarantee.
     func watch(_ windows: Set<WindowID>) -> Bool {
         if lastRequested == windows { return true }
         guard let request = Self.requestNotifications else {

@@ -9,17 +9,20 @@ extension KiwiCore {
     func updateStickyIndicators() {
         guard tiler.settings.stickyStyle.indicator else {
             stickyIndicators.sync([])
+            borders.setStickyTracked([])
             return
         }
+        let sticky = state.windows.all.filter(\.isSticky)
         stickyIndicators.sync(
-            state.windows.all
-                .filter(\.isSticky)
-                .map {
-                    StickyIndicatorManager.Spec(
-                        window: $0.id,
-                        frame: $0.frame
-                    )
-                }
+            sticky.map {
+                StickyIndicatorManager.Spec(
+                    window: $0.id,
+                    frame: $0.frame
+                )
+            }
         )
+        // Fold sticky windows into the ring's WS watch set so the
+        // chip gets z-order/frame events even with no border (#414).
+        borders.setStickyTracked(Set(sticky.map(\.id)))
     }
 }

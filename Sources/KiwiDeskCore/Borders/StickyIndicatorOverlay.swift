@@ -21,6 +21,11 @@ final class StickyIndicatorOverlay {
 
     private var panel: NSPanel?
     private let target: CGWindowID
+    /// The last window frame this chip positioned against (AX
+    /// coords) — the observable seam that lets the manager's
+    /// WS-tracking guard be tested (a suppressed `follow` leaves
+    /// this unchanged; `reposition` advances it).
+    private(set) var lastFrame: CGRect?
 
     init(window: CGWindowID) {
         target = window
@@ -32,6 +37,7 @@ final class StickyIndicatorOverlay {
     /// event made the chip visibly lag behind its window (the
     /// borders' one-order-per-sync rule, owner QA 2026-07-21).
     func update(frame: CGRect) {
+        lastFrame = frame
         let panel = self.panel ?? makePanel()
         self.panel = panel
         let chip = CGRect(
