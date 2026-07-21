@@ -695,7 +695,7 @@ and on a crowded space it keeps a fully visible slot instead
 of falling into the overflow pile (in the scrolling layout it
 scrolls like any other slot — the row itself is the
 overflow). Rearrange it on its home space to move it
-everywhere; on other spaces it cannot be reordered.
+everywhere; on other spaces it cannot be reordered or mouse-resized — the gesture snaps back.
 
 Because a sticky window can look identical to a normal one,
 KiwiDesk marks it with a small badge chip in its top-right
