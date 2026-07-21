@@ -106,15 +106,36 @@ extension TilingEngine {
     /// restore itself is deliberately NOT gated behind that
     /// tolerance, so it cannot be swallowed by echo lag.
     ///
+    /// A capture is consumed only once the window's STATE frame
+    /// reads back at the original — i.e. the restore's AX echo
+    /// landed. Consuming eagerly opened an echo-lag hole: on a
+    /// rapid space bounce (A→B→A→B on a held hotkey) the next
+    /// stash saw a nil entry while the state frame still read
+    /// the corner, captured the corner as the new "original",
+    /// and the window was restored to the corner forever. Until
+    /// the echo lands the entry survives, re-stashes cannot
+    /// re-capture (nil guard), and each activation simply
+    /// re-issues the idempotent restore. A genuine user move
+    /// consumes the entry instead (`forgetStash`, wired to
+    /// non-echo `windowMoved` events): the user took over.
+    ///
     /// A window that got a layout frame this retile (unfloated
     /// while stashed) is the layout's to place: its entry is
-    /// dropped, not re-applied. Entries for windows that left
-    /// the state (closed, or re-keyed by a native-tab switch,
-    /// #308) are swept so the map cannot grow stale ids.
+    /// dropped, not re-applied. A drag-exempt window keeps its
+    /// entry untouched — the pointer owns it mid-gesture, and a
+    /// cancelled gesture must not have lost the original.
+    /// Entries for windows that left the state (closed) are
+    /// swept — before the active-space guard, so a reused
+    /// WindowID (#152) cannot inherit a dead capture — and a
+    /// native-tab re-key migrates its entry to the new id
+    /// (`KiwiCore.handle`, #308).
     func restoreStashed(
         state: StateCoordinator,
         frames: [WindowID: CGRect]
     ) {
+        stashedFrames = stashedFrames.filter {
+            state.windows[$0.key] != nil
+        }
         guard
             let active = state.workspaces.activeSpace,
             let space = state.workspaces[active]
@@ -122,14 +143,26 @@ extension TilingEngine {
         for id in space.windows {
             guard let original = stashedFrames[id]
             else { continue }
-            stashedFrames[id] = nil
-            guard frames[id] == nil, id != dragExemptWindow
-            else { continue }
+            if frames[id] != nil {
+                stashedFrames[id] = nil
+                continue
+            }
+            guard id != dragExemptWindow else { continue }
+            if let current = state.windows[id]?.frame,
+                Self.close(current, to: original)
+            {
+                stashedFrames[id] = nil
+                continue
+            }
             animation.cancel(window: id)
             setFrame(id, original)
         }
-        stashedFrames = stashedFrames.filter {
-            state.windows[$0.key] != nil
-        }
+    }
+
+    /// Drops a window's stash capture: the user moved it
+    /// (a non-echo `windowMoved`), so the captured frame no
+    /// longer represents where the window belongs.
+    func forgetStash(_ id: WindowID) {
+        stashedFrames[id] = nil
     }
 }

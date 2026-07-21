@@ -58,7 +58,7 @@ file list; grep within a subsystem for specifics:
 | `Animation` | Per-monitor `DisplayLink` animation |
 | `IPC` | CLI / external command IPC |
 | `Bar` | In-app App Bar & Space Bar overlays |
-| `Borders` | Focus-window border overlays (per-window rings) |
+| `Borders` | Focus & sticky overlays (rings, sticky marks) |
 | `Power` | Power / display-state handling |
 | `Permissions` | AX / permission prompts |
 | `Localization` | `L()` string routing & locale catalogs |

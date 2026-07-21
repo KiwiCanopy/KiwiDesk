@@ -67,29 +67,44 @@ extension SpaceBarItemView {
 
     /// The sticky / floating corner badges (#414): shown per
     /// slot from the group aggregate ("at least one"), gated by
-    /// the Lua-only `space_bar.sticky_badge`, tinted through
-    /// the same ladder as the glyph they mark.
+    /// the Lua-only `space_bar.sticky_badge`, styled exactly
+    /// like the count badge (`applyBadge`) so all three corners
+    /// read as one badge family sitting inside the glyph.
     private func styleStateBadges() {
         for (index, app) in apps.enumerated() {
             guard index < stickyBadgeViews.count,
                 index < floatingBadgeViews.count
             else { break }
-            let tint =
-                app.focused && isActive
-                ? NSColor(kiwiHex: style.focusedItemColor)
-                : stateColor
-            let alpha = untintedAppAlpha(focused: app.focused)
-            let sticky = stickyBadgeViews[index]
-            sticky.isHidden =
-                !(style.stickyBadge && app.sticky)
-            sticky.contentTintColor = tint
-            sticky.alphaValue = alpha
-            let floating = floatingBadgeViews[index]
-            floating.isHidden =
-                !(style.stickyBadge && app.floating)
-            floating.contentTintColor = tint
-            floating.alphaValue = alpha
+            applyStateBadge(
+                stickyBadgeViews[index],
+                shown: style.stickyBadge && app.sticky,
+                appFocused: app.focused
+            )
+            applyStateBadge(
+                floatingBadgeViews[index],
+                shown: style.stickyBadge && app.floating,
+                appFocused: app.focused
+            )
         }
+    }
+
+    /// The count badge's ladder (`applyBadge`), applied to a
+    /// state badge: plate in `groupBadgeColor`, mark in the
+    /// badge text color (focused accent when this glyph's app
+    /// holds the focus), whole badge dimmed to the app's tier.
+    private func applyStateBadge(
+        _ badge: StateBadgeView,
+        shown: Bool,
+        appFocused: Bool
+    ) {
+        badge.isHidden = !shown
+        badge.layer?.backgroundColor =
+            NSColor(kiwiHex: style.groupBadgeColor).cgColor
+        badge.symbol.contentTintColor =
+            appFocused && isActive
+            ? NSColor(kiwiHex: style.focusedItemColor)
+            : NSColor(kiwiHex: style.groupBadgeTextColor)
+        badge.alphaValue = untintedAppAlpha(focused: appFocused)
     }
 
     /// A count / overflow badge follows the same 3-tier ladder as the

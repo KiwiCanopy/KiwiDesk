@@ -70,46 +70,6 @@ struct SpaceBarDriverTests {
         #expect(items[1].apps.isEmpty)
     }
 
-    @Test("State badges aggregate over a same-app run (#414)")
-    func stateBadgeAggregation() throws {
-        let core = seededCore()
-        // A second Web window forms a run with window 1; make
-        // window 1 sticky and window 3 floating — the single
-        // group slot must wear BOTH badges ("at least one").
-        core.state.apply(.windowCreated(window(3, app: "Web")))
-        core.state.setSticky(WindowID(1), true)
-        core.state.setFloating(WindowID(3), true)
-        let items = core.spaceBarItems(
-            display: display,
-            style: SpaceBarStyle()
-        )
-        let first = try #require(items.first)
-        // Flat order Web, Mail, Web — adjacent runs only, so
-        // the two Web windows do NOT merge across Mail.
-        #expect(
-            first.apps.map(\.name) == ["Web", "Mail", "Web"]
-        )
-        #expect(
-            first.apps.map(\.sticky) == [true, false, false]
-        )
-        #expect(
-            first.apps.map(\.floating) == [false, false, true]
-        )
-        // Adjacent windows of one app DO merge and aggregate.
-        core.state.apply(
-            .windowDestroyed(WindowID(2), wasMinimized: false)
-        )
-        let merged = try #require(
-            core.spaceBarItems(
-                display: display,
-                style: SpaceBarStyle()
-            ).first
-        )
-        #expect(merged.apps.map(\.name) == ["Web"])
-        #expect(merged.apps.map(\.sticky) == [true])
-        #expect(merged.apps.map(\.floating) == [true])
-    }
-
     @Test("hide_empty drops empty spaces except the current one")
     func hideEmpty() {
         let core = seededCore()

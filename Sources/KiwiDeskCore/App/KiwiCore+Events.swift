@@ -145,6 +145,13 @@ extension KiwiCore {
             // behind the live bounds — the guard lives there, once.
             borders.follow(id, windowFrame: frame)
             stickyIndicators.follow(id, windowFrame: frame)
+            // A genuine user move (not the echo of our own
+            // frame-set) supersedes a pending stash restore:
+            // the user took the window over, so the captured
+            // frame no longer says where it belongs (#412).
+            if !tiler.didRecentlySetFrame(id) {
+                tiler.forgetStash(id)
+            }
             drag.windowMoved(id, frame: frame)
         case .windowResized(let id, let frame):
             borders.follow(id, windowFrame: frame)
@@ -205,6 +212,16 @@ extension KiwiCore {
             }
             if pendingFocusRaise == old {
                 pendingFocusRaise = new
+            }
+            // A stashed floating window's captured frame must
+            // follow the re-key too, or the restore sweep drops
+            // it and the window stays parked at the stash
+            // corner forever — #412's "floating vanishes"
+            // failure mode, reintroduced on this one path.
+            if let frame = tiler.stashedFrames
+                .removeValue(forKey: old)
+            {
+                tiler.stashedFrames[new] = frame
             }
             cancelDrag(old)
         default:

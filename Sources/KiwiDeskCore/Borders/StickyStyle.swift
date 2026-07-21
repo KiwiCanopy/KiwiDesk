@@ -13,6 +13,13 @@ import Foundation
 /// The GUI's forced-ON coverage guard is presentation only,
 /// never a clamp here.
 public struct StickyStyle: Sendable, Equatable {
+    /// The sticky mark — ONE glyph everywhere (#414): the
+    /// on-window chip and the Space Bar badge both read this,
+    /// so the two surfaces can never drift apart. Lives here
+    /// (the sticky namespace), not in a Bar view, so neither
+    /// subsystem reaches laterally into the other for it.
+    public static let symbolName = "square.stack.3d.up.fill"
+
     /// On-window sticky glyph, on by default: a sticky window
     /// can look identical to a normal one, and unlike a focus
     /// border there is no native cue to fall back on.

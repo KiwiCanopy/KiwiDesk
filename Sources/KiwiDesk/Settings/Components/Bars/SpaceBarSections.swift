@@ -39,6 +39,20 @@ struct SpaceBarEditorSection: View {
                         + "edge in every layout."
                 )
             )
+            // Coverage-guard write-through (#414): hiding the
+            // bar makes the on-window mark the ONLY sticky
+            // indicator, so its greyed "forced ON" toggle in
+            // Appearance must be the real stored state, not a
+            // display fiction. The GUI curates its own file
+            // here; Lua's sticky.set_indicator stays unclamped.
+            .onChange(of: style.wrappedValue.enabled) {
+                _,
+                enabled in
+                if !enabled {
+                    model.config.settings.stickyStyle
+                        .indicator = true
+                }
+            }
             behavior
             appearance
         }

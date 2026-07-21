@@ -83,7 +83,7 @@ final class StickyIndicatorOverlay {
         view.layer?.masksToBounds = true
         let symbol = NSImageView()
         symbol.image = NSImage(
-            systemSymbolName: SpaceBarItemView.stickySymbol,
+            systemSymbolName: StickyStyle.symbolName,
             accessibilityDescription: L(
                 "sticky.indicator.ax",
                 "Sticky window"

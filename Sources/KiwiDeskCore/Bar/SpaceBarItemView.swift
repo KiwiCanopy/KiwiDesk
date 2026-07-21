@@ -57,10 +57,10 @@ final class SpaceBarItemView: NSView {
     /// One count badge per glyph slot (hidden below 2).
     var badgeViews: [NSTextField] = []
     /// Per-slot state badges (#414): sticky top-left, floating
-    /// bottom-left. Small tinted symbols, no circle plate — a
-    /// state mark, not a count.
-    var stickyBadgeViews: [NSImageView] = []
-    var floatingBadgeViews: [NSImageView] = []
+    /// bottom-left — the count badge's circular plate wearing a
+    /// symbol, so all three corners read as one badge family.
+    var stickyBadgeViews: [StateBadgeView] = []
+    var floatingBadgeViews: [StateBadgeView] = []
     /// The "+n" overflow badge, its own trailing slot.
     let overflowBadge = SpaceBarItemView.makeBadge()
     /// The identifier↔glyphs rule (QA 2026-07-19) — the front
@@ -146,22 +146,8 @@ final class SpaceBarItemView: NSView {
         return tf
     }
 
-    /// A corner state badge (#414): a template SF Symbol tinted
-    /// through the item's color ladder.
-    static func makeStateBadge(symbol: String) -> NSImageView {
-        let iv = NSImageView()
-        iv.image = NSImage(
-            systemSymbolName: symbol,
-            accessibilityDescription: nil
-        )
-        iv.imageScaling = .scaleProportionallyUpOrDown
-        iv.setAccessibilityElement(false)
-        return iv
-    }
-
-    /// The sticky mark — one glyph everywhere (#414): the same
-    /// symbol marks the window itself (StickyIndicatorOverlay).
-    static let stickySymbol = "square.stack.3d.up.fill"
+    /// The floating badge's mark. The sticky mark is shared
+    /// with the on-window chip — see `StickyStyle.symbolName`.
     static let floatingSymbol = "macwindow.on.rectangle"
 
     @available(*, unavailable)
@@ -292,15 +278,15 @@ final class SpaceBarItemView: NSView {
             return badge
         }
         stickyBadgeViews = apps.map { _ in
-            let badge = Self.makeStateBadge(
-                symbol: Self.stickySymbol
+            let badge = StateBadgeView(
+                symbolName: StickyStyle.symbolName
             )
             addSubview(badge)
             return badge
         }
         floatingBadgeViews = apps.map { _ in
-            let badge = Self.makeStateBadge(
-                symbol: Self.floatingSymbol
+            let badge = StateBadgeView(
+                symbolName: Self.floatingSymbol
             )
             addSubview(badge)
             return badge

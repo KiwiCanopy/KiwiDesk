@@ -1,4 +1,5 @@
 import CoreGraphics
+import Foundation
 import Testing
 
 @testable import KiwiDeskCore
@@ -105,10 +106,10 @@ struct StashRestoreTests {
         return state
     }
 
-    @Test("Activating a space consumes its windows' captures")
-    func consumesActiveEntries() {
+    @Test("A capture survives until the restore echo lands")
+    func consumesOnlyOnEcho() {
         let engine = TilingEngine()
-        let state = makeState()
+        var state = makeState()
         let original = CGRect(
             x: 10,
             y: 20,
@@ -116,8 +117,41 @@ struct StashRestoreTests {
             height: 200
         )
         engine.stashedFrames[WindowID(1)] = original
+        // The state frame still reads elsewhere (the corner /
+        // the stale echo): the restore is issued but the entry
+        // must survive — consuming eagerly is the rapid-bounce
+        // hole that re-captured the corner as "original".
+        engine.restoreStashed(state: state, frames: [:])
+        #expect(
+            engine.stashedFrames[WindowID(1)] == original
+        )
+        // A re-stash while the entry lives cannot re-capture
+        // (nil guard) — see `reStashKeepsOriginal`.
+        // The echo lands: the state frame reads the original,
+        // and the next retile consumes the capture.
+        state.apply(.windowMoved(WindowID(1), original))
         engine.restoreStashed(state: state, frames: [:])
         #expect(engine.stashedFrames[WindowID(1)] == nil)
+    }
+
+    @Test("A user move consumes the capture (forgetStash)")
+    func userMoveForgets() {
+        let engine = TilingEngine()
+        engine.stashedFrames[WindowID(1)] = .zero
+        engine.forgetStash(WindowID(1))
+        #expect(engine.stashedFrames.isEmpty)
+    }
+
+    @Test("A drag-exempt window keeps its capture untouched")
+    func dragExemptKeepsEntry() {
+        let engine = TilingEngine()
+        let state = makeState()
+        engine.dragExemptWindow = WindowID(1)
+        engine.stashedFrames[WindowID(1)] = .zero
+        engine.restoreStashed(state: state, frames: [:])
+        #expect(
+            engine.stashedFrames[WindowID(1)] == .zero
+        )
     }
 
     @Test("Inactive spaces keep their windows' captures")
@@ -166,5 +200,41 @@ struct StashRestoreTests {
         engine.stashedFrames[WindowID(99)] = .zero
         engine.restoreStashed(state: state, frames: [:])
         #expect(engine.stashedFrames[WindowID(99)] == nil)
+    }
+
+    /// A native-tab re-key (#308) while a floating window is
+    /// stashed must carry the capture to the new id — or the
+    /// sweep drops it and the window stays parked at the
+    /// corner forever (#412's failure mode, on this one path).
+    @Test("A rekey carries the stash capture to the new id")
+    @MainActor
+    func rekeyCarriesCapture() {
+        let core = KiwiCore(
+            configDirectory: FileManager.default
+                .temporaryDirectory
+                .appendingPathComponent(
+                    "kiwi-stash-rekey-\(UUID().uuidString)"
+                )
+        )
+        core.state.apply(
+            .windowCreated(makeWindow(1, floating: true))
+        )
+        // Stashed = the window's home space is inactive; on
+        // the active space the restore pass would (rightly)
+        // consume the capture during the rekey's retile.
+        core.state.workspaces.ensureSpace(SpaceID(2))
+        core.state.workspaces.activate(SpaceID(2))
+        let original = CGRect(
+            x: 10,
+            y: 20,
+            width: 300,
+            height: 200
+        )
+        core.tiler.stashedFrames[WindowID(1)] = original
+        core.handle(.windowRekeyed(WindowID(1), WindowID(2)))
+        #expect(
+            core.tiler.stashedFrames[WindowID(2)] == original
+        )
+        #expect(core.tiler.stashedFrames[WindowID(1)] == nil)
     }
 }

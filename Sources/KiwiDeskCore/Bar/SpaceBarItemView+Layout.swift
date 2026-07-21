@@ -186,7 +186,8 @@ extension SpaceBarItemView {
         if index < stickyBadgeViews.count,
             !stickyBadgeViews[index].isHidden
         {
-            stickyBadgeViews[index].frame = backingAlignedRect(
+            let badge = stickyBadgeViews[index]
+            badge.frame = backingAlignedRect(
                 CGRect(
                     x: cellRect.minX - 1,
                     y: cellRect.minY - 1,
@@ -195,11 +196,13 @@ extension SpaceBarItemView {
                 ),
                 options: .alignAllEdgesNearest
             )
+            badge.needsLayout = true
         }
         if index < floatingBadgeViews.count,
             !floatingBadgeViews[index].isHidden
         {
-            floatingBadgeViews[index].frame = backingAlignedRect(
+            let badge = floatingBadgeViews[index]
+            badge.frame = backingAlignedRect(
                 CGRect(
                     x: cellRect.minX - 1,
                     y: cellRect.maxY - side + 1,
@@ -208,6 +211,7 @@ extension SpaceBarItemView {
                 ),
                 options: .alignAllEdgesNearest
             )
+            badge.needsLayout = true
         }
     }
 
