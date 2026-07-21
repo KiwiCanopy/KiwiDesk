@@ -96,6 +96,12 @@ extension KiwiCore {
     /// leaving exactly the focused tile above them. The body re-reads
     /// `activeSpace?.focused` so a stale target no-ops.
     func raiseFloatsAbove(afterFocusing id: WindowID) {
+        // Focusing a float returns without rescheduling, so a
+        // `.floatRaise` still pending from a tile focus <50ms earlier
+        // fires and no-ops (its id is stale) — a second float can then
+        // sit under a tile until the next tiled focus re-raises the
+        // layer. Self-healing and rare (sub-50ms tile→float); the
+        // z-order thrash the coalescing removes is the worse failure.
         guard state.windows[id]?.isFloating != true,
             !floatLayerTargets().isEmpty
         else { return }
