@@ -262,6 +262,65 @@ extension KiwiCore {
         }
     }
 
+    /// Quiet-raises the windows that belong ABOVE the tiled
+    /// plane after a space activation (#412/#414 QA): the
+    /// active space's floating windows — their stash restore
+    /// repositions but cannot re-order, so the switch's focus
+    /// raise buried them behind full-frame tiled windows —
+    /// and every sticky window (visible on all spaces, never
+    /// stashed, equally buried). Then hands focus over as the
+    /// sequence's ordered final step (the `raiseSequentially`
+    /// pattern: AXRaise on the active app's windows steals
+    /// focus window by window, so the intended focus must be
+    /// re-asserted after the raises, and the focused window
+    /// ends on top). With nothing to raise, focus is handed
+    /// over directly.
+    func raiseFloatsAndSticky(
+        thenFocus focused: WindowID?,
+        warp: Bool
+    ) {
+        var targets: [WindowID] = []
+        if let space = activeSpace {
+            targets = space.windows.filter {
+                state.windows[$0]?.isFloating == true
+            }
+        }
+        for window in state.windows.all
+        where window.isSticky && !targets.contains(window.id) {
+            targets.append(window.id)
+        }
+        let ordered = targets.compactMap {
+            eventLoop.element(for: $0)
+        }
+        guard !ordered.isEmpty else {
+            if let focused {
+                focusWindow(
+                    focused,
+                    refocusRetile: false,
+                    warp: warp
+                )
+            }
+            return
+        }
+        zOrderRestoresInFlight += 1
+        nonisolated(unsafe) let elements = ordered
+        zOrderQueue.async { [weak self] in
+            for element in elements {
+                AXHelper.raiseQuietly(element)
+            }
+            Task { @MainActor [weak self] in
+                if let focused {
+                    self?.focusWindow(
+                        focused,
+                        refocusRetile: false,
+                        warp: warp
+                    )
+                }
+                self?.zOrderRestoresInFlight -= 1
+            }
+        }
+    }
+
     /// Whether swapping these two windows moves one across
     /// the stack layout's master/stack boundary.
     func crossesStackBoundary(

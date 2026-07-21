@@ -157,6 +157,58 @@ struct StickyCommandTests {
     }
 }
 
+/// Sticky windows are focusable from every space (#414): a
+/// focus landing on one whose HOME space is inactive must NOT
+/// pull that space forward — following it yanked the user back
+/// to the origin space on every interaction (the QA fly-back).
+@Suite("Sticky focus follow", .serialized)
+@MainActor
+struct StickyFocusFollowTests {
+    private func makeCore() -> KiwiCore {
+        KiwiCore(
+            configDirectory: FileManager.default
+                .temporaryDirectory
+                .appendingPathComponent(
+                    "kiwi-follow-\(UUID().uuidString)"
+                )
+        )
+    }
+
+    private func seed(_ core: KiwiCore) {
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: WindowID(1),
+                    pid: 1,
+                    appName: "App"
+                )
+            )
+        )
+        core.state.workspaces.ensureSpace(SpaceID(2))
+        core.state.workspaces.activate(SpaceID(2))
+    }
+
+    @Test("A foreign sticky focus schedules no follow")
+    func stickyExempt() {
+        let core = makeCore()
+        seed(core)
+        core.state.setSticky(WindowID(1), true)
+        core.handle(.windowFocused(WindowID(1)))
+        #expect(core.deferred.task(for: .focusFollow) == nil)
+        #expect(
+            core.state.workspaces.activeSpace == SpaceID(2)
+        )
+    }
+
+    @Test("A foreign non-sticky focus still follows")
+    func nonStickyFollows() {
+        let core = makeCore()
+        seed(core)
+        core.handle(.windowFocused(WindowID(1)))
+        #expect(core.deferred.task(for: .focusFollow) != nil)
+    }
+}
+
 /// Close/reopen persistence of the sticky intent (#414),
 /// mirroring the float persistence (#160): identity is app +
 /// title, an empty title carries no identity, and the last

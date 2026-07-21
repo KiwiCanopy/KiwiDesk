@@ -154,8 +154,42 @@ extension TilingEngine {
                 stashedFrames[id] = nil
                 continue
             }
+            // An original whose display is gone can never be
+            // reached — the OS clamps every set elsewhere, the
+            // clamp echoes within grace, and the retry would
+            // loop forever. Consume; the OS-relocated frame is
+            // the best remaining truth (the user can move it).
+            if !NSScreen.screens.contains(where: {
+                GeometryUtils.axVisibleFrame(of: $0)
+                    .intersects(original)
+            }) {
+                stashedFrames[id] = nil
+                continue
+            }
             animation.cancel(window: id)
             setFrame(id, original)
+        }
+    }
+
+    /// Whether a frame sits at some screen's stash corner.
+    /// Keeps a LATE stash echo — one landing past the applier's
+    /// 1 s grace, so `didRecentlySetFrame` no longer vouches
+    /// for it — from classifying as a user move and consuming
+    /// the capture (which would strand the window at the
+    /// corner, the #412 failure mode). A genuine user drag TO
+    /// the exact corner is indistinguishable and keeps its
+    /// capture — harmless: the next activation restores it.
+    static func looksStashed(_ frame: CGRect) -> Bool {
+        NSScreen.screens.contains { screen in
+            let bounds = GeometryUtils.axVisibleFrame(
+                of: screen
+            )
+            return abs(
+                frame.minX - (bounds.maxX - stashPeek)
+            ) <= retileTolerance
+                && abs(
+                    frame.minY - (bounds.maxY - stashPeek)
+                ) <= retileTolerance
         }
     }
 

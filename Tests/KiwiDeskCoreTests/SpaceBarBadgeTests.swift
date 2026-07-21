@@ -86,4 +86,34 @@ struct SpaceBarBadgeTests {
         #expect(merged.apps.map(\.sticky) == [true])
         #expect(merged.apps.map(\.floating) == [true])
     }
+
+    @Test("Foreign sticky windows appear on every space item")
+    func foreignStickyListed() throws {
+        let core = seededCore()
+        core.state.workspaces.assign(SpaceID("2"), to: display)
+        core.state.setSticky(WindowID(1), true)
+        let items = core.spaceBarItems(
+            display: display,
+            style: SpaceBarStyle()
+        )
+        #expect(items.count == 2)
+        let second = try #require(
+            items.first { $0.space == SpaceID("2") }
+        )
+        // Space "2" has no members of its own, but the sticky
+        // window is present there too — its item says so,
+        // badge included (#414).
+        #expect(second.apps.map(\.name) == ["Web"])
+        #expect(second.apps.map(\.sticky) == [true])
+        // Unsticky: the foreign listing disappears.
+        core.state.setSticky(WindowID(1), false)
+        let after = core.spaceBarItems(
+            display: display,
+            style: SpaceBarStyle()
+        )
+        let empty = try #require(
+            after.first { $0.space == SpaceID("2") }
+        )
+        #expect(empty.apps.isEmpty)
+    }
 }

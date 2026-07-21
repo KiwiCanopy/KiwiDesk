@@ -119,8 +119,13 @@ extension KiwiCore {
             // Deferred: app activation transiently re-reports
             // the app's OLD focused window right before a new
             // window opens — only follow if focus settles.
+            // A STICKY window is exempt (#414): it is visible
+            // and legitimately focusable on every space, so
+            // following its home would yank the user back to
+            // it on every interaction — the fly-back bug.
             if let space = state.workspaces.space(of: id),
-                space != state.workspaces.activeSpace
+                space != state.workspaces.activeSpace,
+                state.windows[id]?.isSticky != true
             {
                 scheduleFocusFollow(id)
             } else if activeSpace?.mode.isFocusDriven == true {
@@ -149,13 +154,25 @@ extension KiwiCore {
             // frame-set) supersedes a pending stash restore:
             // the user took the window over, so the captured
             // frame no longer says where it belongs (#412).
-            if !tiler.didRecentlySetFrame(id) {
+            // A frame AT a stash corner is treated as an echo
+            // even past the applier's grace — a stalled app's
+            // late stash echo must not strand the window there.
+            if !tiler.didRecentlySetFrame(id),
+                !TilingEngine.looksStashed(frame)
+            {
                 tiler.forgetStash(id)
             }
             drag.windowMoved(id, frame: frame)
         case .windowResized(let id, let frame):
             borders.follow(id, windowFrame: frame)
             stickyIndicators.follow(id, windowFrame: frame)
+            // Same policy as .windowMoved above: a genuine
+            // user resize takes the window over.
+            if !tiler.didRecentlySetFrame(id),
+                !TilingEngine.looksStashed(frame)
+            {
+                tiler.forgetStash(id)
+            }
             // Resize gestures share the drag pipeline (same
             // settle debounce). Only mouse-driven resizes
             // count; apps resizing themselves are corrected

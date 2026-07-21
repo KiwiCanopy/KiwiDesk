@@ -246,7 +246,7 @@ public final class TilingEngine {
 
     /// Frames within this distance per edge count as "already
     /// there". Covers rounding and small app-side clamping.
-    private static let retileTolerance: CGFloat = 2
+    static let retileTolerance: CGFloat = 2
 
     static func close(
         _ a: CGRect,

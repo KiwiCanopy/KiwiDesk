@@ -98,12 +98,16 @@ extension KiwiCore {
             animated: tiler.settings.animations.onSpaceChange,
             force: true
         )
-        // Hand real (AX) focus to the space's last focused
-        // window — otherwise keystrokes keep going to a
-        // window that is now stashed offscreen.
-        if let next = activeSpace?.focused {
-            focusWindow(next, refocusRetile: false, warp: true)
-        }
+        // Floats and sticky windows come back above the
+        // tiled plane, then real (AX) focus lands on the
+        // space's last focused window — otherwise keystrokes
+        // keep going to a window that is now stashed
+        // offscreen (#412 QA: without the raise, a restored
+        // float sat buried behind full-frame tiled windows).
+        raiseFloatsAndSticky(
+            thenFocus: activeSpace?.focused,
+            warp: true
+        )
         emitSpaceChange()
         scheduleSpaceSettle(SpaceID(raw))
         return .ok()

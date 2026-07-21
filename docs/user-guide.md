@@ -821,6 +821,10 @@ though native icons take no tint (App Font glyphs use the
 Focused item color instead). Click a Space to switch to it;
 glyphs are informational.
 
+A sticky window is present on every Space, and the bar says
+so: it appears in **every** Space's item (after that Space's
+own windows), wearing its sticky badge everywhere.
+
 Window state shows on the glyphs as small corner badges:
 **sticky** windows wear a badge on the glyph's top-left,
 **floating** windows on the bottom-left (the top-right corner

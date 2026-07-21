@@ -28,9 +28,28 @@ struct SpaceBarEditorSection: View {
                 sameEdge: model.config.settings
                     .spaceBarSharesEdgeWithAppBar
             )
+            // Coverage-guard write-through (#414): hiding
+            // the bar makes the on-window mark the ONLY
+            // sticky indicator, so its greyed "forced ON"
+            // toggle in Appearance must be the real stored
+            // state, not a display fiction. A write-through
+            // BINDING, not .onChange: the set fires only on
+            // the user's gesture, so a profile load that
+            // replaces the model's config while this section
+            // is open cannot overwrite a Lua-authored
+            // indicator=false (Lua stays unclamped).
             ToggleRow(
                 label: L("space_bar.enabled", "Show Space Bar"),
-                isOn: style.enabled,
+                isOn: Binding(
+                    get: { style.wrappedValue.enabled },
+                    set: { on in
+                        style.wrappedValue.enabled = on
+                        if !on {
+                            model.config.settings
+                                .stickyStyle.indicator = true
+                        }
+                    }
+                ),
                 help: L(
                     "space_bar.enabled.help",
                     "One bar per display listing that "
@@ -39,20 +58,6 @@ struct SpaceBarEditorSection: View {
                         + "edge in every layout."
                 )
             )
-            // Coverage-guard write-through (#414): hiding the
-            // bar makes the on-window mark the ONLY sticky
-            // indicator, so its greyed "forced ON" toggle in
-            // Appearance must be the real stored state, not a
-            // display fiction. The GUI curates its own file
-            // here; Lua's sticky.set_indicator stays unclamped.
-            .onChange(of: style.wrappedValue.enabled) {
-                _,
-                enabled in
-                if !enabled {
-                    model.config.settings.stickyStyle
-                        .indicator = true
-                }
-            }
             behavior
             appearance
         }

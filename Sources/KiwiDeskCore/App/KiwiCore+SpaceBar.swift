@@ -127,8 +127,13 @@ extension KiwiCore {
         focusHidden: Bool
     ) {
         // One pass: ids and names stay index-aligned with no
-        // unreachable "?" fallback.
-        let pairs = space.windows.compactMap { id in
+        // unreachable "?" fallback. Sticky windows homed on
+        // OTHER spaces are appended: present on every space
+        // (#414), so every item lists them — the bar mirrors
+        // what the space actually shows.
+        let members =
+            space.windows + stickyWindowsElsewhere(space)
+        let pairs = members.compactMap { id in
             state.windows[id].map { (id, $0.appName) }
         }
         let windows = pairs.map(\.0)
@@ -147,6 +152,20 @@ extension KiwiCore {
                 hidden.contains { $0.contains(focus) }
             } ?? false
         return (apps, hidden.reduce(0) { $0 + $1.count }, focusHidden)
+    }
+
+    /// Sticky windows whose home is another space (#414):
+    /// visible on this space too, so its bar item lists them
+    /// after the space's own windows. Stable id order — their
+    /// home array order belongs to another space's item.
+    private func stickyWindowsElsewhere(
+        _ space: Space
+    ) -> [WindowID] {
+        state.windows.all
+            .filter(\.isSticky)
+            .map(\.id)
+            .filter { !space.windows.contains($0) }
+            .sorted { $0.raw < $1.raw }
     }
 
     /// One glyph slot for a same-app run.
