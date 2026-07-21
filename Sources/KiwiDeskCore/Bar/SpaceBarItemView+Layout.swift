@@ -107,10 +107,12 @@ extension SpaceBarItemView {
         // The overflow "+n" fills its cell like a glyph, so it reads
         // as the run's final icon rather than a small detached dot
         // (owner/designer 2026-07-20). A per-app count stays the
-        // small corner dot (0.42/8, QA 2026-07-19 — the 0.5-of-cell
-        // badge read oversized next to small glyphs).
+        // small corner dot (the shared badge-family size, QA
+        // 2026-07-19 — the 0.5-of-cell badge read oversized next to
+        // small glyphs).
         let base =
-            centered ? cell * 0.8 : max(cell * 0.42, 8)
+            centered
+            ? cell * 0.8 : StateBadgeMetrics.side(cell: cell)
         badge.font = .systemFont(
             ofSize: base * (centered ? 0.5 : 0.72),
             weight: .bold
@@ -167,7 +169,7 @@ extension SpaceBarItemView {
         onCellAt offset: CGFloat,
         cell: CGFloat
     ) {
-        let side = max(cell * 0.42, 8)
+        let side = StateBadgeMetrics.side(cell: cell)
         let cellRect =
             horizontal
             ? CGRect(

@@ -1,5 +1,23 @@
 import AppKit
 
+/// Shared size for the Space Bar's badge family (#414): the
+/// group-count dot and the sticky/floating state marks all
+/// derive from ONE factor of the glyph cell (floored for
+/// legibility on thin bars), so the three read as one family
+/// and shrink together. One home for the constant so a future
+/// resize can't touch one site and forget the other (§5
+/// mirror hygiene). Trimmed 0.42→0.38 / 8→7 (owner 2026-07-21,
+/// ui-designer consult).
+enum StateBadgeMetrics {
+    static let sizeFactor: CGFloat = 0.38
+    static let floor: CGFloat = 7
+
+    /// The badge's diameter/side on a glyph cell of `cell` pts.
+    static func side(cell: CGFloat) -> CGFloat {
+        max(cell * sizeFactor, floor)
+    }
+}
+
 /// A Space Bar state badge (#414): the group-count badge's
 /// circular plate wearing a template symbol instead of a
 /// count, so the sticky/floating marks read as the same badge
