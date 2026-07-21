@@ -51,9 +51,10 @@ extension KiwiCore {
             focusWindow(id, warp: false)
             return
         }
-        let tiled = space.windows.filter {
-            state.windows[$0]?.isFloating == false
-        }
+        let tiled = state.effectiveTiledMembers(
+            of: space,
+            activeSpace: activeSpace?.id
+        )
         // Everything below resolves against the active space's
         // params (#17): base value, master classification, and
         // the write target all follow the space's own override,

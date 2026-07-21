@@ -35,9 +35,10 @@ extension KiwiCore {
                 state.windows[$0]?.isFloating == true
             }
         )
-        let tiled = space.windows.filter {
-            !floating.contains($0)
-        }
+        let tiled = state.effectiveTiledMembers(
+            of: space,
+            activeSpace: activeSpace?.id
+        )
         guard let index = tiled.firstIndex(of: focused) else {
             return .fail("no focused tiled window")
         }

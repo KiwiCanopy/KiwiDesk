@@ -171,6 +171,14 @@ extension TilingEngine {
         }
     }
 
+    /// Migrates a stashed frame capture when a native-tab rekeys
+    /// a window id (#308/#412).
+    public func rekeyStash(oldID: WindowID, newID: WindowID) {
+        guard let capture = stashedFrames.removeValue(forKey: oldID)
+        else { return }
+        stashedFrames[newID] = capture
+    }
+
     /// Whether a frame sits at some screen's stash corner.
     /// Keeps a LATE stash echo — one landing past the applier's
     /// 1 s grace, so `didRecentlySetFrame` no longer vouches

@@ -286,5 +286,52 @@ public struct StateCoordinator: Sendable {
         }
         return effects
     }
+}
 
+extension StateCoordinator {
+    /// The Space Bar's traveling-glyph membership for a space:
+    /// on the current space, sticky windows homed elsewhere are
+    /// appended (id-sorted) so their glyph follows the user;
+    /// on any other space, its own sticky windows are pruned so
+    /// the glyph shows in exactly one place (#414/#415). This is
+    /// presentation-only — layout/nav use `effectiveTiledMembers`,
+    /// which does NOT travel in v1.
+    public func effectiveMembers(
+        of space: Space,
+        activeSpace: SpaceID? = nil
+    ) -> [WindowID] {
+        let activeID = activeSpace ?? workspaces.activeSpace
+        let isCurrent = (space.id == activeID)
+        if isCurrent {
+            let elsewhere = windows.all
+                .filter(\.isSticky)
+                .map(\.id)
+                .filter { !space.windows.contains($0) }
+                .sorted { $0.raw < $1.raw }
+            return space.windows + elsewhere
+        }
+        return space.windows.filter { id in
+            windows[id]?.isSticky != true
+        }
+    }
+
+    /// Ordered tiled members of a space (`!isFloating`) — the
+    /// single authority replacing the open-coded
+    /// `space.windows.filter { !isFloating }` layout sites (#415).
+    ///
+    /// Unlike `effectiveMembers` (the Space Bar's traveling-glyph
+    /// derivation), this does NOT inject sticky windows homed on
+    /// another space: in v1 a sticky window "remains a member of
+    /// exactly one space — its home — for layout and bar purposes"
+    /// (`docs/lua-reference.md`); its glyph travels but its tile
+    /// does not. `activeSpace` is threaded by every call site so
+    /// #414 v2 (tiled-sticky, phase two) can turn injection on here
+    /// with home-index placement without re-plumbing — it is
+    /// deliberately unused in v1.
+    public func effectiveTiledMembers(
+        of space: Space,
+        activeSpace: SpaceID? = nil
+    ) -> [WindowID] {
+        space.windows.filter { windows[$0]?.isFloating == false }
+    }
 }

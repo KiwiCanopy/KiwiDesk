@@ -8,12 +8,13 @@ extension KiwiCore {
     /// windows" right after a restart means the startup scan
     /// missed them; "0 tiled" means wrong float verdicts.
     func logSpaceContents(_ id: SpaceID) {
-        let members = state.workspaces[id]?.windows ?? []
-        let tiled = members.filter {
-            state.windows[$0]?.isFloating == false
-        }
+        guard let space = state.workspaces[id] else { return }
+        let tiled = state.effectiveTiledMembers(
+            of: space,
+            activeSpace: activeSpace?.id
+        )
         onLog(
-            "space \(id.raw): \(members.count) windows, "
+            "space \(id.raw): \(space.windows.count) windows, "
                 + "\(tiled.count) tiled"
         )
     }

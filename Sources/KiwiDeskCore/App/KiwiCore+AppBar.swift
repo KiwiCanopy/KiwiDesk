@@ -176,10 +176,17 @@ extension KiwiCore {
         var reordered = Array(groups.joined()).makeIterator()
         // Resolved before withSpace: reading `state` inside
         // its inout closure would violate exclusivity.
+        // NOTE (#414 v2): the writeback below maps only this
+        // space's own array, so `tiled` must stay LOCAL. When
+        // phase two turns injection on in effectiveTiledMembers,
+        // this site must exclude traveling members first —
+        // otherwise a foreign id lands in `reordered.next()` and
+        // overwrites a local slot (drops a real local window).
         let tiled = Set(
-            space.windows.filter {
-                state.windows[$0]?.isFloating == false
-            }
+            state.effectiveTiledMembers(
+                of: space,
+                activeSpace: activeSpace?.id
+            )
         )
         state.workspaces.withSpace(space.id) { sp in
             sp.windows = sp.windows.map { id in

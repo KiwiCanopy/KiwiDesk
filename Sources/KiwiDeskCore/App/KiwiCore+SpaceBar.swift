@@ -136,21 +136,21 @@ extension KiwiCore {
         // (including its home's) — so one glyph always sits
         // where the user is, instead of cloning onto every
         // item at once.
-        let members: [WindowID]
-        if isCurrent {
-            members =
-                space.windows + stickyWindowsElsewhere(space)
-        } else {
-            members = space.windows.filter {
-                state.windows[$0]?.isSticky != true
-            }
+        let activeID = isCurrent ? space.id : activeSpace?.id
+        let members = state.effectiveMembers(
+            of: space,
+            activeSpace: activeID
+        )
+        let pairs = members.compactMap { id -> (WindowID, String, Bool)? in
+            guard let window = state.windows[id] else { return nil }
+            let isSpecial = window.isFloating || window.isSticky
+            return (id, window.appName, isSpecial)
         }
-        let pairs = members.compactMap { id in
-            state.windows[id].map { (id, $0.appName) }
-        }
-        let windows = pairs.map(\.0)
-        let groups = Self.adjacentRuns(of: pairs.map(\.1))
-            .map { Array(windows[$0]) }
+        let windows = pairs.map { $0.0 }
+        let groups = Self.adjacentRuns(
+            of: pairs.map { $0.1 },
+            specials: pairs.map { $0.2 }
+        ).map { Array(windows[$0]) }
         let cap = style.resolvedGlyphCap
         let visible = groups.prefix(cap)
         let hidden = groups.dropFirst(cap)
@@ -164,20 +164,6 @@ extension KiwiCore {
                 hidden.contains { $0.contains(focus) }
             } ?? false
         return (apps, hidden.reduce(0) { $0 + $1.count }, focusHidden)
-    }
-
-    /// Sticky windows whose home is another space (#414):
-    /// visible on this space too, so its bar item lists them
-    /// after the space's own windows. Stable id order — their
-    /// home array order belongs to another space's item.
-    private func stickyWindowsElsewhere(
-        _ space: Space
-    ) -> [WindowID] {
-        state.windows.all
-            .filter(\.isSticky)
-            .map(\.id)
-            .filter { !space.windows.contains($0) }
-            .sorted { $0.raw < $1.raw }
     }
 
     /// One glyph slot for a same-app run.

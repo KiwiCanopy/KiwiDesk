@@ -4,11 +4,12 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The Space Bar state badges' driver half (#414): a group
-/// slot aggregates its windows' sticky/floating states — an
-/// "at least one" signal (badge inheritance). Split from
-/// `SpaceBarDriverTests` for the file ceiling; per-file
-/// helpers by convention.
+/// The Space Bar state badges' driver half (#414): each item
+/// slot carries its window's sticky/floating badge. Floating
+/// and sticky windows never merge into a multi-window same-app
+/// group (design-decisions row 97), so every badge belongs to
+/// a single-window slot. Split from `SpaceBarDriverTests` for
+/// the file ceiling; per-file helpers by convention.
 @MainActor
 private func makeCore() -> KiwiCore {
     KiwiCore(
@@ -72,19 +73,23 @@ struct SpaceBarBadgeTests {
         #expect(
             first.apps.map(\.floating) == [false, false, true]
         )
-        // Adjacent windows of one app DO merge and aggregate.
+        // Removing Mail leaves two adjacent Web windows, but
+        // both hold a special state (window 1 sticky, window 3
+        // floating), so they never merge into one group — each
+        // stays its own slot wearing its own badge, keeping the
+        // per-window state visible (design-decisions row 97).
         core.state.apply(
             .windowDestroyed(WindowID(2), wasMinimized: false)
         )
-        let merged = try #require(
+        let split = try #require(
             core.spaceBarItems(
                 display: display,
                 style: SpaceBarStyle()
             ).first
         )
-        #expect(merged.apps.map(\.name) == ["Web"])
-        #expect(merged.apps.map(\.sticky) == [true])
-        #expect(merged.apps.map(\.floating) == [true])
+        #expect(split.apps.map(\.name) == ["Web", "Web"])
+        #expect(split.apps.map(\.sticky) == [true, false])
+        #expect(split.apps.map(\.floating) == [false, true])
     }
 
     @Test("Sticky glyphs travel with the current space")

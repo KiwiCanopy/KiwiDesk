@@ -130,9 +130,10 @@ public final class TilingEngine {
         let bounds = settings.layoutBounds(
             from: GeometryUtils.axVisibleFrame(of: screen)
         )
-        let tiled = space.windows.filter { id in
-            state.windows[id]?.isFloating == false
-        }
+        let tiled = state.effectiveTiledMembers(
+            of: space,
+            activeSpace: state.workspaces.activeSpace
+        )
         let context = settings.context(
             bounds: bounds,
             space: space

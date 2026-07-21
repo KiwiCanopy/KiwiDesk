@@ -73,11 +73,10 @@ extension KiwiCore {
         else {
             return .fail("no focused window")
         }
-        let candidates = space.windows
-            .filter {
-                $0 != focused
-                    && state.windows[$0]?.isFloating == false
-            }
+        let candidates = state.effectiveTiledMembers(
+            of: space,
+            activeSpace: activeSpace?.id
+        ).filter { $0 != focused }
             .compactMap { id -> (WindowID, CGRect)? in
                 guard
                     let slot = slots[id]
@@ -177,9 +176,10 @@ extension KiwiCore {
         case .down where !horizontal: step = 1
         default: return nil
         }
-        let tiled = space.windows.filter {
-            state.windows[$0]?.isFloating == false
-        }
+        let tiled = state.effectiveTiledMembers(
+            of: space,
+            activeSpace: activeSpace?.id
+        )
         guard let index = tiled.firstIndex(of: focused)
         else { return nil }
         let targetIndex = index + step

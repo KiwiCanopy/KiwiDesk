@@ -172,9 +172,10 @@ extension KiwiCore {
         guard let previous, previous != target,
             let space = activeSpace
         else { return false }
-        let tiled = space.windows.filter {
-            state.windows[$0]?.isFloating == false
-        }
+        let tiled = state.effectiveTiledMembers(
+            of: space,
+            activeSpace: activeSpace?.id
+        )
         guard let targetIndex = tiled.firstIndex(of: target),
             let previousIndex = tiled.firstIndex(of: previous)
         else { return false }
