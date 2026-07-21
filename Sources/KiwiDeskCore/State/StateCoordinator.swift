@@ -82,6 +82,14 @@ public struct StateCoordinator: Sendable {
     /// `rememberedSpaces`' lifetime (manual floats are rare).
     private var rememberedFloating: [WindowIdentity: Bool] = [:]
 
+    /// Sticky intent of windows that closed (#414), mirroring
+    /// `rememberedFloating`'s identity keying and lifetime. A
+    /// set, not a map: sticky defaults off and has no detection
+    /// source, so "remembered off" and "never sticky" are the
+    /// same state — the close of a non-sticky window clears its
+    /// identity's entry (last close wins, like float).
+    private var rememberedSticky: Set<WindowIdentity> = []
+
     /// Stable close/reopen identity of a window (#160).
     private struct WindowIdentity: Hashable, Sendable {
         let app: String
@@ -121,6 +129,18 @@ public struct StateCoordinator: Sendable {
         guard windows[id] != nil else { return }
         windows.setFloating(id, floating)
         manualFloatOverrides[id] = floating
+    }
+
+    /// Marks a window sticky/unsticky (`make_sticky`, #414).
+    /// No override map alongside: sticky has no detection
+    /// source to fight, so the window flag itself is the whole
+    /// live state; close/reopen memory is `rememberedSticky`.
+    public mutating func setSticky(
+        _ id: WindowID,
+        _ sticky: Bool
+    ) {
+        guard windows[id] != nil else { return }
+        windows.setSticky(id, sticky)
     }
 
     /// Returns a window to detection control (`make_auto`):
@@ -176,6 +196,7 @@ public struct StateCoordinator: Sendable {
         case .appTerminated(let pid):
             for window in windows.windows(pid: pid) {
                 rememberFloatOverride(of: window)
+                rememberStickyIntent(of: window)
             }
             for id in windows.removeAll(pid: pid) {
                 workspaces.remove(id)
@@ -188,6 +209,7 @@ public struct StateCoordinator: Sendable {
                 rememberedSpaces[window.id] != nil
             windows.upsert(window)
             restoreFloatOverride(of: window)
+            restoreStickyIntent(of: window)
             let target =
                 rememberedSpaces[window.id]
                 ?? window.appBundleID.flatMap { appRules[$0] }
@@ -233,6 +255,7 @@ public struct StateCoordinator: Sendable {
             // and would lose a manual override too (#160).
             if let window = windows[id] {
                 rememberFloatOverride(of: window)
+                rememberStickyIntent(of: window)
             }
             windows.remove(id)
             workspaces.remove(id)
@@ -259,6 +282,7 @@ public struct StateCoordinator: Sendable {
             // title lands (#160).
             if let window = windows[id] {
                 restoreFloatOverride(of: window)
+                restoreStickyIntent(of: window)
             }
             // A late title can restore a remembered float
             // override — the only title change that retiles.
@@ -309,6 +333,39 @@ public struct StateCoordinator: Sendable {
             !window.title.isEmpty
         else { return }
         rememberedFloating[WindowIdentity(of: window)] = intent
+    }
+
+    /// Writes a closing window's sticky state into the
+    /// close/reopen memory (#414). Membership IS the intent:
+    /// a sticky close inserts, a non-sticky close clears any
+    /// stale entry of the same identity (last close wins). An
+    /// empty title carries no identity — skipped, like float.
+    private mutating func rememberStickyIntent(
+        of window: ManagedWindow
+    ) {
+        guard !window.title.isEmpty else { return }
+        let identity = WindowIdentity(of: window)
+        if window.isSticky {
+            rememberedSticky.insert(identity)
+        } else {
+            rememberedSticky.remove(identity)
+        }
+    }
+
+    /// Restores a remembered sticky intent onto a (re)tracked
+    /// window, consuming the entry; the flag re-arms at the
+    /// next close through `rememberStickyIntent`. Runs at
+    /// creation and again on title changes (lazy-title apps),
+    /// mirroring the float restore.
+    private mutating func restoreStickyIntent(
+        of window: ManagedWindow
+    ) {
+        guard !window.title.isEmpty,
+            rememberedSticky.remove(
+                WindowIdentity(of: window)
+            ) != nil
+        else { return }
+        windows.setSticky(window.id, true)
     }
 
     /// Restores a remembered float intent onto a (re)tracked

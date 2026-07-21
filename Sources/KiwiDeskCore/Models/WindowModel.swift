@@ -58,6 +58,13 @@ public struct ManagedWindow: Sendable, Equatable {
     public var title: String
     public var frame: CGRect
     public var isFloating: Bool
+    /// Sticky: present on every virtual space instead of hiding
+    /// with its home space (#414). Orthogonal to `isFloating` —
+    /// a per-window-instance flag flipped by `make_sticky` /
+    /// `toggle_sticky`, never by detection. The window remains a
+    /// member of exactly one space (the flat-array invariant);
+    /// stickiness only exempts it from the inactive-space stash.
+    public var isSticky: Bool
     /// A transient overlay — a launcher/panel that floats for a
     /// structural reason (accessory activation policy, non-standard
     /// panel subrole, or a raised CGWindow layer), NOT because a
@@ -75,6 +82,7 @@ public struct ManagedWindow: Sendable, Equatable {
         title: String = "",
         frame: CGRect = .zero,
         isFloating: Bool = false,
+        isSticky: Bool = false,
         isTransientOverlay: Bool = false
     ) {
         self.id = id
@@ -84,6 +92,7 @@ public struct ManagedWindow: Sendable, Equatable {
         self.title = title
         self.frame = frame
         self.isFloating = isFloating
+        self.isSticky = isSticky
         self.isTransientOverlay = isTransientOverlay
     }
 
@@ -103,6 +112,7 @@ public struct ManagedWindow: Sendable, Equatable {
             title: title,
             frame: frame,
             isFloating: isFloating,
+            isSticky: isSticky,
             isTransientOverlay: isTransientOverlay
         )
     }

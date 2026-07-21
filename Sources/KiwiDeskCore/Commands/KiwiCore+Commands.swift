@@ -35,6 +35,12 @@ extension KiwiCore {
             return setFocusedAuto()
         case "toggle_floating":
             return toggleFocusedFloating()
+        case "make_sticky":
+            return setFocusedSticky(true)
+        case "make_unsticky":
+            return setFocusedSticky(false)
+        case "toggle_sticky":
+            return toggleFocusedSticky()
         case "resize":
             return resize(args)
         case "move_to_track":
@@ -139,6 +145,36 @@ extension KiwiCore {
             return .fail("no focused window")
         }
         return setFocusedFloating(!window.isFloating)
+    }
+
+    /// `make_sticky` / `make_unsticky` (#414): flips the focused
+    /// window's sticky flag. No mode argument and no tri-state:
+    /// sticky has no detection source, so on/off is the whole
+    /// story — the window keeps its existing float/tiled state.
+    /// The retile applies the effect (stash exemption) at once.
+    private func setFocusedSticky(
+        _ sticky: Bool
+    ) -> CommandResponse {
+        guard let focused = activeSpace?.focused else {
+            return .fail("no focused window")
+        }
+        state.setSticky(focused, sticky)
+        retile()
+        return .ok()
+    }
+
+    /// `toggle_sticky` (#414): the everyday sticky verb — the
+    /// only one offered in the Settings shortcut list (#221
+    /// precedent); the explicit `make_*` verbs remain for
+    /// scripts that need a direction.
+    private func toggleFocusedSticky() -> CommandResponse {
+        guard
+            let focused = activeSpace?.focused,
+            let window = state.windows[focused]
+        else {
+            return .fail("no focused window")
+        }
+        return setFocusedSticky(!window.isSticky)
     }
 
     /// `make_auto` (#164): clears the focused window's manual

@@ -1,0 +1,226 @@
+import AppKit
+import CoreGraphics
+import Testing
+
+@testable import KiwiDeskCore
+
+/// The sticky verbs (#414): `make_sticky` / `make_unsticky` /
+/// `toggle_sticky` flip the focused window's `isSticky` flag.
+/// No mode argument and no tri-state — sticky has no detection
+/// source, so on/off is the whole story, and the window keeps
+/// its float/tiled state untouched.
+@Suite("Sticky commands", .serialized)
+@MainActor
+struct StickyCommandTests {
+    private func makeCore() -> KiwiCore {
+        KiwiCore(
+            configDirectory: FileManager.default
+                .temporaryDirectory
+                .appendingPathComponent(
+                    "kiwi-sticky-\(UUID().uuidString)"
+                )
+        )
+    }
+
+    private func addWindow(_ core: KiwiCore, _ raw: UInt32) {
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: WindowID(raw),
+                    pid: 1,
+                    appName: "App\(raw)"
+                )
+            )
+        )
+    }
+
+    private func isSticky(_ core: KiwiCore) -> Bool? {
+        core.state.windows[WindowID(1)]?.isSticky
+    }
+
+    @Test("make_sticky marks the focused window")
+    func makeSticky() {
+        let core = makeCore()
+        addWindow(core, 1)
+        #expect(isSticky(core) == false)
+        #expect(core.execute("make_sticky").isSuccess)
+        #expect(isSticky(core) == true)
+    }
+
+    @Test("make_unsticky clears the flag")
+    func makeUnsticky() {
+        let core = makeCore()
+        addWindow(core, 1)
+        #expect(core.execute("make_sticky").isSuccess)
+        #expect(core.execute("make_unsticky").isSuccess)
+        #expect(isSticky(core) == false)
+    }
+
+    @Test("two toggles return to the original state")
+    func toggleRoundTrip() {
+        let core = makeCore()
+        addWindow(core, 1)
+        #expect(core.execute("toggle_sticky").isSuccess)
+        #expect(isSticky(core) == true)
+        #expect(core.execute("toggle_sticky").isSuccess)
+        #expect(isSticky(core) == false)
+    }
+
+    @Test("sticky leaves the float state untouched")
+    func orthogonalToFloat() {
+        let core = makeCore()
+        addWindow(core, 1)
+        #expect(core.execute("make_floating").isSuccess)
+        #expect(core.execute("make_sticky").isSuccess)
+        let window = core.state.windows[WindowID(1)]
+        #expect(window?.isFloating == true)
+        #expect(window?.isSticky == true)
+        #expect(core.execute("make_tiled").isSuccess)
+        #expect(
+            core.state.windows[WindowID(1)]?.isSticky == true
+        )
+    }
+
+    @Test("sticky verbs without a focused window fail")
+    func failsWithoutFocus() {
+        let core = makeCore()
+        #expect(!core.execute("make_sticky").isSuccess)
+        #expect(!core.execute("make_unsticky").isSuccess)
+        #expect(!core.execute("toggle_sticky").isSuccess)
+    }
+
+    @Test("sticky verbs are listed in the API reference")
+    func listedInReference() {
+        for verb in [
+            "make_sticky", "make_unsticky", "toggle_sticky",
+        ] {
+            #expect(
+                APIReference.commands.contains {
+                    $0.command == verb
+                }
+            )
+        }
+    }
+}
+
+/// Close/reopen persistence of the sticky intent (#414),
+/// mirroring the float persistence (#160): identity is app +
+/// title, an empty title carries no identity, and the last
+/// close wins for a shared identity.
+@Suite("Sticky persistence")
+struct StickyPersistenceTests {
+    private func makeWindow(
+        _ id: UInt32,
+        pid: pid_t = 100,
+        title: String = "Doc"
+    ) -> ManagedWindow {
+        ManagedWindow(
+            id: WindowID(id),
+            pid: pid,
+            appName: "TestApp",
+            title: title
+        )
+    }
+
+    @Test("make_sticky survives close and reopen")
+    func stickySurvivesReopen() {
+        var state = StateCoordinator()
+        state.apply(.windowCreated(makeWindow(1)))
+        state.setSticky(WindowID(1), true)
+        state.apply(
+            .windowDestroyed(WindowID(1), wasMinimized: false)
+        )
+        state.apply(.windowCreated(makeWindow(2)))
+        #expect(state.windows[WindowID(2)]?.isSticky == true)
+    }
+
+    @Test("an unsticky close clears a stale remembered intent")
+    func unstickyCloseClears() {
+        var state = StateCoordinator()
+        state.apply(.windowCreated(makeWindow(1)))
+        state.setSticky(WindowID(1), true)
+        state.apply(
+            .windowDestroyed(WindowID(1), wasMinimized: false)
+        )
+        // Reopen restores sticky; the user then turns it off.
+        state.apply(.windowCreated(makeWindow(2)))
+        #expect(state.windows[WindowID(2)]?.isSticky == true)
+        state.setSticky(WindowID(2), false)
+        state.apply(
+            .windowDestroyed(WindowID(2), wasMinimized: false)
+        )
+        state.apply(.windowCreated(makeWindow(3)))
+        #expect(state.windows[WindowID(3)]?.isSticky == false)
+    }
+
+    @Test("app termination remembers sticky for relaunch")
+    func appTerminationRemembers() {
+        var state = StateCoordinator()
+        state.apply(.windowCreated(makeWindow(1)))
+        state.setSticky(WindowID(1), true)
+        state.apply(.appTerminated(pid: 100))
+        state.apply(.windowCreated(makeWindow(2)))
+        #expect(state.windows[WindowID(2)]?.isSticky == true)
+    }
+
+    @Test("a late-loading title still restores the intent")
+    func lazyTitleRestores() {
+        var state = StateCoordinator()
+        state.apply(.windowCreated(makeWindow(1)))
+        state.setSticky(WindowID(1), true)
+        state.apply(
+            .windowDestroyed(WindowID(1), wasMinimized: false)
+        )
+        state.apply(.windowCreated(makeWindow(2, title: "")))
+        #expect(state.windows[WindowID(2)]?.isSticky == false)
+        state.apply(.windowTitleChanged(WindowID(2), "Doc"))
+        #expect(state.windows[WindowID(2)]?.isSticky == true)
+    }
+
+    @Test("empty titles carry no identity to remember")
+    func emptyTitleNeverRemembered() {
+        var state = StateCoordinator()
+        state.apply(.windowCreated(makeWindow(1, title: "")))
+        state.setSticky(WindowID(1), true)
+        state.apply(
+            .windowDestroyed(WindowID(1), wasMinimized: false)
+        )
+        state.apply(.windowCreated(makeWindow(2, title: "")))
+        #expect(state.windows[WindowID(2)]?.isSticky == false)
+    }
+
+    @Test("the restored intent re-arms for the next cycle")
+    func restoredIntentRearms() {
+        var state = StateCoordinator()
+        state.apply(.windowCreated(makeWindow(1)))
+        state.setSticky(WindowID(1), true)
+        state.apply(
+            .windowDestroyed(WindowID(1), wasMinimized: false)
+        )
+        state.apply(.windowCreated(makeWindow(2)))
+        state.apply(
+            .windowDestroyed(WindowID(2), wasMinimized: false)
+        )
+        state.apply(.windowCreated(makeWindow(3)))
+        #expect(state.windows[WindowID(3)]?.isSticky == true)
+    }
+
+    @Test("untracked ids never record an intent")
+    func untrackedIdIgnored() {
+        var state = StateCoordinator()
+        state.setSticky(WindowID(9), true)
+        state.apply(.windowCreated(makeWindow(9)))
+        #expect(state.windows[WindowID(9)]?.isSticky == false)
+    }
+
+    @Test("a rekey carries the sticky flag to the new id")
+    func rekeyCarriesFlag() {
+        var state = StateCoordinator()
+        state.apply(.windowCreated(makeWindow(1)))
+        state.setSticky(WindowID(1), true)
+        state.apply(
+            .windowRekeyed(WindowID(1), WindowID(2))
+        )
+        #expect(state.windows[WindowID(2)]?.isSticky == true)
+    }
+}

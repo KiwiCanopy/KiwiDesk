@@ -64,6 +64,7 @@ struct WindowRekeyTests {
             title: "Title",
             frame: CGRect(x: 1, y: 2, width: 3, height: 4),
             isFloating: true,
+            isSticky: true,
             isTransientOverlay: true
         )
         // The fixture must touch every field, so a new field added

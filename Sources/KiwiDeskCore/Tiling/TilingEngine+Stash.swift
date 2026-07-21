@@ -72,16 +72,20 @@ extension TilingEngine {
     }
 
     /// Parks one window at the stash corner of `bounds`. A
-    /// floating window's original frame is captured on its
-    /// first stash — no layout recomputes a floating frame, so
-    /// the restore pass needs it. Guarded on nil: a later
-    /// forced re-stash (whose state frame is already the AX
-    /// echo of the corner) must not overwrite the original.
+    /// sticky window is exempt — present on every space is the
+    /// whole feature (#414), so it stays in place when its home
+    /// space goes inactive. A floating window's original frame
+    /// is captured on its first stash — no layout recomputes a
+    /// floating frame, so the restore pass needs it. Guarded on
+    /// nil: a later forced re-stash (whose state frame is
+    /// already the AX echo of the corner) must not overwrite
+    /// the original.
     func stash(
         _ window: ManagedWindow,
         in bounds: CGRect,
         force: Bool
     ) {
+        guard !window.isSticky else { return }
         let target = Self.stashFrame(window.frame, in: bounds)
         if !force, Self.close(window.frame, to: target) {
             return

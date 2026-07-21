@@ -77,6 +77,17 @@ struct StashCaptureTests {
         )
         #expect(engine.stashedFrames.isEmpty)
     }
+
+    @Test("Sticky windows are never stashed (#414)")
+    func stickyExempt() {
+        let engine = TilingEngine()
+        var window = makeWindow(1, floating: true)
+        window.isSticky = true
+        engine.stash(window, in: bounds, force: true)
+        // No capture: the window was left in place, so there
+        // is nothing for the restore pass to put back.
+        #expect(engine.stashedFrames.isEmpty)
+    }
 }
 
 @Suite("Floating stash restore")

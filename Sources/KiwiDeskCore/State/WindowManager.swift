@@ -80,6 +80,16 @@ public struct WindowManager: Sendable {
         windows[id]?.title = title
     }
 
+    /// Flips a window's sticky flag (#414). Purely a state
+    /// write — sticky has no detection source and no coupled
+    /// invariant (unlike `setFloating`'s overlay clear below).
+    public mutating func setSticky(
+        _ id: WindowID,
+        _ sticky: Bool
+    ) {
+        windows[id]?.isSticky = sticky
+    }
+
     public mutating func setFloating(
         _ id: WindowID,
         _ floating: Bool
