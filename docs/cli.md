@@ -85,6 +85,7 @@ already-running / not-running cases exit 0.
 | | `set_resize_step` | pt (default 50) — Grow/Shrink magnitude |
 | | `set_resize_feedback` | true\|false (default `true`) — alert sound when a resize hotkey can't act |
 | | `set_swap_skips_cascade` | true\|false (default `true`) — swap from a pile targets the outside neighbor |
+| | `set_float_nudge` | true\|false (default `true`) — shove a window toward center when it toggles to floating |
 | | `set_fallback_space` | space id ("" clears) — rehome target on profile switch |
 | | `set_space_icon` | space id, icon (SF Symbol\|emoji\|char; "" clears) |
 | | `quit.set_layout` | `grid` (default) — how windows are spread on quit |

@@ -512,6 +512,36 @@ this: it resizes itself directly, in every mode (width for x,
 height for y, floored at `min_window_size`). (#122, #124,
 #129)
 
+**The tiled→floating toggle nudges the window, and the nudge is
+a fixed magnitude, not proportional.** A window keeps its exact
+frame the instant it turns floating, so `make_floating` /
+`toggle_floating` looked like they did nothing — no acknowledgement
+of the state change. The float direction now gives the window a
+small shove toward its screen's visible-frame center (the tiled
+direction already animates a real move back into the layout, so it
+needs none). The magnitude is deliberately **fixed** —
+`min(24 pt, distance to center)` along the unit vector to the
+center — rather than proportional to the window size: a
+size-scaled nudge (longest-side × 0.2, say) teleports a maximized
+window clear across the screen while barely moving a small one.
+The fixed form self-tapers instead — a window already near the
+center has a short distance term and so moves less, reaching zero
+with no edge special-casing; a dead-centered window (direction
+undefined) shoves straight down. The target is clamped fully
+inside the visible frame, exactly like tiled placement, so it can
+never land under the menu bar / a reserved bar strip or partly
+off-screen, and it rides the existing relayout animation so the
+motion reads as a deliberate move, not a jump. Fires on the
+explicit float verbs only — `make_floating` and a
+`toggle_floating` that lands on floating — once per tiled→floating
+flip, never on an already-floating window. `make_auto` is
+deliberately excluded: its flip is detection-driven, not a
+deliberate user float, so it gets no acknowledging nudge.
+Fixed, not proportional, is the whole point — recorded
+here so it is not "optimized" back into a size-scaled form. A
+niche polish behavior, so the disable knob (`set_float_nudge`,
+default on) is Lua-only with no Settings toggle.
+
 ### Spaces, profiles & config ownership
 
 **The fallback space is an explicit choice, not "whichever
