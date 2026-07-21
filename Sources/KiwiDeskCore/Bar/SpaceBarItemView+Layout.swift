@@ -112,7 +112,7 @@ extension SpaceBarItemView {
         let base =
             centered ? cell * 0.8 : max(cell * 0.42, 8)
         badge.font = .systemFont(
-            ofSize: base * (centered ? 0.5 : 0.9),
+            ofSize: base * (centered ? 0.5 : 0.72),
             weight: .bold
         )
         let textWidth = ceil(badge.cell?.cellSize.width ?? 0)
@@ -183,18 +183,16 @@ extension SpaceBarItemView {
                 height: cell
             )
         // Flipped coordinates: minY is the visual top.
-        // Fully inside the cell (owner QA 2026-07-21): the
-        // leading badges read detached when they poke past the
-        // icon like the count badge's 1 pt overhang does on
-        // the trailing side, so they inset 1 pt inward instead.
+        // Overhang matching the count badge (#414): sticky
+        // hugs top-leading, floating hugs bottom-leading.
         if index < stickyBadgeViews.count,
             !stickyBadgeViews[index].isHidden
         {
             let badge = stickyBadgeViews[index]
             badge.frame = backingAlignedRect(
                 CGRect(
-                    x: cellRect.minX + 1,
-                    y: cellRect.minY + 1,
+                    x: cellRect.minX - 1,
+                    y: cellRect.minY - 1,
                     width: side,
                     height: side
                 ),
@@ -208,8 +206,8 @@ extension SpaceBarItemView {
             let badge = floatingBadgeViews[index]
             badge.frame = backingAlignedRect(
                 CGRect(
-                    x: cellRect.minX + 1,
-                    y: cellRect.maxY - side - 1,
+                    x: cellRect.minX - 1,
+                    y: cellRect.maxY - side + 1,
                     width: side,
                     height: side
                 ),
