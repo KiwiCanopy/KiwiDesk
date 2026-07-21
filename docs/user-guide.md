@@ -695,7 +695,11 @@ and on a crowded space it keeps a fully visible slot instead
 of falling into the overflow pile (in the scrolling layout it
 scrolls like any other slot — the row itself is the
 overflow). Rearrange it on its home space to move it
-everywhere; on other spaces it cannot be reordered or mouse-resized — the gesture snaps back.
+everywhere; on other spaces it cannot be reordered or mouse-resized — the gesture snaps back. The `?` beside **Toggle
+sticky** in Shortcuts spells this out. When such a drag snaps
+back, the window's chip briefly expands into a pill naming its
+**home space**, so you can see where the tile actually
+belongs.
 
 Because a sticky window can look identical to a normal one,
 KiwiDesk marks it with a small badge chip in its top-right

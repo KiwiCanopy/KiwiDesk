@@ -256,6 +256,9 @@ extension KiwiCore {
         // back to its injected slot instead.
         guard space.windows.contains(id) else {
             retile()
+            // The tile just snapped back to its injected slot —
+            // surface WHERE it actually belongs (#421).
+            flashStickyHomeSpace(id)
             return
         }
 

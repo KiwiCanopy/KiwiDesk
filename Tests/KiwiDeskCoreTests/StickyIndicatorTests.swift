@@ -38,6 +38,41 @@ struct StickyIndicatorManagerTests {
         manager.clear()
         #expect(manager.markedWindows.isEmpty)
     }
+
+    @Test("Flash keeps the set; an unmarked window is a no-op")
+    func flashContract() {
+        let manager = StickyIndicatorManager()
+        manager.sync([spec(1)])
+        // Marked window flashes (#421); an unmarked one must
+        // not create a chip or crash.
+        manager.flash(WindowID(1), spaceName: "Work")
+        manager.flash(WindowID(2), spaceName: "Home")
+        #expect(manager.markedWindows == [WindowID(1)])
+    }
+}
+
+/// The home-space pill's geometry (#421): the plate grows to fit
+/// the name, capped so a long name truncates instead of sprawling.
+@Suite("Sticky indicator pill", .serialized)
+@MainActor
+struct StickyIndicatorPlateTests {
+    @Test("A name expands the plate past the collapsed square")
+    func expands() {
+        let plate = StickyIndicatorPlate()
+        #expect(
+            plate.expandedWidth(for: "Work")
+                > StickyIndicatorPlate.size
+        )
+    }
+
+    @Test("A long name caps at the max pill width")
+    func caps() {
+        let plate = StickyIndicatorPlate()
+        let width = plate.expandedWidth(
+            for: String(repeating: "W", count: 80)
+        )
+        #expect(width == StickyIndicatorPlate.maxWidth)
+    }
 }
 
 /// The driver (#414): every sticky window wears the chip on
