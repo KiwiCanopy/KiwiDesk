@@ -13,6 +13,15 @@ public struct WorkspaceManager: Sendable {
     private var spaceDisplay: [SpaceID: DisplayID] = [:]
     public private(set) var activeSpace: SpaceID?
 
+    /// The window holding the SYSTEM focus, across spaces —
+    /// every focus write lands here (`focus(_:in:)` is the one
+    /// write path). Distinct from a space's own `focused`,
+    /// which is just that space's last-focused member: a
+    /// sticky window focused from a foreign space (#414) makes
+    /// the two disagree, and surfaces that accent "the focused
+    /// window" (the Space Bar) must follow this one.
+    public private(set) var lastFocused: WindowID?
+
     public init() {}
 
     // MARK: - Spaces
@@ -166,6 +175,7 @@ public struct WorkspaceManager: Sendable {
 
     /// Removes a window from whatever space contains it.
     public mutating func remove(_ window: WindowID) {
+        if lastFocused == window { lastFocused = nil }
         guard let id = space(of: window) else { return }
         spaces[id]?.remove(window)
     }
@@ -173,6 +183,7 @@ public struct WorkspaceManager: Sendable {
     /// Re-keys a window in its space, preserving slot and focus
     /// (#308). No-op if `old` is in no space.
     public mutating func rekey(_ old: WindowID, to new: WindowID) {
+        if lastFocused == old { lastFocused = new }
         guard let id = space(of: old) else { return }
         spaces[id]?.rekey(old, to: new)
     }
@@ -185,6 +196,7 @@ public struct WorkspaceManager: Sendable {
             return
         }
         spaces[id]?.focused = window
+        lastFocused = window
     }
 
     /// Mutates one space in place (array reordering etc.).

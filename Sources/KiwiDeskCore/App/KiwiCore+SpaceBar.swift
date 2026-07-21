@@ -89,7 +89,8 @@ extension KiwiCore {
                 }
                 let (apps, overflow, focusHidden) = spaceBarApps(
                     in: space,
-                    style: style
+                    style: style,
+                    isCurrent: id == current
                 )
                 if style.hideEmpty, apps.isEmpty,
                     id != current
@@ -120,19 +121,30 @@ extension KiwiCore {
     /// badge).
     func spaceBarApps(
         in space: Space,
-        style: SpaceBarStyle
+        style: SpaceBarStyle,
+        isCurrent: Bool = true
     ) -> (
         apps: [SpaceBarItemView.App],
         overflow: Int,
         focusHidden: Bool
     ) {
         // One pass: ids and names stay index-aligned with no
-        // unreachable "?" fallback. Sticky windows homed on
-        // OTHER spaces are appended: present on every space
-        // (#414), so every item lists them — the bar mirrors
-        // what the space actually shows.
-        let members =
-            space.windows + stickyWindowsElsewhere(space)
+        // unreachable "?" fallback. Sticky glyphs TRAVEL with
+        // the user (#414 QA): a sticky window is listed only
+        // under the CURRENT space's item — appended there when
+        // homed elsewhere, pruned from every inactive item
+        // (including its home's) — so one glyph always sits
+        // where the user is, instead of cloning onto every
+        // item at once.
+        let members: [WindowID]
+        if isCurrent {
+            members =
+                space.windows + stickyWindowsElsewhere(space)
+        } else {
+            members = space.windows.filter {
+                state.windows[$0]?.isSticky != true
+            }
+        }
         let pairs = members.compactMap { id in
             state.windows[id].map { (id, $0.appName) }
         }
@@ -204,7 +216,11 @@ extension KiwiCore {
             name: name,
             icon: icon,
             glyph: glyph,
-            focused: space.focused.map(group.contains) ?? false,
+            // The SYSTEM focus, not this space's own memory:
+            // a foreign sticky window can hold it (#414 QA —
+            // its glyph was stuck on the unfocused dim tier).
+            focused: state.workspaces.lastFocused
+                .map(group.contains) ?? false,
             count: group.count,
             // Badge inheritance (#414): a group aggregates its
             // children's states — an "at least one" signal.

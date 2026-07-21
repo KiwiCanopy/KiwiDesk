@@ -273,11 +273,14 @@ extension KiwiCore {
     /// pattern: AXRaise on the active app's windows steals
     /// focus window by window, so the intended focus must be
     /// re-asserted after the raises, and the focused window
-    /// ends on top). With nothing to raise, focus is handed
-    /// over directly.
+    /// ends on top). The re-assert never warps — it runs while
+    /// `zOrderRestoresInFlight` holds, where `mouseWarpEligible`
+    /// swallows warps by design — so callers that want the
+    /// pointer to follow warp at INTENT time, before calling
+    /// this (as `focusSpace` does). With nothing to raise,
+    /// focus is handed over directly.
     func raiseFloatsAndSticky(
-        thenFocus focused: WindowID?,
-        warp: Bool
+        thenFocus focused: WindowID?
     ) {
         var targets: [WindowID] = []
         if let space = activeSpace {
@@ -285,7 +288,10 @@ extension KiwiCore {
                 state.windows[$0]?.isFloating == true
             }
         }
+        // Sorted: `all` is dictionary-ordered, and overlapping
+        // sticky windows must not shuffle z-order per switch.
         for window in state.windows.all
+            .sorted(by: { $0.id.raw < $1.id.raw })
         where window.isSticky && !targets.contains(window.id) {
             targets.append(window.id)
         }
@@ -297,7 +303,7 @@ extension KiwiCore {
                 focusWindow(
                     focused,
                     refocusRetile: false,
-                    warp: warp
+                    warp: false
                 )
             }
             return
@@ -313,7 +319,7 @@ extension KiwiCore {
                     self?.focusWindow(
                         focused,
                         refocusRetile: false,
-                        warp: warp
+                        warp: false
                     )
                 }
                 self?.zOrderRestoresInFlight -= 1

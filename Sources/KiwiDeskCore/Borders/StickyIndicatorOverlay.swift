@@ -26,8 +26,11 @@ final class StickyIndicatorOverlay {
         target = window
     }
 
-    /// Places the chip at `frame`'s top-right (AX coords) and
-    /// re-asserts stacking above the target.
+    /// Places the chip at `frame`'s top-right (AX coords).
+    /// Position only — stacking is `order()`'s job, asserted on
+    /// sync, never per tick: a WindowServer reorder per move
+    /// event made the chip visibly lag behind its window (the
+    /// borders' one-order-per-sync rule, owner QA 2026-07-21).
     func update(frame: CGRect) {
         let panel = self.panel ?? makePanel()
         self.panel = panel
@@ -47,7 +50,12 @@ final class StickyIndicatorOverlay {
         if !panel.isVisible {
             panel.orderFrontRegardless()
         }
-        panel.order(.above, relativeTo: Int(target))
+    }
+
+    /// Stacks the chip directly above its target window. Called
+    /// on sync (steady state), not per follow tick.
+    func order() {
+        panel?.order(.above, relativeTo: Int(target))
     }
 
     func hide() {

@@ -57,6 +57,12 @@ public final class BorderManager {
     private var skyLightActive = false
     private var reportedTrackingActive: Bool?
     var onLog: @MainActor (String) -> Void = { _ in }
+    /// Tee of every WindowServer bounds re-read (`reconcile`) —
+    /// the live-tracking hot path AX echoes lag behind. Wired
+    /// to the sticky chip so it follows a dragged window at
+    /// WS event rate, exactly like the ring (QA 2026-07-21);
+    /// a no-op by default.
+    var onFrameReconciled: @MainActor (WindowID, CGRect) -> Void = { _, _ in }
 
     public init() {}
 
@@ -201,6 +207,7 @@ public final class BorderManager {
             windowFrame: frame,
             restoreVisibility: restoreVisibility
         )
+        onFrameReconciled(id, frame)
         return true
     }
 

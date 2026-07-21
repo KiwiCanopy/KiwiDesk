@@ -87,25 +87,38 @@ struct SpaceBarBadgeTests {
         #expect(merged.apps.map(\.floating) == [true])
     }
 
-    @Test("Foreign sticky windows appear on every space item")
-    func foreignStickyListed() throws {
+    @Test("Sticky glyphs travel with the current space")
+    func stickyGlyphTravels() throws {
         let core = seededCore()
         core.state.workspaces.assign(SpaceID("2"), to: display)
         core.state.setSticky(WindowID(1), true)
+        // On its home space: listed as a normal member.
+        let home = try #require(
+            core.spaceBarItems(
+                display: display,
+                style: SpaceBarStyle()
+            ).first { $0.space == SpaceID("1") }
+        )
+        #expect(home.apps.map(\.name) == ["Web", "Mail"])
+        #expect(home.apps.map(\.sticky) == [true, false])
+        // Switch to space 2: the sticky glyph moves — it joins
+        // the current item and is pruned from the home item
+        // (one glyph, always where the user is).
+        core.state.workspaces.activate(SpaceID("2"))
         let items = core.spaceBarItems(
             display: display,
             style: SpaceBarStyle()
         )
-        #expect(items.count == 2)
         let second = try #require(
             items.first { $0.space == SpaceID("2") }
         )
-        // Space "2" has no members of its own, but the sticky
-        // window is present there too — its item says so,
-        // badge included (#414).
         #expect(second.apps.map(\.name) == ["Web"])
         #expect(second.apps.map(\.sticky) == [true])
-        // Unsticky: the foreign listing disappears.
+        let first = try #require(
+            items.first { $0.space == SpaceID("1") }
+        )
+        #expect(first.apps.map(\.name) == ["Mail"])
+        // Unsticky: the glyph returns home.
         core.state.setSticky(WindowID(1), false)
         let after = core.spaceBarItems(
             display: display,
@@ -115,5 +128,11 @@ struct SpaceBarBadgeTests {
             after.first { $0.space == SpaceID("2") }
         )
         #expect(empty.apps.isEmpty)
+        let restored = try #require(
+            after.first { $0.space == SpaceID("1") }
+        )
+        #expect(
+            restored.apps.map(\.name) == ["Web", "Mail"]
+        )
     }
 }

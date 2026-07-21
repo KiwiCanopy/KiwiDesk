@@ -2789,8 +2789,8 @@ purposes.
 Because a sticky window can look identical to a normal one,
 KiwiDesk marks it: a small badge chip in the window's top-right
 corner (toggleable — see `sticky.set_indicator`) and a sticky
-badge on its Space Bar glyph — listed under **every** space's
-item, since it is present on all of them (see
+badge on its Space Bar glyph — which travels with you, listed
+under whichever space is current (see
 `space_bar.set_sticky_badge`).
 
 Prefer sticky over an `ignore_rules` entry for "keep this

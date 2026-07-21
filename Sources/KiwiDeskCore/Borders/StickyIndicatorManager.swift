@@ -48,6 +48,10 @@ public final class StickyIndicatorManager {
                 )
             overlays[spec.window] = overlay
             overlay.update(frame: spec.frame)
+            // Re-assert stacking each sync (focus change,
+            // retile, z-order restore) — never per follow
+            // tick (the chip lags otherwise).
+            overlay.order()
         }
     }
 

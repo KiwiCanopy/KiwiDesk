@@ -25,6 +25,10 @@ extension KiwiCore {
         ) { [weak self] in
             guard let self else { return }
             guard let window = self.state.windows[id],
+                // Made sticky inside the dwell: following it
+                // now would fly the user back (#414) — the
+                // schedule-time exemption re-checked at fire.
+                !window.isSticky,
                 NSWorkspace.shared.frontmostApplication?
                     .processIdentifier == window.pid,
                 // An open quick-terminal-style panel makes AX
@@ -104,10 +108,14 @@ extension KiwiCore {
         // keep going to a window that is now stashed
         // offscreen (#412 QA: without the raise, a restored
         // float sat buried behind full-frame tiled windows).
-        raiseFloatsAndSticky(
-            thenFocus: activeSpace?.focused,
-            warp: true
-        )
+        // Warp at INTENT time: the deferred re-assert runs
+        // under the z-order counter, where warps are swallowed
+        // — and the forced retile above already assigned the
+        // slot the warp targets.
+        if let next = activeSpace?.focused {
+            warpMouseToFocused(next)
+        }
+        raiseFloatsAndSticky(thenFocus: activeSpace?.focused)
         emitSpaceChange()
         scheduleSpaceSettle(SpaceID(raw))
         return .ok()

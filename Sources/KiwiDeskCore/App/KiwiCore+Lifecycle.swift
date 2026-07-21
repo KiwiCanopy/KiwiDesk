@@ -19,6 +19,12 @@ extension KiwiCore {
         // bar never renders an image-fallback frame.
         appFont.preload()
         borders.start()
+        // The chip rides the ring's WindowServer bounds stream
+        // during drags — AX move echoes alone lag visibly.
+        borders.onFrameReconciled = { [weak self] id, frame in
+            self?.stickyIndicators
+                .follow(id, windowFrame: frame)
+        }
         loadConfig()
         sleepWake.start()
         eventLoop.start()
