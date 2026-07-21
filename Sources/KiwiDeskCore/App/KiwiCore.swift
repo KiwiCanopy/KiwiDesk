@@ -257,6 +257,14 @@ public final class KiwiCore {
         persistScrollOffset()
         updateAppBar()
         updateSpaceBar()
+        // Pin floats above the tiled plane (#418) BEFORE the ring
+        // pass below: the border overlay pins each ring to its
+        // target's live server level, so a window that just turned
+        // floating must reach its floating level here first, or the
+        // ring is pinned a level under the window it just promoted.
+        // Diffs against the last pass, so steady state costs nothing
+        // and the float set is already settled by the layout above.
+        enforceFloatLevels()
         // Rings ride the same freshness as the bar: every
         // structural / focus / mode / settings retile. Runs after
         // the layout above so it reads the just-updated state
@@ -281,9 +289,5 @@ public final class KiwiCore {
         // after `updateAppBar()`: the clamp reads the strips it
         // just painted (#242).
         clampFloatsClearOfBars()
-        // Pin floats above the tiled plane (#418). Diffs against
-        // the last pass, so steady state costs nothing; the float
-        // set is already settled by the layout above.
-        enforceFloatLevels()
     }
 }

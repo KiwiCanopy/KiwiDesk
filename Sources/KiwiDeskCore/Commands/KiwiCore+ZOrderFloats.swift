@@ -69,7 +69,11 @@ extension KiwiCore {
     /// back, degrading to "floats above every UNfocused tiled
     /// window" — the fast path is the fully-correct version. Gated
     /// by the caller to genuine (non-echo) focus changes so the
-    /// focus-handoff's own echo cannot re-trigger the raise.
+    /// focus-handoff's own echo cannot re-trigger the raise. Best
+    /// effort by nature: the float raises emit non-self focus
+    /// echoes that warp the mouse onto the last-raised float, and
+    /// the handoff does not warp back — an accepted artifact of a
+    /// macOS that has dropped the level symbol entirely.
     func raiseFloatsIfFallback(afterFocusing id: WindowID) {
         guard !WindowLevel.isAvailable,
             state.windows[id]?.isFloating != true,
