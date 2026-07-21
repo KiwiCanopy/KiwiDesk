@@ -204,7 +204,18 @@ another space is injected into the active space's tiled member
 array (`StateCoordinator.effectiveTiledMembers`, derived
 home-index insertion), so geometric layouts see its slot as an
 ordinary neighbor candidate and array-order layouts step through
-its index like any other. What *does* differ per layout is the
+its index like any other. The one place the injection is *not*
+enough is the **scroll pan anchor** (#431): a focus-driven layout
+pans to `context.focused`, but the traveler can never be the
+active space's membership-guarded `focused` slot, so focusing it
+(a bar-item click, a keyboard navigate-to) left the viewport put.
+`StateCoordinator.scrollAnchor` closes the gap — while the
+traveler is the frontmost window (`lastFocused`) it becomes the
+pan anchor, reverting to the space's own focus the moment a real
+member is focused. This is purely a render anchor: `space.focused`
+and every implicit-focused verb are untouched (the *source* of
+directional focus/swap stays the space's own slot — see Accepted
+limitations, and #416). What *does* differ per layout is the
 overflow pile: a sticky window keeps a fully-tiled slot, so the
 partial tile-then-pile overflows — Stack zones, track columns
 (`cascade_overflow`), and the grid's last-cell pile — clamp it

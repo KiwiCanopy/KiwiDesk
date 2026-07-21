@@ -150,15 +150,25 @@ extension TilingSettings {
     /// diverge from the applied layout only when a sticky is
     /// piled — the hardest drift to spot. Strip-geometry-only
     /// builds pass `[]` explicitly.
+    ///
+    /// `focusedOverride` supplies the pan anchor a focus-driven
+    /// layout (Scrolling) reads, for the one case a window a space
+    /// should scroll to can never be its `focused` slot: a
+    /// tiled-sticky traveler is injected into the active space's
+    /// row but is a member only of its home space, so the
+    /// membership guard keeps `space.focused` off it (#431).
+    /// Callers that carve only the bar strip omit it and fall back
+    /// to `space.focused`.
     public func context(
         bounds: CGRect,
         space: Space,
-        sticky: Set<WindowID>
+        sticky: Set<WindowID>,
+        focusedOverride: WindowID? = nil
     ) -> LayoutContext {
         LayoutContext(
             bounds: bounds,
             gaps: gaps(for: space.id),
-            focused: space.focused,
+            focused: focusedOverride ?? space.focused,
             minWindowSize: minWindowSize,
             stackWeights: space.stackWeights,
             scrollOffset: space.scrollOffset,

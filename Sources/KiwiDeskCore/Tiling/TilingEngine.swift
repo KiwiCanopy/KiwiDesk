@@ -141,6 +141,16 @@ public final class TilingEngine {
                 state.windows.all
                     .filter(\.isSticky)
                     .map(\.id)
+            ),
+            // Scroll to a tiled-sticky traveler when it is the
+            // frontmost window (#431): it has a slot in `tiled`
+            // but can never be the membership-guarded `focused`
+            // slot. `persistScrollOffset` reads this same
+            // `layoutInput`, so the pan and the stored offset stay
+            // consistent.
+            focusedOverride: state.scrollAnchor(
+                of: space,
+                tiled: tiled
             )
         )
         return (space, tiled, context)
