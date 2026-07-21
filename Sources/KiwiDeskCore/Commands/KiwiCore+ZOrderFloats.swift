@@ -45,27 +45,13 @@ extension KiwiCore {
         }
         // Stamp the floats so the focus echoes their AX raises emit
         // (AX couples raise with app activation) are reverted to the
-        // real focus instead of moving the ring onto a float — but
-        // only within `zOrderRaiseEchoWindow`, so a later deliberate
-        // float focus is never mistaken for the echo (#418). Prune by
-        // age, then restamp: overlapping sequences must not orphan
-        // each other's entries (a plain reset let a prior sequence's
-        // late echoes consume the new sequence's entries).
-        let now = Date()
-        zOrderRaiseEchoes = zOrderRaiseEchoes.filter {
-            now.timeIntervalSince($0.value) < Self.zOrderRaiseEchoWindow
-        }
-        // Skip the focused window (the space-switch-onto-a-float
-        // case): its echo is the intended focus, honored not
-        // reverted, so stamping it only risks eating a later click.
-        for id in pairs.map(\.0) where id != focused {
-            zOrderRaiseEchoes[id] = now
-        }
-        // Guard the focus handoff by generation + live focus: a stale
-        // sequence (superseded by a newer focus) must not steal focus
-        // back, and must not fight a concurrent sequence.
-        zOrderRaiseGeneration += 1
-        let generation = zOrderRaiseGeneration
+        // real focus instead of moving the ring onto a float (#418);
+        // the returned generation guards the handoff against a stale
+        // sequence stealing focus back.
+        let generation = stampZOrderRaise(
+            pairs.map(\.0),
+            excluding: focused
+        )
         performZOrderSequence(elements: pairs.map(\.1)) {
             [weak self] in
             guard let self,
@@ -142,17 +128,66 @@ extension KiwiCore {
         return targets
     }
 
+    /// Stamps `ids` (except `focused`, whose echo is the intended
+    /// focus) into the shared z-order echo ledger and bumps the
+    /// generation, returning it for the completion's staleness guard.
+    /// One home for the prune window and the skip-focused rule,
+    /// shared by the float raise and the pile restores (#418/#425) so
+    /// the two paths cannot drift.
+    func stampZOrderRaise(
+        _ ids: [WindowID],
+        excluding focused: WindowID?
+    ) -> Int {
+        let now = Date()
+        zOrderRaiseEchoes = zOrderRaiseEchoes.filter {
+            now.timeIntervalSince($0.value)
+                < Self.zOrderRaiseEchoWindow
+        }
+        for id in ids where id != focused {
+            zOrderRaiseEchoes[id] = now
+        }
+        zOrderRaiseGeneration += 1
+        return zOrderRaiseGeneration
+    }
+
     /// Runs a serial Z-order raise sequence on `zOrderQueue`,
     /// holding `zOrderRestoresInFlight` until the main-actor
     /// completion block finishes (#415 architect follow-up).
+    ///
+    /// Our OWN windows (the tracked Settings float) must be raised on
+    /// the main thread: `AXUIElementPerformAction` on an own-process
+    /// window runs AppKit's window ordering IN-PROCESS on the calling
+    /// thread, so the background `zOrderQueue` trips AppKit's
+    /// main-thread assertion and crashes (#426). Foreign raises are
+    /// blocking IPC to another process's main thread and belong off
+    /// our main thread. So own windows are raised here (this runs on
+    /// the main actor), foreign ones on the queue.
     func performZOrderSequence(
         elements: [AXUIElement],
         completion: @MainActor @escaping () -> Void
     ) {
+        for element in elements
+        where AXHelper.mustRaiseOnMainThread(element) {
+            AXHelper.raiseQuietly(element)
+        }
+        let foreign = elements.filter {
+            !AXHelper.mustRaiseOnMainThread($0)
+        }
+        // All-own (no foreign) runs the completion synchronously,
+        // skipping the `zOrderRestoresInFlight` bracket. Safe today
+        // because own windows are never focus-driven restore targets
+        // (the monocle re-arm guard keys on that counter but is only
+        // reached via a foreign focused window, so foreign is never
+        // empty there). Revisit if an own window can ever become a
+        // tiled restore member.
+        guard !foreign.isEmpty else {
+            completion()
+            return
+        }
         zOrderRestoresInFlight += 1
-        nonisolated(unsafe) let elements = elements
+        nonisolated(unsafe) let foreignRaises = foreign
         zOrderQueue.async { [weak self] in
-            for element in elements {
+            for element in foreignRaises {
                 AXHelper.raiseQuietly(element)
             }
             Task { @MainActor [weak self] in

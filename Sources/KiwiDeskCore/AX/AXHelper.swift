@@ -177,14 +177,33 @@ public enum AXHelper {
     }
 
     /// Raises a window without focusing it or activating its
-    /// app — z-order only. Blocking IPC (returns after the
-    /// target app processed the action), safe off the main
-    /// thread like all AX element calls.
+    /// app — z-order only. For a FOREIGN window this is blocking
+    /// IPC (returns after the target app processed the action) and
+    /// safe off the main thread; for an OWN-process window AppKit
+    /// runs the ordering in-process on the calling thread, so the
+    /// caller must gate on `mustRaiseOnMainThread` (#426).
     public static func raiseQuietly(_ element: AXUIElement) {
         AXUIElementPerformAction(
             element,
             kAXRaiseAction as CFString
         )
+    }
+
+    /// Whether `element`'s window belongs to our own process, so
+    /// raising it must happen on the main thread:
+    /// `AXUIElementPerformAction` on an own-process window runs
+    /// AppKit's window ordering in-process on the calling thread,
+    /// and the background z-order queue then trips AppKit's
+    /// main-thread assertion (#426). A failed pid lookup is treated
+    /// as own — the safe default, since a foreign window wrongly
+    /// raised on the main thread only costs a blocking call, while
+    /// an own window wrongly raised off it crashes.
+    public static func mustRaiseOnMainThread(
+        _ element: AXUIElement
+    ) -> Bool {
+        var pid: pid_t = 0
+        let err = AXUIElementGetPid(element, &pid)
+        return err != .success || pid == getpid()
     }
 
     /// Raises a window and gives it (and its app) focus.

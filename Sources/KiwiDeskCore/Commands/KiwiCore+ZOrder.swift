@@ -290,34 +290,19 @@ extension KiwiCore {
         guard !pairs.isEmpty else { return }
         // The raises below steal focus window by window (see the
         // queue comment) and their echoes carry no self-raise
-        // provenance (#152/#425). Stamp the raised ids so a pile
-        // member's echo is reverted to the real focus instead of
-        // moving the ring onto it (`zOrderRaiseEchoes`, shared with
-        // the float path); the focused window is left out of the
-        // raise and re-asserted last, so its own echo (a self-raise)
-        // is honored, while the stamped pile-mates' echoes are not.
-        // Warps are held both by that revert and by
-        // `zOrderRestoresInFlight`, so a restore never ping-pongs the
-        // pointer across pile centers (#186). Prune by age, then
-        // restamp, like the float path.
-        let now = Date()
-        zOrderRaiseEchoes = zOrderRaiseEchoes.filter {
-            now.timeIntervalSince($0.value)
-                < Self.zOrderRaiseEchoWindow
-        }
-        // Skip the focused window: its echo is the intended focus
-        // (honored, never reverted), so stamping it only risks a
-        // lingering entry eating a later deliberate focus of it.
-        for (id, _) in pairs where id != focused {
-            zOrderRaiseEchoes[id] = now
-        }
-        // Generation-guard the closing re-assert so a stale restore
-        // (superseded by a newer focus or z-order sequence) cannot
-        // steal focus back. Checking live focus too is safe because
-        // the revert above keeps `activeSpace.focused` on the real
-        // target through the pile echoes.
-        zOrderRaiseGeneration += 1
-        let generation = zOrderRaiseGeneration
+        // provenance (#152/#425). Stamp the raised pile-mates (not
+        // the focused window, re-asserted last) so their echoes are
+        // reverted to the real focus instead of moving the ring onto
+        // a pile member (`zOrderRaiseEchoes`, shared with the float
+        // path); warps are held by that revert and by
+        // `zOrderRestoresInFlight` (#186). The returned generation
+        // guards the closing re-assert against a stale restore —
+        // safe to also check live focus because the revert keeps
+        // `activeSpace.focused` on the real target through the echoes.
+        let generation = stampZOrderRaise(
+            pairs.map(\.0),
+            excluding: focused
+        )
         performZOrderSequence(elements: pairs.map(\.1)) {
             [weak self] in
             guard let self,
