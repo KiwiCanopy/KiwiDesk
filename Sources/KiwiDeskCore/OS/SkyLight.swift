@@ -62,25 +62,6 @@ public enum SkyLight {
         as: DisplayCurrentSpaceFn.self
     )
 
-    // MARK: - Window level (#418)
-
-    /// `SLSSetWindowLevel(cid, wid, level)` — the non-transacted
-    /// write twin of the border code's `SLSGetWindowLevel` read
-    /// (`SkyLight+Borders.swift`). Sets a foreign-process window's
-    /// server-side stacking level so a floating window renders above
-    /// the tiled plane regardless of focus. Fire-and-forget like the
-    /// border transactions: the returned `CGError` is unreliable, so
-    /// callers never gate on it (#357 lesson).
-    public typealias SetWindowLevelFn =
-        @convention(c) (
-            ConnectionID, CGWindowID, Int32
-        ) -> CGError
-
-    public static let setWindowLevel: SetWindowLevelFn? = symbol(
-        "SLSSetWindowLevel",
-        as: SetWindowLevelFn.self
-    )
-
     // MARK: - Display suppression
 
     public typealias DisableUpdateFn =

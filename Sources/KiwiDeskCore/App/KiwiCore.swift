@@ -85,13 +85,30 @@ public final class KiwiCore {
     /// reused). See `handle(_:)`'s `.windowFocused` case.
     var outstandingSelfRaises: Set<WindowID> = []
 
-    /// Windows currently promoted to the floating window-server
-    /// level (#418). The change set the enforcement pass diffs
-    /// against the live set of floating windows: an entry appears
-    /// when a window is raised to the floating level and is dropped
-    /// when it turns tiled or leaves. Steady state issues no
-    /// SkyLight calls. Empty (and unused) on the AX-fallback path.
-    var floatLevelPromoted: Set<WindowID> = []
+    /// Floats we raised above the tiled plane, stamped with the
+    /// raise time (#418). AX couples a raise with app activation, so
+    /// `raiseFloatsAbove` emits a focus echo per raised float; an
+    /// echo landing on a stamped member within `floatRaiseEchoWindow`
+    /// whose id differs from the focus the user actually reached is
+    /// that echo — reverted, not honored. The stamp bounds the
+    /// ambiguity: a *deliberate* focus of a float outside the window
+    /// is never mistaken for our raise's echo (the bare-set version
+    /// poisoned a lingering entry forever when a raise emitted no
+    /// echo). Stamped per sequence (restamped, pruned by age),
+    /// consumed on echo, cleaned on destroy/rekey.
+    var floatRaisesInFlight: [WindowID: Date] = [:]
+
+    /// Bumped per float-raise sequence so a stale sequence's focus
+    /// handoff cannot steal focus back after a newer focus has
+    /// superseded it (the `runPendingFocusRaise` staleness pattern).
+    var floatRaiseGeneration = 0
+
+    /// How long after a float raise its focus echo may still arrive
+    /// and be reverted (#418). Generous — slow AX apps (Electron)
+    /// report late — at the cost of a deliberate float focus within
+    /// the window being eaten once; strictly better than the old
+    /// permanent poisoning. Tunable.
+    static let floatRaiseEchoWindow: TimeInterval = 2.0
 
     /// Resolves the OS foreground app's pid for the focused-command
     /// preflight (#292). `nil` disables the guard — the default, so
@@ -257,14 +274,6 @@ public final class KiwiCore {
         persistScrollOffset()
         updateAppBar()
         updateSpaceBar()
-        // Pin floats above the tiled plane (#418) BEFORE the ring
-        // pass below: the border overlay pins each ring to its
-        // target's live server level, so a window that just turned
-        // floating must reach its floating level here first, or the
-        // ring is pinned a level under the window it just promoted.
-        // Diffs against the last pass, so steady state costs nothing
-        // and the float set is already settled by the layout above.
-        enforceFloatLevels()
         // Rings ride the same freshness as the bar: every
         // structural / focus / mode / settings retile. Runs after
         // the layout above so it reads the just-updated state
