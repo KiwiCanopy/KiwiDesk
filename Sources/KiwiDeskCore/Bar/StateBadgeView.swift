@@ -25,7 +25,7 @@ enum StateBadgeMetrics {
 /// both `StickyStyle` and `FloatingStyle` — so the Bar subsystem
 /// renders the marks without reaching into the sticky/floating
 /// namespaces itself.
-public struct StateMarkColors: Equatable {
+public struct StateMarkColors: Sendable, Equatable {
     public let sticky: String
     public let floating: String
 

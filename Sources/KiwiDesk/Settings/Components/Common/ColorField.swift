@@ -293,8 +293,13 @@ struct ColorSwatch: View {
     }
 
     private func present() {
+        // Seed an OPAQUE color when Automatic: the empty well's
+        // `color` is `.clear` (alpha 0), which would open the panel
+        // with the opacity slider at zero — a hue picked without
+        // touching alpha would commit an invisible mark (#429).
+        let seed = isAutomatic ? NSColor.labelColor : NSColor(color)
         token = ColorPanelController.shared.present(
-            current: NSColor(color)
+            current: seed
         ) { hex = HexColorField.hexString(from: $0) }
     }
 }
