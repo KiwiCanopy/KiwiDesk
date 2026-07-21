@@ -176,9 +176,18 @@ extension KiwiCore {
             1,
             tiler.settings.resolvedStack(for: space.id).masterCount
         )
-        guard space.windows.count > boundary else { return }
+        // The layout partitions the TILED list (#414 v2: sticky
+        // travelers included at their injected index), so the
+        // cascade to re-raise is its stack zone — raw
+        // `space.windows` would misplace the boundary past any
+        // floating member and miss travelers entirely.
+        let tiled = state.effectiveTiledMembers(
+            of: space,
+            activeSpace: activeSpace?.id
+        )
+        guard tiled.count > boundary else { return }
         raiseSequentially(
-            Array(space.windows[boundary...]),
+            Array(tiled[boundary...]),
             thenFocus: space.focused
         )
     }

@@ -8,13 +8,18 @@ extension KiwiCore {
     /// active space's floating windows — their stash restore
     /// repositions but cannot re-order, so the switch's focus
     /// raise buried them behind full-frame tiled windows —
-    /// and every sticky window (visible on all spaces, never
-    /// stashed, equally buried). Then hands focus over as the
-    /// sequence's ordered final step (the `raiseSequentially`
-    /// pattern: AXRaise on the active app's windows steals
-    /// focus window by window, so the intended focus must be
-    /// re-asserted after the raises, and the focused window
-    /// ends on top). The re-assert never warps — it runs while
+    /// and every FLOATING sticky window (visible on all
+    /// spaces, never stashed, equally buried). The gate is
+    /// `isFloating`, never `isSticky` alone (#418 tier model):
+    /// a tiled-sticky window is a real layout participant on
+    /// the active space (#414 v2) and stays on the tiled
+    /// plane — raising it would pop a tile over its neighbors.
+    /// Then hands focus over as the sequence's ordered final
+    /// step (the `raiseSequentially` pattern: AXRaise on the
+    /// active app's windows steals focus window by window, so
+    /// the intended focus must be re-asserted after the
+    /// raises, and the focused window ends on top). The
+    /// re-assert never warps — it runs while
     /// `zOrderRestoresInFlight` holds, where `mouseWarpEligible`
     /// swallows warps by design — so callers that want the
     /// pointer to follow warp at INTENT time, before calling
@@ -33,7 +38,9 @@ extension KiwiCore {
         // sticky windows must not shuffle z-order per switch.
         for window in state.windows.all
             .sorted(by: { $0.id.raw < $1.id.raw })
-        where window.isSticky && !targets.contains(window.id) {
+        where window.isSticky && window.isFloating
+            && !targets.contains(window.id)
+        {
             targets.append(window.id)
         }
         let ordered = targets.compactMap {
