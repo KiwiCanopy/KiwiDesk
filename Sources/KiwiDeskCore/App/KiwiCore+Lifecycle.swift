@@ -19,11 +19,22 @@ extension KiwiCore {
         // bar never renders an image-fallback frame.
         appFont.preload()
         borders.start()
-        // The chip rides the ring's WindowServer bounds stream
-        // during drags — AX move echoes alone lag visibly.
+        // The chip rides the ring's WindowServer bounds stream —
+        // AX move echoes alone lag visibly during drags. The
+        // reposition path is unguarded (WS bounds are the truth);
+        // the reorder tee re-asserts stacking on a raise that fires
+        // no AX focus event (a re-click on the focused window); and
+        // the tracking predicate lets the chip's AX-echo `follow`
+        // stand down while the WS stream owns the frame.
         borders.onFrameReconciled = { [weak self] id, frame in
             self?.stickyIndicators
-                .follow(id, windowFrame: frame)
+                .reposition(id, windowFrame: frame)
+        }
+        borders.onWindowReordered = { [weak self] id in
+            self?.stickyIndicators.reassert(id)
+        }
+        stickyIndicators.isWindowServerTracked = { [weak self] id in
+            self?.borders.chipUsesWindowServerTracking(id) ?? false
         }
         loadConfig()
         sleepWake.start()

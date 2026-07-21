@@ -23,6 +23,16 @@ public final class StickyIndicatorManager {
     private var overlays: [WindowID: StickyIndicatorOverlay] =
         [:]
 
+    /// Whether the WindowServer stream already tracks this window's
+    /// frame — wired to `BorderManager.chipUsesWindowServerTracking`.
+    /// When true, `follow` (the AX-echo / animation path) stands
+    /// down so a coalesced echo can't rewind the chip behind the
+    /// live WS bounds (the ring's `follow` guard, mirrored). A no-op
+    /// default keeps the manager testable in isolation.
+    public var isWindowServerTracked: @MainActor (WindowID) -> Bool = { _ in
+        false
+    }
+
     public init() {}
 
     /// Windows currently wearing the mark — the contract
@@ -55,10 +65,31 @@ public final class StickyIndicatorManager {
         }
     }
 
-    /// Move/animation hot path: re-corner an already-shown chip
-    /// on a fresh window frame. A no-op for unmarked windows.
+    /// AX-echo / animation hot path: re-corner an already-shown
+    /// chip on a fresh frame — UNLESS the WindowServer stream
+    /// already tracks it, since a coalesced AX echo would rewind
+    /// the chip behind the live WS bounds (the ring's `follow`
+    /// guard, mirrored). A no-op for unmarked windows.
     public func follow(_ id: WindowID, windowFrame: CGRect) {
+        guard !isWindowServerTracked(id) else { return }
         overlays[id]?.update(frame: windowFrame)
+    }
+
+    /// Unguarded reposition — the WindowServer bounds re-read
+    /// (`onFrameReconciled`) owns the chip's frame directly, so it
+    /// bypasses the WS-tracking guard on `follow` (the ring's
+    /// `apply`, mirrored). A no-op for unmarked windows.
+    public func reposition(_ id: WindowID, windowFrame: CGRect) {
+        overlays[id]?.update(frame: windowFrame)
+    }
+
+    /// Re-asserts a chip's stacking above its target after a
+    /// WindowServer z-order change (`onWindowReordered`): a
+    /// re-click raises the window above its own chip yet fires no
+    /// AX focus event, so this is the only re-assert that path
+    /// gets (#414 QA). A no-op for unmarked windows.
+    public func reassert(_ id: WindowID) {
+        overlays[id]?.order()
     }
 
     /// Retires every chip at once (shutdown).
