@@ -2877,12 +2877,13 @@ sticky.set_indicator(false)
 **Expects:** a hex color string `#RRGGBB` or `#RRGGBBAA`, or an
 empty string `""` for **Automatic** (default `""`).
 
-**Does:** tints the sticky mark's glyph — both the on-window chip
-and the Space Bar sticky badge read this one value, so the mark is
-the same color everywhere. `""` is Automatic: the adaptive system
-label color that flips black/white with light and dark mode (the
-shipped look). Any other value must parse as a hex color; the
-glyph draws in it on a neutral plate.
+**Does:** tints the sticky mark — both the on-window chip and the
+Space Bar sticky badge read this one value, so the mark is the
+same color everywhere. The mark becomes a filled disc in the
+color with a legible auto-contrast glyph. `""` is Automatic: the
+badge keeps the count-badge fill and the chip is a neutral glyph
+on glass that flips black/white with light and dark mode (the
+shipped look). Any non-empty value must parse as a hex color.
 
 **Example:**
 
@@ -2896,11 +2897,12 @@ sticky.set_color("")          -- back to Automatic
 **Expects:** a hex color string `#RRGGBB` or `#RRGGBBAA`, or an
 empty string `""` for **Automatic** (default `""`).
 
-**Does:** tints the Space Bar floating badge glyph. Floating
-windows have no on-window chip (they float above the tiles, so
-they are self-evident), so this affects the Space Bar mark only.
-`""` is Automatic (adaptive label color); any other value must
-parse as a hex color.
+**Does:** tints the Space Bar floating badge — a filled disc in
+the color with an auto-contrast glyph. Floating windows have no
+on-window chip (they float above the tiles, so they are
+self-evident), so this affects the Space Bar mark only. `""` is
+Automatic (the badge keeps the count-badge fill); any non-empty
+value must parse as a hex color.
 
 **Example:**
 

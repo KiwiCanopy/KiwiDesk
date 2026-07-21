@@ -36,20 +36,14 @@ public struct StateMarkColors: Sendable, Equatable {
 }
 
 /// A Space Bar state badge (#414): the count badge's circular
-/// plate wearing a template symbol instead of a count. Since #429
-/// the sticky/floating marks leave the count badge's colored fill:
-/// the glyph carries the chosen state color and the plate goes
-/// neutral (owner "colored glyph, neutral plate"). It still hugs
-/// inside the glyph's corner exactly like the count does.
+/// plate wearing a template symbol instead of a count, so the
+/// sticky/floating marks read as the same badge family. Since #429
+/// the fill carries the chosen state color (Automatic falls back
+/// to the count badge's own fill, so the default trio stays
+/// consistent) and the glyph on top is auto-contrasted for
+/// legibility — a filled disc shows its hue far better than a thin
+/// glyph stroke at the 7-9pt badge size (owner + ui-designer).
 final class StateBadgeView: NSView {
-    /// The neutral plate behind a state-mark glyph (#429): a faint
-    /// appearance-adaptive scrim that seats the colored glyph in
-    /// its corner without competing with it — the mark's color is
-    /// the signal, not the plate's. (The count badge keeps its own
-    /// solid `groupBadgeColor` fill; this is the state marks only.)
-    static let neutralPlate =
-        NSColor.labelColor.withAlphaComponent(0.12)
-
     let symbol = NSImageView()
 
     init(symbolName: String) {

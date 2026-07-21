@@ -14,6 +14,24 @@ extension NSColor {
         hex.isEmpty ? fallback : NSColor(kiwiHex: hex)
     }
 
+    /// A legible black-or-white glyph color for a symbol drawn on
+    /// THIS color as a fill (#429): the state marks are filled
+    /// discs, and the glyph on top is auto-contrasted rather than a
+    /// second manual knob, so any picked fill keeps a readable mark
+    /// (a guardrail on legibility, never on taste). Uses the sRGB
+    /// relative-luminance weights, biased slightly toward white
+    /// (threshold 0.6) since a mid-tone chip reads better with
+    /// white than black. Alpha is ignored — the fill's own hue is
+    /// what the glyph sits on.
+    var contrastingGlyph: NSColor {
+        let c = usingColorSpace(.sRGB) ?? self
+        let luminance =
+            0.299 * c.redComponent
+            + 0.587 * c.greenComponent
+            + 0.114 * c.blueComponent
+        return luminance > 0.6 ? .black : .white
+    }
+
     /// Colors come as user-set hex strings; a string that no
     /// longer parses falls back to the system accent color.
     convenience init(kiwiHex hex: String) {

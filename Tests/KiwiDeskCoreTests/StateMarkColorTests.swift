@@ -37,6 +37,17 @@ struct StateMarkColorTests {
         #expect(red != NSColor.labelColor)
     }
 
+    @Test("contrastingGlyph picks a legible black/white")
+    func contrastGlyph() {
+        // Light fill → black glyph; dark fill → white glyph.
+        #expect(NSColor.white.contrastingGlyph == .black)
+        #expect(NSColor.black.contrastingGlyph == .white)
+        // A mid/dark brand hue biases to white (threshold 0.6).
+        #expect(
+            NSColor(kiwiHex: "#4E9F3D").contrastingGlyph == .white
+        )
+    }
+
     @Test("styles default to the Automatic sentinel")
     func defaultsAutomatic() {
         #expect(StickyStyle().color == "")
