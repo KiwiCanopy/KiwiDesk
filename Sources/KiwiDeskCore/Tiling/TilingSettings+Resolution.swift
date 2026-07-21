@@ -143,9 +143,17 @@ extension TilingSettings {
         )
     }
 
+    /// `sticky` = the sticky window ids (#414 v2), so overflow
+    /// piles can keep them fully tiled. REQUIRED so every new
+    /// call site chooses (the `forceRetile` pattern, §5): a
+    /// frame-producing build that silently omitted it would
+    /// diverge from the applied layout only when a sticky is
+    /// piled — the hardest drift to spot. Strip-geometry-only
+    /// builds pass `[]` explicitly.
     public func context(
         bounds: CGRect,
-        space: Space
+        space: Space,
+        sticky: Set<WindowID>
     ) -> LayoutContext {
         LayoutContext(
             bounds: bounds,
@@ -156,6 +164,7 @@ extension TilingSettings {
             scrollOffset: space.scrollOffset,
             trackBreaks: space.trackBreaks,
             trackWeights: space.trackWeights,
+            sticky: sticky,
             bsp: resolvedBsp(for: space.id),
             stack: resolvedStack(for: space.id),
             scrolling: resolvedScrolling(for: space.id),

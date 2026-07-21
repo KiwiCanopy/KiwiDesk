@@ -204,15 +204,25 @@ public struct TrackLayout: LayoutSystem {
                 )
             }
             let ids = Array(windows)
-            if let rects = OverlapStack.overflowFrames(
+            if let overflow = OverlapStack.overflowFrames(
                 count: ids.count,
                 in: region,
                 vertical: vertical,
                 minSize: context.minWindowSize,
                 gap: gap
             ) {
+                // Sticky windows keep a fully-tiled slot
+                // (#414 v2); non-sticky ones overflow instead.
+                let ordered = OverlapStack.stickyExempt(
+                    ids,
+                    tiled: overflow.tiled,
+                    sticky: context.sticky
+                )
                 return Dictionary(
-                    uniqueKeysWithValues: zip(ids, rects)
+                    uniqueKeysWithValues: zip(
+                        ordered,
+                        overflow.rects
+                    )
                 )
             }
             return OverlapStack.frames(

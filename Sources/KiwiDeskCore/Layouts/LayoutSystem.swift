@@ -97,6 +97,14 @@ public struct LayoutContext: Sendable {
     /// Per-track size weight, keyed by the track's head window
     /// (#128). Snapshot of `Space.trackWeights`.
     public var trackWeights: [WindowID: Double]
+    /// Sticky windows (#414 v2): members here keep a fully
+    /// tiled slot when a layout overflows into an
+    /// `OverlapStack` pile (`OverlapStack.stickyExempt`) —
+    /// a non-sticky window overflows instead. May contain ids
+    /// not in the passed window array (floating stickies);
+    /// layouts only ever test membership against the ids they
+    /// were handed, so the over-approximation is harmless.
+    public var sticky: Set<WindowID>
 
     public var bsp: BspParams
     public var stack: StackParams
@@ -117,6 +125,7 @@ public struct LayoutContext: Sendable {
         scrollOffset: CGFloat? = nil,
         trackBreaks: Set<WindowID> = [],
         trackWeights: [WindowID: Double] = [:],
+        sticky: Set<WindowID> = [],
         bsp: BspParams = BspParams(),
         stack: StackParams = StackParams(),
         scrolling: ScrollingParams = ScrollingParams(),
@@ -133,6 +142,7 @@ public struct LayoutContext: Sendable {
         self.scrollOffset = scrollOffset
         self.trackBreaks = trackBreaks
         self.trackWeights = trackWeights
+        self.sticky = sticky
         self.bsp = bsp
         self.stack = stack
         self.scrolling = scrolling

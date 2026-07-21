@@ -91,9 +91,13 @@ extension KiwiCore {
         // Space-first reservation (#293): the App Bar carves
         // inside the frame the Space Bar already inset — same
         // rule the retile path applies.
+        // Empty sticky set: this context only carves the bar
+        // strip (`usable` + `barFrame`), it never produces
+        // per-window frames, so pile exemption cannot apply.
         let context = settings.context(
             bounds: settings.layoutBounds(from: bounds),
-            space: space
+            space: space,
+            sticky: []
         )
         let groups = barGroups(
             in: space,
@@ -173,21 +177,29 @@ extension KiwiCore {
         else { return }
         let moved = groups.remove(at: from)
         groups.insert(moved, at: min(to, groups.count))
-        var reordered = Array(groups.joined()).makeIterator()
         // Resolved before withSpace: reading `state` inside
         // its inout closure would violate exclusivity.
-        // NOTE (#414 v2): the writeback below maps only this
-        // space's own array, so `tiled` must stay LOCAL. When
-        // phase two turns injection on in effectiveTiledMembers,
-        // this site must exclude traveling members first —
-        // otherwise a foreign id lands in `reordered.next()` and
-        // overwrites a local slot (drops a real local window).
-        let tiled = Set(
-            state.effectiveTiledMembers(
-                of: space,
-                activeSpace: activeSpace?.id
-            )
+        // LOCAL-only (#414 v2): the writeback below maps only
+        // this space's own array, while `groups` (built on the
+        // injecting `effectiveTiledMembers`) can hold traveling
+        // sticky items with no local slot. Both the slot set and
+        // the reorder stream drop travelers — a foreign id in
+        // `reordered.next()` would overwrite a local slot and
+        // drop a real window. Dragging a traveler item therefore
+        // reorders nothing: non-home reorder is a v2 non-goal.
+        let tiled = Set(state.localTiledMembers(of: space))
+        let stream = Array(groups.joined())
+            .filter { tiled.contains($0) }
+        // Stream and slots both derive from localTiledMembers,
+        // so the counts provably match; a future drift between
+        // the group source and the writeback should fail loud
+        // here, not silently mis-map slots via the `?? id`
+        // fallback below.
+        assert(
+            stream.count
+                == space.windows.filter(tiled.contains).count
         )
+        var reordered = stream.makeIterator()
         state.workspaces.withSpace(space.id) { sp in
             sp.windows = sp.windows.map { id in
                 tiled.contains(id)

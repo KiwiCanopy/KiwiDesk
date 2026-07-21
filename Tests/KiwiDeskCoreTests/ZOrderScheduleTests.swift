@@ -192,7 +192,11 @@ struct ZOrderScheduleTests {
             focused: WindowID(1)
         )
         many.scrollOffset = 0
-        let manyCtx = settings.context(bounds: bounds, space: many)
+        let manyCtx = settings.context(
+            bounds: bounds,
+            space: many,
+            sticky: []
+        )
         #expect(
             ScrollingLayout.rowOverflows(for: many.windows, in: manyCtx)
         )
@@ -203,7 +207,11 @@ struct ZOrderScheduleTests {
             focused: WindowID(1)
         )
         few.scrollOffset = 0
-        let fewCtx = settings.context(bounds: bounds, space: few)
+        let fewCtx = settings.context(
+            bounds: bounds,
+            space: few,
+            sticky: []
+        )
         #expect(
             !ScrollingLayout.rowOverflows(for: few.windows, in: fewCtx)
         )

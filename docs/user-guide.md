@@ -689,7 +689,13 @@ one with the **Toggle sticky** shortcut (Shortcuts ▸ Size &
 Float; there is no app rule list, stickiness is per window).
 The flag survives closing and reopening the window, and it is
 independent of floating: a floating sticky window keeps its
-own frame everywhere, a tiled one keeps its current place.
+own frame everywhere, a tiled one tiles into every space's
+layout — it takes a slot near where it sits on its own space,
+and on a crowded space it keeps a fully visible slot instead
+of falling into the overflow pile (in the scrolling layout it
+scrolls like any other slot — the row itself is the
+overflow). Rearrange it on its home space to move it
+everywhere; on other spaces it cannot be reordered or mouse-resized — the gesture snaps back.
 
 Because a sticky window can look identical to a normal one,
 KiwiDesk marks it with a small badge chip in its top-right

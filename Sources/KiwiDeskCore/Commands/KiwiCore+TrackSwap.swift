@@ -35,6 +35,14 @@ extension KiwiCore {
                 state.windows[$0]?.isFloating == true
             }
         )
+        // Injected list (#414 v2): a traveler shifts the track
+        // composition this gauge sees, while the mutation below
+        // partitions the LOCAL array — at the edge the overflow
+        // block can mis-gauge by one track. Accepted: the
+        // membership guards keep the mutation safe, the focused
+        // window is always local (per-space focus cannot hold a
+        // traveler), and translating the gauge to the local
+        // array is the non-home-reorder non-goal's territory.
         let tiled = state.effectiveTiledMembers(
             of: space,
             activeSpace: activeSpace?.id

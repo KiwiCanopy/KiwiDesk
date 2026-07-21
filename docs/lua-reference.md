@@ -2778,13 +2778,20 @@ macOS-native analog is Mission Control's "Assign To → All
 Desktops". Stickiness is a per-window flag, flipped on a
 specific live window after it spawns; there is no app-matcher
 rule list. It is orthogonal to floating: a floating sticky
-window keeps its own frame everywhere, while a tiled window
-marked sticky keeps its current place for now (tiling into
-every space's layout is a planned second phase). The flag
-survives the window closing and reopening (matched by app name
-and title, like the float override), and the window remains a
-member of exactly one space — its home — for layout and bar
-purposes.
+window keeps its own frame everywhere, while a tiled sticky
+window tiles into every space's layout — on whichever space is
+active it joins the tiled members at a position derived from
+its position among its home space's tiles (clamped to the
+target space's count; nothing is stored). The flag survives
+the window closing and reopening (matched by app name and
+title, like the float override), and the window remains a real
+member of exactly one space — its home; presence everywhere is
+derived. Reordering the window on its home space therefore
+moves its derived slot on every space, while reordering it on
+a foreign space is not supported: a swap or bar drag targeting
+it there does nothing. On a crowded space a tiled sticky
+window keeps a fully visible slot instead of falling into the
+overflow cascade — a non-sticky window overflows in its place.
 
 Because a sticky window can look identical to a normal one,
 KiwiDesk marks it: a small badge chip in the window's top-right

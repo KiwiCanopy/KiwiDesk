@@ -86,8 +86,8 @@ struct TiledMembersParityTests {
         #expect(helperOutput == [WindowID(1), WindowID(3)])
     }
 
-    @Test("Tiled members never inject a tiled-sticky homed elsewhere")
-    func tiledStickyStaysHomeForLayout() {
+    @Test("Tiled-sticky homed elsewhere joins the active layout")
+    func tiledStickyJoinsActiveLayout() {
         var state = StateCoordinator()
         let space1 = SpaceID("1")
         let space2 = SpaceID("2")
@@ -96,8 +96,9 @@ struct TiledMembersParityTests {
         state.workspaces.activate(space1)
 
         // A TILED sticky window (isFloating: false) homed on the
-        // inactive space2 — the reachable v1 state a `!isFloating`
-        // predicate does NOT filter out.
+        // inactive space2: #414 v2 injects it into the ACTIVE
+        // space's tiled members at its derived home index (0 —
+        // it is its home's first tiled member).
         let w1 = makeWindow(1, isFloating: false)
         let wSticky = makeWindow(2, isFloating: false, isSticky: true)
         state.windows.upsert(w1)
@@ -112,28 +113,50 @@ struct TiledMembersParityTests {
             return
         }
 
-        // Active space1: the traveler must NOT join the tiled
-        // layout (its glyph travels, its tile stays home in v1).
-        let s1Old = s1.windows.filter {
-            state.windows[$0]?.isFloating == false
-        }
+        // Active space1: the traveler tiles in at home index 0.
         let s1Tiled = state.effectiveTiledMembers(
             of: s1,
             activeSpace: space1
         )
-        #expect(s1Tiled == s1Old)
-        #expect(s1Tiled == [WindowID(1)])
+        #expect(s1Tiled == [WindowID(2), WindowID(1)])
+        // The injection is derived, never stored: the space's
+        // own array is untouched.
+        #expect(s1.windows == [WindowID(1)])
 
-        // Inactive home space2 still lays out its own member.
-        let s2Old = s2.windows.filter {
-            state.windows[$0]?.isFloating == false
-        }
+        // Inactive home space2 still lays out its own member —
+        // and ONLY the active space tiles travelers.
         let s2Tiled = state.effectiveTiledMembers(
             of: s2,
             activeSpace: space1
         )
-        #expect(s2Tiled == s2Old)
         #expect(s2Tiled == [WindowID(2)])
+    }
+
+    @Test("Floating sticky never joins the tiled members")
+    func floatingStickyStaysOutOfTiled() {
+        var state = StateCoordinator()
+        let space1 = SpaceID("1")
+        let space2 = SpaceID("2")
+        state.workspaces.ensureSpace(space1)
+        state.workspaces.ensureSpace(space2)
+        state.workspaces.activate(space1)
+
+        let w1 = makeWindow(1)
+        let wFloat = makeWindow(2, isFloating: true, isSticky: true)
+        state.windows.upsert(w1)
+        state.windows.upsert(wFloat)
+        state.workspaces.add(WindowID(1), to: space1)
+        state.workspaces.add(WindowID(2), to: space2)
+
+        guard let s1 = state.workspaces[space1] else {
+            Issue.record("Expected space to exist")
+            return
+        }
+        let tiled = state.effectiveTiledMembers(
+            of: s1,
+            activeSpace: space1
+        )
+        #expect(tiled == [WindowID(1)])
     }
 
     @Test("Effective members handles traveling sticky windows across spaces")
