@@ -64,6 +64,45 @@ extension StateCoordinator {
         return members
     }
 
+    /// The window a focus-driven surface should treat as focused
+    /// on `space` — the target a Scrolling space pans to, a
+    /// Monocle space raises on top, and the App Bar highlights
+    /// (`KiwiCore.appBarFocused`). Normally its own `focused`
+    /// slot, except when
+    /// a tiled-sticky traveler is the frontmost window
+    /// (`lastFocused`) and can never BE that slot (#431). A
+    /// traveler is injected into the active space's row (present
+    /// in `tiled`) yet is a member only of its home space, so
+    /// `WorkspaceManager.focus`'s membership guard keeps
+    /// `space.focused` off it; without this the layout cannot
+    /// surface it — clicking its bar item, or navigating to it,
+    /// would leave it off-screen (Scrolling) or buried (Monocle).
+    ///
+    /// `lastFocused` is a **global** field, so the anchor tracks
+    /// the last-focused window across the whole workspace: it
+    /// yields the traveler until any real member is next focused,
+    /// not the instant a space is switched (a bare switch fires no
+    /// focus event). An inactive space injects no travelers
+    /// (`tiled` is local-only) so it always yields its own focus.
+    ///
+    /// - Parameters:
+    ///   - space: the space whose surface target is wanted.
+    ///   - tiled: the space's `effectiveTiledMembers`, passed in
+    ///     so the caller's already-computed list is reused rather
+    ///     than recomputed.
+    /// - Returns: the traveler to surface, or `space.focused` when
+    ///   no frontmost traveler applies (may itself be `nil`).
+    public func focusAnchor(
+        of space: Space,
+        tiled: [WindowID]
+    ) -> WindowID? {
+        guard let last = workspaces.lastFocused,
+            !space.windows.contains(last),
+            tiled.contains(last)
+        else { return space.focused }
+        return last
+    }
+
     /// The Space Bar's membership for a space: on the current
     /// space, sticky windows homed elsewhere travel in — tiled
     /// travelers at their injected layout position (so the bar

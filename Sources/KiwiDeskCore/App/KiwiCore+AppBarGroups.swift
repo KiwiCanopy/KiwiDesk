@@ -5,6 +5,38 @@ import AppKit
 /// collapsed into groups. Shared by the per-display driver
 /// (`KiwiCore+AppBar`) and the drag reorder.
 extension KiwiCore {
+    /// The window whose App Bar item renders *focused* for
+    /// `space`. On the **active** space this is the shared
+    /// `focusAnchor` — the system frontmost when a tiled-sticky
+    /// traveler holds it, else the space's own slot: a traveler
+    /// holds the focus but can never be the membership-guarded
+    /// slot (#431), so `space.focused` would leave its item on the
+    /// unfocused tier and never expand its group (the fix the
+    /// Space Bar already carries, #414). Delegating to
+    /// `focusAnchor` (rather than raw `lastFocused`) also inherits
+    /// its `tiled`-membership guard: right after a bare switch a
+    /// stale global `lastFocused` that is a *non-traveler* on the
+    /// previous space falls back to this space's own focus instead
+    /// of transiently blanking the highlight (a stale *traveler*
+    /// is injected here, so it deliberately surfaces, matching
+    /// Scrolling and Monocle). Every **inactive**-
+    /// display space keeps its remembered `focused`, which never
+    /// holds the system focus. (The Space Bar reads raw
+    /// `lastFocused`: its items are spaces, so a non-active
+    /// space's group never contains it — no guard needed there.)
+    func appBarFocused(of space: Space) -> WindowID? {
+        guard space.id == activeSpace?.id else {
+            return space.focused
+        }
+        return state.focusAnchor(
+            of: space,
+            tiled: state.effectiveTiledMembers(
+                of: space,
+                activeSpace: activeSpace?.id
+            )
+        )
+    }
+
     /// The bar's items: the space's tiled windows in order,
     /// with adjacent same-app runs collapsed into one group
     /// while `grouping` is on. Same-app windows that are not
@@ -46,7 +78,8 @@ extension KiwiCore {
         }
         return runs.flatMap { group -> [[WindowID]] in
             let focusedInside =
-                space.focused.map(group.contains) ?? false
+                appBarFocused(of: space).map(group.contains)
+                ?? false
             return focusedInside && group.count > 1
                 ? group.map { [$0] } : [group]
         }

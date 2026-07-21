@@ -79,7 +79,13 @@ public struct LayoutContext: Sendable {
     public var bounds: CGRect
     /// Resolved gaps for this space (override > global).
     public var gaps: Gaps
-    /// Focused window (drives Scrolling and Monocle ordering).
+    /// The window Scrolling pans to. A render/pan anchor that may
+    /// diverge from the space's own focus: it can carry a
+    /// tiled-sticky traveler that is the frontmost window but not
+    /// the membership-guarded `focused` slot (#431,
+    /// `StateCoordinator.focusAnchor`). Only Scrolling reads it —
+    /// Monocle's raise resolves the anchor itself
+    /// (`restoreMonocleZOrder`), it does not read this field.
     public var focused: WindowID?
     /// Below this width/height the Overlap Stack kicks in.
     public var minWindowSize: CGFloat

@@ -114,7 +114,8 @@ extension KiwiCore {
             space: space.id,
             items: groups.map { barItem(for: $0, style: style) },
             activeIndex: groups.firstIndex { group in
-                space.focused.map(group.contains) ?? false
+                appBarFocused(of: space).map(group.contains)
+                    ?? false
             },
             strip: strip,
             style: style

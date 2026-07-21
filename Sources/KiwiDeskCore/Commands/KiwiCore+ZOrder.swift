@@ -85,7 +85,20 @@ extension KiwiCore {
     /// jump — and they overlap fully, so their order never shows
     /// (owner 2026-07-20).
     private func restoreMonocleZOrder(_ space: Space) {
-        guard let focused = space.focused,
+        // A tiled-sticky traveler is the frontmost window but never
+        // the membership-guarded `focused` slot (#431); raising
+        // `space.focused` would bury it behind the space's own
+        // local window. `focusAnchor` surfaces the traveler while
+        // it holds the system focus. `thenFocus` gets the anchor
+        // too: the closing re-assert fires only when it equals
+        // `activeSpace.focused` (`raiseSequentially`), so a
+        // traveler skips it and the raise stands, while a local
+        // focus re-asserts as before.
+        let tiled = state.effectiveTiledMembers(
+            of: space,
+            activeSpace: activeSpace?.id
+        )
+        guard let focused = state.focusAnchor(of: space, tiled: tiled),
             state.windows[focused]?.isFloating == false
         else { return }
         raiseSequentially([focused], thenFocus: focused)
@@ -312,34 +325,5 @@ extension KiwiCore {
                 self.focusWindow(focused, warp: false)
             }
         }
-    }
-
-    /// Whether swapping these two windows moves one across
-    /// the stack layout's master/stack boundary.
-    func crossesStackBoundary(
-        _ a: WindowID,
-        _ b: WindowID,
-        in space: Space
-    ) -> Bool {
-        guard space.mode == .stack else { return false }
-        // Per-space master boundary (#17), matching layout math.
-        let boundary = max(
-            1,
-            tiler.settings.resolvedStack(for: space.id).masterCount
-        )
-        // Indexes into the tiled list, like the layout's
-        // partition and `restoreStackZOrder`: raw
-        // `space.windows` would shift the boundary past a
-        // floating member. A traveler (#414 v2) resolves too —
-        // moot while its swap no-ops, but the two boundary
-        // derivations in this file must not contradict.
-        let tiled = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: activeSpace?.id
-        )
-        guard let indexA = tiled.firstIndex(of: a),
-            let indexB = tiled.firstIndex(of: b)
-        else { return false }
-        return (indexA < boundary) != (indexB < boundary)
     }
 }
