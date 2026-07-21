@@ -149,4 +149,13 @@ struct StickyIndicatorDriverTests {
         core.updateStickyIndicators()
         #expect(core.stickyIndicators.markedWindows.isEmpty)
     }
+
+    @Test("Home-space label: numeric reads Space N, named is raw")
+    func homeLabel() {
+        let core = makeCore()
+        // Numeric id → prose "Space N" (never a bare digit); a
+        // named space is its own label (#421).
+        #expect(core.stickyHomeLabel("3") == "Space 3")
+        #expect(core.stickyHomeLabel("Work") == "Work")
+    }
 }

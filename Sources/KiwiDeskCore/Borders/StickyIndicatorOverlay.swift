@@ -81,6 +81,11 @@ final class StickyIndicatorOverlay {
     func hide() {
         collapseWork?.cancel()
         collapseWork = nil
+        // Retire in the collapsed state so a later re-show (a
+        // `hide` not paired with a retire) can't resurrect the
+        // chip mid-pill.
+        currentWidth = Self.size
+        plate.setNameShown(false, animated: false, duration: 0)
         panel?.orderOut(nil)
     }
 
@@ -89,12 +94,7 @@ final class StickyIndicatorOverlay {
     func flash(spaceName: String) {
         guard panel != nil, let frame = lastFrame else { return }
         let width = plate.expandedWidth(for: spaceName)
-        setPill(
-            width: width,
-            radius: StickyIndicatorPlate.expandedRadius,
-            nameShown: true,
-            on: frame
-        )
+        setPill(width: width, nameShown: true, on: frame)
 
         collapseWork?.cancel()
         let work = DispatchWorkItem { [weak self] in
@@ -103,7 +103,6 @@ final class StickyIndicatorOverlay {
             }
             self.setPill(
                 width: Self.size,
-                radius: StickyIndicatorPlate.collapsedRadius,
                 nameShown: false,
                 on: frame
             )
@@ -115,14 +114,14 @@ final class StickyIndicatorOverlay {
         )
     }
 
-    /// Animates plate width, corner radius and the name's fade
-    /// together. `StickyIndicatorPlate.layout()` reflows the glyph
-    /// and name from the live bounds each animation step, so the
-    /// glyph holds its screen position. Reduce Motion swaps the
+    /// Animates plate width and the name/shape morph together.
+    /// `StickyIndicatorPlate.layout()` reflows the glyph and name
+    /// from the live bounds each animation step, so the glyph
+    /// holds its screen position; the plate owns the name fade and
+    /// corner radius (`setNameShown`). Reduce Motion swaps the
     /// morph for an instant show/hide.
     private func setPill(
         width: CGFloat,
-        radius: CGFloat,
         nameShown: Bool,
         on frame: CGRect
     ) {
@@ -132,20 +131,23 @@ final class StickyIndicatorOverlay {
 
         if reduceMotion {
             panel.setFrame(rect, display: true)
-            plate.name.alphaValue = nameShown ? 1 : 0
-            plate.layer?.cornerRadius = radius
+            plate.setNameShown(nameShown, animated: false, duration: 0)
             return
         }
         NSAnimationContext.runAnimationGroup { ctx in
-            ctx.duration =
+            let duration =
                 nameShown
                 ? Self.expandDuration : Self.collapseDuration
+            ctx.duration = duration
             ctx.timingFunction = CAMediaTimingFunction(
                 name: nameShown ? .easeOut : .easeIn
             )
             panel.animator().setFrame(rect, display: true)
-            plate.name.animator().alphaValue = nameShown ? 1 : 0
-            plate.animateCornerRadius(to: radius, over: ctx.duration)
+            plate.setNameShown(
+                nameShown,
+                animated: true,
+                duration: duration
+            )
         }
     }
 

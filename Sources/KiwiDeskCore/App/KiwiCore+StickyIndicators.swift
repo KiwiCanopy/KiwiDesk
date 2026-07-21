@@ -43,8 +43,12 @@ extension KiwiCore {
     }
 
     /// A named space is its own label; a numeric id reads as
-    /// "Space N" so the pill never shows a bare digit.
-    private func stickyHomeLabel(_ id: SpaceID) -> String {
+    /// "Space N" so the pill never shows a bare digit. This is
+    /// deliberately the *prose* form ("Space 3"), NOT the Space
+    /// Bar's bare-digit identifier glyph (`spaceIdentifier`) — the
+    /// pill is a sentence-like cue, not a bar tile, so don't
+    /// "align" it to the glyph. `internal` for a unit test.
+    func stickyHomeLabel(_ id: SpaceID) -> String {
         Int(id.raw) != nil
             ? L("sticky.home.space", "Space %1$@", id.raw)
             : id.raw

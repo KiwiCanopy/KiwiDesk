@@ -97,6 +97,27 @@ final class StickyIndicatorPlate: NSVisualEffectView {
         return Self.namePad + measured + Self.nameGap + Self.size
     }
 
+    /// Shows or hides the home-space name, taking the plate from
+    /// rounded-square badge to full capsule (or back). The plate
+    /// owns its own subview alpha and corner radius so the overlay
+    /// drives only the panel width/frame. `animated` rides the
+    /// caller's `NSAnimationContext` group.
+    func setNameShown(
+        _ shown: Bool,
+        animated: Bool,
+        duration: TimeInterval
+    ) {
+        let radius =
+            shown ? Self.expandedRadius : Self.collapsedRadius
+        if animated {
+            name.animator().alphaValue = shown ? 1 : 0
+            animateCornerRadius(to: radius, over: duration)
+        } else {
+            name.alphaValue = shown ? 1 : 0
+            layer?.cornerRadius = radius
+        }
+    }
+
     /// Animates the corner radius alongside a width change (a
     /// plain set inside `NSAnimationContext` doesn't drive the
     /// layer's implicit animation for a borderless panel).
