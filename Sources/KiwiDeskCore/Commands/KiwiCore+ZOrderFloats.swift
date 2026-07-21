@@ -18,7 +18,7 @@ extension KiwiCore {
     /// (the `raiseSequentially` pattern: AXRaise on a foreign
     /// window activates its app and steals focus window by window,
     /// so the intended focus must be re-asserted after the raises).
-    /// The raised floats are recorded in `floatRaisesInFlight` so
+    /// The raised floats are recorded in `zOrderRaiseEchoes` so
     /// their focus echoes are reverted rather than moving the ring
     /// onto them (see `KiwiCore+Events`); the re-assert never warps
     /// — it runs while `zOrderRestoresInFlight` holds, where
@@ -46,25 +46,30 @@ extension KiwiCore {
         // Stamp the floats so the focus echoes their AX raises emit
         // (AX couples raise with app activation) are reverted to the
         // real focus instead of moving the ring onto a float — but
-        // only within `floatRaiseEchoWindow`, so a later deliberate
+        // only within `zOrderRaiseEchoWindow`, so a later deliberate
         // float focus is never mistaken for the echo (#418). Prune by
         // age, then restamp: overlapping sequences must not orphan
         // each other's entries (a plain reset let a prior sequence's
         // late echoes consume the new sequence's entries).
         let now = Date()
-        floatRaisesInFlight = floatRaisesInFlight.filter {
-            now.timeIntervalSince($0.value) < Self.floatRaiseEchoWindow
+        zOrderRaiseEchoes = zOrderRaiseEchoes.filter {
+            now.timeIntervalSince($0.value) < Self.zOrderRaiseEchoWindow
         }
-        for id in pairs.map(\.0) { floatRaisesInFlight[id] = now }
+        // Skip the focused window (the space-switch-onto-a-float
+        // case): its echo is the intended focus, honored not
+        // reverted, so stamping it only risks eating a later click.
+        for id in pairs.map(\.0) where id != focused {
+            zOrderRaiseEchoes[id] = now
+        }
         // Guard the focus handoff by generation + live focus: a stale
         // sequence (superseded by a newer focus) must not steal focus
         // back, and must not fight a concurrent sequence.
-        floatRaiseGeneration += 1
-        let generation = floatRaiseGeneration
+        zOrderRaiseGeneration += 1
+        let generation = zOrderRaiseGeneration
         performZOrderSequence(elements: pairs.map(\.1)) {
             [weak self] in
             guard let self,
-                generation == self.floatRaiseGeneration
+                generation == self.zOrderRaiseGeneration
             else { return }
             if let focused, focused == self.activeSpace?.focused {
                 self.focusWindow(
@@ -80,7 +85,7 @@ extension KiwiCore {
     /// window, keeping floats above the just-focused window (#418).
     /// AX couples raise and focus, so the raised floats' apps
     /// activate; `raiseFloatsAndSticky` hands focus back and the
-    /// float echoes are reverted (`floatRaisesInFlight`), so the
+    /// float echoes are reverted (`zOrderRaiseEchoes`), so the
     /// ring stays on the focused tiled window while the floats keep
     /// their z-order above it. Gated by the caller to genuine
     /// (non-echo) focus changes so the focus-handoff's own echo

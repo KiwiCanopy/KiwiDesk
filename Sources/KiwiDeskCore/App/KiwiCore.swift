@@ -85,31 +85,38 @@ public final class KiwiCore {
     /// reused). See `handle(_:)`'s `.windowFocused` case.
     var outstandingSelfRaises: Set<WindowID> = []
 
-    /// Floats we raised above the tiled plane, stamped with the
-    /// raise time (#418). AX couples a raise with app activation, so
-    /// `raiseFloatsAbove` emits a focus echo per raised float; an
-    /// echo landing on a stamped member within `floatRaiseEchoWindow`
+    /// Windows we raised purely for z-order, stamped with the raise
+    /// time — floats promoted above the tiled plane (#418) AND the
+    /// overflow-pile members a cascade restore re-raises (#425). A
+    /// raise (`kAXRaiseAction`) couples with app activation, so it
+    /// emits a focus echo carrying no self-raise provenance (#152);
+    /// an echo on a stamped member within `zOrderRaiseEchoWindow`
     /// whose id differs from the focus the user actually reached is
-    /// that echo — reverted, not honored. The stamp bounds the
-    /// ambiguity: a *deliberate* focus of a float outside the window
-    /// is never mistaken for our raise's echo (the bare-set version
-    /// poisoned a lingering entry forever when a raise emitted no
-    /// echo). Stamped per sequence (restamped, pruned by age),
-    /// consumed on echo, cleaned on destroy/rekey.
-    var floatRaisesInFlight: [WindowID: Date] = [:]
+    /// that echo — reverted, not honored, so the ring stays on the
+    /// real focus while the raise keeps its z-order. The stamp bounds
+    /// the ambiguity: a *deliberate* focus of such a window outside
+    /// the window is never mistaken for the echo (a bare set poisoned
+    /// a lingering entry forever when a raise emitted no echo).
+    /// Stamped per sequence (restamped, pruned by age), consumed on
+    /// echo, cleaned on destroy/rekey.
+    var zOrderRaiseEchoes: [WindowID: Date] = [:]
 
-    /// Bumped per float-raise sequence so a stale sequence's focus
-    /// handoff cannot steal focus back after a newer focus has
-    /// superseded it (the `runPendingFocusRaise` staleness pattern).
-    var floatRaiseGeneration = 0
+    /// Bumped per z-order raise sequence (float raise or pile
+    /// restore) so a stale sequence's focus handoff cannot steal
+    /// focus back after a newer focus has superseded it (the
+    /// `runPendingFocusRaise` staleness pattern). The `zOrderRaise
+    /// Echoes` revert keeps focus on the real target, which is what
+    /// makes the live-focus half of the guard safe to check.
+    var zOrderRaiseGeneration = 0
 
-    /// How long after a float raise its focus echo may still arrive
-    /// and be reverted (#418). Sized to the slowest AX responders —
-    /// Electron/WebKit answer focus queries in ~100-300 ms (§5) — with
-    /// ~3x margin, at the cost of a deliberate float focus within the
-    /// window being eaten once (strictly better than the old
-    /// permanent poisoning). Tunable.
-    static let floatRaiseEchoWindow: TimeInterval = 1.0
+    /// How long after a z-order raise its focus echo may still arrive
+    /// and be reverted (#418/#425). Sized to the slowest AX
+    /// responders — Electron/WebKit answer focus queries in
+    /// ~100-300 ms (§5) — with ~3x margin, at the cost of a
+    /// deliberate focus of a raised window within the window being
+    /// eaten once (strictly better than the old permanent
+    /// poisoning). Tunable.
+    static let zOrderRaiseEchoWindow: TimeInterval = 1.0
 
     /// Resolves the OS foreground app's pid for the focused-command
     /// preflight (#292). `nil` disables the guard — the default, so

@@ -284,19 +284,47 @@ extension KiwiCore {
         _ ids: [WindowID],
         thenFocus focused: WindowID?
     ) {
-        let ordered = ids.compactMap {
-            eventLoop.element(for: $0)
+        let pairs = ids.compactMap { id in
+            eventLoop.element(for: id).map { (id, $0) }
         }
-        guard !ordered.isEmpty else { return }
-        // The raises below steal focus window by window (see
-        // the queue comment), and those echoes carry no
-        // self-raise provenance — hold mouse-follows-focus
-        // warps until the closing re-assert ran, so a restore
-        // never ping-pongs the pointer across pile centers
-        // (#186).
-        performZOrderSequence(elements: ordered) { [weak self] in
-            if let focused {
-                self?.focusWindow(focused, warp: false)
+        guard !pairs.isEmpty else { return }
+        // The raises below steal focus window by window (see the
+        // queue comment) and their echoes carry no self-raise
+        // provenance (#152/#425). Stamp the raised ids so a pile
+        // member's echo is reverted to the real focus instead of
+        // moving the ring onto it (`zOrderRaiseEchoes`, shared with
+        // the float path); the focused window is left out of the
+        // raise and re-asserted last, so its own echo (a self-raise)
+        // is honored, while the stamped pile-mates' echoes are not.
+        // Warps are held both by that revert and by
+        // `zOrderRestoresInFlight`, so a restore never ping-pongs the
+        // pointer across pile centers (#186). Prune by age, then
+        // restamp, like the float path.
+        let now = Date()
+        zOrderRaiseEchoes = zOrderRaiseEchoes.filter {
+            now.timeIntervalSince($0.value)
+                < Self.zOrderRaiseEchoWindow
+        }
+        // Skip the focused window: its echo is the intended focus
+        // (honored, never reverted), so stamping it only risks a
+        // lingering entry eating a later deliberate focus of it.
+        for (id, _) in pairs where id != focused {
+            zOrderRaiseEchoes[id] = now
+        }
+        // Generation-guard the closing re-assert so a stale restore
+        // (superseded by a newer focus or z-order sequence) cannot
+        // steal focus back. Checking live focus too is safe because
+        // the revert above keeps `activeSpace.focused` on the real
+        // target through the pile echoes.
+        zOrderRaiseGeneration += 1
+        let generation = zOrderRaiseGeneration
+        performZOrderSequence(elements: pairs.map(\.1)) {
+            [weak self] in
+            guard let self,
+                generation == self.zOrderRaiseGeneration
+            else { return }
+            if let focused, focused == self.activeSpace?.focused {
+                self.focusWindow(focused, warp: false)
             }
         }
     }

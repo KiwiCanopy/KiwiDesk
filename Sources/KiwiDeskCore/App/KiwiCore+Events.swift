@@ -66,21 +66,22 @@ extension KiwiCore {
                 }
                 ignoredPanelActive.removeAll()
             }
-            // A focus echo from our own z-order raise of a float
-            // (#418): AX couples the raise with app activation, so
-            // raising a float above the tiled plane emits a focus
-            // echo for it. The raise must not move focus or the
-            // active ring onto the float — revert to the window the
-            // user actually reached and drop the echo, leaving the
-            // float raised. An echo whose id equals the intended
-            // focus is a deliberate float focus (a space switch onto
-            // a float) and falls through to normal handling.
-            if let stamp = floatRaisesInFlight[id],
+            // A focus echo from our own z-order raise (#418/#425):
+            // AX couples the raise with app activation, so raising a
+            // float above the tiled plane, or a pile member during a
+            // cascade restore, emits a focus echo for it. The raise
+            // must not move focus or the active ring onto that window
+            // — revert to the window the user actually reached and
+            // drop the echo, leaving it raised. The stamped set never
+            // holds the intended focus (the raisers skip it), so a
+            // deliberate focus (a space switch onto a float; a click
+            // on a pile-mate) is unstamped and falls through.
+            if let stamp = zOrderRaiseEchoes[id],
                 Date().timeIntervalSince(stamp)
-                    < Self.floatRaiseEchoWindow,
+                    < Self.zOrderRaiseEchoWindow,
                 let intended = effects.focusBefore, intended != id
             {
-                floatRaisesInFlight[id] = nil
+                zOrderRaiseEchoes[id] = nil
                 // Drop a matching self-raise too: this echo is
                 // consumed here and never reaches the `selfEcho`
                 // read below, so its outstanding entry would leak.
@@ -233,9 +234,9 @@ extension KiwiCore {
         case .windowDestroyed(let id, let wasMinimized):
             // Drop any unechoed self-raise for the gone window: its
             // echo will never land, and WindowIDs can be reused
-            // (#152/#158). Same for a pending float-raise echo.
+            // (#152/#158). Same for a pending z-order-raise echo.
             outstandingSelfRaises.remove(id)
-            floatRaisesInFlight[id] = nil
+            zOrderRaiseEchoes[id] = nil
             cancelDrag(id)
             dragOverlay.hideAll()
             // The switch timestamp is set by the
@@ -271,8 +272,8 @@ extension KiwiCore {
             if outstandingSelfRaises.remove(old) != nil {
                 outstandingSelfRaises.insert(new)
             }
-            if let stamp = floatRaisesInFlight.removeValue(forKey: old) {
-                floatRaisesInFlight[new] = stamp
+            if let stamp = zOrderRaiseEchoes.removeValue(forKey: old) {
+                zOrderRaiseEchoes[new] = stamp
             }
             if pendingFocusRaise == old {
                 pendingFocusRaise = new
