@@ -25,6 +25,9 @@ public final class KiwiCore {
     /// Focus-window border overlays (#278), one ring per bordered
     /// window. Driven by `updateBorders()` inside `retile()`.
     public let borders = BorderManager()
+    /// On-window sticky marks (#414): a border sibling,
+    /// driven by `updateStickyIndicators()` inside `retile()`.
+    public let stickyIndicators = StickyIndicatorManager()
     public let mouse = MouseTracker()
     public let profiles: ProfileManager
     public let crash: CrashRecovery
@@ -265,6 +268,8 @@ public final class KiwiCore {
             // `follow` self-suppresses for WindowServer-tracked
             // rings (#285), so the animation tee can't rewind them.
             self?.borders.follow(id, windowFrame: frame)
+            self?.stickyIndicators
+                .follow(id, windowFrame: frame)
         }
 
         socket.handler = { [weak self] command, args in
@@ -322,6 +327,8 @@ public final class KiwiCore {
         // frames (steady state); per-tick moves come from the
         // animation tee (`tiler.onFrameApplied`).
         updateBorders()
+        // The sticky marks ride the same freshness (#414).
+        updateStickyIndicators()
         // An animated relayout (spawn, close, mode/gap change)
         // restacks windows, so WindowServer fires the same
         // hide/reorder events as a drag-swap — which can leave a

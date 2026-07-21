@@ -81,6 +81,7 @@ extension KiwiCore {
         // by direct AX (no animation tee), so a ring left up would
         // sit stranded over the scattered desktop.
         borders.stop()
+        stickyIndicators.clear()
         // Gather windows onto their owning monitors before
         // any subsystem teardown; AX must still be live here.
         gatherWindows()

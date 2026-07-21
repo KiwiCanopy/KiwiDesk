@@ -144,9 +144,11 @@ extension KiwiCore {
             // tracks the ring (#285), so an AX echo can't rewind it
             // behind the live bounds — the guard lives there, once.
             borders.follow(id, windowFrame: frame)
+            stickyIndicators.follow(id, windowFrame: frame)
             drag.windowMoved(id, frame: frame)
         case .windowResized(let id, let frame):
             borders.follow(id, windowFrame: frame)
+            stickyIndicators.follow(id, windowFrame: frame)
             // Resize gestures share the drag pipeline (same
             // settle debounce). Only mouse-driven resizes
             // count; apps resizing themselves are corrected

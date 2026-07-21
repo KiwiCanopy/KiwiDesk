@@ -721,6 +721,7 @@
   "spaces.overrides.floating.help": "Floating has no layout overrides.",
   "spaces.overrides.none": "Overrides…",
   "spaces.title": "Spaces",
+  "sticky.indicator.ax": "Sticky window",
   "track.auto_tracks": "Automatic tracks",
   "track.auto_tracks_caption": "Fits as many tracks as the screen allows, using the minimum window size above — opening and collapsing them as windows come and go.",
   "track.count": "Track limit",
