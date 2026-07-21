@@ -85,6 +85,14 @@ public final class KiwiCore {
     /// reused). See `handle(_:)`'s `.windowFocused` case.
     var outstandingSelfRaises: Set<WindowID> = []
 
+    /// Windows currently promoted to the floating window-server
+    /// level (#418). The change set the enforcement pass diffs
+    /// against the live set of floating windows: an entry appears
+    /// when a window is raised to the floating level and is dropped
+    /// when it turns tiled or leaves. Steady state issues no
+    /// SkyLight calls. Empty (and unused) on the AX-fallback path.
+    var floatLevelPromoted: Set<WindowID> = []
+
     /// Resolves the OS foreground app's pid for the focused-command
     /// preflight (#292). `nil` disables the guard — the default, so
     /// unit tests exercising focused commands directly are
@@ -273,5 +281,9 @@ public final class KiwiCore {
         // after `updateAppBar()`: the clamp reads the strips it
         // just painted (#242).
         clampFloatsClearOfBars()
+        // Pin floats above the tiled plane (#418). Diffs against
+        // the last pass, so steady state costs nothing; the float
+        // set is already settled by the layout above.
+        enforceFloatLevels()
     }
 }

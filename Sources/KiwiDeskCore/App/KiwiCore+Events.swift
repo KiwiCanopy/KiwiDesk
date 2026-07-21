@@ -142,6 +142,14 @@ extension KiwiCore {
                 // costs one no-op pass. Deliberate.
                 retileWithScrollDuration()
             }
+            // Keep floats above the just-focused tiled window
+            // (#418). Fast path: their level already does this,
+            // so this is a no-op; AX fallback only. Skipped on a
+            // self-echo so the raise's own focus handoff cannot
+            // re-trigger it.
+            if !selfEcho {
+                raiseFloatsIfFallback(afterFocusing: id)
+            }
         case .windowCreated(let window):
             // A brand-new window supersedes a pending follow
             // of a hidden window (see above).

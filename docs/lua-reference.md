@@ -2700,7 +2700,13 @@ tiled: it keeps whatever frame you give it, on the virtual
 space it belongs to — like a tiled window, it hides with its
 space and reappears where you left it when you switch back. (A
 window that should stay visible on *every* space is a [sticky
-window](#sticky-windows), not a floating one.) The override
+window](#sticky-windows), not a floating one.) A floating
+window is always kept **above** the tiled plane: focusing or
+cmd-tabbing to a tiled window no longer buries the float behind
+it, and two overlapping floats stack most-recently-focused on
+top. (To exclude a window from tiling *without* pinning it
+above others, use `ignore_rules` — KiwiDesk then leaves its
+z-order untouched.) The override
 survives the window closing and reopening (matched by app name
 and title; a window that closes while untitled has no identity
 to match and loses it) and applies only to that window — use

@@ -9,11 +9,16 @@ extension KiwiCore {
     /// repositions but cannot re-order, so the switch's focus
     /// raise buried them behind full-frame tiled windows —
     /// and every FLOATING sticky window (visible on all
-    /// spaces, never stashed, equally buried). The gate is
-    /// `isFloating`, never `isSticky` alone (#418 tier model):
-    /// a tiled-sticky window is a real layout participant on
-    /// the active space (#414 v2) and stays on the tiled
-    /// plane — raising it would pop a tile over its neighbors.
+    /// spaces, never stashed, equally buried). The target set
+    /// (`floatLayerElements`) gates on `isFloating`, never
+    /// `isSticky` alone (#418 tier model): a tiled-sticky
+    /// window is a real layout participant on the active space
+    /// (#414 v2) and stays on the tiled plane — raising it
+    /// would pop a tile over its neighbors. On the #418 fast
+    /// path the floats' window level already holds them above
+    /// the tiled plane across the switch, so the raise is
+    /// skipped and only the focus handoff runs; the raise is
+    /// the §5 fallback for a macOS without the level symbol.
     /// Then hands focus over as the sequence's ordered final
     /// step (the `raiseSequentially` pattern: AXRaise on the
     /// active app's windows steals focus window by window, so
@@ -28,24 +33,13 @@ extension KiwiCore {
     func raiseFloatsAndSticky(
         thenFocus focused: WindowID?
     ) {
-        var targets: [WindowID] = []
-        if let space = activeSpace {
-            targets = space.windows.filter {
-                state.windows[$0]?.isFloating == true
-            }
-        }
-        // Sorted: `all` is dictionary-ordered, and overlapping
-        // sticky windows must not shuffle z-order per switch.
-        for window in state.windows.all
-            .sorted(by: { $0.id.raw < $1.id.raw })
-        where window.isSticky && window.isFloating
-            && !targets.contains(window.id)
-        {
-            targets.append(window.id)
-        }
-        let ordered = targets.compactMap {
-            eventLoop.element(for: $0)
-        }
+        // Fast path (#418): a floating window's window-server level
+        // is pinned above the tiled plane and survives space
+        // switches, so the per-switch AX raise is redundant — hand
+        // focus over directly. The raise machinery below stays as
+        // the §5 fallback for a macOS that drops the level symbol.
+        let ordered =
+            WindowLevel.isAvailable ? [] : floatLayerElements()
         guard !ordered.isEmpty else {
             if let focused {
                 focusWindow(
@@ -65,6 +59,47 @@ extension KiwiCore {
                 )
             }
         }
+    }
+
+    /// Re-raises the float layer after focus lands on a tiled
+    /// window, on the AX fallback only (#418). The fast path keeps
+    /// floats above the tiled plane via their window level, so this
+    /// is a no-op there. AX couples raise and focus, so the raised
+    /// floats' apps activate; `raiseFloatsAndSticky` hands focus
+    /// back, degrading to "floats above every UNfocused tiled
+    /// window" — the fast path is the fully-correct version. Gated
+    /// by the caller to genuine (non-echo) focus changes so the
+    /// focus-handoff's own echo cannot re-trigger the raise.
+    func raiseFloatsIfFallback(afterFocusing id: WindowID) {
+        guard !WindowLevel.isAvailable,
+            state.windows[id]?.isFloating != true,
+            !floatLayerElements().isEmpty
+        else { return }
+        raiseFloatsAndSticky(thenFocus: id)
+    }
+
+    /// The AX elements of the windows that belong ABOVE the tiled
+    /// plane: the active space's floating windows plus every
+    /// floating sticky window (visible on all spaces, never
+    /// stashed). The gate is `isFloating`, never `isSticky` alone —
+    /// a tiled-sticky window is a real layout participant (#414 v2)
+    /// and stays on the tiled plane. Sorted by id so overlapping
+    /// floats keep a stable order across passes.
+    private func floatLayerElements() -> [AXUIElement] {
+        var targets: [WindowID] = []
+        if let space = activeSpace {
+            targets = space.windows.filter {
+                state.windows[$0]?.isFloating == true
+            }
+        }
+        for window in state.windows.all
+            .sorted(by: { $0.id.raw < $1.id.raw })
+        where window.isSticky && window.isFloating
+            && !targets.contains(window.id)
+        {
+            targets.append(window.id)
+        }
+        return targets.compactMap { eventLoop.element(for: $0) }
     }
 
     /// Runs a serial Z-order raise sequence on `zOrderQueue`,
