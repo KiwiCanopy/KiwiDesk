@@ -64,9 +64,11 @@ extension StateCoordinator {
         return members
     }
 
-    /// The window a focus-driven layout should surface on `space`
-    /// — the target a Scrolling space pans to and a Monocle space
-    /// raises on top. Normally its own `focused` slot, except when
+    /// The window a focus-driven surface should treat as focused
+    /// on `space` — the target a Scrolling space pans to, a
+    /// Monocle space raises on top, and the App Bar highlights
+    /// (`KiwiCore.appBarFocused`). Normally its own `focused`
+    /// slot, except when
     /// a tiled-sticky traveler is the frontmost window
     /// (`lastFocused`) and can never BE that slot (#431). A
     /// traveler is injected into the active space's row (present

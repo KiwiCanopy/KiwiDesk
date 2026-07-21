@@ -14,10 +14,12 @@ extension KiwiCore {
     /// unfocused tier and never expand its group (the fix the
     /// Space Bar already carries, #414). Delegating to
     /// `focusAnchor` (rather than raw `lastFocused`) also inherits
-    /// its `tiled`-membership guard, so a stale global
-    /// `lastFocused` on the previous space right after a bare
-    /// switch falls back to this space's own focus instead of
-    /// transiently blanking the highlight. Every **inactive**-
+    /// its `tiled`-membership guard: right after a bare switch a
+    /// stale global `lastFocused` that is a *non-traveler* on the
+    /// previous space falls back to this space's own focus instead
+    /// of transiently blanking the highlight (a stale *traveler*
+    /// is injected here, so it deliberately surfaces, matching
+    /// Scrolling and Monocle). Every **inactive**-
     /// display space keeps its remembered `focused`, which never
     /// holds the system focus. (The Space Bar reads raw
     /// `lastFocused`: its items are spaces, so a non-active
