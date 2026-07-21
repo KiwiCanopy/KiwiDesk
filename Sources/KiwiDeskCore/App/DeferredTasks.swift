@@ -31,6 +31,10 @@ final class DeferredTasks {
         /// Re-orders every desired focus ring after a drag/drop
         /// transition (`scheduleBorderDropReconcile`).
         case borderDropSettle
+        /// Coalesced re-raise of the float layer after focus lands
+        /// on a tiled window (`raiseFloatsAbove`) — a burst of focus
+        /// changes collapses to one raise for the final target.
+        case floatRaise
     }
 
     private var tasks: [Key: Task<Void, Never>] = [:]
