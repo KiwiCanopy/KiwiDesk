@@ -141,12 +141,16 @@ extension KiwiCore {
             of: space,
             activeSpace: activeID
         )
-        let pairs = members.compactMap { id in
-            state.windows[id].map { (id, $0.appName) }
+        let pairs = members.compactMap { id -> (WindowID, String, Bool)? in
+            guard let window = state.windows[id] else { return nil }
+            let isSpecial = window.isFloating || window.isSticky
+            return (id, window.appName, isSpecial)
         }
         let windows = pairs.map { $0.0 }
-        let groups = Self.adjacentRuns(of: pairs.map { $0.1 })
-            .map { Array(windows[$0]) }
+        let groups = Self.adjacentRuns(
+            of: pairs.map { $0.1 },
+            specials: pairs.map { $0.2 }
+        ).map { Array(windows[$0]) }
         let cap = style.resolvedGlyphCap
         let visible = groups.prefix(cap)
         let hidden = groups.dropFirst(cap)

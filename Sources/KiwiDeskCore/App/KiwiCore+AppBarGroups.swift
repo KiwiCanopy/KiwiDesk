@@ -40,21 +40,28 @@ extension KiwiCore {
         }
     }
 
-    /// Runs of equal adjacent values:
+    /// Runs of equal adjacent values, with optional floating/sticky
+    /// flags breaking runs into individual 1-window items (#414):
     /// ["Zed", "Zed", "Finder", "Zed"] ->
-    /// [0..<2, 2..<3, 3..<4] — the trailing Zed is not next
-    /// to the first two, so it stays its own run.
+    /// [0..<2, 2..<3, 3..<4] — floating/sticky items do not merge.
     nonisolated static func adjacentRuns(
-        of names: [String]
+        of names: [String],
+        specials: [Bool] = []
     ) -> [Range<Int>] {
         var runs: [Range<Int>] = []
         var start = 0
-        for index in names.indices
-        where index + 1 == names.count
-            || names[index + 1] != names[index]
-        {
-            runs.append(start..<(index + 1))
-            start = index + 1
+        for index in names.indices {
+            let isLast = (index + 1 == names.count)
+            let isSpecial = !specials.isEmpty && specials[index]
+            let nextIsSpecial =
+                !specials.isEmpty && !isLast && specials[index + 1]
+            let nameChanges =
+                !isLast && names[index + 1] != names[index]
+
+            if isLast || isSpecial || nextIsSpecial || nameChanges {
+                runs.append(start..<(index + 1))
+                start = index + 1
+            }
         }
         return runs
     }
