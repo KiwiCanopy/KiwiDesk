@@ -39,9 +39,19 @@ public final class TilingEngine {
     /// must not yank it to its computed slot or stash it into the
     /// corner. The drag handlers set this for the gesture's life
     /// and clear it at drop, when the window's real placement runs
-    /// un-exempt. Same spirit as the `!isFloating` stash exemption:
-    /// pinned for the duration.
+    /// un-exempt: pinned for the duration of the gesture.
     public var dragExemptWindow: WindowID?
+
+    /// Original frames of floating windows parked off-screen by
+    /// `stashInactive`, keyed by window. Engine-owned, transient,
+    /// per-window tiling state — the `dragExemptWindow` precedent —
+    /// NOT a `ManagedWindow` property: a parked frame is a
+    /// hide-mechanism artifact, not window identity (#412).
+    /// Captured on the first stash only, consumed by
+    /// `restoreStashed` when the window's space activates again.
+    /// Tiled windows need no entry: their frames are recomputed
+    /// by the layout on every retile.
+    var stashedFrames: [WindowID: CGRect] = [:]
 
     /// Resolves the AX element of a window (wired to the
     /// event loop's registry).
@@ -199,6 +209,7 @@ public final class TilingEngine {
             fallback: screen,
             force: force
         )
+        restoreStashed(state: state, frames: frames)
     }
 
     /// Applies one frame through the shared animate-or-instant
@@ -233,82 +244,11 @@ public final class TilingEngine {
         }
     }
 
-    // MARK: - Hiding inactive virtual spaces
-
-    /// Visible sliver of stashed windows: the WindowServer's
-    /// clamp floor plus this sliver's own margin (see
-    /// `WindowServerFacts.visibilityFloor`). An ask below the
-    /// floor (the old 8 pt) was unreachable — the OS lifted it
-    /// to ~32 pt, the ±2 pt tolerance never passed, and
-    /// `stashInactive` re-issued a frame for every
-    /// inactive-space window on every retile (#148). At
-    /// floor + margin the target is achievable, so stashed
-    /// windows settle; the visible change is marginal (the OS
-    /// already showed ~32–40 pt).
-    nonisolated static let stashPeek: CGFloat =
-        WindowServerFacts.visibilityFloor + 8
-
-    /// Where a hidden window parks: the bottom-right corner
-    /// of its screen, AeroSpace style (only the top-left
-    /// `stashPeek` corner remains visible). Size unchanged.
-    nonisolated static func stashFrame(
-        _ frame: CGRect,
-        in bounds: CGRect
-    ) -> CGRect {
-        CGRect(
-            x: bounds.maxX - stashPeek,
-            y: bounds.maxY - stashPeek,
-            width: frame.width,
-            height: frame.height
-        )
-    }
-
-    /// Hides the tiled windows of every inactive virtual
-    /// space. Floating windows (incl. PIP) are left alone —
-    /// they behave as pinned across virtual spaces. Windows
-    /// come back through the normal retile when their space
-    /// is activated again.
-    private func stashInactive(
-        state: StateCoordinator,
-        fallback: NSScreen,
-        force: Bool
-    ) {
-        guard let active = state.workspaces.activeSpace
-        else { return }
-        for space in state.workspaces.allSpaces
-        where space.id != active {
-            for id in space.windows {
-                guard let window = state.windows[id],
-                    !window.isFloating,
-                    id != dragExemptWindow
-                else { continue }
-                let screen =
-                    NSScreen.screens.first {
-                        GeometryUtils.axVisibleFrame(of: $0)
-                            .intersects(window.frame)
-                    } ?? fallback
-                let target = Self.stashFrame(
-                    window.frame,
-                    in: GeometryUtils.axVisibleFrame(
-                        of: screen
-                    )
-                )
-                if !force,
-                    Self.close(window.frame, to: target)
-                {
-                    continue
-                }
-                animation.cancel(window: id)
-                setFrame(id, target)
-            }
-        }
-    }
-
     /// Frames within this distance per edge count as "already
     /// there". Covers rounding and small app-side clamping.
     private static let retileTolerance: CGFloat = 2
 
-    private static func close(
+    static func close(
         _ a: CGRect,
         to b: CGRect
     ) -> Bool {
