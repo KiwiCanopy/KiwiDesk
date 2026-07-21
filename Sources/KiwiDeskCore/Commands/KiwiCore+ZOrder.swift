@@ -93,11 +93,13 @@ extension KiwiCore {
 
     /// Track (#193): an overflow cascade piles windows — the
     /// windows inside one track, or the merged overflow track —
-    /// with the title-bar offset. Array order IS the cascade
-    /// order everywhere in the track model (each pile is a
-    /// contiguous slice), so raising the piled windows in that
-    /// order puts each pile's first window behind and its last
-    /// in front, keeping every title bar visible.
+    /// with the title-bar offset. Raise order follows the
+    /// RENDERED cascade, not the array: `stickyExempt` (#414
+    /// v2) can promote a piled sticky out of its array slot, so
+    /// array order no longer equals cascade order; the frames
+    /// themselves do (`cascadeRaiseOrder`), putting each pile's
+    /// top window behind and its bottom in front, keeping every
+    /// title bar visible.
     ///
     /// Raise ONLY the windows that actually overlap (#192): the
     /// side-by-side tracks that tile need no z-order, and raising
@@ -127,7 +129,34 @@ extension KiwiCore {
             }
         }
         guard piled.count > 1 else { return }
-        raiseSequentially(piled, thenFocus: space.focused)
+        raiseSequentially(
+            Self.cascadeRaiseOrder(piled, frames: frames),
+            thenFocus: space.focused
+        )
+    }
+
+    /// Raise order for a cascading region: ascending `minY` —
+    /// piles always cascade downward, so the most-buried
+    /// (topmost) frame raises first and each later raise lands
+    /// on top of it. Frame order, not array order: the render
+    /// can reorder a pile (`OverlapStack.stickyExempt`, #414
+    /// v2), and raising in array order would bury the displaced
+    /// window's title bar under the promoted sticky's full
+    /// slot. Non-overlapping members sort in too (harmless —
+    /// nothing they cover). Ties keep the input order. Pure
+    /// math, unit-tested.
+    nonisolated static func cascadeRaiseOrder(
+        _ ids: [WindowID],
+        frames: [WindowID: CGRect]
+    ) -> [WindowID] {
+        ids.enumerated()
+            .sorted { a, b in
+                let ya = frames[a.element]?.minY ?? 0
+                let yb = frames[b.element]?.minY ?? 0
+                if ya != yb { return ya < yb }
+                return a.offset < b.offset
+            }
+            .map(\.element)
     }
 
     /// Schedules a track z-order restore, but only when the
@@ -186,8 +215,14 @@ extension KiwiCore {
             activeSpace: activeSpace?.id
         )
         guard tiled.count > boundary else { return }
+        // Frame-ordered, not array-ordered: the zone cascade's
+        // rendered order can differ from the array once
+        // `stickyExempt` promotes a piled sticky (#414 v2).
         raiseSequentially(
-            Array(tiled[boundary...]),
+            Self.cascadeRaiseOrder(
+                Array(tiled[boundary...]),
+                frames: tiler.calculatedFrames(state: state)
+            ),
             thenFocus: space.focused
         )
     }
@@ -272,8 +307,18 @@ extension KiwiCore {
             1,
             tiler.settings.resolvedStack(for: space.id).masterCount
         )
-        guard let indexA = space.windows.firstIndex(of: a),
-            let indexB = space.windows.firstIndex(of: b)
+        // Indexes into the tiled list, like the layout's
+        // partition and `restoreStackZOrder`: raw
+        // `space.windows` would shift the boundary past a
+        // floating member. A traveler (#414 v2) resolves too —
+        // moot while its swap no-ops, but the two boundary
+        // derivations in this file must not contradict.
+        let tiled = state.effectiveTiledMembers(
+            of: space,
+            activeSpace: activeSpace?.id
+        )
+        guard let indexA = tiled.firstIndex(of: a),
+            let indexB = tiled.firstIndex(of: b)
         else { return false }
         return (indexA < boundary) != (indexB < boundary)
     }

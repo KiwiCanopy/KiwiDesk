@@ -47,6 +47,19 @@ struct OverlapStackStickyTests {
         #expect(ordered == ids([2, 4, 1, 3]))
     }
 
+    @Test("stickyExempt promotes what it can; surplus stays piled")
+    func partialSurplus() {
+        // One displaceable non-sticky slot, three piled
+        // stickies: exactly one promotion (by pile order), the
+        // remaining stickies stay in the pile, nothing lost.
+        let ordered = OverlapStack.stickyExempt(
+            ids([1, 5, 6, 7]),
+            tiled: 2,
+            sticky: [WindowID(5), WindowID(6), WindowID(7)]
+        )
+        #expect(ordered == ids([5, 6, 1, 7]))
+    }
+
     @Test("stickyExempt with an all-sticky overload keeps count")
     func allStickyOverload() {
         let input = ids([1, 2, 3])
@@ -130,6 +143,66 @@ struct OverlapStackStickyTests {
         #expect(
             (frames[WindowID(3)]?.origin.y ?? 0)
                 >= lastCellOrigin.y
+        )
+    }
+
+    @Test("Track keeps a sticky out of the column cascade")
+    func trackColumnExemption() {
+        // One track (no breaks), four windows in a column too
+        // short for two full slots: the tail cascades. Sticky 4
+        // must take the single full slot at the column top.
+        let context = LayoutContext(
+            bounds: CGRect(x: 0, y: 0, width: 600, height: 900),
+            gaps: Gaps.uniform(0),
+            minWindowSize: 300,
+            sticky: [WindowID(4)]
+        )
+        let frames = TrackLayout().calculateGeometry(
+            for: ids([1, 2, 3, 4]),
+            in: context
+        )
+        guard let stickyFrame = frames[WindowID(4)] else {
+            Issue.record("Expected a frame for the sticky")
+            return
+        }
+        #expect(stickyFrame.minY == 0)
+        #expect(stickyFrame.height >= 300)
+    }
+
+    @Test("cascadeRaiseOrder raises top frames first")
+    func cascadeRaiseOrderFollowsFrames() {
+        // Render order (minY) disagrees with array order — the
+        // stickyExempt case: the promoted sticky (full slot at
+        // the top) must raise FIRST even though it sits last in
+        // the array, so the displaced sliver ends up on top of
+        // it, title bar visible.
+        let frames: [WindowID: CGRect] = [
+            WindowID(10): CGRect(
+                x: 0,
+                y: 100,
+                width: 50,
+                height: 50
+            ),
+            WindowID(20): CGRect(x: 0, y: 0, width: 50, height: 50),
+            WindowID(30): CGRect(
+                x: 0,
+                y: 50,
+                width: 50,
+                height: 50
+            ),
+        ]
+        #expect(
+            KiwiCore.cascadeRaiseOrder(
+                ids([10, 20, 30]),
+                frames: frames
+            ) == ids([20, 30, 10])
+        )
+        // Ties (and missing frames) keep the input order.
+        #expect(
+            KiwiCore.cascadeRaiseOrder(
+                ids([3, 1, 2]),
+                frames: [:]
+            ) == ids([3, 1, 2])
         )
     }
 

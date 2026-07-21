@@ -100,7 +100,10 @@ public struct LayoutContext: Sendable {
     /// Sticky windows (#414 v2): members here keep a fully
     /// tiled slot when a layout overflows into an
     /// `OverlapStack` pile (`OverlapStack.stickyExempt`) —
-    /// a non-sticky window overflows instead.
+    /// a non-sticky window overflows instead. May contain ids
+    /// not in the passed window array (floating stickies);
+    /// layouts only ever test membership against the ids they
+    /// were handed, so the over-approximation is harmless.
     public var sticky: Set<WindowID>
 
     public var bsp: BspParams

@@ -123,6 +123,40 @@ struct TiledStickyInjectionTests {
         )
     }
 
+    @Test("Clamped travelers keep ascending (index, id) order")
+    func clampedTravelersKeepOrder() {
+        // One local; both travelers' home indexes (2 and 2)
+        // clamp past the end — the appended pair must stay in
+        // ascending id order, and a lower home index must
+        // always land first (regression: reversed insertion
+        // inverted both under clamping).
+        var state = StateCoordinator()
+        state.workspaces.ensureSpace("1")
+        state.workspaces.ensureSpace("2")
+        state.workspaces.activate("1")
+        state.windows.upsert(makeWindow(1))
+        state.workspaces.add(WindowID(1), to: "1")
+        for id: UInt32 in [101, 102] {
+            state.windows.upsert(makeWindow(id))
+            state.workspaces.add(WindowID(id), to: "2")
+        }
+        state.windows.upsert(makeWindow(20, isSticky: true))
+        state.workspaces.add(WindowID(20), to: "2")
+        state.windows.upsert(makeWindow(30, isSticky: true))
+        state.workspaces.add(WindowID(30), to: "2")
+        guard let s1 = state.workspaces["1"] else {
+            Issue.record("Expected space")
+            return
+        }
+        let tiled = state.effectiveTiledMembers(
+            of: s1,
+            activeSpace: "1"
+        )
+        #expect(
+            tiled == [WindowID(1), WindowID(20), WindowID(30)]
+        )
+    }
+
     @Test("The sticky's own home space injects nothing extra")
     func homeSpaceStaysLocal() {
         var state = StateCoordinator()

@@ -29,7 +29,19 @@ extension KiwiCore {
         let names = tiled.map {
             state.windows[$0]?.appName ?? "?"
         }
-        let runs = Self.adjacentRuns(of: names).map {
+        // Sticky windows stay individual items like on the
+        // Space Bar (#414): merging a tiled-sticky traveler
+        // into a same-app group would hide it behind an
+        // aggregate count, and clicking the group would focus
+        // its first member — possibly the traveler. Floating
+        // never appears here (tiled list).
+        let specials = tiled.map {
+            state.windows[$0]?.isSticky == true
+        }
+        let runs = Self.adjacentRuns(
+            of: names,
+            specials: specials
+        ).map {
             Array(tiled[$0])
         }
         return runs.flatMap { group -> [[WindowID]] in

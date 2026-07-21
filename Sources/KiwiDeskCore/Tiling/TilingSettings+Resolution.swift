@@ -144,12 +144,16 @@ extension TilingSettings {
     }
 
     /// `sticky` = the sticky window ids (#414 v2), so overflow
-    /// piles can keep them fully tiled; presentation-only
-    /// context builds (bar geometry) may omit it.
+    /// piles can keep them fully tiled. REQUIRED so every new
+    /// call site chooses (the `forceRetile` pattern, §5): a
+    /// frame-producing build that silently omitted it would
+    /// diverge from the applied layout only when a sticky is
+    /// piled — the hardest drift to spot. Strip-geometry-only
+    /// builds pass `[]` explicitly.
     public func context(
         bounds: CGRect,
         space: Space,
-        sticky: Set<WindowID> = []
+        sticky: Set<WindowID>
     ) -> LayoutContext {
         LayoutContext(
             bounds: bounds,

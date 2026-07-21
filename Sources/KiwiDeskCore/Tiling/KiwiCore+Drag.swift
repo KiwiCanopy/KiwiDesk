@@ -246,9 +246,18 @@ extension KiwiCore {
         }
         guard let space = activeSpace,
             space.mode != .floating,
-            space.windows.contains(id),
             state.windows[id]?.isFloating == false
         else { return }
+        // A tiled-sticky traveler (#414 v2) is an on-screen
+        // tile with no local slot: its reorder here is a v2
+        // non-goal, but the gesture physically moved the
+        // window and `.windowMoved` never retiles — a bare
+        // return would strand it at the drop frame. Snap it
+        // back to its injected slot instead.
+        guard space.windows.contains(id) else {
+            retile()
+            return
+        }
 
         let frame = liveDropFrame(id, fallback: frame)
         let slots = tiler.calculatedFrames(state: state)

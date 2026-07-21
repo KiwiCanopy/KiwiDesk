@@ -84,7 +84,19 @@ extension KiwiCore {
             span: span,
             minSize: Double(tiler.settings.minWindowSize)
         )
-        let head = tiled[ranges[track].lowerBound]
+        // Key the weight to the first LOCAL member of the
+        // track: a traveler heading it (#414 v2) is not in
+        // `space.windows`, so an entry under its id could never
+        // be pruned (orphan; recycled-id hazard, #308) and
+        // stops applying the moment it leaves. While the
+        // traveler heads the track the layout still reads the
+        // head's (default) weight — an accepted wobble, see
+        // design-decisions.
+        guard
+            let head = tiled[ranges[track]].first(where: {
+                space.windows.contains($0)
+            })
+        else { return .fail("track has no local window") }
         state.workspaces.withSpace(space.id) {
             $0.trackWeights[head] = value
         }

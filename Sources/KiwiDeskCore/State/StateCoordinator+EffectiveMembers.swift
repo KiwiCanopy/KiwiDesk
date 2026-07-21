@@ -44,15 +44,21 @@ extension StateCoordinator {
         var members = localTiledMembers(of: space)
         let activeID = activeSpace ?? workspaces.activeSpace
         guard space.id == activeID else { return members }
-        // Reversed: inserting the highest (index, id) first
-        // keeps equal-index travelers in ascending id order
-        // after the earlier ones push them right.
-        for traveler in tiledStickyTravelers(into: space)
-            .reversed()
+        // Ascending (index, id) order, each insertion offset by
+        // the travelers already placed before it: earlier
+        // travelers occupy slots ahead of later home indexes,
+        // and the offset keeps the clamped (append) case in the
+        // same ascending order — a reversed insertion inverted
+        // ties whenever two travelers clamped to the end.
+        for (placed, traveler)
+            in tiledStickyTravelers(into: space).enumerated()
         {
             members.insert(
                 traveler.id,
-                at: min(traveler.homeIndex, members.count)
+                at: min(
+                    traveler.homeIndex + placed,
+                    members.count
+                )
             )
         }
         return members

@@ -26,7 +26,8 @@ struct ScrollOffsetPlumbingTests {
         space.scrollOffset = -123
         let context = settings.context(
             bounds: CGRect(x: 0, y: 0, width: 1920, height: 1080),
-            space: space
+            space: space,
+            sticky: []
         )
         #expect(context.scrollOffset == -123)
     }
@@ -58,7 +59,8 @@ struct ScrollOffsetPlumbingTests {
         space.scrollOffset = -400
         let context = settings.context(
             bounds: CGRect(x: 0, y: 0, width: 1920, height: 1080),
-            space: space
+            space: space,
+            sticky: []
         )
         #expect(
             ScrollingLayout.viewportOffset(for: [w1], in: context)

@@ -91,9 +91,13 @@ extension KiwiCore {
         // Space-first reservation (#293): the App Bar carves
         // inside the frame the Space Bar already inset — same
         // rule the retile path applies.
+        // Empty sticky set: this context only carves the bar
+        // strip (`usable` + `barFrame`), it never produces
+        // per-window frames, so pile exemption cannot apply.
         let context = settings.context(
             bounds: settings.layoutBounds(from: bounds),
-            space: space
+            space: space,
+            sticky: []
         )
         let groups = barGroups(
             in: space,
@@ -184,9 +188,18 @@ extension KiwiCore {
         // drop a real window. Dragging a traveler item therefore
         // reorders nothing: non-home reorder is a v2 non-goal.
         let tiled = Set(state.localTiledMembers(of: space))
-        var reordered = Array(groups.joined())
+        let stream = Array(groups.joined())
             .filter { tiled.contains($0) }
-            .makeIterator()
+        // Stream and slots both derive from localTiledMembers,
+        // so the counts provably match; a future drift between
+        // the group source and the writeback should fail loud
+        // here, not silently mis-map slots via the `?? id`
+        // fallback below.
+        assert(
+            stream.count
+                == space.windows.filter(tiled.contains).count
+        )
+        var reordered = stream.makeIterator()
         state.workspaces.withSpace(space.id) { sp in
             sp.windows = sp.windows.map { id in
                 tiled.contains(id)
