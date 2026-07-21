@@ -56,6 +56,10 @@ public struct TilingSettings: Sendable, Equatable {
     /// the focused window (and, when enabled, unfocused ones).
     /// A pure post-layout overlay — never feeds back into layout.
     public var borderStyle = BorderStyle()
+    /// Sticky-window indicator settings (#414): the on-window
+    /// glyph marking a sticky window. A border sibling — pure
+    /// post-layout overlay, never feeds back into layout.
+    public var stickyStyle = StickyStyle()
     /// Drag visuals (see DragOverlay): the dragged window's
     /// own slot (ghost) and the swap target slot (drop zone).
     public var dragGhost = DragVisual.ghostDefault

@@ -110,7 +110,10 @@ struct StashRestoreTests {
         let engine = TilingEngine()
         let state = makeState()
         let original = CGRect(
-            x: 10, y: 20, width: 300, height: 200
+            x: 10,
+            y: 20,
+            width: 300,
+            height: 200
         )
         engine.stashedFrames[WindowID(1)] = original
         engine.restoreStashed(state: state, frames: [:])
@@ -122,7 +125,10 @@ struct StashRestoreTests {
         let engine = TilingEngine()
         let state = makeState()
         let original = CGRect(
-            x: 10, y: 20, width: 300, height: 200
+            x: 10,
+            y: 20,
+            width: 300,
+            height: 200
         )
         engine.stashedFrames[WindowID(2)] = original
         engine.restoreStashed(state: state, frames: [:])
@@ -143,7 +149,10 @@ struct StashRestoreTests {
             state: state,
             frames: [
                 WindowID(1): CGRect(
-                    x: 0, y: 0, width: 500, height: 500
+                    x: 0,
+                    y: 0,
+                    width: 500,
+                    height: 500
                 )
             ]
         )

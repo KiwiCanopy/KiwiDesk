@@ -30,7 +30,7 @@ struct SettingsCodingTests {
                 "animations", "app_bar", "border", "drag", "gap",
                 "layout", "min_window_size", "mouse",
                 "mouse_resize", "new_window_placement_override", "quit",
-                "resize", "space", "space_bar",
+                "resize", "space", "space_bar", "sticky",
                 "swap_skips_cascade",
             ]
         )
@@ -50,6 +50,12 @@ struct SettingsCodingTests {
         #expect(border["unfocused_enabled"] as? Bool == false)
         #expect(border["corner_style"] as? String == "rounded")
         #expect(border["draw_order"] as? String == "behind")
+        // `sticky.set_indicator` → `sticky.indicator` (#414).
+        // Default on: the on-window glyph is the only sticky
+        // cue that never depends on another surface.
+        let sticky = try object(root["sticky"])
+        #expect(Set(sticky.keys) == ["indicator"])
+        #expect(sticky["indicator"] as? Bool == true)
         // `quit.set_layout` → `quit.layout` (#197); `grid` is
         // the only strategy today and the default.
         // `quit.set_grid_target_depth` →
@@ -216,6 +222,8 @@ struct SettingsCodingTests {
         settings.borderStyle.unfocusedEnabled = true
         settings.borderStyle.unfocusedColor = "#04050607"
         settings.borderStyle.cornerStyle = .square
+        settings.stickyStyle.indicator = false
+        settings.spaceBarStyle.stickyBadge = false
         settings.gapsOverride[SpaceID(2)] = .uniform(4)
         settings.placementOverride[SpaceID("mail")] = .last
         settings.animations.onSpaceChange = true

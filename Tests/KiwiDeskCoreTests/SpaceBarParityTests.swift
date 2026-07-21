@@ -112,6 +112,7 @@ struct SpaceBarCommandParityTests {
         .activeIndicator(.gap), .cornerRoundness(5),
         .dimFactor(0.3), .activeDimFactor(0.7),
         .showFrontApp(true), .hideEmpty(true),
+        .stickyBadge(false),
         .springDelay(1000),
         .itemColor("#010101"), .activeItemColor("#020202"),
         .focusedItemColor("#030303"), .hoverFillColor("#040404"),
@@ -185,7 +186,8 @@ struct SpaceBarCommandParityTests {
         for key: SpaceBarStyle.CodingKeys
     ) -> [JSONValue] {
         switch key {
-        case .enabled, .showFrontApp, .hideEmpty, .liquidGlass:
+        case .enabled, .showFrontApp, .hideEmpty,
+            .stickyBadge, .liquidGlass:
             return [.bool(true)]
         case .edge: return [.string("bottom")]
         case .alignment: return [.string("end")]

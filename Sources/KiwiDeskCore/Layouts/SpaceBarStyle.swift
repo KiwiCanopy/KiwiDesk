@@ -86,6 +86,14 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// Hides empty spaces except the current one (verdict 4);
     /// off by default.
     public var hideEmpty = false
+    /// Sticky/floating state badges on space items (#414):
+    /// sticky top-left, floating bottom-left (top-right stays
+    /// the group count). On by default and Lua-only
+    /// (`set_sticky_badge`, no GUI toggle) — in the bar there
+    /// is otherwise no way to tell tiled from floating, and a
+    /// sticky window is invisible state. Space Bar only; the
+    /// App Bar shows no state badges.
+    public var stickyBadge = true
     /// Drag-drop spring dwell (#372): how long a dragged window
     /// must hover a Space item before the visible space springs
     /// to it, in milliseconds. Read through `resolvedSpringDelay`,
@@ -157,6 +165,7 @@ extension SpaceBarStyle: Codable {
         case activeDimFactor = "active_dim_factor"
         case showFrontApp = "show_front_app"
         case hideEmpty = "hide_empty"
+        case stickyBadge = "sticky_badge"
         case springDelay = "spring_delay"
         case itemColor = "item_color"
         case activeItemColor = "active_item_color"
@@ -270,6 +279,11 @@ extension SpaceBarStyle: Codable {
                 Bool.self,
                 forKey: .hideEmpty
             ) ?? defaults.hideEmpty
+        stickyBadge =
+            try container.decodeIfPresent(
+                Bool.self,
+                forKey: .stickyBadge
+            ) ?? defaults.stickyBadge
         springDelay =
             try container.decodeIfPresent(
                 Int.self,

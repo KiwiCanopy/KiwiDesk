@@ -89,6 +89,60 @@ struct StickyCommandTests {
         #expect(!core.execute("toggle_sticky").isSuccess)
     }
 
+    @Test("sticky.set_indicator writes the style, unclamped")
+    func setIndicator() {
+        let core = makeCore()
+        #expect(core.tiler.settings.stickyStyle.indicator)
+        #expect(
+            core.execute(
+                "sticky.set_indicator",
+                args: [.bool(false)]
+            ).isSuccess
+        )
+        #expect(!core.tiler.settings.stickyStyle.indicator)
+        // No coverage-guard clamp here: off stays off even
+        // with the Space Bar also off (Lua is open, #414).
+        #expect(
+            core.execute(
+                "space_bar.set_enabled",
+                args: [.bool(false)]
+            ).isSuccess
+        )
+        #expect(!core.tiler.settings.stickyStyle.indicator)
+    }
+
+    @Test("sticky.set_indicator rejects non-boolean input")
+    func setIndicatorRejects() {
+        let core = makeCore()
+        #expect(
+            !core.execute(
+                "sticky.set_indicator",
+                args: [.string("yes")]
+            ).isSuccess
+        )
+        #expect(
+            !core.execute(
+                "sticky.set_unknown",
+                args: [.bool(true)]
+            ).isSuccess
+        )
+    }
+
+    @Test("space_bar.set_sticky_badge writes the style")
+    func setStickyBadge() {
+        let core = makeCore()
+        #expect(core.tiler.settings.spaceBarStyle.stickyBadge)
+        #expect(
+            core.execute(
+                "space_bar.set_sticky_badge",
+                args: [.bool(false)]
+            ).isSuccess
+        )
+        #expect(
+            !core.tiler.settings.spaceBarStyle.stickyBadge
+        )
+    }
+
     @Test("sticky verbs are listed in the API reference")
     func listedInReference() {
         for verb in [

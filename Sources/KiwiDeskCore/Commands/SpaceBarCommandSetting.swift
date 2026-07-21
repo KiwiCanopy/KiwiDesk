@@ -25,6 +25,7 @@ enum SpaceBarCommandSetting {
     case activeDimFactor(CGFloat)
     case showFrontApp(Bool)
     case hideEmpty(Bool)
+    case stickyBadge(Bool)
     case springDelay(Int)
     case itemColor(String)
     case activeItemColor(String)
@@ -117,6 +118,7 @@ enum SpaceBarCommandSetting {
             "enabled": Self.enabled,
             "show_front_app": Self.showFrontApp,
             "hide_empty": Self.hideEmpty,
+            "sticky_badge": Self.stickyBadge,
             "liquid_glass": Self.liquidGlass,
         ]
     }
@@ -258,6 +260,7 @@ enum SpaceBarCommandSetting {
         case .showFrontApp(let value):
             style.showFrontApp = value
         case .hideEmpty(let value): style.hideEmpty = value
+        case .stickyBadge(let value): style.stickyBadge = value
         case .springDelay(let value):
             style.springDelay = value
         case .itemColor(let value): style.itemColor = value

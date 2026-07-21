@@ -2679,7 +2679,11 @@ unbundled helper process) cannot be targeted by a rule.
 **Expects:** nothing.
 
 **Does:** marks the focused window as floating. It is no longer
-tiled and stays visible across all virtual spaces. The override
+tiled: it keeps whatever frame you give it, on the virtual
+space it belongs to — like a tiled window, it hides with its
+space and reappears where you left it when you switch back. (A
+window that should stay visible on *every* space is a [sticky
+window](#sticky-windows), not a floating one.) The override
 survives the window closing and reopening (matched by app name
 and title; a window that closes while untitled has no identity
 to match and loses it) and applies only to that window — use

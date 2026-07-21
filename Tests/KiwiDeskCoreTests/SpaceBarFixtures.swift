@@ -30,6 +30,7 @@ enum SpaceBarFixtures {
         style.activeDimFactor = 0.7
         style.showFrontApp = true
         style.hideEmpty = true
+        style.stickyBadge = false
         style.springDelay = 1000
         style.itemColor = "#010101"
         style.activeItemColor = "#020202"
