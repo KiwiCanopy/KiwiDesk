@@ -6,22 +6,33 @@ import AppKit
 /// (`KiwiCore+AppBar`) and the drag reorder.
 extension KiwiCore {
     /// The window whose App Bar item renders *focused* for
-    /// `space`. On the **active** space this is the system
-    /// frontmost (`lastFocused`), not the space's own `focused`
-    /// slot: a tiled-sticky traveler holds the system focus but
-    /// can never be the membership-guarded slot (#431), so
-    /// `space.focused` would leave its item on the unfocused tier
-    /// and never expand its group — the same fix the Space Bar
-    /// already carries (#414). Every **inactive**-display space
-    /// keeps its own remembered `focused`, which never holds the
-    /// system focus. (The Space Bar reads raw `lastFocused`: its
-    /// items are spaces, so a non-active space's group simply
-    /// never contains it — no active-space guard needed there.)
+    /// `space`. On the **active** space this is the shared
+    /// `focusAnchor` — the system frontmost when a tiled-sticky
+    /// traveler holds it, else the space's own slot: a traveler
+    /// holds the focus but can never be the membership-guarded
+    /// slot (#431), so `space.focused` would leave its item on the
+    /// unfocused tier and never expand its group (the fix the
+    /// Space Bar already carries, #414). Delegating to
+    /// `focusAnchor` (rather than raw `lastFocused`) also inherits
+    /// its `tiled`-membership guard, so a stale global
+    /// `lastFocused` on the previous space right after a bare
+    /// switch falls back to this space's own focus instead of
+    /// transiently blanking the highlight. Every **inactive**-
+    /// display space keeps its remembered `focused`, which never
+    /// holds the system focus. (The Space Bar reads raw
+    /// `lastFocused`: its items are spaces, so a non-active
+    /// space's group never contains it — no guard needed there.)
     func appBarFocused(of space: Space) -> WindowID? {
         guard space.id == activeSpace?.id else {
             return space.focused
         }
-        return state.workspaces.lastFocused ?? space.focused
+        return state.focusAnchor(
+            of: space,
+            tiled: state.effectiveTiledMembers(
+                of: space,
+                activeSpace: activeSpace?.id
+            )
+        )
     }
 
     /// The bar's items: the space's tiled windows in order,
