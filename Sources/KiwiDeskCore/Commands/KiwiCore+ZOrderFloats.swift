@@ -86,11 +86,25 @@ extension KiwiCore {
     /// (non-echo) focus changes so the focus-handoff's own echo
     /// cannot re-trigger the raise, and skipped when the focused
     /// window is itself a float (it is already on the float layer).
+    ///
+    /// Coalesced through the `.floatRaise` deferred slot: a burst of
+    /// focus changes (rapid clicks, held focus-nav) would otherwise
+    /// pile one full raise sequence per focus, and their intermediate
+    /// raises thrash the z-order — more than one tile transiently
+    /// ends up over the float. The slot self-cancels on reschedule,
+    /// so only the window focus finally settles on raises the floats,
+    /// leaving exactly the focused tile above them. The body re-reads
+    /// `activeSpace?.focused` so a stale target no-ops.
     func raiseFloatsAbove(afterFocusing id: WindowID) {
         guard state.windows[id]?.isFloating != true,
             !floatLayerTargets().isEmpty
         else { return }
-        raiseFloatsAndSticky(thenFocus: id)
+        deferred.schedule(.floatRaise, after: .milliseconds(50)) {
+            [weak self] in
+            guard let self, id == self.activeSpace?.focused
+            else { return }
+            self.raiseFloatsAndSticky(thenFocus: id)
+        }
     }
 
     /// The ids of the windows that belong ABOVE the tiled plane:

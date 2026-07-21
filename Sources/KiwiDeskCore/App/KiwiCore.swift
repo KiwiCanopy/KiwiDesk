@@ -104,11 +104,12 @@ public final class KiwiCore {
     var floatRaiseGeneration = 0
 
     /// How long after a float raise its focus echo may still arrive
-    /// and be reverted (#418). Generous — slow AX apps (Electron)
-    /// report late — at the cost of a deliberate float focus within
-    /// the window being eaten once; strictly better than the old
-    /// permanent poisoning. Tunable.
-    static let floatRaiseEchoWindow: TimeInterval = 2.0
+    /// and be reverted (#418). Sized to the slowest AX responders —
+    /// Electron/WebKit answer focus queries in ~100-300 ms (§5) — with
+    /// ~3x margin, at the cost of a deliberate float focus within the
+    /// window being eaten once (strictly better than the old
+    /// permanent poisoning). Tunable.
+    static let floatRaiseEchoWindow: TimeInterval = 1.0
 
     /// Resolves the OS foreground app's pid for the focused-command
     /// preflight (#292). `nil` disables the guard — the default, so

@@ -1,5 +1,4 @@
 import CoreFoundation
-import CoreGraphics
 import Foundation
 
 /// Runtime bridge to the private SkyLight framework.
