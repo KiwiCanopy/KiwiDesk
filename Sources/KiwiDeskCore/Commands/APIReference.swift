@@ -247,7 +247,10 @@ public enum APIReference {
             "set_corner_style", "set_draw_order", "fit_gaps",
         ],
         "sticky": [
-            "set_indicator"
+            "set_indicator", "set_color",
+        ],
+        "floating": [
+            "set_color"
         ],
     ]
 

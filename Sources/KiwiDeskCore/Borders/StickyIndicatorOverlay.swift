@@ -87,6 +87,14 @@ final class StickyIndicatorOverlay {
         panel?.order(.above, relativeTo: Int(target))
     }
 
+    /// Tints the chip's glyph (and, when expanded, the pill's
+    /// home-space name) to the sticky mark color (#429); empty =
+    /// "Automatic" (adaptive `.labelColor`). Set every sync before
+    /// `update`, so a color change lands on the next retile.
+    func setMarkColor(_ hex: String) {
+        plate.setMarkColor(hex)
+    }
+
     func hide() {
         expandWork?.cancel()
         expandWork = nil

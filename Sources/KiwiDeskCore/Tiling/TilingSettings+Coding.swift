@@ -19,6 +19,7 @@ extension TilingSettings: Codable {
         case spaceBar = "space_bar"
         case border
         case sticky
+        case floating
         case drag
         case gap
         case layout
@@ -111,6 +112,11 @@ extension TilingSettings: Codable {
                 StickyStyle.self,
                 forKey: .sticky
             ) ?? StickyStyle()
+        floatingStyle =
+            try container.decodeIfPresent(
+                FloatingStyle.self,
+                forKey: .floating
+            ) ?? FloatingStyle()
         animations =
             try container.decodeIfPresent(
                 AnimationSettings.self,

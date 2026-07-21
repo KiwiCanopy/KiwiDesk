@@ -60,6 +60,10 @@ public struct TilingSettings: Sendable, Equatable {
     /// glyph marking a sticky window. A border sibling — pure
     /// post-layout overlay, never feeds back into layout.
     public var stickyStyle = StickyStyle()
+    /// Floating-window mark settings (#429): the sticky pair's
+    /// sibling. Just the Space Bar floating badge tint today —
+    /// floating has no on-window chip.
+    public var floatingStyle = FloatingStyle()
     /// Drag visuals (see DragOverlay): the dragged window's
     /// own slot (ghost) and the swap target slot (drop zone).
     public var dragGhost = DragVisual.ghostDefault

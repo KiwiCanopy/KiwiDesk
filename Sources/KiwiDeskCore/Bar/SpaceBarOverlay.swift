@@ -106,7 +106,8 @@ public final class SpaceBarOverlay {
             items: [Item],
             frontApp: SpaceBarItemView.App?,
             strip: CGRect,
-            style: SpaceBarStyle
+            style: SpaceBarStyle,
+            stateMarkColors: StateMarkColors
         )?
 
     public init() {}
@@ -120,7 +121,8 @@ public final class SpaceBarOverlay {
         items: [Item],
         frontApp: SpaceBarItemView.App? = nil,
         strip: CGRect,
-        style: SpaceBarStyle
+        style: SpaceBarStyle,
+        stateMarkColors: StateMarkColors
     ) {
         guard !items.isEmpty,
             strip.width >= 1, strip.height >= 1
@@ -128,7 +130,7 @@ public final class SpaceBarOverlay {
             hide()
             return
         }
-        lastShown = (items, frontApp, strip, style)
+        lastShown = (items, frontApp, strip, style, stateMarkColors)
         render(followingActive: true)
     }
 
@@ -154,7 +156,7 @@ public final class SpaceBarOverlay {
     /// snapped straight back (the App Bar's `followingFocus`).
     func render(followingActive: Bool) {
         guard let state = lastShown else { return }
-        let (items, frontApp, strip, style) = state
+        let (items, frontApp, strip, style, stateMarkColors) = state
         let panel = self.panel ?? makePanel()
         self.panel = panel
         styleContainer(panel, style: style, strip: strip)
@@ -264,6 +266,7 @@ public final class SpaceBarOverlay {
                 active: item.active,
                 horizontal: horizontal,
                 style: style,
+                stateMarkColors: stateMarkColors,
                 overflow: item.overflow,
                 focusInOverflow: item.focusInOverflow
             )

@@ -1132,6 +1132,31 @@ The glyph stays pinned in the rightmost square through the morph
 window width so it never overruns its own edge; Reduce Motion
 swaps the morph for an instant show/hide. (#421)
 
+**The sticky/floating marks are a colored-glyph state-color
+pair, defaulting to Automatic.** The one sticky glyph reads the
+one `sticky.color`, so the on-window chip and the Space Bar
+sticky badge can never drift to different colors; floating gets
+its own `floating.color` (a minimal `floating` namespace, since
+floating has no other setting) tinting its Space Bar badge only —
+it has no on-window chip. The color owns the *glyph*, not the
+plate: the SF Symbol draws in the chosen color on a neutral
+plate, which pulls the two Space Bar state marks *out* of the
+count badge's `groupBadgeColor` fill family — a state mark now
+means one color everywhere, and the count badge keeps its own
+red fill. The default is **Automatic** (the empty-hex sentinel →
+adaptive `.labelColor`), not a concrete brand hex like the other
+color wells: the chip sits on top of arbitrary third-party window
+content all day, and the label color is the only default
+guaranteed legible against anything behind the translucent plate,
+light or dark — a fixed hue can wash out or clash. So the shipped
+neutral look is unchanged for anyone who never opens the grid;
+color is on-demand. The mark glyph itself changed to `infinity`
+("always / everywhere," and a single stroke that stays crisp at
+the 7–9 pt badge size where the old `square.stack.3d.up.fill`'s
+perspective smeared); the pushpin family is off-limits —
+`SpaceAssignmentChip` uses `pin.fill` for the opposite idea (a
+window bound to one space). (#429)
+
 **Overrides are visible-but-inherited, never hidden.** A
 per-layout or per-space override row always shows — dimmed
 with the inherited global value until its checkbox unlocks

@@ -26,8 +26,31 @@ extension KiwiCore {
             }
             tiler.settings.stickyStyle.indicator = flag
             return .ok()
+        case "color":
+            return setMarkColor(args) {
+                tiler.settings.stickyStyle.color = $0
+            }
         default:
             return .fail("unknown command: \(command)")
         }
+    }
+
+    /// A state-mark color setter (#429), shared by `sticky.set_color`
+    /// and `floating.set_color`: an EMPTY string is accepted as the
+    /// "Automatic" sentinel (adaptive `.labelColor`), any other value
+    /// must parse as `#RRGGBB[AA]`. Mirrors `border.set_*_color` but
+    /// with the empty case that marks alone carry.
+    func setMarkColor(
+        _ args: [JSONValue],
+        _ write: (String) -> Void
+    ) -> CommandResponse {
+        guard let hex = args.first?.stringValue else {
+            return .fail("expected hex color (#RRGGBB[AA]) or \"\"")
+        }
+        guard hex.isEmpty || DragVisual.parseHex(hex) != nil else {
+            return .fail("expected hex color (#RRGGBB[AA]) or \"\"")
+        }
+        write(hex)
+        return .ok()
     }
 }

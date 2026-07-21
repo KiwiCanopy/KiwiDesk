@@ -78,32 +78,36 @@ extension SpaceBarItemView {
             applyStateBadge(
                 stickyBadgeViews[index],
                 shown: style.stickyBadge && app.sticky,
+                markHex: stateMarkColors.sticky,
                 appFocused: app.focused
             )
             applyStateBadge(
                 floatingBadgeViews[index],
                 shown: style.stickyBadge && app.floating,
+                markHex: stateMarkColors.floating,
                 appFocused: app.focused
             )
         }
     }
 
-    /// The count badge's ladder (`applyBadge`), applied to a
-    /// state badge: plate in `groupBadgeColor`, mark in the
-    /// badge text color (focused accent when this glyph's app
-    /// holds the focus), whole badge dimmed to the app's tier.
+    /// A state mark (#429): the glyph carries the chosen state
+    /// color (empty = "Automatic" → adaptive `.labelColor`) on a
+    /// neutral plate — the mark leaves the count badge's
+    /// `groupBadgeColor` family so its color means one thing
+    /// everywhere (owner: "colored glyph, neutral plate"). No
+    /// focused-accent switch: the mark is always its state color,
+    /// and focus still reads through the alpha tier.
     private func applyStateBadge(
         _ badge: StateBadgeView,
         shown: Bool,
+        markHex: String,
         appFocused: Bool
     ) {
         badge.isHidden = !shown
         badge.layer?.backgroundColor =
-            NSColor(kiwiHex: style.groupBadgeColor).cgColor
+            StateBadgeView.neutralPlate.cgColor
         badge.symbol.contentTintColor =
-            appFocused && isActive
-            ? NSColor(kiwiHex: style.focusedItemColor)
-            : NSColor(kiwiHex: style.groupBadgeTextColor)
+            NSColor.mark(hex: markHex, fallback: .labelColor)
         badge.alphaValue = untintedAppAlpha(focused: appFocused)
     }
 

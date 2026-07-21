@@ -14,11 +14,13 @@ extension KiwiCore {
             return
         }
         let sticky = state.windows.all.filter(\.isSticky)
+        let color = tiler.settings.stickyStyle.color
         stickyIndicators.sync(
             sticky.map {
                 StickyIndicatorManager.Spec(
                     window: $0.id,
-                    frame: $0.frame
+                    frame: $0.frame,
+                    color: color
                 )
             }
         )

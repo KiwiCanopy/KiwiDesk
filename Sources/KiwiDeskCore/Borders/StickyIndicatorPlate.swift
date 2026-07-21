@@ -37,6 +37,13 @@ final class StickyIndicatorPlate: NSVisualEffectView {
     let symbol = NSImageView()
     let name = NSTextField(labelWithString: "")
 
+    /// The resolved mark tint (#429): the sticky color, or the
+    /// adaptive `.labelColor` when "Automatic" (empty hex). Owns
+    /// the glyph and, when the chip expands into a pill, the
+    /// home-space name and its inline symbol — so a colored mark
+    /// reads cohesive across the whole chip.
+    private var markColor: NSColor = .labelColor
+
     init() {
         super.init(
             frame: CGRect(
@@ -75,6 +82,16 @@ final class StickyIndicatorPlate: NSVisualEffectView {
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError() }
+
+    /// Applies the sticky mark tint (#429): empty hex = "Automatic"
+    /// (adaptive `.labelColor`), any other value the parsed color.
+    /// Sets the glyph now; the pill name re-tints on the next
+    /// `prepare` (its attributed string is rebuilt there).
+    func setMarkColor(_ hex: String) {
+        markColor = NSColor.mark(hex: hex, fallback: .labelColor)
+        symbol.contentTintColor = markColor
+        name.textColor = markColor
+    }
 
     override func layout() {
         super.layout()
@@ -121,7 +138,7 @@ final class StickyIndicatorPlate: NSVisualEffectView {
     ) -> NSAttributedString {
         let attrs: [NSAttributedString.Key: Any] = [
             .font: nameFont,
-            .foregroundColor: NSColor.labelColor,
+            .foregroundColor: markColor,
         ]
         // Split on the positional slot so the substituted mark
         // keeps whatever order the translation puts it in.
@@ -161,7 +178,7 @@ final class StickyIndicatorPlate: NSVisualEffectView {
             weight: .semibold
         )
         .applying(
-            NSImage.SymbolConfiguration(paletteColors: [.labelColor])
+            NSImage.SymbolConfiguration(paletteColors: [markColor])
         )
         guard
             let image = NSImage(
