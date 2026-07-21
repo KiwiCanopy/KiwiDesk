@@ -294,7 +294,7 @@ public struct StackLayout: LayoutSystem {
     ) -> [WindowID: CGRect] {
         let ids = Array(windows)
         guard
-            let rects = OverlapStack.overflowFrames(
+            let overflow = OverlapStack.overflowFrames(
                 count: ids.count,
                 in: region,
                 vertical: vertical,
@@ -312,8 +312,15 @@ public struct StackLayout: LayoutSystem {
                 minSize: context.minWindowSize
             )
         }
+        // Sticky windows keep a fully-tiled slot (#414 v2);
+        // a non-sticky window overflows instead.
+        let ordered = OverlapStack.stickyExempt(
+            ids,
+            tiled: overflow.tiled,
+            sticky: context.sticky
+        )
         return Dictionary(
-            uniqueKeysWithValues: zip(ids, rects)
+            uniqueKeysWithValues: zip(ordered, overflow.rects)
         )
     }
 }

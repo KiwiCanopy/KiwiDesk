@@ -70,14 +70,19 @@ public enum OverlapStack {
     /// `minSize` strip of the primary. The single authority
     /// behind the stack column overflow and both track axes
     /// (#128), so the geometry cannot drift between them.
+    ///
+    /// Returns the rects plus the count of fully-tiled leading
+    /// slots — the overflow boundary callers need to keep sticky
+    /// windows out of the buried tail (#414 v2,
+    /// `stickyExempt`).
     public static func overflowFrames(
         count: Int,
         in region: CGRect,
         vertical: Bool,
         minSize: CGFloat,
         gap: CGFloat
-    ) -> [CGRect]? {
-        guard count > 0 else { return [] }
+    ) -> (rects: [CGRect], tiled: Int)? {
+        guard count > 0 else { return ([], 0) }
         let primary = vertical ? region.height : region.width
         for tiled in stride(from: count - 1, through: 1, by: -1) {
             let buried = CGFloat(count - tiled - 1)
@@ -125,9 +130,48 @@ public enum OverlapStack {
                         )
                 )
             }
-            return rects
+            return (rects, tiled)
         }
         return nil
+    }
+
+    /// Reorders `ids` so sticky windows keep a fully-tiled slot
+    /// (#414 v2): each sticky id caught in the buried tail
+    /// (index ≥ `tiled`) is clamped to the end of the tiled
+    /// prefix, displacing the trailing non-sticky tiled windows
+    /// into the pile instead. Relative order within each class
+    /// is preserved; with more piled stickies than displaceable
+    /// non-sticky slots, the surplus stays piled (an all-sticky
+    /// overload has no slot to give). Callers zip the result
+    /// with positional rects (`overflowFrames`, a grid's
+    /// last-cell pile), so this must return exactly the input
+    /// ids, only reordered.
+    public static func stickyExempt(
+        _ ids: [WindowID],
+        tiled: Int,
+        sticky: Set<WindowID>
+    ) -> [WindowID] {
+        guard tiled > 0, tiled < ids.count, !sticky.isEmpty
+        else { return ids }
+        let piled = ids[tiled...].filter { sticky.contains($0) }
+        guard !piled.isEmpty else { return ids }
+        var prefix = Array(ids[..<tiled])
+        var displaced: [WindowID] = []
+        for index in stride(
+            from: prefix.count - 1,
+            through: 0,
+            by: -1
+        )
+        where displaced.count < piled.count
+            && !sticky.contains(prefix[index])
+        {
+            displaced.insert(prefix.remove(at: index), at: 0)
+        }
+        let promoted = piled.prefix(displaced.count)
+        let rest = ids[tiled...].filter {
+            !promoted.contains($0)
+        }
+        return prefix + promoted + displaced + rest
     }
 
     /// A tiled rect occupying `[along, along+extent)` on the

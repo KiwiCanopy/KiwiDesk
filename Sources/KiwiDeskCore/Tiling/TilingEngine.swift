@@ -136,7 +136,12 @@ public final class TilingEngine {
         )
         let context = settings.context(
             bounds: bounds,
-            space: space
+            space: space,
+            sticky: Set(
+                state.windows.all
+                    .filter(\.isSticky)
+                    .map(\.id)
+            )
         )
         return (space, tiled, context)
     }

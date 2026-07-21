@@ -76,8 +76,16 @@ public struct GridLayout: LayoutSystem {
         // the balanced arrangement is clamped to the cap; rigid
         // whenever the fixed grid fills up.
         if count > capacity {
+            // Sticky windows keep a fully-tiled cell (#414 v2):
+            // one caught past the cap trades places with the
+            // last non-sticky tiled window, which piles instead.
+            let ordered = OverlapStack.stickyExempt(
+                windows,
+                tiled: capacity - 1,
+                sticky: context.sticky
+            )
             for (index, window)
-                in windows[..<(capacity - 1)].enumerated()
+                in ordered[..<(capacity - 1)].enumerated()
             {
                 result[window] = cell(
                     col: index % columns,
@@ -90,7 +98,7 @@ public struct GridLayout: LayoutSystem {
             )
             result.merge(
                 OverlapStack.frames(
-                    for: windows[(capacity - 1)...],
+                    for: ordered[(capacity - 1)...],
                     in: lastCell,
                     minSize: context.minWindowSize
                 )
