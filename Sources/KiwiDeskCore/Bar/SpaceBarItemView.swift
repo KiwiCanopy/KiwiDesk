@@ -103,6 +103,10 @@ final class SpaceBarItemView: NSView {
     let springRing = CAShapeLayer()
     var horizontal = true
     var style = SpaceBarStyle()
+    /// The sticky / floating badge tints (#429), resolved by
+    /// `KiwiCore`; the state badges' glyphs read these instead of
+    /// the count badge's `groupBadgeColor` family.
+    var stateMarkColors = StateMarkColors(sticky: "", floating: "")
     var onSelect: (SpaceID) -> Void = { _ in }
 
     /// Flipped so the identifier leads at the visual top on
@@ -194,6 +198,7 @@ final class SpaceBarItemView: NSView {
         active: Bool,
         horizontal: Bool,
         style: SpaceBarStyle,
+        stateMarkColors: StateMarkColors,
         overflow: Int = 0,
         focusInOverflow: Bool = false
     ) {
@@ -213,6 +218,7 @@ final class SpaceBarItemView: NSView {
         self.isActive = active
         self.horizontal = horizontal
         self.style = style
+        self.stateMarkColors = stateMarkColors
         // Hover is NOT reset here: a retile under the pointer
         // (focus changes are frequent) must not drop the tint —
         // mouseExited still fires when the pointer leaves.

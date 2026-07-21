@@ -237,6 +237,25 @@ native tags. A non-interactive value state in a control row
 the same capsule language rather than as bare gray prose,
 which read as skippable filler.
 
+**An "Automatic" color well shows adaptivity as a shape, not
+an absence.** (#429, ui-designer consult.) Almost every color
+setting stores a concrete hex, but a few default to an
+*adaptive* system color (the sticky/floating marks use the
+label color, which flips black/white with appearance and has
+no fixed hex). A `HexColorField` opts into this with an
+`automatic` flag: an empty hex is then a valid value meaning
+"Automatic," and the swatch draws a diagonal light/dark split
+(the macOS "Auto appearance" idiom) with an "Automatic"
+placeholder in the hex field — so the adaptive state reads as
+a deliberate shape, never as an empty/broken dot. Clearing back
+to Automatic has two paths: right-click the swatch (a checked
+"Automatic" menu item) or empty the hex field and commit.
+Resolve empty through the mark fallback, never the generic hex
+parser — an unset adaptive color means "adapt," not "broken,"
+so it must land on the adaptive fallback, not the accent color
+the parser falls back to. The flag stays off for the ~14 wells
+whose color has a concrete default and no adaptive concept.
+
 ## Row layout & alignment
 
 **Row order within a section is fixed-tier, not

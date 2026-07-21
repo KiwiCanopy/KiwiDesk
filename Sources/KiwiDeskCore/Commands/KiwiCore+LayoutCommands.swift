@@ -40,6 +40,8 @@ extension KiwiCore {
             response = borderCommand(command, args)
         } else if command.hasPrefix("sticky.") {
             response = stickyCommand(command, args)
+        } else if command.hasPrefix("floating.") {
+            response = floatingCommand(command, args)
         } else if command.hasPrefix("mouse.") {
             response = mouseCommand(command, args)
         } else {

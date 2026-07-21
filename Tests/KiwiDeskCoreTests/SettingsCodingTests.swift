@@ -30,8 +30,8 @@ struct SettingsCodingTests {
                 "animations", "app_bar", "border", "drag", "gap",
                 "layout", "min_window_size", "mouse",
                 "mouse_resize", "new_window_placement_override", "quit",
-                "resize", "space", "space_bar", "sticky",
-                "swap_skips_cascade",
+                "floating", "resize", "space", "space_bar",
+                "sticky", "swap_skips_cascade",
             ]
         )
         // `border.set_*` → `border.*` (#278). Default on,
@@ -53,9 +53,18 @@ struct SettingsCodingTests {
         // `sticky.set_indicator` → `sticky.indicator` (#414).
         // Default on: the on-window glyph is the only sticky
         // cue that never depends on another surface.
+        // `sticky.set_color` → `sticky.color` (#429); default is
+        // the empty "Automatic" sentinel (adaptive label color).
         let sticky = try object(root["sticky"])
-        #expect(Set(sticky.keys) == ["indicator"])
+        #expect(Set(sticky.keys) == ["indicator", "color"])
         #expect(sticky["indicator"] as? Bool == true)
+        #expect(sticky["color"] as? String == "")
+        // `floating.set_color` → `floating.color` (#429): the
+        // sticky mark's sibling namespace, also Automatic by
+        // default.
+        let floating = try object(root["floating"])
+        #expect(Set(floating.keys) == ["color"])
+        #expect(floating["color"] as? String == "")
         // `quit.set_layout` → `quit.layout` (#197); `grid` is
         // the only strategy today and the default.
         // `quit.set_grid_target_depth` →
@@ -223,6 +232,8 @@ struct SettingsCodingTests {
         settings.borderStyle.unfocusedColor = "#04050607"
         settings.borderStyle.cornerStyle = .square
         settings.stickyStyle.indicator = false
+        settings.stickyStyle.color = "#4E9F3D"
+        settings.floatingStyle.color = "#E8A33D"
         settings.spaceBarStyle.stickyBadge = false
         settings.gapsOverride[SpaceID(2)] = .uniform(4)
         settings.placementOverride[SpaceID("mail")] = .last

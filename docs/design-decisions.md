@@ -1132,6 +1132,37 @@ The glyph stays pinned in the rightmost square through the morph
 window width so it never overruns its own edge; Reduce Motion
 swaps the morph for an instant show/hide. (#421)
 
+**The sticky/floating marks are a filled state-color pair,
+defaulting to Automatic.** The one sticky glyph reads the one
+`sticky.color`, so the on-window chip and the Space Bar sticky
+badge can never drift to different colors; floating gets its own
+`floating.color` (a minimal `floating` namespace, since floating
+has no other setting) tinting its Space Bar badge only — it has
+no on-window chip. The color owns the *fill*, and the glyph on
+top is auto-contrasted black/white for legibility (a filled disc
+shows its hue far better than a thin glyph stroke at the 7–9 pt
+badge size, and an auto-contrast glyph means any picked fill stays
+readable — a guardrail on legibility, never taste). The Space Bar
+sticky/floating marks stay filled discs in the count badge's
+family; the on-window chip nests the same filled disc inside its
+glass square, so the two surfaces read as one mark. **Automatic**
+falls back to today's look on each surface: the badges inherit the
+count badge's own `groupBadgeColor` fill (the default trio stays
+one consistent color), and the chip drops the disc for the bare
+neutral `.labelColor` glyph on glass. The default is Automatic
+(the empty-hex sentinel), not a concrete brand hex like the other
+color wells: the chip sits on top of arbitrary third-party window
+content all day, and the adaptive label color is the only default
+guaranteed legible against anything behind the translucent plate,
+light or dark — a fixed hue can wash out or clash. So the shipped
+look is unchanged for anyone who never opens the grid; color is
+on-demand. The mark glyph itself changed to `infinity`
+("always / everywhere," and a single stroke that stays crisp at
+the 7–9 pt badge size where the old `square.stack.3d.up.fill`'s
+perspective smeared); the pushpin family is off-limits —
+`SpaceAssignmentChip` uses `pin.fill` for the opposite idea (a
+window bound to one space). (#429)
+
 **Overrides are visible-but-inherited, never hidden.** A
 per-layout or per-space override row always shows — dimmed
 with the inherited global value until its checkbox unlocks

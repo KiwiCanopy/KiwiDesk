@@ -18,11 +18,31 @@ enum StateBadgeMetrics {
     }
 }
 
-/// A Space Bar state badge (#414): the group-count badge's
-/// circular plate wearing a template symbol instead of a
-/// count, so the sticky/floating marks read as the same badge
-/// family and hug inside the glyph's corner exactly like the
-/// count does.
+/// The two state-mark tints resolved for one bar render (#429):
+/// the raw hex a sticky / floating badge glyph draws in (empty =
+/// "Automatic", resolved to the adaptive `.labelColor` by
+/// `NSColor.mark`). Carried as data from `KiwiCore` — which owns
+/// both `StickyStyle` and `FloatingStyle` — so the Bar subsystem
+/// renders the marks without reaching into the sticky/floating
+/// namespaces itself.
+public struct StateMarkColors: Sendable, Equatable {
+    public let sticky: String
+    public let floating: String
+
+    public init(sticky: String, floating: String) {
+        self.sticky = sticky
+        self.floating = floating
+    }
+}
+
+/// A Space Bar state badge (#414): the count badge's circular
+/// plate wearing a template symbol instead of a count, so the
+/// sticky/floating marks read as the same badge family. Since #429
+/// the fill carries the chosen state color (Automatic falls back
+/// to the count badge's own fill, so the default trio stays
+/// consistent) and the glyph on top is auto-contrasted for
+/// legibility — a filled disc shows its hue far better than a thin
+/// glyph stroke at the 7-9pt badge size (owner + ui-designer).
 final class StateBadgeView: NSView {
     let symbol = NSImageView()
 

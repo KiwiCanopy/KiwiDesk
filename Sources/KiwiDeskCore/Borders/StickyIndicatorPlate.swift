@@ -36,6 +36,21 @@ final class StickyIndicatorPlate: NSVisualEffectView {
 
     let symbol = NSImageView()
     let name = NSTextField(labelWithString: "")
+    /// The colored disc behind the glyph when a mark color is set
+    /// (#429): the on-window twin of the Space Bar state badge, so
+    /// the chip and the badge read as the same filled mark. Hidden
+    /// on Automatic — the chip is then the bare neutral glyph on
+    /// glass (today's look).
+    let roundel = NSView()
+    /// Roundel diameter inside the 20pt glyph square — a touch
+    /// smaller so the glass frames it.
+    static let roundelSize: CGFloat = 15
+
+    /// The resolved mark tint (#429): the sticky color, or the
+    /// adaptive `.labelColor` when "Automatic" (empty hex). Owns
+    /// the pill's home-space name (and its inline symbol); the
+    /// glyph itself sits on the roundel in an auto-contrast color.
+    private var markColor: NSColor = .labelColor
 
     init() {
         super.init(
@@ -69,12 +84,38 @@ final class StickyIndicatorPlate: NSVisualEffectView {
         name.usesSingleLineMode = true
         name.alphaValue = 0
 
+        roundel.wantsLayer = true
+        roundel.layer?.cornerRadius = Self.roundelSize / 2
+        roundel.isHidden = true
+
         addSubview(name)
+        addSubview(roundel)
         addSubview(symbol)
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError() }
+
+    /// Applies the sticky mark tint (#429). Automatic (empty hex):
+    /// the bare neutral glyph on glass — roundel hidden, glyph and
+    /// pill name in the adaptive `.labelColor` (today's look). A
+    /// chosen color: a filled roundel behind the glyph, the glyph
+    /// auto-contrasted on it, and the pill name in the mark color.
+    /// The pill name re-tints on the next `prepare`.
+    func setMarkColor(_ hex: String) {
+        if hex.isEmpty {
+            markColor = .labelColor
+            roundel.isHidden = true
+            symbol.contentTintColor = .labelColor
+        } else {
+            let fill = NSColor(kiwiHex: hex)
+            markColor = fill
+            roundel.isHidden = false
+            roundel.layer?.backgroundColor = fill.cgColor
+            symbol.contentTintColor = fill.contrastingGlyph
+        }
+        name.textColor = markColor
+    }
 
     override func layout() {
         super.layout()
@@ -84,6 +125,16 @@ final class StickyIndicatorPlate: NSVisualEffectView {
             y: 0,
             width: Self.size,
             height: Self.size
+        )
+        // The roundel is centered in the same rightmost square as
+        // the glyph, so it stays pinned to the window corner while
+        // the pill grows leftward.
+        let inset = (Self.size - Self.roundelSize) / 2
+        roundel.frame = CGRect(
+            x: w - Self.size + inset,
+            y: inset,
+            width: Self.roundelSize,
+            height: Self.roundelSize
         )
         let textHeight = ceil(name.intrinsicContentSize.height)
         let right = w - Self.size - Self.nameGap
@@ -121,7 +172,7 @@ final class StickyIndicatorPlate: NSVisualEffectView {
     ) -> NSAttributedString {
         let attrs: [NSAttributedString.Key: Any] = [
             .font: nameFont,
-            .foregroundColor: NSColor.labelColor,
+            .foregroundColor: markColor,
         ]
         // Split on the positional slot so the substituted mark
         // keeps whatever order the translation puts it in.
@@ -161,7 +212,7 @@ final class StickyIndicatorPlate: NSVisualEffectView {
             weight: .semibold
         )
         .applying(
-            NSImage.SymbolConfiguration(paletteColors: [.labelColor])
+            NSImage.SymbolConfiguration(paletteColors: [markColor])
         )
         guard
             let image = NSImage(

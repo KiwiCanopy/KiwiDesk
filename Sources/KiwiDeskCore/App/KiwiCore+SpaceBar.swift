@@ -47,7 +47,11 @@ extension KiwiCore {
             items: items,
             frontApp: frontApp(display: display.id, style: style),
             strip: strip,
-            style: style
+            style: style,
+            stateMarkColors: StateMarkColors(
+                sticky: tiler.settings.stickyStyle.color,
+                floating: tiler.settings.floatingStyle.color
+            )
         )
     }
 

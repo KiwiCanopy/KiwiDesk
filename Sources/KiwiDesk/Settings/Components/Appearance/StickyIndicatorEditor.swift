@@ -65,6 +65,37 @@ struct StickyIndicatorEditor: View {
                     destination: .bars
                 )
             }
+            Divider()
+            markColors
         }
+    }
+
+    /// The sticky/floating mark tints (#429): the sticky color
+    /// paints the on-window chip glyph and the Space Bar sticky
+    /// badge; the floating color paints the Space Bar floating
+    /// badge. Both default to Automatic (the adaptive system
+    /// label color) — colors gate nothing, so they group as a
+    /// small pair for scannability (AGENTS §2.7 carve-out).
+    @ViewBuilder private var markColors: some View {
+        Text(L("sticky.mark_color", "Mark color"))
+            .font(.subheadline.weight(.semibold))
+        HexColorField(
+            label: L("sticky.color", "Sticky"),
+            a11yLabel: L(
+                "sticky.color.a11y",
+                "Sticky window mark color"
+            ),
+            automatic: true,
+            hex: $model.config.settings.stickyStyle.color
+        )
+        HexColorField(
+            label: L("floating.color", "Floating"),
+            a11yLabel: L(
+                "floating.color.a11y",
+                "Floating window mark color"
+            ),
+            automatic: true,
+            hex: $model.config.settings.floatingStyle.color
+        )
     }
 }

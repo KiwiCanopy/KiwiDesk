@@ -18,19 +18,26 @@ public final class SpaceBarManager {
         /// The resolved style; its `edge` is the stored
         /// absolute edge — single source, like the App Bar.
         public let style: SpaceBarStyle
+        /// The sticky / floating badge tints (#429), resolved from
+        /// `StickyStyle`/`FloatingStyle` by `KiwiCore` — carried as
+        /// data so the bar renders the marks without reaching into
+        /// those namespaces.
+        let stateMarkColors: StateMarkColors
 
         init(
             display: DisplayID,
             items: [SpaceBarOverlay.Item],
             frontApp: SpaceBarItemView.App? = nil,
             strip: CGRect,
-            style: SpaceBarStyle
+            style: SpaceBarStyle,
+            stateMarkColors: StateMarkColors
         ) {
             self.display = display
             self.items = items
             self.frontApp = frontApp
             self.strip = strip
             self.style = style
+            self.stateMarkColors = stateMarkColors
         }
     }
 
@@ -93,7 +100,8 @@ public final class SpaceBarManager {
                 items: bar.items,
                 frontApp: bar.frontApp,
                 strip: bar.strip,
-                style: bar.style
+                style: bar.style,
+                stateMarkColors: bar.stateMarkColors
             )
         }
     }

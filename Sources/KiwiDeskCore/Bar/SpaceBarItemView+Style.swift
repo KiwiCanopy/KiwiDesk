@@ -78,32 +78,39 @@ extension SpaceBarItemView {
             applyStateBadge(
                 stickyBadgeViews[index],
                 shown: style.stickyBadge && app.sticky,
+                markHex: stateMarkColors.sticky,
                 appFocused: app.focused
             )
             applyStateBadge(
                 floatingBadgeViews[index],
                 shown: style.stickyBadge && app.floating,
+                markHex: stateMarkColors.floating,
                 appFocused: app.focused
             )
         }
     }
 
-    /// The count badge's ladder (`applyBadge`), applied to a
-    /// state badge: plate in `groupBadgeColor`, mark in the
-    /// badge text color (focused accent when this glyph's app
-    /// holds the focus), whole badge dimmed to the app's tier.
+    /// A state mark (#429): a filled disc like the count badge,
+    /// but tinted with the chosen state color and wearing an
+    /// auto-contrast glyph. Automatic (empty) falls back to the
+    /// count badge's own `groupBadgeColor` fill, so the default
+    /// sticky / floating / count trio stays one consistent family;
+    /// a picked color makes just that mark stand out. The glyph is
+    /// computed black/white so any fill keeps a legible mark — no
+    /// focused-accent switch; focus reads through the alpha tier.
     private func applyStateBadge(
         _ badge: StateBadgeView,
         shown: Bool,
+        markHex: String,
         appFocused: Bool
     ) {
         badge.isHidden = !shown
-        badge.layer?.backgroundColor =
-            NSColor(kiwiHex: style.groupBadgeColor).cgColor
-        badge.symbol.contentTintColor =
-            appFocused && isActive
-            ? NSColor(kiwiHex: style.focusedItemColor)
-            : NSColor(kiwiHex: style.groupBadgeTextColor)
+        let fill = NSColor.mark(
+            hex: markHex,
+            fallback: NSColor(kiwiHex: style.groupBadgeColor)
+        )
+        badge.layer?.backgroundColor = fill.cgColor
+        badge.symbol.contentTintColor = fill.contrastingGlyph
         badge.alphaValue = untintedAppAlpha(focused: appFocused)
     }
 

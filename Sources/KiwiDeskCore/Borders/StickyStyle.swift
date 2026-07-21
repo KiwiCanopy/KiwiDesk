@@ -18,12 +18,29 @@ public struct StickyStyle: Sendable, Equatable {
     /// so the two surfaces can never drift apart. Lives here
     /// (the sticky namespace), not in a Bar view, so neither
     /// subsystem reaches laterally into the other for it.
-    public static let symbolName = "square.stack.3d.up.fill"
+    ///
+    /// `infinity` (#429, ui-designer): "always / everywhere" for a
+    /// window present on every space, and a single clean stroke
+    /// that stays crisp at the 7–9 pt badge size where the old
+    /// `square.stack.3d.up.fill`'s perspective smeared. Pin-family
+    /// glyphs are off-limits — `SpaceAssignmentChip` uses `pin.fill`
+    /// for the opposite idea (bound to ONE space).
+    public static let symbolName = "infinity"
 
     /// On-window sticky glyph, on by default: a sticky window
     /// can look identical to a normal one, and unlike a focus
     /// border there is no native cue to fall back on.
     public var indicator = true
+
+    /// The sticky mark's tint (#429). One value the on-window
+    /// chip glyph AND the Space Bar sticky badge both read (the
+    /// "one glyph everywhere" family extends to color), so the
+    /// two surfaces can never drift to different colors. Empty =
+    /// "Automatic": the adaptive `.labelColor` that flips with
+    /// light/dark, resolved via `NSColor.mark(hex:fallback:)` —
+    /// there is no fixed hex for it, so it stays the empty
+    /// sentinel rather than a frozen neutral.
+    public var color = ""
 
     public init() {}
 }
@@ -35,6 +52,7 @@ extension StickyStyle: Codable {
     /// `set_` verb — the `sticky` nesting carries the namespace.
     enum CodingKeys: String, CodingKey, CaseIterable {
         case indicator
+        case color
     }
 
     /// Manual decoding: profiles saved before a field existed
@@ -49,5 +67,10 @@ extension StickyStyle: Codable {
                 Bool.self,
                 forKey: .indicator
             ) ?? defaults.indicator
+        color =
+            try container.decodeIfPresent(
+                String.self,
+                forKey: .color
+            ) ?? defaults.color
     }
 }

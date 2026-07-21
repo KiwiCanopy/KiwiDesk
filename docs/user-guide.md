@@ -712,6 +712,19 @@ invisible. (From Lua both indicators are freely configurable —
 Space Bar shows its own sticky badge either way, and floating
 windows get a bar badge too — see the Space Bar section.
 
+Under the toggle, **Mark color** tints the marks. **Sticky**
+colors both the on-window chip and the Space Bar sticky badge
+(one mark, one color everywhere); **Floating** colors the
+Space Bar floating badge (floating windows have no on-window
+chip). The mark becomes a **filled disc** in the chosen color
+with a legible black or white glyph picked automatically for
+contrast. Both default to **Automatic** — the swatch shows a
+diagonal light/dark split, and the mark keeps its default look
+(the Space Bar badge stays the count-badge color; the on-window
+chip is a neutral glyph on glass that adapts to light and dark).
+Pick a color to override; right-click the swatch (or clear the
+hex field) to return to Automatic.
+
 ## Bars
 
 The **Bars** section hosts both bar editors behind a fixed

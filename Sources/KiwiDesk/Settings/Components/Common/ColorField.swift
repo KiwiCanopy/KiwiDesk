@@ -28,6 +28,11 @@ struct HexColorField: View {
     /// half-width columns (#231); the App Bar color grid keeps
     /// the default `colorLabelColumn`.
     var labelWidth: CGFloat = SettingsMetrics.colorLabelColumn
+    /// Whether an EMPTY hex is a valid "Automatic" value (#429):
+    /// the swatch then shows an adaptive split state and an empty
+    /// entry commits instead of reverting. Off for the ~14 wells
+    /// whose color has a concrete default and no adaptive concept.
+    var automatic: Bool = false
     @Binding var hex: String
 
     var body: some View {
@@ -35,7 +40,11 @@ struct HexColorField: View {
             Text(label)
                 .frame(width: labelWidth, alignment: .leading)
                 .lineLimit(1)
-            ColorSwatch(label: a11yLabel ?? label, hex: $hex)
+            ColorSwatch(
+                label: a11yLabel ?? label,
+                automatic: automatic,
+                hex: $hex
+            )
         }
     }
 
@@ -74,6 +83,9 @@ struct HexColorField: View {
 /// the dot — they stay in sync for free.
 struct ColorSwatch: View {
     let label: String
+    /// Empty hex = "Automatic" (adaptive), not a parse failure —
+    /// see `HexColorField.automatic`.
+    var automatic: Bool = false
     @Binding var hex: String
     /// The field edits a string proxy so intermediate typing
     /// never clobbers `hex`; it commits (parse + normalize) on
@@ -86,16 +98,27 @@ struct ColorSwatch: View {
     /// clobbering a later swatch that took the panel.
     @State private var token = 0
 
-    init(label: String, hex: Binding<String>) {
+    init(
+        label: String,
+        automatic: Bool = false,
+        hex: Binding<String>
+    ) {
         self.label = label
+        self.automatic = automatic
         self._hex = hex
         self._draft = State(initialValue: hex.wrappedValue)
+    }
+
+    /// True while this well is showing its adaptive "Automatic"
+    /// state — an empty hex on a well that allows it.
+    private var isAutomatic: Bool {
+        automatic && hex.isEmpty
     }
 
     var body: some View {
         HStack(spacing: 6) {
             swatchButton
-            TextField("", text: $draft)
+            TextField(placeholder, text: $draft)
                 .labelsHidden()
                 .frame(width: SettingsMetrics.colorHexColumn)
                 .font(.system(.caption, design: .monospaced))
@@ -134,11 +157,12 @@ struct ColorSwatch: View {
     /// The color dot as a discrete pressable chip: its own
     /// neutral background + hairline border carry the "button"
     /// signifier, so the affordance never merges into a dark
-    /// fill the way a bare filled shape did.
+    /// fill the way a bare filled shape did. On an `automatic`
+    /// well with no color set it shows the adaptive split state
+    /// instead of a color, and a right-click clears back to it.
     private var swatchButton: some View {
         Button(action: present) {
-            Circle()
-                .fill(color)
+            dot
                 .frame(width: 14, height: 14)
                 .overlay(
                     Circle().strokeBorder(
@@ -162,19 +186,20 @@ struct ColorSwatch: View {
             cornerRadius: 6,
             padding: 0
         )
-        .help(
-            L(
-                "color_field.swatch.help",
-                "Edit the %1$@ color",
-                hex
-            )
-        )
+        .automaticMenu(automatic: automatic, hex: $hex, draft: $draft)
+        .help(swatchHelp)
         .accessibilityLabel(
-            L(
-                "color_field.swatch.a11y",
-                "%1$@ color",
-                label
-            )
+            isAutomatic
+                ? L(
+                    "color_field.swatch.a11y_auto",
+                    "%1$@ color, Automatic",
+                    label
+                )
+                : L(
+                    "color_field.swatch.a11y",
+                    "%1$@ color",
+                    label
+                )
         )
         .accessibilityHint(
             L(
@@ -182,6 +207,47 @@ struct ColorSwatch: View {
                 "Opens the color picker"
             )
         )
+    }
+
+    /// The dot itself: a diagonal light/dark split when Automatic
+    /// (the macOS "Auto appearance" idiom — the adaptivity reads
+    /// as a shape, not an absent color), else the flat color.
+    @ViewBuilder private var dot: some View {
+        if isAutomatic {
+            Circle().fill(
+                LinearGradient(
+                    stops: [
+                        .init(color: .white, location: 0.5),
+                        .init(color: .black, location: 0.5),
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+        } else {
+            Circle().fill(color)
+        }
+    }
+
+    private var swatchHelp: String {
+        isAutomatic
+            ? L(
+                "color_field.swatch.help_auto",
+                "Automatic — follows light and dark"
+            )
+            : L(
+                "color_field.swatch.help",
+                "Edit the %1$@ color",
+                hex
+            )
+    }
+
+    /// The hex field's placeholder: the word "Automatic" on an
+    /// adaptive well with no color (so a blank box never reads as
+    /// "unset by accident"), else empty.
+    private var placeholder: String {
+        isAutomatic
+            ? L("color_field.hex.automatic", "Automatic") : ""
     }
 
     /// Falls back to `.clear` (an empty dot) when the stored
@@ -205,6 +271,15 @@ struct ColorSwatch: View {
     /// shared. On failure silently revert to the last-good
     /// value.
     private func commit() {
+        // On an adaptive well, an emptied field is a valid commit
+        // to "Automatic" — not a parse failure to revert (#429).
+        if automatic,
+            draft.trimmingCharacters(in: .whitespaces).isEmpty
+        {
+            hex = ""
+            draft = ""
+            return
+        }
         if let rgba = DragVisual.parseHex(draft) {
             let ns = NSColor(
                 srgbRed: CGFloat(rgba.red),
@@ -218,114 +293,50 @@ struct ColorSwatch: View {
     }
 
     private func present() {
+        // Seed an OPAQUE color when Automatic: the empty well's
+        // `color` is `.clear` (alpha 0), which would open the panel
+        // with the opacity slider at zero — a hue picked without
+        // touching alpha would commit an invisible mark (#429).
+        let seed = isAutomatic ? NSColor.labelColor : NSColor(color)
         token = ColorPanelController.shared.present(
-            current: NSColor(color)
+            current: seed
         ) { hex = HexColorField.hexString(from: $0) }
     }
 }
 
-/// Drives the one shared `NSColorPanel` for every `ColorSwatch`.
-/// The last swatch to open the panel owns it: `present`
-/// retargets the panel and re-points the change callback,
-/// mirroring how a native color well hands the panel between
-/// wells.
-@MainActor
-final class ColorPanelController: NSObject {
-    static let shared = ColorPanelController()
-
-    private var onChange: ((NSColor) -> Void)?
-    private lazy var doneAccessory: NSView = makeDoneAccessory()
-    /// Bumped per `present`; identifies the current owner so a
-    /// swatch only resigns the panel while it still owns it.
-    private var activeToken = 0
-
-    @discardableResult
-    func present(
-        current: NSColor,
-        onChange: @escaping (NSColor) -> Void
-    ) -> Int {
-        activeToken += 1
-        self.onChange = onChange
-        let panel = NSColorPanel.shared
-        panel.showsAlpha = true
-        panel.accessoryView = doneAccessory
-        // Open on the colour wheel (preferred over the sliders
-        // pane, even though hex entry lives there).
-        panel.mode = .wheel
-        panel.color = current
-        panel.setTarget(self)
-        panel.setAction(#selector(panelColorChanged(_:)))
-        panel.makeKeyAndOrderFront(nil)
-        return activeToken
-    }
-
-    /// Detach when the owning swatch disappears — only if it is
-    /// still the owner (a later swatch may have taken over).
-    func resign(_ token: Int) {
-        guard token == activeToken else { return }
-        dismiss()
-    }
-
-    /// Unconditional teardown, e.g. on window close: stop
-    /// routing and put the panel away so it can't write into a
-    /// reloaded config after the window is gone. `activeToken`
-    /// is intentionally NOT reset — `present` always advances
-    /// it, so a later `resign(oldToken)` still no-ops; resetting
-    /// to 0 would collide with a never-clicked swatch's initial
-    /// token.
-    func dismiss() {
-        onChange = nil
-        let panel = NSColorPanel.shared
-        // Detach our Done bar so it can't linger on the shared
-        // panel for the process lifetime and bleed into any other
-        // future `NSColorPanel.shared` user.
-        panel.accessoryView = nil
-        panel.orderOut(nil)
-    }
-
-    private func makeDoneAccessory() -> NSView {
-        // The accessory is built before the panel is on screen, so
-        // its content width isn't laid out yet; start at a sane
-        // default and let `autoresizingMask` size it to the panel.
-        let container = NSView(
-            frame: NSRect(x: 0, y: 0, width: 300, height: 42)
-        )
-        container.autoresizingMask = [.width]
-        let button = NSButton(
-            title: L("color_panel.done", "Done"),
-            target: self,
-            action: #selector(donePicking)
-        )
-        button.bezelStyle = .rounded
-        button.keyEquivalent = "\r"
-        button.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(button)
-        NSLayoutConstraint.activate([
-            button.centerXAnchor.constraint(
-                equalTo: container.centerXAnchor
-            ),
-            button.centerYAnchor.constraint(
-                equalTo: container.centerYAnchor
-            ),
-            button.leadingAnchor.constraint(
-                greaterThanOrEqualTo: container.leadingAnchor,
-                constant: 12
-            ),
-            button.trailingAnchor.constraint(
-                lessThanOrEqualTo: container.trailingAnchor,
-                constant: -12
-            ),
-        ])
-        return container
-    }
-
-    @objc private func donePicking() {
-        dismiss()
-    }
-
-    @objc private func panelColorChanged(
-        _ sender: NSColorPanel
-    ) {
-        onChange?(sender.color)
+extension View {
+    /// The right-click clear path for an adaptive well (#429): one
+    /// "Automatic" item, checked while the well already is, that
+    /// resets the color to the empty sentinel. A no-op wrapper on a
+    /// well that has no Automatic concept. This is the discoverable
+    /// way back — the swatch click opens the picker (a concrete
+    /// pick), and typing an empty value is the other path.
+    @ViewBuilder
+    fileprivate func automaticMenu(
+        automatic: Bool,
+        hex: Binding<String>,
+        draft: Binding<String>
+    ) -> some View {
+        if automatic {
+            contextMenu {
+                Button {
+                    hex.wrappedValue = ""
+                    draft.wrappedValue = ""
+                } label: {
+                    if hex.wrappedValue.isEmpty {
+                        Label(
+                            L("color_field.automatic", "Automatic"),
+                            systemImage: "checkmark"
+                        )
+                    } else {
+                        Text(
+                            L("color_field.automatic", "Automatic")
+                        )
+                    }
+                }
+            }
+        } else {
+            self
+        }
     }
 }

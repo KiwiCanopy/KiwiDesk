@@ -13,10 +13,20 @@ public final class StickyIndicatorManager {
     public struct Spec: Equatable {
         public let window: WindowID
         public let frame: CGRect
+        /// The mark tint as raw hex (#429); empty = "Automatic"
+        /// (adaptive `.labelColor`). Resolved at the plate via
+        /// `NSColor.mark` so the chip and the Space Bar sticky
+        /// badge read the one `StickyStyle.color`.
+        public let color: String
 
-        public init(window: WindowID, frame: CGRect) {
+        public init(
+            window: WindowID,
+            frame: CGRect,
+            color: String = ""
+        ) {
             self.window = window
             self.frame = frame
+            self.color = color
         }
     }
 
@@ -63,6 +73,7 @@ public final class StickyIndicatorManager {
                     window: spec.window.raw
                 )
             overlays[spec.window] = overlay
+            overlay.setMarkColor(spec.color)
             overlay.update(frame: spec.frame)
             // Re-assert stacking each sync (focus change,
             // retile, z-order restore) — never per follow
