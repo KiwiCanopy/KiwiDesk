@@ -101,6 +101,12 @@ extension KiwiCore {
             // this is the only refresh they get; focus-driven
             // layouts retile and refresh again (cheap, idempotent).
             updateBorders()
+            // Chips too: the click's raise put the window ABOVE
+            // its own chip, and chip stacking is asserted only
+            // on sync (never per tick) — without this the mark
+            // vanished behind the window on a plain click until
+            // the next retile (owner QA 2026-07-21).
+            updateStickyIndicators()
             // The Space Bar's focused-glyph accent follows the
             // same rule (#293): layout-independent, so it can't
             // ride the focus-driven retile alone.
