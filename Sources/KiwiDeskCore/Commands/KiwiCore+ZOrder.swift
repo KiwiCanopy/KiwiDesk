@@ -149,10 +149,17 @@ extension KiwiCore {
         _ ids: [WindowID],
         frames: [WindowID: CGRect]
     ) -> [WindowID] {
-        ids.enumerated()
+        // A frameless id raises LAST (on top): unreachable
+        // today (both callers derive ids and frames from the
+        // same layout), but if a derivation ever drifts, a
+        // window floating above the cascade is visible —
+        // buried under it would be a silent loss.
+        let unknown = CGFloat.greatestFiniteMagnitude
+        return
+            ids.enumerated()
             .sorted { a, b in
-                let ya = frames[a.element]?.minY ?? 0
-                let yb = frames[b.element]?.minY ?? 0
+                let ya = frames[a.element]?.minY ?? unknown
+                let yb = frames[b.element]?.minY ?? unknown
                 if ya != yb { return ya < yb }
                 return a.offset < b.offset
             }
