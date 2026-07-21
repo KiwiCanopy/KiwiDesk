@@ -34,6 +34,12 @@ struct NavRow: View {
                     }
                 }
             Text(command.resolvedLabel)
+            if let help = command.help {
+                HelpButton(
+                    explanation: help(),
+                    subject: command.resolvedLabel
+                )
+            }
             Spacer()
             KeyRecorderField(
                 combo: index.map { bindings[$0].combo } ?? "",

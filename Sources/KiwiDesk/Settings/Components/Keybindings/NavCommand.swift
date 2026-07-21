@@ -21,6 +21,12 @@ struct NavCommand: Identifiable, Hashable {
     /// catalog builders that carry a translatable key supply
     /// this explicitly.
     var displayLabel: @MainActor () -> String = { "" }
+    /// Optional contextual-help text (#94) for a `?` affordance
+    /// beside the row label — set only where a preset carries a
+    /// real limitation a user would otherwise hit blind (#420
+    /// tiled-sticky reorder limit). Excluded from `==`/`hash`
+    /// like `displayLabel`: identity stays label + Lua + icon.
+    var help: (@MainActor () -> String)? = nil
     var id: String { lua }
 
     @MainActor var resolvedLabel: String {

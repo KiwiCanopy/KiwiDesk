@@ -75,6 +75,17 @@ extension KeybindingCatalog {
         lua: "KiwiDesk.toggle_sticky()",
         displayLabel: {
             L("keybinding.toggle_sticky", "Toggle sticky")
+        },
+        help: {
+            L(
+                "keybinding.toggle_sticky.help",
+                "Keeps this window visible on every space. A "
+                    + "tiled sticky window can be rearranged only "
+                    + "on its home space — elsewhere, its position "
+                    + "follows automatically. A floating sticky "
+                    + "window isn't affected — it moves freely "
+                    + "everywhere."
+            )
         }
     )
 
