@@ -269,4 +269,3 @@ extension KiwiCore {
         return (indexA < boundary) != (indexB < boundary)
     }
 }
-

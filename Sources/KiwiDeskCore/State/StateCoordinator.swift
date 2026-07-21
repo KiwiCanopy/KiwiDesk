@@ -286,5 +286,50 @@ public struct StateCoordinator: Sendable {
         }
         return effects
     }
+}
 
+extension StateCoordinator {
+    /// Ordered window members for a space, accounting for
+    /// traveling sticky windows across active/inactive spaces (#415).
+    public func effectiveMembers(
+        of space: Space,
+        activeSpace: SpaceID? = nil,
+        matching predicate: ((ManagedWindow) -> Bool)? = nil
+    ) -> [WindowID] {
+        let activeID = activeSpace ?? workspaces.activeSpace
+        let isCurrent = (space.id == activeID)
+        let rawMembers: [WindowID]
+        if isCurrent {
+            let elsewhere = windows.all
+                .filter(\.isSticky)
+                .map(\.id)
+                .filter { !space.windows.contains($0) }
+                .sorted { $0.raw < $1.raw }
+            rawMembers = space.windows + elsewhere
+        } else {
+            rawMembers = space.windows.filter { id in
+                windows[id]?.isSticky != true
+            }
+        }
+        if let predicate {
+            return rawMembers.filter { id in
+                guard let window = windows[id] else { return false }
+                return predicate(window)
+            }
+        }
+        return rawMembers
+    }
+
+    /// Ordered tiled members of a space (`!isFloating`), taking into
+    /// account traveling sticky windows and active space context (#415).
+    public func effectiveTiledMembers(
+        of space: Space,
+        activeSpace: SpaceID? = nil
+    ) -> [WindowID] {
+        effectiveMembers(
+            of: space,
+            activeSpace: activeSpace,
+            matching: { !$0.isFloating }
+        )
+    }
 }

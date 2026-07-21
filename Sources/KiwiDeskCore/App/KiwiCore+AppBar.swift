@@ -177,9 +177,10 @@ extension KiwiCore {
         // Resolved before withSpace: reading `state` inside
         // its inout closure would violate exclusivity.
         let tiled = Set(
-            space.windows.filter {
-                state.windows[$0]?.isFloating == false
-            }
+            state.effectiveTiledMembers(
+                of: space,
+                activeSpace: activeSpace?.id
+            )
         )
         state.workspaces.withSpace(space.id) { sp in
             sp.windows = sp.windows.map { id in

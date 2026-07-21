@@ -27,9 +27,10 @@ extension KiwiCore {
         swapping: Bool
     ) -> CommandResponse? {
         let params = tiler.settings.resolvedTrack(for: space.id)
-        let tiled = space.windows.filter {
-            state.windows[$0]?.isFloating == false
-        }
+        let tiled = state.effectiveTiledMembers(
+            of: space,
+            activeSpace: activeSpace?.id
+        )
         guard let index = tiled.firstIndex(of: focused) else {
             return nil
         }
@@ -187,11 +188,11 @@ extension KiwiCore {
         focused: WindowID
     ) -> Set<WindowID> {
         let slots = tiler.calculatedFrames(state: state)
-        let tiled = space.windows.compactMap {
-            id -> (id: WindowID, frame: CGRect)? in
-            guard state.windows[id]?.isFloating == false,
-                let frame = slots[id]
-            else { return nil }
+        let tiled = state.effectiveTiledMembers(
+            of: space,
+            activeSpace: activeSpace?.id
+        ).compactMap { id -> (id: WindowID, frame: CGRect)? in
+            guard let frame = slots[id] else { return nil }
             return (id, frame)
         }
         return Navigation.pileMates(of: focused, among: tiled)

@@ -212,9 +212,10 @@ extension KiwiCore {
         space: Space
     ) -> CommandResponse {
         let stack = tiler.settings.resolvedStack(for: space.id)
-        let tiled = space.windows.filter {
-            state.windows[$0]?.isFloating == false
-        }
+        let tiled = state.effectiveTiledMembers(
+            of: space,
+            activeSpace: activeSpace?.id
+        )
         let splitAxis =
             stack.stackPosition.splitsHorizontally ? "x" : "y"
         guard axis != splitAxis else {

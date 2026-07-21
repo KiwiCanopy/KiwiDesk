@@ -19,9 +19,10 @@ extension KiwiCore {
         in space: Space,
         grouping: Bool
     ) -> [[WindowID]] {
-        let tiled = space.windows.filter {
-            state.windows[$0]?.isFloating == false
-        }
+        let tiled = state.effectiveTiledMembers(
+            of: space,
+            activeSpace: activeSpace?.id
+        )
         guard grouping else {
             return tiled.map { [$0] }
         }
