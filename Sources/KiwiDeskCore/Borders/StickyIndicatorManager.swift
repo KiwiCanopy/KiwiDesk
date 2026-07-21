@@ -41,6 +41,12 @@ public final class StickyIndicatorManager {
         Set(overlays.keys)
     }
 
+    /// The frame a window's chip last positioned against, for
+    /// tests that need to prove `follow` stood down (or didn't).
+    public func lastFrame(_ id: WindowID) -> CGRect? {
+        overlays[id]?.lastFrame
+    }
+
     /// Shows exactly `desired` — one chip per sticky window —
     /// and retires the chips of any window no longer in the set.
     public func sync(_ desired: [Spec]) {

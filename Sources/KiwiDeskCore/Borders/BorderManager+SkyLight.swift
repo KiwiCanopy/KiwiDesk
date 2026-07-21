@@ -6,6 +6,13 @@ import AppKit
 /// each file under the size ceiling; the stored state it touches
 /// (`overlays`, `eventSource`, `skyLightActive`, `stickyTracked`, …)
 /// is internal on the main type for exactly this reason.
+///
+/// `BorderManager` is now the WindowServer-events broker for two
+/// consumers — the ring (its overlays) and the sticky chip (via the
+/// `onFrameReconciled` / `onWindowReordered` tees) — because
+/// `SkyLightWindowEvents` has a single weak sink. Two consumers is a
+/// deliberate deferral; a THIRD would be the trigger to extract a
+/// standalone `WindowServerWatch` service with peer subscribers (#414).
 extension BorderManager {
     /// Geometry tracking is independent of rendering. If a raw SLS
     /// window falls back to AppKit, that panel can still follow real
@@ -39,15 +46,19 @@ extension BorderManager {
     /// never AX, then fed through the same geometry path as animation
     /// and cursor following.
     ///
-    /// No border-overlay guard: a sticky-tracked window may wear a
-    /// chip but no ring, and it needs the same WS frame stream
-    /// (`reconcile` → `onFrameReconciled`) and z-order tee
-    /// (`onWindowReordered`). The ring's own actions stay guarded
-    /// per case (`overlays[id]?`).
+    /// Scoped guard, not the ring's old overlay-only one: a
+    /// sticky-tracked window may wear a chip but no ring, so it must
+    /// pass too — it needs the same WS frame stream (`reconcile` →
+    /// `onFrameReconciled`) and z-order tee (`onWindowReordered`).
+    /// A window we watch neither way is a stale additive delivery
+    /// (`watch(_:)`'s undocumented semantics) and is dropped, so no
+    /// stray bounds read or tee fan-out fires for it.
     func handleSkyLightEvent(
         _ kind: SkyLightWindowEvents.Kind,
         window id: WindowID
     ) {
+        guard overlays[id] != nil || stickyTracked.contains(id)
+        else { return }
         switch kind.action {
         case .follow:
             _ = reconcile(id)

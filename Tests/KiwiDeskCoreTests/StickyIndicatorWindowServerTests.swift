@@ -24,9 +24,10 @@ struct StickyChipWindowServerTeeTests {
         let border = BorderManager()
         var reasserted: [WindowID] = []
         border.onWindowReordered = { reasserted.append($0) }
-        // No overlay for window 7 — it is sticky-tracked only. The
-        // old top-level overlay guard dropped this event, burying the
-        // chip on a re-click.
+        // Window 7 wears a chip but no ring — sticky-tracked only.
+        // The old top-level overlay guard dropped this event,
+        // burying the chip on a re-click; the scoped guard admits it.
+        border.setStickyTracked([WindowID(7)])
         reorder(border, 7)
         #expect(reasserted == [WindowID(7)])
     }
@@ -36,8 +37,20 @@ struct StickyChipWindowServerTeeTests {
         let border = BorderManager()
         var reasserted: [WindowID] = []
         border.onWindowReordered = { reasserted.append($0) }
+        border.setStickyTracked([WindowID(3)])
         border.handleSkyLightEvent(.unhide, window: WindowID(3))
         #expect(reasserted == [WindowID(3)])
+    }
+
+    @Test("A stale delivery we watch neither way is dropped")
+    func staleDeliveryDropped() {
+        let border = BorderManager()
+        var reasserted: [WindowID] = []
+        border.onWindowReordered = { reasserted.append($0) }
+        // No ring, not sticky-tracked: an additive stale delivery.
+        // The scoped guard must drop it — no stray tee fan-out.
+        reorder(border, 7)
+        #expect(reasserted.isEmpty)
     }
 
     @Test("chipUsesWindowServerTracking follows the watch set")
@@ -93,14 +106,21 @@ struct StickyChipManagerEntryPointTests {
     @Test("follow stands down while the WindowServer tracks it")
     func followSuppressedWhenTracked() {
         let manager = StickyIndicatorManager()
+        let moved = CGRect(x: 9, y: 9, width: 9, height: 9)
         manager.sync([spec(1)])
         manager.isWindowServerTracked = { $0 == WindowID(1) }
-        // No observable frame accessor, but the guard must not
-        // retire or duplicate the chip — the mark stays intact.
-        manager.follow(
-            WindowID(1),
-            windowFrame: CGRect(x: 9, y: 9, width: 9, height: 9)
-        )
-        #expect(manager.markedWindows == [WindowID(1)])
+        // WS-tracked: the laggy AX-echo `follow` must NOT move the
+        // chip (the WS `reposition` owns the frame). Without the
+        // guard this call would advance `lastFrame` to `moved`.
+        manager.follow(WindowID(1), windowFrame: moved)
+        #expect(manager.lastFrame(WindowID(1)) != moved)
+        // The unguarded WS path always advances it.
+        manager.reposition(WindowID(1), windowFrame: moved)
+        #expect(manager.lastFrame(WindowID(1)) == moved)
+        // And untracked, the AX echo is free to move it again.
+        manager.isWindowServerTracked = { _ in false }
+        let axFrame = CGRect(x: 5, y: 5, width: 5, height: 5)
+        manager.follow(WindowID(1), windowFrame: axFrame)
+        #expect(manager.lastFrame(WindowID(1)) == axFrame)
     }
 }
