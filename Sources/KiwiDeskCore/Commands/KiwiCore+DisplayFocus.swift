@@ -90,6 +90,10 @@ extension KiwiCore {
     ///     swallow keystrokes matches stock macOS's "last window
     ///     closed, no key window" state and is recoverable with a
     ///     click. This is the installed `desktopFocusYield`.
+    /// Finder whose only windows are *minimized* also skips (it is
+    /// off-screen, indistinguishable from other-space via the
+    /// WindowServer) — an over-conservative but safe missed
+    /// activation, not a teleport.
     func yieldFocusToDesktop() {
         guard
             let finder = NSRunningApplication.runningApplications(
