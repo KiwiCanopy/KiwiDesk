@@ -681,6 +681,17 @@ Popovers, sheets, emoji pickers, and other windows above a bordered
 window stay above its ring, which is pinned to the focused window's
 stacking level; the window stays focused and keeps its full ring.
 
+When you focus or swap in a direction where there is no window —
+you're already at the edge — the focus ring gives a small
+rubber-band bounce toward that edge and springs back, the same
+"nothing further this way" cue as scroll overscroll. The window
+never moves; only the ring flexes. It works even with the focus
+border switched off (a brief ring appears just for the bounce) and,
+under **Reduce Motion**, becomes a single opacity pulse instead of
+a movement. This is distinct from a sticky window's pill: the
+bounce is a wordless "edge of the layout," the pill explains a
+window that *can't* be moved.
+
 ### Sticky Windows
 
 A **sticky** window stays visible on every virtual space

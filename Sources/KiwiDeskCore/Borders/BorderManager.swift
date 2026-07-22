@@ -49,7 +49,7 @@ public final class BorderManager {
     /// that comes back empty (a square/borderless window reporting no
     /// radius) is a permanent answer, not a transient one — so a
     /// resolved default is cached too, never re-queried every sync.
-    private var cornerRadii: [WindowID: CGFloat] = [:]
+    var cornerRadii: [WindowID: CGFloat] = [:]
     /// The draw order every ring is currently built for (#367).
     /// Global, not per-window: flipping it retires all overlays so
     /// each rebuilds on the matching backend (below → AppKit,
@@ -78,6 +78,11 @@ public final class BorderManager {
     /// when they wear no ring (borders off / unfocused). Folded
     /// into the WS watch set so the reorder tee reaches them.
     var stickyTracked: Set<WindowID> = []
+
+    /// Drives the dead-end rubber-band (#436). Owned here because it
+    /// bumps the same overlays this manager holds, and spawns a
+    /// transient one when borders are off (see `+DeadEnd`).
+    let bumpAnimator = BorderBumpAnimator()
 
     public init() {}
 
@@ -186,7 +191,7 @@ public final class BorderManager {
     /// resolved once and cached (#357). Falls back to the shared
     /// default when SkyLight reports none — that default is cached
     /// too, so a radius-less window isn't re-queried on every sync.
-    private func cornerRadius(for id: WindowID) -> CGFloat {
+    func cornerRadius(for id: WindowID) -> CGFloat {
         if let cached = cornerRadii[id] { return cached }
         let resolved =
             SkyLight.windowCornerRadius(id.raw)
@@ -231,7 +236,7 @@ public final class BorderManager {
         _ = eventSource?.watch([])
     }
 
-    private func overlay(for window: WindowID) -> BorderOverlay {
+    func overlay(for window: WindowID) -> BorderOverlay {
         if let existing = overlays[window] { return existing }
         let overlay = BorderOverlay(
             window: window.raw,
@@ -259,7 +264,7 @@ public final class BorderManager {
     /// The screen a window's frame center sits on (for the ring's
     /// pixel scale), or the main screen. AX coords, so flip the
     /// center before the Cocoa hit test.
-    private func screen(for frame: CGRect) -> NSScreen? {
+    func screen(for frame: CGRect) -> NSScreen? {
         let center = GeometryUtils.axPoint(
             CGPoint(x: frame.midX, y: frame.midY)
         )

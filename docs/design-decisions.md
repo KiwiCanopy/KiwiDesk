@@ -1162,6 +1162,37 @@ The glyph stays pinned in the rightmost square through the morph
 window width so it never overruns its own edge; Reduce Motion
 swaps the morph for an instant show/hide. (#421)
 
+**Refusal and dead-end feedback are two distinct vocabularies —
+never merged.** A move that is *refused for a reason* (a swap onto
+a tiled-sticky traveler, homed on another space) explains itself
+with the **home-space pill** — semantic, worded, on the window
+that can't move, not the one that tried (#435). A move that simply
+*runs out of layout* — focus or swap in a direction with no window
+beyond the edge — gets a wordless **rubber-band bounce**: the
+focus ring offsets a few points toward the wall and springs back,
+the scroll-overscroll idiom, not the login-shake (#436). The split
+is deliberate: the bounce *means* "nothing there," so firing it on
+a locked-but-present traveler would contradict a cue users are
+trained to read as a genuine edge — and two cues for one keypress
+reads as a glitch. So keyboard-swap-onto-a-traveler is pill-only
+(there *is* a window there); the bounce is reserved for a true
+no-candidate edge (the exact `.fail("no window … of focus")`,
+never `"no focused window"`). The keyboard path has no snap-back
+motion of its own, so the pill's own entrance gets a small scale
+overshoot — a third, smallest motion bound to the cue that
+explains, so a keypress still feels registered, without lending it
+the bounce's meaning. The bounce moves the **ring overlay only,
+never the window** (an AX/SkyLight frame-set burst on a tight loop
+would fight the tiling engine's frame authority and the app's
+own edge self-clamp precisely where the cue fires); it rides a
+`Spring` + per-monitor `DisplayLinkDriver` mirroring
+`AnimationEngine`, works with the focus border off (a transient
+overlay carries it, torn down on settle), coalesces key-repeat by
+retargeting the live spring in place, and under Reduce Motion
+substitutes a single opacity pulse for the movement. No sound: an
+all-day tool with constantly-hammered directional keys makes an
+audible per-wall tick worse than silence.
+
 **The sticky/floating marks are a filled state-color pair,
 defaulting to Automatic.** The one sticky glyph reads the one
 `sticky.color`, so the on-window chip and the Space Bar sticky

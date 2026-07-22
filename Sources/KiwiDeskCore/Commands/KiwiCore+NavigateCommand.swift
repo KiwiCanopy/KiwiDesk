@@ -108,6 +108,10 @@ extension KiwiCore {
                 candidates: searchCandidates
             )
         else {
+            // Dead end — no window that way. Rubber-band the ring
+            // toward the wall (#436); wordless, unlike the traveler
+            // pill (#435). Fires for focus and swap alike.
+            flashDeadEnd(focused, direction: direction)
             return .fail("no window \(raw) of focus")
         }
         if swapping {

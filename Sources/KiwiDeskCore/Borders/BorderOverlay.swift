@@ -42,6 +42,11 @@ final class BorderOverlay {
     private var lastCornerRadius: CGFloat =
         GeometryUtils.systemWindowCornerRadius
     private var isHidden = false
+    /// The dead-end rubber-band's live offset (#436), layered on top
+    /// of `lastFrame` when geometry is built. Held separately from
+    /// `lastFrame` so a steady-state `sync` mid-bump keeps the offset
+    /// instead of snapping the ring back to the un-shifted frame.
+    private var bumpOffset = CGVector.zero
     private let makeFallback: @MainActor () -> any BorderOverlayBackend
     private let onFallback: @MainActor (String) -> Void
 
@@ -131,13 +136,33 @@ final class BorderOverlay {
         }
     }
 
+    /// Rubber-bands the ring by `offset` from its last real frame for
+    /// the dead-end cue (#436), optionally overriding the stroke with
+    /// `colorHex` (a Reduce-Motion opacity dip). Pure overlay motion:
+    /// it re-renders geometry with implicit animation disabled and
+    /// never touches the window, so no AX write and nothing for the
+    /// tiling engine's frame authority to fight. A no-op before the
+    /// first real render (no `lastFrame` to shift).
+    func renderBump(offset: CGVector, colorHex: String? = nil) {
+        guard lastFrame != nil else { return }
+        bumpOffset = offset
+        _ = backend.update(
+            geometry: geometry(for: backend),
+            colorHex: colorHex ?? lastColorHex,
+            screen: lastScreen
+        )
+    }
+
     /// Builds the ring geometry for a backend's order mode from the
-    /// last rendered inputs.
+    /// last rendered inputs, plus any live dead-end bump offset.
     private func geometry(
         for backend: any BorderOverlayBackend
     ) -> BorderGeometry {
         BorderGeometry.compute(
-            windowFrame: lastFrame ?? .zero,
+            windowFrame: (lastFrame ?? .zero).offsetBy(
+                dx: bumpOffset.dx,
+                dy: bumpOffset.dy
+            ),
             width: lastWidth,
             cornerStyle: lastCornerStyle,
             order: backend.orderMode,

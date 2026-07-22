@@ -107,10 +107,11 @@ extension KiwiCore {
             // is a deliberate no-op — do not fall through to the
             // geometric search, which would re-enter the same
             // cascade. A non-piled nil still falls through (edge
-            // steps, cross-monitor focus).
-            return pile.isEmpty
-                ? nil
-                : .fail("no window \(direction.rawValue) of focus")
+            // steps, cross-monitor focus) and hits the geometric
+            // dead-end cue there instead.
+            if pile.isEmpty { return nil }
+            flashDeadEnd(focused, direction: direction)
+            return .fail("no window \(direction.rawValue) of focus")
         }
         if swapping {
             if refuseSwapOntoTraveler(target, in: space) {
