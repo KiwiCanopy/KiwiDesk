@@ -10,8 +10,24 @@ extension KiwiCore {
         }
     }
 
+    /// The window nearly every implicit-focused command acts on,
+    /// and the one the #292 preflight guard vets: the focus ANCHOR
+    /// of the active space, not its `space.focused` slot. (`resize`
+    /// is the exception — it keeps the local slot to avoid
+    /// orphaning id-keyed per-space weights; see `KiwiCore.resize`.)
+    /// A
+    /// tiled-sticky traveler can hold the OS focus yet never
+    /// occupy that membership-guarded slot (#431/#435), so reading
+    /// `space.focused` would target — and let the guard vet — the
+    /// stale local window rather than the traveler the user sees
+    /// focused. Identical to `space.focused` whenever no traveler
+    /// is frontmost, so the common path is unchanged.
+    public var focusedWindowID: WindowID? {
+        activeSpace.flatMap { state.focusAnchor(of: $0) }
+    }
+
     public var focusedWindow: ManagedWindow? {
-        activeSpace?.focused.flatMap { state.windows[$0] }
+        focusedWindowID.flatMap { state.windows[$0] }
     }
 
     /// Read-only profile-name availability — the queryable

@@ -195,7 +195,7 @@ extension KiwiCore {
         guard let raw = args.first?.stringValue else {
             return .fail("expected space id")
         }
-        guard let focused = activeSpace?.focused else {
+        guard let focused = focusedWindowID else {
             return .fail("no focused window")
         }
         moveWindow(focused, to: SpaceID(raw), follow: follow)

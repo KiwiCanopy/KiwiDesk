@@ -20,6 +20,10 @@ extension KiwiCore {
             of: space,
             activeSpace: activeSpace?.id
         )
+        // `space.focused`, not the anchor: resize keys per-window
+        // weights by id, which must stay on a real member to avoid
+        // orphaning under a non-member traveler (#308) — see
+        // `resize` in `KiwiCore+Resize.swift`.
         guard let focused = space.focused,
             let index = tiled.firstIndex(of: focused)
         else { return .fail("no focused tiled window") }

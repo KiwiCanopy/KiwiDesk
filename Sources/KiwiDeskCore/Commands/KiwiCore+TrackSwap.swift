@@ -22,10 +22,17 @@ extension KiwiCore {
         guard space.mode == .track else {
             return .fail("track.swap needs a track space")
         }
-        guard let focused = space.focused,
+        guard let focused = state.focusAnchor(of: space),
             state.windows[focused]?.isFloating == false
         else {
             return .fail("no focused tiled window")
+        }
+        // A track reorder mutates the LOCAL array, so a focused
+        // traveler (injected, not a member) has no track to move —
+        // refuse with the home-space pill (#435), the same dead-
+        // swap explanation as directional swap-from-traveler.
+        if refuseSwapOntoTraveler(focused, in: space) {
+            return .ok()
         }
         let params = tiler.settings.resolvedTrack(for: space.id)
         // Snapshot float verdicts first: the withSpace closure
@@ -40,9 +47,9 @@ extension KiwiCore {
         // partitions the LOCAL array — at the edge the overflow
         // block can mis-gauge by one track. Accepted: the
         // membership guards keep the mutation safe, the focused
-        // window is always local (per-space focus cannot hold a
-        // traveler), and translating the gauge to the local
-        // array is the non-home-reorder non-goal's territory.
+        // window is always local (a focused traveler is refused
+        // above), and translating the gauge to the local array is
+        // the non-home-reorder non-goal's territory.
         let tiled = state.effectiveTiledMembers(
             of: space,
             activeSpace: activeSpace?.id

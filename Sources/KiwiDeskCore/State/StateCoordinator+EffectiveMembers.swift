@@ -103,6 +103,20 @@ extension StateCoordinator {
         return last
     }
 
+    /// `focusAnchor` computing its own `tiled` — for the many
+    /// focused-command bodies that don't already hold the space's
+    /// `effectiveTiledMembers`. On an inactive space no traveler is
+    /// injected, so this collapses to `space.focused`.
+    public func focusAnchor(of space: Space) -> WindowID? {
+        focusAnchor(
+            of: space,
+            tiled: effectiveTiledMembers(
+                of: space,
+                activeSpace: space.id
+            )
+        )
+    }
+
     /// The Space Bar's membership for a space: on the current
     /// space, sticky windows homed elsewhere travel in — tiled
     /// travelers at their injected layout position (so the bar

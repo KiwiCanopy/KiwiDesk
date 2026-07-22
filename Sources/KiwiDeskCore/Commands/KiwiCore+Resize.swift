@@ -45,6 +45,15 @@ extension KiwiCore {
         guard let space = activeSpace else {
             return .fail("no active space")
         }
+        // Resize is the ONE focused verb that resolves against
+        // `space.focused`, not the focus anchor: every path below
+        // writes id-keyed per-space state (BSP/stack/track ratios
+        // and per-window weights), and keying that under a
+        // non-member traveler id would orphan it (never pruned,
+        // recycled-id hazard #308). A future per-space-keyed resize
+        // sibling belongs on this same local-focus side — the rest
+        // of the focused verbs use the anchor. See the
+        // resize-stays-local row in docs/design-decisions.md.
         // A floating focused window resizes ITSELF, in every
         // layout mode — it does not participate in the layout,
         // so the ratio paths below (and their unknown-focus

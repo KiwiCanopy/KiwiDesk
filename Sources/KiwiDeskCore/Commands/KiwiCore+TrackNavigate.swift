@@ -226,10 +226,16 @@ extension KiwiCore {
         guard space.mode == .track else {
             return .fail("move_to_track needs a track space")
         }
-        guard let focused = space.focused,
+        guard let focused = state.focusAnchor(of: space),
             state.windows[focused]?.isFloating == false
         else {
             return .fail("no focused tiled window")
+        }
+        // A focused traveler (injected, not a local member) has no
+        // track to move within this space — refuse with the home-
+        // space pill (#435), like swap-from-traveler.
+        if refuseSwapOntoTraveler(focused, in: space) {
+            return .ok()
         }
         let params = tiler.settings.resolvedTrack(for: space.id)
         // Snapshot float verdicts first: the withSpace closure

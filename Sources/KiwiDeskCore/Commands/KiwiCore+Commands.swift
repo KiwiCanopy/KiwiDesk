@@ -125,7 +125,7 @@ extension KiwiCore {
     private func setFocusedFloating(
         _ floating: Bool
     ) -> CommandResponse {
-        guard let focused = activeSpace?.focused else {
+        guard let focused = focusedWindowID else {
             return .fail("no focused window")
         }
         // Snapshot before the flip so the nudge fires on the
@@ -151,7 +151,7 @@ extension KiwiCore {
     /// #164 tri-state is preserved by construction.
     private func toggleFocusedFloating() -> CommandResponse {
         guard
-            let focused = activeSpace?.focused,
+            let focused = focusedWindowID,
             let window = state.windows[focused]
         else {
             return .fail("no focused window")
@@ -167,7 +167,7 @@ extension KiwiCore {
     private func setFocusedSticky(
         _ sticky: Bool
     ) -> CommandResponse {
-        guard let focused = activeSpace?.focused else {
+        guard let focused = focusedWindowID else {
             return .fail("no focused window")
         }
         state.setSticky(focused, sticky)
@@ -181,7 +181,7 @@ extension KiwiCore {
     /// scripts that need a direction.
     private func toggleFocusedSticky() -> CommandResponse {
         guard
-            let focused = activeSpace?.focused,
+            let focused = focusedWindowID,
             let window = state.windows[focused]
         else {
             return .fail("no focused window")
@@ -200,7 +200,7 @@ extension KiwiCore {
     /// If `handle` ever grows a `windowFloatChanged` side
     /// effect (bus emit), mirror it here.
     private func setFocusedAuto() -> CommandResponse {
-        guard let focused = activeSpace?.focused else {
+        guard let focused = focusedWindowID else {
             return .fail("no focused window")
         }
         state.clearFloatOverride(focused)

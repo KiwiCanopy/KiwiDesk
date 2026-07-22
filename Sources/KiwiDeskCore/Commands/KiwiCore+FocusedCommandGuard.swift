@@ -14,7 +14,9 @@ extension KiwiCore {
     /// commands `FocusedCommandPolicy` classifies as focused.
     ///
     /// Foreground ownership requires ALL of:
-    /// 1. `activeSpace.focused` resolves to a tracked window;
+    /// 1. `focusedWindow` (the focus ANCHOR, `focusedWindowID`, so a
+    ///    frontmost tiled-sticky traveler is recognized, not the
+    ///    stale local slot) resolves to a tracked window;
     /// 2. the OS frontmost app shares that window's pid;
     /// 3. the event loop still observes that pid;
     /// 4. no ignored panel is latched for that pid.

@@ -169,7 +169,7 @@ extension KiwiCore {
         _ promote: Bool
     ) -> CommandResponse {
         guard let space = activeSpace,
-            let focused = space.focused
+            let focused = state.focusAnchor(of: space)
         else {
             return .fail("no focused window")
         }
@@ -182,6 +182,12 @@ extension KiwiCore {
             return .fail(
                 "promote/demote need a stack space"
             )
+        }
+        // A promote/demote reorders the LOCAL array, so a focused
+        // traveler (injected, not a member) can't move — refuse
+        // with the home-space pill (#435), like swap-from-traveler.
+        if refuseSwapOntoTraveler(focused, in: space) {
+            return .ok()
         }
         // Per-space master boundary (#17), matching layout math.
         let count =
