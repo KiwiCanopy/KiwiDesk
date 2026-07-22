@@ -23,10 +23,8 @@ extension BorderManager {
         // Inert until the app lifecycle has started, mirroring the
         // SkyLight-runtime dormancy (`start()`): keeps unit tests and
         // previews from spawning panels + display links on the many
-        // command dead-ends they exercise. Also inert under Mission
-        // Control — a bounce would re-surface a frozen-hidden ring.
-        guard privateRuntimeStarted, !suspended,
-            let screen = screen(for: frame)
+        // command dead-ends they exercise.
+        guard privateRuntimeStarted, let screen = screen(for: frame)
         else { return }
 
         let overlay: BorderOverlay

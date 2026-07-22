@@ -13,9 +13,6 @@ import CoreGraphics
 /// overlays (launchers/panels, #300) never do.
 extension KiwiCore {
     func updateBorders() {
-        // Frozen hidden while Mission Control is up; the overview's
-        // close drives the rebuild (`setMissionControlActive`).
-        guard !missionControlActive else { return }
         // Global draw order (behind / front, #367) — set before the
         // enabled guard so a re-enable rebuilds on the right backend.
         borders.setDrawOrder(tiler.settings.borderStyle.drawOrder)

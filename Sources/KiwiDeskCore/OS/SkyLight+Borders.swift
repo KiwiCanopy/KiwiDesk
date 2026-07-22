@@ -1,5 +1,6 @@
 import CoreFoundation
 import CoreGraphics
+import Foundation
 
 /// Runtime-only SkyLight surface used by the focus-border fast path
 /// (#285 Tier 2). Every symbol is optional: callers must gate on
@@ -123,6 +124,14 @@ extension SkyLight {
         @convention(c) (
             CFTypeRef, Int32
         ) -> CGError
+    typealias MoveWindowsToManagedSpaceFn =
+        @convention(c) (
+            ConnectionID, CFArray, SpaceID
+        ) -> Void
+    typealias CopySpacesForWindowsFn =
+        @convention(c) (
+            ConnectionID, UInt32, CFArray
+        ) -> Unmanaged<CFArray>?
 
     static let newRegionWithRect: NewRegionWithRectFn? = symbol(
         "CGSNewRegionWithRect",
@@ -212,6 +221,23 @@ extension SkyLight {
         "SLSTransactionCommit",
         as: TransactionCommitFn.self
     )
+    // Space pinning is REQUIRED (folded into
+    // `borderRenderingAvailable` below): it is the sole mechanism
+    // that hides the SkyLight ring in Mission Control now that the
+    // notification-driven observer is gone, so a nil lookup here
+    // retires the whole SkyLight backend to the AppKit `.transient`
+    // fallback (which self-hides) rather than leaving an unpinned,
+    // all-spaces ring floating over the overview.
+    static let moveWindowsToManagedSpace: MoveWindowsToManagedSpaceFn? =
+        symbol(
+            "SLSMoveWindowsToManagedSpace",
+            as: MoveWindowsToManagedSpaceFn.self
+        )
+    static let copySpacesForWindows: CopySpacesForWindowsFn? =
+        symbol(
+            "SLSCopySpacesForWindows",
+            as: CopySpacesForWindowsFn.self
+        )
 
     /// Complete drawing/movement surface. Notification symbols are
     /// checked separately by `SkyLightWindowEvents`; Tier 2 is used
@@ -232,5 +258,78 @@ extension SkyLight {
             && transactionSubLevel != nil
             && transactionTransform != nil
             && transactionOrder != nil && transactionCommit != nil
+            // Space-pinning is now REQUIRED, not a best-effort extra:
+            // it is the sole mechanism that hides the SkyLight ring in
+            // Mission Control (the old `MissionControlObserver` that
+            // hid an unpinned ring was removed). Without it, retire to
+            // the AppKit `.transient` fallback, which self-vanishes.
+            && moveWindowsToManagedSpace != nil
+            && copySpacesForWindows != nil
+    }
+
+    /// `SLSCopySpacesForWindows` selector: every space kind
+    /// (user + fullscreen + system), so a window on any space
+    /// answers.
+    private static let allSpacesSelector: UInt32 = 0x7
+
+    /// Pins `window` to the space `target` currently occupies (the
+    /// active space when the query yields nothing), so a Mission
+    /// Control swipe leaves the ring behind instead of floating a
+    /// space-unassigned — therefore all-spaces — window over the
+    /// overview (the jankyborders model). Returns whether a space
+    /// resolved and the move was issued; the caller retires the
+    /// SkyLight backend on `false` so an unpinnable ring falls back
+    /// to the AppKit `.transient` renderer instead of floating in
+    /// Mission Control. The symbol `guard`s are defensive (both are
+    /// required by `borderRenderingAvailable`); the space `guard` is
+    /// the one that can actually fire at runtime.
+    static func pinWindow(
+        _ window: CGWindowID,
+        toSpaceOf target: CGWindowID,
+        connection: ConnectionID
+    ) -> Bool {
+        guard let move = moveWindowsToManagedSpace,
+            let windows = windowList(window)
+        else { return false }
+        guard
+            let space =
+                windowSpace(target, connection: connection)
+                ?? getActiveSpace?(connection)
+        else { return false }
+        move(connection, windows, space)
+        return true
+    }
+
+    /// The space `target` sits on, per the WindowServer.
+    private static func windowSpace(
+        _ target: CGWindowID,
+        connection: ConnectionID
+    ) -> SpaceID? {
+        guard let copySpaces = copySpacesForWindows,
+            let windows = windowList(target),
+            let spaces = copySpaces(
+                connection,
+                allSpacesSelector,
+                windows
+            )?.takeRetainedValue() as NSArray?,
+            let first = spaces.firstObject as? NSNumber
+        else { return nil }
+        return first.uint64Value
+    }
+
+    /// One-window `CFArray` for the space calls. jankyborders
+    /// packs the id as a signed-32 `CFNumber`; match it.
+    private static func windowList(
+        _ id: CGWindowID
+    ) -> CFArray? {
+        var wid = id
+        guard
+            let number = CFNumberCreate(
+                kCFAllocatorDefault,
+                .sInt32Type,
+                &wid
+            )
+        else { return nil }
+        return [number] as CFArray
     }
 }

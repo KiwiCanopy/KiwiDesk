@@ -269,12 +269,6 @@ extension KiwiCore {
                 retile()
             }
         case .nativeSpaceChanged:
-            // Backstop for a dropped `AXExposeExit`: a native-space
-            // change is only observable once the overview is gone, so
-            // it doubles as an implicit exit edge — clear a stuck
-            // Mission Control state (no-op when already inactive)
-            // before the handler rebuilds overlays for the new space.
-            if missionControlActive { setMissionControlActive(false) }
             handleNativeSpaceChange()
         case .windowRekeyed(let old, let new):
             // A native-tab active-tab change: the state fold already

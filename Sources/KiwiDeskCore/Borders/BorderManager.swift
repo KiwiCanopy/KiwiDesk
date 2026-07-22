@@ -57,14 +57,10 @@ public final class BorderManager {
     private var cornerRadii: [WindowID: CGFloat] = [:]
     /// The draw order every ring is currently built for (#367).
     /// Global, not per-window: flipping it retires all overlays so
-    /// each rebuilds on the matching backend (below → AppKit,
-    /// above → SkyLight) at the next `sync`.
+    /// each rebuilds for the new order at the next `sync`. Both
+    /// orders now prefer the SkyLight backend (below-order too);
+    /// AppKit is only the availability/failure fallback.
     private var activeOrder: BorderGeometry.Order = .below
-    /// Frozen-hidden while Mission Control / Exposé is up. Gates the
-    /// show paths (`sync` / `follow` / the WindowServer event handler)
-    /// so the live event stream can't re-surface a ring over the
-    /// overview (`setSuspended`).
-    private(set) var suspended = false
     var eventSource: SkyLightWindowEvents?
     var triedEventSource = false
     var privateRuntimeStarted = false
@@ -102,11 +98,6 @@ public final class BorderManager {
     /// registering process-global SkyLight callbacks.
     func start() {
         privateRuntimeStarted = true
-        // A fresh start is unambiguously un-suspended: if a stop landed
-        // while Mission Control was up (an AX-permission revoke goes
-        // through KiwiCore.stop() without a matching setSuspended), the
-        // flag would otherwise stay stuck and gate every ring forever.
-        suspended = false
     }
 
     /// Retires every ring and disables private callbacks until the
@@ -126,10 +117,11 @@ public final class BorderManager {
 
     /// Selects whether rings stack behind or in front of windows
     /// (#367). A no-op when unchanged; a real flip retires every
-    /// live overlay so the next `sync` rebuilds it on the backend
-    /// that matches the new order (front → SkyLight above-order,
-    /// behind → AppKit below-order). Per-window `specs` and cached
-    /// radii are kept — only the render backend changes.
+    /// live overlay so the next `sync` rebuilds it for the new
+    /// order. Both orders prefer the SkyLight backend (front =
+    /// above-order, behind = below-order); AppKit renders only when
+    /// SkyLight is unavailable. Per-window `specs` and cached radii
+    /// are kept — only the geometry/stacking changes.
     public func setDrawOrder(_ order: BorderStyle.DrawOrder) {
         let mapped: BorderGeometry.Order =
             order == .front ? .above : .below
@@ -139,29 +131,10 @@ public final class BorderManager {
         activeOrder = mapped
     }
 
-    /// Freezes every ring hidden for the duration of Mission Control
-    /// / Exposé: a SkyLight ring is a sticky WindowServer window that
-    /// would otherwise float over the overview at full size. The WS
-    /// event stream keeps flowing while the overview is up, so the
-    /// flag also gates `sync` / `follow` / the event handler — a
-    /// one-shot hide alone would be undone by the next move or
-    /// reorder event. The caller re-syncs on resume (mirrors the
-    /// `setDrawOrder` retire-then-rebuild idiom).
-    public func setSuspended(_ suspend: Bool) {
-        guard suspend != suspended else { return }
-        suspended = suspend
-        guard suspend else { return }
-        bumpAnimator.flushAll()
-        for overlay in overlays.values { overlay.hide() }
-        for overlay in bumpTransients.values { overlay.hide() }
-        bumpTransients = [:]
-    }
-
     /// Shows exactly `desired` — one ring per window — and retires
     /// the overlays of any window no longer in the set (an empty
     /// array retires them all).
     public func sync(_ desired: [Spec]) {
-        guard !suspended else { return }
         let wanted = Set(desired.map(\.window))
         updateSkyLightSubscription(wanted)
         for (id, overlay) in overlays where !wanted.contains(id) {
@@ -196,7 +169,7 @@ public final class BorderManager {
     /// (was hand-mirrored across three call sites). A no-op for
     /// windows without a ring.
     public func follow(_ id: WindowID, windowFrame: CGRect) {
-        guard !suspended, !usesWindowServerTracking(id) else { return }
+        guard !usesWindowServerTracking(id) else { return }
         apply(id, windowFrame: windowFrame)
     }
 
@@ -304,15 +277,18 @@ public final class BorderManager {
     func makeOverlay(for window: WindowID) -> BorderOverlay {
         BorderOverlay(
             window: window.raw,
-            // Below-order (AppKit) is the default (#361): its
-            // `order(.below)` re-stack is flicker-free — unlike the
-            // SkyLight above-order transaction — so it holds steady
-            // under the per-keystroke compositor churn Firefox/Zen
-            // emit, and with each window's real radius the corner hugs
-            // cleanly. `border.set_draw_order("front")` opts into the
-            // crisp SkyLight above-order path (#367); `activeOrder`
-            // carries that choice. WS geometry tracking is unaffected
-            // (see `usesWindowServerTracking`).
+            // Below-order stays the default (#361) and now prefers
+            // the space-pinned SkyLight path: Mission Control
+            // leaves a pinned ring behind instantly (jankyborders'
+            // model), and a below ring skips the above-order
+            // sub-level re-assertion that flickered under the
+            // per-keystroke compositor churn Firefox/Zen emit —
+            // the target itself occludes it. AppKit is now purely
+            // the fallback when the private surface is unavailable
+            // or fails. `border.set_draw_order("front")` opts into
+            // the SkyLight above-order path (#367); `activeOrder`
+            // carries that choice. WS geometry tracking is
+            // unaffected (see `usesWindowServerTracking`).
             order: activeOrder,
             onFallback: { [weak self] reason in
                 self?.onLog(

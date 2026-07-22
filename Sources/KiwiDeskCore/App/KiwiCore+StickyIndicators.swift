@@ -8,8 +8,6 @@ import CoreGraphics
 /// (the mark is a border sibling, not a border feature).
 extension KiwiCore {
     func updateStickyIndicators() {
-        // Hidden while Mission Control is up; rebuilt on its close.
-        guard !missionControlActive else { return }
         guard tiler.settings.stickyStyle.indicator else {
             stickyIndicators.sync([])
             borders.setStickyTracked([])

@@ -5,11 +5,12 @@ import AppKit
 /// and replay the latest state through the mandatory AppKit fallback.
 @MainActor
 protocol BorderOverlayBackend: AnyObject {
-    /// Where this backend stacks its ring, which the facade needs to
-    /// build the matching geometry: SkyLight draws `above` the target
-    /// (visible hairline overlap), AppKit draws `below` it (masked
-    /// overlap). The facade recomputes geometry for this mode on
-    /// every render and after a fallback swap (#357).
+    /// Where this backend stacks its ring, which the facade needs
+    /// to build the matching geometry: `above` draws a visible
+    /// hairline overlap on the target, `below` masks the overlap
+    /// behind it. SkyLight renders either order; the AppKit
+    /// fallback is below-only. The facade recomputes geometry for
+    /// this mode on every render and after a fallback swap (#357).
     var orderMode: BorderGeometry.Order { get }
     func update(
         geometry: BorderGeometry,
@@ -58,21 +59,22 @@ final class BorderOverlay {
         targetWindow = window
         self.onFallback = onFallback
         makeFallback = { AppKitBorderOverlay() }
-        // `above`-order is the SkyLight fast path; `below`-order is
-        // AppKit. The transport follows the requested draw order —
-        // AppKit cannot express a visible above-window ring, and the
-        // SkyLight sub-level path is what makes `above` non-flickering
-        // occlusion-correct (#357/#367).
-        let preferSkyLight = order == .above
-        if preferSkyLight,
-            let skyLight = SkyLightBorderOverlay(targetWindow: window)
-        {
+        // Both orders prefer the SkyLight transport: its window is
+        // space-pinned at creation, so Mission Control leaves the
+        // ring behind instantly — an NSPanel cannot be pinned and
+        // lingers until settle. `above` keeps the sub-level path
+        // that makes it occlusion-correct (#357/#367); `below`
+        // orders beneath the target with none of that churn.
+        // AppKit remains the fallback whenever the private surface
+        // is unavailable or an operation fails.
+        if let skyLight = SkyLightBorderOverlay(
+            targetWindow: window,
+            order: order
+        ) {
             backend = skyLight
         } else {
             backend = AppKitBorderOverlay()
-            if preferSkyLight {
-                onFallback("SLS renderer initialization failed")
-            }
+            onFallback("SLS renderer initialization failed")
         }
     }
 
@@ -322,15 +324,14 @@ private final class AppKitBorderOverlay: BorderOverlayBackend {
         panel.level = .normal
         panel.isReleasedWhenClosed = false
         panel.animationBehavior = .none
-        // Stay on the window's own Space; a fullscreen window
-        // gets no border (auxiliary only). Not cycled by the app
-        // switcher. `.stationary` keeps Exposé/Mission Control from
-        // treating this tracking overlay as a managed window and
-        // showing it as a stray Kiwi tile — the SkyLight fast path
-        // already excludes itself via its jankyborders window tags,
-        // so only this AppKit fallback needs the hint.
+        // A fullscreen window gets no border (auxiliary only); not
+        // cycled by the app switcher. `.transient` hides this AppKit
+        // fallback ring in Exposé/Mission Control at the compositor
+        // level so it vanishes with the swipe — the SkyLight fast
+        // path self-vanishes via its space pin, and this hint gives
+        // the fallback ring the same instant behavior.
         panel.collectionBehavior = [
-            .stationary,
+            .transient,
             .fullScreenAuxiliary,
             .ignoresCycle,
         ]

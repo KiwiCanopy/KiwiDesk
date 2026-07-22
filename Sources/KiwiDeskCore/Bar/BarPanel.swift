@@ -24,12 +24,13 @@ enum BarPanel {
         panel.level = .floating
         panel.isReleasedWhenClosed = false
         panel.animationBehavior = .none
-        // `.stationary` keeps the bars out of Exposé/Mission Control
-        // (orthogonal to `.canJoinAllSpaces`, which spans Spaces) so
-        // neither overlay surfaces there as a stray Kiwi window.
+        // `.transient` hides the bars in Exposé/Mission Control at
+        // the compositor level, so they vanish with the swipe and
+        // restore on exit with no handler latency; `.canJoinAllSpaces`
+        // (orthogonal) still spans every Space.
         panel.collectionBehavior = [
             .canJoinAllSpaces,
-            .stationary,
+            .transient,
             .fullScreenAuxiliary,
             .ignoresCycle,
         ]

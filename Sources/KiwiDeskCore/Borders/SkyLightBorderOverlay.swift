@@ -9,36 +9,46 @@ import CoreGraphics
 /// latest state through its AppKit panel.
 @MainActor
 final class SkyLightBorderOverlay: BorderOverlayBackend {
-    private static let borderTags: UInt64 =
+    // The surface plumbing (create/reshape/draw/destroy) lives in
+    // the `SkyLightBorderOverlay+Surface` extension (separate
+    // file, 350-line ceiling), so this state is internal rather
+    // than private.
+    static let borderTags: UInt64 =
         (1 << 1) | (1 << 9) | (1 << 18)
-    private static let backingStoreBuffered: Int32 = 2
-    private static let orderOut: Int32 = 0
-    private static let orderAbove: Int32 = 1
-    private static let parkedOrigin = CGPoint(x: -9_999, y: -9_999)
+    static let backingStoreBuffered: Int32 = 2
+    static let orderOut: Int32 = 0
+    static let orderAbove: Int32 = 1
+    static let orderBelow: Int32 = -1
+    static let parkedOrigin = CGPoint(x: -9_999, y: -9_999)
 
-    /// The ring stacks *above* its target so its own clean corner
-    /// arc is the only visible edge — nothing occludes it, so
-    /// rounded corners read symmetric (#357). Occlusion by child
-    /// windows is preserved by pinning the ring's sub-level to the
-    /// target's (see `order(relativeTo:)`), not by ordering below.
-    let orderMode: BorderGeometry.Order = .above
+    /// Where this ring stacks (#357/#367). `above` keeps its own
+    /// clean corner arc as the only visible edge and preserves
+    /// child-window occlusion by pinning to the target's
+    /// sub-level; `below` needs no such pinning — the target
+    /// itself occludes the ring beneath it — so its re-stack is a
+    /// single order-below transaction (see `order(relativeTo:)`).
+    let orderMode: BorderGeometry.Order
 
-    private let connection: SkyLight.ConnectionID
-    private let targetWindow: CGWindowID
-    private var window: CGWindowID = 0
+    let connection: SkyLight.ConnectionID
+    let targetWindow: CGWindowID
+    var window: CGWindowID = 0
     /// Unsafe only so Swift 6's nonisolated `deinit` can release the
     /// retained CF object; all operational access remains MainActor.
-    nonisolated(unsafe) private var context: CGContext?
-    private var geometry: BorderGeometry?
-    private var colorHex = ""
-    private var scale: CGFloat = 0
+    nonisolated(unsafe) var context: CGContext?
+    var geometry: BorderGeometry?
+    var colorHex = ""
+    var scale: CGFloat = 0
 
-    init?(targetWindow: CGWindowID) {
+    init?(
+        targetWindow: CGWindowID,
+        order: BorderGeometry.Order = .above
+    ) {
         guard SkyLight.borderRenderingAvailable,
             let connection = SkyLight.connection
         else { return nil }
         self.connection = connection
         self.targetWindow = targetWindow
+        orderMode = order
     }
 
     deinit {
@@ -119,7 +129,24 @@ final class SkyLightBorderOverlay: BorderOverlayBackend {
         // (JankyBorders fires them and only commits), so they are
         // best-effort: gating them on `.success` reads a junk register
         // and would falsely retire this backend to the AppKit
-        // below-order fallback. Only `makeTransaction` is load-bearing.
+        // fallback. Only `makeTransaction` is load-bearing.
+        if orderMode == .below {
+            // Below-order needs none of the level/sub-level
+            // pinning above-order re-asserts for popover
+            // occlusion (#357): the target itself occludes a
+            // ring beneath it, so one plain order-below op keeps
+            // the re-stack churn-free (the jankyborders model —
+            // the above path's per-sync sub-level transactions
+            // are the suspected #361 flicker source).
+            _ = SkyLight.transactionOrder?(
+                transaction,
+                window,
+                Self.orderBelow,
+                targetWindow
+            )
+            commit(transaction)
+            return true
+        }
         var level: Int64 = 0
         if SkyLight.getWindowLevel?(connection, targetWindow, &level)
             == .success,
@@ -164,129 +191,6 @@ final class SkyLightBorderOverlay: BorderOverlayBackend {
         return true
     }
 
-    private func createWindow(frame: CGRect, scale: CGFloat) -> Bool {
-        guard
-            let region = makeRegion(
-                CGRect(origin: .zero, size: frame.size)
-            ), let newWindow = SkyLight.newWindow
-        else { return false }
-        var newID: CGWindowID = 0
-        guard
-            newWindow(
-                connection,
-                Self.backingStoreBuffered,
-                Float(Self.parkedOrigin.x),
-                Float(Self.parkedOrigin.y),
-                region,
-                &newID
-            ) == .success,
-            newID != 0
-        else { return false }
-        window = newID
-
-        var tags = Self.borderTags
-        guard
-            SkyLight.setWindowTags?(
-                connection,
-                newID,
-                &tags,
-                64
-            ) == .success,
-            SkyLight.setWindowOpacity?(
-                connection,
-                newID,
-                false
-            ) == .success,
-            SkyLight.setShadowParameters?(
-                connection,
-                newID,
-                0,
-                0,
-                0,
-                0
-            ) == .success,
-            setResolution(scale),
-            let created = SkyLight.windowContextCreate?(
-                connection,
-                newID,
-                nil
-            )
-        else { return false }
-        context = created.takeRetainedValue()
-        self.scale = scale
-        return true
-    }
-
-    private func reshape(to frame: CGRect) -> Bool {
-        guard
-            let region = makeRegion(
-                CGRect(origin: .zero, size: frame.size)
-            ),
-            SkyLight.windowFreeze?(
-                connection,
-                window,
-                nil
-            ) == .success,
-            SkyLight.setWindowShape?(
-                connection,
-                window,
-                Float(frame.origin.x),
-                Float(frame.origin.y),
-                region
-            ) == .success
-        else { return false }
-        return true
-    }
-
-    private func setResolution(_ scale: CGFloat) -> Bool {
-        SkyLight.setWindowResolution?(
-            connection,
-            window,
-            Double(scale)
-        ) == .success
-    }
-
-    private func draw(
-        _ geometry: BorderGeometry,
-        colorHex: String
-    ) -> Bool {
-        guard let context else { return false }
-        let bounds = CGRect(
-            origin: .zero,
-            size: geometry.overlayFrame.size
-        )
-        let pathRect = bounds.insetBy(
-            dx: geometry.lineWidth / 2,
-            dy: geometry.lineWidth / 2
-        )
-        context.clear(bounds)
-        context.setLineWidth(geometry.lineWidth)
-        context.setStrokeColor(NSColor(kiwiHex: colorHex).cgColor)
-        context.addPath(
-            CGPath(
-                roundedRect: pathRect,
-                cornerWidth: geometry.cornerRadius,
-                cornerHeight: geometry.cornerRadius,
-                transform: nil
-            )
-        )
-        context.strokePath()
-        context.flush()
-        guard
-            SkyLight.flushWindowContent?(
-                connection,
-                window,
-                nil
-            ) == .success
-        else { return false }
-        // Harmless when the window was not frozen; required after a
-        // shape resize so the fresh surface becomes visible at once.
-        return SkyLight.windowThaw?(
-            connection,
-            window
-        ) == .success
-    }
-
     private func move(
         to origin: CGPoint,
         resetTransform: Bool
@@ -319,26 +223,5 @@ final class SkyLightBorderOverlay: BorderOverlayBackend {
     /// is fire-and-forget — a garbage return must not read as failure.
     private func commit(_ transaction: CFTypeRef) {
         _ = SkyLight.transactionCommit?(transaction, 0)
-    }
-
-    private func makeRegion(_ rect: CGRect) -> CFTypeRef? {
-        guard let create = SkyLight.newRegionWithRect else {
-            return nil
-        }
-        var rect = rect
-        var region: Unmanaged<CFTypeRef>?
-        guard create(&rect, &region) == .success else { return nil }
-        return region?.takeRetainedValue()
-    }
-
-    private func destroyWindow() {
-        context = nil
-        if window != 0 {
-            _ = SkyLight.releaseWindow?(connection, window)
-        }
-        window = 0
-        geometry = nil
-        colorHex = ""
-        scale = 0
     }
 }
