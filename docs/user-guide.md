@@ -699,7 +699,10 @@ everywhere; on other spaces it cannot be reordered or mouse-resized — the gest
 sticky** in Shortcuts spells this out. When such a drag snaps
 back, the window's chip briefly expands into a pill naming its
 **home space** — by the same icon or name its Space Bar tile
-shows — so you can see where the tile actually belongs.
+shows — so you can see where the tile actually belongs. The same
+pill appears on the sticky window when you drag *another* window
+onto its slot: the sticky one is the one that can't move, so it's
+the one that explains why.
 
 Because a sticky window can look identical to a normal one,
 KiwiDesk marks it with a small badge chip in its top-right
