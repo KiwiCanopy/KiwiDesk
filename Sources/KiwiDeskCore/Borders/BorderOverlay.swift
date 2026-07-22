@@ -303,7 +303,9 @@ private final class AppKitBorderOverlay: BorderOverlayBackend {
     }
 
     private func makePanel() -> NSPanel {
-        let panel = NSPanel(
+        // A frame-constraining panel would clamp a top-row ring's
+        // upward dead-end bump to zero (#436) — see BorderOverlayPanel.
+        let panel = BorderOverlayPanel(
             contentRect: .zero,
             styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
