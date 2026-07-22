@@ -23,6 +23,12 @@ public enum KiwiEvent: Sendable {
     /// verdict changed (a window scanned mid-launch can report
     /// a wrong subrole once; see EventLoop.reconcile).
     case windowFloatChanged(WindowID, isFloating: Bool)
+    /// A tracked window entered or left native (green-button)
+    /// fullscreen. The window keeps its state slot (no destroy);
+    /// only the snapshot flag flips, so the focus ring can be
+    /// suppressed while it fills its own macOS Space. Emitted
+    /// from the reconcile recheck, change-only.
+    case windowFullscreenChanged(WindowID, isFullscreen: Bool)
     /// A managed window's tracked id changed in place, from the
     /// first id to the second. Native macOS tabs are separate
     /// `NSWindow`s sharing one frame, one on screen at a time, each

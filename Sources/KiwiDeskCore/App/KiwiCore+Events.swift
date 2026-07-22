@@ -268,6 +268,13 @@ extension KiwiCore {
             if effects.floatFlipped {
                 retile()
             }
+        case .windowFullscreenChanged:
+            // Ring only: a native-fullscreen window fills the
+            // display, so a ring would show only at the corners —
+            // drop it now, restore it when fullscreen ends. The
+            // state fold already flipped the snapshot flag; no
+            // retile (the window keeps its home-space slot).
+            updateBorders()
         case .nativeSpaceChanged:
             handleNativeSpaceChange()
         case .windowRekeyed(let old, let new):

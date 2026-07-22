@@ -62,6 +62,10 @@ public final class EventLoop {
     /// reconcile can re-check and emit only actual changes
     /// (manual make_floating overrides stay untouched).
     var detectedFloating: [WindowID: Bool] = [:]
+    /// Last native-fullscreen verdict per tracked window, so the
+    /// reconcile recheck emits `.windowFullscreenChanged` only on
+    /// an actual transition (mirrors `detectedFloating`).
+    var detectedFullscreen: [WindowID: Bool] = [:]
     /// Tracked windows whose CGWindow layer read as ignored
     /// once; untracked only if the reading persists (layers
     /// flicker during fullscreen transitions).
@@ -141,6 +145,7 @@ public final class EventLoop {
         enhancedUIBaselines = [:]
         manualAXApplied = []
         detectedFloating = [:]
+        detectedFullscreen = [:]
         ignorePending = []
         trackedFrames = [:]
         tabCarriers = []
@@ -233,7 +238,12 @@ public final class EventLoop {
                 subrole: subrole,
                 layer: layer ?? 0
             )
+        // Native fullscreen suppresses the focus ring (a ring
+        // around a display-filling window shows only at the
+        // corners); snapshot it here, refresh on reconcile.
+        window.isFullscreen = AXHelper.isFullscreen(element)
         detectedFloating[window.id] = window.isFloating
+        detectedFullscreen[window.id] = window.isFullscreen
         elements[pid, default: [:]][window.id] = element
         observers[pid]?.observe(window: element)
         // Remember every window's frame, and which windows carry a
@@ -261,6 +271,7 @@ public final class EventLoop {
         pid: pid_t,
         app: AppRef
     ) {
+        recheckFullscreen(element, id: id)
         let floating =
             shouldForceFloat(pid: pid)
             || FloatDetection.shouldFloat(
@@ -271,6 +282,25 @@ public final class EventLoop {
         guard detectedFloating[id] != floating else { return }
         detectedFloating[id] = floating
         onEvent(.windowFloatChanged(id, isFloating: floating))
+    }
+
+    /// Re-reads native-fullscreen state on reconcile so a
+    /// green-button transition (no destroy/create pair) flips
+    /// the snapshot flag and the focus ring follows. Change-only,
+    /// like the float recheck above.
+    private func recheckFullscreen(
+        _ element: AXUIElement,
+        id: WindowID
+    ) {
+        let fullscreen = AXHelper.isFullscreen(element)
+        guard detectedFullscreen[id] != fullscreen else { return }
+        detectedFullscreen[id] = fullscreen
+        onEvent(
+            .windowFullscreenChanged(
+                id,
+                isFullscreen: fullscreen
+            )
+        )
     }
 
 }

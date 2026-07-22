@@ -133,6 +133,7 @@ extension EventLoop {
         manualAXApplied.remove(pid)
         for id in Array(elements[pid, default: [:]].keys) {
             detectedFloating[id] = nil
+            detectedFullscreen[id] = nil
             ignorePending.remove(id)
             trackedFrames[id] = nil
             tabCarriers.remove(id)

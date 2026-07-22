@@ -86,6 +86,7 @@ extension EventLoop {
         where !consumed.contains(id) {
             elements[pid]?[id] = nil
             detectedFloating[id] = nil
+            detectedFullscreen[id] = nil
             ignorePending.remove(id)
             trackedFrames[id] = nil
             tabCarriers.remove(id)
@@ -144,6 +145,8 @@ extension EventLoop {
         elements[pid, default: [:]][to] = element
         detectedFloating[to] = detectedFloating[from]
         detectedFloating[from] = nil
+        detectedFullscreen[to] = detectedFullscreen[from]
+        detectedFullscreen[from] = nil
         ignorePending.remove(from)
         trackedFrames[from] = nil
         trackedFrames[to] = AXHelper.frame(of: element)

@@ -82,6 +82,7 @@ extension EventLoop {
                 } else {
                     elements[pid]?[id] = nil
                     detectedFloating[id] = nil
+                    detectedFullscreen[id] = nil
                     trackedFrames[id] = nil
                     tabCarriers.remove(id)
                     onEvent(

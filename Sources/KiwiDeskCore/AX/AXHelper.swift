@@ -130,6 +130,20 @@ public enum AXHelper {
         ) ?? false
     }
 
+    /// Whether a window is in native (green-button) fullscreen.
+    /// Standard AX attribute string; the SDK header exposes no
+    /// Swift constant for it. Snapshot at track/reconcile only —
+    /// never in the border or layout path (AGENTS.md §5).
+    public static func isFullscreen(
+        _ element: AXUIElement
+    ) -> Bool {
+        attribute(
+            element,
+            "AXFullScreen",
+            as: Bool.self
+        ) ?? false
+    }
+
     /// Current `AXEnhancedUserInterface` state of an app, read
     /// live (nil if the app does not answer). Used to bracket an
     /// instant frame-set: EUI-on apps animate programmatic frame

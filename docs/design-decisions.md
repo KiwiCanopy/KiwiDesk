@@ -287,6 +287,16 @@ window that is genuinely an overlay is caught by the stable
 accessory-policy path at track time, independent of any one-off
 subrole read.
 
+A **native-fullscreen** (green-button) window is suppressed by the
+same draw-time mechanism: it stays a member of its home virtual
+space (macOS moves it to its own Space without a destroy), but it
+fills the display, so a ring would peek out only at the rounded
+corners — jankyborders skips fullscreen windows for the same
+reason. The verdict (`ManagedWindow.isFullscreen`) is snapshotted
+from `AXFullScreen` at track time and refreshed change-only on
+reconcile, keeping AX out of the border path; it is orthogonal to
+floating, so float mutations never touch it.
+
 The ring's **rendering backend is opportunistic, not architectural**
 (#285): when the complete runtime-linked SkyLight drawing and event
 surface resolves, an SLS window follows WindowServer move/resize/order

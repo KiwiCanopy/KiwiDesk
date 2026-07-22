@@ -677,6 +677,9 @@ windows. Below it:
 
 Launcher and panel overlays (Spotlight, Raycast, Alfred) never get
 a ring, even while you type into them — only genuine windows do.
+Windows in native (green-button) fullscreen aren't ringed either:
+they fill the display, so a ring would peek out only at the
+corners. The ring returns when the window leaves fullscreen.
 Popovers, sheets, emoji pickers, and other windows above a bordered
 window stay above its ring, which is pinned to the focused window's
 stacking level; the window stays focused and keeps its full ring.

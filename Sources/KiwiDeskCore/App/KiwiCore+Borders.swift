@@ -9,8 +9,10 @@ import CoreGraphics
 /// Every tiled window gets its own ring when unfocused borders are
 /// enabled, including every member of an overflow cascade. Monocle
 /// is always focused-only because only one window is visible;
-/// floating windows get a ring only while focused, and transient
-/// overlays (launchers/panels, #300) never do.
+/// floating windows get a ring only while focused; transient
+/// overlays (launchers/panels, #300) and native-fullscreen
+/// windows (display-filling — only the corners would show)
+/// never do.
 extension KiwiCore {
     func updateBorders() {
         // Global draw order (behind / front, #367) — set before the
@@ -52,6 +54,20 @@ extension KiwiCore {
                 state.windows[$0]?.isTransientOverlay == true
             }
         )
+        // Native-fullscreen windows never get one either: they
+        // keep their home-space slot (no destroy fires), but fill
+        // the display, so a ring would show only at the corners.
+        // Travelers ARE included here (a tiled-sticky window can go
+        // fullscreen) — unlike `floating`/`overlays` above, which
+        // scan `space.windows` only *by construction*: a floating or
+        // transient-overlay window is never tiled, so it can never be
+        // a traveler. Don't "harmonize" the three scopes into one —
+        // only fullscreen needs the traveler union.
+        let fullscreen = Set(
+            (space.windows + travelers).filter {
+                state.windows[$0]?.isFullscreen == true
+            }
+        )
         let slots = (space.windows + travelers).compactMap {
             id -> (id: WindowID, frame: CGRect)? in
             guard let frame = targets[id] ?? state.windows[id]?.frame
@@ -64,6 +80,7 @@ extension KiwiCore {
             slots: slots,
             floating: floating,
             overlays: overlays,
+            fullscreen: fullscreen,
             isMonocle: space.mode == .monocle
         )
         // Draw each ring around the window's REAL frame (its
@@ -102,8 +119,10 @@ extension KiwiCore {
     /// The rings to show for one space. Focused window always
     /// (when borders are on), unless it is a transient overlay
     /// (`overlays` — a launcher/panel that momentarily takes focus,
-    /// #300); every other visible tiled slot only when
-    /// `unfocusedEnabled` and the space isn't monocle. Overlays and
+    /// #300) or in native fullscreen (`fullscreen` — it fills the
+    /// display, a ring would show only at the corners); every
+    /// other visible tiled slot only when `unfocusedEnabled` and
+    /// the space isn't monocle. Overlays, fullscreen windows, and
     /// unfocused floating windows never get a ring. Cascade members
     /// remain independent: border presentation must not change the
     /// shared pile semantics used by navigation and swap. Pure over
@@ -114,6 +133,7 @@ extension KiwiCore {
         slots: [(id: WindowID, frame: CGRect)],
         floating: Set<WindowID>,
         overlays: Set<WindowID>,
+        fullscreen: Set<WindowID>,
         isMonocle: Bool
     ) -> [BorderManager.Spec] {
         guard style.enabled, let focused,
@@ -124,9 +144,11 @@ extension KiwiCore {
         let width = style.clampedWidth
         var specs: [BorderManager.Spec] = []
         // A focused transient overlay (Spotlight/Raycast/Alfred)
-        // gets no ring; a focused user-floated standard window
-        // still does.
-        if !overlays.contains(focused) {
+        // or native-fullscreen window gets no ring; a focused
+        // user-floated standard window still does.
+        if !overlays.contains(focused),
+            !fullscreen.contains(focused)
+        {
             specs.append(
                 BorderManager.Spec(
                     window: focused,
@@ -144,6 +166,7 @@ extension KiwiCore {
         where slot.id != focused
             && !floating.contains(slot.id)
             && !overlays.contains(slot.id)
+            && !fullscreen.contains(slot.id)
         {
             specs.append(
                 BorderManager.Spec(

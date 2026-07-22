@@ -272,6 +272,12 @@ public struct StateCoordinator: Sendable {
             // flag when a window heals back to tiled (#300).
             windows.setFloating(id, floating)
 
+        case .windowFullscreenChanged(let id, let fullscreen):
+            // No override layer here (unlike float): fullscreen
+            // is purely AX-detected, so the re-check verdict
+            // always applies.
+            windows.setFullscreen(id, fullscreen)
+
         case .windowRekeyed(let old, let new):
             rekey(old, to: new)
 

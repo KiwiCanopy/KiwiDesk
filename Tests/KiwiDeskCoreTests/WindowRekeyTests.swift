@@ -65,7 +65,8 @@ struct WindowRekeyTests {
             frame: CGRect(x: 1, y: 2, width: 3, height: 4),
             isFloating: true,
             isSticky: true,
-            isTransientOverlay: true
+            isTransientOverlay: true,
+            isFullscreen: true
         )
         // The fixture must touch every field, so a new field added
         // to ManagedWindow that withID forgets shows up as an extra

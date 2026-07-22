@@ -27,6 +27,7 @@ struct BorderSpecsTests {
         slots: [(id: WindowID, frame: CGRect)],
         floating: Set<WindowID> = [],
         overlays: Set<WindowID> = [],
+        fullscreen: Set<WindowID> = [],
         monocle: Bool = false
     ) -> [BorderManager.Spec] {
         KiwiCore.borderSpecs(
@@ -35,6 +36,7 @@ struct BorderSpecsTests {
             slots: slots,
             floating: floating,
             overlays: overlays,
+            fullscreen: fullscreen,
             isMonocle: monocle
         )
     }
@@ -166,6 +168,42 @@ struct BorderSpecsTests {
             slots: slots,
             floating: [w2],
             overlays: [w2]
+        )
+        #expect(Set(result.map(\.window)) == [w1, w3])
+    }
+
+    @Test("A focused native-fullscreen window gets no ring")
+    func focusedFullscreenSuppressed() {
+        // A display-filling window would show a ring only at its
+        // rounded corners — suppress it (jankyborders does too).
+        // A normal focused window keeps its ring (`focusedOnly`).
+        #expect(
+            specs(
+                BorderStyle(),
+                focused: w1,
+                slots: disjoint,
+                fullscreen: [w1]
+            ).isEmpty
+        )
+    }
+
+    @Test("A fullscreen window is excluded from unfocused rings")
+    func fullscreenExcludedWhenUnfocused() {
+        var style = BorderStyle()
+        style.unfocusedEnabled = true
+        // w2 is fullscreen; its home-space slot survives (no
+        // destroy fires on the green button), but it must not
+        // wear an unfocused ring while w1 and w3 keep theirs.
+        let slots: [(id: WindowID, frame: CGRect)] = [
+            (w1, CGRect(x: 0, y: 0, width: 100, height: 100)),
+            (w2, CGRect(x: 200, y: 0, width: 100, height: 100)),
+            (w3, CGRect(x: 400, y: 0, width: 100, height: 100)),
+        ]
+        let result = specs(
+            style,
+            focused: w1,
+            slots: slots,
+            fullscreen: [w2]
         )
         #expect(Set(result.map(\.window)) == [w1, w3])
     }

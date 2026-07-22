@@ -90,6 +90,21 @@ public struct WindowManager: Sendable {
         windows[id]?.isSticky = sticky
     }
 
+    /// Applies a re-detected native-fullscreen verdict — the
+    /// fold target of `.windowFullscreenChanged`. Detection-owned
+    /// like the overlay flag, but orthogonal to floating, so
+    /// `setFloating` below deliberately does NOT touch it:
+    /// clearing it there would desync the event loop's
+    /// change-only `detectedFullscreen` cache and pin a stale
+    /// verdict until the next fullscreen transition. The
+    /// reconcile recheck is the single heal path.
+    public mutating func setFullscreen(
+        _ id: WindowID,
+        _ fullscreen: Bool
+    ) {
+        windows[id]?.isFullscreen = fullscreen
+    }
+
     public mutating func setFloating(
         _ id: WindowID,
         _ floating: Bool

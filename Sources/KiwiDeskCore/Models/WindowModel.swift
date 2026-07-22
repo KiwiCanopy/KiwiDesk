@@ -73,6 +73,15 @@ public struct ManagedWindow: Sendable, Equatable {
     /// a KiwiDesk focus ring, unlike a user-floated standard window
     /// (#300). Classified once at track time (`EventLoop.track`).
     public var isTransientOverlay: Bool
+    /// Native (green-button) fullscreen: the window owns a
+    /// dedicated macOS Space but stays a member of its home
+    /// virtual space (no `.windowDestroyed` fires). It fills the
+    /// display, so a focus ring would show only at the rounded
+    /// corners — never draw one (jankyborders skips fullscreen
+    /// windows too). Snapshotted from `kAXFullScreenAttribute`
+    /// at track time and refreshed on reconcile — pure state,
+    /// no AX in the border path.
+    public var isFullscreen: Bool
 
     public init(
         id: WindowID,
@@ -83,7 +92,8 @@ public struct ManagedWindow: Sendable, Equatable {
         frame: CGRect = .zero,
         isFloating: Bool = false,
         isSticky: Bool = false,
-        isTransientOverlay: Bool = false
+        isTransientOverlay: Bool = false,
+        isFullscreen: Bool = false
     ) {
         self.id = id
         self.pid = pid
@@ -94,6 +104,7 @@ public struct ManagedWindow: Sendable, Equatable {
         self.isFloating = isFloating
         self.isSticky = isSticky
         self.isTransientOverlay = isTransientOverlay
+        self.isFullscreen = isFullscreen
     }
 
     /// A copy carrying a different id, every other field preserved.
@@ -113,7 +124,8 @@ public struct ManagedWindow: Sendable, Equatable {
             frame: frame,
             isFloating: isFloating,
             isSticky: isSticky,
-            isTransientOverlay: isTransientOverlay
+            isTransientOverlay: isTransientOverlay,
+            isFullscreen: isFullscreen
         )
     }
 }

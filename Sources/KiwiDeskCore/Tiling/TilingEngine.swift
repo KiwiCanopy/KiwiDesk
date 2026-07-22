@@ -104,7 +104,10 @@ public final class TilingEngine {
             return true
         case .appLaunched, .windowFocused, .windowMoved,
             .windowResized, .windowTitleChanged,
-            .nativeSpaceChanged:
+            .nativeSpaceChanged, .windowFullscreenChanged:
+            // A fullscreen flip changes only the ring (the
+            // window keeps its slot on its home space); KiwiCore
+            // refreshes borders directly, no retile.
             return false
         }
     }
