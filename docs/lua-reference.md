@@ -187,6 +187,47 @@ KiwiDesk.move_to_space_and_follow("mail")
 KiwiDesk.move_to_space_and_follow(3)
 ```
 
+### move_space_to_display
+
+**Expects:** a space identifier, then a display reference — a
+**number** (1-based position: `1` is the main display,
+`2` the next left-to-right) or a **string** matching a connected
+monitor's fingerprint (as printed by `list_monitors`) or name.
+
+**Does:** moves the whole space to that monitor **now** and shows
+it there (each monitor shows one space at a time). This is a
+runtime move: a later monitor change (dock/undock) re-resolves
+placement from the pins, so use `pin_space_to_display` to make it
+stick. Creates the space if it does not exist yet.
+
+**Example:**
+
+```lua
+KiwiDesk.move_space_to_display("mail", 2)      -- second monitor
+KiwiDesk.move_space_to_display(3, "DELL U2723QE:3840x2160")
+```
+
+### pin_space_to_display
+
+**Expects:** a space identifier, then a display reference (same
+forms as `move_space_to_display`).
+
+**Does:** pins the space to that monitor by the monitor's
+fingerprint, so the assignment survives dock/undock — and, when
+declared in `init.lua`, a relaunch. Overrides any Main-role
+assignment for the space. Creates the space if new.
+
+Under a GUI-managed config the Settings **Canvas** stays the
+persistent owner of pins, so a pin set from Lua is a session
+override there; under a Lua-managed config the pin persists
+because `init.lua` re-runs on launch.
+
+**Example:**
+
+```lua
+KiwiDesk.pin_space_to_display("mail", 2)
+```
+
 ### move_to_track
 
 **Expects:** `"prev"` or `"next"` (exactly these — no

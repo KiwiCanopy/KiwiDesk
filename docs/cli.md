@@ -65,6 +65,8 @@ already-running / not-running cases exit 0.
 | | `focus_space` | space id |
 | | `move_to_space` | space id |
 | | `move_to_space_and_follow` | space id |
+| | `move_space_to_display` | space id, display index or name |
+| | `pin_space_to_display` | space id, display index or name |
 | Window | `make_floating` | — |
 | | `make_tiled` | — |
 | | `make_auto` | — |

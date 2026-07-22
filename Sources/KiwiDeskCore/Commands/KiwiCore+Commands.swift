@@ -27,6 +27,10 @@ extension KiwiCore {
             return moveToSpace(args, follow: false)
         case "move_to_space_and_follow":
             return moveToSpace(args, follow: true)
+        case "move_space_to_display":
+            return moveSpaceToDisplay(args)
+        case "pin_space_to_display":
+            return pinSpaceToDisplay(args)
         case "make_floating":
             return setFocusedFloating(true)
         case "make_tiled":
