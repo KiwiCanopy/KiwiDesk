@@ -15,11 +15,10 @@ extension KiwiCore {
                 .processIdentifier
         }
         // Yields key focus to the desktop when a move empties the
-        // focused display's space (#446) — Finder owns the desktop.
-        desktopFocusYield = {
-            NSRunningApplication.runningApplications(
-                withBundleIdentifier: "com.apple.finder"
-            ).first?.activate()
+        // focused display's space (#446) — Finder owns the desktop,
+        // gated so it never teleports the user to another Space.
+        desktopFocusYield = { [weak self] in
+            self?.yieldFocusToDesktop()
         }
         // A bare left click on another monitor's empty desktop
         // moves the focused display (#446).

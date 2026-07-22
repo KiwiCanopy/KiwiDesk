@@ -74,4 +74,43 @@ extension KiwiCore {
         )
         emitSpaceChange()
     }
+
+    /// Hands key focus to the desktop when a move empties the
+    /// focused display's space (#446). macOS exposes no "focus the
+    /// empty desktop" API, so we activate Finder (the desktop's
+    /// owner) — but only when doing so cannot teleport the user to
+    /// another Space (option 3, per ui-designer):
+    ///   • Finder has no document windows anywhere → clean activate,
+    ///     the desktop simply becomes frontmost.
+    ///   • Finder has a window on a currently-visible space (any
+    ///     display) → activate surfaces it on-screen, no switch.
+    ///   • Finder's windows live only on non-visible spaces →
+    ///     SKIP. Activating would jump Spaces (the "switch to a
+    ///     Space with open windows" setting); leaving focus to
+    ///     swallow keystrokes matches stock macOS's "last window
+    ///     closed, no key window" state and is recoverable with a
+    ///     click. This is the installed `desktopFocusYield`.
+    func yieldFocusToDesktop() {
+        guard
+            let finder = NSRunningApplication.runningApplications(
+                withBundleIdentifier: "com.apple.finder"
+            ).first
+        else { return }
+        let pid = finder.processIdentifier
+        let anyWindows = AXHelper.normalWindowCount(
+            pid: pid,
+            onScreenOnly: false
+        )
+        // Only pay the second WindowServer query when there is
+        // something that could teleport.
+        let onScreen =
+            anyWindows == 0
+            ? 0
+            : AXHelper.normalWindowCount(
+                pid: pid,
+                onScreenOnly: true
+            )
+        guard anyWindows == 0 || onScreen > 0 else { return }
+        finder.activate()
+    }
 }
