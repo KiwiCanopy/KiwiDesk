@@ -4,29 +4,87 @@ import CoreGraphics
 // MARK: - Hiding inactive virtual spaces
 
 extension TilingEngine {
-    /// Visible sliver of stashed windows: the WindowServer's
-    /// clamp floor plus this sliver's own margin (see
-    /// `WindowServerFacts.visibilityFloor`). An ask below the
-    /// floor (the old 8 pt) was unreachable — the OS lifted it
-    /// to ~32 pt, the ±2 pt tolerance never passed, and
-    /// `stashInactive` re-issued a frame for every
-    /// inactive-space window on every retile (#148). At
-    /// floor + margin the target is achievable, so stashed
-    /// windows settle; the visible change is marginal (the OS
-    /// already showed ~32–40 pt).
-    nonisolated static let stashPeek: CGFloat =
+    /// Visible sliver of a stashed window — asymmetric on
+    /// purpose (#410), confirmed on device.
+    ///
+    /// **Width = 1 pt.** A stashed window hangs off *two* edges
+    /// (a bottom corner); that corner overhang escapes the
+    /// ~32–40 pt single-edge visibility floor, so the horizontal
+    /// remnant reaches a barely-perceptible 1 pt (AeroSpace/rift
+    /// ship the same 1 px).
+    ///
+    /// **Height = `visibilityFloor + 8`.** The vertical does not
+    /// escape: parking at the bottom puts the title bar at the
+    /// screen edge, and macOS lifts the window to keep it
+    /// grabbable — the #142/#148 clamp (verified: at a 1 pt ask
+    /// the OS floored the height back to ~floor anyway). So 1 pt
+    /// buys no visual gain vertically, only thrash (the frame
+    /// re-issued every retile, the ±2 pt tolerance never passing)
+    /// and a #412 stranding risk. We ship the reachable value
+    /// instead: same ~floor-tall look, no thrash. Net: a
+    /// 1 × ~48 pt tab, not the old 48 × 48 slab.
+    nonisolated static let stashPeekX: CGFloat = 1
+    nonisolated static let stashPeekY: CGFloat =
         WindowServerFacts.visibilityFloor + 8
 
-    /// Where a hidden window parks: the bottom-right corner
-    /// of its screen, AeroSpace style (only the top-left
-    /// `stashPeek` corner remains visible). Size unchanged.
+    /// The bottom corner a stashed window parks in. Chosen per
+    /// monitor (`optimalHideCorner`) so the window's body — which
+    /// hangs ~its full width off the parked side — spills into
+    /// dead space, not onto a neighbor display (#410).
+    enum HideCorner {
+        case bottomLeft
+        case bottomRight
+    }
+
+    /// Picks the bottom corner whose horizontal overhang misses
+    /// every adjacent display (#410, AeroSpace's `OptimalHide
+    /// Corner` scan). A stashed window's body hangs off the
+    /// parked side; parking toward a neighbor monitor would show
+    /// that body on the neighbor. Prefer the side with no
+    /// adjacent display; default bottom-right when both or
+    /// neither side has one. All frames are AX visible frames;
+    /// x is shared with Cocoa, so left/right adjacency is exact.
+    nonisolated static func optimalHideCorner(
+        for screen: CGRect,
+        among others: [CGRect]
+    ) -> HideCorner {
+        func hasNeighbor(onRight: Bool) -> Bool {
+            others.contains { other in
+                let touchesX =
+                    onRight
+                    ? other.minX >= screen.maxX - 1
+                    : other.maxX <= screen.minX + 1
+                let overlapsY =
+                    other.minY < screen.maxY
+                    && other.maxY > screen.minY
+                return touchesX && overlapsY
+            }
+        }
+        if !hasNeighbor(onRight: true) { return .bottomRight }
+        if !hasNeighbor(onRight: false) { return .bottomLeft }
+        return .bottomRight
+    }
+
+    /// Where a hidden window parks: a bottom corner of its
+    /// screen, `stashPeekX × stashPeekY` remaining visible, the
+    /// body spilling off the parked side and the bottom. Size
+    /// unchanged. `.bottomLeft` anchors the window's right edge
+    /// so the visible remnant is its top-right corner.
     nonisolated static func stashFrame(
         _ frame: CGRect,
-        in bounds: CGRect
+        in bounds: CGRect,
+        corner: HideCorner
     ) -> CGRect {
-        CGRect(
-            x: bounds.maxX - stashPeek,
-            y: bounds.maxY - stashPeek,
+        let x: CGFloat
+        switch corner {
+        case .bottomRight:
+            x = bounds.maxX - stashPeekX
+        case .bottomLeft:
+            x = bounds.minX + stashPeekX - frame.width
+        }
+        return CGRect(
+            x: x,
+            y: bounds.maxY - stashPeekY,
             width: frame.width,
             height: frame.height
         )
@@ -49,6 +107,9 @@ extension TilingEngine {
     ) {
         guard let active = state.workspaces.activeSpace
         else { return }
+        let allVisible = NSScreen.screens.map {
+            GeometryUtils.axVisibleFrame(of: $0)
+        }
         for space in state.workspaces.allSpaces
         where space.id != active {
             for id in space.windows {
@@ -60,11 +121,17 @@ extension TilingEngine {
                         GeometryUtils.axVisibleFrame(of: $0)
                             .intersects(window.frame)
                     } ?? fallback
+                let bounds = GeometryUtils.axVisibleFrame(
+                    of: screen
+                )
+                let corner = Self.optimalHideCorner(
+                    for: bounds,
+                    among: allVisible.filter { $0 != bounds }
+                )
                 stash(
                     window,
-                    in: GeometryUtils.axVisibleFrame(
-                        of: screen
-                    ),
+                    in: bounds,
+                    corner: corner,
                     force: force
                 )
             }
@@ -83,10 +150,15 @@ extension TilingEngine {
     func stash(
         _ window: ManagedWindow,
         in bounds: CGRect,
+        corner: HideCorner,
         force: Bool
     ) {
         guard !window.isSticky else { return }
-        let target = Self.stashFrame(window.frame, in: bounds)
+        let target = Self.stashFrame(
+            window.frame,
+            in: bounds,
+            corner: corner
+        )
         if !force, Self.close(window.frame, to: target) {
             return
         }
@@ -187,17 +259,28 @@ extension TilingEngine {
     /// corner, the #412 failure mode). A genuine user drag TO
     /// the exact corner is indistinguishable and keeps its
     /// capture — harmless: the next activation restores it.
+    /// Checks both bottom corners (which one a window parked in
+    /// depends on its monitor's neighbors, `optimalHideCorner`),
+    /// with the asymmetric peek: `.bottomLeft` anchors the right
+    /// edge, so its x depends on the frame width.
     static func looksStashed(_ frame: CGRect) -> Bool {
         NSScreen.screens.contains { screen in
             let bounds = GeometryUtils.axVisibleFrame(
                 of: screen
             )
-            return abs(
-                frame.minX - (bounds.maxX - stashPeek)
-            ) <= retileTolerance
-                && abs(
-                    frame.minY - (bounds.maxY - stashPeek)
+            let atBottom =
+                abs(frame.minY - (bounds.maxY - stashPeekY))
+                <= retileTolerance
+            let atRight =
+                abs(frame.minX - (bounds.maxX - stashPeekX))
+                <= retileTolerance
+            let atLeft =
+                abs(
+                    frame.minX
+                        - (bounds.minX + stashPeekX
+                            - frame.width)
                 ) <= retileTolerance
+            return atBottom && (atRight || atLeft)
         }
     }
 

@@ -43,7 +43,7 @@ struct StashCaptureTests {
     func capturesFloatingOnce() {
         let engine = TilingEngine()
         let window = makeWindow(1, floating: true)
-        engine.stash(window, in: bounds, force: true)
+        engine.stash(window, in: bounds, corner: .bottomRight, force: true)
         #expect(
             engine.stashedFrames[WindowID(1)] == window.frame
         )
@@ -53,16 +53,22 @@ struct StashCaptureTests {
     func reStashKeepsOriginal() {
         let engine = TilingEngine()
         let window = makeWindow(1, floating: true)
-        engine.stash(window, in: bounds, force: true)
+        engine.stash(window, in: bounds, corner: .bottomRight, force: true)
         // The AX echo of the stash updated state: the window
         // now reads at the corner. A later forced retile
         // re-stashes it — the capture must survive.
         var echoed = window
         echoed.frame = TilingEngine.stashFrame(
             window.frame,
-            in: bounds
+            in: bounds,
+            corner: .bottomRight
         )
-        engine.stash(echoed, in: bounds, force: true)
+        engine.stash(
+            echoed,
+            in: bounds,
+            corner: .bottomRight,
+            force: true
+        )
         #expect(
             engine.stashedFrames[WindowID(1)] == window.frame
         )
@@ -74,6 +80,7 @@ struct StashCaptureTests {
         engine.stash(
             makeWindow(1, floating: false),
             in: bounds,
+            corner: .bottomRight,
             force: true
         )
         #expect(engine.stashedFrames.isEmpty)
@@ -84,7 +91,7 @@ struct StashCaptureTests {
         let engine = TilingEngine()
         var window = makeWindow(1, floating: true)
         window.isSticky = true
-        engine.stash(window, in: bounds, force: true)
+        engine.stash(window, in: bounds, corner: .bottomRight, force: true)
         // No capture: the window was left in place, so there
         // is nothing for the restore pass to put back.
         #expect(engine.stashedFrames.isEmpty)
