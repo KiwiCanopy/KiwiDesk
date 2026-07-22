@@ -277,15 +277,13 @@ extension KiwiCore {
         // A tiled-sticky traveler is injected into this space's
         // layout but is not a member of it (#414 v2): dropping
         // another window onto it is refused by `Space.swap`'s
-        // membership guard and would silently no-op. Treat it like
-        // a no-target drop — snap the dragged window back — but
-        // flash the traveler's home-space pill so the refusal is
-        // explained on the constrained window, not the trier (#435).
-        // (`id` is a local member here: a dragged traveler already
-        // returned early above.)
-        if let target, !space.windows.contains(target) {
+        // membership guard and would silently no-op. Share the one
+        // refusal predicate + pill with the keyboard swap sites
+        // (#435), then snap the dragged window back — a no-target
+        // drop — and focus it. (`id` is a local member here: a
+        // dragged traveler already returned early above.)
+        if let target, refuseSwapOntoTraveler(target, in: space) {
             retile()
-            flashStickyHomeSpace(target)
             focusWindow(id, warp: false)
             return
         }

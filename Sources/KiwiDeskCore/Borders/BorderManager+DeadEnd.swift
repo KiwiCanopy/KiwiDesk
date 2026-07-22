@@ -5,11 +5,12 @@ extension BorderManager {
     /// dead-end cue (#436). The ring itself never moves the window —
     /// only the overlay geometry animates (`BorderOverlay.renderBump`).
     ///
-    /// Works whether or not borders are enabled: if the window has no
-    /// live ring, a transient overlay is spawned from the passed
-    /// style, bumped, then torn down on settle — so borders-off users
-    /// get the same cue. When a ring already exists it is bumped in
-    /// place and left standing.
+    /// Works whether or not borders are enabled: a live steady-state
+    /// ring is bumped in place, and a window with no ring gets a
+    /// **transient** overlay kept in `bumpTransients` (never in the
+    /// `overlays` store `sync` owns), bumped, then torn down on
+    /// settle — so the two lifecycles can never adopt or stomp each
+    /// other.
     func flashDeadEnd(
         window: WindowID,
         frame: CGRect,
@@ -19,13 +20,23 @@ extension BorderManager {
         cornerStyle: BorderStyle.CornerStyle,
         reduceMotion: Bool
     ) {
-        guard let screen = screen(for: frame) else { return }
-        let hadRing = overlays[window] != nil
-        let overlay = overlay(for: window)
-        if !hadRing {
-            // Establish the ring so the bump has something to shift,
-            // then order it into the target's band for the flash.
-            overlay.update(
+        // Inert until the app lifecycle has started, mirroring the
+        // SkyLight-runtime dormancy (`start()`): keeps unit tests and
+        // previews from spawning panels + display links on the many
+        // command dead-ends they exercise.
+        guard privateRuntimeStarted, let screen = screen(for: frame)
+        else { return }
+
+        let overlay: BorderOverlay
+        if let live = overlays[window] {
+            overlay = live
+        } else {
+            // Borders off for this window: spawn (or reuse) a
+            // transient ring outside `overlays` and establish it so
+            // the bump has something to shift.
+            let ring = bumpTransients[window] ?? makeOverlay(for: window)
+            bumpTransients[window] = ring
+            ring.update(
                 frame: frame,
                 width: width,
                 cornerStyle: cornerStyle,
@@ -33,8 +44,10 @@ extension BorderManager {
                 colorHex: colorHex,
                 screen: screen
             )
-            overlay.order(relativeTo: window.raw)
+            ring.order(relativeTo: window.raw)
+            overlay = ring
         }
+
         bumpAnimator.flash(
             window: window,
             overlay: overlay,
@@ -43,12 +56,10 @@ extension BorderManager {
             screen: screen,
             reduceMotion: reduceMotion
         ) { [weak self] in
-            // Tear down only what this cue spawned; a pre-existing
-            // ring stays under the steady-state sync's ownership.
-            guard let self, !hadRing else { return }
-            self.overlays[window]?.hide()
-            self.overlays[window] = nil
-            self.cornerRadii[window] = nil
+            // Retire only a transient we spawned; a live ring is left
+            // to the steady-state sync (no-op if none is stored).
+            self?.bumpTransients[window]?.hide()
+            self?.bumpTransients[window] = nil
         }
     }
 }

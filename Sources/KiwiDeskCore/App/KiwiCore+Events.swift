@@ -28,6 +28,7 @@ extension KiwiCore {
         switch event {
         case .displaysChanged:
             tiler.displaysChanged()
+            borders.displaysChanged()
             handleMonitorChange()
             emitMonitorChange()
         case .windowFocused(let id):

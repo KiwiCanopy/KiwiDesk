@@ -22,6 +22,13 @@ final class BorderBumpAnimator {
 
     /// At most one bump per window — a repeat retargets it in place.
     private var active: [WindowID: Active] = [:]
+    /// One driver per monitor, keyed by `DisplayID` — the same
+    /// per-monitor discipline as `AnimationEngine` (a monitor may
+    /// therefore hold this driver *and* AnimationEngine's at once;
+    /// both tick at the display's own rate, neither is a global
+    /// timer, so the one-DisplayLink-per-monitor guardrail holds in
+    /// intent). Distinct tick payloads and lifecycles keep them
+    /// separate rather than sharing a registry (§2.4).
     private var drivers: [DisplayID: DisplayLinkDriver] = [:]
 
     /// One opacity pulse for the Reduce-Motion substitution: dip to
@@ -66,6 +73,22 @@ final class BorderBumpAnimator {
             )
         }
         startDriver(for: display, screen: screen)
+    }
+
+    /// Force-settles every in-flight bump: resets each ring's offset
+    /// so none is left shifted, runs its teardown (`onDone`, which
+    /// retires a transient overlay), and invalidates all drivers.
+    /// Called on `BorderManager.clear()` and on a display change,
+    /// where a bump's monitor may have vanished and its DisplayLink
+    /// would otherwise stop ticking mid-flight and leak the entry.
+    func flushAll() {
+        for a in active.values {
+            a.overlay?.renderBump(offset: .zero)
+            a.onDone()
+        }
+        active.removeAll()
+        for driver in drivers.values { driver.invalidate() }
+        drivers.removeAll()
     }
 
     private func startDriver(for display: DisplayID, screen: NSScreen) {
@@ -141,10 +164,13 @@ final class BorderBumpAnimator {
     }
 
     /// `hex` with its alpha multiplied by `factor`, as `#RRGGBBAA`.
+    /// Falls back to `hex` unchanged if the color can't be resolved
+    /// to sRGB — never touches component accessors on a color space
+    /// that would trap.
     static func dim(_ hex: String, alpha factor: Double) -> String {
-        let base =
-            NSColor(kiwiHex: hex).usingColorSpace(.sRGB)
-            ?? NSColor(kiwiHex: hex)
+        guard
+            let base = NSColor(kiwiHex: hex).usingColorSpace(.sRGB)
+        else { return hex }
         let byte = { (v: CGFloat) in
             Int((min(1, max(0, v)) * 255).rounded())
         }

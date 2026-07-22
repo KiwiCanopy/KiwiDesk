@@ -40,6 +40,11 @@ public final class BorderManager {
     // `BorderManager+SkyLight` extension (separate file), so they are
     // internal rather than private.
     var overlays: [WindowID: BorderOverlay] = [:]
+    /// Transient rings spawned only to carry the dead-end bounce on
+    /// a window that has no steady-state ring (borders off). Kept
+    /// out of `overlays` so `sync` never sees them; torn down by the
+    /// bump animator's completion (`+DeadEnd`).
+    var bumpTransients: [WindowID: BorderOverlay] = [:]
     /// Last synced spec per window, so the per-tick `follow` can
     /// recompute geometry from a fresh frame while reusing the
     /// window's color / width / corner style.
@@ -49,7 +54,7 @@ public final class BorderManager {
     /// that comes back empty (a square/borderless window reporting no
     /// radius) is a permanent answer, not a transient one — so a
     /// resolved default is cached too, never re-queried every sync.
-    var cornerRadii: [WindowID: CGFloat] = [:]
+    private var cornerRadii: [WindowID: CGFloat] = [:]
     /// The draw order every ring is currently built for (#367).
     /// Global, not per-window: flipping it retires all overlays so
     /// each rebuilds on the matching backend (below → AppKit,
@@ -228,17 +233,38 @@ public final class BorderManager {
     /// before the quit gather scatters windows; steady-state
     /// retirement of individual rings goes through `sync`.
     public func clear() {
+        bumpAnimator.flushAll()
         for overlay in overlays.values { overlay.hide() }
+        for overlay in bumpTransients.values { overlay.hide() }
         overlays = [:]
+        bumpTransients = [:]
         specs = [:]
         cornerRadii = [:]
         stickyTracked = []
         _ = eventSource?.watch([])
     }
 
-    func overlay(for window: WindowID) -> BorderOverlay {
+    /// Force-settles in-flight dead-end bounces on a display change:
+    /// a bump whose monitor was unplugged would otherwise stall (its
+    /// DisplayLink stops firing) and leak its transient overlay.
+    func displaysChanged() {
+        bumpAnimator.flushAll()
+    }
+
+    private func overlay(for window: WindowID) -> BorderOverlay {
         if let existing = overlays[window] { return existing }
-        let overlay = BorderOverlay(
+        let overlay = makeOverlay(for: window)
+        overlays[window] = overlay
+        return overlay
+    }
+
+    /// Builds a ring overlay for `window` without inserting it into
+    /// the steady-state `overlays` store. Used there via
+    /// `overlay(for:)`, and by the dead-end cue's transient overlay
+    /// (`+DeadEnd`), which lives in a separate store so a concurrent
+    /// `sync` can never adopt or stomp it (and vice-versa).
+    func makeOverlay(for window: WindowID) -> BorderOverlay {
+        BorderOverlay(
             window: window.raw,
             // Below-order (AppKit) is the default (#361): its
             // `order(.below)` re-stack is flicker-free — unlike the
@@ -257,8 +283,6 @@ public final class BorderManager {
                 )
             }
         )
-        overlays[window] = overlay
-        return overlay
     }
 
     /// The screen a window's frame center sits on (for the ring's

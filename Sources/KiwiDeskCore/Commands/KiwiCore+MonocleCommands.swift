@@ -140,6 +140,9 @@ extension KiwiCore {
             return nil
         }
         if swapping {
+            if refuseSwapOntoTraveler(target, in: space) {
+                return .ok()
+            }
             state.workspaces.withSpace(space.id) {
                 $0.swap(focused, target)
             }
