@@ -17,7 +17,7 @@ struct TiledMembersParityTests {
             appName: "App",
             title: "Title",
             isFloating: isFloating,
-            isSticky: isSticky
+            stickyScope: isSticky ? .global : .none
         )
     }
 
@@ -123,13 +123,19 @@ struct TiledMembersParityTests {
         // own array is untouched.
         #expect(s1.windows == [WindowID(1)])
 
-        // Inactive home space2 still lays out its own member —
-        // and ONLY the active space tiles travelers.
+        // A global sticky RENDERS on the focused space (space1),
+        // so its inactive home space2 drops it from its own tiled
+        // layout (#445) — the home monitor reserves no phantom slot
+        // to fight the traveler frame on the render display. The
+        // window's flat-array membership in space2 is untouched
+        // (derivation only); its home INDEX still derives from the
+        // full local list, so the space1 injection above is intact.
         let s2Tiled = state.effectiveTiledMembers(
             of: s2,
             activeSpace: space1
         )
-        #expect(s2Tiled == [WindowID(2)])
+        #expect(s2Tiled == [])
+        #expect(s2.windows == [WindowID(2)])
     }
 
     @Test("Floating sticky never joins the tiled members")

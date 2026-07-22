@@ -20,7 +20,10 @@ extension KiwiCore {
                 StickyIndicatorManager.Spec(
                     window: $0.id,
                     frame: $0.frame,
-                    color: color
+                    color: color,
+                    symbolName: StickyStyle.symbolName(
+                        for: $0.stickyScope
+                    ) ?? StickyStyle.symbolName
                 )
             }
         )
@@ -107,6 +110,80 @@ extension KiwiCore {
                 "sticky.pile.pill",
                 "Sticky windows can't be moved to the pile"
             ),
+            mark: .text(""),
+            delay: 0.05
+        )
+    }
+
+    /// Whether moving `window` to `target` is refused because it is
+    /// sticky (#445), flashing the matching pill when it is. The
+    /// single sticky-move gate, shared by EVERY membership-mutation
+    /// choke point — the keyboard/CLI `move_to_space` (`moveWindow`)
+    /// AND the Space-Bar spring (`springSwitchSpace`) — because
+    /// `moveWindow` is not the only path that re-homes a window.
+    ///
+    /// A global sticky is everywhere, so no space is a valid target.
+    /// A display sticky refuses only a SAME-display target (it can't
+    /// change spaces on its monitor); a target on ANOTHER monitor is
+    /// allowed and re-homes it — its home display follows the new
+    /// home space. When exactly one of from/target has no assigned
+    /// display (a target space not yet shown on any monitor), they
+    /// compare unequal and the move is ALLOWED: a not-yet-placed
+    /// space is treated as elsewhere, re-homing on first show.
+    func stickyMoveRefused(
+        _ window: WindowID,
+        to target: SpaceID
+    ) -> Bool {
+        guard let sticky = state.windows[window], sticky.isSticky
+        else { return false }
+        switch sticky.stickyScope {
+        case .none:
+            return false
+        case .global:
+            flashStickyMoveBlocked(window, scope: .global)
+            return true
+        case .display:
+            let fromDisplay = state.homeDisplay(of: window)
+            let toDisplay = state.workspaces.display(of: target)
+            guard fromDisplay == toDisplay else { return false }
+            // On a single monitor "display" and "global" coincide —
+            // there is no other display to move to — so the negative
+            // "another space" copy is the honest one, not the
+            // "different display" escape hatch.
+            let scope: StickyScope =
+                state.workspaces.allDisplays.count <= 1
+                ? .global : .display
+            flashStickyMoveBlocked(window, scope: scope)
+            return true
+        }
+    }
+
+    /// Refuses a `move_to_space` on a sticky window with a terse
+    /// on-window pill (#445). Shape follows whether an escape
+    /// exists: a global sticky has no valid target (negative), a
+    /// display sticky can still cross to another monitor (positive
+    /// "here's how"). The "why + how" lives in the keybinding `?`
+    /// help, not this pill. Gated by the same `sticky.indicator` as
+    /// the chip; a no-op when the mark is off. Appears at once — the
+    /// move is refused outright, so no relayout precedes it.
+    func flashStickyMoveBlocked(
+        _ id: WindowID,
+        scope: StickyScope
+    ) {
+        guard tiler.settings.stickyStyle.indicator else { return }
+        let format =
+            scope == .display
+            ? L(
+                "sticky.display.pill",
+                "Can only be moved to a different display"
+            )
+            : L(
+                "sticky.everywhere.pill",
+                "Sticky windows can't be moved to another space"
+            )
+        stickyIndicators.flash(
+            id,
+            format: format,
             mark: .text(""),
             delay: 0.05
         )

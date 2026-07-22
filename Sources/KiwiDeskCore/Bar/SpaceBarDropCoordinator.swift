@@ -64,10 +64,13 @@ final class SpaceBarDropCoordinator {
     /// Clear every hover tint and pending sweep.
     var clearFeedback: @MainActor () -> Void = {}
     /// Spring the visible space to `target` while `window` stays
-    /// pinned mid-drag.
+    /// pinned mid-drag. Returns whether the spring actually
+    /// happened — a refused sticky move (#445) or an already-active
+    /// target springs nothing, so `fire` must not record it as
+    /// `sprungSpace`.
     var spring:
         @MainActor (_ target: SpaceID, _ window: WindowID)
-            -> Void = { _, _ in }
+            -> Bool = { _, _ in false }
 
     /// The item currently armed (hover tint + running sweep), or
     /// nil. Lets `handleDragMove` suppress the in-space ghost
@@ -157,8 +160,13 @@ final class SpaceBarDropCoordinator {
     private func fire(_ target: SpaceID, _ id: WindowID) {
         dwellTask = nil
         armedSpace = nil
-        sprungSpace = target
         clearFeedback()
-        spring(target, id)
+        // Record the spring only if it actually switched: a refused
+        // sticky move (#445) leaves the visible space put, so a
+        // stale `sprungSpace` would suppress re-arming the pill and
+        // mis-route the drop to `.placeInSprung` on the home space.
+        if spring(target, id) {
+            sprungSpace = target
+        }
     }
 }

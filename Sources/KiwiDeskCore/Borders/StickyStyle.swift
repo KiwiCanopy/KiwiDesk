@@ -20,12 +20,31 @@ public struct StickyStyle: Sendable, Equatable {
     /// subsystem reaches laterally into the other for it.
     ///
     /// `infinity` (#429, ui-designer): "always / everywhere" for a
-    /// window present on every space, and a single clean stroke
-    /// that stays crisp at the 7–9 pt badge size where the old
-    /// `square.stack.3d.up.fill`'s perspective smeared. Pin-family
-    /// glyphs are off-limits — `SpaceAssignmentChip` uses `pin.fill`
-    /// for the opposite idea (bound to ONE space).
+    /// GLOBAL-sticky window present on every space of every
+    /// monitor, and a single clean stroke that stays crisp at the
+    /// 7–9 pt badge size where the old `square.stack.3d.up.fill`'s
+    /// perspective smeared.
     public static let symbolName = "infinity"
+
+    /// The DISPLAY-sticky mark (#445): `pin.fill` — "tacked to
+    /// this screen" for a window present on every space of ONE
+    /// monitor. A filled glyph, so it tints from `color` exactly
+    /// like `infinity`. Deliberately the pin: `SpaceAssignmentChip`
+    /// uses the same pin for "bound to one space", the neighbouring
+    /// idea — display-sticky is "bound to one display", so the
+    /// shared family reads as intended, not as a collision.
+    public static let displaySymbolName = "pin.fill"
+
+    /// The mark glyph for a scope, or nil for `.none` (no mark).
+    /// One lookup so the on-window chip and the Space Bar badge
+    /// pick the same per-scope glyph.
+    public static func symbolName(for scope: StickyScope) -> String? {
+        switch scope {
+        case .none: return nil
+        case .global: return symbolName
+        case .display: return displaySymbolName
+        }
+    }
 
     /// On-window sticky glyph, on by default: a sticky window
     /// can look identical to a normal one, and unlike a focus

@@ -44,6 +44,11 @@ final class SpaceBarItemView: NSView {
         /// is otherwise no way to tell these states apart.
         var sticky = false
         var floating = false
+        /// The sticky SCOPE the badge glyph reflects (#445):
+        /// `.global` → `infinity`, `.display` → `pin.fill`. The
+        /// run's first sticky member wins (badge inheritance); a
+        /// mixed run is rare and either glyph reads as "sticky".
+        var stickyScope: StickyScope = .none
     }
 
     let identifierImage = NSImageView()
@@ -283,9 +288,11 @@ final class SpaceBarItemView: NSView {
             addSubview(badge)
             return badge
         }
-        stickyBadgeViews = apps.map { _ in
+        stickyBadgeViews = apps.map { app in
             let badge = StateBadgeView(
-                symbolName: StickyStyle.symbolName
+                symbolName: StickyStyle.symbolName(
+                    for: app.stickyScope
+                ) ?? StickyStyle.symbolName
             )
             addSubview(badge)
             return badge

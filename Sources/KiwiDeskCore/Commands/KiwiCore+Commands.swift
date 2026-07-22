@@ -44,11 +44,15 @@ extension KiwiCore {
         case "toggle_floating":
             return toggleFocusedFloating()
         case "make_sticky":
-            return setFocusedSticky(true)
+            return setFocusedSticky(.global)
+        case "make_display_sticky":
+            return setFocusedSticky(.display)
         case "make_unsticky":
-            return setFocusedSticky(false)
+            return setFocusedSticky(.none)
         case "toggle_sticky":
-            return toggleFocusedSticky()
+            return toggleFocusedSticky(.global)
+        case "toggle_display_sticky":
+            return toggleFocusedSticky(.display)
         case "resize":
             return resize(args)
         case "move_to_track":
@@ -167,34 +171,44 @@ extension KiwiCore {
         return setFocusedFloating(!window.isFloating)
     }
 
-    /// `make_sticky` / `make_unsticky` (#414): flips the focused
-    /// window's sticky flag. No mode argument and no tri-state:
-    /// sticky has no detection source, so on/off is the whole
-    /// story — the window keeps its existing float/tiled state.
-    /// The retile applies the effect (stash exemption) at once.
+    /// `make_sticky` / `make_display_sticky` / `make_unsticky`
+    /// (#414/#445): sets the focused window's sticky SCOPE. No
+    /// tri-state and no detection source — the scope is the whole
+    /// story, and each verb writes its own scope outright, so
+    /// `make_sticky` on a display-sticky window turns it global and
+    /// vice versa (the #221 sibling-verb model). The window keeps
+    /// its float/tiled state; the retile applies the effect (stash
+    /// exemption, traveler injection) at once.
     private func setFocusedSticky(
-        _ sticky: Bool
+        _ scope: StickyScope
     ) -> CommandResponse {
         guard let focused = focusedWindowID else {
             return .fail("no focused window")
         }
-        state.setSticky(focused, sticky)
+        state.setSticky(focused, scope)
         retile()
         return .ok()
     }
 
-    /// `toggle_sticky` (#414): the everyday sticky verb — the
-    /// only one offered in the Settings shortcut list (#221
-    /// precedent); the explicit `make_*` verbs remain for
-    /// scripts that need a direction.
-    private func toggleFocusedSticky() -> CommandResponse {
+    /// `toggle_sticky` / `toggle_display_sticky` (#414/#445): the
+    /// everyday sticky verbs, the two offered in the Settings
+    /// shortcut list (#221 precedent). Each toggles ITS scope
+    /// against off: already in `scope` → off; anything else
+    /// (unsticky OR the other scope) → `scope`. So toggling display
+    /// on a global sticky switches it to display, matching the
+    /// `make_*` override semantics.
+    private func toggleFocusedSticky(
+        _ scope: StickyScope
+    ) -> CommandResponse {
         guard
             let focused = focusedWindowID,
             let window = state.windows[focused]
         else {
             return .fail("no focused window")
         }
-        return setFocusedSticky(!window.isSticky)
+        let next: StickyScope =
+            window.stickyScope == scope ? .none : scope
+        return setFocusedSticky(next)
     }
 
     /// `make_auto` (#164): clears the focused window's manual

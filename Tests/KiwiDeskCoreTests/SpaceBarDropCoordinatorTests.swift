@@ -38,7 +38,12 @@ struct SpaceBarDropCoordinatorTests {
             rec.sweeps.append(space)
         }
         coord.clearFeedback = { rec.clears += 1 }
-        coord.spring = { rec.sprang.append(($0, $1)) }
+        coord.spring = {
+            rec.sprang.append(($0, $1))
+            // The mock always springs (no #445 refusal), so `fire`
+            // records `sprungSpace` as before.
+            return true
+        }
         return (coord, rec)
     }
 

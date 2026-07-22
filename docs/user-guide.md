@@ -701,7 +701,17 @@ A **sticky** window stays visible on every virtual space
 instead of hiding with its home space when you switch — mark
 one with the **Toggle sticky** shortcut (Shortcuts ▸ Size &
 Float; there is no app rule list, stickiness is per window).
-The flag survives closing and reopening the window, and it is
+Sticky has two scopes, both in that shortcut list:
+**Toggle sticky** keeps the window on every space of **every**
+monitor (marked with an ∞ chip), while **Toggle display sticky**
+keeps it on every space of just **one** monitor — the screen it
+lives on (marked with a 📌 chip). Moving a display-sticky window
+to a space on another monitor re-homes it there; moving a
+global-sticky one anywhere, or a display-sticky one to a
+different space on the *same* monitor, is refused with a brief
+pill on the window (its whole point is to stay put). On a single
+monitor the two are identical. The flag survives closing and
+reopening the window, and it is
 independent of floating: a floating sticky window keeps its
 own frame everywhere, a tiled one tiles into every space's
 layout — it takes a slot near where it sits on its own space,

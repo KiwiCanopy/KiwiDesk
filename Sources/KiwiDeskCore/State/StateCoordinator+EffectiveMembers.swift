@@ -41,9 +41,21 @@ extension StateCoordinator {
         of space: Space,
         activeSpace: SpaceID? = nil
     ) -> [WindowID] {
-        var members = localTiledMembers(of: space)
-        let activeID = activeSpace ?? workspaces.activeSpace
-        guard space.id == activeID else { return members }
+        let focused = activeSpace ?? workspaces.activeSpace
+        // A local sticky that RENDERS on another space has
+        // physically traveled away (#445: a global sticky follows
+        // the focused display; a display sticky follows its home
+        // monitor's shown space). Drop it from this space's layout
+        // so its home monitor reserves no phantom slot to fight the
+        // traveler frame on the render display. On the common
+        // single-monitor / home-active path its render space IS
+        // this space, so nothing is dropped.
+        var members = localTiledMembers(of: space).filter { id in
+            guard let window = windows[id], window.isSticky
+            else { return true }
+            return stickyRenderSpace(of: window, focused: focused)
+                == space.id
+        }
         // Ascending (index, id) order, each insertion offset by
         // the travelers already placed before it: earlier
         // travelers occupy slots ahead of later home indexes,
@@ -51,7 +63,8 @@ extension StateCoordinator {
         // same ascending order — a reversed insertion inverted
         // ties whenever two travelers clamped to the end.
         for (placed, traveler)
-            in tiledStickyTravelers(into: space).enumerated()
+            in tiledStickyTravelers(into: space, focused: focused)
+            .enumerated()
         {
             members.insert(
                 traveler.id,
@@ -62,6 +75,80 @@ extension StateCoordinator {
             )
         }
         return members
+    }
+
+    /// The single space a sticky window RENDERS on right now —
+    /// where its one physical frame lands and its glyph shows
+    /// (#445). A sticky window is a real member of one home space
+    /// but is DERIVED onto others; with two scopes across several
+    /// monitors it can only physically be one place, so this names
+    /// it:
+    ///
+    /// - `.global`: the FOCUSED active space. One physical window
+    ///   follows the display the user is on — injected there as a
+    ///   traveler, or rendered in place when its home space IS the
+    ///   focused one.
+    /// - `.display`: the space currently shown on its HOME display
+    ///   (`activeSpace(on:)`). It never leaves that monitor; a
+    ///   cross-display `move_to_space` re-homes it first.
+    ///
+    /// Collapses to the focused active space when the home display
+    /// is unresolvable (single monitor, early boot, unit tests) —
+    /// there "one monitor" and "every monitor" coincide, so a
+    /// display sticky behaves exactly like a global one.
+    func stickyRenderSpace(
+        of window: ManagedWindow,
+        focused: SpaceID?
+    ) -> SpaceID? {
+        switch window.stickyScope {
+        case .none:
+            return nil
+        case .global:
+            return focused ?? workspaces.activeSpace
+        case .display:
+            guard let display = homeDisplay(of: window.id) else {
+                return focused ?? workspaces.activeSpace
+            }
+            return workspaces.activeSpace(on: display)
+        }
+    }
+
+    /// The display a window's HOME space is assigned to — the one
+    /// primitive the "home display = display of home space"
+    /// invariant (#445) rests on, shared so `stickyRenderSpace`,
+    /// `stickyExemptFromStash`, and the move guard cannot drift on
+    /// how it is computed. Each caller keeps its own fallback for
+    /// the unresolvable (single-monitor / unassigned) case.
+    func homeDisplay(of window: WindowID) -> DisplayID? {
+        workspaces.space(of: window)
+            .flatMap { workspaces.display(of: $0) }
+    }
+
+    /// Whether a sticky window is exempt from the inactive-space
+    /// stash while `space` is being parked (#414/#445). A global
+    /// sticky is always exempt — present on every monitor. A
+    /// display sticky is exempt only on its OWN display's spaces:
+    /// parking a space on ANOTHER display must not keep it visible
+    /// there. Under the one-home-space invariant the window only
+    /// ever appears in the stash loop on its home display, so this
+    /// is exempt-in-practice; the display check states the
+    /// invariant explicitly and stays correct if that ever shifts.
+    /// Collapses to exempt when the home display is unresolvable
+    /// (single monitor), where display and global sticky coincide.
+    func stickyExemptFromStash(
+        _ window: ManagedWindow,
+        onSpace space: SpaceID
+    ) -> Bool {
+        switch window.stickyScope {
+        case .none:
+            return false
+        case .global:
+            return true
+        case .display:
+            guard let homeDisplay = homeDisplay(of: window.id)
+            else { return true }
+            return workspaces.display(of: space) == homeDisplay
+        }
     }
 
     /// The window a focus-driven surface should treat as focused
@@ -129,24 +216,31 @@ extension StateCoordinator {
         of space: Space,
         activeSpace: SpaceID? = nil
     ) -> [WindowID] {
-        let activeID = activeSpace ?? workspaces.activeSpace
-        guard space.id == activeID else {
-            return space.windows.filter { id in
-                windows[id]?.isSticky != true
-            }
-        }
+        let focused = activeSpace ?? workspaces.activeSpace
         let injected = effectiveTiledMembers(
             of: space,
-            activeSpace: activeID
+            activeSpace: focused
         )
         // Merge: local windows keep their flat-array positions
         // (floating included); each tiled traveler lands before
         // the local tiled member that follows it in the injected
         // order. Locals appear in `injected` in their original
-        // relative order, so a single cursor suffices.
+        // relative order, so a single cursor suffices. A local
+        // sticky that renders on ANOTHER space (#445) is skipped —
+        // its glyph shows once, where it renders — and it is absent
+        // from `injected` too (dropped there), so the cursor stays
+        // aligned. This subsumes the old "prune own sticky on a
+        // non-active space" branch and additionally KEEPS a sticky
+        // that renders on a secondary display's shown space.
         var result: [WindowID] = []
         var next = 0
         for id in space.windows {
+            if let window = windows[id], window.isSticky,
+                stickyRenderSpace(of: window, focused: focused)
+                    != space.id
+            {
+                continue
+            }
             guard windows[id]?.isFloating == false else {
                 result.append(id)
                 continue
@@ -160,9 +254,13 @@ extension StateCoordinator {
         }
         result.append(contentsOf: injected[next...])
         let floating = windows.all
-            .filter { $0.isSticky && $0.isFloating }
+            .filter {
+                $0.isSticky && $0.isFloating
+                    && !space.windows.contains($0.id)
+                    && stickyRenderSpace(of: $0, focused: focused)
+                        == space.id
+            }
             .map(\.id)
-            .filter { !space.windows.contains($0) }
             .sorted { $0.raw < $1.raw }
         return result + floating
     }
@@ -174,12 +272,15 @@ extension StateCoordinator {
     /// insert in a stable order regardless of dictionary
     /// ordering.
     private func tiledStickyTravelers(
-        into space: Space
+        into space: Space,
+        focused: SpaceID?
     ) -> [(id: WindowID, homeIndex: Int)] {
         windows.all
             .filter {
                 $0.isSticky && !$0.isFloating
                     && !space.windows.contains($0.id)
+                    && stickyRenderSpace(of: $0, focused: focused)
+                        == space.id
             }
             .compactMap { window -> (WindowID, Int)? in
                 guard

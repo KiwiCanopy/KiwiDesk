@@ -38,6 +38,58 @@ struct StickyCommandTests {
         core.state.windows[WindowID(1)]?.isSticky
     }
 
+    private func scope(_ core: KiwiCore) -> StickyScope? {
+        core.state.windows[WindowID(1)]?.stickyScope
+    }
+
+    @Test("make_display_sticky sets the display scope")
+    func makeDisplaySticky() {
+        let core = makeCore()
+        addWindow(core, 1)
+        #expect(core.execute("make_display_sticky").isSuccess)
+        #expect(scope(core) == .display)
+        #expect(isSticky(core) == true)
+    }
+
+    @Test("each make_* verb overrides the other scope")
+    func scopeOverride() {
+        let core = makeCore()
+        addWindow(core, 1)
+        #expect(core.execute("make_sticky").isSuccess)
+        #expect(scope(core) == .global)
+        // make_display_sticky on a global sticky → display.
+        #expect(core.execute("make_display_sticky").isSuccess)
+        #expect(scope(core) == .display)
+        // make_sticky on a display sticky → global.
+        #expect(core.execute("make_sticky").isSuccess)
+        #expect(scope(core) == .global)
+        #expect(core.execute("make_unsticky").isSuccess)
+        #expect(scope(core) == StickyScope.none)
+    }
+
+    @Test("toggle_display_sticky flips display against off")
+    func toggleDisplay() {
+        let core = makeCore()
+        addWindow(core, 1)
+        #expect(core.execute("toggle_display_sticky").isSuccess)
+        #expect(scope(core) == .display)
+        #expect(core.execute("toggle_display_sticky").isSuccess)
+        #expect(scope(core) == StickyScope.none)
+    }
+
+    @Test("toggle_display_sticky on a global sticky switches scope")
+    func toggleDisplayFromGlobal() {
+        let core = makeCore()
+        addWindow(core, 1)
+        #expect(core.execute("make_sticky").isSuccess)
+        // Toggling the OTHER scope switches, never turns off.
+        #expect(core.execute("toggle_display_sticky").isSuccess)
+        #expect(scope(core) == .display)
+        // And toggle_sticky on a display sticky switches to global.
+        #expect(core.execute("toggle_sticky").isSuccess)
+        #expect(scope(core) == .global)
+    }
+
     @Test("make_sticky marks the focused window")
     func makeSticky() {
         let core = makeCore()
@@ -146,7 +198,8 @@ struct StickyCommandTests {
     @Test("sticky verbs are listed in the API reference")
     func listedInReference() {
         for verb in [
-            "make_sticky", "make_unsticky", "toggle_sticky",
+            "make_sticky", "make_display_sticky", "make_unsticky",
+            "toggle_sticky", "toggle_display_sticky",
         ] {
             #expect(
                 APIReference.commands.contains {
@@ -192,7 +245,7 @@ struct StickyFocusFollowTests {
     func stickyExempt() {
         let core = makeCore()
         seed(core)
-        core.state.setSticky(WindowID(1), true)
+        core.state.setSticky(WindowID(1), .global)
         core.handle(.windowFocused(WindowID(1)))
         #expect(core.deferred.task(for: .focusFollow) == nil)
         #expect(
@@ -232,7 +285,7 @@ struct StickyPersistenceTests {
     func stickySurvivesReopen() {
         var state = StateCoordinator()
         state.apply(.windowCreated(makeWindow(1)))
-        state.setSticky(WindowID(1), true)
+        state.setSticky(WindowID(1), .global)
         state.apply(
             .windowDestroyed(WindowID(1), wasMinimized: false)
         )
@@ -244,14 +297,14 @@ struct StickyPersistenceTests {
     func unstickyCloseClears() {
         var state = StateCoordinator()
         state.apply(.windowCreated(makeWindow(1)))
-        state.setSticky(WindowID(1), true)
+        state.setSticky(WindowID(1), .global)
         state.apply(
             .windowDestroyed(WindowID(1), wasMinimized: false)
         )
         // Reopen restores sticky; the user then turns it off.
         state.apply(.windowCreated(makeWindow(2)))
         #expect(state.windows[WindowID(2)]?.isSticky == true)
-        state.setSticky(WindowID(2), false)
+        state.setSticky(WindowID(2), .none)
         state.apply(
             .windowDestroyed(WindowID(2), wasMinimized: false)
         )
@@ -263,7 +316,7 @@ struct StickyPersistenceTests {
     func appTerminationRemembers() {
         var state = StateCoordinator()
         state.apply(.windowCreated(makeWindow(1)))
-        state.setSticky(WindowID(1), true)
+        state.setSticky(WindowID(1), .global)
         state.apply(.appTerminated(pid: 100))
         state.apply(.windowCreated(makeWindow(2)))
         #expect(state.windows[WindowID(2)]?.isSticky == true)
@@ -273,7 +326,7 @@ struct StickyPersistenceTests {
     func lazyTitleRestores() {
         var state = StateCoordinator()
         state.apply(.windowCreated(makeWindow(1)))
-        state.setSticky(WindowID(1), true)
+        state.setSticky(WindowID(1), .global)
         state.apply(
             .windowDestroyed(WindowID(1), wasMinimized: false)
         )
@@ -287,7 +340,7 @@ struct StickyPersistenceTests {
     func emptyTitleNeverRemembered() {
         var state = StateCoordinator()
         state.apply(.windowCreated(makeWindow(1, title: "")))
-        state.setSticky(WindowID(1), true)
+        state.setSticky(WindowID(1), .global)
         state.apply(
             .windowDestroyed(WindowID(1), wasMinimized: false)
         )
@@ -299,7 +352,7 @@ struct StickyPersistenceTests {
     func restoredIntentRearms() {
         var state = StateCoordinator()
         state.apply(.windowCreated(makeWindow(1)))
-        state.setSticky(WindowID(1), true)
+        state.setSticky(WindowID(1), .global)
         state.apply(
             .windowDestroyed(WindowID(1), wasMinimized: false)
         )
@@ -314,7 +367,7 @@ struct StickyPersistenceTests {
     @Test("untracked ids never record an intent")
     func untrackedIdIgnored() {
         var state = StateCoordinator()
-        state.setSticky(WindowID(9), true)
+        state.setSticky(WindowID(9), .global)
         state.apply(.windowCreated(makeWindow(9)))
         #expect(state.windows[WindowID(9)]?.isSticky == false)
     }
@@ -323,7 +376,7 @@ struct StickyPersistenceTests {
     func rekeyCarriesFlag() {
         var state = StateCoordinator()
         state.apply(.windowCreated(makeWindow(1)))
-        state.setSticky(WindowID(1), true)
+        state.setSticky(WindowID(1), .global)
         state.apply(
             .windowRekeyed(WindowID(1), WindowID(2))
         )

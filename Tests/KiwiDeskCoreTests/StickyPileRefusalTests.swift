@@ -28,7 +28,7 @@ struct StickyPileRefusalTests {
             id: WindowID(id),
             pid: 100,
             appName: "App",
-            isSticky: isSticky
+            stickyScope: isSticky ? .global : .none
         )
     }
 

@@ -219,7 +219,12 @@ extension KiwiCore {
             },
             floating: group.contains {
                 state.windows[$0]?.isFloating == true
-            }
+            },
+            // The run's first sticky member picks the badge glyph
+            // (#445): global → infinity, display → pin.fill.
+            stickyScope: group.compactMap {
+                state.windows[$0]
+            }.first(where: \.isSticky)?.stickyScope ?? .none
         )
     }
 

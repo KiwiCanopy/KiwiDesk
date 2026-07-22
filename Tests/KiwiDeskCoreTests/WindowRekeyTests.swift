@@ -64,7 +64,7 @@ struct WindowRekeyTests {
             title: "Title",
             frame: CGRect(x: 1, y: 2, width: 3, height: 4),
             isFloating: true,
-            isSticky: true,
+            stickyScope: .global,
             isTransientOverlay: true,
             isFullscreen: true
         )

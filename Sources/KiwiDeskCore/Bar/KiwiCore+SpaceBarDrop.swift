@@ -34,6 +34,7 @@ extension KiwiCore {
         }
         spaceBarDrop.spring = { [weak self] target, window in
             self?.springSwitchSpace(to: target, dragging: window)
+                ?? false
         }
     }
 
@@ -73,13 +74,26 @@ extension KiwiCore {
     /// Deliberately NOT `focusSpace` — that warps the cursor to
     /// hand off AX focus, which would rip the pointer out of the OS
     /// drag loop. No focus hand-off, no warp, no settle timer.
+    ///
+    /// Returns whether it actually sprang, so the drop coordinator
+    /// records `sprungSpace` only on a real switch (#445): a refused
+    /// sticky move or an already-active target springs nothing.
+    @discardableResult
     private func springSwitchSpace(
         to target: SpaceID,
         dragging window: WindowID
-    ) {
+    ) -> Bool {
         guard state.workspaces.activeSpace != target else {
-            return
+            return false
         }
+        // The spring is a second membership-mutation path (#372):
+        // it re-homes the dragged window directly, not through
+        // `moveWindow`, so the #445 sticky guard must fire here too
+        // — otherwise dragging a sticky onto a Space Bar item would
+        // silently re-home a window that `move_to_space` refuses.
+        // Refused → no spring at all (no move, no visible switch);
+        // the pill explains why, the drag stays on this space.
+        if stickyMoveRefused(window, to: target) { return false }
         tiler.dragExemptWindow = window
         let from = state.workspaces.space(of: window)
         if from != target {
@@ -96,5 +110,6 @@ extension KiwiCore {
         state.workspaces.activate(target)
         retile(animated: false, force: true)
         emitSpaceChange()
+        return true
     }
 }

@@ -18,15 +18,21 @@ public final class StickyIndicatorManager {
         /// `NSColor.mark` so the chip and the Space Bar sticky
         /// badge read the one `StickyStyle.color`.
         public let color: String
+        /// The SF Symbol for this window's sticky SCOPE (#445):
+        /// `infinity` for global, `pin.fill` for display. Carried
+        /// per-window because one chip manager serves both kinds.
+        public let symbolName: String
 
         public init(
             window: WindowID,
             frame: CGRect,
-            color: String = ""
+            color: String = "",
+            symbolName: String = StickyStyle.symbolName
         ) {
             self.window = window
             self.frame = frame
             self.color = color
+            self.symbolName = symbolName
         }
     }
 
@@ -74,6 +80,7 @@ public final class StickyIndicatorManager {
                 )
             overlays[spec.window] = overlay
             overlay.setMarkColor(spec.color)
+            overlay.setSymbol(spec.symbolName)
             overlay.update(frame: spec.frame)
             // Re-assert stacking each sync (focus change,
             // retile, z-order restore) — never per follow

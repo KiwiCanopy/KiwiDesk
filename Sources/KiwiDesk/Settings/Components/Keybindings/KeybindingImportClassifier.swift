@@ -71,7 +71,9 @@ enum KeybindingImportClassifier {
             KeybindingCatalog.toggleFloating,
             KeybindingCatalog.makeFloating,
             KeybindingCatalog.toggleSticky,
+            KeybindingCatalog.toggleDisplaySticky,
             KeybindingCatalog.makeSticky,
+            KeybindingCatalog.makeDisplaySticky,
             KeybindingCatalog.makeUnsticky,
             KeybindingCatalog.showShortcuts,
         ] {

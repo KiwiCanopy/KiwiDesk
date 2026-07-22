@@ -37,7 +37,7 @@ struct TravelerFocusedCommandTests {
             pid: pid,
             appName: appName,
             title: "Title",
-            isSticky: isSticky
+            stickyScope: isSticky ? .global : .none
         )
     }
 
@@ -125,19 +125,26 @@ struct TravelerFocusedCommandTests {
         #expect(core.state.windows[WindowID(1)]?.isSticky == false)
     }
 
-    @Test("move_to_space relocates the traveler, not the local slot")
+    @Test("move_to_space on a sticky traveler is refused, not misdirected")
     func moveToSpaceHitsTraveler() {
         let core = makeCore()
         seed(core, travelerPID: getpid())
         core.state.workspaces.ensureSpace("3")
+        // A global sticky can't change spaces (#445): the shared
+        // move guard fires on the frontmost TRAVELER (50) and
+        // refuses with a pill, reported as success (a semantic
+        // refusal). The traveler stays home ("2"). Crucially the
+        // non-sticky local window (1) did NOT move to "3" either —
+        // proof the command targeted the traveler, since targeting
+        // the local slot would have relocated a NON-sticky window
+        // freely.
         #expect(
             core.execute(
                 "move_to_space",
                 args: [.string("3")]
             ).isSuccess
         )
-        #expect(core.state.workspaces.space(of: WindowID(50)) == "3")
-        // The local window stayed on its space.
+        #expect(core.state.workspaces.space(of: WindowID(50)) == "2")
         #expect(core.state.workspaces.space(of: WindowID(1)) == "1")
     }
 

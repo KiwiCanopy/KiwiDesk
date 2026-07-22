@@ -30,7 +30,7 @@ struct BorderTravelerFocusTests {
             pid: 100,
             appName: "App",
             title: "Title",
-            isSticky: isSticky
+            stickyScope: isSticky ? .global : .none
         )
     }
 

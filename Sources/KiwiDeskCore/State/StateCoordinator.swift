@@ -86,13 +86,13 @@ public struct StateCoordinator: Sendable {
     /// `rememberedSpaces`' lifetime (manual floats are rare).
     var rememberedFloating: [WindowIdentity: Bool] = [:]
 
-    /// Sticky intent of windows that closed (#414), mirroring
-    /// `rememberedFloating`'s identity keying and lifetime. A
-    /// set, not a map: sticky defaults off and has no detection
-    /// source, so "remembered off" and "never sticky" are the
-    /// same state — the close of a non-sticky window clears its
-    /// identity's entry (last close wins, like float).
-    var rememberedSticky: Set<WindowIdentity> = []
+    /// Sticky intent of windows that closed (#414/#445), mirroring
+    /// `rememberedFloating`'s identity keying and lifetime. A map
+    /// now that sticky carries a SCOPE (`.global` / `.display`):
+    /// an absent identity means "not sticky" (`.none` is never
+    /// stored), so the close of a non-sticky window drops its
+    /// entry (last close wins, like float).
+    var rememberedSticky: [WindowIdentity: StickyScope] = [:]
 
     /// Stable close/reopen identity of a window (#160).
     struct WindowIdentity: Hashable, Sendable {

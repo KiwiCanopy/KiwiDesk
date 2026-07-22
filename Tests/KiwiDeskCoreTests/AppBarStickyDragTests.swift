@@ -45,7 +45,7 @@ struct AppBarStickyDragTests {
                 id: WindowID(4),
                 pid: 1,
                 appName: "D",
-                isSticky: true
+                stickyScope: .global
             )
         )
         core.state.workspaces.ensureSpace(SpaceID(2))

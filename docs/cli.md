@@ -73,9 +73,11 @@ already-running / not-running cases exit 0.
 | | `make_tiled` | — |
 | | `make_auto` | — |
 | | `toggle_floating` | — |
-| | `make_sticky` | — |
+| | `make_sticky` | — (sticky on every monitor) |
+| | `make_display_sticky` | — (sticky on this monitor only) |
 | | `make_unsticky` | — |
 | | `toggle_sticky` | — |
+| | `toggle_display_sticky` | — |
 | | `resize` | `x\|y`, delta (px) |
 | | `move_to_track` | `prev\|next` — move window to the adjacent track (track spaces) |
 | Launch | `pull_or_spawn` | app bundle id (e.g. `com.apple.safari`) |

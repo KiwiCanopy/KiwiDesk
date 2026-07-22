@@ -42,6 +42,10 @@ final class StickyIndicatorOverlay {
     private var panel: NSPanel?
     private let plate = StickyIndicatorPlate()
     private let target: CGWindowID
+    /// The scope glyph this chip currently wears (#445): `infinity`
+    /// (global) or `pin.fill` (display). Set every sync before
+    /// `update`, so a scope flip lands on the next retile.
+    private var symbolName = StickyStyle.symbolName
     /// Current visual width of the mark — collapsed `size`, or the
     /// expanded pill width. `update` re-corners against this so a
     /// frame follow arriving mid-pill keeps the plate anchored.
@@ -93,6 +97,26 @@ final class StickyIndicatorOverlay {
     /// `update`, so a color change lands on the next retile.
     func setMarkColor(_ hex: String) {
         plate.setMarkColor(hex)
+    }
+
+    /// Sets the chip's scope glyph (#445). Applied to the live
+    /// plate at once when the panel already exists; otherwise
+    /// `makePanel` reads `symbolName` on first show.
+    func setSymbol(_ name: String) {
+        guard name != symbolName else { return }
+        symbolName = name
+        if panel != nil { applySymbol() }
+    }
+
+    /// Loads `symbolName` into the plate's glyph image.
+    private func applySymbol() {
+        plate.symbol.image = NSImage(
+            systemSymbolName: symbolName,
+            accessibilityDescription: L(
+                "sticky.indicator.ax",
+                "Sticky window"
+            )
+        )
     }
 
     func hide() {
@@ -271,13 +295,7 @@ final class StickyIndicatorOverlay {
             .fullScreenAuxiliary,
             .ignoresCycle,
         ]
-        plate.symbol.image = NSImage(
-            systemSymbolName: StickyStyle.symbolName,
-            accessibilityDescription: L(
-                "sticky.indicator.ax",
-                "Sticky window"
-            )
-        )
+        applySymbol()
         panel.contentView = plate
         return panel
     }

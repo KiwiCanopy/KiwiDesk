@@ -19,7 +19,7 @@ struct TiledStickyInjectionTests {
             appName: "App",
             title: "Title",
             isFloating: isFloating,
-            isSticky: isSticky
+            stickyScope: isSticky ? .global : .none
         )
     }
 

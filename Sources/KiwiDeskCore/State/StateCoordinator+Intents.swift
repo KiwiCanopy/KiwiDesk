@@ -21,16 +21,17 @@ extension StateCoordinator {
         manualFloatOverrides[id] = floating
     }
 
-    /// Marks a window sticky/unsticky (`make_sticky`, #414).
-    /// No override map alongside: sticky has no detection
-    /// source to fight, so the window flag itself is the whole
-    /// live state; close/reopen memory is `rememberedSticky`.
+    /// Sets a window's sticky scope (`make_sticky` /
+    /// `make_display_sticky` / `make_unsticky`, #414/#445). No
+    /// override map alongside: sticky has no detection source to
+    /// fight, so the window value itself is the whole live state;
+    /// close/reopen memory is `rememberedSticky`.
     public mutating func setSticky(
         _ id: WindowID,
-        _ sticky: Bool
+        _ scope: StickyScope
     ) {
         guard windows[id] != nil else { return }
-        windows.setSticky(id, sticky)
+        windows.setSticky(id, scope)
     }
 
     /// Returns a window to detection control (`make_auto`):
@@ -90,10 +91,10 @@ extension StateCoordinator {
     ) {
         guard !window.title.isEmpty else { return }
         let identity = WindowIdentity(of: window)
-        if window.isSticky {
-            rememberedSticky.insert(identity)
+        if window.stickyScope == .none {
+            rememberedSticky[identity] = nil
         } else {
-            rememberedSticky.remove(identity)
+            rememberedSticky[identity] = window.stickyScope
         }
     }
 
@@ -106,10 +107,10 @@ extension StateCoordinator {
         of window: ManagedWindow
     ) {
         guard !window.title.isEmpty,
-            rememberedSticky.remove(
-                WindowIdentity(of: window)
-            ) != nil
+            let scope = rememberedSticky.removeValue(
+                forKey: WindowIdentity(of: window)
+            )
         else { return }
-        windows.setSticky(window.id, true)
+        windows.setSticky(window.id, scope)
     }
 }

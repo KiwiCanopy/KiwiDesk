@@ -44,6 +44,29 @@ public struct AppRef: Sendable, Equatable {
     }
 }
 
+/// How widely a window sticks across virtual spaces (#414/#445).
+///
+/// A sticky window is a real member of exactly one space (the
+/// flat-array invariant) — stickiness only DERIVES its presence
+/// elsewhere and exempts it from the inactive-space stash. The
+/// scope decides *where* that presence extends:
+///
+/// - `.none`: an ordinary window, hidden with its home space.
+/// - `.global`: every space of EVERY monitor (the original #414
+///   sticky). Wears the `infinity` mark.
+/// - `.display`: every space of ONE monitor — its home space's
+///   display (#445). Follows to another monitor only via an
+///   explicit cross-display `move_to_space`, which re-homes it.
+///   Wears the `pin.fill` mark.
+///
+/// The home DISPLAY is not stored: it is derived from the home
+/// space's display on demand, so a re-home needs no bookkeeping.
+public enum StickyScope: String, Sendable, Equatable, CaseIterable {
+    case none
+    case global
+    case display
+}
+
 /// A snapshot of one application window tracked by KiwiDesk.
 ///
 /// This is pure state: it never talks to the Accessibility API.
@@ -58,13 +81,23 @@ public struct ManagedWindow: Sendable, Equatable {
     public var title: String
     public var frame: CGRect
     public var isFloating: Bool
-    /// Sticky: present on every virtual space instead of hiding
-    /// with its home space (#414). Orthogonal to `isFloating` —
-    /// a per-window-instance flag flipped by `make_sticky` /
-    /// `toggle_sticky`, never by detection. The window remains a
-    /// member of exactly one space (the flat-array invariant);
-    /// stickiness only exempts it from the inactive-space stash.
-    public var isSticky: Bool
+    /// Sticky scope: present on every space of every monitor
+    /// (`.global`) or of just its home monitor (`.display`),
+    /// instead of hiding with its home space (#414/#445).
+    /// Orthogonal to `isFloating` — a per-window-instance value
+    /// set by `make_sticky` / `make_display_sticky` / the toggles,
+    /// never by detection. The window remains a member of exactly
+    /// one space (the flat-array invariant); stickiness only
+    /// exempts it from the inactive-space stash and derives its
+    /// presence elsewhere.
+    public var stickyScope: StickyScope
+
+    /// Whether the window is sticky in ANY scope — the predicate
+    /// the many "sticky at all" read sites want (pile exemption,
+    /// z-order, indicator set). Scope-specific behavior (stash
+    /// exemption, traveler injection, move guard) reads
+    /// `stickyScope` directly.
+    public var isSticky: Bool { stickyScope != .none }
     /// A transient overlay — a launcher/panel that floats for a
     /// structural reason (accessory activation policy, non-standard
     /// panel subrole, or a raised CGWindow layer), NOT because a
@@ -91,7 +124,7 @@ public struct ManagedWindow: Sendable, Equatable {
         title: String = "",
         frame: CGRect = .zero,
         isFloating: Bool = false,
-        isSticky: Bool = false,
+        stickyScope: StickyScope = .none,
         isTransientOverlay: Bool = false,
         isFullscreen: Bool = false
     ) {
@@ -102,7 +135,7 @@ public struct ManagedWindow: Sendable, Equatable {
         self.title = title
         self.frame = frame
         self.isFloating = isFloating
-        self.isSticky = isSticky
+        self.stickyScope = stickyScope
         self.isTransientOverlay = isTransientOverlay
         self.isFullscreen = isFullscreen
     }
@@ -123,7 +156,7 @@ public struct ManagedWindow: Sendable, Equatable {
             title: title,
             frame: frame,
             isFloating: isFloating,
-            isSticky: isSticky,
+            stickyScope: stickyScope,
             isTransientOverlay: isTransientOverlay,
             isFullscreen: isFullscreen
         )

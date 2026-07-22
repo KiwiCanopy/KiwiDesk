@@ -80,14 +80,14 @@ public struct WindowManager: Sendable {
         windows[id]?.title = title
     }
 
-    /// Flips a window's sticky flag (#414). Purely a state
+    /// Sets a window's sticky scope (#414/#445). Purely a state
     /// write — sticky has no detection source and no coupled
     /// invariant (unlike `setFloating`'s overlay clear below).
     public mutating func setSticky(
         _ id: WindowID,
-        _ sticky: Bool
+        _ scope: StickyScope
     ) {
-        windows[id]?.isSticky = sticky
+        windows[id]?.stickyScope = scope
     }
 
     /// Applies a re-detected native-fullscreen verdict — the

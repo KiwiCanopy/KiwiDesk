@@ -48,6 +48,7 @@ extension KeybindingCatalog {
             ),
             toggleFloating,
             toggleSticky,
+            toggleDisplaySticky,
         ]
     }
 
@@ -89,6 +90,30 @@ extension KeybindingCatalog {
         }
     )
 
+    /// The Toggle-display-sticky row (#445) — the coarse-to-fine
+    /// peer of Toggle sticky: keep the window on every space of
+    /// THIS monitor only, or stop. `make_display_sticky` /
+    /// `make_unsticky` stay Lua/CLI-only, recognized below.
+    static let toggleDisplaySticky = NavCommand(
+        label: "Toggle display sticky",
+        lua: "KiwiDesk.toggle_display_sticky()",
+        displayLabel: {
+            L(
+                "keybinding.toggle_display_sticky",
+                "Toggle display sticky"
+            )
+        },
+        help: {
+            L(
+                "keybinding.toggle_display_sticky.help",
+                "Keeps this window visible on every space of the "
+                    + "monitor it lives on. Moving it to a space on "
+                    + "another monitor re-homes it there. Turn a "
+                    + "sticky window fully global with Toggle sticky."
+            )
+        }
+    )
+
     /// Classification-only anchors (#4/#91) for hand-written
     /// sticky verbs, mirroring `makeFloating` below: imported
     /// bindings land in Size & Float with proper labels
@@ -98,6 +123,17 @@ extension KeybindingCatalog {
         lua: "KiwiDesk.make_sticky()",
         displayLabel: {
             L("keybinding.make_sticky", "Make sticky")
+        }
+    )
+
+    static let makeDisplaySticky = NavCommand(
+        label: "Make display sticky",
+        lua: "KiwiDesk.make_display_sticky()",
+        displayLabel: {
+            L(
+                "keybinding.make_display_sticky",
+                "Make display sticky"
+            )
         }
     )
 

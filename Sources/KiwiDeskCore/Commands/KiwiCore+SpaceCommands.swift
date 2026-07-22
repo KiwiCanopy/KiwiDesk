@@ -211,12 +211,18 @@ extension KiwiCore {
     /// command resolves the focused one. When the target is
     /// already the active space (a Space Bar spring drop), this
     /// files the window into the visible layout and focuses it.
+    ///
+    /// Sticky moves are guarded up front via `stickyMoveRefused`
+    /// (#445) — the same gate the Space-Bar spring calls, since
+    /// `addFocusedToSpace` (not `moveWindow`) is the real re-home
+    /// choke point and has two callers.
     func moveWindow(
         _ window: WindowID,
         to target: SpaceID,
         follow: Bool
     ) {
         let from = state.workspaces.space(of: window)
+        if stickyMoveRefused(window, to: target) { return }
         addFocusedToSpace(window, to: target)
         // The moved window becomes the target space's focus, so
         // the FIRST focus of that space raises it. Without this,

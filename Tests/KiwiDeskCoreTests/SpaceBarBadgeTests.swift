@@ -55,7 +55,7 @@ struct SpaceBarBadgeTests {
         // window 1 sticky and window 3 floating — the single
         // group slot must wear BOTH badges ("at least one").
         core.state.apply(.windowCreated(window(3, app: "Web")))
-        core.state.setSticky(WindowID(1), true)
+        core.state.setSticky(WindowID(1), .global)
         core.state.setFloating(WindowID(3), true)
         let items = core.spaceBarItems(
             display: display,
@@ -96,7 +96,7 @@ struct SpaceBarBadgeTests {
     func stickyGlyphTravels() throws {
         let core = seededCore()
         core.state.workspaces.assign(SpaceID("2"), to: display)
-        core.state.setSticky(WindowID(1), true)
+        core.state.setSticky(WindowID(1), .global)
         // On its home space: listed as a normal member.
         let home = try #require(
             core.spaceBarItems(
@@ -124,7 +124,7 @@ struct SpaceBarBadgeTests {
         )
         #expect(first.apps.map(\.name) == ["Mail"])
         // Unsticky: the glyph returns home.
-        core.state.setSticky(WindowID(1), false)
+        core.state.setSticky(WindowID(1), .none)
         let after = core.spaceBarItems(
             display: display,
             style: SpaceBarStyle()

@@ -86,15 +86,27 @@ struct StashCaptureTests {
         #expect(engine.stashedFrames.isEmpty)
     }
 
-    @Test("Sticky windows are never stashed (#414)")
+    /// The sticky exemption moved out of `stash` into the
+    /// `stickyExemptFromStash` predicate applied by `stashInactive`
+    /// (#445), so `stash` itself now parks whatever it is handed —
+    /// the exemption is proven at the predicate below.
+    @Test("A global sticky window is exempt from the stash (#414)")
     func stickyExempt() {
-        let engine = TilingEngine()
-        var window = makeWindow(1, floating: true)
-        window.isSticky = true
-        engine.stash(window, in: bounds, corner: .bottomRight, force: true)
-        // No capture: the window was left in place, so there
-        // is nothing for the restore pass to put back.
-        #expect(engine.stashedFrames.isEmpty)
+        let state = StateCoordinator()
+        let window = ManagedWindow(
+            id: WindowID(1),
+            pid: 100,
+            appName: "TestApp",
+            stickyScope: .global
+        )
+        // Global is exempt on any space, no membership needed.
+        #expect(
+            state.stickyExemptFromStash(window, onSpace: SpaceID(9))
+        )
+        let plain = makeWindow(2)
+        #expect(
+            !state.stickyExemptFromStash(plain, onSpace: SpaceID(9))
+        )
     }
 }
 

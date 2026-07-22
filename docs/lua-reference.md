@@ -2908,12 +2908,34 @@ it there does nothing. On a crowded space a tiled sticky
 window keeps a fully visible slot instead of falling into the
 overflow cascade — a non-sticky window overflows in its place.
 
+Sticky comes in two scopes:
+
+- **Sticky** (`make_sticky` / `toggle_sticky`) — present on
+  every space of **every** monitor. Wears the `infinity` (∞)
+  mark.
+- **Display sticky** (`make_display_sticky` /
+  `toggle_display_sticky`) — present on every space of **one**
+  monitor: the display its home space lives on. Wears the
+  `pin.fill` (📌) mark.
+
+Both share one off-switch (`make_unsticky`), and each verb sets
+its own scope outright — `make_sticky` on a display-sticky window
+turns it global, and vice versa. On a single monitor the two
+scopes coincide (one monitor is every monitor).
+
+Moving a sticky window with `move_to_space` is guarded, since its
+whole point is to stay put: a **global** sticky refuses any
+target (it is already everywhere); a **display** sticky refuses a
+target on the *same* monitor but accepts one on *another* monitor,
+which re-homes it to that display. A refused move surfaces a brief
+pill on the window rather than silently doing nothing.
+
 Because a sticky window can look identical to a normal one,
-KiwiDesk marks it: a small badge chip in the window's top-right
-corner (toggleable — see `sticky.set_indicator`) and a sticky
-badge on its Space Bar glyph — which travels with you, listed
-under whichever space is current (see
-`space_bar.set_sticky_badge`).
+KiwiDesk marks it: a badge chip in the window's top-right corner
+(toggleable — see `sticky.set_indicator`; `infinity` for global,
+`pin.fill` for display) and the same per-scope badge on its Space
+Bar glyph — which travels with you, listed under whichever space
+is current (see `space_bar.set_sticky_badge`).
 
 Prefer sticky over an `ignore_rules` entry for "keep this
 visible everywhere": an ignored window loses tracking, focus
@@ -2924,14 +2946,31 @@ fully managed.
 
 **Expects:** nothing.
 
-**Does:** marks the focused window sticky — it stays visible on
-every virtual space. No mode argument: the window keeps its
-existing floating or tiled state.
+**Does:** marks the focused window **globally** sticky — it stays
+visible on every virtual space of every monitor. No mode
+argument: the window keeps its existing floating or tiled state.
+Overrides display sticky if the window already had it.
 
 **Example:**
 
 ```lua
 KiwiDesk.make_sticky()
+```
+
+### make_display_sticky
+
+**Expects:** nothing.
+
+**Does:** marks the focused window sticky to its **current
+monitor** — it stays visible on every space of that one display,
+but not on other monitors. Moving it to a space on another
+monitor re-homes it there. Overrides global sticky if the window
+already had it.
+
+**Example:**
+
+```lua
+KiwiDesk.make_display_sticky()
 ```
 
 ### make_unsticky
@@ -2951,16 +2990,35 @@ KiwiDesk.make_unsticky()
 
 **Expects:** nothing.
 
-**Does:** flips the focused window's sticky flag in one verb.
-This is the everyday sticky command and the only sticky verb
-offered in the Settings shortcut list; the explicit `make_*`
-verbs remain for scripts that need a specific direction.
+**Does:** flips the focused window between **global** sticky and
+off in one verb. This is an everyday sticky command, offered as a
+bindable row in the Settings shortcut list; the explicit `make_*`
+verbs remain for scripts that need a specific direction. Toggling
+global on a display-sticky window switches it to global.
 
 **Example:**
 
 ```lua
 KiwiDesk.bind("cmd+alt+s", function()
     KiwiDesk.toggle_sticky()
+end)
+```
+
+### toggle_display_sticky
+
+**Expects:** nothing.
+
+**Does:** flips the focused window between **display** sticky (its
+current monitor only) and off in one verb. The coarse-to-fine
+peer of `toggle_sticky`, also offered in the Settings shortcut
+list. Toggling display on a global-sticky window switches it to
+display.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("cmd+alt+d", function()
+    KiwiDesk.toggle_display_sticky()
 end)
 ```
 

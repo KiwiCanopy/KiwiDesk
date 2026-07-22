@@ -118,7 +118,14 @@ extension TilingEngine {
         where !visible.contains(space.id) {
             for id in space.windows {
                 guard let window = state.windows[id],
-                    id != dragExemptWindow
+                    id != dragExemptWindow,
+                    // Sticky exemption is scope-aware (#445): a
+                    // global sticky never parks; a display sticky
+                    // parks only off its own monitor.
+                    !state.stickyExemptFromStash(
+                        window,
+                        onSpace: space.id
+                    )
                 else { continue }
                 let screen =
                     NSScreen.screens.first {
@@ -142,10 +149,11 @@ extension TilingEngine {
         }
     }
 
-    /// Parks one window at the stash corner of `bounds`. A
-    /// sticky window is exempt — present on every space is the
-    /// whole feature (#414), so it stays in place when its home
-    /// space goes inactive. A floating window's original frame
+    /// Parks one window at the stash corner of `bounds`. Sticky
+    /// exemption is decided by the caller (`stickyExemptFromStash`,
+    /// #445) before this runs — present on every space is the whole
+    /// feature (#414), so a sticky window stays in place when its
+    /// home space goes inactive. A floating window's original frame
     /// is captured on its first stash — no layout recomputes a
     /// floating frame, so the restore pass needs it. Guarded on
     /// nil: a later forced re-stash (whose state frame is
@@ -157,7 +165,6 @@ extension TilingEngine {
         corner: HideCorner,
         force: Bool
     ) {
-        guard !window.isSticky else { return }
         let target = Self.stashFrame(
             window.frame,
             in: bounds,

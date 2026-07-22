@@ -128,7 +128,7 @@ struct StickyIndicatorDriverTests {
         let core = makeCore()
         addWindow(core, 1)
         addWindow(core, 2)
-        core.state.setSticky(WindowID(1), true)
+        core.state.setSticky(WindowID(1), .global)
         core.updateStickyIndicators()
         #expect(
             core.stickyIndicators.markedWindows == [WindowID(1)]
@@ -139,7 +139,7 @@ struct StickyIndicatorDriverTests {
     func marksAcrossSpaces() {
         let core = makeCore()
         addWindow(core, 1)
-        core.state.setSticky(WindowID(1), true)
+        core.state.setSticky(WindowID(1), .global)
         core.state.workspaces.ensureSpace(SpaceID(2))
         core.state.workspaces.activate(SpaceID(2))
         core.updateStickyIndicators()
@@ -152,7 +152,7 @@ struct StickyIndicatorDriverTests {
     func indicatorGate() {
         let core = makeCore()
         addWindow(core, 1)
-        core.state.setSticky(WindowID(1), true)
+        core.state.setSticky(WindowID(1), .global)
         core.updateStickyIndicators()
         #expect(!core.stickyIndicators.markedWindows.isEmpty)
         core.tiler.settings.stickyStyle.indicator = false
@@ -164,9 +164,9 @@ struct StickyIndicatorDriverTests {
     func unstickyRetires() {
         let core = makeCore()
         addWindow(core, 1)
-        core.state.setSticky(WindowID(1), true)
+        core.state.setSticky(WindowID(1), .global)
         core.updateStickyIndicators()
-        core.state.setSticky(WindowID(1), false)
+        core.state.setSticky(WindowID(1), .none)
         core.updateStickyIndicators()
         #expect(core.stickyIndicators.markedWindows.isEmpty)
     }
