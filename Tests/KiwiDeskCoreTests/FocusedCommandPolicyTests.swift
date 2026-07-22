@@ -21,6 +21,8 @@ struct FocusedCommandPolicyTests {
         // so they skip the foreground preflight (like focus_space).
         "move_space_to_display",
         "pin_space_to_display",
+        "create_space",
+        "delete_space",
         "pull_or_spawn",
         "spawn_new",
         "get_state",

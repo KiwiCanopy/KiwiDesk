@@ -228,6 +228,42 @@ because `init.lua` re-runs on launch.
 KiwiDesk.pin_space_to_display("mail", 2)
 ```
 
+### create_space
+
+**Expects:** a space identifier, and optionally a layout mode
+(`"bsp"`, `"stack"`, `"scrolling"`, `"grid"`, `"monocle"`,
+`"track"`).
+
+**Does:** brings a space into existence and resolves it onto a
+display. Spaces otherwise appear implicitly the first time you
+reference one (`focus_space`, `move_to_space`, a keybinding), so
+this is mainly for declaring a space — and its mode — up front in
+`init.lua`. A no-op beyond the mode set if the space already
+exists.
+
+**Example:**
+
+```lua
+KiwiDesk.create_space("scratch", "monocle")
+```
+
+### delete_space
+
+**Expects:** a space identifier.
+
+**Does:** removes the space after moving its windows to the
+fallback space (or the first surviving space), so nothing is
+orphaned, and clears the space from the placement pins, Main
+role, and per-space settings. Refuses to delete the only space.
+Runtime only — a space still declared in `init.lua` or the GUI
+config reappears on the next config load.
+
+**Example:**
+
+```lua
+KiwiDesk.delete_space("scratch")
+```
+
 ### move_to_track
 
 **Expects:** `"prev"` or `"next"` (exactly these — no
