@@ -49,12 +49,7 @@ extension KiwiCore {
                 ),
                 space != self.state.workspaces.activeSpace
             else { return }
-            self.state.workspaces.activate(space)
-            self.retile(
-                animated: self.tiler.settings.animations.onSpaceChange,
-                force: true
-            )
-            self.emitSpaceChange()
+            self.applyFocusedSpaceSwitch(to: space)
             // The focus echo that triggered this follow found
             // the window on an inactive space, where the warp
             // guard skips; now that the space is forward the
@@ -223,6 +218,10 @@ extension KiwiCore {
     ) {
         let from = state.workspaces.space(of: window)
         if stickyMoveRefused(window, to: target) { return }
+        // Captured before the focus reassign below overwrites it:
+        // whether the moved window currently holds OS key focus.
+        // Only then must an emptied origin yield focus (#446).
+        let movedHeldFocus = state.workspaces.lastFocused == window
         addFocusedToSpace(window, to: target)
         // The moved window becomes the target space's focus, so
         // the FIRST focus of that space raises it. Without this,
@@ -252,6 +251,18 @@ extension KiwiCore {
             // The moved window would keep macOS focus while
             // stashed offscreen; refocus the current space.
             focusWindow(next, refocusRetile: false, warp: true)
+        } else if movedHeldFocus {
+            // Reached only when the active space has no member to
+            // take over (else the neighbor branch fired) AND the
+            // moved window held system key focus. It is now stashed
+            // offscreen yet still key — orphaned — so hand focus to
+            // the desktop, the state a bare empty-desktop click
+            // leaves (#446). Keying on `lastFocused` (not the
+            // emptied `from`) is the exact hazard: a move that did
+            // NOT hold system focus never yields, and a #414
+            // traveler / secondary-display window that DID hold it
+            // is cleaned up wherever its origin was.
+            desktopFocusYield?()
         }
         retile(
             animated: follow

@@ -1,7 +1,9 @@
 import AppKit
 
 /// Remembers the most recent left-button press via global
-/// event monitors.
+/// event monitors, and re-emits each press through
+/// `onLeftMouseDown` for consumers that react to a click's
+/// location (the #446 display-focus follow).
 ///
 /// The press is needed to classify the trailing AX resize event
 /// of a fast mouse gesture: it arrives after the button release,
@@ -20,6 +22,14 @@ public final class MouseTracker {
     public private(set) var press: Press?
     private var monitors: [Any] = []
 
+    /// Fired on every left-button press, with the press location
+    /// in Cocoa screen coordinates (bottom-left origin) — the
+    /// space the `NSScreen` frames live in. Drives the
+    /// display-focus follow (#446): a bare click on another
+    /// monitor's empty desktop moves the "focused display". Only
+    /// clicks reach here (never mouse movement), so it is cheap.
+    public var onLeftMouseDown: ((CGPoint) -> Void)?
+
     public init() {}
 
     public func start() {
@@ -30,6 +40,7 @@ public final class MouseTracker {
             let location = event.locationInWindow
             Task { @MainActor in
                 self?.recordDown(at: location)
+                self?.onLeftMouseDown?(location)
             }
         }
         let up = NSEvent.addGlobalMonitorForEvents(
