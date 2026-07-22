@@ -288,7 +288,7 @@ struct GlobalAppBarGroup: View {
         )
     }
 
-    // Color rows live in AppBarSections+Colors.swift (#374,
+    // Color rows live in AppBarGroups+Colors.swift (#374,
     // the SpaceBarColorsGroup sibling split).
 
     private var globalStyleCaption: String {

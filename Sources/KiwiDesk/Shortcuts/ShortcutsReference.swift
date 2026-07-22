@@ -134,7 +134,7 @@ enum ShortcutsReferenceBuilder {
 
     /// Membership twin of the editor's `FocusGroup` /
     /// `MoveWindowsGroup` / `SizeFloatGroup` / `ChangeModesGroup`
-    /// (`KeybindingSections.swift`) and `KeybindingCatalog`'s
+    /// (`KeybindingGroups.swift`) and `KeybindingCatalog`'s
     /// `navigationGroups`. Row identity (label / icon / Lua) is
     /// single-sourced from the catalog, so only the *grouping* is
     /// mirrored here — and a forgotten command degrades to Custom via

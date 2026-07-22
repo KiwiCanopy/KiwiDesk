@@ -91,7 +91,7 @@ enum SettingsMetrics {
 
     /// The inline hex `TextField` beside each color swatch.
     /// Fixed (not auto-sizing) so the two-column color grid in
-    /// `AppBarSections` keeps stable cell widths as values
+    /// `AppBarGroups` keeps stable cell widths as values
     /// change; sized for the widest stored form, "#RRGGBBAA".
     static let colorHexColumn: CGFloat = 84
 }

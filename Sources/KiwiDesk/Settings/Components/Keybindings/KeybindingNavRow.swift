@@ -6,7 +6,7 @@ import SwiftUI
 /// preflight hard-blocks combos already held by another row
 /// (#34); the row id feeds "Go to" (#68 §3.6.2).
 ///
-/// Extracted from `KeybindingSections` (the shared row every
+/// Extracted from `KeybindingGroups` (the shared row every
 /// section composes) to keep that file under the size ceiling.
 struct NavRow: View {
     @ObservedObject var model: SettingsModel

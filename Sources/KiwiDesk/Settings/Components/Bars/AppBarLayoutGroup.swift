@@ -6,7 +6,7 @@ import SwiftUI
 /// accordion: dimmed rows show the global value they inherit,
 /// the checkbox unlocks a row, and unlocked rows carry the
 /// accent styling from `OverrideChrome`. Split out of
-/// `AppBarSections.swift` (which keeps the global editor) to
+/// `AppBarGroups.swift` (which keeps the global editor) to
 /// stay under the file-size ceiling.
 struct LayoutAppBarGroup: View {
     let title: String

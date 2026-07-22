@@ -2,7 +2,7 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The App Bar color rows (#374), split from
-/// `AppBarSections.swift` for the file ceiling — the
+/// `AppBarGroups.swift` for the file ceiling — the
 /// `SpaceBarColorsGroup` sibling. The disclosure's `@State`
 /// stays in `GlobalAppBarGroup` (extensions can't hold
 /// state); only the row builders live here.
