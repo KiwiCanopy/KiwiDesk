@@ -127,6 +127,15 @@ public final class KiwiCore {
     /// ownership is unknown, which fails the command closed.
     var frontmostPIDProvider: (@MainActor () -> pid_t?)?
 
+    /// Hands key focus to the desktop (Finder) when a move without
+    /// follow empties the focused display's space (#446). macOS has
+    /// no native "focus the empty desktop", so the moved — now
+    /// stashed offscreen — window would otherwise keep key focus.
+    /// Injectable and `nil` by default so unit tests observe the
+    /// yield without a live Finder; `start()` installs the real
+    /// activation.
+    var desktopFocusYield: (@MainActor () -> Void)?
+
     /// Pids of apps currently showing a focused ignored panel
     /// (Ghostty's quick terminal). Set when the event loop
     /// filters the panel's own focus report (#21); consumed by

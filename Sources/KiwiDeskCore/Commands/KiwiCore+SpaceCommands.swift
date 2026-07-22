@@ -223,6 +223,10 @@ extension KiwiCore {
     ) {
         let from = state.workspaces.space(of: window)
         if stickyMoveRefused(window, to: target) { return }
+        // Captured before the focus reassign below overwrites it:
+        // whether the moved window currently holds OS key focus.
+        // Only then must an emptied origin yield focus (#446).
+        let movedHeldFocus = state.workspaces.lastFocused == window
         addFocusedToSpace(window, to: target)
         // The moved window becomes the target space's focus, so
         // the FIRST focus of that space raises it. Without this,
@@ -252,6 +256,12 @@ extension KiwiCore {
             // The moved window would keep macOS focus while
             // stashed offscreen; refocus the current space.
             focusWindow(next, refocusRetile: false, warp: true)
+        } else if movedHeldFocus {
+            // The moved window was the ONLY one on this space, so
+            // there is no neighbor to refocus and it would keep
+            // key focus offscreen. Hand focus to the desktop — the
+            // same state a bare empty-desktop click leaves (#446).
+            desktopFocusYield?()
         }
         retile(
             animated: follow

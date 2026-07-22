@@ -20,6 +20,14 @@ public final class MouseTracker {
     public private(set) var press: Press?
     private var monitors: [Any] = []
 
+    /// Fired on every left-button press, with the press location
+    /// in Cocoa screen coordinates (bottom-left origin) — the
+    /// space the `NSScreen` frames live in. Drives the
+    /// display-focus follow (#446): a bare click on another
+    /// monitor's empty desktop moves the "focused display". Only
+    /// clicks reach here (never mouse movement), so it is cheap.
+    public var onLeftMouseDown: ((CGPoint) -> Void)?
+
     public init() {}
 
     public func start() {
@@ -30,6 +38,7 @@ public final class MouseTracker {
             let location = event.locationInWindow
             Task { @MainActor in
                 self?.recordDown(at: location)
+                self?.onLeftMouseDown?(location)
             }
         }
         let up = NSEvent.addGlobalMonitorForEvents(

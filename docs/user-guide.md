@@ -568,6 +568,12 @@ When you add a new monitor and save the profile, the new arrangement
 is recorded so the profile becomes available for future loads with
 this hardware.
 
+Each monitor shows its own space at once, and the **focused
+monitor** is simply the one you last clicked — clicking a window
+*or* the bare desktop on another display moves focus there. A new
+window, and a global sticky window, then appear on that monitor's
+space. Clicking the menu bar or the Dock does not move focus.
+
 ## Appearance
 
 The **Appearance** section (in the **Design** group) customizes

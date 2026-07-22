@@ -14,6 +14,18 @@ extension KiwiCore {
             NSWorkspace.shared.frontmostApplication?
                 .processIdentifier
         }
+        // Yields key focus to the desktop when a move empties the
+        // focused display's space (#446) — Finder owns the desktop.
+        desktopFocusYield = {
+            NSRunningApplication.runningApplications(
+                withBundleIdentifier: "com.apple.finder"
+            ).first?.activate()
+        }
+        // A bare left click on another monitor's empty desktop
+        // moves the focused display (#446).
+        mouse.onLeftMouseDown = { [weak self] point in
+            self?.followDisplayUnderClick(at: point)
+        }
         lastNativeSpace = NativeSpaces.activeSpaceNumber()
         // Cheap and off-main; kicked here so the first glyph
         // bar never renders an image-fallback frame.

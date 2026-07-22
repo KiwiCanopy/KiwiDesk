@@ -316,6 +316,74 @@ struct MoveToSpaceTests {
         #expect(second != first)
     }
 
+    /// Issue #446 symptom 2: moving the ONLY window off a space
+    /// without follow leaves nothing to refocus, so the moved
+    /// (now stashed offscreen) window would keep OS key focus.
+    /// The emptied origin must yield focus to the desktop.
+    @Test("Emptying the space yields focus to the desktop")
+    func emptyingSpaceYieldsDesktopFocus() {
+        let core = makeCore()
+        var yields = 0
+        core.desktopFocusYield = { yields += 1 }
+        addWindow(core, 1)
+        #expect(core.activeSpace?.focused == WindowID(1))
+        core.execute("move_to_space", args: [.string("2")])
+        // Space 1 is now empty and the moved window held focus.
+        #expect(yields == 1)
+    }
+
+    /// A neighbor remaining on the origin space is refocused
+    /// instead — no desktop yield (#446).
+    @Test("A remaining neighbor is refocused, not the desktop")
+    func remainingNeighborSkipsDesktopYield() {
+        let core = makeCore()
+        var yields = 0
+        core.desktopFocusYield = { yields += 1 }
+        addWindow(core, 1)
+        addWindow(core, 2)
+        // Window 2 is the focus; move it away, 1 remains.
+        #expect(core.activeSpace?.focused == WindowID(2))
+        core.execute("move_to_space", args: [.string("3")])
+        #expect(yields == 0)
+        #expect(core.activeSpace?.focused == WindowID(1))
+    }
+
+    /// Following the move switches to the target, so the origin
+    /// never needs a yield (#446).
+    @Test("Following the move does not yield to the desktop")
+    func followSkipsDesktopYield() {
+        let core = makeCore()
+        var yields = 0
+        core.desktopFocusYield = { yields += 1 }
+        addWindow(core, 1)
+        core.execute(
+            "move_to_space_and_follow",
+            args: [.string("2")]
+        )
+        #expect(yields == 0)
+        #expect(core.state.workspaces.activeSpace == SpaceID(2))
+    }
+
+    /// Issue #446 symptom 1: the display-follow is a no-op with
+    /// no per-display space assignment (single-monitor / headless)
+    /// — a click never spuriously flips the active space. The
+    /// cross-monitor move itself needs a second display (device
+    /// QA); this pins the single-display collapse.
+    @Test("Display-follow click is a no-op on one display")
+    func displayFollowNoOpSingleDisplay() {
+        guard let screen = NSScreen.main else { return }
+        let core = makeCore()
+        addWindow(core, 1)
+        let before = core.state.workspaces.activeSpace
+        core.followDisplayUnderClick(
+            at: CGPoint(
+                x: screen.visibleFrame.midX,
+                y: screen.visibleFrame.midY
+            )
+        )
+        #expect(core.state.workspaces.activeSpace == before)
+    }
+
     @Test("Moving to the current space re-stamps focus safely")
     func moveToSameSpaceIsSafe() {
         let core = makeCore()
