@@ -60,6 +60,11 @@ public final class BorderManager {
     /// each rebuilds on the matching backend (below → AppKit,
     /// above → SkyLight) at the next `sync`.
     private var activeOrder: BorderGeometry.Order = .below
+    /// Frozen-hidden while Mission Control / Exposé is up. Gates the
+    /// show paths (`sync` / `follow` / the WindowServer event handler)
+    /// so the live event stream can't re-surface a ring over the
+    /// overview (`setSuspended`).
+    private(set) var suspended = false
     var eventSource: SkyLightWindowEvents?
     var triedEventSource = false
     var privateRuntimeStarted = false
@@ -97,6 +102,11 @@ public final class BorderManager {
     /// registering process-global SkyLight callbacks.
     func start() {
         privateRuntimeStarted = true
+        // A fresh start is unambiguously un-suspended: if a stop landed
+        // while Mission Control was up (an AX-permission revoke goes
+        // through KiwiCore.stop() without a matching setSuspended), the
+        // flag would otherwise stay stuck and gate every ring forever.
+        suspended = false
     }
 
     /// Retires every ring and disables private callbacks until the
@@ -129,10 +139,29 @@ public final class BorderManager {
         activeOrder = mapped
     }
 
+    /// Freezes every ring hidden for the duration of Mission Control
+    /// / Exposé: a SkyLight ring is a sticky WindowServer window that
+    /// would otherwise float over the overview at full size. The WS
+    /// event stream keeps flowing while the overview is up, so the
+    /// flag also gates `sync` / `follow` / the event handler — a
+    /// one-shot hide alone would be undone by the next move or
+    /// reorder event. The caller re-syncs on resume (mirrors the
+    /// `setDrawOrder` retire-then-rebuild idiom).
+    public func setSuspended(_ suspend: Bool) {
+        guard suspend != suspended else { return }
+        suspended = suspend
+        guard suspend else { return }
+        bumpAnimator.flushAll()
+        for overlay in overlays.values { overlay.hide() }
+        for overlay in bumpTransients.values { overlay.hide() }
+        bumpTransients = [:]
+    }
+
     /// Shows exactly `desired` — one ring per window — and retires
     /// the overlays of any window no longer in the set (an empty
     /// array retires them all).
     public func sync(_ desired: [Spec]) {
+        guard !suspended else { return }
         let wanted = Set(desired.map(\.window))
         updateSkyLightSubscription(wanted)
         for (id, overlay) in overlays where !wanted.contains(id) {
@@ -167,7 +196,7 @@ public final class BorderManager {
     /// (was hand-mirrored across three call sites). A no-op for
     /// windows without a ring.
     public func follow(_ id: WindowID, windowFrame: CGRect) {
-        guard !usesWindowServerTracking(id) else { return }
+        guard !suspended, !usesWindowServerTracking(id) else { return }
         apply(id, windowFrame: windowFrame)
     }
 

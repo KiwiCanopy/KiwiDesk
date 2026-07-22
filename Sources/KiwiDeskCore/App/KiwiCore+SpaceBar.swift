@@ -9,6 +9,8 @@ import AppKit
 /// no AX calls in bar building.
 extension KiwiCore {
     func updateSpaceBar() {
+        // Hidden while Mission Control is up; rebuilt on its close.
+        guard !missionControlActive else { return }
         let style = tiler.settings.spaceBarStyle
         guard style.enabled else {
             spaceBars.sync([])

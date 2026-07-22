@@ -263,7 +263,11 @@ final class StickyIndicatorOverlay {
         panel.level = .normal
         panel.isReleasedWhenClosed = false
         panel.animationBehavior = .none
+        // `.stationary` exempts this chip/pill overlay from Exposé
+        // and Mission Control so it never surfaces as a stray Kiwi
+        // window; it still stays on its target's own Space.
         panel.collectionBehavior = [
+            .stationary,
             .fullScreenAuxiliary,
             .ignoresCycle,
         ]

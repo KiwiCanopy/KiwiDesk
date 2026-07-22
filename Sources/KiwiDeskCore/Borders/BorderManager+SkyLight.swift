@@ -57,6 +57,9 @@ extension BorderManager {
         _ kind: SkyLightWindowEvents.Kind,
         window id: WindowID
     ) {
+        // While Mission Control / Exposé is up every ring is frozen
+        // hidden; a stray move/reorder event must not re-show one.
+        guard !suspended else { return }
         guard overlays[id] != nil || stickyTracked.contains(id)
         else { return }
         switch kind.action {

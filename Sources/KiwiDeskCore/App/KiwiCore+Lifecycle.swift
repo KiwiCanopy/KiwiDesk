@@ -36,6 +36,9 @@ extension KiwiCore {
         stickyIndicators.isWindowServerTracked = { [weak self] id in
             self?.borders.chipUsesWindowServerTracking(id) ?? false
         }
+        // Hide the sticky ring / stationary bars while Mission
+        // Control is up so they don't float over the overview.
+        startMissionControlObserver()
         loadConfig()
         sleepWake.start()
         eventLoop.start()
@@ -99,6 +102,10 @@ extension KiwiCore {
         // sit stranded over the scattered desktop.
         borders.stop()
         stickyIndicators.clear()
+        // Drop the Dock AX observer (its deinit removes the run-loop
+        // source); a later start() re-creates it.
+        missionControl = nil
+        missionControlActive = false
         // Gather windows onto their owning monitors before
         // any subsystem teardown; AX must still be live here.
         gatherWindows()

@@ -11,6 +11,8 @@ import AppKit
 /// by that layout's own overrides.
 extension KiwiCore {
     func updateAppBar() {
+        // Hidden while Mission Control is up; rebuilt on its close.
+        guard !missionControlActive else { return }
         let settings = tiler.settings
         let displays = state.workspaces.allDisplays
         // Cold start: `loadConfig()` can apply a profile and

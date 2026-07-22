@@ -324,8 +324,13 @@ private final class AppKitBorderOverlay: BorderOverlayBackend {
         panel.animationBehavior = .none
         // Stay on the window's own Space; a fullscreen window
         // gets no border (auxiliary only). Not cycled by the app
-        // switcher.
+        // switcher. `.stationary` keeps Exposé/Mission Control from
+        // treating this tracking overlay as a managed window and
+        // showing it as a stray Kiwi tile — the SkyLight fast path
+        // already excludes itself via its jankyborders window tags,
+        // so only this AppKit fallback needs the hint.
         panel.collectionBehavior = [
+            .stationary,
             .fullScreenAuxiliary,
             .ignoresCycle,
         ]

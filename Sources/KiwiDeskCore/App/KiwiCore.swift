@@ -28,6 +28,15 @@ public final class KiwiCore {
     /// On-window sticky marks (#414): a border sibling,
     /// driven by `updateStickyIndicators()` inside `retile()`.
     public let stickyIndicators = StickyIndicatorManager()
+    /// Mission Control / Exposé observer. Hides the overlays while
+    /// the overview is up so a sticky ring / stationary bar can't
+    /// float over it. Nil until `start()`, or when the Dock AX
+    /// element is unreachable — then overlays stay visible there.
+    var missionControl: MissionControlObserver?
+    /// True while Mission Control / Exposé is up. Gates the overlay
+    /// `update*()` refreshes so a stray event can't re-show a hidden
+    /// overlay before the overview closes.
+    var missionControlActive = false
     public let mouse = MouseTracker()
     public let profiles: ProfileManager
     public let crash: CrashRecovery
