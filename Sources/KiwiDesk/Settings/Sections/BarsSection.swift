@@ -36,7 +36,7 @@ struct BarsSection: View {
                 switch editor {
                 case .appBar: appBarEditor
                 case .spaceBar:
-                    SpaceBarEditorSection(model: model)
+                    SpaceBarEditorGroup(model: model)
                 }
             }
             .padding(16)
@@ -57,20 +57,20 @@ struct BarsSection: View {
     /// every layout inherits plus the two per-layout override
     /// sections.
     @ViewBuilder private var appBarEditor: some View {
-        GlobalAppBarSection(
+        GlobalAppBarGroup(
             style: $model.config.settings.appBarStyle,
             spaceBarSharedEdge: model.config.settings
                 .spaceBarSharesEdgeWithAppBar
                 ? model.config.settings.spaceBarStyle.edge
                 : nil
         )
-        LayoutAppBarSection(
+        LayoutAppBarGroup(
             title: L("layout.monocle.name", "Monocle"),
             mode: .monocle,
             bar: $model.config.settings.monocle.appBar,
             global: model.config.settings.appBarStyle
         )
-        LayoutAppBarSection(
+        LayoutAppBarGroup(
             title: L("layout.scrolling.name", "Scrolling"),
             mode: .scrolling,
             bar: $model.config.settings.scrolling.appBar,

@@ -3,10 +3,10 @@ import SwiftUI
 
 /// The App Bar color rows (#374), split from
 /// `AppBarSections.swift` for the file ceiling — the
-/// `SpaceBarColorsSection` sibling. The disclosure's `@State`
-/// stays in `GlobalAppBarSection` (extensions can't hold
+/// `SpaceBarColorsGroup` sibling. The disclosure's `@State`
+/// stays in `GlobalAppBarGroup` (extensions can't hold
 /// state); only the row builders live here.
-extension GlobalAppBarSection {
+extension GlobalAppBarGroup {
     // The two the preview reflects most, kept inline: the fill
     // under the tabs and the active-tab indicator accent.
     @ViewBuilder var inlineColors: some View {

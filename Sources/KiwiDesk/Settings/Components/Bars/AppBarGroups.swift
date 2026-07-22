@@ -34,7 +34,7 @@ struct AppBarColorGrid<Content: View>: View {
 // grayed out).
 
 /// The global `app_bar.*` look every layout inherits.
-struct GlobalAppBarSection: View {
+struct GlobalAppBarGroup: View {
     @Binding var style: AppBarStyle
     /// The Space Bar's resolved edge when both enabled bars
     /// share one, else nil (#374) — one optional, so the
@@ -289,7 +289,7 @@ struct GlobalAppBarSection: View {
     }
 
     // Color rows live in AppBarSections+Colors.swift (#374,
-    // the SpaceBarColorsSection sibling split).
+    // the SpaceBarColorsGroup sibling split).
 
     private var globalStyleCaption: String {
         L(

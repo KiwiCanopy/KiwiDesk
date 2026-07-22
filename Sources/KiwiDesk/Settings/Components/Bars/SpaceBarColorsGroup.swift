@@ -9,7 +9,7 @@ import SwiftUI
 /// extension: the disclosure owns `@State`, which extensions
 /// cannot hold. Expansion resets when the editor is torn down
 /// (tab switch) — the app-wide disclosure precedent.
-struct SpaceBarColorsSection: View {
+struct SpaceBarColorsGroup: View {
     @ObservedObject var model: SettingsModel
     @State private var advancedColorsExpanded = false
 

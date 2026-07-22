@@ -244,7 +244,7 @@ struct ShortcutsReferenceTests {
     func activeModeExcludedFromSwitch() {
         reset()
         // A self-switch row (switch to the mode you're in) must not
-        // render — mirrors the editor's ChangeModesSection filter.
+        // render — mirrors the editor's ChangeModesGroup filter.
         let reference = build(
             [
                 binding(

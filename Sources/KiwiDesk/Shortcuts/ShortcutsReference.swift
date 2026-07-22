@@ -132,8 +132,8 @@ enum ShortcutsReferenceBuilder {
 
     // MARK: - Bands
 
-    /// Membership twin of the editor's `FocusSection` /
-    /// `MoveWindowsSection` / `SizeFloatSection` / `ChangeModesSection`
+    /// Membership twin of the editor's `FocusGroup` /
+    /// `MoveWindowsGroup` / `SizeFloatGroup` / `ChangeModesGroup`
     /// (`KeybindingSections.swift`) and `KeybindingCatalog`'s
     /// `navigationGroups`. Row identity (label / icon / Lua) is
     /// single-sourced from the catalog, so only the *grouping* is
@@ -159,7 +159,7 @@ enum ShortcutsReferenceBuilder {
                 icons: spaceIcons
             )
         // Exclude the active mode: you never switch to the mode
-        // you're already in, and the editor's ChangeModesSection
+        // you're already in, and the editor's ChangeModesGroup
         // filters it out the same way — keep the two in parity.
         let switchModes =
             modeNames

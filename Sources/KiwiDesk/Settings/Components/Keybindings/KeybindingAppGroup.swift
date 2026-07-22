@@ -7,7 +7,7 @@ import SwiftUI
 /// behavior (Open or Focus / Open New, #334), and a combo. The
 /// default action pulls the app into the current space, launching
 /// it if needed.
-struct ApplicationsSection: View {
+struct ApplicationsGroup: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
     @Environment(\.keybindingOverrideBase)

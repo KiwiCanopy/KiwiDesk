@@ -17,7 +17,7 @@ import SwiftUI
 /// config across a routine profile/monitor swap. Rows here are
 /// ordinary `NavRow`s — rebind, clear, and the recorder's
 /// "Go to" (which scrolls to the row's Lua id) all work.
-struct OrphanedShortcutsSection: View {
+struct OrphanedShortcutsGroup: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
     let spaces: [SpaceID]

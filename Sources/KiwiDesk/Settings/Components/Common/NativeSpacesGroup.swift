@@ -9,7 +9,7 @@ import SwiftUI
 /// KiwiDesk's own virtual spaces read elsewhere in the app.
 /// Bindings mutate `model.config.profileBindings`; the footer's
 /// profile actions persist them.
-struct NativeSpacesSection: View {
+struct NativeSpacesGroup: View {
     @ObservedObject var model: SettingsModel
 
     var body: some View {

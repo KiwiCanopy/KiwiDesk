@@ -8,7 +8,7 @@ import SwiftUI
 /// from the defined spaces, so adding a space adds its
 /// commands. Recording upserts a `.navigation` row keyed by
 /// its Lua; clearing removes it.
-struct FocusSection: View {
+struct FocusGroup: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
     let spaces: [SpaceID]
@@ -49,7 +49,7 @@ struct FocusSection: View {
     }
 }
 
-struct MoveWindowsSection: View {
+struct MoveWindowsGroup: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
     let spaces: [SpaceID]
@@ -130,7 +130,7 @@ struct MoveWindowsSection: View {
 /// (#56) and Make floating — plus the reserved slot for the
 /// configurable resize step (#58). The step control lands
 /// directly above the rows it parameterizes.
-struct SizeFloatSection: View {
+struct SizeFloatGroup: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
 
@@ -192,7 +192,7 @@ struct SizeFloatSection: View {
 /// "Show shortcuts panel" hotkey — app chrome, not a workspace
 /// action, so it sits in its own low section rather than among
 /// Focus / Move / Size. Unbound by default.
-struct GeneralShortcutsSection: View {
+struct GeneralShortcutsGroup: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
 
@@ -212,7 +212,7 @@ struct GeneralShortcutsSection: View {
 /// Switch modes: one row per other mode, binding a
 /// `switch_mode` shortcut. Shown only when more than one mode
 /// exists.
-struct ChangeModesSection: View {
+struct ChangeModesGroup: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
     let modeNames: [String]

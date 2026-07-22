@@ -7,7 +7,7 @@ import SwiftUI
 /// that already carry every launch behavior are dropped from the
 /// picker and the Add button greys, so re-adding can only ever
 /// produce a *distinct* behavior, never a duplicate (#334).
-extension ApplicationsSection {
+extension ApplicationsGroup {
     var addRow: some View {
         HStack {
             AppPickerButton(

@@ -9,7 +9,7 @@ import SwiftUI
 /// app can hold one shortcut per behavior without a new row
 /// primitive: the dropdown greys a behavior already bound for that
 /// app so the pair can't collide, while the other stays reachable.
-extension ApplicationsSection {
+extension ApplicationsGroup {
     @ViewBuilder
     func behaviorMenu(
         _ binding: Binding<KeyBinding>

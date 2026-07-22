@@ -5,7 +5,7 @@ import SwiftUI
 /// Bindings", renamed and collapsed by its host. Raw Lua stays
 /// monospaced on purpose: arbitrary Lua *is* the capability
 /// here, not a serialization leak.
-struct AdvancedLuaSection: View {
+struct AdvancedLuaGroup: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
     @Environment(\.keybindingOverrideBase)

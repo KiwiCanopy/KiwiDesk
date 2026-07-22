@@ -8,7 +8,7 @@ import SwiftUI
 /// style), content toggles, sizes, colors. All settings are
 /// global — the bar is layout-independent, so there is no
 /// per-layout override tier here.
-struct SpaceBarEditorSection: View {
+struct SpaceBarEditorGroup: View {
     @ObservedObject var model: SettingsModel
 
     var style: Binding<SpaceBarStyle> {
@@ -64,7 +64,7 @@ struct SpaceBarEditorSection: View {
         SettingsSection(
             L("space_bar.colors.title", "Space Bar colors")
         ) {
-            SpaceBarColorsSection(model: model)
+            SpaceBarColorsGroup(model: model)
         }
     }
 

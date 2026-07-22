@@ -8,7 +8,7 @@ import SwiftUI
 /// accent styling from `OverrideChrome`. Split out of
 /// `AppBarSections.swift` (which keeps the global editor) to
 /// stay under the file-size ceiling.
-struct LayoutAppBarSection: View {
+struct LayoutAppBarGroup: View {
     let title: String
     let mode: LayoutMode
     @Binding var bar: LayoutAppBar
@@ -74,7 +74,7 @@ struct LayoutAppBarSection: View {
     // not to re-explain the field — reserved for a field the
     // global editor can't already teach.
     //
-    // Twin of `GlobalAppBarSection.behavior` (#291): the same
+    // Twin of `GlobalAppBarGroup.behavior` (#291): the same
     // five look fields, rendered here as `.segmented`
     // overrides. Keep the two lists — and their segmented
     // control choice — in lockstep. A sixth field, or a

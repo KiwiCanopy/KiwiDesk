@@ -42,7 +42,7 @@ struct ProfilesSection: View {
     /// offered in live editing.
     @ViewBuilder private var nativeSpaces: some View {
         if !model.editingStoredProfile {
-            NativeSpacesSection(model: model)
+            NativeSpacesGroup(model: model)
         }
     }
 

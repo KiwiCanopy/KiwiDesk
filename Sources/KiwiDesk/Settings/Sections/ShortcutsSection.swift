@@ -31,7 +31,7 @@ struct ShortcutsSection: View {
                     // beside their definition, not buried
                     // below the action groups.
                     if model.config.modes.count > 1 {
-                        ChangeModesSection(
+                        ChangeModesGroup(
                             model: model,
                             bindings: bindingsBinding,
                             modeNames: model.config.modes.map(
@@ -40,25 +40,25 @@ struct ShortcutsSection: View {
                             current: selected
                         )
                     }
-                    FocusSection(
+                    FocusGroup(
                         model: model,
                         bindings: bindingsBinding,
                         spaces: model.config.spaces
                     )
-                    MoveWindowsSection(
+                    MoveWindowsGroup(
                         model: model,
                         bindings: bindingsBinding,
                         spaces: model.config.spaces
                     )
-                    SizeFloatSection(
+                    SizeFloatGroup(
                         model: model,
                         bindings: bindingsBinding
                     )
-                    ApplicationsSection(
+                    ApplicationsGroup(
                         model: model,
                         bindings: bindingsBinding
                     )
-                    GeneralShortcutsSection(
+                    GeneralShortcutsGroup(
                         model: model,
                         bindings: bindingsBinding
                     )
@@ -67,7 +67,7 @@ struct ShortcutsSection: View {
                     // recording can reach the holder — the
                     // per-space groups above only render
                     // live spaces.
-                    OrphanedShortcutsSection(
+                    OrphanedShortcutsGroup(
                         model: model,
                         bindings: bindingsBinding,
                         spaces: model.config.spaces
@@ -205,7 +205,7 @@ struct ShortcutsSection: View {
                 Text(advancedDrawerCaption)
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                AdvancedLuaSection(
+                AdvancedLuaGroup(
                     model: model,
                     bindings: bindingsBinding
                 )

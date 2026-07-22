@@ -255,7 +255,7 @@ enum KeybindingCatalog {
     // MARK: - Change-mode & application commands (single source)
 
     /// The Change-Modes row that switches to `name`. The one
-    /// authority for this Lua so the writer (`ChangeModesSection`)
+    /// authority for this Lua so the writer (`ChangeModesGroup`)
     /// and the import classifier match byte-for-byte — a drift
     /// here would silently demote imports to Custom (#4).
     static func switchModeCommand(_ name: String) -> NavCommand {
