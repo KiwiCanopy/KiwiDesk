@@ -1,7 +1,9 @@
 import AppKit
 
 /// Remembers the most recent left-button press via global
-/// event monitors.
+/// event monitors, and re-emits each press through
+/// `onLeftMouseDown` for consumers that react to a click's
+/// location (the #446 display-focus follow).
 ///
 /// The press is needed to classify the trailing AX resize event
 /// of a fast mouse gesture: it arrives after the button release,

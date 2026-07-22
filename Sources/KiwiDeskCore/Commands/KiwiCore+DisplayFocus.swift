@@ -50,12 +50,24 @@ extension KiwiCore {
             let target = state.workspaces.activeSpace(on: display),
             target != state.workspaces.activeSpace
         else { return }
-        state.workspaces.activate(target)
-        // A focused-display move is a space switch: force past the
-        // tolerance check, honour the space-change animation, and
-        // tell the bars where we landed. No window is raised — a
-        // bare desktop click deliberately leaves key focus on the
-        // desktop, and forcing a window forward would fight it.
+        // A bare desktop click deliberately leaves key focus on the
+        // desktop, so no window is raised — forcing one forward
+        // would fight it. This also fires on a cross-display
+        // *window* click, redundantly with the AX focus-follow
+        // path; the switch is idempotent (`target != activeSpace`
+        // guards the repeat) so the overlap is harmless.
+        applyFocusedSpaceSwitch(to: target)
+    }
+
+    /// Commits a focused-display / space switch to `space`: makes
+    /// it the active space, force-retiles honouring the
+    /// space-change animation (§5: an explicit switch forces past
+    /// the "already there" tolerance check), and tells the bars.
+    /// The shared tail of the empty-desktop display follow (#446)
+    /// and the AX focus-follow (`scheduleFocusFollow`, #22) — each
+    /// caller adds its own raise / warp / settle afterwards.
+    func applyFocusedSpaceSwitch(to space: SpaceID) {
+        state.workspaces.activate(space)
         retile(
             animated: tiler.settings.animations.onSpaceChange,
             force: true

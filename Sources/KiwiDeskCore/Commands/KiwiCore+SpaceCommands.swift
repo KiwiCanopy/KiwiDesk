@@ -49,12 +49,7 @@ extension KiwiCore {
                 ),
                 space != self.state.workspaces.activeSpace
             else { return }
-            self.state.workspaces.activate(space)
-            self.retile(
-                animated: self.tiler.settings.animations.onSpaceChange,
-                force: true
-            )
-            self.emitSpaceChange()
+            self.applyFocusedSpaceSwitch(to: space)
             // The focus echo that triggered this follow found
             // the window on an inactive space, where the warp
             // guard skips; now that the space is forward the
@@ -256,11 +251,16 @@ extension KiwiCore {
             // The moved window would keep macOS focus while
             // stashed offscreen; refocus the current space.
             focusWindow(next, refocusRetile: false, warp: true)
-        } else if movedHeldFocus {
-            // The moved window was the ONLY one on this space, so
-            // there is no neighbor to refocus and it would keep
-            // key focus offscreen. Hand focus to the desktop — the
-            // same state a bare empty-desktop click leaves (#446).
+        } else if movedHeldFocus,
+            from == state.workspaces.activeSpace
+        {
+            // The moved window was the ONLY one on the focused
+            // display's space, so there is no neighbor to refocus
+            // and it would keep key focus offscreen. Hand focus to
+            // the desktop — the same state a bare empty-desktop
+            // click leaves (#446). Scoped to the active space: a
+            // Space-Bar drag from a *non-active* space (the other
+            // `moveWindow` caller) leaves the user's focus alone.
             desktopFocusYield?()
         }
         retile(

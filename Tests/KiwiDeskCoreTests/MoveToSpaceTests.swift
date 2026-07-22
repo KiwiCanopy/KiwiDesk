@@ -366,9 +366,11 @@ struct MoveToSpaceTests {
 
     /// Issue #446 symptom 1: the display-follow is a no-op with
     /// no per-display space assignment (single-monitor / headless)
-    /// — a click never spuriously flips the active space. The
-    /// cross-monitor move itself needs a second display (device
-    /// QA); this pins the single-display collapse.
+    /// — a click never spuriously flips the active space. Here it
+    /// bails at the `activeSpace(on:)` guard (the test's space is
+    /// unassigned to a display), not the `display != focusedDisplay`
+    /// one; the true cross-monitor collapse needs a second display
+    /// (device QA). This pins the no-op outcome regardless.
     @Test("Display-follow click is a no-op on one display")
     func displayFollowNoOpSingleDisplay() {
         guard let screen = NSScreen.main else { return }
