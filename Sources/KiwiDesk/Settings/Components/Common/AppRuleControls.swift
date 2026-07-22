@@ -66,39 +66,3 @@ struct AppSelector: View {
         }
     }
 }
-
-/// The borderless-menu signature (`ProfileEditTargetMenu`): a
-/// trailing chevron on the label so a bare-text menu still reads
-/// as "this opens a menu".
-private func menuLabel(_ text: String) -> some View {
-    HStack(spacing: 4) {
-        Text(text)
-        Image(systemName: "chevron.up.chevron.down")
-            .font(.caption2)
-            .foregroundStyle(.secondary)
-    }
-}
-
-/// A dropdown of the user's defined spaces (spaces can only be
-/// assigned to ones that already exist).
-struct SpaceMenu: View {
-    let spaces: [SpaceID]
-    let selected: SpaceID?
-    let onPick: (SpaceID) -> Void
-
-    var body: some View {
-        Menu {
-            ForEach(spaces, id: \.raw) { space in
-                Button(space.raw) { onPick(space) }
-            }
-        } label: {
-            menuLabel(
-                selected?.raw
-                    ?? L("space_menu.placeholder", "Space…")
-            )
-            .frame(minWidth: 70, alignment: .leading)
-        }
-        .controlSize(.large)
-        .frame(width: 110)
-    }
-}

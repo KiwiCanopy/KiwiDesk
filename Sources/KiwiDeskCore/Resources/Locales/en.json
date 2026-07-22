@@ -696,7 +696,6 @@
   "space_bar.tab_background_fit.boxed_only": "Boxed draws a box per item, not a shared plate, so there is nothing to size.",
   "space_bar.tab_background_fit.label": "Background size",
   "space_bar.thickness": "Thickness",
-  "space_menu.placeholder": "Space…",
   "space_override.caption": "Unchecked settings inherit %1$@ defaults.",
   "space_override.dormant.entry_many": "%1$@ — %2$d fields",
   "space_override.dormant.entry_one": "%1$@ — 1 field",
