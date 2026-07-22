@@ -151,7 +151,19 @@ public struct WorkspaceManager: Sendable {
         if let active = activeSpace, spaceDisplay[active] == display {
             return active
         }
-        if let shown = secondaryShown[display] { return shown }
+        // Self-healing: a `secondaryShown` pick counts only while
+        // that space still lives on THIS display. A reassignment
+        // (profile apply, topology change) can leave the entry
+        // stale — pointing at a space now on another display — and
+        // honoring it would lay the same space on two screens. A
+        // stale entry is ignored, falling back to the first
+        // assigned space, so the read path stays correct even if a
+        // writer forgot to prune.
+        if let shown = secondaryShown[display],
+            spaceDisplay[shown] == display
+        {
+            return shown
+        }
         return spaces(on: display).first
     }
 
@@ -305,6 +317,13 @@ public struct WorkspaceManager: Sendable {
     ) {
         ensureSpace(space)
         spaceDisplay[space] = display
+        // Reassigning a space can strand a `secondaryShown` entry
+        // that still points at it on its OLD display; drop any
+        // entry no longer matching its display so stale picks
+        // never accumulate (the read path also ignores them).
+        secondaryShown = secondaryShown.filter { display, space in
+            spaceDisplay[space] == display
+        }
     }
 
     public func display(of space: SpaceID) -> DisplayID? {

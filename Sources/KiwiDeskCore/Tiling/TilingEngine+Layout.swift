@@ -86,25 +86,33 @@ extension TilingEngine {
             return [(space, screen)]
         }
         let fallback = NSScreen.main ?? NSScreen.screens.first
-        var out: [(space: Space, screen: NSScreen)] = []
-        var covered: Set<SpaceID> = []
+        // Keyed by physical screen (frame origin — stable across
+        // the fresh `NSScreen` instances `NSScreen.screens` may
+        // hand back), so a screen hosts exactly ONE space. Two
+        // displays that both fall back to `main` (unresolvable), or
+        // a focused active space whose display is untracked landing
+        // on `main`, cannot double-place two different spaces on
+        // one screen — the focused active space, written last, wins
+        // its screen.
+        var byScreen: [String: (space: Space, screen: NSScreen)] = [:]
+        func key(_ s: NSScreen) -> String {
+            "\(s.frame.origin.x),\(s.frame.origin.y)"
+        }
         for display in displays {
             guard
                 let id = state.workspaces.activeSpace(on: display.id),
                 let space = state.workspaces[id],
                 let screen = Self.screen(for: display.id) ?? fallback
             else { continue }
-            out.append((space, screen))
-            covered.insert(id)
+            byScreen[key(screen)] = (space, screen)
         }
         if let id = state.workspaces.activeSpace,
-            !covered.contains(id),
             let space = state.workspaces[id],
             let screen = Self.screen(for: id, in: state)
         {
-            out.append((space, screen))
+            byScreen[key(screen)] = (space, screen)
         }
-        return out
+        return Array(byScreen.values)
     }
 
     /// The `NSScreen` a space lays out on: its assigned display's
@@ -162,6 +170,12 @@ extension TilingEngine {
                 windows: input.tiled,
                 context: input.context
             )
+            // Each visible space is a distinct space on a distinct
+            // display, so their window sets are disjoint and the
+            // union is lossless — the `new` tie-break never fires
+            // in practice. It guards only the degenerate case of
+            // the same space resolving onto two displays, which
+            // `activeSpace(on:)` already self-heals against.
             frames.merge(computed) { _, new in new }
         }
         return frames

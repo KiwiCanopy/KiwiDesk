@@ -154,4 +154,21 @@ struct MultiMonitorSpaceTests {
         // A falls back to its first remaining assigned space (1).
         #expect(w.activeSpace(on: displayA) == SpaceID("1"))
     }
+
+    @Test("Reassigning a shown space never lays it on two displays")
+    func reassignDoesNotDoubleShow() {
+        var w = twoMonitorState()
+        w.activate(SpaceID("2"))
+        w.activate(SpaceID("5"))  // A parked showing space 2
+        // Space 2 is now moved to display B (profile / topology
+        // reassign). A's stale secondary pick at 2 must not keep
+        // showing it — 2 lives on B now.
+        w.assign(SpaceID("2"), to: displayB)
+        #expect(w.activeSpace(on: displayA) == SpaceID("1"))
+        #expect(w.activeSpace(on: displayB) == SpaceID("5"))
+        // No space is claimed by two displays at once.
+        let a = w.activeSpace(on: displayA)
+        let b = w.activeSpace(on: displayB)
+        #expect(a != b)
+    }
 }
