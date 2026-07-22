@@ -348,6 +348,32 @@ struct MoveToSpaceTests {
         #expect(core.activeSpace?.focused == WindowID(1))
     }
 
+    /// Issue #446 (review): the yield keys on system key focus
+    /// (`lastFocused`), not on the emptied origin being the active
+    /// space. A window that holds key focus while stashed on a
+    /// NON-active space (a #414 traveler, or a secondary display's
+    /// space) is still orphaned offscreen when moved again with no
+    /// active-space neighbor — so it must still yield, not be
+    /// suppressed because `from != activeSpace`.
+    @Test("A focus-holding window off a non-active space yields")
+    func nonActiveOriginStillYields() {
+        let core = makeCore()
+        var yields = 0
+        core.desktopFocusYield = { yields += 1 }
+        addWindow(core, 1)
+        // Park window 1 on space 2; the move re-stamps it as the
+        // system focus while active space 1 is left empty.
+        core.execute("move_to_space", args: [.string("2")])
+        #expect(core.state.workspaces.lastFocused == WindowID(1))
+        #expect(core.state.workspaces.activeSpace == SpaceID(1))
+        #expect(core.activeSpace?.focused == nil)
+        // Move it again off the NON-active space 2. Still orphaned
+        // offscreen with no active-space neighbor → yields anyway.
+        yields = 0
+        core.moveWindow(WindowID(1), to: SpaceID(3), follow: false)
+        #expect(yields == 1)
+    }
+
     /// Following the move switches to the target, so the origin
     /// never needs a yield (#446).
     @Test("Following the move does not yield to the desktop")
