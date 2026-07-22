@@ -88,7 +88,10 @@ struct ScrollingFloatingFocusTests {
                 "kiwidesk-tests-\(UUID().uuidString)"
             )
         let core = KiwiCore(configDirectory: directory)
-        for id in 1...5 {
+        // Twenty windows so the row overflows every display width:
+        // the offset then stays scrolled on any host, single- or
+        // multi-monitor (see the assertion note below, #450).
+        for id in 1...20 {
             core.state.apply(
                 .windowCreated(
                     ManagedWindow(
@@ -108,11 +111,10 @@ struct ScrollingFloatingFocusTests {
             "scroll.set_slot_size",
             args: [.number(800)]
         )
-        // Scroll far, then back to w2: the offset rests at
-        // w2's left-visible edge — scrolled, but well inside
-        // the boundary of the row even after one slot floats
-        // out of it, so only the #141 bug could move it.
-        core.state.workspaces.focus(WindowID(5), in: space)
+        // Scroll to the far end, then back to w2: the offset
+        // rests scrolled (negative). Once w2 floats it must keep
+        // a scrolled position; only the #141 bug would pan it home.
+        core.state.workspaces.focus(WindowID(20), in: space)
         core.retile(animated: false)
         core.state.workspaces.focus(w2, in: space)
         core.retile(animated: false)
@@ -120,8 +122,18 @@ struct ScrollingFloatingFocusTests {
         #expect(scrolled != nil && scrolled! < 0)
         core.execute("make_floating")
         core.retile(animated: false)
-        // Pre-#141 the slot-0 fallback panned the viewport
-        // home and persisted 0 — the tiled row visibly jumped.
-        #expect(core.activeSpace?.scrollOffset == scrolled)
+        // The floating focus has no slot, so the viewport keeps a
+        // boundary-clamped scrolled position instead of the pre-#141
+        // slot-0 pan home (which reset the offset to 0 and jumped
+        // the row). Asserted as the sign-stable invariant, not the
+        // exact pre-float value: floating drops a slot, so on a
+        // viewport that leaves the old offset past the shortened
+        // row's boundary it legitimately re-clamps by up to one
+        // slot. Pinning the exact value coupled the test to
+        // NSScreen.main and failed on multi-monitor hosts (#450);
+        // the 20-window row overflows any display, so "still
+        // scrolled" holds everywhere.
+        let afterFloat = core.activeSpace?.scrollOffset
+        #expect(afterFloat != nil && afterFloat! < 0)
     }
 }
