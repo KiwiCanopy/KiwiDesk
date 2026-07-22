@@ -264,6 +264,13 @@ config reappears on the next config load.
 KiwiDesk.delete_space("scratch")
 ```
 
+> **Renaming a space** has no Lua verb by design. Rename in the
+> Settings app (which also rewrites every keybinding that targets
+> the space and persists the change), or — with a Lua config —
+> change the id in `init.lua` and reload. A runtime rename could
+> only do a partial, non-persistent remap, so it is deliberately
+> omitted.
+
 ### move_to_track
 
 **Expects:** `"prev"` or `"next"` (exactly these — no
