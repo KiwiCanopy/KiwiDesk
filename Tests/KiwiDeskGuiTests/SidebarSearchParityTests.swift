@@ -77,7 +77,7 @@ struct SidebarSearchParityTests {
     func renderedHeadersAreIndexed() throws {
         var indexed = try lKeys(in: indexSource())
         let glyphFile = settingsDir.appendingPathComponent(
-            "LayoutModeGlyph.swift"
+            "Components/Common/LayoutModeGlyph.swift"
         )
         indexed.formUnion(
             try lKeys(
