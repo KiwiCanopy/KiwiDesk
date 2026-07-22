@@ -251,6 +251,15 @@ public final class BorderManager {
         bumpAnimator.flushAll()
     }
 
+    /// Drops a window's cached corner radius. Narrow surface for the
+    /// dead-end cue's transient teardown (`+DeadEnd`) so a borders-off
+    /// window that only ever bounced doesn't keep a stale radius until
+    /// `clear()` — which would mis-round a later ring if the id is
+    /// recycled (#308). No-op'd when a steady ring still owns it.
+    func forgetCornerRadius(_ id: WindowID) {
+        cornerRadii[id] = nil
+    }
+
     private func overlay(for window: WindowID) -> BorderOverlay {
         if let existing = overlays[window] { return existing }
         let overlay = makeOverlay(for: window)

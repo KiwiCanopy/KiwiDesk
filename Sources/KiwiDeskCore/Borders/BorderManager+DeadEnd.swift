@@ -56,10 +56,16 @@ extension BorderManager {
             screen: screen,
             reduceMotion: reduceMotion
         ) { [weak self] in
+            guard let self else { return }
             // Retire only a transient we spawned; a live ring is left
             // to the steady-state sync (no-op if none is stored).
-            self?.bumpTransients[window]?.hide()
-            self?.bumpTransients[window] = nil
+            self.bumpTransients[window]?.hide()
+            self.bumpTransients[window] = nil
+            // Drop the radius we cached only for this transient —
+            // unless a steady ring adopted the window meanwhile.
+            if self.overlays[window] == nil {
+                self.forgetCornerRadius(window)
+            }
         }
     }
 }
