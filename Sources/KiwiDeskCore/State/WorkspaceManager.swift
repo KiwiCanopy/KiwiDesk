@@ -11,7 +11,24 @@ public struct WorkspaceManager: Sendable {
     private var order: [SpaceID] = []
     private var displays: [DisplayID: Display] = [:]
     private var spaceDisplay: [SpaceID: DisplayID] = [:]
+    /// The space shown on the FOCUSED display — the one the user
+    /// is currently acting on. Every command that means "the
+    /// current space" reads this. On a single monitor it is the
+    /// whole story; with several, the other displays' shown
+    /// spaces live in `secondaryShown`.
     public private(set) var activeSpace: SpaceID?
+
+    /// The space shown on each display OTHER than the focused
+    /// one (multi-monitor, #multi-monitor). AeroSpace's
+    /// `screenPointToVisibleWorkspace` minus the focused entry:
+    /// we keep the focused display's space in `activeSpace`, so
+    /// the invariant is that `display(of: activeSpace)` is never
+    /// a key here. A display absent from the map falls back to
+    /// its first-assigned space, so a freshly attached monitor
+    /// needs no explicit seeding — only an explicit switch away
+    /// from that default records an entry. Every non-focused
+    /// display's shown space is thus `activeSpace(on:)`.
+    private var secondaryShown: [DisplayID: SpaceID] = [:]
 
     /// The window holding the SYSTEM focus, across spaces —
     /// every focus write lands here (`focus(_:in:)` is the one
@@ -100,9 +117,60 @@ public struct WorkspaceManager: Sendable {
         order = front + rest
     }
 
+    /// Makes `id` the shown space on its display and moves focus
+    /// to that display. If `id` lives on a DIFFERENT display than
+    /// the currently focused one, the previously focused display
+    /// keeps showing its space (parked in `secondaryShown`) — it
+    /// is not stashed. On one monitor (or before displays are
+    /// assigned) this reduces to the old behavior: replace the
+    /// single `activeSpace`.
     public mutating func activate(_ id: SpaceID) {
         ensureSpace(id)
+        let newDisplay = spaceDisplay[id]
+        let oldDisplay = activeSpace.flatMap { spaceDisplay[$0] }
+        if let newDisplay, newDisplay != oldDisplay {
+            // Focus is moving to another display. Preserve the
+            // display we're leaving so its space stays visible.
+            if let oldDisplay, let old = activeSpace {
+                secondaryShown[oldDisplay] = old
+            }
+            // The newly focused display's space is now the
+            // authoritative `activeSpace`, not a secondary entry.
+            secondaryShown[newDisplay] = nil
+        }
         activeSpace = id
+    }
+
+    /// The space shown on `display`: the focused `activeSpace`
+    /// when that space is assigned to this display, else an
+    /// explicit `secondaryShown` pick, else the first space
+    /// assigned to it (creation order). Nil when nothing is
+    /// assigned. This is the single truth the tiler lays out per
+    /// display and the bars read (superseding `currentSpace`).
+    public func activeSpace(on display: DisplayID) -> SpaceID? {
+        if let active = activeSpace, spaceDisplay[active] == display {
+            return active
+        }
+        if let shown = secondaryShown[display] { return shown }
+        return spaces(on: display).first
+    }
+
+    /// Every space currently visible on some display — the
+    /// focused `activeSpace` plus each other display's shown
+    /// space. Drives `stashInactive`: a space in this set is
+    /// laid out in place on its display; every space outside it
+    /// is parked in a corner. With no displays known yet, this
+    /// is just `{activeSpace}`, so the single-monitor path is
+    /// unchanged.
+    public var visibleSpaces: Set<SpaceID> {
+        var result: Set<SpaceID> = []
+        if let active = activeSpace { result.insert(active) }
+        for display in displays.keys {
+            if let shown = activeSpace(on: display) {
+                result.insert(shown)
+            }
+        }
+        return result
     }
 
     /// Removes a space and forgets its display assignment. Any
@@ -113,6 +181,7 @@ public struct WorkspaceManager: Sendable {
         spaces[id] = nil
         order.removeAll { $0 == id }
         spaceDisplay[id] = nil
+        secondaryShown = secondaryShown.filter { $0.value != id }
         if activeSpace == id {
             activeSpace = order.first
         }
@@ -226,6 +295,7 @@ public struct WorkspaceManager: Sendable {
         for (space, display) in spaceDisplay where display == id {
             spaceDisplay[space] = nil
         }
+        secondaryShown[id] = nil
         return displays.removeValue(forKey: id)
     }
 
@@ -246,17 +316,10 @@ public struct WorkspaceManager: Sendable {
         order.filter { spaceDisplay[$0] == display }
     }
 
-    /// The space a display currently shows: the globally active
-    /// space when it is assigned to this display, otherwise the
-    /// first space assigned to it (creation order). Nil when no
-    /// space is assigned. Drives the per-display app bar (#16);
-    /// the composed layouts give each secondary display exactly
-    /// one space, so the first-assigned fallback is the visible
-    /// one there and the active space covers the main display.
+    /// The space a display currently shows. Alias of
+    /// `activeSpace(on:)`; kept for the bar/overlay call sites
+    /// that predate the per-display active model.
     public func currentSpace(on display: DisplayID) -> SpaceID? {
-        if let active = activeSpace, spaceDisplay[active] == display {
-            return active
-        }
-        return spaces(on: display).first
+        activeSpace(on: display)
     }
 }

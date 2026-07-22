@@ -56,8 +56,13 @@ re-tile.
    `design-decisions.md`. A window's `CGWindowID` is **not** stable.
 3. **`State`** — the reconciled result mutates the flat
    `[WindowID]`-per-space array. Nothing tree-shaped enters here.
-4. **`Tiling`** — reads the flat array for the affected space and asks
-   the active layout where each window goes.
+4. **`Tiling`** — lays out **one space per connected display** (each
+   display's `activeSpace(on:)`) onto that display's own bounds, and
+   parks every space visible on no display in a screen corner
+   (`stashInactive`, keyed off `visibleSpaces`). The focused display's
+   space is the global `activeSpace`; other displays' shown spaces are
+   tracked alongside it, so switching focus to one monitor never hides
+   another's. Single-monitor collapses to exactly one active space.
 5. **`Layouts`** — a **pure function** computes frames from the array +
    resolved settings (no AX, no I/O — AX is slow and must never be
    called inside layout math; §5). Which model a layout uses

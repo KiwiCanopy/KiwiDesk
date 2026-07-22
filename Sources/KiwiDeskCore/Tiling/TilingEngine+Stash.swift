@@ -105,13 +105,17 @@ extension TilingEngine {
         fallback: NSScreen,
         force: Bool
     ) {
-        guard let active = state.workspaces.activeSpace
-        else { return }
+        // Every space shown on some display stays in place; only
+        // spaces visible on NO display are parked. On one monitor
+        // this is exactly `{activeSpace}` — unchanged. On several,
+        // each display keeps its own shown space (#multi-monitor).
+        let visible = state.workspaces.visibleSpaces
+        guard !visible.isEmpty else { return }
         let allVisible = NSScreen.screens.map {
             GeometryUtils.axVisibleFrame(of: $0)
         }
         for space in state.workspaces.allSpaces
-        where space.id != active {
+        where !visible.contains(space.id) {
             for id in space.windows {
                 guard let window = state.windows[id],
                     id != dragExemptWindow
@@ -208,11 +212,14 @@ extension TilingEngine {
         stashedFrames = stashedFrames.filter {
             state.windows[$0.key] != nil
         }
-        guard
-            let active = state.workspaces.activeSpace,
-            let space = state.workspaces[active]
-        else { return }
-        for id in space.windows {
+        // Restore floats for every space currently shown on some
+        // display, not just the focused one (#multi-monitor): a
+        // secondary display's space activating must un-park its
+        // floating windows too.
+        let visibleWindows = state.workspaces.visibleSpaces
+            .compactMap { state.workspaces[$0]?.windows }
+            .flatMap { $0 }
+        for id in visibleWindows {
             guard let original = stashedFrames[id]
             else { continue }
             if frames[id] != nil {

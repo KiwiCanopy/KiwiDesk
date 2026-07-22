@@ -112,69 +112,6 @@ public final class TilingEngine {
         }
     }
 
-    /// The active space's layout inputs — the single source
-    /// that `calculatedFrames` and the scroll-offset persist
-    /// (`KiwiCore.persistScrollOffset`) both consume, so the
-    /// screen pick, floating filter, and context can never
-    /// drift between the frames we apply and the offset we
-    /// store. `nil` without an active space or a screen.
-    func layoutInput(
-        state: StateCoordinator
-    ) -> (space: Space, tiled: [WindowID], context: LayoutContext)? {
-        guard
-            let spaceID = state.workspaces.activeSpace,
-            let space = state.workspaces[spaceID],
-            let screen = NSScreen.main
-                ?? NSScreen.screens.first
-        else { return nil }
-        // Space-first reservation (#293): the Space Bar strip
-        // comes off the visible frame before any layout — or
-        // the App Bar — sees its bounds.
-        let bounds = settings.layoutBounds(
-            from: GeometryUtils.axVisibleFrame(of: screen)
-        )
-        let tiled = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: state.workspaces.activeSpace
-        )
-        let context = settings.context(
-            bounds: bounds,
-            space: space,
-            sticky: Set(
-                state.windows.all
-                    .filter(\.isSticky)
-                    .map(\.id)
-            ),
-            // Surface a tiled-sticky traveler when it is the
-            // frontmost window (#431): it has a slot in `tiled`
-            // but can never be the membership-guarded `focused`
-            // slot. Only Scrolling reads `context.focused`, to
-            // pan; `persistScrollOffset` reads this same
-            // `layoutInput`, so the pan and the stored offset stay
-            // consistent.
-            focusedOverride: state.focusAnchor(
-                of: space,
-                tiled: tiled
-            )
-        )
-        return (space, tiled, context)
-    }
-
-    /// The frames the active space's layout assigns right
-    /// now, without applying them. Used by retiling and by
-    /// drag-and-drop slot detection.
-    public func calculatedFrames(
-        state: StateCoordinator
-    ) -> [WindowID: CGRect] {
-        guard let input = layoutInput(state: state)
-        else { return [:] }
-        return LayoutEngine.calculate(
-            mode: input.space.mode,
-            windows: input.tiled,
-            context: input.context
-        )
-    }
-
     /// Recomputes and applies the active space's layout.
     /// `animated: false` snaps windows to their targets in
     /// one frame-set each (virtual space switches).
@@ -238,8 +175,9 @@ public final class TilingEngine {
     /// in-flight animation cancelled. The single authority for
     /// this policy — `retile` and the floating keyboard resize
     /// both route here; never copy the branch (a copy already
-    /// drifted once, dropping the cancel). The screen pick is
-    /// the pre-existing single-screen ceiling (plan item 8).
+    /// drifted once, dropping the cancel). The animation screen
+    /// is the display the target frame lands on (multi-monitor:
+    /// one `DisplayLink` per monitor), falling back to main.
     public func applyFrame(
         _ id: WindowID,
         from current: CGRect,
@@ -248,7 +186,8 @@ public final class TilingEngine {
         isNewWindow: Bool = false
     ) {
         if animated,
-            let screen = NSScreen.main
+            let screen = Self.screen(containing: target)
+                ?? NSScreen.main
                 ?? NSScreen.screens.first
         {
             animation.animate(
