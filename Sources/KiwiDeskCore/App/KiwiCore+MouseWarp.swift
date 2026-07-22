@@ -43,8 +43,13 @@ extension KiwiCore {
         tiler.settings.mouse.followsFocus
             && NSEvent.pressedMouseButtons == 0
             && zOrderRestoresInFlight == 0
-            && state.workspaces.space(of: id)
+            && (state.workspaces.space(of: id)
                 == state.workspaces.activeSpace
+                // A sticky window is visible on EVERY space
+                // (#414): its foreign home is not "stashed
+                // off-screen", the traveler's slot is right
+                // there — so the pointer follows it too.
+                || state.windows[id]?.isSticky == true)
     }
 
     /// Warps the pointer to the newly-focused window when

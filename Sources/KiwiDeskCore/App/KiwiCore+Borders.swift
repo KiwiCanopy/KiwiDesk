@@ -13,18 +13,33 @@ import CoreGraphics
 /// overlays (launchers/panels, #300) never do.
 extension KiwiCore {
     func updateBorders() {
-        let style = tiler.settings.borderStyle
         // Global draw order (behind / front, #367) — set before the
         // enabled guard so a re-enable rebuilds on the right backend.
-        borders.setDrawOrder(style.drawOrder)
-        guard style.enabled, let space = activeSpace else {
-            borders.sync([])
-            return
-        }
+        borders.setDrawOrder(tiler.settings.borderStyle.drawOrder)
+        borders.sync(desiredBorderSpecs())
+    }
+
+    /// The rings the active space should show right now — the pure
+    /// data-gathering half of `updateBorders`, split out so it can be
+    /// asserted without spawning overlay panels. Empty when borders
+    /// are disabled or no space is active.
+    func desiredBorderSpecs() -> [BorderManager.Spec] {
+        let style = tiler.settings.borderStyle
+        guard style.enabled, let space = activeSpace else { return [] }
         // Layout slots identify the active space's tiled windows and
         // provide fallback geometry; drawing below uses each real
         // frame so apps that clamp their size still get an exact ring.
         let targets = tiler.calculatedFrames(state: state)
+        // Tiled membership includes tiled-sticky travelers injected
+        // into the active space (#414 v2). The focused window is the
+        // same `focusAnchor` the App Bar / Scrolling / Monocle already
+        // read (#431), so a keyboard focus that lands on a traveler
+        // moves the ring onto it too — not only a mouse click.
+        let tiled = state.effectiveTiledMembers(
+            of: space,
+            activeSpace: activeSpace?.id
+        )
+        let travelers = tiled.filter { !space.windows.contains($0) }
         let floating = Set(
             space.windows.filter {
                 state.windows[$0]?.isFloating == true
@@ -37,7 +52,7 @@ extension KiwiCore {
                 state.windows[$0]?.isTransientOverlay == true
             }
         )
-        let slots = space.windows.compactMap {
+        let slots = (space.windows + travelers).compactMap {
             id -> (id: WindowID, frame: CGRect)? in
             guard let frame = targets[id] ?? state.windows[id]?.frame
             else { return nil }
@@ -45,7 +60,7 @@ extension KiwiCore {
         }
         let chosen = Self.borderSpecs(
             style: style,
-            focused: space.focused,
+            focused: state.focusAnchor(of: space, tiled: tiled),
             slots: slots,
             floating: floating,
             overlays: overlays,
@@ -55,18 +70,16 @@ extension KiwiCore {
         // actual on-screen size, which an app may have clamped
         // larger than the slot), not the slot it was assigned.
         // Falls back to the slot only until the first AX echo.
-        borders.sync(
-            chosen.map { spec in
-                BorderManager.Spec(
-                    window: spec.window,
-                    frame: state.windows[spec.window]?.frame
-                        ?? spec.frame,
-                    colorHex: spec.colorHex,
-                    width: spec.width,
-                    cornerStyle: spec.cornerStyle
-                )
-            }
-        )
+        return chosen.map { spec in
+            BorderManager.Spec(
+                window: spec.window,
+                frame: state.windows[spec.window]?.frame
+                    ?? spec.frame,
+                colorHex: spec.colorHex,
+                width: spec.width,
+                cornerStyle: spec.cornerStyle
+            )
+        }
     }
 
     /// WindowServer can briefly order the swap target out while a

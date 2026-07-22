@@ -741,6 +741,7 @@
   "sticky.indicator.forced_link": "Space Bar",
   "sticky.indicator.help": "A sticky window can look identical to a normal one, so KiwiDesk marks it with a small badge in its top-right corner. The Space Bar shows its own sticky badge either way.",
   "sticky.mark_color": "Mark color",
+  "sticky.pile.pill": "Sticky windows can't be moved to the pile",
   "sticky.title": "Sticky windows",
   "track.auto_tracks": "Automatic tracks",
   "track.auto_tracks_caption": "Fits as many tracks as the screen allows, using the minimum window size above — opening and collapsing them as windows come and go.",

@@ -13,10 +13,36 @@ extension KiwiCore {
         else {
             return .fail("expected left|right|up|down")
         }
-        guard let space = activeSpace,
-            let focused = space.focused
+        guard let space = activeSpace else {
+            return .fail("no focused window")
+        }
+        // The origin is the focus ANCHOR, never `space.focused`:
+        // a tiled-sticky traveler can hold the system focus yet
+        // never be the membership-guarded `focused` slot (#431),
+        // so `space.focused` would navigate from the previously
+        // focused LOCAL window — trapping the user on the
+        // traveler (every press recomputes from the stale
+        // origin, so it re-targets the traveler or dead-ends)
+        // and flashing the dead-end cue on the wrong ring.
+        let tiled = state.effectiveTiledMembers(
+            of: space,
+            activeSpace: space.id
+        )
+        guard
+            let focused = state.focusAnchor(
+                of: space,
+                tiled: tiled
+            )
         else {
             return .fail("no focused window")
+        }
+        // Swapping FROM a traveler is refused up front, for every
+        // layout path below: a traveler is a member only of its
+        // home space, so `Space.swap` on the active space would
+        // silently no-op (#414 v2) — explain with the home-space
+        // pill on the traveler instead of a dead swap (#435).
+        if swapping, refuseSwapOntoTraveler(focused, in: space) {
+            return .ok()
         }
         // Monocle windows all share one frame, so geometric
         // neighbor search finds nothing. Directions on the
@@ -73,10 +99,7 @@ extension KiwiCore {
         else {
             return .fail("no focused window")
         }
-        let candidates = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: activeSpace?.id
-        ).filter { $0 != focused }
+        let candidates = tiled.filter { $0 != focused }
             .compactMap { id -> (WindowID, CGRect)? in
                 guard
                     let slot = slots[id]
@@ -120,6 +143,15 @@ extension KiwiCore {
             // pill (#435), never the rubber-band cue reserved for a
             // true no-candidate edge (#436).
             if refuseSwapOntoTraveler(target, in: space) {
+                return .ok()
+            }
+            // A sticky focused window can't enter the overflow pile
+            // (it is pile-exempt): explain, don't dead-swap (#438).
+            if refuseStickyIntoPile(
+                focused,
+                target: target,
+                among: candidates
+            ) {
                 return .ok()
             }
             let crossedZones = crossesStackBoundary(

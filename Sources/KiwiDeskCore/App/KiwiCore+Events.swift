@@ -77,16 +77,23 @@ extension KiwiCore {
             // holds the intended focus (the raisers skip it), so a
             // deliberate focus (a space switch onto a float; a click
             // on a pile-mate) is unstamped and falls through.
+            // Never consumed for an echo of our OWN focus raise
+            // (`outstandingSelfRaises`): a keyboard focus can land
+            // on a window a pile restore stamped moments earlier,
+            // and for a tiled-sticky traveler `focusBefore` stays
+            // on the stale local slot (the membership guard keeps
+            // `space.focused` off travelers), so `intended != id`
+            // cannot clear it — the revert would undo a deliberate
+            // focus and strand the ring off the truly focused
+            // window (#431). The self-echo path below consumes the
+            // outstanding entry; the stamp expires on its own.
             if let stamp = zOrderRaiseEchoes[id],
                 Date().timeIntervalSince(stamp)
                     < Self.zOrderRaiseEchoWindow,
-                let intended = effects.focusBefore, intended != id
+                let intended = effects.focusBefore, intended != id,
+                !outstandingSelfRaises.contains(id)
             {
                 zOrderRaiseEchoes[id] = nil
-                // Drop a matching self-raise too: this echo is
-                // consumed here and never reaches the `selfEcho`
-                // read below, so its outstanding entry would leak.
-                outstandingSelfRaises.remove(id)
                 if let space = state.workspaces.space(of: intended) {
                     state.workspaces.focus(intended, in: space)
                 }

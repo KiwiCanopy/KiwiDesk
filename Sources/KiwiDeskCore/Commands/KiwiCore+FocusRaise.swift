@@ -80,7 +80,19 @@ extension KiwiCore {
         refocusRetile: Bool = true,
         warp: Bool
     ) {
-        let previousFocused = activeSpace?.focused
+        // The anchor, not `activeSpace?.focused`: stepping off a
+        // tiled-sticky traveler must classify the scroll pan
+        // direction from the traveler's slot, not from the stale
+        // local focus (#431). Identical for any local focus.
+        let previousFocused = activeSpace.flatMap { sp in
+            state.focusAnchor(
+                of: sp,
+                tiled: state.effectiveTiledMembers(
+                    of: sp,
+                    activeSpace: sp.id
+                )
+            )
+        }
         let space = state.workspaces.space(of: id)
         if let space {
             state.workspaces.focus(id, in: space)

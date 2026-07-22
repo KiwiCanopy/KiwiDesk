@@ -142,9 +142,16 @@ extension KiwiCore {
             }
         }
         guard piled.count > 1 else { return }
+        // The anchor, not `space.focused` (#431): with a focused
+        // traveler the closing re-assert must skip (not steal
+        // focus back to the stale local slot) — the monocle
+        // restore's rule, applied to every restore.
         raiseSequentially(
             Self.cascadeRaiseOrder(piled, frames: frames),
-            thenFocus: space.focused
+            thenFocus: state.focusAnchor(
+                of: space,
+                tiled: input.tiled
+            )
         )
     }
 
@@ -238,12 +245,13 @@ extension KiwiCore {
         // Frame-ordered, not array-ordered: the zone cascade's
         // rendered order can differ from the array once
         // `stickyExempt` promotes a piled sticky (#414 v2).
+        // Anchor, not `space.focused` — see restoreTrackZOrder.
         raiseSequentially(
             Self.cascadeRaiseOrder(
                 Array(tiled[boundary...]),
                 frames: tiler.calculatedFrames(state: state)
             ),
-            thenFocus: space.focused
+            thenFocus: state.focusAnchor(of: space, tiled: tiled)
         )
     }
 
@@ -259,8 +267,12 @@ extension KiwiCore {
             activeSpace: activeSpace?.id
         )
         guard tiled.count > 1 else { return }
+        // Anchor, not `space.focused` — see restoreTrackZOrder.
+        // The pile split follows the traveler's slot too: it is
+        // the row position the viewport actually centers on.
+        let anchor = state.focusAnchor(of: space, tiled: tiled)
         let focusIndex =
-            space.focused.flatMap {
+            anchor.flatMap {
                 tiled.firstIndex(of: $0)
             } ?? 0
         raiseSequentially(
@@ -268,7 +280,7 @@ extension KiwiCore {
                 tiled,
                 focusIndex: focusIndex
             ),
-            thenFocus: space.focused
+            thenFocus: anchor
         )
     }
 

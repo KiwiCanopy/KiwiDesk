@@ -59,6 +59,9 @@ extension KiwiCore {
     /// swap (#435). Returns `false` for a normal member: the swap
     /// proceeds. No snap-back animation on the keyboard path, so the
     /// pill's own entrance micro-pop carries the acknowledgement.
+    /// Guards both swap ends: `navigate` also passes the ORIGIN
+    /// (the focus anchor), since swapping FROM a traveler is the
+    /// same dead `Space.swap` no-op with the same explanation.
     func refuseSwapOntoTraveler(
         _ target: WindowID,
         in space: Space
@@ -66,6 +69,47 @@ extension KiwiCore {
         guard !space.windows.contains(target) else { return false }
         flashStickyHomeSpace(target)
         return true
+    }
+
+    /// Refuses a swap that would push a sticky FOCUSED window into
+    /// the overflow pile (#438). A sticky window is pile-exempt
+    /// (#414 v2) — it always keeps a tiled cell, so swapping it onto
+    /// a piled `target` is futile: the retile snaps it straight back
+    /// and only reshuffles a neighbour into the pile. Detect the
+    /// piled target with the shared cascade detector (#172), flash a
+    /// cue on the sticky window, and report the refusal so the caller
+    /// skips the dead swap. A third, distinct vocabulary from the
+    /// traveler pill (#435) and the dead-end bounce (#436). Returns
+    /// `false` for any normal swap (non-sticky focus, or a tiled
+    /// target).
+    func refuseStickyIntoPile(
+        _ focused: WindowID,
+        target: WindowID,
+        among slots: [(id: WindowID, frame: CGRect)]
+    ) -> Bool {
+        guard state.windows[focused]?.isSticky == true,
+            !Navigation.pileMates(of: target, among: slots).isEmpty
+        else { return false }
+        flashStickyCannotPile(focused)
+        return true
+    }
+
+    /// Expands a sticky window's chip into a pill explaining it can't
+    /// be sent to the overflow pile (#438). Gated by the same
+    /// `sticky.indicator` as the chip; a no-op for a non-sticky
+    /// window or when the mark is off. No relayout precedes it (the
+    /// swap is refused outright), so it appears at once.
+    func flashStickyCannotPile(_ id: WindowID) {
+        guard tiler.settings.stickyStyle.indicator else { return }
+        stickyIndicators.flash(
+            id,
+            format: L(
+                "sticky.pile.pill",
+                "Sticky windows can't be moved to the pile"
+            ),
+            mark: .text(""),
+            delay: 0.05
+        )
     }
 
     /// How long to hold the pill back so it appears only once the
