@@ -113,6 +113,9 @@ extension KiwiCore {
                 : .fail("no window \(direction.rawValue) of focus")
         }
         if swapping {
+            if refuseSwapOntoTraveler(target, in: space) {
+                return .ok()
+            }
             state.workspaces.withSpace(space.id) {
                 $0.swap(focused, target)
             }

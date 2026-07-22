@@ -50,6 +50,24 @@ extension KiwiCore {
         )
     }
 
+    /// Refuses a swap whose `target` is a tiled-sticky traveler.
+    /// A traveler is injected into the active space's layout but is
+    /// not a member of it, so `Space.swap`'s membership guard would
+    /// silently no-op the exchange (#414 v2). Flash the home-space
+    /// pill on the traveler — the window that can't move, not the
+    /// trier — and report the refusal so the caller skips the dead
+    /// swap (#435). Returns `false` for a normal member: the swap
+    /// proceeds. No snap-back animation on the keyboard path, so the
+    /// pill's own entrance micro-pop carries the acknowledgement.
+    func refuseSwapOntoTraveler(
+        _ target: WindowID,
+        in space: Space
+    ) -> Bool {
+        guard !space.windows.contains(target) else { return false }
+        flashStickyHomeSpace(target)
+        return true
+    }
+
     /// How long to hold the pill back so it appears only once the
     /// snap-back has settled: the relayout animation duration (the
     /// snap-back is an `onRelayout` reflow) plus a small buffer, or

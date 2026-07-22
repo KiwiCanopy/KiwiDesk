@@ -111,6 +111,13 @@ extension KiwiCore {
             return .fail("no window \(raw) of focus")
         }
         if swapping {
+            // A keyboard swap onto a tiled-sticky traveler is a
+            // semantic refusal, not a dead-end: explain it with the
+            // pill (#435), never the rubber-band cue reserved for a
+            // true no-candidate edge (#436).
+            if refuseSwapOntoTraveler(target, in: space) {
+                return .ok()
+            }
             let crossedZones = crossesStackBoundary(
                 focused,
                 target,
@@ -205,6 +212,9 @@ extension KiwiCore {
             return nil
         }
         if swapping {
+            if refuseSwapOntoTraveler(target, in: space) {
+                return .ok()
+            }
             state.workspaces.withSpace(space.id) {
                 $0.swap(focused, target)
             }

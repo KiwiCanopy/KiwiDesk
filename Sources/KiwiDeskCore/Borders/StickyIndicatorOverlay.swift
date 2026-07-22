@@ -191,6 +191,28 @@ final class StickyIndicatorOverlay {
                 duration: duration
             )
         }
+        if nameShown { popEntrance() }
+    }
+
+    /// A brief scale overshoot on the pill's entrance so a keyboard
+    /// refusal — which has no snap-back motion of its own — still
+    /// *feels* like the keypress registered (ui-designer 2026-07-22).
+    /// Deliberately the pill's own body, not the ring rubber-band
+    /// (#436): a third, smallest vocabulary bound to the cue that
+    /// explains, keeping "your move bounced" (ring) and "here's why"
+    /// (pill) distinct. Guarded by Reduce Motion via the `setPill`
+    /// caller, which skips this whole branch.
+    private func popEntrance() {
+        guard let layer = plate.layer else { return }
+        let pop = CAKeyframeAnimation(keyPath: "transform.scale")
+        pop.values = [1.0, 1.045, 1.0]
+        pop.keyTimes = [0, 0.45, 1.0]
+        pop.duration = 0.13
+        pop.timingFunctions = [
+            CAMediaTimingFunction(name: .easeOut),
+            CAMediaTimingFunction(name: .easeIn),
+        ]
+        layer.add(pop, forKey: "entrancePop")
     }
 
     private var reduceMotion: Bool {
