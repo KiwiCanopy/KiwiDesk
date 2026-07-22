@@ -33,6 +33,15 @@ public struct TilingSettings: Sendable, Equatable {
     /// spaces), same tier as `minWindowSize`; power-user escape
     /// hatch, no GUI. `focus` is never affected.
     public var swapSkipsCascade = true
+    /// When true (default), toggling a window tiled→floating
+    /// gives it a small fixed shove toward the screen center so
+    /// the state change is visible — a float otherwise keeps its
+    /// exact frame, making the toggle look inert. Fires on the
+    /// float direction only (`make_tiled` already animates a real
+    /// move back into the layout). Global (per profile, all
+    /// spaces), same tier as `swapSkipsCascade`; a niche polish
+    /// toggle, Lua-only, no GUI. See `FloatNudge`.
+    public var floatNudge = true
     public var bsp = BspParams()
     public var stack = StackParams()
     public var scrolling = ScrollingParams()

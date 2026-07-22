@@ -83,6 +83,19 @@ extension KiwiCore {
         return .ok()
     }
 
+    func setFloatNudge(
+        _ args: [JSONValue]
+    ) -> CommandResponse {
+        guard let on = args.first?.boolValue else {
+            return .fail("expected boolean")
+        }
+        tiler.settings.floatNudge = on
+        // No retile: the flag is read only at the moment a
+        // tiled→floating toggle fires, never by layout math, so
+        // flipping it can't move any window here.
+        return .ok()
+    }
+
     func setResizeStep(
         _ args: [JSONValue]
     ) -> CommandResponse {

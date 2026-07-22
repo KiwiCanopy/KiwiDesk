@@ -341,6 +341,31 @@ case, so this lives in config only.
 KiwiDesk.set_swap_skips_cascade(true)
 ```
 
+### set_float_nudge
+
+**Expects:** `true` or `false` (default `true`).
+
+**Does:** whether toggling a window from tiled to floating gives
+it a small nudge toward the screen center. A window keeps its
+exact frame when it floats, so without the nudge the toggle looks
+like it did nothing; a fixed shove (up to 24 pt, tapering to zero
+for a window already near the center) acknowledges the state
+change. Fires on the float direction only — `make_floating` and a
+`toggle_floating` that lands on floating — never on `make_tiled`,
+which already animates a real move back into the layout. The
+magnitude is fixed, not scaled by window size, so a maximized
+window does not leap across the screen and a tiny one still
+moves; the target is always kept fully on screen and clear of the
+menu bar and any App/Space Bar. Global (per profile, all spaces);
+a niche polish toggle, so it lives in config only, with no
+Settings toggle.
+
+**Example:**
+
+```lua
+KiwiDesk.set_float_nudge(true)
+```
+
 ### set_resize_feedback
 
 **Expects:** `true` or `false` (default `true`).

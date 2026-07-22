@@ -27,7 +27,8 @@ struct SettingsCodingTests {
         )
         #expect(
             Set(root.keys) == [
-                "animations", "app_bar", "border", "drag", "gap",
+                "animations", "app_bar", "border", "drag",
+                "float_nudge", "gap",
                 "layout", "min_window_size", "mouse",
                 "mouse_resize", "new_window_placement_override", "quit",
                 "floating", "resize", "space", "space_bar",
@@ -79,6 +80,10 @@ struct SettingsCodingTests {
         // `set_swap_skips_cascade` → top-level `swap_skips_cascade`
         // (#172), on by default.
         #expect(root["swap_skips_cascade"] as? Bool == true)
+        // `set_float_nudge` → top-level `float_nudge`, on by
+        // default: a tiled→floating toggle shoves the window
+        // toward center so the state change is visible.
+        #expect(root["float_nudge"] as? Bool == true)
         // `set_space_icon` → `space.icon[space_id]` (#68).
         let space = try object(root["space"])
         let icons = try object(space["icon"])
@@ -220,6 +225,7 @@ struct SettingsCodingTests {
         settings.track.wrapFocus = true
         settings.minWindowSize = 200
         settings.swapSkipsCascade = false
+        settings.floatNudge = false
         settings.resizeStep = 75
         settings.resizeFeedback = false
         settings.dragGhost.enabled = false

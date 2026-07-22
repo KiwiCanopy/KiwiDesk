@@ -63,6 +63,8 @@ extension KiwiCore {
             return setMinWindowSize(args)
         case "set_swap_skips_cascade":
             return setSwapSkipsCascade(args)
+        case "set_float_nudge":
+            return setFloatNudge(args)
         case "set_resize_step":
             return setResizeStep(args)
         case "set_resize_feedback":
@@ -126,8 +128,18 @@ extension KiwiCore {
         guard let focused = activeSpace?.focused else {
             return .fail("no focused window")
         }
+        // Snapshot before the flip so the nudge fires on the
+        // tiled→floating transition only — not on a re-issued
+        // `make_floating` for an already-floating window.
+        let wasFloating =
+            state.windows[focused]?.isFloating ?? false
         state.setFloating(focused, floating)
         retile()
+        // Float direction only: `make_tiled` already animates a
+        // real move back into the layout, so no nudge there.
+        if floating, !wasFloating {
+            nudgeFloating(focused)
+        }
         return .ok()
     }
 
