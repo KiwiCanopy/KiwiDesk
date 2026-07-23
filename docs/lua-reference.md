@@ -2873,7 +2873,7 @@ vice versa. Like `make_floating`/`make_tiled`, it writes an
 explicit manual override (which survives close/reopen); it never
 produces the `auto` state, so `make_auto` stays the way back to
 detection control. This is the everyday float shortcut (bound to
-`option+t` by default and the only float verb offered in the
+`control+option+f` by default and the only float verb offered in the
 Settings shortcut list); the explicit `make_*` verbs remain for
 scripts that need a specific direction.
 

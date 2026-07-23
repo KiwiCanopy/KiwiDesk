@@ -1281,18 +1281,30 @@ you can drive KiwiDesk before configuring anything:
 
 | Action | Shortcut |
 | --- | --- |
-| Focus window left / down / up / right | `⌥H` `⌥J` `⌥K` `⌥L` |
-| Go to space 1–9 | `⌥1` … `⌥9` |
-| Swap with window left / down / up / right | `⌥⇧H` `⌥⇧J` `⌥⇧K` `⌥⇧L` |
-| Move to space 1–9 | `⌥⇧1` … `⌥⇧9` |
-| Shrink / Grow width | `⌥-` / `⌥=` |
-| Shrink / Grow height | `⌥⇧-` / `⌥⇧=` |
-| Toggle floating | `⌥T` |
+| Focus window left / down / up / right | `⌃⌥←` `⌃⌥↓` `⌃⌥↑` `⌃⌥→` |
+| Go to space 1–9 | `⌃⌥1` … `⌃⌥9` |
+| Swap with window left / down / up / right | `⌃⌥⇧←` `⌃⌥⇧↓` `⌃⌥⇧↑` `⌃⌥⇧→` |
+| Move to space 1–9 | `⌃⌥⇧1` … `⌃⌥⇧9` |
+| Move to space 1–9 and follow | `⌃⌥⌘1` … `⌃⌥⌘9` |
+| Grow / Shrink width | `⌃⌥⌘→` / `⌃⌥⌘←` |
+| Grow / Shrink height | `⌃⌥⌘↑` / `⌃⌥⌘↓` |
+| Toggle floating | `⌃⌥F` |
+| Toggle display sticky | `⌃⌥S` |
+| Toggle sticky (all spaces) | `⌃⌥⇧S` |
 
-The digits are display-order positions: `⌥3` targets the *third*
-space in your Spaces list, whatever its name. A row is generated
-only for spaces that exist when the set is seeded (at most nine),
-so no shortcut ever targets a space that isn't there.
+Every default is built on **Control-Option** (`⌃⌥`), escalating to
+`⌃⌥⇧` and `⌃⌥⌘`. On macOS the Option key by itself types special
+characters — on many layouts `⌥L` is `@` and `⌥5` is `[` — so a
+global `⌥`-only shortcut would swallow them; adding Control keeps
+every default clear of both macOS system shortcuts and text entry.
+Directions use the arrow keys, which are identical on every layout.
+
+Each space digit is bound to a space *by name*: `⌃⌥3` goes to
+whichever space was third when the set was seeded. Renaming that
+space in Settings rewrites the shortcut to follow it, so the binding
+survives a rename. At least `⌃⌥1`…`⌃⌥5` are seeded on a fresh
+install — even before you have created five spaces — so the digits
+work out of the box.
 
 The set is seeded only while **no** shortcut is bound anywhere —
 into `gui.json` at first launch on a fresh install, or into the
@@ -1423,7 +1435,7 @@ under Custom Bindings.
 
 The per-space rows above render one row per space in the current
 space list. A bound shortcut whose target space is *not* in that
-list — say `⌥6 → Go to Space 6` after switching from an 8-space
+list — say `⌃⌥6 → Go to Space 6` after switching from an 8-space
 to a 4-space profile — appears in a dimmed **Inactive shortcuts**
 section at the bottom instead of disappearing. Such a shortcut:
 

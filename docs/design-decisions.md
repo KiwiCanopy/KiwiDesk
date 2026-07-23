@@ -1112,13 +1112,27 @@ view literals but missed catalog-defined strings).
 into emptiness.** A fresh install used to boot with zero
 shortcuts (the default mode existed but was empty): a GUI-first
 user had no way to focus or move a window until they authored
-every combo. Now `Core.DefaultKeybindings` seeds a starter set
-(⌥HJKL focus, ⌥⇧HJKL swap, ⌥digit / ⌥⇧digit per-space, ⌥-/⌥=
-width resize, ⌥⇧-/⌥⇧= height resize, ⌥T float) with one
-guard everywhere: **only when no
-mode carries a single binding** — a user- or Lua-authored
+every combo. Now `Core.DefaultKeybindings` seeds a starter set on an
+**escalating Control-Option scheme** (#270): `⌃⌥` arrows focus /
+`⌃⌥⇧` arrows swap, `⌃⌥` / `⌃⌥⇧` / `⌃⌥⌘` digit per-space go / move
+/ move-and-follow, `⌃⌥⌘` arrows resize, `⌃⌥F` float, `⌃⌥S` display
+sticky, `⌃⌥⇧S` global sticky — with one guard everywhere: **only
+when no mode carries a single binding** — a user- or Lua-authored
 binding anywhere blocks the seed, making it idempotent and
-never destructive. The set lives in the **base `gui.json`
+never destructive.
+
+**Why Control-Option, not bare Option (#270).** On macOS Option is
+the special-character (AltGr) modifier, so a *global* `⌥`+key
+hotkey swallows text entry on international Apple keyboards
+(`⌥L`=@, `⌥5`=[, `⌥8`={ …). macOS composes those characters only
+when the modifier is exactly `⌥` or `⌥⇧`; adding Control (or
+Command) suppresses it, so `⌃⌥` is the lightest text-safe chord
+(the earlier bare-`⌥` set, and Amethyst's `⌥⇧`, are not). Its only
+overlap is VoiceOver's `⌃⌥` modifier, inert unless VoiceOver is on
+and remappable to Caps Lock; `⌘⌥` was rejected because it collides
+with always-on system shortcuts (Force Quit, Dock, Hide/Minimize).
+Directions bind the arrow keys, which never compose a character on
+any layout. The set lives in the **base `gui.json`
 modes**, never a profile override (profiles stay
 tiling-plus-sparse-behavior, #55): on first launch the seeded
 model is persisted so the very first boot is GUI-managed and the
@@ -1142,11 +1156,13 @@ declares tiling settings of its own stays Lua-owned (no seed —
 seeding would let the GUI defaults overwrite its Lua tiling) and
 is offered the **Adopt** path instead. With a settings-free
 `init.lua` the seed appears in the editable model and persists on
-the first Save. Per-space rows are
-**position-based** (⌥3 = third space in display order,
-whatever its name), generated only for spaces that exist at
-seed time and capped at nine — no dead rows targeting
-nonexistent spaces. The seeded Lua and labels mirror
+the first Save. Per-space rows number the digits
+by display position but bind each to its space **by name**
+(`⌃⌥3` → the third space's name at seed time; a later rename
+rewrites the binding to follow it, so it survives). The first run
+pads the discovered list to a **five-space starter set** so
+`⌃⌥1`–`⌃⌥5` seed even though a fresh macOS reports only the active
+Space (#270), and the set still caps at nine. The seeded Lua and labels mirror
 `KeybindingCatalog` byte-for-byte (guarded by
 `DefaultSeedCatalogParityTests`) so the rows stay presets, not
 Custom (#4). (#91)

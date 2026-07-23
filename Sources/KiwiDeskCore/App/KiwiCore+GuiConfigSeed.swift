@@ -151,11 +151,10 @@ extension KiwiCore {
     /// a single binding — a fresh install, or an `init.lua`
     /// that declares none — the base `default` mode gets the
     /// starter set so a new user can drive KiwiDesk
-    /// immediately. Per-space rows generate from the model's
-    /// final space list (live-derived, after the empty-state
-    /// fallback), so no dead row targeting a nonexistent space
-    /// is authored. Never fires once a user (or Lua) authored
-    /// any binding, in any mode — idempotent by that guard.
+    /// immediately. Never fires once a user (or Lua) authored
+    /// any binding, in any mode — idempotent by that guard, so
+    /// the space padding below is a first-run-only effect and
+    /// never pollutes a Lua-managed user's space list.
     private func seedDefaultShortcuts(
         _ config: inout GuiConfig
     ) {
@@ -165,6 +164,20 @@ extension KiwiCore {
                 where: { $0.isDefault }
             )
         else { return }
+        // First run reports only the ACTIVE Space (#270): the live
+        // list is a single numbered space (usually ["1"]), which
+        // would seed only ⌃⌥1. Pad just that bare signature to the
+        // five-space starter set the empty state already uses, so
+        // ⌃⌥1…5 all work out of the box. A named or multi-space
+        // list is a configured setup — left exactly as discovered
+        // so the seed never invents spaces the user didn't (dedup
+        // keeps the live space first, #75).
+        if config.spaces.count == 1,
+            Int(config.spaces[0].raw) != nil {
+            config.spaces = SpaceID.deduplicated(
+                config.spaces + (1...5).map { SpaceID($0) }
+            )
+        }
         config.modes[index].bindings =
             DefaultKeybindings.bindings(
                 spaces: config.spaces,
