@@ -19,13 +19,15 @@ extension KiwiCore {
         guard tiler.settings.floatNudge,
             let current = state.windows[id]?.frame
         else { return }
-        // Off-screen fallback resolves the window's SPACE's
-        // display (#449), never blindly the main screen.
+        // Max-overlap pick, not first-intersect (#449 QA): a
+        // slot-overflowing window (an app whose min width beats
+        // its stack slot) straddles the screen edge, and the
+        // first-intersect pick could target the NEIGHBOR display
+        // — the nudge then confined it fully onto the wrong
+        // monitor. Off-screen fallback resolves the window's
+        // SPACE's display, never blindly the main screen.
         let screen =
-            NSScreen.screens.first {
-                GeometryUtils.axVisibleFrame(of: $0)
-                    .intersects(current)
-            }
+            TilingEngine.screen(containing: current)
             ?? state.workspaces.space(of: id).flatMap {
                 TilingEngine.screen(for: $0, in: state)
             }
