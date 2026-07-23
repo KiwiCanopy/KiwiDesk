@@ -52,9 +52,21 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     }
 
     /// Shows the dashboard, refreshing from the backend so the
-    /// active profile and any external config edits are current.
+    /// active profile and any external config edits are current —
+    /// except when the model holds unsaved edits.
     func show() {
-        model.reload()
+        // Reopening must not discard an unsaved edit (#455). The
+        // model is retained across close with its staged `config`
+        // and its live-registered hotkeys intact; reseeding it from
+        // `gui.json` here would drop the edit, clear the "Unsaved
+        // changes" state, and roll the live hotkey back — the
+        // "reopen loses my new shortcut" bug. Only a clean model
+        // reloads, to pick up external edits (a profile switch, an
+        // outside `gui.json` write). Mirrors the non-destructive
+        // `refreshProfiles` / `refreshLayoutDrift` above.
+        if !model.isDirty {
+            model.reload()
+        }
         // Promote on every open, not just the first — closing
         // the window demotes to `.accessory`, so a reused
         // window must re-raise to get its Dock icon back.
