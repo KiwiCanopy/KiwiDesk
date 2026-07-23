@@ -148,6 +148,11 @@ extension KiwiCore {
             if outstandingSelfRaises.remove(old) != nil {
                 outstandingSelfRaises.insert(new)
             }
+            if let stamp = selfRaiseStamps.removeValue(
+                forKey: old
+            ) {
+                selfRaiseStamps[new] = stamp
+            }
             if let stamp = zOrderRaiseEchoes.removeValue(forKey: old) {
                 zOrderRaiseEchoes[new] = stamp
             }
