@@ -28,7 +28,9 @@ public final class SpaceBarOverlay {
     /// Click-to-focus hook; wired to `KiwiCore.focusSpace`.
     public var onSelect: @MainActor (SpaceID) -> Void = { _ in }
 
-    private var panel: NSPanel?
+    // Internal (not private): `render()` in the +Render extension
+    // reads and lazily creates the panel.
+    var panel: NSPanel?
     var itemViews: [SpaceBarItemView] = []
     /// The clipping item viewport (#385): items and the trailing
     /// front segment render inside it, inset by an arrow zone at
@@ -38,6 +40,15 @@ public final class SpaceBarOverlay {
     let itemContainer = AppBarOverlay.FlippedView()
     let backArrow = BarArrowView()
     let forwardArrow = BarArrowView()
+    /// Where the front-app segment's views (and its glass backdrop)
+    /// are hosted this render (#409): `itemContainer` while the run
+    /// fits, so the segment is the run's tail as before; the panel
+    /// content (outside the clipping viewport) while the run
+    /// overflows, so the segment stays pinned to the trailing rim
+    /// while only the Spaces scroll behind the arrows. Set by
+    /// `render()` before the front pass; read by
+    /// `attachFrontViewsIfNeeded` and `updateFrontGlass`.
+    weak var frontHost: NSView?
     /// The Liquid Glass plate under the items when `tabBackground`
     /// resolves to `material` (#390); nil otherwise / below macOS
     /// 26. Stored as a plain view — the concrete type is 26-only.
@@ -58,6 +69,12 @@ public final class SpaceBarOverlay {
     var frontTint: NSView?
     /// Colored backdrop behind the single glass plate (#408).
     var glassTint: NSView?
+    /// Throwaway content view that turns the shared plate into a
+    /// bare frosted backdrop when the front app is pinned over an
+    /// overflowing run (#409) — an empty content view frosts as
+    /// true glass (the `frontGlass` precedent), letting the plate
+    /// span the strip under both the items and the pinned segment.
+    let glassBackdropFiller = NSView()
     /// Under plain + glass when the run fits, the glass hosts this
     /// flipped run wrapper at the hugged plate frame with the run
     /// (items + front segment) placed run-local — so the frosted
@@ -101,7 +118,9 @@ public final class SpaceBarOverlay {
         return tf
     }()
     let frontName = NSTextField(labelWithString: "")
-    private var lastShown:
+    // Internal (not private): read by `render()` in the +Render
+    // extension.
+    var lastShown:
         (
             items: [Item],
             frontApp: SpaceBarItemView.App?,
@@ -150,184 +169,8 @@ public final class SpaceBarOverlay {
 
     // MARK: - Rendering
 
-    /// One layout pass over the last shown state. `show()`
-    /// follows the active Space into view; a manual arrow or
-    /// autoscroll re-renders without that adjustment so it isn't
-    /// snapped straight back (the App Bar's `followingFocus`).
-    func render(followingActive: Bool) {
-        guard let state = lastShown else { return }
-        let (items, frontApp, strip, style, stateMarkColors) = state
-        let panel = self.panel ?? makePanel()
-        self.panel = panel
-        styleContainer(panel, style: style, strip: strip)
-        syncItemViewCount(items.count)
-        let horizontal = style.edge.isHorizontal
-        let depth = horizontal ? strip.height : strip.width
-        let axis = horizontal ? strip.width : strip.height
-        let gap = style.boxGap
-        let lengths = items.map { item in
-            style.boxSize > 0
-                ? style.boxSize
-                : SpaceBarItemView.autoLength(
-                    appCount: item.apps.count,
-                    overflow: item.overflow,
-                    depth: depth
-                )
-        }
-        // Items plus the trailing front segment align as ONE run
-        // (an end-aligned bar ends at the rim including the
-        // segment) — and scroll as one when the run overflows.
-        let front = frontExtent(
-            frontApp,
-            depth: depth,
-            horizontal: horizontal,
-            style: style
-        )
-        let total = Self.runTotal(
-            lengths: lengths,
-            gap: gap,
-            frontExtent: front
-        )
-        let (inset, viewport) = Self.scrollViewport(
-            axis: axis,
-            total: total,
-            gap: gap
-        )
-        scrollOffset = Self.scrollOffset(
-            current: scrollOffset,
-            lengths: lengths,
-            gap: gap,
-            frontExtent: front,
-            activeIndex: followingActive ? activeIndex(items) : nil,
-            viewport: viewport,
-            margin: gap
-        )
-        let viewportRect = placeItemContainer(
-            inset: inset,
-            viewport: viewport,
-            strip: strip,
-            horizontal: horizontal
-        )
-        let metrics = Self.runMetrics(
-            lengths: lengths,
-            gap: gap,
-            frontExtent: front,
-            strip: strip,
-            viewport: viewport,
-            horizontal: horizontal,
-            alignment: style.alignment,
-            pad: SpaceBarItemView.pad,
-            scrollOffset: scrollOffset
-        )
-        // The shared plate (plain fill / glass) hugs or spans
-        // per `tab_background_fit`. With no arrow inset the
-        // viewport is the strip, so viewport-local run
-        // coordinates are already strip-local; while inset > 0
-        // the plate is full anyway.
-        let runStart: CGFloat
-        if let first = metrics.itemFrames.first {
-            runStart = horizontal ? first.minX : first.minY
-        } else {
-            runStart = metrics.frontStart
-        }
-        let plateFrame = BarPlate.frame(
-            strip: strip,
-            runStart: runStart,
-            runTotal: total,
-            inset: inset,
-            gap: gap,
-            horizontal: horizontal,
-            fit: style.tabBackgroundFit
-        )
-        // The one hosting mode for this render (#407): prepared
-        // (non-target teardown) here, then installed post-passes
-        // once the item frames are laid out.
-        let hosting = glassHosting(style, overflow: inset > 0)
-        prepareGlassHosting(
-            hosting,
-            panel: panel,
-            style: style,
-            strip: strip,
-            plateFrame: plateFrame,
-            viewport: viewportRect
-        )
-        recordHitFrames(
-            items: items,
-            frames: metrics.itemFrames,
-            strip: strip
-        )
-        for (index, item) in items.enumerated() {
-            let view = itemViews[index]
-            view.frame = metrics.itemFrames[index]
-            view.configure(
-                space: item.space,
-                spaceGlyph: item.spaceGlyph,
-                apps: item.apps,
-                active: item.active,
-                horizontal: horizontal,
-                style: style,
-                stateMarkColors: stateMarkColors,
-                overflow: item.overflow,
-                focusInOverflow: item.focusInOverflow
-            )
-            view.onSelect = { [weak self] space in
-                self?.onSelect(space)
-            }
-            // Only the run's outer items meet a rounded plate end.
-            // The trailing end is the front-app segment's when one
-            // trails, so the last Space item clips its trailing
-            // corner only without a front app.
-            view.isFirstInRun = index == 0
-            view.isLastInRun =
-                index == items.count - 1 && frontApp == nil
-        }
-        renderFrontSegment(
-            frontApp,
-            after: metrics.frontStart,
-            strip: strip,
-            viewport: viewport,
-            style: style,
-            horizontal: horizontal
-        )
-        // Install the target hosting from the now-laid-out item
-        // frames (per-box glass and the plain-glass run both position
-        // from them, so this runs after the item + front passes).
-        // #407: one dispatch, no per-mode branching at the call site.
-        installGlassHosting(
-            hosting,
-            panel: panel,
-            frames: metrics.itemFrames,
-            viewport: viewportRect,
-            plateFrame: plateFrame,
-            style: style,
-            depth: horizontal ? strip.height : strip.width
-        )
-        layoutArrows(
-            strip: strip,
-            inset: inset,
-            viewport: viewport,
-            total: total,
-            lengths: lengths,
-            gap: gap,
-            horizontal: horizontal,
-            style: style
-        )
-        panel.setFrame(
-            GeometryUtils.flip(
-                strip,
-                primaryHeight: GeometryUtils.primaryHeight
-            ),
-            display: true
-        )
-        if !panel.isVisible {
-            panel.orderFrontRegardless()
-        }
-    }
-
-    /// The index of the active Space, for scroll-follow.
-    private func activeIndex(_ items: [Item]) -> Int? {
-        items.firstIndex(where: \.active)
-    }
+    // `render(followingActive:)` and `activeIndex` live in
+    // `SpaceBarOverlay+Render.swift` (file size, §2).
 
     /// Axis start of the content run per `alignment` (#293
     /// QA). `pad` keeps the run off the strip's rim and floors

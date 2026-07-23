@@ -12,6 +12,7 @@ extension SpaceBarOverlay {
         viewport: CGRect,
         plateFrame: CGRect,
         overflow: Bool,
+        pinnedFront: Bool,
         style: SpaceBarStyle,
         depth: CGFloat
     ) {
@@ -28,7 +29,22 @@ extension SpaceBarOverlay {
         }
         plate.isHidden = false
         let radius = style.resolvedCornerRadius(forThickness: depth)
-        if overflow {
+        if overflow && pinnedFront {
+            // The front segment is pinned OUTSIDE the scrolling
+            // viewport (#409), so the plate can't just host the item
+            // viewport — it would leave the pinned app on bare panel.
+            // Span the whole strip as a frosted backdrop under BOTH
+            // the scrolling items and the pinned segment (siblings
+            // above it), so the app sits on one continuous plate.
+            spanBackdrop(
+                plate: plate,
+                content: content,
+                viewport: viewport,
+                plateFrame: plateFrame,
+                radius: radius,
+                style: style
+            )
+        } else if overflow {
             spanViewport(
                 plate: plate,
                 viewport: viewport,
@@ -79,6 +95,54 @@ extension SpaceBarOverlay {
         applyPlateTint(
             plate: plate,
             frame: viewport,
+            radius: radius,
+            hex: style.fillColor
+        )
+    }
+
+    /// Pinned overflow (#409): the plate spans the WHOLE strip as a
+    /// frosted backdrop (empty content frosts as true glass — the
+    /// `frontGlass` precedent), sitting below both the scrolling
+    /// item viewport and the pinned front segment (siblings above
+    /// it), so the pinned app rides one continuous plate instead of
+    /// bare panel. It does NOT host the items: a hosted view is
+    /// auto-sized to the glass bounds, which would break the scroll
+    /// clip. The items keep their own `itemContainer`.
+    private func spanBackdrop(
+        plate: NSView,
+        content: NSView,
+        viewport: CGRect,
+        plateFrame: CGRect,
+        radius: CGFloat,
+        style: SpaceBarStyle
+    ) {
+        returnRunToContainer()
+        // Release the item viewport back to a plain sibling if a
+        // prior render hosted it (leaving span/hug hosting).
+        if GlassPlate.holds(plate, itemContainer) {
+            GlassPlate.detach(plate)
+            content.addSubview(
+                itemContainer,
+                positioned: .below,
+                relativeTo: backArrow
+            )
+            itemContainer.frame = viewport
+        }
+        GlassPlate.setContent(plate, glassBackdropFiller)
+        content.addSubview(
+            plate,
+            positioned: .below,
+            relativeTo: itemContainer
+        )
+        GlassPlate.update(
+            plate,
+            frame: plateFrame,
+            cornerRadius: radius,
+            tintHex: style.fillColor
+        )
+        applyPlateTint(
+            plate: plate,
+            frame: plateFrame,
             radius: radius,
             hex: style.fillColor
         )

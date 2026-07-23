@@ -128,6 +128,7 @@ extension SpaceBarOverlay {
         frames: [CGRect],
         viewport: CGRect,
         plateFrame: CGRect,
+        pinnedFront: Bool,
         style: SpaceBarStyle,
         depth: CGFloat
     ) {
@@ -144,6 +145,7 @@ extension SpaceBarOverlay {
                 viewport: viewport,
                 plateFrame: plateFrame,
                 overflow: mode == .plainGlassSpan,
+                pinnedFront: pinnedFront,
                 style: style,
                 depth: depth
             )

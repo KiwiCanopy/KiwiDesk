@@ -12,7 +12,7 @@ extension SpaceBarOverlay {
         _ app: SpaceBarItemView.App?,
         after cursor: CGFloat,
         strip: CGRect,
-        viewport: CGFloat,
+        nameBound: CGFloat,
         style: SpaceBarStyle,
         horizontal: Bool
     ) {
@@ -50,7 +50,7 @@ extension SpaceBarOverlay {
             app,
             at: offset,
             depth: depth,
-            viewport: viewport,
+            viewport: nameBound,
             horizontal: horizontal,
             accent: accent,
             style: style
@@ -149,8 +149,14 @@ extension SpaceBarOverlay {
         guard let app else { return 0 }
         let pad = SpaceBarItemView.pad
         let cell = max(depth - pad * 2, 8)
+        // Mirror the placement (#409): leading gap, rule, symmetric
+        // `boxGap` right gap, glyph cell, plus the chip's `pad`
+        // inset each side — which also reserves the pinned band.
+        let chip = style.hasBox || wantsBoxGlass(style)
+        let inset = chip ? pad : 0
         var extent =
-            style.boxGap + BarDivider.sectionThickness + pad + cell
+            style.boxGap + BarDivider.sectionThickness
+            + style.boxGap + inset + cell + inset
         if horizontal {
             extent += pad
             let size =
@@ -171,12 +177,14 @@ extension SpaceBarOverlay {
     }
 
     private func attachFrontViewsIfNeeded() {
-        // The segment lives inside the clipping viewport so it
-        // scrolls (and clips) with the items — the tail of one
-        // run (#385). Re-added every render so it stays ABOVE item
-        // views created later (`syncItemViewCount` appends on
-        // top) — otherwise a long item row paints over it.
-        let content = itemContainer
+        // The segment hosts in the clipping viewport (run tail) or,
+        // while pinned, in the panel content outside it (#409) — see
+        // `frontHost`. Re-added every render so it stays ABOVE item
+        // views created later (`syncItemViewCount` appends on top,
+        // and pinned it must sit over the plate) — otherwise a long
+        // item row paints over it. Moving hosts also detaches it
+        // from the previous parent (a plain `addSubview` reparents).
+        let content = frontHost ?? itemContainer
         // frontBox first so it lands beneath the divider/glyph/
         // name added above it — the box is the chip behind them.
         for view in [
@@ -215,7 +223,14 @@ extension SpaceBarOverlay {
             thickness: BarDivider.sectionThickness,
             fullDepth: true
         )
-        return BarDivider.sectionThickness + SpaceBarItemView.pad
+        // Symmetric gap (#409): `boxGap` on the rule's right to
+        // match the `boxGap` the run cursor already left on its
+        // left. Under a chip (Boxed / per-box glass) the content is
+        // `pad`-inset, so the chip EDGE lands `boxGap` out; Plain
+        // has no chip, so the bare glyph sits `boxGap` out.
+        let chip = style.hasBox || wantsBoxGlass(style)
+        return BarDivider.sectionThickness + style.boxGap
+            + (chip ? SpaceBarItemView.pad : 0)
     }
 
     /// The focused app's glyph (App Font ligature or image);

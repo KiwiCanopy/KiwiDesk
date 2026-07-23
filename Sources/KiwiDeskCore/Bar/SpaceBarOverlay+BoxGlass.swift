@@ -85,8 +85,13 @@ extension SpaceBarOverlay {
             return
         }
         frontGlass = glass
-        if glass.superview !== itemContainer {
-            itemContainer.addSubview(
+        // Follow the loose front views to their host (#409): the
+        // clipping viewport as the run's tail, or the panel content
+        // while pinned. Kept just below the divider so the segment's
+        // real views paint over the frosted backdrop.
+        let host = frontHost ?? itemContainer
+        if glass.superview !== host {
+            host.addSubview(
                 glass,
                 positioned: .below,
                 relativeTo: frontDivider
@@ -94,7 +99,8 @@ extension SpaceBarOverlay {
             // A backdrop glass renders flat without a contentView;
             // a throwaway empty view makes it frost as true glass,
             // and the segment's real views paint over it (they sit
-            // above in z, laid out in `itemContainer`).
+            // above in z, in the same `frontHost` — the viewport, or
+            // the panel content while pinned, #409).
             GlassPlate.setContent(glass, NSView())
         }
         glass.isHidden = false

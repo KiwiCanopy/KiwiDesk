@@ -21,6 +21,11 @@ extension SpaceBarOverlay {
         let step: CGFloat
         /// The largest valid scroll offset (`total − viewport`).
         let maxOffset: CGFloat
+        /// The Spaces region's trailing edge along the axis (#409):
+        /// the strip length, or `strip − front band` while the front
+        /// segment is pinned. The forward arrow sits one zone inside
+        /// it, and `arrowHit` bounds the forward zone by it.
+        let trailingAxis: CGFloat
     }
 
     /// Quiet dwell over an arrow before the first autoscroll tick,
@@ -40,6 +45,7 @@ extension SpaceBarOverlay {
         inset: CGFloat,
         viewport: CGFloat,
         total: CGFloat,
+        trailingAxis: CGFloat,
         lengths: [CGFloat],
         gap: CGFloat,
         horizontal: Bool,
@@ -55,17 +61,20 @@ extension SpaceBarOverlay {
             horizontal
             ? CGRect(x: 0, y: 0, width: zone, height: strip.height)
             : CGRect(x: 0, y: 0, width: strip.width, height: zone)
+        // The forward arrow sits at the Spaces region's trailing
+        // edge — the strip rim, or one front band in while the front
+        // segment is pinned there (#409).
         forwardArrow.frame =
             horizontal
             ? CGRect(
-                x: strip.width - zone,
+                x: trailingAxis - zone,
                 y: 0,
                 width: zone,
                 height: strip.height
             )
             : CGRect(
                 x: 0,
-                y: strip.height - zone,
+                y: trailingAxis - zone,
                 width: strip.width,
                 height: zone
             )
@@ -96,7 +105,8 @@ extension SpaceBarOverlay {
             inset: inset,
             horizontal: horizontal,
             step: step,
-            maxOffset: maxOffset
+            maxOffset: maxOffset,
+            trailingAxis: trailingAxis
         )
     }
 
@@ -133,6 +143,7 @@ extension SpaceBarOverlay {
             at: local,
             strip: geom.strip,
             inset: geom.inset,
+            trailingAxis: geom.trailingAxis,
             horizontal: geom.horizontal
         )
         // Only a direction that still has hidden items counts —
