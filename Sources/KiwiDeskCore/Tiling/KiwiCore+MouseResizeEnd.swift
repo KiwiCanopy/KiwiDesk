@@ -109,7 +109,7 @@ extension KiwiCore {
         switch adjustment {
         case .bspRatioH(let delta):
             let base =
-                tiler.settings.resolvedBsp(for: space.id)
+                tiler.settings.resolvedBsp(for: space)
                 .splitRatioH
             // Cap at the display's effective range (#383): no
             // invisible ratchet past the min-size cliff, matching
@@ -120,13 +120,13 @@ extension KiwiCore {
                 available: Double(bounds.width),
                 minSize: Double(tiler.settings.minWindowSize)
             )
-            tiler.settings.setSplitRatioH(
+            writeSplitRatioH(
                 min(max(value, 0.1), 0.9),
                 for: space.id
             )
         case .bspRatioV(let delta):
             let base =
-                tiler.settings.resolvedBsp(for: space.id)
+                tiler.settings.resolvedBsp(for: space)
                 .splitRatioV
             let value = SplitDomain.cappedRatioWrite(
                 base + Double(delta),
@@ -134,13 +134,13 @@ extension KiwiCore {
                 available: Double(bounds.height),
                 minSize: Double(tiler.settings.minWindowSize)
             )
-            tiler.settings.setSplitRatioV(
+            writeSplitRatioV(
                 min(max(value, 0.1), 0.9),
                 for: space.id
             )
         case .masterRatio(let delta):
             let stack =
-                tiler.settings.resolvedStack(for: space.id)
+                tiler.settings.resolvedStack(for: space)
             let base = stack.masterRatio
             // The ratio lives on the split axis (#222), so the
             // cap's available span follows it too.
@@ -155,7 +155,7 @@ extension KiwiCore {
                 available: Double(available),
                 minSize: Double(tiler.settings.minWindowSize)
             )
-            tiler.settings.setMasterRatio(
+            writeMasterRatio(
                 min(max(value, 0.1), 0.9),
                 for: space.id
             )
@@ -164,12 +164,12 @@ extension KiwiCore {
             // magnitude (a stored pt as-is; auto/% seeded against
             // the scroll axis), add the delta, store as points.
             let scrolling =
-                tiler.settings.resolvedScrolling(for: space.id)
+                tiler.settings.resolvedScrolling(for: space)
             let horizontal = scrolling.axisIsHorizontal
             let along = horizontal ? bounds.width : bounds.height
             let current = scrolling.slotSize
                 .editablePoints(along: along, horizontal: horizontal)
-            tiler.settings.setSlotSize(
+            writeSlotSize(
                 .points(clamping: current + delta),
                 for: space.id
             )

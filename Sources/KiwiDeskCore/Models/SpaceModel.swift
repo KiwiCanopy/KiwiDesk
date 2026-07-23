@@ -192,6 +192,14 @@ public struct Space: Sendable, Equatable {
     /// Session-only like `stackWeights`; travels with the break
     /// marker.
     public var trackWeights: [WindowID: Double]
+    /// Interactive-resize ratio layer (#458): the value a
+    /// resize wrote for THIS space when no config override of
+    /// the field exists — so resizing a no-override space no
+    /// longer moves every other no-override space through the
+    /// global. Session-only like `stackWeights` (never
+    /// persisted); cleared on an actual mode change and on
+    /// config reload. See `SessionRatios`.
+    public var sessionRatios: SessionRatios
 
     public init(
         id: SpaceID,
@@ -201,7 +209,8 @@ public struct Space: Sendable, Equatable {
         stackWeights: [WindowID: Double] = [:],
         scrollOffset: CGFloat? = nil,
         trackBreaks: Set<WindowID> = [],
-        trackWeights: [WindowID: Double] = [:]
+        trackWeights: [WindowID: Double] = [:],
+        sessionRatios: SessionRatios = SessionRatios()
     ) {
         self.id = id
         self.mode = mode
@@ -211,6 +220,7 @@ public struct Space: Sendable, Equatable {
         self.scrollOffset = scrollOffset
         self.trackBreaks = trackBreaks
         self.trackWeights = trackWeights
+        self.sessionRatios = sessionRatios
     }
 
     /// Appends a window if it is not already present.

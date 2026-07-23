@@ -86,6 +86,9 @@ public struct WorkspaceManager: Sendable {
         guard spaces[id]?.mode != mode else { return }
         spaces[id]?.mode = mode
         spaces[id]?.scrollOffset = nil
+        // The session resize layer (#458) is a stint value like
+        // the offset: a fresh mode stint reseeds from config.
+        spaces[id]?.sessionRatios = SessionRatios()
         // Track boundaries follow the same rule (#128): a
         // fresh track stint never resumes markers minted for a
         // different stint. Entering track seeds every window

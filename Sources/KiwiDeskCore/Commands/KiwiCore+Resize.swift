@@ -142,7 +142,7 @@ extension KiwiCore {
         space: Space
     ) -> CommandResponse {
         let scrolling =
-            tiler.settings.resolvedScrolling(for: space.id)
+            tiler.settings.resolvedScrolling(for: space)
         let horizontal = scrolling.axisIsHorizontal
         let screen = TilingEngine.screen(
             for: space.id,
@@ -154,7 +154,7 @@ extension KiwiCore {
         let along = horizontal ? bounds.width : bounds.height
         let current = scrolling.slotSize
             .editablePoints(along: along, horizontal: horizontal)
-        tiler.settings.setSlotSize(
+        writeSlotSize(
             .points(clamping: current + CGFloat(delta)),
             for: space.id
         )

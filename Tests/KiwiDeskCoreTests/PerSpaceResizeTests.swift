@@ -58,15 +58,26 @@ struct PerSpaceResizeTests {
         #expect(core.tiler.settings.stack.masterRatio == globalBefore)
     }
 
-    @Test("Resize in an unoverridden space edits the global")
-    func resizeHitsGlobalWhenUnoverridden() {
+    @Test("Resize in an unoverridden space edits its session layer")
+    func resizeHitsSessionWhenUnoverridden() {
         let core = makeCore()
         stackSpace(core)
         let before = core.tiler.settings.stack.masterRatio
         core.execute("resize", args: [.string("x"), .number(500)])
-        #expect(core.tiler.settings.stack.masterRatio != before)
-        // No override was created for a space that had none.
+        // #458: the global no longer moves — every other
+        // no-override space stays put — and no override is
+        // silently authored either; the value lives in the
+        // space's session layer.
+        #expect(core.tiler.settings.stack.masterRatio == before)
         #expect(core.tiler.settings.stack.override.isEmpty)
+        let space = core.state.workspaces[SpaceID("1")]
+        #expect(space?.sessionRatios.masterRatio != nil)
+        if let space {
+            #expect(
+                core.tiler.settings.resolvedStack(for: space)
+                    .masterRatio != before
+            )
+        }
     }
 
     @Test("Resize base is the resolved value, not the global")
@@ -118,10 +129,14 @@ struct PerSpaceResizeTests {
             "set_mode",
             args: [.string("1"), .string("bsp")]
         )
-        let hBefore = core.tiler.settings.bsp.splitRatioH
         core.execute("resize", args: [.string("y"), .number(500)])
-        // The V ratio moved; the H ratio is untouched.
-        #expect(core.tiler.settings.bsp.splitRatioV != 0.5)
-        #expect(core.tiler.settings.bsp.splitRatioH == hBefore)
+        // The V ratio moved (in the session layer, #458); the H
+        // ratio is untouched on every layer.
+        let session =
+            core.state.workspaces[SpaceID("1")]?.sessionRatios
+        #expect(session?.splitRatioV != nil)
+        #expect(session?.splitRatioH == nil)
+        #expect(core.tiler.settings.bsp.splitRatioV == 0.5)
+        #expect(core.tiler.settings.bsp.splitRatioH == 0.5)
     }
 }

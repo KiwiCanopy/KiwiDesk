@@ -375,6 +375,33 @@ two-axis layout's wire keys are named follows the
 geometric-wire rule in
 [Settings UI patterns](ui-patterns.md#labels--wire-names).
 
+**Interactive resizes are session-scoped per space; the config
+layers never move underneath them (#458).** Before, a resize on
+a space with no authored override wrote the *global* ratio —
+coherent under the #17 layered model ("you resized the
+default") but visibly wrong the moment two monitors show two
+no-override spaces: resizing one resized both. The two rejected
+alternatives: keeping as-is (documented confusion), and
+materializing a per-space override on first resize (silently
+pins the space, decouples it from Layout Defaults, and fills
+the #290 override editor with overrides the user never
+authored). Chosen: a **session ratio layer** on the `Space`
+(`SessionRatios`), the `stackWeights` precedent — interactive
+writes land there when no authored override carries the field,
+config stays untouched, and the layer reseeds on a real mode
+change or `reload_config`. Read precedence is authored override
+> session > global, and an **explicit global setter**
+(`bsp.set_ratio_h`, `stack.set_master_ratio`,
+`scroll.set_slot_size`) drops its field's session shadow
+everywhere so an explicit write always visibly applies (the
+#383 "visibly did nothing" rationale). Covers the BSP split
+ratios, stack master ratio, and scrolling slot size — the same
+shape for all three, per the #458 scope note. Accepted edges: a
+GUI Layout Defaults slider edit (a direct global write, no
+session clear) stays shadowed on session-resized spaces until a
+reload or mode change, and removing an override field
+mid-session can resurface an older session value until then.
+
 **Resize is truly 2-axis via two per-space BSP ratios; per-node
 ratios are rejected.** `resize("x")` and `resize("y")` used to
 write the *same* scalar (one `splitRatio` for every BSP split, one

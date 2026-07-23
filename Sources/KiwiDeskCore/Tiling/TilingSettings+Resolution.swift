@@ -58,62 +58,113 @@ extension TilingSettings {
             .resolved(onto: track)
     }
 
+    // MARK: - Session-aware resolution (#458)
+
+    /// `resolvedBsp` with the space's session resize layer
+    /// overlaid — authored override field > session > global —
+    /// so an interactive resize on a no-override space shows on
+    /// that space alone. Layout reads (`context`) and resize
+    /// current-value reads use these; readers of non-ratio
+    /// params may keep the id form.
+    public func resolvedBsp(for space: Space) -> BspParams {
+        var params = resolvedBsp(for: space.id)
+        let override = bsp.override[space.id]
+        if override?.splitRatioH == nil,
+            let value = space.sessionRatios.splitRatioH
+        {
+            params.splitRatioH = value
+        }
+        if override?.splitRatioV == nil,
+            let value = space.sessionRatios.splitRatioV
+        {
+            params.splitRatioV = value
+        }
+        return params
+    }
+
+    /// See `resolvedBsp(for: Space)`.
+    public func resolvedStack(for space: Space) -> StackParams {
+        var params = resolvedStack(for: space.id)
+        if stack.override[space.id]?.masterRatio == nil,
+            let value = space.sessionRatios.masterRatio
+        {
+            params.masterRatio = value
+        }
+        return params
+    }
+
+    /// See `resolvedBsp(for: Space)`.
+    public func resolvedScrolling(
+        for space: Space
+    ) -> ScrollingParams {
+        var params = resolvedScrolling(for: space.id)
+        if scrolling.override[space.id]?.slotSize == nil,
+            let value = space.sessionRatios.slotSize
+        {
+            params.slotSize = value
+        }
+        return params
+    }
+
     // MARK: - Per-space writes (interactive resize)
     //
     // Only the interactive-resize path routes here — Lua `set_*`
     // and the GUI per-space bindings write the global params or
-    // the override map directly. These helpers exist so a resize
-    // edits the value the space displays without knowing whether
-    // that value is overridden.
+    // the override map directly. Since #458 these write ONLY an
+    // authored override field; a no-override space returns
+    // false and the caller (`KiwiCore.writeSplitRatioH` family)
+    // stores the value in the space's session layer instead —
+    // never the global, which would visibly resize every other
+    // no-override space.
 
-    /// Writes a resize-adjusted value for `space`: into the
-    /// space's override when it already overrides that field,
-    /// else into the global params. So resizing a window edits
-    /// exactly the value the space currently displays — its
-    /// override when it has one, the global otherwise (the
-    /// pre-#17 behavior) — never silently shifting other spaces.
+    /// Writes into the space's override when it already
+    /// overrides the field; returns whether it did.
+    @discardableResult
     public mutating func setSplitRatioH(
         _ value: Double,
         for space: SpaceID
-    ) {
-        if bsp.override[space]?.splitRatioH != nil {
-            bsp.override[space]?.splitRatioH = value
-        } else {
-            bsp.splitRatioH = value
+    ) -> Bool {
+        guard bsp.override[space]?.splitRatioH != nil else {
+            return false
         }
+        bsp.override[space]?.splitRatioH = value
+        return true
     }
 
+    @discardableResult
     public mutating func setSplitRatioV(
         _ value: Double,
         for space: SpaceID
-    ) {
-        if bsp.override[space]?.splitRatioV != nil {
-            bsp.override[space]?.splitRatioV = value
-        } else {
-            bsp.splitRatioV = value
+    ) -> Bool {
+        guard bsp.override[space]?.splitRatioV != nil else {
+            return false
         }
+        bsp.override[space]?.splitRatioV = value
+        return true
     }
 
+    @discardableResult
     public mutating func setMasterRatio(
         _ value: Double,
         for space: SpaceID
-    ) {
-        if stack.override[space]?.masterRatio != nil {
-            stack.override[space]?.masterRatio = value
-        } else {
-            stack.masterRatio = value
+    ) -> Bool {
+        guard stack.override[space]?.masterRatio != nil else {
+            return false
         }
+        stack.override[space]?.masterRatio = value
+        return true
     }
 
+    @discardableResult
     public mutating func setSlotSize(
         _ value: ScrollSize,
         for space: SpaceID
-    ) {
-        if scrolling.override[space]?.slotSize != nil {
-            scrolling.override[space]?.slotSize = value
-        } else {
-            scrolling.slotSize = value
+    ) -> Bool {
+        guard scrolling.override[space]?.slotSize != nil else {
+            return false
         }
+        scrolling.override[space]?.slotSize = value
+        return true
     }
 
     /// True while the Space Bar and at least one *enabled*
@@ -175,9 +226,9 @@ extension TilingSettings {
             trackBreaks: space.trackBreaks,
             trackWeights: space.trackWeights,
             sticky: sticky,
-            bsp: resolvedBsp(for: space.id),
-            stack: resolvedStack(for: space.id),
-            scrolling: resolvedScrolling(for: space.id),
+            bsp: resolvedBsp(for: space),
+            stack: resolvedStack(for: space),
+            scrolling: resolvedScrolling(for: space),
             grid: resolvedGrid(for: space.id),
             monocle: resolvedMonocle(for: space.id),
             track: resolvedTrack(for: space.id),

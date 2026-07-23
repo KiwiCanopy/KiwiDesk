@@ -3281,6 +3281,22 @@ callers never hear it, they read the error JSON. What the
   track cannot trade cross-axis space, and a window alone in
   its track has no share to grow; both report an error.
 
+**Where the ratio write lands (#458):** a space with an authored
+per-space override of the field (`bsp.set_ratio_h_override`, the
+Settings override editor) keeps editing that override. A space
+*without* one stores the value in a **session layer scoped to
+that space** — the shared global never moves, so resizing one
+space no longer visibly resizes every other no-override space,
+and no override is silently authored on your behalf. Session
+values behave like the stack's per-window weights: never saved
+to a profile, gone on restart, reseeded from config on a real
+mode change or `reload_config`, and dropped for a field the
+moment you set its global explicitly (`bsp.set_ratio_h`,
+`stack.set_master_ratio`, `scroll.set_slot_size` — an explicit
+write always shows everywhere). This covers the BSP split
+ratios, the stack master ratio, and the scrolling slot size —
+the three interactive-resize knobs — consistently.
+
 **Example:**
 
 ```lua

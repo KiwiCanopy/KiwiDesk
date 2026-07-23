@@ -40,14 +40,23 @@ struct StackFocusResizeTests {
         }
     }
 
+    /// Session-resolved master ratio of space "1" (#458).
+    private func resolvedMaster(_ core: KiwiCore) -> Double {
+        core.tiler.settings.resolvedStack(
+            for: core.state.workspaces[SpaceID("1")]!
+        ).masterRatio
+    }
+
     @Test("x with the master focused grows the master ratio")
     func masterFocusGrowsMaster() {
         let core = makeCore()
         stackSpace(core)
         core.state.apply(.windowFocused(WindowID(3)))
-        let before = core.tiler.settings.stack.masterRatio
+        let before = resolvedMaster(core)
         core.execute("resize", args: [.string("x"), .number(500)])
-        #expect(core.tiler.settings.stack.masterRatio > before)
+        #expect(resolvedMaster(core) > before)
+        // The global never moves for a no-override space (#458).
+        #expect(core.tiler.settings.stack.masterRatio == before)
     }
 
     @Test("x with a stack window focused lowers the master ratio")
@@ -55,11 +64,11 @@ struct StackFocusResizeTests {
         let core = makeCore()
         stackSpace(core)
         core.state.apply(.windowFocused(WindowID(1)))
-        let before = core.tiler.settings.stack.masterRatio
+        let before = resolvedMaster(core)
         core.execute("resize", args: [.string("x"), .number(500)])
         // +delta grows the FOCUSED window: the stack column
         // widens, so the master ratio drops (#67).
-        #expect(core.tiler.settings.stack.masterRatio < before)
+        #expect(resolvedMaster(core) < before)
     }
 
     @Test("y bumps the focused stack window's weight only")
