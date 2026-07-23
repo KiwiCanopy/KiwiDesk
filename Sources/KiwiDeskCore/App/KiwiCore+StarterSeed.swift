@@ -32,8 +32,10 @@ extension KiwiCore {
             return
         }
         // Populate state so pins resolve and `buildProfile`
-        // captures a real monitor set. A no-op re-publish arrives
-        // later from the event loop.
+        // captures a real monitor set. The event loop re-publishes
+        // the same set later — an idempotent state re-apply, whose
+        // `handleMonitorChange` is then the step that matches and
+        // keeps this profile.
         state.apply(.displaysChanged(displays))
         do {
             try applyStandard(
