@@ -25,8 +25,9 @@ import Foundation
 /// Per-space rows are position-based (`control+option+1` targets
 /// the FIRST space in display order, whatever its name),
 /// generated only for the spaces that exist at seed time and
-/// capped at nine — so no dead row targeting a nonexistent space
-/// is ever authored (#91).
+/// capped at ten — positions 1…9 then ⌃⌥0 for the tenth (#466) —
+/// so no dead row targeting a nonexistent space is ever authored
+/// (#91).
 public enum DefaultKeybindings {
     /// Direction ↔ canonical label phrase, in the catalog's
     /// order (left, down, up, right). The arrow key that drives
@@ -57,10 +58,10 @@ public enum DefaultKeybindings {
                 )
             )
         }
-        for (offset, space) in numbered(spaces) {
+        for (digit, space) in numbered(spaces) {
             rows.append(
                 KeyBinding(
-                    combo: "control+option+\(offset)",
+                    combo: "control+option+\(digit)",
                     lua: "KiwiDesk.focus_space"
                         + "(\(SpaceLuaArg.quote(space.raw)))",
                     kind: .navigation,
@@ -79,10 +80,10 @@ public enum DefaultKeybindings {
                 )
             )
         }
-        for (offset, space) in numbered(spaces) {
+        for (digit, space) in numbered(spaces) {
             rows.append(
                 KeyBinding(
-                    combo: "control+option+shift+\(offset)",
+                    combo: "control+option+shift+\(digit)",
                     lua: "KiwiDesk.move_to_space"
                         + "(\(SpaceLuaArg.quote(space.raw)))",
                     kind: .navigation,
@@ -92,10 +93,10 @@ public enum DefaultKeybindings {
         }
         // Tier 3 — ⌃⌥⌘: resize, move-to-space-and-follow.
         rows.append(contentsOf: resizeRows(step: resizeStep))
-        for (offset, space) in numbered(spaces) {
+        for (digit, space) in numbered(spaces) {
             rows.append(
                 KeyBinding(
-                    combo: "control+option+command+\(offset)",
+                    combo: "control+option+command+\(digit)",
                     lua: "KiwiDesk.move_to_space_and_follow"
                         + "(\(SpaceLuaArg.quote(space.raw)))",
                     kind: .navigation,
@@ -165,11 +166,17 @@ public enum DefaultKeybindings {
         ]
     }
 
-    /// The first nine spaces paired with their 1-based display
-    /// position — the digit each per-space combo uses.
+    /// The first ten spaces paired with the digit key each
+    /// per-space combo uses: positions 1…9 map to `"1"`…`"9"`, and
+    /// the tenth to `"0"` (⌃⌥0 = space 10, the top-row order). Ten
+    /// is the hard cap — the number row has no eleventh digit — so
+    /// spaces past the tenth ship unbound by default (#466);
+    /// they stay bindable in the Keybindings editor.
     private static func numbered(
         _ spaces: [SpaceID]
-    ) -> [(Int, SpaceID)] {
-        spaces.prefix(9).enumerated().map { ($0 + 1, $1) }
+    ) -> [(String, SpaceID)] {
+        spaces.prefix(10).enumerated().map { index, space in
+            (index == 9 ? "0" : String(index + 1), space)
+        }
     }
 }

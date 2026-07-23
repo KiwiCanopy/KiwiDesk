@@ -106,6 +106,7 @@ planned escape hatch; it is not a wontfix dumping ground.
 | While a tiled-sticky traveler visits a **track space at index 0** (or at any track head slot), that track's custom width temporarily reverts to the default share, snapping back when the traveler leaves. | Track head weights are keyed by the head window, and the visiting traveler becomes the (implicit) head; its id carries no stored weight, and storing one under a non-member id would orphan (never pruned, recycled-id hazard #308) — so `resize` writes instead key the first local member, which applies once the traveler departs. A transient wobble, not data loss. | `Space.trackWeights` is keyed by the track's head window (#128), and injection is derived — the traveler is never a member whose entries the space could own or prune. | Resolve the head weight against the first local member at read time if the wobble ever matters in practice. |
 | `track.swap`'s overflow-block gauge can misjudge by one track at the edge while a tiled-sticky traveler visits a track space (the gauge reads the injected list, the mutation partitions the local array). | The mutation stays safe (membership guards; the focused window is always local), the mismatch surfaces only as an occasionally over- or under-cautious refusal at the folded-overflow boundary, and translating the gauge to the local array is the non-home-reorder non-goal's territory. | The gauge and the mutation deliberately consume different derivations: reads see the rendered (injected) space, writes own only the local array. | Re-derive the gauge from `localTiledMembers` if the edge ever bites in practice. |
 | `KiwiDesk.exec` (and `os.execute`) **dedups identical commands by default**: while one copy of the exact command string is in flight, a second `exec` of it is skipped — it returns `nil` and its callback never fires. | For the dominant use — per-event hook pokes to a receiver that re-queries full state (the sketchybar bridge) — a second poke while one is pending is redundant, and deduping is what caps a wedged receiver at one stuck child per command instead of thousands ([#467](https://github.com/hajiboy95/KiwiDesk/issues/467)). It edges past "Lua is open" (§2.7) only for the rare case of deliberately running two identical commands at once, which the opt-out covers. | The launcher tracks an in-flight count per exact command string and skips a dedup launch while it is non-zero (`ExecLauncher.inFlight`); the raw `launch` primitive defaults dedup off, the opinionated default-on lives at the Lua boundary (`KiwiCore+ExecAPI`). | Pass `dedup = false` (the 4th `exec` argument) to run identical commands in parallel; the callback then fires normally. |
+| The first-run beginner ladder seeds five spaces per display (10 on two monitors, 15 on three, and 5 × N for more), but only the first ten get a default digit shortcut — spaces 11+ ship with no `⌃⌥`/`⌃⌥⇧`/`⌃⌥⌘` binding. | The number row has exactly ten keys (`1`…`9`, `0`); there is no eleventh digit to bind, and inventing a two-key or lettered default for the overflow would be less predictable than leaving it to the user. Every space stays reachable and bindable — only the *default* shortcut is absent (#466, "approachable by default, powerful on demand"). | `DefaultKeybindings.numbered` caps the per-space rows at ten and maps the tenth to `⌃⌥0`; the ladder itself (`StarterLadder`) scales to any display count, so on 3+ monitors it out-runs the digit keys by design. | Reach spaces 11+ from the Space Bar, or bind them yourself in the Keybindings editor (any space is bindable, by name). |
 | If an Accessibility-permission revoke (`stop()`) fires while an exec child is *genuinely wedged* (a grandchild holds its output pipe past EOF), that child's bookkeeping — and its in-flight dedup tally — leaks for the process life, so that exact command string stays dedup-blocked even if its receiver later recovers. | The window is tiny (the stop must land in the interval a child holds the pipe past EOF) and clearing the entry would be *wrong*: a later EOF reap of that child would then find no entry and leak its Lua callback ref. Not SIGTERM-ing a child after management has torn down (children are fire-and-forget, §5) outweighs reclaiming the corner ([#467](https://github.com/hajiboy95/KiwiDesk/issues/467) / [#37](https://github.com/hajiboy95/KiwiDesk/issues/37)). | `cancelWatchdogs()` cancels the timeout watchdog but leaves the `running`/`inFlight` entry, since only the child's own eventual termination can safely release it (`ExecLauncher`). | Reload the config (a fresh VM and launcher) if a hook command stays silently dedup-blocked after an AX-permission cycle. |
 
 ### Blocked by macOS (SIP)
@@ -1236,13 +1237,41 @@ the first Save. Per-space rows number the digits
 by display position but bind each to its space **by name**
 (`⌃⌥3` → the third space's name at seed time; a later rename
 rewrites the binding to follow it, so it survives). The first run
-pads the discovered list to a **nine-space starter set** so all of
-`⌃⌥1`–`⌃⌥9` seed even though a fresh macOS reports only the active
-Space (#270) — a multi-monitor first run usually has several. The
-seeded Lua and labels mirror
+pads the discovered list to the **per-display beginner ladder**
+(see below) so the digit shortcuts seed even though a fresh macOS
+reports only the active Space (#270). Digits scale to the seeded
+count: `⌃⌥1`–`⌃⌥5` on one display, and up to `⌃⌥1`–`⌃⌥9` plus
+`⌃⌥0` for the tenth space on two (`0` is the top-row key after
+`9`; there is no eleventh, so spaces past the tenth ship unbound —
+see *Accepted limitations*). The seeded Lua and labels mirror
 `KeybindingCatalog` byte-for-byte (guarded by
 `DefaultSeedCatalogParityTests`) so the rows stay presets, not
-Custom (#4). (#91)
+Custom (#4). (#91/#466)
+
+**A fresh install seeds a five-per-display beginner ladder, not
+nine flat spaces (#466).** The old first run padded to nine
+numbered `bsp` spaces purely so `⌃⌥1`–`⌃⌥9` had somewhere to go
+(#270). But a shortcut never needs a pre-created space — `focus_space`
+already `ensureSpace`s on first press — so the nine existed only to
+back the digits, and every new user stared at nine identical `bsp`
+desktops. The ladder replaces them: **five spaces per connected
+display**, one per layout mode — track (new window → own track),
+stack (single master, 80/20), bsp, grid (3×2), floating — repeating
+whole on each monitor (1–5 main, 6–10 second, 11–15 third). It is a
+guided tour of what KiwiDesk does, sized to the hardware. Because the
+per-space modes, monitor pins, and tuning are **profile-scoped** and
+`gui.json` carries only globals, the ladder is materialized as a real,
+adopted **Starter** profile at first run (`seedFirstRunStarterProfile`,
+after the event loop reconciles displays) — the same durable store any
+saved profile uses, so a reload re-applies it and the user owns and
+edits it like any other. The identical ladder is also offered as the
+**Starter** preset for each screen count (`StandardProfiles`), sharing
+one pure generator (`StarterLadder`) with the seed so the two never
+drift; it is deliberately **not** the silent `isStandard` fallback —
+landing in a demo of empty modes on a monitor change would be a poor
+default, so the workflow Standards keep that job. First-run-only, and
+gated on the same "no authored binding disarms the seed" guard, so it
+never touches a configured setup. (#466, supersedes the #270 nine-pad)
 
 **Orphaned space shortcuts are surfaced, never pruned.** A
 binding that targets a space by name outlives the space's
