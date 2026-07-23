@@ -142,6 +142,30 @@ struct StartupFocusSeedTests {
         #expect(core.focusedWindowID == WindowID(9))
     }
 
+    @Test("A non-sticky fold never surfaces on the active space")
+    func nonStickyFoldStaysHome() {
+        let core = makeCore()
+        add(core, 1)
+        core.state.workspaces.ensureSpace(SpaceID(2))
+        core.state.windows.upsert(
+            ManagedWindow(
+                id: WindowID(9),
+                pid: 200,
+                appName: "Other"
+            )
+        )
+        core.state.workspaces.add(WindowID(9), to: SpaceID(2))
+        wipeFocus(core)
+        core.seedStartupFocus(frontmost: WindowID(9))
+        // Home slot written; the active space's anchor is NOT
+        // the non-traveler — the fallback filled it locally.
+        #expect(
+            core.state.workspaces[SpaceID(2)]?.focused
+                == WindowID(9)
+        )
+        #expect(core.focusedWindowID == WindowID(1))
+    }
+
     @Test("Frontmost seed satisfies the #292 guard")
     func seededFocusUnblocksFocusedCommands() {
         let core = makeCore()

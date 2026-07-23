@@ -141,7 +141,11 @@ extension FloatDetection {
     /// app's focus reports *forever*, killing focus-follow for
     /// their managed windows (#448 review). Visibility-scan
     /// only: the track/reconcile gate is keyed by AX-tracked
-    /// windows, which status items never are.
+    /// windows, which status items never are. Accepted residue:
+    /// a bar raised to or above the main-menu level (some
+    /// launchers do, to show over native fullscreen) escapes
+    /// the focus-distrust while up — transient, and the bar
+    /// itself still never gets managed (the gate has no band).
     static func isPanelBandLayer(_ layer: Int) -> Bool {
         layer != 0
             && layer < Int(CGWindowLevelForKey(.mainMenuWindow))
