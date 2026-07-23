@@ -57,6 +57,15 @@ extension KiwiCore {
             // forward-immediate raise can fire while a backward
             // raise is still unechoed (#158).
             outstandingSelfRaises.insert(id)
+            // Stamp for the sibling-report distrust (#465 QA),
+            // pruning expired entries so the dictionary cannot
+            // grow with never-echoed raises.
+            let now = Date()
+            selfRaiseStamps = selfRaiseStamps.filter {
+                now.timeIntervalSince($0.value)
+                    < Self.selfRaiseSiblingWindow
+            }
+            selfRaiseStamps[id] = now
             AXHelper.raise(element, pid: window.pid)
         }
     }

@@ -85,6 +85,10 @@ extension KiwiCore {
         guard let raw = args.first?.stringValue else {
             return .fail("expected space id")
         }
+        // Who is frontmost BEFORE the switch: the settle uses it
+        // to tell "the handoff's activate never landed" (#463)
+        // apart from "the user moved on since".
+        let priorFrontmost = frontmostPIDProvider?()
         state.workspaces.activate(SpaceID(raw))
         logSpaceContents(SpaceID(raw))
         retile(
@@ -101,49 +105,20 @@ extension KiwiCore {
         // under the z-order counter, where warps are swallowed
         // — and the forced retile above already assigned the
         // slot the warp targets.
-        if let next = activeSpace?.focused {
+        let next = resolveSpaceSwitchFocusTarget()
+        if let next {
             warpMouseToFocused(next)
         }
-        raiseFloatsAndSticky(thenFocus: activeSpace?.focused)
-        emitSpaceChange()
-        scheduleSpaceSettle(SpaceID(raw))
-        return .ok()
-    }
-
-    /// A virtual-space switch applies each window's target frame
-    /// exactly once. Slow-AX apps (Electron/WebKit answer lazily)
-    /// and deprioritized background windows occasionally drop
-    /// that single position update and stay parked offscreen, so
-    /// the space comes up missing windows until another switch
-    /// re-issues the frames. Re-assert the layout once, shortly
-    /// after the switch, so the stragglers land without a manual
-    /// second focus. Mirrors `settleAfterNativeSwitch` (#22).
-    ///
-    /// Layout only — no focus re-assert (unlike the native
-    /// settle): a virtual switch already handed real focus to the
-    /// space's window, so only dropped *frames* need recovery,
-    /// not focus. Single-shot: an app that drops the frame again
-    /// on the retry still needs another switch — if that recurs,
-    /// re-issue only the windows still at the stash corner rather
-    /// than lengthening or repeating this timer.
-    func scheduleSpaceSettle(_ target: SpaceID) {
-        deferred.schedule(
-            .spaceSettle,
-            after: .milliseconds(300)
-        ) { [weak self] in
-            guard let self,
-                self.state.workspaces.activeSpace == target,
-                // A native desktop switch in this window runs its
-                // own retile + settle and is still re-tracking
-                // windows; don't collide (cf. scheduleFocusFollow).
-                Date().timeIntervalSince(self.lastNativeSwitch)
-                    > NativeSwitch.settle
-            else { return }
-            self.retile(
-                animated: self.tiler.settings.animations.onSpaceChange,
-                force: true
-            )
+        raiseFloatsAndSticky(thenFocus: next)
+        if next == nil {
+            yieldFocusAfterEmptySwitch()
         }
+        emitSpaceChange()
+        scheduleSpaceSettle(
+            SpaceID(raw),
+            priorFrontmost: priorFrontmost
+        )
+        return .ok()
     }
 
     /// Files a window into a target space honoring that space's
@@ -250,13 +225,19 @@ extension KiwiCore {
             )
         }
         if follow {
+            // Captured before the raise below can change it —
+            // the settle's dropped-activate detection (#463).
+            let priorFrontmost = frontmostPIDProvider?()
             state.workspaces.activate(target)
             // The retile below owns placement (see focusWindow).
             focusWindow(window, refocusRetile: false, warp: true)
             emitSpaceChange()
             // Following is a space switch too: re-assert so the
             // target's other windows survive a dropped frame.
-            scheduleSpaceSettle(target)
+            scheduleSpaceSettle(
+                target,
+                priorFrontmost: priorFrontmost
+            )
         } else if let next = activeSpace?.focused {
             // The moved window would keep macOS focus while
             // stashed offscreen; refocus the current space.

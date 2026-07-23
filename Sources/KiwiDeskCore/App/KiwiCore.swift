@@ -82,8 +82,25 @@ public final class KiwiCore {
     /// a backward raise may still be unechoed — two self-raises
     /// can be outstanding at once. An id is removed on its own
     /// echo, and when its window is destroyed (WindowIDs can be
-    /// reused). See `handle(_:)`'s `.windowFocused` case.
+    /// reused). See `handleWindowFocused` in
+    /// `KiwiCore+FocusEvents.swift`.
     var outstandingSelfRaises: Set<WindowID> = []
+
+    /// When each self-raise was issued — the recency bound for
+    /// the same-app activation re-report distrust (#465 QA):
+    /// only a raise younger than `selfRaiseSiblingWindow` makes
+    /// a sibling's hidden-space focus report suspect. Purely
+    /// age-compared (pruned on write, never consumed), so a
+    /// raise that never echoes cannot poison the app's hidden
+    /// windows forever — the `zOrderRaiseEchoWindow` lesson.
+    var selfRaiseStamps: [WindowID: Date] = [:]
+
+    /// Sized like `zOrderRaiseEchoWindow`, and for the same
+    /// reason: Electron/WebKit apps answer AX lazily (100–300
+    /// ms), so their activation re-report can trail our raise
+    /// by several hundred ms; beyond ~1 s a same-app report is
+    /// a user action, not our raise's echo.
+    static let selfRaiseSiblingWindow: TimeInterval = 1.0
 
     /// Windows we raised purely for z-order, stamped with the raise
     /// time — floats promoted above the tiled plane (#418) AND the
