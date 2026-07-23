@@ -60,21 +60,9 @@ public enum StandardProfiles {
         screens: Int,
         summary: String
     ) -> StandardLayout {
-        StandardLayout(
-            name: "Starter",
-            summary: summary,
-            screenCount: screens,
-            spaceCount: StarterLadder.spaceCount(
-                displayCount: screens
-            ),
-            spaceModes: StarterLadder.spaceModes(
-                displayCount: screens
-            ),
-            spaceScreens: StarterLadder.spaceScreens(
-                displayCount: screens
-            ),
-            isStandard: false,
-            settings: StarterLadder.settings()
+        StarterLadder.standardLayout(
+            displayCount: screens,
+            summary: summary
         )
     }
 

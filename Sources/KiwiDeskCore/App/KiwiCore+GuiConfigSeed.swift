@@ -123,19 +123,25 @@ extension KiwiCore {
         StarterLadder.spaces(displayCount: firstRunDisplayCount())
     }
 
-    /// Connected-display count for first-run seeding. Prefers live
-    /// workspace state, but `guiConfigSeed()` runs in `loadConfig`
-    /// *before* the event loop reconciles displays, so it falls
-    /// back to a direct `NSScreen` read (floored at one — a Mac
-    /// always drives a screen). Tests seed displays into state to
-    /// drive this deterministically.
+    /// Connected displays for first-run seeding. `loadConfig` runs
+    /// before the event loop's first `publishDisplays`, so live
+    /// state is still empty on a genuine first launch — fall back
+    /// to the same `NSScreen` source `publishDisplays` reads.
+    /// Prefers live state when present (tests seed displays there
+    /// to drive this deterministically). The one accessor behind
+    /// both the `gui.json` space count and the Starter profile, so
+    /// the two can't size to different display counts.
+    func firstRunDisplays() -> [Display] {
+        let live = state.workspaces.allDisplays
+        if !live.isEmpty { return live }
+        return NSScreen.screens.compactMap { $0.kiwiDisplay }
+    }
+
+    /// `firstRunDisplays().count`, floored at one — a Mac always
+    /// drives at least one screen even if the read comes back
+    /// empty (headless CI).
     func firstRunDisplayCount() -> Int {
-        let live = state.workspaces.allDisplays.count
-        if live > 0 { return live }
-        let screens = NSScreen.screens
-            .compactMap { $0.kiwiDisplay }
-            .count
-        return max(1, screens)
+        max(1, firstRunDisplays().count)
     }
 
     /// Builds an editable model from the running configuration.

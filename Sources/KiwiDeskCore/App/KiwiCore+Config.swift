@@ -128,10 +128,11 @@ extension KiwiCore {
         // once against the FINAL effective rules. Without this,
         // verdicts stay stale until an unrelated AX event (#164).
         eventLoop.reconcileAll()
-        // Displays are now known: author the beginner ladder's
-        // "Starter" profile (modes, pins, tuning) before the event
-        // loop's first monitor change, which then matches and keeps
-        // it (#466). First-run-only.
+        // Author the beginner ladder's "Starter" profile (modes,
+        // pins, tuning). It reads displays from NSScreen itself
+        // (the event loop hasn't published them yet) and runs
+        // before the loop's first monitor change, which then
+        // matches and keeps it (#466). First-run-only.
         if seedStarterProfile {
             seedFirstRunStarterProfile()
         }

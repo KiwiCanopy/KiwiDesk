@@ -9,69 +9,43 @@ extension KiwiCore {
     /// already wrote the matching space list and scaled shortcuts;
     /// this lays the profile-scoped half on top and persists it.
     ///
-    /// Runs from `loadConfig` after `reconcileAll` has populated
-    /// displays, so `allDisplays` is authoritative — and before
-    /// the event loop's first `handleMonitorChange`, which then
-    /// finds this profile as an exact match and keeps it. Saving
-    /// adopts it (`currentName`), so every later reload re-applies
-    /// it via `reapplyActiveProfileState`. First-run-only: the
-    /// caller gates it on the same signal as the `gui.json` seed,
-    /// so a monitor added later never re-seeds.
+    /// `loadConfig` runs before the event loop's first
+    /// `publishDisplays`, so displays aren't in state yet — the
+    /// ladder needs them for its pins and for a non-empty monitor
+    /// set (without which the first `handleMonitorChange` couldn't
+    /// match the profile and would drop it for a composed
+    /// Standard). So it reads the same `NSScreen` source and
+    /// populates state first, then applies through the one
+    /// canonical path — `applyStandard` — which composes, sets
+    /// modes/pins/tuning, adopts, and saves (setting `currentName`,
+    /// so every later reload re-applies it via
+    /// `reapplyActiveProfileState`). First-run-only: the caller
+    /// gates it on the same signal as the `gui.json` seed plus an
+    /// empty profile list, so an existing setup is never touched.
     func seedFirstRunStarterProfile() {
-        let ordered = PositionalDisplays.ordered(
-            state.workspaces.allDisplays,
-            mainID: PositionalDisplays.liveMainID
-        )
-        let count = max(1, ordered.count)
-        let spaces = StarterLadder.spaces(displayCount: count)
-        for space in spaces {
-            state.workspaces.ensureSpace(space)
+        let displays = firstRunDisplays()
+        guard !displays.isEmpty else {
+            onLog(
+                "first run: no displays detected; skipped the "
+                    + "Starter profile seed"
+            )
+            return
         }
-        state.workspaces.reorder(matching: spaces)
-
-        // Per-space modes (sparse map ⇒ bsp fallback).
-        let modes = StarterLadder.spaceModes(displayCount: count)
-        for space in spaces {
-            setSpaceMode(space, modes[space] ?? .bsp)
-        }
-
-        // Pin each display's block to its ordered fingerprint; the
-        // main block takes the Main role. A block whose display
-        // isn't connected (can't happen at seed time, defensive)
-        // falls back to Main.
-        var pins: [SpaceID: String] = [:]
-        var mains: Set<SpaceID> = []
-        for space in spaces {
-            let screen = StarterLadder.screen(of: space)
-            if screen >= 1, screen < ordered.count {
-                pins[space] = ordered[screen].fingerprint
-            } else {
-                mains.insert(space)
-            }
-        }
-        spacePins = pins
-        mainSpaces = mains
-
-        // Wholesale, so the seeded profile's settings match exactly
-        // what applying the Starter preset would produce (on a
-        // fresh run the live settings are still the defaults).
-        tiler.settings = StarterLadder.settings()
-
-        resolveSpaceDisplays()
-
-        // Durable + adopted: `save` writes the JSON and sets
-        // `currentName`, so `reapplyActiveProfileState` reloads it.
+        // Populate state so pins resolve and `buildProfile`
+        // captures a real monitor set. A no-op re-publish arrives
+        // later from the event loop.
+        state.apply(.displaysChanged(displays))
         do {
-            try profiles.save(
-                buildProfile(name: profiles.freeName(base: "Starter"))
+            try applyStandard(
+                StarterLadder.standardLayout(
+                    displayCount: displays.count
+                )
             )
         } catch {
             onLog(
-                "first run: could not save the Starter profile: "
+                "first run: could not seed the Starter profile: "
                     + "\(error)"
             )
         }
-        retile(force: true)
-        emitSpaceChange()
     }
 }

@@ -196,5 +196,28 @@ struct StarterLadderSeedTests {
         #expect(
             saved.spaceModes[SpaceID("9")] == .grid
         )
+        // The saved profile carries a real monitor set — both
+        // displays — or the first monitor change couldn't match
+        // it and would drop it for a composed Standard.
+        #expect(saved.monitorSets.first?.monitors.count == 2)
+    }
+
+    @Test("empty state falls back to NSScreen for the ladder")
+    func seedPopulatesDisplaysFromScreens() {
+        // The production path: state has no displays when the seed
+        // runs (loadConfig precedes the first publishDisplays).
+        // The seed must still populate them from NSScreen so the
+        // profile isn't saved with an empty monitor set.
+        let core = makeCore()
+        #expect(core.state.workspaces.allDisplays.isEmpty)
+        core.seedFirstRunStarterProfile()
+        // On any real display this authors the profile with a
+        // non-empty monitor set; on a headless runner it logs and
+        // skips. Either way it never saves an empty-monitor
+        // profile that a monitor change would discard.
+        if let saved = try? core.profiles.read(name: "Starter") {
+            #expect(saved.monitorSets.first?.monitors.isEmpty == false)
+            #expect(!core.state.workspaces.allDisplays.isEmpty)
+        }
     }
 }
