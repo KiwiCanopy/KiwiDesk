@@ -683,6 +683,8 @@ windows. Below it:
 
 Launcher and panel overlays (Spotlight, Raycast, Alfred) never get
 a ring, even while you type into them — only genuine windows do.
+Their command bars aren't managed at all: they never appear in the
+App or Space Bars, never tile, and stay put when you switch spaces.
 Windows in native (green-button) fullscreen aren't ringed either:
 they fill the display, so a ring would peek out only at the
 corners. The ring returns when the window leaves fullscreen.

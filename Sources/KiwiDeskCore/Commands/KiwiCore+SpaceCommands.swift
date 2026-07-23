@@ -69,19 +69,7 @@ extension KiwiCore {
     /// window, which may live on another space (issue #21).
     func activateSpaceOfFocusedWindow() {
         guard
-            let app = NSWorkspace.shared.frontmostApplication,
-            !FloatDetection.hasVisibleIgnoredPanel(
-                pid: app.processIdentifier,
-                bundleID: AppRef(app).bundleID,
-                isAccessory: EventLoop.classifiesAsOverlay(
-                    pid: app.processIdentifier,
-                    activationPolicy: app.activationPolicy
-                )
-            ),
-            let element = AXHelper.focusedWindow(
-                pid: app.processIdentifier
-            ),
-            let id = AXHelper.windowID(of: element),
+            let id = trustedFrontmostFocusedWindowID(),
             // The cold startup scan may not have tracked the
             // focused window yet — the session snapshot still
             // remembers where it belongs.

@@ -80,6 +80,14 @@ extension EventLoop {
     /// by default, it just keeps its focus ring. Third-party
     /// accessory apps stay swept — their windows are menu-bar
     /// utility UI, the #300 case.
+    ///
+    /// Load-bearing since #448: the hard ignore gate
+    /// (`FloatDetection.shouldIgnore`'s `isAccessory` arm) also
+    /// keys on this predicate. It must stay exactly
+    /// "third-party accessory activation policy" — widening it
+    /// toward the fuller transient-overlay definition (panel
+    /// subroles, raised layers) would silently widen the ignore
+    /// gate to regular apps' panels, which must only float.
     nonisolated static func classifiesAsOverlay(
         pid: pid_t,
         activationPolicy: NSApplication.ActivationPolicy
@@ -126,7 +134,7 @@ extension EventLoop {
         pid: pid_t,
         app: AppRef,
         layer: Int? = nil,
-        isAccessory: Bool? = nil
+        isAccessory: Bool
     ) -> Bool {
         if Self.isOwnProcess(pid) {
             let canBecomeMain =
@@ -150,8 +158,7 @@ extension EventLoop {
         return FloatDetection.shouldIgnore(
             bundleID: app.bundleID,
             layer: layer ?? FloatDetection.windowLayer(of: id) ?? 0,
-            isAccessory: isAccessory
-                ?? classifiesAsOverlay(pid: pid),
+            isAccessory: isAccessory,
             rules: ignoreRules
         )
     }

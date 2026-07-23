@@ -179,9 +179,11 @@ extension StateCoordinator {
     /// stale local slot made same-app implicit-focused verbs
     /// (`toggle_sticky` pressed while looking at the sticky)
     /// silently mutate the wrong window, and cross-app ones fail
-    /// the #292 pid check. The render-space test keeps inactive
-    /// spaces yielding their own focus, exactly like the
-    /// tiled-traveler injection.
+    /// the #292 pid check. The render space resolves against the
+    /// REAL active space (`focused: nil`), so an inactive space
+    /// keeps yielding its own focus — matching the one-arg
+    /// overload, whose traveler injection likewise uses the real
+    /// active space.
     ///
     /// - Parameters:
     ///   - space: the space whose surface target is wanted.
@@ -210,15 +212,17 @@ extension StateCoordinator {
 
     /// `focusAnchor` computing its own `tiled` — for the many
     /// focused-command bodies that don't already hold the space's
-    /// `effectiveTiledMembers`. On an inactive space no traveler is
-    /// injected, so this collapses to `space.focused`.
+    /// `effectiveTiledMembers`. Travelers are injected against
+    /// the REAL active space (not the queried space as if it
+    /// were active, #416 review): a traveler physically renders
+    /// on one space, so an inactive space injects none and
+    /// collapses to `space.focused` — the same notion of
+    /// "active" the floating-sticky test uses, keeping the two
+    /// traveler branches in agreement.
     public func focusAnchor(of space: Space) -> WindowID? {
         focusAnchor(
             of: space,
-            tiled: effectiveTiledMembers(
-                of: space,
-                activeSpace: space.id
-            )
+            tiled: effectiveTiledMembers(of: space)
         )
     }
 

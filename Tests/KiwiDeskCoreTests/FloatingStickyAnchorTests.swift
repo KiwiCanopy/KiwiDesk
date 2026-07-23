@@ -107,6 +107,25 @@ struct FloatingStickyAnchorTests {
         }
     }
 
+    @Test("A tiled traveler agrees: inactive spaces stay local")
+    func inactiveSpaceIgnoresTiledTraveler() {
+        let core = makeCore()
+        seed(core, localPID: 100, travelerPID: getpid())
+        // Make the traveler tiled: both traveler branches must
+        // resolve "active" the same way (#416 review), so an
+        // inactive space anchors neither kind.
+        if var traveler = core.state.windows[WindowID(50)] {
+            traveler.isFloating = false
+            core.state.windows.upsert(traveler)
+        }
+        core.state.workspaces.ensureSpace("3")
+        if let three = core.state.workspaces[SpaceID("3")] {
+            #expect(core.state.focusAnchor(of: three) == nil)
+        } else {
+            Issue.record("space 3 missing")
+        }
+    }
+
     /// THE #416 repro: same app owns the sticky and a local
     /// window, so the pid-granular guard passes either way —
     /// the verb must hit the sticky under the user's eyes.

@@ -18,25 +18,35 @@ extension KiwiCore {
     /// only — never raises or AX-focuses anything, so launch
     /// steals no OS focus.
     func seedStartupFocus() {
-        seedStartupFocus(frontmost: frontmostManagedWindowID())
+        let frontmost = trustedFrontmostFocusedWindowID()
+            .flatMap { state.windows[$0] != nil ? $0 : nil }
+        seedStartupFocus(frontmost: frontmost)
     }
 
     /// Testable core, the OS-frontmost managed window injected.
     ///
-    /// The frontmost window — when it is a member of the active
-    /// space — seeds *unconditionally*: it is what the user is
-    /// actually looking at, so it corrects both the wiped and
-    /// the arbitrary-discovery focus (and is a no-op when a
-    /// real focus event already landed on it). The fallback
-    /// (first tiled member, else first window of an all-floating
-    /// space) runs only when nothing is focused yet: it is a
-    /// guess, and must never override a real restored or
-    /// observed focus.
+    /// The frontmost window seeds *unconditionally*: it is what
+    /// the user is actually looking at, so it corrects both the
+    /// wiped and the arbitrary-discovery focus (and is a no-op
+    /// when a real focus event already landed on it). A member
+    /// of the active space takes its `focused` slot; a managed
+    /// window homed elsewhere — a sticky traveler rendered over
+    /// the active space — folds into its HOME slot, exactly as
+    /// `windowFocused` would, so `lastFocused` lets the anchor
+    /// surface it (#416/#431). The fallback (first tiled member,
+    /// else first window of an all-floating space) runs only
+    /// when nothing is focused yet: it is a guess, and must
+    /// never override a real restored or observed focus.
     func seedStartupFocus(frontmost: WindowID?) {
         guard let space = activeSpace else { return }
-        if let frontmost, space.windows.contains(frontmost) {
-            state.workspaces.focus(frontmost, in: space.id)
-            return
+        if let frontmost {
+            if space.windows.contains(frontmost) {
+                state.workspaces.focus(frontmost, in: space.id)
+                return
+            }
+            if let home = state.workspaces.space(of: frontmost) {
+                state.workspaces.focus(frontmost, in: home)
+            }
         }
         guard focusedWindowID == nil else { return }
         let candidate =
@@ -46,12 +56,15 @@ extension KiwiCore {
         state.workspaces.focus(candidate, in: space.id)
     }
 
-    /// The OS-frontmost app's AX-focused window, resolved to a
-    /// tracked id. Mirrors `activateSpaceOfFocusedWindow`'s
-    /// distrust of apps currently showing an ignored panel
-    /// (issue #21): while a quick-terminal-style panel is open,
-    /// AX reports the app's main window as focused.
-    private func frontmostManagedWindowID() -> WindowID? {
+    /// The OS-frontmost app's AX-focused window id — the one
+    /// shared "trusted frontmost" chain (#442 review): frontmost
+    /// app, distrusted while it shows an ignored panel (issue
+    /// #21: AX then reports the app's stale *main* window as
+    /// focused), then its AX-focused window resolved to an id.
+    /// Callers add their own tail: the startup seed requires the
+    /// id to be tracked; the startup landing falls back to the
+    /// session's remembered space for a not-yet-tracked id.
+    func trustedFrontmostFocusedWindowID() -> WindowID? {
         guard
             let app = NSWorkspace.shared.frontmostApplication,
             !FloatDetection.hasVisibleIgnoredPanel(
@@ -64,10 +77,8 @@ extension KiwiCore {
             ),
             let element = AXHelper.focusedWindow(
                 pid: app.processIdentifier
-            ),
-            let id = AXHelper.windowID(of: element),
-            state.windows[id] != nil
+            )
         else { return nil }
-        return id
+        return AXHelper.windowID(of: element)
     }
 }

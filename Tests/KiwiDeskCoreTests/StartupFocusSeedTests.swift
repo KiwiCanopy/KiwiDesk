@@ -114,6 +114,34 @@ struct StartupFocusSeedTests {
         #expect(core.focusedWindowID == nil)
     }
 
+    @Test("A frontmost sticky traveler folds into its home slot")
+    func frontmostTravelerSeedsHomeFocus() {
+        let core = makeCore()
+        add(core, 1)
+        // Window 9: a floating global sticky homed on space 2,
+        // rendered over the active space and OS-frontmost at
+        // boot.
+        core.state.workspaces.ensureSpace(SpaceID(2))
+        var sticky = ManagedWindow(
+            id: WindowID(9),
+            pid: 200,
+            appName: "Sticky",
+            stickyScope: .global
+        )
+        sticky.isFloating = true
+        core.state.windows.upsert(sticky)
+        core.state.workspaces.add(WindowID(9), to: SpaceID(2))
+        wipeFocus(core)
+        core.seedStartupFocus(frontmost: WindowID(9))
+        // Folded home (the membership-guarded slot), surfaced on
+        // the active space through the #416 anchor.
+        #expect(
+            core.state.workspaces[SpaceID(2)]?.focused
+                == WindowID(9)
+        )
+        #expect(core.focusedWindowID == WindowID(9))
+    }
+
     @Test("Frontmost seed satisfies the #292 guard")
     func seededFocusUnblocksFocusedCommands() {
         let core = makeCore()

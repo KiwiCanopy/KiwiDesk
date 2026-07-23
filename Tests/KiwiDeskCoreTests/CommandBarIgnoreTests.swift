@@ -98,6 +98,22 @@ struct CommandBarIgnoreTests {
         )
     }
 
+    @Test("The visible-panel scan counts only the panel band")
+    func panelBandExcludesStatusItems() {
+        // Command bars and quick terminals: floating (3) up to
+        // modal panel (8).
+        #expect(FloatDetection.isPanelBandLayer(3))
+        #expect(FloatDetection.isPanelBandLayer(8))
+        // A menu-bar app's permanent NSStatusItem window (25)
+        // or a popped menu (101) must never read as a visible
+        // ignored panel — that would distrust every accessory
+        // app's focus reports forever.
+        #expect(!FloatDetection.isPanelBandLayer(0))
+        #expect(!FloatDetection.isPanelBandLayer(24))
+        #expect(!FloatDetection.isPanelBandLayer(25))
+        #expect(!FloatDetection.isPanelBandLayer(101))
+    }
+
     @Test("Layer scan required for accessory and listed apps")
     func requiresWindowLayers() {
         #expect(

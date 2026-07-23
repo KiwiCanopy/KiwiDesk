@@ -132,6 +132,21 @@ extension FloatDetection {
         return layers
     }
 
+    /// The panel band: raised CGWindow layers BELOW the main-
+    /// menu/status level. Command bars and quick terminals live
+    /// here (floating 3 … modal panel 8); an accessory app's
+    /// permanent `NSStatusItem` window sits at the status level
+    /// (25) and a popped menu above it — counting those as a
+    /// "visible ignored panel" would distrust every menu-bar
+    /// app's focus reports *forever*, killing focus-follow for
+    /// their managed windows (#448 review). Visibility-scan
+    /// only: the track/reconcile gate is keyed by AX-tracked
+    /// windows, which status items never are.
+    static func isPanelBandLayer(_ layer: Int) -> Bool {
+        layer != 0
+            && layer < Int(CGWindowLevelForKey(.mainMenuWindow))
+    }
+
     /// True while the app currently shows an ignored panel on
     /// screen. While Ghostty's quick terminal is open, AX
     /// reports the app's *main* window as focused — trusting
@@ -163,11 +178,14 @@ extension FloatDetection {
                 kCGNullWindowID
             ) as? [[String: Any]] ?? []
         return list.contains { info in
-            info[kCGWindowOwnerPID as String] as? pid_t == pid
+            let layer =
+                info[kCGWindowLayer as String] as? Int ?? 0
+            return info[kCGWindowOwnerPID as String] as? pid_t
+                == pid
+                && isPanelBandLayer(layer)
                 && shouldIgnore(
                     bundleID: bundleID,
-                    layer: info[kCGWindowLayer as String]
-                        as? Int ?? 0,
+                    layer: layer,
                     isAccessory: isAccessory,
                     rules: IgnoreRules()
                 )
