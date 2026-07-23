@@ -28,6 +28,29 @@ This decouples the two processes: sketchybar's script runs in
 its own Lua sandbox, outside the app watchdog and main-thread
 restrictions.
 
+> **Wedged daemon → runaway triggers.**
+> `sketchybar --trigger` normally exits in milliseconds. If the
+> sketchybar daemon is absent or wedged, the trigger blocks instead
+> — and because these hooks fire on *every* KiwiDesk event,
+> unbounded fire-and-forget would let thousands of stuck `--trigger`
+> processes pile up (re-parented to launchd, some alive for hours),
+> measurably loading the scheduler.
+>
+> `KiwiDesk.exec` bounds this automatically: each trigger gets a
+> 30 s default `timeout` and identical in-flight commands are
+> deduped, so even a permanently wedged daemon leaves **at most
+> one** stuck child per distinct trigger, reaped every 30 s (see
+> [`KiwiDesk.exec`](../lua-reference.md#kiwideskexec)). KiwiDesk
+> also warns in its log once more than 20 children are outstanding.
+>
+> If you hit a pile-up from an older config (or a hard-wedged
+> daemon), clear the clients and restart the daemon:
+>
+> ```sh
+> pkill -f "sketchybar --trigger"    # clients only, not the daemon
+> brew services restart sketchybar
+> ```
+
 ## Events you can subscribe to
 
 All nine events fire whenever KiwiDesk's state changes. Hook

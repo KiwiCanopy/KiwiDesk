@@ -3497,15 +3497,31 @@ background.
 | `stdout` | string | everything written to stdout |
 | `stderr` | string | everything written to stderr |
 
-- `timeout` — an optional number of seconds. If given and the
-  command has not exited by then, it receives SIGTERM and the
-  callback is still invoked with the termination code.
+- `timeout` — an optional number of seconds. If the command has
+  not exited by then, it receives SIGTERM and the callback is
+  still invoked with the termination code. **Defaults to 30 s**
+  when omitted, so a wedged hook command can never accumulate
+  without bound — hook commands finish in milliseconds, so the
+  deadline only bites a genuine hang. Pass `0` (or a negative
+  number) for *no* limit, for a deliberately long-running command.
+- `dedup` — an optional boolean, **default `true`**. While an
+  identical `command` string is already running, a second `exec`
+  of it is skipped (returns `nil`) rather than spawning again. For
+  trigger-style pokes — `sketchybar --trigger …`, where the
+  handler re-reads full state anyway — this is the correct
+  semantics: a second poke while one is pending adds nothing, and
+  it caps a wedged receiver at one stuck child per command instead
+  of a per-event pile-up. Pass `false` for commands you genuinely
+  want to run in parallel with an identical copy of themselves.
+  Note a skipped call **does not invoke its callback** — no child
+  ran — so don't rely on a callback firing for a command that may
+  still be in flight.
 
 **Does:** starts the command in the background and returns
 immediately — KiwiDesk never waits for it. Returns the child's pid
-(a number), or `nil` when the command could not be started. If the
-config reloads before the command finishes, the callback is dropped
-silently.
+(a number), or `nil` when the command could not be started **or was
+skipped as a duplicate** (see `dedup`). If the config reloads before
+the command finishes, the callback is dropped silently.
 
 **Output cap:** stdout and stderr are each capped at ~1 MB. Output
 beyond the cap is still read (so the child never blocks writing), but
@@ -3515,8 +3531,16 @@ the string delivered to the callback is truncated and ends with
 **Quit policy:** exec children are fire-and-forget. When KiwiDesk
 exits, running children are re-parented to launchd and finish
 naturally — a `sketchybar --notify` hook will complete even if
-KiwiDesk quits first. Use `timeout` for commands that must not
-outlive a reasonable interval.
+KiwiDesk quits first. The 30 s default `timeout` still bounds each
+one; pass `timeout = 0` for a command that must be allowed to run
+indefinitely.
+
+**Hanging hooks:** when the number of outstanding children crosses
+20, KiwiDesk logs a warning (`N exec children outstanding — a hook
+command may be hanging`). The live count is also on
+`get_state().exec_running`. With the default `timeout` and `dedup`,
+even a permanently wedged receiver leaves at most one stuck child
+per distinct command, reaped every 30 s.
 
 The child's `PATH` gets `/opt/homebrew/bin` and `/usr/local/bin`
 appended, so Homebrew tools (`sketchybar`, `borders`, …) resolve
@@ -3538,6 +3562,10 @@ KiwiDesk.exec("defaults read -g AppleInterfaceStyle",
 KiwiDesk.exec("some-slow-tool", function(code, out, err)
     -- code is non-zero if killed by the watchdog
 end, 5)
+
+-- No limit (deliberately long-running), and opt out of dedup so
+-- two identical copies can run at once:
+KiwiDesk.exec("long-running-tool", nil, 0, false)
 ```
 
 ### os.execute
@@ -3550,6 +3578,11 @@ returns `true`.
 **immediately** — it does *not* wait, and the return value says
 nothing about whether the command succeeded. When you need the exit
 code or output, use `KiwiDesk.exec` with a callback instead.
+
+Because it routes through `KiwiDesk.exec`, `os.execute` inherits its
+defaults: a 30 s timeout and identical-command dedup. A genuinely
+long-running `os.execute` is killed at 30 s — call `KiwiDesk.exec`
+directly with `timeout = 0` for one that must run unbounded.
 
 **Example:**
 
