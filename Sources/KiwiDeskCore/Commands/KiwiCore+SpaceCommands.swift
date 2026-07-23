@@ -223,6 +223,10 @@ extension KiwiCore {
         // Only then must an emptied origin yield focus (#446).
         let movedHeldFocus = state.workspaces.lastFocused == window
         addFocusedToSpace(window, to: target)
+        // A float crossing displays must re-anchor (#444):
+        // membership alone never moves it — no layout frame is
+        // recomputed for a float. The retile below delivers.
+        reanchorFloat(window, to: target)
         // The moved window becomes the target space's focus, so
         // the FIRST focus of that space raises it. Without this,
         // `focusSpace` finds no focus to hand over and the window

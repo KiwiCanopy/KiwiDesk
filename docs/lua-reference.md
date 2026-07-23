@@ -162,9 +162,16 @@ following** it — you stay on the current space. The moved
 window becomes the target space's focused window, so the first
 time you switch there it is the window you land on.
 
+If the target space is shown on **another monitor**, a floating
+window is re-anchored onto that display — it keeps its position
+relative to the screen it left, clamped inside the target's
+usable area. (Tiled windows arrive through the layout anyway.)
+
 A quick drag-and-drop of a window onto a Space item in the Space
 Bar performs this same move (see the user guide); there is no
-separate verb for it.
+separate verb for it — though a *floating* window dropped this
+way stays where the pointer released it, since the drag itself
+placed it.
 
 **Example:**
 
@@ -198,7 +205,9 @@ monitor's fingerprint (as printed by `list_monitors`) or name.
 it there (each monitor shows one space at a time). This is a
 runtime move: a later monitor change (dock/undock) re-resolves
 placement from the pins, so use `pin_space_to_display` to make it
-stick. Creates the space if it does not exist yet.
+stick. Creates the space if it does not exist yet. Floating
+members travel too: each is re-anchored onto the new monitor,
+keeping its relative position.
 
 **Example:**
 

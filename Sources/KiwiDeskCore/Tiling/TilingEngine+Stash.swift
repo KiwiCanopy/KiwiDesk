@@ -257,6 +257,25 @@ extension TilingEngine {
         }
     }
 
+    /// A float's captured original frame, if one is pending —
+    /// the frame `restoreStashed` will deliver. Read-side
+    /// companion to `seedStash`/`forgetStash`, so callers never
+    /// touch `stashedFrames` directly.
+    func stashOriginal(_ id: WindowID) -> CGRect? {
+        stashedFrames[id]
+    }
+
+    /// Seeds (or overwrites) a float's capture with a
+    /// re-anchored frame (#444): the translated frame becomes
+    /// the "original" that `restoreStashed` delivers — on the
+    /// very next retile when the target space is visible, or on
+    /// the activation that un-parks it. Overwriting is the
+    /// point: a pre-existing capture holds source-display
+    /// coordinates that are no longer where the window belongs.
+    func seedStash(_ id: WindowID, frame: CGRect) {
+        stashedFrames[id] = frame
+    }
+
     /// Migrates a stashed frame capture when a native-tab rekeys
     /// a window id (#308/#412).
     public func rekeyStash(oldID: WindowID, newID: WindowID) {

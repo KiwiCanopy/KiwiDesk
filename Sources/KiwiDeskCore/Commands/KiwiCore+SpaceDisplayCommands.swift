@@ -57,6 +57,10 @@ extension KiwiCore {
         state.workspaces.assign(space, to: display)
         // Show it on — and move focus to — the target display.
         state.workspaces.activate(space)
+        // The layout carries the tiled members to the new
+        // display; floats have no layout frame, so each one
+        // re-anchors explicitly (#444).
+        reanchorFloats(of: space)
         retile(
             animated: tiler.settings.animations.onSpaceChange,
             force: true
@@ -100,8 +104,22 @@ extension KiwiCore {
         // wins, so drop any stale Main designation.
         mainSpaces.remove(space)
         resolveSpaceDisplays()
+        // A pin that moved the space across displays strands its
+        // floats like a window move would (#444); re-anchor them
+        // (a same-display pin is a no-op per float).
+        reanchorFloats(of: space)
         retile(force: true)
         emitSpaceChange()
         return .ok()
+    }
+
+    /// Re-anchors every floating member of `space` onto its
+    /// (possibly new) display — the space-level sibling of the
+    /// `moveWindow` re-anchor (#444). `reanchorFloat` itself
+    /// skips tiled members and same-display cases.
+    private func reanchorFloats(of space: SpaceID) {
+        for id in state.workspaces[space]?.windows ?? [] {
+            reanchorFloat(id, to: space)
+        }
     }
 }
