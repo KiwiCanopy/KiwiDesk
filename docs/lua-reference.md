@@ -144,7 +144,14 @@ KiwiDesk.swap("right")
 **Expects:** a space identifier (number or string).
 
 **Does:** switches to that virtual space, hiding the current
-space's tiled windows and revealing the target's.
+space's tiled windows and revealing the target's. Keyboard
+focus follows: the target's focused window (or its first
+window when none is stamped) is raised and its app activated;
+switching to an **empty** space hands focus to the desktop
+instead, so keystrokes never keep flowing into a now-hidden
+window. If macOS drops the activation, the post-switch settle
+(~300 ms) detects the unchanged frontmost app and re-raises
+once.
 
 **Example:**
 
