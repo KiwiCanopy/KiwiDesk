@@ -272,11 +272,14 @@ extension TilingEngine {
     /// the activation that un-parks it. Overwriting is the
     /// point: a pre-existing capture holds source-display
     /// coordinates that are no longer where the window belongs.
-    /// Known fragility (accepted): any non-echo `windowMoved`
+    /// Known fragilities (accepted): any non-echo `windowMoved`
     /// landing before the delivery echo — a user drag, or an
     /// app spontaneously moving its own parked window —
     /// consumes the seed via `forgetStash`, cancelling the
-    /// re-anchor. Consistent with "the user took over".
+    /// re-anchor; and a relocation landing MID-DRAG never seeds
+    /// at all (`reanchorFloat` skips the drag-exempt window),
+    /// so that float can restore to its old monitor later.
+    /// Both are consistent with "the pointer took over".
     func seedStash(_ id: WindowID, frame: CGRect) {
         stashedFrames[id] = frame
     }
