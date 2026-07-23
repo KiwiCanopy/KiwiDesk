@@ -390,17 +390,20 @@ authored). Chosen: a **session ratio layer** on the `Space`
 writes land there when no authored override carries the field,
 config stays untouched, and the layer reseeds on a real mode
 change or `reload_config`. Read precedence is authored override
-> session > global, and an **explicit global setter**
+> session > global, and every **explicit config write** drops
+the session shadow so it always visibly applies (the #383
+"visibly did nothing" rationale): a global setter
 (`bsp.set_ratio_h`, `stack.set_master_ratio`,
-`scroll.set_slot_size`) drops its field's session shadow
-everywhere so an explicit write always visibly applies (the
-#383 "visibly did nothing" rationale). Covers the BSP split
-ratios, stack master ratio, and scrolling slot size — the same
-shape for all three, per the #458 scope note. Accepted edges: a
-GUI Layout Defaults slider edit (a direct global write, no
-session clear) stays shadowed on session-resized spaces until a
-reload or mode change, and removing an override field
-mid-session can resurface an older session value until then.
+`scroll.set_slot_size`) clears its own field everywhere, and an
+explicit apply — `load_profile`, a preset, a GUI save — clears
+the whole layer, riding the same `forceRetile` classification
+those applies already carry (§5); event-driven applies (monitor
+change, native-space binding) keep it, so a display reconnect
+never eats an interactive resize. Covers the BSP split ratios,
+stack master ratio, and scrolling slot size — the same shape
+for all three, per the #458 scope note. Accepted edge: removing
+an override field mid-session can resurface an older session
+value until the next reseed.
 
 **Resize is truly 2-axis via two per-space BSP ratios; per-node
 ratios are rejected.** `resize("x")` and `resize("y")` used to

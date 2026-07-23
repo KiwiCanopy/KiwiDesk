@@ -110,6 +110,135 @@ struct SessionRatioTests {
         }
     }
 
+    @Test("Every explicit global setter drops its own shadow")
+    func allExplicitSettersClearTheirField() {
+        let core = makeCore()
+        core.execute("resize", args: [.string("y"), .number(500)])
+        #expect(
+            core.execute(
+                "bsp.set_ratio_v",
+                args: [.number(0.4)]
+            ).isSuccess
+        )
+        #expect(
+            core.state.workspaces[SpaceID("1")]?
+                .sessionRatios.splitRatioV == nil
+        )
+        core.execute(
+            "set_mode",
+            args: [.string("1"), .string("stack")]
+        )
+        core.execute("resize", args: [.string("x"), .number(500)])
+        #expect(
+            core.state.workspaces[SpaceID("1")]?
+                .sessionRatios.masterRatio != nil
+        )
+        #expect(
+            core.execute(
+                "stack.set_master_ratio",
+                args: [.number(0.55)]
+            ).isSuccess
+        )
+        #expect(
+            core.state.workspaces[SpaceID("1")]?
+                .sessionRatios.masterRatio == nil
+        )
+        core.execute(
+            "set_mode",
+            args: [.string("1"), .string("scrolling")]
+        )
+        core.execute("resize", args: [.string("x"), .number(50)])
+        #expect(
+            core.state.workspaces[SpaceID("1")]?
+                .sessionRatios.slotSize != nil
+        )
+        #expect(
+            core.execute(
+                "scroll.set_slot_size",
+                args: [.number(700)]
+            ).isSuccess
+        )
+        #expect(
+            core.state.workspaces[SpaceID("1")]?
+                .sessionRatios.slotSize == nil
+        )
+    }
+
+    @Test("Consecutive resizes accumulate on the session base")
+    func consecutiveResizesAccumulate() {
+        let core = makeCore()
+        core.execute("resize", args: [.string("x"), .number(100)])
+        let first = core.state.workspaces[SpaceID("1")]?
+            .sessionRatios.splitRatioH
+        core.execute("resize", args: [.string("x"), .number(100)])
+        let second = core.state.workspaces[SpaceID("1")]?
+            .sessionRatios.splitRatioH
+        // A read regressed to the config-only resolver would
+        // recompute global+delta each time: the second resize
+        // would land on the same value and the window would
+        // visibly stick after one step.
+        if let first, let second {
+            #expect(second > first)
+        } else {
+            Issue.record("session ratio missing")
+        }
+    }
+
+    @Test("An explicit profile apply reseeds the layer")
+    func explicitProfileApplyReseeds() {
+        let core = makeCore()
+        core.execute("resize", args: [.string("x"), .number(500)])
+        #expect(
+            core.state.workspaces[SpaceID("1")]?
+                .sessionRatios.splitRatioH != nil
+        )
+        let profile = Profile(
+            name: "p",
+            monitorSets: [MonitorSet(monitors: ["A:1x1"])],
+            spaceModes: ["1": .bsp],
+            settings: core.tiler.settings
+        )
+        core.apply(profile: profile, forceRetile: true)
+        #expect(
+            core.state.workspaces[SpaceID("1")]?
+                .sessionRatios == SessionRatios()
+        )
+        // An event-driven (un-forced) apply keeps the layer.
+        core.execute("resize", args: [.string("x"), .number(500)])
+        core.apply(profile: profile, forceRetile: false)
+        #expect(
+            core.state.workspaces[SpaceID("1")]?
+                .sessionRatios.splitRatioH != nil
+        )
+    }
+
+    @Test("reload_config reseeds the layer")
+    func reloadReseeds() {
+        let core = makeCore()
+        core.execute("resize", args: [.string("x"), .number(500)])
+        #expect(
+            core.state.workspaces[SpaceID("1")]?
+                .sessionRatios.splitRatioH != nil
+        )
+        core.loadConfig()
+        #expect(
+            core.state.workspaces[SpaceID("1")]?
+                .sessionRatios == SessionRatios()
+        )
+    }
+
+    /// The #458 mirror net (§5 parity rule): the SessionRatios
+    /// field list is hand-mirrored at the overlay funcs
+    /// (`TilingSettings+Resolution`), the write wrappers and
+    /// clears (`KiwiCore+SessionRatioWrite`, the three command
+    /// files), and this suite. Adding a field must fail here
+    /// until every site — and a behavioral test — is updated.
+    @Test("SessionRatios carries exactly the mirrored fields")
+    func fieldCountPinsTheMirrors() {
+        let mirror = Mirror(reflecting: SessionRatios())
+        #expect(mirror.children.count == 4)
+    }
+
     @Test("Scrolling slot resize stays per-space too")
     func scrollingSlotSession() {
         let core = makeCore()

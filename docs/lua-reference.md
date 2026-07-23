@@ -3290,7 +3290,8 @@ space no longer visibly resizes every other no-override space,
 and no override is silently authored on your behalf. Session
 values behave like the stack's per-window weights: never saved
 to a profile, gone on restart, reseeded from config on a real
-mode change or `reload_config`, and dropped for a field the
+mode change, `reload_config`, `load_profile` (or any other
+explicit profile/preset/GUI apply), and dropped for a field the
 moment you set its global explicitly (`bsp.set_ratio_h`,
 `stack.set_master_ratio`, `scroll.set_slot_size` — an explicit
 write always shows everywhere). This covers the BSP split

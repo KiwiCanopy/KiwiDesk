@@ -33,6 +33,16 @@ extension KiwiCore {
         // The engine's cached durations sync via
         // `TilingEngine.settings.didSet` (#51).
         tiler.settings = profile.settings
+        // An EXPLICIT apply reseeds the session resize layer
+        // (#458): the incoming settings are the new truth, and
+        // a session shadow would make the profile's ratios
+        // visibly do nothing (§5 forced-retile rationale).
+        // Event-driven applies (monitor change, native-space
+        // binding) keep it — a display reconnect must not eat
+        // the user's interactive resizes.
+        if forceRetile {
+            clearSessionRatios { $0 = SessionRatios() }
+        }
         let declared = profile.declaredSpaces
         // Seed live order from the profile's stored list so
         // creation order matches display order. Using
@@ -157,6 +167,10 @@ extension KiwiCore {
         forceRetile: Bool
     ) {
         tiler.settings = composed.settings
+        // Same explicit-apply reseed as `apply(profile:)`.
+        if forceRetile {
+            clearSessionRatios { $0 = SessionRatios() }
+        }
         for space in composed.spaces {
             state.workspaces.ensureSpace(space)
             state.workspaces.setMode(
