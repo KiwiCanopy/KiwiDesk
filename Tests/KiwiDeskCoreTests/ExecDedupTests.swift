@@ -126,4 +126,27 @@ struct ExecDedupTests {
         // watchdog path is proven in `ExecTests.execTimeout`.
         #expect(KiwiCore.defaultExecTimeout == 30)
     }
+
+    @Test("explicit timeout 0 disables the watchdog, not instant-kill")
+    func zeroTimeoutMeansNoLimit() async throws {
+        let core = makeCore()
+        let lua = try #require(core.lua)
+        // 0 must map to "no watchdog", NOT a 0-second deadline that
+        // SIGTERMs the child immediately. A long-lived child proves
+        // it by gap: a mis-parsed 0-as-deadline would terminate and
+        // reap well within reapGrace (2s), while no-limit keeps it
+        // running. The child outlives any starved poll (#344), so
+        // the check can't flake on a late resume.
+        #expect(
+            lua.run("z = KiwiDesk.exec('sleep 30', nil, 0)").succeeded
+        )
+        #expect(core.exec.runningCount == 1)
+        if case .number(let pid) = lua.global("z") {
+            #expect(pid > 0)
+        } else {
+            Issue.record("expected a pid for an accepted exec")
+        }
+        try await Task.sleep(nanoseconds: 2_500_000_000)
+        #expect(core.exec.runningCount == 1)
+    }
 }

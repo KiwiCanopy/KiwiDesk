@@ -64,10 +64,18 @@ public final class ExecLauncher {
     /// command still tears down cleanly.
     private var inFlight: [String: Int] = [:]
 
-    /// `runningCount` value at which `launch` warns once that a
-    /// hook command may be hanging (#467). Discoverable without
-    /// polling `get_state.exec_running`.
+    /// `runningCount` value at which `launch` warns that a hook
+    /// command may be hanging (#467). Discoverable without polling
+    /// `get_state.exec_running`.
     private static let warnThreshold = 20
+
+    /// One-shot latch for the `warnThreshold` warning: set when the
+    /// outstanding count first reaches the threshold, re-armed once
+    /// it falls back below. Without it a monotonic pile-up (the
+    /// #467 scenario) would warn only on the single `== threshold`
+    /// launch and a count flapping across the line would re-warn
+    /// every crossing.
+    private var highWaterWarned = false
 
     public init() {}
 
@@ -89,7 +97,9 @@ public final class ExecLauncher {
     /// spawn). For trigger-style pokes that just re-poke a
     /// receiver this is correct semantics — a second poke while
     /// one is pending adds nothing — and it bounds accumulation
-    /// against a wedged receiver (#467).
+    /// against a wedged receiver (#467). `dedup` defaults to
+    /// `false` here (a raw, policy-free primitive); the opinionated
+    /// default-on lives at the Lua boundary in `KiwiCore+ExecAPI`.
     @discardableResult
     public func launch(
         _ command: String,
@@ -164,7 +174,8 @@ public final class ExecLauncher {
 
         running[key] = Child(process: process, command: command)
         inFlight[command, default: 0] += 1
-        if running.count == Self.warnThreshold {
+        if running.count >= Self.warnThreshold, !highWaterWarned {
+            highWaterWarned = true
             onLog(
                 "exec: \(running.count) children outstanding — "
                     + "a hook command may be hanging"
@@ -250,9 +261,14 @@ public final class ExecLauncher {
     /// then leaks for the life of the process (`exec` outlives a
     /// stop/start), inflating `runningCount` and (its `inFlight`
     /// tally riding along) keeping that exact command deduped
-    /// away. Accepted: a truly-wedged child would only re-wedge
-    /// on respawn, and avoiding a post-teardown SIGTERM outweighs
-    /// reclaiming one entry in that triple-conditional corner.
+    /// away — even if the receiver later recovers, so a
+    /// transiently-wedged command can stay dedup-blocked for the
+    /// process life. Accepted (documented as a limitation): the
+    /// window is tiny (a stop must fire while a child holds the
+    /// pipe past EOF), and clearing the entries here would be
+    /// wrong — a later EOF `reap` of that child would then find no
+    /// entry and leak its Lua callback ref. Avoiding a
+    /// post-teardown SIGTERM outweighs the corner.
     func cancelWatchdogs() {
         // Snapshot the keys: the loop mutates `running`.
         for key in Array(running.keys) {
@@ -281,6 +297,9 @@ public final class ExecLauncher {
             inFlight[child.command] = n - 1
         } else {
             inFlight[child.command] = nil
+        }
+        if running.count < Self.warnThreshold {
+            highWaterWarned = false
         }
         onExit?(code, stdout, stderr)
     }

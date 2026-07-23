@@ -3513,6 +3513,9 @@ background.
   it caps a wedged receiver at one stuck child per command instead
   of a per-event pile-up. Pass `false` for commands you genuinely
   want to run in parallel with an identical copy of themselves.
+  Note a skipped call **does not invoke its callback** — no child
+  ran — so don't rely on a callback firing for a command that may
+  still be in flight.
 
 **Does:** starts the command in the background and returns
 immediately — KiwiDesk never waits for it. Returns the child's pid
@@ -3559,6 +3562,10 @@ KiwiDesk.exec("defaults read -g AppleInterfaceStyle",
 KiwiDesk.exec("some-slow-tool", function(code, out, err)
     -- code is non-zero if killed by the watchdog
 end, 5)
+
+-- No limit (deliberately long-running), and opt out of dedup so
+-- two identical copies can run at once:
+KiwiDesk.exec("long-running-tool", nil, 0, false)
 ```
 
 ### os.execute
@@ -3571,6 +3578,11 @@ returns `true`.
 **immediately** — it does *not* wait, and the return value says
 nothing about whether the command succeeded. When you need the exit
 code or output, use `KiwiDesk.exec` with a callback instead.
+
+Because it routes through `KiwiDesk.exec`, `os.execute` inherits its
+defaults: a 30 s timeout and identical-command dedup. A genuinely
+long-running `os.execute` is killed at 30 s — call `KiwiDesk.exec`
+directly with `timeout = 0` for one that must run unbounded.
 
 **Example:**
 
