@@ -184,7 +184,8 @@ extension KiwiCore {
         // so the seed never invents spaces the user didn't (dedup
         // keeps the live space first, #75).
         if config.spaces.count == 1,
-            Int(config.spaces[0].raw) != nil {
+            Int(config.spaces[0].raw) != nil
+        {
             config.spaces = SpaceID.deduplicated(
                 config.spaces + Self.starterSpaces
             )
