@@ -387,7 +387,6 @@
   "track.count": "Spur-Limit",
   "track.count_caption": "Begrenzt durch die minimale Fenstergröße oben: mehr Spuren als passen, klappen in die Überlaufspur.",
   "track.new_window": "Neues Fenster",
-  "track.new_window.focused": "Reiht sich in die fokussierte Spur ein",
   "track.new_window.own": "Öffnet seine eigene Spur",
   "track.new_window_position": "Position",
   "track.wrap_focus": "Fokus umlaufen lassen"

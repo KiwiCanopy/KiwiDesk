@@ -7,19 +7,34 @@ import Foundation
 /// over the flat array — no geometry; the layout renders overflow.
 extension Space {
     /// Inserts a window per the track layout's `new_window` rule
-    /// (#128) and `new_window_position` (#188): it either opens
-    /// its own new track or joins the focused track, and
-    /// `position` places it — for a new track, among the tracks;
-    /// for a join, among that track's windows. `ownTrack` ALWAYS
-    /// opens a new track (#192): the overflow track is a read-time
-    /// view, so spawn never caps — the far-edge surplus folds into
-    /// the overflow track when the layout renders. `isTiled`
-    /// supplies the float knowledge the space itself does not hold
-    /// — the partition only spans tiled windows.
+    /// (#128, #437) and `new_window_position` (#188). `ownTrack`
+    /// ALWAYS opens its own new track (#192): the overflow track is
+    /// a read-time view, so spawn never caps — the far-edge surplus
+    /// folds into it when the layout renders. `focusedTrack` is
+    /// fill-then-spill: the window joins the focused track (placed
+    /// by `position` among its windows) UNTIL that track already
+    /// holds `spillCapacity` windows — as many as fit at
+    /// `min_window_size` — and another track fits under `trackCap`,
+    /// when it opens a NEW track beside the focused one instead
+    /// (#437). `spillCapacity == nil` disables the spill so the
+    /// window always joins-and-piles — the explicit-placement path
+    /// (`move_to_space` travelers), which must not be relocated.
+    /// `trackCap` is 0 (unlimited, `auto_tracks`) or the fixed
+    /// `count + 1`; at the cap there is no room to spill, so it
+    /// piles. `isTiled` supplies the float knowledge the space
+    /// itself does not hold — the partition only spans tiled
+    /// windows.
+    /// `spillCapacity`/`trackCap` default to the no-spill identity
+    /// (join-and-pile): production routes through
+    /// `WorkspaceManager.add`, which requires both so every spawn
+    /// path chooses, but the Space primitive's default keeps
+    /// position-only callers simple.
     public mutating func insertIntoTrack(
         _ window: WindowID,
         rule: TrackParams.NewWindowTrack,
         position: SpawnPlacement,
+        spillCapacity: Int? = nil,
+        trackCap: Int = 0,
         isTiled: (WindowID) -> Bool
     ) {
         guard !windows.contains(window) else { return }
@@ -52,6 +67,23 @@ extension Space {
             insertOwnTrack(
                 window,
                 position: position,
+                focusedTrack: track,
+                tiled: tiled,
+                ranges: ranges
+            )
+        } else if let capacity = spillCapacity,
+            counts[track] >= capacity,
+            trackCap == 0 || counts.count < trackCap
+        {
+            // Fill-then-spill (#437): the focused track can't fit
+            // another window at min size and another track fits, so
+            // open a NEW track immediately after the focused one.
+            // Focus follows it (the caller's `focus`), so the next
+            // window fills that track and spills again — the
+            // recursion needs no special-casing.
+            insertOwnTrack(
+                window,
+                position: .afterFocused,
                 focusedTrack: track,
                 tiled: tiled,
                 ranges: ranges

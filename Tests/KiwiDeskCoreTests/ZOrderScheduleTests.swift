@@ -160,6 +160,13 @@ struct ZOrderScheduleTests {
     func trackSwapSchedulesRestore() {
         let core = makeCore()
         let space = makeSpace(core, windows: 8)
+        // own_track seeds eight separate markers so the cap below
+        // folds them all into one pile; fill-then-spill (#437, the
+        // default) would pack them by display capacity instead.
+        _ = core.execute(
+            "track.set_new_window",
+            args: [.string("own_track")]
+        )
         setMode(core, space, "track")
         // Cap the space to one track: all eight windows pile into
         // it and cascade (cascade_all default), so a swap scrambles

@@ -255,6 +255,7 @@ struct TrackSpawnTests {
     func spawnOwnTrack() {
         var state = StateCoordinator(defaultSpace: "1")
         state.workspaces.setMode("1", .track)
+        state.trackParams.newWindow = .ownTrack
         // after_focused keeps a stable left-to-right order for
         // this partition assertion (the default `first` would
         // reverse it — covered by its own test below).
@@ -284,6 +285,7 @@ struct TrackSpawnTests {
     func spawnHonorsOverride() {
         var state = StateCoordinator(defaultSpace: "1")
         state.workspaces.setMode("1", .track)
+        state.trackParams.newWindow = .ownTrack
         state.trackParams.newWindowPosition = .afterFocused
         var over = TrackOverride()
         // A fixed cap needs automatic off (#178); count alone is

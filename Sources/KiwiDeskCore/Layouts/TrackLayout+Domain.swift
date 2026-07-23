@@ -125,6 +125,61 @@ extension TrackLayout {
         )
     }
 
+    /// How many min-size windows fit stacked inside ONE track
+    /// along its in-track axis (#437, fill-then-spill): the
+    /// orthogonal of `geometricCap` (which caps how many *tracks*
+    /// fit across the cross-axis). A vertical track (column)
+    /// stacks its windows down `usable.height` with the vertical
+    /// inner gap; a horizontal track (row) runs them along
+    /// `usable.width`. Independent of the track count — every
+    /// track spans the full in-track axis — so it is a stable
+    /// per-display capacity. At equal track weights it matches the
+    /// count at which `trackFrames` starts piling (both go through
+    /// `StackLayout.maxColumnTotal` / `fitCap`), so a spawn spills
+    /// about when the render would otherwise cascade — a min-size
+    /// heuristic, since a resized (non-uniform) track can diverge by
+    /// a window. At least
+    /// 1 (a track always holds one window before spilling);
+    /// `.max` when there is no minimum.
+    public static func trackCapacity(
+        for context: LayoutContext
+    ) -> Int {
+        let vertical = context.track.axis == .vertical
+        let gap =
+            vertical
+            ? context.gaps.inner.vertical
+            : context.gaps.inner.horizontal
+        let span =
+            vertical
+            ? context.usable.height : context.usable.width
+        let cap = fitCap(
+            crossSpan: span,
+            minSize: context.minWindowSize,
+            gap: gap
+        )
+        return cap == .max ? .max : max(1, cap)
+    }
+
+    /// The break-marker seed that packs a tiled window list into
+    /// tracks of `capacity` each (#437): a break every `capacity`
+    /// windows, so entering track mode under fill-then-spill lays
+    /// the existing windows out as filled tracks — what
+    /// window-by-window spawning would have built — instead of one
+    /// column each. `capacity <= 0` (no minimum) is one track
+    /// holding everything, matching the seed's "no markers" case.
+    public static func fillSeed(
+        tiled: [WindowID],
+        capacity: Int
+    ) -> Set<WindowID> {
+        guard capacity > 0 else { return [] }
+        var breaks: Set<WindowID> = []
+        for (index, id) in tiled.enumerated()
+        where index % capacity == 0 {
+            breaks.insert(id)
+        }
+        return breaks
+    }
+
     /// Resolves the marker-track count against the two caps the
     /// layout applies — `normalCap` (the fixed `count`, or
     /// `.max` when `auto_tracks` is on) and `geoCap` (how many

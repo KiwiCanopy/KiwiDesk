@@ -167,9 +167,9 @@ enum LayoutHelp {
     @MainActor static var trackPosition: String {
         L(
             "track.new_window_position.help",
-            "With \u{201C}Opens own track\u{201D}, where the "
+            "With \u{201C}Opens its own track\u{201D}, where the "
                 + "new track lands among the tracks; with "
-                + "\u{201C}Joins the focused track\u{201D}, "
+                + "\u{201C}Fills the focused track\u{201D}, "
                 + "where the window lands inside it: First, "
                 + "Last, or right before or after the focused "
                 + "one."

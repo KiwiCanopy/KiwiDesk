@@ -241,6 +241,13 @@ struct TrackCommandsTests {
         let space = core.state.workspaces.space(
             of: WindowID(1)
         )!
+        // own_track so the seed is deterministic (one window per
+        // track); the default fill-then-spill would pack by display
+        // capacity (#437).
+        core.execute(
+            "track.set_new_window",
+            args: [.string("own_track")]
+        )
         #expect(
             core.execute(
                 "set_mode",
@@ -304,6 +311,11 @@ struct TrackCommandsTests {
         let space = core.state.workspaces.space(
             of: WindowID(1)
         )!
+        // own_track for a deterministic one-per-track seed (#437).
+        core.execute(
+            "track.set_new_window",
+            args: [.string("own_track")]
+        )
         core.execute(
             "set_mode",
             args: [.string(space.raw), .string("track")]
@@ -334,6 +346,12 @@ struct TrackCommandsTests {
                 )
             )
         }
+        // own_track so a traveler opens its own track (the
+        // fill-then-spill default would join-and-pile — #437).
+        core.execute(
+            "track.set_new_window",
+            args: [.string("own_track")]
+        )
         // Move 2 and 3 to space "2", switch it to track.
         core.state.workspaces.focus(WindowID(2), in: "1")
         core.execute("move_to_space", args: [.string("2")])
@@ -344,8 +362,8 @@ struct TrackCommandsTests {
             args: [.string("2"), .string("track")]
         )
         // Now move window 1 (focused in space 1) into space 2:
-        // with own_track default it must open its own track,
-        // not silently join the last one.
+        // under own_track it must open its own track, not silently
+        // join the last one.
         core.state.workspaces.focus(WindowID(1), in: "1")
         #expect(
             core.execute("move_to_space", args: [.string("2")])

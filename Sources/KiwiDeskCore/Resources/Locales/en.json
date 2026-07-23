@@ -752,9 +752,9 @@
   "track.count": "Track limit",
   "track.count_caption": "Bounded by the minimum window size above: more tracks than fit collapse into the overflow track.",
   "track.new_window": "New window",
-  "track.new_window.focused": "Joins the focused track",
+  "track.new_window.focused": "Fills the focused track",
   "track.new_window.own": "Opens its own track",
   "track.new_window_position": "Position",
-  "track.new_window_position.help": "With “Opens own track”, where the new track lands among the tracks; with “Joins the focused track”, where the window lands inside it: First, Last, or right before or after the focused one.",
+  "track.new_window_position.help": "With “Opens its own track”, where the new track lands among the tracks; with “Fills the focused track”, where the window lands inside it: First, Last, or right before or after the focused one.",
   "track.wrap_focus": "Wrap focus"
 }

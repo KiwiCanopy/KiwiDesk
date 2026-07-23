@@ -47,6 +47,17 @@ public struct StateCoordinator: Sendable {
     /// every other mode.
     public var trackParams = TrackParams()
 
+    /// Per-space fill-then-spill capacity (#437), mirrored from the
+    /// tiler before each event like `trackParams`: how many windows
+    /// a track holds at `min_window_size` before a `focused_track`
+    /// spawn spills into a new track beside the focused one. The
+    /// number is geometry-derived (the space's display), computed
+    /// where the geometry lives (`TilingEngine.trackCapacities`) so
+    /// this state core stays pure. An absent entry (unknown display)
+    /// makes the spawn join-and-pile — the same safe fallback a
+    /// traveler takes.
+    public var trackCapacities: [SpaceID: Int] = [:]
+
     /// Last known space per window. Window ids are stable OS
     /// ids, so a "created" window with a remembered space is
     /// one coming back from another native macOS Space (or a
@@ -195,6 +206,8 @@ public struct StateCoordinator: Sendable {
                         to: target,
                         trackRule: params.newWindow,
                         trackPosition: params.newWindowPosition,
+                        spillCapacity: trackCapacities[target],
+                        trackCap: params.trackCap,
                         isTiled: { [windows] in
                             windows[$0]?.isFloating == false
                         }

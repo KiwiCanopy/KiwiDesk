@@ -160,7 +160,7 @@ extension KiwiCore {
             preferring: config.fallbackSpace
         )
         for space in state.workspaces.allSpaces {
-            state.workspaces.setMode(
+            setSpaceMode(
                 space.id,
                 config.spaceModes[space.id] ?? .bsp
             )

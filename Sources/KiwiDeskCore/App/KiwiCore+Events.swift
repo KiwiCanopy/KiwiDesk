@@ -23,6 +23,17 @@ extension KiwiCore {
         ]
         state.spawnOverride = tiler.settings.placementOverride
         state.trackParams = tiler.settings.track
+        // Fill-then-spill needs each track space's capacity (#437),
+        // which is display geometry — resolve it here and mirror it
+        // in like `trackParams`, so a `focused_track` spawn reads a
+        // plain Int and the state core stays geometry-free. Only a
+        // window creation consumes it, so skip the per-space context
+        // builds on every other (higher-frequency) event.
+        if case .windowCreated = event {
+            state.trackCapacities = tiler.trackCapacities(
+                state: state
+            )
+        }
         let effects = state.apply(event)
         var newlyCreatedWindow: WindowID? = nil
         switch event {

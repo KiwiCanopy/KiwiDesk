@@ -81,7 +81,8 @@ public struct WorkspaceManager: Sendable {
     /// home whenever an unrelated setting is edited.
     public mutating func setMode(
         _ id: SpaceID,
-        _ mode: LayoutMode
+        _ mode: LayoutMode,
+        trackSeed: Set<WindowID>? = nil
     ) {
         guard spaces[id]?.mode != mode else { return }
         spaces[id]?.mode = mode
@@ -89,15 +90,14 @@ public struct WorkspaceManager: Sendable {
         // The session resize layer (#458) is a stint value like
         // the offset: a fresh mode stint reseeds from config.
         spaces[id]?.sessionRatios = SessionRatios()
-        // Track boundaries follow the same rule (#128): a
-        // fresh track stint never resumes markers minted for a
-        // different stint. Entering track seeds every window
-        // as its own track (the dynamic default; a positive
-        // cap merges the surplus at read time).
+        // Track boundaries follow the same rule (#128). Entering
+        // track uses the caller's `trackSeed` (fill-then-spill
+        // packing, #437) or seeds every window as its own track.
         spaces[id]?.trackWeights = [:]
-        let seed =
+        let seed: Set<WindowID> =
             mode == .track
-            ? Set(spaces[id]?.windows ?? []) : Set()
+            ? (trackSeed ?? Set(spaces[id]?.windows ?? []))
+            : []
         spaces[id]?.trackBreaks = seed
     }
 
@@ -235,16 +235,16 @@ public struct WorkspaceManager: Sendable {
         spaces[id]?.insert(window, placement: placement)
     }
 
-    /// Adds a window to a track-mode space per the track
-    /// layout's `new_window` rule (#128), removing it from its
-    /// old space. The track twin of `add(_:to:placement:)`;
-    /// `isTiled` supplies the float knowledge the space does
-    /// not hold.
+    /// Adds a window to a track-mode space per `new_window` (#128,
+    /// #437), removing it from its old space; the track twin of
+    /// `add(_:to:placement:)`. `isTiled` supplies float knowledge.
     public mutating func add(
         _ window: WindowID,
         to id: SpaceID,
         trackRule: TrackParams.NewWindowTrack,
         trackPosition: SpawnPlacement,
+        spillCapacity: Int?,
+        trackCap: Int,
         isTiled: (WindowID) -> Bool
     ) {
         remove(window)
@@ -253,6 +253,8 @@ public struct WorkspaceManager: Sendable {
             window,
             rule: trackRule,
             position: trackPosition,
+            spillCapacity: spillCapacity,
+            trackCap: trackCap,
             isTiled: isTiled
         )
     }

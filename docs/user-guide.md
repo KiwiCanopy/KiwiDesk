@@ -462,12 +462,16 @@ Adjust each mode's defaults:
 - **Track**: a somewhat more advanced layout (a caption at the
   top of the section says so) where several windows can share
   one track. **Arrange** (Columns = tracks side by side, Rows =
-  tracks stacked); **New window** — whether it opens its own
-  track or
-  joins the focused one — with a **Position** picker for where
-  within that choice it lands (first, last, before or after the
-  focused track/window; defaults to **first** so a new window
-  isn't buried in the overflow); **Automatic tracks** (on by
+  tracks stacked); **New window** — **Fills the focused track**
+  (the default) fills the track you're in and spills the next
+  window into a new track beside it once it's full (shelf-like:
+  fill the column you're at before reaching for a new one), while
+  **Opens its own track** gives every new window its own column
+  (the ultrawide "one app per column" choice) — with a
+  **Position** picker for where within that choice it lands (first,
+  last, before or after the focused track/window; defaults to
+  **first** so a new window isn't buried in the overflow);
+  **Automatic tracks** (on by
   default — tracks open and collapse as windows come and go;
   turn it off to pin a fixed **Track limit**, which greys out
   while automatic is on — the limit counts *normal* tracks, so a
