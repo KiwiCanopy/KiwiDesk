@@ -16,6 +16,11 @@ import Foundation
 /// access to it run commands under KiwiDesk's identity (and
 /// its Accessibility grant). Do not add it to the dispatcher.
 extension KiwiCore {
+    /// Default `KiwiDesk.exec` timeout when the call gives none
+    /// (#467): generous, since hook commands finish in
+    /// milliseconds — it bounds only a genuine hang.
+    static let defaultExecTimeout: TimeInterval = 30
+
     func registerExecAPI(on lua: LuaInterpreter) {
         lua.register("exec") { [weak self, weak lua] args in
             let callbackRef: Int32?
@@ -26,15 +31,29 @@ extension KiwiCore {
             } else {
                 callbackRef = nil
             }
-            // Optional third argument: timeout in seconds.
+            // Optional third argument: timeout in seconds. Absent
+            // → a generous default so a hung hook child (a wedged
+            // sketchybar --trigger, say) can't accumulate without
+            // bound (#467); hook commands are ms-scale, so the
+            // deadline only bites a genuine hang. An explicit
+            // `0` (or negative) means no limit, for a deliberately
+            // long-running command.
             let timeout: TimeInterval?
             if case .number(let t) =
-                args.dropFirst(2).first ?? .none, t > 0
+                args.dropFirst(2).first ?? .none
             {
-                timeout = t
+                timeout = t > 0 ? t : nil
             } else {
-                timeout = nil
+                timeout = Self.defaultExecTimeout
             }
+            // Optional fourth argument: dedup (default true). While
+            // an identical command is already in flight, skip the
+            // spawn — correct for trigger-style pokes and the cap
+            // that keeps a wedged receiver from piling up children
+            // (#467). Pass `false` for legitimately-parallel
+            // identical commands.
+            let dedup =
+                args.dropFirst(3).first?.boolValue ?? true
             guard let self,
                 let command = args.first?.stringValue,
                 !command.isEmpty
@@ -80,6 +99,7 @@ extension KiwiCore {
                 let pid = self.exec.launch(
                     command,
                     timeout: timeout,
+                    dedup: dedup,
                     onExit: onExit
                 )
             else {

@@ -43,15 +43,31 @@ public final class ExecLauncher {
     /// A launched child and its optional timeout watchdog, kept
     /// together so the two can never desync — one table, one
     /// count. The `Process` must stay alive until termination or
-    /// its handlers never fire.
+    /// its handlers never fire. `command` is kept so the reap can
+    /// find and decrement this child's in-flight tally.
     private struct Child {
         let process: Process
+        let command: String
         var watchdog: Task<Void, Never>?
     }
 
     /// Children we have launched and not yet reaped, keyed by
     /// object identity (pids can be recycled).
     private var running: [ObjectIdentifier: Child] = [:]
+
+    /// In-flight count per exact command string, powering the
+    /// `dedup` skip (#467). A wedged receiver (e.g. a sketchybar
+    /// daemon that never answers) otherwise lets per-event hook
+    /// pokes pile up without bound; deduping caps it at one stuck
+    /// child per distinct command. Reference-counted so a
+    /// legitimately-parallel non-deduped launch of the same
+    /// command still tears down cleanly.
+    private var inFlight: [String: Int] = [:]
+
+    /// `runningCount` value at which `launch` warns once that a
+    /// hook command may be hanging (#467). Discoverable without
+    /// polling `get_state.exec_running`.
+    private static let warnThreshold = 20
 
     public init() {}
 
@@ -66,12 +82,28 @@ public final class ExecLauncher {
     /// SIGTERM after that interval if it has not already
     /// exited; the `onExit` callback is still invoked with
     /// the termination code.
+    ///
+    /// When `dedup` is true and an identical `command` string is
+    /// already in flight, the spawn is skipped and nil returned
+    /// (the caller releases any callback ref, as on a failed
+    /// spawn). For trigger-style pokes that just re-poke a
+    /// receiver this is correct semantics — a second poke while
+    /// one is pending adds nothing — and it bounds accumulation
+    /// against a wedged receiver (#467).
     @discardableResult
     public func launch(
         _ command: String,
         timeout: TimeInterval? = nil,
+        dedup: Bool = false,
         onExit: ExitHandler? = nil
     ) -> Int32? {
+        if dedup, (inFlight[command] ?? 0) > 0 {
+            onLog(
+                "exec: skipped duplicate in-flight command "
+                    + "'\(command)'"
+            )
+            return nil
+        }
         let process = Process()
         process.executableURL = URL(
             fileURLWithPath: "/bin/sh"
@@ -130,7 +162,14 @@ public final class ExecLauncher {
             return nil
         }
 
-        running[key] = Child(process: process)
+        running[key] = Child(process: process, command: command)
+        inFlight[command, default: 0] += 1
+        if running.count == Self.warnThreshold {
+            onLog(
+                "exec: \(running.count) children outstanding — "
+                    + "a hook command may be hanging"
+            )
+        }
         capture?.drain()
 
         if let timeout {
@@ -209,9 +248,11 @@ public final class ExecLauncher {
     /// is *already stuck* (grandchild holding the pipe, so EOF
     /// never arrives) when the stop fires — its `running` entry
     /// then leaks for the life of the process (`exec` outlives a
-    /// stop/start), inflating `runningCount`. Accepted: avoiding
-    /// a post-teardown SIGTERM outweighs reclaiming one entry in
-    /// that triple-conditional corner.
+    /// stop/start), inflating `runningCount` and (its `inFlight`
+    /// tally riding along) keeping that exact command deduped
+    /// away. Accepted: a truly-wedged child would only re-wedge
+    /// on respawn, and avoiding a post-teardown SIGTERM outweighs
+    /// reclaiming one entry in that triple-conditional corner.
     func cancelWatchdogs() {
         // Snapshot the keys: the loop mutates `running`.
         for key in Array(running.keys) {
@@ -236,6 +277,11 @@ public final class ExecLauncher {
         guard let child = running[key] else { return }
         child.watchdog?.cancel()
         running[key] = nil
+        if let n = inFlight[child.command], n > 1 {
+            inFlight[child.command] = n - 1
+        } else {
+            inFlight[child.command] = nil
+        }
         onExit?(code, stdout, stderr)
     }
 
