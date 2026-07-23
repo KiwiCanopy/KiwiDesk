@@ -1302,9 +1302,10 @@ Directions use the arrow keys, which are identical on every layout.
 Each space digit is bound to a space *by name*: `⌃⌥3` goes to
 whichever space was third when the set was seeded. Renaming that
 space in Settings rewrites the shortcut to follow it, so the binding
-survives a rename. At least `⌃⌥1`…`⌃⌥5` are seeded on a fresh
-install — even before you have created five spaces — so the digits
-work out of the box.
+survives a rename. All nine digits `⌃⌥1`…`⌃⌥9` are seeded on a fresh
+install — even before you have created that many spaces — so the
+shortcuts work out of the box (a common multi-monitor first run
+already has several).
 
 The set is seeded only while **no** shortcut is bound anywhere —
 into `gui.json` at first launch on a fresh install, or into the

@@ -1160,9 +1160,10 @@ the first Save. Per-space rows number the digits
 by display position but bind each to its space **by name**
 (`⌃⌥3` → the third space's name at seed time; a later rename
 rewrites the binding to follow it, so it survives). The first run
-pads the discovered list to a **five-space starter set** so
-`⌃⌥1`–`⌃⌥5` seed even though a fresh macOS reports only the active
-Space (#270), and the set still caps at nine. The seeded Lua and labels mirror
+pads the discovered list to a **nine-space starter set** so all of
+`⌃⌥1`–`⌃⌥9` seed even though a fresh macOS reports only the active
+Space (#270) — a multi-monitor first run usually has several. The
+seeded Lua and labels mirror
 `KeybindingCatalog` byte-for-byte (guarded by
 `DefaultSeedCatalogParityTests`) so the rows stay presets, not
 Custom (#4). (#91)

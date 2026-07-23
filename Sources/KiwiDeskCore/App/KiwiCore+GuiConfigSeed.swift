@@ -110,12 +110,13 @@ extension KiwiCore {
         }
     }
 
-    /// The starter space set a fresh install gets — five numbered
-    /// spaces — so ⌃⌥1…5 all bind out of the box (#270). One
-    /// constant behind both first-run pads (empty list and the
-    /// single-space signature) so the count can't drift between
-    /// them.
-    static let starterSpaces = (1...5).map { SpaceID($0) }
+    /// The starter space set a fresh install gets — nine numbered
+    /// spaces, so every digit key ⌃⌥1…9 binds out of the box even
+    /// on a multi-monitor first run where more spaces are likely
+    /// (#270). One constant behind both first-run pads (empty list
+    /// and the single-space signature) so the count can't drift
+    /// between them.
+    static let starterSpaces = (1...9).map { SpaceID($0) }
 
     /// Builds an editable model from the running configuration.
     /// Keybindings and mode icons are recovered from the source
@@ -177,8 +178,8 @@ extension KiwiCore {
         // First run reports only the ACTIVE Space (#270): the live
         // list is a single numbered space (usually ["1"]), which
         // would seed only ⌃⌥1. Pad just that bare signature to the
-        // five-space starter set the empty state already uses, so
-        // ⌃⌥1…5 all work out of the box. A named or multi-space
+        // nine-space starter set the empty state already uses, so
+        // ⌃⌥1…9 all work out of the box. A named or multi-space
         // list is a configured setup — left exactly as discovered
         // so the seed never invents spaces the user didn't (dedup
         // keeps the live space first, #75).
