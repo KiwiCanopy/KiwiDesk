@@ -118,6 +118,10 @@ extension KiwiCore {
         // animates at the incoming duration, not a stale one
         // (#51 review).
         tiler.settings = config.settings
+        // A GUI save is an explicit apply (§5): reseed the
+        // session resize layer so an edited Layout Defaults
+        // ratio visibly applies on every space (#458).
+        clearSessionRatios { $0 = SessionRatios() }
         // Ensure spaces in display order first (config.spaces
         // is the authoritative list, so insertion order matches
         // the user's chosen Spaces ordering). Any extras that

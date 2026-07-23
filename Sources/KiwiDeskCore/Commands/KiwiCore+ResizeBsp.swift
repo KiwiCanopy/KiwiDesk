@@ -18,7 +18,7 @@ extension KiwiCore {
         span: Double,
         space: Space
     ) -> CommandResponse {
-        let bsp = tiler.settings.resolvedBsp(for: space.id)
+        let bsp = tiler.settings.resolvedBsp(for: space)
         let signed =
             bspFocusSign(axis: axis, space: space)
             * delta
@@ -36,7 +36,7 @@ extension KiwiCore {
                 available: span,
                 minSize: minSize
             )
-            tiler.settings.setSplitRatioH(
+            writeSplitRatioH(
                 min(max(value, 0.1), 0.9),
                 for: space.id
             )
@@ -47,7 +47,7 @@ extension KiwiCore {
                 available: span,
                 minSize: minSize
             )
-            tiler.settings.setSplitRatioV(
+            writeSplitRatioV(
                 min(max(value, 0.1), 0.9),
                 for: space.id
             )

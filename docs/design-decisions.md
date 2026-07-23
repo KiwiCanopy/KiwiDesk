@@ -383,6 +383,36 @@ two-axis layout's wire keys are named follows the
 geometric-wire rule in
 [Settings UI patterns](ui-patterns.md#labels--wire-names).
 
+**Interactive resizes are session-scoped per space; the config
+layers never move underneath them (#458).** Before, a resize on
+a space with no authored override wrote the *global* ratio —
+coherent under the #17 layered model ("you resized the
+default") but visibly wrong the moment two monitors show two
+no-override spaces: resizing one resized both. The two rejected
+alternatives: keeping as-is (documented confusion), and
+materializing a per-space override on first resize (silently
+pins the space, decouples it from Layout Defaults, and fills
+the #290 override editor with overrides the user never
+authored). Chosen: a **session ratio layer** on the `Space`
+(`SessionRatios`), the `stackWeights` precedent — interactive
+writes land there when no authored override carries the field,
+config stays untouched, and the layer reseeds on a real mode
+change or `reload_config`. Read precedence is authored override
+> session > global, and every **explicit config write** drops
+the session shadow so it always visibly applies (the #383
+"visibly did nothing" rationale): a global setter
+(`bsp.set_ratio_h`, `stack.set_master_ratio`,
+`scroll.set_slot_size`) clears its own field everywhere, and an
+explicit apply — `load_profile`, a preset, a GUI save — clears
+the whole layer, riding the same `forceRetile` classification
+those applies already carry (§5); event-driven applies (monitor
+change, native-space binding) keep it, so a display reconnect
+never eats an interactive resize. Covers the BSP split ratios,
+stack master ratio, and scrolling slot size — the same shape
+for all three, per the #458 scope note. Accepted edge: removing
+an override field mid-session can resurface an older session
+value until the next reseed.
+
 **Resize is truly 2-axis via two per-space BSP ratios; per-node
 ratios are rejected.** `resize("x")` and `resize("y")` used to
 write the *same* scalar (one `splitRatio` for every BSP split, one

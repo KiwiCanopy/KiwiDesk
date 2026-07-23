@@ -22,7 +22,7 @@ extension KiwiCore {
         span: Double,
         space: Space
     ) -> CommandResponse {
-        let stack = tiler.settings.resolvedStack(for: space.id)
+        let stack = tiler.settings.resolvedStack(for: space)
         let tiled = state.effectiveTiledMembers(
             of: space,
             activeSpace: activeSpace?.id
@@ -51,7 +51,7 @@ extension KiwiCore {
                 available: span,
                 minSize: Double(tiler.settings.minWindowSize)
             )
-            tiler.settings.setMasterRatio(
+            writeMasterRatio(
                 min(max(value, 0.1), 0.9),
                 for: space.id
             )

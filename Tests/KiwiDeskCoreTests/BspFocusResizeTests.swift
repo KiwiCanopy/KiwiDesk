@@ -48,14 +48,26 @@ struct BspFocusResizeTests {
         }
     }
 
+    /// The session-resolved ratios of space "1" (#458): an
+    /// interactive resize on a no-override space lands in the
+    /// session layer, so tests read the resolved value, and the
+    /// stored globals must stay untouched.
+    private func resolvedBsp(_ core: KiwiCore) -> BspParams {
+        core.tiler.settings.resolvedBsp(
+            for: core.state.workspaces[SpaceID("1")]!
+        )
+    }
+
     @Test("x with the left window focused raises the H ratio")
     func leftFocusGrowsLeft() {
         let core = makeCore()
         bspSpace(core)
         core.state.apply(.windowFocused(WindowID(1)))
-        let before = core.tiler.settings.bsp.splitRatioH
+        let before = resolvedBsp(core).splitRatioH
         core.execute("resize", args: [.string("x"), .number(200)])
-        #expect(core.tiler.settings.bsp.splitRatioH > before)
+        #expect(resolvedBsp(core).splitRatioH > before)
+        // The global never moves for a no-override space (#458).
+        #expect(core.tiler.settings.bsp.splitRatioH == before)
     }
 
     @Test("x with the right window focused lowers the H ratio")
@@ -63,11 +75,11 @@ struct BspFocusResizeTests {
         let core = makeCore()
         bspSpace(core)
         core.state.apply(.windowFocused(WindowID(2)))
-        let before = core.tiler.settings.bsp.splitRatioH
+        let before = resolvedBsp(core).splitRatioH
         core.execute("resize", args: [.string("x"), .number(200)])
         // +delta grows the FOCUSED window: the right region
         // widens, so the shared H ratio drops (#122).
-        #expect(core.tiler.settings.bsp.splitRatioH < before)
+        #expect(resolvedBsp(core).splitRatioH < before)
     }
 
     @Test("y with the top window focused raises the V ratio")
@@ -77,9 +89,9 @@ struct BspFocusResizeTests {
         // [1, 2, 3]: w1 left; the right region stacks w2 over
         // w3 (alternating → vertical at depth 1).
         core.state.apply(.windowFocused(WindowID(2)))
-        let before = core.tiler.settings.bsp.splitRatioV
+        let before = resolvedBsp(core).splitRatioV
         core.execute("resize", args: [.string("y"), .number(200)])
-        #expect(core.tiler.settings.bsp.splitRatioV > before)
+        #expect(resolvedBsp(core).splitRatioV > before)
     }
 
     @Test("y with the bottom window focused lowers the V ratio")
@@ -87,9 +99,9 @@ struct BspFocusResizeTests {
         let core = makeCore()
         bspSpace(core, count: 3)
         core.state.apply(.windowFocused(WindowID(3)))
-        let before = core.tiler.settings.bsp.splitRatioV
+        let before = resolvedBsp(core).splitRatioV
         core.execute("resize", args: [.string("y"), .number(200)])
-        #expect(core.tiler.settings.bsp.splitRatioV < before)
+        #expect(resolvedBsp(core).splitRatioV < before)
     }
 
     @Test("a huge x resize caps at the effective range (#383)")
@@ -114,7 +126,7 @@ struct BspFocusResizeTests {
         )!.upperBound
         let expected = min(max(bound, 0.1), 0.9)
         core.execute("resize", args: [.string("x"), .number(9000)])
-        #expect(abs(core.tiler.settings.bsp.splitRatioH - expected) < 1e-9)
+        #expect(abs(resolvedBsp(core).splitRatioH - expected) < 1e-9)
     }
 
     @Test("x with a floating focused window resizes the float")
@@ -125,13 +137,13 @@ struct BspFocusResizeTests {
         // shared ratio must not move, in either direction.
         core.state.apply(.windowFocused(WindowID(2)))
         core.state.setFloating(WindowID(2), true)
-        let before = core.tiler.settings.bsp.splitRatioH
+        let before = resolvedBsp(core).splitRatioH
         let response = core.execute(
             "resize",
             args: [.string("x"), .number(200)]
         )
         #expect(response.isSuccess)
-        #expect(core.tiler.settings.bsp.splitRatioH == before)
+        #expect(resolvedBsp(core).splitRatioH == before)
     }
 
     @Test("right focus writes the space's own override (#17)")

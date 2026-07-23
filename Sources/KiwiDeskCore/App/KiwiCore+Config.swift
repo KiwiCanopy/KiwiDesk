@@ -151,6 +151,11 @@ extension KiwiCore {
         tiler.settings.placementOverride = [:]
         tiler.settings.spaceIcons = [:]
         fallbackSpace = nil
+        // The session resize layer reseeds on reload (#458):
+        // the config about to apply is the new truth, and a
+        // shadowing session value would make an edited ratio
+        // visibly do nothing (§5 forced-retile rationale).
+        clearSessionRatios { $0 = SessionRatios() }
         for space in state.workspaces.allSpaces
         where space.mode != .bsp {
             state.workspaces.setMode(space.id, .bsp)

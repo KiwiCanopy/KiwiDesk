@@ -50,9 +50,16 @@ struct StackArrangementResizeTests {
         let core = makeCore()
         topStackSpace(core)
         core.state.apply(.windowFocused(WindowID(3)))
-        let before = core.tiler.settings.stack.masterRatio
+        let before = core.tiler.settings.resolvedStack(
+            for: core.state.workspaces[SpaceID("1")]!
+        ).masterRatio
         core.execute("resize", args: [.string("y"), .number(300)])
-        #expect(core.tiler.settings.stack.masterRatio > before)
+        // #458: the write lands in the session layer.
+        #expect(
+            core.tiler.settings.resolvedStack(
+                for: core.state.workspaces[SpaceID("1")]!
+            ).masterRatio > before
+        )
     }
 
     @Test("x bumps a horizontal stack row's weight")

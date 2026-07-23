@@ -38,6 +38,14 @@ struct MouseResizeApplyTests {
         return core.state.workspaces[SpaceID("1")]!
     }
 
+    /// Session-resolved params of space "1" (#458): mouse
+    /// drops on a no-override space land in the session layer.
+    private func resolvedBsp(_ core: KiwiCore) -> BspParams {
+        core.tiler.settings.resolvedBsp(
+            for: core.state.workspaces[SpaceID("1")]!
+        )
+    }
+
     @Test("bspRatioH writes only the H ratio")
     func hAppliesToH() {
         let core = makeCore()
@@ -47,9 +55,11 @@ struct MouseResizeApplyTests {
             in: space,
             bounds: bounds
         )
-        let bsp = core.tiler.settings.bsp
+        let bsp = resolvedBsp(core)
         #expect(abs(bsp.splitRatioH - 0.6) < 1e-9)
         #expect(bsp.splitRatioV == 0.5)
+        // The stored global is untouched (#458).
+        #expect(core.tiler.settings.bsp.splitRatioH == 0.5)
     }
 
     @Test("bspRatioV writes only the V ratio")
@@ -61,7 +71,7 @@ struct MouseResizeApplyTests {
             in: space,
             bounds: bounds
         )
-        let bsp = core.tiler.settings.bsp
+        let bsp = resolvedBsp(core)
         #expect(abs(bsp.splitRatioV - 0.6) < 1e-9)
         #expect(bsp.splitRatioH == 0.5)
     }
@@ -79,7 +89,7 @@ struct MouseResizeApplyTests {
             in: space,
             bounds: bounds
         )
-        #expect(abs(core.tiler.settings.bsp.splitRatioH - 0.7) < 1e-9)
+        #expect(abs(resolvedBsp(core).splitRatioH - 0.7) < 1e-9)
     }
 
     @Test("bspRatioV drag caps at the effective range (#383)")
@@ -92,7 +102,7 @@ struct MouseResizeApplyTests {
             in: space,
             bounds: bounds
         )
-        #expect(abs(core.tiler.settings.bsp.splitRatioV - 0.625) < 1e-9)
+        #expect(abs(resolvedBsp(core).splitRatioV - 0.625) < 1e-9)
     }
 
     @Test("masterRatio applies onto the resolved base")
@@ -104,7 +114,9 @@ struct MouseResizeApplyTests {
             in: space,
             bounds: bounds
         )
-        let stack = core.tiler.settings.stack
+        let stack = core.tiler.settings.resolvedStack(
+            for: core.state.workspaces[SpaceID("1")]!
+        )
         #expect(abs(stack.masterRatio - 0.5) < 1e-9)
     }
 
@@ -120,7 +132,9 @@ struct MouseResizeApplyTests {
             in: space,
             bounds: bounds
         )
-        let stack = core.tiler.settings.stack
+        let stack = core.tiler.settings.resolvedStack(
+            for: core.state.workspaces[SpaceID("1")]!
+        )
         #expect(abs(stack.masterRatio - 0.7) < 1e-9)
     }
 
@@ -138,7 +152,9 @@ struct MouseResizeApplyTests {
             in: space,
             bounds: bounds
         )
-        let after = core.tiler.settings.scrolling.slotSize
+        let after = core.tiler.settings.resolvedScrolling(
+            for: core.state.workspaces[SpaceID("1")]!
+        ).slotSize
             .editablePoints(along: bounds.width, horizontal: true)
         #expect(abs(after - before - 100) < 0.5)
     }

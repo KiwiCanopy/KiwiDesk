@@ -20,6 +20,8 @@ extension KiwiCore {
             guard let ratio = Self.parseMasterRatio(args.first)
             else { return Self.masterRatioError }
             tiler.settings.stack.masterRatio = ratio
+            // Explicit global write shows everywhere (#458).
+            clearSessionRatios { $0.masterRatio = nil }
         case "stack.set_overflow_style":
             guard
                 let style = Self.parseOverflowStyle(

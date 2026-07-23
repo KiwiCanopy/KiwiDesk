@@ -21,10 +21,14 @@ extension KiwiCore {
             guard let ratio = Self.parseSplitRatio(args.first)
             else { return Self.ratioError }
             tiler.settings.bsp.splitRatioH = ratio
+            // An explicit global write must show everywhere:
+            // drop the session shadow (#458).
+            clearSessionRatios { $0.splitRatioH = nil }
         case "bsp.set_ratio_v":
             guard let ratio = Self.parseSplitRatio(args.first)
             else { return Self.ratioError }
             tiler.settings.bsp.splitRatioV = ratio
+            clearSessionRatios { $0.splitRatioV = nil }
         case "bsp.set_new_window_placement":
             guard let placement = parsePlacement(args) else {
                 return placementError
