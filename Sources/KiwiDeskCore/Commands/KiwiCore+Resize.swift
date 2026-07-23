@@ -67,10 +67,17 @@ extension KiwiCore {
                 delta: delta
             )
         }
+        // Span resolves on the space's OWN display (#449) —
+        // main-screen math resized against the wrong bounds on
+        // a secondary monitor.
+        let bounds = TilingEngine.screen(
+            for: space.id,
+            in: state
+        ).map { GeometryUtils.axVisibleFrame(of: $0) }
         let span =
             axis == "x"
-            ? Double(NSScreen.main?.visibleFrame.width ?? 1920)
-            : Double(NSScreen.main?.visibleFrame.height ?? 1080)
+            ? Double(bounds?.width ?? 1920)
+            : Double(bounds?.height ?? 1080)
         let response: CommandResponse
         switch space.mode {
         case .bsp:
@@ -125,204 +132,11 @@ extension KiwiCore {
         return response
     }
 
-    /// Per-axis BSP resize (#56): "x" moves the side-by-side
-    /// splits, "y" the stacked splits — independent knobs. The
-    /// delta's sign follows the FOCUSED window (#122): a slot
-    /// in the second (right/bottom) region grows when the
-    /// shared ratio DROPS, so +delta always grows the focused
-    /// region — mouse-path parity (`MouseResize.translate`).
-    private func resizeBsp(
-        axis: String,
-        delta: Double,
-        span: Double,
-        space: Space
-    ) -> CommandResponse {
-        let bsp = tiler.settings.resolvedBsp(for: space.id)
-        let signed =
-            bspFocusSign(axis: axis, space: space)
-            * delta
-        // Cap the write at the display's effective range (#383):
-        // past it the layout clamps anyway and the stored value
-        // would only ratchet invisibly, exactly like the stack
-        // path (#44). Span is the raw screen extent (a superset of
-        // the gap-adjusted range) so the cap never blocks reaching
-        // the visible bound.
-        let minSize = Double(tiler.settings.minWindowSize)
-        if axis == "x" {
-            let value = SplitDomain.cappedRatioWrite(
-                bsp.splitRatioH + signed / span,
-                base: bsp.splitRatioH,
-                available: span,
-                minSize: minSize
-            )
-            tiler.settings.setSplitRatioH(
-                min(max(value, 0.1), 0.9),
-                for: space.id
-            )
-        } else {
-            let value = SplitDomain.cappedRatioWrite(
-                bsp.splitRatioV + signed / span,
-                base: bsp.splitRatioV,
-                available: span,
-                minSize: minSize
-            )
-            tiler.settings.setSplitRatioV(
-                min(max(value, 0.1), 0.9),
-                for: space.id
-            )
-        }
-        return .ok()
-    }
-
-    /// Which way the shared BSP ratio must move so "grow"
-    /// grows the FOCUSED window — the mouse path's side rule,
-    /// via the shared authority (`MouseResize.bspSide`).
-    /// Unknown focus (none, or floating — no slot) keeps +1,
-    /// the first-region direction (the pre-#122 behavior).
-    /// Assumes `space` IS the active space: the slot lookup
-    /// resolves the active space's frames only, so any other
-    /// space silently gets the +1 fallback.
-    private func bspFocusSign(
-        axis: String,
-        space: Space
-    ) -> Double {
-        guard let focused = space.focused,
-            let slot = tiler.calculatedFrames(
-                state: state
-            )[focused],
-            let screen = NSScreen.main
-                ?? NSScreen.screens.first
-        else { return 1 }
-        return Double(
-            MouseResize.bspSide(
-                slot: slot,
-                bounds: GeometryUtils.axVisibleFrame(
-                    of: screen
-                ),
-                horizontal: axis == "x"
-            )
-        )
-    }
-
-    /// Focus-aware stack resize (#67), arrangement-aware
-    /// (#222). The split axis (x for a left/right stack zone,
-    /// y for top/bottom) moves the master/stack split in the
-    /// direction that grows the FOCUSED window: focused in
-    /// master → +delta raises the ratio, focused in the stack
-    /// zone → +delta lowers it (the zone grows). The other
-    /// axis grows the focused window's share of its zone via
-    /// the per-window weights — but only when the zone lines
-    /// up along that axis; a zone has no cross-axis parameter,
-    /// so that resize fails like any unsupported axis.
-    private func resizeStack(
-        axis: String,
-        delta: Double,
-        span: Double,
-        space: Space
-    ) -> CommandResponse {
-        let stack = tiler.settings.resolvedStack(for: space.id)
-        let tiled = state.effectiveTiledMembers(
-            of: space,
-            activeSpace: activeSpace?.id
-        )
-        let splitAxis =
-            stack.stackPosition.splitsHorizontally ? "x" : "y"
-        guard axis != splitAxis else {
-            // Unknown focus keeps the master-grows direction
-            // (the pre-#67 behavior).
-            let (master, _) = StackLayout.partition(
-                tiled,
-                masterCount: stack.masterCount
-            )
-            let inMaster =
-                space.focused.flatMap { focused in
-                    tiled.contains(focused)
-                        ? master.contains(focused) : nil
-                } ?? true
-            let sign: Double = inMaster ? 1 : -1
-            // Interactive writes cap at the display's effective
-            // range (#44) — past it the layout clamps and the
-            // stored value would only ratchet invisibly.
-            let value = SplitDomain.cappedRatioWrite(
-                stack.masterRatio + sign * delta / span,
-                base: stack.masterRatio,
-                available: span,
-                minSize: Double(tiler.settings.minWindowSize)
-            )
-            tiler.settings.setMasterRatio(
-                min(max(value, 0.1), 0.9),
-                for: space.id
-            )
-            return .ok()
-        }
-        guard let focused = space.focused,
-            let column = StackLayout.column(
-                containing: focused,
-                in: tiled,
-                masterCount: stack.masterCount
-            )
-        else { return .fail("no focused tiled window") }
-        // The weight axis is the focused zone's own axis: a
-        // vertical zone divides heights ("y"), a horizontal one
-        // widths ("x"). The stack zone's axis derives from the
-        // position (#222) and is always orthogonal to the split;
-        // only a master zone oriented along the split axis has
-        // no cross-axis parameter — perceivable no-op like
-        // unsupported modes (#184).
-        let (master, _) = StackLayout.partition(
-            tiled,
-            masterCount: stack.masterCount
-        )
-        let orientation =
-            master.contains(focused)
-            ? stack.masterOrientation
-            : stack.stackPosition.stackOrientation
-        let weightAxis =
-            orientation == .vertical ? "y" : "x"
-        guard axis == weightAxis else {
-            cueUnsupportedCommand()
-            return .fail(
-                "no \(axis) parameter for this arrangement"
-            )
-        }
-        guard let focusOffset = column.firstIndex(of: focused),
-            column.count > 1
-        else {
-            return .fail("focused window is alone in its column")
-        }
-        // The step math (delta → weight change, grow cap,
-        // clamp) is the shared #67/#128 authority; the screen
-        // span stands in for the column height A — close enough
-        // for a keyboard nudge, and the layout renormalizes
-        // whatever we store.
-        let weightFloor = StackLayout.weightFloor
-        let weights = column.map {
-            max(space.stackWeights[$0] ?? 1, weightFloor)
-        }
-        let index =
-            column.distance(
-                from: column.startIndex,
-                to: focusOffset
-            )
-        let value = StackLayout.weightStep(
-            weights: weights,
-            at: index,
-            delta: delta,
-            span: span,
-            minSize: Double(tiler.settings.minWindowSize)
-        )
-        state.workspaces.withSpace(space.id) {
-            $0.stackWeights[focused] = value
-        }
-        return .ok()
-    }
-
     /// The scrolling slot resizes along its own scroll axis,
     /// not the requested x/y axis. Take the current magnitude
     /// (stored pt as-is; auto/% seeded against the axis), add
     /// the delta, store as points. Screen basis matches the
-    /// mouse-resize path (main screen — the pre-existing
-    /// single-screen ceiling, see plan item 8).
+    /// mouse-resize path: the space's own display (#449).
     private func resizeScrollingSlot(
         _ delta: Double,
         space: Space
@@ -330,7 +144,10 @@ extension KiwiCore {
         let scrolling =
             tiler.settings.resolvedScrolling(for: space.id)
         let horizontal = scrolling.axisIsHorizontal
-        let screen = NSScreen.main ?? NSScreen.screens.first
+        let screen = TilingEngine.screen(
+            for: space.id,
+            in: state
+        )
         let bounds =
             screen.map { GeometryUtils.axVisibleFrame(of: $0) }
             ?? CGRect(x: 0, y: 0, width: 1920, height: 1080)

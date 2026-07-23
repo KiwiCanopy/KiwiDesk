@@ -19,11 +19,17 @@ extension KiwiCore {
         guard tiler.settings.floatNudge,
             let current = state.windows[id]?.frame
         else { return }
+        // Off-screen fallback resolves the window's SPACE's
+        // display (#449), never blindly the main screen.
         let screen =
             NSScreen.screens.first {
                 GeometryUtils.axVisibleFrame(of: $0)
                     .intersects(current)
-            } ?? NSScreen.main ?? NSScreen.screens.first
+            }
+            ?? state.workspaces.space(of: id).flatMap {
+                TilingEngine.screen(for: $0, in: state)
+            }
+            ?? NSScreen.screens.first
         guard let screen else { return }
         let visible = GeometryUtils.axVisibleFrame(of: screen)
         let nudged = FloatNudge.target(

@@ -41,9 +41,14 @@ extension KiwiCore {
         frame: CGRect,
         in space: Space
     ) {
+        // The bounds resolve on the space's OWN display (#449):
+        // every ratio cap and translate below reads them, and
+        // main-screen math was wrong on a secondary monitor.
         guard tiler.settings.mouseResize == .layout,
-            let screen = NSScreen.main
-                ?? NSScreen.screens.first
+            let screen = TilingEngine.screen(
+                for: space.id,
+                in: state
+            )
         else {
             retile(
                 animated: tiler.settings.animations.onWindowResize

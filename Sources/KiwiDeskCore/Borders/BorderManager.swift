@@ -299,15 +299,12 @@ public final class BorderManager {
         )
     }
 
-    /// The screen a window's frame center sits on (for the ring's
-    /// pixel scale), or the main screen. AX coords, so flip the
-    /// center before the Cocoa hit test.
+    /// The screen a window's frame mostly sits on (for the ring's
+    /// pixel scale), or the main screen. Max visible-area overlap
+    /// (#449), not a center hit test: a frame hanging off an edge
+    /// (stash corner, mid-drag) keeps an offscreen center yet
+    /// still resolves its OWN display's scale.
     func screen(for frame: CGRect) -> NSScreen? {
-        let center = GeometryUtils.axPoint(
-            CGPoint(x: frame.midX, y: frame.midY)
-        )
-        return NSScreen.screens.first {
-            $0.frame.contains(center)
-        } ?? NSScreen.main
+        TilingEngine.screen(containing: frame) ?? NSScreen.main
     }
 }
