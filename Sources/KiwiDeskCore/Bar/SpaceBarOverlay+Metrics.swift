@@ -181,19 +181,22 @@ extension SpaceBarOverlay {
         at local: CGPoint,
         strip: CGRect,
         inset: CGFloat,
+        trailingAxis: CGFloat,
         horizontal: Bool
     ) -> ScrollArrow? {
         guard inset > 0 else { return nil }
         let axisPos = horizontal ? local.x : local.y
-        let axisLen = horizontal ? strip.width : strip.height
         let crossPos = horizontal ? local.y : local.x
         let crossLen = horizontal ? strip.height : strip.width
+        // The forward zone ends at `trailingAxis` — the Spaces
+        // region's trailing edge — not the strip rim, so a point in
+        // the pinned front band past it is not a scroll zone (#409).
         guard crossPos >= 0, crossPos <= crossLen,
-            axisPos >= 0, axisPos <= axisLen
+            axisPos >= 0, axisPos <= trailingAxis
         else { return nil }
         let zone = BarArrowView.zone
         if axisPos < zone { return .back }
-        if axisPos > axisLen - zone { return .forward }
+        if axisPos > trailingAxis - zone { return .forward }
         return nil
     }
 }

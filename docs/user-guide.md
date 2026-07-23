@@ -917,9 +917,10 @@ their size; small chevrons appear at the ends toward the hidden
 Spaces, and the bar follows the active Space into view. Click a
 chevron to scroll, or — while dragging a window — hold the cursor
 over a chevron and the bar autoscrolls so you can drop onto a
-Space that started off-screen. The front-app segment scrolls with
-the row (it's the row's tail), so it's at the far end when you
-scroll there.
+Space that started off-screen. The front-app segment stays
+pinned at the trailing end — only the Spaces scroll behind the
+chevrons — so the focused app is always in view; while the bar
+fits it sits at the row's tail as before.
 
 The editor's order matches the App Bar editor's: preview,
 **Show Space Bar**, **Position** (any of the four screen edges

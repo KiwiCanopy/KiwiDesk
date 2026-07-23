@@ -119,6 +119,7 @@ struct SpaceBarScrollTests {
                 at: CGPoint(x: 10, y: 16),
                 strip: strip,
                 inset: zone + 6,
+                trailingAxis: 200,
                 horizontal: true
             ) == .back
         )
@@ -127,6 +128,7 @@ struct SpaceBarScrollTests {
                 at: CGPoint(x: 195, y: 16),
                 strip: strip,
                 inset: zone + 6,
+                trailingAxis: 200,
                 horizontal: true
             ) == .forward
         )
@@ -135,8 +137,38 @@ struct SpaceBarScrollTests {
                 at: CGPoint(x: 100, y: 16),
                 strip: strip,
                 inset: zone + 6,
+                trailingAxis: 200,
                 horizontal: true
             ) == nil
+        )
+    }
+
+    @Test(
+        "Forward zone tracks the pinned front band, not the rim"
+    )
+    func arrowHitPinnedFrontBand() {
+        // The front segment holds the trailing 60pt; the Spaces
+        // region (and its forward arrow) ends at trailingAxis 140.
+        let strip = CGRect(x: 0, y: 0, width: 200, height: 32)
+        // A point in the pinned band past trailingAxis is inert.
+        #expect(
+            SpaceBarOverlay.arrowHit(
+                at: CGPoint(x: 180, y: 16),
+                strip: strip,
+                inset: zone + 6,
+                trailingAxis: 140,
+                horizontal: true
+            ) == nil
+        )
+        // The forward arrow now sits just inside trailingAxis.
+        #expect(
+            SpaceBarOverlay.arrowHit(
+                at: CGPoint(x: 135, y: 16),
+                strip: strip,
+                inset: zone + 6,
+                trailingAxis: 140,
+                horizontal: true
+            ) == .forward
         )
     }
 
@@ -148,6 +180,7 @@ struct SpaceBarScrollTests {
                 at: CGPoint(x: 10, y: 16),
                 strip: strip,
                 inset: 0,
+                trailingAxis: 200,
                 horizontal: true
             ) == nil
         )
@@ -161,6 +194,7 @@ struct SpaceBarScrollTests {
                 at: CGPoint(x: 10, y: 40),
                 strip: strip,
                 inset: zone + 6,
+                trailingAxis: 200,
                 horizontal: true
             ) == nil
         )
@@ -174,6 +208,7 @@ struct SpaceBarScrollTests {
                 at: CGPoint(x: 16, y: 10),
                 strip: strip,
                 inset: zone + 6,
+                trailingAxis: 200,
                 horizontal: false
             ) == .back
         )
@@ -182,6 +217,7 @@ struct SpaceBarScrollTests {
                 at: CGPoint(x: 16, y: 195),
                 strip: strip,
                 inset: zone + 6,
+                trailingAxis: 200,
                 horizontal: false
             ) == .forward
         )
