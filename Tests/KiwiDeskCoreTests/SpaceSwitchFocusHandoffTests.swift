@@ -208,6 +208,69 @@ struct SpaceSwitchFocusHandoffTests {
         #expect(logs.isEmpty)
     }
 
+    /// #465 QA regression: raising same-app window B activates
+    /// the app, and a lazy-AX app re-reports its OLD focused
+    /// window A on a hidden space; following that report yanked
+    /// the user back to A's space. While B's raise is unechoed,
+    /// the sibling report is distrusted: no follow, state focus
+    /// reverted.
+    @Test("Stale same-app re-report neither follows nor moves")
+    func activationReReportSuppressed() {
+        let core = makeCore()
+        addWindow(core, 1, pid: 5)
+        addWindow(core, 2, pid: 5)
+        // Window 1 hides on space 2; window 2 stays the active
+        // space's focus (the raised-and-unechoed target).
+        core.moveWindow(
+            WindowID(1),
+            to: SpaceID(2),
+            follow: false
+        )
+        #expect(core.state.workspaces.lastFocused == WindowID(2))
+        core.outstandingSelfRaises.insert(WindowID(2))
+        core.handle(.windowFocused(WindowID(1)))
+        // No focus-follow scheduled, focus stays reverted.
+        #expect(core.deferred.task(for: .focusFollow) == nil)
+        #expect(core.state.workspaces.lastFocused == WindowID(2))
+        #expect(core.state.workspaces.activeSpace == SpaceID(1))
+    }
+
+    /// Control: with no unechoed same-app raise in flight, the
+    /// same hidden-window report schedules the normal cmd-tab
+    /// focus-follow — the suppression is provenance-scoped, not
+    /// a blanket cross-space mute.
+    @Test("A clean hidden-window report still schedules follow")
+    func cleanReportStillFollows() {
+        let core = makeCore()
+        addWindow(core, 1, pid: 5)
+        addWindow(core, 2, pid: 5)
+        core.moveWindow(
+            WindowID(1),
+            to: SpaceID(2),
+            follow: false
+        )
+        core.handle(.windowFocused(WindowID(1)))
+        #expect(core.deferred.task(for: .focusFollow) != nil)
+    }
+
+    /// A raise in flight for a DIFFERENT app never suppresses:
+    /// the report is not that raise's activation echo.
+    @Test("Another app's raise does not suppress the follow")
+    func otherAppRaiseDoesNotSuppress() {
+        let core = makeCore()
+        addWindow(core, 1, pid: 5)
+        addWindow(core, 2, pid: 5)
+        addWindow(core, 3, pid: 9)
+        core.moveWindow(
+            WindowID(1),
+            to: SpaceID(2),
+            follow: false
+        )
+        core.outstandingSelfRaises.insert(WindowID(3))
+        core.handle(.windowFocused(WindowID(1)))
+        #expect(core.deferred.task(for: .focusFollow) != nil)
+    }
+
     /// The settle's dropped-activate detection: the app that
     /// was frontmost BEFORE the switch still is at settle time,
     /// and it is not the focused window's app — the cooperative
