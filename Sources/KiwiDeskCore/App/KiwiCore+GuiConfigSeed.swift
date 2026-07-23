@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 
 /// The "seed / overlay a `GuiConfig` from live or stored-profile
@@ -110,13 +111,38 @@ extension KiwiCore {
         }
     }
 
-    /// The starter space set a fresh install gets — nine numbered
-    /// spaces, so every digit key ⌃⌥1…9 binds out of the box even
-    /// on a multi-monitor first run where more spaces are likely
-    /// (#270). One constant behind both first-run pads (empty list
-    /// and the single-space signature) so the count can't drift
-    /// between them.
-    static let starterSpaces = (1...9).map { SpaceID($0) }
+    /// The starter space set a fresh install gets — the beginner
+    /// ladder sized to the connected displays: five spaces per
+    /// display (#466, superseding the flat nine of #270). One
+    /// generator behind both first-run pads (empty list and the
+    /// single-space signature) so the count can't drift between
+    /// them; the ladder's per-space MODES and pins are applied and
+    /// persisted separately by `seedFirstRunStarterProfile()`,
+    /// since `gui.json` carries only the space list and shortcuts.
+    func starterSpaces() -> [SpaceID] {
+        StarterLadder.spaces(displayCount: firstRunDisplayCount())
+    }
+
+    /// Connected displays for first-run seeding. `loadConfig` runs
+    /// before the event loop's first `publishDisplays`, so live
+    /// state is still empty on a genuine first launch — fall back
+    /// to the same `NSScreen` source `publishDisplays` reads.
+    /// Prefers live state when present (tests seed displays there
+    /// to drive this deterministically). The one accessor behind
+    /// both the `gui.json` space count and the Starter profile, so
+    /// the two can't size to different display counts.
+    func firstRunDisplays() -> [Display] {
+        let live = state.workspaces.allDisplays
+        if !live.isEmpty { return live }
+        return NSScreen.screens.compactMap { $0.kiwiDisplay }
+    }
+
+    /// `firstRunDisplays().count`, floored at one — a Mac always
+    /// drives at least one screen even if the read comes back
+    /// empty (headless CI).
+    func firstRunDisplayCount() -> Int {
+        max(1, firstRunDisplays().count)
+    }
 
     /// Builds an editable model from the running configuration.
     /// Keybindings and mode icons are recovered from the source
@@ -144,7 +170,7 @@ extension KiwiCore {
             defined + Array(modes.keys)
         )
         if config.spaces.isEmpty {
-            config.spaces = Self.starterSpaces
+            config.spaces = starterSpaces()
         }
         var bindings: [Int: String] = [:]
         for (number, name) in nativeSpaceBindings {
@@ -178,8 +204,9 @@ extension KiwiCore {
         // First run reports only the ACTIVE Space (#270): the live
         // list is a single numbered space (usually ["1"]), which
         // would seed only ⌃⌥1. Pad just that bare signature to the
-        // nine-space starter set the empty state already uses, so
-        // ⌃⌥1…9 all work out of the box. A named or multi-space
+        // per-display ladder the empty state already uses, so the
+        // scaled digit shortcuts (⌃⌥1–5 on one display, …+0 on two)
+        // all work out of the box (#466). A named or multi-space
         // list is a configured setup — left exactly as discovered
         // so the seed never invents spaces the user didn't (dedup
         // keeps the live space first, #75).
@@ -187,7 +214,7 @@ extension KiwiCore {
             Int(config.spaces[0].raw) != nil
         {
             config.spaces = SpaceID.deduplicated(
-                config.spaces + Self.starterSpaces
+                config.spaces + starterSpaces()
             )
         }
         config.modes[index].bindings =

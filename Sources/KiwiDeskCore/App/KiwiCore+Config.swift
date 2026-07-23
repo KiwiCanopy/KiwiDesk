@@ -55,9 +55,21 @@ extension KiwiCore {
         // all-comment starter template (which declares nothing).
         let luaOwnsSettings = configDeclaresManagedSettings
         ensureDefaultConfig()
-        if !guiConfigStore.exists, !luaOwnsSettings {
+        // No sidecar yet and no Lua-owned settings: seed gui.json
+        // (space list + scaled shortcuts). Unchanged from before —
+        // this also re-seeds on a reload of a Lua config that has
+        // no gui.json, which is harmless.
+        let seedGuiConfig = !guiConfigStore.exists && !luaOwnsSettings
+        if seedGuiConfig {
             try? guiConfigStore.save(guiConfigSeed())
         }
+        // The beginner ladder's profile-scoped half is materialized
+        // (once displays are known, below) only on a TRULY fresh
+        // install — no profile of any kind exists yet — so a Lua
+        // config that already saved a profile keeps it and is never
+        // handed a Starter profile (#466).
+        let seedStarterProfile =
+            seedGuiConfig && profiles.list().isEmpty
         // Typo-guard hits are recorded only for the chunk run:
         // a guarded unknown call is non-fatal, so it must land
         // here as an issue to stay visible (#39).
@@ -116,6 +128,14 @@ extension KiwiCore {
         // once against the FINAL effective rules. Without this,
         // verdicts stay stale until an unrelated AX event (#164).
         eventLoop.reconcileAll()
+        // Author the beginner ladder's "Starter" profile (modes,
+        // pins, tuning). It reads displays from NSScreen itself
+        // (the event loop hasn't published them yet) and runs
+        // before the loop's first monitor change, which then
+        // matches and keeps it (#466). First-run-only.
+        if seedStarterProfile {
+            seedFirstRunStarterProfile()
+        }
         retile()
         // Publish what this load could not apply (#68): the
         // Lua/sidecar problems above plus any profile JSON

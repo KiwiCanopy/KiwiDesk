@@ -49,7 +49,7 @@ struct DefaultKeybindingsTests {
         }
     }
 
-    @Test("per-space rows cap at nine spaces")
+    @Test("per-space rows cap at ten spaces, tenth on ⌃⌥0")
     func spacesCapped() {
         let rows = DefaultKeybindings.bindings(
             spaces: spaces(12),
@@ -61,10 +61,21 @@ struct DefaultKeybindingsTests {
         let move = rows.filter {
             $0.lua.hasPrefix("KiwiDesk.move_to_space(")
         }
-        #expect(goTo.count == 9)
-        #expect(move.count == 9)
+        // Ten digit rows per tier — 1…9 then 0 for the tenth.
+        #expect(goTo.count == 10)
+        #expect(move.count == 10)
+        #expect(
+            rows.contains {
+                $0.combo == "control+option+0"
+                    && $0.lua == "KiwiDesk.focus_space(\"10\")"
+            }
+        )
+        // No dead digit past ten (there is no eleventh key).
         #expect(
             !rows.contains { $0.combo == "control+option+10" }
+        )
+        #expect(
+            !rows.contains { $0.combo == "control+option+11" }
         )
     }
 

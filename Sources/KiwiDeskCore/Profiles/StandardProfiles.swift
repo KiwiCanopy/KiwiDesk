@@ -25,12 +25,46 @@ public struct StandardLayout: Sendable, Equatable {
 /// The shipped per-count layouts. Never deletable; a count with
 /// no saved user profile falls back to its Standard.
 public enum StandardProfiles {
-    /// The catalog, ordered by screen count, Standards first.
+    /// The catalog, ordered by screen count. The beginner
+    /// `Starter` ladder leads each count (the "start here" preset,
+    /// #466); the workflow layouts follow, silent-fallback
+    /// Standard among them.
     public static let all: [StandardLayout] = [
-        developer, minimalist, focusStack,
-        dualDeveloper, coderAndMonitor,
-        commandCenter, visualCreative,
+        starterOne, developer, minimalist, focusStack,
+        starterTwo, dualDeveloper, coderAndMonitor,
+        starterThree, commandCenter, visualCreative,
     ]
+
+    /// The beginner ladder as an applyable preset per screen
+    /// count (#466) — the same `StarterLadder` generator the
+    /// first-run seed uses, so the two never drift. Never the
+    /// silent `isStandard` fallback: a demo layout of empty modes
+    /// is a poor thing to land in silently on a monitor change.
+    static let starterOne = starter(
+        screens: 1,
+        summary: "One space per layout mode — track, stack, "
+            + "bsp, grid, and floating."
+    )
+    static let starterTwo = starter(
+        screens: 2,
+        summary: "The five-mode set repeated on each display, "
+            + "track through floating."
+    )
+    static let starterThree = starter(
+        screens: 3,
+        summary: "The five-mode set on all three displays, "
+            + "track through floating."
+    )
+
+    private static func starter(
+        screens: Int,
+        summary: String
+    ) -> StandardLayout {
+        StarterLadder.standardLayout(
+            displayCount: screens,
+            summary: summary
+        )
+    }
 
     /// The layouts planning for exactly `count` screens.
     public static func layouts(

@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 import Testing
 
@@ -17,6 +18,18 @@ struct FirstRunSeedTests {
                 .appendingPathComponent(
                     "kiwi-seed-\(UUID().uuidString)"
                 )
+        )
+    }
+
+    private func twoBySide(
+        _ id: UInt32,
+        name: String,
+        x: CGFloat
+    ) -> Display {
+        Display(
+            id: DisplayID(id),
+            name: name,
+            frame: CGRect(x: x, y: 0, width: 1920, height: 1080)
         )
     }
 
@@ -198,28 +211,35 @@ struct FirstRunSeedTests {
         )
     }
 
-    /// #270: at first run macOS reports only the active Space, so
-    /// the live list is just ["1"] — not empty, so the empty-state
-    /// pad is skipped. The seed pads to a nine-space starter set
-    /// anyway, so ⌃⌥1…9 all bind out of the box rather than only
-    /// ⌃⌥1.
-    @Test("partial first-run discovery still seeds spaces 1-9")
-    func partialDiscoveryPadsToNine() {
+    /// #270/#466: at first run macOS reports only the active
+    /// Space, so the live list is just ["1"] — not empty, so the
+    /// empty-state pad is skipped. The seed pads that bare
+    /// signature to the per-display ladder anyway, so with two
+    /// displays spaces 1–10 all exist and the top digit ⌃⌥0
+    /// (= space 10) binds out of the box rather than only ⌃⌥1.
+    @Test("partial first-run discovery pads to the ladder")
+    func partialDiscoveryPadsToLadder() {
         let core = makeCore()
+        core.state.apply(
+            .displaysChanged([
+                twoBySide(1, name: "Main", x: 0),
+                twoBySide(2, name: "Second", x: 1920),
+            ])
+        )
         core.state.workspaces.ensureSpace(SpaceID("1"))
 
         let seed = core.guiConfigSeed()
         let spaces = Set(seed.spaces.map(\.raw))
-        for n in 1...9 {
+        for n in 1...10 {
             #expect(spaces.contains("\(n)"), "missing space \(n)")
         }
         let base = seed.modes.first { $0.isDefault }
         #expect(
             (base?.bindings ?? []).contains {
-                $0.combo == "control+option+9"
-                    && $0.lua == "KiwiDesk.focus_space(\"9\")"
+                $0.combo == "control+option+0"
+                    && $0.lua == "KiwiDesk.focus_space(\"10\")"
             },
-            "⌃⌥9 not seeded despite only space 1 discovered"
+            "⌃⌥0 not seeded despite two displays discovered"
         )
     }
 }

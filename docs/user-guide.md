@@ -1120,14 +1120,19 @@ mode (see [Per-Profile Shortcut Overrides](#per-profile-shortcut-overrides)).
 
 ### Built-in Standards & Presets
 
-KiwiDesk ships seven built-in **profiles** — Standards for 1, 2, or
-3 screens that resolve silently when no saved profile matches, and
+KiwiDesk ships ten built-in **profiles** — a beginner **Starter**
+ladder plus workflow layouts for 1, 2, or 3 screens. One workflow
+layout per screen count is the *Standard* that resolves silently
+when no saved profile matches; the rest (Starter included) are
 Presets you can apply to spin up a starting point. (These are whole
 profiles — not to be confused with the six layout *modes* like bsp
 or stack.)
 
 **1 Screen:**
 
+- **Starter** — One space per layout mode: track, stack, bsp, grid,
+  and floating. The fresh-install tour; a good way back to a
+  known-good starting point.
 - **Developer** *(Standard)* — IDE in stack (space 2), docs in scrolling
   (space 3), preview fullscreen (space 4). Best for software dev.
 - **Minimalist** — Spacious gaps (20 pt), scrolling reading (space 1),
@@ -1138,6 +1143,8 @@ or stack.)
 
 **2 Screens:**
 
+- **Starter** — The five-mode ladder repeated on each display
+  (spaces 1–5 on the main, 6–10 on the second).
 - **Dual Developer** *(Standard)* — Main screen: IDE/docs/preview.
   Secondary: mail/chat/media. Tight gaps (8 pt).
 - **Coder & Monitor** — Main screen: editor/terminals. Secondary:
@@ -1145,6 +1152,8 @@ or stack.)
 
 **3 Screens:**
 
+- **Starter** — The five-mode ladder on all three displays
+  (spaces 1–5 / 6–10 / 11–15).
 - **Command Center** *(Standard)* — Left: communication (stack).
   Center: workspace (IDE/docs/preview). Right: logs/monitoring.
 - **Visual Creative & Developer** — Left: design canvas. Center:
@@ -1281,6 +1290,27 @@ combos to actions. Every shortcut lives in a **mode** — normally the
 **default** mode (active at startup), plus optional modal modes
 (vim-style); only the active mode's bindings fire at a time.
 
+### Your first run
+
+A fresh install doesn't drop you onto an empty desktop. It seeds a
+**beginner ladder** — five spaces per connected display, each set to
+a different layout mode so you meet the whole range at once:
+
+| Space | Mode | Shows off |
+| --- | --- | --- |
+| 1 | track | a new window opens its own new track |
+| 2 | stack | a single master with an 80/20 split |
+| 3 | bsp | the default binary layout |
+| 4 | grid | a 3×2 grid |
+| 5 | floating | windows left untiled |
+
+With a second display the block repeats — spaces 6–10 on the second
+monitor, 11–15 on a third, and so on. The ladder is saved as an
+ordinary, editable profile named **Starter**, so nothing here is
+locked in: change any space's mode, delete spaces, or apply a
+different [preset](#presets) whenever you like. (The same ladder is
+always available as the **Starter** preset if you want it back.)
+
 ### Default Shortcuts
 
 A fresh install starts with a usable set in the default mode, so
@@ -1289,10 +1319,10 @@ you can drive KiwiDesk before configuring anything:
 | Action | Shortcut |
 | --- | --- |
 | Focus window left / down / up / right | `⌃⌥←` `⌃⌥↓` `⌃⌥↑` `⌃⌥→` |
-| Go to space 1–9 | `⌃⌥1` … `⌃⌥9` |
+| Go to space | `⌃⌥1` … `⌃⌥9`, then `⌃⌥0` for the tenth |
 | Swap with window left / down / up / right | `⌃⌥⇧←` `⌃⌥⇧↓` `⌃⌥⇧↑` `⌃⌥⇧→` |
-| Move to space 1–9 | `⌃⌥⇧1` … `⌃⌥⇧9` |
-| Move to space 1–9 and follow | `⌃⌥⌘1` … `⌃⌥⌘9` |
+| Move to space | `⌃⌥⇧1` … `⌃⌥⇧9`, `⌃⌥⇧0` |
+| Move to space and follow | `⌃⌥⌘1` … `⌃⌥⌘9`, `⌃⌥⌘0` |
 | Grow / Shrink width | `⌃⌥⌘→` / `⌃⌥⌘←` |
 | Grow / Shrink height | `⌃⌥⌘↑` / `⌃⌥⌘↓` |
 | Toggle floating | `⌃⌥F` |
@@ -1309,10 +1339,11 @@ Directions use the arrow keys, which are identical on every layout.
 Each space digit is bound to a space *by name*: `⌃⌥3` goes to
 whichever space was third when the set was seeded. Renaming that
 space in Settings rewrites the shortcut to follow it, so the binding
-survives a rename. All nine digits `⌃⌥1`…`⌃⌥9` are seeded on a fresh
-install — even before you have created that many spaces — so the
-shortcuts work out of the box (a common multi-monitor first run
-already has several).
+survives a rename. The digit shortcuts scale to the seeded ladder —
+`⌃⌥1`…`⌃⌥5` on one display, up to `⌃⌥1`…`⌃⌥9` plus `⌃⌥0` (the tenth
+space) on two. The number row stops at ten keys, so **spaces past
+the tenth ship without a default digit shortcut** — reach them from
+the Space Bar or bind them yourself in the Keybindings editor.
 
 The set is seeded only while **no** shortcut is bound anywhere —
 into `gui.json` at first launch on a fresh install, or into the
