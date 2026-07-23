@@ -147,7 +147,10 @@ extension FloatDetection {
     /// the focus-distrust while up — transient, and the bar
     /// itself still never gets managed (the gate has no band).
     static func isPanelBandLayer(_ layer: Int) -> Bool {
-        layer != 0
+        // Strictly RAISED: negative (desktop-level) layers are
+        // below normal — a wallpaper utility's permanent
+        // backdrop window must not latch the distrust either.
+        layer > 0
             && layer < Int(CGWindowLevelForKey(.mainMenuWindow))
     }
 

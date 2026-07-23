@@ -112,6 +112,11 @@ struct CommandBarIgnoreTests {
         #expect(!FloatDetection.isPanelBandLayer(24))
         #expect(!FloatDetection.isPanelBandLayer(25))
         #expect(!FloatDetection.isPanelBandLayer(101))
+        // Desktop-level backdrops (wallpaper utilities) sit
+        // BELOW normal — the band is strictly raised.
+        #expect(
+            !FloatDetection.isPanelBandLayer(-2_147_483_623)
+        )
     }
 
     @Test("Layer scan required for accessory and listed apps")
