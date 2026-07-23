@@ -56,6 +56,7 @@ extension KiwiCore {
         if let session = crash.consumeSession() {
             restore(session)
             activateSpaceOfFocusedWindow()
+            seedStartupFocus()
             // Same contract as every other space switch:
             // force past the tolerance check, respect the
             // space-switch animation setting, and tell bus
@@ -90,17 +91,21 @@ extension KiwiCore {
             guard let self, self.eventLoop.isRunning
             else { return }
             self.eventLoop.reconcileAll()
-            guard
-                self.state.workspaces.activeSpace == landed
-            else { return }
-            self.activateSpaceOfFocusedWindow()
-            if self.state.workspaces.activeSpace != landed {
-                self.retile(
-                    animated: self.tiler.settings.animations.onSpaceChange,
-                    force: true
-                )
-                self.emitSpaceChange()
+            if self.state.workspaces.activeSpace == landed {
+                self.activateSpaceOfFocusedWindow()
+                if self.state.workspaces.activeSpace != landed {
+                    self.retile(
+                        animated: self.tiler.settings
+                            .animations.onSpaceChange,
+                        force: true
+                    )
+                    self.emitSpaceChange()
+                }
             }
+            // Runs even when the user already switched away:
+            // a hotkey space switch fires no focus event, so
+            // the seed is still the only anchor source (#442).
+            self.seedStartupFocus()
         }
     }
 
