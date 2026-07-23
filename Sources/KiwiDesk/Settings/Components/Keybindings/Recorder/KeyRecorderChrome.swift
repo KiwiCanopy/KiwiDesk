@@ -90,7 +90,10 @@ struct LiveApplyCaption: View {
     private var text: String {
         switch feedback.status {
         case .applied:
-            L("key_recorder.live_applied", "Active now")
+            L(
+                "key_recorder.live_applied",
+                "Active now — Save to keep it"
+            )
         case .inactiveMode(let mode):
             L(
                 "key_recorder.live_inactive_mode",

@@ -248,7 +248,7 @@
   "key_recorder.dismiss_conflict": "Dismiss shortcut conflict",
   "key_recorder.go_to": "Go to",
   "key_recorder.help_press": "A shortcut is one key plus any of ⌃ Control, ⌥ Option, ⇧ Shift, and ⌘ Command — it locks in the moment you press the key. For more shortcut layers, add Modes.",
-  "key_recorder.live_applied": "Active now",
+  "key_recorder.live_applied": "Active now — Save to keep it",
   "key_recorder.live_apply_failed": "The shortcut change was recorded but couldn't be applied live. Save or Revert to retry.",
   "key_recorder.live_compile_failed": "Recorded — the action couldn't compile",
   "key_recorder.live_denied": "Recorded — the system didn't grant it",
