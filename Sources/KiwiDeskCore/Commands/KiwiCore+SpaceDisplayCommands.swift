@@ -103,23 +103,12 @@ extension KiwiCore {
         // placements (`SpacePlacement` precedence); a fresh pin
         // wins, so drop any stale Main designation.
         mainSpaces.remove(space)
+        // `resolveSpaceDisplays` re-anchors the floats of every
+        // space it relocates (#444) — including another space
+        // this pin displaces off the target display.
         resolveSpaceDisplays()
-        // A pin that moved the space across displays strands its
-        // floats like a window move would (#444); re-anchor them
-        // (a same-display pin is a no-op per float).
-        reanchorFloats(of: space)
         retile(force: true)
         emitSpaceChange()
         return .ok()
-    }
-
-    /// Re-anchors every floating member of `space` onto its
-    /// (possibly new) display — the space-level sibling of the
-    /// `moveWindow` re-anchor (#444). `reanchorFloat` itself
-    /// skips tiled members and same-display cases.
-    private func reanchorFloats(of space: SpaceID) {
-        for id in state.workspaces[space]?.windows ?? [] {
-            reanchorFloat(id, to: space)
-        }
     }
 }

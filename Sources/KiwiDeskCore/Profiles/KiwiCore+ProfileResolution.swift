@@ -138,6 +138,12 @@ extension KiwiCore {
         where !survivors.contains(space.id) {
             for window in space.windows {
                 state.workspaces.add(window, to: fallback)
+                // A rehome is a cross-space move: a float whose
+                // fallback lives on another display re-anchors
+                // (#444). A later `resolveSpaceDisplays` moving
+                // the fallback re-translates from the seeded
+                // capture, so the order composes.
+                reanchorFloat(window, to: fallback)
             }
             state.workspaces.removeSpace(space.id)
         }
@@ -248,6 +254,7 @@ extension KiwiCore {
                 displays: displays,
                 mainID: mainID
             )?.assignment ?? [:]
+        var relocated: [SpaceID] = []
         for space in state.workspaces.allSpaces {
             guard
                 let resolved = SpacePlacement.resolve(
@@ -259,10 +266,23 @@ extension KiwiCore {
                     assignment: assignment
                 )
             else { continue }
+            let previous = state.workspaces.display(of: space.id)
             state.workspaces.assign(
                 space.id,
                 to: resolved.display.id
             )
+            if let previous, previous != resolved.display.id {
+                relocated.append(space.id)
+            }
+        }
+        // Every space-relocation path funnels through this
+        // resolve — monitor re-dock, profile apply, config
+        // reload, pin displacement — so the cross-display float
+        // re-anchor lives HERE (#444 review), not per verb. A
+        // first-ever assignment (`previous == nil`, boot) is not
+        // a relocation.
+        for space in relocated {
+            reanchorFloats(of: space)
         }
     }
 

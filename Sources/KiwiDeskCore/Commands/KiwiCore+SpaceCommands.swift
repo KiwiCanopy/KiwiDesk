@@ -226,7 +226,13 @@ extension KiwiCore {
         // A float crossing displays must re-anchor (#444):
         // membership alone never moves it — no layout frame is
         // recomputed for a float. The retile below delivers.
-        reanchorFloat(window, to: target)
+        // Same-space re-files (a Space Bar drop on the current
+        // space, a redundant move) stay geometry-neutral: the
+        // window may sit on another display than its membership
+        // by USER choice, and placement always wins (review).
+        if from != target {
+            reanchorFloat(window, to: target)
+        }
         // The moved window becomes the target space's focus, so
         // the FIRST focus of that space raises it. Without this,
         // `focusSpace` finds no focus to hand over and the window

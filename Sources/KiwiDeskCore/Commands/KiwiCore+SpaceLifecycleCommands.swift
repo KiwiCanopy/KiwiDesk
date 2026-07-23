@@ -65,6 +65,11 @@ extension KiwiCore {
         mainSpaces.remove(space)
         if fallbackSpace == space { fallbackSpace = nil }
         resolveSpaceDisplays()
+        // The rehomed windows now belong to `target`, whose
+        // display just settled above: floats from the deleted
+        // space's display re-anchor; `target`'s own floats
+        // no-op (#444).
+        reanchorFloats(of: target)
         retile(force: true)
         emitSpaceChange()
         return .ok()

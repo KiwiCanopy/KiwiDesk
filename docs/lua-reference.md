@@ -168,10 +168,11 @@ relative to the screen it left, clamped inside the target's
 usable area. (Tiled windows arrive through the layout anyway.)
 
 A quick drag-and-drop of a window onto a Space item in the Space
-Bar performs this same move (see the user guide); there is no
-separate verb for it — though a *floating* window dropped this
-way stays where the pointer released it, since the drag itself
-placed it.
+Bar performs this same move (see the user guide), re-anchoring a
+float the same way — the pointer released over the *bar item*,
+not at a chosen position. Only when the drag dwells long enough
+to **spring** the space open and you place the window yourself
+does it stay exactly where you released it.
 
 **Example:**
 
