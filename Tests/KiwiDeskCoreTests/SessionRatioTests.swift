@@ -212,6 +212,47 @@ struct SessionRatioTests {
         )
     }
 
+    @Test("A composed (preset) apply follows the same rule")
+    func composedApplyReseeds() {
+        let core = makeCore()
+        core.execute("resize", args: [.string("x"), .number(500)])
+        let composed = ProfileComposition.Composed(
+            sourceName: "standard",
+            spaces: ["1"],
+            spaceModes: ["1": .bsp],
+            assignment: [:],
+            settings: core.tiler.settings
+        )
+        core.apply(composed: composed, forceRetile: false)
+        #expect(
+            core.state.workspaces[SpaceID("1")]?
+                .sessionRatios.splitRatioH != nil
+        )
+        core.apply(composed: composed, forceRetile: true)
+        #expect(
+            core.state.workspaces[SpaceID("1")]?
+                .sessionRatios == SessionRatios()
+        )
+    }
+
+    @Test("The GUI save apply always reseeds")
+    func guiSaveApplyReseeds() {
+        let core = makeCore()
+        core.execute("resize", args: [.string("x"), .number(500)])
+        #expect(
+            core.state.workspaces[SpaceID("1")]?
+                .sessionRatios.splitRatioH != nil
+        )
+        var config = GuiConfig()
+        config.settings = core.tiler.settings
+        config.spaces = ["1"]
+        core.applyProfileScopedState(from: config)
+        #expect(
+            core.state.workspaces[SpaceID("1")]?
+                .sessionRatios == SessionRatios()
+        )
+    }
+
     @Test("reload_config reseeds the layer")
     func reloadReseeds() {
         let core = makeCore()

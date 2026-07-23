@@ -24,7 +24,9 @@ extension KiwiCore {
     /// Growth threshold (review 2026-07): two classification
     /// Bools is the ceiling. A THIRD would be the point to
     /// fold them into one apply-intent value (.userExplicit /
-    /// .hardwareEvent) — do not add Bool #3.
+    /// .hardwareEvent) — do not add Bool #3. The session
+    /// ratio-layer clear (#458) rides this same classification;
+    /// an eventual fold carries it along.
     func apply(
         profile: Profile,
         pruneStaleSpaces: Bool = false,
