@@ -110,6 +110,13 @@ extension KiwiCore {
         }
     }
 
+    /// The starter space set a fresh install gets — five numbered
+    /// spaces — so ⌃⌥1…5 all bind out of the box (#270). One
+    /// constant behind both first-run pads (empty list and the
+    /// single-space signature) so the count can't drift between
+    /// them.
+    static let starterSpaces = (1...5).map { SpaceID($0) }
+
     /// Builds an editable model from the running configuration.
     /// Keybindings and mode icons are recovered from the source
     /// file via `recoverKeybindings` (#4); the sidecar owns them
@@ -136,7 +143,7 @@ extension KiwiCore {
             defined + Array(modes.keys)
         )
         if config.spaces.isEmpty {
-            config.spaces = (1...5).map { SpaceID($0) }
+            config.spaces = Self.starterSpaces
         }
         var bindings: [Int: String] = [:]
         for (number, name) in nativeSpaceBindings {
@@ -150,11 +157,14 @@ extension KiwiCore {
     /// First-run starter shortcuts (#91): when no mode carries
     /// a single binding — a fresh install, or an `init.lua`
     /// that declares none — the base `default` mode gets the
-    /// starter set so a new user can drive KiwiDesk
-    /// immediately. Never fires once a user (or Lua) authored
-    /// any binding, in any mode — idempotent by that guard, so
-    /// the space padding below is a first-run-only effect and
-    /// never pollutes a Lua-managed user's space list.
+    /// starter set so a new user can drive KiwiDesk immediately.
+    /// Also pads `config.spaces` on the bare first-run signature
+    /// (see below) — a deliberate second effect, kept here rather
+    /// than in `guiConfigSeed` because it depends on this same
+    /// no-binding guard. Never fires once a user (or Lua) authored
+    /// any binding, in any mode — idempotent by that guard, so the
+    /// space padding is a first-run-only effect and never pollutes
+    /// a Lua-managed user's space list.
     private func seedDefaultShortcuts(
         _ config: inout GuiConfig
     ) {
@@ -175,7 +185,7 @@ extension KiwiCore {
         if config.spaces.count == 1,
             Int(config.spaces[0].raw) != nil {
             config.spaces = SpaceID.deduplicated(
-                config.spaces + (1...5).map { SpaceID($0) }
+                config.spaces + Self.starterSpaces
             )
         }
         config.modes[index].bindings =
