@@ -19,17 +19,26 @@ public struct TrackParams: Sendable, Equatable, Codable {
         case horizontal
     }
 
-    /// Whether a new window opens its own track or joins the
-    /// focused one (#128 design decision 3). Where within that
-    /// choice it lands is the orthogonal `newWindowPosition`.
+    /// Whether a new window fills the focused track (spilling into
+    /// a new one when it is full) or opens its own track (#128,
+    /// redefined #437). Where within that choice it lands is the
+    /// orthogonal `newWindowPosition`.
     public enum NewWindowTrack: String, Sendable, Codable {
         /// The window opens its own new track; `newWindowPosition`
         /// places that track among the others. Falls back to
-        /// `focusedTrack` when the track cap is reached.
+        /// joining once the track cap is reached. The "one
+        /// full-width app per column" (ultrawide) choice.
         case ownTrack = "own_track"
-        /// The window joins the focused window's track;
-        /// `newWindowPosition` places it among that track's
-        /// windows.
+        /// Fill-then-spill (#437, the default): the window joins
+        /// the focused window's track, and `newWindowPosition`
+        /// places it among that track's windows — until the track
+        /// can't fit another window at `min_window_size`, when the
+        /// window instead spills into a NEW track beside the
+        /// focused one (focus follows it, so the next window fills
+        /// that track and spills again). With no other track to
+        /// spill to — a fixed `count` cap with no room, or a
+        /// traveler dropped by `move_to_space` — it piles in the
+        /// focused track instead (the overflow fallback).
         case focusedTrack = "focused_track"
     }
 
@@ -48,7 +57,7 @@ public struct TrackParams: Sendable, Equatable, Codable {
     /// `autoTracks` is on. The live partition is session state
     /// (`Space.trackBreaks`), like `stackWeights`.
     public var count: Int = 2
-    public var newWindow: NewWindowTrack = .ownTrack
+    public var newWindow: NewWindowTrack = .focusedTrack
     /// Where a new window lands within the `newWindow` choice,
     /// reusing the shared `SpawnPlacement` vocabulary. For
     /// `own_track` it positions the new track among the others
@@ -145,7 +154,7 @@ public struct TrackParams: Sendable, Equatable, Codable {
             try container.decodeIfPresent(
                 NewWindowTrack.self,
                 forKey: .newWindow
-            ) ?? .ownTrack
+            ) ?? .focusedTrack
         newWindowPosition =
             try container.decodeIfPresent(
                 SpawnPlacement.self,

@@ -158,7 +158,7 @@ extension KiwiCore {
         clearSessionRatios { $0 = SessionRatios() }
         for space in state.workspaces.allSpaces
         where space.mode != .bsp {
-            state.workspaces.setMode(space.id, .bsp)
+            setSpaceMode(space.id, .bsp)
         }
     }
 

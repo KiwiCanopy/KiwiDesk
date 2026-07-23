@@ -1264,21 +1264,38 @@ track.set_auto_tracks(false)
 
 ### track.set_new_window
 
-**Expects:** `"own_track"` (default) or `"focused_track"`.
+**Expects:** `"focused_track"` (default) or `"own_track"`.
 
-**Does:** decides whether a new window opens its **own** new
-track or **joins** the focused window's track. Where within that
-choice it lands is the separate
-[`track.set_new_window_position`](#track_set_new_window_position).
-`own_track` falls back to joining once `track.set_count` is
-reached. Track spaces use this pair instead of the flat
+**Does:** decides where a new window lands in a track space.
+
+- `focused_track` (**fill-then-spill**, the default): the window
+  **joins** the focused window's track — placed among its windows
+  by [`track.set_new_window_position`](#track_set_new_window_position)
+  — until that track can't fit another window at
+  `min_window_size`, when the window instead **spills into a new
+  track** immediately beside the focused one. Focus follows the
+  new window, so the next one fills that track and spills again.
+  With no other track to spill to it piles in the focused track
+  instead: under a fixed [`track.set_count`](#track_set_count) cap
+  with no room for another track, or for a window an explicit
+  `move_to_space` drops onto a full track (an explicit placement,
+  never relocated).
+- `own_track`: each new window opens its **own** new track,
+  positioned among the others by
+  [`track.set_new_window_position`](#track_set_new_window_position)
+  — the "one full-width app per column" (ultrawide) choice. Falls
+  back to joining once `track.set_count` is reached.
+
+Track spaces use this pair instead of the flat
 `new_window_placement` vocabulary — a flat index cannot say "own
-track".
+track". The fill-then-spill boundary is display-dependent (how
+many windows fit at `min_window_size`), so the same window count
+spills sooner on a smaller display.
 
 **Example:**
 
 ```lua
-track.set_new_window("focused_track")
+track.set_new_window("own_track")
 ```
 
 ### track.set_new_window_position

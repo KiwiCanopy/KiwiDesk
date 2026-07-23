@@ -115,6 +115,49 @@ extension TilingEngine {
         return Array(byScreen.values)
     }
 
+    /// The fill-then-spill capacity (#437) of every track-mode
+    /// space, keyed by id: how many windows its focused track
+    /// holds before a spawn spills into a new track. It is
+    /// geometry-derived (the space's display, `min_window_size`,
+    /// inner gap, axis), so it lives here and is mirrored into the
+    /// pure `StateCoordinator` before each event — spawn then reads
+    /// a plain Int and no geometry leaks into the state core. Empty
+    /// (skipped) when no space is in track mode, the common case.
+    func trackCapacities(
+        state: StateCoordinator
+    ) -> [SpaceID: Int] {
+        var caps: [SpaceID: Int] = [:]
+        for space in state.workspaces.allSpaces
+        where space.mode == .track {
+            caps[space.id] = trackCapacity(for: space, state: state)
+        }
+        return caps
+    }
+
+    /// One space's fill-then-spill capacity, laid out on its own
+    /// display (multi-monitor), for the spawn mirror and the
+    /// track-entry seed (#437). Works before the mode flips — it
+    /// reads only the usable area, min size, gap, and resolved
+    /// axis, none of which depend on the current partition.
+    func trackCapacity(
+        for space: Space,
+        state: StateCoordinator
+    ) -> Int {
+        // No display at all → unbounded (never spill), a safe
+        // fall back to join-and-pile.
+        guard let screen = Self.screen(for: space.id, in: state)
+        else { return .max }
+        let bounds = settings.layoutBounds(
+            from: GeometryUtils.axVisibleFrame(of: screen)
+        )
+        let context = settings.context(
+            bounds: bounds,
+            space: space,
+            sticky: []
+        )
+        return TrackLayout.trackCapacity(for: context)
+    }
+
     /// The `NSScreen` a space lays out on: its assigned display's
     /// screen, else the main screen.
     static func screen(

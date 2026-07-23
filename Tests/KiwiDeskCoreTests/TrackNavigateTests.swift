@@ -33,6 +33,13 @@ private func makeTrackSpace(
         )
     }
     let space = core.state.workspaces.space(of: WindowID(1))!
+    // own_track so mode-entry seeds one window per track — the
+    // multi-track fixture these tests exercise. #437 flipped the
+    // default to fill-then-spill, whose seed would pack them.
+    core.execute(
+        "track.set_new_window",
+        args: [.string("own_track")]
+    )
     core.execute(
         "set_mode",
         args: [.string(space.raw), .string("track")]

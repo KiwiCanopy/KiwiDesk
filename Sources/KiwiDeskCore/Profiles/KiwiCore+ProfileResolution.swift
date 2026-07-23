@@ -77,7 +77,7 @@ extension KiwiCore {
         // sparse) profile doesn't declare reverts to bsp
         // instead of keeping the previous state's mode.
         for space in state.workspaces.allSpaces {
-            state.workspaces.setMode(
+            setSpaceMode(
                 space.id,
                 profile.spaceModes[space.id] ?? .bsp
             )
@@ -175,7 +175,7 @@ extension KiwiCore {
         }
         for space in composed.spaces {
             state.workspaces.ensureSpace(space)
-            state.workspaces.setMode(
+            setSpaceMode(
                 space,
                 composed.spaceModes[space] ?? .bsp
             )

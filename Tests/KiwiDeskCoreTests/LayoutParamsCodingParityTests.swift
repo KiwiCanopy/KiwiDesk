@@ -146,7 +146,7 @@ struct LayoutParamsCodingParityTests {
         params.axis = .horizontal
         params.autoTracks = false
         params.count = 4
-        params.newWindow = .focusedTrack
+        params.newWindow = .ownTrack
         params.newWindowPosition = .last
         params.overflowStyle = .cascadeOverflow
         params.wrapFocus = true

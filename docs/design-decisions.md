@@ -370,8 +370,43 @@ and simply falls into the overflow track's slice at render time.
 `cascade_all`); every normal track's own overflow is always
 `cascade_overflow`. An earlier "overflow-aware spawn" idea —
 shifting windows into a new track at spawn based on available
-space — was rejected for putting geometry into state (it would
-make spawn outcomes monitor-dependent and non-deterministic).
+space — was rejected here for putting geometry into state (it
+would make spawn outcomes monitor-dependent and
+non-deterministic). **This was deliberately revisited for the
+`focused_track` default — see the next entry.**
+
+**Fill-then-spill is the track default; the spawn-geometry ban is
+relaxed for it (#437, 2026-07-23):** `focused_track` — now the
+default (`own_track` demoted to the ultrawide "one app per column"
+opt-in) — fills the focused track and, when it can't fit another
+window at `min_window_size`, spills the next window into a new
+track beside it (focus follows, so the recursion needs no
+special-casing). The unbounded within-track pile the old
+`focused_track` produced was never a chosen feature — it was the
+overflow fallback moonlighting as primary behavior. Getting the
+shelf-like "fill the column you're at first" feel **requires**
+the geometry #192 kept out of spawn: the spill boundary is "how
+many fit at `min_window_size`," a display-dependent count. So the
+ban is relaxed *for this one decision*, with the cost #192 named
+accepted: spawn outcomes are monitor-dependent (a set of windows
+packs into fewer tracks on a larger display, and moving to a
+bigger display does not un-spill an already-spilled window). The
+containment that keeps it honest: the geometry is computed only
+where it already lives (`TilingEngine.trackCapacity`, the same
+`fitCap` the render piles by) and **mirrored into the pure state
+core as a plain per-space `Int`** (`StateCoordinator.trackCapacities`,
+like `trackParams`), so `Space.insertIntoTrack` stays a pure
+function of the flat array plus that number — no `LayoutContext`
+reaches the state layer. The pile survives only as the
+no-alternative fallback (a fixed `count` cap with no room, or a
+`move_to_space` traveler an explicit placement mustn't relocate),
+so it never contradicts the spill. Entering track mode seeds the
+same way: `focused_track` packs the existing windows into filled
+tracks (`TrackLayout.fillSeed`), `own_track` gives each its own —
+the seed mirrors what incoming windows would do. Navigation and
+the overflow-pile classification are unchanged (the pile is still
+the array-order Track model's fallback), so the table above keeps
+its Track row as-is.
 
 ### Layout and resize behavior
 

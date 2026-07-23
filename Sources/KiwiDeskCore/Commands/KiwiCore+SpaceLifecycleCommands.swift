@@ -20,7 +20,7 @@ extension KiwiCore {
             guard let mode = LayoutMode(rawValue: modeRaw) else {
                 return .fail("unknown mode: \(modeRaw)")
             }
-            state.workspaces.setMode(space, mode)
+            setSpaceMode(space, mode)
         }
         // Give the new space a display (auto / main) so it can be
         // shown, then apply.

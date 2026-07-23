@@ -82,17 +82,17 @@ struct TrackEditor: View {
                 options: [
                     (
                         L(
-                            "track.new_window.own",
-                            "Opens its own track"
+                            "track.new_window.focused",
+                            "Fills the focused track"
                         ),
-                        TrackParams.NewWindowTrack.ownTrack
+                        TrackParams.NewWindowTrack.focusedTrack
                     ),
                     (
                         L(
-                            "track.new_window.focused",
-                            "Joins the focused track"
+                            "track.new_window.own",
+                            "Opens its own track"
                         ),
-                        .focusedTrack
+                        .ownTrack
                     ),
                 ]
             )

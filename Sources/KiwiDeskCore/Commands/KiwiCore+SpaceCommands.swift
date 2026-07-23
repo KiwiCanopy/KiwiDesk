@@ -168,11 +168,17 @@ extension KiwiCore {
         }
         let params = tiler.settings.resolvedTrack(for: target)
         let windows = state.windows
+        // A traveler is an explicit placement (#437): it joins the
+        // focused track and piles if full — `spillCapacity: nil`
+        // suppresses the fill-then-spill, so the move is never
+        // second-guessed by relocating the window to a new track.
         state.workspaces.add(
             window,
             to: target,
             trackRule: params.newWindow,
             trackPosition: params.newWindowPosition,
+            spillCapacity: nil,
+            trackCap: params.trackCap,
             isTiled: { windows[$0]?.isFloating == false }
         )
     }

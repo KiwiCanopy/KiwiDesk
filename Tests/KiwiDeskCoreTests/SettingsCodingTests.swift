@@ -154,7 +154,7 @@ struct SettingsCodingTests {
         // (#178), on by default; `count` is the remembered cap.
         #expect(track["auto_tracks"] as? Bool == true)
         #expect(track["count"] as? Int == 2)
-        #expect(track["new_window"] as? String == "own_track")
+        #expect(track["new_window"] as? String == "focused_track")
         #expect(track["wrap_focus"] as? Bool == false)
         // SpaceID-keyed maps encode as objects, not arrays.
         let gap = try object(root["gap"])
