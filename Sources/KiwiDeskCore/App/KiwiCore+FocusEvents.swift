@@ -30,7 +30,8 @@ extension KiwiCore {
                 // still be an outstanding self-raise; drop
                 // it so a later genuine focus of this window
                 // is not misread as our own echo (cf. the
-                // .windowDestroyed cleanup below).
+                // .windowDestroyed cleanup in
+                // KiwiCore+Events.swift).
                 outstandingSelfRaises.remove(id)
                 if let before = effects.focusBefore,
                     let space = state.workspaces.space(
@@ -87,20 +88,31 @@ extension KiwiCore {
         // the raise of B lands app-internally. Acting on A
         // would schedule a focus-follow that yanks the user
         // to A's space right after they explicitly switched
-        // away. While our raise of a same-app window is still
-        // unechoed, distrust a report for a sibling window on
-        // a NON-visible space: revert the state focus it just
-        // moved and stay put. Scoped to non-visible spaces so
-        // a genuine click on a same-app window the user can
-        // SEE (active space, another display's shown space)
-        // is never suppressed; a genuine cmd-tab to the
-        // hidden sibling inside this narrow unechoed window
-        // is the accepted trade — the next focus event
-        // follows normally.
+        // away. While a raise of a same-app window is RECENT
+        // (`selfRaiseStamps`, age-bounded so a never-echoed
+        // raise cannot poison the app's hidden windows forever
+        // — the `zOrderRaiseEchoWindow` lesson), distrust a
+        // report for a sibling window on a NON-visible space:
+        // revert the state focus it just moved and stay put.
+        // Scoped to non-visible spaces so a genuine click on a
+        // same-app window the user can SEE (active space,
+        // another display's shown space) is never suppressed;
+        // sticky windows are exempt too — `space(of:)` is only
+        // their hidden HOME, the window itself renders visibly
+        // (#414), and the follow is already sticky-exempt so a
+        // sticky report cannot cause the space-yank anyway. A
+        // genuine cmd-tab to a hidden plain sibling inside the
+        // ~1 s window is the accepted trade — the next focus
+        // event follows normally.
+        let now = Date()
         if !outstandingSelfRaises.contains(id),
             let pid = state.windows[id]?.pid,
-            outstandingSelfRaises.contains(where: {
-                state.windows[$0]?.pid == pid
+            state.windows[id]?.isSticky != true,
+            selfRaiseStamps.contains(where: {
+                $0.key != id
+                    && state.windows[$0.key]?.pid == pid
+                    && now.timeIntervalSince($0.value)
+                        < Self.selfRaiseSiblingWindow
             }),
             let echoSpace = state.workspaces.space(of: id),
             !state.workspaces.visibleSpaces
