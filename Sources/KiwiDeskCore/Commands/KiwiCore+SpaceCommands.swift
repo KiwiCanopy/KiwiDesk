@@ -105,7 +105,7 @@ extension KiwiCore {
         // under the z-order counter, where warps are swallowed
         // — and the forced retile above already assigned the
         // slot the warp targets.
-        let next = spaceSwitchFocusTarget()
+        let next = resolveSpaceSwitchFocusTarget()
         if let next {
             warpMouseToFocused(next)
         }

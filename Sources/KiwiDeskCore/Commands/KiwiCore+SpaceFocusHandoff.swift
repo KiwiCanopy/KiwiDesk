@@ -14,8 +14,10 @@ extension KiwiCore {
     /// members but no stamped focus, its FIRST member, stamped so
     /// the ring and the raise cannot disagree (#463: a
     /// highlighted window the raise never targeted). Nil only
-    /// for a space with nothing to focus.
-    func spaceSwitchFocusTarget() -> WindowID? {
+    /// for a space with nothing to focus. "Resolve", not a pure
+    /// query: the fallback path writes the space's focus (and
+    /// with it the global `lastFocused`).
+    func resolveSpaceSwitchFocusTarget() -> WindowID? {
         guard let space = activeSpace else { return nil }
         if let anchor = state.focusAnchor(of: space) {
             return anchor
@@ -38,9 +40,14 @@ extension KiwiCore {
     /// and — when the frontmost seam is wired — its app must
     /// still be the OS-frontmost one; if the user's real focus
     /// is an unmanaged app, stealing it for Finder would be
-    /// worse than the swallowed keys.
+    /// worse than the swallowed keys. A visible float/sticky
+    /// layer also skips (review): those windows are legitimate
+    /// focus recipients, and their in-flight raise-activations
+    /// would race the Finder activate — focus settling on a
+    /// VISIBLE window never re-creates the #463 hazard.
     func yieldFocusAfterEmptySwitch() {
         guard
+            floatLayerTargets().isEmpty,
             let last = state.workspaces.lastFocused,
             let lastSpace = state.workspaces.space(of: last),
             !state.workspaces.visibleSpaces.contains(lastSpace),
@@ -69,8 +76,9 @@ extension KiwiCore {
     /// the ring on the target while the previous app keeps key
     /// focus. Detection is deliberately narrow — frontmost app
     /// unchanged since BEFORE the switch yet not the focused
-    /// window's app — so a user who clicked or cmd-tabbed away
-    /// inside the settle window is never fought.
+    /// window's app — so a user who moved on to any OTHER app
+    /// or window is never fought (edge cases on
+    /// `reassertSwitchFocus`).
     /// Single-shot: an app that drops the frame again
     /// on the retry still needs another switch — if that recurs,
     /// re-issue only the windows still at the stash corner rather
@@ -101,7 +109,7 @@ extension KiwiCore {
         }
     }
 
-    /// Re-raises the switch's focus target when the OS provably
+    /// Re-raises the switch's focus target when the OS likely
     /// ignored the handoff (#463): the app that was frontmost
     /// BEFORE the switch still is, and it is not the focused
     /// window's app. Any other frontmost means the user (or a
@@ -111,6 +119,25 @@ extension KiwiCore {
     /// a sticky traveler legitimately holding cross-space focus
     /// must not be "corrected" back to the local slot (#431).
     /// Internal (not private) for direct guard coverage.
+    ///
+    /// Known edges of the deliberately narrow detection:
+    /// - A cmd-tab BACK to the pre-switch app inside the 300 ms
+    ///   settle reads as "activate never landed" and is
+    ///   re-raised over once (macOS MRU puts exactly that app
+    ///   first). Single-shot and recoverable — accepted, see
+    ///   the design-decisions limitations row.
+    /// - App-granular by choice: a dropped WINDOW raise inside
+    ///   an already-frontmost app is invisible here; #463's
+    ///   hazard is the dropped app activation.
+    /// - A traveler anchor is its own `priorFrontmost`, so a
+    ///   float raise stealing frontmost mid-switch reads as
+    ///   "moved on" — don't "fix" that into fighting travelers.
+    /// - A rapid switch burst keeps only the last capture
+    ///   (`.spaceSettle` self-cancels) — single-shot philosophy.
+    /// - Unlike the empty-switch yield, this WILL take focus
+    ///   from an unmanaged frontmost app: it serves the explicit
+    ///   switch command's intent, while the yield's Finder
+    ///   target is nobody's intent — asymmetry deliberate.
     func reassertSwitchFocus(priorFrontmost: pid_t?) {
         guard
             let priorFrontmost,
