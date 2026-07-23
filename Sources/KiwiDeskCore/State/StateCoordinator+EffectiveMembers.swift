@@ -172,6 +172,17 @@ extension StateCoordinator {
     /// focus event). An inactive space injects no travelers
     /// (`tiled` is local-only) so it always yields its own focus.
     ///
+    /// A **floating** sticky traveler is never in `tiled`, so it
+    /// gets its own membership test (#416): when `lastFocused` is
+    /// a floating sticky that RENDERS on this space, it is the
+    /// window under the user's eyes — resolving past it to the
+    /// stale local slot made same-app implicit-focused verbs
+    /// (`toggle_sticky` pressed while looking at the sticky)
+    /// silently mutate the wrong window, and cross-app ones fail
+    /// the #292 pid check. The render-space test keeps inactive
+    /// spaces yielding their own focus, exactly like the
+    /// tiled-traveler injection.
+    ///
     /// - Parameters:
     ///   - space: the space whose surface target is wanted.
     ///   - tiled: the space's `effectiveTiledMembers`, passed in
@@ -184,10 +195,17 @@ extension StateCoordinator {
         tiled: [WindowID]
     ) -> WindowID? {
         guard let last = workspaces.lastFocused,
-            !space.windows.contains(last),
-            tiled.contains(last)
+            !space.windows.contains(last)
         else { return space.focused }
-        return last
+        if tiled.contains(last) { return last }
+        if let window = windows[last], window.isSticky,
+            window.isFloating,
+            stickyRenderSpace(of: window, focused: nil)
+                == space.id
+        {
+            return last
+        }
+        return space.focused
     }
 
     /// `focusAnchor` computing its own `tiled` — for the many

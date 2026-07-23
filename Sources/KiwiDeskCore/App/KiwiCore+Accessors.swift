@@ -16,12 +16,13 @@ extension KiwiCore {
     /// is the exception — it keeps the local slot to avoid
     /// orphaning id-keyed per-space weights; see `KiwiCore.resize`.)
     /// A
-    /// tiled-sticky traveler can hold the OS focus yet never
-    /// occupy that membership-guarded slot (#431/#435), so reading
-    /// `space.focused` would target — and let the guard vet — the
-    /// stale local window rather than the traveler the user sees
-    /// focused. Identical to `space.focused` whenever no traveler
-    /// is frontmost, so the common path is unchanged.
+    /// sticky traveler — tiled (#431/#435) or floating (#416) —
+    /// can hold the OS focus yet never occupy that
+    /// membership-guarded slot, so reading `space.focused` would
+    /// target — and let the guard vet — the stale local window
+    /// rather than the traveler the user sees focused. Identical
+    /// to `space.focused` whenever no traveler is frontmost, so
+    /// the common path is unchanged.
     public var focusedWindowID: WindowID? {
         activeSpace.flatMap { state.focusAnchor(of: $0) }
     }
