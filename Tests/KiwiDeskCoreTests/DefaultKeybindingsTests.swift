@@ -63,7 +63,9 @@ struct DefaultKeybindingsTests {
         }
         #expect(goTo.count == 9)
         #expect(move.count == 9)
-        #expect(!rows.contains { $0.combo == "option+10" })
+        #expect(
+            !rows.contains { $0.combo == "control+option+10" }
+        )
     }
 
     @Test("per-space combos are position-based, not name-based")
@@ -79,8 +81,8 @@ struct DefaultKeybindingsTests {
         let web = rows.first {
             $0.lua == "KiwiDesk.focus_space(\"web\")"
         }
-        #expect(mail?.combo == "option+1")
-        #expect(web?.combo == "option+2")
+        #expect(mail?.combo == "control+option+1")
+        #expect(web?.combo == "control+option+2")
     }
 
     @Test("space names quote through the canonical escaper")
