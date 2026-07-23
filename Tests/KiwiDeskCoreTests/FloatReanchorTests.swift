@@ -20,26 +20,58 @@ private let sideBounds = CGRect(
 )
 
 /// Pure re-anchor math (#444): a float crossing displays keeps
-/// its position relative to the source visible frame, confined
-/// inside the target's.
+/// its PROPORTIONAL position in the target visible frame (QA:
+/// bottom-right must stay bottom-right on a bigger screen),
+/// confined inside it.
 @Suite("Float re-anchor geometry")
 struct FloatReanchorTests {
-    @Test("Translates by the visible-frame origin offset")
-    func translatesByOriginOffset() {
-        let frame = CGRect(x: 100, y: 125, width: 800, height: 600)
+    @Test("Maps the center to the proportional position")
+    func mapsCenterProportionally() {
+        // Center at 25% x / 50% y of main: 200×100 around
+        // (480, 552.5).
+        let frame = CGRect(
+            x: 380,
+            y: 502.5,
+            width: 200,
+            height: 100
+        )
         let moved = FloatReanchor.target(
             frame: frame,
             from: mainBounds,
             to: sideBounds
         )
-        #expect(moved.origin == CGPoint(x: 2020, y: 205))
+        // 25% / 50% of the side display: center (2280, 542.5).
+        #expect(moved.origin == CGPoint(x: 2180, y: 492.5))
+        #expect(moved.size == frame.size)
+    }
+
+    @Test("A corner window lands in the same corner")
+    func cornerStaysInCorner() {
+        // Flush with main's bottom-right; proportionally the
+        // window overhangs the smaller display, so the confine
+        // snugs it into the SAME corner there.
+        let frame = CGRect(
+            x: 1620,
+            y: 880,
+            width: 300,
+            height: 200
+        )
+        let moved = FloatReanchor.target(
+            frame: frame,
+            from: mainBounds,
+            to: sideBounds
+        )
+        #expect(moved.maxX == sideBounds.maxX)
+        #expect(moved.maxY == sideBounds.maxY)
+        #expect(sideBounds.contains(moved))
         #expect(moved.size == frame.size)
     }
 
     @Test("Confines into a smaller target display")
     func confinesIntoSmallerTarget() {
-        // Near main's bottom-right: the raw offset would overflow
-        // the smaller secondary; the confine pulls it inside.
+        // Near main's bottom-right: the proportional center
+        // would overflow the smaller secondary; the confine
+        // pulls it inside.
         let frame = CGRect(
             x: 1100,
             y: 460,

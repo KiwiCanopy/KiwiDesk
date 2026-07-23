@@ -163,8 +163,9 @@ window becomes the target space's focused window, so the first
 time you switch there it is the window you land on.
 
 If the target space is shown on **another monitor**, a floating
-window is re-anchored onto that display — it keeps its position
-relative to the screen it left, clamped inside the target's
+window is re-anchored onto that display — it keeps its
+*proportional* position (a bottom-right float stays bottom-right
+on a differently-sized screen), clamped inside the target's
 usable area. (Tiled windows arrive through the layout anyway.)
 
 A quick drag-and-drop of a window onto a Space item in the Space
