@@ -2756,6 +2756,17 @@ discovered again. Ghostty's quick terminal remains a built-in
 layer-specific exception because only its panel — not normal Ghostty
 windows — must be ignored.
 
+**Command bars are ignored automatically.** A Spotlight/Raycast-style
+launcher is a menu-bar (accessory) app whose bar is a raised-layer
+overlay; KiwiDesk never manages such a window, so the bar is not
+tiled, stashed, or pulled along on a space switch. The rule is
+generic — accessory app **and** raised window layer — so any
+launcher or HUD qualifies without a rule; the app's normal windows
+(settings, pickers) stay managed as floats. Raycast's command bar is
+additionally recognized by bundle id for setups where Raycast shows
+a dock icon and loses the accessory policy. `ignore_rules` remains
+the whole-app escape hatch for anything the heuristic misses.
+
 Invisible helper windows are ignored automatically: a raised-layer
 window that is fully transparent or sits entirely off-screen (the
 lifecycle keepalive some menu-bar apps create) is never tracked,

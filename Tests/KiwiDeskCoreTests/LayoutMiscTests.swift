@@ -236,6 +236,7 @@ struct FloatRuleTests {
             FloatDetection.shouldIgnore(
                 bundleID: "com.mitchellh.ghostty",
                 layer: 3,
+                isAccessory: false,
                 rules: noRules
             )
         )
@@ -244,15 +245,18 @@ struct FloatRuleTests {
             !FloatDetection.shouldIgnore(
                 bundleID: "com.mitchellh.ghostty",
                 layer: 0,
+                isAccessory: false,
                 rules: noRules
             )
         )
-        // Other apps' panels merely float; only Ghostty's
-        // quick terminal is ignored outright (issue #21).
+        // Other regular apps' panels merely float; the ignore
+        // is layer-scoped per app (#21) or accessory-wide
+        // (#448), never blanket raised-layer.
         #expect(
             !FloatDetection.shouldIgnore(
                 bundleID: "com.apple.finder",
                 layer: 3,
+                isAccessory: false,
                 rules: noRules
             )
         )
@@ -265,6 +269,7 @@ struct FloatRuleTests {
             FloatDetection.shouldIgnore(
                 bundleID: "io.tailscale.ipn.macos",
                 layer: 0,
+                isAccessory: false,
                 rules: rules
             )
         )
@@ -272,6 +277,7 @@ struct FloatRuleTests {
             FloatDetection.shouldIgnore(
                 bundleID: "io.tailscale.ipn.macos",
                 layer: 9,
+                isAccessory: true,
                 rules: rules
             )
         )
@@ -279,6 +285,7 @@ struct FloatRuleTests {
             !FloatDetection.shouldIgnore(
                 bundleID: "com.apple.finder",
                 layer: 0,
+                isAccessory: false,
                 rules: rules
             )
         )
@@ -300,6 +307,7 @@ struct FloatRuleTests {
                 FloatDetection.shouldIgnore(
                     bundleID: bundleID,
                     layer: 0,
+                    isAccessory: false,
                     rules: IgnoreRules()
                 )
             )

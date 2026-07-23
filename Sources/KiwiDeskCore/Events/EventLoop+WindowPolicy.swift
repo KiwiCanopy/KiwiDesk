@@ -125,7 +125,8 @@ extension EventLoop {
         _ element: AXUIElement,
         pid: pid_t,
         app: AppRef,
-        layer: Int? = nil
+        layer: Int? = nil,
+        isAccessory: Bool? = nil
     ) -> Bool {
         if Self.isOwnProcess(pid) {
             let canBecomeMain =
@@ -149,6 +150,8 @@ extension EventLoop {
         return FloatDetection.shouldIgnore(
             bundleID: app.bundleID,
             layer: layer ?? FloatDetection.windowLayer(of: id) ?? 0,
+            isAccessory: isAccessory
+                ?? classifiesAsOverlay(pid: pid),
             rules: ignoreRules
         )
     }

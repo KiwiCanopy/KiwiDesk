@@ -117,7 +117,8 @@ extension EventLoop {
             guard elements[pid]?[id] != nil else {
                 if FloatDetection.isBuiltInIgnoredPanel(
                     bundleID: app.bundleID,
-                    id: id
+                    id: id,
+                    isAccessory: classifiesAsOverlay(pid: pid)
                 ) {
                     onIgnoredPanelFocus(pid)
                 }

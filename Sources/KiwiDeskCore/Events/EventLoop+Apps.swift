@@ -120,7 +120,11 @@ extension EventLoop {
                 onEvent(.windowFocused(id))
             } else if FloatDetection.isBuiltInIgnoredPanel(
                 bundleID: AppRef(app).bundleID,
-                id: id
+                id: id,
+                isAccessory: Self.classifiesAsOverlay(
+                    pid: pid,
+                    activationPolicy: app.activationPolicy
+                )
             ) {
                 onIgnoredPanelFocus(pid)
             }

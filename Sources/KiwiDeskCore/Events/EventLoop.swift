@@ -206,13 +206,17 @@ public final class EventLoop {
             )
         else { return }
         // Some panels must never be managed at all — merely
-        // floating them still pins them to a space (issue #21).
+        // floating them still pins them to a space (issue #21;
+        // #448 extends this to accessory apps' raised-layer
+        // command bars).
+        let isAccessory = classifiesAsOverlay(pid: pid)
         guard
             !shouldIgnore(
                 element,
                 pid: pid,
                 app: app,
-                layer: layer ?? 0
+                layer: layer ?? 0,
+                isAccessory: isAccessory
             )
         else {
             return
@@ -232,7 +236,7 @@ public final class EventLoop {
         // launcher does not (#300). Our own Settings window is
         // exempt (#315, see `classifiesAsOverlay`).
         window.isTransientOverlay =
-            classifiesAsOverlay(pid: pid)
+            isAccessory
             || FloatDetection.shouldFloat(
                 role: role,
                 subrole: subrole,

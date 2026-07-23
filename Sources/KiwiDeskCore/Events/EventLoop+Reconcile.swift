@@ -37,11 +37,16 @@ extension EventLoop {
             detach(pid: pid, restoreEnhancedUI: true)
             return
         }
+        let isAccessory = Self.classifiesAsOverlay(
+            pid: pid,
+            activationPolicy: activationPolicy
+        )
         // One window-server snapshot for the whole pass; only
         // apps with an ignore rule need layers at all.
         let layers =
             FloatDetection.requiresWindowLayers(
-                bundleID: app.bundleID
+                bundleID: app.bundleID,
+                isAccessory: isAccessory
             ) ? FloatDetection.windowLayers(pid: pid) : [:]
         let liveElements = AXHelper.windows(pid: pid)
         if activationPolicy == .regular
@@ -81,12 +86,14 @@ extension EventLoop {
                 element,
                 pid: pid,
                 app: app,
-                layer: layers[id]
+                layer: layers[id],
+                isAccessory: isAccessory
             ) {
                 // App-wide user rules are stable config, not a
                 // flickering window-server signal. Apply them
                 // immediately; the one-reading grace below is
-                // only for Ghostty's layer-scoped built-in.
+                // only for the layer-scoped classes (built-in
+                // panels, accessory command bars #448).
                 if shouldIgnoreApp(bundleID: app.bundleID) {
                     ignorePending.remove(id)
                     continue

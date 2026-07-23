@@ -269,24 +269,32 @@ monocle — where only the focused window is visible — borders stay
 focused-only. Floating windows are excluded from the unfocused set;
 the focused window is still ringed whether tiled or floating.
 
-A **transient overlay** — a launcher or panel (Spotlight, Raycast,
-Alfred) that floats for a *structural* reason (accessory activation
-policy, a non-standard panel subrole, or a raised CGWindow layer)
-rather than a matched `float_rules` entry — never receives a ring,
-even while it holds focus (#300). The suppression is a **draw-time
-heuristic**, not an entry in the `ignore_rules`/built-in ignore
-list (#176/#177): these overlays float and behave correctly, so
-they belong in managed state; only the ring is wrong, and the fix
-belongs where the ring is drawn. This is deliberately narrower than
-excluding *all* focused floats — a user who floats a standard
-window still wants its ring; a launcher does not. The classification
-is captured at track time (`ManagedWindow.isTransientOverlay`), so
-the pure `borderSpecs` decision stays AX-free, and it clears the
-moment detection self-heals a window back to tiled — the flag can
-never outlive the float state it depends on (overlay ⟹ floating). A
-window that is genuinely an overlay is caught by the stable
-accessory-policy path at track time, independent of any one-off
-subrole read.
+A **transient overlay** — a window that floats for a *structural*
+reason (accessory activation policy, a non-standard panel subrole,
+or a raised CGWindow layer) rather than a matched `float_rules`
+entry — never receives a ring, even while it holds focus (#300).
+The suppression is a **draw-time heuristic** for windows that stay
+in managed state: they float and behave correctly, so only the ring
+is wrong, and the fix belongs where the ring is drawn. This is
+deliberately narrower than excluding *all* focused floats — a user
+who floats a standard window still wants its ring; a panel does
+not. The classification is captured at track time
+(`ManagedWindow.isTransientOverlay`), so the pure `borderSpecs`
+decision stays AX-free, and it clears the moment detection
+self-heals a window back to tiled — the flag can never outlive the
+float state it depends on (overlay ⟹ floating).
+
+The *launcher* subset of that class — an accessory app's
+raised-layer command bar (Spotlight, Raycast, Alfred) — graduated
+from draw-time suppression to the **built-in ignore gate** (#448):
+#300 kept those bars managed because only the ring was wrong, but
+multi-monitor QA (#446) showed a managed bar is also space-pinned —
+tiled, stashed, and dragged across space switches. They are now
+never tracked at all (accessory policy **and** raised layer, plus a
+layer-scoped bundle belt for a dock-icon Raycast, alongside
+Ghostty's quick terminal #21). The draw-time heuristic remains for
+the structural floats that stay managed: panel-subrole windows of
+regular apps and accessory apps' layer-0 windows.
 
 A **native-fullscreen** (green-button) window is suppressed by the
 same draw-time mechanism: it stays a member of its home virtual

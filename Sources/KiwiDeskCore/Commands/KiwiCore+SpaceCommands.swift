@@ -38,7 +38,9 @@ extension KiwiCore {
                 // actually typing into (issue #21).
                 !FloatDetection.hasVisibleIgnoredPanel(
                     pid: window.pid,
-                    bundleID: window.appBundleID
+                    bundleID: window.appBundleID,
+                    isAccessory: self.eventLoop
+                        .classifiesAsOverlay(pid: window.pid)
                 ),
                 let element = AXHelper.focusedWindow(
                     pid: window.pid
@@ -70,7 +72,11 @@ extension KiwiCore {
             let app = NSWorkspace.shared.frontmostApplication,
             !FloatDetection.hasVisibleIgnoredPanel(
                 pid: app.processIdentifier,
-                bundleID: AppRef(app).bundleID
+                bundleID: AppRef(app).bundleID,
+                isAccessory: EventLoop.classifiesAsOverlay(
+                    pid: app.processIdentifier,
+                    activationPolicy: app.activationPolicy
+                )
             ),
             let element = AXHelper.focusedWindow(
                 pid: app.processIdentifier
