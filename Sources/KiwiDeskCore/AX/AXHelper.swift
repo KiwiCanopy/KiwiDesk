@@ -270,6 +270,20 @@ public enum AXHelper {
         )
         NSRunningApplication(processIdentifier: pid)?
             .activate()
+        // Assert window-SPECIFIC focus after the activation
+        // (#496): Electron/WebKit apps apply the queued main
+        // change lazily (100-300 ms, §5), so activation can land
+        // while the app's main window is still the previous one
+        // — macOS then hands key focus to the app's most-recent
+        // window, on whatever display it sits. The app-element
+        // focused-window write is processed after the earlier
+        // ops, so the intended target wins the race even when
+        // every step applies late.
+        AXUIElementSetAttributeValue(
+            AXUIElementCreateApplication(pid),
+            kAXFocusedWindowAttribute as CFString,
+            element
+        )
     }
 
     /// Builds a `ManagedWindow` snapshot from an AX element.
