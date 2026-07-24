@@ -151,7 +151,14 @@ extension TilingEngine {
                     in: bounds,
                     corner: corner,
                     force: force,
-                    animated: animated
+                    animated: animated,
+                    // A floating-MODE space's members ride the
+                    // float capture/restore cycle whatever their
+                    // own flag (#500): its layout places nothing
+                    // on return, so without a capture nothing
+                    // would ever bring them back from the corner.
+                    capturesOriginal: window.isFloating
+                        || space.mode == .floating
                 )
             }
         }
@@ -167,12 +174,19 @@ extension TilingEngine {
     /// nil: a later forced re-stash (whose state frame is
     /// already the AX echo of the corner) must not overwrite
     /// the original.
+    /// `capturesOriginal` overrides the default `isFloating`
+    /// capture gate (#500): `stashInactive` passes the
+    /// EFFECTIVE-float verdict — flag OR floating-mode space —
+    /// since a floating layout places nothing on return and the
+    /// restore pass is such a window's only way back. Nil keeps
+    /// the flag-only default for direct callers.
     func stash(
         _ window: ManagedWindow,
         in bounds: CGRect,
         corner: HideCorner,
         force: Bool,
-        animated: Bool = false
+        animated: Bool = false,
+        capturesOriginal: Bool? = nil
     ) {
         let target = Self.stashFrame(
             window.frame,
@@ -182,7 +196,7 @@ extension TilingEngine {
         if !force, Self.close(window.frame, to: target) {
             return
         }
-        if window.isFloating,
+        if capturesOriginal ?? window.isFloating,
             stashedFrames[window.id] == nil
         {
             stashedFrames[window.id] = window.frame

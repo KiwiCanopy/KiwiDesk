@@ -66,6 +66,32 @@ struct MoveFocusLatchTests {
         #expect(!latch.isLatched(WindowID(1), at: later))
     }
 
+    /// #493 edge case 2: the floating-mode re-anchor (#498) is
+    /// pure geometry before the follow branch — a no-follow move
+    /// into a floating-mode space relocates the frame but must
+    /// compose with the latch exactly like any other no-follow
+    /// move: stay on the origin space, schedule no follow.
+    @Test("No-follow move to a floating-mode space stays put")
+    func noFollowFloatingModeMoveStaysPut() {
+        let core = makeCore()
+        core.execute(
+            "set_mode",
+            args: [.string("2"), .string("floating")]
+        )
+        addWindow(core, 10, pid: 5)
+        addWindow(core, 20, pid: 5)
+        core.moveWindow(
+            WindowID(20),
+            to: SpaceID(2),
+            follow: false
+        )
+        #expect(core.moveLatch.isLatched(WindowID(20)))
+        #expect(
+            core.state.workspaces.activeSpace == SpaceID(1)
+        )
+        #expect(core.deferred.task(for: .focusFollow) == nil)
+    }
+
     @Test("No-follow move latches; follow move does not")
     func noFollowMoveStampsLatch() {
         let core = makeCore()
