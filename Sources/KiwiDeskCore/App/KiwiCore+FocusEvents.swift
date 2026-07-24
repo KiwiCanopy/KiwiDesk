@@ -91,19 +91,24 @@ extension KiwiCore {
         // away. While a raise of a same-app window is RECENT
         // (`selfRaiseStamps`, age-bounded so a never-echoed
         // raise cannot poison the app's hidden windows forever
-        // — the `zOrderRaiseEchoWindow` lesson), distrust a
-        // report for a sibling window on a NON-visible space:
-        // revert the state focus it just moved and stay put.
-        // Scoped to non-visible spaces so a genuine click on a
-        // same-app window the user can SEE (active space,
-        // another display's shown space) is never suppressed;
-        // sticky windows are exempt too — `space(of:)` is only
-        // their hidden HOME, the window itself renders visibly
-        // (#414), and the follow is already sticky-exempt so a
-        // sticky report cannot cause the space-yank anyway. A
-        // genuine cmd-tab to a hidden plain sibling inside the
-        // ~1 s window is the accepted trade — the next focus
-        // event follows normally.
+        // — the `zOrderRaiseEchoWindow` lesson), distrust the
+        // sibling report on a NON-visible space and — #496 —
+        // on a space shown on ANOTHER display, unless a fresh
+        // click landed inside the reported window: on two
+        // monitors the app's most-recent sibling is typically
+        // visible over there, and forced activation genuinely
+        // keys it, so trusting the report teleported the user
+        // cross-display. A clicked sibling is a user action
+        // wherever it is (`recentClickInside`). Same-DISPLAY
+        // visible siblings stay honored — in-app window cycling
+        // must not be fought. Sticky windows are exempt too —
+        // `space(of:)` is only their hidden HOME, the window
+        // itself renders visibly (#414), and the follow is
+        // already sticky-exempt so a sticky report cannot cause
+        // the space-yank anyway. A genuine clickless focus of a
+        // distrusted sibling (cmd-tab, in-app cross-display
+        // cycle) inside the ~1 s window is the accepted trade —
+        // the next focus event follows normally.
         let now = Date()
         if !outstandingSelfRaises.contains(id),
             let pid = state.windows[id]?.pid,
@@ -114,9 +119,8 @@ extension KiwiCore {
                     && now.timeIntervalSince($0.value)
                         < Self.selfRaiseSiblingWindow
             }),
-            let echoSpace = state.workspaces.space(of: id),
-            !state.workspaces.visibleSpaces
-                .contains(echoSpace)
+            distrustsSiblingSpace(of: id),
+            !recentClickInside(id, now: now)
         {
             if let intended = effects.focusBefore,
                 intended != id,
@@ -125,6 +129,20 @@ extension KiwiCore {
                 )
             {
                 state.workspaces.focus(intended, in: space)
+                // The app genuinely keyed the sibling (forced
+                // activation resolves to its MRU window, #496):
+                // reverting state alone would split state focus
+                // from OS key focus. Re-assert the raise the
+                // app overrode — DIRECT and unstamped, so the
+                // ping-pong is bounded by the original stamp's
+                // ~1 s window instead of renewing itself.
+                if let window = state.windows[intended],
+                    let element = eventLoop.element(
+                        for: intended
+                    )
+                {
+                    AXHelper.raise(element, pid: window.pid)
+                }
             }
             updateBorders()
             updateStickyIndicators()
@@ -212,5 +230,47 @@ extension KiwiCore {
         if !selfEcho {
             raiseFloatsAbove(afterFocusing: id)
         }
+    }
+
+    /// Whether a same-app sibling report for `id` is inherently
+    /// suspect by WHERE the window lives (#465/#496): a hidden
+    /// space always is; a space shown on a display OTHER than
+    /// the active space's is too (the cross-display steal — a
+    /// forced activation keys the app's MRU window over there).
+    /// The active space's own display stays trusted so in-app
+    /// window cycling is never fought.
+    private func distrustsSiblingSpace(
+        of id: WindowID
+    ) -> Bool {
+        guard
+            let echoSpace = state.workspaces.space(of: id)
+        else { return false }
+        guard
+            state.workspaces.visibleSpaces.contains(echoSpace)
+        else { return true }
+        guard
+            let active = state.workspaces.activeSpace,
+            echoSpace != active
+        else { return false }
+        let activeDisplay = state.workspaces.display(of: active)
+        let echoDisplay = state.workspaces.display(of: echoSpace)
+        return echoDisplay != activeDisplay
+    }
+
+    /// Whether a left click landed inside `id`'s frame within
+    /// the sibling-distrust window — the discriminator that
+    /// tells a genuine cross-display click from an activation
+    /// re-report (#496). Frames and the stamp are both AX
+    /// coordinates.
+    private func recentClickInside(
+        _ id: WindowID,
+        now: Date
+    ) -> Bool {
+        guard let click = lastLeftClick,
+            now.timeIntervalSince(click.at)
+                < Self.selfRaiseSiblingWindow,
+            let frame = state.windows[id]?.frame
+        else { return false }
+        return frame.contains(click.point)
     }
 }

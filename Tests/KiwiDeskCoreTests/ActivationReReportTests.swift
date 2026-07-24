@@ -127,6 +127,77 @@ struct ActivationReReportTests {
         #expect(core.state.workspaces.lastFocused == WindowID(1))
     }
 
+    /// Spaces 1 (active) and 2 shown on two different fake
+    /// displays — the #496 cross-display shape. The hidden
+    /// sibling of `seedHiddenSibling` becomes a VISIBLE one on
+    /// the other monitor.
+    private func splitAcrossDisplays(_ core: KiwiCore) {
+        for (index, name) in ["A", "B"].enumerated() {
+            core.state.workspaces.upsertDisplay(
+                Display(
+                    id: DisplayID(UInt32(index + 1)),
+                    name: name,
+                    frame: CGRect(
+                        x: CGFloat(index) * 1920,
+                        y: 0,
+                        width: 1920,
+                        height: 1080
+                    )
+                )
+            )
+        }
+        core.state.workspaces.assign(
+            SpaceID(1),
+            to: DisplayID(1)
+        )
+        core.state.workspaces.assign(
+            SpaceID(2),
+            to: DisplayID(2)
+        )
+        core.state.workspaces.activate(SpaceID(1))
+    }
+
+    /// #496: a sibling VISIBLE on the other display is exactly
+    /// where a forced activation keys the app's MRU window —
+    /// without a click backing the report, distrust it like a
+    /// hidden one (the old visible-space carve-out was the door
+    /// the cross-display focus steal walked through).
+    @Test("A clickless other-display sibling is distrusted")
+    func otherDisplaySiblingDistrusted() {
+        let core = makeCore()
+        seedHiddenSibling(core)
+        splitAcrossDisplays(core)
+        core.selfRaiseStamps[WindowID(2)] = Date()
+        core.handle(.windowFocused(WindowID(1)))
+        #expect(core.deferred.task(for: .focusFollow) == nil)
+        #expect(core.state.workspaces.lastFocused == WindowID(2))
+        #expect(core.state.workspaces.activeSpace == SpaceID(1))
+    }
+
+    /// The click discriminator (#496): the same other-display
+    /// report backed by a fresh click inside the window is a
+    /// user action and is honored.
+    @Test("A clicked other-display sibling is honored")
+    func clickedOtherDisplaySiblingHonored() {
+        let core = makeCore()
+        seedHiddenSibling(core)
+        splitAcrossDisplays(core)
+        core.state.apply(
+            .windowMoved(
+                WindowID(1),
+                CGRect(x: 2100, y: 300, width: 800, height: 600)
+            )
+        )
+        core.selfRaiseStamps[WindowID(2)] = Date()
+        core.lastLeftClick = (
+            Date(),
+            CGPoint(x: 2500, y: 600)
+        )
+        core.handle(.windowFocused(WindowID(1)))
+        #expect(core.state.workspaces.lastFocused == WindowID(1))
+        #expect(core.deferred.task(for: .focusFollow) != nil)
+    }
+
     /// A sticky sibling is exempt (review): `space(of:)` is
     /// only its hidden HOME — the window itself renders
     /// visibly (#414), and the follow is sticky-exempt anyway,
