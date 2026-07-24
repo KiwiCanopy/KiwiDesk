@@ -77,6 +77,8 @@ extension KiwiCore {
             return setSwapSkipsCascade(args)
         case "set_float_nudge":
             return setFloatNudge(args)
+        case "set_float_scale_on_display_change":
+            return setFloatScaleOnDisplayChange(args)
         case "set_resize_step":
             return setResizeStep(args)
         case "set_resize_feedback":

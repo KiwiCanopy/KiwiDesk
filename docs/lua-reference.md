@@ -488,6 +488,40 @@ Settings toggle.
 KiwiDesk.set_float_nudge(true)
 ```
 
+### set_float_scale_on_display_change
+
+**Expects:** `true` or `false` (default `true`).
+
+**Does:** whether a floating window re-anchored across displays
+also scales its **size** to keep the same relative footprint. By
+default (`true`) a float that crosses to a differently sized
+display is scaled by the per-axis ratio of the two displays — a
+window that filled half of a 4K screen fills half of a 1080p one
+— as well as re-anchored to the same relative spot (bottom-right
+stays bottom-right). This keeps an oversized float from arriving
+half off-screen: when the target display is smaller, macOS clamps
+a too-tall window's height but lets its width overflow the edge,
+so keeping the exact size lands the window partly off the screen.
+Applies wherever a float crosses displays (move-to-space, moving
+a space to another display, a display-change sweep) and to
+windows that are floating only because their space is in floating
+mode, not just explicitly floated ones. The result is still
+confined fully on screen and clear of any App/Space Bar. Set
+`false` to keep the exact pixel size across displays instead — a
+deliberate multi-monitor choice (screen recording, pixel-matched
+capture windows) that accepts the overflow and avoids the slight
+aspect-ratio change the per-axis scale introduces between
+displays of different aspect ratios (e.g. 16:9 → 16:10). Global
+(per profile, all spaces); a power-user knob, so it lives in
+config only, with no Settings toggle.
+
+**Example:**
+
+```lua
+-- keep a float's exact pixel size across displays
+KiwiDesk.set_float_scale_on_display_change(false)
+```
+
 ### set_resize_feedback
 
 **Expects:** `true` or `false` (default `true`).

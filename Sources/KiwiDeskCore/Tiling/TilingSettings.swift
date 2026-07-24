@@ -42,6 +42,25 @@ public struct TilingSettings: Sendable, Equatable {
     /// spaces), same tier as `swapSkipsCascade`; a niche polish
     /// toggle, Lua-only, no GUI. See `FloatNudge`.
     public var floatNudge = true
+    /// When true (default ON, #502), a floating window re-anchored
+    /// across displays also scales its SIZE by the per-axis ratio
+    /// of the target to the source display, keeping the same
+    /// relative footprint — an oversized float shrinks to fit the
+    /// smaller screen instead of overflowing its edge (the OS lets
+    /// width overflow while it half-clamps height, so keeping the
+    /// size lands the window partly off-screen, which reads as
+    /// broken to most users). Supersedes the #444/#493 "keep the
+    /// size" default. Set false to keep the exact pixel size across
+    /// displays (a deliberate multi-monitor choice — screen
+    /// recording, pixel-matched capture — that accepts the OS
+    /// overflow, and avoids the per-axis aspect distortion on
+    /// mismatched-aspect displays). Read only by
+    /// `FloatReanchor.target` at a display-crossing re-anchor,
+    /// never by layout math — so flipping it moves nothing, exactly
+    /// like `floatNudge`, its flat sibling. Lua-only knob
+    /// (`set_float_scale_on_display_change`); no GUI (the OFF state
+    /// is the narrow, technical ask — GUI-curates/Lua-open §2.7).
+    public var floatScaleOnDisplayChange = true
     public var bsp = BspParams()
     public var stack = StackParams()
     public var scrolling = ScrollingParams()

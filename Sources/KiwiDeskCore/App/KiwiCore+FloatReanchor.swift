@@ -55,7 +55,8 @@ extension KiwiCore {
         let translated = FloatReanchor.target(
             frame: base,
             from: source,
-            to: dest
+            to: dest,
+            scaleSize: tiler.settings.floatScaleOnDisplayChange
         )
         // Clear of the strips painted for the target space TODAY
         // — the same clamp every float gets (#242). A parked

@@ -109,6 +109,86 @@ struct FloatReanchorTests {
         )
         #expect(moved == frame)
     }
+
+    @Test("scaleSize off leaves the size untouched (default)")
+    func scaleOffKeepsSize() {
+        let frame = CGRect(
+            x: 60,
+            y: 100,
+            width: 1800,
+            height: 800
+        )
+        let moved = FloatReanchor.target(
+            frame: frame,
+            from: mainBounds,
+            to: sideBounds
+        )
+        #expect(moved.size == frame.size)
+    }
+
+    @Test("scaleSize shrinks an oversized float to fit (#502)")
+    func scaleShrinksToFit() {
+        // 1800 pt wide fits main (1920) but overflows the smaller
+        // side display (1440) at full size — the confine would
+        // pin it to a corner still overflowing. Scaled by the
+        // per-axis ratio it fits outright.
+        let frame = CGRect(
+            x: 60,
+            y: 100,
+            width: 1800,
+            height: 800
+        )
+        let moved = FloatReanchor.target(
+            frame: frame,
+            from: mainBounds,
+            to: sideBounds,
+            scaleSize: true
+        )
+        // Width ratio 1440/1920 = 0.75 → 1350 (exact).
+        #expect(moved.width == 1350)
+        #expect(moved.height < frame.height)
+        #expect(sideBounds.contains(moved))
+    }
+
+    @Test("scaleSize preserves the relative footprint (#502)")
+    func scaleKeepsRelativeFootprint() {
+        let frame = CGRect(
+            x: 480,
+            y: 305,
+            width: 960,
+            height: 400
+        )
+        let moved = FloatReanchor.target(
+            frame: frame,
+            from: mainBounds,
+            to: sideBounds,
+            scaleSize: true
+        )
+        // Same fraction of each display axis before and after.
+        let beforeW = frame.width / mainBounds.width
+        let afterW = moved.width / sideBounds.width
+        let beforeH = frame.height / mainBounds.height
+        let afterH = moved.height / sideBounds.height
+        #expect(abs(afterW - beforeW) < 0.0001)
+        #expect(abs(afterH - beforeH) < 0.0001)
+    }
+
+    @Test("scaleSize with a degenerate source keeps that axis")
+    func scaleDegenerateSourceKeepsAxis() {
+        // A zero-width source has no ratio to apply: the width is
+        // left untouched even when scaling is requested.
+        let degenerate = CGRect(x: 0, y: 25, width: 0, height: 1055)
+        let frame = CGRect(x: 0, y: 25, width: 400, height: 300)
+        let moved = FloatReanchor.target(
+            frame: frame,
+            from: degenerate,
+            to: sideBounds,
+            scaleSize: true
+        )
+        #expect(moved.width == frame.width)
+        // Height still scales by its own (valid) ratio.
+        #expect(moved.height != frame.height)
+    }
 }
 
 /// The seeded-capture bookkeeping the re-anchor delivery rides
