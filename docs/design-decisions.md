@@ -185,6 +185,21 @@ the candidate set, array-order layouts **skip** their array
 indices (#172). Both share one geometric detector,
 `Navigation.pileMates`.
 
+Orthogonal to both models, directional `focus` (never `swap`)
+runs a **two-tier candidate search** (#488): tiled candidates
+first — the model above — and, only when no tiled window lies in
+the pressed direction, the space's floating windows by their
+live frames (`StateCoordinator.floatingFocusCandidates`:
+float-flagged members plus floating sticky windows rendering on
+the space; transient overlays and fullscreen windows never).
+Tiled-first keeps tile-to-tile navigation untouched while
+removing the directional black hole a visible float used to be —
+dropped from `effectiveTiledMembers`, it could navigate out (the
+anchor falls back to a geometric search from its live frame) but
+nothing could navigate back in. Array-order layouts reach the
+float tier through their existing edge fall-through to the
+geometric search.
+
 ```mermaid
 flowchart TD
     L["a new layout"] --> M{"navigation model?"}

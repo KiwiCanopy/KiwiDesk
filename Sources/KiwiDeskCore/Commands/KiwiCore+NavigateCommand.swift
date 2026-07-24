@@ -124,12 +124,23 @@ extension KiwiCore {
                 }
             }
         }
+        // Two-tier candidate search (#488): tiled slots first;
+        // when no tiled candidate lies in the direction, the
+        // float tier (focus only, live frames) keeps a visible
+        // floating window from being a directional dead end.
         guard
             let target = Navigation.neighbor(
                 from: frame,
                 in: direction,
                 candidates: searchCandidates
             )
+                ?? floatTierTarget(
+                    from: frame,
+                    in: direction,
+                    space: space,
+                    focused: focused,
+                    swapping: swapping
+                )
         else {
             // Dead end — no window that way. Rubber-band the ring
             // toward the wall (#436); wordless, unlike the traveler

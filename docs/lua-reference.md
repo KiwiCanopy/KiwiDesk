@@ -113,6 +113,19 @@ at the ends unless `track.set_wrap_focus(true)` is set, which
 wraps within the track along the axis and last ↔ first track
 across it.
 
+The search is two-tier: **tiled windows always win**, and only
+when no tiled window lies in the pressed direction are the
+space's *floating* windows (including floating sticky windows
+shown on the space) considered, by their live frames — so a
+float parked beside the layout is reachable at the edge, while
+tile-to-tile navigation never detours through a hovering
+float. Transient panels (Spotlight-style launchers) and
+fullscreen windows are never focus targets. A float parked
+*exactly* on a tiled slot shares that tile's center, so no
+direction points at it — see Accepted Limitations; click it or
+cycle to it instead. `swap` stays tiled-only: a floating
+window has no slot to trade.
+
 **Example:**
 
 ```lua
