@@ -94,6 +94,25 @@ struct FocusFloatTierMonocleTests {
         )
     }
 
+    @Test("A lone monocle window's swap is an honest dead end")
+    func loneWindowSwapDeadEnds() {
+        let core = makeCore()
+        _ = makeMonocleWithFloat(core, tiled: 1)
+        let space = SpaceID("1")
+        core.state.workspaces.focus(WindowID(1), in: space)
+        // The float tier is swap-excluded and no tiled
+        // candidate exists: fail (dead-end cue), never the old
+        // silent .ok — and never a float trade.
+        #expect(
+            !core.execute("swap", args: [.string("right")])
+                .isSuccess
+        )
+        #expect(
+            core.state.workspaces[space]?.windows
+                == [WindowID(1), WindowID(2)]
+        )
+    }
+
     @Test("An unwrapped monocle end reaches a float on the axis")
     func unwrappedEndReachesFloat() {
         let core = makeCore()
