@@ -21,14 +21,14 @@ Powerful when you reach for it, never in your way.
 ![macOS 14+](https://img.shields.io/badge/macOS-14%2B-000000?logo=apple&logoColor=white)
 ![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white)
 [![CI](https://github.com/hajiboy95/KiwiDesk/actions/workflows/ci.yml/badge.svg)](https://github.com/hajiboy95/KiwiDesk/actions/workflows/ci.yml)
-![License MIT](https://img.shields.io/badge/License-MIT-4E9F3D)
+![License MIT](https://img.shields.io/badge/License-MIT-8DB354)
 ![App Store — coming soon](https://img.shields.io/badge/App_Store-coming_soon-8B5E3C)
 
 <br>
 
-[![Documentation](https://img.shields.io/badge/📖_Documentation-4E9F3D?style=for-the-badge)](https://kiwidesk.pages.dev/docs/)
-[![Quick Start](https://img.shields.io/badge/🚀_Quick_Start-357229?style=for-the-badge)](https://kiwidesk.pages.dev/docs/user-guide/)
-[![Recipes](https://img.shields.io/badge/🧩_Recipes-6DBF5B?style=for-the-badge)](https://kiwidesk.pages.dev/docs/recipes/)
+[![Documentation](https://img.shields.io/badge/📖_Documentation-8DB354?style=for-the-badge)](https://kiwidesk.pages.dev/docs/)
+[![Quick Start](https://img.shields.io/badge/🚀_Quick_Start-627D3A?style=for-the-badge)](https://kiwidesk.pages.dev/docs/user-guide/)
+[![Recipes](https://img.shields.io/badge/🧩_Recipes-AACB5D?style=for-the-badge)](https://kiwidesk.pages.dev/docs/recipes/)
 [![Support on Ko-fi](https://img.shields.io/badge/Support-FF5E5B?style=for-the-badge&logo=kofi&logoColor=white)](https://ko-fi.com/kiwicanopy)
 
 </div>

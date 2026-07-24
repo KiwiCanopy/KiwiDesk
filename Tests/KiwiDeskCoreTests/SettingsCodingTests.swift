@@ -47,7 +47,7 @@ struct SettingsCodingTests {
         )
         #expect(border["enabled"] as? Bool == true)
         #expect(border["width"] as? Double == 2)
-        #expect(border["focused_color"] as? String == "#4E9F3D")
+        #expect(border["focused_color"] as? String == "#0F8FAE")
         #expect(border["unfocused_enabled"] as? Bool == false)
         #expect(border["corner_style"] as? String == "rounded")
         #expect(border["draw_order"] as? String == "behind")
@@ -177,15 +177,16 @@ struct SettingsCodingTests {
                 "border_alignment", "enabled", "fill", "fill_color",
             ]
         )
-        // Kiwi defaults: all-green ghost (origin), all-amber
-        // drop zone (target) — hue carries origin vs. target.
-        #expect(ghost["border_color"] as? String == "#4E9F3D")
-        #expect(ghost["fill_color"] as? String == "#4E9F3D40")
+        // Kiwi defaults: teal ghost (origin), amber drop zone
+        // (target) — hue carries origin vs. target. Overlays are
+        // contrast-tuned, decoupled from the brand green.
+        #expect(ghost["border_color"] as? String == "#0F8FAE")
+        #expect(ghost["fill_color"] as? String == "#0F8FAE40")
         #expect(ghost["border_thickness"] as? Double == 5)
         #expect(ghost["border_alignment"] as? String == "inside")
         let zone = try object(drag["drop_zone"])
-        #expect(zone["border_color"] as? String == "#E8A33D")
-        #expect(zone["fill_color"] as? String == "#E8A33D40")
+        #expect(zone["border_color"] as? String == "#C2790A")
+        #expect(zone["fill_color"] as? String == "#C2790A40")
         #expect(zone["border_thickness"] as? Double == 5)
         #expect(zone["border_alignment"] as? String == "inside")
     }

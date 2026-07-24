@@ -102,22 +102,26 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// snakes to the `spring_delay` key the parity guard expects.)
     public var springDelay = 1500
     /// Inactive spaces: identifier + glyphs (muted tier).
-    public var itemColor = "#F2EBD966"
+    /// KiwiCanopy theme; defaults mirrored as examples in
+    /// docs/lua-reference.md (Space Bar colors) — change both.
+    public var itemColor = "#EAF3EE66"
     /// The active space's accent (identifier + its glyphs).
-    public var activeItemColor = "#4E9F3D"
+    public var activeItemColor = "#8DB354"
     /// The focused window's accent — its glyph inside the active
     /// space AND the front-app segment (glyph + name). A
     /// genuinely different hue, not a tint of the active-space
     /// color, so the two states read apart (QA 2026-07-19).
+    /// Kept amber pending its own convergence pass (separate
+    /// semantic from the drag drop-zone) — see issue follow-up.
     public var focusedItemColor = "#E8A33D"
     /// Hover tint on non-active space items.
-    public var hoverFillColor = "#6DBF5B80"
-    public var hoverItemColor = "#F2EBD9"
+    public var hoverFillColor = "#AACB5D80"
+    public var hoverItemColor = "#EAF3EE"
     /// The fill under the items — a box per Space (Boxed), one
     /// shared plate (Plain), or the Liquid Glass tint (Material).
-    /// Dark moss, one green family with the accent (2026-07-20).
-    public var fillColor = "#37452E66"
-    public var highlightColor = "#4E9F3D"
+    /// A translucent cool-dark surface under the kiwi accent.
+    public var fillColor = "#14201C66"
+    public var highlightColor = "#8DB354"
     /// Count badges (grouped duplicates and the "+n" overflow),
     /// shown in these colors on the active space and muted from
     /// `itemColor` on inactive ones.

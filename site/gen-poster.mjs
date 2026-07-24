@@ -16,13 +16,13 @@ const H = 720;
 const bg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <defs>
     <linearGradient id="g" x1="0" y1="0" x2="0.6" y2="1">
-      <stop offset="0" stop-color="#16240f"/>
-      <stop offset="0.55" stop-color="#101d0b"/>
-      <stop offset="1" stop-color="#0c160a"/>
+      <stop offset="0" stop-color="#151e16"/>
+      <stop offset="0.55" stop-color="#0d1512"/>
+      <stop offset="1" stop-color="#0a100e"/>
     </linearGradient>
     <radialGradient id="glow" cx="0.5" cy="0.44" r="0.55">
-      <stop offset="0" stop-color="#4e9f3d" stop-opacity="0.30"/>
-      <stop offset="1" stop-color="#4e9f3d" stop-opacity="0"/>
+      <stop offset="0" stop-color="#8db354" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#8db354" stop-opacity="0"/>
     </radialGradient>
   </defs>
   <rect width="${W}" height="${H}" fill="url(#g)"/>

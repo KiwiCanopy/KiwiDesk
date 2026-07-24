@@ -79,7 +79,8 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         case .bars: return .pink
         case .behavior: return .orange
         case .profiles:
-            return Color(red: 0.16, green: 0.53, blue: 0.28)
+            // KiwiCanopy kiwi green #8DB354 (was forest #298744).
+            return Color(red: 0.553, green: 0.702, blue: 0.329)
         case .shortcuts:
             return Color(
                 red: 0.35,
