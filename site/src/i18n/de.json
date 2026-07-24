@@ -93,7 +93,7 @@
   "guide_gs_appstore_small": "Laden im",
   "guide_gs_eyebrow": "Erster Schritt",
   "guide_gs_first_p": "Sobald die Berechtigung erteilt ist, legt KiwiDesk los. Sobald du ein Fenster öffnest, siehst du, wie es sich sauber an seinen Platz fügt — es füllt seinen Teil des Bildschirms aus, Kante an Kante, ohne Überlappung. Öffnest du ein zweites, teilen sich die beiden den Platz nebeneinander. Nichts ist verdeckt, nichts muss gesucht werden. Du arbeitest einfach so weiter wie immer; das Anordnen passiert ganz von allein.",
-  "guide_gs_first_sub": "Dein erstes aufgeräumtes Fenster",
+  "guide_gs_first_sub": "Dein erster aufgeräumter Desktop",
   "guide_gs_p1": "Die Installation von KiwiDesk dauert etwa eine Minute — ein Klick im Mac App Store, und schon ist es startbereit.",
   "guide_gs_perm_p": "Beim ersten Start von KiwiDesk bittet macOS dich, den Zugriff auf die <strong>Bedienungshilfen</strong> freizugeben. Das ist die normale, erwartete Abfrage — und es ist das Einzige, was KiwiDesk von dir benötigt. Um deinen Bildschirm aufzuräumen, muss die App in der Lage sein, deine Fenster zu bewegen und in der Größe anzupassen, und macOS schützt diese Funktion über diese Berechtigung. Ein kurzer Onboarding-Assistent führt dich direkt an die richtige Stelle in den <strong>Systemeinstellungen › Datenschutz &amp; Sicherheit › Bedienungshilfen</strong> und hilft dir, den Schalter umzulegen.",
   "guide_gs_perm_sub": "Die einzige Berechtigung, die es braucht",

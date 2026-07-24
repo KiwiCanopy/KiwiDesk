@@ -445,17 +445,23 @@ const scenarios = [
               <div class="learn-snap" aria-hidden="true">
                 <svg viewBox="0 0 320 150"
                   preserveAspectRatio="xMidYMid meet">
-                  <rect x="18" y="24" width="96" height="70" rx="6"
-                    class="tile tile--ghost" />
-                  <path d="M132 59h34m0 0-9-9m9 9-9 9" fill="none"
+                  <!-- Before: three windows piled up and overlapping -->
+                  <rect x="12" y="26" width="78" height="58" rx="6"
+                    class="tile" />
+                  <rect x="30" y="44" width="78" height="58" rx="6"
+                    class="tile" />
+                  <rect x="48" y="62" width="78" height="58" rx="6"
+                    class="tile tile--accent" />
+                  <path d="M140 73h36m0 0-9-9m9 9-9 9" fill="none"
                     stroke="currentColor" stroke-width="2.4"
                     stroke-linecap="round" stroke-linejoin="round"
                     style="color: var(--text-faint)" />
-                  <rect x="188" y="18" width="56" height="112" rx="6"
+                  <!-- After: the same windows, tidied edge to edge -->
+                  <rect x="196" y="18" width="52" height="112" rx="6"
                     class="tile" />
-                  <rect x="248" y="18" width="56" height="53" rx="6"
+                  <rect x="254" y="18" width="54" height="53" rx="6"
                     class="tile tile--accent" />
-                  <rect x="248" y="77" width="56" height="53" rx="6"
+                  <rect x="254" y="77" width="54" height="53" rx="6"
                     class="tile" />
                 </svg>
               </div>
