@@ -120,6 +120,57 @@ struct WorkspaceManagerTests {
         // No space assigned → nil.
         #expect(manager.currentSpace(on: DisplayID(3)) == nil)
     }
+
+    @Test(
+        """
+        A cross-display drop lands on the target's index, \
+        shifting the target down and dropping from the origin \
+        (#492)
+        """
+    )
+    func crossDisplayMoveInsert() {
+        var manager = WorkspaceManager()
+        manager.add(WindowID(1), to: "A")
+        manager.add(WindowID(2), to: "A")
+        manager.add(WindowID(3), to: "B")
+        manager.add(WindowID(4), to: "B")
+        // Drop window 1 (from A) onto window 4's slot in B — the
+        // exact add-then-move `relocateAcrossDisplay` performs.
+        let target = WindowID(4)
+        let targetIndex =
+            manager["B"]?.windows
+            .firstIndex(of: target) ?? 0
+        manager.add(WindowID(1), to: "B", after: target)
+        manager.withSpace("B") { $0.move(WindowID(1), to: targetIndex) }
+        // 1 takes 4's old index (1); 4 shifts to index 2.
+        #expect(
+            manager["B"]?.windows
+                == [WindowID(3), WindowID(1), WindowID(4)]
+        )
+        // 1 is gone from the origin space.
+        #expect(manager["A"]?.windows == [WindowID(2)])
+        #expect(manager.space(of: WindowID(1)) == SpaceID("B"))
+    }
+
+    @Test("A cross-display drop onto the first slot inserts at 0")
+    func crossDisplayMoveFirstSlot() {
+        var manager = WorkspaceManager()
+        manager.add(WindowID(1), to: "A")
+        manager.add(WindowID(2), to: "B")
+        manager.add(WindowID(3), to: "B")
+        let target = WindowID(2)
+        let targetIndex =
+            manager["B"]?.windows
+            .firstIndex(of: target) ?? 0
+        manager.add(WindowID(1), to: "B", after: target)
+        manager.withSpace("B") { $0.move(WindowID(1), to: targetIndex) }
+        // 1 takes the head slot; 2 shifts to index 1.
+        #expect(
+            manager["B"]?.windows
+                == [WindowID(1), WindowID(2), WindowID(3)]
+        )
+        #expect(manager["A"]?.windows.isEmpty == true)
+    }
 }
 
 @Suite("StateCoordinator")

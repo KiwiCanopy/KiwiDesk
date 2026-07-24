@@ -195,7 +195,7 @@ extension KiwiCore {
         // at spring time — so it falls through to the ordinary in-
         // space drop, which places it at the cursor's slot. Own-
         // space / off-bar also fall through unchanged.
-        switch spaceBarDrop.ended(id, cursor: NSEvent.mouseLocation)
+        switch spaceBarDrop.ended(id, cursor: drag.cursorLocation())
         {
         case .relocate(let target):
             moveWindow(id, to: target, follow: false)
@@ -285,6 +285,15 @@ extension KiwiCore {
             at: GeometryUtils.axPoint(drag.cursorLocation()),
             slots: slots
         )
+        // A drop whose target sits on ANOTHER display moves the
+        // window there instead of swapping (#492) — checked before
+        // the traveler refusal below, which would otherwise reject
+        // every cross-display target as a non-member.
+        if let target,
+            relocateAcrossDisplay(id, onto: target, from: space)
+        {
+            return
+        }
         // A tiled-sticky traveler is injected into this space's
         // layout but is not a member of it (#414 v2): dropping
         // another window onto it is refused by `Space.swap`'s

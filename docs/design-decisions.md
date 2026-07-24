@@ -1597,6 +1597,46 @@ titles ("dragged window", "swap target"). Section captions
 are a `SettingsSection` affordance, so other groups can
 adopt the same pattern.
 
+**[Principle] The drop target follows the cursor; a
+cross-display drop MOVES, a same-display drop swaps.** (#492.)
+The drop-zone and the final drop resolve their target from the
+mouse **cursor**, not the dragged window's frame center — a
+large window dragged onto a smaller display keeps its center
+over the origin display long after the pointer has crossed, so
+a center hit-test never reaches the destination slot and no
+feedback appears. The cursor is where the intent lives, and it
+alone selects both the destination display and the slot (the
+slot pool already spans every visible display). Preview and
+drop share the one cursor rule, so the highlight can never
+promise a target the drop won't act on.
+
+Releasing over a slot on **another display MOVES** the window
+into that display's space, onto the target's slot — the moved
+window takes the target's array index, the target and the rest
+shift up one, and (because a tiling slot exists only where a
+window sits) the destination display **re-partitions** to N+1
+slots. A **same-display** drop still **swaps** the two windows.
+The window belongs to its origin space for the whole drag, so
+the destination shows no gap *until* the drop commits the
+membership change — opening one live mid-drag (a ghost over an
+empty slot as the cursor enters) is a possible later polish,
+not part of this behavior. *Rationale:* the primary
+reason to drag a window to another monitor is to *move it
+there* — swap-only would be frustrating, and it can fling a
+window you never touched onto your other display. *Trade-off:*
+this makes cross-display behave differently from same-display
+(move vs swap), and it is not capacity-neutral — the
+destination gains a window and the origin loses one, so both
+displays re-partition. That was chosen deliberately over the
+one-rule-everywhere swap (which a UI-design pass argued for on
+consistency grounds): the move model matches direct-manipulation
+expectation for a monitor-to-monitor drag. The refusal guards
+(`refuseSwapOntoTraveler`, sticky-move) fire on both paths;
+the destination is the active space of the display **under the
+cursor**, validated to actually contain the target, so a
+tiled-sticky traveler injected onto a foreign display can't
+teleport the window to wherever its home space happens to show.
+
 **Ghost and Drop zone are two side-by-side columns.** (#231.)
 Each column leads with its own live preview and puts its
 controls directly beneath, so tuning a column's border width
