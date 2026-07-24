@@ -36,10 +36,21 @@ public enum FloatReanchor {
         isFloating || targetMode == .floating
     }
 
+    /// When `scaleSize` is on (#502, the default — see
+    /// `TilingSettings.floatScaleOnDisplayChange`), the window's
+    /// size is scaled by the per-axis ratio of the target to the
+    /// source visible frame *before* it is re-centered — so a float
+    /// keeps the same relative footprint across differently sized
+    /// displays (a too-wide window shrinks to fit instead of
+    /// overflowing the smaller screen's edge, which macOS lets it
+    /// do on width while it half-clamps height). Off keeps the
+    /// exact size (the pre-#502 behavior). A degenerate source span
+    /// leaves that axis's size untouched — no ratio to apply.
     public static func target(
         frame: CGRect,
         from source: CGRect,
-        to target: CGRect
+        to target: CGRect,
+        scaleSize: Bool = false
     ) -> CGRect {
         let relX =
             source.width > 0
@@ -49,13 +60,19 @@ public enum FloatReanchor {
             source.height > 0
             ? (frame.midY - source.minY) / source.height
             : 0.5
+        let width =
+            scaleSize && source.width > 0
+            ? frame.width * target.width / source.width
+            : frame.width
+        let height =
+            scaleSize && source.height > 0
+            ? frame.height * target.height / source.height
+            : frame.height
         let moved = CGRect(
-            x: target.minX + relX * target.width
-                - frame.width / 2,
-            y: target.minY + relY * target.height
-                - frame.height / 2,
-            width: frame.width,
-            height: frame.height
+            x: target.minX + relX * target.width - width / 2,
+            y: target.minY + relY * target.height - height / 2,
+            width: width,
+            height: height
         )
         return FloatNudge.confine(moved, to: target)
     }

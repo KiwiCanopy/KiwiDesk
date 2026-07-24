@@ -23,6 +23,10 @@ extension TilingSettings {
             forKey: .floatNudge
         )
         try container.encode(
+            floatScaleOnDisplayChange,
+            forKey: .floatScaleOnDisplayChange
+        )
+        try container.encode(
             placementOverride,
             forKey: .placementOverride
         )

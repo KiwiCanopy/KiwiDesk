@@ -28,7 +28,8 @@ struct SettingsCodingTests {
         #expect(
             Set(root.keys) == [
                 "animations", "app_bar", "border", "drag",
-                "float_nudge", "gap",
+                "float_nudge", "float_scale_on_display_change",
+                "gap",
                 "layout", "min_window_size", "mouse",
                 "mouse_resize", "new_window_placement_override", "quit",
                 "floating", "resize", "space", "space_bar",
@@ -94,6 +95,14 @@ struct SettingsCodingTests {
         // default: a tiled→floating toggle shoves the window
         // toward center so the state change is visible.
         #expect(root["float_nudge"] as? Bool == true)
+        // `set_float_scale_on_display_change` → top-level
+        // `float_scale_on_display_change` (#502), ON by default:
+        // a cross-display float scales to fit unless opted out
+        // (supersedes the #444/#493 keep-the-size default).
+        #expect(
+            root["float_scale_on_display_change"] as? Bool
+                == true
+        )
         // `set_space_icon` → `space.icon[space_id]` (#68).
         let space = try object(root["space"])
         let icons = try object(space["icon"])
@@ -237,6 +246,7 @@ struct SettingsCodingTests {
         settings.minWindowSize = 200
         settings.swapSkipsCascade = false
         settings.floatNudge = false
+        settings.floatScaleOnDisplayChange = false
         settings.resizeStep = 75
         settings.resizeFeedback = false
         settings.dragGhost.enabled = false

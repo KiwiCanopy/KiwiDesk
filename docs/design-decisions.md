@@ -1663,6 +1663,33 @@ still holds: where the landing is rule-based, no slot is
 promised. Same-display track drops swap positionally, so their
 highlight stays.
 
+**[Principle] A float crossing displays scales to fit by
+default; keeping the exact size is the opt-out.** (#502,
+supersedes #444/#493.) *Rationale:* #444/#493 originally kept a
+float's exact size on a cross-display re-anchor — "size is the
+user's choice" — and explicitly rejected shrink/center as the
+default. QA reversed the judgment: because macOS half-clamps a
+too-tall window's height but lets its width overflow the screen
+edge, a float that keeps its size on a move to a *smaller*
+display arrives partly off-screen, which reads as broken to most
+users. So `float_scale_on_display_change` now defaults **on** —
+the window is scaled by the per-axis ratio of the two displays
+(same relative footprint) as well as re-anchored, wherever a
+float crosses displays and for floating-mode members too (#498/
+#500), still confined clear of the bars. *Trade-off:* the scale
+is per-axis, so on displays of different aspect ratio it slightly
+distorts the window's aspect, and it resizes floats that already
+fit — accepted as the lesser surprise versus a window hanging off
+the edge. *Map:* the escape hatch stays **Lua-only, no GUI**
+(`set_float_scale_on_display_change(false)`) — the OFF state
+("keep my float's exact pixels, accept the overflow") is a
+narrow, technical ask (screen recording, pixel-matched capture),
+the same GUI-curates/Lua-open call as `float_nudge` and the bar
+`dim_factor` knobs; a GUI toggle would need a paragraph of caveats
+in its caption, which is contextual-help/Lua-reference work, not a
+Settings control. A future contributor must not re-derive "size is
+the user's choice" from the old #444/#493 record and revert this.
+
 **Ghost and Drop zone are two side-by-side columns.** (#231.)
 Each column leads with its own live preview and puts its
 controls directly beneath, so tuning a column's border width

@@ -96,6 +96,20 @@ extension KiwiCore {
         return .ok()
     }
 
+    func setFloatScaleOnDisplayChange(
+        _ args: [JSONValue]
+    ) -> CommandResponse {
+        guard let on = args.first?.boolValue else {
+            return .fail("expected boolean")
+        }
+        tiler.settings.floatScaleOnDisplayChange = on
+        // No retile (like `set_float_nudge`): the flag is read
+        // only by `FloatReanchor.target` at a display-crossing
+        // re-anchor, never by layout math, so flipping it moves
+        // nothing here.
+        return .ok()
+    }
+
     func setResizeStep(
         _ args: [JSONValue]
     ) -> CommandResponse {
