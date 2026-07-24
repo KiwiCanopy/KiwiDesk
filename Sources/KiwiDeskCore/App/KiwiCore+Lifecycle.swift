@@ -59,12 +59,10 @@ extension KiwiCore {
             seedStartupFocus()
             // Same contract as every other space switch:
             // force past the tolerance check, respect the
-            // space-switch animation setting, and tell bus
-            // subscribers (the bar) where we landed.
-            retile(
-                animated: tiler.settings.animations.onSpaceChange,
-                force: true
-            )
+            // space-switch animation setting (coordinated
+            // out+in, #207), and tell bus subscribers (the
+            // bar) where we landed.
+            spaceSwitchRetile()
             emitSpaceChange()
             onLog("restored previous session arrangement")
         }
@@ -94,11 +92,7 @@ extension KiwiCore {
             if self.state.workspaces.activeSpace == landed {
                 self.activateSpaceOfFocusedWindow()
                 if self.state.workspaces.activeSpace != landed {
-                    self.retile(
-                        animated: self.tiler.settings
-                            .animations.onSpaceChange,
-                        force: true
-                    )
+                    self.spaceSwitchRetile()
                     self.emitSpaceChange()
                 }
             }

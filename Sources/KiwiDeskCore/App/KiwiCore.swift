@@ -293,14 +293,16 @@ public final class KiwiCore {
     public func retile(
         animated: Bool? = nil,
         force: Bool = false,
-        newlyCreatedWindow: WindowID? = nil
+        newlyCreatedWindow: WindowID? = nil,
+        stashAnimated: Bool = false
     ) {
         tiler.retile(
             state: state,
             animated: animated
                 ?? tiler.settings.animations.onRelayout,
             force: force,
-            newlyCreatedWindow: newlyCreatedWindow
+            newlyCreatedWindow: newlyCreatedWindow,
+            stashAnimated: stashAnimated
         )
         // Scrolling reads back its own last offset (#66); other
         // modes never write `scrollOffset`, so this is a no-op

@@ -99,8 +99,14 @@ extension KiwiCore {
                 Date().timeIntervalSince(self.lastNativeSwitch)
                     > NativeSwitch.settle
             else { return }
+            // Deliberately NOT `spaceSwitchRetile()` (#207):
+            // the re-issue keeps the instant park so a dropped
+            // park lands in one set, not a late visible slide;
+            // a still-running exit slide is protected by
+            // `stash()`'s in-flight skip.
             self.retile(
-                animated: self.tiler.settings.animations.onSpaceChange,
+                animated: self.tiler.settings
+                    .animations.onSpaceChange,
                 force: true
             )
             self.reassertSwitchFocus(

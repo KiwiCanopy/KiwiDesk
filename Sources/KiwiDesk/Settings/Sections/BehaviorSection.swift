@@ -78,6 +78,18 @@ struct BehaviorSection: View {
                 isOn: $model.config.settings.animations
                     .onSpaceChange
             )
+            // Retires the entrance-only mental image (#207):
+            // the transition is a coordinated out+in.
+            Text(
+                L(
+                    "behavior.animations.space_change.caption",
+                    "Windows slide out of the space you're "
+                        + "leaving and into the one you're "
+                        + "switching to."
+                )
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
             Toggle(
                 L(
                     "behavior.animations.window_resize",

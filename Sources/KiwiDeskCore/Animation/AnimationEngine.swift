@@ -94,6 +94,18 @@ public final class AnimationEngine {
         animations.values.contains { $0[window] != nil }
     }
 
+    /// The frame a window's in-flight animation is heading to,
+    /// nil when idle. Lets an instant frame-set skip a window
+    /// already sliding to the same target (#207 exit slide).
+    public func targetFrame(window: WindowID) -> CGRect? {
+        for perWindow in animations.values {
+            if let animation = perWindow[window] {
+                return animation.targetFrame
+            }
+        }
+        return nil
+    }
+
     private var spring: Spring {
         Spring(
             response: Double(storedDurationMS) / 1000 * 1.4,
@@ -173,6 +185,9 @@ public final class AnimationEngine {
     }
 
     /// Stops everything, snapping to targets when enabled.
+    /// Without `snapToTargets`, a window mid-exit-slide (#207)
+    /// is left half-visible until a retile re-parks it —
+    /// production callers should snap.
     public func cancelAll(snapToTargets: Bool = false) {
         for perWindow in animations.values {
             for (id, animation) in perWindow {

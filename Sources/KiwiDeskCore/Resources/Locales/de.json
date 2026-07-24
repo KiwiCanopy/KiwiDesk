@@ -42,6 +42,7 @@
   "behavior.animations.scrolling_xref": "Fokus-Animationen für das Scrolling-Layout findest du unter",
   "behavior.animations.scrolling_xref_link": "Layout-Standards ▸ Scrolling",
   "behavior.animations.space_change": "Wechsel virtueller Spaces animieren",
+  "behavior.animations.space_change.caption": "Fenster gleiten aus dem Space, den du verlässt, hinaus und in den Space hinein, zu dem du wechselst.",
   "behavior.animations.title": "Animationen",
   "behavior.animations.window_resize": "Größenänderung von Fenstern animieren",
   "behavior.animations.window_swap": "Fenstertausch animieren",

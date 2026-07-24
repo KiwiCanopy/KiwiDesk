@@ -103,6 +103,7 @@
   "behavior.animations.scrolling_xref": "Scrolling-layout focus shifts have their own toggle and speed in",
   "behavior.animations.scrolling_xref_link": "Layout Defaults ▸ Scrolling",
   "behavior.animations.space_change": "Animate virtual space switches",
+  "behavior.animations.space_change.caption": "Windows slide out of the space you're leaving and into the one you're switching to.",
   "behavior.animations.title": "Animations",
   "behavior.animations.window_resize": "Animate window resizes",
   "behavior.animations.window_swap": "Animate window swaps",
