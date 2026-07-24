@@ -325,6 +325,32 @@ body::before {
 }
 
 /* =========================================================
+   Skip link (WCAG 2.4.1)
+   Off-screen until focused, then slides into the top-left over
+   the sticky nav. Shared by the landing and guide pages.
+   ========================================================= */
+.skip-link {
+  position: fixed;
+  top: var(--sp-1);
+  left: var(--sp-1);
+  z-index: 100;
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-3);
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-150%);
+  transition: transform 0.15s ease;
+}
+.skip-link:focus {
+  transform: translateY(0);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* =========================================================
    Nav
    ========================================================= */
 .nav {

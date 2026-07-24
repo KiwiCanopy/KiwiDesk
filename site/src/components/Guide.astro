@@ -168,6 +168,45 @@ const scenarios = [
     after: s.guide_scenario_developer_after,
   },
 ];
+
+// SEO/head: absolute URLs derived from Astro.site so they survive
+// the pages.dev → custom-domain switch. `canonical` is this
+// locale's own guide page; the hreflang pair links EN ↔ DE.
+const guideHref = lang === "de" ? "/de/guide/" : "/guide/";
+const canonical = new URL(guideHref, Astro.site).href;
+const enURL = new URL("/guide/", Astro.site).href;
+const deURL = new URL("/de/guide/", Astro.site).href;
+const ogImageURL = new URL(ogImage.src, Astro.site).href;
+const ogLocale = lang === "de" ? "de_DE" : "en_US";
+const ogLocaleAlt = lang === "de" ? "en_US" : "de_DE";
+
+// Structured data: the site (WebSite) plus this guide as a
+// TechArticle, emitted as one JSON-LD graph in the head. The
+// landing page carries the SoftwareApplication node; the guide is
+// an article about the product.
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "KiwiDesk",
+    url: new URL("/", Astro.site).href,
+    inLanguage: lang,
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    headline: s.guide_meta_title,
+    description: s.guide_meta_desc,
+    url: canonical,
+    image: ogImageURL,
+    inLanguage: lang,
+    author: {
+      "@type": "Organization",
+      name: "KiwiCanopy",
+      url: makerProfile,
+    },
+  },
+];
 ---
 
 <!doctype html>
@@ -178,19 +217,26 @@ const scenarios = [
       content="width=device-width, initial-scale=1" />
     <title>{s.guide_meta_title}</title>
     <meta name="description" content={s.guide_meta_desc} />
+    <link rel="canonical" href={canonical} />
     <meta property="og:title" content={s.guide_meta_title} />
     <meta property="og:description" content={s.guide_meta_desc} />
     <meta property="og:type" content="article" />
-    <meta property="og:locale"
-      content={lang === "de" ? "de_DE" : "en_US"} />
-    <meta property="og:image"
-      content={new URL(ogImage.src, Astro.site).href} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content="KiwiDesk" />
+    <meta property="og:locale" content={ogLocale} />
+    <meta property="og:locale:alternate" content={ogLocaleAlt} />
+    <meta property="og:image" content={ogImageURL} />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={s.guide_meta_title} />
+    <meta name="twitter:description" content={s.guide_meta_desc} />
+    <meta name="twitter:image" content={ogImageURL} />
     <meta name="theme-color" content="#101d0b" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="alternate" hreflang="en" href="/guide/" />
-    <link rel="alternate" hreflang="de" href="/de/guide/" />
-    <link rel="alternate" hreflang="x-default" href="/guide/" />
+    <link rel="alternate" hreflang="en" href={enURL} />
+    <link rel="alternate" hreflang="de" href={deURL} />
+    <link rel="alternate" hreflang="x-default" href={enURL} />
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)}
+    ></script>
     <!-- Anti-FOUC: resolve the theme before first paint so the
          page never flashes the wrong theme. Shares the exact
          `starlight-theme` key with the landing + docs, so a
@@ -267,6 +313,9 @@ const scenarios = [
     </script>
   </head>
   <body>
+    <!-- Skip link (WCAG 2.4.1): first focusable element, jumps past
+         the nav to the guide content. Off-screen until focused. -->
+    <a class="skip-link" href="#learnMain">{s.skip_to_content}</a>
     <!-- ============ Site nav (no mode toggle, no tab bar) ====== -->
     <nav class="nav" id="nav">
       <div class="wrap nav__inner">
@@ -347,7 +396,7 @@ const scenarios = [
     </details>
 
     <!-- ============ Page content ============ -->
-    <main class="learn" id="learnMain">
+    <main class="learn" id="learnMain" tabindex="-1">
       <div class="wrap">
         <div class="learn__layout">
           <!-- Desktop sticky TOC rail -->
@@ -620,7 +669,7 @@ const scenarios = [
             aria-hidden="true" width="20" height="16" />
           {s.footer_kofi}
         </a>
-        <nav class="footer__links" aria-label="Footer">
+        <nav class="footer__links" aria-label={s.footer_nav_aria}>
           <a href={homeHref}>{s.guide_footer_home}</a>
           <a href="/docs/">{s.footer_docs}</a>
           <a href={repo} target="_blank" rel="noopener"

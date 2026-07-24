@@ -94,6 +94,51 @@ const steps = [
   { n: "2", title: t.how_2_title, body: t.how_2_body },
   { n: "3", title: t.how_3_title, body: t.how_3_body },
 ];
+
+// SEO/head: absolute URLs derived from Astro.site so they survive
+// the pages.dev → custom-domain switch. `canonical` is this
+// locale's own page; `ogImageURL` is the shared social card.
+const canonical = new URL(homeHref, Astro.site).href;
+const enURL = new URL("/", Astro.site).href;
+const deURL = new URL("/de/", Astro.site).href;
+const ogImageURL = new URL(ogImage.src, Astro.site).href;
+const ogLocale = lang === "de" ? "de_DE" : "en_US";
+const ogLocaleAlt = lang === "de" ? "en_US" : "de_DE";
+
+// Structured data: KiwiDesk itself (SoftwareApplication) plus the
+// site (WebSite), emitted as one JSON-LD graph in the head.
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "KiwiDesk",
+    applicationCategory: "UtilitiesApplication",
+    operatingSystem: "macOS",
+    description: t.meta_desc,
+    url: canonical,
+    image: ogImageURL,
+    inLanguage: lang,
+    isAccessibleForFree: true,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+    author: {
+      "@type": "Organization",
+      name: "KiwiCanopy",
+      url: makerProfile,
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "KiwiDesk",
+    url: canonical,
+    inLanguage: lang,
+    description: t.meta_desc,
+  },
+];
 ---
 
 <!doctype html>
@@ -103,19 +148,26 @@ const steps = [
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{t.meta_title}</title>
     <meta name="description" content={t.meta_desc} />
+    <link rel="canonical" href={canonical} />
     <meta property="og:title" content={t.meta_title} />
     <meta property="og:description" content={t.meta_desc} />
     <meta property="og:type" content="website" />
-    <meta property="og:locale"
-      content={lang === "de" ? "de_DE" : "en_US"} />
-    <meta property="og:image"
-      content={new URL(ogImage.src, Astro.site).href} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content="KiwiDesk" />
+    <meta property="og:locale" content={ogLocale} />
+    <meta property="og:locale:alternate" content={ogLocaleAlt} />
+    <meta property="og:image" content={ogImageURL} />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={t.meta_title} />
+    <meta name="twitter:description" content={t.meta_desc} />
+    <meta name="twitter:image" content={ogImageURL} />
     <meta name="theme-color" content="#101d0b" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="alternate" hreflang="en" href="/" />
-    <link rel="alternate" hreflang="de" href="/de/" />
-    <link rel="alternate" hreflang="x-default" href="/" />
+    <link rel="alternate" hreflang="en" href={enURL} />
+    <link rel="alternate" hreflang="de" href={deURL} />
+    <link rel="alternate" hreflang="x-default" href={enURL} />
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)}
+    ></script>
     <!-- Anti-FOUC: resolve theme AND mode before first paint so the
          page never flashes the wrong theme or reveals dev sections.
          `starlight-theme` is shared with the docs; `kiwidesk-site-
@@ -200,6 +252,9 @@ const steps = [
     </script>
   </head>
   <body>
+    <!-- Skip link (WCAG 2.4.1): first focusable element, jumps past
+         the nav to the page content. Off-screen until focused. -->
+    <a class="skip-link" href="#main-content">{t.skip_to_content}</a>
     <!-- ============ Nav ============ -->
     <nav class="nav" id="nav">
       <div class="wrap nav__inner">
@@ -316,6 +371,9 @@ const steps = [
       </div>
     </nav>
 
+    <!-- Main landmark + skip-link target, wrapping all page content
+         between the site nav and footer. -->
+    <main id="main-content" tabindex="-1">
     <!-- ============ Hero ============ -->
     <header class="hero">
       <div class="hero__glow" aria-hidden="true"></div>
@@ -381,7 +439,7 @@ const steps = [
          them in one slot (rather than one above + one below the
          hero) means the two modes read consistently as you switch
          between them. -->
-    <section class="quote-band" aria-label="Our take">
+    <section class="quote-band" aria-label={t.quote_band_aria}>
       <div class="wrap">
         <blockquote class="quote-band__mark reveal">
           <p class="simple-only">{oq}{t.quote_opening}{cq}</p>
@@ -430,7 +488,7 @@ const steps = [
         </div>
         <div class="demo__frame reveal">
           <video id="demoVideo" controls preload="metadata"
-            playsinline aria-label="KiwiDesk demo">
+            playsinline aria-label={t.demo_video_aria}>
             <source src="/kiwidesk-demo.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
@@ -609,7 +667,7 @@ const steps = [
           <h2>{t.config_title}</h2>
           <p>{t.config_body}</p>
         </div>
-        <div class="code" aria-label="Example init.lua">
+        <div class="code" aria-label={t.config_code_aria}>
           <div class="code__bar">
             <span class="code__dot" aria-hidden="true"></span>
             <span class="code__dot" aria-hidden="true"></span>
@@ -640,7 +698,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
             <p>{oq}{t.quote_cli}{cq}</p>
           </blockquote>
         </div>
-        <div class="code" aria-label="KiwiDesk CLI examples">
+        <div class="code" aria-label={t.cli_code_aria}>
           <div class="code__bar">
             <span class="code__dot" aria-hidden="true"></span>
             <span class="code__dot" aria-hidden="true"></span>
@@ -675,7 +733,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
           </p>
         </div>
         <div class="code"
-          aria-label="Build KiwiDesk from source">
+          aria-label={t.build_code_aria}>
           <div class="code__bar">
             <span class="code__dot" aria-hidden="true"></span>
             <span class="code__dot" aria-hidden="true"></span>
@@ -728,6 +786,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
         </div>
       </div>
     </section>
+    </main>
 
     <!-- ============ Footer ============ -->
     <footer class="footer">
@@ -750,7 +809,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
             aria-hidden="true" width="20" height="16" />
           {t.footer_kofi}
         </a>
-        <nav class="footer__links" aria-label="Footer">
+        <nav class="footer__links" aria-label={t.footer_nav_aria}>
           <a class="dev-only" href="/docs/">{t.footer_docs}</a>
           <a class="dev-only" href={repo} target="_blank"
             rel="noopener">{t.footer_github}</a>
