@@ -1597,6 +1597,72 @@ titles ("dragged window", "swap target"). Section captions
 are a `SettingsSection` affordance, so other groups can
 adopt the same pattern.
 
+**[Principle] The drop target follows the cursor; a
+cross-display drop MOVES, a same-display drop swaps.** (#492.)
+The drop-zone and the final drop resolve their target from the
+mouse **cursor**, not the dragged window's frame center — a
+large window dragged onto a smaller display keeps its center
+over the origin display long after the pointer has crossed, so
+a center hit-test never reaches the destination slot and no
+feedback appears. The cursor is where the intent lives, and it
+alone selects both the destination display and the slot (the
+slot pool already spans every visible display). Preview and
+drop share the one cursor rule, so the highlight can never
+promise a target the drop won't act on.
+
+Releasing on **another display MOVES** the window into that
+display's active space. Onto a window's slot it takes the
+target's array index, the target and the rest shift up one; over
+empty space (an empty monitor, or a gap) it appends. A **track**
+destination is the exception: the arriving window follows the
+space's `new_window` rule (e.g. open in a new track), like a
+freshly spawned window, rather than the positional slot — routed
+through the same `addFocusedToSpace` choke point a keyboard /
+Space-Bar move uses, so track cap / spill placement lives in one
+place. Because a cross-display drop is resolved **before** the
+resize gate, a big window clamped smaller as it crosses onto a
+smaller display still reads as a move, not a resize. Either way
+— because a tiling slot exists only where a window sits — the
+destination display **re-partitions** to N+1 slots. A
+**same-display** drop still **swaps** the two windows. The
+destination is the active space of the display **under the
+cursor**, so an empty monitor still receives the drop; only a
+same-display release outside every slot snaps back.
+The window belongs to its origin space for the whole drag, so
+the destination shows no gap *until* the drop commits the
+membership change — opening one live mid-drag (a ghost over an
+empty slot as the cursor enters) is a possible later polish,
+not part of this behavior. *Rationale:* the primary
+reason to drag a window to another monitor is to *move it
+there* — swap-only would be frustrating, and it can fling a
+window you never touched onto your other display. *Trade-off:*
+this makes cross-display behave differently from same-display
+(move vs swap), and it is not capacity-neutral — the
+destination gains a window and the origin loses one, so both
+displays re-partition. That was chosen deliberately over the
+one-rule-everywhere swap (which a UI-design pass argued for on
+consistency grounds): the move model matches direct-manipulation
+expectation for a monitor-to-monitor drag. The sticky-move guard
+fires on both paths. The destination is the active space of the
+display **under the cursor**, so a tiled-sticky traveler injected
+onto a foreign display can't teleport the window to wherever its
+home space happens to show: a drop whose target isn't a real
+member of the cursor display's space (a foreign-display traveler,
+or empty space) is treated as an empty drop and *moves* the
+window to that display rather than snapping back with the #435
+refusal pill — you were dragging there anyway. The same-display
+traveler drop still shows the pill.
+
+**The track exception keeps the preview honest by suppressing,
+not lying.** A track destination files an arriving window by its
+`new_window` rule, not the pointed slot — so the *cross-display
+drop-zone highlight is suppressed over a track destination*
+(`handleDragMove`), leaving only the ghost. The invariant "the
+highlight never promises a slot the drop won't act on" therefore
+still holds: where the landing is rule-based, no slot is
+promised. Same-display track drops swap positionally, so their
+highlight stays.
+
 **Ghost and Drop zone are two side-by-side columns.** (#231.)
 Each column leads with its own live preview and puts its
 controls directly beneath, so tuning a column's border width

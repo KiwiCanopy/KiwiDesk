@@ -3,16 +3,26 @@ import CoreGraphics
 /// The drop-target rule, shared by the live preview and the
 /// final drop so the highlight can never disagree with what
 /// the drop does: a drag targets the slot that contains the
-/// dragged frame's center.
+/// mouse CURSOR (AX coordinates), not the dragged window's
+/// frame center.
+///
+/// Cursor-keyed, not center-keyed, so a large window dragged
+/// onto a smaller display resolves its target the moment the
+/// cursor crosses over — a big window's center lags on the
+/// origin display long after the pointer (and the user's
+/// intent) has left it (#492). Dragging is a pointer gesture;
+/// intent lives at the cursor, matching how macOS itself
+/// decides which display a drag belongs to. The slot pool
+/// already spans every visible display (`calculatedFrames`),
+/// so the cursor alone selects both the display and the slot.
 enum DragTarget {
     static func swapTarget(
         of id: WindowID,
-        frame: CGRect,
+        at point: CGPoint,
         slots: [WindowID: CGRect]
     ) -> WindowID? {
-        let center = CGPoint(x: frame.midX, y: frame.midY)
         let hits = slots.filter { entry in
-            entry.key != id && entry.value.contains(center)
+            entry.key != id && entry.value.contains(point)
         }
         // Slots can overlap (stack overflow cascade). The hit
         // slot with the lowest top edge is the one visually

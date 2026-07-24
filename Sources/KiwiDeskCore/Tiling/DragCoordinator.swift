@@ -45,6 +45,17 @@ public final class DragCoordinator {
         false
     }
 
+    /// The live pointer location in Cocoa (bottom-left) screen
+    /// coordinates. Injected to keep this type AppKit-free and
+    /// testable — drag tests place the cursor without moving the
+    /// real mouse. Wired to `NSEvent.mouseLocation` in `wireDrag`.
+    /// The drop target is keyed on this, not the dragged frame's
+    /// center, so it reaches the destination display the instant
+    /// the pointer does (#492).
+    public var cursorLocation: @MainActor () -> CGPoint = {
+        .zero
+    }
+
     /// Quiet time after the last move event (seconds).
     public var settleDelay: TimeInterval = 0.35
     /// Recheck interval while waiting for the release.

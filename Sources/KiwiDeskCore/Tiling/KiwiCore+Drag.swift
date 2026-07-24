@@ -25,6 +25,7 @@ extension KiwiCore {
         drag.isMousePressed = {
             NSEvent.pressedMouseButtons & 1 == 1
         }
+        drag.cursorLocation = { NSEvent.mouseLocation }
         wireSpaceBarDrop()
     }
 
@@ -49,7 +50,7 @@ extension KiwiCore {
         // zone scrolls hidden Spaces into reach (#385). The zones
         // are disjoint from item hit frames, so at most one of the
         // two arms for any given cursor position.
-        let cursor = NSEvent.mouseLocation
+        let cursor = drag.cursorLocation()
         spaceBars.updateDragAutoScroll(atGlobal: cursor)
         spaceBarDrop.moved(id, cursor: cursor)
         if spaceBarDrop.isArmed {
@@ -128,14 +129,23 @@ extension KiwiCore {
                 cornerRadius: settings.dragCornerRadius
             )
         }
+        // Target the slot under the CURSOR, not the dragged
+        // frame's center: the drop-zone must reach the
+        // destination display the instant the pointer does,
+        // even while a big window's center trails behind on the
+        // origin display (#492). `cursor` is Cocoa (bottom-left);
+        // slots are AX (top-left), so flip it.
         let target = DragTarget.swapTarget(
             of: id,
-            frame: frame,
+            at: GeometryUtils.axPoint(cursor),
             slots: slots
         )
+        // Suppress the highlight over a cross-display track dest
+        // (files by rule, not the slot); see `dropZoneTarget` (#492).
+        let honestTarget = dropZoneTarget(target, from: space)
         if settings.dragDropZone.enabled,
-            let target,
-            let targetSlot = slots[target]
+            let honestTarget,
+            let targetSlot = slots[honestTarget]
         {
             dragOverlay.showDropZone(
                 at: targetSlot,
@@ -188,7 +198,7 @@ extension KiwiCore {
         // at spring time — so it falls through to the ordinary in-
         // space drop, which places it at the cursor's slot. Own-
         // space / off-bar also fall through unchanged.
-        switch spaceBarDrop.ended(id, cursor: NSEvent.mouseLocation)
+        switch spaceBarDrop.ended(id, cursor: drag.cursorLocation())
         {
         case .relocate(let target):
             moveWindow(id, to: target, follow: false)
@@ -236,6 +246,26 @@ extension KiwiCore {
 
         let frame = liveDropFrame(id, fallback: frame)
         let slots = tiler.calculatedFrames(state: state)
+        // Resolve the swap target from the cursor, exactly as the
+        // live preview did (#492), so the drop can never disagree
+        // with the drop-zone the user saw. AX coords: flip the
+        // Cocoa mouse location.
+        let target = DragTarget.swapTarget(
+            of: id,
+            at: GeometryUtils.axPoint(drag.cursorLocation()),
+            slots: slots
+        )
+        // A drop whose cursor ends on ANOTHER display moves the
+        // window there — resolved BEFORE the resize gate below,
+        // because dragging a big window onto a smaller display
+        // makes macOS clamp its size, which `MouseResize.isResize`
+        // would else read as a resize and snap it back (#492): a
+        // gesture ending on another display is always a move, never
+        // a resize. Same-display drops fall through (relocate
+        // returns false when the destination is the origin space).
+        if relocateAcrossDisplay(id, onto: target, from: space) {
+            return
+        }
         if slots[id] != nil,
             MouseResize.isResize(from: start, to: frame)
         {
@@ -269,11 +299,6 @@ extension KiwiCore {
             }
             return
         }
-        let target = DragTarget.swapTarget(
-            of: id,
-            frame: frame,
-            slots: slots
-        )
         // A tiled-sticky traveler is injected into this space's
         // layout but is not a member of it (#414 v2): dropping
         // another window onto it is refused by `Space.swap`'s
