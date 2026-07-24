@@ -10,13 +10,14 @@
    ========================================================= */
 
 :root {
-  /* ---- Brand palette (theme-invariant) ---- */
-  --kiwi-flesh: #4e9f3d;
-  --kiwi-bright: #6dbf5b;
-  --kiwi-shell: #8b5e3c;
-  --kiwi-cream: #f2ebd9;
-  --kiwi-seed: #12240d;
-  --kiwi-ink: #1c1a17;
+  /* ---- Brand palette (theme-invariant, KiwiCanopy tokens —
+     see KiwiCanopy-web/src/styles/theme.css, issue #439) ---- */
+  --kiwi-flesh: #8db354; /* accent — deeper kiwi green, fills */
+  --kiwi-bright: #aacb5d; /* accent-soft — brighter kiwi green */
+  --kiwi-shell: #8b5e3c; /* warm tertiary — fills only, sparing */
+  --kiwi-cream: #e1eedb; /* pale kiwi surface-mist tint (unused ref) */
+  --kiwi-seed: #0d1512; /* deep brand bg (unused ref) */
+  --kiwi-ink: #12251a; /* forest ink, green-forward (unused ref) */
 
   /* ---- Spacing scale (8pt-ish, fluid at the edges) ---- */
   --sp-1: 0.5rem;
@@ -48,86 +49,93 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  /* Surfaces (deep green-black family) */
-  --bg-0: #0c1608;   /* deepest */
-  --bg-1: #101d0b;   /* base */
-  --bg-2: #142310;   /* tinted band */
-  --bg-3: #182a13;   /* card / raised */
-  --border: rgba(109, 191, 91, 0.14);
-  --border-strong: rgba(109, 191, 91, 0.28);
+  /* Surfaces — brand --bg/--surface anchor bg-1/bg-3; bg-0/bg-2
+     are derived rungs on the same ramp for the extra bands this
+     page needs (deepest floor, tinted section). */
+  --bg-0: #0a100d;   /* deepest (code / diagrams) */
+  --bg-1: #0d1512;   /* base — brand --bg (dark) */
+  --bg-2: #101a16;   /* tinted band */
+  --bg-3: #14201c;   /* card / raised — brand --surface (dark) */
+  --border: rgba(137, 181, 137, 0.14); /* sage — no teal, #439 */
+  --border-strong: rgba(137, 181, 137, 0.28);
 
-  /* Text */
-  --text: #eef3e6;
-  --text-dim: #b6c4a8;
-  --text-faint: #7f9070;
+  /* Text — brand --ink / --text-muted (dark); --text-faint is a
+     recomputed third tier, still AA on every dark surface above. */
+  --text: #eaf3ee;
+  --text-dim: #9fb3ab;
+  --text-faint: #7a8c85;
 
-  /* Accents */
+  /* Accents — brand --accent-soft doubles as the text-safe accent
+     here (icon/link/eyebrow use); --accent-deep is fill-only. */
   --accent: var(--kiwi-bright);
   --accent-deep: var(--kiwi-flesh);
-  --glow: rgba(78, 159, 61, 0.45);
+  --glow: rgba(141, 179, 84, 0.45);
 
-  /* Hero band — deep green-black, glows read strongly */
-  --hero-bg-top: #12210c;
+  /* Hero band — deep brand bg, glows read strongly */
+  --hero-bg-top: #162017;
   --hero-bg-bot: var(--bg-1);
   --hero-ink: var(--text);
   --hero-ink-dim: var(--text-dim);
-  --hero-shell: #c7a06e;
-  --hero-glow: rgba(78, 159, 61, 0.22);
-  --hero-mark-shadow: 0 12px 34px rgba(78, 159, 61, 0.28);
+  --hero-glow: rgba(141, 179, 84, 0.22);
+  --hero-mark-shadow: 0 12px 34px rgba(141, 179, 84, 0.28);
 
   /* Page ambient wash (body::before) */
-  --wash-a: rgba(78, 159, 61, 0.14);
-  --wash-b: rgba(139, 94, 60, 0.08);
+  --wash-a: rgba(141, 179, 84, 0.14);
+  --wash-b: rgba(176, 123, 80, 0.1);
 
   /* Nav resting text over the hero band */
   --nav-ink: var(--text);
   --nav-ink-dim: var(--text-dim);
-  --nav-hover-bg: rgba(109, 191, 91, 0.1);
-  --nav-scrolled-bg: rgba(12, 22, 8, 0.72);
+  --nav-hover-bg: rgba(170, 203, 93, 0.1);
+  --nav-scrolled-bg: rgba(10, 16, 13, 0.72);
 
   /* Card & surface fills */
   --card-bg: linear-gradient(
     180deg,
     var(--bg-3),
-    rgba(16, 29, 11, 0.6)
+    rgba(13, 21, 18, 0.6)
   );
-  --card-glow: rgba(109, 191, 91, 0.12);
+  --card-glow: rgba(170, 203, 93, 0.12);
 
   /* Ghost button on the hero band */
-  --ghost-bg: rgba(109, 191, 91, 0.06);
+  --ghost-bg: rgba(170, 203, 93, 0.06);
   --ghost-ink: var(--text);
   --ghost-border: var(--border-strong);
-  --ghost-hover-bg: rgba(109, 191, 91, 0.12);
+  --ghost-hover-bg: rgba(170, 203, 93, 0.12);
   --ghost-hover-border: var(--accent);
 
-  /* Pill on the hero band */
-  --pill-ink: var(--hero-shell);
-  --pill-bg: rgba(199, 160, 110, 0.12);
-  --pill-border: rgba(199, 160, 110, 0.32);
+  /* Pill on the hero band — ink is the same text-safe accent
+     links/eyebrows use (never the warm tertiary, see AGENTS.md);
+     warm stays confined to the fill/border, used sparingly. */
+  --pill-ink: var(--accent);
+  --pill-bg: rgba(176, 123, 80, 0.14);
+  --pill-border: rgba(176, 123, 80, 0.36);
   --pill-dot: var(--kiwi-bright);
-  --pill-dot-glow: rgba(109, 191, 91, 0.9);
+  --pill-dot-glow: rgba(170, 203, 93, 0.9);
 
   /* Terminal / code block */
   --code-bg: var(--bg-0);
   --code-bar-bg: rgba(0, 0, 0, 0.25);
-  --code-dot-idle: #3a4a30;
+  --code-dot-idle: #384a38;
 
   /* Diagram tiles */
-  --tile-fill: rgba(109, 191, 91, 0.18);
-  --tile-fill-accent: rgba(109, 191, 91, 0.4);
-  --tile-fill-ghost: rgba(109, 191, 91, 0.08);
+  --tile-fill: rgba(170, 203, 93, 0.18);
+  --tile-fill-accent: rgba(170, 203, 93, 0.4);
+  --tile-fill-ghost: rgba(170, 203, 93, 0.08);
   --tile-stroke: var(--kiwi-bright);
-  --tile-stroke-ghost: rgba(109, 191, 91, 0.4);
+  --tile-stroke-ghost: rgba(170, 203, 93, 0.4);
 
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
   --shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
   --shadow-glow: 0 30px 90px -20px var(--glow);
 
-  /* Ko-fi support button (warm, brand-tinted) */
-  --kofi-bg: rgba(199, 160, 110, 0.14);
-  --kofi-ink: #e8c99a;
-  --kofi-border: rgba(199, 160, 110, 0.36);
-  --kofi-hover-bg: rgba(199, 160, 110, 0.24);
+  /* Ko-fi support button — warm tint stays on the fill/border
+     only; the ink is plain --text (warm never carries text, see
+     AGENTS.md's "never text/primary" rule for the tertiary). */
+  --kofi-bg: rgba(176, 123, 80, 0.14);
+  --kofi-ink: var(--text);
+  --kofi-border: rgba(176, 123, 80, 0.36);
+  --kofi-hover-bg: rgba(176, 123, 80, 0.24);
 }
 
 /* =========================================================
@@ -137,85 +145,104 @@
 :root[data-theme="light"] {
   color-scheme: light;
 
-  /* Surfaces (cream family, subtle alternating tints) */
-  --bg-0: #ece2c9;   /* deepest (code / diagrams) */
-  --bg-1: #faf6ec;   /* base */
-  --bg-2: #f2ebd9;   /* tinted band */
-  --bg-3: #fffdf7;   /* card / raised */
-  --border: rgba(22, 52, 57, 0.12);
-  --border-strong: rgba(22, 52, 57, 0.22);
+  /* Surfaces — brand --bg/--surface anchor bg-1/bg-3 exactly;
+     bg-0/bg-2 are derived rungs blending in kiwi-green tints for
+     the extra bands this page needs (deepest floor, tinted
+     section) — green-forward, no teal (issue #439 follow-up). */
+  --bg-0: #e1eedb;   /* deepest (code / diagrams) — kiwi mist */
+  --bg-1: #f7f9f5;   /* base — brand --bg (light) */
+  --bg-2: #ecf3e9;   /* tinted band (bg-1 x bg-0 blend) */
+  --bg-3: #ffffff;   /* card / raised — brand --surface (light) */
+  --border: rgba(18, 37, 26, 0.12); /* forest ink, no teal */
+  --border-strong: rgba(18, 37, 26, 0.22);
 
-  /* Text (deep green-teal ink) */
-  --text: #163439;
-  --text-dim: #3f5a54;
-  --text-faint: #526860;     /* AA (4.5:1) on footer/tint #ece2c9 */
+  /* Text — forest ink (green-forward, no teal); --text-dim/
+     --text-faint stay the brand's own --text-muted role and a
+     recomputed third tier, both re-verified AA on every new
+     light surface above (incl. --bg-0, the footer/diagram floor:
+     text-faint holds 4.57:1 there, text-dim 5.25:1). */
+  --text: #12251a;
+  --text-dim: #55635c;
+  --text-faint: #5f6c65;     /* AA (4.5:1) on footer/tint #e1eedb */
 
-  /* Accents */
-  --accent: #367029;         /* AA on cream + .tint bands */
+  /* Accents — the raw brand fill green is ~2.3:1 on this bg and
+     fails AA, so text/link uses a darkened, purpose-built shade
+     of the same hue instead (never the raw fill green as text).
+     Re-verified AA on every new surface above (4.95:1 min, on
+     --bg-0). */
+  --accent: #546b32;         /* AA on bg + .tint bands */
   --accent-deep: var(--kiwi-flesh);
-  --glow: rgba(78, 159, 61, 0.35);
+  --glow: rgba(141, 179, 84, 0.35);
 
-  /* Hero band — cream, matches the light wordmark's teal */
-  --hero-bg-top: #fbf9f2;
-  --hero-bg-bot: #f2ebd9;
-  --hero-ink: #163439;
-  --hero-ink-dim: #3f5a54;
-  --hero-shell: #6b4a30;
-  --hero-glow: rgba(78, 159, 61, 0.18);
-  --hero-mark-shadow: 0 10px 28px rgba(22, 52, 57, 0.16);
+  /* Hero band — brand bg fading into the kiwi-mist tint */
+  --hero-bg-top: #fafbf9;
+  --hero-bg-bot: var(--bg-2);
+  --hero-ink: var(--text);
+  --hero-ink-dim: var(--text-dim);
+  --hero-glow: rgba(141, 179, 84, 0.18);
+  --hero-mark-shadow: 0 10px 28px rgba(18, 37, 26, 0.16);
 
-  /* Page ambient wash (body::before) */
-  --wash-a: rgba(78, 159, 61, 0.08);
-  --wash-b: rgba(139, 94, 60, 0.05);
+  /* Page ambient wash (body::before) — warm gets a touch more
+     presence here (elevated from sparse to a real secondary,
+     issue #439 follow-up), still a fill only, never text. */
+  --wash-a: rgba(141, 179, 84, 0.08);
+  --wash-b: rgba(139, 94, 60, 0.07);
 
   /* Nav resting text over the hero band */
   --nav-ink: var(--hero-ink);
   --nav-ink-dim: var(--hero-ink-dim);
-  --nav-hover-bg: rgba(78, 159, 61, 0.12);
-  --nav-scrolled-bg: rgba(250, 246, 236, 0.82);
+  --nav-hover-bg: rgba(141, 179, 84, 0.12);
+  --nav-scrolled-bg: rgba(247, 249, 245, 0.82);
 
   /* Card & surface fills */
   --card-bg: linear-gradient(
     180deg,
     var(--bg-3),
-    #fbf7ec
+    var(--bg-1)
   );
-  --card-glow: rgba(78, 159, 61, 0.1);
+  --card-glow: rgba(141, 179, 84, 0.1);
 
   /* Ghost button on the hero band */
-  --ghost-bg: rgba(22, 52, 57, 0.04);
+  --ghost-bg: rgba(18, 37, 26, 0.04);
   --ghost-ink: var(--hero-ink);
-  --ghost-border: rgba(22, 52, 57, 0.28);
-  --ghost-hover-bg: rgba(22, 52, 57, 0.08);
+  --ghost-border: rgba(18, 37, 26, 0.28);
+  --ghost-hover-bg: rgba(18, 37, 26, 0.08);
   --ghost-hover-border: var(--hero-ink);
 
-  /* Pill on the hero band */
-  --pill-ink: var(--hero-shell);
-  --pill-bg: rgba(139, 94, 60, 0.1);
-  --pill-border: rgba(139, 94, 60, 0.3);
+  /* Pill on the hero band — ink is the same text-safe accent
+     links/eyebrows use (never the warm tertiary, see AGENTS.md);
+     warm stays confined to the fill/border/dot, given a bit more
+     presence here (elevated from sparse, issue #439 follow-up). */
+  --pill-ink: var(--accent);
+  --pill-bg: rgba(139, 94, 60, 0.12);
+  --pill-border: rgba(139, 94, 60, 0.34);
   --pill-dot: var(--kiwi-shell);
   --pill-dot-glow: rgba(139, 94, 60, 0.55);
 
   /* Terminal / code block (kept dark for legibility + contrast
-     against the cream page — a familiar terminal look) */
+     against the light page — a familiar terminal look) */
   --code-bg: #14231a;
   --code-bar-bg: rgba(0, 0, 0, 0.28);
-  --code-dot-idle: #3a4a30;
+  --code-dot-idle: #384a38;
 
-  /* Diagram tiles */
-  --tile-fill: rgba(61, 125, 48, 0.16);
-  --tile-fill-accent: rgba(61, 125, 48, 0.34);
-  --tile-fill-ghost: rgba(61, 125, 48, 0.08);
+  /* Diagram tiles — a darkened accent for readable fill area
+     against the light page; --tile-stroke keeps the raw fill
+     green as a thin, low-area outline. */
+  --tile-fill: rgba(109, 139, 65, 0.16);
+  --tile-fill-accent: rgba(109, 139, 65, 0.34);
+  --tile-fill-ghost: rgba(109, 139, 65, 0.08);
   --tile-stroke: var(--accent-deep);
-  --tile-stroke-ghost: rgba(61, 125, 48, 0.4);
+  --tile-stroke-ghost: rgba(109, 139, 65, 0.4);
 
-  --shadow-sm: 0 2px 10px rgba(22, 52, 57, 0.1);
-  --shadow: 0 14px 40px rgba(22, 52, 57, 0.14);
+  --shadow-sm: 0 2px 10px rgba(18, 37, 26, 0.1);
+  --shadow: 0 14px 40px rgba(18, 37, 26, 0.14);
   --shadow-glow: 0 26px 80px -24px var(--glow);
 
-  /* Ko-fi support button (warm, brand-tinted) */
+  /* Ko-fi support button — warm tint stays on the fill/border
+     only; the ink is plain --text (warm never carries text, see
+     AGENTS.md's "never text/primary" rule for the tertiary). */
   --kofi-bg: rgba(139, 94, 60, 0.1);
-  --kofi-ink: #7a4f2e;
+  --kofi-ink: var(--text);
   --kofi-border: rgba(139, 94, 60, 0.32);
   --kofi-hover-bg: rgba(139, 94, 60, 0.18);
 }
@@ -653,7 +680,7 @@ body::before {
 .btn--primary {
   /* Deep enough green under white text to clear AA contrast
      even on the light hero (kiwi-bright alone is too pale). */
-  background: linear-gradient(180deg, var(--kiwi-flesh), #357229);
+  background: linear-gradient(180deg, var(--kiwi-flesh), #627d3a);
   color: #ffffff;
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.16);
   box-shadow: 0 10px 30px -8px var(--glow),
@@ -897,8 +924,8 @@ section {
   width: 100%;
   background: radial-gradient(
     circle at center,
-    rgba(12, 22, 8, 0.15),
-    rgba(12, 22, 8, 0.55)
+    rgba(10, 16, 13, 0.15),
+    rgba(10, 16, 13, 0.55)
   );
   transition: opacity 0.35s ease, visibility 0.35s ease;
 }
@@ -998,7 +1025,7 @@ section {
   border-radius: 12px;
   display: grid;
   place-items: center;
-  background: rgba(78, 159, 61, 0.14);
+  background: rgba(141, 179, 84, 0.14);
   border: 1px solid var(--border-strong);
   color: var(--accent);
   margin-bottom: 1rem;
@@ -1155,7 +1182,7 @@ section {
   gap: 0.5rem;
   padding: 0.7rem 1rem;
   background: var(--code-bar-bg);
-  border-bottom: 1px solid rgba(109, 191, 91, 0.14);
+  border-bottom: 1px solid rgba(170, 203, 93, 0.14);
 }
 
 .code__dot {
@@ -1190,9 +1217,9 @@ section {
   align-items: center;
   gap: 0.35rem;
   padding: 0.25rem 0.55rem;
-  border: 1px solid rgba(109, 191, 91, 0.32);
+  border: 1px solid rgba(170, 203, 93, 0.32);
   border-radius: 8px;
-  background: rgba(109, 191, 91, 0.1);
+  background: rgba(170, 203, 93, 0.1);
   /* Bumped from #b6c4a8 for a legible copy label against the
      dark-pinned terminal in both themes (the bright light-mode
      surround makes the dim text under-read otherwise). */
@@ -1207,8 +1234,8 @@ section {
 }
 
 .code__copy:hover {
-  background: rgba(109, 191, 91, 0.18);
-  border-color: rgba(109, 191, 91, 0.55);
+  background: rgba(170, 203, 93, 0.18);
+  border-color: rgba(170, 203, 93, 0.55);
   color: #f4f8ee;
 }
 

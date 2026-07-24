@@ -1729,12 +1729,12 @@ app_bar.set_group_adjacent_windows(true)
 **Expects:** a hex color (`#RRGGBB` or `#RRGGBBAA`).
 
 **Does:** sets the item's text and glyph color (default
-`#F2EBD9`).
+`#EAF3EE`).
 
 **Example:**
 
 ```lua
-app_bar.set_item_color("#F2EBD9")
+app_bar.set_item_color("#EAF3EE")
 ```
 
 ### app_bar.set_fill_color
@@ -1742,7 +1742,7 @@ app_bar.set_item_color("#F2EBD9")
 **Expects:** a hex color.
 
 **Does:** sets the fill under the items — a box per item
-(`boxed`) or one shared plate (`plain`). Default `#37452E66`,
+(`boxed`) or one shared plate (`plain`). Default `#14201C66`,
 translucent dark moss. With the `liquid_glass` finish on, it
 also tints the glass: the color sits behind the glass, which
 refracts it into its hue (see `app_bar.set_liquid_glass`). Under
@@ -1753,7 +1753,7 @@ full).
 **Example:**
 
 ```lua
-app_bar.set_fill_color("#37452E66")
+app_bar.set_fill_color("#14201C66")
 ```
 
 ### app_bar.set_active_item_color
@@ -1761,12 +1761,12 @@ app_bar.set_fill_color("#37452E66")
 **Expects:** a hex color.
 
 **Does:** sets the text and glyph color of the active item — the
-focused tab (default `#4E9F3D`, flesh-green).
+focused tab (default `#8DB354`, kiwi green).
 
 **Example:**
 
 ```lua
-app_bar.set_active_item_color("#4E9F3D")
+app_bar.set_active_item_color("#8DB354")
 ```
 
 ### app_bar.set_highlight_color
@@ -1779,7 +1779,7 @@ outline or the edge mark).
 **Example:**
 
 ```lua
-app_bar.set_highlight_color("#4E9F3D")
+app_bar.set_highlight_color("#8DB354")
 ```
 
 ### app_bar.set_hover_fill_color
@@ -1787,12 +1787,12 @@ app_bar.set_highlight_color("#4E9F3D")
 **Expects:** a hex color.
 
 **Does:** sets the hover feedback on clickable items (default
-`#6DBF5B80`, light translucent green).
+`#AACB5D80`, light translucent green).
 
 **Example:**
 
 ```lua
-app_bar.set_hover_fill_color("#6DBF5B80")
+app_bar.set_hover_fill_color("#AACB5D80")
 ```
 
 ### app_bar.set_hover_item_color
@@ -1804,7 +1804,7 @@ app_bar.set_hover_fill_color("#6DBF5B80")
 **Example:**
 
 ```lua
-app_bar.set_hover_item_color("#F2EBD9")
+app_bar.set_hover_item_color("#EAF3EE")
 ```
 
 ### app_bar.set_group_badge_color
@@ -2183,9 +2183,9 @@ Same `#RRGGBB` / `#RRGGBBAA` grammar as every other color
 setting. The three-state ladder is the bar's signature:
 
 - `space_bar.set_item_color` — inactive Spaces (default
-  `#F2EBD966`).
+  `#EAF3EE66`).
 - `space_bar.set_active_item_color` — the active Space's
-  identifier and glyphs (default `#4E9F3D`).
+  identifier and glyphs (default `#8DB354`).
 - `space_bar.set_focused_item_color` — the focused window
   wherever it shows: its glyph inside the active Space and the
   front-app segment (default `#E8A33D`, a deliberately different
@@ -2203,7 +2203,7 @@ setting. The three-state ladder is the bar's signature:
 **Example:**
 
 ```lua
-space_bar.set_active_item_color("#4E9F3D")
+space_bar.set_active_item_color("#8DB354")
 space_bar.set_focused_item_color("#E8A33D")
 ```
 
@@ -2314,13 +2314,13 @@ drag.set_ghost_border_alignment("inside")
 
 **Expects:** a hex color.
 
-**Does:** sets the ghost border color (default `#4E9F3D`,
-flesh-green — the ghost, drag's origin, is all-green).
+**Does:** sets the ghost border color (default `#567A1F`,
+deep green — the ghost, drag's origin, is all-green).
 
 **Example:**
 
 ```lua
-drag.set_ghost_border_color("#4E9F3D")
+drag.set_ghost_border_color("#567A1F")
 ```
 
 ### drag.set_ghost_fill
@@ -2339,13 +2339,13 @@ drag.set_ghost_fill(true)
 
 **Expects:** a hex color.
 
-**Does:** sets the ghost fill color (default `#4E9F3D40`,
-flesh-green with 25% alpha).
+**Does:** sets the ghost fill color (default `#567A1F40`,
+deep green with 25% alpha).
 
 **Example:**
 
 ```lua
-drag.set_ghost_fill_color("#4E9F3D40")
+drag.set_ghost_fill_color("#567A1F40")
 ```
 
 ### drag.set_drop_zone_enabled
@@ -2400,14 +2400,14 @@ drag.set_drop_zone_border_alignment("inside")
 
 **Expects:** a hex color.
 
-**Does:** sets the drop zone border color (default `#E8A33D`,
+**Does:** sets the drop zone border color (default `#C2790A`,
 amber — the drop zone, drag's target, is all-amber so it reads
 apart from the green ghost).
 
 **Example:**
 
 ```lua
-drag.set_drop_zone_border_color("#E8A33D")
+drag.set_drop_zone_border_color("#C2790A")
 ```
 
 ### drag.set_drop_zone_fill
@@ -2426,13 +2426,13 @@ drag.set_drop_zone_fill(true)
 
 **Expects:** a hex color.
 
-**Does:** sets the drop zone fill color (default `#E8A33D40`,
+**Does:** sets the drop zone fill color (default `#C2790A40`,
 amber with 25% alpha).
 
 **Example:**
 
 ```lua
-drag.set_drop_zone_fill_color("#E8A33D40")
+drag.set_drop_zone_fill_color("#C2790A40")
 ```
 
 ### drag.set_corner_radius
@@ -2506,12 +2506,12 @@ border.set_width(2)
 the same format as every other KiwiDesk color.
 
 **Does:** sets the focused window's ring color (default
-`"#4E9F3D"`, the Kiwi theme's flesh-green focus accent).
+`"#567A1F"`, the Kiwi theme's deep-green focus accent).
 
 **Example:**
 
 ```lua
-border.set_focused_color("#4E9F3D")
+border.set_focused_color("#567A1F")
 ```
 
 ### border.set_unfocused_enabled
@@ -3825,15 +3825,15 @@ stripped, grouped by namespace — `set_gap_override` becomes
       "corner_radius": 16,
       "ghost": {
         "enabled": true, "border": true,
-        "border_color": "#4E9F3D", "border_thickness": 5,
+        "border_color": "#567A1F", "border_thickness": 5,
         "border_alignment": "inside",
-        "fill": true, "fill_color": "#4E9F3D40"
+        "fill": true, "fill_color": "#567A1F40"
       },
       "drop_zone": {
         "enabled": true, "border": true,
-        "border_color": "#E8A33D", "border_thickness": 5,
+        "border_color": "#C2790A", "border_thickness": 5,
         "border_alignment": "inside",
-        "fill": true, "fill_color": "#E8A33D40"
+        "fill": true, "fill_color": "#C2790A40"
       }
     },
     "gap": {

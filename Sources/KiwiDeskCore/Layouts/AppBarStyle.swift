@@ -69,28 +69,31 @@ public struct AppBarStyle: Sendable, Equatable {
     /// Lua-only power knob (`set_dim_factor`, no GUI); the default
     /// matches `BarAccent.untintedAlpha`. Clamped in `resolvedDim`.
     public var dimFactor: CGFloat = BarAccent.untintedAlpha
-    /// Kiwi theme: cream item text/glyph, a translucent
-    /// dark-moss fill (box, plate, or glass tint), a flesh-green
-    /// active accent — one green family, not the old brown/green
-    /// pair (2026-07-20; brown fully retired, drag visuals now
-    /// green/amber).
-    public var itemColor = "#F2EBD9"
+    /// KiwiCanopy theme: ink-on-dark item text, a translucent
+    /// cool-dark surface fill (box, plate, or glass tint), a
+    /// kiwi-green active accent. Bars own their backdrop, so the
+    /// fill-only brand green is legible here; content overlays
+    /// (focus ring, drag ghost) paint over arbitrary windows and
+    /// are decoupled to a contrast-tuned teal — see BorderStyle
+    /// and DragVisual. Defaults here are mirrored as examples in
+    /// docs/lua-reference.md (App Bar colors) — change both.
+    public var itemColor = "#EAF3EE"
     /// The fill under the items — a box per item (Boxed), one
     /// shared plate (Plain), or the Liquid Glass tint
     /// (Material). One knob, three renders.
-    public var fillColor = "#37452E66"
-    public var activeItemColor = "#4E9F3D"
-    public var highlightColor = "#4E9F3D"
+    public var fillColor = "#14201C66"
+    public var activeItemColor = "#8DB354"
+    public var highlightColor = "#8DB354"
     /// Hover feedback on clickable (non-active) items: a
     /// lighter, translucent kiwi green, deliberately a shade
     /// off the highlight so hover and active never read as
     /// the same state.
-    public var hoverFillColor = "#6DBF5B80"
+    public var hoverFillColor = "#AACB5D80"
     /// Item text/glyph while hovered; defaults to the normal
-    /// item color (the hover tint is translucent, so cream
+    /// item color (the hover tint is translucent, so the text
     /// stays readable through it) — the knob exists for themes
     /// whose hover tint needs darker text.
-    public var hoverItemColor = "#F2EBD9"
+    public var hoverItemColor = "#EAF3EE"
     /// The count badge on grouped items.
     public var groupBadgeColor = "#B00020"
     public var groupBadgeTextColor = "#FFFFFF"

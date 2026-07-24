@@ -17,31 +17,35 @@ public struct DragVisual: Sendable, Equatable, Encodable {
     public var fill: Bool
     public var fillColor: String
 
-    /// Ghost (drag origin): all kiwi-green — same hue as the
-    /// focus accent. Origin vs. target reads by hue against the
-    /// drop zone's amber (2026-07-20; was a brown/green swap, but
-    /// brown left the palette with the moss-fill refresh).
+    /// Ghost (drag origin): deep kiwi green — the brand accent hue
+    /// darkened for stroke duty, same signal as the focus ring.
+    /// The bright accent is fill-only and vanishes over light
+    /// window content, so this drops it in lightness (not hue) to
+    /// stay legible and on-brand. Origin vs. target reads by hue
+    /// against the drop zone's amber. Defaults mirrored in
+    /// docs/lua-reference.md (drag colors) — change both.
     public static let ghostDefault = DragVisual(
         enabled: true,
         border: true,
-        borderColor: "#4E9F3D",
+        borderColor: "#567A1F",
         borderThickness: 5,
         borderAlignment: .inside,
         fill: true,
-        fillColor: "#4E9F3D40"
+        fillColor: "#567A1F40"
     )
 
-    /// Drop zone (drag target): all amber — the palette's other
-    /// established hue (`focused_item_color`), so the target draws
-    /// the eye apart from the green origin.
+    /// Drop zone (drag target): a vivid, darkened amber — the
+    /// other established hue, kept far from the teal origin so the
+    /// two read apart. Darkened from the old #E8A33D for the same
+    /// reason as the ring: legible over light window content.
     public static let dropZoneDefault = DragVisual(
         enabled: true,
         border: true,
-        borderColor: "#E8A33D",
+        borderColor: "#C2790A",
         borderThickness: 5,
         borderAlignment: .inside,
         fill: true,
-        fillColor: "#E8A33D40"
+        fillColor: "#C2790A40"
     )
 
     public init(

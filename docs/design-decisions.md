@@ -73,6 +73,7 @@ planned escape hatch; it is not a wontfix dumping ground.
 | `track.swap` refuses a swap that would touch the **overflow track** while it folds two or more marker-tracks together — under a fixed limit (`auto_tracks` off, more marker-tracks than `count`) *or* a geometric fold on a display too narrow for the tracks at `min_window_size`. | The folded slot is a read-time merge over the marker partition — its slices have no marker identity, so exchanging them would re-derive a *different* composition after the swap (windows leaking between visible tracks). Rewriting markers to pin the view would destroy the grandfathered partition instead. | The guard gauges the fold against the render's own effective cap — the fixed limit AND the geometric fit (`TrackLayout.overflowCap` / `geometricCap`, shared with the layout math) — and rejects only a swap whose own or target track is the folded slot; two normal tracks still swap ([#182](https://github.com/hajiboy95/KiwiDesk/issues/182) review, widened by [#198](https://github.com/hajiboy95/KiwiDesk/issues/198)). | Raise the track limit, turn automatic tracks on, or widen the display, then swap; `move_to_track` still works under the merge. |
 | A lone window left behind at quit lands in a quarter-display top-left grid cell instead of keeping its size centered. | The quit grid's dimension formula is deliberately floored at 2×2 ([#197](https://github.com/hajiboy95/KiwiDesk/issues/197) spec): one placement rule for every window count reads predictably, and a quit-time special case would be the only layout math that branches on N == 1. | `QuitGridLayout.dimension(for:targetDepth:)` clamps to 2…4; teardown placement is one-shot, with no live manager to refine it afterwards. | Future `quit.layout` strategies (center, columns, …) slot into the same enum seam; until then, resize the window after quit. |
 | Very large window sets exceed the quit grid's density target: past 4×4 the grid stops growing and cells keep cascading deeper, however high `quit.grid_target_depth` is set. | The 4×4 cap is a teardown safety boundary, not a visual preference ([#281](https://github.com/hajiboy95/KiwiDesk/issues/281)): it interacts with minimum window size, cascade reachability, and display geometry, and no live manager remains after quit to correct an unreachable pile. The density target only moves the 2×2→3×3→4×4 growth thresholds. | `QuitGridLayout.maxDimension` is a constant; the target (`quit.set_grid_target_depth`, GUI "Target windows per cell", default 5, range 1–20) feeds only the dimension formula. | Raising the cap would need a separate architecture change deriving a safe per-display limit; until then the cascade keeps every title bar reachable via the pinned offsets. |
+| The focus ring / drag ghost can be low-contrast against — or visually confusable with — window content that shares its green hue (a green terminal theme, an editor's build-success green, git-diff additions). | Overlays paint over arbitrary content, so no *static* hex can guarantee contrast against every possible window; the deep green `#567A1F` clears 3:1 on near-white and near-black (the common cases) and the ring's 2px stroke lets shape aid legibility even where hue contrast is weak. Green is the deliberate brand-identity choice (the ring reads as "kiwi") accepting this occasional collision with content-green. | The overlay color is a fixed value with no per-window content sampling — dynamic contrast would need live sampling of the covered pixels, deliberately out of scope for the brand convergence ([#439](https://github.com/hajiboy95/KiwiDesk/issues/439)). | Recolor the ring/ghost (`border.set_focused_color`, `drag.set_ghost_border_color`) if your work lives in green-heavy apps; a content-sampling signal is a possible future spike. |
 | Holding a key to resize a floating window under-accumulates while a slide/resize animation is still in flight. | Each step re-bases on the last AX-reported frame; mid-animation the AX echo lags, so rapid repeats read stale geometry. | Resize re-bases on live AX state, and AX echoes trail an in-flight animation. | Let the frame settle, or press again once the animation completes ([#129](https://github.com/hajiboy95/KiwiDesk/issues/129)). |
 | Cross-display float residues remain now that slot math is display-resolved, all pointer- or loss-shaped: a floating window dropped via the **Space-Bar spring** onto a space shown on another monitor stays exactly where the pointer released it (it does not teleport to that monitor); a space relocation landing **mid-drag** skips the float under the pointer entirely (it can restore to the old monitor on a later activation); and a parked float whose **removed** display's space never re-resolves elsewhere restores to wherever the OS relocated it — when the space does re-resolve (the common re-dock), the float is delivered to the new display at a main-relative guess of its old position. (Mirror case: a space that first *gains* a display at runtime is a first assignment, not a relocation, so floats parked at the main-screen fallback stay main-anchored until moved.) Delivery itself may **flicker** once on a cross-display move — instant placement, a macOS display-handoff re-clamp, then the retry winning — accepted deliberately: the delivery rides the stash-restore retry loop, and animating it would either restart per retile (jerky) or give up the retry (silent stranding on a dropped frame-set). | Resize / mouse-resize / float-nudge / border math resolve the space's own display, and every space-relocation path (window moves, `move/pin_space_to_display`, profile applies, monitor re-dock, config reload, space-delete rehome) re-anchors floats ([#449](https://github.com/hajiboy95/KiwiDesk/issues/449) / [#444](https://github.com/hajiboy95/KiwiDesk/issues/444)). The spring drop is a pointer-owned placement — the user chose that spot mid-drag, and yanking the window across monitors at release would fight the gesture. A dead display leaves no source bounds to translate from, so the OS-relocated frame is the best remaining truth. | `TilingEngine.screen(for:in:)` / `screen(containing:)` resolve displays; `KiwiCore.reanchorFloat` seeds the translated frame as the stash original and `restoreStashed` delivers it. The spring path (`springSwitchSpace`) performs no re-anchor by design, and `restoreStashed` consumes a capture whose display is gone. | Move the float with `move_to_space` (which re-anchors), or just drag it — a user placement always wins. |
 | Moving the only window off the focused display's space (without follow) hands key focus to the **desktop by activating Finder**. In the narrow case where Finder's only windows live on *non-visible* spaces, KiwiDesk deliberately does **nothing** instead — so the moved window's app can briefly keep key focus (stray keystrokes are swallowed until the next click), rather than risk a Space switch. | macOS exposes no public "focus the empty desktop" API, and activating Finder while its windows sit only on another space can teleport the user there (the "switch to a Space with open windows" setting). Leaving no key window matches stock macOS after its last window closes — mild and recoverable — whereas a Space teleport contradicts the move the user just made (ui-designer call, option 3). | `KiwiCore.yieldFocusToDesktop` (installed as `desktopFocusYield` in `start()`) activates Finder only when it has no document windows anywhere, or at least one on a currently-visible space — gauged by `AXHelper.normalWindowCount(onScreenOnly:)` over the WindowServer (layer-0, desktop excluded); otherwise it skips. `moveWindow`'s no-follow branch fires it only when the active space empties and the moved window held key focus ([#446](https://github.com/hajiboy95/KiwiDesk/issues/446)); `focus_space` fires the same yield when the target space has nothing to focus and the stashed previous window's app is still frontmost ([#463](https://github.com/hajiboy95/KiwiDesk/issues/463)). | Click the desktop to focus it; or keep a Finder window on the space you're on. A window remaining on the space is refocused instead of the desktop. |
@@ -1512,23 +1513,44 @@ new palette against, not a spec the reflection-based
 - **`group_badge_color` defaults to the universal `#B00020` /
   white**; a bespoke badge echoes the palette temperature and
   pairs a text color chosen for contrast against *that* badge.
-- **Drag ghost / drop-zone:** either single-accent (same hue,
-  border opaque + fill ~15–25 %) or a deliberate two-hue swap
-  of hues already established elsewhere — never a fresh color
-  just for drag.
+- **Drag ghost / drop-zone:** a deliberate two-hue split
+  (border opaque + fill ~15–25 %) so origin reads apart from
+  target. Origin is the brand green darkened for stroke duty;
+  target is a distinct amber — see the overlay note below.
 
-The Kiwi (Default) palette was refreshed the same day from a
-brown/green pair to one green family (dark-moss fill `#37452E66`,
-flesh-green accent `#4E9F3D`, cream text, amber focused). Brown
-was retired entirely, including the drag visuals — the ghost/drop
--zone swap now re-sources its two hues from the palette's own
-green (ghost = origin) and amber (drop zone = target), per the
-two-hue drag pattern above, so nothing spends a stray third hue.
-Two branded siblings ship alongside the default and lead the
-shelf right after it: **Kiwi Dark** (a dark-base green identity,
-distinct from the neutral True Dark) and **Kiwi Gold** (a warm
-gold-fruit variant, green as its secondary) — both authored in
-`bundled.json`, both following the same guide.
+**KiwiCanopy palette convergence (#439).** KiwiDesk is one tool
+under the KiwiCanopy parent brand; the shipped default palette
+adopts the shared brand tokens so the studio reads as one
+identity. Chrome the app fully controls takes the brand kiwi
+green directly: bar `active`/`highlight` = `#8DB354`, hover =
+`#AACB5D80`, item text = cool ink `#EAF3EE`, fill = cool-dark
+`#14201C66`. The forest green `#4E9F3D` and cream `#F2EBD9` are
+retired everywhere. Two branded siblings lead the shelf after
+the default: **Kiwi Dark** (dark-base green identity, distinct
+from neutral True Dark) and **Kiwi Gold** (warm gold-fruit
+variant, green as its secondary) — both in `bundled.json`.
+The authored siblings are **hand-maintained**: unlike the derived
+"Kiwi (Default)" (which reads live from the struct defaults via
+`PaletteCatalog.defaultPalette`), they do not auto-track a
+brand-token change — shifting a brand hex means editing
+`bundled.json` by hand in the same change set.
+
+**Content overlays are the brand green, darkened for duty.**
+The focus ring and drag ghost paint over *arbitrary* third-party
+window content. The bright kiwi accent (`#8DB354`/`#AACB5D`) is a
+fill-only color — too light to survive as a thin stroke on light
+windows (`#AACB5D` ≈ 1.5:1 on white, fails AA) — so the ring and
+ghost drop the *same* accent hue (~84°) down in lightness to
+`#567A1F`, which clears 3:1 on both near-white and near-black
+while staying unmistakably on-brand green. The drag drop-zone
+keeps a distinct hue as a darkened amber `#C2790A` (the old
+`#E8A33D` had the same light-window problem), so origin (green)
+still reads apart from target (amber). This is a darkening, not a
+hue change — the same move the green-forward identity makes for
+ink and borders: keep the hue, drop the lightness where a role
+needs contrast. (The Space Bar's own `focused_item_color` stays
+amber `#E8A33D` for now — a separate "viewing-not-active"
+semantic, converged in a follow-up, #470.)
 
 **The App Bar has its own sidebar destination.** (#229,
 superseding the earlier "Appearance ends with the App Bar

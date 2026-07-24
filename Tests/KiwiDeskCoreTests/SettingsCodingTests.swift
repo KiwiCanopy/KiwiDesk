@@ -36,7 +36,8 @@ struct SettingsCodingTests {
             ]
         )
         // `border.set_*` → `border.*` (#278). Default on,
-        // focused-only, 2 pt, rounded, accent-blue focused color.
+        // focused-only, 2 pt, rounded, deep-kiwi-green focused
+        // color (#439 overlay signal — accent hue darkened).
         let border = try object(root["border"])
         #expect(
             Set(border.keys) == [
@@ -47,10 +48,19 @@ struct SettingsCodingTests {
         )
         #expect(border["enabled"] as? Bool == true)
         #expect(border["width"] as? Double == 2)
-        #expect(border["focused_color"] as? String == "#4E9F3D")
+        #expect(border["focused_color"] as? String == "#567A1F")
         #expect(border["unfocused_enabled"] as? Bool == false)
         #expect(border["corner_style"] as? String == "rounded")
         #expect(border["draw_order"] as? String == "behind")
+        // Bar chrome defaults take the brand kiwi green (#439);
+        // pinned here so an accidental struct-default change
+        // fails the build, not just the doc-drift breadcrumb.
+        let appBar = try object(root["app_bar"])
+        #expect(appBar["active_item_color"] as? String == "#8DB354")
+        #expect(appBar["highlight_color"] as? String == "#8DB354")
+        let spaceBar = try object(root["space_bar"])
+        #expect(spaceBar["active_item_color"] as? String == "#8DB354")
+        #expect(spaceBar["highlight_color"] as? String == "#8DB354")
         // `sticky.set_indicator` → `sticky.indicator` (#414).
         // Default on: the on-window glyph is the only sticky
         // cue that never depends on another surface.
@@ -177,15 +187,16 @@ struct SettingsCodingTests {
                 "border_alignment", "enabled", "fill", "fill_color",
             ]
         )
-        // Kiwi defaults: all-green ghost (origin), all-amber
-        // drop zone (target) — hue carries origin vs. target.
-        #expect(ghost["border_color"] as? String == "#4E9F3D")
-        #expect(ghost["fill_color"] as? String == "#4E9F3D40")
+        // Kiwi defaults: deep-green ghost (origin), amber drop
+        // zone (target) — hue carries origin vs. target. The
+        // ghost is the brand accent hue darkened for stroke duty.
+        #expect(ghost["border_color"] as? String == "#567A1F")
+        #expect(ghost["fill_color"] as? String == "#567A1F40")
         #expect(ghost["border_thickness"] as? Double == 5)
         #expect(ghost["border_alignment"] as? String == "inside")
         let zone = try object(drag["drop_zone"])
-        #expect(zone["border_color"] as? String == "#E8A33D")
-        #expect(zone["fill_color"] as? String == "#E8A33D40")
+        #expect(zone["border_color"] as? String == "#C2790A")
+        #expect(zone["fill_color"] as? String == "#C2790A40")
         #expect(zone["border_thickness"] as? Double == 5)
         #expect(zone["border_alignment"] as? String == "inside")
     }
