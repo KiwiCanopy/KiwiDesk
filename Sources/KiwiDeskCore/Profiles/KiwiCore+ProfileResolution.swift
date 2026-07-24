@@ -180,8 +180,12 @@ extension KiwiCore {
                 composed.spaceModes[space] ?? .bsp
             )
         }
-        spacePins = [:]
-        mainSpaces = []
+        // Honor the composed layout's own positional plan (#485):
+        // for a workflow Standard this equals what
+        // `resolveSpaceDisplays` re-derives below, but the ladder's
+        // five-per-display plan is NOT the count's Standard, so its
+        // blocks would otherwise scatter into the Standard's slots.
+        adoptComposedPlacement(composed)
         fallbackSpace = nil
         // A transient Standard has no keybinding or app-rule
         // override — revert to the base gui.json config
@@ -227,19 +231,16 @@ extension KiwiCore {
                 live: displays.count
             )
         }
+        // `apply(composed:)` adopts the composed placement, so the
+        // pins/mains `buildProfile` captures below are already set.
         apply(composed: composed, forceRetile: true)
         // If the save below fails, state honestly reflects a
-        // transient Standard instead of a stale profile.
+        // transient Standard instead of a stale profile. Adopting
+        // the standard first also lets `buildProfile` tag the
+        // beginner ladder from `currentStandard` (#485).
         profiles.adoptStandard(named: composed.sourceName)
-        adoptComposedPlacement(composed)
         let name = profiles.freeName(base: layout.name)
-        var profile = buildProfile(name: name)
-        // Tag the beginner ladder so a later unmatched monitor
-        // change recomposes it (not a workflow Standard) at the
-        // new display count (#485). Every other preset saves a
-        // normal, unflagged profile.
-        profile.isStarterLadder = layout.name == StarterLadder.name
-        try profiles.save(profile)
+        try profiles.save(buildProfile(name: name))
         // A preset can define more spaces than the first-run seed
         // authored digit shortcuts for; bind the newcomers
         // additively so ⌃⌥N covers them too (#485).
@@ -307,11 +308,14 @@ extension KiwiCore {
             // whose deltas may sit inside the tolerance.
             apply(profile: profile, forceRetile: true)
         } else if profiles.currentStandard != nil,
-            let composed = ProfileComposition.compose(
-                displays: state.workspaces.allDisplays,
-                mainID: PositionalDisplays.liveMainID
+            let composed = composeMonitorChangeFallback(
+                displays: state.workspaces.allDisplays
             )
         {
+            // Recompose through the same baseline-aware fallback as
+            // a monitor change, so a reload while on the transient
+            // ladder Standard re-applies the LADDER, not the count's
+            // workflow Standard (#485). `apply` adopts its placement.
             apply(composed: composed, forceRetile: true)
         }
     }

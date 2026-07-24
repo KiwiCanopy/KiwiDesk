@@ -107,6 +107,32 @@ struct ProfileCopyTests {
         #expect(!copy.isDefault)
     }
 
+    @Test("Copy of the Starter ladder is not the baseline (#485)")
+    func copyClearsStarterLadderFlag() throws {
+        let core = try makeGuiCore()
+        var starter = sourceProfile()
+        starter.name = "Starter"
+        starter.isStarterLadder = true
+        try core.profiles.save(starter)
+        let edited = try core.loadGuiConfig(editing: "Starter")
+
+        try core.copyProfile(
+            named: "Starter",
+            to: "My Setup",
+            with: edited
+        )
+
+        // The copy is the user's own profile — the ladder
+        // baseline flag must not ride along, or an unmatched
+        // monitor change would recompose the ladder over it.
+        let copy = try core.profiles.read(name: "My Setup")
+        #expect(!copy.isStarterLadder)
+        // The source keeps the flag.
+        #expect(
+            try core.profiles.read(name: "Starter").isStarterLadder
+        )
+    }
+
     @Test("Pending edits land in the copy, not the source")
     func pendingEditsLandInCopy() throws {
         let core = try makeGuiCore()

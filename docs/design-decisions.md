@@ -1307,11 +1307,22 @@ sticky via `currentStandard`). Every other baseline still gets the
 workflow Standard, so #466's "no silent demo layout" promise holds for
 everyone who didn't choose the ladder. The flag rides re-saves and
 edits but **not** a save-as-new — an explicitly named copy is the
-user's own profile and resolves normally. The digit-shortcut half is
-the additive twin: `topUpDigitShortcuts` binds only the `⌃⌥N` a growth
+user's own profile and resolves normally (`copyProfile` clears it
+beside `isDefault`, the two identity flags a copy must neutralize). A
+transient ladder Standard carries the flag onto the first profile the
+user *saves* of it, via `buildProfile` reading `currentStandard`, so a
+save doesn't drop them off the ladder either. Both recompose sites are
+covered: `handleMonitorChange`'s `.none` branch and
+`reapplyActiveProfileState` (a config reload) both route through
+`composeMonitorChangeFallback`, and `apply(composed:)` now adopts its
+own `composed.assignment` (`adoptComposedPlacement`) rather than
+discarding it — equivalent for a workflow Standard, correct for the
+ladder's five-per-display blocks. The digit-shortcut half is the
+additive twin: `topUpDigitShortcuts` binds only the `⌃⌥N` a growth
 left unbound (GUI-managed, never overwriting a custom chord, capped at
-ten), so the shortcuts follow the spaces. Do not "simplify" the `.none`
-branch back to a bare `StandardProfiles.standard` — that reintroduces
+ten), so the shortcuts follow the spaces. Do not "simplify" either
+recompose site back to a bare `StandardProfiles.standard`, nor make
+`apply(composed:)` discard its assignment again — each reintroduces
 #485. (#485)
 
 **Orphaned space shortcuts are surfaced, never pruned.** A

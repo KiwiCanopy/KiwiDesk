@@ -159,6 +159,39 @@ struct StarterRescaleTests {
         #expect(!core.isOnStarterBaseline)
     }
 
+    @Test("saving a recomposed ladder Standard stays the baseline")
+    func savingTransientLadderKeepsFlag() throws {
+        let core = try onStarterBaseline()
+        connect(core, [display(2, "B", x: 100)])
+        core.handleMonitorChange()
+        // A transient ladder Standard is on screen (10 spaces).
+        #expect(core.profiles.currentStandard == "Starter")
+        // The user saves it under a new name.
+        core.execute("save_profile", args: [.string("Both")])
+        // buildProfile tags it from currentStandard, so the saved
+        // profile is still the ladder baseline — a later change
+        // won't drop them to a workflow Standard.
+        #expect(try core.profiles.read(name: "Both").isStarterLadder)
+        #expect(core.isOnStarterBaseline)
+    }
+
+    @Test("a reload on the transient ladder re-applies the ladder")
+    func reloadKeepsLadder() throws {
+        let core = try onStarterBaseline()
+        connect(core, [display(2, "B", x: 100)])
+        core.handleMonitorChange()
+        #expect(core.state.workspaces.allSpaces.count == 10)
+        // The profile re-apply a config reload performs must keep
+        // the ladder, not recompose the workflow Standard (#485,
+        // the second recompose site).
+        core.reapplyActiveProfileState()
+        #expect(core.profiles.currentStandard == "Starter")
+        #expect(core.state.workspaces.allSpaces.count == 10)
+        let blockTwo = displaysOf(core, 6...10)
+        #expect(blockTwo.count == 1)
+        #expect(displaysOf(core, 1...5) != blockTwo)
+    }
+
     // MARK: - Additive shortcut top-up
 
     @Test("display change tops up ⌃⌥N for the new spaces")

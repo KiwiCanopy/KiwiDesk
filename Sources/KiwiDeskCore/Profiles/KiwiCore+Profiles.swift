@@ -126,6 +126,15 @@ extension KiwiCore {
             name: name,
             monitorSets: [liveMonitorSet()],
             mainSpaces: mainSpaces.sorted { $0.raw < $1.raw },
+            // Carry the beginner-ladder identity when the live
+            // layout IS the ladder (#485): the transient ladder
+            // Standard sets `currentStandard`, so a first save of
+            // it stays a baseline that re-scales on later display
+            // changes. `applyStandard` adopts the standard before
+            // this, so the preset path is covered here too; a
+            // save-as-new copy (which reads, not builds) is not.
+            isStarterLadder: profiles.currentStandard
+                == StarterLadder.name,
             spaces: liveSpaces,
             fallbackSpace: fallbackSpace.flatMap {
                 liveSpaces.contains($0) ? $0 : nil

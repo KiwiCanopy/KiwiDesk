@@ -101,18 +101,11 @@ extension KiwiCore {
                 )
                 return
             }
+            // `apply(composed:)` adopts the composed placement, so
+            // the ladder's five-per-display blocks land correctly
+            // (not scattered into the workflow Standard's slots).
             apply(composed: composed, forceRetile: false)
             profiles.adoptStandard(named: composed.sourceName)
-            // The ladder's five-per-display plan is not the count's
-            // Standard that `apply` lets `resolveSpaceDisplays`
-            // recompose, so pin its blocks from the composed
-            // assignment and re-resolve — otherwise the blocks would
-            // scatter into the workflow Standard's positions (#485).
-            if composed.sourceName == StarterLadder.name {
-                adoptComposedPlacement(composed)
-                resolveSpaceDisplays()
-                retile()
-            }
             // Bind ⌃⌥N for spaces the change added past the
             // first-run seed — additive, never overwriting a
             // custom chord (#485).
