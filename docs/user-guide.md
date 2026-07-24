@@ -720,6 +720,14 @@ a movement. This is distinct from a sticky window's pill: the
 bounce is a wordless "edge of the layout," the pill explains a
 window that *can't* be moved.
 
+Floating windows take part in directional focus as a second
+tier: tiled windows always win, but when no tiled window lies
+in the pressed direction — you're at the layout's edge — focus
+reaches a floating window sitting that way (including a
+floating sticky shown on the space). So a float parked beside
+the tiles is one keypress away, while navigating between tiles
+never detours through a float hovering over them.
+
 ### Sticky Windows
 
 A **sticky** window stays visible on every virtual space

@@ -124,12 +124,23 @@ extension KiwiCore {
                 }
             }
         }
+        // Two-tier candidate search (#488): tiled slots first;
+        // when no tiled candidate lies in the direction, the
+        // float tier (focus only, live frames) keeps a visible
+        // floating window from being a directional dead end.
         guard
             let target = Navigation.neighbor(
                 from: frame,
                 in: direction,
                 candidates: searchCandidates
             )
+                ?? floatTierTarget(
+                    from: frame,
+                    in: direction,
+                    space: space,
+                    focused: focused,
+                    swapping: swapping
+                )
         else {
             // Dead end — no window that way. Rubber-band the ring
             // toward the wall (#436); wordless, unlike the traveler
@@ -198,10 +209,10 @@ extension KiwiCore {
     /// navigation) for cross-axis directions, for a floating
     /// focused window, and for a non-wrapping step past the
     /// row's ends — at an end no tiled window lies further along
-    /// the axis (slot positions are monotonic in array index)
-    /// and floating windows are never candidates, so the
-    /// geometric search cleanly fails there; it can never land
-    /// on a pinned twin.
+    /// the axis (slot positions are monotonic in array index),
+    /// so the tiled search fails and only the float tier (#488)
+    /// can answer; pinned twins are all tiled, so the
+    /// fall-through can never land on one.
     private func scrollingStep(
         _ direction: Direction,
         space: Space,

@@ -177,13 +177,28 @@ detail:
 | **Scrolling** | array-order | steps along the scroll axis (`scrollingStep`), geometric fallback cross-axis | no min-size cascade — the edge pile (#142) is a viewport pin, not an `OverlapStack` fallback |
 | **Monocle** | array-order | steps along the orientation, wraps iff `wrap_focus` (`monocleCycle`) — same 1-D shape as scrolling | no — every window shares one frame |
 | **Track** | array-order | steps both axes (`trackStep`) | yes — surplus tracks merge into one far-edge **overflow track** (`OverlapStack`) shaped by `overflow_style` (#192, default `cascade_all`); normal tracks always `cascade_overflow` |
-| **Floating** | none | no slots | n/a |
+| **Floating** | geometric (live frames) | `Navigation.neighbor` with no slots: every member navigates by its live frame (the slot→frame fallback), flagged floats via the #488 float tier | n/a |
 
 The two models need different handling for anything pile-aware:
 geometric layouts **exclude** the focused window's pile-mates from
 the candidate set, array-order layouts **skip** their array
 indices (#172). Both share one geometric detector,
 `Navigation.pileMates`.
+
+Orthogonal to both models, directional `focus` (never `swap`)
+runs a **two-tier candidate search** (#488): tiled candidates
+first — the model above — and, only when no tiled window lies in
+the pressed direction, the space's floating windows by their
+live frames (`StateCoordinator.floatingFocusCandidates`:
+float-flagged members plus floating sticky windows rendering on
+the space; transient overlays and fullscreen windows never).
+Tiled-first keeps tile-to-tile navigation untouched while
+removing the directional black hole a visible float used to be —
+dropped from `effectiveTiledMembers`, it could navigate out (the
+anchor falls back to a geometric search from its live frame) but
+nothing could navigate back in. Array-order layouts reach the
+float tier through their existing edge fall-through to the
+geometric search.
 
 ```mermaid
 flowchart TD

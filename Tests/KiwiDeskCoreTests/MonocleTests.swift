@@ -946,7 +946,7 @@ struct MonocleCycleTests {
         )
     }
 
-    @Test("A single window cycles onto itself as a no-op")
+    @Test("A single window is an honest dead end, not a no-op")
     func singleWindow() {
         let core = makeCore()
         core.execute(
@@ -959,8 +959,12 @@ struct MonocleCycleTests {
             )
         )
         core.state.workspaces.focus(w1, in: SpaceID(1))
+        // #488: the lone-window press falls through the cycle so
+        // the float tier can answer; with no float that way it
+        // fails with the dead-end cue (matching scrolling and
+        // track) instead of the old silent .ok.
         #expect(
-            core.execute("focus", args: [.string("right")])
+            !core.execute("focus", args: [.string("right")])
                 .isSuccess
         )
         #expect(core.activeSpace?.focused == w1)
