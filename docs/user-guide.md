@@ -928,6 +928,25 @@ The badges follow the item's color ladder, so they mute on
 inactive Spaces. They have no Settings toggle; Lua can hide
 them with `space_bar.set_sticky_badge(false)`.
 
+At a glance, the marks you may see and what each means:
+
+| Mark | Where it sits | Means |
+| --- | --- | --- |
+| ∞ chip | On the window, top-right corner | **Global sticky** — stays on every Space of every monitor |
+| 📌 chip | On the window, top-right corner | **Display sticky** — stays on every Space of the one monitor it lives on |
+| Badge, glyph's **top-left** | Space Bar | That window (or a window in the group) is **sticky** |
+| Badge, glyph's **bottom-left** | Space Bar | That window is **floating** |
+| `+n` / count badge, glyph's **top-right** | Space Bar | How many windows a grouped glyph holds |
+
+Every mark is a **filled disc** in its state color with a legible
+black-or-white glyph auto-picked for contrast; sticky and floating
+each get their own color (see **Mark color**, above). Floating shows
+no on-window chip — in the bar is the only place a tiled and a
+floating window look different. (Lua:
+[`sticky.set_indicator`](lua-reference.md#stickyset_indicator),
+[`sticky.set_color`](lua-reference.md#stickyset_color),
+[`floating.set_color`](lua-reference.md#floatingset_color).)
+
 **Drag a window onto a Space** to move it there — a two-speed
 gesture. Drag a window's title bar over another Space's item and
 either:
