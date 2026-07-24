@@ -140,9 +140,12 @@ extension KiwiCore {
             at: GeometryUtils.axPoint(cursor),
             slots: slots
         )
+        // Suppress the highlight over a cross-display track dest
+        // (files by rule, not the slot); see `dropZoneTarget` (#492).
+        let honestTarget = dropZoneTarget(target, from: space)
         if settings.dragDropZone.enabled,
-            let target,
-            let targetSlot = slots[target]
+            let honestTarget,
+            let targetSlot = slots[honestTarget]
         {
             dragOverlay.showDropZone(
                 at: targetSlot,
@@ -253,16 +256,13 @@ extension KiwiCore {
             slots: slots
         )
         // A drop whose cursor ends on ANOTHER display moves the
-        // window there — resolved BEFORE the resize gate below.
-        // Dragging a big window onto a smaller display makes macOS
-        // clamp its size, which `MouseResize.isResize` would
-        // otherwise read as a resize and snap the window back
-        // (#492): a gesture that ends on another display is always
-        // a move, never a resize (a tiled window can't be resized
-        // onto another display). Onto a window it takes that slot,
-        // over empty space it appends; same-display drops fall
-        // through (relocate returns false when the destination is
-        // the origin space).
+        // window there — resolved BEFORE the resize gate below,
+        // because dragging a big window onto a smaller display
+        // makes macOS clamp its size, which `MouseResize.isResize`
+        // would else read as a resize and snap it back (#492): a
+        // gesture ending on another display is always a move, never
+        // a resize. Same-display drops fall through (relocate
+        // returns false when the destination is the origin space).
         if relocateAcrossDisplay(id, onto: target, from: space) {
             return
         }

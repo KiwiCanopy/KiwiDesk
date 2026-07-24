@@ -1642,12 +1642,26 @@ destination gains a window and the origin loses one, so both
 displays re-partition. That was chosen deliberately over the
 one-rule-everywhere swap (which a UI-design pass argued for on
 consistency grounds): the move model matches direct-manipulation
-expectation for a monitor-to-monitor drag. The refusal guards
-(`refuseSwapOntoTraveler`, sticky-move) fire on both paths;
-the destination is the active space of the display **under the
-cursor**, validated to actually contain the target, so a
-tiled-sticky traveler injected onto a foreign display can't
-teleport the window to wherever its home space happens to show.
+expectation for a monitor-to-monitor drag. The sticky-move guard
+fires on both paths. The destination is the active space of the
+display **under the cursor**, so a tiled-sticky traveler injected
+onto a foreign display can't teleport the window to wherever its
+home space happens to show: a drop whose target isn't a real
+member of the cursor display's space (a foreign-display traveler,
+or empty space) is treated as an empty drop and *moves* the
+window to that display rather than snapping back with the #435
+refusal pill — you were dragging there anyway. The same-display
+traveler drop still shows the pill.
+
+**The track exception keeps the preview honest by suppressing,
+not lying.** A track destination files an arriving window by its
+`new_window` rule, not the pointed slot — so the *cross-display
+drop-zone highlight is suppressed over a track destination*
+(`handleDragMove`), leaving only the ghost. The invariant "the
+highlight never promises a slot the drop won't act on" therefore
+still holds: where the landing is rule-based, no slot is
+promised. Same-display track drops swap positionally, so their
+highlight stays.
 
 **Ghost and Drop zone are two side-by-side columns.** (#231.)
 Each column leads with its own live preview and puts its

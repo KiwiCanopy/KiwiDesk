@@ -17,6 +17,26 @@ import Foundation
 /// (`emitWindowMovedToSpace`, the #463 settle, the overflow
 /// z-order restore) this must honor too.
 extension KiwiCore {
+    /// The window the live drop-zone highlight should mark, or nil
+    /// to suppress it. Suppresses over a **cross-display track**
+    /// destination: a track space files an arriving window by its
+    /// `new_window` rule, not the pointed slot, so highlighting that
+    /// slot would promise a landing the drop won't honor (#492). A
+    /// same-display drop (which swaps positionally) and a non-track
+    /// destination (which inserts on the slot) keep their truthful
+    /// highlight. `origin` is the dragged window's home space.
+    func dropZoneTarget(
+        _ target: WindowID?,
+        from origin: Space
+    ) -> WindowID? {
+        guard let target,
+            let sid = state.workspaces.space(of: target),
+            sid != origin.id,
+            state.workspaces[sid]?.mode == .track
+        else { return target }
+        return nil
+    }
+
     /// Handles a tiled drop whose cursor ends on a DIFFERENT
     /// display than the dragged window. The window moves into the
     /// display-under-the-cursor's active space, and the focused
