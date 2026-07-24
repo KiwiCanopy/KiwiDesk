@@ -128,6 +128,15 @@ public final class ExecLauncher {
             process.standardError = pipes.err
             capture = OutputCapture(pipes.out, pipes.err)
         } else {
+            // Fire-and-forget: nobody reads the output, so give
+            // the child the null device instead of letting it
+            // inherit ours. An inherited pipe outlives us in a
+            // long-lived child (a wedged `sketchybar --trigger`),
+            // and whoever reads our stdout then waits for an EOF
+            // that never comes — the #489 test-runner hang, where
+            // the child held the swiftpm runner's pipe hostage.
+            process.standardOutput = FileHandle.nullDevice
+            process.standardError = FileHandle.nullDevice
             capture = nil
         }
 

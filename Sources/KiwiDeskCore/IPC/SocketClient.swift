@@ -53,7 +53,14 @@ public final class SocketClient {
             }
         }
         guard result == 0 else {
-            Darwin.close(fd)
+            // Do NOT close here: every stored property is
+            // initialized by now, so a throwing class init still
+            // runs deinit, whose close would then be the SECOND
+            // close of this fd. Under concurrent fd churn the
+            // number gets recycled — and a guarded reissue turns
+            // the double close into an EXC_GUARD process kill
+            // (#489: the test-runner crash). deinit owns the one
+            // and only close.
             throw SocketError.connectFailed(
                 String(cString: strerror(errno))
             )
