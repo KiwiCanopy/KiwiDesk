@@ -73,8 +73,8 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         // Deeper teal/green than the system defaults: the
         // bright `.teal`/`.green` washed the white glyph out.
         case .layoutDefaults:
-            // A distinct section teal — kept apart from the
-            // overlay teal #0F8FAE (focus ring / drag ghost).
+            // One of the varied per-section icon tints (System
+            // Settings style), not a brand hue.
             return Color(red: 0.09, green: 0.47, blue: 0.53)
         case .monitors: return .blue
         case .appearance: return .purple

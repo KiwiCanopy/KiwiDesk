@@ -17,20 +17,21 @@ public struct DragVisual: Sendable, Equatable, Encodable {
     public var fill: Bool
     public var fillColor: String
 
-    /// Ghost (drag origin): contrast-tuned teal — the same
-    /// functional signal as the focus ring, decoupled from the
-    /// brand green because it paints over arbitrary window
-    /// content where kiwi green vanishes. Origin vs. target reads
-    /// by hue against the drop zone's amber. Defaults mirrored in
+    /// Ghost (drag origin): deep kiwi green — the brand accent hue
+    /// darkened for stroke duty, same signal as the focus ring.
+    /// The bright accent is fill-only and vanishes over light
+    /// window content, so this drops it in lightness (not hue) to
+    /// stay legible and on-brand. Origin vs. target reads by hue
+    /// against the drop zone's amber. Defaults mirrored in
     /// docs/lua-reference.md (drag colors) — change both.
     public static let ghostDefault = DragVisual(
         enabled: true,
         border: true,
-        borderColor: "#0F8FAE",
+        borderColor: "#567A1F",
         borderThickness: 5,
         borderAlignment: .inside,
         fill: true,
-        fillColor: "#0F8FAE40"
+        fillColor: "#567A1F40"
     )
 
     /// Drop zone (drag target): a vivid, darkened amber — the

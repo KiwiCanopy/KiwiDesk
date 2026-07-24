@@ -52,15 +52,16 @@ public struct BorderStyle: Sendable, Equatable {
     /// Ring width (pt). Raw here; callers clamp to
     /// `minWidth...maxWidth` (`clampedWidth`).
     public var width: CGFloat = 2
-    /// Contrast-tuned teal — a functional focus signal, decoupled
-    /// from the KiwiCanopy brand green on purpose: the ring paints
-    /// over arbitrary window content (light docs, dark terminals),
-    /// where the fill-only kiwi green vanishes. This darker/more
-    /// saturated variant of the brand's border teal clears 3:1 on
-    /// both near-white and near-black. Bars keep the brand green
-    /// (they own their backdrop); overlays do not. Default mirrored
-    /// in docs/lua-reference.md (border colors) — change both.
-    public var focusedColor = "#0F8FAE"
+    /// Deep kiwi green — the brand accent hue (~84°) darkened for
+    /// stroke duty. The bright accent (#8DB354) is fill-only and
+    /// vanishes as a thin ring over light window content, so the
+    /// ring drops it in lightness (not hue) to clear 3:1 on both
+    /// near-white and near-black while staying on-brand green. May
+    /// read low-contrast over window content that is itself green
+    /// (see docs/design-decisions.md accepted limitations). Default
+    /// mirrored in docs/lua-reference.md (border colors) — change
+    /// both.
+    public var focusedColor = "#567A1F"
     public var unfocusedEnabled = false
     /// A subtle translucent grey — present without competing with
     /// the focused ring for attention.

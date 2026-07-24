@@ -36,8 +36,8 @@ struct SettingsCodingTests {
             ]
         )
         // `border.set_*` → `border.*` (#278). Default on,
-        // focused-only, 2 pt, rounded, contrast-tuned teal
-        // focused color (#439 overlay signal).
+        // focused-only, 2 pt, rounded, deep-kiwi-green focused
+        // color (#439 overlay signal — accent hue darkened).
         let border = try object(root["border"])
         #expect(
             Set(border.keys) == [
@@ -48,7 +48,7 @@ struct SettingsCodingTests {
         )
         #expect(border["enabled"] as? Bool == true)
         #expect(border["width"] as? Double == 2)
-        #expect(border["focused_color"] as? String == "#0F8FAE")
+        #expect(border["focused_color"] as? String == "#567A1F")
         #expect(border["unfocused_enabled"] as? Bool == false)
         #expect(border["corner_style"] as? String == "rounded")
         #expect(border["draw_order"] as? String == "behind")
@@ -187,11 +187,11 @@ struct SettingsCodingTests {
                 "border_alignment", "enabled", "fill", "fill_color",
             ]
         )
-        // Kiwi defaults: teal ghost (origin), amber drop zone
-        // (target) — hue carries origin vs. target. Overlays are
-        // contrast-tuned, decoupled from the brand green.
-        #expect(ghost["border_color"] as? String == "#0F8FAE")
-        #expect(ghost["fill_color"] as? String == "#0F8FAE40")
+        // Kiwi defaults: deep-green ghost (origin), amber drop
+        // zone (target) — hue carries origin vs. target. The
+        // ghost is the brand accent hue darkened for stroke duty.
+        #expect(ghost["border_color"] as? String == "#567A1F")
+        #expect(ghost["fill_color"] as? String == "#567A1F40")
         #expect(ghost["border_thickness"] as? Double == 5)
         #expect(ghost["border_alignment"] as? String == "inside")
         let zone = try object(drag["drop_zone"])

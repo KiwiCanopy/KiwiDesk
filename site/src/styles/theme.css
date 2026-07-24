@@ -5,7 +5,7 @@
   --kiwi-green: #8db354;
   --kiwi-green-bright: #aacb5d;
   --kiwi-brown: #8b5e3c;
-  --kiwi-cream: #dbeeee;
+  --kiwi-cream: #e1eedb;
   --kiwi-seed: #0d1512;
 }
 
@@ -30,19 +30,21 @@
 /* Light theme accents. Accent text is a darkened variant of the
    brand's kiwi green — the raw fill green is ~2.3:1 on this bg
    and fails AA, so this role stays a purpose-built text-safe
-   shade rather than the raw brand hex. */
+   shade rather than the raw brand hex. --sl-color-white and the
+   gray ramp are anchored on the forest ink (green-forward, no
+   teal — issue #439 follow-up), not a teal-tinted ink. */
 :root[data-theme="light"] {
   --sl-color-accent-low: #cce0a2;
   --sl-color-accent: #546b32;
   --sl-color-accent-high: #384721;
-  --sl-color-white: #1c373d;
-  --sl-color-gray-1: #1e393f;
-  --sl-color-gray-2: #274046;
-  --sl-color-gray-3: #344c51;
-  --sl-color-gray-4: #586c6f;
-  --sl-color-gray-5: #98a5a5;
-  --sl-color-gray-6: #dae0dd;
-  --sl-color-gray-7: #e8ece8;
+  --sl-color-white: #12251a;
+  --sl-color-gray-1: #14271c;
+  --sl-color-gray-2: #1d2f25;
+  --sl-color-gray-3: #2b3c32;
+  --sl-color-gray-4: #505f56;
+  --sl-color-gray-5: #949d96;
+  --sl-color-gray-6: #d9ddd8;
+  --sl-color-gray-7: #e7eae6;
   --sl-color-black: #f7f9f5;
 }
 

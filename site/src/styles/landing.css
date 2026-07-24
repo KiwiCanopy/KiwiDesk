@@ -15,9 +15,9 @@
   --kiwi-flesh: #8db354; /* accent — deeper kiwi green, fills */
   --kiwi-bright: #aacb5d; /* accent-soft — brighter kiwi green */
   --kiwi-shell: #8b5e3c; /* warm tertiary — fills only, sparing */
-  --kiwi-cream: #dbeeee; /* pale surface-mist tint (unused ref) */
+  --kiwi-cream: #e1eedb; /* pale kiwi surface-mist tint (unused ref) */
   --kiwi-seed: #0d1512; /* deep brand bg (unused ref) */
-  --kiwi-ink: #1c373d; /* brand ink (unused ref) */
+  --kiwi-ink: #12251a; /* forest ink, green-forward (unused ref) */
 
   /* ---- Spacing scale (8pt-ish, fluid at the edges) ---- */
   --sp-1: 0.5rem;
@@ -56,8 +56,8 @@
   --bg-1: #0d1512;   /* base — brand --bg (dark) */
   --bg-2: #101a16;   /* tinted band */
   --bg-3: #14201c;   /* card / raised — brand --surface (dark) */
-  --border: rgba(137, 179, 181, 0.14);
-  --border-strong: rgba(137, 179, 181, 0.28);
+  --border: rgba(137, 181, 137, 0.14); /* sage — no teal, #439 */
+  --border-strong: rgba(137, 181, 137, 0.28);
 
   /* Text — brand --ink / --text-muted (dark); --text-faint is a
      recomputed third tier, still AA on every dark surface above. */
@@ -81,7 +81,7 @@
 
   /* Page ambient wash (body::before) */
   --wash-a: rgba(141, 179, 84, 0.14);
-  --wash-b: rgba(176, 123, 80, 0.08);
+  --wash-b: rgba(176, 123, 80, 0.1);
 
   /* Nav resting text over the hero band */
   --nav-ink: var(--text);
@@ -108,8 +108,8 @@
      links/eyebrows use (never the warm tertiary, see AGENTS.md);
      warm stays confined to the fill/border, used sparingly. */
   --pill-ink: var(--accent);
-  --pill-bg: rgba(176, 123, 80, 0.12);
-  --pill-border: rgba(176, 123, 80, 0.32);
+  --pill-bg: rgba(176, 123, 80, 0.14);
+  --pill-border: rgba(176, 123, 80, 0.36);
   --pill-dot: var(--kiwi-bright);
   --pill-dot-glow: rgba(170, 203, 93, 0.9);
 
@@ -146,41 +146,47 @@
   color-scheme: light;
 
   /* Surfaces — brand --bg/--surface anchor bg-1/bg-3 exactly;
-     bg-0/bg-2 are derived rungs blending in --surface-mist for
+     bg-0/bg-2 are derived rungs blending in kiwi-green tints for
      the extra bands this page needs (deepest floor, tinted
-     section), instead of the retired cream family. */
-  --bg-0: #dbeeee;   /* deepest (code / diagrams) — brand mist */
+     section) — green-forward, no teal (issue #439 follow-up). */
+  --bg-0: #e1eedb;   /* deepest (code / diagrams) — kiwi mist */
   --bg-1: #f7f9f5;   /* base — brand --bg (light) */
-  --bg-2: #e9f3f2;   /* tinted band (bg-1 x bg-0 blend) */
+  --bg-2: #ecf3e9;   /* tinted band (bg-1 x bg-0 blend) */
   --bg-3: #ffffff;   /* card / raised — brand --surface (light) */
-  --border: rgba(137, 179, 181, 0.12);
-  --border-strong: rgba(137, 179, 181, 0.22);
+  --border: rgba(18, 37, 26, 0.12); /* forest ink, no teal */
+  --border-strong: rgba(18, 37, 26, 0.22);
 
-  /* Text — brand --ink / --text-muted (light); --text-faint is a
-     recomputed third tier, still AA on every light surface above
-     (incl. --bg-0, the footer/diagram floor). */
-  --text: #1c373d;
+  /* Text — forest ink (green-forward, no teal); --text-dim/
+     --text-faint stay the brand's own --text-muted role and a
+     recomputed third tier, both re-verified AA on every new
+     light surface above (incl. --bg-0, the footer/diagram floor:
+     text-faint holds 4.57:1 there, text-dim 5.25:1). */
+  --text: #12251a;
   --text-dim: #55635c;
-  --text-faint: #5f6c65;     /* AA (4.5:1) on footer/tint #dbeeee */
+  --text-faint: #5f6c65;     /* AA (4.5:1) on footer/tint #e1eedb */
 
   /* Accents — the raw brand fill green is ~2.3:1 on this bg and
      fails AA, so text/link uses a darkened, purpose-built shade
-     of the same hue instead (never the raw fill green as text). */
+     of the same hue instead (never the raw fill green as text).
+     Re-verified AA on every new surface above (4.95:1 min, on
+     --bg-0). */
   --accent: #546b32;         /* AA on bg + .tint bands */
   --accent-deep: var(--kiwi-flesh);
   --glow: rgba(141, 179, 84, 0.35);
 
-  /* Hero band — brand bg fading into the mist tint */
+  /* Hero band — brand bg fading into the kiwi-mist tint */
   --hero-bg-top: #fafbf9;
   --hero-bg-bot: var(--bg-2);
   --hero-ink: var(--text);
   --hero-ink-dim: var(--text-dim);
   --hero-glow: rgba(141, 179, 84, 0.18);
-  --hero-mark-shadow: 0 10px 28px rgba(28, 55, 61, 0.16);
+  --hero-mark-shadow: 0 10px 28px rgba(18, 37, 26, 0.16);
 
-  /* Page ambient wash (body::before) */
+  /* Page ambient wash (body::before) — warm gets a touch more
+     presence here (elevated from sparse to a real secondary,
+     issue #439 follow-up), still a fill only, never text. */
   --wash-a: rgba(141, 179, 84, 0.08);
-  --wash-b: rgba(139, 94, 60, 0.05);
+  --wash-b: rgba(139, 94, 60, 0.07);
 
   /* Nav resting text over the hero band */
   --nav-ink: var(--hero-ink);
@@ -197,18 +203,19 @@
   --card-glow: rgba(141, 179, 84, 0.1);
 
   /* Ghost button on the hero band */
-  --ghost-bg: rgba(28, 55, 61, 0.04);
+  --ghost-bg: rgba(18, 37, 26, 0.04);
   --ghost-ink: var(--hero-ink);
-  --ghost-border: rgba(28, 55, 61, 0.28);
-  --ghost-hover-bg: rgba(28, 55, 61, 0.08);
+  --ghost-border: rgba(18, 37, 26, 0.28);
+  --ghost-hover-bg: rgba(18, 37, 26, 0.08);
   --ghost-hover-border: var(--hero-ink);
 
   /* Pill on the hero band — ink is the same text-safe accent
      links/eyebrows use (never the warm tertiary, see AGENTS.md);
-     warm stays confined to the fill/border/dot, used sparingly. */
+     warm stays confined to the fill/border/dot, given a bit more
+     presence here (elevated from sparse, issue #439 follow-up). */
   --pill-ink: var(--accent);
-  --pill-bg: rgba(139, 94, 60, 0.1);
-  --pill-border: rgba(139, 94, 60, 0.3);
+  --pill-bg: rgba(139, 94, 60, 0.12);
+  --pill-border: rgba(139, 94, 60, 0.34);
   --pill-dot: var(--kiwi-shell);
   --pill-dot-glow: rgba(139, 94, 60, 0.55);
 
@@ -227,8 +234,8 @@
   --tile-stroke: var(--accent-deep);
   --tile-stroke-ghost: rgba(109, 139, 65, 0.4);
 
-  --shadow-sm: 0 2px 10px rgba(28, 55, 61, 0.1);
-  --shadow: 0 14px 40px rgba(28, 55, 61, 0.14);
+  --shadow-sm: 0 2px 10px rgba(18, 37, 26, 0.1);
+  --shadow: 0 14px 40px rgba(18, 37, 26, 0.14);
   --shadow-glow: 0 26px 80px -24px var(--glow);
 
   /* Ko-fi support button — warm tint stays on the fill/border

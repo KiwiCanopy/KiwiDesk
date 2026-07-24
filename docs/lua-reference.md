@@ -2314,13 +2314,13 @@ drag.set_ghost_border_alignment("inside")
 
 **Expects:** a hex color.
 
-**Does:** sets the ghost border color (default `#0F8FAE`,
-teal — the ghost, drag's origin, is all-teal).
+**Does:** sets the ghost border color (default `#567A1F`,
+deep green — the ghost, drag's origin, is all-green).
 
 **Example:**
 
 ```lua
-drag.set_ghost_border_color("#0F8FAE")
+drag.set_ghost_border_color("#567A1F")
 ```
 
 ### drag.set_ghost_fill
@@ -2339,13 +2339,13 @@ drag.set_ghost_fill(true)
 
 **Expects:** a hex color.
 
-**Does:** sets the ghost fill color (default `#0F8FAE40`,
-teal with 25% alpha).
+**Does:** sets the ghost fill color (default `#567A1F40`,
+deep green with 25% alpha).
 
 **Example:**
 
 ```lua
-drag.set_ghost_fill_color("#0F8FAE40")
+drag.set_ghost_fill_color("#567A1F40")
 ```
 
 ### drag.set_drop_zone_enabled
@@ -2402,7 +2402,7 @@ drag.set_drop_zone_border_alignment("inside")
 
 **Does:** sets the drop zone border color (default `#C2790A`,
 amber — the drop zone, drag's target, is all-amber so it reads
-apart from the teal ghost).
+apart from the green ghost).
 
 **Example:**
 
@@ -2506,12 +2506,12 @@ border.set_width(2)
 the same format as every other KiwiDesk color.
 
 **Does:** sets the focused window's ring color (default
-`"#0F8FAE"`, the Kiwi theme's teal focus accent).
+`"#567A1F"`, the Kiwi theme's deep-green focus accent).
 
 **Example:**
 
 ```lua
-border.set_focused_color("#0F8FAE")
+border.set_focused_color("#567A1F")
 ```
 
 ### border.set_unfocused_enabled
@@ -3825,9 +3825,9 @@ stripped, grouped by namespace — `set_gap_override` becomes
       "corner_radius": 16,
       "ghost": {
         "enabled": true, "border": true,
-        "border_color": "#0F8FAE", "border_thickness": 5,
+        "border_color": "#567A1F", "border_thickness": 5,
         "border_alignment": "inside",
-        "fill": true, "fill_color": "#0F8FAE40"
+        "fill": true, "fill_color": "#567A1F40"
       },
       "drop_zone": {
         "enabled": true, "border": true,

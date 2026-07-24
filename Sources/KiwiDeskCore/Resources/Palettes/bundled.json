@@ -19,10 +19,10 @@
       "space_bar.highlight_color": "#8DB354",
       "space_bar.group_badge_color": "#B00020",
       "space_bar.group_badge_text_color": "#FFFFFF",
-      "border.focused_color": "#0F8FAE",
+      "border.focused_color": "#567A1F",
       "border.unfocused_color": "#3A3A3C99",
-      "drag.ghost.border_color": "#0F8FAE",
-      "drag.ghost.fill_color": "#0F8FAE40",
+      "drag.ghost.border_color": "#567A1F",
+      "drag.ghost.fill_color": "#567A1F40",
       "drag.drop_zone.border_color": "#C2790A",
       "drag.drop_zone.fill_color": "#C2790A40"
     }
