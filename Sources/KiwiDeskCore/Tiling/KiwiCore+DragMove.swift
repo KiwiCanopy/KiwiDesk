@@ -107,10 +107,24 @@ extension KiwiCore {
         // of the #492 drop-ordering gotcha).
         let crossed = dragCrossing.hasCrossed(id)
         if (looksResize || !movedOrigin) && !crossed {
-            if looksResize {
-                // An edge pull near the display seam must never
-                // dwell into a membership move.
+            // Only a CONFIDENT resize (press in the edge band,
+            // size changing) disarms the dwell: an edge pull
+            // near the display seam must never dwell into a
+            // membership move. The magnitude-only fallback keeps
+            // feeding it — macOS live-clamps a big window's size
+            // as it approaches a smaller display, which reads as
+            // a resize and would otherwise permanently kill the
+            // dwell in the feature's headline case (review). The
+            // coordinator only ever arms while the cursor is on
+            // a FOREIGN display, so a same-display resize feeds
+            // it nothing. Visuals stay hidden either way (#237),
+            // and if the stricter gate still misreads a move the
+            // loss is graceful: the drop-commit relocate (#492)
+            // moves the window at release.
+            if pressNearEdge && sizeChanged {
                 dragCrossing.cancelPending(for: id)
+            } else if movedOrigin {
+                updateDragCrossing(id, cursor: cursor)
             }
             dragOverlay.hideAll()
             return

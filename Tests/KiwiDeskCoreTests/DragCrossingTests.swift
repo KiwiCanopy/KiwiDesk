@@ -155,6 +155,64 @@ struct DragCrossingTests {
         )
     }
 
+    @Test("A stale dwell fire is dropped when the cursor left")
+    func staleFireRevalidatesCursor() {
+        let core = makeTwoDisplayCore()
+        // AX move events can lag the pointer by more than the
+        // dwell (Electron): by fire time the cursor is back on
+        // the home display — the fire must not commit.
+        core.drag.cursorLocation = { CGPoint(x: 100, y: 100) }
+        let id = WindowID(1)
+        core.dragCrossing.onCross(id, DisplayID(2))
+        #expect(
+            core.state.workspaces.space(of: id) == SpaceID(1)
+        )
+        #expect(core.dragCrossing.hasCrossed(id) == false)
+    }
+
+    @Test("An armed Space Bar target blocks the dwell fire")
+    func armedBarBlocksFire() throws {
+        let core = makeTwoDisplayCore()
+        let id = WindowID(1)
+        // Arm a bar target through the coordinator's own API: a
+        // hit over a foreign space's item arms synchronously.
+        core.spaceBarDrop.hitTest = { _ in SpaceID("9") }
+        core.spaceBarDrop.currentSpace = { _ in SpaceID(1) }
+        core.spaceBarDrop.moved(id, cursor: .zero)
+        try #require(core.spaceBarDrop.isArmed)
+        // The bar spring is a competing membership mover; an
+        // armed target wins over a racing dwell fire.
+        core.dragCrossing.onCross(id, DisplayID(2))
+        #expect(
+            core.state.workspaces.space(of: id) == SpaceID(1)
+        )
+        #expect(core.dragCrossing.hasCrossed(id) == false)
+    }
+
+    @Test("A native-tab rekey reverts under the new id")
+    func rekeyTransfersRevert() {
+        let core = makeTwoDisplayCore()
+        let old = WindowID(1)
+        let new = WindowID(9)
+        core.dragCrossing.onCross(old, DisplayID(2))
+        #expect(
+            core.state.workspaces.space(of: old) == SpaceID("2")
+        )
+        // The state fold swaps the id in place (#308), then the
+        // event handler transfers the crossing bookkeeping,
+        // cancels the old gesture, and reverts under the new id
+        // — the exact wiring in KiwiCore+Events.
+        core.state.apply(.windowRekeyed(old, new))
+        core.dragCrossing.rekey(old: old, new: new)
+        core.cancelDrag(old)
+        core.revertLiveCrossing(new)
+        #expect(
+            core.state.workspaces.space(of: new) == SpaceID(1)
+        )
+        #expect(core.dragCrossing.origin(for: new) == nil)
+        #expect(core.dragCrossing.origin(for: old) == nil)
+    }
+
     @Test("A marked sticky refusal blocks later crossings")
     func stickyRefusalBlocks() {
         let core = makeTwoDisplayCore()

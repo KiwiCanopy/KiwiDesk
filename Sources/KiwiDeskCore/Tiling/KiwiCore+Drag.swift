@@ -65,6 +65,11 @@ extension KiwiCore {
         // ends the crossing bookkeeping either way. A crossed
         // gesture is a MOVE for the resize gate below.
         let crossedDisplays = dragCrossing.endGesture(id)
+        // For the crossed drop's #463 settle below — captured
+        // before the retile/focus can change it, mirroring the
+        // drop-commit relocate.
+        let priorFrontmost =
+            crossedDisplays ? frontmostPIDProvider?() : nil
         dragOverlay.hideAll()
         spaceBars.endDragAutoScroll()
         defer { scheduleBorderDropReconcile() }
@@ -221,6 +226,16 @@ extension KiwiCore {
         // drop snaps the window back to a slot the pointer
         // may sit outside of.
         focusWindow(id, warp: false)
+        // A live-crossed gesture activated the destination at
+        // crossing time with NO settle (mid-drag, the spring
+        // model); its drop is where the #463 re-assert belongs —
+        // parity with the drop-commit relocate's obligation.
+        if crossedDisplays {
+            scheduleSpaceSettle(
+                space.id,
+                priorFrontmost: priorFrontmost
+            )
+        }
         if crossedZones {
             scheduleZOrderRestore()
         }

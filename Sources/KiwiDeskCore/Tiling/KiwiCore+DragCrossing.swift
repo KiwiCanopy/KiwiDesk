@@ -53,6 +53,15 @@ extension KiwiCore {
             // Released during the dwell: the drop-commit
             // relocate owns the gesture now.
             drag.isMousePressed(),
+            // The dwell disarms only on AX move events, and
+            // Electron/WebKit apps deliver those 100–300 ms
+            // late — longer than the dwell (§5). Re-validate
+            // the LIVE cursor at fire time: still on the display
+            // the dwell armed for, and not aiming at a Space Bar
+            // item (a competing membership mover).
+            !spaceBarDrop.isArmed,
+            dragCrossing.displayAt(drag.cursorLocation())
+                == display,
             let originID = state.workspaces.space(of: id),
             let origin = state.workspaces[originID],
             origin.windows.contains(id),
@@ -138,6 +147,11 @@ extension KiwiCore {
             let last = $0.windows.count - 1
             $0.move(id, to: min(origin.index, max(last, 0)))
         }
+        // `add` re-homing cleared `lastFocused` (it was this
+        // window, stamped at the crossing); re-stamp it in the
+        // restored home so bar accents / focus-yield paths don't
+        // read a startup-like nil (review).
+        state.workspaces.focus(id, in: origin.space)
         state.workspaces.activate(origin.space)
         emitWindowMovedToSpace(
             id,
@@ -147,6 +161,10 @@ extension KiwiCore {
             to: origin.space
         )
         retile(animated: false, force: true)
+        // The revert re-inserts into a possibly-overflowing
+        // stack / track / pile — the same §5 obligation the
+        // crossing itself honors (review).
+        scheduleZOrderRestore()
         emitSpaceChange()
     }
 }

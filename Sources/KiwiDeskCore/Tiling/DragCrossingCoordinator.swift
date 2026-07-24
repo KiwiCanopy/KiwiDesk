@@ -55,6 +55,10 @@ public final class DragCrossingCoordinator {
         var stickyRefused = false
     }
     private var gestures: [WindowID: Gesture] = [:]
+    /// A single slot, not per-window: only one window is ever
+    /// user-dragged at a time, so `schedule` may displace another
+    /// window's dwell without harm. `gestures` stays per-window
+    /// because ids must not inherit stale bookkeeping.
     private var pending:
         (window: WindowID, display: DisplayID, task: Task<Void, Never>)?
 
@@ -128,6 +132,10 @@ public final class DragCrossingCoordinator {
         gestures[id]?.crossed == true
     }
 
+    /// Defense in depth only: sticky windows never arm the dwell
+    /// (`updateDragCrossing` filters them), so this fires solely
+    /// when a window BECAME sticky mid-dwell. Per-gesture, not
+    /// per-display — revisit if the sticky exclusion is relaxed.
     func markStickyRefused(_ id: WindowID) {
         var gesture = gestures[id] ?? Gesture()
         gesture.stickyRefused = true
@@ -136,6 +144,18 @@ public final class DragCrossingCoordinator {
 
     func stickyRefused(_ id: WindowID) -> Bool {
         gestures[id]?.stickyRefused == true
+    }
+
+    /// Retargets a gesture's bookkeeping onto a native-tab
+    /// rekeyed id (#308) — the id swapped in place mid-drag, and
+    /// the revert must find the origin under the NEW id. Any
+    /// pending dwell dies with the old id: the gesture is being
+    /// aborted, not continued.
+    func rekey(old: WindowID, new: WindowID) {
+        cancelPending(for: old)
+        guard let gesture = gestures.removeValue(forKey: old)
+        else { return }
+        gestures[new] = gesture
     }
 
     /// Ends the gesture at drop or cancel: disarms any dwell,

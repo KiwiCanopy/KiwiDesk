@@ -7,15 +7,27 @@ import Foundation
 /// monitor is a relocation — "put this window over there" — which
 /// is what people reach for; a same-display drop still swaps.
 ///
-/// This is a SECOND window-relocation path beside `moveWindow`
-/// (which backs the keyboard / Space-Bar move and runs the #207
-/// space-switch animation + warp, both wrong when the destination
-/// space is already on-screen). No parity test binds the two, so
-/// keep its focus / event / z-order obligations in sync by hand
-/// with `moveWindow`'s follow branch and the same-space swap in
-/// `handleDragEnd`: whatever they honor after a re-home
-/// (`emitWindowMovedToSpace`, the #463 settle, the overflow
-/// z-order restore) this must honor too.
+/// FOUR window-relocation paths now exist, with DELIBERATELY
+/// different post-rehome obligations. No parity test can bind
+/// behavior — this table is the registry; keep it honest by hand
+/// when touching any of the four:
+///
+///   path                  AX focus   #463    z-order   retile
+///                                    settle  restore   force
+///   moveWindow(follow:)   yes+warp   yes     —         —
+///   Space-Bar spring      none       none    none      yes
+///   live crossing (#504)  none       none    yes       yes
+///   drop-commit (below)   no-warp    yes     yes       no
+///
+/// The spring and the crossing run MID-DRAG: the pointer is
+/// inside the OS drag loop, so they assert no AX focus and
+/// schedule no settle (a warp would rip the pointer out of the
+/// drag); the crossed gesture's DROP schedules the #463 settle
+/// instead (`handleDragEnd`). All four emit
+/// `windowMovedToSpace` + `spaceChange`. Placement can never
+/// diverge: relocate and crossing share `insertDropped`; spring
+/// and moveWindow share `addFocusedToSpace` (which insertDropped
+/// also routes through for track / empty destinations).
 extension KiwiCore {
     /// The window the live drop-zone highlight should mark, or nil
     /// to suppress it. Suppresses over a **cross-display track**

@@ -137,6 +137,31 @@ struct DragCrossingCoordinatorTests {
         #expect(crossing.hasCrossed(id) == false)
     }
 
+    @Test("rekey moves the gesture record; the dwell dies")
+    func rekeyTransfersGesture() async throws {
+        let crossing = makeCoordinator()
+        var fired = 0
+        crossing.onCross = { _, _ in fired += 1 }
+        let old = WindowID(1)
+        let new = WindowID(9)
+        crossing.recordOriginIfNeeded(old, space: "A", index: 1)
+        crossing.markCrossed(old)
+        crossing.moved(
+            old,
+            cursor: CGPoint(x: 1500, y: 100),
+            homeDisplay: DisplayID(1)
+        )
+        crossing.rekey(old: old, new: new)
+        // The bookkeeping follows the id swap (#308)…
+        #expect(crossing.origin(for: new)?.space == SpaceID("A"))
+        #expect(crossing.origin(for: new)?.index == 1)
+        #expect(crossing.hasCrossed(new))
+        #expect(crossing.origin(for: old) == nil)
+        // …but the armed dwell dies with the aborted gesture.
+        try await Task.sleep(nanoseconds: 150_000_000)
+        #expect(fired == 0)
+    }
+
     @Test("A sticky refusal is remembered for the gesture")
     func stickyRefusalOnce() {
         let crossing = makeCoordinator()
