@@ -243,6 +243,29 @@ extension KiwiCore {
 
         let frame = liveDropFrame(id, fallback: frame)
         let slots = tiler.calculatedFrames(state: state)
+        // Resolve the swap target from the cursor, exactly as the
+        // live preview did (#492), so the drop can never disagree
+        // with the drop-zone the user saw. AX coords: flip the
+        // Cocoa mouse location.
+        let target = DragTarget.swapTarget(
+            of: id,
+            at: GeometryUtils.axPoint(drag.cursorLocation()),
+            slots: slots
+        )
+        // A drop whose cursor ends on ANOTHER display moves the
+        // window there — resolved BEFORE the resize gate below.
+        // Dragging a big window onto a smaller display makes macOS
+        // clamp its size, which `MouseResize.isResize` would
+        // otherwise read as a resize and snap the window back
+        // (#492): a gesture that ends on another display is always
+        // a move, never a resize (a tiled window can't be resized
+        // onto another display). Onto a window it takes that slot,
+        // over empty space it appends; same-display drops fall
+        // through (relocate returns false when the destination is
+        // the origin space).
+        if relocateAcrossDisplay(id, onto: target, from: space) {
+            return
+        }
         if slots[id] != nil,
             MouseResize.isResize(from: start, to: frame)
         {
@@ -274,25 +297,6 @@ extension KiwiCore {
                 retile()
                 focusWindow(id, warp: false)
             }
-            return
-        }
-        // Resolve the swap target from the cursor, exactly as the
-        // live preview did (#492), so the drop can never disagree
-        // with the drop-zone the user saw. AX coords: flip the
-        // Cocoa mouse location.
-        let target = DragTarget.swapTarget(
-            of: id,
-            at: GeometryUtils.axPoint(drag.cursorLocation()),
-            slots: slots
-        )
-        // A drop whose cursor ends on ANOTHER display moves the
-        // window there instead of swapping (#492) — onto a window
-        // it takes that slot, over empty space it appends. Checked
-        // before the traveler refusal below, which would otherwise
-        // reject every cross-display target as a non-member, and it
-        // runs even with no target so an empty monitor still
-        // receives the drop.
-        if relocateAcrossDisplay(id, onto: target, from: space) {
             return
         }
         // A tiled-sticky traveler is injected into this space's

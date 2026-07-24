@@ -20,12 +20,13 @@ extension KiwiCore {
     /// Handles a tiled drop whose cursor ends on a DIFFERENT
     /// display than the dragged window. The window moves into the
     /// display-under-the-cursor's active space, and the focused
-    /// display follows the drop there. When the cursor is over a
-    /// window (`target`), the moved window takes that slot — the
-    /// target and everything after it shift down one; when it is
-    /// over empty space (an empty monitor, or a gap), the window is
-    /// appended. Either way, dropping over another display *moves
-    /// the window there* (#492).
+    /// display follows the drop there. In a geometric / array-order
+    /// layout, dropping over a window (`target`) lands on that slot
+    /// — the target and everything after it shift down one. A track
+    /// space instead treats the arrival like a new window (its
+    /// `new_window` rule), and a drop over empty space just receives
+    /// it. Either way, dropping over another display *moves the
+    /// window there* (#492).
     ///
     /// Returns `true` when it took the drop (the caller returns
     /// without running the same-space swap); `false` when the drop
@@ -54,12 +55,6 @@ extension KiwiCore {
             destID != origin.id,
             let dest = state.workspaces[destID]
         else { return false }
-        // The target's slot index in the destination — nil when the
-        // drop is over empty space, or over a traveler that isn't a
-        // real member here (append, don't chase its home space).
-        let targetIndex = target.flatMap {
-            dest.windows.firstIndex(of: $0)
-        }
         // A sticky window that can't cross displays snaps back
         // instead — the same gate a keyboard / Space-Bar move
         // honors (#445).
@@ -73,16 +68,27 @@ extension KiwiCore {
         // captured before the retile/focus below for the #463
         // dropped-activate settle.
         let priorFrontmost = frontmostPIDProvider?()
-        // Move id into the destination space (drops it from the
-        // origin). Onto a window: add after the target, then slot it
-        // on the target's index so id takes the promised slot and
-        // the target and its followers shift one. Onto empty space:
-        // append.
-        state.workspaces.add(id, to: destID, after: target)
-        if let targetIndex {
+        // Placement. Dropping onto a WINDOW in a geometric /
+        // array-order layout lands on that slot (the target and its
+        // followers shift one), honoring the drop-zone the user saw.
+        // Everything else — a TRACK space, or a drop over empty
+        // space / no target — routes through `addFocusedToSpace`,
+        // the same choke point `moveWindow` uses: a window arriving
+        // on a track space follows its `new_window` rule (e.g. open
+        // in a new track) exactly like a freshly spawned one, and an
+        // empty destination just receives the window. Keeping this
+        // one choke point also keeps track cap / spill placement out
+        // of two hand-maintained copies.
+        if dest.mode != .track,
+            let target,
+            let targetIndex = dest.windows.firstIndex(of: target)
+        {
+            state.workspaces.add(id, to: destID, after: target)
             state.workspaces.withSpace(destID) {
                 $0.move(id, to: targetIndex)
             }
+        } else {
+            addFocusedToSpace(id, to: destID)
         }
         state.workspaces.focus(id, in: destID)
         // The pointer ended on the destination display; make it the

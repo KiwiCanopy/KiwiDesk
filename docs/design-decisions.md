@@ -1613,7 +1613,15 @@ promise a target the drop won't act on.
 Releasing on **another display MOVES** the window into that
 display's active space. Onto a window's slot it takes the
 target's array index, the target and the rest shift up one; over
-empty space (an empty monitor, or a gap) it appends. Either way
+empty space (an empty monitor, or a gap) it appends. A **track**
+destination is the exception: the arriving window follows the
+space's `new_window` rule (e.g. open in a new track), like a
+freshly spawned window, rather than the positional slot — routed
+through the same `addFocusedToSpace` choke point a keyboard /
+Space-Bar move uses, so track cap / spill placement lives in one
+place. Because a cross-display drop is resolved **before** the
+resize gate, a big window clamped smaller as it crosses onto a
+smaller display still reads as a move, not a resize. Either way
 — because a tiling slot exists only where a window sits — the
 destination display **re-partitions** to N+1 slots. A
 **same-display** drop still **swaps** the two windows. The
