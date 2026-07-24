@@ -21,8 +21,15 @@ extension KiwiCore {
             self?.yieldFocusToDesktop()
         }
         // A bare left click on another monitor's empty desktop
-        // moves the focused display (#446).
+        // moves the focused display (#446). The press also
+        // stamps the click discriminator for the cross-display
+        // sibling distrust (#496) — in AX coordinates, the
+        // space window frames live in.
         mouse.onLeftMouseDown = { [weak self] point in
+            self?.lastLeftClick = (
+                Date(),
+                GeometryUtils.axPoint(point)
+            )
             self?.followDisplayUnderClick(at: point)
         }
         lastNativeSpace = NativeSpaces.activeSpaceNumber()

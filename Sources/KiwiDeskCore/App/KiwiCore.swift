@@ -102,6 +102,15 @@ public final class KiwiCore {
     /// a user action, not our raise's echo.
     static let selfRaiseSiblingWindow: TimeInterval = 1.0
 
+    /// The last left-button press, in AX coordinates (#496): the
+    /// click discriminator for the cross-display sibling
+    /// distrust. A focus report backed by a fresh click inside
+    /// the reported window is a user action; one without is an
+    /// activation re-report. Stamped by the `MouseTracker` hook
+    /// in `KiwiCore+Lifecycle`; compared against
+    /// `selfRaiseSiblingWindow` so the two recencies agree.
+    var lastLeftClick: (at: Date, point: CGPoint)?
+
     /// Windows we raised purely for z-order, stamped with the raise
     /// time — floats promoted above the tiled plane (#418) AND the
     /// overflow-pile members a cascade restore re-raises (#425). A

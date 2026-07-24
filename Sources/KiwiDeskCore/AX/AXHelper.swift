@@ -254,22 +254,38 @@ public enum AXHelper {
     }
 
     /// Raises a window and gives it (and its app) focus.
+    ///
+    /// Order and options are load-bearing (#496): with several
+    /// windows of one app across monitors, a COOPERATIVE
+    /// `activate()` may be deferred by macOS and resolved
+    /// against the app's most-recently-used window — key focus
+    /// then lands on another display's sibling, not the raised
+    /// target. So: make the target the app's MAIN window first,
+    /// raise it (both synchronous AX round-trips — processed by
+    /// the app before the next line runs), then FORCE the
+    /// activation. The AeroSpace-proven sequence for the same
+    /// macOS multi-monitor bug (their #101); public API only.
+    /// `.activateIgnoringOtherApps` is deprecated-as-no-op on
+    /// macOS 14+, but AeroSpace ships this exact call in its
+    /// working fix — kept deliberately to match byte-for-byte
+    /// (it still forces on older systems; the main+raise-before-
+    /// activate order carries the fix on newer ones).
     @MainActor
     public static func raise(
         _ element: AXUIElement,
         pid: pid_t
     ) {
-        AXUIElementPerformAction(
-            element,
-            kAXRaiseAction as CFString
-        )
         AXUIElementSetAttributeValue(
             element,
             kAXMainAttribute as CFString,
             kCFBooleanTrue
         )
+        AXUIElementPerformAction(
+            element,
+            kAXRaiseAction as CFString
+        )
         NSRunningApplication(processIdentifier: pid)?
-            .activate()
+            .activate(options: .activateIgnoringOtherApps)
     }
 
     /// Builds a `ManagedWindow` snapshot from an AX element.
