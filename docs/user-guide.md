@@ -1026,8 +1026,12 @@ interaction.
   250).
 - **Scroll speed** (ms): scrolling-layout slide speed when focus moves
   (50–1000, default 250).
-- **On space change**: animate when switching virtual spaces (default
-  off; can be slow on older machines).
+- **On space change**: animate virtual space switches as a coordinated
+  transition — windows slide out of the space you're leaving while the
+  new space's windows slide in from the hiding corner (default off;
+  both spaces animate at once, which can be slow on older machines).
+  Native macOS Space switches are never animated — see
+  [Accepted limitations](accepted-limitations.md).
 - **On scrolling**: animate the slide in scrolling layout (default on).
 - **On window resize**: animate when splits adjust (default on).
 - **On window swap**: animate when two tiles swap (default on).

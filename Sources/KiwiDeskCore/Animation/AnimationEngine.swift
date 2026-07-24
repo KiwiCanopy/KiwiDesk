@@ -94,6 +94,20 @@ public final class AnimationEngine {
         animations.values.contains { $0[window] != nil }
     }
 
+    /// The frame a window's in-flight animation is heading to,
+    /// nil when it is not animating. Lets an instant frame-set
+    /// recognise a window already sliding to that same target
+    /// (#207: the exit slide of a coordinated space switch)
+    /// and leave the animation to finish instead of snapping.
+    public func targetFrame(window: WindowID) -> CGRect? {
+        for perWindow in animations.values {
+            if let animation = perWindow[window] {
+                return animation.targetFrame
+            }
+        }
+        return nil
+    }
+
     private var spring: Spring {
         Spring(
             response: Double(storedDurationMS) / 1000 * 1.4,

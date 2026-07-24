@@ -68,10 +68,7 @@ extension KiwiCore {
     /// caller adds its own raise / warp / settle afterwards.
     func applyFocusedSpaceSwitch(to space: SpaceID) {
         state.workspaces.activate(space)
-        retile(
-            animated: tiler.settings.animations.onSpaceChange,
-            force: true
-        )
+        spaceSwitchRetile()
         emitSpaceChange()
     }
 

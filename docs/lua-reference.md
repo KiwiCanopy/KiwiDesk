@@ -505,8 +505,10 @@ does](https://nikitabobko.github.io/AeroSpace/guide#emulation-of-virtual-workspa
 they are parked in the bottom-right corner of their screen with
 only a few pixels peeking in (macOS refuses fully offscreen
 windows). They return to their tiles when their space becomes
-active — instantly by default; see `animations.set_on_space_change`
-under Animations. Focusing a hidden window (cmd+tab) pulls its
+active — instantly by default; with
+`animations.set_on_space_change` the whole switch animates as a
+coordinated slide, out to the corner and in from it (see
+Animations). Focusing a hidden window (cmd+tab) pulls its
 space forward automatically. Floating windows — including
 picture-in-picture — are never stashed and stay visible across all
 virtual spaces.
@@ -3947,10 +3949,18 @@ animations.set_scroll_speed(250)
 
 **Expects:** `true` or `false` (default `false`).
 
-**Does:** enables or disables animation when switching virtual spaces.
-Off (the default) is faster: flying many windows in from the hiding
-corner at once stutters on slow apps. Opt in if you like the effect
-anyway.
+**Does:** enables or disables the coordinated animation when
+switching virtual spaces: the outgoing windows slide out to the
+hiding corner while the incoming ones slide in from it — one
+toggle drives both directions. Off (the default) is faster: a
+coordinated switch animates *both* spaces' windows at once, and
+each animated window costs a blocking AX call per frame, which
+stutters on slow apps. Opt in if you like the effect anyway.
+
+Native macOS Space switches are never animated in either
+direction — macOS stops reporting an inactive desktop's windows
+to Accessibility, so there is nothing to fly around (see
+[Accepted limitations](accepted-limitations.md)).
 
 **Example:**
 

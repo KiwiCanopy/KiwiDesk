@@ -61,10 +61,7 @@ extension KiwiCore {
         // display; floats have no layout frame, so each one
         // re-anchors explicitly (#444).
         reanchorFloats(of: space)
-        retile(
-            animated: tiler.settings.animations.onSpaceChange,
-            force: true
-        )
+        spaceSwitchRetile()
         emitSpaceChange()
         return .ok()
     }

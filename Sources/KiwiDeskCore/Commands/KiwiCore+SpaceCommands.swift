@@ -91,10 +91,7 @@ extension KiwiCore {
         let priorFrontmost = frontmostPIDProvider?()
         state.workspaces.activate(SpaceID(raw))
         logSpaceContents(SpaceID(raw))
-        retile(
-            animated: tiler.settings.animations.onSpaceChange,
-            force: true
-        )
+        spaceSwitchRetile()
         // Floats and sticky windows come back above the
         // tiled plane, then real (AX) focus lands on the
         // space's last focused window — otherwise keystrokes
@@ -255,10 +252,12 @@ extension KiwiCore {
             // is cleaned up wherever its origin was.
             desktopFocusYield?()
         }
-        retile(
-            animated: follow
-                ? tiler.settings.animations.onSpaceChange : true,
-            force: follow
-        )
+        if follow {
+            // A follow IS a space switch: same coordinated
+            // out+in policy (#207), same force contract.
+            spaceSwitchRetile()
+        } else {
+            retile(animated: true)
+        }
     }
 }

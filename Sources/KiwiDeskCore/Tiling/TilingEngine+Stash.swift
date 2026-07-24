@@ -100,10 +100,16 @@ extension TilingEngine {
     /// their space is activated again; floating windows come
     /// back through `restoreStashed`, from the frame captured
     /// here on their first stash.
+    ///
+    /// `animated: true` is phase 1 of a coordinated space
+    /// switch (#207): the park becomes a visible slide to the
+    /// corner instead of an instant set. Every other caller
+    /// keeps the instant default.
     func stashInactive(
         state: StateCoordinator,
         fallback: NSScreen,
-        force: Bool
+        force: Bool,
+        animated: Bool = false
     ) {
         // Every space shown on some display stays in place; only
         // spaces visible on NO display are parked. On one monitor
@@ -143,7 +149,8 @@ extension TilingEngine {
                     window,
                     in: bounds,
                     corner: corner,
-                    force: force
+                    force: force,
+                    animated: animated
                 )
             }
         }
@@ -163,7 +170,8 @@ extension TilingEngine {
         _ window: ManagedWindow,
         in bounds: CGRect,
         corner: HideCorner,
-        force: Bool
+        force: Bool,
+        animated: Bool = false
     ) {
         let target = Self.stashFrame(
             window.frame,
@@ -177,6 +185,29 @@ extension TilingEngine {
             stashedFrames[window.id] == nil
         {
             stashedFrames[window.id] = window.frame
+        }
+        if animated {
+            // Phase 1 of a coordinated switch (#207): slide to
+            // the corner. A window still flying IN retargets in
+            // place (spring carry-over), so a rapid bounce
+            // stays smooth.
+            applyFrame(
+                window.id,
+                from: window.frame,
+                to: target,
+                animated: true
+            )
+            return
+        }
+        // An instant park must not snap a window already
+        // sliding to this corner (#207): an event-driven retile
+        // or the 300 ms settle landing mid-exit would otherwise
+        // cancel the slide and teleport the window. Let the
+        // animation finish; it ends at this exact target.
+        if let inFlight = animation.targetFrame(
+            window: window.id
+        ), Self.close(inFlight, to: target) {
+            return
         }
         animation.cancel(window: window.id)
         setFrame(window.id, target)

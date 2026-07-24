@@ -122,11 +122,18 @@ public final class TilingEngine {
     /// echoes of our own frame-sets — during rapid
     /// back-and-forth switching those echoes lag, and skipping
     /// based on them leaves windows stranded mid-transition.
+    ///
+    /// `stashAnimated` makes the park of newly-inactive
+    /// windows a visible slide to the corner instead of an
+    /// instant set — the coordinated space switch (#207), where
+    /// the outgoing windows slide out WHILE the incoming ones
+    /// slide in. Every other retile keeps the instant default.
     public func retile(
         state: StateCoordinator,
         animated: Bool = true,
         force: Bool = false,
-        newlyCreatedWindow: WindowID? = nil
+        newlyCreatedWindow: WindowID? = nil,
+        stashAnimated: Bool = false
     ) {
         guard
             let screen = NSScreen.main
@@ -164,7 +171,8 @@ public final class TilingEngine {
         stashInactive(
             state: state,
             fallback: screen,
-            force: force
+            force: force,
+            animated: stashAnimated
         )
         restoreStashed(state: state, frames: frames)
     }

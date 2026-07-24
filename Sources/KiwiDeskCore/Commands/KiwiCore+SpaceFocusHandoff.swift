@@ -100,7 +100,8 @@ extension KiwiCore {
                     > NativeSwitch.settle
             else { return }
             self.retile(
-                animated: self.tiler.settings.animations.onSpaceChange,
+                animated: self.tiler.settings
+                    .animations.onSpaceChange,
                 force: true
             )
             self.reassertSwitchFocus(
