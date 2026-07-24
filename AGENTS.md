@@ -432,6 +432,26 @@ Keep this list updated whenever a recurring mistake is found.
   only bounds a genuine hang. Prove the *behavior* by the gap (a
   short watchdog against a much longer sleep), never by a tight
   wait. New async tests here follow suit.
+- **Unit tests never need the running app; device QA launches it
+  direct.** `swift test` is fully self-contained (per-test
+  `KiwiCore` over a temp config dir, throwaway sockets; the
+  service tests only parse `launchctl` strings) — the app's
+  run state is irrelevant to it. The running app matters only
+  for device QA, and there launch it DIRECT in a terminal
+  (`.build/release/KiwiDesk` — Ctrl-C to stop, `NSLog` output
+  visible, incl. the #292 preflight-denial and settle lines),
+  not via `service start`; stop the service first if loaded, or
+  the single-instance guard keeps the OLD binary running.
+  Every release rebuild changes the binary hash, which drops the
+  TCC Accessibility grant (re-grant in System Settings) and a
+  restart flattens session state (spaces, float flags) — plan
+  QA around it; the durable fix is #89's signed .app bundle.
+  Run the full suite as `swift test --skip ExecTests` then
+  `swift test --filter ExecTests`: combined it stalls for
+  minutes at the tail (spawned exec children hold the runner's
+  pipe, and the #344 hang-guards crawl under full-suite
+  starvation — #489 tracks the root fix); suite *ordering* is
+  not a lever, swift-testing schedules suites concurrently.
 - **Discardable test results must express side-effect intent.**
   When a command or setup helper primarily mutates state but also
   returns optional convenience data, mark the declaration
