@@ -253,6 +253,16 @@ struct DragDropTests {
             x: targetSlot.midX - home.width / 2,
             y: targetSlot.midY - home.height / 2
         )
+        // The drop target follows the cursor, not the frame
+        // center (#492): place the pointer over the target slot.
+        // `cursorLocation` is Cocoa; the flip is its own inverse,
+        // so `axPoint` of the AX center yields the Cocoa point
+        // that flips back to it.
+        core.drag.cursorLocation = {
+            GeometryUtils.axPoint(
+                CGPoint(x: targetSlot.midX, y: targetSlot.midY)
+            )
+        }
         core.handleDragEnd(
             WindowID(1),
             start: home,
@@ -279,6 +289,11 @@ struct DragDropTests {
             width: 100,
             height: 100
         )
+        // Cursor over no slot either — the drop target is keyed
+        // on the pointer (#492), so pin it away from every slot.
+        core.drag.cursorLocation = {
+            GeometryUtils.axPoint(CGPoint(x: -9000, y: -9000))
+        }
         core.handleDragEnd(
             WindowID(1),
             start: nowhere.offsetBy(dx: 500, dy: 500),
@@ -309,6 +324,13 @@ struct DragDropTests {
             x: targetSlot.midX - home.width / 2,
             y: targetSlot.midY - home.height / 2
         )
+        // Cursor over the target slot: the drop zone is keyed on
+        // the pointer, not the frame center (#492).
+        core.drag.cursorLocation = {
+            GeometryUtils.axPoint(
+                CGPoint(x: targetSlot.midX, y: targetSlot.midY)
+            )
+        }
         core.handleDragMove(
             WindowID(1),
             start: home,
@@ -317,8 +339,11 @@ struct DragDropTests {
         #expect(core.dragOverlay.isGhostVisible)
         #expect(core.dragOverlay.isDropZoneVisible)
 
-        // Over no slot: the drop zone goes away, the ghost
+        // Cursor over no slot: the drop zone goes away, the ghost
         // (home slot) stays.
+        core.drag.cursorLocation = {
+            GeometryUtils.axPoint(CGPoint(x: -9000, y: -9000))
+        }
         core.handleDragMove(
             WindowID(1),
             start: home,
@@ -484,6 +509,13 @@ struct DragDropTests {
             x: targetSlot.midX - frame.width / 2,
             y: targetSlot.midY - frame.height / 2
         )
+        // Pointer over the target slot: the swap is keyed on the
+        // cursor, not the (constrained) frame's center (#492).
+        core.drag.cursorLocation = {
+            GeometryUtils.axPoint(
+                CGPoint(x: targetSlot.midX, y: targetSlot.midY)
+            )
+        }
         core.handleDragEnd(
             WindowID(1),
             start: start,
@@ -604,37 +636,78 @@ struct DragTargetTests {
         ),
     ]
 
-    @Test("The slot under the frame's center is the target")
-    func centerRule() {
-        let frame = CGRect(x: 90, y: 10, width: 80, height: 80)
+    @Test("The slot under the cursor is the target")
+    func cursorRule() {
+        // Cursor over slot 2's area.
+        let cursor = CGPoint(x: 130, y: 50)
         #expect(
             DragTarget.swapTarget(
                 of: WindowID(1),
-                frame: frame,
+                at: cursor,
                 slots: slots
             ) == WindowID(2)
         )
     }
 
-    @Test("A window's own slot is never its target")
-    func neverSelf() {
-        let frame = CGRect(x: 10, y: 10, width: 50, height: 50)
+    @Test(
+        """
+        Target follows the cursor onto the destination display \
+        even while the dragged window's center trails behind \
+        on the origin display (#492)
+        """
+    )
+    func cursorLeadsOverCenter() {
+        // A big window on the origin display dragged toward a
+        // smaller one. Its center still sits over the origin
+        // slot, but the cursor has already crossed to the
+        // destination slot.
+        let origin = CGRect(x: 0, y: 0, width: 2000, height: 1000)
+        let dest = CGRect(
+            x: 2000,
+            y: 0,
+            width: 800,
+            height: 600
+        )
+        let pool: [WindowID: CGRect] = [
+            WindowID(2): origin,
+            WindowID(3): dest,
+        ]
+        let windowCenter = CGPoint(x: 900, y: 500)
+        let cursor = CGPoint(x: 2400, y: 300)
+        // The old center rule would have picked the origin slot,
+        // never resolving the destination.
+        #expect(origin.contains(windowCenter))
+        #expect(!dest.contains(windowCenter))
+        // The cursor rule lands on the destination slot.
         #expect(
             DragTarget.swapTarget(
                 of: WindowID(1),
-                frame: frame,
+                at: cursor,
+                slots: pool
+            ) == WindowID(3)
+        )
+    }
+
+    @Test("A window's own slot is never its target")
+    func neverSelf() {
+        // Cursor over slot 1 (the dragged window's own slot).
+        let cursor = CGPoint(x: 30, y: 30)
+        #expect(
+            DragTarget.swapTarget(
+                of: WindowID(1),
+                at: cursor,
                 slots: slots
             ) == nil
         )
     }
 
-    @Test("A center over no slot yields no target")
+    @Test("A cursor over no slot yields no target")
     func nowhere() {
-        let frame = CGRect(x: 500, y: 500, width: 50, height: 50)
+        let cursor = CGPoint(x: 500, y: 500)
         #expect(
             DragTarget.swapTarget(
                 of: WindowID(1),
-                frame: frame,
+                at: cursor,
                 slots: slots
             ) == nil
         )
@@ -673,12 +746,7 @@ struct DragTargetTests {
         func target(centerY: CGFloat) -> WindowID? {
             DragTarget.swapTarget(
                 of: WindowID(1),
-                frame: CGRect(
-                    x: 30,
-                    y: centerY - 20,
-                    width: 40,
-                    height: 40
-                ),
+                at: CGPoint(x: 50, y: centerY),
                 slots: cascade
             )
         }
@@ -699,12 +767,12 @@ struct DragTargetTests {
             WindowID(2): rect,
             WindowID(3): rect,
         ]
-        let frame = CGRect(x: 30, y: 30, width: 40, height: 40)
+        let cursor = CGPoint(x: 50, y: 50)
         for _ in 0..<10 {
             #expect(
                 DragTarget.swapTarget(
                     of: WindowID(1),
-                    frame: frame,
+                    at: cursor,
                     slots: same
                 ) == WindowID(3)
             )

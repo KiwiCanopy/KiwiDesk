@@ -25,6 +25,7 @@ extension KiwiCore {
         drag.isMousePressed = {
             NSEvent.pressedMouseButtons & 1 == 1
         }
+        drag.cursorLocation = { NSEvent.mouseLocation }
         wireSpaceBarDrop()
     }
 
@@ -49,7 +50,7 @@ extension KiwiCore {
         // zone scrolls hidden Spaces into reach (#385). The zones
         // are disjoint from item hit frames, so at most one of the
         // two arms for any given cursor position.
-        let cursor = NSEvent.mouseLocation
+        let cursor = drag.cursorLocation()
         spaceBars.updateDragAutoScroll(atGlobal: cursor)
         spaceBarDrop.moved(id, cursor: cursor)
         if spaceBarDrop.isArmed {
@@ -128,9 +129,15 @@ extension KiwiCore {
                 cornerRadius: settings.dragCornerRadius
             )
         }
+        // Target the slot under the CURSOR, not the dragged
+        // frame's center: the drop-zone must reach the
+        // destination display the instant the pointer does,
+        // even while a big window's center trails behind on the
+        // origin display (#492). `cursor` is Cocoa (bottom-left);
+        // slots are AX (top-left), so flip it.
         let target = DragTarget.swapTarget(
             of: id,
-            frame: frame,
+            at: GeometryUtils.axPoint(cursor),
             slots: slots
         )
         if settings.dragDropZone.enabled,
@@ -269,9 +276,13 @@ extension KiwiCore {
             }
             return
         }
+        // Resolve the swap target from the cursor, exactly as the
+        // live preview did (#492), so the drop can never disagree
+        // with the drop-zone the user saw. AX coords: flip the
+        // Cocoa mouse location.
         let target = DragTarget.swapTarget(
             of: id,
-            frame: frame,
+            at: GeometryUtils.axPoint(drag.cursorLocation()),
             slots: slots
         )
         // A tiled-sticky traveler is injected into this space's
