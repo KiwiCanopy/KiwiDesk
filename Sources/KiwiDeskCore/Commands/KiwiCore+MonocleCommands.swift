@@ -119,7 +119,12 @@ extension KiwiCore {
         )
         guard let index = tiled.firstIndex(of: focused)
         else { return nil }
-        guard tiled.count > 1 else { return .ok() }
+        // A lone tiled window has nothing to cycle: fall
+        // through instead of swallowing the press with `.ok()`,
+        // so the float tier (#488) can answer — and with no
+        // float that way the shared dead-end cue fires, like
+        // every other layout's single-window edge.
+        guard tiled.count > 1 else { return nil }
         let wrap =
             tiler.settings.resolvedMonocle(for: space.id)
             .wrapFocus
