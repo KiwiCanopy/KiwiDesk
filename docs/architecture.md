@@ -43,6 +43,18 @@ graph LR
 The core loop: the OS tells us windows changed, we update state, we
 re-tile.
 
+```mermaid
+flowchart TD
+    OS["macOS: AXObserver / event listener<br/>created · destroyed · moved · focused"] --> RC{"reconcile delta<br/>vs known state"}
+    RC -->|normal delta| ST
+    RC -->|tab pair at same frame| TR["TabReconciler coalesce<br/>→ .windowRekeyed"]
+    TR --> ST["State: flat WindowID per space<br/>id swapped in place, no tree"]
+    ST --> TI["Tiling: one space per display,<br/>park off-display spaces"]
+    TI --> LA["Layouts: pure fn<br/>frames from array + resolved settings"]
+    LA --> PL["OS: place windows<br/>SkyLight dlsym → AX fallback"]
+    PL -.->|un-forced: ±2 pt tolerance absorbs AX echo| OS
+```
+
 1. **`Events` / `AX`** — an `AXObserver` callback (window created,
    destroyed, moved, focused) or an event listener fires. AX callbacks
    arrive on the run loop of the thread that registered them; observer
@@ -79,10 +91,32 @@ Event-driven retiles run **un-forced**, so the engine's ±2 pt "already
 there" tolerance can absorb AX-echo lag without wobbling windows.
 (Contrast with pipeline 2.)
 
+**Tab reconciliation** (the subtle case in step 2). A native-tab
+switch is temporal — one window disappears as another appears at the
+same frame — so it must be coalesced, not read as destroy + create:
+
+```mermaid
+flowchart LR
+    A["AX: a window disappears"] --> C{"same frame within the<br/>coalesce window, and an<br/>AXTabGroup on either side?"}
+    B["AX: a window appears<br/>at the same frame"] --> C
+    C -->|yes| R[".windowRekeyed<br/>slot kept, id swapped in place"]
+    C -->|no, or native-space reconcileAll| D["destroy + create<br/>two separate windows"]
+```
+
 ## 2. Command dispatch (`set_*` verbs)
 
 User intent — a hotkey, a CLI call, or a Lua statement — becomes a
 command that mutates state and re-tiles.
+
+```mermaid
+flowchart TD
+    K["Keys: Carbon hotkey"] --> CMD
+    I["IPC: CLI / external"] --> CMD
+    L["Lua: VM bridge"] --> CMD
+    CMD["Commands: dispatch set_* verb<br/>1:1 with profile JSON key"] --> ST["State mutates"]
+    ST --> TP["Tiling → Layouts → OS<br/>as in pipeline 1"]
+    TP -.->|forced retile: bypass ±2 pt tolerance| MV["windows move even on a 1 pt edit"]
+```
 
 1. **`Keys`** (Carbon `RegisterEventHotKey`, chosen to avoid the Input
    Monitoring permission — §5), **`IPC`** (CLI / external), or **`Lua`**
@@ -106,6 +140,18 @@ main thread (§5).
 ## 3. Config resolve (global → layout → space, + profiles)
 
 How settings become the values a layout function reads.
+
+```mermaid
+flowchart TD
+    OWN{"KiwiCore.isGuiManaged?"} -->|Lua| INI["init.lua"]
+    OWN -->|GUI| GUI["gui.json"]
+    INI --> CFG["Config: decode owner → settings"]
+    GUI --> CFG
+    CFG --> PRO["Profiles: sparse override layer<br/>tiling + behavior, never profile-selecting keys"]
+    PRO --> RES["resolve: merge field-by-field<br/>global → layout → space"]
+    RES --> CLP["cross-field clamps applied LAST<br/>on the merged values"]
+    CLP --> LA["Layouts read resolved values<br/>pure, before layout math"]
+```
 
 1. **`Config`** decodes the active owner — `init.lua` (Lua) or
    `gui.json` (GUI) — into settings. Ownership is decided by the single
@@ -132,6 +178,15 @@ interpolates and hands each frame to the same `OS` placement path as
 pipeline 1's final step. Position-only frames are applied per app for
 efficiency.
 
+```mermaid
+flowchart LR
+    P["placement (animated, not snapped)"] --> DL1["DisplayLink · monitor 1"]
+    P --> DL2["DisplayLink · monitor 2"]
+    DL1 --> AN["Animation: interpolate frames"]
+    DL2 --> AN
+    AN --> OSP["OS placement path<br/>position-only frames, per app"]
+```
+
 ---
 
 ## Where to go next
@@ -139,5 +194,7 @@ efficiency.
 - **AGENTS.md §1** — the subsystem/target map (the *where*).
 - **AGENTS.md §5** — the guardrails each step above links to (the
   *why it's subtle*).
-- **`design-decisions.md`** — the layout navigation/overflow table,
-  tab-reconcile model, and accepted limitations (the *decided tradeoffs*).
+- **`design-decisions.md`** — the layout navigation/overflow table
+  and tab-reconcile model (the *decided tradeoffs*); the
+  [Accepted limitations](accepted-limitations.md) page collects the
+  bugs-by-design.

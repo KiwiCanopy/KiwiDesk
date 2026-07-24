@@ -426,7 +426,7 @@ Adjust each mode's defaults:
   right stack) that is the out-of-the-box behavior once the
   master count exceeds one; switch the orientation to vertical
   for individually resizable masters
-  (see [Accepted limitations](design-decisions.md#accepted-limitations)).
+  (see [Accepted limitations](accepted-limitations.md)).
 - **Scrolling**: orientation (horizontal or vertical), anchor
   (where the focused column rests on every focus — **Center**, or
   flush against the leading/trailing edge, shown as **Left**/
@@ -509,7 +509,7 @@ Adjust each mode's defaults:
 > not growing, or a stack window's *mouse* height-drag snapping
 > back — are settled architectural trades, each with a reason and,
 > where planned, a real fix. See
-> [Accepted limitations](design-decisions.md#accepted-limitations).
+> [Accepted limitations](accepted-limitations.md).
 
 ### Per-Space Overrides
 
