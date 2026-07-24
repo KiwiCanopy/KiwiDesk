@@ -101,6 +101,39 @@ extension KiwiCore {
 
     // MARK: - Building / persisting
 
+    /// Writes a composed layout's positional `assignment` into the
+    /// live `spacePins` + `mainSpaces` — the composed-placement
+    /// primitive behind `apply(composed:)`. A space assigned to the
+    /// main display (or unassigned) takes the Main role; the rest
+    /// pin to their display's fingerprint. For a workflow Standard
+    /// this equals what `resolveSpaceDisplays` re-derives from the
+    /// count's Standard, so it's a no-op in effect; for the beginner
+    /// ladder, whose five-per-display plan is NOT the count's
+    /// Standard, it's load-bearing — without it the blocks scatter
+    /// into the Standard's slots (#485).
+    func adoptComposedPlacement(
+        _ composed: ProfileComposition.Composed
+    ) {
+        let ordered = PositionalDisplays.ordered(
+            state.workspaces.allDisplays,
+            mainID: PositionalDisplays.liveMainID
+        )
+        var pins: [SpaceID: String] = [:]
+        var mains: Set<SpaceID> = []
+        for space in composed.spaces {
+            let assigned = composed.assignment[space]
+            if assigned == ordered.first?.id || assigned == nil {
+                mains.insert(space)
+            } else if let display = ordered.first(where: {
+                $0.id == assigned
+            }) {
+                pins[space] = display.fingerprint
+            }
+        }
+        spacePins = pins
+        mainSpaces = mains
+    }
+
     /// The connected monitors as a stored set, carrying the
     /// live space pins (pins to disconnected monitors drop).
     func liveMonitorSet() -> MonitorSet {

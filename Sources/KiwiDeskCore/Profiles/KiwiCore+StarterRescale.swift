@@ -57,41 +57,6 @@ extension KiwiCore {
         )
     }
 
-    /// Translates a composed layout's positional `assignment`
-    /// into the live `spacePins` + `mainSpaces`, so the composed
-    /// blocks land on their planned displays. `apply(composed:)`
-    /// itself discards the assignment and lets
-    /// `resolveSpaceDisplays` recompose the *count's* Standard —
-    /// which places a workflow Standard correctly (it IS that
-    /// Standard) but would scatter the ladder's five-per-display
-    /// blocks (#485). Shared by `applyStandard` (which then saves
-    /// the pins into a profile) and the transient ladder fallback
-    /// (which re-resolves in place). A space assigned to the main
-    /// display — or unassigned — takes the Main role; the rest pin
-    /// to their display's fingerprint.
-    func adoptComposedPlacement(
-        _ composed: ProfileComposition.Composed
-    ) {
-        let ordered = PositionalDisplays.ordered(
-            state.workspaces.allDisplays,
-            mainID: PositionalDisplays.liveMainID
-        )
-        var pins: [SpaceID: String] = [:]
-        var mains: Set<SpaceID> = []
-        for space in composed.spaces {
-            let assigned = composed.assignment[space]
-            if assigned == ordered.first?.id || assigned == nil {
-                mains.insert(space)
-            } else if let display = ordered.first(where: {
-                $0.id == assigned
-            }) {
-                pins[space] = display.fingerprint
-            }
-        }
-        spacePins = pins
-        mainSpaces = mains
-    }
-
     /// Adds ⌃⌥N digit shortcuts for spaces that appeared after the
     /// first-run seed authored them — the display-change twin of
     /// `seedDefaultShortcuts` (#485). Strictly additive and
