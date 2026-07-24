@@ -86,6 +86,25 @@ struct StashCaptureTests {
         #expect(engine.stashedFrames.isEmpty)
     }
 
+    /// #500: `stashInactive` passes the EFFECTIVE-float verdict
+    /// — a floating-MODE space's member captures whatever its
+    /// own flag, since no layout will place it on return.
+    @Test("The effective-float override captures a tiled window")
+    func effectiveFloatOverrideCaptures() {
+        let engine = TilingEngine()
+        let window = makeWindow(1, floating: false)
+        engine.stash(
+            window,
+            in: bounds,
+            corner: .bottomRight,
+            force: true,
+            capturesOriginal: true
+        )
+        #expect(
+            engine.stashedFrames[WindowID(1)] == window.frame
+        )
+    }
+
     /// The sticky exemption moved out of `stash` into the
     /// `stickyExemptFromStash` predicate applied by `stashInactive`
     /// (#445), so `stash` itself now parks whatever it is handed —
