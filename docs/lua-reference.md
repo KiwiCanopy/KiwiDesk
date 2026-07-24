@@ -3954,8 +3954,9 @@ switching virtual spaces: the outgoing windows slide out to the
 hiding corner while the incoming ones slide in from it — one
 toggle drives both directions. Off (the default) is faster: a
 coordinated switch animates *both* spaces' windows at once, and
-each animated window costs a blocking AX call per frame, which
-stutters on slow apps. Opt in if you like the effect anyway.
+slow-responding apps (Electron/WebKit) can fall behind on the
+extra per-frame window moves and stutter. Opt in if you like
+the effect anyway.
 
 Native macOS Space switches are never animated in either
 direction — macOS stops reporting an inactive desktop's windows

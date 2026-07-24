@@ -26,13 +26,29 @@ import Foundation
 /// an inactive desktop's windows, so that path stays instant in
 /// both directions (accepted limitation, #25/#26).
 extension KiwiCore {
-    /// The retile behind every explicit virtual-space switch —
-    /// the single authority for the switch's animation policy.
+    /// The retile behind an explicit virtual-space switch —
+    /// the authority for the switch's animation policy.
     /// Instant (both directions) when `on_space_change` is off;
     /// the coordinated concurrent out+in when it is on. Always
     /// forces (§5): switches must push past the "already there"
     /// tolerance, whose state frames lag behind AX echoes
     /// during rapid switching.
+    ///
+    /// Three switch-shaped retiles deliberately do NOT route
+    /// here — do not "unify" them onto this policy:
+    /// - The 300 ms settle re-assert (`scheduleSpaceSettle`)
+    ///   keeps an instant park: its job is re-issuing frames a
+    ///   slow-AX app dropped, and an animated stash would start
+    ///   a fresh visible slide 300 ms after the switch (plus
+    ///   corner-to-corner springs and `beginAnimating` EUI
+    ///   churn for every already-parked window). Mid-transition
+    ///   it relies on `stash()`'s in-flight skip to leave the
+    ///   exit slide running.
+    /// - The Space Bar spring switch stays instant: mid-drag,
+    ///   an animation would fight the pointer and the
+    ///   drag-exempt window.
+    /// - `delete_space` of the shown space retiles under the
+    ///   relayout policy: a structural edit, not navigation.
     func spaceSwitchRetile() {
         let animated =
             tiler.settings.animations.onSpaceChange

@@ -95,10 +95,8 @@ public final class AnimationEngine {
     }
 
     /// The frame a window's in-flight animation is heading to,
-    /// nil when it is not animating. Lets an instant frame-set
-    /// recognise a window already sliding to that same target
-    /// (#207: the exit slide of a coordinated space switch)
-    /// and leave the animation to finish instead of snapping.
+    /// nil when idle. Lets an instant frame-set skip a window
+    /// already sliding to the same target (#207 exit slide).
     public func targetFrame(window: WindowID) -> CGRect? {
         for perWindow in animations.values {
             if let animation = perWindow[window] {
@@ -187,6 +185,9 @@ public final class AnimationEngine {
     }
 
     /// Stops everything, snapping to targets when enabled.
+    /// Without `snapToTargets`, a window mid-exit-slide (#207)
+    /// is left half-visible until a retile re-parks it —
+    /// production callers should snap.
     public func cancelAll(snapToTargets: Bool = false) {
         for perWindow in animations.values {
             for (id, animation) in perWindow {
