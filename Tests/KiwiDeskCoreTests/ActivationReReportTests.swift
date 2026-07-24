@@ -51,6 +51,15 @@ struct ActivationReReportTests {
             to: SpaceID(2),
             follow: false
         )
+        // The staging move latches window 1 against the follow
+        // (#482); these tests simulate a LATER user focus, so
+        // age the latch out.
+        core.moveLatch.stamp(
+            WindowID(1),
+            at: Date(
+                timeIntervalSinceNow: -MoveIntentLatch.window - 1
+            )
+        )
     }
 
     @Test("Stale same-app re-report neither follows nor moves")
