@@ -161,8 +161,11 @@ at directory altitude — see **`docs/architecture.md`**.
    *expects → does → example* form), `docs/user-guide.md`
    (the Settings app & GUI flows), `docs/cli.md` (commands,
    events, IPC), `docs/recipes/` (integration recipes),
-   `docs/design-decisions.md` (when a settled product/UX
-   decision is made or changed), `docs/ui-patterns.md` (when a
+   `docs/design-decisions.md` (a durable product/UX decision a
+   contributor would otherwise re-litigate or undo — a
+   Principle, Rationale, Trade-off, or Map, per that file's
+   charter; never an event log or a restatement of current
+   behavior), `docs/ui-patterns.md` (when a
    shared Settings control convention is added or changed) —
    and `plan/` when the design itself shifts. Code and docs
    must never describe different behavior.
@@ -178,10 +181,10 @@ at directory altitude — see **`docs/architecture.md`**.
    `npm run build` in `site/` when you touch either.
    When a review or manual pass classifies a behavior as
    **accepted-by-architecture**, it adds a row to the *Accepted
-   limitations* table in `docs/design-decisions.md` in the same
+   limitations* page (`docs/accepted-limitations.md`) in the same
    change set — the user-facing twin of the §5 guardrail rule
-   (OS-blocked-by-SIP items are a separate class there, with no
-   in-app escape hatch).
+   (OS-blocked-by-SIP items are a separate class, kept in
+   `docs/design-decisions.md`, with no in-app escape hatch).
 6. **Review:** once a substantial change is finished, verified,
    and committed, spin up **both** `code-reviewer` and
    `architect-reviewer` on the diff since the last review point —

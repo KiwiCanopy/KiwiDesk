@@ -2,6 +2,7 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 import icon from "astro-icon";
+import mermaid from "astro-mermaid";
 import { remarkDocsLinks } from "./remark-docs-links.mjs";
 
 // The public site URL. Override with SITE_URL at build time
@@ -15,6 +16,13 @@ export default defineConfig({
   // Starlight routes and drop their duplicate H1 (see the plugin).
   markdown: { remarkPlugins: [remarkDocsLinks] },
   integrations: [
+    // Renders ```mermaid fenced blocks in docs as diagrams,
+    // client-side, with light/dark synced to the site theme
+    // (`autoTheme` reads the `data-theme` Starlight sets). Must
+    // precede Starlight so its remark/rehype pass runs first
+    // (astro-mermaid ordering requirement). GitHub renders the
+    // same fenced blocks natively, so the source stays one form.
+    mermaid({ theme: "forest", autoTheme: true }),
     icon(),
     starlight({
       title: "KiwiDesk",
@@ -59,10 +67,11 @@ export default defineConfig({
             { label: "Lua Reference", slug: "docs/lua-reference" },
             { label: "CLI & IPC", slug: "docs/cli" },
             {
+              // A user-facing page of its own (bugs-by-design):
+              // split out of the contributor Design Decisions doc
+              // so it owns a real sidebar entry + active state.
               label: "Accepted Limitations",
-              // User-facing entry point into the table that lives
-              // in the (contributor-facing) Design Decisions page.
-              link: "/docs/design-decisions/#accepted-limitations",
+              slug: "docs/accepted-limitations",
             },
           ],
         },
@@ -81,6 +90,7 @@ export default defineConfig({
         {
           label: "Contributing",
           items: [
+            { label: "Architecture", slug: "docs/architecture" },
             {
               label: "Design Decisions",
               slug: "docs/design-decisions",
