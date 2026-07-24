@@ -73,13 +73,17 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
         // Deeper teal/green than the system defaults: the
         // bright `.teal`/`.green` washed the white glyph out.
         case .layoutDefaults:
+            // A distinct section teal — kept apart from the
+            // overlay teal #0F8FAE (focus ring / drag ghost).
             return Color(red: 0.09, green: 0.47, blue: 0.53)
         case .monitors: return .blue
         case .appearance: return .purple
         case .bars: return .pink
         case .behavior: return .orange
         case .profiles:
-            // KiwiCanopy kiwi green #8DB354 (was forest #298744).
+            // KiwiCanopy kiwi green #8DB354 as RGB floats (was
+            // forest #298747) — keep in sync with the brand green
+            // if it shifts; this literal isn't derived from it.
             return Color(red: 0.553, green: 0.702, blue: 0.329)
         case .shortcuts:
             return Color(

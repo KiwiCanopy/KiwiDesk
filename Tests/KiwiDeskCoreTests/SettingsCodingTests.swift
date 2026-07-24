@@ -36,7 +36,8 @@ struct SettingsCodingTests {
             ]
         )
         // `border.set_*` → `border.*` (#278). Default on,
-        // focused-only, 2 pt, rounded, accent-blue focused color.
+        // focused-only, 2 pt, rounded, contrast-tuned teal
+        // focused color (#439 overlay signal).
         let border = try object(root["border"])
         #expect(
             Set(border.keys) == [
@@ -51,6 +52,15 @@ struct SettingsCodingTests {
         #expect(border["unfocused_enabled"] as? Bool == false)
         #expect(border["corner_style"] as? String == "rounded")
         #expect(border["draw_order"] as? String == "behind")
+        // Bar chrome defaults take the brand kiwi green (#439);
+        // pinned here so an accidental struct-default change
+        // fails the build, not just the doc-drift breadcrumb.
+        let appBar = try object(root["app_bar"])
+        #expect(appBar["active_item_color"] as? String == "#8DB354")
+        #expect(appBar["highlight_color"] as? String == "#8DB354")
+        let spaceBar = try object(root["space_bar"])
+        #expect(spaceBar["active_item_color"] as? String == "#8DB354")
+        #expect(spaceBar["highlight_color"] as? String == "#8DB354")
         // `sticky.set_indicator` → `sticky.indicator` (#414).
         // Default on: the on-window glyph is the only sticky
         // cue that never depends on another surface.

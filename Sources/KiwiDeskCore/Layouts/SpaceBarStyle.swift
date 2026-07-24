@@ -112,7 +112,7 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// genuinely different hue, not a tint of the active-space
     /// color, so the two states read apart (QA 2026-07-19).
     /// Kept amber pending its own convergence pass (separate
-    /// semantic from the drag drop-zone) — see issue follow-up.
+    /// semantic from the drag drop-zone) — see #470.
     public var focusedItemColor = "#E8A33D"
     /// Hover tint on non-active space items.
     public var hoverFillColor = "#AACB5D80"

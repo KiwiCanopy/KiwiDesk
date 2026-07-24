@@ -1529,6 +1529,11 @@ retired everywhere. Two branded siblings lead the shelf after
 the default: **Kiwi Dark** (dark-base green identity, distinct
 from neutral True Dark) and **Kiwi Gold** (warm gold-fruit
 variant, green as its secondary) — both in `bundled.json`.
+The authored siblings are **hand-maintained**: unlike the derived
+"Kiwi (Default)" (which reads live from the struct defaults via
+`PaletteCatalog.defaultPalette`), they do not auto-track a
+brand-token change — shifting a brand hex means editing
+`bundled.json` by hand in the same change set.
 
 **Content overlays are decoupled from the brand, on purpose.**
 The focus ring and drag ghost paint over *arbitrary* third-party
@@ -1545,7 +1550,7 @@ This is the intended reading of the drag two-hue rule above —
 overlays are the one place a functional signal outranks the
 palette. (The Space Bar's own `focused_item_color` stays amber
 `#E8A33D` for now — a separate "viewing-not-active" semantic,
-converged in a follow-up.)
+converged in a follow-up, #470.)
 
 **The App Bar has its own sidebar destination.** (#229,
 superseding the earlier "Appearance ends with the App Bar
