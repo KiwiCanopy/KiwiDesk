@@ -232,8 +232,11 @@ extension StateCoordinator {
     /// order matches the tiles on screen, #414 v2), floating
     /// travelers appended id-sorted (they have no slot); on any
     /// other space, its own sticky windows are pruned so each
-    /// glyph shows in exactly one place. Presentation-only —
-    /// layout/nav use `effectiveTiledMembers`.
+    /// glyph shows in exactly one place. Two client classes:
+    /// presentation (the bars) and, filtered to floats, the
+    /// float tier of directional focus
+    /// (`floatingFocusCandidates`, #488) — layout/z-order keep
+    /// using `effectiveTiledMembers`.
     public func effectiveMembers(
         of space: Space,
         activeSpace: SpaceID? = nil

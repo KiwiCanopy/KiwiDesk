@@ -134,9 +134,11 @@ extension KiwiCore {
             target = step > 0 ? tiled[0] : tiled[tiled.count - 1]
         } else {
             // At an end without a wrap: fall through. Every
-            // monocle window shares one frame, so the geometric
-            // search finds no neighbor and the command cleanly
-            // fails — no accidental jump.
+            // monocle window shares one frame, so the TILED
+            // search finds no neighbor; only the float tier
+            // (#488) can answer — a deliberate float hop, never
+            // an accidental tile jump — and with no float that
+            // way the command cleanly fails.
             return nil
         }
         if swapping {

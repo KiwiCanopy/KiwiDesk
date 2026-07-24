@@ -18,8 +18,9 @@ extension KiwiCore {
     /// keeps cross-monitor focus alive and, with unequal track
     /// lengths, may pick a diagonally-nearest window past a
     /// track end rather than failing outright (the scrolling
-    /// precedent's trade; a real edge with no candidate still
-    /// fails cleanly).
+    /// precedent's trade). A real edge with no tiled candidate
+    /// falls to the float tier (#488); with no float that way
+    /// it still fails cleanly.
     func trackStep(
         _ direction: Direction,
         space: Space,

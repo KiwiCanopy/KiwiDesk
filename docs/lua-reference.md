@@ -119,7 +119,9 @@ space's *floating* windows (including floating sticky windows
 shown on the space) considered, by their live frames — so a
 float parked beside the layout is reachable at the edge, while
 tile-to-tile navigation never detours through a hovering
-float. Transient panels (Spotlight-style launchers) and
+float. On an axis with `wrap_focus` on, the wrap wins over the
+float tier — a float past that edge is reachable on the cross
+axis only. Transient panels (Spotlight-style launchers) and
 fullscreen windows are never focus targets. A float parked
 *exactly* on a tiled slot shares that tile's center, so no
 direction points at it — see Accepted Limitations; click it or

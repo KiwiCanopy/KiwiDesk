@@ -14,46 +14,33 @@ import Foundation
 
 extension StateCoordinator {
     /// The windows the float tier of directional `focus` may
-    /// reach on `space` (#488): the space's own float-flagged
-    /// members plus floating sticky travelers homed elsewhere
-    /// but RENDERING here (#445), id-sorted for determinism.
+    /// reach on `space` (#488): every floating window
+    /// `effectiveMembers` shows there — the space's own
+    /// float-flagged members (minus a sticky member rendering
+    /// on another space, #445) plus floating sticky travelers
+    /// homed elsewhere but rendering here, id-sorted.
+    ///
+    /// Deliberately a FILTER over `effectiveMembers`, never a
+    /// third open-coded copy of its membership rules (§5 mirror
+    /// rule): a future membership change there reaches focus
+    /// reachability for free. Tiled travelers fall out through
+    /// the `isFloating` test.
     ///
     /// Never candidates: transient overlays — a launcher/panel
     /// must not take directional focus (#300) — and native
     /// fullscreen windows, which live on their own macOS Space.
-    /// A sticky float member that renders on ANOTHER space has
-    /// physically traveled away and is dropped, mirroring the
-    /// tiled filter in `effectiveTiledMembers`.
     public func floatingFocusCandidates(
         of space: Space,
         activeSpace: SpaceID? = nil
     ) -> [WindowID] {
-        let focused = activeSpace ?? workspaces.activeSpace
-        let members = space.windows.filter { id in
-            guard let window = windows[id],
-                window.isFloating,
-                isFloatFocusCandidate(window)
-            else { return false }
-            guard window.isSticky else { return true }
-            return stickyRenderSpace(of: window, focused: focused)
-                == space.id
-        }
-        let travelers = windows.all
-            .filter {
-                $0.isSticky && $0.isFloating
-                    && isFloatFocusCandidate($0)
-                    && !space.windows.contains($0.id)
-                    && stickyRenderSpace(of: $0, focused: focused)
-                        == space.id
+        effectiveMembers(of: space, activeSpace: activeSpace)
+            .filter { id in
+                guard let window = windows[id] else {
+                    return false
+                }
+                return window.isFloating
+                    && !window.isTransientOverlay
+                    && !window.isFullscreen
             }
-            .map(\.id)
-            .sorted { $0.raw < $1.raw }
-        return members + travelers
-    }
-
-    private func isFloatFocusCandidate(
-        _ window: ManagedWindow
-    ) -> Bool {
-        !window.isTransientOverlay && !window.isFullscreen
     }
 }

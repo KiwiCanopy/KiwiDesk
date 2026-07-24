@@ -224,6 +224,12 @@ struct FocusFloatTierTests {
             !core.execute("swap", args: [.string("left")])
                 .isSuccess
         )
+        // And the flat array is untouched — a swap-then-fail
+        // regression would still trip this.
+        #expect(
+            core.state.workspaces[space]?.windows
+                == [WindowID(1), WindowID(2), WindowID(3)]
+        )
     }
 
     /// The live #488 probe, replayed: a float parked EXACTLY on

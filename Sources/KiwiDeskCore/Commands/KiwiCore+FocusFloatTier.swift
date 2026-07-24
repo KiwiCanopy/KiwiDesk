@@ -1,4 +1,4 @@
-import AppKit
+import CoreGraphics
 import Foundation
 
 /// The float tier of directional `focus` (#488), split from
