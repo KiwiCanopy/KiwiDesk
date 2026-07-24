@@ -285,13 +285,14 @@ extension KiwiCore {
             at: GeometryUtils.axPoint(drag.cursorLocation()),
             slots: slots
         )
-        // A drop whose target sits on ANOTHER display moves the
-        // window there instead of swapping (#492) — checked before
-        // the traveler refusal below, which would otherwise reject
-        // every cross-display target as a non-member.
-        if let target,
-            relocateAcrossDisplay(id, onto: target, from: space)
-        {
+        // A drop whose cursor ends on ANOTHER display moves the
+        // window there instead of swapping (#492) — onto a window
+        // it takes that slot, over empty space it appends. Checked
+        // before the traveler refusal below, which would otherwise
+        // reject every cross-display target as a non-member, and it
+        // runs even with no target so an empty monitor still
+        // receives the drop.
+        if relocateAcrossDisplay(id, onto: target, from: space) {
             return
         }
         // A tiled-sticky traveler is injected into this space's

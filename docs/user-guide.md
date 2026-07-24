@@ -643,9 +643,11 @@ When you drag a tiled window, KiwiDesk shows two overlays:
   slot — even a big window dragged onto a smaller display.
 
 Releasing over another window's slot **on the same display swaps**
-the two; releasing over a slot **on another display moves** the
-window there, onto that slot (the windows below it shift down one).
-Releasing outside every slot snaps the window back.
+the two; releasing **on another display moves** the window there —
+onto a window's slot it lands there (the windows below it shift
+down one), and onto empty space (an empty monitor) it just moves
+across. Releasing outside every slot **on your own display** snaps
+the window back.
 
 Floating windows show neither overlay: they have no tile slot to
 preview, and dropping one over a tiled slot does nothing. Use

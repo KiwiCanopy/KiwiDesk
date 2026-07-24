@@ -17,12 +17,15 @@ import Foundation
 /// (`emitWindowMovedToSpace`, the #463 settle, the overflow
 /// z-order restore) this must honor too.
 extension KiwiCore {
-    /// Handles a tiled drop whose cursor-resolved `target` lives on
-    /// a different display than the dragged window. The dragged
-    /// window is moved into the destination display's active space
-    /// and slotted exactly where the drop-zone promised — on the
-    /// target's index, pushing the target and everything after it
-    /// down one — and the focused display follows the drop there.
+    /// Handles a tiled drop whose cursor ends on a DIFFERENT
+    /// display than the dragged window. The window moves into the
+    /// display-under-the-cursor's active space, and the focused
+    /// display follows the drop there. When the cursor is over a
+    /// window (`target`), the moved window takes that slot — the
+    /// target and everything after it shift down one; when it is
+    /// over empty space (an empty monitor, or a gap), the window is
+    /// appended. Either way, dropping over another display *moves
+    /// the window there* (#492).
     ///
     /// Returns `true` when it took the drop (the caller returns
     /// without running the same-space swap); `false` when the drop
@@ -32,12 +35,13 @@ extension KiwiCore {
     /// The destination is the active space of the display UNDER THE
     /// CURSOR, not `space(of: target)`: a tiled-sticky traveler is
     /// injected into a foreign display yet still belongs to its home
-    /// space, so keying on the cursor's display (and validating that
-    /// `target` is a real member there) keeps a traveler from
-    /// teleporting the window to wherever its home happens to show.
+    /// space, so keying on the cursor's display (and only slotting
+    /// `target` when it is a real member there) keeps a traveler
+    /// from teleporting the window to wherever its home happens to
+    /// show — a non-member target is treated as an empty drop.
     func relocateAcrossDisplay(
         _ id: WindowID,
-        onto target: WindowID,
+        onto target: WindowID?,
         from origin: Space
     ) -> Bool {
         let cocoaCursor = drag.cursorLocation()
@@ -48,9 +52,14 @@ extension KiwiCore {
             let display = screen.kiwiDisplay?.id,
             let destID = state.workspaces.activeSpace(on: display),
             destID != origin.id,
-            let dest = state.workspaces[destID],
-            let targetIndex = dest.windows.firstIndex(of: target)
+            let dest = state.workspaces[destID]
         else { return false }
+        // The target's slot index in the destination — nil when the
+        // drop is over empty space, or over a traveler that isn't a
+        // real member here (append, don't chase its home space).
+        let targetIndex = target.flatMap {
+            dest.windows.firstIndex(of: $0)
+        }
         // A sticky window that can't cross displays snaps back
         // instead — the same gate a keyboard / Space-Bar move
         // honors (#445).
@@ -65,11 +74,15 @@ extension KiwiCore {
         // dropped-activate settle.
         let priorFrontmost = frontmostPIDProvider?()
         // Move id into the destination space (drops it from the
-        // origin), then slot it on the target's index: id takes the
-        // promised slot, the target and its followers shift one.
+        // origin). Onto a window: add after the target, then slot it
+        // on the target's index so id takes the promised slot and
+        // the target and its followers shift one. Onto empty space:
+        // append.
         state.workspaces.add(id, to: destID, after: target)
-        state.workspaces.withSpace(destID) {
-            $0.move(id, to: targetIndex)
+        if let targetIndex {
+            state.workspaces.withSpace(destID) {
+                $0.move(id, to: targetIndex)
+            }
         }
         state.workspaces.focus(id, in: destID)
         // The pointer ended on the destination display; make it the

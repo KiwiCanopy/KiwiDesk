@@ -171,6 +171,26 @@ struct WorkspaceManagerTests {
         )
         #expect(manager["A"]?.windows.isEmpty == true)
     }
+
+    @Test(
+        """
+        A cross-display drop over empty space appends to the \
+        destination — the no-target path for an empty monitor \
+        (#492)
+        """
+    )
+    func crossDisplayMoveEmptyDestination() {
+        var manager = WorkspaceManager()
+        manager.add(WindowID(1), to: "A")
+        manager.add(WindowID(2), to: "A")
+        // Destination "B" has no windows (an empty monitor). With
+        // no target, `relocateAcrossDisplay` appends via
+        // `add(_:to:after:)` with a nil anchor.
+        manager.add(WindowID(1), to: "B", after: nil)
+        #expect(manager["B"]?.windows == [WindowID(1)])
+        #expect(manager["A"]?.windows == [WindowID(2)])
+        #expect(manager.space(of: WindowID(1)) == SpaceID("B"))
+    }
 }
 
 @Suite("StateCoordinator")

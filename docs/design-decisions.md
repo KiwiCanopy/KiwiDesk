@@ -1610,12 +1610,16 @@ slot pool already spans every visible display). Preview and
 drop share the one cursor rule, so the highlight can never
 promise a target the drop won't act on.
 
-Releasing over a slot on **another display MOVES** the window
-into that display's space, onto the target's slot — the moved
-window takes the target's array index, the target and the rest
-shift up one, and (because a tiling slot exists only where a
-window sits) the destination display **re-partitions** to N+1
-slots. A **same-display** drop still **swaps** the two windows.
+Releasing on **another display MOVES** the window into that
+display's active space. Onto a window's slot it takes the
+target's array index, the target and the rest shift up one; over
+empty space (an empty monitor, or a gap) it appends. Either way
+— because a tiling slot exists only where a window sits — the
+destination display **re-partitions** to N+1 slots. A
+**same-display** drop still **swaps** the two windows. The
+destination is the active space of the display **under the
+cursor**, so an empty monitor still receives the drop; only a
+same-display release outside every slot snaps back.
 The window belongs to its origin space for the whole drag, so
 the destination shows no gap *until* the drop commits the
 membership change — opening one live mid-drag (a ghost over an
