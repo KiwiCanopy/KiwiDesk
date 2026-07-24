@@ -1525,11 +1525,14 @@ identity. Chrome the app fully controls takes the brand kiwi
 green directly: bar `active`/`highlight` = `#8DB354`, hover =
 `#AACB5D80`, item text = cool ink `#EAF3EE`, fill = cool-dark
 `#14201C66`. The forest green `#4E9F3D` and cream `#F2EBD9` are
-retired everywhere. Two branded siblings lead the shelf after
-the default: **Kiwi Dark** (dark-base green identity, distinct
-from neutral True Dark) and **Kiwi Gold** (warm gold-fruit
-variant, green as its secondary) — both in `bundled.json`.
-The authored siblings are **hand-maintained**: unlike the derived
+retired everywhere. One branded sibling leads the shelf after
+the default: **Kiwi Gold** (warm gold-fruit variant, green as its
+secondary) in `bundled.json`. Bundled dark presets cover three
+non-overlapping axes — brand-soft (the default), neutral-hard
+(True Dark), warm (Kiwi Gold); a near-dupe fourth doesn't earn a
+slot, and opacity/contrast variants belong in Lua/profile tuning,
+not a second preset. The authored siblings are **hand-maintained**:
+unlike the derived
 "Kiwi (Default)" (which reads live from the struct defaults via
 `PaletteCatalog.defaultPalette`), they do not auto-track a
 brand-token change — shifting a brand hex means editing
