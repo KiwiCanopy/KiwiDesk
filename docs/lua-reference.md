@@ -173,7 +173,10 @@ If the target space is shown on **another monitor**, a floating
 window is re-anchored onto that display — it keeps its
 *proportional* position (a bottom-right float stays bottom-right
 on a differently-sized screen), clamped inside the target's
-usable area. (Tiled windows arrive through the layout anyway.)
+usable area. Tiled windows arrive through the layout — except
+into a **floating-mode space**, whose layout assigns no frames:
+any window moved there is re-anchored the same proportional
+way, so it physically arrives on that monitor too.
 
 A quick drag-and-drop of a window onto a Space item in the Space
 Bar performs this same move (see the user guide), re-anchoring a

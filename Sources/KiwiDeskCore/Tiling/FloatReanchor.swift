@@ -22,6 +22,20 @@ public enum FloatReanchor {
     /// untouched; an axis larger than the target pins to its
     /// min edge — `FloatNudge.confine`). A degenerate source
     /// span maps to the target's center.
+    /// Whether a window moved to `targetMode` needs the
+    /// re-anchor at all (#498): every float-flagged window, and
+    /// ANY window bound for a floating-MODE space — there the
+    /// layout assigns no frames, so "the retile delivers" never
+    /// happens and membership alone would leave it physically on
+    /// the old display. Tiled windows bound for tiling spaces
+    /// skip: the layout owns their frames.
+    public static func eligible(
+        isFloating: Bool,
+        targetMode: LayoutMode?
+    ) -> Bool {
+        isFloating || targetMode == .floating
+    }
+
     public static func target(
         frame: CGRect,
         from source: CGRect,

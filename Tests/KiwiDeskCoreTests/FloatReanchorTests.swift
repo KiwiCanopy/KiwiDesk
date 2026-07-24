@@ -179,4 +179,37 @@ struct FloatReanchorSeedTests {
         )
         #expect(engine.stashOriginal(WindowID(1)) == seeded)
     }
+
+    @Test("Eligibility: floats always, anyone into floating mode")
+    func eligibility() {
+        // Float-flagged windows re-anchor whatever the target.
+        #expect(
+            FloatReanchor.eligible(
+                isFloating: true,
+                targetMode: .bsp
+            )
+        )
+        // A tiled window bound for a floating-MODE space (#498)
+        // re-anchors too: that layout assigns no frames, so no
+        // retile would ever deliver it to the new display.
+        #expect(
+            FloatReanchor.eligible(
+                isFloating: false,
+                targetMode: .floating
+            )
+        )
+        // Tiled window into a tiling space: the layout owns it.
+        #expect(
+            !FloatReanchor.eligible(
+                isFloating: false,
+                targetMode: .track
+            )
+        )
+        #expect(
+            !FloatReanchor.eligible(
+                isFloating: false,
+                targetMode: nil
+            )
+        )
+    }
 }

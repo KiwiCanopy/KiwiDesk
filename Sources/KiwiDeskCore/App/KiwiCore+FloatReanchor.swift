@@ -13,9 +13,11 @@ import CoreGraphics
 /// apply path to drift. (Stickies are the one exception — see
 /// below: they never park, so they apply directly.)
 extension KiwiCore {
-    /// Re-anchors floating `id` onto `target`'s display when
-    /// that differs from the display its frame sits on. No-op
-    /// for tiled windows (the layout owns their frames),
+    /// Re-anchors `id` onto `target`'s display when that differs
+    /// from the display its frame sits on — every float-flagged
+    /// window, plus any window bound for a floating-MODE space
+    /// (#498, `FloatReanchor.eligible`). No-op for tiled windows
+    /// bound for tiling spaces (the layout owns their frames),
     /// same-display moves (#412 stash behavior unchanged),
     /// global stickies (visible everywhere, so a membership move
     /// never needs to teleport one), and a window mid-drag (the
@@ -26,7 +28,10 @@ extension KiwiCore {
     /// resolves the bars.
     func reanchorFloat(_ id: WindowID, to target: SpaceID) {
         guard let window = state.windows[id],
-            window.isFloating,
+            FloatReanchor.eligible(
+                isFloating: window.isFloating,
+                targetMode: state.workspaces[target]?.mode
+            ),
             window.stickyScope != .global,
             tiler.dragExemptWindow != id
         else { return }
@@ -70,7 +75,11 @@ extension KiwiCore {
         // would silently wipe the seed (`forgetStash`). No
         // park/restore cycle to ride: apply directly, dropping
         // any stale capture so a restore can't fight the frame.
-        if window.isSticky {
+        // A non-flagged window bound for a floating-MODE space
+        // (#498) also applies directly: the stash machinery only
+        // captures frames for float-FLAGGED windows, so a seeded
+        // capture would never be delivered for it.
+        if window.isSticky || !window.isFloating {
             tiler.forgetStash(id)
             tiler.applyFrame(
                 id,
