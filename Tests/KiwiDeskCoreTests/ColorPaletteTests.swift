@@ -117,15 +117,15 @@ struct ColorPaletteTests {
         #expect(settings.appBarStyle.fillColor == before)
     }
 
-    @Test("The bundled catalog is 9 palettes, default first, unique")
+    @Test("The bundled catalog is 8 palettes, default first, unique")
     func bundledCatalog() {
         let all = PaletteCatalog.bundled()
-        #expect(all.count == 9)
+        #expect(all.count == 8)
         #expect(all.first?.name == PaletteCatalog.defaultName)
         let names = all.map(\.name)
-        #expect(Set(names).count == 9)
-        // The eight authored palettes decoded from the resource.
-        #expect(PaletteCatalog.authored().count == 8)
+        #expect(Set(names).count == 8)
+        // The seven authored palettes decoded from the resource.
+        #expect(PaletteCatalog.authored().count == 7)
     }
 
     @Test("Every bundled palette's colors are valid hexes")
