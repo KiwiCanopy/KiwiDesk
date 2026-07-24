@@ -11,6 +11,19 @@ the point-and-click interface for all window tiling, monitors,
 spaces, and keybindings. You never need to edit files directly
 unless you want custom Lua.
 
+The short version of what happens every time you open a window:
+
+```mermaid
+flowchart LR
+    O["You open a window"] --> M{"Tiled by this<br/>space's layout?"}
+    M -->|"Yes"| P["KiwiDesk places it —<br/>edge to edge, no overlap"]
+    M -->|"Floating layout,<br/>or a Float rule"| L["Left where it is,<br/>free to drag"]
+    P --> R["Open more, and they<br/>share the space automatically"]
+```
+
+Everything below is how you shape that behavior — which layout a
+space uses, the gaps, the bars, and the shortcuts.
+
 ## Getting Started
 
 Open Settings from the KiwiDesk menu in the menu bar, or press
@@ -18,7 +31,7 @@ Open Settings from the KiwiDesk menu in the menu bar, or press
 two-group sidebar on the left:
 
 - **Design** — sections scoped to the active profile (Spaces,
-  Layout, Monitors, Appearance, App Bar, Behavior).
+  Layout, Monitors, Appearance, Bars, Behavior).
 - **System** — global settings that apply everywhere (Profiles,
   Shortcuts, App Rules, General).
 
@@ -762,7 +775,11 @@ diagonal light/dark split, and the mark keeps its default look
 (the Space Bar badge stays the count-badge color; the on-window
 chip is a neutral glyph on glass that adapts to light and dark).
 Pick a color to override; right-click the swatch (or clear the
-hex field) to return to Automatic.
+hex field) to return to Automatic. (Lua:
+[`sticky.set_color`](lua-reference.md#stickyset_color) and
+[`floating.set_color`](lua-reference.md#floatingset_color); the
+badge visibility toggle is
+[`space_bar.set_sticky_badge`](lua-reference.md#space_barset_sticky_badge).)
 
 ## Bars
 
@@ -777,8 +794,21 @@ its own preview and owns its settings.
 ### App Bar
 
 The App Bar is the strip that shows every window in the current
-space. Configure it globally (applies to every layout that shows a
-bar) or override individual fields per layout.
+space — it only renders in **Monocle** and **Scrolling**, the two
+layouts where a window can hide behind another or scroll off the
+edge, so you always see what's open. Configure it globally (applies
+to every layout that shows a bar) or override individual fields per
+layout.
+
+**Click a tab** to focus that window; **drag a tab** along the bar
+to rearrange the windows. Because Monocle and Scrolling don't lay
+windows out side by side, the App Bar is where you reorder them:
+drag a tab left or right (or up/down on a vertical bar) and the
+underlying window order follows. Grouped tabs expand into their
+members when you click, so any window in a same-app group can be
+picked or dragged directly. (Lua: `app_bar.*` setters, and the
+rearrange gesture shares the drop visuals in
+[Drag & Drop Rearranging](lua-reference.md#drag--drop-rearranging).)
 
 A **live mock strip** sits at the top of the Global Style section:
 three sample tabs — one grouped, one active, one plain — drawn with
@@ -915,6 +945,14 @@ before the ring completes to cancel. The whole item is the target
 (glyphs and the `+n` badge are not separate drop zones), and
 dropping onto the Space a window is already on does nothing.
 
+```mermaid
+flowchart TD
+    D["Drag a window's title bar<br/>over another Space's item"] --> H{"Hold, or release<br/>right away?"}
+    H -->|"Release before the ring fills"| F["Flick and drop —<br/>window jumps to that Space,<br/>you stay put"]
+    H -->|"Pause until the ring sweeps"| S["Hold to place —<br/>view springs to that Space,<br/>drop it exactly where you want"]
+    H -->|"Move off the item first"| C["Cancelled —<br/>nothing moves"]
+```
+
 **Many Spaces:** when the Spaces don't all fit the strip the bar
 scrolls instead of clipping — the same as the App Bar. Items keep
 their size; small chevrons appear at the ends toward the hidden
@@ -1039,7 +1077,7 @@ global config; every saved profile is listed below, one row each
   adopts your changes into the loaded profile as usual.
 - **Edit** a saved profile **without switching** — the Settings
   sidebar becomes profile-scoped: the Design sections (Spaces,
-  Layout, Monitors, Appearance, App Bar, Behavior) edit this profile, and
+  Layout, Monitors, Appearance, Bars, Behavior) edit this profile, and
   **General is hidden** — it holds global state a profile edit
   never writes. Save writes to this profile's JSON instead of
   the active one (the caption beside the button names the
@@ -1543,6 +1581,14 @@ off, then log out and back in.
 When you switch desktops (Ctrl+arrow, Mission Control, …), the bound
 profile loads with its spaces, layouts, and settings. Desktops without
 a binding keep whatever profile is active.
+
+```mermaid
+flowchart TD
+    S["You switch to a<br/>macOS desktop (Space)"] --> B{"A profile bound<br/>to this desktop?"}
+    B -->|"Yes"| A["That profile activates —<br/>its layout, gaps, and rules"]
+    B -->|"No binding"| K["The current profile<br/>stays active"]
+    P["You pick a profile<br/>by shortcut or menu"] --> A
+```
 
 Bindings edited here are stored in `gui.json`
 (`profile_bindings`); a hand-written config declares them in
