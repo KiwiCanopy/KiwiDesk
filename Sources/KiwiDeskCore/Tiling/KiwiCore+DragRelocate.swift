@@ -6,6 +6,16 @@ import Foundation
 /// swapping the two (#492). Dropping a window onto a different
 /// monitor is a relocation — "put this window over there" — which
 /// is what people reach for; a same-display drop still swaps.
+///
+/// This is a SECOND window-relocation path beside `moveWindow`
+/// (which backs the keyboard / Space-Bar move and runs the #207
+/// space-switch animation + warp, both wrong when the destination
+/// space is already on-screen). No parity test binds the two, so
+/// keep its focus / event / z-order obligations in sync by hand
+/// with `moveWindow`'s follow branch and the same-space swap in
+/// `handleDragEnd`: whatever they honor after a re-home
+/// (`emitWindowMovedToSpace`, the #463 settle, the overflow
+/// z-order restore) this must honor too.
 extension KiwiCore {
     /// Handles a tiled drop whose cursor-resolved `target` lives on
     /// a different display than the dragged window. The dragged
@@ -82,6 +92,15 @@ extension KiwiCore {
         retile(animated: tiler.settings.animations.onWindowSwap)
         // Mouse-made focus, no warp — matches the same-space drop.
         focusWindow(id, warp: false)
+        // The destination may be an overflowing stack / track /
+        // scrolling pile; inserting a window scrambles its stacking
+        // exactly as a swap does, so restore it once the retile
+        // settles (§5 cross-layout obligation, #193 / #150 — the
+        // twin of the same-space drop's z-order restores). Keyed on
+        // the just-activated destination, so `runPendingZOrderRestore`
+        // dispatches the mode-correct restore; a non-overlapping
+        // destination mode falls through to a no-op.
+        scheduleZOrderRestore()
         emitSpaceChange()
         // The follow hands focus to a space that was already
         // visible; re-assert once so a dropped cooperative activate
