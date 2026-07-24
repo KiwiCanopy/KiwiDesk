@@ -1391,8 +1391,12 @@ a different layout mode so you meet the whole range at once:
 | 5 | floating | windows left untiled |
 
 With a second display the block repeats — spaces 6–10 on the second
-monitor, 11–15 on a third, and so on. The ladder is saved as an
-ordinary, editable profile named **Starter**, so nothing here is
+monitor, 11–15 on a third, and so on. The ladder keeps this shape as
+you plug and unplug displays: while you're still on the Starter
+layout, connecting or removing a monitor re-scales it to five spaces
+per screen, and the `⌃⌥N` space shortcuts extend to cover the new
+spaces (up to ten — the number row's limit). The ladder is saved as
+an ordinary, editable profile named **Starter**, so nothing here is
 locked in: change any space's mode, delete spaces, or apply a
 different [preset](#presets) whenever you like. (The same ladder is
 always available as the **Starter** preset if you want it back.)

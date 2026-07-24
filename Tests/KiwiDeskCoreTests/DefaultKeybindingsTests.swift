@@ -141,4 +141,112 @@ struct DefaultKeybindingsTests {
         // The directional / resize / float set still seeds.
         #expect(!rows.isEmpty)
     }
+
+    // MARK: - Additive digit top-up (#485)
+
+    @Test("top-up binds only the digits grown past the seed")
+    func topUpAddsOnlyNewDigits() {
+        // Seeded for five spaces; the display change grew to ten.
+        let existing = DefaultKeybindings.bindings(
+            spaces: spaces(5),
+            resizeStep: 50
+        )
+        let added = DefaultKeybindings.digitTopUp(
+            existing: existing,
+            spaces: spaces(10)
+        )
+        let combos = Set(added.map(\.combo))
+        // ⌃⌥6-9 and ⌃⌥0 (tenth), across all three tiers — nothing
+        // for the already-bound ⌃⌥1-5.
+        #expect(!combos.contains("control+option+5"))
+        #expect(combos.contains("control+option+6"))
+        #expect(combos.contains("control+option+0"))
+        #expect(combos.contains("control+option+shift+6"))
+        #expect(combos.contains("control+option+command+0"))
+        // Five new digits × three tiers.
+        #expect(added.count == 15)
+        #expect(
+            added.contains {
+                $0.combo == "control+option+0"
+                    && $0.lua == "KiwiDesk.focus_space(\"10\")"
+            }
+        )
+    }
+
+    @Test("top-up never overwrites a user's custom chord")
+    func topUpSkipsCustomChords() {
+        // The user rebound ⌃⌥6 to something of their own.
+        var existing = DefaultKeybindings.bindings(
+            spaces: spaces(5),
+            resizeStep: 50
+        )
+        existing.append(
+            KeyBinding(
+                combo: "control+option+6",
+                lua: "KiwiDesk.toggle_floating()",
+                kind: .custom,
+                label: "Mine"
+            )
+        )
+        let added = DefaultKeybindings.digitTopUp(
+            existing: existing,
+            spaces: spaces(10)
+        )
+        // Tier 1 for space 6 is taken, so it is not re-added; the
+        // shift/command tiers for space 6 are still free.
+        #expect(
+            !added.contains { $0.combo == "control+option+6" }
+        )
+        #expect(
+            added.contains {
+                $0.combo == "control+option+shift+6"
+            }
+        )
+    }
+
+    @Test("top-up counts an equivalent alias as already bound")
+    func topUpHonorsAliasedCombos() {
+        // A hand-written config authored ⌃⌥7 as `ctrl+alt+7`.
+        let existing = [
+            KeyBinding(
+                combo: "ctrl+alt+7",
+                lua: "whatever()"
+            )
+        ]
+        let added = DefaultKeybindings.digitTopUp(
+            existing: existing,
+            spaces: spaces(7)
+        )
+        // The alias parses to the same physical shortcut, so the
+        // focus tier for space 7 is treated as taken.
+        #expect(
+            !added.contains { $0.combo == "control+option+7" }
+        )
+    }
+
+    @Test("top-up respects the ten-space cap")
+    func topUpCapsAtTen() {
+        let added = DefaultKeybindings.digitTopUp(
+            existing: [],
+            spaces: spaces(12)
+        )
+        // Ten spaces × three tiers; nothing for spaces 11-12.
+        #expect(added.count == 30)
+        #expect(
+            !added.contains { $0.lua.contains("(\"11\")") }
+        )
+    }
+
+    @Test("top-up is a no-op when every digit is already bound")
+    func topUpIdempotent() {
+        let existing = DefaultKeybindings.bindings(
+            spaces: spaces(5),
+            resizeStep: 50
+        )
+        let added = DefaultKeybindings.digitTopUp(
+            existing: existing,
+            spaces: spaces(5)
+        )
+        #expect(added.isEmpty)
+    }
 }

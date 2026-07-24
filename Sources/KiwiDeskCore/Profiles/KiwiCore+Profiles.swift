@@ -101,6 +101,39 @@ extension KiwiCore {
 
     // MARK: - Building / persisting
 
+    /// Writes a composed layout's positional `assignment` into the
+    /// live `spacePins` + `mainSpaces` — the composed-placement
+    /// primitive behind `apply(composed:)`. A space assigned to the
+    /// main display (or unassigned) takes the Main role; the rest
+    /// pin to their display's fingerprint. For a workflow Standard
+    /// this equals what `resolveSpaceDisplays` re-derives from the
+    /// count's Standard, so it's a no-op in effect; for the beginner
+    /// ladder, whose five-per-display plan is NOT the count's
+    /// Standard, it's load-bearing — without it the blocks scatter
+    /// into the Standard's slots (#485).
+    func adoptComposedPlacement(
+        _ composed: ProfileComposition.Composed
+    ) {
+        let ordered = PositionalDisplays.ordered(
+            state.workspaces.allDisplays,
+            mainID: PositionalDisplays.liveMainID
+        )
+        var pins: [SpaceID: String] = [:]
+        var mains: Set<SpaceID> = []
+        for space in composed.spaces {
+            let assigned = composed.assignment[space]
+            if assigned == ordered.first?.id || assigned == nil {
+                mains.insert(space)
+            } else if let display = ordered.first(where: {
+                $0.id == assigned
+            }) {
+                pins[space] = display.fingerprint
+            }
+        }
+        spacePins = pins
+        mainSpaces = mains
+    }
+
     /// The connected monitors as a stored set, carrying the
     /// live space pins (pins to disconnected monitors drop).
     func liveMonitorSet() -> MonitorSet {
@@ -126,6 +159,15 @@ extension KiwiCore {
             name: name,
             monitorSets: [liveMonitorSet()],
             mainSpaces: mainSpaces.sorted { $0.raw < $1.raw },
+            // Carry the beginner-ladder identity when the live
+            // layout IS the ladder (#485): the transient ladder
+            // Standard sets `currentStandard`, so a first save of
+            // it stays a baseline that re-scales on later display
+            // changes. `applyStandard` adopts the standard before
+            // this, so the preset path is covered here too; a
+            // save-as-new copy (which reads, not builds) is not.
+            isStarterLadder: profiles.currentStandard
+                == StarterLadder.name,
             spaces: liveSpaces,
             fallbackSpace: fallbackSpace.flatMap {
                 liveSpaces.contains($0) ? $0 : nil

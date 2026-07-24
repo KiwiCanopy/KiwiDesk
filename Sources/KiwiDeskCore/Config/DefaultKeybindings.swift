@@ -59,15 +59,7 @@ public enum DefaultKeybindings {
             )
         }
         for (digit, space) in numbered(spaces) {
-            rows.append(
-                KeyBinding(
-                    combo: "control+option+\(digit)",
-                    lua: "KiwiDesk.focus_space"
-                        + "(\(SpaceLuaArg.quote(space.raw)))",
-                    kind: .navigation,
-                    label: "Go to Space \(space.raw)"
-                )
-            )
+            rows.append(focusSpaceRow(digit: digit, space: space))
         }
         // Tier 2 — ⌃⌥⇧: swap a window, move it to a space.
         for (dir, phrase) in directions {
@@ -81,28 +73,12 @@ public enum DefaultKeybindings {
             )
         }
         for (digit, space) in numbered(spaces) {
-            rows.append(
-                KeyBinding(
-                    combo: "control+option+shift+\(digit)",
-                    lua: "KiwiDesk.move_to_space"
-                        + "(\(SpaceLuaArg.quote(space.raw)))",
-                    kind: .navigation,
-                    label: "Move to Space \(space.raw)"
-                )
-            )
+            rows.append(moveSpaceRow(digit: digit, space: space))
         }
         // Tier 3 — ⌃⌥⌘: resize, move-to-space-and-follow.
         rows.append(contentsOf: resizeRows(step: resizeStep))
         for (digit, space) in numbered(spaces) {
-            rows.append(
-                KeyBinding(
-                    combo: "control+option+command+\(digit)",
-                    lua: "KiwiDesk.move_to_space_and_follow"
-                        + "(\(SpaceLuaArg.quote(space.raw)))",
-                    kind: .navigation,
-                    label: "Move to Space \(space.raw) & follow"
-                )
-            )
+            rows.append(followSpaceRow(digit: digit, space: space))
         }
         // Toggles — mnemonic letters. Display sticky is the more
         // frequent scope, so it takes the lighter ⌃⌥ chord; the
@@ -164,6 +140,87 @@ public enum DefaultKeybindings {
                 label: "Shrink height"
             ),
         ]
+    }
+
+    // MARK: - Per-space rows (one per tier, shared with top-up)
+
+    /// Tier 1 — ⌃⌥ + digit: focus (go to) a space.
+    private static func focusSpaceRow(
+        digit: String,
+        space: SpaceID
+    ) -> KeyBinding {
+        KeyBinding(
+            combo: "control+option+\(digit)",
+            lua: "KiwiDesk.focus_space"
+                + "(\(SpaceLuaArg.quote(space.raw)))",
+            kind: .navigation,
+            label: "Go to Space \(space.raw)"
+        )
+    }
+
+    /// Tier 2 — ⌃⌥⇧ + digit: move the window to a space.
+    private static func moveSpaceRow(
+        digit: String,
+        space: SpaceID
+    ) -> KeyBinding {
+        KeyBinding(
+            combo: "control+option+shift+\(digit)",
+            lua: "KiwiDesk.move_to_space"
+                + "(\(SpaceLuaArg.quote(space.raw)))",
+            kind: .navigation,
+            label: "Move to Space \(space.raw)"
+        )
+    }
+
+    /// Tier 3 — ⌃⌥⌘ + digit: move the window and follow it.
+    private static func followSpaceRow(
+        digit: String,
+        space: SpaceID
+    ) -> KeyBinding {
+        KeyBinding(
+            combo: "control+option+command+\(digit)",
+            lua: "KiwiDesk.move_to_space_and_follow"
+                + "(\(SpaceLuaArg.quote(space.raw)))",
+            kind: .navigation,
+            label: "Move to Space \(space.raw) & follow"
+        )
+    }
+
+    /// The per-space digit rows MISSING from `existing` for the
+    /// live `spaces` — the additive top-up when a display change
+    /// grows the space count past the digits seeded on first run
+    /// (#485). Strictly additive: a digit whose combo is already
+    /// bound (a seeded default OR a user's custom chord) is left
+    /// untouched, so the top-up can never overwrite a binding. The
+    /// same position → digit mapping and ten-cap as `bindings`
+    /// (`numbered`), so a space past the tenth still ships unbound.
+    /// Combo identity is by parsed `KeyCombo`, so an equivalent
+    /// hand-authored alias (`ctrl+alt+6`) counts as taken.
+    public static func digitTopUp(
+        existing: [KeyBinding],
+        spaces: [SpaceID]
+    ) -> [KeyBinding] {
+        let taken = Set(
+            existing.compactMap {
+                KeyCombo.parse($0.combo)
+            }
+        )
+        let isFree: (KeyBinding) -> Bool = { row in
+            guard let combo = KeyCombo.parse(row.combo) else {
+                return false
+            }
+            return !taken.contains(combo)
+        }
+        var rows: [KeyBinding] = []
+        for (digit, space) in numbered(spaces) {
+            let candidates = [
+                focusSpaceRow(digit: digit, space: space),
+                moveSpaceRow(digit: digit, space: space),
+                followSpaceRow(digit: digit, space: space),
+            ]
+            rows.append(contentsOf: candidates.filter(isFree))
+        }
+        return rows
     }
 
     /// The first ten spaces paired with the digit key each

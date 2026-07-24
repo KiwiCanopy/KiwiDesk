@@ -19,6 +19,11 @@ import Foundation
 /// hand-mirrored (`.claude/rules/parity-tests.md`, at the logic
 /// level).
 public enum StarterLadder {
+    /// The canonical name of the ladder, shared by its
+    /// `StandardLayout` face and the monitor-change baseline
+    /// predicate (#485) — one string, never a magic literal.
+    public static let name = "Starter"
+
     /// Spaces each display's block contributes.
     public static let spacesPerDisplay = 5
 
@@ -99,7 +104,7 @@ public enum StarterLadder {
         summary: String = ""
     ) -> StandardLayout {
         StandardLayout(
-            name: "Starter",
+            name: name,
             summary: summary,
             screenCount: max(1, displayCount),
             spaceCount: spaceCount(displayCount: displayCount),

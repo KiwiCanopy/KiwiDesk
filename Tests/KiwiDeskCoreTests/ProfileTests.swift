@@ -244,6 +244,43 @@ struct ProfileModelTests {
         #expect(json.contains("\"spaces\":["))
     }
 
+    @Test("starter_ladder flag round-trips (#485)")
+    func starterLadderRoundTrips() throws {
+        var profile = makeProfile(name: "s", monitors: ["A:1x1"])
+        profile.isStarterLadder = true
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let data = try encoder.encode(profile)
+        #expect(
+            String(decoding: data, as: UTF8.self)
+                .contains("\"starter_ladder\":true")
+        )
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let decoded = try decoder.decode(Profile.self, from: data)
+        #expect(decoded.isStarterLadder)
+    }
+
+    @Test("starter_ladder defaults false when absent (#485)")
+    func starterLadderDecodeDefault() throws {
+        // Legacy profiles predate the key — they decode to false,
+        // never the ladder baseline.
+        let json = """
+            {"name":"old",
+             "monitor_sets":[{"monitors":["A:1x1"]}],
+             "space_modes":{},
+             "settings":{},
+             "saved_at":"2026-06-01T00:00:00Z"}
+            """
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let profile = try decoder.decode(
+            Profile.self,
+            from: Data(json.utf8)
+        )
+        #expect(!profile.isStarterLadder)
+    }
+
     @Test("Profile.orderedSpaces uses stored order")
     func orderedSpacesUsesStoredOrder() {
         let profile = Profile(
