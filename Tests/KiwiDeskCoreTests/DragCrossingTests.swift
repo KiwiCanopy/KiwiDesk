@@ -198,14 +198,12 @@ struct DragCrossingTests {
         #expect(
             core.state.workspaces.space(of: old) == SpaceID("2")
         )
-        // The state fold swaps the id in place (#308), then the
-        // event handler transfers the crossing bookkeeping,
-        // cancels the old gesture, and reverts under the new id
-        // — the exact wiring in KiwiCore+Events.
-        core.state.apply(.windowRekeyed(old, new))
-        core.dragCrossing.rekey(old: old, new: new)
-        core.cancelDrag(old)
-        core.revertLiveCrossing(new)
+        // Drive the REAL event handler: the state fold swaps
+        // the id in place (#308), then the handler transfers
+        // the crossing bookkeeping, cancels the old gesture,
+        // and reverts under the new id — this pins the wiring
+        // ORDER in KiwiCore+Events, not just the pieces.
+        core.handle(.windowRekeyed(old, new))
         #expect(
             core.state.workspaces.space(of: new) == SpaceID(1)
         )

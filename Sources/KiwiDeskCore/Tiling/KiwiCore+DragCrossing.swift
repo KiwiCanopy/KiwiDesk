@@ -58,8 +58,14 @@ extension KiwiCore {
             // late — longer than the dwell (§5). Re-validate
             // the LIVE cursor at fire time: still on the display
             // the dwell armed for, and not aiming at a Space Bar
-            // item (a competing membership mover).
+            // item (a competing membership mover) — checked both
+            // via the armed state AND a live bar hit-test, since
+            // the same event lag can leave the bar not yet armed
+            // while the pointer already hovers an item.
             !spaceBarDrop.isArmed,
+            spaceBars.spaceItem(
+                atGlobal: drag.cursorLocation()
+            ) == nil,
             dragCrossing.displayAt(drag.cursorLocation())
                 == display,
             let originID = state.workspaces.space(of: id),

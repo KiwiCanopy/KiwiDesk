@@ -14,10 +14,13 @@ import Foundation
 ///
 ///   path                  AX focus   #463    z-order   retile
 ///                                    settle  restore   force
-///   moveWindow(follow:)   yes+warp   yes     —         —
+///   moveWindow(follow:)   yes+warp   yes     —         yes*
 ///   Space-Bar spring      none       none    none      yes
 ///   live crossing (#504)  none       none    yes       yes
 ///   drop-commit (below)   no-warp    yes     yes       no
+///
+///   *follow runs `spaceSwitchRetile` (forced); the no-follow
+///    branch retiles un-forced.
 ///
 /// The spring and the crossing run MID-DRAG: the pointer is
 /// inside the OS drag loop, so they assert no AX focus and
