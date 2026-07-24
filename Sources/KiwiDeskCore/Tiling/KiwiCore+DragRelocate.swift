@@ -7,15 +7,33 @@ import Foundation
 /// monitor is a relocation — "put this window over there" — which
 /// is what people reach for; a same-display drop still swaps.
 ///
-/// This is a SECOND window-relocation path beside `moveWindow`
-/// (which backs the keyboard / Space-Bar move and runs the #207
-/// space-switch animation + warp, both wrong when the destination
-/// space is already on-screen). No parity test binds the two, so
-/// keep its focus / event / z-order obligations in sync by hand
-/// with `moveWindow`'s follow branch and the same-space swap in
-/// `handleDragEnd`: whatever they honor after a re-home
-/// (`emitWindowMovedToSpace`, the #463 settle, the overflow
-/// z-order restore) this must honor too.
+/// FOUR window-relocation paths now exist, with DELIBERATELY
+/// different post-rehome obligations. No parity test can bind
+/// behavior — this table is the registry; keep it honest by hand
+/// when touching any of the four:
+///
+///   path                  AX focus   #463    z-order   retile
+///                                    settle  restore   force
+///   moveWindow(follow:)   yes+warp   yes*    —         yes*
+///   Space-Bar spring      none       none    none      yes
+///   live crossing (#504)  none       none    yes       yes
+///   drop-commit (below)   no-warp    yes     yes       no
+///
+///   *follow only: `spaceSwitchRetile` (forced) + the #463
+///    settle. The no-follow branch retiles un-forced, runs the
+///    conditional #482 `moveLatch` / `scheduleMoveSettle` pair
+///    instead, and emits no `spaceChange`.
+///
+/// The spring and the crossing run MID-DRAG: the pointer is
+/// inside the OS drag loop, so they assert no AX focus and
+/// schedule no settle (a warp would rip the pointer out of the
+/// drag); the crossed gesture's DROP schedules the #463 settle
+/// instead (`handleDragEnd`). All four emit
+/// `windowMovedToSpace`; all but the no-follow move emit
+/// `spaceChange`. Placement can never
+/// diverge: relocate and crossing share `insertDropped`; spring
+/// and moveWindow share `addFocusedToSpace` (which insertDropped
+/// also routes through for track / empty destinations).
 extension KiwiCore {
     /// The window the live drop-zone highlight should mark, or nil
     /// to suppress it. Suppresses over a **cross-display track**
@@ -67,13 +85,13 @@ extension KiwiCore {
     ) -> Bool {
         let cocoaCursor = drag.cursorLocation()
         guard
-            let screen = NSScreen.screens.first(where: {
-                $0.frame.contains(cocoaCursor)
-            }),
-            let display = screen.kiwiDisplay?.id,
+            // Same display resolution the live crossing uses
+            // (#504) — injected, so drag tests can fake a
+            // topology; wired to NSScreen in wireDragCrossing.
+            let display = dragCrossing.displayAt(cocoaCursor),
             let destID = state.workspaces.activeSpace(on: display),
             destID != origin.id,
-            let dest = state.workspaces[destID]
+            state.workspaces[destID] != nil
         else { return false }
         // A sticky window that can't cross displays snaps back
         // instead — the same gate a keyboard / Space-Bar move
@@ -99,17 +117,7 @@ extension KiwiCore {
         // empty destination just receives the window. Keeping this
         // one choke point also keeps track cap / spill placement out
         // of two hand-maintained copies.
-        if dest.mode != .track,
-            let target,
-            let targetIndex = dest.windows.firstIndex(of: target)
-        {
-            state.workspaces.add(id, to: destID, after: target)
-            state.workspaces.withSpace(destID) {
-                $0.move(id, to: targetIndex)
-            }
-        } else {
-            addFocusedToSpace(id, to: destID)
-        }
+        insertDropped(id, onto: target, into: destID)
         state.workspaces.focus(id, in: destID)
         // The pointer ended on the destination display; make it the
         // focused one so "current space" follows the window there —
@@ -147,5 +155,33 @@ extension KiwiCore {
         // window.
         scheduleSpaceSettle(destID, priorFrontmost: priorFrontmost)
         return true
+    }
+
+    /// Files a dragged window into `destID` — the ONE placement
+    /// choke point shared by the drop-commit relocate (#492) and
+    /// the live crossing (#504), so the two paths can never land
+    /// a window differently. Onto a member window in a geometric /
+    /// array-order layout: the target's index (target and
+    /// followers shift one). A track destination, or no / foreign
+    /// target: `addFocusedToSpace`, the same seam a keyboard /
+    /// Space-Bar move uses, so the `new_window` rule and track
+    /// cap / spill live in one place.
+    func insertDropped(
+        _ id: WindowID,
+        onto target: WindowID?,
+        into destID: SpaceID
+    ) {
+        guard let dest = state.workspaces[destID] else { return }
+        if dest.mode != .track,
+            let target,
+            let targetIndex = dest.windows.firstIndex(of: target)
+        {
+            state.workspaces.add(id, to: destID, after: target)
+            state.workspaces.withSpace(destID) {
+                $0.move(id, to: targetIndex)
+            }
+        } else {
+            addFocusedToSpace(id, to: destID)
+        }
     }
 }

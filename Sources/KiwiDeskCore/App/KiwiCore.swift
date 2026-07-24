@@ -18,6 +18,8 @@ public final class KiwiCore {
     public let spaceBars = SpaceBarManager()
     /// Space Bar drag-drop gesture state (#372).
     let spaceBarDrop = SpaceBarDropCoordinator()
+    /// Live cross-display make-room gesture state (#504).
+    let dragCrossing = DragCrossingCoordinator()
     /// Glyph-vs-image icon decisions for bar items (#294),
     /// shared by the App Bar, the Space Bar (#293) and the
     /// shortcuts panel.

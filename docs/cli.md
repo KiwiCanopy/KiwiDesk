@@ -294,8 +294,10 @@ must also refresh their state on `native_space_change`.
 
 `window_moved_to_space` fires when a window is explicitly
 moved to another virtual space (`move_to_space`,
-with or without follow); bulk reassignments (profile load,
-session restore) stay silent:
+with or without follow, or a drag onto another display — the
+live crossing emits as the membership moves, so a drag pulled
+back before release emits once per crossing); bulk
+reassignments (profile load, session restore) stay silent:
 
 ```json
 {"event": "window_moved_to_space",

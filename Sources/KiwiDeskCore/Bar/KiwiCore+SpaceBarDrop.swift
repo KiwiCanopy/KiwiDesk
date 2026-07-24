@@ -47,6 +47,11 @@ extension KiwiCore {
     /// leak onto a reused WindowID (#372, review).
     func cancelDrag(_ id: WindowID) {
         drag.cancel(id)
+        // A live display crossing (#504) already moved the
+        // window's membership; put it back where the gesture
+        // started (and always drop the crossing bookkeeping, so
+        // a reused WindowID can't inherit a stale gesture).
+        revertLiveCrossing(id)
         if tiler.dragExemptWindow == id {
             tiler.dragExemptWindow = nil
         }

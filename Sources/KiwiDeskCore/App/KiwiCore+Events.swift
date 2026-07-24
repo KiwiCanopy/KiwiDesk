@@ -169,7 +169,17 @@ extension KiwiCore {
             // corner forever — #412's "floating vanishes"
             // failure mode, reintroduced on this one path.
             tiler.rekeyStash(oldID: old, newID: new)
+            // A live display crossing's bookkeeping (#504) must
+            // follow the id swap, or a rekey after a crossing
+            // strands the (new) window on the destination space
+            // with no record to revert from. Transfer FIRST —
+            // cancelDrag(old) then finds nothing under the old
+            // id — and revert under the new one: the gesture is
+            // aborted, so the window goes home like any other
+            // abnormal end.
+            dragCrossing.rekey(old: old, new: new)
             cancelDrag(old)
+            revertLiveCrossing(new)
         default:
             break
         }

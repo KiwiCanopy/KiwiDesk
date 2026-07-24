@@ -1628,11 +1628,32 @@ destination display **re-partitions** to N+1 slots. A
 destination is the active space of the display **under the
 cursor**, so an empty monitor still receives the drop; only a
 same-display release outside every slot snaps back.
-The window belongs to its origin space for the whole drag, so
-the destination shows no gap *until* the drop commits the
-membership change — opening one live mid-drag (a ghost over an
-empty slot as the cursor enters) is a possible later polish,
-not part of this behavior. *Rationale:* the primary
+The move happens **live** (#504): once the cursor has dwelt on
+the destination display for a beat (a debounce, so skimming the
+seam — or an overflow-inducing crossing that would bounce right
+back — never re-tiles both displays per mouse event), the
+window's *membership* eager-moves there and both displays
+re-partition, opening a real slot under the cursor while the
+dragged window stays pinned under the pointer (`dragExemptWindow`
+— its frame is never set mid-drag). This is the Space-Bar-spring
+model (#372) keyed on displays, and it buys the unification: from
+the crossing on, the drag *is* a same-display drag in the
+destination space — swap on a window, snap into the opened gap,
+one "you're inside this space now" rule. Dragging back before
+release crosses back symmetrically; an abnormal end (window
+closed or rekeyed mid-drag) restores the origin space and index.
+A gesture that crossed is a **move for the rest of its life**:
+the drop skips the resize interpretation outright — the live twin
+of the relocate-before-resize-gate ordering — because macOS
+clamps a big window's size on a smaller display, which the
+magnitude test would misread as a resize. The drop-commit
+relocate path remains for the fast flick whose dwell never fired,
+sharing one placement choke point (`insertDropped`) with the
+crossing so the two can never land a window differently. Sticky
+windows are the deliberate exception: they never live-cross —
+their cross-display drop keeps the full #445 gate + pill
+semantics of the drop-commit path, resolved once at release.
+*Rationale:* the primary
 reason to drag a window to another monitor is to *move it
 there* — swap-only would be frustrating, and it can fling a
 window you never touched onto your other display. *Trade-off:*

@@ -643,9 +643,17 @@ When you drag a tiled window, KiwiDesk shows two overlays:
   slot — even a big window dragged onto a smaller display.
 
 Releasing over another window's slot **on the same display swaps**
-the two; releasing **on another display moves** the window there —
+the two; dragging **onto another display moves** the window there.
+The move happens **live**: once the cursor has settled on the
+other display for a beat, the destination's windows slide apart to
+open a real slot under the cursor — the dragged window itself
+stays pinned under the pointer — and from that moment the drag
+behaves exactly like a local one there (release over a window to
+swap, release outside every slot to snap into the opened gap).
+Pulling the cursor back before releasing moves the window home the
+same way. A fast flick across still commits the move at release —
 onto a window's slot it lands there (the windows below it shift
-down one), and onto empty space (an empty monitor) it just moves
+down one), onto empty space (an empty monitor) it just moves
 across. Releasing outside every slot **on your own display** snaps
 the window back.
 
