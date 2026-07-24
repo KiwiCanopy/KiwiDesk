@@ -231,26 +231,19 @@ extension KiwiCore {
         // If the save below fails, state honestly reflects a
         // transient Standard instead of a stale profile.
         profiles.adoptStandard(named: composed.sourceName)
-        let ordered = PositionalDisplays.ordered(
-            displays,
-            mainID: mainID
-        )
-        var pins: [SpaceID: String] = [:]
-        var mains: Set<SpaceID> = []
-        for space in composed.spaces {
-            let assigned = composed.assignment[space]
-            if assigned == ordered.first?.id || assigned == nil {
-                mains.insert(space)
-            } else if let display = ordered.first(where: {
-                $0.id == assigned
-            }) {
-                pins[space] = display.fingerprint
-            }
-        }
-        spacePins = pins
-        mainSpaces = mains
+        adoptComposedPlacement(composed)
         let name = profiles.freeName(base: layout.name)
-        try profiles.save(buildProfile(name: name))
+        var profile = buildProfile(name: name)
+        // Tag the beginner ladder so a later unmatched monitor
+        // change recomposes it (not a workflow Standard) at the
+        // new display count (#485). Every other preset saves a
+        // normal, unflagged profile.
+        profile.isStarterLadder = layout.name == StarterLadder.name
+        try profiles.save(profile)
+        // A preset can define more spaces than the first-run seed
+        // authored digit shortcuts for; bind the newcomers
+        // additively so ⌃⌥N covers them too (#485).
+        topUpDigitShortcuts()
         return name
     }
 

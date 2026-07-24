@@ -68,10 +68,14 @@ extension KiwiCore {
             }
             profiles.markDirty()
         case .none:
+            // On the beginner ladder baseline, recompose the
+            // ladder at the live display count instead of a
+            // workflow Standard, so the five-per-display shape
+            // survives the change (#485). Any other baseline gets
+            // the count's built-in Standard, unchanged (#53).
             guard
-                let composed = ProfileComposition.compose(
-                    displays: displays,
-                    mainID: PositionalDisplays.liveMainID
+                let composed = composeMonitorChangeFallback(
+                    displays: displays
                 )
             else { return }
             // A hand-written or hybrid Lua config keeps
@@ -99,6 +103,20 @@ extension KiwiCore {
             }
             apply(composed: composed, forceRetile: false)
             profiles.adoptStandard(named: composed.sourceName)
+            // The ladder's five-per-display plan is not the count's
+            // Standard that `apply` lets `resolveSpaceDisplays`
+            // recompose, so pin its blocks from the composed
+            // assignment and re-resolve — otherwise the blocks would
+            // scatter into the workflow Standard's positions (#485).
+            if composed.sourceName == StarterLadder.name {
+                adoptComposedPlacement(composed)
+                resolveSpaceDisplays()
+                retile()
+            }
+            // Bind ⌃⌥N for spaces the change added past the
+            // first-run seed — additive, never overwriting a
+            // custom chord (#485).
+            topUpDigitShortcuts()
             onLog(
                 "monitor change: no matching profile, "
                     + "composed standard '\(composed.sourceName)'"

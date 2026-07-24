@@ -1289,6 +1289,31 @@ default, so the workflow Standards keep that job. First-run-only, and
 gated on the same "no authored binding disarms the seed" guard, so it
 never touches a configured setup. (#466, supersedes the #270 nine-pad)
 
+**The ladder IS the unmatched-change fallback — but only while it's
+the active baseline (#485).** [Rationale] #466 keeps the ladder out
+of the silent `isStandard` fallback so nobody *else* lands in a demo
+of empty modes. But the beginner who started on the ladder hit the
+mirror-image bug: the seeded **Starter** profile only covers its
+first-run display count, so plugging a second monitor matched no
+stored set, fell to `.none`, and composed a *workflow* Standard —
+handing the newcomer fewer spaces (Dual Developer's 8, not the
+ladder's 10) and no `⌃⌥N` past the seeded count. The fix scopes the
+override tightly: `handleMonitorChange`'s `.none` branch recomposes
+the **ladder** at the live display count *only when the user is on the
+Starter baseline* (`isOnStarterBaseline` — the adopted seed profile,
+flagged `Profile.isStarterLadder` so the identity survives a rename or
+an edited mode, or a transient ladder Standard from an earlier change,
+sticky via `currentStandard`). Every other baseline still gets the
+workflow Standard, so #466's "no silent demo layout" promise holds for
+everyone who didn't choose the ladder. The flag rides re-saves and
+edits but **not** a save-as-new — an explicitly named copy is the
+user's own profile and resolves normally. The digit-shortcut half is
+the additive twin: `topUpDigitShortcuts` binds only the `⌃⌥N` a growth
+left unbound (GUI-managed, never overwriting a custom chord, capped at
+ten), so the shortcuts follow the spaces. Do not "simplify" the `.none`
+branch back to a bare `StandardProfiles.standard` — that reintroduces
+#485. (#485)
+
 **Orphaned space shortcuts are surfaced, never pruned.** A
 binding that targets a space by name outlives the space's
 presence in the current profile: it stays Carbon-registered
