@@ -31,14 +31,59 @@ extension KiwiCore {
         guard let frontmostPID = frontmostPIDProvider,
             FocusedCommandPolicy.isFocused(command)
         else { return nil }
+        // Sampled ONCE, before the guard: the log below must
+        // print the pid that actually denied, not a re-sample
+        // that may have changed in exactly the racy activation
+        // window this seam diagnoses.
+        let front = frontmostPID()
         guard let focused = focusedWindow,
-            let front = frontmostPID(),
+            let front,
             front == focused.pid,
             eventLoop.observes(pid: focused.pid),
             !ignoredPanelActive.contains(focused.pid)
         else {
+            // The hotkey path discards the response, so a denial
+            // is otherwise invisible — the "#483 `_and_follow`
+            // does nothing" trap. Log which clause denied: the
+            // anchor/frontmost divergence is usually a dropped
+            // cooperative activate (#463).
+            logFocusedCommandDenial(
+                command,
+                focused: focusedWindow,
+                front: front
+            )
             return .fail("no managed window is currently focused")
         }
         return nil
+    }
+
+    /// One line naming the denied command, both sides of the
+    /// divergence, and the clause that failed.
+    private func logFocusedCommandDenial(
+        _ command: String,
+        focused: ManagedWindow?,
+        front: pid_t?
+    ) {
+        let anchor = focused.map {
+            "window \($0.id.raw) pid \($0.pid)"
+        }
+        let reason: String
+        if let focused, let front {
+            if front != focused.pid {
+                reason = "frontmost pid \(front) is another app"
+            } else if !eventLoop.observes(pid: focused.pid) {
+                reason = "pid unobserved"
+            } else {
+                reason = "ignored panel latched"
+            }
+        } else if focused == nil {
+            reason = "no focus anchor"
+        } else {
+            reason = "foreground unknown"
+        }
+        onLog(
+            "preflight (#292): denied \(command) — anchor "
+                + "\(anchor ?? "none"), \(reason)"
+        )
     }
 }

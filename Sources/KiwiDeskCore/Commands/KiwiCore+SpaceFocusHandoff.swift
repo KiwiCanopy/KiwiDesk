@@ -110,21 +110,67 @@ extension KiwiCore {
                 force: true
             )
             self.reassertSwitchFocus(
-                priorFrontmost: priorFrontmost
+                priorFrontmost: priorFrontmost,
+                context: "space settle"
             )
         }
     }
 
-    /// Re-raises the switch's focus target when the OS likely
-    /// ignored the handoff (#463): the app that was frontmost
-    /// BEFORE the switch still is, and it is not the focused
-    /// window's app. Any other frontmost means the user (or a
-    /// later command) moved on — hands off. Inert until the
-    /// frontmost seam is wired (`frontmostPIDProvider`, like the
-    /// focused-command guard). The anchor, not `space.focused`:
-    /// a sticky traveler legitimately holding cross-space focus
-    /// must not be "corrected" back to the local slot (#431).
-    /// Internal (not private) for direct guard coverage.
+    /// The no-follow move's half of the settle (#482/#483): a
+    /// plain `move_to_space` refocuses the origin through the
+    /// same cooperative raise a space switch uses, and the OS
+    /// may drop it the same way — leaving the MOVED window key
+    /// while it sits on another display or stashed offscreen.
+    /// The move-intent latch already blocks the focus-follow
+    /// teleport; this heals the divergence itself, which
+    /// otherwise ALSO makes the #292 preflight silently deny
+    /// the next focused command (#483's `_and_follow` "does
+    /// nothing"). No frame re-issue — the move's own retile
+    /// owns placement; this is focus-only. Guarded like
+    /// `scheduleSpaceSettle`: fires only while the origin space
+    /// is still active and no native transition is settling,
+    /// then delegates the narrow dropped-activate detection to
+    /// `reassertSwitchFocus`.
+    func scheduleMoveSettle(
+        origin: SpaceID?,
+        priorFrontmost: pid_t?
+    ) {
+        deferred.schedule(
+            .moveSettle,
+            after: .milliseconds(300)
+        ) { [weak self] in
+            guard let self,
+                self.state.workspaces.activeSpace == origin,
+                Date().timeIntervalSince(self.lastNativeSwitch)
+                    > NativeSwitch.settle
+            else { return }
+            self.reassertSwitchFocus(
+                priorFrontmost: priorFrontmost,
+                context: "move settle"
+            )
+        }
+    }
+
+    /// Re-raises the active space's focus anchor when the OS
+    /// likely ignored a handoff (#463): the app that was
+    /// frontmost BEFORE the triggering command still is, and it
+    /// is not the focused window's app. Any other frontmost
+    /// means the user (or a later command) moved on — hands off.
+    /// Two-caller authority: the space-switch settle (#463,
+    /// `priorFrontmost` = frontmost before the switch) and the
+    /// no-follow move settle (#482/#483, `priorFrontmost` =
+    /// frontmost before the origin refocus raise — the moved
+    /// window's app whenever it held focus). The reuse is sound
+    /// for a non-obvious reason: detection is pid-granular, and
+    /// the #292 preflight divergence the move settle heals is
+    /// pid-granular too, so the blind spot and the healed hazard
+    /// line up exactly. `context` labels the log with the
+    /// triggering settle. Inert until the frontmost seam is
+    /// wired (`frontmostPIDProvider`, like the focused-command
+    /// guard). The anchor, not `space.focused`: a sticky
+    /// traveler legitimately holding cross-space focus must not
+    /// be "corrected" back to the local slot (#431). Internal
+    /// (not private) for direct guard coverage.
     ///
     /// Known edges of the deliberately narrow detection:
     /// - A cmd-tab BACK to the pre-switch app inside the 300 ms
@@ -144,7 +190,24 @@ extension KiwiCore {
     ///   from an unmanaged frontmost app: it serves the explicit
     ///   switch command's intent, while the yield's Finder
     ///   target is nobody's intent — asymmetry deliberate.
-    func reassertSwitchFocus(priorFrontmost: pid_t?) {
+    /// - Move-settle edge: a genuine user action inside the
+    ///   300 ms that keeps the MOVED window's app frontmost
+    ///   (clicking a same-app sibling on the origin) reads as
+    ///   "raise never landed" and is re-raised over once — the
+    ///   cmd-tab edge's sibling, different signature. Narrowing
+    ///   the detection for one caller must keep the other's row
+    ///   in view.
+    /// - On the Space Bar drag caller (no #292 preflight forcing
+    ///   frontmost ≈ focused), `movedHeldFocus` gates arming on
+    ///   the RING, so `priorFrontmost` can in principle be an
+    ///   unrelated app the user is really in; the guard then
+    ///   fires only if that app ALSO stays frontmost through the
+    ///   settle — accepted single-shot residue, a decision, not
+    ///   an accident.
+    func reassertSwitchFocus(
+        priorFrontmost: pid_t?,
+        context: String
+    ) {
         guard
             let priorFrontmost,
             let frontmost = frontmostPIDProvider?(),
@@ -155,7 +218,7 @@ extension KiwiCore {
             pid != frontmost
         else { return }
         onLog(
-            "space settle: keyboard focus stayed with pid "
+            "\(context): keyboard focus stayed with pid "
                 + "\(frontmost); re-raising window \(focused.raw)"
         )
         focusWindow(focused, refocusRetile: false, warp: false)

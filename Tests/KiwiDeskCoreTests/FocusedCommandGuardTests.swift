@@ -124,6 +124,25 @@ struct FocusedCommandGuardTests {
         #expect(core.state.windows[WindowID(1)]?.isFloating == false)
     }
 
+    /// The hotkey path discards the response, so a denial must at
+    /// least leave a log trace naming the command and both sides
+    /// of the mismatch (#483's "does nothing" diagnosis).
+    @Test("A denial logs the command and the divergence")
+    func denialLogsDivergence() {
+        let core = makeCore()
+        var logs: [String] = []
+        core.onLog = { logs.append($0) }
+        addFocused(core, pid: 1)
+        core.frontmostPIDProvider = { 999 }
+        _ = core.execute("move_to_space_and_follow")
+        #expect(
+            logs.contains {
+                $0.contains("denied move_to_space_and_follow")
+                    && $0.contains("999")
+            }
+        )
+    }
+
     @Test("Unrestricted commands bypass the guard")
     func unrestrictedBypass() {
         let core = makeCore()

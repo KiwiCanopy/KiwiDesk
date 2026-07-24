@@ -17,14 +17,23 @@ extension KiwiCore {
         // must not flip the virtual space mid-restore.
         guard
             Date().timeIntervalSince(lastNativeSwitch)
-                > NativeSwitch.settle
+                > NativeSwitch.settle,
+            // A re-report for a window just moved WITHOUT follow
+            // is the dropped origin-refocus raise talking, not
+            // the user (#482/#483) — following it would teleport
+            // to the space the move explicitly stayed away from.
+            !moveLatch.isLatched(id)
         else { return }
         deferred.schedule(
             .focusFollow,
             after: .milliseconds(250)
         ) { [weak self] in
             guard let self else { return }
-            guard let window = self.state.windows[id],
+            guard
+                // Re-checked at fire: a no-follow move issued
+                // while this follow was pending re-latches.
+                !self.moveLatch.isLatched(id),
+                let window = self.state.windows[id],
                 // Made sticky inside the dwell: following it
                 // now would fly the user back (#414) — the
                 // schedule-time exemption re-checked at fire.
@@ -221,6 +230,19 @@ extension KiwiCore {
                 to: target
             )
         }
+        if !follow {
+            // A no-follow move must not be turned into a follow
+            // by the OS dropping the origin refocus raise below
+            // (#463's cooperative activate): the moved window
+            // then keeps key focus, its app re-reports it
+            // AX-focused, and the focus-follow would teleport
+            // the user to the target (#482/#483). Latch the
+            // intent — every no-follow branch shares the hazard
+            // (in the yield branch, the Finder activate can even
+            // BE the moved window's app: a floating Finder
+            // window, #483).
+            moveLatch.stamp(window)
+        }
         if follow {
             // Captured before the raise below can change it —
             // the settle's dropped-activate detection (#463).
@@ -236,9 +258,28 @@ extension KiwiCore {
                 priorFrontmost: priorFrontmost
             )
         } else if let next = activeSpace?.focused {
+            // Captured before the refocus raise below — the
+            // settle's dropped-activate detection (#463 pattern).
+            let priorFrontmost = frontmostPIDProvider?()
             // The moved window would keep macOS focus while
             // stashed offscreen; refocus the current space.
             focusWindow(next, refocusRetile: false, warp: true)
+            // Arm the settle that re-raises `next` once when the
+            // moved window's app provably kept frontmost. Only a
+            // move that held key focus can leave that hazard;
+            // otherwise `priorFrontmost` is whatever app the
+            // user is really in — never fight it. The gate reads
+            // the RING (`lastFocused`), which the hazard itself
+            // can leave stale: then the settle is skipped and a
+            // #292 denial may persist until the next click — the
+            // latch still blocks the teleport, so this residue
+            // degrades, never breaks. Don't widen the gate.
+            if movedHeldFocus {
+                scheduleMoveSettle(
+                    origin: state.workspaces.activeSpace,
+                    priorFrontmost: priorFrontmost
+                )
+            }
         } else if movedHeldFocus {
             // Reached only when the active space has no member to
             // take over (else the neighbor branch fired) AND the

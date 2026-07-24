@@ -25,6 +25,9 @@ final class DeferredTasks {
         /// One-shot layout re-assert after a virtual-space
         /// switch (`scheduleSpaceSettle`).
         case spaceSettle
+        /// One-shot focus re-assert after a no-follow
+        /// `move_to_space` (`scheduleMoveSettle`, #482/#483).
+        case moveSettle
         /// Layout + focus re-assert after a native desktop
         /// switch (`settleAfterNativeSwitch`).
         case nativeSpaceSettle

@@ -204,7 +204,10 @@ struct SpaceSwitchFocusHandoffTests {
         // Settle-side: the traveler's app frontmost = agreement.
         logs = []
         core.frontmostPIDProvider = { 6 }
-        core.reassertSwitchFocus(priorFrontmost: 6)
+        core.reassertSwitchFocus(
+            priorFrontmost: 6,
+            context: "space settle"
+        )
         #expect(logs.isEmpty)
     }
 
@@ -257,19 +260,31 @@ struct SpaceSwitchFocusHandoffTests {
         logs = []
         // Frontmost changed since the switch: user moved on.
         core.frontmostPIDProvider = { 7 }
-        core.reassertSwitchFocus(priorFrontmost: 5)
+        core.reassertSwitchFocus(
+            priorFrontmost: 5,
+            context: "space settle"
+        )
         #expect(logs.isEmpty)
         // Frontmost unchanged but IS the focused window's app:
         // the handoff landed (same-app switch) — nothing to do.
         core.frontmostPIDProvider = { 6 }
-        core.reassertSwitchFocus(priorFrontmost: 6)
+        core.reassertSwitchFocus(
+            priorFrontmost: 6,
+            context: "space settle"
+        )
         #expect(logs.isEmpty)
         // No capture (seam unwired at switch time): inert.
-        core.reassertSwitchFocus(priorFrontmost: nil)
+        core.reassertSwitchFocus(
+            priorFrontmost: nil,
+            context: "space settle"
+        )
         #expect(logs.isEmpty)
         // The genuine drop still fires.
         core.frontmostPIDProvider = { 5 }
-        core.reassertSwitchFocus(priorFrontmost: 5)
+        core.reassertSwitchFocus(
+            priorFrontmost: 5,
+            context: "space settle"
+        )
         #expect(logs.count == 1)
     }
 }

@@ -53,6 +53,15 @@ struct IgnoredPanelDismissTests {
         // falls back to window 1 on the active space 1.
         _ = core.execute("move_to_space", args: [.string("2")])
         core.deferred.cancel(.focusFollow)
+        // The staging move latches window 2 against the follow
+        // (#482); these tests simulate a LATER dismiss report,
+        // so age the latch out.
+        core.moveLatch.stamp(
+            WindowID(2),
+            at: Date(
+                timeIntervalSinceNow: -MoveIntentLatch.window - 1
+            )
+        )
         return core
     }
 

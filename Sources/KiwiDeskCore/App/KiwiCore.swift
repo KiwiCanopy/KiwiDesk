@@ -181,6 +181,10 @@ public final class KiwiCore {
     /// `schedule*` call sites.
     let deferred = DeferredTasks()
 
+    /// Windows just moved without follow, whose focus re-reports
+    /// must not space-follow (#482/#483) — see the type doc.
+    let moveLatch = MoveIntentLatch()
+
     /// Native desktop we are currently on (Mission Control
     /// number), and the virtual space each desktop showed
     /// last, restored when the user returns to it.
