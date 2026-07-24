@@ -105,26 +105,32 @@ extension KiwiCore {
         // the magnitude test would read as a resize — hiding the
         // ghost the crossing just made room for (the live twin
         // of the #492 drop-ordering gotcha).
+        // The dwell feed never disarms in this branch (nothing
+        // needs it: a genuine resize can't arm, see below) and
+        // admits, besides size-held moves, exactly one
+        // size-changed shape: SHRUNK while the origin
+        // translates. That is the macOS clamp's signature — a
+        // big window dragged toward a smaller display is
+        // clamped SMALLER mid-translation, possibly before the
+        // cursor ever crosses the seam (a trailing-side grab),
+        // and the latched size delta must not cost the gesture
+        // its crossing (review rounds 1–3). A genuine edge pull
+        // is excluded either way: an enlarge-pull GROWS, and a
+        // shrink-pull walks the cursor into the window's own
+        // body — the home display — so it feeds a dwell that
+        // never arms. If the gate still misreads a gesture the
+        // loss is graceful: the drop-commit relocate (#492)
+        // moves the window at release, and the fire-time
+        // guards (button, display, bar) bound every stale
+        // fire. Visuals below stay strictly move-gated (#237).
+        let grew =
+            frame.width > start.width + 0.5
+            || frame.height > start.height + 0.5
         let crossed = dragCrossing.hasCrossed(id)
         if (looksResize || !movedOrigin) && !crossed {
-            // NO dwell feed and NO disarm here — both matter.
-            // A resize changes its size from the first real
-            // frame, so a resize gesture never sees the
-            // size-held feed below and can never ARM the dwell:
-            // a seam-adjacent edge pull cannot live-cross
-            // mid-resize (review round 2), with nothing to
-            // cancel. The macOS size clamp near a smaller
-            // display also lands in this branch — but only
-            // after the size-held approach frames already armed
-            // the dwell, and an armed dwell survives un-fed
-            // frames (only returning home, or the fire-time
-            // cursor re-check, disarms it), so the clamp cannot
-            // kill the crossing it heralds (review round 1: a
-            // disarm here did exactly that). Visuals stay
-            // hidden either way (#237); if this gate misreads a
-            // move, the loss is graceful — the drop-commit
-            // relocate (#492) still moves the window at
-            // release.
+            if movedOrigin && !grew {
+                updateDragCrossing(id, cursor: cursor)
+            }
             dragOverlay.hideAll()
             return
         }
