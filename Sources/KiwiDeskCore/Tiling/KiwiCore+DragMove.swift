@@ -130,6 +130,15 @@ extension KiwiCore {
         if (looksResize || !movedOrigin) && !crossed {
             if movedOrigin && !grew {
                 updateDragCrossing(id, cursor: cursor)
+            } else if grew {
+                // A grown frame is a real enlarge pull: also
+                // DISARM any dwell the gesture's sub-threshold
+                // prefix armed (its first frames can read as a
+                // size-held move with the cursor already across
+                // the seam) — an edge resize must never dwell
+                // into a membership move. A clamp never grows,
+                // so this cannot cost the clamp its crossing.
+                dragCrossing.cancelPending(for: id)
             }
             dragOverlay.hideAll()
             return

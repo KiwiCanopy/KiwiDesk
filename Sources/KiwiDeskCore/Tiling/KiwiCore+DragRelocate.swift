@@ -14,20 +14,23 @@ import Foundation
 ///
 ///   path                  AX focus   #463    z-order   retile
 ///                                    settle  restore   force
-///   moveWindow(follow:)   yes+warp   yes     —         yes*
+///   moveWindow(follow:)   yes+warp   yes*    —         yes*
 ///   Space-Bar spring      none       none    none      yes
 ///   live crossing (#504)  none       none    yes       yes
 ///   drop-commit (below)   no-warp    yes     yes       no
 ///
-///   *follow runs `spaceSwitchRetile` (forced); the no-follow
-///    branch retiles un-forced.
+///   *follow only: `spaceSwitchRetile` (forced) + the #463
+///    settle. The no-follow branch retiles un-forced, runs the
+///    conditional #482 `moveLatch` / `scheduleMoveSettle` pair
+///    instead, and emits no `spaceChange`.
 ///
 /// The spring and the crossing run MID-DRAG: the pointer is
 /// inside the OS drag loop, so they assert no AX focus and
 /// schedule no settle (a warp would rip the pointer out of the
 /// drag); the crossed gesture's DROP schedules the #463 settle
 /// instead (`handleDragEnd`). All four emit
-/// `windowMovedToSpace` + `spaceChange`. Placement can never
+/// `windowMovedToSpace`; all but the no-follow move emit
+/// `spaceChange`. Placement can never
 /// diverge: relocate and crossing share `insertDropped`; spring
 /// and moveWindow share `addFocusedToSpace` (which insertDropped
 /// also routes through for track / empty destinations).
