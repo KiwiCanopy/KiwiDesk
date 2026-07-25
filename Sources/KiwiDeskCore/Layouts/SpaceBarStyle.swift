@@ -107,8 +107,13 @@ public struct SpaceBarStyle: Sendable, Equatable {
     public var itemColor = "#EAF3EE66"
     /// The active space's accent (identifier + its glyphs).
     public var activeItemColor = "#8DB354"
-    /// The focused window's accent — its glyph inside the active
-    /// space AND the front-app segment (glyph + name). A
+    /// The focused window's accent, on three surfaces: its glyph
+    /// inside the active space, the front-app segment (glyph +
+    /// name), and the group-count badge's text
+    /// (`SpaceBarItemView+Style.applyBadge`) — the badge is easy
+    /// to miss, and it is the one surface where this colour is
+    /// ink on the crimson badge chip rather than on the bar
+    /// plate. A
     /// genuinely different hue, not a tint of the active-space
     /// color, so the two states read apart (QA 2026-07-19).
     ///
@@ -161,4 +166,17 @@ public struct SpaceBarStyle: Sendable, Equatable {
 /// force a hand-written encode, i.e. exactly the mirrored field
 /// list `.claude/rules/parity-tests.md` says to avoid. The keys
 /// and the sparse decode live in `SpaceBarStyle+Coding.swift`.
+///
+/// This is the **opposite** placement from
+/// `TilingSettings+Coding.swift`, deliberately, and the two
+/// should not be "harmonized": that type hand-writes its encode,
+/// so it can keep the conformance next to the implementation and
+/// warns against a gutted extension re-synthesizing camelCase.
+/// `SpaceBarStyle` relies on synthesis instead, so its
+/// conformance has to stay here. The residual hazard — deleting
+/// or renaming `CodingKeys` in the other file would let both
+/// sides silently re-synthesize camelCase — is backstopped by
+/// `SpaceBarParityTests` (which references
+/// `CodingKeys.allCases`, so it stops compiling) and
+/// `SettingsCodingTests` (which pins the snake_case keys).
 extension SpaceBarStyle: Codable {}

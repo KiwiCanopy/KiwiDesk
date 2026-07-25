@@ -2,9 +2,19 @@ import CoreGraphics
 import Foundation
 
 /// `SpaceBarStyle`'s wire form, split out of the type's own file
-/// at the 350-line ceiling (AGENTS.md §2.1). Same `+Coding`
-/// convention as `TilingSettings+Coding.swift`: the struct keeps
-/// the fields and their rationale, the encoding lives here.
+/// at the 350-line ceiling (AGENTS.md §2.1): the struct keeps the
+/// fields and their rationale, the keys and the decode live here.
+///
+/// It borrows the `+Coding` file name from
+/// `TilingSettings+Coding.swift` but **not** its shape, and the
+/// difference is load-bearing: that type declares its conformance
+/// in the `+Coding` file and hand-writes `encode(to:)` in a third
+/// file. Here the conformance stays in `SpaceBarStyle.swift`,
+/// because Swift only synthesizes `encode(to:)` where the
+/// conformance sits — so encode remains generated and a new
+/// stored property cannot be silently dropped from the wire.
+/// Moving the conformance into this file is a compile error, not
+/// a subtle regression; the compiler enforces the arrangement.
 ///
 /// Sparse by design — a decode falls back to `defaults` per
 /// field, so a profile written before a field existed still
