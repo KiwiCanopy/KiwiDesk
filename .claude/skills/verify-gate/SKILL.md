@@ -38,6 +38,13 @@ boundaries, or `Sendable` conformances — there the ~2min buys
 back a PR round-trip. Otherwise skip it and let CI catch it, and
 say in the report that it was skipped and why.
 
+CI **reports** this job, it does not **block** on it (required
+status checks need branch protection, which this plan does not
+offer for a private repo — #487). So when you skip it locally,
+say in the report that the `Release Build` job must be read
+before merging — and run it locally anyway for anything landing
+without a PR.
+
 ## Report
 
 End with a one-line PASS/FAIL summary per step, marking step 5

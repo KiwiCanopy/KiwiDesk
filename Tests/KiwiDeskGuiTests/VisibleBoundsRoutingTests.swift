@@ -22,12 +22,18 @@ import Testing
 /// exact drift `.claude/rules/tests.md` ratified that helper to
 /// avoid. It scans `Sources/KiwiDeskCore`, not the GUI tree.
 ///
-/// Known limits, both fail **shut**: the needle is textually
-/// exact, so a §2.2 hard wrap between `GeometryUtils.` and
-/// `axVisibleFrame` hides a call (the per-file counts catch the
-/// inverse — a listed call rewrapped away goes red), and a call
-/// reached through a new helper that itself calls the direct API
-/// from an allowlisted file is invisible.
+/// The needle is the **bare** `axVisibleFrame`, not the
+/// qualified call. Matching `GeometryUtils.axVisibleFrame` failed
+/// OPEN — a §2.2 hard wrap between the type and the member hid a
+/// call in an unlisted file, and `swift format` keeps that wrap,
+/// so the violation would have been formatter-blessed and
+/// permanently invisible (found in review). The bare name is
+/// declared in exactly one place, whose own declaration is
+/// allowlisted below.
+///
+/// Remaining limit, which fails **shut**: a call reached through
+/// a new helper that itself calls the direct API from an
+/// allowlisted file is invisible.
 @Suite("Visible-bounds routing")
 struct VisibleBoundsRoutingTests {
     private var coreRoot: URL {
@@ -42,11 +48,12 @@ struct VisibleBoundsRoutingTests {
     /// the only reminder an agent editing it gets).
     private let governed = ["Tiling", "Layouts", "Commands"]
 
-    /// Every file allowed to call `GeometryUtils.axVisibleFrame`
-    /// directly, with today's exact count and the reason it is
-    /// outside the hook. Anything absent from this map must be
-    /// at zero.
+    /// Every file allowed to name `axVisibleFrame` directly, with
+    /// today's exact count and the reason it is outside the hook.
+    /// Anything absent from this map must be at zero.
     private let allowed: [String: Int] = [
+        // The declaration itself.
+        "GeometryUtils.swift": 1,
         // The hook's own default.
         "TilingEngine.swift": 1,
         // `screen(containing:)` is static — no instance in hand.
@@ -70,7 +77,7 @@ struct VisibleBoundsRoutingTests {
                     try String(contentsOf: file, encoding: .utf8)
                 )
                 let hits = source.occurrences(
-                    of: "GeometryUtils.axVisibleFrame"
+                    of: "axVisibleFrame"
                 )
                 guard hits > 0 else { continue }
                 counts[file.lastPathComponent, default: 0] += hits
@@ -78,10 +85,9 @@ struct VisibleBoundsRoutingTests {
         }
         for (file, count) in counts.sorted(by: { $0.key < $1.key }) {
             let unlisted =
-                "\(file) makes \(count) direct "
-                + "GeometryUtils.axVisibleFrame call(s); route "
-                + "them through tiler.visibleBounds, or justify "
-                + "and re-pin the count here"
+                "\(file) names axVisibleFrame \(count) time(s); "
+                + "route those bounds through tiler.visibleBounds, "
+                + "or justify and re-pin the count here"
             #expect(
                 allowed[file] == count,
                 Comment(rawValue: unlisted)
@@ -91,8 +97,9 @@ struct VisibleBoundsRoutingTests {
         // the entry is now unfalsifiable and should be dropped.
         for (file, expected) in allowed {
             let vanished =
-                "\(file) no longer makes \(expected) direct "
-                + "call(s) — drop or re-pin its allowlist entry"
+                "\(file) no longer names axVisibleFrame "
+                + "\(expected) time(s) — drop or re-pin its "
+                + "allowlist entry"
             #expect(
                 counts[file] == expected,
                 Comment(rawValue: vanished)

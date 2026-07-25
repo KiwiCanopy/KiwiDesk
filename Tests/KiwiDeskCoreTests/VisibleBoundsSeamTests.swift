@@ -47,6 +47,12 @@ struct VisibleBoundsSeamTests {
             "space_bar.set_enabled",
             args: [.bool(false)]
         )
+        // Pin the two defaults these fixtures reason from, the
+        // rule this change set wrote into §5: the pile threshold
+        // below is 2 * min, and a finished mouse resize only
+        // reaches the layout at all in `.layout` mode.
+        #expect(core.tiler.settings.minWindowSize == 300)
+        #expect(core.tiler.settings.mouseResize == .layout)
         return core
     }
 
@@ -147,16 +153,29 @@ struct VisibleBoundsSeamTests {
     @Test("The BSP resize sign reads the injected bounds")
     func bspFocusSignFollowsInjectedBounds() {
         // `bspFocusSign` classifies the focused slot as the first
-        // or second region by comparing it against the display
-        // bounds, so an un-injected read would compare a slot laid
-        // out in the fixture's 1000pt rect against the host's much
-        // wider one — and on a wide host BOTH windows fall in its
-        // first half, so the right window's delta would stop
-        // flipping. Growing the right window must lower the shared
-        // ratio (#122).
+        // or second region via `MouseResize.bspSide`, which is
+        // `slot.midX <= bounds.midX ? 1 : -1`. Growing the right
+        // window must lower the shared ratio (#122).
+        //
+        // The rect sits at a NEGATIVE origin on purpose. A revert
+        // to the host's screen leaves the slot where the injected
+        // rect put it and only changes the `bounds` it is compared
+        // against — so with a rect at x: 0 the classification
+        // survives on any host narrower than ~1500pt, including
+        // the ~1066pt runner of #523: the guard would have been
+        // green on CI and red only on a wide dev Mac, reproducing
+        // the very anti-pattern it exists to catch (review). Here
+        // the right slot's midX is −4250 against the injected
+        // −4500 (second region), while EVERY real display has
+        // midX ≥ 0 (first region), so a revert goes red anywhere.
         guard NSScreen.main != nil else { return }
         let core = makeCore(
-            bounds: CGRect(x: 0, y: 0, width: 1000, height: 900)
+            bounds: CGRect(
+                x: -5000,
+                y: 0,
+                width: 1000,
+                height: 900
+            )
         )
         core.execute(
             "set_mode",

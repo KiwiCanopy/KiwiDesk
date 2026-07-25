@@ -1,7 +1,10 @@
 import Foundation
 
 /// Stateless primitives shared by the source-scanning parity
-/// guards (`SidebarSearchParityTests`, `DiscardGateParityTests`).
+/// guards: `SidebarSearchParityTests`, `DiscardGateParityTests`,
+/// `GreyOutParityTests`, and `VisibleBoundsRoutingTests` — which
+/// scans `Sources/KiwiDeskCore`, not the GUI tree, and lives here
+/// only because this helper does.
 ///
 /// Ratified as a third shared test primitive under AGENTS.md §5
 /// ("Split test suites early") and `.claude/rules/tests.md`, on
