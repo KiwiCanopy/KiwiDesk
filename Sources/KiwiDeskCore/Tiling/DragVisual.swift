@@ -27,11 +27,11 @@ public struct DragVisual: Sendable, Equatable, Encodable {
     public static let ghostDefault = DragVisual(
         enabled: true,
         border: true,
-        borderColor: "#567A1F",
+        borderColor: "#588613",
         borderThickness: 5,
         borderAlignment: .inside,
         fill: true,
-        fillColor: "#567A1F40"
+        fillColor: "#58861340"
     )
 
     /// Drop zone (drag target): a vivid, darkened amber — the

@@ -2370,13 +2370,13 @@ drag.set_ghost_border_alignment("inside")
 
 **Expects:** a hex color.
 
-**Does:** sets the ghost border color (default `#567A1F`,
+**Does:** sets the ghost border color (default `#588613`,
 deep green — the ghost, drag's origin, is all-green).
 
 **Example:**
 
 ```lua
-drag.set_ghost_border_color("#567A1F")
+drag.set_ghost_border_color("#588613")
 ```
 
 ### drag.set_ghost_fill
@@ -2395,13 +2395,13 @@ drag.set_ghost_fill(true)
 
 **Expects:** a hex color.
 
-**Does:** sets the ghost fill color (default `#567A1F40`,
+**Does:** sets the ghost fill color (default `#58861340`,
 deep green with 25% alpha).
 
 **Example:**
 
 ```lua
-drag.set_ghost_fill_color("#567A1F40")
+drag.set_ghost_fill_color("#58861340")
 ```
 
 ### drag.set_drop_zone_enabled
@@ -2548,12 +2548,15 @@ border.set_enabled(true)
 **Expects:** a number (points). Out-of-range values are clamped
 to `0.5`–`20`.
 
-**Does:** sets the ring width (default `2`).
+**Does:** sets the ring width (default `5`). 5 pt is the widest
+that still tiles cleanly when unfocused rings are on — each ring
+reaches its width into the 10 pt gap, so two of them exactly fill
+it without overlapping.
 
 **Example:**
 
 ```lua
-border.set_width(2)
+border.set_width(5)
 ```
 
 ### border.set_focused_color
@@ -2562,12 +2565,12 @@ border.set_width(2)
 the same format as every other KiwiDesk color.
 
 **Does:** sets the focused window's ring color (default
-`"#567A1F"`, the Kiwi theme's deep-green focus accent).
+`"#588613"`, the Kiwi theme's deep-green focus accent).
 
 **Example:**
 
 ```lua
-border.set_focused_color("#567A1F")
+border.set_focused_color("#588613")
 ```
 
 ### border.set_unfocused_enabled
@@ -2616,13 +2619,15 @@ border.set_corner_style("rounded")
 **Expects:** a boolean.
 
 **Does:** when `true`, wraps the **focused** ring in a soft colored
-bloom — a zero-offset blurred halo in the ring's own color, the
-JankyBorders "glow" look (default `false`). A render trait like
-width and corners: it reuses `focused_color`, adds no color choice,
-and never rings the unfocused windows (a bloom on every dim ring
-would undo the point of making the focused one stand out). The soft
-edge is allowed to bleed into the layout gap, so `fit_gaps` is
-unaffected.
+bloom — a zero-offset blurred halo, the JankyBorders "glow" look
+(default `false`). A render trait like width and corners: it adds no
+color choice and never rings the unfocused windows (a bloom on every
+dim ring would undo the point of making the focused one stand out).
+The bloom is a **brightened** derivative of `focused_color` (a halo
+is a fill, not a legibility-bound stroke, so it reads more vivid than
+the darkened ring, in the ring's own hue) — set only `focused_color`
+and the glow follows. The soft edge is allowed to bleed into the
+layout gap, so `fit_gaps` is unaffected.
 
 **Example:**
 
@@ -3900,9 +3905,9 @@ stripped, grouped by namespace — `set_gap_override` becomes
       "corner_radius": 16,
       "ghost": {
         "enabled": true, "border": true,
-        "border_color": "#567A1F", "border_thickness": 5,
+        "border_color": "#588613", "border_thickness": 5,
         "border_alignment": "inside",
-        "fill": true, "fill_color": "#567A1F40"
+        "fill": true, "fill_color": "#58861340"
       },
       "drop_zone": {
         "enabled": true, "border": true,

@@ -50,18 +50,29 @@ public struct BorderStyle: Sendable, Equatable {
 
     public var enabled = true
     /// Ring width (pt). Raw here; callers clamp to
-    /// `minWidth...maxWidth` (`clampedWidth`).
-    public var width: CGFloat = 2
-    /// Deep kiwi green — the brand accent hue (~84°) darkened for
-    /// stroke duty. The bright accent (#8DB354) is fill-only and
-    /// vanishes as a thin ring over light window content, so the
-    /// ring drops it in lightness (not hue) to clear 3:1 on both
-    /// near-white and near-black while staying on-brand green. May
-    /// read low-contrast over window content that is itself green
-    /// (see docs/design-decisions.md accepted limitations). Default
-    /// mirrored in docs/lua-reference.md (border colors) — change
-    /// both.
-    public var focusedColor = "#567A1F"
+    /// `minWidth...maxWidth` (`clampedWidth`). Default 5 pt — thick
+    /// enough to actually read as a frame (2 pt was too faint), and
+    /// the largest width that still tiles cleanly when unfocused
+    /// rings are on: each ring reaches `width` into the 10 pt inner
+    /// gap, so `2 × 5 = 10` fills the gap edge-to-edge without
+    /// overlap; 6 pt would overlap. A thicker stroke also reads at a
+    /// brighter, more saturated color than a hairline can (see
+    /// `focusedColor`).
+    public var width: CGFloat = 5
+    /// Kiwi green — the brand accent hue (~84°). Still darkened from
+    /// the fill-only bright accent (#8DB354, which vanishes as a ring
+    /// over light content), but at the 5 pt default width a thicker
+    /// stroke tolerates more saturation, so this sits livelier than
+    /// the old #567A1F (S 75% vs 60% at the same lightness) while
+    /// still clearing the 3:1 floor on both near-white (~4.3:1) and
+    /// near-black (~4.8:1). Hue, not lightness, stays the on-brand
+    /// invariant. May read low-contrast over window content that is
+    /// itself green (see docs/design-decisions.md accepted
+    /// limitations). Default mirrored in docs/lua-reference.md
+    /// (border colors) and the drag ghost (`DragVisual.ghostDefault`)
+    /// — change all three. The optional glow blooms a brightened
+    /// derivative of this (`BorderStyle.glowColor(from:)`).
+    public var focusedColor = "#588613"
     public var unfocusedEnabled = false
     /// A subtle translucent grey — present without competing with
     /// the focused ring for attention.
@@ -69,8 +80,11 @@ public struct BorderStyle: Sendable, Equatable {
     public var cornerStyle: CornerStyle = .rounded
     /// A soft colored bloom around the focused ring (#358) — the
     /// JankyBorders `COLOR_STYLE_GLOW` look, a zero-offset blurred
-    /// halo in the ring's own hue. A render trait like width and
-    /// corners, not a visibility toggle: it reuses `focusedColor`,
+    /// halo in a brightened derivative of the ring's hue
+    /// (`glowColor(from:)` — a bloom is a fill, so it can be far more
+    /// vivid than the legibility-darkened stroke). A render trait
+    /// like width and corners, not a visibility toggle: it reuses
+    /// `focusedColor` (introducing no separate color knob),
     /// introduces no color choice, and applies to the **focused
     /// ring only** (a bloom on every unfocused ring would undercut
     /// the focused one it is meant to make pop). Default OFF —

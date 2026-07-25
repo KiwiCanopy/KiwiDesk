@@ -42,6 +42,12 @@ public struct Gaps: Sendable, Equatable, Codable {
         /// Gap between stacked windows (rows).
         public var vertical: CGFloat
 
+        /// The 10 pt default couples to `BorderStyle.width` (5 pt):
+        /// two neighbouring focus rings each reach their width into
+        /// this gap, so `2 × 5 = 10` fills it edge-to-edge without
+        /// overlap. Lowering this default silently invalidates that
+        /// rationale (rings would overlap with unfocused borders on) —
+        /// revisit the width default and its docs if you change it.
         public init(
             horizontal: CGFloat = 10,
             vertical: CGFloat = 10

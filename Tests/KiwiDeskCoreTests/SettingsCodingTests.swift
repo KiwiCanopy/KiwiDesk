@@ -48,8 +48,8 @@ struct SettingsCodingTests {
             ]
         )
         #expect(border["enabled"] as? Bool == true)
-        #expect(border["width"] as? Double == 2)
-        #expect(border["focused_color"] as? String == "#567A1F")
+        #expect(border["width"] as? Double == 5)
+        #expect(border["focused_color"] as? String == "#588613")
         #expect(border["unfocused_enabled"] as? Bool == false)
         #expect(border["corner_style"] as? String == "rounded")
         #expect(border["glow"] as? Bool == false)
@@ -200,8 +200,8 @@ struct SettingsCodingTests {
         // Kiwi defaults: deep-green ghost (origin), amber drop
         // zone (target) — hue carries origin vs. target. The
         // ghost is the brand accent hue darkened for stroke duty.
-        #expect(ghost["border_color"] as? String == "#567A1F")
-        #expect(ghost["fill_color"] as? String == "#567A1F40")
+        #expect(ghost["border_color"] as? String == "#588613")
+        #expect(ghost["fill_color"] as? String == "#58861340")
         #expect(ghost["border_thickness"] as? Double == 5)
         #expect(ghost["border_alignment"] as? String == "inside")
         let zone = try object(drag["drop_zone"])

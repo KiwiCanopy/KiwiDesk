@@ -170,8 +170,15 @@ private struct FocusBorderPreview: View {
                             lineWidth: width
                         )
                         .shadow(
+                            // Bloom uses the brightened derivative,
+                            // matching the real renderer (#358).
                             color: glow
-                                ? Color(kiwiHex: color) : .clear,
+                                ? Color(
+                                    kiwiHex: BorderStyle.glowColor(
+                                        from: color
+                                    )
+                                )
+                                : .clear,
                             radius: glow ? glowRadius : 0
                         )
                 }

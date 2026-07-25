@@ -1613,16 +1613,29 @@ window content. The bright kiwi accent (`#8DB354`/`#AACB5D`) is a
 fill-only color — too light to survive as a thin stroke on light
 windows (`#AACB5D` ≈ 1.5:1 on white, fails AA) — so the ring and
 ghost drop the *same* accent hue (~84°) down in lightness to
-`#567A1F`, which clears 3:1 on both near-white and near-black
-while staying unmistakably on-brand green. The drag drop-zone
+`#588613`, which clears 3:1 on both near-white (~4.3:1) and
+near-black (~4.8:1) while staying unmistakably on-brand green. The
+default ring width is 5 pt (was 2): a thicker stroke is not just
+more visible, it reads at a *more saturated* color than a hairline
+can (a 2 pt line's anti-aliased edges wash its effective contrast
+out), which is why the default could move off the duller `#567A1F`
+to this livelier `#588613` at the same lightness. 5 pt is also the
+widest that still tiles cleanly with unfocused rings on: each ring
+reaches its width into the 10 pt default inner gap, so `2 × 5 = 10`
+fills the gap edge-to-edge without overlap (6 pt would overlap).
+That couples the width default to the gap default — changing either
+without the other re-opens or overlaps the ring band. The drag drop-zone
 keeps a distinct hue as a darkened amber `#C2790A` (the old
 `#E8A33D` had the same light-window problem), so origin (green)
 still reads apart from target (amber). This is a darkening, not a
 hue change — the same move the green-forward identity makes for
 ink and borders: keep the hue, drop the lightness where a role
-needs contrast. (The Space Bar's own `focused_item_color` stays
-amber `#E8A33D` for now — a separate "viewing-not-active"
-semantic, converged in a follow-up, #470.)
+needs contrast. The optional **glow** inverts this trade for the
+bloom only: a halo is a fill, not a stroke, so it brightens the ring
+hue back up (`BorderStyle.glowColor`) instead of staying darkened.
+(The Space Bar's own `focused_item_color` stays amber `#E8A33D` for
+now — a separate "viewing-not-active" semantic, converged in a
+follow-up, #470.)
 
 **The App Bar has its own sidebar destination.** (#229,
 superseding the earlier "Appearance ends with the App Bar
