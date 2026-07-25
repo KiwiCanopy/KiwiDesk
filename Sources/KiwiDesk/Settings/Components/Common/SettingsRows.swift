@@ -58,7 +58,12 @@ struct PtSlider: View {
             // A locale whose word for "Automatic" runs longer
             // than the column shrinks rather than truncating —
             // a clipped readout reads as a rendering bug, a
-            // slightly smaller one does not.
+            // slightly smaller one does not. Load-bearing: the
+            // word ONLY renders on an `AutoGatedGroup`-gated
+            // row, so it is always dimmed and disabled beside
+            // full-size numbers — a slightly smaller word there
+            // reads as "inert", not "broken". Don't "fix" the
+            // scale factor away.
             .lineLimit(1)
             .minimumScaleFactor(0.75)
         }

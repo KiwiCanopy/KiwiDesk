@@ -1288,7 +1288,7 @@ track.set_axis("vertical")
 **Expects:** an integer ≥ 0.
 
 **Does:** sets how many **normal** tracks a space can hold. `0`
-restores **automatic** tracks (the default — tracks open and
+restores the **automatic** track limit (the default — tracks open and
 collapse as windows come and go; see `track.set_auto_tracks`).
 A positive value pins the limit *and turns automatic off*, so
 `set_limit(3)` takes effect on its own. Beyond the limit, one

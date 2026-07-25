@@ -152,32 +152,6 @@ loud?* — not by which pane it lives in:
 
 Minimum window size migrated slider → `StepperRow` on this
 rule (#204): it is a precise pt threshold, not a feel knob.
-
-**"Automatic" is the word for a value; "Auto" is the adjective
-in a toggle label (R6/#406).** A value the user *reads* or
-*picks* takes macOS's own full word — the empty-hex colour
-sentinel, an app rule's target, a monitor chip's placement, and
-`PtSlider`'s readout, which prints **Automatic** in place of
-`0 pt` while the Auto sentinel is set. A toggle that turns
-automation on takes "Auto" as an adjective in front of the
-field it gates — "Auto item size" over **Item size**, "Auto
-track limit" over **Track limit** — because "Automatic item
-size" is needlessly long for a label whose noun is already on
-the next row. That adjective form must name **what** is decided
-automatically: "Automatic tracks" was retired because no track
-is itself automatic, only how many of them exist (ui-designer,
-2026-07-25).
-
-The readout costs a metric to honour, and the width was paid
-rather than dodged: `SettingsMetrics.readoutColumn` went
-64 → 84 pt, since the widest string it holds is no longer a
-number ("2000 pt") but that word. It is now the one column
-sized by a *word*, so a locale whose term runs longer shrinks
-via `minimumScaleFactor` instead of clipping — a clipped
-readout reads as a rendering bug, a slightly smaller one does
-not. Every slider's track is 20 pt shorter as a result; that is
-the price of the rule, accepted deliberately.
-
 **Layout Defaults is a per-mode tab strip, not a stacked
 scroll (#204).** The layout modes are a fixed, small,
 mutually-exclusive set (`LayoutMode` minus Floating), so they
@@ -258,7 +232,7 @@ on a passive `BadgeChip` would promise interaction the chip
 doesn't have. Depth comes from the hairline stroke both chip
 types now share, matching the flat capsule language of
 native tags. A non-interactive value state in a control row
-(the slot size's "Auto — orientation standard") renders in
+(the slot size's "Default — orientation standard") renders in
 the same capsule language rather than as bare gray prose,
 which read as skippable filler.
 
@@ -355,8 +329,9 @@ label string ("Columns: 3") read as static text, and even a
 plain readout beside arrows read as passive, so the value is
 a real `TextField` (type a number, or use the arrows) that
 commits and clamps on Return / focus loss. An optional unit
-`suffix` ("ms") sits between the field and the arrows. The color grid is the other exception: its
-two-column `HexColorField` layout keeps its own label width
+`suffix` ("ms") sits between the field and the arrows. The
+color grid is the other exception: its two-column
+`HexColorField` layout keeps its own label width
 (`colorLabelColumn`), because the shared axis would misalign
 the grid's second column. Dropdowns ride the axis via
 `DropdownRow` and take `.controlSize(.large)` so a menu
@@ -365,6 +340,17 @@ Within a section, a `Divider` separates geometry controls
 from the behavior dropdowns (overflow, new-window placement)
 — eight-point uniform spacing alone let unrelated rows read
 as one group.
+
+The readout column is the one sized by a **word**, not a number
+(R6/#406): an Auto-gated slider prints "Automatic" there, so
+`readoutColumn` went 64 → 84 pt — "2000 pt" is no longer the
+widest string it holds. A locale whose term runs longer shrinks
+via `minimumScaleFactor` rather than clipping. Every slider's
+track is 20 pt shorter as a result, and the per-Space popover
+widened 384 → 404 pt to pay that back on the app's narrowest
+editing surface. See `docs/design-decisions.md` before
+narrowing it again — the alternatives were weighed and
+rejected.
 
 **Preview alignment splits on standalone-vs-paired, not by
 tab.** (ui-designer consult 2026-07-14.) A settings preview is
@@ -498,8 +484,8 @@ outlier moves. Three R6 renames are that case:
 `drag.set_ghost_border_thickness` → `…_border_width` (the GUI
 already said "Width"; a stroke has a width, a bar has a
 thickness), `track.set_count` → `track.set_limit` (the GUI
-already said "Track limit"; the value is a cap that automatic
-tracks overrides, not a count of what exists), and
+already said "Track limit"; the value is a cap that
+`auto_tracks` overrides, not a count of what exists), and
 `tab_background` → `background_style` on both bars (the entries
 are not browser tabs, and under Plain no item draws a box of
 its own in steady state). The discriminator is never churn cost —
@@ -522,6 +508,54 @@ steppers are 1-based wherever 0 carries a separate Lua meaning;
 the range. Track has no per-space automatic row, so the grey
 there keys on the RESOLVED `auto_tracks` (#171) — the value the
 space actually gets, never the global.
+
+**"Automatic" is the word for a value; "Auto" is the adjective
+in a toggle label (R6/#406).** A value the user *reads* or
+*picks* takes macOS's own full word — the empty-hex colour
+sentinel, an app rule's target, a monitor chip's placement, and
+`PtSlider`'s readout, which prints **Automatic** in place of
+`0 pt` while the Auto sentinel is set. A toggle that turns
+automation on takes "Auto" as an adjective, because "Automatic
+item size" is needlessly long for a label whose noun is already
+on the next row. Two shapes, picked by **how many fields the
+toggle gates**:
+
+- **One gated field → `Auto <Field>`**, naming it exactly:
+  "Auto item size" over **Item size**, "Auto track limit" over
+  **Track limit**. The pair reads top-to-bottom.
+- **A gate over a *set* of fields → verb + object** naming the
+  composite: **"Auto-size grid"** gates Columns *and* Rows, so
+  no single field name exists — "Auto grid size" would name a
+  field that appears on no row. Verb+object is forced by the
+  multi-field gate, not chosen; do not "fix" it into the first
+  shape.
+
+Either shape must name **what** is decided automatically:
+"Automatic tracks" was retired because no track is itself
+automatic, only how many of them exist (ui-designer,
+2026-07-25). And "Automatic" is for a value the system
+*computes* — a fixed built-in stays **"Default"** (the slot
+size's `Default — orientation standard`), which is why that one
+does not take the word despite its `slot_size.auto` key.
+
+**A boolean mode flag names the MODE on the wire, even when its
+label names the field it gates (R6/#406).** "Auto track limit"
+ships against wire `track.set_auto_tracks` /
+`layout.track.auto_tracks`, and that divergence is decided, not
+an oversight. The reason is not "the wire is geometric" — a
+boolean is not geometric — but that the two names describe
+different true things. With the flag ON, `limit` is not
+computed automatically, it is **ignored entirely**
+(`TrackParams.trackCap` returns 0, meaning unlimited, and the
+count falls out of geometry). So the wire names a *mode* —
+"the partition manages itself; the limit field is dead" — which
+is accurate, while `auto_limit` would name an automatic limit
+that does not exist. The label may still say "Auto track limit"
+because a label is read **beside** the field it gates, and a
+wire name is read alone. This is the third clause of the
+rename discriminator above: relabel when the label is
+ambiguous, rename the wire when the wire term is wrong, and
+expect a mode flag to diverge from its own label by design.
 
 ## Interaction states
 
@@ -616,8 +650,8 @@ by an Auto toggle stores `0` as the sentinel but its readout
 prints "Automatic" while gated — "0 pt" next to a greyed slider
 reads like a broken value (QA 2026-07-19). The full word, not
 "Auto": a readout is a value, and the column was widened to
-hold it (see *"Automatic" is the word for a value*, above). The slider itself
-stays floored at 1 so dragging can never write the sentinel
+hold it (see *"Automatic" is the word for a value*, below).
+The slider itself stays floored at 1 so dragging can never write the sentinel
 (#381).
 
 **A control may relabel with the mode it serves.** One field,

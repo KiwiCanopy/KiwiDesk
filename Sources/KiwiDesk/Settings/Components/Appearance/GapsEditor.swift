@@ -110,6 +110,11 @@ struct GapsEditor: View {
             )
             .foregroundStyle(.secondary)
             .font(.system(.body, design: .monospaced))
+            // The other word-valued readout (see `PtSlider`):
+            // a longer locale shrinks rather than wrapping and
+            // growing the row's height.
+            .lineLimit(1)
+            .minimumScaleFactor(0.75)
             .help(
                 mixed
                     ? L(

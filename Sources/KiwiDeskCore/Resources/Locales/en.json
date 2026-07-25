@@ -119,7 +119,7 @@
   "behavior.quit.caption": "Before KiwiDesk stops, it arranges managed windows on each display so their title bars remain reachable.",
   "behavior.quit.summary": "2×2 up to %1$d windows · 3×3 up to %2$d · 4×4 above %2$d",
   "behavior.quit.target_depth": "Target windows per cell",
-  "behavior.quit.target_depth.help": "Automatic adds a row and column when cells would exceed this target. The grid stays between 2×2 and 4×4; after 4×4, additional windows keep cascading in its cells.",
+  "behavior.quit.target_depth.help": "The grid adds a row and column when cells would exceed this target. It stays between 2×2 and 4×4; after 4×4, additional windows keep cascading in its cells.",
   "behavior.quit.title": "On Quit",
   "border.caption": "Outlines the focused window so it stands out in a gapped layout.",
   "border.controls.disabled": "Turn on Show focus border to edit these settings.",
