@@ -10,5 +10,14 @@ extension SettingsModel {
     /// footer Save), never a live link.
     func applyPalette(_ palette: ColorPalette) {
         palette.apply(to: &config.settings)
+        // Kiwi Neon is the glow showcase, but a palette's colors
+        // can't set the non-color `border.glow` flag (palettes are
+        // color-only, `ColorPaletteKeys`), so switch the bloom on
+        // when it's picked. One-directional by design — picking a
+        // sober palette later doesn't force glow back off, leaving a
+        // user's own choice intact (they toggle it in Focus border).
+        if palette.name == PaletteCatalog.neonName {
+            config.settings.borderStyle.glow = true
+        }
     }
 }

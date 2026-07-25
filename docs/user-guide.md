@@ -616,10 +616,14 @@ App Bar and Space Bar — the bars take most of a palette's paint but
 are edited on their own tab, so the mirror shows a click landing
 without leaving Appearance.
 
-- **Bundled** palettes (Kiwi, Clean Light, Slate, True Dark,
-  Sunset, Ultraviolet, Monochrome) are built in and marked
-  "Built-in" — they can't be renamed or deleted. "Kiwi" is the
-  shipped default, so applying it is a reset to the default colors.
+- **Bundled** palettes (Kiwi, Kiwi Gold, Kiwi Neon, Clean Light,
+  Slate, True Dark, Sunset, Ultraviolet, Monochrome) are built in
+  and marked "Built-in" — they can't be renamed or deleted. "Kiwi"
+  is the shipped default, so applying it is a reset to the default
+  colors. **Kiwi Neon** is a bright dark theme built to show off the
+  focus-border **glow** — picking it also switches the glow on (you
+  can turn it back off in Focus border); other palettes leave your
+  glow setting alone.
 - **My palettes** are yours. The **＋** tile saves the current
   colors as a new palette; right-click a saved palette to **Rename**,
   **Export…**, or **Delete** it. **Import…** loads a palette file

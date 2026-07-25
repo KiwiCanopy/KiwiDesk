@@ -33,18 +33,21 @@ extension NSColor {
     }
 
     /// An opaque sRGB `CGColor` for the focus-border glow bloom
-    /// (#358). The glow is a `CGContextSetShadowWithColor` shadow,
-    /// and on a SkyLight window-backed context a calibrated/catalog
-    /// `CGColor` (what `NSColor(kiwiHex:).cgColor` yields) is not
-    /// honored for the shadow path — it drops to the default
-    /// black-at-low-alpha and reads gray. Rebuilding the color in
-    /// sRGB with alpha forced to 1 (JankyBorders' own
-    /// `CGColorCreateGenericRGB(r, g, b, 1.0)`) keeps the bloom the
-    /// ring's hue. Used for the shadow color only — the ring body
-    /// keeps its faithful hex (alpha included), so a translucent
-    /// `focused_color` still reads translucent.
+    /// (#358). Two things happen here: (1) the color is BRIGHTENED
+    /// from the ring hue via `BorderStyle.glowColor(from:)` — a bloom
+    /// is a fill, not a legibility-bound thin stroke, so it reads far
+    /// more vivid than the darkened ring; (2) it is rebuilt in sRGB
+    /// with alpha forced to 1. The shadow is a
+    /// `CGContextSetShadowWithColor`, and on a SkyLight window-backed
+    /// context a calibrated/catalog `CGColor` (what
+    /// `NSColor(kiwiHex:).cgColor` yields) is not honored for the
+    /// shadow path — it drops to black-at-low-alpha and reads gray;
+    /// the sRGB rebuild (JankyBorders' `CGColorCreateGenericRGB(r, g,
+    /// b, 1.0)`) fixes that. Used for the shadow color only — the
+    /// ring body keeps its faithful hex (alpha included), so a
+    /// translucent `focused_color` still reads translucent.
     static func kiwiGlow(hex: String) -> CGColor {
-        let base = NSColor(kiwiHex: hex)
+        let base = NSColor(kiwiHex: BorderStyle.glowColor(from: hex))
         let srgb = base.usingColorSpace(.sRGB) ?? base
         return CGColor(
             srgbRed: srgb.redComponent,

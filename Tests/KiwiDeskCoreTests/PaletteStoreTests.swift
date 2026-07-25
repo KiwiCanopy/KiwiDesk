@@ -23,7 +23,7 @@ struct PaletteStoreTests {
     @Test("Built-ins are the catalog; no user palettes at first")
     func initialState() {
         let (store, _) = makeStore()
-        #expect(store.builtins().count == 8)
+        #expect(store.builtins().count == 9)
         #expect(store.userPalettes().isEmpty)
     }
 
