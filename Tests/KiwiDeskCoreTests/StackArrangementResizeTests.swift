@@ -32,6 +32,16 @@ struct StackArrangementResizeTests {
             "stack.set_stack_position",
             args: [.string("top")]
         )
+        // Zones are measured against the host's real NSScreen,
+        // so on a short display the default 300pt minimum leaves
+        // the split no room to move and the ratio assertions
+        // below stop describing anything. Pin a minimum no
+        // plausible display can breach; the clamped case has its
+        // own coverage.
+        core.execute(
+            "set_min_window_size",
+            args: [.number(100)]
+        )
         for index in 1...3 {
             core.state.apply(
                 .windowCreated(
