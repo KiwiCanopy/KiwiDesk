@@ -12,7 +12,11 @@ extension SettingsModel {
     /// records a degenerate 0-screen set that can never resolve.
     /// Gates the monitor-capturing actions — Save as New Profile,
     /// Update, and Save a Copy As from the live active profile —
-    /// and doubles as their disabled-button tooltip. Stored-
+    /// and doubles as their disabled-button tooltip. Since #516
+    /// the first two are only *reached* by this gate when there
+    /// is nothing global to save; a pending global edit routes
+    /// to `.saveGlobalsOnly` instead. Copy stays unconditionally
+    /// gated — it always captures a monitor set. Stored-
     /// profile edits are NOT gated: their write path only upserts
     /// a monitor set that already matches the live set, and while
     /// paused `set(matching: [])` finds none, so the refresh is
@@ -132,16 +136,6 @@ extension SettingsModel {
         } catch {
             core.onLog("settings save failed: \(error)")
         }
-    }
-
-    private var globalsChanged: Bool {
-        guard let saved = savedSidecar else { return true }
-        return saved.modes != config.modes
-            || saved.appRules != config.appRules
-            || saved.floatRules != config.floatRules
-            || saved.ignoreRules != config.ignoreRules
-            || saved.profileBindings != config.profileBindings
-            || saved.spaces != config.spaces
     }
 
     // MARK: - Editing a stored profile (#18)

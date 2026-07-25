@@ -1228,8 +1228,17 @@ capture the live monitor set (**Save as New Profile…**, **Save a
 Copy As…** from the active profile, and **Save** when it refreshes
 the active profile's monitor set) is greyed out, with a tooltip
 explaining why. A profile saved with no monitors could never
-resolve later. Grant access first; editing a *stored* profile
-(which keeps its own on-disk monitor set) stays available.
+resolve later. Editing a *stored* profile (which keeps its own
+on-disk monitor set) stays available.
+
+**Your settings still save while paused.** Shortcuts, app rules,
+float and ignore rules, your space list, and Desktop → profile
+bindings carry no monitor set, so **Save** stays available for
+them and writes `gui.json` as usual — a caption beside the footer
+reads "Layout and monitors stay paused; Save covers everything
+else." Only layout/tiling edits wait for a profile save, and if
+you have both pending, the footer keeps saying **Unsaved changes**
+until you grant access and save the profile too.
 
 After saving, if a global setting changed (keybindings, app/float/
 ignore rules, or native Space bindings), `gui.json` is rewritten.

@@ -196,30 +196,6 @@ final class SettingsModel: ObservableObject {
     /// lives in `SettingsModel+ProfileOverrides.swift`.
     var editingStoredProfile: Bool { target != .live }
 
-    /// Which primary Save verb the footer currently offers. The
-    /// single source of the edit-context classification so any
-    /// affordance that points the user at Save (the footer's own
-    /// primary slot, the Fit-Gaps status) reads it here instead
-    /// of re-deriving the branch — a second copy silently omitted
-    /// the raw-Lua case and hard-coded the button labels.
-    enum PrimarySaveAction {
-        /// Save (⌘S) writes init.lua verbatim.
-        case saveLua
-        /// Save (⌘S) writes the stored profile; applies on load.
-        case updateStoredProfile
-        /// Save (⌘S) updates the active profile: apply + persist.
-        case updateActiveProfile
-        /// No target yet — Save as New Profile… creates one.
-        case saveAsNewProfile
-    }
-
-    var primarySaveAction: PrimarySaveAction {
-        if editingLua { return .saveLua }
-        if editingStoredProfile { return .updateStoredProfile }
-        if activeProfile != nil { return .updateActiveProfile }
-        return .saveAsNewProfile
-    }
-
     // MARK: - Sync with the backend
 
     // `reload()` and `selectEditTarget` — the single edit-mode

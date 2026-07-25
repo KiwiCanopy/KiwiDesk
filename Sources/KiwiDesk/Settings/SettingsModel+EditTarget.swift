@@ -100,6 +100,26 @@ extension SettingsModel {
 
     private func liveState() -> TargetState {
         var loaded = core.loadGuiConfig()
+        // `loadGuiConfig` overlays `spaces` from LIVE state, and
+        // while paused the engine never started — so live holds
+        // only `StateCoordinator`'s boot default and the overlay
+        // has replaced the authored list with `["1"]`. Same
+        // hazard #326 hit, same fix it used: read the authored
+        // sidecar instead.
+        //
+        // This is not cosmetic. Before #516 nothing could write
+        // `gui.json` while paused, so a degenerate list only
+        // mis-displayed; now a globals save would PERSIST it and
+        // destroy the user's spaces. Seeding correctly fixes the
+        // display and the save together, and keeps dirty
+        // tracking honest — patching only the write would leave
+        // `config.spaces` permanently diverged from the
+        // baseline, so the footer could never go clean.
+        if permissionPaused,
+            let persisted = core.persistedGuiConfig()
+        {
+            loaded.spaces = persisted.spaces
+        }
         // Recovered rows arrive as `.custom`; sort the ones
         // that match a catalog action into their sections
         // before the tabs render them (#4).

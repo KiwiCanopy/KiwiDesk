@@ -39,6 +39,15 @@ struct SettingsFooter: View {
                 .font(.caption)
                 .foregroundStyle(.orange)
             }
+            if model.primarySaveAction == .saveGlobalsOnly {
+                // Names what is EXCLUDED, not the six fields it
+                // writes — one sentence beats a field list, and
+                // the reader already has the paused banner above
+                // for the why (#516, ui-designer).
+                Text(pausedScopeCaption)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
             if let drift = model.layoutDrift {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(
@@ -166,6 +175,14 @@ struct SettingsFooter: View {
         }
     }
 
+    private var pausedScopeCaption: String {
+        L(
+            "footer.save.globals_only",
+            "Layout and monitors stay paused; Save covers "
+                + "everything else."
+        )
+    }
+
     private var saveCopyAsLabel: String {
         L("footer.save_a_copy_as", "Save a Copy As…")
     }
@@ -205,6 +222,17 @@ struct SettingsFooter: View {
                     model.profileSaveBlockedReason
                         ?? model.updateHint ?? ""
                 )
+        case .saveGlobalsOnly:
+            // Accessibility is off, so no profile may capture
+            // the empty monitor set — but a global changed, and
+            // globals carry no monitor set. Plain "Save", like
+            // its two profile siblings: scope rides the caption
+            // beside the footer, not the label (#516).
+            Button(save) { model.saveGlobalsWhilePaused() }
+                .keyboardShortcut("s")
+                .buttonStyle(.borderedProminent)
+                .controlSize(.regular)
+                .disabled(!model.isDirty)
         case .saveAsNewProfile:
             // No profile yet — the create action takes the
             // primary slot; it captures the live monitor set,
