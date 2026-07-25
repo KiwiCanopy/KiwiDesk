@@ -448,17 +448,11 @@ body::before {
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.4));
 }
 
-/* Swap the nav mark by theme, like the hero wordmark: colored
-   logo in light, golden variant in dark. */
-.nav__mark--dark {
-  display: none;
-}
-:root[data-theme="dark"] .nav__mark--light {
-  display: none;
-}
-:root[data-theme="dark"] .nav__mark--dark {
-  display: block;
-}
+/* No theme swap on the mark (#479): the symbol holds its kiwi
+   green in both themes, so one <img> serves both. Only the hero
+   *wordmark* still swaps, because its lettering has to invert
+   for contrast — a legibility problem on text, not a hue
+   problem on the symbol. */
 
 .nav__links {
   display: flex;

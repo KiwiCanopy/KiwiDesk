@@ -63,7 +63,6 @@ let package = Package(
                 .copy("Resources/Wordmark.png"),
                 .copy("Resources/WordmarkDark.png"),
                 .copy("Resources/AppMark.png"),
-                .copy("Resources/AppMarkDark.png"),
             ]
         ),
         .testTarget(

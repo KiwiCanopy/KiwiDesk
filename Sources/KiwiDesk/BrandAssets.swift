@@ -38,27 +38,31 @@ enum BrandAssets {
         Bundle.module.image(forResource: "Wordmark")
 
     /// Dark-mode wordmark from `logo_wordmark_dark.svg`: the
-    /// fused text is recoloured to warm off-white so it reads
-    /// on a dark pane without a badge. The About view swaps to
-    /// this by `colorScheme`, so neither mode needs a backing
-    /// card.
+    /// kiwi mark is byte-identical to the light master and only
+    /// the lettering flips to the brand mist-green, so it reads
+    /// on a dark pane without a badge (#479 — before that, the
+    /// dark variant re-hued the whole logo to gold). The About
+    /// view swaps by `colorScheme`, so neither mode needs a
+    /// backing card.
     static let wordmarkDark: NSImage? =
         Bundle.module.image(forResource: "WordmarkDark")
 
-    /// The full-colour app mark from `logo.svg`. Two uses: the
-    /// Settings sidebar identity header, and the runtime Dock
-    /// icon (`NSApp.applicationIconImage`) so the bare
-    /// executable shows the real logo whenever it raises to
-    /// `.regular`. The Dock use is an interim stand-in until the
-    /// packaged `.app` ships an `.icns` (#89); harmless once the
-    /// bundle provides one.
+    /// The full-colour app mark from `logo.svg`, in **both**
+    /// appearances. Two uses: the Settings sidebar identity
+    /// header, and the runtime Dock icon
+    /// (`NSApp.applicationIconImage`) so the bare executable
+    /// shows the real logo whenever it raises to `.regular`. The
+    /// Dock use is an interim stand-in until the packaged `.app`
+    /// ships an `.icns` (#89); harmless once the bundle provides
+    /// one.
+    ///
+    /// There is deliberately **no dark variant** (#479). A mark
+    /// that changes hue per appearance reads as a different
+    /// brand; the mark holds its kiwi green and only the
+    /// wordmark's *ink* is themed, which is a legibility problem
+    /// on text rather than a hue problem on the symbol. The
+    /// retired `AppMarkDark` was a gold recolour of the whole
+    /// mark, predating the green-forward palette (#439).
     static let appMark: NSImage? =
         Bundle.module.image(forResource: "AppMark")
-
-    /// The golden dark-mode app mark (from `logo_dark.svg`), for
-    /// the sidebar identity on a dark pane. The Dock icon keeps
-    /// the colour `appMark` — the Dock tile is a neutral surface
-    /// where the light mark reads in either appearance.
-    static let appMarkDark: NSImage? =
-        Bundle.module.image(forResource: "AppMarkDark")
 }
