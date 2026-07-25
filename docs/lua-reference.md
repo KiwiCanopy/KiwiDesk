@@ -1572,7 +1572,7 @@ app_bar.set_alignment("start")
 
 **Expects:** a positive number (points).
 
-**Does:** sets the strip depth, carved out of the layout.
+**Does:** sets the bar's thickness, carved out of the layout.
 
 **Example:**
 
@@ -1985,9 +1985,9 @@ space_bar.set_alignment("center")
 
 ### space_bar.set_thickness
 
-**Expects:** depth in points (default `32`).
+**Expects:** thickness in points (default `32`).
 
-**Does:** sets the depth of the reserved strip.
+**Does:** sets the bar's thickness, carved out of the layout.
 
 **Example:**
 
@@ -2510,31 +2510,32 @@ drag.set_corner_radius(16)
 
 ## Focus Border
 
-KiwiDesk can draw a thin ring around the focused window so it is
+KiwiDesk can draw a thin border around the focused window so it is
 unmistakable in a gapped layout — the feedback keyboard-driven
 focus otherwise lacks. It is **on by default** and marks only the
-focused window; you can optionally ring every other window too.
+focused window; it can optionally show one on every other window
+too.
 
-The ring is a pure overlay: it never changes where windows tile
+The border is a pure overlay: it never changes where windows tile
 (no gap coupling). The configured width is the thickness drawn
 outward into the gap — the value `border.fit_gaps` sizes gaps from.
-By default the ring is stacked **behind** its window: a flicker-free
+By default the border is stacked **behind** its window: a flicker-free
 placement that holds steady even when a window redraws rapidly (some
 browsers repaint on every keystroke) and hugs each window's real
 corner radius. The trade is that the window's drop-shadow falls
-across the ring's lower reach and the corner meets the window with a
+across the border's lower reach and the corner meets the window with a
 filled seam rather than a floating hairline.
 `border.set_draw_order("front")` switches to an in-front placement
 that is crisper and shadowless but can flicker on those browsers —
 a power-user opt-in (see below). Rounded corners match the real
 macOS window radius (queried per window); square draws sharp
-corners. The ring is pinned to its window's stacking level, so
+corners. The border is pinned to its window's stacking level, so
 popovers, sheets, and other windows the system places above the
-target still stay above its ring.
+target still stay above its border.
 
-Overflow piles and monocle show a ring only on the visible
+Overflow piles and monocle show a border only on the visible
 top window; set gaps at least as wide as the border to avoid
-neighbouring rings touching.
+neighbouring borders touching.
 
 ### border.set_enabled
 
@@ -2553,8 +2554,8 @@ border.set_enabled(true)
 **Expects:** a number (points). Out-of-range values are clamped
 to `0.5`–`20`.
 
-**Does:** sets the ring width (default `5`). 5 pt is the widest
-that still tiles cleanly when unfocused rings are on — each ring
+**Does:** sets the border width (default `5`). 5 pt is the widest
+that still tiles cleanly when unfocused borders are on — each border
 reaches its width into the 10 pt gap, so two of them exactly fill
 it without overlapping.
 
@@ -2569,7 +2570,7 @@ border.set_width(5)
 **Expects:** a hex color string (`"#RRGGBB"` or `"#RRGGBBAA"`) —
 the same format as every other KiwiDesk color.
 
-**Does:** sets the focused window's ring color (default
+**Does:** sets the focused window's border color (default
 `"#588613"`, the Kiwi theme's deep-green focus accent).
 
 **Example:**
@@ -2582,8 +2583,9 @@ border.set_focused_color("#588613")
 
 **Expects:** a boolean.
 
-**Does:** when `true`, also rings the unfocused windows (default
-`false`). Ignored in monocle, where only the focused window shows.
+**Does:** when `true`, also draws a border on the unfocused
+windows (default `false`). Ignored in monocle, where only the
+focused window shows.
 
 **Example:**
 
@@ -2595,7 +2597,7 @@ border.set_unfocused_enabled(false)
 
 **Expects:** a hex color string (`"#RRGGBB"` or `"#RRGGBBAA"`).
 
-**Does:** sets the unfocused windows' ring color (default
+**Does:** sets the unfocused windows' border color (default
 `"#8E8E93CC"`, a neutral grey at 80% opacity).
 
 **Example:**
@@ -2623,14 +2625,15 @@ border.set_corner_style("rounded")
 
 **Expects:** a boolean.
 
-**Does:** when `true`, wraps the **focused** ring in a soft colored
+**Does:** when `true`, wraps the **focused** border in a soft colored
 bloom — a zero-offset blurred halo, the JankyBorders "glow" look
 (default `false`). A render trait like width and corners: it adds no
-color choice and never rings the unfocused windows (a bloom on every
-dim ring would undo the point of making the focused one stand out).
+color choice and never touches the unfocused windows (a bloom on
+every dim border would undo the point of making the focused one
+stand out).
 The bloom is a **brightened** derivative of `focused_color` (a halo
 is a fill, not a legibility-bound stroke, so it reads more vivid than
-the darkened ring, in the ring's own hue) — set only `focused_color`
+the darkened border, in its own hue) — set only `focused_color`
 and the glow follows. The soft edge is allowed to bleed into the
 layout gap, so `fit_gaps` is unaffected.
 
@@ -2644,7 +2647,7 @@ border.set_glow(true)
 
 **Expects:** `"behind"` or `"front"`.
 
-**Does:** chooses where the ring stacks relative to windows.
+**Does:** chooses where the border stacks relative to windows.
 `behind` (default) draws it below the window — flicker-free, hugs
 the real corner radius, but carries the window's drop-shadow on its
 lower reach and a filled corner seam. `front` draws it above the
@@ -2653,7 +2656,7 @@ that repaint rapidly (Firefox/Zen and other Gecko browsers emit a
 compositor reorder on every keystroke). There is no GUI control for
 this: `behind` is the right default for everyone, and `front` is a
 niche preference exposed to Lua only. Changing it re-draws every
-ring immediately.
+border immediately.
 
 **Example:**
 
@@ -2672,7 +2675,7 @@ neighbour, keeping `remaining` points of deliberate whitespace
 past the border's reach. Every outer edge becomes
 `reach + remaining`; each inner axis becomes `reach + remaining`,
 or `2 × reach + remaining` when `unfocused_enabled` is on (both
-neighbouring rings need clearance; the whitespace sits between
+neighbouring borders need clearance; the whitespace sits between
 them once). The reach is simply the configured border width; the
 renderer’s hidden overlap is behind the window and does not count.
 The action deliberately
