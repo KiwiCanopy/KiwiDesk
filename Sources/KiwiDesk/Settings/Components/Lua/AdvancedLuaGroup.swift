@@ -151,7 +151,18 @@ struct AdvancedLuaGroup: View {
         )
     }
 
+    /// Deleting a row must unregister its hotkey, exactly as
+    /// `onClear` does above (#517). Without this the row
+    /// vanishes while its shortcut keeps firing until Save or
+    /// Revert — `liveApplyRecorded` rebuilds the running table
+    /// from its own session copy, which never saw the removal.
+    /// No-op off the live target, where nothing is registered.
     private func remove(_ id: UUID) {
         bindings.removeAll { $0.id == id }
+        _ = model.liveApplyRecorded(
+            modeName: modeName,
+            bindingID: id,
+            combo: nil
+        )
     }
 }
