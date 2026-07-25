@@ -100,6 +100,39 @@ extension SettingsModel {
 
     private func liveState() -> TargetState {
         var loaded = core.loadGuiConfig()
+        // `loadGuiConfig` overlays `spaces` from LIVE state, and
+        // in a started engine that overlay is authoritative — it
+        // carries the chosen display ORDER, and a space living
+        // only in `gui.json` was seeded into live at boot (#77).
+        //
+        // It is untrusted in exactly one recognisable state:
+        // live holds ONLY `StateCoordinator`'s boot default, the
+        // shape of an Accessibility-off cold boot where the
+        // engine never started and so never seeded. The overlay
+        // has then silently replaced the authored list with
+        // `["1"]`, and the authored one is the only safe read.
+        // #326 hit the same hazard and fixed it the same way.
+        //
+        // Keyed on the DATA, not on `permissionPaused`: that
+        // flag is pushed in by `setPermissionPaused` AFTER
+        // `SettingsModel.init` has run its first `reload()`, so
+        // gating on it would leave the very first seed
+        // degenerate — and before #516 that only mis-displayed,
+        // while a globals save now PERSISTS what was seeded.
+        //
+        // Kept narrow on purpose. A broader "is the authored
+        // list a subset of live?" test also fires in a HEALTHY
+        // engine — a space deleted at runtime but not yet saved
+        // is absent from live and present in the sidecar — and
+        // would resurrect it in the editor.
+        let bootDefault = [SpaceID(1)]
+        if loaded.spaces == bootDefault,
+            let persisted = core.persistedGuiConfig(),
+            !persisted.spaces.isEmpty,
+            persisted.spaces != bootDefault
+        {
+            loaded.spaces = persisted.spaces
+        }
         // Recovered rows arrive as `.custom`; sort the ones
         // that match a catalog action into their sections
         // before the tabs render them (#4).

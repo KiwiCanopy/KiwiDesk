@@ -160,6 +160,17 @@ struct FitGapsAction: View {
                 "Draft updated — Save as New Profile… to "
                     + "apply and persist."
             )
+        case .saveGlobalsOnly:
+            // Paused: Save writes gui.json only, and gaps are
+            // tiling — so this draft is NOT what that Save
+            // persists. Say so rather than pointing at a verb
+            // that won't carry it (#516).
+            return L(
+                "border.fit_gaps.updated_paused",
+                "Draft updated — gaps persist once "
+                    + "Accessibility is on and you save the "
+                    + "profile."
+            )
         case .updateActiveProfile, .saveLua:
             return L(
                 "border.fit_gaps.updated",

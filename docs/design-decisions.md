@@ -1036,6 +1036,40 @@ honest reduction. Adding the third verb later means changing
 `PendingDiscard` and every call site — decide before doing it,
 not by accretion.
 
+**A paused engine blocks profile saves, never global ones.**
+The #335 gate exists for one reason: with Accessibility off no
+displays are discovered, so persisting a *profile* would record a
+degenerate 0-screen monitor set that can never resolve. It caught
+the six `gui.json` globals — keybindings, app/float/ignore rules,
+the space list, Desktop→profile bindings — as collateral, purely
+because `saveGuiConfig` had exactly one caller and that caller sat
+behind the gate. None of the six has a monitor dependency, so a
+user editing app rules met a greyed Save explaining *monitors*,
+and lost the work on close.
+
+A fifth `PrimarySaveAction` case (`.saveGlobalsOnly`) takes the
+primary slot while paused **and** a global actually changed. Three
+things that are load-bearing rather than incidental:
+
+- *Ahead of the two profile verbs only.* `.saveLua` and
+  `.updateStoredProfile` write no monitor set either, so they were
+  never blocked and must not be rerouted. **Save a Copy As** stays
+  unconditionally gated — a copy always captures the live set.
+- *Its own narrow method.* Routing through `persist(named:)` would
+  drag in the overlapping-monitor-set warning and a "Saving
+  failed" message naming a profile the save never touched.
+- *Partial-clean, never `reload()`.* Only the six fields are
+  adopted as clean; a blanket reload would discard staged tiling
+  edits this save did not persist, and with both pending the
+  footer must keep reading "Unsaved changes".
+
+The copy names what is **excluded** ("Layout and monitors stay
+paused; Save covers everything else") rather than listing six
+field names — one sentence, and the paused banner above already
+carries the why. The blocked tooltip's monitor wording is
+unchanged and is finally accurate: it now appears only when a
+monitor set really is the only thing a save would write.
+
 **Quick-menu layout switch is session-only.** Changing the active
 space's layout mode from the status-bar quick menu updates the running
 state immediately but is session-only by default (temporary). It does
