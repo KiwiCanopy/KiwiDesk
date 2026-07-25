@@ -44,6 +44,13 @@ struct GlobalAppBarGroup: View {
     /// must decide, or the row silently vanishes for App Bar
     /// users.
     var spaceBarSharedEdge: AppBarEdge?
+    /// Every layout bar that can show one (Monocle, Scrolling),
+    /// so a gate can ask whether ANY consumer still reads the
+    /// field it guards. No default on purpose, like
+    /// `spaceBarSharedEdge`: a call site that forgets this would
+    /// silently grey a live control. Predicates live in
+    /// `AppBarGroups+Gates.swift`.
+    var layoutBars: [LayoutAppBar]
     // The full palette is ~10 hex fields; only Box / Active box
     // / Highlight (the ones the preview strip most visibly
     // reflects) stay inline, the rest collapse behind a
@@ -63,7 +70,24 @@ struct GlobalAppBarGroup: View {
             // is judged in place before Save.
             AppBarPreviewStrip(style: style)
             behavior
+                .modifier(
+                    GreyOut(active: !anyBarShown, help: noBarHelp)
+                )
+            // Deliberately OUTSIDE the block gate: `iconSource`
+            // has a second consumer that renders whether or not
+            // any bar does — the shortcuts panel's Apps band
+            // (`ShortcutsPanelController`). A parent `.disabled`
+            // would dim a control still governing a visible
+            // surface, the mirror of the bug this sweep fixes.
+            iconSourceRow
+            trailingBehavior
+                .modifier(
+                    GreyOut(active: !anyBarShown, help: noBarHelp)
+                )
             appearance
+                .modifier(
+                    GreyOut(active: !anyBarShown, help: noBarHelp)
+                )
         }
         SettingsSection(
             L("app_bar.global_colors.title", "Global colors")
@@ -79,6 +103,7 @@ struct GlobalAppBarGroup: View {
                 .font(.subheadline)
             }
         }
+        .modifier(GreyOut(active: !anyBarShown, help: noBarHelp))
     }
 
     @ViewBuilder private var behavior: some View {
@@ -146,7 +171,11 @@ struct GlobalAppBarGroup: View {
                 // glass each tab hugs its own box, without glass
                 // each tab draws its own box — so fit is inert for
                 // Boxed regardless of the glass finish.
-                active: style.tabBackground == .boxed,
+                // Asked of the bars actually SHOWN, not the
+                // global value: a layout overriding to Plain
+                // still reads this global fit, and greying it
+                // hid the only editor for a value in use.
+                active: everyShownBarBoxed,
                 help: L(
                     "app_bar.tab_background_fit.boxed_only",
                     "Boxed draws a box per tab, not a shared "
@@ -170,7 +199,7 @@ struct GlobalAppBarGroup: View {
                 // Vertical bars render icon-only (names would
                 // need stacked or rotated text) — the stored
                 // preference survives an edge round-trip.
-                active: !style.edge.isHorizontal,
+                active: everyShownBarVertical,
                 help: L(
                     "app_bar.content.vertical_only",
                     "Left and right bars always show icons "
@@ -178,9 +207,13 @@ struct GlobalAppBarGroup: View {
                 )
             )
         )
-        // #294 icon rendering, directly below the Content
-        // control it depends on; greyed (never hidden, #171)
-        // when Name-only content shows no icons at all.
+    }
+
+    /// #294 icon rendering, directly below the Content control
+    /// it depends on; greyed (never hidden, #171) when Name-only
+    /// content shows no icons at all. Its own builder so the
+    /// editor-wide gate can skip it — see the call site.
+    @ViewBuilder private var iconSourceRow: some View {
         DropdownRow(
             label: iconSourceLabel,
             help: L(
@@ -211,15 +244,18 @@ struct GlobalAppBarGroup: View {
                 // Gate on the RENDERED content: a vertical bar
                 // collapses Name to icon-only, so icons are on
                 // screen and this control must stay live.
-                active: style.content.rendered(
-                    horizontal: style.edge.isHorizontal
-                ) == .name,
+                active: everyShownBarNameOnly,
                 help: L(
                     "app_bar.icon_source.name_only",
                     "Icons are hidden while Content is Name."
                 )
             )
         )
+    }
+
+    /// The rows after `iconSourceRow`, so the editor-wide gate
+    /// can wrap them without swallowing it.
+    @ViewBuilder private var trailingBehavior: some View {
         ToggleRow(
             label: L(
                 "app_bar.group_adjacent",
@@ -232,59 +268,6 @@ struct GlobalAppBarGroup: View {
                     + "into a single tab, marked with a count "
                     + "badge, instead of showing one tab each."
             )
-        )
-    }
-
-    // Ordered thickness → the two Auto-gated size pairs
-    // (`AutoGatedGroup`: the toggle bound directly above the slider
-    // it owns) → a divider → corner roundness (gated by a different
-    // switch, Tab background). "Auto" size/font is a GUI face on the
-    // model's 0 = auto sentinel: the toggle greys its slider and
-    // stores 0; turning it off restores a sensible non-zero value
-    // (#171 grey-out).
-    @ViewBuilder private var appearance: some View {
-        PtSlider(
-            label: L("app_bar.thickness", "Thickness"),
-            value: $style.thickness,
-            range: 30...80
-        )
-        AutoGatedGroup(
-            title: L("app_bar.box_size.auto", "Auto box size"),
-            isOn: AppBarAuto.binding($style.boxSize, restore: 120)
-        ) {
-            PtSlider(
-                label: L("app_bar.box_size", "Box size"),
-                value: $style.boxSize,
-                range: 1...200,
-                autoAtZero: true
-            )
-        }
-        PtSlider(
-            label: L("app_bar.box_gap", "Box gap"),
-            value: $style.boxGap,
-            range: 0...40
-        )
-        AutoGatedGroup(
-            title: L("app_bar.font_size.auto", "Auto font size"),
-            isOn: AppBarAuto.binding($style.fontSize, restore: 14)
-        ) {
-            PtSlider(
-                label: L("app_bar.font_size", "Font size"),
-                value: $style.fontSize,
-                range: 1...32,
-                autoAtZero: true
-            )
-        }
-        Divider()
-        // Never greyed since tab_background_fit: roundness
-        // shapes the Boxed tabs, the glass plate, AND Plain's
-        // own shared plate (BarPlate) — the old Plain grey
-        // predated Plain getting a plate (QA 2026-07-19).
-        PtSlider(
-            label: L("app_bar.corner_roundness", "Corner roundness"),
-            value: $style.cornerRoundness,
-            range: 0...100,
-            unit: "%"
         )
     }
 

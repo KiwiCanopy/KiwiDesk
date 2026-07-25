@@ -58,14 +58,35 @@ struct SpaceBarEditorGroup: View {
                         + "edge in every layout."
                 )
             )
+            // Everything below configures a bar that isn't
+            // drawn while the switch above is off — greyed,
+            // never hidden (#171/#520). The precedent is three
+            // files away: FocusBorderEditor greys its whole
+            // block off its own enable toggle.
             behavior
+                .modifier(GreyOut(active: !enabled, help: offHelp))
             appearance
+                .modifier(GreyOut(active: !enabled, help: offHelp))
         }
         SettingsSection(
             L("space_bar.colors.title", "Space Bar colors")
         ) {
             SpaceBarColorsGroup(model: model)
+                .modifier(GreyOut(active: !enabled, help: offHelp))
         }
+    }
+
+    var enabled: Bool { style.wrappedValue.enabled }
+
+    /// Nested `GreyOut`s multiply their 0.5 opacity to 0.25, so
+    /// every inner gate in this editor is written `enabled && …`
+    /// — the block gate already covers the bar-is-off case.
+    /// Keep that conjunction when adding one.
+    var offHelp: String {
+        L(
+            "space_bar.disabled.help",
+            "Turn on Show Space Bar to edit these settings."
+        )
     }
 
     // MARK: - Behavior
@@ -136,7 +157,8 @@ struct SpaceBarEditorGroup: View {
                 // Boxed never draws a shared plate to size — glass
                 // hugs each box, solid draws each box — so fit is
                 // inert for Boxed regardless of the glass finish.
-                active: style.wrappedValue.tabBackground == .boxed,
+                active: style.wrappedValue.tabBackground
+                    == .boxed,
                 help: L(
                     "space_bar.tab_background_fit.boxed_only",
                     "Boxed draws a box per item, not a shared "
@@ -238,83 +260,11 @@ struct SpaceBarEditorGroup: View {
         }
     }
 
-    // MARK: - Appearance
-
-    @ViewBuilder private var appearance: some View {
-        PtSlider(
-            label: L("space_bar.thickness", "Thickness"),
-            value: style.thickness,
-            range: 30...80
-        )
-        AutoGatedGroup(
-            title: L(
-                "space_bar.box_size.auto",
-                "Auto box size"
-            ),
-            isOn: AppBarAuto.binding(
-                style.boxSize,
-                restore: 120
-            )
-        ) {
-            PtSlider(
-                label: L("space_bar.box_size", "Box size"),
-                value: style.boxSize,
-                range: 1...200,
-                autoAtZero: true
-            )
-        }
-        PtSlider(
-            label: L("space_bar.box_gap", "Box gap"),
-            value: style.boxGap,
-            range: 0...40
-        )
-        AutoGatedGroup(
-            title: L(
-                "space_bar.font_size.auto",
-                "Auto font size"
-            ),
-            isOn: AppBarAuto.binding(style.fontSize, restore: 14)
-        ) {
-            PtSlider(
-                label: L("space_bar.font_size", "Font size"),
-                value: style.fontSize,
-                range: 1...32,
-                autoAtZero: true
-            )
-        }
-        StepperRow(
-            label: L("space_bar.glyph_cap", "Glyphs per Space"),
-            value: style.glyphCap,
-            in: SpaceBarStyle.glyphCapRange,
-            help: L(
-                "space_bar.glyph_cap.help",
-                "How many app glyphs a Space shows before the "
-                    + "rest collapse into a +n badge. Adjacent "
-                    + "windows of the same app count as one glyph."
-            )
-        )
-        glyphCapSummary
-        Divider()
-        // Never greyed since tab_background_fit: roundness
-        // shapes the Boxed items, the glass plate, AND Plain's
-        // own shared plate (BarPlate) — the old Plain grey
-        // predated Plain getting a plate (QA 2026-07-19).
-        PtSlider(
-            label: L(
-                "space_bar.corner_roundness",
-                "Corner roundness"
-            ),
-            value: style.cornerRoundness,
-            range: 0...100,
-            unit: "%"
-        )
-    }
-
     /// Neutral live summary of the current cap — a caption that
     /// states what shows, not why (#94 defers the why to `help`).
     /// The preview strip is a fixed stand-in and cannot honestly
     /// render N synthetic glyphs, so the fact lives here.
-    private var glyphCapSummary: some View {
+    var glyphCapSummary: some View {
         Text(
             L(
                 "space_bar.glyph_cap.summary",

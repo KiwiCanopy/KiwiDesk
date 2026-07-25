@@ -28,14 +28,30 @@ struct LayoutAppBarGroup: View {
                 L("app_bar.layout.show", "Show app bar"),
                 isOn: $bar.enabled
             )
-            if bar.enabled {
-                DisclosureGroup(
-                    L("app_bar.layout.overrides", "Overrides"),
-                    isExpanded: $overridesExpanded
-                ) {
-                    overrides
-                }
+            // Greyed, not hidden (#171/#520). `LayoutAppBar`
+            // encodes every override field regardless of
+            // `enabled`, so removing the rows actively concealed
+            // that the stored values are PRESERVED — the exact
+            // case docs/ui-patterns.md names. The drawer stays
+            // collapsed by default, so the cost of keeping it is
+            // one dimmed row, not a wall of controls.
+            DisclosureGroup(
+                L("app_bar.layout.overrides", "Overrides"),
+                isExpanded: $overridesExpanded
+            ) {
+                overrides
             }
+            .modifier(
+                GreyOut(
+                    active: !bar.enabled,
+                    help: L(
+                        "app_bar.layout.overrides.disabled",
+                        "Turn on Show app bar to edit this "
+                            + "layout's overrides. They are kept "
+                            + "either way."
+                    )
+                )
+            )
         }
     }
 

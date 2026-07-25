@@ -44,9 +44,23 @@ struct ProfilesSection: View {
     /// (#68 §3.2): native-Space bindings are global — only
     /// offered in live editing.
     @ViewBuilder private var nativeSpaces: some View {
-        if !model.editingStoredProfile {
-            NativeSpacesGroup(model: model)
-        }
+        // Greyed, not hidden (#171/#520). The bindings are
+        // global and a stored profile may never override what
+        // SELECTS it (AGENTS §5), so they are correctly not
+        // editable here — but hiding them meant a user editing a
+        // profile could not even READ which Desktop maps to
+        // what, which is exactly the context that decision needs.
+        NativeSpacesGroup(model: model)
+            .modifier(
+                GreyOut(
+                    active: model.editingStoredProfile,
+                    help: L(
+                        "profiles.native_spaces.live_only",
+                        "Desktop bindings are global — switch to "
+                            + "Live to change them."
+                    )
+                )
+            )
     }
 
     // MARK: - Saved profiles (#36)

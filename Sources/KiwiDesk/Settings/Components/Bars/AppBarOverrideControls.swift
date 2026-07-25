@@ -49,6 +49,7 @@ struct OverrideChrome<Content: View>: View {
     /// rotor reads "Help: Split ratio" not a bare "Help".
     var subject: String? = nil
     @ViewBuilder let content: Content
+    @Environment(\.isInsideGreyOut) private var alreadyDimmed
 
     var body: some View {
         HStack(
@@ -71,7 +72,17 @@ struct OverrideChrome<Content: View>: View {
                 )
             content
                 .disabled(!isOn.wrappedValue)
-                .opacity(isOn.wrappedValue ? 1 : 0.5)
+                // Same single-dim rule as `GreyOut` (#520): an
+                // inheriting row inside a gated block would
+                // otherwise compound to 0.25.
+                .opacity(
+                    !isOn.wrappedValue && !alreadyDimmed
+                        ? 0.5 : 1
+                )
+                .environment(
+                    \.isInsideGreyOut,
+                    alreadyDimmed || !isOn.wrappedValue
+                )
                 // The narrowed column pays for the checkbox
                 // prefix, so the shared rows inside land on
                 // the same control axis as plain rows.

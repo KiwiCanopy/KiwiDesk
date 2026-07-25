@@ -863,8 +863,9 @@ running windows.
   plate reaches — **Hug items** (default; the plate wraps the
   tabs like the Dock wraps its icons) or **Full width**
   (edge-to-edge). Hug falls back to full width once the tabs
-  overflow and scroll. Greyed for Boxed, which draws no shared
-  plate. The Space Bar has the same control.
+  overflow and scroll. Greyed when every bar on screen resolves
+  to Boxed, which draws no shared plate. The Space Bar has the
+  same control.
 - **Position**: the screen edge the bar occupies — top, bottom,
   left, or right (default top). Absolute for every layout; the
   preview strip rotates vertical for left/right. When the Space
@@ -886,10 +887,14 @@ running windows.
   uniformly to fit the widest item; fixed pixel width.
 - **Content**: icon only, name only, or both. Left/right bars
   always render icon-only (names would need stacked or rotated
-  text), so the control greys there; your choice returns when
-  the bar moves back to a horizontal edge.
+  text), so the control greys when every bar on screen sits on
+  a vertical edge; your choice returns when one moves back to a
+  horizontal edge.
 - **App symbol style**: how app icons are drawn (greyed while
-  Content is Name, which shows no icons). **System default**
+  every bar on screen renders names only, which shows no
+  icons). This one stays available even when no layout shows an
+  App Bar at all, because it also styles the shortcuts panel's
+  Apps band. **System default**
   shows each app's icon as macOS provides it — including your
   system-wide Icon & widget style choice. **Glyphs** shows a
   monochrome symbol from the bundled [SketchyBar App
@@ -899,6 +904,20 @@ running windows.
   apps without a symbol keep their icon. With Glyphs active,
   the shortcuts panel's Apps band shows the same symbols
   (following the global style — the panel spans all layouts).
+**Controls with nothing to act on are dimmed, not removed.**
+Turn the Space Bar off, or turn off the App Bar in every layout
+that can show one, and that editor's controls stay on screen —
+disabled and dimmed, with their stored values intact and a
+tooltip saying what to turn back on. The same applies to
+individual settings: the Highlight and Active item colors dim
+under the Gap indicator (which hides the active tab rather than
+marking it, so neither color is drawn); a drag visual's Border
+and Fill rows dim when that part is switched off; and the
+Floating mark color dims when the Space Bar — its only surface —
+is off. A layout's **Overrides** drawer and the
+**Desktop → profile** bindings are dimmed rather than hidden
+too, so you can still read what they hold.
+
 - **Font size**: auto or fixed. Auto-gated sliders (box size,
   font size) read "Auto" while their toggle is on.
 - **Corner roundness**: 0–100% (0 = square, 100 = full capsule).

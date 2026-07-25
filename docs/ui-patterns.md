@@ -517,6 +517,38 @@ what "grey, don't hide" asks for. A source-scanning guard
 (`DiscardGateParityTests`) fails the build on an ungated path;
 see `docs/design-decisions.md` for why the gate sits at the call
 site and which exceptions are deliberate.
+Three rules that fall out of applying this across a whole editor
+(#520), each of which was got wrong somewhere before it was
+written down:
+
+- **Gate a whole editor off its own switch, not just the odd
+  row.** When a switch turns off the thing an entire section
+  configures — the Space Bar's own toggle, "no layout shows an
+  App Bar", a drag visual's Enabled — dim the whole block.
+  `FocusBorderEditor` is the reference shape.
+- **Ask the value that is actually read, never the global.** A
+  gate keyed on a global while a per-layout or per-space
+  override is what renders will grey the only editor for a value
+  in use — the worse failure, because the control is live and
+  looks dead. Resolve first (`bar.resolved(with: global)`,
+  `resolvedGrid(for: space)`), and ask whether *any* consumer
+  still reads the field.
+- **Conjoin an inner gate with its block gate.** `GreyOut`
+  multiplies opacity, so a row dimmed by both its own rule and
+  the block above it lands at `0.25` and reads as broken rather
+  than disabled. Write the inner predicate as
+  `blockIsOn && ownRule`.
+
+And one exemption worth stating: a control whose *only* consumer
+is off may still have a second one. The App Bar's "App symbol
+style" stays live even when no bar shows, because `iconSource`
+also drives the shortcuts panel's Apps band — check for a second
+reader before dimming.
+
+The convention is guarded by `GreyOutParityTests`, which scans
+for the *hiding* shape rather than listing the greyed controls:
+a list cannot see the next site, which is how a dozen surfaces
+drifted while the rule sat unenforced.
 
 **Sentinel values read as words, not numbers.** A slider gated
 by an Auto toggle stores `0` as the sentinel but its readout

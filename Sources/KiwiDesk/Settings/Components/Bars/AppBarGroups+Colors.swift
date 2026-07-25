@@ -18,6 +18,7 @@ extension GlobalAppBarGroup {
             label: L("app_bar.color.highlight", "Highlight"),
             hex: $style.highlightColor
         )
+        .modifier(GreyOut(active: gapOnly, help: gapHelp))
     }
 
     // The remaining palette, behind the disclosure.
@@ -34,6 +35,7 @@ extension GlobalAppBarGroup {
                 ),
                 hex: $style.activeItemColor
             )
+            .modifier(GreyOut(active: gapOnly, help: gapHelp))
             HexColorField(
                 label: L("app_bar.color.hover_fill", "Hover fill"),
                 hex: $style.hoverFillColor
