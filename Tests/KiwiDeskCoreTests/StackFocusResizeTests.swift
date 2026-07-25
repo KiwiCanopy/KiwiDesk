@@ -27,7 +27,7 @@ struct StackFocusResizeTests {
                 "kiwidesk-tests-\(UUID().uuidString)"
             )
         let core = KiwiCore(configDirectory: dir)
-        core.tiler.displayBounds = { _ in Self.display }
+        core.tiler.visibleBounds = { _ in Self.display }
         return core
     }
 
@@ -192,11 +192,10 @@ struct StackFocusResizeTests {
         stackSpace(core)
         // The cap derives from the display height, which the
         // fixture pins (#531) — a 6K host legitimately reaches
-        // the 10 clamp otherwise.
-        core.execute(
-            "set_min_window_size",
-            args: [.number(300)]
-        )
+        // the 10 clamp otherwise — and from the minimum, which
+        // stays at its 300pt default. Pinned, not assumed: the
+        // expected weight below is span / 300 − 1.
+        #expect(core.tiler.settings.minWindowSize == 300)
         let span = Double(Self.display.height)
         core.state.apply(.windowFocused(WindowID(2)))
         // Hammer Grow height far past where the column mate

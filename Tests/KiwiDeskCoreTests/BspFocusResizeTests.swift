@@ -28,7 +28,7 @@ struct BspFocusResizeTests {
                 "kiwidesk-tests-\(UUID().uuidString)"
             )
         let core = KiwiCore(configDirectory: dir)
-        core.tiler.displayBounds = { _ in Self.display }
+        core.tiler.visibleBounds = { _ in Self.display }
         return core
     }
 

@@ -22,7 +22,7 @@ private func makeCore() -> KiwiCore {
             "kiwidesk-reach-\(UUID().uuidString)"
         )
     let core = KiwiCore(configDirectory: dir)
-    core.tiler.displayBounds = { _ in testDisplay }
+    core.tiler.visibleBounds = { _ in testDisplay }
     return core
 }
 
@@ -104,12 +104,16 @@ struct BspFocusReachabilityTests {
             "bsp.set_strategy",
             args: [.string("alternating")]
         )
-        // `min_window_size` stays at its 300pt default: the
-        // pinned 1920pt display leaves the bottom-right region
-        // 960pt wide, well clear of the 2 * min threshold below
-        // which BspLayout correctly falls back to an OverlapStack
-        // pile (#383/#44) instead of the pair asserted here. That
-        // threshold is what a narrow host display used to trip.
+        // `min_window_size` stays at its 300pt default: within
+        // the pinned 1920pt display the bottom-right region is
+        // 929pt wide (the 32pt Space Bar strip and the 10pt gaps
+        // come off first), well clear of the 2 * min threshold
+        // below which BspLayout correctly falls back to an
+        // OverlapStack pile (#383/#44) instead of the pair
+        // asserted here. That threshold is what a narrow host
+        // display used to trip. Pinned, not assumed — this suite
+        // now describes something else if the default moves.
+        #expect(core.tiler.settings.minWindowSize == 300)
         spawn(core, count: 4)
         return SpaceID("1")
     }

@@ -73,7 +73,7 @@ extension KiwiCore {
         let bounds = TilingEngine.screen(
             for: space.id,
             in: state
-        ).map { tiler.displayBounds($0) }
+        ).map { tiler.visibleBounds($0) }
         let span =
             axis == "x"
             ? Double(bounds?.width ?? 1920)
@@ -149,7 +149,7 @@ extension KiwiCore {
             in: state
         )
         let bounds =
-            screen.map { tiler.displayBounds($0) }
+            screen.map { tiler.visibleBounds($0) }
             ?? CGRect(x: 0, y: 0, width: 1920, height: 1080)
         let along = horizontal ? bounds.width : bounds.height
         let current = scrolling.slotSize

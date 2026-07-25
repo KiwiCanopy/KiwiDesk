@@ -27,7 +27,7 @@ struct StackArrangementResizeTests {
                 "kiwidesk-tests-\(UUID().uuidString)"
             )
         let core = KiwiCore(configDirectory: dir)
-        core.tiler.displayBounds = { _ in Self.display }
+        core.tiler.visibleBounds = { _ in Self.display }
         return core
     }
 
@@ -44,10 +44,13 @@ struct StackArrangementResizeTests {
             "stack.set_stack_position",
             args: [.string("top")]
         )
-        // `min_window_size` stays at its 300pt default: the
-        // pinned 1080pt-tall display leaves the split room to
-        // move, which a short host display did not. The clamped
-        // case has its own coverage.
+        // `min_window_size` stays at its 300pt default: against
+        // the pinned 1080pt-tall display that leaves the split a
+        // [0.278, 0.722] band to move in, which a short host
+        // display did not. The clamped case has its own coverage.
+        // Pinned, not assumed — a moved default would silently
+        // change what the ratio assertions below describe.
+        #expect(core.tiler.settings.minWindowSize == 300)
         for index in 1...3 {
             core.state.apply(
                 .windowCreated(

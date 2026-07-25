@@ -79,7 +79,7 @@ extension KiwiCore {
         return Double(
             MouseResize.bspSide(
                 slot: slot,
-                bounds: tiler.displayBounds(screen),
+                bounds: tiler.visibleBounds(screen),
                 horizontal: axis == "x"
             )
         )

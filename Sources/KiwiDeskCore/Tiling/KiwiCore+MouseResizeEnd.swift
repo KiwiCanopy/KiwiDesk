@@ -71,7 +71,7 @@ extension KiwiCore {
             tiled,
             masterCount: stack.masterCount
         ).master.contains(id)
-        let bounds = tiler.displayBounds(screen)
+        let bounds = tiler.visibleBounds(screen)
         let adjustment = MouseResize.translate(
             mode: space.mode,
             isMaster: isMaster,

@@ -69,20 +69,36 @@ public final class TilingEngine {
     public var onFrameApplied: @MainActor (WindowID, CGRect) -> Void =
         { _, _ in }
 
-    /// Where display geometry enters layout: the AX-coordinate
-    /// visible frame a screen lays out into. Every slot the
-    /// layout calculates, every track capacity, and every resize
-    /// span reads its bounds through this ONE hook, so a fixture
-    /// can state the display it means instead of inheriting
-    /// whatever the host happens to have (#531) — the shape
-    /// `DragCrossingCoordinator.displayAt` already uses.
+    /// Where display *size* enters layout: the AX-coordinate
+    /// visible frame of one screen. Every slot the layout
+    /// calculates, every track capacity and every resize span
+    /// reads its bounds through this hook, so a fixture can
+    /// state the display it means instead of inheriting whatever
+    /// the host happens to have (#531). Internal, not public:
+    /// production never writes it — only tests do, through
+    /// `@testable`.
     ///
-    /// Its reach is layout, not chrome: stash parking, bar
-    /// strips, and float re-anchoring resolve their own screens
-    /// (some from `NSScreen.screens` with no instance in hand),
-    /// and they place things ON a display rather than deciding
-    /// what a layout asserts.
-    public var displayBounds: @MainActor (NSScreen) -> CGRect = {
+    /// **It pins size, not topology.** Which screen a space
+    /// lands on still comes from `NSScreen` via the three static
+    /// `screen(…)` resolvers, so a fixture can shrink the
+    /// display it lays out against but cannot fabricate a second
+    /// one. Injecting topology would want a display-resolver
+    /// value subsuming this hook and those statics — a larger
+    /// change, and pre-release nothing blocks it later (§5).
+    ///
+    /// **What stays outside it, and why.** `screen(containing:)`
+    /// and `looksStashed` are `static` — no instance in hand.
+    /// `stashInactive` / `restoreStashed` *enumerate*
+    /// `NSScreen.screens` to pick a parking corner, which a
+    /// one-rect hook would collapse to a single display. The bar
+    /// strips (`KiwiCore+AppBar`, `+SpaceBar`) and the float
+    /// nudge / re-anchor draw on a physical screen, where a
+    /// fabricated rect means nothing. So a fixture that pins
+    /// bounds and calls `calculatedFrames`, `trackCapacity` or a
+    /// resize is fully pinned; one that drives a whole `retile`
+    /// is not — parking and bar geometry still run against the
+    /// real display.
+    var visibleBounds: @MainActor (NSScreen) -> CGRect = {
         GeometryUtils.axVisibleFrame(of: $0)
     }
 

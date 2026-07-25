@@ -19,7 +19,9 @@ Closes #... (if applicable)
 - [ ] No contradictions between code and docs
 - [ ] `swift build && swift test && ./scripts/lint.sh`
   passes
-- [ ] Release build passes: `swift build -c release`
+- [ ] Release build green — CI's `Release Build` job (read it
+  before merging; it reports, it does not block), or locally
+  for concurrency / `@Sendable` changes
 - [ ] PR is focused; refactors separated from features
 
 ## How I verified
