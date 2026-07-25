@@ -1713,8 +1713,8 @@ shows the app's icon as macOS provides it — including whatever
 system-wide Icon & widget style the user picked. `app_font`
 shows a monochrome glyph from the bundled [SketchyBar App
 Font](https://github.com/kvndrsslr/sketchybar-app-font)
-instead, colored by the bar's text colors (normal / active /
-hover); apps without a glyph keep their icon. Styled icon
+instead, colored by the bar's item colors (Item / Active item /
+Hover item); apps without a glyph keep their icon. Styled icon
 variants (the system's Dark/Clear/Tinted renderings) cannot be
 fetched by apps — no public API hands them out.
 
@@ -2057,7 +2057,7 @@ space_bar.set_glyph_cap(8)
 `"app_image"`).
 
 **Does:** how app glyphs are drawn — the native app image, or a
-monochrome App Font glyph following the bar's text colors. An
+monochrome App Font glyph following the bar's item colors. An
 app with no image falls back to the App Font either way.
 
 **Example:**

@@ -167,7 +167,7 @@ struct SpaceBarEditorGroup: View {
                 "space_bar.icon_source.help",
                 "How app glyphs are drawn. Glyphs shows a "
                     + "monochrome symbol colored by the bar's "
-                    + "text colors; apps without a symbol keep "
+                    + "item colors; apps without a symbol keep "
                     + "their app icon."
             )
         ) {

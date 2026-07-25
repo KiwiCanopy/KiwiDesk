@@ -188,8 +188,8 @@ struct GlobalAppBarGroup: View {
                 "How app icons are drawn. Glyphs shows a "
                     + "monochrome symbol from KiwiDesk's "
                     + "built-in icon set, colored by the bar's "
-                    + "text colors — Text, Active text, and "
-                    + "Hover text below — so those colors also "
+                    + "item colors — Item, Active item, and "
+                    + "Hover item below — so those colors also "
                     + "decide how the glyphs look. Apps "
                     + "without a symbol keep their app icon."
             )
