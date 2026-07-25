@@ -123,6 +123,47 @@ struct AppBarCommandParityTests {
         #expect(touched == fieldNames(AppBarStyle()))
     }
 
+    /// The third leg, mirroring `SpaceBarParityTests`: the verb
+    /// is registered and the enum applies, but `parse` matches
+    /// the field on a RAW STRING. A typo there (the
+    /// `case "background_style":` lines T4 edited) leaves the
+    /// verb registered, every other guard green, and dispatch
+    /// failing only at runtime.
+    @Test("Parse accepts every field's spelling")
+    func parseCoverage() {
+        for key in AppBarStyle.CodingKeys.allCases {
+            let parsed = AppBarCommandSetting.parse(
+                field: key.stringValue,
+                args: sampleArgs(for: key)
+            )
+            #expect(
+                (try? parsed.get()) != nil,
+                "parse rejected \(key.stringValue)"
+            )
+        }
+    }
+
+    private func sampleArgs(
+        for key: AppBarStyle.CodingKeys
+    ) -> [JSONValue] {
+        switch key {
+        case .liquidGlass, .groupAdjacentWindows:
+            return [.bool(true)]
+        case .edge: return [.string("bottom")]
+        case .alignment: return [.string("end")]
+        case .iconSource: return [.string("app_font")]
+        case .backgroundStyle: return [.string("plain")]
+        case .backgroundFit: return [.string("full")]
+        case .activeIndicator: return [.string("gap")]
+        case .content: return [.string("icon")]
+        case .thickness, .itemSize, .itemGap, .fontSize,
+            .cornerRoundness, .dimFactor:
+            return [.number(10)]
+        default:
+            return [.string("#123456")]
+        }
+    }
+
     /// The `space_bar` twin of this lives in
     /// `SpaceBarCommandTests`. Without it the app-bar verb list
     /// in `APIReference` was a hand-typed mirror of the field

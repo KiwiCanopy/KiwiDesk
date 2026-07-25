@@ -1487,14 +1487,19 @@ mark, badge, chip, pill. The wire and every label now say
 **mark** (`sticky.set_mark`, JSON `sticky.mark`, the
 `StickyMark*` overlay types). Two words survive because they
 name something genuinely different, not the same dot: **badge**
-is the slot a state mark occupies *in a bar* — the App Bar's
-group-count badge and the Space Bar's sticky/floating badges
-share that family (they are drawn in the count badge's slot and
-inherit its fill on Automatic), which is why
-`space_bar.set_sticky_badge` keeps the word while the on-window
-cue is a mark; and **pill** is the mark's transient EXPANDED
-state, not the mark itself. A new state cue picks from those
-three by *where and what*, never as a synonym.
+is a small disc attached to a bar item's corner — the group
+**count** badge (top-trailing) and the Space Bar's **sticky**
+(top-leading) and **floating** (bottom-leading) state badges.
+One family, three deliberately different corners (see the
+cross-surface note above): same disc treatment, same
+`groupBadgeColor` fill on Automatic. That shared treatment — not
+a shared slot — is why `space_bar.set_sticky_badge` keeps the
+word while the on-window cue is a mark. And **pill** is the
+mark's transient EXPANDED state, not the mark itself. A new
+state cue picks among these words by *where and what*, never as
+a synonym — note the bar's **active indicator** is a fourth
+thing again: it marks which item is current, not a window's
+state.
 
 **The sticky mark has a transient third mode: the home-space
 pill.** In steady state the mark is a passive glyph, identical

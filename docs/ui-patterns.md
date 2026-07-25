@@ -458,9 +458,10 @@ it, and turn a precise geometric term into a category-error
 presentational one (an "axis" whose value is `columns`).
 Single-axis layouts (Scrolling, Monocle) stay plain
 "Horizontal/Vertical" — one axis, no ambiguity, nothing to
-disambiguate. Fix the label, never the wire; §5's one-vocabulary
-rule (Lua == JSON) holds either way and is orthogonal to this
-GUI↔wire question.
+disambiguate. Fix the label, never the wire — **when the wire
+term is accurate; see the next entry for when it isn't**. §5's
+one-vocabulary rule (Lua == JSON) holds either way and is
+orthogonal to this GUI↔wire question.
 
 **When the wire is the outlier, rename the wire instead (R6,
 #406).** The rule above answers a narrower question than its

@@ -833,14 +833,15 @@ edge, so you always see what's open. Configure it globally (applies
 to every layout that shows a bar) or override individual fields per
 layout.
 
-**Click a tab** to focus that window; **drag a tab** along the bar
-to rearrange the windows. (Settings calls these the bar's
-**items** — hence Item size, Item gap and Item color below.) Because Monocle and Scrolling don't lay
-windows out side by side, the App Bar is where you reorder them:
-drag a tab left or right (or up/down on a vertical bar) and the
-underlying window order follows. Grouped tabs expand into their
-members when you click, so any window in a same-app group can be
-picked or dragged directly. (Lua: `app_bar.*` setters, and the
+**Click a tab** to focus that window; **drag a tab** along the
+bar to rearrange the windows. (Settings calls these the bar's
+**items** — hence Item size, Item gap and Item color below.)
+Because Monocle and Scrolling don't lay windows out side by
+side, the App Bar is where you reorder them: drag a tab left or
+right (or up/down on a vertical bar) and the underlying window
+order follows. Grouped tabs expand into their members when you
+click, so any window in a same-app group can be picked or
+dragged directly. (Lua: `app_bar.*` setters, and the
 rearrange gesture shares the drop visuals in
 [Drag & Drop Rearranging](lua-reference.md#drag--drop-rearranging).)
 

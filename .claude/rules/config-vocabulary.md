@@ -35,11 +35,20 @@ pick — which is why the same terms drifted twice (#228 split
 `tab_background`; R6 renamed it). Reuse these; don't coin a
 synonym:
 
-- **mark** — the on-window state glyph (sticky). Not indicator,
-  not chip.
-- **badge** — a state or count marker drawn in a *bar's* badge
-  slot (`group_badge_*`, `space_bar.sticky_badge`).
+- **mark** — the on-window state glyph (sticky). Retired as a
+  name for it: *indicator*, *chip*.
+- **badge** — a small disc on a bar item's corner: the group
+  count badge, and the Space Bar's sticky / floating state
+  badges (`group_badge_*`, `space_bar.sticky_badge`). One
+  family, three different corners.
 - **pill** — the sticky mark's transient EXPANDED state only.
+- **indicator** — the bar's **active-item** marker
+  (`active_indicator`): which item is current, never a window's
+  state. Live and correct — T1 retired "indicator" only as a
+  name for the sticky mark.
+- **chip** — a Settings-app token widget (`Settings/Chips.swift`:
+  `SpaceChip`, `BadgeChip`, `SpaceAssignmentChip`). Live and
+  correct; retired only as a name for the sticky mark.
 - **item** — one entry in a bar (a window, a same-app group, a
   space). Its geometry is `item_size` / `item_gap`. Never "tab":
   that word belongs to macOS **native tabs** (§5) and to the
@@ -47,8 +56,13 @@ synonym:
 - **width** vs **thickness** — a *stroke* has a width
   (`border.set_width`, `drag.…_border_width`); a *bar* has a
   thickness (`app_bar.set_thickness`).
-- **limit** vs **count** — a `limit` is a cap the user sets
-  (`track.set_limit`); a `count` is how many exist right now.
+- **limit** / **cap** / **count** — a `limit` is a user-set
+  maximum (`track.set_limit`); `cap` is the same idea where it
+  already reads better (`space_bar.set_glyph_cap`, and
+  `trackCap` / `normalCap` in code); a `count` is how many exist
+  right now. `stack.set_master_count` is a retained exception —
+  the user names how many windows are masters, and it shipped
+  that way.
 - **style** — names WHERE or HOW something is drawn, not what
   the drawn thing is called (`background_style`).
 
