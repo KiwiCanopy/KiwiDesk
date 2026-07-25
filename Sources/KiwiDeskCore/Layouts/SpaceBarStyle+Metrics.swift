@@ -25,7 +25,7 @@ extension SpaceBarStyle {
     /// Valid glyph-cap bounds (#376): 1 (a lone glyph + "+n",
     /// matching the PR #381 "0 is toggle-only, floor at 1" idiom)
     /// through 12 (past ~a dozen a status glyph row stops being
-    /// scannable at any box size). A fixed clamp, not fit-derived —
+    /// scannable at any item size). A fixed clamp, not fit-derived —
     /// a display-dependent cap would resolve differently per screen
     /// and break the bar's otherwise-uniform model.
     public static let glyphCapRange = 1...12

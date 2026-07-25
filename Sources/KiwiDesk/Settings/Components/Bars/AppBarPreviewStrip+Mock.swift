@@ -80,8 +80,8 @@ extension AppBarPreviewStrip {
         if style.glassEnabled {
             return L("app_bar.liquid_glass", "Liquid Glass")
         }
-        return style.tabBackground == .boxed
-            ? L("app_bar.tab_background.boxed", "Boxed")
-            : L("app_bar.tab_background.plain", "Plain")
+        return style.backgroundStyle == .boxed
+            ? L("app_bar.background_style.boxed", "Boxed")
+            : L("app_bar.background_style.plain", "Plain")
     }
 }

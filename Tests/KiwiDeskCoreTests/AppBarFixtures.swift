@@ -17,12 +17,12 @@ enum AppBarFixtures {
         style.edge = .bottom
         style.alignment = .end
         style.thickness = 44
-        style.tabBackground = .plain
+        style.backgroundStyle = .plain
         style.liquidGlass = true
-        style.tabBackgroundFit = .full
+        style.backgroundFit = .full
         style.activeIndicator = .gap
-        style.boxSize = 120
-        style.boxGap = 3
+        style.itemSize = 120
+        style.itemGap = 3
         style.content = .name
         style.iconSource = .appFont
         style.groupAdjacentWindows = false
@@ -46,16 +46,16 @@ enum AppBarFixtures {
         bar.edge = .right
         bar.alignment = .start
         bar.thickness = 50
-        bar.tabBackground = .boxed
+        bar.backgroundStyle = .boxed
         // Differs from the global fixture (true) so resolve parity
         // sees the override write.
         bar.liquidGlass = false
         // The global fixture uses .full, so the override must
         // differ for the resolve parity to see the write.
-        bar.tabBackgroundFit = .hug
+        bar.backgroundFit = .hug
         bar.activeIndicator = .outline
-        bar.boxSize = 88
-        bar.boxGap = 9
+        bar.itemSize = 88
+        bar.itemGap = 9
         bar.content = .iconAndName
         bar.iconSource = .appImage
         bar.groupAdjacentWindows = true

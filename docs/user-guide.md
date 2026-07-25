@@ -761,9 +761,9 @@ one with the **Toggle sticky** shortcut (Shortcuts ▸ Size &
 Float; there is no app rule list, stickiness is per window).
 Sticky has two scopes, both in that shortcut list:
 **Toggle sticky** keeps the window on every space of **every**
-monitor (marked with an ∞ chip), while **Toggle display sticky**
+monitor (marked with an ∞ mark), while **Toggle display sticky**
 keeps it on every space of just **one** monitor — the screen it
-lives on (marked with a 📌 chip). Moving a display-sticky window
+lives on (marked with a 📌 mark). Moving a display-sticky window
 to a space on another monitor re-homes it there; moving a
 global-sticky one anywhere, or a display-sticky one to a
 different space on the *same* monitor, is refused with a brief
@@ -779,7 +779,7 @@ scrolls like any other slot — the row itself is the
 overflow). Rearrange it on its home space to move it
 everywhere; on other spaces it cannot be reordered or mouse-resized — the gesture snaps back. The `?` beside **Toggle
 sticky** in Shortcuts spells this out. When such a drag snaps
-back, the window's chip briefly expands into a pill naming its
+back, the window's mark briefly expands into a pill naming its
 **home space** — by the same icon or name its Space Bar tile
 shows — so you can see where the tile actually belongs. The same
 pill appears on the sticky window when you drag *another* window
@@ -787,26 +787,26 @@ onto its slot: the sticky one is the one that can't move, so it's
 the one that explains why.
 
 Because a sticky window can look identical to a normal one,
-KiwiDesk marks it with a small badge chip in its top-right
+KiwiDesk draws a small mark in its top-right
 corner. **Show mark on sticky windows** (on by default) turns
-the chip off — unless the Space Bar is hidden, in which case
-the toggle greys out and stays on: with the bar off the chip
-is the only sticky indicator, and sticky state must never be
-invisible. (From Lua both indicators are freely configurable —
-`sticky.set_indicator`, `space_bar.set_sticky_badge`.) The
+the mark off — unless the Space Bar is hidden, in which case
+the toggle greys out and stays on: with the bar off the mark
+is the only one there is, and sticky state must never be
+invisible. (From Lua both marks are freely configurable —
+`sticky.set_mark`, `space_bar.set_sticky_badge`.) The
 Space Bar shows its own sticky badge either way, and floating
 windows get a bar badge too — see the Space Bar section.
 
 Under the toggle, **Mark color** tints the marks. **Sticky**
-colors both the on-window chip and the Space Bar sticky badge
+colors both the on-window mark and the Space Bar sticky badge
 (one mark, one color everywhere); **Floating** colors the
 Space Bar floating badge (floating windows have no on-window
-chip). The mark becomes a **filled disc** in the chosen color
+mark). The mark becomes a **filled disc** in the chosen color
 with a legible black or white glyph picked automatically for
 contrast. Both default to **Automatic** — the swatch shows a
 diagonal light/dark split, and the mark keeps its default look
 (the Space Bar badge stays the count-badge color; the on-window
-chip is a neutral glyph on glass that adapts to light and dark).
+mark is a neutral glyph on glass that adapts to light and dark).
 Pick a color to override; right-click the swatch (or clear the
 hex field) to return to Automatic. (Lua:
 [`sticky.set_color`](lua-reference.md#stickyset_color) and
@@ -852,7 +852,7 @@ running windows.
 
 **Global settings:**
 
-- **Tab background**: boxed (a box per tab honoring corner
+- **Background style**: boxed (a box per item honoring corner
   roundness), plain (names on a shared translucent strip), or
   **Liquid Glass** — a macOS&nbsp;26 glass plate under the items,
   tinted by the Background color (transparent = clear glass) and
@@ -861,8 +861,8 @@ running windows.
   opens on older macOS, where it falls back to Boxed.
 - **Background size**: how far Plain's strip or the Liquid Glass
   plate reaches — **Hug items** (default; the plate wraps the
-  tabs like the Dock wraps its icons) or **Full width**
-  (edge-to-edge). Hug falls back to full width once the tabs
+  items like the Dock wraps its icons) or **Full width**
+  (edge-to-edge). Hug falls back to full width once the items
   overflow and scroll. Greyed when every bar on screen resolves
   to Boxed, which draws no shared plate. The Space Bar has the
   same control.
@@ -878,12 +878,12 @@ running windows.
   the three behave the same.
 - **Active indicator**: ring (outlined border around the active
   tab), edge mark (accent bar on the active tab's window-facing
-  edge), or gap (active slot empty). Orthogonal to tab background
-  — all combinations are valid. Full-color app icons (System
+  edge), or gap (active slot empty). Orthogonal to the background
+  style — all combinations are valid. Full-color app icons (System
   default) also dim to half strength on inactive tabs, so the
   active app reads even though those icons take no tint.
 - **Thickness**: the strip's depth in points.
-- **Box size**: auto (0) measures rendered width and sizes slots
+- **Item size**: auto (0) measures rendered width and sizes slots
   uniformly to fit the widest item; fixed pixel width.
 - **Content**: icon only, name only, or both. Left/right bars
   always render icon-only (names would need stacked or rotated
@@ -984,8 +984,8 @@ At a glance, the marks you may see and what each means:
 
 | Mark | Where it sits | Means |
 | --- | --- | --- |
-| ∞ chip | On the window, top-right corner | **Global sticky** — stays on every Space of every monitor |
-| 📌 chip | On the window, top-right corner | **Display sticky** — stays on every Space of the one monitor it lives on |
+| ∞ mark | On the window, top-right corner | **Global sticky** — stays on every Space of every monitor |
+| 📌 mark | On the window, top-right corner | **Display sticky** — stays on every Space of the one monitor it lives on |
 | Badge, glyph's **top-left** | Space Bar | That window (or a window in the group) is **sticky** |
 | Badge, glyph's **bottom-left** | Space Bar | That window is **floating** |
 | `+n` / count badge, glyph's **top-right** | Space Bar | How many windows a grouped glyph holds |
@@ -993,9 +993,9 @@ At a glance, the marks you may see and what each means:
 Every mark is a **filled disc** in its state color with a legible
 black-or-white glyph auto-picked for contrast; sticky and floating
 each get their own color (see **Mark color**, above). Floating shows
-no on-window chip — in the bar is the only place a tiled and a
+no on-window mark — in the bar is the only place a tiled and a
 floating window look different. (Lua:
-[`sticky.set_indicator`](lua-reference.md#stickyset_indicator),
+[`sticky.set_mark`](lua-reference.md#stickyset_mark),
 [`sticky.set_color`](lua-reference.md#stickyset_color),
 [`floating.set_color`](lua-reference.md#floatingset_color).)
 

@@ -36,32 +36,32 @@ struct TrackOverrideTests {
     func resolveAppliesAll() {
         var over = TrackOverride()
         over.axis = .horizontal
-        over.count = 3
+        over.limit = 3
         let resolved = over.resolved(onto: TrackParams())
         #expect(resolved.axis == .horizontal)
-        #expect(resolved.count == 3)
+        #expect(resolved.limit == 3)
     }
 
     @Test("Unset fields inherit the global, per field")
     func partialInheritance() {
         var global = TrackParams()
         global.axis = .horizontal
-        global.count = 2
+        global.limit = 2
         var over = TrackOverride()
-        over.count = 5  // override only this
+        over.limit = 5  // override only this
         let resolved = over.resolved(onto: global)
-        #expect(resolved.count == 5)  // set
+        #expect(resolved.limit == 5)  // set
         #expect(resolved.axis == .horizontal)  // inherited
     }
 
     @Test("Sparse encode: only set fields, round-trips")
     func sparseRoundTrip() throws {
         var over = TrackOverride()
-        over.count = 4
+        over.limit = 4
         let data = try JSONEncoder().encode(over)
         let json =
             try #require(String(data: data, encoding: .utf8))
-        #expect(json.contains("count"))
+        #expect(json.contains("limit"))
         #expect(!json.contains("axis"))
         let back = try JSONDecoder().decode(
             TrackOverride.self,
@@ -84,12 +84,12 @@ struct TrackOverrideTests {
     @Test("TilingSettings resolves track per space")
     func settingsResolver() {
         var settings = TilingSettings()
-        settings.track.count = 0
+        settings.track.limit = 0
         var over = TrackOverride()
-        over.count = 3
+        over.limit = 3
         settings.track.override[SpaceID("2")] = over
-        #expect(settings.resolvedTrack(for: "2").count == 3)
-        #expect(settings.resolvedTrack(for: "1").count == 0)
+        #expect(settings.resolvedTrack(for: "2").limit == 3)
+        #expect(settings.resolvedTrack(for: "1").limit == 0)
     }
 
     @Test("overflow_style resolves per space (#188)")

@@ -116,22 +116,22 @@ struct LayoutAppBarGroup: View {
         )
         OverridePickerRow(
             label: L(
-                "app_bar.tab_background.label",
-                "Tab background"
+                "app_bar.background_style.label",
+                "Background style"
             ),
-            value: $bar.tabBackground,
-            global: global.tabBackground,
-            options: AppBarOptions.tabBackground,
+            value: $bar.backgroundStyle,
+            global: global.backgroundStyle,
+            options: AppBarOptions.backgroundStyle,
             style: .segmented
         )
         OverridePickerRow(
             label: L(
-                "app_bar.tab_background_fit.label",
+                "app_bar.background_fit.label",
                 "Background size"
             ),
-            value: $bar.tabBackgroundFit,
-            global: global.tabBackgroundFit,
-            options: AppBarOptions.tabBackgroundFit,
+            value: $bar.backgroundFit,
+            global: global.backgroundFit,
+            options: AppBarOptions.backgroundFit,
             style: .segmented
         )
         .modifier(
@@ -141,10 +141,10 @@ struct LayoutAppBarGroup: View {
                 // inert for Boxed — resolve to see the effective
                 // shape under any override.
                 active: bar.resolved(with: global)
-                    .tabBackground == .boxed,
+                    .backgroundStyle == .boxed,
                 help: L(
-                    "app_bar.tab_background_fit.boxed_only",
-                    "Boxed draws a box per tab, not a shared "
+                    "app_bar.background_fit.boxed_only",
+                    "Boxed draws a box per item, not a shared "
                         + "plate, so there is nothing to size."
                 )
             )
@@ -203,17 +203,17 @@ struct LayoutAppBarGroup: View {
             range: 20...80
         )
         OverrideAutoSliderRow(
-            label: L("app_bar.box_size", "Box size"),
-            autoLabel: L("app_bar.box_size.auto", "Auto box size"),
-            value: $bar.boxSize,
-            global: global.boxSize,
+            label: L("app_bar.item_size", "Item size"),
+            autoLabel: L("app_bar.item_size.auto", "Auto item size"),
+            value: $bar.itemSize,
+            global: global.itemSize,
             restore: 120,
             range: 1...200
         )
         OverrideSliderRow(
-            label: L("app_bar.box_gap", "Box gap"),
-            value: $bar.boxGap,
-            global: global.boxGap,
+            label: L("app_bar.item_gap", "Item gap"),
+            value: $bar.itemGap,
+            global: global.itemGap,
             range: 0...40
         )
         OverrideAutoSliderRow(
@@ -237,7 +237,7 @@ struct LayoutAppBarGroup: View {
             range: 0...100,
             unit: "%"
         )
-        // Never greyed since tab_background_fit: roundness
+        // Never greyed since background_fit: roundness
         // also shapes Plain's own shared plate (matches the
         // global + Space editors, QA 2026-07-19).
     }

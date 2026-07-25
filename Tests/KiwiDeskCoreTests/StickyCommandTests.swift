@@ -141,17 +141,17 @@ struct StickyCommandTests {
         #expect(!core.execute("toggle_sticky").isSuccess)
     }
 
-    @Test("sticky.set_indicator writes the style, unclamped")
+    @Test("sticky.set_mark writes the style, unclamped")
     func setIndicator() {
         let core = makeCore()
-        #expect(core.tiler.settings.stickyStyle.indicator)
+        #expect(core.tiler.settings.stickyStyle.mark)
         #expect(
             core.execute(
-                "sticky.set_indicator",
+                "sticky.set_mark",
                 args: [.bool(false)]
             ).isSuccess
         )
-        #expect(!core.tiler.settings.stickyStyle.indicator)
+        #expect(!core.tiler.settings.stickyStyle.mark)
         // No coverage-guard clamp here: off stays off even
         // with the Space Bar also off (Lua is open, #414).
         #expect(
@@ -160,15 +160,15 @@ struct StickyCommandTests {
                 args: [.bool(false)]
             ).isSuccess
         )
-        #expect(!core.tiler.settings.stickyStyle.indicator)
+        #expect(!core.tiler.settings.stickyStyle.mark)
     }
 
-    @Test("sticky.set_indicator rejects non-boolean input")
+    @Test("sticky.set_mark rejects non-boolean input")
     func setIndicatorRejects() {
         let core = makeCore()
         #expect(
             !core.execute(
-                "sticky.set_indicator",
+                "sticky.set_mark",
                 args: [.string("yes")]
             ).isSuccess
         )

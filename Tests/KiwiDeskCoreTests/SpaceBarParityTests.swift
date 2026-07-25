@@ -104,11 +104,11 @@ struct SpaceBarCommandParityTests {
     private static let everySetting: [SpaceBarCommandSetting] = [
         .enabled(false), .edge(.bottom), .alignment(.end),
         .thickness(44),
-        .boxSize(120), .boxGap(3), .fontSize(15),
+        .itemSize(120), .itemGap(3), .fontSize(15),
         .glyphCap(8),
-        .iconSource(.appFont), .tabBackground(.plain),
+        .iconSource(.appFont), .backgroundStyle(.plain),
         .liquidGlass(true),
-        .tabBackgroundFit(.full),
+        .backgroundFit(.full),
         .activeIndicator(.gap), .cornerRoundness(5),
         .dimFactor(0.3), .activeDimFactor(0.7),
         .showFrontApp(true), .hideEmpty(true),
@@ -192,10 +192,10 @@ struct SpaceBarCommandParityTests {
         case .edge: return [.string("bottom")]
         case .alignment: return [.string("end")]
         case .iconSource: return [.string("app_font")]
-        case .tabBackground: return [.string("plain")]
-        case .tabBackgroundFit: return [.string("full")]
+        case .backgroundStyle: return [.string("plain")]
+        case .backgroundFit: return [.string("full")]
         case .activeIndicator: return [.string("gap")]
-        case .thickness, .boxSize, .boxGap, .fontSize,
+        case .thickness, .itemSize, .itemGap, .fontSize,
             .cornerRoundness, .dimFactor, .activeDimFactor:
             return [.number(10)]
         case .springDelay: return [.number(1000)]

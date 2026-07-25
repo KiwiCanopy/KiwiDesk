@@ -1462,7 +1462,7 @@ The rows stay live at runtime by design; only their
 
 **Sticky state must never be invisible from the GUI.** A
 sticky window can look identical to a normal one, so it gets
-two indicators: an on-window chip (top-RIGHT corner —
+two marks: an on-window mark (top-RIGHT corner —
 top-left belongs to the traffic lights) and a Space Bar badge
 (top-LEFT of its glyph — the bar reserves top-right for the
 group count; an intentional cross-surface difference).
@@ -1471,22 +1471,22 @@ floating are otherwise indistinguishable — on the window
 itself floating is self-evident. Badges are Space-Bar-only
 (the per-layout App Bar shows no state badges), survive
 grouping as an "at least one" aggregate, and have no GUI
-toggle. The coverage guard: the on-window chip's toggle greys
+toggle. The coverage guard: the on-window mark's toggle greys
 out and renders forced ON while the Space Bar is off, because
-that chip is then the only sticky indicator and — unlike a
+it is then the only sticky mark there is and — unlike a
 focus border, which duplicates an OS cue — sticky has no
 native fallback. The guard is presentation-only; Lua's
-`sticky.set_indicator` and `space_bar.set_sticky_badge` apply
-unclamped, so a deliberate zero-indicator setup stays
+`sticky.set_mark` and `space_bar.set_sticky_badge` apply
+unclamped, so a deliberate zero-mark setup stays
 reachable from the open layer (`dim_factor` precedent).
 (#414)
 
-**The sticky chip has a transient third mode: the home-space
-pill.** In steady state the chip is a passive glyph, identical
+**The sticky mark has a transient third mode: the home-space
+pill.** In steady state the mark is a passive glyph, identical
 on every space. But a tiled-sticky window belongs to exactly
 one *home* space, and nothing said which — so when a drag on a
 foreign space snaps the tile back (the one friction moment the
-question exists), the chip expands leftward into a pill —
+question exists), the mark expands leftward into a pill —
 "Can only be moved in its home space *N*" — then auto-collapses.
 The expand waits for the snap-back to settle first (expanding
 mid-snap reads as lag) — the wait tracks the live relayout
@@ -1497,7 +1497,7 @@ caption crowding a tiny corner badge, against "captions label,
 don't teach." It names the home *space* by its configured Space
 Bar identifier (SF Symbol or emoji, id/name as fallback) so the
 pill and the space's bar tile read as the same place — not a
-focus/z-order state, since the chip is not a focus cue: it marks
+focus/z-order state, since the mark is not a focus cue: it marks
 every sticky window on every space at once.
 The glyph stays pinned in the rightmost square through the morph
 (its screen position never moves), and the pill clamps to the
@@ -1550,24 +1550,24 @@ than duplicate the geometric detector against the array-step model.
 
 **The sticky/floating marks are a filled state-color pair,
 defaulting to Automatic.** The one sticky glyph reads the one
-`sticky.color`, so the on-window chip and the Space Bar sticky
+`sticky.color`, so the on-window mark and the Space Bar sticky
 badge can never drift to different colors; floating gets its own
 `floating.color` (a minimal `floating` namespace, since floating
 has no other setting) tinting its Space Bar badge only — it has
-no on-window chip. The color owns the *fill*, and the glyph on
+no on-window mark. The color owns the *fill*, and the glyph on
 top is auto-contrasted black/white for legibility (a filled disc
 shows its hue far better than a thin glyph stroke at the 7–9 pt
 badge size, and an auto-contrast glyph means any picked fill stays
 readable — a guardrail on legibility, never taste). The Space Bar
 sticky/floating marks stay filled discs in the count badge's
-family; the on-window chip nests the same filled disc inside its
+family; the on-window mark nests the same filled disc inside its
 glass square, so the two surfaces read as one mark. **Automatic**
 falls back to today's look on each surface: the badges inherit the
 count badge's own `groupBadgeColor` fill (the default trio stays
-one consistent color), and the chip drops the disc for the bare
+one consistent color), and the mark drops the disc for the bare
 neutral `.labelColor` glyph on glass. The default is Automatic
 (the empty-hex sentinel), not a concrete brand hex like the other
-color wells: the chip sits on top of arbitrary third-party window
+color wells: the mark sits on top of arbitrary third-party window
 content all day, and the adaptive label color is the only default
 guaranteed legible against anything behind the translucent plate,
 light or dark — a fixed hue can wash out or clash. So the shipped
@@ -2256,12 +2256,12 @@ every bundled
 palette.
 
 **Plate reach is its own property, not a fourth background.**
-(QA 2026-07-19.) `tab_background_fit` (`full` | `hug`, default
+(QA 2026-07-19.) `background_fit` (`full` | `hug`, default
 hug) answers "how far does the shared plate reach" — a different
-question from `tab_background`'s "what is it made of", so it is
+question from `background_style`'s "where is it drawn", so it is
 orthogonal, and `plain` gets the choice as well as Liquid Glass
 (folding hug into `material` alone would have locked `plain`
-full-width forever). Hug wraps the run plus one box gap per end
+full-width forever). Hug wraps the run plus one item gap per end
 (the Dock's read — the calmer default for "approachable by
 default") and falls back to full while the run overflows and
 scrolls, where content fills the strip and there is nothing to
@@ -2270,8 +2270,8 @@ control, per #171. One geometry authority: `BarPlate.frame`,
 shared by both bars and pinned by `BarPlateTests`.
 
 **Liquid Glass is an orthogonal finish toggle, not a third
-`tab_background`.** (#390; revised 2026-07-20.) It was first
-shipped as a third `TabBackground` case (`material`) beside
+`background_style`.** (#390; revised 2026-07-20.) It was first
+shipped as a third `BackgroundStyle` case (`material`) beside
 `boxed`/`plain`, on the reasoning that a toggle would be ambiguous
 ("boxed + glass" = glass boxes or a glass strip under opaque
 boxes?). On-device testing (macOS 26.5.2) forced a rethink on two
@@ -2303,10 +2303,11 @@ round-trips everywhere (portability). Explicitly out of scope: a
 glass border/stroke, a shadow (`BarPanel` is deliberately
 shadowless), and vibrancy-following text.
 
-**Tab background and active indicator are orthogonal.** (#228.)
+**Background style and active indicator are orthogonal.** (#228.)
 The old coupled `style` enum (`pills` / `segments` / `underline`)
-conflated two orthogonal concerns: the per-tab box rendering and
-the active-tab marking. The redesign splits them into `tab_background`
+conflated two orthogonal concerns: the per-item box rendering and
+the active-tab marking. The redesign splits them into
+`background_style`
 (`boxed` / `plain`) and `active_indicator` (`ring` / `edge_mark` /
 `gap`), so all combinations are expressible — e.g. boxed + edge
 mark (the old "segments" look), plain + edge mark (the old

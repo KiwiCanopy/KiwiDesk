@@ -2,22 +2,22 @@ import AppKit
 import CoreGraphics
 
 /// Drives the on-window sticky marks (#414): every sticky
-/// window wears the chip, on every space — a sticky window is
+/// window wears the mark, on every space — a sticky window is
 /// visible everywhere, so its mark is too. Gated only by
-/// `sticky.indicator`; deliberately NOT by `border.enabled`
+/// `sticky.mark`; deliberately NOT by `border.enabled`
 /// (the mark is a border sibling, not a border feature).
 extension KiwiCore {
-    func updateStickyIndicators() {
-        guard tiler.settings.stickyStyle.indicator else {
-            stickyIndicators.sync([])
+    func updateStickyMarks() {
+        guard tiler.settings.stickyStyle.mark else {
+            stickyMarks.sync([])
             borders.setStickyTracked([])
             return
         }
         let sticky = state.windows.all.filter(\.isSticky)
         let color = tiler.settings.stickyStyle.color
-        stickyIndicators.sync(
+        stickyMarks.sync(
             sticky.map {
-                StickyIndicatorManager.Spec(
+                StickyMarkManager.Spec(
                     window: $0.id,
                     frame: $0.frame,
                     color: color,
@@ -28,21 +28,21 @@ extension KiwiCore {
             }
         )
         // Fold sticky windows into the ring's WS watch set so the
-        // chip gets z-order/frame events even with no border (#414).
+        // mark gets z-order/frame events even with no border (#414).
         borders.setStickyTracked(Set(sticky.map(\.id)))
     }
 
     /// #421: when a tiled-sticky traveler snaps back after a drag
-    /// on a FOREIGN space, briefly expand its chip into a pill
+    /// on a FOREIGN space, briefly expand its mark into a pill
     /// naming its home space — the one moment the "where does this
     /// belong?" question exists (ui-designer 2026-07-21). Guarded
-    /// by the same `sticky.indicator` gate as the chip; a no-op
-    /// for a non-sticky window (no chip to expand).
+    /// by the same `sticky.mark` gate as the mark; a no-op
+    /// for a non-sticky window (no mark to expand).
     func flashStickyHomeSpace(_ id: WindowID) {
-        guard tiler.settings.stickyStyle.indicator,
+        guard tiler.settings.stickyStyle.mark,
             let home = state.workspaces.space(of: id)
         else { return }
-        stickyIndicators.flash(
+        stickyMarks.flash(
             id,
             format: L(
                 "sticky.home.pill",
@@ -97,14 +97,14 @@ extension KiwiCore {
         return true
     }
 
-    /// Expands a sticky window's chip into a pill explaining it can't
+    /// Expands a sticky window's mark into a pill explaining it can't
     /// be sent to the overflow pile (#438). Gated by the same
-    /// `sticky.indicator` as the chip; a no-op for a non-sticky
+    /// `sticky.mark` as the mark; a no-op for a non-sticky
     /// window or when the mark is off. No relayout precedes it (the
     /// swap is refused outright), so it appears at once.
     func flashStickyCannotPile(_ id: WindowID) {
-        guard tiler.settings.stickyStyle.indicator else { return }
-        stickyIndicators.flash(
+        guard tiler.settings.stickyStyle.mark else { return }
+        stickyMarks.flash(
             id,
             format: L(
                 "sticky.pile.pill",
@@ -163,14 +163,14 @@ extension KiwiCore {
     /// exists: a global sticky has no valid target (negative), a
     /// display sticky can still cross to another monitor (positive
     /// "here's how"). The "why + how" lives in the keybinding `?`
-    /// help, not this pill. Gated by the same `sticky.indicator` as
-    /// the chip; a no-op when the mark is off. Appears at once — the
+    /// help, not this pill. Gated by the same `sticky.mark` as
+    /// the mark; a no-op when the mark is off. Appears at once — the
     /// move is refused outright, so no relayout precedes it.
     func flashStickyMoveBlocked(
         _ id: WindowID,
         scope: StickyScope
     ) {
-        guard tiler.settings.stickyStyle.indicator else { return }
+        guard tiler.settings.stickyStyle.mark else { return }
         let format =
             scope == .display
             ? L(
@@ -181,7 +181,7 @@ extension KiwiCore {
                 "sticky.everywhere.pill",
                 "Sticky windows can't be moved to another space"
             )
-        stickyIndicators.flash(
+        stickyMarks.flash(
             id,
             format: format,
             mark: .text(""),

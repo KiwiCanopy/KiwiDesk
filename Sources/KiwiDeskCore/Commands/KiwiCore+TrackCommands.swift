@@ -16,23 +16,24 @@ extension KiwiCore {
                 )
             else { return Self.trackAxisError }
             tiler.settings.track.axis = axis
-        case "track.set_count":
-            guard let count = args.first?.intValue,
-                count >= 0
+        case "track.set_limit":
+            guard let limit = args.first?.intValue,
+                limit >= 0
             else {
                 return .fail(
                     "expected a track limit (0 = automatic)"
                 )
             }
             // 0 keeps the Lua "0 = automatic" idiom; a positive
-            // count pins the cap and turns automatic off, so
-            // `track.set_count(3)` takes effect without a second
+            // limit pins the cap and turns automatic off, so
+            // `track.set_limit(3)` takes effect without a second
             // call. The remembered magnitude is left untouched by
-            // the 0 case (#178).
-            if count == 0 {
+            // the 0 case (#178). 0 is never STORED — the GUI
+            // steppers start at 1 so the field has one meaning.
+            if limit == 0 {
                 tiler.settings.track.autoTracks = true
             } else {
-                tiler.settings.track.count = count
+                tiler.settings.track.limit = limit
                 tiler.settings.track.autoTracks = false
             }
         case "track.set_auto_tracks":
@@ -107,19 +108,19 @@ extension KiwiCore {
                 )
             else { return Self.trackAxisError }
             over.axis = axis
-        case "count":
-            guard let count = rest.first?.intValue,
-                count >= 0
+        case "limit":
+            guard let limit = rest.first?.intValue,
+                limit >= 0
             else {
                 return .fail(
                     "expected a track limit (0 = automatic)"
                 )
             }
             // Same coupling as the global setter (#178).
-            if count == 0 {
+            if limit == 0 {
                 over.autoTracks = true
             } else {
-                over.count = count
+                over.limit = limit
                 over.autoTracks = false
             }
         case "auto_tracks":

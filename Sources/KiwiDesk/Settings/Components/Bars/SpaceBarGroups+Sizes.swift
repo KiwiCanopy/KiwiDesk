@@ -15,24 +15,24 @@ extension SpaceBarEditorGroup {
         )
         AutoGatedGroup(
             title: L(
-                "space_bar.box_size.auto",
-                "Auto box size"
+                "space_bar.item_size.auto",
+                "Auto item size"
             ),
             isOn: AppBarAuto.binding(
-                style.boxSize,
+                style.itemSize,
                 restore: 120
             )
         ) {
             PtSlider(
-                label: L("space_bar.box_size", "Box size"),
-                value: style.boxSize,
+                label: L("space_bar.item_size", "Item size"),
+                value: style.itemSize,
                 range: 1...200,
                 autoAtZero: true
             )
         }
         PtSlider(
-            label: L("space_bar.box_gap", "Box gap"),
-            value: style.boxGap,
+            label: L("space_bar.item_gap", "Item gap"),
+            value: style.itemGap,
             range: 0...40
         )
         AutoGatedGroup(
@@ -62,7 +62,7 @@ extension SpaceBarEditorGroup {
         )
         glyphCapSummary
         Divider()
-        // Never greyed since tab_background_fit: roundness
+        // Never greyed since background_fit: roundness
         // shapes the Boxed items, the glass plate, AND Plain's
         // own shared plate (BarPlate) — the old Plain grey
         // predated Plain getting a plate (QA 2026-07-19).

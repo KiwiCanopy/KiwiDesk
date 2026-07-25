@@ -20,7 +20,7 @@ struct TrackEditor: View {
                 newWindow: model.config.settings.track.newWindow,
                 placement: model.config.settings.track
                     .newWindowPosition,
-                count: model.config.settings.track.count,
+                limit: model.config.settings.track.limit,
                 autoTracks: model.config.settings.track.autoTracks
             )
             // Track is a somewhat more advanced layout
@@ -109,13 +109,13 @@ struct TrackEditor: View {
             trackAuto
             VStack(alignment: .leading, spacing: 4) {
                 StepperRow(
-                    label: L("track.count", "Track limit"),
-                    value: $model.config.settings.track.count,
+                    label: L("track.limit", "Track limit"),
+                    value: $model.config.settings.track.limit,
                     in: 1...10
                 )
                 Text(
                     L(
-                        "track.count_caption",
+                        "track.limit_caption",
                         "Bounded by the minimum window size above: "
                             + "more tracks than fit collapse into "
                             + "the overflow track."

@@ -183,7 +183,7 @@ public struct Space: Sendable, Equatable {
     /// prunes naturally; a dying head hands its break to its
     /// successor (`remove`), and `swap` keeps boundaries at the
     /// slot, not on the traveling window. Ephemeral: what
-    /// persists is the *rule* (`layout.track.count`/`axis`).
+    /// persists is the *rule* (`layout.track.limit`/`axis`).
     /// Seeded to all windows on mode entry, cleared on leave.
     public var trackBreaks: Set<WindowID>
     /// Per-track size weight, keyed by the track's head window

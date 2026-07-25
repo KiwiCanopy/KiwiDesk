@@ -136,9 +136,9 @@ struct GlobalAppBarGroup: View {
             )
         )
         SegmentedPicker(
-            tabBackgroundLabel,
-            selection: $style.tabBackground,
-            options: AppBarOptions.tabBackground.map { ($0.1, $0.0) }
+            backgroundStyleLabel,
+            selection: $style.backgroundStyle,
+            options: AppBarOptions.backgroundStyle.map { ($0.1, $0.0) }
         )
         // Liquid Glass is a finish over either shape, offered only
         // where it can render (macOS 26+) — hidden, not greyed,
@@ -160,9 +160,9 @@ struct GlobalAppBarGroup: View {
         // grouping); greyed for Boxed, which draws no shared
         // plate (#171).
         SegmentedPicker(
-            tabBackgroundFitLabel,
-            selection: $style.tabBackgroundFit,
-            options: AppBarOptions.tabBackgroundFit
+            backgroundFitLabel,
+            selection: $style.backgroundFit,
+            options: AppBarOptions.backgroundFit
                 .map { ($0.1, $0.0) }
         )
         .modifier(
@@ -177,8 +177,8 @@ struct GlobalAppBarGroup: View {
                 // hid the only editor for a value in use.
                 active: everyShownBarBoxed,
                 help: L(
-                    "app_bar.tab_background_fit.boxed_only",
-                    "Boxed draws a box per tab, not a shared "
+                    "app_bar.background_fit.boxed_only",
+                    "Boxed draws a box per item, not a shared "
                         + "plate, so there is nothing to size."
                 )
             )
@@ -289,12 +289,12 @@ struct GlobalAppBarGroup: View {
     private var alignmentLabel: String {
         L("app_bar.alignment.label", "Alignment")
     }
-    private var tabBackgroundLabel: String {
-        L("app_bar.tab_background.label", "Tab background")
+    private var backgroundStyleLabel: String {
+        L("app_bar.background_style.label", "Background style")
     }
-    private var tabBackgroundFitLabel: String {
+    private var backgroundFitLabel: String {
         L(
-            "app_bar.tab_background_fit.label",
+            "app_bar.background_fit.label",
             "Background size"
         )
     }

@@ -66,7 +66,7 @@ struct AppBarPreviewStrip: View {
             ForEach(mockTabs) { tab($0) }
         }
         .padding(4)
-        // The shared plate honors `tab_background_fit`: the
+        // The shared plate honors `background_fit`: the
         // mock naturally hugs its tabs, so `full` stretches it
         // to the canvas edge instead (QA 2026-07-19).
         .frame(
@@ -92,7 +92,7 @@ struct AppBarPreviewStrip: View {
             shape
                 .fill(.ultraThinMaterial)
                 .overlay(shape.fill(color(style.fillColor)))
-        } else if style.tabBackground == .plain {
+        } else if style.backgroundStyle == .plain {
             shape.fill(color(style.fillColor))
         } else {
             shape.fill(Color.clear)
@@ -100,7 +100,7 @@ struct AppBarPreviewStrip: View {
     }
 
     private var plateSpansCanvas: Bool {
-        !style.hasBox && style.tabBackgroundFit == .full
+        !style.hasBox && style.backgroundFit == .full
     }
 
     /// Row on top/bottom, column on left/right.
@@ -128,7 +128,7 @@ struct AppBarPreviewStrip: View {
             .frame(width: slotWidth, height: slotHeight)
             .background(
                 RoundedRectangle(
-                    cornerRadius: style.tabBackground == .boxed
+                    cornerRadius: style.backgroundStyle == .boxed
                         ? corner : 0
                 )
                 .fill(boxFill(t))
@@ -193,7 +193,7 @@ struct AppBarPreviewStrip: View {
             : textColor(t)
     }
 
-    /// The active indicator, orthogonal to the tab background:
+    /// The active indicator, orthogonal to the background style:
     /// `ring` outlines the active tab (flush on Boxed, an inset
     /// capsule on Plain), `edgeMark` draws a bar on the
     /// window-facing edge inset to the box corner. `gap` never
@@ -211,7 +211,7 @@ struct AppBarPreviewStrip: View {
     }
 
     @ViewBuilder private var ringAccent: some View {
-        if style.tabBackground == .boxed {
+        if style.backgroundStyle == .boxed {
             RoundedRectangle(cornerRadius: corner)
                 .strokeBorder(
                     color(style.highlightColor),
@@ -280,7 +280,7 @@ struct AppBarPreviewStrip: View {
 
     private func boxFill(_ t: MockTab) -> Color {
         // Plain and any glass finish draw one shared plate, no
-        // per-tab box. Boxed-solid draws one Fill for every box;
+        // per-item box. Boxed-solid draws one Fill for every box;
         // the active tab is marked by the indicator, not a fill.
         style.hasBox ? color(style.fillColor) : .clear
     }

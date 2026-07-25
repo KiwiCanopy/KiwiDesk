@@ -11,9 +11,9 @@ import Foundation
 /// it just for this layout" (shown black). `resolved(with:)`
 /// merges the two into the concrete style the bar renders with.
 public struct LayoutAppBar: Sendable, Equatable {
-    public typealias TabBackground = AppBarStyle.TabBackground
-    public typealias TabBackgroundFit =
-        AppBarStyle.TabBackgroundFit
+    public typealias BackgroundStyle = AppBarStyle.BackgroundStyle
+    public typealias BackgroundFit =
+        AppBarStyle.BackgroundFit
     public typealias ActiveIndicator = AppBarStyle.ActiveIndicator
     public typealias Content = AppBarStyle.Content
 
@@ -25,12 +25,12 @@ public struct LayoutAppBar: Sendable, Equatable {
     public var edge: AppBarEdge?
     public var alignment: AppBarStyle.BarAlignment?
     public var thickness: CGFloat?
-    public var tabBackground: TabBackground?
+    public var backgroundStyle: BackgroundStyle?
     public var liquidGlass: Bool?
-    public var tabBackgroundFit: TabBackgroundFit?
+    public var backgroundFit: BackgroundFit?
     public var activeIndicator: ActiveIndicator?
-    public var boxSize: CGFloat?
-    public var boxGap: CGFloat?
+    public var itemSize: CGFloat?
+    public var itemGap: CGFloat?
     public var content: Content?
     public var iconSource: BarAppIconSource?
     public var groupAdjacentWindows: Bool?
@@ -62,16 +62,16 @@ public struct LayoutAppBar: Sendable, Equatable {
         if let thickness {
             out.thickness = max(AppBarStyle.minThickness, thickness)
         }
-        if let tabBackground { out.tabBackground = tabBackground }
+        if let backgroundStyle { out.backgroundStyle = backgroundStyle }
         if let liquidGlass { out.liquidGlass = liquidGlass }
-        if let tabBackgroundFit {
-            out.tabBackgroundFit = tabBackgroundFit
+        if let backgroundFit {
+            out.backgroundFit = backgroundFit
         }
         if let activeIndicator {
             out.activeIndicator = activeIndicator
         }
-        if let boxSize { out.boxSize = boxSize }
-        if let boxGap { out.boxGap = boxGap }
+        if let itemSize { out.itemSize = itemSize }
+        if let itemGap { out.itemGap = itemGap }
         if let content { out.content = content }
         if let iconSource { out.iconSource = iconSource }
         if let groupAdjacentWindows {
@@ -120,12 +120,12 @@ extension LayoutAppBar: Codable {
         case edge
         case alignment
         case thickness
-        case tabBackground = "tab_background"
+        case backgroundStyle = "background_style"
         case liquidGlass = "liquid_glass"
-        case tabBackgroundFit = "tab_background_fit"
+        case backgroundFit = "background_fit"
         case activeIndicator = "active_indicator"
-        case boxSize = "box_size"
-        case boxGap = "box_gap"
+        case itemSize = "item_size"
+        case itemGap = "item_gap"
         case content
         case iconSource = "icon_source"
         case groupAdjacentWindows = "group_adjacent_windows"
@@ -161,29 +161,29 @@ extension LayoutAppBar: Codable {
             CGFloat.self,
             forKey: .thickness
         )
-        tabBackground = try container.decodeIfPresent(
-            TabBackground.self,
-            forKey: .tabBackground
+        backgroundStyle = try container.decodeIfPresent(
+            BackgroundStyle.self,
+            forKey: .backgroundStyle
         )
         liquidGlass = try container.decodeIfPresent(
             Bool.self,
             forKey: .liquidGlass
         )
-        tabBackgroundFit = try container.decodeIfPresent(
-            TabBackgroundFit.self,
-            forKey: .tabBackgroundFit
+        backgroundFit = try container.decodeIfPresent(
+            BackgroundFit.self,
+            forKey: .backgroundFit
         )
         activeIndicator = try container.decodeIfPresent(
             ActiveIndicator.self,
             forKey: .activeIndicator
         )
-        boxSize = try container.decodeIfPresent(
+        itemSize = try container.decodeIfPresent(
             CGFloat.self,
-            forKey: .boxSize
+            forKey: .itemSize
         )
-        boxGap = try container.decodeIfPresent(
+        itemGap = try container.decodeIfPresent(
             CGFloat.self,
-            forKey: .boxGap
+            forKey: .itemGap
         )
         content = try container.decodeIfPresent(
             Content.self,
@@ -262,23 +262,23 @@ extension LayoutAppBar: Codable {
             forKey: .thickness
         )
         try container.encodeIfPresent(
-            tabBackground,
-            forKey: .tabBackground
+            backgroundStyle,
+            forKey: .backgroundStyle
         )
         try container.encodeIfPresent(
             liquidGlass,
             forKey: .liquidGlass
         )
         try container.encodeIfPresent(
-            tabBackgroundFit,
-            forKey: .tabBackgroundFit
+            backgroundFit,
+            forKey: .backgroundFit
         )
         try container.encodeIfPresent(
             activeIndicator,
             forKey: .activeIndicator
         )
-        try container.encodeIfPresent(boxSize, forKey: .boxSize)
-        try container.encodeIfPresent(boxGap, forKey: .boxGap)
+        try container.encodeIfPresent(itemSize, forKey: .itemSize)
+        try container.encodeIfPresent(itemGap, forKey: .itemGap)
         try container.encodeIfPresent(content, forKey: .content)
         try container.encodeIfPresent(
             iconSource,

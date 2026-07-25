@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The GUI face of the `box_size`/`font_size` 0 = auto sentinel
+/// The GUI face of the `item_size`/`font_size` 0 = auto sentinel
 /// (#228 §3): an "Auto" toggle whose on-state stores 0 and whose
 /// off-state restores a sensible non-zero size, so the user never
 /// drags a slider to 0 to mean "auto".

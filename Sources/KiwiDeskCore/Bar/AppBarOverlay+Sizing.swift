@@ -1,7 +1,7 @@
 import AppKit
 
 /// Box sizing: every item gets the same slot length — the
-/// configured `box_size`, or a standard length per content
+/// configured `item_size`, or a standard length per content
 /// mode when unset (0). The length is clamped between the
 /// icon square (icons never clip) and a quarter of the bar
 /// (single items never balloon). Items that overflow the
@@ -33,9 +33,9 @@ extension AppBarOverlay {
         let horizontal = style.edge.isHorizontal
         let axis = horizontal ? strip.width : strip.height
         let thickness = horizontal ? strip.height : strip.width
-        let gap = style.boxGap
+        let gap = style.itemGap
         let slot = Self.slotLength(
-            boxSize: style.boxSize,
+            itemSize: style.itemSize,
             content: style.content.rendered(
                 horizontal: horizontal
             ),
@@ -63,7 +63,7 @@ extension AppBarOverlay {
         )
     }
 
-    /// The auto (`box_size = 0`) slot length: on a horizontal
+    /// The auto (`item_size = 0`) slot length: on a horizontal
     /// bar, the widest item measured at the effective font (so
     /// slots fit their real names instead of a fixed guess); a
     /// vertical bar renders icon-only (QA 2026-07-19), so its
@@ -131,15 +131,15 @@ extension AppBarOverlay {
     }
 
     /// The shared slot length for one bar layout pass. `autoWidth`
-    /// is the measured/standard length used when `box_size` is 0.
+    /// is the measured/standard length used when `item_size` is 0.
     nonisolated static func slotLength(
-        boxSize: CGFloat,
+        itemSize: CGFloat,
         content: AppBarStyle.Content,
         thickness: CGFloat,
         axis: CGFloat,
         autoWidth: CGFloat
     ) -> CGFloat {
-        let requested = boxSize > 0 ? boxSize : autoWidth
+        let requested = itemSize > 0 ? itemSize : autoWidth
         // When the quarter cap and the icon minimum collide
         // (a tiny bar), the minimum wins: a clipped icon
         // looks worse than a bar that has to scroll.

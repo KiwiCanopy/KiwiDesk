@@ -46,7 +46,7 @@ struct SpaceBarEditorGroup: View {
                         style.wrappedValue.enabled = on
                         if !on {
                             model.config.settings
-                                .stickyStyle.indicator = true
+                                .stickyStyle.mark = true
                         }
                     }
                 ),
@@ -119,11 +119,11 @@ struct SpaceBarEditorGroup: View {
         )
         SegmentedPicker(
             L(
-                "space_bar.tab_background.label",
-                "Item background"
+                "space_bar.background_style.label",
+                "Background style"
             ),
-            selection: style.tabBackground,
-            options: AppBarOptions.tabBackground
+            selection: style.backgroundStyle,
+            options: AppBarOptions.backgroundStyle
                 .map { ($0.1, $0.0) }
         )
         // Liquid Glass finish — offered only on macOS 26+ (#390).
@@ -145,11 +145,11 @@ struct SpaceBarEditorGroup: View {
         // plate (#171).
         SegmentedPicker(
             L(
-                "space_bar.tab_background_fit.label",
+                "space_bar.background_fit.label",
                 "Background size"
             ),
-            selection: style.tabBackgroundFit,
-            options: AppBarOptions.tabBackgroundFit
+            selection: style.backgroundFit,
+            options: AppBarOptions.backgroundFit
                 .map { ($0.1, $0.0) }
         )
         .modifier(
@@ -157,10 +157,10 @@ struct SpaceBarEditorGroup: View {
                 // Boxed never draws a shared plate to size — glass
                 // hugs each box, solid draws each box — so fit is
                 // inert for Boxed regardless of the glass finish.
-                active: style.wrappedValue.tabBackground
+                active: style.wrappedValue.backgroundStyle
                     == .boxed,
                 help: L(
-                    "space_bar.tab_background_fit.boxed_only",
+                    "space_bar.background_fit.boxed_only",
                     "Boxed draws a box per item, not a shared "
                         + "plate, so there is nothing to size."
                 )

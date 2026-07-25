@@ -11,7 +11,7 @@ extension AppBarOverlay {
 
     /// `plain` and `material` draw their shared plate as its
     /// own view (`updatePlainPlate` / the glass-hosting dispatch)
-    /// so it can hug the run (`tab_background_fit`); `boxed` boxes
+    /// so it can hug the run (`background_fit`); `boxed` boxes
     /// each tab. The container itself never paints.
     func styleContainer(
         _ panel: NSPanel,
@@ -40,7 +40,7 @@ extension AppBarOverlay {
     ) {
         // Solid Plain plate: the Plain shape without the glass
         // finish (Plain + glass draws the glass plate instead).
-        guard style.tabBackground == .plain, !style.glassEnabled,
+        guard style.backgroundStyle == .plain, !style.glassEnabled,
             let content = panel.contentView
         else {
             plainPlate?.isHidden = true
@@ -84,7 +84,7 @@ extension AppBarOverlay {
         GlassHosting.resolve(
             available: AppBarStyle.glassAvailable,
             glassEnabled: style.glassEnabled,
-            boxed: style.tabBackground == .boxed,
+            boxed: style.backgroundStyle == .boxed,
             overflow: overflow
         )
     }

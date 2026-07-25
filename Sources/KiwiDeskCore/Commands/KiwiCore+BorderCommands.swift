@@ -6,7 +6,7 @@ import Foundation
 /// retile, so the trailer IS the apply path.
 ///
 /// Out-of-range width is silently clamped (matching
-/// `drag.set_border_thickness`); only a wrong *type* or an
+/// `drag.set_border_width`); only a wrong *type* or an
 /// unknown enum string fails.
 extension KiwiCore {
     func borderCommand(

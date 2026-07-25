@@ -553,7 +553,7 @@ struct DragVisualCommandTests {
             args: [.string("#112233")]
         )
         core.execute(
-            "drag.set_ghost_border_thickness",
+            "drag.set_ghost_border_width",
             args: [.number(4)]
         )
         core.execute(
@@ -561,7 +561,7 @@ struct DragVisualCommandTests {
             args: [.string("outside")]
         )
         core.execute(
-            "drag.set_drop_zone_border_thickness",
+            "drag.set_drop_zone_border_width",
             args: [.number(3)]
         )
         core.execute(
@@ -575,9 +575,9 @@ struct DragVisualCommandTests {
         let settings = core.tiler.settings
         #expect(!settings.dragGhost.enabled)
         #expect(settings.dragGhost.fillColor == "#112233")
-        #expect(settings.dragGhost.borderThickness == 4)
+        #expect(settings.dragGhost.borderWidth == 4)
         #expect(settings.dragGhost.borderAlignment == .outside)
-        #expect(settings.dragDropZone.borderThickness == 3)
+        #expect(settings.dragDropZone.borderWidth == 3)
         #expect(settings.dragDropZone.borderAlignment == .inside)
         #expect(!settings.dragDropZone.border)
         #expect(settings.dragCornerRadius == 26)

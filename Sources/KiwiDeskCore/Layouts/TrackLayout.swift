@@ -31,7 +31,7 @@ public struct TrackLayout: LayoutSystem {
             : context.gaps.inner.vertical
         // The overflow track (#192): the surplus beyond the normal
         // capacity folds into ONE far-edge track. Normal capacity
-        // is the fixed `track.set_count` (auto off) or unlimited
+        // is the fixed `track.set_limit` (auto off) or unlimited
         // (auto on); the overflow track is the EXTRA column past
         // it, so a limit of N shows up to N normal tracks + 1
         // overflow. Geometry always caps the total: if capacity+1

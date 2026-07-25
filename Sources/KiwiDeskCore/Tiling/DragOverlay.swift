@@ -52,7 +52,7 @@ public final class DragOverlay {
         style: DragVisual
     ) -> CGRect {
         guard style.border else { return frame }
-        let offset = style.borderThickness / 2
+        let offset = style.borderWidth / 2
         switch style.borderAlignment {
         case .inside:
             return frame.insetBy(dx: offset, dy: offset)
@@ -98,7 +98,7 @@ public final class DragOverlay {
             return
         }
         layer.cornerRadius = radius
-        layer.borderWidth = style.border ? style.borderThickness : 0
+        layer.borderWidth = style.border ? style.borderWidth : 0
         layer.borderColor = color(style.borderColor).cgColor
         layer.backgroundColor =
             style.fill

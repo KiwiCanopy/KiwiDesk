@@ -63,14 +63,14 @@ struct SettingsCodingTests {
         let spaceBar = try object(root["space_bar"])
         #expect(spaceBar["active_item_color"] as? String == "#8DB354")
         #expect(spaceBar["highlight_color"] as? String == "#8DB354")
-        // `sticky.set_indicator` → `sticky.indicator` (#414).
+        // `sticky.set_mark` → `sticky.mark` (#414).
         // Default on: the on-window glyph is the only sticky
         // cue that never depends on another surface.
         // `sticky.set_color` → `sticky.color` (#429); default is
         // the empty "Automatic" sentinel (adaptive label color).
         let sticky = try object(root["sticky"])
-        #expect(Set(sticky.keys) == ["indicator", "color"])
-        #expect(sticky["indicator"] as? Bool == true)
+        #expect(Set(sticky.keys) == ["mark", "color"])
+        #expect(sticky["mark"] as? Bool == true)
         #expect(sticky["color"] as? String == "")
         // `floating.set_color` → `floating.color` (#429): the
         // sticky mark's sibling namespace, also Automatic by
@@ -173,7 +173,7 @@ struct SettingsCodingTests {
         // `track.set_auto_tracks` → `layout.track.auto_tracks`
         // (#178), on by default; `count` is the remembered cap.
         #expect(track["auto_tracks"] as? Bool == true)
-        #expect(track["count"] as? Int == 2)
+        #expect(track["limit"] as? Int == 2)
         #expect(track["new_window"] as? String == "focused_track")
         #expect(track["wrap_focus"] as? Bool == false)
         // SpaceID-keyed maps encode as objects, not arrays.
@@ -193,7 +193,7 @@ struct SettingsCodingTests {
         let ghost = try object(drag["ghost"])
         #expect(
             Set(ghost.keys) == [
-                "border", "border_color", "border_thickness",
+                "border", "border_color", "border_width",
                 "border_alignment", "enabled", "fill", "fill_color",
             ]
         )
@@ -202,12 +202,12 @@ struct SettingsCodingTests {
         // ghost is the brand accent hue darkened for stroke duty.
         #expect(ghost["border_color"] as? String == "#588613")
         #expect(ghost["fill_color"] as? String == "#58861340")
-        #expect(ghost["border_thickness"] as? Double == 5)
+        #expect(ghost["border_width"] as? Double == 5)
         #expect(ghost["border_alignment"] as? String == "inside")
         let zone = try object(drag["drop_zone"])
         #expect(zone["border_color"] as? String == "#C2790A")
         #expect(zone["fill_color"] as? String == "#C2790A40")
-        #expect(zone["border_thickness"] as? Double == 5)
+        #expect(zone["border_width"] as? Double == 5)
         #expect(zone["border_alignment"] as? String == "inside")
     }
 
@@ -241,7 +241,7 @@ struct SettingsCodingTests {
         settings.monocle.wrapFocus = false
         settings.track.axis = .horizontal
         settings.track.autoTracks = false
-        settings.track.count = 3
+        settings.track.limit = 3
         settings.track.newWindow = .focusedTrack
         settings.track.wrapFocus = true
         settings.minWindowSize = 200
@@ -260,7 +260,7 @@ struct SettingsCodingTests {
         settings.borderStyle.unfocusedColor = "#04050607"
         settings.borderStyle.cornerStyle = .square
         settings.borderStyle.glow = true
-        settings.stickyStyle.indicator = false
+        settings.stickyStyle.mark = false
         settings.stickyStyle.color = "#4E9F3D"
         settings.floatingStyle.color = "#E8A33D"
         settings.spaceBarStyle.stickyBadge = false

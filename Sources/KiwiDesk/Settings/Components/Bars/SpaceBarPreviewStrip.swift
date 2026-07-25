@@ -97,7 +97,7 @@ struct SpaceBarPreviewStrip: View {
             if style.edge.isHorizontal { item(.empty) }
         }
         .padding(4)
-        // The shared plate honors `tab_background_fit`: the
+        // The shared plate honors `background_fit`: the
         // mock naturally hugs its items, so `full` stretches
         // it to the canvas edge instead (QA 2026-07-19).
         .frame(
@@ -122,7 +122,7 @@ struct SpaceBarPreviewStrip: View {
             shape
                 .fill(.ultraThinMaterial)
                 .overlay(shape.fill(color(style.fillColor)))
-        } else if style.tabBackground == .plain {
+        } else if style.backgroundStyle == .plain {
             shape.fill(color(style.fillColor))
         } else {
             shape.fill(Color.clear)
@@ -130,7 +130,7 @@ struct SpaceBarPreviewStrip: View {
     }
 
     private var plateSpansCanvas: Bool {
-        !style.hasBox && style.tabBackgroundFit == .full
+        !style.hasBox && style.backgroundFit == .full
     }
 
     @ViewBuilder private func stack<C: View>(
@@ -168,8 +168,8 @@ struct SpaceBarPreviewStrip: View {
 
     var gap: CGFloat {
         style.edge.isHorizontal
-            ? scale(style.boxGap, from: 0...40, to: 0...14)
-            : scale(style.boxGap, from: 0...40, to: 0...4)
+            ? scale(style.itemGap, from: 0...40, to: 0...14)
+            : scale(style.itemGap, from: 0...40, to: 0...4)
     }
 
     var corner: CGFloat {
@@ -241,8 +241,8 @@ struct SpaceBarPreviewStrip: View {
         if style.glassEnabled {
             return L("app_bar.liquid_glass", "Liquid Glass")
         }
-        return style.tabBackground == .boxed
-            ? L("app_bar.tab_background.boxed", "Boxed")
-            : L("app_bar.tab_background.plain", "Plain")
+        return style.backgroundStyle == .boxed
+            ? L("app_bar.background_style.boxed", "Boxed")
+            : L("app_bar.background_style.plain", "Plain")
     }
 }

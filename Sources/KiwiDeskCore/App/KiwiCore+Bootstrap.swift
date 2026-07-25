@@ -45,7 +45,7 @@ extension KiwiCore {
         }
         tiler.onFrameApplied = { [weak self] id, frame in
             self?.borders.follow(id, windowFrame: frame)
-            self?.stickyIndicators
+            self?.stickyMarks
                 .follow(id, windowFrame: frame)
         }
 

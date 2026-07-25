@@ -330,7 +330,7 @@ Formally: prev = the lower array index (toward the sequence
 start), next = the higher. Past the first or last track it
 opens a **new** track at that edge — the keyboard way to open
 tracks, matching what `own_track` spawning does. Refused when
-the space is not in track mode, when `track.set_count` already
+the space is not in track mode, when `track.set_limit` already
 caps the tracks, or when the window already forms the edge
 track alone (nothing would change). Never wraps. Focus and
 window `swap` keep their
@@ -1255,7 +1255,7 @@ swap would touch the **overflow track** while it is folding two
 or more tracks together — the merged slices are a read-time
 view with no marker identity to exchange, so the swap would
 scramble which windows land in which track. This covers the
-fold under a fixed limit (`track.set_count` with automatic
+fold under a fixed limit (`track.set_limit` with automatic
 tracks off) *and* the geometric fold on a display too narrow to
 fit the tracks at `min_window_size`. Swapping two normal tracks
 is unaffected — only a swap into the folded slot is refused, so
@@ -1283,7 +1283,7 @@ horizontal tracks are rows. The axis also decides which
 track.set_axis("vertical")
 ```
 
-### track.set_count
+### track.set_limit
 
 **Expects:** an integer ≥ 0.
 
@@ -1291,7 +1291,7 @@ track.set_axis("vertical")
 restores **automatic** tracks (the default — tracks open and
 collapse as windows come and go; see `track.set_auto_tracks`).
 A positive value pins the limit *and turns automatic off*, so
-`set_count(3)` takes effect on its own. Beyond the limit, one
+`set_limit(3)` takes effect on its own. Beyond the limit, one
 extra **overflow track** opens at the far edge and collects the
 surplus (#192): a new `own_track` window past the limit opens
 that overflow track, and further windows fold into it (rendered
@@ -1305,18 +1305,18 @@ off restores it.
 **Example:**
 
 ```lua
-track.set_count(3)
+track.set_limit(3)
 ```
 
 ### track.set_auto_tracks
 
 **Expects:** `true` or `false` (default `true`).
 
-**Does:** whether the track count is managed automatically. On
+**Does:** whether the track limit is managed automatically. On
 (the default), tracks open and collapse as windows come and go —
-no cap. Off pins the count to the value set by `track.set_count`.
-The track twin of `grid.set_auto_size`. `track.set_count(0)` is
-the shorthand for turning this on; `track.set_count(n)` for
+no cap. Off pins the cap to the value set by `track.set_limit`.
+The track twin of `grid.set_auto_size`. `track.set_limit(0)` is
+the shorthand for turning this on; `track.set_limit(n)` for
 turning it off with a cap of `n`.
 
 **Example:**
@@ -1339,7 +1339,7 @@ track.set_auto_tracks(false)
   track** immediately beside the focused one. Focus follows the
   new window, so the next one fills that track and spills again.
   With no other track to spill to it piles in the focused track
-  instead: under a fixed [`track.set_count`](#track_set_count) cap
+  instead: under a fixed [`track.set_limit`](#track_set_limit) cap
   with no room for another track, or for a window an explicit
   `move_to_space` drops onto a full track (an explicit placement,
   never relocated).
@@ -1347,7 +1347,7 @@ track.set_auto_tracks(false)
   positioned among the others by
   [`track.set_new_window_position`](#track_set_new_window_position)
   — the "one full-width app per column" (ultrawide) choice. Falls
-  back to joining once `track.set_count` is reached.
+  back to joining once `track.set_limit` is reached.
 
 Track spaces use this pair instead of the flat
 `new_window_placement` vocabulary — a flat index cannot say "own
@@ -1437,7 +1437,7 @@ track.set_wrap_focus(true)
 track.set_axis_override("code", "horizontal")
 ```
 
-### track.set_count_override
+### track.set_limit_override
 
 **Expects:**
 
@@ -1451,7 +1451,7 @@ space, and `0` turns it back on.
 **Example:**
 
 ```lua
-track.set_count_override("code", 2)
+track.set_limit_override("code", 2)
 ```
 
 ### track.set_auto_tracks_override
@@ -1511,7 +1511,7 @@ vertical-axis layouts; `end` resolves to the bottom or right. The
 bar always renders on the edge the position names, so no clamp or
 mismatch can occur.
 
-Items appear in window order and are always **equal-sized**: `box_size`
+Items appear in window order and are always **equal-sized**: `item_size`
 pt along the bar (width on horizontal bars, height on vertical
 ones). Left at `0` (the default), each `content` mode gets a
 sensible standard. The size is clamped: at least the icon square
@@ -1580,23 +1580,24 @@ app_bar.set_alignment("start")
 app_bar.set_thickness(32)
 ```
 
-### app_bar.set_tab_background
+### app_bar.set_background_style
 
 **Expects:** `"boxed"` or `"plain"`.
 
-**Does:** sets the SHAPE of the tab backgrounds:
-- **boxed** — a box per tab honoring the corner roundness
+**Does:** sets WHERE the background is drawn:
+- **boxed** — a box per item honoring the corner roundness
   (0% = square, 100% = full capsule).
-- **plain** — no per-tab box; names sit on one shared
-  translucent strip.
+- **plain** — no per-item box; names sit on one shared
+  translucent strip that spans the whole bar.
 
-Liquid Glass is no longer a shape here — it is a separate finish
-toggle, `set_liquid_glass` (below), that lays over either shape.
+Liquid Glass is no longer an option here — it is a separate
+finish toggle, `set_liquid_glass` (below), that lays over
+either style.
 
 **Example:**
 
 ```lua
-app_bar.set_tab_background("plain")
+app_bar.set_background_style("plain")
 ```
 
 ### app_bar.set_liquid_glass
@@ -1624,25 +1625,24 @@ portable. Per-layout override:
 app_bar.set_liquid_glass(true)
 ```
 
-### app_bar.set_tab_background_fit
+### app_bar.set_background_fit
 
 **Expects:** `"full"` or `"hug"` (default `"hug"`).
 
 **Does:** sets how far the shared background plate reaches
 under `plain` (and the Liquid Glass finish over it): `hug` wraps
-the tab run plus one box gap of breathing room per end (the
+the item run plus one item gap of breathing room per end (the
 Dock's read), `full` spans the whole strip. Hug falls back to
-full while the tabs overflow and scroll. Inert under `boxed`,
-which
-draws a box per tab instead of a shared plate (the Settings
-control greys there). Per-layout override:
-`monocle.set_app_bar_tab_background_fit` /
-`scroll.set_app_bar_tab_background_fit`.
+full while the items overflow and scroll. Inert under `boxed`,
+which draws a box per item instead of a shared plate (the
+Settings control greys there). Per-layout override:
+`monocle.set_app_bar_background_fit` /
+`scroll.set_app_bar_background_fit`.
 
 **Example:**
 
 ```lua
-app_bar.set_tab_background_fit("full")
+app_bar.set_background_fit("full")
 ```
 
 ### app_bar.set_active_indicator
@@ -1650,7 +1650,7 @@ app_bar.set_tab_background_fit("full")
 **Expects:** `"outline"`, `"edge_mark"`, or `"gap"`.
 
 **Does:** how the focused window is marked. This is orthogonal to
-`tab_background` — the two combine freely:
+`background_style` — the two combine freely:
 - **outline** — an outlined border around the active tab.
 - **edge_mark** — an accent bar on the active tab's
   window-facing edge.
@@ -1662,7 +1662,7 @@ app_bar.set_tab_background_fit("full")
 app_bar.set_active_indicator("outline")
 ```
 
-### app_bar.set_box_size
+### app_bar.set_item_size
 
 **Expects:** a number (points); `0` means auto (default).
 
@@ -1674,10 +1674,10 @@ long names don't truncate and short ones don't waste space.
 **Example:**
 
 ```lua
-app_bar.set_box_size(0)
+app_bar.set_item_size(0)
 ```
 
-### app_bar.set_box_gap
+### app_bar.set_item_gap
 
 **Expects:** a non-negative number (points).
 
@@ -1686,7 +1686,7 @@ app_bar.set_box_size(0)
 **Example:**
 
 ```lua
-app_bar.set_box_gap(6)
+app_bar.set_item_gap(6)
 ```
 
 ### app_bar.set_content
@@ -1897,7 +1897,7 @@ prefixed with the layout name:
 
 - `monocle.set_app_bar_enabled`, `monocle.set_app_bar_edge`,
   `monocle.set_app_bar_thickness`, etc.
-- `scroll.set_app_bar_enabled`, `scroll.set_app_bar_tab_background`,
+- `scroll.set_app_bar_enabled`, `scroll.set_app_bar_background_style`,
   `scroll.set_app_bar_active_indicator`,
   `scroll.set_app_bar_corner_roundness`, etc.
 
@@ -1906,7 +1906,7 @@ prefixed with the layout name:
 ```lua
 monocle.set_app_bar_enabled(true)
 scroll.set_app_bar_enabled(true)
-scroll.set_app_bar_tab_background("plain")  -- override for scrolling
+scroll.set_app_bar_background_style("plain")  -- override for scrolling
 ```
 
 ## Space Bar
@@ -1995,7 +1995,7 @@ space_bar.set_alignment("center")
 space_bar.set_thickness(28)
 ```
 
-### space_bar.set_box_size
+### space_bar.set_item_size
 
 **Expects:** length in points; `0` (default) = auto.
 
@@ -2005,10 +2005,10 @@ Auto sizes each item to its content (identifier + glyphs).
 **Example:**
 
 ```lua
-space_bar.set_box_size(0)
+space_bar.set_item_size(0)
 ```
 
-### space_bar.set_box_gap
+### space_bar.set_item_gap
 
 **Expects:** points (default `6`).
 
@@ -2017,7 +2017,7 @@ space_bar.set_box_size(0)
 **Example:**
 
 ```lua
-space_bar.set_box_gap(6)
+space_bar.set_item_gap(6)
 ```
 
 ### space_bar.set_font_size
@@ -2066,7 +2066,7 @@ app with no image falls back to the App Font either way.
 space_bar.set_icon_source("app_font")
 ```
 
-### space_bar.set_tab_background
+### space_bar.set_background_style
 
 **Expects:** `"boxed"` or `"plain"` (default `"boxed"`).
 
@@ -2077,7 +2077,7 @@ separate finish, `space_bar.set_liquid_glass`.
 **Example:**
 
 ```lua
-space_bar.set_tab_background("boxed")
+space_bar.set_background_style("boxed")
 ```
 
 ### space_bar.set_liquid_glass
@@ -2086,7 +2086,8 @@ space_bar.set_tab_background("boxed")
 
 **Does:** lays the macOS 26 Liquid Glass finish over the Space
 items — see `app_bar.set_liquid_glass` for the full behavior
-(orthogonal to the shape, `fill_color` tints the glass via a
+(orthogonal to the background style, `fill_color` tints the
+glass via a
 colored backdrop behind it, hidden and inert below macOS 26).
 
 **Example:**
@@ -2095,18 +2096,18 @@ colored backdrop behind it, hidden and inert below macOS 26).
 space_bar.set_liquid_glass(true)
 ```
 
-### space_bar.set_tab_background_fit
+### space_bar.set_background_fit
 
 **Expects:** `"full"` or `"hug"` (default `"hug"`).
 
 **Does:** how far the shared plate reaches under `plain` (and the
-Liquid Glass finish) — see `app_bar.set_tab_background_fit`; same
+Liquid Glass finish) — see `app_bar.set_background_fit`; same
 vocabulary, same boxed inertness and overflow fallback.
 
 **Example:**
 
 ```lua
-space_bar.set_tab_background_fit("hug")
+space_bar.set_background_fit("hug")
 ```
 
 ### space_bar.set_active_indicator
@@ -2346,16 +2347,16 @@ drag.set_ghost_enabled(true)
 drag.set_ghost_border(true)
 ```
 
-### drag.set_ghost_border_thickness
+### drag.set_ghost_border_width
 
 **Expects:** a non-negative number (points).
 
-**Does:** sets the border thickness of the ghost.
+**Does:** sets the border width of the ghost.
 
 **Example:**
 
 ```lua
-drag.set_ghost_border_thickness(5)
+drag.set_ghost_border_width(5)
 ```
 
 ### drag.set_ghost_border_alignment
@@ -2432,16 +2433,16 @@ drag.set_drop_zone_enabled(true)
 drag.set_drop_zone_border(true)
 ```
 
-### drag.set_drop_zone_border_thickness
+### drag.set_drop_zone_border_width
 
 **Expects:** a non-negative number (points).
 
-**Does:** sets the border thickness of the drop zone.
+**Does:** sets the border width of the drop zone.
 
 **Example:**
 
 ```lua
-drag.set_drop_zone_border_thickness(5)
+drag.set_drop_zone_border_width(5)
 ```
 
 ### drag.set_drop_zone_border_alignment
@@ -3061,8 +3062,8 @@ which re-homes it to that display. A refused move surfaces a brief
 pill on the window rather than silently doing nothing.
 
 Because a sticky window can look identical to a normal one,
-KiwiDesk marks it: a badge chip in the window's top-right corner
-(toggleable — see `sticky.set_indicator`; `infinity` for global,
+KiwiDesk marks it: a mark in the window's top-right corner
+(toggleable — see `sticky.set_mark`; `infinity` for global,
 `pin.fill` for display) and the same per-scope badge on its Space
 Bar glyph — which travels with you, listed under whichever space
 is current (see `space_bar.set_sticky_badge`).
@@ -3152,21 +3153,21 @@ KiwiDesk.bind("cmd+alt+d", function()
 end)
 ```
 
-### sticky.set_indicator
+### sticky.set_mark
 
 **Expects:** boolean (default `true`).
 
 **Does:** shows or hides the on-window sticky mark — the small
-chip at a sticky window's top-right corner. Applies exactly
+glyph at a sticky window's top-right corner. Applies exactly
 what you set: turning it off while the Space Bar is also off
-leaves sticky state with no indicator at all, which is a valid
+leaves sticky state with no mark at all, which is a valid
 power-user choice from Lua (the Settings app, by contrast,
 keeps the mark forced on while the Space Bar is off).
 
 **Example:**
 
 ```lua
-sticky.set_indicator(false)
+sticky.set_mark(false)
 ```
 
 ### sticky.set_color
@@ -3174,11 +3175,11 @@ sticky.set_indicator(false)
 **Expects:** a hex color string `#RRGGBB` or `#RRGGBBAA`, or an
 empty string `""` for **Automatic** (default `""`).
 
-**Does:** tints the sticky mark — both the on-window chip and the
+**Does:** tints the sticky mark — both the on-window mark and the
 Space Bar sticky badge read this one value, so the mark is the
 same color everywhere. The mark becomes a filled disc in the
 color with a legible auto-contrast glyph. `""` is Automatic: the
-badge keeps the count-badge fill and the chip is a neutral glyph
+badge keeps the count-badge fill and the mark is a neutral glyph
 on glass that flips black/white with light and dark mode (the
 shipped look). Any non-empty value must parse as a hex color.
 
@@ -3196,7 +3197,7 @@ empty string `""` for **Automatic** (default `""`).
 
 **Does:** tints the Space Bar floating badge — a filled disc in
 the color with an auto-contrast glyph. Floating windows have no
-on-window chip (they float above the tiles, so they are
+on-window mark (they float above the tiles, so they are
 self-evident), so this affects the Space Bar mark only. `""` is
 Automatic (the badge keeps the count-badge fill); any non-empty
 value must parse as a hex color.
@@ -3909,13 +3910,13 @@ stripped, grouped by namespace — `set_gap_override` becomes
       "corner_radius": 16,
       "ghost": {
         "enabled": true, "border": true,
-        "border_color": "#588613", "border_thickness": 5,
+        "border_color": "#588613", "border_width": 5,
         "border_alignment": "inside",
         "fill": true, "fill_color": "#58861340"
       },
       "drop_zone": {
         "enabled": true, "border": true,
-        "border_color": "#C2790A", "border_thickness": 5,
+        "border_color": "#C2790A", "border_width": 5,
         "border_alignment": "inside",
         "fill": true, "fill_color": "#C2790A40"
       }
@@ -3943,7 +3944,7 @@ stripped, grouped by namespace — `set_gap_override` becomes
                    "bar": { "enabled": true,
                             "position": "top",
                             "style": "pills",
-                            "box_size": 0 } },
+                            "item_size": 0 } },
       "scroll": { "anchor": "follow", "slot_size": 0,
                   "new_window_placement": "after_focused" },
       "stack": { "master_count": 1, "master_ratio": 0.6,

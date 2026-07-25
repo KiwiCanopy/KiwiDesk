@@ -75,18 +75,18 @@ public final class BorderManager {
     var onLog: @MainActor (String) -> Void = { _ in }
     /// Tee of every WindowServer bounds re-read (`reconcile`) —
     /// the live-tracking hot path AX echoes lag behind. Wired
-    /// to the sticky chip so it follows a dragged window at
+    /// to the sticky mark so it follows a dragged window at
     /// WS event rate, exactly like the ring (QA 2026-07-21);
     /// a no-op by default.
     var onFrameReconciled: @MainActor (WindowID, CGRect) -> Void = { _, _ in }
     /// Tee of every WindowServer z-order change (`.reorder` /
-    /// `.level`). Wired to the sticky chip so it re-asserts its
+    /// `.level`). Wired to the sticky mark so it re-asserts its
     /// stacking whenever the target raises — a re-click on an
-    /// ALREADY-focused window raises it above its own chip yet
+    /// ALREADY-focused window raises it above its own mark yet
     /// fires no AX focus event, so the focus-driven re-sync never
     /// runs (owner QA 2026-07-21). A no-op by default.
     var onWindowReordered: @MainActor (WindowID) -> Void = { _ in }
-    /// Windows the sticky chip needs WS z-order events for, even
+    /// Windows the sticky mark needs WS z-order events for, even
     /// when they wear no ring (borders off / unfocused). Folded
     /// into the WS watch set so the reorder tee reaches them.
     var stickyTracked: Set<WindowID> = []

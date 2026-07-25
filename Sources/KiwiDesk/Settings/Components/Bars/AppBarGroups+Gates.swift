@@ -25,7 +25,7 @@ extension GlobalAppBarGroup {
     var everyShownBarBoxed: Bool {
         anyBarShown
             && shownBars.allSatisfy {
-                $0.resolved(with: style).tabBackground == .boxed
+                $0.resolved(with: style).backgroundStyle == .boxed
             }
     }
 

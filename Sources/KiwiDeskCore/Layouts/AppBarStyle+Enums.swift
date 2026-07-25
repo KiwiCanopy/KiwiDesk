@@ -22,29 +22,29 @@ extension AppBarStyle {
         return false
     }
 
-    /// The SHAPE of the tab background — orthogonal both to
+    /// WHERE the background is drawn — orthogonal both to
     /// `activeIndicator` (which marks only the active tab) and to
     /// the `liquidGlass` finish (a colorless glass material laid
-    /// over either shape on macOS 26). Boxed = a box per tab
+    /// over either shape on macOS 26). Boxed = a box per item
     /// (honors `cornerRoundness`); Plain = one shared strip.
-    public enum TabBackground: String, Sendable, Codable {
-        /// A box per tab, honoring `cornerRoundness`
+    public enum BackgroundStyle: String, Sendable, Codable {
+        /// A box per item, honoring `cornerRoundness`
         /// (roundness 0 = square).
         case boxed
-        /// No per-tab box; names sit on one shared translucent
+        /// No per-item box; names sit on one shared translucent
         /// strip.
         case plain
     }
 
     /// How big the shared background plate is (QA 2026-07-19).
-    /// Orthogonal to `TabBackground` — "what the plate is made
+    /// Orthogonal to `BackgroundStyle` — "what the plate is made
     /// of" vs "how far it reaches": `plain` draws one shared plate
     /// and honors this; `boxed` draws no shared plate, so the
     /// setting is inert there (the GUI greys it).
-    public enum TabBackgroundFit: String, Sendable, Codable {
+    public enum BackgroundFit: String, Sendable, Codable {
         /// The plate spans the whole strip edge-to-edge.
         case full
-        /// The plate wraps the content run plus one box gap of
+        /// The plate wraps the content run plus one item gap of
         /// breathing room per end — the Dock's read; falls back
         /// to `full` once the run overflows and scrolls
         /// (content fills the strip there, nothing to hug).
@@ -52,7 +52,7 @@ extension AppBarStyle {
     }
 
     /// How the active tab is marked. Orthogonal to
-    /// `tabBackground`: works on any background.
+    /// `backgroundStyle`: works on any background.
     public enum ActiveIndicator: String, Sendable, Codable {
         /// An outline around the active tab, tracing its shape at
         /// the bar's roundness (a capsule at max, square at 0).
@@ -77,7 +77,7 @@ extension AppBarStyle {
         /// rotated text is not native (QA 2026-07-19; the Space
         /// Bar settled the same rule for its front-app name).
         /// The stored preference round-trips, mirroring
-        /// `TabBackground.rendered(glassAvailable:)`.
+        /// `BackgroundStyle.rendered(glassAvailable:)`.
         public func rendered(horizontal: Bool) -> Content {
             horizontal ? self : .icon
         }

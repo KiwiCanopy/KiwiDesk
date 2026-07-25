@@ -12,7 +12,7 @@ extension AppBarOverlay {
     /// The resolved style wants per-box glass: the glass finish over
     /// the boxed shape. (Plain + glass keeps the single plate.)
     func wantsBoxGlass(_ style: AppBarStyle) -> Bool {
-        style.glassEnabled && style.tabBackground == .boxed
+        style.glassEnabled && style.backgroundStyle == .boxed
     }
 
     /// Hosts each item in its own glass box at `frames[i]`, tinted

@@ -42,29 +42,30 @@ enum AppBarOptions {
         }
     }
 
-    /// The tab-background SHAPE. Liquid Glass is no longer a shape
+    /// WHERE the background is drawn — per item, or one plate
+    /// behind all of them. Liquid Glass is no longer an option
     /// here — it is a separate `liquidGlass` finish toggle (#390),
     /// offered only where it can render (macOS 26+).
     @MainActor
-    static let tabBackground: [(AppBarStyle.TabBackground, String)] = [
-        (.boxed, L("app_bar.tab_background.boxed", "Boxed")),
-        (.plain, L("app_bar.tab_background.plain", "Plain")),
+    static let backgroundStyle: [(AppBarStyle.BackgroundStyle, String)] = [
+        (.boxed, L("app_bar.background_style.boxed", "Boxed")),
+        (.plain, L("app_bar.background_style.plain", "Plain")),
     ]
     /// How far the shared plate reaches (QA 2026-07-19).
     /// Default (hug) first, like every options list here.
     @MainActor
-    static let tabBackgroundFit: [(AppBarStyle.TabBackgroundFit, String)] = [
+    static let backgroundFit: [(AppBarStyle.BackgroundFit, String)] = [
         (
             .hug,
             L(
-                "app_bar.tab_background_fit.hug",
+                "app_bar.background_fit.hug",
                 "Hug"
             )
         ),
         (
             .full,
             L(
-                "app_bar.tab_background_fit.full",
+                "app_bar.background_fit.full",
                 "Full width"
             )
         ),

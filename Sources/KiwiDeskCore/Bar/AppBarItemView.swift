@@ -307,7 +307,7 @@ final class AppBarItemView: NSView {
     }
 
     /// How the active tab is marked, gated on the indicator and
-    /// orthogonal to `tabBackground` (the background no longer
+    /// orthogonal to `backgroundStyle` (the background no longer
     /// secretly picks the accent). Only the active tab, and never
     /// under `gap` (its slot is hidden entirely).
     enum AccentMode { case none, outline, edgeMark }

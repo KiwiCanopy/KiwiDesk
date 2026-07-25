@@ -20,7 +20,7 @@ extension SpaceBarPreviewStrip {
         .padding(3)
         .background(
             RoundedRectangle(
-                cornerRadius: style.tabBackground == .boxed
+                cornerRadius: style.backgroundStyle == .boxed
                     ? corner : 0
             )
             .fill(itemBox(state))
@@ -121,7 +121,7 @@ extension SpaceBarPreviewStrip {
     }
 
     private func itemBox(_ state: MockState) -> Color {
-        guard style.tabBackground == .boxed else {
+        guard style.backgroundStyle == .boxed else {
             return .clear
         }
         // One fill for every box — active is marked by the

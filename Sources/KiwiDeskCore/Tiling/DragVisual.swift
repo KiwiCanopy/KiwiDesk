@@ -12,7 +12,11 @@ public struct DragVisual: Sendable, Equatable, Encodable {
     public var enabled: Bool
     public var border: Bool
     public var borderColor: String
-    public var borderThickness: CGFloat
+    /// A *stroke* has a width; a *bar* has a thickness (R6/#406).
+    /// The GUI already drew that distinction — its label is
+    /// "Width" — and only the wire said `border_thickness`, so
+    /// the wire moved to match rather than the other way round.
+    public var borderWidth: CGFloat
     public var borderAlignment: BorderAlignment
     public var fill: Bool
     public var fillColor: String
@@ -28,7 +32,7 @@ public struct DragVisual: Sendable, Equatable, Encodable {
         enabled: true,
         border: true,
         borderColor: "#588613",
-        borderThickness: 5,
+        borderWidth: 5,
         borderAlignment: .inside,
         fill: true,
         fillColor: "#58861340"
@@ -42,7 +46,7 @@ public struct DragVisual: Sendable, Equatable, Encodable {
         enabled: true,
         border: true,
         borderColor: "#C2790A",
-        borderThickness: 5,
+        borderWidth: 5,
         borderAlignment: .inside,
         fill: true,
         fillColor: "#C2790A40"
@@ -52,7 +56,7 @@ public struct DragVisual: Sendable, Equatable, Encodable {
         enabled: Bool,
         border: Bool,
         borderColor: String,
-        borderThickness: CGFloat,
+        borderWidth: CGFloat,
         borderAlignment: BorderAlignment,
         fill: Bool,
         fillColor: String
@@ -60,7 +64,7 @@ public struct DragVisual: Sendable, Equatable, Encodable {
         self.enabled = enabled
         self.border = border
         self.borderColor = borderColor
-        self.borderThickness = borderThickness
+        self.borderWidth = borderWidth
         self.borderAlignment = borderAlignment
         self.fill = fill
         self.fillColor = fillColor
@@ -73,7 +77,7 @@ public struct DragVisual: Sendable, Equatable, Encodable {
         case enabled
         case border
         case borderColor = "border_color"
-        case borderThickness = "border_thickness"
+        case borderWidth = "border_width"
         case borderAlignment = "border_alignment"
         case fill
         case fillColor = "fill_color"
@@ -103,11 +107,11 @@ public struct DragVisual: Sendable, Equatable, Encodable {
                 String.self,
                 forKey: .borderColor
             ) ?? defaults.borderColor
-        borderThickness =
+        borderWidth =
             try container.decodeIfPresent(
                 CGFloat.self,
-                forKey: .borderThickness
-            ) ?? defaults.borderThickness
+                forKey: .borderWidth
+            ) ?? defaults.borderWidth
         borderAlignment =
             try container.decodeIfPresent(
                 BorderAlignment.self,

@@ -53,7 +53,7 @@ struct GreyOutParityTests {
         ("SpaceBarGroups.swift", "GreyOut(active: !enabled"),
         ("AppBarGroups.swift", "GreyOut(active: !anyBarShown"),
         ("DragVisualsEditor.swift", "active: !visual.enabled"),
-        ("StickyIndicatorEditor.swift", "active: !spaceBarOn"),
+        ("StickyMarkEditor.swift", "active: !spaceBarOn"),
         ("AppBarLayoutGroup.swift", "active: !bar.enabled"),
         (
             "ProfilesSection.swift",
