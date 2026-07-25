@@ -37,6 +37,27 @@ struct BorderCommandTests {
         #expect(core.tiler.settings.borderStyle.unfocusedEnabled)
     }
 
+    @Test("set_glow toggles the bloom, rejects non-bool")
+    func glowToggle() {
+        let core = makeCore()
+        #expect(!core.tiler.settings.borderStyle.glow)
+        #expect(
+            core.execute(
+                "border.set_glow",
+                args: [.bool(true)]
+            ).isSuccess
+        )
+        #expect(core.tiler.settings.borderStyle.glow)
+        // A non-boolean argument is rejected, leaving the flag on.
+        #expect(
+            !core.execute(
+                "border.set_glow",
+                args: [.string("yes")]
+            ).isSuccess
+        )
+        #expect(core.tiler.settings.borderStyle.glow)
+    }
+
     @Test("set_width clamps out-of-range silently, rejects type")
     func widthClamp() {
         let core = makeCore()

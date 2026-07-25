@@ -705,6 +705,10 @@ windows. Below it:
 - **Corners**: **Rounded** matches your windows' real corner
   radius; **Square** draws sharp corners — seamless on windows that
   are already square, an intentional squared frame on rounded ones.
+- **Glow**: wraps the focused ring in a soft colored bloom for a bit
+  more presence. Off by default; it only ever touches the focused
+  window, never the unfocused rings. The live preview shows the
+  effect as you toggle it.
 - **Fit layout gaps**: previews the exact global **Outer** and
   **Inner** values needed to keep rings apart, plus the requested
   **Extra spacing** (0–100 pt, default 0). Inner gaps account for

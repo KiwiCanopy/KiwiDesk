@@ -87,6 +87,17 @@ struct FocusBorderEditor: View {
                 (L("border.corner.square", "Square"), .square),
             ]
         )
+        // A render trait of the ring like Width and Corners — a soft
+        // bloom in the focused ring's hue (#358). Sits with the other
+        // styling traits, no caption (the live preview above shows
+        // it on toggle); a11y gets the descriptive gloss.
+        Toggle(L("border.glow", "Glow"), isOn: style.glow)
+            .accessibilityLabel(
+                L(
+                    "border.glow.a11y",
+                    "Soft glow around the focus border"
+                )
+            )
         Divider()
         FitGapsAction(model: model)
     }
@@ -108,10 +119,16 @@ private struct FocusBorderPreview: View {
             RoundedRectangle(cornerRadius: 6)
                 .fill(Color.secondary.opacity(0.12))
             HStack(spacing: 16) {
-                window(color: style.focusedColor, ringed: true)
+                window(
+                    color: style.focusedColor,
+                    ringed: true,
+                    // Glow is focused-ring-only (#358).
+                    glow: style.glow
+                )
                 window(
                     color: style.unfocusedColor,
-                    ringed: style.unfocusedEnabled
+                    ringed: style.unfocusedEnabled,
+                    glow: false
                 )
             }
             .padding(14)
@@ -123,7 +140,8 @@ private struct FocusBorderPreview: View {
 
     private func window(
         color: String,
-        ringed: Bool
+        ringed: Bool,
+        glow: Bool
     ) -> some View {
         // Remap the 1–20 pt width onto the preview's smaller span
         // so a thick border reads without swamping the mock.
@@ -132,6 +150,11 @@ private struct FocusBorderPreview: View {
             from: 1...20,
             to: 1...7
         )
+        // Remap the nominal 10 pt glow blur (BorderGeometry.glowBlur)
+        // the same way — the literal 10 pt would swamp this 96 pt
+        // mock and read as a smear, not a halo (#358). A proportional
+        // approximation, like width and corners here.
+        let glowRadius = scale(10, from: 1...20, to: 1...7)
         let radius: CGFloat =
             style.cornerStyle == .square ? 0 : 12
         return RoundedRectangle(cornerRadius: radius)
@@ -145,6 +168,11 @@ private struct FocusBorderPreview: View {
                         .stroke(
                             Color(kiwiHex: color),
                             lineWidth: width
+                        )
+                        .shadow(
+                            color: glow
+                                ? Color(kiwiHex: color) : .clear,
+                            radius: glow ? glowRadius : 0
                         )
                 }
             }

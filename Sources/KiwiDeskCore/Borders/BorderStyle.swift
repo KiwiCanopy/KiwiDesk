@@ -67,6 +67,16 @@ public struct BorderStyle: Sendable, Equatable {
     /// the focused ring for attention.
     public var unfocusedColor = "#8E8E93CC"
     public var cornerStyle: CornerStyle = .rounded
+    /// A soft colored bloom around the focused ring (#358) — the
+    /// JankyBorders `COLOR_STYLE_GLOW` look, a zero-offset blurred
+    /// halo in the ring's own hue. A render trait like width and
+    /// corners, not a visibility toggle: it reuses `focusedColor`,
+    /// introduces no color choice, and applies to the **focused
+    /// ring only** (a bloom on every unfocused ring would undercut
+    /// the focused one it is meant to make pop). Default OFF —
+    /// native-first, matching JankyBorders' own default; the flat
+    /// ring already reads clearly, glow is additive flourish.
+    public var glow = false
     /// Ring stacked behind windows (default) or in front. A niche
     /// Lua-only preference with no GUI control (#367).
     public var drawOrder: DrawOrder = .behind
@@ -126,6 +136,7 @@ extension BorderStyle: Codable {
         case unfocusedEnabled = "unfocused_enabled"
         case unfocusedColor = "unfocused_color"
         case cornerStyle = "corner_style"
+        case glow
         case drawOrder = "draw_order"
     }
 
@@ -166,6 +177,11 @@ extension BorderStyle: Codable {
                 CornerStyle.self,
                 forKey: .cornerStyle
             ) ?? defaults.cornerStyle
+        glow =
+            try container.decodeIfPresent(
+                Bool.self,
+                forKey: .glow
+            ) ?? defaults.glow
         drawOrder =
             try container.decodeIfPresent(
                 DrawOrder.self,
