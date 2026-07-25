@@ -182,8 +182,25 @@ struct GeneralSection: View {
                     }
                 }
                 Divider()
+                // Opening the raw editor swaps the primary Save
+                // to `.saveLua`, which writes `luaSource`
+                // verbatim — so staged visual edits are dropped
+                // while the footer still reads "Unsaved
+                // changes". Gated like every other discard
+                // path (#515).
                 Button {
-                    model.showLuaEditor = true
+                    model.discardingEdits(
+                        message: L(
+                            "discard.lua_editor.message",
+                            "The raw editor saves init.lua as "
+                                + "text, so the edits you "
+                                + "haven't saved are dropped."
+                        ),
+                        confirmLabel: L(
+                            "discard.lua_editor.confirm",
+                            "Discard & edit init.lua"
+                        )
+                    ) { model.showLuaEditor = true }
                 } label: {
                     Label(
                         L(

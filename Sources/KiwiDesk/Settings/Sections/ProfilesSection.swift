@@ -13,8 +13,11 @@ import SwiftUI
 struct ProfilesSection: View {
     @ObservedObject var model: SettingsModel
     /// The profile whose rename popover is open, if any.
-    @State private var renaming: String?
-    @State private var renameDraft = ""
+    /// `internal`, not `private`: the rename affordance that
+    /// owns this state lives in `ProfilesSection+Rename.swift`
+    /// (file ceiling), and `@State` cannot move to an extension.
+    @State var renaming: String?
+    @State var renameDraft = ""
 
     var body: some View {
         ScrollView {
@@ -176,8 +179,22 @@ struct ProfilesSection: View {
             if !summary.isDefault {
                 makeDefaultLink(summary.name)
             }
+            // Load / Delete both end in `reload()`, which
+            // re-seeds from disk and clears the dirty flag, so
+            // both drop staged edits — gated like the edit-
+            // target menu (#515).
             Button(L("profiles.load", "Load")) {
-                model.loadProfile(named: summary.name)
+                model.discardingEdits(
+                    message: L(
+                        "discard.load_profile.message",
+                        "Loading a profile replaces the edits "
+                            + "you haven't saved."
+                    ),
+                    confirmLabel: L(
+                        "discard.load_profile.confirm",
+                        "Discard & load"
+                    )
+                ) { model.loadProfile(named: summary.name) }
             }
             .buttonStyle(.bordered)
             .controlSize(.large)
@@ -191,7 +208,18 @@ struct ProfilesSection: View {
                     )
             )
             Button {
-                model.deleteProfile(named: summary.name)
+                model.discardingEdits(
+                    message: L(
+                        "discard.delete_profile.message",
+                        "Deleting reloads the dashboard, "
+                            + "dropping the edits you haven't "
+                            + "saved."
+                    ),
+                    confirmLabel: L(
+                        "discard.delete_profile.confirm",
+                        "Discard & delete"
+                    )
+                ) { model.deleteProfile(named: summary.name) }
             } label: {
                 Image(systemName: "trash")
             }
@@ -217,80 +245,6 @@ struct ProfilesSection: View {
         .buttonStyle(.plain)
         .font(.caption)
         .linkHover()
-    }
-
-    /// Rename is a pencil right beside the profile name (in
-    /// front of the badges), opening a popover. The rename is
-    /// immediate (file + native-Space bindings follow), like
-    /// Delete and make default. Unlike the other icon-only
-    /// borderless buttons, the pencil stays persistently visible
-    /// (a soft always-on background circle, matching
-    /// `hoverHighlight`'s hover value at rest) rather than
-    /// hover-only — it is the primary discovery path for
-    /// renaming, so it must not require finding it first.
-    private func renameButton(_ name: String) -> some View {
-        Button {
-            beginRename(name)
-        } label: {
-            Image(systemName: "pencil")
-                .imageScale(.medium)
-        }
-        .buttonStyle(.borderless)
-        .frame(width: 22, height: 22)
-        .iconButtonAffordance(
-            L("profiles.rename.help", "Rename profile"),
-            cornerRadius: 11,
-            padding: 0
-        )
-        .popover(
-            isPresented: Binding(
-                get: { renaming == name },
-                set: { if !$0 { renaming = nil } }
-            )
-        ) {
-            HStack {
-                TextField(
-                    L("footer.profile_name", "Profile name"),
-                    text: $renameDraft
-                )
-                .textFieldStyle(.roundedBorder)
-                .frame(width: 160)
-                .onSubmit { commitRename(of: name) }
-                Button(L("profiles.rename", "Rename")) {
-                    commitRename(of: name)
-                }
-                .disabled(!canRename(name))
-            }
-            .padding(10)
-        }
-    }
-
-    /// Mirrors the core's case-insensitive collision check
-    /// (APFS: "a" → "B" collides with "b"), still allowing
-    /// the case-only self-rename ("work" → "Work"). One
-    /// optimistic mirror is the limit (review 2026-07): a
-    /// second GUI consumer of this rule gets a read-only
-    /// availability query on the KiwiCore facade instead of
-    /// a copy — core stays the only authority either way.
-    private func canRename(_ old: String) -> Bool {
-        let new = renameDraft.trimmed
-        guard !new.isEmpty, new != old else { return false }
-        return !model.profiles.contains {
-            $0.caseInsensitiveCompare(new) == .orderedSame
-                && $0.caseInsensitiveCompare(old)
-                    != .orderedSame
-        }
-    }
-
-    private func beginRename(_ name: String) {
-        renameDraft = name
-        renaming = name
-    }
-
-    private func commitRename(of old: String) {
-        guard canRename(old) else { return }
-        model.renameProfile(from: old, to: renameDraft)
-        renaming = nil
     }
 
     /// Each covered monitor combination as one chip row, so

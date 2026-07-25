@@ -38,8 +38,23 @@ extension ProfilesSection {
                 .foregroundStyle(.secondary)
             }
             Spacer()
+            // Same `reload()` tail as the healthy-row Delete, so
+            // the same discard gate (#515). Found by the
+            // structural guard, not by the audit — which is the
+            // argument for having the guard.
             Button {
-                model.deleteProfile(named: name)
+                model.discardingEdits(
+                    message: L(
+                        "discard.delete_profile.message",
+                        "Deleting reloads the dashboard, "
+                            + "dropping the edits you haven't "
+                            + "saved."
+                    ),
+                    confirmLabel: L(
+                        "discard.delete_profile.confirm",
+                        "Discard & delete"
+                    )
+                ) { model.deleteProfile(named: name) }
             } label: {
                 Image(systemName: "trash")
             }

@@ -145,6 +145,11 @@ struct SettingsView: View {
         // toolbar strip above it — while the sidebar keeps the
         // traffic lights over its full height.
         .ignoresSafeArea(.container, edges: .top)
+        // The one discard dialog (#515), hosted here because
+        // this wrapper is shared by the structured shell AND
+        // the raw Lua editor — "Back to visual editor" discards
+        // unsaved Lua and needs the same gate.
+        .discardConfirmation(model: model)
     }
 
     @ViewBuilder private var detailPane: some View {

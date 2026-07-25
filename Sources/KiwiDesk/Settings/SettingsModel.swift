@@ -41,6 +41,10 @@ final class SettingsModel: ObservableObject {
     /// panel's "Edit in Settings…" bridge, #326). `SettingsView`
     /// consumes and clears it.
     @Published var pendingDestination: SettingsDestination?
+    /// A destructive action parked behind the unsaved-changes
+    /// dialog (#515). Written only by `discardingEdits`; the one
+    /// dialog in `SettingsView.chrome` presents and clears it.
+    @Published var pendingDiscard: PendingDiscard?
     /// The state as last loaded/saved — what `isDirty`
     /// compares against. Set only by `apply(_:)` (every clean
     /// transition funnels through `reload()`).

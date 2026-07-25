@@ -68,14 +68,30 @@ struct LuaEditorTab: View {
                 )
                 .foregroundStyle(.secondary)
                 Spacer()
+                // The mirror image of "Edit init.lua directly":
+                // `reload()` re-seeds from disk, so unsaved Lua
+                // is dropped. Same gate (#515).
                 Button(
                     L(
                         "lua_editor.back_to_visual",
                         "Back to visual editor"
                     )
                 ) {
-                    model.showLuaEditor = false
-                    model.reload()
+                    model.discardingEdits(
+                        message: L(
+                            "discard.visual_editor.message",
+                            "Leaving the raw editor reloads "
+                                + "init.lua from disk, dropping "
+                                + "the Lua you haven't saved."
+                        ),
+                        confirmLabel: L(
+                            "discard.visual_editor.confirm",
+                            "Discard & leave"
+                        )
+                    ) {
+                        model.showLuaEditor = false
+                        model.reload()
+                    }
                 }
             }
             .font(.callout)

@@ -1183,6 +1183,17 @@ context; there is no separate fourth button:
   banner's profile picker names the edit target
   authoritatively.
 
+Any action that would replace what you have staged asks first.
+While the footer reads **Unsaved changes**, a confirmation names
+what you are about to lose before it happens — switching the edit
+target in the banner picker, **Load**, **Delete** or renaming a
+saved profile, applying a preset, and moving into or out of the raw
+`init.lua` editor. Each dialog spells out the specific consequence
+("Loading a profile replaces the edits you haven't saved") and its
+confirm button carries the verb, so Cancel is always the safe
+choice. With nothing staged the action runs immediately — the
+prompt only appears when there is something to lose.
+
 Until your first profile exists, Settings points the way
 without gating anything: the Profiles sidebar tile carries a
 small accent dot, and the Presets list leads with a "Start
