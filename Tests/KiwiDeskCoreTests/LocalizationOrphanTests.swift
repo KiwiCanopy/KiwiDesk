@@ -10,12 +10,7 @@ import Testing
 /// convention as `LocalizationDriftGuardTests`.
 @Suite("extract-keys orphan detection and pruning")
 struct LocalizationOrphanTests {
-    private var repoRoot: URL {
-        URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()  // KiwiDeskCoreTests
-            .deletingLastPathComponent()  // Tests
-            .deletingLastPathComponent()  // repo root
-    }
+    private var repoRoot: URL { scriptFixtureRepoRoot() }
 
     private func makeFixture(
         swift swiftFiles: [String: String],
@@ -60,38 +55,21 @@ struct LocalizationOrphanTests {
         _ arguments: [String],
         sources: URL,
         locales: URL
-    ) throws -> (status: Int32, stdout: String, stderr: String) {
-        let script = repoRoot.appendingPathComponent(
-            "scripts/extract-keys"
+    ) throws -> ScriptRun {
+        // `extract-keys` is the env-var-scoped shape: it
+        // honours these two overrides, so the real script
+        // runs in place against flat temp dirs — no fixture
+        // tree needed (see `ScriptFixture.swift`).
+        try runPythonScript(
+            at: repoRoot.appendingPathComponent(
+                "scripts/extract-keys"
+            ),
+            arguments: arguments,
+            environment: [
+                "KIWIDESK_EXTRACT_SOURCES": sources.path,
+                "KIWIDESK_EXTRACT_LOCALES": locales.path,
+            ]
         )
-        let process = Process()
-        process.executableURL = URL(
-            fileURLWithPath: "/usr/bin/env"
-        )
-        process.arguments = ["python3", script.path] + arguments
-        process.environment = [
-            "KIWIDESK_EXTRACT_SOURCES": sources.path,
-            "KIWIDESK_EXTRACT_LOCALES": locales.path,
-        ]
-        let stdoutPipe = Pipe()
-        let stderrPipe = Pipe()
-        process.standardOutput = stdoutPipe
-        process.standardError = stderrPipe
-        try process.run()
-        process.waitUntilExit()
-        let stdout =
-            String(
-                data: stdoutPipe.fileHandleForReading
-                    .readDataToEndOfFile(),
-                encoding: .utf8
-            ) ?? ""
-        let stderr =
-            String(
-                data: stderrPipe.fileHandleForReading
-                    .readDataToEndOfFile(),
-                encoding: .utf8
-            ) ?? ""
-        return (process.terminationStatus, stdout, stderr)
     }
 
     @Test(

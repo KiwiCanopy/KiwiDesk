@@ -7,113 +7,33 @@ import Testing
 /// destination key rather than silently clobbering data.
 @Suite("rename-key")
 struct RenameKeyTests {
-    private var repoRoot: URL {
-        URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()  // KiwiDeskCoreTests
-            .deletingLastPathComponent()  // Tests
-            .deletingLastPathComponent()  // repo root
-    }
+    private var repoRoot: URL { scriptFixtureRepoRoot() }
 
     /// `rename-key` has no env-var override (it always targets
     /// `Sources/KiwiDeskCore/Resources/Locales` under its own
-    /// `__file__`-derived repo root) — so to test it against a
-    /// throwaway fixture, `run(_:root:)` copies the script into
-    /// a fixture tree shaped like the real repo
-    /// (`<fixture>/scripts/rename-key` next to
-    /// `<fixture>/Sources/KiwiDeskCore/Resources/Locales`), and
-    /// this helper builds that fixture tree's locale files.
+    /// `__file__`-derived repo root) — so the shared
+    /// `ScriptFixture` primitives copy the script into a fixture
+    /// tree shaped like the real repo and run it there.
     private func makeFixtureRoot(
         locales localeFiles: [String: String]
-    ) throws -> (root: URL, cleanup: () -> Void) {
-        let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent(
-                "kiwi-rename-key-\(UUID().uuidString)"
-            )
-        let locales =
-            root
-            .appendingPathComponent("Sources")
-            .appendingPathComponent("KiwiDeskCore")
-            .appendingPathComponent("Resources")
-            .appendingPathComponent("Locales")
-        try FileManager.default.createDirectory(
-            at: locales,
-            withIntermediateDirectories: true
-        )
-        for (name, content) in localeFiles {
-            try content.write(
-                to: locales.appendingPathComponent(name),
-                atomically: true,
-                encoding: .utf8
-            )
-        }
-        return (
-            root,
-            { try? FileManager.default.removeItem(at: root) }
+    ) throws -> RepoShapedFixture {
+        try makeRepoShapedFixture(
+            prefix: "kiwi-rename-key",
+            locales: localeFiles
         )
     }
 
     @discardableResult
     private func run(
         _ arguments: [String],
-        root: URL
-    ) throws -> (status: Int32, stdout: String, stderr: String) {
-        // Copy the real script into the fixture root so its
-        // `__file__`-derived ROOT resolves to the fixture, not
-        // the real repo — `rename-key` has no env-var override
-        // by design (it always targets the real locale
-        // directory for a human running it).
-        let realScript = repoRoot.appendingPathComponent(
-            "scripts/rename-key"
+        fixture: RepoShapedFixture
+    ) throws -> ScriptRun {
+        try runRepoScript(
+            "rename-key",
+            arguments: arguments,
+            in: fixture,
+            repoRoot: repoRoot
         )
-        let fixtureScriptsDir = root.appendingPathComponent(
-            "scripts"
-        )
-        try FileManager.default.createDirectory(
-            at: fixtureScriptsDir,
-            withIntermediateDirectories: true
-        )
-        let fixtureScript =
-            fixtureScriptsDir
-            .appendingPathComponent("rename-key")
-        try FileManager.default.copyItem(
-            at: realScript,
-            to: fixtureScript
-        )
-
-        let process = Process()
-        process.executableURL = URL(
-            fileURLWithPath: "/usr/bin/env"
-        )
-        process.arguments =
-            ["python3", fixtureScript.path]
-            + arguments
-        let stdoutPipe = Pipe()
-        let stderrPipe = Pipe()
-        process.standardOutput = stdoutPipe
-        process.standardError = stderrPipe
-        try process.run()
-        process.waitUntilExit()
-        let stdout =
-            String(
-                data: stdoutPipe.fileHandleForReading
-                    .readDataToEndOfFile(),
-                encoding: .utf8
-            ) ?? ""
-        let stderr =
-            String(
-                data: stderrPipe.fileHandleForReading
-                    .readDataToEndOfFile(),
-                encoding: .utf8
-            ) ?? ""
-        return (process.terminationStatus, stdout, stderr)
-    }
-
-    private func locales(in root: URL) -> URL {
-        root
-            .appendingPathComponent("Sources")
-            .appendingPathComponent("KiwiDeskCore")
-            .appendingPathComponent("Resources")
-            .appendingPathComponent("Locales")
     }
 
     @Test("renames the key in every locale file, keeping values")
@@ -129,24 +49,15 @@ struct RenameKeyTests {
         defer { fixture.cleanup() }
         let result = try run(
             ["menu.quit", "menu.exit"],
-            root: fixture.root
+            fixture: fixture
         )
         #expect(result.status == 0)
 
-        let localesDir = locales(in: fixture.root)
         for (name, expected) in [
             ("en.json", "Quit KiwiDesk"),
             ("de.json", "KiwiDesk beenden"),
         ] {
-            let data = try Data(
-                contentsOf: localesDir.appendingPathComponent(
-                    name
-                )
-            )
-            let decoded = try JSONDecoder().decode(
-                [String: String].self,
-                from: data
-            )
+            let decoded = try fixture.decodeLocale(name)
             #expect(decoded["menu.quit"] == nil)
             #expect(decoded["menu.exit"] == expected)
         }
@@ -162,7 +73,7 @@ struct RenameKeyTests {
         defer { fixture.cleanup() }
         let result = try run(
             ["no.such.key", "some.new.key"],
-            root: fixture.root
+            fixture: fixture
         )
         #expect(result.status != 0)
         #expect(result.stderr.contains("no.such.key"))
@@ -179,20 +90,13 @@ struct RenameKeyTests {
         defer { fixture.cleanup() }
         let result = try run(
             ["menu.quit", "menu.exit"],
-            root: fixture.root
+            fixture: fixture
         )
         #expect(result.status != 0)
         #expect(result.stderr.contains("menu.exit"))
 
         // Nothing was touched on failure.
-        let data = try Data(
-            contentsOf: locales(in: fixture.root)
-                .appendingPathComponent("en.json")
-        )
-        let decoded = try JSONDecoder().decode(
-            [String: String].self,
-            from: data
-        )
+        let decoded = try fixture.decodeLocale("en.json")
         #expect(decoded["menu.quit"] == "Quit KiwiDesk")
         #expect(decoded["menu.exit"] == "Already taken")
     }
@@ -210,18 +114,11 @@ struct RenameKeyTests {
         defer { fixture.cleanup() }
         let result = try run(
             ["menu.quit", "menu.exit"],
-            root: fixture.root
+            fixture: fixture
         )
         #expect(result.status == 0)
 
-        let frData = try Data(
-            contentsOf: locales(in: fixture.root)
-                .appendingPathComponent("fr.json")
-        )
-        let fr = try JSONDecoder().decode(
-            [String: String].self,
-            from: frData
-        )
+        let fr = try fixture.decodeLocale("fr.json")
         // fr.json never had menu.quit — untouched, no
         // spurious menu.exit key created.
         #expect(fr == ["menu.settings": "Réglages…"])

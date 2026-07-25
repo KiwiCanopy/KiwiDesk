@@ -24,6 +24,18 @@ skipped so they re-surface the next time `scripts/extract-keys
 with a blank value. `<locale>.json` itself stays a flat `{key:
 string}` map — the source/translation shape is scratch-file-only
 and never reaches the file `LocaleCatalog` loads at runtime.
+
+An entry is also skipped when its stored "source" no longer
+matches the key's current English in `en.json` (issue #252). A
+worksheet is filled out over days; in that window the English
+meaning can change in code and `scripts/drop-key` can retire the
+old translations. Merging on non-emptiness alone would silently
+resurrect a translation of the *old* meaning — defeating exactly
+what drop-key retired, with nothing able to flag it afterwards.
+Comparing against the stored source costs nothing (extract-keys
+already writes it) and closes that window: the stale entry is
+skipped with a warning and re-surfaces on the next extract run,
+carrying the new English.
 """
 
 import json
@@ -59,15 +71,36 @@ def main(argv: list[str]) -> int:
         )
         return 1
 
+    english_file = LOCALES_DIR / "en.json"
+    if not english_file.exists():
+        print(
+            f"merge-keys: {english_file} does not exist — cannot "
+            "verify that any worksheet entry still matches its "
+            "English source, so nothing was merged.",
+            file=sys.stderr,
+        )
+        return 1
+    english: dict[str, str] = json.loads(
+        english_file.read_text(encoding="utf-8")
+    )
+
     entries = json.loads(missing_file.read_text(encoding="utf-8"))
     translated: dict[str, str] = {}
     skipped: list[str] = []
+    stale: list[str] = []
     for key, entry in entries.items():
         value = entry.get("translation", "").strip()
-        if value:
-            translated[key] = value
-        else:
+        if not value:
             skipped.append(key)
+            continue
+        # The stored source is the English the translator saw.
+        # A missing "source" is unverifiable, so it counts as a
+        # mismatch — a hand-written worksheet gets the same guard
+        # as a generated one rather than an exemption from it.
+        if entry.get("source") != english.get(key):
+            stale.append(key)
+            continue
+        translated[key] = value
 
     existing: dict[str, str] = {}
     if locale_file.exists():
@@ -99,6 +132,17 @@ def main(argv: list[str]) -> int:
         )
         for key in sorted(skipped):
             print(f"    - {key}")
+    if stale:
+        print(
+            f"merge-keys: {len(stale)} key(s) were skipped "
+            "because the English changed since extraction — the "
+            "translation would have been of the old meaning. "
+            f"Re-run scripts/extract-keys {flag}{locale} to get "
+            "them back with the new English:",
+            file=sys.stderr,
+        )
+        for key in sorted(stale):
+            print(f"    - {key}", file=sys.stderr)
     return 0
 
 

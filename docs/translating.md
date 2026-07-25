@@ -185,6 +185,16 @@ translate for language names.
    didn't exist), and deletes the temp file. Entries you left
    empty are skipped — not merged as blanks — and printed so you
    know what's still pending.
+
+   An entry is **also skipped when its `"source"` no longer
+   matches that key's current English** in `en.json` — the
+   meaning changed in code while the worksheet was out, so the
+   translation you have is of the old meaning. Those keys are
+   listed on stderr; re-run `scripts/extract-keys fr` to get
+   them back carrying the new English. (This is the guard that
+   keeps a worksheet from silently resurrecting exactly what
+   `scripts/drop-key` retired.) `--site` behaves identically
+   against the site's own `en.json`.
 5. Rebuild (`swift build`) and open Settings ▸ General ▸
    Language — the new locale should appear, listed by its
    native name, with every translated string live and every
