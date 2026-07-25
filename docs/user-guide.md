@@ -894,8 +894,8 @@ running windows.
   system-wide Icon & widget style choice. **Glyphs** shows a
   monochrome symbol from the bundled [SketchyBar App
   Font](https://github.com/kvndrsslr/sketchybar-app-font)
-  instead, colored by the bar's text colors (Text, Active
-  text, Hover text — so those colors also style the glyphs);
+  instead, colored by the bar's item colors (Item, Active
+  item, Hover item — so those colors also style the glyphs);
   apps without a symbol keep their icon. With Glyphs active,
   the shortcuts panel's Apps band shows the same symbols
   (following the global style — the panel spans all layouts).
