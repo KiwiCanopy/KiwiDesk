@@ -380,8 +380,6 @@
   "spaces.fallback_badge.help": "Fenster aus einem gelöschten Space landen hier, wenn du das Profil wechselst.",
   "spaces.fallback_caption": "Wenn du das Profil wechselst, landen Fenster aus nicht vorhandenen Spaces in diesem Fallback-Space.",
   "spaces.title": "Spaces",
-  "track.auto_tracks": "Automatische Spuren",
-  "track.auto_tracks_caption": "Öffnet und schließt Spuren automatisch, je nachdem wie Fenster hinzukommen und verschwinden.",
   "track.limit": "Spur-Limit",
   "track.limit_caption": "Begrenzt durch die minimale Fenstergröße oben: mehr Spuren als passen, klappen in die Überlaufspur.",
   "track.new_window": "Neues Fenster",

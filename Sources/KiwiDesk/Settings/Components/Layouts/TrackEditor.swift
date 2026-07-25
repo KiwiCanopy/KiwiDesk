@@ -169,14 +169,21 @@ struct TrackEditor: View {
         )
     }
 
-    /// The automatic-tracks toggle with its caption. On (the
+    /// The auto-track-limit toggle with its caption. On (the
     /// default), tracks open and collapse with the window count
     /// and the Track limit stepper below greys out; off pins the
-    /// count. The track twin of the grid's "Auto-size grid".
+    /// limit. The track twin of the grid's "Auto-size grid".
+    ///
+    /// Labelled "Auto track limit", not "Automatic tracks"
+    /// (R6/#406, ui-designer): no track is itself automatic —
+    /// only HOW MANY exist is — so the label names the field it
+    /// gates, matching the `AutoGatedGroup` pairs ("Auto item
+    /// size" over "Item size"). Reads as a pair with the
+    /// stepper directly below.
     private var trackAuto: some View {
         VStack(alignment: .leading, spacing: 4) {
             Toggle(
-                L("track.auto_tracks", "Automatic tracks"),
+                L("track.auto_tracks", "Auto track limit"),
                 isOn: $model.config.settings.track.autoTracks
             )
             Text(

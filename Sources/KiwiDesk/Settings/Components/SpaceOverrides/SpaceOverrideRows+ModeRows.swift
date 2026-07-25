@@ -166,7 +166,7 @@ extension SpaceOverrideRows {
                 active: g.resolvedTrack(for: space).autoTracks,
                 help: L(
                     "track.auto_tracks.gates",
-                    "Automatic tracks is on for this space, so "
+                    "Auto track limit is on for this space, so "
                         + "the screen decides how many open."
                 )
             )

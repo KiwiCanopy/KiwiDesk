@@ -172,9 +172,9 @@ struct BehaviorSection: View {
                 in: QuitGridLayout.targetDepthRange,
                 help: L(
                     "behavior.quit.target_depth.help",
-                    "Automatic adds a row and column when "
-                        + "cells would exceed this target. The "
-                        + "grid stays between 2×2 and 4×4; "
+                    "The grid adds a row and column when "
+                        + "cells would exceed this target. It "
+                        + "stays between 2×2 and 4×4; "
                         + "after 4×4, additional windows keep "
                         + "cascading in its cells."
                 )

@@ -484,12 +484,12 @@ Adjust each mode's defaults:
   **Position** picker for where within that choice it lands (first,
   last, before or after the focused track/window; defaults to
   **first** so a new window isn't buried in the overflow);
-  **Automatic tracks** (on by
-  default — tracks open and collapse as windows come and go;
-  turn it off to pin a fixed **Track limit**, which greys out
-  while automatic is on — the limit counts *normal* tracks, so a
-  limit of 3 shows up to three tracks plus one overflow track
-  for anything beyond); **Overflow** — how the **overflow
+  **Auto track limit** (on by default — the screen decides how
+  many tracks fit, and they open and collapse as windows come
+  and go; turn it off to pin a fixed **Track limit**, which
+  greys out while the toggle is on — the limit counts *normal*
+  tracks, so a limit of 3 shows up to three tracks plus one
+  overflow track for anything beyond); **Overflow** — how the **overflow
   track** renders (the far-edge track that collects the surplus
   when more tracks exist than fit side by side): **cascade all**
   (the default) piles its windows from the top, **cascade
@@ -921,7 +921,7 @@ is off. A layout's **Overrides** drawer and the
 too, so you can still read what they hold.
 
 - **Font size**: auto or fixed. Auto-gated sliders (item size,
-  font size) read "Auto" while their toggle is on.
+  font size) read "Automatic" while their toggle is on.
 - **Corner roundness**: 0–100% (0 = square, 100 = full capsule).
   Rounds the boxed items, or the shared plate under Plain and
   Liquid Glass.

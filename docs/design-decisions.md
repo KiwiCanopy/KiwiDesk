@@ -381,7 +381,7 @@ irrelevant. Copy carries the same message with none of that.
 when there are more tracks than the space's normal capacity, the
 fitting prefix tiles and the surplus merges into one far-edge
 overflow track. Normal capacity is the **Track limit** N when
-automatic tracks is off (so a limit of N shows up to N normal
+Auto track limit is off (so a limit of N shows up to N normal
 tracks **plus** one overflow track — `trackCap` is `count + 1`,
 and a new `own_track` window past N opens the overflow track
 rather than joining), or **how many fit at `min_window_size`**
@@ -2274,6 +2274,50 @@ satisfies it; **Kiwi Neon and Kiwi Gold are ratified exceptions**
 pending their own retune (#511). `ColorPaletteTests` pins the inequality for
 every bundled
 palette.
+
+**"Automatic" is a value; "Auto" is an adjective — and the
+readout column was widened to say it.** (R6/#406, owner ruling
+2026-07-25.) The word rule itself is a control convention and
+lives in `docs/ui-patterns.md`. What belongs here is the cost
+it was allowed to impose, because a contributor would otherwise
+undo it as an obvious tidy-up.
+
+An Auto-gated slider prints its sentinel as a word rather than
+"0 pt". Under the rule that word is **Automatic**, which did
+not fit `SettingsMetrics.readoutColumn` at 64 pt — a constant
+whose comment said it was "sized for the widest value in use
+(2000 pt)". Two alternatives were weighed and **rejected**:
+keeping "Auto" as a documented compact-surface exception (the
+384 pt popover precedent), and dropping the word entirely for a
+dash. The owner chose the full word, so the width was paid.
+
+The bill came to 8 pt, not 20, because the **font** was the
+real cost. The readouts had been monospaced, where even narrow
+letters are padded to digit width; they now use the proportional
+system font with `monospacedDigit()` — System Settings' own
+idiom — which keeps digit runs tabular so magnitudes still stack
+down a column, while letters render at natural width. Measured
+at 13 pt: "Automatic" 61.3 and "2000 pt" 48.5 proportional,
+against 72.3 and 56.3 monospaced. So the column is **64 → 72**,
+and the per-Space popover **384 → 392** to pay it back on the
+app's narrowest editing surface.
+
+The column stays **shared**: letting the Auto row size
+independently would keep the trailing edges aligned but leave
+ragged track ends within one section, and jump on every toggle
+flip. And it stays **trailing** — the readout's outer edge is
+the pane's right margin, so trailing is the only alignment that
+pins it to one line down the whole pane. Centring pins neither
+edge; leading would fix the slider-to-number gap at the cost of
+a ragged pane margin, trading something seen while dragging for
+something seen always (ui-designer, 2026-07-26, after the owner
+asked).
+
+One fact keeps the shrink from reading as a bug, and it is easy
+to lose: the word only ever renders on an `AutoGatedGroup`-gated
+row, so it is always dimmed and disabled beside full-size
+numbers — a slightly scaled word there reads as *inert*, not
+*broken*.
 
 **The background control names WHERE the background is drawn,
 not what the rectangle is called.** (R6/#406, owner ruling
