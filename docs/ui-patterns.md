@@ -343,14 +343,20 @@ as one group.
 
 The readout column is the one sized by a **word**, not a number
 (R6/#406): an Auto-gated slider prints "Automatic" there, so
-`readoutColumn` went 64 → 84 pt — "2000 pt" is no longer the
-widest string it holds. A locale whose term runs longer shrinks
-via `minimumScaleFactor` rather than clipping. Every slider's
-track is 20 pt shorter as a result, and the per-Space popover
-widened 384 → 404 pt to pay that back on the app's narrowest
-editing surface. See `docs/design-decisions.md` before
-narrowing it again — the alternatives were weighed and
-rejected.
+"2000 pt" is no longer the widest string it holds. The readouts
+render in the **proportional** system font with
+`monospacedDigit()` — System Settings' own idiom — so digit runs
+stay tabular while letters take their natural width; that is
+what keeps the column at 72 pt rather than the 84 a monospaced
+face would need. It is still 8 pt wider than before the word
+arrived, and the per-Space popover widened 384 → 392 pt to pay
+that back on the app's narrowest editing surface. Alignment
+stays **trailing**: the readout's outer edge is also the pane's
+right margin, so trailing is the only choice that pins it to
+one line down the whole pane (ui-designer, 2026-07-26) —
+centring pins neither edge, and leading would trade a gap you
+see while dragging for a ragged margin you see always. See
+`docs/design-decisions.md` before narrowing it again.
 
 **Preview alignment splits on standalone-vs-paired, not by
 tab.** (ui-designer consult 2026-07-14.) A settings preview is

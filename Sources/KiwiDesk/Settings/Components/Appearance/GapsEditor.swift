@@ -109,7 +109,7 @@ struct GapsEditor: View {
                 alignment: .trailing
             )
             .foregroundStyle(.secondary)
-            .font(.system(.body, design: .monospaced))
+            .font(.body.monospacedDigit())
             // The other word-valued readout (see `PtSlider`):
             // a longer locale shrinks rather than wrapping and
             // growing the row's height.
@@ -222,7 +222,7 @@ private struct GapRow: View {
                     alignment: .trailing
                 )
                 .foregroundStyle(.secondary)
-                .font(.system(.body, design: .monospaced))
+                .font(.body.monospacedDigit())
         }
     }
 }

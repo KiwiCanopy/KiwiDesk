@@ -67,10 +67,19 @@ enum SettingsMetrics {
     /// The trailing readout of a slider row. Sized for the
     /// widest STRING in use — which is no longer a number: an
     /// Auto-sentinel slider prints "Automatic" there (R6/#406),
-    /// longer than "2000 pt". Widened 64 → 84 for it; a locale
-    /// that runs longer still shrinks via `minimumScaleFactor`
-    /// rather than clipping (`PtSlider`).
-    static let readoutColumn: CGFloat = 84
+    /// wider than "2000 pt".
+    ///
+    /// 72, measured not guessed. The readouts render in the
+    /// PROPORTIONAL system font with `monospacedDigit()` — System
+    /// Settings' own idiom — so digit runs stay tabular ("8 pt"
+    /// and "2000 pt" still stack) while letters render at their
+    /// natural width. At 13 pt that is "Automatic" 61.3 and
+    /// "2000 pt" 48.5, against 72.3 / 56.3 in the monospaced
+    /// face this replaced: the same headroom ratio the retired
+    /// 64 pt constant used, for 12 pt less column. A locale
+    /// whose term runs longer (de "Automatisch", 75.6) shrinks
+    /// via `minimumScaleFactor` rather than clipping.
+    static let readoutColumn: CGFloat = 72
 
     /// `HexColorField`'s label column. The color fields live
     /// in their own two-column grid, deliberately NOT on the

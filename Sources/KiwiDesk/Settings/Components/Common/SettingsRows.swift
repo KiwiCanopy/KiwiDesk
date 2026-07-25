@@ -54,7 +54,7 @@ struct PtSlider: View {
                 alignment: .trailing
             )
             .foregroundStyle(.secondary)
-            .font(.system(.body, design: .monospaced))
+            .font(.body.monospacedDigit())
             // A locale whose word for "Automatic" runs longer
             // than the column shrinks rather than truncating —
             // a clipped readout reads as a rendering bug, a
@@ -108,7 +108,7 @@ struct SecondsRow: View {
                 alignment: .trailing
             )
             .foregroundStyle(.secondary)
-            .font(.system(.body, design: .monospaced))
+            .font(.body.monospacedDigit())
         }
     }
 }
@@ -146,7 +146,7 @@ struct RatioRow: View {
                     alignment: .trailing
                 )
                 .foregroundStyle(.secondary)
-                .font(.system(.body, design: .monospaced))
+                .font(.body.monospacedDigit())
         }
     }
 }

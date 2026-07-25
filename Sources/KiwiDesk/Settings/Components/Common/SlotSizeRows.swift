@@ -239,7 +239,7 @@ struct SlotSizeRows: View {
                         alignment: .trailing
                     )
                     .foregroundStyle(.secondary)
-                    .font(.system(.body, design: .monospaced))
+                    .font(.body.monospacedDigit())
             }
         case .percent:
             HStack {
@@ -259,7 +259,7 @@ struct SlotSizeRows: View {
                         alignment: .trailing
                     )
                     .foregroundStyle(.secondary)
-                    .font(.system(.body, design: .monospaced))
+                    .font(.body.monospacedDigit())
             }
         }
     }
