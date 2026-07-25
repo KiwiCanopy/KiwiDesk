@@ -183,6 +183,13 @@ struct PausedGlobalsSaveTests {
             "the paused save destroyed the authored space list"
         )
         #expect(onDisk.spaces.contains(SpaceID("mail")))
+        // Exactly the authored list — not the authored list
+        // PLUS the boot default. The freshness net appends every
+        // live space the staged list lacks, so on a cold paused
+        // boot it would graft "1" on and the saved list would
+        // grow one junk entry per save. Found by a probe after
+        // the seed fix looked complete.
+        #expect(onDisk.spaces.map(\.raw) == ["work", "mail"])
     }
 
     /// A Lua-owned config has no sidecar baseline, and

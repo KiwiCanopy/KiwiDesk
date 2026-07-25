@@ -49,13 +49,27 @@ extension SettingsModel {
     /// monitor-set warning and a "Saving failed" message that
     /// names a profile this save never touched.
     func saveGlobalsWhilePaused() {
-        // `spaces` is one of the six, and its freshness net has
-        // to run here too — without it a space created live
-        // while the dashboard sat open is pruned on save.
-        core.mergeLiveSpaces(
-            into: &config,
-            seededWith: seedSpaces
-        )
+        // `spaces` is one of the six, so its freshness net runs
+        // here too — without it a space created live while the
+        // dashboard sat open is pruned on save.
+        //
+        // But ONLY when live is trustworthy. The net appends
+        // every live space the staged list lacks, so on an
+        // Accessibility-off cold boot it appends
+        // `StateCoordinator`'s boot default and the user's saved
+        // list silently grows a spurious "1" on every save. That
+        // state cannot have live-created spaces to rescue —
+        // the engine never started — so the net has nothing to
+        // do and is skipped. (Caught by a probe after the seed
+        // fix: the save wrote ["work", "mail", "1"].)
+        if core.state.workspaces.allSpaces.map(\.id)
+            != [SpaceID(1)]
+        {
+            core.mergeLiveSpaces(
+                into: &config,
+                seededWith: seedSpaces
+            )
+        }
         do {
             try core.saveGuiConfig(config)
         } catch {
