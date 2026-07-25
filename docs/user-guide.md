@@ -1290,6 +1290,12 @@ your connected displays. The layout loads and is saved as an editable
 profile under the preset's name. The first profile saved for a screen
 count becomes that count's default.
 
+Apply switches your **live** layout, so it is greyed while you are
+editing a saved profile from the banner picker — that mode never
+touches what is on screen. Switch back to Live to apply one. It is
+also greyed when the preset's screen count doesn't match your
+connected displays; the tooltip says which of the two it is.
+
 Presets themselves cannot be deleted; they always stay available. If
 you delete all saved profiles for a screen count, that count silently
 reverts to its Standard on the next monitor change.

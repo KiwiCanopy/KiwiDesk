@@ -118,8 +118,12 @@ struct PresetsSection: View {
     @ViewBuilder private func applyButton(
         _ layout: StandardLayout
     ) -> some View {
+        // Two independent reasons Apply can be unavailable, so
+        // the help has to say WHICH one (#518).
+        let editing = model.editingStoredProfile
         let appliable =
             model.displays.count == layout.screenCount
+            && !editing
         // Apply materializes a profile and reloads, so it
         // drops staged edits like the profile actions (#515).
         let button = Button(L("presets.apply", "Apply")) {
@@ -137,15 +141,7 @@ struct PresetsSection: View {
         }
         .controlSize(.large)
         .disabled(!appliable)
-        .help(
-            appliable
-                ? ""
-                : L(
-                    "presets.needs_screens",
-                    "Needs %1$d connected screen(s).",
-                    layout.screenCount
-                )
-        )
+        .help(applyHelp(layout, editing: editing))
         if appliable, layout.isStandard,
             model.profileSummaries.isEmpty
         {
@@ -153,6 +149,32 @@ struct PresetsSection: View {
         } else {
             button.buttonStyle(.bordered)
         }
+    }
+
+    /// Greyed, never hidden (#171) — with the reason, because
+    /// "why is Apply dead" has two different answers and the
+    /// stored-profile one contradicts what the user just read
+    /// in the header.
+    private func applyHelp(
+        _ layout: StandardLayout,
+        editing: Bool
+    ) -> String {
+        if editing {
+            return L(
+                "presets.editing_stored",
+                "Applying a preset switches your live layout, "
+                    + "which editing a saved profile never does. "
+                    + "Switch to Live to apply one."
+            )
+        }
+        if model.displays.count != layout.screenCount {
+            return L(
+                "presets.needs_screens",
+                "Needs %1$d connected screen(s).",
+                layout.screenCount
+            )
+        }
+        return ""
     }
 }
 
