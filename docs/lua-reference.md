@@ -1985,9 +1985,9 @@ space_bar.set_alignment("center")
 
 ### space_bar.set_thickness
 
-**Expects:** depth in points (default `32`).
+**Expects:** thickness in points (default `32`).
 
-**Does:** sets the depth of the reserved strip.
+**Does:** sets the bar's thickness, carved out of the layout.
 
 **Example:**
 
@@ -2513,8 +2513,8 @@ drag.set_corner_radius(16)
 KiwiDesk can draw a thin border around the focused window so it is
 unmistakable in a gapped layout — the feedback keyboard-driven
 focus otherwise lacks. It is **on by default** and marks only the
-focused window; you can optionally draw one on every other
-window too.
+focused window; it can optionally show one on every other window
+too.
 
 The border is a pure overlay: it never changes where windows tile
 (no gap coupling). The configured width is the thickness drawn
@@ -2584,8 +2584,8 @@ border.set_focused_color("#588613")
 **Expects:** a boolean.
 
 **Does:** when `true`, also draws a border on the unfocused
-windows (default
-`false`). Ignored in monocle, where only the focused window shows.
+windows (default `false`). Ignored in monocle, where only the
+focused window shows.
 
 **Example:**
 
@@ -2629,11 +2629,11 @@ border.set_corner_style("rounded")
 bloom — a zero-offset blurred halo, the JankyBorders "glow" look
 (default `false`). A render trait like width and corners: it adds no
 color choice and never touches the unfocused windows (a bloom on
-every
-dim border would undo the point of making the focused one stand out).
+every dim border would undo the point of making the focused one
+stand out).
 The bloom is a **brightened** derivative of `focused_color` (a halo
 is a fill, not a legibility-bound stroke, so it reads more vivid than
-the darkened border, in the border's own hue) — set only `focused_color`
+the darkened border, in its own hue) — set only `focused_color`
 and the glow follows. The soft edge is allowed to bleed into the
 layout gap, so `fit_gaps` is unaffected.
 

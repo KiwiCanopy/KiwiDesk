@@ -606,7 +606,8 @@ keeps the selected color.
 At the top of Appearance, the **Color Palette** shelf paints a whole
 set of colors across the App Bar, Space Bar, focus borders, and drag
 visuals in one click. Each palette shows a small scene thumbnail —
-a mock bar, a ringed window, and a drag swatch — in its own colors,
+a mock bar, a bordered window, and a drag swatch — in its own
+colors,
 so you judge the whole look, not isolated chips. Applying a palette
 is a **one-time paint**, not a live link: it overwrites the current
 colors (you can still tweak any individual color afterward), and the
@@ -675,7 +676,7 @@ Toggle each visual on/off and customize:
 
 ### Focus Border
 
-Below Drag Visuals, the **Focus border** group draws a thin border
+Below Drag Visuals, the **Focus border** group puts a thin border
 around the focused window so you never lose track of which window
 has focus in a gapped layout — the cue keyboard-driven focus
 otherwise lacks. It is **on by default**.
@@ -697,14 +698,14 @@ windows. Below it:
 - **Show border on unfocused windows**: off by default — when on,
   every other tiled window gets a border too, including every member
   of an overflow cascade, in its own (greyed until enabled) color.
-  Floating windows aren't ringed when unfocused (only the focused
-  window is, whether tiled or floating); monocle always shows only
-  the focused border.
+  Floating windows get no border when unfocused (only the focused
+  window does, whether tiled or floating); monocle always shows
+  only the focused border.
 - **Width**: 1–20 pt — the visible thickness reaching outward into
   the gap, and the value **Fit layout gaps** sizes gaps from. The
-  border sits just above the window with a small overlap lapping onto
-  the window edge to keep its corners closed; that overlap isn't
-  part of the width. Keep gaps at least as wide as the border so
+  border sits **behind** its window by default, with a small
+  overlap tucked under the window edge so its corners stay
+  closed; that overlap isn't part of the width. Keep gaps at least as wide as the border so
   neighbouring borders don't touch.
 - **Corners**: **Rounded** matches your windows' real corner
   radius; **Square** draws sharp corners — seamless on windows that
@@ -727,7 +728,7 @@ Launcher and panel overlays (Spotlight, Raycast, Alfred) never get
 a border, even while you type into them — only genuine windows do.
 Their command bars aren't managed at all: they never appear in the
 App or Space Bars, never tile, and stay put when you switch spaces.
-Windows in native (green-button) fullscreen aren't ringed either:
+Windows in native (green-button) fullscreen get none either:
 they fill the display, so a border would peek out only at the
 corners. The border returns when the window leaves fullscreen.
 Popovers, sheets, emoji pickers, and other windows above a bordered
@@ -739,7 +740,8 @@ you're already at the edge — the focus border gives a small
 rubber-band bounce toward that edge and springs back, the same
 "nothing further this way" cue as scroll overscroll. The window
 never moves; only the border flexes. It works even with the focus
-border switched off (a brief one appears just for the bounce) and,
+border switched off (a border appears briefly, just for the
+bounce) and,
 under **Reduce Motion**, becomes a single opacity pulse instead of
 a movement. This is distinct from a sticky window's pill: the
 bounce is a wordless "edge of the layout," the pill explains a
@@ -884,7 +886,8 @@ running windows.
   style — all combinations are valid. Full-color app icons (System
   default) also dim to half strength on inactive items, so the
   active app reads even though those icons take no tint.
-- **Thickness**: the strip's depth in points.
+- **Thickness**: how far the bar reaches into the layout, in
+  points.
 - **Item size**: auto (0) measures rendered width and sizes slots
   uniformly to fit the widest item; fixed pixel width.
 - **Content**: icon only, name only, or both. Left/right bars
@@ -939,8 +942,8 @@ separate active-fill color.
 **Per-layout overrides:**
 
 Click a layout to override one field just for that layout — e.g.,
-make scrolling draw a plain background while monocle stays
-boxed. When
+make scrolling draw a plain background while monocle stays boxed.
+When
 you open a layout's **Overrides**, a compact chip leads the rows:
 color swatches of the layout's *resolved* bar (global overlaid with
 its overrides) and a count of how many fields differ — a quick read

@@ -194,7 +194,7 @@ struct AppBarPreviewStrip: View {
     }
 
     /// The active indicator, orthogonal to the background style:
-    /// `ring` outlines the active item (flush on Boxed, an inset
+    /// `outline` outlines the active item (flush on Boxed, an inset
     /// capsule on Plain), `edgeMark` draws a bar on the
     /// window-facing edge inset to the box corner. `gap` never
     /// reaches here (the slot is hidden).
