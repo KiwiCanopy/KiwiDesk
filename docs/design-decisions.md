@@ -1904,14 +1904,24 @@ tint of the active green — a lighter shade of the same hue
 washed into "active space" and the two states read as one, and
 hue alone does not survive colour-vision deficiency against a
 green primary (see the lightness clause in the palette-coherence
-heuristics above). Note its **third** surface, easy to miss when
-enumerating consumers: the group-count / `+n` badge text
-(`SpaceBarItemView+Style.applyBadge`), which is ink on the
-crimson badge chip rather than on the bar plate — the one place
-the darkening costs contrast instead of buying it (3.40:1 →
-2.10:1 against the default `#B00020`), and the one thing to look
-at on a Space with grouped duplicates. In Settings the
-`Focused window`
+heuristics above). It has **two** surfaces, not three: the
+group-count / `+n` badge text was the third until #470, and is
+now the deliberate exception — badge ink stays
+`group_badge_text_color` and never takes the focused accent.
+A glyph and a badge do not share a background (a glyph's ink is
+contrast-tested against the bar plate, a badge's against a
+second, independently chosen fill), so the **alpha** half of the
+2026-07-20 uniform ladder generalizes and the **ink** half only
+ever held against the one badge fill it was eyeballed against —
+#470's darkening took that pair to 2.10:1. Nothing is lost:
+`untintedAppAlpha` already puts the focused app's badge uniquely
+at full alpha, beside a glyph that *is* tinted. It also restores
+the grain the App Bar's own count badge and the sticky/floating
+state marks already had, and matches the platform — the system
+badge is white-on-red unconditionally, with no focused variant.
+The corollary for a *bespoke* badge still stands: choose its
+text colour for contrast against that badge, not from the
+accents. In Settings the `Focused window`
 row greys out (#171) when its only surfaces are untintable:
 native-image glyphs *and* no front-app name shown. Emoji
 identifiers and native app

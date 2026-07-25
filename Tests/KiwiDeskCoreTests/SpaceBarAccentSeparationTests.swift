@@ -188,6 +188,30 @@ struct SpaceBarAccentSeparationTests {
         #expect(focused < active)
     }
 
+    @Test("Badge ink is legible on the badge chip")
+    func badgeInkClearsContrastOnItsChip() throws {
+        func luminance(_ hex: String) -> Double? {
+            guard let c = components(hex) else { return nil }
+            return 0.2126 * linear(c.r) + 0.7152 * linear(c.g)
+                + 0.0722 * linear(c.b)
+        }
+        let ink = try #require(luminance(style.groupBadgeTextColor))
+        let chip = try #require(luminance(style.groupBadgeColor))
+        let ratio =
+            (max(ink, chip) + 0.05) / (min(ink, chip) + 0.05)
+        // The badge numeral is small text, so 4.5:1. This exists
+        // because the pairing broke once: a 2026-07-20 change had
+        // the badge take `focusedItemColor` when its app was
+        // focused, which silently coupled the badge's legibility
+        // to an accent tuned against a *different* background —
+        // and #470's darkening of that accent took the pair to
+        // 2.10:1. Badge ink now stays `groupBadgeTextColor`
+        // (#470, ui-designer consult); this pins that the two
+        // badge fields are chosen against each other and nothing
+        // else re-couples them.
+        #expect(ratio >= 4.5)
+    }
+
     @Test("The derived default palette carries the same pair")
     func derivedPaletteMatchesTheStruct() {
         // "Kiwi (Default)" is read from the struct defaults at

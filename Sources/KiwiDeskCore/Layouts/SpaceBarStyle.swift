@@ -107,13 +107,12 @@ public struct SpaceBarStyle: Sendable, Equatable {
     public var itemColor = "#EAF3EE66"
     /// The active space's accent (identifier + its glyphs).
     public var activeItemColor = "#8DB354"
-    /// The focused window's accent, on three surfaces: its glyph
-    /// inside the active space, the front-app segment (glyph +
-    /// name), and the group-count badge's text
-    /// (`SpaceBarItemView+Style.applyBadge`) — the badge is easy
-    /// to miss, and it is the one surface where this colour is
-    /// ink on the crimson badge chip rather than on the bar
-    /// plate. A
+    /// The focused window's accent, on two surfaces: its glyph
+    /// inside the active space, and the front-app segment (glyph
+    /// + name). Deliberately NOT the group-count badge's text —
+    /// that is ink on an independently chosen chip rather than on
+    /// the bar plate, so it keeps `groupBadgeTextColor` and lets
+    /// the alpha ladder carry focus (#470). A
     /// genuinely different hue, not a tint of the active-space
     /// color, so the two states read apart (QA 2026-07-19).
     ///
