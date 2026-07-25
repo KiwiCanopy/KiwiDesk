@@ -31,13 +31,51 @@ struct SidebarSearchParityTests {
         )
     }
 
-    /// Section headers deliberately absent from the index:
-    /// fail-shut — a NEW header is either indexed or added
-    /// here consciously.
+    /// Drawer titles — `DisclosureGroup` labels — which are
+    /// section headers as far as a *searching user* is
+    /// concerned: a drawer is collapsed, so its contents are
+    /// exactly what they cannot see and most need to find.
+    ///
+    /// Hand-listed, deliberately, after a source scan was tried
+    /// and rejected: SwiftUI's label may lead the initializer
+    /// (`DisclosureGroup(L(…), isExpanded:)`), trail the body
+    /// (`… { body } label: { … }`), or live in a separate
+    /// computed property far from the call — so no anchor
+    /// reliably picks the title out, and the scan kept selecting
+    /// a row from inside the drawer instead. A guard that needs
+    /// a growing exclusion list to stay green is worse than an
+    /// honest short list. The cost is the usual one: this list
+    /// is itself a place to forget, so **add a new drawer here
+    /// when you add it to a view**, and note the `unindexed`
+    /// set below is what keeps it fail-shut rather than
+    /// silently short.
+    private let drawerTitles: Set<String> = [
+        "general.advanced.title",
+        "shortcuts.advanced.title",
+        "monitors.advanced.title",
+        "bars.advanced_colors",
+        "gaps.per_edge",
+        "gaps.per_axis",
+        "app_bar.layout.overrides",
+        "space_override.dormant.label",
+    ]
+
+    /// Headers deliberately absent from the index: fail-shut —
+    /// a NEW one is either indexed or added here consciously.
     private let unindexed: Set<String> = [
         // Computed per-layout title ("%1$@ bar"), deferred to
         // the #277 per-control catalog.
-        "app_bar.layout.title"
+        "app_bar.layout.title",
+        // The per-layout override drawer, inside that same
+        // computed-title section — indexing the child while its
+        // parent is deferred would point search at a header the
+        // result caption cannot name.
+        "app_bar.layout.overrides",
+        // Lives in the per-Space "Overrides…" popover, which is
+        // reachable only from a row button, not from a
+        // destination — search navigates to destinations, so it
+        // has nowhere to send the user.
+        "space_override.dormant.label",
     ]
 
     @Test("every index key has a rendering call site")
@@ -69,10 +107,19 @@ struct SidebarSearchParityTests {
 
     /// The reverse direction: every literal
     /// `SettingsSection(L("key", ...))` header under Settings/
-    /// must be indexed or consciously excluded, so a new
-    /// section can't ship silently unsearchable. Mode names
-    /// route through `LayoutMode.displayName`, so its
-    /// `LayoutModeGlyph.swift` keys count as indexed.
+    /// **and every `DisclosureGroup` label** must be indexed or
+    /// consciously excluded, so a new section can't ship
+    /// silently unsearchable. Mode names route through
+    /// `LayoutMode.displayName`, so its `LayoutModeGlyph.swift`
+    /// keys count as indexed.
+    ///
+    /// Disclosures were added to this scan in #277. They were
+    /// the guard's structural blind spot: it matched only
+    /// `SettingsSection(`, so the three "Advanced" drawers —
+    /// including General's, which holds the config path and
+    /// "Edit init.lua directly" — were unsearchable and *no
+    /// test could fail*. A drawer is exactly what a user
+    /// searches for, being the content they cannot see.
     @Test("every rendered section header is indexed")
     func renderedHeadersAreIndexed() throws {
         var indexed = try lKeys(in: indexSource())
@@ -100,6 +147,7 @@ struct SidebarSearchParityTests {
             )
         }
         #expect(!headers.isEmpty)
+        headers.formUnion(drawerTitles)
         for key in headers where !unindexed.contains(key) {
             #expect(
                 indexed.contains(key),

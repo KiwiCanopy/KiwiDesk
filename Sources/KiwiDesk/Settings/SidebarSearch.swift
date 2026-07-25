@@ -109,11 +109,17 @@ enum SidebarSearch {
                     "monitors.orphan_pins.title",
                     "Pinned to disconnected monitors"
                 ),
+                L(
+                    "monitors.advanced.title",
+                    "Advanced — monitor fingerprints"
+                ),
             ]
         case .appearance:
             return [
                 L("palettes.title", "Color Palette"),
                 L("gaps.title", "Gaps"),
+                L("gaps.per_edge", "Per-edge…"),
+                L("gaps.per_axis", "Per-axis…"),
                 L("drag.title", "Drag & Drop"),
                 L("border.title", "Focus border"),
                 L("sticky.title", "Sticky windows"),
@@ -136,6 +142,7 @@ enum SidebarSearch {
                     "space_bar.colors.title",
                     "Space Bar colors"
                 ),
+                L("bars.advanced_colors", "Advanced colors"),
             ]
         case .behavior:
             return [
@@ -186,6 +193,10 @@ enum SidebarSearch {
                     "shortcuts.override.title",
                     "Profile shortcuts"
                 ),
+                L(
+                    "shortcuts.advanced.title",
+                    "Advanced: Lua bindings"
+                ),
             ]
         case .appRules:
             return [
@@ -201,6 +212,7 @@ enum SidebarSearch {
                     "Language"
                 ),
                 L("general.about.title", "About"),
+                L("general.advanced.title", "Advanced"),
             ]
         }
     }
