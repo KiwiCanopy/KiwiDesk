@@ -14,7 +14,11 @@ extension BorderStyle {
     public static func glowColor(from hex: String) -> String {
         guard let c = DragVisual.parseHex(hex) else { return hex }
         var (h, s, l) = rgbToHSL(r: c.red, g: c.green, b: c.blue)
-        s = max(s, 0.80)
+        // Floor saturation only for a color that HAS a hue — an
+        // achromatic ring (grey/white/black, hue 0) must bloom grey,
+        // not a spurious pink from flooring saturation onto hue-0.
+        // (A white `focused_color` ships in the Monochrome palette.)
+        if s > 0 { s = max(s, 0.80) }
         l = min(0.72, max(0.55, l + 0.25))
         let (r, g, b) = hslToRGB(h: h, s: s, l: l)
         return String(

@@ -29,6 +29,22 @@ struct BorderGlowColorTests {
         #expect(c.red > 0.2)  // lifted off the dark input
     }
 
+    @Test("An achromatic ring blooms grey, never a spurious hue")
+    func achromaticStaysGrey() {
+        // White ships as Monochrome's focused_color — the bloom must
+        // stay grey, not pick up a pink tint from the saturation
+        // floor landing on hue 0.
+        for ring in ["#FFFFFF", "#000000", "#808080"] {
+            let c = DragVisual.parseHex(
+                BorderStyle.glowColor(from: ring)
+            )
+            #expect(c != nil)
+            guard let c else { continue }
+            #expect(c.red == c.green)
+            #expect(c.green == c.blue)
+        }
+    }
+
     @Test("Unparseable input passes through unchanged")
     func parseFailPassthrough() {
         #expect(BorderStyle.glowColor(from: "not-a-hex") == "not-a-hex")

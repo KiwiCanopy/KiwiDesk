@@ -1619,7 +1619,12 @@ default ring width is 5 pt (was 2): a thicker stroke is not just
 more visible, it reads at a *more saturated* color than a hairline
 can (a 2 pt line's anti-aliased edges wash its effective contrast
 out), which is why the default could move off the duller `#567A1F`
-to this livelier `#588613` at the same lightness. The drag drop-zone
+to this livelier `#588613` at the same lightness. 5 pt is also the
+widest that still tiles cleanly with unfocused rings on: each ring
+reaches its width into the 10 pt default inner gap, so `2 × 5 = 10`
+fills the gap edge-to-edge without overlap (6 pt would overlap).
+That couples the width default to the gap default — changing either
+without the other re-opens or overlaps the ring band. The drag drop-zone
 keeps a distinct hue as a darkened amber `#C2790A` (the old
 `#E8A33D` had the same light-window problem), so origin (green)
 still reads apart from target (amber). This is a darkening, not a
