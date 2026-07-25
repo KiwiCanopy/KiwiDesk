@@ -229,7 +229,7 @@ struct DragVisualControls: View {
             }
             .modifier(
                 GreyOut(
-                    active: visual.enabled && !visual.border,
+                    active: !visual.border,
                     help: borderOffHelp
                 )
             )
@@ -246,7 +246,7 @@ struct DragVisualControls: View {
             )
             .modifier(
                 GreyOut(
-                    active: visual.enabled && !visual.fill,
+                    active: !visual.fill,
                     help: fillOffHelp
                 )
             )

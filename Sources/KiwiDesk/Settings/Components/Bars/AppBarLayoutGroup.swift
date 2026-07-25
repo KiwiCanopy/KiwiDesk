@@ -140,12 +140,8 @@ struct LayoutAppBarGroup: View {
                 // hugs each box, solid draws each box), so fit is
                 // inert for Boxed — resolve to see the effective
                 // shape under any override.
-                // `bar.enabled &&`: the drawer gate above
-                // already dims these when the bar is off, and
-                // nested GreyOuts multiply to 0.25 opacity.
-                active: bar.enabled
-                    && bar.resolved(with: global)
-                        .tabBackground == .boxed,
+                active: bar.resolved(with: global)
+                    .tabBackground == .boxed,
                 help: L(
                     "app_bar.tab_background_fit.boxed_only",
                     "Boxed draws a box per tab, not a shared "
@@ -176,9 +172,8 @@ struct LayoutAppBarGroup: View {
                 // against this layout's EFFECTIVE edge — via
                 // the one resolve authority, never a hand
                 // mirror of it.
-                active: bar.enabled
-                    && !bar.resolved(with: global)
-                        .edge.isHorizontal,
+                active: !bar.resolved(with: global)
+                    .edge.isHorizontal,
                 help: L(
                     "app_bar.content.vertical_only",
                     "Left and right bars always show icons "

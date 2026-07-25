@@ -113,13 +113,8 @@ struct SpaceBarColorsGroup: View {
                     // "name only on horizontal" half mirrors
                     // SpaceBarOverlay+FrontApp's name-visibility
                     // rule — keep in step if that changes.
-                    // `enabled &&`: the editor's block gate
-                    // already dims this whole group when the
-                    // bar is off, and nested GreyOuts multiply
-                    // their 0.5 opacity to 0.25.
-                    active: style.wrappedValue.enabled
-                        && style.wrappedValue.iconSource
-                            == .appImage
+                    active: style.wrappedValue.iconSource
+                        == .appImage
                         && !(style.wrappedValue.showFrontApp
                             && style.wrappedValue.edge
                                 .isHorizontal),

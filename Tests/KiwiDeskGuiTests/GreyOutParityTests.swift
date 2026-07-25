@@ -35,16 +35,35 @@ struct GreyOutParityTests {
     /// predicate each one's block gate must be keyed on. These
     /// are the editors whose whole body configures something a
     /// switch can turn off — the #520 class.
+    /// Each editor's block gate, as the EXACT expression it must
+    /// still contain — not a bare identifier.
+    ///
+    /// The first cut of this list used needles like `"enabled"`,
+    /// which the #520 review showed were satisfied by unrelated
+    /// pre-existing code (`space_bar.enabled`, `isOn:
+    /// $visual.enabled`): five of nine gates could be deleted
+    /// outright with the suite still green. A needle that cannot
+    /// fail is worse than no needle, because it reads like
+    /// coverage.
     private let gatedEditors: [(file: String, gate: String)] = [
-        ("FocusBorderEditor.swift", "enabled"),
-        ("SpaceBarGroups.swift", "enabled"),
-        ("AppBarGroups.swift", "anyBarShown"),
-        ("DragVisualsEditor.swift", "visual.enabled"),
-        ("StickyIndicatorEditor.swift", "spaceBarOn"),
-        ("AppBarLayoutGroup.swift", "bar.enabled"),
-        ("ProfilesSection.swift", "editingStoredProfile"),
-        ("SpaceOverrideRows+ModeRows.swift", "resolved"),
-        ("AppBarGroups+Colors.swift", "gapOnly"),
+        (
+            "FocusBorderEditor.swift",
+            "active: !style.wrappedValue.enabled"
+        ),
+        ("SpaceBarGroups.swift", "GreyOut(active: !enabled"),
+        ("AppBarGroups.swift", "GreyOut(active: !anyBarShown"),
+        ("DragVisualsEditor.swift", "active: !visual.enabled"),
+        ("StickyIndicatorEditor.swift", "active: !spaceBarOn"),
+        ("AppBarLayoutGroup.swift", "active: !bar.enabled"),
+        (
+            "ProfilesSection.swift",
+            "active: model.editingStoredProfile"
+        ),
+        (
+            "SpaceOverrideRows+ModeRows.swift",
+            "active: g.resolvedGrid(for: space).autoSize"
+        ),
+        ("AppBarGroups+Colors.swift", "active: gapOnly"),
     ]
 
     @Test("every gated editor still greys off its own switch")
@@ -59,19 +78,12 @@ struct GreyOutParityTests {
                 try String(contentsOf: file, encoding: .utf8)
             )
             #expect(
-                source.contains("GreyOut("),
-                Comment(
-                    rawValue:
-                        "\(name) lost its GreyOut — a control "
-                        + "with no effect must be greyed, never "
-                        + "left live (#171)"
-                )
-            )
-            #expect(
                 source.contains(gate),
                 Comment(
                     rawValue:
-                        "\(name) no longer gates on \"\(gate)\""
+                        "\(name) lost its gate "
+                        + "`\(gate)` — a control with no effect "
+                        + "must be greyed, never left live (#171)"
                 )
             )
         }
@@ -167,43 +179,83 @@ struct GreyOutParityTests {
         #expect(!capabilityGate.isEmpty)
     }
 
-    /// Nested `GreyOut`s multiply their 0.5 opacity to 0.25,
-    /// which reads as broken rather than disabled. Every editor
-    /// that gained a block gate had to conjoin its inner gates
-    /// with the same flag; this pins that the conjunctions are
-    /// still there, since the symptom is purely visual and no
-    /// other test can see it.
-    @Test("inner gates stay conjoined with their block gate")
-    func innerGatesAvoidDoubleDimming() throws {
-        let files = try SourceScan.swiftSources(under: settingsDir)
-        let conjunctions: [(file: String, needle: String)] = [
-            ("SpaceBarGroups.swift", "active: enabled"),
-            (
-                "SpaceBarColorsGroup.swift",
-                "active: style.wrappedValue.enabled"
-            ),
-            ("AppBarLayoutGroup.swift", "active: bar.enabled"),
-            (
-                "DragVisualsEditor.swift",
-                "active: visual.enabled &&"
-            ),
-        ]
-        for (name, needle) in conjunctions {
-            let file = try #require(
-                files.first { $0.lastPathComponent == name }
+    /// The real invariant, tested on the primitive instead of
+    /// on every call site: `GreyOut` dims ONCE however deeply it
+    /// nests. The previous shape of this test asserted that each
+    /// inner gate carried a hand-written `blockIsOn &&`
+    /// conjunction — which is exactly the "one more place to
+    /// forget" the #520 review then caught being forgotten (a
+    /// modifier applied twice, and two `AutoGatedGroup`s dimming
+    /// to 0.25 from the shipping defaults).
+    ///
+    /// The environment flag makes it unrepresentable instead, so
+    /// what needs pinning is the primitive's own wiring.
+    @Test("the grey treatment dims once, however it nests")
+    func greyOutDimsOnce() throws {
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Common/"
+                    + "AutoGatedGroup.swift"
             )
+        let source = SourceScan.stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        )
+        // Dims only when no ancestor already did.
+        #expect(
+            source.contains("active && !alreadyDimmed ? 0.5 : 1")
+        )
+        // …and publishes the fact to everything below.
+        #expect(source.contains("alreadyDimmed || active"))
+        // Disabling is unconditional: the control is inert
+        // whether or not an ancestor already dimmed it.
+        #expect(source.contains(".disabled(active)"))
+
+        // The override chrome dims through the same flag, so an
+        // inheriting row inside a gated block cannot compound.
+        let chrome = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Bars/"
+                    + "AppBarOverrideControls.swift"
+            )
+        let chromeSource = SourceScan.stripComments(
+            try String(contentsOf: chrome, encoding: .utf8)
+        )
+        #expect(chromeSource.contains("isInsideGreyOut"))
+        #expect(chromeSource.contains("!alreadyDimmed"))
+    }
+
+    /// No control may carry the treatment twice — that compounds
+    /// to 0.25 through the one path the environment flag cannot
+    /// see, since both modifiers sit at the same depth. Shipped
+    /// once in this very sweep before review caught it.
+    @Test("no view applies the grey treatment twice in a row")
+    func noDoubledGreyOutModifier() throws {
+        for file in try SourceScan.swiftSources(
+            under: settingsDir
+        ) {
             let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
-            #expect(
-                source.contains(needle),
-                Comment(
-                    rawValue:
-                        "\(name): an inner GreyOut lost its "
-                        + "\"\(needle)\" conjunction and will "
-                        + "double-dim to 0.25 opacity"
-                )
+            let lines = source.split(
+                separator: "\n",
+                omittingEmptySubsequences: false
             )
+            for (index, line) in lines.enumerated()
+            where index > 0 {
+                let previous = lines[index - 1]
+                let doubled =
+                    line.contains(".modifier(GreyOut(")
+                    && previous.contains(".modifier(GreyOut(")
+                #expect(
+                    !doubled,
+                    Comment(
+                        rawValue:
+                            "\(file.lastPathComponent):"
+                            + "\(index + 1) applies GreyOut "
+                            + "twice — that dims to 0.25"
+                    )
+                )
+            }
         }
     }
 }

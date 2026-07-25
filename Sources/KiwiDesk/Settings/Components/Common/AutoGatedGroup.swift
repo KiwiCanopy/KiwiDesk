@@ -47,14 +47,48 @@ struct AutoGatedGroup<Gated: View>: View {
 /// dimmed, with an optional explanatory tooltip. Generic (not
 /// App-Bar-specific) — `AutoGatedGroup`, the App Bar roundness
 /// gate, and the per-layout override all share it.
+///
+/// **Dims once, however deeply it nests.** Opacity multiplies,
+/// so a row inside an already-dimmed block used to land at
+/// `0.25` and read as broken rather than disabled. The #520
+/// sweep, which gates whole editors, made that reachable from
+/// the shipping defaults — an Auto-gated slider inside a
+/// switched-off bar hit it with one click.
+///
+/// The first active gate dims and publishes that fact; every
+/// gate below it still `.disabled`s (correct — the control is
+/// inert either way) but leaves opacity alone. Conjoining each
+/// inner predicate by hand was the alternative and is one more
+/// thing to forget; this makes the invariant unrepresentable
+/// instead of merely documented.
 struct GreyOut: ViewModifier {
     let active: Bool
     var help: String = ""
+    @Environment(\.isInsideGreyOut) private var alreadyDimmed
 
     func body(content: Content) -> some View {
         content
             .disabled(active)
-            .opacity(active ? 0.5 : 1)
+            .opacity(active && !alreadyDimmed ? 0.5 : 1)
             .help(active ? help : "")
+            .environment(
+                \.isInsideGreyOut,
+                alreadyDimmed || active
+            )
+    }
+}
+
+private struct GreyOutDepthKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    /// True once some ancestor has already applied the grey
+    /// treatment, so a nested dim would compound it. Read by
+    /// `GreyOut` and by `OverrideChrome`, which dims inheriting
+    /// rows through the same mechanism.
+    var isInsideGreyOut: Bool {
+        get { self[GreyOutDepthKey.self] }
+        set { self[GreyOutDepthKey.self] = newValue }
     }
 }

@@ -157,12 +157,8 @@ struct SpaceBarEditorGroup: View {
                 // Boxed never draws a shared plate to size — glass
                 // hugs each box, solid draws each box — so fit is
                 // inert for Boxed regardless of the glass finish.
-                // `enabled &&`: the block gate above already
-                // dims everything when the bar is off, and
-                // nested GreyOuts would multiply to 0.25.
-                active: enabled
-                    && style.wrappedValue.tabBackground
-                        == .boxed,
+                active: style.wrappedValue.tabBackground
+                    == .boxed,
                 help: L(
                     "space_bar.tab_background_fit.boxed_only",
                     "Boxed draws a box per item, not a shared "
