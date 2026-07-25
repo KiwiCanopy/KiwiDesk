@@ -127,6 +127,46 @@ struct MergeKeysTests {
         #expect(result.stderr.contains("gap.hint"))
     }
 
+    @Test("no source AND no en.json entry is still unverifiable")
+    func skipsWhenBothSourceAndEnglishAreAbsent() throws {
+        let fx = try fixture(locales: [
+            "en.json": #"{"menu.quit": "Quit"}"#,
+            "de.json": #"{}"#,
+            // The crossed case: neither side has anything to
+            // compare. A plain `!=` between the two reads equal
+            // and would merge unverifiable text for a key the
+            // app no longer ships — the worst combination the
+            // guard exists to catch, and the one each of the two
+            // single-condition tests above leaves uncovered.
+            "missing_de.json": #"""
+            {"gone.key": {"translation": "Verschwunden"}}
+            """#,
+        ])
+        defer { fx.cleanup() }
+
+        let result = try run(["de"], in: fx)
+        #expect(result.status == 0)
+        #expect(try fx.decodeLocale("de.json").isEmpty)
+        #expect(result.stderr.contains("gone.key"))
+    }
+
+    @Test("a null source is unverifiable, not a match")
+    func skipsNullSource() throws {
+        let fx = try fixture(locales: [
+            "en.json": #"{"gap.hint": "Meaning"}"#,
+            "de.json": #"{}"#,
+            "missing_de.json": #"""
+            {"gap.hint": {"source": null,
+                          "translation": "Bedeutung"}}
+            """#,
+        ])
+        defer { fx.cleanup() }
+
+        let result = try run(["de"], in: fx)
+        #expect(result.status == 0)
+        #expect(try fx.decodeLocale("de.json").isEmpty)
+    }
+
     @Test("a stale key survives to be re-extracted, not lost")
     func staleKeyStaysMissing() throws {
         let fx = try fixture(locales: [
@@ -164,6 +204,54 @@ struct MergeKeysTests {
         let result = try run(["de"], in: fx)
         #expect(result.status == 0)
         #expect(try fx.decodeLocale("de.json") == ["b.key": "Be"])
+    }
+
+    // MARK: - The recovery leg the whole design rests on
+
+    @Test("extract-keys re-mints a skipped key with new English")
+    func staleKeyIsReMintedByExtractKeys() throws {
+        // The guard is only safe because a skipped key comes
+        // BACK. That half lives in `extract-keys`' mint
+        // predicate, in a different script — so without this
+        // test, tightening that predicate would silently turn
+        // merge-keys' skip into permanent loss with a green
+        // suite. Both scripts run in one repo-shaped fixture.
+        let fx = try fixture(locales: [
+            "en.json": #"{"gap.hint": "New meaning"}"#,
+            "de.json": #"{}"#,
+            "missing_de.json": #"""
+            {"gap.hint": {"source": "Old meaning",
+                          "translation": "Alte Bedeutung"}}
+            """#,
+        ])
+        defer { fx.cleanup() }
+        // extract-keys regenerates en.json from real call sites,
+        // so the fixture needs the matching source.
+        try fx.writeSources([
+            "A.swift": #"""
+            let a = L("gap.hint", "New meaning")
+            """#
+        ])
+
+        try run(["de"], in: fx)
+        #expect(!fx.localeFileExists("missing_de.json"))
+
+        let extract = try runRepoScript(
+            "extract-keys",
+            arguments: ["de"],
+            in: fx,
+            repoRoot: repoRoot
+        )
+        #expect(extract.status == 0)
+
+        let worksheet =
+            try JSONSerialization.jsonObject(
+                with: fx.rawLocaleFile("missing_de.json")
+            ) as? [String: [String: String]]
+        // Back on the to-translate list, carrying the NEW
+        // English — not the one the translator worked from.
+        #expect(worksheet?["gap.hint"]?["source"] == "New meaning")
+        #expect(worksheet?["gap.hint"]?["translation"] == "")
     }
 
     // MARK: - Pre-existing behaviour the guard must not break

@@ -188,13 +188,30 @@ translate for language names.
 
    An entry is **also skipped when its `"source"` no longer
    matches that key's current English** in `en.json` — the
-   meaning changed in code while the worksheet was out, so the
-   translation you have is of the old meaning. Those keys are
-   listed on stderr; re-run `scripts/extract-keys fr` to get
-   them back carrying the new English. (This is the guard that
-   keeps a worksheet from silently resurrecting exactly what
-   `scripts/drop-key` retired.) `--site` behaves identically
-   against the site's own `en.json`.
+   English changed in code while the worksheet was out, so the
+   translation you have is of the old text. Same for an entry
+   with no usable `"source"`, or a key that has left `en.json`
+   entirely: nothing to verify against, so nothing is merged.
+   Those keys are listed on stderr **with the discarded text**,
+   and the summary line reports how many were dropped. This is
+   the guard that keeps a worksheet from silently resurrecting
+   exactly what `scripts/drop-key` retired. `--site` behaves
+   identically against the site's own `en.json`.
+
+   Two caveats worth knowing before relying on it:
+
+   - It compares **text**, not meaning, so a typo fix in the
+     English also invalidates a finished entry — stricter than
+     the convention below, deliberately, since a script cannot
+     tell a typo from a rewrite.
+   - Re-running `scripts/extract-keys fr` gets a skipped key
+     back **only if `fr.json` does not already have it**, since
+     that is when a key is re-minted. Every worksheet
+     `extract-keys` itself produces satisfies that; a
+     hand-written entry for an already-translated key does not,
+     and its text is gone once merge-keys has reported it. To
+     revise an existing translation, edit `fr.json` directly
+     (see below) rather than hand-writing a worksheet.
 5. Rebuild (`swift build`) and open Settings ▸ General ▸
    Language — the new locale should appear, listed by its
    native name, with every translated string live and every

@@ -421,12 +421,14 @@ Keep this list updated whenever a recurring mistake is found.
   setup/teardown coupling and no assertions of their own:
   `ReflectionParity.swift` (structural-parity reflection helpers
   backing the field-list guards) and `ScriptFixture.swift`
-  (spawn a `scripts/*` tool, drain its pipes, lay out a temp
-  tree). Each was earned by a **counted threshold** — the
-  script harness was extracted at the fifth hand-copy, in #252 —
-  and by a drift risk where a divergent copy weakens a guard or
-  silently changes what a suite observes, rather than merely
-  costing lines. A third exception needs the same case made.
+  (spawn a `scripts/*` tool and drain its pipes, plus the
+  repo-shaped temp tree the `__file__`-rooted scripts need).
+  The bar is the **drift risk** — a divergent copy weakens a
+  guard, or silently changes what a suite observes — not the
+  copy count, which is merely the evidence that prompted the
+  look (the script harness was extracted at the fifth hand-copy,
+  in #252). Duplication that only costs lines stays duplicated
+  (§2.4). A further exception needs the same case made.
 - **An async test that awaits real spawned work needs a generous
   hang-guard, not a tight deadline (#344).** A test that spawns a
   real subprocess (`ExecTests`) or schedules an unstructured `Task`

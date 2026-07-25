@@ -15,27 +15,40 @@ import Foundation
 /// merge-keys' suite would have been the *fifth* hand-copied
 /// spawn harness, so the copy was extracted here instead.
 ///
-/// Two fixture shapes exist because the scripts resolve their
-/// repo root two different ways, and that difference is real,
-/// not incidental:
+/// Two fixture shapes exist, and the split is **historical, not
+/// fundamental** — `extract-keys` was wired for env overrides
+/// before the copy-into-a-fixture technique existed, and the
+/// repo-shaped form would serve it too:
 ///
 /// - **Repo-shaped** (`rename-key`, `drop-key`, `merge-keys`):
 ///   the script derives its root from its own `__file__` and has
-///   no env-var override by design, so the test must copy the
-///   script into a directory tree shaped like the real repo.
-///   Use `makeRepoShapedFixture` + `runRepoScript`.
+///   no env-var override, so the test copies the script into a
+///   directory tree shaped like the real repo. Use
+///   `makeRepoShapedFixture` + `runRepoScript`.
 /// - **Env-var scoped** (`extract-keys`): the script honours
 ///   `KIWIDESK_EXTRACT_SOURCES` / `KIWIDESK_EXTRACT_LOCALES`, so
 ///   the real script runs in place against flat temp dirs. Use
 ///   `runPythonScript` directly with an `environment`.
 ///
+/// Converging the two on the repo-shaped form would be a real
+/// improvement — it exercises each script exactly as shipped,
+/// and it would let the test-only env hooks be deleted from
+/// production code. It would also make `extract-keys --site`
+/// testable at all: `SITE_LOCALES_DIR` is `__file__`-derived
+/// with no override, so site mode is unreachable under the
+/// env-var shape today. Left as a follow-up rather than widened
+/// into this change.
+///
 /// Only the spawn primitive is shared by both.
 
-/// The repo root, derived from this file's location.
-func scriptFixtureRepoRoot(_ filePath: StaticString = #filePath)
-    -> URL
-{
-    URL(fileURLWithPath: "\(filePath)")
+/// The repo root, derived from **this** file's location.
+///
+/// `#filePath` is used in the body, never as a default argument:
+/// a defaulted `#filePath` expands at the *call site*, so a suite
+/// added one directory deeper would silently resolve `Tests/` as
+/// the repo root and fail on a confusing copy error.
+func scriptFixtureRepoRoot() -> URL {
+    URL(fileURLWithPath: #filePath)
         .deletingLastPathComponent()  // KiwiDeskCoreTests
         .deletingLastPathComponent()  // Tests
         .deletingLastPathComponent()  // repo root
@@ -70,9 +83,14 @@ func runPythonScript(
     process.standardOutput = stdoutPipe
     process.standardError = stderrPipe
     try process.run()
-    // Read before waiting: a script that outstrips the pipe
-    // buffer would otherwise block forever on write while the
-    // test blocks on exit.
+    // Read before waiting, so a script whose stdout outgrows the
+    // pipe buffer cannot block on write while the test blocks on
+    // exit. This is sequential, so it is not a general guarantee:
+    // a child that filled its *stderr* buffer before closing
+    // stdout would still deadlock. Sound for these scripts (a few
+    // lines of stderr at most) and strictly better than the
+    // hand-copies it replaced, one of which never drained stdout
+    // at all. Concurrent drains are the fix if that ever changes.
     let outData = stdoutPipe.fileHandleForReading
         .readDataToEndOfFile()
     let errData = stderrPipe.fileHandleForReading
@@ -151,6 +169,29 @@ struct RepoShapedFixture {
             atPath: dir(site: site)
                 .appendingPathComponent(name).path
         )
+    }
+
+    /// Writes Swift files into `<root>/Sources/KiwiDesk`, one of
+    /// the two trees `extract-keys` scans by default. Lets a
+    /// repo-shaped fixture host `extract-keys` too, which is what
+    /// a cross-script round trip (merge-keys → extract-keys)
+    /// needs — the env-var shape cannot host `merge-keys`.
+    func writeSources(_ files: [String: String]) throws {
+        let dir =
+            root
+            .appendingPathComponent("Sources")
+            .appendingPathComponent("KiwiDesk")
+        try FileManager.default.createDirectory(
+            at: dir,
+            withIntermediateDirectories: true
+        )
+        for (name, content) in files {
+            try content.write(
+                to: dir.appendingPathComponent(name),
+                atomically: true,
+                encoding: .utf8
+            )
+        }
     }
 }
 
