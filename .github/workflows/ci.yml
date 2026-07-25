@@ -46,3 +46,28 @@ jobs:
 
       - name: Test (ExecTests)
         run: swift test --filter ExecTests
+
+  release-build:
+    name: Release Build
+    # A sibling job, not a fourth step in build-lint-test: `swift
+    # test` there already compiles the tree in debug, so building
+    # release in the same job compiles it twice in series and
+    # grows the pipeline by the release build's full wall clock.
+    # As a parallel job it costs nothing on the critical path.
+    #
+    # This is the gate AGENTS.md §3 no longer asks every commit to
+    # pay locally: the optimizer turns on concurrency diagnostics
+    # (non-Sendable captures in `@Sendable` closures) the debug
+    # build silently accepts. #532.
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: |
+          sudo xcode-select -s /Applications/Xcode_26.6.app \
+            || sudo xcode-select -s /Applications/Xcode.app
+          swift --version
+
+      - name: Build (release)
+        run: swift build -c release

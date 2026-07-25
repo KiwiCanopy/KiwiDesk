@@ -11,12 +11,25 @@ import Testing
 @Suite("BSP focus-aware resize (#122)", .serialized)
 @MainActor
 struct BspFocusResizeTests {
+    /// The display these fixtures resize against (#531) — the
+    /// cap span below is read straight off its width, so the
+    /// expected ratio is a literal instead of a re-derivation of
+    /// whatever screen the host has.
+    private static let display = CGRect(
+        x: 0,
+        y: 0,
+        width: 1600,
+        height: 1000
+    )
+
     private func makeCore() -> KiwiCore {
         let dir = FileManager.default.temporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-tests-\(UUID().uuidString)"
             )
-        return KiwiCore(configDirectory: dir)
+        let core = KiwiCore(configDirectory: dir)
+        core.tiler.displayBounds = { _ in Self.display }
+        return core
     }
 
     /// BSP space under the ALTERNATING strategy, so the split
@@ -109,24 +122,20 @@ struct BspFocusResizeTests {
         let core = makeCore()
         bspSpace(core)
         core.state.apply(.windowFocused(WindowID(1)))
-        // The keyboard path passes the screen width as the cap
+        // The keyboard path passes the display width as the cap
         // span; an outsized delta must stop at THAT display's
-        // effective bound, not the blind 0.9 store clamp. Recompute
-        // the bound from the same live span the command uses, so
-        // the check is display-independent: if the cap were removed
-        // the stored ratio would be 0.9 and diverge from `expected`
-        // on any display narrow enough for the bound to sit below
-        // 0.9 (the deterministic cap-vs-pile proof is the mouse
-        // twin `MouseResizeApplyTests.bspRatioHDragCapped`).
-        let span = Double(NSScreen.main?.visibleFrame.width ?? 1920)
-        let minSize = Double(core.tiler.settings.minWindowSize)
-        let bound = SplitDomain.effectiveRatioRange(
-            available: span,
-            minSize: minSize
-        )!.upperBound
-        let expected = min(max(bound, 0.1), 0.9)
+        // effective bound, not the blind 0.9 store clamp. With the
+        // display pinned (#531) the bound is a literal rather than
+        // a re-derivation of the formula under test: 1600pt wide
+        // against the 300pt default minimum leaves
+        // (1600 − 300) / 1600 = 0.8125, below the 0.9 clamp — so a
+        // removed cap would store 0.9 and fail here. (The mouse
+        // twin is `MouseResizeApplyTests.bspRatioHDragCapped`.)
+        #expect(core.tiler.settings.minWindowSize == 300)
         core.execute("resize", args: [.string("x"), .number(9000)])
-        #expect(abs(resolvedBsp(core).splitRatioH - expected) < 1e-9)
+        #expect(
+            abs(resolvedBsp(core).splitRatioH - 0.8125) < 1e-9
+        )
     }
 
     @Test("x with a floating focused window resizes the float")

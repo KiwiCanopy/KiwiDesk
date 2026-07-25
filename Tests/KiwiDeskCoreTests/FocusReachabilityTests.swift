@@ -4,13 +4,26 @@ import Testing
 
 @testable import KiwiDeskCore
 
+/// The display these fixtures lay out on (#531). Pinned rather
+/// than inherited from the host: the arrangements below are a
+/// function of the bounds, so a narrow CI display would silently
+/// build a different one.
+private let testDisplay = CGRect(
+    x: 0,
+    y: 0,
+    width: 1920,
+    height: 1080
+)
+
 @MainActor
 private func makeCore() -> KiwiCore {
     let dir = FileManager.default.temporaryDirectory
         .appendingPathComponent(
             "kiwidesk-reach-\(UUID().uuidString)"
         )
-    return KiwiCore(configDirectory: dir)
+    let core = KiwiCore(configDirectory: dir)
+    core.tiler.displayBounds = { _ in testDisplay }
+    return core
 }
 
 /// Spawns `count` same-app windows (the device-QA shape) into
@@ -91,20 +104,12 @@ struct BspFocusReachabilityTests {
             "bsp.set_strategy",
             args: [.string("alternating")]
         )
-        // These frames come off the host's real NSScreen, so the
-        // default 300pt minimum makes the arrangement depend on
-        // how wide that screen is: the bottom-right region is a
-        // quarter of it, and below 2 * min BspLayout correctly
-        // falls back to an OverlapStack pile (#383/#44) instead
-        // of the side-by-side pair asserted below. A CI runner's
-        // ~1066pt display lands under that threshold. Pin a
-        // minimum no plausible display can breach — the pile
-        // fallback has its own coverage, and is not the subject
-        // here.
-        core.execute(
-            "set_min_window_size",
-            args: [.number(100)]
-        )
+        // `min_window_size` stays at its 300pt default: the
+        // pinned 1920pt display leaves the bottom-right region
+        // 960pt wide, well clear of the 2 * min threshold below
+        // which BspLayout correctly falls back to an OverlapStack
+        // pile (#383/#44) instead of the pair asserted here. That
+        // threshold is what a narrow host display used to trip.
         spawn(core, count: 4)
         return SpaceID("1")
     }

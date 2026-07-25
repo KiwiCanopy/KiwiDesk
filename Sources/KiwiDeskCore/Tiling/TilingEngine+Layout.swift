@@ -36,7 +36,7 @@ extension TilingEngine {
         // comes off the visible frame before any layout — or
         // the App Bar — sees its bounds.
         let bounds = settings.layoutBounds(
-            from: GeometryUtils.axVisibleFrame(of: screen)
+            from: displayBounds(screen)
         )
         let tiled = state.effectiveTiledMembers(
             of: space,
@@ -148,7 +148,7 @@ extension TilingEngine {
         guard let screen = Self.screen(for: space.id, in: state)
         else { return .max }
         let bounds = settings.layoutBounds(
-            from: GeometryUtils.axVisibleFrame(of: screen)
+            from: displayBounds(screen)
         )
         let context = settings.context(
             bounds: bounds,

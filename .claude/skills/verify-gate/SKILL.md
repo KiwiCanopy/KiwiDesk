@@ -1,5 +1,5 @@
 ---
-description: Run KiwiDesk's full verification gate — debug build, tests, lint, and the mandatory release build (AGENTS.md §3, the Verify step). Use before any commit or PR.
+description: Run KiwiDesk's full verification gate — debug build, tests, and lint (AGENTS.md §3, the Verify step), plus the release build when the change touches concurrency. Use before any commit or PR.
 argument-hint: "[optional: file/dir to scope the lint]"
 ---
 
@@ -11,21 +11,36 @@ later steps.
 ## Fast inner loop
 
 1. `swift build`
-2. `swift test`
-3. `scripts/lint.sh $ARGUMENTS` (omit the argument to lint the repo)
+2. `swift test --skip ExecTests`
+3. `swift test --filter ExecTests`
+4. `scripts/lint.sh $ARGUMENTS` (omit the argument to lint the
+   repo)
 
-## Mandatory release gate
+Steps 2 and 3 are **separate commands** by design (AGENTS.md §5):
+run as one `swift test` the suite stalls for minutes at the tail,
+because spawned exec children hold the runner's pipe. #489 tracks
+the root fix.
 
-4. `swift build -c release`
+`scripts/lint.sh` prints warnings that are not failures — only
+its **exit code** decides.
 
-The release build is **required** before any commit or PR: it
-enables the optimizer and stricter concurrency diagnostics (e.g.
-non-Sendable captures in `@Sendable` closures) that the debug
-build silently misses. A change that passes 1–3 but fails 4 is
-**not** verified.
+## Release build — conditional
+
+5. `swift build -c release`
+
+The release build enables the optimizer and stricter concurrency
+diagnostics (e.g. non-Sendable captures in `@Sendable` closures)
+that the debug build silently misses. CI runs it as a parallel
+job on every PR (#532), so it is **not** a mandatory local step.
+
+Run it locally when the change touches concurrency, `@Sendable`
+boundaries, or `Sendable` conformances — there the ~2min buys
+back a PR round-trip. Otherwise skip it and let CI catch it, and
+say in the report that it was skipped and why.
 
 ## Report
 
-End with a one-line PASS/FAIL summary per step. On any failure,
-show the relevant compiler/test/lint output and stop — the gate
-has not passed.
+End with a one-line PASS/FAIL summary per step, marking step 5
+PASS, FAIL, or SKIPPED (with the reason). On any failure, show
+the relevant compiler/test/lint output and stop — the gate has
+not passed.

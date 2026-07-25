@@ -11,12 +11,24 @@ import Testing
 @Suite("Stack arrangement resize (#222)", .serialized)
 @MainActor
 struct StackArrangementResizeTests {
+    /// The display these fixtures resize against (#531): the
+    /// zone geometry the ratio assertions read is a function of
+    /// these bounds, so pin them instead of inheriting the host's.
+    private static let display = CGRect(
+        x: 0,
+        y: 0,
+        width: 1920,
+        height: 1080
+    )
+
     private func makeCore() -> KiwiCore {
         let dir = FileManager.default.temporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-tests-\(UUID().uuidString)"
             )
-        return KiwiCore(configDirectory: dir)
+        let core = KiwiCore(configDirectory: dir)
+        core.tiler.displayBounds = { _ in Self.display }
+        return core
     }
 
     /// Stack space with three windows and the stack zone on
@@ -32,16 +44,10 @@ struct StackArrangementResizeTests {
             "stack.set_stack_position",
             args: [.string("top")]
         )
-        // Zones are measured against the host's real NSScreen,
-        // so on a short display the default 300pt minimum leaves
-        // the split no room to move and the ratio assertions
-        // below stop describing anything. Pin a minimum no
-        // plausible display can breach; the clamped case has its
-        // own coverage.
-        core.execute(
-            "set_min_window_size",
-            args: [.number(100)]
-        )
+        // `min_window_size` stays at its 300pt default: the
+        // pinned 1080pt-tall display leaves the split room to
+        // move, which a short host display did not. The clamped
+        // case has its own coverage.
         for index in 1...3 {
             core.state.apply(
                 .windowCreated(

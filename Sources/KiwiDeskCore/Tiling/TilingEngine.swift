@@ -69,6 +69,23 @@ public final class TilingEngine {
     public var onFrameApplied: @MainActor (WindowID, CGRect) -> Void =
         { _, _ in }
 
+    /// Where display geometry enters layout: the AX-coordinate
+    /// visible frame a screen lays out into. Every slot the
+    /// layout calculates, every track capacity, and every resize
+    /// span reads its bounds through this ONE hook, so a fixture
+    /// can state the display it means instead of inheriting
+    /// whatever the host happens to have (#531) — the shape
+    /// `DragCrossingCoordinator.displayAt` already uses.
+    ///
+    /// Its reach is layout, not chrome: stash parking, bar
+    /// strips, and float re-anchoring resolve their own screens
+    /// (some from `NSScreen.screens` with no instance in hand),
+    /// and they place things ON a display rather than deciding
+    /// what a layout asserts.
+    public var displayBounds: @MainActor (NSScreen) -> CGRect = {
+        GeometryUtils.axVisibleFrame(of: $0)
+    }
+
     public init() {
         applier.elementProvider = { [weak self] id in
             self?.elementProvider(id)

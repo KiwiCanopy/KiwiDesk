@@ -149,12 +149,16 @@ at directory altitude — see **`docs/architecture.md`**.
    plan (files to change, API surface, tests) before implementing.
 3. **Act:** implement step by step; keep commits focused.
 4. **Verify:** `swift build && swift test && scripts/lint.sh` for
-   the fast inner loop. A **release build** (with
-   `swift build -c release`) must also pass before any commit
-   or PR — it enables
-   the optimizer and stricter concurrency diagnostics (e.g.
-   non-Sendable captures in `@Sendable` closures) that the debug
-   build silently misses.
+   the fast inner loop. A **release build**
+   (`swift build -c release`) enables the optimizer and stricter
+   concurrency diagnostics (e.g. non-Sendable captures in
+   `@Sendable` closures) that the debug build silently misses.
+   CI runs it as a **parallel job** on every PR (#532), so it is
+   no longer a mandatory local step: run it before committing
+   when the change touches concurrency, `@Sendable` boundaries,
+   or `Sendable` conformances, and otherwise let the PR catch it.
+   It stays mandatory before a change *lands* — the PR's release
+   job is what makes it so, not the local run.
 5. **Document:** any user-visible behavior change updates the
    matching docs in the same change set —
    `docs/lua-reference.md` (Lua config & behavior, in
@@ -360,6 +364,25 @@ Keep this list updated whenever a recurring mistake is found.
   their AX tree warm; do not remove this without a replacement.
 - **Windows live in a flat `[WindowID]` per space.** Do not
   introduce tree/container structures into state or layout code.
+- **Display geometry enters layout through one hook (#531).**
+  Layout slots, track capacity and resize spans read their bounds
+  from `TilingEngine.displayBounds` (default: the screen's
+  `axVisibleFrame`), never `GeometryUtils.axVisibleFrame`
+  directly. Its reach is layout, not chrome — stash parking, bar
+  strips and float re-anchoring resolve their own screens, and
+  some have no engine instance in hand. **Every geometry fixture
+  pins its own rect** (`core.tiler.displayBounds = { _ in rect }`)
+  rather than inheriting the host's real `NSScreen`: an
+  inherited display makes a test assert whatever the machine
+  happens to be, and a narrow CI runner then builds a *different*
+  arrangement from the same code (#523 — below
+  `2 * min_window_size` BSP correctly falls back to an
+  `OverlapStack` pile, so three reachability assertions failed on
+  the runner and passed on a dev Mac). Reproduce a CI-only
+  geometry failure by **raising `min_window_size` until the same
+  threshold trips**, not by chasing the screen size; a pile's
+  signature is equal `minX` with midYs exactly
+  `OverlapStack.offset` (40 pt, vertical-only) apart.
 - **macOS native tabs are one `NSWindow` per tab, coalesced
   temporally.** Finder/Terminal/Ghostty native tabs are separate
   `NSWindow`s sharing one on-screen frame, each with its own

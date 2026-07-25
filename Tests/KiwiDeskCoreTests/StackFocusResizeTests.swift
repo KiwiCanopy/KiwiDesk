@@ -11,12 +11,24 @@ import Testing
 @Suite("Stack focus-aware resize (#67)", .serialized)
 @MainActor
 struct StackFocusResizeTests {
+    /// The display these fixtures resize against (#531) — the
+    /// overflow cliff below is a function of its height, so pin
+    /// it rather than re-deriving it from the host's screen.
+    private static let display = CGRect(
+        x: 0,
+        y: 0,
+        width: 1920,
+        height: 1080
+    )
+
     private func makeCore() -> KiwiCore {
         let dir = FileManager.default.temporaryDirectory
             .appendingPathComponent(
                 "kiwidesk-tests-\(UUID().uuidString)"
             )
-        return KiwiCore(configDirectory: dir)
+        let core = KiwiCore(configDirectory: dir)
+        core.tiler.displayBounds = { _ in Self.display }
+        return core
     }
 
     /// Stack space with three windows. `.first` placement
@@ -178,17 +190,14 @@ struct StackFocusResizeTests {
     func growthCappedAtOverflowCliff() {
         let core = makeCore()
         stackSpace(core)
-        // Pin the geometry the cap derives from, so the
-        // expected value does not depend on the machine's
-        // screen height (review: a 6K display legitimately
-        // reaches the 10 clamp otherwise).
+        // The cap derives from the display height, which the
+        // fixture pins (#531) — a 6K host legitimately reaches
+        // the 10 clamp otherwise.
         core.execute(
             "set_min_window_size",
             args: [.number(300)]
         )
-        let span = Double(
-            NSScreen.main?.visibleFrame.height ?? 1080
-        )
+        let span = Double(Self.display.height)
         core.state.apply(.windowFocused(WindowID(2)))
         // Hammer Grow height far past where the column mate
         // would drop below min_window_size: the stored weight

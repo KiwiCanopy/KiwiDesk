@@ -8,6 +8,14 @@ paths:
 The binding rules live in **AGENTS.md §2 & §5** (canonical). The
 ones that bite large test PRs, as a checklist (rationale is in §5):
 
+- **Pin the display, never inherit it** — a geometry fixture sets
+  `core.tiler.displayBounds = { _ in rect }` (#531). A test that
+  lets the layout resolve the host's real `NSScreen` asserts
+  whatever that machine is, and a narrow CI runner builds a
+  different arrangement from identical code (#523). Reproduce a
+  CI-only geometry failure by raising `min_window_size` until the
+  same threshold trips; a pile is equal `minX` with midYs 40 pt
+  apart.
 - **Split suites early** — the 79-char limit and 350-line ceiling
   bite large test files. Break a suite into focused files *before*
   it approaches the ceiling.
