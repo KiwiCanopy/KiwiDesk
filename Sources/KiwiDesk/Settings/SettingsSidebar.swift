@@ -199,13 +199,10 @@ struct SettingsSidebar: View {
             )
     }
 
-    /// The golden dark mark on dark, colour mark on light;
-    /// falls back across variants if one resource is missing.
-    private var mark: NSImage? {
-        colorScheme == .dark
-            ? BrandAssets.appMarkDark ?? BrandAssets.appMark
-            : BrandAssets.appMark
-    }
+    /// One mark in both appearances (#479): the symbol holds
+    /// its kiwi green rather than re-hueing per theme, so there
+    /// is nothing here to branch on.
+    private var mark: NSImage? { BrandAssets.appMark }
 
     private var visibleWholeApp: [SettingsDestination] {
         SettingsDestination.wholeApp.filter {

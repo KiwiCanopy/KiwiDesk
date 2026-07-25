@@ -32,10 +32,9 @@ export default defineConfig({
       // Icon-only mark in the header (the stacked wordmark is
       // too tall for the top bar); the "KiwiDesk" title sits
       // beside it. Masters are symlinked from repo-root assets/.
-      logo: {
-        light: "./src/assets/brand/logo.svg",
-        dark: "./src/assets/brand/logo_dark.svg",
-      },
+      // One mark in both themes (#479) — the symbol holds its
+      // kiwi green, so there is no light/dark pair to declare.
+      logo: { src: "./src/assets/brand/logo.svg" },
       favicon: "/favicon.svg",
       social: [
         {

@@ -10,8 +10,7 @@ an asset catalog — `swift build` on CI does not run actool).
 | `logo_mono.svg` | `MenuBarIcon.tiff` (18/36 px) | Menu-bar template icon + quick-menu header |
 | `logo_wordmark.svg` | `Wordmark.png` (512 px) | Settings ▸ General ▸ About (light mode) |
 | `logo_wordmark_dark.svg` | `WordmarkDark.png` (512 px) | Settings ▸ General ▸ About (dark mode) |
-| `logo.svg` | `AppMark.png` (512 px) | Sidebar identity (light mode) + runtime Dock icon (`NSApp.applicationIconImage`) while `.regular` |
-| `logo_dark.svg` | `AppMarkDark.png` (512 px) | Sidebar identity (dark mode) — golden variant |
+| `logo.svg` | `AppMark.png` (512 px) | Sidebar identity (**both** appearances) + runtime Dock icon (`NSApp.applicationIconImage`) while `.regular` |
 | `logo.svg` | — (reserved) | App-icon (`.icns`) master, once an `.app` bundle exists (#89) |
 
 ## Website-only assets
@@ -46,16 +45,41 @@ sips -s format png --resampleHeightWidthMax 512 \
     assets/logo.svg --out "$R/AppMark.png"
 ```
 
+The repo README's own header images are separate, larger raster
+copies of the two wordmarks — regenerate them in the same pass:
+
+```sh
+sips -s format png --resampleHeightWidthMax 900 \
+    assets/logo_wordmark.svg --out assets/logo_wordmark.png
+sips -s format png --resampleHeightWidthMax 900 \
+    assets/logo_wordmark_dark.svg \
+    --out assets/dark_logo_wordmark.png
+```
+
 Constraints on the masters (see `BrandAssets.swift`):
 
 - `logo_mono.svg` must stay **pure black on transparency** —
   it ships as a template image that macOS tints.
-- `logo_wordmark.svg` has its name text fused into the
-  artwork's compound path, so it can't recolour at runtime.
-  Rather than a backing badge, it ships in two variants —
-  navy text for light mode, and `logo_wordmark_dark.svg`
-  (text recoloured to warm off-white `#F2F5EC`) for dark. The
-  About view swaps by `colorScheme`. Both keep a **transparent
-  background** so the mark melts into the pane; if you edit
-  one, mirror the geometry in the other and only the text/dark
-  elements change colour.
+- **The mark holds its hue across themes; only the wordmark's
+  ink is themed** (#479). A logo that changes colour per
+  appearance reads as a different brand, and the only real
+  reason a dark variant exists is ink contrast — a legibility
+  problem on the text, not a hue problem on the green. So
+  there is deliberately **no dark symbol master**: `logo.svg`
+  serves both appearances, in the app and on the site.
+- `logo_wordmark.svg`'s lettering was originally fused into the
+  same compound path as the mark's window tiles, which is why
+  the retired dark variant recoloured the *whole* logo to gold
+  — the two could not be told apart. That path is now **split
+  at the gutter between the mark (ends y≈874) and the lettering
+  (starts y≈927)**, so the ink family (`#12251a`) appears as
+  separate mark paths and text paths. To retheme the lettering,
+  change only the text paths' `fill` **and** their matching
+  `stroke` (these masters repeat the fill as a hairline stroke;
+  missing it outlines every glyph in the old hue).
+- The two wordmark masters ship the **same geometry**, differing
+  only in the text paths' colour: `#12251a` (forest ink) for
+  light, `#E1EEDB` (mist-green) for dark. The About view swaps
+  by `colorScheme`. Both keep a **transparent background** so
+  the mark melts into the pane. If you edit one, mirror the
+  edit in the other.

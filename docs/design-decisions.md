@@ -1588,6 +1588,30 @@ new palette against, not a spec the reflection-based
   target. Origin is the brand green darkened for stroke duty;
   target is a distinct amber — see the overlay note below.
 
+**The logo's mark holds one hue across themes; only the wordmark
+ink is themed (#479).** A dark-mode logo exists for exactly one
+reason — ink contrast on a dark pane — and that is a *lightness*
+problem on the lettering, not a *hue* problem on the symbol.
+Re-hueing a mark per appearance reads as a different brand, which
+a young identity cannot afford; the industry norm (Slack,
+Spotify, Stripe, Linear, Apple) is to hold the mark and flip the
+chrome or text. So the kiwi symbol is byte-identical in both
+appearances — there is deliberately **no dark symbol master**,
+and `logo.svg` serves the app sidebar, the Dock icon and the site
+nav in either theme. Only the wordmark's ink moves: forest
+`#12251a` on light, mist-green `#E1EEDB` on dark. Same "keep the
+hue, change the lightness" move the palette already makes for
+overlays (see the content-overlays note below), applied to
+brand assets. Trade-off: the mark cannot be tuned for a dark
+backdrop, so it must read on both by construction — it does,
+because the pale kiwi flesh gives the dark window tiles their own
+ground regardless of what is behind the mark. What this replaced:
+a gold recolour of the *entire* logo, symbol included, authored
+before #439 made green-forward explicit and never revisited —
+which was possible only because the master fused the lettering
+and the mark's tiles into one path, so nothing could recolour the
+text alone. That path is now split (see `assets/README.md`).
+
 **The default palette adopts the KiwiCanopy brand tokens (#439).**
 KiwiDesk is one tool under the KiwiCanopy parent brand; the
 shipped default palette takes the shared brand tokens so the
