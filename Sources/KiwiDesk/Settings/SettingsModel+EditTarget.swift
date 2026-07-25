@@ -101,22 +101,35 @@ extension SettingsModel {
     private func liveState() -> TargetState {
         var loaded = core.loadGuiConfig()
         // `loadGuiConfig` overlays `spaces` from LIVE state, and
-        // while paused the engine never started — so live holds
-        // only `StateCoordinator`'s boot default and the overlay
-        // has replaced the authored list with `["1"]`. Same
-        // hazard #326 hit, same fix it used: read the authored
-        // sidecar instead.
+        // in a started engine that overlay is authoritative — it
+        // carries the chosen display ORDER, and a space living
+        // only in `gui.json` was seeded into live at boot (#77).
         //
-        // This is not cosmetic. Before #516 nothing could write
-        // `gui.json` while paused, so a degenerate list only
-        // mis-displayed; now a globals save would PERSIST it and
-        // destroy the user's spaces. Seeding correctly fixes the
-        // display and the save together, and keeps dirty
-        // tracking honest — patching only the write would leave
-        // `config.spaces` permanently diverged from the
-        // baseline, so the footer could never go clean.
-        if permissionPaused,
-            let persisted = core.persistedGuiConfig()
+        // It is untrusted in exactly one recognisable state:
+        // live holds ONLY `StateCoordinator`'s boot default, the
+        // shape of an Accessibility-off cold boot where the
+        // engine never started and so never seeded. The overlay
+        // has then silently replaced the authored list with
+        // `["1"]`, and the authored one is the only safe read.
+        // #326 hit the same hazard and fixed it the same way.
+        //
+        // Keyed on the DATA, not on `permissionPaused`: that
+        // flag is pushed in by `setPermissionPaused` AFTER
+        // `SettingsModel.init` has run its first `reload()`, so
+        // gating on it would leave the very first seed
+        // degenerate — and before #516 that only mis-displayed,
+        // while a globals save now PERSISTS what was seeded.
+        //
+        // Kept narrow on purpose. A broader "is the authored
+        // list a subset of live?" test also fires in a HEALTHY
+        // engine — a space deleted at runtime but not yet saved
+        // is absent from live and present in the sidecar — and
+        // would resurrect it in the editor.
+        let bootDefault = [SpaceID(1)]
+        if loaded.spaces == bootDefault,
+            let persisted = core.persistedGuiConfig(),
+            !persisted.spaces.isEmpty,
+            persisted.spaces != bootDefault
         {
             loaded.spaces = persisted.spaces
         }
