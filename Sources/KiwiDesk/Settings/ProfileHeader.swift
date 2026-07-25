@@ -131,8 +131,6 @@ struct ProfileHeaderBar: View {
 /// (title + chevron, no pill). Saving lives in the footer.
 struct ProfileEditTargetMenu: View {
     @ObservedObject var model: SettingsModel
-    @State private var confirmingSwitch = false
-    @State private var switchTarget: String?
 
     var body: some View {
         // The menu isn't an icon-only control, so its "why"
@@ -181,36 +179,6 @@ struct ProfileEditTargetMenu: View {
         }
         .menuStyle(.borderlessButton)
         .fixedSize()
-        .confirmationDialog(
-            L(
-                "profile_header.discard.title",
-                "Discard unsaved changes?"
-            ),
-            isPresented: $confirmingSwitch,
-            titleVisibility: .visible
-        ) {
-            Button(
-                L(
-                    "profile_header.discard.confirm",
-                    "Discard & switch"
-                ),
-                role: .destructive
-            ) {
-                model.selectEditTarget(switchTarget)
-            }
-            Button(
-                L("profile_header.discard.cancel", "Cancel"),
-                role: .cancel
-            ) {}
-        } message: {
-            Text(
-                L(
-                    "profile_header.discard.message",
-                    "Switching profiles drops the edits you "
-                        + "haven't saved."
-                )
-            )
-        }
     }
 
     private func requestSelect(_ name: String?) {
@@ -219,12 +187,20 @@ struct ProfileEditTargetMenu: View {
         // stored target. Re-picking the open one is a no-op, so
         // it never pops a pointless discard dialog.
         guard name != model.editingProfile else { return }
-        if model.isDirty {
-            switchTarget = name
-            confirmingSwitch = true
-        } else {
-            model.selectEditTarget(name)
-        }
+        // This menu was the original discard-confirm site; it
+        // now shares the dashboard-wide gate (#515) so the six
+        // other discard paths cannot drift from it.
+        model.discardingEdits(
+            message: L(
+                "discard.switch_profile.message",
+                "Switching profiles drops the edits you "
+                    + "haven't saved."
+            ),
+            confirmLabel: L(
+                "discard.switch_profile.confirm",
+                "Discard & switch"
+            )
+        ) { model.selectEditTarget(name) }
     }
 
     private var liveEntryLabel: String {

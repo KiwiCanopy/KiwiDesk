@@ -144,6 +144,11 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         // hotkeys suspended. Idempotent — a no-op when nothing is
         // armed.
         model.setRecorderArmed(false)
+        // Same class of state, same reasoning (#515): a parked
+        // discard closure captured a view that is now gone, and
+        // the retained window would carry it into the next
+        // `show()` — a dialog about edits that no longer exist.
+        model.cancelPendingDiscard()
         // Put the shared color panel away so it can't write
         // into the config after the window is gone.
         ColorPanelController.shared.dismiss()

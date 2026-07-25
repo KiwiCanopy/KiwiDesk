@@ -18,17 +18,9 @@ import Testing
 /// revisits); keep it in mind when relocating sections.
 @Suite("Sidebar search index parity")
 struct SidebarSearchParityTests {
-    private var repoRoot: URL {
-        URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()  // KiwiDeskGuiTests
-            .deletingLastPathComponent()  // Tests
-            .deletingLastPathComponent()  // repo root
-    }
-
     private var settingsDir: URL {
-        repoRoot.appendingPathComponent(
-            "Sources/KiwiDesk/Settings"
-        )
+        SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/Settings")
     }
 
     /// Headers deliberately absent from the index: fail-shut —
@@ -64,7 +56,7 @@ struct SidebarSearchParityTests {
         #expect(!indexKeys.isEmpty)
 
         var rendered = Set<String>()
-        for file in try swiftSources(under: settingsDir)
+        for file in try SourceScan.swiftSources(under: settingsDir)
         where file.lastPathComponent != "SidebarSearch.swift" {
             rendered.formUnion(
                 try lKeys(
@@ -114,7 +106,7 @@ struct SidebarSearchParityTests {
         )
 
         var headers = Set<String>()
-        for file in try swiftSources(under: settingsDir) {
+        for file in try SourceScan.swiftSources(under: settingsDir) {
             headers.formUnion(
                 try sectionHeaderKeys(
                     in: String(
@@ -135,7 +127,7 @@ struct SidebarSearchParityTests {
         // the index would never be examined at all.
         var drawers = Set<String>()
         var unresolved: [String] = []
-        for file in try swiftSources(under: settingsDir) {
+        for file in try SourceScan.swiftSources(under: settingsDir) {
             let found = disclosureTitleKeys(
                 in: try String(contentsOf: file, encoding: .utf8)
             )
@@ -186,7 +178,7 @@ struct SidebarSearchParityTests {
     private func disclosureTitleKeys(
         in source: String
     ) -> (keys: Set<String>, unresolved: [String]) {
-        let text = Array(stripComments(source))
+        let text = Array(SourceScan.stripComments(source))
         var keys = Set<String>()
         var unresolved: [String] = []
         let needle = Array("DisclosureGroup")
@@ -199,7 +191,7 @@ struct SidebarSearchParityTests {
             }
             var cursor = i + needle.count
             guard
-                let args = balanced(
+                let args = SourceScan.balanced(
                     text,
                     from: &cursor,
                     open: "(",
@@ -221,14 +213,18 @@ struct SidebarSearchParityTests {
             }
             // Trailing-label form: body first, then `label:`.
             guard
-                balanced(
+                SourceScan.balanced(
                     text,
                     from: &cursor,
                     open: "{",
                     close: "}"
                 ) != nil,
-                skipLiteral("label:", text, from: &cursor),
-                let label = balanced(
+                SourceScan.skipLiteral(
+                    "label:",
+                    text,
+                    from: &cursor
+                ),
+                let label = SourceScan.balanced(
                     text,
                     from: &cursor,
                     open: "{",
@@ -247,59 +243,6 @@ struct SidebarSearchParityTests {
             i = cursor
         }
         return (keys, unresolved)
-    }
-
-    /// Consumes whitespace then a balanced `open`…`close` run,
-    /// returning its interior. String literals are skipped so a
-    /// brace or paren inside one cannot unbalance the walk.
-    private func balanced(
-        _ text: [Character],
-        from cursor: inout Int,
-        open: Character,
-        close: Character
-    ) -> String? {
-        var i = cursor
-        while i < text.count, text[i].isWhitespace { i += 1 }
-        guard i < text.count, text[i] == open else { return nil }
-        var depth = 0
-        let start = i + 1
-        while i < text.count {
-            let character = text[i]
-            if character == "\"" {
-                i += 1
-                while i < text.count, text[i] != "\"" {
-                    if text[i] == "\\" { i += 1 }
-                    i += 1
-                }
-            } else if character == open {
-                depth += 1
-            } else if character == close {
-                depth -= 1
-                if depth == 0 {
-                    cursor = i + 1
-                    return String(text[start..<i])
-                }
-            }
-            i += 1
-        }
-        return nil
-    }
-
-    /// Consumes whitespace then `literal`, if present.
-    private func skipLiteral(
-        _ literal: String,
-        _ text: [Character],
-        from cursor: inout Int
-    ) -> Bool {
-        var i = cursor
-        while i < text.count, text[i].isWhitespace { i += 1 }
-        let wanted = Array(literal)
-        guard
-            i + wanted.count <= text.count,
-            Array(text[i..<(i + wanted.count)]) == wanted
-        else { return false }
-        cursor = i + wanted.count
-        return true
     }
 
     /// The FIRST match in document order. Deliberately not
@@ -338,7 +281,7 @@ struct SidebarSearchParityTests {
     /// `extract-keys` comment-aware).
     private func lKeys(in source: String) throws -> Set<String> {
         try keys(
-            in: stripComments(source),
+            in: SourceScan.stripComments(source),
             pattern: #"L\(\s*"([a-z0-9_.]+)""#
         )
     }
@@ -350,7 +293,7 @@ struct SidebarSearchParityTests {
         in source: String
     ) throws -> Set<String> {
         try keys(
-            in: stripComments(source),
+            in: SourceScan.stripComments(source),
             pattern:
                 #"SettingsSection\(\s*L\(\s*"([a-z0-9_.]+)""#
         )
@@ -377,36 +320,5 @@ struct SidebarSearchParityTests {
             keys.insert(String(source[keyRange]))
         }
         return keys
-    }
-
-    /// Cuts each line at its first `//` — adequate for this
-    /// repo (no `/* */` convention), and string literals never
-    /// carry `//` before an `L(` key on the same line.
-    private func stripComments(_ source: String) -> String {
-        source
-            .split(separator: "\n", omittingEmptySubsequences: false)
-            .map { line -> Substring in
-                if let slash = line.range(of: "//") {
-                    return line[..<slash.lowerBound]
-                }
-                return line
-            }
-            .joined(separator: "\n")
-    }
-
-    private func swiftSources(
-        under directory: URL
-    ) throws -> [URL] {
-        let enumerator = FileManager.default.enumerator(
-            at: directory,
-            includingPropertiesForKeys: nil
-        )
-        var files: [URL] = []
-        while let item = enumerator?.nextObject() as? URL {
-            if item.pathExtension == "swift" {
-                files.append(item)
-            }
-        }
-        return files
     }
 }

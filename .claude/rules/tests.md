@@ -13,7 +13,7 @@ ones that bite large test PRs, as a checklist (rationale is in §5):
   it approaches the ceiling.
 - **Per-file private helpers are the convention** — small
   duplication across suites is fine; no shared test harness.
-  Two ratified exceptions, both *stateless primitives* with no
+  Three ratified exceptions, all *stateless primitives* with no
   setup/teardown coupling and no assertions of their own:
   - *structural-parity primitives* (reflection helpers backing
     the field-list guards) in `ReflectionParity.swift` — a
@@ -28,6 +28,14 @@ ones that bite large test PRs, as a checklist (rationale is in §5):
     per the #249 architect review); a divergent copy silently
     changes what a suite observes (an undrained pipe, a missed
     `stderr`) without failing anything.
+  - *source-scanning primitives* in `SourceScan.swift` — the
+    delimiter walker (`balanced`, `skipLiteral`), comment
+    stripper and file enumerator shared by the parity guards
+    that scan Swift source. Extracted at the **second** copy,
+    on drift risk alone: harden the walker in one copy and not
+    the other and the over-matching copy swallows the very call
+    sites its guard exists to catch, so the guard passes for
+    the wrong reason.
 
   **The drift risk is the bar; the copy count is only the
   evidence that prompted the look.** Both cases above happened

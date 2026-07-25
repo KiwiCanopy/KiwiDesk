@@ -977,6 +977,65 @@ undoing an edit clears the footer again — a latched flag
 kept claiming unsaved changes after the user had already
 put everything back.
 
+**Every edit-dropping action routes through one discard gate,
+and the guard over it is a lens, not a list.** Seven Settings
+actions ended in `reload()` — which re-seeds from disk and
+clears `isDirty` — and six of them dropped the user's staged
+edits with no prompt at all. They now share
+`SettingsModel.discardingEdits`, which runs the action when
+clean and parks it behind a single dashboard-wide dialog when
+dirty.
+
+*The gate lives at the call site, not on the model methods.*
+The alternative — a required `confirming:` parameter on
+`loadProfile`, `deleteProfile`, … in the shape of
+`apply(profile:forceRetile:)` — would be compiler-enforced
+rather than test-enforced, and is the stronger design on that
+axis. It was not taken because two of the seven paths are not
+method calls at all (`showLuaEditor` is a `@Published` flag, and
+leaving the raw editor is a two-statement composite), and
+because self-gating methods double-prompt the moment one
+confirmed gesture calls two of them. The cost is accepted
+knowingly: the model methods stay individually unsafe, and a
+source-scanning guard stands in for the type constraint. Revisit
+if a third surface outside `Sources/KiwiDesk/Settings` ever
+drives one of them.
+
+*The guard discovers, it does not enumerate.* It walks
+delimiters to extract every `discardingEdits` trailing closure,
+then requires every occurrence of a destructive `model.*` call
+to sit inside one. A hand-listed "these seven are gated" would
+be fail-**open** for the case that matters — an eighth path
+absent from both the list and the index is never examined. That
+is not hypothetical: discovery found a seventh path the #406
+audit's own hand-traced list had missed (the broken-profile
+Delete). An eighth, `adoptIntoGui`, was found by a *reviewer*,
+not by the guard — it had no token for that call. Recorded
+because the difference matters: the guard covers what it has
+needles for, and `adoptIntoGui` now carries one.
+
+*Deliberate exceptions, so they are not "fixed" later.* The
+footer's **Revert** is unconfirmed on purpose — the verb is the
+confirmation, and that is the macOS norm. **Adopt** keeps its
+own dialog instead of stacking the shared one, so one gesture
+prompts once; that dialog names the dropped buffer itself when
+dirty. Reopening the window (`SettingsWindowController.show`)
+guards with `if !model.isDirty` rather than prompting, because
+reopening is not a user action against their edits (#455). The
+menu-bar Load Profile and the Config Issues delete go straight
+to the core and never `reload()` the model, so they drop
+nothing.
+
+*The dialog offers two verbs, not three.* macOS document apps
+offer Save / Discard / Cancel with Save as default. An
+unconditional Save is not offerable here: with no profile yet
+the primary action is "Save as New Profile…", which needs a
+naming sheet, and `profileSaveBlockedReason` can block saving
+outright while Accessibility is off. Discard / Cancel is the
+honest reduction. Adding the third verb later means changing
+`PendingDiscard` and every call site — decide before doing it,
+not by accretion.
+
 **Quick-menu layout switch is session-only.** Changing the active
 space's layout mode from the status-bar quick menu updates the running
 state immediately but is session-only by default (temporary). It does

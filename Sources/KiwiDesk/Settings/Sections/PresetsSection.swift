@@ -120,8 +120,20 @@ struct PresetsSection: View {
     ) -> some View {
         let appliable =
             model.displays.count == layout.screenCount
+        // Apply materializes a profile and reloads, so it
+        // drops staged edits like the profile actions (#515).
         let button = Button(L("presets.apply", "Apply")) {
-            model.applyStandardPreset(layout)
+            model.discardingEdits(
+                message: L(
+                    "discard.apply_preset.message",
+                    "Applying a preset replaces the edits you "
+                        + "haven't saved."
+                ),
+                confirmLabel: L(
+                    "discard.apply_preset.confirm",
+                    "Discard & apply"
+                )
+            ) { model.applyStandardPreset(layout) }
         }
         .controlSize(.large)
         .disabled(!appliable)

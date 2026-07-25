@@ -38,7 +38,33 @@ struct LuaEditorTab: View {
                 model.adoptIntoGui()
             }
             Button(L("footer.cancel", "Cancel"), role: .cancel) {}
+        } message: {
+            Text(adoptMessage)
         }
+    }
+
+    /// Adopt is an eighth discard path (#515 review): it reads
+    /// the original from **disk**, never `luaSource`, then
+    /// reloads — so an unsaved buffer is dropped. It keeps its
+    /// own dialog rather than stacking the shared discard gate
+    /// on top (one gesture, one prompt), so that dialog has to
+    /// say so itself. The adopt help's "Nothing is lost" is
+    /// about the on-disk commented backup and was silently
+    /// false for the buffer.
+    private var adoptMessage: String {
+        guard model.isDirty else {
+            return L(
+                "lua_editor.adopt.message",
+                "Your current init.lua is kept as a "
+                    + "commented-out backup."
+            )
+        }
+        return L(
+            "lua_editor.adopt.message_dirty",
+            "Your current init.lua is kept as a commented-out "
+                + "backup — but Adopt reads that file from disk, "
+                + "so the edits you haven't saved are dropped."
+        )
     }
 
     @ViewBuilder private var header: some View {
@@ -68,14 +94,30 @@ struct LuaEditorTab: View {
                 )
                 .foregroundStyle(.secondary)
                 Spacer()
+                // The mirror image of "Edit init.lua directly":
+                // `reload()` re-seeds from disk, so unsaved Lua
+                // is dropped. Same gate (#515).
                 Button(
                     L(
                         "lua_editor.back_to_visual",
                         "Back to visual editor"
                     )
                 ) {
-                    model.showLuaEditor = false
-                    model.reload()
+                    model.discardingEdits(
+                        message: L(
+                            "discard.visual_editor.message",
+                            "Leaving the raw editor reloads "
+                                + "init.lua from disk, dropping "
+                                + "the Lua you haven't saved."
+                        ),
+                        confirmLabel: L(
+                            "discard.visual_editor.confirm",
+                            "Discard & leave"
+                        )
+                    ) {
+                        model.showLuaEditor = false
+                        model.reload()
+                    }
                 }
             }
             .font(.callout)
@@ -111,9 +153,12 @@ struct LuaEditorTab: View {
     private var adoptHelpBody: String {
         L(
             "lua_editor.adopt_help.body",
-            "Nothing is lost: your current code isn't "
-                + "deleted, it's kept as a "
-                + "commented-out backup in init.lua. "
+            // Was "Nothing is lost: …", which is true of the
+            // FILE and false of an unsaved editor buffer — and
+            // this popover sits beside the Adopt dialog that now
+            // says the opposite when dirty (#515 review).
+            "Your init.lua isn't deleted: it's kept as a "
+                + "commented-out backup in the new file. "
                 + "Gaps, layouts, rules, and "
                 + "keybindings are imported; a "
                 + "shortcut that can't be read back "
