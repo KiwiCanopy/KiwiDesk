@@ -220,6 +220,9 @@ struct BorderGeometryTests {
     /// style **and both order modes**. The overlap (hidden below,
     /// on-window above) must never leak into this public reach, or
     /// the fit-gaps math would drift when the ring flips order.
+    /// Glow is deliberately excluded here — its bloom bleeds into the
+    /// gap on purpose, so `glow: true` grows the frame *past* the
+    /// reach (covered by `glowGrowsFrame`), not a violation of this.
     @Test("outwardReach matches compute's outward offset")
     func outwardReachMatchesCompute() {
         let widths: [CGFloat] = [BorderStyle.minWidth, 2, 10, 20]

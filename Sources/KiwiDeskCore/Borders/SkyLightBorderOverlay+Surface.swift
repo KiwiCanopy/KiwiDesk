@@ -208,7 +208,12 @@ extension SkyLightBorderOverlay {
             cornerHeight: innerRadius,
             transform: nil
         )
-        let color = NSColor.kiwiGlow(hex: colorHex)
+        // The ring body keeps the faithful hex (alpha and all), so a
+        // translucent `focused_color` stays translucent — only the
+        // shadow forces opacity, matching JankyBorders and the other
+        // render paths.
+        let ringColor = NSColor(kiwiHex: colorHex).cgColor
+        let glowColor = NSColor.kiwiGlow(hex: colorHex)
         context.saveGState()
         context.addRect(bounds)
         context.addPath(inner)
@@ -216,9 +221,9 @@ extension SkyLightBorderOverlay {
         context.setShadow(
             offset: .zero,
             blur: geometry.glowMargin,
-            color: color
+            color: glowColor
         )
-        context.setFillColor(color)
+        context.setFillColor(ringColor)
         context.addPath(outer)
         context.fillPath()
         context.restoreGState()

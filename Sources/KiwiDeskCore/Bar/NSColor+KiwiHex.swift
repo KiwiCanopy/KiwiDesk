@@ -40,8 +40,9 @@ extension NSColor {
     /// black-at-low-alpha and reads gray. Rebuilding the color in
     /// sRGB with alpha forced to 1 (JankyBorders' own
     /// `CGColorCreateGenericRGB(r, g, b, 1.0)`) keeps the bloom the
-    /// ring's hue. Used for both the shadow and the solid halo band
-    /// so the two never disagree.
+    /// ring's hue. Used for the shadow color only — the ring body
+    /// keeps its faithful hex (alpha included), so a translucent
+    /// `focused_color` still reads translucent.
     static func kiwiGlow(hex: String) -> CGColor {
         let base = NSColor(kiwiHex: hex)
         let srgb = base.usingColorSpace(.sRGB) ?? base
