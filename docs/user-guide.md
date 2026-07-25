@@ -1226,7 +1226,7 @@ While window management is **paused** because Accessibility access
 is off, KiwiDesk has detected no displays — so any save that would
 capture the live monitor set (**Save as New Profile…**, **Save a
 Copy As…** from the active profile, and **Save** when it refreshes
-the active profile's monitor set) is greyed out, with a tooltip
+the active profile's monitor set) is unavailable, with a tooltip
 explaining why. A profile saved with no monitors could never
 resolve later. Editing a *stored* profile (which keeps its own
 on-disk monitor set) stays available.

@@ -23,6 +23,11 @@ private final class PausedRegistrar: HotkeyRegistrar {
 @Suite("Saving globals while paused", .serialized)
 @MainActor
 struct PausedGlobalsSaveTests {
+    /// NOTE: this helper's `saveGuiConfig` runs `loadConfig()`,
+    /// so tests built on it exercise a WARM core — the
+    /// revoked-mid-session shape. The cold-paused shape (engine
+    /// never started) is what the two tests below build by hand,
+    /// and it is where the interesting failures live.
     private func makeModel() throws -> (SettingsModel, KiwiCore) {
         let core = KiwiCore(
             configDirectory: FileManager.default
@@ -190,6 +195,48 @@ struct PausedGlobalsSaveTests {
         // grow one junk entry per save. Found by a probe after
         // the seed fix looked complete.
         #expect(onDisk.spaces.map(\.raw) == ["work", "mail"])
+    }
+
+    /// A cold paused save must not start the engine.
+    ///
+    /// `saveGuiConfig` reloads the config, and on a cold paused
+    /// boot that reload would be the session's FIRST: it creates
+    /// the Lua VM and runs the user's init.lua, registers Carbon
+    /// hotkeys — which need no Accessibility grant and so would
+    /// genuinely fire — applies a profile against an empty
+    /// display set, and retiles. All while the dashboard shows
+    /// "Window management is paused". Writing the store directly
+    /// keeps that contract; `core.start()` picks the file up when
+    /// permission arrives.
+    @Test("a cold paused save does not start the engine")
+    func coldPausedSaveDoesNotStartTheEngine() throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent(
+                "kiwi-cold-paused-\(UUID().uuidString)"
+            )
+        var authored = GuiConfig()
+        authored.spaces = [SpaceID("work")]
+        try GuiConfigStore(directory: directory).save(authored)
+
+        let core = KiwiCore(
+            configDirectory: directory,
+            hotkeyRegistrar: PausedRegistrar()
+        )
+        let model = SettingsModel(core: core)
+        model.permissionPaused = true
+        #expect(core.lua == nil, "fixture is not a cold core")
+
+        editGlobal(model)
+        model.saveGlobalsWhilePaused()
+
+        #expect(
+            core.lua == nil,
+            "the paused save started the config engine"
+        )
+        let onDisk = try #require(
+            GuiConfigStore(directory: directory).load()
+        )
+        #expect(onDisk.appRules["com.example.app"] != nil)
     }
 
     /// A Lua-owned config has no sidecar baseline, and

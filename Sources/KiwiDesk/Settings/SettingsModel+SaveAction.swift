@@ -34,15 +34,19 @@ extension SettingsModel {
         // .saveLua and .updateStoredProfile write no monitor set
         // either, so they were never blocked and must not be
         // rerouted (#516).
-        // `savedSidecar` is nil exactly when the config is NOT
-        // GUI-managed, and `globalsChanged` reports true for an
-        // unknown baseline — so without this guard a Lua-owned
-        // config offers the globals Save unconditionally, with
-        // no edit pending, and writing it would create gui.json
-        // and seize ownership from init.lua outside the one
-        // sanctioned adopt path (AGENTS §5). An unknown baseline
-        // is not evidence of a pending global edit.
-        if permissionPaused, savedSidecar != nil, globalsChanged {
+        // A Lua-owned config has no sidecar baseline, and
+        // `globalsChanged` reports true for an unknown baseline —
+        // so without this the verb appears with NO edit pending,
+        // and writing it would create gui.json and seize
+        // ownership from init.lua outside the sanctioned adopt
+        // path. An unknown baseline is not evidence of an edit.
+        //
+        // Asks `core.isGuiManaged`, not `savedSidecar != nil`:
+        // AGENTS §5 keeps ONE ownership predicate, and the
+        // sidecar is a snapshot from the last reload — delete
+        // gui.json behind the app's back and a stale non-nil
+        // would let the save re-create it.
+        if permissionPaused, core.isGuiManaged, globalsChanged {
             return .saveGlobalsOnly
         }
         if activeProfile != nil { return .updateActiveProfile }
