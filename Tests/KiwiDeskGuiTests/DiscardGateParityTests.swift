@@ -14,66 +14,121 @@ import Testing
 /// instead discovers *every* occurrence of each destructive
 /// call and requires it to sit inside a `discardingEdits`
 /// closure — so a new ungated call site fails on arrival. It
-/// earned that design immediately: the broken-profile Delete
+/// earned that design twice: the broken-profile Delete
 /// (`ProfilesSection+Broken.swift`) was a seventh path the #406
-/// audit's own hand-traced list missed.
+/// audit's hand-traced list missed, and `adoptIntoGui` an
+/// eighth.
 ///
-/// Known limit: this is lexical. A destructive call reached
-/// through a helper function that is *itself* called outside a
-/// gate reads as gated here. Adding one is the shape to watch.
+/// Known limits, all of which fail **shut**:
+/// - Lexical. A destructive call reached through a helper that
+///   is itself called outside a gate reads as gated, as does one
+///   nested in a sub-closure inside a gate body.
+/// - Receiver-name coupling: the needles assume the model is
+///   bound as `model`. A call through another binding name or
+///   `self.` is invisible. This is the likelier hole in practice
+///   — prefer `model` as the binding name in Settings views.
+/// - Needles are whitespace-exact, so a §2.2 hard wrap between
+///   `model.showLuaEditor =` and `true` would hide that site.
+///   The per-token count assertions below are what catch it.
 @Suite("Discard gate call-site parity")
 struct DiscardGateParityTests {
     /// The model calls whose tail is `reload()` — each drops
-    /// staged edits and clears `isDirty`.
-    private let destructive = [
-        "model.showLuaEditor = true",
-        "model.loadProfile(",
-        "model.deleteProfile(",
-        "model.renameProfile(",
-        "model.applyStandardPreset(",
-        "model.selectEditTarget(",
+    /// staged edits and clears `isDirty` — with the exact number
+    /// of gated occurrences expected today.
+    ///
+    /// Pinned per token, not as an aggregate: a loose floor lets
+    /// a single token go dead (renamed method, rewrapped line)
+    /// while the suite stays green, so the guard would quietly
+    /// stop guarding that path.
+    private let destructive: [(call: String, expected: Int)] = [
+        ("model.showLuaEditor = true", 1),
+        ("model.loadProfile(", 1),
+        ("model.deleteProfile(", 2),
+        ("model.renameProfile(", 1),
+        ("model.applyStandardPreset(", 1),
+        ("model.selectEditTarget(", 1),
+        // The broad net the header promises. Everything above is
+        // reachable through this one, but naming them separately
+        // is what makes a dead token visible.
+        ("model.reload()", 2),
     ]
 
-    /// Files excluded, each for a stated reason — fail-shut, so
-    /// a new exclusion is a conscious edit rather than a gap.
-    private let exempt: Set<String> = [
-        // `adoptIntoGui` migrates the file on DISK into GUI
-        // management; it never reads the editor buffer, and it
-        // already carries its own confirmation naming the
-        // migration. A second dialog on top would double-prompt
-        // one gesture.
-        "LuaEditorTab.swift"
+    /// Exempted per FILE AND TOKEN, never a whole file — a
+    /// file-level exemption in a fail-shut guard blinds every
+    /// future call in that file, which is the opposite of what
+    /// an exemption should cost.
+    private let exempt: [String: Set<String>] = [
+        // Adopt migrates the file on DISK into GUI management
+        // and keeps its OWN confirmation, whose message now
+        // names the dropped buffer when the model is dirty
+        // (#515 review). Stacking the shared gate on top would
+        // prompt twice for one gesture.
+        "LuaEditorTab.swift": ["model.adoptIntoGui("],
+        // Deliberately guarded by `if !model.isDirty` instead:
+        // reopening the window must pick up external edits
+        // without ever discarding staged ones (#455).
+        "SettingsWindowController.swift": ["model.reload()"],
     ]
 
     @Test("every destructive call sits inside the gate")
     func destructiveCallsAreGated() throws {
-        var seen = 0
-        for file in try swiftSources(under: settingsDir)
-        where !exempt.contains(file.lastPathComponent) {
-            let source = stripComments(
+        var counts: [String: Int] = [:]
+        for file in try SourceScan.swiftSources(
+            under: settingsDir
+        ) {
+            let name = file.lastPathComponent
+            let source = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
             let gated = gateClosures(in: source)
                 .joined(separator: "\n")
-            for call in destructive {
-                let total = source.count(of: call)
+            for (call, _) in destructive {
+                let total = source.occurrences(of: call)
                 guard total > 0 else { continue }
-                seen += total
+                if exempt[name]?.contains(call) == true {
+                    continue
+                }
+                counts[call, default: 0] += total
                 #expect(
-                    gated.count(of: call) == total,
+                    gated.occurrences(of: call) == total,
                     Comment(
                         rawValue:
                             "ungated discard path: \(call) in "
-                            + file.lastPathComponent
+                            + name
                     )
                 )
             }
         }
         // A scan that matches nothing passes vacuously — the
         // failure mode that let the sidebar-search guard sit
-        // blind. Six of the seven gated paths live outside the
-        // exempt file.
-        #expect(seen >= 6)
+        // blind for three drawers.
+        for (call, expected) in destructive {
+            #expect(
+                counts[call, default: 0] == expected,
+                Comment(
+                    rawValue:
+                        "\(call): found "
+                        + "\(counts[call, default: 0]) gated "
+                        + "site(s), expected \(expected) — a "
+                        + "path was added, removed, or the "
+                        + "needle went stale"
+                )
+            )
+        }
+    }
+
+    /// `adoptIntoGui` is exempted from the shared gate because
+    /// it carries its own dialog — so that dialog must name the
+    /// loss. Pinned here, beside the exemption that depends on
+    /// it, rather than in a suite nobody reads next to it.
+    @Test("the adopt exemption still warns about the buffer")
+    func adoptDialogNamesTheDroppedBuffer() throws {
+        let file = settingsDir.appendingPathComponent(
+            "Components/Lua/LuaEditorTab.swift"
+        )
+        let source = try String(contentsOf: file, encoding: .utf8)
+        #expect(source.contains("lua_editor.adopt.message_dirty"))
+        #expect(source.contains("model.isDirty"))
     }
 
     /// The trailing closure of every `discardingEdits(…) { … }`
@@ -93,13 +148,13 @@ struct DiscardGateParityTests {
             }
             var cursor = i + needle.count
             guard
-                balanced(
+                SourceScan.balanced(
                     text,
                     from: &cursor,
                     open: "(",
                     close: ")"
                 ) != nil,
-                let body = balanced(
+                let body = SourceScan.balanced(
                     text,
                     from: &cursor,
                     open: "{",
@@ -115,97 +170,8 @@ struct DiscardGateParityTests {
         return found
     }
 
-    /// Consumes whitespace then a balanced `open`…`close` run,
-    /// returning its interior. String literals are skipped so a
-    /// brace or paren inside one cannot unbalance the walk.
-    private func balanced(
-        _ text: [Character],
-        from cursor: inout Int,
-        open: Character,
-        close: Character
-    ) -> String? {
-        var i = cursor
-        while i < text.count, text[i].isWhitespace { i += 1 }
-        guard i < text.count, text[i] == open else { return nil }
-        var depth = 0
-        let start = i + 1
-        while i < text.count {
-            let character = text[i]
-            if character == "\"" {
-                i += 1
-                while i < text.count, text[i] != "\"" {
-                    if text[i] == "\\" { i += 1 }
-                    i += 1
-                }
-            } else if character == open {
-                depth += 1
-            } else if character == close {
-                depth -= 1
-                if depth == 0 {
-                    cursor = i + 1
-                    return String(text[start..<i])
-                }
-            }
-            i += 1
-        }
-        return nil
-    }
-
-    /// Cuts each line at its first `//`, so a comment naming a
-    /// destructive call cannot register as one.
-    private func stripComments(_ source: String) -> String {
-        source
-            .split(
-                separator: "\n",
-                omittingEmptySubsequences: false
-            )
-            .map { line -> Substring in
-                if let slash = line.range(of: "//") {
-                    return line[..<slash.lowerBound]
-                }
-                return line
-            }
-            .joined(separator: "\n")
-    }
-
     private var settingsDir: URL {
-        URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()  // KiwiDeskGuiTests
-            .deletingLastPathComponent()  // Tests
-            .deletingLastPathComponent()  // repo root
+        SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk/Settings")
-    }
-
-    private func swiftSources(
-        under directory: URL
-    ) throws -> [URL] {
-        let enumerator = FileManager.default.enumerator(
-            at: directory,
-            includingPropertiesForKeys: nil
-        )
-        var files: [URL] = []
-        while let item = enumerator?.nextObject() as? URL {
-            if item.pathExtension == "swift" {
-                files.append(item)
-            }
-        }
-        return files
-    }
-}
-
-extension String {
-    /// Non-overlapping occurrences of `needle`.
-    fileprivate func count(of needle: String) -> Int {
-        guard !needle.isEmpty else { return 0 }
-        var total = 0
-        var cursor = startIndex
-        while let found = range(
-            of: needle,
-            range: cursor..<endIndex
-        ) {
-            total += 1
-            cursor = found.upperBound
-        }
-        return total
     }
 }

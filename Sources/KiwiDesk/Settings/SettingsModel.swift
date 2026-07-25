@@ -42,8 +42,8 @@ final class SettingsModel: ObservableObject {
     /// consumes and clears it.
     @Published var pendingDestination: SettingsDestination?
     /// A destructive action parked behind the unsaved-changes
-    /// dialog (#515). Written only by `discardingEdits`; the one
-    /// dialog in `SettingsView.chrome` presents and clears it.
+    /// dialog (#515). Written only by `discardingEdits` and the
+    /// two `*PendingDiscard` verbs in `SettingsModel+Discard`.
     @Published var pendingDiscard: PendingDiscard?
     /// The state as last loaded/saved — what `isDirty`
     /// compares against. Set only by `apply(_:)` (every clean

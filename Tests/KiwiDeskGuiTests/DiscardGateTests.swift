@@ -85,15 +85,40 @@ struct DiscardGateTests {
         )
     }
 
-    @Test("confirming runs exactly what was parked")
+    /// Confirm clears the state BEFORE running. Two gated
+    /// actions flip `editingLua` and re-mount the view tree, so
+    /// leaving the clear to the dialog's dismissal would race
+    /// that teardown and a surviving `pendingDiscard` would
+    /// re-present for an action that already ran.
+    @Test("confirming clears the state, then runs it once")
     func confirmRunsParkedAction() throws {
+        let model = try makeDirtyModel()
+        var ran = 0
+        var stateAtRun: PendingDiscard?
+        model.discardingEdits(
+            message: "m",
+            confirmLabel: "c"
+        ) {
+            ran += 1
+            stateAtRun = model.pendingDiscard
+        }
+        model.confirmPendingDiscard()
+        #expect(ran == 1)
+        #expect(stateAtRun == nil)
+        #expect(model.pendingDiscard == nil)
+    }
+
+    /// Idempotent: a second confirm has nothing to run.
+    @Test("confirming twice runs the action once")
+    func confirmIsIdempotent() throws {
         let model = try makeDirtyModel()
         var ran = 0
         model.discardingEdits(
             message: "m",
             confirmLabel: "c"
         ) { ran += 1 }
-        model.pendingDiscard?.perform()
+        model.confirmPendingDiscard()
+        model.confirmPendingDiscard()
         #expect(ran == 1)
     }
 
@@ -110,7 +135,7 @@ struct DiscardGateTests {
             message: "m",
             confirmLabel: "c"
         ) { ran = true }
-        model.pendingDiscard = nil
+        model.cancelPendingDiscard()
         #expect(!ran)
         #expect(model.isDirty)
         #expect(
@@ -119,10 +144,13 @@ struct DiscardGateTests {
         )
     }
 
-    /// Two requests without an intervening dismissal must not
-    /// silently merge: the second replaces the first, so the
-    /// user can never confirm a dialog whose message describes
-    /// a different action than the one that runs.
+    /// Two requests without an intervening dismissal replace
+    /// rather than merge, so no parked action is ever silently
+    /// dropped on the floor while its copy stays on screen.
+    /// (A presented `confirmationDialog` does not re-read its
+    /// `presenting:` value, so the UI keeps showing the first
+    /// message — this pins the model side, which is the half a
+    /// test can reach.)
     @Test("a second request replaces the first")
     func secondRequestReplacesFirst() throws {
         let model = try makeDirtyModel()
@@ -137,7 +165,7 @@ struct DiscardGateTests {
             confirmLabel: "c"
         ) { ranSecond = true }
         #expect(model.pendingDiscard?.message == "second")
-        model.pendingDiscard?.perform()
+        model.confirmPendingDiscard()
         #expect(!ranFirst)
         #expect(ranSecond)
     }

@@ -27,6 +27,15 @@ struct SettingsView: View {
         // ~16pt of column width in insets, so the old minimum
         // squeezed the detail pane (settled by eye).
         .frame(minWidth: 840, minHeight: 540)
+        // The one discard dialog (#515). Hosted HERE, above the
+        // `editingLua` branch, not inside `chrome` — `chrome` is
+        // instantiated in both arms, and two of the gated actions
+        // flip `editingLua`, so a dialog hosted there would be
+        // torn down by its own confirm button. This `Group`'s
+        // identity is stable across that flip, and it still
+        // covers both modes (the raw editor's "Back to visual
+        // editor" needs the gate as much as the shell does).
+        .discardConfirmation(model: model)
         .onChange(of: model.editingStoredProfile) { _, editing in
             // The selection must never point at a destination
             // the sidebar just hid (#18).
@@ -145,11 +154,6 @@ struct SettingsView: View {
         // toolbar strip above it — while the sidebar keeps the
         // traffic lights over its full height.
         .ignoresSafeArea(.container, edges: .top)
-        // The one discard dialog (#515), hosted here because
-        // this wrapper is shared by the structured shell AND
-        // the raw Lua editor — "Back to visual editor" discards
-        // unsaved Lua and needs the same gate.
-        .discardConfirmation(model: model)
     }
 
     @ViewBuilder private var detailPane: some View {

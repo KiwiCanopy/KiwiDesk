@@ -38,7 +38,33 @@ struct LuaEditorTab: View {
                 model.adoptIntoGui()
             }
             Button(L("footer.cancel", "Cancel"), role: .cancel) {}
+        } message: {
+            Text(adoptMessage)
         }
+    }
+
+    /// Adopt is an eighth discard path (#515 review): it reads
+    /// the original from **disk**, never `luaSource`, then
+    /// reloads — so an unsaved buffer is dropped. It keeps its
+    /// own dialog rather than stacking the shared discard gate
+    /// on top (one gesture, one prompt), so that dialog has to
+    /// say so itself. The adopt help's "Nothing is lost" is
+    /// about the on-disk commented backup and was silently
+    /// false for the buffer.
+    private var adoptMessage: String {
+        guard model.isDirty else {
+            return L(
+                "lua_editor.adopt.message",
+                "Your current init.lua is kept as a "
+                    + "commented-out backup."
+            )
+        }
+        return L(
+            "lua_editor.adopt.message_dirty",
+            "Your current init.lua is kept as a commented-out "
+                + "backup — but Adopt reads that file from disk, "
+                + "so the edits you haven't saved are dropped."
+        )
     }
 
     @ViewBuilder private var header: some View {

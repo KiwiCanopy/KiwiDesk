@@ -200,7 +200,20 @@ struct GeneralSection: View {
                             "discard.lua_editor.confirm",
                             "Discard & edit init.lua"
                         )
-                    ) { model.showLuaEditor = true }
+                    ) {
+                        // Discard for real, or the dialog lies:
+                        // flipping the flag alone leaves `config`
+                        // staged and `isDirty` true, so the footer
+                        // still reads "Unsaved changes" and
+                        // leaving again prompts a second time for
+                        // edits the user already discarded. Flag
+                        // first, then reload — `liveState()`
+                        // carries `showLuaEditor` through, and
+                        // this is the exact mirror of "Back to
+                        // visual editor".
+                        model.showLuaEditor = true
+                        model.reload()
+                    }
                 } label: {
                     Label(
                         L(
