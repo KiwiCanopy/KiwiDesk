@@ -675,46 +675,46 @@ Toggle each visual on/off and customize:
 
 ### Focus Border
 
-Below Drag Visuals, the **Focus border** group draws a thin ring
+Below Drag Visuals, the **Focus border** group draws a thin border
 around the focused window so you never lose track of which window
 has focus in a gapped layout — the cue keyboard-driven focus
 otherwise lacks. It is **on by default**.
 
-On supported macOS versions, KiwiDesk draws the ring as a native
+On supported macOS versions, KiwiDesk draws the border as a native
 WindowServer overlay and follows move, resize, and ordering events at
 their source. This keeps it attached during app-driven moves as well as
 mouse drags. Every private symbol is resolved at runtime; if that
-surface is missing or an operation fails, the same ring is redrawn with
+surface is missing or an operation fails, the same border is redrawn with
 the AppKit overlay automatically. Neither path requires disabling SIP.
 
-A live two-window preview leads the controls, showing the ring at
+A live two-window preview leads the controls, showing the border at
 your current color, width, and corner style before it touches real
 windows. Below it:
 
 - **Show focus border**: the master on/off switch.
-- **Color**: the focused window's ring color (a swatch plus hex
+- **Color**: the focused window's border color (a swatch plus hex
   field, the same control as every other KiwiDesk color).
 - **Show border on unfocused windows**: off by default — when on,
-  every other tiled window gets a ring too, including every member
+  every other tiled window gets a border too, including every member
   of an overflow cascade, in its own (greyed until enabled) color.
   Floating windows aren't ringed when unfocused (only the focused
   window is, whether tiled or floating); monocle always shows only
-  the focused ring.
+  the focused border.
 - **Width**: 1–20 pt — the visible thickness reaching outward into
   the gap, and the value **Fit layout gaps** sizes gaps from. The
-  ring sits just above the window with a small overlap lapping onto
+  border sits just above the window with a small overlap lapping onto
   the window edge to keep its corners closed; that overlap isn't
   part of the width. Keep gaps at least as wide as the border so
-  neighbouring rings don't touch.
+  neighbouring borders don't touch.
 - **Corners**: **Rounded** matches your windows' real corner
   radius; **Square** draws sharp corners — seamless on windows that
   are already square, an intentional squared frame on rounded ones.
-- **Glow**: wraps the focused ring in a soft colored bloom for a bit
+- **Glow**: wraps the focused border in a soft colored bloom for a bit
   more presence. Off by default; it only ever touches the focused
-  window, never the unfocused rings. The live preview shows the
+  window, never the unfocused borders. The live preview shows the
   effect as you toggle it.
 - **Fit layout gaps**: previews the exact global **Outer** and
-  **Inner** values needed to keep rings apart, plus the requested
+  **Inner** values needed to keep borders apart, plus the requested
   **Extra spacing** (0–100 pt, default 0). Inner gaps account for
   both borders when unfocused borders are shown. **Set Gap Values**
   stages those values and warns before replacing asymmetric
@@ -724,22 +724,22 @@ windows. Below it:
   shrink gaps. (Lua: `border.fit_gaps(remaining)`.)
 
 Launcher and panel overlays (Spotlight, Raycast, Alfred) never get
-a ring, even while you type into them — only genuine windows do.
+a border, even while you type into them — only genuine windows do.
 Their command bars aren't managed at all: they never appear in the
 App or Space Bars, never tile, and stay put when you switch spaces.
 Windows in native (green-button) fullscreen aren't ringed either:
-they fill the display, so a ring would peek out only at the
-corners. The ring returns when the window leaves fullscreen.
+they fill the display, so a border would peek out only at the
+corners. The border returns when the window leaves fullscreen.
 Popovers, sheets, emoji pickers, and other windows above a bordered
-window stay above its ring, which is pinned to the focused window's
-stacking level; the window stays focused and keeps its full ring.
+window stay above its border, which is pinned to the focused window's
+stacking level; the window stays focused and keeps its full border.
 
 When you focus or swap in a direction where there is no window —
-you're already at the edge — the focus ring gives a small
+you're already at the edge — the focus border gives a small
 rubber-band bounce toward that edge and springs back, the same
 "nothing further this way" cue as scroll overscroll. The window
-never moves; only the ring flexes. It works even with the focus
-border switched off (a brief ring appears just for the bounce) and,
+never moves; only the border flexes. It works even with the focus
+border switched off (a brief one appears just for the bounce) and,
 under **Reduce Motion**, becomes a single opacity pulse instead of
 a movement. This is distinct from a sticky window's pill: the
 bounce is a wordless "edge of the layout," the pill explains a
@@ -878,8 +878,8 @@ running windows.
   it fits — start, center (default), or end. Edge-relative: a
   left bar's start is its top. Once items overflow and scroll,
   the three behave the same.
-- **Active indicator**: ring (outlined border around the active
-  item), edge mark (accent bar on the active item's window-facing
+- **Active indicator**: outline (an outlined border around the
+  active item), edge mark (accent bar on the active item's window-facing
   edge), or gap (active slot empty). Orthogonal to the background
   style — all combinations are valid. Full-color app icons (System
   default) also dim to half strength on inactive items, so the
@@ -933,13 +933,14 @@ active item, hover states, and group badge) collapses behind an
 knob for every filled surface: the box per item (Boxed), the shared
 plate (Plain), or the Liquid Glass **tint** (Material) — a
 transparent Fill means clear, untinted glass. The active item is
-marked by the indicator (ring or edge mark), so there is no
+marked by the indicator (outline or edge mark), so there is no
 separate active-fill color.
 
 **Per-layout overrides:**
 
 Click a layout to override one field just for that layout — e.g.,
-make scrolling show segment style while monocle stays pills. When
+make scrolling draw a plain background while monocle stays
+boxed. When
 you open a layout's **Overrides**, a compact chip leads the rows:
 color swatches of the layout's *resolved* bar (global overlaid with
 its overrides) and a count of how many fields differ — a quick read

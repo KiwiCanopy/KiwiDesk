@@ -161,7 +161,7 @@ already-running / not-running cases exit 0.
 | | `track.set_axis` | `vertical\|horizontal` (default vertical = columns) |
 | | `track.set_limit` | n (0 = automatic; n>0 pins a cap and turns automatic off) |
 | | `track.set_auto_tracks` | true\|false (default `true`) |
-| | `track.set_new_window` | `own_track\|focused_track` (default `own_track`) |
+| | `track.set_new_window` | `own_track\|focused_track` (default `focused_track`) |
 | | `track.set_new_window_position` | placement¹ (default `first`) — where within the new_window choice |
 | | `track.set_overflow_style` | `cascade_all\|cascade_overflow` (default `cascade_all` for track) |
 | | `track.set_wrap_focus` | true\|false (default false) |
