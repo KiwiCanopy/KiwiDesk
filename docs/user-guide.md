@@ -118,7 +118,7 @@ blocks the next launch; the lock dies with the process.
 KiwiDesk runs a lightweight menu bar helper for daily controls. Clicking
 the KiwiDesk icon opens the quick menu where you can:
 
-- **Layout**: Switch the active space's layout algorithm (Bsp, Stack,
+- **Layout**: Switch the active space's layout algorithm (BSP, Stack,
   Scrolling, Monocle, Grid, Track, Floating).
   - Switches made through the quick menu are **session-only** (temporary)
     by default and do not rewrite the active profile.

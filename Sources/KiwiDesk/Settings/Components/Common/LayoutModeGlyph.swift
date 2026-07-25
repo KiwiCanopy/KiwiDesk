@@ -37,7 +37,7 @@ extension LayoutMode {
 
     @MainActor var displayName: String {
         switch self {
-        case .bsp: return L("layout.bsp.name", "Bsp")
+        case .bsp: return L("layout.bsp.name", "BSP")
         case .stack: return L("layout.stack.name", "Stack")
         case .scrolling:
             return L("layout.scrolling.name", "Scrolling")
