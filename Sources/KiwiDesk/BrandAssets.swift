@@ -48,7 +48,7 @@ enum BrandAssets {
         Bundle.module.image(forResource: "WordmarkDark")
 
     /// The full-colour app mark from `logo.svg`, in **both**
-    /// appearances. Three uses: the Settings sidebar identity
+    /// appearances. Two uses: the Settings sidebar identity
     /// header, and the runtime Dock icon
     /// (`NSApp.applicationIconImage`) so the bare executable
     /// shows the real logo whenever it raises to `.regular`. The

@@ -15,7 +15,8 @@ struct SettingsSidebar: View {
     /// the instant a profile exists, back if the last one is
     /// deleted. Never a gate.
     let spotlightProfiles: Bool
-    /// Swaps the identity mark to the golden variant on dark.
+    /// Tones the inactive destination card; the identity mark no
+    /// longer branches on appearance (#479).
     @Environment(\.colorScheme) private var colorScheme
     /// Solidifies the card wash while the window is inactive
     /// (#297) — per-element fades ride `InactiveDimmed` instead.

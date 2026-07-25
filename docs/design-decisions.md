@@ -1593,16 +1593,27 @@ ink is themed (#479).** A dark-mode logo exists for exactly one
 reason — ink contrast on a dark pane — and that is a *lightness*
 problem on the lettering, not a *hue* problem on the symbol.
 Re-hueing a mark per appearance reads as a different brand, which
-a young identity cannot afford; the industry norm (Slack,
-Spotify, Stripe, Linear, Apple) is to hold the mark and flip the
-chrome or text. So the kiwi symbol is byte-identical in both
+a young identity cannot afford. The docs site already worked this
+way before the rule was written down — `site/src/styles/theme.css`
+themes the Starlight title ink while its header mark stays fixed
+— so this generalizes a precedent rather than importing one. So the kiwi symbol is byte-identical in both
 appearances — there is deliberately **no dark symbol master**,
-and `logo.svg` serves the app sidebar, the Dock icon and the site
-nav in either theme. Only the wordmark's ink moves: forest
-`#12251a` on light, mist-green `#E1EEDB` on dark. Same "keep the
-hue, change the lightness" move the palette already makes for
-overlays (see the content-overlays note below), applied to
-brand assets. Trade-off: the mark cannot be tuned for a dark
+and `logo.svg` serves the app sidebar, the Dock icon, the site
+nav and the Starlight header in either theme. (The retired
+`logo_dark.svg` is recoverable at `1c135a4:assets/logo_dark.svg`
+— but a future dark variant should be derived from the current
+green master's geometry, not from a gold recolour authored
+against the pre-#439 palette.) Only the wordmark's ink moves: forest
+`#12251a` on light, mist-green `#E1EEDB` on dark. The kinship with the
+content-overlays note below is narrower than it looks and worth
+stating precisely: **both refuse to re-hue the identity
+element** — but the overlays reach for lightness *to avoid
+needing a variant at all* (one darkened `#588613` survives both
+near-white and near-black), while the mark reaches for nothing
+and the wordmark keeps two pre-inked masters. Nor is the ink
+move itself a lightness-only shift: `#12251a` → `#E1EEDB` turns
+the hue as well, because ink has no identity to protect. Only
+the symbol does. Trade-off: the mark cannot be tuned for a dark
 backdrop, so it must read on both by construction — it does,
 because the pale kiwi flesh gives the dark window tiles their own
 ground regardless of what is behind the mark. What this replaced:
@@ -2284,10 +2295,12 @@ PNG/TIFF copies regenerated with macOS built-ins
 (`assets/README.md`) because `swift build` on CI runs no
 actool. The menu bar and quick-menu header render the mono
 mark as an 18 pt template TIFF (macOS tints it; the old SF
-Symbol stays as missing-resource fallback). About shows the
-wordmark on a fixed light badge — its navy text is fused into
-the artwork's compound path, so it cannot follow dark mode.
-(#68 §3.8/§3.9)
+Symbol stays as missing-resource fallback). About swaps between
+two pre-inked wordmark rasters by `colorScheme` and needs no
+backing badge — the lettering is artwork, not text, so the ink
+is baked at rasterization time rather than tinted at runtime.
+(#68 §3.8/§3.9; the badge and the "cannot follow dark mode"
+constraint both went in #479, which split the fused path.)
 
 
 ### Out of scope, on purpose
