@@ -75,9 +75,10 @@ private func reachable(
 }
 
 /// #488 owner repro, bsp: w1 the left half, w2 the top right,
-/// w3/w4 the bottom-right pair. The alternating strategy pins
-/// that shape on any host screen. Directional focus must reach
-/// every window from every other.
+/// w3/w4 the bottom-right pair. `alternating` picks the split
+/// axis from depth alone, so the shape is screen-independent —
+/// but only above the pile threshold. Directional focus must
+/// reach every window from every other.
 @Suite("BSP focus reachability (#488)", .serialized)
 @MainActor
 struct BspFocusReachabilityTests {
@@ -89,6 +90,20 @@ struct BspFocusReachabilityTests {
         core.execute(
             "bsp.set_strategy",
             args: [.string("alternating")]
+        )
+        // These frames come off the host's real NSScreen, so the
+        // default 300pt minimum makes the arrangement depend on
+        // how wide that screen is: the bottom-right region is a
+        // quarter of it, and below 2 * min BspLayout correctly
+        // falls back to an OverlapStack pile (#383/#44) instead
+        // of the side-by-side pair asserted below. A CI runner's
+        // ~1066pt display lands under that threshold. Pin a
+        // minimum no plausible display can breach — the pile
+        // fallback has its own coverage, and is not the subject
+        // here.
+        core.execute(
+            "set_min_window_size",
+            args: [.number(100)]
         )
         spawn(core, count: 4)
         return SpaceID("1")

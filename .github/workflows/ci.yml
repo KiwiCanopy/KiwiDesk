@@ -17,13 +17,18 @@ concurrency:
 jobs:
   build-lint-test:
     name: Build, Lint & Test
-    runs-on: macos-15
+    # macos-26 (Tahoe), not macos-15: the tree uses macOS 26 SDK
+    # symbols (NSGlassEffectView, #390). `if #available` gates
+    # execution, not compilation, so the symbol must exist in the
+    # SDK or the file cannot compile at all. The deployment target
+    # is unchanged, so the binary still runs on older macOS.
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
 
       - name: Select Xcode
         run: |
-          sudo xcode-select -s /Applications/Xcode_16.4.app \
+          sudo xcode-select -s /Applications/Xcode_26.6.app \
             || sudo xcode-select -s /Applications/Xcode.app
           swift --version
 
@@ -33,5 +38,11 @@ jobs:
       - name: Lint
         run: ./scripts/lint.sh
 
+      # Split per AGENTS.md §5: run as one `swift test` the suite
+      # stalls for minutes at the tail, because spawned exec
+      # children hold the runner's pipe. #489 tracks the root fix.
       - name: Test
-        run: swift test
+        run: swift test --skip ExecTests
+
+      - name: Test (ExecTests)
+        run: swift test --filter ExecTests
