@@ -121,6 +121,8 @@ enum SidebarSearch {
                 L("gaps.per_edge", "Per-edge…"),
                 L("gaps.per_axis", "Per-axis…"),
                 L("drag.title", "Drag & Drop"),
+                L("drag.ghost", "Ghost"),
+                L("drag.drop_zone", "Drop zone"),
                 L("border.title", "Focus border"),
                 L("sticky.title", "Sticky windows"),
             ]
@@ -134,6 +136,11 @@ enum SidebarSearch {
                     "app_bar.global_colors.title",
                     "Global colors"
                 ),
+                // Renders inside both colour groups; placed at
+                // its first render position, since the contract
+                // is render order and the first match wins the
+                // caption.
+                L("bars.advanced_colors", "Advanced colors"),
                 L(
                     "space_bar.global_style.title",
                     "Space Bar style"
@@ -142,7 +149,6 @@ enum SidebarSearch {
                     "space_bar.colors.title",
                     "Space Bar colors"
                 ),
-                L("bars.advanced_colors", "Advanced colors"),
             ]
         case .behavior:
             return [
