@@ -84,6 +84,23 @@ extension ProfilesSection {
         // must not strand it mid-rename.
         let draft = renameDraft
         renaming = nil
+        // One turn later, deliberately. `renaming = nil`
+        // dismisses an NSPopover; requesting the confirm sheet
+        // in the same update can drop it while that dismissal
+        // animates, and a dropped sheet makes Rename a dead
+        // click that silently keeps the edits. Both reviewers
+        // flagged the combination independently. Ordering only —
+        // the draft and the old name are already captured, so
+        // nothing here can go stale.
+        DispatchQueue.main.async {
+            requestRename(from: old, draft: draft)
+        }
+    }
+
+    private func requestRename(
+        from old: String,
+        draft: String
+    ) {
         model.discardingEdits(
             message: L(
                 "discard.rename_profile.message",
