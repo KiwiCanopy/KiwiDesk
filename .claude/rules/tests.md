@@ -12,12 +12,30 @@ ones that bite large test PRs, as a checklist (rationale is in §5):
   bite large test files. Break a suite into focused files *before*
   it approaches the ceiling.
 - **Per-file private helpers are the convention** — small
-  duplication across suites is fine; no shared test harness. One
-  ratified exception: *stateless structural-parity primitives*
-  (reflection helpers backing the field-list guards) live shared
-  in `ReflectionParity.swift` — duplicating them would let a
-  divergent copy silently weaken a guard, the exact drift those
-  guards prevent.
+  duplication across suites is fine; no shared test harness.
+  Two ratified exceptions, both *stateless primitives* with no
+  setup/teardown coupling and no assertions of their own:
+  - *structural-parity primitives* (reflection helpers backing
+    the field-list guards) in `ReflectionParity.swift` — a
+    divergent copy would silently weaken a guard, the exact
+    drift those guards prevent;
+  - *script-spawn primitives* in `ScriptFixture.swift` — spawn
+    a `scripts/*` tool and drain its pipes, plus the
+    repo-shaped temp tree the `__file__`-rooted scripts need
+    (the env-var-scoped `extract-keys` suites still lay out
+    their own flat dirs, and that duplication is fine).
+    Extracted at the **fifth** copy (#252's merge-keys suite,
+    per the #249 architect review); a divergent copy silently
+    changes what a suite observes (an undrained pipe, a missed
+    `stderr`) without failing anything.
+
+  **The drift risk is the bar; the copy count is only the
+  evidence that prompted the look.** Both cases above happened
+  to be caught at a threshold, but "we're at three copies" is
+  not on its own an argument — a fourth shared helper needs a
+  named way that a divergent copy would weaken a guard or
+  change what a suite observes, plus statelessness. Duplication
+  that merely costs lines stays duplicated (§2.4).
 - **Discardable results express side-effect intent** — a command
   or setup helper whose primary job is mutation may use
   `@discardableResult` when callers commonly ignore optional

@@ -24,6 +24,38 @@ skipped so they re-surface the next time `scripts/extract-keys
 with a blank value. `<locale>.json` itself stays a flat `{key:
 string}` map — the source/translation shape is scratch-file-only
 and never reaches the file `LocaleCatalog` loads at runtime.
+
+An entry is also skipped when its stored "source" no longer
+matches the key's current English in `en.json` (issue #252). A
+worksheet is filled out over days; in that window the English
+meaning can change in code and `scripts/drop-key` can retire the
+old translations. Merging on non-emptiness alone would silently
+resurrect a translation of the *old* meaning — defeating exactly
+what drop-key retired, with nothing able to flag it afterwards.
+Comparing against the stored source costs nothing (extract-keys
+already writes it) and closes that window.
+
+Three things that guard is deliberately NOT:
+
+- It compares *text*, not meaning, so a cosmetic English edit (a
+  typo, punctuation) also invalidates a finished entry. §5 says
+  cosmetic edits keep translations, so this is stricter than the
+  convention — kept anyway, because a script cannot tell the two
+  apart and erring toward "re-translate" is the safe direction.
+- Its authority is the committed `en.json`, not the `L()` call
+  sites. An English edit that has not been re-extracted yet
+  compares equal and merges. That window is bounded by
+  `extract-keys --check`, which `scripts/lint.sh` and
+  `scripts/pre-commit` run unconditionally and which hard-fails
+  on a stale `en.json` — so relaxing *that* check would silently
+  widen this race back open.
+- Recovery is not universal. A skipped key re-surfaces on the
+  next `extract-keys` run only because `write_missing` re-mints
+  keys the locale file does not already have. If the key already
+  carries a translation, nothing re-mints it and the skipped
+  text is simply discarded. Every worksheet extract-keys itself
+  mints satisfies that precondition; a hand-written entry for an
+  already-translated key does not.
 """
 
 import json
@@ -34,6 +66,37 @@ ROOT = Path(__file__).resolve().parent.parent
 LOCALES_DIR = (
     ROOT / "Sources" / "KiwiDeskCore" / "Resources" / "Locales"
 )
+
+
+def _load_map(path: Path, label: str) -> dict | None:
+    """Decodes a JSON object, reporting a malformed file in the
+    script's own voice instead of a raw traceback. Returns None
+    on failure; every caller aborts before writing anything."""
+    try:
+        loaded = json.loads(path.read_text(encoding="utf-8"))
+    except (
+        json.JSONDecodeError,
+        UnicodeDecodeError,
+        OSError,
+    ) as error:
+        # UnicodeDecodeError matters as much as bad JSON here: the
+        # worksheet is the one file in this pipeline a non-developer
+        # edits, and an editor that saves it as Latin-1 would
+        # otherwise dump a traceback.
+        print(
+            f"merge-keys: {label} could not be read ({error}) — "
+            "nothing was merged.",
+            file=sys.stderr,
+        )
+        return None
+    if not isinstance(loaded, dict):
+        print(
+            f"merge-keys: {label} must be a JSON object — "
+            "nothing was merged.",
+            file=sys.stderr,
+        )
+        return None
+    return loaded
 
 
 def main(argv: list[str]) -> int:
@@ -59,21 +122,67 @@ def main(argv: list[str]) -> int:
         )
         return 1
 
-    entries = json.loads(missing_file.read_text(encoding="utf-8"))
+    english_file = LOCALES_DIR / "en.json"
+    if not english_file.exists():
+        print(
+            f"merge-keys: {english_file} does not exist — cannot "
+            "verify that any worksheet entry still matches its "
+            "English source, so nothing was merged.",
+            file=sys.stderr,
+        )
+        return 1
+    english = _load_map(english_file, "en.json")
+    if english is None:
+        return 1
+
+    entries = _load_map(missing_file, missing_file.name)
+    if entries is None:
+        return 1
+
     translated: dict[str, str] = {}
     skipped: list[str] = []
+    stale: list[str] = []
+    unverifiable: list[str] = []
     for key, entry in entries.items():
-        value = entry.get("translation", "").strip()
-        if value:
-            translated[key] = value
-        else:
+        if not isinstance(entry, dict):
+            unverifiable.append(key)
+            continue
+        value = entry.get("translation")
+        if not isinstance(value, str):
+            # Not an empty translation — a malformed one. Report
+            # it with the other unverifiable entries rather than
+            # telling the user it was left blank.
+            unverifiable.append(key)
+            continue
+        if not value.strip():
             skipped.append(key)
+            continue
+        # The stored source is the English the translator saw.
+        # A non-string source is unverifiable, and so is a key
+        # `en.json` no longer has — note both must be checked
+        # explicitly: comparing `entry.get("source")` against
+        # `english.get(key)` reads equal when BOTH are absent,
+        # which would merge unverifiable text for a key the app
+        # no longer ships (the one combination the guard most
+        # needs to catch).
+        source = entry.get("source")
+        current = english.get(key)
+        if not isinstance(source, str) or not isinstance(
+            current, str
+        ):
+            unverifiable.append(key)
+            continue
+        if source != current:
+            stale.append(key)
+            continue
+        translated[key] = value.strip()
 
     existing: dict[str, str] = {}
     if locale_file.exists():
-        existing = json.loads(
-            locale_file.read_text(encoding="utf-8")
-        )
+        loaded = _load_map(locale_file, locale_file.name)
+        if loaded is None:
+            return 1
+        existing = loaded
 
     existing.update(translated)
     LOCALES_DIR.mkdir(parents=True, exist_ok=True)
@@ -85,10 +194,15 @@ def main(argv: list[str]) -> int:
         encoding="utf-8",
     )
     missing_file.unlink()
+    # The dropped count rides the summary line, because that is
+    # the line a human skims and a wrapper captures — a bare
+    # "merged 0 key(s)" reads as a clean success.
+    dropped = len(stale) + len(unverifiable)
+    tail = f" {dropped} dropped, see stderr." if dropped else ""
     print(
         f"merge-keys: merged {len(translated)} key(s) into "
         f"{locale_file} ({len(existing)} total); removed "
-        f"{missing_file.name}."
+        f"{missing_file.name}.{tail}"
     )
     if skipped:
         print(
@@ -99,7 +213,63 @@ def main(argv: list[str]) -> int:
         )
         for key in sorted(skipped):
             print(f"    - {key}")
+    # Two distinct reasons, reported apart: telling someone their
+    # English changed when the entry simply never carried a
+    # "source" reads as a tool bug.
+    _report_dropped(
+        stale,
+        entries,
+        "the English changed since extraction, so the "
+        "translation would have been of the old meaning",
+        flag,
+        locale,
+    )
+    _report_dropped(
+        unverifiable,
+        entries,
+        "the entry carried no usable \"source\" (or was not in "
+        "the worksheet's {\"source\", \"translation\"} shape at "
+        "all), or the key is no longer in en.json — either way "
+        "nothing could be verified",
+        flag,
+        locale,
+    )
     return 0
+
+
+def _report_dropped(
+    keys: list[str],
+    entries: dict,
+    reason: str,
+    flag: str,
+    locale: str,
+) -> None:
+    """Warns about entries that were dropped rather than merged.
+    Echoes each discarded translation: the worksheet is unlinked
+    either way, so this transcript is the only copy left."""
+    if not keys:
+        return
+    print(
+        f"merge-keys: {len(keys)} key(s) were skipped because "
+        f"{reason}. Re-run scripts/extract-keys {flag}{locale} "
+        "to get them back with the current English (that only "
+        "re-mints keys the locale file does not already have). "
+        "The discarded text is echoed here — it is not saved "
+        "anywhere else:",
+        file=sys.stderr,
+    )
+    for key in sorted(keys):
+        entry = entries.get(key)
+        # A bare-string entry (`{"a.key": "Ein Text"}`) is the
+        # likeliest hand-written shape, and it is exactly the one
+        # the dict branch alone would echo as '' — which would
+        # make this transcript silently lose the text it promises
+        # to preserve.
+        text = entry if isinstance(entry, str) else ""
+        if isinstance(entry, dict):
+            value = entry.get("translation")
+            text = value if isinstance(value, str) else ""
+        print(f"    - {key}: {text!r}", file=sys.stderr)
 
 
 if __name__ == "__main__":

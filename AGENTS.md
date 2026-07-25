@@ -416,7 +416,19 @@ Keep this list updated whenever a recurring mistake is found.
 - **Split test suites early.** The 79-char limit and 350-line
   ceiling repeatedly bit large test files. Break suites into
   focused files before they grow; per-file private helpers are the
-  convention and small duplication across suites is fine.
+  convention and small duplication across suites is fine. Two
+  ratified exceptions, both *stateless primitives* with no
+  setup/teardown coupling and no assertions of their own:
+  `ReflectionParity.swift` (structural-parity reflection helpers
+  backing the field-list guards) and `ScriptFixture.swift`
+  (spawn a `scripts/*` tool and drain its pipes, plus the
+  repo-shaped temp tree the `__file__`-rooted scripts need).
+  The bar is the **drift risk** — a divergent copy weakens a
+  guard, or silently changes what a suite observes — not the
+  copy count, which is merely the evidence that prompted the
+  look (the script harness was extracted at the fifth hand-copy,
+  in #252). Duplication that only costs lines stays duplicated
+  (§2.4). A further exception needs the same case made.
 - **An async test that awaits real spawned work needs a generous
   hang-guard, not a tight deadline (#344).** A test that spawns a
   real subprocess (`ExecTests`) or schedules an unstructured `Task`
