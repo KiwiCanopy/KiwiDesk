@@ -158,4 +158,45 @@ struct SidebarSearchTests {
             )
         }
     }
+
+    @Test("a drawer header is reachable, on every tab that has one")
+    func drawerHeadersAreReachable() {
+        pinEnglish()
+        defer { reset() }
+        // The #406 gap: drawers were unsearchable. Parity tests
+        // compare KEYS, so only this pins the destination
+        // mapping — the axis a source scan structurally cannot
+        // see (it reads text, not the view tree).
+        let results = SidebarSearch.results(
+            query: "advanced",
+            editingStoredProfile: false
+        )
+        // Sidebar order. Appearance is absent on purpose: its
+        // drawers are "Per-edge…" / "Per-axis…", neither of
+        // which contains "advanced".
+        #expect(
+            results.map(\.destination)
+                == [.monitors, .bars, .shortcuts, .general]
+        )
+    }
+
+    @Test("a drawer's own words reach its tab")
+    func drawerSpecificTermsResolve() {
+        pinEnglish()
+        defer { reset() }
+        for (query, destination) in [
+            ("fingerprint", SettingsDestination.monitors),
+            ("per-edge", .appearance),
+            ("drop zone", .appearance),
+        ] {
+            let results = SidebarSearch.results(
+                query: query,
+                editingStoredProfile: false
+            )
+            #expect(
+                results.map(\.destination) == [destination],
+                Comment(rawValue: query)
+            )
+        }
+    }
 }
