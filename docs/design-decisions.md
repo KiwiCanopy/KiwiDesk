@@ -308,6 +308,23 @@ Ghostty's quick terminal #21). The draw-time heuristic remains for
 the structural floats that stay managed: panel-subrole windows of
 regular apps and accessory apps' layer-0 windows.
 
+The optional **glow** (#358) — a soft blurred colored bloom around
+the ring, the JankyBorders `COLOR_STYLE_GLOW` look — is a global
+bool (`border.glow`, default OFF) with two deliberate scope choices.
+It rides the **focused ring only**, never the unfocused set: a bloom
+on every dim ring would undercut the one it exists to make pop, and
+`unfocused_color` is tuned to be present-without-competing, the
+opposite intent. And its outward extent is kept **out of
+`outwardReach`**, so `border.fit_gaps` still sizes gaps to the crisp
+stroke and the soft bloom is allowed to bleed into the gap — the
+overlay *frame* grows by the blur so the halo isn't clipped, but the
+gap math stays simple. (An earlier attempt that shadowed the thin
+stroke directly banded into contour lines and dropped to gray on the
+SkyLight context; the shipped version casts the shadow from a solid
+clipped ring-band in an sRGB alpha-1 color, matching JankyBorders.
+Default OFF is native-first — a fresh install reads as a crisp flat
+ring, glow is opt-in flourish.)
+
 A **native-fullscreen** (green-button) window is suppressed by the
 same draw-time mechanism: it stays a member of its home virtual
 space (macOS moves it to its own Space without a destroy), but it

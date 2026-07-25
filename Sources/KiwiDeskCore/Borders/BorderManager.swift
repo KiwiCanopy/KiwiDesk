@@ -19,19 +19,25 @@ public final class BorderManager {
         public let colorHex: String
         public let width: CGFloat
         public let cornerStyle: BorderStyle.CornerStyle
+        /// Whether this ring wears the glow bloom (#358). Set only on
+        /// the focused ring — `borderSpecs` never glows an unfocused
+        /// ring, so this is `false` for every non-focused spec.
+        public let glow: Bool
 
         public init(
             window: WindowID,
             frame: CGRect,
             colorHex: String,
             width: CGFloat,
-            cornerStyle: BorderStyle.CornerStyle
+            cornerStyle: BorderStyle.CornerStyle,
+            glow: Bool = false
         ) {
             self.window = window
             self.frame = frame
             self.colorHex = colorHex
             self.width = width
             self.cornerStyle = cornerStyle
+            self.glow = glow
         }
     }
 
@@ -152,7 +158,8 @@ public final class BorderManager {
                 cornerStyle: spec.cornerStyle,
                 cornerRadius: cornerRadius(for: spec.window),
                 colorHex: spec.colorHex,
-                screen: screen(for: spec.frame)
+                screen: screen(for: spec.frame),
+                glow: spec.glow
             )
             // Re-assert stacking each sync (focus change, retile,
             // z-order restore) — the target may have moved in the
@@ -190,6 +197,7 @@ public final class BorderManager {
             cornerRadius: cornerRadius(for: id),
             colorHex: spec.colorHex,
             screen: screen(for: windowFrame),
+            glow: spec.glow,
             restoreVisibility: restoreVisibility
         )
     }

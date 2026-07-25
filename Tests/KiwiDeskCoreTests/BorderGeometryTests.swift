@@ -29,6 +29,39 @@ struct BorderGeometryTests {
         )
     }
 
+    @Test("Glow grows the overlay frame, leaves reach alone")
+    func glowGrowsFrame() {
+        let plain = BorderGeometry.compute(
+            windowFrame: window,
+            width: 2,
+            cornerStyle: .rounded,
+            systemRadius: 16
+        )
+        let glowing = BorderGeometry.compute(
+            windowFrame: window,
+            width: 2,
+            cornerStyle: .rounded,
+            systemRadius: 16,
+            glow: true
+        )
+        // Frame grows by the blur on every side so the halo has
+        // room; the stroke geometry itself is unchanged (#358).
+        #expect(plain.glowMargin == 0)
+        #expect(glowing.glowMargin == BorderGeometry.glowBlur)
+        #expect(
+            glowing.overlayFrame
+                == window.insetBy(
+                    dx: -(2 + BorderGeometry.glowBlur),
+                    dy: -(2 + BorderGeometry.glowBlur)
+                )
+        )
+        #expect(glowing.lineWidth == plain.lineWidth)
+        #expect(glowing.cornerRadius == plain.cornerRadius)
+        // Outward reach (fit-gaps) must NOT count the bloom — it
+        // bleeds into the gap by design.
+        #expect(BorderGeometry.outwardReach(width: 2) == 2)
+    }
+
     @Test("Thick width also keeps a fixed hidden overlap")
     func thickWidth() {
         let g = BorderGeometry.compute(
@@ -187,6 +220,9 @@ struct BorderGeometryTests {
     /// style **and both order modes**. The overlap (hidden below,
     /// on-window above) must never leak into this public reach, or
     /// the fit-gaps math would drift when the ring flips order.
+    /// Glow is deliberately excluded here — its bloom bleeds into the
+    /// gap on purpose, so `glow: true` grows the frame *past* the
+    /// reach (covered by `glowGrowsFrame`), not a violation of this.
     @Test("outwardReach matches compute's outward offset")
     func outwardReachMatchesCompute() {
         let widths: [CGFloat] = [BorderStyle.minWidth, 2, 10, 20]

@@ -32,6 +32,28 @@ extension NSColor {
         return luminance > 0.6 ? .black : .white
     }
 
+    /// An opaque sRGB `CGColor` for the focus-border glow bloom
+    /// (#358). The glow is a `CGContextSetShadowWithColor` shadow,
+    /// and on a SkyLight window-backed context a calibrated/catalog
+    /// `CGColor` (what `NSColor(kiwiHex:).cgColor` yields) is not
+    /// honored for the shadow path — it drops to the default
+    /// black-at-low-alpha and reads gray. Rebuilding the color in
+    /// sRGB with alpha forced to 1 (JankyBorders' own
+    /// `CGColorCreateGenericRGB(r, g, b, 1.0)`) keeps the bloom the
+    /// ring's hue. Used for the shadow color only — the ring body
+    /// keeps its faithful hex (alpha included), so a translucent
+    /// `focused_color` still reads translucent.
+    static func kiwiGlow(hex: String) -> CGColor {
+        let base = NSColor(kiwiHex: hex)
+        let srgb = base.usingColorSpace(.sRGB) ?? base
+        return CGColor(
+            srgbRed: srgb.redComponent,
+            green: srgb.greenComponent,
+            blue: srgb.blueComponent,
+            alpha: 1
+        )
+    }
+
     /// Colors come as user-set hex strings; a string that no
     /// longer parses falls back to the system accent color.
     convenience init(kiwiHex hex: String) {

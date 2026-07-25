@@ -2611,6 +2611,25 @@ squared frame on rounded ones.
 border.set_corner_style("rounded")
 ```
 
+### border.set_glow
+
+**Expects:** a boolean.
+
+**Does:** when `true`, wraps the **focused** ring in a soft colored
+bloom — a zero-offset blurred halo in the ring's own color, the
+JankyBorders "glow" look (default `false`). A render trait like
+width and corners: it reuses `focused_color`, adds no color choice,
+and never rings the unfocused windows (a bloom on every dim ring
+would undo the point of making the focused one stand out). The soft
+edge is allowed to bleed into the layout gap, so `fit_gaps` is
+unaffected.
+
+**Example:**
+
+```lua
+border.set_glow(true)
+```
+
 ### border.set_draw_order
 
 **Expects:** `"behind"` or `"front"`.

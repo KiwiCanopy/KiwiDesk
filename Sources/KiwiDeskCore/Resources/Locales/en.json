@@ -138,6 +138,8 @@
   "border.fit_gaps.updated_new": "Draft updated — Save as New Profile… to apply and persist.",
   "border.focused_color": "Color",
   "border.focused_color.a11y": "Focused window border color",
+  "border.glow": "Glow",
+  "border.glow.a11y": "Soft glow around the focus border",
   "border.title": "Focus border",
   "border.unfocused_color": "Color",
   "border.unfocused_color.a11y": "Unfocused window border color",

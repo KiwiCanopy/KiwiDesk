@@ -29,8 +29,20 @@ struct BorderGeometry: Equatable {
     /// plus the overlap hidden behind the target.
     let lineWidth: CGFloat
     /// Corner radius (pt) of the stroke's centerline path, drawn
-    /// in the overlay's own bounds inset by `lineWidth / 2`.
+    /// in the overlay's own bounds inset by `lineWidth / 2` plus
+    /// `glowMargin`.
     let cornerRadius: CGFloat
+    /// Extra outward room (pt) the overlay frame carries **beyond**
+    /// the visible reach so a glow bloom isn't clipped by the
+    /// window bounds (#358). `0` when glow is off — then the frame
+    /// and draw math are identical to a plain ring. When on, the
+    /// frame grows by this on every side and the stroke path is
+    /// inset back by it, so the ring stays put and the margin is
+    /// pure bloom space. Deliberately kept OUT of `outwardReach`:
+    /// the soft bloom is allowed to bleed into the layout gap, so
+    /// `border.fit_gaps` stays sized to the crisp stroke (#358
+    /// ui-designer decision).
+    let glowMargin: CGFloat
 
     /// **`below`-order only.** The one cushion beyond what corner
     /// geometry strictly requires, shared by both styles: rounded's arc
@@ -78,17 +90,25 @@ struct BorderGeometry: Equatable {
     /// unchanged); only the inner edge moves.
     static let aboveVisibleLapCap: CGFloat = 1
 
+    /// The glow bloom's blur radius (pt), and the amount the overlay
+    /// frame grows on every side when glow is on so the halo isn't
+    /// clipped (#358). Matches JankyBorders' fixed 10 pt
+    /// `COLOR_STYLE_GLOW` shadow.
+    static let glowBlur: CGFloat = 10
+
     /// Builds the ring geometry for `windowFrame` (AX coords).
     /// `width` is clamped defensively; `systemRadius` is the
     /// shared window corner radius (rounded style) or ignored
-    /// (square style → 0).
+    /// (square style → 0). `glow` grows the overlay frame by
+    /// `glowBlur` on every side so the bloom has room (#358).
     static func compute(
         windowFrame: CGRect,
         width: CGFloat,
         cornerStyle: BorderStyle.CornerStyle,
         order: Order = .below,
         systemRadius: CGFloat = GeometryUtils
-            .systemWindowCornerRadius
+            .systemWindowCornerRadius,
+        glow: Bool = false
     ) -> BorderGeometry {
         let visible = Self.clamp(width)
         let overlap = overlap(
@@ -103,13 +123,15 @@ struct BorderGeometry: Equatable {
         let radius =
             cornerStyle == .square
             ? 0 : max(0, systemRadius + visible - stroke / 2)
+        let margin = glow ? glowBlur : 0
         return BorderGeometry(
             overlayFrame: windowFrame.insetBy(
-                dx: -visible,
-                dy: -visible
+                dx: -(visible + margin),
+                dy: -(visible + margin)
             ),
             lineWidth: stroke,
-            cornerRadius: radius
+            cornerRadius: radius,
+            glowMargin: margin
         )
     }
 

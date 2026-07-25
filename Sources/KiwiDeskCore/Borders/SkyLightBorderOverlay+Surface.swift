@@ -115,22 +115,29 @@ extension SkyLightBorderOverlay {
             origin: .zero,
             size: geometry.overlayFrame.size
         )
-        let pathRect = bounds.insetBy(
-            dx: geometry.lineWidth / 2,
-            dy: geometry.lineWidth / 2
-        )
+        // The stroke sits `glowMargin` in from the grown frame so
+        // the ring stays put and the extra margin is bloom room
+        // (#358); `glowMargin` is 0 for a plain ring, so this is the
+        // original inset then.
+        let inset = geometry.glowMargin + geometry.lineWidth / 2
+        let pathRect = bounds.insetBy(dx: inset, dy: inset)
         context.clear(bounds)
-        context.setLineWidth(geometry.lineWidth)
-        context.setStrokeColor(NSColor(kiwiHex: colorHex).cgColor)
-        context.addPath(
-            CGPath(
-                roundedRect: pathRect,
-                cornerWidth: geometry.cornerRadius,
-                cornerHeight: geometry.cornerRadius,
-                transform: nil
+        if geometry.glowMargin > 0 {
+            paintGlow(
+                context,
+                bounds: bounds,
+                pathRect: pathRect,
+                geometry: geometry,
+                colorHex: colorHex
             )
-        )
-        context.strokePath()
+        } else {
+            paintRing(
+                context,
+                pathRect: pathRect,
+                geometry: geometry,
+                colorHex: colorHex
+            )
+        }
         context.flush()
         guard
             SkyLight.flushWindowContent?(
@@ -145,6 +152,81 @@ extension SkyLightBorderOverlay {
             connection,
             window
         ) == .success
+    }
+
+    /// A plain crisp ring: stroke the centerline path at the full
+    /// line width. The no-glow path, and identical to the pre-#358
+    /// draw.
+    private func paintRing(
+        _ context: CGContext,
+        pathRect: CGRect,
+        geometry: BorderGeometry,
+        colorHex: String
+    ) {
+        context.setLineWidth(geometry.lineWidth)
+        context.setStrokeColor(NSColor(kiwiHex: colorHex).cgColor)
+        context.addPath(
+            CGPath(
+                roundedRect: pathRect,
+                cornerWidth: geometry.cornerRadius,
+                cornerHeight: geometry.cornerRadius,
+                transform: nil
+            )
+        )
+        context.strokePath()
+    }
+
+    /// The glow ring (#358): a **filled** ring band that casts a
+    /// soft outward bloom. Shadowing a thin stroke banded into
+    /// visible contour lines (the shelved first attempt); casting
+    /// the shadow from a solid band — the JankyBorders technique —
+    /// blooms cleanly. Clipped to everything but the window interior
+    /// so the bloom spills outward into the grown margin but never
+    /// paints over window content. The band itself is the ring, so
+    /// no separate stroke is drawn.
+    private func paintGlow(
+        _ context: CGContext,
+        bounds: CGRect,
+        pathRect: CGRect,
+        geometry: BorderGeometry,
+        colorHex: String
+    ) {
+        let half = geometry.lineWidth / 2
+        let radius = geometry.cornerRadius
+        // Square rings (radius 0) keep sharp corners on both edges.
+        let outerRadius = radius <= 0 ? 0 : radius + half
+        let innerRadius = radius <= 0 ? 0 : max(0, radius - half)
+        let outer = CGPath(
+            roundedRect: pathRect.insetBy(dx: -half, dy: -half),
+            cornerWidth: outerRadius,
+            cornerHeight: outerRadius,
+            transform: nil
+        )
+        let inner = CGPath(
+            roundedRect: pathRect.insetBy(dx: half, dy: half),
+            cornerWidth: innerRadius,
+            cornerHeight: innerRadius,
+            transform: nil
+        )
+        // The ring body keeps the faithful hex (alpha and all), so a
+        // translucent `focused_color` stays translucent — only the
+        // shadow forces opacity, matching JankyBorders and the other
+        // render paths.
+        let ringColor = NSColor(kiwiHex: colorHex).cgColor
+        let glowColor = NSColor.kiwiGlow(hex: colorHex)
+        context.saveGState()
+        context.addRect(bounds)
+        context.addPath(inner)
+        context.clip(using: .evenOdd)
+        context.setShadow(
+            offset: .zero,
+            blur: geometry.glowMargin,
+            color: glowColor
+        )
+        context.setFillColor(ringColor)
+        context.addPath(outer)
+        context.fillPath()
+        context.restoreGState()
     }
 
     func makeRegion(_ rect: CGRect) -> CFTypeRef? {

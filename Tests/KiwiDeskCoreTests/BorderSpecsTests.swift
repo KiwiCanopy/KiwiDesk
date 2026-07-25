@@ -86,6 +86,24 @@ struct BorderSpecsTests {
         #expect(other?.colorHex == style.unfocusedColor)
     }
 
+    @Test("Glow rides the focused ring only, never unfocused")
+    func glowFocusedOnly() {
+        var style = BorderStyle()
+        style.glow = true
+        style.unfocusedEnabled = true
+        let result = specs(style, focused: w1, slots: disjoint)
+        let focused = result.first { $0.window == w1 }
+        let other = result.first { $0.window == w2 }
+        #expect(focused?.glow == true)
+        // A bloom on every unfocused ring would undercut the one it
+        // should make pop (#358) — so unfocused rings never glow.
+        #expect(other?.glow == false)
+        // And with glow off, the focused ring doesn't glow either.
+        style.glow = false
+        let plain = specs(style, focused: w1, slots: disjoint)
+        #expect(plain.first { $0.window == w1 }?.glow == false)
+    }
+
     @Test("Monocle stays focused-only despite unfocused toggle")
     func monocleFocusedOnly() {
         var style = BorderStyle()

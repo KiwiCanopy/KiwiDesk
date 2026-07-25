@@ -44,7 +44,7 @@ struct SettingsCodingTests {
             Set(border.keys) == [
                 "enabled", "width", "focused_color",
                 "unfocused_enabled", "unfocused_color",
-                "corner_style", "draw_order",
+                "corner_style", "glow", "draw_order",
             ]
         )
         #expect(border["enabled"] as? Bool == true)
@@ -52,6 +52,7 @@ struct SettingsCodingTests {
         #expect(border["focused_color"] as? String == "#567A1F")
         #expect(border["unfocused_enabled"] as? Bool == false)
         #expect(border["corner_style"] as? String == "rounded")
+        #expect(border["glow"] as? Bool == false)
         #expect(border["draw_order"] as? String == "behind")
         // Bar chrome defaults take the brand kiwi green (#439);
         // pinned here so an accidental struct-default change
@@ -258,6 +259,7 @@ struct SettingsCodingTests {
         settings.borderStyle.unfocusedEnabled = true
         settings.borderStyle.unfocusedColor = "#04050607"
         settings.borderStyle.cornerStyle = .square
+        settings.borderStyle.glow = true
         settings.stickyStyle.indicator = false
         settings.stickyStyle.color = "#4E9F3D"
         settings.floatingStyle.color = "#E8A33D"

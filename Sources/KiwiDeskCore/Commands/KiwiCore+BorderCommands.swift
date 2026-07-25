@@ -77,6 +77,10 @@ extension KiwiCore {
             return setColor(args) {
                 tiler.settings.borderStyle.unfocusedColor = $0
             }
+        case "glow":
+            return setBool(args) {
+                tiler.settings.borderStyle.glow = $0
+            }
         case "corner_style":
             guard let raw = args.first?.stringValue,
                 let style = BorderStyle.CornerStyle(rawValue: raw)
