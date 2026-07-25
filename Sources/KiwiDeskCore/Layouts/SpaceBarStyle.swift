@@ -107,13 +107,27 @@ public struct SpaceBarStyle: Sendable, Equatable {
     public var itemColor = "#EAF3EE66"
     /// The active space's accent (identifier + its glyphs).
     public var activeItemColor = "#8DB354"
-    /// The focused window's accent — its glyph inside the active
-    /// space AND the front-app segment (glyph + name). A
+    /// The focused window's accent, on two surfaces: its glyph
+    /// inside the active space, and the front-app segment (glyph
+    /// + name). Deliberately NOT the group-count badge's text —
+    /// that is ink on an independently chosen chip rather than on
+    /// the bar plate, so it keeps `groupBadgeTextColor` and lets
+    /// the alpha ladder carry focus (#470). A
     /// genuinely different hue, not a tint of the active-space
     /// color, so the two states read apart (QA 2026-07-19).
-    /// Kept amber pending its own convergence pass (separate
-    /// semantic from the drag drop-zone) — see #470.
-    public var focusedItemColor = "#E8A33D"
+    ///
+    /// Converged onto the palette in #470 by reusing the amber
+    /// the rebrand had *already* ratified for the drag drop-zone
+    /// (`DragVisual.dropZoneDefault`) rather than inventing a
+    /// hue: same H36 as the old `#E8A33D`, dropped L57% → L40%.
+    /// The **lightness** is load-bearing, not the hue — hue alone
+    /// does not survive colour-vision deficiency against a green
+    /// primary. Keep that gap if this is retuned; a lighter amber
+    /// loses it (`SpaceBarAccentSeparationTests` pins the floor,
+    /// docs/design-decisions.md carries the numbers). Accepted
+    /// trade: focused now reads darker than the active green, not
+    /// brighter. Default mirrored in docs/lua-reference.md.
+    public var focusedItemColor = "#C2790A"
     /// Hover tint on non-active space items.
     public var hoverFillColor = "#AACB5D80"
     public var hoverItemColor = "#EAF3EE"
@@ -145,205 +159,23 @@ public struct SpaceBarStyle: Sendable, Equatable {
 
 // MARK: - Codable
 
-extension SpaceBarStyle: Codable {
-    /// JSON keys are the Lua setters (`space_bar.set_*`) minus
-    /// the `set_` verb. `CaseIterable` is load-bearing: the
-    /// parity test (`SpaceBarParityTests`) reflects over
-    /// `allCases` to prove every field has a key.
-    enum CodingKeys: String, CodingKey, CaseIterable {
-        case enabled
-        case edge
-        case alignment
-        case thickness
-        case boxSize = "box_size"
-        case boxGap = "box_gap"
-        case fontSize = "font_size"
-        case glyphCap = "glyph_cap"
-        case iconSource = "icon_source"
-        case tabBackground = "tab_background"
-        case liquidGlass = "liquid_glass"
-        case tabBackgroundFit = "tab_background_fit"
-        case activeIndicator = "active_indicator"
-        case cornerRoundness = "corner_roundness"
-        case dimFactor = "dim_factor"
-        case activeDimFactor = "active_dim_factor"
-        case showFrontApp = "show_front_app"
-        case hideEmpty = "hide_empty"
-        case stickyBadge = "sticky_badge"
-        case springDelay = "spring_delay"
-        case itemColor = "item_color"
-        case activeItemColor = "active_item_color"
-        case focusedItemColor = "focused_item_color"
-        case hoverFillColor = "hover_fill_color"
-        case hoverItemColor = "hover_item_color"
-        case fillColor = "fill_color"
-        case highlightColor = "highlight_color"
-        case groupBadgeColor = "group_badge_color"
-        case groupBadgeTextColor = "group_badge_text_color"
-    }
-
-    /// Manual decoding: profiles saved before a field existed
-    /// must keep loading (missing keys fall back to defaults).
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(
-            keyedBy: CodingKeys.self
-        )
-        let defaults = Self()
-        enabled =
-            try container.decodeIfPresent(
-                Bool.self,
-                forKey: .enabled
-            ) ?? defaults.enabled
-        edge =
-            try container.decodeIfPresent(
-                AppBarEdge.self,
-                forKey: .edge
-            ) ?? defaults.edge
-        alignment =
-            try container.decodeIfPresent(
-                Alignment.self,
-                forKey: .alignment
-            ) ?? defaults.alignment
-        thickness = max(
-            AppBarStyle.minThickness,
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .thickness
-            ) ?? defaults.thickness
-        )
-        boxSize =
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .boxSize
-            ) ?? defaults.boxSize
-        boxGap =
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .boxGap
-            ) ?? defaults.boxGap
-        fontSize =
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .fontSize
-            ) ?? defaults.fontSize
-        glyphCap =
-            try container.decodeIfPresent(
-                Int.self,
-                forKey: .glyphCap
-            ) ?? defaults.glyphCap
-        iconSource =
-            try container.decodeIfPresent(
-                BarAppIconSource.self,
-                forKey: .iconSource
-            ) ?? defaults.iconSource
-        tabBackground =
-            try container.decodeIfPresent(
-                TabBackground.self,
-                forKey: .tabBackground
-            ) ?? defaults.tabBackground
-        liquidGlass =
-            try container.decodeIfPresent(
-                Bool.self,
-                forKey: .liquidGlass
-            ) ?? defaults.liquidGlass
-        tabBackgroundFit =
-            try container.decodeIfPresent(
-                TabBackgroundFit.self,
-                forKey: .tabBackgroundFit
-            ) ?? defaults.tabBackgroundFit
-        activeIndicator =
-            try container.decodeIfPresent(
-                ActiveIndicator.self,
-                forKey: .activeIndicator
-            ) ?? defaults.activeIndicator
-        cornerRoundness =
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .cornerRoundness
-            ) ?? defaults.cornerRoundness
-        dimFactor = AppBarStyle.clampDim(
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .dimFactor
-            ) ?? defaults.dimFactor
-        )
-        activeDimFactor = AppBarStyle.clampDim(
-            try container.decodeIfPresent(
-                CGFloat.self,
-                forKey: .activeDimFactor
-            ) ?? defaults.activeDimFactor
-        )
-        showFrontApp =
-            try container.decodeIfPresent(
-                Bool.self,
-                forKey: .showFrontApp
-            ) ?? defaults.showFrontApp
-        hideEmpty =
-            try container.decodeIfPresent(
-                Bool.self,
-                forKey: .hideEmpty
-            ) ?? defaults.hideEmpty
-        stickyBadge =
-            try container.decodeIfPresent(
-                Bool.self,
-                forKey: .stickyBadge
-            ) ?? defaults.stickyBadge
-        springDelay =
-            try container.decodeIfPresent(
-                Int.self,
-                forKey: .springDelay
-            ) ?? defaults.springDelay
-        try decodeColors(from: container)
-    }
-
-    private mutating func decodeColors(
-        from container: KeyedDecodingContainer<CodingKeys>
-    ) throws {
-        let defaults = Self()
-        itemColor =
-            try container.decodeIfPresent(
-                String.self,
-                forKey: .itemColor
-            ) ?? defaults.itemColor
-        activeItemColor =
-            try container.decodeIfPresent(
-                String.self,
-                forKey: .activeItemColor
-            ) ?? defaults.activeItemColor
-        focusedItemColor =
-            try container.decodeIfPresent(
-                String.self,
-                forKey: .focusedItemColor
-            ) ?? defaults.focusedItemColor
-        hoverFillColor =
-            try container.decodeIfPresent(
-                String.self,
-                forKey: .hoverFillColor
-            ) ?? defaults.hoverFillColor
-        hoverItemColor =
-            try container.decodeIfPresent(
-                String.self,
-                forKey: .hoverItemColor
-            ) ?? defaults.hoverItemColor
-        fillColor =
-            try container.decodeIfPresent(
-                String.self,
-                forKey: .fillColor
-            ) ?? defaults.fillColor
-        highlightColor =
-            try container.decodeIfPresent(
-                String.self,
-                forKey: .highlightColor
-            ) ?? defaults.highlightColor
-        groupBadgeColor =
-            try container.decodeIfPresent(
-                String.self,
-                forKey: .groupBadgeColor
-            ) ?? defaults.groupBadgeColor
-        groupBadgeTextColor =
-            try container.decodeIfPresent(
-                String.self,
-                forKey: .groupBadgeTextColor
-            ) ?? defaults.groupBadgeTextColor
-    }
-}
+/// The conformance is declared here, in the type's own file,
+/// because Swift only synthesizes `encode(to:)` where the
+/// conformance sits — a cross-file `extension … : Codable` would
+/// force a hand-written encode, i.e. exactly the mirrored field
+/// list `.claude/rules/parity-tests.md` says to avoid. The keys
+/// and the sparse decode live in `SpaceBarStyle+Coding.swift`.
+///
+/// This is the **opposite** placement from
+/// `TilingSettings+Coding.swift`, deliberately, and the two
+/// should not be "harmonized": that type hand-writes its encode,
+/// so it can keep the conformance next to the implementation and
+/// warns against a gutted extension re-synthesizing camelCase.
+/// `SpaceBarStyle` relies on synthesis instead, so its
+/// conformance has to stay here. The residual hazard — deleting
+/// or renaming `CodingKeys` in the other file would let both
+/// sides silently re-synthesize camelCase — is backstopped by
+/// `SpaceBarParityTests` (which references
+/// `CodingKeys.allCases`, so it stops compiling) and
+/// `SettingsCodingTests` (which pins the snake_case keys).
+extension SpaceBarStyle: Codable {}

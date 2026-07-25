@@ -2244,9 +2244,13 @@ setting. The three-state ladder is the bar's signature:
   identifier and glyphs (default `#8DB354`).
 - `space_bar.set_focused_item_color` — the focused window
   wherever it shows: its glyph inside the active Space and the
-  front-app segment (default `#E8A33D`, a deliberately different
-  hue so "focused window" never washes into the active-Space
-  green).
+  front-app segment (default `#C2790A`, a deliberately different
+  hue **and a step darker**, so "focused window" never washes
+  into the active-Space green — including for a red-green
+  colour-blind reader, for whom hue alone would not separate the
+  two). If you retune it, keep a lightness gap from
+  `active_item_color`; a lighter amber loses the distinction
+  again.
 - `space_bar.set_hover_fill_color` / `space_bar.set_hover_item_color`
   — hover tint on non-active items.
 - `space_bar.set_fill_color` / `space_bar.set_highlight_color` —
@@ -2260,7 +2264,7 @@ setting. The three-state ladder is the bar's signature:
 
 ```lua
 space_bar.set_active_item_color("#8DB354")
-space_bar.set_focused_item_color("#E8A33D")
+space_bar.set_focused_item_color("#C2790A")
 ```
 
 ## Where New Windows Land

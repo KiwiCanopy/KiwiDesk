@@ -119,16 +119,35 @@ extension SpaceBarItemView {
     /// dims via `alphaValue` to the app's focus tier — full for the
     /// focused app (or on hover), `activeUnfocusedAlpha` for an
     /// unfocused app on the active space, `untintedAlpha` on an
-    /// inactive one. Its text takes the focused-window color when
-    /// this badge's app holds the focus (walks back #293's muted
-    /// itemColor on inactive spaces — one uniform ladder now).
+    /// inactive one.
+    ///
+    /// The **alpha** half of that ladder generalizes; the **ink**
+    /// half did not, and no longer applies here (#470,
+    /// ui-designer consult). Badge text stays
+    /// `groupBadgeTextColor` and never takes the focused accent,
+    /// because a glyph and a badge do not share a background: a
+    /// glyph's ink is contrast-tested against the bar plate, a
+    /// badge's against a second, independently chosen fill. The
+    /// focused accent was only ever safe against the one badge
+    /// fill it was eyeballed against, and #470's darkening took
+    /// that pair to 2.10:1 — below even the large-text floor.
+    /// Alpha is chip-color-agnostic, so it survives any fill, any
+    /// palette, any future accent retune.
+    ///
+    /// This also puts the badge back in line with its siblings
+    /// rather than carving an exception: the App Bar's own count
+    /// badge (`AppBarItemView.applyGroupBadge`) and the
+    /// sticky/floating state marks below both already leave the
+    /// ink alone and let alpha carry focus. Nothing is lost —
+    /// `untintedAppAlpha` already puts the focused app's badge
+    /// uniquely at full alpha, beside a glyph that *is* tinted.
+    /// It is also what macOS does: the system badge is
+    /// white-on-red unconditionally, with no focused variant.
     private func applyBadge(_ badge: NSTextField, appFocused: Bool) {
         badge.layer?.backgroundColor =
             NSColor(kiwiHex: style.groupBadgeColor).cgColor
         badge.textColor =
-            appFocused && isActive
-            ? NSColor(kiwiHex: style.focusedItemColor)
-            : NSColor(kiwiHex: style.groupBadgeTextColor)
+            NSColor(kiwiHex: style.groupBadgeTextColor)
         badge.alphaValue = untintedAppAlpha(focused: appFocused)
     }
 

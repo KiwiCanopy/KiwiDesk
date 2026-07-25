@@ -1565,6 +1565,39 @@ new palette against, not a spec the reflection-based
   `space_bar.focused_item_color` is the complementary
   temperature (cool primary → warm focused, and vice-versa),
   so "active space" and "focused window" read as two signals.
+- **…and the two accents must differ on an axis the deficiency
+  *preserves*, which for a green-primary palette leaves only
+  lightness.** (#470.) The rule to check is not "different hue"
+  but "still different after red-green vision loss". Two axes
+  survive it: **lightness**, and **blue↔yellow**. A cool-primary
+  palette gets the second one free — True Dark's `#64D2FF` /
+  `#FF9F0A` separates at **241/441** under simulated protanopia
+  despite the two being nearly equal in lightness. A
+  *green*-primary palette does not: green↔amber is precisely the
+  axis protanopia and deuteranopia flatten, so lightness is the
+  only channel left. That is what the old default got wrong —
+  `#8DB354` / `#E8A33D` measures **22/441**, i.e. the same
+  colour to a protanope, while satisfying both "different hue"
+  and "complementary temperature". The converged `#C2790A`
+  measures **93**, which is why the focused accent now reads
+  *darker* than the active green rather than brighter.
+  Deliberately **not** retuned by #470, because each is an
+  eye-confirm call of its own: **Kiwi Neon** (`#86EA43` /
+  `#F4CA25`, 39) and **Kiwi Gold** (`#D9A521` / `#8DB354`, 49) —
+  Gold being the inverted twin of the same defect, gold primary
+  against the brand green, so both ends move together when it is
+  retuned. `ColorPaletteTests` pins inequality only, catalog-wide;
+  `SpaceBarAccentSeparationTests` pins this clause for the
+  derived default palette. Tightening the guard catalog-wide and
+  retuning those two belong to one change, not this one (#511) —
+  it must assert CVD separation, not a lightness proxy, or it
+  will fail True Dark, which has no defect. *(Every separation
+  figure here is a Viénot-1999 protanopia simulation in linear
+  sRGB, Euclidean RGB distance, max √3·255 = 441 —
+  `SpaceBarAccentSeparationTests` computes the same quantity, and
+  pins these very numbers so the metric cannot drift from the
+  argument. Other CVD models give different absolutes: Machado
+  2009 reads the same two pairs as 28 and 96.)*
 - **Focus is one color across bar and border.**
   `border.focused_color` = the primary accent; `highlight_color`
   defaults to it too (borrow the secondary only as a flourish,
@@ -1668,9 +1701,15 @@ ink and borders: keep the hue, drop the lightness where a role
 needs contrast. The optional **glow** inverts this trade for the
 bloom only: a halo is a fill, not a stroke, so it brightens the ring
 hue back up (`BorderStyle.glowColor`) instead of staying darkened.
-(The Space Bar's own `focused_item_color` stays amber `#E8A33D` for
-now — a separate "viewing-not-active" semantic, converged in a
-follow-up, #470.)
+The Space Bar's own `focused_item_color` — a separate
+"viewing-not-active" semantic — converged onto the **same**
+`#C2790A` in #470 rather than getting its own amber. The bar owns
+its backdrop, so it never needed the drop-zone's *contrast*
+darkening; it turned out to need the identical darkening for a
+different reason (state separation from the green under
+colour-vision deficiency — see the lightness clause above), and
+reusing the ratified hex beat minting a second amber for one
+palette.
 
 **The App Bar has its own sidebar destination.** (#229,
 superseding the earlier "Appearance ends with the App Bar
@@ -1894,10 +1933,30 @@ Space AND the front-app segment's glyph + name (QA 2026-07-19:
 the front-app segment IS the focused window, so it belongs to
 the focused accent, not the active-Space one; each accent now
 maps to exactly one concept — the Space vs the focused window).
-The focused accent is a deliberately **different hue** (amber
-`#E8A33D` in the Kiwi theme), not a tint of the active green —
-a lighter shade of the same hue washed into "active space" and
-the two states read as one. In Settings the `Focused window`
+The focused accent is a deliberately **different hue** *and a
+step darker* (amber `#C2790A` in the Kiwi theme, #470), not a
+tint of the active green — a lighter shade of the same hue
+washed into "active space" and the two states read as one, and
+hue alone does not survive colour-vision deficiency against a
+green primary (see the lightness clause in the palette-coherence
+heuristics above). It has **two** surfaces, not three: the
+group-count / `+n` badge text was the third until #470, and is
+now the deliberate exception — badge ink stays
+`group_badge_text_color` and never takes the focused accent.
+A glyph and a badge do not share a background (a glyph's ink is
+contrast-tested against the bar plate, a badge's against a
+second, independently chosen fill), so the **alpha** half of the
+2026-07-20 uniform ladder generalizes and the **ink** half only
+ever held against the one badge fill it was eyeballed against —
+#470's darkening took that pair to 2.10:1. Nothing is lost:
+`untintedAppAlpha` already puts the focused app's badge uniquely
+at full alpha, beside a glyph that *is* tinted. It also restores
+the grain the App Bar's own count badge and the sticky/floating
+state marks already had, and matches the platform — the system
+badge is white-on-red unconditionally, with no focused variant.
+The corollary for a *bespoke* badge still stands: choose its
+text colour for contrast against that badge, not from the
+accents. In Settings the `Focused window`
 row greys out (#171) when its only surfaces are untintable:
 native-image glyphs *and* no front-app name shown. Emoji
 identifiers and native app
@@ -2079,7 +2138,7 @@ profile JSON uses (`app_bar.fill_color` vs `space_bar.fill_color` —
 bare wire keys collide between the two bars), so it is **not** a
 `TilingSettings` field and never widens the profile schema; it
 lives in its own global `palettes.json` plus a bundled resource.
-The seven built-ins are read-only with reserved names (a user
+The nine built-ins are read-only with reserved names (a user
 palette can't shadow one — rename/delete are *omitted*, not
 greyed, because the constraint is never-meaningful-for-this-kind,
 not mode-inert); "Kiwi (Default)" is derived from the shipped
@@ -2087,14 +2146,20 @@ struct defaults at load, so it never drifts and doubles as a
 reset. Escalating to a full design-package (bundling geometry,
 fonts, icon source with colors, or a tab restructure) waits on a
 real signal that people want to share the *whole look* as one
-artifact — not merely "more than seven palettes," which
+artifact — not merely "more than nine palettes," which
 save/export/import already answers.
 Every bundled palette keeps `space_bar.focused_item_color` a
 **different hue** from its active accent (the two-accent rule,
 QA 2026-07-19) — Monochrome included: color is the only channel
 the focused-window state has, so even a mono palette carries one
 deliberate accent (`#FFD60A`) rather than erasing the state.
-`ColorPaletteTests` pins the inequality for every bundled
+Since #470 that rule carries a second clause for green-primary
+palettes — the pair must also separate under red-green vision
+loss, which there means a **lightness gap** (see the
+palette-coherence heuristics above). The derived default
+satisfies it; **Kiwi Neon and Kiwi Gold are ratified exceptions**
+pending their own retune (#511). `ColorPaletteTests` pins the inequality for
+every bundled
 palette.
 
 **Plate reach is its own property, not a fourth background.**
