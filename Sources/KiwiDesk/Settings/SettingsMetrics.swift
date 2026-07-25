@@ -64,9 +64,13 @@ enum SettingsMetrics {
     /// constants, not because it shares that axis.
     static let facetControlColumn: CGFloat = 140
 
-    /// The trailing numeric readout of a slider row. Sized for
-    /// the widest value in use ("2000 pt").
-    static let readoutColumn: CGFloat = 64
+    /// The trailing readout of a slider row. Sized for the
+    /// widest STRING in use — which is no longer a number: an
+    /// Auto-sentinel slider prints "Automatic" there (R6/#406),
+    /// longer than "2000 pt". Widened 64 → 84 for it; a locale
+    /// that runs longer still shrinks via `minimumScaleFactor`
+    /// rather than clipping (`PtSlider`).
+    static let readoutColumn: CGFloat = 84
 
     /// `HexColorField`'s label column. The color fields live
     /// in their own two-column grid, deliberately NOT on the

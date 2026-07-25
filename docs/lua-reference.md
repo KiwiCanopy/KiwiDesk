@@ -1461,7 +1461,7 @@ track.set_limit_override("code", 2)
 - A space identifier.
 - A boolean.
 
-**Does:** overrides the automatic-tracks flag for one space.
+**Does:** overrides the auto-track-limit flag for one space.
 
 **Example:**
 

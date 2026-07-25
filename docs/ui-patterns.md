@@ -153,6 +153,31 @@ loud?* — not by which pane it lives in:
 Minimum window size migrated slider → `StepperRow` on this
 rule (#204): it is a precise pt threshold, not a feel knob.
 
+**"Automatic" is the word for a value; "Auto" is the adjective
+in a toggle label (R6/#406).** A value the user *reads* or
+*picks* takes macOS's own full word — the empty-hex colour
+sentinel, an app rule's target, a monitor chip's placement, and
+`PtSlider`'s readout, which prints **Automatic** in place of
+`0 pt` while the Auto sentinel is set. A toggle that turns
+automation on takes "Auto" as an adjective in front of the
+field it gates — "Auto item size" over **Item size**, "Auto
+track limit" over **Track limit** — because "Automatic item
+size" is needlessly long for a label whose noun is already on
+the next row. That adjective form must name **what** is decided
+automatically: "Automatic tracks" was retired because no track
+is itself automatic, only how many of them exist (ui-designer,
+2026-07-25).
+
+The readout costs a metric to honour, and the width was paid
+rather than dodged: `SettingsMetrics.readoutColumn` went
+64 → 84 pt, since the widest string it holds is no longer a
+number ("2000 pt") but that word. It is now the one column
+sized by a *word*, so a locale whose term runs longer shrinks
+via `minimumScaleFactor` instead of clipping — a clipped
+readout reads as a rendering bug, a slightly smaller one does
+not. Every slider's track is 20 pt shorter as a result; that is
+the price of the rule, accepted deliberately.
+
 **Layout Defaults is a per-mode tab strip, not a stacked
 scroll (#204).** The layout modes are a fixed, small,
 mutually-exclusive set (`LayoutMode` minus Floating), so they
@@ -517,7 +542,7 @@ state, and a recognizable rest treatment or list context —
 
 **Inapplicable controls are greyed, not hidden.** When a
 setting makes another control inert — Auto-size grid overrides
-the Columns/Rows steppers (#171), Automatic tracks overrides the
+the Columns/Rows steppers (#171), Auto track limit overrides the
 Track limit stepper (#178), Fill empty space does nothing in a
 rigid grid, the scroll-speed row is dead when Animate focus
 shifts is off, the bars' Content picker is inert on a vertical
@@ -588,8 +613,10 @@ drifted while the rule sat unenforced.
 
 **Sentinel values read as words, not numbers.** A slider gated
 by an Auto toggle stores `0` as the sentinel but its readout
-prints "Auto" while gated — "0 pt" next to a greyed slider
-reads like a broken value (QA 2026-07-19). The slider itself
+prints "Automatic" while gated — "0 pt" next to a greyed slider
+reads like a broken value (QA 2026-07-19). The full word, not
+"Auto": a readout is a value, and the column was widened to
+hold it (see *"Automatic" is the word for a value*, above). The slider itself
 stays floored at 1 so dragging can never write the sentinel
 (#381).
 

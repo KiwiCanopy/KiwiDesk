@@ -20,7 +20,11 @@ struct PtSlider: View {
     var unit: String = "pt"
     /// Opt-in: 0 is this slider's Auto sentinel (an
     /// `AutoGatedGroup` toggle wrote it), so the readout says
-    /// "Auto" instead of "0 pt". Explicit, never inferred from
+    /// "Automatic" instead of "0 pt" — the full word, because a
+    /// readout is a VALUE the user reads, not the adjective in a
+    /// toggle label (R6/#406). It is the widest thing the readout
+    /// column has to hold; see `SettingsMetrics.readoutColumn`.
+    /// Explicit, never inferred from
     /// the range — a 1-floored slider without a sentinel must
     /// keep printing its number (QA 2026-07-19).
     var autoAtZero: Bool = false
@@ -42,7 +46,7 @@ struct PtSlider: View {
             )
             Text(
                 autoAtZero && value == 0
-                    ? L("settings.readout.auto", "Auto")
+                    ? L("settings.readout.auto", "Automatic")
                     : "\(Int(value)) \(unit)"
             )
             .frame(
@@ -51,6 +55,12 @@ struct PtSlider: View {
             )
             .foregroundStyle(.secondary)
             .font(.system(.body, design: .monospaced))
+            // A locale whose word for "Automatic" runs longer
+            // than the column shrinks rather than truncating —
+            // a clipped readout reads as a rendering bug, a
+            // slightly smaller one does not.
+            .lineLimit(1)
+            .minimumScaleFactor(0.75)
         }
     }
 }
