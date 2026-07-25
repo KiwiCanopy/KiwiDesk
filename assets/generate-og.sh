@@ -7,8 +7,11 @@
 #
 #   og-banner.svg  →  og-banner.jpg   (1200×630 link-preview banner)
 #
-# The mark is referenced by relative href, so KiwiDesk_mark.svg must sit
-# next to og-banner.svg for qlmanage to resolve it.
+# The mark is referenced by relative href, so logo.svg must sit next to
+# og-banner.svg for qlmanage to resolve it. It points at the ONE mark
+# master on purpose (#479): the banner used to embed a private copy,
+# which kept the retired teal shell for a whole rebrand because nobody
+# remembered it was a copy.
 
 set -eu
 

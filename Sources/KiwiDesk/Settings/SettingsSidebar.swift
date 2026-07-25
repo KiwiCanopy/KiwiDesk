@@ -15,7 +15,8 @@ struct SettingsSidebar: View {
     /// the instant a profile exists, back if the last one is
     /// deleted. Never a gate.
     let spotlightProfiles: Bool
-    /// Swaps the identity mark to the golden variant on dark.
+    /// Tones the inactive destination card; the identity mark no
+    /// longer branches on appearance (#479).
     @Environment(\.colorScheme) private var colorScheme
     /// Solidifies the card wash while the window is inactive
     /// (#297) — per-element fades ride `InactiveDimmed` instead.
@@ -199,13 +200,10 @@ struct SettingsSidebar: View {
             )
     }
 
-    /// The golden dark mark on dark, colour mark on light;
-    /// falls back across variants if one resource is missing.
-    private var mark: NSImage? {
-        colorScheme == .dark
-            ? BrandAssets.appMarkDark ?? BrandAssets.appMark
-            : BrandAssets.appMark
-    }
+    /// One mark in both appearances (#479): the symbol holds
+    /// its kiwi green rather than re-hueing per theme, so there
+    /// is nothing here to branch on.
+    private var mark: NSImage? { BrandAssets.appMark }
 
     private var visibleWholeApp: [SettingsDestination] {
         SettingsDestination.wholeApp.filter {
