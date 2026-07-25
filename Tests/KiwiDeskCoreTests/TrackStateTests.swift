@@ -291,7 +291,7 @@ struct TrackSpawnTests {
         // A fixed cap needs automatic off (#178); count alone is
         // the remembered magnitude, inert while auto is on.
         over.autoTracks = false
-        over.count = 2
+        over.limit = 2
         state.trackParams.override["1"] = over
         let w = ids(3)
         for id in w {

@@ -8,8 +8,8 @@ import Testing
 /// `glassAvailable`. The actual glass rendering is AppKit and
 /// OS-gated (exercised by hand); these pin the pure, portable
 /// behavior — the gate, `hasBox`, round-trip, and command parse.
-@Suite("Tab background — Liquid Glass")
-struct TabBackgroundGlassTests {
+@Suite("Background style — Liquid Glass")
+struct BackgroundStyleGlassTests {
     @Test("glassEnabled gates the finish on OS capability")
     func glassGate() {
         var style = AppBarStyle()
@@ -22,9 +22,9 @@ struct TabBackgroundGlassTests {
     @Test("hasBox is the Boxed shape without the glass finish")
     func hasBox() {
         var style = AppBarStyle()
-        style.tabBackground = .boxed
+        style.backgroundStyle = .boxed
         #expect(style.hasBox == !style.glassEnabled)
-        style.tabBackground = .plain
+        style.backgroundStyle = .plain
         #expect(style.hasBox == false)
     }
 
@@ -32,14 +32,14 @@ struct TabBackgroundGlassTests {
     func roundTrip() throws {
         var style = AppBarStyle()
         style.liquidGlass = true
-        style.tabBackground = .plain
+        style.backgroundStyle = .plain
         let data = try JSONEncoder().encode(style)
         let back = try JSONDecoder().decode(
             AppBarStyle.self,
             from: data
         )
         #expect(back.liquidGlass == true)
-        #expect(back.tabBackground == .plain)
+        #expect(back.backgroundStyle == .plain)
     }
 
     @Test("both bar parsers accept liquid_glass")

@@ -255,7 +255,7 @@ struct MoveToTrackTests {
         // the overflow track (trackCap = count + 1 = 2), already
         // at the cap: no third track can open.
         setHeads(core, space: space, heads: [WindowID(2)])
-        core.execute("track.set_count", args: [.number(1)])
+        core.execute("track.set_limit", args: [.number(1)])
         #expect(
             !core.execute(
                 "move_to_track",

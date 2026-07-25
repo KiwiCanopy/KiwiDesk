@@ -1,20 +1,20 @@
 import Foundation
 
-/// The sticky-window indicator settings (#414), stored
+/// The sticky-window mark settings (#414), stored
 /// top-level as `sticky` in profile JSON and set from Lua via
 /// `sticky.set_*`. One knob so far: the on-window glyph that
-/// marks a sticky window (`Borders/StickyIndicatorManager`), a
+/// marks a sticky window (`Borders/StickyMarkManager`), a
 /// sibling of the focus border — borders are optional and often
 /// off, so the mark must not ride them.
 ///
 /// The setter applies unconditionally: turning the glyph off
 /// with the Space Bar also off is a valid deliberate
-/// zero-indicator state from Lua (the `dim_factor` precedent).
+/// zero-mark state from Lua (the `dim_factor` precedent).
 /// The GUI's forced-ON coverage guard is presentation only,
 /// never a clamp here.
 public struct StickyStyle: Sendable, Equatable {
     /// The sticky mark — ONE glyph everywhere (#414): the
-    /// on-window chip and the Space Bar badge both read this,
+    /// on-window mark and the Space Bar badge both read this,
     /// so the two surfaces can never drift apart. Lives here
     /// (the sticky namespace), not in a Bar view, so neither
     /// subsystem reaches laterally into the other for it.
@@ -36,7 +36,7 @@ public struct StickyStyle: Sendable, Equatable {
     public static let displaySymbolName = "pin.fill"
 
     /// The mark glyph for a scope, or nil for `.none` (no mark).
-    /// One lookup so the on-window chip and the Space Bar badge
+    /// One lookup so the on-window mark and the Space Bar badge
     /// pick the same per-scope glyph.
     public static func symbolName(for scope: StickyScope) -> String? {
         switch scope {
@@ -49,10 +49,10 @@ public struct StickyStyle: Sendable, Equatable {
     /// On-window sticky glyph, on by default: a sticky window
     /// can look identical to a normal one, and unlike a focus
     /// border there is no native cue to fall back on.
-    public var indicator = true
+    public var mark = true
 
     /// The sticky mark's tint (#429). One value the on-window
-    /// chip glyph AND the Space Bar sticky badge both read (the
+    /// mark glyph AND the Space Bar sticky badge both read (the
     /// "one glyph everywhere" family extends to color), so the
     /// two surfaces can never drift to different colors. Empty =
     /// "Automatic": the adaptive `.labelColor` that flips with
@@ -70,7 +70,7 @@ extension StickyStyle: Codable {
     /// JSON keys are the Lua setters (`sticky.set_*`) minus the
     /// `set_` verb — the `sticky` nesting carries the namespace.
     enum CodingKeys: String, CodingKey, CaseIterable {
-        case indicator
+        case mark
         case color
     }
 
@@ -81,11 +81,11 @@ extension StickyStyle: Codable {
             keyedBy: CodingKeys.self
         )
         let defaults = Self()
-        indicator =
+        mark =
             try container.decodeIfPresent(
                 Bool.self,
-                forKey: .indicator
-            ) ?? defaults.indicator
+                forKey: .mark
+            ) ?? defaults.mark
         color =
             try container.decodeIfPresent(
                 String.self,

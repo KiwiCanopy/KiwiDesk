@@ -7,7 +7,7 @@ extension NSColor {
     /// from `init(kiwiHex:)`, whose parse-fail fallback is the
     /// accent color: an empty mark color means "adapt with
     /// appearance", not "broken", so it must land on the adaptive
-    /// fallback, never the accent. Shared by the sticky chip, both
+    /// fallback, never the accent. Shared by the sticky mark, both
     /// Space Bar state badges, and the Lua/CLI setters so every
     /// path resolves "Automatic" identically.
     static func mark(hex: String, fallback: NSColor) -> NSColor {
@@ -20,7 +20,7 @@ extension NSColor {
     /// second manual knob, so any picked fill keeps a readable mark
     /// (a guardrail on legibility, never on taste). Uses the sRGB
     /// relative-luminance weights, biased slightly toward white
-    /// (threshold 0.6) since a mid-tone chip reads better with
+    /// (threshold 0.6) since a mid-tone mark reads better with
     /// white than black. Alpha is ignored — the fill's own hue is
     /// what the glyph sits on.
     var contrastingGlyph: NSColor {

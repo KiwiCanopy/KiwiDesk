@@ -55,11 +55,11 @@ extension KiwiCore {
             default:
                 tiler.settings[keyPath: visual].fill = flag
             }
-        case "border_thickness":
+        case "border_width":
             guard let thickness = args.first?.numberValue else {
                 return .fail("expected thickness (pt)")
             }
-            tiler.settings[keyPath: visual].borderThickness =
+            tiler.settings[keyPath: visual].borderWidth =
                 max(0, thickness)
         case "border_alignment":
             guard let val = args.first?.stringValue,

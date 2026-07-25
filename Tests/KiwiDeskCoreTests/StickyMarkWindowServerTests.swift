@@ -4,12 +4,12 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The sticky chip rides the ring's WindowServer stream (#414 QA):
+/// The sticky mark rides the ring's WindowServer stream (#414 QA):
 /// a re-click on an ALREADY-focused window raises it above its own
-/// chip but fires no AX focus event, so the chip's only re-assert is
+/// mark but fires no AX focus event, so the mark's only re-assert is
 /// the WS `.reorder` tee — which must reach a sticky window even when
 /// it wears no ring. These pin that plumbing at the manager boundary.
-@Suite("Sticky chip WindowServer tee")
+@Suite("Sticky mark WindowServer tee")
 @MainActor
 struct StickyChipWindowServerTeeTests {
     private func reorder(
@@ -24,15 +24,15 @@ struct StickyChipWindowServerTeeTests {
         let border = BorderManager()
         var reasserted: [WindowID] = []
         border.onWindowReordered = { reasserted.append($0) }
-        // Window 7 wears a chip but no ring — sticky-tracked only.
+        // Window 7 wears a mark but no ring — sticky-tracked only.
         // The old top-level overlay guard dropped this event,
-        // burying the chip on a re-click; the scoped guard admits it.
+        // burying the mark on a re-click; the scoped guard admits it.
         border.setStickyTracked([WindowID(7)])
         reorder(border, 7)
         #expect(reasserted == [WindowID(7)])
     }
 
-    @Test("Unhide (followAndReorder) also tees the chip re-assert")
+    @Test("Unhide (followAndReorder) also tees the mark re-assert")
     func unhideTeesReassert() {
         let border = BorderManager()
         var reasserted: [WindowID] = []
@@ -53,8 +53,8 @@ struct StickyChipWindowServerTeeTests {
         #expect(reasserted.isEmpty)
     }
 
-    @Test("chipUsesWindowServerTracking follows the watch set")
-    func chipTrackingReflectsStickySet() {
+    @Test("markUsesWindowServerTracking follows the watch set")
+    func markTrackingReflectsStickySet() {
         let border = BorderManager()
         border.setStickyTracked([WindowID(7)])
         #expect(border.stickyTracked == [WindowID(7)])
@@ -63,30 +63,30 @@ struct StickyChipWindowServerTeeTests {
         // which resets `skyLightActive` while the runtime is not
         // started in unit tests).
         border.skyLightActive = true
-        #expect(border.chipUsesWindowServerTracking(WindowID(7)))
+        #expect(border.markUsesWindowServerTracking(WindowID(7)))
         // A window we do not track stays on the AX-echo path.
-        #expect(!border.chipUsesWindowServerTracking(WindowID(9)))
+        #expect(!border.markUsesWindowServerTracking(WindowID(9)))
     }
 
     @Test("A dead stream never claims WS tracking")
     func noTrackingWhenStreamDown() {
         let border = BorderManager()
         border.setStickyTracked([WindowID(7)])
-        // `skyLightActive` false — the chip must keep following AX
+        // `skyLightActive` false — the mark must keep following AX
         // echoes, never stand down waiting on a stream that is off.
-        #expect(!border.chipUsesWindowServerTracking(WindowID(7)))
+        #expect(!border.markUsesWindowServerTracking(WindowID(7)))
     }
 }
 
-/// The chip manager's WS-driven entry points are no-ops for a window
+/// The mark manager's WS-driven entry points are no-ops for a window
 /// wearing no mark — the tee fires for every watched window (rings
 /// included), so a re-assert / reposition of an unmarked id must not
-/// crash or conjure a chip.
-@Suite("Sticky chip manager WS entry points")
+/// crash or conjure a mark.
+@Suite("Sticky mark manager WS entry points")
 @MainActor
 struct StickyChipManagerEntryPointTests {
-    private func spec(_ id: UInt32) -> StickyIndicatorManager.Spec {
-        StickyIndicatorManager.Spec(
+    private func spec(_ id: UInt32) -> StickyMarkManager.Spec {
+        StickyMarkManager.Spec(
             window: WindowID(id),
             frame: CGRect(x: 0, y: 0, width: 400, height: 300)
         )
@@ -94,7 +94,7 @@ struct StickyChipManagerEntryPointTests {
 
     @Test("reassert / reposition on an unmarked window are no-ops")
     func unmarkedEntryPointsAreNoOps() {
-        let manager = StickyIndicatorManager()
+        let manager = StickyMarkManager()
         manager.reassert(WindowID(1))
         manager.reposition(
             WindowID(1),
@@ -105,12 +105,12 @@ struct StickyChipManagerEntryPointTests {
 
     @Test("follow stands down while the WindowServer tracks it")
     func followSuppressedWhenTracked() {
-        let manager = StickyIndicatorManager()
+        let manager = StickyMarkManager()
         let moved = CGRect(x: 9, y: 9, width: 9, height: 9)
         manager.sync([spec(1)])
         manager.isWindowServerTracked = { $0 == WindowID(1) }
         // WS-tracked: the laggy AX-echo `follow` must NOT move the
-        // chip (the WS `reposition` owns the frame). Without the
+        // mark (the WS `reposition` owns the frame). Without the
         // guard this call would advance `lastFrame` to `moved`.
         manager.follow(WindowID(1), windowFrame: moved)
         #expect(manager.lastFrame(WindowID(1)) != moved)

@@ -24,11 +24,11 @@ final class AppBarItemView: NSView {
     }()
     let label = NSTextField(labelWithString: "")
     let accent = NSView()
-    /// Rounds/clips only the active mark (and ring) to the tab's
-    /// corner without clipping the tab itself — so the mark cuts on
+    /// Rounds/clips only the active mark (and ring) to the item's
+    /// corner without clipping the item itself — so the mark cuts on
     /// the curve while the corner badge stays whole (owner
-    /// 2026-07-20). Covers the tab bounds; the accent lives inside.
-    /// Flipped to match the tab, so the accent's y math is unchanged.
+    /// 2026-07-20). Covers the item bounds; the accent lives inside.
+    /// Flipped to match the item, so the accent's y math is unchanged.
     let accentClip = AppBarOverlay.FlippedView()
     let badge: NSTextField = {
         let tf = NSTextField(labelWithString: "")
@@ -51,10 +51,10 @@ final class AppBarItemView: NSView {
     var edge: AppBarEdge { style.edge }
     private(set) var isActive = false
     private(set) var count = 1
-    /// Whether this tab sits at the run's leading / trailing end.
+    /// Whether this item sits at the run's leading / trailing end.
     /// Set by the overlay each render (index 0 / last). Under Plain
-    /// the shared plate rounds only there, so only these tabs clip
-    /// their outer corner; Boxed clips every tab (its own box).
+    /// the shared plate rounds only there, so only these items clip
+    /// their outer corner; Boxed clips every item (its own box).
     var isFirstInRun = false
     var isLastInRun = false
     private var isHovered = false
@@ -230,7 +230,7 @@ final class AppBarItemView: NSView {
         applyCornerRadius()
     }
 
-    /// The tab's bar-cross dimension (its thickness), which the
+    /// The item's bar-cross dimension (its thickness), which the
     /// corner radius resolves against.
     var crossThickness: CGFloat {
         horizontal ? bounds.height : bounds.width
@@ -239,7 +239,7 @@ final class AppBarItemView: NSView {
     /// Round the box fill to `cornerRoundness`% of a capsule, and
     /// clip the active mark to the same corner through `accentClip`
     /// so it cuts on the curve like the Space Bar (owner 2026-07-20)
-    /// instead of a square end — the tab itself does NOT clip, so a
+    /// instead of a square end — the item itself does NOT clip, so a
     /// corner count badge stays whole. Which corners round follows
     /// `maskedCorners`.
     func applyCornerRadius() {
@@ -253,7 +253,7 @@ final class AppBarItemView: NSView {
         accentClip.layer?.maskedCorners = maskedCorners
     }
 
-    /// Boxed clips all four corners (each tab is its own box). Plain
+    /// Boxed clips all four corners (each item is its own box). Plain
     /// clips only where the shared plate actually rounds — the run's
     /// outer end — so the mark cuts on the curve there and runs
     /// square (touching a neighbour) between (owner 2026-07-20). The
@@ -286,8 +286,8 @@ final class AppBarItemView: NSView {
             : style.itemColor
     }
 
-    /// Whether this tab paints a box behind its content: always
-    /// when `boxed`, and on hover (a `plain` tab reveals a box
+    /// Whether this item paints a box behind its content: always
+    /// when `boxed`, and on hover (a `plain` item reveals a box
     /// only while hovered). `plain` is otherwise boxless in every
     /// combo, including the active ring (which is a pure stroke).
     private var hasBox: Bool {
@@ -306,9 +306,9 @@ final class AppBarItemView: NSView {
         return style.hasBox ? style.fillColor : "#00000000"
     }
 
-    /// How the active tab is marked, gated on the indicator and
-    /// orthogonal to `tabBackground` (the background no longer
-    /// secretly picks the accent). Only the active tab, and never
+    /// How the active item is marked, gated on the indicator and
+    /// orthogonal to `backgroundStyle` (the background no longer
+    /// secretly picks the accent). Only the active item, and never
     /// under `gap` (its slot is hidden entirely).
     enum AccentMode { case none, outline, edgeMark }
 

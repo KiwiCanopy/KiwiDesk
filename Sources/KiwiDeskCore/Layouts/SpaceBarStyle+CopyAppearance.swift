@@ -53,16 +53,16 @@ extension SpaceBarStyle {
         switch key {
         case "alignment": alignment = appBar.alignment
         case "thickness": thickness = appBar.thickness
-        case "box_size": boxSize = appBar.boxSize
-        case "box_gap": boxGap = appBar.boxGap
+        case "item_size": itemSize = appBar.itemSize
+        case "item_gap": itemGap = appBar.itemGap
         case "font_size": fontSize = appBar.fontSize
         case "icon_source": iconSource = appBar.iconSource
-        case "tab_background":
-            tabBackground = appBar.tabBackground
+        case "background_style":
+            backgroundStyle = appBar.backgroundStyle
         case "liquid_glass":
             liquidGlass = appBar.liquidGlass
-        case "tab_background_fit":
-            tabBackgroundFit = appBar.tabBackgroundFit
+        case "background_fit":
+            backgroundFit = appBar.backgroundFit
         case "active_indicator":
             activeIndicator = appBar.activeIndicator
         case "corner_roundness":

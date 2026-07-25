@@ -6,15 +6,15 @@ import SwiftUI
 /// mark is its overlay sibling.
 ///
 /// Coverage guard (GUI-only, #171 grey-don't-hide): with the
-/// Space Bar off, the mark is the ONLY sticky indicator, so the
+/// Space Bar off, this is the ONLY sticky mark, so the
 /// toggle renders forced ON and disabled — sticky state must
 /// never be invisible from the GUI. The stored value is not
 /// touched, and Lua stays free to set any combination
-/// (`sticky.set_indicator`, the dim_factor precedent). The
+/// (`sticky.set_mark`, the dim_factor precedent). The
 /// guard keys on the Space Bar (never the per-layout App Bar);
 /// `SpaceBarStyle.enabled` is deliberately a single global
 /// bool, so this is one `.disabled`, no per-space cases.
-struct StickyIndicatorEditor: View {
+struct StickyMarkEditor: View {
     @ObservedObject var model: SettingsModel
 
     private var spaceBarOn: Bool {
@@ -32,20 +32,20 @@ struct StickyIndicatorEditor: View {
         ) {
             ToggleRow(
                 label: L(
-                    "sticky.indicator",
+                    "sticky.mark",
                     "Show mark on sticky windows"
                 ),
                 isOn: spaceBarOn
                     ? $model.config.settings.stickyStyle
-                        .indicator
+                        .mark
                     : .constant(true),
                 help: L(
-                    "sticky.indicator.help",
+                    "sticky.mark.help",
                     "A sticky window can look identical to a "
-                        + "normal one, so KiwiDesk marks it "
-                        + "with a small badge in its top-right "
-                        + "corner. The Space Bar shows its own "
-                        + "sticky badge either way."
+                        + "normal one, so KiwiDesk draws a small "
+                        + "mark in its top-right corner. The "
+                        + "Space Bar shows its own sticky badge "
+                        + "either way."
                 )
             )
             .disabled(!spaceBarOn)
@@ -54,12 +54,12 @@ struct StickyIndicatorEditor: View {
                 // the `?` popover (#94).
                 CrossReferenceRow(
                     prose: L(
-                        "sticky.indicator.forced",
+                        "sticky.mark.forced",
                         "On — the Space Bar is off, so this "
-                            + "is the only sticky indicator."
+                            + "is the only sticky mark."
                     ),
                     linkTitle: L(
-                        "sticky.indicator.forced_link",
+                        "sticky.mark.forced_link",
                         "Space Bar"
                     ),
                     destination: .bars
@@ -71,7 +71,7 @@ struct StickyIndicatorEditor: View {
     }
 
     /// The sticky/floating mark tints (#429): the sticky color
-    /// paints the on-window chip glyph and the Space Bar sticky
+    /// paints the on-window mark glyph and the Space Bar sticky
     /// badge; the floating color paints the Space Bar floating
     /// badge. Both default to Automatic (the adaptive system
     /// label color) — colors gate nothing, so they group as a
@@ -92,7 +92,7 @@ struct StickyIndicatorEditor: View {
         // badge (`KiwiCore+SpaceBar`), so this tints nothing
         // while the bar is off — greyed, not hidden (#171).
         // The sticky color above is deliberately NOT gated: it
-        // also paints the on-window chip, so it stays live.
+        // also paints the on-window mark, so it stays live.
         HexColorField(
             label: L("floating.color", "Floating"),
             a11yLabel: L(

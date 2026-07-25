@@ -28,8 +28,8 @@ public final class KiwiCore {
     /// window. Driven by `updateBorders()` inside `retile()`.
     public let borders = BorderManager()
     /// On-window sticky marks (#414): a border sibling,
-    /// driven by `updateStickyIndicators()` inside `retile()`.
-    public let stickyIndicators = StickyIndicatorManager()
+    /// driven by `updateStickyMarks()` inside `retile()`.
+    public let stickyMarks = StickyMarkManager()
     public let mouse = MouseTracker()
     public let profiles: ProfileManager
     public let crash: CrashRecovery
@@ -328,7 +328,7 @@ public final class KiwiCore {
         // animation tee (`tiler.onFrameApplied`).
         updateBorders()
         // The sticky marks ride the same freshness (#414).
-        updateStickyIndicators()
+        updateStickyMarks()
         // An animated relayout (spawn, close, mode/gap change)
         // restacks windows, so WindowServer fires the same
         // hide/reorder events as a drag-swap — which can leave a

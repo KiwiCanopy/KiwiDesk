@@ -1,6 +1,6 @@
 import AppKit
 
-/// The on-window sticky mark (#414): a small chip wearing the
+/// The on-window sticky mark (#414): a small mark wearing the
 /// sticky symbol, hugging its window's top-RIGHT corner
 /// (top-left belongs to the traffic lights). A border sibling,
 /// deliberately independent of `border.enabled` — borders are
@@ -21,10 +21,10 @@ import AppKit
 /// back on a foreign space — so nothing changes for the common
 /// case (ui-designer 2026-07-21).
 @MainActor
-final class StickyIndicatorOverlay {
-    /// Collapsed chip square and its inset from the window
+final class StickyMarkOverlay {
+    /// Collapsed mark square and its inset from the window
     /// corner. Final size picked by eye (#414).
-    static let size: CGFloat = StickyIndicatorPlate.size
+    static let size: CGFloat = StickyMarkPlate.size
     static let inset: CGFloat = 6
 
     /// The pill's own HUD timings — expand settles in, holds long
@@ -40,9 +40,9 @@ final class StickyIndicatorOverlay {
     private static let collapseDuration: TimeInterval = 0.16
 
     private var panel: NSPanel?
-    private let plate = StickyIndicatorPlate()
+    private let plate = StickyMarkPlate()
     private let target: CGWindowID
-    /// The scope glyph this chip currently wears (#445): `infinity`
+    /// The scope glyph this mark currently wears (#445): `infinity`
     /// (global) or `pin.fill` (display). Set every sync before
     /// `update`, so a scope flip lands on the next retile.
     private var symbolName = StickyStyle.symbolName
@@ -55,7 +55,7 @@ final class StickyIndicatorOverlay {
     /// so a rapid series of rejected drags never flickers.
     private var expandWork: DispatchWorkItem?
     private var collapseWork: DispatchWorkItem?
-    /// The last window frame this chip positioned against (AX
+    /// The last window frame this mark positioned against (AX
     /// coords) — the observable seam that lets the manager's
     /// WS-tracking guard be tested (a suppressed `follow` leaves
     /// this unchanged; `reposition` advances it).
@@ -65,11 +65,11 @@ final class StickyIndicatorOverlay {
         target = window
     }
 
-    /// Places the chip at `frame`'s top-right (AX coords), its
+    /// Places the mark at `frame`'s top-right (AX coords), its
     /// right edge fixed at the window corner so the glyph never
     /// moves as the pill widens leftward. Position only —
     /// stacking is `order()`'s job, asserted on sync, never per
-    /// tick: a WindowServer reorder per move event made the chip
+    /// tick: a WindowServer reorder per move event made the mark
     /// visibly lag behind its window (the borders' one-order-per-
     /// sync rule, owner QA 2026-07-21).
     func update(frame: CGRect) {
@@ -77,7 +77,7 @@ final class StickyIndicatorOverlay {
         let panel = self.panel ?? makePanel()
         self.panel = panel
         panel.setFrame(
-            chipRect(for: frame, width: currentWidth),
+            markRect(for: frame, width: currentWidth),
             display: false
         )
         if !panel.isVisible {
@@ -85,13 +85,13 @@ final class StickyIndicatorOverlay {
         }
     }
 
-    /// Stacks the chip directly above its target window. Called
+    /// Stacks the mark directly above its target window. Called
     /// on sync (steady state), not per follow tick.
     func order() {
         panel?.order(.above, relativeTo: Int(target))
     }
 
-    /// Tints the chip's glyph (and, when expanded, the pill's
+    /// Tints the mark's glyph (and, when expanded, the pill's
     /// home-space name) to the sticky mark color (#429); empty =
     /// "Automatic" (adaptive `.labelColor`). Set every sync before
     /// `update`, so a color change lands on the next retile.
@@ -99,7 +99,7 @@ final class StickyIndicatorOverlay {
         plate.setMarkColor(hex)
     }
 
-    /// Sets the chip's scope glyph (#445). Applied to the live
+    /// Sets the mark's scope glyph (#445). Applied to the live
     /// plate at once when the panel already exists; otherwise
     /// `makePanel` reads `symbolName` on first show.
     func setSymbol(_ name: String) {
@@ -113,7 +113,7 @@ final class StickyIndicatorOverlay {
         plate.symbol.image = NSImage(
             systemSymbolName: symbolName,
             accessibilityDescription: L(
-                "sticky.indicator.ax",
+                "sticky.mark.ax",
                 "Sticky window"
             )
         )
@@ -126,7 +126,7 @@ final class StickyIndicatorOverlay {
         collapseWork = nil
         // Retire in the collapsed state so a later re-show (a
         // `hide` not paired with a retire) can't resurrect the
-        // chip mid-pill.
+        // mark mid-pill.
         currentWidth = Self.size
         plate.setNameShown(false, animated: false, duration: 0)
         panel?.orderOut(nil)
@@ -134,11 +134,11 @@ final class StickyIndicatorOverlay {
 
     /// Waits `delay` for the snap-back animation to settle (so the
     /// pill doesn't chase a still-moving window), then briefly
-    /// expands the chip into a pill showing `format` with `mark`
+    /// expands the mark into a pill showing `format` with `mark`
     /// substituted, then auto-collapses (#421). `delay` tracks the
     /// caller's relayout duration, so a slow/long snap-back holds
     /// the pill back exactly as long as the window travels. A no-op
-    /// if the chip isn't shown.
+    /// if the mark isn't shown.
     func flash(format: String, mark: SpaceMark, delay: TimeInterval) {
         guard panel != nil, lastFrame != nil else { return }
         expandWork?.cancel()
@@ -181,7 +181,7 @@ final class StickyIndicatorOverlay {
     }
 
     /// Animates plate width and the name/shape morph together.
-    /// `StickyIndicatorPlate.layout()` reflows the glyph and name
+    /// `StickyMarkPlate.layout()` reflows the glyph and name
     /// from the live bounds each animation step, so the glyph
     /// holds its screen position; the plate owns the name fade and
     /// corner radius (`setNameShown`). Reduce Motion swaps the
@@ -192,7 +192,7 @@ final class StickyIndicatorOverlay {
         on frame: CGRect
     ) {
         currentWidth = width
-        let rect = chipRect(for: frame, width: width)
+        let rect = markRect(for: frame, width: width)
         guard let panel else { return }
 
         if reduceMotion {
@@ -249,18 +249,18 @@ final class StickyIndicatorOverlay {
 
     /// The mark's screen rect for a window `frame`: right edge
     /// pinned at the corner (`inset` in), `width` growing left.
-    private func chipRect(
+    private func markRect(
         for frame: CGRect,
         width: CGFloat
     ) -> CGRect {
-        let chip = CGRect(
+        let mark = CGRect(
             x: frame.maxX - width - Self.inset,
             y: frame.minY + Self.inset,
             width: width,
             height: Self.size
         )
         return GeometryUtils.flip(
-            chip,
+            mark,
             primaryHeight: GeometryUtils.primaryHeight
         )
     }
@@ -281,13 +281,13 @@ final class StickyIndicatorOverlay {
         panel.backgroundColor = .clear
         panel.hasShadow = false
         panel.ignoresMouseEvents = true
-        // Normal level + relative order: the chip shares its
+        // Normal level + relative order: the mark shares its
         // target's band so windows above the target also cover
-        // the chip (the border panel's stacking, inverted).
+        // the mark (the border panel's stacking, inverted).
         panel.level = .normal
         panel.isReleasedWhenClosed = false
         panel.animationBehavior = .none
-        // `.transient` hides this chip/pill overlay in Exposé and
+        // `.transient` hides this mark/pill overlay in Exposé and
         // Mission Control at the compositor level, so it vanishes
         // with the swipe and restores on exit with no handler lag.
         panel.collectionBehavior = [

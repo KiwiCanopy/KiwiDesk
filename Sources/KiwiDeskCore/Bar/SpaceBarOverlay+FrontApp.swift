@@ -130,7 +130,7 @@ extension SpaceBarOverlay {
     }
 
     /// Axis length the segment will consume, for the render
-    /// pass's alignment total — the leading box gap, the
+    /// pass's alignment total — the leading item gap, the
     /// divider and glyph (`layoutDivider`/`layoutFrontGlyph`
     /// mirrors), and on horizontal bars the glyph→name pad
     /// plus the measured name. Vertical bars end at the glyph
@@ -150,13 +150,13 @@ extension SpaceBarOverlay {
         let pad = SpaceBarItemView.pad
         let cell = max(depth - pad * 2, 8)
         // Mirror the placement (#409): leading gap, rule, symmetric
-        // `boxGap` right gap, glyph cell, plus the chip's `pad`
+        // `itemGap` right gap, glyph cell, plus the chip's `pad`
         // inset each side — which also reserves the pinned band.
         let chip = style.hasBox || wantsBoxGlass(style)
         let inset = chip ? pad : 0
         var extent =
-            style.boxGap + BarDivider.sectionThickness
-            + style.boxGap + inset + cell + inset
+            style.itemGap + BarDivider.sectionThickness
+            + style.itemGap + inset + cell + inset
         if horizontal {
             extent += pad
             let size =
@@ -223,13 +223,13 @@ extension SpaceBarOverlay {
             thickness: BarDivider.sectionThickness,
             fullDepth: true
         )
-        // Symmetric gap (#409): `boxGap` on the rule's right to
-        // match the `boxGap` the run cursor already left on its
+        // Symmetric gap (#409): `itemGap` on the rule's right to
+        // match the `itemGap` the run cursor already left on its
         // left. Under a chip (Boxed / per-box glass) the content is
-        // `pad`-inset, so the chip EDGE lands `boxGap` out; Plain
-        // has no chip, so the bare glyph sits `boxGap` out.
+        // `pad`-inset, so the chip EDGE lands `itemGap` out; Plain
+        // has no chip, so the bare glyph sits `itemGap` out.
         let chip = style.hasBox || wantsBoxGlass(style)
-        return BarDivider.sectionThickness + style.boxGap
+        return BarDivider.sectionThickness + style.itemGap
             + (chip ? SpaceBarItemView.pad : 0)
     }
 

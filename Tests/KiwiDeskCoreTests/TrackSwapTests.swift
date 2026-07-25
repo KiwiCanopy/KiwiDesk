@@ -169,7 +169,7 @@ struct TrackSwapTests {
         // and 4 into one overflow slot with no marker identity.
         // Window 3 sits in that folded slot, so a swap would
         // scramble the composition (review H1) and is refused.
-        core.execute("track.set_count", args: [.number(2)])
+        core.execute("track.set_limit", args: [.number(2)])
         let response = core.execute(
             "track.swap",
             args: [.string("next")]
@@ -184,7 +184,7 @@ struct TrackSwapTests {
     func normalTracksSwapDespiteFold() {
         let core = makeCore()
         let space = makeTrackSpace(core, windows: 4, focus: 1)
-        core.execute("track.set_count", args: [.number(2)])
+        core.execute("track.set_limit", args: [.number(2)])
         // Render: [1] [2] [3, 4 overflow]. Swapping the two
         // NORMAL tracks (1 and 2) is clean — neither is the
         // folded slot — so it succeeds even though 3 and 4 fold
@@ -208,7 +208,7 @@ struct TrackSwapTests {
     func capWithoutMergeSwaps() {
         let core = makeCore()
         let space = makeTrackSpace(core, windows: 2, focus: 1)
-        core.execute("track.set_count", args: [.number(2)])
+        core.execute("track.set_limit", args: [.number(2)])
         #expect(
             core.execute(
                 "track.swap",

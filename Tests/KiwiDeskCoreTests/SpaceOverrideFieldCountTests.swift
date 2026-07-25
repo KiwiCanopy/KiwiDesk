@@ -49,7 +49,7 @@ struct SpaceOverrideFieldCountTests {
         var track = TrackOverride()
         track.axis = .horizontal
         track.autoTracks = true
-        track.count = 4
+        track.limit = 4
         track.overflowStyle = .cascadeAll
 
         return [

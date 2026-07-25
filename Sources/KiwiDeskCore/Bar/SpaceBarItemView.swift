@@ -156,7 +156,7 @@ final class SpaceBarItemView: NSView {
     }
 
     /// The floating badge's mark. The sticky mark is shared
-    /// with the on-window chip — see `StickyStyle.symbolName`.
+    /// with the on-window mark — see `StickyStyle.symbolName`.
     static let floatingSymbol = "macwindow.on.rectangle"
 
     @available(*, unavailable)

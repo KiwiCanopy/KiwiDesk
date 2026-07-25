@@ -32,14 +32,14 @@ extension SpaceBarStyle {
         case edge
         case alignment
         case thickness
-        case boxSize = "box_size"
-        case boxGap = "box_gap"
+        case itemSize = "item_size"
+        case itemGap = "item_gap"
         case fontSize = "font_size"
         case glyphCap = "glyph_cap"
         case iconSource = "icon_source"
-        case tabBackground = "tab_background"
+        case backgroundStyle = "background_style"
         case liquidGlass = "liquid_glass"
-        case tabBackgroundFit = "tab_background_fit"
+        case backgroundFit = "background_fit"
         case activeIndicator = "active_indicator"
         case cornerRoundness = "corner_roundness"
         case dimFactor = "dim_factor"
@@ -88,16 +88,16 @@ extension SpaceBarStyle {
                 forKey: .thickness
             ) ?? defaults.thickness
         )
-        boxSize =
+        itemSize =
             try container.decodeIfPresent(
                 CGFloat.self,
-                forKey: .boxSize
-            ) ?? defaults.boxSize
-        boxGap =
+                forKey: .itemSize
+            ) ?? defaults.itemSize
+        itemGap =
             try container.decodeIfPresent(
                 CGFloat.self,
-                forKey: .boxGap
-            ) ?? defaults.boxGap
+                forKey: .itemGap
+            ) ?? defaults.itemGap
         fontSize =
             try container.decodeIfPresent(
                 CGFloat.self,
@@ -113,21 +113,21 @@ extension SpaceBarStyle {
                 BarAppIconSource.self,
                 forKey: .iconSource
             ) ?? defaults.iconSource
-        tabBackground =
+        backgroundStyle =
             try container.decodeIfPresent(
-                TabBackground.self,
-                forKey: .tabBackground
-            ) ?? defaults.tabBackground
+                BackgroundStyle.self,
+                forKey: .backgroundStyle
+            ) ?? defaults.backgroundStyle
         liquidGlass =
             try container.decodeIfPresent(
                 Bool.self,
                 forKey: .liquidGlass
             ) ?? defaults.liquidGlass
-        tabBackgroundFit =
+        backgroundFit =
             try container.decodeIfPresent(
-                TabBackgroundFit.self,
-                forKey: .tabBackgroundFit
-            ) ?? defaults.tabBackgroundFit
+                BackgroundFit.self,
+                forKey: .backgroundFit
+            ) ?? defaults.backgroundFit
         activeIndicator =
             try container.decodeIfPresent(
                 ActiveIndicator.self,

@@ -62,7 +62,7 @@ extension KiwiCore {
             // tracks the ring (#285), so an AX echo can't rewind it
             // behind the live bounds — the guard lives there, once.
             borders.follow(id, windowFrame: frame)
-            stickyIndicators.follow(id, windowFrame: frame)
+            stickyMarks.follow(id, windowFrame: frame)
             // A genuine user move (not the echo of our own
             // frame-set) supersedes a pending stash restore:
             // the user took the window over, so the captured
@@ -78,7 +78,7 @@ extension KiwiCore {
             drag.windowMoved(id, frame: frame)
         case .windowResized(let id, let frame):
             borders.follow(id, windowFrame: frame)
-            stickyIndicators.follow(id, windowFrame: frame)
+            stickyMarks.follow(id, windowFrame: frame)
             // Same policy as .windowMoved above: a genuine
             // user resize takes the window over.
             if !tiler.didRecentlySetFrame(id),

@@ -145,13 +145,13 @@ struct LayoutParamsCodingParityTests {
         var params = TrackParams()
         params.axis = .horizontal
         params.autoTracks = false
-        params.count = 4
+        params.limit = 4
         params.newWindow = .ownTrack
         params.newWindowPosition = .last
         params.overflowStyle = .cascadeOverflow
         params.wrapFocus = true
         var over = TrackOverride()
-        over.count = 2
+        over.limit = 2
         params.override[space] = over
         return params
     }

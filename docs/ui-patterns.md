@@ -106,8 +106,8 @@ mode strip) may exceed four — they switch the visible editor
 rather than edit a value, so the count cap doesn't apply.
 The *same semantic field uses the same control on comparable
 full-width surfaces*: the App Bar global editor and its
-per-layout override rows both render Position / Tab
-background / Active indicator / Content as segments, so the
+per-layout override rows both render Position / Background
+style / Active indicator / Content as segments, so the
 two never sit adjacent showing one field two ways. The #291
 audit applied the rule across every editor — converting the
 App Bar fields (global and override), Stack's Master
@@ -458,9 +458,45 @@ it, and turn a precise geometric term into a category-error
 presentational one (an "axis" whose value is `columns`).
 Single-axis layouts (Scrolling, Monocle) stay plain
 "Horizontal/Vertical" — one axis, no ambiguity, nothing to
-disambiguate. Fix the label, never the wire; §5's one-vocabulary
-rule (Lua == JSON) holds either way and is orthogonal to this
-GUI↔wire question.
+disambiguate. Fix the label, never the wire — **when the wire
+term is accurate; see the next entry for when it isn't**. §5's
+one-vocabulary rule (Lua == JSON) holds either way and is
+orthogonal to this GUI↔wire question.
+
+**When the wire is the outlier, rename the wire instead (R6,
+#406).** The rule above answers a narrower question than its
+closing line suggests: there the wire term is *correct* and the
+label alone is ambiguous, so only the label moves. When the
+**wire** term is factually wrong for what it names, the same
+reasoning points the other way — the accurate side stays and the
+outlier moves. Three R6 renames are that case:
+`drag.set_ghost_border_thickness` → `…_border_width` (the GUI
+already said "Width"; a stroke has a width, a bar has a
+thickness), `track.set_count` → `track.set_limit` (the GUI
+already said "Track limit"; the value is a cap that automatic
+tracks overrides, not a count of what exists), and
+`tab_background` → `background_style` on both bars (the entries
+are not browser tabs, and under Plain no item draws a box of
+its own in steady state). The discriminator is never churn cost —
+pre-release makes churn cheap on both sides (§5) — but which
+side misdescribes the thing: relabel when the label is
+ambiguous, rename the wire when the wire term is wrong.
+
+**An override stepper's range must exclude any value that
+carries a separate meaning on the wire (audit finding 20,
+#406).** In a per-space override row `nil` is the inherit
+sentinel (`OverrideChrome`), so every value *inside* the
+stepper's range is a stored value with one meaning. The
+per-space Track-limit stepper ran `0...10` while its global twin
+ran `1...10`: a stored 0 resolved to `max(1, 0)` = one track,
+while the Lua setter's `0` means *automatic* and is never
+persisted (it flips `auto_tracks` instead). One stored number,
+two meanings, decided by which surface wrote it. Override
+steppers are 1-based wherever 0 carries a separate Lua meaning;
+"automatic" belongs to its own field rather than hiding inside
+the range. Track has no per-space automatic row, so the grey
+there keys on the RESOLVED `auto_tracks` (#171) — the value the
+space actually gets, never the global.
 
 ## Interaction states
 

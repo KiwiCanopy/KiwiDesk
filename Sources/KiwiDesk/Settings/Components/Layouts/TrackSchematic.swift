@@ -18,12 +18,12 @@ struct TrackSchematic: View {
     let overflowStyle: StackParams.OverflowStyle
     let newWindow: TrackParams.NewWindowTrack
     let placement: SpawnPlacement
-    let count: Int
+    let limit: Int
     let autoTracks: Bool
 
     private var vertical: Bool { axis == .vertical }
     private var trackCount: Int {
-        autoTracks ? 3 : min(max(count, 1), 4)
+        autoTracks ? 3 : min(max(limit, 1), 4)
     }
     private var focusIdx: Int { trackCount / 2 }
 
@@ -43,7 +43,7 @@ struct TrackSchematic: View {
                 )
                 .animation(LayoutSchematic.damping, value: newWindow)
                 .animation(LayoutSchematic.damping, value: placement)
-                .animation(LayoutSchematic.damping, value: count)
+                .animation(LayoutSchematic.damping, value: limit)
                 .animation(LayoutSchematic.damping, value: autoTracks)
         }
     }

@@ -3,7 +3,7 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// Pins the shared plate's `tab_background_fit` geometry
+/// Pins the shared plate's `background_fit` geometry
 /// (QA 2026-07-19): hug wraps the run plus one gap per end,
 /// clamped to the strip; full — and every hug fallback — spans
 /// the strip.

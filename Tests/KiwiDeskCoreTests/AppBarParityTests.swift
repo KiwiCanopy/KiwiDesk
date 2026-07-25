@@ -85,10 +85,10 @@ struct AppBarCommandParityTests {
     /// or `AppBarStyle` drift apart.
     private static let everySetting: [AppBarCommandSetting] = [
         .edge(.bottom), .alignment(.end), .thickness(50),
-        .tabBackground(.plain), .liquidGlass(true),
-        .tabBackgroundFit(.full),
+        .backgroundStyle(.plain), .liquidGlass(true),
+        .backgroundFit(.full),
         .activeIndicator(.gap),
-        .boxSize(88), .boxGap(9),
+        .itemSize(88), .itemGap(9),
         .content(.name), .iconSource(.appFont),
         .groupAdjacentWindows(false),
         .fontSize(20), .cornerRoundness(12), .dimFactor(0.3),
@@ -121,5 +121,95 @@ struct AppBarCommandParityTests {
         // give it an exclusion set here (cf. the override tests'
         // `notOverridable`) rather than dropping the assert.
         #expect(touched == fieldNames(AppBarStyle()))
+    }
+
+    /// The third leg, mirroring `SpaceBarParityTests`: the verb
+    /// is registered and the enum applies, but `parse` matches
+    /// the field on a RAW STRING. A typo there (the
+    /// `case "background_style":` lines T4 edited) leaves the
+    /// verb registered, every other guard green, and dispatch
+    /// failing only at runtime.
+    @Test("Parse accepts every field's spelling")
+    func parseCoverage() {
+        for key in AppBarStyle.CodingKeys.allCases {
+            let parsed = AppBarCommandSetting.parse(
+                field: key.stringValue,
+                args: sampleArgs(for: key)
+            )
+            #expect(
+                (try? parsed.get()) != nil,
+                "parse rejected \(key.stringValue)"
+            )
+        }
+    }
+
+    private func sampleArgs(
+        for key: AppBarStyle.CodingKeys
+    ) -> [JSONValue] {
+        switch key {
+        case .liquidGlass, .groupAdjacentWindows:
+            return [.bool(true)]
+        case .edge: return [.string("bottom")]
+        case .alignment: return [.string("end")]
+        case .iconSource: return [.string("app_font")]
+        case .backgroundStyle: return [.string("plain")]
+        case .backgroundFit: return [.string("full")]
+        case .activeIndicator: return [.string("gap")]
+        case .content: return [.string("icon")]
+        case .thickness, .itemSize, .itemGap, .fontSize,
+            .cornerRoundness, .dimFactor:
+            return [.number(10)]
+        default:
+            return [.string("#123456")]
+        }
+    }
+
+    /// The `space_bar` twin of this lives in
+    /// `SpaceBarCommandTests`. Without it the app-bar verb list
+    /// in `APIReference` was a hand-typed mirror of the field
+    /// list with no guard (AGENTS §5) — a stale entry registers a
+    /// Lua function whose dispatch always fails, a missing one
+    /// silently deletes a verb, and neither shows up in a build.
+    @Test("The app_bar namespace mirrors AppBarStyle's keys")
+    func appBarNamespaceParity() {
+        let expected = Set(
+            AppBarStyle.CodingKeys.allCases.map {
+                "set_\($0.stringValue)"
+            }
+        )
+        #expect(
+            Set(APIReference.namespaces["app_bar"] ?? []) == expected
+        )
+    }
+
+    /// The per-layout twins carry the same field list under a
+    /// `set_app_bar_` prefix, and add `enabled` — the one
+    /// `LayoutAppBar` field with no global counterpart.
+    ///
+    /// The layout list is hand-written, so it is asserted in BOTH
+    /// directions: forward, that each named layout carries the
+    /// whole field list; and backward, that no OTHER namespace
+    /// has grown app-bar verbs. Without the reverse leg a third
+    /// bar-hosting layout could ship a partial verb set and this
+    /// guard would stay green — the "one more place to forget"
+    /// shape AGENTS §5 warns about.
+    @Test("Each bar-hosting layout mirrors LayoutAppBar's keys")
+    func layoutAppBarNamespaceParity() {
+        let expected = Set(
+            LayoutAppBar.Key.allCases.map {
+                "set_app_bar_\($0.stringValue)"
+            }
+        )
+        let hosting = APIReference.namespaces.filter { _, verbs in
+            verbs.contains { $0.hasPrefix("set_app_bar_") }
+        }
+        #expect(Set(hosting.keys) == ["monocle", "scroll"])
+        for layout in ["monocle", "scroll"] {
+            let verbs = Set(
+                (APIReference.namespaces[layout] ?? [])
+                    .filter { $0.hasPrefix("set_app_bar_") }
+            )
+            #expect(verbs == expected, "\(layout) app-bar verbs")
+        }
     }
 }

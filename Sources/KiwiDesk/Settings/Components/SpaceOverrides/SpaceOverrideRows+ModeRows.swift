@@ -147,14 +147,19 @@ extension SpaceOverrideRows {
         // tracks makes the limit inert, and the field that says
         // so has no row here.
         OverrideStepperRow(
-            label: L("track.count", "Track limit"),
+            label: L("track.limit", "Track limit"),
             value: binding(
                 \.track.override,
                 space,
-                \.count
+                \.limit
             ),
-            global: g.track.count,
-            range: 0...10
+            global: g.track.limit,
+            // 1-based like the global stepper and the Columns/
+            // Rows rows above: `nil` is the inherit sentinel, so
+            // a stored 0 would be a real value resolving to ONE
+            // track while Lua's 0 means automatic — two meanings
+            // for one field (audit finding 20, #406).
+            range: 1...10
         )
         .modifier(
             GreyOut(

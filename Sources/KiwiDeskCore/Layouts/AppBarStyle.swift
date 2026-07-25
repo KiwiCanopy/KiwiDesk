@@ -21,7 +21,7 @@ public struct AppBarStyle: Sendable, Equatable {
     public var alignment: BarAlignment = .center
     /// Depth of the reserved strip (pt).
     public var thickness: CGFloat = 32
-    public var tabBackground: TabBackground = .boxed
+    public var backgroundStyle: BackgroundStyle = .boxed
     /// Liquid Glass finish (macOS 26+), orthogonal to the shape:
     /// a colorless glass material laid over the Boxed boxes or the
     /// Plain plate. Ignored below macOS 26 (`glassEnabled`). Fill
@@ -30,7 +30,7 @@ public struct AppBarStyle: Sendable, Equatable {
     public var liquidGlass: Bool = false
     /// Hug by default: a tight plate reads calmer than an
     /// edge-to-edge strip (ui-designer, QA 2026-07-19).
-    public var tabBackgroundFit: TabBackgroundFit = .hug
+    public var backgroundFit: BackgroundFit = .hug
     public var activeIndicator: ActiveIndicator = .outline
     /// Item length along the bar (pt) — every item is the
     /// same size. 0 (default) = a standard length per
@@ -38,9 +38,9 @@ public struct AppBarStyle: Sendable, Equatable {
     /// text is shown. Clamped at layout time between the icon
     /// square (icons never clip) and a quarter of the bar;
     /// items that overflow anyway scroll instead of shrinking.
-    public var boxSize: CGFloat = 0
+    public var itemSize: CGFloat = 0
     /// Spacing between boxes (pt); 0 = touching.
-    public var boxGap: CGFloat = 6
+    public var itemGap: CGFloat = 6
     public var content: Content = .iconAndName
     /// Where app icons come from: the native app image, or a
     /// monochrome SketchyBar App Font glyph that follows the
@@ -61,10 +61,10 @@ public struct AppBarStyle: Sendable, Equatable {
     /// 100 = a full capsule (radius = thickness/2), 0 = square.
     /// Resolved to a concrete radius in
     /// `resolvedCornerRadius(forThickness:)`. Percentage, not
-    /// pt, so it can't exceed thickness/2 (which rendered tabs
+    /// pt, so it can't exceed thickness/2 (which rendered items
     /// as pointed hexagons) and self-adapts to any thickness.
     public var cornerRoundness: CGFloat = 50
-    /// Opacity of an inactive tab's untinted icon (0.05–1). The dim
+    /// Opacity of an inactive item's untinted icon (0.05–1). The dim
     /// carries "not focused" for content that takes no state color.
     /// Lua-only power knob (`set_dim_factor`, no GUI); the default
     /// matches `BarAccent.untintedAlpha`. Clamped in `resolvedDim`.
@@ -100,7 +100,7 @@ public struct AppBarStyle: Sendable, Equatable {
 
     public init() {}
 
-    /// The concrete corner radius (pt) for a tab/strip of the
+    /// The concrete corner radius (pt) for an item/strip of the
     /// given cross dimension: `cornerRoundness`% of its half —
     /// 100% is a capsule, 0% square. One resolution site shared
     /// by the item box, the shared strip, the scroll arrows, and
@@ -133,7 +133,7 @@ public struct AppBarStyle: Sendable, Equatable {
     /// draw no per-item box, so item fill/accent geometry that
     /// keyed on "boxed" keys on this instead.
     public var hasBox: Bool {
-        tabBackground == .boxed && !glassEnabled
+        backgroundStyle == .boxed && !glassEnabled
     }
 }
 
@@ -149,12 +149,12 @@ extension AppBarStyle: Codable {
         case edge
         case alignment
         case thickness
-        case tabBackground = "tab_background"
+        case backgroundStyle = "background_style"
         case liquidGlass = "liquid_glass"
-        case tabBackgroundFit = "tab_background_fit"
+        case backgroundFit = "background_fit"
         case activeIndicator = "active_indicator"
-        case boxSize = "box_size"
-        case boxGap = "box_gap"
+        case itemSize = "item_size"
+        case itemGap = "item_gap"
         case content
         case iconSource = "icon_source"
         case groupAdjacentWindows = "group_adjacent_windows"
@@ -195,36 +195,36 @@ extension AppBarStyle: Codable {
                 forKey: .thickness
             ) ?? defaults.thickness
         )
-        tabBackground =
+        backgroundStyle =
             try container.decodeIfPresent(
-                TabBackground.self,
-                forKey: .tabBackground
-            ) ?? defaults.tabBackground
+                BackgroundStyle.self,
+                forKey: .backgroundStyle
+            ) ?? defaults.backgroundStyle
         liquidGlass =
             try container.decodeIfPresent(
                 Bool.self,
                 forKey: .liquidGlass
             ) ?? defaults.liquidGlass
-        tabBackgroundFit =
+        backgroundFit =
             try container.decodeIfPresent(
-                TabBackgroundFit.self,
-                forKey: .tabBackgroundFit
-            ) ?? defaults.tabBackgroundFit
+                BackgroundFit.self,
+                forKey: .backgroundFit
+            ) ?? defaults.backgroundFit
         activeIndicator =
             try container.decodeIfPresent(
                 ActiveIndicator.self,
                 forKey: .activeIndicator
             ) ?? defaults.activeIndicator
-        boxSize =
+        itemSize =
             try container.decodeIfPresent(
                 CGFloat.self,
-                forKey: .boxSize
-            ) ?? defaults.boxSize
-        boxGap =
+                forKey: .itemSize
+            ) ?? defaults.itemSize
+        itemGap =
             try container.decodeIfPresent(
                 CGFloat.self,
-                forKey: .boxGap
-            ) ?? defaults.boxGap
+                forKey: .itemGap
+            ) ?? defaults.itemGap
         content =
             try container.decodeIfPresent(
                 Content.self,

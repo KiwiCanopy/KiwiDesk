@@ -12,13 +12,13 @@ public enum SpaceMark: Equatable {
 
 /// The sticky mark's rounded plate (#414/#421): the sticky glyph
 /// pinned in the rightmost square, and a home-space name to its
-/// left, hidden until the chip flashes into a pill. Lays its two
+/// left, hidden until the mark flashes into a pill. Lays its two
 /// subviews out from the live bounds in `layout()` — called on
 /// every step of the plate's width animation — so the glyph holds
 /// its screen position while the name stretches into view.
 @MainActor
-final class StickyIndicatorPlate: NSVisualEffectView {
-    /// Collapsed chip square; the glyph always occupies the
+final class StickyMarkPlate: NSVisualEffectView {
+    /// Collapsed mark square; the glyph always occupies the
     /// rightmost square of this side.
     static let size: CGFloat = 20
     /// Padding left of the name, and the gap between name and
@@ -38,8 +38,8 @@ final class StickyIndicatorPlate: NSVisualEffectView {
     let name = NSTextField(labelWithString: "")
     /// The colored disc behind the glyph when a mark color is set
     /// (#429): the on-window twin of the Space Bar state badge, so
-    /// the chip and the badge read as the same filled mark. Hidden
-    /// on Automatic — the chip is then the bare neutral glyph on
+    /// the mark and the badge read as the same filled mark. Hidden
+    /// on Automatic — the mark is then the bare neutral glyph on
     /// glass (today's look).
     let roundel = NSView()
     /// Roundel diameter inside the 20pt glyph square — a touch

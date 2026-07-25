@@ -90,7 +90,7 @@ public struct TilingSettings: Sendable, Equatable {
     public var stickyStyle = StickyStyle()
     /// Floating-window mark settings (#429): the sticky pair's
     /// sibling. Just the Space Bar floating badge tint today —
-    /// floating has no on-window chip.
+    /// floating has no on-window mark.
     public var floatingStyle = FloatingStyle()
     /// Drag visuals (see DragOverlay): the dragged window's
     /// own slot (ghost) and the swap target slot (drop zone).

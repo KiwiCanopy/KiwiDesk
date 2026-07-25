@@ -115,7 +115,7 @@ private struct DragVisualPreview: View {
         // responding halfway up, reading as "the setting broke."
         let radius = scale(cornerRadius, from: 0...40, to: 0...20)
         let width = scale(
-            visual.borderThickness,
+            visual.borderWidth,
             from: 0...20,
             to: 0...10
         )
@@ -215,7 +215,7 @@ struct DragVisualControls: View {
                 )
                 PtSlider(
                     label: L("drag.border_width", "Width"),
-                    value: $visual.borderThickness,
+                    value: $visual.borderWidth,
                     range: 0...20
                 )
                 SegmentedPicker(

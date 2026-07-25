@@ -1,12 +1,12 @@
 import CoreGraphics
 
 /// The shared background plate's frame — `plain`'s fill and the
-/// Liquid Glass plate — for `tab_background_fit`
+/// Liquid Glass plate — for `background_fit`
 /// (QA 2026-07-19). Strip-local coordinates; pure math shared
 /// by both bars so the two plates can't drift.
 enum BarPlate {
     /// `full` spans the strip; `hug` wraps the content run plus
-    /// one box gap of breathing room per end, clamped to the
+    /// one item gap of breathing room per end, clamped to the
     /// strip. Hug falls back to full while the run overflows
     /// and scrolls (`inset > 0` — content fills the strip, so
     /// there is nothing to hug) and for an empty run.
@@ -17,7 +17,7 @@ enum BarPlate {
         inset: CGFloat,
         gap: CGFloat,
         horizontal: Bool,
-        fit: AppBarStyle.TabBackgroundFit
+        fit: AppBarStyle.BackgroundFit
     ) -> CGRect {
         let full = CGRect(
             x: 0,

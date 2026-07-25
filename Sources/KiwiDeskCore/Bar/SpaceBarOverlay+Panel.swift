@@ -7,7 +7,7 @@ import AppKit
 extension SpaceBarOverlay {
     /// `plain` and `material` draw their shared plate as its
     /// own view (`updatePlainPlate` / the glass-hosting dispatch)
-    /// so it can hug the run (`tab_background_fit`); `boxed` boxes
+    /// so it can hug the run (`background_fit`); `boxed` boxes
     /// each item. The container itself never paints.
     func styleContainer(
         _ panel: NSPanel,
@@ -33,7 +33,7 @@ extension SpaceBarOverlay {
         plateFrame: CGRect
     ) {
         // Solid Plain plate: Plain shape without the glass finish.
-        guard style.tabBackground == .plain, !style.glassEnabled,
+        guard style.backgroundStyle == .plain, !style.glassEnabled,
             let content = panel.contentView
         else {
             plainPlate?.isHidden = true
@@ -68,7 +68,7 @@ extension SpaceBarOverlay {
         GlassHosting.resolve(
             available: AppBarStyle.glassAvailable,
             glassEnabled: style.glassEnabled,
-            boxed: style.tabBackground == .boxed,
+            boxed: style.backgroundStyle == .boxed,
             overflow: overflow
         )
     }

@@ -43,20 +43,22 @@ public struct TrackParams: Sendable, Equatable, Codable {
     }
 
     public var axis: Axis = .vertical
-    /// Whether the track count is managed automatically (#178):
+    /// Whether the track limit is managed automatically (#178):
     /// on (the default), tracks open and collapse as windows come
-    /// and go — no cap. Off pins the count to `count`. The
+    /// and go — no cap. Off pins the cap to `limit`. The
     /// carousel-vs-grid twin of `GridParams.autoSize`. The layout
-    /// reads `count` directly for the normal/overflow split
+    /// reads `limit` directly for the normal/overflow split
     /// (#192); spawn, navigation, and swap read `trackCap`
-    /// (= `count + 1`, the overflow track included).
+    /// (= `limit + 1`, the overflow track included).
     public var autoTracks = true
     /// The fixed maximum number of tracks used when `autoTracks`
     /// is off (the remembered magnitude, so toggling auto off
-    /// restores it instead of resetting). Ignored while
-    /// `autoTracks` is on. The live partition is session state
-    /// (`Space.trackBreaks`), like `stackWeights`.
-    public var count: Int = 2
+    /// restores it instead of resetting). A *cap* that automatic
+    /// tracks overrides, not a count of what exists — hence
+    /// `limit`, matching the GUI's own "Track limit" (R6/#406).
+    /// Ignored while `autoTracks` is on. The live partition is
+    /// session state (`Space.trackBreaks`), like `stackWeights`.
+    public var limit: Int = 2
     public var newWindow: NewWindowTrack = .focusedTrack
     /// Where a new window lands within the `newWindow` choice,
     /// reusing the shared `SpawnPlacement` vocabulary. For
@@ -93,35 +95,35 @@ public struct TrackParams: Sendable, Equatable, Codable {
 
     /// The hard cap on **marker** tracks that spawn, navigation,
     /// and swap enforce: 0 (unlimited, dynamic) while `autoTracks`
-    /// is on, otherwise `count + 1` (#192) — the fixed `count`
+    /// is on, otherwise `limit + 1` (#192) — the fixed `limit`
     /// **normal** tracks plus the one extra **overflow track**
     /// that catches the surplus. A new `own_track` window past
-    /// `count` therefore opens the overflow track rather than
-    /// joining an existing one. The layout reads `count` directly
+    /// `limit` therefore opens the overflow track rather than
+    /// joining an existing one. The layout reads `limit` directly
     /// for the normal/overflow split; everything that moves
     /// windows between tracks reads this so none can disagree on
     /// where the last track is.
     public var trackCap: Int {
-        autoTracks ? 0 : max(1, count) + 1
+        autoTracks ? 0 : max(1, limit) + 1
     }
 
     /// The **normal**-track capacity the render and every
     /// overflow-fold guard gauge against (#192/#198): `.max`
     /// (geometry alone caps) while `auto_tracks` is on, else the
-    /// fixed `count`. The `.max` sentinel is the contract
+    /// fixed `limit`. The `.max` sentinel is the contract
     /// `TrackLayout.overflowCap` reads (`normalCap == .max` = no
-    /// count fold). Sibling of `trackCap`; both live here so no
+    /// limit fold). Sibling of `trackCap`; both live here so no
     /// site re-derives the fixed-cap rule and drifts from the
     /// layout (the shared-authority precedent that #198 closed).
     public var normalCap: Int {
-        autoTracks ? .max : max(1, count)
+        autoTracks ? .max : max(1, limit)
     }
 
     /// JSON keys follow the Lua setters (`track.set_axis`).
     private enum CodingKeys: String, CodingKey {
         case axis
         case autoTracks = "auto_tracks"
-        case count
+        case limit
         case newWindow = "new_window"
         case newWindowPosition = "new_window_position"
         case overflowStyle = "overflow_style"
@@ -145,10 +147,10 @@ public struct TrackParams: Sendable, Equatable, Codable {
                 Bool.self,
                 forKey: .autoTracks
             ) ?? true
-        count =
+        limit =
             try container.decodeIfPresent(
                 Int.self,
-                forKey: .count
+                forKey: .limit
             ) ?? 2
         newWindow =
             try container.decodeIfPresent(
@@ -183,7 +185,7 @@ public struct TrackParams: Sendable, Equatable, Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(axis, forKey: .axis)
         try container.encode(autoTracks, forKey: .autoTracks)
-        try container.encode(count, forKey: .count)
+        try container.encode(limit, forKey: .limit)
         try container.encode(newWindow, forKey: .newWindow)
         try container.encode(
             newWindowPosition,

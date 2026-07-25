@@ -25,7 +25,7 @@ extension GlobalAppBarGroup {
     var everyShownBarBoxed: Bool {
         anyBarShown
             && shownBars.allSatisfy {
-                $0.resolved(with: style).tabBackground == .boxed
+                $0.resolved(with: style).backgroundStyle == .boxed
             }
     }
 
@@ -49,7 +49,7 @@ extension GlobalAppBarGroup {
             }
     }
 
-    /// Under `activeIndicator = .gap` the active tab's view is
+    /// Under `activeIndicator = .gap` the active item's view is
     /// hidden outright (`AppBarOverlay`) and `accentMode`
     /// returns `.none` (`AppBarItemView`), so neither the
     /// highlight nor the active-item ink is ever painted.
@@ -63,7 +63,7 @@ extension GlobalAppBarGroup {
     var gapHelp: String {
         L(
             "app_bar.color.gap_only",
-            "The Gap indicator hides the active tab instead of "
+            "The Gap indicator hides the active item instead of "
                 + "marking it, so these colors aren't drawn."
         )
     }

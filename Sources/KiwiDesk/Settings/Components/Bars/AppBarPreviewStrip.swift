@@ -7,7 +7,7 @@ import SwiftUI
 /// a neutral backdrop (judging the colors *is* the point), so
 /// "what does this look like" is answered before Save without
 /// touching live state. Pure SwiftUI — no AX, no runtime reads.
-/// Three mock tabs (one grouped, one active, one plain) exercise
+/// Three mock items (one grouped, one active, one plain) exercise
 /// the normal / active / badge color sets in one glance; hover
 /// colors have no static state to show and are left to the rows.
 ///
@@ -63,11 +63,11 @@ struct AppBarPreviewStrip: View {
 
     private var strip: some View {
         stack {
-            ForEach(mockTabs) { tab($0) }
+            ForEach(mockItems) { item($0) }
         }
         .padding(4)
-        // The shared plate honors `tab_background_fit`: the
-        // mock naturally hugs its tabs, so `full` stretches it
+        // The shared plate honors `background_fit`: the
+        // mock naturally hugs its items, so `full` stretches it
         // to the canvas edge instead (QA 2026-07-19).
         .frame(
             maxWidth: plateSpansCanvas
@@ -78,10 +78,10 @@ struct AppBarPreviewStrip: View {
         .background(stripBackground)
     }
 
-    /// The shared plate under the tabs: Plain fills it with the
+    /// The shared plate under the items: Plain fills it with the
     /// Fill color; Material shows a frosted-glass proxy (the mock
     /// can't host a live `NSGlassEffectView`) tinted by Fill;
-    /// Boxed draws no shared plate (each tab boxes itself).
+    /// Boxed draws no shared plate (each item boxes itself).
     @ViewBuilder private var stripBackground: some View {
         let shape = RoundedRectangle(
             cornerRadius: style.hasBox ? 0 : corner
@@ -92,7 +92,7 @@ struct AppBarPreviewStrip: View {
             shape
                 .fill(.ultraThinMaterial)
                 .overlay(shape.fill(color(style.fillColor)))
-        } else if style.tabBackground == .plain {
+        } else if style.backgroundStyle == .plain {
             shape.fill(color(style.fillColor))
         } else {
             shape.fill(Color.clear)
@@ -100,7 +100,7 @@ struct AppBarPreviewStrip: View {
     }
 
     private var plateSpansCanvas: Bool {
-        !style.hasBox && style.tabBackgroundFit == .full
+        !style.hasBox && style.backgroundFit == .full
     }
 
     /// Row on top/bottom, column on left/right.
@@ -114,21 +114,21 @@ struct AppBarPreviewStrip: View {
         }
     }
 
-    @ViewBuilder private func tab(_ t: MockTab) -> some View {
+    @ViewBuilder private func item(_ t: MockItem) -> some View {
         if t.active, style.activeIndicator == .gap {
             // Active item hidden — leave the gap it would occupy.
             Color.clear.frame(width: slotWidth, height: slotHeight)
         } else {
-            tabBox(t)
+            itemBox(t)
         }
     }
 
-    private func tabBox(_ t: MockTab) -> some View {
-        tabContent(t)
+    private func itemBox(_ t: MockItem) -> some View {
+        itemContent(t)
             .frame(width: slotWidth, height: slotHeight)
             .background(
                 RoundedRectangle(
-                    cornerRadius: style.tabBackground == .boxed
+                    cornerRadius: style.backgroundStyle == .boxed
                         ? corner : 0
                 )
                 .fill(boxFill(t))
@@ -141,8 +141,8 @@ struct AppBarPreviewStrip: View {
     /// collapses every content mode to `.icon` there
     /// (`Content.rendered(horizontal:)`, QA 2026-07-19), so
     /// the mock shows exactly that.
-    @ViewBuilder private func tabContent(
-        _ t: MockTab
+    @ViewBuilder private func itemContent(
+        _ t: MockItem
     ) -> some View {
         if style.edge.isHorizontal {
             HStack(spacing: 3) {
@@ -172,12 +172,12 @@ struct AppBarPreviewStrip: View {
     /// app images dim to half strength when inactive (QA
     /// 2026-07-19) — shape plus opacity carry the state, since
     /// a full-color icon takes no tint.
-    private func iconOpacity(_ t: MockTab) -> Double {
+    private func iconOpacity(_ t: MockItem) -> Double {
         style.iconSource == .appImage && !t.active
             ? style.dimFactor : 1
     }
 
-    private func textColor(_ t: MockTab) -> Color {
+    private func textColor(_ t: MockItem) -> Color {
         color(
             t.active ? style.activeItemColor : style.itemColor
         )
@@ -187,19 +187,19 @@ struct AppBarPreviewStrip: View {
     /// each mock icon's own color (full-color app images);
     /// Glyphs recolor into the state text ladder — the same
     /// colors the real glyph labels follow.
-    private func iconColor(_ t: MockTab) -> Color {
+    private func iconColor(_ t: MockItem) -> Color {
         style.iconSource == .appImage
             ? t.nativeColor
             : textColor(t)
     }
 
-    /// The active indicator, orthogonal to the tab background:
-    /// `ring` outlines the active tab (flush on Boxed, an inset
+    /// The active indicator, orthogonal to the background style:
+    /// `ring` outlines the active item (flush on Boxed, an inset
     /// capsule on Plain), `edgeMark` draws a bar on the
     /// window-facing edge inset to the box corner. `gap` never
     /// reaches here (the slot is hidden).
     @ViewBuilder private func activeAccent(
-        _ t: MockTab
+        _ t: MockItem
     ) -> some View {
         if t.active {
             switch style.activeIndicator {
@@ -211,7 +211,7 @@ struct AppBarPreviewStrip: View {
     }
 
     @ViewBuilder private var ringAccent: some View {
-        if style.tabBackground == .boxed {
+        if style.backgroundStyle == .boxed {
             RoundedRectangle(cornerRadius: corner)
                 .strokeBorder(
                     color(style.highlightColor),
@@ -234,7 +234,7 @@ struct AppBarPreviewStrip: View {
     }
 
     @ViewBuilder private var edgeMarkAccent: some View {
-        // The mark sits on the tab's window-facing side: a top
+        // The mark sits on the item's window-facing side: a top
         // bar faces down, a bottom bar up, a left bar right, a
         // right bar left. Full-width, no corner inset — matching
         // the Space Bar (owner call 2026-07-20; twin of
@@ -263,7 +263,7 @@ struct AppBarPreviewStrip: View {
         }
     }
 
-    @ViewBuilder private func badge(_ t: MockTab) -> some View {
+    @ViewBuilder private func badge(_ t: MockItem) -> some View {
         if let count = t.badge {
             Text("\(count)")
                 .font(.system(size: 7, weight: .bold))
@@ -278,10 +278,10 @@ struct AppBarPreviewStrip: View {
 
     // MARK: - Colors
 
-    private func boxFill(_ t: MockTab) -> Color {
+    private func boxFill(_ t: MockItem) -> Color {
         // Plain and any glass finish draw one shared plate, no
-        // per-tab box. Boxed-solid draws one Fill for every box;
-        // the active tab is marked by the indicator, not a fill.
+        // per-item box. Boxed-solid draws one Fill for every box;
+        // the active item is marked by the indicator, not a fill.
         style.hasBox ? color(style.fillColor) : .clear
     }
 

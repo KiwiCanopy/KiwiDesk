@@ -24,12 +24,12 @@ struct AppBarOverrideTests {
     func inheritance() {
         var global = AppBarStyle()
         global.thickness = 20
-        global.tabBackground = .plain
+        global.backgroundStyle = .plain
         global.itemColor = "#010203"
         let bar = LayoutAppBar()
         let resolved = bar.resolved(with: global)
         #expect(resolved.thickness == 20)
-        #expect(resolved.tabBackground == .plain)
+        #expect(resolved.backgroundStyle == .plain)
         #expect(resolved.itemColor == "#010203")
     }
 
@@ -37,13 +37,13 @@ struct AppBarOverrideTests {
     func overrideOne() {
         var global = AppBarStyle()
         global.thickness = 20
-        global.tabBackground = .plain
+        global.backgroundStyle = .plain
         var bar = LayoutAppBar()
         bar.thickness = 50
         let resolved = bar.resolved(with: global)
         // The one set field wins; the rest still inherit.
         #expect(resolved.thickness == 50)
-        #expect(resolved.tabBackground == .plain)
+        #expect(resolved.backgroundStyle == .plain)
     }
 
     @Test("Stored edge is absolute; override beats global")
@@ -229,12 +229,12 @@ struct AppBarCommandTests {
         #expect(core.tiler.settings.appBarStyle.thickness == 40)
         #expect(
             core.execute(
-                "app_bar.set_tab_background",
+                "app_bar.set_background_style",
                 args: [.string("plain")]
             ).isSuccess
         )
         #expect(
-            core.tiler.settings.appBarStyle.tabBackground
+            core.tiler.settings.appBarStyle.backgroundStyle
                 == .plain
         )
     }
@@ -254,12 +254,12 @@ struct AppBarCommandTests {
         )
         #expect(
             core.execute(
-                "scroll.set_app_bar_tab_background",
+                "scroll.set_app_bar_background_style",
                 args: [.string("plain")]
             ).isSuccess
         )
         #expect(
-            core.tiler.settings.scrolling.appBar.tabBackground
+            core.tiler.settings.scrolling.appBar.backgroundStyle
                 == .plain
         )
         // Untouched fields stay nil (inherit the global look).
@@ -320,7 +320,7 @@ struct AppBarCommandTests {
         let core = makeCore()
         #expect(
             !core.execute(
-                "app_bar.set_tab_background",
+                "app_bar.set_background_style",
                 args: [.string("triangles")]
             ).isSuccess
         )

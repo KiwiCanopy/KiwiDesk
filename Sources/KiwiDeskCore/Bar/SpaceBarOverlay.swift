@@ -49,7 +49,7 @@ public final class SpaceBarOverlay {
     /// `render()` before the front pass; read by
     /// `attachFrontViewsIfNeeded` and `updateFrontGlass`.
     weak var frontHost: NSView?
-    /// The Liquid Glass plate under the items when `tabBackground`
+    /// The Liquid Glass plate under the items when `backgroundStyle`
     /// resolves to `material` (#390); nil otherwise / below macOS
     /// 26. Stored as a plain view — the concrete type is 26-only.
     var glassPlate: NSView?
@@ -83,7 +83,7 @@ public final class SpaceBarOverlay {
     var glassRun: AppBarOverlay.FlippedView?
     /// `plain`'s shared fill plate — its own view (not the
     /// container layer) so it can hug the run
-    /// (`tab_background_fit`, QA 2026-07-19).
+    /// (`background_fit`, QA 2026-07-19).
     var plainPlate: NSView?
     /// Whole-bar scroll offset (#385); 0 while the run fits.
     var scrollOffset: CGFloat = 0

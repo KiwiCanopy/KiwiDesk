@@ -6,7 +6,7 @@ import SwiftUI
 /// private: a same-type extension in another file needs to see
 /// them; nothing outside the preview should reach in anyway.
 extension AppBarPreviewStrip {
-    struct MockTab: Identifiable {
+    struct MockItem: Identifiable {
         let id: Int
         let icon: String
         let name: String
@@ -17,9 +17,9 @@ extension AppBarPreviewStrip {
         let nativeColor: Color
     }
 
-    var mockTabs: [MockTab] {
+    var mockItems: [MockItem] {
         [
-            MockTab(
+            MockItem(
                 id: 0,
                 icon: "globe",
                 name: L("app_bar.preview.app_web", "Web"),
@@ -27,7 +27,7 @@ extension AppBarPreviewStrip {
                 badge: 2,
                 nativeColor: .blue
             ),
-            MockTab(
+            MockItem(
                 id: 1,
                 icon: "envelope",
                 name: L("app_bar.preview.app_mail", "Mail"),
@@ -35,7 +35,7 @@ extension AppBarPreviewStrip {
                 badge: nil,
                 nativeColor: .orange
             ),
-            MockTab(
+            MockItem(
                 id: 2,
                 icon: "terminal",
                 name: L("app_bar.preview.app_code", "Code"),
@@ -80,8 +80,8 @@ extension AppBarPreviewStrip {
         if style.glassEnabled {
             return L("app_bar.liquid_glass", "Liquid Glass")
         }
-        return style.tabBackground == .boxed
-            ? L("app_bar.tab_background.boxed", "Boxed")
-            : L("app_bar.tab_background.plain", "Plain")
+        return style.backgroundStyle == .boxed
+            ? L("app_bar.background_style.boxed", "Boxed")
+            : L("app_bar.background_style.plain", "Plain")
     }
 }

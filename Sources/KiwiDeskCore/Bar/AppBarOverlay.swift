@@ -76,7 +76,7 @@ public final class AppBarOverlay {
     let itemContainer = FlippedView()
     let backArrow = BarArrowView()
     let forwardArrow = BarArrowView()
-    /// The Liquid Glass plate under the items when `tabBackground`
+    /// The Liquid Glass plate under the items when `backgroundStyle`
     /// resolves to `material` (#390); nil otherwise / below macOS
     /// 26. Stored as a plain view — the concrete type is 26-only.
     var glassPlate: NSView?
@@ -103,7 +103,7 @@ public final class AppBarOverlay {
     var glassTint: NSView?
     /// `plain`'s shared fill plate — its own view (not the
     /// container layer) so it can hug the run
-    /// (`tab_background_fit`, QA 2026-07-19).
+    /// (`background_fit`, QA 2026-07-19).
     var plainPlate: NSView?
     /// Under plain + glass when the run fits (no overflow), the
     /// glass hosts this flipped run wrapper at the hugged plate
@@ -228,7 +228,7 @@ public final class AppBarOverlay {
             scrolledBy: scrollOffset
         )
         // The shared plate (plain fill / glass) hugs or spans
-        // per `tab_background_fit`. With no arrow inset the
+        // per `background_fit`. With no arrow inset the
         // viewport is the strip, so viewport-local frames are
         // already strip-local; while inset > 0 the plate is
         // full anyway.
@@ -245,7 +245,7 @@ public final class AppBarOverlay {
             inset: m.inset,
             gap: m.gap,
             horizontal: m.horizontal,
-            fit: style.tabBackgroundFit
+            fit: style.backgroundFit
         )
         // The one hosting mode for this render (#407): prepared
         // (non-target teardown) in the animation group below, then
@@ -255,7 +255,7 @@ public final class AppBarOverlay {
         // Frame changes ease into place so group expansion
         // (and scroll-follow) widens out instead of popping;
         // fresh views snap. The plates ride the same group —
-        // a hug plate must slide with the tabs it wraps.
+        // a hug plate must slide with the items it wraps.
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.15
             context.timingFunction = CAMediaTimingFunction(
@@ -300,7 +300,7 @@ public final class AppBarOverlay {
                 horizontal: m.horizontal,
                 style: style
             )
-            // Only the run's outer tabs meet a rounded plate end,
+            // Only the run's outer items meet a rounded plate end,
             // so only they clip their outer corner (Plain).
             view.isFirstInRun = index == 0
             view.isLastInRun = index == items.count - 1

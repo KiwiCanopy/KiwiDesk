@@ -123,12 +123,12 @@ already-running / not-running cases exit 0.
 | | `set_wake_restore_delay` | ms |
 | Drag | `drag.set_ghost_enabled` | true\|false |
 | | `drag.set_ghost_border` / `drag.set_ghost_fill` | true\|false |
-| | `drag.set_ghost_border_thickness` | pt (default 5) |
+| | `drag.set_ghost_border_width` | pt (default 5) |
 | | `drag.set_ghost_border_alignment` | `inside\|outside` (default inside) |
 | | `drag.set_ghost_border_color` / `drag.set_ghost_fill_color` | #RRGGBB[AA] |
 | | `drag.set_drop_zone_enabled` | true\|false |
 | | `drag.set_drop_zone_border` / `drag.set_drop_zone_fill` | true\|false |
-| | `drag.set_drop_zone_border_thickness` | pt (default 5) |
+| | `drag.set_drop_zone_border_width` | pt (default 5) |
 | | `drag.set_drop_zone_border_alignment` | `inside\|outside` (default inside) |
 | | `drag.set_drop_zone_border_color` / `drag.set_drop_zone_fill_color` | #RRGGBB[AA] |
 | | `drag.set_corner_radius` | pt (default 16) |
@@ -159,7 +159,7 @@ already-running / not-running cases exit 0.
 | | `monocle.set_new_window_placement` | placement¹ (default `first`) |
 | Track | `track.swap` | `prev\|next` — swap the focused window's whole track with the adjacent one |
 | | `track.set_axis` | `vertical\|horizontal` (default vertical = columns) |
-| | `track.set_count` | n (0 = automatic; n>0 pins a cap and turns automatic off) |
+| | `track.set_limit` | n (0 = automatic; n>0 pins a cap and turns automatic off) |
 | | `track.set_auto_tracks` | true\|false (default `true`) |
 | | `track.set_new_window` | `own_track\|focused_track` (default `own_track`) |
 | | `track.set_new_window_position` | placement¹ (default `first`) — where within the new_window choice |

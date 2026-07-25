@@ -1,13 +1,13 @@
 import Foundation
 
 /// The floating-window mark settings (#429): sticky's sibling.
-/// Sticky owns a `StickyStyle` because it has an on-window chip
+/// Sticky owns a `StickyStyle` because it has an on-window mark
 /// and a toggle; floating has neither — its only visual is the
 /// Space Bar floating badge — so this namespace carries just the
 /// one knob today. It still earns its own `floating` group rather
 /// than borrowing sticky's or the bar's: the two state colors are
 /// a pair, each in its own state's namespace, and a future
-/// on-window floating chip would find its color already at home
+/// on-window floating mark would find its color already at home
 /// here (one vocabulary, AGENTS.md §5).
 ///
 /// Set from Lua via `floating.set_*`; the setter applies

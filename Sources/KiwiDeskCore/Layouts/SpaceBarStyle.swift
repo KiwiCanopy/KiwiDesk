@@ -17,9 +17,9 @@ import Foundation
 /// window — its glyph inside the active space AND the front-app
 /// segment (spaces.lua's `space_focused_window`).
 public struct SpaceBarStyle: Sendable, Equatable {
-    public typealias TabBackground = AppBarStyle.TabBackground
-    public typealias TabBackgroundFit =
-        AppBarStyle.TabBackgroundFit
+    public typealias BackgroundStyle = AppBarStyle.BackgroundStyle
+    public typealias BackgroundFit =
+        AppBarStyle.BackgroundFit
     public typealias ActiveIndicator = AppBarStyle.ActiveIndicator
     public typealias Alignment = AppBarStyle.BarAlignment
 
@@ -43,9 +43,9 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// Bar default.
     public var thickness: CGFloat = 32
     /// Box length along the bar (pt); 0 (default) = auto.
-    public var boxSize: CGFloat = 0
+    public var itemSize: CGFloat = 0
     /// Spacing between space boxes (pt).
-    public var boxGap: CGFloat = 6
+    public var itemGap: CGFloat = 6
     /// 0 (default) = auto: text scales with the bar thickness.
     public var fontSize: CGFloat = 0
     /// Max app-group glyphs rendered per Space item (#376);
@@ -59,12 +59,12 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// colors. Apps without a resolvable image fall back to the
     /// App Font `Default` glyph either way.
     public var iconSource: BarAppIconSource = .appImage
-    public var tabBackground: TabBackground = .boxed
+    public var backgroundStyle: BackgroundStyle = .boxed
     /// Liquid Glass finish (macOS 26+), orthogonal to the shape —
     /// see `AppBarStyle.liquidGlass`. Ignored below 26.
     public var liquidGlass: Bool = false
     /// Hug by default, like the App Bar (QA 2026-07-19).
-    public var tabBackgroundFit: TabBackgroundFit = .hug
+    public var backgroundFit: BackgroundFit = .hug
     public var activeIndicator: ActiveIndicator = .outline
     /// Corner rounding as a percentage (0–100) of thickness/2,
     /// like the App Bar.
@@ -152,7 +152,7 @@ public struct SpaceBarStyle: Sendable, Equatable {
 
     /// An item paints its own box: Boxed shape, no glass finish.
     public var hasBox: Bool {
-        tabBackground == .boxed && !glassEnabled
+        backgroundStyle == .boxed && !glassEnabled
     }
 
 }

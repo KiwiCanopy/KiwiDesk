@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The GUI face of the `box_size`/`font_size` 0 = auto sentinel
+/// The GUI face of the `item_size`/`font_size` 0 = auto sentinel
 /// (#228 §3): an "Auto" toggle whose on-state stores 0 and whose
 /// off-state restores a sensible non-zero size, so the user never
 /// drags a slider to 0 to mean "auto".
@@ -17,8 +17,8 @@ enum AppBarAuto {
     }
 }
 
-/// The Position/Tab-background/Active-indicator/Content dropdown
-/// labels are
+/// The Position/Background-style/Active-indicator/Content
+/// dropdown labels are
 /// data (an array of value/label pairs shared by the global and
 /// per-layout override pickers), so they route through `L()` at
 /// the point of construction (`@MainActor`, matching every

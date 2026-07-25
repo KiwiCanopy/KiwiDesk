@@ -27,7 +27,7 @@ struct TrackCommandsTests {
             ).isSuccess
         )
         #expect(
-            core.execute("track.set_count", args: [.number(3)])
+            core.execute("track.set_limit", args: [.number(3)])
                 .isSuccess
         )
         #expect(
@@ -44,7 +44,7 @@ struct TrackCommandsTests {
         )
         let track = core.tiler.settings.track
         #expect(track.axis == .horizontal)
-        #expect(track.count == 3)
+        #expect(track.limit == 3)
         #expect(track.newWindow == .focusedTrack)
         #expect(track.wrapFocus)
     }
@@ -95,31 +95,31 @@ struct TrackCommandsTests {
         )
     }
 
-    @Test("set_count couples the automatic flag (#178)")
-    func countCouplesAuto() {
+    @Test("set_limit couples the automatic flag (#178)")
+    func limitCouplesAuto() {
         let core = makeCore()
         // Default is automatic (dynamic) — cap 0.
         #expect(core.tiler.settings.track.autoTracks)
         #expect(core.tiler.settings.track.trackCap == 0)
         // A positive count pins the cap and turns auto off, so
         // it takes effect without a second call.
-        core.execute("track.set_count", args: [.number(3)])
-        #expect(core.tiler.settings.track.count == 3)
+        core.execute("track.set_limit", args: [.number(3)])
+        #expect(core.tiler.settings.track.limit == 3)
         #expect(!core.tiler.settings.track.autoTracks)
         // trackCap = count + 1 (#192): three normal tracks plus
         // the extra overflow track that catches the surplus.
         #expect(core.tiler.settings.track.trackCap == 4)
         // 0 restores automatic, leaving the remembered count.
-        core.execute("track.set_count", args: [.number(0)])
+        core.execute("track.set_limit", args: [.number(0)])
         #expect(core.tiler.settings.track.autoTracks)
-        #expect(core.tiler.settings.track.count == 3)
+        #expect(core.tiler.settings.track.limit == 3)
         #expect(core.tiler.settings.track.trackCap == 0)
     }
 
     @Test("set_auto_tracks toggles the flag directly (#178)")
     func setAutoTracks() {
         let core = makeCore()
-        core.execute("track.set_count", args: [.number(4)])
+        core.execute("track.set_limit", args: [.number(4)])
         #expect(!core.tiler.settings.track.autoTracks)
         #expect(
             core.execute(
@@ -129,7 +129,7 @@ struct TrackCommandsTests {
         )
         #expect(core.tiler.settings.track.autoTracks)
         // The remembered cap survives for when auto goes off again.
-        #expect(core.tiler.settings.track.count == 4)
+        #expect(core.tiler.settings.track.limit == 4)
         #expect(core.tiler.settings.track.trackCap == 0)
         // A non-boolean is rejected.
         #expect(
@@ -146,14 +146,14 @@ struct TrackCommandsTests {
         // A fixed cap in one space via the coupled count setter.
         #expect(
             core.execute(
-                "track.set_count_override",
+                "track.set_limit_override",
                 args: [.string("2"), .number(3)]
             ).isSuccess
         )
         let over = core.tiler.settings.track.override[
             SpaceID("2")
         ]
-        #expect(over?.count == 3)
+        #expect(over?.limit == 3)
         #expect(over?.autoTracks == false)
         // count + 1 = the three normal tracks plus the overflow
         // track (#192).
@@ -179,7 +179,7 @@ struct TrackCommandsTests {
         )
         #expect(
             !core.execute(
-                "track.set_count",
+                "track.set_limit",
                 args: [.number(-1)]
             ).isSuccess
         )
@@ -203,7 +203,7 @@ struct TrackCommandsTests {
         )
         #expect(
             core.execute(
-                "track.set_count_override",
+                "track.set_limit_override",
                 args: [.string("2"), .number(2)]
             ).isSuccess
         )
@@ -211,15 +211,15 @@ struct TrackCommandsTests {
             SpaceID("2")
         ]
         #expect(over?.axis == .horizontal)
-        #expect(over?.count == 2)
+        #expect(over?.limit == 2)
         // The global params are untouched.
         #expect(core.tiler.settings.track.axis == .vertical)
         #expect(
-            core.tiler.settings.resolvedTrack(for: "2").count
+            core.tiler.settings.resolvedTrack(for: "2").limit
                 == 2
         )
         #expect(
-            core.tiler.settings.resolvedTrack(for: "1").count
+            core.tiler.settings.resolvedTrack(for: "1").limit
                 == 2
         )
     }

@@ -128,17 +128,17 @@ struct GlobalAppBarGroup: View {
                 .map { ($0.1, $0.0) },
             help: L(
                 "app_bar.alignment.label.help",
-                "Where the tab group sits along the bar while "
+                "Where the item group sits along the bar while "
                     + "it fits. Start and End follow the edge "
                     + "(a left bar's Start is its top); once "
-                    + "tabs overflow and scroll, all three "
+                    + "items overflow and scroll, all three "
                     + "behave the same."
             )
         )
         SegmentedPicker(
-            tabBackgroundLabel,
-            selection: $style.tabBackground,
-            options: AppBarOptions.tabBackground.map { ($0.1, $0.0) }
+            backgroundStyleLabel,
+            selection: $style.backgroundStyle,
+            options: AppBarOptions.backgroundStyle.map { ($0.1, $0.0) }
         )
         // Liquid Glass is a finish over either shape, offered only
         // where it can render (macOS 26+) — hidden, not greyed,
@@ -160,16 +160,16 @@ struct GlobalAppBarGroup: View {
         // grouping); greyed for Boxed, which draws no shared
         // plate (#171).
         SegmentedPicker(
-            tabBackgroundFitLabel,
-            selection: $style.tabBackgroundFit,
-            options: AppBarOptions.tabBackgroundFit
+            backgroundFitLabel,
+            selection: $style.backgroundFit,
+            options: AppBarOptions.backgroundFit
                 .map { ($0.1, $0.0) }
         )
         .modifier(
             GreyOut(
                 // Boxed never draws a shared plate to size — with
-                // glass each tab hugs its own box, without glass
-                // each tab draws its own box — so fit is inert for
+                // glass each item hugs its own box, without glass
+                // each item draws its own box — so fit is inert for
                 // Boxed regardless of the glass finish.
                 // Asked of the bars actually SHOWN, not the
                 // global value: a layout overriding to Plain
@@ -177,8 +177,8 @@ struct GlobalAppBarGroup: View {
                 // hid the only editor for a value in use.
                 active: everyShownBarBoxed,
                 help: L(
-                    "app_bar.tab_background_fit.boxed_only",
-                    "Boxed draws a box per tab, not a shared "
+                    "app_bar.background_fit.boxed_only",
+                    "Boxed draws a box per item, not a shared "
                         + "plate, so there is nothing to size."
                 )
             )
@@ -265,8 +265,8 @@ struct GlobalAppBarGroup: View {
             help: L(
                 "app_bar.group_adjacent.help",
                 "Merges neighbouring windows of the same app "
-                    + "into a single tab, marked with a count "
-                    + "badge, instead of showing one tab each."
+                    + "into a single item, marked with a count "
+                    + "badge, instead of showing one item each."
             )
         )
     }
@@ -289,12 +289,12 @@ struct GlobalAppBarGroup: View {
     private var alignmentLabel: String {
         L("app_bar.alignment.label", "Alignment")
     }
-    private var tabBackgroundLabel: String {
-        L("app_bar.tab_background.label", "Tab background")
+    private var backgroundStyleLabel: String {
+        L("app_bar.background_style.label", "Background style")
     }
-    private var tabBackgroundFitLabel: String {
+    private var backgroundFitLabel: String {
         L(
-            "app_bar.tab_background_fit.label",
+            "app_bar.background_fit.label",
             "Background size"
         )
     }

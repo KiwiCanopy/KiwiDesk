@@ -57,7 +57,7 @@ extension AppBarItemView {
             x = box.maxX - diameter / 2
             y = box.minY - diameter / 2
         }
-        // Keep the corner badge clear of the tab's rounded corner
+        // Keep the corner badge clear of the item's rounded corner
         // (#411): the badge overlaps the top-trailing corner, and the
         // rounding cuts it — hard under any glass finish (the item is
         // the glass's clipped contentView), and off the rounded box
@@ -146,7 +146,7 @@ extension AppBarItemView {
         // and name (manual QA 2026-07-18).
         var spacing: CGFloat =
             side > 0 && showText ? pad / 2 : 0
-        // A grouped tab reserves room after the name for its count
+        // A grouped item reserves room after the name for its count
         // badge, so the badge sits beside the name instead of
         // clamping over it (owner 2026-07-20).
         let badgeReserve: CGFloat =
@@ -164,7 +164,7 @@ extension AppBarItemView {
         }
         label.isHidden = !showText || textSize.width == 0
         // Fold the badge's own footprint (a 2 pt gap + the circle)
-        // into the centering so a grouped tab's badge doesn't crowd
+        // into the centering so a grouped item's badge doesn't crowd
         // the trailing edge — icon + name + badge center as one
         // group, so the trailing gap matches the leading one (owner
         // 2026-07-20). Only when the name shows: an icon-only badge
@@ -175,7 +175,7 @@ extension AppBarItemView {
             badgeReserve > 0 && textSize.width > 0
             ? badgeReserve - pad + 2
             : 0
-        // The edge floor exists for text; an icon-only tab at
+        // The edge floor exists for text; an icon-only item at
         // the minimum slot keeps the tighter pad so its glyph
         // box can't poke past the trailing border.
         var x = max(

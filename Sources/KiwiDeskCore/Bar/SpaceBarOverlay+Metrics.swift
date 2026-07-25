@@ -121,7 +121,7 @@ extension SpaceBarOverlay {
     /// `current` (so manual arrow/auto scrolling sticks) and moves
     /// just far enough to keep the active item fully visible,
     /// `margin` clear of the viewport's ends. Item lengths vary
-    /// (auto `box_size`), so the active item's span is summed from
+    /// (auto `item_size`), so the active item's span is summed from
     /// the real lengths rather than a fixed slot pitch. Pass a nil
     /// index to only clamp. 0 while everything fits.
     nonisolated static func scrollOffset(

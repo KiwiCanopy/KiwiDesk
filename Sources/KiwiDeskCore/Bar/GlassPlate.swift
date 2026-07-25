@@ -27,7 +27,7 @@ enum GlassPlate {
     /// `fill_color` means clear glass (no tint).
     /// `animated` eases a frame change through the caller's
     /// `NSAnimationContext` group (the App Bar moves its plate
-    /// alongside its sliding tabs); fresh plates snap direct.
+    /// alongside its sliding items); fresh plates snap direct.
     @MainActor
     static func update(
         _ view: NSView,

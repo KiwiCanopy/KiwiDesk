@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-// The mock can't be to-scale (a 200 pt tab won't fit an 84 pt
+// The mock can't be to-scale (a 200 pt item won't fit an 84 pt
 // canvas), so each dimension maps its full real range onto a
 // legible preview range *proportionally* — dragging any
 // slider always keeps moving the mock, rather than hitting a
@@ -22,8 +22,8 @@ extension AppBarPreviewStrip {
     /// where the inner-box height budgets the axis).
     var gap: CGFloat {
         style.edge.isHorizontal
-            ? scale(style.boxGap, from: 0...40, to: 0...16)
-            : scale(style.boxGap, from: 0...40, to: 0...5)
+            ? scale(style.itemGap, from: 0...40, to: 0...16)
+            : scale(style.itemGap, from: 0...40, to: 0...5)
     }
 
     /// The shared %-resolve against the preview's own (scaled)
@@ -38,11 +38,11 @@ extension AppBarPreviewStrip {
     }
 
     /// Box length along the bar axis: honor an explicit
-    /// `boxSize` (mapped 1–200 pt → 20–72 pt), else size to the
+    /// `itemSize` (mapped 1–200 pt → 20–72 pt), else size to the
     /// content kind.
     var slotLength: CGFloat {
-        if style.boxSize > 0 {
-            return scale(style.boxSize, from: 1...200, to: 20...72)
+        if style.itemSize > 0 {
+            return scale(style.itemSize, from: 1...200, to: 20...72)
         }
         switch style.content {
         case .icon: return max(thickness, 22)
@@ -57,8 +57,8 @@ extension AppBarPreviewStrip {
     /// 3 × 18 + 2 × 5 + 8 strip padding = 72 at the maxima.
     /// The box-size slider still visibly moves the mock.
     var verticalSlotLength: CGFloat {
-        if style.boxSize > 0 {
-            return scale(style.boxSize, from: 1...200, to: 14...18)
+        if style.itemSize > 0 {
+            return scale(style.itemSize, from: 1...200, to: 14...18)
         }
         return 16
     }

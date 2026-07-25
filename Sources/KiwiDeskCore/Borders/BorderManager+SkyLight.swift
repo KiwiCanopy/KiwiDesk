@@ -8,7 +8,7 @@ import AppKit
 /// is internal on the main type for exactly this reason.
 ///
 /// `BorderManager` is now the WindowServer-events broker for two
-/// consumers — the ring (its overlays) and the sticky chip (via the
+/// consumers — the ring (its overlays) and the sticky mark (via the
 /// `onFrameReconciled` / `onWindowReordered` tees) — because
 /// `SkyLightWindowEvents` has a single weak sink. Two consumers is a
 /// deliberate deferral; a THIRD would be the trigger to extract a
@@ -21,20 +21,20 @@ extension BorderManager {
         overlays[id] != nil && skyLightActive
     }
 
-    /// Whether the sticky chip should trust the WindowServer stream
+    /// Whether the sticky mark should trust the WindowServer stream
     /// for this window (and suppress the laggy AX echo), mirroring
     /// `usesWindowServerTracking` for the ring. True for any window
     /// we actually watch — bordered OR sticky-tracked — once the
     /// stream is live.
-    func chipUsesWindowServerTracking(_ id: WindowID) -> Bool {
+    func markUsesWindowServerTracking(_ id: WindowID) -> Bool {
         skyLightActive
             && (overlays[id] != nil || stickyTracked.contains(id))
     }
 
-    /// The sticky chip's WS tracking set (#414 QA): sticky windows
+    /// The sticky mark's WS tracking set (#414 QA): sticky windows
     /// need the reorder tee and frame stream even with no ring, so
     /// they are folded into the watch subscription here. Driven by
-    /// `updateStickyIndicators`; a no-op when unchanged.
+    /// `updateStickyMarks`; a no-op when unchanged.
     func setStickyTracked(_ ids: Set<WindowID>) {
         guard ids != stickyTracked else { return }
         stickyTracked = ids
@@ -47,7 +47,7 @@ extension BorderManager {
     /// and cursor following.
     ///
     /// Scoped guard, not the ring's old overlay-only one: a
-    /// sticky-tracked window may wear a chip but no ring, so it must
+    /// sticky-tracked window may wear a mark but no ring, so it must
     /// pass too — it needs the same WS frame stream (`reconcile` →
     /// `onFrameReconciled`) and z-order tee (`onWindowReordered`).
     /// A window we watch neither way is a stale additive delivery
@@ -84,7 +84,7 @@ extension BorderManager {
             skyLightActive = false
             return
         }
-        // Sticky chips ride the same stream as rings (#414 QA), so
+        // Sticky marks ride the same stream as rings (#414 QA), so
         // their windows join the watch set even without a ring.
         let wanted = borderWanted.union(stickyTracked)
         if !triedEventSource, !wanted.isEmpty {

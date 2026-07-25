@@ -11,14 +11,14 @@ enum SpaceBarCommandSetting {
     case edge(AppBarEdge)
     case alignment(SpaceBarStyle.Alignment)
     case thickness(CGFloat)
-    case boxSize(CGFloat)
-    case boxGap(CGFloat)
+    case itemSize(CGFloat)
+    case itemGap(CGFloat)
     case fontSize(CGFloat)
     case glyphCap(Int)
     case iconSource(BarAppIconSource)
-    case tabBackground(SpaceBarStyle.TabBackground)
+    case backgroundStyle(SpaceBarStyle.BackgroundStyle)
     case liquidGlass(Bool)
-    case tabBackgroundFit(SpaceBarStyle.TabBackgroundFit)
+    case backgroundFit(SpaceBarStyle.BackgroundFit)
     case activeIndicator(SpaceBarStyle.ActiveIndicator)
     case cornerRoundness(CGFloat)
     case dimFactor(CGFloat)
@@ -90,18 +90,18 @@ enum SpaceBarCommandSetting {
                 BarAppIconSource.self,
                 "app_image|app_font"
             ).map(Self.iconSource)
-        case "tab_background":
+        case "background_style":
             return choice(
                 args,
-                SpaceBarStyle.TabBackground.self,
+                SpaceBarStyle.BackgroundStyle.self,
                 "boxed|plain"
-            ).map(Self.tabBackground)
-        case "tab_background_fit":
+            ).map(Self.backgroundStyle)
+        case "background_fit":
             return choice(
                 args,
-                SpaceBarStyle.TabBackgroundFit.self,
+                SpaceBarStyle.BackgroundFit.self,
                 "full|hug"
-            ).map(Self.tabBackgroundFit)
+            ).map(Self.backgroundFit)
         case "active_indicator":
             return choice(
                 args,
@@ -128,8 +128,8 @@ enum SpaceBarCommandSetting {
     {
         [
             "thickness": Self.thickness,
-            "box_size": Self.boxSize,
-            "box_gap": Self.boxGap,
+            "item_size": Self.itemSize,
+            "item_gap": Self.itemGap,
             "font_size": Self.fontSize,
             "corner_roundness": Self.cornerRoundness,
             "dim_factor": Self.dimFactor,
@@ -239,16 +239,16 @@ enum SpaceBarCommandSetting {
         case .alignment(let value): style.alignment = value
         case .thickness(let value):
             style.thickness = max(AppBarStyle.minThickness, value)
-        case .boxSize(let value): style.boxSize = value
-        case .boxGap(let value): style.boxGap = value
+        case .itemSize(let value): style.itemSize = value
+        case .itemGap(let value): style.itemGap = value
         case .fontSize(let value): style.fontSize = value
         case .glyphCap(let value): style.glyphCap = value
         case .iconSource(let value): style.iconSource = value
-        case .tabBackground(let value):
-            style.tabBackground = value
+        case .backgroundStyle(let value):
+            style.backgroundStyle = value
         case .liquidGlass(let value): style.liquidGlass = value
-        case .tabBackgroundFit(let value):
-            style.tabBackgroundFit = value
+        case .backgroundFit(let value):
+            style.backgroundFit = value
         case .activeIndicator(let value):
             style.activeIndicator = value
         case .cornerRoundness(let value):

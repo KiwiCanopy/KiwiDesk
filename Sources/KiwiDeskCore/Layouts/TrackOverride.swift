@@ -15,7 +15,7 @@ import Foundation
 public struct TrackOverride: Sendable, Equatable {
     public var axis: TrackParams.Axis?
     public var autoTracks: Bool?
-    public var count: Int?
+    public var limit: Int?
     public var overflowStyle: StackParams.OverflowStyle?
 
     public init() {}
@@ -26,7 +26,7 @@ public struct TrackOverride: Sendable, Equatable {
         var out = global
         if let axis { out.axis = axis }
         if let autoTracks { out.autoTracks = autoTracks }
-        if let count { out.count = count }
+        if let limit { out.limit = limit }
         if let overflowStyle { out.overflowStyle = overflowStyle }
         // Merged params hold no override map (see ScrollingOverride).
         out.override = [:]
@@ -36,7 +36,7 @@ public struct TrackOverride: Sendable, Equatable {
     /// True when no field is set — a fully-inherited space needs
     /// no stored override (drives sparse encoding).
     public var isEmpty: Bool {
-        axis == nil && autoTracks == nil && count == nil
+        axis == nil && autoTracks == nil && limit == nil
             && overflowStyle == nil
     }
 }
@@ -50,7 +50,7 @@ extension TrackOverride: Codable {
     enum CodingKeys: String, CodingKey {
         case axis
         case autoTracks = "auto_tracks"
-        case count
+        case limit
         case overflowStyle = "overflow_style"
     }
 
@@ -66,9 +66,9 @@ extension TrackOverride: Codable {
             Bool.self,
             forKey: .autoTracks
         )
-        count = try container.decodeIfPresent(
+        limit = try container.decodeIfPresent(
             Int.self,
-            forKey: .count
+            forKey: .limit
         )
         overflowStyle = try container.decodeIfPresent(
             StackParams.OverflowStyle.self,
@@ -83,7 +83,7 @@ extension TrackOverride: Codable {
             autoTracks,
             forKey: .autoTracks
         )
-        try container.encodeIfPresent(count, forKey: .count)
+        try container.encodeIfPresent(limit, forKey: .limit)
         try container.encodeIfPresent(
             overflowStyle,
             forKey: .overflowStyle

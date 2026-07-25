@@ -326,8 +326,8 @@ Keep this list updated whenever a recurring mistake is found.
 - **One vocabulary across Lua and profile JSON.** A profile
   JSON key is the Lua command name with the `set_` verb
   stripped, snake_case, grouped by namespace:
-  `set_gap_override` → `gap.override`, `bsp.set_ratio` →
-  `layout.bsp.ratio`, `stack.set_master_ratio` →
+  `set_gap_override` → `gap.override`, `bsp.set_ratio_h` →
+  `layout.bsp.ratio_h`, `stack.set_master_ratio` →
   `layout.stack.master_ratio`. Multi-part element names nest
   further when the element is a configurable unit:
   `drag.set_ghost_fill_color` → `drag.ghost.fill_color`.

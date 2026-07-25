@@ -427,7 +427,7 @@ core as a plain per-space `Int`** (`StateCoordinator.trackCapacities`,
 like `trackParams`), so `Space.insertIntoTrack` stays a pure
 function of the flat array plus that number — no `LayoutContext`
 reaches the state layer. The pile survives only as the
-no-alternative fallback (a fixed `count` cap with no room, or a
+no-alternative fallback (a fixed `limit` cap with no room, or a
 `move_to_space` traveler an explicit placement mustn't relocate),
 so it never contradicts the spill. Entering track mode seeds the
 same way: `focused_track` packs the existing windows into filled
@@ -793,7 +793,7 @@ sit beside the global ones; `make_unsticky` is shared, and each
 verb writes its scope outright so `make_sticky` on a display
 sticky turns it global and vice versa (the #221 sibling-verb
 model — no tri-state, no detection source). Both wear the same
-indicator toggle and color; only the glyph differs — `infinity`
+mark toggle and color; only the glyph differs — `infinity`
 (∞) for global, `pin.fill` (📌) for display (the pin reads as
 "tacked to this screen", the sibling of `SpaceAssignmentChip`'s
 "bound to one space"). On a single monitor the two scopes
@@ -805,7 +805,7 @@ Because a sticky window's whole point is to stay put,
 rewriting its home membership: a global sticky refuses any
 target (it is already everywhere), a display sticky refuses a
 *same-display* target but accepts a *cross-display* one (which
-re-homes it). The refusal reuses the shipped `StickyIndicatorPlate`
+re-homes it). The refusal reuses the shipped `StickyMarkPlate`
 pill (`sticky.everywhere.pill` / `sticky.display.pill`), fired
 from the shared `moveWindow` choke point so the keyboard move and
 the Space-Bar drag both honour it. Which display a sticky
@@ -1462,7 +1462,7 @@ The rows stay live at runtime by design; only their
 
 **Sticky state must never be invisible from the GUI.** A
 sticky window can look identical to a normal one, so it gets
-two indicators: an on-window chip (top-RIGHT corner —
+two marks: an on-window mark (top-RIGHT corner —
 top-left belongs to the traffic lights) and a Space Bar badge
 (top-LEFT of its glyph — the bar reserves top-right for the
 group count; an intentional cross-surface difference).
@@ -1471,22 +1471,42 @@ floating are otherwise indistinguishable — on the window
 itself floating is self-evident. Badges are Space-Bar-only
 (the per-layout App Bar shows no state badges), survive
 grouping as an "at least one" aggregate, and have no GUI
-toggle. The coverage guard: the on-window chip's toggle greys
+toggle. The coverage guard: the on-window mark's toggle greys
 out and renders forced ON while the Space Bar is off, because
-that chip is then the only sticky indicator and — unlike a
+it is then the only sticky mark there is and — unlike a
 focus border, which duplicates an OS cue — sticky has no
 native fallback. The guard is presentation-only; Lua's
-`sticky.set_indicator` and `space_bar.set_sticky_badge` apply
-unclamped, so a deliberate zero-indicator setup stays
+`sticky.set_mark` and `space_bar.set_sticky_badge` apply
+unclamped, so a deliberate zero-mark setup stays
 reachable from the open layer (`dim_factor` precedent).
 (#414)
 
-**The sticky chip has a transient third mode: the home-space
-pill.** In steady state the chip is a passive glyph, identical
+**One word for the dot — "mark" — with two deliberate
+carve-outs.** (R6/#406.) Five words named one thing: indicator,
+mark, badge, chip, pill. The wire and every label now say
+**mark** (`sticky.set_mark`, JSON `sticky.mark`, the
+`StickyMark*` overlay types). Two words survive because they
+name something genuinely different, not the same dot: **badge**
+is a small disc attached to a bar item's corner — the group
+**count** badge (top-trailing) and the Space Bar's **sticky**
+(top-leading) and **floating** (bottom-leading) state badges.
+One family, three deliberately different corners (see the
+cross-surface note above): same disc treatment, same
+`groupBadgeColor` fill on Automatic. That shared treatment — not
+a shared slot — is why `space_bar.set_sticky_badge` keeps the
+word while the on-window cue is a mark. And **pill** is the
+mark's transient EXPANDED state, not the mark itself. A new
+state cue picks among these words by *where and what*, never as
+a synonym — note the bar's **active indicator** is a fourth
+thing again: it marks which item is current, not a window's
+state.
+
+**The sticky mark has a transient third mode: the home-space
+pill.** In steady state the mark is a passive glyph, identical
 on every space. But a tiled-sticky window belongs to exactly
 one *home* space, and nothing said which — so when a drag on a
 foreign space snaps the tile back (the one friction moment the
-question exists), the chip expands leftward into a pill —
+question exists), the mark expands leftward into a pill —
 "Can only be moved in its home space *N*" — then auto-collapses.
 The expand waits for the snap-back to settle first (expanding
 mid-snap reads as lag) — the wait tracks the live relayout
@@ -1497,7 +1517,7 @@ caption crowding a tiny corner badge, against "captions label,
 don't teach." It names the home *space* by its configured Space
 Bar identifier (SF Symbol or emoji, id/name as fallback) so the
 pill and the space's bar tile read as the same place — not a
-focus/z-order state, since the chip is not a focus cue: it marks
+focus/z-order state, since the mark is not a focus cue: it marks
 every sticky window on every space at once.
 The glyph stays pinned in the rightmost square through the morph
 (its screen position never moves), and the pill clamps to the
@@ -1550,24 +1570,24 @@ than duplicate the geometric detector against the array-step model.
 
 **The sticky/floating marks are a filled state-color pair,
 defaulting to Automatic.** The one sticky glyph reads the one
-`sticky.color`, so the on-window chip and the Space Bar sticky
+`sticky.color`, so the on-window mark and the Space Bar sticky
 badge can never drift to different colors; floating gets its own
 `floating.color` (a minimal `floating` namespace, since floating
 has no other setting) tinting its Space Bar badge only — it has
-no on-window chip. The color owns the *fill*, and the glyph on
+no on-window mark. The color owns the *fill*, and the glyph on
 top is auto-contrasted black/white for legibility (a filled disc
 shows its hue far better than a thin glyph stroke at the 7–9 pt
 badge size, and an auto-contrast glyph means any picked fill stays
 readable — a guardrail on legibility, never taste). The Space Bar
 sticky/floating marks stay filled discs in the count badge's
-family; the on-window chip nests the same filled disc inside its
+family; the on-window mark nests the same filled disc inside its
 glass square, so the two surfaces read as one mark. **Automatic**
 falls back to today's look on each surface: the badges inherit the
 count badge's own `groupBadgeColor` fill (the default trio stays
-one consistent color), and the chip drops the disc for the bare
+one consistent color), and the mark drops the disc for the bare
 neutral `.labelColor` glyph on glass. The default is Automatic
 (the empty-hex sentinel), not a concrete brand hex like the other
-color wells: the chip sits on top of arbitrary third-party window
+color wells: the mark sits on top of arbitrary third-party window
 content all day, and the adaptive label color is the only default
 guaranteed legible against anything behind the translucent plate,
 light or dark — a fixed hue can wash out or clash. So the shipped
@@ -2006,7 +2026,7 @@ load/import accepts it silently.
 Adjacent same-app runs collapse into one glyph + count badge
 unconditionally — unlike the App Bar's `group_adjacent_windows`
 toggle. The asymmetry is structural, not an oversight: App Bar
-tabs are click targets, so grouping changes interaction and
+items are click targets, so grouping changes interaction and
 earns a toggle; Space Bar glyphs are informational, and the
 glyph cap depends on grouping running **first** (an ungrouped
 mode would burn the cap on duplicates while conveying less).
@@ -2255,13 +2275,52 @@ pending their own retune (#511). `ColorPaletteTests` pins the inequality for
 every bundled
 palette.
 
+**The background control names WHERE the background is drawn,
+not what the rectangle is called.** (R6/#406, owner ruling
+2026-07-25.) The picker shipped as **"Tab background"** on the
+App Bar and **"Item background"** on the Space Bar. Both are
+false half the time: under `plain` **no item draws a box of its
+own** in steady state — there is one bar-wide plate (`BarPlate`),
+so the background belongs to the *bar*, not to the item. (Hover
+still reveals a box per item; that is a transient affordance,
+not the configured background.) "Tab" fails
+from the other side, since an App Bar entry is a window or a
+same-app group, not a browser tab. The control is not naming an
+object; it is choosing where the fill goes — per item, or one
+plate behind all of them. Hence **"Background style"** on both
+bars (options unchanged: Boxed / Plain), wire
+`tab_background` → `background_style`, which also makes the two
+bars finally name the same picker the same way. The rejected
+alternative was "Item background everywhere", which reads
+correctly under Boxed and is a lie under Plain — that asymmetry
+is the whole reason the name moved, so do not restore it. Item
+*geometry* did become "Item size" / "Item gap"
+(`box_size` → `item_size`, `box_gap` → `item_gap`): those stay
+true under either style, because items have size and spacing in
+Plain too, they simply draw no box of their own.
+
+**A bar entry is an "item", not a "tab" — except in gesture
+prose.** (R6/#406, owner ruling 2026-07-25.) An App Bar entry is
+a window or a same-app group; it has none of a browser tab's
+semantics, and the Space Bar's entries were already items. The
+colors said `item_color` / `active_item_color` from the start,
+and T4 moved the geometry to match (`item_size` / `item_gap`),
+so **item is the model noun** — labels, help strings, captions,
+enum doc comments, and the Lua reference all use it. The one
+carve-out is the user guide's *gesture* prose ("click a tab",
+"drag a tab"), where the word names what the reader touches
+rather than what the model holds; that paragraph is deliberate,
+not an oversight. Note this is unrelated to **macOS native
+tabs** (`TabReconciler`, §5), which keep the word because they
+genuinely are tabs — a blanket rename must never reach them.
+
 **Plate reach is its own property, not a fourth background.**
-(QA 2026-07-19.) `tab_background_fit` (`full` | `hug`, default
+(QA 2026-07-19.) `background_fit` (`full` | `hug`, default
 hug) answers "how far does the shared plate reach" — a different
-question from `tab_background`'s "what is it made of", so it is
+question from `background_style`'s "where is it drawn", so it is
 orthogonal, and `plain` gets the choice as well as Liquid Glass
 (folding hug into `material` alone would have locked `plain`
-full-width forever). Hug wraps the run plus one box gap per end
+full-width forever). Hug wraps the run plus one item gap per end
 (the Dock's read — the calmer default for "approachable by
 default") and falls back to full while the run overflows and
 scrolls, where content fills the strip and there is nothing to
@@ -2270,8 +2329,8 @@ control, per #171. One geometry authority: `BarPlate.frame`,
 shared by both bars and pinned by `BarPlateTests`.
 
 **Liquid Glass is an orthogonal finish toggle, not a third
-`tab_background`.** (#390; revised 2026-07-20.) It was first
-shipped as a third `TabBackground` case (`material`) beside
+`background_style`.** (#390; revised 2026-07-20.) It was first
+shipped as a third `BackgroundStyle` case (`material`) beside
 `boxed`/`plain`, on the reasoning that a toggle would be ambiguous
 ("boxed + glass" = glass boxes or a glass strip under opaque
 boxes?). On-device testing (macOS 26.5.2) forced a rethink on two
@@ -2303,10 +2362,11 @@ round-trips everywhere (portability). Explicitly out of scope: a
 glass border/stroke, a shadow (`BarPanel` is deliberately
 shadowless), and vibrancy-following text.
 
-**Tab background and active indicator are orthogonal.** (#228.)
+**Background style and active indicator are orthogonal.** (#228.)
 The old coupled `style` enum (`pills` / `segments` / `underline`)
-conflated two orthogonal concerns: the per-tab box rendering and
-the active-tab marking. The redesign splits them into `tab_background`
+conflated two orthogonal concerns: the per-item box rendering and
+the active-item marking. The redesign splits them into
+`background_style`
 (`boxed` / `plain`) and `active_indicator` (`ring` / `edge_mark` /
 `gap`), so all combinations are expressible — e.g. boxed + edge
 mark (the old "segments" look), plain + edge mark (the old

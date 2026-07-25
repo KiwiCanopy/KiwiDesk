@@ -5,14 +5,14 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The sticky-mark diff-sync (#414): one chip per sticky
+/// The sticky-mark diff-sync (#414): one mark per sticky
 /// window, retired when the window stops being sticky or goes
 /// away — `BorderManager`'s contract at marker scale.
-@Suite("Sticky indicator manager", .serialized)
+@Suite("Sticky mark manager", .serialized)
 @MainActor
-struct StickyIndicatorManagerTests {
-    private func spec(_ id: UInt32) -> StickyIndicatorManager.Spec {
-        StickyIndicatorManager.Spec(
+struct StickyMarkManagerTests {
+    private func spec(_ id: UInt32) -> StickyMarkManager.Spec {
+        StickyMarkManager.Spec(
             window: WindowID(id),
             frame: CGRect(x: 0, y: 0, width: 400, height: 300)
         )
@@ -20,7 +20,7 @@ struct StickyIndicatorManagerTests {
 
     @Test("Sync shows exactly the desired set")
     func syncDiff() {
-        let manager = StickyIndicatorManager()
+        let manager = StickyMarkManager()
         manager.sync([spec(1), spec(2)])
         #expect(
             manager.markedWindows == [WindowID(1), WindowID(2)]
@@ -31,9 +31,9 @@ struct StickyIndicatorManagerTests {
         #expect(manager.markedWindows.isEmpty)
     }
 
-    @Test("Clear retires every chip")
+    @Test("Clear retires every mark")
     func clearAll() {
-        let manager = StickyIndicatorManager()
+        let manager = StickyMarkManager()
         manager.sync([spec(1)])
         manager.clear()
         #expect(manager.markedWindows.isEmpty)
@@ -41,10 +41,10 @@ struct StickyIndicatorManagerTests {
 
     @Test("Flash keeps the set; an unmarked window is a no-op")
     func flashContract() {
-        let manager = StickyIndicatorManager()
+        let manager = StickyMarkManager()
         manager.sync([spec(1)])
         // Marked window flashes (#421); an unmarked one must
-        // not create a chip or crash.
+        // not create a mark or crash.
         let fmt = "Home space %1$@"
         manager.flash(
             WindowID(1),
@@ -64,43 +64,43 @@ struct StickyIndicatorManagerTests {
 
 /// The home-space pill's geometry (#421): the plate grows to fit
 /// the name, capped so a long name truncates instead of sprawling.
-@Suite("Sticky indicator pill", .serialized)
+@Suite("Sticky mark plate", .serialized)
 @MainActor
-struct StickyIndicatorPlateTests {
+struct StickyMarkPlateTests {
     @Test("A name expands the plate past the collapsed square")
     func expands() {
-        let plate = StickyIndicatorPlate()
+        let plate = StickyMarkPlate()
         #expect(
             plate.prepare(format: "Home %1$@", mark: .text("Work"))
-                > StickyIndicatorPlate.size
+                > StickyMarkPlate.size
         )
     }
 
     @Test("A symbol mark also expands (renders inline)")
     func symbolExpands() {
-        let plate = StickyIndicatorPlate()
+        let plate = StickyMarkPlate()
         #expect(
             plate.prepare(format: "Home %1$@", mark: .symbol("star"))
-                > StickyIndicatorPlate.size
+                > StickyMarkPlate.size
         )
     }
 
     @Test("A long name caps at the max pill width")
     func caps() {
-        let plate = StickyIndicatorPlate()
+        let plate = StickyMarkPlate()
         let width = plate.prepare(
             format: "%1$@",
             mark: .text(String(repeating: "W", count: 120))
         )
-        #expect(width == StickyIndicatorPlate.maxWidth)
+        #expect(width == StickyMarkPlate.maxWidth)
     }
 }
 
-/// The driver (#414): every sticky window wears the chip on
-/// every space; the `sticky.indicator` toggle retires them all.
-@Suite("Sticky indicator driver", .serialized)
+/// The driver (#414): every sticky window wears the mark on
+/// every space; the `sticky.mark` toggle retires them all.
+@Suite("Sticky mark driver", .serialized)
 @MainActor
-struct StickyIndicatorDriverTests {
+struct StickyMarkDriverTests {
     private func makeCore() -> KiwiCore {
         KiwiCore(
             configDirectory: FileManager.default
@@ -129,9 +129,9 @@ struct StickyIndicatorDriverTests {
         addWindow(core, 1)
         addWindow(core, 2)
         core.state.setSticky(WindowID(1), .global)
-        core.updateStickyIndicators()
+        core.updateStickyMarks()
         #expect(
-            core.stickyIndicators.markedWindows == [WindowID(1)]
+            core.stickyMarks.markedWindows == [WindowID(1)]
         )
     }
 
@@ -142,22 +142,22 @@ struct StickyIndicatorDriverTests {
         core.state.setSticky(WindowID(1), .global)
         core.state.workspaces.ensureSpace(SpaceID(2))
         core.state.workspaces.activate(SpaceID(2))
-        core.updateStickyIndicators()
+        core.updateStickyMarks()
         #expect(
-            core.stickyIndicators.markedWindows == [WindowID(1)]
+            core.stickyMarks.markedWindows == [WindowID(1)]
         )
     }
 
-    @Test("sticky.indicator off retires every mark")
-    func indicatorGate() {
+    @Test("sticky.mark off retires every mark")
+    func markGate() {
         let core = makeCore()
         addWindow(core, 1)
         core.state.setSticky(WindowID(1), .global)
-        core.updateStickyIndicators()
-        #expect(!core.stickyIndicators.markedWindows.isEmpty)
-        core.tiler.settings.stickyStyle.indicator = false
-        core.updateStickyIndicators()
-        #expect(core.stickyIndicators.markedWindows.isEmpty)
+        core.updateStickyMarks()
+        #expect(!core.stickyMarks.markedWindows.isEmpty)
+        core.tiler.settings.stickyStyle.mark = false
+        core.updateStickyMarks()
+        #expect(core.stickyMarks.markedWindows.isEmpty)
     }
 
     @Test("An unsticky flip retires the mark on the next sync")
@@ -165,9 +165,9 @@ struct StickyIndicatorDriverTests {
         let core = makeCore()
         addWindow(core, 1)
         core.state.setSticky(WindowID(1), .global)
-        core.updateStickyIndicators()
+        core.updateStickyMarks()
         core.state.setSticky(WindowID(1), .none)
-        core.updateStickyIndicators()
-        #expect(core.stickyIndicators.markedWindows.isEmpty)
+        core.updateStickyMarks()
+        #expect(core.stickyMarks.markedWindows.isEmpty)
     }
 }

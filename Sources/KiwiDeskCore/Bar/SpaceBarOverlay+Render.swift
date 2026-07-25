@@ -20,10 +20,10 @@ extension SpaceBarOverlay {
         let horizontal = style.edge.isHorizontal
         let depth = horizontal ? strip.height : strip.width
         let axis = horizontal ? strip.width : strip.height
-        let gap = style.boxGap
+        let gap = style.itemGap
         let lengths = items.map { item in
-            style.boxSize > 0
-                ? style.boxSize
+            style.itemSize > 0
+                ? style.itemSize
                 : SpaceBarItemView.autoLength(
                     appCount: item.apps.count,
                     overflow: item.overflow,
@@ -101,7 +101,7 @@ extension SpaceBarOverlay {
             scrollOffset: scrollOffset
         )
         // The shared plate (plain fill / glass) hugs or spans
-        // per `tab_background_fit`. With no arrow inset the
+        // per `background_fit`. With no arrow inset the
         // viewport is the strip, so viewport-local run
         // coordinates are already strip-local; while inset > 0
         // the plate is full anyway.
@@ -130,7 +130,7 @@ extension SpaceBarOverlay {
                 inset: inset,
                 gap: gap,
                 horizontal: horizontal,
-                fit: style.tabBackgroundFit
+                fit: style.backgroundFit
             )
         // The one hosting mode for this render (#407): prepared
         // (non-target teardown) here, then installed post-passes

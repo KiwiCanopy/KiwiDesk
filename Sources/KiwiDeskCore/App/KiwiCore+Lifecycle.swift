@@ -37,22 +37,22 @@ extension KiwiCore {
         // bar never renders an image-fallback frame.
         appFont.preload()
         borders.start()
-        // The chip rides the ring's WindowServer bounds stream —
+        // The mark rides the ring's WindowServer bounds stream —
         // AX move echoes alone lag visibly during drags. The
         // reposition path is unguarded (WS bounds are the truth);
         // the reorder tee re-asserts stacking on a raise that fires
         // no AX focus event (a re-click on the focused window); and
-        // the tracking predicate lets the chip's AX-echo `follow`
+        // the tracking predicate lets the mark's AX-echo `follow`
         // stand down while the WS stream owns the frame.
         borders.onFrameReconciled = { [weak self] id, frame in
-            self?.stickyIndicators
+            self?.stickyMarks
                 .reposition(id, windowFrame: frame)
         }
         borders.onWindowReordered = { [weak self] id in
-            self?.stickyIndicators.reassert(id)
+            self?.stickyMarks.reassert(id)
         }
-        stickyIndicators.isWindowServerTracked = { [weak self] id in
-            self?.borders.chipUsesWindowServerTracking(id) ?? false
+        stickyMarks.isWindowServerTracked = { [weak self] id in
+            self?.borders.markUsesWindowServerTracking(id) ?? false
         }
         loadConfig()
         sleepWake.start()
@@ -115,7 +115,7 @@ extension KiwiCore {
         // by direct AX (no animation tee), so a ring left up would
         // sit stranded over the scattered desktop.
         borders.stop()
-        stickyIndicators.clear()
+        stickyMarks.clear()
         // Gather windows onto their owning monitors before
         // any subsystem teardown; AX must still be live here.
         gatherWindows()

@@ -173,7 +173,7 @@ struct ZOrderScheduleTests {
         // the stacking. Turn off swap-skips-cascade (#172) so the
         // swap targets the in-pile neighbor instead of stepping
         // past the whole pile.
-        _ = core.execute("track.set_count", args: [.number(1)])
+        _ = core.execute("track.set_limit", args: [.number(1)])
         _ = core.execute(
             "set_swap_skips_cascade",
             args: [.bool(false)]

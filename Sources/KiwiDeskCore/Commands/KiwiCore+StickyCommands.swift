@@ -1,8 +1,8 @@
 import Foundation
 
-/// `sticky.*` sub-API (#414): the sticky-window indicator
+/// `sticky.*` sub-API (#414): the sticky-window mark
 /// settings. Each setter writes one `StickyStyle` field;
-/// `layoutCommand`'s forced retile applies it (the indicator
+/// `layoutCommand`'s forced retile applies it (the mark
 /// sync runs inside the retile path, like the borders).
 ///
 /// Applies unconditionally — the GUI's "forced ON while the
@@ -20,11 +20,11 @@ extension KiwiCore {
             command.dropFirst("sticky.set_".count)
         )
         switch field {
-        case "indicator":
+        case "mark":
             guard let flag = args.first?.boolValue else {
                 return .fail("expected boolean")
             }
-            tiler.settings.stickyStyle.indicator = flag
+            tiler.settings.stickyStyle.mark = flag
             return .ok()
         case "color":
             return setMarkColor(args) {

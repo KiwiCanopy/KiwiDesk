@@ -129,7 +129,7 @@ struct TrackOverflowStyleTests {
             ) {
                 $0.minWindowSize = 300
                 $0.track.autoTracks = false
-                $0.track.count = 2
+                $0.track.limit = 2
                 $0.track.overflowStyle = .cascadeAll
             }
         )
@@ -158,7 +158,7 @@ struct TrackOverflowStyleTests {
             ) {
                 $0.minWindowSize = 300
                 $0.track.autoTracks = false
-                $0.track.count = 3
+                $0.track.limit = 3
             }
         )
         // Four distinct columns; the far edge (w3) is the overflow
