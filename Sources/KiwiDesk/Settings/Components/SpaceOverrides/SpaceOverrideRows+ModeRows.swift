@@ -18,6 +18,9 @@ extension SpaceOverrideRows {
             ],
             style: .menu
         )
+        // Gated on this space's RESOLVED value, like the
+        // stack rows do (#520) — the global twin is greyed for
+        // a rigid grid, and the per-space row was not.
         OverrideToggleRow(
             label: L(
                 "scroll_grid.fill_empty_space",
@@ -29,6 +32,16 @@ extension SpaceOverrideRows {
                 \.fillEmptySpace
             ),
             global: g.grid.fillEmptySpace
+        )
+        .modifier(
+            GreyOut(
+                active: g.resolvedGrid(for: space).type == .rigid,
+                help: L(
+                    "scroll_grid.fill_empty_space.rigid_only",
+                    "A rigid grid keeps every cell, so there is "
+                        + "no empty space to fill."
+                )
+            )
         )
         // "Arrange: Columns first / Rows first" (#217) — GUI
         // label only; the `split_direction` wire vocab is kept.
@@ -58,17 +71,34 @@ extension SpaceOverrideRows {
             ],
             style: .menu
         )
-        OverrideStepperRow(
-            label: L("scroll_grid.columns", "Columns"),
-            value: binding(\.grid.override, space, \.columns),
-            global: g.grid.columns,
-            range: 1...10
-        )
-        OverrideStepperRow(
-            label: L("scroll_grid.rows", "Rows"),
-            value: binding(\.grid.override, space, \.rows),
-            global: g.grid.rows,
-            range: 1...10
+        // Auto-size decides both dimensions, so both rows are
+        // inert while it resolves on for this space. The field
+        // itself has no row here (audit finding 17), so unlike
+        // the global editor — where the gating toggle sits
+        // directly above — the help has to NAME what is gating.
+        Group {
+            OverrideStepperRow(
+                label: L("scroll_grid.columns", "Columns"),
+                value: binding(\.grid.override, space, \.columns),
+                global: g.grid.columns,
+                range: 1...10
+            )
+            OverrideStepperRow(
+                label: L("scroll_grid.rows", "Rows"),
+                value: binding(\.grid.override, space, \.rows),
+                global: g.grid.rows,
+                range: 1...10
+            )
+        }
+        .modifier(
+            GreyOut(
+                active: g.resolvedGrid(for: space).autoSize,
+                help: L(
+                    "scroll_grid.auto_size.gates",
+                    "Auto-size grid is on for this space, so the "
+                        + "screen decides the columns and rows."
+                )
+            )
         )
     }
 
@@ -113,6 +143,9 @@ extension SpaceOverrideRows {
             ],
             style: .menu
         )
+        // Same shape as the grid dimensions above: automatic
+        // tracks makes the limit inert, and the field that says
+        // so has no row here.
         OverrideStepperRow(
             label: L("track.count", "Track limit"),
             value: binding(
@@ -122,6 +155,16 @@ extension SpaceOverrideRows {
             ),
             global: g.track.count,
             range: 0...10
+        )
+        .modifier(
+            GreyOut(
+                active: g.resolvedTrack(for: space).autoTracks,
+                help: L(
+                    "track.auto_tracks.gates",
+                    "Automatic tracks is on for this space, so "
+                        + "the screen decides how many open."
+                )
+            )
         )
         OverridePickerRow(
             label: L("layout_params.overflow", "Overflow"),

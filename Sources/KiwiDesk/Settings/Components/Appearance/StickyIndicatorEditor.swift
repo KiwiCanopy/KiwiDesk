@@ -88,6 +88,11 @@ struct StickyIndicatorEditor: View {
             automatic: true,
             hex: $model.config.settings.stickyStyle.color
         )
+        // The floating mark's ONLY surface is the Space Bar
+        // badge (`KiwiCore+SpaceBar`), so this tints nothing
+        // while the bar is off — greyed, not hidden (#171).
+        // The sticky color above is deliberately NOT gated: it
+        // also paints the on-window chip, so it stays live.
         HexColorField(
             label: L("floating.color", "Floating"),
             a11yLabel: L(
@@ -96,6 +101,16 @@ struct StickyIndicatorEditor: View {
             ),
             automatic: true,
             hex: $model.config.settings.floatingStyle.color
+        )
+        .modifier(
+            GreyOut(
+                active: !spaceBarOn,
+                help: L(
+                    "floating.color.space_bar_only",
+                    "The floating mark is drawn only in the "
+                        + "Space Bar, which is off."
+                )
+            )
         )
     }
 }

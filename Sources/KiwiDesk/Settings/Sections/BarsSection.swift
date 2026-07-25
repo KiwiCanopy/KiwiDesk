@@ -62,7 +62,11 @@ struct BarsSection: View {
             spaceBarSharedEdge: model.config.settings
                 .spaceBarSharesEdgeWithAppBar
                 ? model.config.settings.spaceBarStyle.edge
-                : nil
+                : nil,
+            layoutBars: [
+                model.config.settings.monocle.appBar,
+                model.config.settings.scrolling.appBar,
+            ]
         )
         LayoutAppBarGroup(
             title: L("layout.monocle.name", "Monocle"),

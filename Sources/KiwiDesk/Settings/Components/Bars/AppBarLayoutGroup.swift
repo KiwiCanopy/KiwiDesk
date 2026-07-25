@@ -28,14 +28,30 @@ struct LayoutAppBarGroup: View {
                 L("app_bar.layout.show", "Show app bar"),
                 isOn: $bar.enabled
             )
-            if bar.enabled {
-                DisclosureGroup(
-                    L("app_bar.layout.overrides", "Overrides"),
-                    isExpanded: $overridesExpanded
-                ) {
-                    overrides
-                }
+            // Greyed, not hidden (#171/#520). `LayoutAppBar`
+            // encodes every override field regardless of
+            // `enabled`, so removing the rows actively concealed
+            // that the stored values are PRESERVED — the exact
+            // case docs/ui-patterns.md names. The drawer stays
+            // collapsed by default, so the cost of keeping it is
+            // one dimmed row, not a wall of controls.
+            DisclosureGroup(
+                L("app_bar.layout.overrides", "Overrides"),
+                isExpanded: $overridesExpanded
+            ) {
+                overrides
             }
+            .modifier(
+                GreyOut(
+                    active: !bar.enabled,
+                    help: L(
+                        "app_bar.layout.overrides.disabled",
+                        "Turn on Show app bar to edit this "
+                            + "layout's overrides. They are kept "
+                            + "either way."
+                    )
+                )
+            )
         }
     }
 
@@ -124,8 +140,12 @@ struct LayoutAppBarGroup: View {
                 // hugs each box, solid draws each box), so fit is
                 // inert for Boxed — resolve to see the effective
                 // shape under any override.
-                active: bar.resolved(with: global)
-                    .tabBackground == .boxed,
+                // `bar.enabled &&`: the drawer gate above
+                // already dims these when the bar is off, and
+                // nested GreyOuts multiply to 0.25 opacity.
+                active: bar.enabled
+                    && bar.resolved(with: global)
+                        .tabBackground == .boxed,
                 help: L(
                     "app_bar.tab_background_fit.boxed_only",
                     "Boxed draws a box per tab, not a shared "
@@ -156,8 +176,9 @@ struct LayoutAppBarGroup: View {
                 // against this layout's EFFECTIVE edge — via
                 // the one resolve authority, never a hand
                 // mirror of it.
-                active: !bar.resolved(with: global)
-                    .edge.isHorizontal,
+                active: bar.enabled
+                    && !bar.resolved(with: global)
+                        .edge.isHorizontal,
                 help: L(
                     "app_bar.content.vertical_only",
                     "Left and right bars always show icons "

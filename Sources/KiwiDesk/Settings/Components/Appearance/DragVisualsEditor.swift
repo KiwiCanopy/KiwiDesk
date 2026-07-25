@@ -185,37 +185,93 @@ struct DragVisualControls: View {
     @Binding var visual: DragVisual
     @Environment(\.settingsLabelColumn) private var labelColumn
 
+    /// Three gates the column already implies and none of it
+    /// enforced (#520): with the visual off nothing it draws
+    /// exists, and with Border or Fill off their own rows tint
+    /// nothing. The column's preview already prints "disabled"
+    /// beside them, so the controls were the only surface still
+    /// claiming to matter. Greyed, never hidden (#171).
+    ///
+    /// Each inner gate carries `visual.enabled &&` so nested
+    /// `GreyOut`s can't multiply their 0.5 opacity to 0.25 —
+    /// the outer gate already covers the visual-off case.
     var body: some View {
         Toggle(L("drag.enabled", "Enabled"), isOn: $visual.enabled)
         Divider()
-        Toggle(L("drag.border", "Border"), isOn: $visual.border)
-        HexColorField(
-            label: L("drag.border_color", "Color"),
-            a11yLabel: L("drag.border_color.a11y", "Border color"),
-            labelWidth: labelColumn,
-            hex: $visual.borderColor
+        Group {
+            Toggle(
+                L("drag.border", "Border"),
+                isOn: $visual.border
+            )
+            Group {
+                HexColorField(
+                    label: L("drag.border_color", "Color"),
+                    a11yLabel: L(
+                        "drag.border_color.a11y",
+                        "Border color"
+                    ),
+                    labelWidth: labelColumn,
+                    hex: $visual.borderColor
+                )
+                PtSlider(
+                    label: L("drag.border_width", "Width"),
+                    value: $visual.borderThickness,
+                    range: 0...20
+                )
+                SegmentedPicker(
+                    borderAlignmentLabel,
+                    selection: $visual.borderAlignment,
+                    options: [
+                        (L("drag.inside", "Inside"), .inside),
+                        (L("drag.outside", "Outside"), .outside),
+                    ]
+                )
+            }
+            .modifier(
+                GreyOut(
+                    active: visual.enabled && !visual.border,
+                    help: borderOffHelp
+                )
+            )
+            Divider()
+            Toggle(L("drag.fill", "Fill"), isOn: $visual.fill)
+            HexColorField(
+                label: L("drag.fill_color", "Color"),
+                a11yLabel: L(
+                    "drag.fill_color.a11y",
+                    "Fill color"
+                ),
+                labelWidth: labelColumn,
+                hex: $visual.fillColor
+            )
+            .modifier(
+                GreyOut(
+                    active: visual.enabled && !visual.fill,
+                    help: fillOffHelp
+                )
+            )
+        }
+        .modifier(
+            GreyOut(
+                active: !visual.enabled,
+                help: L(
+                    "drag.disabled.help",
+                    "Turn on Enabled to edit this visual."
+                )
+            )
         )
-        PtSlider(
-            label: L("drag.border_width", "Width"),
-            value: $visual.borderThickness,
-            range: 0...20
+    }
+
+    private var borderOffHelp: String {
+        L(
+            "drag.border.off_help",
+            "Turn on Border to edit its color, width, and "
+                + "alignment."
         )
-        SegmentedPicker(
-            borderAlignmentLabel,
-            selection: $visual.borderAlignment,
-            options: [
-                (L("drag.inside", "Inside"), .inside),
-                (L("drag.outside", "Outside"), .outside),
-            ]
-        )
-        Divider()
-        Toggle(L("drag.fill", "Fill"), isOn: $visual.fill)
-        HexColorField(
-            label: L("drag.fill_color", "Color"),
-            a11yLabel: L("drag.fill_color.a11y", "Fill color"),
-            labelWidth: labelColumn,
-            hex: $visual.fillColor
-        )
+    }
+
+    private var fillOffHelp: String {
+        L("drag.fill.off_help", "Turn on Fill to edit its color.")
     }
 
     private var borderAlignmentLabel: String {
