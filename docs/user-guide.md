@@ -1476,9 +1476,10 @@ long word forms (`cmd`, `alt`, `semicolon`, …).
 
 **Recordings apply instantly on the live target.** When you are
 editing the live configuration (the active profile or Standard),
-a committed recording — and a clear — takes effect immediately:
-press a combo recorded in the runtime-active mode and it works,
-no Save needed. A brief caption reports the exact outcome:
+a committed recording — and a clear, and deleting a whole row —
+takes effect immediately: press a combo recorded in the
+runtime-active mode and it works, no Save needed, and a deleted
+row's combo stops working the moment its row disappears. A brief caption reports the exact outcome:
 "Active now", updated for an inactive mode, refused by macOS,
 shadowed by the active profile, or unable to compile/apply. The
 change is still *unsaved*: the footer's Save persists the base
