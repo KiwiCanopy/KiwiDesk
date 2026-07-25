@@ -225,7 +225,7 @@ struct LayoutAppBarGroup: View {
             range: 1...32
         )
         Divider()
-        // Roundness only shapes a Boxed tab; grey it when this
+        // Roundness only shapes a Boxed item; grey it when this
         // layout resolves to Plain (#171 grey-out).
         OverrideSliderRow(
             label: L(

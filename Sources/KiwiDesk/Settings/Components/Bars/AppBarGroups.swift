@@ -128,10 +128,10 @@ struct GlobalAppBarGroup: View {
                 .map { ($0.1, $0.0) },
             help: L(
                 "app_bar.alignment.label.help",
-                "Where the tab group sits along the bar while "
+                "Where the item group sits along the bar while "
                     + "it fits. Start and End follow the edge "
                     + "(a left bar's Start is its top); once "
-                    + "tabs overflow and scroll, all three "
+                    + "items overflow and scroll, all three "
                     + "behave the same."
             )
         )
@@ -168,8 +168,8 @@ struct GlobalAppBarGroup: View {
         .modifier(
             GreyOut(
                 // Boxed never draws a shared plate to size — with
-                // glass each tab hugs its own box, without glass
-                // each tab draws its own box — so fit is inert for
+                // glass each item hugs its own box, without glass
+                // each item draws its own box — so fit is inert for
                 // Boxed regardless of the glass finish.
                 // Asked of the bars actually SHOWN, not the
                 // global value: a layout overriding to Plain
@@ -265,8 +265,8 @@ struct GlobalAppBarGroup: View {
             help: L(
                 "app_bar.group_adjacent.help",
                 "Merges neighbouring windows of the same app "
-                    + "into a single tab, marked with a count "
-                    + "badge, instead of showing one tab each."
+                    + "into a single item, marked with a count "
+                    + "badge, instead of showing one item each."
             )
         )
     }

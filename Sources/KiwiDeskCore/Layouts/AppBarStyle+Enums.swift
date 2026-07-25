@@ -23,7 +23,7 @@ extension AppBarStyle {
     }
 
     /// WHERE the background is drawn — orthogonal both to
-    /// `activeIndicator` (which marks only the active tab) and to
+    /// `activeIndicator` (which marks only the active item) and to
     /// the `liquidGlass` finish (a colorless glass material laid
     /// over either shape on macOS 26). Boxed = a box per item
     /// (honors `cornerRoundness`); Plain = one shared strip.
@@ -37,8 +37,8 @@ extension AppBarStyle {
     }
 
     /// How big the shared background plate is (QA 2026-07-19).
-    /// Orthogonal to `BackgroundStyle` — "what the plate is made
-    /// of" vs "how far it reaches": `plain` draws one shared plate
+    /// Orthogonal to `BackgroundStyle` — "where is it drawn"
+    /// vs "how far does it reach": `plain` draws one shared plate
     /// and honors this; `boxed` draws no shared plate, so the
     /// setting is inert there (the GUI greys it).
     public enum BackgroundFit: String, Sendable, Codable {
@@ -51,16 +51,16 @@ extension AppBarStyle {
         case hug
     }
 
-    /// How the active tab is marked. Orthogonal to
+    /// How the active item is marked. Orthogonal to
     /// `backgroundStyle`: works on any background.
     public enum ActiveIndicator: String, Sendable, Codable {
-        /// An outline around the active tab, tracing its shape at
+        /// An outline around the active item, tracing its shape at
         /// the bar's roundness (a capsule at max, square at 0).
         case outline
         /// An accent bar on the window-facing edge of the
-        /// active tab.
+        /// active item.
         case edgeMark = "edge_mark"
-        /// The active tab's slot is left empty — an empty slot
+        /// The active item's slot is left empty — an empty slot
         /// marks the focused window.
         case gap
     }

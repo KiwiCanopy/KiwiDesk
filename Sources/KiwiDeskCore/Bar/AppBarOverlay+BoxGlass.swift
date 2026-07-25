@@ -1,7 +1,7 @@
 import AppKit
 
 /// Per-box Liquid Glass (piece 2). Under `boxed + liquid_glass`
-/// each tab gets its own frosted `NSGlassEffectView` hosting the
+/// each item gets its own frosted `NSGlassEffectView` hosting the
 /// item as its `contentView`, instead of the single shared plate —
 /// so the "boxed" shape survives the glass finish. Drag/reflow
 /// operates on the glass box (`draggableView`), and the scroll
@@ -78,7 +78,7 @@ extension AppBarOverlay {
     }
 
     /// Frosted backdrop boxes behind the visible scroll arrows, so
-    /// they match the tabs. The arrows stay on top and interactive
+    /// they match the items. The arrows stay on top and interactive
     /// (their own box is set transparent in `layoutArrows`); a
     /// backdrop is enough since they need no `contentView` hosting.
     func updateArrowGlasses(style: AppBarStyle) {

@@ -122,4 +122,43 @@ struct AppBarCommandParityTests {
         // `notOverridable`) rather than dropping the assert.
         #expect(touched == fieldNames(AppBarStyle()))
     }
+
+    /// The `space_bar` twin of this lives in
+    /// `SpaceBarCommandTests`. Without it the app-bar verb list
+    /// in `APIReference` was a hand-typed mirror of the field
+    /// list with no guard (AGENTS §5) — a stale entry registers a
+    /// Lua function whose dispatch always fails, a missing one
+    /// silently deletes a verb, and neither shows up in a build.
+    @Test("The app_bar namespace mirrors AppBarStyle's keys")
+    func appBarNamespaceParity() {
+        let expected = Set(
+            AppBarStyle.CodingKeys.allCases.map {
+                "set_\($0.stringValue)"
+            }
+        )
+        #expect(
+            Set(APIReference.namespaces["app_bar"] ?? []) == expected
+        )
+    }
+
+    /// The per-layout twins carry the same field list under a
+    /// `set_app_bar_` prefix, and add `enabled` — the one
+    /// `LayoutAppBar` field with no global counterpart. Both
+    /// bar-hosting layouts are checked, so adding a bar to a
+    /// third layout without its verbs goes red here.
+    @Test("Each bar-hosting layout mirrors LayoutAppBar's keys")
+    func layoutAppBarNamespaceParity() {
+        let expected = Set(
+            LayoutAppBar.Key.allCases.map {
+                "set_app_bar_\($0.stringValue)"
+            }
+        )
+        for layout in ["monocle", "scroll"] {
+            let verbs = Set(
+                (APIReference.namespaces[layout] ?? [])
+                    .filter { $0.hasPrefix("set_app_bar_") }
+            )
+            #expect(verbs == expected, "\(layout) app-bar verbs")
+        }
+    }
 }

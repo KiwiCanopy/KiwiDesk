@@ -819,7 +819,7 @@ badge visibility toggle is
 The **Bars** section hosts both bar editors behind a fixed
 **Space Bar | App Bar** switch at the top — two picker cards,
 each showing a small schematic of the bar it opens (numbered
-space tabs vs a row of app icons). The Space Bar leads and is
+space items vs a row of app icons). The Space Bar leads and is
 the default: it appears in every layout, while the App Bar
 only renders in Monocle and Scrolling. Each editor leads with
 its own preview and owns its settings.
@@ -844,7 +844,7 @@ rearrange gesture shares the drop visuals in
 [Drag & Drop Rearranging](lua-reference.md#drag--drop-rearranging).)
 
 A **live mock strip** sits at the top of the Global Style section:
-three sample tabs — one grouped, one active, one plain — drawn with
+three sample items — one grouped, one active, one plain — drawn with
 your configured position, style, sizes, corner radius, and colors,
 so you can judge a color or size change in place before Save. It is
 a static preview (no hover or interaction) and never touches your
@@ -872,15 +872,15 @@ running windows.
   Bar shares the edge, an inline note under this control
   explains the stacking order (Space Bar at the screen edge,
   App Bar next to the windows).
-- **Alignment**: where the tab group sits along the bar while
+- **Alignment**: where the item group sits along the bar while
   it fits — start, center (default), or end. Edge-relative: a
-  left bar's start is its top. Once tabs overflow and scroll,
+  left bar's start is its top. Once items overflow and scroll,
   the three behave the same.
 - **Active indicator**: ring (outlined border around the active
-  tab), edge mark (accent bar on the active tab's window-facing
+  item), edge mark (accent bar on the active item's window-facing
   edge), or gap (active slot empty). Orthogonal to the background
   style — all combinations are valid. Full-color app icons (System
-  default) also dim to half strength on inactive tabs, so the
+  default) also dim to half strength on inactive items, so the
   active app reads even though those icons take no tint.
 - **Thickness**: the strip's depth in points.
 - **Item size**: auto (0) measures rendered width and sizes slots
@@ -910,7 +910,7 @@ that can show one, and that editor's controls stay on screen —
 disabled and dimmed, with their stored values intact and a
 tooltip saying what to turn back on. The same applies to
 individual settings: the Highlight and Active item colors dim
-under the Gap indicator (which hides the active tab rather than
+under the Gap indicator (which hides the active item rather than
 marking it, so neither color is drawn); a drag visual's Border
 and Fill rows dim when that part is switched off; and the
 Floating mark color dims when the Space Bar — its only surface —
@@ -918,19 +918,19 @@ is off. A layout's **Overrides** drawer and the
 **Desktop → profile** bindings are dimmed rather than hidden
 too, so you can still read what they hold.
 
-- **Font size**: auto or fixed. Auto-gated sliders (box size,
+- **Font size**: auto or fixed. Auto-gated sliders (item size,
   font size) read "Auto" while their toggle is on.
 - **Corner roundness**: 0–100% (0 = square, 100 = full capsule).
-  Rounds the boxed tabs, or the shared plate under Plain and
+  Rounds the boxed items, or the shared plate under Plain and
   Liquid Glass.
 
 **Colors:** Fill and Highlight — the ones the preview strip most
 visibly reflects — sit inline. The rest of the palette (item,
 active item, hover states, and group badge) collapses behind an
 **Advanced colors** disclosure, shut by default. **Fill** is one
-knob for every filled surface: the box per tab (Boxed), the shared
+knob for every filled surface: the box per item (Boxed), the shared
 plate (Plain), or the Liquid Glass **tint** (Material) — a
-transparent Fill means clear, untinted glass. The active tab is
+transparent Fill means clear, untinted glass. The active item is
 marked by the indicator (ring or edge mark), so there is no
 separate active-fill color.
 
@@ -1042,9 +1042,8 @@ at the screen edge and the App Bar next to the windows, and an
 inline note in both editors explains the order when both share
 one), **Alignment** (start / center / end along the bar,
 edge-relative, like the App Bar's — and, like it, the three read
-the same once the bar overflows and scrolls), item background,
-active
-indicator and **App symbol style**, the two behavior toggles,
+the same once the bar overflows and scrolls), background style,
+active indicator and **App symbol style**, the two behavior toggles,
 sizes and **Glyphs per Space** (how many app glyphs an item
 shows before the rest collapse into the `+n` badge, 1–12), then
 colors.

@@ -12,7 +12,7 @@ extension AppBarOverlay {
     /// `plain` and `material` draw their shared plate as its
     /// own view (`updatePlainPlate` / the glass-hosting dispatch)
     /// so it can hug the run (`background_fit`); `boxed` boxes
-    /// each tab. The container itself never paints.
+    /// each item. The container itself never paints.
     func styleContainer(
         _ panel: NSPanel,
         style: AppBarStyle,
@@ -57,8 +57,8 @@ extension AppBarOverlay {
             )
         }
         plate.isHidden = false
-        // Ease alongside the tabs (same animation group): a
-        // snapping hug plate pops while the tabs it wraps are
+        // Ease alongside the items (same animation group): a
+        // snapping hug plate pops while the items it wraps are
         // still sliding. Fresh plates take their frame direct.
         if animated, plate.frame != .zero,
             plate.frame != plateFrame

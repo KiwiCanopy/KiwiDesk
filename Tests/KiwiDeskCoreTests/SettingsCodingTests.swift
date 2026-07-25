@@ -171,7 +171,7 @@ struct SettingsCodingTests {
         let track = try object(layout["track"])
         #expect(track["axis"] as? String == "vertical")
         // `track.set_auto_tracks` → `layout.track.auto_tracks`
-        // (#178), on by default; `count` is the remembered cap.
+        // (#178), on by default; `limit` is the remembered cap.
         #expect(track["auto_tracks"] as? Bool == true)
         #expect(track["limit"] as? Int == 2)
         #expect(track["new_window"] as? String == "focused_track")

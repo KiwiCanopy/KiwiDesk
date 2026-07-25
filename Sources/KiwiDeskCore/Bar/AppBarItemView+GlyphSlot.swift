@@ -19,7 +19,7 @@ extension AppBarItemView {
     /// padded image square reads visibly undersized for them.
     /// The glyph sizes to its cell, shrinks until the cell fits
     /// the box's width (a wide ligature must never spill into
-    /// the tab padding or the name), and centers pixel-aligned.
+    /// the item padding or the name), and centers pixel-aligned.
     func layoutIconSlot(in square: CGRect) {
         if glyphLabel.isHidden {
             iconView.frame = square
@@ -30,10 +30,10 @@ extension AppBarItemView {
         // padded square reads undersized. Horizontal: grow
         // vertically plus toward the text by exactly the
         // icon-name gap (pad/2), leading edge pinned, so the
-        // glyph can neither reach the tab border nor overlap
+        // glyph can neither reach the item border nor overlap
         // the label. Vertical: grow along the bar axis only —
         // the sides stay pinned so a wide ligature never
-        // touches the tab's side borders.
+        // touches the item's side borders.
         let pad = Self.contentPadding
         let box =
             horizontal
@@ -59,8 +59,8 @@ extension AppBarItemView {
         }
         // With a name, a narrow glyph snugs toward the text so
         // its slack doesn't widen the gap — clamped to its box,
-        // so a wide glyph can never hang out of the tab.
-        // Icon-only tabs center.
+        // so a wide glyph can never hang out of the item.
+        // Icon-only items center.
         let snugToName = horizontal && !label.isHidden
         // Clamp BEFORE positioning: centering the unclamped
         // cell width then clamping the frame shifted the glyph

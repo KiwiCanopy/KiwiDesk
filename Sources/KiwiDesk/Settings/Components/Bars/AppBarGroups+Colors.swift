@@ -8,7 +8,7 @@ import SwiftUI
 /// state); only the row builders live here.
 extension GlobalAppBarGroup {
     // The two the preview reflects most, kept inline: the fill
-    // under the tabs and the active-tab indicator accent.
+    // under the items and the active-item indicator accent.
     @ViewBuilder var inlineColors: some View {
         HexColorField(
             label: L("app_bar.color.fill", "Fill"),

@@ -8,7 +8,7 @@ import Testing
 /// `glassAvailable`. The actual glass rendering is AppKit and
 /// OS-gated (exercised by hand); these pin the pure, portable
 /// behavior — the gate, `hasBox`, round-trip, and command parse.
-@Suite("Tab background — Liquid Glass")
+@Suite("Background style — Liquid Glass")
 struct BackgroundStyleGlassTests {
     @Test("glassEnabled gates the finish on OS capability")
     func glassGate() {

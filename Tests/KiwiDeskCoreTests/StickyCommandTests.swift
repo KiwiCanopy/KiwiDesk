@@ -142,7 +142,7 @@ struct StickyCommandTests {
     }
 
     @Test("sticky.set_mark writes the style, unclamped")
-    func setIndicator() {
+    func setMark() {
         let core = makeCore()
         #expect(core.tiler.settings.stickyStyle.mark)
         #expect(
@@ -164,7 +164,7 @@ struct StickyCommandTests {
     }
 
     @Test("sticky.set_mark rejects non-boolean input")
-    func setIndicatorRejects() {
+    func setMarkRejects() {
         let core = makeCore()
         #expect(
             !core.execute(

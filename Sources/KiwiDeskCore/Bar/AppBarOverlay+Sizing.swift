@@ -96,7 +96,7 @@ extension AppBarOverlay {
         // notably `.center` alignment, which alone widens the cell
         // by 4 pt; a left-aligned or raw-string measurement leaves
         // the widest name's slot those 4 pt short of itself,
-        // tail-truncating exactly the tab that defined the width.
+        // tail-truncating exactly the item that defined the width.
         let measure = NSTextField(labelWithString: "")
         measure.alignment = .center
         measure.font = font
@@ -115,7 +115,7 @@ extension AppBarOverlay {
             }
             let spacing =
                 iconSide > 0 && text > 0 ? pad / 2 : 0
-            // A grouped tab's count badge sits after the name, so
+            // A grouped item's count badge sits after the name, so
             // the slot must be wide enough for it too or the widest
             // name over-truncates (owner 2026-07-20) — same reserve
             // as `layoutHorizontal`.

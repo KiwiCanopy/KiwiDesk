@@ -6,7 +6,7 @@ import SwiftUI
 /// picker read as inert chrome, so users never realized two
 /// bars exist. The Displays-pane pattern instead — each option
 /// is a small schematic of the bar it opens (a row of app
-/// icons vs numbered space tabs) with its name below, selected
+/// icons vs numbered space items) with its name below, selected
 /// state as an accent ring. Static mocks, not config-driven:
 /// the chip answers "which bar is this," the editor's own live
 /// preview answers "what does mine look like."
@@ -83,12 +83,12 @@ struct BarEditorPicker: View {
         }
     }
 
-    /// Numbered space tabs, the first on the accent plate.
+    /// Numbered space items, the first on the accent plate.
     private var spaceBarMock: some View {
         HStack(spacing: 4) {
-            mockTab("1", active: true)
-            mockTab("2")
-            mockTab("3")
+            mockItem("1", active: true)
+            mockItem("2")
+            mockItem("3")
         }
     }
 
@@ -115,7 +115,7 @@ struct BarEditorPicker: View {
             }
     }
 
-    private func mockTab(
+    private func mockItem(
         _ number: String,
         active: Bool = false
     ) -> some View {

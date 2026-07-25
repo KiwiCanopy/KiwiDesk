@@ -30,14 +30,14 @@ struct SpaceBarEditorGroup: View {
             )
             // Coverage-guard write-through (#414): hiding
             // the bar makes the on-window mark the ONLY
-            // sticky indicator, so its greyed "forced ON"
+            // sticky cue left, so its greyed "forced ON"
             // toggle in Appearance must be the real stored
             // state, not a display fiction. A write-through
             // BINDING, not .onChange: the set fires only on
             // the user's gesture, so a profile load that
             // replaces the model's config while this section
             // is open cannot overwrite a Lua-authored
-            // indicator=false (Lua stays unclamped).
+            // mark=false (Lua stays unclamped).
             ToggleRow(
                 label: L("space_bar.enabled", "Show Space Bar"),
                 isOn: Binding(

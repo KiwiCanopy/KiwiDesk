@@ -1,7 +1,7 @@
 import AppKit
 import CoreGraphics
 
-/// Keeps one sticky-mark mark per sticky window (#414),
+/// Keeps one sticky mark per sticky window (#414),
 /// mirroring `BorderManager`'s diff-sync at marker scale: `sync`
 /// for steady state (create / move / retire), `follow` for the
 /// move/animation hot path. Driven by

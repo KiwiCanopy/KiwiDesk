@@ -17,8 +17,8 @@ enum AppBarAuto {
     }
 }
 
-/// The Position/Tab-background/Active-indicator/Content dropdown
-/// labels are
+/// The Position/Background-style/Active-indicator/Content
+/// dropdown labels are
 /// data (an array of value/label pairs shared by the global and
 /// per-layout override pickers), so they route through `L()` at
 /// the point of construction (`@MainActor`, matching every

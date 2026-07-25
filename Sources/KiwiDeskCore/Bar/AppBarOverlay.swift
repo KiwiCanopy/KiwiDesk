@@ -255,7 +255,7 @@ public final class AppBarOverlay {
         // Frame changes ease into place so group expansion
         // (and scroll-follow) widens out instead of popping;
         // fresh views snap. The plates ride the same group —
-        // a hug plate must slide with the tabs it wraps.
+        // a hug plate must slide with the items it wraps.
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.15
             context.timingFunction = CAMediaTimingFunction(
@@ -300,7 +300,7 @@ public final class AppBarOverlay {
                 horizontal: m.horizontal,
                 style: style
             )
-            // Only the run's outer tabs meet a rounded plate end,
+            // Only the run's outer items meet a rounded plate end,
             // so only they clip their outer corner (Plain).
             view.isFirstInRun = index == 0
             view.isLastInRun = index == items.count - 1

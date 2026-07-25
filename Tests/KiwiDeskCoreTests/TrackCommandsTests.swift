@@ -95,7 +95,7 @@ struct TrackCommandsTests {
         )
     }
 
-    @Test("set_count couples the automatic flag (#178)")
+    @Test("set_limit couples the automatic flag (#178)")
     func countCouplesAuto() {
         let core = makeCore()
         // Default is automatic (dynamic) — cap 0.

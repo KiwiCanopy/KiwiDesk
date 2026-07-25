@@ -8,10 +8,10 @@ extension GlobalAppBarGroup {
     // Ordered thickness → the two Auto-gated size pairs
     // (`AutoGatedGroup`: the toggle bound directly above the slider
     // it owns) → a divider → corner roundness (gated by a different
-    // switch, Background style). "Auto" size/font is a GUI face on
-    // model's 0 = auto sentinel: the toggle greys its slider and
-    // stores 0; turning it off restores a sensible non-zero value
-    // (#171 grey-out).
+    // switch, Background style). "Auto" size/font is a GUI face
+    // on the model's 0 = auto sentinel: the toggle greys its
+    // slider and stores 0; turning it off restores a sensible
+    // non-zero value (#171 grey-out).
     @ViewBuilder var appearance: some View {
         PtSlider(
             label: L("app_bar.thickness", "Thickness"),
@@ -47,7 +47,7 @@ extension GlobalAppBarGroup {
         }
         Divider()
         // Never greyed since background_fit: roundness
-        // shapes the Boxed tabs, the glass plate, AND Plain's
+        // shapes the Boxed items, the glass plate, AND Plain's
         // own shared plate (BarPlate) — the old Plain grey
         // predated Plain getting a plate (QA 2026-07-19).
         PtSlider(

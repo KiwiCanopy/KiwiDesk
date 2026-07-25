@@ -1333,19 +1333,19 @@ track.set_auto_tracks(false)
 
 - `focused_track` (**fill-then-spill**, the default): the window
   **joins** the focused window's track — placed among its windows
-  by [`track.set_new_window_position`](#track_set_new_window_position)
+  by [`track.set_new_window_position`](#trackset_new_window_position)
   — until that track can't fit another window at
   `min_window_size`, when the window instead **spills into a new
   track** immediately beside the focused one. Focus follows the
   new window, so the next one fills that track and spills again.
   With no other track to spill to it piles in the focused track
-  instead: under a fixed [`track.set_limit`](#track_set_limit) cap
+  instead: under a fixed [`track.set_limit`](#trackset_limit) cap
   with no room for another track, or for a window an explicit
   `move_to_space` drops onto a full track (an explicit placement,
   never relocated).
 - `own_track`: each new window opens its **own** new track,
   positioned among the others by
-  [`track.set_new_window_position`](#track_set_new_window_position)
+  [`track.set_new_window_position`](#trackset_new_window_position)
   — the "one full-width app per column" (ultrawide) choice. Falls
   back to joining once `track.set_limit` is reached.
 
@@ -1367,7 +1367,7 @@ track.set_new_window("own_track")
 or `"after_focused"`.
 
 **Does:** places the new window within the
-[`track.set_new_window`](#track_set_new_window) choice, reusing
+[`track.set_new_window`](#trackset_new_window) choice, reusing
 the shared placement vocabulary. For `own_track` it positions the
 **new track** among the others (`first` = leftmost column /
 topmost row, `last` = the far edge, `before`/`after_focused` =
@@ -1554,10 +1554,10 @@ app_bar.set_edge("top")
 **Expects:** `"start"`, `"center"`, or `"end"`
 (default `"center"`).
 
-**Does:** places the tab group along the bar while it fits.
+**Does:** places the item group along the bar while it fits.
 Values are edge-relative, so they stay correct on every edge —
 a left bar's `start` is its top, a top bar's `start` is its
-left. Once the tabs overflow and scroll, all three values
+left. Once the items overflow and scroll, all three values
 behave the same (the group follows the scroll offset).
 Per-layout overrides can change it
 (`monocle.set_app_bar_alignment`, `scroll.set_app_bar_alignment`).
@@ -1604,7 +1604,7 @@ app_bar.set_background_style("plain")
 
 **Expects:** a boolean.
 
-**Does:** lays a macOS 26 Liquid Glass material over the tab
+**Does:** lays a macOS 26 Liquid Glass material over the item
 backgrounds (the boxes or the plate) — an orthogonal finish, so
 it combines with either shape. `fill_color` tints the glass: a
 solid colored layer sits behind the glass and the glass refracts
@@ -1651,10 +1651,10 @@ app_bar.set_background_fit("full")
 
 **Does:** how the focused window is marked. This is orthogonal to
 `background_style` — the two combine freely:
-- **outline** — an outlined border around the active tab.
-- **edge_mark** — an accent bar on the active tab's
+- **outline** — an outlined border around the active item.
+- **edge_mark** — an accent bar on the active item's
   window-facing edge.
-- **gap** — the active tab's slot is left empty.
+- **gap** — the active item's slot is left empty.
 
 **Example:**
 
@@ -1741,10 +1741,10 @@ app_bar.set_font_size(0)
 
 **Expects:** a number 0–100 (percentage; default 50).
 
-**Does:** sets the corner rounding of boxed tabs as a percentage,
+**Does:** sets the corner rounding of boxed items as a percentage,
 where 0 = square and 100 = a full capsule (radius = thickness/2).
-It only affects `boxed` tabs (ignored for `plain`). The percentage
-cannot exceed the maximum, so tabs never render as pointed.
+It only affects `boxed` items (ignored for `plain`). The percentage
+cannot exceed the maximum, so items never render as pointed.
 
 **Example:**
 
@@ -1756,7 +1756,7 @@ app_bar.set_corner_roundness(50)
 
 **Expects:** a number 0.05–1 (default 0.4).
 
-**Does:** sets the opacity of an inactive tab's untinted icon — the
+**Does:** sets the opacity of an inactive item's untinted icon — the
 dim that carries "not focused" for content that takes no state color.
 Lua-only (no GUI); values are clamped to a legible range. Lower = a
 stronger inactive cue.
@@ -1817,7 +1817,7 @@ app_bar.set_fill_color("#14201C66")
 **Expects:** a hex color.
 
 **Does:** sets the text and glyph color of the active item — the
-focused tab (default `#8DB354`, kiwi green).
+focused item (default `#8DB354`, kiwi green).
 
 **Example:**
 
@@ -3933,7 +3933,8 @@ stripped, grouped by namespace — `set_gap_override` becomes
     "layout": {
       "bsp": {
         "new_window_placement": "after_focused",
-        "ratio": 0.5,
+        "ratio_h": 0.5,
+        "ratio_v": 0.5,
         "strategy": "longest_side"
       },
       "grid": { "columns": 3, "rows": 2, "type": "dynamic",
@@ -3941,10 +3942,10 @@ stripped, grouped by namespace — `set_gap_override` becomes
                 "split_direction": "horizontal",
                 "new_window_placement": "last" },
       "monocle": { "orientation": "horizontal",
-                   "bar": { "enabled": true,
-                            "position": "top",
-                            "style": "pills",
-                            "item_size": 0 } },
+                   "app_bar": { "enabled": true,
+                                "edge": "top",
+                                "background_style": "boxed",
+                                "item_size": 0 } },
       "scroll": { "anchor": "follow", "slot_size": 0,
                   "new_window_placement": "after_focused" },
       "stack": { "master_count": 1, "master_ratio": 0.6,

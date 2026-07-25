@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-// The mock can't be to-scale (a 200 pt tab won't fit an 84 pt
+// The mock can't be to-scale (a 200 pt item won't fit an 84 pt
 // canvas), so each dimension maps its full real range onto a
 // legible preview range *proportionally* — dragging any
 // slider always keeps moving the mock, rather than hitting a

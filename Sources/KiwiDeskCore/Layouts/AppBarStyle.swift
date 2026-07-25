@@ -61,10 +61,10 @@ public struct AppBarStyle: Sendable, Equatable {
     /// 100 = a full capsule (radius = thickness/2), 0 = square.
     /// Resolved to a concrete radius in
     /// `resolvedCornerRadius(forThickness:)`. Percentage, not
-    /// pt, so it can't exceed thickness/2 (which rendered tabs
+    /// pt, so it can't exceed thickness/2 (which rendered items
     /// as pointed hexagons) and self-adapts to any thickness.
     public var cornerRoundness: CGFloat = 50
-    /// Opacity of an inactive tab's untinted icon (0.05–1). The dim
+    /// Opacity of an inactive item's untinted icon (0.05–1). The dim
     /// carries "not focused" for content that takes no state color.
     /// Lua-only power knob (`set_dim_factor`, no GUI); the default
     /// matches `BarAccent.untintedAlpha`. Clamped in `resolvedDim`.
@@ -100,7 +100,7 @@ public struct AppBarStyle: Sendable, Equatable {
 
     public init() {}
 
-    /// The concrete corner radius (pt) for a tab/strip of the
+    /// The concrete corner radius (pt) for an item/strip of the
     /// given cross dimension: `cornerRoundness`% of its half —
     /// 100% is a capsule, 0% square. One resolution site shared
     /// by the item box, the shared strip, the scroll arrows, and

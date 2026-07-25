@@ -462,6 +462,39 @@ disambiguate. Fix the label, never the wire; §5's one-vocabulary
 rule (Lua == JSON) holds either way and is orthogonal to this
 GUI↔wire question.
 
+**When the wire is the outlier, rename the wire instead (R6,
+#406).** The rule above answers a narrower question than its
+closing line suggests: there the wire term is *correct* and the
+label alone is ambiguous, so only the label moves. When the
+**wire** term is factually wrong for what it names, the same
+reasoning points the other way — the accurate side stays and the
+outlier moves. Three R6 renames are that case:
+`drag.set_ghost_border_thickness` → `…_border_width` (the GUI
+already said "Width"; a stroke has a width, a bar has a
+thickness), `track.set_count` → `track.set_limit` (the GUI
+already said "Track limit"; the value is a cap that automatic
+tracks overrides, not a count of what exists), and
+`tab_background` → `background_style` on both bars (the entries
+are not browser tabs, and under Plain there is no per-item
+background at all). The discriminator is never churn cost —
+pre-release makes churn cheap on both sides (§5) — but which
+side misdescribes the thing: relabel when the label is
+ambiguous, rename the wire when the wire term is wrong.
+
+**An override stepper's range must exclude any value that
+carries a separate meaning on the wire (audit finding 20,
+#406).** In a per-space override row `nil` is the inherit
+sentinel (`OverrideChrome`), so every value *inside* the
+stepper's range is a stored value with one meaning. The
+per-space Track-limit stepper ran `0...10` while its global twin
+ran `1...10`: a stored 0 resolved to `max(1, 0)` = one track,
+while the Lua setter's `0` means *automatic* and is never
+persisted (it flips `auto_tracks` instead). One stored number,
+two meanings, decided by which surface wrote it. Override
+steppers are 1-based wherever 0 carries a separate Lua meaning;
+"automatic" belongs to its own field, which then greys the
+stepper (#171) rather than hiding inside its range.
+
 ## Interaction states
 
 **Hover confirms custom hit areas; it never creates the only
