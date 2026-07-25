@@ -1565,6 +1565,25 @@ new palette against, not a spec the reflection-based
   `space_bar.focused_item_color` is the complementary
   temperature (cool primary → warm focused, and vice-versa),
   so "active space" and "focused window" read as two signals.
+- **…and by *lightness*, which is the clause that actually
+  holds.** (#470.) Hue and temperature both fail for a
+  *green*-primary palette, because green↔amber is precisely the
+  axis protanopia and deuteranopia flatten: the old default pair
+  `#8DB354` / `#E8A33D` simulates to a separation of **22/441**
+  under protanopia — indistinguishable — while every
+  cool-primary bundled palette clears 175. Lightness is the one
+  channel every CVD type preserves, so the two accents must also
+  sit a visible step apart in it. The converged default
+  `#C2790A` separates at **93** for exactly that reason, and
+  that is why the focused accent now reads *darker* than the
+  active green rather than brighter. Known exceptions,
+  deliberately not retuned by #470 because each is an
+  eye-confirm call of its own: **Kiwi Neon** (`#86EA43` /
+  `#F4CA25`, 39) and **Kiwi Gold** (`#D9A521` / `#8DB354`, 49).
+  `ColorPaletteTests` pins inequality only — a
+  perceptual-distance assertion would fail those two today, so
+  tightening the test and retuning them belong to one change,
+  not this one.
 - **Focus is one color across bar and border.**
   `border.focused_color` = the primary accent; `highlight_color`
   defaults to it too (borrow the secondary only as a flourish,
@@ -1633,9 +1652,15 @@ ink and borders: keep the hue, drop the lightness where a role
 needs contrast. The optional **glow** inverts this trade for the
 bloom only: a halo is a fill, not a stroke, so it brightens the ring
 hue back up (`BorderStyle.glowColor`) instead of staying darkened.
-(The Space Bar's own `focused_item_color` stays amber `#E8A33D` for
-now — a separate "viewing-not-active" semantic, converged in a
-follow-up, #470.)
+The Space Bar's own `focused_item_color` — a separate
+"viewing-not-active" semantic — converged onto the **same**
+`#C2790A` in #470 rather than getting its own amber. The bar owns
+its backdrop, so it never needed the drop-zone's *contrast*
+darkening; it turned out to need the identical darkening for a
+different reason (state separation from the green under
+colour-vision deficiency — see the lightness clause above), and
+reusing the ratified hex beat minting a second amber for one
+palette.
 
 **The App Bar has its own sidebar destination.** (#229,
 superseding the earlier "Appearance ends with the App Bar
@@ -2059,7 +2084,11 @@ Every bundled palette keeps `space_bar.focused_item_color` a
 QA 2026-07-19) — Monochrome included: color is the only channel
 the focused-window state has, so even a mono palette carries one
 deliberate accent (`#FFD60A`) rather than erasing the state.
-`ColorPaletteTests` pins the inequality for every bundled
+Since #470 that rule carries a second clause — a **lightness gap**
+as well, because hue alone does not survive colour-vision
+deficiency on a green-primary palette (see the palette-coherence
+heuristics above). `ColorPaletteTests` pins the inequality for
+every bundled
 palette.
 
 **Plate reach is its own property, not a fourth background.**
