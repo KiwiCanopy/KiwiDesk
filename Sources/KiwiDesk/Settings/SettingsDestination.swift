@@ -32,7 +32,7 @@ enum SettingsDestination: String, CaseIterable, Identifiable {
     @MainActor var title: String {
         switch self {
         case .spaces: return L("sidebar.spaces", "Spaces")
-        case .layoutDefaults: return L("sidebar.layout", "Layout")
+        case .layoutDefaults: return L("sidebar.layout", "Layout Defaults")
         case .monitors: return L("sidebar.monitors", "Monitors")
         case .appearance:
             return L("sidebar.appearance", "Appearance")

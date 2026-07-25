@@ -14,7 +14,7 @@ struct BspEditor: View {
 
     var body: some View {
         SettingsSection(
-            L("layout.bsp.name", "Bsp"),
+            L("layout.bsp.name", "BSP"),
             symbol: LayoutMode.bsp.glyph
         ) {
             BspSchematic(

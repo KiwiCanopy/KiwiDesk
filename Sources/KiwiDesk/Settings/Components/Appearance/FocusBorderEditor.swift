@@ -91,13 +91,16 @@ struct FocusBorderEditor: View {
         // bloom in the focused ring's hue (#358). Sits with the other
         // styling traits, no caption (the live preview above shows
         // it on toggle); a11y gets the descriptive gloss.
-        Toggle(L("border.glow", "Glow"), isOn: style.glow)
-            .accessibilityLabel(
-                L(
-                    "border.glow.a11y",
-                    "Soft glow around the focus border"
-                )
+        Toggle(
+            L("border.glow", "Show glow"),
+            isOn: style.glow
+        )
+        .accessibilityLabel(
+            L(
+                "border.glow.a11y",
+                "Soft glow around the focus border"
             )
+        )
         Divider()
         FitGapsAction(model: model)
     }
