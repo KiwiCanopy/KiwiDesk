@@ -4,6 +4,12 @@
 // committed source of truth; this script is not in the build):
 //   node gen-poster.mjs
 //
+// NOTE (#479): src/assets/demo-poster.png is NOT currently in the
+// repo and nothing under site/ imports it, so this script is
+// presently orphaned. Its output would change with the retired
+// amber, hence the comment fix below — but decide whether to
+// re-run and commit the poster, or delete this script.
+//
 // A branded banner — the KiwiDesk wordmark on the site's dark
 // green background — stands in for a real first frame (no ffmpeg
 // in this environment). Swap for an actual frame later if wanted.
@@ -29,7 +35,9 @@ const bg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" v
   <rect width="${W}" height="${H}" fill="url(#glow)"/>
 </svg>`;
 
-// The wordmark master (golden-on-transparent, for dark bg).
+// The dark-mode wordmark master: green mark, mist-green
+// lettering on transparent, for a dark bg (#479 — it was
+// golden-on-transparent until the amber logo was retired).
 const wordmark = readFileSync("src/assets/brand/logo_wordmark_dark.svg");
 const markHeight = 400;
 const mark = await sharp(wordmark, { density: 300 })

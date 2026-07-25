@@ -115,11 +115,14 @@ struct GeneralSection: View {
         }
     }
 
-    /// The wordmark's name text is fused into the artwork's
-    /// compound path, so it can't recolour per appearance.
-    /// Instead of a backing card we ship two masters — navy
-    /// text for light, off-white for dark — and swap by
-    /// `colorScheme`, so the mark melts into the pane in both.
+    /// The wordmark is artwork, not text, so its ink is baked at
+    /// rasterization time rather than tinted at runtime: we ship
+    /// two masters — forest lettering for light, mist-green for
+    /// dark — and swap by `colorScheme`, so no backing card is
+    /// needed and the mark melts into the pane in both. The
+    /// **symbol** is identical in the two (#479); only the
+    /// lettering is themed, and `BrandMasterParityTests` pins
+    /// that.
     @ViewBuilder private var aboutBrand: some View {
         if let wordmark {
             Image(nsImage: wordmark)

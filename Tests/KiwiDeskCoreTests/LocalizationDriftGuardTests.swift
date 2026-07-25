@@ -10,12 +10,7 @@ import Testing
 /// human-facing CLI always scans the real `Sources/KiwiDesk`).
 @Suite("extract-keys drift guard")
 struct LocalizationDriftGuardTests {
-    private var repoRoot: URL {
-        URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()  // KiwiDeskCoreTests
-            .deletingLastPathComponent()  // Tests
-            .deletingLastPathComponent()  // repo root
-    }
+    private var repoRoot: URL { scriptFixtureRepoRoot() }
 
     private func makeFixture(
         _ swiftFiles: [String: String]
@@ -51,28 +46,21 @@ struct LocalizationDriftGuardTests {
     private func runExtractKeys(
         sources: URL,
         locales: URL
-    ) throws -> (status: Int32, stderr: String) {
-        let script = repoRoot.appendingPathComponent(
-            "scripts/extract-keys"
+    ) throws -> ScriptRun {
+        // `extract-keys` is the env-var-scoped shape: it honours
+        // these two overrides, so the real script runs in place
+        // against flat temp dirs — no fixture tree needed (see
+        // `ScriptFixture.swift`).
+        try runPythonScript(
+            at: repoRoot.appendingPathComponent(
+                "scripts/extract-keys"
+            ),
+            arguments: [],
+            environment: [
+                "KIWIDESK_EXTRACT_SOURCES": sources.path,
+                "KIWIDESK_EXTRACT_LOCALES": locales.path,
+            ]
         )
-        let process = Process()
-        process.executableURL = URL(
-            fileURLWithPath: "/usr/bin/env"
-        )
-        process.arguments = ["python3", script.path]
-        process.environment = [
-            "KIWIDESK_EXTRACT_SOURCES": sources.path,
-            "KIWIDESK_EXTRACT_LOCALES": locales.path,
-        ]
-        let stderrPipe = Pipe()
-        process.standardError = stderrPipe
-        process.standardOutput = Pipe()
-        try process.run()
-        process.waitUntilExit()
-        let data = stderrPipe.fileHandleForReading
-            .readDataToEndOfFile()
-        let stderr = String(data: data, encoding: .utf8) ?? ""
-        return (process.terminationStatus, stderr)
     }
 
     @Test("a clean tree exits 0 and writes en.json")

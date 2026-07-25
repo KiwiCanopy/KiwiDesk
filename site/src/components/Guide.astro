@@ -27,7 +27,6 @@
 import { Image } from "astro:assets";
 import { Icon } from "astro-icon/components";
 import logoMark from "../assets/brand/logo.svg";
-import logoMarkDark from "../assets/brand/logo_dark.svg";
 import kofiIcon from "../assets/brand/kofi_symbol.svg";
 import kiwiCanopy from "../assets/brand/kiwi-canopy.png";
 import ogImage from "../assets/brand/og-banner.jpg";
@@ -321,11 +320,8 @@ const jsonLd = [
       <div class="wrap nav__inner">
         <a class="nav__brand" href={homeHref}
           aria-label={s.nav_home_label}>
-          <img class="nav__mark nav__mark--light" src={logoMark.src}
+          <img class="nav__mark" src={logoMark.src}
             width="28" height="28" alt="" aria-hidden="true" />
-          <img class="nav__mark nav__mark--dark"
-            src={logoMarkDark.src} width="28" height="28" alt=""
-            aria-hidden="true" />
           <span>KiwiDesk</span>
         </a>
         <div class="nav__links">

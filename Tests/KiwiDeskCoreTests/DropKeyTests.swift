@@ -8,111 +8,30 @@ import Testing
 /// any file.
 @Suite("drop-key")
 struct DropKeyTests {
-    private var repoRoot: URL {
-        URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()  // KiwiDeskCoreTests
-            .deletingLastPathComponent()  // Tests
-            .deletingLastPathComponent()  // repo root
-    }
+    private var repoRoot: URL { scriptFixtureRepoRoot() }
 
-    /// Same fixture discipline as `RenameKeyTests`: the script
-    /// derives its repo root from `__file__`, so the test
-    /// copies it into a fixture tree shaped like the real repo.
+    /// `drop-key` derives its repo root from `__file__`, so the
+    /// shared `ScriptFixture` primitives copy it into a fixture
+    /// tree shaped like the real repo.
     private func makeFixtureRoot(
         locales localeFiles: [String: String]
-    ) throws -> (root: URL, cleanup: () -> Void) {
-        let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent(
-                "kiwi-drop-key-\(UUID().uuidString)"
-            )
-        let locales =
-            root
-            .appendingPathComponent("Sources")
-            .appendingPathComponent("KiwiDeskCore")
-            .appendingPathComponent("Resources")
-            .appendingPathComponent("Locales")
-        try FileManager.default.createDirectory(
-            at: locales,
-            withIntermediateDirectories: true
-        )
-        for (name, content) in localeFiles {
-            try content.write(
-                to: locales.appendingPathComponent(name),
-                atomically: true,
-                encoding: .utf8
-            )
-        }
-        return (
-            root,
-            { try? FileManager.default.removeItem(at: root) }
+    ) throws -> RepoShapedFixture {
+        try makeRepoShapedFixture(
+            prefix: "kiwi-drop-key",
+            locales: localeFiles
         )
     }
 
     @discardableResult
     private func run(
         _ arguments: [String],
-        root: URL
-    ) throws -> (status: Int32, stdout: String, stderr: String) {
-        let realScript = repoRoot.appendingPathComponent(
-            "scripts/drop-key"
-        )
-        let fixtureScriptsDir = root.appendingPathComponent(
-            "scripts"
-        )
-        try FileManager.default.createDirectory(
-            at: fixtureScriptsDir,
-            withIntermediateDirectories: true
-        )
-        let fixtureScript =
-            fixtureScriptsDir
-            .appendingPathComponent("drop-key")
-        try FileManager.default.copyItem(
-            at: realScript,
-            to: fixtureScript
-        )
-
-        let process = Process()
-        process.executableURL = URL(
-            fileURLWithPath: "/usr/bin/env"
-        )
-        process.arguments =
-            ["python3", fixtureScript.path]
-            + arguments
-        let stdoutPipe = Pipe()
-        let stderrPipe = Pipe()
-        process.standardOutput = stdoutPipe
-        process.standardError = stderrPipe
-        try process.run()
-        process.waitUntilExit()
-        let stdout =
-            String(
-                data: stdoutPipe.fileHandleForReading
-                    .readDataToEndOfFile(),
-                encoding: .utf8
-            ) ?? ""
-        let stderr =
-            String(
-                data: stderrPipe.fileHandleForReading
-                    .readDataToEndOfFile(),
-                encoding: .utf8
-            ) ?? ""
-        return (process.terminationStatus, stdout, stderr)
-    }
-
-    private func decoded(
-        _ name: String,
-        in root: URL
-    ) throws -> [String: String] {
-        let url =
-            root
-            .appendingPathComponent("Sources")
-            .appendingPathComponent("KiwiDeskCore")
-            .appendingPathComponent("Resources")
-            .appendingPathComponent("Locales")
-            .appendingPathComponent(name)
-        return try JSONDecoder().decode(
-            [String: String].self,
-            from: Data(contentsOf: url)
+        fixture: RepoShapedFixture
+    ) throws -> ScriptRun {
+        try runRepoScript(
+            "drop-key",
+            arguments: arguments,
+            in: fixture,
+            repoRoot: repoRoot
         )
     }
 
@@ -130,14 +49,14 @@ struct DropKeyTests {
             """#,
         ])
         defer { fixture.cleanup() }
-        let result = try run(["gap.hint"], root: fixture.root)
+        let result = try run(["gap.hint"], fixture: fixture)
         #expect(result.status == 0)
 
-        let en = try decoded("en.json", in: fixture.root)
+        let en = try fixture.decodeLocale("en.json")
         #expect(en["gap.hint"] == "New meaning")
-        let de = try decoded("de.json", in: fixture.root)
+        let de = try fixture.decodeLocale("de.json")
         #expect(de == ["menu.quit": "Ende"])
-        let fr = try decoded("fr.json", in: fixture.root)
+        let fr = try fixture.decodeLocale("fr.json")
         #expect(fr == [:])
     }
 
@@ -156,11 +75,11 @@ struct DropKeyTests {
         // batch must fail without dropping gap.hint.
         let result = try run(
             ["gap.hint", "no.such.key"],
-            root: fixture.root
+            fixture: fixture
         )
         #expect(result.status != 0)
         #expect(result.stderr.contains("no.such.key"))
-        let de = try decoded("de.json", in: fixture.root)
+        let de = try fixture.decodeLocale("de.json")
         #expect(de["gap.hint"] == "Alte Bedeutung")
     }
 
@@ -177,7 +96,7 @@ struct DropKeyTests {
         defer { fixture.cleanup() }
         // A brand-new key has no stale translations to drop —
         // treat as a mistake, not a no-op success.
-        let result = try run(["fresh.key"], root: fixture.root)
+        let result = try run(["fresh.key"], fixture: fixture)
         #expect(result.status != 0)
         #expect(result.stderr.contains("fresh.key"))
     }
@@ -200,12 +119,12 @@ struct DropKeyTests {
         // must not crash after de was already written.
         let result = try run(
             ["a.key", "a.key", "b.key"],
-            root: fixture.root
+            fixture: fixture
         )
         #expect(result.status == 0)
-        let de = try decoded("de.json", in: fixture.root)
+        let de = try fixture.decodeLocale("de.json")
         #expect(de == [:])
-        let fr = try decoded("fr.json", in: fixture.root)
+        let fr = try fixture.decodeLocale("fr.json")
         #expect(fr == [:])
     }
 
@@ -222,10 +141,10 @@ struct DropKeyTests {
         defer { fixture.cleanup() }
         let result = try run(
             ["a.key", "b.key"],
-            root: fixture.root
+            fixture: fixture
         )
         #expect(result.status == 0)
-        let de = try decoded("de.json", in: fixture.root)
+        let de = try fixture.decodeLocale("de.json")
         #expect(de == ["menu.quit": "Ende"])
     }
 }
