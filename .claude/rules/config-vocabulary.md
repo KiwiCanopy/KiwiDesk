@@ -3,6 +3,14 @@ paths:
   - "Sources/KiwiDeskCore/Config/**"
   - "Sources/KiwiDeskCore/Profiles/**"
   - "Sources/KiwiDeskCore/Commands/**"
+  # The `CodingKeys` and labels the glossary below governs are
+  # authored here, not in the three dirs above — scoping this
+  # file to Commands alone is why the same nouns drifted twice.
+  - "Sources/KiwiDeskCore/Layouts/**"
+  - "Sources/KiwiDeskCore/Tiling/**"
+  - "Sources/KiwiDeskCore/Borders/**"
+  - "Sources/KiwiDeskCore/Bar/**"
+  - "Sources/KiwiDesk/Settings/**"
 ---
 
 # Config / profile vocabulary
@@ -12,8 +20,8 @@ profile JSON:
 
 - A profile JSON key is the Lua command name with the `set_` verb
   stripped, snake_case, grouped by namespace:
-  `set_gap_override` → `gap.override`, `bsp.set_ratio` →
-  `layout.bsp.ratio`. Multi-part element names nest further:
+  `set_gap_override` → `gap.override`, `bsp.set_ratio_h` →
+  `layout.bsp.ratio_h`. Multi-part element names nest further:
   `drag.set_ghost_fill_color` → `drag.ghost.fill_color`.
 - Groups are **singular** (`gap`, `layout`, `drag`); never invent
   synonyms or plurals.

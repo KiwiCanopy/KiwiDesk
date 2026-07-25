@@ -2274,9 +2274,11 @@ palette.
 not what the rectangle is called.** (R6/#406, owner ruling
 2026-07-25.) The picker shipped as **"Tab background"** on the
 App Bar and **"Item background"** on the Space Bar. Both are
-false half the time: under `plain` there is **no per-item box at
-all** — there is one bar-wide plate (`BarPlate`), so the
-background belongs to the *bar*, not to the item. "Tab" fails
+false half the time: under `plain` **no item draws a box of its
+own** in steady state — there is one bar-wide plate (`BarPlate`),
+so the background belongs to the *bar*, not to the item. (Hover
+still reveals a box per item; that is a transient affordance,
+not the configured background.) "Tab" fails
 from the other side, since an App Bar entry is a window or a
 same-app group, not a browser tab. The control is not naming an
 object; it is choosing where the fill goes — per item, or one

@@ -5,9 +5,9 @@ import CoreGraphics
 /// and the stroke's line width / corner radius, with no AppKit —
 /// so the hidden-overlap rule is unit-testable in isolation.
 ///
-/// `width` is always the visible thickness outside the target. The
-/// renderer adds a fixed overlap behind the target; that hidden part
-/// is not counted as border thickness. Ordering the overlay behind
+/// `width` is always the visible stroke width outside the target.
+/// The renderer adds a fixed overlap behind the target; that hidden
+/// part is not counted in the width. Ordering the overlay behind
 /// the target masks the overlap and lets square rings fill the reveal
 /// beneath rounded window corners.
 struct BorderGeometry: Equatable {

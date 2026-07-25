@@ -96,7 +96,7 @@ struct TrackCommandsTests {
     }
 
     @Test("set_limit couples the automatic flag (#178)")
-    func countCouplesAuto() {
+    func limitCouplesAuto() {
         let core = makeCore()
         // Default is automatic (dynamic) — cap 0.
         #expect(core.tiler.settings.track.autoTracks)

@@ -143,9 +143,15 @@ struct AppBarCommandParityTests {
 
     /// The per-layout twins carry the same field list under a
     /// `set_app_bar_` prefix, and add `enabled` — the one
-    /// `LayoutAppBar` field with no global counterpart. Both
-    /// bar-hosting layouts are checked, so adding a bar to a
-    /// third layout without its verbs goes red here.
+    /// `LayoutAppBar` field with no global counterpart.
+    ///
+    /// The layout list is hand-written, so it is asserted in BOTH
+    /// directions: forward, that each named layout carries the
+    /// whole field list; and backward, that no OTHER namespace
+    /// has grown app-bar verbs. Without the reverse leg a third
+    /// bar-hosting layout could ship a partial verb set and this
+    /// guard would stay green — the "one more place to forget"
+    /// shape AGENTS §5 warns about.
     @Test("Each bar-hosting layout mirrors LayoutAppBar's keys")
     func layoutAppBarNamespaceParity() {
         let expected = Set(
@@ -153,6 +159,10 @@ struct AppBarCommandParityTests {
                 "set_app_bar_\($0.stringValue)"
             }
         )
+        let hosting = APIReference.namespaces.filter { _, verbs in
+            verbs.contains { $0.hasPrefix("set_app_bar_") }
+        }
+        #expect(Set(hosting.keys) == ["monocle", "scroll"])
         for layout in ["monocle", "scroll"] {
             let verbs = Set(
                 (APIReference.namespaces[layout] ?? [])
