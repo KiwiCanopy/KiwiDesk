@@ -74,9 +74,17 @@ def _load_map(path: Path, label: str) -> dict | None:
     on failure; every caller aborts before writing anything."""
     try:
         loaded = json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as error:
+    except (
+        json.JSONDecodeError,
+        UnicodeDecodeError,
+        OSError,
+    ) as error:
+        # UnicodeDecodeError matters as much as bad JSON here: the
+        # worksheet is the one file in this pipeline a non-developer
+        # edits, and an editor that saves it as Latin-1 would
+        # otherwise dump a traceback.
         print(
-            f"merge-keys: {label} is not valid JSON ({error}) — "
+            f"merge-keys: {label} could not be read ({error}) — "
             "nothing was merged.",
             file=sys.stderr,
         )
@@ -140,7 +148,13 @@ def main(argv: list[str]) -> int:
             unverifiable.append(key)
             continue
         value = entry.get("translation")
-        if not isinstance(value, str) or not value.strip():
+        if not isinstance(value, str):
+            # Not an empty translation — a malformed one. Report
+            # it with the other unverifiable entries rather than
+            # telling the user it was left blank.
+            unverifiable.append(key)
+            continue
+        if not value.strip():
             skipped.append(key)
             continue
         # The stored source is the English the translator saw.
@@ -213,8 +227,10 @@ def main(argv: list[str]) -> int:
     _report_dropped(
         unverifiable,
         entries,
-        "the entry carried no usable \"source\", or the key is "
-        "no longer in en.json, so nothing could be verified",
+        "the entry carried no usable \"source\" (or was not in "
+        "the worksheet's {\"source\", \"translation\"} shape at "
+        "all), or the key is no longer in en.json — either way "
+        "nothing could be verified",
         flag,
         locale,
     )
@@ -244,7 +260,12 @@ def _report_dropped(
     )
     for key in sorted(keys):
         entry = entries.get(key)
-        text = ""
+        # A bare-string entry (`{"a.key": "Ein Text"}`) is the
+        # likeliest hand-written shape, and it is exactly the one
+        # the dict branch alone would echo as '' — which would
+        # make this transcript silently lose the text it promises
+        # to preserve.
+        text = entry if isinstance(entry, str) else ""
         if isinstance(entry, dict):
             value = entry.get("translation")
             text = value if isinstance(value, str) else ""
