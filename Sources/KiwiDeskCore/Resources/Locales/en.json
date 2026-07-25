@@ -510,6 +510,7 @@
   "presets.developer.summary": "IDE stack, scrolling docs, and a fullscreen preview space.",
   "presets.dual_developer.name": "Dual Developer",
   "presets.dual_developer.summary": "Code and docs on the main display; mail, chat, and media on the second.",
+  "presets.editing_stored": "Applying a preset switches your live layout, which editing a saved profile never does. Switch to Live to apply one.",
   "presets.focus_stack.name": "Focus Stack",
   "presets.focus_stack.summary": "Two stacked task spaces and a deep-work monocle space.",
   "presets.minimalist.name": "Minimalist",

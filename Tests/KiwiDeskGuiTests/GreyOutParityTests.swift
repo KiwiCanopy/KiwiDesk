@@ -64,6 +64,12 @@ struct GreyOutParityTests {
             "active: g.resolvedGrid(for: space).autoSize"
         ),
         ("AppBarGroups+Colors.swift", "active: gapOnly"),
+        // Not a GreyOut site — a plain `.disabled` with its own
+        // reason-bearing help — but the same convention, and
+        // the same failure if it is dropped: Apply would switch
+        // the live layout while the header promises it won't
+        // (#518).
+        ("PresetsSection.swift", "model.editingStoredProfile"),
     ]
 
     @Test("every gated editor still greys off its own switch")
