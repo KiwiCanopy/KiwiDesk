@@ -53,18 +53,30 @@ extension SettingsModel {
         )
     }
 
-    /// Confirms the parked action: clears the state FIRST, then
+    /// Confirms a parked action: clears the state FIRST, then
     /// runs it.
     ///
-    /// The order is the point. Two gated actions flip
-    /// `editingLua`, which re-mounts the view tree, so leaving
-    /// the clear to the dialog's own dismissal path would race
-    /// the teardown — and a surviving `pendingDiscard` would
-    /// re-present the dialog for an action that already ran.
-    /// Model-owned also makes the confirm path unit-testable,
-    /// which a closure invoked only by SwiftUI is not.
-    func confirmPendingDiscard() {
-        guard let pending = pendingDiscard else { return }
+    /// Takes the value rather than re-reading `pendingDiscard`,
+    /// and both halves of that matter:
+    ///
+    /// - **Clearing first** — two gated actions flip
+    ///   `editingLua`, which re-mounts the view tree, so leaving
+    ///   the clear to the dialog's dismissal would race the
+    ///   teardown and a surviving `pendingDiscard` would
+    ///   re-present for an action that already ran.
+    /// - **Taking the capture** — the dismissal path *also*
+    ///   clears, and SwiftUI does not contract whether it runs
+    ///   before or after the button action. A re-read that lost
+    ///   that race would make Discard a silent no-op: the user
+    ///   clicks the destructive verb and nothing happens. The
+    ///   dialog hands over the value it is already presenting,
+    ///   so neither order can lose it. (The repo's other confirm
+    ///   dialog, `SpacesSection+Customize`, uses the capture for
+    ///   the same reason.)
+    ///
+    /// Model-owned so the confirm path is unit-testable, which a
+    /// closure invoked only by SwiftUI is not.
+    func confirmPendingDiscard(_ pending: PendingDiscard) {
         pendingDiscard = nil
         pending.perform()
     }

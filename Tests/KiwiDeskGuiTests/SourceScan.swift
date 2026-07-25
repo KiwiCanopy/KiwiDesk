@@ -3,9 +3,9 @@ import Foundation
 /// Stateless primitives shared by the source-scanning parity
 /// guards (`SidebarSearchParityTests`, `DiscardGateParityTests`).
 ///
-/// Ratified as a third shared test primitive under
-/// `.claude/rules/parity-tests.md`, on that file's own bar —
-/// **drift risk, not copy count**. `balanced` and
+/// Ratified as a third shared test primitive under AGENTS.md §5
+/// ("Split test suites early") and `.claude/rules/tests.md`, on
+/// their own bar — **drift risk, not copy count**. `balanced` and
 /// `swiftSources` were byte-identical in both suites, and the
 /// named harm is concrete: harden the walker in one copy and not
 /// the other (raw strings, multiline literals, interpolation) and

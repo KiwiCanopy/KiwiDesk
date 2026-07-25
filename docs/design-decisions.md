@@ -1007,9 +1007,12 @@ then requires every occurrence of a destructive `model.*` call
 to sit inside one. A hand-listed "these seven are gated" would
 be fail-**open** for the case that matters — an eighth path
 absent from both the list and the index is never examined. That
-is not hypothetical: discovery found two paths the #406 audit's
-own hand-traced list had missed (the broken-profile Delete, and
-`adoptIntoGui`).
+is not hypothetical: discovery found a seventh path the #406
+audit's own hand-traced list had missed (the broken-profile
+Delete). An eighth, `adoptIntoGui`, was found by a *reviewer*,
+not by the guard — it had no token for that call. Recorded
+because the difference matters: the guard covers what it has
+needles for, and `adoptIntoGui` now carries one.
 
 *Deliberate exceptions, so they are not "fixed" later.* The
 footer's **Revert** is unconfirmed on purpose — the verb is the

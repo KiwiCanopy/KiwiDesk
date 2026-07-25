@@ -416,13 +416,17 @@ Keep this list updated whenever a recurring mistake is found.
 - **Split test suites early.** The 79-char limit and 350-line
   ceiling repeatedly bit large test files. Break suites into
   focused files before they grow; per-file private helpers are the
-  convention and small duplication across suites is fine. Two
-  ratified exceptions, both *stateless primitives* with no
+  convention and small duplication across suites is fine. Three
+  ratified exceptions, all *stateless primitives* with no
   setup/teardown coupling and no assertions of their own:
   `ReflectionParity.swift` (structural-parity reflection helpers
-  backing the field-list guards) and `ScriptFixture.swift`
+  backing the field-list guards), `ScriptFixture.swift`
   (spawn a `scripts/*` tool and drain its pipes, plus the
-  repo-shaped temp tree the `__file__`-rooted scripts need).
+  repo-shaped temp tree the `__file__`-rooted scripts need), and
+  `SourceScan.swift` (the delimiter walker and file enumerator
+  the source-scanning parity guards share — an over-matching
+  divergent copy makes a guard pass for the wrong reason, which
+  is the exact failure those guards exist to prevent).
   The bar is the **drift risk** — a divergent copy weakens a
   guard, or silently changes what a suite observes — not the
   copy count, which is merely the evidence that prompted the

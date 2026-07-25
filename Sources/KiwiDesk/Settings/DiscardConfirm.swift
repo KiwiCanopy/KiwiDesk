@@ -25,8 +25,11 @@ struct DiscardConfirmation: ViewModifier {
             titleVisibility: .visible,
             presenting: model.pendingDiscard
         ) { pending in
+            // Hand over the presented value, never a re-read:
+            // the dismissal setter above clears the same state,
+            // and SwiftUI does not contract which runs first.
             Button(pending.confirmLabel, role: .destructive) {
-                model.confirmPendingDiscard()
+                model.confirmPendingDiscard(pending)
             }
             Button(
                 L("discard.cancel", "Cancel"),

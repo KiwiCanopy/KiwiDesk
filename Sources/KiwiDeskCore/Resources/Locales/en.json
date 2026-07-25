@@ -383,7 +383,7 @@
   "lua_editor.adopt.message": "Your current init.lua is kept as a commented-out backup.",
   "lua_editor.adopt.message_dirty": "Your current init.lua is kept as a commented-out backup — but Adopt reads that file from disk, so the edits you haven't saved are dropped.",
   "lua_editor.adopt.title": "Adopt this config into the visual editor?",
-  "lua_editor.adopt_help.body": "Nothing is lost: your current code isn't deleted, it's kept as a commented-out backup in init.lua. Gaps, layouts, rules, and keybindings are imported; a shortcut that can't be read back stays in the backup — re-add it in the Shortcuts section.",
+  "lua_editor.adopt_help.body": "Your init.lua isn't deleted: it's kept as a commented-out backup in the new file. Gaps, layouts, rules, and keybindings are imported; a shortcut that can't be read back stays in the backup — re-add it in the Shortcuts section.",
   "lua_editor.adopt_into_visual": "Adopt into Visual Editor…",
   "lua_editor.back_to_visual": "Back to visual editor",
   "lua_editor.editing_directly": "Editing init.lua directly.",

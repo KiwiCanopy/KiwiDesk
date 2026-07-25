@@ -186,7 +186,6 @@
   "layout_params.split_strategy": "Split-Strategie",
   "lua_editor.adopt": "Übernehmen",
   "lua_editor.adopt.title": "Diese Konfiguration in den visuellen Editor übernehmen?",
-  "lua_editor.adopt_help.body": "Keine Sorge, es geht nichts verloren: Dein Code wird als Backup in der init.lua behalten. Abstände, Layouts, Regeln und Tastenkürzel werden übernommen. Kürzel, die nicht importiert werden können, verbleiben im Backup und können einfach neu hinzugefügt werden.",
   "lua_editor.adopt_into_visual": "In visuellen Editor übernehmen…",
   "lua_editor.back_to_visual": "Zurück zum visuellen Editor",
   "lua_editor.editing_directly": "Direktes Bearbeiten der init.lua.",

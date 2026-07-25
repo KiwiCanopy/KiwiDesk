@@ -14,10 +14,14 @@ import Testing
 /// instead discovers *every* occurrence of each destructive
 /// call and requires it to sit inside a `discardingEdits`
 /// closure — so a new ungated call site fails on arrival. It
-/// earned that design twice: the broken-profile Delete
+/// earned that design immediately: the broken-profile Delete
 /// (`ProfilesSection+Broken.swift`) was a seventh path the #406
-/// audit's hand-traced list missed, and `adoptIntoGui` an
-/// eighth.
+/// audit's hand-traced list missed, and this guard found it.
+///
+/// An eighth, `adoptIntoGui`, was found by a human reviewer —
+/// NOT by this guard, which had no token for it. That is the
+/// honest record, and the reason its token is listed below with
+/// an expected count of 0 rather than left out.
 ///
 /// Known limits, all of which fail **shut**:
 /// - Lexical. A destructive call reached through a helper that
@@ -51,6 +55,12 @@ struct DiscardGateParityTests {
         // reachable through this one, but naming them separately
         // is what makes a dead token visible.
         ("model.reload()", 2),
+        // Expected 0: its only call site is exempted below. The
+        // token is listed anyway, because `exempt` is consulted
+        // ONLY for tokens in this list — omitting it made the
+        // exemption dead and left the path unscanned. Listed, a
+        // SECOND adopt call site anywhere breaks the count.
+        ("model.adoptIntoGui(", 0),
     ]
 
     /// Exempted per FILE AND TOKEN, never a whole file — a
@@ -126,7 +136,12 @@ struct DiscardGateParityTests {
         let file = settingsDir.appendingPathComponent(
             "Components/Lua/LuaEditorTab.swift"
         )
-        let source = try String(contentsOf: file, encoding: .utf8)
+        // Comments stripped, like the sibling scan: a doc
+        // comment mentioning either token must not keep this
+        // green after the code it describes is deleted.
+        let source = SourceScan.stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        )
         #expect(source.contains("lua_editor.adopt.message_dirty"))
         #expect(source.contains("model.isDirty"))
     }

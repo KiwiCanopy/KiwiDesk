@@ -153,9 +153,12 @@ struct LuaEditorTab: View {
     private var adoptHelpBody: String {
         L(
             "lua_editor.adopt_help.body",
-            "Nothing is lost: your current code isn't "
-                + "deleted, it's kept as a "
-                + "commented-out backup in init.lua. "
+            // Was "Nothing is lost: …", which is true of the
+            // FILE and false of an unsaved editor buffer — and
+            // this popover sits beside the Adopt dialog that now
+            // says the opposite when dirty (#515 review).
+            "Your init.lua isn't deleted: it's kept as a "
+                + "commented-out backup in the new file. "
                 + "Gaps, layouts, rules, and "
                 + "keybindings are imported; a "
                 + "shortcut that can't be read back "
