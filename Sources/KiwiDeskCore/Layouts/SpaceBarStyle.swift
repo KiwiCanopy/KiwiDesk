@@ -120,11 +120,16 @@ public struct SpaceBarStyle: Sendable, Equatable {
     /// the rebrand had *already* ratified for the drag drop-zone
     /// (`DragVisual.dropZoneDefault`) rather than inventing a
     /// hue: same H36 as the old `#E8A33D`, dropped L57% → L40%.
-    /// The **lightness** is load-bearing, not the hue — hue alone
-    /// does not survive colour-vision deficiency against a green
-    /// primary. Keep that gap if this is retuned; a lighter amber
-    /// loses it (`SpaceBarAccentSeparationTests` pins the floor,
-    /// docs/design-decisions.md carries the numbers). Accepted
+    /// Here the **lightness** is load-bearing, not the hue: an
+    /// amber against a green primary is the axis red-green vision
+    /// loss erases, so keep that gap if this is retuned — a
+    /// lighter amber loses it. What survives the loss generally is
+    /// lightness *or* blue↔yellow, and #511's Kiwi Neon takes the
+    /// second road (green primary → cyan focused, near-equal
+    /// lightness); that road is closed here only because the
+    /// default's amber is fixed by the drag drop-zone above.
+    /// (`SpaceBarAccentSeparationTests` pins the floor,
+    /// docs/design-decisions.md carries the numbers.) Accepted
     /// trade: focused now reads darker than the active green, not
     /// brighter. Default mirrored in docs/lua-reference.md.
     public var focusedItemColor = "#C2790A"

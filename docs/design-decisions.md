@@ -1704,9 +1704,14 @@ copy/paste theme sharing works through the panel. (#68
 **Palette colors follow a rough matching guide.** (#408
 follow-up, 2026-07-20.) A palette (the bar + border + drag
 colors, bundled or user-saved) reads as one system when its
-roles relate by a few loose heuristics — a guide to eyeball a
-new palette against, not a spec the reflection-based
-`ColorPaletteKeys` surface enforces:
+roles relate by a few loose heuristics — mostly a guide to
+eyeball a new palette against rather than a spec the
+reflection-based `ColorPaletteKeys` surface enforces. Mostly:
+four clauses of the colour-vision rule below *are* build gates
+over the bundled catalog as of #511 (accent inequality, the
+separation floor, both accent keys present, both opaque). The
+rest are advice. Where a clause is enforced this list says so —
+don't assume from tone.
 
 - **Hue budget: 1–3 chromatic hues, 2 is the sweet spot.**
   Count only saturated identity hues, not neutrals or the
@@ -1714,39 +1719,62 @@ new palette against, not a spec the reflection-based
   one *focused accent*; >3 hues is a smell (Monochrome and
   the deliberately-busier Sunset/Ultraviolet are the ratified
   exceptions).
-- **Primary vs. focused accent differ by *temperature*, not
-  just hue.** `active_item_color` / `highlight_color` /
+- **The two accents must separate on an axis red-green vision
+  loss *preserves* — lightness, or blue↔yellow.** (#470,
+  widened catalog-wide by #511. **Enforced.**)
+  `active_item_color` / `highlight_color` /
   `border.focused_color` share the *primary* hue;
-  `space_bar.focused_item_color` is the complementary
-  temperature (cool primary → warm focused, and vice-versa),
-  so "active space" and "focused window" read as two signals.
-- **…and the two accents must differ on an axis the deficiency
-  *preserves*, which for a green-primary palette leaves only
-  lightness.** (#470.) The rule to check is not "different hue"
-  but "still different after red-green vision loss". Two axes
-  survive it: **lightness**, and **blue↔yellow**. A cool-primary
-  palette gets the second one free — True Dark's `#64D2FF` /
-  `#FF9F0A` separates at **241/441** under simulated protanopia
-  despite the two being nearly equal in lightness. A
-  *green*-primary palette does not: green↔amber is precisely the
-  axis protanopia and deuteranopia flatten, so lightness is the
-  only channel left. That is what the old default got wrong —
-  `#8DB354` / `#E8A33D` measures **22/441**, i.e. the same
-  colour to a protanope, while satisfying both "different hue"
-  and "complementary temperature". The converged `#C2790A`
-  measures **93**, which is why the focused accent now reads
-  *darker* than the active green rather than brighter.
-  Deliberately **not** retuned by #470, because each is an
-  eye-confirm call of its own: **Kiwi Neon** (`#86EA43` /
-  `#F4CA25`, 39) and **Kiwi Gold** (`#D9A521` / `#8DB354`, 49) —
-  Gold being the inverted twin of the same defect, gold primary
-  against the brand green, so both ends move together when it is
-  retuned. `ColorPaletteTests` pins inequality only, catalog-wide;
-  `SpaceBarAccentSeparationTests` pins this clause for the
-  derived default palette. Tightening the guard catalog-wide and
-  retuning those two belong to one change, not this one (#511) —
-  it must assert CVD separation, not a lightness proxy, or it
-  will fail True Dark, which has no defect. *(Every separation
+  `space_bar.focused_item_color` is the second signal, and the
+  test it must pass is not "a different hue" but "still a
+  different colour after the loss". Exactly two axes survive.
+
+  The **complementary temperature** rule of thumb — cool primary
+  → warm focused, and vice-versa — usually satisfies this,
+  because for a cool primary the flip *is* a blue↔yellow move:
+  True Dark's `#64D2FF` / `#FF9F0A` separates at **241/441**
+  though the two sit nearly equal in lightness. It is only a
+  rule of thumb, and it inverts on a **green** primary, where
+  the warm side is precisely the collapsing axis. The old
+  default is the proof: `#8DB354` / `#E8A33D` measures
+  **22/441** — one colour to a protanope — while satisfying both
+  "different hue" and "complementary temperature". A
+  green-primary palette must therefore go down in *lightness*
+  (the default's `#C2790A`, **93**, which is why focused reads
+  *darker* than active) or across to the *cool* side, giving the
+  temperature flip up altogether.
+
+  #511's two green-primary siblings took the cool road: **Kiwi
+  Neon** `#F4CA25` → `#2BE0FF` (**37 → 190**) and **Kiwi Gold**
+  `#8DB354` → `#9CE8C8` (**49 → 181** — the inverted twin, gold
+  primary against the brand green). Lightness alone would have
+  cleared the floor for both (Gold `#B8D095` measures 124, Neon
+  `#AA8909` 131), so this was *not* forced. It was chosen for
+  parity with the 181+ band the rest of the catalog sits in, and
+  because those two lightness picks land on a washed sage and a
+  dull mustard that stop reading as their own palette — an
+  eye-confirm call, not an arithmetic one. **So don't "fix" Kiwi
+  Neon back to an amber**: green primary → cyan focused with no
+  temperature flip is the decision, not an oversight. Gold's
+  mint sits at H155 rather than a teal so the palette keeps a
+  green read (#439 rules teal out as a *brand* hue); Neon's cyan
+  at H189 is nearer that line and is allowed because Kiwi Neon
+  is an expressive showcase palette, not a carrier of the brand
+  tokens.
+
+  `SpaceBarAccentSeparationTests` sweeps the catalog and
+  measures this quantity — CVD separation, never a lightness
+  proxy, which would condemn True Dark, a palette with no
+  defect. Its floor is **60**: a floor, not a target, set by the
+  default's 93 and meant to catch disasters rather than to
+  license a new palette at 61.
+  `ColorPaletteTests.focusedAccentDistinct` pins mere inequality
+  and is *subsumed* by that sweep — kept as the cheap check, not
+  a second half of the coverage. **Bundled palettes only.** User
+  palettes and the Lua setters are deliberately not held to it:
+  §2.7's "the GUI curates, Lua is open" makes an accessibility
+  heuristic the wrong thing for a setter to clamp, and the guard
+  itself cannot see the "genuinely different hue" half of the
+  rule anyway. *(Every separation
   figure here is a Viénot-1999 protanopia simulation in linear
   sRGB, Euclidean RGB distance, max √3·255 = 441 —
   `SpaceBarAccentSeparationTests` computes the same quantity, and
@@ -1773,8 +1801,16 @@ new palette against, not a spec the reflection-based
   pairs a text color chosen for contrast against *that* badge.
 - **Drag ghost / drop-zone:** a deliberate two-hue split
   (border opaque + fill ~15–25 %) so origin reads apart from
-  target. Origin is the brand green darkened for stroke duty;
-  target is a distinct amber — see the overlay note below.
+  target — and since #511 it is held to the **same CVD
+  separation floor as the two accents** (`DragPairSeparationTests`;
+  **enforced**), because origin and target are the only two
+  overlays on screen at once. **Target tracks
+  `space_bar.focused_item_color`** — true for the shipped default
+  and six of the nine palettes; Monochrome, Sunset and
+  Ultraviolet keep a third colour and clear the floor anyway.
+  Origin is a green darkened for stroke duty, but *not*
+  necessarily the ring's green: see the overlay note below for
+  why the shipped ghost had to leave the hue family.
 
 **The logo's mark holds one hue across themes; only the wordmark
 ink is themed (#479).** A dark-mode logo exists for exactly one
@@ -1796,7 +1832,7 @@ against the pre-#439 palette.) Only the wordmark's ink moves: forest
 content-overlays note below is narrower than it looks and worth
 stating precisely: **both refuse to re-hue the identity
 element** — but the overlays reach for lightness *to avoid
-needing a variant at all* (one darkened `#588613` survives both
+needing a variant at all* (one darkened hex survives both
 near-white and near-black), while the mark reaches for nothing
 and the wordmark keeps two pre-inked masters. Nor is the ink
 move itself a lightness-only shift: `#12251a` → `#E1EEDB` turns
@@ -1834,10 +1870,13 @@ brand-token change — shifting a brand hex means editing
 The focus ring and drag ghost paint over *arbitrary* third-party
 window content. The bright kiwi accent (`#8DB354`/`#AACB5D`) is a
 fill-only color — too light to survive as a thin stroke on light
-windows (`#AACB5D` ≈ 1.5:1 on white, fails AA) — so the ring and
-ghost drop the *same* accent hue (~84°) down in lightness to
-`#588613`, which clears 3:1 on both near-white (~4.3:1) and
-near-black (~4.8:1) while staying unmistakably on-brand green. The
+windows (`#AACB5D` ≈ 1.5:1 on white, fails AA) — so the **ring**
+drops the accent hue (~84°) down in lightness to `#588613`, which
+clears 3:1 on both near-white (~4.3:1) and near-black (~4.8:1)
+while staying unmistakably on-brand green. The **ghost** shared
+that hex until #511, and no longer does — see the origin/target
+paragraph below; the 3:1-at-both-ends bar is what survived the
+move, the shared hue is what did not. The
 default ring width is 5 pt (was 2): a thicker stroke is not just
 more visible, it reads at a *more saturated* color than a hairline
 can (a 2 pt line's anti-aliased edges wash its effective contrast
@@ -1849,11 +1888,50 @@ fills the gap edge-to-edge without overlap (6 pt would overlap).
 That couples the width default to the gap default — changing either
 without the other re-opens or overlaps the ring band. The drag drop-zone
 keeps a distinct hue as a darkened amber `#C2790A` (the old
-`#E8A33D` had the same light-window problem), so origin (green)
-still reads apart from target (amber). This is a darkening, not a
+`#E8A33D` had the same light-window problem), so origin still
+reads apart from target. For the *ring*, that darkening is not a
 hue change — the same move the green-forward identity makes for
 ink and borders: keep the hue, drop the lightness where a role
-needs contrast. The optional **glow** inverts this trade for the
+needs contrast.
+
+**The drag ghost is the one place that move ran out of room
+(#511).** Origin and target are the only two overlays on screen
+*simultaneously*, so they are the only pair that has to separate
+from each other, and a yellow-green against an amber is exactly
+what red-green vision loss erases — they measured **4.7/441**,
+worse than the 22 #470 called one colour. The target could not
+move (its amber is the hex the Space Bar's focused accent
+converged onto), so the ghost had to. What it could not keep was
+the ring's *chroma*: stacking the 3:1-on-both-ends bar onto the
+separation floor caps the ring's hue family at **S0.45**, so the
+ring's own S0.75 cannot satisfy all three at any lightness — the
+ghost could not simply be a darker or lighter `#588613`. Drop to
+the shipped ghost's S0.40 and the ring's hue does qualify, but
+only just: `#799D43` measures **61**, a point over the floor,
+where the emerald band (which caps at full saturation) gives
+**76** at the same chroma. That trade — chroma against
+separation, not impossibility — is pinned by
+`DragPairSeparationTests.ringHueFamilyCannotSeparateAtChroma`,
+which is also where to start when re-deriving it; the numbers
+here are quoted from that guard rather than the other way round.
+So the ghost alone moved to a deep emerald `#347957` — hue 150,
+S0.40, **76/441**, 5.2:1 on near-white and 4.0:1 on near-black,
+margin on all three while keeping real chroma. The contrast bar
+held; the hue it shared with the ring did not. The ring keeps
+`#588613` — it has no partner to separate from, so nothing asks
+it to move. Origin is therefore green-but-not-*the*-green, which
+is the cost, and the alternative (`#2F4A0C`, a yellow-green at
+85/441) was rejected for falling to 2.11:1 on near-black — that
+would have traded a colour-vision defect for a contrast one.
+Bundled palettes follow the same rule:
+target tracks `space_bar.focused_item_color` in six of the nine,
+which is what fixed Clean Light, Slate and True Dark, each of
+which had been shipping origin and target as the *same hex*
+(separation 0, for every viewer, not only CVD). Monochrome,
+Sunset and Ultraviolet keep a third colour and already clear the
+floor. `DragPairSeparationTests` guards all of it.
+
+The optional **glow** inverts this trade for the
 bloom only: a halo is a fill, not a stroke, so it brightens the ring
 hue back up (`BorderStyle.glowColor`) instead of staying darkened.
 The Space Bar's own `focused_item_color` — a separate
@@ -2308,14 +2386,13 @@ Every bundled palette keeps `space_bar.focused_item_color` a
 QA 2026-07-19) — Monochrome included: color is the only channel
 the focused-window state has, so even a mono palette carries one
 deliberate accent (`#FFD60A`) rather than erasing the state.
-Since #470 that rule carries a second clause for green-primary
-palettes — the pair must also separate under red-green vision
-loss, which there means a **lightness gap** (see the
-palette-coherence heuristics above). The derived default
-satisfies it; **Kiwi Neon and Kiwi Gold are ratified exceptions**
-pending their own retune (#511). `ColorPaletteTests` pins the inequality for
-every bundled
-palette.
+Since #470 that rule carries a second clause: the pair must also
+separate under red-green vision loss (see the palette-coherence
+heuristics above, which carry the numbers and the reasoning).
+Every **bundled** palette satisfies it — the two green-primary
+siblings were retuned to a cool focused accent by #511 — and
+`SpaceBarAccentSeparationTests` measures that, catalog-wide.
+User palettes are not held to it; the shelf curates, Lua is open.
 
 **"Automatic" is a value; "Auto" is an adjective — and the
 readout column was widened to say it.** (R6/#406, owner ruling

@@ -12,7 +12,7 @@
       "app_bar.group_badge_text_color": "#FFFFFF",
       "space_bar.item_color": "#EAF3EE66",
       "space_bar.active_item_color": "#D9A521",
-      "space_bar.focused_item_color": "#8DB354",
+      "space_bar.focused_item_color": "#9CE8C8",
       "space_bar.hover_fill_color": "#E8C34D80",
       "space_bar.hover_item_color": "#EAF3EE",
       "space_bar.fill_color": "#3A332666",
@@ -23,8 +23,8 @@
       "border.unfocused_color": "#8A7E6C66",
       "drag.ghost.border_color": "#D9A521",
       "drag.ghost.fill_color": "#D9A52140",
-      "drag.drop_zone.border_color": "#8DB354",
-      "drag.drop_zone.fill_color": "#8DB35440"
+      "drag.drop_zone.border_color": "#9CE8C8",
+      "drag.drop_zone.fill_color": "#9CE8C840"
     }
   },
   {
@@ -51,8 +51,8 @@
       "border.unfocused_color": "#8E8E9366",
       "drag.ghost.border_color": "#0A84FF",
       "drag.ghost.fill_color": "#0A84FF40",
-      "drag.drop_zone.border_color": "#0A84FF",
-      "drag.drop_zone.fill_color": "#0A84FF26"
+      "drag.drop_zone.border_color": "#FF9F0A",
+      "drag.drop_zone.fill_color": "#FF9F0A26"
     }
   },
   {
@@ -79,8 +79,8 @@
       "border.unfocused_color": "#48484A99",
       "drag.ghost.border_color": "#5E9EFF",
       "drag.ghost.fill_color": "#5E9EFF40",
-      "drag.drop_zone.border_color": "#5E9EFF",
-      "drag.drop_zone.fill_color": "#5E9EFF26"
+      "drag.drop_zone.border_color": "#FFB340",
+      "drag.drop_zone.fill_color": "#FFB34026"
     }
   },
   {
@@ -107,8 +107,8 @@
       "border.unfocused_color": "#3A3A3C99",
       "drag.ghost.border_color": "#64D2FF",
       "drag.ghost.fill_color": "#64D2FF40",
-      "drag.drop_zone.border_color": "#64D2FF",
-      "drag.drop_zone.fill_color": "#64D2FF26"
+      "drag.drop_zone.border_color": "#FF9F0A",
+      "drag.drop_zone.fill_color": "#FF9F0A26"
     }
   },
   {
@@ -208,7 +208,7 @@
       "app_bar.group_badge_text_color": "#000000",
       "space_bar.item_color": "#D8FFC2",
       "space_bar.active_item_color": "#86EA43",
-      "space_bar.focused_item_color": "#F4CA25",
+      "space_bar.focused_item_color": "#2BE0FF",
       "space_bar.hover_fill_color": "#86EA4380",
       "space_bar.hover_item_color": "#FFFFFF",
       "space_bar.fill_color": "#0A1F0FD9",
@@ -219,8 +219,8 @@
       "border.unfocused_color": "#3A5A3A66",
       "drag.ghost.border_color": "#4A9816",
       "drag.ghost.fill_color": "#4A981640",
-      "drag.drop_zone.border_color": "#F4CA25",
-      "drag.drop_zone.fill_color": "#F4CA2526"
+      "drag.drop_zone.border_color": "#2BE0FF",
+      "drag.drop_zone.fill_color": "#2BE0FF26"
     }
   }
 ]

@@ -20,14 +20,16 @@ import Testing
 /// disagree on real palettes in this repo. True Dark's
 /// `#64D2FF` / `#FF9F0A` separates at 241 (fine) while sitting
 /// almost equal in lightness, so a luminance floor would condemn
-/// a palette that has no defect, and would block the catalog-wide
-/// tightening that is deferred to the Kiwi Neon / Kiwi Gold
-/// retune. Guarding the real quantity keeps that door open.
+/// a palette that has no defect — and would have blocked the
+/// catalog-wide tightening #511 went on to do. Guarding the real
+/// quantity is what kept that door open.
 ///
-/// Scope is the **derived default palette only**, deliberately:
-/// Kiwi Neon (39) and Kiwi Gold (49) sit below any threshold
-/// worth setting, and retuning them is an eye-confirm call that
-/// belongs with its own change.
+/// Scope is the **whole bundled catalog** (#511), and it
+/// subsumes `ColorPaletteTests.focusedAccentDistinct` — an equal
+/// pair separates at 0, so anything that guard catches this one
+/// catches too, plus the missing-key and `#FFFFFF` vs
+/// `#FFFFFFFF` cases it waves through. That one is kept as the
+/// cheap check; don't read the pair as split coverage.
 ///
 /// What this suite does *not* cover: the "genuinely different
 /// hue" half of the two-accent rule. A dark green would pass
@@ -38,21 +40,6 @@ import Testing
 @Suite("Space Bar accent separation")
 struct SpaceBarAccentSeparationTests {
     private var style: SpaceBarStyle { SpaceBarStyle() }
-
-    /// sRGB → linear, the same transfer function WCAG uses.
-    private func linear(_ value: Double) -> Double {
-        value <= 0.03928
-            ? value / 12.92
-            : pow((value + 0.055) / 1.055, 2.4)
-    }
-
-    private func components(_ hex: String) -> (
-        r: Double, g: Double, b: Double
-    )? {
-        guard let rgb = DragVisual.parseHex(hex) else { return nil }
-        // `parseHex` already normalizes each channel to 0...1.
-        return (rgb.red, rgb.green, rgb.blue)
-    }
 
     /// Both accents must be opaque for any of this to mean
     /// anything: `parseHex` accepts `#RRGGBBAA`, and the Lua
@@ -67,63 +54,6 @@ struct SpaceBarAccentSeparationTests {
         }
     }
 
-    /// Simulates protanopia (Viénot/Brettel LMS reduction) and
-    /// returns the result in 0...255 sRGB.
-    ///
-    /// Protan is the strictest of the three for this palette:
-    /// it is the axis a green primary and a warm focused accent
-    /// collapse onto, so it is the one the rule is written
-    /// against. Deutan tracks it closely; tritan is unaffected.
-    private func protanope(_ hex: String) -> (
-        r: Double, g: Double, b: Double
-    )? {
-        guard let c = components(hex) else { return nil }
-        let r = linear(c.r)
-        let g = linear(c.g)
-        let b = linear(c.b)
-        // sRGB → LMS.
-        let l = 17.8824 * r + 43.5161 * g + 4.11935 * b
-        let m = 3.45565 * r + 27.1554 * g + 3.86714 * b
-        let s = 0.0299566 * r + 0.184309 * g + 1.46709 * b
-        // The long-wavelength cone is missing: L is reconstructed
-        // from the remaining two.
-        let lp = 2.02344 * m - 2.52581 * s
-        // LMS → sRGB.
-        func encode(_ value: Double) -> Double {
-            let v = min(max(value, 0), 1)
-            let s =
-                v <= 0.0031308
-                ? 12.92 * v
-                : 1.055 * pow(v, 1 / 2.4) - 0.055
-            return min(max(s, 0), 1) * 255
-        }
-        return (
-            encode(
-                0.0809444479 * lp - 0.130504409 * m
-                    + 0.116721066 * s
-            ),
-            encode(
-                -0.0102485335 * lp + 0.0540193266 * m
-                    - 0.113614708 * s
-            ),
-            encode(
-                -0.000365296938 * lp - 0.00412161469 * m
-                    + 0.693511405 * s
-            )
-        )
-    }
-
-    /// Euclidean distance in simulated sRGB, 0...441.
-    private func separation(_ a: String, _ b: String) -> Double? {
-        guard let x = protanope(a), let y = protanope(b) else {
-            return nil
-        }
-        let dr = x.r - y.r
-        let dg = x.g - y.g
-        let db = x.b - y.b
-        return (dr * dr + dg * dg + db * db).squareRoot()
-    }
-
     @Test("The simulation reproduces the numbers #470 was decided on")
     func simulationMatchesTheRecordedMeasurements() throws {
         // Pin the metric itself before pinning anything with it —
@@ -131,10 +61,14 @@ struct SpaceBarAccentSeparationTests {
         // below pass vacuously. These are the figures quoted in
         // docs/design-decisions.md and the commit that set the
         // default; they are what the decision was made on.
-        let old = try #require(separation("#8DB354", "#E8A33D"))
-        let new = try #require(separation("#8DB354", "#C2790A"))
+        let old = try #require(
+            ColorVision.separation("#8DB354", "#E8A33D")
+        )
+        let new = try #require(
+            ColorVision.separation("#8DB354", "#C2790A")
+        )
         let coolPrimary = try #require(
-            separation("#64D2FF", "#FF9F0A")
+            ColorVision.separation("#64D2FF", "#FF9F0A")
         )
         #expect(abs(old - 22) < 3)
         #expect(abs(new - 93) < 3)
@@ -147,38 +81,90 @@ struct SpaceBarAccentSeparationTests {
     @Test("The default accent pair survives red-green vision loss")
     func defaultPairSeparatesUnderProtanopia() throws {
         let gap = try #require(
-            separation(style.activeItemColor, style.focusedItemColor)
+            ColorVision.separation(
+                style.activeItemColor,
+                style.focusedItemColor
+            )
         )
-        // The shipped pair measures 93. 60 is the floor:
-        // comfortably above the 22 of the pre-#470 default and
-        // above both near-miss retunes considered at the time
-        // (`#F0B858` 23, `#E09B2E` 39), while leaving room to
-        // retune the hex without tripping a guard on a colour
-        // that is actually fine. It is the *green*-primary case
-        // that needs this — see the suite doc comment.
-        //
-        // If an eye-confirm asks for a different amber and this
-        // goes red: re-measure, and move the floor only if the
-        // new *measurement* justifies it. Lowering it to fit a
-        // pick discards the argument the number encodes.
+        // The shipped pair measures 93; the floor is 60 (see
+        // `ColorVision.separationFloor`). Kept as its own test
+        // alongside the catalog sweep because the struct defaults
+        // are what a user with no palette applied actually sees.
         let detail =
             "active \(style.activeItemColor) vs focused "
             + "\(style.focusedItemColor) separate by only "
             + "\(gap)/441 under simulated protanopia — hue alone "
             + "does not survive it against a green primary (#470)"
-        #expect(gap >= 60, Comment(rawValue: detail))
+        #expect(
+            gap >= ColorVision.separationFloor,
+            Comment(rawValue: detail)
+        )
+    }
+
+    /// The catalog-wide half of the clause (#511).
+    ///
+    /// Beyond the gap itself this pins two authoring rules that
+    /// were previously only conventions: a bundled palette
+    /// **defines both accent keys** (the inequality guard skips a
+    /// palette that omits either, so an absent focused accent read
+    /// as compliance), and both are **opaque** — `parseHex`
+    /// accepts `#RRGGBBAA`, and the catalog does use alpha for the
+    /// muted item tier, so a translucent accent is a plausible
+    /// slip that would clear the distance check on its RGB alone.
+    @Test("Every bundled accent pair survives red-green vision loss")
+    func everyBundledPairSeparatesUnderProtanopia() throws {
+        let palettes = PaletteCatalog.bundled()
+        // `PaletteCatalog.authored()` soft-fails to `[]` on a
+        // missing or malformed resource, and `bundled()` prepends
+        // the derived default — so without this the sweep would
+        // silently shrink to one palette and still pass, which is
+        // the "guard that cannot fail" this suite exists to avoid.
+        #expect(palettes.count == 9)
+        for palette in palettes {
+            let name = palette.name
+            // `#expect`, not `#require`: a require here aborts the
+            // sweep at the first offender, so a two-palette
+            // regression would report as one.
+            guard
+                let active =
+                    palette.colors["space_bar.active_item_color"],
+                let focused =
+                    palette.colors["space_bar.focused_item_color"]
+            else {
+                Issue.record("\(name) omits an accent key")
+                continue
+            }
+            for hex in [active, focused] {
+                let rgb = DragVisual.parseHex(hex)
+                #expect(
+                    rgb?.alpha == 1,
+                    Comment(rawValue: "\(name) \(hex) is not opaque")
+                )
+            }
+            guard
+                let gap = ColorVision.separation(active, focused)
+            else {
+                Issue.record("\(name) has an unparseable accent")
+                continue
+            }
+            let detail =
+                "\(name): active \(active) vs focused \(focused) "
+                + "separate by only \(gap)/441 under simulated "
+                + "protanopia (#511)"
+            #expect(
+                gap >= ColorVision.separationFloor,
+                Comment(rawValue: detail)
+            )
+        }
     }
 
     @Test("The default focused accent is darker than the active")
     func focusedIsDarkerThanActive() throws {
-        func luminance(_ hex: String) -> Double? {
-            guard let c = components(hex) else { return nil }
-            return 0.2126 * linear(c.r) + 0.7152 * linear(c.g)
-                + 0.0722 * linear(c.b)
-        }
-        let active = try #require(luminance(style.activeItemColor))
+        let active = try #require(
+            ColorVision.luminance(style.activeItemColor)
+        )
         let focused = try #require(
-            luminance(style.focusedItemColor)
+            ColorVision.luminance(style.focusedItemColor)
         )
         // Direction, not magnitude: the accepted trade of #470 is
         // that focused reads *darker*. Worth pinning separately
@@ -190,15 +176,12 @@ struct SpaceBarAccentSeparationTests {
 
     @Test("Badge ink is legible on the badge chip")
     func badgeInkClearsContrastOnItsChip() throws {
-        func luminance(_ hex: String) -> Double? {
-            guard let c = components(hex) else { return nil }
-            return 0.2126 * linear(c.r) + 0.7152 * linear(c.g)
-                + 0.0722 * linear(c.b)
-        }
-        let ink = try #require(luminance(style.groupBadgeTextColor))
-        let chip = try #require(luminance(style.groupBadgeColor))
-        let ratio =
-            (max(ink, chip) + 0.05) / (min(ink, chip) + 0.05)
+        let ratio = try #require(
+            ColorVision.contrast(
+                style.groupBadgeTextColor,
+                style.groupBadgeColor
+            )
+        )
         // The badge numeral is small text, so 4.5:1. This exists
         // because the pairing broke once: a 2026-07-20 change had
         // the badge take `focusedItemColor` when its app was

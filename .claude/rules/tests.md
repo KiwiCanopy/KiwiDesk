@@ -25,7 +25,7 @@ ones that bite large test PRs, as a checklist (rationale is in §5):
   it approaches the ceiling.
 - **Per-file private helpers are the convention** — small
   duplication across suites is fine; no shared test harness.
-  Three ratified exceptions, all *stateless primitives* with no
+  Four ratified exceptions, all *stateless primitives* with no
   setup/teardown coupling and no assertions of their own:
   - *structural-parity primitives* (reflection helpers backing
     the field-list guards) in `ReflectionParity.swift` — a
@@ -40,6 +40,18 @@ ones that bite large test PRs, as a checklist (rationale is in §5):
     per the #249 architect review); a divergent copy silently
     changes what a suite observes (an undrained pipe, a missed
     `stderr`) without failing anything.
+  - *colour-vision maths* in `ColorVision.swift` — the
+    Viénot protanopia transform plus luminance/contrast, shared
+    by `SpaceBarAccentSeparationTests` and
+    `DragPairSeparationTests`. Extracted at the **second** copy
+    (#511): those guards assert on the numbers it returns, and
+    the numbers *are* the argument the palette decisions rest
+    on, so a drifted copy silently moves a threshold without
+    failing anything. It also owns the shared separation
+    **floor**: the two families share hexes (the drop-zone amber
+    *is* the Space Bar's focused accent), so one threshold over
+    one colour is deliberate, not policy misfiled into a maths
+    helper.
   - *source-scanning primitives* in `SourceScan.swift` — the
     delimiter walker (`balanced`, `skipLiteral`), comment
     stripper and file enumerator shared by the parity guards
@@ -50,9 +62,9 @@ ones that bite large test PRs, as a checklist (rationale is in §5):
     the wrong reason.
 
   **The drift risk is the bar; the copy count is only the
-  evidence that prompted the look.** Both cases above happened
+  evidence that prompted the look.** Each case above happened
   to be caught at a threshold, but "we're at three copies" is
-  not on its own an argument — a fourth shared helper needs a
+  not on its own an argument — a further shared helper needs a
   named way that a divergent copy would weaken a guard or
   change what a suite observes, plus statelessness. Duplication
   that merely costs lines stays duplicated (§2.4).

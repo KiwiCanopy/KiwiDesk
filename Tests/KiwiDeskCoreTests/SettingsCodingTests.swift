@@ -197,11 +197,13 @@ struct SettingsCodingTests {
                 "border_alignment", "enabled", "fill", "fill_color",
             ]
         )
-        // Kiwi defaults: deep-green ghost (origin), amber drop
-        // zone (target) — hue carries origin vs. target. The
-        // ghost is the brand accent hue darkened for stroke duty.
-        #expect(ghost["border_color"] as? String == "#588613")
-        #expect(ghost["fill_color"] as? String == "#58861340")
+        // Kiwi defaults: emerald ghost (origin), amber drop zone
+        // (target) — hue carries origin vs. target, and since
+        // #511 it has to do so under red-green vision loss too,
+        // which is why the ghost is no longer the ring's
+        // yellow-green (see DragVisual.ghostDefault).
+        #expect(ghost["border_color"] as? String == "#347957")
+        #expect(ghost["fill_color"] as? String == "#34795740")
         #expect(ghost["border_width"] as? Double == 5)
         #expect(ghost["border_alignment"] as? String == "inside")
         let zone = try object(drag["drop_zone"])

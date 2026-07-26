@@ -2375,13 +2375,15 @@ drag.set_ghost_border_alignment("inside")
 
 **Expects:** a hex color.
 
-**Does:** sets the ghost border color (default `#588613`,
-deep green — the ghost, drag's origin, is all-green).
+**Does:** sets the ghost border color (default `#347957`,
+deep emerald — the ghost, drag's origin, is all-green; a
+bluer green than the focus ring since #511, so it separates
+from the drop zone's amber under red-green vision loss).
 
 **Example:**
 
 ```lua
-drag.set_ghost_border_color("#588613")
+drag.set_ghost_border_color("#347957")
 ```
 
 ### drag.set_ghost_fill
@@ -2400,13 +2402,13 @@ drag.set_ghost_fill(true)
 
 **Expects:** a hex color.
 
-**Does:** sets the ghost fill color (default `#58861340`,
-deep green with 25% alpha).
+**Does:** sets the ghost fill color (default `#34795740`,
+deep emerald with 25% alpha).
 
 **Example:**
 
 ```lua
-drag.set_ghost_fill_color("#58861340")
+drag.set_ghost_fill_color("#34795740")
 ```
 
 ### drag.set_drop_zone_enabled
@@ -3915,9 +3917,9 @@ stripped, grouped by namespace — `set_gap_override` becomes
       "corner_radius": 16,
       "ghost": {
         "enabled": true, "border": true,
-        "border_color": "#588613", "border_width": 5,
+        "border_color": "#347957", "border_width": 5,
         "border_alignment": "inside",
-        "fill": true, "fill_color": "#58861340"
+        "fill": true, "fill_color": "#34795740"
       },
       "drop_zone": {
         "enabled": true, "border": true,

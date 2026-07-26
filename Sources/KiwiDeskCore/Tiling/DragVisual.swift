@@ -21,26 +21,41 @@ public struct DragVisual: Sendable, Equatable, Encodable {
     public var fill: Bool
     public var fillColor: String
 
-    /// Ghost (drag origin): deep kiwi green — the brand accent hue
-    /// darkened for stroke duty, same signal as the focus ring.
-    /// The bright accent is fill-only and vanishes over light
-    /// window content, so this drops it in lightness (not hue) to
-    /// stay legible and on-brand. Origin vs. target reads by hue
-    /// against the drop zone's amber. Defaults mirrored in
-    /// docs/lua-reference.md (drag colors) — change both.
+    /// Ghost (drag origin): a deep emerald. It was the ring's
+    /// yellow-green `#588613` until #511 measured origin against
+    /// target and got **4.7/441** under simulated protanopia —
+    /// worse than the 22 that #470 called "the same colour to a
+    /// protanope". Target is locked (the drop-zone amber is the
+    /// hex `space_bar.focusedItemColor` converged onto), so the
+    /// origin had to move — and what it could not keep was the
+    /// ring's *chroma*. Adding the 3:1-on-both-ends bar from
+    /// `docs/accepted-limitations.md` to the separation floor
+    /// caps the ring's hue family at S0.45, so the ring's own
+    /// S0.75 cannot qualify at any lightness: this could not be a
+    /// darker or lighter `#588613`. At the ghost's S0.40 the
+    /// ring's hue clears the floor by one point (`#799D43`, 61)
+    /// where 150° gives 76. Chroma against separation, not
+    /// impossibility — pinned by
+    /// `DragPairSeparationTests.ringHueFamilyCannotSeparateAtChroma`,
+    /// which is the place to re-derive it. So the ghost no longer
+    /// matches the focus ring, deliberately: the ring has no
+    /// partner to separate from and keeps `#588613`.
+    /// Defaults mirrored in docs/lua-reference.md (drag colors)
+    /// — change both.
     public static let ghostDefault = DragVisual(
         enabled: true,
         border: true,
-        borderColor: "#588613",
+        borderColor: "#347957",
         borderWidth: 5,
         borderAlignment: .inside,
         fill: true,
-        fillColor: "#58861340"
+        fillColor: "#34795740"
     )
 
     /// Drop zone (drag target): a vivid, darkened amber — the
-    /// other established hue, kept far from the teal origin so the
-    /// two read apart. Darkened from the old #E8A33D for the same
+    /// other established hue, kept far from the emerald origin so
+    /// the two read apart, including under red-green vision loss
+    /// (#511). Darkened from the old #E8A33D for the same
     /// reason as the ring: legible over light window content.
     public static let dropZoneDefault = DragVisual(
         enabled: true,
