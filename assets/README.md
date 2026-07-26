@@ -12,7 +12,7 @@ an asset catalog — `swift build` on CI does not run actool).
 | `logo_wordmark.svg` | `Wordmark.png` (512 px) | Settings ▸ General ▸ About (light mode) |
 | `logo_wordmark_dark.svg` | `WordmarkDark.png` (512 px) | Settings ▸ General ▸ About (dark mode) |
 | `logo.svg` | `AppMark.png` (512 px) | Sidebar identity (**both** appearances) + runtime Dock icon (`NSApp.applicationIconImage`) while `.regular` |
-| `logo.svg` | — (reserved) | App-icon (`.icns`) master, once an `.app` bundle exists (#89) |
+| `logo.svg` | `AppIcon.icon/Assets/*.svg` | App icon — see [App icon](#app-icon-appiconicon) below (#89) |
 
 ## Website-only assets
 
@@ -103,3 +103,78 @@ Constraints on the masters (see `BrandAssets.swift`):
   by `colorScheme`. Both keep a **transparent background** so
   the mark melts into the pane. If you edit one, mirror the
   edit in the other.
+
+## App icon (`AppIcon.icon`)
+
+`AppIcon.icon` is an **Icon Composer document** (Xcode 26) — the
+macOS 26 unified app icon. It holds no artwork of its own: the
+two layer files under `Assets/` are *derived from* `logo.svg`,
+so the mark stays a single master here too.
+
+| Part | Owner | Edit it by |
+|---|---|---|
+| `Assets/seeds.svg` | generated | `scripts/build-icon-layers` |
+| `Assets/window.svg` | generated | `scripts/build-icon-layers` |
+| `icon.json` | hand-tuned | Icon Composer, or by hand |
+
+**Never hand-edit the two layer SVGs** — a change to the mark's
+shape is reapplied by re-running the generator. The generator
+never writes `icon.json`, so re-deriving the layers cannot
+clobber the tuning.
+
+```sh
+cd "$(git rev-parse --show-toplevel)"
+scripts/build-icon-layers
+```
+
+The generator splits `logo.svg`'s forest-ink compound path into
+its outer ring, twelve seeds and five window subpaths **by size,
+not by index** (so re-exporting the master from a vector editor,
+which reorders paths freely, cannot mis-sort them) and asserts
+those counts, failing loudly if the mark's shape changed.
+
+### Compiling it
+
+Needs Xcode's `actool`; `swift build` does not run it, which is
+why nothing here is wired into the build yet. One `.icon`
+produces **both** icon formats:
+
+```sh
+mkdir -p /tmp/appicon
+actool assets/AppIcon.icon --compile /tmp/appicon \
+    --platform macosx --minimum-deployment-target 14.0 \
+    --app-icon AppIcon \
+    --output-partial-info-plist /tmp/appicon/partial.plist
+```
+
+`Assets.car` carries the real renditions (up to 1024 px);
+`AppIcon.icns` is the legacy fallback. The bundle's `Info.plist`
+needs both keys actool reports — `CFBundleIconName` (`Assets.car`)
+and `CFBundleIconFile` (the `.icns`). Wiring that into a real
+`.app` is the open remainder of #89.
+
+### Decisions baked into `icon.json`
+
+- **The mark's outer ring is dropped.** On macOS 26 the squircle
+  *is* the container; keeping the ring nests one container inside
+  another and reads pre-Big-Sur. The generator discards it.
+- **`glass` is `false` on both layers, deliberately.** The
+  Liquid Glass specular smears into visible speckle along the
+  window glyph's thin `#d7e9ba` outline — obvious at 1:1. The
+  background fill still gets its material sheen and the group
+  shadows still give depth. Do not switch it back on without
+  re-rendering and looking at the outline.
+- **The fill is the mark's own flesh greens**, `#a5cb5a` →
+  `#89b34e`. `icon.json` takes no hex, so they are written as
+  `srgb:` floats. Icon Composer's material *lightens* whatever
+  fill it is given, which is why the endpoints are the literal
+  brand hexes rather than pre-darkened ones: the rendered
+  midtone then lands on the brand green. Use `srgb:`, not
+  `display-p3:` — the same numbers read as a more saturated
+  colour in P3.
+- **`translucency` is off.** At 0.5 it halves the artwork and
+  washes the glyph out against the fill.
+- The compiled `.icns` tops out at **256 px** (`ic04` `ic07`
+  `ic11` `ic13`). That is the exact set Apple's own macOS 26
+  apps ship — Notes, Reminders and Icon Composer all match it —
+  not a truncation to fix. The large sizes live in `Assets.car`.

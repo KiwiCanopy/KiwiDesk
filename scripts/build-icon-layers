@@ -1,0 +1,197 @@
+#!/usr/bin/env python3
+"""Re-derive the app icon's layer art from assets/logo.svg (#89).
+
+`assets/AppIcon.icon` is an Icon Composer document. Its two layer
+files are *derived* from the mark master, not hand-drawn — so a
+change to `logo.svg`'s shape is reapplied by re-running this, not
+by editing the layers. That keeps the README's "logo.svg is the
+single mark master, do not add a second copy" rule true for the
+app icon too (the OG banner kept a retired teal shell through a
+whole rebrand precisely because its copy was hand-maintained).
+
+What it does NOT touch: `icon.json`. The fill, shadow, glass and
+translucency there are hand-tuned in Icon Composer and carry no
+geometry, so regenerating layers never clobbers that tuning.
+
+The mark's forest-ink (`#12251a`) is one compound path holding
+the outer ring, the twelve seeds and the five window subpaths.
+They are told apart by size, not by index, so re-exporting
+`logo.svg` from a vector editor (which reorders paths freely)
+does not silently mis-sort them. The expected counts are then
+asserted: a shape change that adds or drops a subpath fails here
+loudly instead of shipping a wrong icon.
+
+The outer ring is deliberately dropped — on macOS 26 the
+squircle *is* the container, and keeping the ring would nest one
+container inside another.
+"""
+
+import re
+import sys
+from pathlib import Path
+
+INK = "#12251a"          # mark shell ink: ring + seeds + window
+OUTLINE = "#d7e9ba"      # the window glyph's inner outline
+N_RING, N_WINDOW, N_SEEDS = 2, 5, 12
+
+NUM = re.compile(r"[-+]?(?:\d*\.\d+|\d+)(?:[eE][-+]?\d+)?")
+CMD = re.compile(r"([MmZzLlHhVvCcSsQqTtAa])")
+ARGC = dict(M=2, L=2, H=1, V=1, C=6, S=4, Q=4, T=2, A=7, Z=0)
+
+
+def tokens(d):
+    """Yield (command, args) with implicit repeats expanded."""
+    parts = CMD.split(d)
+    for i in range(1, len(parts), 2):
+        cmd = parts[i]
+        nums = [float(x) for x in NUM.findall(parts[i + 1])]
+        n = ARGC[cmd.upper()]
+        if n == 0:
+            yield cmd, []
+            continue
+        for k in range(0, len(nums) - n + 1, n):
+            # a repeated moveto is an implicit lineto
+            c = cmd
+            if k and cmd in "Mm":
+                c = "L" if cmd == "M" else "l"
+            yield c, nums[k:k + n]
+
+
+def subpaths(d):
+    """Split `d` into absolute-start subpaths with their bboxes.
+
+    Each subpath keeps its original commands and winding
+    direction, so a subset re-joined into one `d` still renders
+    its holes under the default nonzero fill rule.
+    """
+    cur = [0.0, 0.0]
+    start = [0.0, 0.0]
+    out, buf, pts = [], [], []
+
+    def flush():
+        if not buf:
+            return
+        xs = [p[0] for p in pts]
+        ys = [p[1] for p in pts]
+        out.append((" ".join(buf),
+                    (min(xs), min(ys), max(xs), max(ys))))
+
+    for cmd, a in tokens(d):
+        up, rel = cmd.upper(), cmd.islower()
+        if up == "M":
+            flush()
+            buf, pts = [], []
+            x, y = (cur[0] + a[0], cur[1] + a[1]) if rel else a
+            cur, start = [x, y], [x, y]
+            buf.append("M%.3f,%.3f" % (x, y))
+            pts.append((x, y))
+            continue
+        if up == "Z":
+            buf.append("Z")
+            cur = start[:]
+            continue
+        buf.append(cmd + ",".join("%.3f" % v for v in a))
+        if up == "H":
+            cur[0] = cur[0] + a[0] if rel else a[0]
+        elif up == "V":
+            cur[1] = cur[1] + a[0] if rel else a[0]
+        elif up == "A":
+            cur = ([cur[0] + a[5], cur[1] + a[6]] if rel
+                   else [a[5], a[6]])
+        else:
+            dx, dy = a[-2], a[-1]
+            base = (cur[0], cur[1])
+            cur = [base[0] + dx, base[1] + dy] if rel else [dx, dy]
+            for k in range(0, len(a) - 2, 2):
+                pts.append((base[0] + a[k], base[1] + a[k + 1])
+                           if rel else (a[k], a[k + 1]))
+        pts.append(tuple(cur))
+    flush()
+    return out
+
+
+def classify(subs, w, h):
+    """Sort subpaths into ring / window / seeds by size alone.
+
+    The ring spans the whole artboard; the five window subpaths
+    are all wider than 15% of it; every seed is far narrower.
+    The gap between the narrowest window part and the widest
+    seed is roughly 4x, so the threshold is not delicate.
+    """
+    ring, window, seeds = [], [], []
+    for d, (x0, y0, x1, y1) in subs:
+        bw, bh = x1 - x0, y1 - y0
+        if bw > 0.9 * w and bh > 0.9 * h:
+            ring.append((d, (x0, y0, x1, y1)))
+        elif bw > 0.15 * w:
+            window.append((d, (x0, y0, x1, y1)))
+        else:
+            seeds.append((d, (x0, y0, x1, y1)))
+    return ring, window, seeds
+
+
+def main():
+    root = Path(__file__).resolve().parent.parent
+    master = root / "assets" / "logo.svg"
+    dest = root / "assets" / "AppIcon.icon" / "Assets"
+    src = master.read_text()
+
+    vb = re.search(r'viewBox="([^"]+)"', src).group(1).split()
+    w, h = float(vb[2]), float(vb[3])
+
+    paths = re.findall(r"<path[^>]*?/>", src)
+    def pick(color):
+        hit = [p for p in paths if color in p]
+        if len(hit) != 1:
+            sys.exit(f"expected one {color} path, found {len(hit)}"
+                     f" — has {master.name} been restructured?")
+        return re.search(r'\bd="([^"]*)"', hit[0]).group(1)
+
+    ring, window, seeds = classify(subpaths(pick(INK)), w, h)
+    got = (len(ring), len(window), len(seeds))
+    if got != (N_RING, N_WINDOW, N_SEEDS):
+        sys.exit(
+            f"{master.name} split into ring/window/seeds {got}, "
+            f"expected {(N_RING, N_WINDOW, N_SEEDS)}. The mark's "
+            "shape changed — eyeball the new split, then update "
+            "the counts at the top of this script.")
+
+    # Square the canvas on the *content* (ring excluded), so both
+    # layers share one viewBox and stay registered under Icon
+    # Composer's per-layer scale.
+    boxes = [b for _, b in window + seeds]
+    x0 = min(b[0] for b in boxes)
+    y0 = min(b[1] for b in boxes)
+    x1 = max(b[2] for b in boxes)
+    y1 = max(b[3] for b in boxes)
+    side = max(w, h)
+    ox = (x0 + x1) / 2 - side / 2
+    oy = (y0 + y1) / 2 - side / 2
+    head = ('<svg xmlns="http://www.w3.org/2000/svg" '
+            'viewBox="%.2f %.2f %.0f %.0f" '
+            'width="%.0f" height="%.0f">'
+            % (ox, oy, side, side, side, side))
+
+    def write(name, body):
+        (dest / name).write_text(head + body + "</svg>\n")
+
+    write("seeds.svg",
+          '<path fill="%s" d="%s"/>'
+          % (INK, " ".join(d for d, _ in seeds)))
+    # The window's subpaths stay in ONE path element, in source
+    # order: split apart, nonzero winding floods the frame and
+    # panels solid and the glyph turns into a filled rectangle.
+    write("window.svg",
+          '<path fill="%s" d="%s"/><path fill="%s" d="%s"/>'
+          % (INK, " ".join(d for d, _ in window),
+             OUTLINE, pick(OUTLINE)))
+
+    print(f"seeds.svg   {len(seeds)} subpaths")
+    print(f"window.svg  {len(window)} subpaths + outline")
+    print(f"viewBox     {ox:.2f} {oy:.2f} {side:.0f} {side:.0f}")
+    print(f"dropped     {len(ring)} ring subpaths (squircle "
+          "replaces the ring)")
+
+
+if __name__ == "__main__":
+    main()
