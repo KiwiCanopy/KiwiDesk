@@ -3,8 +3,7 @@ import KiwiDeskCore
 
 /// The catalog backing the keybindings tab: navigation presets
 /// and installed applications. Known macOS shortcuts used for
-/// conflict detection live in Core's `SystemShortcuts`
-/// (05_GUI_Concept §2, Tab 5).
+/// conflict detection live in Core's `SystemShortcuts`.
 enum KeybindingCatalog {
     // dir is the Lua argument; phrase is the positional English
     // wording used in the canonical `label` ("above"/"below"

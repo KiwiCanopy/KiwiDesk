@@ -20,11 +20,11 @@ extension JSONValue {
     }
 }
 
-/// Registers the KiwiDesk Lua API (see 04_API_Contract).
+/// Registers the KiwiDesk Lua API.
 ///
 /// Main commands live on the global `KiwiDesk` table; layout
 /// sub-APIs live on `stack`, `bsp`, `scroll`, and `grid`
-/// tables, matching the contract examples verbatim.
+/// tables.
 extension KiwiCore {
     func registerLuaAPI(on lua: LuaInterpreter) {
         for entry in APIReference.commands {
@@ -64,8 +64,7 @@ extension KiwiCore {
         }
     }
 
-    /// `KiwiDesk.bind`, `define_mode`, and `switch_mode`
-    /// (04_API_Contract §8).
+    /// `KiwiDesk.bind`, `define_mode`, and `switch_mode`.
     private func registerKeybindingAPI(
         on lua: LuaInterpreter
     ) {

@@ -2,7 +2,7 @@ import AppKit
 import Foundation
 
 /// Command execution: the single entry point shared by the
-/// Lua API, the CLI, and the IPC socket (see 04_API_Contract).
+/// Lua API, the CLI, and the IPC socket.
 extension KiwiCore {
     @discardableResult
     public func execute(

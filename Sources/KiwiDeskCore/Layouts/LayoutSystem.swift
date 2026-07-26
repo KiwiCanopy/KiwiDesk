@@ -3,7 +3,7 @@ import Foundation
 
 /// A layout algorithm: a pure function from a flat window array
 /// to per-window geometry. No trees, no containers — this is the
-/// core KiwiDesk idea (see 01_Manifest).
+/// core KiwiDesk idea.
 public protocol LayoutSystem: Sendable {
     /// Calculates frames for tiled windows inside the context's
     /// bounds. Windows not present in the result keep their

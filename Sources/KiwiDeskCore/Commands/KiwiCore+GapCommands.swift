@@ -2,7 +2,7 @@ import CoreGraphics
 import Foundation
 
 /// Gap and minimum-size setters. Both accept the values the
-/// GUI's Layouts & Gaps tab produces (see 05_GUI_Concept §3).
+/// GUI's Layouts & Gaps tab produces.
 extension KiwiCore {
     func setGaps(
         _ command: String,

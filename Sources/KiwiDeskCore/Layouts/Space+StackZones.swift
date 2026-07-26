@@ -1,4 +1,4 @@
-// MARK: - Stack zone array operations (see 03_Layout_Engine)
+// MARK: - Stack zone array operations
 
 extension Space {
     /// Moves a stack-zone window into the master zone by

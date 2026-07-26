@@ -3,7 +3,7 @@ import Foundation
 /// launchd service control (`KiwiDesk service start|stop|
 /// restart`). Writes a LaunchAgent referencing the installed
 /// binary and drives it via `launchctl bootstrap`/`bootout` —
-/// no Homebrew services dependency (see 04_API_Contract §10).
+/// no Homebrew services dependency.
 public enum ServiceManager {
     public static let label = "org.kiwidesk.KiwiDesk"
 

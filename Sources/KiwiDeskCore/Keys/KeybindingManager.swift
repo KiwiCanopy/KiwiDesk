@@ -14,7 +14,7 @@ public protocol HotkeyRegistrar: AnyObject {
 
 extension CarbonHotkeyCenter: HotkeyRegistrar {}
 
-/// Modal keybindings (04_API_Contract §8): named modes hold
+/// Modal keybindings: named modes hold
 /// their own bindings; exactly one mode is active. The default
 /// mode holds `KiwiDesk.bind(...)` registrations.
 @MainActor
