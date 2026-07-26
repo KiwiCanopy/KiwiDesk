@@ -32,11 +32,28 @@ import Testing
 /// exactly that wrap hiding a call). Its two non-call sites, the
 /// declaration and the seam, are allowlisted below.
 ///
-/// Same two open failure modes as the sibling, and neither is
-/// benign: a call reached through a new helper inside an
-/// allowlisted file is invisible, and `SourceScan.stripComments`
-/// cuts at the first `//`, so a `//` inside a string literal
-/// preceding a call on that line would erase it.
+/// Four open failure modes, none benign:
+///
+/// 1. A call reached through a new helper inside an allowlisted
+///    file is invisible. Note the per-file count pins *addition*,
+///    not *substitution*: swap the exempt call for
+///    `layoutBounds(on:)` while adding one raw call for a span
+///    helper and the count is unchanged and this stays green.
+/// 2. `SourceScan.stripComments` cuts at the first `//`, so a
+///    `//` inside a string literal preceding a call on that line
+///    would erase it.
+/// 3. **The two guards do not compose over each other's
+///    allowlists.** A file exempted by `VisibleBoundsRoutingTests`
+///    reaches `axVisibleFrame` directly and therefore names
+///    `visibleBounds` zero times, so a span measured inside one of
+///    those files is invisible to BOTH nets. That is the most
+///    likely of the four, because those files already hold real
+///    geometry (parking, bar strips, float re-anchor).
+/// 4. Neither guard sees a bounds source that is neither symbol —
+///    `NSScreen.visibleFrame`, a hand-built `CGRect`, a slot rect.
+///    This asks "who may name `visibleBounds`", never "every span
+///    consumer names `layoutBounds`"; a lens cannot ask the
+///    latter.
 @Suite("Layout-bounds routing")
 struct LayoutBoundsRoutingTests {
     private var coreRoot: URL {
@@ -59,10 +76,17 @@ struct LayoutBoundsRoutingTests {
         // The `layoutBounds(on:)` seam — the one legitimate
         // consumer, and what every span reads through.
         "Tiling/TilingEngine+Layout.swift": 1,
-        // A float nudge moves a window that does NOT participate
-        // in the layout, so it may cross the strip: its bound is
-        // the display, and reserving the region would trap floats
-        // out of it.
+        // A float nudge measures NO span: it is a capped 24 pt
+        // direction vector plus a `confine`, with no
+        // delta-over-span and no midpoint classification, so the
+        // arithmetic this guard protects does not occur there.
+        // Nor may it reserve the strip itself — float geometry
+        // follows PAINTED chrome, and `SpaceBarManager.sync`
+        // drops an empty bar while `layoutBounds` still reserves
+        // its strip, so routing would confine a float out of a
+        // region no bar occupies. The authoritative bar clamp
+        // (`floatFrameClampedClearOfBars`, #242) runs on the very
+        // next statement and owns that edge.
         "App/KiwiCore+FloatNudge.swift": 1,
     ]
 

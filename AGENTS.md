@@ -369,8 +369,11 @@ Keep this list updated whenever a recurring mistake is found.
   display satisfies the first guard and is still the bug, which
   is why there are two: `LayoutBoundsRoutingTests` is the
   second, and **its `allowed` map is that exemption list.** The
-  exception is anything outside the layout: a float nudge may
-  legitimately cross the strip, so its bound is the display.
+  exception is a rect used as a *containment box* for a window
+  the layout does not place — no span to divide, no midpoint to
+  classify against, and its relationship to a bar owned by the
+  painted-strip clamp (#242) instead. Do not restate which
+  files those are here; the `allowed` map is the one copy.
   It pins **size, not topology**: which screen a space lands on
   still comes from `NSScreen` through the static `screen(…)`
   resolvers, so a fixture can shrink its display but not

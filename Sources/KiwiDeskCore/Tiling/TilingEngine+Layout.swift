@@ -17,6 +17,15 @@ extension TilingEngine {
     /// Not a *second* bounds hook: the display size still enters
     /// through `visibleBounds` alone (#531). This only reserves
     /// the strip on top of it, which is why the seam is one line.
+    ///
+    /// It is the region **before outer gaps**, while the layouts
+    /// divide `area` = region minus those gaps
+    /// (`LayoutSystem`). That is deliberate for a cap's
+    /// `available:` — a superset must never block reaching the
+    /// visible bound — but it does leave a `delta / span`
+    /// division, and the scrolling seed, off by the outer gap.
+    /// Much smaller than the strip this fixed, and not a
+    /// licence to assume the seam is exact.
     func layoutBounds(on screen: NSScreen) -> CGRect {
         settings.layoutBounds(from: visibleBounds(screen))
     }

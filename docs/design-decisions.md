@@ -462,12 +462,16 @@ by the strip, and the scrolling slot *stored* points measured
 against a length no layout ever used. The distinction is not a
 second display hook: size still enters through
 `visibleBounds` alone (#531), and this reserves the strip on
-top of it. **The deliberate exception is anything that does
-not participate in the layout:** a float nudge bounds a
-window that may legitimately cross the strip, so its span is
-the display (`KiwiCore+FloatNudge`). Enforcement is
-`LayoutBoundsRoutingTests`, whose allowlist is the exemption
-list.
+top of it. **The deliberate exception is a rect used as a
+containment box for a window the layout does not place** —
+there is no span to divide and no midpoint to classify
+against, and such a window's relationship to a bar is owned
+by the painted-strip clamp instead (#242), which is
+authoritative because it reads the bars actually drawn rather
+than the strips config would reserve. Which files that
+covers, and why each qualifies, is the allowlist in
+`LayoutBoundsRoutingTests` — the exemption list, and the only
+copy of it.
 
 **Interactive resizes are session-scoped per space; the config
 layers never move underneath them (#458).** Before, a resize on

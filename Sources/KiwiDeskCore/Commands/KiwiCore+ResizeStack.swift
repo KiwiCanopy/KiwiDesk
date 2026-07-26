@@ -42,9 +42,10 @@ extension KiwiCore {
                         ? master.contains(focused) : nil
                 } ?? true
             let sign: Double = inMaster ? 1 : -1
-            // Interactive writes cap at the display's effective
-            // range (#44) — past it the layout clamps and the
-            // stored value would only ratchet invisibly.
+            // Interactive writes cap at the layout region's
+            // effective range (#44, region since #537) — past it
+            // the layout clamps and the stored value would only
+            // ratchet invisibly.
             let value = SplitDomain.cappedRatioWrite(
                 stack.masterRatio + sign * delta / span,
                 base: stack.masterRatio,

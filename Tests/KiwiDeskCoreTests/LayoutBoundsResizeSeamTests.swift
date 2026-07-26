@@ -141,9 +141,13 @@ struct LayoutBoundsResizeSeamTests {
             Issue.record("no space 1")
             return
         }
-        let size = core.tiler.settings
-            .resolvedScrolling(for: space).slotSize
-        #expect(size == .points(810))
+        let scrolling = core.tiler.settings
+            .resolvedScrolling(for: space)
+        // Pin the default this arithmetic reasons from: a
+        // vertical axis would measure the (bar-unaffected)
+        // height and red this test for an unrelated reason.
+        #expect(scrolling.axisIsHorizontal)
+        #expect(scrolling.slotSize == .points(810))
     }
 
     @Test("A finished mouse resize divides by the region")

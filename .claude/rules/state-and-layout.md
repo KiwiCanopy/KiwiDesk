@@ -34,8 +34,10 @@ See AGENTS.md §1 and §5 for full rationale. When editing here:
   passes the guard above and is still the bug —
   `LayoutBoundsRoutingTests` is the second net, and its
   `allowed` map is likewise the exemption list. The exception is
-  anything that does not participate in the layout (the float
-  nudge), whose bound is the display.
+  a rect used as a *containment box* for a window the layout does
+  not place: no span, no midpoint, and the painted-strip clamp
+  (#242) owns its relationship to a bar. Which files qualify
+  lives in that map, not here.
 - Space identifiers are **strings** and case-sensitive; numeric
   strings and integers are equivalent (`"1"` == `1`).
 

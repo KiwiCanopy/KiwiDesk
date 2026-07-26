@@ -116,9 +116,10 @@ extension KiwiCore {
             let base =
                 tiler.settings.resolvedBsp(for: space)
                 .splitRatioH
-            // Cap at the display's effective range (#383): no
-            // invisible ratchet past the min-size cliff, matching
-            // the keyboard path and the stack drag (#44).
+            // Cap at the layout region's effective range (#383):
+            // no invisible ratchet past the min-size cliff,
+            // matching the keyboard path and the stack drag (#44).
+            // `bounds` is the region, not the display (#537).
             let value = SplitDomain.cappedRatioWrite(
                 base + Double(delta),
                 base: base,

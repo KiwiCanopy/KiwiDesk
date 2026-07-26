@@ -3377,14 +3377,16 @@ callers never hear it, they read the error JSON. What the
   splits still share the one ratio; with no focused window the
   delta moves the left/top region, as before. Like the stack,
   the write stops at the bound that keeps both regions at
-  `min_window_size` on the current display (#383), so a resize
-  no longer suddenly collapses the split into an overlap pile.
+  `min_window_size` within the area the layout fills (#383) —
+  the display minus any Space Bar strip — so a resize no longer
+  suddenly collapses the split into an overlap pile.
 - **stack** — focus-aware (#67). `"x"` moves the master/stack
   split *in the direction that grows the focused window*: with
   a master focused, a positive delta raises the master ratio;
   with a stack window focused, it lowers the ratio (the column
   grows). The write stops at the bound that keeps both zones
-  at `min_window_size` on the current display (#44). `"y"`
+  at `min_window_size` within the area the layout fills (#44).
+  `"y"`
   grows or shrinks the focused window's vertical
   share of its column via per-window weights — session-scoped,
   never saved to a profile, and reset when a window leaves the

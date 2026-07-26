@@ -22,12 +22,14 @@ extension KiwiCore {
         let signed =
             bspFocusSign(axis: axis, space: space)
             * delta
-        // Cap the write at the display's effective range (#383):
-        // past it the layout clamps anyway and the stored value
-        // would only ratchet invisibly, exactly like the stack
-        // path (#44). Span is the raw screen extent (a superset of
-        // the gap-adjusted range) so the cap never blocks reaching
-        // the visible bound.
+        // Cap the write at the layout region's effective range
+        // (#383): past it the layout clamps anyway and the stored
+        // value would only ratchet invisibly, exactly like the
+        // stack path (#44). Span is the region before outer gaps
+        // (#537) — still a superset of the gap-adjusted range the
+        // layout divides, so the cap never blocks reaching the
+        // visible bound, but no longer a superset by the Space
+        // Bar's whole strip, which let the ratchet back in.
         let minSize = Double(tiler.settings.minWindowSize)
         if axis == "x" {
             let value = SplitDomain.cappedRatioWrite(
