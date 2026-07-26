@@ -370,14 +370,94 @@
   text-align: center;
 }
 
-/* What the bridge leads to — one line, set below the CTA so the
-   Terminal step is never a surprise on the other side. */
-.learn-install__preview {
+/* Plain-language lead-in. Spells out how to reach Terminal at
+   all — this audience may never have opened it. */
+.learn-install__lead {
   margin: 0;
-  font-size: 0.88rem;
-  line-height: 1.5;
+  font-size: 0.95rem;
+  line-height: 1.6;
   color: var(--text-dim);
-  max-width: 34ch;
+  max-width: 46ch;
+}
+
+/* The command block. Wider than the prose column's measure would
+   allow, and scrollable rather than wrapped — a wrapped shell
+   command invites a mis-paste. */
+.learn-install__code {
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+}
+
+/* Undo the inline-chip treatment above. `.learn code` styles the
+   little tinted chips in prose, and it also matches the <code>
+   inside a terminal block — which painted a chip background over
+   the dark terminal and, worse, set `color: var(--text)`, i.e.
+   near-black ink on the near-black terminal (#122519 on #14231a,
+   invisible). The landing never hit this because it has no
+   equivalent prose-chip rule. Hand the block back to `.code pre`. */
+.learn .code pre code {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+  white-space: pre;
+}
+
+/* Who the tap belongs to. Faint, but above the fold of the
+   block — it answers "is this safe to paste" at the moment the
+   question occurs. */
+.learn-install__source {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-faint);
+  max-width: 40ch;
+}
+
+/* "Don't have Homebrew yet?" — collapsed, because most readers
+   either have it or do not know what it is; neither should have
+   to step around it. */
+.learn-install__alt {
+  width: 100%;
+  text-align: left;
+}
+
+.learn-install__alt > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  font-size: 0.88rem;
+  color: var(--text-dim);
+  list-style: none;
+  padding: 0.25rem 0;
+}
+
+.learn-install__alt > summary::-webkit-details-marker {
+  display: none;
+}
+
+.learn-install__alt > summary:hover {
+  color: var(--text);
+}
+
+.learn-install__alt-chevron {
+  flex: 0 0 auto;
+  transition: transform 0.2s ease;
+}
+
+.learn-install__alt[open] .learn-install__alt-chevron {
+  transform: rotate(90deg);
+}
+
+.learn-install__alt p {
+  margin: 0.5rem 0 0.75rem;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--text-dim);
 }
 
 /* The App Store promise. Deliberately plain text at the faintest

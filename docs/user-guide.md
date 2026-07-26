@@ -1456,7 +1456,7 @@ per screen, and the `⌃⌥N` space shortcuts extend to cover the new
 spaces (up to ten — the number row's limit). The ladder is saved as
 an ordinary, editable profile named **Starter**, so nothing here is
 locked in: change any space's mode, delete spaces, or apply a
-different [preset](#presets) whenever you like. (The same ladder is
+different [preset](#built-in-standards--presets) whenever you like. (The same ladder is
 always available as the **Starter** preset if you want it back.)
 
 ### Default Shortcuts

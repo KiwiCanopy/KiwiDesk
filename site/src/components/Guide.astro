@@ -58,6 +58,17 @@ const repo = "https://github.com/KiwiCanopy/KiwiDesk";
 const kofi = "https://ko-fi.com/kiwicanopy";
 const makerProfile = "https://github.com/hajiboy95";
 
+// The install command. Landing.astro holds its own copy for the
+// Nerd quickstart — two surfaces, two literals. A fully-qualified
+// tap token stays valid forever (including after any homebrew-cask
+// acceptance), so a missed copy degrades to "one page shows the
+// long form", never to a broken command.
+const installCmd = "brew install --cask kiwicanopy/tap/kiwidesk";
+// Homebrew's own installer, for the "don't have brew yet?" case.
+const brewCmd =
+  '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com' +
+  '/Homebrew/install/HEAD/install.sh)"';
+
 // The table of contents — drives both the desktop rail and the
 // mobile dropdown. Order matches the sections below. `id` is the
 // anchor (never translated); `label` is localized copy.
@@ -459,31 +470,95 @@ const jsonLd = [
               </div>
               <p>{s.guide_gs_p1}</p>
 
-              <!-- Install status card. This deliberately carries
-                   NO App Store badge and NO shell command. The
-                   badge went because a dimmed or ribboned Apple
-                   badge still reads as "tap = the store opens" and
-                   so reads broken, not forthcoming — that is a
-                   different failure from §2.7's grey-don't-hide,
-                   which covers a control with no effect in the
-                   CURRENT mode, not a channel that does not exist
-                   yet. The command went because this is the
-                   friendly surface; one bridge leads to it on the
-                   landing (the #326 shape), rather than an in-place
-                   reveal that would put Terminal syntax here. -->
+              <!-- Install block. No App Store badge: a dimmed or
+                   ribboned Apple badge still reads "tap = the store
+                   opens", so it reads broken rather than
+                   forthcoming — a different failure from §2.7's
+                   grey-don't-hide, which covers a control inert in
+                   the CURRENT mode, not a channel that does not
+                   exist yet.
+                   The command itself IS here, deliberately. It used
+                   to be a bridge to the landing's Nerd-mode
+                   quickstart, on the reading that a friendly
+                   surface must never show shell text. That was
+                   backwards: the copy promises "one line, ready to
+                   copy" and then a cross-page jump into a mode
+                   labelled Nerd withheld it — neither sparing the
+                   reader the Terminal nor giving it to them. §2.7
+                   keeps *configuration depth* optional (Lua,
+                   profiles, overrides); it does not mean a first
+                   run must never show one copy-paste line. So the
+                   newcomer path no longer depends on the mode
+                   system at all. -->
               <div class="learn-install">
                 <span class="pill">
                   <span class="pill__dot" aria-hidden="true"></span>
                   {s.beta_badge}
                 </span>
-                <a class="btn btn--primary"
-                  href={`${homeHref}#start`}>
-                  {s.guide_gs_install_cta}
-                  <Icon name="lucide:arrow-right" width={16}
-                    height={16} aria-hidden="true" />
-                </a>
-                <p class="learn-install__preview"
-                  >{s.guide_gs_install_preview}</p>
+                <p class="learn-install__lead"
+                  >{s.guide_gs_install_lead}</p>
+
+                <div class="code learn-install__code"
+                  aria-label={s.guide_gs_install_code_aria}>
+                  <div class="code__bar">
+                    <span class="code__dot" aria-hidden="true"></span>
+                    <span class="code__dot" aria-hidden="true"></span>
+                    <span class="code__dot" aria-hidden="true"></span>
+                    <span class="code__title"
+                      >{s.guide_gs_install_bar}</span>
+                    <button class="code__copy" type="button"
+                      data-copy={installCmd}
+                      data-label-copy={s.guide_gs_install_copy}
+                      data-label-done={s.guide_gs_install_copied}
+                      aria-label={s.guide_gs_install_copy_aria}>
+                      <Icon name="lucide:copy" class="code__copy-icon"
+                        width={15} height={15} aria-hidden="true" />
+                      <span class="code__copy-label"
+                        >{s.guide_gs_install_copy}</span>
+                    </button>
+                  </div>
+                  <pre><code>{installCmd}</code></pre>
+                </div>
+
+                <!-- Names the tap. A slash-qualified token does
+                     not look like the plain one-word install most
+                     people have seen, and the unspoken question is
+                     whether the source is trustworthy. -->
+                <p class="learn-install__source"
+                  >{s.guide_gs_install_source}</p>
+
+                <details class="learn-install__alt">
+                  <summary>
+                    <Icon name="lucide:chevron-right"
+                      class="learn-install__alt-chevron" width={15}
+                      height={15} aria-hidden="true" />
+                    {s.guide_gs_brew_summary}
+                  </summary>
+                  <p>{s.guide_gs_brew_body}</p>
+                  <div class="code learn-install__code"
+                    aria-label={s.guide_gs_brew_code_aria}>
+                    <div class="code__bar">
+                      <span class="code__dot" aria-hidden="true"></span>
+                      <span class="code__dot" aria-hidden="true"></span>
+                      <span class="code__dot" aria-hidden="true"></span>
+                      <span class="code__title"
+                        >{s.guide_gs_install_bar}</span>
+                      <button class="code__copy" type="button"
+                        data-copy={brewCmd}
+                        data-label-copy={s.guide_gs_install_copy}
+                        data-label-done={s.guide_gs_install_copied}
+                        aria-label={s.guide_gs_brew_copy_aria}>
+                        <Icon name="lucide:copy"
+                          class="code__copy-icon" width={15}
+                          height={15} aria-hidden="true" />
+                        <span class="code__copy-label"
+                          >{s.guide_gs_install_copy}</span>
+                      </button>
+                    </div>
+                    <pre><code>{brewCmd}</code></pre>
+                  </div>
+                </details>
+
                 <!-- A promise, not a control: plain text, never
                      styled as something tappable. -->
                 <p class="learn-install__later"
@@ -669,13 +744,13 @@ const jsonLd = [
               <div class="learn-close">
                 <h2>{s.guide_close_title}</h2>
                 <p>{s.guide_close_p}</p>
-                <!-- Was `#getting-started`, an id the landing has
-                     never had — a dead jump that left the visitor
-                     at the top of the home page. Points at the
-                     install bridge now, same target as the
-                     getting-started card above. -->
-                <a class="btn btn--primary"
-                  href={`${homeHref}#start`}>
+                <!-- Points back up to THIS page's install block.
+                     It used to be `${homeHref}#getting-started` —
+                     an id the landing has never had, so the jump
+                     died at the top of the home page. Now that the
+                     command lives here, the closing CTA has no
+                     reason to leave the guide at all. -->
+                <a class="btn btn--primary" href="#getting-started">
                   {s.guide_close_cta}
                   <Icon name="lucide:arrow-right" width={16} height={16}
                     aria-hidden="true" />
@@ -833,6 +908,33 @@ const jsonLd = [
             tocMobile.open = false;
           });
         });
+
+      // ---- Copy buttons on the install blocks ----
+      // Same behavior as the landing's: swap the label to "Copied"
+      // for a moment, then restore it. Bound per button so the
+      // install command and the Homebrew installer each work.
+      // A silent failure is fine — the command is visible and
+      // selectable either way, so a blocked clipboard costs
+      // nothing but the shortcut.
+      document.querySelectorAll(".code__copy").forEach((copyBtn) => {
+        const copyLabel = copyBtn.querySelector(".code__copy-label");
+        copyBtn.addEventListener("click", async () => {
+          const text = copyBtn.getAttribute("data-copy") || "";
+          const idle = copyBtn.getAttribute("data-label-copy") || "";
+          const done = copyBtn.getAttribute("data-label-done") || "";
+          try {
+            await navigator.clipboard.writeText(text);
+            copyBtn.classList.add("is-copied");
+            if (copyLabel) copyLabel.textContent = done;
+            setTimeout(() => {
+              copyBtn.classList.remove("is-copied");
+              if (copyLabel) copyLabel.textContent = idle;
+            }, 1600);
+          } catch (e) {
+            /* clipboard blocked — no-op */
+          }
+        });
+      });
     </script>
   </body>
 </html>

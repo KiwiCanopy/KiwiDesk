@@ -132,7 +132,13 @@ at directory altitude — see **`docs/architecture.md`**.
    a separate "toggles" block (colors, which gate nothing, may
    group by type for grid scannability); **grey, don't hide** a
    control with no effect in the current mode (#171), keeping the
-   disabled control visible and dimmed; **the live preview leads**
+   disabled control visible and dimmed — this covers a control
+   that *would* work in another mode, so dimming says "switch that
+   on and I act"; an affordance for a channel that does not exist
+   yet is **removed outright**, because dimming cannot revoke the
+   promise its shape makes and it reads broken instead of
+   forthcoming (the site's App Store badge, retired for the
+   Homebrew beta rather than greyed); **the live preview leads**
    its editor; **defer per-control "why" to contextual help**
    (the planned `?` affordance, #94) rather than bloating labels or
    captions with glosses that would later duplicate it. A caption's
