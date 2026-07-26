@@ -11,18 +11,34 @@ import SwiftUI
 /// (tab switch) — the app-wide disclosure precedent.
 struct SpaceBarColorsGroup: View {
     @ObservedObject var model: SettingsModel
+    /// Whether the bar is off, and the explanation to show while
+    /// it is. Taken as parameters rather than letting the caller
+    /// wrap this whole view in a `GreyOut`: the gate has to reach
+    /// the disclosure's *content* and skip its label, because a
+    /// disabled `DisclosureGroup` refuses to toggle in either
+    /// direction (owner-confirmed, #527) — wrapping it from
+    /// outside strands the drawer and hides the colors it holds.
+    var gatedOff: Bool = false
+    var gateHelp: String = ""
     @State private var advancedColorsExpanded = false
 
     private var style: Binding<SpaceBarStyle> {
         $model.config.settings.spaceBarStyle
     }
 
+    private var gate: GreyOut {
+        GreyOut(active: gatedOff, help: gateHelp)
+    }
+
     var body: some View {
         copyAppearance
+            .modifier(gate)
         accentLadder
+            .modifier(gate)
         DisclosureGroup(isExpanded: $advancedColorsExpanded) {
             AppBarColorGrid { advancedColors }
                 .padding(.top, 8)
+                .modifier(gate)
         } label: {
             Text(
                 L("bars.advanced_colors", "Advanced colors")

@@ -714,6 +714,20 @@ written down:
   the block above it lands at `0.25` and reads as broken rather
   than disabled. Write the inner predicate as
   `blockIsOn && ownRule`.
+- **Never gate a `DisclosureGroup` — gate its content.** A
+  disabled disclosure refuses to toggle in **either** direction
+  (owner-confirmed on device, #527): shut, it will not open, so
+  the values inside are as hidden as if the rows had been
+  removed — the one outcome greying exists to prevent; open, it
+  will not close, so the user is stranded in a wall of dimmed
+  controls. Put the `GreyOut` on the drawer's content and leave
+  the label live. That also means a block gate must not wrap a
+  section that *contains* a disclosure: push it down to the
+  siblings, or pass the gate into the child view
+  (`SpaceBarColorsGroup(gatedOff:gateHelp:)`) so it can place it
+  correctly. Expansion state is deliberately preserved across
+  the toggle — with the label live, closing is one click, and
+  auto-collapsing would lose a drawer the user opened on purpose.
 
 And one exemption worth stating: a control whose *only* consumer
 is off may still have a second one. The App Bar's "App symbol

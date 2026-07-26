@@ -93,9 +93,24 @@ struct GlobalAppBarGroup: View {
             L("app_bar.global_colors.title", "Global colors")
         ) {
             AppBarColorGrid { inlineColors }
+                .modifier(
+                    GreyOut(active: !anyBarShown, help: noBarHelp)
+                )
+            // The gate sits on the drawer's CONTENT, never on the
+            // `DisclosureGroup` — a disabled disclosure refuses to
+            // toggle in either direction (owner-confirmed, #527),
+            // so gating the whole section left this one stuck in
+            // whatever state it was in and hid the colors it
+            // holds. The label stays live; the swatches dim.
             DisclosureGroup(isExpanded: $advancedColorsExpanded) {
                 AppBarColorGrid { advancedColors }
                     .padding(.top, 8)
+                    .modifier(
+                        GreyOut(
+                            active: !anyBarShown,
+                            help: noBarHelp
+                        )
+                    )
             } label: {
                 Text(
                     L("bars.advanced_colors", "Advanced colors")
@@ -103,7 +118,6 @@ struct GlobalAppBarGroup: View {
                 .font(.subheadline)
             }
         }
-        .modifier(GreyOut(active: !anyBarShown, help: noBarHelp))
     }
 
     @ViewBuilder private var behavior: some View {

@@ -71,8 +71,14 @@ struct SpaceBarEditorGroup: View {
         SettingsSection(
             L("space_bar.colors.title", "Space Bar colors")
         ) {
-            SpaceBarColorsGroup(model: model)
-                .modifier(GreyOut(active: !enabled, help: offHelp))
+            // Gate passed IN, not wrapped around: the group has
+            // to keep its "Advanced colors" disclosure label
+            // live (#527).
+            SpaceBarColorsGroup(
+                model: model,
+                gatedOff: !enabled,
+                gateHelp: offHelp
+            )
         }
     }
 

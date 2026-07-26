@@ -39,20 +39,35 @@ struct LayoutAppBarGroup: View {
                 L("app_bar.layout.overrides", "Overrides"),
                 isExpanded: $overridesExpanded
             ) {
+                // The gate goes on the CONTENT, never the
+                // `DisclosureGroup` — a disabled disclosure
+                // refuses to expand (owner-confirmed on device,
+                // #527), so gating the whole thing left the
+                // stored values exactly as concealed as removing
+                // the rows would have, which is the one outcome
+                // the comment above says greying avoids. The
+                // label stays live: the user can open the drawer,
+                // read what is kept, and see it is not editable
+                // yet.
                 overrides
-            }
-            .modifier(
-                GreyOut(
-                    active: !bar.enabled,
-                    help: L(
-                        "app_bar.layout.overrides.disabled",
-                        "Turn on Show app bar to edit this "
-                            + "layout's overrides. They are kept "
-                            + "either way."
+                    .modifier(
+                        GreyOut(
+                            active: !bar.enabled,
+                            help: overridesDisabledHelp
+                        )
                     )
-                )
-            )
+            }
         }
+    }
+
+    /// Why the rows are dimmed, on the rows themselves — the
+    /// disclosure label stays live so this is reachable.
+    private var overridesDisabledHelp: String {
+        L(
+            "app_bar.layout.overrides.disabled",
+            "Turn on Show app bar to edit this layout's "
+                + "overrides. They are kept either way."
+        )
     }
 
     /// Split out so `DisclosureGroup` builds it lazily.
