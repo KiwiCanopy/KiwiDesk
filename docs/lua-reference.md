@@ -2654,9 +2654,10 @@ border.set_glow(true)
 ### border.set_glow_size
 
 **Expects:** a size in points, or `0` for automatic (the
-default). Out-of-range values clamp silently (negative → `0`,
-above the renderable ceiling of 40 → 40), like the other border
-magnitudes; a non-numeric argument fails.
+default). A value above the renderable ceiling of 40 clamps
+silently, like the other border magnitudes; a negative or
+non-numeric argument fails — switching back to automatic takes
+an explicit `0`, never a clamp.
 
 **Does:** sets the glow bloom's blur radius. `0` keeps the
 automatic behavior — the width-scaled formula that gives a

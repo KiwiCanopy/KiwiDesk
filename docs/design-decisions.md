@@ -327,7 +327,8 @@ of `border.glow_size` (#551, owner-requested): an explicit size
 overrides it, clamped only at a renderable ceiling — the GUI
 curates a tighter slider band, Lua stays open — resolved once in
 `BorderStyle.resolvedGlowBlur` before any geometry, so the
-pipeline still carries a single finished number. A glow ring also **renders on the AppKit
+pipeline still carries a single finished number. A glow ring
+also **renders on the AppKit
 backend** (`BorderOverlay.ensureBackend`), swapping back to
 SkyLight when glow turns off: the WindowServer-backed SkyLight
 context drops any `CGContextSetShadowWithColor` hue to the

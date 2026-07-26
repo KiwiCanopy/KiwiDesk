@@ -10,7 +10,7 @@ import SwiftUI
 /// removed.
 ///
 /// Shared by the App Bar Auto item/font-size pairs (the toggle is
-/// the `0 = auto` sentinel exposed through `AppBarAuto.binding`)
+/// the `0 = auto` sentinel exposed through `AutoSentinel.binding`)
 /// and the Grid Auto-size block (a plain `autoSize` bool gating
 /// the Columns/Rows steppers). Before this component those three
 /// spelled the same interaction three ways, with different visual
@@ -109,5 +109,27 @@ extension EnvironmentValues {
     var isInsideGreyOut: Bool {
         get { self[GreyOutDepthKey.self] }
         set { self[GreyOutDepthKey.self] = newValue }
+    }
+}
+
+/// The `0 = automatic` sentinel's GUI face: a Bool binding over
+/// a numeric field where `0` means automatic, so the Auto
+/// toggle reads and writes the sentinel without a second stored
+/// flag. Turning auto OFF seeds `restore` — pass the value the
+/// automatic behavior currently produces where it is computable
+/// (the glow size), a sensible constant where it is not (the
+/// bar sizes, whose auto values are content-measured at render).
+/// Promoted from the Bars area (as `AppBarAuto`) when the Focus
+/// border glow became its second client (#551) — `Common/`
+/// admits primitives shared across component areas.
+enum AutoSentinel {
+    static func binding(
+        _ value: Binding<CGFloat>,
+        restore: CGFloat
+    ) -> Binding<Bool> {
+        Binding(
+            get: { value.wrappedValue == 0 },
+            set: { value.wrappedValue = $0 ? 0 : restore }
+        )
     }
 }

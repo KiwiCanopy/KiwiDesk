@@ -80,10 +80,20 @@ struct BorderCommandTests {
             core.tiler.settings.borderStyle.glowSize
                 == BorderStyle.maxGlowSize
         )
-        // 0 restores the automatic width-scaled formula; a
-        // negative value clamps up to it.
+        // 0 restores the automatic width-scaled formula
+        // explicitly…
         #expect(
             core.execute(
+                "border.set_glow_size",
+                args: [.number(0)]
+            ).isSuccess
+        )
+        #expect(core.tiler.settings.borderStyle.glowSize == 0)
+        // …but a negative REJECTS instead of clamping: max(0,…)
+        // would flip into the automatic regime, which can make
+        // the glow bigger — the opposite of probing downward.
+        #expect(
+            !core.execute(
                 "border.set_glow_size",
                 args: [.number(-3)]
             ).isSuccess

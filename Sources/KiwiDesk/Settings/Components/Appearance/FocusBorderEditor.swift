@@ -124,12 +124,25 @@ struct FocusBorderEditor: View {
         )
         // Directly below the toggle that gates it (topic
         // grouping); Auto is the width-scaled formula's 0
-        // sentinel, the AppBarAuto face (#551). Inner gate
-        // conjoined with the block gate (`enabled &&`) so
-        // nested GreyOuts can't compound the dim.
+        // sentinel, the AutoSentinel face (#551). The `enabled &&`
+        // conjunction is NOT about dim-compounding (the
+        // isInsideGreyOut flag already prevents that) — it keeps
+        // this gate inactive while the whole block is off, so
+        // its "Turn on Glow effect" hover can't shadow the
+        // block-level "Turn on Show focus border" explanation.
         AutoGatedGroup(
             title: L("border.glow_size.auto", "Auto glow size"),
-            isOn: AppBarAuto.binding(style.glowSize, restore: 4)
+            isOn: AutoSentinel.binding(
+                style.glowSize,
+                // Take over from where auto left off — a fixed
+                // restore snapped the ring visibly at non-default
+                // widths (auto reaches 12 at width 20). Always
+                // inside the 1-20 GUI band (the formula caps
+                // at 12).
+                restore: BorderStyle.glowBlur(
+                    for: style.wrappedValue.clampedWidth
+                ).rounded()
+            )
         ) {
             PtSlider(
                 label: L("border.glow_size", "Glow size"),
