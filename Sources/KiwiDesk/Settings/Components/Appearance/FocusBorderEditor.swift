@@ -15,13 +15,17 @@ struct FocusBorderEditor: View {
     }
 
     var body: some View {
+        // The header `?` is the gate's live anchor (#527): every
+        // help affordance inside the greyed block is dead, so the
+        // why-off explanation must live outside it.
         SettingsSection(
             L("border.title", "Focus border"),
             caption: L(
                 "border.caption",
                 "Outlines the focused window so it stands out "
                     + "in a gapped layout."
-            )
+            ),
+            help: style.wrappedValue.enabled ? nil : offHelp
         ) {
             Toggle(
                 L("border.enabled", "Show focus border"),
@@ -31,14 +35,18 @@ struct FocusBorderEditor: View {
             controls.modifier(
                 GreyOut(
                     active: !style.wrappedValue.enabled,
-                    help: L(
-                        "border.controls.disabled",
-                        "Turn on Show focus border to edit "
-                            + "these settings."
-                    )
+                    help: offHelp
                 )
             )
         }
+    }
+
+    private var offHelp: String {
+        L(
+            "border.controls.disabled",
+            "Turn on Show focus border to edit "
+                + "these settings."
+        )
     }
 
     @ViewBuilder private var controls: some View {
@@ -68,8 +76,16 @@ struct FocusBorderEditor: View {
                 hex: style.unfocusedColor
             )
             .modifier(
+                // Its gating toggle sits directly above, so the
+                // adjacency is the anchor (#527) — the hover
+                // string just names the action.
                 GreyOut(
-                    active: !style.wrappedValue.unfocusedEnabled
+                    active: !style.wrappedValue.unfocusedEnabled,
+                    help: L(
+                        "border.unfocused_color.disabled",
+                        "Turn on Show border on unfocused "
+                            + "windows to edit its color."
+                    )
                 )
             )
         }

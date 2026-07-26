@@ -63,7 +63,20 @@ struct DragVisualsEditor: View {
         caption: String,
         visual: Binding<DragVisual>
     ) -> some View {
-        SettingsSection(title, caption: caption, subsection: true) {
+        // The header `?` is the gate's live anchor (#527): with
+        // the visual off the column below the Enabled toggle is
+        // dimmed, and help inside a greyed block is dead.
+        SettingsSection(
+            title,
+            caption: caption,
+            subsection: true,
+            help: visual.wrappedValue.enabled
+                ? nil
+                : L(
+                    "drag.disabled.help",
+                    "Turn on Enabled to edit this visual."
+                )
+        ) {
             DragVisualPreview(
                 visual: visual.wrappedValue,
                 cornerRadius: model.config.settings

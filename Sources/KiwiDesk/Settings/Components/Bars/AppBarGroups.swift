@@ -59,8 +59,12 @@ struct GlobalAppBarGroup: View {
     @State private var advancedColorsExpanded = false
 
     var body: some View {
+        // The header `?` is the gate's live anchor (#527): every
+        // help affordance inside the greyed block is dead, so the
+        // why-off explanation must live outside it.
         SettingsSection(
-            L("app_bar.global_style.title", "Global style")
+            L("app_bar.global_style.title", "Global style"),
+            help: anyBarShown ? nil : noBarHelp
         ) {
             Text(globalStyleCaption)
                 .font(.caption)
@@ -90,7 +94,8 @@ struct GlobalAppBarGroup: View {
                 )
         }
         SettingsSection(
-            L("app_bar.global_colors.title", "Global colors")
+            L("app_bar.global_colors.title", "Global colors"),
+            help: anyBarShown ? nil : noBarHelp
         ) {
             AppBarColorGrid { inlineColors }
                 .modifier(

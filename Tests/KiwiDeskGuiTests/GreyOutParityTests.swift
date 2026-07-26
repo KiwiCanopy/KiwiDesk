@@ -55,9 +55,12 @@ struct GreyOutParityTests {
         ("DragVisualsEditor.swift", "active: !visual.enabled"),
         ("StickyMarkEditor.swift", "active: !spaceBarOn"),
         ("AppBarLayoutGroup.swift", "active: !bar.enabled"),
+        // The gate is passed INTO the group (#527) so its
+        // section header — and the `?` anchor on it — stays
+        // live; the wrap-around form would disable both.
         (
             "ProfilesSection.swift",
-            "active: model.editingStoredProfile"
+            "gatedOff: model.editingStoredProfile"
         ),
         (
             "SpaceOverrideRows+ModeRows.swift",
@@ -90,6 +93,65 @@ struct GreyOutParityTests {
                         "\(name) lost its gate "
                         + "`\(gate)` — a control with no effect "
                         + "must be greyed, never left live (#171)"
+                )
+            )
+        }
+    }
+
+    /// #527: a block gate's explanation must stay reachable
+    /// while the block is dimmed — `.disabled` is cumulative,
+    /// so every `HelpButton` inside the gated subtree is dead.
+    /// Each block-gated editor therefore renders a live anchor
+    /// OUTSIDE the gate: the section header's `help:` or a
+    /// disclosure label. Exact expressions, like `gatedEditors`
+    /// — losing one silently regresses that editor to the
+    /// dead-tooltip form this sweep removed.
+    private let gateAnchors: [(file: String, anchor: String)] = [
+        (
+            "FocusBorderEditor.swift",
+            "help: style.wrappedValue.enabled ? nil : offHelp"
+        ),
+        (
+            "SpaceBarGroups.swift",
+            "help: enabled ? nil : offHelp"
+        ),
+        (
+            "AppBarGroups.swift",
+            "help: anyBarShown ? nil : noBarHelp"
+        ),
+        (
+            "DragVisualsEditor.swift",
+            "help: visual.wrappedValue.enabled"
+        ),
+        (
+            "NativeSpacesGroup.swift",
+            "help: gatedOff ? gateHelp : nil"
+        ),
+        // The anchor is the live disclosure label, not a
+        // section header — the `?` rides it while the rows
+        // below are dimmed.
+        ("AppBarLayoutGroup.swift", "HelpButton("),
+    ]
+
+    @Test("every block gate keeps a live help anchor")
+    func blockGatesKeepTheirAnchor() throws {
+        let files = try SourceScan.swiftSources(under: settingsDir)
+        for (name, anchor) in gateAnchors {
+            let file = try #require(
+                files.first { $0.lastPathComponent == name },
+                "anchored editor file is gone: \(name)"
+            )
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            #expect(
+                source.contains(anchor),
+                Comment(
+                    rawValue:
+                        "\(name) lost its gate anchor "
+                        + "`\(anchor)` — a greyed block's help "
+                        + "must stay clickable outside the "
+                        + "disabled subtree (#527)"
                 )
             )
         }

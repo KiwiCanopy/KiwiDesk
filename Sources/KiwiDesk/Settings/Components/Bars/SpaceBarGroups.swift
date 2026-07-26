@@ -16,8 +16,12 @@ struct SpaceBarEditorGroup: View {
     }
 
     var body: some View {
+        // The header `?` is the gate's live anchor (#527): every
+        // help affordance inside the greyed block is dead, so the
+        // why-off explanation must live outside it.
         SettingsSection(
-            L("space_bar.global_style.title", "Space Bar style")
+            L("space_bar.global_style.title", "Space Bar style"),
+            help: enabled ? nil : offHelp
         ) {
             Text(caption)
                 .font(.caption)
@@ -69,7 +73,8 @@ struct SpaceBarEditorGroup: View {
                 .modifier(GreyOut(active: !enabled, help: offHelp))
         }
         SettingsSection(
-            L("space_bar.colors.title", "Space Bar colors")
+            L("space_bar.colors.title", "Space Bar colors"),
+            help: enabled ? nil : offHelp
         ) {
             // Gate passed IN, not wrapped around: the group has
             // to keep its "Advanced colors" disclosure label

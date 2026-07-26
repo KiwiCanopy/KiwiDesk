@@ -759,6 +759,28 @@ written down:
   the toggle — with the label live, closing is one click, and
   auto-collapsing would lose a drawer the user opened on purpose.
 
+- **A block gate's explanation lives on a live anchor, not
+  inside the block.** SwiftUI's `.disabled` is cumulative and
+  `.disabled(false)` is a no-op, so every `HelpButton` inside a
+  greyed block is dead — exactly when "what is this, why is it
+  off" matters most (#527). A *block* gate (a whole editor or
+  multi-row group) therefore renders a live `?` outside the
+  gated subtree: the `SettingsSection` header (its `help:`
+  parameter) or the drawer's live disclosure label, passed only
+  while the gate is active and carrying the why-off + how-to-
+  enable copy. When the gate must reach inside a child view to
+  do this, pass it in (`NativeSpacesGroup(gatedOff:gateHelp:)`,
+  the `SpaceBarColorsGroup` shape) rather than wrapping the
+  child from outside, which would disable the anchor too. A
+  *control-scoped* gate — one row, its gating control directly
+  adjacent (Background style over Background size, a toggle
+  over its slider) — keeps just the `GreyOut` hover string: the
+  adjacency answers "why", and a header `?` would gloss a
+  single self-explaining row. Per-control `?`s inside a gated
+  block stay visible-but-dimmed like every other row member;
+  their fine print matters once the block is live again, and
+  the anchor covers the meantime.
+
 And one exemption worth stating: a control whose *only* consumer
 is off may still have a second one. The App Bar's "App symbol
 style" stays live even when no bar shows, because `iconSource`
