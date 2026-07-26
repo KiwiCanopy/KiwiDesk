@@ -1508,3 +1508,42 @@ section {
     transform: translateX(12px);
   }
 }
+
+/* ---- Japanese line breaking ----
+   Japanese has no spaces, so a browser will break a headline
+   between any two kana — leaving an orphan like
+   「ウインドウが、ひ / とりでに片づく」. `keep-all` restricts breaks
+   to punctuation, so the line turns at the 、 where the phrase
+   actually ends.
+
+   `overflow-wrap: anywhere` is the escape hatch, and it is
+   load-bearing: a headline with no internal punctuation
+   (「ウインドウがひとりでに片づくところを見る」) has no break
+   opportunity at all under keep-all and would otherwise overflow
+   its box — measured at 516px inside 355px. Together they mean
+   "break at punctuation when you can, anywhere only when you must".
+
+   `word-break: auto-phrase` would be smarter still, but it is
+   Chromium-only — no use for a Mac product whose visitors are on
+   Safari. Scoped to <html lang="ja"> so German and English keep
+   their default behavior. */
+:root[lang="ja"] h1,
+:root[lang="ja"] h2,
+:root[lang="ja"] h3 {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+/* Short UI labels get keep-all WITHOUT the escape hatch. A nav link
+   or button is never long enough to overflow, and the escape would
+   reintroduce exactly the per-character break we are preventing:
+   「ガイド」 was rendering as three stacked lines, 22px wide and
+   81px tall, because the default allows a break between any two
+   kana and the flex item is narrow. */
+:root[lang="ja"] .nav__link,
+:root[lang="ja"] .btn,
+:root[lang="ja"] .eyebrow,
+:root[lang="ja"] .mode-toggle__seg,
+:root[lang="ja"] .lang-switch__opt {
+  word-break: keep-all;
+}
