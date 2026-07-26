@@ -1,22 +1,6 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The GUI face of the `item_size`/`font_size` 0 = auto sentinel
-/// (#228 §3): an "Auto" toggle whose on-state stores 0 and whose
-/// off-state restores a sensible non-zero size, so the user never
-/// drags a slider to 0 to mean "auto".
-enum AppBarAuto {
-    static func binding(
-        _ value: Binding<CGFloat>,
-        restore: CGFloat
-    ) -> Binding<Bool> {
-        Binding(
-            get: { value.wrappedValue == 0 },
-            set: { value.wrappedValue = $0 ? 0 : restore }
-        )
-    }
-}
-
 /// The Position/Background-style/Active-indicator/Content
 /// dropdown labels are
 /// data (an array of value/label pairs shared by the global and
@@ -181,7 +165,7 @@ struct OverrideAutoSliderRow: View {
         OverrideChrome(isOn: overrideToggle($value, global: global)) {
             AutoGatedGroup(
                 title: autoLabel,
-                isOn: AppBarAuto.binding(
+                isOn: AutoSentinel.binding(
                     overrideValue($value, global: global),
                     restore: restore
                 )

@@ -95,7 +95,7 @@ extension KiwiCore {
                 colorHex: spec.colorHex,
                 width: spec.width,
                 cornerStyle: spec.cornerStyle,
-                glow: spec.glow
+                glowBlur: spec.glowBlur
             )
         }
     }
@@ -159,7 +159,7 @@ extension KiwiCore {
                     cornerStyle: style.cornerStyle,
                     // Focused ring only — a bloom on every unfocused
                     // ring undercuts the one it should make pop.
-                    glow: style.glow
+                    glowBlur: style.resolvedGlowBlur
                 )
             )
         }

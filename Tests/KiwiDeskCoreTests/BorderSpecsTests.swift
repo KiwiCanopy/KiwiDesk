@@ -94,14 +94,17 @@ struct BorderSpecsTests {
         let result = specs(style, focused: w1, slots: disjoint)
         let focused = result.first { $0.window == w1 }
         let other = result.first { $0.window == w2 }
-        #expect(focused?.glow == true)
+        #expect(
+            focused?.glowBlur == style.resolvedGlowBlur
+        )
+        #expect((focused?.glowBlur ?? 0) > 0)
         // A bloom on every unfocused ring would undercut the one it
         // should make pop (#358) — so unfocused rings never glow.
-        #expect(other?.glow == false)
+        #expect(other?.glowBlur == 0)
         // And with glow off, the focused ring doesn't glow either.
         style.glow = false
         let plain = specs(style, focused: w1, slots: disjoint)
-        #expect(plain.first { $0.window == w1 }?.glow == false)
+        #expect(plain.first { $0.window == w1 }?.glowBlur == 0)
     }
 
     @Test("Monocle stays focused-only despite unfocused toggle")

@@ -46,10 +46,11 @@ final class BorderOverlay {
     private var lastWidth: CGFloat = 0
     private var lastCornerStyle: BorderStyle.CornerStyle = .rounded
     private var lastColorHex = ""
-    /// Whether the last render asked for the glow bloom (#358). Kept
-    /// alongside the other raw inputs so a fallback swap or a
-    /// dead-end bump rebuilds geometry with the same glow state.
-    private var lastGlow = false
+    /// The last render's resolved glow blur (`0` = no glow,
+    /// #358/#551). Kept alongside the other raw inputs so a
+    /// fallback swap or a dead-end bump rebuilds geometry with
+    /// the same glow state.
+    private var lastGlowBlur: CGFloat = 0
     private weak var lastScreen: NSScreen?
     private var targetWindow: CGWindowID
     /// The target's real corner radius, resolved by `BorderManager`
@@ -181,7 +182,7 @@ final class BorderOverlay {
         cornerRadius: CGFloat,
         colorHex: String,
         screen: NSScreen?,
-        glow: Bool = false,
+        glowBlur: CGFloat = 0,
         restoreVisibility: Bool = false
     ) {
         lastFrame = frame
@@ -190,8 +191,8 @@ final class BorderOverlay {
         lastCornerRadius = cornerRadius
         lastColorHex = colorHex
         lastScreen = screen
-        lastGlow = glow
-        let swapped = ensureBackend(glow: glow)
+        lastGlowBlur = glowBlur
+        let swapped = ensureBackend(glow: glowBlur > 0)
         let shouldRestore = restoreVisibility && isHidden
         guard
             backend.update(
@@ -261,7 +262,7 @@ final class BorderOverlay {
             cornerStyle: lastCornerStyle,
             order: backend.orderMode,
             systemRadius: lastCornerRadius,
-            glow: lastGlow
+            glowBlur: lastGlowBlur
         )
     }
 

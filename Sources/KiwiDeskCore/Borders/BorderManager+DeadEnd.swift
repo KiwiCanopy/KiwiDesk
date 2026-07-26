@@ -42,7 +42,13 @@ extension BorderManager {
                 cornerStyle: cornerStyle,
                 cornerRadius: cornerRadius(for: window),
                 colorHex: colorHex,
-                screen: screen
+                screen: screen,
+                // Explicitly bloom-less, not an omitted default:
+                // the transient is a directional cue borrowing
+                // the ring's look, never the focus ring (glow is
+                // focused-only, #358), and blooming it would
+                // spawn an AppKit backend for a ~200 ms flash.
+                glowBlur: 0
             )
             ring.order(relativeTo: window.raw)
             overlay = ring

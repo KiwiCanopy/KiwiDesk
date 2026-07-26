@@ -42,7 +42,7 @@ struct BorderGeometryTests {
             width: 2,
             cornerStyle: .rounded,
             systemRadius: 16,
-            glow: true
+            glowBlur: BorderStyle.glowBlur(for: 2)
         )
         // Frame grows by the blur on every side so the halo has
         // room; the stroke geometry itself is unchanged (#358).
@@ -71,6 +71,32 @@ struct BorderGeometryTests {
         // Outward reach (fit-gaps) must NOT count the bloom — it
         // bleeds into the gap by design.
         #expect(BorderGeometry.outwardReach(width: 2) == 2)
+    }
+
+    @Test("Explicit glow size overrides the formula, capped")
+    func explicitGlowSize() {
+        var style = BorderStyle()
+        style.glow = true
+        // The 0 sentinel means automatic — the width formula.
+        #expect(
+            style.resolvedGlowBlur
+                == BorderStyle.glowBlur(for: style.clampedWidth)
+        )
+        // An explicit size wins verbatim below the cap (#551) —
+        // no floor: Lua may go softer than the GUI band.
+        style.glowSize = 7
+        #expect(style.resolvedGlowBlur == 7)
+        style.glowSize = 1
+        #expect(style.resolvedGlowBlur == 1)
+        // …and clamps at the renderable ceiling.
+        style.glowSize = 100
+        #expect(
+            style.resolvedGlowBlur == BorderStyle.maxGlowSize
+        )
+        #expect(BorderStyle.maxGlowSize == 40)
+        // Glow off silences the size entirely.
+        style.glow = false
+        #expect(style.resolvedGlowBlur == 0)
     }
 
     @Test("Thick width also keeps a fixed hidden overlap")

@@ -2638,9 +2638,9 @@ is a fill, not a legibility-bound stroke, so it reads more vivid than
 the darkened border, in its own hue) — set only `focused_color`
 and the glow follows. Its reach **scales with the border width**
 (clamped to a legible band), so a hairline border gets a subtle
-rim and a thick one a proportional aura — there is no separate
-size knob. The soft edge is allowed to bleed into the
-layout gap, so `fit_gaps` is unaffected. One interaction: a
+rim and a thick one a proportional aura — override it with
+`set_glow_size` below. The soft edge is allowed to bleed into
+the layout gap, so `fit_gaps` is unaffected. One interaction: a
 glowing ring renders on the behind-order fallback renderer, so
 `draw_order("front")` is inert while glow is on (see
 [Accepted limitations](accepted-limitations.md)).
@@ -2649,6 +2649,30 @@ glowing ring renders on the behind-order fallback renderer, so
 
 ```lua
 border.set_glow(true)
+```
+
+### border.set_glow_size
+
+**Expects:** a size in points, or `0` for automatic (the
+default). A value above the renderable ceiling of 40 clamps
+silently, like the other border magnitudes; a negative or
+non-numeric argument fails — switching back to automatic takes
+an explicit `0`, never a clamp.
+
+**Does:** sets the glow bloom's blur radius. `0` keeps the
+automatic behavior — the width-scaled formula that gives a
+hairline border a subtle rim and a thick one a proportional
+aura — while an explicit size pins the reach regardless of the
+border width. The GUI slider offers 1–20 pt behind an **Auto
+glow size** toggle; larger values up to 40 stay a Lua
+fine-tune. No effect while `glow` is off.
+
+**Example:**
+
+```lua
+border.set_glow(true)
+border.set_glow_size(8)   -- a fixed, wider bloom
+border.set_glow_size(0)   -- back to automatic
 ```
 
 ### border.set_draw_order

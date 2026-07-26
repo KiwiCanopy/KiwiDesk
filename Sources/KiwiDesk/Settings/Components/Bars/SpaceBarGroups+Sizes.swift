@@ -18,7 +18,7 @@ extension SpaceBarEditorGroup {
                 "space_bar.item_size.auto",
                 "Auto item size"
             ),
-            isOn: AppBarAuto.binding(
+            isOn: AutoSentinel.binding(
                 style.itemSize,
                 restore: 120
             )
@@ -40,7 +40,7 @@ extension SpaceBarEditorGroup {
                 "space_bar.font_size.auto",
                 "Auto font size"
             ),
-            isOn: AppBarAuto.binding(style.fontSize, restore: 14)
+            isOn: AutoSentinel.binding(style.fontSize, restore: 14)
         ) {
             PtSlider(
                 label: L("space_bar.font_size", "Font size"),

@@ -20,7 +20,7 @@ extension GlobalAppBarGroup {
         )
         AutoGatedGroup(
             title: L("app_bar.item_size.auto", "Auto item size"),
-            isOn: AppBarAuto.binding($style.itemSize, restore: 120)
+            isOn: AutoSentinel.binding($style.itemSize, restore: 120)
         ) {
             PtSlider(
                 label: L("app_bar.item_size", "Item size"),
@@ -36,7 +36,7 @@ extension GlobalAppBarGroup {
         )
         AutoGatedGroup(
             title: L("app_bar.font_size.auto", "Auto font size"),
-            isOn: AppBarAuto.binding($style.fontSize, restore: 14)
+            isOn: AutoSentinel.binding($style.fontSize, restore: 14)
         ) {
             PtSlider(
                 label: L("app_bar.font_size", "Font size"),

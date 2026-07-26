@@ -58,6 +58,57 @@ struct BorderCommandTests {
         #expect(core.tiler.settings.borderStyle.glow)
     }
 
+    @Test("set_glow_size caps at the ceiling, 0 = automatic")
+    func glowSize() {
+        let core = makeCore()
+        #expect(
+            core.execute(
+                "border.set_glow_size",
+                args: [.number(7)]
+            ).isSuccess
+        )
+        #expect(core.tiler.settings.borderStyle.glowSize == 7)
+        // Over the renderable ceiling clamps silently, like the
+        // other border magnitudes (#551).
+        #expect(
+            core.execute(
+                "border.set_glow_size",
+                args: [.number(999)]
+            ).isSuccess
+        )
+        #expect(
+            core.tiler.settings.borderStyle.glowSize
+                == BorderStyle.maxGlowSize
+        )
+        // 0 restores the automatic width-scaled formula
+        // explicitly…
+        #expect(
+            core.execute(
+                "border.set_glow_size",
+                args: [.number(0)]
+            ).isSuccess
+        )
+        #expect(core.tiler.settings.borderStyle.glowSize == 0)
+        // …but a negative REJECTS instead of clamping: max(0,…)
+        // would flip into the automatic regime, which can make
+        // the glow bigger — the opposite of probing downward.
+        #expect(
+            !core.execute(
+                "border.set_glow_size",
+                args: [.number(-3)]
+            ).isSuccess
+        )
+        #expect(core.tiler.settings.borderStyle.glowSize == 0)
+        // A non-numeric argument is rejected, state unchanged.
+        #expect(
+            !core.execute(
+                "border.set_glow_size",
+                args: [.string("big")]
+            ).isSuccess
+        )
+        #expect(core.tiler.settings.borderStyle.glowSize == 0)
+    }
+
     @Test("set_width clamps out-of-range silently, rejects type")
     func widthClamp() {
         let core = makeCore()

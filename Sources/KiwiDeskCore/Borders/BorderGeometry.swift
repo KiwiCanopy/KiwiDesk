@@ -91,15 +91,18 @@ struct BorderGeometry: Equatable {
     static let aboveVisibleLapCap: CGFloat = 1
 
     // The glow blur formula lives on `BorderStyle.glowBlur(for:)`
-    // beside `glowColor` — both style-derived, and the GUI
-    // preview (a different target) mirrors them from there.
+    // beside `glowColor` — both style-derived; the resolved
+    // number reaches `compute` via `Spec.glowBlur`.
 
     /// Builds the ring geometry for `windowFrame` (AX coords).
     /// `width` is clamped defensively; `systemRadius` is the
     /// shared window corner radius (rounded style) or ignored
-    /// (square style → 0). `glow` grows the overlay frame by
-    /// `BorderStyle.glowBlur(for:)` on every side so the bloom
-    /// has room (#358, width-scaled since #533).
+    /// (square style → 0). `glowBlur` (`0` = no glow) grows the
+    /// overlay frame by itself on every side so the bloom has
+    /// room (#358). It arrives RESOLVED
+    /// (`BorderStyle.resolvedGlowBlur` — width-scaled auto or
+    /// the explicit `glow_size`, #533/#551): geometry takes the
+    /// finished number and stays free of style resolution.
     static func compute(
         windowFrame: CGRect,
         width: CGFloat,
@@ -107,7 +110,7 @@ struct BorderGeometry: Equatable {
         order: Order = .below,
         systemRadius: CGFloat = GeometryUtils
             .systemWindowCornerRadius,
-        glow: Bool = false
+        glowBlur: CGFloat = 0
     ) -> BorderGeometry {
         let visible = Self.clamp(width)
         let overlap = overlap(
@@ -122,7 +125,7 @@ struct BorderGeometry: Equatable {
         let radius =
             cornerStyle == .square
             ? 0 : max(0, systemRadius + visible - stroke / 2)
-        let margin = glow ? BorderStyle.glowBlur(for: visible) : 0
+        let margin = max(0, glowBlur)
         return BorderGeometry(
             overlayFrame: windowFrame.insetBy(
                 dx: -(visible + margin),

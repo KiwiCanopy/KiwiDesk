@@ -122,6 +122,45 @@ struct FocusBorderEditor: View {
                 "Soft glow around the focus border"
             )
         )
+        // Directly below the toggle that gates it (topic
+        // grouping); Auto is the width-scaled formula's 0
+        // sentinel, the AutoSentinel face (#551). The `enabled &&`
+        // conjunction is NOT about dim-compounding (the
+        // isInsideGreyOut flag already prevents that) — it keeps
+        // this gate inactive while the whole block is off, so
+        // its "Turn on Glow effect" hover can't shadow the
+        // block-level "Turn on Show focus border" explanation.
+        AutoGatedGroup(
+            title: L("border.glow_size.auto", "Auto glow size"),
+            isOn: AutoSentinel.binding(
+                style.glowSize,
+                // Take over from where auto left off — a fixed
+                // restore snapped the ring visibly at non-default
+                // widths (auto reaches 12 at width 20). Always
+                // inside the 1-20 GUI band (the formula caps
+                // at 12).
+                restore: BorderStyle.glowBlur(
+                    for: style.wrappedValue.clampedWidth
+                ).rounded()
+            )
+        ) {
+            PtSlider(
+                label: L("border.glow_size", "Glow size"),
+                value: style.glowSize,
+                range: 1...20,
+                autoAtZero: true
+            )
+        }
+        .modifier(
+            GreyOut(
+                active: style.wrappedValue.enabled
+                    && !style.wrappedValue.glow,
+                help: L(
+                    "border.glow_size.disabled",
+                    "Turn on Glow effect to adjust its size."
+                )
+            )
+        )
         Divider()
         FitGapsAction(model: model)
     }
@@ -174,17 +213,19 @@ private struct FocusBorderPreview: View {
             from: 1...20,
             to: 1...7
         )
-        // Remap the width-scaled glow blur
-        // (`BorderStyle.glowBlur(for:)`, #533) the same way —
-        // the literal pt value would swamp this 96 pt mock and
+        // Remap the RESOLVED glow blur (auto formula or the
+        // explicit glow_size, #533/#551) the same way — the
+        // literal pt value would swamp this 96 pt mock and
         // read as a smear, not a halo (#358). A proportional
         // approximation, like width and corners here.
         // The source band is derived from the formula's own
         // clamp, so a retuned floor/cap cannot leave this remap
         // silently stale (the numbers live in
-        // `BorderGeometryTests`, nowhere else).
+        // `BorderGeometryTests`, nowhere else); an explicit
+        // size past the band clamps at the mock's top, which
+        // is honest enough for a schematic.
         let glowRadius = scale(
-            BorderStyle.glowBlur(for: style.clampedWidth),
+            style.resolvedGlowBlur,
             from: BorderStyle.glowBlur(
                 for: BorderStyle.minWidth
             )...BorderStyle.glowBlur(for: BorderStyle.maxWidth),

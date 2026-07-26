@@ -25,7 +25,7 @@ struct BorderSwapTests {
             cornerRadius: 16,
             colorHex: "#FF0000",
             screen: nil,
-            glow: glow,
+            glowBlur: glow ? 4 : 0,
             restoreVisibility: restore
         )
     }
