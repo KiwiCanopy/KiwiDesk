@@ -9,6 +9,12 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  # Manual "Run workflow" button in the Actions tab. Additive — the
+  # automatic triggers above still fire. Useful while the repo is
+  # private, where macOS runners bill at a 10x multiplier against a
+  # 2,000-minute allowance; on a public repo Actions is free and this
+  # is just a convenience for re-running without an empty commit.
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
