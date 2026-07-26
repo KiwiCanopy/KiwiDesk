@@ -18,7 +18,7 @@ struct DragVisualsEditor: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             SettingsSection(
-                L("drag.title", "Drag & Drop"),
+                L("drag.title", "Drag & drop"),
                 caption: L(
                     "drag.caption",
                     "Drag a window onto another to swap "

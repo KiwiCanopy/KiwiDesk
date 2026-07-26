@@ -63,7 +63,7 @@ extension ApplicationsGroup {
             )
         case .openNew:
             // Not bare "Open" — ambiguous under a section already
-            // titled "Open Applications".
+            // titled "Open applications".
             return L("shortcuts.app_behavior.open_new", "Open New")
         }
     }

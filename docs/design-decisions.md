@@ -491,7 +491,7 @@ height-dominant one V). **Per-node ratios were deliberately
 rejected**: they require stable per-split identity, i.e. a
 container tree, which the flat-`[WindowID]`-array model forbids
 (AGENTS.md §5) — two global ratios per space is the design that
-fits the architecture. The Size & Float catalog grows from 3 rows
+fits the architecture. The Size & float catalog grows from 3 rows
 to 5 (Grow/Shrink × width/height + Make floating), all authored
 from the one shared `resize.step`; scrolling still resizes its
 slot along its own scroll axis whichever axis is passed, and
@@ -1826,7 +1826,7 @@ palette.
 
 **The App Bar has its own sidebar destination.** (#229,
 superseding the earlier "Appearance ends with the App Bar
-block" note.) Appearance kept only Gaps and Drag & Drop —
+block" note.) Appearance kept only Gaps and Drag & drop —
 the everyday controls people revisit — while the App Bar
 (global style + ~10 colors + per-layout overrides) was the
 deepest rabbit hole in that tab and dominated the scroll. It
@@ -1840,7 +1840,7 @@ behind an **"Advanced colors" disclosure** (shut by default),
 keeping only Fill / Highlight — the ones the preview strip
 most visibly reflects — inline.
 
-**Drag & Drop explains itself in plain words.** The group
+**Drag & drop explains itself in plain words.** The group
 opens with one sentence on what dragging does (swap a
 window's position with another), and Ghost / Drop zone are
 smaller subsections — each with a one-sentence caption
@@ -2588,7 +2588,7 @@ constraint both went in #479, which split the fused path.)
   newly-authored Grow/Shrink bindings and is recovered from
   bindings on import, but changing it does **not** rewrite
   existing bound rows (their literal keeps firing). An in-GUI
-  step control (a slider in Shortcuts ▸ Size & Float) and a
+  step control (a slider in Shortcuts ▸ Size & float) and a
   live-rewrite of already-bound rows are deliberately out of
   scope for now; the reserved slot is additive, so their later
   arrival won't re-layout the section.

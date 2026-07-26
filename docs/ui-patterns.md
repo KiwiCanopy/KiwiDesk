@@ -167,6 +167,33 @@ owns one tab and one schematic.
 
 ## Shared visual language
 
+**Section titles are sentence case** — "On quit", "Drag & drop",
+"Move windows", not "On Quit" or "Drag & Drop" (R5, #406). It was
+already the large majority, and it is what macOS System Settings
+uses for its own pane sections; the alternative (normalising *up*
+to Title Case) would have touched ~25 strings instead of 6. This
+is a policy choice rather than a fix, which is why it is written
+down: a new `SettingsSection` follows the rule instead of
+re-deciding it. Capitalise only what a sentence would — proper
+nouns stay ("Advanced Lua bindings"), and an acronym stays an
+acronym ("BSP").
+
+**A qualified "Advanced" disclosure is `Advanced <noun phrase>`,
+with no connector** — "Advanced colors", "Advanced Lua bindings",
+"Advanced monitor fingerprints" (R3, #406). The three had drifted
+onto three different formats (bare, `Advanced: …`, `Advanced —
+…`), which read as three unrelated controls rather than one
+recurring affordance. The bare "Advanced" stays bare where the
+section it sits in already names the subject. Sequenced after the
+rule above deliberately, so both use one capitalisation rule.
+
+Shipped translations keep their own typography here: these were
+cosmetic English edits, so German still reads "Erweitert: …" and
+"Erweitert — …". That is correct German, and forcing
+re-translation would have regressed those strings to English —
+see `docs/translating.md` for when a rename does warrant
+`scripts/drop-key`.
+
 **Option tabs are a solid sliding-pill segment control.**
 Every pick-one-of-few chooser (layout parameters, mouse
 resize, icon picker tabs) uses `SegmentedPicker`

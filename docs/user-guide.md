@@ -146,7 +146,7 @@ shortcuts bound in the currently active mode — a fast "what can I press
 right now" lookup. It is not an editor: it only shows what is already
 bound, grouped into three sections:
 
-- **Controls** — window and focus actions (Focus, Move Windows, Size &
+- **Controls** — window and focus actions (Focus, Move windows, Size &
   Float, Switch modes), laid out in two columns.
 - **Apps** — your app-launch shortcuts, each with the app's icon. A
   small window-plus badge marks a shortcut set to *Open New* (always
@@ -504,7 +504,7 @@ Adjust each mode's defaults:
   default: on,
   focus wraps within the track along the axis and from the last
   track to the first across it; swap never wraps). The track
-  shortcuts live in Shortcuts ▸ Move Windows under the "Move to
+  shortcuts live in Shortcuts ▸ Move windows under the "Move to
   track" subheader — a caption there notes they only matter if
   you use the track layout: "Move window to previous/next
   track" rows move a window across tracks or open a new one at
@@ -601,9 +601,9 @@ swatch opens the native Colors panel and updates the staged value as
 you pick; **Done** or the red window close button closes the panel and
 keeps the selected color.
 
-### Color Palette
+### Color palette
 
-At the top of Appearance, the **Color Palette** shelf paints a whole
+At the top of Appearance, the **Color palette** shelf paints a whole
 set of colors across the App Bar, Space Bar, focus borders, and drag
 visuals in one click. Each palette shows a small scene thumbnail —
 a mock bar, a bordered window, and a drag swatch — in its own
@@ -1117,7 +1117,7 @@ interaction.
 - **Wake restore delay** (ms): how long to wait after wake before
   restoring (default 1500 ms, giving apps time to settle).
 
-### On Quit
+### On quit
 
 Before KiwiDesk stops, it arranges managed windows on each display
 so their title bars remain reachable.
@@ -1596,10 +1596,10 @@ like `cmd+j+k` are not supported — use modal modes instead.
 Each row has an action. Built-in actions live under headings:
 
 - **Focus** — move focus (left, right, up, down).
-- **Move Windows** — swap windows, send to space, and the
+- **Move windows** — swap windows, send to space, and the
   Move-to-track and Swap-with-track rows (always shown; a
   caption notes they only matter in the track layout).
-- **Size & Float** — the per-axis Grow/Shrink rows, Make
+- **Size & float** — the per-axis Grow/Shrink rows, Make
   floating, the resize step, and **Alert sound when resize
   can't apply** (default on): a resize shortcut pressed in a
   layout without a resize target (monocle, grid, a floating

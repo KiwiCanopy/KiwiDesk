@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Advanced: Lua bindings (#68 §3.6.1) — the old "Custom
+/// Advanced Lua bindings (#68 §3.6.1) — the old "Custom
 /// Bindings", renamed and collapsed by its host. Raw Lua stays
 /// monospaced on purpose: arbitrary Lua *is* the capability
 /// here, not a serialization leak.

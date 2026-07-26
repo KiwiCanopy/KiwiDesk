@@ -111,16 +111,16 @@ enum SidebarSearch {
                 ),
                 L(
                     "monitors.advanced.title",
-                    "Advanced — monitor fingerprints"
+                    "Advanced monitor fingerprints"
                 ),
             ]
         case .appearance:
             return [
-                L("palettes.title", "Color Palette"),
+                L("palettes.title", "Color palette"),
                 L("gaps.title", "Gaps"),
                 L("gaps.per_edge", "Per-edge…"),
                 L("gaps.per_axis", "Per-axis…"),
-                L("drag.title", "Drag & Drop"),
+                L("drag.title", "Drag & drop"),
                 L("drag.ghost", "Ghost"),
                 L("drag.drop_zone", "Drop zone"),
                 L("border.title", "Focus border"),
@@ -157,7 +157,7 @@ enum SidebarSearch {
                     "behavior.animations.title",
                     "Animations"
                 ),
-                L("behavior.quit.title", "On Quit"),
+                L("behavior.quit.title", "On quit"),
             ]
         case .profiles:
             return [
@@ -180,15 +180,15 @@ enum SidebarSearch {
                 L("shortcuts.section.focus", "Focus"),
                 L(
                     "shortcuts.section.move_windows",
-                    "Move Windows"
+                    "Move windows"
                 ),
                 L(
                     "shortcuts.section.size_float",
-                    "Size & Float"
+                    "Size & float"
                 ),
                 L(
                     "shortcuts.section.open_applications",
-                    "Open Applications"
+                    "Open applications"
                 ),
                 L("shortcuts.section.general", "General"),
                 L(
@@ -201,7 +201,7 @@ enum SidebarSearch {
                 ),
                 L(
                     "shortcuts.advanced.title",
-                    "Advanced: Lua bindings"
+                    "Advanced Lua bindings"
                 ),
             ]
         case .appRules:

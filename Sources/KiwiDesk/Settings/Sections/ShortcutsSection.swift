@@ -215,7 +215,7 @@ struct ShortcutsSection: View {
             Text(
                 L(
                     "shortcuts.advanced.title",
-                    "Advanced: Lua bindings"
+                    "Advanced Lua bindings"
                 )
             )
             .font(.headline)

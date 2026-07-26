@@ -32,7 +32,7 @@ struct ApplicationsGroup: View {
         SettingsSection(
             L(
                 "shortcuts.section.open_applications",
-                "Open Applications"
+                "Open applications"
             )
         ) {
             ForEach(orderedAppIDs, id: \.self) { id in

@@ -533,7 +533,7 @@ no resize target — but silent failure at the keyboard reads as
 "KiwiDesk ignored me"; the beep is the standard macOS answer.
 Only hotkey fires cue; the same command over CLI/IPC stays
 silent (scripted callers branch on the error JSON). The GUI
-twin lives under Shortcuts ▸ Size & Float.
+twin lives under Shortcuts ▸ Size & float.
 
 **Example:**
 

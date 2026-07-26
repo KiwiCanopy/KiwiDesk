@@ -173,14 +173,14 @@ enum ShortcutsReferenceBuilder {
             ShortcutSubgroup(
                 title: L(
                     "shortcuts.section.move_windows",
-                    "Move Windows"
+                    "Move windows"
                 ),
                 rows: rows(move)
             ),
             ShortcutSubgroup(
                 title: L(
                     "shortcuts.section.size_float",
-                    "Size & Float"
+                    "Size & float"
                 ),
                 rows: rows(
                     KeybindingCatalog.resizeAndFloat(

@@ -154,7 +154,7 @@ struct BehaviorSection: View {
     /// the only strategy.
     private var quitSection: some View {
         SettingsSection(
-            L("behavior.quit.title", "On Quit"),
+            L("behavior.quit.title", "On quit"),
             caption: L(
                 "behavior.quit.caption",
                 "Before KiwiDesk stops, it arranges managed "

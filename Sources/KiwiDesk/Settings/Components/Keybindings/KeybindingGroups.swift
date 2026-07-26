@@ -60,7 +60,7 @@ struct MoveWindowsGroup: View {
 
     var body: some View {
         SettingsSection(
-            L("shortcuts.section.move_windows", "Move Windows")
+            L("shortcuts.section.move_windows", "Move windows")
         ) {
             ForEach(KeybindingCatalog.swapDirections) {
                 command in
@@ -136,7 +136,7 @@ struct SizeFloatGroup: View {
 
     var body: some View {
         SettingsSection(
-            L("shortcuts.section.size_float", "Size & Float")
+            L("shortcuts.section.size_float", "Size & float")
         ) {
             ForEach(
                 KeybindingCatalog.resizeAndFloat(
