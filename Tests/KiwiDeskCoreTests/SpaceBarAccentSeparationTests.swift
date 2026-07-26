@@ -20,14 +20,15 @@ import Testing
 /// disagree on real palettes in this repo. True Dark's
 /// `#64D2FF` / `#FF9F0A` separates at 241 (fine) while sitting
 /// almost equal in lightness, so a luminance floor would condemn
-/// a palette that has no defect, and would block the catalog-wide
-/// tightening that is deferred to the Kiwi Neon / Kiwi Gold
-/// retune. Guarding the real quantity keeps that door open.
+/// a palette that has no defect — and would have blocked the
+/// catalog-wide tightening #511 went on to do. Guarding the real
+/// quantity is what kept that door open.
 ///
-/// Scope is the **derived default palette only**, deliberately:
-/// Kiwi Neon (39) and Kiwi Gold (49) sit below any threshold
-/// worth setting, and retuning them is an eye-confirm call that
-/// belongs with its own change.
+/// Scope is the **whole bundled catalog** (#511). It was the
+/// derived default alone until Kiwi Neon (39) and Kiwi Gold (49)
+/// were retuned — each an eye-confirm call, which is why they
+/// were ratified exceptions for one release cycle rather than
+/// silently failing a guard.
 ///
 /// What this suite does *not* cover: the "genuinely different
 /// hue" half of the two-accent rule. A dark green would pass
@@ -38,6 +39,24 @@ import Testing
 @Suite("Space Bar accent separation")
 struct SpaceBarAccentSeparationTests {
     private var style: SpaceBarStyle { SpaceBarStyle() }
+
+    /// The floor every bundled active/focused pair must clear.
+    ///
+    /// The shipped default measures 93 and is the *lowest* in the
+    /// catalog — every other palette sits at 160 or above — so 60
+    /// is set by the default and nothing else. It is comfortably
+    /// above the 22 of the pre-#470 default and above both
+    /// near-miss retunes considered at the time (`#F0B858` 23,
+    /// `#E09B2E` 39), while leaving room to retune a hex without
+    /// tripping a guard on a colour that is actually fine. It is
+    /// the *green*-primary case that needs this — see the suite
+    /// doc comment.
+    ///
+    /// If an eye-confirm asks for a different accent and this goes
+    /// red: re-measure, and move the floor only if the new
+    /// *measurement* justifies it. Lowering it to fit a pick
+    /// discards the argument the number encodes.
+    private static let floor: Double = 60
 
     /// sRGB → linear, the same transfer function WCAG uses.
     private func linear(_ value: Double) -> Double {
@@ -149,24 +168,51 @@ struct SpaceBarAccentSeparationTests {
         let gap = try #require(
             separation(style.activeItemColor, style.focusedItemColor)
         )
-        // The shipped pair measures 93. 60 is the floor:
-        // comfortably above the 22 of the pre-#470 default and
-        // above both near-miss retunes considered at the time
-        // (`#F0B858` 23, `#E09B2E` 39), while leaving room to
-        // retune the hex without tripping a guard on a colour
-        // that is actually fine. It is the *green*-primary case
-        // that needs this — see the suite doc comment.
-        //
-        // If an eye-confirm asks for a different amber and this
-        // goes red: re-measure, and move the floor only if the
-        // new *measurement* justifies it. Lowering it to fit a
-        // pick discards the argument the number encodes.
+        // The shipped pair measures 93; the floor is 60 (see
+        // `floor` for why that number). Kept as its own test
+        // alongside the catalog sweep because the struct defaults
+        // are what a user with no palette applied actually sees.
         let detail =
             "active \(style.activeItemColor) vs focused "
             + "\(style.focusedItemColor) separate by only "
             + "\(gap)/441 under simulated protanopia — hue alone "
             + "does not survive it against a green primary (#470)"
-        #expect(gap >= 60, Comment(rawValue: detail))
+        #expect(gap >= Self.floor, Comment(rawValue: detail))
+    }
+
+    /// The catalog-wide half of the clause (#511).
+    ///
+    /// `ColorPaletteTests.focusedAccentDistinct` pins only that
+    /// the pair is *unequal*, and skips a palette that omits
+    /// either key. This one requires both keys and measures the
+    /// gap, so a new bundled palette cannot ship a pair that is
+    /// technically two colours and practically one.
+    @Test("Every bundled accent pair survives red-green vision loss")
+    func everyBundledPairSeparatesUnderProtanopia() throws {
+        for palette in PaletteCatalog.bundled() {
+            let name = palette.name
+            let active = try #require(
+                palette.colors["space_bar.active_item_color"],
+                Comment(rawValue: name)
+            )
+            let focused = try #require(
+                palette.colors["space_bar.focused_item_color"],
+                Comment(rawValue: name)
+            )
+            // Opacity first: `parseHex` accepts `#RRGGBBAA`, so a
+            // near-transparent accent would clear the distance
+            // check below on its RGB alone.
+            for hex in [active, focused] {
+                let rgb = try #require(DragVisual.parseHex(hex))
+                #expect(rgb.alpha == 1, Comment(rawValue: "\(name) \(hex)"))
+            }
+            let gap = try #require(separation(active, focused))
+            let detail =
+                "\(name): active \(active) vs focused \(focused) "
+                + "separate by only \(gap)/441 under simulated "
+                + "protanopia (#511)"
+            #expect(gap >= Self.floor, Comment(rawValue: detail))
+        }
     }
 
     @Test("The default focused accent is darker than the active")

@@ -1720,6 +1720,11 @@ new palette against, not a spec the reflection-based
   `space_bar.focused_item_color` is the complementary
   temperature (cool primary → warm focused, and vice-versa),
   so "active space" and "focused window" read as two signals.
+  **The clause below outranks this one when they collide** —
+  Kiwi Neon runs green primary → *cyan* focused, no temperature
+  flip at all, because the warm side of the flip is exactly what
+  red-green vision loss erases against a green primary. Don't
+  "fix" it back to an amber.
 - **…and the two accents must differ on an axis the deficiency
   *preserves*, which for a green-primary palette leaves only
   lightness.** (#470.) The rule to check is not "different hue"
@@ -1736,17 +1741,23 @@ new palette against, not a spec the reflection-based
   and "complementary temperature". The converged `#C2790A`
   measures **93**, which is why the focused accent now reads
   *darker* than the active green rather than brighter.
-  Deliberately **not** retuned by #470, because each is an
-  eye-confirm call of its own: **Kiwi Neon** (`#86EA43` /
-  `#F4CA25`, 39) and **Kiwi Gold** (`#D9A521` / `#8DB354`, 49) —
-  Gold being the inverted twin of the same defect, gold primary
-  against the brand green, so both ends move together when it is
-  retuned. `ColorPaletteTests` pins inequality only, catalog-wide;
-  `SpaceBarAccentSeparationTests` pins this clause for the
-  derived default palette. Tightening the guard catalog-wide and
-  retuning those two belong to one change, not this one (#511) —
-  it must assert CVD separation, not a lightness proxy, or it
-  will fail True Dark, which has no defect. *(Every separation
+  The two green-primary siblings carried the same defect and were
+  retuned by #511 — **Kiwi Neon** (39) and **Kiwi Gold** (49, the
+  inverted twin: gold primary against the brand green). Neither
+  could be fixed on lightness alone, which is the limit of the
+  clause above: Gold's green has to reach an off-white L≈0.90 to
+  clear the floor, and Neon's amber has to go so dark it drops to
+  2.9:1 against its own bar. Both took a **cool** focused accent
+  instead — Neon `#2BE0FF` (190), Gold `#9CE8C8` (181), a mint
+  rather than a teal so Gold keeps a green read (#439 rules teal
+  out as a KiwiDesk hue). So the clause is really "lightness *or*
+  blue↔yellow, and a green-primary palette that can afford
+  neither lightness nor a hue move has no third option".
+  `ColorPaletteTests` pins inequality only, catalog-wide;
+  `SpaceBarAccentSeparationTests` measures the gap, also
+  catalog-wide, and asserts CVD separation rather than a
+  lightness proxy — a luminance floor would fail True Dark, which
+  has no defect. *(Every separation
   figure here is a Viénot-1999 protanopia simulation in linear
   sRGB, Euclidean RGB distance, max √3·255 = 441 —
   `SpaceBarAccentSeparationTests` computes the same quantity, and
@@ -2308,14 +2319,13 @@ Every bundled palette keeps `space_bar.focused_item_color` a
 QA 2026-07-19) — Monochrome included: color is the only channel
 the focused-window state has, so even a mono palette carries one
 deliberate accent (`#FFD60A`) rather than erasing the state.
-Since #470 that rule carries a second clause for green-primary
-palettes — the pair must also separate under red-green vision
-loss, which there means a **lightness gap** (see the
-palette-coherence heuristics above). The derived default
-satisfies it; **Kiwi Neon and Kiwi Gold are ratified exceptions**
-pending their own retune (#511). `ColorPaletteTests` pins the inequality for
-every bundled
-palette.
+Since #470 that rule carries a second clause: the pair must also
+separate under red-green vision loss (see the palette-coherence
+heuristics above). Every bundled palette satisfies it — the two
+green-primary siblings were retuned to a cool focused accent by
+#511, since neither could clear the floor on lightness alone.
+`ColorPaletteTests` pins the inequality for every bundled
+palette; `SpaceBarAccentSeparationTests` measures the gap.
 
 **"Automatic" is a value; "Auto" is an adjective — and the
 readout column was widened to say it.** (R6/#406, owner ruling
