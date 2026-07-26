@@ -3,12 +3,8 @@
 Binding rules for human developers and AI agents working on this
 repository. Read this file before modifying any code.
 
-This file is the canonical source. Claude Code loads a
-caveman-compressed brief generated from it
-(`.claude/AGENTS.brief.md`, built by
-`scripts/build-agent-brief.sh`) to save per-session context;
-regenerate that brief whenever you edit this file. Other agents
-(Cursor, Codex) and humans read this file directly.
+This file is the canonical source, and every agent (Claude Code,
+Cursor, Codex) and human reads it directly.
 
 ---
 
@@ -288,15 +284,6 @@ no trailing period. Body (optional) explains the why, wrapped at
   `npx -y github:JuliusBrussee/caveman --non-interactive`.
   `--non-interactive` avoids a hang when piped; append flags to
   scope it, e.g. `--only claude`, `--minimal`, `--uninstall`.
-- Regenerate the compressed agent brief after editing this file:
-  `./scripts/build-agent-brief.sh` (needs caveman + a `claude`
-  CLI or `ANTHROPIC_API_KEY`). The compression is a full-document
-  LLM pass and commonly takes **several minutes** — run it in the
-  background, not under a short (e.g. 2-minute) timeout that would
-  kill it mid-pass; slow is not hung. `scripts/lint.sh` runs
-  `scripts/check-agent-brief.sh`, which only warns (never blocks)
-  if the brief is stale — so editing this file needs no caveman
-  install; the brief just drifts until someone rebuilds it.
 
 ### Subagent delegation (AI agents)
 

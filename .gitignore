@@ -69,7 +69,6 @@ plan/
 .claude/*
 !.claude/skills/
 !.claude/rules/
-!.claude/AGENTS.brief.md
 .agents/skills/
 /.codex/agents/
 # Optional skill installs keep their local resolution state untracked.
