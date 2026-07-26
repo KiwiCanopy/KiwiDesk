@@ -23,11 +23,21 @@ struct SettingsGroupHeader: View {
 /// explanation under the title; `subsection` shrinks the title
 /// for groups that belong to a bigger one (Ghost / Drop zone
 /// under Drag & drop).
+///
+/// The optional `help` renders a live `HelpButton` beside the
+/// title — the block-gate anchor (#527): the header sits
+/// OUTSIDE any `GreyOut` in `content`, so while a gate dims the
+/// body (killing every `?` inside it, since `.disabled` is
+/// cumulative), this one stays clickable and explains why the
+/// block is off and how to enable it. Call sites pass it only
+/// while their gate is active — once the block is live, its own
+/// controls' help takes over and the anchor would gloss nothing.
 struct SettingsSection<Content: View>: View {
     let title: String
     let symbol: String?
     let caption: String?
     let subsection: Bool
+    let help: String?
     @ViewBuilder let content: Content
 
     init(
@@ -35,12 +45,14 @@ struct SettingsSection<Content: View>: View {
         symbol: String? = nil,
         caption: String? = nil,
         subsection: Bool = false,
+        help: String? = nil,
         @ViewBuilder content: () -> Content
     ) {
         self.title = title
         self.symbol = symbol
         self.caption = caption
         self.subsection = subsection
+        self.help = help
         self.content = content()
     }
 
@@ -48,17 +60,25 @@ struct SettingsSection<Content: View>: View {
         VStack(alignment: .leading, spacing: 8) {
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 6) {
-                    if let symbol {
-                        Image(systemName: symbol)
-                            .foregroundStyle(.secondary)
+                    HStack(spacing: 6) {
+                        if let symbol {
+                            Image(systemName: symbol)
+                                .foregroundStyle(.secondary)
+                        }
+                        Text(title)
                     }
-                    Text(title)
+                    .font(
+                        subsection
+                            ? .subheadline.weight(.semibold)
+                            : .headline
+                    )
+                    if let help {
+                        HelpButton(
+                            explanation: help,
+                            subject: title
+                        )
+                    }
                 }
-                .font(
-                    subsection
-                        ? .subheadline.weight(.semibold)
-                        : .headline
-                )
                 if let caption {
                     Text(caption)
                         .font(.caption)

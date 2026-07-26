@@ -114,8 +114,19 @@ struct GridEditor: View {
             // design-decisions "grey inapplicable controls").
             // `GreyOut`, not a bare `.disabled`, so it dims the
             // same way as its per-space twin — the two used to
-            // read differently for the same state (#527).
-            .modifier(GreyOut(active: fillEmptyIsInert))
+            // read differently for the same state (#527). The
+            // gating picker sits directly above, so adjacency is
+            // the anchor; the hover string names the reason.
+            .modifier(
+                GreyOut(
+                    active: fillEmptyIsInert,
+                    help: L(
+                        "scroll_grid.fill_empty_space.rigid_only",
+                        "A rigid grid keeps every cell, so there "
+                            + "is no empty space to fill."
+                    )
+                )
+            )
             Divider()
             // Auto-size + its dimensions read as a distinct block
             // from the grid-fill behaviour above, mirroring the

@@ -50,17 +50,17 @@ struct ProfilesSection: View {
         // editable here — but hiding them meant a user editing a
         // profile could not even READ which Desktop maps to
         // what, which is exactly the context that decision needs.
-        NativeSpacesGroup(model: model)
-            .modifier(
-                GreyOut(
-                    active: model.editingStoredProfile,
-                    help: L(
-                        "profiles.native_spaces.live_only",
-                        "Desktop bindings are global — switch to "
-                            + "Live to change them."
-                    )
-                )
+        // Gate passed IN, not wrapped around (#527): the group
+        // keeps its section header — and its `?` anchor — live.
+        NativeSpacesGroup(
+            model: model,
+            gatedOff: model.editingStoredProfile,
+            gateHelp: L(
+                "profiles.native_spaces.live_only",
+                "Desktop bindings are global — switch to "
+                    + "Live to change them."
             )
+        )
     }
 
     // MARK: - Saved profiles (#36)

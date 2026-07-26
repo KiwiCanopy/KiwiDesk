@@ -733,9 +733,9 @@ what "grey, don't hide" asks for. A source-scanning guard
 (`DiscardGateParityTests`) fails the build on an ungated path;
 see `docs/design-decisions.md` for why the gate sits at the call
 site and which exceptions are deliberate.
-Three rules that fall out of applying this across a whole editor
-(#520), each of which was got wrong somewhere before it was
-written down:
+The rules that fall out of applying this across a whole editor
+(#520, #527), each of which was got wrong somewhere before it
+was written down:
 
 - **Gate a whole editor off its own switch, not just the odd
   row.** When a switch turns off the thing an entire section
@@ -768,6 +768,38 @@ written down:
   correctly. Expansion state is deliberately preserved across
   the toggle — with the label live, closing is one click, and
   auto-collapsing would lose a drawer the user opened on purpose.
+
+- **A block gate's explanation lives on a live anchor, not
+  inside the block.** SwiftUI's `.disabled` is cumulative and
+  `.disabled(false)` is a no-op, so every `HelpButton` inside a
+  greyed block is dead — exactly when "what is this, why is it
+  off" matters most (#527). A *block* gate (a whole editor or
+  multi-row group) therefore renders a live `?` outside the
+  gated subtree, passed only while the gate is active and
+  carrying the why-off and how-to-enable copy. Pick the anchor
+  by scope: **the nearest live label that scopes exactly the
+  gated content** — the `SettingsSection` header (its `help:`
+  parameter) when the whole section body is gated, the drawer's
+  live disclosure label when only the drawer's content is (a
+  header `?` on the per-layout bar section would over-claim:
+  its Show toggle above the drawer stays live). When the gate
+  must reach inside a child view to do this, pass it in
+  (`NativeSpacesGroup(gatedOff:gateHelp:)`, the
+  `SpaceBarColorsGroup` shape) rather than wrapping the child
+  from outside, which would disable the anchor too. A
+  *control-scoped* gate — one row, its gating control directly
+  adjacent (Background style over Background size, a toggle
+  over its slider) — keeps just the `GreyOut` hover string: the
+  adjacency answers "why", and a header `?` would gloss a
+  single self-explaining row. A *remote* control-scoped gate
+  (the gating field lives on another surface) also stays
+  hover-only while its section is live, but should carry a live
+  state-dependent cue when one exists — the sticky editor's
+  conditional `CrossReferenceRow` naming the Space Bar is the
+  model. Per-control `?`s inside a gated block stay
+  visible-but-dimmed like every other row member; their fine
+  print matters once the block is live again, and the anchor
+  covers the meantime. Guarded by `GreyOutAnchorTests`.
 
 And one exemption worth stating: a control whose *only* consumer
 is off may still have a second one. The App Bar's "App symbol

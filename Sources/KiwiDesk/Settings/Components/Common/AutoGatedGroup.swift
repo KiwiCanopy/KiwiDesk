@@ -52,9 +52,20 @@ struct AutoGatedGroup<Gated: View>: View {
 
 /// The #171 "grey, don't hide" treatment: a control that has no
 /// effect in the current mode stays visible but disabled and
-/// dimmed, with an optional explanatory tooltip. Generic (not
-/// App-Bar-specific) — `AutoGatedGroup`, the App Bar roundness
-/// gate, and the per-layout override all share it.
+/// dimmed. Generic (not App-Bar-specific) — `AutoGatedGroup`,
+/// the App Bar roundness gate, and the per-layout override all
+/// share it.
+///
+/// `help` is a HOVER fallback only (`.help()`), never the #94
+/// affordance: `.disabled` is cumulative, so any `HelpButton`
+/// inside the wrapped content is dead while the gate is active.
+/// A *block* gate therefore renders its explanation as a live
+/// `?` on an anchor outside the gated subtree — the
+/// `SettingsSection` header (`help:`) or a disclosure label
+/// (#527). A *control-scoped* gate (one row, its gating control
+/// directly adjacent) keeps just this hover string: the
+/// adjacency already answers "why", the way the toggle above an
+/// `AutoGatedGroup` does.
 ///
 /// **Dims once, however deeply it nests.** Opacity multiplies,
 /// so a row inside an already-dimmed block used to land at

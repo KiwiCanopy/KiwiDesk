@@ -35,10 +35,7 @@ struct LayoutAppBarGroup: View {
             // case docs/ui-patterns.md names. The drawer stays
             // collapsed by default, so the cost of keeping it is
             // one dimmed row, not a wall of controls.
-            DisclosureGroup(
-                L("app_bar.layout.overrides", "Overrides"),
-                isExpanded: $overridesExpanded
-            ) {
+            DisclosureGroup(isExpanded: $overridesExpanded) {
                 // The gate goes on the CONTENT, never the
                 // `DisclosureGroup` — a disabled disclosure
                 // refuses to expand (owner-confirmed on device,
@@ -56,12 +53,30 @@ struct LayoutAppBarGroup: View {
                             help: overridesDisabledHelp
                         )
                     )
+            } label: {
+                // The live label doubles as the gate's help
+                // anchor (#527) — every `?` in the dimmed rows
+                // is dead. Keep the literal `L(...)` inline:
+                // the sidebar-search walker reads label blocks.
+                HStack(spacing: 6) {
+                    Text(L("app_bar.layout.overrides", "Overrides"))
+                    if !bar.enabled {
+                        HelpButton(
+                            explanation: overridesDisabledHelp,
+                            subject: overridesLabel
+                        )
+                    }
+                }
             }
         }
     }
 
-    /// Why the rows are dimmed, on the rows themselves — the
-    /// disclosure label stays live so this is reachable.
+    private var overridesLabel: String {
+        L("app_bar.layout.overrides", "Overrides")
+    }
+
+    /// Why the rows are dimmed — the live `?` on the drawer
+    /// label, plus the hover fallback on the rows.
     private var overridesDisabledHelp: String {
         L(
             "app_bar.layout.overrides.disabled",
@@ -255,78 +270,5 @@ struct LayoutAppBarGroup: View {
         // Never greyed since background_fit: roundness
         // also shapes Plain's own shared plate (matches the
         // global + Space editors, QA 2026-07-19).
-    }
-}
-
-/// The color override rows, in `AppBarColorGrid` so they read
-/// as the same 2-column grid as Global's colors (#2). Field
-/// order mirrors the global editor — the inline pair (Fill,
-/// Highlight) first, then the rest of the palette — so a field
-/// keeps the same reading order in both editors. (Column
-/// positions match only for the inline pair: Global splits its
-/// colors into an inline grid plus an advanced disclosure, while
-/// these eight flow as one continuous grid.)
-struct LayoutAppBarColorOverrides: View {
-    @Binding var bar: LayoutAppBar
-    let global: AppBarStyle
-
-    var body: some View {
-        AppBarColorGrid {
-            OverrideColorRow(
-                label: L("app_bar.color.fill", "Fill"),
-                value: $bar.fillColor,
-                global: global.fillColor
-            )
-            OverrideColorRow(
-                label: L(
-                    "app_bar.color.highlight",
-                    "Highlight"
-                ),
-                value: $bar.highlightColor,
-                global: global.highlightColor
-            )
-            OverrideColorRow(
-                label: L("app_bar.color.item", "Item"),
-                value: $bar.itemColor,
-                global: global.itemColor
-            )
-            OverrideColorRow(
-                label: L(
-                    "app_bar.color.active_item",
-                    "Active item"
-                ),
-                value: $bar.activeItemColor,
-                global: global.activeItemColor
-            )
-            OverrideColorRow(
-                label: L("app_bar.color.hover_fill", "Hover fill"),
-                value: $bar.hoverFillColor,
-                global: global.hoverFillColor
-            )
-            OverrideColorRow(
-                label: L(
-                    "app_bar.color.hover_item",
-                    "Hover item"
-                ),
-                value: $bar.hoverItemColor,
-                global: global.hoverItemColor
-            )
-            OverrideColorRow(
-                label: L(
-                    "app_bar.color.group_badge",
-                    "Group badge"
-                ),
-                value: $bar.groupBadgeColor,
-                global: global.groupBadgeColor
-            )
-            OverrideColorRow(
-                label: L(
-                    "app_bar.color.badge_text",
-                    "Badge text"
-                ),
-                value: $bar.groupBadgeTextColor,
-                global: global.groupBadgeTextColor
-            )
-        }
     }
 }

@@ -55,9 +55,19 @@ struct GreyOutParityTests {
         ("DragVisualsEditor.swift", "active: !visual.enabled"),
         ("StickyMarkEditor.swift", "active: !spaceBarOn"),
         ("AppBarLayoutGroup.swift", "active: !bar.enabled"),
+        // The gate is passed INTO the group (#527) so its
+        // section header — and the `?` anchor on it — stays
+        // live; the wrap-around form would disable both. Two
+        // needles: the caller's predicate plumbing, and the
+        // child's actual disable — deleting either one strands
+        // the invariant, so both must pin.
         (
             "ProfilesSection.swift",
-            "active: model.editingStoredProfile"
+            "gatedOff: model.editingStoredProfile"
+        ),
+        (
+            "NativeSpacesGroup.swift",
+            "GreyOut(active: gatedOff"
         ),
         (
             "SpaceOverrideRows+ModeRows.swift",
@@ -94,6 +104,10 @@ struct GreyOutParityTests {
             )
         }
     }
+
+    // The #527 block-gate help-anchor guard lives in its own
+    // suite (`GreyOutAnchorTests`) — split per §5 before this
+    // file reached the ceiling.
 
     /// The hiding shape, discovered rather than enumerated.
     /// `if <predicate> {` around settings content removes it from

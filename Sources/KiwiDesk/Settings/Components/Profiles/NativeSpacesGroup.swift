@@ -11,27 +11,53 @@ import SwiftUI
 /// profile actions persist them.
 struct NativeSpacesGroup: View {
     @ObservedObject var model: SettingsModel
+    /// Whether the group is read-only, and the explanation to
+    /// show while it is. Taken as parameters rather than letting
+    /// the caller wrap this whole view in a `GreyOut`: the gate
+    /// has to skip the section header so its `?` anchor stays
+    /// clickable (#527) — wrapping from outside would disable
+    /// the one affordance that says why the rows are dimmed.
+    var gatedOff: Bool = false
+    var gateHelp: String = ""
 
     var body: some View {
         SettingsSection(
             L(
                 "native_spaces.title",
                 "Profiles per macOS Space"
-            )
+            ),
+            // The empty-string guard keeps a caller that gates
+            // without copy from rendering a live `?` over an
+            // empty popover — no anchor is better than a blank
+            // one.
+            help: gatedOff && !gateHelp.isEmpty ? gateHelp : nil
         ) {
+            // The warning and its "Open Desktop & Dock
+            // Settings" button stay OUTSIDE the gate (#527
+            // follow-ups): the display-config advice holds — and
+            // the button works — whichever profile is being
+            // edited. Only the binding rows are read-only here.
             if DisplaySpacesSetting.recommendsSharedSpaces(
                 displayCount: model.displays.count
             ) {
                 separateSpacesWarning
             }
-            if spaceNumbers.isEmpty {
-                emptyHint
-            } else {
-                intro
-                ForEach(spaceNumbers, id: \.self) { number in
-                    spaceRow(number)
+            Group {
+                if spaceNumbers.isEmpty {
+                    emptyHint
+                } else {
+                    intro
+                    ForEach(
+                        spaceNumbers,
+                        id: \.self
+                    ) { number in
+                        spaceRow(number)
+                    }
                 }
             }
+            .modifier(
+                GreyOut(active: gatedOff, help: gateHelp)
+            )
         }
     }
 

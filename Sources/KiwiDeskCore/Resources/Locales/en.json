@@ -147,6 +147,7 @@
   "border.title": "Focus border",
   "border.unfocused_color": "Color",
   "border.unfocused_color.a11y": "Unfocused window border color",
+  "border.unfocused_color.disabled": "Turn on Show border on unfocused windows to edit its color.",
   "border.unfocused_enabled": "Show border on unfocused windows",
   "border.width": "Width",
   "brand.menu_bar_icon.a11y": "KiwiDesk",
