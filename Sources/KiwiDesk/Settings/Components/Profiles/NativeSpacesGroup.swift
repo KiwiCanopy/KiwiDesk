@@ -26,7 +26,11 @@ struct NativeSpacesGroup: View {
                 "native_spaces.title",
                 "Profiles per macOS Space"
             ),
-            help: gatedOff ? gateHelp : nil
+            // The empty-string guard keeps a caller that gates
+            // without copy from rendering a live `?` over an
+            // empty popover — no anchor is better than a blank
+            // one.
+            help: gatedOff && !gateHelp.isEmpty ? gateHelp : nil
         ) {
             // The warning and its "Open Desktop & Dock
             // Settings" button stay OUTSIDE the gate (#527
