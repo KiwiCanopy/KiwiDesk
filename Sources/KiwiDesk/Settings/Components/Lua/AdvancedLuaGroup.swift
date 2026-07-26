@@ -47,7 +47,7 @@ struct AdvancedLuaGroup: View {
             .font(.system(.body, design: .monospaced))
             KeyRecorderField(
                 combo: binding.wrappedValue.combo,
-                conflict: KeybindingConflicts.text(
+                conflict: ConflictText.tooltip(
                     for: binding.wrappedValue,
                     in: bindings
                 ),

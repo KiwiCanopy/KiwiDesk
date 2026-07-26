@@ -6,40 +6,13 @@ import Foundation
 /// the GUI target) since it is pure logic over
 /// `KeyBinding`/`KeyMode`, with no GUI dependency.
 public enum KeybindingConflicts {
-    /// A tooltip describing the conflict on this row, or nil if
-    /// the combo is empty, invalid-but-empty, or unique.
-    public static func text(
-        for binding: KeyBinding,
-        in bindings: [KeyBinding]
-    ) -> String? {
-        guard !binding.combo.isEmpty else { return nil }
-        guard let combo = KeyCombo.parse(binding.combo) else {
-            return "Not a recognized shortcut."
-        }
-        for other in bindings
-        where other.id != binding.id && !other.combo.isEmpty {
-            guard let otherCombo = KeyCombo.parse(other.combo)
-            else { continue }
-            if otherCombo == combo {
-                let who =
-                    other.label.isEmpty
-                    ? other.combo : other.label
-                return "Already bound in this mode: \(who)"
-            }
-        }
-        if let system = SystemShortcuts.map[combo] {
-            return "Conflicts with macOS: \(system)"
-        }
-        return nil
-    }
-
     /// Whether any row in the set carries a conflict. This is
     /// the per-mode primitive `hasAnyAcrossModes` reduces over:
     /// modes are independent keymaps, so each is checked
     /// against its own rows only, never across modes.
     public static func hasAny(_ bindings: [KeyBinding]) -> Bool {
         bindings.contains { binding in
-            text(for: binding, in: bindings) != nil
+            conflict(for: binding, in: bindings) != nil
         }
     }
 
@@ -57,7 +30,8 @@ public enum KeybindingConflicts {
     /// named, enumerated summary (see `SettingsModel`'s banner
     /// formatter). One entry per conflicting row; a row that
     /// duplicates another and *also* shadows a system shortcut
-    /// only reports the first match, same as `text(for:in:)`.
+    /// only reports the first match, since it reduces over
+    /// `conflict(for:in:)` and inherits its branch order.
     public static func conflicts(
         in modes: [KeyMode]
     ) -> [Conflict] {
@@ -69,8 +43,12 @@ public enum KeybindingConflicts {
     }
 
     /// One row's conflict: its display name and what it clashes
-    /// with, or nil if the row is empty/unique/valid.
-    private static func conflict(
+    /// with, or nil if the row is empty/unique/valid. **The one
+    /// public per-row primitive** — the GUI renders both the row
+    /// tooltip and the banner from this structure, because a
+    /// pre-rendered English sentence could never be translated
+    /// from actor-free Core (#96).
+    public static func conflict(
         for binding: KeyBinding,
         in bindings: [KeyBinding]
     ) -> Conflict? {
@@ -109,9 +87,10 @@ public enum KeybindingConflicts {
 public struct Conflict: Equatable, Sendable {
     /// What this row clashes with.
     public enum Target: Equatable, Sendable {
-        /// A reserved macOS shortcut, by its display name
-        /// (e.g. "Close Window").
-        case systemShortcut(String)
+        /// A reserved macOS shortcut, as a case the GUI
+        /// localizes (never its English name — see
+        /// `SystemShortcut`, #96).
+        case systemShortcut(SystemShortcut)
         /// Another row in the same mode, by its display name.
         case otherBinding(String)
         /// The combo itself couldn't be parsed — not a "conflicts
