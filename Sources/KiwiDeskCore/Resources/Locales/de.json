@@ -142,7 +142,6 @@
   "border.fit_gaps.updated_paused": "Entwurf aktualisiert — Abstände bleiben gespeichert, sobald Bedienungshilfen aktiv sind und du das Profil sicherst.",
   "border.focused_color": "Farbe",
   "border.focused_color.a11y": "Rahmenfarbe des fokussierten Fensters",
-  "border.glow": "Leuchten anzeigen",
   "border.glow.a11y": "Sanftes Leuchten um den Fokus-Rahmen",
   "border.title": "Fokus-Rahmen",
   "border.unfocused_color": "Farbe",

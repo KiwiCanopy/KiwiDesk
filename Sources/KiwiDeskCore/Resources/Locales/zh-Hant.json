@@ -142,7 +142,6 @@
   "border.fit_gaps.updated_paused": "草稿已更新，間距會在「輔助使用」開啟且你儲存描述檔後保留。",
   "border.focused_color": "顏色",
   "border.focused_color.a11y": "焦點視窗邊框顏色",
-  "border.glow": "顯示光暈",
   "border.glow.a11y": "焦點邊框周圍的柔和光暈",
   "border.title": "焦點邊框",
   "border.unfocused_color": "顏色",

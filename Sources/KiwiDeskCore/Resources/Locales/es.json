@@ -142,7 +142,6 @@
   "border.fit_gaps.updated_paused": "Borrador actualizado: los espacios se conservarán cuando Accesibilidad esté activada y guardes el perfil.",
   "border.focused_color": "Color",
   "border.focused_color.a11y": "Color del borde de ventana enfocada",
-  "border.glow": "Resplandor",
   "border.glow.a11y": "Resplandor suave alrededor del borde de foco",
   "border.title": "Bordes de ventana",
   "border.unfocused_color": "Color",

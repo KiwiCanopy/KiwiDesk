@@ -142,7 +142,6 @@
   "border.fit_gaps.updated_paused": "下書きを更新しました。アクセシビリティをオンにしてプロファイルを保存すると、間隔が保持されます。",
   "border.focused_color": "カラー",
   "border.focused_color.a11y": "フォーカスされたウインドウの境界線のカラー",
-  "border.glow": "グロー効果",
   "border.glow.a11y": "フォーカスの境界線を囲む柔らかな光",
   "border.title": "ウインドウボーダー",
   "border.unfocused_color": "カラー",
