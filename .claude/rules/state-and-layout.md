@@ -26,6 +26,18 @@ See AGENTS.md §1 and §5 for full rationale. When editing here:
   target and fails on an unlisted direct call; **its `allowed`
   map is the exemption list** — which files may call it, and
   why — so add the entry there rather than a note here.
+- A layout **span** reads one hook further in:
+  `TilingEngine.layoutBounds(on:)` (#537), which reserves the
+  Space Bar's strip (#293) so a resize divides its delta by the
+  region the layout filled, not the whole display. Routing
+  through `visibleBounds` and then dividing by the display
+  passes the guard above and is still the bug —
+  `LayoutBoundsRoutingTests` is the second net, and its
+  `allowed` map is likewise the exemption list. The exception is
+  a rect used as a *containment box* for a window the layout does
+  not place: no span, no midpoint, and the painted-strip clamp
+  (#242) owns its relationship to a bar. Which files qualify
+  lives in that map, not here.
 - Space identifiers are **strings** and case-sensitive; numeric
   strings and integers are equivalent (`"1"` == `1`).
 

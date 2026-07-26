@@ -22,12 +22,14 @@ extension KiwiCore {
         let signed =
             bspFocusSign(axis: axis, space: space)
             * delta
-        // Cap the write at the display's effective range (#383):
-        // past it the layout clamps anyway and the stored value
-        // would only ratchet invisibly, exactly like the stack
-        // path (#44). Span is the raw screen extent (a superset of
-        // the gap-adjusted range) so the cap never blocks reaching
-        // the visible bound.
+        // Cap the write at the layout region's effective range
+        // (#383): past it the layout clamps anyway and the stored
+        // value would only ratchet invisibly, exactly like the
+        // stack path (#44). Span is the region before outer gaps
+        // (#537) — still a superset of the gap-adjusted range the
+        // layout divides, so the cap never blocks reaching the
+        // visible bound, but no longer a superset by the Space
+        // Bar's whole strip, which let the ratchet back in.
         let minSize = Double(tiler.settings.minWindowSize)
         if axis == "x" {
             let value = SplitDomain.cappedRatioWrite(
@@ -76,10 +78,14 @@ extension KiwiCore {
                 in: state
             )
         else { return 1 }
+        // The layout region, not the raw frame (#537): the slot
+        // being classified was placed inside that region, so the
+        // midpoint it is compared against has to be the region's
+        // — a Space Bar on a leading edge shifts it.
         return Double(
             MouseResize.bspSide(
                 slot: slot,
-                bounds: tiler.visibleBounds(screen),
+                bounds: tiler.layoutBounds(on: screen),
                 horizontal: axis == "x"
             )
         )

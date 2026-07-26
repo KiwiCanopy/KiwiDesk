@@ -69,11 +69,14 @@ extension KiwiCore {
         }
         // Span resolves on the space's OWN display (#449) —
         // main-screen math resized against the wrong bounds on
-        // a secondary monitor.
+        // a secondary monitor — and on the LAYOUT REGION of it,
+        // not the raw frame (#537): a delta divided by a span the
+        // Space Bar's strip inflates understates every ratio it
+        // writes, and the caps below share the same span.
         let bounds = TilingEngine.screen(
             for: space.id,
             in: state
-        ).map { tiler.visibleBounds($0) }
+        ).map { tiler.layoutBounds(on: $0) }
         let span =
             axis == "x"
             ? Double(bounds?.width ?? 1920)
@@ -136,7 +139,11 @@ extension KiwiCore {
     /// not the requested x/y axis. Take the current magnitude
     /// (stored pt as-is; auto/% seeded against the axis), add
     /// the delta, store as points. Screen basis matches the
-    /// mouse-resize path: the space's own display (#449).
+    /// mouse-resize path: the space's own display (#449), and its
+    /// layout region rather than the raw frame (#537) — this is
+    /// the one resize path whose span becomes a *stored* value,
+    /// so a strip-wide span mis-seeds the slot itself, not just
+    /// the size of one nudge.
     private func resizeScrollingSlot(
         _ delta: Double,
         space: Space
@@ -149,7 +156,7 @@ extension KiwiCore {
             in: state
         )
         let bounds =
-            screen.map { tiler.visibleBounds($0) }
+            screen.map { tiler.layoutBounds(on: $0) }
             ?? CGRect(x: 0, y: 0, width: 1920, height: 1080)
         let along = horizontal ? bounds.width : bounds.height
         let current = scrolling.slotSize

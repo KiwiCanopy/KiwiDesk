@@ -13,6 +13,15 @@ import Testing
 /// two went in routed but uncovered, and reverting either left
 /// the whole behavioural suite green.
 ///
+/// This guards the layer *below* `LayoutBoundsRoutingTests`
+/// (#537): here, nobody bypasses the hook; there, nobody
+/// consumes it raw where the layout *region* is meant. Both are
+/// needed — routing through this hook and then dividing by the
+/// whole display passes this suite and is still the bug. The two
+/// do **not** compose over each other's allowlists: a file
+/// exempted here names `visibleBounds` zero times, so a span
+/// measured inside one is invisible to both.
+///
 /// **The lens, not the list.** The scan discovers *every*
 /// occurrence under `Sources/KiwiDeskCore` and pins a per-file
 /// count, so a new direct call in an unlisted file fails on

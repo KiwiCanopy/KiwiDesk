@@ -15,11 +15,15 @@ import CoreGraphics
 ///   frame, so it starts inside the Space Bar's inset and the
 ///   corners cannot overlap.
 public enum SpaceBarGeometry {
-    // NOTE: every `axVisibleFrame -> settings.context(bounds:)`
-    // flow MUST route its bounds through
-    // `TilingSettings.layoutBounds(from:)` (which wraps
-    // `remainingFrame`) — a flow that skips it re-opens the
-    // strip to layouts.
+    // NOTE: every flow that reads a layout *span* MUST route its
+    // bounds through `TilingSettings.layoutBounds(from:)` (which
+    // wraps `remainingFrame`) — normally via the engine seam,
+    // `TilingEngine.layoutBounds(on:)`. A flow that skips it
+    // re-opens the strip. That is not only the
+    // `settings.context(bounds:)` flows: the resize paths build no
+    // `LayoutContext` yet divide a delta by this span and compare
+    // slots against its midpoint, and read it raw until #537.
+    // `LayoutBoundsRoutingTests` is the enforcement.
 
     /// The strip the bar occupies on `visible` (AX coordinates),
     /// or nil while the bar is off. Reuses the App Bar's

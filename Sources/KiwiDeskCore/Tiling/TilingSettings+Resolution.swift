@@ -218,7 +218,14 @@ extension TilingSettings {
     /// visible frame and `context(bounds:space:)` — every
     /// caller routes through it so no flow can silently skip
     /// the inset.
-    public func layoutBounds(from visible: CGRect) -> CGRect {
+    ///
+    /// Deliberately **not** `public`: it takes a raw frame the
+    /// caller had to obtain some other way, so it is the
+    /// unsafe half of the pair. Callers with a screen in hand
+    /// want `TilingEngine.layoutBounds(on:)` (#537), and both
+    /// routing guards scan only this module — a cross-module
+    /// caller would be invisible to them.
+    func layoutBounds(from visible: CGRect) -> CGRect {
         SpaceBarGeometry.remainingFrame(
             in: visible,
             style: spaceBarStyle

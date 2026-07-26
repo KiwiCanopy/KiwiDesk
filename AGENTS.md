@@ -355,12 +355,25 @@ Keep this list updated whenever a recurring mistake is found.
   their AX tree warm; do not remove this without a replacement.
 - **Windows live in a flat `[WindowID]` per space.** Do not
   introduce tree/container structures into state or layout code.
-- **Display SIZE enters layout through one hook (#531).** Layout
+- **Display SIZE enters layout through one hook (#531), and a
+  layout SPAN through a second one on top of it (#537).** Layout
   slots, track capacity and resize spans read their bounds from
   `TilingEngine.visibleBounds` (default: the screen's
   `axVisibleFrame`), never `GeometryUtils.axVisibleFrame`
   directly — `VisibleBoundsRoutingTests` scans the whole
   `KiwiDeskCore` target and fails on an unlisted direct call.
+  Everything that measures a *span* then reads
+  `TilingEngine.layoutBounds(on:)`, which reserves the Space
+  Bar's strip (#293) — the region the layout actually divided.
+  Routing through the hook and then dividing by the whole
+  display satisfies the first guard and is still the bug, which
+  is why there are two: `LayoutBoundsRoutingTests` is the
+  second, and **its `allowed` map is that exemption list.** The
+  exception is a rect used as a *containment box* for a window
+  the layout does not place — no span to divide, no midpoint to
+  classify against, and its relationship to a bar owned by the
+  painted-strip clamp (#242) instead. Do not restate which
+  files those are here; the `allowed` map is the one copy.
   It pins **size, not topology**: which screen a space lands on
   still comes from `NSScreen` through the static `screen(…)`
   resolvers, so a fixture can shrink its display but not

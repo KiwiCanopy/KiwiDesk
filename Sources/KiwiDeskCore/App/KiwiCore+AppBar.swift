@@ -90,7 +90,12 @@ extension KiwiCore {
         )
         // Space-first reservation (#293): the App Bar carves
         // inside the frame the Space Bar already inset — same
-        // rule the retile path applies.
+        // rule the retile path applies, reached through
+        // `layoutBounds(from:)` rather than the engine's
+        // `layoutBounds(on:)` seam because chrome is drawn on a
+        // REAL screen: this is one of the deliberate
+        // `visibleBounds` exemptions, and the reason lives in
+        // `VisibleBoundsRoutingTests.allowed` (#537 review).
         // Empty sticky set: this context only carves the bar
         // strip (`usable` + `barFrame`), it never produces
         // per-window frames, so pile exemption cannot apply.
