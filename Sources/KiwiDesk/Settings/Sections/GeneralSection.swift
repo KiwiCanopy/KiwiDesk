@@ -254,9 +254,28 @@ struct GeneralSection: View {
 private struct LocaleOption {
     let code: String
 
+    /// The endonym, with its first character capitalized *for
+    /// this locale*.
+    ///
+    /// `localizedString(forIdentifier:)` returns the running-text
+    /// form, and Spanish, French, Italian and Russian do not
+    /// capitalize a language name mid-sentence — so the raw list
+    /// read "English, Deutsch, español, français, italiano,
+    /// русский", capitalized only where the language's own
+    /// orthography happens to do it. That looks like a bug
+    /// because in a *list* it is one: macOS System Settings
+    /// capitalizes every entry, and matching it is the
+    /// Apple-native call (§2.7).
+    ///
+    /// Uppercasing with the entry's own locale, not the current
+    /// one, keeps a language's own casing rules in charge; scripts
+    /// without case (日本語, 한국어, 中文) are returned untouched.
     var nativeName: String {
-        Locale(identifier: code)
-            .localizedString(forIdentifier: code)
-            ?? code
+        let locale = Locale(identifier: code)
+        let raw =
+            locale.localizedString(forIdentifier: code) ?? code
+        guard let first = raw.first else { return raw }
+        return String(first).uppercased(with: locale)
+            + raw.dropFirst()
     }
 }

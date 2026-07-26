@@ -9,11 +9,13 @@ import SwiftUI
 /// (§3.12) at the bottom.
 struct SettingsView: View {
     @ObservedObject var model: SettingsModel
-    /// Profiles is the natural entry point for both the
-    /// first-run and the returning user (§5.8) — it is the
-    /// default selection, not the top row.
-    @State private var selection: SettingsDestination =
-        .profiles
+    /// The sidebar selection lives on the model, not in `@State`
+    /// — see `SettingsModel.destination`. A locale change re-keys
+    /// this view, and `@State` would not survive it.
+    private var selection: SettingsDestination {
+        get { model.destination }
+        nonmutating set { model.destination = newValue }
+    }
 
     var body: some View {
         Group {
@@ -82,7 +84,7 @@ struct SettingsView: View {
     private var structuredShell: some View {
         HStack(spacing: 0) {
             SettingsSidebar(
-                selection: $selection,
+                selection: $model.destination,
                 editingStoredProfile: model.editingStoredProfile,
                 spotlightProfiles:
                     model.profileSummaries.isEmpty

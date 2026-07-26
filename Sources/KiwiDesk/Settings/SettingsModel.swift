@@ -41,6 +41,21 @@ final class SettingsModel: ObservableObject {
     /// panel's "Edit in Settings…" bridge, #326). `SettingsView`
     /// consumes and clears it.
     @Published var pendingDestination: SettingsDestination?
+    /// Which sidebar row is selected.
+    ///
+    /// Held here rather than as `@State` in `SettingsView`
+    /// because the view is re-keyed on a GUI language change
+    /// (`LocaleScopedRoot`), and `@State` does not survive that —
+    /// switching language silently threw the user back to
+    /// Profiles mid-task. The model outlives the rebuild, so the
+    /// selection does too.
+    ///
+    /// Profiles stays the *entry* point for a first-run and a
+    /// returning user (§5.8): `SettingsWindowController.show()`
+    /// resets this each time the window is opened, so persisting
+    /// it here changes nothing a user sees except that a language
+    /// switch no longer moves them.
+    @Published var destination: SettingsDestination = .profiles
     /// A destructive action parked behind the unsaved-changes
     /// dialog (#515). Written only by `discardingEdits` and the
     /// two `*PendingDiscard` verbs in `SettingsModel+Discard`.
