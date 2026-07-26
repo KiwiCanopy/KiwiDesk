@@ -97,11 +97,34 @@ public struct BorderStyle: Sendable, Equatable {
     /// native-first, matching JankyBorders' own default; the flat
     /// ring already reads clearly, glow is additive flourish.
     public var glow = false
+    /// The bloom's blur radius in points, `0` = automatic (#551):
+    /// the width-scaled formula (`glowBlur(for:)`). An explicit
+    /// value overrides the formula, clamped only to the
+    /// renderable cap — the GUI curates a tighter band, Lua is
+    /// open per AGENTS §2.7.
+    public var glowSize: CGFloat = 0
     /// Ring stacked behind windows (default) or in front. A niche
     /// Lua-only preference with no GUI control (#367).
     public var drawOrder: DrawOrder = .behind
 
     public init() {}
+
+    /// The renderable ceiling for an explicit `glowSize` — past
+    /// this the overlay frame growth buys no legible bloom.
+    public static let maxGlowSize: CGFloat = 40
+
+    /// The blur the focused ring's bloom actually renders: `0`
+    /// while glow is off; otherwise the explicit `glowSize`
+    /// (capped) or, at the `0 = automatic` sentinel, the
+    /// width-scaled formula. Resolved HERE, before geometry —
+    /// `BorderGeometry.compute` takes the finished number, so
+    /// the geometry math stays free of style resolution.
+    public var resolvedGlowBlur: CGFloat {
+        guard glow else { return 0 }
+        return glowSize > 0
+            ? min(Self.maxGlowSize, glowSize)
+            : Self.glowBlur(for: clampedWidth)
+    }
 
     /// The width actually rendered — raw `width` clamped into
     /// range so a hand-edited profile can't paint an absurd ring.
@@ -157,6 +180,7 @@ extension BorderStyle: Codable {
         case unfocusedColor = "unfocused_color"
         case cornerStyle = "corner_style"
         case glow
+        case glowSize = "glow_size"
         case drawOrder = "draw_order"
     }
 
@@ -202,6 +226,11 @@ extension BorderStyle: Codable {
                 Bool.self,
                 forKey: .glow
             ) ?? defaults.glow
+        glowSize =
+            try container.decodeIfPresent(
+                CGFloat.self,
+                forKey: .glowSize
+            ) ?? defaults.glowSize
         drawOrder =
             try container.decodeIfPresent(
                 DrawOrder.self,
