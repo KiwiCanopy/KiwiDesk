@@ -21,8 +21,14 @@ only the mechanical contract.
    `%1$d`. Same set, same spelling. They are numbered precisely
    so you *can* move them — put them where the sentence needs
    them in your language, not where English has them.
-3. Keep `\n` escapes, and any leading or trailing space, as in
-   the source.
+3. **Keep `\n` escapes *inside* the string.** Leading and
+   trailing whitespace is a different matter: `merge-keys` trims
+   it, so it cannot survive and must never carry meaning. (It used
+   to say otherwise. One English string ended in `\n` to separate
+   a header from a list; the trim silently dropped it in all
+   eleven locales and the header ran into the first bullet. The
+   newline moved into the Swift instead — a structural separator
+   is not copy.)
 4. **Do not translate**: the product name *KiwiDesk*; code and
    config identifiers (`init.lua`, `gui.json`, `set_gap_global`,
    Lua function names); key names themselves.

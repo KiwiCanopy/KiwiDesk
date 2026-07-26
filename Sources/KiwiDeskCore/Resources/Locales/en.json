@@ -292,7 +292,7 @@
   "keybinding.conflict.bullet.unrecognized": "\"%1$@\" isn't a recognized shortcut",
   "keybinding.conflict.bullet.with": "\"%1$@\" with \"%2$@\"",
   "keybinding.conflict.other_binding": "Shortcut for \"%1$@\" is conflicting with \"%2$@\".",
-  "keybinding.conflict.several": "Several shortcuts are conflicting:\n",
+  "keybinding.conflict.several": "Several shortcuts are conflicting:",
   "keybinding.conflict.system": "Shortcut for \"%1$@\" is conflicting with the macOS shortcut \"%2$@\".",
   "keybinding.conflict.tooltip.other_binding": "Already bound in this mode: %1$@",
   "keybinding.conflict.tooltip.system": "Conflicts with macOS: %1$@",

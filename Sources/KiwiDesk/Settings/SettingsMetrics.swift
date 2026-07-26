@@ -7,13 +7,28 @@ import SwiftUI
 /// of each row picking its own label width.
 enum SettingsMetrics {
     /// The label column in front of sliders, segmented pickers
-    /// and dropdowns. The longest row label in use ("Mouse
-    /// resize action") measures ~121 pt at body size; 150 also
-    /// holds the label-adjacent help `?` (#94 placement, ~24 pt
-    /// glyph + chip + gap) on rows that carry one — rows
-    /// without help just gain truncation headroom for longer
-    /// locales.
-    static let labelColumn: CGFloat = 150
+    /// and dropdowns. Holds the label-adjacent help `?` (#94
+    /// placement, ~24 pt glyph + chip + gap) on rows that carry
+    /// one.
+    ///
+    /// Widened from 150 to 210 when #95 landed the remaining
+    /// eight languages. 150 was sized for English ("Mouse resize
+    /// action", ~121 pt) and de; measured across all eleven
+    /// locales, 53 of 451 row labels overflowed it — `es` 12,
+    /// `ru` 11, `fr` 10, `pt-BR` 9, `it` 8, `de` 2, `ja` 1, with
+    /// `en`/`ko`/`zh-*` clean. 210 clears 43 of those 53. It is
+    /// deliberately not sized to clear all of them: the last ten
+    /// need ~280 pt, which would cost every slider and picker in
+    /// the app 130 pt of travel to serve a handful of the longest
+    /// Romance and Russian labels. Those still truncate on one
+    /// line (`lineLimit(1)`), visibly, with the full text in the
+    /// row's help where it has one.
+    ///
+    /// The remaining rule for a new label: measure it. Past ~210
+    /// pt in any shipped locale, shorten the label rather than
+    /// moving this number again — it is the shared alignment axis
+    /// for every section, so it trades control width app-wide.
+    static let labelColumn: CGFloat = 210
 
     /// `OverrideChrome`'s leading padding and checkbox
     /// spacing — consumed by the chrome itself, so retuning
@@ -30,12 +45,22 @@ enum SettingsMetrics {
     /// row's control on the same axis as the plain rows. The
     /// chrome re-scopes the shared rows onto this via
     /// `\.settingsLabelColumn`. The discount means a label
-    /// that fits `labelColumn` can still wrap here — override
-    /// labels must measure under ~116 pt at body size (the
-    /// old 94 pt column bit "Focused anchor" at 97 pt,
-    /// shortened to "Focus anchor"; it would fit again now);
-    /// the shared rows' `lineLimit(1)` makes an overflow
-    /// truncate visibly instead of wrapping quietly.
+    /// that fits `labelColumn` can still truncate here; the
+    /// shared rows' `lineLimit(1)` makes that visible rather
+    /// than a quiet wrap.
+    ///
+    /// It rides `labelColumn`, so #95's widening moved it 116 →
+    /// 176, and every override label in every shipped locale now
+    /// fits (the two that did not — `es`/`ru` "App symbol style" —
+    /// were shortened instead, since an override label sits on the
+    /// app's narrowest surface and wants the terser form anyway).
+    /// Worth knowing what the widening costs there:
+    /// the per-space popover is 392 pt, so an override row there
+    /// now leaves ~150 pt for its control instead of ~210. That
+    /// still holds its menus (the widest value, "Column width",
+    /// measures well under it) — but it is the surface to check
+    /// first if this number moves again, since it has the least
+    /// room and no plain rows to align with.
     static let overrideLabelColumn: CGFloat =
         labelColumn - (2 * overrideRowInset + checkboxWidth)
 

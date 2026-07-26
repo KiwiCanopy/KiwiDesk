@@ -70,10 +70,18 @@ extension SettingsModel {
             return sentence(only)
         }
         let lines = conflicts.map { "– \(bulletLine($0))" }
+        // The separator lives here, not on the end of the
+        // translatable string. It used to be a trailing `\n` inside
+        // the English, and `merge-keys` trims surrounding
+        // whitespace off every translation — so all eleven locales
+        // shipped without it and ran this header into the first
+        // bullet. A structural newline is not copy; a catalog is
+        // the wrong place to carry one.
         return L(
             "keybinding.conflict.several",
-            "Several shortcuts are conflicting:\n"
+            "Several shortcuts are conflicting:"
         )
+            + "\n"
             + lines.joined(separator: "\n")
     }
 

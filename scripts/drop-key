@@ -81,6 +81,12 @@ def main(argv: list[str]) -> int:
     rest: list[str] = []
     index = 0
     while index < len(args):
+        if args[index].startswith("--locale="):
+            # `--locale=de` would otherwise fall through and be
+            # read as a key name, blaming the wrong argument.
+            locales.append(args[index].split("=", 1)[1])
+            index += 1
+            continue
         if args[index] == "--locale":
             if index + 1 >= len(args):
                 print(
@@ -102,6 +108,14 @@ def main(argv: list[str]) -> int:
     # promise the pre-validation pass exists for.
     keys = list(dict.fromkeys(args))
 
+    if "en" in locales:
+        print(
+            "drop-key: en.json is the generated English source "
+            "(scripts/extract-keys) and is never edited here — "
+            "drop the key from a translation instead.",
+            file=sys.stderr,
+        )
+        return 1
     files = _translation_files(locales or None)
     if not files:
         scope = (
@@ -163,9 +177,14 @@ def main(argv: list[str]) -> int:
             f"{', '.join(dropped)}"
         )
 
+    scope = (
+        f"{', '.join(locales)}'s"
+        if locales
+        else "each locale's"
+    )
     print(
         "drop-key: done. The key(s) fall back to English at "
-        "runtime and reappear on each locale's to-translate "
+        f"runtime and reappear on {scope} to-translate "
         f"list (scripts/extract-keys {flag}<locale>)."
     )
     return 0

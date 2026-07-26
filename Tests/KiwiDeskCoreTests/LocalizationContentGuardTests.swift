@@ -1,11 +1,12 @@
 import Foundation
 import Testing
 
-/// Exercises the per-value content guards `extract-keys --check`
-/// gates on (issue #95): a wrong writing system, a tagged English
-/// stub, and English words left inside a translated sentence.
-/// `LocalizationOverlapGuardTests` covers the corpus-wide
-/// cross-language check that needs whole catalogs.
+/// Exercises the *exact* per-value content guards `extract-keys
+/// --check` gates on (issue #95): a wrong writing system, a tagged
+/// English stub, and interpolation-specifier drift. The heuristic
+/// one lives in `LocalizationResidueGuardTests`, and the two
+/// corpus-wide checks in `LocalizationOverlapGuardTests` and
+/// `LocalizationCollapseGuardTests`.
 ///
 /// Every fixture is text the test writes itself. Asserting against
 /// the shipped catalogs instead would tie the guard's coverage to
@@ -65,6 +66,11 @@ struct LocalizationContentGuardTests {
             catalogs: [locale: ["a.add": value]]
         )
         #expect((result.status == 0) == passes)
+        // Not just "some failure": a bare non-zero exit is also
+        // what a traceback or a different guard would produce.
+        if !passes {
+            #expect(result.stderr.contains("Kana"))
+        }
     }
 
     @Test("Hangul outside Korean fails")
@@ -147,118 +153,51 @@ struct LocalizationContentGuardTests {
         #expect(result.status == 0)
     }
 
+    /// Placeholder parity is the one guard protecting a *runtime*
+    /// path: these values reach `String(format:)`, so a dropped
+    /// `%1$@` loses the interpolated name and an invented one reads
+    /// an argument that was never passed.
     @Test(
-        "English left in a non-Latin value fails",
+        "specifier drift fails",
         arguments: [
-            ("ja", "追加 Window", "Window"),
-            ("ko", "추가 a mode", "a"),
-            ("zh-Hans", "焦点 anchor", "anchor"),
-            ("ru", "Фокус here", "here"),
+            ("About %1$@", "情報", "drops"),
+            ("About %1$@", "%1$@ の %2$@ について", "adds"),
         ]
     )
-    func englishResidueFails(
-        locale: String,
+    func specifierDriftFails(
+        english: String,
         value: String,
-        word: String
+        verb: String
     ) throws {
-        let english = [
-            "Window": "Add Window",
-            "a": "Add a mode",
-            "anchor": "Focus anchor",
-            "here": "Focus here",
-        ][word]!
         let result = try ContentGuardFixture.check(
-            english: ["a.key": english],
-            catalogs: [locale: ["a.key": value]]
+            english: ["a.about": english],
+            catalogs: ["ja": ["a.about": value]]
         )
         #expect(result.status != 0)
-        #expect(result.stderr.contains("English word"))
+        #expect(result.stderr.contains(verb))
     }
 
-    /// The residue rule is confined to non-Latin scripts on
-    /// purpose: in a Latin-script locale a retained English word is
-    /// indistinguishable from a cognate or a loanword, and these
-    /// three are all correct translations.
-    @Test(
-        "a Latin-script cognate is not residue",
-        arguments: [
-            ("pt-BR", "Active item", "Item ativo"),
-            ("de", "My Setup", "Mein Setup"),
-            ("it", "Track limit", "Limite del track"),
-        ]
-    )
-    func latinCognateIsNotResidue(
-        locale: String,
-        english: String,
-        value: String
-    ) throws {
+    /// The numbering exists so a translation *can* reorder the
+    /// arguments, and many languages must — so order is not drift.
+    @Test("reordered specifiers pass")
+    func reorderedSpecifiersPass() throws {
         let result = try ContentGuardFixture.check(
-            english: ["a.key": english],
-            catalogs: [locale: ["a.key": value]]
+            english: ["a.two": "%1$@ before %2$@"],
+            catalogs: ["ja": ["a.two": "%2$@ の前に %1$@"]]
         )
         #expect(result.status == 0)
     }
 
-    /// An English `-ing` welded onto a translated stem is precise
-    /// in *any* locale — no target language forms a word that way.
-    @Test("a welded English gerund fails in a Latin locale")
-    func weldedGerundFails() throws {
+    /// `%%` renders a literal percent and carries no argument, so a
+    /// translation may add it — several locales write `"%1$d%%"`
+    /// where the English spells out "percent".
+    @Test("a literal percent is not drift")
+    func literalPercentIsNotDrift() throws {
         let result = try ContentGuardFixture.check(
-            english: ["a.edit": "Editing init.lua directly."],
-            catalogs: ["fr": ["a.edit": "Modifiering init.lua."]]
-        )
-        #expect(result.status != 0)
-        #expect(result.stderr.contains("Modifiering"))
-    }
-
-    @Test("an all-English value is not read as residue")
-    func untranslatedValueIsNotResidue() throws {
-        // A different defect with a different fix, and correct for
-        // the handful of keys whose English is a bare product term.
-        let result = try ContentGuardFixture.check(
-            english: ["a.lua": "Lua"],
-            catalogs: ["ja": ["a.lua": "Lua"]]
+            english: ["a.pct": "ratio %1$d percent"],
+            catalogs: ["ja": ["a.pct": "比率 %1$d%%"]]
         )
         #expect(result.status == 0)
-    }
-
-    @Test(
-        "glossary terms and specifiers survive translation",
-        arguments: [
-            ("Show app bar", "App Barを表示"),
-            ("Mission Control: Space Left", "Mission Control: 左"),
-            ("Edit init.lua", "init.luaを編集"),
-            ("%1$d screens", "画面%1$d台"),
-            ("Press ⌘ Command", "⌘ Commandを押す"),
-            ("Collapse into a +n badge", "+n バッジに折りたたむ"),
-            // Layout-mode names: `layout.<mode>.name` ships each
-            // untranslated, so a sentence naming one keeps it.
-            ("Stack preview: %1$d windows", "Stack プレビュー"),
-            ("Bundle identifier", "Bundle 識別子"),
-        ]
-    )
-    func glossaryIsNotResidue(
-        english: String,
-        value: String
-    ) throws {
-        let result = try ContentGuardFixture.check(
-            english: ["a.key": english],
-            catalogs: ["ja": ["a.key": value]]
-        )
-        #expect(result.status == 0)
-    }
-
-    /// `Command` is stripped only where a modifier glyph precedes
-    /// it, so the same word left bare is still caught — the reason
-    /// the key names are stripped rather than glossarised.
-    @Test("a bare key name is still residue")
-    func bareKeyNameIsResidue() throws {
-        let result = try ContentGuardFixture.check(
-            english: ["a.preset": "Command Center"],
-            catalogs: ["ja": ["a.preset": "Command 中央"]]
-        )
-        #expect(result.status != 0)
-        #expect(result.stderr.contains("Command"))
     }
 }
 
@@ -294,10 +233,15 @@ private enum ContentGuardFixture {
         )
         let script = scriptFixtureRepoRoot()
             .appendingPathComponent("scripts/extract-keys")
-        let environment = [
-            "KIWIDESK_EXTRACT_SOURCES": sources.path,
-            "KIWIDESK_EXTRACT_LOCALES": locales.path,
-        ]
+        // Inherit the real environment and override the two keys,
+        // rather than replacing it. A two-entry environment drops
+        // PATH, so `/usr/bin/env python3` fell back to the system
+        // 3.9 — a different interpreter from the one
+        // `scripts/lint.sh` and CI use, which quietly made the
+        // suite the only thing pinning 3.9 compatibility.
+        var environment = ProcessInfo.processInfo.environment
+        environment["KIWIDESK_EXTRACT_SOURCES"] = sources.path
+        environment["KIWIDESK_EXTRACT_LOCALES"] = locales.path
         // Generate en.json first: `--check` compares against it,
         // and a fixture that skipped this step would fail as
         // stale whatever the catalogs contained.

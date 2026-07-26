@@ -649,30 +649,44 @@ Keep this list updated whenever a recurring mistake is found.
   `LocaleCatalog` soft-fail to `[:]` and silently revert that
   locale to English); an orphan key (in a locale file, absent
   from code) only warns — clean it up with
-  `extract-keys --prune`. **Everything above reads keys; five
+  `extract-keys --prune`. **Everything above reads keys; six
   guards read the copy** (`scripts/localization_guards.py`, #95),
-  and `--check` hard-fails on each: a **wrong writing system**
-  (Cyrillic→`ru`, Kana→`ja`, Han→`ja`/`zh-Hans`/`zh-Hant`,
-  Hangul→`ko`; Latin is deliberately absent — every locale uses
-  it, so its presence proves nothing), a **tagged stub**
-  (`"Icon & name (ES)"`, full-width `（JA）` included), **English
-  residue** in a translated sentence, **cross-language overlap**
-  (two different languages sharing a file's worth of identical
-  values), and a **collapsed translation** (one filler reused for
-  many unrelated keys). `merge-keys` runs the per-value three so
+  and `--check` hard-fails on each. Five are exact contracts: a
+  **wrong writing system** (Cyrillic→`ru`, Kana→`ja`,
+  Han→`ja`/`zh-Hans`/`zh-Hant`, Hangul→`ko`; Latin is deliberately
+  absent — every locale uses it, so its presence proves nothing),
+  a **tagged stub** (`"Icon & name (ES)"`, full-width `（JA）`
+  included), **specifier drift** (the `%1$@` multiset must match
+  the English — the only guard on a runtime path, since these
+  reach `String(format:)`), **cross-language overlap** (two
+  different languages sharing a file's worth of identical values),
+  and a **collapsed translation** (one filler reused for many
+  unrelated keys). The sixth, **English residue** in a translated
+  sentence, is a heuristic and the only one with a scope:
+  non-Latin-script locales, and the app catalogs only (not
+  `--site`, whose prose keeps third-party names and inline HTML).
+  In a Latin-script locale a retained English word is
+  indistinguishable from a cognate (`"Item ativo"`, `"Mein
+  Setup"`), so widening it would flag dozens of good translations;
+  don't re-add a rule claiming to be precise everywhere, as an
+  `-ing`-weld sub-rule once did — German `fing`/`Frühling`
+  falsifies it. `merge-keys` runs the per-value guards so
   contamination never lands. There is **no baseline/exemption
   file** — a hit is a real defect; what the guards carry is a
-  `GLOSSARY` of terms that stay English, which a new such term
-  must join in the same change set. The residue rule is confined
-  to non-Latin scripts on purpose: in a Latin-script locale a
-  retained English word is indistinguishable from a cognate
-  (`"Item ativo"`, `"Mein Setup"`), so widening it would flag
-  dozens of good translations. All of this is backed by Swift
-  tests — each localization script has a sibling suite
+  grouped `GLOSSARY` of terms that stay English, which a new such
+  term must join, in the group that justifies it, in the same
+  change set. Locale policy is keyed by locale in two tables, so a
+  **new locale must be registered** in them or two guards go
+  silently quiet — `--check` refuses an unregistered locale and
+  `LocalizationRegistryTests` pins it. All of this is backed by
+  Swift tests — each localization script has a sibling suite
   (`LocalizationDriftGuardTests`, `LocalizationOrphanTests`,
   `RenameKeyTests`, `DropKeyTests`,
   `LocalizationContentGuardTests`,
+  `LocalizationResidueGuardTests`,
   `LocalizationOverlapGuardTests`,
+  `LocalizationCollapseGuardTests`,
+  `LocalizationRegistryTests`,
   `MergeKeysContentGuardTests`, and future scripts follow
   suit) — so a regression in the tooling itself is
   covered by `swift test`, not just by running the script. A

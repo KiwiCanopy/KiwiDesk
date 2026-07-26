@@ -67,6 +67,11 @@ Three things that guard is deliberately NOT:
   already-translated key does not.
 """
 
+# `dict | None` and `str | None` below are evaluated at def time, so
+# without this the module will not import on the system python3
+# (3.9) — see scripts/localization_guards.py.
+from __future__ import annotations
+
 import json
 import sys
 from pathlib import Path
@@ -74,6 +79,7 @@ from pathlib import Path
 from localization_guards import (
     english_residue,
     foreign_scripts,
+    placeholder_drift,
     tagged_stub,
 )
 
@@ -115,7 +121,7 @@ def _load_map(path: Path, label: str) -> dict | None:
 
 
 def _content_defect(
-    locale: str, value: str, english: str
+    locale: str, value: str, english: str, residue: bool = True
 ) -> str | None:
     """Why `value` must not be written to `<locale>.json`, or None.
 
@@ -134,11 +140,16 @@ def _content_defect(
     tag = tagged_stub(locale, value)
     if tag:
         return f"is untranslated English tagged ({tag})"
-    residue = english_residue(locale, value, english)
-    if residue:
+    drift = placeholder_drift(value, english)
+    if drift:
+        return f"{drift} relative to the English"
+    if not residue:
+        return None
+    left = english_residue(locale, value, english)
+    if left:
         return (
             "still carries the English word(s) "
-            f"{', '.join(residue)}"
+            f"{', '.join(left)}"
         )
     return None
 
@@ -228,7 +239,9 @@ def main(argv: list[str]) -> int:
         # keys are absent from <locale>.json by construction (that
         # is why the worksheet held them), so the re-mint recovery
         # above applies to them unchanged.
-        defect = _content_defect(locale, text, current)
+        defect = _content_defect(
+            locale, text, current, residue=not site
+        )
         if defect:
             broken[key] = defect
             continue

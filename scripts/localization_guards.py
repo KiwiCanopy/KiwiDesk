@@ -6,7 +6,8 @@ entry. Nothing else in the pipeline reads the copy, so a bad
 worksheet lands silently and renders live: a reviewer skimming a
 language they do not read sees plausible text.
 
-Four predicates live here, ordered by how much they can prove:
+Six predicates live here. Five are **exact contracts** and hold
+for any corpus of translated strings:
 
 1. `foreign_scripts` — the writing system is wrong for the locale
    (ported from KiwiCV's `scripts/i18n/check-scripts.cjs` via
@@ -15,8 +16,8 @@ Four predicates live here, ordered by how much they can prove:
    shape).
 2. `tagged_stub` — English text with a locale marker appended,
    `"Icon & name (ES)"` / `"Group adjacent…（JA）"`.
-3. `english_residue` — an English sentence with single words
-   swapped, `"保存 as New Profile…"`, `"編集ing init.lua directly"`.
+3. `placeholder_drift` — the `%1$@`/`%1$d` set does not match the
+   English. The only one that guards a runtime path.
 4. `overlapping_locales` — two different languages sharing a
    suspicious number of byte-identical values (the shape that
    caught ~360 entries of French sitting in `it.json`).
@@ -25,9 +26,22 @@ Four predicates live here, ordered by how much they can prove:
    interpolated strings per locale replaced with a bare
    `"Opzione %1$@"` / `"Opção %1$@"`).
 
+The sixth is a **heuristic tuned on short app UI labels**, and the
+only one with a corpus scope:
+
+6. `english_residue` — an English sentence with single words
+   swapped, `"追加 Window"`, `"編集ing init.lua directly"`. Runs on
+   non-Latin-script locales only (see its docstring), and callers
+   apply it to the app catalogs only — the marketing site's
+   manifests are prose full of third-party product names
+   (`Homebrew`, `SketchyBar`, `JankyBorders`) and embedded HTML,
+   where every retained token is legitimate. Pulling that
+   vocabulary into `GLOSSARY` would couple the app's glossary to
+   the site's copy; scoping the predicate is the smaller seam.
+
 A script guard catches the wrong *script*, never the wrong
 *language within one script* — French in Italian is Latin either
-way. That gap is why 2–4 exist alongside 1.
+way. That gap is why 2–6 exist alongside 1.
 
 Every predicate takes the strings it judges as arguments and is
 kept apart from the corpus walk, so the sibling Swift suite can
@@ -40,12 +54,18 @@ There is deliberately **no baseline/exemption file**: the corpus
 is clean once this change lands, so any hit is a real defect.
 """
 
-# `X | None` in a signature is evaluated at def time, and the
-# oldest interpreter this has to run under is the system python3
-# (3.9) — a test that replaces the environment drops PATH, so
-# `/usr/bin/env python3` no longer finds a newer one. Deferring
-# annotation evaluation keeps the modern syntax readable without
-# pinning an interpreter the repo does not otherwise require.
+# `X | None` in a signature is evaluated at def time, so without
+# this the module will not import on macOS's own python3 (3.9.6) —
+# which is what `/usr/bin/env python3` finds for a contributor who
+# has not installed a newer one, and this repo asks for none.
+# `scripts/merge-keys` and `scripts/drop-key` carry it for the same
+# reason. Deferring annotation evaluation keeps the modern syntax
+# readable without pinning an interpreter.
+#
+# (An earlier version of this comment blamed the Swift fixtures for
+# replacing the process environment and so dropping PATH. That was
+# true and is now fixed — they inherit it — but it was never the
+# whole reason, and it made the constraint look test-only.)
 from __future__ import annotations
 
 import re
@@ -58,18 +78,50 @@ import re
 # separate them; kana can, because Chinese has none. That
 # asymmetry is why the table lists which locales may use each
 # script rather than one "expected script" per locale.
+#
+# The scripts with an empty tuple are not "unused forever" — they
+# are unclaimed. Ship `ar.json` without adding `ar` here and every
+# Arabic value fails as foreign to its own locale. That is
+# fail-closed rather than fail-open, which is the right direction,
+# and `unregistered_locales` fires first with a message that says
+# where to register.
+#
+# Ranges use `\u` escapes: the exact boundaries carry the reasoning
+# (see Kana), and a literal `・` inside a character class is
+# invisible in review.
 SCRIPTS = [
-    ("Cyrillic", r"[Ѐ-ӿԀ-ԯ]", ("ru",)),
-    ("Greek", r"[Ͱ-Ͽ]", ()),
-    ("Kana", r"[぀-ヿ]", ("ja",)),
+    ("Cyrillic", r"[\u0400-\u04ff\u0500-\u052f]", ("ru",)),
+    ("Greek", r"[\u0370-\u03ff]", ()),
     (
+        # Hiragana, then katakana split so U+30FB `・` falls in
+        # the hole: that interpunct is shared CJK punctuation, not
+        # a kana letter, and Traditional Chinese uses it between
+        # transliterated foreign names (`史蒂夫・賈伯斯`) — inside
+        # the range it failed correct zh-Hant copy as Japanese.
+        # Half-width katakana is included: unambiguously kana, and
+        # previously unattributable to any locale.
+        "Kana",
+        r"[\u3041-\u309f\u30a0-\u30fa"
+        r"\u30fc-\u30ff\uff66-\uff9d]",
+        ("ja",),
+    ),
+    (
+        # URO, Ext-A, compatibility ideographs. Ext-B and beyond
+        # (U+20000+) are deliberately out — astral-plane rare
+        # characters are not the case this guard is aimed at.
         "Han",
-        r"[一-鿿㐀-䶿豈-﫿]",
+        r"[\u4e00-\u9fff\u3400-\u4dbf\uf900-\ufaff]",
         ("ja", "zh-Hans", "zh-Hant"),
     ),
-    ("Hangul", r"[가-힯ᄀ-ᇿ]", ("ko",)),
-    ("Arabic", r"[؀-ۿ]", ()),
-    ("Hebrew", r"[֐-׿]", ()),
+    (
+        # Syllables, conjoining jamo, and the compatibility jamo
+        # block a plain Hangul range misses.
+        "Hangul",
+        r"[\uac00-\ud7af\u1100-\u11ff\u3130-\u318f]",
+        ("ko",),
+    ),
+    ("Arabic", r"[\u0600-\u06ff]", ()),
+    ("Hebrew", r"[\u0590-\u05ff]", ()),
 ]
 
 _SCRIPT_RES = [
@@ -79,14 +131,10 @@ _SCRIPT_RES = [
 
 # Locales whose copy is written in a non-Latin script. Derived
 # from the table above rather than restated, so adding a locale
-# there cannot leave this set behind. `english_residue`'s first
-# rule only applies to these: in a Latin-script locale a retained
-# English word is indistinguishable from a cognate or a loanword.
+# there cannot leave this set behind. `english_residue` applies
+# only to these — see its docstring.
 NON_LATIN_LOCALES = {
-    locale
-    for name, _, locales in SCRIPTS
-    for locale in locales
-    if name != "Latin"
+    locale for _, _, locales in SCRIPTS for locale in locales
 }
 
 # Terms that stay English in every locale by design: the product,
@@ -102,42 +150,59 @@ NON_LATIN_LOCALES = {
 # Stack" now reads as a deliberate name rather than residue — which
 # is the right call: `de` independently translated that same string
 # as `Focus Stack`.
+#
+# Grouped, because an unlabelled flat set is how a glossary turns
+# into a baseline: without the grouping a reader cannot tell "the
+# shipped UI really renders this untranslated" from "someone
+# silenced a hit to get the gate green". Add to the group that
+# justifies the term, or argue for a new group.
 GLOSSARY = {
-    "app",
-    "apps",
-    "bar",
+    # The product, and the technologies it wraps or names.
     "bsp",
-    "bundle",  # "Bundle identifier", Apple's own term
-    "control",  # Apple's "Mission Control", kept in every locale
-    "default",  # the literal name of the standard shortcut mode
-    "desktop",
-    "dock",
-    "esc",
-    "finder",
-    "floating",
-    "gaps",
-    "grid",
     "ide",
     "kiwidesk",
     "lua",
     "macos",
-    "mission",
-    "monocle",
-    "pt",
-    "rrggbb",
-    "rrggbbaa",
-    "scrolling",
-    "sf",
+    "tiling",
     "sip",
-    "space",
-    "spaces",
-    "stack",
-    "sticky",
+    "ui",
+    # Apple's own names: features, key names, and API terms. The
+    # `system_shortcut.*` keys follow macOS per locale, but these
+    # words stay English inside prose in every locale.
+    "bundle",  # "Bundle identifier"
+    "control",  # "Mission Control"
+    "desktop",  # Mission Control's own noun
+    "dock",
+    "esc",
+    "finder",
+    "mission",
+    "sf",  # "SF Symbol"
     "symbol",
     "symbols",
-    "tiling",
+    # Layout-mode names. `layout.<mode>.name` ships each one
+    # untranslated, so any sentence naming a mode keeps it.
+    "floating",
+    "grid",
+    "monocle",
+    "scrolling",
+    "stack",
+    "sticky",
     "track",
-    "ui",
+    # Nouns the shipped UI renders untranslated in the GUI's own
+    # feature names — "App Bar", "Space Bar", "Gaps" — so prose
+    # referring to them keeps the word. These are the entries most
+    # worth challenging if the GUI ever translates those names.
+    "app",
+    "apps",
+    "bar",
+    "gaps",
+    "space",
+    "spaces",
+    # Literal values and format tokens the user types or reads.
+    "default",  # the standard shortcut mode's literal name
+    "pt",  # the unit
+    "rrggbb",
+    "rrggbbaa",
 }
 
 # Locale codes a stub marker is written with. Keyed by the base
@@ -161,16 +226,48 @@ _STUB_TAGS = {
 # complete.
 _TAG = re.compile(r"[(（]\s*([A-Za-z][A-Za-z\-]{0,7})\s*[)）]")
 
+
+def unregistered_locales(names: list[str]) -> list[str]:
+    """Shipped locales this module has no policy for.
+
+    `SCRIPTS` and `_STUB_TAGS` are registries, and a locale absent
+    from them loses guards **silently** — `tagged_stub("pl", …)`
+    finds no tag set and returns None, `english_residue("pl", …)`
+    reads `pl` as Latin-script and returns nothing. Two of the
+    guards would be off with no signal at all, which is the exact
+    failure the guards exist to prevent, one level up.
+
+    So membership is checked rather than assumed. Only
+    `_STUB_TAGS` is required: a locale legitimately absent from
+    `SCRIPTS` is a Latin-script one, which is a real answer.
+    `SourceScan`-style parity is enforced by
+    `LocalizationRegistryTests`, which walks the shipped files.
+    """
+    return sorted(
+        name
+        for name in names
+        if name != "en"
+        and base_language(name) not in _STUB_TAGS
+    )
+
 # Interpolation specifiers, so `%1$d` never contributes the word
-# `d` and `%1$@` never contributes `@`.
+# `d` and `%1$@` never contributes `@`. Includes `%%`, the literal
+# percent escape, which is likewise not a word.
 _SPECIFIER = re.compile(r"%\d+\$[@d]|%[@d]|%%")
+
+# Just the *argument* references, for `placeholder_drift`. `%%`
+# is deliberately excluded: it renders a literal `%` and carries
+# no argument, so a translation may legitimately add or drop it —
+# several locales write "%1$d%%" where the English spells out
+# "percent". Counting it as drift flagged four correct values.
+_ARG_SPECIFIER = re.compile(r"%\d+\$[@d]")
 
 # A modifier glyph and the key name that follows it: `⌘ Command`,
 # `⇧Shift`. These are Apple's key names, correctly left English in
 # every locale, and stripping them here is better than
 # glossarising `command` — which would hide the real residue in
 # `"Command 中央"` for English "Command Center".
-_KEY_NAME = re.compile(r"[⌘⌥⌃⇧⇪]+\s*[A-Za-z]*")
+_KEY_NAME = re.compile(r"[⌘⌥⌃⇧⇪]+[ \t]*[A-Za-z]*")
 
 # Dotted identifiers and calls: `init.lua`,
 # `KiwiDesk.reload_config()`.
@@ -207,9 +304,54 @@ def tagged_stub(locale: str, value: str) -> str | None:
     """
     allowed = _STUB_TAGS.get(base_language(locale), set())
     for tag in _TAG.findall(value):
-        if tag.lower().replace("_", "-") in allowed:
+        if tag.lower() in allowed:
             return tag
     return None
+
+
+def placeholder_drift(value: str, english: str) -> str | None:
+    """How `value`'s interpolation specifiers differ from
+    `english`'s, or None when they match.
+
+    The one guard here that protects a *runtime* path rather than
+    the copy: these values reach `String(format:)`, so a dropped
+    `%1$@` silently loses the interpolated name or count and an
+    invented one reads an argument that was never passed.
+    `TRANSLATION_BRIEF.md` has always told translators to preserve
+    the set exactly; nothing enforced it.
+
+    Compares as a multiset, so a duplicate specifier counts — but
+    not as a sequence: the numbering exists precisely so a
+    translation *can* reorder them, and many languages must.
+    """
+    want = sorted(_ARG_SPECIFIER.findall(english))
+    got = sorted(_ARG_SPECIFIER.findall(value))
+    if want == got:
+        return None
+    missing = sorted(_multiset_difference(want, got))
+    extra = sorted(_multiset_difference(got, want))
+    parts = []
+    if missing:
+        parts.append(f"drops {', '.join(missing)}")
+    if extra:
+        parts.append(f"adds {', '.join(extra)}")
+    return " and ".join(parts)
+
+
+def _multiset_difference(
+    left: list[str], right: list[str]
+) -> list[str]:
+    """Members of `left` not covered by `right`, counting
+    duplicates — a plain set difference would call `%1$@ %1$@`
+    against `%1$@` a match."""
+    remaining = list(right)
+    surplus: list[str] = []
+    for item in left:
+        if item in remaining:
+            remaining.remove(item)
+        else:
+            surplus.append(item)
+    return surplus
 
 
 def _words(text: str) -> list[str]:
@@ -231,49 +373,68 @@ def english_residue(
 ) -> list[str]:
     """English fragments left behind in `value`.
 
-    Two rules, both aimed at a worksheet that substituted single
-    words instead of translating the sentence:
+    Aimed at a worksheet that substituted single words instead of
+    translating the sentence — `"追加 Window"` for "Add Window",
+    `"編集ing init.lua directly"` for "Editing init.lua directly".
 
-    - In a **non-Latin-script** locale, any word of the English
-      source still present in a value that is otherwise
-      translated. Decisive there, and *only* there: `"Item ativo"`
-      for "Active item" is correct Portuguese, so the same rule
-      over `pt-BR` would flag every cognate and loanword.
-    - In **any** locale, an English `-ing` welded onto a
-      translated stem — `"Modifiering"`, `"編集ing"`. Precise
-      because no target language forms a word that way; the
-      `-s`/`-ed`/`-d` welds this same worksheet also produced
-      (`"保存d profiles"`, `"Salvard"`) are *not* checked, because
-      native words ending in those letters are everywhere ("und",
-      "bord", "Feld") and the rule would drown in them. Those
-      values are caught by the first rule wherever it applies.
+    **Non-Latin-script locales only, by design.** In a
+    Latin-script locale a retained English word is
+    indistinguishable from a cognate or a loanword: `"Item ativo"`,
+    `"Mein Setup"` and `"Limite del track"` are all correct, so
+    the rule would flag good translations by the dozen. Scoped
+    here, it needs no per-language lexicon.
+
+    An earlier draft carried a second sub-rule that ran in *every*
+    locale: an English `-ing` welded onto a translated stem
+    (`"Modifiering"`, `"Editaring"`), justified by "no target
+    language forms a word that way". German falsifies that outright
+    — `fing`, `ging`, `Ring`, and the productive `-ling` class
+    (`Frühling`, `Lehrling`); the repo's own site copy contains
+    `fing`. Scoping it here instead made it unreachable rather than
+    correct: a weld in a non-Latin locale has a non-Latin stem
+    (`"保存d"`, `"編集ing"`), so tokenizing leaves a bare suffix and
+    nothing to match. It is gone. The values it aimed at are caught
+    by the rule above — `"編集ing init.lua directly."` fails on
+    `directly`, not on the weld — and a Latin locale's genuine weld
+    is review-caught, like the rest of Latin word-swap residue.
+
+    The `-s`/`-ed`/`-d` welds (`"保存d profiles"`, `"Salvard"`) were
+    never checked, for the same reason plus a worse one: native
+    words ending in those letters are everywhere ("und", "bord",
+    "Feld").
     """
+    if locale not in NON_LATIN_LOCALES:
+        return []
+    if not _is_partly_translated(locale, value):
+        return []
     source = _words(english)
     lowered = {word.lower() for word in source}
-    found: list[str] = []
     value_words = _words(value)
-
-    if locale in NON_LATIN_LOCALES and _is_partly_translated(
-        locale, value
-    ):
-        found += [
-            word
-            for word in value_words
-            if word.lower() in lowered
-            and word.lower() not in GLOSSARY
-            and (len(word) > 1 or word.lower() == "a")
-        ]
-
-    found += _welded_gerunds(source, value_words, lowered)
+    found = [
+        word
+        for word in value_words
+        if word.lower() in lowered
+        and word.lower() not in GLOSSARY
+        and (len(word) > 1 or word.lower() == "a")
+    ]
     return sorted(set(found))
 
 
 def _is_partly_translated(locale: str, value: str) -> bool:
     """Whether `value` carries any character of its own script.
 
-    An all-English value is *untranslated*, a different defect
-    with a different fix, and legitimately correct for the handful
-    of keys whose English is a bare product term ("Lua", "BSP").
+    An all-English value in a non-Latin locale is *untranslated*,
+    and this rule stays out of it: for 15-21 keys per locale that
+    is the correct answer (`KiwiDesk`, `Lua`, `BSP`, `App Bar`,
+    `Mission Control`), and telling those apart from a genuinely
+    skipped string needs a per-locale allowlist nothing here has.
+
+    Stated plainly because an earlier draft of this docstring
+    claimed the defect had "a different fix": it does not. No guard
+    owns it, and `write_missing` will not re-mint a key whose
+    locale value is non-empty, so an untranslated-but-English value
+    never resurfaces on a to-translate list either. `drop-key
+    --locale` is the only way to put one back in play.
     """
     return any(
         pattern.search(value)
@@ -282,37 +443,15 @@ def _is_partly_translated(locale: str, value: str) -> bool:
     )
 
 
-def _welded_gerunds(
-    source: list[str], value_words: list[str], lowered: set[str]
-) -> list[str]:
-    """Tokens that took an English `-ing` from `source` onto a
-    stem that is not the English one."""
-    stems = {
-        word[:-3].lower()
-        for word in source
-        if len(word) > 3 and word.lower().endswith("ing")
-    }
-    if not stems:
-        return []
-    return [
-        word
-        for word in value_words
-        if len(word) > 3
-        and word.lower().endswith("ing")
-        and word.lower() not in lowered
-        and word.lower() not in GLOSSARY
-        and not any(
-            word.lower().startswith(stem) for stem in stems
-        )
-    ]
-
-
-# A pair is flagged at 5% of the keys they share, floored at 20.
-# Sibling languages really do coincide on short UI labels —
-# `es`/`pt-BR` sit at 11 identical values (1.4%) with the corpus
-# clean — while a whole file pasted into the wrong locale lands
-# near 45%. The floor keeps a small catalog from tripping on a
-# handful of matches.
+# A locale pair is flagged at 5% of the keys they share, floored at
+# 20. Sibling languages really do coincide on short UI labels —
+# `es`/`pt-BR` sit at 13 identical values with the corpus clean —
+# while a whole file pasted into the wrong locale lands near 45%.
+#
+# At the corpus's 810 shared keys the ratio governs (5% = 40) and
+# the floor is dead outside fixtures; the floor is what keeps a
+# *small* catalog (the 237-key site manifests, or a new locale
+# mid-translation) from tripping on a handful of matches.
 OVERLAP_RATIO = 0.05
 OVERLAP_FLOOR = 20
 
@@ -325,14 +464,30 @@ def _nontrivial(value: str) -> bool:
 
 
 # A translation reused for this many *distinct* English strings is
-# a collapse, and any reuse at all is one when the value carries an
-# interpolation specifier. Both thresholds were measured against
-# the eight shipped locales: zero false positives, because the
-# innocent collapses are near-synonyms sharing one target word
-# ("Alignment"/"Orientation" → `Ausrichtung`, "Thickness"/"Width" →
-# `Spessore`) and never reach five, while a specifier-bearing
-# string is specific enough that two of them never coincide.
+# a collapse. Both thresholds were measured against the shipped
+# corpus, which is the only place their headroom is visible — record
+# it here when it moves, because the numbers alone read arbitrary:
+#
+# - Plain values: the worst *innocent* collapse in the corpus is
+#   **3** distinct English strings on one value (`de` "Standard" for
+#   "default"/"Default"/"standard", `ko` "고정" for "Make
+#   sticky"/"Rigid"/"Sticky"). Near-synonyms sharing one target word
+#   are normal and must pass, so the limit sits at 5 — two clear.
+#   That is thin for a growing Settings UI, which reuses exactly
+#   this word class; a fourth synonym is the signal to re-measure
+#   rather than to raise the number reflexively.
+# - Specifier-bearing values: 3 as well, not 2. A string specific
+#   enough to interpolate an argument rarely coincides across
+#   unrelated keys — but *two* keys legitimately share one English
+#   string today (`app_bar.preview.caption` and
+#   `space_bar.preview.caption`, both "Position: %1$@ · %2$@"), and
+#   a purely cosmetic edit to one of them would make the English
+#   distinct and hard-fail all eleven catalogs at once. §5 says a
+#   cosmetic edit keeps translations, so the guard must not punish
+#   it. The real defect this caught had groups of 37, 4, 4 and 3, so
+#   3 loses nothing.
 COLLAPSE_LIMIT = 5
+SPECIFIER_COLLAPSE_LIMIT = 3
 
 
 def collapsed_translations(
@@ -340,7 +495,7 @@ def collapsed_translations(
 ) -> list[tuple[str, list[str]]]:
     """Values this locale reuses for unrelated English strings.
 
-    Catches the defect class the other four cannot see: content
+    Catches the defect class the other five cannot see: content
     that is fluent, in the right script, free of English residue —
     and simply not a translation of its key. A worksheet generator
     that gives up on interpolated strings emits one filler for all
@@ -359,7 +514,8 @@ def collapsed_translations(
         if len({english[key] for key in keys}) >= COLLAPSE_LIMIT
         or (
             _SPECIFIER.search(value)
-            and len({english[key] for key in keys}) >= 2
+            and len({english[key] for key in keys})
+            >= SPECIFIER_COLLAPSE_LIMIT
         )
     ]
     return sorted(findings, key=lambda hit: -len(hit[1]))
@@ -377,7 +533,7 @@ def overlapping_locales(
     skipped — `zh-Hans` and `zh-Hant` are one language in two
     scripts and legitimately agree on a great deal.
     """
-    names = sorted(name for name in catalogs if name != "en")
+    names = sorted(catalogs)
     findings: list[tuple[str, str, list[str]]] = []
     for index, first in enumerate(names):
         for second in names[index + 1 :]:

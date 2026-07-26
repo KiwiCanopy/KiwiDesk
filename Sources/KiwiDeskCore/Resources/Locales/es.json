@@ -48,7 +48,7 @@
   "app_bar.icon_source.app_font": "Glifos",
   "app_bar.icon_source.app_image": "Predeterminado del sistema",
   "app_bar.icon_source.help": "Cómo se dibujan los iconos de las apps. Símbolos muestra un símbolo monocromo del conjunto de iconos integrado de KiwiDesk, coloreado con los colores de elemento de la barra —Elemento, Elemento activo y Elemento bajo el puntero, más abajo—, así que esos colores también determinan el aspecto de los símbolos. Las apps sin símbolo conservan su propio icono.",
-  "app_bar.icon_source.label": "Estilo de símbolos de aplicación",
+  "app_bar.icon_source.label": "Estilo de símbolos",
   "app_bar.icon_source.name_only": "Los iconos se ocultan cuando el contenido es Nombre.",
   "app_bar.item_gap": "Espacio entre elementos",
   "app_bar.item_size": "Tamaño de elemento",

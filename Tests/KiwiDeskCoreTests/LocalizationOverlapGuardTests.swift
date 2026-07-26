@@ -104,6 +104,42 @@ struct LocalizationOverlapGuardTests {
         #expect(result.status == 0)
     }
 
+    /// The **ratio** branch, which the fixtures above never reach.
+    /// At 810 shared keys the shipped corpus computes
+    /// `max(20, 40) = 40`, so the 5% rule is what actually governs
+    /// production while the floor is dead outside small catalogs —
+    /// leaving `OVERLAP_RATIO` a free variable as far as a
+    /// floor-only suite can tell. 440 keys puts the limit at 22.
+    @Test(
+        "past the floor, the 5% ratio governs",
+        arguments: [(21, true), (25, false)]
+    )
+    func ratioGovernsLargeCatalogs(
+        shared: Int,
+        passes: Bool
+    ) throws {
+        let count = 440
+        var english: [String: String] = [:]
+        var french: [String: String] = [:]
+        var italian: [String: String] = [:]
+        for index in 0..<count {
+            english["k.\(index)"] = "English phrase number \(index)"
+            french["k.\(index)"] = "phrase fr numero \(index)"
+            italian["k.\(index)"] =
+                index < shared
+                ? "phrase fr numero \(index)"
+                : "phrase it numero \(index)"
+        }
+        let result = try OverlapFixture.check(
+            english: english,
+            catalogs: ["fr": french, "it": italian]
+        )
+        #expect((result.status == 0) == passes)
+        if !passes {
+            #expect(result.stderr.contains("identical"))
+        }
+    }
+
     private static func english() -> [String: String] {
         var map: [String: String] = [:]
         for index in 0..<keyCount {
@@ -163,10 +199,15 @@ private enum OverlapFixture {
         )
         let script = scriptFixtureRepoRoot()
             .appendingPathComponent("scripts/extract-keys")
-        let environment = [
-            "KIWIDESK_EXTRACT_SOURCES": sources.path,
-            "KIWIDESK_EXTRACT_LOCALES": locales.path,
-        ]
+        // Inherit the real environment and override the two keys,
+        // rather than replacing it. A two-entry environment drops
+        // PATH, so `/usr/bin/env python3` fell back to the system
+        // 3.9 — a different interpreter from the one
+        // `scripts/lint.sh` and CI use, which quietly made the
+        // suite the only thing pinning 3.9 compatibility.
+        var environment = ProcessInfo.processInfo.environment
+        environment["KIWIDESK_EXTRACT_SOURCES"] = sources.path
+        environment["KIWIDESK_EXTRACT_LOCALES"] = locales.path
         try runPythonScript(
             at: script,
             arguments: [],
