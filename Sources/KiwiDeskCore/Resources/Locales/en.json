@@ -142,7 +142,7 @@
   "border.fit_gaps.updated_paused": "Draft updated — gaps persist once Accessibility is on and you save the profile.",
   "border.focused_color": "Color",
   "border.focused_color.a11y": "Focused window border color",
-  "border.glow": "Show glow",
+  "border.glow": "Glow effect",
   "border.glow.a11y": "Soft glow around the focus border",
   "border.title": "Focus border",
   "border.unfocused_color": "Color",

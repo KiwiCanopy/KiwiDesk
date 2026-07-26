@@ -142,7 +142,6 @@
   "border.fit_gaps.updated_paused": "Rascunho atualizado — os espaçamentos serão mantidos quando a Acessibilidade estiver ativada e você salvar o perfil.",
   "border.focused_color": "Cor",
   "border.focused_color.a11y": "Cor da borda da janela em foco",
-  "border.glow": "Efeito de brilho",
   "border.glow.a11y": "Brilho suave ao redor da borda de foco",
   "border.title": "Bordas de janela",
   "border.unfocused_color": "Cor",

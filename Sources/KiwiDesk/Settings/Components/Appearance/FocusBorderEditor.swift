@@ -106,9 +106,14 @@ struct FocusBorderEditor: View {
         // A render trait of the ring like Width and Corners — a soft
         // bloom in the focused ring's hue (#358). Sits with the other
         // styling traits, no caption (the live preview above shows
-        // it on toggle); a11y gets the descriptive gloss.
+        // it on toggle); a11y gets the descriptive gloss. A noun
+        // phrase like its true siblings (Width, Corners), NOT the
+        // "Show X" family — that family gates an element other
+        // controls configure, while this toggles a trait; and the
+        // verb form was ambiguous in German ("Leuchten anzeigen"
+        // reads as "show lamps"). ui-designer verdict 2026-07-26.
         Toggle(
-            L("border.glow", "Show glow"),
+            L("border.glow", "Glow effect"),
             isOn: style.glow
         )
         .accessibilityLabel(

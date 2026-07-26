@@ -142,7 +142,6 @@
   "border.fit_gaps.updated_paused": "초안이 업데이트되었습니다. 손쉬운 사용을 켜고 프로파일을 저장하면 간격이 유지됩니다.",
   "border.focused_color": "색상",
   "border.focused_color.a11y": "포커스된 윈도우의 테두리 색상",
-  "border.glow": "글로우 효과",
   "border.glow.a11y": "포커스 테두리를 감싸는 부드러운 광채",
   "border.title": "윈도우 테두리",
   "border.unfocused_color": "색상",

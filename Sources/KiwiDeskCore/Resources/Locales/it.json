@@ -142,7 +142,6 @@
   "border.fit_gaps.updated_paused": "Bozza aggiornata: le spaziature verranno conservate quando l'Accessibilità sarà attiva e avrai salvato il profilo.",
   "border.focused_color": "Colore",
   "border.focused_color.a11y": "Colore del bordo della finestra attiva",
-  "border.glow": "Effetto bagliore",
   "border.glow.a11y": "Alone tenue attorno al bordo di fuoco",
   "border.title": "Bordi della finestra",
   "border.unfocused_color": "Colore",

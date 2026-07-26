@@ -142,7 +142,6 @@
   "border.fit_gaps.updated_paused": "草稿已更新。打开“辅助功能”并存储描述文件后，间距即会保留。",
   "border.focused_color": "颜色",
   "border.focused_color.a11y": "焦点窗口的边框颜色",
-  "border.glow": "发光效果",
   "border.glow.a11y": "焦点边框周围的柔和光晕",
   "border.title": "窗口边框",
   "border.unfocused_color": "颜色",
