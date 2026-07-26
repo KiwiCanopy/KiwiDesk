@@ -35,7 +35,9 @@ extension KiwiCore {
         guard let screen else { return }
         // Routed through the hook (#531) like the resize spans:
         // one screen, bounds in and a window frame out, so a
-        // fixture can state the display a nudge confines to.
+        // fixture can state the display a nudge targets. The
+        // clamp below still reads real bar strips, so with bars
+        // on the final frame is only half pinned.
         let visible = tiler.visibleBounds(screen)
         let nudged = FloatNudge.target(
             frame: current,

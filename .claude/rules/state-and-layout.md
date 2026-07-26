@@ -4,6 +4,7 @@ paths:
   - "Sources/KiwiDeskCore/Tiling/**"
   - "Sources/KiwiDeskCore/Layouts/**"
   - "Sources/KiwiDeskCore/Commands/**"
+  - "Sources/KiwiDeskCore/App/**"
 ---
 
 # State, tiling & layout
@@ -16,19 +17,21 @@ See AGENTS.md §1 and §5 for full rationale. When editing here:
   keep them actor-free and unit-testable; no AX or AppKit calls.
 - Display **bounds** reach layout only through
   `TilingEngine.visibleBounds` (#531) — layout slots, track
-  capacity and the resize spans in `Commands/` all read it, never
-  `GeometryUtils.axVisibleFrame` directly. A direct call
-  re-imports the host's real screen, which is what made identical
-  code build different arrangements on a dev Mac and a CI runner
-  (#523). `VisibleBoundsRoutingTests` scans these directories and
-  fails on an unlisted direct call; the allowlist there names the
-  four files legitimately outside the hook, and why.
+  capacity, the resize spans in `Commands/` and the float nudge
+  in `App/` all read it, never `GeometryUtils.axVisibleFrame`
+  directly. A direct call re-imports the host's real screen,
+  which is what made identical code build different arrangements
+  on a dev Mac and a CI runner (#523).
+  `VisibleBoundsRoutingTests` scans the whole `KiwiDeskCore`
+  target and fails on an unlisted direct call; **its `allowed`
+  map is the exemption list** — which files may call it, and
+  why — so add the entry there rather than a note here.
 - Space identifiers are **strings** and case-sensitive; numeric
   strings and integers are equivalent (`"1"` == `1`).
 
-`Commands/**` is in scope because command dispatch resolves the
-same geometry the layout does (the resize spans). The bounds,
-flat-array and space-id rules apply there as written; the
-**pure-function** rule does not — `Commands/` is `@MainActor`
-and legitimately calls AppKit. That rule stays scoped to
-`Layouts/`.
+`Commands/**` and `App/**` are in scope because they resolve the
+same geometry the layout does (the resize spans, the float nudge
+and the bar strips). The bounds, flat-array and space-id rules
+apply there as written; the **pure-function** rule does not —
+both are `@MainActor` and legitimately call AppKit. That rule
+stays scoped to `Layouts/`.

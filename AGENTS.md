@@ -372,8 +372,8 @@ Keep this list updated whenever a recurring mistake is found.
   slots, track capacity and resize spans read their bounds from
   `TilingEngine.visibleBounds` (default: the screen's
   `axVisibleFrame`), never `GeometryUtils.axVisibleFrame`
-  directly — `VisibleBoundsRoutingTests` scans `Tiling`,
-  `Layouts` and `Commands` and fails on an unlisted direct call.
+  directly — `VisibleBoundsRoutingTests` scans the whole
+  `KiwiDeskCore` target and fails on an unlisted direct call.
   It pins **size, not topology**: which screen a space lands on
   still comes from `NSScreen` through the static `screen(…)`
   resolvers, so a fixture can shrink its display but not

@@ -21,6 +21,11 @@ struct VisibleBoundsResizeSeamTests {
             )
         let core = KiwiCore(configDirectory: dir)
         core.tiler.visibleBounds = { _ in bounds }
+        // Zero gaps and no Space Bar, so the injected rect IS the
+        // span: both reservations are real defaults with their
+        // own coverage, and leaving them on would only blur what
+        // these assertions are about (see #537 for the resize
+        // span's own divergence from the layout region).
         core.execute("set_gap_global", args: [.number(0)])
         core.execute(
             "space_bar.set_enabled",

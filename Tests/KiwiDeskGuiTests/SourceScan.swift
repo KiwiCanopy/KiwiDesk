@@ -79,7 +79,10 @@ enum SourceScan {
 
     /// Cuts each line at its first `//` — adequate for this repo
     /// (no `/* */` convention, and no shipped string carries
-    /// `//`). A URL inside a string literal WOULD mis-cut and
+    /// `//`). Note the direction depends on the consumer: for a
+    /// *counting* guard a mis-cut erases a call and so fails
+    /// OPEN, where for the balanced-walker consumers below it
+    /// fails shut. A URL inside a string literal WOULD mis-cut and
     /// unbalance a later walk; that fails shut, as a mystifying
     /// red rather than a silent pass. Verified absent from the
     /// scanned trees.
