@@ -77,6 +77,10 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         // `pendingReveal` just above and still wins — the view
         // consumes it after this.
         model.destination = .profiles
+        // The two surface selections live on the model too now
+        // (#277), so they need the same re-assertion — otherwise
+        // reopening Settings can land in the App Bar editor.
+        model.resetSurfaces()
         // Promote on every open, not just the first — closing
         // the window demotes to `.accessory`, so a reused
         // window must re-raise to get its Dock icon back.

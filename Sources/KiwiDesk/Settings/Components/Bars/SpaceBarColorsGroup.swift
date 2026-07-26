@@ -45,6 +45,12 @@ struct SpaceBarColorsGroup: View {
             )
             .font(.subheadline)
         }
+        // Anchored on BOTH bars' drawers, not just the App Bar's:
+        // the index carries this label surface-free, so a hit
+        // reveals whichever side the user is already on instead of
+        // yanking them across the switch. Only one editor renders
+        // at a time, so the shared id is never ambiguous.
+        .searchTarget(L("bars.advanced_colors", "Advanced colors"))
     }
 
     /// One-shot copy, then fully independent — never a live

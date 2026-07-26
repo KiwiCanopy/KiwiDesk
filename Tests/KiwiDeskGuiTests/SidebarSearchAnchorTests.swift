@@ -88,43 +88,47 @@ struct SidebarSearchAnchorTests {
         #expect(result?.path.isEmpty == true)
     }
 
-    /// Every anchor a result can produce must be a string some
-    /// view actually tags itself with. `SettingsSection` derives
-    /// its `.id` from the title it renders, so the check is that
-    /// the anchor text equals an indexed entry's text — the same
-    /// value, not a parallel copy. A drifted `path(to:)` that
-    /// smuggled a breadcrumb segment into the anchor would fail
-    /// here.
-    @Test("every anchor is an indexed entry's own text")
-    func anchorsAreIndexedText() {
+    /// Anchor identity is the label TEXT (see `SettingsAnchor`),
+    /// so two entries in one destination sharing a label are one
+    /// `.id` in one `ScrollView`: `scrollTo` picks undefined which,
+    /// and — worse, because it is visible — the flash matches by
+    /// text, so *every* view carrying that label washes at once.
+    ///
+    /// This is the tripwire for the per-control catalog. Text is
+    /// sound for the 38 header-level anchors and provably unsound
+    /// one level down: Appearance alone renders "Color" six times
+    /// simultaneously (focused and unfocused border, plus the
+    /// ghost and drop-zone columns' border and fill rows), and
+    /// `SlotSizeRows.sizeLabel` even swaps with a sibling picker.
+    /// So the catalog cannot land on text identity, and this test
+    /// is what stops it doing so quietly.
+    @Test("no two entries in a destination share a label")
+    func anchorTextsAreUniquePerDestination() {
         pinEnglish()
         defer { reset() }
-        var checked = 0
+        var total = 0
         for destination in SettingsDestination.allCases {
-            let texts = Set(
-                SidebarSearch.entries(of: destination)
-                    .map(\.text)
-            )
+            let texts = SidebarSearch.entries(of: destination)
+                .map(\.text)
             #expect(!texts.isEmpty)
-            for entry in SidebarSearch.entries(of: destination) {
-                let result = SidebarSearch.results(
-                    query: entry.text,
-                    editingStoredProfile: false
+            #expect(
+                texts.count == Set(texts).count,
+                Comment(
+                    rawValue:
+                        "\(destination) has a duplicate anchor "
+                        + "label; text identity no longer holds: "
+                        + texts.sorted().joined(separator: ", ")
                 )
-                .first { $0.destination == destination }
-                guard let result, let anchor = result.anchor.anchor
-                else { continue }
-                #expect(
-                    texts.contains(anchor),
-                    Comment(rawValue: "\(destination): \(anchor)")
-                )
-                checked += 1
-            }
+            )
+            total += texts.count
         }
-        // A zero here would pass every expectation above
-        // vacuously. 38 entries today; the floor only has to
-        // prove the sweep ran.
-        #expect(checked >= 30)
+        // Pinned, so shrinking the index cannot make the sweep
+        // above vacuous while still passing. 44 entries from 38
+        // literal `L()` keys in the index files — the six mode
+        // tabs come from `LayoutMode.placementTabs`, so
+        // `SidebarSearchParityTests` counts 38 where this counts
+        // 44. Both numbers are deliberate.
+        #expect(total == 44)
     }
 
     /// The surface of every entry must be one this destination
@@ -140,8 +144,14 @@ struct SidebarSearchAnchorTests {
                 switch entry.surface {
                 case .main:
                     continue
-                case .layoutMode:
+                case .layoutMode(let mode):
                     #expect(destination == .layoutDefaults)
+                    // Floating has no tab (it renders
+                    // `EmptyView`), so selecting it would reveal
+                    // nothing — the case alone is not enough.
+                    #expect(
+                        LayoutMode.placementTabs.contains(mode)
+                    )
                 case .bar:
                     #expect(destination == .bars)
                 }

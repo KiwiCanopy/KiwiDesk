@@ -51,6 +51,9 @@ struct SettingsView: View {
             ) {
                 selection = .spaces
             }
+            // A different profile means a different most-used
+            // layout mode, so the mode tab must re-derive (#277).
+            model.resetSurfaces()
         }
         // A navigation request — the #326 "Edit in Settings…"
         // deep link, or a #277 search hit. Guarded by the same
@@ -61,25 +64,32 @@ struct SettingsView: View {
         .onAppear { apply(model.pendingReveal) }
     }
 
-    /// Applies a request's destination and surface — the half
-    /// that is meaningful in both modes.
+    /// Phase 1 of a reveal: destination and surface, the half
+    /// that is meaningful in both modes. The **only** consumer of
+    /// `pendingReveal`, and it clears it.
     ///
-    /// Deliberately does NOT clear the request when it succeeds:
-    /// the detail pane's scroll driver owns the reveal and the
-    /// clear, so a request landing while the raw Lua editor shows
-    /// survives until there is a pane with something to scroll.
-    /// An *unreachable* one is cleared here, since no pane will
-    /// ever consume it.
+    /// Phase 2 goes to `pendingScroll`, so each field has one
+    /// writer and one clearer. An earlier cut had both this and
+    /// the pane's scroll driver observing `pendingReveal`, with
+    /// the driver clearing it — and since the outer `.onAppear`
+    /// re-read the model rather than a captured value, a
+    /// child-first `onAppear` order (SwiftUI does not specify it)
+    /// let the driver blank the request before this ran. The #326
+    /// "Edit in Settings…" bridge would then land on Profiles,
+    /// which `SettingsWindowController.show()` had just set.
+    ///
+    /// Handing phase 2 to its own field also keeps the property
+    /// that motivated the split: a request arriving while the raw
+    /// Lua editor shows still resolves later, because
+    /// `pendingScroll` simply waits for a pane to exist.
     private func apply(_ request: SettingsAnchor?) {
         guard let request else { return }
+        model.pendingReveal = nil
         guard
             request.destination.isReachable(
                 editingStoredProfile: model.editingStoredProfile
             )
-        else {
-            model.pendingReveal = nil
-            return
-        }
+        else { return }
         selection = request.destination
         switch request.surface {
         case .main:
@@ -89,6 +99,7 @@ struct SettingsView: View {
         case .bar(let editor):
             model.barEditor = editor
         }
+        model.pendingScroll = request.anchor
     }
 
     /// The structured settings shell: a fixed-width source list
@@ -201,28 +212,28 @@ struct SettingsView: View {
             ScrollViewReader { proxy in
                 detail
                     .environment(\.settingsFlash, model.flash)
-                    .onChange(of: model.pendingReveal) {
+                    .onChange(of: model.pendingScroll) {
                         _,
-                        request in
-                        reveal(request, proxy: proxy)
+                        anchor in
+                        reveal(anchor, proxy: proxy)
                     }
                     .onAppear {
-                        reveal(model.pendingReveal, proxy: proxy)
+                        reveal(model.pendingScroll, proxy: proxy)
                     }
             }
         }
     }
 
-    /// Scrolls to a request's anchor and flashes it, then clears
-    /// the request. Runs after `apply` has already selected the
-    /// destination and surface.
+    /// Phase 2: scrolls the pane to `anchor` and flashes it, then
+    /// clears the request. Runs after `apply` has selected the
+    /// destination and surface, so the target exists or is about
+    /// to.
     private func reveal(
-        _ request: SettingsAnchor?,
+        _ anchor: String?,
         proxy: ScrollViewProxy
     ) {
-        guard let request else { return }
-        model.pendingReveal = nil
-        guard let anchor = request.anchor else { return }
+        guard let anchor else { return }
+        model.pendingScroll = nil
         revealTask?.cancel()
         revealTask = Task { @MainActor in
             // Yield one pass first: `apply` may have just flipped
@@ -230,13 +241,12 @@ struct SettingsView: View {
             // asking the proxy for an id in the same synchronous
             // pass as the state change that mints it misses.
             await Task.yield()
-            let scroll = { proxy.scrollTo(anchor, anchor: .top) }
             if reduceMotion {
-                scroll()
+                proxy.scrollTo(anchor, anchor: .top)
             } else {
                 withAnimation(
                     .easeInOut(duration: SettingsReveal.scroll)
-                ) { scroll() }
+                ) { proxy.scrollTo(anchor, anchor: .top) }
             }
             try? await Task.sleep(
                 nanoseconds: SettingsReveal.nanoseconds(
@@ -244,7 +254,23 @@ struct SettingsView: View {
                 )
             )
             guard !Task.isCancelled else { return }
-            model.flash(anchor)
+            // Re-issue, un-animated. One cooperative yield drains
+            // queued main-actor work but does not promise SwiftUI
+            // has LAID OUT the new subtree, so the first
+            // `scrollTo` can be a silent no-op — and then the wash
+            // would paint off-screen and the user would see
+            // nothing at all. Layout has certainly run by now; if
+            // the first attempt landed, this is a no-op.
+            proxy.scrollTo(anchor, anchor: .top)
+            let token = model.startFlash(anchor)
+            try? await Task.sleep(
+                nanoseconds: SettingsReveal.nanoseconds(
+                    SettingsReveal.hold
+                )
+            )
+            // Clearing is what triggers the fade — the modifier
+            // keeps no timer of its own.
+            model.endFlash(token: token)
         }
     }
 

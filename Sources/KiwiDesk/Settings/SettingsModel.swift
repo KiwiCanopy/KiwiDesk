@@ -51,10 +51,16 @@ final class SettingsModel: ObservableObject {
     @Published var pendingReveal: SettingsAnchor?
     /// The flash in progress. Published into the environment so
     /// each anchored view can recognize itself; nil between
-    /// reveals. Written only through `flash(_:)`, which owns the
-    /// re-trigger token.
+    /// reveals. Written only through `startFlash` / `endFlash`,
+    /// which own the re-trigger token.
     @Published private(set) var flash: SettingsFlash?
     private var flashToken = 0
+    /// Phase 2 of a reveal: the anchor whose pane is now showing
+    /// and can be scrolled. Minted by `SettingsView.apply` once
+    /// the destination and surface are set, consumed by the
+    /// detail pane's scroll driver — see `pendingReveal` for why
+    /// the two phases are separate fields.
+    @Published var pendingScroll: String?
     /// The Layout Defaults mode tab, and the Bars editor behind
     /// the App Bar / Space Bar switch.
     ///
@@ -99,14 +105,44 @@ final class SettingsModel: ObservableObject {
     /// the dashboard sat open) — see `KiwiCore.mergeLiveSpaces`.
     var seedSpaces: [SpaceID] = []
 
+    /// Forgets both surface selections, so they re-derive their
+    /// defaults.
+    ///
+    /// Needed because moving them off view-local `@State` (#277)
+    /// silently promoted two per-visit landings to
+    /// process-lifetime ones: Layout Defaults re-derived the
+    /// profile's most-used mode on every mount, and Bars always
+    /// opened on the Space Bar (both ui-designer calls). Called
+    /// where `destination` is also re-asserted — on window open,
+    /// and on an edit-target switch, whose whole point is that the
+    /// most-used mode is now a different profile's.
+    func resetSurfaces() {
+        layoutModeTab = nil
+        barEditor = .spaceBar
+    }
+
     /// Starts a flash on `anchor`, bumping the token so that
     /// revealing the same anchor twice still re-fires (#277).
-    func flash(_ anchor: String) {
+    func startFlash(_ anchor: String) -> Int {
         flashToken += 1
         flash = SettingsFlash(
             anchor: anchor,
             token: flashToken
         )
+        return flashToken
+    }
+
+    /// Ends the flash, if `token` is still the current one.
+    ///
+    /// Must be called: `SearchRevealFlash` uses `.task(id:)`,
+    /// which runs on *appear* as well as on change, so a value
+    /// left standing re-washes the card every time the user
+    /// navigates back to it — no user action involved. The token
+    /// check makes a late finisher from a superseded flash unable
+    /// to cancel the current one.
+    func endFlash(token: Int) {
+        guard flash?.token == token else { return }
+        flash = nil
     }
 
     func recomputeDirty() {

@@ -220,6 +220,7 @@ struct ShortcutsSection: View {
             )
             .font(.headline)
         }
+        .searchTarget(L("shortcuts.advanced.title", "Lua bindings"))
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 8)

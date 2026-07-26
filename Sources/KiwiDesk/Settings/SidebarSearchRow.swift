@@ -36,13 +36,10 @@ struct SidebarSearchRow: View {
                 badged: badged
             )
         }
-        .tag(result.destination)
-        // Selection alone cannot carry the anchor, so the tap
-        // goes through `reveal`, which sets the destination too —
-        // the `.tag` above keeps the highlight and arrow-key
-        // navigation working (a keyboard move navigates without
-        // scrolling, which is the honest behavior: nothing was
-        // picked).
+        // Selection alone cannot carry the anchor, so activation
+        // goes through `reveal`, which sets the destination too.
+        // `List`'s own selection still tracks, because `reveal`
+        // writes the destination this row is identified by.
         .contentShape(Rectangle())
         .onTapGesture { reveal(result.anchor) }
         // VoiceOver stops once per row and must hear the whole
@@ -51,6 +48,12 @@ struct SidebarSearchRow: View {
         .accessibilityElement(children: .combine)
         .accessibilityLabel(axLabel)
         .accessibilityValue(badgeValue)
+        // A tap gesture under a combined element is not reliably
+        // reachable by VoiceOver's activate, and there is no
+        // `Button` here to supply the trait, so both are explicit
+        // — otherwise the reveal is mouse-only for AX users.
+        .accessibilityAddTraits(.isButton)
+        .accessibilityAction { reveal(result.anchor) }
     }
 
     /// The path joined for display, or nil for a

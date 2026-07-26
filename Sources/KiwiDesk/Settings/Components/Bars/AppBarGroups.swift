@@ -122,6 +122,12 @@ struct GlobalAppBarGroup: View {
                 )
                 .font(.subheadline)
             }
+            // Anchored on the label, which is deliberately OUTSIDE
+            // the `GreyOut` on the content above — a wash nested in
+            // a dimmed subtree compounds to ~0.09 and reads broken.
+            .searchTarget(
+                L("bars.advanced_colors", "Advanced colors")
+            )
         }
     }
 

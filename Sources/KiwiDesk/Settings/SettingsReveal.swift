@@ -69,12 +69,19 @@ extension EnvironmentValues {
 /// some other switch has greyed still deserves a full-strength
 /// flash — the user typed a real label, and "grey, don't hide"
 /// (§2.7) means it is findable precisely while inert.
+/// Stateless by design. An earlier cut held the opacity in
+/// `@State` and ran the hold-then-fade inside a `.task(id:)`,
+/// which re-washed a card every time the user navigated back to
+/// it: `.task(id:)` fires on *appear* as well as on change, and
+/// the model's value outlived the reveal that set it. Now the
+/// environment value IS the "on" state, its removal IS the fade
+/// trigger, and the driver in `SettingsView` owns the single
+/// timeline — nothing here can be left latched.
 private struct SearchRevealFlash: ViewModifier {
     let anchor: String
     @Environment(\.settingsFlash) private var flash
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
-    @State private var opacity: Double = 0
     private var isMine: Bool { flash?.anchor == anchor }
 
     func body(content: Content) -> some View {
@@ -83,39 +90,25 @@ private struct SearchRevealFlash: ViewModifier {
                 RoundedRectangle(
                     cornerRadius: SettingsReveal.cornerRadius
                 )
-                .fill(Color.accentColor.opacity(opacity))
+                .fill(
+                    Color.accentColor.opacity(
+                        isMine ? SettingsReveal.peakOpacity : 0
+                    )
+                )
                 .padding(-SettingsReveal.bleed)
             }
-            .task(id: flash) { await run() }
+            // Arriving is instant, leaving eases out. Reduce
+            // Motion drops the cross-*fade*, not the affordance:
+            // a flat tint shown and then removed is not motion,
+            // so the wash still appears for the same ≈1.2 s and
+            // simply disappears — the same split `HoverChip`
+            // makes.
+            .animation(fadeOut, value: isMine)
     }
 
-    /// Reduce Motion drops the cross-*fade*, not the affordance:
-    /// a flat tint shown and then removed is not motion, so the
-    /// wash still appears for the same ≈1.2 s and simply
-    /// disappears instead of dissolving — the same split
-    /// `HoverChip` already makes.
-    private func run() async {
-        guard isMine else { return }
-        opacity = SettingsReveal.peakOpacity
-        try? await Task.sleep(
-            nanoseconds: SettingsReveal.nanoseconds(
-                SettingsReveal.hold
-            )
-        )
-        guard !reduceMotion else {
-            try? await Task.sleep(
-                nanoseconds: SettingsReveal.nanoseconds(
-                    SettingsReveal.fade
-                )
-            )
-            opacity = 0
-            return
-        }
-        withAnimation(
-            .easeOut(duration: SettingsReveal.fade)
-        ) {
-            opacity = 0
-        }
+    private var fadeOut: Animation? {
+        guard !reduceMotion, !isMine else { return nil }
+        return .easeOut(duration: SettingsReveal.fade)
     }
 }
 
@@ -138,5 +131,27 @@ extension View {
     /// Paints the reveal wash while `anchor` is the flashed one.
     func searchFlash(_ anchor: String) -> some View {
         modifier(SearchRevealFlash(anchor: anchor))
+    }
+
+    /// Both halves at once, for an anchor that is NOT a
+    /// `SettingsSection` — a `DisclosureGroup` label, which is
+    /// its own heading AND its own scroll target, so there is no
+    /// card to land on and nothing to split.
+    ///
+    /// Required at every **indexed** drawer site.
+    /// `SettingsSection` anchors itself from the title it is
+    /// handed, so a section cannot forget; a bare
+    /// `DisclosureGroup` has no such choke point, and the first
+    /// cut of #277 shipped six unanchored drawers — searching
+    /// "Per-edge…" opened Appearance and sat at the top of the
+    /// pane, because no view claimed that id.
+    /// `SidebarSearchParityTests` now fails on an indexed drawer
+    /// key that is missing here. The durable fix is a
+    /// `SettingsDisclosure` wrapper that anchors itself the way
+    /// `SettingsSection` does; that lands with the per-control
+    /// catalog, which needs the same wrapper to drive
+    /// `isExpanded` for a hit *inside* a drawer.
+    func searchTarget(_ anchor: String) -> some View {
+        searchFlash(anchor).searchAnchor(anchor)
     }
 }

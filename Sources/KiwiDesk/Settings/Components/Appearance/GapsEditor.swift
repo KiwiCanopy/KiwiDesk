@@ -50,6 +50,7 @@ struct GapsEditor: View {
                 }
                 .padding(.top, 4)
             }
+            .searchTarget(L("gaps.per_edge", "Per-edge…"))
             Divider()
             masterRow(
                 label: L("gaps.inner", "Inner gap"),
@@ -74,6 +75,7 @@ struct GapsEditor: View {
                 }
                 .padding(.top, 4)
             }
+            .searchTarget(L("gaps.per_axis", "Per-axis…"))
         }
     }
 

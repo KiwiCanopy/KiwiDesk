@@ -4,7 +4,7 @@ import Testing
 /// The search index is a second mirror of the subsection-title
 /// list (.claude/rules/parity-tests.md): the titles live once
 /// at their `SettingsSection(...)` call sites and once in
-/// `SidebarSearch.subsections(of:)`. Two source-scanning
+/// `SidebarSearchIndex.entries(of:)`. Source-scanning
 /// guards close both drift directions — a header removed or
 /// renamed in a view (stale index key), and a header added to
 /// a view but never indexed (silent search gap) —
@@ -23,14 +23,36 @@ struct SidebarSearchParityTests {
             .appendingPathComponent("Sources/KiwiDesk/Settings")
     }
 
-    /// The index's own files, whose `L()` tuples are the index
-    /// rather than a rendering call site. Both are named so a key
-    /// added to either counts as indexed and neither can vouch
-    /// for itself as a render site (#277 split the list out of
-    /// the matching logic).
-    private let indexFiles: Set<String> = [
-        "SidebarSearch.swift",
-        "SidebarSearchIndex.swift",
+    /// Is this one of the index's own files, whose `L()` tuples
+    /// ARE the index rather than a rendering call site?
+    ///
+    /// A prefix rule, not a hand-listed set: the index is going to
+    /// be split further as the per-control catalog grows
+    /// (`SidebarSearchIndex+Controls.swift`), and a grown set
+    /// fails **open** in a guard whose whole design is fail-shut —
+    /// a new index file absent from the set contributes no keys to
+    /// the forward check while landing on the *render* side, where
+    /// its own tuples vouch for themselves. `SidebarSearchRow` and
+    /// `SidebarSearchField` are presentation and stay on the
+    /// render side.
+    private func isIndexFile(_ name: String) -> Bool {
+        name == "SidebarSearch.swift"
+            || name.hasPrefix("SidebarSearchIndex")
+    }
+
+    /// Index keys whose anchor is real but invisible to a source
+    /// scan, because the title reaches `SettingsSection` through a
+    /// computed property instead of a literal `L(...)` argument.
+    /// Fail-shut: a new index key is either anchored at a literal
+    /// site or listed here with its reason.
+    private let computedAnchors: Set<String> = [
+        // `DragVisualsEditor`'s `ghostLabel` / `dropZoneLabel` are
+        // computed, then passed positionally into the shared
+        // `column(title:…)` helper. `SettingsSection` anchors
+        // itself from whatever string it is handed, so these two
+        // DO scroll and flash — only the scan is blind to them.
+        "drag.ghost",
+        "drag.drop_zone",
     ]
 
     /// Headers deliberately absent from the index: fail-shut —
@@ -67,7 +89,7 @@ struct SidebarSearchParityTests {
 
         var rendered = Set<String>()
         for file in try SourceScan.swiftSources(under: settingsDir)
-        where !indexFiles.contains(file.lastPathComponent) {
+        where !isIndexFile(file.lastPathComponent) {
             rendered.formUnion(
                 try lKeys(
                     in: String(
@@ -81,6 +103,87 @@ struct SidebarSearchParityTests {
             #expect(
                 rendered.contains(key),
                 "stale search index key: \(key)"
+            )
+        }
+    }
+
+    /// The direction that was missing, and whose absence shipped
+    /// six broken entries (#277 QA): an index key must name a
+    /// label some view **anchors itself with**, not merely a
+    /// string that exists somewhere under `Settings/`.
+    ///
+    /// `indexKeysHaveRenderingCallSites` above accepts any `L()`
+    /// call anywhere in the tree, so all six of tier 1's drawer
+    /// entries passed it while `proxy.scrollTo` was a silent
+    /// no-op and nothing flashed — searching "Per-edge…" opened
+    /// Appearance and sat at the top of the pane. The suite's own
+    /// new-suite twin could not catch it either: it compared the
+    /// anchors the matcher produces against the index they were
+    /// copied from, so it was tautological.
+    ///
+    /// Anchorable means exactly three things:
+    /// `SettingsSection(L(...))`, which anchors itself from the
+    /// title it is handed; `.searchTarget(L(...))`, the opt-in a
+    /// bare `DisclosureGroup` needs; and `LayoutMode.displayName`,
+    /// whose tuples the per-mode editors pass to
+    /// `SettingsSection`.
+    @Test("every index key is anchored by some view")
+    func indexKeysAreAnchored() throws {
+        let indexKeys = try lKeys(in: indexSource())
+        // 38 today. Pinned, not just non-empty: the file set is
+        // now discovered by prefix, so a split that silently
+        // dropped a file would shrink this rather than emptying
+        // it, and a shrunken set still passes every `contains`
+        // check below.
+        #expect(indexKeys.count == 38)
+
+        var anchorable = Set<String>()
+        for file in try SourceScan.swiftSources(under: settingsDir)
+        where !isIndexFile(file.lastPathComponent) {
+            let source = try String(
+                contentsOf: file,
+                encoding: .utf8
+            )
+            anchorable.formUnion(
+                try sectionHeaderKeys(in: source)
+            )
+            anchorable.formUnion(
+                try searchTargetKeys(in: source)
+            )
+            if file.lastPathComponent
+                == "LayoutModeGlyph.swift"
+            {
+                anchorable.formUnion(try lKeys(in: source))
+            }
+        }
+        #expect(!anchorable.isEmpty)
+
+        for key in indexKeys where !computedAnchors.contains(key) {
+            #expect(
+                anchorable.contains(key),
+                Comment(
+                    rawValue:
+                        "indexed but unanchored — a reveal on "
+                        + "this key scrolls nowhere and flashes "
+                        + "nothing: \(key)"
+                )
+            )
+        }
+        // The exemptions must stay real. A key that stops being
+        // indexed, or gains a literal anchor, has to leave the
+        // set rather than sit there vouching for nothing.
+        for key in computedAnchors {
+            #expect(
+                indexKeys.contains(key),
+                "stale computedAnchors entry: \(key)"
+            )
+            #expect(
+                !anchorable.contains(key),
+                Comment(
+                    rawValue:
+                        "\(key) now has a literal anchor; drop "
+                        + "it from computedAnchors"
+                )
             )
         }
     }
@@ -275,16 +378,23 @@ struct SidebarSearchParityTests {
     }
 
     private func indexSource() throws -> String {
-        try indexFiles.sorted()
-            .map {
-                try String(
-                    contentsOf:
-                        settingsDir
-                        .appendingPathComponent($0),
-                    encoding: .utf8
-                )
-            }
+        try SourceScan.swiftSources(under: settingsDir)
+            .filter { isIndexFile($0.lastPathComponent) }
+            .sorted { $0.path < $1.path }
+            .map { try String(contentsOf: $0, encoding: .utf8) }
             .joined(separator: "\n")
+    }
+
+    /// Literal keys passed to `.searchTarget(L(...))` — the
+    /// anchor a `DisclosureGroup` label must opt into, since only
+    /// `SettingsSection` anchors itself.
+    private func searchTargetKeys(
+        in source: String
+    ) throws -> Set<String> {
+        try keys(
+            in: SourceScan.stripComments(source),
+            pattern: #"\.searchTarget\(\s*L\(\s*"([a-z0-9_.]+)""#
+        )
     }
 
     /// Every `L("key", ...)` literal in a source string; the

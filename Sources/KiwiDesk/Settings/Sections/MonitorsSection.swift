@@ -221,6 +221,9 @@ struct MonitorsSection: View {
             )
             .font(.headline)
         }
+        .searchTarget(
+            L("monitors.advanced.title", "Monitor fingerprints")
+        )
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 8)

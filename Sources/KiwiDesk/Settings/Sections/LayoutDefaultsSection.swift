@@ -53,13 +53,17 @@ struct LayoutDefaultsSection: View {
             }
             .padding(16)
         }
-        // Land on the profile's most-used mode the first time the
-        // pane appears, then leave the tab alone (mirrors
-        // `ShortcutsSection.ensureSelection`). Latched by writing
-        // the model once rather than by a separate flag: without
-        // the write, `selected` would keep re-deriving
-        // `initialMode` and the tab would move under a user who
-        // edits space modes while this pane is open.
+        // Land on the profile's most-used mode, then leave the tab
+        // alone (mirrors `ShortcutsSection.ensureSelection`).
+        // Latched by writing the model once rather than by a
+        // separate flag: without the write, `selected` would keep
+        // re-deriving `initialMode`, so adding a space in another
+        // tab could move this one under the user.
+        //
+        // The latch is cleared by `SettingsModel.resetSurfaces()`
+        // — on window open and on an edit-target switch — so this
+        // still re-derives per visit in the cases that matter,
+        // which is what it did as view-local `@State`.
         .onAppear {
             if model.layoutModeTab == nil {
                 model.layoutModeTab = initialMode

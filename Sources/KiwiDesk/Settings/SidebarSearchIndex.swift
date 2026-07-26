@@ -181,15 +181,19 @@ extension SidebarSearch {
                 ),
                 surface: .bar(.appBar)
             ),
-            // Renders inside both colour groups; placed at its
-            // first render position, since the contract is render
-            // order and the first match wins.
+            // Renders inside BOTH colour groups, so it stays
+            // surface-free on purpose: pinning it to one side
+            // would yank a user reading the other bar across the
+            // switch to an identically-named drawer, which is
+            // worse than tier 1's plain "open the tab". Both
+            // drawers carry the anchor, and only one editor
+            // renders at a time, so the reveal lands on whichever
+            // side is already showing.
             .init(
                 text: L(
                     "bars.advanced_colors",
                     "Advanced colors"
-                ),
-                surface: .bar(.appBar)
+                )
             ),
             .init(
                 text: L(

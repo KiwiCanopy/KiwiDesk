@@ -54,7 +54,11 @@ struct SettingsSidebar: View {
         .safeAreaInset(edge: .top, spacing: 0) {
             VStack(spacing: 0) {
                 appIdentity
-                SidebarSearchField(text: $query)
+                SidebarSearchField(
+                    text: $query,
+                    onMove: move,
+                    onCommit: commitHighlighted
+                )
             }
         }
         // Fixed, non-resizable column (#297) — matching System
@@ -126,15 +130,56 @@ struct SettingsSidebar: View {
         }
     }
 
-    /// The flat results list that replaces both groups while a
-    /// query is live (#90): once a query narrows the sidebar,
-    /// two mostly-empty scope headers are clutter. Rows stay
-    /// selectable through the same `List(selection:)` tags.
-    @ViewBuilder private var searchResults: some View {
-        let results = SidebarSearch.results(
+    /// The live result list. A computed property, not a local in
+    /// `searchResults`, because the keyboard handlers below step
+    /// through the same list.
+    private var results: [SidebarSearchResult] {
+        SidebarSearch.results(
             query: query,
             editingStoredProfile: editingStoredProfile
         )
+    }
+
+    /// ↑/↓ from the field move the highlight and navigate, which
+    /// is cheap; the scroll and flash wait for Return. Revealing
+    /// on every keystroke would re-scroll and re-wash the pane
+    /// while the user is still arrowing past it.
+    private func move(_ direction: MoveCommandDirection) {
+        let results = results
+        guard !results.isEmpty else { return }
+        let current = results.firstIndex {
+            $0.destination == selection
+        }
+        let next: Int
+        switch direction {
+        case .up:
+            next = current.map { max($0 - 1, 0) } ?? 0
+        case .down:
+            next =
+                current.map {
+                    min($0 + 1, results.count - 1)
+                } ?? 0
+        default:
+            return
+        }
+        selection = results[next].destination
+    }
+
+    private func commitHighlighted() {
+        guard
+            let hit = results.first(where: {
+                $0.destination == selection
+            })
+        else { return }
+        reveal(hit.anchor)
+    }
+
+    /// The flat results list that replaces both groups while a
+    /// query is live (#90): once a query narrows the sidebar, two
+    /// mostly-empty scope headers are clutter. Rows stay
+    /// selectable through the same `List(selection:)` identity.
+    @ViewBuilder private var searchResults: some View {
+        let results = results
         if results.isEmpty {
             Text(
                 L("sidebar.search.no_results", "No results")

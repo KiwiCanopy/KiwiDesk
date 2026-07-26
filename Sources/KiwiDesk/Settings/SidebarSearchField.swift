@@ -11,6 +11,15 @@ import SwiftUI
 /// precedent instead.
 struct SidebarSearchField: View {
     @Binding var text: String
+    /// Moves the highlighted result while focus stays in the
+    /// field, System Settings-style. Without this the results
+    /// were mouse-only: the `List` never takes focus while the
+    /// user is typing, so ↑/↓ went nowhere.
+    var onMove: (MoveCommandDirection) -> Void = { _ in }
+    /// Return reveals the highlighted result. Separate from
+    /// `onMove` on purpose — arrowing navigates (cheap), Return
+    /// commits to the scroll and flash.
+    var onCommit: () -> Void = {}
     @FocusState private var focused: Bool
 
     var body: some View {
@@ -46,6 +55,19 @@ struct SidebarSearchField: View {
         .focused($focused)
         // Escape clears, matching `NSSearchField`.
         .onExitCommand { text = "" }
+        // `onKeyPress`, not `onMoveCommand`: the latter has no
+        // pass-through, so it would swallow ←/→ and break caret
+        // movement inside the field. Returning `.ignored` for
+        // anything else is the whole point.
+        .onKeyPress(.upArrow) {
+            onMove(.up)
+            return .handled
+        }
+        .onKeyPress(.downArrow) {
+            onMove(.down)
+            return .handled
+        }
+        .onSubmit(onCommit)
         // Explicit name, so accessibility does not depend on
         // the placeholder staying non-decorative.
         .accessibilityLabel(

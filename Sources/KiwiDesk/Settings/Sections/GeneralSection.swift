@@ -233,6 +233,7 @@ struct GeneralSection: View {
             Text(L("general.advanced.title", "Advanced"))
                 .font(.headline)
         }
+        .searchTarget(L("general.advanced.title", "Advanced"))
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 8)
