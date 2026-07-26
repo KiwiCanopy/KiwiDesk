@@ -86,18 +86,20 @@ public final class TilingEngine {
     /// value subsuming this hook and those statics — a larger
     /// change, and pre-release nothing blocks it later (§5).
     ///
-    /// **What stays outside it, and why.** `screen(containing:)`
-    /// and `looksStashed` are `static` — no instance in hand.
-    /// `stashInactive` / `restoreStashed` *enumerate*
-    /// `NSScreen.screens` to pick a parking corner, which a
-    /// one-rect hook would collapse to a single display. The bar
-    /// strips (`KiwiCore+AppBar`, `+SpaceBar`) and the float
-    /// nudge / re-anchor draw on a physical screen, where a
-    /// fabricated rect means nothing. So a fixture that pins
-    /// bounds and calls `calculatedFrames`, `trackCapacity` or a
-    /// resize is fully pinned; one that drives a whole `retile`
-    /// is not — parking and bar geometry still run against the
-    /// real display.
+    /// **What stays outside it lives in one executable place** —
+    /// `VisibleBoundsRoutingTests.allowed`, which names every
+    /// exempt file and its reason and fails on a new direct call.
+    /// Prose copies of that list drifted apart on their first
+    /// outing, so this comment does not keep one. The shape of
+    /// the exemptions: `static` sites with no instance in hand,
+    /// and sites that resolve *several* screens (parking picks a
+    /// corner across all of them, re-anchor compares two) where
+    /// one rect would collapse the distinction.
+    ///
+    /// So a fixture that pins bounds and calls `calculatedFrames`,
+    /// `trackCapacity` or a resize is fully pinned; one that
+    /// drives a whole `retile` is not — parking and bar geometry
+    /// still run against the real display.
     var visibleBounds: @MainActor (NSScreen) -> CGRect = {
         GeometryUtils.axVisibleFrame(of: $0)
     }

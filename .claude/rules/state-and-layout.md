@@ -27,5 +27,8 @@ See AGENTS.md §1 and §5 for full rationale. When editing here:
   strings and integers are equivalent (`"1"` == `1`).
 
 `Commands/**` is in scope because command dispatch resolves the
-same geometry the layout does (the resize spans) — the rest of
-these rules apply to it as written.
+same geometry the layout does (the resize spans). The bounds,
+flat-array and space-id rules apply there as written; the
+**pure-function** rule does not — `Commands/` is `@MainActor`
+and legitimately calls AppKit. That rule stays scoped to
+`Layouts/`.

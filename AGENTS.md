@@ -33,6 +33,7 @@ Module layout (SwiftPM targets):
 | `KiwiDeskCore` | `Sources/KiwiDeskCore` | State, events, OS bridge |
 | `KiwiDesk` | `Sources/KiwiDesk` | Executable, menu bar, GUI |
 | `KiwiDeskCoreTests` | `Tests/KiwiDeskCoreTests` | Unit tests |
+| `KiwiDeskGuiTests` | `Tests/KiwiDeskGuiTests` | GUI tests, plus the source-scanning parity guards (`SourceScan`) — which scan **both** trees, so a `KiwiDeskCore` invariant may be guarded from here |
 
 The Swift core must stay strictly separated from the SwiftUI GUI
 and (later) the Lua VM.
@@ -376,13 +377,16 @@ Keep this list updated whenever a recurring mistake is found.
   It pins **size, not topology**: which screen a space lands on
   still comes from `NSScreen` through the static `screen(…)`
   resolvers, so a fixture can shrink its display but not
-  fabricate a second one. Outside the hook, by reason and not by
-  category: `screen(containing:)` and `looksStashed` are
-  `static`; stash parking *enumerates* `NSScreen.screens` to pick
-  a corner, which one rect would collapse; the bar strips and the
-  float nudge / re-anchor draw on a physical screen. So a fixture
-  driving `calculatedFrames`, `trackCapacity` or a resize is
-  fully pinned, and one driving a whole `retile` is not.
+  fabricate a second one. **Which files are exempt, and why,
+  lives in that guard's `allowed` map, not in prose** — three
+  prose copies of the list drifted apart the first time they were
+  written. The shape: `static` sites with no instance in hand,
+  and sites resolving *several* screens (parking picks a corner
+  across all of them; float re-anchor compares two and
+  early-returns when they match, so routing it would silently
+  no-op a default-ON feature under every pinned fixture). So a
+  fixture driving `calculatedFrames`, `trackCapacity` or a resize
+  is fully pinned, and one driving a whole `retile` is not.
   **Every geometry fixture pins its own rect**
   (`core.tiler.visibleBounds = { _ in rect }`) rather than
   inheriting the host's real `NSScreen`, and pins any default it

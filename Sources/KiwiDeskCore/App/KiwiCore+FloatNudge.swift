@@ -33,12 +33,15 @@ extension KiwiCore {
             }
             ?? NSScreen.screens.first
         guard let screen else { return }
-        let visible = GeometryUtils.axVisibleFrame(of: screen)
+        // Routed through the hook (#531) like the resize spans:
+        // one screen, bounds in and a window frame out, so a
+        // fixture can state the display a nudge confines to.
+        let visible = tiler.visibleBounds(screen)
         let nudged = FloatNudge.target(
             frame: current,
             visible: visible
         )
-        // `axVisibleFrame` excludes the menu bar but not the
+        // `visibleBounds` excludes the menu bar but not the
         // App/Space Bar strips; clear those too, the same clamp
         // every float gets (#242).
         let target = floatFrameClampedClearOfBars(

@@ -5,10 +5,14 @@ import Testing
 /// bounds through `TilingEngine.visibleBounds`, never by calling
 /// `GeometryUtils.axVisibleFrame` directly (#531): a direct call
 /// re-imports the host's real screen, and a fixture that pins
-/// the hook then silently stops pinning that path. Reverting any
-/// one routed call site leaves the whole behavioural suite green
-/// for two of them, so the invariant needs a source guard rather
-/// than trust.
+/// the hook then silently stops pinning that path.
+///
+/// The routed call sites each have a behavioural test today, so
+/// this guard is not what covers them — it is what covers the
+/// *next* one, which arrives before its test does. Two of the
+/// four went in routed but uncovered, and reverting either left
+/// all 1979 tests green; that is the gap this closes on arrival
+/// rather than in review.
 ///
 /// **The lens, not the list.** The scan discovers *every*
 /// occurrence under the three governed directories and pins a
@@ -42,15 +46,25 @@ struct VisibleBoundsRoutingTests {
     }
 
     /// The directories where a direct call would re-import the
-    /// host screen into layout: `Tiling` and `Layouts` own the
-    /// layout path, `Commands` owns the resize spans (and is
-    /// covered by no `.claude/rules/*` file, so this guard is
-    /// the only reminder an agent editing it gets).
-    private let governed = ["Tiling", "Layouts", "Commands"]
+    /// host screen: `Tiling` and `Layouts` own the layout path,
+    /// `Commands` owns the resize spans (and is covered by no
+    /// `.claude/rules/*` file, so this guard is the only reminder
+    /// an agent editing it gets), and `App` is where every live
+    /// exception actually lives — scanning only the first three
+    /// would have watched the files that are already correct and
+    /// missed the ones deliberately outside the hook (review).
+    private let governed = [
+        "Tiling", "Layouts", "Commands", "App",
+    ]
 
     /// Every file allowed to name `axVisibleFrame` directly, with
     /// today's exact count and the reason it is outside the hook.
     /// Anything absent from this map must be at zero.
+    ///
+    /// **This map is the exemption list.** AGENTS.md §5 and the
+    /// `visibleBounds` doc comment carry the principle and point
+    /// here for the files, rather than restating them — three
+    /// prose copies drifted apart on their first outing (review).
     private let allowed: [String: Int] = [
         // The declaration itself.
         "GeometryUtils.swift": 1,
@@ -63,6 +77,16 @@ struct VisibleBoundsRoutingTests {
         // onto the same bounds.
         "TilingEngine+Stash.swift": 3,
         "TilingEngine+StashRestore.swift": 2,
+        // The bar strips are drawn ON a screen; a fabricated rect
+        // would place real chrome nowhere.
+        "KiwiCore+AppBar.swift": 2,
+        "KiwiCore+SpaceBar.swift": 1,
+        // DO NOT ROUTE. Re-anchor resolves the source AND the
+        // destination screen and early-returns when they are
+        // equal — under a one-rect hook they always are, so
+        // routing it would silently disable a default-ON feature
+        // (#502) in every pinned fixture while staying green.
+        "KiwiCore+FloatReanchor.swift": 2,
     ]
 
     @Test("Only the allowlisted files resolve bounds directly")

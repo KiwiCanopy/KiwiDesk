@@ -12,8 +12,11 @@ import Testing
 ///
 /// Screen *existence* is still the host's: `screen(for:in:)`
 /// falls back to `NSScreen.main`, and with no screen at all the
-/// injected closure is never consulted — hence the guard in
-/// `makeCore`. Only bounds are pinned, never topology.
+/// injected closure is never consulted — hence each test's
+/// guard. Only bounds are pinned, never topology.
+///
+/// The resize half of the seam lives in
+/// `VisibleBoundsResizeSeamTests`.
 @Suite("Injected visible bounds (#531)", .serialized)
 @MainActor
 struct VisibleBoundsSeamTests {
@@ -47,12 +50,10 @@ struct VisibleBoundsSeamTests {
             "space_bar.set_enabled",
             args: [.bool(false)]
         )
-        // Pin the two defaults these fixtures reason from, the
-        // rule this change set wrote into §5: the pile threshold
-        // below is 2 * min, and a finished mouse resize only
-        // reaches the layout at all in `.layout` mode.
+        // Pin the default this fixture reasons from, the rule
+        // this change set wrote into §5: the pile threshold
+        // below is 2 * min.
         #expect(core.tiler.settings.minWindowSize == 300)
-        #expect(core.tiler.settings.mouseResize == .layout)
         return core
     }
 
@@ -148,129 +149,5 @@ struct VisibleBoundsSeamTests {
                     - OverlapStack.offset
             ) < 1
         )
-    }
-
-    @Test("The BSP resize sign reads the injected bounds")
-    func bspFocusSignFollowsInjectedBounds() {
-        // `bspFocusSign` classifies the focused slot as the first
-        // or second region via `MouseResize.bspSide`, which is
-        // `slot.midX <= bounds.midX ? 1 : -1`. Growing the right
-        // window must lower the shared ratio (#122).
-        //
-        // The rect sits at a NEGATIVE origin on purpose. A revert
-        // to the host's screen leaves the slot where the injected
-        // rect put it and only changes the `bounds` it is compared
-        // against — so with a rect at x: 0 the classification
-        // survives on any host narrower than ~1500pt, including
-        // the ~1066pt runner of #523: the guard would have been
-        // green on CI and red only on a wide dev Mac, reproducing
-        // the very anti-pattern it exists to catch (review). Here
-        // the right slot's midX is −4250 against the injected
-        // −4500 (second region), while EVERY real display has
-        // midX ≥ 0 (first region), so a revert goes red anywhere.
-        guard NSScreen.main != nil else { return }
-        let core = makeCore(
-            bounds: CGRect(
-                x: -5000,
-                y: 0,
-                width: 1000,
-                height: 900
-            )
-        )
-        core.execute(
-            "set_mode",
-            args: [.string("1"), .string("bsp")]
-        )
-        core.execute(
-            "bsp.set_strategy",
-            args: [.string("alternating")]
-        )
-        spawn(core, count: 2)
-        core.state.apply(.windowFocused(WindowID(2)))
-        let before = core.tiler.settings.resolvedBsp(
-            for: core.state.workspaces[SpaceID("1")]!
-        ).splitRatioH
-        core.execute("resize", args: [.string("x"), .number(100)])
-        let after = core.tiler.settings.resolvedBsp(
-            for: core.state.workspaces[SpaceID("1")]!
-        ).splitRatioH
-        #expect(abs((before - after) - 0.1) < 1e-9)
-    }
-
-    @Test("A finished mouse resize reads the injected bounds")
-    func mouseResizeEndFollowsInjectedBounds() {
-        // `handleResizeEnd` translates the dragged frame into a
-        // ratio delta against the display bounds, so the stored
-        // ratio is delta-over-span for the INJECTED span: dragging
-        // the left window's right edge 100pt wider on a 1000pt
-        // display is +0.1, whatever the host measures.
-        guard NSScreen.main != nil else { return }
-        let core = makeCore(
-            bounds: CGRect(x: 0, y: 0, width: 1000, height: 900)
-        )
-        core.execute(
-            "set_mode",
-            args: [.string("1"), .string("bsp")]
-        )
-        core.execute(
-            "bsp.set_strategy",
-            args: [.string("alternating")]
-        )
-        spawn(core, count: 2)
-        guard let space = core.state.workspaces[SpaceID("1")],
-            let slot = core.tiler.calculatedFrames(
-                state: core.state
-            )[WindowID(1)]
-        else {
-            Issue.record("no slot for the left window")
-            return
-        }
-        let before = core.tiler.settings.resolvedBsp(
-            for: space
-        ).splitRatioH
-        var dragged = slot
-        dragged.size.width += 100
-        core.handleResizeEnd(
-            WindowID(1),
-            slot: slot,
-            frame: dragged,
-            in: space
-        )
-        let after = core.tiler.settings.resolvedBsp(
-            for: core.state.workspaces[SpaceID("1")]!
-        ).splitRatioH
-        #expect(abs((after - before) - 0.1) < 1e-9)
-    }
-
-    @Test("The resize span is the injected width, not the host's")
-    func resizeSpanFollowsInjectedWidth() {
-        // No screen at all means the injected closure is
-        // never consulted (the layout resolves no screen to
-        // pass it), so there is nothing here to assert.
-        guard NSScreen.main != nil else { return }
-        // A 1000pt-wide display makes the keyboard resize's
-        // delta-over-span arithmetic exact: 100pt of a 1000pt
-        // span is 0.1 of the ratio, whatever the host measures.
-        let core = makeCore(
-            bounds: CGRect(x: 0, y: 0, width: 1000, height: 900)
-        )
-        core.execute(
-            "set_mode",
-            args: [.string("1"), .string("bsp")]
-        )
-        core.execute(
-            "bsp.set_strategy",
-            args: [.string("alternating")]
-        )
-        spawn(core, count: 2)
-        core.state.apply(.windowFocused(WindowID(1)))
-        let before = core.tiler.settings.resolvedBsp(
-            for: core.state.workspaces[SpaceID("1")]!
-        ).splitRatioH
-        core.execute("resize", args: [.string("x"), .number(100)])
-        let after = core.tiler.settings.resolvedBsp(
-            for: core.state.workspaces[SpaceID("1")]!
-        ).splitRatioH
-        #expect(abs((after - before) - 0.1) < 1e-9)
     }
 }
