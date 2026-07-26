@@ -76,3 +76,11 @@ plan/
 
 # macOS specific
 .DS_Store
+
+# Python bytecode from the scripts/ localization tooling.
+scripts/__pycache__/
+
+# Transient translator worksheets: scripts/extract-keys <locale>
+# mints them, scripts/merge-keys deletes them. Never committed.
+Sources/KiwiDeskCore/Resources/Locales/missing_*.json
+site/src/i18n/missing_*.json

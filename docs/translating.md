@@ -421,6 +421,8 @@ writing anything**. It HARD-FAILS (non-zero exit) on:
   German silently revert to all-English. That's a feature dying
   quietly, and quiet is exactly what this check exists to
   prevent.
+- **broken content** in any translated value — the four checks
+  described in *Content guards* below.
 
 It only *warns* (prints, does not fail) about **orphan keys** —
 see *Maintaining the key set* below.
@@ -433,6 +435,86 @@ additionally fires on locale-only changes: staging just
 `extract-keys --check` before the commit completes, so a
 translator gets instant local feedback instead of waiting for
 CI to reject a broken or stale file.
+
+### Content guards
+
+Everything above reads *keys*. Nothing there ever looks at a
+translated value, so a bad worksheet used to land silently and
+render live — a reviewer skimming a language they do not read
+sees plausible text. Four checks read the copy itself
+(`scripts/localization_guards.py`), each a hard failure:
+
+- **Wrong writing system.** Every locale value must use only the
+  scripts that locale actually writes in: Cyrillic belongs to
+  `ru`, kana to `ja`, Han to `ja`/`zh-Hans`/`zh-Hant`, Hangul to
+  `ko`, and Greek, Arabic and Hebrew to none of them. Latin is
+  deliberately *not* in the table — every locale uses it for
+  `KiwiDesk`, URLs and `%1$@`, so its presence proves nothing.
+  Note that Han cannot separate Japanese from Chinese, while kana
+  can; that is why the table maps each script to the locales
+  allowed to use it rather than giving each locale one expected
+  script. `en.json` is checked too: it is generated, so a stray
+  non-Latin glyph there is a pasted literal in Swift.
+- **Tagged stubs.** Untranslated English carrying its own locale
+  code — `"Icon & name (ES)"`, `"Testo Global colors (IT)"`, and
+  with full-width parens `"Group adjacent…（JA）"`. The full-width
+  pair matters: an ASCII-only regex once reported a 45%-complete
+  Japanese file as 98% complete. A value naming a *different*
+  language (`"Alemán (DE)"` in Spanish) is legitimate and passes.
+- **English left in a translated sentence.** The shape a
+  word-swapping machine translation produces: `"追加 Window"` for
+  "Add Window", `"編集ing init.lua directly"` for "Editing
+  init.lua directly", `"保存 as New Profile…"`. Note the English
+  plural welded onto a translated verb — a detector requiring
+  several source words in a row misses these entirely, and ~90 of
+  them once survived two review passes.
+- **Cross-language overlap.** Two locales of *different*
+  languages sharing too many byte-identical values — the shape
+  that caught ~360 entries of French sitting in `it.json`. The
+  threshold is 5% of the keys they share, floored at 20: sibling
+  languages genuinely coincide on short labels (`es` and `pt-BR`
+  sit at 11 with the corpus clean), while a whole file pasted
+  into the wrong locale lands near 45%. Pairs of the same base
+  language are skipped — `zh-Hans` and `zh-Hant` are one language
+  in two scripts and agree on a great deal legitimately.
+
+There is **no baseline or exemption file**. The corpus is clean,
+so any hit is a real defect. What the guards do carry is a
+**glossary** — the terms that stay English in every locale
+(`KiwiDesk`, `Lua`, `macOS`, `BSP`, Apple's `Mission Control`,
+the layout-mode names `Floating`/`Sticky`/`Monocle`). Interpolation
+specifiers, dotted identifiers like `init.lua`, and a key name
+following a modifier glyph (`⌘ Command`) are stripped before any
+word is judged. If you add a term that must stay English, add it
+to `GLOSSARY` in the same change set.
+
+`scripts/merge-keys` runs the first three of these per worksheet
+entry, so a bad translation is **skipped rather than written**.
+The clean entries in the same worksheet still merge, and each
+skipped one is echoed to stderr with the reason — the worksheet
+is deleted either way, so that transcript is the only copy of the
+discarded text. Re-run `scripts/extract-keys <locale>` to get the
+skipped keys back with the current English.
+
+**One gap, stated plainly:** the English-residue check runs only
+on non-Latin-script locales (`ja`, `ko`, `zh-Hans`, `zh-Hant`,
+`ru`). In a Latin-script locale a retained English word is
+indistinguishable from a cognate or a loanword — `"Item ativo"`,
+`"Mein Setup"`, `"Limite del track"` are all correct — so the
+rule would flag dozens of good translations. The one sub-rule
+that *is* precise everywhere, an English `-ing` welded onto a
+translated stem (`"Modifiering"`), runs on every locale. Latin
+locales are otherwise covered by the script, stub and overlap
+checks; word-swap residue there is caught by review, not by the
+gate.
+
+All of this is backed by Swift tests —
+`LocalizationContentGuardTests`, `LocalizationOverlapGuardTests`
+and `MergeKeysContentGuardTests` — which exercise the predicates
+against strings the tests write themselves, never the shipped
+catalogs. Asserting against the real corpus would tie the guard's
+coverage to the corpus staying dirty: each assertion would pass
+only while a bug was live and fail the moment it was fixed.
 
 ## Maintaining the key set (for maintainers)
 
@@ -480,6 +562,16 @@ their stale values, not deriving keys:
   no side notes or issue comments needed. It fails without
   touching anything if a key exists in no translation (typo
   guard). `--site` targets the site manifests instead.
+- **Retire one locale's bad translation.**
+  `scripts/drop-key --locale <locale> [--locale <locale>] <key>…`
+  narrows the drop to the named locales. This is the *other*
+  reason a translation gets retired: the English is fine and the
+  **translation** is defective — which is exactly what the
+  content guards report, per locale. Dropping every locale's copy
+  would discard good translations of the same key, so the fix
+  path has to be per locale too. The typo guard still applies
+  inside the narrowed scope: a key present elsewhere but not in
+  the named locales fails rather than silently dropping nothing.
 
 **Rename vs. drop vs. deprecate — pick based on whether the
 *meaning* changed, and where it changed.** If a key is just
