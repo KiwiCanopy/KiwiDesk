@@ -27,8 +27,78 @@ import Testing
 /// content underneath. There is no fixed background to measure
 /// against — see the overlay row in `docs/accepted-limitations.md`
 /// for why that stays an accepted limitation.
-@Suite("Drag overlay origin/target separation")
+@Suite("Overlay color separation and contrast")
 struct DragPairSeparationTests {
+    /// Why the ghost left the focus ring's hue family (#511).
+    ///
+    /// This exists because the prose version of this argument was
+    /// written wrong three times running. Every figure in the
+    /// origin/target paragraph of `docs/design-decisions.md` that
+    /// survived review is one a test pins; every figure that had
+    /// to be retracted was prose-only. So the claim is pinned
+    /// here and the prose cites it.
+    ///
+    /// The trade is **chroma against separation**, not
+    /// impossibility: the ring's hue family does contain colours
+    /// satisfying all three constraints, they just cannot be
+    /// saturated. Anyone re-deriving this: sweep HSL over the
+    /// stated hue band, and impose all three constraints at once
+    /// (separation ≥ floor against the drop-zone amber, ≥3:1 on
+    /// near-white *and* near-black). Sweeping with a saturation
+    /// floor of your own makes the qualifying set look like it
+    /// clusters there — that is the mistake this test is here to
+    /// stop repeating.
+    @Test("The ring's hue family cannot do the ghost's job")
+    func ringHueFamilyCannotSeparateAtChroma() throws {
+        let target = DragVisual.dropZoneDefault.borderColor
+        func qualifies(_ hex: String) -> Bool {
+            guard
+                let gap = ColorVision.separation(hex, target),
+                let onWhite = ColorVision.contrast(hex, "#FFFFFF"),
+                let onBlack = ColorVision.contrast(hex, "#000000")
+            else { return false }
+            return gap >= ColorVision.separationFloor
+                && onWhite >= 3 && onBlack >= 3
+        }
+        // At the ring's own hue AND its own saturation, no
+        // lightness works. This is the load-bearing claim: the
+        // ghost could not simply be a darker or lighter #588613.
+        for step in 0...100 {
+            let candidate = ColorVision.hex(
+                hue: 84,
+                saturation: 0.75,
+                lightness: Double(step) / 100
+            )
+            #expect(
+                !qualifies(candidate),
+                Comment(rawValue: "\(candidate) unexpectedly works")
+            )
+        }
+        // Drop to the shipped ghost's chroma and the ring's hue
+        // does qualify — but barely, where the emerald clears the
+        // floor with room. That gap is the whole argument.
+        let matchedChroma = "#799D43"
+        #expect(qualifies(matchedChroma))
+        let ringHue = try #require(
+            ColorVision.separation(matchedChroma, target)
+        )
+        let shipped = try #require(
+            ColorVision.separation(
+                DragVisual.ghostDefault.borderColor,
+                target
+            )
+        )
+        #expect(abs(ringHue - 61) < 3)
+        #expect(abs(shipped - 76) < 3)
+        // And the yellow-green that *did* clear separation well
+        // (85) failed the contrast bar instead — the rejected
+        // alternative, kept here so the trade stays visible.
+        let rejected = try #require(
+            ColorVision.contrast("#2F4A0C", "#000000")
+        )
+        #expect(rejected < 3)
+    }
+
     @Test("The shipped drag pair survives red-green vision loss")
     func defaultPairSeparatesUnderProtanopia() throws {
         let ghost = DragVisual.ghostDefault.borderColor

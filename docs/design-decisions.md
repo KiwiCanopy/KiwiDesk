@@ -1901,18 +1901,20 @@ from each other, and a yellow-green against an amber is exactly
 what red-green vision loss erases — they measured **4.7/441**,
 worse than the 22 #470 called one colour. The target could not
 move (its amber is the hex the Space Bar's focused accent
-converged onto), so the ghost had to. It could not stay a
-yellow-green *at the ring's chroma*: stacking the
-3:1-on-both-ends bar onto the separation floor leaves a
-knife-edge in that hue family — every colour satisfying all
-three sits at saturation ~0.25 and **exactly** 3.0:1 on white, a
-desaturated grey-green with no margin on two constraints at once,
-and at the ring's own S0.75 in its own hue band *nothing*
-qualifies. (The overlap is not empty, which an earlier draft of
-this paragraph claimed — it is merely a knife-edge. Re-measure
-before trusting either statement.) How much separation is
-*available* climbs with hue: ~86 at 75–90°, ~119 at 135–150°. So
-the ghost alone moved to a deep emerald `#347957` — hue 150,
+converged onto), so the ghost had to. What it could not keep was
+the ring's *chroma*: stacking the 3:1-on-both-ends bar onto the
+separation floor caps the ring's hue family at **S0.45**, so the
+ring's own S0.75 cannot satisfy all three at any lightness — the
+ghost could not simply be a darker or lighter `#588613`. Drop to
+the shipped ghost's S0.40 and the ring's hue does qualify, but
+only just: `#799D43` measures **61**, a point over the floor,
+where the emerald band (which caps at full saturation) gives
+**76** at the same chroma. That trade — chroma against
+separation, not impossibility — is pinned by
+`DragPairSeparationTests.ringHueFamilyCannotSeparateAtChroma`,
+which is also where to start when re-deriving it; the numbers
+here are quoted from that guard rather than the other way round.
+So the ghost alone moved to a deep emerald `#347957` — hue 150,
 S0.40, **76/441**, 5.2:1 on near-white and 4.0:1 on near-black,
 margin on all three while keeping real chroma. The contrast bar
 held; the hue it shared with the ring did not. The ring keeps

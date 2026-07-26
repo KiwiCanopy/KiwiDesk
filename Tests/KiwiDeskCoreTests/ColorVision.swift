@@ -20,26 +20,33 @@ import Foundation
 enum ColorVision {
     /// The separation floor, shared by both guards.
     ///
-    /// One number on purpose. Motion is a redundant cue the drag
-    /// overlay has and the Space Bar does not (the ghost tracks
-    /// the cursor, the drop zone stays put), so a lower drag floor
-    /// would be arguable — but the two overlays are frequently
-    /// adjacent, the reader resolves which-is-which from a
-    /// near-static glance, and colour-vision deficiency grants no
-    /// compensating boost to motion discrimination. A hex clearing
-    /// the shared floor was available, so a second threshold to
-    /// explain and guard buys nothing.
+    /// One number on purpose, and the structural reason comes
+    /// first: **the two families share hexes.** The drop-zone
+    /// amber *is* `SpaceBarStyle.focusedItemColor`, and six of
+    /// the nine palettes tie target to the focused accent — so
+    /// one hex is routinely measured in both families at once.
+    /// Two thresholds over one colour is a latent contradiction:
+    /// a retune could clear the drag floor and fail the accent
+    /// floor on the identical value, and whichever guard ran
+    /// first would decide. Secondarily, motion is a redundant cue
+    /// the drag overlay has and the Space Bar does not, so a
+    /// *lower* drag floor sounds arguable — but the two overlays
+    /// are frequently adjacent, the reader resolves
+    /// which-is-which from a near-static glance, and the drag
+    /// family has *less* headroom anyway (see below), so it would
+    /// have been backwards.
     ///
-    /// **A floor, not a target.** It is set by the shipped Space
-    /// Bar default, which measures 93 and is the lowest pair in
-    /// either family; every authored palette now sits at 123 or
-    /// above. 60 is comfortably past the 22 of the pre-#470
-    /// default and past both near-miss retunes considered at the
-    /// time (`#F0B858` 23, `#E09B2E` 39), while leaving room to
-    /// retune a hex without tripping a guard on a colour that is
-    /// actually fine. A new palette landing at 61 passes while
-    /// being far worse than anything shipped — aim for the band,
-    /// and let this catch the disasters.
+    /// **A floor, not a target.** What actually ships: the drag
+    /// default at **76** is the lowest pair in either family, the
+    /// Space Bar default at **93** the lowest of its own, and
+    /// every authored palette sits at **123 or above**. 60 is
+    /// comfortably past the 22 of the pre-#470 default and past
+    /// both near-miss retunes considered at the time (`#F0B858`
+    /// 23, `#E09B2E` 39), while leaving room to retune a hex
+    /// without tripping a guard on a colour that is actually
+    /// fine. A new palette landing at 61 passes while being far
+    /// worse than anything shipped — aim for the band, and let
+    /// this catch the disasters.
     ///
     /// If an eye-confirm asks for a colour that trips this:
     /// re-measure, and move the floor only if the new
@@ -120,6 +127,33 @@ enum ColorVision {
                     + 0.693511405 * s
             )
         )
+    }
+
+    /// HSL → hex, for sweeping a hue family in a guard.
+    static func hex(
+        hue: Double,
+        saturation: Double,
+        lightness: Double
+    ) -> String {
+        let c = (1 - abs(2 * lightness - 1)) * saturation
+        let hp = hue.truncatingRemainder(dividingBy: 360) / 60
+        let x = c * (1 - abs(hp.truncatingRemainder(dividingBy: 2) - 1))
+        let (r1, g1, b1): (Double, Double, Double) =
+            switch hp {
+            case ..<1: (c, x, 0)
+            case ..<2: (x, c, 0)
+            case ..<3: (0, c, x)
+            case ..<4: (0, x, c)
+            case ..<5: (x, 0, c)
+            default: (c, 0, x)
+            }
+        let m = lightness - c / 2
+        let bytes = [r1, g1, b1].map {
+            Int((($0 + m) * 255).rounded())
+        }
+        return "#"
+            + bytes.map { String(format: "%02X", $0) }
+            .joined()
     }
 
     /// Euclidean distance in simulated sRGB, 0...441 (√3·255).

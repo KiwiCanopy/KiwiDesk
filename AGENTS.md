@@ -475,7 +475,10 @@ Keep this list updated whenever a recurring mistake is found.
   argument the palette decisions rest on, so a copy that drifted
   in one suite would move a guard's threshold without failing
   anything; extracted at the second copy, on that risk alone,
-  same as `SourceScan`).
+  same as `SourceScan`). That last one also owns the shared
+  separation **floor**, deliberately — the two families share
+  hexes, so one threshold over one colour is the point; don't
+  "tidy" the policy back out of the maths file.
   The bar is the **drift risk** — a divergent copy weakens a
   guard, or silently changes what a suite observes — not the
   copy count, which is merely the evidence that prompted the

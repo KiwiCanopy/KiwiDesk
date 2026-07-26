@@ -67,10 +67,16 @@ public struct BorderStyle: Sendable, Equatable {
     /// still clearing the 3:1 floor on both near-white (~4.3:1) and
     /// near-black (~4.8:1). Hue, not lightness, stays the on-brand
     /// invariant. May read low-contrast over window content that is
-    /// itself green (see docs/design-decisions.md accepted
-    /// limitations). Default mirrored in docs/lua-reference.md
-    /// (border colors) and the drag ghost (`DragVisual.ghostDefault`)
-    /// — change all three. The optional glow blooms a brightened
+    /// itself green (see docs/accepted-limitations.md, whose
+    /// mitigation is the 3:1 floor above — keep it if you retune).
+    /// Default mirrored in docs/lua-reference.md (border colors)
+    /// — change both. The drag ghost used to be this same hex and
+    /// **deliberately no longer is** (#511: it has to separate
+    /// from the drop-zone amber under red-green vision loss, which
+    /// this hue family cannot do at this chroma — see
+    /// `DragVisual.ghostDefault`). Do not re-converge them; the
+    /// ring is free to move here precisely because it has no
+    /// partner to separate from. The optional glow blooms a brightened
     /// derivative of this (`BorderStyle.glowColor(from:)`).
     public var focusedColor = "#588613"
     public var unfocusedEnabled = false
