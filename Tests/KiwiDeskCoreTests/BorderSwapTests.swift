@@ -107,19 +107,29 @@ struct BorderSwapTests {
     func nilPreferredRetires() {
         let primary = SwapSpyBackend(rendersGlow: false)
         let fallback = SwapSpyBackend(rendersGlow: true)
+        // Counting factory: a bare nil default would make this
+        // test pass even with the retire latch deleted (a nil
+        // ask has no side effect to observe) — the ask COUNT is
+        // the latch's one observable.
+        var asks = 0
         let overlay = BorderOverlay(
             window: 7,
             backend: primary,
-            fallback: fallback
+            fallback: fallback,
+            preferred: { _ in
+                asks += 1
+                return nil
+            }
         )
         render(overlay, glow: true)
         fallback.calls = []
 
-        // Default seam preferred factory returns nil — the ring
-        // stays on the glow-capable backend, and stops asking.
+        // The ring stays on the glow-capable backend, and after
+        // the first nil it must stop asking.
         render(overlay, glow: false)
         render(overlay, glow: false)
         #expect(fallback.calls == [.update, .update])
+        #expect(asks == 1)
     }
 }
 
