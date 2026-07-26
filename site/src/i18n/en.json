@@ -1,6 +1,6 @@
 {
   "beta_badge": "Public beta",
-  "build_body": "KiwiDesk is in public beta. Install it with Homebrew — one command, and the kiwidesk CLI comes with it. Packaged releases and the Mac App Store build come with 1.0.",
+  "build_body": "KiwiDesk is in public beta. Install it with Homebrew — one command, and the kiwidesk CLI comes with it. Packaged releases and the Mac App Store build follow once the beta has settled.",
   "build_cmt": "# for contributors — Homebrew is the easy path",
   "build_code_aria": "Build KiwiDesk from source",
   "build_copy": "Copy",
@@ -23,6 +23,7 @@
   "calm_point_4": "Works out of the box — configurable if you want",
   "calm_title": "Calmer than dragging windows around",
   "cli_body": "Every action is a command. Bind them to keys, script them, or stream live events over a Unix socket into SketchyBar, JankyBorders, or your own tools.",
+  "cli_cmt": "# stream live events (feed SketchyBar, your own tools…)",
   "cli_code_aria": "KiwiDesk CLI examples",
   "cli_eyebrow": "Command line",
   "cli_title": "Drive it from the terminal",

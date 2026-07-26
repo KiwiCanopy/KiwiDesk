@@ -171,9 +171,12 @@ config:
 -- `sbar`):
 local SBAR = require("sketchybar")
 
--- Binary path: the Homebrew cask puts "kiwidesk" on PATH. If
--- you built from source, point this at your clone instead.
-local KIWIDESK = "kiwidesk"
+-- Binary path: absolute, like JQ below. sketchybar is spawned by
+-- launchd with a minimal PATH that usually lacks
+-- /opt/homebrew/bin, so a bare "kiwidesk" would not resolve here
+-- even though the cask installs it there. Point this at your
+-- clone instead if you built from source.
+local KIWIDESK = "/opt/homebrew/bin/kiwidesk"
 local JQ = "/opt/homebrew/bin/jq"
 
 -- Optional: load an icon map (app name → icon character).

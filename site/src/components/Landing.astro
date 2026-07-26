@@ -197,22 +197,26 @@ const jsonLd = [
         } catch (e) {
           root.dataset.theme = "dark";
         }
-        // Arriving on #start is the install bridge (from /guide/,
-        // or the Simple-mode CTA): an explicit ask for the
-        // technical view. Force Nerd BEFORE first paint — the
-        // section is .dev-only (display:none), so a hash landing
-        // on a hidden element would scroll nowhere — and persist
-        // it exactly as a toggle click does, so the stored mode
-        // stays the single source of truth rather than a URL
-        // override that silently reverts on the next visit.
+        // Arriving on #start is the install bridge. Resolve Nerd
+        // BEFORE first paint — the section is .dev-only
+        // (display:none), so a hash landing on a hidden element
+        // would scroll nowhere.
+        //
+        // TRANSIENT, not persisted, and the asymmetry is the
+        // point: the in-page bridge click (below) DOES persist,
+        // because that visitor chose it here, knowingly. A bare
+        // /#start arrival did not — it is equally a link someone
+        // was sent, a bookmark, or a search result. Writing the
+        // stored mode there would silently rewrite a stranger's
+        // preference for every future visit, before they have
+        // seen a single pixel, on a choice they never made.
+        // Reverting to the default on their next visit is the
+        // correct behavior for them, not a shortcoming.
         var bridged = location.hash === "#start";
         try {
           var m = localStorage.getItem("kiwidesk-site-mode");
-          if (bridged) {
-            m = "dev";
-            localStorage.setItem("kiwidesk-site-mode", "dev");
-          }
-          root.dataset.mode = m === "dev" ? "dev" : "simple";
+          root.dataset.mode =
+            bridged || m === "dev" ? "dev" : "simple";
         } catch (e) {
           root.dataset.mode = bridged ? "dev" : "simple";
         }
@@ -243,7 +247,14 @@ const jsonLd = [
         var paths = { en: "/", de: "/de/", ja: "/ja/" };
         var current = on("/de") ? "de" : on("/ja") ? "ja" : "en";
         function go(lang) {
-          if (lang !== current) location.replace(paths[lang]);
+          // Carry the fragment across the locale redirect. Without
+          // it a shared /#start (the install bridge's own URL)
+          // drops its hash for any visitor whose locale differs
+          // from the link's, landing them at the top of another
+          // locale's page with nothing to explain why.
+          if (lang !== current) {
+            location.replace(paths[lang] + location.hash);
+          }
         }
         var stored;
         try {
@@ -740,11 +751,11 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
             <span class="code__dot" aria-hidden="true"></span>
             <span class="code__title">{t.cli_title_bar}</span>
           </div>
-          <pre><code><span class="prompt">$</span> KiwiDesk set_mode monocle
-<span class="prompt">$</span> KiwiDesk focus left
-<span class="prompt">$</span> KiwiDesk get_state
-<span class="cmt"># stream live events (feed SketchyBar, your own tools…)</span>
-<span class="prompt">$</span> KiwiDesk subscribe space_change</code></pre>
+          <pre><code><span class="prompt">$</span> kiwidesk set_mode monocle
+<span class="prompt">$</span> kiwidesk focus left
+<span class="prompt">$</span> kiwidesk get_state
+<span class="cmt">{t.cli_cmt}</span>
+<span class="prompt">$</span> kiwidesk subscribe space_change</code></pre>
         </div>
       </div>
     </section>
@@ -1046,9 +1057,12 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
       // The #cta button is the one install path a Simple-mode
       // reader is offered. #start lives in a .dev-only section, so
       // a bare hash jump would land on a display:none element and
-      // scroll nowhere. Switch modes through applyMode() (which
-      // persists the choice, exactly as clicking the toggle does)
-      // and scroll in the same tick: applyMode sets `data-mode`
+      // scroll nowhere. Switch modes through applyMode(), which
+      // PERSISTS the choice exactly as clicking the toggle does —
+      // this visitor clicked the bridge on this page, so it is a
+      // real choice, unlike a bare /#start arrival (see the head
+      // script, which resolves that case transiently instead).
+      // Scroll in the same tick: applyMode sets `data-mode`
       // synchronously, so scrollIntoView's own forced reflow
       // already sees the revealed section at its real offset.
       // Deliberately NOT deferred to requestAnimationFrame — rAF
@@ -1065,8 +1079,8 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
               behavior: reduce ? "auto" : "smooth",
               block: "start",
             });
-            // Keep the URL shareable — landing on /#start later
-            // re-enters Nerd mode via the <head> resolver.
+            // Keep the URL shareable — /#start re-enters Nerd
+            // mode via the <head> resolver, for this visit only.
             history.replaceState(null, "", "#start");
           });
         });

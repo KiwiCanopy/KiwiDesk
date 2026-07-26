@@ -39,13 +39,14 @@ Lua callback arguments
 
 ## Hammerspoon
 
-Drive KiwiDesk from Hammerspoon (or vice versa) through the CLI.
-Installed from the Homebrew cask, `kiwidesk` is already on
-`PATH`; a source build is not, so point `KIWIDESK` at it instead
-(see the [recipes intro](index.md)):
+Drive KiwiDesk from Hammerspoon (or vice versa) through the CLI
+(see the [recipes intro](index.md) for the binary path):
 
 ```lua
-local KIWIDESK = "kiwidesk"  -- or a source build's full path
+-- Absolute: Hammerspoon is a GUI app, so its os.execute inherits
+-- launchd's minimal PATH without /opt/homebrew/bin. Swap in your
+-- clone's path if you built from source.
+local KIWIDESK = "/opt/homebrew/bin/kiwidesk"
 
 hs.hotkey.bind({"cmd", "alt"}, "m", function()
     os.execute("'" .. KIWIDESK .. "' set_mode monocle")

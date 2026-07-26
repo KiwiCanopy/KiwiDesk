@@ -19,9 +19,9 @@ Use this for tools that accept external command invocation
 (sketchybar `--trigger`, borders `active_color=...`).
 
 **CLI event stream** (shell scripts, other processes): Use
-`KiwiDesk subscribe <events...>` to receive newline-delimited
+`kiwidesk subscribe <events...>` to receive newline-delimited
 JSON from a separate terminal session or script. Query state
-on-demand with `KiwiDesk get_state` and `KiwiDesk list_monitors`.
+on-demand with `kiwidesk get_state` and `kiwidesk list_monitors`.
 Use this when you need durable polling, cross-process
 communication, or your tool runs in a different sandbox (like
 Hammerspoon).

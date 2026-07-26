@@ -1,5 +1,5 @@
 /// The running build's version and commit, reported by
-/// `KiwiDesk --version` and the `version` command.
+/// `kiwidesk --version` and the `version` command.
 ///
 /// Both fields are plain constants bumped by hand as part of
 /// the release process (see `scripts/bump-version.sh`) rather

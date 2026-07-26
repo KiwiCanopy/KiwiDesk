@@ -1,6 +1,6 @@
 import Foundation
 
-/// launchd service control (`KiwiDesk service start|stop|
+/// launchd service control (`kiwidesk service start|stop|
 /// restart`). Writes a LaunchAgent referencing the installed
 /// binary and drives it via `launchctl bootstrap`/`bootout` —
 /// no Homebrew services dependency.

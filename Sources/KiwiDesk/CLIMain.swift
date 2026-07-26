@@ -2,7 +2,7 @@ import Foundation
 import KiwiDeskCore
 
 /// CLI mode: the same binary doubles as the command-line tool
-/// when invoked with arguments (`KiwiDesk focus left`).
+/// when invoked with arguments (`kiwidesk focus left`).
 func runCLI(_ arguments: [String]) -> Int32 {
     let command = arguments[1]
 
@@ -22,7 +22,7 @@ func runCLI(_ arguments: [String]) -> Int32 {
 
 private func runService(_ arguments: [String]) -> Int32 {
     guard arguments.count > 2 else {
-        print("usage: KiwiDesk service start|stop|restart|status")
+        print("usage: kiwidesk service start|stop|restart|status")
         return 1
     }
     let outcome: ServiceManager.Outcome
@@ -117,19 +117,19 @@ private let cliUsage = """
     KiwiDesk — tiling window manager for macOS
 
     usage:
-      KiwiDesk                        run the app
-      KiwiDesk <command> [args...]    send an IPC command
-      KiwiDesk --version              print version and exit
-      KiwiDesk service start|stop|restart|status
-      KiwiDesk subscribe [events...]  stream events (NDJSON)
+      kiwidesk                        run the app
+      kiwidesk <command> [args...]    send an IPC command
+      kiwidesk --version              print version and exit
+      kiwidesk service start|stop|restart|status
+      kiwidesk subscribe [events...]  stream events (NDJSON)
 
     examples:
-      KiwiDesk focus left
-      KiwiDesk set_mode 1 bsp
-      KiwiDesk set_gap_global 12
-      KiwiDesk get_state
-      KiwiDesk subscribe space_change layout_change
+      kiwidesk focus left
+      kiwidesk set_mode 1 bsp
+      kiwidesk set_gap_global 12
+      kiwidesk get_state
+      kiwidesk subscribe space_change layout_change
 
-    run 'KiwiDesk list_commands' (app must be running) for
+    run 'kiwidesk list_commands' (app must be running) for
     the full command list.
     """

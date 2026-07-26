@@ -1,6 +1,6 @@
 {
   "beta_badge": "パブリックベータ",
-  "build_body": "KiwiDesk はパブリックベータです。Homebrew でインストールできます。コマンド 1 つで、kiwidesk CLI も一緒に入ります。パッケージ版のリリースと Mac App Store 版は 1.0 で提供します。",
+  "build_body": "KiwiDesk はパブリックベータです。Homebrew でインストールできます。コマンド 1 つで、kiwidesk CLI も一緒に入ります。パッケージ版のリリースと Mac App Store 版は、ベータが落ち着いてから提供します。",
   "build_cmt": "# コントリビューター向け — 手軽なのは Homebrew",
   "build_code_aria": "KiwiDesk をソースからビルドする",
   "build_copy": "コピー",
@@ -23,6 +23,7 @@
   "calm_point_4": "そのまま使えて、必要なら細かく設定できる",
   "calm_title": "ウインドウを動かし回すより、ずっと穏やかに",
   "cli_body": "すべての操作がコマンドです。キーに割り当てても、スクリプトから呼び出しても、Unix ソケット経由でイベントを SketchyBar や JankyBorders、自作のツールへ流し込んでも構いません。",
+  "cli_cmt": "# ライブイベントを配信（SketchyBar や自作ツールへ）",
   "cli_code_aria": "KiwiDesk CLI の例",
   "cli_eyebrow": "コマンドライン",
   "cli_title": "ターミナルから操る",

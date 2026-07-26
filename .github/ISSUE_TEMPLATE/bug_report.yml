@@ -13,7 +13,7 @@ body:
     id: kiwidesk_version
     attributes:
       label: KiwiDesk version or commit
-      description: "Run `KiwiDesk --version`."
+      description: "Run `kiwidesk --version`."
       placeholder: "0.1.0 (abc1234)"
     validations:
       required: true
@@ -47,7 +47,7 @@ body:
         or conditions needed to trigger the bug.
       placeholder: |
         1. Open Terminal
-        2. Run `KiwiDesk set_mode bsp`
+        2. Run `kiwidesk set_mode bsp`
         3. (etc.)
     validations:
       required: true
@@ -70,15 +70,15 @@ body:
       label: Relevant output and logs
       description: |
         Paste the output of these commands (one per block):
-        - `KiwiDesk get_state` (print as JSON)
-        - `KiwiDesk get_layout_info` (current layout details)
+        - `kiwidesk get_state` (print as JSON)
+        - `kiwidesk get_layout_info` (current layout details)
         - `log show --predicate 'eventMessage contains[c] "KiwiDesk"'`
         (copy lines mentioning KiwiDesk)
       placeholder: |
-        ## KiwiDesk get_state
+        ## kiwidesk get_state
         { "spaces": {...}, ... }
 
-        ## KiwiDesk get_layout_info
+        ## kiwidesk get_layout_info
         { "layout": "bsp", ... }
 
         ## System log (KiwiDesk filter)

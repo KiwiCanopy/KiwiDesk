@@ -1,6 +1,6 @@
 /* =========================================================
-   KiwiDesk — Learn page styles
-   The single, scroll-through newcomer guide at /learn/. Reuses
+   KiwiDesk — Guide page styles
+   The single, scroll-through newcomer guide at /guide/. Reuses
    the landing's design system wholesale (landing.css is imported
    first, so every custom property, the nav, footer, buttons, code
    block, .tile fills, .layouts / .layout-card grid, and the .wrap
@@ -8,7 +8,7 @@
    Learn page needs on top: a two-column layout with a sticky
    table of contents, the readable article column, section
    headers, callout cards, the FAQ, the "is it for you" scenarios,
-   and the App Store button. Everything is keyed on the same
+   and the install status card. Everything is keyed on the same
    :root[data-theme] variables so light + dark stay correct.
    ========================================================= */
 

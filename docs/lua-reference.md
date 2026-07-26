@@ -13,7 +13,7 @@ KiwiDesk is configured through a single Lua file:
 ```
 
 It is created with a commented starter template on first launch
-and re-read on `KiwiDesk reload_config`. The embedded
+and re-read on `kiwidesk reload_config`. The embedded
 interpreter is **Lua 5.5** with the full standard library.
 
 Three safety rails apply to all Lua code:
@@ -2875,7 +2875,7 @@ ignore_rules = {
 }
 ```
 
-After editing `init.lua`, run `KiwiDesk reload_config`. Newly ignored
+After editing `init.lua`, run `kiwidesk reload_config`. Newly ignored
 apps leave KiwiDesk state, and apps removed from the list are
 discovered again. Ghostty's quick terminal remains a built-in
 layer-specific exception because only its panel — not normal Ghostty
@@ -2934,7 +2934,7 @@ identifier. The Settings app's pickers handle this for you —
 they list installed apps by name and store the identifier
 behind the scenes. To find one by hand:
 
-- Run `KiwiDesk get_state` (or the `get_state` command over
+- Run `kiwidesk get_state` (or the `get_state` command over
   IPC): every window carries a `bundle_id` field alongside its
   display `app` name. Focus a window of the app and read it off.
 - Or ask macOS directly:
@@ -3723,8 +3723,7 @@ end)
 **Does:** calling `os.exit()` from a config file would kill the
 KiwiDesk process immediately, including your window layout. It is
 stubbed out to prevent accidental or malicious instant app
-termination. If you want to restart KiwiDesk use `KiwiDesk service
-restart` from a terminal or a keybinding via `KiwiDesk.exec`.
+termination. If you want to restart KiwiDesk use `kiwidesk service restart` from a terminal or a keybinding via `KiwiDesk.exec`.
 
 Note that, unlike real `os.exit`, the stub **returns** — code after
 the call keeps running. Don't rely on `os.exit()` to halt a script;

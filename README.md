@@ -95,10 +95,22 @@ brew install --cask kiwicanopy/tap/kiwidesk
 
 The cask installs the app and puts the `kiwidesk` CLI on your
 `PATH`. It ships from this project's own tap
-(`KiwiCanopy/homebrew-tap`); the fully-qualified token above taps
-it for you, so there is no separate `brew tap` step. A short
-`brew install --cask kiwidesk` needs acceptance into
-homebrew-cask, which is a post-beta step (#105).
+([`KiwiCanopy/homebrew-tap`](https://github.com/KiwiCanopy/homebrew-tap));
+the fully-qualified token above taps it for you, so there is no
+separate `brew tap` step. The shorter `brew install --cask
+kiwidesk` would need acceptance into homebrew-cask itself, which
+is a post-beta step.
+
+Later builds arrive the same way:
+
+```sh
+brew upgrade --cask kiwidesk
+```
+
+> Until KiwiDesk ships a signed `.app` (#89), each upgrade changes
+> the binary and macOS drops its Accessibility grant — re-approve
+> it in **System Settings › Privacy & Security › Accessibility**
+> if windows stop being managed after an upgrade.
 
 On first launch, an onboarding wizard walks you through granting
 the Accessibility permission KiwiDesk needs to manage windows.

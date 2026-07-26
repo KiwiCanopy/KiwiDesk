@@ -215,7 +215,7 @@ kiwidesk reload_config
 ```
 
 For GUI-managed setups, put the array at the root `ignore_rules` key
-in `gui.json`, then run `KiwiDesk reload_config`. Matching apps
+in `gui.json`, then run `kiwidesk reload_config`. Matching apps
 disappear from KiwiDesk state and emit no window events. Removing an
 id and reloading makes its windows manageable again.
 

@@ -95,8 +95,8 @@ Use the [issue templates](.github/ISSUE_TEMPLATE/) when opening
 an issue. GitHub will prompt you to choose a template.
 
 **Bug reports** capture macOS version, KiwiDesk version/commit
-(`KiwiDesk --version`), repro steps, expected vs. actual
-behavior, and relevant logs (`KiwiDesk get_state`,
+(`kiwidesk --version`), repro steps, expected vs. actual
+behavior, and relevant logs (`kiwidesk get_state`,
 `get_layout_info`, and system log lines). The template walks
 you through the details.
 

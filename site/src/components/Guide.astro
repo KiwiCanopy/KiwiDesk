@@ -2,21 +2,22 @@
 // KiwiDesk — shared Guide component (the single-page newcomer
 // guide at /guide/).
 //
-// Rendered by both /src/pages/guide/index.astro (English,
-// `lang="en"`) and /src/pages/de/guide/index.astro (German,
-// `lang="de"`). All user-facing copy arrives via the `t` prop (a
-// per-locale strings object from src/i18n/<lang>.json); this file
-// owns only structure, assets, and behavior — never inline copy.
+// Rendered by /src/pages/guide/index.astro (English), and its
+// /de/ and /ja/ counterparts. All user-facing copy arrives via
+// the `t` prop (a per-locale strings object from
+// src/i18n/<lang>.json); this file owns only structure, assets,
+// and behavior — never inline copy.
 //
 // Per-key English fallback: `s = { ...en, ...t }` means any key a
 // locale hasn't translated yet renders its English source rather
 // than a blank, so /de/guide/ is safe to ship before German is
 // filled in — it turns German key-by-key as translations land.
 //
-// Released framing: the install copy is written as if KiwiDesk has
-// shipped — a placeholder App Store button (href="#") plus a
-// Homebrew cask — even though the landing hero stays its "coming
-// soon" teaser. This is launch-prep copy.
+// Release framing: KiwiDesk ships as a Homebrew-only public beta,
+// with the Mac App Store build following later. This page carries
+// the beta status and a bridge to the landing's install section,
+// but never the shell command itself — the Terminal step lives on
+// the technical surface, not this one.
 //
 // Two client states share their localStorage keys with the
 // landing + docs so a toggle anywhere carries across the site:

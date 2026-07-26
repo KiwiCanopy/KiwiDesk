@@ -1718,13 +1718,13 @@ For the CLI, see [cli.md](cli.md).
 
 To check your current state in raw form, run:
 ```
-KiwiDesk get_state
-KiwiDesk get_profile_status
+kiwidesk get_state
+kiwidesk get_profile_status
 ```
 
 To reload your config after editing `init.lua` by hand:
 ```
-KiwiDesk reload_config
+kiwidesk reload_config
 ```
 
 ## Troubleshooting
@@ -1735,12 +1735,12 @@ KiwiDesk. It will prompt you when needed.
 
 **Settings window won't open?**  
 Restart KiwiDesk via menu bar › Service › Restart, or run
-`KiwiDesk service restart` in a terminal.
+`kiwidesk service restart` in a terminal.
 
 **Shortcut not working?**  
 Check the Shortcuts section for a ⚠️ conflict marker. Verify the combo
 is not reserved by macOS. If you hand-edited, reload with
-`KiwiDesk reload_config`.
+`kiwidesk reload_config`.
 
 **Typo in init.lua?**  
 A misspelled function name (e.g. `scroll.set_width` instead of
