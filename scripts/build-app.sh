@@ -12,15 +12,19 @@
 #   scripts/build-app.sh [--identity <id>] [--notarize <profile>]
 #                        [--output <dir>] [--skip-build]
 #
-#   --identity   Signing identity. Default: "-" (ad-hoc).
+#   --identity   Signing identity. Omit it and the sole
+#                "Developer ID Application" identity in the
+#                keychain is used, falling back to "-" (ad-hoc)
+#                when there is none — so this needs no argument
+#                on a release machine nor on a contributor's.
 #                Ad-hoc works with no Apple account, but its code
 #                identity IS the binary hash, so macOS treats
 #                every rebuild as a different app and the
 #                Accessibility grant resets each time. Any stable
 #                certificate (a self-signed one is enough) keeps
-#                the grant across rebuilds; a "Developer ID
-#                Application: ..." identity is the one that can
-#                also be notarized for distribution.
+#                the grant across rebuilds; a Developer ID
+#                identity is the one that can also be notarized
+#                for distribution.
 #   --notarize   Submit to Apple and staple, using a notarytool
 #                keychain profile you created yourself with
 #                `xcrun notarytool store-credentials`. Requires a
@@ -29,7 +33,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-IDENTITY="-"
+IDENTITY=""
 NOTARY_PROFILE=""
 OUT="$ROOT/.build/app"
 SKIP_BUILD=0
@@ -43,6 +47,34 @@ while [ "$#" -gt 0 ]; do
         *) echo "error: unknown argument '$1'" >&2; exit 2 ;;
     esac
 done
+
+# Resolve the identity from the keychain when none was given.
+# The identity STRING IS NOT A SECRET — it is stamped into every
+# binary it signs and any user can read it back with
+# `codesign -dv` — so it is discovered here rather than
+# hardcoded to one developer's name or smuggled through a CI
+# secret. Only the certificate itself is secret, and that lives
+# in the keychain either way. CI imports the .p12 first and then
+# lands on the same branch below.
+if [ -z "$IDENTITY" ]; then
+    found=()
+    while IFS= read -r line; do
+        [ -n "$line" ] && found+=("$line")
+    done < <(security find-identity -v -p codesigning 2>/dev/null \
+        | sed -n 's/.*"\(Developer ID Application: [^"]*\)".*/\1/p')
+
+    if [ "${#found[@]}" -eq 1 ]; then
+        IDENTITY="${found[0]}"
+        echo "==> signing identity: $IDENTITY"
+    elif [ "${#found[@]}" -eq 0 ]; then
+        IDENTITY="-"
+    else
+        echo "error: several Developer ID Application identities" \
+             "in the keychain — pass --identity with one of:" >&2
+        printf '  %s\n' "${found[@]}" >&2
+        exit 2
+    fi
+fi
 
 # Checked here rather than at the notarize step, so an
 # unsatisfiable request fails in a second instead of after a

@@ -296,10 +296,16 @@ no trailing period. Body (optional) explains the why, wrapped at
   build, compiles `assets/AppIcon.icon` through `actool`, and
   signs it. Nothing it writes is a second copy: the version is
   read from `KiwiDeskVersion.swift` and the two icon keys come
-  from actool's own partial plist. Signing defaults to **ad-hoc**
-  so it runs with no Apple account — pass `--identity` for a
-  stable certificate and `--notarize <profile>` for a
-  `notarytool` keychain profile you created yourself.
+  from actool's own partial plist. It also **discovers the
+  signing identity** from the keychain — that string is not a
+  secret (any user can read it out of a shipped binary with
+  `codesign -dv`), so it is never hardcoded to a developer's
+  name nor passed through a CI secret; only the certificate is
+  secret, and it lives in the keychain. With no certificate
+  present it falls back to ad-hoc, so a contributor can still
+  build. `--identity` overrides, `--notarize <profile>` takes a
+  `notarytool` keychain profile the developer created
+  themselves.
 - Fetch third-party subagents per clone with one explicit target:
   `./scripts/install-subagents.sh --claude` installs Claude Code
   agents and workspace skills; `./scripts/install-subagents.sh
