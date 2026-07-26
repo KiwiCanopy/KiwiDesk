@@ -98,7 +98,8 @@ struct BorderGeometry: Equatable {
     /// `width` is clamped defensively; `systemRadius` is the
     /// shared window corner radius (rounded style) or ignored
     /// (square style → 0). `glow` grows the overlay frame by
-    /// `glowBlur` on every side so the bloom has room (#358).
+    /// `BorderStyle.glowBlur(for:)` on every side so the bloom
+    /// has room (#358, width-scaled since #533).
     static func compute(
         windowFrame: CGRect,
         width: CGFloat,

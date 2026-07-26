@@ -352,7 +352,10 @@ floating, so float mutations never touch it.
 The ring's **rendering backend is opportunistic, not architectural**
 (#285): when the complete runtime-linked SkyLight drawing and event
 surface resolves, an SLS window follows WindowServer move/resize/order
-events directly. Drawing and tracking degrade independently: a failed
+events directly. One carve-out: the glow ring *mandates* the public
+AppKit renderer for correctness (#533, see the glow entry above) —
+bending the doctrine in the safe direction, toward the mandatory
+public fallback, never onto the private path. Drawing and tracking degrade independently: a failed
 raw-window operation replays the ring through the public AppKit panel
 without discarding a healthy WindowServer event stream. Direct mouse
 drags use one movement authority: WindowServer bounds whenever its event

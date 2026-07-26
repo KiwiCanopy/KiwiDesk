@@ -89,13 +89,15 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         return true
     }
 
-    /// The glow bloom on the fallback ring (#358). The shadow is
-    /// cast from a **filled** outer rounded-rect `shadowPath`, not
-    /// the thin stroke, so the bloom is a solid halo instead of a
-    /// banded contour smear. Below-order occludes the inward half of
-    /// the bloom behind the window, so only the outward bloom shows
-    /// — matching the SkyLight path. `masksToBounds` stays false so
-    /// the halo can spill past the shape into the grown frame.
+    /// The glow bloom (#358/#533) — this backend is the SOLE
+    /// glow renderer: the facade swaps every glow ring here
+    /// (`BorderOverlay.ensureBackend`). The shadow is cast from
+    /// a **filled** outer rounded-rect `shadowPath`, not the
+    /// thin stroke, so the bloom is a solid halo instead of a
+    /// banded contour smear. Below-order occludes the inward
+    /// half of the bloom behind the window, so only the outward
+    /// bloom shows. `masksToBounds` stays false so the halo can
+    /// spill past the shape into the grown frame.
     private func applyGlow(
         geometry: BorderGeometry,
         rect: CGRect,

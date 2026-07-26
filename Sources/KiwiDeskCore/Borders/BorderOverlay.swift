@@ -12,6 +12,13 @@ protocol BorderOverlayBackend: AnyObject {
     /// fallback is below-only. The facade recomputes geometry for
     /// this mode on every render and after a fallback swap (#357).
     var orderMode: BorderGeometry.Order { get }
+    /// Whether this backend can render the glow bloom (#533).
+    /// The SkyLight surface cannot — its WindowServer context
+    /// drops every shadow colour — so the facade swaps a glow
+    /// ring to a backend that answers `true`. Defaults to `true`
+    /// (only SkyLight opts out); test fakes flip it to exercise
+    /// the swap.
+    var rendersGlow: Bool { get }
     func update(
         geometry: BorderGeometry,
         colorHex: String,
@@ -19,6 +26,10 @@ protocol BorderOverlayBackend: AnyObject {
     ) -> Bool
     func order(relativeTo windowNumber: CGWindowID) -> Bool
     func hide() -> Bool
+}
+
+extension BorderOverlayBackend {
+    var rendersGlow: Bool { true }
 }
 
 /// Per-ring backend facade (#285 Tier 2). SkyLight is attempted only
@@ -53,13 +64,19 @@ final class BorderOverlay {
     /// instead of snapping the ring back to the un-shifted frame.
     private var bumpOffset = CGVector.zero
     private let makeFallback: @MainActor () -> any BorderOverlayBackend
+    /// Rebuilds the preferred (SkyLight) backend for a glow-off
+    /// swap-back (#533). Injectable so the swap machinery is
+    /// testable through the same seam as `makeFallback`; `nil`
+    /// means the preferred backend is unavailable, which retires
+    /// it (see `skyLightRetired`).
+    private let makePreferred:
+        @MainActor (CGWindowID) -> (any BorderOverlayBackend)?
     private let onFallback: @MainActor (String) -> Void
-    /// The order this ring was created with, kept so a glow-driven
-    /// backend swap (#533) can rebuild the SkyLight backend once
-    /// glow turns back off.
-    private let preferredOrder: BorderGeometry.Order
-    /// True after a real SkyLight failure — a glow-off swap must
-    /// never resurrect a backend that already failed.
+    /// True once the preferred SkyLight backend must never be
+    /// re-attempted: after a real failure, and after its init
+    /// returns nil (static unavailability) — otherwise every
+    /// glow-off update on the apply hot path would re-run the
+    /// doomed init forever.
     private var skyLightRetired = false
 
     init(
@@ -69,8 +86,10 @@ final class BorderOverlay {
     ) {
         targetWindow = window
         self.onFallback = onFallback
-        preferredOrder = order
         makeFallback = { AppKitBorderOverlay() }
+        makePreferred = {
+            SkyLightBorderOverlay(targetWindow: $0, order: order)
+        }
         // Both orders prefer the SkyLight transport: its window is
         // space-pinned at creation, so Mission Control leaves the
         // ring behind instantly — an NSPanel cannot be pinned and
@@ -86,6 +105,10 @@ final class BorderOverlay {
             backend = skyLight
         } else {
             backend = AppKitBorderOverlay()
+            // Retire, don't just report: availability is static,
+            // so a glow-off swap-back re-attempting the init on
+            // every update would fail identically forever.
+            skyLightRetired = true
             onFallback("SLS renderer initialization failed")
         }
     }
@@ -95,44 +118,48 @@ final class BorderOverlay {
     init(
         window: CGWindowID,
         backend: any BorderOverlayBackend,
-        fallback: (any BorderOverlayBackend)? = nil
+        fallback: (any BorderOverlayBackend)? = nil,
+        preferred: (
+            @MainActor (CGWindowID) -> (any BorderOverlayBackend)?
+        )? = nil
     ) {
         targetWindow = window
         self.backend = backend
-        preferredOrder = backend.orderMode
         makeFallback = {
             fallback ?? AppKitBorderOverlay()
         }
+        makePreferred = preferred ?? { _ in nil }
         onFallback = { _ in }
     }
 
-    /// A glow ring always renders on the AppKit backend (#533):
-    /// the WindowServer-backed SkyLight context drops any
-    /// `setShadow` colour to default black-at-low-alpha (a grey
-    /// smear), and every painted-falloff substitute banded or
-    /// clipped on device — while the `CAShapeLayer` shadow
-    /// renders the bloom correctly. Plain rings stay on SkyLight
-    /// for its space pin (instant Mission Control hide). The
-    /// swap is two-way on the glow toggle, except after a real
-    /// SkyLight failure, which stays retired. Swapping before
-    /// the backend's first window exists is free — the SkyLight
-    /// surface is created lazily on its first update.
+    /// A glow ring always renders on a backend that can bloom
+    /// (#533): the WindowServer-backed SkyLight context drops
+    /// any `setShadow` colour to default black-at-low-alpha (a
+    /// grey smear), and every painted-falloff substitute banded
+    /// or clipped on device — while the `CAShapeLayer` shadow
+    /// renders correctly. Plain rings stay on SkyLight for its
+    /// space pin (instant Mission Control hide). The swap is
+    /// two-way on the glow toggle, driven by the backend's own
+    /// `rendersGlow` capability, except once SkyLight is
+    /// retired. Swapping before the backend's first window
+    /// exists is free — the SkyLight surface is created lazily
+    /// on its first update.
     @discardableResult
     private func ensureBackend(glow: Bool) -> Bool {
-        if glow, backend is SkyLightBorderOverlay {
+        if glow, !backend.rendersGlow {
             _ = backend.hide()
             backend = makeFallback()
             return true
         }
-        if !glow, !skyLightRetired,
-            backend is AppKitBorderOverlay,
-            let skyLight = SkyLightBorderOverlay(
-                targetWindow: targetWindow,
-                order: preferredOrder
-            )
-        {
+        if !glow, !skyLightRetired, backend.rendersGlow {
+            guard
+                let preferred = makePreferred(targetWindow)
+            else {
+                skyLightRetired = true
+                return false
+            }
             _ = backend.hide()
-            backend = skyLight
+            backend = preferred
             return true
         }
         return false
@@ -174,12 +201,14 @@ final class BorderOverlay {
         }
         if swapped && !shouldRestore {
             // The fresh backend's window has no stacking yet —
-            // re-assert what the old one had, like the fallback
-            // swap replay does.
+            // re-assert what the old one had through the FACADE
+            // methods, so a failed op on a fresh SkyLight window
+            // follows the retire-and-fall-back discipline
+            // instead of leaving a drawn-but-unordered ring.
             if isHidden {
-                _ = backend.hide()
+                hide()
             } else {
-                _ = backend.order(relativeTo: targetWindow)
+                order(relativeTo: targetWindow)
             }
         }
         if shouldRestore {

@@ -15,6 +15,11 @@ final class SkyLightBorderOverlay: BorderOverlayBackend {
     // than private.
     static let borderTags: UInt64 =
         (1 << 1) | (1 << 9) | (1 << 18)
+
+    /// The WindowServer-backed context drops every shadow colour
+    /// to default black-at-low-alpha (#533) — glow rings belong
+    /// on the AppKit backend.
+    let rendersGlow = false
     static let backingStoreBuffered: Int32 = 2
     static let orderOut: Int32 = 0
     static let orderAbove: Int32 = 1

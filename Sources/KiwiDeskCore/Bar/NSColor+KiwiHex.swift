@@ -49,8 +49,13 @@ extension NSColor {
     static func kiwiGlow(hex: String) -> CGColor {
         let base = NSColor(kiwiHex: BorderStyle.glowColor(from: hex))
         let srgb = base.usingColorSpace(.sRGB) ?? base
+        // sRGB-tagged on purpose: the consumer is a
+        // colour-managed CALayer, and the components above are
+        // sRGB — packing them into a GenericRGB colour would
+        // gamma-shift the bloom off the pinned `glowColor`
+        // derivation.
         return CGColor(
-            red: srgb.redComponent,
+            srgbRed: srgb.redComponent,
             green: srgb.greenComponent,
             blue: srgb.blueComponent,
             alpha: 1

@@ -2640,7 +2640,10 @@ and the glow follows. Its reach **scales with the border width**
 (clamped to a legible band), so a hairline border gets a subtle
 rim and a thick one a proportional aura — there is no separate
 size knob. The soft edge is allowed to bleed into the
-layout gap, so `fit_gaps` is unaffected.
+layout gap, so `fit_gaps` is unaffected. One interaction: a
+glowing ring renders on the behind-order fallback renderer, so
+`draw_order("front")` is inert while glow is on (see
+[Accepted limitations](accepted-limitations.md)).
 
 **Example:**
 
@@ -2662,6 +2665,11 @@ compositor reorder on every keystroke). There is no GUI control for
 this: `behind` is the right default for everyone, and `front` is a
 niche preference exposed to Lua only. Changing it re-draws every
 border immediately.
+
+While `border.glow` is on, the focused ring renders on the
+behind-order renderer regardless of this setting — `"front"`
+takes effect again the moment glow turns off (see
+[Accepted limitations](accepted-limitations.md)).
 
 **Example:**
 

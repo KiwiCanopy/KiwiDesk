@@ -158,9 +158,15 @@ private struct FocusBorderPreview: View {
         // the literal pt value would swamp this 96 pt mock and
         // read as a smear, not a halo (#358). A proportional
         // approximation, like width and corners here.
+        // The source band is derived from the formula's own
+        // clamp, so a retuned floor/cap cannot leave this remap
+        // silently stale (the numbers live in
+        // `BorderGeometryTests`, nowhere else).
         let glowRadius = scale(
             BorderStyle.glowBlur(for: style.clampedWidth),
-            from: 2...12,
+            from: BorderStyle.glowBlur(
+                for: BorderStyle.minWidth
+            )...BorderStyle.glowBlur(for: BorderStyle.maxWidth),
             to: 1...5
         )
         let radius: CGFloat =
