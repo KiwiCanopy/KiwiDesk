@@ -177,8 +177,7 @@ public enum FloatDetection {
 extension AXHelper {
     /// Detects macOS native tabs (Finder, Terminal, Safari).
     /// A tab group is a single `NSWindow` and is treated as
-    /// ONE tiling unit — tabs are never split apart (see
-    /// 03_Layout_Engine §6.1).
+    /// ONE tiling unit — tabs are never split apart.
     @MainActor
     public static func hasNativeTabs(
         _ element: AXUIElement

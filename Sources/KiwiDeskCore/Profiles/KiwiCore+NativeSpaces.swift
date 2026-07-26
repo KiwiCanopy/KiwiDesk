@@ -1,8 +1,8 @@
 import Foundation
 
-/// Per-native-space profile binding (04_API_Contract §6):
-/// each Mission Control desktop can carry its own profile,
-/// swapped in when the user switches native Spaces.
+/// Per-native-space profile binding: each Mission Control
+/// desktop can carry its own profile, swapped in when the user
+/// switches native Spaces.
 extension KiwiCore {
     // MARK: - Commands
 

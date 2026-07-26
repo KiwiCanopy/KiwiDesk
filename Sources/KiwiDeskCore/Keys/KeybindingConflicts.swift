@@ -2,9 +2,9 @@ import Foundation
 
 /// Conflict detection for the keybindings tab. Comparisons run
 /// on the parsed `KeyCombo` (key code + modifiers), so they are
-/// independent of how a combo was spelled (05_GUI_Concept §2,
-/// Tab 5). Lives in Core (not the GUI target) since it is pure
-/// logic over `KeyBinding`/`KeyMode`, with no GUI dependency.
+/// independent of how a combo was spelled. Lives in Core (not
+/// the GUI target) since it is pure logic over
+/// `KeyBinding`/`KeyMode`, with no GUI dependency.
 public enum KeybindingConflicts {
     /// A tooltip describing the conflict on this row, or nil if
     /// the combo is empty, invalid-but-empty, or unique.
