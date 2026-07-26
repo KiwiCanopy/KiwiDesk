@@ -94,11 +94,20 @@ NON_LATIN_LOCALES = {
 # and the layout-mode names the GUI shows verbatim. This is a
 # glossary — the vocabulary a translator is told to leave alone —
 # not a per-key exemption list.
+#
+# The layout names are here because `layout.<mode>.name` ships each
+# one untranslated ("BSP", "Grid", "Stack", "Track", …), so every
+# sentence that refers to a mode by name keeps it. That costs the
+# residue rule a little reach — `"フォーカス Stack"` for "Focus
+# Stack" now reads as a deliberate name rather than residue — which
+# is the right call: `de` independently translated that same string
+# as `Focus Stack`.
 GLOSSARY = {
     "app",
     "apps",
     "bar",
     "bsp",
+    "bundle",  # "Bundle identifier", Apple's own term
     "control",  # Apple's "Mission Control", kept in every locale
     "default",  # the literal name of the standard shortcut mode
     "desktop",
@@ -107,6 +116,7 @@ GLOSSARY = {
     "finder",
     "floating",
     "gaps",
+    "grid",
     "ide",
     "kiwidesk",
     "lua",
@@ -116,14 +126,17 @@ GLOSSARY = {
     "pt",
     "rrggbb",
     "rrggbbaa",
+    "scrolling",
     "sf",
     "sip",
     "space",
     "spaces",
+    "stack",
     "sticky",
     "symbol",
     "symbols",
     "tiling",
+    "track",
     "ui",
 }
 

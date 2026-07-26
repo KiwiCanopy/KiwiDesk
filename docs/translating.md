@@ -481,12 +481,14 @@ sees plausible text. Four checks read the copy itself
 There is **no baseline or exemption file**. The corpus is clean,
 so any hit is a real defect. What the guards do carry is a
 **glossary** — the terms that stay English in every locale
-(`KiwiDesk`, `Lua`, `macOS`, `BSP`, Apple's `Mission Control`,
-the layout-mode names `Floating`/`Sticky`/`Monocle`). Interpolation
+(`KiwiDesk`, `Lua`, `macOS`, Apple's `Mission Control` and
+`Bundle identifier`, and every layout-mode name, because
+`layout.<mode>.name` ships each one untranslated). Interpolation
 specifiers, dotted identifiers like `init.lua`, and a key name
 following a modifier glyph (`⌘ Command`) are stripped before any
 word is judged. If you add a term that must stay English, add it
-to `GLOSSARY` in the same change set.
+to `GLOSSARY` in the same change set — the guard will tell you, by
+rejecting an otherwise-correct translation.
 
 `scripts/merge-keys` runs the first three of these per worksheet
 entry, so a bad translation is **skipped rather than written**.

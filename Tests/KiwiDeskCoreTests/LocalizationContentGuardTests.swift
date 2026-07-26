@@ -231,6 +231,10 @@ struct LocalizationContentGuardTests {
             ("%1$d screens", "画面%1$d台"),
             ("Press ⌘ Command", "⌘ Commandを押す"),
             ("Collapse into a +n badge", "+n バッジに折りたたむ"),
+            // Layout-mode names: `layout.<mode>.name` ships each
+            // untranslated, so a sentence naming one keeps it.
+            ("Stack preview: %1$d windows", "Stack プレビュー"),
+            ("Bundle identifier", "Bundle 識別子"),
         ]
     )
     func glossaryIsNotResidue(
