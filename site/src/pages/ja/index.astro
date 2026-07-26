@@ -1,0 +1,11 @@
+---
+// KiwiDesk — Japanese marketing landing page at /ja/.
+//
+// Renders the same shared <Landing> component as the English root,
+// only with the Japanese strings and locale. Keeping the template in
+// one place means the three routes can never drift structurally.
+import Landing from "../../components/Landing.astro";
+import ja from "../../i18n/ja.json";
+---
+
+<Landing t={ja} lang="ja" />

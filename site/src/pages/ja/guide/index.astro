@@ -1,0 +1,12 @@
+---
+// KiwiDesk — Japanese guide at /ja/guide/.
+//
+// Renders the same shared <Guide> component as the English route,
+// only with the Japanese strings and locale. Untranslated keys fall
+// back to English per-key (see Guide.astro), so this page is safe
+// before every ja.json key is filled in.
+import Guide from "../../../components/Guide.astro";
+import ja from "../../../i18n/ja.json";
+---
+
+<Guide t={ja} lang="ja" />

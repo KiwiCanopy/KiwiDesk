@@ -37,7 +37,7 @@ import "../styles/learn.css";
 
 interface Props {
   t: Record<string, string>;
-  lang: "en" | "de";
+  lang: "en" | "de" | "ja";
 }
 const { t, lang } = Astro.props;
 // Per-key English fallback: untranslated keys degrade to English.
@@ -45,12 +45,13 @@ const s = { ...en, ...t } as Record<string, string>;
 
 // Home path for the active locale (landing), and the guide path
 // pair the language switcher toggles between.
-const homeHref = lang === "de" ? "/de/" : "/";
+const homeHref =
+  lang === "de" ? "/de/" : lang === "ja" ? "/ja/" : "/";
 
 // Locale-aware quotation marks for the footer aside (German opens
 // low „…“, English high “…”), mirroring Landing.astro.
-const oq = lang === "de" ? "„" : "“";
-const cq = lang === "de" ? "“" : "”";
+const oq = lang === "de" ? "„" : lang === "ja" ? "「" : "“";
+const cq = lang === "de" ? "“" : lang === "ja" ? "」" : "”";
 
 const repo = "https://github.com/KiwiCanopy/KiwiDesk";
 const kofi = "https://ko-fi.com/kiwicanopy";
@@ -72,13 +73,13 @@ const toc = [
 // the shared helper so they match the landing exactly. `name` is
 // the technical layout name (kept as-is); `desc` is localized.
 const layouts = [
-  { name: "stack", desc: s.guide_layout_stack },
-  { name: "bsp", desc: s.guide_layout_bsp },
-  { name: "scrolling", desc: s.guide_layout_scrolling },
-  { name: "monocle", desc: s.guide_layout_monocle },
-  { name: "grid", desc: s.guide_layout_grid },
-  { name: "track", desc: s.guide_layout_track },
-  { name: "floating", desc: s.guide_layout_floating },
+  { name: "stack", label: "Stack", desc: s.guide_layout_stack },
+  { name: "bsp", label: "BSP", desc: s.guide_layout_bsp },
+  { name: "scrolling", label: "Scrolling", desc: s.guide_layout_scrolling },
+  { name: "monocle", label: "Monocle", desc: s.guide_layout_monocle },
+  { name: "grid", label: "Grid", desc: s.guide_layout_grid },
+  { name: "track", label: "Track", desc: s.guide_layout_track },
+  { name: "floating", label: "Floating", desc: s.guide_layout_floating },
 ];
 
 // The Settings window's sections, grouped as the app shows them
@@ -171,13 +172,20 @@ const scenarios = [
 // SEO/head: absolute URLs derived from Astro.site so they survive
 // the pages.dev → custom-domain switch. `canonical` is this
 // locale's own guide page; the hreflang pair links EN ↔ DE.
-const guideHref = lang === "de" ? "/de/guide/" : "/guide/";
+const guideHref =
+  lang === "de"
+    ? "/de/guide/"
+    : lang === "ja"
+      ? "/ja/guide/"
+      : "/guide/";
 const canonical = new URL(guideHref, Astro.site).href;
 const enURL = new URL("/guide/", Astro.site).href;
 const deURL = new URL("/de/guide/", Astro.site).href;
+const jaURL = new URL("/ja/guide/", Astro.site).href;
 const ogImageURL = new URL(ogImage.src, Astro.site).href;
-const ogLocale = lang === "de" ? "de_DE" : "en_US";
-const ogLocaleAlt = lang === "de" ? "en_US" : "de_DE";
+const ogLocale =
+  lang === "de" ? "de_DE" : lang === "ja" ? "ja_JP" : "en_US";
+const ogLocaleAlt = lang === "en" ? "de_DE" : "en_US";
 
 // Structured data: the site (WebSite) plus this guide as a
 // TechArticle, emitted as one JSON-LD graph in the head. The
@@ -233,6 +241,7 @@ const jsonLd = [
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="alternate" hreflang="en" href={enURL} />
     <link rel="alternate" hreflang="de" href={deURL} />
+    <link rel="alternate" hreflang="ja" href={jaURL} />
     <link rel="alternate" hreflang="x-default" href={enURL} />
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)}
     ></script>
@@ -270,10 +279,23 @@ const jsonLd = [
     <script is:inline>
       (function () {
         var here = location.pathname;
-        var onDe =
-          here === "/de/guide/" || here === "/de/guide";
-        function go(path) {
-          if (path !== here) location.replace(path);
+        // Which locale this URL already is. Trailing slash optional
+        // so /de/guide and /de/guide/ both count as "already there".
+        function on(prefix) {
+          return here === prefix + "/" || here === prefix;
+        }
+        var paths = {
+          en: "/guide/",
+          de: "/de/guide/",
+          ja: "/ja/guide/",
+        };
+        var current = on("/de/guide")
+          ? "de"
+          : on("/ja/guide")
+            ? "ja"
+            : "en";
+        function go(lang) {
+          if (lang !== current) location.replace(paths[lang]);
         }
         var stored;
         try {
@@ -281,15 +303,15 @@ const jsonLd = [
         } catch (e) {
           stored = null;
         }
-        if (stored === "de") {
-          if (!onDe) return go("/de/guide/");
-        } else if (stored === "en") {
-          if (onDe) return go("/guide/");
-        } else {
-          var nav = (navigator.language || "").toLowerCase();
-          if (nav.indexOf("de") === 0 && !onDe)
-            return go("/de/guide/");
-        }
+        if (paths[stored]) return go(stored);
+        // No stored pref: nudge by navigator.language, but only away
+        // from the English guide, never between two non-English
+        // ones — that keeps /guide/ the sole canonical default and
+        // leaves no pair we could bounce between.
+        if (current !== "en") return;
+        var nav = (navigator.language || "").toLowerCase();
+        if (nav.indexOf("de") === 0) return go("de");
+        if (nav.indexOf("ja") === 0) return go("ja");
       })();
     </script>
     <!-- Restore scroll after a language switch: the EN|DE switcher
@@ -330,7 +352,7 @@ const jsonLd = [
             <span class="learn-back__text">{s.guide_back_home}</span>
           </a>
 
-          <!-- Language switcher: EN | DE segmented control. Each
+          <!-- Language switcher: EN | DE | JA segmented control. Each
                segment links to that locale's guide route AND records
                the choice in `kiwidesk-site-lang` (wired below), so
                the preference persists across visits. -->
@@ -343,6 +365,10 @@ const jsonLd = [
             <a class="lang-switch__opt" data-lang="de"
               href="/de/guide/" lang="de"
               aria-current={lang === "de" ? "true" : undefined}>DE</a>
+            <span class="lang-switch__sep" aria-hidden="true"></span>
+            <a class="lang-switch__opt" data-lang="ja"
+              href="/ja/guide/" lang="ja"
+              aria-current={lang === "ja" ? "true" : undefined}>JA</a>
           </div>
 
           <button class="theme-toggle" id="themeToggle" type="button"
@@ -527,7 +553,7 @@ const jsonLd = [
                       aria-hidden="true">
                       <Fragment set:html={layoutDiagram(l.name)} />
                     </div>
-                    <h3>{l.name}</h3>
+                    <h3>{l.label}</h3>
                     <p>{l.desc}</p>
                   </article>
                 ))}
@@ -721,7 +747,8 @@ const jsonLd = [
         .forEach((opt) => {
           opt.addEventListener("click", () => {
             const lang = opt.getAttribute("data-lang");
-            if (lang !== "en" && lang !== "de") return;
+            if (lang !== "en" && lang !== "de" && lang !== "ja")
+              return;
             try {
               localStorage.setItem("kiwidesk-site-lang", lang);
               // Stash scroll so the destination locale restores it.
