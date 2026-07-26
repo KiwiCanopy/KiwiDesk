@@ -19,6 +19,15 @@ import AppKit
 final class AppKitBorderOverlay: BorderOverlayBackend {
     private var panel: NSPanel?
     private let shape = CAShapeLayer()
+    /// A second, tighter shadow stacked under the ring (#533): a
+    /// single Gaussian shadow starts at only ~half the glow
+    /// colour's intensity at the ring edge and reads washy. This
+    /// layer casts the same silhouette at half the radius, so
+    /// the two sum toward the full colour at the edge and fade
+    /// out along the wider tail — the "100% at the ring → 0 at
+    /// the reach" ramp the owner asked for. Content-free: only
+    /// its `shadowPath` renders.
+    private let glowBoost = CAShapeLayer()
 
     /// The AppKit panel stacks below its target (it cannot express a
     /// SkyLight sub-level, so `above` here would paint over child
@@ -26,6 +35,12 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
     /// correct at the cost of the rounded corner seam, which only
     /// the SkyLight `above` path fixes.
     let orderMode: BorderGeometry.Order = .below
+
+    /// Explicit, not just the protocol default: this backend IS
+    /// the glow renderer (#533), and the capability should be
+    /// legible beside `applyGlow` rather than inherited by
+    /// omission.
+    let rendersGlow = true
 
     /// Positions the ring around `geometry.overlayFrame` (AX
     /// coords) and strokes it in `colorHex`. Used both for a
@@ -80,13 +95,15 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         return true
     }
 
-    /// The glow bloom on the fallback ring (#358). The shadow is
-    /// cast from a **filled** outer rounded-rect `shadowPath`, not
-    /// the thin stroke, so the bloom is a solid halo instead of a
-    /// banded contour smear. Below-order occludes the inward half of
-    /// the bloom behind the window, so only the outward bloom shows
-    /// — matching the SkyLight path. `masksToBounds` stays false so
-    /// the halo can spill past the shape into the grown frame.
+    /// The glow bloom (#358/#533) — this backend is the SOLE
+    /// glow renderer: the facade swaps every glow ring here
+    /// (`BorderOverlay.ensureBackend`). The shadow is cast from
+    /// a **filled** outer rounded-rect `shadowPath`, not the
+    /// thin stroke, so the bloom is a solid halo instead of a
+    /// banded contour smear. Below-order occludes the inward
+    /// half of the bloom behind the window, so only the outward
+    /// bloom shows. `masksToBounds` stays false so the halo can
+    /// spill past the shape into the grown frame.
     private func applyGlow(
         geometry: BorderGeometry,
         rect: CGRect,
@@ -96,21 +113,32 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
             shape.shadowOpacity = 0
             shape.shadowColor = nil
             shape.shadowPath = nil
+            glowBoost.shadowOpacity = 0
+            glowBoost.shadowColor = nil
+            glowBoost.shadowPath = nil
             return
         }
         let half = geometry.lineWidth / 2
         let radius = geometry.cornerRadius
         let outerRadius = radius <= 0 ? 0 : radius + half
-        shape.shadowColor = NSColor.kiwiGlow(hex: colorHex)
-        shape.shadowRadius = geometry.glowMargin
-        shape.shadowOpacity = 1
-        shape.shadowOffset = .zero
-        shape.shadowPath = CGPath(
+        let silhouette = CGPath(
             roundedRect: rect.insetBy(dx: -half, dy: -half),
             cornerWidth: outerRadius,
             cornerHeight: outerRadius,
             transform: nil
         )
+        let glow = NSColor.kiwiGlow(hex: colorHex)
+        shape.shadowColor = glow
+        shape.shadowRadius = geometry.glowMargin
+        shape.shadowOpacity = 1
+        shape.shadowOffset = .zero
+        shape.shadowPath = silhouette
+        glowBoost.frame = shape.frame
+        glowBoost.shadowColor = glow
+        glowBoost.shadowRadius = geometry.glowMargin / 2
+        glowBoost.shadowOpacity = 1
+        glowBoost.shadowOffset = .zero
+        glowBoost.shadowPath = silhouette
     }
 
     /// Stacks the ring directly behind its target window in the
@@ -162,6 +190,9 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         ]
         let view = NSView()
         view.wantsLayer = true
+        // Boost below the ring so the stacked bloom never paints
+        // over the crisp stroke.
+        view.layer?.addSublayer(glowBoost)
         view.layer?.addSublayer(shape)
         panel.contentView = view
         return panel

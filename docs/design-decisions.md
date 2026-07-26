@@ -318,12 +318,26 @@ opposite intent. And its outward extent is kept **out of
 `outwardReach`**, so `border.fit_gaps` still sizes gaps to the crisp
 stroke and the soft bloom is allowed to bleed into the gap — the
 overlay *frame* grows by the blur so the halo isn't clipped, but the
-gap math stays simple. (An earlier attempt that shadowed the thin
-stroke directly banded into contour lines and dropped to gray on the
-SkyLight context; the shipped version casts the shadow from a solid
-clipped ring-band in an sRGB alpha-1 color, matching JankyBorders.
-Default OFF is native-first — a fresh install reads as a crisp flat
-ring, glow is opt-in flourish.)
+gap math stays simple. The blur **scales with the ring width**
+(clamped; `BorderGeometryTests` pins the formula's calibration
+points — cite the test, don't restate the numbers): #533 device
+QA showed a fixed blur swamps a hairline ring and vanishes
+against a thick one. A glow ring also **renders on the AppKit
+backend** (`BorderOverlay.ensureBackend`), swapping back to
+SkyLight when glow turns off: the WindowServer-backed SkyLight
+context drops any `CGContextSetShadowWithColor` hue to the
+default black-at-low-alpha — a grey smear with a clipped hard
+edge (#533, device-confirmed with the colour rebuilt in sRGB and
+GenericRGB both, and with the bloom pre-rendered to a bitmap and
+blitted) — and painted-falloff substitutes banded on device (the
+same contour lines as the shelved first attempt, which shadowed
+the thin stroke directly). The `CAShapeLayer` double shadow (a
+full-radius pass plus a half-radius boost, summing toward the
+full glow colour at the ring edge) is the one renderer that
+blooms correctly; the cost is that a glow ring under
+`draw_order: "front"` degrades to behind-the-window ordering.
+Default OFF is native-first — a fresh install reads as a crisp
+flat ring, glow is opt-in flourish.
 
 A **native-fullscreen** (green-button) window is suppressed by the
 same draw-time mechanism: it stays a member of its home virtual
@@ -338,7 +352,10 @@ floating, so float mutations never touch it.
 The ring's **rendering backend is opportunistic, not architectural**
 (#285): when the complete runtime-linked SkyLight drawing and event
 surface resolves, an SLS window follows WindowServer move/resize/order
-events directly. Drawing and tracking degrade independently: a failed
+events directly. One carve-out: the glow ring *mandates* the public
+AppKit renderer for correctness (#533, see the glow entry above) —
+bending the doctrine in the safe direction, toward the mandatory
+public fallback, never onto the private path. Drawing and tracking degrade independently: a failed
 raw-window operation replays the ring through the public AppKit panel
 without discarding a healthy WindowServer event stream. Direct mouse
 drags use one movement authority: WindowServer bounds whenever its event

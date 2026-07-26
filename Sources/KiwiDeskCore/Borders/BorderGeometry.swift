@@ -90,17 +90,16 @@ struct BorderGeometry: Equatable {
     /// unchanged); only the inner edge moves.
     static let aboveVisibleLapCap: CGFloat = 1
 
-    /// The glow bloom's blur radius (pt), and the amount the overlay
-    /// frame grows on every side when glow is on so the halo isn't
-    /// clipped (#358). Matches JankyBorders' fixed 10 pt
-    /// `COLOR_STYLE_GLOW` shadow.
-    static let glowBlur: CGFloat = 10
+    // The glow blur formula lives on `BorderStyle.glowBlur(for:)`
+    // beside `glowColor` — both style-derived, and the GUI
+    // preview (a different target) mirrors them from there.
 
     /// Builds the ring geometry for `windowFrame` (AX coords).
     /// `width` is clamped defensively; `systemRadius` is the
     /// shared window corner radius (rounded style) or ignored
     /// (square style → 0). `glow` grows the overlay frame by
-    /// `glowBlur` on every side so the bloom has room (#358).
+    /// `BorderStyle.glowBlur(for:)` on every side so the bloom
+    /// has room (#358, width-scaled since #533).
     static func compute(
         windowFrame: CGRect,
         width: CGFloat,
@@ -123,7 +122,7 @@ struct BorderGeometry: Equatable {
         let radius =
             cornerStyle == .square
             ? 0 : max(0, systemRadius + visible - stroke / 2)
-        let margin = glow ? glowBlur : 0
+        let margin = glow ? BorderStyle.glowBlur(for: visible) : 0
         return BorderGeometry(
             overlayFrame: windowFrame.insetBy(
                 dx: -(visible + margin),
