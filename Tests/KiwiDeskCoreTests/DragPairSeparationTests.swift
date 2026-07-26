@@ -29,10 +29,6 @@ import Testing
 /// for why that stays an accepted limitation.
 @Suite("Drag overlay origin/target separation")
 struct DragPairSeparationTests {
-    /// Shared with `SpaceBarAccentSeparationTests`; see
-    /// `ColorVision` for why the maths lives in one place.
-    private static let separationFloor: Double = 60
-
     @Test("The shipped drag pair survives red-green vision loss")
     func defaultPairSeparatesUnderProtanopia() throws {
         let ghost = DragVisual.ghostDefault.borderColor
@@ -47,28 +43,39 @@ struct DragPairSeparationTests {
         let detail =
             "ghost \(ghost) vs drop zone \(zone) separate by only "
             + "\(gap)/441 under simulated protanopia (#511)"
-        #expect(gap >= Self.separationFloor, Comment(rawValue: detail))
+        #expect(
+            gap >= ColorVision.separationFloor,
+            Comment(rawValue: detail)
+        )
     }
 
-    @Test("The ghost still clears 3:1 on near-white and near-black")
-    func ghostHoldsItsContrastFloor() throws {
-        // The constraint that picked the hue. `#2F4A0C` separated
-        // better (85) but fell to 2.11:1 on near-black, and the
-        // overlay row in docs/accepted-limitations.md rests on the
-        // overlay clearing 3:1 at *both* ends — it is the whole
-        // mitigation for painting over arbitrary window content.
-        // Hue ~150 is the nearest place both hold.
-        let ghost = DragVisual.ghostDefault.borderColor
-        for backdrop in ["#FFFFFF", "#000000"] {
-            let ratio = try #require(
-                ColorVision.contrast(ghost, backdrop)
-            )
-            #expect(
-                ratio >= 3,
-                Comment(
-                    rawValue: "\(ghost) on \(backdrop): \(ratio):1"
+    @Test("Both overlays clear 3:1 on near-white and near-black")
+    func overlaysHoldTheirContrastFloor() throws {
+        // The constraint that picked the ghost's hue. `#2F4A0C`
+        // separated better (85) but fell to 2.11:1 on near-black,
+        // and the overlay row in docs/accepted-limitations.md
+        // rests on the overlay clearing 3:1 at *both* ends — that
+        // is the whole mitigation for painting over arbitrary
+        // window content. The ring is in this loop because the
+        // same row names it, and it is the likelier of the two to
+        // move (it went `#567A1F` → `#588613` in the #358 batch).
+        let overlays = [
+            DragVisual.ghostDefault.borderColor,
+            BorderStyle().focusedColor,
+        ]
+        for overlay in overlays {
+            for backdrop in ["#FFFFFF", "#000000"] {
+                let ratio = try #require(
+                    ColorVision.contrast(overlay, backdrop)
                 )
-            )
+                #expect(
+                    ratio >= 3,
+                    Comment(
+                        rawValue:
+                            "\(overlay) on \(backdrop): \(ratio):1"
+                    )
+                )
+            }
         }
     }
 
@@ -81,16 +88,32 @@ struct DragPairSeparationTests {
         #expect(palettes.count == 9)
         for palette in palettes {
             let name = palette.name
+            // Every palette carries drag keys, the derived default
+            // included: `ColorPaletteKeys.all` builds them by
+            // reflection over `DragVisual.CodingKeys` under both
+            // prefixes, and `ColorPaletteTests` pins all 23 keys
+            // resolving. So a missing one is a real regression,
+            // recorded rather than skipped — matching the sibling
+            // sweep in `SpaceBarAccentSeparationTests`.
             guard
                 let ghost =
                     palette.colors["drag.ghost.border_color"],
                 let zone =
                     palette.colors["drag.drop_zone.border_color"]
             else {
-                // The derived default carries no drag keys — it is
-                // built from the struct defaults, which the first
-                // test above covers directly.
+                Issue.record("\(name) omits a drag color key")
                 continue
+            }
+            // Opacity, for the same reason the accent sweep pins
+            // it — and the risk is higher here: `fill_color` is
+            // alpha-bearing by design and sits one line away from
+            // `border_color` in every palette.
+            for hex in [ghost, zone] {
+                let rgb = DragVisual.parseHex(hex)
+                #expect(
+                    rgb?.alpha == 1,
+                    Comment(rawValue: "\(name) \(hex) is not opaque")
+                )
             }
             guard let gap = ColorVision.separation(ghost, zone) else {
                 Issue.record("\(name) has an unparseable drag color")
@@ -100,7 +123,10 @@ struct DragPairSeparationTests {
                 "\(name): ghost \(ghost) vs drop zone \(zone) "
                 + "separate by only \(gap)/441 under simulated "
                 + "protanopia (#511)"
-            #expect(gap >= Self.separationFloor, Comment(rawValue: detail))
+            #expect(
+                gap >= ColorVision.separationFloor,
+                Comment(rawValue: detail)
+            )
         }
     }
 }

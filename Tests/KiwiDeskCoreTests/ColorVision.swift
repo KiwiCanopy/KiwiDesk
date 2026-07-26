@@ -18,6 +18,35 @@ import Foundation
 /// are the argument here (see `docs/design-decisions.md`), so
 /// there must be exactly one place that computes them.
 enum ColorVision {
+    /// The separation floor, shared by both guards.
+    ///
+    /// One number on purpose. Motion is a redundant cue the drag
+    /// overlay has and the Space Bar does not (the ghost tracks
+    /// the cursor, the drop zone stays put), so a lower drag floor
+    /// would be arguable — but the two overlays are frequently
+    /// adjacent, the reader resolves which-is-which from a
+    /// near-static glance, and colour-vision deficiency grants no
+    /// compensating boost to motion discrimination. A hex clearing
+    /// the shared floor was available, so a second threshold to
+    /// explain and guard buys nothing.
+    ///
+    /// **A floor, not a target.** It is set by the shipped Space
+    /// Bar default, which measures 93 and is the lowest pair in
+    /// either family; every authored palette now sits at 123 or
+    /// above. 60 is comfortably past the 22 of the pre-#470
+    /// default and past both near-miss retunes considered at the
+    /// time (`#F0B858` 23, `#E09B2E` 39), while leaving room to
+    /// retune a hex without tripping a guard on a colour that is
+    /// actually fine. A new palette landing at 61 passes while
+    /// being far worse than anything shipped — aim for the band,
+    /// and let this catch the disasters.
+    ///
+    /// If an eye-confirm asks for a colour that trips this:
+    /// re-measure, and move the floor only if the new
+    /// *measurement* justifies it. Lowering it to fit a pick
+    /// discards the argument the number encodes.
+    static let separationFloor: Double = 60
+
     /// sRGB → linear, the same transfer function WCAG uses.
     static func linear(_ value: Double) -> Double {
         value <= 0.03928

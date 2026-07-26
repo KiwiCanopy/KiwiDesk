@@ -41,28 +41,6 @@ import Testing
 struct SpaceBarAccentSeparationTests {
     private var style: SpaceBarStyle { SpaceBarStyle() }
 
-    /// The floor every bundled active/focused pair must clear.
-    ///
-    /// Set by the shipped default and nothing else: it measures
-    /// 93, the *lowest* in the catalog, where every other palette
-    /// now sits at 181 or above. 60 is comfortably above the 22 of
-    /// the pre-#470 default and above both near-miss retunes
-    /// considered at the time (`#F0B858` 23, `#E09B2E` 39), while
-    /// leaving room to retune a hex without tripping a guard on a
-    /// colour that is actually fine.
-    ///
-    /// **It is a floor, not a target.** A new bundled palette that
-    /// lands at 61 passes while being far worse than anything in
-    /// the catalog; the standard the #511 retunes were actually
-    /// held to was parity with that 181+ band. Aim there and let
-    /// this catch the disasters.
-    ///
-    /// If an eye-confirm asks for a different accent and this goes
-    /// red: re-measure, and move the floor only if the new
-    /// *measurement* justifies it. Lowering it to fit a pick
-    /// discards the argument the number encodes.
-    private static let separationFloor: Double = 60
-
     /// Both accents must be opaque for any of this to mean
     /// anything: `parseHex` accepts `#RRGGBBAA`, and the Lua
     /// setters route through it — so `"#C2790A11"` is a legal,
@@ -83,8 +61,12 @@ struct SpaceBarAccentSeparationTests {
         // below pass vacuously. These are the figures quoted in
         // docs/design-decisions.md and the commit that set the
         // default; they are what the decision was made on.
-        let old = try #require(ColorVision.separation("#8DB354", "#E8A33D"))
-        let new = try #require(ColorVision.separation("#8DB354", "#C2790A"))
+        let old = try #require(
+            ColorVision.separation("#8DB354", "#E8A33D")
+        )
+        let new = try #require(
+            ColorVision.separation("#8DB354", "#C2790A")
+        )
         let coolPrimary = try #require(
             ColorVision.separation("#64D2FF", "#FF9F0A")
         )
@@ -105,7 +87,7 @@ struct SpaceBarAccentSeparationTests {
             )
         )
         // The shipped pair measures 93; the floor is 60 (see
-        // `separationFloor`). Kept as its own test
+        // `ColorVision.separationFloor`). Kept as its own test
         // alongside the catalog sweep because the struct defaults
         // are what a user with no palette applied actually sees.
         let detail =
@@ -113,7 +95,10 @@ struct SpaceBarAccentSeparationTests {
             + "\(style.focusedItemColor) separate by only "
             + "\(gap)/441 under simulated protanopia — hue alone "
             + "does not survive it against a green primary (#470)"
-        #expect(gap >= Self.separationFloor, Comment(rawValue: detail))
+        #expect(
+            gap >= ColorVision.separationFloor,
+            Comment(rawValue: detail)
+        )
     }
 
     /// The catalog-wide half of the clause (#511).
@@ -156,7 +141,9 @@ struct SpaceBarAccentSeparationTests {
                     Comment(rawValue: "\(name) \(hex) is not opaque")
                 )
             }
-            guard let gap = ColorVision.separation(active, focused) else {
+            guard
+                let gap = ColorVision.separation(active, focused)
+            else {
                 Issue.record("\(name) has an unparseable accent")
                 continue
             }
@@ -164,7 +151,10 @@ struct SpaceBarAccentSeparationTests {
                 "\(name): active \(active) vs focused \(focused) "
                 + "separate by only \(gap)/441 under simulated "
                 + "protanopia (#511)"
-            #expect(gap >= Self.separationFloor, Comment(rawValue: detail))
+            #expect(
+                gap >= ColorVision.separationFloor,
+                Comment(rawValue: detail)
+            )
         }
     }
 

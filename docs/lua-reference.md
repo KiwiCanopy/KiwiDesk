@@ -2377,8 +2377,8 @@ drag.set_ghost_border_alignment("inside")
 
 **Does:** sets the ghost border color (default `#347957`,
 deep emerald — the ghost, drag's origin, is all-green; a
-greener-than-the-ring green since #511, so it separates from
-the drop zone's amber under red-green vision loss).
+bluer green than the focus ring since #511, so it separates
+from the drop zone's amber under red-green vision loss).
 
 **Example:**
 

@@ -1901,17 +1901,27 @@ from each other, and a yellow-green against an amber is exactly
 what red-green vision loss erases — they measured **4.7/441**,
 worse than the 22 #470 called one colour. The target could not
 move (its amber is the hex the Space Bar's focused accent
-converged onto), and no yellow-green separates from that amber
-while still clearing 3:1 at both ends — the two constraints have
-no overlap in the hue family. So the ghost alone moved to a deep
-emerald `#347957` (hue ~150, **76/441**, 5.2:1 on near-white and
-4.0:1 on near-black): the contrast bar held, the shared hue with
-the ring did not. The ring keeps `#588613` — it has no partner to
-separate from, so nothing asks it to move. Origin is therefore
-green-but-not-*the*-green, which is the cost, and the alternative
-(`#2F4A0C`, a yellow-green at 85/441) was rejected for falling to
-2.11:1 on near-black — that would have traded a colour-vision
-defect for a contrast one. Bundled palettes follow the same rule:
+converged onto), so the ghost had to. It could not stay a
+yellow-green *at the ring's chroma*: stacking the
+3:1-on-both-ends bar onto the separation floor leaves a
+knife-edge in that hue family — every colour satisfying all
+three sits at saturation ~0.25 and **exactly** 3.0:1 on white, a
+desaturated grey-green with no margin on two constraints at once,
+and at the ring's own S0.75 in its own hue band *nothing*
+qualifies. (The overlap is not empty, which an earlier draft of
+this paragraph claimed — it is merely a knife-edge. Re-measure
+before trusting either statement.) How much separation is
+*available* climbs with hue: ~86 at 75–90°, ~119 at 135–150°. So
+the ghost alone moved to a deep emerald `#347957` — hue 150,
+S0.40, **76/441**, 5.2:1 on near-white and 4.0:1 on near-black,
+margin on all three while keeping real chroma. The contrast bar
+held; the hue it shared with the ring did not. The ring keeps
+`#588613` — it has no partner to separate from, so nothing asks
+it to move. Origin is therefore green-but-not-*the*-green, which
+is the cost, and the alternative (`#2F4A0C`, a yellow-green at
+85/441) was rejected for falling to 2.11:1 on near-black — that
+would have traded a colour-vision defect for a contrast one.
+Bundled palettes follow the same rule:
 target tracks `space_bar.focused_item_color` in six of the nine,
 which is what fixed Clean Light, Slate and True Dark, each of
 which had been shipping origin and target as the *same hex*

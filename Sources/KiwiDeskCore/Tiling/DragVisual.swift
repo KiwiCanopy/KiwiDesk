@@ -27,13 +27,19 @@ public struct DragVisual: Sendable, Equatable, Encodable {
     /// worse than the 22 that #470 called "the same colour to a
     /// protanope". Target is locked (the drop-zone amber is the
     /// hex `space_bar.focusedItemColor` converged onto), so the
-    /// origin had to move, and it could not stay a yellow-green:
-    /// against that amber, nothing in the hue family separates
-    /// while also clearing 3:1 on *both* near-white and near-black
-    /// (`docs/accepted-limitations.md`). Hue ~150 is the nearest
-    /// place both hold — 76/441, 5.2:1 and 4.0:1. So the ghost no
-    /// longer matches the focus ring, deliberately: the ring has
-    /// no partner to separate from and keeps `#588613`.
+    /// origin had to move — and it could not stay a yellow-green
+    /// at the ring's chroma. Adding the 3:1-on-both-ends bar from
+    /// `docs/accepted-limitations.md` to the separation floor
+    /// leaves a knife-edge: every qualifying yellow-green sits at
+    /// saturation ~0.25 and *exactly* 3.0:1 on white, a desaturated
+    /// grey-green with no margin on two constraints at once, and
+    /// at the ring's own S0.75 in its own hue band nothing
+    /// qualifies at all. Separation available climbs with hue
+    /// (~86 max at 75–90°, ~119 at 135–150°), so this sits at 150°
+    /// — 76/441, 5.2:1 and 4.0:1, margin on all three while
+    /// keeping real chroma (S0.40). So the ghost no longer matches
+    /// the focus ring, deliberately: the ring has no partner to
+    /// separate from and keeps `#588613`.
     /// Defaults mirrored in docs/lua-reference.md (drag colors)
     /// — change both.
     public static let ghostDefault = DragVisual(

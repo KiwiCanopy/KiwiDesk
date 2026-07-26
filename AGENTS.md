@@ -468,7 +468,7 @@ Keep this list updated whenever a recurring mistake is found.
   the source-scanning parity guards share — an over-matching
   divergent copy makes a guard pass for the wrong reason, which
   is the exact failure those guards exist to prevent), and
-  `ColorVisionSimulation.swift` (the Viénot protanopia transform,
+  `ColorVision.swift` (the Viénot protanopia transform,
   luminance and contrast maths behind the CVD separation guards
   — `SpaceBarAccentSeparationTests` and `DragPairSeparationTests`
   assert *on the numbers it returns*, and the numbers are the

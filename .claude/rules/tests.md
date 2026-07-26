@@ -40,7 +40,7 @@ ones that bite large test PRs, as a checklist (rationale is in §5):
     per the #249 architect review); a divergent copy silently
     changes what a suite observes (an undrained pipe, a missed
     `stderr`) without failing anything.
-  - *colour-vision maths* in `ColorVisionSimulation.swift` — the
+  - *colour-vision maths* in `ColorVision.swift` — the
     Viénot protanopia transform plus luminance/contrast, shared
     by `SpaceBarAccentSeparationTests` and
     `DragPairSeparationTests`. Extracted at the **second** copy
