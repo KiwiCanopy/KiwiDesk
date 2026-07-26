@@ -1,12 +1,12 @@
 blank_issues_enabled: false
 contact_links:
   - name: Questions & ideas
-    url: https://github.com/hajiboy95/KiwiDesk/discussions
+    url: https://github.com/KiwiCanopy/KiwiDesk/discussions
     about: |
       Ask a question, share a setup, or float a feature idea
       in Discussions before opening an issue.
   - name: Security vulnerability
-    url: https://github.com/hajiboy95/KiwiDesk/security/advisories/new
+    url: https://github.com/KiwiCanopy/KiwiDesk/security/advisories/new
     about: |
       Report privately via GitHub's Security tab.
       See SECURITY.md for details.

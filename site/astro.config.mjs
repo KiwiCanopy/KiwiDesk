@@ -40,7 +40,7 @@ export default defineConfig({
         {
           icon: "github",
           label: "GitHub",
-          href: "https://github.com/hajiboy95/KiwiDesk",
+          href: "https://github.com/KiwiCanopy/KiwiDesk",
         },
       ],
       // Append a quiet KiwiCanopy parent-brand mention below the

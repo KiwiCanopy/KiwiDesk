@@ -240,7 +240,7 @@ extension KiwiCore {
         )
         let template = """
             -- KiwiDesk configuration
-            -- Docs: https://github.com/hajiboy95/KiwiDesk
+            -- Docs: https://github.com/KiwiCanopy/KiwiDesk
             --
             -- Everyday settings live in the Settings window;
             -- this file is for optional custom Lua. Comments

@@ -7,7 +7,7 @@ files, strict linting, and a heavily unit-tested core.
 ## Getting Started
 
 ```sh
-git clone https://github.com/hajiboy95/KiwiDesk.git
+git clone https://github.com/KiwiCanopy/KiwiDesk.git
 cd KiwiDesk
 ./scripts/install-hooks.sh   # pre-commit lint hook
 swift build
@@ -103,7 +103,7 @@ you through the details.
 **Feature requests** should describe the **use case** and
 **problem it solves** (not just the feature itself). Check the
 **Status** note at the top of the
-[README](https://github.com/hajiboy95/KiwiDesk) first to see
+[README](https://github.com/KiwiCanopy/KiwiDesk) first to see
 what already ships and what's still in progress.
 
 ## Vulnerability Reports

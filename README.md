@@ -20,7 +20,7 @@ Powerful when you reach for it, never in your way.
 
 ![macOS 14+](https://img.shields.io/badge/macOS-14%2B-000000?logo=apple&logoColor=white)
 ![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white)
-[![CI](https://github.com/hajiboy95/KiwiDesk/actions/workflows/ci.yml/badge.svg)](https://github.com/hajiboy95/KiwiDesk/actions/workflows/ci.yml)
+[![CI](https://github.com/KiwiCanopy/KiwiDesk/actions/workflows/ci.yml/badge.svg)](https://github.com/KiwiCanopy/KiwiDesk/actions/workflows/ci.yml)
 ![License MIT](https://img.shields.io/badge/License-MIT-8DB354)
 ![App Store — coming soon](https://img.shields.io/badge/App_Store-coming_soon-8B5E3C)
 
@@ -92,7 +92,7 @@ come with the 1.0 release).
 Requirements: macOS 14+, Xcode 16+ / Swift 6.
 
 ```sh
-git clone https://github.com/hajiboy95/KiwiDesk.git
+git clone https://github.com/KiwiCanopy/KiwiDesk.git
 cd KiwiDesk
 swift build -c release
 .build/release/KiwiDesk           # run the app

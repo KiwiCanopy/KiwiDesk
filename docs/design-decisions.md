@@ -103,11 +103,11 @@ escape hatch — only Apple exposing a supported API. They are
 tracked, not abandoned:
 
 - **Move the focused window to another native Space**
-  ([#25](https://github.com/hajiboy95/KiwiDesk/issues/25)).
+  ([#25](https://github.com/KiwiCanopy/KiwiDesk/issues/25)).
 - **Switch the visible native Space programmatically**
-  ([#26](https://github.com/hajiboy95/KiwiDesk/issues/26)).
+  ([#26](https://github.com/KiwiCanopy/KiwiDesk/issues/26)).
 - **Restore windows across all native Spaces on quit**
-  ([#70](https://github.com/hajiboy95/KiwiDesk/issues/70)).
+  ([#70](https://github.com/KiwiCanopy/KiwiDesk/issues/70)).
 - **Place a window above the top screen border** — the
   WindowServer silently rejects any frame above the visible
   area's top edge. (Partial left/right/bottom overflow is
@@ -119,16 +119,16 @@ tracked, not abandoned:
   instead — their *upper* strip peeks — so retile targets stay
   achievable and the already-there tolerance keeps working.
   Horizontal scrolling is unaffected
-  ([#139](https://github.com/hajiboy95/KiwiDesk/issues/139);
+  ([#139](https://github.com/KiwiCanopy/KiwiDesk/issues/139);
   the pin shipped with
-  [#66](https://github.com/hajiboy95/KiwiDesk/issues/66)).
+  [#66](https://github.com/KiwiCanopy/KiwiDesk/issues/66)).
   On the other edges KiwiDesk pins far-offscreen slots at its
   own fixed sliver, safely above the OS minimum, for the same
   achievable-target reason
-  ([#142](https://github.com/hajiboy95/KiwiDesk/issues/142));
+  ([#142](https://github.com/KiwiCanopy/KiwiDesk/issues/142));
   stashed inactive-space windows park at the same
   floor-derived sliver
-  ([#148](https://github.com/hajiboy95/KiwiDesk/issues/148)).
+  ([#148](https://github.com/KiwiCanopy/KiwiDesk/issues/148)).
 - **Pin a foreign floating window above the tiled plane by its
   window-server level** — `SLSSetWindowLevel` only affects windows
   owned by the *connection* that issues it, so KiwiDesk can level
@@ -139,10 +139,10 @@ tracked, not abandoned:
   commit `347231e`). `#418` ships the AX re-raise instead — kept
   above on focus, with the transient-activation limitation on the
   [Accepted limitations](accepted-limitations.md) page
-  ([#424](https://github.com/hajiboy95/KiwiDesk/issues/424)).
+  ([#424](https://github.com/KiwiCanopy/KiwiDesk/issues/424)).
 
 All of these are collected in
-[#140](https://github.com/hajiboy95/KiwiDesk/issues/140).
+[#140](https://github.com/KiwiCanopy/KiwiDesk/issues/140).
 
 ### Layout navigation & overflow models
 
@@ -238,7 +238,7 @@ the #431 rewire and the #292 foreground guard both read
 not the stale local slot it can never occupy. A keyboard reorder
 that cannot apply to a non-member (`swap`, `track.swap`,
 `stack.promote`/`demote`, `move_to_track`) refuses with the
-home-space pill ([#435](https://github.com/hajiboy95/KiwiDesk/issues/435))
+home-space pill ([#435](https://github.com/KiwiCanopy/KiwiDesk/issues/435))
 rather than silently no-op. `resize` is the one exception, staying
 on `space.focused` to avoid orphaning a per-space weight under a
 non-member id (see [Accepted limitations](accepted-limitations.md)). The **App Bar** highlight has the same
@@ -2446,7 +2446,7 @@ direction in chat):
   luminance-ramp approximation misrepresents Apple's
   plate-regenerated styles. Dark / Clear / Tinted as true in-app
   choices remain API-blocked — see [Accepted limitations](accepted-limitations.md);
-  [#362](https://github.com/hajiboy95/KiwiDesk/issues/362)
+  [#362](https://github.com/KiwiCanopy/KiwiDesk/issues/362)
   tracks the private-IconServices probe that could add them.
 - **The glyph map format is JSON** (`icon_map.json` vendored from
   upstream): decoded directly in Swift, validated once, cached —
