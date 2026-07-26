@@ -1,0 +1,3234 @@
+{
+  "app.already_running.message": {
+    "source": "Another KiwiDesk instance is already managing your windows, so this one will quit.",
+    "translation": "Outra instância do KiwiDesk já está gerenciando suas janelas, portanto esta será encerrada."
+  },
+  "app.already_running.title": {
+    "source": "KiwiDesk Is Already Running",
+    "translation": "O KiwiDesk já está em execução"
+  },
+  "app_bar.active_indicator.edge_mark": {
+    "source": "Edge mark",
+    "translation": "Marca de borda"
+  },
+  "app_bar.active_indicator.gap": {
+    "source": "Gap",
+    "translation": "Espaço"
+  },
+  "app_bar.active_indicator.label": {
+    "source": "Active indicator",
+    "translation": "Indicador ativo"
+  },
+  "app_bar.active_indicator.outline": {
+    "source": "Outline",
+    "translation": "Contorno"
+  },
+  "app_bar.alignment.center": {
+    "source": "Center",
+    "translation": "Centro"
+  },
+  "app_bar.alignment.end": {
+    "source": "End",
+    "translation": "Fim"
+  },
+  "app_bar.alignment.label": {
+    "source": "Alignment",
+    "translation": "Alinhamento"
+  },
+  "app_bar.alignment.label.help": {
+    "source": "Where the item group sits along the bar while it fits. Start and End follow the edge (a left bar's Start is its top); once items overflow and scroll, all three behave the same.",
+    "translation": "Onde o grupo de itens fica ao longo da barra enquanto houver espaço. Início e Fim seguem a borda (em uma barra à esquerda, Início é o topo); quando os itens transbordam e rolam, os três se comportam da mesma forma."
+  },
+  "app_bar.alignment.start": {
+    "source": "Start",
+    "translation": "Início"
+  },
+  "app_bar.background_fit.boxed_only": {
+    "source": "Boxed draws a box per item, not a shared plate, so there is nothing to size.",
+    "translation": "Em caixas desenha uma caixa por item em vez de uma placa compartilhada, portanto não há o que redimensionar."
+  },
+  "app_bar.background_fit.full": {
+    "source": "Full width",
+    "translation": "Largura total"
+  },
+  "app_bar.background_fit.hug": {
+    "source": "Hug",
+    "translation": "Ajustar"
+  },
+  "app_bar.background_fit.label": {
+    "source": "Background size",
+    "translation": "Tamanho do fundo"
+  },
+  "app_bar.background_style.boxed": {
+    "source": "Boxed",
+    "translation": "Em caixas"
+  },
+  "app_bar.background_style.label": {
+    "source": "Background style",
+    "translation": "Estilo de fundo"
+  },
+  "app_bar.background_style.plain": {
+    "source": "Plain",
+    "translation": "Simples"
+  },
+  "app_bar.color.active_item": {
+    "source": "Active item",
+    "translation": "Item ativo"
+  },
+  "app_bar.color.badge_text": {
+    "source": "Badge text",
+    "translation": "do selo"
+  },
+  "app_bar.color.fill": {
+    "source": "Fill",
+    "translation": "Preenchimento"
+  },
+  "app_bar.color.gap_only": {
+    "source": "The Gap indicator hides the active item instead of marking it, so these colors aren't drawn.",
+    "translation": "Apenas espaçamento"
+  },
+  "app_bar.color.group_badge": {
+    "source": "Group badge",
+    "translation": "Selo de grupo"
+  },
+  "app_bar.color.highlight": {
+    "source": "Highlight",
+    "translation": "Destaque"
+  },
+  "app_bar.color.hover_fill": {
+    "source": "Hover fill",
+    "translation": "Preenchimento ao passar o mouse"
+  },
+  "app_bar.color.hover_item": {
+    "source": "Hover item",
+    "translation": "Item sob o ponteiro"
+  },
+  "app_bar.color.item": {
+    "source": "Item",
+    "translation": "Texto Item (PT)"
+  },
+  "app_bar.content.icon": {
+    "source": "Icon",
+    "translation": "Texto Icon (PT)"
+  },
+  "app_bar.content.icon_and_name": {
+    "source": "Icon & name",
+    "translation": "Texto Icon & name (PT)"
+  },
+  "app_bar.content.label": {
+    "source": "Content",
+    "translation": "Texto Content (PT)"
+  },
+  "app_bar.content.name": {
+    "source": "Name",
+    "translation": "Texto Name (PT)"
+  },
+  "app_bar.content.vertical_only": {
+    "source": "Left and right bars always show icons only.",
+    "translation": "Texto Left and right bars always show icons only. (PT)"
+  },
+  "app_bar.corner_roundness": {
+    "source": "Corner roundness",
+    "translation": "Arredondamento de cantos"
+  },
+  "app_bar.edge.bottom": {
+    "source": "Bottom",
+    "translation": "Abaixo"
+  },
+  "app_bar.edge.label": {
+    "source": "Position",
+    "translation": "Posição"
+  },
+  "app_bar.edge.label.help": {
+    "source": "Which screen edge the bar occupies. The bar reserves this edge in every layout that shows it.",
+    "translation": "A borda da tela na qual a App Bar fica posicionada."
+  },
+  "app_bar.edge.left": {
+    "source": "Left",
+    "translation": "Esquerda"
+  },
+  "app_bar.edge.right": {
+    "source": "Right",
+    "translation": "Direita"
+  },
+  "app_bar.edge.top": {
+    "source": "Top",
+    "translation": "Topo"
+  },
+  "app_bar.font_size": {
+    "source": "Font size",
+    "translation": "Tamanho da fonte"
+  },
+  "app_bar.font_size.auto": {
+    "source": "Auto font size",
+    "translation": "Tamanho de fonte automático"
+  },
+  "app_bar.global_colors.title": {
+    "source": "Global colors",
+    "translation": "Texto Global colors (PT)"
+  },
+  "app_bar.global_style.caption": {
+    "source": "The App Bar appears in the layouts that show one — Monocle and Scrolling. These settings are shared; a layout can override any of them below.",
+    "translation": "Uma barra por tela para todos os layouts. Todas as configurações são globais."
+  },
+  "app_bar.global_style.title": {
+    "source": "Global style",
+    "translation": "Estilo da App Bar"
+  },
+  "app_bar.group_adjacent": {
+    "source": "Group adjacent same-app windows",
+    "translation": "Texto Group adjacent same-app windows (PT)"
+  },
+  "app_bar.group_adjacent.help": {
+    "source": "Merges neighbouring windows of the same app into a single item, marked with a count badge, instead of showing one item each.",
+    "translation": "Texto Merges neighbouring windows of the same app into a single item, marked with a count badge, instead of showing one item each. (PT)"
+  },
+  "app_bar.icon_source.app_font": {
+    "source": "Glyphs",
+    "translation": "Texto Glyphs (PT)"
+  },
+  "app_bar.icon_source.app_image": {
+    "source": "System default",
+    "translation": "Texto System default (PT)"
+  },
+  "app_bar.icon_source.help": {
+    "source": "How app icons are drawn. Glyphs shows a monochrome symbol from KiwiDesk's built-in icon set, colored by the bar's item colors — Item, Active item, and Hover item below — so those colors also decide how the glyphs look. Apps without a symbol keep their app icon.",
+    "translation": "Texto How app icons are drawn. Glyphs shows a monochrome symbol from KiwiDesk's built-in icon set, colored by the bar's item colors — Item, Active item, and Hover item below — so those colors also decide how the glyphs look. Apps without a symbol keep their app icon. (PT)"
+  },
+  "app_bar.icon_source.label": {
+    "source": "App symbol style",
+    "translation": "Texto App symbol style (PT)"
+  },
+  "app_bar.icon_source.name_only": {
+    "source": "Icons are hidden while Content is Name.",
+    "translation": "Texto Icons are hidden while Content is Name. (PT)"
+  },
+  "app_bar.item_gap": {
+    "source": "Item gap",
+    "translation": "Espaço entre itens"
+  },
+  "app_bar.item_size": {
+    "source": "Item size",
+    "translation": "Tamanho do item"
+  },
+  "app_bar.item_size.auto": {
+    "source": "Auto item size",
+    "translation": "Tamanho automático"
+  },
+  "app_bar.layout.overrides": {
+    "source": "Overrides",
+    "translation": "Texto Overrides (PT)"
+  },
+  "app_bar.layout.overrides.caption": {
+    "source": "Dimmed rows inherit the global value — tick a box to override just that field for this layout.",
+    "translation": "Texto Dimmed rows inherit the global value — tick a box to override just that field for this layout. (PT)"
+  },
+  "app_bar.layout.overrides.disabled": {
+    "source": "Turn on Show app bar to edit this layout's overrides. They are kept either way.",
+    "translation": "Texto Turn on Show app bar to edit this layout's overrides. They are kept either way. (PT)"
+  },
+  "app_bar.layout.show": {
+    "source": "Show app bar",
+    "translation": "Texto Show app bar (PT)"
+  },
+  "app_bar.layout.title": {
+    "source": "%1$@ bar",
+    "translation": "Opção %1$@"
+  },
+  "app_bar.liquid_glass": {
+    "source": "Liquid Glass",
+    "translation": "Liquid Glass"
+  },
+  "app_bar.liquid_glass.help": {
+    "source": "Lays a translucent glass material over the boxes or the plate. The Fill color tints it, though the tint reads subtle on current macOS.",
+    "translation": "Texto Lays a translucent glass material over the boxes or the plate. The Fill color tints it, though the tint reads subtle on current macOS. (PT)"
+  },
+  "app_bar.no_layout.help": {
+    "source": "No layout shows an App Bar — turn one on below.",
+    "translation": "Texto No layout shows an App Bar — turn one on below. (PT)"
+  },
+  "app_bar.override.off.help": {
+    "source": "Inheriting the global value",
+    "translation": "Texto Inheriting the global value (PT)"
+  },
+  "app_bar.override.on.help": {
+    "source": "Overriding the global value",
+    "translation": "Texto Overriding the global value (PT)"
+  },
+  "app_bar.preview.app_code": {
+    "source": "Code",
+    "translation": "Texto Code (PT)"
+  },
+  "app_bar.preview.app_mail": {
+    "source": "Mail",
+    "translation": "Texto Mail (PT)"
+  },
+  "app_bar.preview.app_web": {
+    "source": "Web",
+    "translation": "Texto Web (PT)"
+  },
+  "app_bar.preview.ax": {
+    "source": "App bar preview: %1$@ position, %2$@ style.",
+    "translation": "Pré-visualização da App Bar: posição %1$@, estilo %2$@."
+  },
+  "app_bar.preview.caption": {
+    "source": "Position: %1$@ · %2$@",
+    "translation": "Posição: %1$@ · %2$@"
+  },
+  "app_bar.resolved.inherits": {
+    "source": "Inherits the global bar.",
+    "translation": "Texto Inherits the global bar. (PT)"
+  },
+  "app_bar.resolved.overrides": {
+    "source": "%1$d field(s) override the global bar.",
+    "translation": "Opção %1$d"
+  },
+  "app_bar.thickness": {
+    "source": "Thickness",
+    "translation": "Espessura"
+  },
+  "app_picker.search.placeholder": {
+    "source": "Search apps",
+    "translation": "Texto Search apps (PT)"
+  },
+  "app_rules.add": {
+    "source": "Add",
+    "translation": "Adicionar"
+  },
+  "app_rules.add_rule": {
+    "source": "Add app rule",
+    "translation": "Adicionar app rule"
+  },
+  "app_rules.add_window": {
+    "source": "Add Window",
+    "translation": "Adicionar Window"
+  },
+  "app_rules.automatic": {
+    "source": "Automatic",
+    "translation": "Texto Automatic (PT)"
+  },
+  "app_rules.float": {
+    "source": "Float",
+    "translation": "Auto-floating"
+  },
+  "app_rules.float.all_windows": {
+    "source": "All windows",
+    "translation": "Texto All windows (PT)"
+  },
+  "app_rules.float.help": {
+    "source": "Floating takes this app's matching windows out of tiling: each keeps its last position and size and appears on every space, instead of living in one space's grid.\n\nThis is per-app floating — not the **Floating** layout mode, which floats every window in a space.",
+    "translation": "O modo floating remove as janelas correspondentes deste aplicativo do lado a lado: cada uma mantém sua última posição e tamanho e aparece em todos os espaços.\n\nIsso é um floating por aplicativo — não o modo de layout Floating, que faz flutuar todas as janelas de um espaço."
+  },
+  "app_rules.float.never": {
+    "source": "Never",
+    "translation": "Texto Never (PT)"
+  },
+  "app_rules.float.titled": {
+    "source": "Windows titled…",
+    "translation": "Texto Windows titled… (PT)"
+  },
+  "app_rules.other_specify": {
+    "source": "Other (Specify)…",
+    "translation": "Texto Other (Specify)… (PT)"
+  },
+  "app_rules.override.caption": {
+    "source": "Space and float rules made here apply to this profile only. Dimmed facets are inherited from the app-wide base rules and stay in sync with them; changing a facet overrides it for this profile, and deleting a row removes inherited rules here. To edit the base rules themselves, switch back to the currently loaded profile in the header's picker.",
+    "translation": "Texto Space and float rules made here apply to this profile only. Dimmed facets are inherited from the app-wide base rules and stay in sync with them; changing a facet overrides it for this profile, and deleting a row removes inherited rules here. To edit the base rules themselves, switch back to the currently loaded profile in the header's picker. (PT)"
+  },
+  "app_rules.override.overrides": {
+    "source": "This profile overrides base app rules.",
+    "translation": "Texto This profile overrides base app rules. (PT)"
+  },
+  "app_rules.remove_all.help": {
+    "source": "Remove all rules for this app",
+    "translation": "Texto Remove all rules for this app (PT)"
+  },
+  "app_rules.remove_override.help": {
+    "source": "Remove this profile's effective space and float rules for this app",
+    "translation": "Texto Remove this profile's effective space and float rules for this app (PT)"
+  },
+  "app_rules.remove_pattern": {
+    "source": "Remove title pattern",
+    "translation": "Texto Remove title pattern (PT)"
+  },
+  "app_rules.section.caption": {
+    "source": "Pin an app's windows to a space, keep them floating, or both. Deleting a row removes all of the app's rules.",
+    "translation": "Texto Pin an app's windows to a space, keep them floating, or both. Deleting a row removes all of the app's rules. (PT)"
+  },
+  "app_rules.section.title": {
+    "source": "Rules per app",
+    "translation": "Texto Rules per app (PT)"
+  },
+  "app_rules.space": {
+    "source": "Space",
+    "translation": "Espaço de destino"
+  },
+  "app_rules.title_contains": {
+    "source": "Title contains…",
+    "translation": "Texto Title contains… (PT)"
+  },
+  "app_rules.titled.caption": {
+    "source": "Windows whose title contains a pattern stay floating.",
+    "translation": "Texto Windows whose title contains a pattern stay floating. (PT)"
+  },
+  "app_selector.bundle_id": {
+    "source": "Bundle identifier",
+    "translation": "Texto Bundle identifier (PT)"
+  },
+  "app_selector.clear_custom": {
+    "source": "Clear custom app",
+    "translation": "Texto Clear custom app (PT)"
+  },
+  "app_selector.custom": {
+    "source": "Custom…",
+    "translation": "Texto Custom… (PT)"
+  },
+  "bars.advanced_colors": {
+    "source": "Advanced colors",
+    "translation": "Texto Advanced colors (PT)"
+  },
+  "bars.same_edge": {
+    "source": "Both bars share the %1$@ edge — Space Bar sits at the screen edge, App Bar sits next to the windows.",
+    "translation": "Opção %1$@"
+  },
+  "bars.switch": {
+    "source": "Bar",
+    "translation": "Texto Bar (PT)"
+  },
+  "bars.switch.app_bar": {
+    "source": "App Bar",
+    "translation": "App Bar"
+  },
+  "bars.switch.caption": {
+    "source": "KiwiDesk draws two bars — choose which one to configure.",
+    "translation": "Texto KiwiDesk draws two bars — choose which one to configure. (PT)"
+  },
+  "bars.switch.space_bar": {
+    "source": "Space Bar",
+    "translation": "Space Bar"
+  },
+  "behavior.animations.duration": {
+    "source": "Duration",
+    "translation": "Texto Duration (PT)"
+  },
+  "behavior.animations.relayout": {
+    "source": "Animate layout reflows",
+    "translation": "Texto Animate layout reflows (PT)"
+  },
+  "behavior.animations.scrolling_xref": {
+    "source": "Scrolling-layout focus shifts have their own toggle and speed in",
+    "translation": "Texto Scrolling-layout focus shifts have their own toggle and speed in (PT)"
+  },
+  "behavior.animations.scrolling_xref_link": {
+    "source": "Layout Defaults ▸ Scrolling",
+    "translation": "Texto Layout Defaults ▸ Scrolling (PT)"
+  },
+  "behavior.animations.space_change": {
+    "source": "Animate virtual space switches",
+    "translation": "Texto Animate virtual space switches (PT)"
+  },
+  "behavior.animations.space_change.caption": {
+    "source": "Windows slide out of the space you're leaving and into the one you're switching to.",
+    "translation": "Texto Windows slide out of the space you're leaving and into the one you're switching to. (PT)"
+  },
+  "behavior.animations.title": {
+    "source": "Animations",
+    "translation": "Texto Animations (PT)"
+  },
+  "behavior.animations.window_resize": {
+    "source": "Animate window resizes",
+    "translation": "Texto Animate window resizes (PT)"
+  },
+  "behavior.animations.window_swap": {
+    "source": "Animate window swaps",
+    "translation": "Texto Animate window swaps (PT)"
+  },
+  "behavior.mouse.follows_focus": {
+    "source": "Move mouse to focused window",
+    "translation": "Texto Move mouse to focused window (PT)"
+  },
+  "behavior.mouse.resize_action": {
+    "source": "Mouse resize action",
+    "translation": "Texto Mouse resize action (PT)"
+  },
+  "behavior.mouse.resize_action.help": {
+    "source": "**Resize adjacent windows** — Dragging a window's edge resizes it and reflows its neighbours in the layout.\n**Snap back to slot** — The window resizes freely while you drag, then snaps back to its tiled size when you release.",
+    "translation": "Texto **Resize adjacent windows** — Dragging a window's edge resizes it and reflows its neighbours in the layout.\n**Snap back to slot** — The window resizes freely while you drag, then snaps back to its tiled size when you release. (PT)"
+  },
+  "behavior.mouse.resize_layout": {
+    "source": "Resize adjacent windows",
+    "translation": "Texto Resize adjacent windows (PT)"
+  },
+  "behavior.mouse.resize_snap_back": {
+    "source": "Snap back to slot",
+    "translation": "Texto Snap back to slot (PT)"
+  },
+  "behavior.mouse.title": {
+    "source": "Mouse",
+    "translation": "Texto Mouse (PT)"
+  },
+  "behavior.quit.caption": {
+    "source": "Before KiwiDesk stops, it arranges managed windows on each display so their title bars remain reachable.",
+    "translation": "Texto Before KiwiDesk stops, it arranges managed windows on each display so their title bars remain reachable. (PT)"
+  },
+  "behavior.quit.summary": {
+    "source": "2×2 up to %1$d windows · 3×3 up to %2$d · 4×4 above %2$d",
+    "translation": "Texto 2×2 up to %1$d windows · 3×3 up to %2$d · 4×4 above %2$d (PT)"
+  },
+  "behavior.quit.target_depth": {
+    "source": "Target windows per cell",
+    "translation": "Texto Target windows per cell (PT)"
+  },
+  "behavior.quit.target_depth.help": {
+    "source": "The grid adds a row and column when cells would exceed this target. It stays between 2×2 and 4×4; after 4×4, additional windows keep cascading in its cells.",
+    "translation": "Texto The grid adds a row and column when cells would exceed this target. It stays between 2×2 and 4×4; after 4×4, additional windows keep cascading in its cells. (PT)"
+  },
+  "behavior.quit.title": {
+    "source": "On quit",
+    "translation": "Texto On quit (PT)"
+  },
+  "border.caption": {
+    "source": "Outlines the focused window so it stands out in a gapped layout.",
+    "translation": "Personalize a borda que envolve a janela com foco ou selecionada."
+  },
+  "border.controls.disabled": {
+    "source": "Turn on Show focus border to edit these settings.",
+    "translation": "Texto Turn on Show focus border to edit these settings. (PT)"
+  },
+  "border.corner.rounded": {
+    "source": "Rounded",
+    "translation": "Texto Rounded (PT)"
+  },
+  "border.corner.square": {
+    "source": "Square",
+    "translation": "Texto Square (PT)"
+  },
+  "border.corner_style": {
+    "source": "Corners",
+    "translation": "Texto Corners (PT)"
+  },
+  "border.enabled": {
+    "source": "Show focus border",
+    "translation": "Ativar borda de foco"
+  },
+  "border.fit_gaps.action": {
+    "source": "Set Gap Values",
+    "translation": "Texto Set Gap Values (PT)"
+  },
+  "border.fit_gaps.action_hint": {
+    "source": "Updates the draft gap values. Save is still required.",
+    "translation": "Texto Updates the draft gap values. Save is still required. (PT)"
+  },
+  "border.fit_gaps.already_matches": {
+    "source": "Draft gaps already match.",
+    "translation": "Texto Draft gaps already match. (PT)"
+  },
+  "border.fit_gaps.extra_spacing": {
+    "source": "Extra spacing",
+    "translation": "Texto Extra spacing (PT)"
+  },
+  "border.fit_gaps.help": {
+    "source": "Calculates global outer and inner gaps from the border width. Inner gaps allow for both borders when borders on unfocused windows are shown.",
+    "translation": "Texto Calculates global outer and inner gaps from the border width. Inner gaps allow for both borders when borders on unfocused windows are shown. (PT)"
+  },
+  "border.fit_gaps.preview": {
+    "source": "Will set Outer to %1$d pt and Inner to %2$d pt.",
+    "translation": "Opção %1$d e %2$d"
+  },
+  "border.fit_gaps.replaces_edges": {
+    "source": "Replaces per-edge gap values.",
+    "translation": "Texto Replaces per-edge gap values. (PT)"
+  },
+  "border.fit_gaps.title": {
+    "source": "Fit layout gaps",
+    "translation": "Texto Fit layout gaps (PT)"
+  },
+  "border.fit_gaps.unit": {
+    "source": "pt",
+    "translation": "pt"
+  },
+  "border.fit_gaps.updated": {
+    "source": "Draft updated — Save (⌘S) to apply and persist.",
+    "translation": "Texto Draft updated — Save (⌘S) to apply and persist. (PT)"
+  },
+  "border.fit_gaps.updated_inactive": {
+    "source": "Draft updated — Save (⌘S) to persist; it applies when this profile is loaded.",
+    "translation": "Texto Draft updated — Save (⌘S) to persist; it applies when this profile is loaded. (PT)"
+  },
+  "border.fit_gaps.updated_new": {
+    "source": "Draft updated — Save as New Profile… to apply and persist.",
+    "translation": "Texto Draft updated — Save as New Profile… to apply and persist. (PT)"
+  },
+  "border.fit_gaps.updated_paused": {
+    "source": "Draft updated — gaps persist once Accessibility is on and you save the profile.",
+    "translation": "Texto Draft updated — gaps persist once Accessibility is on and you save the profile. (PT)"
+  },
+  "border.focused_color": {
+    "source": "Color",
+    "translation": "Texto Color (PT)"
+  },
+  "border.focused_color.a11y": {
+    "source": "Focused window border color",
+    "translation": "Texto Focused window border color (PT)"
+  },
+  "border.glow": {
+    "source": "Show glow",
+    "translation": "Efeito de brilho"
+  },
+  "border.glow.a11y": {
+    "source": "Soft glow around the focus border",
+    "translation": "Texto Soft glow around the focus border (PT)"
+  },
+  "border.title": {
+    "source": "Focus border",
+    "translation": "Bordas de janela"
+  },
+  "border.unfocused_color": {
+    "source": "Color",
+    "translation": "Texto Color (PT)"
+  },
+  "border.unfocused_color.a11y": {
+    "source": "Unfocused window border color",
+    "translation": "Texto Unfocused window border color (PT)"
+  },
+  "border.unfocused_enabled": {
+    "source": "Show border on unfocused windows",
+    "translation": "Texto Show border on unfocused windows (PT)"
+  },
+  "border.width": {
+    "source": "Width",
+    "translation": "Texto Width (PT)"
+  },
+  "brand.menu_bar_icon.a11y": {
+    "source": "KiwiDesk",
+    "translation": "KiwiDesk"
+  },
+  "color_field.automatic": {
+    "source": "Automatic",
+    "translation": "Texto Automatic (PT)"
+  },
+  "color_field.hex.a11y": {
+    "source": "%1$@ hex value",
+    "translation": "Opção %1$@"
+  },
+  "color_field.hex.automatic": {
+    "source": "Automatic",
+    "translation": "Texto Automatic (PT)"
+  },
+  "color_field.hex.help": {
+    "source": "Type a #RRGGBB or #RRGGBBAA value",
+    "translation": "Texto Type a #RRGGBB or #RRGGBBAA value (PT)"
+  },
+  "color_field.swatch.a11y": {
+    "source": "%1$@ color",
+    "translation": "Opção %1$@"
+  },
+  "color_field.swatch.a11y_auto": {
+    "source": "%1$@ color, Automatic",
+    "translation": "Opção %1$@"
+  },
+  "color_field.swatch.a11y_hint": {
+    "source": "Opens the color picker",
+    "translation": "Texto Opens the color picker (PT)"
+  },
+  "color_field.swatch.help": {
+    "source": "Edit the %1$@ color",
+    "translation": "Editar the %1$@ color"
+  },
+  "color_field.swatch.help_auto": {
+    "source": "Automatic — follows light and dark",
+    "translation": "Texto Automatic — follows light and dark (PT)"
+  },
+  "color_panel.done": {
+    "source": "Done",
+    "translation": "Texto Done (PT)"
+  },
+  "common.off": {
+    "source": "off",
+    "translation": "Texto off (PT)"
+  },
+  "common.on": {
+    "source": "on",
+    "translation": "Texto on (PT)"
+  },
+  "config_issues.cancel": {
+    "source": "Cancel",
+    "translation": "Texto Cancel (PT)"
+  },
+  "config_issues.delete": {
+    "source": "Delete…",
+    "translation": "Excluir…"
+  },
+  "config_issues.delete_confirm.body": {
+    "source": "This removes the profile file. It can't be undone.",
+    "translation": "Texto This removes the profile file. It can't be undone. (PT)"
+  },
+  "config_issues.delete_confirm.title": {
+    "source": "Delete “%1$@”?",
+    "translation": "Excluir “%1$@”?"
+  },
+  "config_issues.empty.body": {
+    "source": "The last configuration load completed cleanly.",
+    "translation": "Texto The last configuration load completed cleanly. (PT)"
+  },
+  "config_issues.empty.title": {
+    "source": "No config issues",
+    "translation": "Texto No config issues (PT)"
+  },
+  "config_issues.header": {
+    "source": "Parts of the configuration could not be loaded.",
+    "translation": "Texto Parts of the configuration could not be loaded. (PT)"
+  },
+  "config_issues.profile_unreadable": {
+    "source": "Couldn't be loaded — it was saved by a different version or edited by hand.",
+    "translation": "Texto Couldn't be loaded — it was saved by a different version or edited by hand. (PT)"
+  },
+  "config_issues.reload": {
+    "source": "Reload config",
+    "translation": "Recarregar configuração"
+  },
+  "config_issues.reload.help": {
+    "source": "Re-runs the config load; fixed files clear their issues.",
+    "translation": "Texto Re-runs the config load; fixed files clear their issues. (PT)"
+  },
+  "config_issues.reveal": {
+    "source": "Reveal in Finder",
+    "translation": "Texto Reveal in Finder (PT)"
+  },
+  "config_issues.title": {
+    "source": "Config Issues",
+    "translation": "Problemas de configuração"
+  },
+  "custom_lua_banner.text": {
+    "source": "Your init.lua also has custom Lua. It doesn’t conflict with the visual editor, and the app never modifies init.lua.",
+    "translation": "Texto Your init.lua also has custom Lua. It doesn’t conflict with the visual editor, and the app never modifies init.lua. (PT)"
+  },
+  "discard.apply_preset.confirm": {
+    "source": "Discard & apply",
+    "translation": "Texto Discard & apply (PT)"
+  },
+  "discard.apply_preset.message": {
+    "source": "Applying a preset replaces the edits you haven't saved.",
+    "translation": "Texto Applying a preset replaces the edits you haven't saved. (PT)"
+  },
+  "discard.cancel": {
+    "source": "Cancel",
+    "translation": "Continuar editando"
+  },
+  "discard.delete_profile.confirm": {
+    "source": "Discard & delete",
+    "translation": "Texto Discard & delete (PT)"
+  },
+  "discard.delete_profile.message": {
+    "source": "Deleting reloads the dashboard, dropping the edits you haven't saved.",
+    "translation": "Texto Deleting reloads the dashboard, dropping the edits you haven't saved. (PT)"
+  },
+  "discard.load_profile.confirm": {
+    "source": "Discard & load",
+    "translation": "Texto Discard & load (PT)"
+  },
+  "discard.load_profile.message": {
+    "source": "Loading a profile replaces the edits you haven't saved.",
+    "translation": "Texto Loading a profile replaces the edits you haven't saved. (PT)"
+  },
+  "discard.lua_editor.confirm": {
+    "source": "Discard & edit init.lua",
+    "translation": "Texto Discard & edit init.lua (PT)"
+  },
+  "discard.lua_editor.message": {
+    "source": "The raw editor saves init.lua as text, so the edits you haven't saved are dropped.",
+    "translation": "Texto The raw editor saves init.lua as text, so the edits you haven't saved are dropped. (PT)"
+  },
+  "discard.rename_profile.confirm": {
+    "source": "Discard & rename",
+    "translation": "Texto Discard & rename (PT)"
+  },
+  "discard.rename_profile.message": {
+    "source": "Renaming reloads the dashboard, dropping the edits you haven't saved.",
+    "translation": "Texto Renaming reloads the dashboard, dropping the edits you haven't saved. (PT)"
+  },
+  "discard.switch_profile.confirm": {
+    "source": "Discard & switch",
+    "translation": "Texto Discard & switch (PT)"
+  },
+  "discard.switch_profile.message": {
+    "source": "Switching profiles drops the edits you haven't saved.",
+    "translation": "Texto Switching profiles drops the edits you haven't saved. (PT)"
+  },
+  "discard.title": {
+    "source": "Discard unsaved changes?",
+    "translation": "Alterações não salvas"
+  },
+  "discard.visual_editor.confirm": {
+    "source": "Discard & leave",
+    "translation": "Texto Discard & leave (PT)"
+  },
+  "discard.visual_editor.message": {
+    "source": "Leaving the raw editor reloads init.lua from disk, dropping the Lua you haven't saved.",
+    "translation": "Texto Leaving the raw editor reloads init.lua from disk, dropping the Lua you haven't saved. (PT)"
+  },
+  "drag.border": {
+    "source": "Border",
+    "translation": "Texto Border (PT)"
+  },
+  "drag.border.off_help": {
+    "source": "Turn on Border to edit its color, width, and alignment.",
+    "translation": "Texto Turn on Border to edit its color, width, and alignment. (PT)"
+  },
+  "drag.border_alignment": {
+    "source": "Alignment",
+    "translation": "Texto Alignment (PT)"
+  },
+  "drag.border_color": {
+    "source": "Color",
+    "translation": "Texto Color (PT)"
+  },
+  "drag.border_color.a11y": {
+    "source": "Border color",
+    "translation": "Texto Border color (PT)"
+  },
+  "drag.border_width": {
+    "source": "Width",
+    "translation": "Texto Width (PT)"
+  },
+  "drag.caption": {
+    "source": "Drag a window onto another to swap their positions in the layout.",
+    "translation": "Comportamento do arrasto e redimensionamento via mouse."
+  },
+  "drag.corner_radius": {
+    "source": "Corner radius",
+    "translation": "Texto Corner radius (PT)"
+  },
+  "drag.disabled": {
+    "source": "disabled",
+    "translation": "Texto disabled (PT)"
+  },
+  "drag.disabled.help": {
+    "source": "Turn on Enabled to edit this visual.",
+    "translation": "Texto Turn on Enabled to edit this visual. (PT)"
+  },
+  "drag.drop_zone": {
+    "source": "Drop zone",
+    "translation": "Texto Drop zone (PT)"
+  },
+  "drag.drop_zone.caption": {
+    "source": "Marks the position your window will snap into when dropped.",
+    "translation": "Texto Marks the position your window will snap into when dropped. (PT)"
+  },
+  "drag.enabled": {
+    "source": "Enabled",
+    "translation": "Ativar arrasto de mouse"
+  },
+  "drag.fill": {
+    "source": "Fill",
+    "translation": "Texto Fill (PT)"
+  },
+  "drag.fill.off_help": {
+    "source": "Turn on Fill to edit its color.",
+    "translation": "Texto Turn on Fill to edit its color. (PT)"
+  },
+  "drag.fill_color": {
+    "source": "Color",
+    "translation": "Texto Color (PT)"
+  },
+  "drag.fill_color.a11y": {
+    "source": "Fill color",
+    "translation": "Texto Fill color (PT)"
+  },
+  "drag.ghost": {
+    "source": "Ghost",
+    "translation": "Texto Ghost (PT)"
+  },
+  "drag.ghost.caption": {
+    "source": "Marks the position your window is dragged from.",
+    "translation": "Texto Marks the position your window is dragged from. (PT)"
+  },
+  "drag.inside": {
+    "source": "Inside",
+    "translation": "Texto Inside (PT)"
+  },
+  "drag.outside": {
+    "source": "Outside",
+    "translation": "Texto Outside (PT)"
+  },
+  "drag.title": {
+    "source": "Drag & drop",
+    "translation": "Arrasto de mouse"
+  },
+  "floating.color": {
+    "source": "Floating",
+    "translation": "Texto Floating (PT)"
+  },
+  "floating.color.a11y": {
+    "source": "Floating window mark color",
+    "translation": "Texto Floating window mark color (PT)"
+  },
+  "floating.color.space_bar_only": {
+    "source": "The floating mark is drawn only in the Space Bar, which is off.",
+    "translation": "Texto The floating mark is drawn only in the Space Bar, which is off. (PT)"
+  },
+  "footer.cancel": {
+    "source": "Cancel",
+    "translation": "Texto Cancel (PT)"
+  },
+  "footer.default_profile_name": {
+    "source": "My Setup",
+    "translation": "Texto My Setup (PT)"
+  },
+  "footer.profile_name": {
+    "source": "Profile name",
+    "translation": "Texto Profile name (PT)"
+  },
+  "footer.revert": {
+    "source": "Revert Changes",
+    "translation": "Texto Revert Changes (PT)"
+  },
+  "footer.revert.restores_layout": {
+    "source": "Revert also restores the profile layout (%1$@).",
+    "translation": "Opção %1$@"
+  },
+  "footer.save": {
+    "source": "Save",
+    "translation": "Salvar"
+  },
+  "footer.save.adopts_layout": {
+    "source": "Save also adopts the session layout (%1$@).",
+    "translation": "Opção %1$@"
+  },
+  "footer.save.globals_only": {
+    "source": "Layout and monitors stay paused; Save covers everything else.",
+    "translation": "Texto Layout and monitors stay paused; Save covers everything else. (PT)"
+  },
+  "footer.save_a_copy_as": {
+    "source": "Save a Copy As…",
+    "translation": "Salvar a Copy As…"
+  },
+  "footer.save_as_new.message": {
+    "source": "The new profile carries the current tiling and the connected monitor set.",
+    "translation": "Texto The new profile carries the current tiling and the connected monitor set. (PT)"
+  },
+  "footer.save_as_new.title": {
+    "source": "Save as new profile",
+    "translation": "Salvar as new profile"
+  },
+  "footer.save_as_new_profile": {
+    "source": "Save as New Profile…",
+    "translation": "Texto Save as New Profile… (PT)"
+  },
+  "footer.save_copy": {
+    "source": "Save copy",
+    "translation": "Salvar copy"
+  },
+  "footer.save_copy_as.message": {
+    "source": "Duplicates “%1$@” with your pending edits — monitor sets and shortcut overrides included. The copy becomes the edit target; the running layout is not changed.",
+    "translation": "Opção %1$@"
+  },
+  "footer.save_copy_as.title": {
+    "source": "Save a copy as",
+    "translation": "Salvar a copy as"
+  },
+  "footer.unsaved_changes": {
+    "source": "Unsaved changes",
+    "translation": "Texto Unsaved changes (PT)"
+  },
+  "gaps.bottom": {
+    "source": "Bottom",
+    "translation": "Texto Bottom (PT)"
+  },
+  "gaps.horizontal": {
+    "source": "Horizontal",
+    "translation": "Texto Horizontal (PT)"
+  },
+  "gaps.inner": {
+    "source": "Inner gap",
+    "translation": "Espaçamento interno"
+  },
+  "gaps.inner_meaning": {
+    "source": "between neighboring windows",
+    "translation": "Texto between neighboring windows (PT)"
+  },
+  "gaps.inner_term": {
+    "source": "Inner",
+    "translation": "Texto Inner (PT)"
+  },
+  "gaps.left": {
+    "source": "Left",
+    "translation": "Texto Left (PT)"
+  },
+  "gaps.mixed": {
+    "source": "mixed",
+    "translation": "Texto mixed (PT)"
+  },
+  "gaps.mixed.help": {
+    "source": "Edges differ — edit them individually below.",
+    "translation": "Texto Edges differ — edit them individually below. (PT)"
+  },
+  "gaps.outer": {
+    "source": "Outer gap",
+    "translation": "Espaçamento externo"
+  },
+  "gaps.outer_meaning": {
+    "source": "between windows and the screen edge",
+    "translation": "Texto between windows and the screen edge (PT)"
+  },
+  "gaps.outer_term": {
+    "source": "Outer",
+    "translation": "Texto Outer (PT)"
+  },
+  "gaps.per_axis": {
+    "source": "Per-axis…",
+    "translation": "Texto Per-axis… (PT)"
+  },
+  "gaps.per_edge": {
+    "source": "Per-edge…",
+    "translation": "Texto Per-edge… (PT)"
+  },
+  "gaps.right": {
+    "source": "Right",
+    "translation": "Texto Right (PT)"
+  },
+  "gaps.title": {
+    "source": "Gaps",
+    "translation": "Espaçamentos (Gaps)"
+  },
+  "gaps.top": {
+    "source": "Top",
+    "translation": "Texto Top (PT)"
+  },
+  "gaps.vertical": {
+    "source": "Vertical",
+    "translation": "Texto Vertical (PT)"
+  },
+  "general.about.app_name": {
+    "source": "KiwiDesk",
+    "translation": "KiwiDesk"
+  },
+  "general.about.support": {
+    "source": "Support KiwiDesk",
+    "translation": "Texto Support KiwiDesk (PT)"
+  },
+  "general.about.title": {
+    "source": "About",
+    "translation": "Texto About (PT)"
+  },
+  "general.advanced.config_file": {
+    "source": "Configuration file",
+    "translation": "Texto Configuration file (PT)"
+  },
+  "general.advanced.edit_lua": {
+    "source": "Edit init.lua directly",
+    "translation": "Texto Edit init.lua directly (PT)"
+  },
+  "general.advanced.edit_lua.caption": {
+    "source": "Opens the integrated Lua editor for custom scripting beyond the visual controls.",
+    "translation": "Texto Opens the integrated Lua editor for custom scripting beyond the visual controls. (PT)"
+  },
+  "general.advanced.reveal": {
+    "source": "Reveal",
+    "translation": "Texto Reveal (PT)"
+  },
+  "general.advanced.title": {
+    "source": "Advanced",
+    "translation": "Texto Advanced (PT)"
+  },
+  "general.language.system_default": {
+    "source": "System default",
+    "translation": "Texto System default (PT)"
+  },
+  "general.language.title": {
+    "source": "Language",
+    "translation": "Texto Language (PT)"
+  },
+  "help.button": {
+    "source": "Help",
+    "translation": "Texto Help (PT)"
+  },
+  "help.button.for": {
+    "source": "Help: %1$@",
+    "translation": "Opção %1$@"
+  },
+  "help.button.hint": {
+    "source": "Shows an explanation of this setting.",
+    "translation": "Texto Shows an explanation of this setting. (PT)"
+  },
+  "icon_picker.choose.help": {
+    "source": "Choose an icon",
+    "translation": "Texto Choose an icon (PT)"
+  },
+  "icon_picker.clear.help": {
+    "source": "Remove icon (use the default)",
+    "translation": "Texto Remove icon (use the default) (PT)"
+  },
+  "icon_picker.emoji": {
+    "source": "Emoji",
+    "translation": "Texto Emoji (PT)"
+  },
+  "icon_picker.preview.menu_bar": {
+    "source": "Menu bar preview",
+    "translation": "Texto Menu bar preview (PT)"
+  },
+  "icon_picker.preview.row": {
+    "source": "Row preview",
+    "translation": "Texto Row preview (PT)"
+  },
+  "icon_picker.recents": {
+    "source": "Recents",
+    "translation": "Texto Recents (PT)"
+  },
+  "icon_picker.search.placeholder": {
+    "source": "Search icons (or an SF Symbol name)",
+    "translation": "Texto Search icons (or an SF Symbol name) (PT)"
+  },
+  "icon_picker.symbols": {
+    "source": "Symbols",
+    "translation": "Texto Symbols (PT)"
+  },
+  "icon_picker.use_as_text": {
+    "source": "Use “%1$@” as text",
+    "translation": "Opção %1$@"
+  },
+  "key_recorder.assigned_to": {
+    "source": "Assigned to “%1$@”",
+    "translation": "Opção %1$@"
+  },
+  "key_recorder.clear": {
+    "source": "Clear shortcut",
+    "translation": "Limpar atalho"
+  },
+  "key_recorder.dismiss_conflict": {
+    "source": "Dismiss shortcut conflict",
+    "translation": "Texto Dismiss shortcut conflict (PT)"
+  },
+  "key_recorder.go_to": {
+    "source": "Go to",
+    "translation": "Texto Go to (PT)"
+  },
+  "key_recorder.help_press": {
+    "source": "A shortcut is one key plus any of ⌃ Control, ⌥ Option, ⇧ Shift, and ⌘ Command — it locks in the moment you press the key. For more shortcut layers, add Modes.",
+    "translation": "Texto A shortcut is one key plus any of ⌃ Control, ⌥ Option, ⇧ Shift, and ⌘ Command — it locks in the moment you press the key. For more shortcut layers, add Modes. (PT)"
+  },
+  "key_recorder.live_applied": {
+    "source": "Active now — Save to keep it",
+    "translation": "Texto Active now — Save to keep it (PT)"
+  },
+  "key_recorder.live_apply_failed": {
+    "source": "The shortcut change was recorded but couldn't be applied live. Save or Revert to retry.",
+    "translation": "Texto The shortcut change was recorded but couldn't be applied live. Save or Revert to retry. (PT)"
+  },
+  "key_recorder.live_compile_failed": {
+    "source": "Recorded — the action couldn't compile",
+    "translation": "Texto Recorded — the action couldn't compile (PT)"
+  },
+  "key_recorder.live_denied": {
+    "source": "Recorded — the system didn't grant it",
+    "translation": "Texto Recorded — the system didn't grant it (PT)"
+  },
+  "key_recorder.live_inactive_mode": {
+    "source": "Updated for “%1$@” mode",
+    "translation": "Opção %1$@"
+  },
+  "key_recorder.live_profile_shadowed": {
+    "source": "Recorded — the active profile overrides it",
+    "translation": "Texto Recorded — the active profile overrides it (PT)"
+  },
+  "key_recorder.live_unavailable": {
+    "source": "Recorded — Save to activate",
+    "translation": "Texto Recorded — Save to activate (PT)"
+  },
+  "key_recorder.press_keys": {
+    "source": "Press keys…",
+    "translation": "Pressione as teclas…"
+  },
+  "key_recorder.record": {
+    "source": "Record",
+    "translation": "Texto Record (PT)"
+  },
+  "key_recorder.revert_failed": {
+    "source": "Revert couldn't restore the running shortcuts. Fix the configuration, then try again.",
+    "translation": "Texto Revert couldn't restore the running shortcuts. Fix the configuration, then try again. (PT)"
+  },
+  "key_recorder.revert_used_snapshot": {
+    "source": "Saved shortcuts couldn't be read, so Revert restored the previous running shortcuts.",
+    "translation": "Texto Saved shortcuts couldn't be read, so Revert restored the previous running shortcuts. (PT)"
+  },
+  "key_recorder.steal": {
+    "source": "Steal",
+    "translation": "Texto Steal (PT)"
+  },
+  "keybinding.conflict.bullet.system": {
+    "source": "\"%1$@\" with the macOS shortcut \"%2$@\"",
+    "translation": "Opção %1$@ e %2$@"
+  },
+  "keybinding.conflict.bullet.unrecognized": {
+    "source": "\"%1$@\" isn't a recognized shortcut",
+    "translation": "Opção %1$@"
+  },
+  "keybinding.conflict.bullet.with": {
+    "source": "\"%1$@\" with \"%2$@\"",
+    "translation": "Opção %1$@ e %2$@"
+  },
+  "keybinding.conflict.other_binding": {
+    "source": "Shortcut for \"%1$@\" is conflicting with \"%2$@\".",
+    "translation": "O atalho para '%1$@' está em conflito com '%2$@'."
+  },
+  "keybinding.conflict.several": {
+    "source": "Several shortcuts are conflicting:\n",
+    "translation": "Vários atalhos estão em conflito:"
+  },
+  "keybinding.conflict.system": {
+    "source": "Shortcut for \"%1$@\" is conflicting with the macOS shortcut \"%2$@\".",
+    "translation": "O atalho para '%1$@' está em conflito com o atalho de sistema do macOS '%2$@'."
+  },
+  "keybinding.conflict.tooltip.other_binding": {
+    "source": "Already bound in this mode: %1$@",
+    "translation": "Já atribuído neste modo: %1$@"
+  },
+  "keybinding.conflict.tooltip.system": {
+    "source": "Conflicts with macOS: %1$@",
+    "translation": "Opção %1$@"
+  },
+  "keybinding.conflict.tooltip.unrecognized": {
+    "source": "Not a recognized shortcut.",
+    "translation": "Texto Not a recognized shortcut. (PT)"
+  },
+  "keybinding.conflict.unrecognized": {
+    "source": "Shortcut for \"%1$@\" isn't a recognized shortcut.",
+    "translation": "Opção %1$@"
+  },
+  "keybinding.dir.above": {
+    "source": "above",
+    "translation": "Texto above (PT)"
+  },
+  "keybinding.dir.below": {
+    "source": "below",
+    "translation": "Texto below (PT)"
+  },
+  "keybinding.dir.left": {
+    "source": "to the left",
+    "translation": "Texto to the left (PT)"
+  },
+  "keybinding.dir.right": {
+    "source": "to the right",
+    "translation": "Texto to the right (PT)"
+  },
+  "keybinding.focus_dir": {
+    "source": "Focus window %1$@",
+    "translation": "Opção %1$@"
+  },
+  "keybinding.go_to_space": {
+    "source": "Go to Space %1$@",
+    "translation": "Opção %1$@"
+  },
+  "keybinding.grow_height": {
+    "source": "Grow height",
+    "translation": "Texto Grow height (PT)"
+  },
+  "keybinding.grow_width": {
+    "source": "Grow width",
+    "translation": "Texto Grow width (PT)"
+  },
+  "keybinding.make_display_sticky": {
+    "source": "Make display sticky",
+    "translation": "Texto Make display sticky (PT)"
+  },
+  "keybinding.make_floating": {
+    "source": "Make floating",
+    "translation": "Texto Make floating (PT)"
+  },
+  "keybinding.make_sticky": {
+    "source": "Make sticky",
+    "translation": "Texto Make sticky (PT)"
+  },
+  "keybinding.make_unsticky": {
+    "source": "Make unsticky",
+    "translation": "Texto Make unsticky (PT)"
+  },
+  "keybinding.move_to_space": {
+    "source": "Move to Space %1$@",
+    "translation": "Mover para o espaço %1$@"
+  },
+  "keybinding.move_to_space_follow": {
+    "source": "Move to Space %1$@ & follow",
+    "translation": "Mover para o espaço %1$@ e seguir"
+  },
+  "keybinding.move_window_to_track": {
+    "source": "Move window to %1$@ track",
+    "translation": "Mover janela para a faixa %1$@"
+  },
+  "keybinding.seq.next": {
+    "source": "next",
+    "translation": "Texto next (PT)"
+  },
+  "keybinding.seq.prev": {
+    "source": "previous",
+    "translation": "Texto previous (PT)"
+  },
+  "keybinding.show_shortcuts": {
+    "source": "Show shortcuts panel",
+    "translation": "Texto Show shortcuts panel (PT)"
+  },
+  "keybinding.shrink_height": {
+    "source": "Shrink height",
+    "translation": "Texto Shrink height (PT)"
+  },
+  "keybinding.shrink_width": {
+    "source": "Shrink width",
+    "translation": "Texto Shrink width (PT)"
+  },
+  "keybinding.swap_dir": {
+    "source": "Swap with window %1$@",
+    "translation": "Opção %1$@"
+  },
+  "keybinding.swap_with_track": {
+    "source": "Swap with %1$@ track",
+    "translation": "Opção %1$@"
+  },
+  "keybinding.switch_to_mode": {
+    "source": "Switch to %1$@",
+    "translation": "Opção %1$@"
+  },
+  "keybinding.toggle_display_sticky": {
+    "source": "Toggle display sticky",
+    "translation": "Texto Toggle display sticky (PT)"
+  },
+  "keybinding.toggle_display_sticky.help": {
+    "source": "Keeps this window visible on every space of the monitor it lives on. Moving it to a space on another monitor re-homes it there. Turn a sticky window fully global with Toggle sticky.",
+    "translation": "Texto Keeps this window visible on every space of the monitor it lives on. Moving it to a space on another monitor re-homes it there. Turn a sticky window fully global with Toggle sticky. (PT)"
+  },
+  "keybinding.toggle_floating": {
+    "source": "Toggle floating",
+    "translation": "Texto Toggle floating (PT)"
+  },
+  "keybinding.toggle_sticky": {
+    "source": "Toggle sticky",
+    "translation": "Texto Toggle sticky (PT)"
+  },
+  "keybinding.toggle_sticky.help": {
+    "source": "Keeps this window visible on every space. A tiled sticky window can be rearranged only on its home space — elsewhere, its position follows automatically. A floating sticky window isn't affected — it moves freely everywhere.",
+    "translation": "Texto Keeps this window visible on every space. A tiled sticky window can be rearranged only on its home space — elsewhere, its position follows automatically. A floating sticky window isn't affected — it moves freely everywhere. (PT)"
+  },
+  "keybinding_conflict.dismiss": {
+    "source": "Dismiss conflict warning",
+    "translation": "Texto Dismiss conflict warning (PT)"
+  },
+  "layout.bsp.name": {
+    "source": "BSP",
+    "translation": "BSP"
+  },
+  "layout.floating.name": {
+    "source": "Floating",
+    "translation": "Texto Floating (PT)"
+  },
+  "layout.grid.name": {
+    "source": "Grid",
+    "translation": "Texto Grid (PT)"
+  },
+  "layout.monocle.name": {
+    "source": "Monocle",
+    "translation": "Texto Monocle (PT)"
+  },
+  "layout.schematic.bsp.ax": {
+    "source": "BSP preview: width ratio %1$d percent, height ratio %2$d percent; the plus tile is where the next window lands.",
+    "translation": "Opção %1$d e %2$d"
+  },
+  "layout.schematic.bsp.caption_alternating": {
+    "source": "Splits alternate horizontal then vertical; the + tile is where the next window opens.",
+    "translation": "Texto Splits alternate horizontal then vertical; the + tile is where the next window opens. (PT)"
+  },
+  "layout.schematic.bsp.caption_longest": {
+    "source": "Each split cuts the longer side; the + tile is where the next window opens.",
+    "translation": "Texto Each split cuts the longer side; the + tile is where the next window opens. (PT)"
+  },
+  "layout.schematic.grid.ax": {
+    "source": "Grid preview: %1$@.",
+    "translation": "Opção %1$@"
+  },
+  "layout.schematic.grid.ax_dynamic": {
+    "source": "a balancing grid",
+    "translation": "Texto a balancing grid (PT)"
+  },
+  "layout.schematic.grid.ax_rigid": {
+    "source": "a fixed grid",
+    "translation": "Texto a fixed grid (PT)"
+  },
+  "layout.schematic.grid.caption_rigid": {
+    "source": "A fixed %1$d × %2$d grid; each window shrinks to a cell, extras stack in the last.",
+    "translation": "Opção %1$d e %2$d"
+  },
+  "layout.schematic.grid.caption_rigid_auto": {
+    "source": "A fixed grid sized to your screen (about 3 × 3); each window shrinks to a cell.",
+    "translation": "Texto A fixed grid sized to your screen (about 3 × 3); each window shrinks to a cell. (PT)"
+  },
+  "layout.schematic.grid.dyn_frame_a": {
+    "source": "4 windows",
+    "translation": "Texto 4 windows (PT)"
+  },
+  "layout.schematic.grid.dyn_frame_b": {
+    "source": "a 5th opens",
+    "translation": "Texto a 5th opens (PT)"
+  },
+  "layout.schematic.grid.order_columns": {
+    "source": "New windows fill across a row, then wrap down.",
+    "translation": "Texto New windows fill across a row, then wrap down. (PT)"
+  },
+  "layout.schematic.grid.order_rows": {
+    "source": "New windows fill down a column, then wrap across.",
+    "translation": "Texto New windows fill down a column, then wrap across. (PT)"
+  },
+  "layout.schematic.monocle.ax": {
+    "source": "Monocle preview: one window fills the screen; focus cycles through the others.",
+    "translation": "Texto Monocle preview: one window fills the screen; focus cycles through the others. (PT)"
+  },
+  "layout.schematic.monocle.caption_h": {
+    "source": "All windows fill the screen; new ones come to the front, and focus cycles left/right.",
+    "translation": "Texto All windows fill the screen; new ones come to the front, and focus cycles left/right. (PT)"
+  },
+  "layout.schematic.monocle.caption_v": {
+    "source": "All windows fill the screen; new ones come to the front, and focus cycles up/down.",
+    "translation": "Texto All windows fill the screen; new ones come to the front, and focus cycles up/down. (PT)"
+  },
+  "layout.schematic.scrolling.ax": {
+    "source": "Scrolling preview: a row of windows framed by the screen, continuing off both edges; the anchor window holds focus.",
+    "translation": "Texto Scrolling preview: a row of windows framed by the screen, continuing off both edges; the anchor window holds focus. (PT)"
+  },
+  "layout.schematic.scrolling.caption": {
+    "source": "Focus rests at the anchor; the row scrolls off past it. The + is where the next window opens.",
+    "translation": "Texto Focus rests at the anchor; the row scrolls off past it. The + is where the next window opens. (PT)"
+  },
+  "layout.schematic.scrolling.follow_a": {
+    "source": "Focus here",
+    "translation": "Texto Focus here (PT)"
+  },
+  "layout.schematic.scrolling.follow_ax": {
+    "source": "Follow preview: two frames — the focus steps one slot over and the viewport pans just enough to reveal it, leaving the previous window visible.",
+    "translation": "Texto Follow preview: two frames — the focus steps one slot over and the viewport pans just enough to reveal it, leaving the previous window visible. (PT)"
+  },
+  "layout.schematic.scrolling.follow_b": {
+    "source": "When focus steps to the next window",
+    "translation": "Texto When focus steps to the next window (PT)"
+  },
+  "layout.schematic.scrolling.follow_caption": {
+    "source": "The viewport holds still and pans the minimum to reveal the focus, keeping the side you came from in view.",
+    "translation": "Texto The viewport holds still and pans the minimum to reveal the focus, keeping the side you came from in view. (PT)"
+  },
+  "layout.schematic.stack.ax": {
+    "source": "Stack preview: %1$d master windows, master ratio %2$d percent; the plus tile is where the next window lands.",
+    "translation": "Opção %1$d e %2$d"
+  },
+  "layout.schematic.stack.caption_all": {
+    "source": "Master zone and stack zone; when the stack fills, the whole zone piles so only the top edges show.",
+    "translation": "Texto Master zone and stack zone; when the stack fills, the whole zone piles so only the top edges show. (PT)"
+  },
+  "layout.schematic.stack.caption_overflow": {
+    "source": "Master zone and stack zone; when the stack fills, the surplus piles up.",
+    "translation": "Texto Master zone and stack zone; when the stack fills, the surplus piles up. (PT)"
+  },
+  "layout.schematic.track.ax": {
+    "source": "Track preview: tracks along one axis, the far one piling overflow; the plus is the next window.",
+    "translation": "Texto Track preview: tracks along one axis, the far one piling overflow; the plus is the next window. (PT)"
+  },
+  "layout.schematic.track.caption_focused": {
+    "source": "New windows join the focused track; the far track piles the overflow.",
+    "translation": "Texto New windows join the focused track; the far track piles the overflow. (PT)"
+  },
+  "layout.schematic.track.caption_own": {
+    "source": "New windows open their own track; the far track piles the overflow.",
+    "translation": "Texto New windows open their own track; the far track piles the overflow. (PT)"
+  },
+  "layout.scrolling.name": {
+    "source": "Scrolling",
+    "translation": "Texto Scrolling (PT)"
+  },
+  "layout.stack.name": {
+    "source": "Stack",
+    "translation": "Texto Stack (PT)"
+  },
+  "layout.track.header_caption": {
+    "source": "A more advanced layout: several windows can share one track, with a track limit and per-track resize.",
+    "translation": "Texto A more advanced layout: several windows can share one track, with a track limit and per-track resize. (PT)"
+  },
+  "layout.track.name": {
+    "source": "Track",
+    "translation": "Texto Track (PT)"
+  },
+  "layout_defaults.min_window_size": {
+    "source": "Minimum window size",
+    "translation": "Texto Minimum window size (PT)"
+  },
+  "layout_defaults.min_window_size_caption": {
+    "source": "Windows never tile smaller than this. It also sets the auto-size grid's cell size.",
+    "translation": "Texto Windows never tile smaller than this. It also sets the auto-size grid's cell size. (PT)"
+  },
+  "layout_defaults.mode_tabs": {
+    "source": "Layout mode",
+    "translation": "Texto Layout mode (PT)"
+  },
+  "layout_params.alternating": {
+    "source": "Alternating",
+    "translation": "Texto Alternating (PT)"
+  },
+  "layout_params.cascade_all": {
+    "source": "Cascade all",
+    "translation": "Texto Cascade all (PT)"
+  },
+  "layout_params.cascade_overflow": {
+    "source": "Cascade overflow",
+    "translation": "Texto Cascade overflow (PT)"
+  },
+  "layout_params.longest_side": {
+    "source": "Longest side",
+    "translation": "Texto Longest side (PT)"
+  },
+  "layout_params.master_count": {
+    "source": "Master count",
+    "translation": "Quantidade principal"
+  },
+  "layout_params.master_orientation": {
+    "source": "Master orientation",
+    "translation": "Texto Master orientation (PT)"
+  },
+  "layout_params.master_orientation.help": {
+    "source": "How the master zone lines up its windows when the master count is more than one: stacked top to bottom, or side by side.",
+    "translation": "Texto How the master zone lines up its windows when the master count is more than one: stacked top to bottom, or side by side. (PT)"
+  },
+  "layout_params.master_ratio": {
+    "source": "Master ratio",
+    "translation": "Proporção principal"
+  },
+  "layout_params.orientation.horizontal": {
+    "source": "Horizontal",
+    "translation": "Texto Horizontal (PT)"
+  },
+  "layout_params.orientation.vertical": {
+    "source": "Vertical",
+    "translation": "Texto Vertical (PT)"
+  },
+  "layout_params.overflow": {
+    "source": "Overflow",
+    "translation": "Texto Overflow (PT)"
+  },
+  "layout_params.overflow.stack.help": {
+    "source": "**Cascade overflow** — Keeps as many windows fully tiled as fit, then cascades only the extra ones at the bottom.\n**Cascade all** — Cascades the whole stack, showing a sliver of every window.",
+    "translation": "Texto **Cascade overflow** — Keeps as many windows fully tiled as fit, then cascades only the extra ones at the bottom.\n**Cascade all** — Cascades the whole stack, showing a sliver of every window. (PT)"
+  },
+  "layout_params.overflow.track.help": {
+    "source": "How the far-edge **overflow track** — which collects the tracks that don't fit side by side — packs its windows.\n**Cascade all** (the default) — piles every window from the top.\n**Cascade overflow** — tiles what fits, piles the rest.\nAn ordinary track that holds more windows than fit always overflows this second way; only the far-edge track is configurable.",
+    "translation": "Texto How the far-edge **overflow track** — which collects the tracks that don't fit side by side — packs its windows.\n**Cascade all** (the default) — piles every window from the top.\n**Cascade overflow** — tiles what fits, piles the rest.\nAn ordinary track that holds more windows than fit always overflows this second way; only the far-edge track is configurable. (PT)"
+  },
+  "layout_params.position.bottom": {
+    "source": "Bottom",
+    "translation": "Texto Bottom (PT)"
+  },
+  "layout_params.position.left": {
+    "source": "Left",
+    "translation": "Texto Left (PT)"
+  },
+  "layout_params.position.right": {
+    "source": "Right",
+    "translation": "Texto Right (PT)"
+  },
+  "layout_params.position.top": {
+    "source": "Top",
+    "translation": "Texto Top (PT)"
+  },
+  "layout_params.split_ratio_h": {
+    "source": "Width split ratio",
+    "translation": "Texto Width split ratio (PT)"
+  },
+  "layout_params.split_ratio_h.help": {
+    "source": "How much of a side-by-side split's width goes to the earlier window; the later window gets the rest. Applies to every left/right split.",
+    "translation": "Texto How much of a side-by-side split's width goes to the earlier window; the later window gets the rest. Applies to every left/right split. (PT)"
+  },
+  "layout_params.split_ratio_v": {
+    "source": "Height split ratio",
+    "translation": "Texto Height split ratio (PT)"
+  },
+  "layout_params.split_ratio_v.help": {
+    "source": "How much of a stacked split's height goes to the earlier window; the later window gets the rest. Applies to every top/bottom split.",
+    "translation": "Texto How much of a stacked split's height goes to the earlier window; the later window gets the rest. Applies to every top/bottom split. (PT)"
+  },
+  "layout_params.split_strategy": {
+    "source": "Split strategy",
+    "translation": "Texto Split strategy (PT)"
+  },
+  "layout_params.split_strategy.help": {
+    "source": "**Longest side** — Cuts whichever side of the region is longer, keeping new windows close to square.\n**Alternating** — Alternates left/right and top/bottom cuts as the layout gets deeper, regardless of shape.",
+    "translation": "Texto **Longest side** — Cuts whichever side of the region is longer, keeping new windows close to square.\n**Alternating** — Alternates left/right and top/bottom cuts as the layout gets deeper, regardless of shape. (PT)"
+  },
+  "layout_params.stack_position": {
+    "source": "Stack position",
+    "translation": "Texto Stack position (PT)"
+  },
+  "layout_params.stack_position.help": {
+    "source": "Which side of the screen the stack zone takes; the master zone gets the other side. The stack lines up to fit its strip: a left or right stack runs top to bottom, a top or bottom stack side by side.",
+    "translation": "Texto Which side of the screen the stack zone takes; the master zone gets the other side. The stack lines up to fit its strip: a left or right stack runs top to bottom, a top or bottom stack side by side. (PT)"
+  },
+  "layout_params.wrap_focus.help": {
+    "source": "When on, moving focus past the last window wraps around to the first, and past the first back to the last, instead of stopping at the end.",
+    "translation": "Texto When on, moving focus past the last window wraps around to the first, and past the first back to the last, instead of stopping at the end. (PT)"
+  },
+  "lua_editor.adopt": {
+    "source": "Adopt",
+    "translation": "Texto Adopt (PT)"
+  },
+  "lua_editor.adopt.message": {
+    "source": "Your current init.lua is kept as a commented-out backup.",
+    "translation": "Texto Your current init.lua is kept as a commented-out backup. (PT)"
+  },
+  "lua_editor.adopt.message_dirty": {
+    "source": "Your current init.lua is kept as a commented-out backup — but Adopt reads that file from disk, so the edits you haven't saved are dropped.",
+    "translation": "Texto Your current init.lua is kept as a commented-out backup — but Adopt reads that file from disk, so the edits you haven't saved are dropped. (PT)"
+  },
+  "lua_editor.adopt.title": {
+    "source": "Adopt this config into the visual editor?",
+    "translation": "Texto Adopt this config into the visual editor? (PT)"
+  },
+  "lua_editor.adopt_help.body": {
+    "source": "Your init.lua isn't deleted: it's kept as a commented-out backup in the new file. Gaps, layouts, rules, and keybindings are imported; a shortcut that can't be read back stays in the backup — re-add it in the Shortcuts section.",
+    "translation": "Texto Your init.lua isn't deleted: it's kept as a commented-out backup in the new file. Gaps, layouts, rules, and keybindings are imported; a shortcut that can't be read back stays in the backup — re-add it in the Shortcuts section. (PT)"
+  },
+  "lua_editor.adopt_into_visual": {
+    "source": "Adopt into Visual Editor…",
+    "translation": "Texto Adopt into Visual Editor… (PT)"
+  },
+  "lua_editor.back_to_visual": {
+    "source": "Back to visual editor",
+    "translation": "Texto Back to visual editor (PT)"
+  },
+  "lua_editor.editing_directly": {
+    "source": "Editing init.lua directly.",
+    "translation": "Texto Editing init.lua directly. (PT)"
+  },
+  "lua_editor.foreign_code": {
+    "source": "This init.lua contains hand-written Lua, so the visual editor is disabled to avoid overwriting it.",
+    "translation": "Texto This init.lua contains hand-written Lua, so the visual editor is disabled to avoid overwriting it. (PT)"
+  },
+  "menu.accessibility_paused": {
+    "source": "Window Management Paused…",
+    "translation": "Texto Window Management Paused… (PT)"
+  },
+  "menu.accessibility_paused.tooltip": {
+    "source": "Click to grant Accessibility permission and resume tiling.",
+    "translation": "Texto Click to grant Accessibility permission and resume tiling. (PT)"
+  },
+  "menu.active_profile": {
+    "source": "Profile: %1$@",
+    "translation": "Perfil ativo: %1$@"
+  },
+  "menu.app.about": {
+    "source": "About %1$@",
+    "translation": "Opção %1$@"
+  },
+  "menu.app.hide": {
+    "source": "Hide %1$@",
+    "translation": "Opção %1$@"
+  },
+  "menu.app.hide_others": {
+    "source": "Hide Others",
+    "translation": "Texto Hide Others (PT)"
+  },
+  "menu.app.show_all": {
+    "source": "Show All",
+    "translation": "Texto Show All (PT)"
+  },
+  "menu.config_issues": {
+    "source": "Config Issues…",
+    "translation": "Texto Config Issues… (PT)"
+  },
+  "menu.edit.copy": {
+    "source": "Copy",
+    "translation": "Texto Copy (PT)"
+  },
+  "menu.edit.cut": {
+    "source": "Cut",
+    "translation": "Texto Cut (PT)"
+  },
+  "menu.edit.paste": {
+    "source": "Paste",
+    "translation": "Texto Paste (PT)"
+  },
+  "menu.edit.redo": {
+    "source": "Redo",
+    "translation": "Texto Redo (PT)"
+  },
+  "menu.edit.select_all": {
+    "source": "Select All",
+    "translation": "Texto Select All (PT)"
+  },
+  "menu.edit.title": {
+    "source": "Edit",
+    "translation": "Editar"
+  },
+  "menu.edit.undo": {
+    "source": "Undo",
+    "translation": "Texto Undo (PT)"
+  },
+  "menu.layout": {
+    "source": "Layout",
+    "translation": "Layout"
+  },
+  "menu.layout.save": {
+    "source": "Save Current Layout to Profile",
+    "translation": "Texto Save Current Layout to Profile (PT)"
+  },
+  "menu.layout.save_failed.title": {
+    "source": "Couldn't Save Layout",
+    "translation": "Texto Couldn't Save Layout (PT)"
+  },
+  "menu.layout.unsaved": {
+    "source": "not saved to profile",
+    "translation": "Texto not saved to profile (PT)"
+  },
+  "menu.no_profiles": {
+    "source": "No saved profiles",
+    "translation": "Texto No saved profiles (PT)"
+  },
+  "menu.profile_broken": {
+    "source": "Can't load — see Config Issues",
+    "translation": "Texto Can't load — see Config Issues (PT)"
+  },
+  "menu.quit": {
+    "source": "Quit KiwiDesk",
+    "translation": "Encerrar KiwiDesk"
+  },
+  "menu.settings": {
+    "source": "Settings…",
+    "translation": "Ajustes…"
+  },
+  "menu.status.a11y": {
+    "source": "KiwiDesk",
+    "translation": "KiwiDesk"
+  },
+  "menu.status.config_error.a11y": {
+    "source": "KiwiDesk (config issues)",
+    "translation": "Texto KiwiDesk (config issues) (PT)"
+  },
+  "menu.status.config_error.tooltip": {
+    "source": "Parts of the configuration could not be loaded — open Config Issues for details.",
+    "translation": "Texto Parts of the configuration could not be loaded — open Config Issues for details. (PT)"
+  },
+  "menu.status.tooltip": {
+    "source": "KiwiDesk",
+    "translation": "KiwiDesk"
+  },
+  "menu.status.warning.a11y": {
+    "source": "KiwiDesk (permission required)",
+    "translation": "Texto KiwiDesk (permission required) (PT)"
+  },
+  "menu.status.warning.tooltip": {
+    "source": "KiwiDesk needs Accessibility permission. Window management is paused.",
+    "translation": "Texto KiwiDesk needs Accessibility permission. Window management is paused. (PT)"
+  },
+  "menu.switch_profile": {
+    "source": "Switch Profile",
+    "translation": "Texto Switch Profile (PT)"
+  },
+  "menu.view_shortcuts": {
+    "source": "View Shortcuts…",
+    "translation": "Texto View Shortcuts… (PT)"
+  },
+  "menu.window.minimize": {
+    "source": "Minimize",
+    "translation": "Texto Minimize (PT)"
+  },
+  "menu.window.title": {
+    "source": "Window",
+    "translation": "Texto Window (PT)"
+  },
+  "menu.window.zoom": {
+    "source": "Zoom",
+    "translation": "Texto Zoom (PT)"
+  },
+  "monitor_card.drop_here": {
+    "source": "Drop a space here",
+    "translation": "Texto Drop a space here (PT)"
+  },
+  "monitor_card.follows_main": {
+    "source": "Follows main display",
+    "translation": "Texto Follows main display (PT)"
+  },
+  "monitor_card.main_badge": {
+    "source": "main",
+    "translation": "Tela principal"
+  },
+  "monitor_card.no_display": {
+    "source": "no display",
+    "translation": "Texto no display (PT)"
+  },
+  "monitor_chip.automatic": {
+    "source": "Automatic",
+    "translation": "Texto Automatic (PT)"
+  },
+  "monitor_chip.help_full": {
+    "source": "%1$@\n%2$@",
+    "translation": "%1$@\n%2$@"
+  },
+  "monitor_chip.hint.auto": {
+    "source": "Placed automatically — drag to pin",
+    "translation": "Texto Placed automatically — drag to pin (PT)"
+  },
+  "monitor_chip.hint.main": {
+    "source": "Follows the main display — drag to pin, ⓧ for automatic",
+    "translation": "Texto Follows the main display — drag to pin, ⓧ for automatic (PT)"
+  },
+  "monitor_chip.hint.pinned": {
+    "source": "Pinned to this monitor — drag to move, ⓧ for automatic",
+    "translation": "Texto Pinned to this monitor — drag to move, ⓧ for automatic (PT)"
+  },
+  "monitor_chip.move_to": {
+    "source": "Move to %1$@",
+    "translation": "Opção %1$@"
+  },
+  "monitors.advanced.caption": {
+    "source": "Profiles reattach automatically when a known monitor setup is reconnected.",
+    "translation": "Texto Profiles reattach automatically when a known monitor setup is reconnected. (PT)"
+  },
+  "monitors.advanced.title": {
+    "source": "Monitor fingerprints",
+    "translation": "Impressões digitais do monitor"
+  },
+  "monitors.cards.caption": {
+    "source": "Drag a space between cards to pin it to a monitor or have it follow the main display. Dimmed spaces are placed automatically. Right-click a space for the same moves.",
+    "translation": "Texto Drag a space between cards to pin it to a monitor or have it follow the main display. Dimmed spaces are placed automatically. Right-click a space for the same moves. (PT)"
+  },
+  "monitors.none_detected": {
+    "source": "No monitors detected.",
+    "translation": "Texto No monitors detected. (PT)"
+  },
+  "monitors.not_connected": {
+    "source": "Monitors not connected",
+    "translation": "Texto Monitors not connected (PT)"
+  },
+  "monitors.not_connected.caption": {
+    "source": "This profile's monitors aren't attached right now, so its space placement can't be edited here. Connect its monitor setup to arrange spaces — the other sections still edit this profile.",
+    "translation": "Texto This profile's monitors aren't attached right now, so its space placement can't be edited here. Connect its monitor setup to arrange spaces — the other sections still edit this profile. (PT)"
+  },
+  "monitors.orphan_pin.help": {
+    "source": "Back to automatic placement",
+    "translation": "Texto Back to automatic placement (PT)"
+  },
+  "monitors.orphan_pins.title": {
+    "source": "Pinned to disconnected monitors",
+    "translation": "Texto Pinned to disconnected monitors (PT)"
+  },
+  "monitors.space_placement": {
+    "source": "Space placement",
+    "translation": "Texto Space placement (PT)"
+  },
+  "monocle.app_bar_xref_state": {
+    "source": "The monocle app bar (currently %1$@) is configured in",
+    "translation": "Opção %1$@"
+  },
+  "monocle.focus_orientation": {
+    "source": "Focus orientation",
+    "translation": "Texto Focus orientation (PT)"
+  },
+  "native_spaces.current": {
+    "source": "current",
+    "translation": "Texto current (PT)"
+  },
+  "native_spaces.desktop": {
+    "source": "Desktop %1$d",
+    "translation": "Opção %1$d"
+  },
+  "native_spaces.empty": {
+    "source": "No native macOS Desktops detected. Add desktops in Mission Control to bind profiles.",
+    "translation": "Texto No native macOS Desktops detected. Add desktops in Mission Control to bind profiles. (PT)"
+  },
+  "native_spaces.intro": {
+    "source": "Each Desktop is a native macOS Space from Mission Control. Pick a profile to load it automatically when that Desktop activates.",
+    "translation": "Texto Each Desktop is a native macOS Space from Mission Control. Pick a profile to load it automatically when that Desktop activates. (PT)"
+  },
+  "native_spaces.none": {
+    "source": "None",
+    "translation": "Texto None (PT)"
+  },
+  "native_spaces.open_settings": {
+    "source": "Open Desktop & Dock Settings",
+    "translation": "Texto Open Desktop & Dock Settings (PT)"
+  },
+  "native_spaces.separate_warning": {
+    "source": "Separate display Spaces are on. KiwiDesk uses one active profile across all displays, so Desktop bindings may be ambiguous.",
+    "translation": "Texto Separate display Spaces are on. KiwiDesk uses one active profile across all displays, so Desktop bindings may be ambiguous. (PT)"
+  },
+  "native_spaces.title": {
+    "source": "Profiles per macOS Space",
+    "translation": "Espaços nativos do macOS"
+  },
+  "notification.permission_lost.body": {
+    "source": "Accessibility permission was revoked. Re-enable it in System Settings > Privacy & Security > Accessibility.",
+    "translation": "Texto Accessibility permission was revoked. Re-enable it in System Settings > Privacy & Security > Accessibility. (PT)"
+  },
+  "notification.permission_lost.title": {
+    "source": "KiwiDesk stopped managing windows",
+    "translation": "Texto KiwiDesk stopped managing windows (PT)"
+  },
+  "onboarding.continue": {
+    "source": "Continue",
+    "translation": "Texto Continue (PT)"
+  },
+  "onboarding.discovery.popover": {
+    "source": "KiwiDesk lives here. Click anytime for layouts and settings.",
+    "translation": "Texto KiwiDesk lives here. Click anytime for layouts and settings. (PT)"
+  },
+  "onboarding.grant.body": {
+    "source": "1. Click “Open System Settings” below.\n2. Find KiwiDesk in the list and turn it on.\n3. Come back here — we detect it automatically.",
+    "translation": "Texto 1. Click “Open System Settings” below.\n2. Find KiwiDesk in the list and turn it on.\n3. Come back here — we detect it automatically. (PT)"
+  },
+  "onboarding.grant.granted": {
+    "source": "Permission granted!",
+    "translation": "Texto Permission granted! (PT)"
+  },
+  "onboarding.grant.open_settings": {
+    "source": "Open System Settings",
+    "translation": "Texto Open System Settings (PT)"
+  },
+  "onboarding.grant.title": {
+    "source": "Enable Accessibility",
+    "translation": "Texto Enable Accessibility (PT)"
+  },
+  "onboarding.grant.waiting": {
+    "source": "Waiting for permission…",
+    "translation": "Texto Waiting for permission… (PT)"
+  },
+  "onboarding.ready.body": {
+    "source": "KiwiDesk is already arranging your windows with sensible defaults. Open Settings and apply a preset for your setup — then fine-tune anything from there. You can always get back here from the menu bar.",
+    "translation": "Texto KiwiDesk is already arranging your windows with sensible defaults. Open Settings and apply a preset for your setup — then fine-tune anything from there. You can always get back here from the menu bar. (PT)"
+  },
+  "onboarding.ready.not_now": {
+    "source": "Not Now",
+    "translation": "Texto Not Now (PT)"
+  },
+  "onboarding.ready.open_settings": {
+    "source": "Open Settings",
+    "translation": "Texto Open Settings (PT)"
+  },
+  "onboarding.ready.title": {
+    "source": "You're ready to go",
+    "translation": "Texto You're ready to go (PT)"
+  },
+  "onboarding.spaces.body": {
+    "source": "KiwiDesk uses one active profile across all displays. For predictable Desktop-to-profile bindings, turn off “Displays have separate Spaces.”\n\nBasic tiling still works if you keep it on. Changing this setting requires logging out and back in.",
+    "translation": "Texto KiwiDesk uses one active profile across all displays. For predictable Desktop-to-profile bindings, turn off “Displays have separate Spaces.”\n\nBasic tiling still works if you keep it on. Changing this setting requires logging out and back in. (PT)"
+  },
+  "onboarding.spaces.open_settings": {
+    "source": "Open Desktop & Dock Settings",
+    "translation": "Texto Open Desktop & Dock Settings (PT)"
+  },
+  "onboarding.spaces.title": {
+    "source": "Use shared Spaces across displays",
+    "translation": "Texto Use shared Spaces across displays (PT)"
+  },
+  "onboarding.welcome.body": {
+    "source": "KiwiDesk arranges your windows automatically. To move and resize windows of other apps, macOS requires you to grant Accessibility permission.\n\nKiwiDesk never reads your keystrokes and does not require disabling System Integrity Protection.",
+    "translation": "O KiwiDesk organiza automaticamente suas janelas. Para mover e redimensionar janelas de outros apps, o macOS exige que você conceda a permissão de 'Acessibilidade'.\n\nO KiwiDesk nunca lê suas teclas pressionadas e não exige a desativação da Proteção de Integridade do Sistema (SIP)."
+  },
+  "onboarding.welcome.title": {
+    "source": "Welcome to KiwiDesk",
+    "translation": "Bem-vindo ao KiwiDesk"
+  },
+  "onboarding.window.title": {
+    "source": "KiwiDesk Setup",
+    "translation": "Texto KiwiDesk Setup (PT)"
+  },
+  "palettes.builtin": {
+    "source": "Built-in",
+    "translation": "Integrado"
+  },
+  "palettes.bundled": {
+    "source": "Bundled",
+    "translation": "Paletas incluídas"
+  },
+  "palettes.caption": {
+    "source": "Apply a bundled or saved set of colors to the App Bar, Space Bar, borders, and drag visuals — a one-time paint, not a live link.",
+    "translation": "Aplique um esquema de cores coordenado a toda a interface."
+  },
+  "palettes.default_name": {
+    "source": "My Palette",
+    "translation": "Texto My Palette (PT)"
+  },
+  "palettes.delete": {
+    "source": "Delete",
+    "translation": "Excluir paleta"
+  },
+  "palettes.empty_hint": {
+    "source": "Palettes you save appear here.",
+    "translation": "Texto Palettes you save appear here. (PT)"
+  },
+  "palettes.export": {
+    "source": "Export…",
+    "translation": "Exportar paleta"
+  },
+  "palettes.import": {
+    "source": "Import…",
+    "translation": "Importar paleta"
+  },
+  "palettes.mine": {
+    "source": "My palettes",
+    "translation": "Minhas paletas"
+  },
+  "palettes.name_placeholder": {
+    "source": "Palette name",
+    "translation": "Texto Palette name (PT)"
+  },
+  "palettes.overwrite": {
+    "source": "Overwrite",
+    "translation": "Texto Overwrite (PT)"
+  },
+  "palettes.rename": {
+    "source": "Rename…",
+    "translation": "Renomear…"
+  },
+  "palettes.rename_confirm": {
+    "source": "Rename",
+    "translation": "Renomear"
+  },
+  "palettes.reserved": {
+    "source": "That name is a built-in palette — choose another.",
+    "translation": "Texto That name is a built-in palette — choose another. (PT)"
+  },
+  "palettes.save": {
+    "source": "Save",
+    "translation": "Salvar"
+  },
+  "palettes.save_current": {
+    "source": "Save current colors as…",
+    "translation": "Texto Save current colors as… (PT)"
+  },
+  "palettes.title": {
+    "source": "Color palette",
+    "translation": "Temas e paletas de cores"
+  },
+  "placement.after_focused": {
+    "source": "After focused",
+    "translation": "Texto After focused (PT)"
+  },
+  "placement.before_focused": {
+    "source": "Before focused",
+    "translation": "Texto Before focused (PT)"
+  },
+  "placement.first": {
+    "source": "First",
+    "translation": "Texto First (PT)"
+  },
+  "placement.last": {
+    "source": "Last",
+    "translation": "Texto Last (PT)"
+  },
+  "placement.new_window": {
+    "source": "New window",
+    "translation": "Nova janela disposta lado a lado"
+  },
+  "placement.new_window.help": {
+    "source": "Where a new window lands relative to the others: First or Last in the layout's order, or right before or after whichever window is focused at the moment it opens.",
+    "translation": "Texto Where a new window lands relative to the others: First or Last in the layout's order, or right before or after whichever window is focused at the moment it opens. (PT)"
+  },
+  "presets.apply": {
+    "source": "Apply",
+    "translation": "Aplicar predefinição"
+  },
+  "presets.caption": {
+    "source": "Built-in layouts per screen count. Apply loads one and saves it as a real, editable profile — only available when the connected screen count matches.",
+    "translation": "Salve e restaure suas disposições de janelas preferidas."
+  },
+  "presets.coder_and_monitor.name": {
+    "source": "Coder & Monitor",
+    "translation": "Texto Coder & Monitor (PT)"
+  },
+  "presets.coder_and_monitor.summary": {
+    "source": "Editor and terminals on the main display; dashboards and logs on the second.",
+    "translation": "Texto Editor and terminals on the main display; dashboards and logs on the second. (PT)"
+  },
+  "presets.command_center.name": {
+    "source": "Command Center",
+    "translation": "Texto Command Center (PT)"
+  },
+  "presets.command_center.summary": {
+    "source": "Workspace and docs center, communication left, logs and monitoring right.",
+    "translation": "Texto Workspace and docs center, communication left, logs and monitoring right. (PT)"
+  },
+  "presets.developer.name": {
+    "source": "Developer",
+    "translation": "Texto Developer (PT)"
+  },
+  "presets.developer.summary": {
+    "source": "IDE stack, scrolling docs, and a fullscreen preview space.",
+    "translation": "Texto IDE stack, scrolling docs, and a fullscreen preview space. (PT)"
+  },
+  "presets.dual_developer.name": {
+    "source": "Dual Developer",
+    "translation": "Texto Dual Developer (PT)"
+  },
+  "presets.dual_developer.summary": {
+    "source": "Code and docs on the main display; mail, chat, and media on the second.",
+    "translation": "Texto Code and docs on the main display; mail, chat, and media on the second. (PT)"
+  },
+  "presets.editing_stored": {
+    "source": "Applying a preset switches your live layout, which editing a saved profile never does. Switch to Live to apply one.",
+    "translation": "Texto Applying a preset switches your live layout, which editing a saved profile never does. Switch to Live to apply one. (PT)"
+  },
+  "presets.focus_stack.name": {
+    "source": "Focus Stack",
+    "translation": "Texto Focus Stack (PT)"
+  },
+  "presets.focus_stack.summary": {
+    "source": "Two stacked task spaces and a deep-work monocle space.",
+    "translation": "Texto Two stacked task spaces and a deep-work monocle space. (PT)"
+  },
+  "presets.minimalist.name": {
+    "source": "Minimalist",
+    "translation": "Texto Minimalist (PT)"
+  },
+  "presets.minimalist.summary": {
+    "source": "Spacious gaps, a scrolling reading space, and single-focus work.",
+    "translation": "Texto Spacious gaps, a scrolling reading space, and single-focus work. (PT)"
+  },
+  "presets.needs_screens": {
+    "source": "Needs %1$d connected screen(s).",
+    "translation": "Opção %1$d"
+  },
+  "presets.space_label": {
+    "source": "Space %1$d: %2$@",
+    "translation": "Opção %1$d e %2$@"
+  },
+  "presets.standard_badge": {
+    "source": "standard",
+    "translation": "Texto standard (PT)"
+  },
+  "presets.start_here": {
+    "source": "Start here — apply a preset for your setup, then adjust anything from any tab.",
+    "translation": "Texto Start here — apply a preset for your setup, then adjust anything from any tab. (PT)"
+  },
+  "presets.title": {
+    "source": "Presets",
+    "translation": "Predefinições de layout"
+  },
+  "presets.visual_creative.name": {
+    "source": "Visual Creative & Developer",
+    "translation": "Texto Visual Creative & Developer (PT)"
+  },
+  "presets.visual_creative.summary": {
+    "source": "Frontend IDE and previews center, design canvas left, inspectors right.",
+    "translation": "Texto Frontend IDE and previews center, design canvas left, inspectors right. (PT)"
+  },
+  "profile_header.dismiss": {
+    "source": "Dismiss",
+    "translation": "Texto Dismiss (PT)"
+  },
+  "profile_header.live.loaded": {
+    "source": "Live (currently loaded)",
+    "translation": "Texto Live (currently loaded) (PT)"
+  },
+  "profile_header.live.standard": {
+    "source": "Live — Standard: %1$@",
+    "translation": "Opção %1$@"
+  },
+  "profile_header.live.transient": {
+    "source": "Live — transient layout",
+    "translation": "Texto Live — transient layout (PT)"
+  },
+  "profile_header.menu.help": {
+    "source": "Pick a saved profile to edit — editing it won't switch your layout.",
+    "translation": "Texto Pick a saved profile to edit — editing it won't switch your layout. (PT)"
+  },
+  "profile_header.menu_row.loaded": {
+    "source": "%1$@ (currently loaded)",
+    "translation": "Opção %1$@"
+  },
+  "profile_header.status.built_in": {
+    "source": "Built-in layout — save as a profile to make it yours.",
+    "translation": "Texto Built-in layout — save as a profile to make it yours. (PT)"
+  },
+  "profile_header.status.editing_loaded": {
+    "source": "Editing %1$@'s saved overrides — saving re-applies %1$@ with your changes.",
+    "translation": "Opção %1$@ e %1$@"
+  },
+  "profile_header.status.editing_stored": {
+    "source": "Editing a saved profile — changes won't switch your layout.",
+    "translation": "Texto Editing a saved profile — changes won't switch your layout. (PT)"
+  },
+  "profile_header.status.no_match": {
+    "source": "No profile matches this monitor setup.",
+    "translation": "Texto No profile matches this monitor setup. (PT)"
+  },
+  "profile_header.status.unsaved_monitor": {
+    "source": "Unsaved monitor changes — update the profile to keep them.",
+    "translation": "Texto Unsaved monitor changes — update the profile to keep them. (PT)"
+  },
+  "profile_header.title.overrides": {
+    "source": "%1$@ — overrides",
+    "translation": "Opção %1$@"
+  },
+  "profile_header.title.standard": {
+    "source": "Standard: %1$@",
+    "translation": "Opção %1$@"
+  },
+  "profile_header.title.transient": {
+    "source": "Transient layout",
+    "translation": "Texto Transient layout (PT)"
+  },
+  "profiles.apply_failed": {
+    "source": "Applying failed: %1$@",
+    "translation": "Opção %1$@"
+  },
+  "profiles.badge.active": {
+    "source": "active",
+    "translation": "Texto active (PT)"
+  },
+  "profiles.badge.connected": {
+    "source": "connected",
+    "translation": "Texto connected (PT)"
+  },
+  "profiles.badge.default": {
+    "source": "default",
+    "translation": "Texto default (PT)"
+  },
+  "profiles.broken.cant_load": {
+    "source": "Can't load — saved by another version or edited by hand.",
+    "translation": "Texto Can't load — saved by another version or edited by hand. (PT)"
+  },
+  "profiles.broken.title": {
+    "source": "Couldn't load",
+    "translation": "Texto Couldn't load (PT)"
+  },
+  "profiles.copy_failed": {
+    "source": "Copying failed: %1$@",
+    "translation": "Opção %1$@"
+  },
+  "profiles.delete.help": {
+    "source": "Delete profile",
+    "translation": "Excluir profile"
+  },
+  "profiles.duplicate_default.help": {
+    "source": "Several profiles of this count are marked default; the alphabetically first wins.",
+    "translation": "Texto Several profiles of this count are marked default; the alphabetically first wins. (PT)"
+  },
+  "profiles.load": {
+    "source": "Load",
+    "translation": "Texto Load (PT)"
+  },
+  "profiles.make_default": {
+    "source": "make default",
+    "translation": "Texto make default (PT)"
+  },
+  "profiles.native_spaces.live_only": {
+    "source": "Desktop bindings are global — switch to Live to change them.",
+    "translation": "Texto Desktop bindings are global — switch to Live to change them. (PT)"
+  },
+  "profiles.other_monitors.help": {
+    "source": "Saved for other monitors — loads with unsaved-changes state.",
+    "translation": "Texto Saved for other monitors — loads with unsaved-changes state. (PT)"
+  },
+  "profiles.overlap_warning": {
+    "source": "This monitor set is also covered by %1$@ — exact-match ties load the alphabetically first.",
+    "translation": "Opção %1$@"
+  },
+  "profiles.rename": {
+    "source": "Rename",
+    "translation": "Renomear"
+  },
+  "profiles.rename.help": {
+    "source": "Rename profile",
+    "translation": "Renomear profile"
+  },
+  "profiles.rename_failed": {
+    "source": "Renaming failed: %1$@",
+    "translation": "Opção %1$@"
+  },
+  "profiles.save_blocked_paused": {
+    "source": "Window management is paused because Accessibility access is off, so no displays are detected. Grant access first — a profile saved now would capture no monitors and never resolve.",
+    "translation": "Texto Window management is paused because Accessibility access is off, so no displays are detected. Grant access first — a profile saved now would capture no monitors and never resolve. (PT)"
+  },
+  "profiles.save_failed": {
+    "source": "Saving failed: %1$@",
+    "translation": "Opção %1$@"
+  },
+  "profiles.saved.empty": {
+    "source": "No profiles saved yet — the built-in Standard resolves until you save one.",
+    "translation": "Texto No profiles saved yet — the built-in Standard resolves until you save one. (PT)"
+  },
+  "profiles.saved.title": {
+    "source": "Saved profiles",
+    "translation": "Salvard profiles"
+  },
+  "profiles.screens.many": {
+    "source": "%1$d screens",
+    "translation": "Opção %1$d"
+  },
+  "profiles.screens.one": {
+    "source": "1 screen",
+    "translation": "Texto 1 screen (PT)"
+  },
+  "profiles.update_hint": {
+    "source": "\"%1$@\" is for %2$d screen(s); %3$d connected. Save as new instead.",
+    "translation": "Texto \"%1$@\" is for %2$d screen(s); %3$d connected. Save as new instead. (PT)"
+  },
+  "scroll_grid.anchor.center": {
+    "source": "Center",
+    "translation": "Texto Center (PT)"
+  },
+  "scroll_grid.anchor.end_h": {
+    "source": "Right",
+    "translation": "Texto Right (PT)"
+  },
+  "scroll_grid.anchor.end_v": {
+    "source": "Bottom",
+    "translation": "Texto Bottom (PT)"
+  },
+  "scroll_grid.anchor.follow": {
+    "source": "Follow",
+    "translation": "Texto Follow (PT)"
+  },
+  "scroll_grid.anchor.start_h": {
+    "source": "Left",
+    "translation": "Texto Left (PT)"
+  },
+  "scroll_grid.anchor.start_v": {
+    "source": "Top",
+    "translation": "Texto Top (PT)"
+  },
+  "scroll_grid.animate_focus_shifts": {
+    "source": "Animate focus shifts",
+    "translation": "Texto Animate focus shifts (PT)"
+  },
+  "scroll_grid.animate_focus_shifts.help": {
+    "source": "Moves windows smoothly when focus changes in a Scrolling space. Turn this off to move the layout immediately. Scroll speed sets how long the movement takes and has no effect while animation is off.",
+    "translation": "Texto Moves windows smoothly when focus changes in a Scrolling space. Turn this off to move the layout immediately. Scroll speed sets how long the movement takes and has no effect while animation is off. (PT)"
+  },
+  "scroll_grid.app_bar_xref_link": {
+    "source": "App Bar",
+    "translation": "App Bar"
+  },
+  "scroll_grid.app_bar_xref_state": {
+    "source": "The scrolling app bar (currently %1$@) is configured in",
+    "translation": "Opção %1$@"
+  },
+  "scroll_grid.arrange": {
+    "source": "Arrange",
+    "translation": "Organizar"
+  },
+  "scroll_grid.arrange.columns": {
+    "source": "Columns",
+    "translation": "Colunas"
+  },
+  "scroll_grid.arrange.columns_first": {
+    "source": "Columns first",
+    "translation": "Primeiro as colunas"
+  },
+  "scroll_grid.arrange.rows": {
+    "source": "Rows",
+    "translation": "Linhas"
+  },
+  "scroll_grid.arrange.rows_first": {
+    "source": "Rows first",
+    "translation": "Primeiro as linhas"
+  },
+  "scroll_grid.auto_size": {
+    "source": "Auto-size grid",
+    "translation": "Tamanho automático da grade"
+  },
+  "scroll_grid.auto_size.gates": {
+    "source": "Auto-size grid is on for this space, so the screen decides the columns and rows.",
+    "translation": "Texto Auto-size grid is on for this space, so the screen decides the columns and rows. (PT)"
+  },
+  "scroll_grid.auto_size_caption": {
+    "source": "Fits as many columns and rows as the screen allows, using the minimum window size above.",
+    "translation": "Ajusta todas as colunas e linhas permitidas pela tela usando o tamanho mínimo de janela acima."
+  },
+  "scroll_grid.columns": {
+    "source": "Columns",
+    "translation": "Colunas"
+  },
+  "scroll_grid.dynamic": {
+    "source": "Dynamic",
+    "translation": "Dinâmico"
+  },
+  "scroll_grid.fill_empty_space": {
+    "source": "Fill empty space",
+    "translation": "Preencher espaço vazio"
+  },
+  "scroll_grid.fill_empty_space.rigid_only": {
+    "source": "A rigid grid keeps every cell, so there is no empty space to fill.",
+    "translation": "Texto A rigid grid keeps every cell, so there is no empty space to fill. (PT)"
+  },
+  "scroll_grid.focus_anchor": {
+    "source": "Focus anchor",
+    "translation": "Âncora de foco"
+  },
+  "scroll_grid.grid_type": {
+    "source": "Grid type",
+    "translation": "Tipo de grade"
+  },
+  "scroll_grid.horizontal": {
+    "source": "Horizontal",
+    "translation": "Horizontal"
+  },
+  "scroll_grid.orientation": {
+    "source": "Orientation",
+    "translation": "Orientação"
+  },
+  "scroll_grid.rigid": {
+    "source": "Rigid",
+    "translation": "Rígido"
+  },
+  "scroll_grid.rows": {
+    "source": "Rows",
+    "translation": "Linhas"
+  },
+  "scroll_grid.scroll_orientation": {
+    "source": "Scroll orientation",
+    "translation": "Orientação de rolagem"
+  },
+  "scroll_grid.scroll_speed": {
+    "source": "Scroll speed",
+    "translation": "Velocidade de rolagem"
+  },
+  "scroll_grid.vertical": {
+    "source": "Vertical",
+    "translation": "Vertical"
+  },
+  "scroll_grid.wrap_focus": {
+    "source": "Wrap focus",
+    "translation": "Rolagem circular de foco"
+  },
+  "settings.globals_save_failed": {
+    "source": "Saving settings failed: %1$@",
+    "translation": "Opção %1$@"
+  },
+  "settings.layout.drift": {
+    "source": "Live: %1$@ — profile has %2$@ (not saved)",
+    "translation": "Opção %1$@ e %2$@"
+  },
+  "settings.permission_paused": {
+    "source": "Window management is paused — KiwiDesk needs Accessibility permission.",
+    "translation": "Texto Window management is paused — KiwiDesk needs Accessibility permission. (PT)"
+  },
+  "settings.permission_paused.action": {
+    "source": "Enable Accessibility…",
+    "translation": "Texto Enable Accessibility… (PT)"
+  },
+  "settings.readout.auto": {
+    "source": "Automatic",
+    "translation": "Texto Automatic (PT)"
+  },
+  "shortcuts.add": {
+    "source": "Add",
+    "translation": "Adicionar"
+  },
+  "shortcuts.add_application": {
+    "source": "Add application",
+    "translation": "Adicionar application"
+  },
+  "shortcuts.add_binding": {
+    "source": "Add binding",
+    "translation": "Adicionar binding"
+  },
+  "shortcuts.add_mode.help": {
+    "source": "Add a mode",
+    "translation": "Adicionar a mode"
+  },
+  "shortcuts.advanced.caption": {
+    "source": "Bind any Lua to a hotkey. This is the power-user escape hatch — the groups above cover the built-in actions.",
+    "translation": "Texto Bind any Lua to a hotkey. This is the power-user escape hatch — the groups above cover the built-in actions. (PT)"
+  },
+  "shortcuts.advanced.title": {
+    "source": "Lua bindings",
+    "translation": "Atalhos Lua"
+  },
+  "shortcuts.app_behavior": {
+    "source": "Launch behavior",
+    "translation": "Texto Launch behavior (PT)"
+  },
+  "shortcuts.app_behavior.help": {
+    "source": "**Open or Focus** brings the app's existing window to the current space, or launches it if the app isn't running.\n\n**Open New** always launches a fresh instance, even when the app is already open.",
+    "translation": "Texto **Open or Focus** brings the app's existing window to the current space, or launches it if the app isn't running.\n\n**Open New** always launches a fresh instance, even when the app is already open. (PT)"
+  },
+  "shortcuts.app_behavior.open_new": {
+    "source": "Open New",
+    "translation": "Texto Open New (PT)"
+  },
+  "shortcuts.app_behavior.open_new.badge": {
+    "source": "Opens a new instance",
+    "translation": "Texto Opens a new instance (PT)"
+  },
+  "shortcuts.app_behavior.open_or_focus": {
+    "source": "Open or Focus",
+    "translation": "Texto Open or Focus (PT)"
+  },
+  "shortcuts.base_mode_protected": {
+    "source": "Base modes can't be removed here",
+    "translation": "Texto Base modes can't be removed here (PT)"
+  },
+  "shortcuts.choose_app": {
+    "source": "Choose app…",
+    "translation": "Escolher app…"
+  },
+  "shortcuts.delete_mode": {
+    "source": "Delete mode",
+    "translation": "Excluir mode"
+  },
+  "shortcuts.go_to_space": {
+    "source": "Go to space",
+    "translation": "Ir para o espaço"
+  },
+  "shortcuts.import": {
+    "source": "Import from init.lua…",
+    "translation": "Importar do init.lua…"
+  },
+  "shortcuts.import.help": {
+    "source": "Reads the shortcuts active in init.lua and adds them here, matching each combo. Known actions sort into the groups below; anything else lands in Advanced. Review, then Save.",
+    "translation": "Texto Reads the shortcuts active in init.lua and adds them here, matching each combo. Known actions sort into the groups below; anything else lands in Advanced. Review, then Save. (PT)"
+  },
+  "shortcuts.imported_note": {
+    "source": "Shortcuts imported — review below, then Save.",
+    "translation": "Texto Shortcuts imported — review below, then Save. (PT)"
+  },
+  "shortcuts.inactive.caption": {
+    "source": "These shortcuts target spaces that are not in the current space list. They still work — pressing one recreates its space — and they keep their key combo. Rebind or remove them here; they become active again when their space returns.",
+    "translation": "Texto These shortcuts target spaces that are not in the current space list. They still work — pressing one recreates its space — and they keep their key combo. Rebind or remove them here; they become active again when their space returns. (PT)"
+  },
+  "shortcuts.lua_placeholder": {
+    "source": "Lua, e.g. KiwiDesk.reload_config()",
+    "translation": "Texto Lua, e.g. KiwiDesk.reload_config() (PT)"
+  },
+  "shortcuts.menu_bar_icon": {
+    "source": "Menu bar icon",
+    "translation": "Ícone da barra de menus"
+  },
+  "shortcuts.mode_name": {
+    "source": "Mode name",
+    "translation": "Nome do modo"
+  },
+  "shortcuts.modes.caption": {
+    "source": "Modes are alternate shortcut sets — only the active mode's shortcuts fire. Bind a key below to switch between them. “default” is the standard mode and is always the active one after the app starts.",
+    "translation": "Texto Modes are alternate shortcut sets — only the active mode's shortcuts fire. Bind a key below to switch between them. “default” is the standard mode and is always the active one after the app starts. (PT)"
+  },
+  "shortcuts.move_to_space": {
+    "source": "Move to space",
+    "translation": "Mover para o espaço"
+  },
+  "shortcuts.move_to_track": {
+    "source": "Move to track",
+    "translation": "Mover para a faixa"
+  },
+  "shortcuts.move_to_track.caption": {
+    "source": "Only relevant if you're using the track layout.",
+    "translation": "Texto Only relevant if you're using the track layout. (PT)"
+  },
+  "shortcuts.other_ellipsis": {
+    "source": "Other…",
+    "translation": "Outro…"
+  },
+  "shortcuts.override.caption": {
+    "source": "Dimmed rows are inherited from the base shortcuts and stay in sync with them. Edit a row to override it for this profile only; matching the base again makes it inherited again. Removing an inherited row only resets it — to disable a combo in this profile, rebind it to a no-op action instead.",
+    "translation": "Texto Dimmed rows are inherited from the base shortcuts and stay in sync with them. Edit a row to override it for this profile only; matching the base again makes it inherited again. Removing an inherited row only resets it — to disable a combo in this profile, rebind it to a no-op action instead. (PT)"
+  },
+  "shortcuts.override.overrides": {
+    "source": "This profile overrides base keybindings.",
+    "translation": "Texto This profile overrides base keybindings. (PT)"
+  },
+  "shortcuts.override.staged": {
+    "source": "Editing “%1$@” — shortcuts take effect the next time this profile is active.",
+    "translation": "Opção %1$@"
+  },
+  "shortcuts.override.staged_loaded": {
+    "source": "Editing “%1$@” — shortcuts re-apply as soon as you save.",
+    "translation": "Opção %1$@"
+  },
+  "shortcuts.override.title": {
+    "source": "Profile shortcuts",
+    "translation": "Atalhos do perfil"
+  },
+  "shortcuts.panel.apps": {
+    "source": "Apps",
+    "translation": "Apps"
+  },
+  "shortcuts.panel.controls": {
+    "source": "Controls",
+    "translation": "Controles"
+  },
+  "shortcuts.panel.custom": {
+    "source": "Custom",
+    "translation": "Personalizados"
+  },
+  "shortcuts.panel.dismiss_hint": {
+    "source": "Esc or click away to close",
+    "translation": "Texto Esc or click away to close (PT)"
+  },
+  "shortcuts.panel.dismiss_hint.bound": {
+    "source": "%1$@ or Esc to close",
+    "translation": "Opção %1$@"
+  },
+  "shortcuts.panel.edit_in_settings": {
+    "source": "Edit in Settings…",
+    "translation": "Editar in Settings…"
+  },
+  "shortcuts.panel.empty": {
+    "source": "No shortcuts bound yet.",
+    "translation": "Texto No shortcuts bound yet. (PT)"
+  },
+  "shortcuts.panel.unavailable": {
+    "source": "Shortcuts are managed by your init.lua.",
+    "translation": "Texto Shortcuts are managed by your init.lua. (PT)"
+  },
+  "shortcuts.remove_binding": {
+    "source": "Remove shortcut",
+    "translation": "Remover shortcut"
+  },
+  "shortcuts.rename": {
+    "source": "Rename",
+    "translation": "Renomear"
+  },
+  "shortcuts.rename_ellipsis": {
+    "source": "Rename…",
+    "translation": "Renomear…"
+  },
+  "shortcuts.section.focus": {
+    "source": "Focus",
+    "translation": "Foco"
+  },
+  "shortcuts.section.general": {
+    "source": "General",
+    "translation": "Geral"
+  },
+  "shortcuts.section.inactive": {
+    "source": "Inactive shortcuts",
+    "translation": "Atalhos inativos"
+  },
+  "shortcuts.section.move_windows": {
+    "source": "Move windows",
+    "translation": "Mover janelas"
+  },
+  "shortcuts.section.open_applications": {
+    "source": "Open applications",
+    "translation": "Abrir aplicativos"
+  },
+  "shortcuts.section.size_float": {
+    "source": "Size & float",
+    "translation": "Tamanho e float"
+  },
+  "shortcuts.section.switch_modes": {
+    "source": "Switch modes",
+    "translation": "Alternar modos"
+  },
+  "shortcuts.size_float.feedback": {
+    "source": "Alert sound when resize can't apply",
+    "translation": "Texto Alert sound when resize can't apply (PT)"
+  },
+  "shortcuts.size_float.layouts_caption": {
+    "source": "Grow/Shrink only applies in the bsp, stack, scrolling, and track layouts; it is a no-op in monocle, grid, and floating. Width and height resize independently; scrolling resizes its slot along the scroll axis for both, and in track one axis resizes the window's track, the other its share within it.",
+    "translation": "Texto Grow/Shrink only applies in the bsp, stack, scrolling, and track layouts; it is a no-op in monocle, grid, and floating. Width and height resize independently; scrolling resizes its slot along the scroll axis for both, and in track one axis resizes the window's track, the other its share within it. (PT)"
+  },
+  "sidebar.app_name": {
+    "source": "KiwiDesk",
+    "translation": "KiwiDesk"
+  },
+  "sidebar.app_rules": {
+    "source": "App Rules",
+    "translation": "Regras de aplicativos"
+  },
+  "sidebar.appearance": {
+    "source": "Appearance",
+    "translation": "Aparência e temas"
+  },
+  "sidebar.bars": {
+    "source": "Bars",
+    "translation": "Barras de informações"
+  },
+  "sidebar.behavior": {
+    "source": "Behavior",
+    "translation": "Comportamento"
+  },
+  "sidebar.general": {
+    "source": "General",
+    "translation": "Geral"
+  },
+  "sidebar.layout": {
+    "source": "Layout Defaults",
+    "translation": "Layout padrão"
+  },
+  "sidebar.monitors": {
+    "source": "Monitors",
+    "translation": "Monitores"
+  },
+  "sidebar.profiles": {
+    "source": "Profiles",
+    "translation": "Perfis"
+  },
+  "sidebar.profiles.badge_ax": {
+    "source": "start here",
+    "translation": "Comece aqui"
+  },
+  "sidebar.search.clear": {
+    "source": "Clear search",
+    "translation": "Limpar busca"
+  },
+  "sidebar.search.no_results": {
+    "source": "No results",
+    "translation": "Nenhum resultado"
+  },
+  "sidebar.search.placeholder": {
+    "source": "Search",
+    "translation": "Buscar"
+  },
+  "sidebar.section.design": {
+    "source": "Design",
+    "translation": "Design"
+  },
+  "sidebar.section.system": {
+    "source": "System",
+    "translation": "Sistema"
+  },
+  "sidebar.shortcuts": {
+    "source": "Shortcuts",
+    "translation": "Atalhos"
+  },
+  "sidebar.spaces": {
+    "source": "Spaces",
+    "translation": "Espaços"
+  },
+  "slot_size.auto": {
+    "source": "Default",
+    "translation": "Tamanho de slot automático"
+  },
+  "slot_size.auto_standard": {
+    "source": "Default — orientation standard",
+    "translation": "Padrão — baseado na orientação"
+  },
+  "slot_size.column_width": {
+    "source": "Column width",
+    "translation": "Largura da coluna"
+  },
+  "slot_size.percent": {
+    "source": "Percent",
+    "translation": "Porcentagem"
+  },
+  "slot_size.points": {
+    "source": "Points",
+    "translation": "Pontos"
+  },
+  "slot_size.row_height": {
+    "source": "Row height",
+    "translation": "Altura da linha"
+  },
+  "slot_size.unit": {
+    "source": "Size unit",
+    "translation": "Unidade de tamanho"
+  },
+  "space_bar.active_indicator.label": {
+    "source": "Active indicator",
+    "translation": "Indicador ativo"
+  },
+  "space_bar.alignment.label": {
+    "source": "Alignment",
+    "translation": "Alinhamento"
+  },
+  "space_bar.alignment.label.help": {
+    "source": "Where the Space items — and the front-app segment, when shown — sit along the bar. Start and End follow the edge — a left bar's Start is its top.",
+    "translation": "Posição dos itens do espaço ao longo da barra."
+  },
+  "space_bar.background_fit.boxed_only": {
+    "source": "Boxed draws a box per item, not a shared plate, so there is nothing to size.",
+    "translation": "Em caixas desenha uma caixa para cada item."
+  },
+  "space_bar.background_fit.label": {
+    "source": "Background size",
+    "translation": "Tamanho do fundo"
+  },
+  "space_bar.background_style.label": {
+    "source": "Background style",
+    "translation": "Estilo de fundo"
+  },
+  "space_bar.color.active_space": {
+    "source": "Active space",
+    "translation": "Espaço ativo"
+  },
+  "space_bar.color.active_space.help": {
+    "source": "Tints the active space's identifier and its app glyphs.",
+    "translation": "Colore o identificador do espaço ativo e os símbolos de apps."
+  },
+  "space_bar.color.badge_text": {
+    "source": "Badge text",
+    "translation": "do selo"
+  },
+  "space_bar.color.fill": {
+    "source": "Fill",
+    "translation": "Preenchimento"
+  },
+  "space_bar.color.focused_item": {
+    "source": "Focused window",
+    "translation": "Janela com foco"
+  },
+  "space_bar.color.focused_item.help": {
+    "source": "Tints the focused window — its glyph in the active Space and the front-app segment. Glyph tint needs Glyphs icon mode.",
+    "translation": "Colore o símbolo da janela com foco."
+  },
+  "space_bar.color.group_badge": {
+    "source": "Group badge",
+    "translation": "Selo de grupo"
+  },
+  "space_bar.color.group_badge.help": {
+    "source": "Count and overflow badges on the active space; inactive spaces mute them from the item color. Grouping is always on.",
+    "translation": "Colore os selos de contagem e transbordamento."
+  },
+  "space_bar.color.highlight": {
+    "source": "Highlight",
+    "translation": "Destaque"
+  },
+  "space_bar.color.hover_fill": {
+    "source": "Hover fill",
+    "translation": "Preenchimento ao passar o mouse"
+  },
+  "space_bar.color.hover_item": {
+    "source": "Hover item",
+    "translation": "Item sob o ponteiro"
+  },
+  "space_bar.color.item": {
+    "source": "Item",
+    "translation": "Texto Item (PT)"
+  },
+  "space_bar.colors.title": {
+    "source": "Space Bar colors",
+    "translation": "Cores da Space Bar"
+  },
+  "space_bar.copy_appearance": {
+    "source": "Copy App Bar appearance…",
+    "translation": "Copiar aparência da App Bar…"
+  },
+  "space_bar.copy_appearance.caption": {
+    "source": "Copies the App Bar's current sizes, style, and colors — a one-time starting point, not a live link.",
+    "translation": "Copia dimensões, estilo e cores atuais da App Bar."
+  },
+  "space_bar.copy_appearance.help": {
+    "source": "Takes the App Bar's current sizes, style, and colors once; edits afterwards stay independent.",
+    "translation": "Obtenha as configurações da App Bar de uma só vez."
+  },
+  "space_bar.corner_roundness": {
+    "source": "Corner roundness",
+    "translation": "Arredondamento de cantos"
+  },
+  "space_bar.disabled.help": {
+    "source": "Turn on Show Space Bar to edit these settings.",
+    "translation": "Ative a Space Bar para editar as configurações."
+  },
+  "space_bar.edge.label": {
+    "source": "Position",
+    "translation": "Posição"
+  },
+  "space_bar.edge.label.help": {
+    "source": "Which screen edge the Space Bar occupies. Sharing an edge with the App Bar is fine — the two stack.",
+    "translation": "A borda da tela na qual a Space Bar fica posicionada."
+  },
+  "space_bar.enabled": {
+    "source": "Show Space Bar",
+    "translation": "Mostrar Space Bar"
+  },
+  "space_bar.enabled.help": {
+    "source": "One bar per display listing that display's Spaces — click a Space to switch to it. The bar reserves its edge in every layout.",
+    "translation": "Exibe a barra da lista de espaços por monitor."
+  },
+  "space_bar.font_size": {
+    "source": "Font size",
+    "translation": "Tamanho da fonte"
+  },
+  "space_bar.font_size.auto": {
+    "source": "Auto font size",
+    "translation": "Tamanho de fonte automático"
+  },
+  "space_bar.front_app.ax": {
+    "source": "Front app: %1$@",
+    "translation": "App em primeiro plano: %1$@"
+  },
+  "space_bar.global_style.caption": {
+    "source": "One bar per display, every layout. All settings are global.",
+    "translation": "Uma barra por tela para todos os layouts. As configurações são globais."
+  },
+  "space_bar.global_style.title": {
+    "source": "Space Bar style",
+    "translation": "Estilo da Space Bar"
+  },
+  "space_bar.glyph_cap": {
+    "source": "Glyphs per Space",
+    "translation": "Limite de ícones por espaço"
+  },
+  "space_bar.glyph_cap.help": {
+    "source": "How many app glyphs a Space shows before the rest collapse into a +n badge. Adjacent windows of the same app count as one glyph.",
+    "translation": "Quantidade de ícones de apps a exibir antes de agrupá-los em um selo +n."
+  },
+  "space_bar.glyph_cap.summary": {
+    "source": "Up to %1$d app groups per Space; more collapse into a +n badge.",
+    "translation": "Exibe até %1$d grupos de apps por espaço."
+  },
+  "space_bar.hide_empty": {
+    "source": "Hide empty Spaces",
+    "translation": "Ocultar espaços vazios"
+  },
+  "space_bar.hide_empty.help": {
+    "source": "Spaces with no windows are hidden from the bar, except the Space you're currently on. Use a shortcut to jump to a hidden Space.",
+    "translation": "Oculta da barra os espaços que não contêm janelas."
+  },
+  "space_bar.icon_source.help": {
+    "source": "How app glyphs are drawn. Glyphs shows a monochrome symbol colored by the bar's item colors; apps without a symbol keep their app icon.",
+    "translation": "Escolha como os símbolos de apps são desenhados."
+  },
+  "space_bar.icon_source.label": {
+    "source": "App symbol style",
+    "translation": "Estilo dos símbolos de app"
+  },
+  "space_bar.item.ax.current": {
+    "source": "%1$@, current",
+    "translation": "%1$@, posição atual"
+  },
+  "space_bar.item.ax.not_current": {
+    "source": "%1$@, not current",
+    "translation": "%1$@, não selecionado"
+  },
+  "space_bar.item.ax.space": {
+    "source": "Space %1$@, %2$d applications",
+    "translation": "Espaço %1$@, %2$d apps"
+  },
+  "space_bar.item_gap": {
+    "source": "Item gap",
+    "translation": "Espaço entre itens"
+  },
+  "space_bar.item_size": {
+    "source": "Item size",
+    "translation": "Tamanho do item"
+  },
+  "space_bar.item_size.auto": {
+    "source": "Auto item size",
+    "translation": "Tamanho automático"
+  },
+  "space_bar.preview.ax": {
+    "source": "Space bar preview: %1$@ position, %2$@ style.",
+    "translation": "Pré-visualização da Space Bar: posição %1$@, estilo %2$@."
+  },
+  "space_bar.preview.caption": {
+    "source": "Position: %1$@ · %2$@",
+    "translation": "Posição: %1$@ · %2$@"
+  },
+  "space_bar.show_front_app": {
+    "source": "Show front app",
+    "translation": "Mostrar app em primeiro plano"
+  },
+  "space_bar.show_front_app.help": {
+    "source": "Adds a trailing segment with the focused window of the Space each display currently shows. Icon-only on vertical bars.",
+    "translation": "Adiciona um segmento indicando a janela com foco de cada tela."
+  },
+  "space_bar.spring_delay": {
+    "source": "Spring delay",
+    "translation": "Atraso de acionamento"
+  },
+  "space_bar.spring_delay.help": {
+    "source": "Drag a window onto a Space and hold this long for the view to spring to that Space, so you can drop the window into its layout. A quicker drop moves the window there without switching.",
+    "translation": "Tempo de espera ao arrastar uma janela para trocar de espaço."
+  },
+  "space_bar.thickness": {
+    "source": "Thickness",
+    "translation": "Espessura"
+  },
+  "space_override.caption": {
+    "source": "Unchecked settings inherit %1$@ defaults.",
+    "translation": "Configurações não selecionadas herdam padrões de %1$@."
+  },
+  "space_override.dormant.entry_many": {
+    "source": "%1$@ — %2$d fields",
+    "translation": "%1$@ — %2$d campos"
+  },
+  "space_override.dormant.entry_one": {
+    "source": "%1$@ — 1 field",
+    "translation": "%1$@ — 1 campo"
+  },
+  "space_override.dormant.label": {
+    "source": "Saved for other layouts (%1$d)",
+    "translation": "Salvo para outros layouts (%1$d)"
+  },
+  "space_override.floating.none": {
+    "source": "Floating has no per-space overrides.",
+    "translation": "Floating não possui substituições por espaço."
+  },
+  "space_override.reset_active": {
+    "source": "Reset %1$@ Overrides",
+    "translation": "Redefinir substituições de %1$@"
+  },
+  "space_override.reset_all": {
+    "source": "Reset All Layout Overrides",
+    "translation": "Redefinir todas as substituições de layout"
+  },
+  "space_override.reset_all_confirm.action": {
+    "source": "Reset All",
+    "translation": "Redefinir tudo"
+  },
+  "space_override.reset_all_confirm.message": {
+    "source": "This clears every layout's saved overrides for this space, not just the current one. This can't be undone.",
+    "translation": "Isso apagará substituições salvas para cada layout neste espaço. Não é possível desfazer."
+  },
+  "space_override.reset_all_confirm.title": {
+    "source": "Reset all layout overrides?",
+    "translation": "Redefinir todas as substituições de layout?"
+  },
+  "space_override.slot_size.help": {
+    "source": "Sets each scrolling window's size along the scroll direction. Horizontal uses column width; vertical uses row height. Default is 1100 pt horizontally and 80% of the available height vertically.",
+    "translation": "Define as dimensões de cada janela com rolagem ao longo do eixo de rolagem."
+  },
+  "space_override.title": {
+    "source": "%1$@ — %2$@ overrides",
+    "translation": "%1$@ — Substituições de %2$@"
+  },
+  "spaces.add.help": {
+    "source": "Add space",
+    "translation": "Adicionar espaço"
+  },
+  "spaces.add.placeholder": {
+    "source": "New space name",
+    "translation": "Nome do novo espaço"
+  },
+  "spaces.caption": {
+    "source": "Each space has its own layout. Add spaces here; they appear in the shortcut and app-rule lists too. Drag rows to reorder.",
+    "translation": "Cada espaço possui seu próprio layout. Arraste as linhas para reordenar."
+  },
+  "spaces.context.clear_fallback": {
+    "source": "Clear Fallback",
+    "translation": "Limpar alternativa"
+  },
+  "spaces.context.delete": {
+    "source": "Delete",
+    "translation": "Excluir"
+  },
+  "spaces.context.make_fallback": {
+    "source": "Make Fallback",
+    "translation": "Definir como alternativa"
+  },
+  "spaces.context.move_down": {
+    "source": "Move Down",
+    "translation": "Mover para baixo"
+  },
+  "spaces.context.move_up": {
+    "source": "Move Up",
+    "translation": "Mover para cima"
+  },
+  "spaces.customize.help": {
+    "source": "Layout overrides for this space",
+    "translation": "Substituições de layout para este espaço"
+  },
+  "spaces.delete.help": {
+    "source": "Delete space",
+    "translation": "Excluir espaço"
+  },
+  "spaces.delete_confirm.cancel": {
+    "source": "Cancel",
+    "translation": "Cancelar"
+  },
+  "spaces.delete_confirm.delete": {
+    "source": "Delete",
+    "translation": "Excluir"
+  },
+  "spaces.delete_confirm.message": {
+    "source": "This space has customized settings — its layout overrides, monitor pin, and any Main or Fallback role are removed too. You can add the space back, but not its settings.",
+    "translation": "Este espaço possui configurações personalizadas. Se for excluído, elas serão perdidas."
+  },
+  "spaces.delete_confirm.title": {
+    "source": "Delete this space?",
+    "translation": "Excluir este espaço?"
+  },
+  "spaces.drag_handle.help": {
+    "source": "Drag to reorder",
+    "translation": "Arrastar para reordenar"
+  },
+  "spaces.empty": {
+    "source": "No spaces yet — add one below. Until you do, every window tiles in a single default space.",
+    "translation": "Nenhum espaço presente. Adicione um abaixo."
+  },
+  "spaces.fallback_badge": {
+    "source": "Fallback",
+    "translation": "Alternativa"
+  },
+  "spaces.fallback_badge.help": {
+    "source": "Windows from a removed space land here when you switch profiles.",
+    "translation": "Janelas de espaços excluídos durante a troca de perfil serão posicionadas aqui."
+  },
+  "spaces.fallback_caption": {
+    "source": "When you switch profiles, windows from a space the new profile doesn't have land in its fallback space (the first space when none is chosen).",
+    "translation": "Janelas de espaços não presentes no novo perfil irão para o espaço de alternativa."
+  },
+  "spaces.mode.help": {
+    "source": "Layout mode for this space",
+    "translation": "Modo de layout para este espaço"
+  },
+  "spaces.overrides.a11y": {
+    "source": "Layout overrides for %1$@, %2$d saved",
+    "translation": "Substituições de layout de %1$@ (%2$d salvas)"
+  },
+  "spaces.overrides.count": {
+    "source": "Overrides (%1$d)",
+    "translation": "Substituições (%1$d)"
+  },
+  "spaces.overrides.floating.help": {
+    "source": "Floating has no layout overrides.",
+    "translation": "Floating não possui substituições de layout."
+  },
+  "spaces.overrides.none": {
+    "source": "Overrides…",
+    "translation": "Substituições…"
+  },
+  "spaces.title": {
+    "source": "Spaces",
+    "translation": "Espaços"
+  },
+  "sticky.caption": {
+    "source": "Sticky windows stay visible on every space (Toggle sticky, in Shortcuts).",
+    "translation": "Janelas floating marcadas como Sticky permanecerão visíveis em todos os espaços."
+  },
+  "sticky.color": {
+    "source": "Sticky",
+    "translation": "Sticky"
+  },
+  "sticky.color.a11y": {
+    "source": "Sticky window mark color",
+    "translation": "Cor da marca de janela Sticky"
+  },
+  "sticky.display.pill": {
+    "source": "Can only be moved to a different display",
+    "translation": "Movível apenas para outros monitores"
+  },
+  "sticky.everywhere.pill": {
+    "source": "Sticky windows can't be moved to another space",
+    "translation": "Janelas Sticky não podem ser movidas para outros espaços"
+  },
+  "sticky.home.pill": {
+    "source": "Can only be moved in its home space %1$@",
+    "translation": "Movível apenas para seu espaço de origem %1$@"
+  },
+  "sticky.mark": {
+    "source": "Show mark on sticky windows",
+    "translation": "Mostrar marca em janelas sticky"
+  },
+  "sticky.mark.ax": {
+    "source": "Sticky window",
+    "translation": "Janela Sticky"
+  },
+  "sticky.mark.forced": {
+    "source": "On — the Space Bar is off, so this is the only sticky mark.",
+    "translation": "Ativo — A Space Bar está desativada, portanto esta é a única marca Sticky."
+  },
+  "sticky.mark.forced_link": {
+    "source": "Space Bar",
+    "translation": "Space Bar"
+  },
+  "sticky.mark.help": {
+    "source": "A sticky window can look identical to a normal one, so KiwiDesk draws a small mark in its top-right corner. The Space Bar shows its own sticky badge either way.",
+    "translation": "Desenha uma pequena marca no canto superior direito das janelas Sticky."
+  },
+  "sticky.mark_color": {
+    "source": "Mark color",
+    "translation": "Cor da marca"
+  },
+  "sticky.pile.pill": {
+    "source": "Sticky windows can't be moved to the pile",
+    "translation": "Não movível para a pilha"
+  },
+  "sticky.title": {
+    "source": "Sticky windows",
+    "translation": "Janelas Sticky"
+  },
+  "system_shortcut.app_switcher": {
+    "source": "App Switcher",
+    "translation": "Seletor de Aplicativos"
+  },
+  "system_shortcut.app_windows": {
+    "source": "App Windows",
+    "translation": "Janelas do Aplicativo"
+  },
+  "system_shortcut.close_window": {
+    "source": "Close Window",
+    "translation": "Fechar Janela"
+  },
+  "system_shortcut.force_quit": {
+    "source": "Force Quit",
+    "translation": "Forçar Encerramento"
+  },
+  "system_shortcut.hide_app": {
+    "source": "Hide App",
+    "translation": "Ocultar Aplicativo"
+  },
+  "system_shortcut.minimize": {
+    "source": "Minimize",
+    "translation": "Minimizar"
+  },
+  "system_shortcut.mission_control": {
+    "source": "Mission Control",
+    "translation": "Mission Control"
+  },
+  "system_shortcut.mission_control_space_left": {
+    "source": "Mission Control: Space Left",
+    "translation": "Mission Control: Espaço à Esquerda"
+  },
+  "system_shortcut.mission_control_space_right": {
+    "source": "Mission Control: Space Right",
+    "translation": "Mission Control: Espaço à Direita"
+  },
+  "system_shortcut.quit_app": {
+    "source": "Quit App",
+    "translation": "Encerrar Aplicativo"
+  },
+  "system_shortcut.screenshot": {
+    "source": "Screenshot",
+    "translation": "Captura de Tela"
+  },
+  "system_shortcut.screenshot_selection": {
+    "source": "Screenshot Selection",
+    "translation": "Captura da Seleção"
+  },
+  "system_shortcut.screenshot_tools": {
+    "source": "Screenshot Tools",
+    "translation": "Ferramentas de Captura de Tela"
+  },
+  "system_shortcut.spotlight": {
+    "source": "Spotlight",
+    "translation": "Spotlight"
+  },
+  "track.auto_tracks": {
+    "source": "Auto track limit",
+    "translation": "Limite automático da faixa"
+  },
+  "track.auto_tracks.gates": {
+    "source": "Auto track limit is on for this space, so the screen decides how many open.",
+    "translation": "O limite automático da faixa está ativo para este espaço, portanto a tela decide quantas abrir."
+  },
+  "track.auto_tracks_caption": {
+    "source": "Fits as many tracks as the screen allows, using the minimum window size above — opening and collapsing them as windows come and go.",
+    "translation": "Ajusta todas as faixas permitidas pela tela usando o tamanho mínimo de janela acima."
+  },
+  "track.limit": {
+    "source": "Track limit",
+    "translation": "Limite da faixa"
+  },
+  "track.limit_caption": {
+    "source": "Bounded by the minimum window size above: more tracks than fit collapse into the overflow track.",
+    "translation": "Limitado pelo tamanho mínimo de janela acima: faixas excedentes agrupam-se na faixa de transbordamento."
+  },
+  "track.new_window": {
+    "source": "New window",
+    "translation": "Nova janela"
+  },
+  "track.new_window.focused": {
+    "source": "Fills the focused track",
+    "translation": "Preenche a faixa com foco"
+  },
+  "track.new_window.own": {
+    "source": "Opens its own track",
+    "translation": "Abre sua própria faixa"
+  },
+  "track.new_window_position": {
+    "source": "Position",
+    "translation": "Posição"
+  },
+  "track.new_window_position.help": {
+    "source": "With “Opens its own track”, where the new track lands among the tracks; with “Fills the focused track”, where the window lands inside it: First, Last, or right before or after the focused one.",
+    "translation": "Especifica onde inserir a nova faixa ou janela."
+  },
+  "track.wrap_focus": {
+    "source": "Wrap focus",
+    "translation": "Rolagem circular de foco"
+  }
+}

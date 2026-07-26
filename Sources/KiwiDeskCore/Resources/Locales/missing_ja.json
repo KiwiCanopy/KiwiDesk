@@ -1,0 +1,3234 @@
+{
+  "app.already_running.message": {
+    "source": "Another KiwiDesk instance is already managing your windows, so this one will quit.",
+    "translation": "KiwiDeskの別のインスタンスが既にウインドウを管理しているため、このインスタンスは終了します。"
+  },
+  "app.already_running.title": {
+    "source": "KiwiDesk Is Already Running",
+    "translation": "KiwiDeskは既に実行中です"
+  },
+  "app_bar.active_indicator.edge_mark": {
+    "source": "Edge mark",
+    "translation": "エッジマーク"
+  },
+  "app_bar.active_indicator.gap": {
+    "source": "Gap",
+    "translation": "ギャップ"
+  },
+  "app_bar.active_indicator.label": {
+    "source": "Active indicator",
+    "translation": "アクティブインジケーター"
+  },
+  "app_bar.active_indicator.outline": {
+    "source": "Outline",
+    "translation": "アウトライン"
+  },
+  "app_bar.alignment.center": {
+    "source": "Center",
+    "translation": "中央"
+  },
+  "app_bar.alignment.end": {
+    "source": "End",
+    "translation": "末尾"
+  },
+  "app_bar.alignment.label": {
+    "source": "Alignment",
+    "translation": "配置"
+  },
+  "app_bar.alignment.label.help": {
+    "source": "Where the item group sits along the bar while it fits. Start and End follow the edge (a left bar's Start is its top); once items overflow and scroll, all three behave the same.",
+    "translation": "バーに沿って項目を配置する位置。"
+  },
+  "app_bar.alignment.start": {
+    "source": "Start",
+    "translation": "先頭"
+  },
+  "app_bar.background_fit.boxed_only": {
+    "source": "Boxed draws a box per item, not a shared plate, so there is nothing to size.",
+    "translation": "ボックス表示では項目ごとに枠を描画するため、全体サイズの変更はありません。"
+  },
+  "app_bar.background_fit.full": {
+    "source": "Full width",
+    "translation": "フル"
+  },
+  "app_bar.background_fit.hug": {
+    "source": "Hug",
+    "translation": "フィット"
+  },
+  "app_bar.background_fit.label": {
+    "source": "Background size",
+    "translation": "背景サイズ"
+  },
+  "app_bar.background_style.boxed": {
+    "source": "Boxed",
+    "translation": "ボックス"
+  },
+  "app_bar.background_style.label": {
+    "source": "Background style",
+    "translation": "背景スタイル"
+  },
+  "app_bar.background_style.plain": {
+    "source": "Plain",
+    "translation": "プレーン"
+  },
+  "app_bar.color.active_item": {
+    "source": "Active item",
+    "translation": "アクティブ項目"
+  },
+  "app_bar.color.badge_text": {
+    "source": "Badge text",
+    "translation": "バッジのテキスト"
+  },
+  "app_bar.color.fill": {
+    "source": "Fill",
+    "translation": "塗りつぶし"
+  },
+  "app_bar.color.gap_only": {
+    "source": "The Gap indicator hides the active item instead of marking it, so these colors aren't drawn.",
+    "translation": "ギャップのみ"
+  },
+  "app_bar.color.group_badge": {
+    "source": "Group badge",
+    "translation": "グループバッジ"
+  },
+  "app_bar.color.highlight": {
+    "source": "Highlight",
+    "translation": "ハイライト"
+  },
+  "app_bar.color.hover_fill": {
+    "source": "Hover fill",
+    "translation": "ホバー時の塗りつぶし"
+  },
+  "app_bar.color.hover_item": {
+    "source": "Hover item",
+    "translation": "ホバー時の項目"
+  },
+  "app_bar.color.item": {
+    "source": "Item",
+    "translation": "項目"
+  },
+  "app_bar.content.icon": {
+    "source": "Icon",
+    "translation": "アイコン"
+  },
+  "app_bar.content.icon_and_name": {
+    "source": "Icon & name",
+    "translation": "アイコンと名前"
+  },
+  "app_bar.content.label": {
+    "source": "Content",
+    "translation": "表示内容"
+  },
+  "app_bar.content.name": {
+    "source": "Name",
+    "translation": "名前"
+  },
+  "app_bar.content.vertical_only": {
+    "source": "Left and right bars always show icons only.",
+    "translation": "左 and right bars always show icons only."
+  },
+  "app_bar.corner_roundness": {
+    "source": "Corner roundness",
+    "translation": "角の丸み"
+  },
+  "app_bar.edge.bottom": {
+    "source": "Bottom",
+    "translation": "下"
+  },
+  "app_bar.edge.label": {
+    "source": "Position",
+    "translation": "位置"
+  },
+  "app_bar.edge.label.help": {
+    "source": "Which screen edge the bar occupies. The bar reserves this edge in every layout that shows it.",
+    "translation": "App Barを配置する画面の端。"
+  },
+  "app_bar.edge.left": {
+    "source": "Left",
+    "translation": "左"
+  },
+  "app_bar.edge.right": {
+    "source": "Right",
+    "translation": "右"
+  },
+  "app_bar.edge.top": {
+    "source": "Top",
+    "translation": "上"
+  },
+  "app_bar.font_size": {
+    "source": "Font size",
+    "translation": "フォントサイズ"
+  },
+  "app_bar.font_size.auto": {
+    "source": "Auto font size",
+    "translation": "自動フォントサイズ"
+  },
+  "app_bar.global_colors.title": {
+    "source": "Global colors",
+    "translation": "全体カラー"
+  },
+  "app_bar.global_style.caption": {
+    "source": "The App Bar appears in the layouts that show one — Monocle and Scrolling. These settings are shared; a layout can override any of them below.",
+    "translation": "各レイアウト・全画面でディスプレイごとに1つのバーを表示。設定はグローバルです。"
+  },
+  "app_bar.global_style.title": {
+    "source": "Global style",
+    "translation": "App Barのスタイル"
+  },
+  "app_bar.group_adjacent": {
+    "source": "Group adjacent same-app windows",
+    "translation": "同アプリの隣接ウインドウをグループ化"
+  },
+  "app_bar.group_adjacent.help": {
+    "source": "Merges neighbouring windows of the same app into a single item, marked with a count badge, instead of showing one item each.",
+    "translation": "同一アプリの隣接ウインドウを個別に表示する代わりに、カウントバッジ付きの単一アイテムに統合します。"
+  },
+  "app_bar.icon_source.app_font": {
+    "source": "Glyphs",
+    "translation": "グリフ"
+  },
+  "app_bar.icon_source.app_image": {
+    "source": "System default",
+    "translation": "システムデフォルト"
+  },
+  "app_bar.icon_source.help": {
+    "source": "How app icons are drawn. Glyphs shows a monochrome symbol from KiwiDesk's built-in icon set, colored by the bar's item colors — Item, Active item, and Hover item below — so those colors also decide how the glyphs look. Apps without a symbol keep their app icon.",
+    "translation": "How app icons are drawn. Glyphs shows a monochrome symbol from KiwiDesk's built-in icon set, colored by the bar's item colors — Item, Active item, and Hover item below — so those colors also decide how the glyphs look. アプリ without a symbol keep their app icon."
+  },
+  "app_bar.icon_source.label": {
+    "source": "App symbol style",
+    "translation": "アプリシンボル スタイル"
+  },
+  "app_bar.icon_source.name_only": {
+    "source": "Icons are hidden while Content is Name.",
+    "translation": "表示内容が「名前」の場合、アイコンは非表示になります。"
+  },
+  "app_bar.item_gap": {
+    "source": "Item gap",
+    "translation": "項目間のギャップ"
+  },
+  "app_bar.item_size": {
+    "source": "Item size",
+    "translation": "項目のサイズ"
+  },
+  "app_bar.item_size.auto": {
+    "source": "Auto item size",
+    "translation": "自動サイズ"
+  },
+  "app_bar.layout.overrides": {
+    "source": "Overrides",
+    "translation": "オーバーライド"
+  },
+  "app_bar.layout.overrides.caption": {
+    "source": "Dimmed rows inherit the global value — tick a box to override just that field for this layout.",
+    "translation": "グレーアウトされた行はグローバル値を継承します。ボックスをチェックすると、このレイアウト用にそのフィールドのみオーバーライドされます。"
+  },
+  "app_bar.layout.overrides.disabled": {
+    "source": "Turn on Show app bar to edit this layout's overrides. They are kept either way.",
+    "translation": "このレイアウトのオーバーライドを編集するにはApp Barを表示をオンにしてください。"
+  },
+  "app_bar.layout.show": {
+    "source": "Show app bar",
+    "translation": "App Barを表示"
+  },
+  "app_bar.layout.title": {
+    "source": "%1$@ bar",
+    "translation": "%1$@ バー"
+  },
+  "app_bar.liquid_glass": {
+    "source": "Liquid Glass",
+    "translation": "Liquid Glass"
+  },
+  "app_bar.liquid_glass.help": {
+    "source": "Lays a translucent glass material over the boxes or the plate. The Fill color tints it, though the tint reads subtle on current macOS.",
+    "translation": "ボックスまたはプレート上に半透明のガラス素材を重ねます。"
+  },
+  "app_bar.no_layout.help": {
+    "source": "No layout shows an App Bar — turn one on below.",
+    "translation": "App Barを表示するレイアウトがありません。以下で有効にしてください。"
+  },
+  "app_bar.override.off.help": {
+    "source": "Inheriting the global value",
+    "translation": "グローバル値を継承中"
+  },
+  "app_bar.override.on.help": {
+    "source": "Overriding the global value",
+    "translation": "グローバル値をオーバーライド中"
+  },
+  "app_bar.preview.app_code": {
+    "source": "Code",
+    "translation": "コード"
+  },
+  "app_bar.preview.app_mail": {
+    "source": "Mail",
+    "translation": "メール"
+  },
+  "app_bar.preview.app_web": {
+    "source": "Web",
+    "translation": "ウェブ"
+  },
+  "app_bar.preview.ax": {
+    "source": "App bar preview: %1$@ position, %2$@ style.",
+    "translation": "App Barプレビュー: 位置 %1$@、スタイル %2$@。"
+  },
+  "app_bar.preview.caption": {
+    "source": "Position: %1$@ · %2$@",
+    "translation": "位置: %1$@ · %2$@"
+  },
+  "app_bar.resolved.inherits": {
+    "source": "Inherits the global bar.",
+    "translation": "グローバルバーを継承しています。"
+  },
+  "app_bar.resolved.overrides": {
+    "source": "%1$d field(s) override the global bar.",
+    "translation": "%1$d 個のフィールドがグローバルバーをオーバーライドしています。"
+  },
+  "app_bar.thickness": {
+    "source": "Thickness",
+    "translation": "厚み"
+  },
+  "app_picker.search.placeholder": {
+    "source": "Search apps",
+    "translation": "検索 apps"
+  },
+  "app_rules.add": {
+    "source": "Add",
+    "translation": "追加"
+  },
+  "app_rules.add_rule": {
+    "source": "Add app rule",
+    "translation": "アプリルールを追加"
+  },
+  "app_rules.add_window": {
+    "source": "Add Window",
+    "translation": "追加 Window"
+  },
+  "app_rules.automatic": {
+    "source": "Automatic",
+    "translation": "自動"
+  },
+  "app_rules.float": {
+    "source": "Float",
+    "translation": "自動フローティング"
+  },
+  "app_rules.float.all_windows": {
+    "source": "All windows",
+    "translation": "All windows（JA）"
+  },
+  "app_rules.float.help": {
+    "source": "Floating takes this app's matching windows out of tiling: each keeps its last position and size and appears on every space, instead of living in one space's grid.\n\nThis is per-app floating — not the **Floating** layout mode, which floats every window in a space.",
+    "translation": "このアプリケーションのウインドウは常にタイルレイアウトの上にフローティング表示されます。\n\nこれはアプリごとのフローティング設定であり、すべてのウインドウをフローティングする **フローティング** レイアウトモードとは異なります。"
+  },
+  "app_rules.float.never": {
+    "source": "Never",
+    "translation": "Never（JA）"
+  },
+  "app_rules.float.titled": {
+    "source": "Windows titled…",
+    "translation": "Windows titled…（JA）"
+  },
+  "app_rules.other_specify": {
+    "source": "Other (Specify)…",
+    "translation": "Other (Specify)…（JA）"
+  },
+  "app_rules.override.caption": {
+    "source": "Space and float rules made here apply to this profile only. Dimmed facets are inherited from the app-wide base rules and stay in sync with them; changing a facet overrides it for this profile, and deleting a row removes inherited rules here. To edit the base rules themselves, switch back to the currently loaded profile in the header's picker.",
+    "translation": "Space and float rules made here apply to this profile only. Dimmed facets are inherited from the app-wide base rules and stay in sync with them; changing a facet overrides it for this profile, and deleting a row removes inherited rules here. To edit the base rules themselves, switch back to the currently loaded profile in the header's picker.（JA）"
+  },
+  "app_rules.override.overrides": {
+    "source": "This profile overrides base app rules.",
+    "translation": "This profile overrides base app rules.（JA）"
+  },
+  "app_rules.remove_all.help": {
+    "source": "Remove all rules for this app",
+    "translation": "削除 all rules for this app"
+  },
+  "app_rules.remove_override.help": {
+    "source": "Remove this profile's effective space and float rules for this app",
+    "translation": "削除 this profile's effective space and float rules for this app"
+  },
+  "app_rules.remove_pattern": {
+    "source": "Remove title pattern",
+    "translation": "削除 title pattern"
+  },
+  "app_rules.section.caption": {
+    "source": "Pin an app's windows to a space, keep them floating, or both. Deleting a row removes all of the app's rules.",
+    "translation": "Pin an app's windows to a space, keep them floating, or both. Deleting a row removes all of the app's rules.（JA）"
+  },
+  "app_rules.section.title": {
+    "source": "Rules per app",
+    "translation": "Rules per app（JA）"
+  },
+  "app_rules.space": {
+    "source": "Space",
+    "translation": "対象操作スペース"
+  },
+  "app_rules.title_contains": {
+    "source": "Title contains…",
+    "translation": "Title contains…（JA）"
+  },
+  "app_rules.titled.caption": {
+    "source": "Windows whose title contains a pattern stay floating.",
+    "translation": "Windows whose title contains a pattern stay floating.（JA）"
+  },
+  "app_selector.bundle_id": {
+    "source": "Bundle identifier",
+    "translation": "Bundle identifier（JA）"
+  },
+  "app_selector.clear_custom": {
+    "source": "Clear custom app",
+    "translation": "クリア custom app"
+  },
+  "app_selector.custom": {
+    "source": "Custom…",
+    "translation": "カスタム…"
+  },
+  "bars.advanced_colors": {
+    "source": "Advanced colors",
+    "translation": "Advanced colors（JA）"
+  },
+  "bars.same_edge": {
+    "source": "Both bars share the %1$@ edge — Space Bar sits at the screen edge, App Bar sits next to the windows.",
+    "translation": "Both bars share the %1$@ edge — Space Bar sits at the screen edge, App Bar sits next to the windows.（JA）"
+  },
+  "bars.switch": {
+    "source": "Bar",
+    "translation": "Bar（JA）"
+  },
+  "bars.switch.app_bar": {
+    "source": "App Bar",
+    "translation": "App Bar"
+  },
+  "bars.switch.caption": {
+    "source": "KiwiDesk draws two bars — choose which one to configure.",
+    "translation": "KiwiDesk draws two bars — choose which one to configure.（JA）"
+  },
+  "bars.switch.space_bar": {
+    "source": "Space Bar",
+    "translation": "Space Bar"
+  },
+  "behavior.animations.duration": {
+    "source": "Duration",
+    "translation": "Duration（JA）"
+  },
+  "behavior.animations.relayout": {
+    "source": "Animate layout reflows",
+    "translation": "Animate layout reflows（JA）"
+  },
+  "behavior.animations.scrolling_xref": {
+    "source": "Scrolling-layout focus shifts have their own toggle and speed in",
+    "translation": "Scrolling-layout focus shifts have their own toggle and speed in（JA）"
+  },
+  "behavior.animations.scrolling_xref_link": {
+    "source": "Layout Defaults ▸ Scrolling",
+    "translation": "Layout Defaults ▸ Scrolling（JA）"
+  },
+  "behavior.animations.space_change": {
+    "source": "Animate virtual space switches",
+    "translation": "Animate virtual space switches（JA）"
+  },
+  "behavior.animations.space_change.caption": {
+    "source": "Windows slide out of the space you're leaving and into the one you're switching to.",
+    "translation": "Windows slide out of the space you're leaving and into the one you're switching to.（JA）"
+  },
+  "behavior.animations.title": {
+    "source": "Animations",
+    "translation": "Animations（JA）"
+  },
+  "behavior.animations.window_resize": {
+    "source": "Animate window resizes",
+    "translation": "Animate window resizes（JA）"
+  },
+  "behavior.animations.window_swap": {
+    "source": "Animate window swaps",
+    "translation": "Animate window swaps（JA）"
+  },
+  "behavior.mouse.follows_focus": {
+    "source": "Move mouse to focused window",
+    "translation": "Move mouse to focused window（JA）"
+  },
+  "behavior.mouse.resize_action": {
+    "source": "Mouse resize action",
+    "translation": "Mouse resize action（JA）"
+  },
+  "behavior.mouse.resize_action.help": {
+    "source": "**Resize adjacent windows** — Dragging a window's edge resizes it and reflows its neighbours in the layout.\n**Snap back to slot** — The window resizes freely while you drag, then snaps back to its tiled size when you release.",
+    "translation": "**Resize adjacent windows** — Dragging a window's edge resizes it and reflows its neighbours in the layout.\n**Snap back to slot** — The window resizes freely while you drag, then snaps back to its tiled size when you release.（JA）"
+  },
+  "behavior.mouse.resize_layout": {
+    "source": "Resize adjacent windows",
+    "translation": "Resize adjacent windows（JA）"
+  },
+  "behavior.mouse.resize_snap_back": {
+    "source": "Snap back to slot",
+    "translation": "Snap back to slot（JA）"
+  },
+  "behavior.mouse.title": {
+    "source": "Mouse",
+    "translation": "Mouse（JA）"
+  },
+  "behavior.quit.caption": {
+    "source": "Before KiwiDesk stops, it arranges managed windows on each display so their title bars remain reachable.",
+    "translation": "Before KiwiDesk stops, it arranges managed windows on each display so their title bars remain reachable.（JA）"
+  },
+  "behavior.quit.summary": {
+    "source": "2×2 up to %1$d windows · 3×3 up to %2$d · 4×4 above %2$d",
+    "translation": "2×2 up to %1$d windows · 3×3 up to %2$d · 4×4 above %2$d（JA）"
+  },
+  "behavior.quit.target_depth": {
+    "source": "Target windows per cell",
+    "translation": "Target windows per cell（JA）"
+  },
+  "behavior.quit.target_depth.help": {
+    "source": "The grid adds a row and column when cells would exceed this target. It stays between 2×2 and 4×4; after 4×4, additional windows keep cascading in its cells.",
+    "translation": "The grid adds a row and column when cells would exceed this target. It stays between 2×2 and 4×4; after 4×4, additional windows keep cascading in its cells.（JA）"
+  },
+  "behavior.quit.title": {
+    "source": "On quit",
+    "translation": "On quit（JA）"
+  },
+  "border.caption": {
+    "source": "Outlines the focused window so it stands out in a gapped layout.",
+    "translation": "フォーカス中または選択中のウインドウを囲むボーダーをカスタマイズします。"
+  },
+  "border.controls.disabled": {
+    "source": "Turn on Show focus border to edit these settings.",
+    "translation": "Turn on Show focus border to edit these settings.（JA）"
+  },
+  "border.corner.rounded": {
+    "source": "Rounded",
+    "translation": "Rounded（JA）"
+  },
+  "border.corner.square": {
+    "source": "Square",
+    "translation": "Square（JA）"
+  },
+  "border.corner_style": {
+    "source": "Corners",
+    "translation": "Corners（JA）"
+  },
+  "border.enabled": {
+    "source": "Show focus border",
+    "translation": "フォーカスボーダーを有効化"
+  },
+  "border.fit_gaps.action": {
+    "source": "Set Gap Values",
+    "translation": "Set Gap Values（JA）"
+  },
+  "border.fit_gaps.action_hint": {
+    "source": "Updates the draft gap values. Save is still required.",
+    "translation": "Updates the draft gap values. 保存 is still required."
+  },
+  "border.fit_gaps.already_matches": {
+    "source": "Draft gaps already match.",
+    "translation": "Draft gaps already match.（JA）"
+  },
+  "border.fit_gaps.extra_spacing": {
+    "source": "Extra spacing",
+    "translation": "Extra spacing（JA）"
+  },
+  "border.fit_gaps.help": {
+    "source": "Calculates global outer and inner gaps from the border width. Inner gaps allow for both borders when borders on unfocused windows are shown.",
+    "translation": "Calculates global outer and inner gaps from the border width. Inner gaps allow for both borders when borders on unfocused windows are shown.（JA）"
+  },
+  "border.fit_gaps.preview": {
+    "source": "Will set Outer to %1$d pt and Inner to %2$d pt.",
+    "translation": "Will set Outer to %1$d pt and Inner to %2$d pt.（JA）"
+  },
+  "border.fit_gaps.replaces_edges": {
+    "source": "Replaces per-edge gap values.",
+    "translation": "Replaces per-edge gap values.（JA）"
+  },
+  "border.fit_gaps.title": {
+    "source": "Fit layout gaps",
+    "translation": "Fit layout gaps（JA）"
+  },
+  "border.fit_gaps.unit": {
+    "source": "pt",
+    "translation": "pt"
+  },
+  "border.fit_gaps.updated": {
+    "source": "Draft updated — Save (⌘S) to apply and persist.",
+    "translation": "Draft updated — 保存 (⌘S) to apply and persist."
+  },
+  "border.fit_gaps.updated_inactive": {
+    "source": "Draft updated — Save (⌘S) to persist; it applies when this profile is loaded.",
+    "translation": "Draft updated — 保存 (⌘S) to persist; it applies when this profile is loaded."
+  },
+  "border.fit_gaps.updated_new": {
+    "source": "Draft updated — Save as New Profile… to apply and persist.",
+    "translation": "Draft updated — 保存 as New Profile… to apply and persist."
+  },
+  "border.fit_gaps.updated_paused": {
+    "source": "Draft updated — gaps persist once Accessibility is on and you save the profile.",
+    "translation": "Draft updated — gaps persist once Accessibility is on and you save the profile.（JA）"
+  },
+  "border.focused_color": {
+    "source": "Color",
+    "translation": "Color（JA）"
+  },
+  "border.focused_color.a11y": {
+    "source": "Focused window border color",
+    "translation": "フォーカスed window border color"
+  },
+  "border.glow": {
+    "source": "Show glow",
+    "translation": "グロー効果"
+  },
+  "border.glow.a11y": {
+    "source": "Soft glow around the focus border",
+    "translation": "Soft glow around the focus border（JA）"
+  },
+  "border.title": {
+    "source": "Focus border",
+    "translation": "ウインドウボーダー"
+  },
+  "border.unfocused_color": {
+    "source": "Color",
+    "translation": "Color（JA）"
+  },
+  "border.unfocused_color.a11y": {
+    "source": "Unfocused window border color",
+    "translation": "Unfocused window border color（JA）"
+  },
+  "border.unfocused_enabled": {
+    "source": "Show border on unfocused windows",
+    "translation": "Show border on unfocused windows（JA）"
+  },
+  "border.width": {
+    "source": "Width",
+    "translation": "Width（JA）"
+  },
+  "brand.menu_bar_icon.a11y": {
+    "source": "KiwiDesk",
+    "translation": "KiwiDesk"
+  },
+  "color_field.automatic": {
+    "source": "Automatic",
+    "translation": "自動"
+  },
+  "color_field.hex.a11y": {
+    "source": "%1$@ hex value",
+    "translation": "%1$@ hex value（JA）"
+  },
+  "color_field.hex.automatic": {
+    "source": "Automatic",
+    "translation": "自動"
+  },
+  "color_field.hex.help": {
+    "source": "Type a #RRGGBB or #RRGGBBAA value",
+    "translation": "Type a #RRGGBB or #RRGGBBAA value（JA）"
+  },
+  "color_field.swatch.a11y": {
+    "source": "%1$@ color",
+    "translation": "%1$@ color（JA）"
+  },
+  "color_field.swatch.a11y_auto": {
+    "source": "%1$@ color, Automatic",
+    "translation": "%1$@ color, 自動"
+  },
+  "color_field.swatch.a11y_hint": {
+    "source": "Opens the color picker",
+    "translation": "開くs the color picker"
+  },
+  "color_field.swatch.help": {
+    "source": "Edit the %1$@ color",
+    "translation": "編集 the %1$@ color"
+  },
+  "color_field.swatch.help_auto": {
+    "source": "Automatic — follows light and dark",
+    "translation": "自動 — follows light and dark"
+  },
+  "color_panel.done": {
+    "source": "Done",
+    "translation": "Done（JA）"
+  },
+  "common.off": {
+    "source": "off",
+    "translation": "off（JA）"
+  },
+  "common.on": {
+    "source": "on",
+    "translation": "on（JA）"
+  },
+  "config_issues.cancel": {
+    "source": "Cancel",
+    "translation": "キャンセル"
+  },
+  "config_issues.delete": {
+    "source": "Delete…",
+    "translation": "削除…"
+  },
+  "config_issues.delete_confirm.body": {
+    "source": "This removes the profile file. It can't be undone.",
+    "translation": "This removes the profile file. It can't be undone.（JA）"
+  },
+  "config_issues.delete_confirm.title": {
+    "source": "Delete “%1$@”?",
+    "translation": "削除 “%1$@”?"
+  },
+  "config_issues.empty.body": {
+    "source": "The last configuration load completed cleanly.",
+    "translation": "The last configuration load completed cleanly.（JA）"
+  },
+  "config_issues.empty.title": {
+    "source": "No config issues",
+    "translation": "No config issues（JA）"
+  },
+  "config_issues.header": {
+    "source": "Parts of the configuration could not be loaded.",
+    "translation": "Parts of the configuration could not be loaded.（JA）"
+  },
+  "config_issues.profile_unreadable": {
+    "source": "Couldn't be loaded — it was saved by a different version or edited by hand.",
+    "translation": "Couldn't be loaded — it was saved by a different version or edited by hand.（JA）"
+  },
+  "config_issues.reload": {
+    "source": "Reload config",
+    "translation": "設定を再読み込み"
+  },
+  "config_issues.reload.help": {
+    "source": "Re-runs the config load; fixed files clear their issues.",
+    "translation": "Re-runs the config load; fixed files clear their issues.（JA）"
+  },
+  "config_issues.reveal": {
+    "source": "Reveal in Finder",
+    "translation": "Reveal in Finder（JA）"
+  },
+  "config_issues.title": {
+    "source": "Config Issues",
+    "translation": "設定の問題"
+  },
+  "custom_lua_banner.text": {
+    "source": "Your init.lua also has custom Lua. It doesn’t conflict with the visual editor, and the app never modifies init.lua.",
+    "translation": "Your init.lua also has custom Lua. It doesn’t conflict with the visual editor, and the app never modifies init.lua.（JA）"
+  },
+  "discard.apply_preset.confirm": {
+    "source": "Discard & apply",
+    "translation": "Discard & apply（JA）"
+  },
+  "discard.apply_preset.message": {
+    "source": "Applying a preset replaces the edits you haven't saved.",
+    "translation": "Applying a preset replaces the edits you haven't saved.（JA）"
+  },
+  "discard.cancel": {
+    "source": "Cancel",
+    "translation": "編集を続ける"
+  },
+  "discard.delete_profile.confirm": {
+    "source": "Discard & delete",
+    "translation": "Discard & delete（JA）"
+  },
+  "discard.delete_profile.message": {
+    "source": "Deleting reloads the dashboard, dropping the edits you haven't saved.",
+    "translation": "Deleting reloads the dashboard, dropping the edits you haven't saved.（JA）"
+  },
+  "discard.load_profile.confirm": {
+    "source": "Discard & load",
+    "translation": "Discard & load（JA）"
+  },
+  "discard.load_profile.message": {
+    "source": "Loading a profile replaces the edits you haven't saved.",
+    "translation": "Loading a profile replaces the edits you haven't saved.（JA）"
+  },
+  "discard.lua_editor.confirm": {
+    "source": "Discard & edit init.lua",
+    "translation": "Discard & edit init.lua（JA）"
+  },
+  "discard.lua_editor.message": {
+    "source": "The raw editor saves init.lua as text, so the edits you haven't saved are dropped.",
+    "translation": "The raw editor saves init.lua as text, so the edits you haven't saved are dropped.（JA）"
+  },
+  "discard.rename_profile.confirm": {
+    "source": "Discard & rename",
+    "translation": "Discard & rename（JA）"
+  },
+  "discard.rename_profile.message": {
+    "source": "Renaming reloads the dashboard, dropping the edits you haven't saved.",
+    "translation": "Renaming reloads the dashboard, dropping the edits you haven't saved.（JA）"
+  },
+  "discard.switch_profile.confirm": {
+    "source": "Discard & switch",
+    "translation": "Discard & switch（JA）"
+  },
+  "discard.switch_profile.message": {
+    "source": "Switching profiles drops the edits you haven't saved.",
+    "translation": "Switching profiles drops the edits you haven't saved.（JA）"
+  },
+  "discard.title": {
+    "source": "Discard unsaved changes?",
+    "translation": "未保存の変更"
+  },
+  "discard.visual_editor.confirm": {
+    "source": "Discard & leave",
+    "translation": "Discard & leave（JA）"
+  },
+  "discard.visual_editor.message": {
+    "source": "Leaving the raw editor reloads init.lua from disk, dropping the Lua you haven't saved.",
+    "translation": "Leaving the raw editor reloads init.lua from disk, dropping the Lua you haven't saved.（JA）"
+  },
+  "drag.border": {
+    "source": "Border",
+    "translation": "ボーダー"
+  },
+  "drag.border.off_help": {
+    "source": "Turn on Border to edit its color, width, and alignment.",
+    "translation": "Turn on Border to edit its color, width, and alignment.（JA）"
+  },
+  "drag.border_alignment": {
+    "source": "Alignment",
+    "translation": "配置"
+  },
+  "drag.border_color": {
+    "source": "Color",
+    "translation": "Color（JA）"
+  },
+  "drag.border_color.a11y": {
+    "source": "Border color",
+    "translation": "Border color（JA）"
+  },
+  "drag.border_width": {
+    "source": "Width",
+    "translation": "Width（JA）"
+  },
+  "drag.caption": {
+    "source": "Drag a window onto another to swap their positions in the layout.",
+    "translation": "マウスによるドラッグ移動およびサイズ変更の動作。"
+  },
+  "drag.corner_radius": {
+    "source": "Corner radius",
+    "translation": "角の半径"
+  },
+  "drag.disabled": {
+    "source": "disabled",
+    "translation": "disabled（JA）"
+  },
+  "drag.disabled.help": {
+    "source": "Turn on Enabled to edit this visual.",
+    "translation": "Turn on Enabled to edit this visual.（JA）"
+  },
+  "drag.drop_zone": {
+    "source": "Drop zone",
+    "translation": "Drop zone（JA）"
+  },
+  "drag.drop_zone.caption": {
+    "source": "Marks the position your window will snap into when dropped.",
+    "translation": "Marks the position your window will snap into when dropped.（JA）"
+  },
+  "drag.enabled": {
+    "source": "Enabled",
+    "translation": "マウスドラッグを有効化"
+  },
+  "drag.fill": {
+    "source": "Fill",
+    "translation": "塗りつぶし"
+  },
+  "drag.fill.off_help": {
+    "source": "Turn on Fill to edit its color.",
+    "translation": "Turn on Fill to edit its color.（JA）"
+  },
+  "drag.fill_color": {
+    "source": "Color",
+    "translation": "Color（JA）"
+  },
+  "drag.fill_color.a11y": {
+    "source": "Fill color",
+    "translation": "Fill color（JA）"
+  },
+  "drag.ghost": {
+    "source": "Ghost",
+    "translation": "Ghost（JA）"
+  },
+  "drag.ghost.caption": {
+    "source": "Marks the position your window is dragged from.",
+    "translation": "Marks the position your window is dragged from.（JA）"
+  },
+  "drag.inside": {
+    "source": "Inside",
+    "translation": "Inside（JA）"
+  },
+  "drag.outside": {
+    "source": "Outside",
+    "translation": "Outside（JA）"
+  },
+  "drag.title": {
+    "source": "Drag & drop",
+    "translation": "マウスドラッグ"
+  },
+  "floating.color": {
+    "source": "Floating",
+    "translation": "フローティング"
+  },
+  "floating.color.a11y": {
+    "source": "Floating window mark color",
+    "translation": "Floating window mark color（JA）"
+  },
+  "floating.color.space_bar_only": {
+    "source": "The floating mark is drawn only in the Space Bar, which is off.",
+    "translation": "The floating mark is drawn only in the Space Bar, which is off.（JA）"
+  },
+  "footer.cancel": {
+    "source": "Cancel",
+    "translation": "キャンセル"
+  },
+  "footer.default_profile_name": {
+    "source": "My Setup",
+    "translation": "My Setup（JA）"
+  },
+  "footer.profile_name": {
+    "source": "Profile name",
+    "translation": "プロファイル名"
+  },
+  "footer.revert": {
+    "source": "Revert Changes",
+    "translation": "Revert Changes（JA）"
+  },
+  "footer.revert.restores_layout": {
+    "source": "Revert also restores the profile layout (%1$@).",
+    "translation": "Revert also restores the profile layout (%1$@).（JA）"
+  },
+  "footer.save": {
+    "source": "Save",
+    "translation": "保存"
+  },
+  "footer.save.adopts_layout": {
+    "source": "Save also adopts the session layout (%1$@).",
+    "translation": "保存 also adopts the session layout (%1$@)."
+  },
+  "footer.save.globals_only": {
+    "source": "Layout and monitors stay paused; Save covers everything else.",
+    "translation": "Layout and monitors stay paused; 保存 covers everything else."
+  },
+  "footer.save_a_copy_as": {
+    "source": "Save a Copy As…",
+    "translation": "保存 a Copy As…"
+  },
+  "footer.save_as_new.message": {
+    "source": "The new profile carries the current tiling and the connected monitor set.",
+    "translation": "The new profile carries the current tiling and the connected monitor set.（JA）"
+  },
+  "footer.save_as_new.title": {
+    "source": "Save as new profile",
+    "translation": "保存 as new profile"
+  },
+  "footer.save_as_new_profile": {
+    "source": "Save as New Profile…",
+    "translation": "保存 as New Profile…"
+  },
+  "footer.save_copy": {
+    "source": "Save copy",
+    "translation": "保存 copy"
+  },
+  "footer.save_copy_as.message": {
+    "source": "Duplicates “%1$@” with your pending edits — monitor sets and shortcut overrides included. The copy becomes the edit target; the running layout is not changed.",
+    "translation": "Duplicates “%1$@” with your pending edits — monitor sets and shortcut overrides included. The copy becomes the edit target; the running layout is not changed.（JA）"
+  },
+  "footer.save_copy_as.title": {
+    "source": "Save a copy as",
+    "translation": "保存 a copy as"
+  },
+  "footer.unsaved_changes": {
+    "source": "Unsaved changes",
+    "translation": "Unsaved changes（JA）"
+  },
+  "gaps.bottom": {
+    "source": "Bottom",
+    "translation": "下"
+  },
+  "gaps.horizontal": {
+    "source": "Horizontal",
+    "translation": "水平"
+  },
+  "gaps.inner": {
+    "source": "Inner gap",
+    "translation": "インナーギャップ"
+  },
+  "gaps.inner_meaning": {
+    "source": "between neighboring windows",
+    "translation": "between neighboring windows（JA）"
+  },
+  "gaps.inner_term": {
+    "source": "Inner",
+    "translation": "Inner（JA）"
+  },
+  "gaps.left": {
+    "source": "Left",
+    "translation": "左"
+  },
+  "gaps.mixed": {
+    "source": "mixed",
+    "translation": "mixed（JA）"
+  },
+  "gaps.mixed.help": {
+    "source": "Edges differ — edit them individually below.",
+    "translation": "Edges differ — edit them individually below.（JA）"
+  },
+  "gaps.outer": {
+    "source": "Outer gap",
+    "translation": "アウターギャップ"
+  },
+  "gaps.outer_meaning": {
+    "source": "between windows and the screen edge",
+    "translation": "between windows and the screen edge（JA）"
+  },
+  "gaps.outer_term": {
+    "source": "Outer",
+    "translation": "Outer（JA）"
+  },
+  "gaps.per_axis": {
+    "source": "Per-axis…",
+    "translation": "Per-axis…（JA）"
+  },
+  "gaps.per_edge": {
+    "source": "Per-edge…",
+    "translation": "Per-edge…（JA）"
+  },
+  "gaps.right": {
+    "source": "Right",
+    "translation": "右"
+  },
+  "gaps.title": {
+    "source": "Gaps",
+    "translation": "ギャップ (隙間)"
+  },
+  "gaps.top": {
+    "source": "Top",
+    "translation": "上"
+  },
+  "gaps.vertical": {
+    "source": "Vertical",
+    "translation": "垂直"
+  },
+  "general.about.app_name": {
+    "source": "KiwiDesk",
+    "translation": "KiwiDesk"
+  },
+  "general.about.support": {
+    "source": "Support KiwiDesk",
+    "translation": "Support KiwiDesk（JA）"
+  },
+  "general.about.title": {
+    "source": "About",
+    "translation": "情報"
+  },
+  "general.advanced.config_file": {
+    "source": "Configuration file",
+    "translation": "Configuration file（JA）"
+  },
+  "general.advanced.edit_lua": {
+    "source": "Edit init.lua directly",
+    "translation": "編集 init.lua directly"
+  },
+  "general.advanced.edit_lua.caption": {
+    "source": "Opens the integrated Lua editor for custom scripting beyond the visual controls.",
+    "translation": "開くs the integrated Lua editor for custom scripting beyond the visual controls."
+  },
+  "general.advanced.reveal": {
+    "source": "Reveal",
+    "translation": "Reveal（JA）"
+  },
+  "general.advanced.title": {
+    "source": "Advanced",
+    "translation": "詳細設定"
+  },
+  "general.language.system_default": {
+    "source": "System default",
+    "translation": "System default（JA）"
+  },
+  "general.language.title": {
+    "source": "Language",
+    "translation": "言語"
+  },
+  "help.button": {
+    "source": "Help",
+    "translation": "ヘルプ"
+  },
+  "help.button.for": {
+    "source": "Help: %1$@",
+    "translation": "Help: %1$@（JA）"
+  },
+  "help.button.hint": {
+    "source": "Shows an explanation of this setting.",
+    "translation": "Shows an explanation of this setting.（JA）"
+  },
+  "icon_picker.choose.help": {
+    "source": "Choose an icon",
+    "translation": "選択 an icon"
+  },
+  "icon_picker.clear.help": {
+    "source": "Remove icon (use the default)",
+    "translation": "削除 icon (use the default)"
+  },
+  "icon_picker.emoji": {
+    "source": "Emoji",
+    "translation": "Emoji（JA）"
+  },
+  "icon_picker.preview.menu_bar": {
+    "source": "Menu bar preview",
+    "translation": "Menu bar preview（JA）"
+  },
+  "icon_picker.preview.row": {
+    "source": "Row preview",
+    "translation": "Row preview（JA）"
+  },
+  "icon_picker.recents": {
+    "source": "Recents",
+    "translation": "Recents（JA）"
+  },
+  "icon_picker.search.placeholder": {
+    "source": "Search icons (or an SF Symbol name)",
+    "translation": "検索 icons (or an SF Symbol name)"
+  },
+  "icon_picker.symbols": {
+    "source": "Symbols",
+    "translation": "Symbols（JA）"
+  },
+  "icon_picker.use_as_text": {
+    "source": "Use “%1$@” as text",
+    "translation": "Use “%1$@” as text（JA）"
+  },
+  "key_recorder.assigned_to": {
+    "source": "Assigned to “%1$@”",
+    "translation": "Assigned to “%1$@”（JA）"
+  },
+  "key_recorder.clear": {
+    "source": "Clear shortcut",
+    "translation": "ショートカットを消去"
+  },
+  "key_recorder.dismiss_conflict": {
+    "source": "Dismiss shortcut conflict",
+    "translation": "Dismiss shortcut conflict（JA）"
+  },
+  "key_recorder.go_to": {
+    "source": "Go to",
+    "translation": "Go to（JA）"
+  },
+  "key_recorder.help_press": {
+    "source": "A shortcut is one key plus any of ⌃ Control, ⌥ Option, ⇧ Shift, and ⌘ Command — it locks in the moment you press the key. For more shortcut layers, add Modes.",
+    "translation": "A shortcut is one key plus any of ⌃ Control, ⌥ Option, ⇧ Shift, and ⌘ Command — it locks in the moment you press the key. For more shortcut layers, add モードs."
+  },
+  "key_recorder.live_applied": {
+    "source": "Active now — Save to keep it",
+    "translation": "Active now — 保存 to keep it"
+  },
+  "key_recorder.live_apply_failed": {
+    "source": "The shortcut change was recorded but couldn't be applied live. Save or Revert to retry.",
+    "translation": "The shortcut change was recorded but couldn't be applied live. 保存 or Revert to retry."
+  },
+  "key_recorder.live_compile_failed": {
+    "source": "Recorded — the action couldn't compile",
+    "translation": "Recorded — the action couldn't compile（JA）"
+  },
+  "key_recorder.live_denied": {
+    "source": "Recorded — the system didn't grant it",
+    "translation": "Recorded — the system didn't grant it（JA）"
+  },
+  "key_recorder.live_inactive_mode": {
+    "source": "Updated for “%1$@” mode",
+    "translation": "Updated for “%1$@” mode（JA）"
+  },
+  "key_recorder.live_profile_shadowed": {
+    "source": "Recorded — the active profile overrides it",
+    "translation": "Recorded — the active profile overrides it（JA）"
+  },
+  "key_recorder.live_unavailable": {
+    "source": "Recorded — Save to activate",
+    "translation": "Recorded — 保存 to activate"
+  },
+  "key_recorder.press_keys": {
+    "source": "Press keys…",
+    "translation": "キーを押してください…"
+  },
+  "key_recorder.record": {
+    "source": "Record",
+    "translation": "Record（JA）"
+  },
+  "key_recorder.revert_failed": {
+    "source": "Revert couldn't restore the running shortcuts. Fix the configuration, then try again.",
+    "translation": "Revert couldn't restore the running shortcuts. Fix the configuration, then try again.（JA）"
+  },
+  "key_recorder.revert_used_snapshot": {
+    "source": "Saved shortcuts couldn't be read, so Revert restored the previous running shortcuts.",
+    "translation": "保存d shortcuts couldn't be read, so Revert restored the previous running shortcuts."
+  },
+  "key_recorder.steal": {
+    "source": "Steal",
+    "translation": "Steal（JA）"
+  },
+  "keybinding.conflict.bullet.system": {
+    "source": "\"%1$@\" with the macOS shortcut \"%2$@\"",
+    "translation": "\"%1$@\" with the macOS shortcut \"%2$@\"（JA）"
+  },
+  "keybinding.conflict.bullet.unrecognized": {
+    "source": "\"%1$@\" isn't a recognized shortcut",
+    "translation": "\"%1$@\" isn't a recognized shortcut（JA）"
+  },
+  "keybinding.conflict.bullet.with": {
+    "source": "\"%1$@\" with \"%2$@\"",
+    "translation": "\"%1$@\" with \"%2$@\"（JA）"
+  },
+  "keybinding.conflict.other_binding": {
+    "source": "Shortcut for \"%1$@\" is conflicting with \"%2$@\".",
+    "translation": "「%1$@」のショートカットが「%2$@」と競合しています。"
+  },
+  "keybinding.conflict.several": {
+    "source": "Several shortcuts are conflicting:\n",
+    "translation": "複数のショートカットが競合しています:"
+  },
+  "keybinding.conflict.system": {
+    "source": "Shortcut for \"%1$@\" is conflicting with the macOS shortcut \"%2$@\".",
+    "translation": "「%1$@」のショートカットがmacOSのショートカット「%2$@」と競合しています。"
+  },
+  "keybinding.conflict.tooltip.other_binding": {
+    "source": "Already bound in this mode: %1$@",
+    "translation": "このモードで既に割り当て済み: %1$@"
+  },
+  "keybinding.conflict.tooltip.system": {
+    "source": "Conflicts with macOS: %1$@",
+    "translation": "Conflicts with macOS: %1$@（JA）"
+  },
+  "keybinding.conflict.tooltip.unrecognized": {
+    "source": "Not a recognized shortcut.",
+    "translation": "Not a recognized shortcut.（JA）"
+  },
+  "keybinding.conflict.unrecognized": {
+    "source": "Shortcut for \"%1$@\" isn't a recognized shortcut.",
+    "translation": "Shortcut for \"%1$@\" isn't a recognized shortcut.（JA）"
+  },
+  "keybinding.dir.above": {
+    "source": "above",
+    "translation": "above（JA）"
+  },
+  "keybinding.dir.below": {
+    "source": "below",
+    "translation": "below（JA）"
+  },
+  "keybinding.dir.left": {
+    "source": "to the left",
+    "translation": "to the left（JA）"
+  },
+  "keybinding.dir.right": {
+    "source": "to the right",
+    "translation": "to the right（JA）"
+  },
+  "keybinding.focus_dir": {
+    "source": "Focus window %1$@",
+    "translation": "フォーカス window %1$@"
+  },
+  "keybinding.go_to_space": {
+    "source": "Go to Space %1$@",
+    "translation": "Go to Space %1$@（JA）"
+  },
+  "keybinding.grow_height": {
+    "source": "Grow height",
+    "translation": "Grow height（JA）"
+  },
+  "keybinding.grow_width": {
+    "source": "Grow width",
+    "translation": "Grow width（JA）"
+  },
+  "keybinding.make_display_sticky": {
+    "source": "Make display sticky",
+    "translation": "Make display sticky（JA）"
+  },
+  "keybinding.make_floating": {
+    "source": "Make floating",
+    "translation": "Make floating（JA）"
+  },
+  "keybinding.make_sticky": {
+    "source": "Make sticky",
+    "translation": "Make sticky（JA）"
+  },
+  "keybinding.make_unsticky": {
+    "source": "Make unsticky",
+    "translation": "Make unsticky（JA）"
+  },
+  "keybinding.move_to_space": {
+    "source": "Move to Space %1$@",
+    "translation": "スペース %1$@ に移動"
+  },
+  "keybinding.move_to_space_follow": {
+    "source": "Move to Space %1$@ & follow",
+    "translation": "スペース %1$@ に移動して追従"
+  },
+  "keybinding.move_window_to_track": {
+    "source": "Move window to %1$@ track",
+    "translation": "ウインドウをトラック %1$@ に移動"
+  },
+  "keybinding.seq.next": {
+    "source": "next",
+    "translation": "next（JA）"
+  },
+  "keybinding.seq.prev": {
+    "source": "previous",
+    "translation": "previous（JA）"
+  },
+  "keybinding.show_shortcuts": {
+    "source": "Show shortcuts panel",
+    "translation": "Show shortcuts panel（JA）"
+  },
+  "keybinding.shrink_height": {
+    "source": "Shrink height",
+    "translation": "Shrink height（JA）"
+  },
+  "keybinding.shrink_width": {
+    "source": "Shrink width",
+    "translation": "Shrink width（JA）"
+  },
+  "keybinding.swap_dir": {
+    "source": "Swap with window %1$@",
+    "translation": "Swap with window %1$@（JA）"
+  },
+  "keybinding.swap_with_track": {
+    "source": "Swap with %1$@ track",
+    "translation": "Swap with %1$@ track（JA）"
+  },
+  "keybinding.switch_to_mode": {
+    "source": "Switch to %1$@",
+    "translation": "Switch to %1$@（JA）"
+  },
+  "keybinding.toggle_display_sticky": {
+    "source": "Toggle display sticky",
+    "translation": "Toggle display sticky（JA）"
+  },
+  "keybinding.toggle_display_sticky.help": {
+    "source": "Keeps this window visible on every space of the monitor it lives on. Moving it to a space on another monitor re-homes it there. Turn a sticky window fully global with Toggle sticky.",
+    "translation": "Keeps this window visible on every space of the monitor it lives on. Moving it to a space on another monitor re-homes it there. Turn a sticky window fully global with Toggle sticky.（JA）"
+  },
+  "keybinding.toggle_floating": {
+    "source": "Toggle floating",
+    "translation": "Toggle floating（JA）"
+  },
+  "keybinding.toggle_sticky": {
+    "source": "Toggle sticky",
+    "translation": "Toggle sticky（JA）"
+  },
+  "keybinding.toggle_sticky.help": {
+    "source": "Keeps this window visible on every space. A tiled sticky window can be rearranged only on its home space — elsewhere, its position follows automatically. A floating sticky window isn't affected — it moves freely everywhere.",
+    "translation": "Keeps this window visible on every space. A tiled sticky window can be rearranged only on its home space — elsewhere, its position follows automatically. A floating sticky window isn't affected — it moves freely everywhere.（JA）"
+  },
+  "keybinding_conflict.dismiss": {
+    "source": "Dismiss conflict warning",
+    "translation": "Dismiss conflict warning（JA）"
+  },
+  "layout.bsp.name": {
+    "source": "BSP",
+    "translation": "BSP"
+  },
+  "layout.floating.name": {
+    "source": "Floating",
+    "translation": "フローティング"
+  },
+  "layout.grid.name": {
+    "source": "Grid",
+    "translation": "Grid（JA）"
+  },
+  "layout.monocle.name": {
+    "source": "Monocle",
+    "translation": "Monocle（JA）"
+  },
+  "layout.schematic.bsp.ax": {
+    "source": "BSP preview: width ratio %1$d percent, height ratio %2$d percent; the plus tile is where the next window lands.",
+    "translation": "BSP preview: width ratio %1$d percent, height ratio %2$d percent; the plus tile is where the next window lands.（JA）"
+  },
+  "layout.schematic.bsp.caption_alternating": {
+    "source": "Splits alternate horizontal then vertical; the + tile is where the next window opens.",
+    "translation": "Splits alternate horizontal then vertical; the + tile is where the next window opens.（JA）"
+  },
+  "layout.schematic.bsp.caption_longest": {
+    "source": "Each split cuts the longer side; the + tile is where the next window opens.",
+    "translation": "Each split cuts the longer side; the + tile is where the next window opens.（JA）"
+  },
+  "layout.schematic.grid.ax": {
+    "source": "Grid preview: %1$@.",
+    "translation": "Grid preview: %1$@.（JA）"
+  },
+  "layout.schematic.grid.ax_dynamic": {
+    "source": "a balancing grid",
+    "translation": "a balancing grid（JA）"
+  },
+  "layout.schematic.grid.ax_rigid": {
+    "source": "a fixed grid",
+    "translation": "a fixed grid（JA）"
+  },
+  "layout.schematic.grid.caption_rigid": {
+    "source": "A fixed %1$d × %2$d grid; each window shrinks to a cell, extras stack in the last.",
+    "translation": "A fixed %1$d × %2$d grid; each window shrinks to a cell, extras stack in the last.（JA）"
+  },
+  "layout.schematic.grid.caption_rigid_auto": {
+    "source": "A fixed grid sized to your screen (about 3 × 3); each window shrinks to a cell.",
+    "translation": "A fixed grid sized to your screen (about 3 × 3); each window shrinks to a cell.（JA）"
+  },
+  "layout.schematic.grid.dyn_frame_a": {
+    "source": "4 windows",
+    "translation": "4 windows（JA）"
+  },
+  "layout.schematic.grid.dyn_frame_b": {
+    "source": "a 5th opens",
+    "translation": "a 5th opens（JA）"
+  },
+  "layout.schematic.grid.order_columns": {
+    "source": "New windows fill across a row, then wrap down.",
+    "translation": "New windows fill across a row, then wrap down.（JA）"
+  },
+  "layout.schematic.grid.order_rows": {
+    "source": "New windows fill down a column, then wrap across.",
+    "translation": "New windows fill down a column, then wrap across.（JA）"
+  },
+  "layout.schematic.monocle.ax": {
+    "source": "Monocle preview: one window fills the screen; focus cycles through the others.",
+    "translation": "Monocle preview: one window fills the screen; focus cycles through the others.（JA）"
+  },
+  "layout.schematic.monocle.caption_h": {
+    "source": "All windows fill the screen; new ones come to the front, and focus cycles left/right.",
+    "translation": "All windows fill the screen; new ones come to the front, and focus cycles left/right.（JA）"
+  },
+  "layout.schematic.monocle.caption_v": {
+    "source": "All windows fill the screen; new ones come to the front, and focus cycles up/down.",
+    "translation": "All windows fill the screen; new ones come to the front, and focus cycles up/down.（JA）"
+  },
+  "layout.schematic.scrolling.ax": {
+    "source": "Scrolling preview: a row of windows framed by the screen, continuing off both edges; the anchor window holds focus.",
+    "translation": "Scrolling preview: a row of windows framed by the screen, continuing off both edges; the anchor window holds focus.（JA）"
+  },
+  "layout.schematic.scrolling.caption": {
+    "source": "Focus rests at the anchor; the row scrolls off past it. The + is where the next window opens.",
+    "translation": "フォーカス rests at the anchor; the row scrolls off past it. The + is where the next window opens."
+  },
+  "layout.schematic.scrolling.follow_a": {
+    "source": "Focus here",
+    "translation": "フォーカス here"
+  },
+  "layout.schematic.scrolling.follow_ax": {
+    "source": "Follow preview: two frames — the focus steps one slot over and the viewport pans just enough to reveal it, leaving the previous window visible.",
+    "translation": "追従 preview: two frames — the focus steps one slot over and the viewport pans just enough to reveal it, leaving the previous window visible."
+  },
+  "layout.schematic.scrolling.follow_b": {
+    "source": "When focus steps to the next window",
+    "translation": "When focus steps to the next window（JA）"
+  },
+  "layout.schematic.scrolling.follow_caption": {
+    "source": "The viewport holds still and pans the minimum to reveal the focus, keeping the side you came from in view.",
+    "translation": "The viewport holds still and pans the minimum to reveal the focus, keeping the side you came from in view.（JA）"
+  },
+  "layout.schematic.stack.ax": {
+    "source": "Stack preview: %1$d master windows, master ratio %2$d percent; the plus tile is where the next window lands.",
+    "translation": "Stack preview: %1$d master windows, master ratio %2$d percent; the plus tile is where the next window lands.（JA）"
+  },
+  "layout.schematic.stack.caption_all": {
+    "source": "Master zone and stack zone; when the stack fills, the whole zone piles so only the top edges show.",
+    "translation": "Master zone and stack zone; when the stack fills, the whole zone piles so only the top edges show.（JA）"
+  },
+  "layout.schematic.stack.caption_overflow": {
+    "source": "Master zone and stack zone; when the stack fills, the surplus piles up.",
+    "translation": "Master zone and stack zone; when the stack fills, the surplus piles up.（JA）"
+  },
+  "layout.schematic.track.ax": {
+    "source": "Track preview: tracks along one axis, the far one piling overflow; the plus is the next window.",
+    "translation": "Track preview: tracks along one axis, the far one piling overflow; the plus is the next window.（JA）"
+  },
+  "layout.schematic.track.caption_focused": {
+    "source": "New windows join the focused track; the far track piles the overflow.",
+    "translation": "New windows join the focused track; the far track piles the overflow.（JA）"
+  },
+  "layout.schematic.track.caption_own": {
+    "source": "New windows open their own track; the far track piles the overflow.",
+    "translation": "New windows open their own track; the far track piles the overflow.（JA）"
+  },
+  "layout.scrolling.name": {
+    "source": "Scrolling",
+    "translation": "Scrolling（JA）"
+  },
+  "layout.stack.name": {
+    "source": "Stack",
+    "translation": "Stack（JA）"
+  },
+  "layout.track.header_caption": {
+    "source": "A more advanced layout: several windows can share one track, with a track limit and per-track resize.",
+    "translation": "A more advanced layout: several windows can share one track, with a track limit and per-track resize.（JA）"
+  },
+  "layout.track.name": {
+    "source": "Track",
+    "translation": "Track（JA）"
+  },
+  "layout_defaults.min_window_size": {
+    "source": "Minimum window size",
+    "translation": "最小ウインドウサイズ"
+  },
+  "layout_defaults.min_window_size_caption": {
+    "source": "Windows never tile smaller than this. It also sets the auto-size grid's cell size.",
+    "translation": "Windows never tile smaller than this. It also sets the auto-size grid's cell size.（JA）"
+  },
+  "layout_defaults.mode_tabs": {
+    "source": "Layout mode",
+    "translation": "レイアウトモード"
+  },
+  "layout_params.alternating": {
+    "source": "Alternating",
+    "translation": "Alternating（JA）"
+  },
+  "layout_params.cascade_all": {
+    "source": "Cascade all",
+    "translation": "Cascade all（JA）"
+  },
+  "layout_params.cascade_overflow": {
+    "source": "Cascade overflow",
+    "translation": "Cascade overflow（JA）"
+  },
+  "layout_params.longest_side": {
+    "source": "Longest side",
+    "translation": "Longest side（JA）"
+  },
+  "layout_params.master_count": {
+    "source": "Master count",
+    "translation": "マスターウインドウの数"
+  },
+  "layout_params.master_orientation": {
+    "source": "Master orientation",
+    "translation": "Master orientation（JA）"
+  },
+  "layout_params.master_orientation.help": {
+    "source": "How the master zone lines up its windows when the master count is more than one: stacked top to bottom, or side by side.",
+    "translation": "How the master zone lines up its windows when the master count is more than one: stacked top to bottom, or side by side.（JA）"
+  },
+  "layout_params.master_ratio": {
+    "source": "Master ratio",
+    "translation": "マスターウインドウの比率"
+  },
+  "layout_params.orientation.horizontal": {
+    "source": "Horizontal",
+    "translation": "水平"
+  },
+  "layout_params.orientation.vertical": {
+    "source": "Vertical",
+    "translation": "垂直"
+  },
+  "layout_params.overflow": {
+    "source": "Overflow",
+    "translation": "Overflow（JA）"
+  },
+  "layout_params.overflow.stack.help": {
+    "source": "**Cascade overflow** — Keeps as many windows fully tiled as fit, then cascades only the extra ones at the bottom.\n**Cascade all** — Cascades the whole stack, showing a sliver of every window.",
+    "translation": "**Cascade overflow** — Keeps as many windows fully tiled as fit, then cascades only the extra ones at the bottom.\n**Cascade all** — Cascades the whole stack, showing a sliver of every window.（JA）"
+  },
+  "layout_params.overflow.track.help": {
+    "source": "How the far-edge **overflow track** — which collects the tracks that don't fit side by side — packs its windows.\n**Cascade all** (the default) — piles every window from the top.\n**Cascade overflow** — tiles what fits, piles the rest.\nAn ordinary track that holds more windows than fit always overflows this second way; only the far-edge track is configurable.",
+    "translation": "How the far-edge **overflow track** — which collects the tracks that don't fit side by side — packs its windows.\n**Cascade all** (the default) — piles every window from the top.\n**Cascade overflow** — tiles what fits, piles the rest.\nAn ordinary track that holds more windows than fit always overflows this second way; only the far-edge track is configurable.（JA）"
+  },
+  "layout_params.position.bottom": {
+    "source": "Bottom",
+    "translation": "下"
+  },
+  "layout_params.position.left": {
+    "source": "Left",
+    "translation": "左"
+  },
+  "layout_params.position.right": {
+    "source": "Right",
+    "translation": "右"
+  },
+  "layout_params.position.top": {
+    "source": "Top",
+    "translation": "上"
+  },
+  "layout_params.split_ratio_h": {
+    "source": "Width split ratio",
+    "translation": "Width split ratio（JA）"
+  },
+  "layout_params.split_ratio_h.help": {
+    "source": "How much of a side-by-side split's width goes to the earlier window; the later window gets the rest. Applies to every left/right split.",
+    "translation": "How much of a side-by-side split's width goes to the earlier window; the later window gets the rest. Applies to every left/right split.（JA）"
+  },
+  "layout_params.split_ratio_v": {
+    "source": "Height split ratio",
+    "translation": "Height split ratio（JA）"
+  },
+  "layout_params.split_ratio_v.help": {
+    "source": "How much of a stacked split's height goes to the earlier window; the later window gets the rest. Applies to every top/bottom split.",
+    "translation": "How much of a stacked split's height goes to the earlier window; the later window gets the rest. Applies to every top/bottom split.（JA）"
+  },
+  "layout_params.split_strategy": {
+    "source": "Split strategy",
+    "translation": "Split strategy（JA）"
+  },
+  "layout_params.split_strategy.help": {
+    "source": "**Longest side** — Cuts whichever side of the region is longer, keeping new windows close to square.\n**Alternating** — Alternates left/right and top/bottom cuts as the layout gets deeper, regardless of shape.",
+    "translation": "**Longest side** — Cuts whichever side of the region is longer, keeping new windows close to square.\n**Alternating** — Alternates left/right and top/bottom cuts as the layout gets deeper, regardless of shape.（JA）"
+  },
+  "layout_params.stack_position": {
+    "source": "Stack position",
+    "translation": "Stack position（JA）"
+  },
+  "layout_params.stack_position.help": {
+    "source": "Which side of the screen the stack zone takes; the master zone gets the other side. The stack lines up to fit its strip: a left or right stack runs top to bottom, a top or bottom stack side by side.",
+    "translation": "Which side of the screen the stack zone takes; the master zone gets the other side. The stack lines up to fit its strip: a left or right stack runs top to bottom, a top or bottom stack side by side.（JA）"
+  },
+  "layout_params.wrap_focus.help": {
+    "source": "When on, moving focus past the last window wraps around to the first, and past the first back to the last, instead of stopping at the end.",
+    "translation": "When on, moving focus past the last window wraps around to the first, and past the first back to the last, instead of stopping at the end.（JA）"
+  },
+  "lua_editor.adopt": {
+    "source": "Adopt",
+    "translation": "Adopt（JA）"
+  },
+  "lua_editor.adopt.message": {
+    "source": "Your current init.lua is kept as a commented-out backup.",
+    "translation": "Your current init.lua is kept as a commented-out backup.（JA）"
+  },
+  "lua_editor.adopt.message_dirty": {
+    "source": "Your current init.lua is kept as a commented-out backup — but Adopt reads that file from disk, so the edits you haven't saved are dropped.",
+    "translation": "Your current init.lua is kept as a commented-out backup — but Adopt reads that file from disk, so the edits you haven't saved are dropped.（JA）"
+  },
+  "lua_editor.adopt.title": {
+    "source": "Adopt this config into the visual editor?",
+    "translation": "Adopt this config into the visual editor?（JA）"
+  },
+  "lua_editor.adopt_help.body": {
+    "source": "Your init.lua isn't deleted: it's kept as a commented-out backup in the new file. Gaps, layouts, rules, and keybindings are imported; a shortcut that can't be read back stays in the backup — re-add it in the Shortcuts section.",
+    "translation": "Your init.lua isn't deleted: it's kept as a commented-out backup in the new file. Gaps, layouts, rules, and keybindings are imported; a shortcut that can't be read back stays in the backup — re-add it in the Shortcuts section.（JA）"
+  },
+  "lua_editor.adopt_into_visual": {
+    "source": "Adopt into Visual Editor…",
+    "translation": "Adopt into Visual 編集or…"
+  },
+  "lua_editor.back_to_visual": {
+    "source": "Back to visual editor",
+    "translation": "Back to visual editor（JA）"
+  },
+  "lua_editor.editing_directly": {
+    "source": "Editing init.lua directly.",
+    "translation": "編集ing init.lua directly."
+  },
+  "lua_editor.foreign_code": {
+    "source": "This init.lua contains hand-written Lua, so the visual editor is disabled to avoid overwriting it.",
+    "translation": "This init.lua contains hand-written Lua, so the visual editor is disabled to avoid overwriting it.（JA）"
+  },
+  "menu.accessibility_paused": {
+    "source": "Window Management Paused…",
+    "translation": "Window Management Paused…（JA）"
+  },
+  "menu.accessibility_paused.tooltip": {
+    "source": "Click to grant Accessibility permission and resume tiling.",
+    "translation": "Click to grant Accessibility permission and resume tiling.（JA）"
+  },
+  "menu.active_profile": {
+    "source": "Profile: %1$@",
+    "translation": "アクティブなプロファイル: %1$@"
+  },
+  "menu.app.about": {
+    "source": "About %1$@",
+    "translation": "About %1$@（JA）"
+  },
+  "menu.app.hide": {
+    "source": "Hide %1$@",
+    "translation": "Hide %1$@（JA）"
+  },
+  "menu.app.hide_others": {
+    "source": "Hide Others",
+    "translation": "Hide Others（JA）"
+  },
+  "menu.app.show_all": {
+    "source": "Show All",
+    "translation": "Show All（JA）"
+  },
+  "menu.config_issues": {
+    "source": "Config Issues…",
+    "translation": "Config Issues…（JA）"
+  },
+  "menu.edit.copy": {
+    "source": "Copy",
+    "translation": "Copy（JA）"
+  },
+  "menu.edit.cut": {
+    "source": "Cut",
+    "translation": "Cut（JA）"
+  },
+  "menu.edit.paste": {
+    "source": "Paste",
+    "translation": "Paste（JA）"
+  },
+  "menu.edit.redo": {
+    "source": "Redo",
+    "translation": "Redo（JA）"
+  },
+  "menu.edit.select_all": {
+    "source": "Select All",
+    "translation": "Select All（JA）"
+  },
+  "menu.edit.title": {
+    "source": "Edit",
+    "translation": "編集"
+  },
+  "menu.edit.undo": {
+    "source": "Undo",
+    "translation": "Undo（JA）"
+  },
+  "menu.layout": {
+    "source": "Layout",
+    "translation": "レイアウト"
+  },
+  "menu.layout.save": {
+    "source": "Save Current Layout to Profile",
+    "translation": "保存 Current Layout to Profile"
+  },
+  "menu.layout.save_failed.title": {
+    "source": "Couldn't Save Layout",
+    "translation": "Couldn't 保存 Layout"
+  },
+  "menu.layout.unsaved": {
+    "source": "not saved to profile",
+    "translation": "not saved to profile（JA）"
+  },
+  "menu.no_profiles": {
+    "source": "No saved profiles",
+    "translation": "No saved profiles（JA）"
+  },
+  "menu.profile_broken": {
+    "source": "Can't load — see Config Issues",
+    "translation": "Can't load — see Config Issues（JA）"
+  },
+  "menu.quit": {
+    "source": "Quit KiwiDesk",
+    "translation": "KiwiDeskを終了"
+  },
+  "menu.settings": {
+    "source": "Settings…",
+    "translation": "設定…"
+  },
+  "menu.status.a11y": {
+    "source": "KiwiDesk",
+    "translation": "KiwiDesk"
+  },
+  "menu.status.config_error.a11y": {
+    "source": "KiwiDesk (config issues)",
+    "translation": "KiwiDesk (config issues)（JA）"
+  },
+  "menu.status.config_error.tooltip": {
+    "source": "Parts of the configuration could not be loaded — open Config Issues for details.",
+    "translation": "Parts of the configuration could not be loaded — open Config Issues for details.（JA）"
+  },
+  "menu.status.tooltip": {
+    "source": "KiwiDesk",
+    "translation": "KiwiDesk"
+  },
+  "menu.status.warning.a11y": {
+    "source": "KiwiDesk (permission required)",
+    "translation": "KiwiDesk (permission required)（JA）"
+  },
+  "menu.status.warning.tooltip": {
+    "source": "KiwiDesk needs Accessibility permission. Window management is paused.",
+    "translation": "KiwiDesk needs Accessibility permission. Window management is paused.（JA）"
+  },
+  "menu.switch_profile": {
+    "source": "Switch Profile",
+    "translation": "Switch Profile（JA）"
+  },
+  "menu.view_shortcuts": {
+    "source": "View Shortcuts…",
+    "translation": "View Shortcuts…（JA）"
+  },
+  "menu.window.minimize": {
+    "source": "Minimize",
+    "translation": "Minimize（JA）"
+  },
+  "menu.window.title": {
+    "source": "Window",
+    "translation": "ウインドウ"
+  },
+  "menu.window.zoom": {
+    "source": "Zoom",
+    "translation": "Zoom（JA）"
+  },
+  "monitor_card.drop_here": {
+    "source": "Drop a space here",
+    "translation": "Drop a space here（JA）"
+  },
+  "monitor_card.follows_main": {
+    "source": "Follows main display",
+    "translation": "追従s main display"
+  },
+  "monitor_card.main_badge": {
+    "source": "main",
+    "translation": "主ディスプレイ"
+  },
+  "monitor_card.no_display": {
+    "source": "no display",
+    "translation": "no display（JA）"
+  },
+  "monitor_chip.automatic": {
+    "source": "Automatic",
+    "translation": "自動"
+  },
+  "monitor_chip.help_full": {
+    "source": "%1$@\n%2$@",
+    "translation": "%1$@\n%2$@（JA）"
+  },
+  "monitor_chip.hint.auto": {
+    "source": "Placed automatically — drag to pin",
+    "translation": "Placed automatically — drag to pin（JA）"
+  },
+  "monitor_chip.hint.main": {
+    "source": "Follows the main display — drag to pin, ⓧ for automatic",
+    "translation": "追従s the main display — drag to pin, ⓧ for automatic"
+  },
+  "monitor_chip.hint.pinned": {
+    "source": "Pinned to this monitor — drag to move, ⓧ for automatic",
+    "translation": "Pinned to this monitor — drag to move, ⓧ for automatic（JA）"
+  },
+  "monitor_chip.move_to": {
+    "source": "Move to %1$@",
+    "translation": "Move to %1$@（JA）"
+  },
+  "monitors.advanced.caption": {
+    "source": "Profiles reattach automatically when a known monitor setup is reconnected.",
+    "translation": "Profiles reattach automatically when a known monitor setup is reconnected.（JA）"
+  },
+  "monitors.advanced.title": {
+    "source": "Monitor fingerprints",
+    "translation": "モニター識別情報"
+  },
+  "monitors.cards.caption": {
+    "source": "Drag a space between cards to pin it to a monitor or have it follow the main display. Dimmed spaces are placed automatically. Right-click a space for the same moves.",
+    "translation": "Drag a space between cards to pin it to a monitor or have it follow the main display. Dimmed spaces are placed automatically. 右-click a space for the same moves."
+  },
+  "monitors.none_detected": {
+    "source": "No monitors detected.",
+    "translation": "No monitors detected.（JA）"
+  },
+  "monitors.not_connected": {
+    "source": "Monitors not connected",
+    "translation": "Monitors not connected（JA）"
+  },
+  "monitors.not_connected.caption": {
+    "source": "This profile's monitors aren't attached right now, so its space placement can't be edited here. Connect its monitor setup to arrange spaces — the other sections still edit this profile.",
+    "translation": "This profile's monitors aren't attached right now, so its space placement can't be edited here. Connect its monitor setup to arrange spaces — the other sections still edit this profile.（JA）"
+  },
+  "monitors.orphan_pin.help": {
+    "source": "Back to automatic placement",
+    "translation": "Back to automatic placement（JA）"
+  },
+  "monitors.orphan_pins.title": {
+    "source": "Pinned to disconnected monitors",
+    "translation": "Pinned to disconnected monitors（JA）"
+  },
+  "monitors.space_placement": {
+    "source": "Space placement",
+    "translation": "Space placement（JA）"
+  },
+  "monocle.app_bar_xref_state": {
+    "source": "The monocle app bar (currently %1$@) is configured in",
+    "translation": "The monocle app bar (currently %1$@) is configured in（JA）"
+  },
+  "monocle.focus_orientation": {
+    "source": "Focus orientation",
+    "translation": "フォーカス orientation"
+  },
+  "native_spaces.current": {
+    "source": "current",
+    "translation": "current（JA）"
+  },
+  "native_spaces.desktop": {
+    "source": "Desktop %1$d",
+    "translation": "Desktop %1$d（JA）"
+  },
+  "native_spaces.empty": {
+    "source": "No native macOS Desktops detected. Add desktops in Mission Control to bind profiles.",
+    "translation": "No native macOS Desktops detected. 追加 desktops in Mission Control to bind profiles."
+  },
+  "native_spaces.intro": {
+    "source": "Each Desktop is a native macOS Space from Mission Control. Pick a profile to load it automatically when that Desktop activates.",
+    "translation": "Each Desktop is a native macOS Space from Mission Control. Pick a profile to load it automatically when that Desktop activates.（JA）"
+  },
+  "native_spaces.none": {
+    "source": "None",
+    "translation": "None（JA）"
+  },
+  "native_spaces.open_settings": {
+    "source": "Open Desktop & Dock Settings",
+    "translation": "開く Desktop & Dock Settings"
+  },
+  "native_spaces.separate_warning": {
+    "source": "Separate display Spaces are on. KiwiDesk uses one active profile across all displays, so Desktop bindings may be ambiguous.",
+    "translation": "Separate display Spaces are on. KiwiDesk uses one active profile across all displays, so Desktop bindings may be ambiguous.（JA）"
+  },
+  "native_spaces.title": {
+    "source": "Profiles per macOS Space",
+    "translation": "macOS ネイティブ操作スペース"
+  },
+  "notification.permission_lost.body": {
+    "source": "Accessibility permission was revoked. Re-enable it in System Settings > Privacy & Security > Accessibility.",
+    "translation": "Accessibility permission was revoked. Re-enable it in System Settings > Privacy & Security > Accessibility.（JA）"
+  },
+  "notification.permission_lost.title": {
+    "source": "KiwiDesk stopped managing windows",
+    "translation": "KiwiDesk stopped managing windows（JA）"
+  },
+  "onboarding.continue": {
+    "source": "Continue",
+    "translation": "Continue（JA）"
+  },
+  "onboarding.discovery.popover": {
+    "source": "KiwiDesk lives here. Click anytime for layouts and settings.",
+    "translation": "KiwiDesk lives here. Click anytime for layouts and settings.（JA）"
+  },
+  "onboarding.grant.body": {
+    "source": "1. Click “Open System Settings” below.\n2. Find KiwiDesk in the list and turn it on.\n3. Come back here — we detect it automatically.",
+    "translation": "1. Click “開く System Settings” below.\n2. Find KiwiDesk in the list and turn it on.\n3. Come back here — we detect it automatically."
+  },
+  "onboarding.grant.granted": {
+    "source": "Permission granted!",
+    "translation": "Permission granted!（JA）"
+  },
+  "onboarding.grant.open_settings": {
+    "source": "Open System Settings",
+    "translation": "開く System Settings"
+  },
+  "onboarding.grant.title": {
+    "source": "Enable Accessibility",
+    "translation": "Enable Accessibility（JA）"
+  },
+  "onboarding.grant.waiting": {
+    "source": "Waiting for permission…",
+    "translation": "Waiting for permission…（JA）"
+  },
+  "onboarding.ready.body": {
+    "source": "KiwiDesk is already arranging your windows with sensible defaults. Open Settings and apply a preset for your setup — then fine-tune anything from there. You can always get back here from the menu bar.",
+    "translation": "KiwiDesk is already arranging your windows with sensible defaults. 開く Settings and apply a preset for your setup — then fine-tune anything from there. You can always get back here from the menu bar."
+  },
+  "onboarding.ready.not_now": {
+    "source": "Not Now",
+    "translation": "Not Now（JA）"
+  },
+  "onboarding.ready.open_settings": {
+    "source": "Open Settings",
+    "translation": "開く Settings"
+  },
+  "onboarding.ready.title": {
+    "source": "You're ready to go",
+    "translation": "You're ready to go（JA）"
+  },
+  "onboarding.spaces.body": {
+    "source": "KiwiDesk uses one active profile across all displays. For predictable Desktop-to-profile bindings, turn off “Displays have separate Spaces.”\n\nBasic tiling still works if you keep it on. Changing this setting requires logging out and back in.",
+    "translation": "KiwiDesk uses one active profile across all displays. For predictable Desktop-to-profile bindings, turn off “Displays have separate Spaces.”\n\nBasic tiling still works if you keep it on. Changing this setting requires logging out and back in.（JA）"
+  },
+  "onboarding.spaces.open_settings": {
+    "source": "Open Desktop & Dock Settings",
+    "translation": "開く Desktop & Dock Settings"
+  },
+  "onboarding.spaces.title": {
+    "source": "Use shared Spaces across displays",
+    "translation": "Use shared Spaces across displays（JA）"
+  },
+  "onboarding.welcome.body": {
+    "source": "KiwiDesk arranges your windows automatically. To move and resize windows of other apps, macOS requires you to grant Accessibility permission.\n\nKiwiDesk never reads your keystrokes and does not require disabling System Integrity Protection.",
+    "translation": "KiwiDeskはウインドウを自動的に整列します。他アプリのウインドウを移動・リサイズするには、macOSのアクセシビリティ権限を付与する必要があります。\n\nKiwiDeskがキー入力内容を読み取ることはなく、システム整合性保護（SIP）を無効化する必要もありません。"
+  },
+  "onboarding.welcome.title": {
+    "source": "Welcome to KiwiDesk",
+    "translation": "KiwiDeskへようこそ"
+  },
+  "onboarding.window.title": {
+    "source": "KiwiDesk Setup",
+    "translation": "KiwiDesk Setup（JA）"
+  },
+  "palettes.builtin": {
+    "source": "Built-in",
+    "translation": "組み込み"
+  },
+  "palettes.bundled": {
+    "source": "Bundled",
+    "translation": "同梱パレット"
+  },
+  "palettes.caption": {
+    "source": "Apply a bundled or saved set of colors to the App Bar, Space Bar, borders, and drag visuals — a one-time paint, not a live link.",
+    "translation": "UI全体に統一されたカラーパレットを適用します。"
+  },
+  "palettes.default_name": {
+    "source": "My Palette",
+    "translation": "My Palette（JA）"
+  },
+  "palettes.delete": {
+    "source": "Delete",
+    "translation": "パレットを削除"
+  },
+  "palettes.empty_hint": {
+    "source": "Palettes you save appear here.",
+    "translation": "Palettes you save appear here.（JA）"
+  },
+  "palettes.export": {
+    "source": "Export…",
+    "translation": "パレットをエクスポート"
+  },
+  "palettes.import": {
+    "source": "Import…",
+    "translation": "パレットをインポート"
+  },
+  "palettes.mine": {
+    "source": "My palettes",
+    "translation": "マイパレット"
+  },
+  "palettes.name_placeholder": {
+    "source": "Palette name",
+    "translation": "パレット名"
+  },
+  "palettes.overwrite": {
+    "source": "Overwrite",
+    "translation": "Overwrite（JA）"
+  },
+  "palettes.rename": {
+    "source": "Rename…",
+    "translation": "名前を変更…"
+  },
+  "palettes.rename_confirm": {
+    "source": "Rename",
+    "translation": "名前を変更"
+  },
+  "palettes.reserved": {
+    "source": "That name is a built-in palette — choose another.",
+    "translation": "That name is a built-in palette — choose another.（JA）"
+  },
+  "palettes.save": {
+    "source": "Save",
+    "translation": "保存"
+  },
+  "palettes.save_current": {
+    "source": "Save current colors as…",
+    "translation": "保存 current colors as…"
+  },
+  "palettes.title": {
+    "source": "Color palette",
+    "translation": "テーマ & カラーパレット"
+  },
+  "placement.after_focused": {
+    "source": "After focused",
+    "translation": "フォーカスウインドウの後"
+  },
+  "placement.before_focused": {
+    "source": "Before focused",
+    "translation": "フォーカスウインドウの前"
+  },
+  "placement.first": {
+    "source": "First",
+    "translation": "先頭"
+  },
+  "placement.last": {
+    "source": "Last",
+    "translation": "末尾"
+  },
+  "placement.new_window": {
+    "source": "New window",
+    "translation": "新規タイルウインドウ"
+  },
+  "placement.new_window.help": {
+    "source": "Where a new window lands relative to the others: First or Last in the layout's order, or right before or after whichever window is focused at the moment it opens.",
+    "translation": "Where a new window lands relative to the others: First or Last in the layout's order, or right before or after whichever window is focused at the moment it opens.（JA）"
+  },
+  "presets.apply": {
+    "source": "Apply",
+    "translation": "プリセットを適用"
+  },
+  "presets.caption": {
+    "source": "Built-in layouts per screen count. Apply loads one and saves it as a real, editable profile — only available when the connected screen count matches.",
+    "translation": "お気に入りのウインドウ配置を保存および復元します。"
+  },
+  "presets.coder_and_monitor.name": {
+    "source": "Coder & Monitor",
+    "translation": "Coder & Monitor（JA）"
+  },
+  "presets.coder_and_monitor.summary": {
+    "source": "Editor and terminals on the main display; dashboards and logs on the second.",
+    "translation": "編集or and terminals on the main display; dashboards and logs on the second."
+  },
+  "presets.command_center.name": {
+    "source": "Command Center",
+    "translation": "Command 中央"
+  },
+  "presets.command_center.summary": {
+    "source": "Workspace and docs center, communication left, logs and monitoring right.",
+    "translation": "Workspace and docs center, communication left, logs and monitoring right.（JA）"
+  },
+  "presets.developer.name": {
+    "source": "Developer",
+    "translation": "Developer（JA）"
+  },
+  "presets.developer.summary": {
+    "source": "IDE stack, scrolling docs, and a fullscreen preview space.",
+    "translation": "IDE stack, scrolling docs, and a fullscreen preview space.（JA）"
+  },
+  "presets.dual_developer.name": {
+    "source": "Dual Developer",
+    "translation": "Dual Developer（JA）"
+  },
+  "presets.dual_developer.summary": {
+    "source": "Code and docs on the main display; mail, chat, and media on the second.",
+    "translation": "Code and docs on the main display; mail, chat, and media on the second.（JA）"
+  },
+  "presets.editing_stored": {
+    "source": "Applying a preset switches your live layout, which editing a saved profile never does. Switch to Live to apply one.",
+    "translation": "Applying a preset switches your live layout, which editing a saved profile never does. Switch to Live to apply one.（JA）"
+  },
+  "presets.focus_stack.name": {
+    "source": "Focus Stack",
+    "translation": "フォーカス Stack"
+  },
+  "presets.focus_stack.summary": {
+    "source": "Two stacked task spaces and a deep-work monocle space.",
+    "translation": "Two stacked task spaces and a deep-work monocle space.（JA）"
+  },
+  "presets.minimalist.name": {
+    "source": "Minimalist",
+    "translation": "Minimalist（JA）"
+  },
+  "presets.minimalist.summary": {
+    "source": "Spacious gaps, a scrolling reading space, and single-focus work.",
+    "translation": "Spacious gaps, a scrolling reading space, and single-focus work.（JA）"
+  },
+  "presets.needs_screens": {
+    "source": "Needs %1$d connected screen(s).",
+    "translation": "Needs %1$d connected screen(s).（JA）"
+  },
+  "presets.space_label": {
+    "source": "Space %1$d: %2$@",
+    "translation": "Space %1$d: %2$@（JA）"
+  },
+  "presets.standard_badge": {
+    "source": "standard",
+    "translation": "standard（JA）"
+  },
+  "presets.start_here": {
+    "source": "Start here — apply a preset for your setup, then adjust anything from any tab.",
+    "translation": "Start here — apply a preset for your setup, then adjust anything from any tab.（JA）"
+  },
+  "presets.title": {
+    "source": "Presets",
+    "translation": "レイアウトプリセット"
+  },
+  "presets.visual_creative.name": {
+    "source": "Visual Creative & Developer",
+    "translation": "Visual Creative & Developer（JA）"
+  },
+  "presets.visual_creative.summary": {
+    "source": "Frontend IDE and previews center, design canvas left, inspectors right.",
+    "translation": "Frontend IDE and previews center, design canvas left, inspectors right.（JA）"
+  },
+  "profile_header.dismiss": {
+    "source": "Dismiss",
+    "translation": "閉じる"
+  },
+  "profile_header.live.loaded": {
+    "source": "Live (currently loaded)",
+    "translation": "Live (currently loaded)（JA）"
+  },
+  "profile_header.live.standard": {
+    "source": "Live — Standard: %1$@",
+    "translation": "Live — Standard: %1$@（JA）"
+  },
+  "profile_header.live.transient": {
+    "source": "Live — transient layout",
+    "translation": "Live — transient layout（JA）"
+  },
+  "profile_header.menu.help": {
+    "source": "Pick a saved profile to edit — editing it won't switch your layout.",
+    "translation": "Pick a saved profile to edit — editing it won't switch your layout.（JA）"
+  },
+  "profile_header.menu_row.loaded": {
+    "source": "%1$@ (currently loaded)",
+    "translation": "%1$@ (currently loaded)（JA）"
+  },
+  "profile_header.status.built_in": {
+    "source": "Built-in layout — save as a profile to make it yours.",
+    "translation": "Built-in layout — save as a profile to make it yours.（JA）"
+  },
+  "profile_header.status.editing_loaded": {
+    "source": "Editing %1$@'s saved overrides — saving re-applies %1$@ with your changes.",
+    "translation": "編集ing %1$@'s saved overrides — saving re-applies %1$@ with your changes."
+  },
+  "profile_header.status.editing_stored": {
+    "source": "Editing a saved profile — changes won't switch your layout.",
+    "translation": "編集ing a saved profile — changes won't switch your layout."
+  },
+  "profile_header.status.no_match": {
+    "source": "No profile matches this monitor setup.",
+    "translation": "No profile matches this monitor setup.（JA）"
+  },
+  "profile_header.status.unsaved_monitor": {
+    "source": "Unsaved monitor changes — update the profile to keep them.",
+    "translation": "Unsaved monitor changes — update the profile to keep them.（JA）"
+  },
+  "profile_header.title.overrides": {
+    "source": "%1$@ — overrides",
+    "translation": "%1$@ — overrides（JA）"
+  },
+  "profile_header.title.standard": {
+    "source": "Standard: %1$@",
+    "translation": "Standard: %1$@（JA）"
+  },
+  "profile_header.title.transient": {
+    "source": "Transient layout",
+    "translation": "Transient layout（JA）"
+  },
+  "profiles.apply_failed": {
+    "source": "Applying failed: %1$@",
+    "translation": "Applying failed: %1$@（JA）"
+  },
+  "profiles.badge.active": {
+    "source": "active",
+    "translation": "active（JA）"
+  },
+  "profiles.badge.connected": {
+    "source": "connected",
+    "translation": "connected（JA）"
+  },
+  "profiles.badge.default": {
+    "source": "default",
+    "translation": "default（JA）"
+  },
+  "profiles.broken.cant_load": {
+    "source": "Can't load — saved by another version or edited by hand.",
+    "translation": "Can't load — saved by another version or edited by hand.（JA）"
+  },
+  "profiles.broken.title": {
+    "source": "Couldn't load",
+    "translation": "Couldn't load（JA）"
+  },
+  "profiles.copy_failed": {
+    "source": "Copying failed: %1$@",
+    "translation": "Copying failed: %1$@（JA）"
+  },
+  "profiles.delete.help": {
+    "source": "Delete profile",
+    "translation": "プロファイルを削除"
+  },
+  "profiles.duplicate_default.help": {
+    "source": "Several profiles of this count are marked default; the alphabetically first wins.",
+    "translation": "Several profiles of this count are marked default; the alphabetically first wins.（JA）"
+  },
+  "profiles.load": {
+    "source": "Load",
+    "translation": "読み込み"
+  },
+  "profiles.make_default": {
+    "source": "make default",
+    "translation": "make default（JA）"
+  },
+  "profiles.native_spaces.live_only": {
+    "source": "Desktop bindings are global — switch to Live to change them.",
+    "translation": "Desktop bindings are global — switch to Live to change them.（JA）"
+  },
+  "profiles.other_monitors.help": {
+    "source": "Saved for other monitors — loads with unsaved-changes state.",
+    "translation": "保存d for other monitors — loads with unsaved-changes state."
+  },
+  "profiles.overlap_warning": {
+    "source": "This monitor set is also covered by %1$@ — exact-match ties load the alphabetically first.",
+    "translation": "This monitor set is also covered by %1$@ — exact-match ties load the alphabetically first.（JA）"
+  },
+  "profiles.rename": {
+    "source": "Rename",
+    "translation": "名前を変更"
+  },
+  "profiles.rename.help": {
+    "source": "Rename profile",
+    "translation": "名前を変更 profile"
+  },
+  "profiles.rename_failed": {
+    "source": "Renaming failed: %1$@",
+    "translation": "Renaming failed: %1$@（JA）"
+  },
+  "profiles.save_blocked_paused": {
+    "source": "Window management is paused because Accessibility access is off, so no displays are detected. Grant access first — a profile saved now would capture no monitors and never resolve.",
+    "translation": "Window management is paused because Accessibility access is off, so no displays are detected. Grant access first — a profile saved now would capture no monitors and never resolve.（JA）"
+  },
+  "profiles.save_failed": {
+    "source": "Saving failed: %1$@",
+    "translation": "Saving failed: %1$@（JA）"
+  },
+  "profiles.saved.empty": {
+    "source": "No profiles saved yet — the built-in Standard resolves until you save one.",
+    "translation": "No profiles saved yet — the built-in Standard resolves until you save one.（JA）"
+  },
+  "profiles.saved.title": {
+    "source": "Saved profiles",
+    "translation": "保存d profiles"
+  },
+  "profiles.screens.many": {
+    "source": "%1$d screens",
+    "translation": "%1$d screens（JA）"
+  },
+  "profiles.screens.one": {
+    "source": "1 screen",
+    "translation": "1 screen（JA）"
+  },
+  "profiles.update_hint": {
+    "source": "\"%1$@\" is for %2$d screen(s); %3$d connected. Save as new instead.",
+    "translation": "\"%1$@\" is for %2$d screen(s); %3$d connected. 保存 as new instead."
+  },
+  "scroll_grid.anchor.center": {
+    "source": "Center",
+    "translation": "中央"
+  },
+  "scroll_grid.anchor.end_h": {
+    "source": "Right",
+    "translation": "右"
+  },
+  "scroll_grid.anchor.end_v": {
+    "source": "Bottom",
+    "translation": "下"
+  },
+  "scroll_grid.anchor.follow": {
+    "source": "Follow",
+    "translation": "追従"
+  },
+  "scroll_grid.anchor.start_h": {
+    "source": "Left",
+    "translation": "左"
+  },
+  "scroll_grid.anchor.start_v": {
+    "source": "Top",
+    "translation": "上"
+  },
+  "scroll_grid.animate_focus_shifts": {
+    "source": "Animate focus shifts",
+    "translation": "Animate focus shifts（JA）"
+  },
+  "scroll_grid.animate_focus_shifts.help": {
+    "source": "Moves windows smoothly when focus changes in a Scrolling space. Turn this off to move the layout immediately. Scroll speed sets how long the movement takes and has no effect while animation is off.",
+    "translation": "Moves windows smoothly when focus changes in a Scrolling space. Turn this off to move the layout immediately. Scroll speed sets how long the movement takes and has no effect while animation is off.（JA）"
+  },
+  "scroll_grid.app_bar_xref_link": {
+    "source": "App Bar",
+    "translation": "App Bar"
+  },
+  "scroll_grid.app_bar_xref_state": {
+    "source": "The scrolling app bar (currently %1$@) is configured in",
+    "translation": "The scrolling app bar (currently %1$@) is configured in（JA）"
+  },
+  "scroll_grid.arrange": {
+    "source": "Arrange",
+    "translation": "配置"
+  },
+  "scroll_grid.arrange.columns": {
+    "source": "Columns",
+    "translation": "列数"
+  },
+  "scroll_grid.arrange.columns_first": {
+    "source": "Columns first",
+    "translation": "列 first"
+  },
+  "scroll_grid.arrange.rows": {
+    "source": "Rows",
+    "translation": "行数"
+  },
+  "scroll_grid.arrange.rows_first": {
+    "source": "Rows first",
+    "translation": "行 first"
+  },
+  "scroll_grid.auto_size": {
+    "source": "Auto-size grid",
+    "translation": "Auto-size grid（JA）"
+  },
+  "scroll_grid.auto_size.gates": {
+    "source": "Auto-size grid is on for this space, so the screen decides the columns and rows.",
+    "translation": "Auto-size grid is on for this space, so the screen decides the columns and rows.（JA）"
+  },
+  "scroll_grid.auto_size_caption": {
+    "source": "Fits as many columns and rows as the screen allows, using the minimum window size above.",
+    "translation": "Fits as many columns and rows as the screen allows, using the minimum window size above.（JA）"
+  },
+  "scroll_grid.columns": {
+    "source": "Columns",
+    "translation": "列数"
+  },
+  "scroll_grid.dynamic": {
+    "source": "Dynamic",
+    "translation": "ダイナミック"
+  },
+  "scroll_grid.fill_empty_space": {
+    "source": "Fill empty space",
+    "translation": "Fill empty space（JA）"
+  },
+  "scroll_grid.fill_empty_space.rigid_only": {
+    "source": "A rigid grid keeps every cell, so there is no empty space to fill.",
+    "translation": "A rigid grid keeps every cell, so there is no empty space to fill.（JA）"
+  },
+  "scroll_grid.focus_anchor": {
+    "source": "Focus anchor",
+    "translation": "フォーカス anchor"
+  },
+  "scroll_grid.grid_type": {
+    "source": "Grid type",
+    "translation": "Grid type（JA）"
+  },
+  "scroll_grid.horizontal": {
+    "source": "Horizontal",
+    "translation": "水平"
+  },
+  "scroll_grid.orientation": {
+    "source": "Orientation",
+    "translation": "向き"
+  },
+  "scroll_grid.rigid": {
+    "source": "Rigid",
+    "translation": "固定"
+  },
+  "scroll_grid.rows": {
+    "source": "Rows",
+    "translation": "行数"
+  },
+  "scroll_grid.scroll_orientation": {
+    "source": "Scroll orientation",
+    "translation": "Scroll orientation（JA）"
+  },
+  "scroll_grid.scroll_speed": {
+    "source": "Scroll speed",
+    "translation": "スクロール速度"
+  },
+  "scroll_grid.vertical": {
+    "source": "Vertical",
+    "translation": "垂直"
+  },
+  "scroll_grid.wrap_focus": {
+    "source": "Wrap focus",
+    "translation": "フォーカスをループ"
+  },
+  "settings.globals_save_failed": {
+    "source": "Saving settings failed: %1$@",
+    "translation": "Saving settings failed: %1$@（JA）"
+  },
+  "settings.layout.drift": {
+    "source": "Live: %1$@ — profile has %2$@ (not saved)",
+    "translation": "Live: %1$@ — profile has %2$@ (not saved)（JA）"
+  },
+  "settings.permission_paused": {
+    "source": "Window management is paused — KiwiDesk needs Accessibility permission.",
+    "translation": "Window management is paused — KiwiDesk needs Accessibility permission.（JA）"
+  },
+  "settings.permission_paused.action": {
+    "source": "Enable Accessibility…",
+    "translation": "Enable Accessibility…（JA）"
+  },
+  "settings.readout.auto": {
+    "source": "Automatic",
+    "translation": "自動"
+  },
+  "shortcuts.add": {
+    "source": "Add",
+    "translation": "追加"
+  },
+  "shortcuts.add_application": {
+    "source": "Add application",
+    "translation": "追加 application"
+  },
+  "shortcuts.add_binding": {
+    "source": "Add binding",
+    "translation": "追加 binding"
+  },
+  "shortcuts.add_mode.help": {
+    "source": "Add a mode",
+    "translation": "追加 a mode"
+  },
+  "shortcuts.advanced.caption": {
+    "source": "Bind any Lua to a hotkey. This is the power-user escape hatch — the groups above cover the built-in actions.",
+    "translation": "Bind any Lua to a hotkey. This is the power-user escape hatch — the groups above cover the built-in actions.（JA）"
+  },
+  "shortcuts.advanced.title": {
+    "source": "Lua bindings",
+    "translation": "Lua ショートカット"
+  },
+  "shortcuts.app_behavior": {
+    "source": "Launch behavior",
+    "translation": "Launch behavior（JA）"
+  },
+  "shortcuts.app_behavior.help": {
+    "source": "**Open or Focus** brings the app's existing window to the current space, or launches it if the app isn't running.\n\n**Open New** always launches a fresh instance, even when the app is already open.",
+    "translation": "**開く or Focus** brings the app's existing window to the current space, or launches it if the app isn't running.\n\n**開く New** always launches a fresh instance, even when the app is already open."
+  },
+  "shortcuts.app_behavior.open_new": {
+    "source": "Open New",
+    "translation": "開く New"
+  },
+  "shortcuts.app_behavior.open_new.badge": {
+    "source": "Opens a new instance",
+    "translation": "開くs a new instance"
+  },
+  "shortcuts.app_behavior.open_or_focus": {
+    "source": "Open or Focus",
+    "translation": "開く or Focus"
+  },
+  "shortcuts.base_mode_protected": {
+    "source": "Base modes can't be removed here",
+    "translation": "Base modes can't be removed here（JA）"
+  },
+  "shortcuts.choose_app": {
+    "source": "Choose app…",
+    "translation": "選択 app…"
+  },
+  "shortcuts.delete_mode": {
+    "source": "Delete mode",
+    "translation": "削除 mode"
+  },
+  "shortcuts.go_to_space": {
+    "source": "Go to space",
+    "translation": "Go to space（JA）"
+  },
+  "shortcuts.import": {
+    "source": "Import from init.lua…",
+    "translation": "インポート from init.lua…"
+  },
+  "shortcuts.import.help": {
+    "source": "Reads the shortcuts active in init.lua and adds them here, matching each combo. Known actions sort into the groups below; anything else lands in Advanced. Review, then Save.",
+    "translation": "Reads the shortcuts active in init.lua and adds them here, matching each combo. Known actions sort into the groups below; anything else lands in Advanced. Review, then 保存."
+  },
+  "shortcuts.imported_note": {
+    "source": "Shortcuts imported — review below, then Save.",
+    "translation": "Shortcuts imported — review below, then 保存."
+  },
+  "shortcuts.inactive.caption": {
+    "source": "These shortcuts target spaces that are not in the current space list. They still work — pressing one recreates its space — and they keep their key combo. Rebind or remove them here; they become active again when their space returns.",
+    "translation": "These shortcuts target spaces that are not in the current space list. They still work — pressing one recreates its space — and they keep their key combo. Rebind or remove them here; they become active again when their space returns.（JA）"
+  },
+  "shortcuts.lua_placeholder": {
+    "source": "Lua, e.g. KiwiDesk.reload_config()",
+    "translation": "Lua, e.g. KiwiDesk.reload_config()（JA）"
+  },
+  "shortcuts.menu_bar_icon": {
+    "source": "Menu bar icon",
+    "translation": "Menu bar icon（JA）"
+  },
+  "shortcuts.mode_name": {
+    "source": "Mode name",
+    "translation": "モード name"
+  },
+  "shortcuts.modes.caption": {
+    "source": "Modes are alternate shortcut sets — only the active mode's shortcuts fire. Bind a key below to switch between them. “default” is the standard mode and is always the active one after the app starts.",
+    "translation": "モードs are alternate shortcut sets — only the active mode's shortcuts fire. Bind a key below to switch between them. “default” is the standard mode and is always the active one after the app starts."
+  },
+  "shortcuts.move_to_space": {
+    "source": "Move to space",
+    "translation": "スペースに移動"
+  },
+  "shortcuts.move_to_track": {
+    "source": "Move to track",
+    "translation": "Move to track（JA）"
+  },
+  "shortcuts.move_to_track.caption": {
+    "source": "Only relevant if you're using the track layout.",
+    "translation": "Only relevant if you're using the track layout.（JA）"
+  },
+  "shortcuts.other_ellipsis": {
+    "source": "Other…",
+    "translation": "Other…（JA）"
+  },
+  "shortcuts.override.caption": {
+    "source": "Dimmed rows are inherited from the base shortcuts and stay in sync with them. Edit a row to override it for this profile only; matching the base again makes it inherited again. Removing an inherited row only resets it — to disable a combo in this profile, rebind it to a no-op action instead.",
+    "translation": "Dimmed rows are inherited from the base shortcuts and stay in sync with them. 編集 a row to override it for this profile only; matching the base again makes it inherited again. Removing an inherited row only resets it — to disable a combo in this profile, rebind it to a no-op action instead."
+  },
+  "shortcuts.override.overrides": {
+    "source": "This profile overrides base keybindings.",
+    "translation": "This profile overrides base keybindings.（JA）"
+  },
+  "shortcuts.override.staged": {
+    "source": "Editing “%1$@” — shortcuts take effect the next time this profile is active.",
+    "translation": "編集ing “%1$@” — shortcuts take effect the next time this profile is active."
+  },
+  "shortcuts.override.staged_loaded": {
+    "source": "Editing “%1$@” — shortcuts re-apply as soon as you save.",
+    "translation": "編集ing “%1$@” — shortcuts re-apply as soon as you save."
+  },
+  "shortcuts.override.title": {
+    "source": "Profile shortcuts",
+    "translation": "Profile shortcuts（JA）"
+  },
+  "shortcuts.panel.apps": {
+    "source": "Apps",
+    "translation": "アプリ"
+  },
+  "shortcuts.panel.controls": {
+    "source": "Controls",
+    "translation": "コントロール"
+  },
+  "shortcuts.panel.custom": {
+    "source": "Custom",
+    "translation": "カスタム"
+  },
+  "shortcuts.panel.dismiss_hint": {
+    "source": "Esc or click away to close",
+    "translation": "Esc or click away to close（JA）"
+  },
+  "shortcuts.panel.dismiss_hint.bound": {
+    "source": "%1$@ or Esc to close",
+    "translation": "%1$@ or Esc to close（JA）"
+  },
+  "shortcuts.panel.edit_in_settings": {
+    "source": "Edit in Settings…",
+    "translation": "編集 in Settings…"
+  },
+  "shortcuts.panel.empty": {
+    "source": "No shortcuts bound yet.",
+    "translation": "No shortcuts bound yet.（JA）"
+  },
+  "shortcuts.panel.unavailable": {
+    "source": "Shortcuts are managed by your init.lua.",
+    "translation": "Shortcuts are managed by your init.lua.（JA）"
+  },
+  "shortcuts.remove_binding": {
+    "source": "Remove shortcut",
+    "translation": "削除 shortcut"
+  },
+  "shortcuts.rename": {
+    "source": "Rename",
+    "translation": "名前を変更"
+  },
+  "shortcuts.rename_ellipsis": {
+    "source": "Rename…",
+    "translation": "名前を変更…"
+  },
+  "shortcuts.section.focus": {
+    "source": "Focus",
+    "translation": "フォーカス"
+  },
+  "shortcuts.section.general": {
+    "source": "General",
+    "translation": "一般"
+  },
+  "shortcuts.section.inactive": {
+    "source": "Inactive shortcuts",
+    "translation": "Inactive shortcuts（JA）"
+  },
+  "shortcuts.section.move_windows": {
+    "source": "Move windows",
+    "translation": "Move windows（JA）"
+  },
+  "shortcuts.section.open_applications": {
+    "source": "Open applications",
+    "translation": "開く applications"
+  },
+  "shortcuts.section.size_float": {
+    "source": "Size & float",
+    "translation": "Size & float（JA）"
+  },
+  "shortcuts.section.switch_modes": {
+    "source": "Switch modes",
+    "translation": "Switch modes（JA）"
+  },
+  "shortcuts.size_float.feedback": {
+    "source": "Alert sound when resize can't apply",
+    "translation": "Alert sound when resize can't apply（JA）"
+  },
+  "shortcuts.size_float.layouts_caption": {
+    "source": "Grow/Shrink only applies in the bsp, stack, scrolling, and track layouts; it is a no-op in monocle, grid, and floating. Width and height resize independently; scrolling resizes its slot along the scroll axis for both, and in track one axis resizes the window's track, the other its share within it.",
+    "translation": "Grow/Shrink only applies in the bsp, stack, scrolling, and track layouts; it is a no-op in monocle, grid, and floating. Width and height resize independently; scrolling resizes its slot along the scroll axis for both, and in track one axis resizes the window's track, the other its share within it.（JA）"
+  },
+  "sidebar.app_name": {
+    "source": "KiwiDesk",
+    "translation": "KiwiDesk"
+  },
+  "sidebar.app_rules": {
+    "source": "App Rules",
+    "translation": "アプリルール"
+  },
+  "sidebar.appearance": {
+    "source": "Appearance",
+    "translation": "外観とテーマ"
+  },
+  "sidebar.bars": {
+    "source": "Bars",
+    "translation": "情報バー"
+  },
+  "sidebar.behavior": {
+    "source": "Behavior",
+    "translation": "動作"
+  },
+  "sidebar.general": {
+    "source": "General",
+    "translation": "一般"
+  },
+  "sidebar.layout": {
+    "source": "Layout Defaults",
+    "translation": "デフォルトレイアウト"
+  },
+  "sidebar.monitors": {
+    "source": "Monitors",
+    "translation": "ディスプレイ"
+  },
+  "sidebar.profiles": {
+    "source": "Profiles",
+    "translation": "プロファイル"
+  },
+  "sidebar.profiles.badge_ax": {
+    "source": "start here",
+    "translation": "ここからスタート"
+  },
+  "sidebar.search.clear": {
+    "source": "Clear search",
+    "translation": "検索をクリア"
+  },
+  "sidebar.search.no_results": {
+    "source": "No results",
+    "translation": "結果なし"
+  },
+  "sidebar.search.placeholder": {
+    "source": "Search",
+    "translation": "検索"
+  },
+  "sidebar.section.design": {
+    "source": "Design",
+    "translation": "デザイン"
+  },
+  "sidebar.section.system": {
+    "source": "System",
+    "translation": "システム"
+  },
+  "sidebar.shortcuts": {
+    "source": "Shortcuts",
+    "translation": "ショートカット"
+  },
+  "sidebar.spaces": {
+    "source": "Spaces",
+    "translation": "操作スペース"
+  },
+  "slot_size.auto": {
+    "source": "Default",
+    "translation": "自動スロットサイズ"
+  },
+  "slot_size.auto_standard": {
+    "source": "Default — orientation standard",
+    "translation": "デフォルト — 向きに応じた標準"
+  },
+  "slot_size.column_width": {
+    "source": "Column width",
+    "translation": "列の幅"
+  },
+  "slot_size.percent": {
+    "source": "Percent",
+    "translation": "パーセント"
+  },
+  "slot_size.points": {
+    "source": "Points",
+    "translation": "ポイント"
+  },
+  "slot_size.row_height": {
+    "source": "Row height",
+    "translation": "行の高さ"
+  },
+  "slot_size.unit": {
+    "source": "Size unit",
+    "translation": "サイズ単位"
+  },
+  "space_bar.active_indicator.label": {
+    "source": "Active indicator",
+    "translation": "アクティブインジケーター"
+  },
+  "space_bar.alignment.label": {
+    "source": "Alignment",
+    "translation": "配置"
+  },
+  "space_bar.alignment.label.help": {
+    "source": "Where the Space items — and the front-app segment, when shown — sit along the bar. Start and End follow the edge — a left bar's Start is its top.",
+    "translation": "バーに沿った操作スペース項目の配置位置。"
+  },
+  "space_bar.background_fit.boxed_only": {
+    "source": "Boxed draws a box per item, not a shared plate, so there is nothing to size.",
+    "translation": "ボックス表示では項目ごとに枠を描画します。"
+  },
+  "space_bar.background_fit.label": {
+    "source": "Background size",
+    "translation": "背景サイズ"
+  },
+  "space_bar.background_style.label": {
+    "source": "Background style",
+    "translation": "背景スタイル"
+  },
+  "space_bar.color.active_space": {
+    "source": "Active space",
+    "translation": "アクティブ操作スペース"
+  },
+  "space_bar.color.active_space.help": {
+    "source": "Tints the active space's identifier and its app glyphs.",
+    "translation": "アクティブな操作スペースの識別子とアプリグリフの色を設定します。"
+  },
+  "space_bar.color.badge_text": {
+    "source": "Badge text",
+    "translation": "バッジのテキスト"
+  },
+  "space_bar.color.fill": {
+    "source": "Fill",
+    "translation": "塗りつぶし"
+  },
+  "space_bar.color.focused_item": {
+    "source": "Focused window",
+    "translation": "フォーカス中のウインドウ"
+  },
+  "space_bar.color.focused_item.help": {
+    "source": "Tints the focused window — its glyph in the active Space and the front-app segment. Glyph tint needs Glyphs icon mode.",
+    "translation": "フォーカス中ウインドウのグリフ色を設定します。"
+  },
+  "space_bar.color.group_badge": {
+    "source": "Group badge",
+    "translation": "グループバッジ"
+  },
+  "space_bar.color.group_badge.help": {
+    "source": "Count and overflow badges on the active space; inactive spaces mute them from the item color. Grouping is always on.",
+    "translation": "カウントおよびオーバーフローのバッジ色を設定します。"
+  },
+  "space_bar.color.highlight": {
+    "source": "Highlight",
+    "translation": "ハイライト"
+  },
+  "space_bar.color.hover_fill": {
+    "source": "Hover fill",
+    "translation": "ホバー時の塗りつぶし"
+  },
+  "space_bar.color.hover_item": {
+    "source": "Hover item",
+    "translation": "ホバー時の項目"
+  },
+  "space_bar.color.item": {
+    "source": "Item",
+    "translation": "項目"
+  },
+  "space_bar.colors.title": {
+    "source": "Space Bar colors",
+    "translation": "Space Barのカラー"
+  },
+  "space_bar.copy_appearance": {
+    "source": "Copy App Bar appearance…",
+    "translation": "App Barの外観をコピー…"
+  },
+  "space_bar.copy_appearance.caption": {
+    "source": "Copies the App Bar's current sizes, style, and colors — a one-time starting point, not a live link.",
+    "translation": "App Barの現在のサイズ、スタイル、カラーをコピーします。"
+  },
+  "space_bar.copy_appearance.help": {
+    "source": "Takes the App Bar's current sizes, style, and colors once; edits afterwards stay independent.",
+    "translation": "App Barの設定を一括で取得します。"
+  },
+  "space_bar.corner_roundness": {
+    "source": "Corner roundness",
+    "translation": "角の丸み"
+  },
+  "space_bar.disabled.help": {
+    "source": "Turn on Show Space Bar to edit these settings.",
+    "translation": "設定変更にはSpace Barを有効にしてください。"
+  },
+  "space_bar.edge.label": {
+    "source": "Position",
+    "translation": "位置"
+  },
+  "space_bar.edge.label.help": {
+    "source": "Which screen edge the Space Bar occupies. Sharing an edge with the App Bar is fine — the two stack.",
+    "translation": "Space Barを配置する画面の端。"
+  },
+  "space_bar.enabled": {
+    "source": "Show Space Bar",
+    "translation": "Space Barを表示"
+  },
+  "space_bar.enabled.help": {
+    "source": "One bar per display listing that display's Spaces — click a Space to switch to it. The bar reserves its edge in every layout.",
+    "translation": "ディスプレイごとに操作スペース一覧バーを表示します。"
+  },
+  "space_bar.font_size": {
+    "source": "Font size",
+    "translation": "フォントサイズ"
+  },
+  "space_bar.font_size.auto": {
+    "source": "Auto font size",
+    "translation": "自動フォントサイズ"
+  },
+  "space_bar.front_app.ax": {
+    "source": "Front app: %1$@",
+    "translation": "最前面アプリ: %1$@"
+  },
+  "space_bar.global_style.caption": {
+    "source": "One bar per display, every layout. All settings are global.",
+    "translation": "画面ごと・全レイアウトで1つのバーを表示。設定は共通です。"
+  },
+  "space_bar.global_style.title": {
+    "source": "Space Bar style",
+    "translation": "Space Barのスタイル"
+  },
+  "space_bar.glyph_cap": {
+    "source": "Glyphs per Space",
+    "translation": "スペースごとのグリフ上限"
+  },
+  "space_bar.glyph_cap.help": {
+    "source": "How many app glyphs a Space shows before the rest collapse into a +n badge. Adjacent windows of the same app count as one glyph.",
+    "translation": "+n バッジに折りたたむ前に表示するアプリグリフの数。"
+  },
+  "space_bar.glyph_cap.summary": {
+    "source": "Up to %1$d app groups per Space; more collapse into a +n badge.",
+    "translation": "操作スペースごとに最大 %1$d 個のアプリグループを表示。"
+  },
+  "space_bar.hide_empty": {
+    "source": "Hide empty Spaces",
+    "translation": "空の操作スペースを非表示"
+  },
+  "space_bar.hide_empty.help": {
+    "source": "Spaces with no windows are hidden from the bar, except the Space you're currently on. Use a shortcut to jump to a hidden Space.",
+    "translation": "ウインドウのない操作スペースをバーから隠します。"
+  },
+  "space_bar.icon_source.help": {
+    "source": "How app glyphs are drawn. Glyphs shows a monochrome symbol colored by the bar's item colors; apps without a symbol keep their app icon.",
+    "translation": "アプリグリフの描画方式を選択します。"
+  },
+  "space_bar.icon_source.label": {
+    "source": "App symbol style",
+    "translation": "アプリシンボル スタイル"
+  },
+  "space_bar.item.ax.current": {
+    "source": "%1$@, current",
+    "translation": "%1$@、現在地"
+  },
+  "space_bar.item.ax.not_current": {
+    "source": "%1$@, not current",
+    "translation": "%1$@、非選択"
+  },
+  "space_bar.item.ax.space": {
+    "source": "Space %1$@, %2$d applications",
+    "translation": "操作スペース %1$@、%2$d 個のアプリ"
+  },
+  "space_bar.item_gap": {
+    "source": "Item gap",
+    "translation": "項目間のギャップ"
+  },
+  "space_bar.item_size": {
+    "source": "Item size",
+    "translation": "項目のサイズ"
+  },
+  "space_bar.item_size.auto": {
+    "source": "Auto item size",
+    "translation": "自動サイズ"
+  },
+  "space_bar.preview.ax": {
+    "source": "Space bar preview: %1$@ position, %2$@ style.",
+    "translation": "Space Barプレビュー: 位置 %1$@、スタイル %2$@。"
+  },
+  "space_bar.preview.caption": {
+    "source": "Position: %1$@ · %2$@",
+    "translation": "位置: %1$@ · %2$@"
+  },
+  "space_bar.show_front_app": {
+    "source": "Show front app",
+    "translation": "最前面アプリを表示"
+  },
+  "space_bar.show_front_app.help": {
+    "source": "Adds a trailing segment with the focused window of the Space each display currently shows. Icon-only on vertical bars.",
+    "translation": "各画面のフォーカス中ウインドウを示すセグメントを追加します。"
+  },
+  "space_bar.spring_delay": {
+    "source": "Spring delay",
+    "translation": "スプリング遅延"
+  },
+  "space_bar.spring_delay.help": {
+    "source": "Drag a window onto a Space and hold this long for the view to spring to that Space, so you can drop the window into its layout. A quicker drop moves the window there without switching.",
+    "translation": "ウインドウをドラッグしたままホールドして操作スペースを切り替えるまでの時間。"
+  },
+  "space_bar.thickness": {
+    "source": "Thickness",
+    "translation": "厚み"
+  },
+  "space_override.caption": {
+    "source": "Unchecked settings inherit %1$@ defaults.",
+    "translation": "未チェックの項目は %1$@ のデフォルト値を継承します。"
+  },
+  "space_override.dormant.entry_many": {
+    "source": "%1$@ — %2$d fields",
+    "translation": "%1$@ — %2$d フィールド"
+  },
+  "space_override.dormant.entry_one": {
+    "source": "%1$@ — 1 field",
+    "translation": "%1$@ — 1 フィールド"
+  },
+  "space_override.dormant.label": {
+    "source": "Saved for other layouts (%1$d)",
+    "translation": "他のレイアウト用に保存済み (%1$d)"
+  },
+  "space_override.floating.none": {
+    "source": "Floating has no per-space overrides.",
+    "translation": "フローティングには操作スペースごとのオーバーライドはありません。"
+  },
+  "space_override.reset_active": {
+    "source": "Reset %1$@ Overrides",
+    "translation": "%1$@ のオーバーライドをリセット"
+  },
+  "space_override.reset_all": {
+    "source": "Reset All Layout Overrides",
+    "translation": "すべてのレイアウトオーバーライドをリセット"
+  },
+  "space_override.reset_all_confirm.action": {
+    "source": "Reset All",
+    "translation": "すべてリセット"
+  },
+  "space_override.reset_all_confirm.message": {
+    "source": "This clears every layout's saved overrides for this space, not just the current one. This can't be undone.",
+    "translation": "この操作スペースに対する全レイアウトのオーバーライドが消去されます。元に戻すことはできません。"
+  },
+  "space_override.reset_all_confirm.title": {
+    "source": "Reset all layout overrides?",
+    "translation": "すべてのレイアウトオーバーライドをリセットしますか？"
+  },
+  "space_override.slot_size.help": {
+    "source": "Sets each scrolling window's size along the scroll direction. Horizontal uses column width; vertical uses row height. Default is 1100 pt horizontally and 80% of the available height vertically.",
+    "translation": "スクロール方向に応じた各スクロールウインドウのサイズを設定します。"
+  },
+  "space_override.title": {
+    "source": "%1$@ — %2$@ overrides",
+    "translation": "%1$@ — %2$@ のオーバーライド"
+  },
+  "spaces.add.help": {
+    "source": "Add space",
+    "translation": "操作スペースを追加"
+  },
+  "spaces.add.placeholder": {
+    "source": "New space name",
+    "translation": "新しい操作スペース名"
+  },
+  "spaces.caption": {
+    "source": "Each space has its own layout. Add spaces here; they appear in the shortcut and app-rule lists too. Drag rows to reorder.",
+    "translation": "操作スペースごとに独自のレイアウトを設定できます。行をドラッグして並べ替えます。"
+  },
+  "spaces.context.clear_fallback": {
+    "source": "Clear Fallback",
+    "translation": "フォールバックを解除"
+  },
+  "spaces.context.delete": {
+    "source": "Delete",
+    "translation": "削除"
+  },
+  "spaces.context.make_fallback": {
+    "source": "Make Fallback",
+    "translation": "フォールバックに指定"
+  },
+  "spaces.context.move_down": {
+    "source": "Move Down",
+    "translation": "下に移動"
+  },
+  "spaces.context.move_up": {
+    "source": "Move Up",
+    "translation": "上に移動"
+  },
+  "spaces.customize.help": {
+    "source": "Layout overrides for this space",
+    "translation": "この操作スペースのレイアウトオーバーライド"
+  },
+  "spaces.delete.help": {
+    "source": "Delete space",
+    "translation": "操作スペースを削除"
+  },
+  "spaces.delete_confirm.cancel": {
+    "source": "Cancel",
+    "translation": "キャンセル"
+  },
+  "spaces.delete_confirm.delete": {
+    "source": "Delete",
+    "translation": "削除"
+  },
+  "spaces.delete_confirm.message": {
+    "source": "This space has customized settings — its layout overrides, monitor pin, and any Main or Fallback role are removed too. You can add the space back, but not its settings.",
+    "translation": "この操作スペースにはカスタム設定があります。削除すると設定も失われます。"
+  },
+  "spaces.delete_confirm.title": {
+    "source": "Delete this space?",
+    "translation": "この操作スペースを削除しますか？"
+  },
+  "spaces.drag_handle.help": {
+    "source": "Drag to reorder",
+    "translation": "ドラッグして並べ替え"
+  },
+  "spaces.empty": {
+    "source": "No spaces yet — add one below. Until you do, every window tiles in a single default space.",
+    "translation": "操作スペースがありません。下から追加してください。"
+  },
+  "spaces.fallback_badge": {
+    "source": "Fallback",
+    "translation": "フォールバック"
+  },
+  "spaces.fallback_badge.help": {
+    "source": "Windows from a removed space land here when you switch profiles.",
+    "translation": "プロファイル切り替え時に削除されたスペースのウインドウがここへ移動します。"
+  },
+  "spaces.fallback_caption": {
+    "source": "When you switch profiles, windows from a space the new profile doesn't have land in its fallback space (the first space when none is chosen).",
+    "translation": "新しいプロファイルに存在しない操作スペースのウインドウはフォールバック先へ移動します。"
+  },
+  "spaces.mode.help": {
+    "source": "Layout mode for this space",
+    "translation": "この操作スペースのレイアウトモード"
+  },
+  "spaces.overrides.a11y": {
+    "source": "Layout overrides for %1$@, %2$d saved",
+    "translation": "%1$@ のレイアウトオーバーライド (%2$d 件保存済み)"
+  },
+  "spaces.overrides.count": {
+    "source": "Overrides (%1$d)",
+    "translation": "オーバーライド (%1$d)"
+  },
+  "spaces.overrides.floating.help": {
+    "source": "Floating has no layout overrides.",
+    "translation": "フローティングにはレイアウトオーバーライドがありません。"
+  },
+  "spaces.overrides.none": {
+    "source": "Overrides…",
+    "translation": "オーバーライド…"
+  },
+  "spaces.title": {
+    "source": "Spaces",
+    "translation": "操作スペース"
+  },
+  "sticky.caption": {
+    "source": "Sticky windows stay visible on every space (Toggle sticky, in Shortcuts).",
+    "translation": "Stickyに設定されたフローティングウインドウはすべての操作スペースで表示され続けます。"
+  },
+  "sticky.color": {
+    "source": "Sticky",
+    "translation": "Sticky"
+  },
+  "sticky.color.a11y": {
+    "source": "Sticky window mark color",
+    "translation": "Stickyウインドウマークのカラー"
+  },
+  "sticky.display.pill": {
+    "source": "Can only be moved to a different display",
+    "translation": "別のディスプレイへ移動可能"
+  },
+  "sticky.everywhere.pill": {
+    "source": "Sticky windows can't be moved to another space",
+    "translation": "他の操作スペースへ移動不可"
+  },
+  "sticky.home.pill": {
+    "source": "Can only be moved in its home space %1$@",
+    "translation": "ホームスペース %1$@ 内でのみ移動可能"
+  },
+  "sticky.mark": {
+    "source": "Show mark on sticky windows",
+    "translation": "Stickyウインドウにマークを表示"
+  },
+  "sticky.mark.ax": {
+    "source": "Sticky window",
+    "translation": "Stickyウインドウ"
+  },
+  "sticky.mark.forced": {
+    "source": "On — the Space Bar is off, so this is the only sticky mark.",
+    "translation": "オン — Space Barがオフのため唯一のマークです。"
+  },
+  "sticky.mark.forced_link": {
+    "source": "Space Bar",
+    "translation": "Space Bar"
+  },
+  "sticky.mark.help": {
+    "source": "A sticky window can look identical to a normal one, so KiwiDesk draws a small mark in its top-right corner. The Space Bar shows its own sticky badge either way.",
+    "translation": "Stickyウインドウの右上隅に小さなマークを描画します。"
+  },
+  "sticky.mark_color": {
+    "source": "Mark color",
+    "translation": "マークのカラー"
+  },
+  "sticky.pile.pill": {
+    "source": "Sticky windows can't be moved to the pile",
+    "translation": "スタックへ移動不可"
+  },
+  "sticky.title": {
+    "source": "Sticky windows",
+    "translation": "Stickyウインドウ"
+  },
+  "system_shortcut.app_switcher": {
+    "source": "App Switcher",
+    "translation": "アプリケーションスイッチャー"
+  },
+  "system_shortcut.app_windows": {
+    "source": "App Windows",
+    "translation": "アプリケーションウインドウ"
+  },
+  "system_shortcut.close_window": {
+    "source": "Close Window",
+    "translation": "ウインドウを閉じる"
+  },
+  "system_shortcut.force_quit": {
+    "source": "Force Quit",
+    "translation": "強制終了"
+  },
+  "system_shortcut.hide_app": {
+    "source": "Hide App",
+    "translation": "アプリケーションを非表示"
+  },
+  "system_shortcut.minimize": {
+    "source": "Minimize",
+    "translation": "最小化"
+  },
+  "system_shortcut.mission_control": {
+    "source": "Mission Control",
+    "translation": "Mission Control"
+  },
+  "system_shortcut.mission_control_space_left": {
+    "source": "Mission Control: Space Left",
+    "translation": "Mission Control: 左の操作スペース"
+  },
+  "system_shortcut.mission_control_space_right": {
+    "source": "Mission Control: Space Right",
+    "translation": "Mission Control: 右の操作スペース"
+  },
+  "system_shortcut.quit_app": {
+    "source": "Quit App",
+    "translation": "アプリケーションを終了"
+  },
+  "system_shortcut.screenshot": {
+    "source": "Screenshot",
+    "translation": "スクリーンショット"
+  },
+  "system_shortcut.screenshot_selection": {
+    "source": "Screenshot Selection",
+    "translation": "選択範囲のスクリーンショット"
+  },
+  "system_shortcut.screenshot_tools": {
+    "source": "Screenshot Tools",
+    "translation": "スクリーンショットツール"
+  },
+  "system_shortcut.spotlight": {
+    "source": "Spotlight",
+    "translation": "Spotlight"
+  },
+  "track.auto_tracks": {
+    "source": "Auto track limit",
+    "translation": "自動トラック上限"
+  },
+  "track.auto_tracks.gates": {
+    "source": "Auto track limit is on for this space, so the screen decides how many open.",
+    "translation": "自動トラック上限がオンのため、画面サイズに応じて開くトラック数が決まります。"
+  },
+  "track.auto_tracks_caption": {
+    "source": "Fits as many tracks as the screen allows, using the minimum window size above — opening and collapsing them as windows come and go.",
+    "translation": "最小ウインドウサイズに基づいて画面に収まる最大トラック数を自動調整します。"
+  },
+  "track.limit": {
+    "source": "Track limit",
+    "translation": "トラック上限"
+  },
+  "track.limit_caption": {
+    "source": "Bounded by the minimum window size above: more tracks than fit collapse into the overflow track.",
+    "translation": "最小サイズに基づいて画面に収まらないトラックはオーバーフロートラックに折りたたまれます。"
+  },
+  "track.new_window": {
+    "source": "New window",
+    "translation": "新規ウインドウ"
+  },
+  "track.new_window.focused": {
+    "source": "Fills the focused track",
+    "translation": "フォーカス中のトラックに収める"
+  },
+  "track.new_window.own": {
+    "source": "Opens its own track",
+    "translation": "独自のトラックを開く"
+  },
+  "track.new_window_position": {
+    "source": "Position",
+    "translation": "位置"
+  },
+  "track.new_window_position.help": {
+    "source": "With “Opens its own track”, where the new track lands among the tracks; with “Fills the focused track”, where the window lands inside it: First, Last, or right before or after the focused one.",
+    "translation": "新しく開くトラックまたはウインドウの挿入位置を指定します。"
+  },
+  "track.wrap_focus": {
+    "source": "Wrap focus",
+    "translation": "フォーカスをループ"
+  }
+}
