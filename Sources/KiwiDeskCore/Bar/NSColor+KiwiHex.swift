@@ -32,25 +32,25 @@ extension NSColor {
         return luminance > 0.6 ? .black : .white
     }
 
-    /// An opaque sRGB `CGColor` for the focus-border glow bloom
-    /// (#358). Two things happen here: (1) the color is BRIGHTENED
-    /// from the ring hue via `BorderStyle.glowColor(from:)` — a bloom
-    /// is a fill, not a legibility-bound thin stroke, so it reads far
-    /// more vivid than the darkened ring; (2) it is rebuilt in sRGB
-    /// with alpha forced to 1. The shadow is a
-    /// `CGContextSetShadowWithColor`, and on a SkyLight window-backed
-    /// context a calibrated/catalog `CGColor` (what
-    /// `NSColor(kiwiHex:).cgColor` yields) is not honored for the
-    /// shadow path — it drops to black-at-low-alpha and reads gray;
-    /// the sRGB rebuild (JankyBorders' `CGColorCreateGenericRGB(r, g,
-    /// b, 1.0)`) fixes that. Used for the shadow color only — the
-    /// ring body keeps its faithful hex (alpha included), so a
-    /// translucent `focused_color` still reads translucent.
+    /// An opaque `CGColor` for the focus-border glow bloom
+    /// (#358): the color is BRIGHTENED from the ring hue via
+    /// `BorderStyle.glowColor(from:)` — a bloom is a fill, not a
+    /// legibility-bound thin stroke, so it reads far more vivid
+    /// than the darkened ring — and rebuilt with alpha forced
+    /// to 1. Consumed only by `AppKitBorderOverlay`'s
+    /// `CAShapeLayer` shadow: a glow ring always renders there,
+    /// because the SkyLight window-backed context drops ANY
+    /// shadow color to default black-at-low-alpha (#533 —
+    /// device-confirmed regardless of the color's space; see
+    /// `BorderOverlay.ensureBackend`). Used for the shadow color
+    /// only — the ring body keeps its faithful hex (alpha
+    /// included), so a translucent `focused_color` still reads
+    /// translucent.
     static func kiwiGlow(hex: String) -> CGColor {
         let base = NSColor(kiwiHex: BorderStyle.glowColor(from: hex))
         let srgb = base.usingColorSpace(.sRGB) ?? base
         return CGColor(
-            srgbRed: srgb.redComponent,
+            red: srgb.redComponent,
             green: srgb.greenComponent,
             blue: srgb.blueComponent,
             alpha: 1

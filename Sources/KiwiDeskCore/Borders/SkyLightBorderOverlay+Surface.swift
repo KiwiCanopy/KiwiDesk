@@ -122,22 +122,20 @@ extension SkyLightBorderOverlay {
         let inset = geometry.glowMargin + geometry.lineWidth / 2
         let pathRect = bounds.insetBy(dx: inset, dy: inset)
         context.clear(bounds)
-        if geometry.glowMargin > 0 {
-            paintGlow(
-                context,
-                bounds: bounds,
-                pathRect: pathRect,
-                geometry: geometry,
-                colorHex: colorHex
-            )
-        } else {
-            paintRing(
-                context,
-                pathRect: pathRect,
-                geometry: geometry,
-                colorHex: colorHex
-            )
-        }
+        // Always the crisp ring: a glow ring never renders here —
+        // the facade swaps it to the AppKit backend (#533), whose
+        // `CAShapeLayer` shadow blooms correctly, because this
+        // WindowServer-backed context drops any shadow colour to
+        // default black-at-low-alpha (grey), and painted-falloff
+        // substitutes banded or clipped on device. If glow
+        // geometry ever does arrive, the inset still holds and
+        // only the bloom is missing.
+        paintRing(
+            context,
+            pathRect: pathRect,
+            geometry: geometry,
+            colorHex: colorHex
+        )
         context.flush()
         guard
             SkyLight.flushWindowContent?(
@@ -174,59 +172,6 @@ extension SkyLightBorderOverlay {
             )
         )
         context.strokePath()
-    }
-
-    /// The glow ring (#358): a **filled** ring band that casts a
-    /// soft outward bloom. Shadowing a thin stroke banded into
-    /// visible contour lines (the shelved first attempt); casting
-    /// the shadow from a solid band — the JankyBorders technique —
-    /// blooms cleanly. Clipped to everything but the window interior
-    /// so the bloom spills outward into the grown margin but never
-    /// paints over window content. The band itself is the ring, so
-    /// no separate stroke is drawn.
-    private func paintGlow(
-        _ context: CGContext,
-        bounds: CGRect,
-        pathRect: CGRect,
-        geometry: BorderGeometry,
-        colorHex: String
-    ) {
-        let half = geometry.lineWidth / 2
-        let radius = geometry.cornerRadius
-        // Square rings (radius 0) keep sharp corners on both edges.
-        let outerRadius = radius <= 0 ? 0 : radius + half
-        let innerRadius = radius <= 0 ? 0 : max(0, radius - half)
-        let outer = CGPath(
-            roundedRect: pathRect.insetBy(dx: -half, dy: -half),
-            cornerWidth: outerRadius,
-            cornerHeight: outerRadius,
-            transform: nil
-        )
-        let inner = CGPath(
-            roundedRect: pathRect.insetBy(dx: half, dy: half),
-            cornerWidth: innerRadius,
-            cornerHeight: innerRadius,
-            transform: nil
-        )
-        // The ring body keeps the faithful hex (alpha and all), so a
-        // translucent `focused_color` stays translucent — only the
-        // shadow forces opacity, matching JankyBorders and the other
-        // render paths.
-        let ringColor = NSColor(kiwiHex: colorHex).cgColor
-        let glowColor = NSColor.kiwiGlow(hex: colorHex)
-        context.saveGState()
-        context.addRect(bounds)
-        context.addPath(inner)
-        context.clip(using: .evenOdd)
-        context.setShadow(
-            offset: .zero,
-            blur: geometry.glowMargin,
-            color: glowColor
-        )
-        context.setFillColor(ringColor)
-        context.addPath(outer)
-        context.fillPath()
-        context.restoreGState()
     }
 
     func makeRegion(_ rect: CGRect) -> CFTypeRef? {

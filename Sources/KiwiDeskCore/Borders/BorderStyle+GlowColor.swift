@@ -2,6 +2,22 @@ import CoreGraphics
 import Foundation
 
 extension BorderStyle {
+    /// The glow bloom's blur radius (pt) — and the amount the
+    /// overlay frame grows on every side so the halo isn't
+    /// clipped. Scaled with the (clamped) ring width so the
+    /// bloom reads as a proportional aura at every width (#533,
+    /// ui-designer verdict): a fixed blur swamps a hairline ring
+    /// and vanishes against a thick one. `0.8` is the
+    /// device-calibrated ratio (4 pt bloom on the default 5 pt
+    /// ring); the floor keeps a hairline ring's halo present,
+    /// the cap stops the overlay surface ballooning past
+    /// diminishing visual returns. `BorderGeometryTests` pins
+    /// the three calibration points. Derived, never stored —
+    /// like `glowColor` below, it adds no profile-JSON key.
+    public static func glowBlur(for width: CGFloat) -> CGFloat {
+        min(12, max(2, 0.8 * width))
+    }
+
     /// The glow bloom's color, derived from a ring color (#358).
     /// A bloom is a FILL, not a thin stroke, so it is freed from the
     /// stroke-legibility limit that keeps `focusedColor` deliberately

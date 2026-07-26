@@ -47,14 +47,25 @@ struct BorderGeometryTests {
         // Frame grows by the blur on every side so the halo has
         // room; the stroke geometry itself is unchanged (#358).
         #expect(plain.glowMargin == 0)
-        #expect(glowing.glowMargin == BorderGeometry.glowBlur)
+        #expect(
+            glowing.glowMargin == BorderStyle.glowBlur(for: 2)
+        )
         #expect(
             glowing.overlayFrame
                 == window.insetBy(
-                    dx: -(2 + BorderGeometry.glowBlur),
-                    dy: -(2 + BorderGeometry.glowBlur)
+                    dx: -(2 + BorderStyle.glowBlur(for: 2)),
+                    dy: -(2 + BorderStyle.glowBlur(for: 2))
                 )
         )
+        // The width-scaled blur (#533): 0.8 × width, clamped to
+        // 2…12. These three pins ARE the calibration — the 4 pt
+        // bloom on the default 5 pt ring is the device-approved
+        // ratio, and the floor/cap keep a hairline ring's halo
+        // present and a slab ring's overlay bounded. Prose cites
+        // this test; do not restate the numbers elsewhere.
+        #expect(BorderStyle.glowBlur(for: 5) == 4)
+        #expect(BorderStyle.glowBlur(for: 1) == 2)
+        #expect(BorderStyle.glowBlur(for: 20) == 12)
         #expect(glowing.lineWidth == plain.lineWidth)
         #expect(glowing.cornerRadius == plain.cornerRadius)
         // Outward reach (fit-gaps) must NOT count the bloom — it

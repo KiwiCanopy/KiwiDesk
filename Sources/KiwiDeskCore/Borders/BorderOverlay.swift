@@ -54,6 +54,13 @@ final class BorderOverlay {
     private var bumpOffset = CGVector.zero
     private let makeFallback: @MainActor () -> any BorderOverlayBackend
     private let onFallback: @MainActor (String) -> Void
+    /// The order this ring was created with, kept so a glow-driven
+    /// backend swap (#533) can rebuild the SkyLight backend once
+    /// glow turns back off.
+    private let preferredOrder: BorderGeometry.Order
+    /// True after a real SkyLight failure — a glow-off swap must
+    /// never resurrect a backend that already failed.
+    private var skyLightRetired = false
 
     init(
         window: CGWindowID,
@@ -62,6 +69,7 @@ final class BorderOverlay {
     ) {
         targetWindow = window
         self.onFallback = onFallback
+        preferredOrder = order
         makeFallback = { AppKitBorderOverlay() }
         // Both orders prefer the SkyLight transport: its window is
         // space-pinned at creation, so Mission Control leaves the
@@ -91,10 +99,43 @@ final class BorderOverlay {
     ) {
         targetWindow = window
         self.backend = backend
+        preferredOrder = backend.orderMode
         makeFallback = {
             fallback ?? AppKitBorderOverlay()
         }
         onFallback = { _ in }
+    }
+
+    /// A glow ring always renders on the AppKit backend (#533):
+    /// the WindowServer-backed SkyLight context drops any
+    /// `setShadow` colour to default black-at-low-alpha (a grey
+    /// smear), and every painted-falloff substitute banded or
+    /// clipped on device — while the `CAShapeLayer` shadow
+    /// renders the bloom correctly. Plain rings stay on SkyLight
+    /// for its space pin (instant Mission Control hide). The
+    /// swap is two-way on the glow toggle, except after a real
+    /// SkyLight failure, which stays retired. Swapping before
+    /// the backend's first window exists is free — the SkyLight
+    /// surface is created lazily on its first update.
+    @discardableResult
+    private func ensureBackend(glow: Bool) -> Bool {
+        if glow, backend is SkyLightBorderOverlay {
+            _ = backend.hide()
+            backend = makeFallback()
+            return true
+        }
+        if !glow, !skyLightRetired,
+            backend is AppKitBorderOverlay,
+            let skyLight = SkyLightBorderOverlay(
+                targetWindow: targetWindow,
+                order: preferredOrder
+            )
+        {
+            _ = backend.hide()
+            backend = skyLight
+            return true
+        }
+        return false
     }
 
     /// Renders the ring around `frame` (AX coords). Takes the raw
@@ -118,6 +159,7 @@ final class BorderOverlay {
         lastColorHex = colorHex
         lastScreen = screen
         lastGlow = glow
+        let swapped = ensureBackend(glow: glow)
         let shouldRestore = restoreVisibility && isHidden
         guard
             backend.update(
@@ -129,6 +171,16 @@ final class BorderOverlay {
             fallBackToAppKit(reason: "SLS renderer update failed")
             if shouldRestore { order(relativeTo: targetWindow) }
             return
+        }
+        if swapped && !shouldRestore {
+            // The fresh backend's window has no stacking yet —
+            // re-assert what the old one had, like the fallback
+            // swap replay does.
+            if isHidden {
+                _ = backend.hide()
+            } else {
+                _ = backend.order(relativeTo: targetWindow)
+            }
         }
         if shouldRestore {
             order(relativeTo: targetWindow)
@@ -198,6 +250,7 @@ final class BorderOverlay {
         reason: String,
         retireBackend: Bool = true
     ) {
+        skyLightRetired = true
         guard !(backend is AppKitBorderOverlay) else { return }
         onFallback(reason)
         if retireBackend { _ = backend.hide() }

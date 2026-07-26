@@ -2636,7 +2636,10 @@ stand out).
 The bloom is a **brightened** derivative of `focused_color` (a halo
 is a fill, not a legibility-bound stroke, so it reads more vivid than
 the darkened border, in its own hue) — set only `focused_color`
-and the glow follows. The soft edge is allowed to bleed into the
+and the glow follows. Its reach **scales with the border width**
+(clamped to a legible band), so a hairline border gets a subtle
+rim and a thick one a proportional aura — there is no separate
+size knob. The soft edge is allowed to bleed into the
 layout gap, so `fit_gaps` is unaffected.
 
 **Example:**

@@ -153,11 +153,16 @@ private struct FocusBorderPreview: View {
             from: 1...20,
             to: 1...7
         )
-        // Remap the nominal 10 pt glow blur (BorderGeometry.glowBlur)
-        // the same way — the literal 10 pt would swamp this 96 pt
-        // mock and read as a smear, not a halo (#358). A proportional
+        // Remap the width-scaled glow blur
+        // (`BorderStyle.glowBlur(for:)`, #533) the same way —
+        // the literal pt value would swamp this 96 pt mock and
+        // read as a smear, not a halo (#358). A proportional
         // approximation, like width and corners here.
-        let glowRadius = scale(10, from: 1...20, to: 1...7)
+        let glowRadius = scale(
+            BorderStyle.glowBlur(for: style.clampedWidth),
+            from: 2...12,
+            to: 1...5
+        )
         let radius: CGFloat =
             style.cornerStyle == .square ? 0 : 12
         return RoundedRectangle(cornerRadius: radius)
