@@ -1163,6 +1163,55 @@ section {
   min-width: 0;
 }
 
+/* The right-hand track holds two blocks now — the Homebrew
+   install (always open, it is how the beta ships) and the
+   build-from-source disclosure beneath it. `min-width: 0` has to
+   repeat here because this wrapper is the grid child now. */
+.quickstart__codes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  min-width: 0;
+}
+
+/* Source build: collapsed by default. Newcomers arriving on the
+   install bridge meet Homebrew first; contributors are one click
+   from the clone commands. */
+.quickstart__alt > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  font-size: 0.88rem;
+  color: var(--text-dim);
+  list-style: none;
+  padding: 0.25rem 0;
+  border-radius: var(--radius-sm);
+}
+
+/* Safari still paints the default disclosure triangle without
+   this — the chevron below is the only marker we want. */
+.quickstart__alt > summary::-webkit-details-marker {
+  display: none;
+}
+
+.quickstart__alt > summary:hover {
+  color: var(--text);
+}
+
+.quickstart__alt-chevron {
+  flex: 0 0 auto;
+  transition: transform 0.2s ease;
+}
+
+.quickstart__alt[open] .quickstart__alt-chevron {
+  transform: rotate(90deg);
+}
+
+.quickstart__alt .code {
+  margin-top: 0.65rem;
+}
+
 .quickstart h2 {
   font-size: clamp(1.6rem, 3.6vw, 2.3rem);
   line-height: 1.14;

@@ -440,6 +440,13 @@ const jsonLd = [
               <span class="learn__eyebrow">{s.guide_eyebrow}</span>
               <h1 class="learn__title">{s.guide_title}</h1>
               <p class="learn__lede">{s.guide_lede}</p>
+              <!-- No beta pill here on purpose. Status rides the
+                   same pill component as the landing hero, but on
+                   this page the header and the install card sit
+                   within one viewport — two identical pills that
+                   close together read as a stutter rather than as
+                   ambient status, so the card (the decision point)
+                   is the one that carries it. -->
             </header>
 
             <!-- ===== 1. Getting started ===== -->
@@ -451,32 +458,35 @@ const jsonLd = [
               </div>
               <p>{s.guide_gs_p1}</p>
 
+              <!-- Install status card. This deliberately carries
+                   NO App Store badge and NO shell command. The
+                   badge went because a dimmed or ribboned Apple
+                   badge still reads as "tap = the store opens" and
+                   so reads broken, not forthcoming — that is a
+                   different failure from §2.7's grey-don't-hide,
+                   which covers a control with no effect in the
+                   CURRENT mode, not a channel that does not exist
+                   yet. The command went because this is the
+                   friendly surface; one bridge leads to it on the
+                   landing (the #326 shape), rather than an in-place
+                   reveal that would put Terminal syntax here. -->
               <div class="learn-install">
-                <a class="appstore-btn" href="#"
-                  aria-label={s.guide_gs_appstore_aria}>
-                  <span class="appstore-btn__glyph">
-                    <svg viewBox="0 0 24 24" fill="currentColor"
-                      aria-hidden="true">
-                      <path d="M17.05 12.54c-.02-2.06 1.68-3.05
-                        1.76-3.1-0.96-1.4-2.45-1.6-2.98-1.62-1.27-.13-2.48.75-3.12.75-.64
-                        0-1.64-.73-2.7-.71-1.39.02-2.67.81-3.38
-                        2.05-1.44 2.5-.37 6.2 1.03 8.23.68.99
-                        1.5 2.1 2.56 2.06 1.03-.04 1.42-.66
-                        2.66-.66 1.24 0 1.59.66 2.68.64 1.1-.02
-                        1.8-1.01 2.48-2 .78-1.15 1.1-2.26
-                        1.12-2.32-.02-.01-2.15-.83-2.17-3.27ZM15.1
-                        6.63c.56-.68.94-1.63.84-2.58-.81.03-1.79.54-2.37
-                        1.22-.52.6-.98 1.56-.86 2.48.9.07
-                        1.83-.46 2.39-1.12Z" />
-                    </svg>
-                  </span>
-                  <span class="appstore-btn__copy">
-                    <span class="appstore-btn__small"
-                      >{s.guide_gs_appstore_small}</span>
-                    <span class="appstore-btn__big"
-                      >{s.guide_gs_appstore_big}</span>
-                  </span>
+                <span class="pill">
+                  <span class="pill__dot" aria-hidden="true"></span>
+                  {s.beta_badge}
+                </span>
+                <a class="btn btn--primary"
+                  href={`${homeHref}#start`}>
+                  {s.guide_gs_install_cta}
+                  <Icon name="lucide:arrow-right" width={16}
+                    height={16} aria-hidden="true" />
                 </a>
+                <p class="learn-install__preview"
+                  >{s.guide_gs_install_preview}</p>
+                <!-- A promise, not a control: plain text, never
+                     styled as something tappable. -->
+                <p class="learn-install__later"
+                  >{s.guide_gs_install_later}</p>
               </div>
 
               <p class="learn__store-note">{s.guide_gs_store_note}</p>
@@ -658,8 +668,13 @@ const jsonLd = [
               <div class="learn-close">
                 <h2>{s.guide_close_title}</h2>
                 <p>{s.guide_close_p}</p>
+                <!-- Was `#getting-started`, an id the landing has
+                     never had — a dead jump that left the visitor
+                     at the top of the home page. Points at the
+                     install bridge now, same target as the
+                     getting-started card above. -->
                 <a class="btn btn--primary"
-                  href={`${homeHref}#getting-started`}>
+                  href={`${homeHref}#start`}>
                   {s.guide_close_cta}
                   <Icon name="lucide:arrow-right" width={16} height={16}
                     aria-hidden="true" />

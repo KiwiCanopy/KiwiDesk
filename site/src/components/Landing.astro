@@ -53,6 +53,13 @@ const kofi = "https://ko-fi.com/kiwicanopy";
 const makerProfile = "https://github.com/hajiboy95";
 const buildCmd =
   `git clone ${repo}.git\ncd KiwiDesk\nswift build -c release`;
+// The ONE place the install command is spelled out on this page
+// (Guide.astro deliberately holds no copy of it — it bridges here
+// instead). The beta ships from a personal tap; a fully-qualified
+// token auto-taps, so this stays a single command. If KiwiDesk is
+// later accepted into homebrew-cask it shortens to
+// `brew install --cask kiwidesk` — a one-line edit here.
+const installCmd = "brew install --cask kiwicanopy/tap/kiwidesk";
 
 // A crisp kiwi-slice glyph (green skin, pale flesh ring, small
 // core, a ring of seed dots) for the mode toggle — drawn rather
@@ -190,11 +197,24 @@ const jsonLd = [
         } catch (e) {
           root.dataset.theme = "dark";
         }
+        // Arriving on #start is the install bridge (from /guide/,
+        // or the Simple-mode CTA): an explicit ask for the
+        // technical view. Force Nerd BEFORE first paint — the
+        // section is .dev-only (display:none), so a hash landing
+        // on a hidden element would scroll nowhere — and persist
+        // it exactly as a toggle click does, so the stored mode
+        // stays the single source of truth rather than a URL
+        // override that silently reverts on the next visit.
+        var bridged = location.hash === "#start";
         try {
           var m = localStorage.getItem("kiwidesk-site-mode");
+          if (bridged) {
+            m = "dev";
+            localStorage.setItem("kiwidesk-site-mode", "dev");
+          }
           root.dataset.mode = m === "dev" ? "dev" : "simple";
         } catch (e) {
-          root.dataset.mode = "simple";
+          root.dataset.mode = bridged ? "dev" : "simple";
         }
       })();
     </script>
@@ -729,7 +749,14 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
       </div>
     </section>
 
-    <!-- ============ Build from source (Nerd only) ======== -->
+    <!-- ============ Install (Nerd only) ==================
+         The install bridge target. Simple-mode readers and the
+         /guide/ arrive here via #start, which the head script
+         resolves into Nerd mode before paint (this section is
+         .dev-only). Homebrew leads because it is how the beta
+         actually ships; building from source stays directly
+         beneath it — contributors still need it, newcomers
+         landing from the bridge should not meet it first. -->
     <section class="quickstart dev-only dev-reveal" id="start">
       <div class="wrap">
         <div>
@@ -747,27 +774,56 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
             {t.build_req}
           </p>
         </div>
-        <div class="code"
-          aria-label={t.build_code_aria}>
-          <div class="code__bar">
-            <span class="code__dot" aria-hidden="true"></span>
-            <span class="code__dot" aria-hidden="true"></span>
-            <span class="code__dot" aria-hidden="true"></span>
-            <span class="code__title">{t.build_title_bar}</span>
-            <button class="code__copy" id="copyBuild" type="button"
-              data-copy={buildCmd}
-              data-label-copy={t.build_copy}
-              data-label-done={t.build_copy_done}
-              aria-label={t.build_copy_aria}>
-              <Icon name="lucide:copy" class="code__copy-icon"
-                width={15} height={15} aria-hidden="true" />
-              <span class="code__copy-label">{t.build_copy}</span>
-            </button>
+        <div class="quickstart__codes">
+          <div class="code" aria-label={t.install_code_aria}>
+            <div class="code__bar">
+              <span class="code__dot" aria-hidden="true"></span>
+              <span class="code__dot" aria-hidden="true"></span>
+              <span class="code__dot" aria-hidden="true"></span>
+              <span class="code__title">{t.install_title_bar}</span>
+              <button class="code__copy" type="button"
+                data-copy={installCmd}
+                data-label-copy={t.build_copy}
+                data-label-done={t.build_copy_done}
+                aria-label={t.install_copy_aria}>
+                <Icon name="lucide:copy" class="code__copy-icon"
+                  width={15} height={15} aria-hidden="true" />
+                <span class="code__copy-label">{t.build_copy}</span>
+              </button>
+            </div>
+            <pre><code><span class="prompt">$</span> {installCmd}
+<span class="cmt">{t.install_cmt}</span></code></pre>
           </div>
-          <pre><code><span class="prompt">$</span> git clone {repo}.git
+
+          <details class="quickstart__alt">
+            <summary>
+              <Icon name="lucide:chevron-right"
+                class="quickstart__alt-chevron" width={15}
+                height={15} aria-hidden="true" />
+              {t.build_source_summary}
+            </summary>
+            <div class="code" aria-label={t.build_code_aria}>
+              <div class="code__bar">
+                <span class="code__dot" aria-hidden="true"></span>
+                <span class="code__dot" aria-hidden="true"></span>
+                <span class="code__dot" aria-hidden="true"></span>
+                <span class="code__title">{t.build_title_bar}</span>
+                <button class="code__copy" type="button"
+                  data-copy={buildCmd}
+                  data-label-copy={t.build_copy}
+                  data-label-done={t.build_copy_done}
+                  aria-label={t.build_copy_aria}>
+                  <Icon name="lucide:copy" class="code__copy-icon"
+                    width={15} height={15} aria-hidden="true" />
+                  <span class="code__copy-label">{t.build_copy}</span>
+                </button>
+              </div>
+              <pre><code><span class="prompt">$</span> git clone {repo}.git
 <span class="prompt">$</span> cd KiwiDesk
 <span class="prompt">$</span> swift build -c release
 <span class="cmt">{t.build_cmt}</span></code></pre>
+            </div>
+          </details>
         </div>
       </div>
     </section>
@@ -780,9 +836,22 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
           <h2>{t.cta_title}</h2>
           <p>{t.cta_body}</p>
           <div class="hero__cta">
-            <span class="btn btn--primary btn--soon">
+            <!-- The install bridge, shown in BOTH modes. In Nerd
+                 mode #start is already visible and this is a plain
+                 in-page jump; in Simple mode the section is hidden,
+                 so the delegated handler below switches to Nerd
+                 first (persisting it, like a toggle click) and then
+                 scrolls. It stays a real <a href> rather than a
+                 button so it keeps anchor semantics (focusable,
+                 middle-click, "copy link"); the mode toggle is
+                 JS-driven anyway, so a JS-off visitor has no Nerd
+                 view to be sent to in the first place. -->
+            <a class="btn btn--primary" href="#start"
+              data-install-bridge>
               {t.cta_primary}
-            </span>
+              <Icon name="lucide:arrow-right" width={16} height={16}
+                aria-hidden="true" />
+            </a>
             <a class="btn btn--ghost dev-only" href={kofi}
               target="_blank" rel="noopener">
               <img class="kofi-icon" src={kofiIcon.src} alt=""
@@ -973,6 +1042,35 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
           ?.focus();
       });
 
+      // ---- Install bridge (Simple mode -> Nerd, then #start) ----
+      // The #cta button is the one install path a Simple-mode
+      // reader is offered. #start lives in a .dev-only section, so
+      // a bare hash jump would land on a display:none element and
+      // scroll nowhere. Switch modes through applyMode() (which
+      // persists the choice, exactly as clicking the toggle does)
+      // and scroll in the same tick: applyMode sets `data-mode`
+      // synchronously, so scrollIntoView's own forced reflow
+      // already sees the revealed section at its real offset.
+      // Deliberately NOT deferred to requestAnimationFrame — rAF
+      // does not fire in a backgrounded tab, which would leave a
+      // click that switched the mode but never scrolled.
+      document
+        .querySelectorAll("[data-install-bridge]")
+        .forEach((link) => {
+          link.addEventListener("click", (e) => {
+            if (html.dataset.mode === "dev") return; // plain jump
+            e.preventDefault();
+            applyMode("dev");
+            document.getElementById("start")?.scrollIntoView({
+              behavior: reduce ? "auto" : "smooth",
+              block: "start",
+            });
+            // Keep the URL shareable — landing on /#start later
+            // re-enters Nerd mode via the <head> resolver.
+            history.replaceState(null, "", "#start");
+          });
+        });
+
       // ---- Language switcher (own `kiwidesk-site-lang` key) ----
       // Each segment is an <a> that already navigates to the target
       // route; here we only persist the explicit choice so the
@@ -1027,23 +1125,27 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
       // Labels come from data-* attributes so the copied/idle text
       // is localized (English "Copy"/"Copied", German
       // "Kopieren"/"Kopiert") without hardcoding either here.
-      const copyBtn = document.getElementById("copyBuild");
-      const copyLabel = copyBtn?.querySelector(".code__copy-label");
-      copyBtn?.addEventListener("click", async () => {
-        const text = copyBtn.getAttribute("data-copy") || "";
-        const idle = copyBtn.getAttribute("data-label-copy") || "";
-        const done = copyBtn.getAttribute("data-label-done") || "";
-        try {
-          await navigator.clipboard.writeText(text);
-          copyBtn.classList.add("is-copied");
-          if (copyLabel) copyLabel.textContent = done;
-          setTimeout(() => {
-            copyBtn.classList.remove("is-copied");
-            if (copyLabel) copyLabel.textContent = idle;
-          }, 1600);
-        } catch (e) {
-          /* clipboard blocked — no-op */
-        }
+      // Every .code block carries its own copy button (install and
+      // build-from-source), each with its own label element, so the
+      // handler is bound per button rather than to one id.
+      document.querySelectorAll(".code__copy").forEach((copyBtn) => {
+        const copyLabel = copyBtn.querySelector(".code__copy-label");
+        copyBtn.addEventListener("click", async () => {
+          const text = copyBtn.getAttribute("data-copy") || "";
+          const idle = copyBtn.getAttribute("data-label-copy") || "";
+          const done = copyBtn.getAttribute("data-label-done") || "";
+          try {
+            await navigator.clipboard.writeText(text);
+            copyBtn.classList.add("is-copied");
+            if (copyLabel) copyLabel.textContent = done;
+            setTimeout(() => {
+              copyBtn.classList.remove("is-copied");
+              if (copyLabel) copyLabel.textContent = idle;
+            }, 1600);
+          } catch (e) {
+            /* clipboard blocked — no-op */
+          }
+        });
       });
 
       // ---- Scroll reveal (motion-aware) ----

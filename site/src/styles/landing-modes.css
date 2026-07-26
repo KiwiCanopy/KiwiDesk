@@ -983,12 +983,6 @@ a.quote-card__byline-main:hover {
   margin-inline: auto;
 }
 
-/* The App Store CTA is honest: it's a "coming soon" label, not a
-   link — styled as a button but non-interactive. */
-.btn--soon {
-  cursor: default;
-}
-
 /* =========================================================
    Reduced motion — snap everything, no reveal animation.
    ========================================================= */

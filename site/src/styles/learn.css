@@ -351,113 +351,43 @@
 }
 
 /* =========================================================
-   Install: App Store button + code block
+   Install: beta status card
+   -----------------------------------------------------------
+   A centered stack — status pill, the one real CTA (the bridge
+   to the landing's install section), then two lines of plain
+   text. No App Store badge lives here any more: Apple's badge
+   shape carries a hard "tap opens the store" expectation that
+   dimming does not cancel, so a placeholder one reads broken
+   rather than forthcoming. The CTA is an ordinary .btn--primary
+   precisely so it borrows no affordance it cannot honor.
    ========================================================= */
 .learn-install {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: 0.85rem;
   margin: 1.75rem 0 0.6rem;
+  text-align: center;
 }
 
-/* A tasteful, self-contained "Download on the App Store" pill —
-   Apple's badge conventions rebuilt with an inline glyph so we
-   ship no external asset. */
-.appstore-btn {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.6rem 1.05rem 0.6rem 0.9rem;
-  border-radius: var(--radius);
-  background-color: var(--appstore-bg, #000);
-  /* Top-highlight gradient gives the pill a raised, 3D face. */
-  background-image: var(
-    --appstore-fill,
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.08),
-      rgba(255, 255, 255, 0) 42%
-    )
-  );
-  color: var(--appstore-ink, #fff);
-  border: 1px solid var(--appstore-border, rgba(255, 255, 255, 0.16));
-  box-shadow: var(
-    --appstore-shadow,
-    0 1px 0 rgba(255, 255, 255, 0.12) inset,
-    0 8px 20px -8px rgba(0, 0, 0, 0.55)
-  );
-  transition: transform 0.2s ease, box-shadow 0.25s ease,
-    border-color 0.2s ease, filter 0.2s ease;
+/* What the bridge leads to — one line, set below the CTA so the
+   Terminal step is never a surprise on the other side. */
+.learn-install__preview {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+  max-width: 34ch;
 }
 
-/* Light mode: authentic App-Store blue with a gradient face and a
-   layered shadow so it reads as a raised, dimensional button
-   against the cream page (dark mode keeps the classic black badge,
-   with the same raised treatment). */
-:root[data-theme="light"] .appstore-btn {
-  --appstore-bg: #0a63e0;
-  --appstore-fill: linear-gradient(180deg, #2b7bf2, #0a56c4);
-  --appstore-ink: #fff;
-  --appstore-border: #0847a0;
-  --appstore-shadow: 0 1px 0 rgba(255, 255, 255, 0.35) inset,
-    0 -1px 0 rgba(0, 0, 0, 0.18) inset,
-    0 10px 24px -8px rgba(10, 99, 224, 0.55),
-    0 2px 6px rgba(18, 37, 26, 0.18);
-}
-
-.appstore-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--appstore-shadow-hover, var(--shadow));
-}
-
-:root[data-theme="light"] .appstore-btn:hover {
-  --appstore-shadow-hover: 0 1px 0 rgba(255, 255, 255, 0.4) inset,
-    0 -1px 0 rgba(0, 0, 0, 0.18) inset,
-    0 16px 32px -8px rgba(10, 99, 224, 0.65),
-    0 4px 10px rgba(18, 37, 26, 0.2);
-}
-
-.appstore-btn:active {
-  transform: translateY(0);
-  filter: brightness(0.96);
-}
-
-.appstore-btn__glyph {
-  width: 26px;
-  height: 26px;
-  flex: 0 0 auto;
-}
-
-.appstore-btn__glyph svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.appstore-btn__copy {
-  display: grid;
-  line-height: 1.1;
-  text-align: left;
-}
-
-.appstore-btn__small {
-  font-size: 0.62rem;
-  letter-spacing: 0.02em;
-  opacity: 0.85;
-}
-
-.appstore-btn__big {
-  font-size: 1.05rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
-.learn-install__or {
+/* The App Store promise. Deliberately plain text at the faintest
+   tier — it is not a control, so it must not look like one. */
+.learn-install__later {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
   color: var(--text-faint);
-  font-size: 0.95rem;
+  max-width: 34ch;
 }
 
 .learn .code {
@@ -848,7 +778,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .appstore-btn:hover,
   .learn-close:hover {
     transform: none;
   }
