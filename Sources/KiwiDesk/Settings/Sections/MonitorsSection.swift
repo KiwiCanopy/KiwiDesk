@@ -101,36 +101,60 @@ struct MonitorsSection: View {
                 )
             ) {
                 ForEach(orphans, id: \.key.raw) { pin in
-                    HStack {
-                        SpaceChip(label: pin.key.raw)
-                        Image(systemName: "arrow.right")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        Text(pin.value)
-                            .font(
-                                .system(
-                                    .caption,
-                                    design: .monospaced
-                                )
-                            )
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        Button {
-                            model.config.spacePins[pin.key] =
-                                nil
-                        } label: {
-                            Image(systemName: "xmark.circle")
-                        }
-                        .buttonStyle(.borderless)
-                        .iconButtonAffordance(
-                            L(
-                                "monitors.orphan_pin.help",
-                                "Back to automatic placement"
-                            )
-                        )
-                    }
+                    orphanPinRow(
+                        space: pin.key,
+                        fingerprint: pin.value
+                    )
                 }
             }
+        }
+    }
+
+    /// One orphaned pin: which space, and the fingerprint of the
+    /// monitor it is waiting for.
+    ///
+    /// Same rule as `fingerprintRow` — a bare hash arrives at
+    /// VoiceOver with no context — but here the section title
+    /// does not even name the value, so the spoken label carries
+    /// both halves. It is scoped to the **readout**, not the
+    /// whole row: combining an interactive child would fold the
+    /// clear button into one element and cost the action.
+    private func orphanPinRow(
+        space: SpaceID,
+        fingerprint: String
+    ) -> some View {
+        HStack {
+            HStack {
+                SpaceChip(label: space.raw)
+                Image(systemName: "arrow.right")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(fingerprint)
+                    .font(.system(.caption, design: .monospaced))
+                    .foregroundStyle(.secondary)
+            }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel(
+                L(
+                    "monitors.orphan_pin.row_axlabel",
+                    "Space %1$@, pinned to fingerprint %2$@",
+                    space.raw,
+                    fingerprint
+                )
+            )
+            Spacer()
+            Button {
+                model.config.spacePins[space] = nil
+            } label: {
+                Image(systemName: "xmark.circle")
+            }
+            .buttonStyle(.borderless)
+            .iconButtonAffordance(
+                L(
+                    "monitors.orphan_pin.help",
+                    "Back to automatic placement"
+                )
+            )
         }
     }
 

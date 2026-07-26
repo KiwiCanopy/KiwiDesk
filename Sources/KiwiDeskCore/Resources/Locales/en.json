@@ -449,6 +449,7 @@
   "monitors.not_connected": "Monitors not connected",
   "monitors.not_connected.caption": "This profile's monitors aren't attached right now, so its space placement can't be edited here. Connect its monitor setup to arrange spaces — the other sections still edit this profile.",
   "monitors.orphan_pin.help": "Back to automatic placement",
+  "monitors.orphan_pin.row_axlabel": "Space %1$@, pinned to fingerprint %2$@",
   "monitors.orphan_pins.title": "Pinned to disconnected monitors",
   "monitors.space_placement": "Space placement",
   "monocle.app_bar_xref_state": "The monocle app bar (currently %1$@) is configured in",

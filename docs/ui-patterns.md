@@ -227,12 +227,24 @@ nothing to misparse, and it is the only advanced thing on its
 page.
 
 **Weigh every title edit against the search index.**
-`SidebarSearch` indexes only visible strings, so a word that
-appears nowhere else in the GUI lives or dies with its title — a
-title that reads better but drops such a word makes its own
-drawer unfindable by the word a user would type. Both "Lua" and
+`SidebarSearch` indexes destination titles plus a *hand-listed*
+set of subsection headers; computed titles and per-control
+labels stay out until #277. So a word that appears in no other
+**indexed** string lives or dies with its title — a title that
+reads better but drops such a word makes its own drawer
+unfindable by the word a user would type. Both "Lua" and
 "fingerprint" are in that position today, which is part of why
-those two titles win. #540 tracks the coupling.
+those two titles win. Note the corollary, since it has already
+misled once: adding that word as a *visible row label* does not
+loosen the coupling, because a row label is not indexed. #540
+tracks it.
+
+Localization splits here, and the split is the rule from §5:
+R5's capitalization and R3's connector were **cosmetic**, so
+German keeps its own typography ("Erweitert: …"). Dropping
+"Advanced" changed the English **meaning**, so those two keys
+took `scripts/drop-key` and re-queue for translation — see
+`docs/translating.md`.
 
 **A section title labels its rows visually; it does not label
 them to VoiceOver.** A diagnostic readout row (Monitors'
@@ -245,12 +257,20 @@ or id arrives with no context: give such a row a combined
 naming the value. Keep `textSelection` scoped to the value
 itself, so copying for a support ticket yields the value alone.
 
-Localization splits here, and the split is the rule from §5:
-R5's capitalization and R3's connector were **cosmetic**, so
-German keeps its own typography ("Erweitert: …"). Dropping
-"Advanced" changed the English **meaning**, so those two keys
-took `scripts/drop-key` and re-queue for translation — see
-`docs/translating.md`.
+Two things decide how far the combined element reaches:
+
+- **Does the title name the value at all?** Monitors' drawer is
+  titled "Monitor fingerprints", so its rows speak the display
+  and the hash. The orphan-pin rows sit under "Pinned to
+  disconnected monitors", which never says *fingerprint*, so
+  their label carries both halves ("Space 3, pinned to
+  fingerprint …").
+- **Does the row hold a control?** Combine the **readout only**,
+  never the whole row. `children: .combine` folds interactive
+  children in too, so wrapping a row that ends in a clear or
+  edit button costs that button its own element — scope the
+  combined element to the static run and leave the control a
+  sibling.
 
 **Option tabs are a solid sliding-pill segment control.**
 Every pick-one-of-few chooser (layout parameters, mouse
