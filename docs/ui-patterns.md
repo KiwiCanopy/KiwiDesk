@@ -228,12 +228,22 @@ page.
 
 **Weigh every title edit against the search index.**
 `SidebarSearch` indexes only visible strings, so a word that
-appears nowhere else in the GUI lives or dies with its title —
-"fingerprint" is rendered as a bare hash with no row label, and
-"Lua" appears in no other indexed string. A title that reads
-better but drops such a word makes its own drawer unfindable by
-the word a user would type; both names above keep theirs, which
-is part of why they win. #540 tracks the underlying coupling.
+appears nowhere else in the GUI lives or dies with its title — a
+title that reads better but drops such a word makes its own
+drawer unfindable by the word a user would type. Both "Lua" and
+"fingerprint" are in that position today, which is part of why
+those two titles win. #540 tracks the coupling.
+
+**A section title labels its rows visually; it does not label
+them to VoiceOver.** A diagnostic readout row (Monitors'
+fingerprint hashes) needs no visible per-row label when the
+drawer above it is named for exactly that value — repeating the
+word on every row was tried and read as noise. But the title is
+spoken once while rows are stepped one at a time, so a bare hash
+or id arrives with no context: give such a row a combined
+`accessibilityElement` with an explicit `accessibilityLabel`
+naming the value. Keep `textSelection` scoped to the value
+itself, so copying for a support ticket yields the value alone.
 
 Localization splits here, and the split is the rule from §5:
 R5's capitalization and R3's connector were **cosmetic**, so

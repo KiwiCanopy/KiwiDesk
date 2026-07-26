@@ -442,6 +442,7 @@
   "monitor_chip.hint.pinned": "Pinned to this monitor — drag to move, ⓧ for automatic",
   "monitor_chip.move_to": "Move to %1$@",
   "monitors.advanced.caption": "Profiles reattach automatically when a known monitor setup is reconnected.",
+  "monitors.advanced.row_axlabel": "%1$@, fingerprint %2$@",
   "monitors.advanced.title": "Monitor fingerprints",
   "monitors.cards.caption": "Drag a space between cards to pin it to a monitor or have it follow the main display. Dimmed spaces are placed automatically. Right-click a space for the same moves.",
   "monitors.none_detected": "No monitors detected.",
