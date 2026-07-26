@@ -62,9 +62,8 @@ final class ShortcutsPanelController: NSObject, NSWindowDelegate {
         let panel = self.panel ?? makePanel()
         self.panel = panel
         panel.contentView = NSHostingView(
-            rootView: root.environmentObject(
-                LocalizationManager.shared
-            )
+            rootView: LocaleScopedRoot { root }
+                .environmentObject(LocalizationManager.shared)
         )
         resize(panel)
         center(panel)

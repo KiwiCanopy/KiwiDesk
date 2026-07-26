@@ -48,8 +48,6 @@ extension AppDelegate {
             self?.exploreFromDiscovery()
         }
 
-        let view = OnboardingView(model: onboardingModel)
-            .environmentObject(LocalizationManager.shared)
         let window = NSWindow(
             contentRect: .zero,
             styleMask: [.titled, .closable, .fullSizeContentView],
@@ -61,7 +59,12 @@ extension AppDelegate {
             "onboarding.window.title",
             "KiwiDesk Setup"
         )
-        window.contentView = NSHostingView(rootView: view)
+        window.contentView = NSHostingView(
+            rootView: LocaleScopedRoot {
+                OnboardingView(model: onboardingModel)
+            }
+            .environmentObject(LocalizationManager.shared)
+        )
         window.isReleasedWhenClosed = false
         window.delegate = self
         window.center()

@@ -107,8 +107,10 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         window.toolbar = toolbar
         window.toolbarStyle = .unified
         window.contentView = NSHostingView(
-            rootView: SettingsView(model: model)
-                .environmentObject(LocalizationManager.shared)
+            rootView: LocaleScopedRoot {
+                SettingsView(model: model)
+            }
+            .environmentObject(LocalizationManager.shared)
         )
         window.isReleasedWhenClosed = false
         window.delegate = self
