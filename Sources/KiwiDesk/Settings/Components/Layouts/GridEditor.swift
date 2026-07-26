@@ -11,6 +11,43 @@ struct GridEditor: View {
         $model.config.settings.grid
     }
 
+    /// Whether any space's override satisfies `predicate`.
+    ///
+    /// A control on this GLOBAL editor is inert only when nothing
+    /// still reads it — and a per-space override can keep it live
+    /// after the global condition would silence it. Asking the
+    /// global alone greys a control that is running, the worse of
+    /// the two failure directions (#520 wrote the rule one level
+    /// down: ask the value that is actually read, never the
+    /// global; #527 found this pair still asking the global).
+    ///
+    /// Deliberately ignores whether that space also overrides the
+    /// gated value itself. If it does, the control is inert for
+    /// it and we leave it enabled anyway — erring toward enabled
+    /// is the safe direction here.
+    private func anyOverride(
+        _ predicate: (GridOverride) -> Bool
+    ) -> Bool {
+        model.config.settings.grid.override.values
+            .contains(where: predicate)
+    }
+
+    /// Fill-empty applies to dynamic grids only, so a rigid
+    /// global silences it — unless a space overrides its type
+    /// back to dynamic, which makes the global value live again.
+    private var fillEmptyIsInert: Bool {
+        model.config.settings.grid.type == .rigid
+            && !anyOverride { $0.type == .dynamic }
+    }
+
+    /// Auto-size supplies the dimensions, so it silences the
+    /// Columns/Rows steppers — unless a space overrides auto-size
+    /// OFF, which makes the global dimensions live for it.
+    private var dimensionsAreInert: Bool {
+        model.config.settings.grid.autoSize
+            && !anyOverride { $0.autoSize == false }
+    }
+
     var body: some View {
         SettingsSection(
             L("layout.grid.name", "Grid"),
@@ -73,12 +110,12 @@ struct GridEditor: View {
                 ),
                 isOn: grid.fillEmptySpace
             )
-            // Fill-empty only applies to dynamic grids; greyed
-            // (not hidden) in rigid so its value stays visible
-            // (see design-decisions "grey inapplicable controls").
-            .disabled(
-                model.config.settings.grid.type == .rigid
-            )
+            // Greyed (not hidden) so its value stays visible (see
+            // design-decisions "grey inapplicable controls").
+            // `GreyOut`, not a bare `.disabled`, so it dims the
+            // same way as its per-space twin — the two used to
+            // read differently for the same state (#527).
+            .modifier(GreyOut(active: fillEmptyIsInert))
             Divider()
             // Auto-size + its dimensions read as a distinct block
             // from the grid-fill behaviour above, mirroring the
@@ -103,7 +140,8 @@ struct GridEditor: View {
                 "Fits as many columns and rows as the "
                     + "screen allows, using the minimum "
                     + "window size above."
-            )
+            ),
+            gatedIsInert: dimensionsAreInert
         ) {
             StepperRow(
                 label: L("scroll_grid.columns", "Columns"),

@@ -174,10 +174,41 @@ extension TilingSettings {
     /// can't drift. Honors per-layout edge overrides.
     public var spaceBarSharesEdgeWithAppBar: Bool {
         guard spaceBarStyle.enabled else { return false }
-        return [monocle.appBar, scrolling.appBar].contains {
+        return appBarHosts.contains {
             $0.enabled
                 && $0.resolved(with: appBarStyle).edge
                     == spaceBarStyle.edge
+        }
+    }
+
+    /// The bar-hosting layout for a mode, or nil for modes that
+    /// show no bar. **The one place that decides which layouts
+    /// host an App Bar** — everything that asks "does this mode
+    /// show a bar?" or "any bar shown?" derives from here, so a
+    /// third hosting layout is one edit.
+    ///
+    /// The list had been hand-copied to three sites; a fourth
+    /// hosting layout added later would have left the Settings
+    /// copy claiming no bar is shown while one rendered, greying
+    /// a live editor (#527). `KiwiCore.barHost(for mode:)`
+    /// delegates here; its per-*space* twin necessarily keeps its
+    /// own switch, because it resolves per-space params — two
+    /// mirrors, which §2.4 allows, rather than three.
+    public func appBarHost(
+        for mode: LayoutMode
+    ) -> AppBarHosting? {
+        switch mode {
+        case .monocle: return monocle
+        case .scrolling: return scrolling
+        default: return nil
+        }
+    }
+
+    /// Every bar-hosting layout's per-layout bar, derived from
+    /// `appBarHost(for:)` rather than re-listed.
+    public var appBarHosts: [LayoutAppBar] {
+        LayoutMode.allCases.compactMap {
+            appBarHost(for: $0)?.appBar
         }
     }
 

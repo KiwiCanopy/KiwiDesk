@@ -148,13 +148,11 @@ extension KiwiCore {
     }
 
     /// The bar-hosting layout for a space mode, or nil for modes
-    /// that don't show a bar.
+    /// that don't show a bar. Delegates to the one list on
+    /// `TilingSettings` (#527) — do not re-enumerate the modes
+    /// here.
     func barHost(for mode: LayoutMode) -> AppBarHosting? {
-        switch mode {
-        case .monocle: return tiler.settings.monocle
-        case .scrolling: return tiler.settings.scrolling
-        default: return nil
-        }
+        tiler.settings.appBarHost(for: mode)
     }
 
     /// Drag-and-drop reorder from the bar: moves the item at

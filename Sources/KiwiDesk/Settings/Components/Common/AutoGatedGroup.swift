@@ -26,6 +26,14 @@ struct AutoGatedGroup<Gated: View>: View {
     /// behaviour (the App Bar sizes), keeping the caption's job to
     /// "name a source the control can't" rather than gloss "why".
     var caption: String? = nil
+    /// Whether the gated controls are genuinely inert. Defaults
+    /// to `isOn` — the common case, where this toggle is the only
+    /// thing that can silence them. A surface whose value can be
+    /// re-enabled elsewhere passes a narrower predicate: the
+    /// global Grid editor's steppers stay live for any space that
+    /// overrides auto-size OFF, and greying a control something
+    /// still reads is the worse direction (#520, #527).
+    var gatedIsInert: Bool? = nil
     @ViewBuilder let gated: Gated
 
     var body: some View {
@@ -37,7 +45,7 @@ struct AutoGatedGroup<Gated: View>: View {
                     .foregroundStyle(.secondary)
             }
             gated
-                .modifier(GreyOut(active: isOn))
+                .modifier(GreyOut(active: gatedIsInert ?? isOn))
         }
     }
 }
