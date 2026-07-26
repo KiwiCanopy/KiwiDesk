@@ -291,6 +291,15 @@ no trailing period. Body (optional) explains the why, wrapped at
   genuinely-intended one with `KIWIDESK_ALLOW_MAIN_COMMIT=1`, which
   names the rule you are skipping instead of `--no-verify` taking
   the lint and locale checks with it.
+- Package the `.app`: `./scripts/build-app.sh` (#89). SwiftPM
+  cannot emit a bundle, so this assembles one from the release
+  build, compiles `assets/AppIcon.icon` through `actool`, and
+  signs it. Nothing it writes is a second copy: the version is
+  read from `KiwiDeskVersion.swift` and the two icon keys come
+  from actool's own partial plist. Signing defaults to **ad-hoc**
+  so it runs with no Apple account — pass `--identity` for a
+  stable certificate and `--notarize <profile>` for a
+  `notarytool` keychain profile you created yourself.
 - Fetch third-party subagents per clone with one explicit target:
   `./scripts/install-subagents.sh --claude` installs Claude Code
   agents and workspace skills; `./scripts/install-subagents.sh
@@ -348,6 +357,17 @@ Keep this list updated whenever a recurring mistake is found.
   adding a setting, pick the Lua name first and derive the
   JSON key from it via `CodingKeys` (Swift property names may
   differ internally). `SettingsCodingTests` pins this shape.
+- **SwiftPM resource bundles go in `Contents/MacOS`, not
+  `Contents/Resources` (#89).** `Bundle.module` resolves
+  `KiwiDesk_*.bundle` **next to the executable**, so inside an
+  `.app` that is `Contents/MacOS`. Put them in the intuitive
+  `Contents/Resources` and every `Bundle.module` client — the
+  locale catalogs, the palettes, the vendored app font, the
+  brand assets — silently falls back to its default with no
+  error logged anywhere; the app looks like it merely reverted
+  to English rather than like it failed to find a file.
+  `scripts/build-app.sh` places and deep-signs them, and hard
+  fails when the release build produced none.
 - **Never disable SIP or ask users to.** Private SkyLight/CGS
   symbols are resolved at runtime via `dlsym` (`SkyLight.swift`),
   never linked with `@_silgen_name` — a linked symbol that

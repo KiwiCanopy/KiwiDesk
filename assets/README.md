@@ -135,8 +135,12 @@ those counts, failing loudly if the mark's shape changed.
 
 ### Compiling it
 
+`scripts/build-app.sh` does this as part of packaging the `.app`
+— that is the normal path, and the rest of this section is only
+for iterating on the icon on its own.
+
 Needs Xcode's `actool`; `swift build` does not run it, which is
-why nothing here is wired into the build yet. One `.icon`
+why the icon is not wired into `swift build`. One `.icon`
 produces **both** icon formats:
 
 ```sh
@@ -150,8 +154,8 @@ actool assets/AppIcon.icon --compile /tmp/appicon \
 `Assets.car` carries the real renditions (up to 1024 px);
 `AppIcon.icns` is the legacy fallback. The bundle's `Info.plist`
 needs both keys actool reports — `CFBundleIconName` (`Assets.car`)
-and `CFBundleIconFile` (the `.icns`). Wiring that into a real
-`.app` is the open remainder of #89.
+and `CFBundleIconFile` (the `.icns`) — which `build-app.sh`
+merges in from actool's partial plist rather than re-typing.
 
 ### Decisions baked into `icon.json`
 
