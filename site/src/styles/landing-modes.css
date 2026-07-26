@@ -525,6 +525,13 @@
 @media (max-width: 520px) {
   .what__art {
     grid-template-columns: 1fr;
+    /* `width: 100%` is load-bearing, not redundant with max-width:
+       `margin-inline: auto` cancels a grid item's default `stretch`,
+       so without an explicit width the box shrink-to-fits. The two
+       tiles are empty divs (their panes are absolutely positioned),
+       so max-content is just the arrow — and both tiles collapsed to
+       40px square. */
+    width: 100%;
     max-width: 300px;
     margin-inline: auto;
   }

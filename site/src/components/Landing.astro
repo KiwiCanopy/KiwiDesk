@@ -28,7 +28,7 @@ import "../styles/landing.css";
 
 interface Props {
   t: Record<string, string>;
-  lang: "en" | "de";
+  lang: "en" | "de" | "ja";
 }
 const { t: locale, lang } = Astro.props;
 // Per-key English fallback: an untranslated locale key degrades to
@@ -37,13 +37,14 @@ const t = { ...en, ...locale } as Record<string, string>;
 
 // Home path for the active locale; the language switcher pairs it
 // with its counterpart. English lives at /, German at /de/.
-const homeHref = lang === "de" ? "/de/" : "/";
+const homeHref =
+  lang === "de" ? "/de/" : lang === "ja" ? "/ja/" : "/";
 
 // Locale-aware quotation marks: German opens low and closes high
 // („…“); English opens and closes high (“…”). Applied to every
 // quoted line so the marks match the active language.
-const oq = lang === "de" ? "„" : "“";
-const cq = lang === "de" ? "“" : "”";
+const oq = lang === "de" ? "„" : lang === "ja" ? "「" : "“";
+const cq = lang === "de" ? "“" : lang === "ja" ? "」" : "”";
 
 const repo = "https://github.com/KiwiCanopy/KiwiDesk";
 const kofi = "https://ko-fi.com/kiwicanopy";
@@ -78,13 +79,13 @@ const features = [
 ];
 
 const layouts = [
-  { name: "bsp", desc: t.layout_bsp },
-  { name: "stack", desc: t.layout_stack },
-  { name: "scrolling", desc: t.layout_scrolling },
-  { name: "monocle", desc: t.layout_monocle },
-  { name: "grid", desc: t.layout_grid },
-  { name: "track", desc: t.layout_track },
-  { name: "floating", desc: t.layout_floating },
+  { name: "bsp", label: "BSP", desc: t.layout_bsp },
+  { name: "stack", label: "Stack", desc: t.layout_stack },
+  { name: "scrolling", label: "Scrolling", desc: t.layout_scrolling },
+  { name: "monocle", label: "Monocle", desc: t.layout_monocle },
+  { name: "grid", label: "Grid", desc: t.layout_grid },
+  { name: "track", label: "Track", desc: t.layout_track },
+  { name: "floating", label: "Floating", desc: t.layout_floating },
 ];
 
 // The three friendly "how it works" steps (Simple mode).
@@ -100,9 +101,11 @@ const steps = [
 const canonical = new URL(homeHref, Astro.site).href;
 const enURL = new URL("/", Astro.site).href;
 const deURL = new URL("/de/", Astro.site).href;
+const jaURL = new URL("/ja/", Astro.site).href;
 const ogImageURL = new URL(ogImage.src, Astro.site).href;
-const ogLocale = lang === "de" ? "de_DE" : "en_US";
-const ogLocaleAlt = lang === "de" ? "en_US" : "de_DE";
+const ogLocale =
+  lang === "de" ? "de_DE" : lang === "ja" ? "ja_JP" : "en_US";
+const ogLocaleAlt = lang === "en" ? "de_DE" : "en_US";
 
 // Structured data: KiwiDesk itself (SoftwareApplication) plus the
 // site (WebSite), emitted as one JSON-LD graph in the head.
@@ -164,6 +167,7 @@ const jsonLd = [
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="alternate" hreflang="en" href={enURL} />
     <link rel="alternate" hreflang="de" href={deURL} />
+    <link rel="alternate" hreflang="ja" href={jaURL} />
     <link rel="alternate" hreflang="x-default" href={enURL} />
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)}
     ></script>
@@ -211,9 +215,15 @@ const jsonLd = [
     <script is:inline>
       (function () {
         var here = location.pathname;
-        var onDe = here === "/de/" || here === "/de";
-        function go(path) {
-          if (path !== here) location.replace(path);
+        // Which locale this URL already is. Trailing slash optional
+        // so /de and /de/ both count as "already there".
+        function on(prefix) {
+          return here === prefix + "/" || here === prefix;
+        }
+        var paths = { en: "/", de: "/de/", ja: "/ja/" };
+        var current = on("/de") ? "de" : on("/ja") ? "ja" : "en";
+        function go(lang) {
+          if (lang !== current) location.replace(paths[lang]);
         }
         var stored;
         try {
@@ -221,14 +231,15 @@ const jsonLd = [
         } catch (e) {
           stored = null;
         }
-        if (stored === "de") {
-          if (!onDe) return go("/de/");
-        } else if (stored === "en") {
-          if (onDe) return go("/");
-        } else {
-          var nav = (navigator.language || "").toLowerCase();
-          if (nav.indexOf("de") === 0 && !onDe) return go("/de/");
-        }
+        if (paths[stored]) return go(stored);
+        // No stored pref: nudge by navigator.language, but only away
+        // from the English root, never between two non-English ones
+        // — that keeps / the sole canonical default and leaves no
+        // pair we could bounce between.
+        if (current !== "en") return;
+        var nav = (navigator.language || "").toLowerCase();
+        if (nav.indexOf("de") === 0) return go("de");
+        if (nav.indexOf("ja") === 0) return go("ja");
       })();
     </script>
     <!-- Restore scroll after a language switch: the EN|DE switcher
@@ -326,12 +337,15 @@ const jsonLd = [
             </span>
           </div>
 
-          <!-- Language switcher: a compact EN | DE segmented control,
-               styled as a sibling of the theme + mode toggles. Each
-               segment is a link to that locale's route AND records
-               the choice in `kiwidesk-site-lang` (wired up in the
-               script below), so the preference persists across
-               visits. The active locale is marked aria-current. -->
+          <!-- Language switcher: a compact EN | DE | JA segmented
+               control, styled as a sibling of the theme + mode
+               toggles. Each segment is a link to that locale's route
+               AND records the choice in `kiwidesk-site-lang` (wired
+               up in the script below), so the preference persists
+               across visits. The active locale is marked
+               aria-current. Two-letter codes throughout, each in its
+               own `lang` so a screen reader pronounces it in that
+               language rather than spelling it out in English. -->
           <div class="lang-switch" role="group"
             aria-label={t.nav_lang_label}>
             <a class="lang-switch__opt" data-lang="en" href="/"
@@ -341,6 +355,10 @@ const jsonLd = [
             <a class="lang-switch__opt" data-lang="de" href="/de/"
               lang="de"
               aria-current={lang === "de" ? "true" : undefined}>DE</a>
+            <span class="lang-switch__sep" aria-hidden="true"></span>
+            <a class="lang-switch__opt" data-lang="ja" href="/ja/"
+              lang="ja"
+              aria-current={lang === "ja" ? "true" : undefined}>JA</a>
           </div>
 
           <button class="theme-toggle" id="themeToggle" type="button"
@@ -648,7 +666,7 @@ const jsonLd = [
               <div class="layout-card__diagram" aria-hidden="true">
                 <Fragment set:html={layoutDiagram(l.name)} />
               </div>
-              <h3>{l.name}</h3>
+              <h3>{l.label}</h3>
               <p>{l.desc}</p>
             </article>
           ))}
@@ -965,7 +983,8 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
         .forEach((opt) => {
           opt.addEventListener("click", () => {
             const lang = opt.getAttribute("data-lang");
-            if (lang !== "en" && lang !== "de") return;
+            if (lang !== "en" && lang !== "de" && lang !== "ja")
+              return;
             try {
               localStorage.setItem("kiwidesk-site-lang", lang);
               // Stash scroll so the destination locale restores it.
