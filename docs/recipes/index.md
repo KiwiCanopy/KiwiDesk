@@ -35,12 +35,13 @@ See the [Lua reference](../lua-reference.md) for the full
 `KiwiDesk.exec` and `os.execute` API, including callback,
 timeout, and output capture.
 
-> **Binary path note:** KiwiDesk is not yet on PATH. Until
-> Homebrew symlinks it at version 1.0, either use the absolute
-> path to your built binary (e.g.,
-> `~/path/to/KiwiDesk/.build/release/KiwiDesk`) or symlink it yourself. The
-> recipes below assume you've stored the path in a variable
-> like `KIWIDESK=~/path/to/KiwiDesk/.build/release/KiwiDesk`.
+> **Binary path note:** installed through the Homebrew cask,
+> KiwiDesk is on your PATH as plain `kiwidesk` — use that
+> directly. If you built from source instead, it is not on PATH:
+> use the absolute path to your built binary (e.g.,
+> `~/path/to/KiwiDesk/.build/release/KiwiDesk`) or symlink it
+> yourself. The recipes below keep the path in a variable like
+> `KIWIDESK=kiwidesk` so either setup works.
 
 ## Recipe pages
 

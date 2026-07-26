@@ -151,10 +151,10 @@ to focus per space, and smart app icon display.
 ### Architecture overview
 
 The widget creates one item per space, pre-allocates window
-icon slots beneath each, and polls state via `KiwiDesk
-get_state | jq` on every `kiwidesk_update` event. A cold-start
-watchdog polls until the first successful read, then goes
-event-driven.
+icon slots beneath each, and polls state via
+`kiwidesk get_state | jq` on every `kiwidesk_update` event. A
+cold-start watchdog polls until the first successful read, then
+goes event-driven.
 
 ### SbarLua item script
 
@@ -171,10 +171,9 @@ config:
 -- `sbar`):
 local SBAR = require("sketchybar")
 
--- Binary path: point this at your clone; swap to plain
--- "kiwidesk" once Homebrew symlinks it (version 1.0).
-local KIWIDESK = os.getenv("HOME")
-    .. "/path/to/KiwiDesk/.build/release/KiwiDesk"
+-- Binary path: the Homebrew cask puts "kiwidesk" on PATH. If
+-- you built from source, point this at your clone instead.
+local KIWIDESK = "kiwidesk"
 local JQ = "/opt/homebrew/bin/jq"
 
 -- Optional: load an icon map (app name → icon character).

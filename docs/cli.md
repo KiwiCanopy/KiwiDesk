@@ -5,15 +5,23 @@ description: Every command, the event stream, and the raw socket protocol.
 
 # CLI & IPC Reference
 
-The `KiwiDesk` binary is both the app and the CLI:
+One binary is both the app and the CLI:
 
 ```sh
-KiwiDesk                      # run the window manager
-KiwiDesk <command> [args...]  # send a command to the app
-KiwiDesk help                 # local usage
-KiwiDesk --version            # local version (no app needed)
-KiwiDesk list_commands        # every command (app running)
+kiwidesk                      # run the window manager
+kiwidesk <command> [args...]  # send a command to the app
+kiwidesk help                 # local usage
+kiwidesk --version            # local version (no app needed)
+kiwidesk list_commands        # every command (app running)
 ```
+
+> The Homebrew cask puts it on your `PATH` as lower-case
+> `kiwidesk`, which is what every example here uses. A source
+> build produces `.build/release/KiwiDesk` instead — same
+> commands, so substitute that path for `kiwidesk` throughout.
+> The capitalized `KiwiDesk` elsewhere on this page is the Lua
+> global, the config directory, or the product name — none of
+> those change.
 
 Commands are sent over a UNIX domain socket at
 `~/.config/KiwiDesk/KiwiDesk.sock`. Exit code is 0 on
@@ -22,7 +30,7 @@ success, 1 on error (message on stderr, data on stdout).
 ## Version
 
 ```sh
-KiwiDesk --version   # or -v; works without the app running
+kiwidesk --version   # or -v; works without the app running
 ```
 
 Prints `<semantic version> (<short commit>)`, e.g. `0.1.0
@@ -34,11 +42,11 @@ over IPC/Lua as the `version` command — see the table below.
 ## Service Control
 
 ```sh
-KiwiDesk service start     # LaunchAgent: run at login,
+kiwidesk service start     # LaunchAgent: run at login,
                            # restart after crashes
-KiwiDesk service stop
-KiwiDesk service restart
-KiwiDesk service status    # loaded? running? pid?
+kiwidesk service stop
+kiwidesk service restart
+kiwidesk service status    # loaded? running? pid?
 ```
 
 `start` bootstraps the agent when it isn't loaded, and
@@ -203,7 +211,7 @@ CLI/IPC callers stay silent).
 apply it with:
 
 ```sh
-KiwiDesk reload_config
+kiwidesk reload_config
 ```
 
 For GUI-managed setups, put the array at the root `ignore_rules` key
@@ -221,8 +229,8 @@ resolved rules immediately over either a Lua- or GUI-owned base.
 External tools subscribe over the same socket:
 
 ```sh
-KiwiDesk subscribe                          # all events
-KiwiDesk subscribe space_change layout_change
+kiwidesk subscribe                          # all events
+kiwidesk subscribe space_change layout_change
 ```
 
 Each event is one JSON line:

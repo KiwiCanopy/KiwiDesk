@@ -22,7 +22,8 @@ Powerful when you reach for it, never in your way.
 ![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white)
 [![CI](https://github.com/KiwiCanopy/KiwiDesk/actions/workflows/ci.yml/badge.svg)](https://github.com/KiwiCanopy/KiwiDesk/actions/workflows/ci.yml)
 ![License MIT](https://img.shields.io/badge/License-MIT-8DB354)
-![App Store — coming soon](https://img.shields.io/badge/App_Store-coming_soon-8B5E3C)
+![Public beta](https://img.shields.io/badge/Public_beta-Homebrew-8DB354)
+![App Store — later](https://img.shields.io/badge/App_Store-after_the_beta-8B5E3C)
 
 <br>
 
@@ -35,11 +36,11 @@ Powerful when you reach for it, never in your way.
 
 <!-- Add a screenshot or demo GIF here once one is captured. -->
 
-> **Status: CLI beta.** The core (layouts, Lua config, CLI,
-> profiles, per-native-space profiles, virtual workspace hiding)
-> and the SwiftUI Settings app are functional; packaged releases
-> (`.dmg`, a Homebrew cask) and the macOS App Store build are in
-> progress.
+> **Status: public beta, on Homebrew.** The core (layouts, Lua
+> config, CLI, profiles, per-native-space profiles, virtual
+> workspace hiding) and the SwiftUI Settings app are functional.
+> Install it with the Homebrew cask below; a packaged `.dmg` and
+> the macOS App Store build follow once the beta has settled.
 
 KiwiDesk is a modular, high-performance tiling window manager for
 macOS, written in Swift and configured in Lua. It combines robust
@@ -86,10 +87,32 @@ a different formula — no tree surgery, no lost state.
 
 ## Installation
 
-Beta: build from source (a packaged `.dmg` and a Homebrew cask
-come with the 1.0 release).
+Requirements: macOS 14 or later.
 
-Requirements: macOS 14+, Xcode 16+ / Swift 6.
+```sh
+brew install --cask kiwicanopy/tap/kiwidesk
+```
+
+The cask installs the app and puts the `kiwidesk` CLI on your
+`PATH`. It ships from this project's own tap
+(`KiwiCanopy/homebrew-tap`); the fully-qualified token above taps
+it for you, so there is no separate `brew tap` step. A short
+`brew install --cask kiwidesk` needs acceptance into
+homebrew-cask, which is a post-beta step (#105).
+
+On first launch, an onboarding wizard walks you through granting
+the Accessibility permission KiwiDesk needs to manage windows.
+
+To start KiwiDesk automatically at login:
+
+```sh
+kiwidesk service start
+```
+
+### Building from source
+
+For contributors, or to run an unreleased commit. Requirements:
+macOS 14+, Xcode 16+ / Swift 6.
 
 ```sh
 git clone https://github.com/KiwiCanopy/KiwiDesk.git
@@ -98,26 +121,18 @@ swift build -c release
 .build/release/KiwiDesk           # run the app
 ```
 
-On first launch, an onboarding wizard walks you through granting
-the Accessibility permission KiwiDesk needs to manage windows.
-
-To start KiwiDesk automatically at login:
-
-```sh
-.build/release/KiwiDesk service start
-```
-
 ## Quick Start
 
-The CLI is the same binary:
+The CLI is the same binary — `kiwidesk` from the cask, or
+`.build/release/KiwiDesk` from a source build:
 
 ```sh
-KiwiDesk set_mode monocle        # current space -> monocle
-KiwiDesk set_mode 2 stack        # space "2" -> master/stack
-KiwiDesk focus left              # move focus
-KiwiDesk set_gap_global 12       # breathing room
-KiwiDesk get_state               # inspect everything as JSON
-KiwiDesk help                    # list every command
+kiwidesk set_mode monocle        # current space -> monocle
+kiwidesk set_mode 2 stack        # space "2" -> master/stack
+kiwidesk focus left              # move focus
+kiwidesk set_gap_global 12       # breathing room
+kiwidesk get_state               # inspect everything as JSON
+kiwidesk help                    # list every command
 ```
 
 Everyday settings live in the **Settings** app — see the

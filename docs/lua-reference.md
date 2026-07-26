@@ -3999,8 +3999,8 @@ above).
 
 When you switch desktops (Ctrl+arrow, Mission Control, …), KiwiDesk
 loads the bound profile — its virtual workspaces, layouts, and
-settings. Unsure which number you're on? Check `KiwiDesk
-get_state` (field `native_space`), or subscribe to the
+settings. Unsure which number you're on? Check
+`kiwidesk get_state` (field `native_space`), or subscribe to the
 `native_space_change` event.
 
 KiwiDesk resolves one active native Desktop number and one active

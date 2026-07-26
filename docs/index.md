@@ -39,9 +39,18 @@ your monitor setup, and native macOS Spaces integration.
 - **[Translating](translating.md)** — the localization
   workflow and how to add a language.
 
-## Install (beta)
+## Install (public beta)
 
-KiwiDesk is pre-release: build from source with
-`swift build -c release`, then start the service with
-`KiwiDesk service start`. The [User Guide](user-guide.md)
-covers the Accessibility permission and first-run setup.
+KiwiDesk is in public beta and installs through Homebrew:
+
+```sh
+brew install --cask kiwicanopy/tap/kiwidesk
+```
+
+That installs the app and puts the `kiwidesk` CLI on your
+`PATH`; start the background service with `kiwidesk service
+start`. The [User Guide](user-guide.md) covers the Accessibility
+permission and first-run setup.
+
+Prefer to build it yourself? `swift build -c release` produces
+`.build/release/KiwiDesk`, which takes the same commands.

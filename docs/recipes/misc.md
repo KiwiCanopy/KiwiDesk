@@ -12,7 +12,7 @@ Any process can subscribe to KiwiDesk events as newline-delimited
 JSON:
 
 ```sh
-KIWIDESK=~/.build/release/KiwiDesk
+KIWIDESK=kiwidesk   # or a source build's full path
 
 "$KIWIDESK" subscribe space_change | while read -r line; do
     space=$(echo "$line" | jq -r '.data.space_id')
@@ -40,13 +40,12 @@ Lua callback arguments
 ## Hammerspoon
 
 Drive KiwiDesk from Hammerspoon (or vice versa) through the CLI.
-Point `KIWIDESK` at your build (it is not on `PATH` before 1.0 —
-see the [recipes intro](index.md)); swap it for plain `kiwidesk`
-once the Homebrew cask symlinks it:
+Installed from the Homebrew cask, `kiwidesk` is already on
+`PATH`; a source build is not, so point `KIWIDESK` at it instead
+(see the [recipes intro](index.md)):
 
 ```lua
-local KIWIDESK = os.getenv("HOME")
-    .. "/path/to/KiwiDesk/.build/release/KiwiDesk"
+local KIWIDESK = "kiwidesk"  -- or a source build's full path
 
 hs.hotkey.bind({"cmd", "alt"}, "m", function()
     os.execute("'" .. KIWIDESK .. "' set_mode monocle")
