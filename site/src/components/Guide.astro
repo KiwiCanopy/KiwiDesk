@@ -14,7 +14,9 @@
 // filled in — it turns German key-by-key as translations land.
 //
 // Release framing: KiwiDesk ships as a Homebrew-only public beta,
-// with the Mac App Store build following later. This page carries
+// with a signed, notarized direct download following later — never
+// the Mac App Store, which is out of scope (see the Distribution
+// entry in docs/design-decisions.md). This page carries
 // the beta status and a bridge to the landing's install section,
 // but never the shell command itself — the Terminal step lives on
 // the technical surface, not this one.
@@ -470,13 +472,18 @@ const jsonLd = [
               </div>
               <p>{s.guide_gs_p1}</p>
 
-              {/* Install block. No App Store badge: a dimmed or
-                   ribboned Apple badge still reads "tap = the store
-                   opens", so it reads broken rather than
-                   forthcoming — a different failure from §2.7's
-                   grey-don't-hide, which covers a control inert in
-                   the CURRENT mode, not a channel that does not
-                   exist yet.
+              {/* Install block. No App Store badge, and there
+                   never will be one: the App Store is out of scope
+                   outright, not pending (private SkyLight symbols
+                   and the sandbox — see the Distribution entry in
+                   docs/design-decisions.md). Even while it was
+                   still framed as "later" a dimmed or ribboned
+                   Apple badge was wrong here, because it still
+                   reads "tap = the store opens" and so reads broken
+                   rather than forthcoming — a different failure
+                   from §2.7's grey-don't-hide, which covers a
+                   control inert in the CURRENT mode, not a channel
+                   that does not exist.
                    The command itself IS here, deliberately. It used
                    to be a bridge to the landing's Nerd-mode
                    quickstart, on the reading that a friendly

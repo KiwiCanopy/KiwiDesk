@@ -144,6 +144,51 @@ tracked, not abandoned:
 All of these are collected in
 [#140](https://github.com/KiwiCanopy/KiwiDesk/issues/140).
 
+### Distribution: direct download, not the Mac App Store
+
+**[Rationale]**
+
+KiwiDesk ships as a signed, notarized direct download plus a
+Homebrew cask. **The Mac App Store is not a later step, it is
+out of scope** — so a roadmap, badge or landing page should
+never promise it again (both did, until #89).
+
+Two independent reasons, either alone sufficient:
+
+- **Private API.** The same SkyLight/CGS symbols the section
+  above rests on — 37 of them — put this squarely against
+  review guideline 2.5.1, which permits public API only.
+  Resolving them through `dlsym` is a robustness measure
+  (`AGENTS.md` §5: a vanished symbol must return nil, not
+  crash at launch), never a way around the guideline.
+- **The sandbox**, which every App Store app must adopt, and
+  which is the *harder* blocker because it survives removing
+  every private symbol. It forbids the `kiwidesk` CLI on
+  `PATH` (one binary serves both roles — `main.swift`), the
+  LaunchAgent `ServiceManager` writes, the subprocesses
+  `ExecLauncher` spawns, and reading a Lua config from a fixed
+  path.
+
+Note what is *not* the reason: driving other apps' windows
+through Accessibility is fine sandboxed — Magnet and Moom do
+exactly that on the App Store. Anyone re-opening this should
+argue about the sandbox, not about AX.
+
+A cut-down App Store build is conceivable and pointless: it
+would drop native-Space management, the CLI, Lua config and the
+service — nearly everything the README advertises. Every
+comparable tool (yabai, Amethyst, AeroSpace, Rectangle) is
+distributed directly for the same reasons.
+
+The practical consequence: **notarization is on the critical
+path, not a nicety.** A Homebrew user who meets Gatekeeper runs
+`xattr -d` and moves on; someone who downloads a `.dmg` from
+the site sees "KiwiDesk is damaged and can't be opened" and
+deletes it. `scripts/build-app.sh --notarize` exists for that
+([#89](https://github.com/KiwiCanopy/KiwiDesk/issues/89)), and
+in-app updates via Sparkle — the replacement for the App
+Store's update channel — depend on it too.
+
 ### Layout navigation & overflow models
 
 **[Map]**
