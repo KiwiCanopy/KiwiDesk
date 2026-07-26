@@ -1,8 +1,10 @@
-# Brief for the translator (KiwiDesk app UI, issue #95)
+# Brief for the translator (KiwiDesk app UI)
 
-Working files: `missing_<locale>.json` in this directory, one per
-locale — `de` (423 keys), `fr`, `es`, `it`, `pt-BR`, `ja`,
-`zh-Hans`, `ko` (808 each).
+Ten locales ship complete at 810 keys each: `de`, `es`, `fr`, `it`,
+`ja`, `ko`, `pt-BR`, `ru`, `zh-Hans`, `zh-Hant`. A round of work
+starts by generating worksheets — `scripts/extract-keys <locale>`
+writes `missing_<locale>.json` here with whatever that locale is
+missing, and nothing when it is complete.
 
 **Read `docs/translating.md` first** — its *Translating well* and
 *Tone & voice* sections are the actual guidance (plain register,
@@ -40,20 +42,45 @@ only the mechanical contract.
    shorter. The known-tight case is "Icon & name" →
    "Symbol & Name".
 
-## German specifically
+## Topping up an existing locale
 
-`de.json` already ships 385 translated keys. Read it before
-starting: the 423 pending keys must match the voice and the
-terminology already there (and its address register — the first
-translator's choice stands, per *Tone & voice*). Terms already
-settled in German should be reused, not re-coined.
+Read the shipped `<locale>.json` before starting: new keys must
+match the voice, the terminology, and the address register already
+there — the first translator's choice stands, per *Tone & voice*.
+Terms already settled in a language get reused, not re-coined.
 
-Two keys are deliberately empty and need fresh translations
-rather than their old ones: `shortcuts.advanced.title` and
-`monitors.advanced.title`. Their English **meaning** changed
-(they are now "Lua bindings" and "Monitor fingerprints", with
-the word "Advanced" dropped), so the previous German was
-retired on purpose.
+## Five things the tooling will reject
+
+`scripts/merge-keys` refuses to write a translation that trips the
+content guards, and `scripts/extract-keys --check` blocks the whole
+commit on one, so these are hard rules rather than advice. See
+*Content guards* in `docs/translating.md` for the full account.
+
+1. **A writing system the locale does not use** — Cyrillic in
+   Japanese, a stray Han glyph in Russian. This one catches
+   fat-finger paste errors that read as fluent text.
+2. **English text tagged with the locale code** — `"Icon & name
+   (ES)"`, `"Group adjacent…（JA）"`. Not a way to mark work in
+   progress: leave `"translation"` empty instead, and the key
+   re-surfaces on the next run.
+3. **English words left inside a translated sentence** —
+   `"追加 Window"`, `"編集ing init.lua directly"`. Checked in the
+   non-Latin-script locales, where it is unambiguous.
+4. **One filler reused for many keys.** If a string is hard —
+   several placeholders, no obvious phrasing — leave it empty. A
+   generic `"Option %1$@"` written across every interpolated key
+   is worse than English, and is exactly what this check exists to
+   catch.
+5. **A whole file pasted into the wrong locale**, caught by
+   comparing locales against each other.
+
+Rule 3 has one exception worth knowing: terms that stay English by
+design — the product name, `Lua`, `macOS`, Apple's feature names,
+and every layout-mode name (`BSP`, `Grid`, `Stack`, `Track`,
+`Monocle`, `Scrolling`, `Floating`) — live in `GLOSSARY` in
+`scripts/localization_guards.py`. If a correct translation is
+rejected because it keeps such a term, the term belongs in that
+list; say so rather than working around it.
 
 ## When a file is done
 
