@@ -51,12 +51,27 @@ by section name or by any of the titled groups inside a section
 (searching "gaps" finds Appearance, "focus" finds Shortcuts).
 While active, a subtle blue outline marks keyboard focus; the
 lighter placeholder gives way to normal text as soon as you type.
-When the match is a group inside the section, the result row
-names it in a smaller line under the section name, so you know
-where to look after clicking; for the per-layout editors under
-Layout it names the layout tab to open. Clicking a result opens
-that section. The query stays put while you navigate — press
-Escape or the clear button to get the full sidebar back.
+
+Each result leads with the words that actually matched, and puts
+the trail to them in a smaller line underneath — so a hit on the
+Space Bar's colours reads **Space Bar colors** over
+"Bars ▸ Space Bar", not the other way round. A section name that
+matches on its own has no second line.
+
+Clicking a result **takes you to the match**, not just to its
+section: the pane scrolls to that group and tints it for about a
+second so your eye lands on it, and anything that would have
+hidden it is switched first — a hit inside one layout's editor
+opens that layout's tab, and a hit on the Space Bar opens the
+Space Bar side of the Bars switch. If the match is a collapsed
+drawer ("Per-edge…", "Advanced"), you land on the drawer's own
+row, highlighted, ready to open.
+
+Only the first match per section is listed, so a broad word like
+"color" gives you one row per section instead of a wall of them;
+type a little more to reach a different one. The query stays put
+while you navigate — press Escape or the clear button to get the
+full sidebar back.
 
 ### Contextual Help (?)
 

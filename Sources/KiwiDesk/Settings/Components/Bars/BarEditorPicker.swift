@@ -11,36 +11,29 @@ import SwiftUI
 /// the chip answers "which bar is this," the editor's own live
 /// preview answers "what does mine look like."
 struct BarEditorPicker: View {
-    @Binding var selection: BarsSection.Editor
+    @Binding var selection: BarEditor
 
     var body: some View {
         // Space Bar first — the omnipresent bar leads
         // (ui-designer 2026-07-19), matching the default
         // editor selection.
         HStack(spacing: 12) {
-            chip(
-                .spaceBar,
-                title: L("bars.switch.space_bar", "Space Bar")
-            ) {
-                spaceBarMock
-            }
-            chip(
-                .appBar,
-                title: L("bars.switch.app_bar", "App Bar")
-            ) {
-                appBarMock
-            }
+            // Titles come from `BarEditor.displayName` so the
+            // chip and a search result's breadcrumb name the
+            // same bar with the same words (#277).
+            chip(.spaceBar) { spaceBarMock }
+            chip(.appBar) { appBarMock }
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(L("bars.switch", "Bar"))
     }
 
     private func chip<Mock: View>(
-        _ editor: BarsSection.Editor,
-        title: String,
+        _ editor: BarEditor,
         @ViewBuilder mock: () -> Mock
     ) -> some View {
         let selected = selection == editor
+        let title = editor.displayName
         return Button {
             selection = editor
         } label: {

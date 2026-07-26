@@ -16,8 +16,19 @@ import SwiftUI
 /// mode's editor. Floating has no tunables, so it has no tab.
 struct LayoutDefaultsSection: View {
     @ObservedObject var model: SettingsModel
-    @State private var selected: LayoutMode = .bsp
-    @State private var didAutoSelect = false
+
+    /// The selected tab, on the model rather than in `@State`
+    /// (#277): a search hit on a mode-gated control has to open
+    /// that mode's tab before there is anything to scroll to, and
+    /// view-local state cannot be written from outside. `nil`
+    /// still means "the user has not picked yet", so the
+    /// most-used-mode landing below survives.
+    private var selected: Binding<LayoutMode> {
+        Binding(
+            get: { model.layoutModeTab ?? initialMode },
+            set: { model.layoutModeTab = $0 }
+        )
+    }
 
     /// Tab order (#204) lives on `LayoutMode.placementTabs` —
     /// the sidebar search index renders the same list, so the
@@ -43,18 +54,22 @@ struct LayoutDefaultsSection: View {
             .padding(16)
         }
         // Land on the profile's most-used mode the first time the
-        // pane appears, then leave the user's tab choice alone
-        // (mirrors `ShortcutsSection.ensureSelection`).
+        // pane appears, then leave the tab alone (mirrors
+        // `ShortcutsSection.ensureSelection`). Latched by writing
+        // the model once rather than by a separate flag: without
+        // the write, `selected` would keep re-deriving
+        // `initialMode` and the tab would move under a user who
+        // edits space modes while this pane is open.
         .onAppear {
-            guard !didAutoSelect else { return }
-            selected = initialMode
-            didAutoSelect = true
+            if model.layoutModeTab == nil {
+                model.layoutModeTab = initialMode
+            }
         }
     }
 
     private var tabStrip: some View {
         SegmentedPicker(
-            selection: $selected,
+            selection: selected,
             options: modes.map { ($0.displayName, $0) }
         )
         .accessibilityLabel(
@@ -64,7 +79,7 @@ struct LayoutDefaultsSection: View {
 
     @ViewBuilder
     private var editor: some View {
-        switch selected {
+        switch selected.wrappedValue {
         case .bsp: BspEditor(model: model)
         case .stack: StackEditor(model: model)
         case .scrolling: ScrollingEditor(model: model)

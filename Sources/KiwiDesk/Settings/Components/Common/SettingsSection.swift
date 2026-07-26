@@ -85,6 +85,12 @@ struct SettingsSection<Content: View>: View {
                         .foregroundStyle(.secondary)
                 }
             }
+            // Every section is a search anchor by existing, not
+            // by remembering to opt in (#277) — the title it was
+            // handed IS the anchor id, so there is no second
+            // identifier to keep in step. The wash marks the
+            // heading; the scroll target below is the whole card.
+            .searchFlash(title)
             VStack(alignment: .leading, spacing: 8) {
                 content
             }
@@ -102,5 +108,6 @@ struct SettingsSection<Content: View>: View {
                     )
             )
         }
+        .searchAnchor(title)
     }
 }

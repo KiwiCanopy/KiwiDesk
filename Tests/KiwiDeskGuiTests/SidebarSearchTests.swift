@@ -37,7 +37,7 @@ struct SidebarSearchTests {
         }
     }
 
-    @Test("a destination-title match carries no caption")
+    @Test("a destination-title match has no path or anchor")
     func titleMatch() {
         pinEnglish()
         defer { reset() }
@@ -50,13 +50,17 @@ struct SidebarSearchTests {
                 == [
                     SidebarSearchResult(
                         destination: .appearance,
-                        subsection: nil
+                        anchor: SettingsAnchor(
+                            destination: .appearance
+                        ),
+                        primary: "Appearance",
+                        path: []
                     )
                 ]
         )
     }
 
-    @Test("a subsection match names the matched header")
+    @Test("a header match leads with the header")
     func subsectionMatch() {
         pinEnglish()
         defer { reset() }
@@ -69,7 +73,12 @@ struct SidebarSearchTests {
                 == [
                     SidebarSearchResult(
                         destination: .appearance,
-                        subsection: "Gaps"
+                        anchor: SettingsAnchor(
+                            destination: .appearance,
+                            anchor: "Gaps"
+                        ),
+                        primary: "Gaps",
+                        path: ["Appearance"]
                     )
                 ]
         )
@@ -84,26 +93,7 @@ struct SidebarSearchTests {
             editingStoredProfile: false
         )
         #expect(results.map(\.destination) == [.bars])
-        #expect(results.first?.subsection == "Global colors")
-    }
-
-    @Test("a mode-gated editor hit names the mode tab")
-    func modeEditorHit() {
-        pinEnglish()
-        defer { reset() }
-        let results = SidebarSearch.results(
-            query: "Monocle",
-            editingStoredProfile: false
-        )
-        #expect(
-            results
-                == [
-                    SidebarSearchResult(
-                        destination: .layoutDefaults,
-                        subsection: "Monocle"
-                    )
-                ]
-        )
+        #expect(results.first?.primary == "Global colors")
     }
 
     @Test("one row per destination, in sidebar order")
@@ -146,14 +136,13 @@ struct SidebarSearchTests {
         #expect(editing.isEmpty)
     }
 
-    @Test("every destination lists at least one subsection")
+    @Test("every destination lists at least one entry")
     func indexCoversEveryDestination() {
         pinEnglish()
         defer { reset() }
         for destination in SettingsDestination.allCases {
             #expect(
-                !SidebarSearch.subsections(of: destination)
-                    .isEmpty,
+                !SidebarSearch.entries(of: destination).isEmpty,
                 "\(destination) has no index entries"
             )
         }

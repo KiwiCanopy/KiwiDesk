@@ -710,6 +710,36 @@ vanished control loses the cue that its stored value is
 return). Greying reads as "not right now"; hiding reads as
 "gone". Precedent: `scrollSpeedRow` disabled by `onScrolling`.
 
+**A revealed target gets a transient wash, never a ring.** When
+search (or any later cross-reference) sends the user to a
+specific place in a pane, the pane scrolls that place's *card* to
+the top — a control landing without the heading that names it
+reads as disembodied — and its **heading** takes a brief accent
+wash: `Color.accentColor` at `0.18`, a corner-6 rounded rect
+bleeding 4 pt past the content, flat for 300 ms, then eased out
+over 900 ms (`SettingsReveal` owns the numbers). Reduce Motion
+drops the cross-fade only: the wash still shows for the same
+≈1.2 s and then simply disappears, because a flat tint shown and
+removed is not motion.
+
+Three things this must not become. **Not a ring or halo** — that
+is this app's vocabulary for "this input is armed"
+(`RecorderButtonChrome`, the search field's focus stroke), and
+spending it here promises a keyboard focus state with no
+`FocusState` behind it. **Not a pulse or scale** — the same
+bouncy motion the layout schematics rejected. **Not nested inside
+a `GreyOut`** — `GreyOut` multiplies opacity on its content, so a
+wash under a dimmed block compounds to ~`0.09` and reads as a
+rendering fault; a hit on a control some other switch has greyed
+still deserves full strength, which is the whole point of "grey,
+don't hide".
+
+Sequencing matters more than the paint. Select the destination,
+then the local surface that *renders* the target (a mode tab, the
+Bars switch), then yield one layout pass before asking the scroll
+proxy for the id — a `scrollTo` in the same synchronous pass as
+the state change that mints the view will miss it.
+
 **An action that reloads must ask before it discards.** Any
 Settings action whose tail is `model.reload()` re-seeds from
 disk and clears `isDirty`, so it destroys whatever the user has

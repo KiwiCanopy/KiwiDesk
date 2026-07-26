@@ -673,6 +673,7 @@
   "sidebar.search.clear": "Clear search",
   "sidebar.search.no_results": "No results",
   "sidebar.search.placeholder": "Search",
+  "sidebar.search.result_ax": "%1$@, in %2$@",
   "sidebar.section.design": "Design",
   "sidebar.section.system": "System",
   "sidebar.shortcuts": "Shortcuts",

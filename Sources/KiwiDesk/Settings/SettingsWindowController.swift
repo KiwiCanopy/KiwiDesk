@@ -47,7 +47,9 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     /// the read-only shortcuts panel's "Edit in Settings…" bridge
     /// (#326). The request is one-shot; `SettingsView` clears it.
     func show(navigatingTo destination: SettingsDestination) {
-        model.pendingDestination = destination
+        model.pendingReveal = SettingsAnchor(
+            destination: destination
+        )
         show()
     }
 
@@ -72,8 +74,8 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         // the model so it survives the locale re-key, so "default
         // selection" has to be re-asserted on open rather than
         // falling out of `@State` being fresh. A deep link set
-        // `pendingDestination` just above and still wins — the
-        // view consumes it after this.
+        // `pendingReveal` just above and still wins — the view
+        // consumes it after this.
         model.destination = .profiles
         // Promote on every open, not just the first — closing
         // the window demotes to `.accessory`, so a reused

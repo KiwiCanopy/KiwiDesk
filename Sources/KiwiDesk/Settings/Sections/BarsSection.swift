@@ -8,18 +8,7 @@ import SwiftUI
 /// App Bar editor keeps every control and per-layout override,
 /// the switch only re-homes it.
 struct BarsSection: View {
-    /// The two editors behind the switch.
-    enum Editor: String, CaseIterable {
-        case appBar
-        case spaceBar
-    }
-
     @ObservedObject var model: SettingsModel
-    /// Space Bar leads and is the default (ui-designer
-    /// 2026-07-19): it is omnipresent across every layout,
-    /// while the App Bar renders only in Monocle/Scrolling —
-    /// landing in the always-relevant editor first.
-    @State private var editor: Editor = .spaceBar
 
     var body: some View {
         ScrollView {
@@ -28,12 +17,20 @@ struct BarsSection: View {
                 // 2026-07-19): the switch itself must show
                 // that two different bars exist.
                 VStack(alignment: .leading, spacing: 6) {
-                    BarEditorPicker(selection: $editor)
+                    // Space Bar leads and is the default
+                    // (ui-designer 2026-07-19): it is omnipresent
+                    // across every layout, while the App Bar
+                    // renders only in Monocle/Scrolling — landing
+                    // in the always-relevant editor first. The
+                    // selection lives on the model (#277) so a
+                    // search hit on a `space_bar.*` header can
+                    // open the editor that renders it.
+                    BarEditorPicker(selection: $model.barEditor)
                     Text(switchCaption)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-                switch editor {
+                switch model.barEditor {
                 case .appBar: appBarEditor
                 case .spaceBar:
                     SpaceBarEditorGroup(model: model)

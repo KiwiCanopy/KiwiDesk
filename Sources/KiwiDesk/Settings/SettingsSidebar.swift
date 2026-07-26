@@ -15,6 +15,11 @@ struct SettingsSidebar: View {
     /// the instant a profile exists, back if the last one is
     /// deleted. Never a gate.
     let spotlightProfiles: Bool
+    /// Hands a picked search result up to the shell, which owns
+    /// the destination, the surface switches and the scroll proxy
+    /// (#277). The sidebar knows what was picked, not how to land
+    /// on it.
+    let reveal: (SettingsAnchor) -> Void
     /// Tones the inactive destination card; the identity mark no
     /// longer branches on appearance (#479).
     @Environment(\.colorScheme) private var colorScheme
@@ -139,36 +144,18 @@ struct SettingsSidebar: View {
             .frame(maxWidth: .infinity, alignment: .center)
             .padding(.vertical, 8)
         } else {
-            ForEach(results) { resultRow($0) }
-        }
-    }
-
-    private func resultRow(
-        _ result: SidebarSearchResult
-    ) -> some View {
-        Label {
-            VStack(alignment: .leading, spacing: 1) {
-                Text(result.destination.title)
-                if let subsection = result.subsection {
-                    Text(subsection)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
+            ForEach(results) { result in
+                SidebarSearchRow(
+                    result: result,
+                    badged: spotlightProfiles
+                        && result.destination == .profiles,
+                    badgeValue: axBadgeValue(
+                        for: result.destination
+                    ),
+                    reveal: reveal
+                )
             }
-        } icon: {
-            // Same badge rule as the grouped rows: the cue is
-            // state-driven, so which list renders the tile
-            // must not change it (review 2026-07-19).
-            SidebarTile(
-                destination: result.destination,
-                badged: spotlightProfiles
-                    && result.destination == .profiles
-            )
         }
-        .tag(result.destination)
-        .accessibilityValue(
-            axBadgeValue(for: result.destination)
-        )
     }
 
     /// App identity centered at the top of the sidebar (#68):

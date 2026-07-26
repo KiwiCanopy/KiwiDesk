@@ -9,6 +9,11 @@ import SwiftUI
 /// (§3.12) at the bottom.
 struct SettingsView: View {
     @ObservedObject var model: SettingsModel
+    /// The in-flight scroll+flash choreography, held so a second
+    /// search click supersedes the first instead of overlapping.
+    @State private var revealTask: Task<Void, Never>?
+    @Environment(\.accessibilityReduceMotion)
+    private var reduceMotion
     /// The sidebar selection lives on the model, not in `@State`
     /// — see `SettingsModel.destination`. A locale change re-keys
     /// this view, and `@State` would not survive it.
@@ -47,23 +52,43 @@ struct SettingsView: View {
                 selection = .spaces
             }
         }
-        // A deep-link request (#326 "Edit in Settings…") navigates
-        // the sidebar, then clears so it fires once. Guarded by the
-        // same reachability filter as every other nav path (#18).
-        .onChange(of: model.pendingDestination) { _, destination in
-            consume(destination)
+        // A navigation request — the #326 "Edit in Settings…"
+        // deep link, or a #277 search hit. Guarded by the same
+        // reachability filter as every other nav path (#18).
+        .onChange(of: model.pendingReveal) { _, request in
+            apply(request)
         }
-        .onAppear { consume(model.pendingDestination) }
+        .onAppear { apply(model.pendingReveal) }
     }
 
-    private func consume(_ destination: SettingsDestination?) {
-        guard let destination else { return }
-        if destination.isReachable(
-            editingStoredProfile: model.editingStoredProfile
-        ) {
-            selection = destination
+    /// Applies a request's destination and surface — the half
+    /// that is meaningful in both modes.
+    ///
+    /// Deliberately does NOT clear the request when it succeeds:
+    /// the detail pane's scroll driver owns the reveal and the
+    /// clear, so a request landing while the raw Lua editor shows
+    /// survives until there is a pane with something to scroll.
+    /// An *unreachable* one is cleared here, since no pane will
+    /// ever consume it.
+    private func apply(_ request: SettingsAnchor?) {
+        guard let request else { return }
+        guard
+            request.destination.isReachable(
+                editingStoredProfile: model.editingStoredProfile
+            )
+        else {
+            model.pendingReveal = nil
+            return
         }
-        model.pendingDestination = nil
+        selection = request.destination
+        switch request.surface {
+        case .main:
+            break
+        case .layoutMode(let mode):
+            model.layoutModeTab = mode
+        case .bar(let editor):
+            model.barEditor = editor
+        }
     }
 
     /// The structured settings shell: a fixed-width source list
@@ -87,7 +112,8 @@ struct SettingsView: View {
                 selection: $model.destination,
                 editingStoredProfile: model.editingStoredProfile,
                 spotlightProfiles:
-                    model.profileSummaries.isEmpty
+                    model.profileSummaries.isEmpty,
+                reveal: { model.pendingReveal = $0 }
             )
             chrome { detailPane }
                 .frame(maxWidth: .infinity)
@@ -167,7 +193,58 @@ struct SettingsView: View {
                 Divider()
                     .padding(.top, 10)
             }
-            detail
+            // ONE reader for all ten sections (#277), above the
+            // `switch` rather than wrapped around each section's
+            // own `ScrollView`: the proxy scrolls any scroll view
+            // in its subtree that holds the id, so ten per-section
+            // wrappers would buy nothing and drift.
+            ScrollViewReader { proxy in
+                detail
+                    .environment(\.settingsFlash, model.flash)
+                    .onChange(of: model.pendingReveal) {
+                        _,
+                        request in
+                        reveal(request, proxy: proxy)
+                    }
+                    .onAppear {
+                        reveal(model.pendingReveal, proxy: proxy)
+                    }
+            }
+        }
+    }
+
+    /// Scrolls to a request's anchor and flashes it, then clears
+    /// the request. Runs after `apply` has already selected the
+    /// destination and surface.
+    private func reveal(
+        _ request: SettingsAnchor?,
+        proxy: ScrollViewProxy
+    ) {
+        guard let request else { return }
+        model.pendingReveal = nil
+        guard let anchor = request.anchor else { return }
+        revealTask?.cancel()
+        revealTask = Task { @MainActor in
+            // Yield one pass first: `apply` may have just flipped
+            // the surface that *creates* the target view, and
+            // asking the proxy for an id in the same synchronous
+            // pass as the state change that mints it misses.
+            await Task.yield()
+            let scroll = { proxy.scrollTo(anchor, anchor: .top) }
+            if reduceMotion {
+                scroll()
+            } else {
+                withAnimation(
+                    .easeInOut(duration: SettingsReveal.scroll)
+                ) { scroll() }
+            }
+            try? await Task.sleep(
+                nanoseconds: SettingsReveal.nanoseconds(
+                    SettingsReveal.scroll + SettingsReveal.settle
+                )
+            )
+            guard !Task.isCancelled else { return }
+            model.flash(anchor)
         }
     }
 

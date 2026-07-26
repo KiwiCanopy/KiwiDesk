@@ -1,33 +1,57 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Sidebar search (#90, tier 1): matches the query against the
-/// destination titles and the subsection headers each
-/// destination renders — localized, so search finds what the
-/// user actually sees. Per-control search, scroll-to +
-/// highlight, and the Layout Defaults mode auto-select are
-/// tier 2 (#277).
+/// Sidebar search: matches the query against the destination
+/// titles and everything `SidebarSearchIndex` lists inside them —
+/// localized, so search finds what the user actually sees.
+///
+/// Tier 1 (#90) stopped at naming the destination and left the
+/// user to hunt. Tier 2 (#277) makes a hit *land*: the result
+/// carries a `SettingsAnchor`, so picking it selects the
+/// destination, switches the local surface that renders the match
+/// (a Layout Defaults mode tab, the Bars switch), scrolls the
+/// pane to it and flashes it. Per-control labels are the
+/// remaining half of tier 2.
 
-/// One search hit: a destination row, plus the matched
-/// subsection header when the destination title itself did not
-/// match — the caption tells the user where inside the tab to
-/// look (for Layout Defaults' mode-gated editors it names the
-/// mode tab to open, so a hit hidden behind the mode strip is
-/// a foreseeable extra click, not a silent dead end).
+/// One search hit, at most one per destination.
+///
+/// `primary` is the deepest string that actually matched, and
+/// that flip is deliberate (ui-designer 2026-07-27): the user
+/// typed a word looking for that specific thing, so the row's
+/// biggest text is the word they typed — the destination they
+/// could already infer becomes the breadcrumb above it. A
+/// destination-title match keeps the tier-1 shape exactly
+/// (primary = the destination, no path).
 struct SidebarSearchResult: Identifiable, Equatable {
     let destination: SettingsDestination
-    let subsection: String?
+    /// Where to land. Its `anchor` is nil when the destination
+    /// title itself matched — there is no finer target than the
+    /// tab, so the pane opens without scrolling.
+    let anchor: SettingsAnchor
+    /// The matched text; the result row's primary line.
+    let primary: String
+    /// The ancestors above `primary`, outermost first.
+    let path: [String]
     var id: SettingsDestination { destination }
 }
 
 enum SidebarSearch {
     /// Case- and diacritic-insensitive substring match
-    /// (`localizedStandardContains`, Apple's user-facing
-    /// search comparison — "grosse" finds "Größe"), one row
-    /// per destination in sidebar order;
-    /// the first matching subsection wins the caption.
-    /// Destinations the sidebar hides while a stored profile
-    /// is edited stay out of the results too — the fourth #18
+    /// (`localizedStandardContains`, Apple's user-facing search
+    /// comparison — "grosse" finds "Größe"), one row per
+    /// destination in sidebar order.
+    ///
+    /// One row per destination is the settled cap (ui-designer
+    /// 2026-07-27): a query like "color" hits many controls, and
+    /// enumerating each would build a forty-row wall in a 190 pt
+    /// column for information the click cannot act on anyway. The
+    /// honest trade-off is that a destination with several
+    /// matches surfaces only its first, and a user who wanted
+    /// another narrows the query — the same escape hatch System
+    /// Settings relies on.
+    ///
+    /// Destinations the sidebar hides while a stored profile is
+    /// edited stay out of the results too — the fourth #18
     /// enforcement point, through the same
     /// `isReachable(editingStoredProfile:)` predicate, never a
     /// hand-negated copy.
@@ -54,172 +78,64 @@ enum SidebarSearch {
         _ query: String,
         in destination: SettingsDestination
     ) -> SidebarSearchResult? {
-        if destination.title
-            .localizedStandardContains(query)
-        {
+        let title = destination.title
+        if title.localizedStandardContains(query) {
             return SidebarSearchResult(
                 destination: destination,
-                subsection: nil
+                anchor: SettingsAnchor(destination: destination),
+                primary: title,
+                path: []
             )
         }
-        let hit = subsections(of: destination).first {
-            $0.localizedStandardContains(query)
-        }
-        return hit.map {
-            SidebarSearchResult(
+        guard
+            let hit = entries(of: destination).first(where: {
+                $0.text.localizedStandardContains(query)
+            })
+        else { return nil }
+        return SidebarSearchResult(
+            destination: destination,
+            anchor: SettingsAnchor(
                 destination: destination,
-                subsection: $0
-            )
-        }
+                surface: hit.surface,
+                anchor: hit.text
+            ),
+            primary: hit.text,
+            path: path(to: hit, in: destination)
+        )
     }
 
-    /// The subsection headers each destination renders, in
-    /// render order, as the exact `L(key, english)` tuples of
-    /// their view call sites — `extract-keys --check` fails
-    /// the gate if a tuple drifts from its twin, and
-    /// `SidebarSearchParityTests` pins that every key here
-    /// still has a rendering call site. Computed titles (the
-    /// per-layout "%1$@ bar") and per-control labels stay out
-    /// until #277.
-    /// Known limit (recorded, #293): `.bars` hosts two
-    /// editors behind a local switch that always opens on App
-    /// Bar, so a hit on a `space_bar.*` header lands one click
-    /// away (the caption names the section). Sub-target
-    /// navigation is #277's per-control catalog territory.
-    @MainActor static func subsections(
-        of destination: SettingsDestination
+    /// The breadcrumb above a hit: the destination, then the
+    /// surface that renders it.
+    ///
+    /// The surface is always named when there is one — including
+    /// the Bars switch's default side. Naming "Space Bar" tells
+    /// the user *which of the two bars* they found, which is the
+    /// information they came for; suppressing it because that
+    /// side happens to open first would leak a default into copy.
+    /// A mode tab whose own name IS the match ("Stack") is not
+    /// repeated above itself.
+    @MainActor private static func path(
+        to entry: SidebarSearchEntry,
+        in destination: SettingsDestination
     ) -> [String] {
-        switch destination {
-        case .spaces:
-            return [L("spaces.title", "Spaces")]
-        case .layoutDefaults:
-            return [
-                L(
-                    "layout_defaults.min_window_size",
-                    "Minimum window size"
-                )
-            ] + LayoutMode.placementTabs.map(\.displayName)
-        case .monitors:
-            return [
-                L(
-                    "monitors.space_placement",
-                    "Space placement"
-                ),
-                L(
-                    "monitors.orphan_pins.title",
-                    "Pinned to disconnected monitors"
-                ),
-                L(
-                    "monitors.advanced.title",
-                    "Monitor fingerprints"
-                ),
-            ]
-        case .appearance:
-            return [
-                L("palettes.title", "Color palette"),
-                L("gaps.title", "Gaps"),
-                L("gaps.per_edge", "Per-edge…"),
-                L("gaps.per_axis", "Per-axis…"),
-                L("drag.title", "Drag & drop"),
-                L("drag.ghost", "Ghost"),
-                L("drag.drop_zone", "Drop zone"),
-                L("border.title", "Focus border"),
-                L("sticky.title", "Sticky windows"),
-            ]
-        case .bars:
-            return [
-                L(
-                    "app_bar.global_style.title",
-                    "Global style"
-                ),
-                L(
-                    "app_bar.global_colors.title",
-                    "Global colors"
-                ),
-                // Renders inside both colour groups; placed at
-                // its first render position, since the contract
-                // is render order and the first match wins the
-                // caption.
-                L("bars.advanced_colors", "Advanced colors"),
-                L(
-                    "space_bar.global_style.title",
-                    "Space Bar style"
-                ),
-                L(
-                    "space_bar.colors.title",
-                    "Space Bar colors"
-                ),
-            ]
-        case .behavior:
-            return [
-                L("behavior.mouse.title", "Mouse"),
-                L(
-                    "behavior.animations.title",
-                    "Animations"
-                ),
-                L("behavior.quit.title", "On quit"),
-            ]
-        case .profiles:
-            return [
-                L(
-                    "profiles.saved.title",
-                    "Saved profiles"
-                ),
-                L("presets.title", "Presets"),
-                L(
-                    "native_spaces.title",
-                    "Profiles per macOS Space"
-                ),
-            ]
-        case .shortcuts:
-            return [
-                L(
-                    "shortcuts.section.switch_modes",
-                    "Switch modes"
-                ),
-                L("shortcuts.section.focus", "Focus"),
-                L(
-                    "shortcuts.section.move_windows",
-                    "Move windows"
-                ),
-                L(
-                    "shortcuts.section.size_float",
-                    "Size & float"
-                ),
-                L(
-                    "shortcuts.section.open_applications",
-                    "Open applications"
-                ),
-                L("shortcuts.section.general", "General"),
-                L(
-                    "shortcuts.section.inactive",
-                    "Inactive shortcuts"
-                ),
-                L(
-                    "shortcuts.override.title",
-                    "Profile shortcuts"
-                ),
-                L(
-                    "shortcuts.advanced.title",
-                    "Lua bindings"
-                ),
-            ]
-        case .appRules:
-            return [
-                L(
-                    "app_rules.section.title",
-                    "Rules per app"
-                )
-            ]
-        case .general:
-            return [
-                L(
-                    "general.language.title",
-                    "Language"
-                ),
-                L("general.about.title", "About"),
-                L("general.advanced.title", "Advanced"),
-            ]
+        var path = [destination.title]
+        if let surface = entry.surface.displayName,
+            surface != entry.text
+        {
+            path.append(surface)
+        }
+        return path
+    }
+}
+
+extension SettingsSurface {
+    /// The surface's own user-facing name, reusing the exact
+    /// tuples of the controls that select it, or nil for `.main`.
+    @MainActor var displayName: String? {
+        switch self {
+        case .main: return nil
+        case .layoutMode(let mode): return mode.displayName
+        case .bar(let editor): return editor.displayName
         }
     }
 }

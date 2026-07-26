@@ -23,6 +23,16 @@ struct SidebarSearchParityTests {
             .appendingPathComponent("Sources/KiwiDesk/Settings")
     }
 
+    /// The index's own files, whose `L()` tuples are the index
+    /// rather than a rendering call site. Both are named so a key
+    /// added to either counts as indexed and neither can vouch
+    /// for itself as a render site (#277 split the list out of
+    /// the matching logic).
+    private let indexFiles: Set<String> = [
+        "SidebarSearch.swift",
+        "SidebarSearchIndex.swift",
+    ]
+
     /// Headers deliberately absent from the index: fail-shut —
     /// a NEW one is either indexed or added here consciously.
     private let unindexed: Set<String> = [
@@ -57,7 +67,7 @@ struct SidebarSearchParityTests {
 
         var rendered = Set<String>()
         for file in try SourceScan.swiftSources(under: settingsDir)
-        where file.lastPathComponent != "SidebarSearch.swift" {
+        where !indexFiles.contains(file.lastPathComponent) {
             rendered.formUnion(
                 try lKeys(
                     in: String(
@@ -265,12 +275,16 @@ struct SidebarSearchParityTests {
     }
 
     private func indexSource() throws -> String {
-        try String(
-            contentsOf: settingsDir.appendingPathComponent(
-                "SidebarSearch.swift"
-            ),
-            encoding: .utf8
-        )
+        try indexFiles.sorted()
+            .map {
+                try String(
+                    contentsOf:
+                        settingsDir
+                        .appendingPathComponent($0),
+                    encoding: .utf8
+                )
+            }
+            .joined(separator: "\n")
     }
 
     /// Every `L("key", ...)` literal in a source string; the
