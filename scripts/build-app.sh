@@ -184,16 +184,24 @@ plutil -lint "$PLIST" >/dev/null
 # 5. Sign
 
 echo "==> codesign (identity: $IDENTITY)"
+# A secure timestamp is required for notarization, but an ad-hoc
+# signature cannot carry one — so it is requested for every real
+# identity and only skipped for "-".
+TS=(--timestamp)
 if [ "$IDENTITY" = "-" ]; then
+    TS=(--timestamp=none)
     echo "    note: ad-hoc — the Accessibility grant will reset" \
-         "on every rebuild."
+         "on every rebuild, and this cannot be notarized."
 fi
-# Deep-sign the nested resource bundles first, then the app.
+# Inside-out: nested code must already be sealed when the outer
+# bundle is signed, or the outer signature does not cover it.
 for b in "$MACOS"/*.bundle; do
     [ -e "$b" ] || continue
-    codesign --force --timestamp=none --sign "$IDENTITY" "$b"
+    codesign --force "${TS[@]}" --options runtime \
+        --sign "$IDENTITY" "$b"
 done
-codesign --force --options runtime --sign "$IDENTITY" "$APP"
+codesign --force "${TS[@]}" --options runtime \
+    --sign "$IDENTITY" "$APP"
 codesign --verify --deep --strict "$APP"
 
 # ---------------------------------------------------------------
