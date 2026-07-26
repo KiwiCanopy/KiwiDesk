@@ -44,13 +44,22 @@ struct SpaceBarColorsGroup: View {
                 L("bars.advanced_colors", "Advanced colors")
             )
             .font(.subheadline)
+            .searchFlash(
+                L("bars.advanced_colors", "Advanced colors")
+            )
         }
-        // Anchored on BOTH bars' drawers, not just the App Bar's:
-        // the index carries this label surface-free, so a hit
-        // reveals whichever side the user is already on instead of
-        // yanking them across the switch. Only one editor renders
-        // at a time, so the shared id is never ambiguous.
-        .searchTarget(L("bars.advanced_colors", "Advanced colors"))
+        // LOAD-BEARING, and so is its twin in `AppBarGroups`: the
+        // index carries this label surface-free so a reveal lands
+        // on whichever bar editor is already open, rather than
+        // yanking a Space Bar reader across the switch to an
+        // identically-named drawer. Only one editor is ever
+        // mounted, so the shared id is never ambiguous — but
+        // deleting this line leaves the parity guard green (the
+        // App Bar site still supplies the key) while silently
+        // restoring the scroll-to-nothing bug for this side.
+        .searchAnchor(
+            L("bars.advanced_colors", "Advanced colors")
+        )
     }
 
     /// One-shot copy, then fully independent — never a live

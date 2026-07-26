@@ -165,12 +165,16 @@ struct SettingsSidebar: View {
         selection = results[next].destination
     }
 
+    /// Falls back to the FIRST result, not to nothing: typing does
+    /// not move `selection` (deliberate — see `query`), so after a
+    /// fresh query nothing is highlighted yet and a bare Return
+    /// would otherwise be a dead key until the user pressed an
+    /// arrow. Every search UI reveals the top hit on Return.
     private func commitHighlighted() {
-        guard
-            let hit = results.first(where: {
-                $0.destination == selection
-            })
-        else { return }
+        let hit =
+            results.first { $0.destination == selection }
+            ?? results.first
+        guard let hit else { return }
         reveal(hit.anchor)
     }
 

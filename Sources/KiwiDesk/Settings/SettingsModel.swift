@@ -106,19 +106,29 @@ final class SettingsModel: ObservableObject {
     var seedSpaces: [SpaceID] = []
 
     /// Forgets both surface selections, so they re-derive their
-    /// defaults.
+    /// defaults. For window open, which re-asserts `destination`
+    /// for the same reason.
     ///
     /// Needed because moving them off view-local `@State` (#277)
     /// silently promoted two per-visit landings to
     /// process-lifetime ones: Layout Defaults re-derived the
     /// profile's most-used mode on every mount, and Bars always
-    /// opened on the Space Bar (both ui-designer calls). Called
-    /// where `destination` is also re-asserted — on window open,
-    /// and on an edit-target switch, whose whole point is that the
-    /// most-used mode is now a different profile's.
+    /// opened on the Space Bar (both ui-designer calls).
     func resetSurfaces() {
-        layoutModeTab = nil
+        resetLayoutModeTab()
         barEditor = .spaceBar
+    }
+
+    /// Just the mode tab — for an **edit-target switch**, where a
+    /// different profile means a different most-used mode.
+    ///
+    /// Separate from `resetSurfaces` because that reasoning covers
+    /// only this one: `barEditor`'s default is a fixed design call
+    /// with no profile dependence, so resetting it here would
+    /// throw a user comparing App Bar colors across profiles back
+    /// to the Space Bar editor mid-task.
+    func resetLayoutModeTab() {
+        layoutModeTab = nil
     }
 
     /// Starts a flash on `anchor`, bumping the token so that

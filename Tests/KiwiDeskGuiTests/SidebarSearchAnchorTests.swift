@@ -102,6 +102,14 @@ struct SidebarSearchAnchorTests {
     /// `SlotSizeRows.sizeLabel` even swaps with a sibling picker.
     /// So the catalog cannot land on text identity, and this test
     /// is what stops it doing so quietly.
+    ///
+    /// Deliberately stricter than the invariant: two entries on
+    /// *mutually exclusive* surfaces of one destination would be
+    /// safe (only one is ever mounted), which is exactly the shape
+    /// `bars.advanced_colors` has in the render tree. It is a
+    /// single index entry today, so nothing trips. When a genuine
+    /// two-surface duplicate arrives, tighten the key to
+    /// `(surface, text)` — do not delete the test.
     @Test("no two entries in a destination share a label")
     func anchorTextsAreUniquePerDestination() {
         pinEnglish()

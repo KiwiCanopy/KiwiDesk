@@ -220,14 +220,21 @@ struct MonitorsSection: View {
                 )
             )
             .font(.headline)
+            .searchFlash(
+                L(
+                    "monitors.advanced.title",
+                    "Monitor fingerprints"
+                )
+            )
         }
-        .searchTarget(
-            L("monitors.advanced.title", "Monitor fingerprints")
-        )
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 8)
                 .fill(Color(nsColor: .controlBackgroundColor))
+        )
+        // Outside the card chrome — see `SettingsReveal`.
+        .searchAnchor(
+            L("monitors.advanced.title", "Monitor fingerprints")
         )
     }
 

@@ -133,25 +133,32 @@ extension View {
         modifier(SearchRevealFlash(anchor: anchor))
     }
 
-    /// Both halves at once, for an anchor that is NOT a
-    /// `SettingsSection` — a `DisclosureGroup` label, which is
-    /// its own heading AND its own scroll target, so there is no
-    /// card to land on and nothing to split.
-    ///
-    /// Required at every **indexed** drawer site.
-    /// `SettingsSection` anchors itself from the title it is
-    /// handed, so a section cannot forget; a bare
-    /// `DisclosureGroup` has no such choke point, and the first
-    /// cut of #277 shipped six unanchored drawers — searching
-    /// "Per-edge…" opened Appearance and sat at the top of the
-    /// pane, because no view claimed that id.
-    /// `SidebarSearchParityTests` now fails on an indexed drawer
-    /// key that is missing here. The durable fix is a
-    /// `SettingsDisclosure` wrapper that anchors itself the way
-    /// `SettingsSection` does; that lands with the per-control
-    /// catalog, which needs the same wrapper to drive
-    /// `isExpanded` for a hit *inside* a drawer.
-    func searchTarget(_ anchor: String) -> some View {
-        searchFlash(anchor).searchAnchor(anchor)
-    }
 }
+
+// MARK: - Anchoring a drawer
+//
+// An indexed `DisclosureGroup` needs BOTH modifiers, applied the
+// same way `SettingsSection` applies them to itself:
+// `.searchFlash` on the **label** content, `.searchAnchor` on the
+// whole group and OUTSIDE any card padding or background it
+// carries. Two mistakes this spells out because both were made:
+//
+//  - Flashing the group washes its *contents* too once the drawer
+//    is expanded — four `GapRow`s under 0.18 accent — which is the
+//    whole-card wash this treatment exists to avoid.
+//  - Anchoring inside a hand-rolled card's `.padding(12)` parks
+//    the content at the viewport top with the card's rounded
+//    border 12 pt above it, off-screen.
+//
+// `SettingsSection` cannot forget, because it anchors from the
+// title it is handed; a bare `DisclosureGroup` has no such choke
+// point, and the first cut of #277 shipped six unanchored drawers
+// — searching "Per-edge…" opened Appearance and sat at the top of
+// the pane, since no view claimed that id.
+// `SidebarSearchParityTests.indexKeysAreAnchored` now fails on an
+// indexed drawer key with no `.searchAnchor(L(...))`.
+//
+// The durable fix is a `SettingsDisclosure` wrapper owning both,
+// so the pairing stops being a call-site convention. It lands with
+// the per-control catalog, which needs that wrapper anyway to
+// drive `isExpanded` for a hit *inside* a drawer.

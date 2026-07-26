@@ -219,12 +219,18 @@ struct ShortcutsSection: View {
                 )
             )
             .font(.headline)
+            .searchFlash(
+                L("shortcuts.advanced.title", "Lua bindings")
+            )
         }
-        .searchTarget(L("shortcuts.advanced.title", "Lua bindings"))
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 8)
                 .fill(Color(nsColor: .controlBackgroundColor))
+        )
+        // Outside the card chrome — see `SettingsReveal`.
+        .searchAnchor(
+            L("shortcuts.advanced.title", "Lua bindings")
         )
     }
 

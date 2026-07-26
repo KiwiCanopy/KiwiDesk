@@ -95,6 +95,31 @@ struct LocalizationRegistryTests {
         #expect(!reported.contains("de"))
     }
 
+    /// Which script a locale writes in is a **declaration**, not a
+    /// default: a locale must name itself in `LATIN_LOCALES` or in
+    /// `SCRIPTS`, even when its stub tags are registered.
+    ///
+    /// This used to be optional, on the reasoning that absence from
+    /// `SCRIPTS` means Latin-script and that is a real answer. The
+    /// feature-name guard inverted the cost of being wrong: it
+    /// holds Latin-script locales to carrying "App Bar" verbatim,
+    /// so a Greek locale with registered tags but no script row
+    /// would be *demanded* to keep an ASCII phrase inside a Greek
+    /// sentence — loudly wrong, where the old failure was quietly
+    /// off. `el` has tags here only because `_STUB_TAGS` is keyed
+    /// by base language and `el` is absent from it too; the point
+    /// is that the report names it either way.
+    @Test("a locale with no script declaration is reported")
+    func undeclaredScriptIsReported() throws {
+        // `de` IS declared (Latin) and `ja` IS declared (via
+        // SCRIPTS), so neither may appear — otherwise this would
+        // pass by flagging everything.
+        let reported = try unregistered(["de", "ja", "el"])
+        #expect(reported.contains("el"))
+        #expect(!reported.contains("de"))
+        #expect(!reported.contains("ja"))
+    }
+
     /// A non-Latin locale must also be in `SCRIPTS`, or its own
     /// script reads as foreign to it — the fail-closed twin of the
     /// silent gap above. Every shipped non-Latin locale must

@@ -123,7 +123,7 @@ struct SidebarSearchParityTests {
     ///
     /// Anchorable means exactly three things:
     /// `SettingsSection(L(...))`, which anchors itself from the
-    /// title it is handed; `.searchTarget(L(...))`, the opt-in a
+    /// title it is handed; `.searchAnchor(L(...))`, the opt-in a
     /// bare `DisclosureGroup` needs; and `LayoutMode.displayName`,
     /// whose tuples the per-mode editors pass to
     /// `SettingsSection`.
@@ -148,7 +148,7 @@ struct SidebarSearchParityTests {
                 try sectionHeaderKeys(in: source)
             )
             anchorable.formUnion(
-                try searchTargetKeys(in: source)
+                try searchAnchorKeys(in: source)
             )
             if file.lastPathComponent
                 == "LayoutModeGlyph.swift"
@@ -385,15 +385,15 @@ struct SidebarSearchParityTests {
             .joined(separator: "\n")
     }
 
-    /// Literal keys passed to `.searchTarget(L(...))` — the
+    /// Literal keys passed to `.searchAnchor(L(...))` — the
     /// anchor a `DisclosureGroup` label must opt into, since only
     /// `SettingsSection` anchors itself.
-    private func searchTargetKeys(
+    private func searchAnchorKeys(
         in source: String
     ) throws -> Set<String> {
         try keys(
             in: SourceScan.stripComments(source),
-            pattern: #"\.searchTarget\(\s*L\(\s*"([a-z0-9_.]+)""#
+            pattern: #"\.searchAnchor\(\s*L\(\s*"([a-z0-9_.]+)""#
         )
     }
 

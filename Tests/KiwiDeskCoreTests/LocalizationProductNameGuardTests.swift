@@ -93,6 +93,46 @@ struct LocalizationProductNameGuardTests {
         #expect(result.status == 0)
     }
 
+    /// The shape that nearly made this guard fight correct German.
+    /// A compounding language hyphenates a two-word proper noun
+    /// onto the following noun, so "Space-Bar-Farben" IS "Space Bar
+    /// colors" with the name intact — a raw substring test rejects
+    /// it and pushes the translator to the ungrammatical
+    /// "Space Bar Farben". The non-breaking variants are the same
+    /// class and travel invisibly through translation tools.
+    @Test(
+        "a compounded or NBSP-joined name still counts as kept",
+        arguments: [
+            ("Space Bar colors", "Space-Bar-Farben"),
+            ("App Bar position", "App-Bar-Position"),
+            ("App Bar style", "App\u{2011}Bar\u{2011}Stil"),
+            ("Space Bar colors", "Space\u{00a0}Bar Farben"),
+        ]
+    )
+    func compoundedNameIsKept(
+        english: String,
+        value: String
+    ) throws {
+        let result = try ProductNameFixture.check(
+            locale: "de",
+            english: english,
+            value: value
+        )
+        #expect(result.status == 0)
+    }
+
+    /// And the normalisation must not have blunted the rule:
+    /// hyphenating a *translated* stem is still a dropped name.
+    @Test("compounding a translated stem still fails")
+    func compoundedTranslationStillFails() throws {
+        let result = try ProductNameFixture.check(
+            locale: "de",
+            english: "Space Bar colors",
+            value: "Space-Leisten-Farben"
+        )
+        #expect(result.status != 0)
+    }
+
     /// The scope, pinned from the other side. A non-Latin sentence
     /// carries the phrase as a foreign body, so adapting it is a
     /// real editorial choice the owner explicitly allowed — and if

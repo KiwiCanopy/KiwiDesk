@@ -151,12 +151,17 @@ Settings ▸ General ▸ Language, listed by its own native name
 
 The **content guards** are the one exception: they key their
 policy by locale, so a new code has to be added to `_STUB_TAGS`
-in `scripts/localization_guards.py` (and to `SCRIPTS` if the
-language writes in a non-Latin script). Forget it and two of the
-six checks go quiet for that locale rather than failing loudly,
-which is why `extract-keys --check` refuses an unregistered
-locale outright and says where to add it —
-`LocalizationRegistryTests` pins the same relation.
+in `scripts/localization_guards.py`, **and** declare its script —
+`SCRIPTS` for a non-Latin language, `LATIN_LOCALES` otherwise.
+Both are required, and the script declaration is not optional the
+way it once was: the feature-name guard holds Latin-script locales
+to keeping "App Bar" verbatim, so a non-Latin locale that forgot
+its `SCRIPTS` row would be read as Latin and *demanded* to carry
+an ASCII phrase inside its own sentences. Forget either and a
+guard goes quiet — or worse, loudly wrong — for that locale, which
+is why `extract-keys --check` refuses an unregistered locale
+outright and says where to add it; `LocalizationRegistryTests`
+pins the same relation.
 
 These language names are **endonyms** — each language shown in its
 own name, the same regardless of the active UI language (so the
@@ -308,7 +313,7 @@ The other maintenance verbs take `--site` too:
 
 - `scripts/extract-keys --site --check` — validates every
   shipped `site/src/i18n/<locale>.json` decodes as a flat
-  `{string: string}` map, runs five of the seven *Content guards*
+  `{string: string}` map, runs six of the seven *Content guards*
   over its values, and warns on orphan keys (present in a
   locale, absent from `en.json`). It does **not** check
   `en.json` freshness — there's no code to derive it from; it

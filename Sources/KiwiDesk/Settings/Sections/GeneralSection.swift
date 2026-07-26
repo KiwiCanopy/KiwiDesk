@@ -232,13 +232,19 @@ struct GeneralSection: View {
         } label: {
             Text(L("general.advanced.title", "Advanced"))
                 .font(.headline)
+                .searchFlash(
+                    L("general.advanced.title", "Advanced")
+                )
         }
-        .searchTarget(L("general.advanced.title", "Advanced"))
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 8)
                 .fill(Color(nsColor: .controlBackgroundColor))
         )
+        // Outside the card chrome, so `scrollTo(anchor: .top)`
+        // lands on the card's top edge rather than 12 pt inside
+        // it with the rounded border off-screen.
+        .searchAnchor(L("general.advanced.title", "Advanced"))
     }
 
     private var editLuaCaption: String {

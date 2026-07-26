@@ -137,6 +137,22 @@ NON_LATIN_LOCALES = {
     locale for _, _, locales in SCRIPTS for locale in locales
 }
 
+# Locales that write in Latin script, declared rather than
+# inferred. There is no `("Latin", …)` row in `SCRIPTS` because
+# every locale uses Latin characters for `KiwiDesk`, URLs and
+# `%1$@`, so a Latin *pattern* proves nothing — but which side of
+# the line a locale sits on now decides who `dropped_product_names`
+# holds to the English feature names, and a wrong default there is
+# loud rather than quiet. `unregistered_locales` refuses a locale
+# missing from both sets; `LocalizationRegistryTests` pins it.
+LATIN_LOCALES = {
+    "de",
+    "es",
+    "fr",
+    "it",
+    "pt-BR",
+}
+
 # Terms that stay English in every locale by design: the product,
 # the technologies it wraps, Apple's own feature and key names,
 # and the layout-mode names the GUI shows verbatim. This is a
@@ -262,17 +278,37 @@ def unregistered_locales(names: list[str]) -> list[str]:
     guards would be off with no signal at all, which is the exact
     failure the guards exist to prevent, one level up.
 
-    So membership is checked rather than assumed. Only
-    `_STUB_TAGS` is required: a locale legitimately absent from
-    `SCRIPTS` is a Latin-script one, which is a real answer.
-    `SourceScan`-style parity is enforced by
-    `LocalizationRegistryTests`, which walks the shipped files.
+    So membership is checked rather than assumed — in **both**
+    registries, which is a tightening. It used to require only
+    `_STUB_TAGS`, on the reasoning that a locale absent from
+    `SCRIPTS` is Latin-script and that is a real answer. That held
+    while the cost of forgetting was a guard going *quiet*.
+
+    `dropped_product_names` inverted that cost. It keys off
+    `NON_LATIN_LOCALES` — derived from `SCRIPTS` — to decide who
+    must carry "App Bar" verbatim, so a Greek or Hebrew locale
+    registered in `_STUB_TAGS` but forgotten in `SCRIPTS` would be
+    read as Latin-script and **actively demanded** to keep an ASCII
+    phrase inside a non-Latin sentence: precisely the call that
+    guard's own rationale says is wrong. Silently-off became
+    loudly-wrong, so which script a locale writes in is now a
+    declaration, not a default: a Latin-script locale says so by
+    joining `LATIN_LOCALES`.
+
+    `LocalizationRegistryTests` walks the shipped files and pins
+    the same requirement.
     """
     return sorted(
         name
         for name in names
         if name != "en"
-        and base_language(name) not in _STUB_TAGS
+        and (
+            base_language(name) not in _STUB_TAGS
+            or (
+                name not in LATIN_LOCALES
+                and name not in NON_LATIN_LOCALES
+            )
+        )
     )
 
 # Interpolation specifiers, so `%1$d` never contributes the word
@@ -469,16 +505,38 @@ def dropped_product_names(
     Substring, not word-boundary: German's "App-Leiste" must NOT
     count as carrying "App Bar", which is exactly what a
     token-level test would conclude.
+
+    Separators are normalised first, and that is load-bearing for
+    the very locale this guard was written for. German joins a
+    two-word proper noun to a following noun with hyphens, so
+    "Space-Bar-Farben" is the orthographically CORRECT rendering
+    of "Space Bar colors" and it does keep the name — a raw
+    substring test rejects it and pushes the translator toward the
+    ungrammatical "Space Bar Farben". A non-breaking space between
+    the two words is the same class, and travels invisibly through
+    translation tools. Normalising costs nothing: "App-Leiste"
+    still fails, because `leiste` is not `bar`.
     """
     if locale in NON_LATIN_LOCALES:
         return []
-    lowered = value.lower()
+    haystack = _flatten_separators(value)
+    needles = _flatten_separators(english)
     return [
         name
         for name in PRODUCT_NAMES
-        if name.lower() in english.lower()
-        and name.lower() not in lowered
+        if _flatten_separators(name) in needles
+        and _flatten_separators(name) not in haystack
     ]
+
+
+# Whitespace (including NBSP) and the hyphen/dash family, which a
+# compounding language uses where English uses a space.
+_SEPARATORS = re.compile(r"[\s ‐-―\-]+")
+
+
+def _flatten_separators(text: str) -> str:
+    """`text` lower-cased with every separator run as one space."""
+    return _SEPARATORS.sub(" ", text).strip().lower()
 
 
 def _is_partly_translated(locale: str, value: str) -> bool:

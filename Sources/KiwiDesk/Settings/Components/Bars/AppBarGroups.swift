@@ -121,11 +121,22 @@ struct GlobalAppBarGroup: View {
                     L("bars.advanced_colors", "Advanced colors")
                 )
                 .font(.subheadline)
+                // On the label, which is deliberately outside the
+                // `GreyOut` on the content above — a wash nested
+                // in a dimmed subtree compounds to ~0.09 and
+                // reads as a rendering fault.
+                .searchFlash(
+                    L("bars.advanced_colors", "Advanced colors")
+                )
             }
-            // Anchored on the label, which is deliberately OUTSIDE
-            // the `GreyOut` on the content above — a wash nested in
-            // a dimmed subtree compounds to ~0.09 and reads broken.
-            .searchTarget(
+            // LOAD-BEARING, and so is its twin in
+            // `SpaceBarColorsGroup`: the index carries this label
+            // surface-free, so a reveal lands on whichever bar
+            // editor is already open. Deleting either anchor
+            // leaves the parity guard green — the other still
+            // supplies the key — while silently restoring the
+            // scroll-to-nothing bug for that side.
+            .searchAnchor(
                 L("bars.advanced_colors", "Advanced colors")
             )
         }

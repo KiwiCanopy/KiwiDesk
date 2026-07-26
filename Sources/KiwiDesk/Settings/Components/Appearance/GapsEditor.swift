@@ -22,10 +22,10 @@ struct GapsEditor: View {
                 unified: outerUnified,
                 mixed: outerMixed
             )
-            DisclosureGroup(
-                L("gaps.per_edge", "Per-edge…"),
-                isExpanded: outerDisclosure
-            ) {
+            // Trailing-label form so the reveal wash can sit on
+            // the label alone; flashing the group would tint the
+            // four rows below it once expanded.
+            DisclosureGroup(isExpanded: outerDisclosure) {
                 VStack(alignment: .leading, spacing: 6) {
                     GapRow(
                         label: L("gaps.top", "Top"),
@@ -49,18 +49,20 @@ struct GapsEditor: View {
                     )
                 }
                 .padding(.top, 4)
+            } label: {
+                Text(L("gaps.per_edge", "Per-edge…"))
+                    .searchFlash(
+                        L("gaps.per_edge", "Per-edge…")
+                    )
             }
-            .searchTarget(L("gaps.per_edge", "Per-edge…"))
+            .searchAnchor(L("gaps.per_edge", "Per-edge…"))
             Divider()
             masterRow(
                 label: L("gaps.inner", "Inner gap"),
                 unified: innerUnified,
                 mixed: innerMixed
             )
-            DisclosureGroup(
-                L("gaps.per_axis", "Per-axis…"),
-                isExpanded: innerDisclosure
-            ) {
+            DisclosureGroup(isExpanded: innerDisclosure) {
                 VStack(alignment: .leading, spacing: 6) {
                     GapRow(
                         label: L("gaps.horizontal", "Horizontal"),
@@ -74,8 +76,13 @@ struct GapsEditor: View {
                     )
                 }
                 .padding(.top, 4)
+            } label: {
+                Text(L("gaps.per_axis", "Per-axis…"))
+                    .searchFlash(
+                        L("gaps.per_axis", "Per-axis…")
+                    )
             }
-            .searchTarget(L("gaps.per_axis", "Per-axis…"))
+            .searchAnchor(L("gaps.per_axis", "Per-axis…"))
         }
     }
 

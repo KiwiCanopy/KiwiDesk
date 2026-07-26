@@ -53,7 +53,10 @@ struct SettingsView: View {
             }
             // A different profile means a different most-used
             // layout mode, so the mode tab must re-derive (#277).
-            model.resetSurfaces()
+            // The mode tab ONLY — the Bars switch has no profile
+            // dependence, and resetting it here would move a user
+            // comparing App Bar colors across profiles.
+            model.resetLayoutModeTab()
         }
         // A navigation request — the #326 "Edit in Settings…"
         // deep link, or a #277 search hit. Guarded by the same
@@ -263,9 +266,15 @@ struct SettingsView: View {
             // the first attempt landed, this is a no-op.
             proxy.scrollTo(anchor, anchor: .top)
             let token = model.startFlash(anchor)
+            // Under Reduce Motion the wash has no fade to live
+            // through — clearing removes it instantly — so the
+            // hold absorbs the fade's duration instead. Without
+            // this the accessibility branch gets a 0.3 s cue
+            // against everyone else's 1.2 s, which is backwards.
             try? await Task.sleep(
                 nanoseconds: SettingsReveal.nanoseconds(
                     SettingsReveal.hold
+                        + (reduceMotion ? SettingsReveal.fade : 0)
                 )
             )
             // Clearing is what triggers the fade — the modifier
