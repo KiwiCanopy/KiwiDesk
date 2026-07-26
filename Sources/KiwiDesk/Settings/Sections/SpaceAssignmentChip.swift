@@ -41,6 +41,23 @@ struct SpaceAssignmentChip: View {
             {
                 IconGlyphLabel(icon: spaceIcon)
                     .font(.system(size: 10))
+                    // The glyph outranks the name (#545).
+                    // `FlowLayout` measures this chip at its
+                    // ideal size and then re-proposes exactly
+                    // that, so any rounding shortfall is taken
+                    // from a flexible child — and at equal
+                    // priority that was the emoji, which cannot
+                    // shrink and so clipped. The name absorbs it
+                    // instead, which it already does by design
+                    // (it truncates into the row's tooltip).
+                    //
+                    // Priority, not `.fixedSize()`: an icon is
+                    // one character only by the GUI picker's
+                    // rule, never Lua's (`set_space_icon` takes
+                    // any string — the GUI curates, Lua is
+                    // open), and a fixed-size glyph would let a
+                    // long one push the whole chip wide.
+                    .layoutPriority(1)
             }
             Text(space.raw)
                 .font(.caption)
