@@ -30,7 +30,8 @@ public enum KeybindingConflicts {
     /// named, enumerated summary (see `SettingsModel`'s banner
     /// formatter). One entry per conflicting row; a row that
     /// duplicates another and *also* shadows a system shortcut
-    /// only reports the first match, same as `text(for:in:)`.
+    /// only reports the first match, since it reduces over
+    /// `conflict(for:in:)` and inherits its branch order.
     public static func conflicts(
         in modes: [KeyMode]
     ) -> [Conflict] {

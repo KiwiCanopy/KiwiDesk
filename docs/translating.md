@@ -48,8 +48,19 @@ not left in English — Core returns the **structure** (a
 `Conflict`, naming a `SystemShortcut` case) and the GUI turns it
 into a sentence, so a translator sees ordinary keys
 (`system_shortcut.*`, `keybinding.conflict.*`) with nothing
-special about them. Nothing to do differently when translating;
-it matters only if you are adding such a string in Core, which
+special about their plumbing.
+
+**The `system_shortcut.*` keys do need one thing done
+differently.** They are Apple's own feature names — Spotlight,
+Mission Control, Force Quit, App Windows — and macOS already
+ships a name for each in your language. Use *that* name, the one
+a user would see in System Settings › Keyboard › Shortcuts, and
+do not translate the English literally. A literal rendering
+reads as a bug precisely because the user has seen Apple's
+wording for the same thing everywhere else.
+
+Otherwise there is nothing to do differently; the structure
+matters only if you are adding such a string in Core, which
 should name a case rather than write English prose.
 
 ## Key convention

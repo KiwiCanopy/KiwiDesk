@@ -631,3 +631,16 @@ Keep this list updated whenever a recurring mistake is found.
   (`LocalizationPreference`), never `gui.json` — it is
   documented as side-effect-free and must never create a
   sidecar or flip `KiwiCore.isGuiManaged`.
+- **Core names, the GUI narrates (#96).** `L()` is `@MainActor`
+  and much of Core is deliberately actor-free, so a user-facing
+  condition detected in Core returns **structure** — a case, an
+  enum, a value type — and the GUI renders the sentence at its
+  own boundary (`Conflict.Target.systemShortcut(SystemShortcut)`
+  → `ConflictText`). Never a pre-rendered English string across
+  that seam: it cannot be translated where it was written, and
+  routing `L()` into actor-free code to fix that would make the
+  manager's isolation a special case to buy one file's
+  convenience. Core currently holds **no** `L()` call site
+  outside `Localization/` — keep it that way. CLI/IPC error
+  strings are the deliberate exception and stay English: they
+  are a machine contract, not UI copy.

@@ -8,12 +8,22 @@ import Testing
 /// display string, because `L()` is `@MainActor` and Core's
 /// conflict detection is actor-free (§2.6).
 ///
-/// The **compiler** guards the mirror — `localizedName` switches
-/// exhaustively, so a new case cannot ship without a string.
-/// What it cannot see is two cases resolving to the SAME string,
-/// which is what a copy-pasted `L(…)` line produces, so that is
-/// what this suite adds. `.serialized` because
-/// `LocalizationManager` is a process-wide singleton.
+/// The case list is mirrored **twice**, and only one of the two
+/// mirrors is compiler-guarded:
+///
+/// - `localizedName` switches exhaustively, so a new case cannot
+///   ship without a string. Nothing to add.
+/// - `SystemShortcuts.map` is a hand-written combo list, and a
+///   case missing from it compiles fine — the shortcut is simply
+///   never detected. That is the silent "add a field, forget one
+///   site" shape `.claude/rules/parity-tests.md` requires a test
+///   for, and `CaseIterable` makes it a reflection-style guard
+///   rather than a second hand-listed one.
+///
+/// What neither reaches is two cases resolving to the SAME
+/// string, which is what a copy-pasted `L(…)` line produces.
+/// `.serialized` because `LocalizationManager` is a process-wide
+/// singleton.
 @Suite("System shortcut names (#96)", .serialized)
 @MainActor
 struct SystemShortcutNamesTests {
@@ -23,6 +33,25 @@ struct SystemShortcutNamesTests {
 
     private func reset() {
         LocalizationManager.shared.select(nil)
+    }
+
+    /// The mirror the compiler cannot see: a case with no combo
+    /// in `SystemShortcuts.map` ships as dead code — it has a
+    /// name, and nothing ever resolves to it, so the shortcut it
+    /// describes is never flagged as a conflict.
+    @Test("every case is reachable from a parsed combo")
+    func everyCaseHasACombo() {
+        let mapped = SystemShortcuts.map.values
+        for shortcut in SystemShortcut.allCases {
+            let message =
+                "\(shortcut) has no entry in SystemShortcuts.map "
+                + "— it can never be detected, so the conflict it "
+                + "names is silently never reported"
+            #expect(
+                mapped.contains(shortcut),
+                Comment(rawValue: message)
+            )
+        }
     }
 
     @Test("every case resolves to a distinct, non-empty name")
