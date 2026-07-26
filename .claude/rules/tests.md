@@ -25,7 +25,7 @@ ones that bite large test PRs, as a checklist (rationale is in §5):
   it approaches the ceiling.
 - **Per-file private helpers are the convention** — small
   duplication across suites is fine; no shared test harness.
-  Three ratified exceptions, all *stateless primitives* with no
+  Four ratified exceptions, all *stateless primitives* with no
   setup/teardown coupling and no assertions of their own:
   - *structural-parity primitives* (reflection helpers backing
     the field-list guards) in `ReflectionParity.swift` — a
@@ -40,6 +40,14 @@ ones that bite large test PRs, as a checklist (rationale is in §5):
     per the #249 architect review); a divergent copy silently
     changes what a suite observes (an undrained pipe, a missed
     `stderr`) without failing anything.
+  - *colour-vision maths* in `ColorVisionSimulation.swift` — the
+    Viénot protanopia transform plus luminance/contrast, shared
+    by `SpaceBarAccentSeparationTests` and
+    `DragPairSeparationTests`. Extracted at the **second** copy
+    (#511): those guards assert on the numbers it returns, and
+    the numbers *are* the argument the palette decisions rest
+    on, so a drifted copy silently moves a threshold without
+    failing anything.
   - *source-scanning primitives* in `SourceScan.swift` — the
     delimiter walker (`balanced`, `skipLiteral`), comment
     stripper and file enumerator shared by the parity guards

@@ -457,7 +457,7 @@ Keep this list updated whenever a recurring mistake is found.
 - **Split test suites early.** The 79-char limit and 350-line
   ceiling repeatedly bit large test files. Break suites into
   focused files before they grow; per-file private helpers are the
-  convention and small duplication across suites is fine. Three
+  convention and small duplication across suites is fine. Four
   ratified exceptions, all *stateless primitives* with no
   setup/teardown coupling and no assertions of their own:
   `ReflectionParity.swift` (structural-parity reflection helpers
@@ -467,7 +467,15 @@ Keep this list updated whenever a recurring mistake is found.
   `SourceScan.swift` (the delimiter walker and file enumerator
   the source-scanning parity guards share — an over-matching
   divergent copy makes a guard pass for the wrong reason, which
-  is the exact failure those guards exist to prevent).
+  is the exact failure those guards exist to prevent), and
+  `ColorVisionSimulation.swift` (the Viénot protanopia transform,
+  luminance and contrast maths behind the CVD separation guards
+  — `SpaceBarAccentSeparationTests` and `DragPairSeparationTests`
+  assert *on the numbers it returns*, and the numbers are the
+  argument the palette decisions rest on, so a copy that drifted
+  in one suite would move a guard's threshold without failing
+  anything; extracted at the second copy, on that risk alone,
+  same as `SourceScan`).
   The bar is the **drift risk** — a divergent copy weakens a
   guard, or silently changes what a suite observes — not the
   copy count, which is merely the evidence that prompted the

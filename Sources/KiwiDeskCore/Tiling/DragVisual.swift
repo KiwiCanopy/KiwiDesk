@@ -21,26 +21,35 @@ public struct DragVisual: Sendable, Equatable, Encodable {
     public var fill: Bool
     public var fillColor: String
 
-    /// Ghost (drag origin): deep kiwi green — the brand accent hue
-    /// darkened for stroke duty, same signal as the focus ring.
-    /// The bright accent is fill-only and vanishes over light
-    /// window content, so this drops it in lightness (not hue) to
-    /// stay legible and on-brand. Origin vs. target reads by hue
-    /// against the drop zone's amber. Defaults mirrored in
-    /// docs/lua-reference.md (drag colors) — change both.
+    /// Ghost (drag origin): a deep emerald. It was the ring's
+    /// yellow-green `#588613` until #511 measured origin against
+    /// target and got **4.7/441** under simulated protanopia —
+    /// worse than the 22 that #470 called "the same colour to a
+    /// protanope". Target is locked (the drop-zone amber is the
+    /// hex `space_bar.focusedItemColor` converged onto), so the
+    /// origin had to move, and it could not stay a yellow-green:
+    /// against that amber, nothing in the hue family separates
+    /// while also clearing 3:1 on *both* near-white and near-black
+    /// (`docs/accepted-limitations.md`). Hue ~150 is the nearest
+    /// place both hold — 76/441, 5.2:1 and 4.0:1. So the ghost no
+    /// longer matches the focus ring, deliberately: the ring has
+    /// no partner to separate from and keeps `#588613`.
+    /// Defaults mirrored in docs/lua-reference.md (drag colors)
+    /// — change both.
     public static let ghostDefault = DragVisual(
         enabled: true,
         border: true,
-        borderColor: "#588613",
+        borderColor: "#347957",
         borderWidth: 5,
         borderAlignment: .inside,
         fill: true,
-        fillColor: "#58861340"
+        fillColor: "#34795740"
     )
 
     /// Drop zone (drag target): a vivid, darkened amber — the
-    /// other established hue, kept far from the teal origin so the
-    /// two read apart. Darkened from the old #E8A33D for the same
+    /// other established hue, kept far from the emerald origin so
+    /// the two read apart, including under red-green vision loss
+    /// (#511). Darkened from the old #E8A33D for the same
     /// reason as the ring: legible over light window content.
     public static let dropZoneDefault = DragVisual(
         enabled: true,
