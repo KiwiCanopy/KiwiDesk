@@ -30,7 +30,7 @@ struct ShortcutRow: Identifiable {
 }
 
 /// A named group of rows inside the Controls band (Focus / Move
-/// Windows / Size & Float / Switch modes).
+/// Windows / Size & float / Switch modes).
 struct ShortcutSubgroup: Identifiable {
     let title: String
     let rows: [ShortcutRow]

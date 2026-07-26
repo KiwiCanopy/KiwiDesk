@@ -167,32 +167,64 @@ owns one tab and one schematic.
 
 ## Shared visual language
 
-**Section titles are sentence case** — "On quit", "Drag & drop",
-"Move windows", not "On Quit" or "Drag & Drop" (R5, #406). It was
-already the large majority, and it is what macOS System Settings
-uses for its own pane sections; the alternative (normalising *up*
-to Title Case) would have touched ~25 strings instead of 6. This
-is a policy choice rather than a fix, which is why it is written
-down: a new `SettingsSection` follows the rule instead of
-re-deciding it. Capitalise only what a sentence would — proper
-nouns stay ("Advanced Lua bindings"), and an acronym stays an
-acronym ("BSP").
+**A section or disclosure title is sentence case** — "On quit",
+"Drag & drop", "Move windows", not "On Quit" or "Drag & Drop"
+(R5, #406). It was already the large majority, and it is what
+macOS System Settings uses for its own in-pane headers; the
+alternative (normalizing *up* to Title Case) would have touched
+~25 strings instead of 6. This is a policy choice rather than a
+fix, which is why it is written down: the next header follows the
+rule instead of re-deciding it.
+
+Three boundaries, because System Settings itself draws them:
+
+- **The rule is scoped to headers** — `SettingsSection` titles
+  and the `.headline` labels of an "Advanced" disclosure. The
+  **sidebar's `SettingsDestination` titles stay Title Case**
+  ("Layout Defaults", "App Rules"): they name a destination, as
+  System Settings' own sidebar does. So do **action labels**
+  ("Open New", "Set Gap Values") — a verb-phrase command follows
+  the menu-item convention, not this one.
+- **`&` does not start a new sentence**: "Size & float", "Drag &
+  drop". The word after the ampersand is the one a sweep will
+  miss, and did (#406 review).
+- **Capitalize only what a sentence would.** A proper noun stays
+  ("Advanced Lua bindings"); an acronym stays an acronym ("BSP").
+  KiwiDesk's own **named surfaces keep their caps** — the App Bar
+  and the Space Bar are things ("Space Bar colors") — while a
+  feature that is just its noun does not ("Focus border").
 
 **A qualified "Advanced" disclosure is `Advanced <noun phrase>`,
 with no connector** — "Advanced colors", "Advanced Lua bindings",
-"Advanced monitor fingerprints" (R3, #406). The three had drifted
-onto three different formats (bare, `Advanced: …`, `Advanced —
-…`), which read as three unrelated controls rather than one
-recurring affordance. The bare "Advanced" stays bare where the
-section it sits in already names the subject. Sequenced after the
-rule above deliberately, so both use one capitalisation rule.
+"Advanced monitor fingerprints" (R3, #406). The three had drifted onto
+three different formats (bare, `Advanced: …`, `Advanced — …`),
+which read as three unrelated controls rather than one recurring
+affordance. Sequenced after the rule above deliberately, so both
+use one capitalization rule.
 
-Shipped translations keep their own typography here: these were
-cosmetic English edits, so German still reads "Erweitert: …" and
-"Erweitert — …". That is correct German, and forcing
-re-translation would have regressed those strings to English —
-see `docs/translating.md` for when a rename does warrant
-`scripts/drop-key`.
+Prefer a noun phrase that survives being read as adjective +
+noun. "Advanced colors" and "Advanced Lua bindings" both sit
+above a basic tier of the same thing, so "the advanced ones" is
+the first reading English gives. "Advanced monitor fingerprints"
+has no basic tier to contrast with, so it can re-scope onto the
+fingerprints — a generic tail ("details", "options") reads
+better there, and the review recommended it. It was **not**
+taken, for a reason worth knowing: `SidebarSearch` indexes the
+visible strings, and "fingerprint" appears nowhere else in the
+GUI, so the better-reading title silently made that drawer
+unfindable by the word a user would actually type. Weigh a title
+edit against the search index (#540).
+
+The bare "Advanced" (General) stays bare because it is the only
+advanced thing on its page — a user never sees two of these at
+once, so the qualifier would answer a question nobody is asking.
+
+Shipped translations keep their own typography here: R5 and R3
+were cosmetic English edits, so German still reads "Erweitert:
+…". That is correct German, and forcing re-translation would
+have regressed those strings to English. Had the *noun* moved it
+would have been a meaning change and taken `scripts/drop-key` —
+see `docs/translating.md` for that line.
 
 **Option tabs are a solid sliding-pill segment control.**
 Every pick-one-of-few chooser (layout parameters, mouse

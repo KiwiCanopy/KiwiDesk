@@ -77,7 +77,7 @@ enum KeybindingCatalog {
         }
     }
 
-    /// The four directional swap rows (Move Windows).
+    /// The four directional swap rows (Move windows).
     static let swapDirections: [NavCommand] = directions.map {
         dir,
         phrase in
@@ -222,7 +222,7 @@ enum KeybindingCatalog {
         ]
     }
 
-    // Size & Float presets (resizeAndFloat, makeFloating,
+    // Size & float presets (resizeAndFloat, makeFloating,
     // resizeShape) live in `KeybindingCatalog+Resize.swift`.
 
     /// A space id as a quoted, escaped Lua string argument.

@@ -2,7 +2,7 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// Section 2 — Open Applications: launch hotkeys. Each row picks
+/// Section 2 — Open applications: launch hotkeys. Each row picks
 /// an installed app (or any bundle via "Other…"), a launch
 /// behavior (Open or Focus / Open New, #334), and a combo. The
 /// default action pulls the app into the current space, launching

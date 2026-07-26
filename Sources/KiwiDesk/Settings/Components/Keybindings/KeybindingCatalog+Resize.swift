@@ -1,11 +1,11 @@
 import KiwiDeskCore
 
-/// The Size & Float presets, split out of `KeybindingCatalog`
+/// The Size & float presets, split out of `KeybindingCatalog`
 /// for file size (AGENTS.md §2): the per-axis Grow/Shrink rows
 /// (#56), the Make-floating row, and `resizeShape` — the import
 /// classifier's inverse of the resize authoring.
 extension KeybindingCatalog {
-    /// Window-size and float presets (Size & Float, §3.6.1).
+    /// Window-size and float presets (Size & float, §3.6.1).
     /// The four Grow/Shrink rows nudge the layout by `step`
     /// points — the configurable global `resize.step` (#58),
     /// passed in by the caller from live settings — on either
@@ -116,7 +116,7 @@ extension KeybindingCatalog {
 
     /// Classification-only anchors (#4/#91) for hand-written
     /// sticky verbs, mirroring `makeFloating` below: imported
-    /// bindings land in Size & Float with proper labels
+    /// bindings land in Size & float with proper labels
     /// instead of demoting to Custom.
     static let makeSticky = NavCommand(
         label: "Make sticky",
@@ -163,7 +163,7 @@ extension KeybindingCatalog {
     /// `resizeAndFloat`'s authoring, used by import classification
     /// (#58, both axes since #56). A shape match (not
     /// byte-for-byte) so a config whose step differs from the
-    /// current one still lands in Size & Float, and its magnitude
+    /// current one still lands in Size & float, and its magnitude
     /// is read back into `resize.step`. Nil unless `lua` is
     /// exactly a single-axis resize with a non-zero integer delta.
     static func resizeShape(

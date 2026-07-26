@@ -22,7 +22,7 @@ struct SettingsGroupHeader: View {
 /// its name. The optional caption is a one-sentence plain-words
 /// explanation under the title; `subsection` shrinks the title
 /// for groups that belong to a bigger one (Ghost / Drop zone
-/// under Drag & Drop).
+/// under Drag & drop).
 struct SettingsSection<Content: View>: View {
     let title: String
     let symbol: String?

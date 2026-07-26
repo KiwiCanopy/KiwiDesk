@@ -2,7 +2,7 @@ import KiwiDeskCore
 import SwiftUI
 
 /// This Profile ▸ Appearance ▸ Focus border (#278). Sits below
-/// Gaps and Drag & Drop. Order per the settled design: enable
+/// Gaps and Drag & drop. Order per the settled design: enable
 /// toggle → live two-window preview → focused color → unfocused
 /// toggle + color → width → corner style (preview leads editor,
 /// AGENTS §2.7). Colors use the shared hex swatch — the same

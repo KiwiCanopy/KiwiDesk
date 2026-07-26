@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The per-row launch-behavior menu for Open Applications (#334):
+/// The per-row launch-behavior menu for Open applications (#334):
 /// a compact borderless menu (mirroring `AppRuleRow`'s Float facet)
 /// choosing between Open or Focus (`pull_or_spawn`, the default) and
 /// Open New (`spawn_new`). The behavior is derived from and written

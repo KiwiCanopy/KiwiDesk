@@ -148,7 +148,7 @@ struct BehaviorSection: View {
         )
     }
 
-    /// On Quit (#281): the quit grid's density target
+    /// On quit (#281): the quit grid's density target
     /// (`quit.grid_target_depth`). Grid dimensions stay
     /// automatic (2×2…4×4); no layout picker while `grid` is
     /// the only strategy.

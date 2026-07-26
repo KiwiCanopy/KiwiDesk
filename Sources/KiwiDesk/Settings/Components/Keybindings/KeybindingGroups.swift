@@ -2,7 +2,7 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The Shortcuts intent groups (#68 §3.6.1): flat sections,
-/// one level of hierarchy — Focus, Move Windows, Size & Float,
+/// one level of hierarchy — Focus, Move windows, Size & float,
 /// Switch modes — rendered as plain titled sections (the old
 /// double-nested disclosures are gone). Space rows generate
 /// from the defined spaces, so adding a space adds its
@@ -126,7 +126,7 @@ struct MoveWindowsGroup: View {
     }
 }
 
-/// Size & Float (#68 §3.5): the per-axis Grow/Shrink rows
+/// Size & float (#68 §3.5): the per-axis Grow/Shrink rows
 /// (#56) and Make floating — plus the reserved slot for the
 /// configurable resize step (#58). The step control lands
 /// directly above the rows it parameterizes.

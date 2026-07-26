@@ -61,7 +61,7 @@ enum KeybindingImportClassifier {
             let command = KeybindingCatalog.switchModeCommand(name)
             map[command.lua] = command.label
         }
-        // Step-independent Size & Float rows: not in any
+        // Step-independent Size & float rows: not in any
         // navigation group and matched by no shape rule, so each
         // needs its own entry or an imported binding stays Custom
         // (#91). `toggle_floating` is the bindable one (#221);

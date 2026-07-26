@@ -2,7 +2,7 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Whole App ▸ Shortcuts (#68 §3.6): a mode strip (chips, "+"
-/// popover), flat intent groups (Focus / Move Windows / Size &
+/// popover), flat intent groups (Focus / Move windows / Size &
 /// Float / Switch modes / Open applications), the raw-Lua rows
 /// demoted to a collapsed Advanced drawer, and Import moved to
 /// the header where a new user can see it. One recorder can be

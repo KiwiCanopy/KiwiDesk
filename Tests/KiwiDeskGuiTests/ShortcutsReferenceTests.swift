@@ -117,8 +117,8 @@ struct ShortcutsReferenceTests {
                 .navigation
             )
         ])
-        // Focus is the only non-empty subgroup; Move Windows /
-        // Size & Float / Switch modes are gone.
+        // Focus is the only non-empty subgroup; Move windows /
+        // Size & float / Switch modes are gone.
         #expect(reference.controls.count == 1)
         #expect(reference.isEmpty == false)
     }

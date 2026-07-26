@@ -39,7 +39,7 @@ enum SettingsMetrics {
     static let overrideLabelColumn: CGFloat =
         labelColumn - (2 * overrideRowInset + checkboxWidth)
 
-    /// The label column for the Drag & Drop editor's two
+    /// The label column for the Drag & drop editor's two
     /// half-width columns (#231). Narrower than the shared 150,
     /// pushed onto every row in a column via the
     /// `\.settingsLabelColumn` override (the seam

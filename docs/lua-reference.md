@@ -3250,7 +3250,7 @@ end)
 ```
 
 Both launch verbs are also reachable from the Settings app: an Open
-Applications shortcut carries a per-row **Launch behavior** menu —
+applications shortcut carries a per-row **Launch behavior** menu —
 *Open or Focus* (`pull_or_spawn`, the default) or *Open New*
 (`spawn_new`).
 

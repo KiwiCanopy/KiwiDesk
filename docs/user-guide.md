@@ -147,7 +147,7 @@ right now" lookup. It is not an editor: it only shows what is already
 bound, grouped into three sections:
 
 - **Controls** — window and focus actions (Focus, Move windows, Size &
-  Float, Switch modes), laid out in two columns.
+  float, Switch modes), laid out in two columns.
 - **Apps** — your app-launch shortcuts, each with the app's icon. A
   small window-plus badge marks a shortcut set to *Open New* (always
   a fresh instance).
@@ -601,7 +601,7 @@ swatch opens the native Colors panel and updates the staged value as
 you pick; **Done** or the red window close button closes the panel and
 keeps the selected color.
 
-### Color palette
+### Color Palette
 
 At the top of Appearance, the **Color palette** shelf paints a whole
 set of colors across the App Bar, Space Bar, focus borders, and drag
@@ -760,7 +760,7 @@ never detours through a float hovering over them.
 A **sticky** window stays visible on every virtual space
 instead of hiding with its home space when you switch — mark
 one with the **Toggle sticky** shortcut (Shortcuts ▸ Size &
-Float; there is no app rule list, stickiness is per window).
+float; there is no app rule list, stickiness is per window).
 Sticky has two scopes, both in that shortcut list:
 **Toggle sticky** keeps the window on every space of **every**
 monitor (marked with an ∞ mark), while **Toggle display sticky**
@@ -1117,7 +1117,7 @@ interaction.
 - **Wake restore delay** (ms): how long to wait after wake before
   restoring (default 1500 ms, giving apps time to settle).
 
-### On quit
+### On Quit
 
 Before KiwiDesk stops, it arranges managed windows on each display
 so their title bars remain reachable.

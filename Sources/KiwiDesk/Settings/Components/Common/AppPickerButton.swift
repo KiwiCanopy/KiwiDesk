@@ -4,7 +4,7 @@ import SwiftUI
 
 /// The searchable app picker (#263), the sibling of
 /// `IconPicker` for the two app choosers (`AppSelector` in App
-/// Rules, `appMenu` in Open Applications). A native `Menu` over
+/// Rules, `appMenu` in Open applications). A native `Menu` over
 /// 150–300 installed apps only offers prefix type-to-select; a
 /// popover with a substring search over a lazy icon list is the
 /// macOS move for long app lists. The persistent escape row
@@ -21,7 +21,7 @@ struct AppPickerButton: View {
     let selection: String?
     /// Floor width for the trigger — just enough for the
     /// "Choose app…" placeholder; it hugs longer names. A caller
-    /// that needs a fixed column (Open Applications) wraps the
+    /// that needs a fixed column (Open applications) wraps the
     /// button in its own `.frame(width:)` instead.
     var minWidth: CGFloat = 110
     let onPick: (KeybindingCatalog.InstalledApp) -> Void
@@ -30,7 +30,7 @@ struct AppPickerButton: View {
     /// panel). Runs after the popover dismisses.
     let escapeLabel: String
     let onEscape: () -> Void
-    /// Bundle ids to omit from the list. Open Applications drops
+    /// Bundle ids to omit from the list. Open applications drops
     /// apps that already carry every launch behavior, since
     /// re-adding could only duplicate (#334). Empty by default, so
     /// a per-row re-pick still offers every app.

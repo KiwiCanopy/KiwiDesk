@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Open Applications add-row: pick an app, then commit it —
+/// The Open applications add-row: pick an app, then commit it —
 /// mirroring App Rules, so a new binding always lands with an app
 /// identity (its shortcut is recorded afterward in the row). Apps
 /// that already carry every launch behavior are dropped from the
