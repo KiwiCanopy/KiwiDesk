@@ -206,7 +206,7 @@ struct MonitorsSection: View {
             Text(
                 L(
                     "monitors.advanced.title",
-                    "Advanced monitor fingerprints"
+                    "Monitor fingerprints"
                 )
             )
             .font(.headline)

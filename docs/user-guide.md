@@ -1613,11 +1613,13 @@ Each row has an action. Built-in actions live under headings:
   collide. Rows are sorted alphabetically by app name (settled when
   the section opens, so a row never shifts out from under you while
   you are recording its shortcut).
-- **Custom Bindings** — custom Lua (from Adopt/Import or hand-written).
+- **Lua bindings** — custom Lua (from Adopt/Import or hand-written).
+  Named "Advanced Lua bindings" until #406: there is no basic Lua
+  binding to contrast it with, so the qualifier only misread.
 
 When you save, every shortcut lives in a mode in `gui.json`. To use
 an action not in the built-in sections, write custom Lua in a row
-under Custom Bindings.
+under Lua bindings.
 
 ### Inactive Shortcuts
 

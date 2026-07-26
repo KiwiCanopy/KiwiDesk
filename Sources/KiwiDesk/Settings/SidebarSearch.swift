@@ -111,7 +111,7 @@ enum SidebarSearch {
                 ),
                 L(
                     "monitors.advanced.title",
-                    "Advanced monitor fingerprints"
+                    "Monitor fingerprints"
                 ),
             ]
         case .appearance:
@@ -201,7 +201,7 @@ enum SidebarSearch {
                 ),
                 L(
                     "shortcuts.advanced.title",
-                    "Advanced Lua bindings"
+                    "Lua bindings"
                 ),
             ]
         case .appRules:

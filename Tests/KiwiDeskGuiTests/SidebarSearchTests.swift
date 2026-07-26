@@ -173,11 +173,28 @@ struct SidebarSearchTests {
         )
         // Sidebar order. Appearance is absent on purpose: its
         // drawers are "Per-edge…" / "Per-axis…", neither of
-        // which contains "advanced".
+        // which contains "advanced". Monitors and Shortcuts are
+        // absent for a newer reason: their drawers dropped the
+        // qualifier, because nothing above them is a lesser
+        // fingerprint or a lesser Lua binding — "Advanced"
+        // prefixes a noun only where a basic tier of that same
+        // noun is visible above it (#406). They stay reachable
+        // by what they hold, pinned below.
         #expect(
-            results.map(\.destination)
-                == [.monitors, .bars, .shortcuts, .general]
+            results.map(\.destination) == [.bars, .general]
         )
+        for (query, destination) in [
+            ("lua bindings", SettingsDestination.shortcuts),
+            ("monitor fingerprints", .monitors),
+        ] {
+            #expect(
+                SidebarSearch.results(
+                    query: query,
+                    editingStoredProfile: false
+                ).map(\.destination) == [destination],
+                Comment(rawValue: query)
+            )
+        }
     }
 
     @Test("a drawer's own words reach its tab")

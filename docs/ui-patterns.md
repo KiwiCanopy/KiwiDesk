@@ -189,42 +189,58 @@ Three boundaries, because System Settings itself draws them:
   drop". The word after the ampersand is the one a sweep will
   miss, and did (#406 review).
 - **Capitalize only what a sentence would.** A proper noun stays
-  ("Advanced Lua bindings"); an acronym stays an acronym ("BSP").
+  ("Lua bindings"); an acronym stays an acronym ("BSP").
   KiwiDesk's own **named surfaces keep their caps** — the App Bar
   and the Space Bar are things ("Space Bar colors") — while a
   feature that is just its noun does not ("Focus border").
 
-**A qualified "Advanced" disclosure is `Advanced <noun phrase>`,
-with no connector** — "Advanced colors", "Advanced Lua bindings",
-"Advanced monitor fingerprints" (R3, #406). The three had drifted onto
-three different formats (bare, `Advanced: …`, `Advanced — …`),
-which read as three unrelated controls rather than one recurring
-affordance. Sequenced after the rule above deliberately, so both
-use one capitalization rule.
+**"Advanced" prefixes a disclosure's noun only when a basic tier
+of that same noun is visible above it; otherwise the drawer is
+named for what it holds** (R3, #406). So: "Advanced colors" —
+Fill and Highlight sit one section up, in the same grid, so "the
+advanced ones" is literally what it means. But **"Lua bindings"**
+and **"Monitor fingerprints"**, because there is no such thing as
+a basic Lua binding or a basic fingerprint. The catalog above
+Shortcuts' drawer is a different noun (*actions*), and Monitors
+has no lesser fingerprint anywhere.
 
-Prefer a noun phrase that survives being read as adjective +
-noun. "Advanced colors" and "Advanced Lua bindings" both sit
-above a basic tier of the same thing, so "the advanced ones" is
-the first reading English gives. "Advanced monitor fingerprints"
-has no basic tier to contrast with, so it can re-scope onto the
-fingerprints — a generic tail ("details", "options") reads
-better there, and the review recommended it. It was **not**
-taken, for a reason worth knowing: `SidebarSearch` indexes the
-visible strings, and "fingerprint" appears nowhere else in the
-GUI, so the better-reading title silently made that drawer
-unfindable by the word a user would actually type. Weigh a title
-edit against the search index (#540).
+The four had drifted onto four formats (bare, `Advanced: …`,
+`Advanced — …`, and the unqualified "Advanced colors"), and the
+first attempt at converging them — `Advanced <noun phrase>`, no
+connector — only moved the drift: with no basic tier to contrast
+against, the adjective re-scopes onto the noun and the title
+promises a distinction the app does not make. A connector
+(`Advanced: Lua bindings`) restores the tier reading but
+re-splits the format, and cannot be stated in one sentence, so
+it drifts again. Dropping the qualifier is the version that both
+reads true and states itself.
 
-The bare "Advanced" (General) stays bare because it is the only
-advanced thing on its page — a user never sees two of these at
-once, so the qualifier would answer a question nobody is asking.
+**Nothing is lost by dropping it.** "Advanced" was standing in
+for cues these drawers already carry: collapsed by default,
+boxed, at the bottom of the page, under the thing a normal user
+came for — and Shortcuts' own caption says it in prose ("the
+power-user escape hatch"). The word was duplicating the caption
+one line below it.
 
-Shipped translations keep their own typography here: R5 and R3
-were cosmetic English edits, so German still reads "Erweitert:
-…". That is correct German, and forcing re-translation would
-have regressed those strings to English. Had the *noun* moved it
-would have been a meaning change and taken `scripts/drop-key` —
-see `docs/translating.md` for that line.
+The bare "Advanced" (General) is untouched by the rule: no noun,
+nothing to misparse, and it is the only advanced thing on its
+page.
+
+**Weigh every title edit against the search index.**
+`SidebarSearch` indexes only visible strings, so a word that
+appears nowhere else in the GUI lives or dies with its title —
+"fingerprint" is rendered as a bare hash with no row label, and
+"Lua" appears in no other indexed string. A title that reads
+better but drops such a word makes its own drawer unfindable by
+the word a user would type; both names above keep theirs, which
+is part of why they win. #540 tracks the underlying coupling.
+
+Localization splits here, and the split is the rule from §5:
+R5's capitalization and R3's connector were **cosmetic**, so
+German keeps its own typography ("Erweitert: …"). Dropping
+"Advanced" changed the English **meaning**, so those two keys
+took `scripts/drop-key` and re-queue for translation — see
+`docs/translating.md`.
 
 **Option tabs are a solid sliding-pill segment control.**
 Every pick-one-of-few chooser (layout parameters, mouse
