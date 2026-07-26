@@ -1,7 +1,8 @@
 import Foundation
 
 /// Stateless primitives shared by the source-scanning parity
-/// guards: `SidebarSearchParityTests`, `DiscardGateParityTests`,
+/// guards: the search-index guards (`SidebarSearchParityTests`,
+/// `SidebarSearchAnchorSiteTests`), `DiscardGateParityTests`,
 /// `GreyOutParityTests`, and the two bounds-routing guards
 /// (`VisibleBoundsRoutingTests`, `LayoutBoundsRoutingTests`) —
 /// which scan `Sources/KiwiDeskCore`, not the GUI tree, and live

@@ -82,7 +82,7 @@ struct SidebarSearchParityTests {
 
     @Test("every index key has a rendering call site")
     func indexKeysHaveRenderingCallSites() throws {
-        let indexKeys = try lKeys(in: indexSource())
+        let indexKeys = try SourceScan.lKeys(in: indexSource())
         // The regex and the file path both went stale if this
         // fires — an empty key set would vacuously pass below.
         #expect(!indexKeys.isEmpty)
@@ -91,7 +91,7 @@ struct SidebarSearchParityTests {
         for file in try SourceScan.swiftSources(under: settingsDir)
         where !isIndexFile(file.lastPathComponent) {
             rendered.formUnion(
-                try lKeys(
+                try SourceScan.lKeys(
                     in: String(
                         contentsOf: file,
                         encoding: .utf8
@@ -129,7 +129,7 @@ struct SidebarSearchParityTests {
     /// `SettingsSection`.
     @Test("every index key is anchored by some view")
     func indexKeysAreAnchored() throws {
-        let indexKeys = try lKeys(in: indexSource())
+        let indexKeys = try SourceScan.lKeys(in: indexSource())
         // 38 today. Pinned, not just non-empty: the file set is
         // now discovered by prefix, so a split that silently
         // dropped a file would shrink this rather than emptying
@@ -145,15 +145,15 @@ struct SidebarSearchParityTests {
                 encoding: .utf8
             )
             anchorable.formUnion(
-                try sectionHeaderKeys(in: source)
+                try SourceScan.sectionHeaderKeys(in: source)
             )
             anchorable.formUnion(
-                try searchAnchorKeys(in: source)
+                try SourceScan.searchAnchorKeys(in: source)
             )
             if file.lastPathComponent
                 == "LayoutModeGlyph.swift"
             {
-                anchorable.formUnion(try lKeys(in: source))
+                anchorable.formUnion(try SourceScan.lKeys(in: source))
             }
         }
         #expect(!anchorable.isEmpty)
@@ -205,12 +205,12 @@ struct SidebarSearchParityTests {
     /// searches for, being the content they cannot see.
     @Test("every rendered section header is indexed")
     func renderedHeadersAreIndexed() throws {
-        var indexed = try lKeys(in: indexSource())
+        var indexed = try SourceScan.lKeys(in: indexSource())
         let glyphFile = settingsDir.appendingPathComponent(
             "Components/Common/LayoutModeGlyph.swift"
         )
         indexed.formUnion(
-            try lKeys(
+            try SourceScan.lKeys(
                 in: String(
                     contentsOf: glyphFile,
                     encoding: .utf8
@@ -221,7 +221,7 @@ struct SidebarSearchParityTests {
         var headers = Set<String>()
         for file in try SourceScan.swiftSources(under: settingsDir) {
             headers.formUnion(
-                try sectionHeaderKeys(
+                try SourceScan.sectionHeaderKeys(
                     in: String(
                         contentsOf: file,
                         encoding: .utf8
@@ -241,7 +241,7 @@ struct SidebarSearchParityTests {
         var drawers = Set<String>()
         var unresolved: [String] = []
         for file in try SourceScan.swiftSources(under: settingsDir) {
-            let found = disclosureTitleKeys(
+            let found = SourceScan.disclosureTitleKeys(
                 in: try String(contentsOf: file, encoding: .utf8)
             )
             drawers.formUnion(found.keys)
@@ -271,178 +271,11 @@ struct SidebarSearchParityTests {
         }
     }
 
-    /// Title keys of every `DisclosureGroup`, by walking
-    /// delimiters rather than matching a flat regex.
-    ///
-    /// A regex cannot do this: the label may lead the
-    /// initializer (`DisclosureGroup(L("gaps.per_edge", …), …)`)
-    /// or trail the body (`… { body } label: { … }`), and
-    /// "the next `label:` after `DisclosureGroup`" picks the
-    /// wrong key — `GeneralSection`'s drawer body contains a
-    /// `Button { … } label: { Label(L("…edit_lua", …))`, so the
-    /// naive anchor selects a control inside the drawer.
-    ///
-    /// Walking the actual `(…)` and `{…}` nesting resolves every
-    /// site in the tree. A site it *cannot* resolve (a label
-    /// hoisted into a computed property, say) is returned as
-    /// unresolved so the caller can fail loudly — turning an
-    /// exotic new shape into a one-line decision instead of a
-    /// silent gap.
-    private func disclosureTitleKeys(
-        in source: String
-    ) -> (keys: Set<String>, unresolved: [String]) {
-        let text = Array(SourceScan.stripComments(source))
-        var keys = Set<String>()
-        var unresolved: [String] = []
-        let needle = Array("DisclosureGroup")
-        var i = 0
-        while i + needle.count <= text.count {
-            guard Array(text[i..<(i + needle.count)]) == needle
-            else {
-                i += 1
-                continue
-            }
-            var cursor = i + needle.count
-            guard
-                let args = SourceScan.balanced(
-                    text,
-                    from: &cursor,
-                    open: "(",
-                    close: ")"
-                )
-            else {
-                unresolved.append("unbalanced args at \(i)")
-                i += needle.count
-                continue
-            }
-            // Leading-label form: the title is an argument.
-            if let key = firstKey(
-                in: args,
-                pattern: #"L\(\s*"([a-z0-9_.]+)""#
-            ) {
-                keys.insert(key)
-                i = cursor
-                continue
-            }
-            // Trailing-label form: body first, then `label:`.
-            guard
-                SourceScan.balanced(
-                    text,
-                    from: &cursor,
-                    open: "{",
-                    close: "}"
-                ) != nil,
-                SourceScan.skipLiteral(
-                    "label:",
-                    text,
-                    from: &cursor
-                ),
-                let label = SourceScan.balanced(
-                    text,
-                    from: &cursor,
-                    open: "{",
-                    close: "}"
-                ),
-                let key = firstKey(
-                    in: label,
-                    pattern: #"L\(\s*"([a-z0-9_.]+)""#
-                )
-            else {
-                unresolved.append("unresolved label at \(i)")
-                i += needle.count
-                continue
-            }
-            keys.insert(key)
-            i = cursor
-        }
-        return (keys, unresolved)
-    }
-
-    /// The FIRST match in document order. Deliberately not
-    /// `keys(in:pattern:).first` — that returns a `Set`, whose
-    /// `first` is arbitrary order, which silently picks a random
-    /// key out of the slice while looking correct.
-    private func firstKey(
-        in source: String,
-        pattern: String
-    ) -> String? {
-        guard
-            let regex = try? NSRegularExpression(pattern: pattern),
-            let match = regex.firstMatch(
-                in: source,
-                range: NSRange(source.startIndex..., in: source)
-            ),
-            let range = Range(match.range(at: 1), in: source)
-        else { return nil }
-        return String(source[range])
-    }
-
     private func indexSource() throws -> String {
         try SourceScan.swiftSources(under: settingsDir)
             .filter { isIndexFile($0.lastPathComponent) }
             .sorted { $0.path < $1.path }
             .map { try String(contentsOf: $0, encoding: .utf8) }
             .joined(separator: "\n")
-    }
-
-    /// Literal keys passed to `.searchAnchor(L(...))` — the
-    /// anchor a `DisclosureGroup` label must opt into, since only
-    /// `SettingsSection` anchors itself.
-    private func searchAnchorKeys(
-        in source: String
-    ) throws -> Set<String> {
-        try keys(
-            in: SourceScan.stripComments(source),
-            pattern: #"\.searchAnchor\(\s*L\(\s*"([a-z0-9_.]+)""#
-        )
-    }
-
-    /// Every `L("key", ...)` literal in a source string; the
-    /// pattern tolerates the 79-char style's line break
-    /// between `L(` and the key. Comments are stripped first,
-    /// so a doc-comment example can't masquerade as a
-    /// rendering call site (the phantom-key hazard that made
-    /// `extract-keys` comment-aware).
-    private func lKeys(in source: String) throws -> Set<String> {
-        try keys(
-            in: SourceScan.stripComments(source),
-            pattern: #"L\(\s*"([a-z0-9_.]+)""#
-        )
-    }
-
-    /// Literal first-argument keys of `SettingsSection(L(...))`
-    /// call sites. Computed titles (a variable first argument)
-    /// are invisible to this scan by construction.
-    private func sectionHeaderKeys(
-        in source: String
-    ) throws -> Set<String> {
-        try keys(
-            in: SourceScan.stripComments(source),
-            pattern:
-                #"SettingsSection\(\s*L\(\s*"([a-z0-9_.]+)""#
-        )
-    }
-
-    private func keys(
-        in source: String,
-        pattern: String
-    ) throws -> Set<String> {
-        let regex = try NSRegularExpression(pattern: pattern)
-        let range = NSRange(source.startIndex..., in: source)
-        var keys = Set<String>()
-        regex.enumerateMatches(
-            in: source,
-            range: range
-        ) { match, _, _ in
-            guard
-                let match,
-                let keyRange = Range(
-                    match.range(at: 1),
-                    in: source
-                )
-            else { return }
-            keys.insert(String(source[keyRange]))
-        }
-        return keys
     }
 }

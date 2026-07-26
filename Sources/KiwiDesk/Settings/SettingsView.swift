@@ -43,6 +43,12 @@ struct SettingsView: View {
         // covers both modes (the raw editor's "Back to visual
         // editor" needs the gate as much as the shell does).
         .discardConfirmation(model: model)
+        // Two repairs on two different signals, deliberately not
+        // merged: reachability genuinely keys on the BOOLEAN — a
+        // destination only appears or disappears on the
+        // live↔stored transition — while the mode tab keys on the
+        // target itself, because stored A → stored B leaves that
+        // boolean `true` and is exactly the case that needs it.
         .onChange(of: model.editingStoredProfile) { _, editing in
             // The selection must never point at a destination
             // the sidebar just hid (#18).
@@ -51,6 +57,8 @@ struct SettingsView: View {
             ) {
                 selection = .spaces
             }
+        }
+        .onChange(of: model.target) { _, _ in
             // A different profile means a different most-used
             // layout mode, so the mode tab must re-derive (#277).
             // The mode tab ONLY — the Bars switch has no profile
@@ -85,16 +93,26 @@ struct SettingsView: View {
     /// that motivated the split: a request arriving while the raw
     /// Lua editor shows still resolves later, because
     /// `pendingScroll` simply waits for a pane to exist.
+    /// The decision lives on `SettingsAnchor.resolved`, which is
+    /// pure and tested; this is only the assignment.
+    ///
+    /// LOAD-BEARING PLACEMENT: the `.onChange`/`.onAppear` pair
+    /// that calls this sits on the outer `Group`, ABOVE the
+    /// `editingLua` branch. That is the sole reason a request
+    /// arriving while the raw Lua editor shows resolves later
+    /// instead of being dropped. Moving it into `structuredShell`
+    /// would look like a tidy-up and would silently kill the #326
+    /// bridge in Lua mode, with every test still green.
     private func apply(_ request: SettingsAnchor?) {
         guard let request else { return }
         model.pendingReveal = nil
         guard
-            request.destination.isReachable(
+            let resolved = request.resolved(
                 editingStoredProfile: model.editingStoredProfile
             )
         else { return }
-        selection = request.destination
-        switch request.surface {
+        selection = resolved.destination
+        switch resolved.surface {
         case .main:
             break
         case .layoutMode(let mode):
@@ -102,7 +120,11 @@ struct SettingsView: View {
         case .bar(let editor):
             model.barEditor = editor
         }
-        model.pendingScroll = request.anchor
+        // Guarded, so a destination-only deep link does not
+        // publish a nil-to-nil model change.
+        if let scroll = resolved.scroll {
+            model.pendingScroll = scroll
+        }
     }
 
     /// The structured settings shell: a fixed-width source list

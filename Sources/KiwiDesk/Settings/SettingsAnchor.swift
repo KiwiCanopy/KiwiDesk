@@ -26,6 +26,30 @@ struct SettingsAnchor: Hashable {
     /// destination" — the #326 "Edit in Settings…" deep link,
     /// which names a tab and nothing finer.
     var anchor: String?
+
+    /// What the shell should do with this request, or nil to
+    /// refuse it.
+    ///
+    /// A pure decision, split from the assignment in
+    /// `SettingsView.apply` so the parts worth pinning are
+    /// reachable from a test: the #18 reachability refusal, which
+    /// of the three surfaces to select, and the nil-anchor case
+    /// that must request no scroll (the #326 bridge). What is left
+    /// in the view is three field writes.
+    func resolved(
+        editingStoredProfile: Bool
+    ) -> (
+        destination: SettingsDestination,
+        surface: SettingsSurface,
+        scroll: String?
+    )? {
+        guard
+            destination.isReachable(
+                editingStoredProfile: editingStoredProfile
+            )
+        else { return nil }
+        return (destination, surface, anchor)
+    }
 }
 
 /// The local switches a destination hides content behind, lifted

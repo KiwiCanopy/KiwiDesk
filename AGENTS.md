@@ -695,10 +695,19 @@ Keep this list updated whenever a recurring mistake is found.
   file** — a hit is a real defect; what the guards carry is a
   grouped `GLOSSARY` of terms that stay English, which a new such
   term must join, in the group that justifies it, in the same
-  change set. Locale policy is keyed by locale in two tables, so a
-  **new locale must be registered** in them or two guards go
-  silently quiet — `--check` refuses an unregistered locale and
-  `LocalizationRegistryTests` pins it. All of this is backed by
+  change set. Locale policy is keyed by locale in **three**
+  tables, so a **new locale must be registered** in all of them:
+  `_STUB_TAGS`, plus a *script declaration* — `SCRIPTS` for a
+  non-Latin language, `LATIN_LOCALES` otherwise. Forgetting the
+  tags makes a guard go silently quiet; forgetting the script
+  declaration used to do the same and now goes **loudly wrong**,
+  which is why it is a declaration rather than a default: the
+  feature-name guard holds Latin-script locales to keeping
+  "App Bar" verbatim, so a locale read as Latin by accident is
+  *demanded* to carry an ASCII phrase inside its own script.
+  `--check` refuses a locale missing from either, and
+  `LocalizationRegistryTests` pins both plus their disjointness.
+  All of this is backed by
   Swift tests — each localization script has a sibling suite
   (`LocalizationDriftGuardTests`, `LocalizationOrphanTests`,
   `RenameKeyTests`, `DropKeyTests`,

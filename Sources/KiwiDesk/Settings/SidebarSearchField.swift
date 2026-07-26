@@ -15,11 +15,16 @@ struct SidebarSearchField: View {
     /// field, System Settings-style. Without this the results
     /// were mouse-only: the `List` never takes focus while the
     /// user is typing, so ↑/↓ went nowhere.
-    var onMove: (MoveCommandDirection) -> Void = { _ in }
+    ///
+    /// No default value, deliberately: a default on a required
+    /// collaboration is fail-open — a second call site that forgot
+    /// it would get a silently mouse-only field, which is the bug
+    /// this parameter exists to fix.
+    let onMove: (MoveCommandDirection) -> Void
     /// Return reveals the highlighted result. Separate from
     /// `onMove` on purpose — arrowing navigates (cheap), Return
     /// commits to the scroll and flash.
-    var onCommit: () -> Void = {}
+    let onCommit: () -> Void
     @FocusState private var focused: Bool
 
     var body: some View {
@@ -58,14 +63,23 @@ struct SidebarSearchField: View {
         // `onKeyPress`, not `onMoveCommand`: the latter has no
         // pass-through, so it would swallow ←/→ and break caret
         // movement inside the field. Returning `.ignored` for
-        // anything else is the whole point.
-        .onKeyPress(.upArrow) {
-            onMove(.up)
-            return .handled
-        }
-        .onKeyPress(.downArrow) {
-            onMove(.down)
-            return .handled
+        // anything else is the whole point — including for a
+        // MODIFIED arrow. The `KeyEquivalent` overload matches
+        // whatever the modifiers are, so claiming ↑/↓ there also
+        // ate ⇧↑ (extend selection to start) and ⌘↑ (caret to
+        // start), two standard text-editing shortcuts.
+        .onKeyPress { press in
+            guard press.modifiers.isEmpty else { return .ignored }
+            switch press.key {
+            case .upArrow:
+                onMove(.up)
+                return .handled
+            case .downArrow:
+                onMove(.down)
+                return .handled
+            default:
+                return .ignored
+            }
         }
         .onSubmit(onCommit)
         // Explicit name, so accessibility does not depend on

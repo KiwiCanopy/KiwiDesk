@@ -145,9 +145,16 @@ struct SettingsSidebar: View {
     /// on every keystroke would re-scroll and re-wash the pane
     /// while the user is still arrowing past it.
     private func move(_ direction: MoveCommandDirection) {
-        let results = results
-        guard !results.isEmpty else { return }
-        let current = results.firstIndex {
+        let hits = results
+        guard !hits.isEmpty else { return }
+        // Arrowing during an in-flight reveal is deliberately NOT
+        // cancelled: the shell owns that task, and plumbing a
+        // third closure down here would buy nothing. The stale
+        // task's remaining work resolves to no-ops — a `scrollTo`
+        // for an id the new pane does not carry, and a flash no
+        // view matches — and it still calls its own `endFlash`,
+        // so nothing is left latched.
+        let current = hits.firstIndex {
             $0.destination == selection
         }
         let next: Int
@@ -157,12 +164,12 @@ struct SettingsSidebar: View {
         case .down:
             next =
                 current.map {
-                    min($0 + 1, results.count - 1)
+                    min($0 + 1, hits.count - 1)
                 } ?? 0
         default:
             return
         }
-        selection = results[next].destination
+        selection = hits[next].destination
     }
 
     /// Falls back to the FIRST result, not to nothing: typing does

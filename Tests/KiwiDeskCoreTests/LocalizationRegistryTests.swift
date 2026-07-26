@@ -1,16 +1,25 @@
 import Foundation
 import Testing
 
-/// Forget-proof parity for the content guards' two registries
+/// Forget-proof parity for the content guards' three registries
 /// (issue #95, `.claude/rules/parity-tests.md`).
 ///
-/// `SCRIPTS` and `_STUB_TAGS` in `scripts/localization_guards.py`
-/// are hand-maintained tables keyed by locale, and a locale absent
-/// from them loses guards **silently** — `tagged_stub` finds no tag
-/// set and returns nothing, `english_residue` reads the locale as
-/// Latin-script and returns nothing. Two of six guards off, no
-/// signal. That is the failure those guards exist to prevent,
-/// one level up, so it gets a net of its own.
+/// `_STUB_TAGS`, `SCRIPTS` and `LATIN_LOCALES` in
+/// `scripts/localization_guards.py` are hand-maintained tables
+/// keyed by locale, and a locale absent from them loses guards
+/// **silently** — `tagged_stub` finds no tag set and returns
+/// nothing, `english_residue` reads the locale as Latin-script and
+/// returns nothing. Guards off, no signal: the failure those
+/// guards exist to prevent, one level up, so it gets a net of its
+/// own.
+///
+/// The script declaration is worse than silent since the
+/// feature-name guard arrived. It holds Latin-script locales to
+/// keeping "App Bar" verbatim, so a non-Latin locale missing its
+/// `SCRIPTS` row is read as Latin and **demanded** to carry an
+/// ASCII phrase inside its own script — loudly wrong rather than
+/// quietly off. Hence a locale must *declare* its script, and the
+/// two sets must be disjoint.
 ///
 /// Unlike the other guard suites this one *does* walk the shipped
 /// catalogs — deliberately. The thing under test is the relation
@@ -41,6 +50,34 @@ struct LocalizationRegistryTests {
             .map { String($0.dropLast(".json".count)) }
             .filter { $0 != "en" }
             .sorted()
+    }
+
+    /// Runs `body` against the real module and returns its stdout,
+    /// so a test cannot drift from the module's own notion of what
+    /// is registered. `json` and `sys.argv` are in scope.
+    private func pythonJSON(_ body: String) throws -> String {
+        let script = """
+            import json, sys
+            sys.path.insert(0, sys.argv[1])
+            \(body)
+            """
+        let file = FileManager.default.temporaryDirectory
+            .appendingPathComponent("reg-\(UUID().uuidString).py")
+        defer { try? FileManager.default.removeItem(at: file) }
+        try script.write(
+            to: file,
+            atomically: true,
+            encoding: .utf8
+        )
+        let run = try runPythonScript(
+            at: file,
+            arguments: [
+                repoRoot.appendingPathComponent("scripts").path
+            ]
+        )
+        return run.stdout.trimmingCharacters(
+            in: .whitespacesAndNewlines
+        )
     }
 
     /// Asks the module itself, so the test cannot drift from the
@@ -109,6 +146,38 @@ struct LocalizationRegistryTests {
     /// off. `el` has tags here only because `_STUB_TAGS` is keyed
     /// by base language and `el` is absent from it too; the point
     /// is that the report names it either way.
+    /// The two script sets must not overlap. A locale in both
+    /// passes `unregistered_locales` happily, and
+    /// `dropped_product_names` tests `NON_LATIN_LOCALES` first —
+    /// so a contradictory declaration is silently *inert* rather
+    /// than loud, re-creating one level in the exact failure the
+    /// declaration exists to remove.
+    @Test("the script declarations are disjoint")
+    func scriptSetsAreDisjoint() throws {
+        let overlap = try pythonJSON(
+            """
+            from localization_guards import (
+                LATIN_LOCALES, NON_LATIN_LOCALES
+            )
+            print(json.dumps(
+                sorted(LATIN_LOCALES & NON_LATIN_LOCALES)
+            ))
+            """
+        )
+        #expect(overlap == "[]")
+        // And neither is empty, or the intersection above is
+        // vacuously clean.
+        for name in ["LATIN_LOCALES", "NON_LATIN_LOCALES"] {
+            let members = try pythonJSON(
+                """
+                from localization_guards import \(name)
+                print(json.dumps(sorted(\(name))))
+                """
+            )
+            #expect(members != "[]", "\(name) is empty")
+        }
+    }
+
     @Test("a locale with no script declaration is reported")
     func undeclaredScriptIsReported() throws {
         // `de` IS declared (Latin) and `ja` IS declared (via

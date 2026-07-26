@@ -105,11 +105,17 @@ struct SidebarSearchAnchorTests {
     ///
     /// Deliberately stricter than the invariant: two entries on
     /// *mutually exclusive* surfaces of one destination would be
-    /// safe (only one is ever mounted), which is exactly the shape
-    /// `bars.advanced_colors` has in the render tree. It is a
-    /// single index entry today, so nothing trips. When a genuine
+    /// safe, since only one is ever mounted. When a genuine
     /// two-surface duplicate arrives, tighten the key to
     /// `(surface, text)` — do not delete the test.
+    ///
+    /// And know what this does NOT cover, because it is the
+    /// commoner shape: one key rendered at several sites that ARE
+    /// on screen together is a single index entry with a single
+    /// text, so nothing here can see it, and no surface tuple can
+    /// separate it. `SidebarSearchAnchorSiteTests` counts anchor
+    /// *sites* for exactly that case. The two are complementary,
+    /// not redundant.
     @Test("no two entries in a destination share a label")
     func anchorTextsAreUniquePerDestination() {
         pinEnglish()
