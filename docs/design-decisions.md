@@ -449,6 +449,26 @@ two-axis layout's wire keys are named follows the
 geometric-wire rule in
 [Settings UI patterns](ui-patterns.md#labels--wire-names).
 
+**A resize span is the layout region, not the display
+(#537).** Anything that divides a delta by a span — or
+compares a slot against a midpoint — reads
+`TilingEngine.layoutBounds(on:)`: the visible frame with the
+Space Bar's strip already reserved (#293), which is the region
+the layout actually filled. Four resize paths read the raw
+display instead (the keyboard span, the BSP focus sign, the
+finished mouse resize, and the scrolling slot's seed), so with
+the bar on — the default — every ratio nudge was understated
+by the strip, and the scrolling slot *stored* points measured
+against a length no layout ever used. The distinction is not a
+second display hook: size still enters through
+`visibleBounds` alone (#531), and this reserves the strip on
+top of it. **The deliberate exception is anything that does
+not participate in the layout:** a float nudge bounds a
+window that may legitimately cross the strip, so its span is
+the display (`KiwiCore+FloatNudge`). Enforcement is
+`LayoutBoundsRoutingTests`, whose allowlist is the exemption
+list.
+
 **Interactive resizes are session-scoped per space; the config
 layers never move underneath them (#458).** Before, a resize on
 a space with no authored override wrote the *global* ratio —

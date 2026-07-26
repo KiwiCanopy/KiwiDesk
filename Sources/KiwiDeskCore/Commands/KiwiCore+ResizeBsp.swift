@@ -76,10 +76,14 @@ extension KiwiCore {
                 in: state
             )
         else { return 1 }
+        // The layout region, not the raw frame (#537): the slot
+        // being classified was placed inside that region, so the
+        // midpoint it is compared against has to be the region's
+        // — a Space Bar on a leading edge shifts it.
         return Double(
             MouseResize.bspSide(
                 slot: slot,
-                bounds: tiler.visibleBounds(screen),
+                bounds: tiler.layoutBounds(on: screen),
                 horizontal: axis == "x"
             )
         )

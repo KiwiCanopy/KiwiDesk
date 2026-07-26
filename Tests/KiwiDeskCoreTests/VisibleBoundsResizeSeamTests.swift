@@ -24,8 +24,9 @@ struct VisibleBoundsResizeSeamTests {
         // Zero gaps and no Space Bar, so the injected rect IS the
         // span: both reservations are real defaults with their
         // own coverage, and leaving them on would only blur what
-        // these assertions are about (see #537 for the resize
-        // span's own divergence from the layout region).
+        // these assertions are about. `LayoutBoundsResizeSeamTests`
+        // is the bar-ON half — that the span excludes the strip
+        // (#537); this suite pins that it follows the hook at all.
         core.execute("set_gap_global", args: [.number(0)])
         core.execute(
             "space_bar.set_enabled",

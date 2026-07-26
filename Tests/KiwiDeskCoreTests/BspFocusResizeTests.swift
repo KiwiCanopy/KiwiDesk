@@ -29,6 +29,17 @@ struct BspFocusResizeTests {
             )
         let core = KiwiCore(configDirectory: dir)
         core.tiler.visibleBounds = { _ in Self.display }
+        // No Space Bar, so the pinned rect IS the resize span: the
+        // span is the layout region since #537, and the default
+        // bar's 32pt strip would turn the cap literal below into a
+        // re-derivation of two formulas at once. That the strip is
+        // reserved has its own suite
+        // (`LayoutBoundsResizeSeamTests`); this one is about the
+        // #383 cap.
+        core.execute(
+            "space_bar.set_enabled",
+            args: [.bool(false)]
+        )
         return core
     }
 
