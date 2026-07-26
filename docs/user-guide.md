@@ -710,10 +710,14 @@ windows. Below it:
 - **Corners**: **Rounded** matches your windows' real corner
   radius; **Square** draws sharp corners — seamless on windows that
   are already square, an intentional squared frame on rounded ones.
-- **Glow**: wraps the focused border in a soft colored bloom for a bit
-  more presence. Off by default; it only ever touches the focused
-  window, never the unfocused borders. The live preview shows the
-  effect as you toggle it.
+- **Glow effect**: wraps the focused border in a soft colored bloom
+  for a bit more presence. Off by default; it only ever touches the
+  focused window, never the unfocused borders. The live preview
+  shows the effect as you toggle it.
+- **Auto glow size**: on by default — the bloom's reach follows the
+  border width, so a hairline border gets a subtle rim and a thick
+  one a proportional aura. Turn it off to pin an exact **Glow
+  size** (1–20 pt) with the slider, independent of the width.
 - **Fit layout gaps**: previews the exact global **Outer** and
   **Inner** values needed to keep borders apart, plus the requested
   **Extra spacing** (0–100 pt, default 0). Inner gaps account for

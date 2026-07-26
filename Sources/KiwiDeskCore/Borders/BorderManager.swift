@@ -19,10 +19,13 @@ public final class BorderManager {
         public let colorHex: String
         public let width: CGFloat
         public let cornerStyle: BorderStyle.CornerStyle
-        /// Whether this ring wears the glow bloom (#358). Set only on
-        /// the focused ring — `borderSpecs` never glows an unfocused
-        /// ring, so this is `false` for every non-focused spec.
-        public let glow: Bool
+        /// The glow bloom's resolved blur radius, `0` = no glow
+        /// (#358/#551). Resolved by `BorderStyle.resolvedGlowBlur`
+        /// at spec build — one number arrives here, never the
+        /// style's raw knobs. Set only on the focused ring —
+        /// `borderSpecs` never glows an unfocused ring, so this
+        /// is `0` for every non-focused spec.
+        public let glowBlur: CGFloat
 
         public init(
             window: WindowID,
@@ -30,14 +33,14 @@ public final class BorderManager {
             colorHex: String,
             width: CGFloat,
             cornerStyle: BorderStyle.CornerStyle,
-            glow: Bool = false
+            glowBlur: CGFloat = 0
         ) {
             self.window = window
             self.frame = frame
             self.colorHex = colorHex
             self.width = width
             self.cornerStyle = cornerStyle
-            self.glow = glow
+            self.glowBlur = glowBlur
         }
     }
 
@@ -159,7 +162,7 @@ public final class BorderManager {
                 cornerRadius: cornerRadius(for: spec.window),
                 colorHex: spec.colorHex,
                 screen: screen(for: spec.frame),
-                glow: spec.glow
+                glowBlur: spec.glowBlur
             )
             // Re-assert stacking each sync (focus change, retile,
             // z-order restore) — the target may have moved in the
@@ -197,7 +200,7 @@ public final class BorderManager {
             cornerRadius: cornerRadius(for: id),
             colorHex: spec.colorHex,
             screen: screen(for: windowFrame),
-            glow: spec.glow,
+            glowBlur: spec.glowBlur,
             restoreVisibility: restoreVisibility
         )
     }

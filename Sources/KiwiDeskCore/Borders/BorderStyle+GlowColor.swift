@@ -12,8 +12,10 @@ extension BorderStyle {
     /// ring); the floor keeps a hairline ring's halo present,
     /// the cap stops the overlay surface ballooning past
     /// diminishing visual returns. `BorderGeometryTests` pins
-    /// the three calibration points. Derived, never stored —
-    /// like `glowColor` below, it adds no profile-JSON key.
+    /// the three calibration points. The automatic DEFAULT —
+    /// an explicit `glow_size` overrides it (#551), resolved by
+    /// `resolvedGlowBlur`; this formula stays the derived face
+    /// of the `0 = automatic` sentinel.
     public static func glowBlur(for width: CGFloat) -> CGFloat {
         min(12, max(2, 0.8 * width))
     }

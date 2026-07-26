@@ -44,9 +44,13 @@ struct SettingsCodingTests {
             Set(border.keys) == [
                 "enabled", "width", "focused_color",
                 "unfocused_enabled", "unfocused_color",
-                "corner_style", "glow", "draw_order",
+                "corner_style", "glow", "glow_size",
+                "draw_order",
             ]
         )
+        // 0 is the automatic sentinel (#551): the width-scaled
+        // blur formula until the user sets an explicit size.
+        #expect(border["glow_size"] as? Double == 0)
         #expect(border["enabled"] as? Bool == true)
         #expect(border["width"] as? Double == 5)
         #expect(border["focused_color"] as? String == "#588613")

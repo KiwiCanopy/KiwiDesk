@@ -81,6 +81,24 @@ extension KiwiCore {
             return setBool(args) {
                 tiler.settings.borderStyle.glow = $0
             }
+        case "glow_size":
+            // 0 = automatic (the width-scaled formula, #551);
+            // an explicit size clamps only at the renderable
+            // ceiling — no floor, Lua may go softer than the
+            // GUI band (curate vs open, AGENTS §2.7).
+            guard
+                let size = args.first?.numberValue,
+                size.isFinite
+            else {
+                return .fail(
+                    "expected size (pt), 0 = automatic"
+                )
+            }
+            tiler.settings.borderStyle.glowSize = min(
+                BorderStyle.maxGlowSize,
+                max(0, size)
+            )
+            return .ok()
         case "corner_style":
             guard let raw = args.first?.stringValue,
                 let style = BorderStyle.CornerStyle(rawValue: raw)
