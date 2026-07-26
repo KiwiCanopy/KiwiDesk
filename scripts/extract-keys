@@ -40,10 +40,26 @@ Usage:
                                        stale (a call site was
                                        added/changed/removed
                                        since the last extract),
-                                       on drift, or if a shipped
+                                       on drift, if a shipped
                                        <locale>.json fails to
                                        decode as a flat
-                                       {string: string} map. Run
+                                       {string: string} map, or if
+                                       any translated value is
+                                       broken content: a wrong
+                                       writing system, a tagged
+                                       English stub, specifier
+                                       drift, two languages sharing
+                                       a file's worth of identical
+                                       values, one filler reused
+                                       across unrelated keys, or
+                                       English words left in a
+                                       translated sentence (that
+                                       last one on non-Latin
+                                       locales, and not under
+                                       --site) — see
+                                       scripts/localization_guards
+                                       and docs/translating.md.
+                                       Run
                                        by scripts/lint.sh (and
                                        scripts/pre-commit when a
                                        locale file is staged) as
@@ -103,6 +119,16 @@ import os
 import re
 import sys
 from pathlib import Path
+
+from localization_guards import (
+    collapsed_translations,
+    english_residue,
+    foreign_scripts,
+    overlapping_locales,
+    placeholder_drift,
+    tagged_stub,
+    unregistered_locales,
+)
 
 ROOT = Path(__file__).resolve().parent.parent
 # Overridable so `LocalizationDriftGuardTests` (Swift, run via
@@ -402,6 +428,124 @@ def validate_locale_files() -> list[str]:
     return problems
 
 
+def _load_catalogs() -> dict[str, dict[str, str]]:
+    """Every shipped `<locale>.json` decoded, keyed by locale.
+    Callers run `validate_locale_files()` first, so a file that
+    does not decode is skipped here rather than re-diagnosed."""
+    catalogs: dict[str, dict[str, str]] = {}
+    for locale_file in shipped_locale_files():
+        try:
+            decoded = json.loads(
+                locale_file.read_text(encoding="utf-8")
+            )
+        except (json.JSONDecodeError, UnicodeDecodeError, OSError):
+            continue
+        if isinstance(decoded, dict):
+            catalogs[locale_file.stem] = decoded
+    return catalogs
+
+
+def check_content(
+    mapping: dict[str, str], residue: bool = True
+) -> list[str]:
+    """Every locale value whose *content* is broken (issue #95).
+
+    `check()` already proves the key structure is current; these
+    are the things structure cannot see. See
+    `scripts/localization_guards` for what each predicate proves.
+
+    `residue=False` drops the one *heuristic* predicate, which is
+    tuned on short app UI labels. Site mode passes it: the
+    marketing manifests are prose carrying third-party product
+    names (`Homebrew`, `SketchyBar`, `JankyBorders`) and embedded
+    HTML, so a "retained English word" there is normal. The corpus
+    walk is the right place for that call — pulling the site's
+    vocabulary into the app's `GLOSSARY` would couple the two, and
+    the predicates themselves stay corpus-agnostic.
+
+    English is script-checked with the others: `en.json` is
+    generated, so a stray non-Latin glyph there is a pasted
+    literal in Swift, and a bug too. It is exempt from the rest,
+    which all compare *against* English.
+    """
+    problems: list[str] = []
+    catalogs = _load_catalogs()
+
+    unregistered = unregistered_locales(sorted(catalogs))
+    if unregistered:
+        problems.append(
+            f"{', '.join(unregistered)}: shipped but absent from "
+            "the guard registry — add the locale to `_STUB_TAGS` "
+            "(and to `SCRIPTS` if it writes in a non-Latin "
+            "script) in scripts/localization_guards.py, or its "
+            "stub and residue guards stay silently off"
+        )
+
+    for locale, catalog in sorted(catalogs.items()):
+        for key, value in sorted(catalog.items()):
+            for script in foreign_scripts(locale, value):
+                problems.append(
+                    f"{locale}.json :: {key} contains {script} "
+                    f"characters, which {locale} does not use — "
+                    f"{value[:70]!r}"
+                )
+            tag = tagged_stub(locale, value)
+            if tag:
+                problems.append(
+                    f"{locale}.json :: {key} is a tagged stub — "
+                    f"untranslated English marked ({tag}) — "
+                    f"{value[:70]!r}"
+                )
+            english = mapping.get(key)
+            if english is None:
+                continue
+            drift = placeholder_drift(value, english)
+            if drift:
+                problems.append(
+                    f"{locale}.json :: {key} {drift} relative to "
+                    f"the English — {value[:70]!r} (English: "
+                    f"{english[:50]!r})"
+                )
+            if not residue:
+                continue
+            left = english_residue(locale, value, english)
+            if left:
+                problems.append(
+                    f"{locale}.json :: {key} still carries the "
+                    f"English word(s) {', '.join(left)} — "
+                    f"{value[:70]!r} (English: {english[:50]!r})"
+                )
+
+        for value, keys in collapsed_translations(
+            catalog, mapping
+        ):
+            problems.append(
+                f"{locale}.json :: {len(keys)} unrelated key(s) "
+                f"all translate to {value[:50]!r} — one filler "
+                "was written instead of a translation. Keys: "
+                f"{', '.join(keys[:5])}"
+            )
+
+    for key, value in sorted(mapping.items()):
+        for script in foreign_scripts("en", value):
+            problems.append(
+                f"en.json :: {key} contains {script} characters, "
+                f"which English does not use — {value[:70]!r}"
+            )
+
+    for first, second, keys in overlapping_locales(
+        catalogs, mapping
+    ):
+        problems.append(
+            f"{first}.json and {second}.json share "
+            f"{len(keys)} identical non-trivial value(s) — one "
+            "language was probably pasted into the other's file. "
+            f"First few: {', '.join(keys[:5])}"
+        )
+
+    return problems
+
+
 def write_en_json(mapping: dict[str, str]) -> None:
     LOCALES_DIR.mkdir(parents=True, exist_ok=True)
     EN_JSON.write_text(
@@ -433,7 +577,9 @@ def _warn_orphans(mapping: dict[str, str]) -> None:
             print(f"    - {key}")
 
 
-def check(mapping: dict[str, str]) -> int:
+def check(
+    mapping: dict[str, str], residue: bool = True
+) -> int:
     """Compares the freshly-scanned mapping to the committed
     en.json without writing anything. Non-zero exit (with a
     diff) means en.json is stale — someone edited/added/removed
@@ -443,7 +589,10 @@ def check(mapping: dict[str, str]) -> int:
     `LocaleCatalog` soft-fail to `[:]` at runtime — the locale
     reverts to all-English silently, so this must block, not
     warn) — checked first, so a translator gets the clearest
-    signal. Separately WARNS (without affecting the exit code)
+    signal, and because `check_content` assumes flat string maps.
+    Broken *content* (`check_content`) blocks next, ahead of the
+    staleness diff: a contaminated value is wrong however fresh
+    en.json is. Separately WARNS (without affecting the exit code)
     about orphan keys in shipped locale files — a lingering
     unused translation is cruft, not a correctness bug, and must
     not block an otherwise-clean translator PR."""
@@ -456,6 +605,16 @@ def check(mapping: dict[str, str]) -> int:
             file=sys.stderr,
         )
         for problem in malformed:
+            print(f"    - {problem}", file=sys.stderr)
+        return 1
+    broken = check_content(mapping, residue=residue)
+    if broken:
+        print(
+            "extract-keys --check: FAILED — broken translation "
+            "content (see docs/translating.md):",
+            file=sys.stderr,
+        )
+        for problem in broken:
             print(f"    - {problem}", file=sys.stderr)
         return 1
     _warn_orphans(mapping)
@@ -642,7 +801,9 @@ def main(argv: list[str]) -> int:
     mode = args[0] if args else None
     mapping = _site_mapping() if site else extract()
     if mode == "--check":
-        return check(mapping)
+        # Site mode drops the residue heuristic — see
+        # `check_content`.
+        return check(mapping, residue=not site)
     if mode == "--prune":
         return prune(mapping, regen=not site)
     # Default action: (re)build the manifest, plus optionally the

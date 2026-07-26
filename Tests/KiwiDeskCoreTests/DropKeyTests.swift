@@ -147,4 +147,85 @@ struct DropKeyTests {
         let de = try fixture.decodeLocale("de.json")
         #expect(de == ["menu.quit": "Ende"])
     }
+
+    /// `--locale` exists for the other reason a translation gets
+    /// retired: the *translation* is defective, not the English.
+    /// The content guards find those per locale (issue #95), so
+    /// dropping every locale's copy would discard good work.
+    @Test("--locale narrows the drop to the named locales")
+    func localeNarrowsTheDrop() throws {
+        let fixture = try makeFixtureRoot(locales: [
+            "en.json": #"""
+            {"a.key": "Add Window"}
+            """#,
+            "de.json": #"""
+            {"a.key": "Fenster hinzufügen"}
+            """#,
+            "ja.json": #"""
+            {"a.key": "追加 Window"}
+            """#,
+            "ko.json": #"""
+            {"a.key": "추가 Window"}
+            """#,
+        ])
+        defer { fixture.cleanup() }
+        let result = try run(
+            ["--locale", "ja", "--locale", "ko", "a.key"],
+            fixture: fixture
+        )
+        #expect(result.status == 0)
+        #expect(try fixture.decodeLocale("ja.json") == [:])
+        #expect(try fixture.decodeLocale("ko.json") == [:])
+        let de = try fixture.decodeLocale("de.json")
+        #expect(de == ["a.key": "Fenster hinzufügen"])
+    }
+
+    /// The typo guard still applies inside the narrowed scope: a
+    /// key that exists elsewhere but not in the named locales is
+    /// an error, not a silent no-op.
+    @Test("--locale keeps the typo guard, scoped")
+    func localeKeepsTypoGuard() throws {
+        let fixture = try makeFixtureRoot(locales: [
+            "en.json": #"{"a.key": "A"}"#,
+            "de.json": #"{"a.key": "Ah"}"#,
+            "ja.json": #"{"b.key": "ビー"}"#,
+        ])
+        defer { fixture.cleanup() }
+        let result = try run(
+            ["--locale", "ja", "a.key"],
+            fixture: fixture
+        )
+        #expect(result.status == 1)
+        #expect(result.stderr.contains("not present in any of ja"))
+        let de = try fixture.decodeLocale("de.json")
+        #expect(de == ["a.key": "Ah"])
+    }
+
+    @Test("an unknown --locale is an error, not a no-op")
+    func unknownLocaleFails() throws {
+        let fixture = try makeFixtureRoot(locales: [
+            "en.json": #"{"a.key": "A"}"#,
+            "de.json": #"{"a.key": "Ah"}"#,
+        ])
+        defer { fixture.cleanup() }
+        let result = try run(
+            ["--locale", "xx", "a.key"],
+            fixture: fixture
+        )
+        #expect(result.status == 1)
+        let de = try fixture.decodeLocale("de.json")
+        #expect(de == ["a.key": "Ah"])
+    }
+
+    @Test("--locale without a value is rejected")
+    func localeNeedsAValue() throws {
+        let fixture = try makeFixtureRoot(locales: [
+            "en.json": #"{"a.key": "A"}"#,
+            "de.json": #"{"a.key": "Ah"}"#,
+        ])
+        defer { fixture.cleanup() }
+        let result = try run(["--locale"], fixture: fixture)
+        #expect(result.status == 1)
+        #expect(result.stderr.contains("needs a locale code"))
+    }
 }

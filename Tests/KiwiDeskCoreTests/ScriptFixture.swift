@@ -232,6 +232,12 @@ func makeRepoShapedFixture(
 /// and runs it there, so its `__file__`-derived root is the
 /// fixture. Copying (not symlinking) is deliberate: Python
 /// resolves a symlink back to the real repo.
+///
+/// Every `scripts/*.py` module is copied alongside it. Python
+/// resolves a plain `import` against the script's own directory,
+/// so a tool that shares a helper module (`merge-keys` and
+/// `extract-keys` both import `localization_guards`) would fail
+/// at import time in a fixture holding only the entry point.
 @discardableResult
 func runRepoScript(
     _ name: String,
@@ -240,16 +246,32 @@ func runRepoScript(
     repoRoot: URL
 ) throws -> ScriptRun {
     let scriptsDir = fixture.root.appendingPathComponent("scripts")
-    let copied = scriptsDir.appendingPathComponent(name)
-    if !FileManager.default.fileExists(atPath: copied.path) {
-        try FileManager.default.createDirectory(
-            at: scriptsDir,
-            withIntermediateDirectories: true
-        )
+    let source = repoRoot.appendingPathComponent("scripts")
+    let modules = try FileManager.default
+        .contentsOfDirectory(atPath: source.path)
+        .filter { $0.hasSuffix(".py") }
+    try FileManager.default.createDirectory(
+        at: scriptsDir,
+        withIntermediateDirectories: true
+    )
+    // Per file, not gated on the entry point: a test that runs two
+    // tools in one fixture (merge-keys then extract-keys) copies
+    // the second entry point while the shared modules are already
+    // there, and copyItem onto an existing path throws.
+    for file in [name] + modules {
+        let destination = scriptsDir.appendingPathComponent(file)
+        guard
+            !FileManager.default.fileExists(
+                atPath: destination.path
+            )
+        else { continue }
         try FileManager.default.copyItem(
-            at: repoRoot.appendingPathComponent("scripts/\(name)"),
-            to: copied
+            at: source.appendingPathComponent(file),
+            to: destination
         )
     }
-    return try runPythonScript(at: copied, arguments: arguments)
+    return try runPythonScript(
+        at: scriptsDir.appendingPathComponent(name),
+        arguments: arguments
+    )
 }

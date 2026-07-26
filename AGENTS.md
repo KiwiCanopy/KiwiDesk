@@ -630,7 +630,11 @@ Keep this list updated whenever a recurring mistake is found.
   changed — run in the same change set, so every locale falls
   back to the new English and the key reappears on its
   to-translate list; cosmetic English edits (typo,
-  punctuation) keep translations — and
+  punctuation) keep translations — `scripts/drop-key --locale
+  <locale> <key>` when the English is fine and a **single
+  locale's translation** is defective (the content guards below
+  report per locale, so dropping every locale's copy would
+  discard good work) — and
   `scripts/extract-keys --prune` to
   drop orphaned ones (see `docs/translating.md`). Because the
   same English text can in principle be authored at two
@@ -645,12 +649,51 @@ Keep this list updated whenever a recurring mistake is found.
   `LocaleCatalog` soft-fail to `[:]` and silently revert that
   locale to English); an orphan key (in a locale file, absent
   from code) only warns — clean it up with
-  `extract-keys --prune`. All of this is backed by Swift tests
-  — each localization script has a sibling suite
+  `extract-keys --prune`. **Everything above reads keys; six
+  guards read the copy** (`scripts/localization_guards.py`, #95),
+  and `--check` hard-fails on each. Five are exact contracts: a
+  **wrong writing system** (Cyrillic→`ru`, Kana→`ja`,
+  Han→`ja`/`zh-Hans`/`zh-Hant`, Hangul→`ko`; Latin is deliberately
+  absent — every locale uses it, so its presence proves nothing),
+  a **tagged stub** (`"Icon & name (ES)"`, full-width `（JA）`
+  included), **specifier drift** (the `%1$@` multiset must match
+  the English — the only guard on a runtime path, since these
+  reach `String(format:)`), **cross-language overlap** (two
+  different languages sharing a file's worth of identical values),
+  and a **collapsed translation** (one filler reused for many
+  unrelated keys). The sixth, **English residue** in a translated
+  sentence, is a heuristic and the only one with a scope:
+  non-Latin-script locales, and the app catalogs only (not
+  `--site`, whose prose keeps third-party names and inline HTML).
+  In a Latin-script locale a retained English word is
+  indistinguishable from a cognate (`"Item ativo"`, `"Mein
+  Setup"`), so widening it would flag dozens of good translations;
+  don't re-add a rule claiming to be precise everywhere, as an
+  `-ing`-weld sub-rule once did — German `fing`/`Frühling`
+  falsifies it. `merge-keys` runs the per-value guards so
+  contamination never lands. There is **no baseline/exemption
+  file** — a hit is a real defect; what the guards carry is a
+  grouped `GLOSSARY` of terms that stay English, which a new such
+  term must join, in the group that justifies it, in the same
+  change set. Locale policy is keyed by locale in two tables, so a
+  **new locale must be registered** in them or two guards go
+  silently quiet — `--check` refuses an unregistered locale and
+  `LocalizationRegistryTests` pins it. All of this is backed by
+  Swift tests — each localization script has a sibling suite
   (`LocalizationDriftGuardTests`, `LocalizationOrphanTests`,
-  `RenameKeyTests`, `DropKeyTests`, and future scripts follow
+  `RenameKeyTests`, `DropKeyTests`,
+  `LocalizationContentGuardTests`,
+  `LocalizationResidueGuardTests`,
+  `LocalizationOverlapGuardTests`,
+  `LocalizationCollapseGuardTests`,
+  `LocalizationRegistryTests`,
+  `MergeKeysContentGuardTests`, and future scripts follow
   suit) — so a regression in the tooling itself is
-  covered by `swift test`, not just by running the script. The
+  covered by `swift test`, not just by running the script. A
+  guard suite exercises its predicate against strings the test
+  writes itself, **never the shipped corpus** — asserting against
+  the real catalogs would make the guard's coverage depend on the
+  corpus staying dirty, passing only while a bug was live. The
   GUI language pick persists in `UserDefaults`
   (`LocalizationPreference`), never `gui.json` — it is
   documented as side-effect-free and must never create a

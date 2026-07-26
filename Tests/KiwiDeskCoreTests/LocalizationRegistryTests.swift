@@ -1,0 +1,138 @@
+import Foundation
+import Testing
+
+/// Forget-proof parity for the content guards' two registries
+/// (issue #95, `.claude/rules/parity-tests.md`).
+///
+/// `SCRIPTS` and `_STUB_TAGS` in `scripts/localization_guards.py`
+/// are hand-maintained tables keyed by locale, and a locale absent
+/// from them loses guards **silently** — `tagged_stub` finds no tag
+/// set and returns nothing, `english_residue` reads the locale as
+/// Latin-script and returns nothing. Two of six guards off, no
+/// signal. That is the failure those guards exist to prevent,
+/// one level up, so it gets a net of its own.
+///
+/// Unlike the other guard suites this one *does* walk the shipped
+/// catalogs — deliberately. The thing under test is the relation
+/// "every file we ship is registered", which has no meaning
+/// against invented locales. It cannot pass for the wrong reason
+/// the way a corpus-derived *content* assertion could: adding a
+/// locale file makes it fail until the tables are updated, which
+/// is exactly the intended trigger.
+@Suite("localization guard registry")
+struct LocalizationRegistryTests {
+    private var repoRoot: URL { scriptFixtureRepoRoot() }
+
+    private var localesDir: URL {
+        repoRoot
+            .appendingPathComponent("Sources")
+            .appendingPathComponent("KiwiDeskCore")
+            .appendingPathComponent("Resources")
+            .appendingPathComponent("Locales")
+    }
+
+    /// Every shipped `<locale>.json`, the same set
+    /// `shipped_locale_files()` walks.
+    private func shippedLocales() throws -> [String] {
+        try FileManager.default
+            .contentsOfDirectory(atPath: localesDir.path)
+            .filter { $0.hasSuffix(".json") }
+            .filter { !$0.hasPrefix("missing_") }
+            .map { String($0.dropLast(".json".count)) }
+            .filter { $0 != "en" }
+            .sorted()
+    }
+
+    /// Asks the module itself, so the test cannot drift from the
+    /// predicate's own notion of "registered".
+    private func unregistered(
+        _ locales: [String]
+    ) throws -> String {
+        let script = """
+            import json, sys
+            sys.path.insert(0, sys.argv[1])
+            from localization_guards import unregistered_locales
+            print(json.dumps(
+                unregistered_locales(json.loads(sys.argv[2]))
+            ))
+            """
+        let file = FileManager.default.temporaryDirectory
+            .appendingPathComponent("reg-\(UUID().uuidString).py")
+        defer { try? FileManager.default.removeItem(at: file) }
+        try script.write(to: file, atomically: true, encoding: .utf8)
+        let payload = String(
+            data: try JSONEncoder().encode(locales),
+            encoding: .utf8
+        )!
+        let run = try runPythonScript(
+            at: file,
+            arguments: [
+                repoRoot.appendingPathComponent("scripts").path,
+                payload,
+            ]
+        )
+        return run.stdout.trimmingCharacters(
+            in: .whitespacesAndNewlines
+        )
+    }
+
+    @Test("every shipped locale is registered")
+    func everyShippedLocaleIsRegistered() throws {
+        let locales = try shippedLocales()
+        // Guards against the net itself rotting into a no-op: a
+        // glob that matched nothing would "pass" forever.
+        #expect(locales.count >= 10)
+        #expect(try unregistered(locales) == "[]")
+    }
+
+    /// The net has to fail for an unregistered locale, or the
+    /// assertion above proves nothing.
+    @Test("an unregistered locale is reported")
+    func unregisteredLocaleIsReported() throws {
+        let reported = try unregistered(["de", "pl", "hi"])
+        #expect(reported.contains("pl"))
+        #expect(reported.contains("hi"))
+        #expect(!reported.contains("de"))
+    }
+
+    /// A non-Latin locale must also be in `SCRIPTS`, or its own
+    /// script reads as foreign to it — the fail-closed twin of the
+    /// silent gap above. Every shipped non-Latin locale must
+    /// therefore accept text in its own script.
+    @Test(
+        "a non-Latin locale accepts its own script",
+        arguments: [
+            ("ru", "Фокус"), ("ja", "フォーカス"),
+            ("ko", "포커스"), ("zh-Hans", "焦点"),
+            ("zh-Hant", "焦點"),
+        ]
+    )
+    func nonLatinLocaleAcceptsOwnScript(
+        locale: String,
+        sample: String
+    ) throws {
+        let script = """
+            import sys
+            sys.path.insert(0, sys.argv[1])
+            from localization_guards import foreign_scripts
+            print(foreign_scripts(sys.argv[2], sys.argv[3]))
+            """
+        let file = FileManager.default.temporaryDirectory
+            .appendingPathComponent("scr-\(UUID().uuidString).py")
+        defer { try? FileManager.default.removeItem(at: file) }
+        try script.write(to: file, atomically: true, encoding: .utf8)
+        let run = try runPythonScript(
+            at: file,
+            arguments: [
+                repoRoot.appendingPathComponent("scripts").path,
+                locale,
+                sample,
+            ]
+        )
+        #expect(
+            run.stdout.trimmingCharacters(
+                in: .whitespacesAndNewlines
+            ) == "[]"
+        )
+    }
+}

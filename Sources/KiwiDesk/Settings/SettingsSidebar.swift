@@ -56,9 +56,19 @@ struct SettingsSidebar: View {
         // Settings. A closed ~9-row icon+label taxonomy never
         // needs more/less room, so a resize handle is the same
         // "bespoke panel" tell we killed the collapse toggle for
-        // (#68). Sized to clear the worst-case *translated* label
-        // ("Erscheinungsbild"); revisit when the 8 languages land
-        // (#95 / #135).
+        // (#68).
+        //
+        // Re-measured across all ten locales when #95 landed: the
+        // worst case is now `ru` "Сочетания клавиш" at ~118 pt,
+        // up from de "Erscheinungsbild" at ~104 pt, and 190 pt
+        // still clears it. Fifteen labels in eight locales did
+        // *not* fit and were shortened instead of widening the
+        // column — a sidebar destination wants a short noun (the
+        // section header inside carries the full title), and
+        // System Settings' own column does not grow per language.
+        // Keep that the fix: a new locale whose destination label
+        // measures past ~120 pt gets a shorter label, not a wider
+        // sidebar.
         .frame(width: 190)
         // Floating pane, the macOS 26 System Settings look: a
         // rounded translucent card in near-window-background

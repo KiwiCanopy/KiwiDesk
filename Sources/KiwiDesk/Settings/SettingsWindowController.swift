@@ -67,6 +67,14 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         if !model.isDirty {
             model.reload()
         }
+        // Profiles is the entry point for a first-run and a
+        // returning user alike (§5.8). The selection now lives on
+        // the model so it survives the locale re-key, so "default
+        // selection" has to be re-asserted on open rather than
+        // falling out of `@State` being fresh. A deep link set
+        // `pendingDestination` just above and still wins — the
+        // view consumes it after this.
+        model.destination = .profiles
         // Promote on every open, not just the first — closing
         // the window demotes to `.accessory`, so a reused
         // window must re-raise to get its Dock icon back.
@@ -107,8 +115,10 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         window.toolbar = toolbar
         window.toolbarStyle = .unified
         window.contentView = NSHostingView(
-            rootView: SettingsView(model: model)
-                .environmentObject(LocalizationManager.shared)
+            rootView: LocaleScopedRoot {
+                SettingsView(model: model)
+            }
+            .environmentObject(LocalizationManager.shared)
         )
         window.isReleasedWhenClosed = false
         window.delegate = self

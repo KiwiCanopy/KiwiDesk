@@ -144,10 +144,19 @@ reachable from that target's `Bundle.module`.
 A locale file is discovered automatically the moment it exists
 under `Resources/Locales/<code>.json` (any code other than
 `en`) and the project is rebuilt — `Package.swift` copies the
-whole directory (`.copy("Resources/Locales")`), so a new file
-added later needs no other registration. It then appears in
+whole directory (`.copy("Resources/Locales")`), so nothing needs
+registering for the app to *use* it. It then appears in
 Settings ▸ General ▸ Language, listed by its own native name
 (e.g. "Deutsch", not "German").
+
+The **content guards** are the one exception: they key their
+policy by locale, so a new code has to be added to `_STUB_TAGS`
+in `scripts/localization_guards.py` (and to `SCRIPTS` if the
+language writes in a non-Latin script). Forget it and two of the
+six checks go quiet for that locale rather than failing loudly,
+which is why `extract-keys --check` refuses an unregistered
+locale outright and says where to add it —
+`LocalizationRegistryTests` pins the same relation.
 
 These language names are **endonyms** — each language shown in its
 own name, the same regardless of the active UI language (so the
@@ -299,10 +308,14 @@ The other maintenance verbs take `--site` too:
 
 - `scripts/extract-keys --site --check` — validates every
   shipped `site/src/i18n/<locale>.json` decodes as a flat
-  `{string: string}` map and warns on orphan keys (present in a
+  `{string: string}` map, runs five of the six *Content guards*
+  over its values, and warns on orphan keys (present in a
   locale, absent from `en.json`). It does **not** check
   `en.json` freshness — there's no code to derive it from; it
-  *is* the source.
+  *is* the source — and it does **not** run the English-residue
+  heuristic, because site copy legitimately keeps third-party
+  product names and inline HTML. The `Site` workflow runs this on
+  every PR that touches `site/**` or `docs/**`.
 - `scripts/extract-keys --site --prune` — drops orphan keys
   from the site locale files (without rewriting the hand-authored
   `en.json`).
@@ -421,6 +434,8 @@ writing anything**. It HARD-FAILS (non-zero exit) on:
   German silently revert to all-English. That's a feature dying
   quietly, and quiet is exactly what this check exists to
   prevent.
+- **broken content** in any translated value — the six checks
+  described in *Content guards* below.
 
 It only *warns* (prints, does not fail) about **orphan keys** —
 see *Maintaining the key set* below.
@@ -433,6 +448,130 @@ additionally fires on locale-only changes: staging just
 `extract-keys --check` before the commit completes, so a
 translator gets instant local feedback instead of waiting for
 CI to reject a broken or stale file.
+
+### Content guards
+
+Everything above reads *keys*. Nothing there ever looks at a
+translated value, so a bad worksheet used to land silently and
+render live — a reviewer skimming a language they do not read
+sees plausible text. Six checks read the copy itself
+(`scripts/localization_guards.py`), each a hard failure. Five are
+exact contracts; the last is a heuristic, and the only one with a
+scope:
+
+- **Wrong writing system.** Every locale value must use only the
+  scripts that locale actually writes in: Cyrillic belongs to
+  `ru`, kana to `ja`, Han to `ja`/`zh-Hans`/`zh-Hant`, Hangul to
+  `ko`, and Greek, Arabic and Hebrew to none of them. Latin is
+  deliberately *not* in the table — every locale uses it for
+  `KiwiDesk`, URLs and `%1$@`, so its presence proves nothing.
+  Note that Han cannot separate Japanese from Chinese, while kana
+  can; that is why the table maps each script to the locales
+  allowed to use it rather than giving each locale one expected
+  script. `en.json` is checked too: it is generated, so a stray
+  non-Latin glyph there is a pasted literal in Swift.
+- **Tagged stubs.** Untranslated English carrying its own locale
+  code — `"Icon & name (ES)"`, `"Testo Global colors (IT)"`, and
+  with full-width parens `"Group adjacent…（JA）"`. The full-width
+  pair matters: an ASCII-only regex once reported a 45%-complete
+  Japanese file as 98% complete. A value naming a *different*
+  language (`"Alemán (DE)"` in Spanish) is legitimate and passes.
+- **Interpolation-specifier drift.** The `%1$@`/`%1$d` set must
+  match the English as a multiset — the one check here that
+  guards a *runtime* path rather than the copy, since these values
+  reach `String(format:)`. Order is deliberately not checked: the
+  numbering exists so a translation can reorder the arguments, and
+  many languages must. A literal `%%` is ignored, because it
+  carries no argument and several locales legitimately write
+  `"%1$d%%"` where the English spells out "percent".
+- **A collapsed translation** — one filler standing in for many
+  unrelated keys. This is the check that caught the worst defect
+  in the corpus: `it.json` and `pt-BR.json` had *every*
+  interpolated string replaced with a bare `"Opzione %1$@"` /
+  `"Opção %1$@"`, 48 keys each. Every other check passes such a
+  value — it is fluent, in the right script, free of English, with
+  the right placeholders. The bar is five distinct English strings
+  on one value, or three when the value carries a specifier.
+  Near-synonyms sharing one target word are normal and pass
+  (`de` "Standard" covers "default"/"Default"/"standard").
+- **English left in a translated sentence.** The shape a
+  word-swapping machine translation produces: `"追加 Window"` for
+  "Add Window", `"保存 as New Profile…"`. A detector requiring
+  several source words in a row misses these entirely, and ~90 of
+  them once survived two review passes. **Non-Latin-script
+  locales only** — see the gap below.
+- **Cross-language overlap.** Two locales of *different*
+  languages sharing too many byte-identical values — the shape
+  that caught ~360 entries of French sitting in `it.json`. The
+  threshold is 5% of the keys they share, floored at 20: sibling
+  languages genuinely coincide on short labels (`es` and `pt-BR`
+  sit at 11 with the corpus clean), while a whole file pasted
+  into the wrong locale lands near 45%. Pairs of the same base
+  language are skipped — `zh-Hans` and `zh-Hant` are one language
+  in two scripts and agree on a great deal legitimately.
+
+There is **no baseline or exemption file**. The corpus is clean,
+so any hit is a real defect. What the guards do carry is a
+**glossary** — the terms that stay English in every locale
+(`KiwiDesk`, `Lua`, `macOS`, Apple's `Mission Control` and
+`Bundle identifier`, and every layout-mode name, because
+`layout.<mode>.name` ships each one untranslated). Interpolation
+specifiers, dotted identifiers like `init.lua`, and a key name
+following a modifier glyph (`⌘ Command`) are stripped before any
+word is judged. If you add a term that must stay English, add it
+to `GLOSSARY` in the same change set — the guard will tell you, by
+rejecting an otherwise-correct translation.
+
+`scripts/merge-keys` runs the first three of these per worksheet
+entry, so a bad translation is **skipped rather than written**.
+The clean entries in the same worksheet still merge, and each
+skipped one is echoed to stderr with the reason — the worksheet
+is deleted either way, so that transcript is the only copy of the
+discarded text. Re-run `scripts/extract-keys <locale>` to get the
+skipped keys back with the current English.
+
+**Two scopes, stated plainly rather than papered over.**
+
+The residue check runs only on **non-Latin-script locales** (`ja`,
+`ko`, `zh-Hans`, `zh-Hant`, `ru`). In a Latin-script locale a
+retained English word is indistinguishable from a cognate or a
+loanword — `"Item ativo"`, `"Mein Setup"`, `"Limite del track"`
+are all correct — so the rule would flag dozens of good
+translations. Latin locales are covered by the other five checks;
+word-swap residue there is caught by review, not by the gate.
+
+An earlier version of this rule kept one sub-rule that ran
+everywhere: an English `-ing` welded onto a translated stem
+(`"Modifiering"`), on the claim that no target language forms a
+word that way. German falsifies that outright — `fing`, `ging`,
+`Ring`, and the whole `-ling` class (`Frühling`, `Lehrling`) — and
+this repo's own site copy contains `fing`. Scoping it to non-Latin
+locales did not rescue it either: a weld there has a *non-Latin*
+stem (`"編集ing"`), so tokenizing leaves a bare suffix with
+nothing to match. It is gone. The values it aimed at still fail —
+`"編集ing init.lua directly."` on `directly` — and a bare weld
+with no English beside it is simply not caught.
+
+The residue check also runs on the **app catalogs only**, not the
+marketing site's (`--site`). Site copy is prose carrying
+third-party product names (`Homebrew`, `SketchyBar`,
+`JankyBorders`, `Ko-fi`) and embedded HTML, where a retained
+English token is normal; the app's glossary has no business
+listing the site's vocabulary. The other five checks run on both.
+
+All of this is backed by Swift tests —
+`LocalizationContentGuardTests` (the exact per-value contracts),
+`LocalizationResidueGuardTests`, `LocalizationOverlapGuardTests`,
+`LocalizationCollapseGuardTests` and
+`MergeKeysContentGuardTests` — which exercise the predicates
+against strings the tests write themselves, never the shipped
+catalogs. `LocalizationRegistryTests` is the one deliberate
+exception: it walks the shipped files to assert every one of them
+is registered in the guards' locale tables, because a locale
+missing from those tables loses two checks *silently*, and that
+relation has no meaning against invented locales. Asserting against the real corpus would tie the guard's
+coverage to the corpus staying dirty: each assertion would pass
+only while a bug was live and fail the moment it was fixed.
 
 ## Maintaining the key set (for maintainers)
 
@@ -480,6 +619,16 @@ their stale values, not deriving keys:
   no side notes or issue comments needed. It fails without
   touching anything if a key exists in no translation (typo
   guard). `--site` targets the site manifests instead.
+- **Retire one locale's bad translation.**
+  `scripts/drop-key --locale <locale> [--locale <locale>] <key>…`
+  narrows the drop to the named locales. This is the *other*
+  reason a translation gets retired: the English is fine and the
+  **translation** is defective — which is exactly what the
+  content guards report, per locale. Dropping every locale's copy
+  would discard good translations of the same key, so the fix
+  path has to be per locale too. The typo guard still applies
+  inside the narrowed scope: a key present elsewhere but not in
+  the named locales fails rather than silently dropping nothing.
 
 **Rename vs. drop vs. deprecate — pick based on whether the
 *meaning* changed, and where it changed.** If a key is just

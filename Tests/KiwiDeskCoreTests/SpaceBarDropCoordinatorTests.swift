@@ -4,6 +4,11 @@ import Testing
 
 @testable import KiwiDeskCore
 
+/// The dwell wait's hang-guard, named and shared the way
+/// `execHangGuard` / `dragSettleHangGuard` are (AGENTS.md §5), so
+/// the next wait added here cannot pick its own tighter number.
+private let springHangGuard: TimeInterval = 120
+
 /// The Space Bar drag-drop state machine (#372): the two-speed
 /// gesture (fast drop relocates, dwell springs then places),
 /// hover arming, and cancellation. Injected closures keep the
@@ -112,10 +117,24 @@ struct SpaceBarDropCoordinatorTests {
             dwell: 0.05
         )
         coord.moved(win, cursor: cursor)
-        // Generous hang-guard (AGENTS.md): the wait exits the
-        // instant the spring fires; the deadline only bounds a
-        // genuine hang under concurrent-suite load.
-        try await untilTrue(timeout: 30) {
+        // Generous hang-guard (AGENTS.md §5): the wait exits the
+        // instant the spring fires, so a passing run is never
+        // slowed — the deadline only bounds a genuine hang.
+        //
+        // Raised 30 → 120 when #95 landed the last three locales.
+        // Nothing here regressed: this suite is `@MainActor`, the
+        // dwell fires through an unstructured `Task`, and the wait
+        // needs the main actor back. A bigger suite starves it for
+        // longer, and the measurement is what forced the number —
+        // one run had it *pass* at 29.7s against the 30s bound,
+        // and neighbouring runs crossed it. A 50 ms dwell taking
+        // 30 s of wall clock is a scheduling fact about a
+        // concurrently-run suite, not a latency this test asserts;
+        // pinning it tight only re-reddens the suite the next time
+        // the suite grows. The starvation itself is a test-runner
+        // property, not app behaviour — nothing a user of the
+        // tiling can observe.
+        try await untilTrue(timeout: springHangGuard) {
             !rec.sprang.isEmpty
         }
         #expect(rec.sprang.map(\.0) == [SpaceID("B")])

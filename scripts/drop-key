@@ -7,8 +7,19 @@ EXCEPT en.json — English is the generated source of truth
 Usage:
     scripts/drop-key <key> [<key> ...]
     scripts/drop-key --site <key> [<key> ...]
+    scripts/drop-key --locale <locale> [--locale <locale>] <key>…
 
-When to use: the English source string's MEANING changed — the
+`--locale` (repeatable) narrows the drop to the named locales
+instead of every shipped translation. Use it when a *translation*
+is defective rather than the English having changed: the content
+guards (`scripts/localization_guards`) find defects per locale, so
+the retirement path has to be per locale too — otherwise fixing
+one bad `ja` value would discard seven good translations of the
+same key. A key absent from every named locale is still an error,
+so a typo cannot silently drop nothing.
+
+When to use (without `--locale`): the English source string's
+MEANING changed — the
 sentence now says something different. A stale translation is
 fluent-but-wrong, so it must not linger: dropping the key makes
 every locale fall back to the new English at runtime (per-key
@@ -27,6 +38,10 @@ Add `--site` to operate on the marketing site's manifests
 site en.json is left untouched.
 """
 
+# Deferred so `list[str] | None` in a signature stays readable
+# under the system python3 (3.9); see localization_guards.py.
+from __future__ import annotations
+
 import json
 import sys
 from pathlib import Path
@@ -37,10 +52,12 @@ LOCALES_DIR = (
 )
 
 
-def _translation_files() -> list[Path]:
+def _translation_files(
+    only: list[str] | None = None,
+) -> list[Path]:
     """Every shipped translation: <locale>.json except the
     English source and the transient missing_<locale>.json
-    worksheets."""
+    worksheets. `only` narrows it to the named locales."""
     if not LOCALES_DIR.is_dir():
         return []
     return sorted(
@@ -48,6 +65,7 @@ def _translation_files() -> list[Path]:
         for path in LOCALES_DIR.glob("*.json")
         if not path.name.startswith("missing_")
         and path.name != "en.json"
+        and (only is None or path.stem in only)
     )
 
 
@@ -59,6 +77,29 @@ def main(argv: list[str]) -> int:
     if site:
         args = [a for a in args if a != "--site"]
         LOCALES_DIR = ROOT / "site" / "src" / "i18n"
+    locales: list[str] = []
+    rest: list[str] = []
+    index = 0
+    while index < len(args):
+        if args[index].startswith("--locale="):
+            # `--locale=de` would otherwise fall through and be
+            # read as a key name, blaming the wrong argument.
+            locales.append(args[index].split("=", 1)[1])
+            index += 1
+            continue
+        if args[index] == "--locale":
+            if index + 1 >= len(args):
+                print(
+                    "drop-key: --locale needs a locale code.",
+                    file=sys.stderr,
+                )
+                return 1
+            locales.append(args[index + 1])
+            index += 2
+            continue
+        rest.append(args[index])
+        index += 1
+    args = rest
     if not args:
         print(__doc__)
         return 1
@@ -67,11 +108,24 @@ def main(argv: list[str]) -> int:
     # promise the pre-validation pass exists for.
     keys = list(dict.fromkeys(args))
 
-    files = _translation_files()
+    if "en" in locales:
+        print(
+            "drop-key: en.json is the generated English source "
+            "(scripts/extract-keys) and is never edited here — "
+            "drop the key from a translation instead.",
+            file=sys.stderr,
+        )
+        return 1
+    files = _translation_files(locales or None)
     if not files:
+        scope = (
+            f" matching --locale {', '.join(locales)}"
+            if locales
+            else ""
+        )
         print(
             f"drop-key: no translation files found under "
-            f"{LOCALES_DIR}.",
+            f"{LOCALES_DIR}{scope}.",
             file=sys.stderr,
         )
         return 1
@@ -89,8 +143,13 @@ def main(argv: list[str]) -> int:
         if not any(key in data for data in data_by_file.values())
     ]
     if nowhere:
+        scope = (
+            f" of {', '.join(locales)}"
+            if locales
+            else " translation"
+        )
         print(
-            "drop-key: FAILED — not present in any translation "
+            f"drop-key: FAILED — not present in any{scope} "
             f"(typo? already dropped?): {', '.join(nowhere)}. "
             "Nothing was changed.",
             file=sys.stderr,
@@ -118,9 +177,14 @@ def main(argv: list[str]) -> int:
             f"{', '.join(dropped)}"
         )
 
+    scope = (
+        f"{', '.join(locales)}'s"
+        if locales
+        else "each locale's"
+    )
     print(
         "drop-key: done. The key(s) fall back to English at "
-        "runtime and reappear on each locale's to-translate "
+        f"runtime and reappear on {scope} to-translate "
         f"list (scripts/extract-keys {flag}<locale>)."
     )
     return 0

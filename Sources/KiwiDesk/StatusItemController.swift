@@ -230,7 +230,10 @@ final class StatusItemController: NSObject, NSMenuDelegate,
         popover.behavior = .transient
         popover.delegate = self
         popover.contentViewController = NSHostingController(
-            rootView: DiscoveryPopoverView()
+            rootView: LocaleScopedRoot {
+                DiscoveryPopoverView()
+            }
+            .environmentObject(LocalizationManager.shared)
         )
         discoveryPopover = popover
         popover.show(

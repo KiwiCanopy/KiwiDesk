@@ -47,8 +47,10 @@ final class ConfigIssuesWindowController: NSObject,
             "Config Issues"
         )
         window.contentView = NSHostingView(
-            rootView: ConfigIssuesView(model: model)
-                .environmentObject(LocalizationManager.shared)
+            rootView: LocaleScopedRoot {
+                ConfigIssuesView(model: model)
+            }
+            .environmentObject(LocalizationManager.shared)
         )
         window.isReleasedWhenClosed = false
         window.delegate = self

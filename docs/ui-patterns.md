@@ -118,6 +118,16 @@ new-window placement (comparative labels), the seven-option
 Space layout mode, and the dynamic Language and
 Desktop→Profile lists.
 
+*Verified against all ten locales when #95 landed.* Every
+shipped segmented strip fits the ~650 pt a full-width row has
+at the 840 pt minimum: the widest is Mouse resize action at
+~503 pt (`es`, "Redimensionar las ventanas contiguas"),
+followed by App Bar active indicator at ~408 pt (`fr`). So the
+rule's "longest shipped localization" clause holds as written,
+with real headroom. Re-measure a strip before adding a fourth
+segment to one of those two — they are the ones with the least
+room left.
+
 **The 384 pt per-Space popover is the documented
 compact-surface exception (#291).** There the inherit
 chrome (a checkbox plus accent bar, `OverrideChrome`) eats

@@ -25,6 +25,15 @@ with a blank value. `<locale>.json` itself stays a flat `{key:
 string}` map — the source/translation shape is scratch-file-only
 and never reaches the file `LocaleCatalog` loads at runtime.
 
+An entry is also skipped when the translation is broken *content* —
+the wrong writing system for the locale, untranslated English
+carrying a locale tag, or English words left inside an otherwise
+translated sentence. These are the same predicates
+`scripts/extract-keys --check` gates the whole corpus on
+(`scripts/localization_guards`), applied per entry so a bad
+worksheet never reaches a committed catalog. See
+docs/translating.md.
+
 An entry is also skipped when its stored "source" no longer
 matches the key's current English in `en.json` (issue #252). A
 worksheet is filled out over days; in that window the English
@@ -58,9 +67,21 @@ Three things that guard is deliberately NOT:
   already-translated key does not.
 """
 
+# `dict | None` and `str | None` below are evaluated at def time, so
+# without this the module will not import on the system python3
+# (3.9) — see scripts/localization_guards.py.
+from __future__ import annotations
+
 import json
 import sys
 from pathlib import Path
+
+from localization_guards import (
+    english_residue,
+    foreign_scripts,
+    placeholder_drift,
+    tagged_stub,
+)
 
 ROOT = Path(__file__).resolve().parent.parent
 LOCALES_DIR = (
@@ -97,6 +118,40 @@ def _load_map(path: Path, label: str) -> dict | None:
         )
         return None
     return loaded
+
+
+def _content_defect(
+    locale: str, value: str, english: str, residue: bool = True
+) -> str | None:
+    """Why `value` must not be written to `<locale>.json`, or None.
+
+    Shares its predicates with `extract-keys --check` through
+    `scripts/localization_guards` rather than re-deriving them: a
+    divergent copy here would admit exactly what the gate rejects,
+    so a translator would merge cleanly and then be unable to
+    commit.
+    """
+    scripts = foreign_scripts(locale, value)
+    if scripts:
+        return (
+            f"contains {' + '.join(scripts)} characters, which "
+            f"{locale} does not use"
+        )
+    tag = tagged_stub(locale, value)
+    if tag:
+        return f"is untranslated English tagged ({tag})"
+    drift = placeholder_drift(value, english)
+    if drift:
+        return f"{drift} relative to the English"
+    if not residue:
+        return None
+    left = english_residue(locale, value, english)
+    if left:
+        return (
+            "still carries the English word(s) "
+            f"{', '.join(left)}"
+        )
+    return None
 
 
 def main(argv: list[str]) -> int:
@@ -143,6 +198,7 @@ def main(argv: list[str]) -> int:
     skipped: list[str] = []
     stale: list[str] = []
     unverifiable: list[str] = []
+    broken: dict[str, str] = {}
     for key, entry in entries.items():
         if not isinstance(entry, dict):
             unverifiable.append(key)
@@ -175,7 +231,21 @@ def main(argv: list[str]) -> int:
         if source != current:
             stale.append(key)
             continue
-        translated[key] = value.strip()
+        text = value.strip()
+        # The same predicates `extract-keys --check` gates on, run
+        # per entry so contamination is never written in the first
+        # place — the verify gate would catch it either way, but
+        # only after it had landed in a committed catalog. These
+        # keys are absent from <locale>.json by construction (that
+        # is why the worksheet held them), so the re-mint recovery
+        # above applies to them unchanged.
+        defect = _content_defect(
+            locale, text, current, residue=not site
+        )
+        if defect:
+            broken[key] = defect
+            continue
+        translated[key] = text
 
     existing: dict[str, str] = {}
     if locale_file.exists():
@@ -197,7 +267,7 @@ def main(argv: list[str]) -> int:
     # The dropped count rides the summary line, because that is
     # the line a human skims and a wrapper captures — a bare
     # "merged 0 key(s)" reads as a clean success.
-    dropped = len(stale) + len(unverifiable)
+    dropped = len(stale) + len(unverifiable) + len(broken)
     tail = f" {dropped} dropped, see stderr." if dropped else ""
     print(
         f"merge-keys: merged {len(translated)} key(s) into "
@@ -224,6 +294,26 @@ def main(argv: list[str]) -> int:
         flag,
         locale,
     )
+    if broken:
+        print(
+            f"merge-keys: {len(broken)} key(s) were skipped "
+            "because the translation itself is broken content "
+            "(see docs/translating.md). Fix the text and re-run "
+            f"scripts/extract-keys {flag}{locale} to get the "
+            "entries back:",
+            file=sys.stderr,
+        )
+        for key in sorted(broken):
+            entry = entries.get(key)
+            value = (
+                entry.get("translation")
+                if isinstance(entry, dict)
+                else ""
+            )
+            print(
+                f"    - {key}: {broken[key]} — {value!r}",
+                file=sys.stderr,
+            )
     _report_dropped(
         unverifiable,
         entries,
