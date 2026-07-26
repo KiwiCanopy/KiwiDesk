@@ -308,7 +308,7 @@ The other maintenance verbs take `--site` too:
 
 - `scripts/extract-keys --site --check` — validates every
   shipped `site/src/i18n/<locale>.json` decodes as a flat
-  `{string: string}` map, runs five of the six *Content guards*
+  `{string: string}` map, runs five of the seven *Content guards*
   over its values, and warns on orphan keys (present in a
   locale, absent from `en.json`). It does **not** check
   `en.json` freshness — there's no code to derive it from; it
@@ -454,10 +454,10 @@ CI to reject a broken or stale file.
 Everything above reads *keys*. Nothing there ever looks at a
 translated value, so a bad worksheet used to land silently and
 render live — a reviewer skimming a language they do not read
-sees plausible text. Six checks read the copy itself
+sees plausible text. Seven checks read the copy itself
 (`scripts/localization_guards.py`), each a hard failure. Five are
-exact contracts; the last is a heuristic, and the only one with a
-scope:
+exact contracts; the last two are scoped to complementary halves
+of the locale set, and one of those is a heuristic:
 
 - **Wrong writing system.** Every locale value must use only the
   scripts that locale actually writes in: Cyrillic belongs to
@@ -500,6 +500,18 @@ scope:
   several source words in a row misses these entirely, and ~90 of
   them once survived two review passes. **Non-Latin-script
   locales only** — see the gap below.
+- **A dropped feature name.** The GUI shows "App Bar" and
+  "Space Bar" untranslated, so a translation that renames them
+  ("Die App-Leiste", "Barra delle app") describes something the
+  interface does not call that. Keep the name verbatim and
+  translate around it: "Mostra la App Bar", "Couleurs de la
+  Space Bar". Capitalization is yours ("App bar" is fine).
+  **Latin-script locales only** — the exact complement of the
+  rule above, and for the mirror reason: in a Japanese or Russian
+  sentence the English phrase is a foreign body, so adapting it
+  ("スペースバーの色") is a legitimate editorial choice. The list
+  is `PRODUCT_NAMES`; adding to it is a product decision about
+  what the GUI leaves in English, not a way to quiet a hit.
 - **Cross-language overlap.** Two locales of *different*
   languages sharing too many byte-identical values — the shape
   that caught ~360 entries of French sitting in `it.json`. The

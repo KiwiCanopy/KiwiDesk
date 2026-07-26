@@ -655,7 +655,7 @@ Keep this list updated whenever a recurring mistake is found.
   `LocaleCatalog` soft-fail to `[:]` and silently revert that
   locale to English); an orphan key (in a locale file, absent
   from code) only warns — clean it up with
-  `extract-keys --prune`. **Everything above reads keys; six
+  `extract-keys --prune`. **Everything above reads keys; seven
   guards read the copy** (`scripts/localization_guards.py`, #95),
   and `--check` hard-fails on each. Five are exact contracts: a
   **wrong writing system** (Cyrillic→`ru`, Kana→`ja`,
@@ -676,7 +676,21 @@ Keep this list updated whenever a recurring mistake is found.
   Setup"`), so widening it would flag dozens of good translations;
   don't re-add a rule claiming to be precise everywhere, as an
   `-ing`-weld sub-rule once did — German `fing`/`Frühling`
-  falsifies it. `merge-keys` runs the per-value guards so
+  falsifies it. The seventh, a **dropped feature name**
+  (`PRODUCT_NAMES` — "App Bar", "Space Bar"), is that rule's
+  mirror image and carries the **complementary** scope:
+  Latin-script locales only. The GUI ships those two names
+  untranslated, so prose that renames them ("Die App-Leiste"
+  beside a chip reading "App Bar") points at something the
+  interface does not call that — and #277 made it plainer, since
+  a destination or surface name is now a breadcrumb segment on
+  every hit inside that pane. In a *non*-Latin sentence the
+  English phrase sits as a foreign body and adapting it is a real
+  editorial call (owner, 2026-07-27), which is exactly why the
+  two scopes partition rather than overlap. Matched as a phrase,
+  not as tokens: `GLOSSARY` holds `app`, `bar` and `space`
+  separately, so a word-level test cannot tell "App Bar" from
+  "App-Leiste". `merge-keys` runs the per-value guards so
   contamination never lands. There is **no baseline/exemption
   file** — a hit is a real defect; what the guards carry is a
   grouped `GLOSSARY` of terms that stay English, which a new such
@@ -690,6 +704,7 @@ Keep this list updated whenever a recurring mistake is found.
   `RenameKeyTests`, `DropKeyTests`,
   `LocalizationContentGuardTests`,
   `LocalizationResidueGuardTests`,
+  `LocalizationProductNameGuardTests`,
   `LocalizationOverlapGuardTests`,
   `LocalizationCollapseGuardTests`,
   `LocalizationRegistryTests`,

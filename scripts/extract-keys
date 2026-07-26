@@ -122,6 +122,7 @@ from pathlib import Path
 
 from localization_guards import (
     collapsed_translations,
+    dropped_product_names,
     english_residue,
     foreign_scripts,
     overlapping_locales,
@@ -505,6 +506,16 @@ def check_content(
                     f"{locale}.json :: {key} {drift} relative to "
                     f"the English — {value[:70]!r} (English: "
                     f"{english[:50]!r})"
+                )
+            dropped = dropped_product_names(
+                locale, value, english
+            )
+            if dropped:
+                problems.append(
+                    f"{locale}.json :: {key} translates the "
+                    f"untranslated feature name(s) "
+                    f"{', '.join(dropped)} — {value[:70]!r} "
+                    f"(English: {english[:50]!r})"
                 )
             if not residue:
                 continue

@@ -205,6 +205,31 @@ GLOSSARY = {
     "rrggbbaa",
 }
 
+# Multi-word feature names the GUI renders untranslated, which a
+# translation must therefore carry verbatim (owner call,
+# 2026-07-27). `GLOSSARY` above only *exempts* these words from
+# the residue rule — it never checked that anyone kept them, and
+# `de` had independently rendered every one of them as
+# "Space-Leiste" / "App-Leiste" while the other four Latin-script
+# locales kept the English.
+#
+# Enforced only where the whole locale is Latin-script. In a
+# non-Latin locale the surrounding sentence is another script, so
+# an English phrase sits in it as a foreign body and adapting it
+# is legitimate — hence `ja` "レイアウト", `ko`, `ru`, `zh-*` are
+# out of scope here by the same reasoning `english_residue` is
+# scoped to exactly the complementary set.
+#
+# A phrase, not the tokens: `GLOSSARY` holds "app", "bar" and
+# "space" individually, so a word-level rule could not tell
+# "App Bar" from "App-Leiste". Adding a name here is a product
+# decision about what the GUI leaves in English — argue it, do
+# not grow the list to silence a hit.
+PRODUCT_NAMES = (
+    "App Bar",
+    "Space Bar",
+)
+
 # Locale codes a stub marker is written with. Keyed by the base
 # language, so `"Texto Item (PT)"` in `pt-BR.json` is caught even
 # though the tag is not the full locale code.
@@ -418,6 +443,42 @@ def english_residue(
         and (len(word) > 1 or word.lower() == "a")
     ]
     return sorted(set(found))
+
+
+def dropped_product_names(
+    locale: str, value: str, english: str
+) -> list[str]:
+    """`PRODUCT_NAMES` the English carries and `value` does not.
+
+    The GUI ships "App Bar" and "Space Bar" untranslated, so a
+    Latin-script locale that renders them in its own words leaves
+    the prose naming something the interface does not
+    ("Die App-Leiste erscheint…" beside a chip reading "App Bar").
+    Search made it plainer still: the destination and surface names
+    are now breadcrumb segments, so a locale-invented name shows up
+    on every hit inside that pane.
+
+    Scoped to Latin-script locales, the complement of
+    `english_residue`'s scope, and for the mirror-image reason. In
+    a non-Latin sentence an untouched English phrase is a foreign
+    body and adapting it is a real editorial choice; between two
+    Latin-script languages "App Bar" reads as the name it is.
+
+    Case-insensitive, because a locale's capitalization rules are
+    its own ("App bar" is a style choice, not a dropped name).
+    Substring, not word-boundary: German's "App-Leiste" must NOT
+    count as carrying "App Bar", which is exactly what a
+    token-level test would conclude.
+    """
+    if locale in NON_LATIN_LOCALES:
+        return []
+    lowered = value.lower()
+    return [
+        name
+        for name in PRODUCT_NAMES
+        if name.lower() in english.lower()
+        and name.lower() not in lowered
+    ]
 
 
 def _is_partly_translated(locale: str, value: str) -> bool:
