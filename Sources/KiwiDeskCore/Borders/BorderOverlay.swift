@@ -115,6 +115,10 @@ final class BorderOverlay {
 
     /// Test seam for exercising facade behavior without creating a
     /// real AppKit or SkyLight window.
+    /// `preferred` feeds glow-off swap-backs; omitting it
+    /// permanently disables swap-back from t0 (`skyLightRetired`
+    /// latches at init, so no hidden mid-test state transition)
+    /// — inject a factory to test swap-backs.
     init(
         window: CGWindowID,
         backend: any BorderOverlayBackend,
@@ -129,6 +133,7 @@ final class BorderOverlay {
             fallback ?? AppKitBorderOverlay()
         }
         makePreferred = preferred ?? { _ in nil }
+        skyLightRetired = preferred == nil
         onFallback = { _ in }
     }
 

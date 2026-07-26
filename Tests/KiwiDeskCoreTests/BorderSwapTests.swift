@@ -131,6 +131,31 @@ struct BorderSwapTests {
         #expect(fallback.calls == [.update, .update])
         #expect(asks == 1)
     }
+
+    @Test("A real failure retires the swap-back before any ask")
+    func failureRetiresBeforeAsking() {
+        let primary = SwapSpyBackend(rendersGlow: false)
+        primary.updateSucceeds = false
+        let fallback = SwapSpyBackend(rendersGlow: true)
+        var asks = 0
+        let overlay = BorderOverlay(
+            window: 7,
+            backend: primary,
+            fallback: fallback,
+            preferred: { _ in
+                asks += 1
+                return nil
+            }
+        )
+        // Failed primary update → retire-and-replay onto the
+        // fallback. The doc-comment invariant: after a REAL
+        // failure, a glow-off render must never ask the
+        // preferred factory again.
+        render(overlay, glow: false)
+        render(overlay, glow: false)
+        #expect(asks == 0)
+        #expect(fallback.calls.contains(.update))
+    }
 }
 
 private final class SwapSpyBackend: BorderOverlayBackend {
@@ -141,6 +166,7 @@ private final class SwapSpyBackend: BorderOverlayBackend {
     }
 
     var calls: [Call] = []
+    var updateSucceeds = true
     let rendersGlow: Bool
     let orderMode: BorderGeometry.Order = .below
 
@@ -154,7 +180,7 @@ private final class SwapSpyBackend: BorderOverlayBackend {
         screen: NSScreen?
     ) -> Bool {
         calls.append(.update)
-        return true
+        return updateSucceeds
     }
 
     func order(relativeTo windowNumber: CGWindowID) -> Bool {

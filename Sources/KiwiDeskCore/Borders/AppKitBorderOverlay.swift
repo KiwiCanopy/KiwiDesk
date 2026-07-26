@@ -36,6 +36,12 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
     /// the SkyLight `above` path fixes.
     let orderMode: BorderGeometry.Order = .below
 
+    /// Explicit, not just the protocol default: this backend IS
+    /// the glow renderer (#533), and the capability should be
+    /// legible beside `applyGlow` rather than inherited by
+    /// omission.
+    let rendersGlow = true
+
     /// Positions the ring around `geometry.overlayFrame` (AX
     /// coords) and strokes it in `colorHex`. Used both for a
     /// steady-state sync and per animation tick — implicit Core
