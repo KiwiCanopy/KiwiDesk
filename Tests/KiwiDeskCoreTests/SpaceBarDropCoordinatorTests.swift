@@ -131,7 +131,9 @@ struct SpaceBarDropCoordinatorTests {
         // 30 s of wall clock is a scheduling fact about a
         // concurrently-run suite, not a latency this test asserts;
         // pinning it tight only re-reddens the suite the next time
-        // the suite grows. #489 tracks the underlying starvation.
+        // the suite grows. The starvation itself is a test-runner
+        // property, not app behaviour — nothing a user of the
+        // tiling can observe.
         try await untilTrue(timeout: springHangGuard) {
             !rec.sprang.isEmpty
         }

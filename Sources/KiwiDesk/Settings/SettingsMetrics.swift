@@ -16,18 +16,21 @@ enum SettingsMetrics {
     /// action", ~121 pt) and de; measured across all eleven
     /// locales, 53 of 451 row labels overflowed it — `es` 12,
     /// `ru` 11, `fr` 10, `pt-BR` 9, `it` 8, `de` 2, `ja` 1, with
-    /// `en`/`ko`/`zh-*` clean. 210 clears 43 of those 53. It is
-    /// deliberately not sized to clear all of them: the last ten
-    /// need ~280 pt, which would cost every slider and picker in
-    /// the app 130 pt of travel to serve a handful of the longest
-    /// Romance and Russian labels. Those still truncate on one
-    /// line (`lineLimit(1)`), visibly, with the full text in the
-    /// row's help where it has one.
+    /// `en`/`ko`/`zh-*` clean. 210 cleared 43 of those 53; the
+    /// remaining ten would have needed ~280 pt, which would cost
+    /// every slider and picker in the app 130 pt of travel to
+    /// serve five keys. Those five were shortened instead — one
+    /// of them, `es` "Retardo de cambio al arrastrar (Spring
+    /// delay)", was carrying a translator's English gloss in
+    /// parentheses at 273 pt.
     ///
-    /// The remaining rule for a new label: measure it. Past ~210
-    /// pt in any shipped locale, shorten the label rather than
-    /// moving this number again — it is the shared alignment axis
-    /// for every section, so it trades control width app-wide.
+    /// **Nothing in any shipped locale truncates here today.**
+    /// That is the state to keep, and the rule that keeps it:
+    /// measure a new label, and past ~210 pt shorten the label
+    /// rather than moving this number again — it is the shared
+    /// alignment axis for every section, so it trades control
+    /// width app-wide. A Settings label wants to be short in
+    /// every language regardless.
     static let labelColumn: CGFloat = 210
 
     /// `OverrideChrome`'s leading padding and checkbox
