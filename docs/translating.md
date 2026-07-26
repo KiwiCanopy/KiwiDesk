@@ -41,6 +41,17 @@ not in `gui.json` — it's a scalar, side-effect-free preference,
 never tiling/keybinding state, and never migrates config
 ownership the way writing to `gui.json` would.
 
+Some strings a user reads do not *originate* in the GUI: a
+keybinding conflict is detected in `KiwiDeskCore`, in code that
+is deliberately actor-free, while `L` is `@MainActor`. Those are
+not left in English — Core returns the **structure** (a
+`Conflict`, naming a `SystemShortcut` case) and the GUI turns it
+into a sentence, so a translator sees ordinary keys
+(`system_shortcut.*`, `keybinding.conflict.*`) with nothing
+special about them. Nothing to do differently when translating;
+it matters only if you are adding such a string in Core, which
+should name a case rather than write English prose.
+
 ## Key convention
 
 Keys are dot-namespaced, lowercase, area-first, mirroring the

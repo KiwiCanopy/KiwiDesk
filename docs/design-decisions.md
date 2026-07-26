@@ -1311,6 +1311,24 @@ persisted data or breaking import classification (issue #9
 follow-up: the original literal-routing sweep covered SwiftUI
 view literals but missed catalog-defined strings).
 
+**Core names it; the GUI says it (#96).** `L()` is `@MainActor` —
+it drives SwiftUI and publishes — while the code that *detects*
+user-facing conditions is deliberately actor-free so it stays
+unit-testable off the main actor (§2.6). So Core never returns a
+rendered sentence: it returns the structure, and the GUI
+localizes at its own boundary. `KeybindingConflicts.conflict`
+returns a `Conflict` whose target names a `SystemShortcut`
+**case**, and `ConflictText` / `SettingsModel+ConflictMessages`
+render the row tooltip and the banner from it at two different
+lengths. The rejected alternative was a non-`@MainActor` lookup
+path for "just these few strings", which buys one file's
+convenience by making the manager's isolation a special case.
+The mirror this creates — one `L(…)` per enum case — is
+**guarded by the compiler**, because the switch is exhaustive: a
+new case cannot ship without a string. Only what the compiler
+cannot see needs a test (two cases resolving to the same string,
+`SystemShortcutNamesTests`).
+
 **First run seeds a starter shortcut set — base tier, only
 into emptiness.** A fresh install used to boot with zero
 shortcuts (the default mode existed but was empty): a GUI-first

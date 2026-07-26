@@ -13,7 +13,7 @@ struct KeybindingConflictsTests {
         ]
         #expect(KeybindingConflicts.hasAny(bindings))
         #expect(
-            KeybindingConflicts.text(
+            KeybindingConflicts.conflict(
                 for: bindings[0],
                 in: bindings
             ) != nil
@@ -83,10 +83,9 @@ struct KeybindingConflictsTests {
         let list = KeybindingConflicts.conflicts(in: modes)
         #expect(list.count == 1)
         #expect(list[0].name == "Close")
-        #expect(
-            list[0].target
-                == .systemShortcut("Close Window")
-        )
+        // The case, never its English name (#96): Core cannot
+        // reach `L()`, so the GUI resolves the display string.
+        #expect(list[0].target == .systemShortcut(.closeWindow))
     }
 
     @Test("conflicts(in:) names an intra-mode duplicate")

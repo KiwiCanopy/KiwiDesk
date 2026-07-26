@@ -115,7 +115,7 @@ struct ApplicationsGroup: View {
             Spacer()
             KeyRecorderField(
                 combo: binding.wrappedValue.combo,
-                conflict: KeybindingConflicts.text(
+                conflict: ConflictText.tooltip(
                     for: binding.wrappedValue,
                     in: bindings
                 ),

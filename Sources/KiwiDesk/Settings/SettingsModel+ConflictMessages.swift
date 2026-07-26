@@ -35,7 +35,7 @@ extension SettingsModel {
         let list = KeybindingConflicts.conflicts(
             in: config.modes
         )
-        if KeybindingConflicts.text(
+        if KeybindingConflicts.conflict(
             for: binding,
             in: bindings
         ) != nil {
@@ -99,13 +99,13 @@ extension SettingsModel {
                 conflict.name,
                 who
             )
-        case .systemShortcut(let name):
+        case .systemShortcut(let shortcut):
             return L(
                 "keybinding.conflict.system",
                 "Shortcut for \"%1$@\" is conflicting with "
                     + "the macOS shortcut \"%2$@\".",
                 conflict.name,
-                name
+                shortcut.localizedName
             )
         }
     }
@@ -127,12 +127,12 @@ extension SettingsModel {
                 conflict.name,
                 who
             )
-        case .systemShortcut(let name):
+        case .systemShortcut(let shortcut):
             return L(
                 "keybinding.conflict.bullet.system",
                 "\"%1$@\" with the macOS shortcut \"%2$@\"",
                 conflict.name,
-                name
+                shortcut.localizedName
             )
         }
     }

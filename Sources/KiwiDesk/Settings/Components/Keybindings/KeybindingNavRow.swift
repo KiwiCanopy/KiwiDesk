@@ -73,7 +73,7 @@ struct NavRow: View {
 
     private var conflict: String? {
         guard let index else { return nil }
-        return KeybindingConflicts.text(
+        return ConflictText.tooltip(
             for: bindings[index],
             in: bindings
         )
