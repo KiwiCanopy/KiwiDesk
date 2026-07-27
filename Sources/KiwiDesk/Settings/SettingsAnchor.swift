@@ -36,6 +36,15 @@ struct SettingsAnchor: Hashable {
     /// of the three surfaces to select, and the nil-anchor case
     /// that must request no scroll (the #326 bridge). What is left
     /// in the view is three field writes.
+    ///
+    /// A surface that its destination cannot render is dropped to
+    /// `.main` rather than refusing the whole request — the
+    /// destination is still worth opening. This is the only
+    /// decision point, so the check belongs here: the index side
+    /// is guarded by `surfacesMatchDestination`, but a hand-built
+    /// anchor carrying `.layoutMode(.floating)` would otherwise
+    /// select a tab whose editor is `EmptyView`, i.e. an empty
+    /// Layout Defaults pane.
     func resolved(
         editingStoredProfile: Bool
     ) -> (
@@ -48,7 +57,22 @@ struct SettingsAnchor: Hashable {
                 editingStoredProfile: editingStoredProfile
             )
         else { return nil }
-        return (destination, surface, anchor)
+        return (destination, renderableSurface, anchor)
+    }
+
+    /// `surface` if `destination` can show it, else `.main`.
+    private var renderableSurface: SettingsSurface {
+        switch surface {
+        case .main:
+            return .main
+        case .layoutMode(let mode):
+            let renders =
+                destination == .layoutDefaults
+                && LayoutMode.placementTabs.contains(mode)
+            return renders ? surface : .main
+        case .bar:
+            return destination == .bars ? surface : .main
+        }
     }
 }
 

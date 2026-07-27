@@ -120,11 +120,15 @@ struct SettingsView: View {
         case .bar(let editor):
             model.barEditor = editor
         }
-        // Guarded, so a destination-only deep link does not
-        // publish a nil-to-nil model change.
-        if let scroll = resolved.scroll {
-            model.pendingScroll = scroll
-        }
+        // Unconditional, including the nil case. Guarding it to
+        // avoid a nil→nil publish would mean a destination-only
+        // request stops CLEARING a `pendingScroll` an earlier
+        // reveal left unconsumed — the driver would then scroll
+        // and wash the old anchor inside the new destination.
+        // That trades a guaranteed supersede for one saved
+        // re-render, in the field whose whole design is one
+        // writer and one clearer.
+        model.pendingScroll = resolved.scroll
     }
 
     /// The structured settings shell: a fixed-width source list
@@ -260,6 +264,12 @@ struct SettingsView: View {
         guard let anchor else { return }
         model.pendingScroll = nil
         revealTask?.cancel()
+        // Captured, so a task that outlives its pane bails instead
+        // of relying on the id being absent from the new one.
+        // Cross-destination duplicate labels are legitimate (only
+        // one destination mounts), and nothing guards them — this
+        // stale window is the single place where that would bite.
+        let destination = selection
         revealTask = Task { @MainActor in
             // Yield one pass first: `apply` may have just flipped
             // the surface that *creates* the target view, and
@@ -278,7 +288,10 @@ struct SettingsView: View {
                     SettingsReveal.scroll + SettingsReveal.settle
                 )
             )
-            guard !Task.isCancelled else { return }
+            guard
+                !Task.isCancelled,
+                selection == destination
+            else { return }
             // Re-issue, un-animated. One cooperative yield drains
             // queued main-actor work but does not promise SwiftUI
             // has LAID OUT the new subtree, so the first

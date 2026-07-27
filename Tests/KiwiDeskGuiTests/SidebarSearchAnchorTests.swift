@@ -145,6 +145,62 @@ struct SidebarSearchAnchorTests {
         #expect(total == 44)
     }
 
+    /// The shell's decision, at the one place it is made. Pinned
+    /// because `apply` is `private` on a `View` and unreachable,
+    /// and because the extraction's stated purpose was to make
+    /// exactly these three things testable.
+    @Test("a request resolves to what the shell should do")
+    func resolvedDecision() {
+        pinEnglish()
+        defer { reset() }
+
+        // #18: a destination the sidebar hides is refused outright.
+        #expect(
+            SettingsAnchor(destination: .general)
+                .resolved(editingStoredProfile: true) == nil
+        )
+        // …and allowed when it is visible.
+        let live = SettingsAnchor(destination: .general)
+            .resolved(editingStoredProfile: false)
+        #expect(live?.destination == .general)
+
+        // A destination-only request must ask for NO scroll — the
+        // #326 bridge's shape.
+        #expect(live?.scroll == nil)
+        #expect(live?.surface == .main)
+
+        // A surface its destination renders passes through.
+        let bars = SettingsAnchor(
+            destination: .bars,
+            surface: .bar(.spaceBar),
+            anchor: "Space Bar colors"
+        )
+        .resolved(editingStoredProfile: false)
+        #expect(bars?.surface == .bar(.spaceBar))
+        #expect(bars?.scroll == "Space Bar colors")
+
+        // One it cannot degrades to `.main` rather than refusing
+        // the whole request: Floating has no tab, so selecting it
+        // would render an empty pane.
+        #expect(
+            SettingsAnchor(
+                destination: .layoutDefaults,
+                surface: .layoutMode(.floating)
+            )
+            .resolved(editingStoredProfile: false)?.surface
+                == .main
+        )
+        // Likewise a surface belonging to another destination.
+        #expect(
+            SettingsAnchor(
+                destination: .appearance,
+                surface: .bar(.appBar)
+            )
+            .resolved(editingStoredProfile: false)?.surface
+                == .main
+        )
+    }
+
     /// The surface of every entry must be one this destination
     /// can actually show — a `.layoutMode` on Bars would select
     /// nothing and the reveal would scroll to a view that is not

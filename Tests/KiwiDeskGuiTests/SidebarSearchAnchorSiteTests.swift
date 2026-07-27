@@ -13,12 +13,26 @@ import Testing
 /// undefined and every matching view washes at once. The index
 /// guard cannot see it, which is why this one counts **sites**.
 ///
-/// It has teeth immediately: the App Bar surface renders each of
-/// its eight colour rows and ~12 style rows three times over
-/// (global plus the Monocle and Scrolling override drawers) once
-/// those drawers are open. None of that is anchored yet — the
-/// catalog will anchor it — and this fails the moment it is,
-/// rather than shipping a plural flash.
+/// It has teeth on the shape that matters most: the App Bar's
+/// eight colour rows live at two source sites
+/// (`AppBarGroups+Colors` and `LayoutAppBarColorOverrides`), so
+/// anchoring them counts 2 and trips.
+///
+/// KNOWN LIMIT, because it counts **source sites** and therefore
+/// assumes one mount per site. `BarsSection` instantiates
+/// `LayoutAppBarGroup` **twice, co-mounted** (Monocle and
+/// Scrolling), so anything anchored inside it is one source site
+/// and two mounted views with identical text — invisible here.
+/// Its drawer label `app_bar.layout.overrides` is the live example
+/// and sits in `SidebarSearchParityTests.unindexed`, i.e. next in
+/// line for the catalog. Note the arithmetic that follows: those
+/// eight colour keys are 2 source sites but **3** co-mounted
+/// views, so `alternatelyMounted`'s value is a source-site count
+/// and NOT a mount count — do not record one for the other.
+///
+/// The durable answer is the one `app_bar.layout.title` already
+/// uses: a per-instance label built with `%1$@`, so each mount
+/// carries its own text and the ambiguity cannot arise.
 @Suite("Sidebar search anchor sites")
 struct SidebarSearchAnchorSiteTests {
     private var settingsDir: URL {
@@ -26,10 +40,12 @@ struct SidebarSearchAnchorSiteTests {
             .appendingPathComponent("Sources/KiwiDesk/Settings")
     }
 
-    /// Keys deliberately anchored at more than one site, with the
-    /// count and the reason that makes it safe. **Mutual exclusion
-    /// is the only admissible reason**: the two sites must never be
-    /// mounted together, so the shared id is never ambiguous.
+    /// Keys deliberately anchored at more than one **source
+    /// site**, with that site count and the reason it is safe.
+    /// **Mutual exclusion is the only admissible reason**: the
+    /// sites must never be mounted together, so the shared id is
+    /// never ambiguous. See the suite docstring on why a site
+    /// count is not a mount count.
     ///
     /// Fail-shut in both directions — an unlisted duplicate fails,
     /// and a listed key whose count no longer matches fails too.
@@ -51,6 +67,8 @@ struct SidebarSearchAnchorSiteTests {
     @Test("no anchor key is claimed by two co-mounted views")
     func anchorKeysAreClaimedOnce() throws {
         var sites: [String: Int] = [:]
+        var sections = 0
+        var explicit = 0
         for file in try SourceScan.swiftSources(under: settingsDir) {
             let source = try String(
                 contentsOf: file,
@@ -62,9 +80,26 @@ struct SidebarSearchAnchorSiteTests {
             for key in try SourceScan.anchorSiteKeys(in: source) {
                 sites[key, default: 0] += 1
             }
+            sections +=
+                try SourceScan
+                .sectionHeaderKeys(in: source).count
+            explicit +=
+                try SourceScan
+                .searchAnchorKeys(in: source).count
         }
-        // A zero would make every check below vacuous.
-        #expect(sites.count >= 30)
+        // Exact, not a floor. A floor of 30 against 43 real keys
+        // would still pass if the `.searchAnchor` half of
+        // `anchorSiteKeys` stopped matching — which is precisely
+        // what a modifier rename did between rounds — leaving six
+        // anchor sites unexamined while every survivor read 1.
+        #expect(sites.count == 43)
+        // And each pattern must contribute, so neither half can go
+        // quiet while the total is made up by the other. These two
+        // count DISTINCT keys per file, so a key anchored twice in
+        // one file lands once here while `sites` records both —
+        // which is why the three numbers do not sum naively.
+        #expect(sections == 37)
+        #expect(explicit == 7)
 
         for (key, count) in sites.sorted(by: { $0.key < $1.key }) {
             guard let allowed = alternatelyMounted[key] else {

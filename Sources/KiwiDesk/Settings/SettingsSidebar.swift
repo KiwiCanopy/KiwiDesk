@@ -148,12 +148,12 @@ struct SettingsSidebar: View {
         let hits = results
         guard !hits.isEmpty else { return }
         // Arrowing during an in-flight reveal is deliberately NOT
-        // cancelled: the shell owns that task, and plumbing a
-        // third closure down here would buy nothing. The stale
-        // task's remaining work resolves to no-ops — a `scrollTo`
-        // for an id the new pane does not carry, and a flash no
-        // view matches — and it still calls its own `endFlash`,
-        // so nothing is left latched.
+        // cancelled from here: the shell owns that task, and
+        // plumbing a third closure down would buy nothing. The
+        // task bails on its own once the destination has moved
+        // (it captures the one it was started for) — which closes
+        // the case rather than resting on the id happening to be
+        // absent from the new pane.
         let current = hits.firstIndex {
             $0.destination == selection
         }

@@ -69,7 +69,18 @@ struct SidebarSearchField: View {
         // ate ⇧↑ (extend selection to start) and ⌘↑ (caret to
         // start), two standard text-editing shortcuts.
         .onKeyPress { press in
-            guard press.modifiers.isEmpty else { return .ignored }
+            // Subtracting, not `isEmpty`: AppKit reports an arrow
+            // key with `.function` and `.numericPad` set, so an
+            // `isEmpty` test can refuse EVERY bare arrow and
+            // silently kill the navigation this exists to restore
+            // — a green build says nothing about it either way.
+            // Only the three intent-carrying modifiers may claim
+            // the key back for text editing.
+            guard
+                press.modifiers.intersection(
+                    [.shift, .command, .option]
+                ).isEmpty
+            else { return .ignored }
             switch press.key {
             case .upArrow:
                 onMove(.up)
