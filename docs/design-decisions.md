@@ -252,14 +252,17 @@ separators are flattened, so German's "Space-Bar-Farben" counts
 as keeping it; case is the locale's own. What it rejects is a
 translation with *zero* mentions.
 
-That distinction is the whole entry, because the guard's author
-misremembered it and filed
-[#561](https://github.com/KiwiCanopy/KiwiDesk/issues/561)
-proposing a per-key opt-out to buy back flexibility the guard
-already allows. Re-deriving it is easy and the conclusion is
-not, so it is written down and pinned by
-`LocalizationProductNameGuardTests` (a parity implementation
-fails two of its arguments).
+The distinction matters because tightening presence to parity
+reads like a strengthening and is a regression. Dropping a
+redundant repetition of a proper noun is ordinary translation
+practice, so a parity check rejects correct work and pushes the
+translator toward a literal, worse sentence to satisfy the tool.
+The defect this guard exists to catch is a locale *renaming* the
+feature; a locale naming it fewer times has not renamed
+anything. `LocalizationProductNameGuardTests` pins the
+distinction — a parity implementation fails two of its
+arguments — because a rule that is only written down invites the
+plausible-looking tightening.
 
 **No exemption file, and none is needed** — the escape hatches
 are ordered and all better than one:
@@ -286,15 +289,19 @@ sentence wrong rather than tighter. That is why presence is
 per-name.
 
 **Growth clause.** Obligation scales with authored English
-mentions, not list length, so adding a name is cheaper than it
-looks. The real hazard is that the check is case-insensitive and
-so cannot tell a *referential* mention from a *descriptive* one.
-Both current names are two-word coinages that only ever occur
-referentially; a future name built from ordinary words would
-fire on incidental prose, and that is when someone will re-argue
-the opt-out. So the existing rule in `PRODUCT_NAMES` — argue a
-name in, never add one to silence a hit — also bars a name that
-can occur descriptively.
+mentions, not with list length, so adding a name binds only the
+keys whose English already contains it — cheaper than it looks.
+The constraint that does not scale is that the check is
+case-insensitive and therefore cannot tell a *referential*
+mention from a *descriptive* one. Both current names are
+two-word coinages that only ever occur referentially, so the
+question never arises. A name built from ordinary words would
+fire on incidental prose that was never naming the feature,
+demanding a verbatim keep for a sentence that has nothing to
+keep — a guard failing on correct copy, which is the one failure
+that makes an exemption file look necessary. So the existing
+rule in `PRODUCT_NAMES` — argue a name in, never add one to
+silence a hit — also bars a name that can occur descriptively.
 
 ### Layout navigation & overflow models
 

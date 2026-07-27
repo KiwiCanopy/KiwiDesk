@@ -89,9 +89,13 @@ struct LocalizationProductNameGuardTests {
     /// never mentioning it fewer times.
     ///
     /// Unpinned, "tighten it to parity" is a one-line change that
-    /// breaks no test — and #561 was filed proposing exactly that,
-    /// as new work, by the author of the shipped guard. Prose in
-    /// `docs/translating.md` did not prevent that; this does.
+    /// breaks no test and reads like a strengthening, which is
+    /// what makes it likely. It is a regression: parity rejects a
+    /// translation naming the bar once where the English named it
+    /// twice — ordinary practice, not a dropped name — and pushes
+    /// the translator toward a literal, worse sentence to satisfy
+    /// the tool. `docs/translating.md` states the rule; this makes
+    /// breaking it fail.
     @Test(
         "fewer mentions than the English still passes",
         arguments: [
