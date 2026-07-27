@@ -23,7 +23,7 @@ struct PaletteShelf: View {
 
     var body: some View {
         SettingsSection(
-            L("palettes.title", "Color palette"),
+            SettingsCatalog.appearance.paletteShelf,
             caption: L(
                 "palettes.caption",
                 "Apply a bundled or saved set of colors to the "

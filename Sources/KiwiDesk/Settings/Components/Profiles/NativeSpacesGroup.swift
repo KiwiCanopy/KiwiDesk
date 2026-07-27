@@ -22,10 +22,7 @@ struct NativeSpacesGroup: View {
 
     var body: some View {
         SettingsSection(
-            L(
-                "native_spaces.title",
-                "Profiles per macOS Space"
-            ),
+            SettingsCatalog.profiles.nativeSpaces,
             // The empty-string guard keeps a caller that gates
             // without copy from rendering a live `?` over an
             // empty popover — no anchor is better than a blank

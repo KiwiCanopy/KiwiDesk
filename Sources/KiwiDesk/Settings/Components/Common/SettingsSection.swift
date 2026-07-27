@@ -34,12 +34,23 @@ struct SettingsGroupHeader: View {
 /// controls' help takes over and the anchor would gloss nothing.
 struct SettingsSection<Content: View>: View {
     let title: String
+    /// The search anchor id, from the `SettingsControl` this
+    /// section was declared as; nil for the String init, whose
+    /// remaining callers are the deliberately-unindexed
+    /// computed titles (`%1$@ bar`).
+    private let anchorID: String?
     let symbol: String?
     let caption: String?
     let subsection: Bool
     let help: String?
     @ViewBuilder let content: Content
 
+    /// Computed-title init: renders identically but is NOT a
+    /// search anchor. An indexable section takes a
+    /// `SettingsControl` instead — declaring it in the catalog
+    /// is what makes it findable, and the catalog's declaration
+    /// is the one list (`SettingsCatalogSiteTests` refuses a
+    /// literal `L()` title here).
     init(
         _ title: String,
         symbol: String? = nil,
@@ -49,6 +60,28 @@ struct SettingsSection<Content: View>: View {
         @ViewBuilder content: () -> Content
     ) {
         self.title = title
+        self.anchorID = nil
+        self.symbol = symbol
+        self.caption = caption
+        self.subsection = subsection
+        self.help = help
+        self.content = content()
+    }
+
+    /// The catalog init: one declaration supplies the rendered
+    /// title AND the search anchor, so a section is findable by
+    /// existing (#277) and its anchor id is stable however the
+    /// localized text collides or changes.
+    @MainActor init(
+        _ control: SettingsControl,
+        symbol: String? = nil,
+        caption: String? = nil,
+        subsection: Bool = false,
+        help: String? = nil,
+        @ViewBuilder content: () -> Content
+    ) {
+        self.title = control.text
+        self.anchorID = control.id
         self.symbol = symbol
         self.caption = caption
         self.subsection = subsection
@@ -57,6 +90,14 @@ struct SettingsSection<Content: View>: View {
     }
 
     var body: some View {
+        if let anchorID {
+            core.searchAnchor(anchorID)
+        } else {
+            core
+        }
+    }
+
+    private var core: some View {
         VStack(alignment: .leading, spacing: 8) {
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 6) {
@@ -85,12 +126,11 @@ struct SettingsSection<Content: View>: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            // Every section is a search anchor by existing, not
-            // by remembering to opt in (#277) — the title it was
-            // handed IS the anchor id, so there is no second
-            // identifier to keep in step. The wash marks the
-            // heading; the scroll target below is the whole card.
-            .searchFlash(title)
+            // A catalog-declared section is a search anchor by
+            // existing (#277) — its `SettingsControl` supplies
+            // the stable id. The wash marks the heading; the
+            // scroll target is the whole card (`body`).
+            .searchFlash(anchorID ?? "")
             VStack(alignment: .leading, spacing: 8) {
                 content
             }
@@ -108,6 +148,5 @@ struct SettingsSection<Content: View>: View {
                     )
             )
         }
-        .searchAnchor(title)
     }
 }

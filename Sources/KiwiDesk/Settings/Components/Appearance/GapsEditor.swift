@@ -14,75 +14,77 @@ struct GapsEditor: View {
     @State private var outerExpanded = false
     @State private var innerExpanded = false
 
+    /// The drawers' catalog declarations — the same values the
+    /// index enumerates, so a reveal targeting an edge row knows
+    /// its drawer by construction.
+    private var perEdge: SettingsDrawer<GapEdgeControls> {
+        SettingsCatalog.appearance.gapsPerEdge
+    }
+
+    private var perAxis: SettingsDrawer<GapAxisControls> {
+        SettingsCatalog.appearance.gapsPerAxis
+    }
+
     var body: some View {
-        SettingsSection(L("gaps.title", "Gaps")) {
+        SettingsSection(SettingsCatalog.appearance.gapsCard) {
             GapsDiagram(outer: outer, inner: inner)
             masterRow(
                 label: L("gaps.outer", "Outer gap"),
                 unified: outerUnified,
                 mixed: outerMixed
             )
-            // Trailing-label form so the reveal wash can sit on
-            // the label alone; flashing the group would tint the
-            // four rows below it once expanded.
-            DisclosureGroup(isExpanded: outerDisclosure) {
+            SettingsDisclosure(
+                perEdge,
+                isExpanded: outerDisclosure
+            ) {
                 VStack(alignment: .leading, spacing: 6) {
                     GapRow(
-                        label: L("gaps.top", "Top"),
+                        control: perEdge.children.edgeTop,
                         value: $model.config.settings
                             .gapsGlobal.outer.top
                     )
                     GapRow(
-                        label: L("gaps.bottom", "Bottom"),
+                        control: perEdge.children.edgeBottom,
                         value: $model.config.settings
                             .gapsGlobal.outer.bottom
                     )
                     GapRow(
-                        label: L("gaps.left", "Left"),
+                        control: perEdge.children.edgeLeft,
                         value: $model.config.settings
                             .gapsGlobal.outer.left
                     )
                     GapRow(
-                        label: L("gaps.right", "Right"),
+                        control: perEdge.children.edgeRight,
                         value: $model.config.settings
                             .gapsGlobal.outer.right
                     )
                 }
                 .padding(.top, 4)
-            } label: {
-                Text(L("gaps.per_edge", "Per-edge…"))
-                    .searchFlash(
-                        L("gaps.per_edge", "Per-edge…")
-                    )
             }
-            .searchAnchor(L("gaps.per_edge", "Per-edge…"))
             Divider()
             masterRow(
                 label: L("gaps.inner", "Inner gap"),
                 unified: innerUnified,
                 mixed: innerMixed
             )
-            DisclosureGroup(isExpanded: innerDisclosure) {
+            SettingsDisclosure(
+                perAxis,
+                isExpanded: innerDisclosure
+            ) {
                 VStack(alignment: .leading, spacing: 6) {
                     GapRow(
-                        label: L("gaps.horizontal", "Horizontal"),
+                        control: perAxis.children.axisHorizontal,
                         value: $model.config.settings
                             .gapsGlobal.inner.horizontal
                     )
                     GapRow(
-                        label: L("gaps.vertical", "Vertical"),
+                        control: perAxis.children.axisVertical,
                         value: $model.config.settings
                             .gapsGlobal.inner.vertical
                     )
                 }
                 .padding(.top, 4)
-            } label: {
-                Text(L("gaps.per_axis", "Per-axis…"))
-                    .searchFlash(
-                        L("gaps.per_axis", "Per-axis…")
-                    )
             }
-            .searchAnchor(L("gaps.per_axis", "Per-axis…"))
         }
     }
 
@@ -205,14 +207,26 @@ struct GapsEditor: View {
 
 // MARK: - GapRow
 
-/// A slider row for a single gap value (0–100 pt).
+/// A slider row for a single gap value (0–100 pt). Takes its
+/// catalog descriptor, so the row is a search anchor by existing
+/// — the first drawer-interior controls the catalog reaches
+/// (#277); a reveal expands the drawer (`SettingsDisclosure`)
+/// and lands here. The wash covers the whole row: unlike a
+/// section card there is no expanded content below the label to
+/// tint by accident.
 private struct GapRow: View {
-    let label: String
+    let control: SettingsControl
     @Binding var value: CGFloat
 
     var body: some View {
+        row
+            .searchFlash(control.id)
+            .searchAnchor(control.id)
+    }
+
+    private var row: some View {
         HStack {
-            Text(label)
+            Text(control.text)
                 .frame(
                     width: SettingsMetrics.labelColumn,
                     alignment: .leading

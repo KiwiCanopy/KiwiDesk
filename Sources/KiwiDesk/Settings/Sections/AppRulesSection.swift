@@ -30,7 +30,7 @@ struct AppRulesSection: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 SettingsSection(
-                    L("app_rules.section.title", "Rules per app")
+                    SettingsCatalog.appRules.rulesPerApp
                 ) {
                     overrideIndicator
                     Text(rulesCaption)

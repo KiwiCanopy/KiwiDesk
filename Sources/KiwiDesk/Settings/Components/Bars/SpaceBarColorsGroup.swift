@@ -35,31 +35,25 @@ struct SpaceBarColorsGroup: View {
             .modifier(gate)
         accentLadder
             .modifier(gate)
-        DisclosureGroup(isExpanded: $advancedColorsExpanded) {
-            AppBarColorGrid { advancedColors }
-                .padding(.top, 8)
-                .modifier(gate)
-        } label: {
-            Text(
-                L("bars.advanced_colors", "Advanced colors")
-            )
-            .font(.subheadline)
-            .searchFlash(
-                L("bars.advanced_colors", "Advanced colors")
-            )
-        }
-        // LOAD-BEARING, and so is its twin in `AppBarGroups`: the
-        // index carries this label surface-free so a reveal lands
-        // on whichever bar editor is already open, rather than
+        // LOAD-BEARING, and so is its twin in `AppBarGroups`:
+        // both drawers mount the ONE surface-free
+        // `advancedColors` declaration, so a reveal lands on
+        // whichever bar editor is already open, rather than
         // yanking a Space Bar reader across the switch to an
         // identically-named drawer. Only one editor is ever
         // mounted, so the shared id is never ambiguous — but
-        // deleting this line leaves the parity guard green (the
-        // App Bar site still supplies the key) while silently
-        // restoring the scroll-to-nothing bug for this side.
-        .searchAnchor(
-            L("bars.advanced_colors", "Advanced colors")
-        )
+        // deleting this mount silently restores the
+        // scroll-to-nothing bug for this side
+        // (`SettingsCatalogSiteTests` pins both references).
+        SettingsDisclosure(
+            SettingsCatalog.bars.advancedColors,
+            chrome: .inline(font: .subheadline),
+            isExpanded: $advancedColorsExpanded
+        ) {
+            AppBarColorGrid { advancedColors }
+                .padding(.top, 8)
+                .modifier(gate)
+        }
     }
 
     /// One-shot copy, then fully independent — never a live

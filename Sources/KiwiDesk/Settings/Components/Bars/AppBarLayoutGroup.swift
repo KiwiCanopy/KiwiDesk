@@ -11,12 +11,18 @@ import SwiftUI
 struct LayoutAppBarGroup: View {
     let title: String
     let mode: LayoutMode
+    /// This mount's own catalog declaration
+    /// (`SettingsCatalog.bars.monocleBarOverrides` /
+    /// `.scrollingBarOverrides`): the group renders twice,
+    /// co-mounted, so a shared anchor id would make `scrollTo`
+    /// undefined — each instance carries its own (#277).
+    let overridesDrawer: SettingsDrawer<SettingsNoChildren>
     @Binding var bar: LayoutAppBar
     let global: AppBarStyle
     /// Collapsed by default: the override rows (menu pickers
     /// especially) are the Appearance tab's dominant mount
-    /// cost, so a `DisclosureGroup` keeps them unbuilt until
-    /// the user opens them — the enable toggle stays outside.
+    /// cost, so a disclosure keeps them unbuilt until the user
+    /// opens them — the enable toggle stays outside.
     @State private var overridesExpanded = false
 
     var body: some View {
@@ -35,17 +41,18 @@ struct LayoutAppBarGroup: View {
             // case docs/ui-patterns.md names. The drawer stays
             // collapsed by default, so the cost of keeping it is
             // one dimmed row, not a wall of controls.
-            DisclosureGroup(isExpanded: $overridesExpanded) {
-                // The gate goes on the CONTENT, never the
-                // `DisclosureGroup` — a disabled disclosure
-                // refuses to expand (owner-confirmed on device,
-                // #527), so gating the whole thing left the
-                // stored values exactly as concealed as removing
-                // the rows would have, which is the one outcome
-                // the comment above says greying avoids. The
-                // label stays live: the user can open the drawer,
-                // read what is kept, and see it is not editable
-                // yet.
+            //
+            // The gate goes on the CONTENT, never the disclosure
+            // — a disabled disclosure refuses to expand
+            // (owner-confirmed on device, #527), so gating the
+            // whole thing left the stored values exactly as
+            // concealed as removing the rows would have. The
+            // label stays live, and doubles as the gate's help
+            // anchor: every `?` in the dimmed rows is dead.
+            SettingsDisclosure(
+                overridesDrawer,
+                isExpanded: $overridesExpanded
+            ) {
                 overrides
                     .modifier(
                         GreyOut(
@@ -53,26 +60,15 @@ struct LayoutAppBarGroup: View {
                             help: overridesDisabledHelp
                         )
                     )
-            } label: {
-                // The live label doubles as the gate's help
-                // anchor (#527) — every `?` in the dimmed rows
-                // is dead. Keep the literal `L(...)` inline:
-                // the sidebar-search walker reads label blocks.
-                HStack(spacing: 6) {
-                    Text(L("app_bar.layout.overrides", "Overrides"))
-                    if !bar.enabled {
-                        HelpButton(
-                            explanation: overridesDisabledHelp,
-                            subject: overridesLabel
-                        )
-                    }
+            } accessory: {
+                if !bar.enabled {
+                    HelpButton(
+                        explanation: overridesDisabledHelp,
+                        subject: overridesDrawer.control.text
+                    )
                 }
             }
         }
-    }
-
-    private var overridesLabel: String {
-        L("app_bar.layout.overrides", "Overrides")
     }
 
     /// Why the rows are dimmed — the live `?` on the drawer

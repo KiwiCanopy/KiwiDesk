@@ -19,7 +19,7 @@ struct FocusBorderEditor: View {
         // help affordance inside the greyed block is dead, so the
         // why-off explanation must live outside it.
         SettingsSection(
-            L("border.title", "Focus border"),
+            SettingsCatalog.appearance.focusBorder,
             caption: L(
                 "border.caption",
                 "Outlines the focused window so it stands out "

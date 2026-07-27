@@ -2,16 +2,16 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Sidebar search: matches the query against the destination
-/// titles and everything `SidebarSearchIndex` lists inside them —
+/// titles and everything `SettingsCatalog` declares inside them —
 /// localized, so search finds what the user actually sees.
 ///
 /// Tier 1 (#90) stopped at naming the destination and left the
 /// user to hunt. Tier 2 (#277) makes a hit *land*: the result
 /// carries a `SettingsAnchor`, so picking it selects the
 /// destination, switches the local surface that renders the match
-/// (a Layout Defaults mode tab, the Bars switch), scrolls the
-/// pane to it and flashes it. Per-control labels are the
-/// remaining half of tier 2.
+/// (a Layout Defaults mode tab, the Bars switch), expands the
+/// drawer holding it if collapsed, scrolls the pane to it and
+/// flashes it.
 
 /// One search hit, at most one per destination.
 ///
@@ -90,24 +90,25 @@ enum SidebarSearch {
             )
         }
         guard
-            let hit = entries(of: destination).first(where: {
-                $0.text.searchMatches(query)
-            })
+            let hit = SettingsCatalog.entries(of: destination)
+                .first(where: {
+                    $0.control.text.searchMatches(query)
+                })
         else { return nil }
         return SidebarSearchResult(
             destination: destination,
             anchor: SettingsAnchor(
                 destination: destination,
-                surface: hit.surface,
-                anchor: hit.text
+                surface: hit.control.surface,
+                anchor: hit.control.id
             ),
-            primary: hit.text,
+            primary: hit.control.text,
             path: path(to: hit, in: destination)
         )
     }
 
     /// The breadcrumb above a hit: the destination, then the
-    /// surface that renders it.
+    /// surface that renders it, then the drawer it sits inside.
     ///
     /// The surface is always named when there is one — including
     /// the Bars switch's default side. Naming "Space Bar" tells
@@ -115,16 +116,21 @@ enum SidebarSearch {
     /// information they came for; suppressing it because that
     /// side happens to open first would leak a default into copy.
     /// A mode tab whose own name IS the match ("Stack") is not
-    /// repeated above itself.
+    /// repeated above itself. A drawer-interior hit names its
+    /// drawer ("Appearance › Per-edge…"), since a bare "Top"
+    /// says nothing about which control was found.
     @MainActor private static func path(
-        to entry: SidebarSearchEntry,
+        to entry: SettingsIndexEntry,
         in destination: SettingsDestination
     ) -> [String] {
         var path = [destination.title]
-        if let surface = entry.surface.displayName,
-            surface != entry.text
+        if let surface = entry.control.surface.displayName,
+            surface != entry.control.text
         {
             path.append(surface)
+        }
+        if let parent = entry.parent {
+            path.append(parent.text)
         }
         return path
     }

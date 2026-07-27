@@ -9,7 +9,7 @@ struct MonocleEditor: View {
 
     var body: some View {
         SettingsSection(
-            L("layout.monocle.name", "Monocle"),
+            SettingsCatalog.layoutMode(.monocle),
             symbol: LayoutMode.monocle.glyph
         ) {
             MonocleSchematic(

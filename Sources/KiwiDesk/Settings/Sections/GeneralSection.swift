@@ -31,7 +31,7 @@ struct GeneralSection: View {
     /// persists immediately).
     private var languageSection: some View {
         SettingsSection(
-            L("general.language.title", "Language")
+            SettingsCatalog.general.languageCard
         ) {
             // Uses the house `DropdownRow` (shared label axis,
             // `.menu` style, large control) like every other
@@ -88,7 +88,7 @@ struct GeneralSection: View {
     /// beneath. Falls back to the pre-logo glyph row when the
     /// bundled resource is missing.
     private var aboutSection: some View {
-        SettingsSection(L("general.about.title", "About")) {
+        SettingsSection(SettingsCatalog.general.aboutCard) {
             VStack(spacing: 10) {
                 aboutBrand
                 Text(KiwiDeskVersion.displayString)
@@ -150,7 +150,11 @@ struct GeneralSection: View {
     }
 
     private var advancedSection: some View {
-        DisclosureGroup(isExpanded: $advancedExpanded) {
+        SettingsDisclosure(
+            SettingsCatalog.general.generalAdvanced,
+            chrome: .card,
+            isExpanded: $advancedExpanded
+        ) {
             VStack(alignment: .leading, spacing: 8) {
                 Text(
                     L(
@@ -229,22 +233,7 @@ struct GeneralSection: View {
             }
             .padding(.top, 8)
             .frame(maxWidth: .infinity, alignment: .leading)
-        } label: {
-            Text(L("general.advanced.title", "Advanced"))
-                .font(.headline)
-                .searchFlash(
-                    L("general.advanced.title", "Advanced")
-                )
         }
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color(nsColor: .controlBackgroundColor))
-        )
-        // Outside the card chrome, so `scrollTo(anchor: .top)`
-        // lands on the card's top edge rather than 12 pt inside
-        // it with the rounded border off-screen.
-        .searchAnchor(L("general.advanced.title", "Advanced"))
     }
 
     private var editLuaCaption: String {

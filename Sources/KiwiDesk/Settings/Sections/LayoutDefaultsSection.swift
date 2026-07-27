@@ -107,10 +107,7 @@ struct LayoutDefaultsSection: View {
 
     private var minSizeSection: some View {
         SettingsSection(
-            L(
-                "layout_defaults.min_window_size",
-                "Minimum window size"
-            ),
+            SettingsCatalog.layoutDefaults.minWindowSize,
             caption: L(
                 "layout_defaults.min_window_size_caption",
                 "Windows never tile smaller than this. It also "

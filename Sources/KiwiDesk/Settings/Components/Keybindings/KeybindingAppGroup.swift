@@ -30,10 +30,7 @@ struct ApplicationsGroup: View {
 
     var body: some View {
         SettingsSection(
-            L(
-                "shortcuts.section.open_applications",
-                "Open applications"
-            )
+            SettingsCatalog.shortcuts.openApplications
         ) {
             ForEach(orderedAppIDs, id: \.self) { id in
                 if let binding = bindingFor(id) {

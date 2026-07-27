@@ -29,12 +29,30 @@ struct SettingsNavigation {
     /// the re-trigger token.
     private(set) var flash: SettingsFlash?
     private var flashToken = 0
-    /// Phase 2 of a reveal: the anchor whose pane is now showing
-    /// and can be scrolled. Minted by `SettingsView.apply` once
-    /// the destination and surface are set, consumed by the
-    /// detail pane's scroll driver — see `pendingReveal` for why
-    /// the two phases are separate fields.
+    /// Phase 2 of a reveal: the anchor id whose pane is now
+    /// showing and can be scrolled. Minted by
+    /// `SettingsView.apply` once the destination and surface are
+    /// set, consumed by the detail pane's scroll driver — see
+    /// `pendingReveal` for why the two phases are separate
+    /// fields.
     var pendingScroll: String?
+    /// The reveal's target id, standing from `apply` until the
+    /// flash ends — unlike `pendingScroll`, which the scroll
+    /// driver consumes immediately. Read (never written) by
+    /// `SettingsDisclosure` through the environment, so a drawer
+    /// holding the target can expand before the driver's
+    /// re-issued `scrollTo`. One writer (`SettingsView.apply`),
+    /// one clearer (`endFlash`) — the part-1 #326 bug was two
+    /// observers of one field, one of which cleared it in
+    /// unspecified `onAppear` order.
+    private(set) var revealTarget: String?
+
+    /// `apply`'s write, unconditional for the same supersede
+    /// reason as `pendingScroll`: a destination-only request
+    /// must clear a stale target too.
+    mutating func setRevealTarget(_ id: String?) {
+        revealTarget = id
+    }
     /// The Layout Defaults mode tab, and the Bars editor behind
     /// the App Bar / Space Bar switch.
     ///
@@ -94,8 +112,13 @@ struct SettingsNavigation {
     /// navigates back to it — no user action involved. The token
     /// check makes a late finisher from a superseded flash unable
     /// to cancel the current one.
+    ///
+    /// Also retires `revealTarget` (same token guard): clearing
+    /// it is what lets a later reveal of the same id register as
+    /// a change on a drawer the user has re-collapsed meanwhile.
     mutating func endFlash(token: Int) {
         guard flash?.token == token else { return }
         flash = nil
+        revealTarget = nil
     }
 }

@@ -30,10 +30,7 @@ struct OrphanedShortcutsGroup: View {
         )
         if !commands.isEmpty {
             SettingsSection(
-                L(
-                    "shortcuts.section.inactive",
-                    "Inactive shortcuts"
-                )
+                SettingsCatalog.shortcuts.inactiveShortcuts
             ) {
                 Text(caption)
                     .font(.caption)

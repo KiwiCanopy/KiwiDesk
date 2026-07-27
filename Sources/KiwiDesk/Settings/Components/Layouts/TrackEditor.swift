@@ -10,7 +10,7 @@ struct TrackEditor: View {
 
     var body: some View {
         SettingsSection(
-            L("layout.track.name", "Track"),
+            SettingsCatalog.layoutMode(.track),
             symbol: LayoutMode.track.glyph
         ) {
             TrackSchematic(

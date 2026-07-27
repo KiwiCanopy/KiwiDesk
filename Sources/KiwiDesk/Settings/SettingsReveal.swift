@@ -35,7 +35,7 @@ enum SettingsReveal {
     }
 }
 
-/// A live flash: which anchor, plus a token bumped once per
+/// A live flash: which anchor id, plus a token bumped once per
 /// reveal. The token exists so that revealing the *same* anchor
 /// twice is a new value — without it the flash's `.task(id:)`
 /// would see an unchanged id and never re-fire, so searching the
@@ -49,13 +49,28 @@ private struct SettingsFlashKey: EnvironmentKey {
     static let defaultValue: SettingsFlash? = nil
 }
 
+private struct SettingsRevealTargetKey: EnvironmentKey {
+    static let defaultValue: String? = nil
+}
+
 extension EnvironmentValues {
-    /// The flash in progress, keyed by resolved label text.
-    /// Compared by each anchored view against its own title; nil
-    /// while nothing is being revealed.
+    /// The flash in progress, keyed by anchor id (a
+    /// `SettingsControl.id`). Compared by each anchored view
+    /// against its own id; nil while nothing is being revealed.
     var settingsFlash: SettingsFlash? {
         get { self[SettingsFlashKey.self] }
         set { self[SettingsFlashKey.self] = newValue }
+    }
+
+    /// The anchor id a reveal is heading for, standing from the
+    /// moment the request is applied until its flash ends — so a
+    /// `SettingsDisclosure` holding that control can expand
+    /// before the scroll driver's re-issued `scrollTo` lands.
+    /// One writer and one clearer, both in `SettingsView`;
+    /// drawers only read it.
+    var settingsRevealTarget: String? {
+        get { self[SettingsRevealTargetKey.self] }
+        set { self[SettingsRevealTargetKey.self] = newValue }
     }
 }
 
@@ -114,16 +129,23 @@ private struct SearchRevealFlash: ViewModifier {
 
 extension View {
     /// Tags this view as the scroll destination for `anchor` —
-    /// its own resolved label text. A one-line wrapper over
-    /// `.id()` on purpose: it names the intent at ~40 call
-    /// sites and keeps the "anchor identity IS the label text"
-    /// decision in one place to revisit.
+    /// a `SettingsControl.id`, never display text (Appearance
+    /// renders "Color" six times at once; ids are stable and
+    /// unique per co-mounted view by construction). A one-line
+    /// wrapper over `.id()` on purpose: it names the intent and
+    /// keeps the identity decision in one place to revisit.
     ///
     /// Goes on the whole card, while `searchFlash` goes on its
     /// header: the scroll lands at the card's top so the group
     /// heading is on screen (a header-less control reads as
     /// disembodied), and the wash marks the heading rather than
     /// washing a whole card in accent.
+    ///
+    /// Applied by the shared primitives only —
+    /// `SettingsSection`, `SettingsDisclosure`, and the anchored
+    /// row shapes — never ad hoc at feature call sites
+    /// (`SettingsCatalogSiteTests` pins the file set), so the
+    /// pairing rules those primitives encode cannot be skipped.
     func searchAnchor(_ anchor: String) -> some View {
         id(anchor)
     }
@@ -134,31 +156,3 @@ extension View {
     }
 
 }
-
-// MARK: - Anchoring a drawer
-//
-// An indexed `DisclosureGroup` needs BOTH modifiers, applied the
-// same way `SettingsSection` applies them to itself:
-// `.searchFlash` on the **label** content, `.searchAnchor` on the
-// whole group and OUTSIDE any card padding or background it
-// carries. Two mistakes this spells out because both were made:
-//
-//  - Flashing the group washes its *contents* too once the drawer
-//    is expanded — four `GapRow`s under 0.18 accent — which is the
-//    whole-card wash this treatment exists to avoid.
-//  - Anchoring inside a hand-rolled card's `.padding(12)` parks
-//    the content at the viewport top with the card's rounded
-//    border 12 pt above it, off-screen.
-//
-// `SettingsSection` cannot forget, because it anchors from the
-// title it is handed; a bare `DisclosureGroup` has no such choke
-// point, and the first cut of #277 shipped six unanchored drawers
-// — searching "Per-edge…" opened Appearance and sat at the top of
-// the pane, since no view claimed that id.
-// `SidebarSearchParityTests.indexKeysAreAnchored` now fails on an
-// indexed drawer key with no `.searchAnchor(L(...))`.
-//
-// The durable fix is a `SettingsDisclosure` wrapper owning both,
-// so the pairing stops being a call-site convention. It lands with
-// the per-control catalog, which needs that wrapper anyway to
-// drive `isExpanded` for a hit *inside* a drawer.

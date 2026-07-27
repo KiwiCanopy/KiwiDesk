@@ -22,7 +22,7 @@ struct BehaviorSection: View {
     }
 
     private var mouseSection: some View {
-        SettingsSection(L("behavior.mouse.title", "Mouse")) {
+        SettingsSection(SettingsCatalog.behavior.mouseCard) {
             SegmentedPicker(
                 L(
                     "behavior.mouse.resize_action",
@@ -68,7 +68,7 @@ struct BehaviorSection: View {
 
     private var animationsSection: some View {
         SettingsSection(
-            L("behavior.animations.title", "Animations")
+            SettingsCatalog.behavior.animationsCard
         ) {
             Toggle(
                 L(
@@ -154,7 +154,7 @@ struct BehaviorSection: View {
     /// the only strategy.
     private var quitSection: some View {
         SettingsSection(
-            L("behavior.quit.title", "On quit"),
+            SettingsCatalog.behavior.quitCard,
             caption: L(
                 "behavior.quit.caption",
                 "Before KiwiDesk stops, it arranges managed "

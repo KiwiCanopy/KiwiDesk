@@ -63,9 +63,11 @@ section: the pane scrolls to that group and tints it for about a
 second so your eye lands on it, and anything that would have
 hidden it is switched first — a hit inside one layout's editor
 opens that layout's tab, and a hit on the Space Bar opens the
-Space Bar side of the Bars switch. If the match is a collapsed
-drawer ("Per-edge…", "Advanced"), you land on the drawer's own
-row, highlighted, ready to open.
+Space Bar side of the Bars switch. If the match sits **inside** a
+collapsed drawer (searching "top" finds the per-edge gap
+sliders), the drawer opens on the way so you land on the row
+itself; a hit on the drawer's own name ("Per-edge…", "Advanced")
+lands on that row, highlighted, ready to open.
 
 Only the first match per section is listed, so a broad word like
 "color" gives you one row per section instead of a wall of them;

@@ -75,7 +75,7 @@ struct SidebarSearchTests {
                         destination: .appearance,
                         anchor: SettingsAnchor(
                             destination: .appearance,
-                            anchor: "Gaps"
+                            anchor: "gaps.title"
                         ),
                         primary: "Gaps",
                         path: ["Appearance"]
@@ -142,8 +142,8 @@ struct SidebarSearchTests {
         defer { reset() }
         for destination in SettingsDestination.allCases {
             #expect(
-                !SidebarSearch.entries(of: destination).isEmpty,
-                "\(destination) has no index entries"
+                !SettingsCatalog.entries(of: destination).isEmpty,
+                "\(destination) has no catalog entries"
             )
         }
     }

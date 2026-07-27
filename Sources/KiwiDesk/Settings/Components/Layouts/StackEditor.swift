@@ -13,7 +13,7 @@ struct StackEditor: View {
 
     var body: some View {
         SettingsSection(
-            L("layout.stack.name", "Stack"),
+            SettingsCatalog.layoutMode(.stack),
             symbol: LayoutMode.stack.glyph
         ) {
             StackSchematic(

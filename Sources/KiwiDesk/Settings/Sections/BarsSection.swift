@@ -65,12 +65,16 @@ struct BarsSection: View {
         LayoutAppBarGroup(
             title: L("layout.monocle.name", "Monocle"),
             mode: .monocle,
+            overridesDrawer:
+                SettingsCatalog.bars.monocleBarOverrides,
             bar: $model.config.settings.monocle.appBar,
             global: model.config.settings.appBarStyle
         )
         LayoutAppBarGroup(
             title: L("layout.scrolling.name", "Scrolling"),
             mode: .scrolling,
+            overridesDrawer:
+                SettingsCatalog.bars.scrollingBarOverrides,
             bar: $model.config.settings.scrolling.appBar,
             global: model.config.settings.appBarStyle
         )

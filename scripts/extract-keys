@@ -85,7 +85,13 @@ English template, and interpolation arguments (`L(key, english,
 args...)`, `String(format:)`-style with positional specifiers
 like `%1$@`) — both forms are recognized; the extractor only
 ever reads the key and English template, never the trailing
-arguments.
+arguments. The Settings control catalog's descriptor shapes
+(`SettingsControl(key, english, ...)` and
+`SettingsDrawer(key, english, ...)`, #277) carry the same
+leading tuple and are scanned identically — their trailing
+labelled arguments (`surface:`, `instance:`, `children:`) are
+skipped. `ControlKeyExtractionTests` is that shape's sibling
+suite.
 
 Both Sources/KiwiDesk (the GUI) and Sources/KiwiDeskCore (where
 `L` itself and `LocalizationManager` live) are scanned — a
@@ -186,11 +192,15 @@ _STRING_LITERAL = re.compile(
     re.DOTALL,
 )
 
-# `L(` then a string literal, a comma, then a string literal,
-# then either `)` (the 2-arg form) or `,` (the interpolating
-# form — trailing `args...` are never captured, only skipped).
+# `L(` — or a Settings catalog descriptor (#277), whose first
+# two arguments are the same key/English tuple: `SettingsControl(`
+# / `SettingsDrawer(` — then a string literal, a comma, then a
+# string literal, then either `)` (the 2-arg form) or `,` (the
+# interpolating / labelled-argument form — trailing arguments
+# such as `surface:`, `instance:`, `children:` or `args...` are
+# never captured, only skipped).
 _CALL = re.compile(
-    r"\bL\(\s*(?P<key>"
+    r"\b(?:L|SettingsControl|SettingsDrawer)\(\s*(?P<key>"
     + _STRING_LITERAL.pattern
     + r")\s*,\s*(?P<english>"
     + _STRING_LITERAL.pattern

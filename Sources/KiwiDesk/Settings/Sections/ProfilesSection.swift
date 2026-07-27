@@ -67,7 +67,7 @@ struct ProfilesSection: View {
 
     private var profileSection: some View {
         SettingsSection(
-            L("profiles.saved.title", "Saved profiles")
+            SettingsCatalog.profiles.savedProfiles
         ) {
             if model.profileSummaries.isEmpty
                 && model.brokenProfiles.isEmpty

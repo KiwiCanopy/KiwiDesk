@@ -21,7 +21,7 @@ struct ScrollingEditor: View {
 
     var body: some View {
         SettingsSection(
-            L("layout.scrolling.name", "Scrolling"),
+            SettingsCatalog.layoutMode(.scrolling),
             symbol: LayoutMode.scrolling.glyph
         ) {
             ScrollingSchematic(

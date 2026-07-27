@@ -18,7 +18,7 @@ struct DragVisualsEditor: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             SettingsSection(
-                L("drag.title", "Drag & drop"),
+                SettingsCatalog.appearance.dragCard,
                 caption: L(
                     "drag.caption",
                     "Drag a window onto another to swap "
@@ -34,7 +34,7 @@ struct DragVisualsEditor: View {
             }
             HStack(alignment: .top, spacing: 16) {
                 column(
-                    title: ghostLabel,
+                    control: SettingsCatalog.appearance.dragGhost,
                     caption: L(
                         "drag.ghost.caption",
                         "Marks the position your window is "
@@ -43,7 +43,8 @@ struct DragVisualsEditor: View {
                     visual: $model.config.settings.dragGhost
                 )
                 column(
-                    title: dropZoneLabel,
+                    control: SettingsCatalog.appearance
+                        .dragDropZone,
                     caption: L(
                         "drag.drop_zone.caption",
                         "Marks the position your window will "
@@ -59,7 +60,7 @@ struct DragVisualsEditor: View {
     /// below, on the narrowed Drag label axis (#231) so the
     /// half-width slider keeps real travel.
     private func column(
-        title: String,
+        control: SettingsControl,
         caption: String,
         visual: Binding<DragVisual>
     ) -> some View {
@@ -67,7 +68,7 @@ struct DragVisualsEditor: View {
         // the visual off the column below the Enabled toggle is
         // dimmed, and help inside a greyed block is dead.
         SettingsSection(
-            title,
+            control,
             caption: caption,
             subsection: true,
             help: visual.wrappedValue.enabled
@@ -89,11 +90,6 @@ struct DragVisualsEditor: View {
             \.settingsLabelColumn,
             SettingsMetrics.dragColumnLabelColumn
         )
-    }
-
-    private var ghostLabel: String { L("drag.ghost", "Ghost") }
-    private var dropZoneLabel: String {
-        L("drag.drop_zone", "Drop zone")
     }
 }
 

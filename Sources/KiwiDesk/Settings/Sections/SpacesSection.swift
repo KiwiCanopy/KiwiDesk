@@ -100,7 +100,7 @@ struct SpacesSection: View {
     static let listSpace = "spacesList"
 
     private var spacesSection: some View {
-        SettingsSection(L("spaces.title", "Spaces")) {
+        SettingsSection(SettingsCatalog.spaces.spacesCard) {
             Text(spacesCaption)
                 .font(.caption)
                 .foregroundStyle(.secondary)

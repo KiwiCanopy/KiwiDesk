@@ -1,8 +1,8 @@
 import Foundation
 
 /// Stateless primitives shared by the source-scanning parity
-/// guards: the search-index guards (`SidebarSearchParityTests`,
-/// `SidebarSearchAnchorSiteTests`), `DiscardGateParityTests`,
+/// guards: the catalog guards (`SettingsCatalogSiteTests`,
+/// `SettingsAnchorPrimitiveTests`), `DiscardGateParityTests`,
 /// `GreyOutParityTests`, and the two bounds-routing guards
 /// (`VisibleBoundsRoutingTests`, `LayoutBoundsRoutingTests`) —
 /// which scan `Sources/KiwiDeskCore`, not the GUI tree, and live
@@ -60,23 +60,6 @@ enum SourceScan {
             i += 1
         }
         return nil
-    }
-
-    /// Consumes whitespace then `literal`, if present.
-    static func skipLiteral(
-        _ literal: String,
-        _ text: [Character],
-        from cursor: inout Int
-    ) -> Bool {
-        var i = cursor
-        while i < text.count, text[i].isWhitespace { i += 1 }
-        let wanted = Array(literal)
-        guard
-            i + wanted.count <= text.count,
-            Array(text[i..<(i + wanted.count)]) == wanted
-        else { return false }
-        cursor = i + wanted.count
-        return true
     }
 
     /// Cuts each line at its first `//` — adequate for this repo

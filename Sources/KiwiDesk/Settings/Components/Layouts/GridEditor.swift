@@ -50,7 +50,7 @@ struct GridEditor: View {
 
     var body: some View {
         SettingsSection(
-            L("layout.grid.name", "Grid"),
+            SettingsCatalog.layoutMode(.grid),
             symbol: LayoutMode.grid.glyph
         ) {
             GridSchematic(

@@ -23,7 +23,7 @@ struct StickyMarkEditor: View {
 
     var body: some View {
         SettingsSection(
-            L("sticky.title", "Sticky windows"),
+            SettingsCatalog.appearance.stickyWindows,
             caption: L(
                 "sticky.caption",
                 "Sticky windows stay visible on every "

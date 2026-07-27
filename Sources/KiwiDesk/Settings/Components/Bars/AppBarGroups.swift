@@ -63,7 +63,7 @@ struct GlobalAppBarGroup: View {
         // help affordance inside the greyed block is dead, so the
         // why-off explanation must live outside it.
         SettingsSection(
-            L("app_bar.global_style.title", "Global style"),
+            SettingsCatalog.bars.appBarStyleCard,
             help: anyBarShown ? nil : noBarHelp
         ) {
             Text(globalStyleCaption)
@@ -94,20 +94,33 @@ struct GlobalAppBarGroup: View {
                 )
         }
         SettingsSection(
-            L("app_bar.global_colors.title", "Global colors"),
+            SettingsCatalog.bars.appBarColorsCard,
             help: anyBarShown ? nil : noBarHelp
         ) {
             AppBarColorGrid { inlineColors }
                 .modifier(
                     GreyOut(active: !anyBarShown, help: noBarHelp)
                 )
-            // The gate sits on the drawer's CONTENT, never on the
-            // `DisclosureGroup` — a disabled disclosure refuses to
-            // toggle in either direction (owner-confirmed, #527),
-            // so gating the whole section left this one stuck in
-            // whatever state it was in and hid the colors it
-            // holds. The label stays live; the swatches dim.
-            DisclosureGroup(isExpanded: $advancedColorsExpanded) {
+            // The gate sits on the drawer's CONTENT, never on
+            // the disclosure — a disabled disclosure refuses to
+            // toggle in either direction (owner-confirmed,
+            // #527), so gating the whole section left this one
+            // stuck in whatever state it was in and hid the
+            // colors it holds. The label stays live; the
+            // swatches dim.
+            //
+            // LOAD-BEARING, and so is its twin in
+            // `SpaceBarColorsGroup`: both drawers mount the ONE
+            // surface-free `advancedColors` declaration, so a
+            // reveal lands on whichever bar editor is already
+            // open. Deleting either mount silently restores the
+            // scroll-to-nothing bug for that side —
+            // `SettingsCatalogSiteTests` pins both references.
+            SettingsDisclosure(
+                SettingsCatalog.bars.advancedColors,
+                chrome: .inline(font: .subheadline),
+                isExpanded: $advancedColorsExpanded
+            ) {
                 AppBarColorGrid { advancedColors }
                     .padding(.top, 8)
                     .modifier(
@@ -116,29 +129,7 @@ struct GlobalAppBarGroup: View {
                             help: noBarHelp
                         )
                     )
-            } label: {
-                Text(
-                    L("bars.advanced_colors", "Advanced colors")
-                )
-                .font(.subheadline)
-                // On the label, which is deliberately outside the
-                // `GreyOut` on the content above — a wash nested
-                // in a dimmed subtree compounds to ~0.09 and
-                // reads as a rendering fault.
-                .searchFlash(
-                    L("bars.advanced_colors", "Advanced colors")
-                )
             }
-            // LOAD-BEARING, and so is its twin in
-            // `SpaceBarColorsGroup`: the index carries this label
-            // surface-free, so a reveal lands on whichever bar
-            // editor is already open. Deleting either anchor
-            // leaves the parity guard green — the other still
-            // supplies the key — while silently restoring the
-            // scroll-to-nothing bug for that side.
-            .searchAnchor(
-                L("bars.advanced_colors", "Advanced colors")
-            )
         }
     }
 

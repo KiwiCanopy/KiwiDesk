@@ -10,7 +10,7 @@ struct PresetsSection: View {
     @ObservedObject var model: SettingsModel
 
     var body: some View {
-        SettingsSection(L("presets.title", "Presets")) {
+        SettingsSection(SettingsCatalog.profiles.presetsCard) {
             rows
         }
     }

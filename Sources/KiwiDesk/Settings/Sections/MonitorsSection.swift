@@ -34,7 +34,7 @@ struct MonitorsSection: View {
 
     private var cardsSection: some View {
         SettingsSection(
-            L("monitors.space_placement", "Space placement")
+            SettingsCatalog.monitors.spacePlacement
         ) {
             if model.displays.isEmpty {
                 Text(
@@ -95,10 +95,7 @@ struct MonitorsSection: View {
         .sorted { $0.key.raw < $1.key.raw }
         if !orphans.isEmpty {
             SettingsSection(
-                L(
-                    "monitors.orphan_pins.title",
-                    "Pinned to disconnected monitors"
-                )
+                SettingsCatalog.monitors.orphanPins
             ) {
                 ForEach(orphans, id: \.key.raw) { pin in
                     orphanPinRow(
@@ -159,8 +156,11 @@ struct MonitorsSection: View {
     }
 
     private var placementUnavailable: some View {
+        // The if/else twin of the editable card above — never
+        // co-mounted, so sharing its anchor id is safe and
+        // allow-listed in `SettingsCatalogSiteTests`.
         SettingsSection(
-            L("monitors.space_placement", "Space placement")
+            SettingsCatalog.monitors.spacePlacement
         ) {
             VStack(alignment: .leading, spacing: 8) {
                 Label(
@@ -194,7 +194,11 @@ struct MonitorsSection: View {
 
     /// Diagnostic, read-only, never touched day to day.
     private var advancedSection: some View {
-        DisclosureGroup(isExpanded: $advancedExpanded) {
+        SettingsDisclosure(
+            SettingsCatalog.monitors.monitorFingerprints,
+            chrome: .card,
+            isExpanded: $advancedExpanded
+        ) {
             VStack(alignment: .leading, spacing: 8) {
                 Text(
                     L(
@@ -212,30 +216,7 @@ struct MonitorsSection: View {
             }
             .padding(.top, 8)
             .frame(maxWidth: .infinity, alignment: .leading)
-        } label: {
-            Text(
-                L(
-                    "monitors.advanced.title",
-                    "Monitor fingerprints"
-                )
-            )
-            .font(.headline)
-            .searchFlash(
-                L(
-                    "monitors.advanced.title",
-                    "Monitor fingerprints"
-                )
-            )
         }
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color(nsColor: .controlBackgroundColor))
-        )
-        // Outside the card chrome — see `SettingsReveal`.
-        .searchAnchor(
-            L("monitors.advanced.title", "Monitor fingerprints")
-        )
     }
 
     /// One display's name and fingerprint. Visually the drawer's

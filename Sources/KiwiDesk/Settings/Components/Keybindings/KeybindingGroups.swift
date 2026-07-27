@@ -18,7 +18,7 @@ struct FocusGroup: View {
     }
 
     var body: some View {
-        SettingsSection(L("shortcuts.section.focus", "Focus")) {
+        SettingsSection(SettingsCatalog.shortcuts.focusKeys) {
             ForEach(KeybindingCatalog.focusDirections) {
                 command in
                 NavRow(
@@ -60,7 +60,7 @@ struct MoveWindowsGroup: View {
 
     var body: some View {
         SettingsSection(
-            L("shortcuts.section.move_windows", "Move windows")
+            SettingsCatalog.shortcuts.moveWindows
         ) {
             ForEach(KeybindingCatalog.swapDirections) {
                 command in
@@ -136,7 +136,7 @@ struct SizeFloatGroup: View {
 
     var body: some View {
         SettingsSection(
-            L("shortcuts.section.size_float", "Size & float")
+            SettingsCatalog.shortcuts.sizeFloat
         ) {
             ForEach(
                 KeybindingCatalog.resizeAndFloat(
@@ -198,7 +198,7 @@ struct GeneralShortcutsGroup: View {
 
     var body: some View {
         SettingsSection(
-            L("shortcuts.section.general", "General")
+            SettingsCatalog.shortcuts.generalKeys
         ) {
             NavRow(
                 model: model,
@@ -220,7 +220,7 @@ struct ChangeModesGroup: View {
 
     var body: some View {
         SettingsSection(
-            L("shortcuts.section.switch_modes", "Switch modes")
+            SettingsCatalog.shortcuts.switchModes
         ) {
             ForEach(others, id: \.self) { name in
                 NavRow(

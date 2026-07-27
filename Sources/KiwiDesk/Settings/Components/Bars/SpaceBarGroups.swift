@@ -20,7 +20,7 @@ struct SpaceBarEditorGroup: View {
         // help affordance inside the greyed block is dead, so the
         // why-off explanation must live outside it.
         SettingsSection(
-            L("space_bar.global_style.title", "Space Bar style"),
+            SettingsCatalog.bars.spaceBarStyleCard,
             help: enabled ? nil : offHelp
         ) {
             Text(caption)
@@ -73,7 +73,7 @@ struct SpaceBarEditorGroup: View {
                 .modifier(GreyOut(active: !enabled, help: offHelp))
         }
         SettingsSection(
-            L("space_bar.colors.title", "Space Bar colors"),
+            SettingsCatalog.bars.spaceBarColorsCard,
             help: enabled ? nil : offHelp
         ) {
             // Gate passed IN, not wrapped around: the group has

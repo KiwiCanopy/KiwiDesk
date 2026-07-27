@@ -127,10 +127,7 @@ struct ShortcutsSection: View {
     @ViewBuilder private var overrideBanner: some View {
         if model.editingStoredProfile {
             SettingsSection(
-                L(
-                    "shortcuts.override.title",
-                    "Profile shortcuts"
-                )
+                SettingsCatalog.shortcuts.profileShortcuts
             ) {
                 // #123: the live target applies recordings
                 // instantly; a stored profile stays staged —
@@ -200,7 +197,11 @@ struct ShortcutsSection: View {
     // MARK: - Advanced drawer (§3.6.1)
 
     private var advancedDrawer: some View {
-        DisclosureGroup(isExpanded: $advancedExpanded) {
+        SettingsDisclosure(
+            SettingsCatalog.shortcuts.luaBindings,
+            chrome: .card,
+            isExpanded: $advancedExpanded
+        ) {
             VStack(alignment: .leading, spacing: 8) {
                 Text(advancedDrawerCaption)
                     .font(.caption)
@@ -211,27 +212,7 @@ struct ShortcutsSection: View {
                 )
             }
             .padding(.top, 8)
-        } label: {
-            Text(
-                L(
-                    "shortcuts.advanced.title",
-                    "Lua bindings"
-                )
-            )
-            .font(.headline)
-            .searchFlash(
-                L("shortcuts.advanced.title", "Lua bindings")
-            )
         }
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color(nsColor: .controlBackgroundColor))
-        )
-        // Outside the card chrome — see `SettingsReveal`.
-        .searchAnchor(
-            L("shortcuts.advanced.title", "Lua bindings")
-        )
     }
 
     private var advancedDrawerCaption: String {
