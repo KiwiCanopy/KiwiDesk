@@ -170,14 +170,15 @@ LATIN_LOCALES = {
 # as a deliberate name rather than residue.
 #
 # Do NOT read this as "the GUI ships mode names untranslated":
-# seven locales translate them (`ja` モノクル, `zh-Hans` 单窗, `es`
-# Monóculo) and three keep them Latin. Both are correct — a mode
-# name is ordinary tiling vocabulary, so rendering it natively is
-# a translation choice. That is why no guard REQUIRES a mode name
-# to be KEPT, unlike `PRODUCT_NAMES`; `untranslated_mode_names`
-# instead requires the English name to be ABSENT once a locale has
-# translated its own picker. `LocalizationModeNameGuardTests` pins
-# the seven/three split so this comment cannot drift.
+# the three CJK locales (`ja` モノクル, `ko` 트랙, `zh-Hans` 单窗)
+# render them natively, while the seven Latin-script locales keep
+# them English so the picker matches the value typed into Lua and
+# the CLI (`set_mode(1, "stack")`). That is why no guard REQUIRES
+# a mode name to be KEPT, unlike `PRODUCT_NAMES`;
+# `untranslated_mode_names` instead requires the English name to
+# be ABSENT once a locale has translated its own picker.
+# `LocalizationModeNamePolicyTests` pins which locales are on
+# which side, so this comment cannot drift.
 #
 # Grouped, because an unlabelled flat set is how a glossary turns
 # into a baseline: without the grouping a reader cannot tell "the

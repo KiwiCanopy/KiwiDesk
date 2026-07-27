@@ -531,10 +531,12 @@ of the locale set, and one of those is a heuristic:
   Floating, Grid, Monocle, Scrolling, Stack and Track are
   ordinary tiling vocabulary, not KiwiDesk coinages, and no guard
   requires you to keep them: `ja` uses モノクル, `zh-Hans` 单窗,
-  `es` Monóculo, while `de`, `ru` and `zh-Hant` keep them in
-  Latin. All correct. The one rule is **match your own picker** —
-  if `layout.monocle.name` in your file says Monóculo, the prose
-  around it says Monóculo too, never "Monocle".
+  `ko` 트랙 — while the seven Latin-script locales keep them
+  English, so the picker matches the value you type into Lua or
+  the CLI (`set_mode(1, "stack")`). The one rule is **match your
+  own picker**: if `layout.monocle.name` in your file says
+  モノクル, the prose around it says モノクル too, never
+  "Monocle".
 - **Cross-language overlap.** Two locales of *different*
   languages sharing too many byte-identical values — the shape
   that caught ~360 entries of French sitting in `it.json`. The

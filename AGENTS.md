@@ -790,7 +790,8 @@ Keep this list updated whenever a recurring mistake is found.
   the *spacebar key*, and neither script capitalizes, so the
   feature name would be indistinguishable from the key. **Layout
   mode names are the opposite family and carry no such guard** —
-  ordinary tiling vocabulary, translated by seven locales and
+  ordinary tiling vocabulary, rendered natively by the three CJK
+  locales and
   kept Latin by three, both correct; the predicate that sorts a
   new name into one family or the other lives in
   `docs/design-decisions.md`. Matched as a phrase,
