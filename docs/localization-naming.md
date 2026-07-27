@@ -149,12 +149,26 @@ Enforced by `untranslated_mode_names`, which requires the
 and skips your locale entirely when your picker is the English
 word.
 
-Descriptive use is not naming. English writes the mode names
-lower-case in running prose ("in the bsp, stack, scrolling, and
-track layouts") and capitalises only when naming the picker entry,
-so the guard matches the capitalised form alone. "La modalità
-floating" describes behaviour and is free; "la disposizione
-Floating" names a picker entry that reads "Fluttuante" and is not.
+Descriptive use is not naming, and case is how the guard tells
+them apart: it matches the capitalised form alone. This is a
+**heuristic, not a rule the English follows** — `en.json`
+capitalises in labels that name no picker entry ("Stack
+position", "Track limit") and lower-cases some referential uses
+("the track layout"). It is cheap and right on the corpus today;
+it is not a guarantee, and a name whose English is lower-cased
+everywhere would slip past it. So "la modalità floating"
+describes behaviour and is free, while "la disposizione Floating"
+names a picker entry that reads "Fluttuante" and is not.
+
+**Known blind spot: the check runs in one direction only.** It
+fires where a picker is translated, which today means the three
+CJK locales. The seven that keep the English names skip
+themselves — which is what removes the need for an exemption
+list, and equally means nothing checks *their* prose against
+their own picker. The mirror defect is therefore invisible: a
+German caption reading "Schwebend" beside a picker reading
+"Floating" passes. Those locales are held by review, and by
+`LocalizationModeNamePolicyTests` only at the label level.
 
 ### Why the Latin-script locales keep English
 

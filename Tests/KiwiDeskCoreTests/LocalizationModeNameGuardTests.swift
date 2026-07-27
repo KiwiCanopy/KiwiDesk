@@ -125,7 +125,8 @@ struct LocalizationModeNameGuardTests {
     func substringIsNotAHit() throws {
         let result = try ModeNameFixture.check(
             picker: "Pila",
-            value: "Il valore Stackoverflow non è un nome."
+            value: "Il valore Stackoverflow non è un nome.",
+            english: "Stack"
         )
         #expect(result.status == 0)
     }

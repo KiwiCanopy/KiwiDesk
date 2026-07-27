@@ -751,7 +751,7 @@ Keep this list updated whenever a recurring mistake is found.
   `LocaleCatalog` soft-fail to `[:]` and silently revert that
   locale to English); an orphan key (in a locale file, absent
   from code) only warns — clean it up with
-  `extract-keys --prune`. **Everything above reads keys; seven
+  `extract-keys --prune`. **Everything above reads keys; eight
   guards read the copy** (`scripts/localization_guards.py`, #95),
   and `--check` hard-fails on each. Five are exact contracts: a
   **wrong writing system** (Cyrillic→`ru`, Kana→`ja`,

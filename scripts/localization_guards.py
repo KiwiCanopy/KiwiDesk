@@ -6,7 +6,7 @@ entry. Nothing else in the pipeline reads the copy, so a bad
 worksheet lands silently and renders live: a reviewer skimming a
 language they do not read sees plausible text.
 
-Six predicates live here. Five are **exact contracts** and hold
+Eight predicates live here. Five are **exact contracts** and hold
 for any corpus of translated strings:
 
 1. `foreign_scripts` — the writing system is wrong for the locale
@@ -161,11 +161,12 @@ LATIN_LOCALES = {
 #
 # The layout names are here to stop the residue rule flagging a
 # locale that legitimately KEEPS a mode name in Latin inside its
-# own script. `ru` and `zh-Hant` do that wholesale; `ja`, `ko` and
-# `zh-Hans` need it for scattered keys too, so the exemption is
-# not the two locales it might look like. (`de` keeps them Latin
-# as well but needs no exemption — `english_residue` is scoped
-# away from Latin-script locales regardless.) It costs the residue
+# own script. Only `ru` and `zh-Hant` exercise it (18 and 10
+# values); the CJK three never have, and structurally now cannot
+# for a capitalised name, since `untranslated_mode_names` forbids
+# it there. (`de` keeps them Latin as well but needs no exemption
+# — `english_residue` is scoped away from Latin-script locales
+# regardless.) It costs the residue
 # rule a little reach: `"フォーカス Stack"` for "Focus Stack" reads
 # as a deliberate name rather than residue.
 #

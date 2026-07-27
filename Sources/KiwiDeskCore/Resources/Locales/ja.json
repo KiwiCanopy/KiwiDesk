@@ -775,7 +775,7 @@
   "spaces.overrides.floating.help": "フローティングにはレイアウトオーバーライドがありません。",
   "spaces.overrides.none": "オーバーライド…",
   "spaces.title": "操作スペース",
-  "sticky.caption": "Stickyに設定されたフローティングウインドウはすべての操作スペースで表示され続けます。",
+  "sticky.caption": "Sticky ウインドウはすべての操作スペースで表示され続けます（ショートカットの「固定を切り替える」）。",
   "sticky.color": "固定",
   "sticky.color.a11y": "Stickyウインドウマークのカラー",
   "sticky.display.pill": "別のディスプレイへ移動可能",

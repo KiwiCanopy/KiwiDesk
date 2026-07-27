@@ -313,7 +313,7 @@ The other maintenance verbs take `--site` too:
 
 - `scripts/extract-keys --site --check` — validates every
   shipped `site/src/i18n/<locale>.json` decodes as a flat
-  `{string: string}` map, runs six of the seven *Content guards*
+  `{string: string}` map, runs six of the eight *Content guards*
   over its values, and warns on orphan keys (present in a
   locale, absent from `en.json`). It does **not** check
   `en.json` freshness — there's no code to derive it from; it
@@ -439,7 +439,7 @@ writing anything**. It HARD-FAILS (non-zero exit) on:
   German silently revert to all-English. That's a feature dying
   quietly, and quiet is exactly what this check exists to
   prevent.
-- **broken content** in any translated value — the six checks
+- **broken content** in any translated value — the checks
   described in *Content guards* below.
 
 It only *warns* (prints, does not fail) about **orphan keys** —
@@ -459,10 +459,11 @@ CI to reject a broken or stale file.
 Everything above reads *keys*. Nothing there ever looks at a
 translated value, so a bad worksheet used to land silently and
 render live — a reviewer skimming a language they do not read
-sees plausible text. Seven checks read the copy itself
+sees plausible text. Eight checks read the copy itself
 (`scripts/localization_guards.py`), each a hard failure. Five are
-exact contracts; the last two are scoped to complementary halves
-of the locale set, and one of those is a heuristic:
+exact contracts. `english_residue` is a heuristic scoped to
+non-Latin locales; the two feature-name checks are scoped by what
+the catalogs ship rather than by script:
 
 - **Wrong writing system.** Every locale value must use only the
   scripts that locale actually writes in: Cyrillic belongs to
@@ -529,10 +530,12 @@ of the locale set, and one of those is a heuristic:
   indistinguishable from the key. The list is `PRODUCT_NAMES`;
   adding to it is a product decision about what the GUI leaves in
   English, not a way to quiet a hit.
-- **Layout mode names are different — translate them freely.**
-  Floating, Grid, Monocle, Scrolling, Stack and Track are
-  ordinary tiling vocabulary, not KiwiDesk coinages, and no guard
-  requires you to keep them: `ja` uses モノクル, `zh-Hans` 单窗,
+- **Layout mode names follow your picker — and only the CJK
+  locales translate them.** Floating, Grid, Monocle, Scrolling,
+  Stack and Track are values the user types verbatim
+  (`set_mode(1, "stack")`), so the seven Latin-script locales keep
+  them English and `LocalizationModeNamePolicyTests` enforces
+  that. The three CJK locales render them natively: `ja` uses モノクル, `zh-Hans` 单窗,
   `ko` 트랙 — while the seven Latin-script locales keep them
   English, so the picker matches the value you type into Lua or
   the CLI (`set_mode(1, "stack")`). The one rule is **match your

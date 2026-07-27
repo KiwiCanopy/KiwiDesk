@@ -775,7 +775,7 @@
   "spaces.overrides.floating.help": "Floating no tiene anulaciones de diseño.",
   "spaces.overrides.none": "Anulaciones…",
   "spaces.title": "Espacios",
-  "sticky.caption": "Las ventanas flotantes marcadas como \"Sticky\" permanecen visibles en todos los espacios (Alternar modo siempre visible, en Atajos).",
+  "sticky.caption": "Las ventanas Sticky permanecen visibles en todos los espacios (Alternar fijado, en Atajos).",
   "sticky.color": "Fijada",
   "sticky.color.a11y": "Color de la marca de ventana fijada",
   "sticky.display.pill": "Solo se puede mover a otra pantalla",

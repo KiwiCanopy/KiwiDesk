@@ -775,7 +775,7 @@
   "spaces.overrides.floating.help": "플로팅에는 레이아웃 오버라이드가 없습니다.",
   "spaces.overrides.none": "오버라이드…",
   "spaces.title": "공간",
-  "sticky.caption": "Sticky로 설정된 플로팅 윈도우는 모든 공간에서 계속 유지되어 표시됩니다.",
+  "sticky.caption": "Sticky 윈도우는 모든 공간에서 계속 표시됩니다(단축키의 \"고정 전환\").",
   "sticky.color": "고정",
   "sticky.color.a11y": "Sticky 윈도우 마크 색상",
   "sticky.display.pill": "다른 디스플레이로만 이동 가능",
