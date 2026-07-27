@@ -505,7 +505,9 @@ of the locale set, and one of those is a heuristic:
   several source words in a row misses these entirely, and ~90 of
   them once survived two review passes. **Non-Latin-script
   locales only** — see the gap below.
-- **A dropped feature name.** The GUI shows "App Bar" and
+- **A dropped feature name.** (Both families, and the rule
+  that sorts a new name into one: [Feature name
+  policy](localization-naming.md).) The GUI shows "App Bar" and
   "Space Bar" untranslated, so a translation that renames them
   ("Die App-Leiste", "Barra delle app") describes something the
   interface does not call that. Keep the name verbatim and

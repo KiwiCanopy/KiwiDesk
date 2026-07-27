@@ -234,147 +234,27 @@ it buys something back — Sparkle's update path is first
 exercised against a real previous release instead of being
 debugged on the release everyone downloads.
 
-### The feature-name guard checks presence, and needs no opt-out
+### Feature names: which stay English, which translate
 
 **[Principle]**
 
-`dropped_product_names` requires **every** locale to carry each
-`PRODUCT_NAMES` entry the English carries — "App Bar",
-"Space Bar" — because the GUI ships those names untranslated in
-all eleven catalogs, so prose renaming them points at something
-the interface does not call that. Search sharpened it: a
-destination name is now a breadcrumb segment, so an invented name
-appears on every hit inside that pane.
+"App Bar" and "Space Bar" are the same in every language; the
+layout mode names are not. Which family a name joins is decided by
+one checkable question — *does this thing's own label key ship
+untranslated in all eleven catalogs?* — and the two families are
+enforced by deliberately opposite-shaped guards: one requires the
+English name to be **present**, the other requires it to be
+**absent**.
 
-**Script is irrelevant, and that is not obvious.** The natural
-reading is that this mirrors the English-residue guard, which is
-non-Latin-only, and an earlier cut scoped it that way — Latin
-locales required to keep the name, non-Latin free to adapt, on
-the argument that an English phrase sits in a Japanese sentence
-as a foreign body. The two guards ask different questions.
-Residue asks whether a word was *forgotten*, which is a judgment
-about the sentence around it and therefore script-sensitive. This
-asks whether a name the interface never translates was translated
-anyway — script-independent, in the same way "KiwiDesk", "Lua"
-and "BSP" stay English everywhere.
+That policy has its own page, because it is a rule a translator
+must follow *and* a decision a maintainer must not undo, and
+because the failure it prevents is invisible to anyone reading a
+language they do not speak:
 
-Adapting is worse in ja and ko, not better: スペースバー and
-스페이스바 are the ordinary words for the **spacebar key**, and
-neither script has capitalization to mark a proper noun, so the
-feature name becomes indistinguishable from the key — a collision
-English does not have.
+**[Feature name policy](localization-naming.md)** — the families,
+what each requires, why script is irrelevant to one and decisive
+to the other, and what to do when adding a name.
 
-**It is a presence check, not a parity check.** One mention
-satisfies it however often the English repeats the name;
-separators are flattened, so German's "Space-Bar-Farben" counts
-as keeping it; case is the locale's own. What it rejects is a
-translation with *zero* mentions.
-
-The distinction matters because tightening presence to parity
-reads like a strengthening and is a regression. Dropping a
-redundant repetition of a proper noun is ordinary translation
-practice, so a parity check rejects correct work and pushes the
-translator toward a literal, worse sentence to satisfy the tool.
-The defect this guard exists to catch is a locale *renaming* the
-feature; a locale naming it fewer times has not renamed
-anything. `LocalizationProductNameGuardTests` pins the
-distinction — a parity implementation fails two of its
-arguments — because a rule that is only written down invites the
-plausible-looking tightening.
-
-**No exemption file, and none is needed** — the escape hatches
-are ordered and all better than one:
-
-1. Reword around the name. All 125 name-bearing translations
-   across the five Latin locales did this, none contorted.
-2. If the name is redundant under its section header, delete it
-   from the **English**. That lifts the obligation in every
-   locale at once and improves the English — the GUI already
-   does this (`SpaceBarGroups`' caption omits the name its
-   header supplies), so the obligation is *authored*, not
-   imposed. An opt-out would invert this, letting locales
-   diverge from an English redundancy nobody fixed.
-3. `scripts/drop-key --locale <locale> <key>` retires one
-   locale's value to the English fallback. A loud escape, which
-   is the point.
-
-Trade-off: a translator who wants the name gone entirely must
-change the English or drop the key. Accepted — no English value
-repeats a single name, and the only multi-mention strings
-*contrast* the two bars ("Space Bar sits at the screen edge, App
-Bar sits next to the windows"), where dropping one makes the
-sentence wrong rather than tighter. That is why presence is
-per-name.
-
-### Which names must stay English, and which must not
-
-**[Principle]**
-
-Two families, and the question that sorts a new name is about
-the **catalogs**, not about the word:
-
-> **Does this thing's own label key ship untranslated in all
-> eleven catalogs?**
-
-**Yes → Family A.** "App Bar", "Space Bar" — `bars.switch.*` is
-Latin in every catalog. Add the name to `PRODUCT_NAMES`;
-`dropped_product_names` then requires every locale to keep it.
-
-**No → Family B.** The layout modes: `layout.<mode>.name` is
-translated by seven locales (`ja` モノクル, `zh-Hans` 单窗, `es`
-Monóculo) and kept Latin by three (`de`, `ru`, `zh-Hant`). No
-name is required; `untranslated_mode_names` instead requires the
-*English* name to be absent wherever the locale translated its
-own picker. The split is pinned by
-`LocalizationModeNameGuardTests`; cite it, don't restate it.
-
-**Ask about the label, not the vocabulary.** The tempting
-predicate — *does this name already have a domain-standard
-translation people know from other software?* — reads well and
-mis-sorts both families. "Space Bar" would be **B**, because
-スペースバー is an extremely standard word — for the *spacebar
-key*. "Track" would be **A**, because there is no domain-standard
-"Track layout" to borrow, yet every translating locale renders it
-(Pista, Piste, トラック). And `drag.ghost` reads like a coinage
-while nine locales translate it (Silueta, Sagoma, ゴースト). The
-catalog question answers all four immediately, and is checkable
-rather than arguable. Coinage-vs-borrowed is the *explanation*
-for how the catalogs came out that way, not the test.
-
-**The two guards are opposite shapes, and that is forced.** A
-Family A name is a coinage with no correct translation, so the
-guard can demand the English be **present**. A Family B name has
-a different correct form per locale, so there is no single word
-to demand — the guard instead requires the English to be
-**absent** once that locale translated its picker. The rule it
-enforces is "prose agrees with your own picker", which needs no
-opinion about which word is right, and the three locales that
-keep the English names are skipped by construction rather than
-by an exemption list.
-
-The symmetric form genuinely cannot exist: demanding the
-locale's *own* translation be present would flag a correct
-Spanish inflection like "las ventanas… flotarán", which carries
-no noun. Rejecting that shape is right. Concluding from it that
-**no** guard was possible does not follow, and is the expensive
-mistake to avoid here — this defect is invisible to a reviewer
-reading a language they do not speak, so a class left to review
-accumulates precisely the errors a guard would have named.
-
-**Growth clause.** Obligation scales with authored English
-mentions, not with list length, so adding a name binds only the
-keys whose English already contains it — cheaper than it looks.
-The constraint that does not scale is that the check is
-case-insensitive and therefore cannot tell a *referential*
-mention from a *descriptive* one. Both current names are
-two-word coinages that only ever occur referentially, so the
-question never arises. A name built from ordinary words would
-fire on incidental prose that was never naming the feature,
-demanding a verbatim keep for a sentence that has nothing to
-keep — a guard failing on correct copy, which is the one failure
-that makes an exemption file look necessary. So the existing
-rule in `PRODUCT_NAMES` — argue a name in, never add one to
-silence a hit — also bars a name that can occur descriptively.
 
 ### Layout navigation & overflow models
 

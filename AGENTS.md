@@ -772,32 +772,19 @@ Keep this list updated whenever a recurring mistake is found.
   Setup"`), so widening it would flag dozens of good translations;
   don't re-add a rule claiming to be precise everywhere, as an
   `-ing`-weld sub-rule once did — German `fing`/`Frühling`
-  falsifies it. The seventh, a **dropped feature name**
-  (`PRODUCT_NAMES` — "App Bar", "Space Bar"), applies to **every
-  locale, script irrelevant** — it is deliberately *not* the
-  residue rule's mirror, though an earlier cut scoped it that
-  way. The GUI ships those two names untranslated in all eleven
-  catalogs, so prose that renames them ("Die App-Leiste" beside a
-  chip reading "App Bar") points at something the interface does
-  not call that — and #277 made it plainer, since a destination
-  or surface name is now a breadcrumb segment on every hit inside
-  that pane. Residue asks whether a word was *forgotten*, a
-  judgment about the surrounding sentence and so script-sensitive;
-  this asks whether a name the interface never translates was
-  translated anyway, which is script-independent in the same way
-  "KiwiDesk", "Lua" and "BSP" are. Adapting is worse in ja/ko, not
-  better: スペースバー and 스페이스바 are the ordinary words for
-  the *spacebar key*, and neither script capitalizes, so the
-  feature name would be indistinguishable from the key. **Layout
-  mode names are the opposite family and carry no such guard** —
-  ordinary tiling vocabulary, rendered natively by the three CJK
-  locales and
-  kept Latin by three, both correct; the predicate that sorts a
-  new name into one family or the other lives in
-  `docs/design-decisions.md`. Matched as a phrase,
-  not as tokens: `GLOSSARY` holds `app`, `bar` and `space`
-  separately, so a word-level test cannot tell "App Bar" from
-  "App-Leiste". `merge-keys` runs the per-value guards so
+  falsifies it. The last two are the **feature-name pair**, and
+  `docs/localization-naming.md` is their one copy — read it
+  before touching either. In short: `dropped_product_names`
+  requires "App Bar" / "Space Bar" **present** in every locale,
+  script irrelevant (it is deliberately *not* the residue rule's
+  mirror); `untranslated_mode_names` requires the English mode
+  name **absent** in the three CJK locales, which render them
+  natively, and skips the seven that keep the English word. A new
+  name joins a family by one checkable question — does its own
+  label key ship untranslated in all eleven catalogs? — never by
+  arguing whether it is a coinage. Matched as a phrase, not as
+  tokens: `GLOSSARY` holds `app`, `bar` and `space` separately,
+  so a word-level test cannot tell "App Bar" from "App-Leiste". `merge-keys` runs the per-value guards so
   contamination never lands. There is **no baseline/exemption
   file** — a hit is a real defect; what the guards carry is a
   grouped `GLOSSARY` of terms that stay English, which a new such

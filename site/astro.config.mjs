@@ -98,6 +98,10 @@ export default defineConfig({
               label: "Settings UI Patterns",
               slug: "docs/ui-patterns",
             },
+            {
+              label: "Feature Name Policy",
+              slug: "docs/localization-naming",
+            },
             { label: "Translating", slug: "docs/translating" },
           ],
         },
