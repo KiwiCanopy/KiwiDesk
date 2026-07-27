@@ -78,7 +78,7 @@
   "app_rules.automatic": "Automático",
   "app_rules.float": "Auto-floating",
   "app_rules.float.all_windows": "Todas as janelas",
-  "app_rules.float.help": "O modo floating remove as janelas correspondentes deste aplicativo do lado a lado: cada uma mantém sua última posição e tamanho e aparece em todos os espaços.\n\nIsso é um floating por aplicativo — não o modo de layout Floating, que faz flutuar todas as janelas de um espaço.",
+  "app_rules.float.help": "O modo floating remove as janelas correspondentes deste aplicativo do lado a lado: cada uma mantém sua última posição e tamanho e aparece em todos os espaços.\n\nIsso é um floating por aplicativo — não o modo de layout Flutuante, que faz flutuar todas as janelas de um espaço.",
   "app_rules.float.never": "Nunca",
   "app_rules.float.titled": "Janelas intituladas…",
   "app_rules.other_specify": "Outro (especificar)…",

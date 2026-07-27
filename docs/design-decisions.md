@@ -262,9 +262,7 @@ Adapting is worse in ja and ko, not better: スペースバー and
 스페이스바 are the ordinary words for the **spacebar key**, and
 neither script has capitalization to mark a proper noun, so the
 feature name becomes indistinguishable from the key — a collision
-English does not have. The exemption was also never used: ja, ko
-and zh-Hans kept the names verbatim in 22 of 25 places and never
-once transliterated them.
+English does not have.
 
 **It is a presence check, not a parity check.** One mention
 satisfies it however often the English repeats the name;
@@ -312,47 +310,56 @@ per-name.
 
 **[Principle]**
 
-Two families, one question to sort a new name into them:
+Two families, and the question that sorts a new name is about
+the **catalogs**, not about the word:
 
-> **Does this name already have an ordinary, domain-standard
-> translation a user would recognize from other software,
-> independent of KiwiDesk?**
+> **Does this thing's own label key ship untranslated in all
+> eleven catalogs?**
 
-**No — it is a coinage naming something with no outside
-referent → Family A.** "App Bar", "Space Bar". Add it to
-`PRODUCT_NAMES`; every locale keeps it verbatim.
+**Yes → Family A.** "App Bar", "Space Bar" — `bars.switch.*` is
+Latin in every catalog. Add the name to `PRODUCT_NAMES`;
+`dropped_product_names` then requires every locale to keep it.
 
-**Yes — it is borrowed vocabulary → Family B.** Floating, Grid,
-Monocle, Scrolling, Stack, Track. Generic tiling-WM terms (yabai
-and Amethyst use the same words) with natural equivalents. Each
-locale decides: eight translate them (`ja` モノクル, `zh-Hans`
-单窗, `es` Monóculo), three keep them Latin (`de`, `ru`,
-`zh-Hant`). Both are correct translations of a technical term.
+**No → Family B.** The layout modes: `layout.<mode>.name` is
+translated by seven locales (`ja` モノクル, `zh-Hans` 单窗, `es`
+Monóculo) and kept Latin by three (`de`, `ru`, `zh-Hant`). No
+name is required; `untranslated_mode_names` instead requires the
+*English* name to be absent wherever the locale translated its
+own picker. The split is pinned by
+`LocalizationModeNameGuardTests`; cite it, don't restate it.
 
-The predicate keys on **pre-existing external vocabulary, not on
-the shape of the word.** A future "Status Bar" is Family B
-despite being a "Bar" compound exactly like Space Bar, because
-ステータスバー is already standard everywhere.
+**Ask about the label, not the vocabulary.** The tempting
+predicate — *does this name already have a domain-standard
+translation people know from other software?* — reads well and
+mis-sorts both families. "Space Bar" would be **B**, because
+スペースバー is an extremely standard word — for the *spacebar
+key*. "Track" would be **A**, because there is no domain-standard
+"Track layout" to borrow, yet every translating locale renders it
+(Pista, Piste, トラック). And `drag.ghost` reads like a coinage
+while nine locales translate it (Silueta, Sagoma, ゴースト). The
+catalog question answers all four immediately, and is checkable
+rather than arguable. Coinage-vs-borrowed is the *explanation*
+for how the catalogs came out that way, not the test.
 
-**Family B gets no guard, and cannot have one.** The obvious
-symmetry — pin each locale's prose to its own
-`layout.<mode>.name` — fails on the growth hazard below, here in
-its worst form: these names *are* ordinary words. Spanish
-rephrased one help string to "las ventanas… flotarán", a verb
-form of the same root; a guard demanding the picker's noun
-"Flotante" would flag correct copy. It cannot distinguish "the
-Floating layout" from "windows will float", and a guard that
-fires on correct work is worse than none — it trains people to
-work around it.
+**The two guards are opposite shapes, and that is forced.** A
+Family A name is a coinage with no correct translation, so the
+guard can demand the English be **present**. A Family B name has
+a different correct form per locale, so there is no single word
+to demand — the guard instead requires the English to be
+**absent** once that locale translated its picker. The rule it
+enforces is "prose agrees with your own picker", which needs no
+opinion about which word is right, and the three locales that
+keep the English names are skipped by construction rather than
+by an exemption list.
 
-So Family B is held by review, not by tooling, to one rule:
-**prose matches its own picker.** If `layout.monocle.name` says
-Monóculo, the sentence beside it says Monóculo, never "Monocle".
-That rule was broken in es/fr/it/pt-BR and zh-Hans — the picker
-read "Flotante" while the caption read "Floating has no per-space
-overrides" — which is the same defect Family A's guard exists to
-prevent, arriving through the door that has no guard on it. It is
-the standing cost of not being able to build one.
+The symmetric form genuinely cannot exist: demanding the
+locale's *own* translation be present would flag a correct
+Spanish inflection like "las ventanas… flotarán", which carries
+no noun. Rejecting that shape is right. Concluding from it that
+**no** guard was possible does not follow, and is the expensive
+mistake to avoid here — this defect is invisible to a reviewer
+reading a language they do not speak, so a class left to review
+accumulates precisely the errors a guard would have named.
 
 **Growth clause.** Obligation scales with authored English
 mentions, not with list length, so adding a name binds only the

@@ -161,20 +161,23 @@ LATIN_LOCALES = {
 #
 # The layout names are here to stop the residue rule flagging a
 # locale that legitimately KEEPS a mode name in Latin inside its
-# own script. `de`, `ru` and `zh-Hant` do exactly that; the other
-# eight translate them (`ja` モノクル, `zh-Hans` 单窗, `es` Monóculo),
-# and both are correct — a mode name is ordinary tiling-WM
-# vocabulary, so rendering it natively is a translation choice, not
-# a defect. Only `ru` and `zh-Hant` actually *need* the exemption,
-# `english_residue` being scoped away from Latin-script `de`
-# anyway. It costs the residue rule a little reach —
-# `"フォーカス Stack"` for "Focus Stack" reads as a deliberate name
-# rather than residue.
+# own script. `ru` and `zh-Hant` do that wholesale; `ja`, `ko` and
+# `zh-Hans` need it for scattered keys too, so the exemption is
+# not the two locales it might look like. (`de` keeps them Latin
+# as well but needs no exemption — `english_residue` is scoped
+# away from Latin-script locales regardless.) It costs the residue
+# rule a little reach: `"フォーカス Stack"` for "Focus Stack" reads
+# as a deliberate name rather than residue.
 #
-# Do NOT read this as "the GUI ships mode names untranslated": it
-# does so in three locales out of eleven. That is why no guard
-# REQUIRES a mode name to be kept, unlike `PRODUCT_NAMES` — see
-# the Family A/B predicate in docs/design-decisions.md.
+# Do NOT read this as "the GUI ships mode names untranslated":
+# seven locales translate them (`ja` モノクル, `zh-Hans` 单窗, `es`
+# Monóculo) and three keep them Latin. Both are correct — a mode
+# name is ordinary tiling vocabulary, so rendering it natively is
+# a translation choice. That is why no guard REQUIRES a mode name
+# to be KEPT, unlike `PRODUCT_NAMES`; `untranslated_mode_names`
+# instead requires the English name to be ABSENT once a locale has
+# translated its own picker. `LocalizationModeNameGuardTests` pins
+# the seven/three split so this comment cannot drift.
 #
 # Grouped, because an unlabelled flat set is how a glossary turns
 # into a baseline: without the grouping a reader cannot tell "the
@@ -204,16 +207,20 @@ GLOSSARY = {
     "sf",  # "SF Symbol"
     "symbol",
     "symbols",
-    # Layout-mode names, for the locales that keep them Latin
-    # (de, ru, zh-Hant) — the other eight translate them, which is
-    # equally correct. See the block comment above.
+    # Layout-mode names, for the locales that keep one in Latin
+    # inside their own script. See the block comment above.
     "floating",
     "grid",
     "monocle",
     "scrolling",
     "stack",
-    "sticky",
     "track",
+    # `sticky` is NOT a layout mode and does not belong with them:
+    # it is a window state, and every locale translates its label
+    # (`de` Fixiert, `ru` Закреплённое, `zh-Hant` 常駐). It stays
+    # exempt because the word appears untranslated inside scattered
+    # prose values, which is a residue question, not a mode one.
+    "sticky",
     # Nouns the shipped UI renders untranslated in the GUI's own
     # feature names — "App Bar", "Space Bar", "Gaps" — so prose
     # referring to them keeps the word. These are the entries most
@@ -232,19 +239,19 @@ GLOSSARY = {
 }
 
 # Multi-word feature names the GUI renders untranslated, which a
-# translation must therefore carry verbatim (owner call,
-# 2026-07-27). `GLOSSARY` above only *exempts* these words from
-# the residue rule — it never checked that anyone kept them, and
-# `de` had independently rendered every one of them as
-# "Space-Leiste" / "App-Leiste" while the other four Latin-script
-# locales kept the English.
+# translation must therefore carry verbatim. `GLOSSARY` above only
+# *exempts* these words from the residue rule — it never checked
+# that anyone kept them, and `de` had independently rendered every
+# one of them as "Space-Leiste" / "App-Leiste".
 #
-# Enforced only where the whole locale is Latin-script. In a
-# non-Latin locale the surrounding sentence is another script, so
-# an English phrase sits in it as a foreign body and adapting it
-# is legitimate — hence `ja` "レイアウト", `ko`, `ru`, `zh-*` are
-# out of scope here by the same reasoning `english_residue` is
-# scoped to exactly the complementary set.
+# Enforced in EVERY locale, whatever its script: the label keys
+# (`bars.switch.app_bar`, `bars.switch.space_bar`) ship Latin in
+# all eleven catalogs, so a translation that renames them names
+# something the picker does not. That catalog fact is the
+# membership test — a name belongs here when its own label key is
+# untranslated everywhere, which is checkable, unlike "is it a
+# coinage". `MODE_NAME_KEYS` below is the other side: those labels
+# ARE translated per locale, so they get the opposite guard.
 #
 # A phrase, not the tokens: `GLOSSARY` holds "app", "bar" and
 # "space" individually, so a word-level rule could not tell
@@ -519,8 +526,8 @@ def dropped_product_names(
     "BSP" are, which `_is_partly_translated` already assumes when
     it lists "App Bar" among the values that are correctly
     all-English in a non-Latin catalog. The exemption was also
-    unused — ja/ko/zh-Hans kept the names verbatim 22 times in 25
-    and never once transliterated them.
+    unused — ja/ko/zh-Hans never once transliterated a name; the
+    values that failed had dropped whole clauses instead.
 
     Transliterating would actively hurt in ja and ko, which is why
     this is a rule and not a preference: スペースバー and 스페이스바
@@ -553,6 +560,69 @@ def dropped_product_names(
         if _flatten_separators(name) in needles
         and _flatten_separators(name) not in haystack
     ]
+
+
+# The layout modes whose name a locale may translate. `BSP` is
+# absent deliberately: it is an initialism every locale keeps, so
+# it has no translated form to diverge from.
+MODE_NAME_KEYS = (
+    "layout.floating.name",
+    "layout.grid.name",
+    "layout.monocle.name",
+    "layout.scrolling.name",
+    "layout.stack.name",
+    "layout.track.name",
+)
+
+
+def untranslated_mode_names(
+    value: str, catalog: dict, english: dict
+) -> list[str]:
+    """English mode names `value` keeps that its own picker doesn't.
+
+    The mirror of `dropped_product_names`, and deliberately the
+    *opposite* shape. A product name is a coinage the GUI never
+    translates, so that guard demands the English be **present**. A
+    mode name is ordinary tiling vocabulary each locale may render
+    natively, so there is no single right word to demand — this
+    guard instead requires the English name to be **absent** once
+    the locale has translated the picker. `de`, `ru` and `zh-Hant`
+    keep the English names, so their picker *is* the English word
+    and they are skipped by construction, with no exemption list.
+
+    Reading `layout.<mode>.name` from the locale's own catalog is
+    the whole trick: the rule is "prose agrees with your picker",
+    which needs no opinion about which word is correct.
+
+    The symmetric form — demand the locale's own translation be
+    present — cannot work, and rejecting it is what made this shape
+    look impossible. Spanish renders one help string "las
+    ventanas… flotarán", a verb inflection carrying no noun, so
+    demanding "Flotante" would flag correct copy.
+
+    **Case-sensitive, and that is the referential/descriptive
+    discriminator.** Capitalised "Floating" names the mode;
+    lower-case "la modalità floating" is a borrowed adjective
+    describing behaviour, which a locale is free to use. Matching
+    only the capitalised form separates the two at no cost. The
+    residual ambiguity is a sentence-initial capital — `it`'s
+    "Stack dell'IDE" reads as either — so a hit is a prompt for
+    judgment, not proof; there are few enough for that to be the
+    right trade.
+    """
+    found = []
+    for key in MODE_NAME_KEYS:
+        source = english.get(key)
+        local = catalog.get(key)
+        if not source or not local:
+            continue
+        if _flatten_separators(local) == _flatten_separators(
+            source
+        ):
+            continue
+        if re.search(rf"\b{re.escape(source)}\b", value):
+            found.append(source)
+    return sorted(set(found))
 
 
 # Whitespace (including NBSP) and the hyphen/dash family, which a

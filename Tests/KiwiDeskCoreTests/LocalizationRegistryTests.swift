@@ -147,10 +147,17 @@ struct LocalizationRegistryTests {
     /// absent from it too; the point is that the report names it
     /// either way.
     ///
-    /// The two script sets must not overlap: a contradictory
-    /// declaration passes `unregistered_locales` happily while
-    /// leaving which guard applies dependent on set-test order,
-    /// which is the ambiguity the declaration exists to remove.
+    /// The two script sets must not overlap. There is no
+    /// order-dependence to fear — `english_residue` makes one
+    /// membership test against `NON_LATIN_LOCALES` and nothing
+    /// reads `LATIN_LOCALES` except the union in
+    /// `unregistered_locales` — so a locale in both gets a
+    /// deterministic answer. The hazard is that the answer is
+    /// deterministically *one-sided*: registration passes, residue
+    /// runs, and the `LATIN_LOCALES` half is an inert promise the
+    /// tooling never consults. A self-contradictory declaration
+    /// that reads as satisfied is the state this pair exists to
+    /// make impossible.
     @Test("the script declarations are disjoint")
     func scriptSetsAreDisjoint() throws {
         let overlap = try pythonJSON(

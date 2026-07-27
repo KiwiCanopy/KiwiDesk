@@ -123,6 +123,7 @@ from pathlib import Path
 from localization_guards import (
     collapsed_translations,
     dropped_product_names,
+    untranslated_mode_names,
     english_residue,
     foreign_scripts,
     overlapping_locales,
@@ -506,6 +507,16 @@ def check_content(
                     f"{locale}.json :: {key} {drift} relative to "
                     f"the English — {value[:70]!r} (English: "
                     f"{english[:50]!r})"
+                )
+            kept = untranslated_mode_names(
+                value, catalog, mapping
+            )
+            if kept:
+                problems.append(
+                    f"{locale}.json :: {key} keeps the English "
+                    f"mode name(s) {', '.join(kept)} while this "
+                    f"locale's own picker translates them — "
+                    f"{value[:70]!r}"
                 )
             dropped = dropped_product_names(value, english)
             if dropped:
