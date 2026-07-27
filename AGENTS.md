@@ -280,6 +280,17 @@ no trailing period. Body (optional) explains the why, wrapped at
   (never hidden in dot-folders): lint, git hooks, localization
   scripts.
 - Install hooks once per clone: `./scripts/install-hooks.sh`.
+  The `pre-commit` hook lints staged Swift, runs the locale checks
+  when a catalog is staged, and **refuses a commit made while HEAD
+  is `main`** — server-side branch protection is impossible while
+  the repo is private (GitHub free answers `403 Upgrade to GitHub
+  Pro or make this repository public`), and the exposure that
+  actually bites is committing to `main` believing HEAD is a
+  feature branch. Deliberately the commit, not the push: ff-merging
+  a reviewed branch legitimately writes to `main`. Override a
+  genuinely-intended one with `KIWIDESK_ALLOW_MAIN_COMMIT=1`, which
+  names the rule you are skipping instead of `--no-verify` taking
+  the lint and locale checks with it.
 - Fetch third-party subagents per clone with one explicit target:
   `./scripts/install-subagents.sh --claude` installs Claude Code
   agents and workspace skills; `./scripts/install-subagents.sh

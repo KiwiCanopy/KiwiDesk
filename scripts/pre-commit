@@ -10,6 +10,41 @@ set -euo pipefail
 ROOT="$(git rev-parse --show-toplevel)"
 STATUS=0
 
+# Refuse a commit made while HEAD is `main`.
+#
+# The repo cannot have server-side branch protection while it is
+# private: GitHub's free plan answers `403 Upgrade to GitHub Pro or
+# make this repository public`, so protection only unlocks at the
+# public flip (#487). And the exposure that flip closes is NOT an
+# outside push — nobody but the owner has write access, and going
+# public grants the world read, not write. It is committing to
+# `main` while believing HEAD is a feature branch, which has already
+# happened once when HEAD moved under a long session.
+#
+# Deliberately gates the COMMIT, not the push: ff-merging a reviewed
+# branch legitimately writes to `main` (`git push origin HEAD:main`),
+# so a push-side block would fire on every intended merge and train
+# everyone to bypass it.
+#
+# Override for a genuinely-intended commit straight onto `main` (a
+# translation merge, a one-line doc fix):
+#
+#     KIWIDESK_ALLOW_MAIN_COMMIT=1 git commit …
+#
+# `--no-verify` also works, but the env var names the rule you meant
+# to skip instead of skipping the lint and locale checks with it.
+BRANCH="$(git symbolic-ref --quiet --short HEAD || echo "")"
+if [ "$BRANCH" = "main" ] \
+    && [ "${KIWIDESK_ALLOW_MAIN_COMMIT:-0}" != "1" ]; then
+    echo "pre-commit: refusing to commit on 'main'."
+    echo "  AGENTS.md §3: branch per change (feat/, fix/, chore/…)," \
+        "then ff-merge."
+    echo "  If HEAD being 'main' is a surprise, this hook just" \
+        "saved you a commit on the wrong branch."
+    echo "  Intended? KIWIDESK_ALLOW_MAIN_COMMIT=1 git commit …"
+    exit 1
+fi
+
 STAGED_SWIFT=()
 while IFS= read -r f; do
     STAGED_SWIFT+=("$ROOT/$f")

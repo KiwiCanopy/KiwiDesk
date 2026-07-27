@@ -9,7 +9,7 @@ files, strict linting, and a heavily unit-tested core.
 ```sh
 git clone https://github.com/KiwiCanopy/KiwiDesk.git
 cd KiwiDesk
-./scripts/install-hooks.sh   # pre-commit lint hook
+./scripts/install-hooks.sh   # lint + locale checks, no commits on main
 swift build
 swift test
 ```
