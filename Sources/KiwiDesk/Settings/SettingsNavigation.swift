@@ -9,6 +9,13 @@ import KiwiDeskCore
 /// (drawer expansions, the Shortcuts mode strip). Everything here
 /// is a one-shot navigation request or a local surface selection —
 /// never edited config, which stays on the model.
+///
+/// `pendingScroll`, `revealTarget` and `flash` are three facets of
+/// one in-flight reveal, held apart because their lifetimes differ
+/// (consumed-immediately vs stands-until-flash-ends). A *fourth*
+/// facet would be the point to fold them into a single reveal
+/// state-machine value rather than more correlated optionals —
+/// worth weighing when the Shortcuts mode strip lands.
 struct SettingsNavigation {
     /// A one-shot navigation request: a sidebar destination, the
     /// local surface to switch to, and optionally a label to

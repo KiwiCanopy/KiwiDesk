@@ -6,7 +6,13 @@ import KiwiDeskCore
 /// by reflection (`SettingsControlIndex`). Replaced the
 /// hand-maintained `SidebarSearchIndex` entry list.
 ///
-/// Declaration order is render order — the index inherits it.
+/// `Mirror` yields stored properties in declaration order, so the
+/// index order is deterministic; keeping it *matching* the view's
+/// visual order is a discipline, not a structural guarantee
+/// (a section reordered in its body without reordering this struct
+/// desyncs them). The blast radius is bounded: one row per
+/// destination means order only breaks ties among several matches
+/// in one destination.
 /// Property names are the tokens the site guards scan for
 /// (`SettingsCatalogSiteTests`), so they must be unique across
 /// the whole catalog and distinctive enough not to collide with
@@ -251,40 +257,50 @@ enum SettingsCatalog {
         .layoutMode(mode)
     }
 
+    /// The declaration struct behind a destination — the one
+    /// enumerated for its index and walked by the catalog guards.
+    /// A single home for the destination→container mapping, so
+    /// `entries(of:)` and the strict-enumeration guard cannot
+    /// disagree about which struct a destination reflects.
+    static func container(
+        of destination: SettingsDestination
+    ) -> Any {
+        switch destination {
+        case .spaces: return spaces
+        case .layoutDefaults: return layoutDefaults
+        case .monitors: return monitors
+        case .appearance: return appearance
+        case .bars: return bars
+        case .behavior: return behavior
+        case .profiles: return profiles
+        case .shortcuts: return shortcuts
+        case .appRules: return appRules
+        case .general: return general
+        }
+    }
+
     /// Everything searchable inside `destination`, in render
     /// order. Each tab names its own mode, so a hit selects
     /// that tab (#277 sub-problem 2).
+    ///
+    /// Layout Defaults appends its mode tabs after the reflected
+    /// entries: their text is `LayoutMode.displayName` (not a
+    /// catalog literal), so they come from the `placementTabs`
+    /// factory rather than a stored declaration.
     static func entries(
         of destination: SettingsDestination
     ) -> [SettingsIndexEntry] {
-        switch destination {
-        case .spaces:
-            return SettingsControlIndex.entries(in: spaces)
-        case .layoutDefaults:
-            return SettingsControlIndex.entries(in: layoutDefaults)
-                + LayoutMode.placementTabs.map {
-                    SettingsIndexEntry(
-                        control: .layoutMode($0),
-                        parent: nil,
-                        propertyPath: []
-                    )
-                }
-        case .monitors:
-            return SettingsControlIndex.entries(in: monitors)
-        case .appearance:
-            return SettingsControlIndex.entries(in: appearance)
-        case .bars:
-            return SettingsControlIndex.entries(in: bars)
-        case .behavior:
-            return SettingsControlIndex.entries(in: behavior)
-        case .profiles:
-            return SettingsControlIndex.entries(in: profiles)
-        case .shortcuts:
-            return SettingsControlIndex.entries(in: shortcuts)
-        case .appRules:
-            return SettingsControlIndex.entries(in: appRules)
-        case .general:
-            return SettingsControlIndex.entries(in: general)
-        }
+        let reflected = SettingsControlIndex.entries(
+            in: container(of: destination)
+        )
+        guard destination == .layoutDefaults else { return reflected }
+        return reflected
+            + LayoutMode.placementTabs.map {
+                SettingsIndexEntry(
+                    control: .layoutMode($0),
+                    parent: nil,
+                    propertyPath: []
+                )
+            }
     }
 }

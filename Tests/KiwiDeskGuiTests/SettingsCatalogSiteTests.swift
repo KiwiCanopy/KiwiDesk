@@ -96,6 +96,42 @@ struct SettingsCatalogSiteTests {
         }
     }
 
+    /// Catalog controls must be **stored** (`let` / stored
+    /// `var`), never *computed* (`var x: SettingsControl { … }`).
+    /// A computed property is invisible to `Mirror`, so the
+    /// enumerator never sees it and `unenumerated(in:)` cannot
+    /// either — it would ship rendered-but-unsearchable with every
+    /// test green. This is the one enumerator gap reflection
+    /// cannot self-check, so a source scan closes it.
+    @Test("no catalog control is a computed property")
+    func catalogControlsAreStored() throws {
+        // Only the declaration files (`SettingsCatalog*`), NOT
+        // `SettingsControl.swift` — its `AnySettingsDrawer`
+        // protocol legitimately declares `var control:
+        // SettingsControl { get }`, which is a requirement, not a
+        // catalog control.
+        for file in try SourceScan.swiftSources(under: settingsDir)
+        where file.lastPathComponent.hasPrefix("SettingsCatalog") {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            let hit = source.range(
+                of:
+                    #"\bvar\s+\w+\s*:\s*Settings(Control|Drawer)"#,
+                options: .regularExpression
+            )
+            #expect(
+                hit == nil,
+                Comment(
+                    rawValue:
+                        "\(file.lastPathComponent) declares a "
+                        + "computed control — Mirror cannot see it, "
+                        + "so it is unsearchable. Use `let`."
+                )
+            )
+        }
+    }
+
     /// Direction two: every `SettingsSection(` /
     /// `SettingsDisclosure(` first argument is a catalog
     /// declaration (counted, so a co-mounted double reference

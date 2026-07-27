@@ -78,6 +78,68 @@ struct SettingsCatalogTests {
         )
     }
 
+    /// Every stored member of every catalog container must be a
+    /// `SettingsControl` or a `SettingsDrawer` — otherwise the
+    /// reflection enumerator drops it silently and it ships
+    /// rendered-but-unsearchable, the exact hole the one-list
+    /// design closes. Both reviewers flagged this as the net's one
+    /// gap before the ~250-control fill (a `[SettingsControl]`
+    /// collection is the realistic first offender). Fails loudly
+    /// the moment such a member appears, naming its path.
+    @Test("no catalog member escapes the enumerator")
+    func everyStoredMemberIsEnumerated() {
+        for destination in SettingsDestination.allCases {
+            let dropped = SettingsControlIndex.unenumerated(
+                in: SettingsCatalog.container(of: destination)
+            )
+            #expect(
+                dropped.isEmpty,
+                Comment(
+                    rawValue:
+                        "\(destination) has catalog member(s) the "
+                        + "enumerator drops (not a SettingsControl "
+                        + "/ SettingsDrawer): "
+                        + dropped.joined(separator: ", ")
+                        + " — a search hit on them reveals nothing"
+                )
+            )
+        }
+    }
+
+    /// A catalog property name doubles as the token
+    /// `catalogDeclarationsAreReferenced` greps render sites for
+    /// (`.\(name)`), and that check is a *substring* match with no
+    /// count backstop for leaf controls. A name equal to a common
+    /// identifier (`.title`, `.name`) would match unrelated tokens
+    /// tree-wide, so a genuinely-dead declaration would false-pass
+    /// — reintroducing the part-1 dead-entry bug for the one class
+    /// (drawer children) the exact-total guards do not cover.
+    /// `propertyNamesAreUnique` pins uniqueness; this pins
+    /// distinctiveness.
+    @Test("catalog property names are distinctive")
+    func propertyNamesAreDistinctive() {
+        let generic: Set<String> = [
+            "title", "name", "label", "text", "id", "caption",
+            "card", "header", "control", "value", "body",
+            "content", "key", "row", "item",
+        ]
+        let names =
+            allEntries
+            .compactMap { $0.1.propertyPath.last }
+        for name in names {
+            #expect(
+                !generic.contains(name),
+                Comment(
+                    rawValue:
+                        "catalog property '\(name)' collides with "
+                        + "a common identifier — its dotted "
+                        + "reference check would match unrelated "
+                        + "tokens; rename it distinctively"
+                )
+            )
+        }
+    }
+
     /// The surface of every entry must be one this destination
     /// can actually show — a `.layoutMode` on Bars would select
     /// nothing and the reveal would scroll to a view that is not

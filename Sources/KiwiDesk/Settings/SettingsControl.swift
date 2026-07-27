@@ -224,4 +224,29 @@ enum SettingsControlIndex {
         }
         return out
     }
+
+    /// Property paths of stored members `entries(in:)` did NOT
+    /// enumerate — anything that is neither a `SettingsControl`
+    /// nor a `SettingsDrawer`, at any depth. Always empty for a
+    /// well-formed catalog; the catalog guard fails loudly when it
+    /// is not, so a member shape the enumerator silently drops (a
+    /// `[SettingsControl]` collection, a stray helper) becomes a
+    /// test failure instead of a rendered-but-unsearchable hole —
+    /// the exact silent-gap class the one-list design exists to
+    /// close. (A *computed* `var` is invisible to `Mirror` and so
+    /// to this walk too; a source scan guards that separately.)
+    static func unenumerated(in container: Any) -> [String] {
+        var out: [String] = []
+        for child in Mirror(reflecting: container).children {
+            let name = child.label ?? "<unnamed>"
+            if child.value is SettingsControl { continue }
+            if let drawer = child.value as? AnySettingsDrawer {
+                out += unenumerated(in: drawer.childContainer)
+                    .map { "\(name).\($0)" }
+            } else {
+                out.append(name)
+            }
+        }
+        return out
+    }
 }
