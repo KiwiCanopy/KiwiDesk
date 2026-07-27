@@ -368,7 +368,13 @@ if [ -n "$NOTARY_PROFILE" ]; then
     notarize_and_staple "$APP_ZIP" "$APP"
     rm -f "$APP_ZIP"
     APP_ZIP=""
-    # The verdict an end user actually gets.
+    # Local assessment only — NOT the verdict a downloader gets.
+    # `spctl --assess` is satisfied by an online lookup, so it
+    # answers "accepted" for a notarized-but-unstapled artifact;
+    # the ticket being physically attached is what buys the
+    # offline pass, and only `stapler validate` proves that. For
+    # the real download verdict see the quarantine recipe in
+    # AGENTS.md §5.
     spctl -a -vvv -t exec "$APP" 2>&1 | sed 's/^/    /'
 fi
 
@@ -451,9 +457,19 @@ if [ "$MAKE_DMG" -eq 1 ]; then
     DMG_PARTIAL=""
 
     if [ -n "$NOTARY_PROFILE" ]; then
+        # The image is the artifact this whole two-submission
+        # design exists to attach a ticket to, so verify the
+        # ticket is really on it rather than trusting spctl,
+        # which an online lookup alone can satisfy.
+        xcrun stapler validate "$DMG" >/dev/null || {
+            echo "error: $DMG has no stapled ticket after" \
+                 "notarization — it would fail offline" >&2
+            exit 1
+        }
         # -t open, not -t exec: the download is opened, not run,
         # and primary-signature is the context Gatekeeper uses
-        # for a quarantined disk image.
+        # for a quarantined disk image. Local assessment only —
+        # see the note in step 6.
         spctl -a -vvv -t open \
             --context context:primary-signature "$DMG" 2>&1 \
             | sed 's/^/    /'

@@ -189,13 +189,15 @@ at directory altitude — see **`docs/architecture.md`**.
    same change set when a feature warrants surfacing there —
    e.g. a new layout mode (#128) adds its user-guide/reference
    prose *and* whatever nav or callout makes it findable. Run
-   `npm run build` in `site/` when you touch either — **under
-   Node 24** (`nvm use` in `site/`, which reads the `.nvmrc`
-   there; CI pins the same in `site.yml`). Astro refuses
-   anything below 22.12, and an install performed on an older
-   Node resolves the wrong platform binaries, so a later `nvm
-   use` alone still fails on a missing native binding — delete
-   `node_modules` and reinstall if that happens.
+   `npm run build` in `site/` when you touch either, after
+   `nvm use` there — **`site/.nvmrc` is the one copy of the
+   Node version**, read by that command and by CI's
+   `node-version-file`, so never restate the number here or in
+   `site.yml`. Astro refuses anything below 22.12, and an
+   install performed on an older Node resolves the wrong
+   platform binaries, so a later `nvm use` alone still fails on
+   a missing native binding — delete `node_modules` and
+   reinstall if that happens.
    When a review or manual pass classifies a behavior as
    **accepted-by-architecture**, it adds a row to the *Accepted
    limitations* page (`docs/accepted-limitations.md`) in the same
@@ -367,25 +369,28 @@ Keep this list updated whenever a recurring mistake is found.
   cannot be caught on the machine that built it.** A disk image
   is a separate piece of signed code from the app inside it:
   notarizing the app does not cover the `.dmg` carrying it, so
-  `--notarize --dmg` submits *twice* and staples each. The trap
-  is the same shape as the `Bundle.module` one below — a
-  locally-built image carries no `com.apple.quarantine`
-  attribute, so it mounts and runs perfectly here and only says
-  "KiwiDesk is damaged and can't be opened" after a real
-  download. Inspecting the artifact locally proves nothing.
+  `--notarize --dmg` submits *twice* and staples each. Like the
+  `Bundle.module` trap, the build machine is the one place the
+  failure is invisible — a locally-built image carries no
+  `com.apple.quarantine` attribute, so it mounts and runs
+  perfectly here and only says "KiwiDesk is damaged and can't be
+  opened" after a real download. **`spctl` is not the check.**
+  `spctl --assess` is satisfied by an *online* notarization
+  lookup, so it answers `accepted` for an artifact that was
+  notarized but never stapled — which then fails on a machine
+  that is offline or behind a captive portal. Only `xcrun
+  stapler validate` proves the ticket is physically attached.
   **Verify by stamping quarantine on a copy**: `xattr -w
   com.apple.quarantine "0081;0;Safari;$(uuidgen)"`, mount it,
-  then `spctl -a -vvv -t open --context
+  then `stapler validate` plus `spctl -a -vvv -t open --context
   context:primary-signature` on the image and `-t exec` on the
-  app inside (the two need different `spctl` invocations).
+  app inside (image and app need different `spctl` invocations).
   Companion rule: **an archive meant for distribution is created
   AFTER stapling, never reused from the notarization payload** —
   the zip submitted to Apple is made pre-staple by construction,
   so shipping it would strand every user with an unticketed
-  bundle. This applies to any future artifact type (`.pkg`, the
-  cask's `.zip`, a Sparkle delta), which is why it lives here
-  and not in one script's §4 bullet.
-
+  bundle. Applies to any artifact type added later (`.pkg`, the
+  cask's `.zip`, a Sparkle delta).
 - **Pre-release, single user: no backward-compat shims.** Nothing
   is publicly released, so nothing external depends on the current
   command names, Lua/CLI verbs, event names, or file formats.

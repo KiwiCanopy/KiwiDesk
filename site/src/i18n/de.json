@@ -1,6 +1,5 @@
 {
   "beta_badge": "Öffentliche Beta",
-  "build_body": "KiwiDesk ist in der öffentlichen Beta. Installiere es mit Homebrew — ein Befehl, und das kiwidesk-CLI kommt gleich mit. Ein signierter, notarisierter Download folgt, sobald sich die Beta gesetzt hat.",
   "build_cmt": "# für Mitwirkende — Homebrew ist der einfache Weg",
   "build_code_aria": "KiwiDesk aus dem Quellcode bauen",
   "build_copy": "Kopieren",
@@ -33,7 +32,6 @@
   "config_eyebrow": "Konfiguration",
   "config_title": "Konfiguriere es in Lua",
   "config_title_bar": "init.lua",
-  "cta_body": "KiwiDesk ist als öffentliche Beta da — du kannst es heute mit Homebrew installieren. Ein signierter Download folgt, sobald sich die Beta gesetzt hat.",
   "cta_eyebrow": "Bereit, wenn du es bist",
   "cta_primary": "Zeig mir die Installation",
   "cta_req": "Gemacht für macOS 14 und neuer.",
@@ -108,7 +106,6 @@
   "guide_gs_install_copied": "Kopiert",
   "guide_gs_install_copy": "Kopieren",
   "guide_gs_install_copy_aria": "Installationsbefehl kopieren",
-  "guide_gs_install_later": "Ein signierter Download folgt, sobald sich die Beta gesetzt hat.",
   "guide_gs_install_lead": "Öffne das Terminal — ⌘Leertaste drücken, „Terminal“ tippen, Return drücken — füge dann diese Zeile ein und drücke Return:",
   "guide_gs_install_source": "Das installiert aus KiwiCanopys eigenem Homebrew-Tap — von denselben Leuten, die KiwiDesk machen.",
   "guide_gs_p1": "KiwiDesk ist in der öffentlichen Beta, und die Installation dauert etwa eine Minute.",

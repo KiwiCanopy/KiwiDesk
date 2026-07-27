@@ -192,9 +192,11 @@ path, not a nicety.** A Homebrew user who meets Gatekeeper runs
 the site sees "KiwiDesk is damaged and can't be opened" and
 deletes it. `scripts/build-app.sh --notarize` exists for that
 ([#89](https://github.com/KiwiCanopy/KiwiDesk/issues/89)), and
-in-app updates via Sparkle — the planned replacement for the
-App Store's update channel, not yet wired up — will depend on
-it too.
+Sparkle — the replacement for the App Store's update channel —
+depends on notarization as well, since it refuses to install an
+update that lacks it. *When* a channel may open is a separate
+question, answered by
+[No distribution channel without an update path](#no-distribution-channel-without-an-update-path).
 
 ### No distribution channel without an update path
 
