@@ -717,3 +717,23 @@ Keep this list updated whenever a recurring mistake is found.
   outside `Localization/` — keep it that way. CLI/IPC error
   strings are the deliberate exception and stay English: they
   are a machine contract, not UI copy.
+- **Site template comments ship to visitors (#557).** An
+  `.astro` **template** comment written `<!-- ... -->` is emitted
+  verbatim into `dist/` and downloaded by everyone; only
+  JSX-style `{/* ... */}` is stripped at build. The design
+  rationale in `site/src/**` — the notes citing AGENTS.md
+  sections, issue numbers and `docs/` paths that explain a
+  non-obvious UX call, e.g. why there is deliberately no App
+  Store badge — is worth keeping in the source and must use
+  `{/* */}`; `Guide.astro` and `Landing.astro` published ~22 KB
+  of it across the locales before #557. Two places are **not**
+  template: frontmatter (between the `---` fences) is already
+  JS, so leave it alone, and inside `<script is:inline>` /
+  `<style>` Astro treats the body as raw text, where a JSX
+  comment renders literally — use `//` there. A comment body
+  containing `*/` self-terminates early, so check before a bulk
+  swap. Verify one by rebuilding the pre-change baseline,
+  regex-stripping `<!--.*?-->` from its output and diffing
+  against the new build: byte-identical across every page proves
+  no markup was swallowed by a mis-terminated delimiter, which
+  counting `<section` only weakly suggests.
