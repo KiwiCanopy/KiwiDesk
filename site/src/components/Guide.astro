@@ -257,11 +257,11 @@ const jsonLd = [
     <link rel="alternate" hreflang="x-default" href={enURL} />
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)}
     ></script>
-    <!-- Anti-FOUC: resolve the theme before first paint so the
+    {/* Anti-FOUC: resolve the theme before first paint so the
          page never flashes the wrong theme. Shares the exact
          `starlight-theme` key with the landing + docs, so a
          toggle anywhere carries across the whole site. (No mode
-         key here — the Guide is never mode-gated.) -->
+         key here — the Guide is never mode-gated.) */}
     <script is:inline>
       (function () {
         var root = document.documentElement;
@@ -279,7 +279,7 @@ const jsonLd = [
         }
       })();
     </script>
-    <!-- Language resolve (anti-redirect-loop), scoped to the guide
+    {/* Language resolve (anti-redirect-loop), scoped to the guide
          pair /guide/ ↔ /de/guide/. Runs before paint, at most once
          per load, and only ever redirects between those two known
          paths via replace() so the back button still works.
@@ -287,7 +287,7 @@ const jsonLd = [
               explicit choice by sending the visitor to its path.
            2. No stored pref: fall back to navigator.language, but
               ONLY nudge the English guide toward German (never the
-              reverse), so /guide/ stays the canonical default. -->
+              reverse), so /guide/ stays the canonical default. */}
     <script is:inline>
       (function () {
         var here = location.pathname;
@@ -326,9 +326,9 @@ const jsonLd = [
         if (nav.indexOf("ja") === 0) return go("ja");
       })();
     </script>
-    <!-- Restore scroll after a language switch: the EN|DE switcher
+    {/* Restore scroll after a language switch: the EN|DE switcher
          stashes scrollY before navigating, so switching languages
-         lands you at the same spot instead of jumping to the top. -->
+         lands you at the same spot instead of jumping to the top. */}
     <script is:inline>
       (function () {
         try {
@@ -346,10 +346,10 @@ const jsonLd = [
     </script>
   </head>
   <body>
-    <!-- Skip link (WCAG 2.4.1): first focusable element, jumps past
-         the nav to the guide content. Off-screen until focused. -->
+    {/* Skip link (WCAG 2.4.1): first focusable element, jumps past
+         the nav to the guide content. Off-screen until focused. */}
     <a class="skip-link" href="#learnMain">{s.skip_to_content}</a>
-    <!-- ============ Site nav (no mode toggle, no tab bar) ====== -->
+    {/* ============ Site nav (no mode toggle, no tab bar) ====== */}
     <nav class="nav" id="nav">
       <div class="wrap nav__inner">
         <a class="nav__brand" href={homeHref}
@@ -364,10 +364,10 @@ const jsonLd = [
             <span class="learn-back__text">{s.guide_back_home}</span>
           </a>
 
-          <!-- Language switcher: EN | DE | JA segmented control. Each
+          {/* Language switcher: EN | DE | JA segmented control. Each
                segment links to that locale's guide route AND records
                the choice in `kiwidesk-site-lang` (wired below), so
-               the preference persists across visits. -->
+               the preference persists across visits. */}
           <div class="lang-switch" role="group"
             aria-label={s.nav_lang_label}>
             <a class="lang-switch__opt" data-lang="en" href="/guide/"
@@ -395,8 +395,8 @@ const jsonLd = [
             </span>
           </button>
 
-          <!-- Ko-fi support button — last in the cluster, icon-only
-               and compact (matches the landing nav). -->
+          {/* Ko-fi support button — last in the cluster, icon-only
+               and compact (matches the landing nav). */}
           <a class="nav__support" href={kofi} target="_blank"
             rel="noopener" aria-label={s.nav_support_aria}>
             <img class="kofi-icon" src={kofiIcon.src} alt=""
@@ -406,7 +406,7 @@ const jsonLd = [
       </div>
     </nav>
 
-    <!-- ============ Mobile TOC (sticky "On this page") ========= -->
+    {/* ============ Mobile TOC (sticky "On this page") ========= */}
     <details class="learn-toc learn-toc--mobile" id="tocMobile">
       <summary aria-label={s.guide_on_this_page}>
         <span class="wrap learn-toc__summary-inner">
@@ -429,11 +429,11 @@ const jsonLd = [
       </div>
     </details>
 
-    <!-- ============ Page content ============ -->
+    {/* ============ Page content ============ */}
     <main class="learn" id="learnMain" tabindex="-1">
       <div class="wrap">
         <div class="learn__layout">
-          <!-- Desktop sticky TOC rail -->
+          {/* Desktop sticky TOC rail */}
           <nav class="learn-toc learn-toc--desktop"
             aria-label={s.guide_on_this_page}>
             <p class="learn-toc__label">{s.guide_on_this_page}</p>
@@ -452,16 +452,16 @@ const jsonLd = [
               <span class="learn__eyebrow">{s.guide_eyebrow}</span>
               <h1 class="learn__title">{s.guide_title}</h1>
               <p class="learn__lede">{s.guide_lede}</p>
-              <!-- No beta pill here on purpose. Status rides the
+              {/* No beta pill here on purpose. Status rides the
                    same pill component as the landing hero, but on
                    this page the header and the install card sit
                    within one viewport — two identical pills that
                    close together read as a stutter rather than as
                    ambient status, so the card (the decision point)
-                   is the one that carries it. -->
+                   is the one that carries it. */}
             </header>
 
-            <!-- ===== 1. Getting started ===== -->
+            {/* ===== 1. Getting started ===== */}
             <section class="learn-section" id="getting-started">
               <div class="learn-section__head">
                 <span class="learn-section__eyebrow"
@@ -470,7 +470,7 @@ const jsonLd = [
               </div>
               <p>{s.guide_gs_p1}</p>
 
-              <!-- Install block. No App Store badge: a dimmed or
+              {/* Install block. No App Store badge: a dimmed or
                    ribboned Apple badge still reads "tap = the store
                    opens", so it reads broken rather than
                    forthcoming — a different failure from §2.7's
@@ -489,7 +489,7 @@ const jsonLd = [
                    profiles, overrides); it does not mean a first
                    run must never show one copy-paste line. So the
                    newcomer path no longer depends on the mode
-                   system at all. -->
+                   system at all. */}
               <div class="learn-install">
                 <span class="pill">
                   <span class="pill__dot" aria-hidden="true"></span>
@@ -520,10 +520,10 @@ const jsonLd = [
                   <pre><code>{installCmd}</code></pre>
                 </div>
 
-                <!-- Names the tap. A slash-qualified token does
+                {/* Names the tap. A slash-qualified token does
                      not look like the plain one-word install most
                      people have seen, and the unspoken question is
-                     whether the source is trustworthy. -->
+                     whether the source is trustworthy. */}
                 <p class="learn-install__source"
                   >{s.guide_gs_install_source}</p>
 
@@ -559,8 +559,8 @@ const jsonLd = [
                   </div>
                 </details>
 
-                <!-- A promise, not a control: plain text, never
-                     styled as something tappable. -->
+                {/* A promise, not a control: plain text, never
+                     styled as something tappable. */}
                 <p class="learn-install__later"
                   >{s.guide_gs_install_later}</p>
               </div>
@@ -602,7 +602,7 @@ const jsonLd = [
               <div class="learn-snap" aria-hidden="true">
                 <svg viewBox="0 0 320 150"
                   preserveAspectRatio="xMidYMid meet">
-                  <!-- Before: three windows piled up and overlapping -->
+                  {/* Before: three windows piled up and overlapping */}
                   <rect x="12" y="26" width="78" height="58" rx="6"
                     class="tile" />
                   <rect x="30" y="44" width="78" height="58" rx="6"
@@ -613,7 +613,7 @@ const jsonLd = [
                     stroke="currentColor" stroke-width="2.4"
                     stroke-linecap="round" stroke-linejoin="round"
                     style="color: var(--text-faint)" />
-                  <!-- After: the same windows, tidied edge to edge -->
+                  {/* After: the same windows, tidied edge to edge */}
                   <rect x="196" y="18" width="52" height="112" rx="6"
                     class="tile" />
                   <rect x="254" y="18" width="54" height="53" rx="6"
@@ -624,7 +624,7 @@ const jsonLd = [
               </div>
             </section>
 
-            <!-- ===== 2. The layouts ===== -->
+            {/* ===== 2. The layouts ===== */}
             <section class="learn-section" id="layouts">
               <div class="learn-section__head">
                 <span class="learn-section__eyebrow"
@@ -646,7 +646,7 @@ const jsonLd = [
               </div>
             </section>
 
-            <!-- ===== 3. Finding your favorite ===== -->
+            {/* ===== 3. Finding your favorite ===== */}
             <section class="learn-section" id="favorite">
               <div class="learn-section__head">
                 <span class="learn-section__eyebrow"
@@ -666,7 +666,7 @@ const jsonLd = [
               </div>
             </section>
 
-            <!-- ===== 4. The Settings app ===== -->
+            {/* ===== 4. The Settings app ===== */}
             <section class="learn-section" id="settings">
               <div class="learn-section__head">
                 <span class="learn-section__eyebrow"
@@ -684,7 +684,7 @@ const jsonLd = [
               </ul>
             </section>
 
-            <!-- ===== 5. FAQ ===== -->
+            {/* ===== 5. FAQ ===== */}
             <section class="learn-section" id="faq">
               <div class="learn-section__head">
                 <span class="learn-section__eyebrow"
@@ -707,7 +707,7 @@ const jsonLd = [
               </div>
             </section>
 
-            <!-- ===== 6. Is KiwiDesk for you? ===== -->
+            {/* ===== 6. Is KiwiDesk for you? ===== */}
             <section class="learn-section" id="is-it-for-me">
               <div class="learn-section__head">
                 <span class="learn-section__eyebrow"
@@ -744,12 +744,12 @@ const jsonLd = [
               <div class="learn-close">
                 <h2>{s.guide_close_title}</h2>
                 <p>{s.guide_close_p}</p>
-                <!-- Points back up to THIS page's install block.
+                {/* Points back up to THIS page's install block.
                      It used to be `${homeHref}#getting-started` —
                      an id the landing has never had, so the jump
                      died at the top of the home page. Now that the
                      command lives here, the closing CTA has no
-                     reason to leave the guide at all. -->
+                     reason to leave the guide at all. */}
                 <a class="btn btn--primary" href="#getting-started">
                   {s.guide_close_cta}
                   <Icon name="lucide:arrow-right" width={16} height={16}
@@ -762,7 +762,7 @@ const jsonLd = [
       </div>
     </main>
 
-    <!-- ============ Footer ============ -->
+    {/* ============ Footer ============ */}
     <footer class="footer">
       <div class="wrap">
         <div class="footer__brand">

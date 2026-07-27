@@ -178,10 +178,10 @@ const jsonLd = [
     <link rel="alternate" hreflang="x-default" href={enURL} />
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)}
     ></script>
-    <!-- Anti-FOUC: resolve theme AND mode before first paint so the
+    {/* Anti-FOUC: resolve theme AND mode before first paint so the
          page never flashes the wrong theme or reveals dev sections.
          `starlight-theme` is shared with the docs; `kiwidesk-site-
-         mode` is this page's own key (default = simple). -->
+         mode` is this page's own key (default = simple). */}
     <script is:inline>
       (function () {
         var root = document.documentElement;
@@ -222,7 +222,7 @@ const jsonLd = [
         }
       })();
     </script>
-    <!-- Language resolve (anti-redirect-loop). Runs before paint,
+    {/* Language resolve (anti-redirect-loop). Runs before paint,
          at most once per load, and only ever redirects between the
          two known paths (/ ↔ /de/) via replace() so the back
          button still works.
@@ -235,7 +235,7 @@ const jsonLd = [
          The `!== here` guard makes every branch a no-op when we are
          already on the target, which is what makes loops impossible.
          `data-lang` on <html> mirrors the active locale so the
-         switcher can render its active state without a round-trip. -->
+         switcher can render its active state without a round-trip. */}
     <script is:inline>
       (function () {
         var here = location.pathname;
@@ -273,9 +273,9 @@ const jsonLd = [
         if (nav.indexOf("ja") === 0) return go("ja");
       })();
     </script>
-    <!-- Restore scroll after a language switch: the EN|DE switcher
+    {/* Restore scroll after a language switch: the EN|DE switcher
          stashes scrollY before navigating, so switching languages
-         lands you at the same spot instead of jumping to the top. -->
+         lands you at the same spot instead of jumping to the top. */}
     <script is:inline>
       (function () {
         try {
@@ -293,10 +293,10 @@ const jsonLd = [
     </script>
   </head>
   <body>
-    <!-- Skip link (WCAG 2.4.1): first focusable element, jumps past
-         the nav to the page content. Off-screen until focused. -->
+    {/* Skip link (WCAG 2.4.1): first focusable element, jumps past
+         the nav to the page content. Off-screen until focused. */}
     <a class="skip-link" href="#main-content">{t.skip_to_content}</a>
-    <!-- ============ Nav ============ -->
+    {/* ============ Nav ============ */}
     <nav class="nav" id="nav">
       <div class="wrap nav__inner">
         <a class="nav__brand" href={homeHref}
@@ -306,18 +306,18 @@ const jsonLd = [
           <span>KiwiDesk</span>
         </a>
         <div class="nav__links">
-          <!-- Guide: shown in BOTH modes — newcomers arriving in
+          {/* Guide: shown in BOTH modes — newcomers arriving in
                Simple mode need the single-scroll /guide/ page, and
-               it's useful in Nerd mode too. -->
+               it's useful in Nerd mode too. */}
           <a class="nav__link nav__link--guide" href="/guide/"
             >{t.nav_guide}</a>
-          <!-- Docs + GitHub live in the DOM always but are hidden in
-               Simple mode (dev-only, via .dev-only). -->
+          {/* Docs + GitHub live in the DOM always but are hidden in
+               Simple mode (dev-only, via .dev-only). */}
           <a class="nav__link dev-only" href="/docs/">{t.nav_docs}</a>
           <a class="nav__link dev-only" href={repo} target="_blank"
             rel="noopener">{t.nav_github}</a>
 
-          <!-- Signature mode toggle: a two-segment control, a
+          {/* Signature mode toggle: a two-segment control, a
                deliberate sibling of the EN | DE language switcher
                beside it. BOTH modes are labeled at all times —
                [ 🥝 Simple | Nerd ] — so a first-time visitor
@@ -333,12 +333,12 @@ const jsonLd = [
                exclusive options, one always active — with a
                descriptive group label and aria-checked on each. This
                is the correct semantics for "pick one of two" and is
-               keyboard operable (arrow keys wired in the script). -->
+               keyboard operable (arrow keys wired in the script). */}
           <div class="mode-toggle" id="modeToggle" role="radiogroup"
             aria-label={t.mode_toggle_aria}>
-            <!-- Sliding kiwi indicator behind the segments. In Simple
+            {/* Sliding kiwi indicator behind the segments. In Simple
                  it holds one kiwi; sliding to Nerd, two smaller
-                 kiwi dots pop in behind the lead so it fills out. -->
+                 kiwi dots pop in behind the lead so it fills out. */}
             <span class="mode-toggle__slider" aria-hidden="true">
               <span class="mode-toggle__extra mode-toggle__extra--2">
                 <Fragment set:html={kiwiSvg(11)} />
@@ -368,7 +368,7 @@ const jsonLd = [
             </span>
           </div>
 
-          <!-- Language switcher: a compact EN | DE | JA segmented
+          {/* Language switcher: a compact EN | DE | JA segmented
                control, styled as a sibling of the theme + mode
                toggles. Each segment is a link to that locale's route
                AND records the choice in `kiwidesk-site-lang` (wired
@@ -376,7 +376,7 @@ const jsonLd = [
                across visits. The active locale is marked
                aria-current. Two-letter codes throughout, each in its
                own `lang` so a screen reader pronounces it in that
-               language rather than spelling it out in English. -->
+               language rather than spelling it out in English. */}
           <div class="lang-switch" role="group"
             aria-label={t.nav_lang_label}>
             <a class="lang-switch__opt" data-lang="en" href="/"
@@ -404,10 +404,10 @@ const jsonLd = [
             </span>
           </button>
 
-          <!-- Ko-fi support button — last in the cluster, icon-only
+          {/* Ko-fi support button — last in the cluster, icon-only
                and compact. Reads as LESS obtrusive than a worded
                link: a small, recognizable control sitting quietly
-               among the toggles. aria-label carries the meaning. -->
+               among the toggles. aria-label carries the meaning. */}
           <a class="nav__support dev-only" href={kofi} target="_blank"
             rel="noopener" aria-label={t.nav_support_aria}>
             <img class="kofi-icon" src={kofiIcon.src} alt=""
@@ -417,10 +417,10 @@ const jsonLd = [
       </div>
     </nav>
 
-    <!-- Main landmark + skip-link target, wrapping all page content
-         between the site nav and footer. -->
+    {/* Main landmark + skip-link target, wrapping all page content
+         between the site nav and footer. */}
     <main id="main-content" tabindex="-1">
-    <!-- ============ Hero ============ -->
+    {/* ============ Hero ============ */}
     <header class="hero">
       <div class="hero__glow" aria-hidden="true"></div>
       <div class="wrap">
@@ -430,7 +430,7 @@ const jsonLd = [
           src={wordmarkDark.src} alt="KiwiDesk" width="230"
           height="273" />
 
-        <!-- Simple-mode hero copy -->
+        {/* Simple-mode hero copy */}
         <div class="hero__mode hero__mode--simple">
           <span class="hero__kicker">{t.hero_kicker}</span>
           <h1>{t.hero_title}</h1>
@@ -453,7 +453,7 @@ const jsonLd = [
           </span>
         </div>
 
-        <!-- Nerd-mode hero copy -->
+        {/* Nerd-mode hero copy */}
         <div class="hero__mode hero__mode--dev">
           <span class="hero__kicker">{t.hero_dev_kicker}</span>
           <h1>{t.hero_dev_title}</h1>
@@ -478,13 +478,13 @@ const jsonLd = [
       <div class="hero__seam" aria-hidden="true"></div>
     </header>
 
-    <!-- ============ Post-hero quote (mode-specific, same slot) ===
+    {/* ============ Post-hero quote (mode-specific, same slot) ===
          Both modes show one quote directly under the hero, in the
          same position — Simple gets the personal opening/motivation
          note, Nerd gets the "works with you" tagline. Keeping
          them in one slot (rather than one above + one below the
          hero) means the two modes read consistently as you switch
-         between them. -->
+         between them. */}
     <section class="quote-band" aria-label={t.quote_band_aria}>
       <div class="wrap">
         <blockquote class="quote-band__mark reveal">
@@ -494,7 +494,7 @@ const jsonLd = [
       </div>
     </section>
 
-    <!-- ============ What is this? (Simple only) ============ -->
+    {/* ============ What is this? (Simple only) ============ */}
     <section class="simple-only" id="what">
       <div class="wrap">
         <div class="what reveal">
@@ -524,7 +524,7 @@ const jsonLd = [
       </div>
     </section>
 
-    <!-- ============ Demo video (both modes) ============ -->
+    {/* ============ Demo video (both modes) ============ */}
     <section class="tint" id="demo">
       <div class="wrap">
         <div class="section-head reveal">
@@ -555,7 +555,7 @@ const jsonLd = [
       </div>
     </section>
 
-    <!-- ============ How it works (Simple only) ============ -->
+    {/* ============ How it works (Simple only) ============ */}
     <section class="simple-only" id="how">
       <div class="wrap">
         <div class="section-head reveal">
@@ -575,7 +575,7 @@ const jsonLd = [
       </div>
     </section>
 
-    <!-- ============ Why it's calmer (Simple only) ============ -->
+    {/* ============ Why it's calmer (Simple only) ============ */}
     <section class="tint simple-only" id="calm">
       <div class="wrap">
         <div class="section-head reveal">
@@ -634,7 +634,7 @@ const jsonLd = [
       </div>
     </section>
 
-    <!-- ============ Maker quote (Simple only) ============ -->
+    {/* ============ Maker quote (Simple only) ============ */}
     <section class="simple-only" id="maker-quote-simple">
       <div class="wrap">
         <blockquote class="quote-card reveal">
@@ -646,7 +646,7 @@ const jsonLd = [
       </div>
     </section>
 
-    <!-- ============ Features (Nerd only) ============ -->
+    {/* ============ Features (Nerd only) ============ */}
     <section class="dev-only dev-reveal" id="features">
       <div class="wrap">
         <div class="section-head">
@@ -668,7 +668,7 @@ const jsonLd = [
       </div>
     </section>
 
-    <!-- ============ Maker quote (Nerd only) ============ -->
+    {/* ============ Maker quote (Nerd only) ============ */}
     <section class="dev-only dev-reveal" id="maker-quote-dev">
       <div class="wrap">
         <blockquote class="quote-card quote-card--dev">
@@ -683,7 +683,7 @@ const jsonLd = [
       </div>
     </section>
 
-    <!-- ============ Layouts (Nerd only) ============ -->
+    {/* ============ Layouts (Nerd only) ============ */}
     <section class="tint dev-only dev-reveal" id="layouts">
       <div class="wrap">
         <div class="section-head">
@@ -705,7 +705,7 @@ const jsonLd = [
       </div>
     </section>
 
-    <!-- ============ Lua config (Nerd only) ============ -->
+    {/* ============ Lua config (Nerd only) ============ */}
     <section class="split dev-only dev-reveal" id="config">
       <div class="wrap">
         <div class="split__copy">
@@ -732,7 +732,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
       </div>
     </section>
 
-    <!-- ============ CLI (Nerd only) ============ -->
+    {/* ============ CLI (Nerd only) ============ */}
     <section class="split split--reverse tint dev-only dev-reveal"
       id="cli">
       <div class="wrap">
@@ -760,14 +760,14 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
       </div>
     </section>
 
-    <!-- ============ Install (Nerd only) ==================
+    {/* ============ Install (Nerd only) ==================
          The install bridge target. Simple-mode readers and the
          /guide/ arrive here via #start, which the head script
          resolves into Nerd mode before paint (this section is
          .dev-only). Homebrew leads because it is how the beta
          actually ships; building from source stays directly
          beneath it — contributors still need it, newcomers
-         landing from the bridge should not meet it first. -->
+         landing from the bridge should not meet it first. */}
     <section class="quickstart dev-only dev-reveal" id="start">
       <div class="wrap">
         <div>
@@ -839,7 +839,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
       </div>
     </section>
 
-    <!-- ============ Final CTA (both modes) ============ -->
+    {/* ============ Final CTA (both modes) ============ */}
     <section class="cta-band" id="cta">
       <div class="wrap">
         <div class="cta-band__inner reveal">
@@ -847,7 +847,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
           <h2>{t.cta_title}</h2>
           <p>{t.cta_body}</p>
           <div class="hero__cta">
-            <!-- The install bridge, shown in BOTH modes. In Nerd
+            {/* The install bridge, shown in BOTH modes. In Nerd
                  mode #start is already visible and this is a plain
                  in-page jump; in Simple mode the section is hidden,
                  so the delegated handler below switches to Nerd
@@ -856,7 +856,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
                  button so it keeps anchor semantics (focusable,
                  middle-click, "copy link"); the mode toggle is
                  JS-driven anyway, so a JS-off visitor has no Nerd
-                 view to be sent to in the first place. -->
+                 view to be sent to in the first place. */}
             <a class="btn btn--primary" href="#start"
               data-install-bridge>
               {t.cta_primary}
@@ -883,7 +883,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
     </section>
     </main>
 
-    <!-- ============ Footer ============ -->
+    {/* ============ Footer ============ */}
     <footer class="footer">
       <div class="wrap">
         <div class="footer__brand">
@@ -910,8 +910,8 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
             rel="noopener">{t.footer_github}</a>
         </nav>
         <p class="footer__copy">{t.footer_copy}</p>
-        <!-- Low-key maker credit — the maker's personal profile,
-             distinct from the project repo link above. -->
+        {/* Low-key maker credit — the maker's personal profile,
+             distinct from the project repo link above. */}
         <p class="footer__credit">
           {t.footer_credit_built_by}
           <a href={makerProfile} target="_blank" rel="noopener">
