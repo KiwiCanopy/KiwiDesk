@@ -27,8 +27,11 @@ let package = Package(
         // Strictly separated from the GUI (see AGENTS.md).
         // `LocalizationManager` lives here (issue #9) so both
         // the SwiftUI GUI and the AppKit quick menu can call
-        // it; the locale JSON files bundle with this target so
-        // its own `Bundle.module` can find them at runtime.
+        // it; the locale JSON files bundle with this target.
+        // Read them through `Bundle.kiwiDeskCore`, never
+        // `Bundle.module` — inside an `.app` the generated
+        // accessor looks where codesign forbids and then traps
+        // (#89, AGENTS.md §5).
         // Resources/Locales/en.json itself is a BUILD-TIME
         // translator manifest, not something the app reads at
         // runtime — English lives inline at every `L(key,

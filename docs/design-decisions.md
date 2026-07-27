@@ -192,8 +192,9 @@ path, not a nicety.** A Homebrew user who meets Gatekeeper runs
 the site sees "KiwiDesk is damaged and can't be opened" and
 deletes it. `scripts/build-app.sh --notarize` exists for that
 ([#89](https://github.com/KiwiCanopy/KiwiDesk/issues/89)), and
-in-app updates via Sparkle — the replacement for the App
-Store's update channel — depend on it too.
+in-app updates via Sparkle — the planned replacement for the
+App Store's update channel, not yet wired up — will depend on
+it too.
 
 ### Layout navigation & overflow models
 

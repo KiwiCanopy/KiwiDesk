@@ -10,8 +10,14 @@ app icon too (the OG banner kept a retired teal shell through a
 whole rebrand precisely because its copy was hand-maintained).
 
 What it does NOT touch: `icon.json`. The fill, shadow, glass and
-translucency there are hand-tuned in Icon Composer and carry no
-geometry, so regenerating layers never clobbers that tuning.
+translucency there are hand-tuned in Icon Composer, so
+regenerating layers never clobbers that tuning. It does READ two
+things back, because both are shared with the master and would
+otherwise drift silently: the gradient stops (which are the
+mark's own greens) and each layer's `position`, which IS
+geometry — this script owns the shared viewBox, so a hand nudge
+there would couple the layers to a viewBox the next run
+recomputes.
 
 The mark's forest-ink (`#12251a`) is one compound path holding
 the outer ring, the twelve seeds and the five window subpaths.
@@ -231,6 +237,34 @@ def assert_fill_matches_master(icon_json, src):
             "did.")
 
 
+def assert_layers_unnudged(icon_json):
+    """Fail if a layer's `position` left identity.
+
+    The shared viewBox is recomputed from the master's content
+    bounds on every run, so the layers stay registered only
+    while both layers sit at scale 1 / translation 0. After a
+    shape edit the natural repair in Icon Composer is to nudge a
+    layer until it looks right — which silently pins it to a
+    viewBox this script will move again.
+    """
+    for group in json.loads(icon_json.read_text()).get(
+            "groups", []):
+        for layer in group.get("layers", []):
+            pos = layer.get("position", {})
+            scale = pos.get("scale", 1)
+            trans = pos.get("translation-in-points", [0, 0])
+            if scale != 1 or list(trans) != [0, 0]:
+                sys.exit(
+                    f"layer {layer.get('name')!r} in "
+                    f"{icon_json.name} sits at scale {scale}, "
+                    f"translation {trans}. Framing belongs to "
+                    "the viewBox this script computes from the "
+                    "master, not to a per-layer nudge — the next "
+                    "run recomputes it and the offset survives. "
+                    "Reset the layer and adjust logo.svg (or "
+                    "this script's framing) instead.")
+
+
 def main():
     root = Path(__file__).resolve().parent.parent
     master = root / "assets" / "logo.svg"
@@ -255,6 +289,7 @@ def main():
         return re.search(r'\bd="([^"]*)"', hit[0]).group(1)
 
     assert_fill_matches_master(icon_dir / "icon.json", src)
+    assert_layers_unnudged(icon_dir / "icon.json")
     ring, window, seeds = classify(subpaths(pick(INK)), w, h)
     got = (len(ring), len(window), len(seeds))
     if got != (N_RING, N_WINDOW, N_SEEDS):

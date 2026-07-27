@@ -36,8 +36,11 @@ public enum ResourceBundle {
     ///     `swift test`, where it resolves normally.
     /// - Returns: the bundle found under
     ///   `Bundle.main.resourceURL`; inside an `.app` with the
-    ///   bundle missing, `Bundle.main` (whose lookups simply
-    ///   return nil); otherwise `fallback`.
+    ///   bundle missing, `Bundle.main` — which answers nil for
+    ///   these names today only because none of them collide
+    ///   with a resource the app itself ships, so treat it as
+    ///   "an empty bundle" rather than a guarantee; otherwise
+    ///   `fallback`.
     public static func locate(
         _ name: String,
         fallback: @autoclosure () -> Bundle
@@ -58,6 +61,17 @@ public enum ResourceBundle {
             // (`AppFontGlyphMap` promises "never a crash"), and
             // an empty bundle lets them.
             if Bundle.main.bundleURL.pathExtension == "app" {
+                // Reachable only in a shipped artifact, so say
+                // so: device QA launches the binary directly and
+                // reads NSLog (§5), and this line is the
+                // difference between "the app is in English and
+                // nobody knows why" and a one-line diagnosis.
+                NSLog(
+                    "KiwiDesk: resource bundle %@.bundle missing "
+                        + "from the app bundle; falling back to "
+                        + "built-in defaults.",
+                    name
+                )
                 return .main
             }
         }
@@ -68,8 +82,15 @@ public enum ResourceBundle {
 extension Bundle {
     /// `KiwiDeskCore`'s resources — locales, palettes, app font.
     /// Use this instead of `Bundle.module` inside this target.
+    /// SwiftPM's generated `<package>_<target>` name. Exposed
+    /// so `ResourceBundleNameTests` can pin it against the
+    /// bundle actually emitted on disk — under `swift test` the
+    /// fallback resolves correctly even when this is wrong, so
+    /// the literal cannot be checked through the accessor.
+    public static let kiwiDeskCoreName = "KiwiDesk_KiwiDeskCore"
+
     public static let kiwiDeskCore: Bundle = ResourceBundle.locate(
-        "KiwiDesk_KiwiDeskCore",
+        kiwiDeskCoreName,
         fallback: .module
     )
 }

@@ -300,7 +300,9 @@ no trailing period. Body (optional) explains the why, wrapped at
   from actool's own partial plist — though the deployment
   target is still typed in three places (`Package.swift`, the
   plist, actool's flag), so a raise to macOS 15 touches all
-  three and only the plist copy fails silently. It also
+  three; both copies fail silently, but only the plist's does so
+  dangerously (an app declaring a lower minimum than it runs on,
+  versus a wrong rendition set). It also
   **discovers the
   signing identity** from the keychain — that string is not a
   secret (any user can read it out of a shipped binary with

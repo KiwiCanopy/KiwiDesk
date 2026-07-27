@@ -9,8 +9,12 @@ extension Bundle {
     /// signed app may not keep anything — and otherwise falls
     /// through to an absolute `.build` path that exists only on
     /// the machine that compiled it (#89).
+    /// See `Bundle.kiwiDeskCoreName` — pinned on disk, because
+    /// the accessor cannot expose a wrong literal.
+    static let kiwiDeskGuiName = "KiwiDesk_KiwiDesk"
+
     static let kiwiDeskGui: Bundle = ResourceBundle.locate(
-        "KiwiDesk_KiwiDesk",
+        kiwiDeskGuiName,
         fallback: .module
     )
 }

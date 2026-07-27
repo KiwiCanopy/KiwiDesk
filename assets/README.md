@@ -121,7 +121,7 @@ so the mark stays a single master here too.
 |---|---|---|
 | `Assets/seeds.svg` | generated | `scripts/build-icon-layers` |
 | `Assets/window.svg` | generated | `scripts/build-icon-layers` |
-| `icon.json` | hand-tuned | Icon Composer, or by hand |
+| `icon.json` | hand-tuned (except `fill`) | Icon Composer, or by hand |
 
 **Never hand-edit the two layer SVGs** — a change to the mark's
 shape is reapplied by re-running the generator. The generator
@@ -175,7 +175,10 @@ merges in from actool's partial plist rather than re-typing.
   shadows still give depth. Do not switch it back on without
   re-rendering and looking at the outline.
 - **The fill is the mark's own flesh greens**, `#a5cb5a` →
-  `#89b34e`. `icon.json` takes no hex, so they are written as
+  `#89b34e` — and this one is *not* free: `build-icon-layers`
+  reads the stops back and exits non-zero unless `logo.svg`
+  still paints them, so an unrelated background colour fails
+  the build rather than drifting. `icon.json` takes no hex, so they are written as
   `srgb:` floats. Icon Composer's material *lightens* whatever
   fill it is given, which is why the endpoints are the literal
   brand hexes rather than pre-darkened ones: the rendered

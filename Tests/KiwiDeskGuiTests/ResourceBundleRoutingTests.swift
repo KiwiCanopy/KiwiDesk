@@ -28,12 +28,23 @@ import Testing
 /// shape of a guard that has quietly stopped guarding.
 @Suite("Resource-bundle routing")
 struct ResourceBundleRoutingTests {
+    /// Every Swift target, discovered rather than listed: a
+    /// third one (a login-item helper, an XPC service — both
+    /// plausible now that a signed `.app` exists) would
+    /// otherwise be scanned by nothing, and the guard's whole
+    /// argument is about the code not yet written.
     private var sourceRoots: [URL] {
-        let repo = SourceScan.repoRoot(from: #filePath)
-        return [
-            repo.appendingPathComponent("Sources/KiwiDeskCore"),
-            repo.appendingPathComponent("Sources/KiwiDesk"),
-        ]
+        let sources = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources")
+        let entries = try? FileManager.default
+            .contentsOfDirectory(
+                at: sources,
+                includingPropertiesForKeys: [.isDirectoryKey]
+            )
+        return (entries ?? []).filter {
+            (try? $0.resourceValues(forKeys: [.isDirectoryKey]))?
+                .isDirectory == true
+        }
     }
 
     /// Every file allowed to name `Bundle.module`, by path under
@@ -72,10 +83,7 @@ struct ResourceBundleRoutingTests {
                 // for anything. A member reference is always
                 // written with the leading dot, so this catches
                 // both spellings.
-                let hits =
-                    source.components(
-                        separatedBy: ".module"
-                    ).count - 1
+                let hits = source.occurrences(of: ".module")
                 guard hits > 0 else { continue }
                 let key = String(
                     file.path.dropFirst(prefix.count)

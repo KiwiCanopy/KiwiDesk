@@ -118,6 +118,13 @@ struct IconLayerParityTests {
 /// `build-icon-layers` reads: the script, the mark master, and
 /// the icon document. The script derives its root from its own
 /// location, so the shape is the contract.
+///
+/// Unlike `runRepoScript`, which copies every `scripts/*.py`
+/// because the localization tools share `localization_guards`,
+/// this copies the one entry point. If the generator ever
+/// imports a sibling module the fixture breaks — but it breaks
+/// **shut**: the ImportError is a non-zero exit, which the
+/// `run.status == 0` expectation catches.
 private func makeIconFixture(repoRoot: URL) throws -> URL {
     let fm = FileManager.default
     let fixture = fm.temporaryDirectory
