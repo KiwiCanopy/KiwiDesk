@@ -196,6 +196,43 @@ in-app updates via Sparkle — the planned replacement for the
 App Store's update channel, not yet wired up — will depend on
 it too.
 
+### The beta is Homebrew-only; the download waits for Sparkle
+
+**[Principle]**
+
+The 0.9 beta ships as a **cask only**. The site's download
+button, and the `.dmg` behind it, stay off until the build they
+point at embeds Sparkle.
+
+Sparkle has to be *inside* the build a user installs. Adding it
+one version later reaches only the people who install that later
+version; everyone already running the earlier one is stranded on
+manual re-download. So the question is not "when do we want
+in-app updates" but "which audience are we allowed to ship
+without them".
+
+That splits cleanly:
+
+- **Homebrew users always have a channel** — `brew upgrade` —
+  so a Sparkle-less beta strands nobody there.
+- **A `.dmg` user has no other channel.** They are exactly the
+  audience with no update path, which makes "download button on
+  the site, no Sparkle in the build" the one combination to
+  avoid.
+
+Consequence for sequencing: the DMG *tooling*
+(`build-app.sh --dmg`) is built early — the release workflow
+([#32](https://github.com/KiwiCanopy/KiwiDesk/issues/32)) has to
+call it, and Sparkle does not change it — but its artifact is
+not published until Sparkle lands. A cask installs from a
+`.zip` and never needs a DMG, so nothing about the beta is
+waiting on this.
+
+Trade-off: the first release reaches fewer people. Accepted,
+and it buys something back — Sparkle's update path is first
+exercised against a real previous release instead of being
+debugged on the release everyone downloads.
+
 ### Layout navigation & overflow models
 
 **[Map]**

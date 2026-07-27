@@ -10,7 +10,7 @@
 #
 # Usage:
 #   scripts/build-app.sh [--identity <id>] [--notarize <profile>]
-#                        [--output <dir>] [--skip-build]
+#                        [--output <dir>] [--skip-build] [--dmg]
 #
 #   --identity   Signing identity. Omit it and the sole
 #                "Developer ID Application" identity in the
@@ -30,6 +30,11 @@
 #                `xcrun notarytool store-credentials`. Requires a
 #                Developer ID identity. This script never handles
 #                your credentials — it only names the profile.
+#   --dmg        Also wrap the finished bundle in a disk image for
+#                the website download. The Homebrew cask installs
+#                from a .zip and never needs this. Combine with
+#                --notarize: the disk image is a separate piece of
+#                signed code and needs its own ticket (see step 7).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -38,6 +43,7 @@ NOTARY_PROFILE=""
 OUT="$ROOT/.build/app"
 SKIP_BUILD=0
 ALLOW_NO_ICON=0
+MAKE_DMG=0
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -55,6 +61,7 @@ while [ "$#" -gt 0 ]; do
             esac
             shift 2 ;;
         --skip-build) SKIP_BUILD=1; shift ;;
+        --dmg) MAKE_DMG=1; shift ;;
         --allow-no-icon) ALLOW_NO_ICON=1; shift ;;
         *) echo "error: unknown argument '$1'" >&2; exit 2 ;;
     esac
@@ -275,16 +282,30 @@ codesign --verify --deep --strict "$APP"
 # ---------------------------------------------------------------
 # 6. Notarize (optional)
 
-if [ -n "$NOTARY_PROFILE" ]; then
-    if [ "$IDENTITY" = "-" ]; then
-        echo "error: notarization needs a Developer ID identity," \
-             "not an ad-hoc signature" >&2
-        exit 1
-    fi
-    ZIP="$OUT/KiwiDesk.zip"
-    SUBMIT_LOG="$OUT/notarytool.json"
-    echo "==> notarizing via keychain profile '$NOTARY_PROFILE'"
-    ditto -c -k --keepParent "$APP" "$ZIP"
+# Submit one artifact, wait for the verdict, staple the ticket
+# into it. Both the .app and the .dmg go through here: they are
+# two separate pieces of signed code and Apple tickets each one
+# individually — the app's ticket does not travel with the image
+# that carries it.
+#
+# An .app cannot be submitted as-is (notarytool takes an archive,
+# and a plain directory would lose its signature in transit), so
+# it is zipped first; a .dmg is already a single file and is
+# submitted directly. Either way the STAPLE targets the original,
+# never the zip.
+notarize_and_staple() {
+    target="$1"
+    payload="$target"
+    zip=""
+    case "$target" in
+        *.app)
+            zip="$OUT/$(basename "$target" .app)-notarize.zip"
+            ditto -c -k --keepParent "$target" "$zip"
+            payload="$zip" ;;
+    esac
+    submit_log="$OUT/notarytool-$(basename "$target").json"
+    echo "==> notarizing $(basename "$target") via keychain" \
+         "profile '$NOTARY_PROFILE'"
     # `submit --wait` has historically exited 0 on
     # `status: Invalid`. Without this branch the rejection
     # surfaces as a confusing *stapler* error, and the
@@ -294,28 +315,85 @@ if [ -n "$NOTARY_PROFILE" ]; then
     # exit (auth, network, expired profile — all plausible on a
     # first submission) would abort here, before the branch that
     # prints the reason and the log.
-    xcrun notarytool submit "$ZIP" \
+    xcrun notarytool submit "$payload" \
         --keychain-profile "$NOTARY_PROFILE" --wait \
-        --output-format json | tee "$SUBMIT_LOG" || true
-    STATUS="$(sed -n 's/.*"status"[: ]*"\([^"]*\)".*/\1/p' \
-        "$SUBMIT_LOG" | tail -1)"
-    if [ "$STATUS" != "Accepted" ]; then
-        echo "error: notarization returned '${STATUS:-unknown}'" >&2
-        SUB_ID="$(sed -n 's/.*"id"[: ]*"\([^"]*\)".*/\1/p' \
-            "$SUBMIT_LOG" | tail -1)"
-        if [ -n "$SUB_ID" ]; then
-            xcrun notarytool log "$SUB_ID" \
+        --output-format json | tee "$submit_log" || true
+    status="$(sed -n 's/.*"status"[: ]*"\([^"]*\)".*/\1/p' \
+        "$submit_log" | tail -1)"
+    if [ "$status" != "Accepted" ]; then
+        echo "error: notarization of $(basename "$target")" \
+             "returned '${status:-unknown}'" >&2
+        sub_id="$(sed -n 's/.*"id"[: ]*"\([^"]*\)".*/\1/p' \
+            "$submit_log" | tail -1)"
+        if [ -n "$sub_id" ]; then
+            xcrun notarytool log "$sub_id" \
                 --keychain-profile "$NOTARY_PROFILE" >&2 || true
         fi
         exit 1
     fi
-    xcrun stapler staple "$APP"
-    rm -f "$ZIP"
+    xcrun stapler staple "$target"
+    [ -n "$zip" ] && rm -f "$zip"
+    return 0
+}
+
+if [ -n "$NOTARY_PROFILE" ]; then
+    if [ "$IDENTITY" = "-" ]; then
+        echo "error: notarization needs a Developer ID identity," \
+             "not an ad-hoc signature" >&2
+        exit 1
+    fi
+    notarize_and_staple "$APP"
     # The verdict an end user actually gets.
     spctl -a -vvv -t exec "$APP" 2>&1 | sed 's/^/    /'
+fi
+
+# ---------------------------------------------------------------
+# 7. Disk image (optional)
+#
+# For the website download only — a Homebrew cask installs from a
+# .zip and never sees this. Built AFTER step 6 on purpose: the
+# image should carry an already-stapled app, so that unpacking it
+# yields a bundle that passes Gatekeeper offline on its own.
+
+if [ "$MAKE_DMG" -eq 1 ]; then
+    DMG="$OUT/KiwiDesk-$VERSION.dmg"
+    STAGE="$OUT/dmg-staging"
+    echo "==> building $DMG"
+    rm -rf "$STAGE"
+    mkdir -p "$STAGE"
+    # ditto, not cp -R: this copies a signed bundle, and cp is
+    # not obliged to carry every extended attribute across.
+    ditto "$APP" "$STAGE/KiwiDesk.app"
+    # The drag-to-install convention. Cosmetic only — no window
+    # background or icon layout, which would need an AppleScript
+    # pass over the mounted volume.
+    ln -s /Applications "$STAGE/Applications"
+    rm -f "$DMG"
+    hdiutil create -volname "KiwiDesk" -srcfolder "$STAGE" \
+        -fs HFS+ -format UDZO -ov "$DMG" >/dev/null
+    rm -rf "$STAGE"
+
+    if [ "$IDENTITY" = "-" ]; then
+        echo "warning: ad-hoc identity — the disk image is left" \
+             "unsigned and will trip Gatekeeper on download" >&2
+    else
+        codesign --force --timestamp --sign "$IDENTITY" "$DMG"
+    fi
+
+    if [ -n "$NOTARY_PROFILE" ]; then
+        notarize_and_staple "$DMG"
+        # -t open, not -t exec: the download is opened, not run,
+        # and primary-signature is the context Gatekeeper uses
+        # for a quarantined disk image.
+        spctl -a -vvv -t open \
+            --context context:primary-signature "$DMG" 2>&1 \
+            | sed 's/^/    /'
+    fi
 fi
 
 echo
 echo "built $APP"
 echo "  run:  open \"$APP\""
 echo "  cli:  $MACOS/KiwiDesk --version"
+[ "$MAKE_DMG" -eq 1 ] && echo "  dmg:  $DMG"
+exit 0

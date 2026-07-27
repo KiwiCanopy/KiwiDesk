@@ -312,7 +312,18 @@ no trailing period. Body (optional) explains the why, wrapped at
   present it falls back to ad-hoc, so a contributor can still
   build. `--identity` overrides, `--notarize <profile>` takes a
   `notarytool` keychain profile the developer created
-  themselves.
+  themselves. `--dmg` additionally wraps the result in a disk
+  image for the website download — the cask installs from a
+  `.zip` and never needs one. **A disk image is its own piece of
+  signed code**, so with `--notarize` the script submits twice
+  (app, then image) and staples each: the app's ticket does not
+  travel with the image carrying it, and an unticketed image
+  greets a downloader with "KiwiDesk is damaged". The image is
+  deliberately built *after* the app is stapled, so unpacking it
+  yields a bundle that passes Gatekeeper offline on its own.
+  When that artifact may be published is a product decision, not
+  a packaging one — see the Sparkle coupling in
+  `docs/design-decisions.md`.
 - Fetch third-party subagents per clone with one explicit target:
   `./scripts/install-subagents.sh --claude` installs Claude Code
   agents and workspace skills; `./scripts/install-subagents.sh
