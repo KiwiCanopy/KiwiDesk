@@ -26,6 +26,7 @@ squircle *is* the container, and keeping the ring would nest one
 container inside another.
 """
 
+import json
 import re
 import sys
 from pathlib import Path
@@ -34,22 +35,65 @@ INK = "#12251a"          # mark shell ink: ring + seeds + window
 OUTLINE = "#d7e9ba"      # the window glyph's inner outline
 N_RING, N_WINDOW, N_SEEDS = 2, 5, 12
 
-NUM = re.compile(r"[-+]?(?:\d*\.\d+|\d+)(?:[eE][-+]?\d+)?")
+_N = r"[-+]?(?:\d*\.\d+|\d+)(?:[eE][-+]?\d+)?"
+NUM = re.compile(_N)
 CMD = re.compile(r"([MmZzLlHhVvCcSsQqTtAa])")
 ARGC = dict(M=2, L=2, H=1, V=1, C=6, S=4, Q=4, T=2, A=7, Z=0)
+
+# An arc cannot be read with a plain number scan. Its two flags are
+# single digits whose grammar production is "0" | "1", and they are
+# allowed to run into the next number with no separator — `svgo` and
+# Illustrator's minifier both emit that form. Scanned as numbers,
+# `a438 438 0 011-27.32` reads as FIVE values, not seven, and the
+# whole arc was silently dropped: `cur` never advanced, so every
+# later coordinate in the subpath shifted by the missing delta while
+# the subpath COUNT stayed right — sailing straight past the
+# assertion in main(). `logo.svg`'s one arc is space-separated
+# today, so this was correct only by luck.
+_SEP = r"[,\s]*"
+ARC = re.compile(
+    f"({_N}){_SEP}({_N}){_SEP}({_N}){_SEP}"   # rx ry x-axis-rotation
+    f"([01]){_SEP}([01]){_SEP}"               # large-arc, sweep
+    f"({_N}){_SEP}({_N})"                     # x y
+)
 
 
 def tokens(d):
     """Yield (command, args) with implicit repeats expanded."""
     parts = CMD.split(d)
     for i in range(1, len(parts), 2):
-        cmd = parts[i]
-        nums = [float(x) for x in NUM.findall(parts[i + 1])]
+        cmd, arg = parts[i], parts[i + 1]
         n = ARGC[cmd.upper()]
         if n == 0:
             yield cmd, []
             continue
-        for k in range(0, len(nums) - n + 1, n):
+
+        if cmd in "Aa":
+            spans, count = [], 0
+            for m in ARC.finditer(arg):
+                spans.append((m.start(), m.end()))
+                count += 1
+                yield cmd, [float(g) for g in m.groups()]
+            rest = arg
+            for s, e in reversed(spans):
+                rest = rest[:s] + rest[e:]
+            if not count or rest.strip(", \t\r\n"):
+                sys.exit(f"unparsable arc group '{cmd}{arg}' in "
+                         "logo.svg — the arc regex did not consume "
+                         "it whole. Fix the regex; never let an arc "
+                         "fall through, it corrupts every later "
+                         "point in its subpath.")
+            continue
+
+        nums = [float(x) for x in NUM.findall(arg)]
+        # A short or ragged group means the scan misread the path.
+        # Failing loudly beats dropping it: a dropped command
+        # leaves the subpath count intact and the geometry wrong.
+        if not nums or len(nums) % n:
+            sys.exit(f"malformed '{cmd}' group in logo.svg: "
+                     f"{len(nums)} argument(s), expected a multiple "
+                     f"of {n}.")
+        for k in range(0, len(nums), n):
             # a repeated moveto is an implicit lineto
             c = cmd
             if k and cmd in "Mm":
@@ -113,15 +157,22 @@ def subpaths(d):
 def classify(subs, w, h):
     """Sort subpaths into ring / window / seeds by size alone.
 
-    The ring spans the whole artboard; the five window subpaths
-    are all wider than 15% of it; every seed is far narrower.
-    The gap between the narrowest window part and the widest
-    seed is roughly 4x, so the threshold is not delicate.
+    Measured against the current master (fractions of the
+    artboard): the two ring subpaths are 0.994 and 0.935 wide,
+    the window parts run 0.626 down to 0.257, and the widest
+    seed is 0.062. Both cuts sit in empty bands — 0.626..0.935
+    for the ring and 0.062..0.257 for the window — so each
+    threshold is placed mid-band rather than snug against the
+    nearest real value. The inner ring is the tight one: at a
+    0.9 cut it had under 4% headroom, and the bbox here is
+    built from Bezier CONTROL points (which inflate it) while
+    an arc contributes only its endpoint (which deflates it),
+    so the measured figure is not exact in either direction.
     """
     ring, window, seeds = [], [], []
     for d, (x0, y0, x1, y1) in subs:
         bw, bh = x1 - x0, y1 - y0
-        if bw > 0.9 * w and bh > 0.9 * h:
+        if bw > 0.75 * w and bh > 0.75 * h:
             ring.append((d, (x0, y0, x1, y1)))
         elif bw > 0.15 * w:
             window.append((d, (x0, y0, x1, y1)))
@@ -130,10 +181,47 @@ def classify(subs, w, h):
     return ring, window, seeds
 
 
+def assert_fill_matches_master(icon_json, src):
+    """Fail if `icon.json`'s gradient left the master behind.
+
+    The generator deliberately never WRITES `icon.json` — the
+    fill, shadow and glass there are hand-tuned. But the
+    gradient is the mark's own flesh green transcribed into
+    `srgb:` floats, so nothing otherwise ties it to
+    `logo.svg`, and a rebrand would regenerate the layers
+    byte-identically while the icon kept the retired colour.
+    Reading it here keeps the tuning hand-owned and the colour
+    single-mastered.
+    """
+    fill = json.loads(icon_json.read_text()).get("fill", {})
+    stops = fill.get("linear-gradient") if isinstance(fill, dict) else None
+    if not stops:
+        return  # a non-gradient fill is a deliberate choice
+    got = []
+    for stop in stops:
+        m = re.match(r"srgb:([\d.]+),([\d.]+),([\d.]+)", str(stop))
+        if not m:
+            sys.exit(f"unreadable fill stop {stop!r} in "
+                     f"{icon_json.name} — expected srgb:r,g,b,a")
+        got.append("#%02x%02x%02x" % tuple(
+            int(round(float(v) * 255)) for v in m.groups()))
+    missing = [h for h in got if h.lower() not in src.lower()]
+    if missing:
+        sys.exit(
+            f"{icon_json.name}'s gradient uses {missing}, which "
+            "no longer appear in logo.svg. The icon background is "
+            "the mark's own flesh green; re-pick the stops in Icon "
+            "Composer (or update them by hand) so the icon does "
+            "not keep a retired colour the way the OG banner once "
+            "did.")
+
+
 def main():
     root = Path(__file__).resolve().parent.parent
     master = root / "assets" / "logo.svg"
-    dest = root / "assets" / "AppIcon.icon" / "Assets"
+    icon_dir = root / "assets" / "AppIcon.icon"
+    dest = icon_dir / "Assets"
+    dest.mkdir(parents=True, exist_ok=True)
     src = master.read_text()
 
     vb = re.search(r'viewBox="([^"]+)"', src).group(1).split()
@@ -143,18 +231,32 @@ def main():
     def pick(color):
         hit = [p for p in paths if color in p]
         if len(hit) != 1:
-            sys.exit(f"expected one {color} path, found {len(hit)}"
-                     f" — has {master.name} been restructured?")
+            sys.exit(
+                f"expected one {color} path, found {len(hit)} — "
+                f"has {master.name} been restructured, or was it "
+                "re-exported with upper-case hex or as "
+                "<path></path> rather than self-closing? The match "
+                "is literal on both counts.")
         return re.search(r'\bd="([^"]*)"', hit[0]).group(1)
 
+    assert_fill_matches_master(icon_dir / "icon.json", src)
     ring, window, seeds = classify(subpaths(pick(INK)), w, h)
     got = (len(ring), len(window), len(seeds))
     if got != (N_RING, N_WINDOW, N_SEEDS):
+        table = "\n".join(
+            "    bw/w=%.4f bh/h=%.4f  -> %s" % (
+                (b[2] - b[0]) / w, (b[3] - b[1]) / h, kind)
+            for kind, group in (("ring", ring), ("window", window),
+                                ("seeds", seeds))
+            for _, b in group)
         sys.exit(
             f"{master.name} split into ring/window/seeds {got}, "
-            f"expected {(N_RING, N_WINDOW, N_SEEDS)}. The mark's "
-            "shape changed — eyeball the new split, then update "
-            "the counts at the top of this script.")
+            f"expected {(N_RING, N_WINDOW, N_SEEDS)}.\n{table}\n"
+            "Two different causes, opposite fixes: the mark's "
+            "SHAPE changed (update the counts at the top), or a "
+            "subpath crossed a threshold in classify() (fix the "
+            "THRESHOLD, not the counts — bumping the counts here "
+            "would ship the ring inside the glyph).")
 
     # Square the canvas on the *content* (ring excluded), so both
     # layers share one viewBox and stay registered under Icon

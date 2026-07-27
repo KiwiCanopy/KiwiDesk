@@ -37,13 +37,25 @@ IDENTITY=""
 NOTARY_PROFILE=""
 OUT="$ROOT/.build/app"
 SKIP_BUILD=0
+ALLOW_NO_ICON=0
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
-        --identity)  IDENTITY="$2"; shift 2 ;;
-        --notarize)  NOTARY_PROFILE="$2"; shift 2 ;;
-        --output)    OUT="$2"; shift 2 ;;
+        --identity|--notarize|--output)
+            # Named, because `set -u` alone would report only a
+            # bare "$2: unbound variable".
+            [ "$#" -ge 2 ] || {
+                echo "error: $1 needs a value" >&2
+                exit 2
+            }
+            case "$1" in
+                --identity) IDENTITY="$2" ;;
+                --notarize) NOTARY_PROFILE="$2" ;;
+                --output)   OUT="$2" ;;
+            esac
+            shift 2 ;;
         --skip-build) SKIP_BUILD=1; shift ;;
+        --allow-no-icon) ALLOW_NO_ICON=1; shift ;;
         *) echo "error: unknown argument '$1'" >&2; exit 2 ;;
     esac
 done
@@ -109,11 +121,14 @@ rm -rf "$APP"
 mkdir -p "$MACOS" "$RES"
 cp "$BUILT/KiwiDesk" "$MACOS/KiwiDesk"
 
-# SwiftPM resource bundles resolve via `Bundle.module`, which
-# looks NEXT TO THE EXECUTABLE — so they belong in Contents/MacOS,
-# not Contents/Resources. Put them in Resources and the locales,
-# palettes, app font and brand assets all silently fall back to
-# their defaults with no error anywhere.
+# Resource bundles go in Contents/Resources: the conventional
+# place, and the only signable one. `Bundle.module` will NOT find
+# them there — see `ResourceBundle.swift`, which is why every
+# call site routes through `Bundle.kiwiDeskCore` /
+# `Bundle.kiwiDeskGui` instead. Copying them where the generated
+# accessor wants them (the bundle root) is not an option:
+# codesign refuses it outright with "unsealed contents present in
+# the bundle root", leaving `Sealed Resources=none`.
 shopt -s nullglob
 bundles=("$BUILT"/*.bundle)
 shopt -u nullglob
@@ -123,7 +138,7 @@ if [ ${#bundles[@]} -eq 0 ]; then
     exit 1
 fi
 for b in "${bundles[@]}"; do
-    cp -R "$b" "$MACOS/"
+    cp -R "$b" "$RES/"
     echo "    resource bundle: $(basename "$b")"
 done
 
@@ -134,14 +149,20 @@ done
 
 ICON_SRC="$ROOT/assets/AppIcon.icon"
 ICON_PLIST="$OUT/icon-partial.plist"
-if command -v actool >/dev/null 2>&1 && [ -d "$ICON_SRC" ]; then
+if xcrun -f actool >/dev/null 2>&1 && [ -d "$ICON_SRC" ]; then
     echo "==> actool $ICON_SRC"
     actool "$ICON_SRC" --compile "$RES" --platform macosx \
         --minimum-deployment-target 14.0 --app-icon AppIcon \
         --output-partial-info-plist "$ICON_PLIST" >/dev/null
+elif [ -n "$NOTARY_PROFILE" ] || [ "$ALLOW_NO_ICON" -eq 0 ]; then
+    echo "error: actool (Xcode, not just Command Line Tools) or" \
+         "$ICON_SRC is missing, so this build would have the" \
+         "generic blank icon. Pass --allow-no-icon if that is" \
+         "really what you want." >&2
+    exit 1
 else
-    echo "warning: actool or $ICON_SRC missing — building" \
-         "without an app icon" >&2
+    echo "warning: no actool or no $ICON_SRC — building without" \
+         "an app icon (--allow-no-icon)" >&2
     : > "$ICON_PLIST"
 fi
 
@@ -150,12 +171,17 @@ fi
 
 VERSION_FILE="$ROOT/Sources/KiwiDeskCore/App/KiwiDeskVersion.swift"
 VERSION="$(sed -n 's/.*let semantic = "\(.*\)".*/\1/p' \
-    "$VERSION_FILE")"
-[ -n "$VERSION" ] || {
-    echo "error: could not read the version from" \
-         "$VERSION_FILE" >&2
-    exit 1
-}
+    "$VERSION_FILE" | head -1)"
+# CFBundleVersion accepts only 1-3 dot-separated integers, and
+# bump-version.sh permits a prerelease suffix (`0.2.0-rc1`) that
+# would be rejected downstream. plutil -lint validates XML, not
+# this, so check the shape here.
+case "$VERSION" in
+    ''|*[!0-9.]*|*..*|.*|*.)
+    echo "error: '$VERSION' from $VERSION_FILE is not usable as" \
+         "CFBundleVersion (1-3 dot-separated integers)" >&2
+    exit 1 ;;
+esac
 echo "==> Info.plist (version $VERSION)"
 
 PLIST="$APP/Contents/Info.plist"
@@ -209,8 +235,15 @@ if [ -s "$ICON_PLIST" ]; then
         done < <(/usr/libexec/PlistBuddy -c "Print" "$ICON_PLIST" \
             | sed -n 's/^ *\([A-Za-z]*\) = .*/\1/p')
     }
+    /usr/libexec/PlistBuddy -c "Print :CFBundleIconName" \
+        "$PLIST" >/dev/null 2>&1 || {
+        echo "error: actool produced a partial plist but no icon" \
+             "keys could be merged — its output format changed." \
+             "See $ICON_PLIST" >&2
+        exit 1
+    }
 fi
-plutil -lint "$PLIST" >/dev/null
+plutil -lint "$PLIST"
 
 # ---------------------------------------------------------------
 # 5. Sign
@@ -227,7 +260,7 @@ if [ "$IDENTITY" = "-" ]; then
 fi
 # Inside-out: nested code must already be sealed when the outer
 # bundle is signed, or the outer signature does not cover it.
-for b in "$MACOS"/*.bundle; do
+for b in "$RES"/*.bundle; do
     [ -e "$b" ] || continue
     codesign --force "${TS[@]}" --options runtime \
         --sign "$IDENTITY" "$b"
@@ -246,12 +279,33 @@ if [ -n "$NOTARY_PROFILE" ]; then
         exit 1
     fi
     ZIP="$OUT/KiwiDesk.zip"
+    SUBMIT_LOG="$OUT/notarytool.json"
     echo "==> notarizing via keychain profile '$NOTARY_PROFILE'"
     ditto -c -k --keepParent "$APP" "$ZIP"
+    # `submit --wait` has historically exited 0 on
+    # `status: Invalid`. Without this branch the rejection
+    # surfaces as a confusing *stapler* error, and the
+    # submission id `notarytool log` needs has already scrolled
+    # past in unstructured output.
     xcrun notarytool submit "$ZIP" \
-        --keychain-profile "$NOTARY_PROFILE" --wait
+        --keychain-profile "$NOTARY_PROFILE" --wait \
+        --output-format json | tee "$SUBMIT_LOG"
+    STATUS="$(sed -n 's/.*"status"[: ]*"\([^"]*\)".*/\1/p' \
+        "$SUBMIT_LOG" | tail -1)"
+    if [ "$STATUS" != "Accepted" ]; then
+        echo "error: notarization returned '${STATUS:-unknown}'" >&2
+        SUB_ID="$(sed -n 's/.*"id"[: ]*"\([^"]*\)".*/\1/p' \
+            "$SUBMIT_LOG" | tail -1)"
+        if [ -n "$SUB_ID" ]; then
+            xcrun notarytool log "$SUB_ID" \
+                --keychain-profile "$NOTARY_PROFILE" >&2 || true
+        fi
+        exit 1
+    fi
     xcrun stapler staple "$APP"
     rm -f "$ZIP"
+    # The verdict an end user actually gets.
+    spctl -a -vvv -t exec "$APP" 2>&1 | sed 's/^/    /'
 fi
 
 echo

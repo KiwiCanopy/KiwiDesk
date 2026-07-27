@@ -15,7 +15,7 @@ public enum AppFont {
     /// already installed for sketchybar itself.
     static let registered: Bool = {
         guard
-            let url = Bundle.module.url(
+            let url = Bundle.kiwiDeskCore.url(
                 forResource: "sketchybar-app-font",
                 withExtension: "ttf",
                 subdirectory: "AppFont"

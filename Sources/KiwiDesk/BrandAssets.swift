@@ -1,6 +1,20 @@
 import AppKit
 import KiwiDeskCore
 
+extension Bundle {
+    /// This target's resources. Routed through
+    /// `ResourceBundle.locate` rather than used as
+    /// `Bundle.module` directly, because inside an `.app` the
+    /// generated accessor searches the bundle *root* — where a
+    /// signed app may not keep anything — and otherwise falls
+    /// through to an absolute `.build` path that exists only on
+    /// the machine that compiled it (#89).
+    static let kiwiDeskGui: Bundle = ResourceBundle.locate(
+        "KiwiDesk_KiwiDesk",
+        fallback: .module
+    )
+}
+
 /// Bundled brand images (#68 §3.8/§3.9), rasterized from the
 /// vector masters in `assets/` (see `assets/README.md` for
 /// the regeneration commands). Every accessor is optional — a
@@ -19,7 +33,7 @@ enum BrandAssets {
     /// state.
     static let menuBarIcon: NSImage? = {
         guard
-            let image = Bundle.module.image(
+            let image = Bundle.kiwiDeskGui.image(
                 forResource: "MenuBarIcon"
             )
         else { return nil }
@@ -35,7 +49,7 @@ enum BrandAssets {
     /// `logo_wordmark.svg`, shown in Settings ▸ General ▸
     /// About in light mode.
     static let wordmark: NSImage? =
-        Bundle.module.image(forResource: "Wordmark")
+        Bundle.kiwiDeskGui.image(forResource: "Wordmark")
 
     /// Dark-mode wordmark from `logo_wordmark_dark.svg`: the
     /// kiwi mark is byte-identical to the light master and only
@@ -45,7 +59,7 @@ enum BrandAssets {
     /// view swaps by `colorScheme`, so neither mode needs a
     /// backing card.
     static let wordmarkDark: NSImage? =
-        Bundle.module.image(forResource: "WordmarkDark")
+        Bundle.kiwiDeskGui.image(forResource: "WordmarkDark")
 
     /// The full-colour app mark from `logo.svg`, in **both**
     /// appearances. Two uses: the Settings sidebar identity
@@ -64,5 +78,5 @@ enum BrandAssets {
     /// retired `AppMarkDark` was a gold recolour of the whole
     /// mark, predating the green-forward palette (#439).
     static let appMark: NSImage? =
-        Bundle.module.image(forResource: "AppMark")
+        Bundle.kiwiDeskGui.image(forResource: "AppMark")
 }

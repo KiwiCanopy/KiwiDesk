@@ -47,7 +47,13 @@ sips -s format png --resampleHeightWidthMax 512 \
     assets/logo_wordmark_dark.svg --out "$R/WordmarkDark.png"
 sips -s format png --resampleHeightWidthMax 512 \
     assets/logo.svg --out "$R/AppMark.png"
+scripts/build-icon-layers
 ```
+
+That last line re-derives the app icon's layer art — see
+[App icon](#app-icon-appiconicon). It is not optional after a
+shape change: `IconLayerParityTests` fails when the committed
+layers no longer match the master.
 
 The repo README's own header images are separate, larger raster
 copies of the two wordmarks — regenerate them in the same pass:

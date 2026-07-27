@@ -146,18 +146,24 @@ All of these are collected in
 
 ### Distribution: direct download, not the Mac App Store
 
-**[Rationale]**
+**[Principle]**
 
 KiwiDesk ships as a signed, notarized direct download plus a
 Homebrew cask. **The Mac App Store is not a later step, it is
 out of scope** — so a roadmap, badge or landing page should
-never promise it again (both did, until #89).
+never promise it again.
+
+It sits next to the SIP entry because a reader who accepts that
+one asks about the App Store next, and both are doors that stay
+shut. The shared root is only the private symbols, though — the
+second reason below is a sandbox constraint, unrelated to SIP.
 
 Two independent reasons, either alone sufficient:
 
-- **Private API.** The same SkyLight/CGS symbols the section
-  above rests on — 37 of them — put this squarely against
-  review guideline 2.5.1, which permits public API only.
+- **Private API.** The SkyLight/CGS symbols the section above
+  discusses — dozens of them, and native-Space management does
+  not work without them — put this squarely against review
+  guideline 2.5.1, which permits public API only.
   Resolving them through `dlsym` is a robustness measure
   (`AGENTS.md` §5: a vanished symbol must return nil, not
   crash at launch), never a way around the guideline.

@@ -137,8 +137,9 @@ at directory altitude — see **`docs/architecture.md`**.
    on and I act"; an affordance for a channel that does not exist
    yet is **removed outright**, because dimming cannot revoke the
    promise its shape makes and it reads broken instead of
-   forthcoming (the site's App Store badge, retired for the
-   Homebrew beta rather than greyed); **the live preview leads**
+   forthcoming (the site's App Store badge, removed rather than
+   greyed — and permanently, the store being out of scope, see
+   `docs/design-decisions.md`); **the live preview leads**
    its editor; **defer per-control "why" to contextual help**
    (the planned `?` affordance, #94) rather than bloating labels or
    captions with glosses that would later duplicate it. A caption's
@@ -296,7 +297,11 @@ no trailing period. Body (optional) explains the why, wrapped at
   build, compiles `assets/AppIcon.icon` through `actool`, and
   signs it. Nothing it writes is a second copy: the version is
   read from `KiwiDeskVersion.swift` and the two icon keys come
-  from actool's own partial plist. It also **discovers the
+  from actool's own partial plist — though the deployment
+  target is still typed in three places (`Package.swift`, the
+  plist, actool's flag), so a raise to macOS 15 touches all
+  three and only the plist copy fails silently. It also
+  **discovers the
   signing identity** from the keychain — that string is not a
   secret (any user can read it out of a shipped binary with
   `codesign -dv`), so it is never hardcoded to a developer's
@@ -363,17 +368,26 @@ Keep this list updated whenever a recurring mistake is found.
   adding a setting, pick the Lua name first and derive the
   JSON key from it via `CodingKeys` (Swift property names may
   differ internally). `SettingsCodingTests` pins this shape.
-- **SwiftPM resource bundles go in `Contents/MacOS`, not
-  `Contents/Resources` (#89).** `Bundle.module` resolves
-  `KiwiDesk_*.bundle` **next to the executable**, so inside an
-  `.app` that is `Contents/MacOS`. Put them in the intuitive
-  `Contents/Resources` and every `Bundle.module` client — the
-  locale catalogs, the palettes, the vendored app font, the
-  brand assets — silently falls back to its default with no
-  error logged anywhere; the app looks like it merely reverted
-  to English rather than like it failed to find a file.
-  `scripts/build-app.sh` places and deep-signs them, and hard
-  fails when the release build produced none.
+- **Never use `Bundle.module` in code that runs from the `.app`
+  (#89)** — go through `ResourceBundle.locate`
+  (`Bundle.kiwiDeskCore` / `Bundle.kiwiDeskGui`). SwiftPM's
+  generated accessor searches `Bundle.main.bundleURL`, which is
+  the executable's directory for a bare binary but the **bundle
+  root** inside an `.app` — and codesign refuses to seal a
+  bundle with anything loose there ("unsealed contents present
+  in the bundle root", `Sealed Resources=none`). So the only
+  location that accessor accepts is one a distributable app
+  cannot use, and the resources live in `Contents/Resources`
+  instead.
+  **The trap is that this cannot be caught on the machine that
+  built it.** The accessor's second candidate is an absolute
+  path into the `.build` directory that compiled it, so locally
+  it always resolves and any layout looks correct; elsewhere —
+  or after deleting `.build` — it matches neither candidate and
+  calls `fatalError`. A hard crash at first access, not a quiet
+  fallback to defaults. Verifying that the files are *present*
+  in the bundle proves nothing about this; only launching a copy
+  with `.build` moved aside does.
 - **Never disable SIP or ask users to.** Private SkyLight/CGS
   symbols are resolved at runtime via `dlsym` (`SkyLight.swift`),
   never linked with `@_silgen_name` — a linked symbol that

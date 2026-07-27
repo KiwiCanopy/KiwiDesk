@@ -460,7 +460,7 @@
   color: var(--text-dim);
 }
 
-/* The App Store promise. Deliberately plain text at the faintest
+/* The follow-up-release note. Deliberately plain text at the faintest
    tier — it is not a control, so it must not look like one. */
 .learn-install__later {
   margin: 0;

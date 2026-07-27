@@ -18,7 +18,7 @@ enum AppFontGlyphMap {
     /// degrades to image rendering, never a crash.
     static func loadBundled() -> [String: String]? {
         guard
-            let url = Bundle.module.url(
+            let url = Bundle.kiwiDeskCore.url(
                 forResource: "icon_map",
                 withExtension: "json",
                 subdirectory: "AppFont"

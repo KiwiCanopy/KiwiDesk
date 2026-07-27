@@ -34,7 +34,7 @@ public enum PaletteCatalog {
     /// The eight authored palettes from `Resources/Palettes`.
     static func authored() -> [ColorPalette] {
         guard
-            let url = Bundle.module.url(
+            let url = Bundle.kiwiDeskCore.url(
                 forResource: "bundled",
                 withExtension: "json",
                 subdirectory: "Palettes"

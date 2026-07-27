@@ -19,7 +19,7 @@ enum LocaleCatalog {
     /// follows the OS language.
     static func availableLocales() -> [String] {
         guard
-            let directory = Bundle.module.url(
+            let directory = Bundle.kiwiDeskCore.url(
                 forResource: "Locales",
                 withExtension: nil
             )
@@ -41,7 +41,7 @@ enum LocaleCatalog {
     /// if the file is missing or malformed.
     static func load(_ locale: String) -> [String: String] {
         guard
-            let url = Bundle.module.url(
+            let url = Bundle.kiwiDeskCore.url(
                 forResource: locale,
                 withExtension: "json",
                 subdirectory: "Locales"
