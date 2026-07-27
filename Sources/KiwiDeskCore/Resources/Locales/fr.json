@@ -40,7 +40,7 @@
   "app_bar.edge.top": "Haut",
   "app_bar.font_size": "Taille de police",
   "app_bar.font_size.auto": "Taille automatique",
-  "app_bar.global_colors.title": "Couleurs globales",
+  "app_bar.global_colors.title": "Couleurs de l'App Bar",
   "app_bar.global_style.caption": "L'App Bar apparaît dans les dispositions qui en affichent une — Monocle et Scrolling. Ces réglages sont partagés ; une disposition peut remplacer chacun d'eux ci-dessous.",
   "app_bar.global_style.title": "Style de l'App Bar",
   "app_bar.group_adjacent": "Regrouper les fenêtres voisines d'une même app",

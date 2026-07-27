@@ -40,7 +40,7 @@
   "app_bar.edge.top": "上",
   "app_bar.font_size": "フォントサイズ",
   "app_bar.font_size.auto": "自動フォントサイズ",
-  "app_bar.global_colors.title": "全体カラー",
+  "app_bar.global_colors.title": "App Barのカラー",
   "app_bar.global_style.caption": "App Bar は、これを表示するレイアウト（モノクルとスクロール）に表示されます。ここでの設定は共通で、各レイアウトが下で個別に上書きできます。",
   "app_bar.global_style.title": "App Barのスタイル",
   "app_bar.group_adjacent": "同アプリの隣接ウインドウをグループ化",

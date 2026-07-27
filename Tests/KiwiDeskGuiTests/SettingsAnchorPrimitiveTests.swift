@@ -105,6 +105,13 @@ struct SettingsAnchorPrimitiveTests {
             "SettingsSection.swift",
             "SettingsDisclosure.swift",
             "GapsEditor.swift",
+            // The Bars switch chips anchor themselves so a
+            // bar-name search lands on the switch (#277). Not a
+            // section/drawer/row shape — a bespoke recognition
+            // control — so it applies the pairing directly, like
+            // GapsEditor's rows, until a shared control primitive
+            // exists.
+            "BarEditorPicker.swift",
         ]
         for needle in [".searchAnchor(", ".searchFlash("] {
             let hits = try occurrences(

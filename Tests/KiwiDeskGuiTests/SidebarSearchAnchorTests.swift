@@ -56,7 +56,7 @@ struct SidebarSearchAnchorTests {
         defer { reset() }
         for (query, editor, side) in [
             ("Space Bar style", BarEditor.spaceBar, "Space Bar"),
-            ("Global style", .appBar, "App Bar"),
+            ("App Bar style", .appBar, "App Bar"),
         ] {
             let result = SidebarSearch.results(
                 query: query,
@@ -71,6 +71,44 @@ struct SidebarSearchAnchorTests {
             // the user came for.
             #expect(
                 result?.path == ["Bars", side],
+                Comment(rawValue: query)
+            )
+        }
+    }
+
+    /// The bare bar name is findable via the indexed switch chips
+    /// (#277): searching "App Bar" selects that editor and lands
+    /// on its chip, not a section below it. The switch entry is
+    /// declared first, so it wins the one-row-per-destination cap
+    /// over the "App Bar style"/"…colors" sections.
+    @Test("a bare bar-name search lands on the switch chip")
+    func barNameHitsSwitch() {
+        pinEnglish()
+        defer { reset() }
+        for (query, editor, anchor) in [
+            ("App Bar", BarEditor.appBar, "bars.switch.app_bar"),
+            (
+                "Space Bar", BarEditor.spaceBar,
+                "bars.switch.space_bar"
+            ),
+        ] {
+            let result = SidebarSearch.results(
+                query: query,
+                editingStoredProfile: false
+            ).first
+            #expect(
+                result?.anchor.surface == .bar(editor),
+                Comment(rawValue: query)
+            )
+            #expect(
+                result?.anchor.anchor == anchor,
+                Comment(rawValue: query)
+            )
+            // The chip's own name IS the match, so the breadcrumb
+            // is the destination alone — not "Bars › App Bar ›
+            // App Bar".
+            #expect(
+                result?.path == ["Bars"],
                 Comment(rawValue: query)
             )
         }

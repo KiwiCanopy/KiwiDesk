@@ -102,14 +102,44 @@ struct AppearanceControls: Sendable {
 }
 
 struct BarsControls: Sendable {
+    /// The App Bar / Space Bar switch chips, indexed so the bare
+    /// bar name is findable — searching "App Bar" selects that
+    /// editor and flashes its chip. Reuses the chips' existing
+    /// `bars.switch.*` label keys (same English), so the chip and
+    /// the search entry name the bar with one string. Declared
+    /// first so a bare bar-name query lands on the switch rather
+    /// than the first section below it. `BarEditorPicker` carries
+    /// these ids.
+    let appBarSwitch = SettingsControl(
+        "bars.switch.app_bar",
+        "App Bar",
+        surface: .bar(.appBar)
+    )
+    let spaceBarSwitch = SettingsControl(
+        "bars.switch.space_bar",
+        "Space Bar",
+        surface: .bar(.spaceBar)
+    )
+    /// "App Bar style"/"App Bar colors", not "Global …"
+    /// (ui-designer 2026-07-28): "Global" is KiwiDesk's word for
+    /// the config-vs-override axis (the Profiles system), so
+    /// reusing it here for bar-wide-vs-per-layout collides with
+    /// established vocabulary and reads ambiguously in isolation
+    /// (a search hit or screenshot has no switch chip in view).
+    /// The global-vs-override distinction is already carried by
+    /// structure — the per-layout "Overrides" drawers nested under
+    /// each named layout section — so the word is redundant here.
+    /// Mirrors the Space Bar's own `"<bar> style"` pattern, whose
+    /// key is likewise `…global_style…` but whose display was
+    /// already written bar-named.
     let appBarStyleCard = SettingsControl(
         "app_bar.global_style.title",
-        "Global style",
+        "App Bar style",
         surface: .bar(.appBar)
     )
     let appBarColorsCard = SettingsControl(
         "app_bar.global_colors.title",
-        "Global colors",
+        "App Bar colors",
         surface: .bar(.appBar)
     )
     /// Renders inside BOTH colour groups, so it stays

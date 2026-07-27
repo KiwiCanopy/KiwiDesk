@@ -40,7 +40,7 @@
   "app_bar.edge.top": "위쪽",
   "app_bar.font_size": "서체 크기",
   "app_bar.font_size.auto": "자동 서체 크기",
-  "app_bar.global_colors.title": "전역 색상",
+  "app_bar.global_colors.title": "App Bar 색상",
   "app_bar.global_style.caption": "App Bar는 이를 표시하는 레이아웃(모노클, 스크롤)에 나타납니다. 여기의 설정은 공유되며, 각 레이아웃이 아래에서 개별적으로 오버라이드할 수 있습니다.",
   "app_bar.global_style.title": "App Bar 스타일",
   "app_bar.group_adjacent": "같은 앱의 인접한 윈도우 묶기",

@@ -89,11 +89,11 @@ struct SidebarSearchTests {
         pinEnglish()
         defer { reset() }
         let results = SidebarSearch.results(
-            query: "obAl coLo",
+            query: "pp bAr cOlo",
             editingStoredProfile: false
         )
         #expect(results.map(\.destination) == [.bars])
-        #expect(results.first?.primary == "Global colors")
+        #expect(results.first?.primary == "App Bar colors")
     }
 
     @Test("one row per destination, in sidebar order")

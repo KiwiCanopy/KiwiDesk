@@ -28,12 +28,22 @@ struct BarEditorPicker: View {
         .accessibilityLabel(L("bars.switch", "Bar"))
     }
 
+    /// The catalog entry backing a chip — the id it anchors, so a
+    /// search for the bar's name lands on and flashes the chip.
+    private func control(_ editor: BarEditor) -> SettingsControl {
+        switch editor {
+        case .appBar: return SettingsCatalog.bars.appBarSwitch
+        case .spaceBar: return SettingsCatalog.bars.spaceBarSwitch
+        }
+    }
+
     private func chip<Mock: View>(
         _ editor: BarEditor,
         @ViewBuilder mock: () -> Mock
     ) -> some View {
         let selected = selection == editor
         let title = editor.displayName
+        let anchor = control(editor).id
         return Button {
             selection = editor
         } label: {
@@ -59,12 +69,18 @@ struct BarEditorPicker: View {
                         lineWidth: 2
                     )
             )
+            // Flash the chip when its bar name is the search hit;
+            // the wash sits behind the chip's own fill.
+            .searchFlash(anchor)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(title)
         .accessibilityAddTraits(
             selected ? [.isSelected] : []
         )
+        // Scroll target for a bar-name search — the switch sits at
+        // the top of the pane, so a hit lands the user there.
+        .searchAnchor(anchor)
     }
 
     /// A row of app-icon tiles, one ringed active.

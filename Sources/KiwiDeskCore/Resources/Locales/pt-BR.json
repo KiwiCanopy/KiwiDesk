@@ -40,7 +40,7 @@
   "app_bar.edge.top": "Topo",
   "app_bar.font_size": "Tamanho da fonte",
   "app_bar.font_size.auto": "Tamanho de fonte automático",
-  "app_bar.global_colors.title": "Cores globais",
+  "app_bar.global_colors.title": "Cores da App Bar",
   "app_bar.global_style.caption": "A App Bar aparece nos layouts que a exibem — Monocle e Scrolling. Essas configurações são compartilhadas; um layout pode substituir qualquer uma delas abaixo.",
   "app_bar.global_style.title": "Estilo da App Bar",
   "app_bar.group_adjacent": "Agrupar janelas vizinhas do mesmo app",

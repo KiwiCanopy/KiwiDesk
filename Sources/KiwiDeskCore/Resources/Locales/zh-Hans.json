@@ -40,7 +40,7 @@
   "app_bar.edge.top": "顶部",
   "app_bar.font_size": "字体大小",
   "app_bar.font_size.auto": "自动字体大小",
-  "app_bar.global_colors.title": "全局颜色",
+  "app_bar.global_colors.title": "App Bar 颜色",
   "app_bar.global_style.caption": "App Bar 会出现在显示它的布局中——单窗和滚动。此处的设置为共享设置，各布局可在下方单独覆盖。",
   "app_bar.global_style.title": "App Bar 样式",
   "app_bar.group_adjacent": "合并同一 App 的相邻窗口",
