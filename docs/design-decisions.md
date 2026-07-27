@@ -192,9 +192,47 @@ path, not a nicety.** A Homebrew user who meets Gatekeeper runs
 the site sees "KiwiDesk is damaged and can't be opened" and
 deletes it. `scripts/build-app.sh --notarize` exists for that
 ([#89](https://github.com/KiwiCanopy/KiwiDesk/issues/89)), and
-in-app updates via Sparkle — the planned replacement for the
-App Store's update channel, not yet wired up — will depend on
-it too.
+Sparkle — the replacement for the App Store's update channel —
+depends on notarization as well, since it refuses to install an
+update that lacks it. *When* a channel may open is a separate
+question, answered by
+[No distribution channel without an update path](#no-distribution-channel-without-an-update-path).
+
+### No distribution channel without an update path
+
+**[Principle]**
+
+Never open a channel a normal user can install from unless that
+build can update itself. This is about *publication*, not about
+a button: the site's download link and a public GitHub Release
+asset are the same channel from the user's side, and a stranded
+user arrives through either. Building an artifact is always
+fine; putting it somewhere people find it is what this governs.
+
+The reason it is a rule and not a preference is the asymmetry of
+the mistake. Sparkle has to be *inside* the build a user
+installs — shipping it one version later reaches only the people
+who install that later version, and everyone already running the
+earlier one stays stranded on manual re-download forever. There
+is no recovering the first group, which is why the gate is on
+publishing rather than on remembering to fix it afterwards.
+
+**Homebrew is the deliberate exception, and it is conditional.**
+`brew upgrade` is a real update path, so a Sparkle-less build
+may ship as a cask. That holds only while the release workflow
+actually bumps the tap — if the cask goes stale the exception
+lapses and the cask users are the stranded ones. It is an
+obligation on the cask
+([#105](https://github.com/KiwiCanopy/KiwiDesk/issues/105)), not
+a property that exists for free.
+
+Until Sparkle lands, the two together mean: cask yes, `.dmg`
+and Release assets no.
+
+Trade-off: the first release reaches fewer people. Accepted, and
+it buys something back — Sparkle's update path is first
+exercised against a real previous release instead of being
+debugged on the release everyone downloads.
 
 ### Layout navigation & overflow models
 

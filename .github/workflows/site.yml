@@ -37,7 +37,10 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          # Read from site/.nvmrc so CI and a local `nvm use`
+          # cannot drift apart — a literal here would silently
+          # keep handing contributors the old version.
+          node-version-file: site/.nvmrc
           cache: npm
           cache-dependency-path: site/package-lock.json
 

@@ -189,7 +189,15 @@ at directory altitude — see **`docs/architecture.md`**.
    same change set when a feature warrants surfacing there —
    e.g. a new layout mode (#128) adds its user-guide/reference
    prose *and* whatever nav or callout makes it findable. Run
-   `npm run build` in `site/` when you touch either.
+   `npm run build` in `site/` when you touch either, after
+   `nvm use` there — **`site/.nvmrc` is the one copy of the
+   Node version**, read by that command and by CI's
+   `node-version-file`, so never restate the number here or in
+   `site.yml`. Astro refuses anything below 22.12, and an
+   install performed on an older Node resolves the wrong
+   platform binaries, so a later `nvm use` alone still fails on
+   a missing native binding — delete `node_modules` and
+   reinstall if that happens.
    When a review or manual pass classifies a behavior as
    **accepted-by-architecture**, it adds a row to the *Accepted
    limitations* page (`docs/accepted-limitations.md`) in the same
@@ -312,7 +320,16 @@ no trailing period. Body (optional) explains the why, wrapped at
   present it falls back to ad-hoc, so a contributor can still
   build. `--identity` overrides, `--notarize <profile>` takes a
   `notarytool` keychain profile the developer created
-  themselves.
+  themselves. `--dmg` additionally wraps the result in a disk
+  image for the website download — the cask installs from a
+  `.zip` and never needs one; with `--notarize` that means two
+  submissions, for the reason in §5. Signing is inside-out over
+  `Resources/*.bundle` only, so the first dependency that adds
+  nested code (`Contents/Frameworks/`, i.e. Sparkle) has to
+  extend that loop — packaging is not "done" for it. Whether a
+  built artifact may be *published* is a separate, product
+  decision: see "No distribution channel without an update path"
+  in `docs/design-decisions.md`.
 - Fetch third-party subagents per clone with one explicit target:
   `./scripts/install-subagents.sh --claude` installs Claude Code
   agents and workspace skills; `./scripts/install-subagents.sh
@@ -348,6 +365,32 @@ already knows costs more than it saves.
 
 Keep this list updated whenever a recurring mistake is found.
 
+- **Every distributable artifact needs its OWN ticket, and this
+  cannot be caught on the machine that built it.** A disk image
+  is a separate piece of signed code from the app inside it:
+  notarizing the app does not cover the `.dmg` carrying it, so
+  `--notarize --dmg` submits *twice* and staples each. Like the
+  `Bundle.module` trap, the build machine is the one place the
+  failure is invisible — a locally-built image carries no
+  `com.apple.quarantine` attribute, so it mounts and runs
+  perfectly here and only says "KiwiDesk is damaged and can't be
+  opened" after a real download. **`spctl` is not the check.**
+  `spctl --assess` is satisfied by an *online* notarization
+  lookup, so it answers `accepted` for an artifact that was
+  notarized but never stapled — which then fails on a machine
+  that is offline or behind a captive portal. Only `xcrun
+  stapler validate` proves the ticket is physically attached.
+  **Verify by stamping quarantine on a copy**: `xattr -w
+  com.apple.quarantine "0081;0;Safari;$(uuidgen)"`, mount it,
+  then `stapler validate` plus `spctl -a -vvv -t open --context
+  context:primary-signature` on the image and `-t exec` on the
+  app inside (image and app need different `spctl` invocations).
+  Companion rule: **an archive meant for distribution is created
+  AFTER stapling, never reused from the notarization payload** —
+  the zip submitted to Apple is made pre-staple by construction,
+  so shipping it would strand every user with an unticketed
+  bundle. Applies to any artifact type added later (`.pkg`, the
+  cask's `.zip`, a Sparkle delta).
 - **Pre-release, single user: no backward-compat shims.** Nothing
   is publicly released, so nothing external depends on the current
   command names, Lua/CLI verbs, event names, or file formats.
