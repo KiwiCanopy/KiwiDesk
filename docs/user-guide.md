@@ -73,6 +73,12 @@ type a little more to reach a different one. The query stays put
 while you navigate — press Escape or the clear button to get the
 full sidebar back.
 
+Matching ignores case, accents, and hyphens-versus-spaces, so
+"grosse" finds "Größe" and "space bar farben" finds
+"Space Bar-Farben". It is a plain substring match, not a fuzzy one:
+type part of what you see and it will be found, but a typo returns
+nothing rather than a confident guess.
+
 ### Contextual Help (?)
 
 Some rows carry a small circled question mark right after

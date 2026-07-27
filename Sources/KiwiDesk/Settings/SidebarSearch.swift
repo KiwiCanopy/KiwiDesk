@@ -36,10 +36,12 @@ struct SidebarSearchResult: Identifiable, Equatable {
 }
 
 enum SidebarSearch {
-    /// Case- and diacritic-insensitive substring match
-    /// (`localizedStandardContains`, Apple's user-facing search
-    /// comparison — "grosse" finds "Größe"), one row per
-    /// destination in sidebar order.
+    /// Substring match through `searchMatches` — the app's one
+    /// search-matching predicate, shared with the app picker:
+    /// case- and diacritic-insensitive ("grosse" finds "Größe")
+    /// and separator-insensitive ("space bar farben" finds
+    /// "Space Bar-Farben"). One row per destination, in sidebar
+    /// order.
     ///
     /// One row per destination is the settled cap (ui-designer
     /// 2026-07-27): a query like "color" hits many controls, and
@@ -79,7 +81,7 @@ enum SidebarSearch {
         in destination: SettingsDestination
     ) -> SidebarSearchResult? {
         let title = destination.title
-        if title.localizedStandardContains(query) {
+        if title.searchMatches(query) {
             return SidebarSearchResult(
                 destination: destination,
                 anchor: SettingsAnchor(destination: destination),
@@ -89,7 +91,7 @@ enum SidebarSearch {
         }
         guard
             let hit = entries(of: destination).first(where: {
-                $0.text.localizedStandardContains(query)
+                $0.text.searchMatches(query)
             })
         else { return nil }
         return SidebarSearchResult(

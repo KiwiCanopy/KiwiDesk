@@ -171,9 +171,10 @@ struct AppPickerButton: View {
 }
 
 /// The picker's substring filter, split out pure so it is unit
-/// testable without the view. Case- and diacritic-insensitive
-/// (`localizedStandardContains`, the app's one search-matching
-/// vocabulary — shared with the sidebar search) on the
+/// testable without the view. Matches through `searchMatches`,
+/// the app's one search-matching predicate (shared with the
+/// sidebar search: case-, diacritic- and separator-insensitive) on
+/// the
 /// localized name OR the bundle id — the latter keeps an app
 /// findable by its English/habitual name (typing "preview"
 /// matches `com.apple.preview` even when it's shown localized
@@ -187,10 +188,8 @@ enum AppPickerFilter {
         let query = query.trimmed
         guard !query.isEmpty else { return apps }
         return apps.filter {
-            $0.name.localizedStandardContains(query)
-                || $0.bundleID.localizedStandardContains(
-                    query
-                )
+            $0.name.searchMatches(query)
+                || $0.bundleID.searchMatches(query)
         }
     }
 }
