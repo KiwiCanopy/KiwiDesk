@@ -155,6 +155,62 @@ struct MergeKeysContentGuardTests {
         #expect(run.stdout.contains("1 dropped"))
     }
 
+    /// The mode-name guard must gate the merge too, or a
+    /// translator merges cleanly and then cannot commit — the
+    /// exact failure `_content_defect`'s docstring exists to
+    /// prevent, and the one this suite already covers for the
+    /// other predicates.
+    ///
+    /// It runs as a second pass because it reads the locale's own
+    /// `layout.<mode>.name`, which the same worksheet may be
+    /// translating. **This fixture puts the picker key AFTER the
+    /// prose key**, so a per-entry check would read the old
+    /// picker (still "Monocle") and let the prose through. The
+    /// projected-catalog pass sees the incoming モノクル and
+    /// rejects it.
+    @Test("a worksheet translating the picker gates its prose")
+    func modeNameGatedAgainstIncomingPicker() throws {
+        let fixture = try makeRepoShapedFixture(
+            prefix: "kiwi-merge-mode",
+            locales: [
+                "en.json": """
+                {
+                  "b.prose": "Monocle shows one window.",
+                  "layout.monocle.name": "Monocle"
+                }
+                """,
+                "ja.json": "{\n  \"b.kept\": \"既存\"\n}",
+                "missing_ja.json": """
+                {
+                  "b.prose": {
+                    "source": "Monocle shows one window.",
+                    "translation": "Monocleは1つ表示します。"
+                  },
+                  "layout.monocle.name": {
+                    "source": "Monocle",
+                    "translation": "モノクル"
+                  }
+                }
+                """,
+            ]
+        )
+        defer { fixture.cleanup() }
+        let run = try runRepoScript(
+            "merge-keys",
+            arguments: ["ja"],
+            in: fixture,
+            repoRoot: repoRoot
+        )
+        #expect(run.status == 0)
+
+        let merged = try fixture.decodeLocale("ja.json")
+        // The picker lands; the prose that contradicts it does not.
+        #expect(merged["layout.monocle.name"] == "モノクル")
+        #expect(merged["b.prose"] == nil)
+        #expect(merged["b.kept"] == "既存")
+        #expect(run.stderr.contains("mode name(s) Monocle"))
+    }
+
     /// The skipped keys are absent from `ja.json` by construction,
     /// which is the precondition `write_missing`'s re-mint recovery
     /// needs — so a translator really can get them back.

@@ -82,6 +82,7 @@ from localization_guards import (
     foreign_scripts,
     placeholder_drift,
     tagged_stub,
+    untranslated_mode_names,
 )
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -263,6 +264,29 @@ def main(argv: list[str]) -> int:
         if loaded is None:
             return 1
         existing = loaded
+
+    # The mode-name guard runs as a SECOND pass, unlike the
+    # per-value predicates above, because it reads this locale's
+    # own `layout.<mode>.name` — which the same worksheet may be
+    # translating. Judging each entry as it arrives would make the
+    # verdict depend on worksheet key order: prose merged before
+    # its picker would be checked against the old picker. So the
+    # projected catalog (what the file will contain once every
+    # candidate lands) is built first, and every candidate is
+    # judged against that.
+    projected = dict(existing)
+    projected.update(translated)
+    for key in sorted(translated):
+        kept = untranslated_mode_names(
+            translated[key], projected, english
+        )
+        if kept:
+            broken[key] = (
+                "keeps the English mode name(s) "
+                f"{', '.join(kept)} while this locale's own "
+                "picker translates them"
+            )
+            del translated[key]
 
     existing.update(translated)
     LOCALES_DIR.mkdir(parents=True, exist_ok=True)

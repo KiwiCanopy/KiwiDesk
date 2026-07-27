@@ -622,7 +622,19 @@ def untranslated_mode_names(
             source
         ):
             continue
-        if re.search(rf"\b{re.escape(source)}\b", value):
+        # NOT `\b`: a CJK character is a Unicode word character,
+        # so `\bMonocle\b` does not match "Monocleは" — Japanese
+        # and Chinese set the name flush against native text with
+        # no space, which is the commonest shape in exactly the
+        # locales this guard covers. The boundary that is wanted
+        # is "not part of a longer LATIN word", so assert on ASCII
+        # alphanumerics directly: "Stackoverflow" still does not
+        # match "Stack".
+        pattern = (
+            rf"(?<![A-Za-z0-9]){re.escape(source)}"
+            rf"(?![A-Za-z0-9])"
+        )
+        if re.search(pattern, value):
             found.append(source)
     return sorted(set(found))
 
