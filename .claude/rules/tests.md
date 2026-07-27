@@ -62,14 +62,20 @@ ones that bite large test PRs, as a checklist (rationale is in §5):
     the wrong reason.
   - *test-core construction* in `TestCore.swift` — the
     `makeTestCore` factory and its `NoopHotkeyRegistrar` (#565).
-    Unlike the four above it guards nothing; it is shared because
-    the thing it defaults — a no-op hotkey registrar in place of
-    the live `CarbonHotkeyCenter` — is the one default the
-    production `KiwiCore.init` cannot carry, and a per-file copy
-    would leave every new suite one forgotten argument away from
-    re-seizing the OS chords (2414 conflict lines, the exact
-    failure #565 removed). Stateless, no assertions, no
-    setup/teardown coupling, so it clears the same bar.
+    It clears the statelessness bar (a per-instance id counter, no
+    assertions, no setup/teardown coupling), but it is admitted on
+    a **second, distinct ground** from the four above. Their risk
+    is *divergence*: a drifted copy silently weakens a guard or
+    changes what a suite observes. This one's risk is *omission*:
+    every copy is identically harmless, but a **forgotten** copy
+    re-enables a dangerous production default — the live
+    `CarbonHotkeyCenter` (and the real `~/.config/KiwiDesk`)
+    seizing the developer's global chords and live config, 2414
+    conflict lines a run. Forget-proofing 112 mandatory-safe
+    call sites is a legitimate basis for sharing; it is simply not
+    the divergence-weakens-a-guard basis the closing paragraph
+    below names. The admission gate therefore has two grounds, not
+    one — state both when weighing a sixth.
 
   **The drift risk is the bar; the copy count is only the
   evidence that prompted the look.** Each case above happened

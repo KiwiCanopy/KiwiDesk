@@ -46,10 +46,14 @@ for f in "${FILES[@]}"; do
     # test case is now ERROR too — a source file and a test file
     # fail identically at the hard limit. The soft 250 target stays
     # source-only: dozens of test files exceed it, and that much
-    # noise would train people to ignore the whole check. A genuine
-    # data-heavy *fixture* file that must exceed the ceiling gets a
-    # named allow-list entry with its reason (the repo idiom for
-    # narrow classes), never a blanket `*/Tests/*` glob.
+    # noise would train people to ignore the whole check.
+    #
+    # No file is exempt today, so the hard-limit branch below is an
+    # unconditional ERROR. If a genuine data-heavy *fixture* file
+    # ever must exceed the ceiling, add a named `case "$f"` branch
+    # for it here with its reason — the repo idiom for narrow
+    # classes — rather than re-introducing the blanket `*/Tests/*`
+    # skip that hid the whole backlog for so long (#277).
     lines=$(wc -l < "$f" | tr -d ' ')
     case "$f" in
         */Tests/*) is_test=1 ;;

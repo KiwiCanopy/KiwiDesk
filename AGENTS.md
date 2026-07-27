@@ -582,14 +582,20 @@ Keep this list updated whenever a recurring mistake is found.
   hexes, so one threshold over one colour is the point; don't
   "tidy" the policy back out of the maths file. The fifth,
   `TestCore.swift` (the `makeTestCore` factory and its
-  `NoopHotkeyRegistrar`, #565), is the one that guards *nothing*:
-  it is shared because the default it supplies — a no-op hotkey
-  registrar standing in for the live `CarbonHotkeyCenter` — is the
-  one default production `KiwiCore.init` cannot carry, and a
-  per-file copy would leave every new suite one forgotten argument
-  from re-seizing the developer's global chords (2414 conflict
-  lines a run). Statelessness and no assertions clear the same bar.
-  The bar is the **drift risk** — a divergent copy weakens a
+  `NoopHotkeyRegistrar`, #565), guards *nothing* and is admitted
+  on a **second ground**. The four above share to prevent
+  *divergence* — a drifted copy silently weakening a guard. This
+  one shares to prevent *omission*: every copy is identically
+  harmless, but a forgotten one re-enables a dangerous production
+  default (the live `CarbonHotkeyCenter` seizing the developer's
+  global chords, the real `~/.config/KiwiDesk` as config — the
+  two defaults `KiwiCore.init` cannot carry, 2414 conflict lines a
+  run). It clears the statelessness bar; the sharing basis is
+  forget-proofing 112 mandatory-safe call sites, not the
+  drift-risk basis. So the gate has two grounds — divergence OR a
+  forgotten copy re-enabling a dangerous default — and a sixth
+  must name which.
+  The classic bar is still the **drift risk** — a divergent copy weakens a
   guard, or silently changes what a suite observes — not the
   copy count, which is merely the evidence that prompted the
   look (the script harness was extracted at the fifth hand-copy,

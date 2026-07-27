@@ -9,6 +9,18 @@ import Testing
 // transitions are a single state machine — one reload path that
 // always assigns every mode-dependent field.
 
+/// No-op so this GUI suite never registers real global chords
+/// (#565); the Core target's `NoopHotkeyRegistrar` is not visible
+/// here, and the Gui convention is a per-file fake.
+private final class NoopRegistrar: HotkeyRegistrar {
+    func register(
+        keyCode: UInt32,
+        modifiers: HotkeyModifiers,
+        handler: @escaping @MainActor () -> Void
+    ) -> UInt32? { 1 }
+    func unregister(id: UInt32) {}
+}
+
 @MainActor
 private func makeModel() -> SettingsModel {
     let core = KiwiCore(
@@ -16,7 +28,8 @@ private func makeModel() -> SettingsModel {
             .temporaryDirectory
             .appendingPathComponent(
                 "kiwi-target-\(UUID().uuidString)"
-            )
+            ),
+        hotkeyRegistrar: NoopRegistrar()
     )
     // GUI-managed config: the sidecar exists and init.lua
     // holds no foreign code (it doesn't exist at all).

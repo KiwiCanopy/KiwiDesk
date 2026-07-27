@@ -28,29 +28,42 @@ final class NoopHotkeyRegistrar: HotkeyRegistrar {
 }
 
 /// Build a `KiwiCore` for a suite that does not test hotkey
-/// registration, with the registrar defaulted to a no-op (#565).
+/// registration, defaulting the two production initializer values
+/// a test must never inherit (#565):
 ///
-/// This is the test-side default the production `KiwiCore.init`
-/// cannot be: its registrar defaults to the live
-/// `CarbonHotkeyCenter`, so a suite that omits the argument would
-/// silently seize the user's global shortcuts and fight a running
-/// KiwiDesk over the same chords. Call this instead of the raw
-/// initializer; pass `hotkeyRegistrar:` to opt into a real or fake
-/// one.
+/// - `hotkeyRegistrar` defaults to a no-op, not the live
+///   `CarbonHotkeyCenter` that would seize the user's global
+///   chords for the whole run.
+/// - `configDirectory` defaults to a throwaway temp dir, not
+///   `nil` — which `KiwiCore.init` resolves to the real
+///   `~/.config/KiwiDesk` (live socket, profiles, `init.lua`).
+///
+/// Both are defaults production cannot carry, and both bite the
+/// same way: one forgotten argument. Call this instead of the raw
+/// initializer. Pass either argument to opt out — a persistence
+/// suite that reloads a second core over the same dir passes an
+/// explicit `configDirectory`; a registration suite passes a
+/// real/fake `hotkeyRegistrar`.
 ///
 /// Shared rather than per-file (a `.claude/rules/tests.md`
 /// exception) because it is a stateless primitive with no
-/// assertions of its own and no setup/teardown coupling — the same
-/// bar the four ratified helpers clear — and because a per-file
-/// copy would leave every new suite one forgotten argument away
-/// from re-seizing the OS chords, the exact failure #565 removes.
+/// assertions of its own and no setup/teardown coupling, and
+/// because a per-file copy would leave every new suite one
+/// forgotten argument away from re-seizing the OS chords — the
+/// exact failure #565 removes.
 @MainActor
 func makeTestCore(
     configDirectory: URL? = nil,
     hotkeyRegistrar: HotkeyRegistrar = NoopHotkeyRegistrar()
 ) -> KiwiCore {
-    KiwiCore(
-        configDirectory: configDirectory,
+    let directory =
+        configDirectory
+        ?? FileManager.default.temporaryDirectory
+        .appendingPathComponent(
+            "kiwi-test-\(UUID().uuidString)"
+        )
+    return KiwiCore(
+        configDirectory: directory,
         hotkeyRegistrar: hotkeyRegistrar
     )
 }

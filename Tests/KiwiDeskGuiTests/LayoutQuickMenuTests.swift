@@ -5,6 +5,18 @@ import Testing
 @testable import KiwiDesk
 @testable import KiwiDeskCore
 
+/// No-op so this GUI suite never registers real global chords
+/// (#565); the Core target's `NoopHotkeyRegistrar` is not visible
+/// here, and the Gui convention is a per-file fake.
+private final class NoopRegistrar: HotkeyRegistrar {
+    func register(
+        keyCode: UInt32,
+        modifiers: HotkeyModifiers,
+        handler: @escaping @MainActor () -> Void
+    ) -> UInt32? { 1 }
+    func unregister(id: UInt32) {}
+}
+
 @Suite("Layout Quick Menu and Drift", .serialized)
 @MainActor
 struct LayoutQuickMenuTests {
@@ -14,7 +26,8 @@ struct LayoutQuickMenuTests {
                 .temporaryDirectory
                 .appendingPathComponent(
                     "kiwi-layout-test-\(UUID().uuidString)"
-                )
+                ),
+            hotkeyRegistrar: NoopRegistrar()
         )
         try? core.guiConfigStore.save(GuiConfig())
         return (SettingsModel(core: core), core)
