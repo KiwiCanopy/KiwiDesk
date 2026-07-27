@@ -20,16 +20,27 @@
 #   0. Flip to 1 the day a second collaborator with Write access
 #   exists.
 #
-#   enforce_admins = false, where GitHub's own hardening advice is to
-#   INCLUDE administrators. Owner's call, eyes open: it keeps an
-#   escape hatch for a genuine emergency, at the price that these
-#   rules NUDGE rather than bind the one account with write access.
-#   Understand what that does and does not buy — the owner is already
-#   the only thing that can merge (no auto-merge, workflow token is
-#   read-only, Actions cannot approve PRs), so the value here is not
-#   keeping others out. It is that the merge button stays hidden
-#   until CI is green, which catches the mistake that actually
-#   happens: merging red. Everything else is self-discipline.
+#   enforce_admins = TRUE, and this reverses #487's original line
+#   ("leave do-not-allow-bypassing OFF so an emergency fix is
+#   possible"). That advice is sound on a TEAM repo, where the rules
+#   still bind every other contributor and the exemption is only an
+#   owner override. It does not survive a solo repo: the owner is the
+#   only account with write access AND an admin, so exempting admins
+#   exempts everybody and the whole ruleset binds nobody.
+#
+#   With it true, the rules bind the one person they can. Workflow
+#   becomes branch -> PR -> CI green -> merge, and no approval is
+#   needed (required_approving_review_count is 0, meaning zero, not
+#   one). What it buys is that red CI cannot be merged.
+#
+#   The emergency hatch is not lost, just not left permanently open:
+#   toggle this off in Settings (~15 s), fix, toggle back. Paying the
+#   protection every day to save that on the rare day was the wrong
+#   trade (owner, 2026-07-27).
+#
+#   NOTE: this is what finally makes `git push origin HEAD:main`
+#   fail — the ff-merge convention retires here, by enforcement
+#   rather than by agreement. Squash-via-PR becomes the one path.
 #
 # required_conversation_resolution = true is an addition beyond
 # #487's list (kept 2026-07-27): it stops a PR merging with an
@@ -76,7 +87,7 @@ gh api -X PUT "repos/$REPO/branches/main/protection" \
     "strict": true,
     "contexts": $CONTEXTS
   },
-  "enforce_admins": false,
+  "enforce_admins": true,
   "required_pull_request_reviews": {
     "required_approving_review_count": 0,
     "require_code_owner_reviews": false
@@ -100,6 +111,15 @@ gh api -X PUT "repos/$REPO/vulnerability-alerts" >/dev/null 2>&1 \
 echo
 echo "Done. Verify:"
 echo "  gh api repos/$REPO/branches/main/protection --jq ."
+echo
+echo "YOUR WORKFLOW CHANGED as of this moment:"
+echo "  'git push origin HEAD:main' now FAILS (enforce_admins)."
+echo "  Use: branch -> PR -> wait for CI -> squash merge."
+echo "  No approval needed; 0 required means zero."
+echo
+echo "Genuine emergency? Reopen the hatch, fix, close it:"
+echo "  gh api -X PATCH repos/$REPO/branches/main/protection \\"
+echo "    -F enforce_admins=false   # ...fix..., then re-run this"
 echo
 echo "Still manual (no stable API on the free plan) — Settings >"
 echo "Code security:"
