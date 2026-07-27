@@ -314,16 +314,14 @@ no trailing period. Body (optional) explains the why, wrapped at
   `notarytool` keychain profile the developer created
   themselves. `--dmg` additionally wraps the result in a disk
   image for the website download — the cask installs from a
-  `.zip` and never needs one. **A disk image is its own piece of
-  signed code**, so with `--notarize` the script submits twice
-  (app, then image) and staples each: the app's ticket does not
-  travel with the image carrying it, and an unticketed image
-  greets a downloader with "KiwiDesk is damaged". The image is
-  deliberately built *after* the app is stapled, so unpacking it
-  yields a bundle that passes Gatekeeper offline on its own.
-  When that artifact may be published is a product decision, not
-  a packaging one — see the Sparkle coupling in
-  `docs/design-decisions.md`.
+  `.zip` and never needs one; with `--notarize` that means two
+  submissions, for the reason in §5. Signing is inside-out over
+  `Resources/*.bundle` only, so the first dependency that adds
+  nested code (`Contents/Frameworks/`, i.e. Sparkle) has to
+  extend that loop — packaging is not "done" for it. Whether a
+  built artifact may be *published* is a separate, product
+  decision: see "No distribution channel without an update path"
+  in `docs/design-decisions.md`.
 - Fetch third-party subagents per clone with one explicit target:
   `./scripts/install-subagents.sh --claude` installs Claude Code
   agents and workspace skills; `./scripts/install-subagents.sh
@@ -358,6 +356,29 @@ already knows costs more than it saves.
 ## 5. Guardrails (Known Pitfalls)
 
 Keep this list updated whenever a recurring mistake is found.
+
+- **Every distributable artifact needs its OWN ticket, and this
+  cannot be caught on the machine that built it.** A disk image
+  is a separate piece of signed code from the app inside it:
+  notarizing the app does not cover the `.dmg` carrying it, so
+  `--notarize --dmg` submits *twice* and staples each. The trap
+  is the same shape as the `Bundle.module` one below — a
+  locally-built image carries no `com.apple.quarantine`
+  attribute, so it mounts and runs perfectly here and only says
+  "KiwiDesk is damaged and can't be opened" after a real
+  download. Inspecting the artifact locally proves nothing.
+  **Verify by stamping quarantine on a copy**: `xattr -w
+  com.apple.quarantine "0081;0;Safari;$(uuidgen)"`, mount it,
+  then `spctl -a -vvv -t open --context
+  context:primary-signature` on the image and `-t exec` on the
+  app inside (the two need different `spctl` invocations).
+  Companion rule: **an archive meant for distribution is created
+  AFTER stapling, never reused from the notarization payload** —
+  the zip submitted to Apple is made pre-staple by construction,
+  so shipping it would strand every user with an unticketed
+  bundle. This applies to any future artifact type (`.pkg`, the
+  cask's `.zip`, a Sparkle delta), which is why it lives here
+  and not in one script's §4 bullet.
 
 - **Pre-release, single user: no backward-compat shims.** Nothing
   is publicly released, so nothing external depends on the current

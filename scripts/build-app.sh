@@ -67,6 +67,23 @@ while [ "$#" -gt 0 ]; do
     esac
 done
 
+# Temporary artifacts are cleared on ANY exit, not just a clean
+# one. A rejected submission or a dropped connection mid-staple
+# used to strand a full zipped copy of the bundle and the disk
+# image staging tree in the output directory. Declared here so
+# the handler can never trip `set -u` on a path the run had not
+# reached yet.
+STAGE=""
+DMG_PARTIAL=""
+DMG_UNTICKETED=0
+cleanup_temp() {
+    rm -f "$OUT/KiwiDesk-notarize.zip"
+    [ -n "$STAGE" ] && rm -rf "$STAGE"
+    [ -n "$DMG_PARTIAL" ] && rm -f "$DMG_PARTIAL"
+    return 0
+}
+trap cleanup_temp EXIT
+
 # Resolve the identity from the keychain when none was given.
 # The identity STRING IS NOT A SECRET — it is stamped into every
 # binary it signs and any user can read it back with
@@ -282,29 +299,23 @@ codesign --verify --deep --strict "$APP"
 # ---------------------------------------------------------------
 # 6. Notarize (optional)
 
-# Submit one artifact, wait for the verdict, staple the ticket
-# into it. Both the .app and the .dmg go through here: they are
-# two separate pieces of signed code and Apple tickets each one
-# individually — the app's ticket does not travel with the image
-# that carries it.
+# Submit <payload>, wait for the verdict, staple the ticket into
+# <staple_target>. Both the .app and the .dmg go through here:
+# they are two separate pieces of signed code and Apple tickets
+# each one individually — the app's ticket does not travel with
+# the image that carries it.
 #
-# An .app cannot be submitted as-is (notarytool takes an archive,
-# and a plain directory would lose its signature in transit), so
-# it is zipped first; a .dmg is already a single file and is
-# submitted directly. Either way the STAPLE targets the original,
-# never the zip.
+# The two arguments are separate because notarytool takes an
+# archive while the thing that must end up stapled is the
+# original: an .app is submitted as a zip and stapled as a
+# bundle, a .dmg is both. Callers own the payload — including
+# deleting a temporary one — so that a caller wanting a KEEPABLE
+# archive is not fighting this function for it.
 notarize_and_staple() {
-    target="$1"
-    payload="$target"
-    zip=""
-    case "$target" in
-        *.app)
-            zip="$OUT/$(basename "$target" .app)-notarize.zip"
-            ditto -c -k --keepParent "$target" "$zip"
-            payload="$zip" ;;
-    esac
-    submit_log="$OUT/notarytool-$(basename "$target").json"
-    echo "==> notarizing $(basename "$target") via keychain" \
+    payload="$1"
+    staple_target="$2"
+    submit_log="$OUT/notarytool-$(basename "$staple_target").json"
+    echo "==> notarizing $(basename "$staple_target") via keychain" \
          "profile '$NOTARY_PROFILE'"
     # `submit --wait` has historically exited 0 on
     # `status: Invalid`. Without this branch the rejection
@@ -321,7 +332,7 @@ notarize_and_staple() {
     status="$(sed -n 's/.*"status"[: ]*"\([^"]*\)".*/\1/p' \
         "$submit_log" | tail -1)"
     if [ "$status" != "Accepted" ]; then
-        echo "error: notarization of $(basename "$target")" \
+        echo "error: notarization of $(basename "$staple_target")" \
              "returned '${status:-unknown}'" >&2
         sub_id="$(sed -n 's/.*"id"[: ]*"\([^"]*\)".*/\1/p' \
             "$submit_log" | tail -1)"
@@ -331,18 +342,17 @@ notarize_and_staple() {
         fi
         exit 1
     fi
-    xcrun stapler staple "$target"
-    [ -n "$zip" ] && rm -f "$zip"
+    xcrun stapler staple "$staple_target"
     return 0
 }
 
+# The ad-hoc case already exited during argument handling; this
+# function is reached only with a real identity.
 if [ -n "$NOTARY_PROFILE" ]; then
-    if [ "$IDENTITY" = "-" ]; then
-        echo "error: notarization needs a Developer ID identity," \
-             "not an ad-hoc signature" >&2
-        exit 1
-    fi
-    notarize_and_staple "$APP"
+    APP_ZIP="$OUT/KiwiDesk-notarize.zip"
+    ditto -c -k --keepParent "$APP" "$APP_ZIP"
+    notarize_and_staple "$APP_ZIP" "$APP"
+    rm -f "$APP_ZIP"
     # The verdict an end user actually gets.
     spctl -a -vvv -t exec "$APP" 2>&1 | sed 's/^/    /'
 fi
@@ -357,7 +367,40 @@ fi
 
 if [ "$MAKE_DMG" -eq 1 ]; then
     DMG="$OUT/KiwiDesk-$VERSION.dmg"
+    # Assemble under a partial name and rename only once the
+    # image is stapled. A failure between here and there would
+    # otherwise leave a correctly-named, plausibly-sized, signed
+    # but TICKETLESS image at the path a release upload reads —
+    # and nothing on disk says it is bad.
+    # The suffix stays `.dmg`: hdiutil APPENDS .dmg to an output
+    # path that lacks it, so a `$DMG.partial` name would silently
+    # produce `$DMG.partial.dmg` and everything downstream would
+    # then act on a file that does not exist.
+    DMG_PARTIAL="$OUT/KiwiDesk-$VERSION-partial.dmg"
     STAGE="$OUT/dmg-staging"
+
+    # Assert what the comment above claims, rather than trusting
+    # the caller's flag order. Two ways to arrive here with an
+    # unstapled bundle: no --notarize at all, or a --notarize run
+    # followed by a bare `--skip-build --dmg`, which re-assembles
+    # and RE-SIGNS the app (step 2 removes it, step 5 signs it),
+    # discarding the ticket the earlier run stapled. Neither is
+    # detectable once the image is built: a locally-built .dmg
+    # carries no quarantine attribute, so it opens fine on this
+    # machine and only fails after a download.
+    DMG_UNTICKETED=0
+    if ! xcrun stapler validate "$APP" >/dev/null 2>&1; then
+        DMG_UNTICKETED=1
+        if [ -n "$NOTARY_PROFILE" ]; then
+            echo "error: $APP is not stapled even though step 6" \
+                 "ran — refusing to package it" >&2
+            exit 1
+        fi
+        echo "warning: the app is not notarized, so this image is" \
+             "for local inspection only — a downloaded copy will" \
+             "be refused. Re-run with --notarize <profile>." >&2
+    fi
+
     echo "==> building $DMG"
     rm -rf "$STAGE"
     mkdir -p "$STAGE"
@@ -368,20 +411,26 @@ if [ "$MAKE_DMG" -eq 1 ]; then
     # background or icon layout, which would need an AppleScript
     # pass over the mounted volume.
     ln -s /Applications "$STAGE/Applications"
-    rm -f "$DMG"
+    rm -f "$DMG" "$DMG_PARTIAL"
     hdiutil create -volname "KiwiDesk" -srcfolder "$STAGE" \
-        -fs HFS+ -format UDZO -ov "$DMG" >/dev/null
+        -fs HFS+ -format UDZO -ov "$DMG_PARTIAL" >/dev/null
     rm -rf "$STAGE"
 
     if [ "$IDENTITY" = "-" ]; then
         echo "warning: ad-hoc identity — the disk image is left" \
              "unsigned and will trip Gatekeeper on download" >&2
     else
-        codesign --force --timestamp --sign "$IDENTITY" "$DMG"
+        codesign --force --timestamp --sign "$IDENTITY" \
+            "$DMG_PARTIAL"
     fi
 
     if [ -n "$NOTARY_PROFILE" ]; then
-        notarize_and_staple "$DMG"
+        notarize_and_staple "$DMG_PARTIAL" "$DMG_PARTIAL"
+    fi
+    mv "$DMG_PARTIAL" "$DMG"
+    DMG_PARTIAL=""
+
+    if [ -n "$NOTARY_PROFILE" ]; then
         # -t open, not -t exec: the download is opened, not run,
         # and primary-signature is the context Gatekeeper uses
         # for a quarantined disk image.
@@ -395,5 +444,11 @@ echo
 echo "built $APP"
 echo "  run:  open \"$APP\""
 echo "  cli:  $MACOS/KiwiDesk --version"
-[ "$MAKE_DMG" -eq 1 ] && echo "  dmg:  $DMG"
+if [ "$MAKE_DMG" -eq 1 ]; then
+    if [ "$DMG_UNTICKETED" -eq 1 ]; then
+        echo "  dmg:  $DMG  (NOT notarized — do not distribute)"
+    else
+        echo "  dmg:  $DMG"
+    fi
+fi
 exit 0

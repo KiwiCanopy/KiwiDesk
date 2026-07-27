@@ -23,7 +23,7 @@ Powerful when you reach for it, never in your way.
 [![CI](https://github.com/KiwiCanopy/KiwiDesk/actions/workflows/ci.yml/badge.svg)](https://github.com/KiwiCanopy/KiwiDesk/actions/workflows/ci.yml)
 ![License MIT](https://img.shields.io/badge/License-MIT-8DB354)
 ![Public beta](https://img.shields.io/badge/Public_beta-Homebrew-8DB354)
-![Direct download — after the beta](https://img.shields.io/badge/Direct_download-after_the_beta-8B5E3C)
+![Direct download — with in-app updates](https://img.shields.io/badge/Direct_download-with_in--app_updates-8B5E3C)
 
 <br>
 
@@ -39,8 +39,12 @@ Powerful when you reach for it, never in your way.
 > **Status: public beta, on Homebrew.** The core (layouts, Lua
 > config, CLI, profiles, per-native-space profiles, virtual
 > workspace hiding) and the SwiftUI Settings app are functional.
-> Install it with the Homebrew cask below; a signed, notarized
-> `.dmg` follows once the beta has settled. KiwiDesk is
+> Install it with the Homebrew cask below, which keeps itself
+> current via `brew upgrade`; a signed, notarized `.dmg` follows
+> once the app can update itself, so that a direct download is
+> never a dead end — see
+> [No distribution channel without an update path](https://kiwidesk.pages.dev/docs/design-decisions/#no-distribution-channel-without-an-update-path).
+> KiwiDesk is
 > distributed directly and **not** through the Mac App Store —
 > see [Distribution](https://kiwidesk.pages.dev/docs/design-decisions/#distribution-direct-download-not-the-mac-app-store)
 > for why.

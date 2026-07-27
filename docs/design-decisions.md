@@ -196,40 +196,39 @@ in-app updates via Sparkle — the planned replacement for the
 App Store's update channel, not yet wired up — will depend on
 it too.
 
-### The beta is Homebrew-only; the download waits for Sparkle
+### No distribution channel without an update path
 
 **[Principle]**
 
-The 0.9 beta ships as a **cask only**. The site's download
-button, and the `.dmg` behind it, stay off until the build they
-point at embeds Sparkle.
+Never open a channel a normal user can install from unless that
+build can update itself. This is about *publication*, not about
+a button: the site's download link and a public GitHub Release
+asset are the same channel from the user's side, and a stranded
+user arrives through either. Building an artifact is always
+fine; putting it somewhere people find it is what this governs.
 
-Sparkle has to be *inside* the build a user installs. Adding it
-one version later reaches only the people who install that later
-version; everyone already running the earlier one is stranded on
-manual re-download. So the question is not "when do we want
-in-app updates" but "which audience are we allowed to ship
-without them".
+The reason it is a rule and not a preference is the asymmetry of
+the mistake. Sparkle has to be *inside* the build a user
+installs — shipping it one version later reaches only the people
+who install that later version, and everyone already running the
+earlier one stays stranded on manual re-download forever. There
+is no recovering the first group, which is why the gate is on
+publishing rather than on remembering to fix it afterwards.
 
-That splits cleanly:
+**Homebrew is the deliberate exception, and it is conditional.**
+`brew upgrade` is a real update path, so a Sparkle-less build
+may ship as a cask. That holds only while the release workflow
+actually bumps the tap — if the cask goes stale the exception
+lapses and the cask users are the stranded ones. It is an
+obligation on the cask
+([#105](https://github.com/KiwiCanopy/KiwiDesk/issues/105)), not
+a property that exists for free.
 
-- **Homebrew users always have a channel** — `brew upgrade` —
-  so a Sparkle-less beta strands nobody there.
-- **A `.dmg` user has no other channel.** They are exactly the
-  audience with no update path, which makes "download button on
-  the site, no Sparkle in the build" the one combination to
-  avoid.
+Until Sparkle lands, the two together mean: cask yes, `.dmg`
+and Release assets no.
 
-Consequence for sequencing: the DMG *tooling*
-(`build-app.sh --dmg`) is built early — the release workflow
-([#32](https://github.com/KiwiCanopy/KiwiDesk/issues/32)) has to
-call it, and Sparkle does not change it — but its artifact is
-not published until Sparkle lands. A cask installs from a
-`.zip` and never needs a DMG, so nothing about the beta is
-waiting on this.
-
-Trade-off: the first release reaches fewer people. Accepted,
-and it buys something back — Sparkle's update path is first
+Trade-off: the first release reaches fewer people. Accepted, and
+it buys something back — Sparkle's update path is first
 exercised against a real previous release instead of being
 debugged on the release everyone downloads.
 
