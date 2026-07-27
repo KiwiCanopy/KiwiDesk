@@ -50,11 +50,15 @@ enum BrandAssets {
     /// The full-colour app mark from `logo.svg`, in **both**
     /// appearances. Two uses: the Settings sidebar identity
     /// header, and the runtime Dock icon
-    /// (`NSApp.applicationIconImage`) so the bare executable
-    /// shows the real logo whenever it raises to `.regular`. The
-    /// Dock use is an interim stand-in until the packaged `.app`
-    /// ships an `.icns` (#89); harmless once the bundle provides
-    /// one.
+    /// (`NSApp.applicationIconImage`) so the **bare executable**
+    /// shows the real logo whenever it raises to `.regular`.
+    ///
+    /// That Dock use is for the bare binary only, and it is not
+    /// self-limiting: assigning `applicationIconImage`
+    /// *overrides* a bundle's own icon rather than deferring to
+    /// it, so `activateAsRegular` gates it on `CFBundleIconName`.
+    /// Left ungated it replaced the packaged `.app`'s real
+    /// AppIcon with this flat raster (#89).
     ///
     /// There is deliberately **no dark variant** (#479). A mark
     /// that changes hue per appearance reads as a different

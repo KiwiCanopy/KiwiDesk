@@ -1,18 +1,30 @@
 import AppKit
 
 extension NSApplication {
-    /// Raise KiwiDesk to `.regular` (Dock tile + menu bar) and
-    /// assert its Dock icon.
+    /// Raise KiwiDesk to `.regular` (Dock tile + menu bar), and
+    /// for the bare executable only, assert a Dock icon.
     ///
-    /// The bare executable ships no `.icns`, so the tile created
-    /// on promotion shows the generic placeholder. An
+    /// The bare executable ships no icon, so the tile created on
+    /// promotion shows the generic placeholder. An
     /// `applicationIconImage` set earlier — while `.accessory`,
     /// before any tile exists — does not carry onto that fresh
-    /// tile, so the mark must be applied *after* the policy
-    /// flip. The packaged `.app` (#89) will supply a real icon
-    /// and make the image assignment a harmless no-op.
+    /// tile, so the mark must be applied *after* the policy flip.
+    ///
+    /// **Inside the packaged `.app` this must NOT run.** The
+    /// assignment *overrides* the bundle's icon rather than
+    /// deferring to it, so leaving it unconditional replaced the
+    /// real `AppIcon` — squircle, layers, the lot — with the flat
+    /// 512 px `AppMark.png` raster the moment Settings opened
+    /// (#89). Keyed on `CFBundleIconName` because that is exactly
+    /// the question being asked: did the bundle bring its own
+    /// icon?
     @MainActor func activateAsRegular() {
         setActivationPolicy(.regular)
+        let bundled =
+            Bundle.main.object(
+                forInfoDictionaryKey: "CFBundleIconName"
+            ) != nil
+        guard !bundled else { return }
         if let icon = BrandAssets.appMark {
             applicationIconImage = icon
         }
@@ -24,9 +36,10 @@ extension NSApplication {
     /// Cooperative `activate()` foregrounds the app only when the
     /// activation was user-initiated. A window opened on **service
     /// (launchd) start** (onboarding) never is, so it reliably
-    /// lands behind the frontmost app; the bundle-less identity
-    /// (#89 not yet shipped) makes even a menu-bar-triggered
-    /// Settings open flaky. `orderFrontRegardless()` +
+    /// lands behind the frontmost app. A bare executable has no
+    /// bundle identity, which made even a menu-bar-triggered
+    /// Settings open flaky; the packaged `.app` (#89) fixes that
+    /// case, but the launchd one is unchanged. `orderFrontRegardless()` +
     /// `activate(ignoringOtherApps:)` is the escape hatch AppKit
     /// reserves for exactly this case (already relied on by
     /// `SingleInstanceGuard`). The packaged `.app` (#89) will make
