@@ -75,9 +75,20 @@ done
 # reached yet.
 STAGE=""
 DMG_PARTIAL=""
+APP_ZIP=""
 DMG_UNTICKETED=0
 cleanup_temp() {
-    rm -f "$OUT/KiwiDesk-notarize.zip"
+    # `set +e` first, and it is load-bearing: errexit applies
+    # inside a trap handler too, so a single failing `rm` would
+    # abort the handler BEFORE the later lines — stranding the
+    # partial image this exists to remove — and would replace
+    # the script's real exit status with 1. `rm -f` returns 0
+    # for a missing file, so this only bites when the output
+    # directory itself refuses the unlink (`--output` is
+    # user-supplied and unvalidated), which is precisely the
+    # case no ordinary run exercises.
+    set +e
+    [ -n "$APP_ZIP" ] && rm -f "$APP_ZIP"
     [ -n "$STAGE" ] && rm -rf "$STAGE"
     [ -n "$DMG_PARTIAL" ] && rm -f "$DMG_PARTIAL"
     return 0
@@ -349,10 +360,14 @@ notarize_and_staple() {
 # The ad-hoc case already exited during argument handling; this
 # function is reached only with a real identity.
 if [ -n "$NOTARY_PROFILE" ]; then
+    # Assigned to the variable the EXIT handler already knows,
+    # never a second copy of the path — renaming it here would
+    # otherwise leave the handler quietly cleaning nothing.
     APP_ZIP="$OUT/KiwiDesk-notarize.zip"
     ditto -c -k --keepParent "$APP" "$APP_ZIP"
     notarize_and_staple "$APP_ZIP" "$APP"
     rm -f "$APP_ZIP"
+    APP_ZIP=""
     # The verdict an end user actually gets.
     spctl -a -vvv -t exec "$APP" 2>&1 | sed 's/^/    /'
 fi
@@ -399,6 +414,11 @@ if [ "$MAKE_DMG" -eq 1 ]; then
         echo "warning: the app is not notarized, so this image is" \
              "for local inspection only — a downloaded copy will" \
              "be refused. Re-run with --notarize <profile>." >&2
+        # Same principle as the partial name above: the FILE says
+        # whether it is distributable, not a warning that scrolls
+        # away. Otherwise `ls` a week later shows a normally-named
+        # release artifact that Gatekeeper will reject.
+        DMG="$OUT/KiwiDesk-$VERSION-unnotarized.dmg"
     fi
 
     echo "==> building $DMG"
