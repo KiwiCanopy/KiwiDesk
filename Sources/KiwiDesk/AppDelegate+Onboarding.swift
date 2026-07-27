@@ -59,14 +59,23 @@ extension AppDelegate {
             "onboarding.window.title",
             "KiwiDesk Setup"
         )
-        window.contentView = NSHostingView(
+        let host = NSHostingView(
             rootView: LocaleScopedRoot {
                 OnboardingView(model: onboardingModel)
             }
             .environmentObject(LocalizationManager.shared)
         )
+        window.contentView = host
         window.isReleasedWhenClosed = false
         window.delegate = self
+        // Size BEFORE centering. `center()` on a still-zero-sized
+        // window puts its bottom-left corner at the screen centre;
+        // the SwiftUI frame then grows the window upward from
+        // there, so the wizard opened tucked under the menu bar
+        // instead of centred. Read the size from the view rather
+        // than repeating `OnboardingView`'s own frame here — two
+        // copies would drift the moment a step needs more room.
+        window.setContentSize(host.fittingSize)
         window.center()
         // Stays `.normal` until Accessibility is granted — see
         // `floatOnboardingAboveManagedWindows()`. Floating it now
