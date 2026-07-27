@@ -83,6 +83,78 @@ struct MergeKeysContentGuardTests {
         #expect(run.stdout.contains("3 dropped"))
     }
 
+    /// The feature-name guard is scoped to **Latin-script**
+    /// locales, so it cannot ride the `ja` worksheet above — in
+    /// Japanese an untouched "App Bar" is a foreign body and
+    /// adapting it is a real editorial call. German is the locale
+    /// the guard was written for.
+    ///
+    /// This is the predicate `merge-keys` was missing: it gated the
+    /// other four, so a renamed feature name merged cleanly and
+    /// then failed `extract-keys --check` at commit time, with the
+    /// worksheet already unlinked.
+    @Test("a renamed feature name is skipped, one mention is kept")
+    func renamedFeatureNameIsSkipped() throws {
+        let fixture = try makeRepoShapedFixture(
+            prefix: "kiwi-merge-product",
+            locales: [
+                "en.json": """
+                {
+                  "b.renamed": "Show the App Bar",
+                  "b.compound": "Space Bar colors",
+                  "b.fewer": "The App Bar lists windows. \
+                The App Bar is optional."
+                }
+                """,
+                "de.json": "{\n  \"b.kept\": \"Vorhanden\"\n}",
+                "missing_de.json": """
+                {
+                  "b.renamed": {
+                    "source": "Show the App Bar",
+                    "translation": "Die App-Leiste anzeigen"
+                  },
+                  "b.compound": {
+                    "source": "Space Bar colors",
+                    "translation": "Space-Bar-Farben"
+                  },
+                  "b.fewer": {
+                    "source": "The App Bar lists windows. \
+                The App Bar is optional.",
+                    "translation": "Die App Bar listet Fenster."
+                  }
+                }
+                """,
+            ]
+        )
+        defer { fixture.cleanup() }
+        let run = try runRepoScript(
+            "merge-keys",
+            arguments: ["de"],
+            in: fixture,
+            repoRoot: repoRoot
+        )
+        #expect(run.status == 0)
+
+        let merged = try fixture.decodeLocale("de.json")
+        #expect(merged["b.renamed"] == nil)
+        #expect(merged["b.kept"] == "Vorhanden")
+        // German compounds a two-word proper noun onto the next
+        // noun with hyphens, so this IS keeping the name.
+        #expect(merged["b.compound"] == "Space-Bar-Farben")
+        // Presence, not parity: the English names the bar twice,
+        // one mention satisfies the guard. Pinned here as well as
+        // in `LocalizationProductNameGuardTests` because a merge
+        // that silently dropped this row would push a translator
+        // toward a literal, worse sentence.
+        #expect(merged["b.fewer"] == "Die App Bar listet Fenster.")
+
+        #expect(
+            run.stderr.contains("feature name(s) App Bar")
+        )
+        #expect(run.stderr.contains("App-Leiste"))
+        #expect(run.stdout.contains("1 dropped"))
+    }
+
     /// The skipped keys are absent from `ja.json` by construction,
     /// which is the precondition `write_missing`'s re-mint recovery
     /// needs — so a translator really can get them back.

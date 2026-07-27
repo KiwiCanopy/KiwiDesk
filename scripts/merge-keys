@@ -77,6 +77,7 @@ import sys
 from pathlib import Path
 
 from localization_guards import (
+    dropped_product_names,
     english_residue,
     foreign_scripts,
     placeholder_drift,
@@ -143,6 +144,15 @@ def _content_defect(
     drift = placeholder_drift(value, english)
     if drift:
         return f"{drift} relative to the English"
+    dropped = dropped_product_names(locale, value, english)
+    if dropped:
+        return (
+            "translates the untranslated feature name(s) "
+            f"{', '.join(dropped)}"
+        )
+    # Ordered above the `residue` gate to match `check_content`:
+    # the feature-name guard is scoped by script, not by corpus,
+    # so site mode runs it too.
     if not residue:
         return None
     left = english_residue(locale, value, english)
