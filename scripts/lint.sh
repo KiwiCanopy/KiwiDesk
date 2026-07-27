@@ -33,33 +33,31 @@ for f in "${FILES[@]}"; do
 
     # File size check.
     #
-    # AGENTS.md §5 applies the ceiling to test suites as well —
-    # "split test suites early" is what forced every one of the
-    # ratified shared-helper extractions — but this used to
+    # AGENTS.md §5 applies the 350-line hard ceiling to test suites
+    # as well — "split test suites early" is what forced every one
+    # of the ratified shared-helper extractions — but this used to
     # `continue` on */Tests/*, so the rule was unenforceable AND
     # invisible to anyone reading §5. A 448-line suite passed a
     # green gate under two reviews explicitly hunting AGENTS
     # violations (#277). The old reason ("data-heavy fixtures are
     # fine") is about fixture files, not suites.
     #
-    # Staged, because the backlog is real: 11 suites are already
-    # over the hard limit, so a test file WARNS where a source file
-    # ERRORS. Promote to ERROR once that list is empty. The soft
-    # target stays source-only — 71 test files exceed it, and that
-    # much noise would train people to ignore the whole check.
+    # #560 split the 11 suites that were over the ceiling, so the
+    # test case is now ERROR too — a source file and a test file
+    # fail identically at the hard limit. The soft 250 target stays
+    # source-only: dozens of test files exceed it, and that much
+    # noise would train people to ignore the whole check. A genuine
+    # data-heavy *fixture* file that must exceed the ceiling gets a
+    # named allow-list entry with its reason (the repo idiom for
+    # narrow classes), never a blanket `*/Tests/*` glob.
     lines=$(wc -l < "$f" | tr -d ' ')
     case "$f" in
         */Tests/*) is_test=1 ;;
         *) is_test=0 ;;
     esac
     if [ "$lines" -gt "$HARD_FILE" ]; then
-        if [ "$is_test" -eq 1 ]; then
-            echo "WARNING: $f has $lines lines" \
-                "(hard limit $HARD_FILE; test-suite backlog)"
-        else
-            echo "ERROR: $f has $lines lines (hard limit $HARD_FILE)"
-            STATUS=1
-        fi
+        echo "ERROR: $f has $lines lines (hard limit $HARD_FILE)"
+        STATUS=1
     elif [ "$is_test" -eq 0 ] && [ "$lines" -gt "$SOFT_FILE" ]; then
         echo "WARNING: $f has $lines lines (sweet spot <=$SOFT_FILE)"
     fi
