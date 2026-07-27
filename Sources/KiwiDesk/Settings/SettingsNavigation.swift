@@ -1,64 +1,101 @@
-import SwiftUI
+import KiwiDeskCore
 
-/// Cross-tab navigation for the settings detail pane: the view
-/// owning the sidebar selection injects a navigator, and deep
-/// sections render quiet links ("Appearance ▸ App Bar") where
-/// their prose points at a control that lives on another tab —
-/// a pointer the user can follow instead of a dead end.
+/// The Settings window's transient navigation state, collapsed
+/// behind one `@Published var nav` on `SettingsModel` (#277).
+///
+/// A value type on purpose: `$model.nav.barEditor` still projects
+/// a `Binding`, so call sites keep their shape while the model
+/// file stays under the 350-line ceiling as part 2 grows this set
+/// (drawer expansions, the Shortcuts mode strip). Everything here
+/// is a one-shot navigation request or a local surface selection —
+/// never edited config, which stays on the model.
+struct SettingsNavigation {
+    /// A one-shot navigation request: a sidebar destination, the
+    /// local surface to switch to, and optionally a label to
+    /// scroll to and flash. Serves both the read-only shortcuts
+    /// panel's "Edit in Settings…" bridge (#326, destination
+    /// only) and a sidebar search hit (#277, full anchor).
+    ///
+    /// `SettingsView` applies the destination and surface; the
+    /// detail pane's scroll driver performs the reveal and clears
+    /// this. A request that arrives while the raw Lua editor is
+    /// showing therefore lingers rather than being dropped, and
+    /// resolves when the visual editor comes back — the detail
+    /// pane is where a scroll target can exist at all.
+    var pendingReveal: SettingsAnchor?
+    /// The flash in progress. Read into the environment so each
+    /// anchored view can recognize itself; nil between reveals.
+    /// Written only through `startFlash` / `endFlash`, which own
+    /// the re-trigger token.
+    private(set) var flash: SettingsFlash?
+    private var flashToken = 0
+    /// Phase 2 of a reveal: the anchor whose pane is now showing
+    /// and can be scrolled. Minted by `SettingsView.apply` once
+    /// the destination and surface are set, consumed by the
+    /// detail pane's scroll driver — see `pendingReveal` for why
+    /// the two phases are separate fields.
+    var pendingScroll: String?
+    /// The Layout Defaults mode tab, and the Bars editor behind
+    /// the App Bar / Space Bar switch.
+    ///
+    /// On the model rather than in the owning views' `@State`
+    /// (#277): a search hit on a mode-gated or bar-gated control
+    /// has to select the surface that renders it before there is
+    /// anything to scroll to, and view-local state cannot be set
+    /// from outside. `layoutModeTab` starts nil so the section
+    /// can still land on the profile's most-used mode the first
+    /// time it appears; a user's later pick, and a reveal, both
+    /// write it.
+    var layoutModeTab: LayoutMode?
+    var barEditor: BarEditor = .spaceBar
 
-private struct SettingsNavigateKey: EnvironmentKey {
-    static let defaultValue: @MainActor (SettingsDestination) -> Void = { _ in
+    /// Forgets both surface selections, so they re-derive their
+    /// defaults. For window open, which re-asserts `destination`
+    /// for the same reason.
+    ///
+    /// Needed because moving them off view-local `@State` (#277)
+    /// silently promoted two per-visit landings to
+    /// process-lifetime ones: Layout Defaults re-derived the
+    /// profile's most-used mode on every mount, and Bars always
+    /// opened on the Space Bar (both ui-designer calls).
+    mutating func resetSurfaces() {
+        resetLayoutModeTab()
+        barEditor = .spaceBar
     }
-}
 
-extension EnvironmentValues {
-    /// Jumps the settings window to a sidebar destination.
-    var settingsNavigate: @MainActor (SettingsDestination) -> Void
-    {
-        get { self[SettingsNavigateKey.self] }
-        set { self[SettingsNavigateKey.self] = newValue }
-    }
-}
-
-/// The standard "lives elsewhere" row: a caption sentence
-/// ending in a tab link, so every pointer at another tab reads
-/// the same and the wording can't drift per section.
-struct CrossReferenceRow: View {
-    let prose: String
-    let linkTitle: String
-    let destination: SettingsDestination
-
-    var body: some View {
-        HStack(spacing: 4) {
-            Text(prose)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            CrossReferenceLink(linkTitle, to: destination)
-        }
-    }
-}
-
-/// A quiet inline tab link in the make-default link's language
-/// (underlined caption, hover lift + pointing hand) so every
-/// "lives elsewhere" pointer reads and acts the same.
-struct CrossReferenceLink: View {
-    let title: String
-    let destination: SettingsDestination
-    @Environment(\.settingsNavigate) private var navigate
-
-    init(_ title: String, to destination: SettingsDestination) {
-        self.title = title
-        self.destination = destination
+    /// Just the mode tab — for an **edit-target switch**, where a
+    /// different profile means a different most-used mode.
+    ///
+    /// Separate from `resetSurfaces` because that reasoning covers
+    /// only this one: `barEditor`'s default is a fixed design call
+    /// with no profile dependence, so resetting it here would
+    /// throw a user comparing App Bar colors across profiles back
+    /// to the Space Bar editor mid-task.
+    mutating func resetLayoutModeTab() {
+        layoutModeTab = nil
     }
 
-    var body: some View {
-        Button {
-            navigate(destination)
-        } label: {
-            Text(title).underline()
-        }
-        .buttonStyle(.plain)
-        .font(.caption)
-        .linkHover()
+    /// Starts a flash on `anchor`, bumping the token so that
+    /// revealing the same anchor twice still re-fires (#277).
+    mutating func startFlash(_ anchor: String) -> Int {
+        flashToken += 1
+        flash = SettingsFlash(
+            anchor: anchor,
+            token: flashToken
+        )
+        return flashToken
+    }
+
+    /// Ends the flash, if `token` is still the current one.
+    ///
+    /// Must be called: `SearchRevealFlash` uses `.task(id:)`,
+    /// which runs on *appear* as well as on change, so a value
+    /// left standing re-washes the card every time the user
+    /// navigates back to it — no user action involved. The token
+    /// check makes a late finisher from a superseded flash unable
+    /// to cancel the current one.
+    mutating func endFlash(token: Int) {
+        guard flash?.token == token else { return }
+        flash = nil
     }
 }

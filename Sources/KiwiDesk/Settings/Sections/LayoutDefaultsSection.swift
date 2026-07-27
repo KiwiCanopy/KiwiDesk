@@ -25,8 +25,8 @@ struct LayoutDefaultsSection: View {
     /// most-used-mode landing below survives.
     private var selected: Binding<LayoutMode> {
         Binding(
-            get: { model.layoutModeTab ?? initialMode },
-            set: { model.layoutModeTab = $0 }
+            get: { model.nav.layoutModeTab ?? initialMode },
+            set: { model.nav.layoutModeTab = $0 }
         )
     }
 
@@ -60,13 +60,14 @@ struct LayoutDefaultsSection: View {
         // re-deriving `initialMode`, so adding a space in another
         // tab could move this one under the user.
         //
-        // The latch is cleared by `SettingsModel.resetSurfaces()`
-        // — on window open and on an edit-target switch — so this
-        // still re-derives per visit in the cases that matter,
-        // which is what it did as view-local `@State`.
+        // The latch is cleared by
+        // `SettingsNavigation.resetSurfaces()` — on window open
+        // and on an edit-target switch — so this still re-derives
+        // per visit in the cases that matter, which is what it did
+        // as view-local `@State`.
         .onAppear {
-            if model.layoutModeTab == nil {
-                model.layoutModeTab = initialMode
+            if model.nav.layoutModeTab == nil {
+                model.nav.layoutModeTab = initialMode
             }
         }
     }

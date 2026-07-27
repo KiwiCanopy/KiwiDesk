@@ -25,12 +25,12 @@ struct BarsSection: View {
                     // selection lives on the model (#277) so a
                     // search hit on a `space_bar.*` header can
                     // open the editor that renders it.
-                    BarEditorPicker(selection: $model.barEditor)
+                    BarEditorPicker(selection: $model.nav.barEditor)
                     Text(switchCaption)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-                switch model.barEditor {
+                switch model.nav.barEditor {
                 case .appBar: appBarEditor
                 case .spaceBar:
                     SpaceBarEditorGroup(model: model)

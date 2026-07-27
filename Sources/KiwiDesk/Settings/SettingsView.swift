@@ -64,15 +64,15 @@ struct SettingsView: View {
             // The mode tab ONLY — the Bars switch has no profile
             // dependence, and resetting it here would move a user
             // comparing App Bar colors across profiles.
-            model.resetLayoutModeTab()
+            model.nav.resetLayoutModeTab()
         }
         // A navigation request — the #326 "Edit in Settings…"
         // deep link, or a #277 search hit. Guarded by the same
         // reachability filter as every other nav path (#18).
-        .onChange(of: model.pendingReveal) { _, request in
+        .onChange(of: model.nav.pendingReveal) { _, request in
             apply(request)
         }
-        .onAppear { apply(model.pendingReveal) }
+        .onAppear { apply(model.nav.pendingReveal) }
     }
 
     /// Phase 1 of a reveal: destination and surface, the half
@@ -105,7 +105,7 @@ struct SettingsView: View {
     /// bridge in Lua mode, with every test still green.
     private func apply(_ request: SettingsAnchor?) {
         guard let request else { return }
-        model.pendingReveal = nil
+        model.nav.pendingReveal = nil
         guard
             let resolved = request.resolved(
                 editingStoredProfile: model.editingStoredProfile
@@ -116,9 +116,9 @@ struct SettingsView: View {
         case .main:
             break
         case .layoutMode(let mode):
-            model.layoutModeTab = mode
+            model.nav.layoutModeTab = mode
         case .bar(let editor):
-            model.barEditor = editor
+            model.nav.barEditor = editor
         }
         // Unconditional, including the nil case. Guarding it to
         // avoid a nil→nil publish would mean a destination-only
@@ -128,7 +128,7 @@ struct SettingsView: View {
         // That trades a guaranteed supersede for one saved
         // re-render, in the field whose whole design is one
         // writer and one clearer.
-        model.pendingScroll = resolved.scroll
+        model.nav.pendingScroll = resolved.scroll
     }
 
     /// The structured settings shell: a fixed-width source list
@@ -153,7 +153,7 @@ struct SettingsView: View {
                 editingStoredProfile: model.editingStoredProfile,
                 spotlightProfiles:
                     model.profileSummaries.isEmpty,
-                reveal: { model.pendingReveal = $0 }
+                reveal: { model.nav.pendingReveal = $0 }
             )
             chrome { detailPane }
                 .frame(maxWidth: .infinity)
@@ -240,14 +240,17 @@ struct SettingsView: View {
             // wrappers would buy nothing and drift.
             ScrollViewReader { proxy in
                 detail
-                    .environment(\.settingsFlash, model.flash)
-                    .onChange(of: model.pendingScroll) {
+                    .environment(\.settingsFlash, model.nav.flash)
+                    .onChange(of: model.nav.pendingScroll) {
                         _,
                         anchor in
                         reveal(anchor, proxy: proxy)
                     }
                     .onAppear {
-                        reveal(model.pendingScroll, proxy: proxy)
+                        reveal(
+                            model.nav.pendingScroll,
+                            proxy: proxy
+                        )
                     }
             }
         }
@@ -262,7 +265,7 @@ struct SettingsView: View {
         proxy: ScrollViewProxy
     ) {
         guard let anchor else { return }
-        model.pendingScroll = nil
+        model.nav.pendingScroll = nil
         revealTask?.cancel()
         // Captured, so a task that outlives its pane bails instead
         // of relying on the id being absent from the new one.
@@ -300,7 +303,7 @@ struct SettingsView: View {
             // nothing at all. Layout has certainly run by now; if
             // the first attempt landed, this is a no-op.
             proxy.scrollTo(anchor, anchor: .top)
-            let token = model.startFlash(anchor)
+            let token = model.nav.startFlash(anchor)
             // Under Reduce Motion the wash has no fade to live
             // through — clearing removes it instantly — so the
             // hold absorbs the fade's duration instead. Without
@@ -314,7 +317,7 @@ struct SettingsView: View {
             )
             // Clearing is what triggers the fade — the modifier
             // keeps no timer of its own.
-            model.endFlash(token: token)
+            model.nav.endFlash(token: token)
         }
     }
 

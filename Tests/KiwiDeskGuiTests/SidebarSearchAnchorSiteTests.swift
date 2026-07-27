@@ -57,7 +57,7 @@ struct SidebarSearchAnchorSiteTests {
     /// bug for that side.
     private let alternatelyMounted: [String: Int] = [
         // The App Bar and Space Bar colour drawers. `BarsSection`
-        // renders exactly one editor per `switch model.barEditor`.
+        // renders one editor per `switch model.nav.barEditor`.
         "bars.advanced_colors": 2,
         // `MonitorsSection`'s cards section and its
         // "not connected" read-only twin are if/else branches.

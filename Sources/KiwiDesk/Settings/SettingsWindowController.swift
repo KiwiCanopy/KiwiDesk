@@ -47,7 +47,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
     /// the read-only shortcuts panel's "Edit in Settings…" bridge
     /// (#326). The request is one-shot; `SettingsView` clears it.
     func show(navigatingTo destination: SettingsDestination) {
-        model.pendingReveal = SettingsAnchor(
+        model.nav.pendingReveal = SettingsAnchor(
             destination: destination
         )
         show()
@@ -80,7 +80,7 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         // The two surface selections live on the model too now
         // (#277), so they need the same re-assertion — otherwise
         // reopening Settings can land in the App Bar editor.
-        model.resetSurfaces()
+        model.nav.resetSurfaces()
         // Promote on every open, not just the first — closing
         // the window demotes to `.accessory`, so a reused
         // window must re-raise to get its Dock icon back.

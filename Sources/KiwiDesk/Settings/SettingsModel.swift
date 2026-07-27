@@ -36,44 +36,13 @@ final class SettingsModel: ObservableObject {
     /// against the as-loaded baselines, not a latched flag —
     /// manually undoing an edit clears the footer again.
     @Published var isDirty = false
-    /// A one-shot navigation request: a sidebar destination, the
-    /// local surface to switch to, and optionally a label to
-    /// scroll to and flash. Serves both the read-only shortcuts
-    /// panel's "Edit in Settings…" bridge (#326, destination
-    /// only) and a sidebar search hit (#277, full anchor).
-    ///
-    /// `SettingsView` applies the destination and surface; the
-    /// detail pane's scroll driver performs the reveal and clears
-    /// this. A request that arrives while the raw Lua editor is
-    /// showing therefore lingers rather than being dropped, and
-    /// resolves when the visual editor comes back — the detail
-    /// pane is where a scroll target can exist at all.
-    @Published var pendingReveal: SettingsAnchor?
-    /// The flash in progress. Published into the environment so
-    /// each anchored view can recognize itself; nil between
-    /// reveals. Written only through `startFlash` / `endFlash`,
-    /// which own the re-trigger token.
-    @Published private(set) var flash: SettingsFlash?
-    private var flashToken = 0
-    /// Phase 2 of a reveal: the anchor whose pane is now showing
-    /// and can be scrolled. Minted by `SettingsView.apply` once
-    /// the destination and surface are set, consumed by the
-    /// detail pane's scroll driver — see `pendingReveal` for why
-    /// the two phases are separate fields.
-    @Published var pendingScroll: String?
-    /// The Layout Defaults mode tab, and the Bars editor behind
-    /// the App Bar / Space Bar switch.
-    ///
-    /// On the model rather than in the owning views' `@State`
-    /// (#277): a search hit on a mode-gated or bar-gated control
-    /// has to select the surface that renders it before there is
-    /// anything to scroll to, and view-local state cannot be set
-    /// from outside. `layoutModeTab` starts nil so the section
-    /// can still land on the profile's most-used mode the first
-    /// time it appears; a user's later pick, and a reveal, both
-    /// write it.
-    @Published var layoutModeTab: LayoutMode?
-    @Published var barEditor: BarEditor = .spaceBar
+    /// The window's transient navigation state — the one-shot
+    /// reveal request, its two-phase scroll/flash, and the local
+    /// surface selections (Layout mode tab, Bars editor). Behind
+    /// one `@Published` so this file stays under the 350-line
+    /// ceiling as #277 part 2 grows the set; a value type, so
+    /// `$model.nav.barEditor` still projects a `Binding`.
+    @Published var nav = SettingsNavigation()
     /// Which sidebar row is selected.
     ///
     /// Held here rather than as `@State` in `SettingsView`
@@ -104,56 +73,6 @@ final class SettingsModel: ObservableObject {
     /// from model staleness (a space that appeared live while
     /// the dashboard sat open) — see `KiwiCore.mergeLiveSpaces`.
     var seedSpaces: [SpaceID] = []
-
-    /// Forgets both surface selections, so they re-derive their
-    /// defaults. For window open, which re-asserts `destination`
-    /// for the same reason.
-    ///
-    /// Needed because moving them off view-local `@State` (#277)
-    /// silently promoted two per-visit landings to
-    /// process-lifetime ones: Layout Defaults re-derived the
-    /// profile's most-used mode on every mount, and Bars always
-    /// opened on the Space Bar (both ui-designer calls).
-    func resetSurfaces() {
-        resetLayoutModeTab()
-        barEditor = .spaceBar
-    }
-
-    /// Just the mode tab — for an **edit-target switch**, where a
-    /// different profile means a different most-used mode.
-    ///
-    /// Separate from `resetSurfaces` because that reasoning covers
-    /// only this one: `barEditor`'s default is a fixed design call
-    /// with no profile dependence, so resetting it here would
-    /// throw a user comparing App Bar colors across profiles back
-    /// to the Space Bar editor mid-task.
-    func resetLayoutModeTab() {
-        layoutModeTab = nil
-    }
-
-    /// Starts a flash on `anchor`, bumping the token so that
-    /// revealing the same anchor twice still re-fires (#277).
-    func startFlash(_ anchor: String) -> Int {
-        flashToken += 1
-        flash = SettingsFlash(
-            anchor: anchor,
-            token: flashToken
-        )
-        return flashToken
-    }
-
-    /// Ends the flash, if `token` is still the current one.
-    ///
-    /// Must be called: `SearchRevealFlash` uses `.task(id:)`,
-    /// which runs on *appear* as well as on change, so a value
-    /// left standing re-washes the card every time the user
-    /// navigates back to it — no user action involved. The token
-    /// check makes a late finisher from a superseded flash unable
-    /// to cancel the current one.
-    func endFlash(token: Int) {
-        guard flash?.token == token else { return }
-        flash = nil
-    }
 
     func recomputeDirty() {
         isDirty =
