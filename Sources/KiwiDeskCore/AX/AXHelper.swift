@@ -265,11 +265,24 @@ public enum AXHelper {
     /// the app before the next line runs), then FORCE the
     /// activation. The AeroSpace-proven sequence for the same
     /// macOS multi-monitor bug (their #101); public API only.
-    /// `.activateIgnoringOtherApps` is deprecated-as-no-op on
-    /// macOS 14+, but AeroSpace ships this exact call in its
-    /// working fix — kept deliberately to match byte-for-byte
-    /// (it still forces on older systems; the main+raise-before-
-    /// activate order carries the fix on newer ones).
+    ///
+    /// **The deprecation warning on `.activateIgnoringOtherApps`
+    /// is accepted deliberately — do NOT "clean it up".** Apple
+    /// documents the flag as having no effect from macOS 14 on,
+    /// and 14 is this app's deployment floor, so on paper it is
+    /// dead code that only earns a warning. Observation says
+    /// otherwise: an earlier build without it let focus jump to
+    /// the MRU sibling — the very symptom described above.
+    /// AeroSpace still ships the same flag today.
+    ///
+    /// Removing it needs evidence, not a doc string: an A/B on
+    /// two displays, one app holding a window on each, 20+ focus
+    /// commands per build, checking key focus lands on the
+    /// targeted window and not the sibling. The failure is a
+    /// race, so a handful of repetitions proves nothing — a
+    /// probe of app-level activation proves less still, since
+    /// this bug is about WHICH WINDOW inside an already-active
+    /// app takes key focus.
     @MainActor
     public static func raise(
         _ element: AXUIElement,
