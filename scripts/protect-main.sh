@@ -8,18 +8,34 @@
 # for the protection endpoint, so this unlocks at the public flip.
 # Run it immediately after flipping visibility.
 #
-# Each setting's reasoning lives in #487; the ones worth repeating
-# because they look wrong:
+# NOT every setting here is the hardened default. Two are deliberate
+# deviations, ratified 2026-07-27 — do not "correct" them to the
+# generic advice without re-reading why:
 #
-#   required_approving_review_count = 0, NOT 1. GitHub does not let
-#   you approve your own PR, so on a solo repo a required approval
-#   either deadlocks every merge or gets bypassed on every merge —
-#   protecting nothing either way. Merge rights come from repo role,
-#   so an outside contributor still cannot merge with 0. Flip this
-#   to 1 the day a second collaborator with Write access exists.
+#   required_approving_review_count = 0, NOT the usual >=1. GitHub
+#   does not let you approve your own PR, so on a solo repo a
+#   required approval either deadlocks every merge or gets bypassed
+#   on every merge — protecting nothing either way. Merge rights come
+#   from repo role, so an outside contributor still cannot merge with
+#   0. Flip to 1 the day a second collaborator with Write access
+#   exists.
 #
-#   enforce_admins = false, so an emergency fix stays possible. The
-#   point of this is catching mistakes, not locking the owner out.
+#   enforce_admins = false, where GitHub's own hardening advice is to
+#   INCLUDE administrators. Owner's call, eyes open: it keeps an
+#   escape hatch for a genuine emergency, at the price that these
+#   rules NUDGE rather than bind the one account with write access.
+#   Understand what that does and does not buy — the owner is already
+#   the only thing that can merge (no auto-merge, workflow token is
+#   read-only, Actions cannot approve PRs), so the value here is not
+#   keeping others out. It is that the merge button stays hidden
+#   until CI is green, which catches the mistake that actually
+#   happens: merging red. Everything else is self-discipline.
+#
+# required_conversation_resolution = true is an addition beyond
+# #487's list (kept 2026-07-27): it stops a PR merging with an
+# unanswered review comment, which starts mattering the day outside
+# PRs arrive. dismiss_stale_reviews was dropped as near-inert at 0
+# required approvals.
 #
 # Status checks are listed by JOB NAME and must match
 # .github/workflows/ci.yml. This is the setting that finally makes
@@ -63,7 +79,6 @@ gh api -X PUT "repos/$REPO/branches/main/protection" \
   "enforce_admins": false,
   "required_pull_request_reviews": {
     "required_approving_review_count": 0,
-    "dismiss_stale_reviews": true,
     "require_code_owner_reviews": false
   },
   "restrictions": null,
