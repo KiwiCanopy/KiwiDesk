@@ -80,6 +80,71 @@ struct LocalizationProductNameGuardTests {
         #expect(result.status == 0)
     }
 
+    /// **Presence, not parity** — the semantics every other pass
+    /// fixture here happens to leave unpinned, because each is 1:1
+    /// in mention count. The guard asks whether the name survives
+    /// at all, never how often: dropping a redundant repetition of
+    /// a proper noun is normal translation practice, and the defect
+    /// this was written for was locales *renaming* the feature,
+    /// never mentioning it fewer times.
+    ///
+    /// Unpinned, "tighten it to parity" is a one-line change that
+    /// breaks no test and reads like a strengthening, which is
+    /// what makes it likely. It is a regression: parity rejects a
+    /// translation naming the bar once where the English named it
+    /// twice — ordinary practice, not a dropped name — and pushes
+    /// the translator toward a literal, worse sentence to satisfy
+    /// the tool. `docs/translating.md` states the rule; this makes
+    /// breaking it fail.
+    @Test(
+        "fewer mentions than the English still passes",
+        arguments: [
+            (
+                "de",
+                "The App Bar lists windows. The App Bar is optional.",
+                "Die App Bar listet Fenster. Sie ist optional."
+            ),
+            (
+                "fr",
+                "Space Bar colors and Space Bar position",
+                "Couleurs et position de la Space Bar"
+            ),
+        ]
+    )
+    func fewerMentionsPasses(
+        locale: String,
+        english: String,
+        value: String
+    ) throws {
+        let result = try ProductNameFixture.check(
+            locale: locale,
+            english: english,
+            value: value
+        )
+        #expect(result.status == 0)
+    }
+
+    /// The complementary half: presence is per **name**, so a value
+    /// naming both bars must keep both. That is not branding, it is
+    /// meaning — the real `bars.same_edge` string contrasts them
+    /// ("Space Bar sits at the screen edge, App Bar sits next to
+    /// the windows"), and a translation keeping one turns a
+    /// contrast into a tautology. Softening the rule to "any one
+    /// name is enough" would let that through.
+    @Test("keeping only one of two names still fails")
+    func keepingOnlyOneNameFails() throws {
+        let result = try ProductNameFixture.check(
+            locale: "de",
+            english:
+                "Space Bar sits at the edge, App Bar sits inside.",
+            value:
+                "Die Space Bar sitzt am Rand, die App-Leiste "
+                + "sitzt innen."
+        )
+        #expect(result.status != 0)
+        #expect(result.stderr.contains("App Bar"))
+    }
+
     /// Capitalization is the locale's own business — a lower-cased
     /// "app bar" still names the thing, and flagging it would turn
     /// a style guide into a build failure.

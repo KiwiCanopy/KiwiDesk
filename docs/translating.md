@@ -510,7 +510,14 @@ of the locale set, and one of those is a heuristic:
   ("Die App-Leiste", "Barra delle app") describes something the
   interface does not call that. Keep the name verbatim and
   translate around it: "Mostra la App Bar", "Couleurs de la
-  Space Bar". Capitalization is yours ("App bar" is fine).
+  Space Bar". Capitalization is yours ("App bar" is fine), and so
+  is compounding — German's "Space-Bar-Farben" keeps the name,
+  because separators are flattened before the comparison.
+  **One mention is enough.** The check asks whether the name
+  survives, never how often: if the English names a bar twice and
+  your sentence reads better naming it once, that passes. Keep
+  each name the English carries, though — a string contrasting
+  the two bars needs both, or the contrast collapses.
   **Latin-script locales only** — the exact complement of the
   rule above, and for the mirror reason: in a Japanese or Russian
   sentence the English phrase is a foreign body, so adapting it

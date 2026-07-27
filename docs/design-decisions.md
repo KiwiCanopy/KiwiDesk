@@ -234,6 +234,75 @@ it buys something back — Sparkle's update path is first
 exercised against a real previous release instead of being
 debugged on the release everyone downloads.
 
+### The feature-name guard checks presence, and needs no opt-out
+
+**[Principle]**
+
+`dropped_product_names` requires a Latin-script locale to carry
+each `PRODUCT_NAMES` entry the English carries — "App Bar",
+"Space Bar" — because the GUI ships those names untranslated, so
+prose renaming them points at something the interface does not
+call that. Search sharpened it: a destination name is now a
+breadcrumb segment, so an invented name appears on every hit
+inside that pane.
+
+**It is a presence check, not a parity check.** One mention
+satisfies it however often the English repeats the name;
+separators are flattened, so German's "Space-Bar-Farben" counts
+as keeping it; case is the locale's own. What it rejects is a
+translation with *zero* mentions.
+
+The distinction matters because tightening presence to parity
+reads like a strengthening and is a regression. Dropping a
+redundant repetition of a proper noun is ordinary translation
+practice, so a parity check rejects correct work and pushes the
+translator toward a literal, worse sentence to satisfy the tool.
+The defect this guard exists to catch is a locale *renaming* the
+feature; a locale naming it fewer times has not renamed
+anything. `LocalizationProductNameGuardTests` pins the
+distinction — a parity implementation fails two of its
+arguments — because a rule that is only written down invites the
+plausible-looking tightening.
+
+**No exemption file, and none is needed** — the escape hatches
+are ordered and all better than one:
+
+1. Reword around the name. All 125 name-bearing translations
+   across the five Latin locales did this, none contorted.
+2. If the name is redundant under its section header, delete it
+   from the **English**. That lifts the obligation in every
+   locale at once and improves the English — the GUI already
+   does this (`SpaceBarGroups`' caption omits the name its
+   header supplies), so the obligation is *authored*, not
+   imposed. An opt-out would invert this, letting locales
+   diverge from an English redundancy nobody fixed.
+3. `scripts/drop-key --locale <locale> <key>` retires one
+   locale's value to the English fallback. A loud escape, which
+   is the point.
+
+Trade-off: a translator who wants the name gone entirely must
+change the English or drop the key. Accepted — no English value
+repeats a single name, and the only multi-mention strings
+*contrast* the two bars ("Space Bar sits at the screen edge, App
+Bar sits next to the windows"), where dropping one makes the
+sentence wrong rather than tighter. That is why presence is
+per-name.
+
+**Growth clause.** Obligation scales with authored English
+mentions, not with list length, so adding a name binds only the
+keys whose English already contains it — cheaper than it looks.
+The constraint that does not scale is that the check is
+case-insensitive and therefore cannot tell a *referential*
+mention from a *descriptive* one. Both current names are
+two-word coinages that only ever occur referentially, so the
+question never arises. A name built from ordinary words would
+fire on incidental prose that was never naming the feature,
+demanding a verbatim keep for a sentence that has nothing to
+keep — a guard failing on correct copy, which is the one failure
+that makes an exemption file look necessary. So the existing
+rule in `PRODUCT_NAMES` — argue a name in, never add one to
+silence a hit — also bars a name that can occur descriptively.
+
 ### Layout navigation & overflow models
 
 **[Map]**
