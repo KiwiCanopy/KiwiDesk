@@ -16,7 +16,7 @@ struct ProfileAppRulesApplyTests {
     // MARK: - Helpers
 
     private func makeGuiCore() -> KiwiCore {
-        let core = KiwiCore(
+        let core = makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(
@@ -120,7 +120,7 @@ struct ProfileAppRulesApplyTests {
     @Test("Not GUI-managed: profile resolves onto Lua base")
     func nonGuiManagedResolvesLuaRules() throws {
         // No gui.json: Lua owns the global base.
-        let core = KiwiCore(
+        let core = makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(
@@ -166,7 +166,7 @@ struct ProfileAppRulesApplyTests {
 
     @Test("Lua base tombstone matches bundle id case-insensitively")
     func luaMixedCaseTombstone() throws {
-        let core = KiwiCore(
+        let core = makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(

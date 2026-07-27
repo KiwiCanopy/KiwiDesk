@@ -120,7 +120,7 @@ private func makeCore() -> KiwiCore {
         .appendingPathComponent(
             "kiwidesk-tests-\(UUID().uuidString)"
         )
-    return KiwiCore(configDirectory: directory)
+    return makeTestCore(configDirectory: directory)
 }
 
 @Suite("bsp.set_*_override (per-space, #17)", .serialized)

@@ -15,7 +15,7 @@ struct PerSpaceResizeTests {
             .appendingPathComponent(
                 "kiwidesk-tests-\(UUID().uuidString)"
             )
-        return KiwiCore(configDirectory: dir)
+        return makeTestCore(configDirectory: dir)
     }
 
     // NOTE: the grow assertions below assume the host (or

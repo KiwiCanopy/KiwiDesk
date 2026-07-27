@@ -9,7 +9,7 @@ private func makeCore() -> KiwiCore {
         .appendingPathComponent(
             "kiwidesk-deferred-tests-\(UUID().uuidString)"
         )
-    return KiwiCore(configDirectory: directory)
+    return makeTestCore(configDirectory: directory)
 }
 
 /// The keyed owner of KiwiCore's one-shot settle tasks (#49).

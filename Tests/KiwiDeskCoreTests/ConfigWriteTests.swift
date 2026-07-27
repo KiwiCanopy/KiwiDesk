@@ -10,7 +10,7 @@ private func makeCore() -> KiwiCore {
         .appendingPathComponent(
             "kiwidesk-cfg-\(UUID().uuidString)"
         )
-    return KiwiCore(configDirectory: directory)
+    return makeTestCore(configDirectory: directory)
 }
 
 /// A model exercising every global + profile-scoped section.

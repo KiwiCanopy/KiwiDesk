@@ -12,7 +12,7 @@ import Testing
 struct FloatingModeParkTests {
     @Test("Parking a floating-mode space captures every member")
     func parkCapturesMembers() {
-        let core = KiwiCore(
+        let core = makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(

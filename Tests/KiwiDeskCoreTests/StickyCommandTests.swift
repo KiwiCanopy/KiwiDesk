@@ -13,7 +13,7 @@ import Testing
 @MainActor
 struct StickyCommandTests {
     private func makeCore() -> KiwiCore {
-        KiwiCore(
+        makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(
@@ -218,7 +218,7 @@ struct StickyCommandTests {
 @MainActor
 struct StickyFocusFollowTests {
     private func makeCore() -> KiwiCore {
-        KiwiCore(
+        makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(

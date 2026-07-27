@@ -10,7 +10,7 @@ import Testing
 @MainActor
 struct ProfileListRulesEditTests {
     private func makeCore() throws -> KiwiCore {
-        let core = KiwiCore(
+        let core = makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(

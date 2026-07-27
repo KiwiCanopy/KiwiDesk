@@ -26,7 +26,7 @@ struct StackFocusResizeTests {
             .appendingPathComponent(
                 "kiwidesk-tests-\(UUID().uuidString)"
             )
-        let core = KiwiCore(configDirectory: dir)
+        let core = makeTestCore(configDirectory: dir)
         core.tiler.visibleBounds = { _ in Self.display }
         return core
     }

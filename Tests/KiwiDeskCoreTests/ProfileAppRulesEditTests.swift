@@ -16,7 +16,7 @@ struct ProfileAppRulesEditTests {
     // MARK: - Helpers
 
     private func makeGuiCore() -> KiwiCore {
-        let core = KiwiCore(
+        let core = makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(

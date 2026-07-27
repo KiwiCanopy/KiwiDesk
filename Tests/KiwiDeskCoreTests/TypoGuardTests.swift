@@ -14,7 +14,7 @@ private func makeCore(config: String? = nil) -> KiwiCore {
         .appendingPathComponent(
             "kiwi-typo-\(UUID().uuidString)"
         )
-    let core = KiwiCore(configDirectory: directory)
+    let core = makeTestCore(configDirectory: directory)
     if let config {
         try? FileManager.default.createDirectory(
             at: directory,

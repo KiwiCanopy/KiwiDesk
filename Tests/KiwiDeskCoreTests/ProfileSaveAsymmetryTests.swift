@@ -20,7 +20,7 @@ import Testing
 @MainActor
 struct ProfileSaveAsymmetryTests {
     private func makeCore() -> KiwiCore {
-        let core = KiwiCore(
+        let core = makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(

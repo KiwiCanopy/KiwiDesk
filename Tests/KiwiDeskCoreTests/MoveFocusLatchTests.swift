@@ -13,7 +13,7 @@ import Testing
 @MainActor
 struct MoveFocusLatchTests {
     private func makeCore() -> KiwiCore {
-        KiwiCore(
+        makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(

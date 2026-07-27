@@ -137,7 +137,7 @@ struct StickyMoveGuardTests {
     private let displayB = DisplayID(2)
 
     private func makeCore() -> KiwiCore {
-        KiwiCore(
+        makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(

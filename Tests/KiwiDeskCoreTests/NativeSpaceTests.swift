@@ -178,7 +178,7 @@ struct StashCornerTests {
 @MainActor
 struct NativeSpaceBindingTests {
     private func makeCore() -> KiwiCore {
-        KiwiCore(
+        makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(

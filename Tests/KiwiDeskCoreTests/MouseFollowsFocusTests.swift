@@ -10,7 +10,7 @@ private func makeCore() -> KiwiCore {
         .appendingPathComponent(
             "kiwidesk-mouse-warp-\(UUID().uuidString)"
         )
-    return KiwiCore(configDirectory: directory)
+    return makeTestCore(configDirectory: directory)
 }
 
 /// Mouse follows focus (#186). The warp itself is a

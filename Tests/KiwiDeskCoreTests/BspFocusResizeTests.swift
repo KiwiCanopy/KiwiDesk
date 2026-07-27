@@ -27,7 +27,7 @@ struct BspFocusResizeTests {
             .appendingPathComponent(
                 "kiwidesk-tests-\(UUID().uuidString)"
             )
-        let core = KiwiCore(configDirectory: dir)
+        let core = makeTestCore(configDirectory: dir)
         core.tiler.visibleBounds = { _ in Self.display }
         // No Space Bar, so the pinned rect IS the resize span: the
         // span is the layout region since #537, and the default

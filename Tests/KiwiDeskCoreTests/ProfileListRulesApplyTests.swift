@@ -13,7 +13,7 @@ struct ProfileListRulesApplyTests {
         guiManaged: Bool = true,
         staleSidecar: Bool = false
     ) throws -> KiwiCore {
-        let core = KiwiCore(
+        let core = makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(

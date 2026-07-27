@@ -209,7 +209,7 @@ struct DragCoordinatorTests {
 @MainActor
 struct DragDropTests {
     private func makeCore() -> KiwiCore {
-        KiwiCore(
+        makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(
@@ -532,7 +532,7 @@ struct DragDropTests {
 @MainActor
 struct DragVisualCommandTests {
     private func makeCore() -> KiwiCore {
-        KiwiCore(
+        makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(

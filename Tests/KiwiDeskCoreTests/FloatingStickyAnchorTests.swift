@@ -16,7 +16,7 @@ import Testing
 @MainActor
 struct FloatingStickyAnchorTests {
     private func makeCore() -> KiwiCore {
-        KiwiCore(
+        makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(

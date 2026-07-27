@@ -11,7 +11,7 @@ private func makeCore() -> KiwiCore {
         .appendingPathComponent(
             "kiwidesk-tests-\(UUID().uuidString)"
         )
-    return KiwiCore(configDirectory: directory)
+    return makeTestCore(configDirectory: directory)
 }
 
 @Suite("Command execution", .serialized)

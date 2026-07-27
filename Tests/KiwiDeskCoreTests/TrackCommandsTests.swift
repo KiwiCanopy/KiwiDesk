@@ -9,7 +9,7 @@ private func makeCore() -> KiwiCore {
         .appendingPathComponent(
             "kiwidesk-track-cmd-\(UUID().uuidString)"
         )
-    return KiwiCore(configDirectory: directory)
+    return makeTestCore(configDirectory: directory)
 }
 
 /// `track.*` setters (#128): globals, per-space overrides, and

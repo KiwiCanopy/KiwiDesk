@@ -247,7 +247,7 @@ struct StashRestoreTests {
     @Test("A rekey carries the stash capture to the new id")
     @MainActor
     func rekeyCarriesCapture() {
-        let core = KiwiCore(
+        let core = makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(

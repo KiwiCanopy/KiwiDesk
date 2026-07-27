@@ -20,7 +20,7 @@ struct StructuredConfigTests {
     // MARK: - Helpers
 
     private func makeCore() -> KiwiCore {
-        KiwiCore(
+        makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(

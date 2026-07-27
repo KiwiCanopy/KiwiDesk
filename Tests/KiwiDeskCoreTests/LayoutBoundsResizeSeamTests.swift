@@ -30,7 +30,7 @@ struct LayoutBoundsResizeSeamTests {
             .appendingPathComponent(
                 "kiwidesk-layoutbounds-\(UUID().uuidString)"
             )
-        let core = KiwiCore(configDirectory: dir)
+        let core = makeTestCore(configDirectory: dir)
         core.tiler.visibleBounds = { _ in bounds }
         core.execute("set_gap_global", args: [.number(0)])
         core.execute("space_bar.set_enabled", args: [.bool(true)])

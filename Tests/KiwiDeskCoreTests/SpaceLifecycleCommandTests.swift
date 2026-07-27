@@ -8,7 +8,7 @@ import Testing
 @MainActor
 struct SpaceLifecycleCommandTests {
     private func makeCore() -> KiwiCore {
-        KiwiCore(
+        makeTestCore(
             configDirectory: FileManager.default.temporaryDirectory
                 .appendingPathComponent(
                     "kiwi-core-\(UUID().uuidString)"

@@ -122,7 +122,7 @@ private func makeCore() -> KiwiCore {
         .appendingPathComponent(
             "kiwidesk-tests-\(UUID().uuidString)"
         )
-    return KiwiCore(configDirectory: directory)
+    return makeTestCore(configDirectory: directory)
 }
 
 @Suite("scroll.set_slot_size", .serialized)

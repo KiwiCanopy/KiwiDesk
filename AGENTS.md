@@ -559,7 +559,7 @@ Keep this list updated whenever a recurring mistake is found.
 - **Split test suites early.** The 79-char limit and 350-line
   ceiling repeatedly bit large test files. Break suites into
   focused files before they grow; per-file private helpers are the
-  convention and small duplication across suites is fine. Four
+  convention and small duplication across suites is fine. Five
   ratified exceptions, all *stateless primitives* with no
   setup/teardown coupling and no assertions of their own:
   `ReflectionParity.swift` (structural-parity reflection helpers
@@ -580,7 +580,15 @@ Keep this list updated whenever a recurring mistake is found.
   same as `SourceScan`). That last one also owns the shared
   separation **floor**, deliberately — the two families share
   hexes, so one threshold over one colour is the point; don't
-  "tidy" the policy back out of the maths file.
+  "tidy" the policy back out of the maths file. The fifth,
+  `TestCore.swift` (the `makeTestCore` factory and its
+  `NoopHotkeyRegistrar`, #565), is the one that guards *nothing*:
+  it is shared because the default it supplies — a no-op hotkey
+  registrar standing in for the live `CarbonHotkeyCenter` — is the
+  one default production `KiwiCore.init` cannot carry, and a
+  per-file copy would leave every new suite one forgotten argument
+  from re-seizing the developer's global chords (2414 conflict
+  lines a run). Statelessness and no assertions clear the same bar.
   The bar is the **drift risk** — a divergent copy weakens a
   guard, or silently changes what a suite observes — not the
   copy count, which is merely the evidence that prompted the

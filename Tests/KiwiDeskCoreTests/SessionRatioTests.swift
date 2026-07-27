@@ -13,7 +13,7 @@ import Testing
 @MainActor
 struct SessionRatioTests {
     private func makeCore() -> KiwiCore {
-        KiwiCore(
+        makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(

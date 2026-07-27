@@ -200,7 +200,7 @@ private func makeCore() -> KiwiCore {
         .appendingPathComponent(
             "kiwidesk-tests-\(UUID().uuidString)"
         )
-    return KiwiCore(configDirectory: directory)
+    return makeTestCore(configDirectory: directory)
 }
 
 @Suite("Stack arrangement commands (#222)", .serialized)

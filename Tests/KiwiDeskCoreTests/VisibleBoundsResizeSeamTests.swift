@@ -19,7 +19,7 @@ struct VisibleBoundsResizeSeamTests {
             .appendingPathComponent(
                 "kiwidesk-bounds-\(UUID().uuidString)"
             )
-        let core = KiwiCore(configDirectory: dir)
+        let core = makeTestCore(configDirectory: dir)
         core.tiler.visibleBounds = { _ in bounds }
         // Zero gaps and no Space Bar, so the injected rect IS the
         // span: both reservations are real defaults with their

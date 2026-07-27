@@ -11,7 +11,7 @@ import Testing
 @MainActor
 struct StateMarkColorTests {
     private func makeCore() -> KiwiCore {
-        KiwiCore(
+        makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(

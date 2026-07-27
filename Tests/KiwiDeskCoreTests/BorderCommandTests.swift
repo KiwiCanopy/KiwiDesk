@@ -9,7 +9,7 @@ private func makeCore() -> KiwiCore {
         .appendingPathComponent(
             "kiwidesk-tests-\(UUID().uuidString)"
         )
-    return KiwiCore(configDirectory: directory)
+    return makeTestCore(configDirectory: directory)
 }
 
 /// `border.*` command surface (#278): the clamp policy (silent

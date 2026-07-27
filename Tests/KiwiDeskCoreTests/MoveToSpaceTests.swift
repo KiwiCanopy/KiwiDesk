@@ -15,7 +15,7 @@ import Testing
 @MainActor
 struct MoveToSpaceTests {
     private func makeCore() -> KiwiCore {
-        KiwiCore(
+        makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(

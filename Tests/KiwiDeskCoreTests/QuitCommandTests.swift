@@ -9,7 +9,7 @@ private func makeCore() -> KiwiCore {
         .appendingPathComponent(
             "kiwidesk-quit-cmd-\(UUID().uuidString)"
         )
-    return KiwiCore(configDirectory: directory)
+    return makeTestCore(configDirectory: directory)
 }
 
 /// The `quit.set_layout` dispatch seam (#197): storage,

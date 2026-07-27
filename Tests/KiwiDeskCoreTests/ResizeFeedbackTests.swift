@@ -9,7 +9,7 @@ private func makeCore() -> KiwiCore {
         .appendingPathComponent(
             "kiwidesk-resize-cue-\(UUID().uuidString)"
         )
-    return KiwiCore(configDirectory: directory)
+    return makeTestCore(configDirectory: directory)
 }
 
 /// The unsupported-resize cue (#184). The beep itself is an

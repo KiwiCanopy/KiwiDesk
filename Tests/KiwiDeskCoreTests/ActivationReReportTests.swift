@@ -16,7 +16,7 @@ import Testing
 @MainActor
 struct ActivationReReportTests {
     private func makeCore() -> KiwiCore {
-        KiwiCore(
+        makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(

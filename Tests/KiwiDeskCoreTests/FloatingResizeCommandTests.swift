@@ -15,7 +15,7 @@ struct FloatingResizeCommandTests {
             .appendingPathComponent(
                 "kiwidesk-tests-\(UUID().uuidString)"
             )
-        return KiwiCore(configDirectory: dir)
+        return makeTestCore(configDirectory: dir)
     }
 
     /// Two windows in the given mode; w2 focused, floating,

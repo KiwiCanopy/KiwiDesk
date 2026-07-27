@@ -15,7 +15,7 @@ struct ShowShortcutsVerbTests {
             .appendingPathComponent(
                 "kiwidesk-tests-\(UUID().uuidString)"
             )
-        return KiwiCore(configDirectory: dir)
+        return makeTestCore(configDirectory: dir)
     }
 
     @Test("KiwiDesk.show_shortcuts() fires the UI hook")

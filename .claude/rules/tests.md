@@ -25,7 +25,7 @@ ones that bite large test PRs, as a checklist (rationale is in §5):
   it approaches the ceiling.
 - **Per-file private helpers are the convention** — small
   duplication across suites is fine; no shared test harness.
-  Four ratified exceptions, all *stateless primitives* with no
+  Five ratified exceptions, all *stateless primitives* with no
   setup/teardown coupling and no assertions of their own:
   - *structural-parity primitives* (reflection helpers backing
     the field-list guards) in `ReflectionParity.swift` — a
@@ -60,6 +60,16 @@ ones that bite large test PRs, as a checklist (rationale is in §5):
     the other and the over-matching copy swallows the very call
     sites its guard exists to catch, so the guard passes for
     the wrong reason.
+  - *test-core construction* in `TestCore.swift` — the
+    `makeTestCore` factory and its `NoopHotkeyRegistrar` (#565).
+    Unlike the four above it guards nothing; it is shared because
+    the thing it defaults — a no-op hotkey registrar in place of
+    the live `CarbonHotkeyCenter` — is the one default the
+    production `KiwiCore.init` cannot carry, and a per-file copy
+    would leave every new suite one forgotten argument away from
+    re-seizing the OS chords (2414 conflict lines, the exact
+    failure #565 removed). Stateless, no assertions, no
+    setup/teardown coupling, so it clears the same bar.
 
   **The drift risk is the bar; the copy count is only the
   evidence that prompted the look.** Each case above happened

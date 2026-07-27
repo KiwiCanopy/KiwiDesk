@@ -13,7 +13,7 @@ import Testing
 @MainActor
 struct StarterRescaleTests {
     private func makeCore() -> KiwiCore {
-        KiwiCore(
+        makeTestCore(
             configDirectory: FileManager.default.temporaryDirectory
                 .appendingPathComponent(
                     "kiwi-rescale-\(UUID().uuidString)"

@@ -87,7 +87,7 @@ struct ScrollingFloatingFocusTests {
             .appendingPathComponent(
                 "kiwidesk-tests-\(UUID().uuidString)"
             )
-        let core = KiwiCore(configDirectory: directory)
+        let core = makeTestCore(configDirectory: directory)
         // Twenty windows so the row overflows every display width:
         // the offset then stays scrolled on any host, single- or
         // multi-monitor (see the assertion note below, #450).

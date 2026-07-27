@@ -17,7 +17,7 @@ import Testing
 @MainActor
 struct TravelerFocusedCommandTests {
     private func makeCore() -> KiwiCore {
-        KiwiCore(
+        makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(

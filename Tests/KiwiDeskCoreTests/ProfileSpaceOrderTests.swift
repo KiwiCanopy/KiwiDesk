@@ -15,7 +15,7 @@ import Testing
 
 @MainActor
 private func makeCore() -> KiwiCore {
-    KiwiCore(
+    makeTestCore(
         configDirectory: FileManager.default
             .temporaryDirectory
             .appendingPathComponent(

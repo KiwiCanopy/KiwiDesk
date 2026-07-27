@@ -120,7 +120,7 @@ struct SwapSkipsCascadeCommandTests {
             .appendingPathComponent(
                 "kiwidesk-swap-skip-\(UUID().uuidString)"
             )
-        return KiwiCore(configDirectory: directory)
+        return makeTestCore(configDirectory: directory)
     }
 
     @Test("Defaults on, and the setter flips it")

@@ -7,7 +7,7 @@ import Testing
 @MainActor
 struct IgnoreRulesConfigTests {
     private func makeCore() -> KiwiCore {
-        KiwiCore(
+        makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(

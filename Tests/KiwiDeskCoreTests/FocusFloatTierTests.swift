@@ -10,7 +10,7 @@ private func makeCore() -> KiwiCore {
         .appendingPathComponent(
             "kiwidesk-floattier-\(UUID().uuidString)"
         )
-    return KiwiCore(configDirectory: dir)
+    return makeTestCore(configDirectory: dir)
 }
 
 @MainActor

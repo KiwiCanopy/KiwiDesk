@@ -11,7 +11,7 @@ import Testing
 @MainActor
 struct StarterLadderSeedTests {
     private func makeCore() -> KiwiCore {
-        KiwiCore(
+        makeTestCore(
             configDirectory: FileManager.default.temporaryDirectory
                 .appendingPathComponent(
                     "kiwi-starter-\(UUID().uuidString)"

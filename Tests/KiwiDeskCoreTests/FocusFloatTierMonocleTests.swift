@@ -10,7 +10,7 @@ private func makeCore() -> KiwiCore {
         .appendingPathComponent(
             "kiwidesk-floatmono-\(UUID().uuidString)"
         )
-    return KiwiCore(configDirectory: dir)
+    return makeTestCore(configDirectory: dir)
 }
 
 /// Monocle space with `count` windows on space "1", horizontal

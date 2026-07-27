@@ -19,7 +19,7 @@ private func makeCore() -> KiwiCore {
         .appendingPathComponent(
             "kiwidesk-exec-dedup-\(UUID().uuidString)"
         )
-    let core = KiwiCore(configDirectory: directory)
+    let core = makeTestCore(configDirectory: directory)
     core.loadConfig()
     return core
 }

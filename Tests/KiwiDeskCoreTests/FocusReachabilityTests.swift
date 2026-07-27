@@ -21,7 +21,7 @@ private func makeCore() -> KiwiCore {
         .appendingPathComponent(
             "kiwidesk-reach-\(UUID().uuidString)"
         )
-    let core = KiwiCore(configDirectory: dir)
+    let core = makeTestCore(configDirectory: dir)
     core.tiler.visibleBounds = { _ in testDisplay }
     return core
 }

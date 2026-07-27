@@ -15,7 +15,7 @@ struct ProfileCopyTests {
     // MARK: - Helpers
 
     private func makeGuiCore() throws -> KiwiCore {
-        let core = KiwiCore(
+        let core = makeTestCore(
             configDirectory: FileManager.default
                 .temporaryDirectory
                 .appendingPathComponent(
