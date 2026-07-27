@@ -40,6 +40,30 @@ struct AppFontResourceTests {
         #expect(AppFont.font(size: 12) != nil)
     }
 
+    /// The drop is currently built from a fork branch precisely
+    /// to carry KiwiDesk's own glyph (see
+    /// `Resources/AppFont/UPSTREAM.md`). Both halves are
+    /// asserted because they fail apart: the map can name a
+    /// ligature the font has no glyph for, which renders as a
+    /// blank App Bar slot rather than falling back to the app
+    /// image. Keep this after the fork pin is lifted — it is
+    /// what proves the upstream release actually carries it.
+    @Test("Bundled map and TTF both carry the KiwiDesk glyph")
+    func kiwiDeskGlyph() throws {
+        let map = AppFontGlyphMap.loadBundled()
+        #expect(map?["KiwiDesk"] == ":kiwidesk:")
+        let font = try #require(AppFont.font(size: 12))
+        // A present ligature collapses the whole token into one
+        // glyph; a missing one leaves the characters unshaped.
+        let line = CTLineCreateWithAttributedString(
+            NSAttributedString(
+                string: ":kiwidesk:",
+                attributes: [.font: font]
+            )
+        )
+        #expect(CTLineGetGlyphCount(line) == 1)
+    }
+
     @Test("Degenerate map entries are dropped, not served")
     func degenerateEntriesDropped() throws {
         let url = FileManager.default.temporaryDirectory

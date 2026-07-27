@@ -33,6 +33,12 @@
         ]
     },
     {
+        "iconName": ":adguard_vpn:",
+        "appNames": [
+            "AdGuard VPN"
+        ]
+    },
+    {
         "iconName": ":adobe_bridge:",
         "appNames": [
             "Adobe Bridge*"
@@ -350,6 +356,12 @@
         ]
     },
     {
+        "iconName": ":betterbird:",
+        "appNames": [
+            "Betterbird"
+        ]
+    },
+    {
         "iconName": ":bettertouchtool:",
         "appNames": [
             "BetterTouchTool"
@@ -366,6 +378,12 @@
         "iconName": ":bit_warden:",
         "appNames": [
             "Bitwarden"
+        ]
+    },
+    {
+        "iconName": ":bitwig_studio:",
+        "appNames": [
+            "Bitwig Studio"
         ]
     },
     {
@@ -597,8 +615,7 @@
         "iconName": ":code:",
         "appNames": [
             "Code",
-            "Code - Insiders",
-            "Electron"
+            "Code - Insiders"
         ]
     },
     {
@@ -927,6 +944,12 @@
         ]
     },
     {
+        "iconName": ":electron:",
+        "appNames": [
+            "Electron"
+        ]
+    },
+    {
         "iconName": ":element:",
         "appNames": [
             "Element"
@@ -1050,6 +1073,12 @@
         ]
     },
     {
+        "iconName": ":flowjo:",
+        "appNames": [
+            "FlowJo"
+        ]
+    },
+    {
         "iconName": ":flstudio:",
         "appNames": [
             "FL Studio"
@@ -1101,6 +1130,12 @@
         "iconName": ":foxit_reader:",
         "appNames": [
             "Foxit PDF Reader"
+        ]
+    },
+    {
+        "iconName": ":free_llm_api:",
+        "appNames": [
+            "FreeLLMAPI"
         ]
     },
     {
@@ -1158,6 +1193,12 @@
         "appNames": [
             "Gemini",
             "Google Gemini"
+        ]
+    },
+    {
+        "iconName": ":ghidra:",
+        "appNames": [
+            "Ghidra"
         ]
     },
     {
@@ -1235,6 +1276,13 @@
         ]
     },
     {
+        "iconName": ":google_earth:",
+        "appNames": [
+            "Google Earth Pro",
+            "Google Earth"
+        ]
+    },
+    {
         "iconName": ":grammarly:",
         "appNames": [
             "Grammarly Editor"
@@ -1289,6 +1337,15 @@
         ]
     },
     {
+        "iconName": ":hermes_agent:",
+        "appNames": [
+            "Hermes",
+            "Hermes Agent",
+            "Hermes Agent Desktop",
+            "Hermes Agent*"
+        ]
+    },
+    {
         "iconName": ":hex_fiend:",
         "appNames": [
             "Hex Fiend"
@@ -1304,6 +1361,19 @@
         "iconName": ":home_assistant:",
         "appNames": [
             "Home Assistant"
+        ]
+    },
+    {
+        "iconName": ":homebrew:",
+        "appNames": [
+            "brew-browser",
+            "WailBrew| TapHouse",
+            "Cork",
+            "Homebrew",
+            "Brewer X",
+            "Applite",
+            "BrewMate",
+            "Brewlet"
         ]
     },
     {
@@ -1405,6 +1475,15 @@
         ]
     },
     {
+        "iconName": ":invoice_ninja:",
+        "appNames": [
+            "Invoice Ninja",
+            "InvoiceNinja",
+            "Invoice Ninja*",
+            "invoiceninja*"
+        ]
+    },
+    {
         "iconName": ":iphone_mirroring:",
         "appNames": [
             "iPhone Mirroring"
@@ -1454,7 +1533,8 @@
     {
         "iconName": ":jellyfin:",
         "appNames": [
-            "Jellyfin Media Player"
+            "Jellyfin Media Player",
+            "Jellyfin Desktop"
         ]
     },
     {
@@ -1563,6 +1643,12 @@
         ]
     },
     {
+        "iconName": ":kiwidesk:",
+        "appNames": [
+            "KiwiDesk"
+        ]
+    },
+    {
         "iconName": ":kodi:",
         "appNames": [
             "Kodi"
@@ -1578,6 +1664,12 @@
         "iconName": ":languagetool_for_desktop:",
         "appNames": [
             "LanguageTool for Desktop"
+        ]
+    },
+    {
+        "iconName": ":latest:",
+        "appNames": [
+            "Latest"
         ]
     },
     {
@@ -1700,6 +1792,14 @@
         "iconName": ":macpass:",
         "appNames": [
             "MacPass"
+        ]
+    },
+    {
+        "iconName": ":macshot:",
+        "appNames": [
+            "macshot",
+            "macshot.app",
+            "MacShot"
         ]
     },
     {
@@ -2186,7 +2286,8 @@
     {
         "iconName": ":openai:",
         "appNames": [
-            "ChatGPT"
+            "ChatGPT",
+            "ChatGPT Classic"
         ]
     },
     {
@@ -2198,7 +2299,8 @@
     {
         "iconName": ":opencode:",
         "appNames": [
-            "opencode"
+            "opencode",
+            "OpenCode"
         ]
     },
     {
@@ -2637,6 +2739,20 @@
         ]
     },
     {
+        "iconName": ":rclone:",
+        "appNames": [
+            "rclone",
+            "Rclone",
+            "Rclone UI"
+        ]
+    },
+    {
+        "iconName": ":reaper:",
+        "appNames": [
+            "REAPER"
+        ]
+    },
+    {
         "iconName": ":reeder5:",
         "appNames": [
             "Reeder"
@@ -2723,9 +2839,16 @@
         ]
     },
     {
+        "iconName": ":rsyncui:",
+        "appNames": [
+            "RsyncUI"
+        ]
+    },
+    {
         "iconName": ":ruffle:",
         "appNames": [
-            "ruffle"
+            "ruffle",
+            "Ruffle"
         ]
     },
     {
@@ -2776,6 +2899,13 @@
         "iconName": ":seafile:",
         "appNames": [
             "Seafile"
+        ]
+    },
+    {
+        "iconName": ":secretive:",
+        "appNames": [
+            "Secretive",
+            "Secretive.app"
         ]
     },
     {
@@ -2843,6 +2973,12 @@
         ]
     },
     {
+        "iconName": ":siri:",
+        "appNames": [
+            "Siri"
+        ]
+    },
+    {
         "iconName": ":sketch:",
         "appNames": [
             "Sketch"
@@ -2864,6 +3000,12 @@
         "iconName": ":smartgit:",
         "appNames": [
             "SmartGit"
+        ]
+    },
+    {
+        "iconName": ":snapgene:",
+        "appNames": [
+            "SnapGene"
         ]
     },
     {
@@ -2970,8 +3112,9 @@
         ]
     },
     {
-        "iconName": ":superproductivity:",
+        "iconName": ":super_productivity:",
         "appNames": [
+            "Super Productivity",
             "superProductivity"
         ]
     },
@@ -3110,6 +3253,12 @@
         ]
     },
     {
+        "iconName": ":ti_connect_ce:",
+        "appNames": [
+            "TI Connect CE"
+        ]
+    },
+    {
         "iconName": ":tick_tick:",
         "appNames": [
             "TickTick"
@@ -3211,6 +3360,12 @@
         "iconName": ":trello:",
         "appNames": [
             "Trello"
+        ]
+    },
+    {
+        "iconName": ":tuple:",
+        "appNames": [
+            "Tuple"
         ]
     },
     {
