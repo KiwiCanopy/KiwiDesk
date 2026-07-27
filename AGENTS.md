@@ -189,7 +189,13 @@ at directory altitude — see **`docs/architecture.md`**.
    same change set when a feature warrants surfacing there —
    e.g. a new layout mode (#128) adds its user-guide/reference
    prose *and* whatever nav or callout makes it findable. Run
-   `npm run build` in `site/` when you touch either.
+   `npm run build` in `site/` when you touch either — **under
+   Node 24** (`nvm use` in `site/`, which reads the `.nvmrc`
+   there; CI pins the same in `site.yml`). Astro refuses
+   anything below 22.12, and an install performed on an older
+   Node resolves the wrong platform binaries, so a later `nvm
+   use` alone still fails on a missing native binding — delete
+   `node_modules` and reinstall if that happens.
    When a review or manual pass classifies a behavior as
    **accepted-by-architecture**, it adds a row to the *Accepted
    limitations* page (`docs/accepted-limitations.md`) in the same
