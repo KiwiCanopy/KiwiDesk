@@ -149,9 +149,12 @@ done
 
 ICON_SRC="$ROOT/assets/AppIcon.icon"
 ICON_PLIST="$OUT/icon-partial.plist"
-if xcrun -f actool >/dev/null 2>&1 && [ -d "$ICON_SRC" ]; then
+if ACTOOL="$(xcrun -f actool 2>/dev/null)" \
+    && [ -d "$ICON_SRC" ]; then
     echo "==> actool $ICON_SRC"
-    actool "$ICON_SRC" --compile "$RES" --platform macosx \
+    # Invoke the resolved path: /usr/bin/actool is a shim that
+    # exists without Xcode, so probing and invoking must agree.
+    "$ACTOOL" "$ICON_SRC" --compile "$RES" --platform macosx \
         --minimum-deployment-target 14.0 --app-icon AppIcon \
         --output-partial-info-plist "$ICON_PLIST" >/dev/null
 elif [ -n "$NOTARY_PROFILE" ] || [ "$ALLOW_NO_ICON" -eq 0 ]; then
@@ -177,7 +180,7 @@ VERSION="$(sed -n 's/.*let semantic = "\(.*\)".*/\1/p' \
 # would be rejected downstream. plutil -lint validates XML, not
 # this, so check the shape here.
 case "$VERSION" in
-    ''|*[!0-9.]*|*..*|.*|*.)
+    ''|*[!0-9.]*|*..*|.*|*.|*.*.*.*)
     echo "error: '$VERSION' from $VERSION_FILE is not usable as" \
          "CFBundleVersion (1-3 dot-separated integers)" >&2
     exit 1 ;;
@@ -287,9 +290,13 @@ if [ -n "$NOTARY_PROFILE" ]; then
     # surfaces as a confusing *stapler* error, and the
     # submission id `notarytool log` needs has already scrolled
     # past in unstructured output.
+    # `|| true`: under `set -o pipefail` a non-zero notarytool
+    # exit (auth, network, expired profile — all plausible on a
+    # first submission) would abort here, before the branch that
+    # prints the reason and the log.
     xcrun notarytool submit "$ZIP" \
         --keychain-profile "$NOTARY_PROFILE" --wait \
-        --output-format json | tee "$SUBMIT_LOG"
+        --output-format json | tee "$SUBMIT_LOG" || true
     STATUS="$(sed -n 's/.*"status"[: ]*"\([^"]*\)".*/\1/p' \
         "$SUBMIT_LOG" | tail -1)"
     if [ "$STATUS" != "Accepted" ]; then

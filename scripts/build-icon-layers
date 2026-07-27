@@ -134,7 +134,17 @@ def subpaths(d):
             buf.append("Z")
             cur = start[:]
             continue
-        buf.append(cmd + ",".join("%.3f" % v for v in a))
+        if up == "A":
+            # large-arc and sweep are the grammar production
+            # "0" | "1" — emitted as %.3f a conforming parser
+            # errors at `.000` and discards the arc and every
+            # command after it in the element.
+            fmt = ("%.3f", "%.3f", "%.3f", "%d", "%d",
+                   "%.3f", "%.3f")
+            buf.append(cmd + ",".join(
+                f % v for f, v in zip(fmt, a)))
+        else:
+            buf.append(cmd + ",".join("%.3f" % v for v in a))
         if up == "H":
             cur[0] = cur[0] + a[0] if rel else a[0]
         elif up == "V":
@@ -205,7 +215,12 @@ def assert_fill_matches_master(icon_json, src):
                      f"{icon_json.name} — expected srgb:r,g,b,a")
         got.append("#%02x%02x%02x" % tuple(
             int(round(float(v) * 255)) for v in m.groups()))
-    missing = [h for h in got if h.lower() not in src.lower()]
+    # Only colours actually painted count: a retired hex left in
+    # a comment, <metadata> or an orphan gradient stop would
+    # otherwise satisfy this while the visible mark moved on.
+    used = {c.lower()
+            for c in re.findall(r'fill="(#[0-9a-fA-F]{6})"', src)}
+    missing = [h for h in got if h.lower() not in used]
     if missing:
         sys.exit(
             f"{icon_json.name}'s gradient uses {missing}, which "

@@ -1,20 +1,6 @@
 import AppKit
 import KiwiDeskCore
 
-extension Bundle {
-    /// This target's resources. Routed through
-    /// `ResourceBundle.locate` rather than used as
-    /// `Bundle.module` directly, because inside an `.app` the
-    /// generated accessor searches the bundle *root* — where a
-    /// signed app may not keep anything — and otherwise falls
-    /// through to an absolute `.build` path that exists only on
-    /// the machine that compiled it (#89).
-    static let kiwiDeskGui: Bundle = ResourceBundle.locate(
-        "KiwiDesk_KiwiDesk",
-        fallback: .module
-    )
-}
-
 /// Bundled brand images (#68 §3.8/§3.9), rasterized from the
 /// vector masters in `assets/` (see `assets/README.md` for
 /// the regeneration commands). Every accessor is optional — a

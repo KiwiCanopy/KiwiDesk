@@ -110,7 +110,7 @@ struct IconLayerParityTests {
             run.status != 0,
             "a recoloured master regenerated silently"
         )
-        #expect(run.stderr.contains("logo.svg"))
+        #expect(run.stderr.contains("gradient uses"))
     }
 }
 
@@ -139,6 +139,18 @@ private func makeIconFixture(repoRoot: URL) throws -> URL {
     try fm.copyItem(
         at: repoRoot.appendingPathComponent("assets"),
         to: fixture.appendingPathComponent("assets")
+    )
+    // Remove the copied layer art. Leaving it would seed the
+    // fixture with the very files the test compares against, so
+    // a generator that silently wrote nowhere would still come
+    // back byte-equal — the comparison has to prove production,
+    // not preservation. `main()` recreates the directory.
+    try? fm.removeItem(
+        at:
+            fixture
+            .appendingPathComponent("assets")
+            .appendingPathComponent("AppIcon.icon")
+            .appendingPathComponent("Assets")
     )
     return fixture
 }

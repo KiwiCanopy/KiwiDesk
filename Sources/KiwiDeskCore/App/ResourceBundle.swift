@@ -31,11 +31,13 @@ public enum ResourceBundle {
     /// - Parameters:
     ///   - name: bundle name without the `.bundle` extension,
     ///     e.g. `KiwiDesk_KiwiDeskCore`.
-    ///   - fallback: the caller's own `Bundle.module`, used when
-    ///     not running from an `.app`.
+    ///   - fallback: the caller's own `Bundle.module`, used only
+    ///     outside an `.app` — for the bare executable and
+    ///     `swift test`, where it resolves normally.
     /// - Returns: the bundle found under
-    ///   `Bundle.main.resourceURL`, or `fallback` when there is
-    ///   none there.
+    ///   `Bundle.main.resourceURL`; inside an `.app` with the
+    ///   bundle missing, `Bundle.main` (whose lookups simply
+    ///   return nil); otherwise `fallback`.
     public static func locate(
         _ name: String,
         fallback: @autoclosure () -> Bundle
@@ -46,6 +48,17 @@ public enum ResourceBundle {
             )
             if let bundle = Bundle(url: url) {
                 return bundle
+            }
+            // Inside an `.app` the resources are supposed to be
+            // right there, so a miss means a broken bundle. Do
+            // NOT fall through to `Bundle.module` here: its
+            // accessor `fatalError`s on any machine that did not
+            // build it, which would turn a missing file into a
+            // launch crash. Every caller is written to degrade
+            // (`AppFontGlyphMap` promises "never a crash"), and
+            // an empty bundle lets them.
+            if Bundle.main.bundleURL.pathExtension == "app" {
+                return .main
             }
         }
         return fallback()
