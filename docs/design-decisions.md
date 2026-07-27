@@ -238,13 +238,33 @@ debugged on the release everyone downloads.
 
 **[Principle]**
 
-`dropped_product_names` requires a Latin-script locale to carry
-each `PRODUCT_NAMES` entry the English carries — "App Bar",
-"Space Bar" — because the GUI ships those names untranslated, so
-prose renaming them points at something the interface does not
-call that. Search sharpened it: a destination name is now a
-breadcrumb segment, so an invented name appears on every hit
-inside that pane.
+`dropped_product_names` requires **every** locale to carry each
+`PRODUCT_NAMES` entry the English carries — "App Bar",
+"Space Bar" — because the GUI ships those names untranslated in
+all eleven catalogs, so prose renaming them points at something
+the interface does not call that. Search sharpened it: a
+destination name is now a breadcrumb segment, so an invented name
+appears on every hit inside that pane.
+
+**Script is irrelevant, and that is not obvious.** The natural
+reading is that this mirrors the English-residue guard, which is
+non-Latin-only, and an earlier cut scoped it that way — Latin
+locales required to keep the name, non-Latin free to adapt, on
+the argument that an English phrase sits in a Japanese sentence
+as a foreign body. The two guards ask different questions.
+Residue asks whether a word was *forgotten*, which is a judgment
+about the sentence around it and therefore script-sensitive. This
+asks whether a name the interface never translates was translated
+anyway — script-independent, in the same way "KiwiDesk", "Lua"
+and "BSP" stay English everywhere.
+
+Adapting is worse in ja and ko, not better: スペースバー and
+스페이스바 are the ordinary words for the **spacebar key**, and
+neither script has capitalization to mark a proper noun, so the
+feature name becomes indistinguishable from the key — a collision
+English does not have. The exemption was also never used: ja, ko
+and zh-Hans kept the names verbatim in 22 of 25 places and never
+once transliterated them.
 
 **It is a presence check, not a parity check.** One mention
 satisfies it however often the English repeats the name;
@@ -287,6 +307,52 @@ repeats a single name, and the only multi-mention strings
 Bar sits next to the windows"), where dropping one makes the
 sentence wrong rather than tighter. That is why presence is
 per-name.
+
+### Which names must stay English, and which must not
+
+**[Principle]**
+
+Two families, one question to sort a new name into them:
+
+> **Does this name already have an ordinary, domain-standard
+> translation a user would recognize from other software,
+> independent of KiwiDesk?**
+
+**No — it is a coinage naming something with no outside
+referent → Family A.** "App Bar", "Space Bar". Add it to
+`PRODUCT_NAMES`; every locale keeps it verbatim.
+
+**Yes — it is borrowed vocabulary → Family B.** Floating, Grid,
+Monocle, Scrolling, Stack, Track. Generic tiling-WM terms (yabai
+and Amethyst use the same words) with natural equivalents. Each
+locale decides: eight translate them (`ja` モノクル, `zh-Hans`
+单窗, `es` Monóculo), three keep them Latin (`de`, `ru`,
+`zh-Hant`). Both are correct translations of a technical term.
+
+The predicate keys on **pre-existing external vocabulary, not on
+the shape of the word.** A future "Status Bar" is Family B
+despite being a "Bar" compound exactly like Space Bar, because
+ステータスバー is already standard everywhere.
+
+**Family B gets no guard, and cannot have one.** The obvious
+symmetry — pin each locale's prose to its own
+`layout.<mode>.name` — fails on the growth hazard below, here in
+its worst form: these names *are* ordinary words. Spanish
+rephrased one help string to "las ventanas… flotarán", a verb
+form of the same root; a guard demanding the picker's noun
+"Flotante" would flag correct copy. It cannot distinguish "the
+Floating layout" from "windows will float", and a guard that
+fires on correct work is worse than none — it trains people to
+work around it.
+
+So Family B is held by review, not by tooling, to one rule:
+**prose matches its own picker.** If `layout.monocle.name` says
+Monóculo, the sentence beside it says Monóculo, never "Monocle".
+That rule was broken in es/fr/it/pt-BR and zh-Hans — the picker
+read "Flotante" while the caption read "Floating has no per-space
+overrides" — which is the same defect Family A's guard exists to
+prevent, arriving through the door that has no guard on it. It is
+the standing cost of not being able to build one.
 
 **Growth clause.** Obligation scales with authored English
 mentions, not with list length, so adding a name binds only the

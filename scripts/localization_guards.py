@@ -140,11 +140,11 @@ NON_LATIN_LOCALES = {
 # Locales that write in Latin script, declared rather than
 # inferred. There is no `("Latin", …)` row in `SCRIPTS` because
 # every locale uses Latin characters for `KiwiDesk`, URLs and
-# `%1$@`, so a Latin *pattern* proves nothing — but which side of
-# the line a locale sits on now decides who `dropped_product_names`
-# holds to the English feature names, and a wrong default there is
-# loud rather than quiet. `unregistered_locales` refuses a locale
-# missing from both sets; `LocalizationRegistryTests` pins it.
+# `%1$@`, so a Latin *pattern* proves nothing — and a locale
+# missing from both sets would have `english_residue` silently
+# disabled, which is the failure the registry exists to prevent.
+# `unregistered_locales` refuses such a locale;
+# `LocalizationRegistryTests` pins it.
 LATIN_LOCALES = {
     "de",
     "es",
@@ -159,13 +159,22 @@ LATIN_LOCALES = {
 # glossary — the vocabulary a translator is told to leave alone —
 # not a per-key exemption list.
 #
-# The layout names are here because `layout.<mode>.name` ships each
-# one untranslated ("BSP", "Grid", "Stack", "Track", …), so every
-# sentence that refers to a mode by name keeps it. That costs the
-# residue rule a little reach — `"フォーカス Stack"` for "Focus
-# Stack" now reads as a deliberate name rather than residue — which
-# is the right call: `de` independently translated that same string
-# as `Focus Stack`.
+# The layout names are here to stop the residue rule flagging a
+# locale that legitimately KEEPS a mode name in Latin inside its
+# own script. `de`, `ru` and `zh-Hant` do exactly that; the other
+# eight translate them (`ja` モノクル, `zh-Hans` 单窗, `es` Monóculo),
+# and both are correct — a mode name is ordinary tiling-WM
+# vocabulary, so rendering it natively is a translation choice, not
+# a defect. Only `ru` and `zh-Hant` actually *need* the exemption,
+# `english_residue` being scoped away from Latin-script `de`
+# anyway. It costs the residue rule a little reach —
+# `"フォーカス Stack"` for "Focus Stack" reads as a deliberate name
+# rather than residue.
+#
+# Do NOT read this as "the GUI ships mode names untranslated": it
+# does so in three locales out of eleven. That is why no guard
+# REQUIRES a mode name to be kept, unlike `PRODUCT_NAMES` — see
+# the Family A/B predicate in docs/design-decisions.md.
 #
 # Grouped, because an unlabelled flat set is how a glossary turns
 # into a baseline: without the grouping a reader cannot tell "the
@@ -195,8 +204,9 @@ GLOSSARY = {
     "sf",  # "SF Symbol"
     "symbol",
     "symbols",
-    # Layout-mode names. `layout.<mode>.name` ships each one
-    # untranslated, so any sentence naming a mode keeps it.
+    # Layout-mode names, for the locales that keep them Latin
+    # (de, ru, zh-Hant) — the other eight translate them, which is
+    # equally correct. See the block comment above.
     "floating",
     "grid",
     "monocle",
@@ -281,19 +291,22 @@ def unregistered_locales(names: list[str]) -> list[str]:
     So membership is checked rather than assumed — in **both**
     registries, which is a tightening. It used to require only
     `_STUB_TAGS`, on the reasoning that a locale absent from
-    `SCRIPTS` is Latin-script and that is a real answer. That held
-    while the cost of forgetting was a guard going *quiet*.
+    `SCRIPTS` is Latin-script and that is a real answer.
 
-    `dropped_product_names` inverted that cost. It keys off
-    `NON_LATIN_LOCALES` — derived from `SCRIPTS` — to decide who
-    must carry "App Bar" verbatim, so a Greek or Hebrew locale
-    registered in `_STUB_TAGS` but forgotten in `SCRIPTS` would be
-    read as Latin-script and **actively demanded** to keep an ASCII
-    phrase inside a non-Latin sentence: precisely the call that
-    guard's own rationale says is wrong. Silently-off became
-    loudly-wrong, so which script a locale writes in is now a
-    declaration, not a default: a Latin-script locale says so by
-    joining `LATIN_LOCALES`.
+    The reasoning is sound and the default is still wrong to rely
+    on, because being wrong is invisible. `english_residue` keys
+    off `NON_LATIN_LOCALES`, so a Greek or Hebrew locale
+    registered in `_STUB_TAGS` but forgotten in `SCRIPTS` is read
+    as Latin-script and has that guard **silently disabled** — it
+    reports nothing and looks exactly like a clean catalog. A
+    guard that cannot fire is worse than no guard, since it also
+    carries the claim of coverage. So which script a locale writes
+    in is a declaration, not a default: a Latin-script locale says
+    so by joining `LATIN_LOCALES`.
+
+    (`dropped_product_names` no longer keys off either set — it
+    applies to every locale — so it is not the reason this is a
+    declaration, though it was when the rule was written.)
 
     `LocalizationRegistryTests` walks the shipped files and pins
     the same requirement.
@@ -482,23 +495,38 @@ def english_residue(
 
 
 def dropped_product_names(
-    locale: str, value: str, english: str
+    value: str, english: str
 ) -> list[str]:
     """`PRODUCT_NAMES` the English carries and `value` does not.
 
-    The GUI ships "App Bar" and "Space Bar" untranslated, so a
-    Latin-script locale that renders them in its own words leaves
-    the prose naming something the interface does not
-    ("Die App-Leiste erscheint…" beside a chip reading "App Bar").
-    Search made it plainer still: the destination and surface names
-    are now breadcrumb segments, so a locale-invented name shows up
-    on every hit inside that pane.
+    The GUI ships "App Bar" and "Space Bar" untranslated in
+    **every** locale — `bars.switch.app_bar` and
+    `bars.switch.space_bar` are Latin in all eleven — so any locale
+    that renders them in its own words leaves the prose naming
+    something the interface does not ("Die App-Leiste erscheint…"
+    beside a chip reading "App Bar"). Search made it plainer still:
+    the destination and surface names are now breadcrumb segments,
+    so a locale-invented name shows up on every hit inside that
+    pane.
 
-    Scoped to Latin-script locales, the complement of
-    `english_residue`'s scope, and for the mirror-image reason. In
-    a non-Latin sentence an untouched English phrase is a foreign
-    body and adapting it is a real editorial choice; between two
-    Latin-script languages "App Bar" reads as the name it is.
+    Applies to every locale, script irrelevant. An earlier cut
+    exempted non-Latin locales on the reasoning that an English
+    phrase sits in a Japanese sentence as a foreign body, so
+    adapting it is a real editorial choice. That is the right lens
+    for `english_residue` — a *forgotten* English word — and the
+    wrong one here: these two names were never meant to be
+    translated in any locale, no more than "KiwiDesk", "Lua" or
+    "BSP" are, which `_is_partly_translated` already assumes when
+    it lists "App Bar" among the values that are correctly
+    all-English in a non-Latin catalog. The exemption was also
+    unused — ja/ko/zh-Hans kept the names verbatim 22 times in 25
+    and never once transliterated them.
+
+    Transliterating would actively hurt in ja and ko, which is why
+    this is a rule and not a preference: スペースバー and 스페이스바
+    are the ordinary words for the *spacebar key*, and neither
+    script has capitalization to mark a proper noun, so the feature
+    name would be indistinguishable from the key.
 
     Case-insensitive, because a locale's capitalization rules are
     its own ("App bar" is a style choice, not a dropped name).
@@ -517,8 +545,6 @@ def dropped_product_names(
     translation tools. Normalising costs nothing: "App-Leiste"
     still fails, because `leiste` is not `bar`.
     """
-    if locale in NON_LATIN_LOCALES:
-        return []
     haystack = _flatten_separators(value)
     needles = _flatten_separators(english)
     return [

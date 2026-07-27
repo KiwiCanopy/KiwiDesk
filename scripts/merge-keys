@@ -144,15 +144,15 @@ def _content_defect(
     drift = placeholder_drift(value, english)
     if drift:
         return f"{drift} relative to the English"
-    dropped = dropped_product_names(locale, value, english)
+    dropped = dropped_product_names(value, english)
     if dropped:
         return (
             "translates the untranslated feature name(s) "
             f"{', '.join(dropped)}"
         )
     # Ordered above the `residue` gate to match `check_content`:
-    # the feature-name guard is scoped by script, not by corpus,
-    # so site mode runs it too.
+    # the feature-name guard applies to every locale and every
+    # corpus, so site mode runs it too.
     if not residue:
         return None
     left = english_residue(locale, value, english)

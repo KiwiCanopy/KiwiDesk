@@ -138,20 +138,19 @@ struct LocalizationRegistryTests {
     ///
     /// This used to be optional, on the reasoning that absence from
     /// `SCRIPTS` means Latin-script and that is a real answer. The
-    /// feature-name guard inverted the cost of being wrong: it
-    /// holds Latin-script locales to carrying "App Bar" verbatim,
-    /// so a Greek locale with registered tags but no script row
-    /// would be *demanded* to keep an ASCII phrase inside a Greek
-    /// sentence — loudly wrong, where the old failure was quietly
-    /// off. `el` has tags here only because `_STUB_TAGS` is keyed
-    /// by base language and `el` is absent from it too; the point
-    /// is that the report names it either way.
-    /// The two script sets must not overlap. A locale in both
-    /// passes `unregistered_locales` happily, and
-    /// `dropped_product_names` tests `NON_LATIN_LOCALES` first —
-    /// so a contradictory declaration is silently *inert* rather
-    /// than loud, re-creating one level in the exact failure the
-    /// declaration exists to remove.
+    /// reasoning holds; relying on it does not, because being wrong
+    /// is invisible. `english_residue` keys off
+    /// `NON_LATIN_LOCALES`, so a Greek locale with registered tags
+    /// but no script row has that guard silently disabled and
+    /// reports like a clean catalog. `el` has tags here only
+    /// because `_STUB_TAGS` is keyed by base language and `el` is
+    /// absent from it too; the point is that the report names it
+    /// either way.
+    ///
+    /// The two script sets must not overlap: a contradictory
+    /// declaration passes `unregistered_locales` happily while
+    /// leaving which guard applies dependent on set-test order,
+    /// which is the ambiguity the declaration exists to remove.
     @Test("the script declarations are disjoint")
     func scriptSetsAreDisjoint() throws {
         let overlap = try pythonJSON(

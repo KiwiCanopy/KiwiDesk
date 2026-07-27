@@ -2,16 +2,21 @@ import Foundation
 import Testing
 
 /// Exercises the dropped-feature-name guard: the GUI ships
-/// "App Bar" and "Space Bar" untranslated, so a Latin-script
-/// locale must carry them verbatim (owner call, 2026-07-27).
+/// "App Bar" and "Space Bar" untranslated in **every** locale, so
+/// every locale must carry them verbatim, script irrelevant.
 ///
-/// The mirror image of the residue guard, and scoped to the
-/// complementary set of locales — so the two are pinned from
-/// opposite sides and neither can quietly widen into the other's
-/// territory. `GLOSSARY` already *exempted* these words from
-/// residue; nothing checked that anyone kept them, and `de` had
+/// `GLOSSARY` already *exempted* these words from the residue
+/// guard; nothing checked that anyone kept them, and `de` had
 /// rendered all 25 of its occurrences as "App-Leiste" /
 /// "Space-Leiste".
+///
+/// The guard is deliberately NOT the mirror of `english_residue`,
+/// though an earlier cut scoped it that way. Residue asks whether
+/// a word was *forgotten*, which is a judgment about the sentence
+/// around it and so is script-sensitive. This asks whether a name
+/// the interface never translates was translated anyway — true
+/// regardless of script, in the same way "KiwiDesk", "Lua" and
+/// "BSP" stay English everywhere.
 ///
 /// Fixtures are text the test writes itself, never the shipped
 /// catalogs — asserting against the corpus would make the guard's
@@ -198,18 +203,25 @@ struct LocalizationProductNameGuardTests {
         #expect(result.status != 0)
     }
 
-    /// The scope, pinned from the other side. A non-Latin sentence
-    /// carries the phrase as a foreign body, so adapting it is a
-    /// real editorial choice the owner explicitly allowed — and if
-    /// this ever starts failing, the guard has swallowed the
-    /// residue guard's territory.
+    /// Script is irrelevant: a non-Latin locale must keep the name
+    /// too. `bars.switch.space_bar` is Latin "Space Bar" in all
+    /// eleven catalogs, so a Japanese sentence naming it
+    /// スペースバー describes something the picker does not call
+    /// that — the same defect as German's "App-Leiste", not a
+    /// different case deserving a different rule.
+    ///
+    /// スペースバー and 스페이스바 make it worse than the Latin
+    /// case rather than better: both are the ordinary words for
+    /// the **spacebar key**, and neither script has capitalization
+    /// to mark a proper noun, so the adapted name is
+    /// indistinguishable from the key.
     ///
     /// Each value is written in its own locale's script, because
     /// the *script* guard runs in the same pass: one shared
     /// katakana fixture made this test fail for `ru`/`ko`/`zh-*` on
     /// foreign characters, which proves nothing about this rule.
     @Test(
-        "a non-Latin locale may adapt the name",
+        "a non-Latin locale must keep the name too",
         arguments: [
             ("ja", "スペースバーの色"),
             ("ko", "스페이스 바 색상"),
@@ -218,7 +230,35 @@ struct LocalizationProductNameGuardTests {
             ("zh-Hant", "空間列顏色"),
         ]
     )
-    func nonLatinLocaleMayAdapt(
+    func nonLatinLocaleMustKeepName(
+        locale: String,
+        value: String
+    ) throws {
+        let result = try ProductNameFixture.check(
+            locale: locale,
+            english: "Space Bar colors",
+            value: value
+        )
+        #expect(result.status != 0)
+        #expect(result.stderr.contains("feature name"))
+    }
+
+    /// And the complement: a non-Latin locale that DOES keep the
+    /// name verbatim inside its own script passes — the shape all
+    /// five actually ship. Without this, the test above would be
+    /// satisfied by a guard that simply failed every non-Latin
+    /// value, which is a different bug with the same signature.
+    @Test(
+        "a non-Latin locale keeping the name passes",
+        arguments: [
+            ("ja", "Space Barの色"),
+            ("ko", "Space Bar 색상"),
+            ("ru", "Цвета Space Bar"),
+            ("zh-Hans", "Space Bar 颜色"),
+            ("zh-Hant", "Space Bar 顏色"),
+        ]
+    )
+    func nonLatinLocaleKeepingNamePasses(
         locale: String,
         value: String
     ) throws {

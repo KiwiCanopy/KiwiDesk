@@ -518,12 +518,23 @@ of the locale set, and one of those is a heuristic:
   your sentence reads better naming it once, that passes. Keep
   each name the English carries, though — a string contrasting
   the two bars needs both, or the contrast collapses.
-  **Latin-script locales only** — the exact complement of the
-  rule above, and for the mirror reason: in a Japanese or Russian
-  sentence the English phrase is a foreign body, so adapting it
-  ("スペースバーの色") is a legitimate editorial choice. The list
-  is `PRODUCT_NAMES`; adding to it is a product decision about
-  what the GUI leaves in English, not a way to quiet a hit.
+  **Every locale, whatever its script** — the interface shows
+  those two names in Latin in all eleven catalogs, so this is not
+  the mirror of the rule above. In Japanese and Korean adapting
+  them is actively worse: スペースバー and 스페이스바 are the
+  everyday words for the *spacebar key*, and neither script has
+  capitals to mark a name, so the feature becomes
+  indistinguishable from the key. The list is `PRODUCT_NAMES`;
+  adding to it is a product decision about what the GUI leaves in
+  English, not a way to quiet a hit.
+- **Layout mode names are different — translate them freely.**
+  Floating, Grid, Monocle, Scrolling, Stack and Track are
+  ordinary tiling vocabulary, not KiwiDesk coinages, and no guard
+  requires you to keep them: `ja` uses モノクル, `zh-Hans` 单窗,
+  `es` Monóculo, while `de`, `ru` and `zh-Hant` keep them in
+  Latin. All correct. The one rule is **match your own picker** —
+  if `layout.monocle.name` in your file says Monóculo, the prose
+  around it says Monóculo too, never "Monocle".
 - **Cross-language overlap.** Two locales of *different*
   languages sharing too many byte-identical values — the shape
   that caught ~360 entries of French sitting in `it.json`. The

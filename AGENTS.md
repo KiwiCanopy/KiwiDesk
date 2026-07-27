@@ -773,17 +773,27 @@ Keep this list updated whenever a recurring mistake is found.
   don't re-add a rule claiming to be precise everywhere, as an
   `-ing`-weld sub-rule once did — German `fing`/`Frühling`
   falsifies it. The seventh, a **dropped feature name**
-  (`PRODUCT_NAMES` — "App Bar", "Space Bar"), is that rule's
-  mirror image and carries the **complementary** scope:
-  Latin-script locales only. The GUI ships those two names
-  untranslated, so prose that renames them ("Die App-Leiste"
-  beside a chip reading "App Bar") points at something the
-  interface does not call that — and #277 made it plainer, since
-  a destination or surface name is now a breadcrumb segment on
-  every hit inside that pane. In a *non*-Latin sentence the
-  English phrase sits as a foreign body and adapting it is a real
-  editorial call (owner, 2026-07-27), which is exactly why the
-  two scopes partition rather than overlap. Matched as a phrase,
+  (`PRODUCT_NAMES` — "App Bar", "Space Bar"), applies to **every
+  locale, script irrelevant** — it is deliberately *not* the
+  residue rule's mirror, though an earlier cut scoped it that
+  way. The GUI ships those two names untranslated in all eleven
+  catalogs, so prose that renames them ("Die App-Leiste" beside a
+  chip reading "App Bar") points at something the interface does
+  not call that — and #277 made it plainer, since a destination
+  or surface name is now a breadcrumb segment on every hit inside
+  that pane. Residue asks whether a word was *forgotten*, a
+  judgment about the surrounding sentence and so script-sensitive;
+  this asks whether a name the interface never translates was
+  translated anyway, which is script-independent in the same way
+  "KiwiDesk", "Lua" and "BSP" are. Adapting is worse in ja/ko, not
+  better: スペースバー and 스페이스바 are the ordinary words for
+  the *spacebar key*, and neither script capitalizes, so the
+  feature name would be indistinguishable from the key. **Layout
+  mode names are the opposite family and carry no such guard** —
+  ordinary tiling-WM vocabulary, translated by eight locales and
+  kept Latin by three, both correct; the predicate that sorts a
+  new name into one family or the other lives in
+  `docs/design-decisions.md`. Matched as a phrase,
   not as tokens: `GLOSSARY` holds `app`, `bar` and `space`
   separately, so a word-level test cannot tell "App Bar" from
   "App-Leiste". `merge-keys` runs the per-value guards so
