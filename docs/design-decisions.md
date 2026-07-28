@@ -977,6 +977,47 @@ frames across monitors before. (#445)
 
 ## Settings GUI & UX
 
+### Open at login
+
+**[Principle]**
+
+**Launch-at-login is a pre-checked default and a durable toggle,
+never a per-launch prompt.** (#342) KiwiDesk registers itself as
+a login item through `SMAppService.mainApp`, surfaced as an
+"Open KiwiDesk at Login" switch at the top of General and as a
+pre-checked box on onboarding's closing card. Two rulings a
+contributor might otherwise undo:
+
+- **Default on.** Most apps default this to opt-in because "not
+  running yet" is a neutral absence. A tiling WM has no such
+  neutral: after a reboot, *not* launched means every window on
+  the machine is unmanaged until the user remembers to open a
+  menu-bar app with no Dock icon prompting them. The off-state
+  is a broken desktop, so the good default is on — which is why
+  "approachable by default" argues *for* pre-checked here, not
+  against it. It stays powerful-on-demand: one uncheck in
+  onboarding or one flip in Settings opts out.
+- **No modal on every start.** A dialog that asks "open at
+  login?" each launch was considered and rejected — it is the
+  same standing-nag shape the quick-menu Accessibility deep-link
+  was cut for, only worse (a modal blocks; a menu row doesn't).
+  Once answered, re-asking is either a persistence bug or a nag;
+  there is no informative third case. Ask once, then the durable
+  Settings toggle owns the decision.
+
+**The toggle is read-through, and `SMAppService` is the one
+authority.** The switch never caches a bool — it reads the live
+`SMAppService.mainApp.status` on appear and on `didBecomeActive`,
+so a change made in System Settings ▸ Login Items directly, or by
+a CLI verb, is reflected without a second source of truth. A
+`.requiresApproval` status reads as *on* (the user's intent) with
+a jump to Login Items, reusing onboarding's "asked, not yet
+confirmed" shape; `.notFound` greys the control (grey, don't
+hide) rather than lying. This is deliberately separate from the
+`kiwidesk service` LaunchAgent + `KeepAlive`, which solves a
+different problem (crash-restart supervision) `SMAppService` does
+not offer for the main app.
+
 ### Navigation & saving
 
 **[Principle]**

@@ -1,0 +1,42 @@
+import ServiceManagement
+import Testing
+
+@testable import KiwiDeskCore
+
+/// The pure OS-status → `LoginItemState` mapping (#342). The real
+/// `register()`/`unregister()` calls touch `SMAppService` and can't
+/// run headless, but the mapping and the `isOn` derivation — the
+/// logic the read-through toggle depends on — are pure and pinned
+/// here.
+@Suite("Login-item state mapping (#342)")
+struct LoginItemStateTests {
+    @Test("each SMAppService status maps to its state")
+    func statusMapping() {
+        #expect(
+            LoginItemManager.state(from: .enabled) == .enabled
+        )
+        #expect(
+            LoginItemManager.state(from: .notRegistered)
+                == .notRegistered
+        )
+        #expect(
+            LoginItemManager.state(from: .requiresApproval)
+                == .requiresApproval
+        )
+        // `.notFound` is not a user on/off — it greys the control
+        // rather than lying, so it folds to `.unavailable`.
+        #expect(
+            LoginItemManager.state(from: .notFound) == .unavailable
+        )
+    }
+
+    @Test("the switch reads on for enabled and awaiting-approval")
+    func isOnDerivation() {
+        // `.requiresApproval` counts as on: the user said yes,
+        // macOS just hasn't confirmed it yet.
+        #expect(LoginItemState.enabled.isOn)
+        #expect(LoginItemState.requiresApproval.isOn)
+        #expect(!LoginItemState.notRegistered.isOn)
+        #expect(!LoginItemState.unavailable.isOn)
+    }
+}

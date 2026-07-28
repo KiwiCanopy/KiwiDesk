@@ -76,6 +76,29 @@ struct OnboardingTests {
         #expect(finished)
     }
 
+    @Test("open-at-login defaults to pre-checked (#342)")
+    func loginItemPreChecked() {
+        #expect(OnboardingModel().openAtLogin)
+    }
+
+    @Test("both exit routes commit the login-item choice (#342)")
+    func loginItemCommittedOnExit() {
+        for (choice, route) in [(true, "explore"), (false, "finish")] {
+            let model = OnboardingModel()
+            var applied: Bool?
+            var exited = false
+            model.openAtLogin = choice
+            model.onSetLoginItem = { applied = $0 }
+
+            model.commitLoginItemThen { exited = true }
+
+            // The chosen flag is applied, and applied BEFORE the
+            // exit runs (the app closes onboarding on exit).
+            #expect(applied == choice, "route \(route)")
+            #expect(exited, "route \(route)")
+        }
+    }
+
     @Test("single display never triggers the recommendation")
     func singleDisplayNeverRecommends() {
         // A single display can't have ambiguous Desktop→profile

@@ -38,6 +38,11 @@ extension AppDelegate {
         onboardingModel.onFinish = { [weak self] in
             self?.closeOnboarding()
         }
+        // The closing card's "open at login" checkbox registers the
+        // app as a login item via SMAppService (#342).
+        onboardingModel.onSetLoginItem = { enabled in
+            LoginItemManager.setEnabled(enabled)
+        }
         // The post-setup discovery card fires once, gated on its
         // own persisted flag — never AX trust, so a later TCC
         // reset never re-pitches (#331).

@@ -82,7 +82,7 @@ struct SettingsCatalogSiteTests {
         let names = SettingsDestination.allCases
             .flatMap { SettingsCatalog.entries(of: $0) }
             .compactMap { $0.propertyPath.last }
-        #expect(names.count == 48)
+        #expect(names.count == 49)
         for name in names {
             #expect(
                 rendered.occurrences(of: ".\(name)") >= 1,
@@ -176,11 +176,11 @@ struct SettingsCatalogSiteTests {
         )
         // Exact totals, so a needle that silently stops matching
         // cannot pass vacuously (part-1: a guard that cannot fire
-        // is worse than none). 36 = the 40 section/disclosure-
+        // is worse than none). 37 = the 41 section/disclosure-
         // mounted top-level declarations − 6 indirect (gaps/drag/
         // overrides ×2 each) + 2 double-mounted; the two bar-
         // switch entries self-anchor, outside this count.
-        #expect(direct.values.reduce(0, +) == 36)
+        #expect(direct.values.reduce(0, +) == 37)
         #expect(
             modeTabs.sorted() == [
                 "bsp", "grid", "monocle", "scrolling", "stack",

@@ -17,6 +17,7 @@ struct GeneralSection: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
+                LoginItemCard()
                 languageSection
                 aboutSection
                 advancedSection

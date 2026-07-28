@@ -14,6 +14,15 @@ final class OnboardingModel {
 
     var step: Step = .welcome
     var isTrusted = false
+    /// The closing card's "open at login" checkbox (#342).
+    /// Pre-checked: the app's off-state after a reboot is a desktop
+    /// of unmanaged windows, not a neutral absence, so the good
+    /// default is on — one uncheck (here or in Settings) opts out.
+    var openAtLogin = true
+    /// Registers/unregisters the login item to match `openAtLogin`.
+    /// Wired to `LoginItemManager`; a no-op stub keeps the model
+    /// testable without touching `SMAppService`.
+    var onSetLoginItem: (Bool) -> Void = { _ in }
     var onOpenSettings: () -> Void = {}
     /// Opens System Settings › Desktop & Dock (#8).
     var onOpenSpaceSettings: () -> Void = {}
@@ -46,12 +55,27 @@ final class OnboardingModel {
     /// The shared completion point every grant path converges on
     /// (grant-only and grant+Spaces): show the one-time discovery
     /// card if it's still pending, else just close (#331).
+    ///
+    /// The login-item choice lives on the discovery card, so a run
+    /// that skips it (the card already shown) never had the chance
+    /// to opt in — that is intended: the checkbox is a one-time
+    /// offer, and Settings ▸ General carries the durable toggle for
+    /// everyone after (#342).
     func finishOrDiscover() {
         if wantsDiscovery() {
             step = .readyToExplore
         } else {
             onFinish()
         }
+    }
+
+    /// Applies the closing card's "open at login" choice, then runs
+    /// the chosen exit. Both exit buttons (Open Settings / Not Now)
+    /// funnel through here so the checkbox is honored whichever the
+    /// user picks (#342).
+    func commitLoginItemThen(_ exit: () -> Void) {
+        onSetLoginItem(openAtLogin)
+        exit()
     }
 }
 
@@ -258,15 +282,23 @@ struct OnboardingView: View {
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
             Spacer()
+            Toggle(
+                L(
+                    "onboarding.ready.open_at_login",
+                    "Open KiwiDesk when I log in"
+                ),
+                isOn: $model.openAtLogin
+            )
+            .toggleStyle(.checkbox)
             Button(
                 L("onboarding.ready.open_settings", "Open Settings")
             ) {
-                model.onExploreSettings()
+                model.commitLoginItemThen { model.onExploreSettings() }
             }
             .keyboardShortcut(.defaultAction)
             .controlSize(.large)
             Button(L("onboarding.ready.not_now", "Not Now")) {
-                model.onFinish()
+                model.commitLoginItemThen { model.onFinish() }
             }
         }
     }

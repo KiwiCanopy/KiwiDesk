@@ -258,6 +258,10 @@ struct AppRulesControls: Sendable {
 }
 
 struct GeneralControls: Sendable {
+    let loginItemCard = SettingsControl(
+        "general.login_item.title",
+        "Open KiwiDesk at Login"
+    )
     let languageCard = SettingsControl(
         "general.language.title",
         "Language"

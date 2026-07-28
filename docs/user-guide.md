@@ -231,6 +231,20 @@ hooks. Only an `init.lua` that already sets tiling itself
 Lua-owned — no `gui.json` is seeded, and the **Adopt into the GUI**
 path is offered instead.
 
+## Open at Login
+
+At the top of **General** (in the **System** group), **Open
+KiwiDesk at Login** registers KiwiDesk as a macOS login item, so it
+launches automatically when you sign in and your windows are
+arranged from the start rather than floating loose until you open
+it by hand. It is on by default; turn it off for manual control.
+
+The switch reflects the real macOS state — you can also revoke it
+from **System Settings ▸ General ▸ Login Items**, and the switch
+follows. If macOS shows *Requires approval in System Settings*,
+click **Open Login Items** and enable KiwiDesk there. First-launch
+setup offers the same choice on its closing card.
+
 ## GUI Language
 
 Go to **General** (in the **System** group) and pick a display
