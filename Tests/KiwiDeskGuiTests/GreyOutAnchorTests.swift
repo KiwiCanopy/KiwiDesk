@@ -57,6 +57,13 @@ struct GreyOutAnchorTests {
             "explanation: overridesDisabledHelp",
             1
         ),
+        // Reduce Motion greys the whole Animations card; the
+        // explanation rides the header `?` so it survives the dim.
+        (
+            "BehaviorSection.swift",
+            "help: reduceMotion ? reduceMotionHelp : nil",
+            1
+        ),
     ]
 
     @Test("every block gate keeps a live help anchor")

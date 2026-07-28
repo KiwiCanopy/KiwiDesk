@@ -60,6 +60,13 @@ public final class AnimationEngine {
     /// apps, so animation is always on in production.
     var isEnabled = true
 
+    /// Whether macOS Reduce Motion is on — when true, `animate`
+    /// snaps to the target instantly (Apple's contract for the
+    /// setting). A seam defaulting to `false` so a host's system
+    /// setting can't skew unit tests; `KiwiCore` wires the real
+    /// `NSWorkspace` read in production.
+    var reduceMotion: @MainActor () -> Bool = { false }
+
     /// General animation duration in ms, clamped to 50–1000.
     /// Maps onto the spring's response time (250 ms = 0.35 s).
     /// Synced from `AnimationSettings.durationMS` on profile
@@ -159,7 +166,7 @@ public final class AnimationEngine {
         to target: CGRect,
         isNewWindow: Bool = false
     ) {
-        guard isEnabled else {
+        guard isEnabled, !reduceMotion() else {
             cancel(window: window)
             apply(window, target, true)
             return

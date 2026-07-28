@@ -103,6 +103,68 @@ struct AnimationEngineTests {
         engine.durationMS = 300
         #expect(engine.durationMS == 300)
     }
+
+    @Test("Reduce Motion snaps to the target with no animation")
+    func reduceMotionSnaps() {
+        guard let screen = NSScreen.main else { return }
+        let engine = AnimationEngine()
+        engine.reduceMotion = { true }
+        var applies: [(frame: CGRect, setSize: Bool)] = []
+        engine.apply = { _, frame, setSize in
+            applies.append((frame, setSize))
+        }
+        let to = CGRect(x: 5, y: 5, width: 300, height: 200)
+        engine.animate(
+            window: WindowID(1),
+            on: screen,
+            from: CGRect(x: 0, y: 0, width: 100, height: 100),
+            to: to
+        )
+        // Instant placement: one apply of the exact target, and
+        // no animation left running.
+        #expect(engine.activeCount == 0)
+        #expect(applies.count == 1)
+        #expect(applies.first?.frame == to)
+        #expect(applies.first?.setSize == true)
+    }
+
+    @Test("reduceMotion seam defaults to false (host can't skew)")
+    func reduceMotionDefaultsFalse() {
+        #expect(AnimationEngine().reduceMotion() == false)
+    }
+
+    @Test("Reduce Motion flipping on tears down an in-flight anim")
+    func reduceMotionCancelsInFlight() {
+        guard let screen = NSScreen.main,
+            let display = screen.kiwiDisplay?.id
+        else { return }
+        let engine = AnimationEngine()
+        var applies: [(frame: CGRect, setSize: Bool)] = []
+        engine.apply = { _, frame, setSize in
+            applies.append((frame, setSize))
+        }
+        engine.animate(
+            window: WindowID(1),
+            on: screen,
+            from: CGRect(x: 0, y: 0, width: 100, height: 100),
+            to: CGRect(x: 0, y: 0, width: 400, height: 400)
+        )
+        engine.tick(display: display, dt: 1.0 / 120.0)
+        #expect(engine.activeCount == 1)
+        // System flag flips on; the next animate snaps instantly and
+        // the guard's cancel tears down the running animation.
+        engine.reduceMotion = { true }
+        let target = CGRect(x: 10, y: 10, width: 500, height: 500)
+        engine.animate(
+            window: WindowID(1),
+            on: screen,
+            from: .zero,
+            to: target
+        )
+        #expect(engine.activeCount == 0)
+        #expect(applies.last?.frame == target)
+        #expect(applies.last?.setSize == true)
+    }
 }
 
 @Suite("AnimationEngine stepwise sizing")
