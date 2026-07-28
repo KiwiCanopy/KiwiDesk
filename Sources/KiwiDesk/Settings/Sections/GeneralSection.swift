@@ -17,8 +17,8 @@ struct GeneralSection: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                LoginItemCard()
                 languageSection
+                LoginItemCard()
                 aboutSection
                 advancedSection
             }
@@ -41,10 +41,20 @@ struct GeneralSection: View {
             // list (`.searchable` in a popover) once shipped
             // locales approach ~15–20.
             DropdownRow(
-                label: L("general.language.title", "Language")
+                // The card heading is already the topic noun
+                // "Language"; the control's own label is the more
+                // specific "Display language" so the two don't
+                // read as a doubled word (ui-designer 2026-07-28).
+                label: L(
+                    "general.language.display",
+                    "Display language"
+                )
             ) {
                 Picker(
-                    L("general.language.title", "Language"),
+                    L(
+                        "general.language.display",
+                        "Display language"
+                    ),
                     selection: languageBinding
                 ) {
                     Text(

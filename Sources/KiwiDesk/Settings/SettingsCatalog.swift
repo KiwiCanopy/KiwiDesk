@@ -258,13 +258,16 @@ struct AppRulesControls: Sendable {
 }
 
 struct GeneralControls: Sendable {
-    let loginItemCard = SettingsControl(
-        "general.login_item.title",
-        "Open KiwiDesk at Login"
-    )
     let languageCard = SettingsControl(
         "general.language.title",
         "Language"
+    )
+    // Terse topic-noun heading; the toggle inside carries the
+    // fuller "Open KiwiDesk at Login" label (ui-designer
+    // 2026-07-28), as every card pairs a noun with an action.
+    let loginItemCard = SettingsControl(
+        "general.login_item.title",
+        "Login"
     )
     let aboutCard = SettingsControl(
         "general.about.title",

@@ -23,10 +23,14 @@ struct LoginItemStateTests {
             LoginItemManager.state(from: .requiresApproval)
                 == .requiresApproval
         )
-        // `.notFound` is not a user on/off — it greys the control
-        // rather than lying, so it folds to `.unavailable`.
+        // `.notFound` is the pre-registration state for `mainApp`,
+        // so a registerable app offers to turn it on rather than
+        // greying out. (The terminal `.notFound` — translocated /
+        // bare binary — is gated to `.unavailable` in `current` by
+        // the location check, which reads `Bundle.main` and so is
+        // not exercised by this pure mapping.)
         #expect(
-            LoginItemManager.state(from: .notFound) == .unavailable
+            LoginItemManager.state(from: .notFound) == .notRegistered
         )
     }
 

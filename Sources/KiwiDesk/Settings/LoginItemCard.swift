@@ -33,8 +33,10 @@ struct LoginItemCard: View {
         SettingsSection(SettingsCatalog.general.loginItemCard) {
             VStack(alignment: .leading, spacing: 6) {
                 ToggleRow(
+                    // Card heading is the noun "Login"; the switch
+                    // carries the full action label on its own key.
                     label: L(
-                        "general.login_item.title",
+                        "general.login_item.switch",
                         "Open KiwiDesk at Login"
                     ),
                     isOn: enabledBinding,
@@ -92,7 +94,8 @@ struct LoginItemCard: View {
             Text(
                 L(
                     "general.login_item.unavailable",
-                    "The login item isn’t available right now."
+                    "Move KiwiDesk to your Applications folder "
+                        + "to turn this on."
                 )
             )
             .font(.caption)

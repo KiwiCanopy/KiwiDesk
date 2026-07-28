@@ -1012,8 +1012,12 @@ the live `SMAppService.mainApp.status` on appear and on
 Items directly is reflected without a second source of truth. A
 `.requiresApproval` status reads as *on* (the user's intent) with
 a jump to Login Items, reusing onboarding's "asked, not yet
-confirmed" shape; `.notFound` greys the control (grey, don't
-hide) rather than lying. This is deliberately separate from the
+confirmed" shape. `.notFound` is the *pre-registration* state
+macOS reports for `mainApp`, so it reads as off-but-registerable,
+not as an error — only a copy that genuinely cannot register (a
+Gatekeeper-translocated download, or a bare non-bundled binary)
+greys the control (grey, don't hide) with a "move to Applications"
+caption. This is deliberately separate from the
 `kiwidesk service` LaunchAgent + `KeepAlive`, which solves a
 different problem (crash-restart supervision) `SMAppService` does
 not offer for the main app. The two overlap on one point: that
