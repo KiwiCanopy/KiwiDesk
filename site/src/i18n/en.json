@@ -111,7 +111,7 @@
   "guide_gs_install_copy": "Copy",
   "guide_gs_install_copy_aria": "Copy the install command",
   "guide_gs_install_later": "A signed direct download follows once the app can update itself; until then Homebrew is the way in, and brew upgrade keeps it current.",
-  "guide_gs_install_lead": "Open Terminal — press ⌘Space, type “Terminal”, press Return — then paste this line and press Return:",
+  "guide_gs_install_lead": "Open Terminal — press ⌘Space, type “Terminal”, press Enter — then paste this line and press Enter:",
   "guide_gs_install_source": "This installs from KiwiCanopy's own Homebrew tap — the same people who make KiwiDesk.",
   "guide_gs_p1": "KiwiDesk is in public beta, and installing it takes about a minute.",
   "guide_gs_perm_p": "The first time you open KiwiDesk, macOS asks you to grant <strong>Accessibility</strong> access. This is the normal, expected prompt — and it's the only thing KiwiDesk needs from you. To tidy your screen, it has to be able to move and resize your windows, and macOS keeps that ability behind this permission. A short onboarding wizard walks you to the right spot in <strong>System Settings › Privacy &amp; Security › Accessibility</strong> and helps you switch it on.",
