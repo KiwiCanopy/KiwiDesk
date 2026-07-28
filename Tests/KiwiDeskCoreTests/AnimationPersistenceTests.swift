@@ -93,47 +93,6 @@ struct AnimationPersistenceTests {
         )
     }
 
-    @Test("scroll.set_speed is a deprecated alias")
-    func scrollSetSpeedAlias() {
-        let core = makeCore()
-        var logs: [String] = []
-        core.onLog = { logs.append($0) }
-        let response = core.execute(
-            "scroll.set_speed",
-            args: [.number(200)]
-        )
-        #expect(response.isSuccess)
-        #expect(
-            core.tiler.animation.scrollDurationMS == 200
-        )
-        #expect(
-            core.tiler.settings.animations.scrollSpeedMS == 200
-        )
-        // Must log a deprecation notice.
-        #expect(logs.contains { $0.contains("deprecated") })
-        #expect(
-            logs.contains {
-                $0.contains("animations.set_scroll_speed")
-            }
-        )
-    }
-
-    @Test("set_animation_duration persists in settings")
-    func oldAliasAlsoPersists() {
-        let core = makeCore()
-        var logs: [String] = []
-        core.onLog = { logs.append($0) }
-        core.execute(
-            "set_animation_duration",
-            args: [.number(300)]
-        )
-        #expect(core.tiler.animation.durationMS == 300)
-        #expect(
-            core.tiler.settings.animations.durationMS == 300
-        )
-        #expect(logs.contains { $0.contains("deprecated") })
-    }
-
     @Test("duration clamped to 50–1000 on engine AND settings")
     func durationClamping() {
         let core = makeCore()

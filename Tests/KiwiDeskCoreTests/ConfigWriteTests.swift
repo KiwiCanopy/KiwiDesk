@@ -237,7 +237,6 @@ struct ConfigWriteTests {
         // managed block is generated (#55).
         #expect(file.contains("-- KiwiDesk.bind(\"cmd+h\""))
         #expect(file.contains("-- KiwiDesk.set_gap_global(7)"))
-        #expect(!file.contains(ManagedConfig.beginMarker))
         // The harmless hook stays LIVE so integrations keep
         // firing after adoption (#355) — its head line is not
         // commented.

@@ -1,30 +1,26 @@
 import Foundation
 
-/// Recognizes the legacy app-managed block in `init.lua` and
-/// classifies the code around it (#55: the app no longer
-/// GENERATES a block — `gui.json` and profiles are loaded
-/// directly, and `init.lua` is hooks-only). The split stays so
-/// a stale block from an earlier version keeps being treated
-/// as app-owned (inert, never "foreign") until the user
-/// deletes it by hand — re-saving is the migration.
+/// Classifies `init.lua` by whether its code touches the GUI's
+/// managed vocabulary (#55: the app loads `gui.json` and profiles
+/// directly and treats `init.lua` as hooks-only — it neither
+/// generates nor recognizes a managed block).
 ///
-/// The GUI only falls back to the raw Lua editor when code
-/// outside a (stale) block touches the managed vocabulary —
-/// verbs the GUI owns in `gui.json`. Harmless custom Lua
-/// (print calls, debug hooks, sketchybar integrations)
-/// coexists with the visual editor; it shows an informational
-/// banner instead of locking the user out.
+/// The GUI falls back to the raw Lua editor only when the code
+/// touches the managed vocabulary — verbs the GUI owns in
+/// `gui.json`. Harmless custom Lua (print calls, debug hooks,
+/// sketchybar integrations) coexists with the visual editor; it
+/// shows an informational banner instead of locking the user out.
+///
+/// Pre-release, the marker-block recognition that used to keep a
+/// stale pre-#55 block "app-owned" was removed (#116): such a block
+/// is now scanned like any other code, so a bind or rule inside it
+/// reads as foreign — the file becomes Lua-owned (raw editor, never
+/// seeded over), the safe direction. Re-saving is the migration.
 public enum ManagedConfig {
-    public static let beginMarker =
-        "-- >>> KiwiDesk managed block "
-        + "(edit in the app, not by hand) >>>"
-    public static let endMarker =
-        "-- <<< KiwiDesk managed block <<<"
-
     // MARK: - Managed vocabulary
 
-    /// Tokens matched against non-comment lines outside the
-    /// (stale) managed block (see `touchesManagedVocabulary`).
+    /// Tokens matched against non-comment, non-blank lines of the
+    /// source (see `touchesManagedVocabulary`).
     /// A match forces the raw editor because the GUI cannot
     /// safely co-own that vocabulary — it owns app rules,
     /// float/ignore rules, keybindings, and profile bindings in
@@ -58,54 +54,14 @@ public enum ManagedConfig {
         "KiwiDesk.bind_profile_to_native_space(",
     ]
 
-    // MARK: - Split / merge
-
-    /// The three regions of a config file. `managed` excludes
-    /// the marker lines; it is nil when no block is present.
-    public struct Split: Equatable {
-        public var before: String
-        public var managed: String?
-        public var after: String
-    }
-
-    /// Divides `source` on the marker lines. A file without
-    /// markers is entirely `before` (managed nil, after empty).
-    public static func split(_ source: String) -> Split {
-        let lines = source.components(separatedBy: "\n")
-        guard
-            let begin = lines.firstIndex(where: {
-                $0.trimmed == beginMarker
-            }),
-            let end = lines[begin...].firstIndex(where: {
-                $0.trimmed == endMarker
-            })
-        else {
-            return Split(
-                before: source,
-                managed: nil,
-                after: ""
-            )
-        }
-        let before = lines[..<begin].joined(separator: "\n")
-        let managed = lines[(begin + 1)..<end]
-            .joined(separator: "\n")
-        let after = lines[(end + 1)...].joined(separator: "\n")
-        return Split(
-            before: before,
-            managed: managed,
-            after: after
-        )
-    }
-
     // `adopt` and its selective-comment machinery live in
     // `ManagedConfig+Adopt.swift` (file-size split, §2).
 
     // MARK: - Foreign-code detection
 
-    /// Whether code outside the managed block touches the GUI's
-    /// managed vocabulary — verbs the GUI itself writes into the
-    /// block (`app_rules`, `float_rules`, `ignore_rules`,
-    /// `KiwiDesk.bind(`,
+    /// Whether the code touches the GUI's managed vocabulary —
+    /// verbs the GUI itself owns in `gui.json` (`app_rules`,
+    /// `float_rules`, `ignore_rules`, `KiwiDesk.bind(`,
     /// etc.). When `true` the visual editor cannot safely co-own
     /// those constructs, so it yields to the raw Lua editor.
     ///
@@ -116,8 +72,8 @@ public enum ManagedConfig {
         classify(source).foreign
     }
 
-    /// Whether any non-blank, non-comment Lua exists outside the
-    /// managed block. This includes harmless code that does NOT
+    /// Whether any non-blank, non-comment Lua exists in the file.
+    /// This includes harmless code that does NOT
     /// touch the managed vocabulary. Used by the GUI to show an
     /// informational banner while keeping the visual editor
     /// active.
@@ -229,14 +185,8 @@ public enum ManagedConfig {
     public static func classify(
         _ source: String
     ) -> (foreign: Bool, custom: Bool) {
-        let sp = split(source)
-        let foreign =
-            touchesManagedVocabulary(sp.before)
-            || touchesManagedVocabulary(sp.after)
-        let custom =
-            foreign
-            || isCode(sp.before)
-            || isCode(sp.after)
+        let foreign = touchesManagedVocabulary(source)
+        let custom = foreign || isCode(source)
         return (foreign: foreign, custom: custom)
     }
 
@@ -314,8 +264,8 @@ public enum ManagedConfig {
 }
 
 extension StringProtocol {
-    /// Trims spaces, tabs, and line terminators (`\r`) so marker
-    /// matching and the foreign-code scan survive CRLF files.
+    /// Trims spaces, tabs, and line terminators (`\r`) so the
+    /// foreign-code scan survives CRLF files.
     fileprivate var trimmed: String {
         trimmingCharacters(in: .whitespacesAndNewlines)
     }

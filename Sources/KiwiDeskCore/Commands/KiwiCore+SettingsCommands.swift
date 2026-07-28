@@ -10,28 +10,6 @@ extension KiwiCore {
         _ args: [JSONValue]
     ) -> CommandResponse {
         switch command {
-        case "set_animation_duration":
-            // Deprecated alias for `animations.set_duration`.
-            guard let ms = args.first?.intValue else {
-                return .fail("expected milliseconds")
-            }
-            onLog(
-                "set_animation_duration is deprecated — use "
-                    + "animations.set_duration(ms)"
-            )
-            // Engine syncs via TilingEngine.settings.didSet.
-            tiler.settings.animations.durationMS = ms
-        case "set_space_animation":
-            // Deprecated alias for `animations.set_on_space_change`
-            // (issue #11). Still works so existing configs load.
-            guard let enabled = args.first?.boolValue else {
-                return .fail("expected boolean")
-            }
-            onLog(
-                "set_space_animation is deprecated — use "
-                    + "animations.set_on_space_change(bool)"
-            )
-            tiler.settings.animations.onSpaceChange = enabled
         case "set_mouse_resize":
             guard let raw = args.first?.stringValue,
                 let mode = MouseResizeMode(rawValue: raw)
@@ -128,7 +106,6 @@ extension KiwiCore {
         case "animations.set_scroll_speed":
             // The scroll-specific duration knob, split from
             // `animations.set_duration` (issue #51).
-            // `scroll.set_speed` is the deprecated alias.
             guard let ms = args.first?.intValue else {
                 return .fail("expected milliseconds")
             }

@@ -140,9 +140,6 @@ item's only appearance in CLI output.
 | | `animations.set_on_window_resize` | true\|false (default true) |
 | | `animations.set_on_window_swap` | true\|false (default true) |
 | | `animations.set_on_relayout` | true\|false (default true) |
-| | `set_space_animation` | deprecated alias for `animations.set_on_space_change` |
-| | `set_animation_duration` | deprecated alias for `animations.set_duration` |
-| | `scroll.set_speed` | deprecated alias for `animations.set_scroll_speed` |
 | Sleep/Wake | `enable_wake_restore` | true\|false |
 | | `set_wake_restore_delay` | ms |
 | Drag | `drag.set_ghost_enabled` | true\|false |

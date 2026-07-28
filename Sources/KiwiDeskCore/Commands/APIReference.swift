@@ -63,11 +63,6 @@ public enum APIReference {
             ("list_monitors", "list_monitors"),
             ("debug_log", "debug_log"),
             ("reload_config", "reload_config"),
-            (
-                "set_animation_duration",
-                "set_animation_duration"
-            ),
-            ("set_space_animation", "set_space_animation"),
             ("set_mouse_resize", "set_mouse_resize"),
             ("enable_wake_restore", "enable_wake_restore"),
             (
@@ -124,7 +119,7 @@ public enum APIReference {
             "set_ratio_h_override", "set_ratio_v_override",
         ],
         "scroll": [
-            "set_slot_size", "set_anchor", "set_speed",
+            "set_slot_size", "set_anchor",
             "set_orientation", "set_new_window_placement",
             "set_wrap_focus",
             "set_slot_size_override", "set_anchor_override",
