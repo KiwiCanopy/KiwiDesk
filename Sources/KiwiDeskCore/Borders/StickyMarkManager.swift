@@ -92,7 +92,17 @@ public final class StickyMarkManager {
             overlays[spec.window] = overlay
             overlay.setMarkColor(spec.color)
             overlay.setSymbol(spec.symbolName)
-            overlay.update(frame: spec.frame)
+            // Geometry stands down mid-animation (#596) — the
+            // same call the ring's `sync` makes, not a mirror of
+            // it. Colour, symbol, stacking and retirement are
+            // unaffected.
+            overlay.update(
+                frame: FollowSource.syncFrame(
+                    spec: spec.frame,
+                    held: overlay.lastFrame,
+                    animating: isAnimating(spec.window)
+                )
+            )
             // Re-assert stacking each sync (focus change,
             // retile, z-order restore) — never per follow
             // tick (the mark lags otherwise).

@@ -15,7 +15,7 @@ import Foundation
 final class DeferredTasks {
     /// One slot per deferred job; scheduling a key replaces
     /// (cancels) whatever that key was still waiting on.
-    enum Key: Hashable {
+    enum Key: Hashable, CaseIterable {
         /// Deferred switch to a hidden window's virtual space
         /// (`scheduleFocusFollow`).
         case focusFollow
@@ -31,9 +31,19 @@ final class DeferredTasks {
         /// Layout + focus re-assert after a native desktop
         /// switch (`settleAfterNativeSwitch`).
         case nativeSpaceSettle
-        /// Re-orders every desired focus ring after a drag/drop
-        /// transition (`scheduleBorderDropReconcile`).
+        /// Re-asserts every desired focus ring's VISIBILITY and
+        /// stacking after a drag/drop or animated transition
+        /// (`scheduleBorderDropReconcile`) — early on purpose, and
+        /// geometry-free while a window animates.
         case borderDropSettle
+        /// Re-syncs ring AND mark GEOMETRY from real window state
+        /// a grace after the last animation ends
+        /// (`scheduleBorderResync`, #596). A separate slot from
+        /// `borderDropSettle` deliberately: they run at different
+        /// delays for different reasons, so sharing one would let
+        /// whichever landed second cancel the other — silently
+        /// dropping either the un-hide or the sticky mark's heal.
+        case borderResync
         /// Coalesced re-raise of the float layer after focus lands
         /// on a tiled window (`raiseFloatsAbove`) — a burst of focus
         /// changes collapses to one raise for the final target.

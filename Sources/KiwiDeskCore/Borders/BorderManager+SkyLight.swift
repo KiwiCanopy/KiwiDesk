@@ -14,6 +14,28 @@ import AppKit
 /// deliberate deferral; a THIRD would be the trigger to extract a
 /// standalone `WindowServerWatch` service with peer subscribers (#414).
 extension BorderManager {
+    /// Reads the `KIWIDESK_NO_WS_TRACKING` QA lever (#596). Any
+    /// non-empty value keeps `skyLightActive` false for the whole
+    /// run, so the ring and mark exercise the AX-fallback path
+    /// the settle-tail symptoms live on — the same fallback
+    /// `os-private-apis.md` requires every private path to have,
+    /// and otherwise unreachable on a healthy Mac.
+    ///
+    /// Named after `StrandDetector.configureFromEnvironment` but
+    /// NOT its twin, in two ways worth keeping straight: this one
+    /// takes the environment as a parameter (that one reads
+    /// `ProcessInfo` directly), and where `KIWIDESK_STRAND_LOG`
+    /// only turns on logging and is otherwise inert, this kills a
+    /// production fast path for the whole run. Call once at
+    /// wiring.
+    func configureFromEnvironment(
+        _ environment: [String: String] = ProcessInfo.processInfo
+            .environment
+    ) {
+        let value = environment["KIWIDESK_NO_WS_TRACKING"]
+        windowServerTrackingDisabled = !(value?.isEmpty ?? true)
+    }
+
     /// Geometry tracking is independent of rendering. If a raw SLS
     /// window falls back to AppKit, that panel can still follow real
     /// bounds from a healthy WindowServer event stream.
@@ -113,26 +135,45 @@ extension BorderManager {
         // Sticky marks ride the same stream as rings (#414 QA), so
         // their windows join the watch set even without a ring.
         let wanted = borderWanted.union(stickyTracked)
-        if !triedEventSource, !wanted.isEmpty {
-            triedEventSource = true
-            eventSource = SkyLightWindowEvents.shared
-            eventSource?.attach(self)
-        }
         let wasActive = skyLightActive
-        skyLightActive = eventSource?.watch(wanted) == true
+        if windowServerTrackingDisabled {
+            // Never attach or watch under the lever: a live
+            // subscription would keep feeding `reconcile`, which
+            // heals exactly the drift the fallback path is meant
+            // to expose.
+            skyLightActive = false
+        } else {
+            if !triedEventSource, !wanted.isEmpty {
+                triedEventSource = true
+                eventSource = SkyLightWindowEvents.shared
+                eventSource?.attach(self)
+            }
+            skyLightActive = eventSource?.watch(wanted) == true
+        }
         if reportedTrackingActive != skyLightActive {
             reportedTrackingActive = skyLightActive
-            let mode =
-                skyLightActive
-                ? "WindowServer border tracking active"
-                : "WindowServer border tracking unavailable; "
-                    + "using AX fallback"
-            onLog(mode)
+            onLog(trackingStatusMessage)
         }
         if wasActive, !skyLightActive {
             for overlay in overlays.values {
                 overlay.useAppKitFallback()
             }
         }
+    }
+
+    /// The one line that tells a QA run which path it is on.
+    /// Names the lever explicitly when it is what forced the
+    /// fallback: an unexplained "unavailable" on a healthy Mac
+    /// would read as a real WindowServer failure.
+    private var trackingStatusMessage: String {
+        if skyLightActive {
+            return "WindowServer border tracking active"
+        }
+        if windowServerTrackingDisabled {
+            return "WindowServer border tracking disabled by "
+                + "KIWIDESK_NO_WS_TRACKING; using AX fallback"
+        }
+        return "WindowServer border tracking unavailable; "
+            + "using AX fallback"
     }
 }

@@ -150,3 +150,18 @@ the binary hash, which drops the TCC Accessibility grant (re-grant
 in System Settings), and a restart flattens session state (spaces,
 float flags) — plan QA around it; #89's signed `.app` is the
 durable fix.
+
+Two env levers exist for device QA, both off by default and both
+read once at wiring:
+
+| Lever | Does |
+|---|---|
+| `KIWIDESK_STRAND_LOG` | Logs any window that did not land on its settled target (#47). Purely a logger — inert otherwise. |
+| `KIWIDESK_NO_WS_TRACKING` | Forces the ring and mark onto the **AX-fallback** path for the whole run (#596), so fallback-only symptoms are reachable on a healthy Mac. Kills a production fast path — see [borders.md](borders.md). |
+
+Window geometry can be sampled without any screen-recording
+grant: `CGWindowListCopyWindowInfo` returns frames for every
+on-screen window, so a small poller that logs only frame
+*changes* turns "does the overlay lag or wobble?" into a diff. A
+ring's frame is its window's outset by `border.width`, so the two
+can be compared arithmetically.
